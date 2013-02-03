@@ -106,29 +106,11 @@ namespace Signum.Windows.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Administration {0}.
-        /// </summary>
-        public static string Administration0 {
-            get {
-                return ResourceManager.GetString("Administration0", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to All.
         /// </summary>
         public static string All {
             get {
                 return ResourceManager.GetString("All", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Call {0} first.
-        /// </summary>
-        public static string Call0First {
-            get {
-                return ResourceManager.GetString("Call0First", resourceCulture);
             }
         }
         
@@ -165,15 +147,6 @@ namespace Signum.Windows.Properties {
         public static string ChooseTheDisplayNameOfTheNewColumn {
             get {
                 return ResourceManager.GetString("ChooseTheDisplayNameOfTheNewColumn", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Close.
-        /// </summary>
-        public static string Close {
-            get {
-                return ResourceManager.GetString("Close", resourceCulture);
             }
         }
         
@@ -219,15 +192,6 @@ namespace Signum.Windows.Properties {
         public static string CreateNew {
             get {
                 return ResourceManager.GetString("CreateNew", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Drag Horizontally and Vertically.
-        /// </summary>
-        public static string DragHorizontallyAndVertically {
-            get {
-                return ResourceManager.GetString("DragHorizontallyAndVertically", resourceCulture);
             }
         }
         
@@ -311,15 +275,6 @@ namespace Signum.Windows.Properties {
         public static string InvalidFormat {
             get {
                 return ResourceManager.GetString("InvalidFormat", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Limitation:.
-        /// </summary>
-        public static string Limitation {
-            get {
-                return ResourceManager.GetString("Limitation", resourceCulture);
             }
         }
         
@@ -420,24 +375,6 @@ namespace Signum.Windows.Properties {
         public static string NoActionsFound {
             get {
                 return ResourceManager.GetString("NoActionsFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No changes has been found.
-        /// </summary>
-        public static string NoChangeHaveBeenFound {
-            get {
-                return ResourceManager.GetString("NoChangeHaveBeenFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to There are no changes.
-        /// </summary>
-        public static string NoChanges {
-            get {
-                return ResourceManager.GetString("NoChanges", resourceCulture);
             }
         }
         
@@ -550,15 +487,6 @@ namespace Signum.Windows.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Related Entity.
-        /// </summary>
-        public static string RelatedEntity {
-            get {
-                return ResourceManager.GetString("RelatedEntity", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Reload.
         /// </summary>
         public static string Reload {
@@ -600,26 +528,6 @@ namespace Signum.Windows.Properties {
         public static string Rows {
             get {
                 return ResourceManager.GetString("Rows", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Save.
-        /// </summary>
-        public static string Save {
-            get {
-                return ResourceManager.GetString("Save", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to There are changes that hasn&apos;t been saved
-        ///
-        ///	Save changes?.
-        /// </summary>
-        public static string SaveChanges {
-            get {
-                return ResourceManager.GetString("SaveChanges", resourceCulture);
             }
         }
         
@@ -713,15 +621,6 @@ namespace Signum.Windows.Properties {
         public static string View {
             get {
                 return ResourceManager.GetString("View", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to View File.
-        /// </summary>
-        public static string ViewFile {
-            get {
-                return ResourceManager.GetString("ViewFile", resourceCulture);
             }
         }
         

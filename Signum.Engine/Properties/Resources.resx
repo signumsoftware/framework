@@ -119,44 +119,58 @@
   </resheader>
   <data name="EndOfSyncScript" xml:space="preserve">
     <value>--- END OF SYNC SCRIPT</value>
+    <comment>SynchronizerMessage</comment>
   </data>
   <data name="EntityWithType0AndId1NotFound" xml:space="preserve">
     <value>Entity with type {0} and Id {1} not found</value>
+    <comment>EngineMessage</comment>
   </data>
   <data name="NNone" xml:space="preserve">
     <value>- n: None</value>
+    <comment>SynchronizerMessage</comment>
   </data>
   <data name="NoWayOfMappingType0Found" xml:space="preserve">
     <value>No way of mapping type {0} found</value>
+    <comment>EngineMessage</comment>
   </data>
   <data name="StartOfSyncScriptGeneratedOn0" xml:space="preserve">
     <value>--- START OF SYNC SCRIPT GENERATED ON {0}</value>
+    <comment>SynchronizerMessage</comment>
   </data>
   <data name="ConcurrencyErrorOnDatabaseTable0Id1" xml:space="preserve">
     <value>Concurrency error on the databe, Table = {0}, Id = {1}</value>
+    <comment>EngineMessage</comment>
   </data>
   <data name="_0HasBeenRenamedIn1" xml:space="preserve">
     <value>     '{0}' has been renamed in {1}?</value>
+    <comment>SynchronizerMessage</comment>
   </data>
   <data name="ThereAre0ThatReferThisEntity" xml:space="preserve">
     <value>There are '{0}' that refer to this entity</value>
+    <comment>EngineMessage</comment>
   </data>
   <data name="ThereAreRecordsIn0PointingToThisTableByColumn1" xml:space="preserve">
     <value>There are records in '{0}' refearing to this table by column '{1}'</value>
+    <comment>EngineMessage</comment>
   </data>
   <data name="UnauthorizedAccessTo0Because1" xml:space="preserve">
     <value>Unautorized access to {0} because {1}</value>
+    <comment>EngineMessage</comment>
   </data>
   <data name="ImpossibleToExecute0FromState1" xml:space="preserve">
     <value>Impossible to execute {0} from state {1}</value>
+    <comment>OperationMessage</comment>
   </data>
   <data name="InUserInterface" xml:space="preserve">
     <value>(in user interface)</value>
+    <comment>OperationMessage</comment>
   </data>
   <data name="Operation01IsNotAuthorized" xml:space="preserve">
     <value>Operation {0} ({1}) is not Authorized</value>
+    <comment>OperationMessage</comment>
   </data>
   <data name="TheEntity0IsNew" xml:space="preserve">
     <value>The entity {0} is new</value>
+    <comment>EngineMessage</comment>
   </data>
 </root>

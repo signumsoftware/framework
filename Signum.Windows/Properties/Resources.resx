@@ -119,235 +119,264 @@
   </resheader>
   <data name="_1Error" xml:space="preserve">
     <value>1 Error: {0}</value>
+    <comment>NormalWindowMessage</comment>
   </data>
   <data name="_0Errors1" xml:space="preserve">
     <value>{0} Errors: {1}</value>
+    <comment>NormalWindowMessage</comment>
   </data>
   <data name="NullValueNotAllowed" xml:space="preserve">
     <value>Null value not allowed</value>
+    <comment>EntityControlMessage</comment>
   </data>
   <data name="NoColumnSelected" xml:space="preserve">
     <value>No column selected</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="CreateNew" xml:space="preserve">
     <value>Create new</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="Find" xml:space="preserve">
     <value>Find</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="NewFilter" xml:space="preserve">
     <value>New Filter</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="Operation" xml:space="preserve">
     <value>Operation</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="Remove" xml:space="preserve">
     <value>Remove</value>
+    <comment>EntityControlMessage</comment>
   </data>
   <data name="View" xml:space="preserve">
     <value>View</value>
+    <comment>EntityControlMessage</comment>
   </data>
   <data name="ViewSelected" xml:space="preserve">
     <value>View Selected</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="MoveDown" xml:space="preserve">
     <value>Move down</value>
+    <comment>EntityControlMessage</comment>
   </data>
   <data name="MoveUp" xml:space="preserve">
     <value>Move up</value>
-  </data>
-  <data name="ViewFile" xml:space="preserve">
-    <value>View File</value>
-  </data>
-  <data name="DragHorizontallyAndVertically" xml:space="preserve">
-    <value>Drag Horizontally and Vertically</value>
+    <comment>EntityControlMessage</comment>
   </data>
   <data name="ThereAreChangesContinue" xml:space="preserve">
     <value>There are new changes that will be lost.
 
 	Continue?</value>
+    <comment>NormalWindowMessage</comment>
   </data>
   <data name="ThereAreChanges" xml:space="preserve">
     <value>There are changes</value>
+    <comment>NormalWindowMessage</comment>
   </data>
   <data name="ImpossibleToSaveIntegrityCheckFailed" xml:space="preserve">
     <value>Imposisible to Save, integrity check failed:
 
 </value>
+    <comment>NormalWindowMessage</comment>
   </data>
   <data name="ThereAreErrors" xml:space="preserve">
     <value>There are errors</value>
-  </data>
-  <data name="SaveChanges" xml:space="preserve">
-    <value>There are changes that hasn't been saved
-
-	Save changes?</value>
-  </data>
-  <data name="NoChanges" xml:space="preserve">
-    <value>There are no changes</value>
-  </data>
-  <data name="NoChangeHaveBeenFound" xml:space="preserve">
-    <value>No changes has been found</value>
-  </data>
-  <data name="Administration0" xml:space="preserve">
-    <value>Administration {0}</value>
+    <comment>NormalWindowMessage</comment>
   </data>
   <data name="Ok" xml:space="preserve">
     <value>Ok</value>
+    <comment>NormalWindowMessage</comment>
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>Cancel</value>
-  </data>
-  <data name="Close" xml:space="preserve">
-    <value>Close</value>
-  </data>
-  <data name="Save" xml:space="preserve">
-    <value>Save</value>
+    <comment>NormalWindowMessage</comment>
   </data>
   <data name="Reload" xml:space="preserve">
     <value>Reload</value>
+    <comment>NormalWindowMessage</comment>
   </data>
   <data name="Filters" xml:space="preserve">
     <value>Filters</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="FinderOf0" xml:space="preserve">
     <value>Finder of {0}</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="Value" xml:space="preserve">
     <value>Value</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="Create" xml:space="preserve">
     <value>Create</value>
+    <comment>EntityControlMessage</comment>
   </data>
   <data name="PleaseSelectAType" xml:space="preserve">
     <value>Please select one of the following types: </value>
+    <comment>SelectorMessage</comment>
   </data>
   <data name="TypeSelector" xml:space="preserve">
     <value>Type Selector</value>
+    <comment>SelectorMessage</comment>
   </data>
   <data name="InvalidFormat" xml:space="preserve">
     <value>Invalid format</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="InvalidDateFormat" xml:space="preserve">
     <value>Invalid date format</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="Results" xml:space="preserve">
     <value>results.</value>
-  </data>
-  <data name="Limitation" xml:space="preserve">
-    <value>Limitation:</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="Field" xml:space="preserve">
     <value>Field</value>
-  </data>
-  <data name="RelatedEntity" xml:space="preserve">
-    <value>Related Entity</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="CheckedAlerts" xml:space="preserve">
     <value>Checked</value>
+    <comment>AlertMessage</comment>
   </data>
   <data name="WarnedAlerts" xml:space="preserve">
     <value>Warned</value>
+    <comment>AlertMessage</comment>
   </data>
   <data name="FutureAlerts" xml:space="preserve">
     <value>Futures</value>
+    <comment>AlertMessage</comment>
   </data>
   <data name="ThereIsNo0" xml:space="preserve">
     <value>There is no {0}</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="New" xml:space="preserve">
     <value>New</value>
+    <comment>EntityControlMessage</comment>
   </data>
   <data name="SelectAnElement" xml:space="preserve">
     <value>Select an element</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="Query0NotAllowed" xml:space="preserve">
     <value>Query {0} is not allowed</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="Query0NotRegistered" xml:space="preserve">
     <value>Query {0} is not registered in the DynamicQueryManager</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="AConnectionWithTheServerIsNecessaryToContinue" xml:space="preserve">
     <value>A connection with the server is necessary to continue</value>
-  </data>
-  <data name="Call0First" xml:space="preserve">
-    <value>Call {0} first</value>
+    <comment>ConnectionMessage</comment>
   </data>
   <data name="ChooseAValue" xml:space="preserve">
     <value>Choose a value</value>
+    <comment>SelectorMessage</comment>
   </data>
   <data name="PleaseChooseAValueToContinue" xml:space="preserve">
     <value>Please, choose a value to continue:</value>
+    <comment>SelectorMessage</comment>
   </data>
   <data name="_note" xml:space="preserve">
     <value>note</value>
+    <comment>NoteMessage</comment>
   </data>
   <data name="_notes" xml:space="preserve">
     <value>notes</value>
+    <comment>NoteMessage</comment>
   </data>
   <data name="NewColumn" xml:space="preserve">
     <value>New Column</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="LoseChanges" xml:space="preserve">
     <value>There are changes that hasn't been saved. 
 Lose changes?</value>
+    <comment>NormalWindowMessage</comment>
   </data>
   <data name="The0HasErrors1" xml:space="preserve">
     <value>The {0} has errors: 
 {1}</value>
+    <comment>NormalWindowMessage</comment>
   </data>
   <data name="FixErrors" xml:space="preserve">
     <value>Fix Errors</value>
+    <comment>NormalWindowMessage</comment>
   </data>
   <data name="ContinueWithErrors" xml:space="preserve">
     <value>Continue with errors?</value>
+    <comment>NormalWindowMessage</comment>
   </data>
   <data name="ContinueAnyway" xml:space="preserve">
     <value>Continue anyway?</value>
+    <comment>NormalWindowMessage</comment>
   </data>
   <data name="Rename" xml:space="preserve">
     <value>Rename</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="NewColumnSName" xml:space="preserve">
     <value>New Column's Name</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="Name" xml:space="preserve">
     <value>Name</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="ChooseTheDisplayNameOfTheNewColumn" xml:space="preserve">
     <value>Choose the display name of the new column</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="NoDirectErrors" xml:space="preserve">
     <value>No direct errors</value>
+    <comment>NormalWindowMessage</comment>
   </data>
   <data name="SessionExpired" xml:space="preserve">
     <value>Sesion Expired</value>
+    <comment>ConnectionMessage</comment>
   </data>
   <data name="Rows" xml:space="preserve">
     <value>Rows:</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="All" xml:space="preserve">
     <value>All</value>
+    <comment>PaginationMessage</comment>
   </data>
   <data name="Of" xml:space="preserve">
     <value>of</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="NoFiltersSpecified" xml:space="preserve">
     <value>No filters specified</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="Loading0" xml:space="preserve">
     <value>Loading {0}...</value>
+    <comment>NormalWindowMessage</comment>
   </data>
   <data name="Navigate" xml:space="preserve">
     <value>Navigate</value>
+    <comment>EntityControlMessage</comment>
   </data>
   <data name="NoActionsFound" xml:space="preserve">
     <value>No actions found</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="ConstructorSelector" xml:space="preserve">
     <value>Constructor Selector</value>
+    <comment>SelectorMessage</comment>
   </data>
   <data name="PleaseSelectAConstructor" xml:space="preserve">
     <value>Please Select a Constructor</value>
+    <comment>SelectorMessage</comment>
   </data>
 </root>

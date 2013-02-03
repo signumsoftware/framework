@@ -119,8 +119,10 @@
   </resheader>
   <data name="No0HasBeenThrown" xml:space="preserve">
     <value>No {0} has been thrown</value>
+    <comment>AssertMessage</comment>
   </data>
   <data name="ExceptionThrownDoesNotContainMessage0" xml:space="preserve">
     <value>Exception thrown does not contain message '{0}'</value>
+    <comment>AssertMessage</comment>
   </data>
 </root>

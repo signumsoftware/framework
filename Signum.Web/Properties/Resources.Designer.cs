@@ -232,15 +232,6 @@ namespace Signum.Web.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Incorrect data in Session. You must reload the page to continue.
-        /// </summary>
-        public static string IncorrectEntityInSessionYouMustReloadThePageToContinue {
-            get {
-                return ResourceManager.GetString("IncorrectEntityInSessionYouMustReloadThePageToContinue", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Invalid format.
         /// </summary>
         public static string InvalidFormat {
@@ -291,15 +282,6 @@ namespace Signum.Web.Properties {
         public static string LineButton_View {
             get {
                 return ResourceManager.GetString("LineButton_View", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Name.
-        /// </summary>
-        public static string Name {
-            get {
-                return ResourceManager.GetString("Name", resourceCulture);
             }
         }
         
@@ -390,24 +372,6 @@ namespace Signum.Web.Properties {
         public static string PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem {
             get {
                 return ResourceManager.GetString("PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Please confirm you&apos;d like to execute the operation {0} to the entity {1} ({2}-{3}).
-        /// </summary>
-        public static string PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123 {
-            get {
-                return ResourceManager.GetString("PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Please confirm you&apos;d like to execute the operation {0} to the selected entities.
-        /// </summary>
-        public static string PleaseConfirmYouDLikeToExecuteTheOperation0ToTheSelectedEntities {
-            get {
-                return ResourceManager.GetString("PleaseConfirmYouDLikeToExecuteTheOperation0ToTheSelectedEntities", resourceCulture);
             }
         }
         
@@ -787,15 +751,6 @@ namespace Signum.Web.Properties {
         public static string Yes {
             get {
                 return ResourceManager.GetString("Yes", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Your Session has timed out, click F5 to reload the entity from the Database.
-        /// </summary>
-        public static string YourSessionHasTimedOutClickF5ToReloadTheEntity {
-            get {
-                return ResourceManager.GetString("YourSessionHasTimedOutClickF5ToReloadTheEntity", resourceCulture);
             }
         }
     }

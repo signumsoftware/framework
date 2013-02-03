@@ -119,249 +119,311 @@
   </resheader>
   <data name="ValueMustBeSpecifiedFor0" xml:space="preserve">
     <value>A value must be specified for {0}</value>
-  </data>
-  <data name="YourSessionHasTimedOutClickF5ToReloadTheEntity" xml:space="preserve">
-    <value>Your Session has timed out, click F5 to reload the entity from the Database</value>
+    <comment>SelectorMessage</comment>
   </data>
   <data name="New" xml:space="preserve">
     <value>New</value>
+    <comment>NormalControlMessage</comment>
   </data>
   <data name="Remove" xml:space="preserve">
     <value>Remove</value>
+    <comment>EntityControlMessage</comment>
   </data>
   <data name="Alerts" xml:space="preserve">
     <value>Alerts</value>
+    <comment>AlertMessage</comment>
   </data>
   <data name="CreateAlert" xml:space="preserve">
     <value>Create alert</value>
+    <comment>AlertMessage</comment>
   </data>
   <data name="CreateNote" xml:space="preserve">
     <value>Create note</value>
+    <comment>NoteMessage</comment>
   </data>
   <data name="Notes" xml:space="preserve">
     <value>Notes</value>
+    <comment>NoteMessage</comment>
   </data>
   <data name="ViewNotes" xml:space="preserve">
     <value>View notes</value>
+    <comment>NotesMessage</comment>
   </data>
   <data name="View" xml:space="preserve">
     <value>View</value>
-  </data>
-  <data name="IncorrectEntityInSessionYouMustReloadThePageToContinue" xml:space="preserve">
-    <value>Incorrect data in Session. You must reload the page to continue</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="Save" xml:space="preserve">
     <value>Save</value>
+    <comment>NormalControlMessage</comment>
   </data>
   <data name="No" xml:space="preserve">
     <value>no</value>
+    <comment>EntityControlMessage</comment>
   </data>
   <data name="Yes" xml:space="preserve">
     <value>yes</value>
+    <comment>EntityControlMessage</comment>
   </data>
   <data name="ShowCalendar" xml:space="preserve">
     <value>Show calendar</value>
+    <comment>CalendarMessage</comment>
   </data>
   <data name="ViewForType0IsNotAllowed" xml:space="preserve">
     <value>View for type {0} is not allowed</value>
+    <comment>NormalControlMessage</comment>
   </data>
   <data name="Type0NotAllowed" xml:space="preserve">
     <value>Type {0} not allowed</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="FilterBuilder_DeleteFilter" xml:space="preserve">
     <value>Delete Filter</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="Field" xml:space="preserve">
     <value>Field</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="Signum_hideFilters" xml:space="preserve">
     <value>Hide filters</value>
-  </data>
-  <data name="Name" xml:space="preserve">
-    <value>Name</value>
+    <comment>JavascriptMessage</comment>
   </data>
   <data name="NoFiltersSpecified" xml:space="preserve">
     <value>No filters specified</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="Operation" xml:space="preserve">
     <value>Operation</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="Search" xml:space="preserve">
     <value>Search</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="Signum_showFilters" xml:space="preserve">
     <value>Show filters</value>
+    <comment>JavascriptMessage</comment>
   </data>
   <data name="Value" xml:space="preserve">
     <value>Value</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="CalendarClose" xml:space="preserve">
     <value>Done</value>
+    <comment>CalendarMessage</comment>
   </data>
   <data name="CalendarNext" xml:space="preserve">
     <value>Next</value>
+    <comment>CalendarMessage</comment>
   </data>
   <data name="CalendarPrevious" xml:space="preserve">
     <value>Prev</value>
+    <comment>CalendarMessage</comment>
   </data>
   <data name="CalendarToday" xml:space="preserve">
     <value>Today</value>
+    <comment>CalendarMessage</comment>
   </data>
   <data name="NoResults" xml:space="preserve">
     <value>No results</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="Signum_noResults" xml:space="preserve">
     <value>No results found</value>
+    <comment>JavascriptMessage</comment>
   </data>
   <data name="Signum_error" xml:space="preserve">
     <value>Error</value>
+    <comment>JavascriptMessage</comment>
   </data>
   <data name="Signum_noElementsSelected" xml:space="preserve">
     <value>No elements selected</value>
+    <comment>JavascriptMessage</comment>
   </data>
   <data name="Signum_executed" xml:space="preserve">
     <value>Executed</value>
+    <comment>JavascriptMessage</comment>
   </data>
   <data name="Signum_popupErrors" xml:space="preserve">
     <value>There are errors in the entity, you want to continue?</value>
+    <comment>JavascriptMessage</comment>
   </data>
   <data name="Signum_popupErrorsStop" xml:space="preserve">
     <value>There are errors in the entity</value>
+    <comment>JavascriptMessage</comment>
   </data>
   <data name="Signum_saved" xml:space="preserve">
     <value>Saved</value>
+    <comment>JavascriptMessage</comment>
   </data>
   <data name="Signum_search" xml:space="preserve">
     <value>Search</value>
+    <comment>JavascriptMessage</comment>
   </data>
   <data name="NotPossibleToaAssign0" xml:space="preserve">
     <value>Not possible to assign {0}</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="_0HasAnInvalidFormat" xml:space="preserve">
     <value>{0} has an invalid format</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="Search_Create" xml:space="preserve">
     <value>Create</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="LineButton_Find" xml:space="preserve">
     <value>Find</value>
+    <comment>EntityControlMessage</comment>
   </data>
   <data name="LineButton_Create" xml:space="preserve">
     <value>Create</value>
+    <comment>EntityControlMessage</comment>
   </data>
   <data name="LineButton_Remove" xml:space="preserve">
     <value>Remove</value>
+    <comment>EntityControlMessage</comment>
   </data>
   <data name="LineButton_View" xml:space="preserve">
     <value>View</value>
+    <comment>EntityControlMessage</comment>
   </data>
   <data name="FilterBuilder_AddColumn" xml:space="preserve">
     <value>Add column</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="FilterBuilder_AddFilter" xml:space="preserve">
     <value>Add filter</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="Signum_addFilter" xml:space="preserve">
     <value>Add filter</value>
+    <comment>JavascriptMessage</comment>
   </data>
   <data name="Signum_editColumnName" xml:space="preserve">
     <value>Edit column name</value>
+    <comment>JavascriptMessage</comment>
   </data>
   <data name="Signum_enterTheNewColumnName" xml:space="preserve">
     <value>Enter the new column name</value>
+    <comment>JavascriptMessage</comment>
   </data>
   <data name="Signum_removeColumn" xml:space="preserve">
     <value>Remove column</value>
+    <comment>JavascriptMessage</comment>
   </data>
   <data name="Signum_reorderColumn_MoveLeft" xml:space="preserve">
     <value>Move left</value>
+    <comment>JavascriptMessage</comment>
   </data>
   <data name="Signum_reorderColumn_MoveRight" xml:space="preserve">
     <value>Move right</value>
+    <comment>JavascriptMessage</comment>
   </data>
   <data name="Signum_selectToken" xml:space="preserve">
     <value>Select a token</value>
+    <comment>JavascriptMessage</comment>
   </data>
   <data name="ChooseAType" xml:space="preserve">
     <value>Choose a type</value>
+    <comment>SelectorMessage</comment>
   </data>
   <data name="Quicklinks" xml:space="preserve">
     <value>Quick links</value>
+    <comment>QuickLinkMessage</comment>
   </data>
   <data name="InvalidFormat" xml:space="preserve">
     <value>Invalid format</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="NoteCreated" xml:space="preserve">
     <value>Note created</value>
+    <comment>NoteMessage</comment>
   </data>
   <data name="AlertCreated" xml:space="preserve">
     <value>Alert created</value>
+    <comment>AlertMessage</comment>
   </data>
   <data name="Alerts_Attended" xml:space="preserve">
     <value>Attended</value>
+    <comment>AlertMessage</comment>
   </data>
   <data name="Alerts_Future" xml:space="preserve">
     <value>Future</value>
+    <comment>AlertMessage</comment>
   </data>
   <data name="Alerts_NotAttended" xml:space="preserve">
     <value>Not attended</value>
+    <comment>AlertMessage</comment>
   </data>
   <data name="Query0IsNotAllowed" xml:space="preserve">
     <value>Query {0} is not allowed</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="SearchControl_Pagination_Of" xml:space="preserve">
     <value>of</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="SearchControl_Pagination_Results" xml:space="preserve">
     <value>results</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="SearchControl_Pagination_Rows" xml:space="preserve">
     <value>Rows</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="SearchControl_Pagination_All" xml:space="preserve">
     <value>All</value>
+    <comment>SearchMessage</comment>
   </data>
   <data name="Signum_loading" xml:space="preserve">
     <value>Loading...</value>
+    <comment>JavascriptMessage</comment>
   </data>
   <data name="Detail" xml:space="preserve">
     <value>Detail</value>
+    <comment>EntityControlMessage</comment>
   </data>
   <data name="Signum_entityRepeater_moveDown" xml:space="preserve">
     <value>Move down</value>
+    <comment>JavascriptMessage</comment>
   </data>
   <data name="Signum_entityRepeater_moveUp" xml:space="preserve">
     <value>Move up</value>
+    <comment>JavascriptMessage</comment>
   </data>
   <data name="LineButton_Navigate" xml:space="preserve">
     <value>Navigate</value>
+    <comment>EntityControlMessage</comment>
   </data>
   <data name="Signum_loseChanges" xml:space="preserve">
     <value>There are changes that haven't been saved. 
 Lose changes?</value>
+    <comment>JavascriptMessage</comment>
   </data>
   <data name="Signum_onlyOneElement" xml:space="preserve">
     <value>You can select only one element</value>
+    <comment>JavascriptMessage</comment>
   </data>
   <data name="Signum_searchControlMenuSelected" xml:space="preserve">
     <value>selected</value>
+    <comment>JavascriptMessage</comment>
   </data>
   <data name="Create" xml:space="preserve">
     <value>Create</value>
+    <comment>OperationMessage</comment>
   </data>
   <data name="PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem" xml:space="preserve">
     <value>Please confirm you'd like to delete the entity from the system</value>
+    <comment>OperationMessage</comment>
   </data>
   <data name="PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem" xml:space="preserve">
     <value>Please confirm you'd like to delete the selected entities from the system</value>
-  </data>
-  <data name="PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123" xml:space="preserve">
-    <value>Please confirm you'd like to execute the operation {0} to the entity {1} ({2}-{3})</value>
-  </data>
-  <data name="PleaseConfirmYouDLikeToExecuteTheOperation0ToTheSelectedEntities" xml:space="preserve">
-    <value>Please confirm you'd like to execute the operation {0} to the selected entities</value>
+    <comment>OperationMessage</comment>
   </data>
   <data name="Search_CtxMenuItem_Operations" xml:space="preserve">
     <value>Operations</value>
+    <comment>SearchMessage</comment>
   </data>
 </root>

@@ -119,54 +119,71 @@
   </resheader>
   <data name="_0As1" xml:space="preserve">
     <value>({0} as {1})</value>
+    <comment>QueryTokenMessage</comment>
   </data>
   <data name="_0DoesNotHaveAValid0Format" xml:space="preserve">
     <value>{{0}} does not have a valid {0} format</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="_0HasMoreThan0DecimalPlaces" xml:space="preserve">
     <value>{{0}} has more than {0} decimal places</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="_0HasNoCorrectFormat" xml:space="preserve">
     <value>{0} has no correct format</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="_0HasSomeRepeatedElements0" xml:space="preserve">
     <value>{{0}} has some repeated elements: {0}</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="_0HasToBe0Than1" xml:space="preserve">
     <value>{{0}} has to be {0} {1}</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="_0HasToBeBetween0And1" xml:space="preserve">
     <value>{{0}} Has to be between {0} and {1}</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="_0HasToBeLowercase" xml:space="preserve">
     <value>{0} has to be lowercase</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="_0HasToBeUppercase" xml:space="preserve">
     <value>{0} has to be uppercase</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="_0IsNecessaryOnState1" xml:space="preserve">
     <value>{0} is necessary on state {1}</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="_0IsNotAllowedOnState1" xml:space="preserve">
     <value>{0} is not allowed on state {1}</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="And" xml:space="preserve">
     <value> and </value>
+    <comment>QueryTokenMessage</comment>
   </data>
   <data name="As0" xml:space="preserve">
     <value>As {0}</value>
+    <comment>QueryTokenMessage</comment>
   </data>
   <data name="Be" xml:space="preserve">
     <value>be </value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="BeBetween0And1" xml:space="preserve">
     <value>be between {0} and {1}</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="BeNotNull" xml:space="preserve">
     <value>be not null</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="Column0NotFound" xml:space="preserve">
     <value>Column {0} not found</value>
+    <comment>QueryTokenMessage</comment>
   </data>
   <data name="ComparisonType_DistinctTo" xml:space="preserve">
     <value>distinct to</value>
@@ -188,12 +205,15 @@
   </data>
   <data name="Count" xml:space="preserve">
     <value>Count</value>
+    <comment>QueryTokenMessage</comment>
   </data>
   <data name="Day" xml:space="preserve">
     <value>Day</value>
+    <comment>QueryTokenMessage</comment>
   </data>
   <data name="FileName" xml:space="preserve">
     <value>file name</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="FilterOperation_Contains" xml:space="preserve">
     <value>contains</value>
@@ -227,111 +247,145 @@
   </data>
   <data name="Have0Decimals" xml:space="preserve">
     <value>have {0} decimals</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="HaveANumberOfElements01" xml:space="preserve">
     <value>have a number of elements {0} {1}</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="HaveAPrecisionOf" xml:space="preserve">
     <value>have a precision of </value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="HaveBetween0And1Characters" xml:space="preserve">
     <value>have between {0} and {1} characters</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="HaveMaximun0Characters" xml:space="preserve">
     <value>have maximun {0} characters</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="HaveMinimum0Characters" xml:space="preserve">
     <value>have minimum {0} characters</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="HaveNoRepeatedElements" xml:space="preserve">
     <value>have no repeated elements</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="HaveValid0Format" xml:space="preserve">
     <value>have a valid {0} format</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="Hour" xml:space="preserve">
     <value>Hour</value>
+    <comment>QueryTokenMessage</comment>
   </data>
   <data name="IdNotValid" xml:space="preserve">
     <value>Id not valid</value>
+    <comment>LiteMessage</comment>
   </data>
   <data name="ImmutableEntity_AllowChange" xml:space="preserve">
     <value>Allow Change</value>
   </data>
   <data name="InvalidFormat" xml:space="preserve">
     <value>Invalid Format</value>
+    <comment>LiteMessage</comment>
   </data>
   <data name="Lowercase" xml:space="preserve">
     <value>lowercase</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="Millisecond" xml:space="preserve">
     <value>Millisecond</value>
+    <comment>QueryTokenMessage</comment>
   </data>
   <data name="Minute" xml:space="preserve">
     <value>Minute</value>
+    <comment>QueryTokenMessage</comment>
   </data>
   <data name="Month" xml:space="preserve">
     <value>Month</value>
+    <comment>QueryTokenMessage</comment>
   </data>
   <data name="MoreThanOneColumnNamed0" xml:space="preserve">
     <value>More than one column named {0}</value>
+    <comment>QueryTokenMessage</comment>
   </data>
   <data name="New" xml:space="preserve">
     <value>New</value>
+    <comment>LiteMessage</comment>
   </data>
   <data name="Of" xml:space="preserve">
     <value> of </value>
+    <comment>QueryTokenMessage</comment>
   </data>
   <data name="OrBeNull" xml:space="preserve">
     <value>or be null</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="Second" xml:space="preserve">
     <value>Second</value>
+    <comment>QueryTokenMessage</comment>
   </data>
   <data name="Telephone" xml:space="preserve">
     <value>Telephone</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="TheLenghtOf0HasToBeEqualTo0" xml:space="preserve">
     <value>The lenght of {{0}} has to be equal to {0}</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="TheLengthOf0HasToBeGreaterOrEqualTo0" xml:space="preserve">
     <value>The length of {{0}} has to be greater than or equal to {0}</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="TheLengthOf0HasToBeLesserOrEqualTo0" xml:space="preserve">
     <value>The length of {{0}} has to be less than or equal to {0}</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="TheNumberOfElementsOf0HasToBe01" xml:space="preserve">
     <value>The number of elements of {{0}} has to be {0} {1}</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="TypeNotFound" xml:space="preserve">
     <value>Type not found</value>
+    <comment>LiteMessage</comment>
   </data>
   <data name="Uppercase" xml:space="preserve">
     <value>uppercase</value>
   </data>
   <data name="Year" xml:space="preserve">
     <value>Year</value>
+    <comment>QueryTokenMessage</comment>
   </data>
   <data name="_0IsNotAllowed" xml:space="preserve">
     <value>{0} is not allowed</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="_0IsNecessary" xml:space="preserve">
     <value>{0} is necessary</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="Date" xml:space="preserve">
     <value>Date</value>
+    <comment>QueryTokenMessage</comment>
   </data>
   <data name="MonthStart" xml:space="preserve">
     <value>Month Start </value>
+    <comment>QueryTokenMessage</comment>
   </data>
   <data name="_0IsNotSet" xml:space="preserve">
     <value>{0} is not set</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="AttemptToModifyLockedEntity0" xml:space="preserve">
     <value>Attempt to modify locked entity {0}</value>
+    <comment>EntityMessage</comment>
   </data>
   <data name="TheNumberOf0IsBeingMultipliedBy1" xml:space="preserve">
     <value>The number of {0} is being multiplied by {1}</value>
+    <comment>ValidationMessage</comment>
   </data>
   <data name="FilterOperation_NotContains" xml:space="preserve">
     <value>not contains</value>
@@ -350,45 +404,55 @@
   </data>
   <data name="DayOfYear" xml:space="preserve">
     <value>Day of year</value>
+    <comment>QueryTokenMessage</comment>
   </data>
   <data name="DayOfWeek" xml:space="preserve">
     <value>Day of week</value>
+    <comment>QueryTokenMessage</comment>
   </data>
   <data name="AnyEntity" xml:space="preserve">
     <value>any entity</value>
+    <comment>QueryTokenMessage</comment>
   </data>
   <data name="Check" xml:space="preserve">
     <value>check</value>
+    <comment>QueryTokenMessage</comment>
   </data>
   <data name="DateTime" xml:space="preserve">
     <value>date and time</value>
+    <comment>QueryTokenMessage</comment>
   </data>
   <data name="DecimalNumber" xml:space="preserve">
     <value>decimal number</value>
+    <comment>QueryTokenMessage</comment>
   </data>
   <data name="Embedded0" xml:space="preserve">
     <value>embedded {0}</value>
+    <comment>QueryTokenMessage</comment>
   </data>
   <data name="GlobalUniqueIdentifier" xml:space="preserve">
     <value>global unique identifier</value>
+    <comment>QueryTokenMessage</comment>
   </data>
   <data name="ListOf0" xml:space="preserve">
     <value>list of {0}</value>
+    <comment>QueryTokenMessage</comment>
   </data>
   <data name="Number" xml:space="preserve">
     <value>number</value>
+    <comment>QueryTokenMessage</comment>
   </data>
   <data name="Text" xml:space="preserve">
     <value>text</value>
-  </data>
-  <data name="Unknown" xml:space="preserve">
-    <value>unknown</value>
+    <comment>QueryTokenMessage</comment>
   </data>
   <data name="Create" xml:space="preserve">
     <value>Create...</value>
+    <comment>OperationMessage</comment>
   </data>
   <data name="CreateFromRegex" xml:space="preserve">
     <value>^Create (.*) from .*$</value>
+    <comment>OperationMessage</comment>
   </data>
   <data name="FilterOperation_IsIn" xml:space="preserve">
     <value>is in</value>

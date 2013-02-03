@@ -870,7 +870,7 @@ namespace Signum.Windows
             string name = methodBase.DeclaringType.FullName + "." + methodBase.Name;
 
             if (!loadedModules.Contains(name))
-                throw new InvalidOperationException(Resources.Call0First.Formato(name));
+                throw new InvalidOperationException("Call {0} firs".Formato(name));
         }
 
         public virtual DataTemplate FindDataTemplate(FrameworkElement element, Type entityType)

@@ -119,83 +119,106 @@
   </resheader>
   <data name="_0Day" xml:space="preserve">
     <value>{0} Day</value>
+    <comment>DateTimeMessage</comment>
   </data>
   <data name="_0Days" xml:space="preserve">
     <value>{0} Days</value>
+    <comment>DateTimeMessage</comment>
   </data>
   <data name="_0Hour" xml:space="preserve">
     <value>{0} Hour</value>
+    <comment>DateTimeMessage</comment>
   </data>
   <data name="_0Hours" xml:space="preserve">
     <value>{0} Hours</value>
+    <comment>DateTimeMessage</comment>
   </data>
   <data name="_0Minute" xml:space="preserve">
     <value>{0} Minute</value>
+    <comment>DateTimeMessage</comment>
   </data>
   <data name="_0Minutes" xml:space="preserve">
     <value>{0} Minutes</value>
+    <comment>DateTimeMessage</comment>
   </data>
   <data name="_0Month" xml:space="preserve">
     <value>{0} Month</value>
+    <comment>DateTimeMessage</comment>
   </data>
   <data name="_0Months" xml:space="preserve">
     <value>{0} Months</value>
+    <comment>DateTimeMessage</comment>
   </data>
   <data name="_0Second" xml:space="preserve">
     <value>{0} Second</value>
+    <comment>DateTimeMessage</comment>
   </data>
   <data name="_0Seconds" xml:space="preserve">
     <value>{0} Seconds</value>
+    <comment>DateTimeMessage</comment>
   </data>
   <data name="_0Year" xml:space="preserve">
     <value>{0} Year</value>
+    <comment>DateTimeMessage</comment>
   </data>
   <data name="_0Years" xml:space="preserve">
     <value>{0} Years</value>
+    <comment>DateTimeMessage</comment>
   </data>
   <data name="And" xml:space="preserve">
     <value> and </value>
+    <comment>CollectionMessage</comment>
   </data>
   <data name="DateLast" xml:space="preserve">
     <value>Last {0}</value>
+    <comment>DateTimeMessage</comment>
   </data>
   <data name="DateThis" xml:space="preserve">
     <value>This {0}</value>
+    <comment>DateTimeMessage</comment>
   </data>
   <data name="EnterYourSelection" xml:space="preserve">
     <value>Enter your selection: </value>
+    <comment>ConsoleMessage</comment>
   </data>
   <data name="EnterYoutSelectionsSeparatedByComma" xml:space="preserve">
     <value>Enter your selections separated by comma: </value>
+    <comment>ConsoleMessage</comment>
   </data>
   <data name="NoOptionWithKey0Found" xml:space="preserve">
     <value>No option with key {0} found</value>
+    <comment>ConsoleMessage</comment>
   </data>
   <data name="Or" xml:space="preserve">
     <value> or </value>
+    <comment>CollectionMessage</comment>
   </data>
   <data name="OS_Unknown0" xml:space="preserve">
     <value>Unknown ({0})</value>
+    <comment>AboutMessage</comment>
   </data>
   <data name="SelectOneOfTheFollowingOptions" xml:space="preserve">
     <value>Select one of the following options:</value>
+    <comment>ConsoleMessage</comment>
   </data>
   <data name="Today" xml:space="preserve">
     <value>Today</value>
+    <comment>DateTimeMessage</comment>
   </data>
   <data name="Tomorrow" xml:space="preserve">
     <value>Tomorrow</value>
-  </data>
-  <data name="Unavailable" xml:space="preserve">
-    <value>Unavailable</value>
+    <comment>DateTimeMessage</comment>
   </data>
   <data name="Yesterday" xml:space="preserve">
     <value>Yesterday</value>
+    <comment>DateTimeMessage</comment>
   </data>
   <data name="Ago" xml:space="preserve">
     <value>{0} ago </value>
+    <comment>DateTimeMessage</comment>
   </data>
   <data name="In" xml:space="preserve">
     <value>In {0}</value>
+    <comment>DateTimeMessage</comment>
   </data>
 </root>

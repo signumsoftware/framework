@@ -91,7 +91,7 @@ namespace Signum.Utilities.ExpressionTrees
                 }
                 catch (Exception)
                 {
-                    return Resources.Unavailable;
+                    return "Unavailable";
                 }
             }
         }
