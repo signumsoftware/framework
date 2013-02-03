@@ -23,4 +23,4 @@ using Signum.Utilities;
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("72545e33-3f4a-4e77-a19c-c0ef0da8155d")]
 
-[assembly:LocalizeDescriptions]
+[assembly:DefaultAssemblyCulture("en")]

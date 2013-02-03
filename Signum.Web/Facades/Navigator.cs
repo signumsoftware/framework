@@ -619,9 +619,7 @@ namespace Signum.Web
 
             if (ident.IsNew)
             {
-                Gender gender = ident.GetType().GetGender();
-                return Properties.Resources.ResourceManager.GetGenderAwareResource("New", gender) + " " + niceName;
-
+                return Properties.Resources.New.ForGenderAndNumber(ident.GetType().GetGender()) + " " + niceName;
             }
             return niceName + " " + ident.Id;
         }

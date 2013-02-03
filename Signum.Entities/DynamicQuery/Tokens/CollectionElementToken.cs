@@ -178,7 +178,7 @@ namespace Signum.Entities.DynamicQuery
 
 
 
-    [ForceLocalization]
+    [DescriptionOptions(DescriptionOptions.Members)]
     public enum CollectionElementType
     {
         Element,

@@ -21,7 +21,7 @@ namespace Signum.Entities
     public abstract class ValidatorAttribute : Attribute
     {
         public Func<ModifiableEntity, bool> IsApplicable; 
-        public string ErrorMessage { get; set; }
+        public Func<string> ErrorMessage { get; set; }
 
         public int Order { get; set; }
 
@@ -39,26 +39,13 @@ namespace Signum.Entities
             if (defaultError == null)
                 return null;
 
-            string error = GetLocalizedErrorMessage(property, this) ?? ErrorMessage ?? defaultError;
+            string error = ErrorMessage == null ? defaultError : ErrorMessage();
             if (error != null)
                 error = error.Formato(property.NiceName());
 
             return error; 
         }
 
-        static string GetLocalizedErrorMessage(PropertyInfo property, ValidatorAttribute validator)
-        {
-            Assembly assembly = property.DeclaringType.Assembly;
-            if (assembly.HasAttribute<LocalizeDescriptionsAttribute>())
-            {
-                string key = property.DeclaringType.Name.Add("_", property.Name).Add("_", validator.GetType().Name);
-                string result = assembly.GetDefaultResourceManager().GetString(key);
-                if (result != null)
-                    return result;
-            }
-
-            return null;
-        }
 
         /// <summary>
         /// When overriden, validates the value against this validator rule
@@ -641,7 +628,7 @@ namespace Signum.Entities
         Lowercase
     }
     
-    [ForceLocalization]
+    [DescriptionOptions(DescriptionOptions.Members)]
     public enum ComparisonType
     {
         EqualTo,
