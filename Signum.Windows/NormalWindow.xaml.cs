@@ -171,14 +171,14 @@ namespace Signum.Windows
                         case AllowErrors.Yes: break;
                         case AllowErrors.No:
                             MessageBox.Show(this,
-                                type.GetGenderAwareResource(() => Properties.Resources.The0HasErrors1).Formato(type.NiceName(), errors.Indent(3)),
+                                Properties.Resources.The0HasErrors1.ForGenderAndNumber(type.GetGender()).Formato(type.NiceName(), errors.Indent(3)),
                                 Properties.Resources.FixErrors,
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Exclamation);
                             return;
                         case AllowErrors.Ask:
                             if (MessageBox.Show(this,
-                                type.GetGenderAwareResource(() => Properties.Resources.The0HasErrors1).Formato(type.NiceName(), errors.Indent(3)) + "\r\n" + Properties.Resources.ContinueAnyway,
+                                Properties.Resources.The0HasErrors1.ForGenderAndNumber(type.GetGender()).Formato(type.NiceName(), errors.Indent(3)) + "\r\n" + Properties.Resources.ContinueAnyway,
                                 Properties.Resources.ContinueWithErrors,
                                 MessageBoxButton.YesNo,
                                 MessageBoxImage.Exclamation,
