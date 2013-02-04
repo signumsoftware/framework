@@ -296,12 +296,10 @@ namespace Signum.Entities
                     if (error != null)
                     {
                         if (sb == null)
-                        {
                             sb = new StringBuilder();
-                            sb.Append(error);
-                        }
-
-                        sb.Append("\r\n");
+                        else
+                            sb.Append("\r\n");
+                        
                         sb.Append(error);
                     }
                 }
@@ -309,7 +307,7 @@ namespace Signum.Entities
                 if (sb == null)
                     return null;
 
-                return sb.ToString(0, sb.Length - 2);
+                return sb.ToString();
             }
         }
 
