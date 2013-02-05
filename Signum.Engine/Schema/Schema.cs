@@ -298,8 +298,6 @@ namespace Signum.Engine.Maps
         {
             Dictionary<InitLevel, Action> dict = new Dictionary<InitLevel, Action>();
 
-            Dictionary<MethodInfo, long> times = new Dictionary<MethodInfo, long>();
-
             InitLevel? initLevel;
 
             public Action this[InitLevel level]
@@ -328,26 +326,34 @@ namespace Signum.Engine.Maps
 
             void InitializeJust(InitLevel currentLevel)
             {
-                Action h = dict.TryGetC(currentLevel);
-                if (h == null)
-                    return;
-
-                var handlers = h.GetInvocationList().Cast<Action>();
-
-                foreach (Action handler in handlers)
+                using (HeavyProfiler.Log("InitializeJuts", () => currentLevel.ToString()))
                 {
-                    Stopwatch sw = Stopwatch.StartNew();
-                    handler();
-                    sw.Stop();
-                    times.Add(handler.Method, sw.ElapsedMilliseconds);
+                    Action h = dict.TryGetC(currentLevel);
+                    if (h == null)
+                        return;
+
+                    var handlers = h.GetInvocationList().Cast<Action>();
+
+                    foreach (Action handler in handlers)
+                    {
+                        using (HeavyProfiler.Log("InitAction", () => "{0}.{1}".Formato(handler.Method.DeclaringType.TypeName(), handler.Method.MethodName())))
+                        {
+                            handler();
+                        }
+                    }
                 }
             }
 
             public override string ToString()
             {
-                return dict.OrderBy(a => a.Key).ToString(a => "{0} -> \r\n{1}".Formato(a.Key,
-                    a.Value.GetInvocationList().Select(h => h.Method).ToString(mi =>
-                        "\t{0}.{1}: {2}".Formato(mi.DeclaringType.TypeName(), mi.MethodName(), times.TryGetS(mi).TryToString("0 ms") ?? "Not Initialized"), "\r\n")), "\r\n\r\n");
+                return dict.OrderBy(a => a.Key)
+                    .ToString(a => "{0} -> \r\n{1}".Formato(
+                        a.Key,
+                        a.Value.GetInvocationList().Select(h => h.Method).ToString(mi => "\t{0}.{1}".Formato(
+                            mi.DeclaringType.TypeName(), 
+                            mi.MethodName()), 
+                        "\r\n")
+                    ), "\r\n\r\n");
             }
         }
 

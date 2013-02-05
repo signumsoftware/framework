@@ -419,24 +419,40 @@ namespace Signum.Utilities
 
         public static string ToString<T>(this IEnumerable<T> collection, string separator)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = null;
             foreach (var item in collection)
             {
+                if (sb == null)
+                    sb = new StringBuilder();
+                else
+                    sb.Append(separator);
+
                 sb.Append(item.ToString());
-                sb.Append(separator);
             }
-            return sb.ToString(0, Math.Max(0, sb.Length - separator.Length));  // Remove at the end is faster
+
+            if (sb == null)
+                return "";
+
+            return sb.ToString();  // Remove at the end is faster
         }
 
         public static string ToString<T>(this IEnumerable<T> collection, Func<T, string> toString, string separator)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = null;
             foreach (var item in collection)
             {
+                if (sb == null)
+                    sb = new StringBuilder();
+                else
+                    sb.Append(separator);
+
                 sb.Append(toString(item));
-                sb.Append(separator);
             }
-            return sb.ToString(0, Math.Max(0, sb.Length - separator.Length));  // Remove at the end is faster
+
+            if (sb == null)
+                return "";
+
+            return sb.ToString();  // Remove at the end is faster
         }
 
 

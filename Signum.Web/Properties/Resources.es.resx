@@ -330,14 +330,44 @@
   <data name="SearchControl_Pagination_Rows" xml:space="preserve">
     <value>Filas</value>
   </data>
+  <data name="Create" xml:space="preserve">
+    <value>Crear</value>
+  </data>
+  <data name="Detail" xml:space="preserve">
+    <value>Detalle</value>
+  </data>
+  <data name="LineButton_Navigate" xml:space="preserve">
+    <value>Navegar</value>
+  </data>
+  <data name="PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem" xml:space="preserve">
+    <value>Confirme que desea eliminar esta entidad del sistema</value>
+  </data>
+  <data name="PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem" xml:space="preserve">
+    <value>Confirme que desea eliminar las entidades seleccionadas del sistema</value>
+  </data>
+  <data name="PleaseConfirmYouDLikeToExecuteTheOperation0ToTheEntity123" xml:space="preserve">
+    <value>Confirme que desea ejecutar la operación {0} para la entidad {1} ({2}-{3})</value>
+  </data>
+  <data name="PleaseConfirmYouDLikeToExecuteTheOperation0ToTheSelectedEntities" xml:space="preserve">
+    <value>Confirme por favor you'd como para ejecutar la operación {0} para las entidades seleccionadas</value>
+  </data>
+  <data name="Search_CtxMenuItem_Operations" xml:space="preserve">
+    <value>Operaciones</value>
+  </data>
+  <data name="Signum_entityRepeater_moveDown" xml:space="preserve">
+    <value>Mover hacia abajo</value>
+  </data>
+  <data name="Signum_entityRepeater_moveUp" xml:space="preserve">
+    <value>Mover hacia arriba</value>
+  </data>
   <data name="Signum_loseChanges" xml:space="preserve">
-    <value>Hay cambios que no se han guardado. 
+    <value>Hay cambios que no han sido guardados. 
 ¿Perder los cambios?</value>
   </data>
   <data name="Signum_onlyOneElement" xml:space="preserve">
-    <value>Sólo puedes seleccionar un elemento</value>
+    <value>Sólo puede seleccionar un elemento</value>
   </data>
   <data name="Signum_searchControlMenuSelected" xml:space="preserve">
-    <value>Seleccionados</value>
+    <value>seleccionado</value>
   </data>
 </root>

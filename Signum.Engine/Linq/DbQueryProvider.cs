@@ -39,7 +39,7 @@ namespace Signum.Engine.Linq
 
         public override object Execute(Expression expression)
         {
-            using (HeavyProfiler.Log("DB"))
+            using (HeavyProfiler.Log("DBQuery", () => expression.Type.TypeName()))
                 return this.Translate(expression, tr => tr.Execute());
         }
 

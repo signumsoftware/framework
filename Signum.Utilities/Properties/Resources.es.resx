@@ -196,6 +196,6 @@
     <value>hace {0} </value>
   </data>
   <data name="In" xml:space="preserve">
-    <value>dentro de {0}</value>
+    <value>En {0}</value>
   </data>
 </root>

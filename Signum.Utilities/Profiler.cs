@@ -97,8 +97,6 @@ namespace Signum.Utilities
 
         public static long? TimeLimit;
 
-        public static int MaxTotalEntriesCount = 1000;
-
 
         static bool enabled;
         public static bool Enabled
@@ -311,12 +309,26 @@ namespace Signum.Utilities
             var list = doc.Element("Logs").Elements("Log").Select(xLog => HeavyProfilerEntry.ImportXml(xLog, null)).ToList();
 
             if (list.Any())
+            {
                 lock (Entries)
                 {
-                    int delta = Entries.Count - list.Min(e => e.Index);
-                    list.ForEach(e => e.Index += delta);
+                    int indexDelta = Entries.Count - list.Min(e => e.Index);
+                    foreach (var e in list)
+                        e.Index += indexDelta;
+
+                    if (Entries.Any())
+                    {
+                        long timeDelta = Entries.Any() ? (Entries.Min(a => a.BeforeStart) - list.Min(a => a.BeforeStart)) : 0;
+
+                        foreach (var e in list)
+                            e.ReBaseTime(timeDelta);
+
+                     
+                    }
+
                     Entries.AddRange(list);
                 }
+            }
         }
 
         public static XDocument SqlStatisticsXDocument()
@@ -511,6 +523,26 @@ namespace Signum.Utilities
                 result.Entries = xLog.Elements("Log").Select(x => ImportXml(x, result)).ToList();
          
             return result;
+        }
+
+
+
+        public XDocument ExportXmlDocument()
+        {
+            return new XDocument(
+                 new XElement("Logs", ExportXml())
+                 );
+        }
+
+        internal void ReBaseTime(long timeDelta)
+        {
+            BeforeStart += timeDelta;
+            Start += timeDelta;
+            End += timeDelta;
+
+            if (Entries != null)
+                foreach (var e in Entries)
+                    e.ReBaseTime(timeDelta);
         }
     }
 

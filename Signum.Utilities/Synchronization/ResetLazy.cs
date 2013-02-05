@@ -12,6 +12,7 @@ namespace Signum.Utilities
     {
         void Reset();
         void Load();
+        Type DeclaringType { get; }
     }
 
     [ComVisible(false)]
@@ -28,20 +29,28 @@ namespace Signum.Utilities
             public readonly T Value;
         }
 
-        public ResetLazy(Func<T> valueFactory, LazyThreadSafetyMode mode = LazyThreadSafetyMode.PublicationOnly)
+        public ResetLazy(Func<T> valueFactory, LazyThreadSafetyMode mode = LazyThreadSafetyMode.PublicationOnly, Type declaringType = null)
         {
             if (valueFactory == null)
                 throw new ArgumentNullException("valueFactory");
 
             this.mode = mode;
             this.valueFactory = valueFactory;
+            this.declaringType = declaringType ?? valueFactory.Method.DeclaringType;
         }
+
         LazyThreadSafetyMode mode; 
         Func<T> valueFactory;
 
         object syncLock = new object();
 
         Box box;
+
+        Type declaringType; 
+        public Type DeclaringType
+        {
+            get { return declaringType; }
+        }
 
         public T Value
         {
@@ -112,17 +121,6 @@ namespace Signum.Utilities
             else
             {
                 this.box = null;
-            }
-        }
-
-        public Type DeclaredType
-        {
-            get
-            {
-                if (valueFactory == null) 
-                    return null;
-
-                return valueFactory.Method.DeclaringType;
             }
         }
     }
