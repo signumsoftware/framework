@@ -10,6 +10,14 @@ using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Basics
 {
+    public static class MultiEnumExtensions
+    {
+        public static T ToEntity<T>(this Enum key) where T:MultiEnumDN, new()
+        {
+            return MultiEnumLogic<T>.ToEntity(key);
+        }
+    }
+
     public static class MultiEnumLogic<T>
         where T:MultiEnumDN, new()
     {
