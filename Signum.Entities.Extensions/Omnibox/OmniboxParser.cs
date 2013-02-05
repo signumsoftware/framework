@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -44,7 +44,7 @@ namespace Signum.Entities.Omnibox
         {
             var rawQuery = omniboxQuery.ToLower();
             return rawQuery == "help" || 
-                rawQuery == Signum.Entities.Extensions.Properties.Resources.Omnibox_Help.ToLower() || 
+                rawQuery == OmniboxMessage.Omnibox_Help.NiceToString().ToLower() || 
                 rawQuery == "?";
         }
 
@@ -62,13 +62,13 @@ namespace Signum.Entities.Omnibox
                     result.AddRange(generator.GetHelp());
                 }
 
-                string matchingOptions = Signum.Entities.Extensions.Properties.Resources.Omnibox_MatchingOptions;
+                string matchingOptions = OmniboxMessage.Omnibox_MatchingOptions.NiceToString();
                 result.Add(new HelpOmniboxResult { Text = matchingOptions });
 
-                string databaseAccess = Signum.Entities.Extensions.Properties.Resources.Omnibox_DatabaseAccess;
+                string databaseAccess = OmniboxMessage.Omnibox_DatabaseAccess.NiceToString();
                 result.Add(new HelpOmniboxResult { Text = databaseAccess });
 
-                string disambiguate = Signum.Entities.Extensions.Properties.Resources.Omnibox_Disambiguate;
+                string disambiguate = OmniboxMessage.Omnibox_Disambiguate.NiceToString();
                 result.Add(new HelpOmniboxResult { Text = disambiguate });
 
                 return result.ToList();

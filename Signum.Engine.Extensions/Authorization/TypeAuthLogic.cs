@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -149,7 +149,7 @@ namespace Signum.Engine.Authorization
                     return;
 
                 if (max < requested)
-                    throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(requested.NiceToString(), ident.GetType().NiceName(), ident.IdOrNull));
+                    throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().Formato(requested.NiceToString(), ident.GetType().NiceName(), ident.IdOrNull));
 
                 Schema_Saving_Instance(ident);
             }
@@ -161,7 +161,7 @@ namespace Signum.Engine.Authorization
             Type type = ident.GetType();
             TypeAllowedBasic access = GetAllowed(type).MaxDB();
             if (access < TypeAllowedBasic.Read)
-                throw new UnauthorizedAccessException(Resources.NotAuthorizedToRetrieve0.Formato(type.NicePluralName()));
+                throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedToRetrieve0.NiceToString().Formato(type.NicePluralName()));
         }
 
         public static TypeRulePack GetTypeRules(Lite<RoleDN> roleLite)

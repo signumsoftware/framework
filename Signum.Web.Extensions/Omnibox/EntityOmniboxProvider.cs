@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -7,6 +7,7 @@ using Signum.Engine.Maps;
 using System.Web.Mvc;
 using Signum.Utilities;
 using Signum.Entities;
+using Signum.Entities.Authorization;
 
 namespace Signum.Web.Omnibox
 {
@@ -30,7 +31,7 @@ namespace Signum.Web.Omnibox
                 if (result.Id != null)
                 {
                     html = html.Concat("{0}: {1}".FormatHtml(result.Id.ToString(), (result.Lite == null) ? 
-                        ColoredSpan(Signum.Entities.Extensions.Properties.Resources.NotFound, "gray") :
+                        ColoredSpan(OmniboxMessage.NotFound.NiceToString(), "gray") :
                         new HtmlTag("span").InnerHtml(new MvcHtmlString(result.Lite.TryToString()))));
                 }
                 else
@@ -38,7 +39,7 @@ namespace Signum.Web.Omnibox
                     if (result.Lite == null)
                     {
                         html = html.Concat("'{0}': {1}".FormatHtml(result.ToStr, 
-                            ColoredSpan(Signum.Entities.Extensions.Properties.Resources.NotFound, "gray")));
+                            ColoredSpan(OmniboxMessage.NotFound.NiceToString(), "gray")));
                     }
                     else
                     {
@@ -60,7 +61,7 @@ namespace Signum.Web.Omnibox
 
         public override MvcHtmlString Icon()
         {
-            return ColoredSpan(" ({0})".Formato(Signum.Web.Properties.Resources.View), "dodgerblue");
+            return ColoredSpan(" ({0})".Formato(AuthMessage.View.NiceToString()), "dodgerblue");
         }
     }
 }

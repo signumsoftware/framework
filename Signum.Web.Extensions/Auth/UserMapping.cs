@@ -1,4 +1,4 @@
-﻿#region usings
+#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +29,7 @@ namespace Signum.Web.Auth
             {
                 string oldPassword = ctx.Parent.Inputs[OldPasswordKey];
                 if (ctx.Value != Security.EncodePassword(oldPassword))
-                    return ctx.ParentNone(OldPasswordKey, Resources.PasswordDoesNotMatchCurrent);
+                    return ctx.ParentNone(OldPasswordKey, AuthMessage.PasswordDoesNotMatchCurrent.NiceToString());
 
                 return GetNewPassword(ctx, NewPasswordKey, NewPasswordBisKey);
             });
@@ -50,14 +50,14 @@ namespace Signum.Web.Auth
         {
             string newPassword = ctx.Parent.Inputs[newPasswordKey];
             if (string.IsNullOrEmpty(newPassword))
-                return ctx.ParentNone(newPasswordKey, Resources.PasswordMustHaveAValue);
+                return ctx.ParentNone(newPasswordKey, AuthMessage.PasswordMustHaveAValue.NiceToString());
 
             string newPasswordBis = ctx.Parent.Inputs[newPasswordBisKey];
             if (string.IsNullOrEmpty(newPasswordBis))
-                return ctx.ParentNone(newPasswordBisKey, Resources.YouMustRepeatTheNewPassword);
+                return ctx.ParentNone(newPasswordBisKey, AuthMessage.YouMustRepeatTheNewPassword.NiceToString());
 
             if (newPassword != newPasswordBis)
-                return ctx.ParentNone(newPasswordBisKey, Resources.TheSpecifiedPasswordsDontMatch);
+                return ctx.ParentNone(newPasswordBisKey, AuthMessage.TheSpecifiedPasswordsDontMatch.NiceToString());
 
             return Security.EncodePassword(newPassword);
         }

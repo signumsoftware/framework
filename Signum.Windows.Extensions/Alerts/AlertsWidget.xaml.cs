@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -93,9 +93,9 @@ namespace Signum.Windows.Alerts
             }
 
             tbAlerts.FontWeight = FontWeights.Normal;
-            CountAlerts(entity, "Future", Properties.Resources.FutureAlerts, btnFutureAlerts);
-            CountAlerts(entity, "Attended", Properties.Resources.CheckedAlerts, btnCheckedAlerts);
-            CountAlerts(entity, "NotAttended", Properties.Resources.WarnedAlerts, btnWarnedAlerts);
+            CountAlerts(entity, "Future", AlertMessage.FutureAlerts.NiceToString(), btnFutureAlerts);
+            CountAlerts(entity, "Attended",  AlertMessage.CheckedAlerts.NiceToString(), btnCheckedAlerts);
+            CountAlerts(entity, "NotAttended", AlertMessage.WarnedAlerts.NiceToString(), btnWarnedAlerts);
         }
 
         void CountAlerts(IdentifiableEntity entity, string filterColumn, string resource, Button button)

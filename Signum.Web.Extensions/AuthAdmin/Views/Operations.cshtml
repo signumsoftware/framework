@@ -1,4 +1,4 @@
-﻿@Html.DynamicCss("~/authAdmin/Content/SF_AuthAdmin.css")
+@Html.DynamicCss("~/authAdmin/Content/SF_AuthAdmin.css")
 @using (var tc = Html.TypeContext<OperationRulePack>())
 {
     @Html.EntityLine(tc, f => f.Role)
@@ -9,19 +9,19 @@
         <thead>
             <tr>
                 <th>
-                    @Resources.OperationsAscx_Operation
+                    @AuthMessage.OperationsAscx_Operation.NiceToString()
                 </th>
                 <th>
-                    @Resources.OperationsAscx_Allow
+                    @AuthMessage.OperationsAscx_Allow.NiceToString()
                 </th> 
                 <th>
-                    @Resources.OperationsAscx_DBOnly
+                    @AuthMessage.OperationsAscx_DBOnly.NiceToString()
                 </th>
                 <th>
-                    @Resources.OperationsAscx_None
+                    @AuthMessage.OperationsAscx_None.NiceToString()
                 </th>
                 <th>
-                    @Resources.OperationsAscx_Overriden
+                    @AuthMessage.OperationsAscx_Overriden.NiceToString()
                 </th>
             </tr>
         </thead>

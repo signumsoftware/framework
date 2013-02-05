@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -152,10 +152,10 @@ namespace Signum.Entities.Processes
             if (pi.Is(() => ExecutionStart) || pi.Is(() => ExecutionEnd))
             {
                 if (this.ExecutionEnd < this.ExecutionStart)
-                    return Resources.ProcessStartIsGreaterThanProcessEnd;
+                    return ProcessMessage.ProcessStartIsGreaterThanProcessEnd.NiceToString();
 
                 if (this.ExecutionStart == null && this.ExecutionEnd != null)
-                    return Resources.ProcessStartIsNullButProcessEndIsNot;
+                    return ProcessMessage.ProcessStartIsNullButProcessEndIsNot.NiceToString();
             }
 
             return stateValidator.Validate(this, pi) ?? base.PropertyValidation(pi);
@@ -246,4 +246,15 @@ namespace Signum.Entities.Processes
     {
         ViewProcessControlPanel
     }
+
+    public enum ProcessMessage
+    {
+        [Description("ProcessExecution {0} is not running anymore")]
+        ProcessExecution0IsNotRunningAnymore,
+        [Description("Process Start is greater than Process End")]
+        ProcessStartIsGreaterThanProcessEnd,
+        [Description("Process Start is null but Process End is not")]
+        ProcessStartIsNullButProcessEndIsNot
+    }
+
 }

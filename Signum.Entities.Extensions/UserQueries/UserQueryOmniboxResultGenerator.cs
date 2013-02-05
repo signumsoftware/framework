@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -40,7 +40,7 @@ namespace Signum.Entities.UserQueries
         public override List<HelpOmniboxResult> GetHelp()
         {
             var resultType = typeof(UserQueryOmniboxResult);
-            var userQuery = Signum.Entities.Extensions.Properties.Resources.Omnibox_UserQuery;
+            var userQuery = OmniboxMessage.Omnibox_UserQuery.NiceToString();
             return new List<HelpOmniboxResult>
             {
                 new HelpOmniboxResult { Text = "'{0}'".Formato(userQuery), OmniboxResultType = resultType }

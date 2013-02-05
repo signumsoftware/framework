@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -75,7 +75,7 @@ namespace Signum.Entities.ControlPanel
                 if (pi.Is(() => part.Column))
                 {
                     if (part.Column >= NumberOfColumns)
-                        return Resources.ControlPanelDN_Part0IsInColumn1ButPanelHasOnly2Columns.Formato(part.Title, part.Column, NumberOfColumns);
+                        return ControlPanelMessage.ControlPanelDN_Part0IsInColumn1ButPanelHasOnly2Columns.NiceToString().Formato(part.Title, part.Column, NumberOfColumns);
                 }
 
                 if (pi.Is(() => part.Row))
@@ -87,7 +87,7 @@ namespace Signum.Entities.ControlPanel
                 if (pi.Is(() => part.Row) || pi.Is(() => part.Column))
                 {
                     if (parts.Any(p => p != part && p.Row == part.Row && p.Column == part.Column))
-                        return Resources.ControlPanelDN_Part0IsInColumn1WhichAlreadyHasOtherParts.Formato(part.Title, part.Column, part.Row);
+                        return ControlPanelMessage.ControlPanelDN_Part0IsInColumn1WhichAlreadyHasOtherParts.NiceToString().Formato(part.Title, part.Column, part.Row);
                 }
             }
 
@@ -102,7 +102,7 @@ namespace Signum.Entities.ControlPanel
         //        int maxRow = rows.Max();
         //        var numbers = 0.To(maxRow);
         //        if (maxRow != rows.Count)
-        //            return Resources.ControlPanelDN_Rows0DontHaveAnyParts.Formato(numbers.Where(n => !rows.Contains(n)).ToString(n => n.ToString(), ", "));
+        //            return ControlPanelMessage.ControlPanelDN_Rows0DontHaveAnyParts.NiceToString().Formato(numbers.Where(n => !rows.Contains(n)).ToString(n => n.ToString(), ", "));
         //    }
 
         //    return base.PropertyValidation(pi);
@@ -157,5 +157,25 @@ namespace Signum.Entities.ControlPanel
         Save,
         Clone,
         Delete,
+    }
+
+    public enum ControlPanelMessage
+    {
+        [Description("Create new part")]
+        ControlPanel_CreateNewPart,
+        [Description("You must save the panel before adding parts")]
+        ControlPanel_YouMustSaveThePanelBeforeAddingParts,
+        [Description("Part {0} is in column {1} but panel has only {2} columns")]
+        ControlPanelDN_Part0IsInColumn1ButPanelHasOnly2Columns,
+        [Description("Part {0} is in column {1} of row {2} which already has other parts")]
+        ControlPanelDN_Part0IsInColumn1WhichAlreadyHasOtherParts,
+        [Description("There are not any parts in rows {0}")]
+        ControlPanelDN_Rows0DontHaveAnyParts,
+        [Description("Title must be specified for {0}")]
+        ControlPanelDN_TitleMustBeSpecifiedFor0,
+        [Description("Counter list")]
+        CountSearchControlPartDN,
+        [Description("Counter")]
+        CountUserQueryElement
     }
 }

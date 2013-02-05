@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -182,7 +182,7 @@ namespace Signum.Web.Chart
             if (!ChartPermission.ViewCharting.IsAuthorized())
                 return null;
 
-            string chartNewText = Resources.Chart_Chart;
+            string chartNewText = ChartMessage.Chart.NiceToString();
 
             return
                 new ToolBarButton

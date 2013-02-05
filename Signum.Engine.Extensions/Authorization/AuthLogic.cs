@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -140,7 +140,7 @@ namespace Signum.Engine.Authorization
 
                     if (problems.Count > 0)
                         throw new ApplicationException(
-                            Signum.Engine.Extensions.Properties.Resources._0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships.Formato(problems.Count) +
+                            AuthMessage._0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships.NiceToString().Formato(problems.Count) +
                             problems.ToString("\r\n"));
                 }
             }
@@ -162,7 +162,7 @@ namespace Signum.Engine.Authorization
 
                 if (problems.Count > 0)
                     throw new ApplicationException(
-                        Signum.Engine.Extensions.Properties.Resources._0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships.Formato(problems.Count) +
+                        AuthMessage._0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships.NiceToString().Formato(problems.Count) +
                         problems.ToString("\r\n"));
 
                 return newRoles;
@@ -176,7 +176,7 @@ namespace Signum.Engine.Authorization
             {
                 user = RetrieveUser(username);
                 if (user == null)
-                    throw new ApplicationException(Signum.Engine.Extensions.Properties.Resources.Username0IsNotValid.Formato(username));
+                    throw new ApplicationException(AuthMessage.Username0IsNotValid.NiceToString().Formato(username));
             }
 
             return UserSession(user);
@@ -268,10 +268,10 @@ namespace Signum.Engine.Authorization
             {
                 UserDN user = RetrieveUser(username);
                 if (user == null)
-                    throw new IncorrectUsernameException(Resources.Username0IsNotValid.Formato(username));
+                    throw new IncorrectUsernameException(AuthMessage.Username0IsNotValid.NiceToString().Formato(username));
 
                 if (user.PasswordHash != passwordHash)
-                    throw new IncorrectPasswordException(Resources.IncorrectPassword);
+                    throw new IncorrectPasswordException(AuthMessage.IncorrectPassword.NiceToString());
 
                 return user;
             }

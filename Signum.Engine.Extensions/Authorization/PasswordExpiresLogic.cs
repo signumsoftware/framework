@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +10,7 @@ using Signum.Entities;
 using Signum.Engine.Mailing;
 using Signum.Engine.Extensions.Properties;
 using Signum.Engine.Operations;
+using Signum.Utilities;
 
 namespace Signum.Engine.Authorization
 {
@@ -47,9 +48,9 @@ namespace Signum.Engine.Authorization
                     var ivp = Database.Query<PasswordExpiresIntervalDN>().Where(p => p.Enabled).FirstOrDefault();
                     if (ivp == null)
                         return;
-
+                    
                     if (TimeZoneManager.Now > u.PasswordSetDate.AddDays((double)ivp.Days))
-                        throw new PasswordExpiredException(Signum.Engine.Extensions.Properties.Resources.ExpiredPassword);
+                        throw new PasswordExpiredException(AuthMessage.ExpiredPassword.NiceToString());
                 });
 
                 AuthLogic.LoginMessage += (() =>
@@ -67,7 +68,7 @@ namespace Signum.Engine.Authorization
                         return null;
 
                     if (TimeZoneManager.Now > u.PasswordSetDate.AddDays((double)ivp.Days).AddDays((double)-ivp.DaysWarning))
-                        return Resources.PasswordNearExpired;
+                        return AuthMessage.PasswordNearExpired.NiceToString();
 
                     return null;
                 });

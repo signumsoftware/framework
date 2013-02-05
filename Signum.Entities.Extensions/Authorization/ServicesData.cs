@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -145,7 +145,7 @@ namespace Signum.Entities.Authorization
     {
         public override string ToString()
         {
-            return Resources._0RulesFor1.Formato(typeof(TypeDN).NiceName(), Role);
+            return AuthMessage._0RulesFor1.NiceToString().Formato(typeof(TypeDN).NiceName(), Role);
         }
     }
 
@@ -329,7 +329,7 @@ namespace Signum.Entities.Authorization
     {
         public override string ToString()
         {
-            return Resources._0RulesFor1.Formato(typeof(PropertyRouteDN).NiceName(), Role);
+            return AuthMessage._0RulesFor1.NiceToString().Formato(typeof(PropertyRouteDN).NiceName(), Role);
         }
     }
     [Serializable]
@@ -341,7 +341,7 @@ namespace Signum.Entities.Authorization
     {
         public override string ToString()
         {
-            return Resources._0RulesFor1.Formato(typeof(QueryDN).NiceName(), Role);
+            return AuthMessage._0RulesFor1.NiceToString().Formato(typeof(QueryDN).NiceName(), Role);
         }
     }
     [Serializable]
@@ -353,7 +353,7 @@ namespace Signum.Entities.Authorization
     {
         public override string ToString()
         {
-            return Resources._0RulesFor1.Formato(typeof(OperationDN).NiceName(), Role);
+            return AuthMessage._0RulesFor1.NiceToString().Formato(typeof(OperationDN).NiceName(), Role);
         }
     }
     [Serializable]
@@ -365,7 +365,7 @@ namespace Signum.Entities.Authorization
     {
         public override string ToString()
         {
-            return Resources._0RulesFor1.Formato(typeof(PermissionDN).NiceName(), Role);
+            return AuthMessage._0RulesFor1.NiceToString().Formato(typeof(PermissionDN).NiceName(), Role);
         }
     }
     [Serializable]
@@ -376,7 +376,7 @@ namespace Signum.Entities.Authorization
     {
         public override string ToString()
         {
-            return Resources._0RulesFor1.Formato(typeof(FacadeMethodDN).NiceName(), Role);
+            return AuthMessage._0RulesFor1.NiceToString().Formato(typeof(FacadeMethodDN).NiceName(), Role);
         }
     }
     [Serializable]

@@ -1,4 +1,4 @@
-﻿<Window x:Class="Signum.Windows.Chart.ChartRequestWindow"
+<Window x:Class="Signum.Windows.Chart.ChartRequestWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:c="clr-namespace:Signum.Windows.Chart"
@@ -34,7 +34,7 @@
                 </LinearGradientBrush>
             </Border.Background>
             <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Margin="5">
-                <TextBox IsReadOnly="True" Foreground="#ff333333" BorderThickness="0" FontSize="18" Background="{x:Null}" Text="{m:Loc ChartFor0}" />
+                <TextBox IsReadOnly="True" Foreground="#ff333333" BorderThickness="0" FontSize="18" Background="{x:Null}" Text="{m:Loc {x:Static d:}}" />
                 <TextBox x:Name="tbEntityType" IsReadOnly="True" Foreground="#ff333333" BorderThickness="0" FontSize="18" Background="{x:Null}" TextBlock.FontWeight="SemiBold" />
                 <TextBox x:Name="tbQueryName" IsReadOnly="True"  Foreground="#ff666666"  BorderThickness="0" FontSize="18" Background="{x:Null}" />
             </StackPanel>
@@ -47,7 +47,7 @@
                 </Grid.RowDefinitions>
                 <StackPanel Orientation="Horizontal" >
                     <m:QueryTokenBuilder x:Name="qtbFilters" SubTokensEvent="qtbFilters_SubTokensEvent" />
-                    <m:ImageButton Image="pack://application:,,,/Signum.Windows;component/Images/newFilter.png" Content="{m:Loc NewFilter, AssemblyType=m:SearchControl}" x:Name="btCreateFilter" Margin="2,2,2,2" VerticalAlignment="Center" Click="btCreateFilter_Click" ToolTipService.ShowOnDisabled="True" />
+                    <m:ImageButton Image="pack://application:,,,/Signum.Windows;component/Images/newFilter.png" Content="{m:Loc {x:Static d:}, AssemblyType=m:SearchControl}" x:Name="btCreateFilter" Margin="2,2,2,2" VerticalAlignment="Center" Click="btCreateFilter_Click" ToolTipService.ShowOnDisabled="True" />
                 </StackPanel>
                 <m:FilterBuilder x:Name="filterBuilder" Grid.Row="1"/>
             </Grid>

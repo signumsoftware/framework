@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -131,7 +131,7 @@ namespace Signum.Entities.SMS
             if (pi.Is(() => StartDate) || pi.Is(() => EndDate))
             {
                 if (EndDate != null && EndDate >= StartDate)
-                    return Resources.EndDateMustBeHigherThanStartDate;
+                    return SmsMessages.EndDateMustBeHigherThanStartDate.NiceToString();
             }
 
             return base.PropertyValidation(pi);

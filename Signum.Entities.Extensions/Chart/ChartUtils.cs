@@ -9,6 +9,7 @@ using Signum.Utilities;
 using Signum.Entities.Extensions.Properties;
 using Signum.Entities.UserQueries;
 using System.Drawing;
+using System.ComponentModel;
 
 namespace Signum.Entities.Chart
 {
@@ -381,4 +382,42 @@ namespace Signum.Entities.Chart
                 .Validators.OfType<StringLengthValidatorAttribute>().SingleEx().AllowNulls = true;
         }
     }
+
+    public enum ChartMessage
+    {
+        [Description("{0} can only be created from the chart window")]
+        _0CanOnlyBeCreatedFromTheChartWindow,
+        [Description("{0} can only be created from the search window")]
+        _0CanOnlyBeCreatedFromTheSearchWindow,
+        Chart,
+        [Description("Chart settings")]
+        Chart_ChartSettings,
+        [Description("Dimension")]
+        Chart_Dimension,
+        [Description("Draw")]
+        Chart_Draw,
+        [Description("Group")]
+        Chart_Group,
+        [Description("Query {0} is not allowed")]
+        Chart_Query0IsNotAllowed,
+        [Description("Toggle info")]
+        Chart_ToggleInfo,
+        [Description("Edit Script")]
+        ChartScript_Edit,
+        [Description("Colors for {0}")]
+        ColorsFor0,
+        CreatePalette,
+        [Description("My Charts")]
+        MyCharts,
+        [Description("Create")]
+        UserChart_CreateNew,
+        [Description("Edit")]
+        UserChart_Edit,
+        [Description("Export data")]
+        UserChart_ExportData,
+        [Description("User charts")]
+        UserChart_UserCharts,
+        ViewPalette
+    }
+
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -105,7 +105,7 @@ namespace Signum.Entities.Omnibox
         public override List<HelpOmniboxResult> GetHelp()
         {
             var resultType = typeof(EntityOmniboxResult);
-            var entityTypeName = Signum.Entities.Extensions.Properties.Resources.Omnibox_Type;
+            var entityTypeName = OmniboxMessage.Omnibox_Type.NiceToString();
 
             return new List<HelpOmniboxResult>
             {
@@ -130,10 +130,10 @@ namespace Signum.Entities.Omnibox
         public override string ToString()
         {
             if (Id.HasValue)
-                return "{0} {1}".Formato(Reflector.CleanTypeName(Type), Id, Lite.TryToString() ?? Resources.NotFound);
+                return "{0} {1}".Formato(Reflector.CleanTypeName(Type), Id, Lite.TryToString() ?? OmniboxMessage.NotFound.NiceToString());
 
             if (ToStr != null)
-                return "{0} \"{1}\"".Formato(Reflector.CleanTypeName(Type), ToStr, Lite.TryToString() ?? Resources.NotFound);
+                return "{0} \"{1}\"".Formato(Reflector.CleanTypeName(Type), ToStr, Lite.TryToString() ?? OmniboxMessage.NotFound.NiceToString());
 
             return Reflector.CleanTypeName(Type);
         }

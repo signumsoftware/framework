@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -93,7 +93,7 @@ namespace Signum.Engine.Authorization
         public static void AuthorizeAccess(MethodInfo mi)
         {
             if (!GetFacadeMethodAllowed(mi))
-                throw new UnauthorizedAccessException(Resources.AccessToFacadeMethod0IsNotAllowed.Formato(mi.Name));
+                throw new UnauthorizedAccessException(AuthMessage.AccessToFacadeMethod0IsNotAllowed.NiceToString().Formato(mi.Name));
         }
 
         public static DefaultDictionary<string, bool> FacadeMethodRules()

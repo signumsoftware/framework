@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -56,7 +56,7 @@ namespace Signum.Entities.ControlPanel
             if (pi.Is(() => Title) && string.IsNullOrEmpty(title))
             {
                 if (content != null && content.RequiresTitle)
-                    return  Resources.ControlPanelDN_TitleMustBeSpecifiedFor0.Formato(content.GetType().NicePluralName());
+                    return  ControlPanelMessage.ControlPanelDN_TitleMustBeSpecifiedFor0.NiceToString().Formato(content.GetType().NicePluralName());
             }
 
             return base.PropertyValidation(pi);

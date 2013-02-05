@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -352,7 +352,7 @@ namespace Signum.Engine.Disconnected
             if (DisconnectedLogic.OfflineMode)
             {
                 if (Upload == Upload.None)
-                    throw new ApplicationException(Resources.NotAllowedToSave0WhileOffline.Formato(ident.GetType().NicePluralName()));
+                    throw new ApplicationException(DisconnectedMessage.NotAllowedToSave0WhileOffline.NiceToString().Formato(ident.GetType().NicePluralName()));
 
                 if (ident.IsNew)
                     return;
@@ -364,20 +364,20 @@ namespace Signum.Engine.Disconnected
                     if (de.DisconnectedMachine != null)
                     {
                         if (!de.DisconnectedMachine.Is(DisconnectedMachineDN.Current))
-                            throw new ApplicationException(Resources.The0WithId12IsLockedBy3.Formato(ident.GetType().NiceName(), ident.Id, ident.ToString(), ((IDisconnectedEntity)ident).DisconnectedMachine));
+                            throw new ApplicationException(DisconnectedMessage.The0WithId12IsLockedBy3.NiceToString().Formato(ident.GetType().NiceName(), ident.Id, ident.ToString(), ((IDisconnectedEntity)ident).DisconnectedMachine));
                         else
                             return;
                     }
                 }
 
                 if (!DisconnectedExportRanges.InModifiableRange(ident.GetType(), ident.Id))
-                    throw new ApplicationException(Resources.NotAllowedToSaveThis0WhileOffline.Formato(ident.GetType().NiceName()));
+                    throw new ApplicationException(AuthMessage.NotAllowedToSaveThis0WhileOffline.NiceToString().Formato(ident.GetType().NiceName()));
 
             }
             else
             {
                 if (Upload == Upload.Subset && ((IDisconnectedEntity)ident).DisconnectedMachine != null)
-                    throw new ApplicationException(Resources.The0WithId12IsLockedBy3.Formato(ident.GetType().NiceName(), ident.Id, ident.ToString(), ((IDisconnectedEntity)ident).DisconnectedMachine));
+                    throw new ApplicationException(DisconnectedMessage.The0WithId12IsLockedBy3.NiceToString().Formato(ident.GetType().NiceName(), ident.Id, ident.ToString(), ((IDisconnectedEntity)ident).DisconnectedMachine));
 
             }
         }

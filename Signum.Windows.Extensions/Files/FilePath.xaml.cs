@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -64,7 +64,7 @@ namespace Signum.Windows.Files
         {
             ToolBarButton button = new ToolBarButton()
             {
-                Content = Extensions.Properties.Resources.Open,
+                Content = FileMessage.Open.NiceToString(),
                 Image = ExtensionsImageLoader.GetImageSortName("document_view.png"),
             };
 

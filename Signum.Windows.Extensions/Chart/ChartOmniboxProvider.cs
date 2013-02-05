@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -37,7 +37,7 @@ namespace Signum.Windows.Chart
 
         public override Run GetIcon()
         {
-            return new Run(" ({0})".Formato(Signum.Windows.Extensions.Properties.Resources.Chart)) { Foreground = Brushes.Violet };
+            return new Run(" ({0})".Formato(ChartMessage.Chart.NiceToString())) { Foreground = Brushes.Violet };
         }
 
         public override void OnSelected(ChartOmniboxResult result, Window window)

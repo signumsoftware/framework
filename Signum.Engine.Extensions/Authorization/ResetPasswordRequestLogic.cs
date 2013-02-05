@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -43,7 +43,7 @@ namespace Signum.Engine.Authorization
                 {
                     return new EmailContent
                     {
-                        Subject = Resources.ResetPasswordCode,
+                        Subject = AuthMessage.ResetPasswordCode.NiceToString(),
                         Body = EmailRenderer.Replace(typeof(AuthLogic).Assembly.ReadResourceStream("Signum.Engine.Extensions.Authorization.ResetPasswordRequestMail.htm"),
                                model, null, Resources.ResourceManager)
                     };
@@ -82,7 +82,7 @@ namespace Signum.Engine.Authorization
             UserDN user = Database.Query<UserDN>().Where(u => u.Email == email).SingleOrDefaultEx();
 
             if (user == null)
-                throw new ApplicationException(Resources.ThereSNotARegisteredUserWithThatEmailAddress);
+                throw new ApplicationException(AuthMessage.ThereSNotARegisteredUserWithThatEmailAddress.NiceToString());
 
             return user;
         };

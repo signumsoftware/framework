@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -330,10 +330,10 @@ namespace Signum.Entities.Omnibox
         {
             val = val.ToLower().RemoveDiacritics();
 
-            if (val == "true" || val == "t" || val == "yes" || val == "y" || val == Resources.Yes)
+            if (val == "true" || val == "t" || val == "yes" || val == "y" || val == OmniboxMessage.Yes.NiceToString())
                 return true;
 
-            if (val == "false" || val == "f" || val == "no" || val == "n" || val == Resources.No)
+            if (val == "false" || val == "f" || val == "no" || val == "n" || val == OmniboxMessage.No.NiceToString())
                 return false;
 
             return null;
@@ -438,9 +438,9 @@ namespace Signum.Entities.Omnibox
         {
             var resultType = typeof(DynamicQueryOmniboxResult);
 
-            var queryName = Signum.Entities.Extensions.Properties.Resources.Omnibox_Query;
-            var field = Signum.Entities.Extensions.Properties.Resources.Omnibox_Field;
-            var value = Signum.Entities.Extensions.Properties.Resources.Omnibox_Value;
+            var queryName = OmniboxMessage.Omnibox_Query.NiceToString();
+            var field = OmniboxMessage.Omnibox_Field.NiceToString();
+            var value = OmniboxMessage.Omnibox_Value.NiceToString();
 
             return new List<HelpOmniboxResult>
             {

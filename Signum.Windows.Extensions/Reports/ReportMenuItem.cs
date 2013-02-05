@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities;
@@ -10,6 +10,7 @@ using Signum.Entities.Reports;
 using Prop = Signum.Windows.Extensions.Properties;
 using Signum.Services;
 using System.Windows.Documents;
+using Signum.Utilities;
 
 namespace Signum.Windows.Reports
 {
@@ -19,7 +20,7 @@ namespace Signum.Windows.Reports
         {
             MenuItem miResult = new MenuItem
             {
-                Header = Prop.Resources.Reports,
+                Header = ExcelMessage.Reports.NiceToString(),
                 Icon = ExtensionsImageLoader.GetImageSortName("excel.png").ToSmallImage()
 
             };
@@ -32,15 +33,15 @@ namespace Signum.Windows.Reports
                 {
                     MenuItem b = (MenuItem)e.OriginalSource;
                     Lite<ExcelReportDN> reportLite = (Lite<ExcelReportDN>)b.Tag;
-
+                    
                     SaveFileDialog sfd = new SaveFileDialog()
                     {
                         AddExtension = true,
                         DefaultExt = ".xlsx",
-                        Filter = Prop.Resources.Excel2007Spreadsheet,
+                        Filter = ExcelMessage.Excel2007Spreadsheet.NiceToString(),
                         FileName = reportLite.ToString() + " - " + DateTime.Now.ToString("yyyyMMddhhmmss") + ".xlsx",
                         OverwritePrompt = true,
-                        Title = Prop.Resources.FindLocationFoExcelReport
+                        Title = ExcelMessage.FindLocationFoExcelReport.NiceToString()
                     };
 
                     if (sfd.ShowDialog(Window.GetWindow(sc)) == true)
@@ -98,7 +99,7 @@ namespace Signum.Windows.Reports
                     miResult.Items.Add(new Separator());
                 }
 
-                miResult.Header = new TextBlock { Inlines = { new Run(Prop.Resources.Reports), reports.Count == 0? (Inline)new Run(): new Bold(new Run(" (" + reports.Count + ")")) } };
+                miResult.Header = new TextBlock { Inlines = { new Run(ExcelMessage.Reports.NiceToString()), reports.Count == 0? (Inline)new Run(): new Bold(new Run(" (" + reports.Count + ")")) } };
 
                 if (reports.Count > 0)
                 {

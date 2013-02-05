@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Signum.Entities;
 using Signum.Utilities;
+using System.ComponentModel;
 
 namespace Signum.Entities.Files
 {
@@ -12,6 +13,30 @@ namespace Signum.Entities.Files
         byte[] BinaryFile { get; set; }
         string FileName { get; set; }
         string FullWebPath { get; }
+    }
+
+    public enum FileMessage
+    {
+        [Description("Download File")]
+        DownloadFile,
+        ErrorSavingFile,
+        [Description("FileTypes")]
+        FileTypes,
+        Open,
+        [Description("Opening has no default implementation for {0}")]
+        OpeningHasNotDefaultImplementationFor0,
+        [Description("Download")]
+        WebDownload,
+        [Description("Image")]
+        WebImage,
+        Remove,
+        [Description("Saving has no default implementation for {0}")]
+        SavingHasNotDefaultImplementationFor0,
+        [Description("Select File")]
+        SelectFile,
+        ViewFile,
+        [Description("Viewing has no default implementation for {0}")]
+        ViewingHasNotDefaultImplementationFor0
     }
 
 

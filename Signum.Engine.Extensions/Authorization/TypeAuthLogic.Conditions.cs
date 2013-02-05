@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -142,7 +142,7 @@ namespace Signum.Engine.Authorization
 
                     string details = debugInfo.ToString(a => "  {0} because {1}".Formato(a.Lite, a.Error), "\r\n");
 
-                    throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(
+                    throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().Formato(
                         typeAllowed.NiceToString(),
                         notFound.Length == 1 ? typeof(T).NiceName() : typeof(T).NicePluralName(), notFound.CommaAnd()) + "\r\n" + details);
                 }
@@ -157,7 +157,7 @@ namespace Signum.Engine.Authorization
         public static void AssertAllowed(this IIdentifiable ident, TypeAllowedBasic allowed, bool inUserInterface)
         {
             if (!ident.IsAllowedFor(allowed, inUserInterface))
-                throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(allowed.NiceToString().ToLower(), ident.GetType().NiceName(), ident.Id));
+                throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().Formato(allowed.NiceToString().ToLower(), ident.GetType().NiceName(), ident.Id));
         }
 
         public static void AssertAllowed(this Lite<IIdentifiable> lite, TypeAllowedBasic allowed)
@@ -171,7 +171,7 @@ namespace Signum.Engine.Authorization
                 AssertAllowed(lite.UntypedEntityOrNull, allowed, inUserInterface);
 
             if (!lite.IsAllowedFor(allowed, inUserInterface))
-                throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(allowed.NiceToString().ToLower(), lite.EntityType.NiceName(), lite.Id));
+                throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().Formato(allowed.NiceToString().ToLower(), lite.EntityType.NiceName(), lite.Id));
         }
 
         [MethodExpander(typeof(IsAllowedForExpander))]

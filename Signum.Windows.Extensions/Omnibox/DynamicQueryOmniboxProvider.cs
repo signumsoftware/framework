@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -98,7 +98,7 @@ namespace Signum.Windows.Omnibox
                     lines.Add(new Bold(new Run(DynamicQueryOmniboxResultGenerator.ToStringOperation(item.Operation.Value))));
 
                     if (item.Value == DynamicQueryOmniboxResultGenerator.UnknownValue)
-                        lines.Add(new Run(Signum.Windows.Extensions.Properties.Resources.Unknown) { Foreground = Brushes.Red });
+                        lines.Add(new Run(OmniboxMessage.Unknown.NiceToString()) { Foreground = Brushes.Red });
                     else if (item.ValuePack != null)
                         lines.AddMatch(item.ValuePack);
                     else if (item.Syntax != null && item.Syntax.Completion == FilterSyntaxCompletion.Complete)

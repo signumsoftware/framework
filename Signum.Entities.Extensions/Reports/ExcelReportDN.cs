@@ -8,6 +8,7 @@ using Signum.Entities.Extensions.Properties;
 using Signum.Utilities;
 using Signum.Entities.Files;
 using System.Linq.Expressions;
+using System.ComponentModel;
 
 namespace Signum.Entities.Reports
 {
@@ -52,4 +53,25 @@ namespace Signum.Entities.Reports
         Save,
         Delete
     }
+
+    public enum ExcelMessage
+    {
+        Data,
+        Download,
+        [Description("Microsoft Office Excel 2007 Spreadsheet (*.xlsx)|*.xlsx")]
+        Excel2007Spreadsheet,
+        [Description("Administer")]
+        ExcelAdminister,
+        [Description("Excel Report")]
+        ExcelReport,
+        [Description("Excel template must have .xlsx extension, and the current one has {0}")]
+        ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0,
+        [Description("Find location for Excel Report")]
+        FindLocationFoExcelReport,
+        Reports,
+        [Description("The Excel Template has a column {0} not present in the Find Window")]
+        TheExcelTemplateHasAColumn0NotPresentInTheFindWindow,
+        ThereAreNoResultsToWrite
+    }
+
 }

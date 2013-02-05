@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Utilities;
+using System.ComponentModel;
 
 namespace Signum.Entities.SMS
 {
@@ -109,4 +110,18 @@ namespace Signum.Entities.SMS
             return sb.ToString();
         }
     }
+
+
+    public enum SmsMessage
+    {
+        Insert,
+        Message,
+        RemainingCharacters,
+        RemoveNonValidCharacters,
+        StatusCanNotBeUpdatedForNonSentMessages,
+        [Description("The template must be Active to construct SMS messages")]
+        TheTemplateMustBeActiveToConstructSMSMessages,
+        TheTextForTheSMSMessageExceedsTheLengthLimit
+    }
+
 }

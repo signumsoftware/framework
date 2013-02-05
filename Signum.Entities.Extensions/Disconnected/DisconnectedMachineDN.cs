@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Entities.Authorization;
 using System.Linq.Expressions;
 using Signum.Utilities;
+using System.ComponentModel;
 
 namespace Signum.Entities.Disconnected
 {
@@ -106,5 +107,13 @@ namespace Signum.Entities.Disconnected
         None,
         New,
         Subset
+    }
+
+    public enum DisconnectedMessage
+    {
+        [Description("Not allowed to save {0} while offline")]
+        NotAllowedToSave0WhileOffline,
+        [Description("The {0} with Id {1} ({2}) is locked by {3}")]
+        The0WithId12IsLockedBy3
     }
 }

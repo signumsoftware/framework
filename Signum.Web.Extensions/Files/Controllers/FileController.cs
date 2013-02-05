@@ -1,4 +1,4 @@
-﻿#region usings
+#region usings
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -151,7 +151,7 @@ namespace Signum.Web.Files
             else
             {
                 sb.AppendLine("parDoc.getElementById('{0}loading').style.display='none';".Formato(prefix));
-                sb.AppendLine("window.parent.alert('{0}');".Formato(Resources.ErrorSavingFile));
+                sb.AppendLine("window.parent.alert('{0}');".Formato(FileMessage.ErrorSavingFile.NiceToString()));
             }
 
             sb.AppendLine("</script>");

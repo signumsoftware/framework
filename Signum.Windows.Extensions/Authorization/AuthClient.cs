@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -69,7 +69,7 @@ namespace Signum.Windows.Authorization
                     {
                         UpdateCache();
 
-                        MessageBox.Show(Resources.AuthorizationCacheSuccessfullyUpdated);
+                        MessageBox.Show(AuthMessage.AuthorizationCacheSuccessfullyUpdated.NiceToString());
                     }));
 
                 SpecialOmniboxProvider.Register(new SpecialOmniboxAction("DownloadAuthRules",

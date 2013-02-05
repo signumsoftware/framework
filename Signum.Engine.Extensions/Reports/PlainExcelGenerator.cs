@@ -1,4 +1,4 @@
-﻿#region usings
+#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +15,7 @@ using System.Globalization;
 using Signum.Entities.Reflection;
 using Signum.Engine.Extensions.Properties;
 using Signum.Entities;
+using Signum.Entities.Reports;
 #endregion
 
 namespace Signum.Engine.Reports
@@ -83,7 +84,7 @@ namespace Signum.Engine.Reports
             stream.WriteAllBytes(Template);
 
             if (results == null)
-                throw new ApplicationException(Resources.ThereAreNoResultsToWrite);
+                throw new ApplicationException(ExcelMessage.ThereAreNoResultsToWrite.NiceToString());
 
             using (SpreadsheetDocument document = SpreadsheetDocument.Open(stream, true))
             {

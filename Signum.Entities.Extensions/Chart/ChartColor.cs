@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -61,7 +61,7 @@ namespace Signum.Entities.Chart
 
         public override string ToString()
         {
-            return Resources.ColorsFor0.Formato(type.CleanName);
+            return ChartMessage.ColorsFor0.NiceToString().Formato(type.CleanName);
         }
     }
 }

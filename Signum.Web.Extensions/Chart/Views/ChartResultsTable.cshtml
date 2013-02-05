@@ -1,4 +1,4 @@
-﻿@using Signum.Entities.DynamicQuery
+@using Signum.Entities.DynamicQuery
 @using Signum.Entities.Reflection
 @using Signum.Web.Properties
 @using Signum.Engine
@@ -15,7 +15,7 @@
 }
 @if (queryResult == null)
 { 
-    @Resources.Signum_noResults
+    @JavascriptMessage.Signum_noResults.NiceToString()
 }
 else
 {
@@ -49,7 +49,7 @@ else
             @if (!queryResult.Rows.Any())
             {
                 <tr>
-                    <td colspan="@(queryResult.Columns.Count() + (navigate ? 1 : 0))">@Resources.Signum_noResults
+                    <td colspan="@(queryResult.Columns.Count() + (navigate ? 1 : 0))">@JavascriptMessage.Signum_noResults.NiceToString()
                     </td>
                 </tr>
             }

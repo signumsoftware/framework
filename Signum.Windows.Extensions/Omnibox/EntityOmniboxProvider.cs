@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,6 +7,7 @@ using System.Windows.Documents;
 using System.Windows.Media;
 using Signum.Utilities;
 using System.Windows;
+using Signum.Entities.Authorization;
 
 namespace Signum.Windows.Omnibox
 {
@@ -35,7 +36,7 @@ namespace Signum.Windows.Omnibox
                     lines.Add(": ");
                     if (result.Lite == null)
                     {
-                        lines.Add(new Run(Signum.Entities.Extensions.Properties.Resources.NotFound) { Foreground = Brushes.Gray });
+                        lines.Add(new Run(OmniboxMessage.NotFound.NiceToString()) { Foreground = Brushes.Gray });
                     }
                     else
                     {
@@ -49,7 +50,7 @@ namespace Signum.Windows.Omnibox
                         lines.Add("\"");
                         lines.Add(result.ToStr);
                         lines.Add("\": ");
-                        lines.Add(new Run(Signum.Entities.Extensions.Properties.Resources.NotFound) { Foreground = Brushes.Gray });
+                        lines.Add(new Run(OmniboxMessage.NotFound.NiceToString()) { Foreground = Brushes.Gray });
                     }
                     else
                     {
@@ -64,7 +65,7 @@ namespace Signum.Windows.Omnibox
 
         public override Run GetIcon()
         {
-            return new Run("({0})".Formato(Extensions.Properties.Resources.View)) { Foreground = Brushes.DodgerBlue };
+            return new Run("({0})".Formato(AuthMessage.View.NiceToString())) { Foreground = Brushes.DodgerBlue };
         }
 
         public override void OnSelected(EntityOmniboxResult result, Window window)

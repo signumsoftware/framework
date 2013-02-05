@@ -174,4 +174,26 @@ namespace Signum.Entities.Alerts
     {
         Save,
     }
+
+    public enum AlertMessage
+    {
+        Alert,
+        [Description("New Alert")]
+        NewAlert,
+        AlertCreated,
+        Alerts,
+        [Description("Attended")]
+        Alerts_Attended,
+        [Description("Future")]
+        Alerts_Future,
+        [Description("Not attended")]
+        Alerts_NotAttended,
+        [Description("Checked")]
+        CheckedAlerts,
+        CreateAlert,
+        [Description("Futures")]
+        FutureAlerts,
+        [Description("Warned")]
+        WarnedAlerts
+    }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,6 +15,7 @@ using Signum.Entities.Authorization;
 using Signum.Entities;
 using Signum.Windows;
 using Signum.Services;
+using Signum.Utilities;
 
 namespace Signum.Windows.Authorization
 {
@@ -42,7 +43,7 @@ namespace Signum.Windows.Authorization
             {
                 if (!user.IsNew)
                 {
-                    MessageBox.Show(Window.GetWindow(this), Signum.Windows.Extensions.Properties.Resources.PasswordChanged, MessageBoxImage.Information.ToString(), MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show(Window.GetWindow(this), AuthMessage.PasswordChanged.NiceToString(), MessageBoxImage.Information.ToString(), MessageBoxButton.OK, MessageBoxImage.Information);
 
                     this.RaiseEvent(new ChangeDataContextEventArgs(user.ToLite().Retrieve()));
                 }

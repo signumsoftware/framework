@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Services;
 using System.ServiceModel;
 using Signum.Entities.Files;
+using System.ComponentModel;
 
 namespace Signum.Services
 {
@@ -26,4 +27,5 @@ namespace Signum.Services
         }       
         */
     }
+
 }

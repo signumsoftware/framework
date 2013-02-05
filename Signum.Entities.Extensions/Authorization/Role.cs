@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -41,7 +41,7 @@ namespace Signum.Entities.Authorization
             {
                 UserDN user = UserDN.Current;
                 if (user == null)
-                    throw new AuthenticationException(Resources.NotUserLogged);
+                    throw new AuthenticationException(AuthMessage.NotUserLogged.NiceToString());
 
                return user.Role;
             }

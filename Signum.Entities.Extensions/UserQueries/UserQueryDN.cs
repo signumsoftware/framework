@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +11,7 @@ using System.Reflection;
 using Signum.Entities.Reports;
 using System.Linq.Expressions;
 using Signum.Entities.Extensions.Properties;
+using System.ComponentModel;
 
 namespace Signum.Entities.UserQueries
 {
@@ -125,7 +126,7 @@ namespace Signum.Entities.UserQueries
         protected override string PropertyValidation(PropertyInfo pi)
         {
             if (pi.Is(() => ElementsPerPage) && ElementsPerPage <= 0 && ElementsPerPage != -1)
-                return Resources.ShouldBe1AllEmptyDefaultOrANumberGreaterThanZero;
+                return UserQueryMessage.ShouldBe1AllEmptyDefaultOrANumberGreaterThanZero.NiceToString();
 
             if (pi.Is(() => Filters) && PreserveFilters && Filters.Any())
                 return "{0} should be empty if {1} is set".Formato(pi.NiceName(), ReflectionTools.GetPropertyInfo(() => PreserveFilters).NiceName());
@@ -467,4 +468,24 @@ namespace Signum.Entities.UserQueries
             return Tuple.Create(ColumnOptionsMode.Replace, current.Select(c => new QueryColumnDN(c)).ToMList());
         }
     }
+
+    public enum UserQueryMessage
+    {
+        [Description("Are you sure to remove '{0}'?")]
+        AreYouSureToRemove0,
+        Edit,
+        [Description("My Queries")]
+        MyQueries,
+        [Description("Remove User Query?")]
+        RemoveUserQuery,
+        [Description("{0} should be -1 (all), empty (default), or a number greater than zero")]
+        ShouldBe1AllEmptyDefaultOrANumberGreaterThanZero,
+        [Description("Create")]
+        UserQueries_CreateNew,
+        [Description("Edit")]
+        UserQueries_Edit,
+        [Description("User Queries")]
+        UserQueries_UserQueries
+    }
+
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,7 +23,7 @@ namespace Signum.Entities.Authorization
         {
             if (Regex.Match(p, @"^[0-9a-zA-Z]{7,15}$").Success)
                 return null;
-            return Resources.ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter;
+            return AuthMessage.ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter.NiceToString();
         };
 
         public static string OnValidatePassword(string password)
@@ -119,7 +119,7 @@ namespace Signum.Entities.Authorization
             if (pi.Is(() => State))
             {
                 if (anulationDate != null && state != UserState.Disabled)
-                    return Resources.TheUserStateMustBeDisabled;
+                    return AuthMessage.TheUserStateMustBeDisabled.NiceToString();
             }
 
             return base.PropertyValidation(pi);

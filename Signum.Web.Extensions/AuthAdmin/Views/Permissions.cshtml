@@ -1,4 +1,4 @@
-﻿@Html.DynamicCss("~/authAdmin/Content/SF_AuthAdmin.css")
+@Html.DynamicCss("~/authAdmin/Content/SF_AuthAdmin.css")
 @Html.ScriptsJs("~/authAdmin/Scripts/SF_AuthAdmin.js")
 <script type="text/javascript">
     $(function () {
@@ -14,16 +14,16 @@
         <thead>
             <tr>
                 <th>
-                    @Resources.PermissionsAscx_Permission
+                    @AuthMessage.PermissionsAscx_Permission.NiceToString()
                 </th>
                 <th>
-                    @Resources.PermissionsAscx_Allow
+                    @AuthMessage.PermissionsAscx_Allow.NiceToString()
                 </th>
                 <th>
-                    @Resources.PermissionsAscx_Deny
+                    @AuthMessage.PermissionsAscx_Deny.NiceToString()
                 </th>
                 <th>
-                    @Resources.PermissionsAscx_Overriden
+                    @AuthMessage.PermissionsAscx_Overriden.NiceToString()
                 </th>
             </tr>
         </thead>
