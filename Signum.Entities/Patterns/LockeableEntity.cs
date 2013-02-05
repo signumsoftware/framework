@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -38,9 +38,15 @@ namespace Signum.Entities.Patterns
                 return false;
 
             if (this.locked)
-                throw new ApplicationException(Resources.AttemptToModifyLockedEntity0.Formato(this.ToString()));
+                throw new ApplicationException(EntityMessage.AttemptToModifyLockedEntity0.NiceToString().Formato(this.ToString()));
             
             return base.Set<T>(ref field, value, property);
         }
+    }
+
+    public enum EntityMessage
+    {
+        [Description("Attempt to modify locked entity {0}")]
+        AttemptToModifyLockedEntity0
     }
 }

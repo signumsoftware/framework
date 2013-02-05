@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -424,7 +424,7 @@ namespace Signum.Windows
 
         public virtual string SearchTitle(object queryName)
         {
-            return Resources.FinderOf0.Formato(QueryUtils.GetNiceName(queryName));
+            return SearchMessage.FinderOf0.NiceToString().Formato(QueryUtils.GetNiceName(queryName));
         }
 
         public virtual Lite<IdentifiableEntity> Find(FindOptions options)
@@ -607,7 +607,7 @@ namespace Signum.Windows
             Type type = entityOrLite is Lite<IdentifiableEntity> ? ((Lite<IdentifiableEntity>)entityOrLite).EntityType : entityOrLite.GetType();
 
             NormalWindow win = CreateNormalWindow();
-            win.SetTitleText(Resources.Loading0.Formato(type.NiceName()));
+            win.SetTitleText(NormalWindowMessage.Loading0.NiceToString().Formato(type.NiceName()));
             win.Show();
             
             try
@@ -823,10 +823,10 @@ namespace Signum.Windows
         {      
             QuerySettings es = QuerySettings.TryGetC(queryName);
             if (es == null)
-                throw new InvalidOperationException(Properties.Resources.Query0NotRegistered.Formato(queryName));
+                throw new InvalidOperationException(SearchMessage.Query0NotRegistered.NiceToString().Formato(queryName));
 
             if (!OnIsFindable(queryName))
-                throw new UnauthorizedAccessException(Properties.Resources.Query0NotAllowed.Formato(queryName));
+                throw new UnauthorizedAccessException(SearchMessage.Query0NotAllowed.NiceToString().Formato(queryName));
         }
 
         public virtual Type SelectTypes(Window parent, IEnumerable<Type> implementations, Func<Type, bool> filterType)
@@ -842,8 +842,8 @@ namespace Signum.Windows
             if (SelectorWindow.ShowDialog(implementations.Where(filterType), out sel,
                 elementIcon: t => Navigator.Manager.GetEntityIcon(t, true),
                 elementText: t => t.NiceName(),
-                title: Properties.Resources.TypeSelector,
-                message: Properties.Resources.PleaseSelectAType,
+                title: SelectorMessage.TypeSelector.NiceToString(),
+                message: SelectorMessage.PleaseSelectAType.NiceToString(),
                 owner: parent))
                 return sel;
             return null;

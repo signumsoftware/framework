@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -242,8 +242,8 @@ namespace Signum.Engine.Operations
         public static void AssertOperationAllowed(Enum operationKey, bool inUserInterface)
         {
             if (!OperationAllowed(operationKey, inUserInterface))
-                throw new UnauthorizedAccessException(Resources.Operation01IsNotAuthorized.Formato(operationKey.NiceToString(), MultiEnumDN.UniqueKey(operationKey)) +
-                    (inUserInterface ? " " + Resources.InUserInterface : ""));
+                throw new UnauthorizedAccessException(OperationMessage.Operation01IsNotAuthorized.NiceToString().Formato(operationKey.NiceToString(), MultiEnumDN.UniqueKey(operationKey)) +
+                    (inUserInterface ? " " + OperationMessage.InUserInterface.NiceToString() : ""));
         }
         #endregion
 
@@ -537,7 +537,7 @@ namespace Signum.Engine.Operations
             if (validStates.Contains(state))
                 return null;
 
-            return Resources.ImpossibleToExecute0FromState1.Formato(operationKey.NiceToString(), ((Enum)(object)state).NiceToString());
+            return OperationMessage.ImpossibleToExecute0FromState1.NiceToString().Formato(operationKey.NiceToString(), ((Enum)(object)state).NiceToString());
         }
 
         public static Type[] FindTypes(Enum operation)
@@ -606,7 +606,7 @@ namespace Signum.Engine.Operations
                     let list = states.Where(s => !o.FromStates.Contains(s)).ToList()
                     where list.Any()
                     select KVP.Create(o.Key,
-                        Resources.ImpossibleToExecute0FromState1.Formato(o.Key.NiceToString(), list.CommaOr(s => ((Enum)(object)s).NiceToString())))).ToDictionary();
+                        OperationMessage.ImpossibleToExecute0FromState1.NiceToString().Formato(o.Key.NiceToString(), list.CommaOr(s => ((Enum)(object)s).NiceToString())))).ToDictionary();
         }
     }
 

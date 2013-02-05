@@ -1,4 +1,4 @@
-﻿#region usings
+#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -102,7 +102,7 @@ namespace Signum.Web
             {
                 using (sb.Surround(new HtmlTag("fieldset")))
                 {
-                    sb.AddLine(new HtmlTag("legend").InnerHtml(new MvcHtmlString(Resources.Detail)));
+                    sb.AddLine(new HtmlTag("legend").InnerHtml(new MvcHtmlString(EntityControlMessage.Detail.NiceToString())));
                     sb.AddLine(helper.Div(listDetail.DetailDiv, null, "sf-entity-list-detail"));
                 }
             }

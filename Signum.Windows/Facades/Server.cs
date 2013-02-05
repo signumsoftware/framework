@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -47,7 +47,7 @@ namespace Signum.Windows
                 current = getServer();
 
                 if (current == null)
-                    throw new NotConnectedToServerException(Properties.Resources.AConnectionWithTheServerIsNecessaryToContinue);
+                    throw new NotConnectedToServerException(ConnectionMessage.AConnectionWithTheServerIsNecessaryToContinue.NiceToString());
 
                 if (Connecting != null)
                     Connecting();                     
@@ -136,7 +136,7 @@ namespace Signum.Windows
 
         static void HandleSessionException(MessageSecurityException e)
         {
-            MessageBox.Show(Properties.Resources.SessionExpired, Properties.Resources.SessionExpired, MessageBoxButton.OK, MessageBoxImage.Hand);
+            MessageBox.Show(ConnectionMessage.SessionExpired.NiceToString(), ConnectionMessage.SessionExpired.NiceToString(), MessageBoxButton.OK, MessageBoxImage.Hand);
         }
 
         public static bool Implements<T>()

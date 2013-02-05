@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -46,9 +46,9 @@ namespace Signum.Windows
         public static readonly IValueConverter ErrorListToErrorCount =
             ConverterFactory.New((string[] str) => str == null ? null :
                                                  new Switch<int, string>(str.Length)
-                                                 .Case(0, Properties.Resources.NoDirectErrors)
-                                                 .Case(1, v => Properties.Resources._1Error.Formato(str[0]))
-                                                 .Default(v => Properties.Resources._0Errors1.Formato(v, str[0])));
+                                                 .Case(0, NormalWindowMessage.NoDirectErrors.NiceToString())
+                                                 .Case(1, v => NormalWindowMessage._1Error.NiceToString().Formato(str[0]))
+                                                 .Default(v => NormalWindowMessage._0Errors1.NiceToString().Formato(v, str[0])));
 
         public static readonly IValueConverter ErrorListToBool =
             ConverterFactory.New((string[] str) => str != null && str.Length > 0);

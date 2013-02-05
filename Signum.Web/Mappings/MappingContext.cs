@@ -1,4 +1,4 @@
-﻿#region usings
+#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -133,7 +133,7 @@ namespace Signum.Web
         {
             if (Inputs[property].HasText())
             {
-                this.Errors.GetOrCreate(property).Add(Resources.InvalidFormat);
+                this.Errors.GetOrCreate(property).Add(ValidationMessage.InvalidFormat.NiceToString());
                 return false;
             }
             return true;
@@ -143,7 +143,7 @@ namespace Signum.Web
         {
             if (Input.HasText())
             {
-                this.Error.Add(Resources.InvalidFormat);
+                this.Error.Add(ValidationMessage.InvalidFormat.NiceToString());
                 return false;
             }
             return true;

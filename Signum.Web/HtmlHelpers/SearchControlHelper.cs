@@ -1,4 +1,4 @@
-﻿#region usings
+#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -126,9 +126,9 @@ namespace Signum.Web
                     };
 
                 sb.Add(helper.Href(options.PopupViewPrefix + "csbtnView",
-                      Resources.LineButton_View,
+                      EntityControlMessage.View.NiceToString(),
                       "",
-                      Resources.LineButton_View,
+                      EntityControlMessage.View.NiceToString(),
                       "sf-line-button sf-view",
                       htmlAttr));
             }
@@ -166,9 +166,9 @@ namespace Signum.Web
                         };
                         sb.AddLine(helper.Href(
                             context.Compose("btnDelete", index.ToString()),
-                            Resources.FilterBuilder_DeleteFilter,
+                            SearchMessage.FilterBuilder_DeleteFilter.NiceToString(),
                             "",
-                            Resources.FilterBuilder_DeleteFilter,
+                            SearchMessage.FilterBuilder_DeleteFilter.NiceToString(),
                             "sf-button",
                             htmlAttr));
                     }

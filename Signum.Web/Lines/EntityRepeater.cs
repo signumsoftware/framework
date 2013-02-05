@@ -1,4 +1,4 @@
-﻿#region usings
+#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,8 +33,8 @@ namespace Signum.Web
         public EntityRepeater(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
             : base(type, untypedValue, parent, controlID, propertyRoute)
         {
-            RemoveElementLinkText = Resources.Remove;
-            AddElementLinkText = Resources.New;
+            RemoveElementLinkText = EntityControlMessage.Remove.NiceToString();
+            AddElementLinkText = LiteMessage.New.NiceToString();
             Find = false;
             LabelClass = "sf-label-repeater-line";
             Reorder = false;

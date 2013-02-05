@@ -1,4 +1,4 @@
-﻿@using Signum.Entities.DynamicQuery
+@using Signum.Entities.DynamicQuery
 @using Signum.Entities.Reflection
 @using Signum.Engine.DynamicQuery
 @using Signum.Web.Properties
@@ -9,17 +9,17 @@
 }
 
 <div class="ui-widget-content ui-corner-bottom sf-filters-list">
-    <span class="sf-explanation" style="@((filterOptions == null || filterOptions.Count == 0) ? "" : "display:none;")">@Resources.NoFiltersSpecified</span>
+    <span class="sf-explanation" style="@((filterOptions == null || filterOptions.Count == 0) ? "" : "display:none;")">@SearchMessage.NoFiltersSpecified.NiceToString()</span>
     <table id="@Model.Compose("tblFilters")" style="@((filterOptions == null || filterOptions.Count == 0) ? "display:none;" : "")">
         <thead>
             <tr>
                 <th>
                 </th>
-                <th class="sf-filter-field-header">@Resources.Field
+                <th class="sf-filter-field-header">@SearchMessage.Field.NiceToString()
                 </th>
-                <th>@Resources.Operation
+                <th>@SearchMessage.Operation.NiceToString()
                 </th>
-                <th>@Resources.Value
+                <th>@SearchMessage.Value.NiceToString()
                 </th>
             </tr>
         </thead>

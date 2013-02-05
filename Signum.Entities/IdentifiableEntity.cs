@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -73,7 +73,7 @@ namespace Signum.Entities
 
         internal string BaseToString()
         {
-            return "{0} ({1})".Formato(GetType().Name, id.HasValue ? id.ToString() : Resources.New);
+            return "{0} ({1})".Formato(GetType().Name, id.HasValue ? id.ToString() : LiteMessage.New.NiceToString());
         }
 
         public override bool Equals(object obj)

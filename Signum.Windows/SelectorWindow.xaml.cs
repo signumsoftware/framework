@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Controls.Primitives;
 using Signum.Utilities;
+using Signum.Entities;
 
 namespace Signum.Windows
 {
@@ -61,10 +62,10 @@ namespace Signum.Windows
             Window owner = null)
         {
             if (title == null)
-                title = Signum.Windows.Properties.Resources.SelectAnElement;
+                title = SearchMessage.SelectAnElement.NiceToString();
 
             if (message == null)
-                message = Signum.Windows.Properties.Resources.SelectAnElement;
+                message = SearchMessage.SelectAnElement.NiceToString();
 
             if (elementIcon == null)
                 elementIcon = o => null;
@@ -97,7 +98,7 @@ namespace Signum.Windows
         {
             InitializeComponent();
 
-            this.Message = Signum.Windows.Properties.Resources.SelectAnElement;
+            this.Message = SearchMessage.SelectAnElement.NiceToString();
         }
 
         private void ToggleButton_Checked(object sender, RoutedEventArgs e)

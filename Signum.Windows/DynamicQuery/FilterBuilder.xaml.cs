@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Net;
 using System.Windows;
@@ -52,7 +52,7 @@ namespace Signum.Windows
         {
             if (queryToken == null)
             {
-                MessageBox.Show(Properties.Resources.NoColumnSelected);
+                MessageBox.Show(SearchMessage.NoColumnSelected.NiceToString());
                 return;
             }
 

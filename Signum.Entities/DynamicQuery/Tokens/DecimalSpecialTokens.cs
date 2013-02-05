@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -26,7 +26,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            return "Floor" + Resources.Of + Parent.ToString();
+            return "Floor" + QueryTokenMessage.Of.NiceToString() + Parent.ToString();
         }
 
         public override string Format
@@ -103,7 +103,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            return "Ceil" + Resources.Of + Parent.ToString();
+            return "Ceil" + QueryTokenMessage.Of.NiceToString() + Parent.ToString();
         }
 
         public override string Format

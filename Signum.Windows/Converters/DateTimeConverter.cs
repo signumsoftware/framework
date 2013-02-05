@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -56,12 +56,12 @@ namespace Signum.Windows
                 if (Strict)
                 {
                     if (!DateTime.TryParseExact(str, Format, cultureInfo, DateTimeStyles.None, out result))
-                        return new ValidationResult(false, Properties.Resources.InvalidDateFormat);
+                        return new ValidationResult(false, ValidationMessage.InvalidDateFormat.NiceToString());
                 }
                 else
                 {
                     if (!DateTime.TryParse(str, cultureInfo, DateTimeStyles.None, out result))
-                         return new ValidationResult(false, Properties.Resources.InvalidDateFormat);
+                         return new ValidationResult(false, ValidationMessage.InvalidDateFormat.NiceToString());
                 }
             }
             return new ValidationResult(true, null);

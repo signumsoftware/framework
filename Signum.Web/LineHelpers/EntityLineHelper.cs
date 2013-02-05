@@ -1,4 +1,4 @@
-﻿#region usings
+#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -72,7 +72,7 @@ namespace Signum.Web
                         {
                             sb.AddLine(
                                 helper.Href(entityLine.Compose(EntityBaseKeys.ToStrLink),
-                                    entityLine.UntypedValue.ToString(), Navigator.NavigateRoute(entityLine.CleanRuntimeType, id), Resources.View, "sf-value-line",
+                                    entityLine.UntypedValue.ToString(), Navigator.NavigateRoute(entityLine.CleanRuntimeType, id), EntityControlMessage.View.NiceToString(), "sf-value-line",
                                     new Dictionary<string, object> { { "style", "display:" + ((entityLine.UntypedValue == null) ? "none" : "block") } }));
                         }
                         else

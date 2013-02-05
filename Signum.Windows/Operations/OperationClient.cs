@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -262,8 +262,8 @@ namespace Signum.Windows.Operations
                 if (!SelectorWindow.ShowDialog(dic.Keys.ToArray(), out selected,
                     elementIcon: k => OperationClient.GetImage(k),
                     elementText: k => OperationClient.GetText(k),
-                    title: Resources.ConstructorSelector,
-                    message: Resources.PleaseSelectAConstructor,
+                    title: SelectorMessage.ConstructorSelector.NiceToString(),
+                    message: SelectorMessage.PleaseSelectAConstructor.NiceToString(),
                     owner: win))
                     return null;
             }

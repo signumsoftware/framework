@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -246,8 +246,8 @@ namespace Signum.Entities.DynamicQuery
                 string firstPart = parts.FirstEx();
 
                 QueryToken result = subTokens(null).Select(t => t.MatchPart(firstPart)).NotNull().SingleEx(
-                    ()=>Resources.Column0NotFound.Formato(firstPart),
-                    () => Resources.MoreThanOneColumnNamed0.Formato(firstPart));
+                    ()=>QueryTokenMessage.Column0NotFound.NiceToString().Formato(firstPart),
+                    () => QueryTokenMessage.MoreThanOneColumnNamed0.NiceToString().Formato(firstPart));
 
                 foreach (var part in parts.Skip(1))
                 {

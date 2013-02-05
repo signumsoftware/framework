@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="AboutMessage">
+    <Member Name="Unknown0" Description="Desconocido {{0}}" />
+  </Type>
+  <Type Name="CollectionMessage">
+    <Member Name="And" Description=" y " />
+    <Member Name="Or" Description=" o " />
+  </Type>
+  <Type Name="ConsoleMessage">
+    <Member Name="EnterYourSelection" Description="Introduzca su selección: " />
+    <Member Name="EnterYoutSelectionsSeparatedByComma" Description="Introduzca sus selecciones separadas por comas: " />
+    <Member Name="NoOptionWithKey0Found" Description="Ninguna opción con clave  {0} encontrada" />
+    <Member Name="SelectOneOfTheFollowingOptions" Description="Elige una de las siguientes opciones:" />
+  </Type>
+  <Type Name="DateTimeMessage">
+    <Member Name="0Day" Description="{0} día" />
+    <Member Name="0Days" Description="{0} días" />
+    <Member Name="0Hour" Description="{0} hora" />
+    <Member Name="0Hours" Description="{0} horas" />
+    <Member Name="0Minute" Description="{0} minuto" />
+    <Member Name="0Minutes" Description="{0} minutos" />
+    <Member Name="0Month" Description="{0} mes" />
+    <Member Name="0Months" Description="{0} meses" />
+    <Member Name="0Second" Description="{0} segundo" />
+    <Member Name="0Seconds" Description="{0} segundos" />
+    <Member Name="0Year" Description="{0} año" />
+    <Member Name="0Years" Description="{0} años" />
+    <Member Name="Ago" Description="hace {0} " />
+    <Member Name="DateLast" Description="{0} pasado" />
+    <Member Name="DateThis" Description="Este {0}" />
+    <Member Name="In" Description="En {0}" />
+    <Member Name="Today" Description="Hoy" />
+    <Member Name="Tomorrow" Description="Mañana" />
+    <Member Name="Yesterday" Description="Ayer" />
+  </Type>
+  <Type Name="Unavailable" Description="No disponible" />
+</Translations>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Net;
 using System.Windows;
@@ -147,8 +147,8 @@ namespace Signum.Windows
                 else
                 {
                     var result = MessageBox.Show(
-                        Properties.Resources.ThereAreChangesContinue,
-                        Properties.Resources.ThereAreChanges,
+                        NormalWindowMessage.ThereAreChangesContinue.NiceToString(),
+                        NormalWindowMessage.ThereAreChanges.NiceToString(),
                         MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.OK);
 
                     if (result == MessageBoxResult.Cancel)
@@ -171,15 +171,15 @@ namespace Signum.Windows
                         case AllowErrors.Yes: break;
                         case AllowErrors.No:
                             MessageBox.Show(this,
-                                Properties.Resources.The0HasErrors1.ForGenderAndNumber(type.GetGender()).Formato(type.NiceName(), errors.Indent(3)),
-                                Properties.Resources.FixErrors,
+                                NormalWindowMessage.The0HasErrors1.NiceToString().ForGenderAndNumber(type.GetGender()).Formato(type.NiceName(), errors.Indent(3)),
+                                NormalWindowMessage.FixErrors.NiceToString(),
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Exclamation);
                             return;
                         case AllowErrors.Ask:
                             if (MessageBox.Show(this,
-                                Properties.Resources.The0HasErrors1.ForGenderAndNumber(type.GetGender()).Formato(type.NiceName(), errors.Indent(3)) + "\r\n" + Properties.Resources.ContinueAnyway,
-                                Properties.Resources.ContinueWithErrors,
+                                NormalWindowMessage.The0HasErrors1.NiceToString().ForGenderAndNumber(type.GetGender()).Formato(type.NiceName(), errors.Indent(3)) + "\r\n" + NormalWindowMessage.ContinueAnyway.NiceToString(),
+                                NormalWindowMessage.ContinueWithErrors.NiceToString(),
                                 MessageBoxButton.YesNo,
                                 MessageBoxImage.Exclamation,
                                 MessageBoxResult.None) == MessageBoxResult.No)
@@ -203,8 +203,8 @@ namespace Signum.Windows
                 if (buttonBar.ViewMode == ViewMode.Navigate)
                 {
                     var result = MessageBox.Show(
-                      Properties.Resources.ThereAreChangesContinue,
-                      Properties.Resources.ThereAreChanges,
+                      NormalWindowMessage.ThereAreChangesContinue.NiceToString(),
+                      NormalWindowMessage.ThereAreChanges.NiceToString(),
                       MessageBoxButton.OKCancel,
                       MessageBoxImage.Question,
                       MessageBoxResult.OK);
@@ -221,8 +221,8 @@ namespace Signum.Windows
                     if (DialogResult == null)
                     {
                         var result = MessageBox.Show(this,
-                            Properties.Resources.LoseChanges,
-                            Properties.Resources.ThereAreChanges,
+                            NormalWindowMessage.LoseChanges.NiceToString(),
+                            NormalWindowMessage.ThereAreChanges.NiceToString(),
                             MessageBoxButton.OKCancel,
                             MessageBoxImage.Question,
                             MessageBoxResult.OK);

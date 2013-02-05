@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -98,7 +98,7 @@ namespace Signum.Web
 
         protected internal override string PropertyValidation(PropertyInfo pi)
         {
-            string error = Resources.ValueMustBeSpecifiedFor0.Formato(fieldName);
+            string error = SelectorMessage.ValueMustBeSpecifiedFor0.NiceToString().Formato(fieldName);
             switch (boxType)
             { 
                 case ValueLineBoxType.Boolean:

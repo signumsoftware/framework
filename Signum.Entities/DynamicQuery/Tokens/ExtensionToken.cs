@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -43,7 +43,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            return DisplayName + Resources.Of + Parent.ToString();
+            return DisplayName + QueryTokenMessage.Of.NiceToString() + Parent.ToString();
         }
 
         Type type;
@@ -110,7 +110,7 @@ namespace Signum.Entities.DynamicQuery
             string parent = Parent.IsAllowed();
 
             if (isAllowed.HasText() && parent.HasText())
-                return Resources.And.Combine(isAllowed, parent);
+                return QueryTokenMessage.And.NiceToString().Combine(isAllowed, parent);
 
             return isAllowed ?? parent;
         }

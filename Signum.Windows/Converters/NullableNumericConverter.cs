@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using Signum.Utilities.Reflection;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
+using Signum.Entities;
 
 namespace Signum.Windows
 {
@@ -62,7 +63,7 @@ namespace Signum.Windows
                 s = s.Trim(culture.NumberFormat.PercentSymbol.ToCharArray());
 
             if (!decimal.TryParse(s, NumberStyles.Number, culture, out v))
-                return new ValidationResult(false, Resources.InvalidFormat);
+                return new ValidationResult(false, ValidationMessage.InvalidFormat.NiceToString());
             else
                 return new ValidationResult(true, null);
         }

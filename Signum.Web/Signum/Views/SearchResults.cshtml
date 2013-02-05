@@ -1,4 +1,4 @@
-﻿@using Signum.Entities.DynamicQuery
+@using Signum.Entities.DynamicQuery
 @using Signum.Entities.Reflection
 @using Signum.Web.Properties
 @using Signum.Engine
@@ -66,7 +66,7 @@
 @if (queryResult.Rows.IsNullOrEmpty())
 {
     <tr>
-        <td colspan="@columnsCount">@Resources.Signum_noResults</td>
+        <td colspan="@columnsCount">@JavascriptMessage.Signum_noResults.NiceToString()</td>
     </tr>
 }
 

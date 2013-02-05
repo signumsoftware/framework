@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.Properties;
+using System.ComponentModel;
 
 namespace Signum.Utilities
 {
@@ -14,7 +15,7 @@ namespace Signum.Utilities
         string welcomeMessage;
 
         public ConsoleSwitch()
-            : this(Resources.SelectOneOfTheFollowingOptions)
+            : this(ConsoleMessage.SelectOneOfTheFollowingOptions.NiceToString())
         {
         }
 
@@ -46,7 +47,7 @@ namespace Signum.Utilities
 
         public V Choose()
         {
-            return Choose(Resources.EnterYourSelection);
+            return Choose(ConsoleMessage.EnterYourSelection.NiceToString());
         }
 
         public V Choose(string endMessage)
@@ -73,7 +74,7 @@ namespace Signum.Utilities
 
         public V[] ChooseMultiple()
         {
-            return ChooseMultiple(Resources.EnterYoutSelectionsSeparatedByComma);
+            return ChooseMultiple(ConsoleMessage.EnterYoutSelectionsSeparatedByComma.NiceToString());
         }
 
         public V[] ChooseMultiple(string endMessage)
@@ -103,7 +104,7 @@ namespace Signum.Utilities
 
         public V GetValue(string line)
         {
-            return dictionary.GetOrThrow(line, Resources.NoOptionWithKey0Found).Item1;
+            return dictionary.GetOrThrow(line, ConsoleMessage.NoOptionWithKey0Found.NiceToString()).Item1;
         }
    
         public IEnumerator<V> GetEnumerator()
@@ -115,5 +116,17 @@ namespace Signum.Utilities
         {
           return GetEnumerator(); 
         }
+    }
+
+    public enum ConsoleMessage
+    {
+        [Description("Enter your selection: ")]
+        EnterYourSelection,
+        [Description("Enter your selections separated by comma: ")]
+        EnterYoutSelectionsSeparatedByComma,
+        [Description("No option with key {0} found")]
+        NoOptionWithKey0Found,
+        [Description("Select one of the following options:")]
+        SelectOneOfTheFollowingOptions
     }
 }

@@ -1,4 +1,4 @@
-﻿#region usings
+#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -345,7 +345,7 @@ namespace Signum.Web.Operations
 
                 content.AddLine(new HtmlTag("li")
                     .Class(ctxItemClass + " sf-search-ctxitem-header")
-                    .InnerHtml(new HtmlTag("span").InnerHtml(Resources.Search_CtxMenuItem_Operations.EncodeHtml())));
+                    .InnerHtml(new HtmlTag("span").InnerHtml(SearchMessage.Search_CtxMenuItem_Operations.NiceToString().EncodeHtml())));
 
                 foreach (var operation in operations)
                 {
@@ -409,7 +409,7 @@ namespace Signum.Web.Operations
                 content.AddLine(new HtmlTag("li")
                     .Class(ctxItemClass + " sf-search-ctxitem-header")
                     .InnerHtml(
-                        new HtmlTag("span").InnerHtml(Resources.Search_CtxMenuItem_Operations.EncodeHtml()))
+                        new HtmlTag("span").InnerHtml(SearchMessage.Search_CtxMenuItem_Operations.NiceToString().EncodeHtml()))
                     );
 
                 foreach (var operation in buttons)

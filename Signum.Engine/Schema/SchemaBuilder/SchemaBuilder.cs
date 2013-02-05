@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -288,7 +288,7 @@ namespace Signum.Engine.Maps
                 case KindOfField.MList:
                     return GenerateFieldMList(route, table, name);
                 default:
-                    throw new NotSupportedException(Resources.NoWayOfMappingType0Found.Formato(route.Type));
+                    throw new NotSupportedException(EngineMessage.NoWayOfMappingType0Found.NiceToString().Formato(route.Type));
             }
         }
 

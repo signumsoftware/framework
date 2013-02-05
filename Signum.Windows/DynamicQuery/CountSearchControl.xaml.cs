@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -151,7 +151,7 @@ namespace Signum.Windows
                 ItemsCount = (int)obj;
                 if (ItemsCount == 0)
                 {
-                    FormattedText = (TextZeroItems ?? Properties.Resources.ThereIsNo0)
+                    FormattedText = (TextZeroItems ?? SearchMessage.ThereIsNo0.NiceToString())
                         .Formato(QueryUtils.GetNiceName(QueryName));
                     tb.FontWeight = FontWeights.Regular;
                 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -93,7 +93,7 @@ namespace Signum.Web
                 new EntityFormatterRule(l => true, (h,l) => 
                 {
                     if (Navigator.IsNavigable(l.EntityType, isSearchEntity: true ))
-                        return h.Href(Navigator.NavigateRoute(l.EntityType, l.Id), h.Encode(Resources.View));
+                        return h.Href(Navigator.NavigateRoute(l.EntityType, l.Id), h.Encode(EntityControlMessage.View.NiceToString()));
                     else
                         return MvcHtmlString.Empty;
                 }),

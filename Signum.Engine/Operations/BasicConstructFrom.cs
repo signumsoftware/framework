@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -49,7 +49,7 @@ namespace Signum.Engine.Operations
         string OnCanConstruct(IIdentifiable entity)
         {
             if (entity.IsNew && !AllowsNew)
-                return Resources.TheEntity0IsNew.Formato(entity);
+                return EngineMessage.TheEntity0IsNew.NiceToString().Formato(entity);
 
             if (CanConstruct != null)
                 return CanConstruct((F)entity);

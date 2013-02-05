@@ -98,6 +98,9 @@
     <Compile Include="DynamicQuery\Tokens\ColumnToken.cs" />
     <Compile Include="DynamicQuery\Tokens\DateTimeSpecialTokens.cs" />
     <Compile Include="DynamicQuery\Tokens\NetPropertyToken.cs" />
+    <Compile Include="EnumMessages.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="ModelEntity.cs" />
     <Compile Include="DynamicQuery\Column.cs" />
     <Compile Include="DynamicQuery\Filter.cs" />
@@ -189,6 +192,26 @@
       <Project>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</Project>
       <Name>Signum.Utilities</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Translations\Signum.Entities.de.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Translations\Signum.Entities.en.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Translations\Signum.Entities.es.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Translations\Signum.Entities.fr.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Translations\Signum.Entities.it.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Translations\Signum.Entities.pt.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -28,7 +28,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string ToString()
         {
-            return Resources.IdentifiableEntity_ToStr;
+            return LiteMessage.ToStr.NiceToString();
         }
 
         public override string Key
@@ -94,7 +94,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            return Resources.IdentifiableEntity_ToStr + Resources.Of + Parent.ToString();
+            return LiteMessage.ToStr.NiceToString() + QueryTokenMessage.Of.NiceToString() + Parent.ToString();
         }
 
         public override QueryToken Clone()

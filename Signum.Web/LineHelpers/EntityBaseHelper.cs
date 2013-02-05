@@ -1,4 +1,4 @@
-﻿#region usings
+#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -110,9 +110,9 @@ namespace Signum.Web
                 htmlAttr.Add("style", "display:none");
 
             return helper.Href(entityBase.Compose("btnView"),
-                  Resources.LineButton_View,
+                  EntityControlMessage.View.NiceToString(),
                   "",
-                  Resources.LineButton_View,
+                  EntityControlMessage.View.NiceToString(),
                   "sf-line-button sf-view",
                   htmlAttr);
         }
@@ -133,9 +133,9 @@ namespace Signum.Web
                 htmlAttr.Add("style", "display:none");
 
             return helper.Href(entityBase.Compose("btnView"),
-                  Resources.LineButton_Navigate,
+                  EntityControlMessage.Navigate.NiceToString(),
                   "",
-                  Resources.LineButton_Navigate,
+                  EntityControlMessage.Navigate.NiceToString(),
                   "sf-line-button sf-view",
                   htmlAttr);
         }
@@ -158,9 +158,9 @@ namespace Signum.Web
                 htmlAttr.Add("style", "display:none");
 
             return helper.Href(entityBase.Compose("btnCreate"),
-                  Resources.LineButton_Create,
+                  EntityControlMessage.Create.NiceToString(),
                   "",
-                  Resources.LineButton_Create,
+                  EntityControlMessage.Create.NiceToString(),
                   "sf-line-button sf-create",
                   htmlAttr);
         }
@@ -181,9 +181,9 @@ namespace Signum.Web
                 htmlAttr.Add("style", "display:none");
 
             return helper.Href(entityBase.Compose("btnFind"),
-                  Resources.LineButton_Find,
+                  EntityControlMessage.Find.NiceToString(),
                   "",
-                  Resources.LineButton_Find,
+                  EntityControlMessage.Find.NiceToString(),
                   "sf-line-button sf-find",
                   htmlAttr);
         }
@@ -204,9 +204,9 @@ namespace Signum.Web
                 htmlAttr.Add("style", "display:none");
 
             return helper.Href(entityBase.Compose("btnRemove"),
-                  Resources.LineButton_Remove,
+                  EntityControlMessage.Remove.NiceToString(),
                   "",
-                  Resources.LineButton_Remove,
+                  EntityControlMessage.Remove.NiceToString(),
                   "sf-line-button sf-remove",
                   htmlAttr);
         }

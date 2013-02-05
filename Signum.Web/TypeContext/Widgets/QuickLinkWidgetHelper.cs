@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -73,11 +73,11 @@ namespace Signum.Web
             }
 
             HtmlStringBuilder label = new HtmlStringBuilder();
-            using (label.Surround(new HtmlTag("a").Class("sf-widget-toggler sf-quicklink-toggler").Attr("title", Resources.Quicklinks)))
+            using (label.Surround(new HtmlTag("a").Class("sf-widget-toggler sf-quicklink-toggler").Attr("title", QuickLinkMessage.Quicklinks.NiceToString())))
             {
                 label.Add(new HtmlTag("span")
                     .Class("ui-icon ui-icon-star")
-                    .InnerHtml(Resources.Quicklinks.EncodeHtml())
+                    .InnerHtml(QuickLinkMessage.Quicklinks.NiceToString().EncodeHtml())
                     .ToHtml());
 
                 label.Add(new HtmlTag("span")
@@ -112,7 +112,7 @@ namespace Signum.Web
                 content.AddLine(new HtmlTag("li")
                     .Class(ctxItemClass + " sf-search-ctxitem-header")
                     .InnerHtml(
-                        new HtmlTag("span").InnerHtml(Resources.Quicklinks.EncodeHtml()))
+                        new HtmlTag("span").InnerHtml(QuickLinkMessage.Quicklinks.NiceToString().EncodeHtml()))
                     );
 
                 foreach (var q in quicklinks)

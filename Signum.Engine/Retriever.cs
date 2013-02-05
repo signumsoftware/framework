@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -188,7 +188,7 @@ namespace Signum.Engine
 
                     foreach (var item in group)
                     {
-                        var toStr = dic.TryGetC(item.Key.Id) ?? ("[" + Resources.EntityWithType0AndId1NotFound.Formato(item.Key.Type.NiceName(), item.Key.Id) + "]");
+                        var toStr = dic.TryGetC(item.Key.Id) ?? ("[" + EngineMessage.EntityWithType0AndId1NotFound.NiceToString().Formato(item.Key.Type.NiceName(), item.Key.Id) + "]");
                         foreach (var lite in item.Value)
                         {
                             lite.SetToString(toStr);

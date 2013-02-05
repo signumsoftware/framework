@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -113,8 +113,8 @@ namespace Signum.Engine.Exceptions
                         "The column {0} of the {1} does not refer to a valid {2}".Formato(Field, TableType.NiceName(), ReferedTableType.NiceName());
                 else
                     return (TableType == null) ?
-                        Resources.ThereAreRecordsIn0PointingToThisTableByColumn1.Formato(TableName, Field) :
-                        Resources.ThereAre0ThatReferThisEntity.Formato(TableType.NicePluralName());
+                        EngineMessage.ThereAreRecordsIn0PointingToThisTableByColumn1.NiceToString().Formato(TableName, Field) :
+                        EngineMessage.ThereAre0ThatReferThisEntity.NiceToString().Formato(TableType.NicePluralName());
             }
         }
     }
@@ -129,7 +129,7 @@ namespace Signum.Engine.Exceptions
         protected EntityNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
         public EntityNotFoundException(Type type, params int[] ids)
-            : base(Resources.EntityWithType0AndId1NotFound.Formato(type.Name, ids.ToString(", ")))
+            : base(EngineMessage.EntityWithType0AndId1NotFound.NiceToString().Formato(type.Name, ids.ToString(", ")))
         {
             this.Type = type;
             this.Ids = ids;
@@ -145,7 +145,7 @@ namespace Signum.Engine.Exceptions
         protected ConcurrencyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
         public ConcurrencyException(Type type, params int[] ids)
-            : base(Resources.ConcurrencyErrorOnDatabaseTable0Id1.Formato(type.NiceName(), ids.ToString(", ")))
+            : base(EngineMessage.ConcurrencyErrorOnDatabaseTable0Id1.NiceToString().Formato(type.NiceName(), ids.ToString(", ")))
         {
             this.Type = type;
             this.Ids = ids;

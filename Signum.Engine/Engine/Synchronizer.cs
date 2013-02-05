@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,6 +6,7 @@ using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.Maps;
 using Signum.Utilities.DataStructures;
+using Signum.Entities;
 
 namespace Signum.Engine
 {
@@ -267,13 +268,13 @@ namespace Signum.Engine
 
             int startingIndex = 0;
 
-            Console.WriteLine(Properties.Resources._0HasBeenRenamedIn1.Formato(oldValue, replacementsKey));
+            Console.WriteLine(SynchronizerMessage._0HasBeenRenamedIn1.NiceToString().Formato(oldValue, replacementsKey));
           retry:
             newValues.Skip(startingIndex).Take(MaxElements)
                 .Select((s, i) => "-{0}{1,2}: {2} ".Formato(i + startingIndex == 0 ? ">" : " ", i + startingIndex, s)).ToConsole();
             Console.WriteLine();
 
-            Console.WriteLine(Properties.Resources.NNone);
+            Console.WriteLine(SynchronizerMessage.NNone.NiceToString());
 
             int remaining = newValues.Count - startingIndex - MaxElements;
             if (remaining > 0)

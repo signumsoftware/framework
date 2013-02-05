@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +12,7 @@ using System.Linq.Expressions;
 using Signum.Web.Lines;
 using System.Web.Mvc.Html;
 using Signum.Entities;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Web
 {
@@ -117,7 +118,7 @@ namespace Signum.Web
             set { buttonImageOnly = value; }
         }
 
-        string buttonText = Resources.ShowCalendar;
+        string buttonText = CalendarMessage.ShowCalendar.NiceToString();
         public string ButtonText
         {
             get { return buttonText; }
@@ -227,11 +228,11 @@ namespace Signum.Web
             else
                 time = line.UntypedValue as TimeSpan?;
 
-            WriteField(sb, helper, line, Signum.Entities.Properties.Resources.Hour, "Hour", time == null ? "" : time.Value.ToString("hh")); 
+            WriteField(sb, helper, line, QueryTokenMessage.Hour.NiceToString(), "Hour", time == null ? "" : time.Value.ToString("hh")); 
 
             sb.Add(helper.Span("", ":", "sf-value-line sf-time-separator", new Dictionary<string, object> { { "style", "font-weight:bold" } }));
 
-            WriteField(sb, helper, line, Signum.Entities.Properties.Resources.Minute, "Minute", time == null ? "" : time.Value.ToString("mm")); 
+            WriteField(sb, helper, line, QueryTokenMessage.Minute.NiceToString(), "Minute", time == null ? "" : time.Value.ToString("mm")); 
 
             return sb.ToHtml();
         }

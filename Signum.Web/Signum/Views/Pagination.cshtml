@@ -1,4 +1,4 @@
-﻿@using Signum.Entities.DynamicQuery
+@using Signum.Entities.DynamicQuery
 @using Signum.Entities.Reflection
 @using Signum.Web.Properties
 @using Signum.Engine
@@ -23,17 +23,17 @@
                     <span class="sf-pagination-strong">@resultTable.StartElementIndex.ToString()</span>
                     <span> - </span>
                     <span class="sf-pagination-strong">@resultTable.EndElementIndex.ToString()</span>
-                    <span>@(" {0} ".Formato(Signum.Web.Properties.Resources.SearchControl_Pagination_Of))</span>
+                    <span>@(" {0} ".Formato(SearchMessage.SearchControl_Pagination_Of.NiceToString()))</span>
                 }
                 <span class="sf-pagination-strong">@resultTable.TotalElements.ToString()</span>
-                <span>@(" {0}.".Formato(Resources.SearchControl_Pagination_Results))</span>
+                <span>@(" {0}.".Formato(SearchMessage.SearchControl_Pagination_Results.NiceToString()))</span>
             }
         </div>
         <div class="sf-pagination-center">
-            <span>@Resources.SearchControl_Pagination_Rows</span>
+            <span>@SearchMessage.SearchControl_Pagination_Rows.NiceToString()</span>
             @{ 
                 var topItems = new List<int> { 5, 10, 20, 50, 100, 200 }.Select(i => new SelectListItem { Text = i.ToString(), Value = i.ToString(), Selected = i.ToString() == elems.TryToString() }).ToList();
-                topItems.Add(new SelectListItem { Text = Resources.SearchControl_Pagination_All, Value = "-1", Selected = elems == -1 });
+                topItems.Add(new SelectListItem { Text = SearchMessage.SearchControl_Pagination_All.NiceToString(), Value = "-1", Selected = elems == -1 });
             }
             @Html.DropDownList(Model.Compose("sfElems"), topItems, new { @class = "sf-pagination-size" })
         </div>

@@ -17,32 +17,27 @@ namespace Signum.Web.PortableAreas
 {
     public class LocalizedJavaScriptRepository : IFileRepository
     {
-        public readonly ResourceManager ResourceManager;
+        public readonly Type MessageType;
         public readonly string VirtualPathPrefix;
-        readonly string ResourceKeyPrefix;
         readonly string JavaScriptVariableName;
 
         readonly ConcurrentDictionary<CultureInfo, StaticContentResult> cachedFiles = new ConcurrentDictionary<CultureInfo, StaticContentResult>();
 
-        public LocalizedJavaScriptRepository(ResourceManager resourceManager, string areaName)
-            : this(resourceManager, "~/" + areaName + "/resources/", areaName + "_", areaName)
+        public LocalizedJavaScriptRepository(Type messageType, string areaName)
+            : this(messageType, "~/" + areaName + "/resources/", areaName)
         {
         }
 
-        public LocalizedJavaScriptRepository(ResourceManager resourceManager, string virtualPathPrefix, string resourceKeyPrefix, string javaScriptVariableName)
+        public LocalizedJavaScriptRepository(Type messageType, string virtualPathPrefix, string javaScriptVariableName)
         {
-            if (resourceManager == null)
-                throw new ArgumentNullException("resourceManager");
+            if (messageType == null)
+                throw new ArgumentNullException("messageType");
 
             if (string.IsNullOrEmpty(virtualPathPrefix))
                 throw new ArgumentNullException("virtualPath");
 
-            if (string.IsNullOrEmpty(resourceKeyPrefix))
-                throw new ArgumentNullException("resourceKeyPrefix");
-
-            this.ResourceManager = resourceManager;
+            this.MessageType = messageType;
             this.VirtualPathPrefix = virtualPathPrefix.ToLower();
-            this.ResourceKeyPrefix = resourceKeyPrefix.ToLower();
             this.JavaScriptVariableName = javaScriptVariableName.ToLower();
         }
 
@@ -79,21 +74,8 @@ namespace Signum.Web.PortableAreas
 
         Dictionary<string, string> ReadAllKeys(CultureInfo ci)
         {
-            ResourceSet set = ResourceManager.GetResourceSet(ci, true, true);
-
-            var dict = set.Cast<DictionaryEntry>()
-                .Where(e => e.Key.ToString().StartsWith(ResourceKeyPrefix, StringComparison.InvariantCultureIgnoreCase))
-                .ToDictionary(e => e.Key.ToString().Substring(ResourceKeyPrefix.Length), e => e.Value.ToString());
-
-
-            if (ci == CultureInfo.InvariantCulture)
-                return dict;
-
-            var baseDict = ReadAllKeys(ci.Parent);
-
-            baseDict.SetRange(dict);
-
-            return baseDict;
+            using (Sync.ChangeCultureUI(ci))
+                return Enum.GetValues(MessageType).Cast<Enum>().ToDictionary(a => a.ToString(), a => a.NiceToString());
         }
 
         public bool FileExists(string file)
@@ -123,7 +105,7 @@ namespace Signum.Web.PortableAreas
 
         public override string ToString()
         {
-            return "LocalizedJavaScript {0} -> {1}".Formato(ResourceKeyPrefix, VirtualPathPrefix);
+            return "LocalizedJavaScript {0} -> {1}".Formato(MessageType.Name, VirtualPathPrefix);
         }
     }
 }

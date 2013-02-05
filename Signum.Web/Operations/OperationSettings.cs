@@ -1,4 +1,4 @@
-﻿#region usings
+#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,8 +45,8 @@ namespace Signum.Web.Operations
 
         public static EntityOperationGroup Create = new EntityOperationGroup
         {
-            Description = () => Signum.Entities.Properties.Resources.Create,
-            SimplifyName = cs => Regex.Replace(cs, Signum.Entities.Properties.Resources.CreateFromRegex, m => m.Groups["t"].Value.FirstUpper(), RegexOptions.IgnoreCase),
+            Description = () => OperationMessage.Create.NiceToString(),
+            SimplifyName = cs => Regex.Replace(cs, OperationMessage.CreateFromRegex.NiceToString(), m => m.Groups["t"].Value.FirstUpper(), RegexOptions.IgnoreCase),
             CssClass = "sf-operation"
         };
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Signum.Entities.Properties;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Utilities;
 
 namespace Signum.Entities.DynamicQuery
 {
@@ -20,12 +21,12 @@ namespace Signum.Entities.DynamicQuery
 
         public override string ToString()
         {
-            return Resources.Date;
+            return QueryTokenMessage.Date.NiceToString();
         }
 
         public override string NiceName()
         {
-            return Resources.Date + Resources.Of + Parent.ToString();
+            return QueryTokenMessage.Date.NiceToString() + QueryTokenMessage.Of.NiceToString() + Parent.ToString();
         }
 
         public override string Format

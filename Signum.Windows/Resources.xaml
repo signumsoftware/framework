@@ -1,4 +1,4 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:sys="clr-namespace:System;assembly=mscorlib" 
     xmlns:m="clr-namespace:Signum.Windows"
@@ -850,15 +850,15 @@
                                 <Button x:Name="PART_RemoveButton"
                                         Style="{StaticResource RoundButton}" 
                                         Content="{StaticResource Remove}" 
-                                        ToolTip="{m:Loc Remove}"
+                                        ToolTip="{m:Loc {x:Static d:EntityControlMessage.Remove}}"
                                         Visibility="{Binding RemoveVisibility, RelativeSource={RelativeSource AncestorType={x:Type m:EntityRepeater}}}" />
                                 <Button x:Name="PART_MoveUp" Style="{DynamicResource RoundButton}" 
                                         Content="{DynamicResource Up}" 
-                                        ToolTip="{m:Loc MoveUp}"
+                                        ToolTip="{m:Loc {x:Static d:EntityControlMessage.MoveUp}}"
                                         Visibility="{Binding MoveVisibility, RelativeSource={RelativeSource AncestorType={x:Type m:EntityRepeater}}}"/>
                                 <Button x:Name="PART_MoveDown" Style="{DynamicResource RoundButton}"                                      
                                         Content="{DynamicResource Down}"
-                                        ToolTip="{m:Loc MoveDown}"
+                                        ToolTip="{m:Loc {x:Static d:EntityControlMessage.MoveDown}}"
                                         Visibility="{Binding MoveVisibility, RelativeSource={RelativeSource AncestorType={x:Type m:EntityRepeater}}}"/>
                             </StackPanel>
                         </Grid>
