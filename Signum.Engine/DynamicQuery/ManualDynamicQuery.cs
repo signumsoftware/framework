@@ -12,21 +12,18 @@ using Signum.Entities.Reflection;
 
 namespace Signum.Engine.DynamicQuery
 {
-    public class ManualDynamicQuery<T> : DynamicQuery<T>
+    public class ManualDynamicQueryCore<T> : DynamicQueryCore<T>
     {
         public Func<QueryRequest, List<ColumnDescription>, DEnumerableCount<T>> Execute { get; private set; }
 
-        public ManualDynamicQuery(Func<QueryRequest, List<ColumnDescription>, DEnumerableCount<T>> execute)
+        public ManualDynamicQueryCore(Func<QueryRequest, List<ColumnDescription>, DEnumerableCount<T>> execute)
         {
             if (execute == null)
                 throw new ArgumentNullException("execute");
 
             this.Execute = execute;
-        }
 
-        protected override ColumnDescriptionFactory[] InitializeColumns()
-        {
-            var result = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Fields)
+            this.StaticColumns = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Fields)
               .Select((e, i) =>
               {
                   if (e.MemberInfo.ReturningType().IsIIdentifiable())
@@ -35,8 +32,8 @@ namespace Signum.Engine.DynamicQuery
                   return new ColumnDescriptionFactory(i, e.MemberInfo, null);
               })
             .ToArray();
-            return result;
         }
+
 
         public override ResultTable ExecuteQuery(QueryRequest request)
         {
@@ -74,10 +71,13 @@ namespace Signum.Engine.DynamicQuery
 
             DEnumerable<T> mr = Execute(req, GetColumnDescriptions());
 
-            ParameterExpression pe = Expression.Parameter(typeof(object), "p");
-            Func<object, Lite<IIdentifiable>> entitySelector = Expression.Lambda<Func<object, Lite<IIdentifiable>>>(TupleReflection.TupleChainProperty(pe, 0), pe).Compile();
-
-            return (Lite<IdentifiableEntity>)mr.Collection.Select(entitySelector).Unique(request.UniqueType);
+            return (Lite<IdentifiableEntity>)mr.Collection.Select(entitySelector.Value).Unique(request.UniqueType);
         }
+
+        static readonly Lazy<Func<object, Lite<IIdentifiable>>> entitySelector = new Lazy<Func<object, Lite<IIdentifiable>>>(() =>
+        {
+            ParameterExpression pe = Expression.Parameter(typeof(object), "p");
+            return  Expression.Lambda<Func<object, Lite<IIdentifiable>>>(TupleReflection.TupleChainProperty(pe, 0), pe).Compile();
+        }, true);
     }
 }
