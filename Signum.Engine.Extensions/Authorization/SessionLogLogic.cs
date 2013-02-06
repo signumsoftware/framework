@@ -18,21 +18,22 @@ namespace Signum.Engine.Authorization
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AuthLogic.AssertStarted(sb);
-                
+
                 sb.Include<SessionLogDN>();
 
                 PermissionAuthLogic.RegisterPermissions(SessionLogPermission.TrackSession);
 
-                dqm[typeof(SessionLogDN)] = (from sl in Database.Query<SessionLogDN>()
-                                             select new
-                                             {
-                                                 Entity = sl,
-                                                 sl.Id,
-                                                 sl.User,
-                                                 sl.SessionStart,
-                                                 sl.SessionEnd,
-                                                 sl.SessionTimeOut
-                                             }).ToDynamic();
+                dqm.RegisterQuery(typeof(SessionLogDN), () =>
+                    from sl in Database.Query<SessionLogDN>()
+                    select new
+                    {
+                        Entity = sl,
+                        sl.Id,
+                        sl.User,
+                        sl.SessionStart,
+                        sl.SessionEnd,
+                        sl.SessionTimeOut
+                    });
             }
         }
 

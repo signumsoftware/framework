@@ -370,7 +370,7 @@ namespace Signum.Engine.Disconnected
             string command =
 @"INSERT INTO {0} ({2})
 SELECT {3}
-FROM {1} as [table]".Formato(
+                    from {1} as [table]".Formato(
                     newTableName,
                     table.Name,
                     table.Columns.Keys.ToString(a => a.SqlScape(), ", "),

@@ -27,29 +27,32 @@ namespace Signum.Engine.ControlPanel
 
                 sb.Include<ControlPanelDN>();
 
-                dqm[typeof(ControlPanelDN)] = (from cp in Database.Query<ControlPanelDN>()
-                                            select new
-                                            {
-                                                Entity = cp,
-                                                cp.DisplayName,
-                                                cp.Related,
-                                            }).ToDynamic();
+                dqm.RegisterQuery(typeof(ControlPanelDN), () =>
+                    from cp in Database.Query<ControlPanelDN>()
+                    select new
+                    {
+                        Entity = cp,
+                        cp.DisplayName,
+                        cp.Related,
+                    });
 
-                dqm[typeof(LinkListPartDN)] = (from cp in Database.Query<LinkListPartDN>()
-                                               select new
-                                               {
-                                                   Entity = cp,
-                                                   ToStr = cp.ToString(),
-                                                   Links = cp.Links.Count
-                                               }).ToDynamic();
+                dqm.RegisterQuery(typeof(LinkListPartDN), () =>
+                    from cp in Database.Query<LinkListPartDN>()
+                    select new
+                    {
+                        Entity = cp,
+                        ToStr = cp.ToString(),
+                        Links = cp.Links.Count
+                    });
 
-                dqm[typeof(CountSearchControlPartDN)] = (from cp in Database.Query<CountSearchControlPartDN>()
-                                               select new
-                                               {
-                                                   Entity = cp,
-                                                   ToStr = cp.ToString(),
-                                                   Links = cp.UserQueries.Count
-                                               }).ToDynamic(); 
+                dqm.RegisterQuery(typeof(CountSearchControlPartDN), () =>
+                    from cp in Database.Query<CountSearchControlPartDN>()
+                    select new
+                    {
+                        Entity = cp,
+                        ToStr = cp.ToString(),
+                        Links = cp.UserQueries.Count
+                    });
 
                 RegisterOperations();
             }
@@ -87,7 +90,7 @@ namespace Signum.Engine.ControlPanel
         public static ControlPanelDN GetHomePageControlPanel()
         {
             var cps = Database.Query<ControlPanelDN>()
-                .Where(a=>a.HomePagePriority.HasValue)
+                .Where(a => a.HomePagePriority.HasValue)
                 .OrderByDescending(a => a.HomePagePriority)
                 .Select(a => a.ToLite())
                 .FirstOrDefault();

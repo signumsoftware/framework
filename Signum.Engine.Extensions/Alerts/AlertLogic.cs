@@ -42,30 +42,31 @@ namespace Signum.Engine.Alerts
             {
                 sb.Include<AlertDN>();
 
-                dqm[typeof(AlertDN)] =
-                    (from a in Database.Query<AlertDN>()
-                     select new
-                            {
-                                Entity = a,
-                                a.Id,
-                                a.AlertType,
-                                a.AlertDate,
-                                Texto = a.Text.Etc(100),
-                                CreacionDate = a.CreationDate,
-                                a.CreatedBy,
-                                a.AttendedDate,
-                                a.AttendedBy,
-                                a.Target
-                            }).ToDynamic();
+                dqm.RegisterQuery(typeof(AlertDN), () =>
+                    from a in Database.Query<AlertDN>()
+                    select new
+                           {
+                               Entity = a,
+                               a.Id,
+                               a.AlertType,
+                               a.AlertDate,
+                               Texto = a.Text.Etc(100),
+                               CreacionDate = a.CreationDate,
+                               a.CreatedBy,
+                               a.AttendedDate,
+                               a.AttendedBy,
+                               a.Target
+                           });
 
-                dqm[typeof(AlertTypeDN)] = (from t in Database.Query<AlertTypeDN>()
-                                            select new
-                                            {
-                                                Entity = t,
-                                                t.Id,
-                                                Nombre = t.Name,
-                                                t.Key,
-                                            }).ToDynamic();
+                dqm.RegisterQuery(typeof(AlertTypeDN), () =>
+                    from t in Database.Query<AlertTypeDN>()
+                    select new
+                    {
+                        Entity = t,
+                        t.Id,
+                        Nombre = t.Name,
+                        t.Key,
+                    });
 
                 AlertGraph.Register();
 
@@ -75,7 +76,7 @@ namespace Signum.Engine.Alerts
                 {
                     AllowsNew = true,
                     Lite = false,
-                    Execute = (a, _) => {  }
+                    Execute = (a, _) => { }
                 }.Register();
 
                 started = true;
@@ -84,7 +85,7 @@ namespace Signum.Engine.Alerts
 
         public static void RegisterAlertType(Enum alertType)
         {
-            SystemAlertTypes.Add(alertType); 
+            SystemAlertTypes.Add(alertType);
         }
 
         public static AlertDN CreateAlert(this IIdentifiable entity, string text, Enum alertType, DateTime? alertDate = null, Lite<UserDN> user = null, string title = null)
@@ -241,12 +242,12 @@ namespace Signum.Engine.Alerts
             List<AlertTypeDN> current = Administrator.TryRetrieveAll<AlertTypeDN>(replacements);
             List<AlertTypeDN> should = GenerateEntities();
 
-            return Synchronizer.SynchronizeScriptReplacing(replacements, 
-                typeof(AlertTypeDN).Name, 
-                should.ToDictionary(s => s.Key), 
-                current.Where(c => c.Key.HasText()).ToDictionary(c => c.Key), 
-                (k, s) => table.InsertSqlSync(s), 
-                (k, c) => table.DeleteSqlSync(c), 
+            return Synchronizer.SynchronizeScriptReplacing(replacements,
+                typeof(AlertTypeDN).Name,
+                should.ToDictionary(s => s.Key),
+                current.Where(c => c.Key.HasText()).ToDictionary(c => c.Key),
+                (k, s) => table.InsertSqlSync(s),
+                (k, c) => table.DeleteSqlSync(c),
                 (k, s, c) =>
                 {
                     if (c.Name != s.Name || c.Key != s.Key)

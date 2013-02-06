@@ -65,7 +65,7 @@ namespace Signum.Engine.Basics
         public static Dictionary<string, QueryDN> RetrieveOrGenerateQueries()
         {
             var current = Database.RetrieveAll<QueryDN>().ToDictionary(a => a.Key);
-            var total = DynamicQueryManager.Current.GetQueries().Keys.ToDictionary(qn => QueryUtils.GetQueryUniqueKey(qn), qn => CreateQuery(qn));
+            var total = DynamicQueryManager.Current.GetQueryNames().ToDictionary(qn => QueryUtils.GetQueryUniqueKey(qn), qn => CreateQuery(qn));
 
             total.SetRange(current);
             return total;

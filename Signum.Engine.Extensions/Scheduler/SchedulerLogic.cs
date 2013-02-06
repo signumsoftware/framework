@@ -56,19 +56,19 @@ namespace Signum.Engine.Scheduler
                 sb.Schema.Initializing[InitLevel.Level4BackgroundProcesses] += Schema_InitializingApplicaton;
                 sb.Schema.EntityEvents<ScheduledTaskDN>().Saving += Schema_Saving;
                 
-                dqm[typeof(CalendarDN)] =
-                     (from st in Database.Query<CalendarDN>()
+                dqm.RegisterQuery(typeof(CalendarDN), ()=>
+                     from st in Database.Query<CalendarDN>()
                       select new
                       {
                           Entity = st,
                           st.Id,
                           st.Name,
                           Holidays = st.Holidays.Count,
-                      }).ToDynamic();
+                      });
 
 
-                dqm[typeof(ScheduledTaskDN)] =
-                    (from st in Database.Query<ScheduledTaskDN>()
+                dqm.RegisterQuery(typeof(ScheduledTaskDN), ()=>
+                    from st in Database.Query<ScheduledTaskDN>()
                      select new
                      {
                          Entity = st,
@@ -77,7 +77,7 @@ namespace Signum.Engine.Scheduler
                          st.NextDate,
                          st.Suspended,
                          st.Rule,
-                     }).ToDynamic();
+                     });
 
                 new BasicExecute<CalendarDN>(CalendarOperation.Save)
                 {

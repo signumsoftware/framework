@@ -42,12 +42,12 @@ namespace Signum.Engine.Chart
 
         public static ResultTable ExecuteChart(ChartRequest request)
         {
-            IDynamicQuery dq = DynamicQueryManager.Current[request.QueryName];
+            IDynamicQueryCore core = DynamicQueryManager.Current.TryGetQuery(request.QueryName).Core.Value;
 
-            if (dq.GetType().FollowC(t => t.BaseType).Any(t => t.IsInstantiationOf(typeof(DynamicQuery<>))))
+            if (core.GetType().FollowC(t => t.BaseType).Any(t => t.IsInstantiationOf(typeof(AutoDynamicQueryCore<>))))
             {
                 using (ExecutionMode.UserInterface())
-                    return miExecuteChart.GetInvoker(dq.GetType().GetGenericArguments()[0])(request, dq);
+                    return miExecuteChart.GetInvoker(core.GetType().GetGenericArguments()[0])(request, core);
             }
 
             throw new NotImplementedException(); 
@@ -132,8 +132,9 @@ namespace Signum.Engine.Chart
             return Expression.Call(typeof(Enumerable), at.AggregateFunction.ToString(), new[] { groupType }, new[] { collection, lambda });
         }
 
-        static GenericInvoker<Func<ChartRequest, IDynamicQuery, ResultTable>> miExecuteChart = new GenericInvoker<Func<ChartRequest, IDynamicQuery, ResultTable>>((req, dq) => ExecuteChart<int>(req, (DynamicQuery<int>)dq));
-        static ResultTable ExecuteChart<T>(ChartRequest request, DynamicQuery<T> dq)
+        static GenericInvoker<Func<ChartRequest, IDynamicQueryCore, ResultTable>> miExecuteChart =
+            new GenericInvoker<Func<ChartRequest, IDynamicQueryCore, ResultTable>>((req, dq) => ExecuteChart<int>(req, (DynamicQueryCore<int>)dq));
+        static ResultTable ExecuteChart<T>(ChartRequest request, DynamicQueryCore<T> dq)
         {
             List<Column> columns = request.Columns.Where(c => c.Token != null).Select(t => t.CreateColumn()).ToList();
 
@@ -143,9 +144,9 @@ namespace Signum.Engine.Chart
             {
                 columns.Add(new _EntityColumn(dq.EntityColumn().BuildColumnDescription()));
 
-                if (dq is AutoDynamicQuery<T>)
+                if (dq is AutoDynamicQueryCore<T>)
                 {
-                    DQueryable<T> query = ((AutoDynamicQuery<T>)dq).Query.ToDQueryable(dq.GetColumnDescriptions())
+                    DQueryable<T> query = ((AutoDynamicQueryCore<T>)dq).Query.ToDQueryable(dq.GetColumnDescriptions())
                         .SelectMany(multiplications)
                         .Where(request.Filters)
                         .OrderBy(request.Orders)
@@ -155,7 +156,7 @@ namespace Signum.Engine.Chart
                 }
                 else
                 {
-                    DEnumerableCount<T> collection = ((ManualDynamicQuery<T>)dq).Execute(new QueryRequest
+                    DEnumerableCount<T> collection = ((ManualDynamicQueryCore<T>)dq).Execute(new QueryRequest
                     {
                         Columns = columns,
                         Filters = request.Filters,
@@ -175,9 +176,9 @@ namespace Signum.Engine.Chart
 
                 var allAggregates = request.AllTokens().OfType<AggregateToken>().ToHashSet(); 
                 
-                if (dq is AutoDynamicQuery<T>)
+                if (dq is AutoDynamicQueryCore<T>)
                 {
-                    DQueryable<T> query = ((AutoDynamicQuery<T>)dq).Query.ToDQueryable(dq.GetColumnDescriptions())
+                    DQueryable<T> query = ((AutoDynamicQueryCore<T>)dq).Query.ToDQueryable(dq.GetColumnDescriptions())
                         .SelectMany(multiplications)
                         .Where(simpleFilters)
                         .GroupBy(keys, allAggregates)
@@ -188,13 +189,12 @@ namespace Signum.Engine.Chart
                 }
                 else
                 {
-                    DEnumerableCount<T> plainCollection = ((ManualDynamicQuery<T>)dq).Execute(new QueryRequest
+                    DEnumerableCount<T> plainCollection = ((ManualDynamicQueryCore<T>)dq).Execute(new QueryRequest
                     { 
                         Columns = keys.Concat(allAggregates.Select(at=>at.Parent).NotNull()).Distinct().Select(t=>new Column(t, t.NiceName())).ToList(),
                         Filters = simpleFilters,
                         QueryName = request.QueryName,
                     }, dq.GetColumnDescriptions());
-
 
                     var groupCollection = plainCollection
                         .GroupBy(keys, allAggregates)

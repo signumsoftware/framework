@@ -47,35 +47,38 @@ namespace Signum.Engine.Files
                 sb.Schema.EntityEvents<FilePathDN>().PreSaving += FilePath_PreSaving;
                 sb.Schema.EntityEvents<FilePathDN>().PreUnsafeDelete += new QueryHandler<FilePathDN>(FilePathLogic_PreUnsafeDelete);
 
-                dqm[typeof(FileRepositoryDN)] = (from r in Database.Query<FileRepositoryDN>()
-                                                 select new
-                                                 {
-                                                     Entity = r,
-                                                     r.Id,
-                                                     r.Name,
-                                                     r.Active,
-                                                     r.PhysicalPrefix,
-                                                     r.WebPrefix
-                                                 }).ToDynamic();
+                dqm.RegisterQuery(typeof(FileRepositoryDN), () =>
+                    from r in Database.Query<FileRepositoryDN>()
+                    select new
+                    {
+                        Entity = r,
+                        r.Id,
+                        r.Name,
+                        r.Active,
+                        r.PhysicalPrefix,
+                        r.WebPrefix
+                    });
 
-                dqm[typeof(FilePathDN)] = (from p in Database.Query<FilePathDN>()
-                                           select new
-                                           {
-                                               Entity = p,
-                                               p.Id,
-                                               p.FileName,
-                                               p.FileType,
-                                               p.FullPhysicalPath,
-                                               p.FullWebPath,
-                                               p.Repository
-                                           }).ToDynamic();
+                dqm.RegisterQuery(typeof(FilePathDN), () =>
+                    from p in Database.Query<FilePathDN>()
+                    select new
+                    {
+                        Entity = p,
+                        p.Id,
+                        p.FileName,
+                        p.FileType,
+                        p.FullPhysicalPath,
+                        p.FullWebPath,
+                        p.Repository
+                    });
 
-                dqm[typeof(FileTypeDN)] = (from f in Database.Query<FileTypeDN>()
-                                           select new
-                                           {
-                                               Entity = f,
-                                               f.Name
-                                           }).ToDynamic();
+                dqm.RegisterQuery(typeof(FileTypeDN), () =>
+                    from f in Database.Query<FileTypeDN>()
+                    select new
+                    {
+                        Entity = f,
+                        f.Name
+                    });
 
                 sb.AddUniqueIndex<FilePathDN>(f => new { f.Sufix, f.Repository });
 
@@ -91,7 +94,7 @@ namespace Signum.Engine.Files
             }
         }
 
-        
+
         static void FilePathLogic_PreUnsafeDelete(IQueryable<FilePathDN> query)
         {
             var list = query.Select(a => a.FullPhysicalPath).ToList();
@@ -107,9 +110,9 @@ namespace Signum.Engine.Files
                 }
             };
         }
-        
 
-        const long ERROR_DISK_FULL = 112L; 
+
+        const long ERROR_DISK_FULL = 112L;
 
         static readonly Variable<bool> unsafeMode = Statics.ThreadVariable<bool>("filePathUnsafeMode");
 
@@ -167,7 +170,7 @@ namespace Signum.Engine.Files
                             i++;
                         }
                     }
-                    while (!SaveFile(fp)); 
+                    while (!SaveFile(fp));
                 }
             }
         }
@@ -180,7 +183,7 @@ namespace Signum.Engine.Files
                 if (!Directory.Exists(path))
                     Directory.CreateDirectory(path);
                 File.WriteAllBytes(fp.FullPhysicalPath, fp.BinaryFile);
-                fp.BinaryFile = null; 
+                fp.BinaryFile = null;
             }
             catch (IOException ex)
             {
@@ -218,7 +221,7 @@ namespace Signum.Engine.Files
     {
         public Func<FilePathDN, FileRepositoryDN> GetRepository { get; set; }
         public Func<FilePathDN, string> CalculateSufix { get; set; }
-        
+
         bool renameOnCollision = true;
         public bool RenameOnCollision
         {

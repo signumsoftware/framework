@@ -28,15 +28,16 @@ namespace Signum.Engine.Reports
                 QueryLogic.Start(sb);
 
                 sb.Include<ExcelReportDN>();
-                dqm[typeof(ExcelReportDN)] = (from s in Database.Query<ExcelReportDN>()
-                                              select new
-                                              {
-                                                  Entity = s,
-                                                  s.Id,
-                                                  s.Query,
-                                                  s.File.FileName,
-                                                  s.DisplayName,
-                                              }).ToDynamic();
+                dqm.RegisterQuery(typeof(ExcelReportDN), () =>
+                    from s in Database.Query<ExcelReportDN>()
+                    select new
+                    {
+                        Entity = s,
+                        s.Id,
+                        s.Query,
+                        s.File.FileName,
+                        s.DisplayName,
+                    });
 
                 new BasicExecute<ExcelReportDN>(ExcelReportOperation.Save)
                 {
@@ -63,7 +64,7 @@ namespace Signum.Engine.Reports
         public static byte[] ExecuteExcelReport(Lite<ExcelReportDN> excelReport, QueryRequest request)
         {
             ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
-            
+
             ExcelReportDN report = excelReport.RetrieveAndForget();
             string extension = Path.GetExtension(report.File.FileName);
             if (extension != ".xlsx")

@@ -222,7 +222,7 @@ namespace Signum.Engine.Help
 
         public static Type GetQueryType(object query)
         {
-            return DynamicQueryManager.Current[query].EntityColumn().Implementations.Value.Types.FirstEx();
+            return DynamicQueryManager.Current.GetQuery(query).Core.Value.EntityColumn().Implementations.Value.Types.FirstEx();
         }
 
         private static List<FileXDocument> LoadDocuments(string subdirectory)

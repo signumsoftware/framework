@@ -28,17 +28,18 @@ namespace Signum.Engine.UserQueries
 
                 sb.Include<UserQueryDN>();
 
-                dqm[typeof(UserQueryDN)] = (from uq in Database.Query<UserQueryDN>()
-                                            select new
-                                            {
-                                                Entity = uq,
-                                                uq.Query,
-                                                uq.Id,
-                                                uq.DisplayName,
-                                                Filters = uq.Filters.Count,
-                                                Columns = uq.Columns.Count,
-                                                Orders = uq.Orders.Count,
-                                            }).ToDynamic();
+                dqm.RegisterQuery(typeof(UserQueryDN), () =>
+                    from uq in Database.Query<UserQueryDN>()
+                    select new
+                    {
+                        Entity = uq,
+                        uq.Query,
+                        uq.Id,
+                        uq.DisplayName,
+                        Filters = uq.Filters.Count,
+                        Columns = uq.Columns.Count,
+                        Orders = uq.Orders.Count,
+                    });
 
                 sb.Schema.EntityEvents<UserQueryDN>().Retrieved += UserQueryLogic_Retrieved;
 

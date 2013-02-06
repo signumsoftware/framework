@@ -195,7 +195,7 @@ namespace Signum.Engine.Help
             return "";
         }
 
-        public static string GetQueryHelp(IDynamicQuery dynamicQuery)
+        public static string GetQueryHelp(IDynamicQueryCore dynamicQuery)
         {
             ColumnDescriptionFactory cdf = dynamicQuery.EntityColumn();
 

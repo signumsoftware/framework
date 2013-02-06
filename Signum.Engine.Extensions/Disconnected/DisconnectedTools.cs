@@ -69,7 +69,7 @@ LOG ON
 
             new SqlPreCommandSimple(
 @"RESTORE DATABASE {0}
-FROM DISK = '{1}'
+                    from DISK = '{1}'
 WITH MOVE '{2}' TO '{3}',
 MOVE '{4}' TO '{5}'".Formato(databaseName, backupFile,
                     logicalDatabaseFile, databaseFile,

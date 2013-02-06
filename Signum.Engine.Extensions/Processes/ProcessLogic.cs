@@ -83,18 +83,18 @@ namespace Signum.Engine.Processes
 
                 sb.Schema.EntityEvents<ProcessExecutionDN>().Saving += ProcessExecution_Saving;
 
-                dqm[typeof(ProcessDN)] =
-                             (from p in Database.Query<ProcessDN>()
+                dqm.RegisterQuery(typeof(ProcessDN), ()=>
+                             from p in Database.Query<ProcessDN>()
                               join pe in Database.Query<ProcessExecutionDN>().DefaultIfEmpty() on p equals pe.Process into g
                               select new
                               {
                                   Entity = p,
                                   p.Id,
                                   p.Name
-                              }).ToDynamic();
+                              });
 
-                dqm[typeof(ProcessExecutionDN)] =
-                             (from pe in Database.Query<ProcessExecutionDN>()
+                dqm.RegisterQuery(typeof(ProcessExecutionDN), ()=>
+                             from pe in Database.Query<ProcessExecutionDN>()
                               select new
                               {
                                   Entity = pe,
@@ -110,7 +110,7 @@ namespace Signum.Engine.Processes
                                   pe.ExecutionEnd,
                                   pe.SuspendDate,
                                   ErrorDate = pe.ExceptionDate,
-                              }).ToDynamic();
+                              });
 
                 dqm.RegisterExpression((ProcessDN p) => p.Executions());
                 dqm.RegisterExpression((ProcessDN p) => p.LastExecution());

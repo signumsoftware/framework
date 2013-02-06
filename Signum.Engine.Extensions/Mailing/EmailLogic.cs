@@ -60,7 +60,7 @@ namespace Signum.Engine.Mailing
     {
         public static string DoNotSend = "null@null.com";
 
-        public static Func<string> OverrideEmailAddress = () => null;     
+        public static Func<string> OverrideEmailAddress = () => null;
 
         public static Func<EmailMessageDN, SmtpClient> SmtpClientBuilder;
 
@@ -78,30 +78,32 @@ namespace Signum.Engine.Mailing
             {
                 sb.Include<EmailMessageDN>();
 
-                dqm[typeof(EmailTemplateDN)] = (from e in Database.Query<EmailTemplateDN>()
-                                                select new
-                                                {
-                                                    Entity = e,
-                                                    e.Id,
-                                                    e.FullClassName,
-                                                    e.FriendlyName,
-                                                }).ToDynamic();
+                dqm.RegisterQuery(typeof(EmailTemplateDN), () =>
+                    from e in Database.Query<EmailTemplateDN>()
+                    select new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.FullClassName,
+                        e.FriendlyName,
+                    });
 
-                dqm[typeof(EmailMessageDN)] = (from e in Database.Query<EmailMessageDN>()
-                                               select new
-                                               {
-                                                   Entity = e,
-                                                   e.Id,
-                                                   e.Recipient,
-                                                   e.State,
-                                                   e.Subject,
-                                                   e.Body,
-                                                   Template = e.Template,
-                                                   e.Sent,
-                                                   e.Received,
-                                                   e.Package,
-                                                   e.Exception,
-                                               }).ToDynamic();
+                dqm.RegisterQuery(typeof(EmailMessageDN), () =>
+                    from e in Database.Query<EmailMessageDN>()
+                    select new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.Recipient,
+                        e.State,
+                        e.Subject,
+                        e.Body,
+                        Template = e.Template,
+                        e.Sent,
+                        e.Received,
+                        e.Package,
+                        e.Exception,
+                    });
 
                 sb.Schema.Initializing[InitLevel.Level2NormalEntities] += Schema_Initializing;
                 sb.Schema.Generating += Schema_Generating;
@@ -137,20 +139,20 @@ namespace Signum.Engine.Mailing
             Dictionary<string, EmailTemplateDN> old = Administrator.TryRetrieveAll<EmailTemplateDN>(replacements).ToDictionary(c => c.FullClassName);
 
             replacements.AskForReplacements(
-                old.Keys.ToHashSet(), 
+                old.Keys.ToHashSet(),
                 should.Keys.ToHashSet(), EmailTemplates);
 
             Dictionary<string, EmailTemplateDN> current = replacements.ApplyReplacementsToOld(old, EmailTemplates);
 
-            return Synchronizer.SynchronizeScript(should, current, 
-                (tn, s) => table.InsertSqlSync(s), 
-                (tn, c) => table.DeleteSqlSync(c), 
+            return Synchronizer.SynchronizeScript(should, current,
+                (tn, s) => table.InsertSqlSync(s),
+                (tn, c) => table.DeleteSqlSync(c),
                 (tn, s, c) =>
                 {
                     c.FullClassName = s.FullClassName;
                     c.FriendlyName = s.FriendlyName;
                     return table.UpdateSqlSync(c);
-                }, 
+                },
                 Spacing.Double);
         }
 
@@ -248,7 +250,7 @@ namespace Signum.Engine.Mailing
             catch (Exception e)
             {
                 if (Transaction.InTestTransaction)
-                    throw; 
+                    throw;
 
                 var exLog = e.LogException().ToLite();
 
@@ -335,7 +337,7 @@ namespace Signum.Engine.Mailing
                             if (i != 3)
                                 Thread.Sleep(3000);
                         }
-                    }); 
+                    });
                 }
                 else
                 {
@@ -348,7 +350,7 @@ namespace Signum.Engine.Mailing
             catch (Exception ex)
             {
                 if (Transaction.InTestTransaction)
-                    throw; 
+                    throw;
 
                 var exLog = ex.LogException().ToLite();
 
@@ -374,12 +376,12 @@ namespace Signum.Engine.Mailing
                     try
                     {
                         onComplete(e);
-                }
+                    }
                     catch (Exception ex)
                     {
                         ex.LogException();
+                    }
                 }
-            }
             };
             client.SendAsync(message, null);
         }
@@ -475,7 +477,7 @@ namespace Signum.Engine.Mailing
             return exceptions;
         }
 
-       
+
     }
 
     public struct Link
@@ -495,5 +497,5 @@ namespace Signum.Engine.Mailing
         }
     }
 
-    
+
 }

@@ -21,8 +21,8 @@ namespace Signum.Engine.Authorization
             {
                 sb.Include<PasswordExpiresIntervalDN>();
 
-                dqm[typeof(PasswordExpiresIntervalDN)] =
-                    (from e in Database.Query<PasswordExpiresIntervalDN>()
+                dqm.RegisterQuery(typeof(PasswordExpiresIntervalDN), ()=>
+                    from e in Database.Query<PasswordExpiresIntervalDN>()
                      select new
                      {
                          Entity = e,
@@ -30,7 +30,7 @@ namespace Signum.Engine.Authorization
                          e.Enabled,
                          e.Days,
                          e.DaysWarning
-                     }).ToDynamic();
+                     });
 
                 new BasicExecute<PasswordExpiresIntervalDN>(PasswordExpiresIntervalOperation.Save)
                 {

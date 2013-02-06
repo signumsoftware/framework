@@ -27,16 +27,17 @@ namespace Signum.Engine.Chart
             {
                 sb.Include<ChartScriptDN>();
 
-                dqm[typeof(ChartScriptDN)] = (from uq in Database.Query<ChartScriptDN>()
-                                              select new
-                                              {
-                                                  Entity = uq,
-                                                  uq.Id,
-                                                  uq.Name,
-                                                  uq.GroupBy,
-                                                  uq.Columns.Count,
-                                                  uq.Icon,
-                                              }).ToDynamic();
+                dqm.RegisterQuery(typeof(ChartScriptDN), () =>
+                    from uq in Database.Query<ChartScriptDN>()
+                    select new
+                    {
+                        Entity = uq,
+                        uq.Id,
+                        uq.Name,
+                        uq.GroupBy,
+                        uq.Columns.Count,
+                        uq.Icon,
+                    });
 
                 Scripts = sb.GlobalLazy(() => Database.Query<ChartScriptDN>().ToList(),
                     new InvalidateWith(typeof(ChartScriptDN)));
@@ -126,7 +127,7 @@ namespace Signum.Engine.Chart
                         File.Delete(file);
 
                     if (script.Icon != null)
-                        script.Icon.Retrieve(); 
+                        script.Icon.Retrieve();
 
                     script.ExportXml().Save(newFileName);
                 });
