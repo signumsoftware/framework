@@ -103,27 +103,29 @@ namespace Signum.Engine.Operations
 
                 MultiEnumLogic<OperationDN>.Start(sb, () => RegisteredOperations);
 
-                dqm[typeof(OperationLogDN)] = (from lo in Database.Query<OperationLogDN>()
-                                               select new
-                                               {
-                                                   Entity = lo,
-                                                   lo.Id,
-                                                   Target = lo.Target,
-                                                   lo.Operation,
-                                                   User = lo.User,
-                                                   lo.Start,
-                                                   lo.End,
-                                                   lo.Exception
-                                               }).ToDynamic();
+                dqm.RegisterQuery(typeof(OperationLogDN), () =>
+                    from lo in Database.Query<OperationLogDN>()
+                    select new
+                    {
+                        Entity = lo,
+                        lo.Id,
+                        Target = lo.Target,
+                        lo.Operation,
+                        User = lo.User,
+                        lo.Start,
+                        lo.End,
+                        lo.Exception
+                    });
 
-                dqm[typeof(OperationDN)] = (from lo in Database.Query<OperationDN>()
-                                            select new
-                                            {
-                                                Entity = lo,
-                                                lo.Id,
-                                                lo.Name,
-                                                lo.Key,
-                                            }).ToDynamic();
+                dqm.RegisterQuery(typeof(OperationDN), () =>
+                    from lo in Database.Query<OperationDN>()
+                    select new
+                    {
+                        Entity = lo,
+                        lo.Id,
+                        lo.Name,
+                        lo.Key,
+                    });
 
                 dqm.RegisterExpression((OperationDN o) => o.LogOperations());
 

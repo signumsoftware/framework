@@ -97,8 +97,6 @@ namespace Signum.Utilities
 
         public static long? TimeLimit;
 
-        public static int MaxTotalEntriesCount = 1000;
-
 
         static bool enabled;
         public static bool Enabled

@@ -11,30 +11,20 @@ using Signum.Utilities;
 
 namespace Signum.Engine.DynamicQuery
 {
-    public class AutoDynamicQuery<T> : DynamicQuery<T>
+    public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
     {
         public IQueryable<T> Query { get; private set; }
         
         Dictionary<string, Meta> metas;
 
-        public AutoDynamicQuery(IQueryable<T> query)
+        public AutoDynamicQueryCore(IQueryable<T> query)
         {
-            if (query == null)
-                throw new ArgumentNullException("query");
-
             this.Query = query;
-        }
 
-        protected override ColumnDescriptionFactory[] InitializeColumns()
-        {
             metas = DynamicQuery.QueryMetadata(Query);
 
-            var result = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Fields)
+            StaticColumns = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Fields)
               .Select((e, i) => new ColumnDescriptionFactory(i, e.MemberInfo, metas[e.MemberInfo.Name])).ToArray();
-
-            result.Where(a => a.IsEntity).SingleEx(() => "Entity column not foundon {0}".Formato(QueryUtils.GetQueryUniqueKey(QueryName)));
-            
-            return result;
         }
 
         public override ResultTable ExecuteQuery(QueryRequest request)

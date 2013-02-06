@@ -20,67 +20,74 @@ using Signum.Entities.Basics;
 
 namespace Signum.Engine.DynamicQuery
 {
-    public interface IDynamicQuery
+    public class DynamicQueryBucket
     {
-        object QueryName { get; set; } 
+        public Lazy<IDynamicQueryCore> Core { get; private set; }
+
+        public object QueryName { get; private set; }
+
+        public Implementations EntityImplementations { get; private set; }
+
+        public DynamicQueryBucket(object queryName, Func<IDynamicQueryCore> lazyQueryCore, Implementations entityImplementations)
+        {
+            if (queryName == null)
+                throw new ArgumentNullException("queryName");
+
+            if (lazyQueryCore == null)
+                throw new ArgumentNullException("lazyQueryCore");
+
+            this.QueryName = queryName;
+            this.EntityImplementations = entityImplementations;
+
+            this.Core = new Lazy<IDynamicQueryCore>(() =>
+            {
+                var core = lazyQueryCore();
+
+                core.StaticColumns.Where(sc => sc.IsEntity).SingleEx(() => "Entity column not found {0}".Formato(QueryUtils.GetQueryUniqueKey(QueryName)));
+
+                core.EntityColumn().Implementations = entityImplementations;
+
+                var errors = core.StaticColumns.Where(sc => sc.Implementations == null && sc.Type.CleanType().IsIIdentifiable()).ToString(a => a.Name, ", ");
+
+                if (errors.HasText())
+                    throw new InvalidOperationException("Column {0} of {1} does not have implementations deffined. Use Column extension method".Formato(errors, QueryUtils.GetQueryUniqueKey(QueryName)));
+
+                return core;
+            });
+        }
+
+
+        public QueryDescription GetDescription()
+        {
+            return new QueryDescription
+            {
+                QueryName = QueryName,
+                Columns = Core.Value.GetColumnDescriptions()
+            };
+        }
+    }
+
+
+    public interface IDynamicQueryCore
+    {
+        ColumnDescriptionFactory[] StaticColumns { get; }
+        Expression Expression { get; } //Optional
 
         ColumnDescriptionFactory EntityColumn();
-        QueryDescription GetDescription(object queryName);
         ResultTable ExecuteQuery(QueryRequest request);
         int ExecuteQueryCount(QueryCountRequest request);
         Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request);
-        Expression Expression { get; } //Optional
-        ResetLazy<ColumnDescriptionFactory[]> StaticColumns { get; } 
+
+        List<ColumnDescription> GetColumnDescriptions();
     }
 
-    public abstract class DynamicQuery<T> : IDynamicQuery
+    public abstract class DynamicQueryCore<T> : IDynamicQueryCore
     {
-        object queryName; 
-        public object QueryName
-        {
-            get { return queryName; }
-            set
-            {
-                if (queryName != null)
-                    throw new InvalidOperationException("The query {0} has already been registered with quey {1}".Formato(
-                        QueryUtils.GetQueryUniqueKey(queryName), QueryUtils.GetQueryUniqueKey(value)));
-
-                queryName = value;
-
-                if (StaticColumns.IsValueCreated)
-                    AssertColumns(StaticColumns.Value);
-            }
-        }
-
-        private void AssertColumns(ColumnDescriptionFactory[] columns)
-        {
-            columns.Where(sc => sc.IsEntity).SingleEx(() => "Entity column not foundon {0}".Formato(QueryUtils.GetQueryUniqueKey(QueryName)));
-
-            var errors =  columns.Where(sc => sc.Implementations == null && sc.Type.CleanType().IsIIdentifiable()).ToString(a=>a.Name, ", ");
-
-            if (errors.HasText())
-                throw new InvalidOperationException("Column {0} of {1} does not have implementations deffined. Use Column extension method".Formato(errors, QueryUtils.GetQueryUniqueKey(QueryName)));
-        }
-
-        public ResetLazy<ColumnDescriptionFactory[]> StaticColumns { get; private set; } 
+        public ColumnDescriptionFactory[] StaticColumns { get; protected set; } 
 
         public abstract ResultTable ExecuteQuery(QueryRequest request);
         public abstract int ExecuteQueryCount(QueryCountRequest request);
         public abstract Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request);
-
-        public DynamicQuery()
-        {
-            StaticColumns = new ResetLazy<ColumnDescriptionFactory[]>(() =>
-            {
-                using (HeavyProfiler.Log("InitColums"))
-                {
-                    var result = InitializeColumns();
-                    if (QueryName != null)
-                        AssertColumns(result);
-                    return result;
-                }
-            });
-        }
 
         protected virtual ColumnDescriptionFactory[] InitializeColumns()
         {
@@ -90,30 +97,10 @@ namespace Signum.Engine.DynamicQuery
             return result;
         }
 
-        public QueryDescription GetDescription(object queryName)
-        {
-            return new QueryDescription
-            {
-                QueryName = queryName,
-                Columns = GetColumnDescriptions()
-            };
-        }
-
-        public List<ColumnDescription> GetColumnDescriptions()
-        {
-            var entity = StaticColumns.Value.Single(f => f.IsEntity);
-            string allowed = entity.IsAllowed();
-            if (allowed != null)
-                throw new InvalidOperationException(
-                    "Not authorized to see Entity column of {0} because {1}".Formato(QueryUtils.GetQueryUniqueKey(QueryName), allowed));
-
-            return StaticColumns.Value.Where(f => f.IsAllowed() == null).Select(f => f.BuildColumnDescription()).ToList();
-        }
-
-        public DynamicQuery<T> Column<S>(Expression<Func<T, S>> column, Action<ColumnDescriptionFactory> change)
+        public DynamicQueryCore<T> Column<S>(Expression<Func<T, S>> column, Action<ColumnDescriptionFactory> change)
         {
             MemberInfo member = ReflectionTools.GetMemberInfo(column);
-            ColumnDescriptionFactory col = StaticColumns.Value.SingleEx(a => a.Name == member.Name);
+            ColumnDescriptionFactory col = StaticColumns.SingleEx(a => a.Name == member.Name);
             change(col);
 
             return this;
@@ -121,7 +108,7 @@ namespace Signum.Engine.DynamicQuery
 
         public ColumnDescriptionFactory EntityColumn()
         {
-            return StaticColumns.Value.Where(c => c.IsEntity).SingleEx(()=>"There's no Entity column");
+            return StaticColumns.Where(c => c.IsEntity).SingleEx(() => "There's no Entity column");
         }
 
         public virtual Expression Expression
@@ -129,7 +116,16 @@ namespace Signum.Engine.DynamicQuery
             get { return null; }
         }
 
-      
+        public List<ColumnDescription> GetColumnDescriptions()
+        {
+            var entity = EntityColumn();
+            string allowed = entity.IsAllowed();
+            if (allowed != null)
+                throw new InvalidOperationException(
+                    "Not authorized to see Entity column because {0}".Formato(allowed));
+
+            return StaticColumns.Where(f => f.IsAllowed() == null).Select(f => f.BuildColumnDescription()).ToList();
+        }
     }
 
     public interface IDynamicInfo
@@ -185,14 +181,14 @@ namespace Signum.Engine.DynamicQuery
 
     public static class DynamicQuery
     {
-        public static DynamicQuery<T> ToDynamic<T>(this IQueryable<T> query)
+        public static AutoDynamicQueryCore<T> Auto<T>(IQueryable<T> query)
         {
-            return new AutoDynamicQuery<T>(query); 
+            return new AutoDynamicQueryCore<T>(query); 
         }
 
-        public static DynamicQuery<T> Manual<T>(Func<QueryRequest, List<ColumnDescription>, DEnumerableCount<T>> execute)
+        public static ManualDynamicQueryCore<T> Manual<T>(Func<QueryRequest, List<ColumnDescription>, DEnumerableCount<T>> execute)
         {
-            return new ManualDynamicQuery<T>(execute); 
+            return new ManualDynamicQueryCore<T>(execute); 
         }
 
 

@@ -454,13 +454,13 @@ namespace Signum.Web
             }
         }
 
-        Dictionary<string, PropertyMapping> Properties = new Dictionary<string, PropertyMapping>();
+        Dictionary<string, PropertyMapping> properties = new Dictionary<string, PropertyMapping>();
 
         public EntityMapping(bool fillProperties)
         {
             if (fillProperties)
             {
-                Properties = Validator.GetPropertyValidators(typeof(T))
+                properties = Validator.GetPropertyValidators(typeof(T))
                     .Where(kvp => !kvp.Value.PropertyInfo.IsReadOnly())
                     .ToDictionary(kvp => kvp.Key, kvp => PropertyMapping.Create(kvp.Value));
             }
@@ -487,7 +487,7 @@ namespace Signum.Web
 
         public virtual void SetValueProperties(MappingContext<T> ctx)
         {
-            foreach (PropertyMapping item in Properties.Values)
+            foreach (PropertyMapping item in properties.Values)
             {
                 item.SetProperty(ctx);
             }
@@ -546,7 +546,7 @@ namespace Signum.Web
         {
             PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
 
-            PropertyMapping<P> propertyMapping = (PropertyMapping<P>)Properties.GetOrCreate(pi.Name,
+            PropertyMapping<P> propertyMapping = (PropertyMapping<P>)properties.GetOrCreate(pi.Name,
                 () => new PropertyMapping<P>(Validator.TryGetPropertyValidator(typeof(T), pi.Name)));
 
             propertyMapping.Mapping = Mapping.New<P>();
@@ -557,7 +557,7 @@ namespace Signum.Web
         public EntityMapping<T> ReplaceProperty<P>(Expression<Func<T, P>> property, Func<Mapping<P>, Mapping<P>> replacer)
         {
             PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
-            var pm = (PropertyMapping<P>)Properties[pi.Name];
+            var pm = (PropertyMapping<P>)properties[pi.Name];
             pm.Mapping = replacer(pm.Mapping);
             return this;
         }
@@ -566,7 +566,7 @@ namespace Signum.Web
         public EntityMapping<T> GetProperty<P>(Expression<Func<T, P>> property, Action<Mapping<P>> continuation)
         {
             PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
-            continuation(((PropertyMapping<P>)Properties[pi.Name]).Mapping);
+            continuation(((PropertyMapping<P>)properties[pi.Name]).Mapping);
             return this;
         }
 
@@ -574,7 +574,7 @@ namespace Signum.Web
         {
             PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
 
-            PropertyMapping<P> propertyMapping = (PropertyMapping<P>)Properties.GetOrCreate(pi.Name,
+            PropertyMapping<P> propertyMapping = (PropertyMapping<P>)properties.GetOrCreate(pi.Name,
                 () => new PropertyMapping<P>(Validator.TryGetPropertyValidator(typeof(T), pi.Name)));
 
             propertyMapping.Mapping = mapping;
@@ -585,13 +585,13 @@ namespace Signum.Web
         public EntityMapping<T> RemoveProperty<P>(Expression<Func<T, P>> property)
         {
             PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
-            Properties.Remove(pi.Name);
+            properties.Remove(pi.Name);
             return this;
         }
 
         public EntityMapping<T> ClearProperties()
         {
-            Properties.Clear();
+            properties.Clear();
             return this;
         }
     }
