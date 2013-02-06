@@ -28,20 +28,20 @@ namespace Signum.Engine.DynamicQuery
 
         public Implementations EntityImplementations { get; private set; }
 
-        public DynamicQueryBucket(object queryName, Func<IDynamicQueryCore> coreFactory, Implementations entityImplementations)
+        public DynamicQueryBucket(object queryName, Func<IDynamicQueryCore> lazyQueryCore, Implementations entityImplementations)
         {
             if (queryName == null)
                 throw new ArgumentNullException("queryName");
 
-            if (coreFactory == null)
-                throw new ArgumentNullException("coreFactory");
+            if (lazyQueryCore == null)
+                throw new ArgumentNullException("lazyQueryCore");
 
             this.QueryName = queryName;
             this.EntityImplementations = entityImplementations;
 
             this.Core = new Lazy<IDynamicQueryCore>(() =>
             {
-                var core = coreFactory();
+                var core = lazyQueryCore();
 
                 core.StaticColumns.Where(sc => sc.IsEntity).SingleEx(() => "Entity column not found {0}".Formato(QueryUtils.GetQueryUniqueKey(QueryName)));
 

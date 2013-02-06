@@ -32,16 +32,20 @@ namespace Signum.Engine.DynamicQuery
         Dictionary<object, DynamicQueryBucket> queries = new Dictionary<object, DynamicQueryBucket>();
 
         Polymorphic<Dictionary<string, ExtensionInfo>> registeredExtensions =
-            new Polymorphic<Dictionary<string, ExtensionInfo>>(PolymorphicMerger.InheritDictionaryInterfaces, null); 
+            new Polymorphic<Dictionary<string, ExtensionInfo>>(PolymorphicMerger.InheritDictionaryInterfaces, null);
 
 
-        public void RegisterQuery<T>(object queryName, Func<IQueryable<T>> query, Implementations? entityImplementations = null)
+        public void RegisterQuery<T>(object queryName, Func<IQueryable<T>> lazyQuery, Implementations? entityImplementations = null)
         {
-            queries[queryName] = new DynamicQueryBucket(queryName, () => new AutoDynamicQueryCore<T>(query()), entityImplementations ?? DefaultImplementations(typeof(T), queryName));
+            queries[queryName] = new DynamicQueryBucket(queryName, () => new AutoDynamicQueryCore<T>(lazyQuery()), entityImplementations ?? DefaultImplementations(typeof(T), queryName));
         }
 
+        public void RegisterQuery<T>(object queryName, Func<DynamicQueryCore<T>> lazyQueryCore, Implementations? entityImplementations = null)
+        {
+            queries[queryName] = new DynamicQueryBucket(queryName, lazyQueryCore, entityImplementations ?? DefaultImplementations(typeof(T), queryName));
+        }
 
-        private static Implementations DefaultImplementations(Type type, object queryName)
+        static Implementations DefaultImplementations(Type type, object queryName)
         {
             var property = type.GetProperty("Entity", BindingFlags.Instance | BindingFlags.Public);
 
@@ -49,11 +53,6 @@ namespace Signum.Engine.DynamicQuery
                 throw new InvalidOperationException("Entity property not found on query {0}".Formato(QueryUtils.GetQueryUniqueKey(queryName)));
 
             return Implementations.By(property.PropertyType.CleanType());
-        }
-
-        public void RegisterQuery<T>(object queryName, Func<DynamicQueryCore<T>> query, Implementations? entityImplementations = null)
-        {
-            queries[queryName] = new DynamicQueryBucket(queryName, query, entityImplementations ?? DefaultImplementations(typeof(T), queryName));
         }
 
         public DynamicQueryBucket TryGetQuery(object queryName)
