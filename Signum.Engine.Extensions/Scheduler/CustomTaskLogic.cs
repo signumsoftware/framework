@@ -53,17 +53,17 @@ namespace Signum.Engine.Scheduler
                 SchedulerLogic.ExecuteTask.Register((CustomTaskDN ct) =>
                     Execute(MultiEnumLogic<CustomTaskDN>.ToEnum(ct.Key)));
 
-                dqm[typeof(CustomTaskDN)] =
-                      (from ct in Database.Query<CustomTaskDN>()
+                dqm.RegisterQuery(typeof(CustomTaskDN), ()=>
+                      from ct in Database.Query<CustomTaskDN>()
                        select new
                        {
                            Entity = ct,
                            ct.Id,
                            ct.Name,
-                       }).ToDynamic();
+                       });
 
-                dqm[typeof(CustomTaskExecutionDN)] =
-                     (from cte in Database.Query<CustomTaskExecutionDN>()
+                dqm.RegisterQuery(typeof(CustomTaskExecutionDN), ()=>
+                     from cte in Database.Query<CustomTaskExecutionDN>()
                       select new
                       {
                           Entity = cte,
@@ -72,7 +72,7 @@ namespace Signum.Engine.Scheduler
                           cte.StartTime,
                           cte.EndTime,
                           cte.Exception,
-                      }).ToDynamic();
+                      });
 
                 dqm.RegisterExpression((CustomTaskDN ct) => ct.Executions());
                 dqm.RegisterExpression((CustomTaskDN ct) => ct.LastExecution());

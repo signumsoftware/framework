@@ -61,7 +61,7 @@ namespace Signum.Engine.Mailing
                             Name = args.TryGetArgC<string>()
                         }.Save();
 
-                        foreach(var m in messages.Select(m => m.RetrieveAndForget()))
+                        foreach (var m in messages.Select(m => m.RetrieveAndForget()))
                         {
                             new EmailMessageDN()
                             {
@@ -78,13 +78,14 @@ namespace Signum.Engine.Mailing
                     }
                 }.Register();
 
-                dqm[typeof(EmailPackageDN)] = (from e in Database.Query<EmailPackageDN>()
-                                               select new
-                                               {
-                                                   Entity = e,
-                                                   e.Id,
-                                                   e.Name,
-                                               }).ToDynamic();
+                dqm.RegisterQuery(typeof(EmailPackageDN), () =>
+                    from e in Database.Query<EmailPackageDN>()
+                    select new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.Name,
+                    });
             }
         }
     }

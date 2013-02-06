@@ -63,15 +63,15 @@ namespace Signum.Engine.Processes
                     sb.Settings.AssertImplementedBy((ProcessExecutionDN pe) => pe.ProcessData, typeof(PackageDN));
 
                     sb.Include<PackageDN>();
-                    dqm[typeof(PackageDN)] =
-                        (from p in Database.Query<PackageDN>()
+                    dqm.RegisterQuery(typeof(PackageDN), ()=>
+                        from p in Database.Query<PackageDN>()
                          select new
                          {
                              Entity = p,
                              p.Id,
                              p.Name,
                              Lines = p.Lines().Count()
-                         }).ToDynamic();
+                         });
 
                 }
 
@@ -82,8 +82,8 @@ namespace Signum.Engine.Processes
 
 
                     sb.Include<PackageOperationDN>();
-                    dqm[typeof(PackageOperationDN)] =
-                        (from p in Database.Query<PackageOperationDN>()
+                    dqm.RegisterQuery(typeof(PackageOperationDN), ()=>
+                        from p in Database.Query<PackageOperationDN>()
                          select new
                          {
                              Entity = p,
@@ -91,13 +91,13 @@ namespace Signum.Engine.Processes
                              p.Name,
                              p.Operation,
                              Lines = p.Lines().Count()
-                         }).ToDynamic();
+                         });
 
                     ProcessLogic.Register(PackageOperationProcess.PackageOperation, new PackageOperationAlgorithm());
                 }
 
-                dqm[typeof(PackageLineDN)] =
-                    (from pl in Database.Query<PackageLineDN>()
+                dqm.RegisterQuery(typeof(PackageLineDN), ()=>
+                    from pl in Database.Query<PackageLineDN>()
                      select new
                      {
                          Entity = pl,
@@ -106,7 +106,7 @@ namespace Signum.Engine.Processes
                          Target = pl.Entity,
                          pl.FinishTime,
                          pl.Exception,
-                     }).ToDynamic();
+                     });
 
                 dqm.RegisterExpression((PackageDN p) => p.Lines());
                 dqm.RegisterExpression((PackageDN p) => p.RemainingLines());

@@ -54,32 +54,34 @@ namespace Signum.Engine.SMS
             {
                 sb.Include<SMSMessageDN>();
 
-                dqm[typeof(SMSMessageDN)] = (from m in Database.Query<SMSMessageDN>()
-                                             select new
-                                             {
-                                                 Entity = m,
-                                                 m.Id,
-                                                 Source = m.From,
-                                                 m.DestinationNumber,
-                                                 m.State,
-                                                 m.SendDate,
-                                                 m.Template
-                                             }).ToDynamic();
+                dqm.RegisterQuery(typeof(SMSMessageDN), () =>
+                    from m in Database.Query<SMSMessageDN>()
+                    select new
+                    {
+                        Entity = m,
+                        m.Id,
+                        Source = m.From,
+                        m.DestinationNumber,
+                        m.State,
+                        m.SendDate,
+                        m.Template
+                    });
 
-                dqm[typeof(SMSTemplateDN)] = (from t in Database.Query<SMSTemplateDN>()
-                                              select new
-                                              {
-                                                  Entity = t,
-                                                  t.Id,
-                                                  t.Name,
-                                                  IsActive = t.IsActiveNow(),
-                                                  Message = t.Message.Etc(50),
-                                                  Source = t.From,
-                                                  t.AssociatedType,
-                                                  t.State,
-                                                  t.StartDate,
-                                                  t.EndDate,
-                                              }).ToDynamic();
+                dqm.RegisterQuery(typeof(SMSTemplateDN), () =>
+                    from t in Database.Query<SMSTemplateDN>()
+                    select new
+                    {
+                        Entity = t,
+                        t.Id,
+                        t.Name,
+                        IsActive = t.IsActiveNow(),
+                        Message = t.Message.Etc(50),
+                        Source = t.From,
+                        t.AssociatedType,
+                        t.State,
+                        t.StartDate,
+                        t.EndDate,
+                    });
 
                 if (registerGraph)
                 {
@@ -354,25 +356,27 @@ namespace Signum.Engine.SMS
                     Construct = (messages, _) => UpdateMessages(messages.RetrieveFromListOfLite())
                 }.Register();
 
-                dqm[typeof(SMSSendPackageDN)] = (from e in Database.Query<SMSSendPackageDN>()
-                                                 select new
-                                                 {
-                                                     Entity = e,
-                                                     e.Id,
-                                                     e.Name,
-                                                     NumLines = e.SMSMessages().Count(),
-                                                     NumErrors = e.SMSMessages().Count(s=>s.Exception != null),
-                                                 }).ToDynamic();
+                dqm.RegisterQuery(typeof(SMSSendPackageDN), () =>
+                    from e in Database.Query<SMSSendPackageDN>()
+                    select new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.Name,
+                        NumLines = e.SMSMessages().Count(),
+                        NumErrors = e.SMSMessages().Count(s => s.Exception != null),
+                    });
 
-                dqm[typeof(SMSUpdatePackageDN)] = (from e in Database.Query<SMSUpdatePackageDN>()
-                                                   select new
-                                                   {
-                                                       Entity = e,
-                                                       e.Id,
-                                                       e.Name,
-                                                       NumLines = e.SMSMessages().Count(),
-                                                       NumErrors = e.SMSMessages().Count(s => s.Exception != null),
-                                                   }).ToDynamic();
+                dqm.RegisterQuery(typeof(SMSUpdatePackageDN), () =>
+                    from e in Database.Query<SMSUpdatePackageDN>()
+                    select new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.Name,
+                        NumLines = e.SMSMessages().Count(),
+                        NumErrors = e.SMSMessages().Count(s => s.Exception != null),
+                    });
             }
         }
 
@@ -418,7 +422,7 @@ namespace Signum.Engine.SMS
         {
             if (SMSSendAndGetTicketAction == null)
                 throw new InvalidOperationException("SMSSendAction was not established");
-            
+
             SendSMS(message, SMSSendAndGetTicketAction);
         }
 
@@ -512,7 +516,7 @@ namespace Signum.Engine.SMS
             new BasicExecute<SMSMessageDN>(SMSMessageOperation.UpdateStatus)
             {
                 CanExecute = m => m.State != SMSMessageState.Created ? null : SmsMessage.StatusCanNotBeUpdatedForNonSentMessages.NiceToString(),
-                Execute = (sms, args) => 
+                Execute = (sms, args) =>
                 {
                     var func = args.TryGetArgC<Func<SMSMessageDN, SMSMessageState>>();
                     if (func != null)

@@ -26,17 +26,18 @@ namespace Signum.Engine.Notes
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<NoteDN>();
-                dqm[typeof(NoteDN)] = (from n in Database.Query<NoteDN>()
-                                       select new
-                                       {
-                                           Entity = n,
-                                           n.Id,
-                                           n.CreatedBy,
-                                           n.CreationDate,
-                                           n.Title,
-                                           Text = n.Text.Etc(100),
-                                           n.Target
-                                       }).ToDynamic();
+                dqm.RegisterQuery(typeof(NoteDN), () =>
+                    from n in Database.Query<NoteDN>()
+                    select new
+                    {
+                        Entity = n,
+                        n.Id,
+                        n.CreatedBy,
+                        n.CreationDate,
+                        n.Title,
+                        Text = n.Text.Etc(100),
+                        n.Target
+                    });
 
                 new BasicExecute<NoteDN>(NoteOperation.Save)
                 {

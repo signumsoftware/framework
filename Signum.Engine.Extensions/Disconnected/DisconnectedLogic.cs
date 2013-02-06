@@ -57,37 +57,40 @@ namespace Signum.Engine.Disconnected
                 sb.Include<DisconnectedExportDN>();
                 sb.Include<DisconnectedImportDN>();
 
-                dqm[typeof(DisconnectedMachineDN)] = (from dm in Database.Query<DisconnectedMachineDN>()
-                                                      select new
-                                                      {
-                                                          Entity = dm,
-                                                          dm.MachineName,
-                                                          dm.State,
-                                                          dm.SeedMin,
-                                                          dm.SeedMax,
-                                                      }).ToDynamic();
+                dqm.RegisterQuery(typeof(DisconnectedMachineDN), () =>
+                    from dm in Database.Query<DisconnectedMachineDN>()
+                    select new
+                    {
+                        Entity = dm,
+                        dm.MachineName,
+                        dm.State,
+                        dm.SeedMin,
+                        dm.SeedMax,
+                    });
 
-                dqm[typeof(DisconnectedExportDN)] = (from dm in Database.Query<DisconnectedExportDN>()
-                                                      select new
-                                                      {
-                                                          Entity = dm,
-                                                          dm.CreationDate,
-                                                          dm.Machine,
-                                                          dm.State,
-                                                          dm.Total,
-                                                          dm.Exception,
-                                                      }).ToDynamic();
+                dqm.RegisterQuery(typeof(DisconnectedExportDN), () =>
+                    from dm in Database.Query<DisconnectedExportDN>()
+                    select new
+                    {
+                        Entity = dm,
+                        dm.CreationDate,
+                        dm.Machine,
+                        dm.State,
+                        dm.Total,
+                        dm.Exception,
+                    });
 
-                dqm[typeof(DisconnectedImportDN)] = (from dm in Database.Query<DisconnectedImportDN>()
-                                                     select new
-                                                     {
-                                                         Entity = dm,
-                                                         dm.CreationDate,
-                                                         dm.Machine,
-                                                         dm.State,
-                                                         dm.Total,
-                                                         dm.Exception,
-                                                     }).ToDynamic();
+                dqm.RegisterQuery(typeof(DisconnectedImportDN), () =>
+                    from dm in Database.Query<DisconnectedImportDN>()
+                    select new
+                    {
+                        Entity = dm,
+                        dm.CreationDate,
+                        dm.Machine,
+                        dm.State,
+                        dm.Total,
+                        dm.Exception,
+                    });
 
                 dqm.RegisterExpression((DisconnectedMachineDN dm) => dm.Imports());
                 dqm.RegisterExpression((DisconnectedMachineDN dm) => dm.Exports());
@@ -112,7 +115,7 @@ namespace Signum.Engine.Disconnected
 
                 new Execute(DisconnectedMachineOperation.Save)
                 {
-                    FromStates = new []{ DisconnectedMachineState.Connected },
+                    FromStates = new[] { DisconnectedMachineState.Connected },
                     ToState = DisconnectedMachineState.Connected,
                     AllowsNew = true,
                     Lite = false,
@@ -121,7 +124,7 @@ namespace Signum.Engine.Disconnected
 
                 new Execute(DisconnectedMachineOperation.UnsafeUnlock)
                 {
-                    FromStates = new[] { DisconnectedMachineState.Disconnected, DisconnectedMachineState.Faulted, DisconnectedMachineState.Fixed  },
+                    FromStates = new[] { DisconnectedMachineState.Disconnected, DisconnectedMachineState.Faulted, DisconnectedMachineState.Fixed },
                     ToState = DisconnectedMachineState.Connected,
                     Execute = (dm, _) =>
                     {
@@ -149,8 +152,8 @@ namespace Signum.Engine.Disconnected
             var ci = Administrator.UnsafeDeletePreCommand(Database.MListQuery((DisconnectedImportDN di) => di.Copies).Where(mle => mle.Element.Type.RefersTo(type)));
 
             return SqlPreCommand.Combine(Spacing.Simple, ce, ci);
-        }    
-  
+        }
+
 
 
         static void EntityEventsGlobal_Saving(IdentifiableEntity ident)
@@ -234,7 +237,7 @@ namespace Signum.Engine.Disconnected
 
         public static Lite<DisconnectedMachineDN> GetDisconnectedMachine(string machineName)
         {
-            return Database.Query<DisconnectedMachineDN>().Where(a => a.MachineName == machineName).Select(a => a.ToLite()).SingleOrDefault(); 
+            return Database.Query<DisconnectedMachineDN>().Where(a => a.MachineName == machineName).Select(a => a.ToLite()).SingleOrDefault();
         }
 
 
@@ -248,7 +251,7 @@ namespace Signum.Engine.Disconnected
                 this.Type = type;
             }
 
-            public Type Type{get;  private set;}
+            public Type Type { get; private set; }
 
             public void Saving(IdentifiableEntity ident)
             {
@@ -281,7 +284,7 @@ namespace Signum.Engine.Disconnected
 
         internal static IDisconnectedStrategy GetStrategy(Type type)
         {
-            if(type.IsEnumEntity())
+            if (type.IsEnumEntity())
                 return new EnumEntityDisconnectedStrategy(type);
 
             return DisconnectedLogic.strategies[type];

@@ -17,7 +17,7 @@ namespace Signum.Engine.Authorization
     public static class UserTicketLogic
     {
         public static TimeSpan ExpirationInterval = TimeSpan.FromDays(60);
-        public static int MaxTicketsPerUser = 4; 
+        public static int MaxTicketsPerUser = 4;
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -26,16 +26,17 @@ namespace Signum.Engine.Authorization
                 AuthLogic.AssertStarted(sb);
                 sb.Include<UserTicketDN>();
 
-                dqm[typeof(UserTicketDN)] = (from ut in Database.Query<UserTicketDN>()
-                                             select new
-                                             {
-                                                 Entity = ut,
-                                                 ut.Id,
-                                                 ut.User,
-                                                 ut.Ticket,
-                                                 ut.ConnectionDate,
-                                                 ut.Device,
-                                             }).ToDynamic();
+                dqm.RegisterQuery(typeof(UserTicketDN), () =>
+                    from ut in Database.Query<UserTicketDN>()
+                    select new
+                    {
+                        Entity = ut,
+                        ut.Id,
+                        ut.User,
+                        ut.Ticket,
+                        ut.ConnectionDate,
+                        ut.Device,
+                    });
 
                 sb.Schema.EntityEvents<UserDN>().Saving += UserTicketLogic_Saving;
             }
@@ -49,8 +50,8 @@ namespace Signum.Engine.Authorization
             };
         }
 
-        static Expression<Func<UserDN, IQueryable<UserTicketDN>>> TicketsExpression = 
-            u => Database.Query<UserTicketDN>().Where(ut=>ut.User == u.ToLite()) ; 
+        static Expression<Func<UserDN, IQueryable<UserTicketDN>>> TicketsExpression =
+            u => Database.Query<UserTicketDN>().Where(ut => ut.User == u.ToLite());
         public static IQueryable<UserTicketDN> Tickets(this UserDN u)
         {
             return TicketsExpression.Evaluate(u);
@@ -80,7 +81,7 @@ namespace Signum.Engine.Authorization
         public static UserDN UpdateTicket(string device, ref string ticket)
         {
             using (Transaction tr = new Transaction())
-            { 
+            {
                 Tuple<int, string> pair = UserTicketDN.ParseTicket(ticket);
 
                 UserDN user = Database.Retrieve<UserDN>(pair.Item1);
@@ -101,7 +102,7 @@ namespace Signum.Engine.Authorization
                     Ticket = Guid.NewGuid().ToString(),
                 }.Save();
 
-                ticket = result.StringTicket(); 
+                ticket = result.StringTicket();
 
                 return tr.Commit(user);
             }
@@ -109,7 +110,7 @@ namespace Signum.Engine.Authorization
 
         public static int RemoveTickets(UserDN user)
         {
-            return user.Tickets().UnsafeDelete(); 
+            return user.Tickets().UnsafeDelete();
         }
 
         public static int CleanExpiredTickets(UserDN user)
@@ -120,13 +121,13 @@ namespace Signum.Engine.Authorization
 
             int tooMuch = user.Tickets().OrderByDescending(t => t.ConnectionDate).Skip(MaxTicketsPerUser).UnsafeDelete();
 
-            return expired + tooMuch; 
+            return expired + tooMuch;
         }
 
         public static int CleanAllExpiredTickets()
         {
             DateTime min = TimeZoneManager.Now.Subtract(ExpirationInterval);
-            return Database.Query<UserTicketDN>().Where(a => a.ConnectionDate < min).UnsafeDelete();  
+            return Database.Query<UserTicketDN>().Where(a => a.ConnectionDate < min).UnsafeDelete();
         }
     }
 }

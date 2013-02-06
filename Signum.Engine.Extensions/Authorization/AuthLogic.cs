@@ -66,40 +66,43 @@ namespace Signum.Engine.Authorization
                 sb.Include<UserDN>();
                 sb.Include<RoleDN>();
 
-                roles = sb.GlobalLazy(CacheRoles,  new InvalidateWith(typeof(RoleDN)));
+                roles = sb.GlobalLazy(CacheRoles, new InvalidateWith(typeof(RoleDN)));
 
                 sb.Schema.EntityEvents<RoleDN>().Saving += Schema_Saving;
 
-                dqm[typeof(RoleDN)] = (from r in Database.Query<RoleDN>()
-                                       select new
-                                       {
-                                           Entity = r,
-                                           r.Id,
-                                           r.Name,
-                                       }).ToDynamic();
+                dqm.RegisterQuery(typeof(RoleDN), () =>
+                    from r in Database.Query<RoleDN>()
+                    select new
+                    {
+                        Entity = r,
+                        r.Id,
+                        r.Name,
+                    });
 
-                dqm[RoleQueries.ReferedBy] = (from r in Database.Query<RoleDN>()
-                                              from rc in r.Roles
-                                              select new
-                                              {
-                                                  Entity = r,
-                                                  r.Id,
-                                                  r.Name,
-                                                  Refered = rc,
-                                              }).ToDynamic();
+                dqm.RegisterQuery(RoleQueries.ReferedBy, () =>
+                    from r in Database.Query<RoleDN>()
+                    from rc in r.Roles
+                    select new
+                    {
+                        Entity = r,
+                        r.Id,
+                        r.Name,
+                        Refered = rc,
+                    });
 
-                dqm[typeof(UserDN)] = (from e in Database.Query<UserDN>()
-                                       select new
-                                       {
-                                           Entity = e,
-                                           e.Id,
-                                           e.UserName,
-                                           e.Email,
-                                           e.Role,
-                                           e.PasswordNeverExpires,
-                                           e.PasswordSetDate,
-                                           e.Related,
-                                       }).ToDynamic();
+                dqm.RegisterQuery(typeof(UserDN), () =>
+                    from e in Database.Query<UserDN>()
+                    select new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.UserName,
+                        e.Email,
+                        e.Role,
+                        e.PasswordNeverExpires,
+                        e.PasswordSetDate,
+                        e.Related,
+                    });
 
                 UserGraph.Register();
 
@@ -425,40 +428,40 @@ namespace Signum.Engine.Authorization
             switch (answer.ToLower())
             {
                 case "e":
-                {
-                    var doc = ExportRules();
-                    doc.Save(fileName);
-                    Console.WriteLine("Sucesfully exported to {0}".Formato(fileName));
+                    {
+                        var doc = ExportRules();
+                        doc.Save(fileName);
+                        Console.WriteLine("Sucesfully exported to {0}".Formato(fileName));
 
-                    if (SafeConsole.Ask("Publish to Load?"))
-                        File.Copy(fileName, "../../" + Path.GetFileName(fileName), overwrite: true);
+                        if (SafeConsole.Ask("Publish to Load?"))
+                            File.Copy(fileName, "../../" + Path.GetFileName(fileName), overwrite: true);
 
-                    break;
-                }
+                        break;
+                    }
                 case "i":
-                {
-                    Console.Write("Reading {0}...".Formato(fileName));
-                    var doc = XDocument.Load(fileName);
-                    Console.WriteLine("Ok");
-                    Console.Write("Importing...");
-                    SqlPreCommand command = ImportRulesScript(doc);
-                    Console.WriteLine("Ok");
+                    {
+                        Console.Write("Reading {0}...".Formato(fileName));
+                        var doc = XDocument.Load(fileName);
+                        Console.WriteLine("Ok");
+                        Console.Write("Importing...");
+                        SqlPreCommand command = ImportRulesScript(doc);
+                        Console.WriteLine("Ok");
 
-                    if (command == null)
-                        Console.WriteLine("No changes necessary!");
-                    else
-                        command.OpenSqlFileRetry();
+                        if (command == null)
+                            Console.WriteLine("No changes necessary!");
+                        else
+                            command.OpenSqlFileRetry();
 
-                    break;
-                }
+                        break;
+                    }
                 case "s":
-                {
-                    SuggestChanges();
-                    if (SafeConsole.Ask("Export now?"))
-                        goto case "e";
+                    {
+                        SuggestChanges();
+                        if (SafeConsole.Ask("Export now?"))
+                            goto case "e";
 
-                    break;
-                }
+                        break;
+                    }
                 default:
                     break;
             }

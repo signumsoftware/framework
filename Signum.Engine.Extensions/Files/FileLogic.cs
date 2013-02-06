@@ -32,7 +32,7 @@ namespace Signum.Engine.Files
         {
             return WebDownloadFileExpression.Evaluate(f);
         }
-    
+
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -40,13 +40,14 @@ namespace Signum.Engine.Files
             {
                 sb.Include<FileDN>();
 
-                dqm[typeof(FileDN)] = (from a in Database.Query<FileDN>()
-                                               select new
-                                               {
-                                                   Entity = a,
-                                                   a.Id,
-                                                   a.FileName,
-                                               }).ToDynamic();
+                dqm.RegisterQuery(typeof(FileDN), () =>
+                    from a in Database.Query<FileDN>()
+                    select new
+                    {
+                        Entity = a,
+                        a.Id,
+                        a.FileName,
+                    });
 
 
                 dqm.RegisterExpression((FileDN f) => f.WebImage(), () => typeof(WebImage).NiceName(), "Image");

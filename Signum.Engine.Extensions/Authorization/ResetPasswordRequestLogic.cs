@@ -26,16 +26,17 @@ namespace Signum.Engine.Authorization
             {
                 sb.Include<ResetPasswordRequestDN>();
 
-                dqm[typeof(ResetPasswordRequestDN)] = (from e in Database.Query<ResetPasswordRequestDN>()
-                                                       select new
-                                                       {
-                                                           Entity = e,
-                                                           e.Id,
-                                                           e.RequestDate,
-                                                           e.Code,
-                                                           e.User,
-                                                           e.User.Email
-                                                       }).ToDynamic();
+                dqm.RegisterQuery(typeof(ResetPasswordRequestDN), () =>
+                    from e in Database.Query<ResetPasswordRequestDN>()
+                    select new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.RequestDate,
+                        e.Code,
+                        e.User,
+                        e.User.Email
+                    });
 
                 EmailLogic.AssertStarted(sb);
 
@@ -52,7 +53,7 @@ namespace Signum.Engine.Authorization
         }
 
         public static ResetPasswordRequestDN ResetPasswordRequest(UserDN user)
-        { 
+        {
             //Remove old previous requests
             Database.Query<ResetPasswordRequestDN>()
                 .Where(r => r.User.Is(user) && r.RequestDate < TimeZoneManager.Now.AddMonths(1))

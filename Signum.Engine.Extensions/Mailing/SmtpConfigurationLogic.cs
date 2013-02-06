@@ -30,42 +30,45 @@ namespace Signum.Engine.Mailing
                 sb.Include<SMTPConfigurationDN>();
                 sb.Schema.EntityEvents<SMTPConfigurationDN>().Saving += new SavingEventHandler<SMTPConfigurationDN>(EmailClientSettingsLogic_Saving);
 
-                dqm[typeof(SMTPConfigurationDN)] = (from s in Database.Query<SMTPConfigurationDN>()
-                                                    select new
-                                                    {
-                                                        Entity = s,
-                                                        s.Id,
-                                                        s.Name,
-                                                        s.Host,
-                                                        s.Port,
-                                                        s.UseDefaultCredentials,
-                                                        s.Username,
-                                                        s.Password,
-                                                        s.EnableSSL
-                                                    }).ToDynamic();
+                dqm.RegisterQuery(typeof(SMTPConfigurationDN), () =>
+                    from s in Database.Query<SMTPConfigurationDN>()
+                    select new
+                    {
+                        Entity = s,
+                        s.Id,
+                        s.Name,
+                        s.Host,
+                        s.Port,
+                        s.UseDefaultCredentials,
+                        s.Username,
+                        s.Password,
+                        s.EnableSSL
+                    });
 
-                dqm[SMTPConfigurationQueries.NoCredentialsData] = (from s in Database.Query<SMTPConfigurationDN>()
-                                                                   select new
-                                                                   {
-                                                                       Entity = s,
-                                                                       s.Id,
-                                                                       s.Name,
-                                                                       s.Host,
-                                                                       s.Port,
-                                                                       s.UseDefaultCredentials,
-                                                                       s.EnableSSL
-                                                                   }).ToDynamic();
+                dqm.RegisterQuery(SMTPConfigurationQueries.NoCredentialsData, () =>
+                    from s in Database.Query<SMTPConfigurationDN>()
+                    select new
+                    {
+                        Entity = s,
+                        s.Id,
+                        s.Name,
+                        s.Host,
+                        s.Port,
+                        s.UseDefaultCredentials,
+                        s.EnableSSL
+                    });
 
-                dqm[typeof(ClientCertificationFileDN)] = (from c in Database.Query<ClientCertificationFileDN>()
-                                                          select new
-                                                          {
-                                                              Entity = c,
-                                                              c.Id,
-                                                              c.Name,
-                                                              CertFileType = c.CertFileType.NiceToString(),
-                                                              c.FullFilePath
-                                                          }).ToDynamic();
-                
+                dqm.RegisterQuery(typeof(ClientCertificationFileDN), () =>
+                    from c in Database.Query<ClientCertificationFileDN>()
+                    select new
+                    {
+                        Entity = c,
+                        c.Id,
+                        c.Name,
+                        CertFileType = c.CertFileType.NiceToString(),
+                        c.FullFilePath
+                    });
+
                 sb.Schema.Initializing[InitLevel.Level2NormalEntities] += SetCache;
 
                 new BasicExecute<SMTPConfigurationDN>(SMTPConfigurationOperation.Save)

@@ -37,7 +37,7 @@ namespace Signum.Engine.Mailing
         }
 
         static Expression<Func<NewsletterDN, IQueryable<NewsletterDeliveryDN>>> RemainingDeliveriesExpression =
-            n =>n.Deliveries().Where(nd=>nd.Exception != null && !nd.Sent);
+            n => n.Deliveries().Where(nd => nd.Exception != null && !nd.Sent);
         public static IQueryable<NewsletterDeliveryDN> RemainingDeliveries(this NewsletterDN n)
         {
             return RemainingDeliveriesExpression.Evaluate(n);
@@ -60,28 +60,30 @@ namespace Signum.Engine.Mailing
                 ProcessLogic.Register(NewsletterOperation.Send, new NewsletterProcessAlgortihm());
 
 
-                dqm[typeof(NewsletterDN)] = (from n in Database.Query<NewsletterDN>()
-                                             select new
-                                             {
-                                                 Entity = n,
-                                                 n.Id,
-                                                 Nombre = n.Name,
-                                                 Texto = n.HtmlBody.Etc(100),
-                                                 Estado = n.State
-                                             }).ToDynamic();
+                dqm.RegisterQuery(typeof(NewsletterDN), () =>
+                    from n in Database.Query<NewsletterDN>()
+                    select new
+                    {
+                        Entity = n,
+                        n.Id,
+                        Nombre = n.Name,
+                        Texto = n.HtmlBody.Etc(100),
+                        Estado = n.State
+                    });
 
 
-                dqm[typeof(NewsletterDeliveryDN)] = (from e in Database.Query<NewsletterDeliveryDN>()
-                                                     select new
-                                                     {
-                                                         Entity = e,
-                                                         e.Id,
-                                                         e.Newsletter,
-                                                         e.Recipient,
-                                                         e.Sent,
-                                                         e.SendDate,
-                                                         e.Exception
-                                                     }).ToDynamic();
+                dqm.RegisterQuery(typeof(NewsletterDeliveryDN), () =>
+                    from e in Database.Query<NewsletterDeliveryDN>()
+                    select new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.Newsletter,
+                        e.Recipient,
+                        e.Sent,
+                        e.SendDate,
+                        e.Exception
+                    });
 
                 NewsletterGraph.Register();
                 sb.AddUniqueIndex<NewsletterDeliveryDN>(nd => new { nd.Newsletter, nd.Recipient });
@@ -272,7 +274,7 @@ namespace Signum.Engine.Mailing
                 ElementsPerPage = QueryRequest.AllElements,
             });
 
-            var lines = resultTable.Rows.Select(r =>new SendLine
+            var lines = resultTable.Rows.Select(r => new SendLine
                 {
                     Send = (Lite<NewsletterDeliveryDN>)r[0],
                     Email = (string)r[1],
@@ -319,7 +321,7 @@ namespace Signum.Engine.Mailing
                         }
                     });
                 }
-                
+
                 var failed = group.Extract(sl => sl.Error != null).GroupBy(sl => sl.Error, sl => sl.Send);
                 foreach (var f in failed)
                 {

@@ -22,22 +22,23 @@ namespace Signum.Engine.Chart
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 if (sb.Schema.Tables.ContainsKey(typeof(UserChartDN)))
-                    throw new InvalidOperationException("UserChart has already been registered"); 
+                    throw new InvalidOperationException("UserChart has already been registered");
 
                 sb.Settings.OverrideAttributes((UserChartDN uc) => uc.Columns.First().TokenString, new Attribute[0]);
 
                 sb.Include<UserChartDN>();
 
-                dqm[typeof(UserChartDN)] = (from uq in Database.Query<UserChartDN>()
-                                            select new
-                                            {
-                                                Entity = uq,
-                                                uq.Query,
-                                                uq.Id,
-                                                uq.DisplayName,
-                                                uq.ChartScript,
-                                                uq.GroupResults,
-                                            }).ToDynamic();
+                dqm.RegisterQuery(typeof(UserChartDN), () =>
+                    from uq in Database.Query<UserChartDN>()
+                    select new
+                    {
+                        Entity = uq,
+                        uq.Query,
+                        uq.Id,
+                        uq.DisplayName,
+                        uq.ChartScript,
+                        uq.GroupResults,
+                    });
 
                 sb.Schema.EntityEvents<UserChartDN>().Retrieved += ChartLogic_Retrieved;
 

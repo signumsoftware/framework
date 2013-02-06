@@ -491,14 +491,14 @@ namespace Signum.Engine.Authorization
             }
         }
      
-        public static DynamicQuery<T> ToDynamicDisableAutoFilter<T>(this IQueryable<T> query)
+        public static DynamicQueryCore<T> ToDynamicDisableAutoFilter<T>(this IQueryable<T> query)
         {
-            return new AutoDynamicQueryNoFilter<T>(query);
+            return new AutoDynamicQueryNoFilterCore<T>(query);
         }
 
-        internal class AutoDynamicQueryNoFilter<T> : AutoDynamicQuery<T>
+        internal class AutoDynamicQueryNoFilterCore<T> : AutoDynamicQueryCore<T>
         {
-            public AutoDynamicQueryNoFilter(IQueryable<T> query)
+            public AutoDynamicQueryNoFilterCore(IQueryable<T> query)
                 : base(query)
             { }
 
