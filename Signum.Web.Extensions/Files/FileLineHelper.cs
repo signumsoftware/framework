@@ -14,18 +14,61 @@ using Signum.Web.Extensions.Properties;
 using System.Linq.Expressions;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
+using Signum.Engine;
 #endregion
 
 namespace Signum.Web.Files
 {
     public static class FileLineHelper
     {
+        
+
+        public static MvcHtmlString FileLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
+            where S : IFile
+        {
+            return FileLineInternal<T, S>(helper, tc, property, null);
+        }
+
+        public static MvcHtmlString FileLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<FileLine> settingsModifier)
+            where S : IFile
+        {
+            return FileLineInternal<T, S>(helper, tc, property, settingsModifier);
+        }
+
+        public static MvcHtmlString FileLineLite<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, Lite<S>>> property)
+           where S : class, IFile, IIdentifiable 
+        {
+            return FileLineInternal<T, Lite<S>>(helper, tc, property, null);
+        }
+
+        public static MvcHtmlString FileLineLite<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, Lite<S>>> property, Action<FileLine> settingsModifier)
+           where S : class, IFile, IIdentifiable 
+        {
+            return FileLineInternal<T, Lite<S>>(helper, tc, property, settingsModifier);
+        }
+
+        static MvcHtmlString FileLineInternal<T, S>(HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<FileLine> settingsModifier)
+        {
+            TypeContext<S> context = Common.WalkExpression(tc, property);
+
+            FileLine fl = new FileLine(context.Type, context.UntypedValue, context, "", context.PropertyRoute);
+
+            EntityBaseHelper.ConfigureEntityBase(fl, fl.Type.CleanType());
+
+            Common.FireCommonTasks(fl);
+
+            if (settingsModifier != null)
+                settingsModifier(fl);
+
+            return helper.InternalFileLine(fl);
+        }
+
         internal static MvcHtmlString InternalFileLine(this HtmlHelper helper, FileLine fileLine)
         {
             if (!fileLine.Visible)
                 return MvcHtmlString.Empty;
 
-            IFile value = (IFile)fileLine.UntypedValue;
+            IFile value = fileLine.GetFileValue(); 
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
@@ -85,7 +128,7 @@ namespace Signum.Web.Files
                 {
                     sb.AddLine(helper.HiddenEntityInfo(fileLine));
 
-                    if (fileLine.PropertyRoute.Type == typeof(FilePathDN))
+                    if (fileLine.PropertyRoute.Type.CleanType() == typeof(FilePathDN))
                     {
                         FilePathDN filePath = value as FilePathDN;
                         if (filePath != null)
@@ -139,29 +182,6 @@ namespace Signum.Web.Files
                 .ToHtml());
 
             return sb.ToHtml();
-        }
-
-        public static MvcHtmlString FileLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
-            where S : IFile
-        {
-            return helper.FileLine<T, S>(tc, property, null);
-        }
-
-        public static MvcHtmlString FileLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property, Action<FileLine> settingsModifier)
-            where S : IFile
-        {
-            TypeContext<S> context = Common.WalkExpression(tc, property);
-
-            FileLine fl = new FileLine(context.Type, context.UntypedValue, context, "", context.PropertyRoute);
-
-            EntityBaseHelper.ConfigureEntityBase(fl, fl.Type.CleanType());
-
-            Common.FireCommonTasks(fl);
-
-            if (settingsModifier != null)
-                settingsModifier(fl);
-
-            return helper.InternalFileLine(fl);
         }
 
         private static Enum GetFileTypeFromValue(FilePathDN fp)
