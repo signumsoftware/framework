@@ -22,9 +22,9 @@ namespace Signum.Engine.Maps
 {
     public struct Forbidden
     {
-        public Forbidden(IdentifiableEntity entity)
+        public Forbidden(HashSet<IdentifiableEntity> set)
         {
-            this.set = new HashSet<IdentifiableEntity> { entity };
+            this.set = set;
         }
 
         public Forbidden(DirectedGraph<IdentifiableEntity> graph, IdentifiableEntity entity)
@@ -32,7 +32,19 @@ namespace Signum.Engine.Maps
             this.set = graph == null ? null : graph.TryRelatedTo(entity);
         }
 
-        HashSet<IdentifiableEntity> set;
+        public Forbidden(DirectedGraph<IdentifiableEntity> graph, List<IdentifiableEntity> entities)
+        {
+            if (graph == null)
+                this.set = null;
+            else
+            {
+                this.set = new HashSet<IdentifiableEntity>();
+                foreach (var entity in entities)
+                    this.set.AddRange(graph.TryRelatedTo(entity));
+            }
+        }
+
+        readonly HashSet<IdentifiableEntity> set;
 
         public bool IsEmpty
         {
@@ -174,7 +186,12 @@ namespace Signum.Engine.Maps
                     ident.id = (int)new SqlPreCommandSimple(sqlSingle, result.InsertParameters(ident, forbidden, "")).ExecuteScalar();
 
                     ident.IsNew = false;
-                    FinishInsert(ident, forbidden);
+
+                    if (forbidden.IsEmpty)
+                        ident.Modified = null;
+
+                    if (saveCollections.Value != null)
+                        saveCollections.Value.InsertCollections(new List<IdentifiableEntity>{ ident }, forbidden);
                 };
             }
             else
@@ -196,7 +213,12 @@ namespace Signum.Engine.Maps
                     new SqlPreCommandSimple(sqlSingle, result.InsertParameters(ident, forbidden, "")).ExecuteNonQuery();
 
                     ident.IsNew = false;
-                    FinishInsert(ident, forbidden);
+
+                    if (forbidden.IsEmpty)
+                        ident.Modified = null;
+
+                    if (saveCollections.Value != null)
+                        saveCollections.Value.InsertCollections(new List<IdentifiableEntity> { ident }, forbidden);
                 };
             }
         }
@@ -248,10 +270,17 @@ namespace Signum.Engine.Maps
 
                     for (int i = 0; i < num; i++)
                     {
-                        var forbidden = new Forbidden(graph, idents[i]);
-                        idents[i].id = (int)table.Rows[i][0];
-                        FinishInsert(idents[i], forbidden);
+                        IdentifiableEntity ident = idents[i];
+
+                        ident.id = (int)table.Rows[i][0];
+                        ident.IsNew = false;
+
+                        if (new Forbidden(graph, ident).IsEmpty)
+                            ident.Modified = null;
                     }
+
+                    if (saveCollections.Value != null)
+                        saveCollections.Value.InsertCollections(idents, new Forbidden(graph, idents));
                 };
 
             }
@@ -265,6 +294,7 @@ namespace Signum.Engine.Maps
                     {
                         var ident = idents[i];
                         AssertHasId(ident);
+
                         Entity entity = ident as Entity;
                         if (entity != null)
                             entity.Ticks = TimeZoneManager.Now.Ticks;
@@ -275,8 +305,16 @@ namespace Signum.Engine.Maps
                     new SqlPreCommandSimple(sqlMulti, result.InsertParametersMany(idents, graph)).ExecuteNonQuery();
                     for (int i = 0; i < num; i++)
                     {
-                        FinishInsert(idents[i], new Forbidden(graph, idents[i]));
+                        IdentifiableEntity ident = idents[i];
+
+                        ident.IsNew = false;
+
+                        if (new Forbidden(graph, ident).IsEmpty)
+                            ident.Modified = null;
                     }
+
+                    if (saveCollections.Value != null)
+                        saveCollections.Value.InsertCollections(idents, new Forbidden(graph, idents));
                 };
 
             }
@@ -428,7 +466,11 @@ namespace Signum.Engine.Maps
                     if (num != 1)
                         throw new ConcurrencyException(ident.GetType(), ident.Id);
 
-                    FinishUpdate(ident, forbidden);
+                    if (forbidden.IsEmpty)
+                        ident.Modified = null;
+
+                    if (saveCollections.Value != null)
+                        saveCollections.Value.UpdateCollections(new List<IdentifiableEntity> { ident }, forbidden);
                 };
             }
             else
@@ -443,7 +485,11 @@ namespace Signum.Engine.Maps
                     if (num != 1)
                         throw new EntityNotFoundException(ident.GetType(), ident.Id);
 
-                    FinishUpdate(ident, forbidden);
+                    if (forbidden.IsEmpty)
+                        ident.Modified = null;
+
+                    if (saveCollections.Value != null)
+                        saveCollections.Value.UpdateCollections(new List<IdentifiableEntity> { ident }, forbidden);
                 };
             }
         }
@@ -477,8 +523,14 @@ namespace Signum.Engine.Maps
 
                     for (int i = 0; i < num; i++)
                     {
-                        FinishUpdate(idents[i], new Forbidden(graph, idents[i]));
+                         IdentifiableEntity ident = idents[i];
+
+                        if(new Forbidden(graph, ident).IsEmpty)
+                              ident.Modified = null;
                     }
+
+                    if (saveCollections.Value != null)
+                        saveCollections.Value.UpdateCollections(idents, new Forbidden(graph, idents));
                 };
             }
             else
@@ -499,8 +551,14 @@ namespace Signum.Engine.Maps
 
                     for (int i = 0; i < num; i++)
                     {
-                        FinishUpdate(idents[i], new Forbidden(graph, idents[i]));
+                        IdentifiableEntity ident = idents[i];
+
+                        if (new Forbidden(graph, ident).IsEmpty)
+                            ident.Modified = null;
                     }
+
+                    if (saveCollections.Value != null)
+                        saveCollections.Value.UpdateCollections(idents, new Forbidden(graph, idents));
                 };
             }
         }
@@ -508,74 +566,50 @@ namespace Signum.Engine.Maps
         class CollectionsCache
         {
             public Func<IdentifiableEntity, SqlPreCommand> SaveCollectionsSync;
-            public Action<IdentifiableEntity, Forbidden, bool> SaveCollections;
+
+            public Action<List<IdentifiableEntity>, Forbidden> InsertCollections;
+            public Action<List<IdentifiableEntity>, Forbidden> UpdateCollections;
         }
 
         ResetLazy<CollectionsCache> saveCollections;
 
-        static GenericInvoker<Func<RelationalTable, RelationalTable.IInsertCache>> giCreateCache = new GenericInvoker<Func<RelationalTable, RelationalTable.IInsertCache>>(
-            (RelationalTable rt) => rt.CreateCache<int>());
+        static GenericInvoker<Func<RelationalTable, Func<object, object>, RelationalTable.IRelationalCache>> giCreateCache =
+            new GenericInvoker<Func<RelationalTable, Func<object, object>, RelationalTable.IRelationalCache>>(
+            (RelationalTable rt, Func<object, object> d) => rt.CreateCache<int>(d));
 
         CollectionsCache InitializeCollections()
         {
             using (HeavyProfiler.LogNoStackTrace("InitializeCollections", () => this.Type.TypeName()))
             {
-                var paramIdent = Expression.Parameter(typeof(IdentifiableEntity), "ident");
-                var paramForbidden = Expression.Parameter(typeof(Forbidden), "forbidden");
-                var paramIsNew = Expression.Parameter(typeof(bool), "isNew");
+                List<RelationalTable.IRelationalCache> caches =
+                    (from ef in Fields.Values
+                     where ef.Field is FieldMList
+                     let rt = ((FieldMList)ef.Field).RelationalTable
+                     select giCreateCache.GetInvoker(rt.Field.FieldType)(rt, ef.Getter)).ToList();
 
-                var entity = Expression.Parameter(Type);
-
-                var castEntity = Expression.Assign(entity, Expression.Convert(paramIdent, Type));
-
-                var list = (from ef in Fields.Values
-                            where ef.Field is FieldMList
-                            let rt = ((FieldMList)ef.Field).RelationalTable
-                            let cache = giCreateCache.GetInvoker(rt.Field.FieldType)(rt)
-                            select new
-                            {
-                                saveCollection = (Expression)Expression.Call(Expression.Constant(cache),
-                                   cache.GetType().GetMethod("RelationalInserts", BindingFlags.NonPublic | BindingFlags.Instance),
-                                   Expression.Field(entity, ef.FieldInfo), paramIdent, paramIsNew, paramForbidden),
-
-                                ef.Getter,
-                                cache
-                            }).ToList();
-
-                if (list.IsEmpty())
+                if (caches.IsEmpty())
                     return null;
                 else
                 {
-                    var miniList = list.Select(a => new { a.Getter, a.cache }).ToList();
                     return new CollectionsCache
                     {
-                        SaveCollections = Expression.Lambda<Action<IdentifiableEntity, Forbidden, bool>>(Expression.Block(new[] { entity },
-                                    list.Select(a => a.saveCollection).PreAnd(castEntity)), paramIdent, paramForbidden, paramIsNew).Compile(),
+                        InsertCollections = (idents, forbidden) =>
+                        {
+                            foreach (var rc in caches)
+                                rc.RelationalInserts(idents, forbidden);
+                        },
 
-                        SaveCollectionsSync = ident => miniList.Select(a => a.cache.RelationalInsertsSync((Modifiable)a.Getter(ident), ident)).Combine(Spacing.Double)
+                        UpdateCollections = (idents, forbidden)=>
+                        {
+                                foreach (var rc in caches)
+                            rc.RelationalUpdates(idents, forbidden);
+                        },
+
+                        SaveCollectionsSync = ident => 
+                            caches.Select(rc => rc.RelationalInsertsSync(ident)).Combine(Spacing.Double)
                     };
                 }
             }
-        }
-
-        internal void FinishInsert(IdentifiableEntity ident, Forbidden forbidden)
-        {
-            ident.IsNew = false;
-
-            if (forbidden.IsEmpty)
-                ident.Modified = null;
-
-            if (saveCollections.Value != null)
-                saveCollections.Value.SaveCollections(ident, forbidden, true);
-        }
-
-        internal void FinishUpdate(IdentifiableEntity ident, Forbidden forbidden)
-        {
-            if (forbidden.IsEmpty)
-                ident.Modified = null;
-
-            if (saveCollections.Value != null)
-                saveCollections.Value.SaveCollections(ident, forbidden, false);
         }
 
         public SqlPreCommand InsertSqlSync(IdentifiableEntity ident, string comment = null)
@@ -666,83 +700,162 @@ namespace Signum.Engine.Maps
 
     public partial class RelationalTable
     {
-        internal interface IInsertCache
+        internal interface IRelationalCache
         {
-            SqlPreCommand RelationalInsertsSync(Modifiable mlist, IdentifiableEntity parent);
+            SqlPreCommand RelationalInsertsSync(IdentifiableEntity parent);
+            void RelationalInserts(List<IdentifiableEntity> idents, Forbidden forbidden);
+            void RelationalUpdates(List<IdentifiableEntity> idents, Forbidden forbidden);
         }
 
-        internal class InsertCache<T> : IInsertCache
+        internal class RelationalCache<T> : IRelationalCache
         {
-            public string sqlDelete;
+            public Func<string, string> sqlDelete;
+            public Func<IdentifiableEntity, string, DbParameter> DeleteParameter;
+            public Action<List<IdentifiableEntity>> Delete1;
+            public Action<List<IdentifiableEntity>> Delete2;
+            public Action<List<IdentifiableEntity>> Delete4;
+            public Action<List<IdentifiableEntity>> Delete8;
+            public Action<List<IdentifiableEntity>> Delete16;
+
             public Func<string, string> sqlInsert;
             public Func<IdentifiableEntity, T, Forbidden, string, List<DbParameter>> InsertParameters;
-            public Func<IdentifiableEntity, DbParameter> DeleteParameter;
+            public Action<List<MListPair<T>>, Forbidden> Insert1;
+            public Action<List<MListPair<T>>, Forbidden> Insert2;
+            public Action<List<MListPair<T>>, Forbidden> Insert4;
+            public Action<List<MListPair<T>>, Forbidden> Insert8;
+            public Action<List<MListPair<T>>, Forbidden> Insert16;
 
-            public Action<List<T>, IdentifiableEntity, Forbidden> Insert1;
-            public Action<List<T>, IdentifiableEntity, Forbidden> Insert2;
-            public Action<List<T>, IdentifiableEntity, Forbidden> Insert4;
-            public Action<List<T>, IdentifiableEntity, Forbidden> Insert8;
-            public Action<List<T>, IdentifiableEntity, Forbidden> Insert16;
+            public Func<IdentifiableEntity, MList<T>> Getter;
 
-            internal void RelationalInserts(MList<T> collection, IdentifiableEntity ident, bool newEntity, Forbidden forbidden)
+            public void RelationalInserts(List<IdentifiableEntity> idents, Forbidden forbidden)
             {
-                if (collection == null)
+                List<MListPair<T>> toInsert = new List<MListPair<T>>();
+
+                foreach (var entity in idents)
                 {
-                    if (!newEntity)
-                        new SqlPreCommandSimple(sqlDelete, new List<DbParameter> { DeleteParameter(ident) }).ExecuteNonQuery();
-                }
-                else
-                {
+                    MList<T> collection = Getter(entity);
+
+                    if (collection == null)
+                        continue;
+
                     if (collection.Modified == false)
-                        return;
+                        continue;
 
                     if (forbidden.IsEmpty)
                         collection.Modified = null;
 
-                    if (!newEntity)
-                        new SqlPreCommandSimple(sqlDelete, new List<DbParameter> { DeleteParameter(ident) }).ExecuteNonQuery();
+                    foreach (var item in collection)
+                        toInsert.Add(new MListPair<T>(entity, item));
+                }
 
-                    if (!Connector.Current.AllowsMultipleQueries)
-                    {
-                        List<T> uniList = new List<T>() { default(T) };
-                        foreach (var item in collection)
-                        {
-                            uniList[0] = item;
-                            Insert1(uniList, ident, forbidden);
-                        }
-                    }
+                ExecuteInsert(toInsert, forbidden);
+            }
+
+            public void RelationalUpdates(List<IdentifiableEntity> idents, Forbidden forbidden)
+            {
+                List<IdentifiableEntity> toDelete = new List<IdentifiableEntity>();
+                List<MListPair<T>> toInsert = new List<MListPair<T>>();
+
+                foreach (var entity in idents)
+                {
+                    MList<T> collection = Getter(entity);
+
+                    if (collection == null)
+                        toDelete.Add(entity);
                     else
                     {
-                        collection.Split_1_2_4_8_16(list =>
-                        {
-                            switch (list.Count)
-                            {
-                                case 1: Insert1(list, ident, forbidden); break;
-                                case 2: Insert2(list, ident, forbidden); break;
-                                case 4: Insert4(list, ident, forbidden); break;
-                                case 8: Insert8(list, ident, forbidden); break;
-                                case 16: Insert16(list, ident, forbidden); break;
-                                default: throw new InvalidOperationException("Unexpected list.Count {0}".Formato(list.Count));
-                            }
-                        });
+                        if (collection.Modified == false)
+                            continue;
+
+                        if (forbidden.IsEmpty)
+                            collection.Modified = null;
+
+                        toDelete.Add(entity);
+
+                        foreach (var item in collection)
+                            toInsert.Add(new MListPair<T>(entity, item));
                     }
+                }
+
+                ExecuteDelete(toDelete);
+
+                ExecuteInsert(toInsert, forbidden);
+            }
+
+            void ExecuteDelete(List<IdentifiableEntity> toDelete)
+            {
+                if (!Connector.Current.AllowsMultipleQueries)
+                {
+                    List<IdentifiableEntity> uniList = new List<IdentifiableEntity>() { null };
+                    foreach (var entity in toDelete)
+                    {
+                        uniList[0] = entity;
+                        Delete1(uniList);
+                    }
+                }
+                else
+                {
+                    toDelete.Split_1_2_4_8_16(list =>
+                    {
+                        switch (list.Count)
+                        {
+                            case 1: Delete1(list); break;
+                            case 2: Delete2(list); break;
+                            case 4: Delete4(list); break;
+                            case 8: Delete8(list); break;
+                            case 16: Delete16(list); break;
+                            default: throw new InvalidOperationException("Unexpected list.Count {0}".Formato(list.Count));
+                        }
+                    });
                 }
             }
 
-            public SqlPreCommand RelationalInsertsSync(Modifiable mlist, IdentifiableEntity parent)
-            {
-                var list = (MList<T>)mlist;
 
-                if (list.Modified == false)
+            void ExecuteInsert(List<MListPair<T>> toInsert, Forbidden forbidden)
+            {
+                if (!Connector.Current.AllowsMultipleQueries)
+                {
+                    List<MListPair<T>> uniList = new List<MListPair<T>>() { default(MListPair<T>) };
+                    foreach (var part in toInsert)
+                    {
+                        uniList[0] = part;
+                        Insert1(uniList, forbidden);
+                    }
+                }
+                else
+                {
+                    toInsert.Split_1_2_4_8_16(list =>
+                    {
+                        switch (list.Count)
+                        {
+                            case 1: Insert1(list, forbidden); break;
+                            case 2: Insert2(list, forbidden); break;
+                            case 4: Insert4(list, forbidden); break;
+                            case 8: Insert8(list, forbidden); break;
+                            case 16: Insert16(list, forbidden); break;
+                            default: throw new InvalidOperationException("Unexpected list.Count {0}".Formato(list.Count));
+                        }
+                    });
+                }
+            }
+
+            public SqlPreCommand RelationalInsertsSync(IdentifiableEntity parent)
+            {
+                MList<T> collection = Getter(parent);
+
+                if (collection == null)
+                    return null;
+
+                if (collection.Modified == false)
                     return null;
 
                 var sqlIns = sqlInsert("");
 
                 if (parent.IsNew)
                 {
-                    return list.Select(e =>
+                    return collection.Select(e =>
                     {
-                        var parameters = InsertParameters(parent, e, new Forbidden(parent), "");
+                        var parameters = InsertParameters(parent, e, new Forbidden(new HashSet<IdentifiableEntity> { parent }), "");
                         parameters.RemoveAt(0);
                         return new SqlPreCommandSimple(sqlIns, parameters).AddComment(e.ToString());
                     }).Combine(Spacing.Simple);
@@ -750,18 +863,28 @@ namespace Signum.Engine.Maps
                 else
                 {
                     return SqlPreCommand.Combine(Spacing.Simple,
-                        new SqlPreCommandSimple(sqlDelete, new List<DbParameter> { DeleteParameter(parent) }),
-                        list.Select(e => new SqlPreCommandSimple(sqlIns, InsertParameters(parent, e, new Forbidden(), "")).AddComment(e.ToString())).Combine(Spacing.Simple));
+                        new SqlPreCommandSimple(sqlDelete(""), new List<DbParameter> { DeleteParameter(parent, "") }),
+                        collection.Select(e => new SqlPreCommandSimple(sqlIns, InsertParameters(parent, e, new Forbidden(), "")).AddComment(e.ToString())).Combine(Spacing.Simple));
                 }
             }
         }
 
-        internal InsertCache<T> CreateCache<T>()
+        internal RelationalCache<T> CreateCache<T>(Func<object, object> getter)
         {
-            InsertCache<T> result = new InsertCache<T>();
+            RelationalCache<T> result = new RelationalCache<T>();
 
-            result.sqlDelete = "DELETE {0} WHERE {1} = @{1}".Formato(Name, BackReference.Name);
-            result.DeleteParameter = ident => Connector.Current.ParameterBuilder.CreateReferenceParameter(ParameterBuilder.GetParameterName(BackReference.Name), false, ident.Id);
+            result.Getter = ident => (MList<T>)getter(ident);
+
+            result.sqlDelete = post => "DELETE {0} WHERE {1} = @{2}".Formato(Name, BackReference.Name.SqlScape(), BackReference.Name + post);
+
+            var pb = Connector.Current.ParameterBuilder;
+            result.DeleteParameter = (ident, post) => pb.CreateReferenceParameter(ParameterBuilder.GetParameterName(BackReference.Name + post), false, ident.Id);
+
+            result.Delete1 = GetDelete(result, 1);
+            result.Delete2 = GetDelete(result, 2);
+            result.Delete4 = GetDelete(result, 4);
+            result.Delete8 = GetDelete(result, 8);
+            result.Delete16 = GetDelete(result, 16);
 
             var trios = new List<Table.Trio>();
             var assigments = new List<Expression>();
@@ -792,19 +915,47 @@ namespace Signum.Engine.Maps
             return result;
         }
 
-        private Action<List<T>, IdentifiableEntity, Forbidden> GetInsert<T>(InsertCache<T> result, int num)
+        private Action<List<IdentifiableEntity>> GetDelete<T>(RelationalCache<T> result, int num)
         {
-            string sql = Enumerable.Range(0, num).ToString(i => result.sqlInsert(i.ToString()), ";\r\n");
+            string sql = Enumerable.Range(0, num).ToString(i => result.sqlDelete(i.ToString()), ";\r\n");
 
-            return (list, ident, forbidden) =>
+            return (list) =>
             {
                 List<DbParameter> parameters = new List<DbParameter>();
                 for (int i = 0; i < num; i++)
                 {
-                    parameters.AddRange(result.InsertParameters(ident, list[i], forbidden, i.ToString()));
+                    parameters.Add(result.DeleteParameter(list[i], i.ToString()));
                 }
                 new SqlPreCommandSimple(sql, parameters).ExecuteNonQuery();
             };
+        }
+
+        private Action<List<MListPair<T>>, Forbidden> GetInsert<T>(RelationalCache<T> result, int num)
+        {
+            string sql = Enumerable.Range(0, num).ToString(i => result.sqlInsert(i.ToString()), ";\r\n");
+
+            return (list, forbidden) =>
+            {
+                List<DbParameter> parameters = new List<DbParameter>();
+                for (int i = 0; i < num; i++)
+                {
+                    var pair = list[i];
+                    parameters.AddRange(result.InsertParameters(pair.Entity, pair.Item, forbidden, i.ToString()));
+                }
+                new SqlPreCommandSimple(sql, parameters).ExecuteNonQuery();
+            };
+        }
+
+        public struct MListPair<T>
+        {
+            public IdentifiableEntity Entity;
+            public T Item;
+
+            public MListPair(IdentifiableEntity ident, T item)
+            {
+                this.Entity = ident;
+                this.Item = item;
+            }
         }
     }
 
