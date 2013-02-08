@@ -63,55 +63,90 @@ namespace Signum.Engine
                     schema.OnSaving(node);
 
                 //Remove all the edges that doesn't mean a dependency
-                identifiables.RemoveAll(identifiables.Edges.Where(e => !e.To.IsNew).ToList());
+                identifiables.RemoveEdges(identifiables.Edges.Where(e => !e.To.IsNew).ToList());
 
                 //Remove all the nodes that are not modified
                 List<IdentifiableEntity> notModified = identifiables.Where(node => node.Modified == false).ToList();
 
                 notModified.ForEach(node => identifiables.RemoveFullNode(node, None));
 
-                //takes apart the 'forbidden' connections from the good ones
-                DirectedGraph<IdentifiableEntity> backEdges = identifiables.FeedbackEdgeSet();
-
-                if (backEdges.IsEmpty())
-                    backEdges = null;
-                else
-                    identifiables.RemoveAll(backEdges.Edges);
-
-                IEnumerable<HashSet<IdentifiableEntity>> groups = identifiables.CompilationOrderGroups();
-
                 log.Switch("SaveGroups");
 
-                foreach (var group in groups)
-                {
-                    SaveGroup(schema, group, backEdges);
-                }
-
-                if (backEdges != null)
-                {
-                    var postSavings = backEdges.Edges.Select(e => e.From).ToHashSet();
-
-                    SaveGroup(schema, postSavings, null);
-                }
+                SaveGraph(schema, identifiables);
 
                 EntityCache.Add(identifiables);
                 EntityCache.Add(notModified);
+
+                GraphExplorer.CleanModifications(modifiables);
             }
         }
 
-        private static void SaveGroup(Schema schema, HashSet<IdentifiableEntity> group, DirectedGraph<IdentifiableEntity> backEdges)
+        private static void SaveGraph(Schema schema, DirectedGraph<IdentifiableEntity> identifiables)
         {
-            foreach (var gr in group.GroupBy(a => new { Type = a.GetType(), a.IsNew }).ToList())
+            //takes apart the 'forbidden' connections from the good ones
+            DirectedGraph<IdentifiableEntity> backEdges = identifiables.FeedbackEdgeSet();
+
+            if (backEdges.IsEmpty())
+                backEdges = null;
+            else
+                identifiables.RemoveEdges(backEdges.Edges);
+
+            Dictionary<TypeNew, int> stats = identifiables.GroupCount(ident => new TypeNew(ident.GetType(), ident.IsNew));
+
+            DirectedGraph<IdentifiableEntity> clone = identifiables.Clone();
+            DirectedGraph<IdentifiableEntity> inv = identifiables.Inverse();
+
+            while (clone.Count > 0)
             {
-                var table = schema.Table(gr.Key.Type);
-                if (gr.Key.IsNew)
-                {
-                    table.InsertMany(gr.ToList(), backEdges);
-                }
-                else
-                {
-                    table.UpdateMany(gr.ToList(), backEdges);
-                }
+                IGrouping<TypeNew, IdentifiableEntity> group = clone.Sinks()
+                    .GroupBy(ident => new TypeNew(ident.GetType(), ident.IsNew))
+                    .WithMin(g => stats[g.Key] - g.Count());
+
+                foreach (var node in group)
+                    clone.RemoveFullNode(node, inv.RelatedTo(node));
+
+                stats[group.Key] -= group.Count();
+
+                SaveGroup(schema, group, backEdges);
+            }
+
+            if (backEdges != null)
+            {
+                foreach (var gr in backEdges.Edges.Select(e => e.From).GroupBy(ident => new TypeNew(ident.GetType(), ident.IsNew)))
+                    SaveGroup(schema, gr, null);
+            }
+        }
+
+        private static void SaveGroup(Schema schema, IGrouping<TypeNew, IdentifiableEntity> group, DirectedGraph<IdentifiableEntity> backEdges)
+        {
+            Table table = schema.Table(group.Key.Type);
+
+            if(group.Key.IsNew)
+                table.InsertMany(group.ToList(), backEdges);
+            else 
+                table.UpdateMany(group.ToList(), backEdges); 
+        }
+
+        struct TypeNew : IEquatable<TypeNew>
+        {
+            public readonly Type Type;
+            public readonly bool IsNew;
+
+            public TypeNew(Type type, bool isNew)
+            {
+                this.Type = type;
+                this.IsNew = isNew;
+            }
+
+            public bool Equals(TypeNew other)
+            {
+                return Type == other.Type &&
+                    IsNew == other.IsNew;
+            }
+
+            public override int GetHashCode()
+            {
+                return Type.GetHashCode() ^ (IsNew ? 1 : 0);
             }
         }
     }

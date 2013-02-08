@@ -187,9 +187,6 @@ namespace Signum.Engine.Maps
 
                     ident.IsNew = false;
 
-                    if (forbidden.IsEmpty)
-                        ident.Modified = null;
-
                     if (saveCollections.Value != null)
                         saveCollections.Value.InsertCollections(new List<IdentifiableEntity>{ ident }, forbidden);
                 };
@@ -213,10 +210,6 @@ namespace Signum.Engine.Maps
                     new SqlPreCommandSimple(sqlSingle, result.InsertParameters(ident, forbidden, "")).ExecuteNonQuery();
 
                     ident.IsNew = false;
-
-                    if (forbidden.IsEmpty)
-                        ident.Modified = null;
-
                     if (saveCollections.Value != null)
                         saveCollections.Value.InsertCollections(new List<IdentifiableEntity> { ident }, forbidden);
                 };
@@ -274,9 +267,6 @@ namespace Signum.Engine.Maps
 
                         ident.id = (int)table.Rows[i][0];
                         ident.IsNew = false;
-
-                        if (new Forbidden(graph, ident).IsEmpty)
-                            ident.Modified = null;
                     }
 
                     if (saveCollections.Value != null)
@@ -308,9 +298,6 @@ namespace Signum.Engine.Maps
                         IdentifiableEntity ident = idents[i];
 
                         ident.IsNew = false;
-
-                        if (new Forbidden(graph, ident).IsEmpty)
-                            ident.Modified = null;
                     }
 
                     if (saveCollections.Value != null)
@@ -466,9 +453,6 @@ namespace Signum.Engine.Maps
                     if (num != 1)
                         throw new ConcurrencyException(ident.GetType(), ident.Id);
 
-                    if (forbidden.IsEmpty)
-                        ident.Modified = null;
-
                     if (saveCollections.Value != null)
                         saveCollections.Value.UpdateCollections(new List<IdentifiableEntity> { ident }, forbidden);
                 };
@@ -484,9 +468,6 @@ namespace Signum.Engine.Maps
                     int num = (int)new SqlPreCommandSimple(sqlUpdate, result.UpdateParameters(ident, -1, forbidden, "")).ExecuteNonQuery();
                     if (num != 1)
                         throw new EntityNotFoundException(ident.GetType(), ident.Id);
-
-                    if (forbidden.IsEmpty)
-                        ident.Modified = null;
 
                     if (saveCollections.Value != null)
                         saveCollections.Value.UpdateCollections(new List<IdentifiableEntity> { ident }, forbidden);
@@ -521,14 +502,6 @@ namespace Signum.Engine.Maps
                     if (table.Rows.Count > 0)
                         throw new ConcurrencyException(Type, table.Rows.Cast<DataRow>().Select(r => (int)r[0]).ToArray());
 
-                    for (int i = 0; i < num; i++)
-                    {
-                         IdentifiableEntity ident = idents[i];
-
-                        if(new Forbidden(graph, ident).IsEmpty)
-                              ident.Modified = null;
-                    }
-
                     if (saveCollections.Value != null)
                         saveCollections.Value.UpdateCollections(idents, new Forbidden(graph, idents));
                 };
@@ -552,9 +525,6 @@ namespace Signum.Engine.Maps
                     for (int i = 0; i < num; i++)
                     {
                         IdentifiableEntity ident = idents[i];
-
-                        if (new Forbidden(graph, ident).IsEmpty)
-                            ident.Modified = null;
                     }
 
                     if (saveCollections.Value != null)
@@ -741,9 +711,6 @@ namespace Signum.Engine.Maps
                     if (collection.Modified == false)
                         continue;
 
-                    if (forbidden.IsEmpty)
-                        collection.Modified = null;
-
                     foreach (var item in collection)
                         toInsert.Add(new MListPair<T>(entity, item));
                 }
@@ -766,9 +733,6 @@ namespace Signum.Engine.Maps
                     {
                         if (collection.Modified == false)
                             continue;
-
-                        if (forbidden.IsEmpty)
-                            collection.Modified = null;
 
                         toDelete.Add(entity);
 
@@ -1146,15 +1110,11 @@ namespace Signum.Engine.Maps
         {
             ParameterExpression embedded = Expression.Parameter(this.FieldType, "embedded");
 
-            Expression notModifiedCondition = Expression.Property(forbidden, "IsEmpty");
-
             if (HasValue != null)
             {
                 trios.Add(new Table.Trio(HasValue, Expression.NotEqual(value, Expression.Constant(null, FieldType)), postfix));
 
                 assigments.Add(Expression.Assign(embedded, Expression.Convert(value, this.FieldType)));
-
-                notModifiedCondition = Expression.And(Expression.NotEqual(embedded, Expression.Constant(null, this.FieldType)), notModifiedCondition);
 
                 foreach (var ef in EmbeddedFields.Values)
                 {
@@ -1169,17 +1129,12 @@ namespace Signum.Engine.Maps
             {
 
                 assigments.Add(Expression.Assign(embedded, Expression.Convert(value.NodeType == ExpressionType.Conditional ? value : Expression.Call(Expression.Constant(this), miCheckNull, value), this.FieldType)));
-                assigments.Add(Expression.IfThen(Expression.Property(forbidden, "IsEmpty"),
-                    Expression.Assign(Expression.Property(embedded, "Modified"), Expression.Constant(null, typeof(bool?)))));
                 foreach (var ef in EmbeddedFields.Values)
                 {
                     ef.Field.CreateParameter(trios, assigments,
                         Expression.Field(embedded, ef.FieldInfo), forbidden, postfix);
                 }
             }
-
-            assigments.Add(Expression.IfThen(notModifiedCondition,
-                 Expression.Assign(Expression.Property(embedded, "Modified"), Expression.Constant(null, typeof(bool?)))));
         }
 
         static MethodInfo miCheckNull = ReflectionTools.GetMethodInfo((FieldEmbedded fe) => fe.CheckNull(null));

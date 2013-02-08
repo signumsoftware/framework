@@ -138,10 +138,14 @@ namespace Signum.Test
             {
                 var prev = Database.MListQuery((AlbumDN a) => a.Songs).Count();
 
+                var authors = 
+                    Database.Query<BandDN>().Take(6).ToList().Concat<IAuthorDN>(
+                    Database.Query<ArtistDN>().Take(8).ToList()).ToList();
+
                 List<AlbumDN> albums = 0.To(16).Select(i => new AlbumDN()
                 {
                     Name = "System Greatest hits {0}".Formato(i),
-                    Author = new ArtistDN { Name = ".Net Framework" },
+                    Author = i < authors.Count ? authors[i] : new ArtistDN { Name = ".Net Framework" },
                     Year = 2001,
                     Songs =  { new SongDN { Name = "Compilation {0}".Formato(i) }}
                 }).ToList();

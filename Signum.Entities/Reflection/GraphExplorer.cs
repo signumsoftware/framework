@@ -38,7 +38,11 @@ namespace Signum.Entities.Reflection
                 Propagate(other, inverseGraph);
         }
 
-  
+        public static void CleanModifications(IEnumerable<Modifiable> graph)
+        {
+            foreach (Modifiable item in graph)
+                item.Modified = null;
+        }
 
         public static DirectedGraph<Modifiable> FromRootIdentifiable(Modifiable root)
         {
