@@ -55,20 +55,7 @@ namespace Signum.Engine.Maps
 
         public ObjectName Name { get; set; }
 
-        bool identity = true;
-        public bool Identity
-        {
-            get { return identity; }
-            set
-            {
-                if (identity != value)
-                {
-                    identity = value;
-                    if (inserter != null && inserter.IsValueCreated) // not too fast
-                        inserter.Reset();
-                }
-            }
-        }
+        public bool Identity {get; set;}
         public bool IsView { get; internal set; }
         public string CleanTypeName { get; set; }
 

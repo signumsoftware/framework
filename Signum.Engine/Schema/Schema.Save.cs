@@ -17,6 +17,7 @@ using System.Threading;
 using System.Text;
 using Signum.Utilities.DataStructures;
 using System.Data.Common;
+using System.Collections.Concurrent;
 
 namespace Signum.Engine.Maps
 {
@@ -64,47 +65,174 @@ namespace Signum.Engine.Maps
             using (HeavyProfiler.LogNoStackTrace("InsertMany", () => this.Type.TypeName()))
             {
                 var ic = inserter.Value;
-
-                if (!Connector.Current.AllowsMultipleQueries)
-                {
-                    foreach (var item in list)
-                        ic.Insert(item, backEdges);
-                }
-                else
-                {
-                    list.Split_1_2_4_8_16(ls =>
-                    {
-                        switch (ls.Count)
-                        {
-                            case 1: ic.Insert(ls[0], backEdges); break;
-                            case 2: ic.Insert2(ls, backEdges); break;
-                            case 4: ic.Insert4(ls, backEdges); break;
-                            case 8: ic.Insert8(ls, backEdges); break;
-                            case 16: ic.Insert16(ls, backEdges); break;
-                        }
-                    });
-                }
+                list.SplitStatements(ls => ic.GetInserter(ls.Count)(ls, backEdges));
             }
         }
 
 
         class InsertCache
         {
+            internal Table table;
+
             public Func<string, bool, string> SqlInsertPattern;
             public Func<IdentifiableEntity, Forbidden, string, List<DbParameter>> InsertParameters;
-            public Action<IdentifiableEntity, DirectedGraph<IdentifiableEntity>> Insert;
-            public Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> Insert2;
-            public Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> Insert4;
-            public Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> Insert8;
-            public Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> Insert16;
 
-            public List<DbParameter> InsertParametersMany(List<IdentifiableEntity> entities, DirectedGraph<IdentifiableEntity> graph)
+            ConcurrentDictionary<int, Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>>> insertDisableIdentityCache = 
+                new ConcurrentDictionary<int, Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>>>();
+
+            ConcurrentDictionary<int, Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>>> insertIdentityCache = 
+                new ConcurrentDictionary<int, Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>>>();
+
+            internal Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> GetInserter(int numElements)
+            {
+                if (table.Identity)
+                    return insertIdentityCache.GetOrAdd(numElements, (int num) => num == 1 ? GetInsertIdentity() : GetInsertMultiIdentity(num));
+                else
+                    return insertDisableIdentityCache.GetOrAdd(numElements, (int num) => num == 1 ? GetInsertDisableIdentity() : GetInsertMultiDisableIdentity(num));
+            }
+
+            private Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> GetInsertIdentity()
+            {
+                string sqlSingle = SqlInsertPattern("", false) + ";SELECT CONVERT(Int,@@Identity) AS [newID]";
+
+                return (list, graph) =>
+                {
+                    IdentifiableEntity ident = list.Single();
+
+                    AssertNoId(ident);
+
+                    Entity entity = ident as Entity;
+                    if (entity != null)
+                        entity.Ticks = TimeZoneManager.Now.Ticks;
+
+                    table.SetToStrField(ident);
+
+                    var forbidden = new Forbidden(graph, ident);
+
+                    ident.id = (int)new SqlPreCommandSimple(sqlSingle, InsertParameters(ident, forbidden, "")).ExecuteScalar();
+
+                    ident.IsNew = false;
+
+                    if (table.saveCollections.Value != null)
+                        table.saveCollections.Value.InsertCollections(new List<IdentifiableEntity> { ident }, forbidden);
+                };
+            }
+
+            Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> GetInsertDisableIdentity()
+            {
+                string sqlSingle = SqlInsertPattern("", false);
+
+                return (list, graph) =>
+                {
+                    IdentifiableEntity ident = list.Single();
+
+                    AssertHasId(ident);
+
+                    Entity entity = ident as Entity;
+                    if (entity != null)
+                        entity.Ticks = TimeZoneManager.Now.Ticks;
+
+                    table.SetToStrField(ident);
+
+                    var forbidden = new Forbidden(graph, ident);
+
+                    new SqlPreCommandSimple(sqlSingle, InsertParameters(ident, forbidden, "")).ExecuteNonQuery();
+
+                    ident.IsNew = false;
+                    if (table.saveCollections.Value != null)
+                        table.saveCollections.Value.InsertCollections(new List<IdentifiableEntity> { ident }, forbidden);
+                };
+            }
+
+
+            Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> GetInsertMultiIdentity(int num)
+            {
+
+                string sqlMulti = new StringBuilder()
+                    .AppendLine("DECLARE @MyTable TABLE (Id INT);")
+                    .AppendLines(Enumerable.Range(0, num).Select(i => SqlInsertPattern(i.ToString(), true)))
+                    .AppendLine("SELECT Id from @MyTable").ToString();
+
+                return (idents, graph) =>
+                {
+                    for (int i = 0; i < num; i++)
+                    {
+                        var ident = idents[i];
+                        AssertNoId(ident);
+
+                        Entity entity = ident as Entity;
+                        if (entity != null)
+                            entity.Ticks = TimeZoneManager.Now.Ticks;
+
+                        table.SetToStrField(ident);
+                    }
+
+                    DataTable dt = new SqlPreCommandSimple(sqlMulti, InsertParametersMany(idents, graph)).ExecuteDataTable();
+
+                    for (int i = 0; i < num; i++)
+                    {
+                        IdentifiableEntity ident = idents[i];
+
+                        ident.id = (int)dt.Rows[i][0];
+                        ident.IsNew = false;
+                    }
+
+                    if (table.saveCollections.Value != null)
+                        table.saveCollections.Value.InsertCollections(idents, new Forbidden(graph, idents));
+                };
+
+            }
+
+            Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> GetInsertMultiDisableIdentity(int num)
+            {
+                string sqlMulti = Enumerable.Range(0, num).ToString(i => SqlInsertPattern(i.ToString(), false), ";\r\n");
+
+                return (idents, graph) =>
+                {
+                    for (int i = 0; i < num; i++)
+                    {
+                        var ident = idents[i];
+                        AssertHasId(ident);
+
+                        Entity entity = ident as Entity;
+                        if (entity != null)
+                            entity.Ticks = TimeZoneManager.Now.Ticks;
+
+                        table.SetToStrField(ident);
+                    }
+
+                    new SqlPreCommandSimple(sqlMulti, InsertParametersMany(idents, graph)).ExecuteNonQuery();
+                    for (int i = 0; i < num; i++)
+                    {
+                        IdentifiableEntity ident = idents[i];
+
+                        ident.IsNew = false;
+                    }
+
+                    if (table.saveCollections.Value != null)
+                        table.saveCollections.Value.InsertCollections(idents, new Forbidden(graph, idents));
+                };
+            }
+
+            List<DbParameter> InsertParametersMany(List<IdentifiableEntity> entities, DirectedGraph<IdentifiableEntity> graph)
             {
                 List<DbParameter> result = new List<DbParameter>();
                 int i = 0;
                 foreach (var item in entities)
                     result.AddRange(InsertParameters(item, new Forbidden(graph, item), (i++).ToString()));
                 return result;
+            }
+
+            void AssertHasId(IdentifiableEntity ident)
+            {
+                if (ident.IdOrNull == null)
+                    throw new InvalidOperationException("{0} should have an Id, since the table has no Identity".Formato(ident, ident.IdOrNull));
+            }
+
+            void AssertNoId(IdentifiableEntity ident)
+            {
+                if (ident.IdOrNull != null)
+                    throw new InvalidOperationException("{0} is new, but has Id {1}".Formato(ident, ident.IdOrNull));
             }
         }
 
@@ -114,7 +242,7 @@ namespace Signum.Engine.Maps
         {
             using (HeavyProfiler.LogNoStackTrace("InitializeInsert", () => this.Type.TypeName()))
             {
-                InsertCache result = new InsertCache();
+                InsertCache result = new InsertCache { table = this };
 
                 var trios = new List<Table.Trio>();
                 var assigments = new List<Expression>();
@@ -142,11 +270,6 @@ namespace Signum.Engine.Maps
 
                 result.InsertParameters = expr.Compile();
 
-                result.Insert = GetInsert(result);
-                result.Insert2 = GetInsertMulti(2, result);
-                result.Insert4 = GetInsertMulti(4, result);
-                result.Insert8 = GetInsertMulti(8, result);
-                result.Insert16 = GetInsertMulti(16, result);
 
                 return result;
             }
@@ -162,57 +285,6 @@ namespace Signum.Engine.Maps
                     return (IColumn)entity.Field;
 
                 return null;
-            }
-        }
-
-        private Action<IdentifiableEntity, DirectedGraph<IdentifiableEntity>> GetInsert(InsertCache result)
-        {
-            if (Identity)
-            {
-                string sqlSingle = result.SqlInsertPattern("", false) + ";SELECT CONVERT(Int,@@Identity) AS [newID]";
-
-                return (ident, graph) =>
-                {
-                    AssertNoId(ident);
-
-                    Entity entity = ident as Entity;
-                    if (entity != null)
-                        entity.Ticks = TimeZoneManager.Now.Ticks;
-
-                    SetToStrField(ident);
-
-                    var forbidden = new Forbidden(graph, ident);
-
-                    ident.id = (int)new SqlPreCommandSimple(sqlSingle, result.InsertParameters(ident, forbidden, "")).ExecuteScalar();
-
-                    ident.IsNew = false;
-
-                    if (saveCollections.Value != null)
-                        saveCollections.Value.InsertCollections(new List<IdentifiableEntity>{ ident }, forbidden);
-                };
-            }
-            else
-            {
-                string sqlSingle = result.SqlInsertPattern("", false);
-
-                return (ident, graph) =>
-                {
-                    AssertHasId(ident);
-
-                    Entity entity = ident as Entity;
-                    if (entity != null)
-                        entity.Ticks = TimeZoneManager.Now.Ticks;
-
-                    SetToStrField(ident);
-
-                    var forbidden = new Forbidden(graph, ident);
-
-                    new SqlPreCommandSimple(sqlSingle, result.InsertParameters(ident, forbidden, "")).ExecuteNonQuery();
-
-                    ident.IsNew = false;
-                    if (saveCollections.Value != null)
-                        saveCollections.Value.InsertCollections(new List<IdentifiableEntity> { ident }, forbidden);
-                };
             }
         }
 
@@ -235,133 +307,137 @@ namespace Signum.Engine.Maps
             return false;
         }
 
-        private Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> GetInsertMulti(int num, InsertCache result)
-        {
-            if (Identity)
-            {
-                string sqlMulti = new StringBuilder()
-                    .AppendLine("DECLARE @MyTable TABLE (Id INT);")
-                    .AppendLines(Enumerable.Range(0, num).Select(i => result.SqlInsertPattern(i.ToString(), true)))
-                    .AppendLine("SELECT Id from @MyTable").ToString();
-
-
-                return (idents, graph) =>
-                {
-                    for (int i = 0; i < num; i++)
-                    {
-                        var ident = idents[i];
-                        AssertNoId(ident);
-
-                        Entity entity = ident as Entity;
-                        if (entity != null)
-                            entity.Ticks = TimeZoneManager.Now.Ticks;
-
-                        SetToStrField(ident);
-                    }
-
-                    DataTable table = new SqlPreCommandSimple(sqlMulti, result.InsertParametersMany(idents, graph)).ExecuteDataTable();
-
-                    for (int i = 0; i < num; i++)
-                    {
-                        IdentifiableEntity ident = idents[i];
-
-                        ident.id = (int)table.Rows[i][0];
-                        ident.IsNew = false;
-                    }
-
-                    if (saveCollections.Value != null)
-                        saveCollections.Value.InsertCollections(idents, new Forbidden(graph, idents));
-                };
-
-            }
-            else
-            {
-                string sqlMulti = Enumerable.Range(0, num).ToString(i => result.SqlInsertPattern(i.ToString(), false), ";\r\n");
-
-                return (idents, graph) =>
-                {
-                    for (int i = 0; i < num; i++)
-                    {
-                        var ident = idents[i];
-                        AssertHasId(ident);
-
-                        Entity entity = ident as Entity;
-                        if (entity != null)
-                            entity.Ticks = TimeZoneManager.Now.Ticks;
-
-                        SetToStrField(ident);
-                    }
-
-                    new SqlPreCommandSimple(sqlMulti, result.InsertParametersMany(idents, graph)).ExecuteNonQuery();
-                    for (int i = 0; i < num; i++)
-                    {
-                        IdentifiableEntity ident = idents[i];
-
-                        ident.IsNew = false;
-                    }
-
-                    if (saveCollections.Value != null)
-                        saveCollections.Value.InsertCollections(idents, new Forbidden(graph, idents));
-                };
-
-            }
-        }
-
-        private void AssertHasId(IdentifiableEntity ident)
-        {
-            if (ident.IdOrNull == null)
-                throw new InvalidOperationException("{0} should have an Id, since the table has no Identity".Formato(ident, ident.IdOrNull));
-        }
-
-        private void AssertNoId(IdentifiableEntity ident)
-        {
-            if (ident.IdOrNull != null)
-                throw new InvalidOperationException("{0} is new, but has Id {1}".Formato(ident, ident.IdOrNull));
-        }
 
         static FieldInfo fiId = ReflectionTools.GetFieldInfo((IdentifiableEntity i) => i.id);
-        static FieldInfo fiTicks = ReflectionTools.GetFieldInfo((Entity i) => i.ticks);
-
-
-
 
         internal void UpdateMany(List<IdentifiableEntity> list, DirectedGraph<IdentifiableEntity> backEdges)
         {
             using (HeavyProfiler.LogNoStackTrace("UpdateMany", () => this.Type.TypeName()))
             {
                 var uc = updater.Value;
-
-                if (!Connector.Current.AllowsMultipleQueries)
-                {
-                    foreach (var item in list)
-                        uc.Update(item, backEdges);
-                }
-                else
-                {
-                    list.Split_1_2_4_8_16(ls =>
-                    {
-                        switch (ls.Count)
-                        {
-                            case 1: uc.Update(ls[0], backEdges); break;
-                            case 2: uc.Update2(ls, backEdges); break;
-                            case 4: uc.Update4(ls, backEdges); break;
-                            case 8: uc.Update8(ls, backEdges); break;
-                            case 16: uc.Update16(ls, backEdges); break;
-                        }
-                    });
-                }
+                list.SplitStatements(ls => uc.GetUpdater(ls.Count)(ls, backEdges));
             }
         }
 
         class UpdateCache
         {
+            internal Table table; 
+
             public Func<string, bool, string> SqlUpdatePattern;
             public Func<IdentifiableEntity, long, Forbidden, string, List<DbParameter>> UpdateParameters;
-            public Action<IdentifiableEntity, DirectedGraph<IdentifiableEntity>> Update;
-            public Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> Update2;
-            public Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> Update4;
-            public Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> Update8;
-            public Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> Update16;
+
+            ConcurrentDictionary<int, Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>>> updateCache = 
+                new ConcurrentDictionary<int, Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>>>();
+
+
+            public Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> GetUpdater(int numElements)
+            {
+                return updateCache.GetOrAdd(numElements, num => num == 1 ? GenerateUpdate() : GetUpdateMultiple(num)); 
+            }
+
+            Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> GenerateUpdate()
+            {
+                string sqlUpdate = SqlUpdatePattern("", false);
+
+                if (typeof(Entity).IsAssignableFrom(table.Type))
+                {
+                    return (uniList, graph) =>
+                    {
+                        IdentifiableEntity ident = uniList.Single();
+                        Entity entity = (Entity)ident;
+
+                        long oldTicks = entity.Ticks;
+                        entity.Ticks = TimeZoneManager.Now.Ticks;
+
+                        table.SetToStrField(ident);
+
+                        var forbidden = new Forbidden(graph, ident);
+
+                        int num = (int)new SqlPreCommandSimple(sqlUpdate, UpdateParameters(ident, oldTicks, forbidden, "")).ExecuteNonQuery();
+                        if (num != 1)
+                            throw new ConcurrencyException(ident.GetType(), ident.Id);
+
+                        if (table.saveCollections.Value != null)
+                            table.saveCollections.Value.UpdateCollections(new List<IdentifiableEntity> { ident }, forbidden);
+                    };
+                }
+                else
+                {
+                    return (uniList, graph) =>
+                    {
+                        IdentifiableEntity ident = uniList.Single();
+
+                        table.SetToStrField(ident);
+
+                        var forbidden = new Forbidden(graph, ident);
+
+                        int num = (int)new SqlPreCommandSimple(sqlUpdate, UpdateParameters(ident, -1, forbidden, "")).ExecuteNonQuery();
+                        if (num != 1)
+                            throw new EntityNotFoundException(ident.GetType(), ident.Id);
+
+                        if (table.saveCollections.Value != null)
+                            table.saveCollections.Value.UpdateCollections(new List<IdentifiableEntity> { ident }, forbidden);
+                    };
+                }
+            }
+
+            Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> GetUpdateMultiple(int num)
+            {
+                string sqlMulti = new StringBuilder()
+                      .AppendLine("DECLARE @NotFound TABLE (Id INT);")
+                      .AppendLines(Enumerable.Range(0, num).Select(i => SqlUpdatePattern(i.ToString(), true)))
+                      .AppendLine("SELECT Id from @NotFound").ToString();
+
+                if (typeof(Entity).IsAssignableFrom(table.Type))
+                {
+                    return (idents, graph) =>
+                    {
+                        List<DbParameter> parameters = new List<DbParameter>();
+                        for (int i = 0; i < num; i++)
+                        {
+                            Entity entity = (Entity)idents[i];
+
+                            long oldTicks = entity.Ticks;
+                            entity.Ticks = TimeZoneManager.Now.Ticks;
+
+                            parameters.AddRange(UpdateParameters(entity, oldTicks, new Forbidden(graph, entity), i.ToString()));
+                        }
+
+                        DataTable dt = new SqlPreCommandSimple(sqlMulti, parameters).ExecuteDataTable();
+
+                        if (dt.Rows.Count > 0)
+                            throw new ConcurrencyException(table.Type, dt.Rows.Cast<DataRow>().Select(r => (int)r[0]).ToArray());
+
+                        if (table.saveCollections.Value != null)
+                            table.saveCollections.Value.UpdateCollections(idents, new Forbidden(graph, idents));
+                    };
+                }
+                else
+                {
+                    return (idents, graph) =>
+                    {
+                        List<DbParameter> parameters = new List<DbParameter>();
+                        for (int i = 0; i < num; i++)
+                        {
+                            var ident = idents[i];
+                            parameters.AddRange(UpdateParameters(ident, -1, new Forbidden(graph, ident), i.ToString()));
+                        }
+
+                        DataTable dt = new SqlPreCommandSimple(sqlMulti, parameters).ExecuteDataTable();
+
+                        if (dt.Rows.Count > 0)
+                            throw new EntityNotFoundException(table.Type, dt.Rows.Cast<DataRow>().Select(r => (int)r[0]).ToArray());
+
+                        for (int i = 0; i < num; i++)
+                        {
+                            IdentifiableEntity ident = idents[i];
+                        }
+
+                        if (table.saveCollections.Value != null)
+                            table.saveCollections.Value.UpdateCollections(idents, new Forbidden(graph, idents));
+                    };
+                }
+            }
         }
 
         ResetLazy<UpdateCache> updater;
@@ -370,7 +446,7 @@ namespace Signum.Engine.Maps
         {
             using (HeavyProfiler.LogNoStackTrace("InitializeUpdate", () => this.Type.TypeName()))
             {
-                UpdateCache result = new UpdateCache();
+                UpdateCache result = new UpdateCache { table = this };
 
                 var trios = new List<Trio>();
                 var assigments = new List<Expression>();
@@ -383,9 +459,7 @@ namespace Signum.Engine.Maps
                 assigments.Add(Expression.Assign(cast, Expression.Convert(paramIdent, Type)));
 
                 foreach (var item in Fields.Values.Where(a => !(a.Field is FieldPrimaryKey)))
-                {
                     item.Field.CreateParameter(trios, assigments, Expression.Field(cast, item.FieldInfo), paramForbidden, paramPostfix);
-                }
 
                 var pb = Connector.Current.ParameterBuilder;
 
@@ -421,121 +495,13 @@ namespace Signum.Engine.Maps
 
                 result.UpdateParameters = expr.Compile();
 
-                result.Update = GetUpdate(result);
-                result.Update2 = GetUpdateMultiple(result, 2);
-                result.Update4 = GetUpdateMultiple(result, 4);
-                result.Update8 = GetUpdateMultiple(result, 8);
-                result.Update16 = GetUpdateMultiple(result, 16);
-
                 return result;
-            }
-        }
-
-
-        private Action<IdentifiableEntity, DirectedGraph<IdentifiableEntity>> GetUpdate(UpdateCache result)
-        {
-            string sqlUpdate = result.SqlUpdatePattern("", false);
-
-            if (typeof(Entity).IsAssignableFrom(this.Type))
-            {
-                return (ident, graph) =>
-                {
-                    Entity entity = (Entity)ident;
-
-                    long oldTicks = entity.Ticks;
-                    entity.Ticks = TimeZoneManager.Now.Ticks;
-
-                    SetToStrField(ident);
-
-                    var forbidden = new Forbidden(graph, ident);
-
-                    int num = (int)new SqlPreCommandSimple(sqlUpdate, result.UpdateParameters(ident, oldTicks, forbidden, "")).ExecuteNonQuery();
-                    if (num != 1)
-                        throw new ConcurrencyException(ident.GetType(), ident.Id);
-
-                    if (saveCollections.Value != null)
-                        saveCollections.Value.UpdateCollections(new List<IdentifiableEntity> { ident }, forbidden);
-                };
-            }
-            else
-            {
-                return (ident, graph) =>
-                {
-                    SetToStrField(ident);
-
-                    var forbidden = new Forbidden(graph, ident);
-
-                    int num = (int)new SqlPreCommandSimple(sqlUpdate, result.UpdateParameters(ident, -1, forbidden, "")).ExecuteNonQuery();
-                    if (num != 1)
-                        throw new EntityNotFoundException(ident.GetType(), ident.Id);
-
-                    if (saveCollections.Value != null)
-                        saveCollections.Value.UpdateCollections(new List<IdentifiableEntity> { ident }, forbidden);
-                };
-            }
-        }
-
-        private Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> GetUpdateMultiple(UpdateCache result, int num)
-        {
-            string sqlMulti = new StringBuilder()
-                  .AppendLine("DECLARE @NotFound TABLE (Id INT);")
-                  .AppendLines(Enumerable.Range(0, num).Select(i => result.SqlUpdatePattern(i.ToString(), true)))
-                  .AppendLine("SELECT Id from @NotFound").ToString();
-
-            if (typeof(Entity).IsAssignableFrom(this.Type))
-            {
-                return (idents, graph) =>
-                {
-                    List<DbParameter> parameters = new List<DbParameter>();
-                    for (int i = 0; i < num; i++)
-                    {
-                        Entity entity = (Entity)idents[i];
-
-                        long oldTicks = entity.Ticks;
-                        entity.Ticks = TimeZoneManager.Now.Ticks;
-
-                        parameters.AddRange(result.UpdateParameters(entity, oldTicks, new Forbidden(graph, entity), i.ToString()));
-                    }
-
-                    DataTable table = new SqlPreCommandSimple(sqlMulti, parameters).ExecuteDataTable();
-
-                    if (table.Rows.Count > 0)
-                        throw new ConcurrencyException(Type, table.Rows.Cast<DataRow>().Select(r => (int)r[0]).ToArray());
-
-                    if (saveCollections.Value != null)
-                        saveCollections.Value.UpdateCollections(idents, new Forbidden(graph, idents));
-                };
-            }
-            else
-            {
-                return (idents, graph) =>
-                {
-                    List<DbParameter> parameters = new List<DbParameter>();
-                    for (int i = 0; i < num; i++)
-                    {
-                        var ident = idents[i];
-                        parameters.AddRange(result.UpdateParameters(ident, -1, new Forbidden(graph, ident), i.ToString()));
-                    }
-
-                    DataTable table = new SqlPreCommandSimple(sqlMulti, parameters).ExecuteDataTable();
-
-                    if (table.Rows.Count > 0)
-                        throw new EntityNotFoundException(Type, table.Rows.Cast<DataRow>().Select(r => (int)r[0]).ToArray());
-
-                    for (int i = 0; i < num; i++)
-                    {
-                        IdentifiableEntity ident = idents[i];
-                    }
-
-                    if (saveCollections.Value != null)
-                        saveCollections.Value.UpdateCollections(idents, new Forbidden(graph, idents));
-                };
             }
         }
 
         class CollectionsCache
         {
-            public Func<IdentifiableEntity, SqlPreCommand> SaveCollectionsSync;
+            public Func<IdentifiableEntity, SqlPreCommand> InsertCollectionsSync;
 
             public Action<List<IdentifiableEntity>, Forbidden> InsertCollections;
             public Action<List<IdentifiableEntity>, Forbidden> UpdateCollections;
@@ -575,8 +541,8 @@ namespace Signum.Engine.Maps
                             rc.RelationalUpdates(idents, forbidden);
                         },
 
-                        SaveCollectionsSync = ident => 
-                            caches.Select(rc => rc.RelationalInsertsSync(ident)).Combine(Spacing.Double)
+                        InsertCollectionsSync = ident => 
+                            caches.Select(rc => rc.RelationalUpdateSync(ident)).Combine(Spacing.Double)
                     };
                 }
             }
@@ -595,7 +561,7 @@ namespace Signum.Engine.Maps
             if (cc == null)
                 return insert;
 
-            SqlPreCommand collections = cc.SaveCollectionsSync(ident);
+            SqlPreCommand collections = cc.InsertCollectionsSync(ident);
 
             if (collections == null)
                 return insert;
@@ -625,7 +591,7 @@ namespace Signum.Engine.Maps
             if (cc == null)
                 return update;
 
-            SqlPreCommand collections = cc.SaveCollectionsSync(ident);
+            SqlPreCommand collections = cc.InsertCollectionsSync(ident);
 
             return SqlPreCommand.Combine(Spacing.Simple, update, collections);
         }
@@ -672,7 +638,7 @@ namespace Signum.Engine.Maps
     {
         internal interface IRelationalCache
         {
-            SqlPreCommand RelationalInsertsSync(IdentifiableEntity parent);
+            SqlPreCommand RelationalUpdateSync(IdentifiableEntity parent);
             void RelationalInserts(List<IdentifiableEntity> idents, Forbidden forbidden);
             void RelationalUpdates(List<IdentifiableEntity> idents, Forbidden forbidden);
         }
@@ -681,19 +647,50 @@ namespace Signum.Engine.Maps
         {
             public Func<string, string> sqlDelete;
             public Func<IdentifiableEntity, string, DbParameter> DeleteParameter;
-            public Action<List<IdentifiableEntity>> Delete1;
-            public Action<List<IdentifiableEntity>> Delete2;
-            public Action<List<IdentifiableEntity>> Delete4;
-            public Action<List<IdentifiableEntity>> Delete8;
-            public Action<List<IdentifiableEntity>> Delete16;
+            public ConcurrentDictionary<int, Action<List<IdentifiableEntity>>> deleteCache = new ConcurrentDictionary<int, Action<List<IdentifiableEntity>>>();
+
+            Action<List<IdentifiableEntity>> GetDelete(int numElements)
+            {
+                return deleteCache.GetOrAdd(numElements, num =>
+                {
+                    string sql = Enumerable.Range(0, num).ToString(i => sqlDelete(i.ToString()), ";\r\n");
+
+                    return list =>
+                    {
+                        List<DbParameter> parameters = new List<DbParameter>();
+                        for (int i = 0; i < num; i++)
+                        {
+                            parameters.Add(DeleteParameter(list[i], i.ToString()));
+                        }
+                        new SqlPreCommandSimple(sql, parameters).ExecuteNonQuery();
+                    };
+                }); 
+            }
 
             public Func<string, string> sqlInsert;
             public Func<IdentifiableEntity, T, Forbidden, string, List<DbParameter>> InsertParameters;
-            public Action<List<MListPair<T>>, Forbidden> Insert1;
-            public Action<List<MListPair<T>>, Forbidden> Insert2;
-            public Action<List<MListPair<T>>, Forbidden> Insert4;
-            public Action<List<MListPair<T>>, Forbidden> Insert8;
-            public Action<List<MListPair<T>>, Forbidden> Insert16;
+            public ConcurrentDictionary<int, Action<List<MListPair<T>>, Forbidden>> insertCache = 
+                new ConcurrentDictionary<int, Action<List<MListPair<T>>, Forbidden>>();
+
+            Action<List<MListPair<T>>, Forbidden> GetInsert(int numElements)
+            {
+                return insertCache.GetOrAdd(numElements, num =>
+                {
+                    string sql = Enumerable.Range(0, num).ToString(i => sqlInsert(i.ToString()), ";\r\n");
+
+                    return (list, forbidden) =>
+                    {
+                        List<DbParameter> parameters = new List<DbParameter>();
+                        for (int i = 0; i < num; i++)
+                        {
+                            var pair = list[i];
+                            parameters.AddRange(InsertParameters(pair.Entity, pair.Item, forbidden, i.ToString()));
+                        }
+                        new SqlPreCommandSimple(sql, parameters).ExecuteNonQuery();
+                    };
+                });
+            }
+
 
             public Func<IdentifiableEntity, MList<T>> Getter;
 
@@ -715,7 +712,7 @@ namespace Signum.Engine.Maps
                         toInsert.Add(new MListPair<T>(entity, item));
                 }
 
-                ExecuteInsert(toInsert, forbidden);
+                toInsert.SplitStatements(list => GetInsert(list.Count)(list, forbidden));
             }
 
             public void RelationalUpdates(List<IdentifiableEntity> idents, Forbidden forbidden)
@@ -741,69 +738,12 @@ namespace Signum.Engine.Maps
                     }
                 }
 
-                ExecuteDelete(toDelete);
+                toDelete.SplitStatements(list => GetDelete(list.Count)(list));
 
-                ExecuteInsert(toInsert, forbidden);
+                toInsert.SplitStatements(list => GetInsert(list.Count)(list, forbidden));
             }
 
-            void ExecuteDelete(List<IdentifiableEntity> toDelete)
-            {
-                if (!Connector.Current.AllowsMultipleQueries)
-                {
-                    List<IdentifiableEntity> uniList = new List<IdentifiableEntity>() { null };
-                    foreach (var entity in toDelete)
-                    {
-                        uniList[0] = entity;
-                        Delete1(uniList);
-                    }
-                }
-                else
-                {
-                    toDelete.Split_1_2_4_8_16(list =>
-                    {
-                        switch (list.Count)
-                        {
-                            case 1: Delete1(list); break;
-                            case 2: Delete2(list); break;
-                            case 4: Delete4(list); break;
-                            case 8: Delete8(list); break;
-                            case 16: Delete16(list); break;
-                            default: throw new InvalidOperationException("Unexpected list.Count {0}".Formato(list.Count));
-                        }
-                    });
-                }
-            }
-
-
-            void ExecuteInsert(List<MListPair<T>> toInsert, Forbidden forbidden)
-            {
-                if (!Connector.Current.AllowsMultipleQueries)
-                {
-                    List<MListPair<T>> uniList = new List<MListPair<T>>() { default(MListPair<T>) };
-                    foreach (var part in toInsert)
-                    {
-                        uniList[0] = part;
-                        Insert1(uniList, forbidden);
-                    }
-                }
-                else
-                {
-                    toInsert.Split_1_2_4_8_16(list =>
-                    {
-                        switch (list.Count)
-                        {
-                            case 1: Insert1(list, forbidden); break;
-                            case 2: Insert2(list, forbidden); break;
-                            case 4: Insert4(list, forbidden); break;
-                            case 8: Insert8(list, forbidden); break;
-                            case 16: Insert16(list, forbidden); break;
-                            default: throw new InvalidOperationException("Unexpected list.Count {0}".Formato(list.Count));
-                        }
-                    });
-                }
-            }
-
-            public SqlPreCommand RelationalInsertsSync(IdentifiableEntity parent)
+            public SqlPreCommand RelationalUpdateSync(IdentifiableEntity parent)
             {
                 MList<T> collection = Getter(parent);
 
@@ -844,11 +784,6 @@ namespace Signum.Engine.Maps
             var pb = Connector.Current.ParameterBuilder;
             result.DeleteParameter = (ident, post) => pb.CreateReferenceParameter(ParameterBuilder.GetParameterName(BackReference.Name + post), false, ident.Id);
 
-            result.Delete1 = GetDelete(result, 1);
-            result.Delete2 = GetDelete(result, 2);
-            result.Delete4 = GetDelete(result, 4);
-            result.Delete8 = GetDelete(result, 8);
-            result.Delete16 = GetDelete(result, 16);
 
             var trios = new List<Table.Trio>();
             var assigments = new List<Expression>();
@@ -870,46 +805,8 @@ namespace Signum.Engine.Maps
 
             result.InsertParameters = expr.Compile();
 
-            result.Insert1 = GetInsert(result, 1);
-            result.Insert2 = GetInsert(result, 2);
-            result.Insert4 = GetInsert(result, 4);
-            result.Insert8 = GetInsert(result, 8);
-            result.Insert16 = GetInsert(result, 16);
-
             return result;
         }
-
-        private Action<List<IdentifiableEntity>> GetDelete<T>(RelationalCache<T> result, int num)
-        {
-            string sql = Enumerable.Range(0, num).ToString(i => result.sqlDelete(i.ToString()), ";\r\n");
-
-            return (list) =>
-            {
-                List<DbParameter> parameters = new List<DbParameter>();
-                for (int i = 0; i < num; i++)
-                {
-                    parameters.Add(result.DeleteParameter(list[i], i.ToString()));
-                }
-                new SqlPreCommandSimple(sql, parameters).ExecuteNonQuery();
-            };
-        }
-
-        private Action<List<MListPair<T>>, Forbidden> GetInsert<T>(RelationalCache<T> result, int num)
-        {
-            string sql = Enumerable.Range(0, num).ToString(i => result.sqlInsert(i.ToString()), ";\r\n");
-
-            return (list, forbidden) =>
-            {
-                List<DbParameter> parameters = new List<DbParameter>();
-                for (int i = 0; i < num; i++)
-                {
-                    var pair = list[i];
-                    parameters.AddRange(result.InsertParameters(pair.Entity, pair.Item, forbidden, i.ToString()));
-                }
-                new SqlPreCommandSimple(sql, parameters).ExecuteNonQuery();
-            };
-        }
-
         public struct MListPair<T>
         {
             public IdentifiableEntity Entity;
@@ -925,38 +822,35 @@ namespace Signum.Engine.Maps
 
     internal static class SaveUtils
     {
-        public static void Split_1_2_4_8_16<T>(this IList<T> original, Action<List<T>> action)
+        public static void SplitStatements<T>(this IList<T> original, Action<List<T>> action)
         {
-            List<T> part = new List<T>(16);
-            int i = 0;
-            for (; i <= original.Count - 16; i += 16)
+            if (!Connector.Current.AllowsMultipleQueries)
             {
-                Fill(part, original, i, 16);
-                action(part);
+                List<T> part = new List<T>(1);
+                for (int i = 0; i < original.Count; i++)
+                {
+                    part[0] = original[i];
+                    action(part);
+                }
             }
-
-            for (; i <= original.Count - 8; i += 8)
+            else
             {
-                Fill(part, original, i, 8);
-                action(part);
-            }
+                int max = Schema.Current.Settings.MaxNumberOfStatementsInSaveQueries;
 
-            for (; i <= original.Count - 4; i += 4)
-            {
-                Fill(part, original, i, 4);
-                action(part);
-            }
+                List<T> part = new List<T>(max);
+                int i = 0;
+                for (; i <= original.Count - max; i += max)
+                {
+                    Fill(part, original, i, max);
+                    action(part);
+                }
 
-            for (; i <= original.Count - 2; i += 2)
-            {
-                Fill(part, original, i, 2);
-                action(part);
-            }
-
-            for (; i <= original.Count - 1; i += 1)
-            {
-                Fill(part, original, i, 1);
-                action(part);
+                int remaining = original.Count - i;
+                if (remaining > 0)
+                {
+                    Fill(part, original, i, remaining);
+                    action(part);
+                }
             }
         }
 
