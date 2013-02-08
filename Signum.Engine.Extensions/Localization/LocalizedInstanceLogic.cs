@@ -20,14 +20,15 @@ namespace Signum.Engine.Extensions.Localization
             {
                 sb.Include<LocalizedInstanceDN>();
 
-                dqm[typeof(LocalizedInstanceDN)] = (from e in Database.Query<LocalizedInstanceDN>()
-                                                   select new
-                                                   {
-                                                       Entity = e,
-                                                       e.Id,
-                                                       e.Culture,
-                                                       e.Instance,
-                                                   }).ToDynamic();
+                dqm.RegisterQuery(typeof(LocalizedInstanceDN), () =>
+                    from e in Database.Query<LocalizedInstanceDN>()
+                    select new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.Culture,
+                        e.Instance,
+                    });
 
                 new BasicExecute<LocalizedInstanceDN>(LocalizedInstanceOperation.Save)
                 {

@@ -182,7 +182,7 @@ namespace Signum.Entities.UserQueries
             set { if (Set(ref token, value, () => Token)) TokenChanged(); }
         }
 
-        [HiddenProperty, DescriptionOptions(DescriptionOptions.None)]
+        [DescriptionOptions(DescriptionOptions.None)]
         public QueryToken TryToken
         {
             get { return token; }

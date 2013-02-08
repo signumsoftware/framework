@@ -24,14 +24,15 @@ namespace Signum.Engine.Localization
         {
             sb.Include<CultureInfoDN>();
 
-            dqm[typeof(CultureInfoDN)] = (from c in Database.Query<CultureInfoDN>()
-                                          select new
-                                          {
-                                              Entity = c,
-                                              c.Id,
-                                              CI = c.Name,
-                                              Description = c.DisplayName
-                                          }).ToDynamic();
+            dqm.RegisterQuery(typeof(CultureInfoDN), () =>
+                from c in Database.Query<CultureInfoDN>()
+                select new
+                {
+                    Entity = c,
+                    c.Id,
+                    CI = c.Name,
+                    Description = c.DisplayName
+                });
 
             cultures.AddRange(cultures);
 
