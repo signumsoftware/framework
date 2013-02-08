@@ -48,7 +48,7 @@ namespace Signum.Engine
 
                 log.Switch("Integrity");
 
-                string error = GraphExplorer.Integrity(modifiables);
+                string error = GraphExplorer.FullIntegrityCheck(modifiables, withIndependentEmbeddedEntities: false);
                 if (error.HasText())
                     throw new ApplicationException(error);
 

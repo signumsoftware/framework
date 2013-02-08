@@ -352,7 +352,7 @@ namespace Signum.Entities
         public string FullIntegrityCheck()
         {
             var graph = GraphExplorer.FromRoot(this);
-            return GraphExplorer.Integrity(graph);
+            return GraphExplorer.FullIntegrityCheck(graph, withIndependentEmbeddedEntities: !(this is IdentifiableEntity));
         }
 
         public Dictionary<ModifiableEntity, string> FullIntegrityCheckDictionary()
