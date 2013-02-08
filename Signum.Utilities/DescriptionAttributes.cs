@@ -176,14 +176,14 @@ namespace Signum.Utilities
                 .GetOrAdd(assembly, (Assembly a) => LoadTranslatedAssembly(assembly, cultureInfo));
         }
 
-        public static string TrannslationDirectory = Path.Combine(typeof(DescriptionManager).Assembly.Location, "Translations");
+        public static string TranslationDirectory = Path.Combine(Path.GetDirectoryName(new Uri(typeof(DescriptionManager).Assembly.CodeBase).LocalPath), "Translations");
 
         public static string TranslationFileName(Assembly assembly, CultureInfo cultureInfo)
         {
-            return "{0}.{1}.xml".Formato(assembly.FullName, cultureInfo.Name);
+            return Path.Combine(TranslationDirectory, "{0}.{1}.xml".Formato(assembly.GetName().Name, cultureInfo.Name));
         }
 
-        public static event Func<Type, DescriptionOptions> DefaultDescriptionOptions = t => t.Name.EndsWith("Message") ? DescriptionOptions.Members : DescriptionOptions.Description; 
+        public static event Func<Type, DescriptionOptions?> DefaultDescriptionOptions = t => t.Name.EndsWith("Message") ? DescriptionOptions.Members : null; 
 
         static Dictionary<Type, LocalizedType> LoadTranslatedAssembly(Assembly assembly, CultureInfo cultureInfo)
         {
@@ -191,8 +191,11 @@ namespace Signum.Utilities
 
             string fileName = TranslationFileName(assembly, cultureInfo);
 
-            Dictionary<string, XElement> file = !File.Exists(fileName) ? null : 
-                XDocument.Load(fileName).Element("Translations").Elements("Type").ToDictionary(x=>x.Attribute("TypeName").Value);
+            Dictionary<string, XElement> file = !File.Exists(fileName) ? null :
+                XDocument.Load(fileName).Element("Translations").Elements("Type")
+                .Select(x => KVP.Create(x.Attribute("Name").Value, x))
+                .Distinct(x => x.Key)
+                .ToDictionary();
 
             if (!isDefault && file == null)
                 return null;
@@ -208,34 +211,47 @@ namespace Signum.Utilities
         static DescriptionOptions GetDescriptionOptions(Type type)
         {
             var doa = type.SingleAttributeInherit<DescriptionOptionsAttribute>();
+            if (doa != null)
+                return doa.Options;
 
-            return doa == null ? DefaultDescriptionOptions(type) : doa.Options;
+            if (DefaultDescriptionOptions == null)
+                return DescriptionOptions.None;
+
+            foreach (Func<Type, DescriptionOptions?> action in DefaultDescriptionOptions.GetInvocationList())
+            {
+                var result = action(type);
+                if (result != null)
+                    return result;
+            }
         }
 
         const BindingFlags bf = BindingFlags.Public | BindingFlags.Instance;
 
         static LocalizedType LoadTranslatedType(Type type, DescriptionOptions opts, CultureInfo cultureInfo, XElement x, bool isDefault)
         {
+            string name = !opts.IsSetAssert(DescriptionOptions.Description, type) ? null :
+                (x == null ? null : x.Attribute("Description").TryCC(xa => xa.Value)) ??
+                (isDefault ? null : DefaultTypeDescription(type));
 
-            string name = !opts.IsSetAssert(DescriptionOptions.Description, type) ? null : 
-                x.Attribute("Description").TryCC(xa => xa.Value) ?? (isDefault ? null : DefaultTypeDescription(type));
-
-            var members = x == null ? null : x.Elements("Member").ToDictionary(m => m.Attribute("MemberName").Value, m => m.Attribute("Name").Value);
+            var members = x == null ? null : x.Elements("Member")
+                .Select(m => KVP.Create(m.Attribute("Name").Value, m.Attribute("Description").Value))
+                .Distinct(m => m.Key)
+                .ToDictionary();
 
             LocalizedType result = new LocalizedType(type)
             {
                 Description = name,
-                PluralDescription = !opts.IsSetAssert(DescriptionOptions.PluralDescription, type) ? null : 
-                             (x.Attribute("NicePluralName").TryCC(xa => xa.Value) ??
-                             (isDefault ? type.SingleAttribute<PluralDescriptionAttribute>().TryCC(t => t.PluralDescription) : null) ?? 
+                PluralDescription = !opts.IsSetAssert(DescriptionOptions.PluralDescription, type) ? null :
+                             ((x == null ? null : x.Attribute("PluralDescription").TryCC(xa => xa.Value)) ??
+                             (isDefault ? type.SingleAttribute<PluralDescriptionAttribute>().TryCC(t => t.PluralDescription) : null) ??
                              (name == null ? null : NaturalLanguageTools.Pluralize(name, cultureInfo))),
 
-                Gender = !opts.IsSetAssert(DescriptionOptions.Gender, type) ? null : 
-                         ( x.Attribute("Gender").TryCS(xa => xa.Value.Single()) ??
+                Gender = !opts.IsSetAssert(DescriptionOptions.Gender, type) ? null :
+                         ((x == null ? null : x.Attribute("Gender").TryCS(xa => xa.Value.Single())) ??
                          (isDefault ? type.SingleAttribute<GenderAttribute>().TryCS(t => t.Gender) : null) ??
                          (name == null ? null : NaturalLanguageTools.GetGender(name, cultureInfo))),
 
-                Members = !opts.IsSetAssert(DescriptionOptions.Members, type) ? null : 
+                Members = !opts.IsSetAssert(DescriptionOptions.Members, type) ? null :
                           (from m in type.GetProperties(bf).Cast<MemberInfo>().Concat(type.GetFields(bf))
                            let mta = m.SingleAttribute<DescriptionOptionsAttribute>()
                            where mta == null || mta.Options.IsSetAssert(DescriptionOptions.Description, m)
@@ -260,14 +276,20 @@ namespace Signum.Utilities
 
         static bool IsSetAssert(this DescriptionOptions opts, DescriptionOptions flag, MemberInfo member)
         {
-            if ((flag == DescriptionOptions.PluralDescription || flag == DescriptionOptions.Gender) && ((opts & DescriptionOptions.Description) != DescriptionOptions.None))
-                throw new InvalidOperationException("{0} has {1} set, but {2} is not".Formato(member.Name, flag, DescriptionOptions.Description));
+            if ((opts.IsSet(DescriptionOptions.PluralDescription) || opts.IsSet(DescriptionOptions.Gender)) && !opts.IsSet(DescriptionOptions.Description))
+                throw new InvalidOperationException("{0} has {1} set also requires {2}".Formato(member.Name, opts, DescriptionOptions.Description));
 
-            const DescriptionOptions typeOnly = DescriptionOptions.PluralDescription | DescriptionOptions.Gender | DescriptionOptions.Members;
+            if ((member is PropertyInfo || member is FieldInfo) &&
+                (opts.IsSet(DescriptionOptions.PluralDescription) ||
+                 opts.IsSet(DescriptionOptions.Gender) ||
+                 opts.IsSet(DescriptionOptions.Members)))
+                throw new InvalidOperationException("Member {0} has {1} set".Formato(member.Name, opts));
 
-            if ((member is PropertyInfo || member is FieldInfo) && ((opts & typeOnly) != DescriptionOptions.None))
-                throw new InvalidOperationException("Member {0} has {1} set".Formato(member.Name, typeOnly));
+            return opts.IsSet(flag);
+        }
 
+        private static bool IsSet(this DescriptionOptions opts, DescriptionOptions flag)
+        {
             return (opts & flag) == flag;
         }
 
