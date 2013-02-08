@@ -93,7 +93,7 @@ namespace Signum.Utilities.DataStructures
             }
         }
 
-        public bool Remove(T from, T to)
+        public bool RemoveEdge(T from, T to)
         {
             var hashSet = adjacency.TryGetC(from);
             if (hashSet == null)
@@ -102,15 +102,15 @@ namespace Signum.Utilities.DataStructures
             return hashSet.Remove(to);
         }
 
-        public bool Remove(Edge<T> edge)
+        public bool RemoveEdge(Edge<T> edge)
         {
-            return Remove(edge.From, edge.To);
+            return RemoveEdge(edge.From, edge.To);
         }
 
-        public void RemoveAll(IEnumerable<Edge<T>> edges)
+        public void RemoveEdges(IEnumerable<Edge<T>> edges)
         {
             foreach (var edge in edges)
-                Remove(edge.From, edge.To);
+                RemoveEdge(edge.From, edge.To);
         }
 
         public bool RemoveFullNode(T node)
@@ -131,7 +131,7 @@ namespace Signum.Utilities.DataStructures
 
             adjacency.Remove(node);
             foreach (var n in inverseRelated)
-                Remove(n, node);
+                RemoveEdge(n, node);
 
             return true;
         }
@@ -483,7 +483,7 @@ namespace Signum.Utilities.DataStructures
             return result;
         }
 
-        private HashSet<T> Sinks()
+        public HashSet<T> Sinks()
         {
             return adjacency.Where(a => a.Value.Count == 0).Select(a => a.Key).ToHashSet();
         }
