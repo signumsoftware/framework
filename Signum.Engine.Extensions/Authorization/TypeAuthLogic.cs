@@ -62,7 +62,7 @@ namespace Signum.Engine.Authorization
         static Action<Lite<RoleDN>> SuggestTypeRules()
         {
             var graph = Schema.Current.ToDirectedGraph();
-            graph.RemoveAll(graph.FeedbackEdgeSet().Edges);
+            graph.RemoveEdges(graph.FeedbackEdgeSet().Edges);
             var compilationOrder = graph.CompilationOrder().ToList();
             var entityTypes = graph.ToDictionary(t => t.Type, t => TypeLogic.GetEntityKind(t.Type));
 
