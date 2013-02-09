@@ -957,9 +957,32 @@ namespace Signum.Engine.Linq
                     {
                         return Visit(m.GetArgument("value"));
                     }
+                case "StringExtensions.Etc": return TryEtc(m.GetArgument("str"), m.GetArgument("max"), m.TryGetArgument("etcString"));
                 default: return null; 
             }
         }
+
+        private Expression TryEtc(Expression str, Expression max, Expression etcString)
+        {
+            var newStr = Visit(str);
+            if (!Has(newStr))
+                return null;
+
+            if (this.IsFullNominateOrAggresive)
+                return newStr;
+
+            var subString = Add(new SqlFunctionExpression(typeof(string), null, SqlFunction.SUBSTRING.ToString(), new Expression[]
+            {
+                newStr,
+                new SqlConstantExpression(1, typeof(int)),
+                Expression.Add(max, new SqlConstantExpression(1, typeof(int))),
+            }));
+
+            return etcString == null ? Expression.Call(miEtc2, subString, max) : Expression.Call(miEtc3, subString, max, etcString); 
+        }
+
+        static MethodInfo miEtc2 = ReflectionTools.GetMethodInfo(() => "".Etc(2));
+        static MethodInfo miEtc3 = ReflectionTools.GetMethodInfo(() => "".Etc(2, "..."));
 
         IDisposable ForceFullNominate()
         {

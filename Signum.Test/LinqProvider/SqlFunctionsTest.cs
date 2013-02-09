@@ -198,6 +198,18 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void Etc()
+        {
+            Assert.IsTrue(Enumerable.SequenceEqual(
+                Database.Query<AlbumDN>().Select(a => a.Name.Etc(10)).Order().ToList(),
+                Database.Query<AlbumDN>().Select(a => a.Name).ToList().Select(l => l.Etc(10)).Order().ToList()));
+
+            Assert.AreEqual(
+                Database.Query<AlbumDN>().Count(a => a.Name.Etc(10).EndsWith("s")),
+                Database.Query<AlbumDN>().Count(a => a.Name.EndsWith("s")));
+        }
+
+        [TestMethod]
         public void TableValuedFunction()
         {
             var list = Database.Query<AlbumDN>()
