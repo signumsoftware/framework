@@ -351,7 +351,7 @@ namespace Signum.Windows
             if (EntityChanged != null)
                 EntityChanged(this, isUserInteraction, oldValue, newValue);
 
-            AutomationProperties.SetHelpText(this, Common.GetEntityStringAndHashCode(newValue));
+            AutomationProperties.SetItemStatus(this, Common.GetEntityStringAndHashCode(newValue));
 
             UpdateVisibility();
         }

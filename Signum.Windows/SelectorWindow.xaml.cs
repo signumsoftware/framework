@@ -12,6 +12,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Controls.Primitives;
 using Signum.Utilities;
+using System.Windows.Automation;
+using System.Windows.Automation.Peers;
 
 namespace Signum.Windows
 {
@@ -97,6 +99,8 @@ namespace Signum.Windows
         {
             InitializeComponent();
 
+            AutomationProperties.SetName(this, "SelectorWindow");
+
             this.Message = Signum.Windows.Properties.Resources.SelectAnElement;
         }
 
@@ -105,6 +109,23 @@ namespace Signum.Windows
             SelectedElement = ((ElementInfo)((ToggleButton)sender).DataContext).Element;
             DialogResult = true;
             Close();
+        }
+
+        protected override AutomationPeer OnCreateAutomationPeer()
+        {
+            return new SelectorWindowAutomationPeer(this);
+        }
+    }
+
+    public class SelectorWindowAutomationPeer : WindowAutomationPeer
+    {
+        public SelectorWindowAutomationPeer(SelectorWindow selectorWindow) : base(selectorWindow)
+        {
+        }
+
+        protected override string GetClassNameCore()
+        {
+            return "SelectorWindow";
         }
     }
 }

@@ -116,7 +116,7 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty PropertyRouteProperty =
-            DependencyProperty.RegisterAttached("PropertyRoute", typeof(PropertyRoute), typeof(Common), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.Inherits));
+            DependencyProperty.RegisterAttached("PropertyRoute", typeof(PropertyRoute), typeof(Common), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.Inherits, (s, e) => { }));
         public static PropertyRoute GetPropertyRoute(DependencyObject obj)
         {
             return (PropertyRoute)obj.GetValue(PropertyRouteProperty);
@@ -326,7 +326,7 @@ namespace Signum.Windows
             RouteTask += TaskSetImplementations;
             RouteTask += TaskSetCollaspeIfNull;
             RouteTask += TaskSetNotNullItemsSource;
-            RouteTask += TaskSetAutomationItemStatus;
+            RouteTask += TaskSetAutomationName;
             RouteTask += TaskSetVoteAutoHide;
             
             LabelOnlyRouteTask += TaskSetLabelText;
@@ -545,24 +545,24 @@ namespace Signum.Windows
             }
         }
 
-        static void TaskSetAutomationItemStatus(FrameworkElement fe, string route, PropertyRoute context)
+        static void TaskSetAutomationName(FrameworkElement fe, string route, PropertyRoute context)
         {
-            if (fe.NotSet(AutomationProperties.ItemStatusProperty))
+            if (fe.NotSet(AutomationProperties.NameProperty))
             {
-                AutomationProperties.SetItemStatus(fe, context.TryToString() ?? "");
+                AutomationProperties.SetName(fe, context.TryToString() ?? "");
             }
         }
 
-        public static readonly DependencyProperty AutomationHelpTextFromDataContextProperty =
-           DependencyProperty.RegisterAttached("AutomationHelpTextFromDataContext", typeof(bool), typeof(Common), new UIPropertyMetadata(false, RegisterUpdater));
-        public static bool GetAutomationHelpTextFromDataContext(DependencyObject obj)
+        public static readonly DependencyProperty AutomationItemStatusFromDataContextProperty =
+           DependencyProperty.RegisterAttached("AutomationItemStatusFromDataContext", typeof(bool), typeof(Common), new UIPropertyMetadata(false, RegisterUpdater));
+        public static bool GetAutomationItemStatusFromDataContext(DependencyObject obj)
         {
-            return (bool)obj.GetValue(AutomationHelpTextFromDataContextProperty);
+            return (bool)obj.GetValue(AutomationItemStatusFromDataContextProperty);
         }
 
-        public static void SetAutomationHelpTextFromDataContext(DependencyObject obj, bool value)
+        public static void SetAutomationItemStatusFromDataContext(DependencyObject obj, bool value)
         {
-            obj.SetValue(AutomationHelpTextFromDataContextProperty, value);
+            obj.SetValue(AutomationItemStatusFromDataContextProperty, value);
         }
 
         static void RegisterUpdater(DependencyObject sender, DependencyPropertyChangedEventArgs args)
@@ -573,19 +573,19 @@ namespace Signum.Windows
             {
                 fe.DataContextChanged += Common_DataContextChanged;
 
-                AutomationProperties.SetHelpText(fe, GetEntityStringAndHashCode(fe.DataContext));
+                AutomationProperties.SetItemStatus(fe, GetEntityStringAndHashCode(fe.DataContext));
             }
             else
             {
                 fe.DataContextChanged -= Common_DataContextChanged;
 
-                AutomationProperties.SetHelpText(fe, "");
+                AutomationProperties.SetItemStatus(fe, "");
             }
         }
 
         static void Common_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            AutomationProperties.SetHelpText((DependencyObject)sender, GetEntityStringAndHashCode(e.NewValue));
+            AutomationProperties.SetItemStatus((DependencyObject)sender, GetEntityStringAndHashCode(e.NewValue));
         }
 
 

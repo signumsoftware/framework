@@ -426,7 +426,7 @@ namespace Signum.Windows
 
             UpdateVisibility();
 
-            AutomationProperties.SetItemStatus(this, QueryUtils.GetQueryUniqueKey(QueryName));
+            AutomationProperties.SetName(this, QueryUtils.GetQueryUniqueKey(QueryName));
 
             foreach (var item in FilterOptions)
             {
@@ -833,7 +833,9 @@ namespace Signum.Windows
             string canOrder = QueryUtils.CanOrder(header.RequestColumn.Token);
             if (canOrder.HasText())
             {
-                MessageBox.Show(canOrder);
+                //Avoid UI Automation hangs
+                Dispatcher.BeginInvoke(() => MessageBox.Show(Window.GetWindow(this), canOrder)); 
+
                 return; 
             }
 
