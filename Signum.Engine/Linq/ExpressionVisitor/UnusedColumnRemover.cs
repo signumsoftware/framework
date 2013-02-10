@@ -51,13 +51,13 @@ namespace Signum.Engine.Linq
 
             ReadOnlyCollection<OrderExpression> orderbys = select.OrderBy.NewIfChange(VisitOrderBy);
             Expression where = this.Visit(select.Where);
-            ReadOnlyCollection<Expression> groupbys = select.GroupBy.NewIfChange(e => IsConstant(e) ? null : Visit(e));
+            ReadOnlyCollection<Expression> groupBy = select.GroupBy.NewIfChange(e => IsConstant(e) ? null : Visit(e));
 
             SourceExpression from = this.VisitSource(select.From);
 
-            if (columns != select.Columns || orderbys != select.OrderBy || where != select.Where || from != select.From || groupbys != select.GroupBy)
+            if (columns != select.Columns || orderbys != select.OrderBy || where != select.Where || from != select.From || groupBy != select.GroupBy)
             {
-                return new SelectExpression(select.Alias, select.IsDistinct, select.IsReverse, select.Top, columns, from, where, orderbys, groupbys);
+                return new SelectExpression(select.Alias, select.IsDistinct, select.IsReverse, select.Top, columns, from, where, orderbys, groupBy, select.ForXmlPathEmpty);
             }
 
             return select;

@@ -142,7 +142,7 @@ namespace Signum.Engine.Linq
             CurrentScope.SetRange(askedColumns);
 
             if (top != select.Top || from != select.From || where != select.Where || columns != select.Columns || orderBy != select.OrderBy || groupBy != select.GroupBy)
-                return new SelectExpression(select.Alias, select.IsDistinct, select.IsReverse, top, columns, from, where, orderBy, groupBy);
+                return new SelectExpression(select.Alias, select.IsDistinct, select.IsReverse, top, columns, from, where, orderBy, groupBy, select.ForXmlPathEmpty);
 
             return select;
         }
@@ -155,7 +155,7 @@ namespace Signum.Engine.Linq
             {
                 if (col.Alias == currentAlias)
                 {
-                    Expression expr = columns.SingleEx(cd => cd.Name == col.Name).Expression;
+                    Expression expr = columns.SingleEx(cd => (cd.Name ?? "-") == col.Name).Expression;
 
                     askedColumns[col] = expr.NodeType == (ExpressionType)DbExpressionType.SqlConstant? expr: col;
                 }
@@ -218,7 +218,7 @@ namespace Signum.Engine.Linq
         {
             var column = scalar.Select.Columns.SingleEx();
 
-            VisitColumn(new ColumnExpression(scalar.Type, scalar.Select.Alias, column.Name));
+            VisitColumn(new ColumnExpression(scalar.Type, scalar.Select.Alias, column.Name ?? "-"));
 
             var select = (SelectExpression)this.Visit(scalar.Select);
             if (select != scalar.Select)
