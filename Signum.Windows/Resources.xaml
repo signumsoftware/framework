@@ -7,6 +7,9 @@
 	xmlns:dn="clr-namespace:Signum.Entities;assembly=Signum.Entities" 
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
 	mc:Ignorable="d">
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="MiniExpander.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
 
     <SolidColorBrush x:Key="BlueBorder" Color="#FF0046AD"/>
     <SolidColorBrush x:Key="BlackBorder" Color="Black"/>
@@ -600,10 +603,11 @@
 
     <Style x:Key="GrayGroupBox" TargetType="{x:Type GroupBox}">
         <Setter Property="Background" Value="#CCC" />
+        <Setter Property="Padding" Value="4" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type GroupBox}">
-                    <Border CornerRadius="3" BorderThickness="1" BorderBrush="{TemplateBinding Background}" Margin="0,0,0,0">
+                    <Border CornerRadius="3" BorderThickness="1" BorderBrush="{TemplateBinding Background}" Margin="{TemplateBinding Margin}">
                         <StackPanel>
                             <Border BorderBrush="{TemplateBinding Background}" Background="{TemplateBinding Background}" BorderThickness="0,0,0,1" CornerRadius="2,2,0,0">
                                 <Border >
