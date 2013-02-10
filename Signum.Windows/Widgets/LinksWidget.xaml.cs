@@ -197,7 +197,7 @@ namespace Signum.Windows
             IsVisible = Navigator.IsFindable(Options.QueryName);
             ShowResultCount = showCount;
 
-            if (ShowResultCount)
+            if (ShowResultCount && IsVisible)
                 Navigator.QueryCountBatch(new CountOptions(Options.QueryName)
                 {
                     FilterOptions = options.FilterOptions,
