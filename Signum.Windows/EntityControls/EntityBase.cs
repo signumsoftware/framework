@@ -376,7 +376,7 @@ namespace Signum.Windows
             object value;
             if (Creating == null)
             {
-                Type type = SelectType(Navigator.IsFindable);
+                Type type = SelectType(t => Navigator.IsCreable(t, isSearchEntity: false));
                 if (type == null)
                     return null;
 
@@ -406,7 +406,7 @@ namespace Signum.Windows
             object value;
             if (Finding == null)
             {
-                Type type = SelectType(t => Navigator.IsCreable(t, isSearchEntity: false));
+                Type type = SelectType(Navigator.IsFindable);
                 if (type == null)
                     return null;
 
