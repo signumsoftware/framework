@@ -110,7 +110,7 @@ namespace Signum.Entities.Reflection
                                          select new { emb, error })
                                         .ToString(p => "{0}:\r\n{1}".Formato(p.emb.GetType().Name, p.error.Indent(2)), "\r\n");
 
-                return "\r\n".Combine(errors, embeddedErrors);
+                return "\r\n".CombineIfNotEmpty(errors, embeddedErrors);
             }
 
         }

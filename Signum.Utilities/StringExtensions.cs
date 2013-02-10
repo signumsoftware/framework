@@ -686,32 +686,41 @@ namespace Signum.Utilities
 
         public static string Combine(this string separator, params object[] elements)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = null;
             foreach (var item in elements)
             {
                 if (item != null)
                 {
+                    if (sb == null)
+                        sb = new StringBuilder();
+                    else
+                        sb.Append(separator);
+
                     sb.Append(item.ToString());
-                    sb.Append(separator);
                 }
             }
 
-            return sb.ToString(0, Math.Max(0, sb.Length - separator.Length));  // Remove at the end is faster
+            return sb == null ? "" : sb.ToString();  // Remove at the end is faster
         }
 
         public static string CombineIfNotEmpty(this string separator, params object[] elements)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = null;
             foreach (var item in elements)
             {
-                if (item != null && item.ToString().HasText())
+                string str;
+                if (item != null && (str = item.ToString()).HasText())
                 {
-                    sb.Append(item.ToString());
-                    sb.Append(separator);
+                    if (sb == null)
+                        sb = new StringBuilder();
+                    else
+                        sb.Append(separator);
+
+                    sb.Append(str);
                 }
             }
 
-            return sb.ToString(0, Math.Max(0, sb.Length - separator.Length));  // Remove at the end is faster
+            return sb == null ? "" : sb.ToString();  // Remove at the end is faster
         }
 
         public static StringBuilder AppendLines(this StringBuilder sb, IEnumerable<string> strings)
