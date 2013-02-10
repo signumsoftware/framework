@@ -29,7 +29,7 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty MoveProperty =
-            DependencyProperty.Register("Move", typeof(bool), typeof(EntityBase), new FrameworkPropertyMetadata(false, (d, e) => ((EntityList)d).UpdateVisibility()));
+            DependencyProperty.Register("Move", typeof(bool), typeof(EntityBase), new FrameworkPropertyMetadata(false, (d, e) => ((EntityListBase)d).UpdateVisibility()));
         public bool Move
         {
             get { return (bool)GetValue(MoveProperty); }
