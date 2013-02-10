@@ -71,6 +71,7 @@ namespace Signum.Windows.UIAutomation
 
         public static bool IsMessageBox(AutomationElement windowElement)
         {
+            
             return windowElement.Current.ControlType == ControlType.Window && windowElement.Current.ClassName == "#32770";
         }
 
@@ -127,35 +128,6 @@ namespace Signum.Windows.UIAutomation
             var win = parentWin.WaitChild(a => a.Current.ControlType == ControlType.Window && a.Current.ClassName == "#32770", timeOut);
 
             return new MessageBoxProxy(win);
-        }
-
-        public static void AssertCapturesMessageBoxError(this AutomationElement element, Action action, Func<string> actionDescription = null, int? timeOut = null)
-        {
-            if (actionDescription == null)
-                actionDescription = () => "Capture MessageBox Error";
-
-            var parentWindow = WindowProxy.Normalize(element);
-
-            action();
-
-
-            element.Wait(() =>
-            {
-                AutomationElement newWindow = parentWindow.TryChild(a => a.Current.ControlType == ControlType.Window);
-                if (newWindow == null)
-                    return false;
-                if (MessageBoxProxy.IsMessageBox(newWindow))
-                {
-                    MessageBoxProxy winMessage = new MessageBoxProxy(newWindow);
-                    if (winMessage.IsError)
-                    {
-                        winMessage.Close();
-                        return true;
-                    }
-                }
-                throw new AssertFailedException(actionDescription());
-
-            }, actionDescription, timeOut ?? WaitExtensions.CapturaWindowTimeout);
         }
     }
 }
