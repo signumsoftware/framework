@@ -119,5 +119,11 @@ namespace Signum.Windows.UIAutomation
 
             element.Wait(() => element.IsVisible(), actionDescription, timeOut);
         }
+
+        public static void AssertClassName(this AutomationElement element, string expectedType)
+        {
+            if (element.Current.ClassName != expectedType)
+                throw new InvalidCastException("The AutomationElement is not a {0}, but a {1}".Formato(expectedType, element.Current.ClassName));
+        }
     }
 }

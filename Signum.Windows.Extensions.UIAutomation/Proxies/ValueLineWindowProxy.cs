@@ -8,14 +8,15 @@ using Signum.Utilities;
 
 namespace Signum.Windows.UIAutomation
 {
-    public class ValueLineWindowProxy<T> : WindowProxy
+    public class ValueLineBoxProxy<T> : WindowProxy
     {
         ValueLineProxy ValueLine { get; set; }
 
-
-        public ValueLineWindowProxy(AutomationElement element)
+        public ValueLineBoxProxy(AutomationElement element)
             : base(element)
         {
+            element.AssertClassName("ValueLineBox");
+
             ValueLine = new ValueLineProxy(element.Child(e => e.Current.ClassName == "ValueLine"), null);
         }
 
@@ -64,7 +65,7 @@ namespace Signum.Windows.UIAutomation
     {
         public static void ValueLineWindowAccept(this AutomationElement element)
         {
-            using (var vlwp = new ValueLineWindowProxy<string>(element))
+            using (var vlwp = new ValueLineBoxProxy<string>(element))
             {
                 vlwp.Accept();
             }
@@ -72,7 +73,7 @@ namespace Signum.Windows.UIAutomation
 
         public static void ValueLineWindowAccept<T>(this AutomationElement element, T value)
         {
-            using (var vlwp = new ValueLineWindowProxy<T>(element))
+            using (var vlwp = new ValueLineBoxProxy<T>(element))
             {
                 vlwp.Value = value;
                 vlwp.Accept();
@@ -81,7 +82,7 @@ namespace Signum.Windows.UIAutomation
 
         public static AutomationElement ValueLineWindowAcceptCapture(this AutomationElement element)
         {
-            using (var vlwp = new ValueLineWindowProxy<string>(element))
+            using (var vlwp = new ValueLineBoxProxy<string>(element))
             {
                 return vlwp.AcceptCapture();
             }
@@ -89,7 +90,7 @@ namespace Signum.Windows.UIAutomation
 
         public static AutomationElement ValueLineWindowAcceptCapture<T>(this AutomationElement element, T value)
         {
-            using (var vlwp = new ValueLineWindowProxy<T>(element))
+            using (var vlwp = new ValueLineBoxProxy<T>(element))
             {
                 vlwp.Value = value;
                 return vlwp.AcceptCapture();
