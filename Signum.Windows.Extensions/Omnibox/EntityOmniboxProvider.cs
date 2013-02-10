@@ -73,7 +73,7 @@ namespace Signum.Windows.Omnibox
                 Navigator.NavigateUntyped(result.Lite);
         }
 
-        public override string GetItemStatus(EntityOmniboxResult result)
+        public override string GetName(EntityOmniboxResult result)
         {
             return "E:" + result.Lite.TryCC(l => l.Key()); 
         }

@@ -56,7 +56,7 @@ namespace Signum.Windows.Omnibox
                     lines.Add(" ");
                     lines.Add(OmniboxClient.Providers.GetOrThrow(helpResult.OmniboxResultType).GetIcon());
                 }
-                AutomationProperties.SetItemStatus(this, "Help");
+                AutomationProperties.SetName(this, "Help");
             }
             else
             {
@@ -68,7 +68,7 @@ namespace Signum.Windows.Omnibox
 
                 lines.Add(provider.GetIcon());
 
-                AutomationProperties.SetItemStatus(this, provider.GetItemStatusBase(result));
+                AutomationProperties.SetName(this, provider.GetNameBase(result));
             }
         }
 
