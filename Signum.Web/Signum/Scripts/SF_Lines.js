@@ -631,7 +631,7 @@ SF.registerModule("Lines", function () {
                 var validatorResult = this.checkValidation(valOptions, itemPrefix);
                 if (validatorResult.acceptChanges) {
                     var runtimeInfo;
-                    var $mainControl = $(".sf-main-control[data-prefix=" + this.options.prefix + "]");
+                    var $mainControl = $(".sf-main-control[data-prefix=" + itemPrefix + "]");
                     if ($mainControl.length > 0) {
                         runtimeInfo = $mainControl.data("runtimeinfo");
                     }
