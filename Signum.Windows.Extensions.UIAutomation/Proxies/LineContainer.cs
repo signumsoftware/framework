@@ -87,7 +87,8 @@ namespace Signum.Windows.UIAutomation
             where T : ModifiableEntity
             where C : ModifiableEntity
         {
-            PropertyRoute route = container.GetRoute(property);
+            PropertyRoute route = property.Body.NodeType != ExpressionType.Convert ? container.GetRoute(property) :
+                 container.GetRoute(Expression.Lambda<Func<T, IIdentifiable>>(((UnaryExpression)property.Body).Operand, property.Parameters));
 
             var subContainer = container.Element.Descendant(a => a.Current.Name == route.ToString());
 
