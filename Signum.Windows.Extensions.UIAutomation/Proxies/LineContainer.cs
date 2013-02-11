@@ -30,47 +30,47 @@ namespace Signum.Windows.UIAutomation
     {
         //public static bool IsVisible(this ILineContainer container, PropertyRoute route)
         //{
-        //    return container.Element.Descendant(a => a.Current.ItemStatus == route.ToString()) != null;
+        //    return container.Element.Descendant(a => a.Current.Name == route.ToString()) != null;
         //}
 
         public static ValueLineProxy ValueLine(this ILineContainer container, PropertyRoute route)
         {
-            var valueLine = container.Element.Descendant(a =>( a.Current.ClassName == "ValueLine"  ||  a.Current.ClassName == "TextArea") && a.Current.ItemStatus == route.ToString());
+            var valueLine = container.Element.Descendant(a =>( a.Current.ClassName == "ValueLine"  ||  a.Current.ClassName == "TextArea") && a.Current.Name == route.ToString());
 
             return new ValueLineProxy(valueLine, route);
         }
 
         public static EntityLineProxy EntityLine(this ILineContainer container, PropertyRoute route)
         {
-            var entityLine = container.Element.Descendant(a => a.Current.ClassName == "EntityLine" && a.Current.ItemStatus == route.ToString());
+            var entityLine = container.Element.Descendant(a => a.Current.ClassName == "EntityLine" && a.Current.Name == route.ToString());
 
             return new EntityLineProxy(entityLine, route);
         }
 
         public static EntityComboProxy EntityCombo(this ILineContainer container, PropertyRoute route)
         {
-            var entityCombo = container.Element.Descendant(a => a.Current.ClassName == "EntityCombo" && a.Current.ItemStatus == route.ToString());
+            var entityCombo = container.Element.Descendant(a => a.Current.ClassName == "EntityCombo" && a.Current.Name == route.ToString());
 
             return new EntityComboProxy(entityCombo, route);
         }
 
         public static EntityDetailProxy EntityDetail(this ILineContainer container, PropertyRoute route)
         {
-            var entityDetails = container.Element.Descendant(a => a.Current.ClassName == "EntityDetail" && a.Current.ItemStatus == route.ToString());
+            var entityDetails = container.Element.Descendant(a => a.Current.ClassName == "EntityDetail" && a.Current.Name == route.ToString());
 
             return new EntityDetailProxy(entityDetails, route);
         }
 
         public static EntityListProxy EntityList(this ILineContainer container, PropertyRoute route)
         {
-            var entityList = container.Element.Descendant(a => a.Current.ClassName == "EntityList" && a.Current.ItemStatus == route.ToString());
+            var entityList = container.Element.Descendant(a => a.Current.ClassName == "EntityList" && a.Current.Name == route.ToString());
 
             return new EntityListProxy(entityList, route);
         }
 
         public static EntityRepeaterProxy EntityRepeater(this ILineContainer container, PropertyRoute route)
         {
-            var entityRepeater = container.Element.Descendant(a => a.Current.ClassName == "EntityRepeater" && a.Current.ItemStatus == route.ToString());
+            var entityRepeater = container.Element.Descendant(a => a.Current.ClassName == "EntityRepeater" && a.Current.Name == route.ToString());
 
             return new EntityRepeaterProxy(entityRepeater, route);
         }
@@ -89,14 +89,14 @@ namespace Signum.Windows.UIAutomation
         {
             PropertyRoute route = container.GetRoute(property);
 
-            var subContainer = container.Element.Descendant(a => a.Current.ItemStatus == route.ToString());
+            var subContainer = container.Element.Descendant(a => a.Current.Name == route.ToString());
 
             return new LineContainer<C> { Element = subContainer, PreviousRoute = typeof(C).IsEmbeddedEntity() ? route : null };
         }
 
         //public static bool ValueLine<T>(this ILineContainer<T> container, Expression<Func<T, object>> property) where T : ModifiableEntity
         //{
-        //    return container.Element.Descendant(a => a.Current.ItemStatus == route.ToString()) != null;
+        //    return container.Element.Descendant(a => a.Current.Name == route.ToString()) != null;
         //}
 
         public static ValueLineProxy ValueLine<T>(this ILineContainer<T> container, Expression<Func<T, object>> property) where T : ModifiableEntity

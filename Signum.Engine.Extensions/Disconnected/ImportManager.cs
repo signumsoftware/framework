@@ -64,7 +64,7 @@ namespace Signum.Engine.Disconnected
             foreach (var item in dic.Values.Where(a => a.Strategy.DisableForeignKeys == null))
                 item.Strategy.DisableForeignKeys = false;
 
-            graph.RemoveAll(feedback.Edges);
+            graph.RemoveEdges(feedback.Edges);
 
             uploadTables = graph.CompilationOrder().Select(t => dic[t]).ToList();
         }

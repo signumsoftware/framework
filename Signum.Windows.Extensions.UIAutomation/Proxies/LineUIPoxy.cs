@@ -43,7 +43,7 @@ namespace Signum.Windows.UIAutomation.Proxies
 
         //public static CountSeachControlPoxy GetCountControlSearchControl(this AutomationElement element, object queryName)
         //{
-        //    var csc = element.Descendant(a => a.Current.ClassName == "CountSearchControl" && a.Current.ItemStatus == QueryUtils.GetQueryUniqueKey(queryName));
+        //    var csc = element.Descendant(a => a.Current.ClassName == "CountSearchControl" && a.Current.Name == QueryUtils.GetQueryUniqueKey(queryName));
 
         //    return new CountSeachControlPoxy(csc);
         //}

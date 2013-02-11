@@ -25,6 +25,8 @@ namespace Signum.Windows.UIAutomation
         public NormalWindowProxy(AutomationElement element)
             : base(element)
         {
+            element.AssertClassName("NormalWindow");
+
             Element.WaitDataContextSet(() => "DataContextSet for {0}".Formato(typeof(T).Name));
         }
 
@@ -99,7 +101,7 @@ namespace Signum.Windows.UIAutomation
             var time = timeOut ?? OperationTimeouts.ExecuteTimeout;
 
             Element.WaitDataContextChangedAfter(
-            action: () => ButtonBar.GetOperationButton(operationKey).ButtonInvoke(),
+            action: () => ButtonBar.GetButton(operationKey).ButtonInvoke(),
             actionDescription: () => "Executing {0} from {1}".Formato(OperationDN.UniqueKey(operationKey), EntityId));
         }
 
@@ -108,25 +110,43 @@ namespace Signum.Windows.UIAutomation
             var time = timeOut ?? OperationTimeouts.ExecuteTimeout;
 
             return Element.CaptureWindow(
-            action: () => ButtonBar.GetOperationButton(operationKey).ButtonInvoke(),
+            action: () => ButtonBar.GetButton(operationKey).ButtonInvoke(),
             actionDescription: () => "Executing {0} from {1} and waiting to capture window".Formato(OperationDN.UniqueKey(operationKey), EntityId));
         }
 
 
-        public AutomationElement ConstructFrom(Enum operationKey, int? timeOut = null)
+        public AutomationElement ConstructFromCapture(Enum operationKey, int? timeOut = null)
         {
             var time = timeOut ?? OperationTimeouts.ConstructFromTimeout;
 
             return Element.CaptureWindow(
-                () => ButtonBar.GetOperationButton(operationKey).ButtonInvoke(),
+                () => GetConstructorButton(operationKey).ButtonInvoke(),
                 () => "Finding a window after {0} from {1} took more than {2} ms".Formato(OperationDN.UniqueKey(operationKey), EntityId, time));
         }
 
-        public NormalWindowProxy<T> ConstructFrom<T>(Enum operationKey, int? timeOut = null) where T : IdentifiableEntity
+        private AutomationElement GetConstructorButton(Enum operationKey)
         {
-            AutomationElement element = ConstructFrom(operationKey, timeOut);
+            var result = ButtonBar.TryGetButton(operationKey);
+            if (result != null)
+                return result;
 
-            return new NormalWindowProxy<T>(element);
+            result = ButtonBar.TryGetGroupButton(operationKey, "Create");
+            if (result != null)
+                return result;
+
+            result = (from sc in MainControl.Descendants(a => a.Current.ClassName == "SearchControl").Select(sc => new SearchControlProxy(sc))
+                      select sc.GetOperationButton(operationKey)).NotNull().FirstOrDefault();
+            if (result != null)
+                return result;
+
+            throw new ElementNotFoundException("Button for operation {0} not found on the ButtonBar or any visible SearchControl".Formato(OperationDN.UniqueKey(operationKey)));
+        }
+
+        public NormalWindowProxy<R> ConstructFrom<R>(Enum operationKey, int? timeOut = null) where R : IdentifiableEntity
+        {
+            AutomationElement element = ConstructFromCapture(operationKey, timeOut);
+
+            return new NormalWindowProxy<R>(element);
         }
 
 
@@ -158,11 +178,18 @@ namespace Signum.Windows.UIAutomation
 
             OnDisposed();
         }
+
+        public void CloseLooseChanges()
+        {
+            Element.CaptureChildWindow(
+                () => Close(), 
+                ()=>"Waiting for loose changes dialog");
+        }
     }
 
     public static class NormalWindowExtensions
     {
-        public static NormalWindowProxy<T> ToNormalWindow<T>(this AutomationElement element) where T : IdentifiableEntity
+        public static NormalWindowProxy<T> ToNormalWindow<T>(this AutomationElement element) where T : ModifiableEntity
         {
             return new NormalWindowProxy<T>(element);
         }
@@ -195,9 +222,47 @@ namespace Signum.Windows.UIAutomation
             get { return Element.ChildById("btReload"); }
         }
 
-        public AutomationElement GetOperationButton(Enum operationKey)
+        public AutomationElement GetButton(Enum operationKey)
         {
-            return Element.Child(a => a.Current.ItemStatus == OperationDN.UniqueKey(operationKey));
+            return Element.Child(a => a.Current.ControlType == ControlType.Button && a.Current.Name == OperationDN.UniqueKey(operationKey));
+        }
+
+        public AutomationElement TryGetButton(Enum operationKey)
+        {
+            return Element.TryChild(a => a.Current.ControlType == ControlType.Button && a.Current.Name == OperationDN.UniqueKey(operationKey));
+        }
+
+        public AutomationElement TryGetGroupButton(Enum operationKey, string groupName)
+        {
+            var groupButton = Element.TryChild(a => a.Current.ControlType == ControlType.Button && a.Current.Name == groupName);
+
+            if (groupButton == null)
+                return null;
+
+            var window = Element.CaptureChildWindow(
+                () => groupButton.ButtonInvoke(),
+                actionDescription: () => "Waiting for ContextMenu after click on {0}".Formato(groupName));
+
+            var menuItem = window
+                .Child(a => a.Current.ControlType == ControlType.Menu)
+                .TryChild(a => a.Current.ControlType == ControlType.MenuItem && a.Current.Name == OperationDN.UniqueKey(operationKey));
+
+            return menuItem;
+        }
+
+        public AutomationElement GetGroupButton(Enum operationKey, string groupName)
+        {
+            var groupButton = Element.Child(a => a.Current.ControlType == ControlType.Button && a.Current.Name == groupName);
+
+            var window = Element.CaptureChildWindow(
+                () => groupButton.ButtonInvoke(),
+                actionDescription: () => "Waiting for ContextMenu after click on {0}".Formato(groupName));
+
+            var menuItem = window
+                .Child(a => a.Current.ControlType == ControlType.Menu)
+                .Child(a => a.Current.ControlType == ControlType.MenuItem && a.Current.Name == OperationDN.UniqueKey(operationKey));
+
+            return menuItem;
         }
     }
 

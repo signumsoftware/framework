@@ -114,7 +114,7 @@ namespace Signum.Engine.SMS
                     var packLite = package.ToLite();
 
                     using (OperationLogic.AllowSave<SMSMessageDN>())
-                        numbers.Select(n => createParams.CreateStaticSMSMessage(n.Exp, packLite, n.Referred)).SaveList();
+                        numbers.Select(n => createParams.CreateStaticSMSMessage(n.Exp, packLite, n.Referred, createParams.Certified)).SaveList();
 
                     var process = ProcessLogic.Create(SMSMessageProcess.Send, package);
 
@@ -130,8 +130,10 @@ namespace Signum.Engine.SMS
         {
             public string Message;
             public string From;
+            public bool Certified;
+            public List<Lite<IdentifiableEntity>> Referreds;
 
-            public SMSMessageDN CreateStaticSMSMessage(string destinationNumber, Lite<SMSSendPackageDN> packLite, Lite<IdentifiableEntity> referred)
+            public SMSMessageDN CreateStaticSMSMessage(string destinationNumber, Lite<SMSSendPackageDN> packLite, Lite<IdentifiableEntity> referred, bool certified)
             {
                 return new SMSMessageDN
                 {
@@ -140,7 +142,8 @@ namespace Signum.Engine.SMS
                     State = SMSMessageState.Created,
                     DestinationNumber = destinationNumber,
                     SendPackage = packLite,
-                    Referred = referred
+                    Referred = referred,
+                    Certified = certified
                 };
             }
         }
@@ -239,7 +242,8 @@ namespace Signum.Engine.SMS
                         From = template.From,
                         DestinationNumber = GetPhoneNumber(provider),
                         State = SMSMessageState.Created,
-                        Referred = provider.ToLite()
+                        Referred = provider.ToLite(),
+                        Certified = template.Certified
                     };
                 }
             }.Register();

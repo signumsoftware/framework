@@ -49,7 +49,7 @@ namespace Signum.Windows.Omnibox
 
         public abstract void OnSelectedBase(OmniboxResult result, Window window);
 
-        public abstract string GetItemStatusBase(OmniboxResult result);
+        public abstract string GetNameBase(OmniboxResult result);
 
         public abstract Run GetIcon();
 
@@ -63,7 +63,7 @@ namespace Signum.Windows.Omnibox
 
         public abstract void OnSelected(T result, Window window);
 
-        public abstract string GetItemStatus(T result);
+        public abstract string GetName(T result);
     
         public override void RenderLinesBase(OmniboxResult result, InlineCollection lines)
         {
@@ -75,9 +75,9 @@ namespace Signum.Windows.Omnibox
             OnSelected((T)result, window);
         }
 
-        public override string GetItemStatusBase(OmniboxResult result)
+        public override string GetNameBase(OmniboxResult result)
         {
-            return GetItemStatus((T)result);
+            return GetName((T)result);
         }
     }
 

@@ -26,7 +26,7 @@ namespace Signum.Windows.UIAutomation
 
         public string PropertyRouteString
         {
-            get { return Element.Current.ItemStatus; }
+            get { return Element.Current.Name; }
         }
 
         public string Label
@@ -169,8 +169,8 @@ namespace Signum.Windows.UIAutomation
             get
             {
                 return
-                    string.IsNullOrEmpty(Element.Current.HelpText) ? null :
-                    Lite.Parse(Element.Current.HelpText.Split(new[] { " Hash:" }, StringSplitOptions.None)[0]);
+                    string.IsNullOrEmpty(Element.Current.ItemStatus) ? null :
+                    Lite.Parse(Element.Current.ItemStatus.Split(new[] { " Hash:" }, StringSplitOptions.None)[0]);
             }
             set
             {
@@ -192,13 +192,14 @@ namespace Signum.Windows.UIAutomation
             {
                 using (var selector = new SelectorWindowProxy(win))
                 {
-                    win = selector.CheckCapture(value.EntityType);
+                    win = selector.SelectCapture(value.EntityType.FullName);
                 }
             }
 
             using (var sw = new SearchWindowProxy(win))
             {
                 sw.AddFilterString("Entity.Id", FilterOperation.EqualTo, value.Id.ToString());
+                sw.Search();
                 sw.SelectElementAt(0);
                 sw.Ok();
             }
@@ -219,6 +220,9 @@ namespace Signum.Windows.UIAutomation
 
         public AutomationElement CreateCapture(int? timeOut = null)
         {
+            if (CreateButton.Current.IsOffscreen)
+                throw new InvalidOperationException("CreateButton is not visible on {0}".Formato(this));
+
             var win = Element.CaptureWindow(
                 () => CreateButton.ButtonInvoke(),
                 () => "Create a new entity on {0}".Formato(this), timeOut);
@@ -253,6 +257,9 @@ namespace Signum.Windows.UIAutomation
 
         public AutomationElement FindCapture(int? timeOut = null)
         {
+            if (FindButton.Current.IsOffscreen)
+                throw new InvalidOperationException("FindButton is not visible on {0}".Formato(this));
+
             var win = Element.CaptureWindow(
                 () => FindButton.ButtonInvoke(),
                 () => "Search entity on {0}".Formato(this), timeOut);
@@ -261,6 +268,9 @@ namespace Signum.Windows.UIAutomation
 
         public NormalWindowProxy<T> View<T>(int? timeOut = null) where T: ModifiableEntity
         {
+            if (ViewButton.Current.IsOffscreen)
+                throw new InvalidOperationException("ViewButton is not visible on {0}".Formato(this));
+
             var win = Element.CaptureWindow(
                 () => ViewButton.ButtonInvoke(),
                 () => "View entity on {0}".Formato(this), timeOut);
@@ -270,6 +280,9 @@ namespace Signum.Windows.UIAutomation
 
         public void Remove()
         {
+            if (RemoveButton.Current.IsOffscreen)
+                throw new InvalidOperationException("RemoveButton is not visible on {0}".Formato(this));
+
             RemoveButton.ButtonInvoke();
         }
     }
@@ -438,7 +451,7 @@ namespace Signum.Windows.UIAutomation
 
         public List<RepeaterLineProxy> GetRepeaterElements()
         {
-            return Element.Descendants(a => a.Current.ClassName == "EntityRepeaterLineBorder").Select(ae => new RepeaterLineProxy(ae)).ToList();
+            return Element.Descendants(a => a.Current.ClassName == "EntityRepeaterContentControl").Select(ae => new RepeaterLineProxy(ae)).ToList();
         }
     }
 
