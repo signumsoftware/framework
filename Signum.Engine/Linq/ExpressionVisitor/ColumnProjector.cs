@@ -111,7 +111,7 @@ namespace Signum.Engine.Linq
         public ColumnGenerator(IEnumerable<ColumnDeclaration> columns)
         {
             foreach (var item in columns)
-                this.columns.Add(item.Name, item);
+                this.columns.Add(item.Name ?? "-", item);
         }
 
         public IEnumerable<ColumnDeclaration> Columns { get { return columns.Values; } }

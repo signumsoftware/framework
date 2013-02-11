@@ -113,8 +113,8 @@ namespace Signum.Windows
             this.Loaded += new RoutedEventHandler(SearchControl_Loaded);
             this.DataContextChanged += new DependencyPropertyChangedEventHandler(CountSearchControl_DataContextChanged);
 
-            this.Bind(AutomationProperties.ItemStatusProperty, this, "QueryName");
-            this.Bind(AutomationProperties.HelpTextProperty, this, "ItemsCount"); 
+            this.Bind(AutomationProperties.NameProperty, this, "QueryName");
+            this.Bind(AutomationProperties.ItemStatusProperty, this, "ItemsCount"); 
         }
 
 

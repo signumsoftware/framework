@@ -224,11 +224,6 @@ namespace Signum.Entities.DynamicQuery
             return Parent.FullKey() + "." + Key;
         }
 
-        public virtual QueryToken MatchPart(string key)
-        {
-            return key == Key ? this : null;
-        }
-
         public override bool Equals(object obj)
         {
             return obj is QueryToken && obj.GetType() == this.GetType() && Equals((QueryToken)obj);

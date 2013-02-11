@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Controls.Primitives;
+using System.Windows.Automation.Peers;
 
 namespace Signum.Windows
 {
@@ -77,6 +78,23 @@ namespace Signum.Windows
             Close(); 
         }
 
-
+        protected override AutomationPeer OnCreateAutomationPeer()
+        {
+            return new ValueLineBoxAutomationPeer(this);
+        }
     }
+
+    public class ValueLineBoxAutomationPeer : WindowAutomationPeer
+    {
+        public ValueLineBoxAutomationPeer(ValueLineBox valueLineBox)
+            : base(valueLineBox)
+        {
+        }
+
+        protected override string GetClassNameCore()
+        {
+            return "ValueLineBox";
+        }
+    }
+
 }

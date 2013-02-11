@@ -281,7 +281,12 @@ namespace Signum.Engine
 
             while (true)
             {
-                string answer = Console.ReadLine().ToLower();
+                string answer = Console.ReadLine();
+
+                if (answer == null)
+                    throw new InvalidOperationException("Impossible to Syncrhonize interactively without Console");
+                
+                 answer= answer.ToLower();
 
                 if (answer == "s" && remaining > 0)
                 {

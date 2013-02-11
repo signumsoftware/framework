@@ -58,7 +58,7 @@ namespace Signum.Windows.Operations
                 Background = man.GetBackground(eoc.OperationInfo, eoc.OperationSettings)
             };
 
-            AutomationProperties.SetItemStatus(button, OperationDN.UniqueKey(eoc.OperationInfo.Key));
+            AutomationProperties.SetName(button, OperationDN.UniqueKey(eoc.OperationInfo.Key));
 
             eoc.SenderButton = button;
 
@@ -89,7 +89,7 @@ namespace Signum.Windows.Operations
                 Background = man.GetBackground(eoc.OperationInfo, eoc.OperationSettings)
             };
 
-            AutomationProperties.SetItemStatus(menuItem, OperationDN.UniqueKey(eoc.OperationInfo.Key));
+            AutomationProperties.SetName(menuItem, OperationDN.UniqueKey(eoc.OperationInfo.Key));
 
             eoc.SenderButton = menuItem;
 
@@ -179,6 +179,9 @@ namespace Signum.Windows.Operations
                 ContextMenu = new ContextMenu(),
                 Background = group.Background,
             };
+
+            if (group.AutomationName.HasText())
+                AutomationProperties.SetName(groupButton, group.AutomationName);
 
             groupButton.ContextMenu = new ContextMenu
             {

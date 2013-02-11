@@ -239,21 +239,21 @@ namespace Signum.Entities.DynamicQuery
             try
             {
                 if (string.IsNullOrEmpty(tokenString))
-                    throw new ArgumentNullException("tokenString"); 
+                    throw new ArgumentNullException("tokenString");
 
                 string[] parts = tokenString.Split('.');
 
                 string firstPart = parts.FirstEx();
 
-                QueryToken result = subTokens(null).Select(t => t.MatchPart(firstPart)).NotNull().SingleEx(
-                    ()=>Resources.Column0NotFound.Formato(firstPart),
-                    () => Resources.MoreThanOneColumnNamed0.Formato(firstPart));
+                QueryToken result = subTokens(null).Where(t => t.Key == firstPart).SingleEx(
+                    () => "Column {0} not found".Formato(firstPart),
+                    () => "More than one column named {0}".Formato(firstPart));
 
                 foreach (var part in parts.Skip(1))
                 {
                     var list = subTokens(result);
 
-                    result = list.Select(t => t.MatchPart(part)).NotNull().SingleEx(
+                    result = list.Where(t => t.Key == part).SingleEx(
                           () => "Token with key '{0}' not found on {1}".Formato(part, result),
                           () => "More than one token with key '{0}' found on {1}".Formato(part, result));
                 }

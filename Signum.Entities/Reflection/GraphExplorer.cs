@@ -38,7 +38,11 @@ namespace Signum.Entities.Reflection
                 Propagate(other, inverseGraph);
         }
 
-  
+        public static void CleanModifications(IEnumerable<Modifiable> graph)
+        {
+            foreach (Modifiable item in graph)
+                item.Modified = null;
+        }
 
         public static DirectedGraph<Modifiable> FromRootIdentifiable(Modifiable root)
         {
@@ -75,33 +79,56 @@ namespace Signum.Entities.Reflection
             return graph.OfType<ModifiableEntity>().Select(m => m.IntegrityCheck()).Where(e => e.HasText()).ToString("\r\n");
         }
 
-        public static string Integrity(DirectedGraph<Modifiable> graph)
+        public static string FullIntegrityCheck(DirectedGraph<Modifiable> graph, bool withIndependentEmbeddedEntities)
         {
-            if (graph.OfType<IdentifiableEntity>().Any() && !graph.OfType<ModelEntity>().Any())
+            string cloneAttack = CloneAttack(graph);
+
+            if (cloneAttack != null)
+                return cloneAttack;
+
+            if (withIndependentEmbeddedEntities == false)
             {
-                var problems = (from m in graph.OfType<IdentifiableEntity>()
-                                group m by new { Type = m.GetType(), Id = (m as IdentifiableEntity).TryCS(ident => (long?)ident.IdOrNull) ?? -m.temporalId } into g
-                                where g.Count() > 1 && g.Count(m => m.SelfModified) > 0
-                                select g).ToList();
-
-                if (problems.Count > 0)
-                    return "CLONE ATTACK!\r\n\r\n" + problems.ToString(p => "{0} different instances of the same entity ({1}) have been found:\r\n {2}".Formato(
-                        p.Count(),
-                        p.Key,
-                        p.ToString(m => "  {0}{1}".Formato(m.SelfModified ? "[SelfModified] " : "", m), "\r\n")), "\r\n\r\n");
-
                 return (from ident in graph.OfType<IdentifiableEntity>()
                         let error = ident.IdentifiableIntegrityCheck()
                         where error.HasText()
-                        select new { ident, error }).ToString(p => "{0}:\r\n{1}".Formato(p.ident.BaseToString(), p.error.Indent(2)), "\r\n");
+                        select new { ident, error })
+                        .ToString(p => "{0}:\r\n{1}".Formato(p.ident.BaseToString(), p.error.Indent(2)), "\r\n");
             }
             else
             {
-                return (from me in graph.OfType<ModifiableEntity>()
-                        select me.IntegrityCheck() into error
-                        where error.HasText()
-                        select error).ToString("\r\n"); 
+                DirectedGraph<Modifiable> identGraph = DirectedGraph<Modifiable>.Generate(graph.Where(a => a is IdentifiableEntity), graph.RelatedTo);
+
+                string errors = (from ident in identGraph.OfType<IdentifiableEntity>()
+                                 let error = ident.IdentifiableIntegrityCheck()
+                                 where error.HasText()
+                                 select new { ident, error })
+                                 .ToString(p => "{0}:\r\n{1}".Formato(p.ident.BaseToString(), p.error.Indent(2)), "\r\n");
+
+                string embeddedErrors = (from emb in graph.Except(identGraph).OfType<ModifiableEntity>()
+                                         let error = emb.IntegrityCheck()
+                                         where error.HasText()
+                                         select new { emb, error })
+                                        .ToString(p => "{0}:\r\n{1}".Formato(p.emb.GetType().Name, p.error.Indent(2)), "\r\n");
+
+                return "\r\n".CombineIfNotEmpty(errors, embeddedErrors);
             }
+
+        }
+
+        static string CloneAttack(DirectedGraph<Modifiable> graph)
+        {
+            var problems = (from m in graph.OfType<IdentifiableEntity>()
+                            group m by new { Type = m.GetType(), Id = (m as IdentifiableEntity).TryCS(ident => (long?)ident.IdOrNull) ?? -m.temporalId } into g
+                            where g.Count() > 1 && g.Count(m => m.SelfModified) > 0
+                            select g).ToList();
+
+            if (problems.Count == 0)
+                return null;
+
+            return "CLONE ATTACK!\r\n\r\n" + problems.ToString(p => "{0} different instances of the same entity ({1}) have been found:\r\n {2}".Formato(
+                p.Count(),
+                p.Key,
+                p.ToString(m => "  {0}{1}".Formato(m.SelfModified ? "[SelfModified] " : "", m), "\r\n")), "\r\n\r\n");
         }
 
         public static DirectedGraph<Modifiable> PreSaving(Func<DirectedGraph<Modifiable>> recreate)

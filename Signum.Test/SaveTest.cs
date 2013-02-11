@@ -95,7 +95,7 @@ namespace Signum.Test
         }
 
         [TestMethod]
-        public void SaveManyMList()
+        public void SaveMList()
         {
             using (Transaction tr = new Transaction())
             using (OperationLogic.AllowSave<AlbumDN>())
@@ -124,6 +124,45 @@ namespace Signum.Test
                 album.Songs.ForEach(a => a.Name = "Updated");
 
                 album.Save();
+
+                //tr.Commit();
+            }
+        }
+
+        [TestMethod]
+        public void SaveManyMList()
+        {
+            using (Transaction tr = new Transaction())
+            using (OperationLogic.AllowSave<AlbumDN>())
+            using (OperationLogic.AllowSave<ArtistDN>())
+            {
+                var prev = Database.MListQuery((AlbumDN a) => a.Songs).Count();
+
+                var authors = 
+                    Database.Query<BandDN>().Take(6).ToList().Concat<IAuthorDN>(
+                    Database.Query<ArtistDN>().Take(8).ToList()).ToList();
+
+                List<AlbumDN> albums = 0.To(16).Select(i => new AlbumDN()
+                {
+                    Name = "System Greatest hits {0}".Formato(i),
+                    Author = i < authors.Count ? authors[i] : new ArtistDN { Name = ".Net Framework" },
+                    Year = 2001,
+                    Songs =  { new SongDN { Name = "Compilation {0}".Formato(i) }}
+                }).ToList();
+
+                albums.SaveList();
+
+                Assert2.AssertAll(GraphExplorer.FromRoots(albums), a => a.SelfModified == false && a.Modified == null);
+
+                Assert.AreEqual(prev + 16, Database.MListQuery((AlbumDN a) => a.Songs).Count());
+
+                albums.ForEach(a => a.Name += "Updated");
+
+                albums.SaveList();
+
+                albums.ForEach(a => a.Songs.ForEach(s => s.Name = "Updated"));
+
+                albums.SaveList();
 
                 //tr.Commit();
             }

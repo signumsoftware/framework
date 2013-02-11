@@ -85,14 +85,30 @@ namespace Signum.Engine.Linq
             if (AreEqual(select.OrderBy, orderings) && !select.IsReverse)
                 return select;
 
-            return new SelectExpression(select.Alias, select.IsDistinct, false, select.Top, select.Columns, select.From, select.Where, orderings, select.GroupBy);
+            return new SelectExpression(select.Alias, select.IsDistinct, false, select.Top, select.Columns, select.From, select.Where, orderings, select.GroupBy, select.ForXmlPathEmpty);
         }
 
 
         protected override Expression VisitScalar(ScalarExpression scalar)
         {
-            using (Scope())
-                return base.VisitScalar(scalar);
+            if (!scalar.Select.ForXmlPathEmpty)
+            {
+                using (Scope())
+                    return base.VisitScalar(scalar);
+            }
+            else
+            {
+                using (Scope())
+                {
+                    var oldOuterMostSelect = outerMostSelect;
+                    outerMostSelect = scalar.Select;
+
+                    var result = base.VisitScalar(scalar);
+                    outerMostSelect = oldOuterMostSelect;
+
+                    return result;
+                }
+            }
         }
 
         protected override Expression VisitExists(ExistsExpression exists)

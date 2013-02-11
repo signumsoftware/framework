@@ -15,6 +15,7 @@ using System.Linq;
 using System.Collections.Generic;
 using Signum.Entities.Reflection;
 using System.Windows.Input;
+using System.Windows.Automation.Peers;
 
 namespace Signum.Windows
 {
@@ -198,7 +199,7 @@ namespace Signum.Windows
 
             MoveFocus();
 
-            if (this.HasChanges())
+            if (this.DataContext != null && this.HasChanges())
             {
                 if (buttonBar.ViewMode == ViewMode.Navigate)
                 {
@@ -274,6 +275,11 @@ namespace Signum.Windows
         }
 
         public ChangeDataContextHandler ChangeDataContext { get; set; }
+
+        protected override AutomationPeer OnCreateAutomationPeer()
+        {
+            return new NormalWindowAutomationPeer(this);
+        }
     }
 
     public enum AllowErrors
@@ -296,6 +302,19 @@ namespace Signum.Windows
         public ViewMode ViewButtons { get; set; }
         public bool SaveProtected { get; set; }
         public bool ShowOperations { get; set; }
+    }
+
+    public class NormalWindowAutomationPeer : WindowAutomationPeer
+    {
+        public NormalWindowAutomationPeer(NormalWindow normalWindow)
+            : base(normalWindow)
+        {
+        }
+
+        protected override string GetClassNameCore()
+        {
+            return "NormalWindow";
+        }
     }
 
 }

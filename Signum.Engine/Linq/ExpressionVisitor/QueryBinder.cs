@@ -119,6 +119,10 @@ namespace Signum.Engine.Linq
                         return BindTake(m.Type, m.GetArgument("source"), m.GetArgument("count"));
                 }
             }
+            else if (m.Method.DeclaringType == typeof(EnumerableExtensions) && m.Method.Name == "ToString")
+            {
+                return this.BindToString(m.GetArgument("source"), m.GetArgument("separator"), m.Method);
+            }
             else if (m.Method.DeclaringType == typeof(Lite) && m.Method.Name == "ToLite")
             {
                 Expression toStr = Visit(m.TryGetArgument("toStr")); //could be null
@@ -185,7 +189,7 @@ namespace Signum.Engine.Linq
 
             ProjectedColumns pc = ColumnProjector.ProjectColumns(projector, alias, newSource.KnownAliases);
 
-            newSource = new SelectExpression(alias, false, false, null, pc.Columns.PreAnd(cd), newSource, null, null, null);
+            newSource = new SelectExpression(alias, false, false, null, pc.Columns.PreAnd(cd), newSource, null, null, null, false);
 
             return result;
         }
@@ -253,7 +257,7 @@ namespace Signum.Engine.Linq
             ProjectedColumns pc = ColumnProjector.ProjectColumns(projection.Projector, alias, projection.Select.KnownAliases);
 
             return new ProjectionExpression(
-                new SelectExpression(alias, false, false, count, pc.Columns, projection.Select, null, null, null),
+                new SelectExpression(alias, false, false, count, pc.Columns, projection.Select, null, null, null, false),
                 pc.Projector, null, resultType);
         }
 
@@ -275,10 +279,10 @@ namespace Signum.Engine.Linq
 
             if (!isRoot && !inTableValuedFunction && pc.Projector is ColumnExpression && (function == UniqueFunction.First || function == UniqueFunction.FirstOrDefault))
                 return new ScalarExpression(pc.Projector.Type,
-                    new SelectExpression(alias, false, false, top, new[] { new ColumnDeclaration("val", pc.Projector) }, newSource, where, null, null));
+                    new SelectExpression(alias, false, false, top, new[] { new ColumnDeclaration("val", pc.Projector) }, newSource, where, null, null, false));
 
             var newProjector = new ProjectionExpression(
-                new SelectExpression(alias, false, false, top, pc.Columns, newSource, where, null, null),
+                new SelectExpression(alias, false, false, top, pc.Columns, newSource, where, null, null, false),
                 pc.Projector, function, resultType);
 
             if (isRoot)
@@ -307,7 +311,7 @@ namespace Signum.Engine.Linq
             Alias alias = NextSelectAlias();
             ProjectedColumns pc = ColumnProjector.ProjectColumns(projection.Projector, alias, projection.Select.KnownAliases, selectTrivialColumns: true);
             return new ProjectionExpression(
-                new SelectExpression(alias, true, false, null, pc.Columns, projection.Select, null, null, null),
+                new SelectExpression(alias, true, false, null, pc.Columns, projection.Select, null, null, null, false),
                 pc.Projector, null, resultType);
         }
 
@@ -318,9 +322,49 @@ namespace Signum.Engine.Linq
             Alias alias = NextSelectAlias();
             ProjectedColumns pc = ColumnProjector.ProjectColumns(projection.Projector, alias, projection.Select.KnownAliases);
             return new ProjectionExpression(
-                new SelectExpression(alias, false, true, null, pc.Columns, projection.Select, null, null, null),
+                new SelectExpression(alias, false, true, null, pc.Columns, projection.Select, null, null, null, false),
                 pc.Projector, null, resultType);
         }
+
+        private Expression BindToString(Expression source, Expression separator, MethodInfo mi)
+        {
+            Expression newSource = Visit(source);
+
+            if (!(newSource is ProjectionExpression))
+                return Expression.Call(mi, newSource, separator);
+
+            ProjectionExpression projection = (ProjectionExpression)newSource;
+
+            var projector = projection.Projector.Type == typeof(string) ? projection.Projector :
+                Expression.Call(projection.Projector, OverloadingSimplifier.miToString);
+
+            Expression nominated;
+            var set = DbExpressionNominator.Nominate(projector, projection.Select.KnownAliases, out nominated, isAggressive: true);
+
+            if(!set.Contains(nominated))
+                return Expression.Call(mi, newSource, separator);
+
+            if (!(separator is ConstantExpression))
+                throw new InvalidCastException("The parameter 'separator' from ToString method should be a constant");
+
+            string value = (string)((ConstantExpression)separator).Value;
+
+            ColumnDeclaration cd = new ColumnDeclaration(null, Expression.Add(new SqlConstantExpression(value, typeof(string)), nominated, miStringConcat));
+
+            Alias alias = NextSelectAlias();
+
+            SelectExpression select = new SelectExpression(alias, false, false, null, new[] { cd }, projection.Select, null, null, null, forXmlPathEmpty: true);
+
+            return new SqlFunctionExpression(typeof(string), null, SqlFunction.STUFF.ToString(), new Expression[]
+            {
+                new ScalarExpression(typeof(string), select),
+                new SqlConstantExpression(1), 
+                new SqlConstantExpression(value.Length), 
+                new SqlConstantExpression("")
+            });
+        }
+
+        static MethodInfo miStringConcat = ReflectionTools.GetMethodInfo(() => string.Concat("", ""));
 
         private Expression BindAggregate(Type resultType, AggregateFunction aggregateFunction, Expression source, LambdaExpression selector, bool isRoot)
         {
@@ -354,7 +398,7 @@ namespace Signum.Engine.Linq
 
             ColumnDeclaration cd = new ColumnDeclaration("a", aggregate);
 
-            SelectExpression select = new SelectExpression(alias, false, false, null, new[] { cd }, newSource, null, null, null);
+            SelectExpression select = new SelectExpression(alias, false, false, null, new[] { cd }, newSource, null, null, null, false);
 
             if (isRoot)
                 return new ProjectionExpression(select,
@@ -382,6 +426,8 @@ namespace Signum.Engine.Linq
 
             return RestoreEnum(subquery, enumType);
         }
+
+
 
         static Type ExtractEnum(ref Type resultType, AggregateFunction aggregateFunction)
         {
@@ -483,7 +529,7 @@ namespace Signum.Engine.Linq
                 else
                 {
                     Expression where = DbExpressionNominator.FullNominate(SmartEqualizer.PolymorphicEqual(projection.Projector, newItem));
-                    se = new ExistsExpression(new SelectExpression(alias, false, false, null, pc.Columns, projection.Select, where, null, null));
+                    se = new ExistsExpression(new SelectExpression(alias, false, false, null, pc.Columns, projection.Select, where, null, null, false));
                 }
 
                 if (isRoot)
@@ -499,7 +545,7 @@ namespace Signum.Engine.Linq
                 throw new ArgumentException("expr");
 
             var alias = NextSelectAlias();
-            SelectExpression select = new SelectExpression(alias, false, false, null, new[] { new ColumnDeclaration("value", expr) }, null, null, null, null);
+            SelectExpression select = new SelectExpression(alias, false, false, null, new[] { new ColumnDeclaration("value", expr) }, null, null, null, null, false);
             return new ProjectionExpression(select, new ColumnExpression(expr.Type, alias, "value"), uniqueFunction, resultType);
         }
 
@@ -519,7 +565,7 @@ namespace Signum.Engine.Linq
             Alias alias = NextSelectAlias();
             ProjectedColumns pc = ColumnProjector.ProjectColumns(projection.Projector, alias, newSource.KnownAliases);
             return new ProjectionExpression(
-                new SelectExpression(alias, false, false, null, pc.Columns, newSource, where, null, null),
+                new SelectExpression(alias, false, false, null, pc.Columns, newSource, where, null, null, false),
                 pc.Projector, null, resultType);
         }
 
@@ -534,7 +580,7 @@ namespace Signum.Engine.Linq
             Alias alias = NextSelectAlias();
             ProjectedColumns pc = ColumnProjector.ProjectColumns(expression, alias, newSource.KnownAliases);
             return new ProjectionExpression(
-                new SelectExpression(alias, false, false, null, pc.Columns, newSource, null, null, null),
+                new SelectExpression(alias, false, false, null, pc.Columns, newSource, null, null, null, false),
                 pc.Projector, null, resultType);
         }
 
@@ -563,7 +609,7 @@ namespace Signum.Engine.Linq
                 JoinExpression join = new JoinExpression(joinType, newSource, collectionProjection.Select, null);
 
                 var result = new ProjectionExpression(
-                    new SelectExpression(alias, false, false, null, pc.Columns, join, null, null, null),
+                    new SelectExpression(alias, false, false, null, pc.Columns, join, null, null, null, false),
                     pc.Projector, null, resultType);
 
                 return result;
@@ -582,7 +628,7 @@ namespace Signum.Engine.Linq
                 var newJoinSource = ApplyExpansions(join);
 
                 var result = new ProjectionExpression(
-                    new SelectExpression(alias, false, false, null, pc.Columns, newJoinSource, null, null, null),
+                    new SelectExpression(alias, false, false, null, pc.Columns, newJoinSource, null, null, null, false),
                     pc.Projector, null, resultType);
 
                 return result;
@@ -624,7 +670,7 @@ namespace Signum.Engine.Linq
             var newSource = ApplyExpansions(join);
 
             ProjectionExpression result = new ProjectionExpression(
-                new SelectExpression(alias, false, false, null, pc.Columns, newSource, null, null, null),
+                new SelectExpression(alias, false, false, null, pc.Columns, newSource, null, null, null, false),
                 pc.Projector, null, resultType);
 
             return result;
@@ -656,7 +702,7 @@ namespace Signum.Engine.Linq
             ProjectedColumns elementPC = ColumnProjector.ProjectColumns(subqueryElemExpr, elementAlias, subQueryNewSource.KnownAliases);
             ProjectionExpression elementSubquery =
                 new ProjectionExpression(
-                    new SelectExpression(elementAlias, false, false, null, elementPC.Columns, subQueryNewSource, subqueryCorrelation, null, null),
+                    new SelectExpression(elementAlias, false, false, null, elementPC.Columns, subQueryNewSource, subqueryCorrelation, null, null, false),
                     elementPC.Projector, null, typeof(IEnumerable<>).MakeGenericType(elementPC.Projector.Type));
 
             NewExpression newResult = Expression.New(typeof(Grouping<,>).MakeGenericType(key.Type, subqueryElemExpr.Type).GetConstructors()[1],
@@ -673,7 +719,7 @@ namespace Signum.Engine.Linq
             });
 
             var result = new ProjectionExpression(
-                new SelectExpression(alias, false, false, null, keyPC.Columns, newSource, null, null, keyPC.Columns.Select(c => c.Expression)),
+                new SelectExpression(alias, false, false, null, keyPC.Columns, newSource, null, null, keyPC.Columns.Select(c => c.Expression), false),
                 resultExpr, null, resultType.GetGenericTypeDefinition().MakeGenericType(resultExpr.Type));
 
             return result;
@@ -704,7 +750,7 @@ namespace Signum.Engine.Linq
             Alias alias = NextSelectAlias();
             ProjectedColumns pc = ColumnProjector.ProjectColumns(projection.Projector, alias, newSource.KnownAliases);
             return new ProjectionExpression(
-                new SelectExpression(alias, false, false, null, pc.Columns, newSource, null, orderings.AsReadOnly(), null),
+                new SelectExpression(alias, false, false, null, pc.Columns, newSource, null, orderings.AsReadOnly(), null, false),
                 pc.Projector, null, resultType);
         }
 
@@ -801,7 +847,7 @@ namespace Signum.Engine.Linq
             ProjectedColumns pc = ColumnProjector.ProjectColumns(exp, selectAlias, new[] { tableAlias });
 
             ProjectionExpression projection = new ProjectionExpression(
-                new SelectExpression(selectAlias, false, false, null, pc.Columns, tableExpression, null, null, null),
+                new SelectExpression(selectAlias, false, false, null, pc.Columns, tableExpression, null, null, null, false),
             pc.Projector, null, resultType);
 
             return projection;
@@ -829,7 +875,7 @@ namespace Signum.Engine.Linq
             ProjectedColumns pc = ColumnProjector.ProjectColumns(exp, selectAlias, new[] { tableAlias });
 
             ProjectionExpression projection = new ProjectionExpression(
-                new SelectExpression(selectAlias, false, false, null, pc.Columns, tableExpression, null, null, null),
+                new SelectExpression(selectAlias, false, false, null, pc.Columns, tableExpression, null, null, null, false),
             pc.Projector, null, returnType);
 
             return projection;
@@ -1839,7 +1885,7 @@ namespace Signum.Engine.Linq
             ProjectedColumns pc = ColumnProjector.ProjectColumns(projection.Projector, newAlias, source.KnownAliases); //Do not replace tokens
 
             return new ProjectionExpression(
-                    new SelectExpression(newAlias, false, false, null, pc.Columns, source, null, null, null),
+                    new SelectExpression(newAlias, false, false, null, pc.Columns, source, null, null, null, false),
                     pc.Projector, projection.UniqueFunction, projection.Type);
         }
 
@@ -1998,7 +2044,7 @@ namespace Signum.Engine.Linq
 
             var where = SmartEqualizer.EqualNullable(mle.BackID, relationalTable.BackColumnExpression(tableAlias));
             var proj = new ProjectionExpression(
-                new SelectExpression(sourceAlias, false, false, null, pc.Columns, tableExpression, where, null, null),
+                new SelectExpression(sourceAlias, false, false, null, pc.Columns, tableExpression, where, null, null, false),
                  pc.Projector, null, mle.Type);
 
             return proj;

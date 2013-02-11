@@ -124,16 +124,16 @@ namespace Signum.Windows.DynamicQuery
         {
         }
 
-        protected override string GetItemStatusCore()
+        protected override string GetNameCore()
         {
             return ((SortGridViewColumnHeader)Owner).RequestColumn.Token.FullKey();
         }
 
-        protected override string GetHelpTextCore()
+        protected override string GetItemStatusCore()
         {
             var adorner = ((SortGridViewColumnHeader)Owner).sortAdorner;
 
-            if(adorner == null)
+            if (adorner == null)
                 return "";
 
             return adorner.OrderType.ToString();

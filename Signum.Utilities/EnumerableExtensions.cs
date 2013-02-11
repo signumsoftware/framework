@@ -415,12 +415,10 @@ namespace Signum.Utilities
             return -1;
         }
 
-
-
-        public static string ToString<T>(this IEnumerable<T> collection, string separator)
+        public static string ToString<T>(this IEnumerable<T> source, string separator)
         {
             StringBuilder sb = null;
-            foreach (var item in collection)
+            foreach (var item in source)
             {
                 if (sb == null)
                     sb = new StringBuilder();
@@ -436,10 +434,10 @@ namespace Signum.Utilities
             return sb.ToString();  // Remove at the end is faster
         }
 
-        public static string ToString<T>(this IEnumerable<T> collection, Func<T, string> toString, string separator)
+        public static string ToString<T>(this IEnumerable<T> source, Func<T, string> toString, string separator)
         {
             StringBuilder sb = null;
-            foreach (var item in collection)
+            foreach (var item in source)
             {
                 if (sb == null)
                     sb = new StringBuilder();
@@ -455,6 +453,10 @@ namespace Signum.Utilities
             return sb.ToString();  // Remove at the end is faster
         }
 
+        public static string ToString<T>(this IQueryable<T> source, Expression<Func<T, string>> toString, string separator)
+        {
+            return source.Select(toString).ToString(separator);
+        }
 
         public static string CommaAnd<T>(this IEnumerable<T> collection)
         {

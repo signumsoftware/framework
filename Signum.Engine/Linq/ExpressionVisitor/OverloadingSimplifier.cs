@@ -85,9 +85,13 @@ namespace Signum.Engine.Linq
         static MethodInfo miOfTypeQ = ReflectionTools.GetMethodInfo(() => Queryable.OfType<int>((IQueryable<string>)null)).GetGenericMethodDefinition();
         static MethodInfo miOfTypeE = ReflectionTools.GetMethodInfo(() => Enumerable.OfType<int>((IEnumerable<string>)null)).GetGenericMethodDefinition();
 
-        static MethodInfo miToString = ReflectionTools.GetMethodInfo(() => ((object)null).ToString());
+        internal static MethodInfo miToString = ReflectionTools.GetMethodInfo(() => ((object)null).ToString());
         static MethodInfo miStringConcat = ReflectionTools.GetMethodInfo(() => string.Concat("", ""));
-        
+
+        static MethodInfo miToStringSeparator = ReflectionTools.GetMethodInfo(() => EnumerableExtensions.ToString((IEnumerable<string>)null, " ")).GetGenericMethodDefinition();
+        static MethodInfo miToStringSeparatorE = ReflectionTools.GetMethodInfo(() => EnumerableExtensions.ToString((IEnumerable<string>)null, a => a, " ")).GetGenericMethodDefinition();
+        static MethodInfo miToStringSeparatorQ = ReflectionTools.GetMethodInfo(() => EnumerableExtensions.ToString((IQueryable<string>)null, a => a, " ")).GetGenericMethodDefinition();
+
 
         static int i = 0; 
 
@@ -365,7 +369,6 @@ namespace Signum.Engine.Linq
                         } 
                     }
                 }
-
             }
 
             if (m.Method.DeclaringType == typeof(Tuple) && m.Method.Name == "Create")
@@ -382,6 +385,25 @@ namespace Signum.Engine.Linq
 
                     return Expression.New(m.Method.ReturnType.GetConstructor(types), m.Arguments.Take(7).And(
                         Expression.New(types[7].GetConstructor(new[] { lastType }), m.Arguments[7])).ToArray());
+                }
+            }
+
+            if (m.Method.DeclaringType == typeof(EnumerableExtensions) && m.Method.IsGenericMethod)
+            {
+                MethodInfo mi = m.Method.GetGenericMethodDefinition();
+
+                if (ReflectionTools.MethodEqual(mi, miToStringSeparatorE) || ReflectionTools.MethodEqual(mi, miToStringSeparatorQ))
+                {
+                    var args = m.Method.GetGenericArguments();
+                    bool isQuery = ReflectionTools.MethodEqual(mi, miToStringSeparatorQ);
+
+                    var source = Visit(m.GetArgument("source"));
+                    var toString = (LambdaExpression)Visit(m.GetArgument("toString").StripQuotes());
+                    var separator = Visit(m.GetArgument("separator"));
+
+                    return Expression.Call(miToStringSeparator.MakeGenericMethod(typeof(string)),
+                        Expression.Call((isQuery ? miSelectQ : miSelectE).MakeGenericMethod(args[0], typeof(string)), source, toString),
+                        separator);
                 }
             }
 

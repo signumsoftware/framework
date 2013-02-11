@@ -39,7 +39,6 @@ namespace Signum.Engine.DynamicQuery
 
                     if (errors.Any())
                         throw new InvalidOperationException("Column {0} Implenentations should be assignable to {1}: {2}".Formato(Name, ct.Name, errors));
-
                 }
 
                 implementations = value;

@@ -138,31 +138,31 @@ namespace Signum.Engine.Maps
 
         internal protected virtual Table Include(Type type, PropertyRoute route)
         {
+            Table result;
+            if (schema.Tables.TryGetValue(type, out result))
+                return result;
+
             using (HeavyProfiler.LogNoStackTrace("Include", () => type.TypeName()))
             {
-                Table result;
-                if (!schema.Tables.TryGetValue(type, out result))
-                {
-                    if (type.IsAbstract)
-                        throw new InvalidOperationException(route.TryCC(r => "Error on field {0}: ".Formato(r)) + "Impossible to include in the Schema the type {0} because is abstract".Formato(type));
+                if (type.IsAbstract)
+                    throw new InvalidOperationException(route.TryCC(r => "Error on field {0}: ".Formato(r)) + "Impossible to include in the Schema the type {0} because is abstract".Formato(type));
 
-                    if (!Reflector.IsIdentifiableEntity(type))
-                        throw new InvalidOperationException(route.TryCC(r => "Error on field {0}: ".Formato(r)) + "Impossible to include in the Schema the type {0} because is not and IdentifiableEntity".Formato(type));
+                if (!Reflector.IsIdentifiableEntity(type))
+                    throw new InvalidOperationException(route.TryCC(r => "Error on field {0}: ".Formato(r)) + "Impossible to include in the Schema the type {0} because is not and IdentifiableEntity".Formato(type));
 
-                    result = new Table(type);
+                result = new Table(type);
 
-                    schema.Tables.Add(type, result);
+                schema.Tables.Add(type, result);
 
-                    string name = schema.Settings.desambiguatedNames.TryGetC(type) ?? Reflector.CleanTypeName(EnumEntity.Extract(type) ?? type);
+                string name = schema.Settings.desambiguatedNames.TryGetC(type) ?? Reflector.CleanTypeName(EnumEntity.Extract(type) ?? type);
 
-                    if (schema.NameToType.ContainsKey(name))
-                        throw new InvalidOperationException(route.TryCC(r => "Error on field {0}: ".Formato(r)) + "Two types have the same cleanName, desambiguate using Schema.Current.Settings.Desambiguate method: \r\n {0}\r\n {1}".Formato(schema.NameToType[name].FullName, type.FullName));
+                if (schema.NameToType.ContainsKey(name))
+                    throw new InvalidOperationException(route.TryCC(r => "Error on field {0}: ".Formato(r)) + "Two types have the same cleanName, desambiguate using Schema.Current.Settings.Desambiguate method: \r\n {0}\r\n {1}".Formato(schema.NameToType[name].FullName, type.FullName));
 
-                    schema.NameToType[name] = type;
-                    schema.TypeToName[type] = name;
+                schema.NameToType[name] = type;
+                schema.TypeToName[type] = name;
 
-                    Complete(result);
-                }
+                Complete(result);
                 return result;
             }
         }
@@ -180,11 +180,6 @@ namespace Signum.Engine.Maps
         HashSet<string> loadedModules = new HashSet<string>();
         public bool NotDefined(MethodBase methodBase)
         {
-            using (HeavyProfiler.LogNoStackTrace("StartLogic", () => methodBase.DeclaringType.TypeName()))
-            {
-                Thread.Sleep(15);
-            }
-
             return loadedModules.Add(methodBase.DeclaringType.FullName + "." + methodBase.Name); 
         }
 

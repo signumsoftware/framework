@@ -10,7 +10,7 @@ using Signum.Entities.Reflection;
 namespace Signum.Entities
 {
     [Serializable]
-    public abstract class Modifiable
+    public abstract class Modifiable 
     {
         [Ignore]
         bool? modified;

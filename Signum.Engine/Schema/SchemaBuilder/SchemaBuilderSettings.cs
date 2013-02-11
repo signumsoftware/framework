@@ -43,6 +43,9 @@ namespace Signum.Engine.Maps
             }
         }
 
+
+        public int MaxNumberOfStatementsInSaveQueries = 16; 
+
         public DBMS DBMS { get; private set; }
 
         public Dictionary<PropertyRoute, Attribute[]> OverridenAttributes = new Dictionary<PropertyRoute, Attribute[]>();
@@ -286,6 +289,7 @@ namespace Signum.Engine.Maps
         {
             return type.IsEnum || GetSqlDbTypePair(type) != null;
         }
+
     }
 
     public class SqlDbTypePair
