@@ -53,10 +53,10 @@ namespace Signum.Windows.Chart
                 string processName = Path.GetFileName(Process.GetCurrentProcess().MainModule.FileName);
 
                 var main = Registry.CurrentUser
-                    .OpenSubKey("Software")
-                    .OpenSubKey("Microsoft")
-                    .OpenSubKey("Internet Explorer")
-                    .OpenSubKey("Main", true)
+                    .AssertOpenSubKey("Software")
+                    .AssertOpenSubKey("Microsoft")
+                    .AssertOpenSubKey("Internet Explorer")
+                    .AssertOpenSubKey("Main", true)
                     .CreateSubKey("FeatureControl")
                     .CreateSubKey("FEATURE_BROWSER_EMULATION");
 
@@ -73,6 +73,32 @@ namespace Signum.Windows.Chart
 
                 ChartUtils.RemoveNotNullValidators();
             }
+        }
+
+        public static RegistryKey AssertOpenSubKey(this RegistryKey key, string name)
+        {
+            if (key == null)
+                throw new ArgumentNullException("key");
+
+            var result = key.OpenSubKey(name);
+
+            if (result == null)
+                throw new InvalidOperationException("RegistryKey {0}/{1} not found".Formato(key, name));
+
+            return result;
+        }
+
+        public static RegistryKey AssertOpenSubKey(this RegistryKey key, string name, bool writeable)
+        {
+            if (key == null)
+                throw new ArgumentNullException("key");
+
+            var result = key.OpenSubKey(name, writeable);
+
+            if (result == null)
+                throw new InvalidOperationException("RegistryKey {0}/{1} not found".Formato(key, name));
+
+            return result;
         }
 
 
