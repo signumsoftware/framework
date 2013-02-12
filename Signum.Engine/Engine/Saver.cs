@@ -112,7 +112,7 @@ namespace Signum.Engine
 
             if (backEdges != null)
             {
-                foreach (var gr in backEdges.Edges.Select(e => e.From).GroupBy(ident => new TypeNew(ident.GetType(), ident.IsNew)))
+                foreach (var gr in backEdges.Edges.Select(e => e.From).Distinct().GroupBy(ident => new TypeNew(ident.GetType(), ident.IsNew)))
                     SaveGroup(schema, gr, null);
             }
         }
