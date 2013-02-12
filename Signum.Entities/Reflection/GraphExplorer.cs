@@ -40,7 +40,7 @@ namespace Signum.Entities.Reflection
 
         public static void CleanModifications(IEnumerable<Modifiable> graph)
         {
-            foreach (Modifiable item in graph)
+            foreach (Modifiable item in graph.Where(a => a.Modified.Value))
                 item.Modified = null;
         }
 
