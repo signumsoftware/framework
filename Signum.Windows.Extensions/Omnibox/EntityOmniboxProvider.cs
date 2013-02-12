@@ -39,7 +39,9 @@ namespace Signum.Windows.Omnibox
                     }
                     else
                     {
-                        lines.Add(result.Lite.TryToString());
+                        string str = result.Lite.TryToString();
+                        if (str.HasText())
+                            lines.Add(str);
                     }
                 }
                 else
