@@ -90,8 +90,7 @@ namespace Signum.Test.LinqProvider
             var graph = GraphExplorer.FromRoots(list);
 
             var problematic = graph.Where(a =>
-                a.Modified != null ||
-                a.SelfModified ||
+                a.IsGraphModified &&
                 a is IdentifiableEntity && (((IdentifiableEntity)a).IdOrNull == null || ((IdentifiableEntity)a).IsNew));
 
             if (problematic.Any())

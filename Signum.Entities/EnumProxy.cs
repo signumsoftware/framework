@@ -14,7 +14,7 @@ namespace Signum.Entities
     {
         public EnumEntity()
         {
-            CleanSelfModified();
+            Modified = ModifiableState.Clean;
         }
 
         public static EnumEntity<T> FromEnum(T t)

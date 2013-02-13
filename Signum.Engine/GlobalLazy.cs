@@ -54,7 +54,7 @@ namespace Signum.Engine
                 using (ExecutionMode.Global())
                 using (HeavyProfiler.Log("ResetLazy", () => typeof(T).TypeName()))
                 using (Transaction tr = Transaction.InTestTransaction ? null : Transaction.ForceNew())
-                using (new EntityCache(true))
+                using (new EntityCache(EntityCacheType.ForceNewSealed))
                 {
                     var value = func();
 

@@ -311,7 +311,7 @@ namespace Signum.Engine.Linq
 
             static PropertyInfo piModified = ReflectionTools.GetPropertyInfo((ModifiableEntity me) => me.Modified);
 
-            static MemberBinding resetModified = Expression.Bind(piModified, Expression.Constant(null, typeof(bool?)));
+            static MemberBinding resetModified = Expression.Bind(piModified, Expression.Constant(ModifiableState.Clean));
 
             protected override Expression VisitEmbeddedEntity(EmbeddedEntityExpression eee)
             {

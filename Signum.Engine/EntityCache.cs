@@ -59,6 +59,10 @@ namespace Signum.Engine
             }
 
             IRetriever retriever;
+            public RealEntityCache(bool isSealed)
+            {
+                IsSealed = isSealed;
+            }
 
             internal IRetriever NewRetriever()
             {
@@ -87,6 +91,8 @@ namespace Signum.Engine
             {
                 return dic.TryGetValue(tuple, out result);
             }
+
+            public bool IsSealed { get; private set; }
         }
 
 
@@ -97,14 +103,12 @@ namespace Signum.Engine
 
         private bool facked = false;
 
-        public EntityCache() : this(false) { }
-
-        public EntityCache(bool forceNew)
+        public EntityCache(EntityCacheType type = EntityCacheType.Normal)
         {
-            if (currentCache.Value == null || forceNew)
+            if (currentCache.Value == null || type != EntityCacheType.Normal)
             {
                 oldCache = currentCache.Value;
-                currentCache.Value = new RealEntityCache();
+                currentCache.Value = new RealEntityCache(type == EntityCacheType.ForceNewSealed);
             }
             else
                 facked = true;
@@ -207,6 +211,13 @@ namespace Signum.Engine
                 }
             }
         }
+    }
+
+    public enum EntityCacheType
+    {
+        Normal,
+        ForceNew,
+        ForceNewSealed
     }
 
     [Serializable]

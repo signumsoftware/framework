@@ -113,7 +113,7 @@ namespace Signum.Test
                     Songs = types.Select(t => new SongDN() { Name = t.Name }).ToMList()
                 }.Save();
 
-                Assert2.AssertAll(GraphExplorer.FromRoot(album), a => a.SelfModified == false && a.Modified == null);
+                Assert2.AssertAll(GraphExplorer.FromRoot(album), a => !a.IsGraphModified);
 
                 Assert.AreEqual(prev + types.Length, Database.MListQuery((AlbumDN a) => a.Songs).Count());
 
@@ -152,7 +152,7 @@ namespace Signum.Test
 
                 albums.SaveList();
 
-                Assert2.AssertAll(GraphExplorer.FromRoots(albums), a => a.SelfModified == false && a.Modified == null);
+                Assert2.AssertAll(GraphExplorer.FromRoots(albums), a => !a.IsGraphModified);
 
                 Assert.AreEqual(prev + 16, Database.MListQuery((AlbumDN a) => a.Songs).Count());
 

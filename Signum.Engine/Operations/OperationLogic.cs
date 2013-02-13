@@ -194,7 +194,7 @@ namespace Signum.Engine.Operations
 
         static void EntityEventsGlobal_Saving(IdentifiableEntity ident)
         {
-            if (ident.Modified == true && 
+            if (ident.IsGraphModified && 
                 IsSaveProtected(ident.GetType()) && 
                 !IsSaveProtectedAllowed(ident.GetType()))
                 throw new InvalidOperationException("Saving '{0}' is controlled by the operations. Use OperationLogic.AllowSave<{0}>() or execute {1}".Formato(
@@ -478,7 +478,7 @@ namespace Signum.Engine.Operations
         {
             if (result.Lite)
             {
-                var list = GraphExplorer.FromRoot(entity).Where(a => a.SelfModified);
+                var list = GraphExplorer.FromRoot(entity).Where(a => a.Modified == ModifiableState.SelfModified);
                 if (list.Any())
                     throw new InvalidOperationException("Operation {0} needs a Lite or a clean entity, but the entity has changes:\r\n {1}".Formato(result.Key, list.ToString("\r\n")));
             }

@@ -33,7 +33,7 @@ namespace Signum.Entities
             if (AllowChange)
                 base.PreSaving(ref graphModified);
             else
-                if (SelfModified)
+                if (Modified == ModifiableState.SelfModified)
                     throw new InvalidOperationException("Attempt to save a not new modified ImmutableEntity");
         }
     }

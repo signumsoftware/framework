@@ -19,6 +19,8 @@ namespace Signum.Engine
         Lite<T> RequestLite<T>(Lite<T> lite) where T : class, IIdentifiable;
         T EmbeddedPostRetrieving<T>(T entity) where T : EmbeddedEntity; 
         IRetriever Parent { get; }
+
+        bool IsSealed { get; }
     }
 
     class RealRetriever : IRetriever
@@ -205,7 +207,7 @@ namespace Signum.Engine
 
                 entity.PostRetrieving();
                 Schema.Current.OnRetrieved(entity);
-                entity.Modified = null;
+                entity.Modified = ModifiableState.Clean;
                 entity.IsNew = false;
 
                 entityCache.Add(entity);
@@ -233,16 +235,21 @@ namespace Signum.Engine
             else
                 return Database.Query<T>().Where(e => ids.Contains(e.Id)).Select(a => KVP.Create(a.Id, a.ToString())).ToDictionary();
         }
+
+        public bool IsSealed
+        {
+            get { return this.entityCache.IsSealed; }
+        }
     }
 
     class ChildRetriever : IRetriever
     {
-        EntityCache.RealEntityCache Cache;
+        EntityCache.RealEntityCache entityCache;
         public IRetriever Parent { get; set; }
-        public ChildRetriever(IRetriever parent, EntityCache.RealEntityCache cache)
+        public ChildRetriever(IRetriever parent, EntityCache.RealEntityCache entityCache)
         {
             this.Parent = parent;
-            this.Cache = cache;
+            this.entityCache = entityCache;
         }
 
         public T Complete<T>(int? id, Action<T> complete) where T : IdentifiableEntity
@@ -273,6 +280,11 @@ namespace Signum.Engine
         public void Dispose()
         {
             EntityCache.ReleaseRetriever(this);
+        }
+
+        public bool IsSealed
+        {
+            get { return this.entityCache.IsSealed; }
         }
     }
 }

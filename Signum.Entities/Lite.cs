@@ -221,16 +221,6 @@ namespace Signum.Entities
             this.toStr = toStr;
         }
 
-        protected override void CleanSelfModified()
-        {
-        }
-
-        public override bool SelfModified
-        {
-            get { return false; }
-        }
-
-
         public Lite<T> Clone()
         {
             return new LiteImp<T>(Id, toStr); 

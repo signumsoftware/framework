@@ -24,25 +24,6 @@ namespace Signum.Entities
     [Serializable, DebuggerTypeProxy(typeof(FlattenHierarchyProxy))]
     public abstract class ModifiableEntity : Modifiable, INotifyPropertyChanged, IDataErrorInfo, ICloneable
     {
-        [Ignore]
-        bool selfModified = true;
-
-        [HiddenProperty]
-        public override bool SelfModified
-        {
-            get { return selfModified; }
-        }
-
-        protected internal virtual void SetSelfModified()
-        {
-            selfModified = true; 
-        }
-
-        protected override void CleanSelfModified()
-        {
-            selfModified = false;
-        }
-
         protected virtual bool Set<T>(ref T field, T value, Expression<Func<T>> property)
         {
             if (EqualityComparer<T>.Default.Equals(field, value))

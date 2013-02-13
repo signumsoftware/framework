@@ -66,7 +66,7 @@ namespace Signum.Engine
                 identifiables.RemoveEdges(identifiables.Edges.Where(e => !e.To.IsNew).ToList());
 
                 //Remove all the nodes that are not modified
-                List<IdentifiableEntity> notModified = identifiables.Where(node => node.Modified == false).ToList();
+                List<IdentifiableEntity> notModified = identifiables.Where(node => !node.IsGraphModified).ToList();
 
                 notModified.ForEach(node => identifiables.RemoveFullNode(node, None));
 

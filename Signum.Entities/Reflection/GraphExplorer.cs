@@ -21,27 +21,24 @@ namespace Signum.Entities.Reflection
                 throw new ArgumentNullException("inverseGraph");
 
             foreach (Modifiable item in inverseGraph)
-                item.Modified = false;
-
-            foreach (Modifiable item in inverseGraph)
-                if (item.SelfModified)
+                if (item.Modified == ModifiableState.SelfModified)
                     Propagate(item, inverseGraph); 
         }
 
         static void Propagate(Modifiable item, DirectedGraph<Modifiable> inverseGraph)
         {
-            if (item.Modified.Value)
+            if (item.Modified == ModifiableState.SelfModified || item.Modified == ModifiableState.Modified)
                 return;
 
-            item.Modified = true;
+            item.Modified = ModifiableState.Modified;
             foreach (var other in inverseGraph.RelatedTo(item))
                 Propagate(other, inverseGraph);
         }
 
         public static void CleanModifications(IEnumerable<Modifiable> graph)
         {
-            foreach (Modifiable item in graph.Where(a => a.Modified.Value))
-                item.Modified = null;
+            foreach (Modifiable item in graph.Where(a => a.Modified == ModifiableState.SelfModified || a.Modified == ModifiableState.Modified))
+                item.Modified = ModifiableState.Clean;
         }
 
         public static DirectedGraph<Modifiable> FromRootIdentifiable(Modifiable root)
@@ -119,7 +116,7 @@ namespace Signum.Entities.Reflection
         {
             var problems = (from m in graph.OfType<IdentifiableEntity>()
                             group m by new { Type = m.GetType(), Id = (m as IdentifiableEntity).TryCS(ident => (long?)ident.IdOrNull) ?? -m.temporalId } into g
-                            where g.Count() > 1 && g.Count(m => m.SelfModified) > 0
+                            where g.Count() > 1 && g.Count(m => m.Modified == ModifiableState.SelfModified) > 0
                             select g).ToList();
 
             if (problems.Count == 0)
@@ -128,7 +125,7 @@ namespace Signum.Entities.Reflection
             return "CLONE ATTACK!\r\n\r\n" + problems.ToString(p => "{0} different instances of the same entity ({1}) have been found:\r\n {2}".Formato(
                 p.Count(),
                 p.Key,
-                p.ToString(m => "  {0}{1}".Formato(m.SelfModified ? "[SelfModified] " : "", m), "\r\n")), "\r\n\r\n");
+                p.ToString(m => "  {0}{1}".Formato(m.Modified, m), "\r\n")), "\r\n\r\n");
         }
 
         public static DirectedGraph<Modifiable> PreSaving(Func<DirectedGraph<Modifiable>> recreate)
@@ -186,7 +183,9 @@ namespace Signum.Entities.Reflection
                 Fillcolor = n is Lite<IdentifiableEntity> ? "white" : color(n.GetType()),
                 Color =
                     n is Lite<IdentifiableEntity> ? color(((Lite<IdentifiableEntity>)n).GetType()) :
-                    (n.SelfModified ? "red" : n.Modified == true ? "red4" :"black"),
+                    (n.Modified == ModifiableState.SelfModified ? "red" : 
+                     n.Modified == ModifiableState.Modified ? "red4" :
+                     n.Modified == ModifiableState.Sealed ? "gray" : "black"),
 
                 Shape = n is Lite<IdentifiableEntity> ? "ellipse" :
                         n is IdentifiableEntity ? "ellipse" :
@@ -247,14 +246,7 @@ namespace Signum.Entities.Reflection
 
         private static string Modified(Modifiable ie)
         {
-            string str = ",".Combine(ie.SelfModified ? "SelfModified" : null,
-                                               ie.Modified == true ? "Modified" :
-                                               ie.Modified == false ? "Not-Modified" : null);
-
-            if (str.HasText())
-                return "({0})".Formato(str);
-
-            return null;
+            return "({0})".Formato(ie.Modified);
         }
 
         private static XAttribute[] GetAttributes(Lite<IdentifiableEntity> lite)
