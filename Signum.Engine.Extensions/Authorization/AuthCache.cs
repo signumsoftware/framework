@@ -258,7 +258,7 @@ namespace Signum.Entities.Authorization
                     (p, ar, pr) =>
                     {
                         pr.Allowed = ar.Allowed;
-                        if (pr.SelfModified)
+                        if (pr.IsGraphModified)
                             pr.Save();
                     });
             }

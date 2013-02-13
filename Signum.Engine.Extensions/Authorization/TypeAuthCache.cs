@@ -207,7 +207,7 @@ namespace Signum.Entities.Authorization
         Dictionary<Lite<RoleDN>, RoleAllowedCache> NewCache()
         {
             using (AuthLogic.Disable())
-            using (new EntityCache(true))
+            using (new EntityCache(EntityCacheType.ForceNewSealed))
             {
                 List<Lite<RoleDN>> roles = AuthLogic.RolesInOrder().ToList();
 
@@ -271,8 +271,8 @@ namespace Signum.Entities.Authorization
                 var current = Database.Query<RuleTypeDN>().Where(r => r.Role == rules.Role && r.Resource != null).ToDictionary(a => a.Resource);
                 var should = rules.Rules.Where(a => a.Overriden).ToDictionary(r => r.Resource);
 
-                Synchronizer.Synchronize(should, current, 
-                    (type, ar) => ar.Allowed.ToRuleType(rules.Role, type).Save(), 
+                Synchronizer.Synchronize(should, current,
+                    (type, ar) => ar.Allowed.ToRuleType(rules.Role, type).Save(),
                     (type, pr) => pr.Delete(),
                     (type, ar, pr) =>
                     {
@@ -287,7 +287,7 @@ namespace Signum.Entities.Authorization
                         if (!pr.Conditions.SequenceEqual(shouldConditions))
                             pr.Conditions = shouldConditions;
 
-                        if (pr.SelfModified)
+                        if (pr.IsGraphModified)
                             pr.Save();
                     });
             }

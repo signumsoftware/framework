@@ -252,13 +252,12 @@ namespace Signum.Entities.UserQueries
         {
             try
             {
-                Token = QueryUtils.Parse(tokenString, subTokens);
+                token = QueryUtils.Parse(tokenString, subTokens);
             }
             catch (Exception e)
             {
                 parseException = new FormatException("{0} {1}: {2}\r\n{3}".Formato(context.GetType().Name, context.IdOrNull, context, e.Message));
             }
-            CleanSelfModified();
         }
 
     }
@@ -294,13 +293,12 @@ namespace Signum.Entities.UserQueries
         {
             try
             {
-                Token = QueryUtils.Parse(tokenString, subTokens);
+                token = QueryUtils.Parse(tokenString, subTokens);
             }
             catch (Exception e)
             {
                 parseException = new FormatException("{0} {1}: {2}\r\n{3}".Formato(context.GetType().Name, context.IdOrNull, context, e.Message));
             }
-            CleanSelfModified();
         }
     }
 
@@ -349,7 +347,7 @@ namespace Signum.Entities.UserQueries
         {
             try
             {
-                Token = QueryUtils.Parse(tokenString, subTokens);
+                token = QueryUtils.Parse(tokenString, subTokens);
             }
             catch (Exception e)
             {
@@ -371,8 +369,6 @@ namespace Signum.Entities.UserQueries
                     string error = FilterValueConverter.TryParse(ValueString, Token.Type, out val);
                     if (string.IsNullOrEmpty(error))
                         Value = val; //Executed on server only
-
-                    CleanSelfModified();
                 }
             }
         }

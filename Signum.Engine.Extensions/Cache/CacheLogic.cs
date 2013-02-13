@@ -117,7 +117,7 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
 
             void Saving(T ident)
             {
-                if (ident.Modified.Value)
+                if (ident.IsGraphModified)
                 {
                     if (ident.IsNew)
                     {

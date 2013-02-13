@@ -294,7 +294,7 @@ namespace Signum.Entities.Chart
         public bool HasChanges()
         {
             var graph = GraphExplorer.FromRoot(this);
-            return graph.Any(a => a.SelfModified);
+            return graph.Any(a => a.Modified == ModifiableState.SelfModified);
         }
     }
 

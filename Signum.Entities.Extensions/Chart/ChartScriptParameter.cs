@@ -14,11 +14,6 @@ namespace Signum.Entities.Chart
     [Serializable]
     public class ChartScriptParameterDN : EmbeddedEntity
     {
-        protected override void SetSelfModified()
-        {
-            base.SetSelfModified();
-        }
-
         [NotNullable, SqlDbType(Size = 50)]
         string name;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 50)]
