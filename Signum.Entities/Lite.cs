@@ -41,7 +41,10 @@ namespace Signum.Entities
     }
 
     [Serializable]
-    abstract class LiteImp  : Modifiable{ }
+    abstract class LiteImp  : Modifiable
+    {
+    
+    }
 
     [Serializable, DebuggerTypeProxy(typeof(FlattenHierarchyProxy))]
     class LiteImp<T> : LiteImp, Lite<T>
@@ -63,6 +66,16 @@ namespace Signum.Entities
 
             this.id = id;
             this.toStr = toStr;
+        }
+
+        public LiteImp(int id, string toStr, ModifiedState modified)
+        {
+            if (typeof(T).IsAbstract)
+                throw new InvalidOperationException(typeof(T).Name + " is abstract");
+
+            this.id = id;
+            this.toStr = toStr;
+            this.Modified = modified; 
         }
 
         public LiteImp(T entity, string toStr)
@@ -234,6 +247,9 @@ namespace Signum.Entities
         static GenericInvoker<Func<int, string, Lite<IdentifiableEntity>>> giNewLite =
             new GenericInvoker<Func<int, string, Lite<IdentifiableEntity>>>((id, str) => new LiteImp<IdentifiableEntity>(id, str));
 
+        static GenericInvoker<Func<int, string, ModifiedState, Lite<IdentifiableEntity>>> giNewLiteModified =
+            new GenericInvoker<Func<int, string, ModifiedState, Lite<IdentifiableEntity>>>((id, str, state) => new LiteImp<IdentifiableEntity>(id, str, state));
+
         static GenericInvoker<Func<IdentifiableEntity, string, Lite<IdentifiableEntity>>> giNewLiteFat =
             new GenericInvoker<Func<IdentifiableEntity, string, Lite<IdentifiableEntity>>>((entity, str) => new LiteImp<IdentifiableEntity>(entity, str));
 
@@ -315,6 +331,11 @@ namespace Signum.Entities
         public static Lite<IdentifiableEntity> Create(Type type, int id, string toStr)
         {
             return giNewLite.GetInvoker(type)(id, toStr);
+        }
+
+        public static Lite<IdentifiableEntity> Create(Type type, int id, string toStr, ModifiedState state)
+        {
+            return giNewLiteModified.GetInvoker(type)(id, toStr, state);
         }
 
         public static Lite<T> ToLite<T>(this T entity)
@@ -484,12 +505,12 @@ namespace Signum.Entities
 
         public static ConstructorInfo LiteConstructor(Type type)
         {
-            return ciLiteConstructor.GetOrAdd(type, t => typeof(LiteImp<>).MakeGenericType(t).GetConstructor(new[] { typeof(int), typeof(string) }));
+            return ciLiteConstructor.GetOrAdd(type, t => typeof(LiteImp<>).MakeGenericType(t).GetConstructor(new[] { typeof(int), typeof(string), typeof(ModifiedState) }));
         }
 
-        public static NewExpression NewExpression(Type type, Expression id, Expression toString)
+        public static NewExpression NewExpression(Type type, Expression id, Expression toString, Expression modified)
         {
-            return Expression.New(Lite.LiteConstructor(type), id.UnNullify(), toString);
+            return Expression.New(Lite.LiteConstructor(type), id.UnNullify(), toString, modified);
         }
     }
 }

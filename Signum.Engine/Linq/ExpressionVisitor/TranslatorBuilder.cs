@@ -310,13 +310,15 @@ namespace Signum.Engine.Linq
             }
 
             static PropertyInfo piModified = ReflectionTools.GetPropertyInfo((ModifiableEntity me) => me.Modified);
-            static PropertyInfo piModifiableState = ReflectionTools.GetPropertyInfo((IRetriever re) => re.ModifiedState);
+            static Expression peModifiableState = Expression.Property(retriever, ReflectionTools.GetPropertyInfo((IRetriever re) => re.ModifiedState));
+
+            static MemberBinding mbModified = Expression.Bind(piModified, peModifiableState);
 
             protected override Expression VisitEmbeddedEntity(EmbeddedEntityExpression eee)
             {
                 Expression ctor = Expression.MemberInit(Expression.New(eee.Type),
                        eee.Bindings.Select(b => Expression.Bind(b.FieldInfo, Visit(b.Binding)))
-                       .And(Expression.Bind(piModified, Expression.Property(retriever, piModifiableState))));
+                       .And(mbModified));
 
                 var entity = Expression.Call(retriever, miEmbeddedPostRetrieving.MakeGenericMethod(eee.Type), ctor);
 
@@ -392,7 +394,7 @@ namespace Signum.Engine.Linq
                     Type type = ((TypeEntityExpression)typeId).TypeValue;
 
                     liteConstructor = Expression.Condition(Expression.NotEqual(id, NullId),
-                        Expression.Convert(Lite.NewExpression(type, id, toStringOrNull), lite.Type),
+                        Expression.Convert(Lite.NewExpression(type, id, toStringOrNull, peModifiableState), lite.Type),
                         nothing);
                 }
                 else if (typeId.NodeType == (ExpressionType)DbExpressionType.TypeImplementedBy)
@@ -403,22 +405,24 @@ namespace Signum.Engine.Linq
                             {
                                 var visitId = Visit(NullifyColumn(ti.ExternalId));
                                 return Expression.Condition(Expression.NotEqual(visitId, NullId),
-                                    Expression.Convert(Lite.NewExpression(ti.Type, visitId, toStringOrNull), lite.Type), acum);
+                                    Expression.Convert(Lite.NewExpression(ti.Type, visitId, toStringOrNull, peModifiableState), lite.Type), acum);
                             });
                 }
                 else if (typeId.NodeType == (ExpressionType)DbExpressionType.TypeImplementedByAll)
                 {
                     TypeImplementedByAllExpression tiba = (TypeImplementedByAllExpression)typeId;
                     liteConstructor = Expression.Condition(Expression.NotEqual(id, NullId),
-                                    Expression.Convert(Expression.Call(miLiteCreate, SchemaGetType(tiba), id.UnNullify(), toStringOrNull), lite.Type),
+                                    Expression.Convert(Expression.Call(miLiteCreate, SchemaGetType(tiba), id.UnNullify(), toStringOrNull, peModifiableState), lite.Type),
                                      nothing);
                 }
                 else
                 {
                     liteConstructor = Expression.Condition(Expression.NotEqual(id, NullId),
-                                       Expression.Convert(Expression.Call(miLiteCreate, Visit(typeId), id.UnNullify(), toStringOrNull), lite.Type),
+                                       Expression.Convert(Expression.Call(miLiteCreate, Visit(typeId), id.UnNullify(), toStringOrNull, peModifiableState), lite.Type),
                                         nothing);
                 }
+
+               
 
                 if (toStr != null)
                     return liteConstructor;
@@ -426,7 +430,7 @@ namespace Signum.Engine.Linq
                     return Expression.Call(retriever, miRequestLite.MakeGenericMethod(Lite.Extract(lite.Type)), liteConstructor);
             }
 
-            static MethodInfo miLiteCreate = ReflectionTools.GetMethodInfo(() => Lite.Create(null, 0, null));
+            static MethodInfo miLiteCreate = ReflectionTools.GetMethodInfo(() => Lite.Create(null, 0, null, ModifiedState.Clean));
 
             protected override Expression VisitMListElement(MListElementExpression mle)
             {

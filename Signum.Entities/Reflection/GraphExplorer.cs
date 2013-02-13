@@ -27,7 +27,7 @@ namespace Signum.Entities.Reflection
 
         static void Propagate(Modifiable item, DirectedGraph<Modifiable> inverseGraph)
         {
-            if (item.Modified == ModifiedState.SelfModified || item.Modified == ModifiedState.Modified)
+            if (item.Modified == ModifiedState.Modified)
                 return;
 
             item.Modified = ModifiedState.Modified;

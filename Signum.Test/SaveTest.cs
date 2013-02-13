@@ -168,5 +168,25 @@ namespace Signum.Test
             }
 
         }
+
+          [TestMethod]
+        public void RetrieveSealed()
+        {
+            using (Transaction tr = new Transaction())
+            using (new EntityCache(EntityCacheType.ForceNewSealed))
+            {
+                var albums = Database.Query<AlbumDN>().ToList();
+
+                Assert2.AssertAll(GraphExplorer.FromRoots(albums), a => a.Modified == ModifiedState.Sealed);
+                
+                Assert2.Throws<InvalidOperationException>(() => albums.First().Name = "New name", "sealed");
+
+
+                var notes = Database.Query<NoteWithDateDN>().ToList();
+                Assert2.AssertAll(GraphExplorer.FromRoots(notes), a => a.Modified == ModifiedState.Sealed);
+
+                //tr.Commit();
+            }
+        }
     }
 }
