@@ -23,20 +23,6 @@ namespace Signum.Engine.Cache
 {
     public abstract class CachedTableBase
     {
-        protected static ConstructorInfo ciKVPIntString = ReflectionTools.GetConstuctorInfo(() => new KeyValuePair<int, string>(1, ""));
-        protected static Action<IRetriever, Modifiable> resetModifiedAction;
-        static CachedTableBase()
-        {
-            ParameterExpression retriever = Expression.Parameter(typeof(IRetriever));
-            ParameterExpression modif = Expression.Parameter(typeof(Modifiable));
-            var piModified = ReflectionTools.GetPropertyInfo((Modifiable me) => me.Modified);
-            var piModifiedStatite = ReflectionTools.GetPropertyInfo((IRetriever me) => me.ModifiedState);
-            resetModifiedAction = Expression.Lambda<Action<IRetriever, Modifiable>>(
-                Expression.Assign(Expression.Property(modif, piModified),
-                Expression.Property(retriever, piModifiedStatite)),
-                retriever, modif).Compile();
-        }
-
         public abstract ITable Table { get; }
 
         List<CachedTableBase> subTables;
@@ -329,7 +315,8 @@ namespace Signum.Engine.Cache
                     Expression lite;
                     if (CacheLogic.GetCacheType(type) == CacheType.Cached)
                     {
-                        lite = Expression.Call(retriever, miRequestLite.MakeGenericMethod(type), Lite.NewExpression(type, id.UnNullify(), Expression.Constant(null, typeof(string))));
+                        lite = Expression.Call(retriever, miRequestLite.MakeGenericMethod(type),
+                            Lite.NewExpression(type, id.UnNullify(), Expression.Constant(null, typeof(string)), peModified));
                     }
                     else
                     {
@@ -379,7 +366,6 @@ namespace Signum.Engine.Cache
             static MethodInfo miRequest = ReflectionTools.GetMethodInfo((IRetriever r) => r.Request<IdentifiableEntity>(null)).GetGenericMethodDefinition();
             static MethodInfo miComplete = ReflectionTools.GetMethodInfo((IRetriever r) => r.Complete<IdentifiableEntity>(0, null)).GetGenericMethodDefinition();
 
-
             internal static ParameterExpression originObject = Expression.Parameter(typeof(object), "originObject");
             internal static ParameterExpression retriever = Expression.Parameter(typeof(IRetriever), "retriever");
 
@@ -388,6 +374,23 @@ namespace Signum.Engine.Cache
                 Expression.Property(retriever, ReflectionTools.GetPropertyInfo((IRetriever re) => re.ModifiedState)));
                 
             static MethodInfo miLiteCreate = ReflectionTools.GetMethodInfo(() => Lite.Create(null, 0, null));
+
+            public static MemberExpression peModified = Expression.Property(retriever, ReflectionTools.GetPropertyInfo((IRetriever me) => me.ModifiedState));
+
+            public static ConstructorInfo ciKVPIntString = ReflectionTools.GetConstuctorInfo(() => new KeyValuePair<int, string>(1, ""));
+
+
+            public static Action<IRetriever, Modifiable> resetModifiedAction; 
+
+            static CachedTableConstructor()
+            {
+                ParameterExpression modif = Expression.Parameter(typeof(Modifiable));
+
+                resetModifiedAction = Expression.Lambda<Action<IRetriever, Modifiable>>(Expression.Assign(
+                    Expression.Property(modif, ReflectionTools.GetPropertyInfo((Modifiable me) => me.Modified)), 
+                    CachedTableConstructor.peModified),
+                    CachedTableConstructor.retriever, modif).Compile();
+            }
 
 
             static MethodInfo miGetType = ReflectionTools.GetMethodInfo((Schema s) => s.GetType(1));
@@ -630,7 +633,7 @@ namespace Signum.Engine.Cache
                 }
             }
 
-            resetModifiedAction(retriever, result);
+            CachedTableConstructor.resetModifiedAction(retriever, result);
 
             return result;
         }
@@ -685,7 +688,7 @@ namespace Signum.Engine.Cache
             {
                 ParameterExpression reader = Expression.Parameter(typeof(FieldReader));
 
-                var kvpConstructor = Expression.New(ciKVPIntString,
+                var kvpConstructor = Expression.New(CachedTableConstructor.ciKVPIntString,
                     FieldReader.GetExpression(reader, 0, typeof(int)),
                     FieldReader.GetExpression(reader, 1, typeof(string)));
 
