@@ -8,6 +8,7 @@ using System.Windows.Media.Animation;
 using Signum.Utilities;
 using System.Windows.Media;
 using Signum.Entities;
+using System.Windows.Automation.Peers;
 
 namespace Signum.Windows
 {
@@ -76,6 +77,26 @@ namespace Signum.Windows
                 if (oldValue != null && newValue != null)
                     Child.BeginAnimation(UIElement.OpacityProperty, animation);
             }
+        }
+    }
+
+    public class AutomationBorder : Border
+    {
+        protected override AutomationPeer OnCreateAutomationPeer()
+        {
+            return new AutomationBorderPeer(this);
+        }
+    }
+
+    public class AutomationBorderPeer : FrameworkElementAutomationPeer
+    {
+        public AutomationBorderPeer(AutomationBorder automationBorder) : base(automationBorder)
+        {
+        }
+
+        protected override string GetClassNameCore()
+        {
+            return "AutomationBorder";
         }
     }
 }
