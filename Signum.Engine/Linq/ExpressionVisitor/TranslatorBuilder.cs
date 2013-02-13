@@ -310,13 +310,13 @@ namespace Signum.Engine.Linq
             }
 
             static PropertyInfo piModified = ReflectionTools.GetPropertyInfo((ModifiableEntity me) => me.Modified);
-
-            static MemberBinding resetModified = Expression.Bind(piModified, Expression.Constant(ModifiableState.Clean));
+            static PropertyInfo piModifiableState = ReflectionTools.GetPropertyInfo((IRetriever re) => re.ModifiedState);
 
             protected override Expression VisitEmbeddedEntity(EmbeddedEntityExpression eee)
             {
                 Expression ctor = Expression.MemberInit(Expression.New(eee.Type),
-                       eee.Bindings.Select(b => Expression.Bind(b.FieldInfo, Visit(b.Binding))).And(resetModified));
+                       eee.Bindings.Select(b => Expression.Bind(b.FieldInfo, Visit(b.Binding)))
+                       .And(Expression.Bind(piModified, Expression.Property(retriever, piModifiableState))));
 
                 var entity = Expression.Call(retriever, miEmbeddedPostRetrieving.MakeGenericMethod(eee.Type), ctor);
 

@@ -20,7 +20,7 @@ namespace Signum.Engine
         T EmbeddedPostRetrieving<T>(T entity) where T : EmbeddedEntity; 
         IRetriever Parent { get; }
 
-        bool IsSealed { get; }
+        ModifiedState ModifiedState { get; }
     }
 
     class RealRetriever : IRetriever
@@ -201,13 +201,15 @@ namespace Signum.Engine
                 }
             }
 
+
+            ModifiedState ms = ModifiedState;
             foreach (var kvp in retrieved)
             {
                 IdentifiableEntity entity = kvp.Value;
 
                 entity.PostRetrieving();
                 Schema.Current.OnRetrieved(entity);
-                entity.Modified = ModifiableState.Clean;
+                entity.Modified = ms;
                 entity.IsNew = false;
 
                 entityCache.Add(entity);
@@ -236,9 +238,9 @@ namespace Signum.Engine
                 return Database.Query<T>().Where(e => ids.Contains(e.Id)).Select(a => KVP.Create(a.Id, a.ToString())).ToDictionary();
         }
 
-        public bool IsSealed
+        public ModifiedState ModifiedState
         {
-            get { return this.entityCache.IsSealed; }
+            get { return this.entityCache.IsSealed ? ModifiedState.Sealed : ModifiedState.Clean; }
         }
     }
 
@@ -282,9 +284,9 @@ namespace Signum.Engine
             EntityCache.ReleaseRetriever(this);
         }
 
-        public bool IsSealed
+        public ModifiedState ModifiedState
         {
-            get { return this.entityCache.IsSealed; }
+            get { return this.entityCache.IsSealed ? ModifiedState.Sealed : ModifiedState.Clean; }
         }
     }
 }
