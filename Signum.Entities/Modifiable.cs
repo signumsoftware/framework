@@ -31,6 +31,7 @@ namespace Signum.Entities
         /// <summary>
         /// True if SelfModified or (saving) and Modified
         /// </summary>
+        [HiddenProperty]
         public bool IsGraphModified
         {
             get { return Modified == ModifiedState.Modified || Modified == ModifiedState.SelfModified; }
