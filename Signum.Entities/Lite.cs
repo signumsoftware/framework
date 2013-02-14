@@ -501,6 +501,11 @@ namespace Signum.Entities
             return new LiteImp<T>(id, toStr);
         }
 
+        public static Lite<T> Create<T>(int id, string toStr, ModifiedState modified) where T : IdentifiableEntity
+        {
+            return new LiteImp<T>(id, toStr, modified);
+        }
+
         static ConcurrentDictionary<Type, ConstructorInfo> ciLiteConstructor = new ConcurrentDictionary<Type, ConstructorInfo>();
 
         public static ConstructorInfo LiteConstructor(Type type)
