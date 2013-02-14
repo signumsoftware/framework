@@ -642,7 +642,7 @@ namespace Signum.Engine.Maps
             if (SetToStrField(ident))
                 ident.SetSelfModified();
 
-            if (ident.Modified == ModifiableState.Clean || ident.Modified == ModifiableState.Sealed)
+            if (ident.Modified == ModifiedState.Clean || ident.Modified == ModifiedState.Sealed)
                 return null;
 
             var uc = updater.Value;
@@ -767,7 +767,7 @@ namespace Signum.Engine.Maps
                     if (collection == null)
                         continue;
 
-                    if (collection.Modified == ModifiableState.Clean)
+                    if (collection.Modified == ModifiedState.Clean)
                         continue;
 
                     foreach (var item in collection)
@@ -790,7 +790,7 @@ namespace Signum.Engine.Maps
                         toDelete.Add(entity);
                     else
                     {
-                        if (collection.Modified == ModifiableState.Clean)
+                        if (collection.Modified == ModifiedState.Clean)
                             continue;
 
                         toDelete.Add(entity);
@@ -812,7 +812,7 @@ namespace Signum.Engine.Maps
                 if (collection == null)
                     return null;
 
-                if (collection.Modified == ModifiableState.Clean)
+                if (collection.Modified == ModifiedState.Clean)
                     return null;
 
                 var sqlIns = sqlInsert("");

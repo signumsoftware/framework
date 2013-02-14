@@ -13,15 +13,15 @@ namespace Signum.Entities
     public abstract class Modifiable 
     {
         [Ignore]
-        ModifiableState modified;
+        ModifiedState modified;
        
         [HiddenProperty]
-        public ModifiableState Modified
+        public ModifiedState Modified
         {
             get { return modified; }
             internal set
             {
-                if(modified == ModifiableState.Sealed)
+                if(modified == ModifiedState.Sealed)
                     throw new InvalidOperationException("The instance {0} is sealed and can not be modified".Formato(this));
 
                 modified = value;
@@ -33,12 +33,12 @@ namespace Signum.Entities
         /// </summary>
         public bool IsGraphModified
         {
-            get { return Modified == ModifiableState.Modified || Modified == ModifiableState.SelfModified; }
+            get { return Modified == ModifiedState.Modified || Modified == ModifiedState.SelfModified; }
         }
 
         protected internal virtual void SetSelfModified()
         {
-            Modified = ModifiableState.SelfModified;
+            Modified = ModifiedState.SelfModified;
         }
 
         protected internal virtual void PreSaving(ref bool graphModified)
@@ -50,7 +50,7 @@ namespace Signum.Entities
         }
     }
 
-    public enum ModifiableState
+    public enum ModifiedState
     {
         SelfModified,
         /// <summary>

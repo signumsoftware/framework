@@ -117,7 +117,7 @@ namespace Signum.Engine.Linq
                         var results = lookUp[kvp.Key];
 
                         kvp.Value.AddRange(results);
-                        kvp.Value.Modified = retriever.IsSealed ? ModifiableState.Sealed: ModifiableState.Clean;
+                        kvp.Value.Modified = retriever.ModifiedState;
                     }
                 }
                 catch (SqlTypeException ex)

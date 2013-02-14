@@ -21,24 +21,24 @@ namespace Signum.Entities.Reflection
                 throw new ArgumentNullException("inverseGraph");
 
             foreach (Modifiable item in inverseGraph)
-                if (item.Modified == ModifiableState.SelfModified)
+                if (item.Modified == ModifiedState.SelfModified)
                     Propagate(item, inverseGraph); 
         }
 
         static void Propagate(Modifiable item, DirectedGraph<Modifiable> inverseGraph)
         {
-            if (item.Modified == ModifiableState.SelfModified || item.Modified == ModifiableState.Modified)
+            if (item.Modified == ModifiedState.Modified)
                 return;
 
-            item.Modified = ModifiableState.Modified;
+            item.Modified = ModifiedState.Modified;
             foreach (var other in inverseGraph.RelatedTo(item))
                 Propagate(other, inverseGraph);
         }
 
         public static void CleanModifications(IEnumerable<Modifiable> graph)
         {
-            foreach (Modifiable item in graph.Where(a => a.Modified == ModifiableState.SelfModified || a.Modified == ModifiableState.Modified))
-                item.Modified = ModifiableState.Clean;
+            foreach (Modifiable item in graph.Where(a => a.Modified == ModifiedState.SelfModified || a.Modified == ModifiedState.Modified))
+                item.Modified = ModifiedState.Clean;
         }
 
         public static DirectedGraph<Modifiable> FromRootIdentifiable(Modifiable root)
@@ -116,7 +116,7 @@ namespace Signum.Entities.Reflection
         {
             var problems = (from m in graph.OfType<IdentifiableEntity>()
                             group m by new { Type = m.GetType(), Id = (m as IdentifiableEntity).TryCS(ident => (long?)ident.IdOrNull) ?? -m.temporalId } into g
-                            where g.Count() > 1 && g.Count(m => m.Modified == ModifiableState.SelfModified) > 0
+                            where g.Count() > 1 && g.Count(m => m.Modified == ModifiedState.SelfModified) > 0
                             select g).ToList();
 
             if (problems.Count == 0)
@@ -183,9 +183,9 @@ namespace Signum.Entities.Reflection
                 Fillcolor = n is Lite<IdentifiableEntity> ? "white" : color(n.GetType()),
                 Color =
                     n is Lite<IdentifiableEntity> ? color(((Lite<IdentifiableEntity>)n).GetType()) :
-                    (n.Modified == ModifiableState.SelfModified ? "red" : 
-                     n.Modified == ModifiableState.Modified ? "red4" :
-                     n.Modified == ModifiableState.Sealed ? "gray" : "black"),
+                    (n.Modified == ModifiedState.SelfModified ? "red" : 
+                     n.Modified == ModifiedState.Modified ? "red4" :
+                     n.Modified == ModifiedState.Sealed ? "gray" : "black"),
 
                 Shape = n is Lite<IdentifiableEntity> ? "ellipse" :
                         n is IdentifiableEntity ? "ellipse" :
