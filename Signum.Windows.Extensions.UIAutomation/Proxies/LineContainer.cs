@@ -9,11 +9,10 @@ using Signum.Entities.Reflection;
 
 namespace Signum.Windows.UIAutomation
 {
-    class LineContainer<T> : ILineContainer<T> where T : ModifiableEntity
+    public class LineContainer<T> : ILineContainer<T> where T : ModifiableEntity
     {
         public PropertyRoute PreviousRoute { get; set; }
         public AutomationElement Element { get; set;  }
-        public WindowProxy ParentWindow { get; set; }
     }
 
     public interface ILineContainer<T> : ILineContainer where T : ModifiableEntity

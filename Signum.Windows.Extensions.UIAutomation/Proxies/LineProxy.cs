@@ -449,19 +449,32 @@ namespace Signum.Windows.UIAutomation
         {
         }
 
-        public List<RepeaterLineProxy> GetRepeaterElements()
+        public RepeaterLineProxy<T> CreateLineContainer<T>() where T : ModifiableEntity
         {
-            return Element.Descendants(a => a.Current.ClassName == "EntityRepeaterContentControl").Select(ae => new RepeaterLineProxy(ae)).ToList();
+            CreateButton.ButtonInvoke();
+            return GetRepeaterElements<T>().Last();
+        }
+
+        public void CreateLineContainer<T>(Action<ILineContainer<T>> action) where T : ModifiableEntity
+        {
+            CreateButton.ButtonInvoke();
+            var lineContainer = GetRepeaterElements<T>().Last();
+            action(lineContainer);
+        }
+
+        public List<RepeaterLineProxy<T>> GetRepeaterElements<T>() where T : ModifiableEntity
+        {
+            return Element.Descendants(a => a.Current.ClassName == "EntityRepeaterContentControl")
+                .Select(ae => new RepeaterLineProxy<T>(ae, this.PropertyRoute.Add("Item"))).ToList();
         }
     }
 
-    public class RepeaterLineProxy
+    public class RepeaterLineProxy<T> : LineContainer<T> where T : ModifiableEntity
     {
-        public AutomationElement Element { get; private set; }
-
-        public RepeaterLineProxy(AutomationElement element)
+        public RepeaterLineProxy(AutomationElement element, PropertyRoute previousRoute)
         {
             this.Element = element;
+            this.PreviousRoute = previousRoute;
         }
 
         public AutomationElement RemoveButton
