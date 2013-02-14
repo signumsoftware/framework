@@ -142,7 +142,7 @@ namespace Signum.Engine.Files
         {
             if (fp.IsNew && !unsafeMode.Value)
             {
-                using (new EntityCache(true))
+                using (new EntityCache(EntityCacheType.ForceNew))
                 {
                     //set typedn from enum
                     if (fp.FileType == null)

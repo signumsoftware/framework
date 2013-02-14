@@ -102,7 +102,7 @@ namespace Signum.Engine.Scheduler
 
         static void Schema_Saving(ScheduledTaskDN task)
         {
-            if (!avoidReloadPlan.Value && task.Modified.Value)
+            if (!avoidReloadPlan.Value && task.IsGraphModified)
             {
                 Transaction.PostRealCommit -= Transaction_RealCommit;
                 Transaction.PostRealCommit += Transaction_RealCommit;
@@ -131,7 +131,7 @@ namespace Signum.Engine.Scheduler
             if (!enabled)
                 return;
 
-            using (new EntityCache(true))
+            using (new EntityCache(EntityCacheType.ForceNew))
             using (AuthLogic.Disable())
                 lock (priorityQueue)
                 {
@@ -179,7 +179,7 @@ namespace Signum.Engine.Scheduler
 
         static void DispatchEvents(object obj) // obj ignored
         {
-            using (new EntityCache(true))
+            using (new EntityCache(EntityCacheType.ForceNew))
             using (AuthLogic.Disable())
                 lock (priorityQueue)
                 {

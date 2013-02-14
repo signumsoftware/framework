@@ -241,8 +241,6 @@ namespace Signum.Entities.Chart
             {
                 parseException = new FormatException("{0} {1}: {2}\r\n{3}".Formato(context.GetType().Name, context.IdOrNull, context, e.Message));
             }
-
-            CleanSelfModified();
         }
 
         public List<QueryToken> SubTokensChart(QueryToken token, IEnumerable<ColumnDescription> columnDescriptions)

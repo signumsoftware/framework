@@ -206,7 +206,7 @@ namespace Signum.Engine.Alerts
 
         static void Schema_Initializing()
         {
-            using (new EntityCache(true))
+            using (new EntityCache(EntityCacheType.ForceNewSealed))
             {
                 Keys = getKeys();
 

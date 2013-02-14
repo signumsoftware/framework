@@ -125,9 +125,9 @@ namespace Signum.Engine.Authorization
 
         static void Schema_Saving(RoleDN role)
         {
-            if (!role.IsNew && role.Roles != null && role.Roles.SelfModified)
+            if (!role.IsNew && role.Roles != null && role.Roles.IsGraphModified)
             {
-                using (new EntityCache(true))
+                using (new EntityCache(EntityCacheType.ForceNew))
                 {
                     EntityCache.AddFullGraph(role);
 
@@ -155,7 +155,7 @@ namespace Signum.Engine.Authorization
             {
                 DirectedGraph<Lite<RoleDN>> newRoles = new DirectedGraph<Lite<RoleDN>>();
 
-                using (new EntityCache(true))
+                using (new EntityCache(EntityCacheType.ForceNewSealed))
                     foreach (var role in Database.RetrieveAll<RoleDN>())
                     {
                         newRoles.Expand(role.ToLite(), r => r.Retrieve().Roles);
