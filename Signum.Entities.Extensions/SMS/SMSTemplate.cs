@@ -126,6 +126,13 @@ namespace Signum.Entities.SMS
             return IsActiveNowExpression.Evaluate(this);
         }
 
+        IIdentifiable aditionalData;
+        public IIdentifiable AditionalData
+        {
+            get { return aditionalData; }
+            set { Set(ref aditionalData, value, () => AditionalData); }
+        }
+
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
         {
             if (pi.Is(() => StartDate) || pi.Is(() => EndDate))
