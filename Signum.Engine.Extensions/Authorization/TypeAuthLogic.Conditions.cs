@@ -438,7 +438,7 @@ namespace Signum.Engine.Authorization
                 this.UserInterface = userInterface;
                 this.Conditions = groups;
             }
-
+            
             public Lite<IIdentifiable> Lite { get; private set; }
             public TypeAllowedBasic Requested { get; private set; }
             public TypeAllowed Fallback { get; private set; }
@@ -468,11 +468,11 @@ namespace Signum.Engine.Authorization
                     {
                         if (cond.InGroup)
                             return Requested <= cond.Allowed.Get(UserInterface) ? null :
-                                "{0} belongs to {1} that is {2} (less than {3})".Formato(Lite, cond.ConditionName, cond.Allowed.Get(UserInterface), Requested);
+                                "is a {0} that belongs to condition {1} that is {2} (less than {3})".Formato(Lite.EntityType.TypeName(), cond.ConditionName, cond.Allowed.Get(UserInterface), Requested);
                     }
 
                     return Requested <= Fallback.Get(UserInterface) ? null :
-                        "The base value for {0} is {1} (less than {2}) and {3} does not belong to any condition".Formato(Lite.EntityType.TypeName(), Fallback.Get(UserInterface), Requested, Lite);
+                        "is a {0} but does not belong to any condition and the base value is {1} (less than {2})".Formato(Lite.EntityType.TypeName(), Fallback.Get(UserInterface), Requested);
                 }
             }
         }
