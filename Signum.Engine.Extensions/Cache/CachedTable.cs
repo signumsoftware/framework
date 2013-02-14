@@ -329,7 +329,7 @@ namespace Signum.Engine.Cache
 
                         cachedTable.subTables.Add(ctb);
 
-                        lite = Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod("GetLite"), id.UnNullify());
+                        lite = Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod("GetLite"), id.UnNullify(), retriever);
                     }
 
                     if (!id.Type.IsNullable())
@@ -411,6 +411,7 @@ namespace Signum.Engine.Cache
 
         Func<FieldReader, object> rowReader;
         Action<object, IRetriever, T> completer;
+        Expression<Action<object, IRetriever, T>> completerExpression;
         Func<object, int> idGetter;
         Func<object, string> toStrGetter;
 
@@ -456,9 +457,9 @@ namespace Signum.Engine.Cache
                 }
 
                 var block = Expression.Block(new[] { ctr.origin }, instructions);
-                var lambda = Expression.Lambda<Action<object, IRetriever, T>>(block, CachedTableConstructor.originObject, CachedTableConstructor.retriever, me);
+                completerExpression = Expression.Lambda<Action<object, IRetriever, T>>(block, CachedTableConstructor.originObject, CachedTableConstructor.retriever, me);
 
-                completer = lambda.Compile();
+                completer = completerExpression.Compile();
 
                 idGetter = ctr.GetGetter<int>((IColumn)table.Fields.Values.Select(ef => ef.Field).Single(f => f is FieldPrimaryKey));
                 toStrGetter = ctr.GetGetter<string>((IColumn)table.Fields[SchemaBuilder.GetToStringFieldInfo(typeof(T)).Name].Field);
@@ -537,6 +538,7 @@ namespace Signum.Engine.Cache
         ResetLazy<Dictionary<int, Dictionary<int, object>>> relationalRows;
 
         Func<FieldReader, object> rowReader;
+        Expression<Func<object, IRetriever, T>> activatorExpression;
         Func<object, IRetriever, T> activator;
         Func<object, int> parentIdGetter;
         Func<object, int> rowIdGetter;
@@ -574,9 +576,9 @@ namespace Signum.Engine.Cache
 
                 var block = Expression.Block(table.Field.FieldType, new[] { ctr.origin }, instructions);
 
-                var lambda = Expression.Lambda<Func<object, IRetriever, T>>(block, CachedTableConstructor.originObject, CachedTableConstructor.retriever);
+                activatorExpression = Expression.Lambda<Func<object, IRetriever, T>>(block, CachedTableConstructor.originObject, CachedTableConstructor.retriever);
 
-                activator = lambda.Compile();
+                activator = activatorExpression.Compile();
 
                 parentIdGetter = ctr.GetGetter<int>(table.BackReference);
                 rowIdGetter = ctr.GetGetter<int>(table.PrimaryKey);
@@ -725,11 +727,11 @@ namespace Signum.Engine.Cache
         }
 
 
-        public Lite<T> GetLite(int id)
+        public Lite<T> GetLite(int id, IRetriever retriever)
         {
             Interlocked.Increment(ref hits);
 
-            return Lite.Create<T>(id, toStrings.Value[id]);
+            return Lite.Create<T>(id, toStrings.Value[id], retriever.ModifiedState);
         }
 
         public override int? Count
