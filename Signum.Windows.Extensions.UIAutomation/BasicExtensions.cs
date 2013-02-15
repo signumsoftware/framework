@@ -30,7 +30,12 @@ namespace Signum.Windows.UIAutomation
 
         public static AutomationElement TabItemSelect(this AutomationElement container, string tabItemName)
         {
-            var tabItem = container.Descendant(h => h.Current.ControlType == ControlType.TabItem && h.Current.Name == tabItemName);
+            var tabItem = container.TryDescendant(h => h.Current.ControlType == ControlType.TabItem && h.Current.Name == tabItemName);
+            if (tabItem == null)
+                tabItem = container.Descendants(h => h.Current.ControlType == ControlType.TabItem)
+                    .Where(el => el.TryChild(h => h.Current.ControlType == ControlType.Text && h.Current.Name == tabItemName) != null)
+                    .FirstEx(() => "TabItem {0} not found".Formato(tabItemName));
+
             tabItem.Pattern<SelectionItemPattern>().Select();
             return tabItem;
         }
