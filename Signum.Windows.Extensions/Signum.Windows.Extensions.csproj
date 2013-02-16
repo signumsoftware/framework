@@ -957,6 +957,9 @@
   <ItemGroup>
     <Resource Include="Images\pin.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\config.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
