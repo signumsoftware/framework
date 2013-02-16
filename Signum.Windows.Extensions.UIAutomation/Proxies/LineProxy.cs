@@ -168,9 +168,7 @@ namespace Signum.Windows.UIAutomation
         {
             get
             {
-                return
-                    string.IsNullOrEmpty(Element.Current.ItemStatus) ? null :
-                    Lite.Parse(Element.Current.ItemStatus.Split(new[] { " Hash:" }, StringSplitOptions.None)[0]);
+                return NormalWindowExtensions.ParseLiteHash(Element.Current.ItemStatus);
             }
             set
             {

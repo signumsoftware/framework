@@ -61,6 +61,11 @@ namespace Signum.Windows.UIAutomation
             get { return Element.ChildById("entityTitle").ChildById("entityToStr").Value(); }
         }
 
+        public Lite<IIdentifiable> Lite
+        {
+            get { return NormalWindowExtensions.ParseLiteHash(this.Element.Current.ItemStatus); }
+
+        }
 
         public void Ok()
         {
@@ -193,6 +198,15 @@ namespace Signum.Windows.UIAutomation
         {
             return new NormalWindowProxy<T>(element);
         }
+
+        public static Lite<IIdentifiable> ParseLiteHash(string itemStatus)
+        {
+            if (string.IsNullOrEmpty(itemStatus))
+                return null;
+
+            return Lite.Parse(itemStatus.Split(new[] { " Hash:" }, StringSplitOptions.None)[0]);
+        }
+
     }
 
 
