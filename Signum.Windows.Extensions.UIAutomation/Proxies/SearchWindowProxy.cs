@@ -46,6 +46,14 @@ namespace Signum.Windows.UIAutomation
             SearchControl.Search();
         }
 
+        public void SearchSelectElementAt(int index)
+        {
+            Search();
+            WaitSearch();
+            SelectElementAt(index);
+            Ok();
+        }
+
         public void WaitSearch()
         {
             SearchControl.WaitSearch();
@@ -58,7 +66,7 @@ namespace Signum.Windows.UIAutomation
 
         public NormalWindowProxy<T> ViewElementAt<T>(int index) where T : IdentifiableEntity
         {
-            return SearchControl.ViewElementAt<T>(index); 
+            return SearchControl.ViewElementAt<T>(index);
         }
 
         public void SelectElementAt(int index)
@@ -137,7 +145,7 @@ namespace Signum.Windows.UIAutomation
             var tb = Element.ChildById("tokenBuilder");
 
             for (int i = 0; i < tokens.Length; i++)
-			{
+            {
                 List<AutomationElement> combos = null;
 
                 tb.Wait(() =>
@@ -159,7 +167,7 @@ namespace Signum.Windows.UIAutomation
         {
             TreeWalker tw = new TreeWalker(ConditionBuilder.ToCondition(ae => ae.Current.ClassName == "FilterLine"));
 
-            var filterLine =  tw.GetLastChild(FilterBuilderControl);
+            var filterLine = tw.GetLastChild(FilterBuilderControl);
 
             if (filterLine == null)
                 throw new ElementNotAvailableException("Last FilterLine not found");
@@ -169,21 +177,21 @@ namespace Signum.Windows.UIAutomation
 
         public AutomationElement FilterBuilderControl
         {
-            get{ return Element.ChildById("filterBuilder");}
+            get { return Element.ChildById("filterBuilder"); }
         }
 
         public AutomationElement SearchButton
         {
-            get{ return Element.ChildById("btFind");}
+            get { return Element.ChildById("btFind"); }
         }
 
         public List<AutomationElement> HeaderItems
         {
-            get 
+            get
             {
                 return Element.Descendants(e => e.Current.ControlType == ControlType.HeaderItem);
             }
-        
+
         }
 
         public void Search()
@@ -195,10 +203,11 @@ namespace Signum.Windows.UIAutomation
         public void WaitSearch()
         {
             Element.Wait(
-                () =>{
-                        Element.AssertMessageBoxChild();
-                        return SearchButton.Current.IsEnabled;
-                     },
+                () =>
+                {
+                    Element.AssertMessageBoxChild();
+                    return SearchButton.Current.IsEnabled;
+                },
                 () => "Waiting after search on SearchControl {0}".Formato(Element.Current.Name));
         }
 
@@ -224,7 +233,7 @@ namespace Signum.Windows.UIAutomation
             var win = Element.CaptureChildWindow(() => Element.ChildById("btCreateColumn").ButtonInvoke(),
                 () => "Adding new column for {0} on SearchControl {1}".Formato(token, Element.Current.Name));
 
-            using(WindowProxy wp = new WindowProxy(win))
+            using (WindowProxy wp = new WindowProxy(win))
             {
                 if (displayName != null)
                     wp.Element.Descendant(a => a.Current.ControlType == ControlType.Edit).Pattern<ValuePattern>().SetValue(displayName);
@@ -245,7 +254,7 @@ namespace Signum.Windows.UIAutomation
             return new NormalWindowProxy<T>(win);
         }
 
-        public NormalWindowProxy<T> Create<T>() where T:IdentifiableEntity
+        public NormalWindowProxy<T> Create<T>() where T : IdentifiableEntity
         {
             return CreateCapture().ToNormalWindow<T>();
         }
@@ -264,7 +273,7 @@ namespace Signum.Windows.UIAutomation
 
         public AutomationElement CreateButton
         {
-            get{return Element.ChildById("btCreate");}
+            get { return Element.ChildById("btCreate"); }
         }
 
         public AutomationElement NavigateButton
@@ -327,11 +336,11 @@ namespace Signum.Windows.UIAutomation
 
         public class ListViewItemProxy
         {
-            public ListViewItemProxy( AutomationElement element, SearchControlProxy sc)
+            public ListViewItemProxy(AutomationElement element, SearchControlProxy sc)
             {
                 this.Element = element;
-                this.SearchControl = sc; 
-                this.Columns = element.Children(a=>a.Current.ClassName =="ContentPresenter");
+                this.SearchControl = sc;
+                this.Columns = element.Children(a => a.Current.ClassName == "ContentPresenter");
             }
 
             public SearchControlProxy SearchControl { get; private set; }
@@ -435,7 +444,7 @@ namespace Signum.Windows.UIAutomation
             StringBuilder sb = new StringBuilder();
 
             foreach (var columnHeader in HeaderItems)
-	        {
+            {
                 try
                 {
                     columnHeader.ButtonInvoke();
@@ -454,11 +463,11 @@ namespace Signum.Windows.UIAutomation
                 {
                     sb.AppendFormat("Query '{0}' Column '{1}':\r\n{2}", Element.Current.Name, columnHeader.Current.Name, e.Message);
                 }
-	        }
+            }
 
             if (sb.Length > 0)
                 throw new MessageBoxErrorException(sb.ToString());
-        
+
         }
     }
 
@@ -542,5 +551,11 @@ namespace Signum.Windows.UIAutomation
 
             return new SearchControlProxy(sc);
         }
+
+        public static SearchWindowProxy ToSearchWindow(this AutomationElement element)
+        {
+            return new SearchWindowProxy(element);
+        }
+
     }
 }

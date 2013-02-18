@@ -81,9 +81,14 @@ namespace Signum.Engine.Chart
             }.Register();
         }
 
-        public static void ImportExportScripts(string folderName)
+        public static void ImportExportChartScripts()
         {
-            Console.WriteLine("You want to export (e), import (i) ChartScripts? (nothing to exit)".Formato(folderName));
+            ImportExportChartScripts(GetDefaultFolderName());
+        }
+
+        public static void ImportExportChartScripts(string folderName)
+        {
+            Console.WriteLine("You want to export (e), import (i) ChartScripts? (nothing to exit)");
 
             string answer = Console.ReadLine();
 
@@ -95,6 +100,24 @@ namespace Signum.Engine.Chart
             {
                 ImportAllScripts(folderName);
             }
+        }
+
+        public static string DefaultFolderDevelopment = @"..\..\..\Extensions\Signum.Engine.Extensions\Chart\ChartScripts";
+        public static string DefaultFolderProduction = @"ChartScripts";
+        private static string GetDefaultFolderName()
+        {
+            if (Directory.Exists(DefaultFolderDevelopment))
+            {
+                if (Directory.Exists(DefaultFolderProduction))
+                    return SafeConsole.Ask("In Production?") ? DefaultFolderProduction : DefaultFolderDevelopment;
+
+                return DefaultFolderDevelopment;
+            }
+
+            if (Directory.Exists(DefaultFolderProduction))
+                return DefaultFolderProduction;
+
+            throw new InvalidOperationException("Default ChartScripts folder not found");
         }
 
         public static void ExportAllScripts(string folderName)

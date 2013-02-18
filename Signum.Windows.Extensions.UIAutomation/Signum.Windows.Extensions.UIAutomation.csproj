@@ -86,7 +86,7 @@
     <Compile Include="Proxies\LineContainer.cs" />
     <Compile Include="Proxies\MessageBoxProxy.cs" />
     <Compile Include="Proxies\OmniBoxProxy.cs" />
-    <Compile Include="Proxies\SelectWindoProxy.cs" />
+    <Compile Include="Proxies\SelectorWindowProxy.cs" />
     <Compile Include="Proxies\LineProxy.cs" />
     <Compile Include="FindExtensions.cs" />
     <Compile Include="MenuItemExtensions.cs" />
