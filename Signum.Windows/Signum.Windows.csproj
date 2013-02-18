@@ -601,7 +601,9 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Images\exception.png" />
+  </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\calendar.png" />
   </ItemGroup>

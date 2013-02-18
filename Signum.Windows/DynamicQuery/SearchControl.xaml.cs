@@ -218,7 +218,8 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty FilterColumnProperty =
-        DependencyProperty.Register("FilterColumn", typeof(string), typeof(SearchControl), new UIPropertyMetadata(null, (d, e) => ((SearchControl)d).AssetNotLoaded(e)));
+        DependencyProperty.Register("FilterColumn", typeof(string), typeof(SearchControl), new UIPropertyMetadata(null, 
+            (d, e) => ((SearchControl)d).AssetNotLoaded(e)));
         public string FilterColumn
         {
             get { return (string)GetValue(FilterColumnProperty); }
@@ -226,7 +227,8 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty FilterRouteProperty =
-            DependencyProperty.Register("FilterRoute", typeof(string), typeof(SearchControl), new UIPropertyMetadata(null, (d, e) => ((SearchControl)d).AssetNotLoaded(e)));
+            DependencyProperty.Register("FilterRoute", typeof(string), typeof(SearchControl), new UIPropertyMetadata(null, 
+                (d, e) => ((SearchControl)d).AssetNotLoaded(e)));
         public string FilterRoute
         {
             get { return (string)GetValue(FilterRouteProperty); }
@@ -238,7 +240,6 @@ namespace Signum.Windows
             if(IsLoaded)
                 throw new InvalidProgramException("You can not change {0} property once loaded".Formato(e.Property));
         }
-
 
         private void SimpleFilterBuilderChanged(DependencyPropertyChangedEventArgs e)
         {
@@ -605,11 +606,12 @@ namespace Signum.Windows
                 {
                     hasBeenLoaded = true;
 
-                    resultTable = (ResultTable)obj;
+                    var rt = (ResultTable)obj;
+                    resultTable = rt;
 
-                    if (resultTable != null)
+                    if (rt != null)
                     {
-                        SetResults();
+                        SetResults(rt);
                     }
                 },
                 () => { btFind.IsEnabled = true; });
@@ -657,45 +659,57 @@ namespace Signum.Windows
             }
         }
 
-        private void SetResults()
+
+        bool settingResults = false;
+        private void SetResults(ResultTable rt)
         {
-            gvResults.Columns.ZipForeach(resultTable.Columns, (gvc, rc) =>
+            try
             {
-                var header = (SortGridViewColumnHeader)gvc.Header;
+                settingResults = true;
 
-                Debug.Assert(rc.Column.Token.Equals(header.RequestColumn.Token));
+                gvResults.Columns.ZipForeach(rt.Columns, (gvc, rc) =>
+                {
+                    var header = (SortGridViewColumnHeader)gvc.Header;
 
-                if (header.ResultColumn == null || header.ResultColumn.Index != rc.Index)
-                    gvc.CellTemplate = CreateDataTemplate(rc);
+                    Debug.Assert(rc.Column.Token.Equals(header.RequestColumn.Token));
 
-                header.ResultColumn = rc; 
-            });             
+                    if (header.ResultColumn == null || header.ResultColumn.Index != rc.Index)
+                        gvc.CellTemplate = CreateDataTemplate(rc);
 
-            lvResult.ItemsSource = resultTable.Rows;
+                    header.ResultColumn = rc;
+                });
 
-            if (resultTable.Rows.Length > 0)
+                lvResult.ItemsSource = rt.Rows;
+
+                if (rt.Rows.Length > 0)
+                {
+                    lvResult.SelectedIndex = 0;
+                    lvResult.ScrollIntoView(rt.Rows.FirstEx());
+                }
+                ItemsCount = lvResult.Items.Count;
+                lvResult.Background = Brushes.White;
+                lvResult.Focus();
+                elementsInPageLabel.Visibility = Visibility.Visible;
+                elementsInPageLabel.TotalPages = rt.TotalPages;
+                elementsInPageLabel.StartElementIndex = rt.StartElementIndex;
+                elementsInPageLabel.EndElementIndex = rt.EndElementIndex;
+                elementsInPageLabel.TotalElements = rt.TotalElements;
+
+                pageSizeSelector.PageSize = rt.ElementsPerPage;
+
+
+                pageSelector.Visibility = System.Windows.Visibility.Visible;
+                pageSelector.CurrentPage = rt.CurrentPage;
+                pageSelector.TotalPages = rt.TotalPages;
+
+                //tbResultados.Visibility = Visibility.Visible;
+                //tbResultados.Foreground = rt.Rows.Length == ElementsPerPage ? Brushes.Red : Brushes.Black;
+                OnQueryResultChanged(false);
+            }
+            finally
             {
-                lvResult.SelectedIndex = 0;
-                lvResult.ScrollIntoView(resultTable.Rows.FirstEx());
-            }            
-            ItemsCount = lvResult.Items.Count;
-            lvResult.Background = Brushes.White;
-            lvResult.Focus();
-            elementsInPageLabel.Visibility = Visibility.Visible;
-            elementsInPageLabel.TotalPages = resultTable.TotalPages;
-            elementsInPageLabel.StartElementIndex = resultTable.StartElementIndex;
-            elementsInPageLabel.EndElementIndex = resultTable.EndElementIndex;
-            elementsInPageLabel.TotalElements = resultTable.TotalElements;
-
-            pageSizeSelector.PageSize = resultTable.ElementsPerPage;
-
-            pageSelector.Visibility = System.Windows.Visibility.Visible;
-            pageSelector.CurrentPage = resultTable.CurrentPage;
-            pageSelector.TotalPages = resultTable.TotalPages;
-            
-            //tbResultados.Visibility = Visibility.Visible;
-            //tbResultados.Foreground = resultTable.Rows.Length == ElementsPerPage ? Brushes.Red : Brushes.Black;
-            OnQueryResultChanged(false);
+                settingResults = false;
+            }
         }
 
         public void ClearResults()
@@ -710,23 +724,27 @@ namespace Signum.Windows
 
         void pageSelector_Changed(object sender, RoutedEventArgs e)
         {
+            if (!IsLoaded || settingResults)
+                return;
+
             if (FixSize != null)
-                FixSize(this, new EventArgs()); 
-            Search(); 
+                FixSize(this, new EventArgs());
+
+            Search();
         }
 
         public event EventHandler FixSize; 
-        public event EventHandler ClearSize; 
+        public event EventHandler ClearSize;
 
         void ElementsPerPage_Changed()
         {
-            if (IsLoaded)
-            {
-                CurrentPage = 1;
-                if (ClearSize != null)
-                    ClearSize(this, new EventArgs()); 
-                Search();
-            }
+            if (!IsLoaded || settingResults)
+                return;
+
+            CurrentPage = 1;
+            if (ClearSize != null)
+                ClearSize(this, new EventArgs());
+            Search();
         }
 
         void OnQueryResultChanged(bool cleaning)

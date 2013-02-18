@@ -8,7 +8,7 @@ using Signum.Utilities.Properties;
 
 namespace Signum.Utilities
 {
-    public class ConsoleSwitch<K, V>: IEnumerable<V>
+    public class ConsoleSwitch<K, V> : IEnumerable<KeyValuePair<string, Tuple<V, string>>>
     {
         Dictionary<string, Tuple<V, string>> dictionary = new Dictionary<string, Tuple<V, string>>(StringComparer.InvariantCultureIgnoreCase);
         string welcomeMessage;
@@ -40,7 +40,7 @@ namespace Signum.Utilities
             if (value is Enum)
                 return ((Enum)value).NiceToString();
             if (value == null)
-                return "[No Name]"; 
+                return "[No Name]";
             return value.ToString();
         }
 
@@ -59,7 +59,7 @@ namespace Signum.Utilities
 
                 Console.Write(endMessage);
                 string line = Console.ReadLine();
-                
+
                 Console.WriteLine();
 
                 return GetValue(line);
@@ -90,7 +90,7 @@ namespace Signum.Utilities
                 if (string.IsNullOrEmpty(line))
                     return null;
 
-                Console.WriteLine(); 
+                Console.WriteLine();
 
                 return line.Split(',').Select(str => GetValue(str)).ToArray();
             }
@@ -105,15 +105,15 @@ namespace Signum.Utilities
         {
             return dictionary.GetOrThrow(line, Resources.NoOptionWithKey0Found).Item1;
         }
-   
-        public IEnumerator<V> GetEnumerator()
+
+        public IEnumerator<KeyValuePair<string, Tuple<V, string>>> GetEnumerator()
         {
-            return dictionary.Values.Select(p=>p.Item1).GetEnumerator();
+            return dictionary.GetEnumerator();
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
-          return GetEnumerator(); 
+            return GetEnumerator();
         }
     }
 }
