@@ -61,12 +61,6 @@ namespace Signum.Windows.UIAutomation
             get { return Element.ChildById("entityTitle").ChildById("entityToStr").Value(); }
         }
 
-        public Lite<IIdentifiable> Lite
-        {
-            get { return NormalWindowExtensions.ParseLiteHash(this.Element.Current.ItemStatus); }
-
-        }
-
         public void Ok()
         {
             ButtonBar.OkButton.ButtonInvoke();
@@ -204,9 +198,13 @@ namespace Signum.Windows.UIAutomation
             if (string.IsNullOrEmpty(itemStatus))
                 return null;
 
-            return Lite.Parse(itemStatus.Split(new[] { " Hash:" }, StringSplitOptions.None)[0]);
+            return Signum.Entities.Lite.Parse(itemStatus.Split(new[] { " Hash:" }, StringSplitOptions.None)[0]);
         }
 
+        public static Lite<T> Lite<T>(this NormalWindowProxy<T> entity) where T : IdentifiableEntity
+        {
+            return (Lite<T>)NormalWindowExtensions.ParseLiteHash(entity.Element.Current.ItemStatus);
+        }
     }
 
 
