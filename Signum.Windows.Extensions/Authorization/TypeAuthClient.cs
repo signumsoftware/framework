@@ -58,34 +58,25 @@ namespace Signum.Windows.Authorization
 
         static bool manager_IsViewable(Type type, ModifiableEntity entity)
         {
-            if (!typeof(IdentifiableEntity).IsAssignableFrom(type))
-                return true;
-
-            IdentifiableEntity ident = (IdentifiableEntity)entity;
+            IdentifiableEntity ident = entity as IdentifiableEntity;
 
             if (ident == null || ident.IsNew)
-                return typeRules.GetAllowed(type).MaxUI() >= TypeAllowedBasic.Read;
+                return GetAllowed(type).MaxUI() >= TypeAllowedBasic.Read;
 
             return ident.IsAllowedFor(TypeAllowedBasic.Read);
         }
 
         static bool manager_IsCreable(Type type)
         {
-            if(!typeof(IdentifiableEntity).IsAssignableFrom(type))
-                return true;
-
-            return typeRules.GetAllowed(type).MaxUI() == TypeAllowedBasic.Create;
+            return GetAllowed(type).MaxUI() == TypeAllowedBasic.Create;
         }
 
         static bool manager_IsReadOnly(Type type, ModifiableEntity entity)
         {
-            if (!typeof(IdentifiableEntity).IsAssignableFrom(type))
-                return false;
-
-            IdentifiableEntity ident = (IdentifiableEntity)entity;
+            IdentifiableEntity ident = entity as IdentifiableEntity;
 
             if (ident == null || ident.IsNew)
-                return typeRules.GetAllowed(type).MaxUI() < TypeAllowedBasic.Modify;
+                return GetAllowed(type).MaxUI() < TypeAllowedBasic.Modify;
             else
                 return !ident.IsAllowedFor(TypeAllowedBasic.Modify);
         }
@@ -118,6 +109,9 @@ namespace Signum.Windows.Authorization
 
         public static TypeAllowedAndConditions GetAllowed(Type type)
         {
+            if (!typeof(IdentifiableEntity).IsAssignableFrom(type))
+                return new TypeAllowedAndConditions(TypeAllowed.Create);
+
             TypeAllowedAndConditions tac = typeRules.GetAllowed(type);
             return tac;
         }
@@ -140,7 +134,7 @@ namespace Signum.Windows.Authorization
 
                 if (type != null && Navigator.Manager.EntitySettings.ContainsKey(type))
                 {
-                    if (typeRules.GetAllowed(type).MaxUI() < TypeAllowedBasic.Read)
+                    if (GetAllowed(type).MaxUI() < TypeAllowedBasic.Read)
                         menuItem.Visibility = Visibility.Collapsed;
                 }
             }
