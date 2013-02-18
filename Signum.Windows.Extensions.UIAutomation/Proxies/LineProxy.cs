@@ -377,6 +377,20 @@ namespace Signum.Windows.UIAutomation
 
             return true;
         }
+
+        public List<AutomationElement> WaitChargedList()
+        {
+            List<AutomationElement> list = null;
+
+            ComboBox.Wait(() =>
+            {
+                ComboBox.Pattern<ExpandCollapsePattern>().Expand();
+                list = ComboBox.Children(c => c.Current.ControlType == ControlType.ListItem);
+                return list.Any();
+            }, () => "ComboBox not charged");
+
+            return list;
+        }
     }
 
     public class EntityDetailProxy : EntityBaseProxy
