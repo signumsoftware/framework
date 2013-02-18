@@ -45,13 +45,12 @@ namespace Signum.Windows.UIAutomation
         {
             SearchControl.Search();
         }
-
-        public void SearchSelectElementAt(int index)
+       
+        public SearchWindowProxy SearchSelectAt(int index)
         {
             Search();
-            WaitSearch();
             SelectElementAt(index);
-            Ok();
+            return this;
         }
 
         public void WaitSearch()
