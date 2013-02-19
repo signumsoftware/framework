@@ -31,12 +31,24 @@ namespace Signum.Engine.SchemaInfoTables
         public string name;
     }
 
-    [SqlViewName("sys", "servers")]
+    [SqlViewName("sys", "databases")]
     public class SysDatabases : IView
     {
         [SqlViewColumn(PrimaryKey = true)]
-        public int server_id;
+        public int database_id;
         public string name;
+        public byte[] owner_sid;
+    }
+
+
+    [SqlViewName("sys", "server_principals")]
+    public class SysServerPrincipals : IView
+    {
+        [SqlViewColumn(PrimaryKey = true)]
+        public int principal_id;
+        public string name;
+        public byte[] sid;
+        public string type_desc;
     }
 
     [SqlViewName("sys", "schemas")]
@@ -46,6 +58,7 @@ namespace Signum.Engine.SchemaInfoTables
         public int schema_id;
         public string name;
 
+
         static Expression<Func<SysSchemas, IQueryable<SysTables>>> TablesExpression =
             s => Database.View<SysTables>().Where(t => t.schema_id == s.schema_id);
         public IQueryable<SysTables> Tables()
@@ -53,7 +66,6 @@ namespace Signum.Engine.SchemaInfoTables
             return TablesExpression.Evaluate(this);
         }
     }
-
 
     [SqlViewName("sys", "tables")]
     public class SysTables : IView
