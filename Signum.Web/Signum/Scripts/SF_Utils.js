@@ -497,5 +497,5 @@ SF.NewContentProcessor = {
                 $mainControl.addClass("sf-changed");
             }
         });
-    },
+    }
 };
