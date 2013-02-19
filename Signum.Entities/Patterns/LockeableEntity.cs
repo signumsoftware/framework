@@ -43,4 +43,22 @@ namespace Signum.Entities.Patterns
             return base.Set<T>(ref field, value, property);
         }
     }
+
+    public class AllowTemporalUnlock : IDisposable
+    {
+        bool locked;
+        LockableEntity Entity;
+
+        public AllowTemporalUnlock(LockableEntity entity) 
+        {
+            locked = entity.Locked;
+            Entity = entity;
+            Entity.Locked = false;
+        }
+
+        public void Dispose()
+        {
+            Entity.Locked = locked;
+        }
+    }
 }
