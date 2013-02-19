@@ -51,6 +51,16 @@ namespace Signum.Engine.SchemaInfoTables
         public string type_desc;
     }
 
+    [SqlViewName("sys", "database_principals")]
+    public class SysDatabasePrincipals : IView
+    {
+        [SqlViewColumn(PrimaryKey = true)]
+        public int principal_id;
+        public string name;
+        public byte[] sid;
+        public string type_desc;
+    }
+
     [SqlViewName("sys", "schemas")]
     public class SysSchemas : IView
     {
