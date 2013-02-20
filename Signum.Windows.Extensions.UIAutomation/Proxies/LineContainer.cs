@@ -27,49 +27,45 @@ namespace Signum.Windows.UIAutomation
 
     public static class LineContainerExtensions
     {
-        //public static bool IsVisible(this ILineContainer container, PropertyRoute route)
-        //{
-        //    return container.Element.Descendant(a => a.Current.Name == route.ToString()) != null;
-        //}
 
-        public static ValueLineProxy ValueLine(this ILineContainer container, PropertyRoute route)
+        public static ValueLineProxy ValueLine(this ILineContainer container, PropertyRoute route, TreeScope scope = TreeScope.Descendants)
         {
-            var valueLine = container.Element.Descendant(a =>( a.Current.ClassName == "ValueLine"  ||  a.Current.ClassName == "TextArea") && a.Current.Name == route.ToString());
+            var valueLine = container.Element.Element(scope, a => (a.Current.ClassName == "ValueLine" || a.Current.ClassName == "TextArea") && a.Current.Name == route.ToString());
 
             return new ValueLineProxy(valueLine, route);
         }
 
-        public static EntityLineProxy EntityLine(this ILineContainer container, PropertyRoute route)
+        public static EntityLineProxy EntityLine(this ILineContainer container, PropertyRoute route, TreeScope scope = TreeScope.Descendants)
         {
-            var entityLine = container.Element.Descendant(a => a.Current.ClassName == "EntityLine" && a.Current.Name == route.ToString());
+            var entityLine = container.Element.Element(scope, a => a.Current.ClassName == "EntityLine" && a.Current.Name == route.ToString());
 
             return new EntityLineProxy(entityLine, route);
         }
 
-        public static EntityComboProxy EntityCombo(this ILineContainer container, PropertyRoute route)
+        public static EntityComboProxy EntityCombo(this ILineContainer container, PropertyRoute route, TreeScope scope = TreeScope.Descendants)
         {
-            var entityCombo = container.Element.Descendant(a => a.Current.ClassName == "EntityCombo" && a.Current.Name == route.ToString());
+            var entityCombo = container.Element.Element(scope, a => a.Current.ClassName == "EntityCombo" && a.Current.Name == route.ToString());
 
             return new EntityComboProxy(entityCombo, route);
         }
 
-        public static EntityDetailProxy EntityDetail(this ILineContainer container, PropertyRoute route)
+        public static EntityDetailProxy EntityDetail(this ILineContainer container, PropertyRoute route, TreeScope scope = TreeScope.Descendants)
         {
-            var entityDetails = container.Element.Descendant(a => a.Current.ClassName == "EntityDetail" && a.Current.Name == route.ToString());
+            var entityDetails = container.Element.Element(scope, a => a.Current.ClassName == "EntityDetail" && a.Current.Name == route.ToString());
 
             return new EntityDetailProxy(entityDetails, route);
         }
 
-        public static EntityListProxy EntityList(this ILineContainer container, PropertyRoute route)
+        public static EntityListProxy EntityList(this ILineContainer container, PropertyRoute route, TreeScope scope = TreeScope.Descendants)
         {
-            var entityList = container.Element.Descendant(a => a.Current.ClassName == "EntityList" && a.Current.Name == route.ToString());
+            var entityList = container.Element.Element(scope, a => a.Current.ClassName == "EntityList" && a.Current.Name == route.ToString());
 
             return new EntityListProxy(entityList, route);
         }
 
-        public static EntityRepeaterProxy EntityRepeater(this ILineContainer container, PropertyRoute route)
+        public static EntityRepeaterProxy EntityRepeater(this ILineContainer container, PropertyRoute route, TreeScope scope = TreeScope.Descendants)
         {
-            var entityRepeater = container.Element.Descendant(a => a.Current.ClassName == "EntityRepeater" && a.Current.Name == route.ToString());
+            var entityRepeater = container.Element.Element(scope, a => a.Current.ClassName == "EntityRepeater" && a.Current.Name == route.ToString());
 
             return new EntityRepeaterProxy(entityRepeater, route);
         }
@@ -82,86 +78,81 @@ namespace Signum.Windows.UIAutomation
             return new LineContainer<T> { Element = element, PreviousRoute = previousRoute };
         }
 
-        public static ILineContainer<C> SubContainer<T, C>(this ILineContainer<T> container, Expression<Func<T, C>> property)
+        public static ILineContainer<C> SubContainer<T, C>(this ILineContainer<T> container, Expression<Func<T, C>> property, TreeScope scope = TreeScope.Descendants) 
             where T : ModifiableEntity
             where C : ModifiableEntity
         {
             PropertyRoute route = property.Body.NodeType != ExpressionType.Convert ? container.GetRoute(property) :
                  container.GetRoute(Expression.Lambda<Func<T, IIdentifiable>>(((UnaryExpression)property.Body).Operand, property.Parameters));
 
-            var subContainer = container.Element.Descendant(a => a.Current.Name == route.ToString());
+            var subContainer = container.Element.Element(scope,  a => a.Current.Name == route.ToString());
 
             return new LineContainer<C> { Element = subContainer, PreviousRoute = typeof(C).IsEmbeddedEntity() ? route : null };
         }
 
-        //public static bool ValueLine<T>(this ILineContainer<T> container, Expression<Func<T, object>> property) where T : ModifiableEntity
-        //{
-        //    return container.Element.Descendant(a => a.Current.Name == route.ToString()) != null;
-        //}
-
-        public static ValueLineProxy ValueLine<T>(this ILineContainer<T> container, Expression<Func<T, object>> property) where T : ModifiableEntity
+        public static ValueLineProxy ValueLine<T>(this ILineContainer<T> container, Expression<Func<T, object>> property, TreeScope scope = TreeScope.Descendants) where T : ModifiableEntity
         {
             PropertyRoute route = container.GetRoute(property);
 
-            return container.ValueLine(route);
+            return container.ValueLine(route, scope);
         }
 
-        public static V ValueLineValue<T, V>(this ILineContainer<T> container, Expression<Func<T, V>> property) where T : ModifiableEntity
+        public static V ValueLineValue<T, V>(this ILineContainer<T> container, Expression<Func<T, V>> property, TreeScope scope = TreeScope.Descendants) where T : ModifiableEntity
         {
             PropertyRoute route = container.GetRoute(property);
 
-            return (V)container.ValueLine(route).Value;
+            return (V)container.ValueLine(route, scope).Value;
         }
 
-        public static void ValueLineValue<T, V>(this ILineContainer<T> container, Expression<Func<T, V>> property, V value) where T : ModifiableEntity
+        public static void ValueLineValue<T, V>(this ILineContainer<T> container, Expression<Func<T, V>> property, V value, TreeScope scope = TreeScope.Descendants) where T : ModifiableEntity
         {
             PropertyRoute route = container.GetRoute(property);
 
-            container.ValueLine(route).Value = value;
+            container.ValueLine(route, scope).Value = value;
         }
 
-        public static EntityLineProxy EntityLine<T>(this ILineContainer<T> container, Expression<Func<T, object>> property) where T : ModifiableEntity
+        public static EntityLineProxy EntityLine<T>(this ILineContainer<T> container, Expression<Func<T, object>> property, TreeScope scope = TreeScope.Descendants) where T : ModifiableEntity
         {
             PropertyRoute route = container.GetRoute(property);
 
-            return container.EntityLine(route);
+            return container.EntityLine(route, scope);
         }
 
-        public static EntityComboProxy EntityCombo<T>(this ILineContainer<T> container, Expression<Func<T, object>> property) where T : ModifiableEntity
+        public static EntityComboProxy EntityCombo<T>(this ILineContainer<T> container, Expression<Func<T, object>> property, TreeScope scope = TreeScope.Descendants) where T : ModifiableEntity
         {
             PropertyRoute route = container.GetRoute(property);
 
-            return container.EntityCombo(route);
+            return container.EntityCombo(route, scope);
         }
 
-        public static EntityDetailProxy EntityDetail<T>(this ILineContainer<T> container, Expression<Func<T, object>> property) where T : ModifiableEntity
+        public static EntityDetailProxy EntityDetail<T>(this ILineContainer<T> container, Expression<Func<T, object>> property, TreeScope scope = TreeScope.Descendants) where T : ModifiableEntity
         {
             PropertyRoute route = container.GetRoute(property);
 
-            return container.EntityDetail(route);
+            return container.EntityDetail(route, scope);
         }
 
-        public static ILineContainer<S> EntityDetailControl<T, S>(this ILineContainer<T> container, Expression<Func<T, S>> property)
+        public static ILineContainer<S> EntityDetailControl<T, S>(this ILineContainer<T> container, Expression<Func<T, S>> property, TreeScope scope = TreeScope.Descendants)
             where T : ModifiableEntity
             where S : ModifiableEntity
         {
             PropertyRoute route = container.GetRoute(property);
 
-            return container.EntityDetail(route).GetDetailControl().ToLineContainer<S>();
+            return container.EntityDetail(route, scope).GetDetailControl<S>();
         }
 
-        public static EntityListProxy EntityList<T>(this ILineContainer<T> container, Expression<Func<T, object>> property) where T : ModifiableEntity
+        public static EntityListProxy EntityList<T>(this ILineContainer<T> container, Expression<Func<T, object>> property, TreeScope scope = TreeScope.Descendants) where T : ModifiableEntity
         {
             PropertyRoute route = container.GetRoute(property);
 
-            return container.EntityList(route);
+            return container.EntityList(route, scope);
         }
 
-        public static EntityRepeaterProxy EntityRepeater<T>(this ILineContainer<T> container, Expression<Func<T, object>> property) where T : ModifiableEntity
+        public static EntityRepeaterProxy EntityRepeater<T>(this ILineContainer<T> container, Expression<Func<T, object>> property, TreeScope scope = TreeScope.Descendants) where T : ModifiableEntity
         {
             PropertyRoute route = container.GetRoute(property);
 
-            return container.EntityRepeater(route);
+            return container.EntityRepeater(route, scope);
         }
 
         public static PropertyRoute GetRoute<T, S>(this ILineContainer<T> container, Expression<Func<T, S>> property) where T : ModifiableEntity

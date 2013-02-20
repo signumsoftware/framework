@@ -25,17 +25,20 @@ namespace Signum.Engine.Authorization
 
         public static readonly DefaultBehaviour<TypeAllowedAndConditions> MaxType = new DefaultBehaviour<TypeAllowedAndConditions>(
             new TypeAllowedAndConditions(TypeAllowed.Create),
-            baseRules => Merge(baseRules, MaxTypeAllowed));
+            baseRules => Merge(baseRules, MaxTypeAllowed, TypeAllowed.Create));
 
         public static readonly DefaultBehaviour<TypeAllowedAndConditions> MinType = new DefaultBehaviour<TypeAllowedAndConditions>(
               new TypeAllowedAndConditions(TypeAllowed.None),
-           baseRules => Merge(baseRules, MinTypeAllowed));
+           baseRules => Merge(baseRules, MinTypeAllowed, TypeAllowed.None));
 
-        static TypeAllowedAndConditions Merge(IEnumerable<TypeAllowedAndConditions> baseRules, Func<IEnumerable<TypeAllowed>, TypeAllowed> merge)
+        static TypeAllowedAndConditions Merge(IEnumerable<TypeAllowedAndConditions> baseRules, Func<IEnumerable<TypeAllowed>, TypeAllowed> merge, TypeAllowed baseAllowed)
         {
             var only = baseRules.Only();
             if (only != null)
                 return only;
+
+            if (baseRules.Any(a => a.Conditions.IsNullOrEmpty() && a.Fallback == baseAllowed))
+                return new TypeAllowedAndConditions(baseAllowed);
 
             var conditions = baseRules.First().Conditions.Select(c => c.ConditionName).ToList();
 

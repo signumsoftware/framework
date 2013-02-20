@@ -87,19 +87,30 @@ namespace Signum.Windows.UIAutomation
                 throw new InvalidOperationException("The checkbox {0} has not been unchecked".Formato(element.Current.AutomationId));
         }
 
-
-
-        public static void SelectByName(this List<AutomationElement> list, string toString, Func<string> containerDescription)
+        public static void WaitComboBoxHasItems(this AutomationElement comboBox, Func<string> containerDescription = null, int? timeOut = null)
         {
-            var filtered = list.Where(a => a.Current.Name == toString).ToList();
+            if (containerDescription == null)
+                containerDescription = () => "ComboBox has items";
 
-            if (filtered.Count == 1)
+            comboBox.Wait(() =>
             {
-                filtered.SingleEx().Pattern<SelectionItemPattern>().Select();
+                comboBox.Pattern<ExpandCollapsePattern>().Expand();
+                return comboBox.TryChild(c => c.Current.ControlType == ControlType.ListItem) != null;
+            }, containerDescription, timeOut);
+        }
+
+        public static void SelectListItemByName(this AutomationElement listParent, string toString, Func<string> containerDescription)
+        {
+            var only = listParent.TryChild(a => a.Current.Name == toString);
+            if (only != null)
+            {
+                only.Pattern<SelectionItemPattern>().Select();
             }
             else
             {
-                filtered = list.Where(a => a.Current.Name.Contains(toString, StringComparison.InvariantCultureIgnoreCase)).ToList();
+                var list = listParent.ChildrenAll();
+
+                var filtered = list.Where(a => a.Current.Name.Contains(toString, StringComparison.InvariantCultureIgnoreCase)).ToList();
 
                 if (filtered.Count == 0)
                     throw new InvalidOperationException("No element found on {0} with ToString '{1}'. Found: \r\n{2}".Formato(containerDescription(), toString, list.ToString(a => a.Current.Name, "\r\n")));

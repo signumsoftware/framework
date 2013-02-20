@@ -213,7 +213,8 @@ namespace Signum.Windows.UIAutomation
 
         public NormalWindowProxy<T> Create<T>(int? timeOut = null) where T: ModifiableEntity
         {
-            return new NormalWindowProxy<T>(CreateCapture(timeOut ?? NormalWindowTimeout));
+            var win = CreateCapture(timeOut); 
+            return new NormalWindowProxy<T>(win) { PreviousRoute = GetElementRoute() };
         }
 
         public AutomationElement CreateCapture(int? timeOut = null)
@@ -223,7 +224,7 @@ namespace Signum.Windows.UIAutomation
 
             var win = Element.CaptureWindow(
                 () => CreateButton.ButtonInvoke(),
-                () => "Create a new entity on {0}".Formato(this), timeOut);
+                () => "Create a new entity on {0}".Formato(this), timeOut ?? NormalWindowTimeout);
             return win;
         }
 
@@ -260,20 +261,38 @@ namespace Signum.Windows.UIAutomation
 
             var win = Element.CaptureWindow(
                 () => FindButton.ButtonInvoke(),
-                () => "Search entity on {0}".Formato(this), timeOut);
+                () => "Search entity on {0}".Formato(this), timeOut ?? SearchWindowTimeout);
             return win;
         }
 
         public NormalWindowProxy<T> View<T>(int? timeOut = null) where T: ModifiableEntity
+        {
+            var win = ViewCapture(timeOut);
+
+            return new NormalWindowProxy<T>(win) { PreviousRoute = GetElementRoute() };
+        }
+
+        public AutomationElement ViewCapture(int? timeOut = null)
         {
             if (ViewButton.Current.IsOffscreen)
                 throw new InvalidOperationException("ViewButton is not visible on {0}".Formato(this));
 
             var win = Element.CaptureWindow(
                 () => ViewButton.ButtonInvoke(),
-                () => "View entity on {0}".Formato(this), timeOut);
+                () => "View entity on {0}".Formato(this), timeOut ?? NormalWindowTimeout);
+            return win;
+        }
 
-            return new NormalWindowProxy<T>(win);
+        protected virtual PropertyRoute GetElementRoute()
+        {
+            if (this.PropertyRoute == null)
+                return null;
+
+            var result = this.PropertyRoute;
+            if (result.Type.IsIIdentifiable())
+                return null;
+
+            return result; 
         }
 
         public void Remove()
@@ -310,9 +329,7 @@ namespace Signum.Windows.UIAutomation
 
             var lb = AutoCompleteControl.WaitChildById("lstBox", timeOut);
 
-            var list = lb.Children(a => a.Current.ControlType == ControlType.ListItem);
-
-            list.SelectByName(toString, ()=>this.ToString());
+            lb.SelectListItemByName(toString, () => this.ToString());
         }
 
         protected override bool FastSelect(Lite<IIdentifiable> value)
@@ -359,9 +376,7 @@ namespace Signum.Windows.UIAutomation
         {
             ComboBox.Pattern<ExpandCollapsePattern>().Expand();
 
-            var list = ComboBox.ChildrenAll();
-
-            list.SelectByName(toString, ()=>this.ToString());
+            ComboBox.SelectListItemByName(toString, ()=>this.ToString());
         }
 
         protected override bool FastSelect(Lite<IIdentifiable> lite)
@@ -378,18 +393,18 @@ namespace Signum.Windows.UIAutomation
             return true;
         }
 
-        public List<AutomationElement> WaitChargedList()
+        public void WaitHasItems(int? timeOut = null)
         {
-            List<AutomationElement> list = null;
+            ComboBox.WaitComboBoxHasItems(() => "EntityCombo {0} has items".Formato(this), timeOut);
+        }
 
-            ComboBox.Wait(() =>
-            {
-                ComboBox.Pattern<ExpandCollapsePattern>().Expand();
-                list = ComboBox.Children(c => c.Current.ControlType == ControlType.ListItem);
-                return list.Any();
-            }, () => "ComboBox not charged");
+        public void SelectFirstElement()
+        {
+            ComboBox.Pattern<ExpandCollapsePattern>().Expand();
 
-            return list;
+            var item = ComboBox.Child(a => a.Current.ControlType == ControlType.ListItem);
+
+            item.Pattern<SelectionItemPattern>().Select();
         }
     }
 
@@ -402,19 +417,47 @@ namespace Signum.Windows.UIAutomation
             return Element.ChildByCondition(DetailCondition);
         }
 
+        public ILineContainer<T> GetDetailControl<T>() where T : ModifiableEntity
+        {
+            return GetDetailControl().ToLineContainer<T>(GetElementRoute());
+        }
+
         public AutomationElement TryDetailControl()
         {
             return Element.TryChildByCondition(DetailCondition);
+        }
+
+        public ILineContainer<T> TryDetailControl<T>() where T : ModifiableEntity
+        {
+            var detail = TryDetailControl();
+            if (detail == null)
+                return null;
+
+            return detail.ToLineContainer<T>(GetElementRoute());
         }
 
         public AutomationElement GetOrCreateDetailControl()
         {
             var result = TryDetailControl();
 
-            if (result == null)
-                CreateButton.ButtonInvoke();
+            if (result != null)
+                return result;
+              
+            CreateButton.ButtonInvoke();
 
             return GetDetailControl();
+        }
+
+        public ILineContainer<T> GetOrCreateDetailControl<T>() where T : ModifiableEntity
+        {
+            var result = TryDetailControl<T>();
+
+            if (result != null)
+                return result;
+
+            CreateButton.ButtonInvoke();
+
+            return GetDetailControl<T>();
         }
 
         public EntityDetailProxy(AutomationElement element, PropertyRoute route)
@@ -448,9 +491,19 @@ namespace Signum.Windows.UIAutomation
 
         public void SelectElementToString(string toString)
         {
-            var list = ListBox.ChildrenAll();
+            ListBox.SelectListItemByName(toString, () => this.ToString());
+        }
 
-            list.SelectByName(toString, () => this.ToString());
+        protected override PropertyRoute GetElementRoute()
+        {
+            if (this.PropertyRoute == null)
+                return null;
+
+            var result = this.PropertyRoute.Add("Item");
+            if (result.Type.IsIIdentifiable())
+                return null;
+
+            return result;
         }
     }
 
@@ -478,6 +531,18 @@ namespace Signum.Windows.UIAutomation
         {
             return Element.Descendants(a => a.Current.ClassName == "EntityRepeaterContentControl")
                 .Select(ae => new RepeaterLineProxy<T>(ae, this.PropertyRoute.Add("Item"))).ToList();
+        }
+
+        protected override PropertyRoute GetElementRoute()
+        {
+            if (this.PropertyRoute == null)
+                return null;
+
+            var result = this.PropertyRoute.Add("Item");
+            if (result.Type.IsIIdentifiable())
+                return null;
+
+            return result;
         }
     }
 
