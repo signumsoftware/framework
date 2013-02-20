@@ -20,6 +20,7 @@ using Signum.Services;
 using System.Windows.Threading;
 using System.Collections.ObjectModel;
 using Signum.Windows.Operations;
+using System.Collections.Concurrent;
 
 namespace Signum.Windows
 {
@@ -323,7 +324,7 @@ namespace Signum.Windows
             {
                 //Looking for a better place to do this
                 PropertyRoute.SetFindImplementationsCallback(Navigator.FindImplementations);
-                QueryToken.EntityExtensions = parent => Server.Return((IDynamicQueryServer server) => server.ExternalQueryToken(parent));
+                QueryToken.EntityExtensions = GetExtensionToken;
 
                 EventManager.RegisterClassHandler(typeof(TextBox), TextBox.GotFocusEvent, new RoutedEventHandler(TextBox_GotFocus));
 
@@ -339,6 +340,12 @@ namespace Signum.Windows
 
                 initialized = true;
             }
+        }
+
+        ConcurrentDictionary<QueryToken, IEnumerable<QueryToken>> extensionCache = new ConcurrentDictionary<QueryToken, IEnumerable<QueryToken>>(); 
+        IEnumerable<QueryToken> GetExtensionToken(QueryToken token)
+        {
+            return extensionCache.GetOrAdd(token, t => Server.Return((IDynamicQueryServer server) => server.ExternalQueryToken(t)));
         }
 
         void CompleteQuerySettings()
