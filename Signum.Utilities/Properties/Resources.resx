@@ -163,10 +163,10 @@
     <value>This {0}</value>
   </data>
   <data name="EnterYourSelection" xml:space="preserve">
-    <value>Enter your selection: </value>
+    <value>Enter your selection (nothing to exit): </value>
   </data>
   <data name="EnterYoutSelectionsSeparatedByComma" xml:space="preserve">
-    <value>Enter your selections separated by comma: </value>
+    <value>Enter your selections separated by comma or hyphen (nothing to exit): </value>
   </data>
   <data name="NoOptionWithKey0Found" xml:space="preserve">
     <value>No option with key {0} found</value>
