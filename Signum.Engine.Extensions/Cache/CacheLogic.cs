@@ -67,14 +67,19 @@ namespace Signum.Engine.Cache
                     if (type != "SQL_LOGIN")
                         throw new InvalidOperationException("The current login '{0}' is a {1} instead of a SQL_LOGIN. Avoid using Integrated Security with Cache Logic".Formato(currentUser, type));
 
-                    var owner = (from db in Database.View<SysDatabases>()
+                    var pair = (from db in Database.View<SysDatabases>()
                                  where db.name == connector.DatabaseName()
-                                 join spl in Database.View<SysServerPrincipals>() on db.owner_sid equals spl.sid
-                                 select spl.name).Single();
+                                 join spl in Database.View<SysServerPrincipals>().DefaultIfEmpty() on db.owner_sid equals spl.sid
+                                join dpl in Database.View<SysDatabasePrincipals>().DefaultIfEmpty() on db.owner_sid equals dpl.sid
+                                 select new
+                                 {
+                                     ServerPrincipalName = spl.name,
+                                     DatabasePrincipalName = dpl.name,
+                                 }).Single();
 
-                    if (currentUser != owner)
+                    if (currentUser != pair.ServerPrincipalName)
                         throw new InvalidOperationException(@"The current owner of the database {0} is '{1}', but the current user is '{2}'. Change the login or call:
-ALTER AUTHORIZATION ON DATABASE::{0} TO {2}".Formato(connector.DatabaseName(), owner, currentUser));
+ALTER AUTHORIZATION ON DATABASE::{0} TO {2}".Formato(connector.DatabaseName(), pair.ServerPrincipalName ?? ("DatabasePrincipal " + pair.DatabasePrincipalName), currentUser));
                 }
 
                 SqlDependency.Start(connector.ConnectionString);
