@@ -163,10 +163,10 @@
     <value>Este {0}</value>
   </data>
   <data name="EnterYourSelection" xml:space="preserve">
-    <value>Introduzca su selección: </value>
+    <value>Introduzca su selección (nada para salir): </value>
   </data>
   <data name="EnterYoutSelectionsSeparatedByComma" xml:space="preserve">
-    <value>Introduzca sus selecciones separadas por comas: </value>
+    <value>Introduzca sus selecciones separadas por comas o guiones (nada para salir): </value>
   </data>
   <data name="NoOptionWithKey0Found" xml:space="preserve">
     <value>Ninguna opción con clave  {0} encontrada</value>

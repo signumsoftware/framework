@@ -40,6 +40,7 @@ namespace Signum.Engine
 
                     SafeConsole.WriteSameLine(pi.ToString());
                 }
+                SafeConsole.ClearSameLine();
             }
         }
 
@@ -62,13 +63,23 @@ namespace Signum.Engine
                     string f = parameters == null ? str : str.Formato(parameters);
                     lock (logStreamWriter)
                         logStreamWriter.WriteLine(f);
-                    SafeConsole.WriteLineColor(color, f.PadRight(Console.WindowWidth - 4));
+                    lock (SafeConsole.SyncKey)
+                    {
+                        SafeConsole.ClearSameLine();
+                        SafeConsole.WriteLineColor(color, str, parameters);
+                    }
                 };
             }
             else
             {
                 return (color, str, parameters) =>
-                    SafeConsole.WriteLineColor(color, str.Formato(parameters).PadRight(Console.WindowWidth - 4));
+                {
+                    lock (SafeConsole.SyncKey)
+                    {
+                        SafeConsole.ClearSameLine();
+                        SafeConsole.WriteLineColor(color, str, parameters);
+                    }
+                };
             }
         }
 
@@ -91,6 +102,7 @@ namespace Signum.Engine
             finally
             {
                 table.Identity = false;
+                SafeConsole.ClearSameLine();
             }
         }
 
@@ -124,6 +136,7 @@ namespace Signum.Engine
             finally
             {
                 table.Identity = false;
+                SafeConsole.ClearSameLine();
             }
         }
 
@@ -131,35 +144,42 @@ namespace Signum.Engine
         {
             using (StreamWriter log = TryOpenAutoFlush(fileName))
             {
-                LogWriter writer = GetLogWriter(log);
-
-                IProgressInfo pi;
-                var col = collection.ToProgressEnumerator(out pi).AsThreadSafe();
-
-                List<Thread> t = 0.To(4).Select(i => new Thread(() =>
+                try
                 {
-                    foreach (var item in col)
+                    LogWriter writer = GetLogWriter(log);
+
+                    IProgressInfo pi;
+                    var col = collection.ToProgressEnumerator(out pi).AsThreadSafe();
+
+                    List<Thread> t = 0.To(4).Select(i => new Thread(() =>
                     {
-                        try
+                        foreach (var item in col)
                         {
-                            using (Transaction tr = new Transaction())
+                            try
                             {
-                                action(item, writer);
-                                tr.Commit();
+                                using (Transaction tr = new Transaction())
+                                {
+                                    action(item, writer);
+                                    tr.Commit();
+                                }
                             }
+                            catch (Exception e)
+                            {
+                                writer(ConsoleColor.Red, "Error in {0}: {1}", elementID(item), e.Message);
+                            }
+                            lock (SafeConsole.SyncKey)
+                                SafeConsole.WriteSameLine(pi.ToString());
                         }
-                        catch (Exception e)
-                        {
-                            writer(ConsoleColor.Red, "Error in {0}: {1}", elementID(item), e.Message);
-                        }
+                    })).ToList();
 
-                        SafeConsole.WriteSameLine(pi.ToString());
-                    }
-                })).ToList();
+                    t.ForEach(a => a.Start());
 
-                t.ForEach(a => a.Start());
-
-                t.ForEach(a => a.Join());
+                    t.ForEach(a => a.Join());
+                }
+                finally
+                {
+                    SafeConsole.ClearSameLine();
+                }
             }
         }
 
