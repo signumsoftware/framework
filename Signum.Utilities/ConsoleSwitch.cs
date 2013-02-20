@@ -162,12 +162,12 @@ namespace Signum.Utilities
                     return Enumerable.Empty<WithDescription<V>>();
 
                 if (from == null && to.HasValue)
-                    return dictionary.Keys.Take(to.Value + 1).Select(dictionary.GetOrThrow);
+                    return dictionary.Keys.Take(to.Value + 1).Select(s => dictionary.GetOrThrow(s));
 
                 if (from.HasValue && to == null)
-                    return dictionary.Keys.Skip(from.Value).Select(dictionary.GetOrThrow);
+                    return dictionary.Keys.Skip(from.Value).Select(s => dictionary.GetOrThrow(s));
 
-                return dictionary.Keys.Skip(from.Value).Take((to.Value + 1) - from.Value).Select(dictionary.GetOrThrow);
+                return dictionary.Keys.Skip(from.Value).Take((to.Value + 1) - from.Value).Select(s => dictionary.GetOrThrow(s));
             }
             else
             {
