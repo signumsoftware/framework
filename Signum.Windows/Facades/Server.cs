@@ -297,6 +297,11 @@ namespace Signum.Windows
             return NameToType.GetOrThrow(cleanName, "Type {0} not found in the Server");
         }
 
+        public static Type ToType(this TypeDN typeDN)
+        {
+            return GetType(typeDN.CleanName);
+        }
+
         public static string GetCleanName(Type type)
         {
             return ServerTypes[type].CleanName;
