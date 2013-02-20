@@ -11,7 +11,7 @@ namespace Signum.Utilities
     public class ConsoleSwitch<K, V> : IEnumerable<KeyValuePair<string, WithDescription<V>>> where V : class
     {
         Dictionary<string, WithDescription<V>> dictionary = new Dictionary<string, WithDescription<V>>(StringComparer.InvariantCultureIgnoreCase);
-        List<int> separators = new List<int>();
+        Dictionary<int, string> separators = new Dictionary<int, string>();
         string welcomeMessage;
 
         public ConsoleSwitch()
@@ -25,9 +25,9 @@ namespace Signum.Utilities
         }
 
         //Separator
-        public void Add()
+        public void Add(string value)
         {
-            separators.Add(dictionary.Keys.Count);
+            separators.AddOrThrow(dictionary.Keys.Count, value, "Already a separator on {0}");
         }
 
         public void Add(K key, V value)
@@ -68,7 +68,7 @@ namespace Signum.Utilities
                 Console.WriteLine(welcomeMessage);
                 PrintOptions();
 
-                Console.Write(endMessage);
+                Console.WriteLine(endMessage);
                 string line = Console.ReadLine();
 
                 if (string.IsNullOrEmpty(line))
@@ -92,8 +92,12 @@ namespace Signum.Utilities
             {
                 var key = keys[i];
 
-                if (separators.Contains(i))
+                string value = separators.TryGetC(i);
+                if (value.HasText())
+                {
                     Console.WriteLine();
+                    Console.WriteLine(value);
+                }
 
                 SafeConsole.WriteColor(ConsoleColor.White, " " + keys[i]);
                 Console.WriteLine(" - " + dictionary[key].Description);
@@ -130,7 +134,7 @@ namespace Signum.Utilities
                 Console.WriteLine(welcomeMessage);
                 PrintOptions();
 
-                Console.Write(endMessage);
+                Console.WriteLine(endMessage);
                 string line = Console.ReadLine();
 
                 if (string.IsNullOrEmpty(line))
@@ -158,12 +162,12 @@ namespace Signum.Utilities
                     return Enumerable.Empty<WithDescription<V>>();
 
                 if (from == null && to.HasValue)
-                    return dictionary.Keys.Take(to.Value).Select(dictionary.GetOrThrow);
+                    return dictionary.Keys.Take(to.Value + 1).Select(dictionary.GetOrThrow);
 
                 if (from.HasValue && to == null)
                     return dictionary.Keys.Skip(from.Value).Select(dictionary.GetOrThrow);
 
-                return dictionary.Keys.Skip(from.Value).Take(to.Value - from.Value).Select(dictionary.GetOrThrow);
+                return dictionary.Keys.Skip(from.Value).Take((to.Value + 1) - from.Value).Select(dictionary.GetOrThrow);
             }
             else
             {
