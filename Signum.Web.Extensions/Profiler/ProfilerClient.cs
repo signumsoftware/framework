@@ -38,7 +38,7 @@ namespace Signum.Web.Profiler
 
                 SpecialOmniboxProvider.Register(new SpecialOmniboxAction("ProfilerHeavy",
                     () => ProfilerPermission.ViewHeavyProfiler.IsAuthorized(),
-                    uh => uh.Action((ProfilerController pc) => pc.Heavy())));
+                    uh => uh.Action((ProfilerController pc) => pc.Heavy(false))));
 
                 SpecialOmniboxProvider.Register(new SpecialOmniboxAction("ProfilerTimeTable",
                     () => ProfilerPermission.ViewTimeTracker.IsAuthorized(),

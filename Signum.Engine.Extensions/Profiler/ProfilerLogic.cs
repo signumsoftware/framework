@@ -37,9 +37,7 @@ namespace Signum.Engine.Profiler
 
         public static void ProfilerEntries(List<HeavyProfilerEntry> entries)
         {
-            int index = HeavyProfiler.Entries.Count;
-            entries.ForEach(e => e.Index += index);
-            HeavyProfiler.Entries.AddRange(entries);
+            HeavyProfiler.ImportEntries(entries, rebaseTime: false);
         }
     }
 }
