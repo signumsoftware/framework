@@ -419,7 +419,7 @@ namespace Signum.Windows.UIAutomation
 
         public ILineContainer<T> GetDetailControl<T>() where T : ModifiableEntity
         {
-            return GetDetailControl().ToLineContainer<T>(GetDetailsPropertyRoute());
+            return GetDetailControl().ToLineContainer<T>(GetElementRoute());
         }
 
         public AutomationElement TryDetailControl()
@@ -433,7 +433,7 @@ namespace Signum.Windows.UIAutomation
             if (detail == null)
                 return null;
 
-            return detail.ToLineContainer<T>(GetDetailsPropertyRoute());
+            return detail.ToLineContainer<T>(GetElementRoute());
         }
 
         public AutomationElement GetOrCreateDetailControl()
@@ -458,17 +458,6 @@ namespace Signum.Windows.UIAutomation
             CreateButton.ButtonInvoke();
 
             return GetDetailControl<T>();
-        }
-
-        PropertyRoute GetDetailsPropertyRoute()
-        {
-            if (PropertyRoute == null)
-                return null;
-
-            if (this.PropertyRoute.Type.IsIIdentifiable())
-                return null;
-
-            return this.PropertyRoute;
         }
 
         public EntityDetailProxy(AutomationElement element, PropertyRoute route)

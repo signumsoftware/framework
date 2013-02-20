@@ -138,7 +138,7 @@ namespace Signum.Windows.UIAutomation
         {
             PropertyRoute route = container.GetRoute(property);
 
-            return container.EntityDetail(route, scope).GetDetailControl().ToLineContainer<S>();
+            return container.EntityDetail(route, scope).GetDetailControl<S>();
         }
 
         public static EntityListProxy EntityList<T>(this ILineContainer<T> container, Expression<Func<T, object>> property, TreeScope scope = TreeScope.Descendants) where T : ModifiableEntity
