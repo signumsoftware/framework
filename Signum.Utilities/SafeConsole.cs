@@ -10,72 +10,50 @@ namespace Signum.Utilities
         public static readonly object SyncKey = new object();
         public static bool needToClear = false;
 
-        public static void WriteLine()
+        public static void WriteSameLine(string format, params object[] parameters)
         {
-            WriteLine("");
+            string str = string.Format(format, parameters);
+
+            if (needToClear)
+                str = str.PadChopRight(Console.WindowWidth);
+
+            Console.WriteLine(str);
+
+            Console.SetCursorPosition(Console.CursorLeft, Console.CursorTop - 1);
+            needToClear = true;
         }
 
-        public static void WriteLine(string format, params object[] parameters)
+        public static void ClearSameLine()
         {
-            string str = FormatString(format, parameters);
-            lock (SyncKey)
+            if (needToClear)
             {
-                Console.WriteLine(str);
-                needToClear = false;
+                Console.WriteLine(new string(' ', Console.WindowWidth));
+
+                Console.SetCursorPosition(Console.CursorLeft, Console.CursorTop - 1);
             }
+            needToClear = false;
         }
 
-        public static void Write(string format, params object[] parameters)
-        {
-            string str = FormatString(format, parameters);
-
-            lock (SyncKey)
-                Console.Write(str);
-        }
 
         public static void WriteColor(ConsoleColor color, string format, params object[] parameters)
         {
-            string str = FormatString(format, parameters);
-            lock (SyncKey)
-            {
-                ConsoleColor old = Console.ForegroundColor;
-                Console.ForegroundColor = color;
-                Console.Write(str);
-                Console.ForegroundColor = old;
-            }
+            string str = string.Format(format, parameters);
+            ConsoleColor old = Console.ForegroundColor;
+            Console.ForegroundColor = color;
+            Console.Write(str);
+            Console.ForegroundColor = old;
         }
 
         public static void WriteLineColor(ConsoleColor color, string format, params object[] parameters)
         {
-            string str = FormatString(format, parameters);
-            lock (SyncKey)
-            {
-                ConsoleColor old = Console.ForegroundColor;
-                Console.ForegroundColor = color;
-                Console.WriteLine(str);
-                Console.ForegroundColor = old;
-            }
+            string str = string.Format(format, parameters);
+            ConsoleColor old = Console.ForegroundColor;
+            Console.ForegroundColor = color;
+            Console.WriteLine(str);
+            Console.ForegroundColor = old;
         }
 
-        public static void WriteSameLine(string format, params object[] parameters)
-        {
-            string str = FormatString(format, parameters);
-            lock (SyncKey)
-            {
-                Console.WriteLine(str.PadChopRight(Console.WindowWidth));
-          
-                Console.SetCursorPosition(Console.CursorLeft, Console.CursorTop - 1);
-                needToClear = true;
-            }
-        }
-
-        static string FormatString(string format, object[] parameters)
-        {
-            string s = string.Format(format, parameters);
-            if (needToClear)
-                s = s.PadRight(Console.WindowWidth - 2);
-            return s;
-        }
+     
 
         public static bool Ask(string question)
         {
@@ -84,19 +62,16 @@ namespace Signum.Utilities
 
         public static string Ask(string question, params string[] answers)
         {
-            lock(SyncKey)
+            Console.Write(question + " ({0}) ".Formato(answers.ToString("/")));
+            do
             {
-                Console.Write(question + " ({0}) ".Formato(answers.ToString("/")));
-                do
-                {
-                    var userAnswer = Console.ReadLine().ToLower();
-                    var result = answers.FirstOrDefault(a => a.StartsWith(userAnswer, StringComparison.CurrentCultureIgnoreCase));
-                    if (result != null)
-                        return result;
+                var userAnswer = Console.ReadLine().ToLower();
+                var result = answers.FirstOrDefault(a => a.StartsWith(userAnswer, StringComparison.CurrentCultureIgnoreCase));
+                if (result != null)
+                    return result;
 
-                    Console.Write("Possible answers: {0} ".Formato(answers.ToString("/")));
-                } while (true);
-            }
+                Console.Write("Possible answers: {0} ".Formato(answers.ToString("/")));
+            } while (true);
         }
 
 
