@@ -269,7 +269,7 @@ namespace Signum.Engine
 
         public static void UpdateToStrings<T>() where T : IdentifiableEntity, new()
         {
-            SafeConsole.WriteLineColor(ConsoleColor.Blue, "Saving toStr for {0}".Formato(typeof(T).TypeName()));
+            SafeConsole.WriteLineColor(ConsoleColor.Cyan, "Saving toStr for {0}".Formato(typeof(T).TypeName()));
 
             if (!Database.Query<T>().Any())
                 return;
