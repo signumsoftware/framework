@@ -289,7 +289,7 @@ namespace Signum.Windows.UIAutomation
                 return null;
 
             var result = this.PropertyRoute;
-            if (result.Type.IsIIdentifiable())
+            if (result.Type.IsIRootEntity())
                 return null;
 
             return result; 
@@ -500,7 +500,7 @@ namespace Signum.Windows.UIAutomation
                 return null;
 
             var result = this.PropertyRoute.Add("Item");
-            if (result.Type.IsIIdentifiable())
+            if (result.Type.IsIRootEntity())
                 return null;
 
             return result;
@@ -530,7 +530,7 @@ namespace Signum.Windows.UIAutomation
         public List<RepeaterLineProxy<T>> GetRepeaterElements<T>() where T : ModifiableEntity
         {
             return Element.Descendants(a => a.Current.ClassName == "EntityRepeaterContentControl")
-                .Select(ae => new RepeaterLineProxy<T>(ae, this.PropertyRoute.Add("Item"))).ToList();
+                .Select(ae => new RepeaterLineProxy<T>(ae, GetElementRoute())).ToList();
         }
 
         protected override PropertyRoute GetElementRoute()
@@ -539,7 +539,7 @@ namespace Signum.Windows.UIAutomation
                 return null;
 
             var result = this.PropertyRoute.Add("Item");
-            if (result.Type.IsIIdentifiable())
+            if ( result.Type.IsIRootEntity())
                 return null;
 
             return result;
