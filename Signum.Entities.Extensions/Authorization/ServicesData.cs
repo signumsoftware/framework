@@ -284,6 +284,11 @@ namespace Signum.Entities.Authorization
 
             return "{0} | {1}".Formato(Fallback, conditions.ToString(c=>"{0} {1}".Formato(c.ConditionName, c.Allowed), " | "));
         }
+
+        internal bool Exactly(TypeAllowed current)
+        {
+            return Fallback == current && Conditions.IsNullOrEmpty();
+        }
     }
 
     [Serializable, AvoidLocalization]

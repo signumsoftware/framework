@@ -53,34 +53,36 @@ namespace Signum.Windows.UIAutomation
 
         public string EntityId
         {
-            get { return Element.ChildById("entityTitle").ChildById("entityId").Value(); }
+            get { return Element.ChildById("entityTitle").ChildById("tbEntityId").Value(); }
         }
 
         public string EntityToStr
         {
-            get { return Element.ChildById("entityTitle").ChildById("entityToStr").Value(); }
+            get { return Element.ChildById("entityTitle").ChildById("tbEntityToStr").Value(); }
         }
 
         public void Ok()
         {
+            var entityId = EntityId;
             ButtonBar.OkButton.ButtonInvoke();
-
             Element.Wait(() => IsClosed,
-            actionDescription: () => "Waiting to close window after OK {0}".Formato(EntityId));
+            actionDescription: () => "Waiting to close window after OK {0}".Formato(entityId));
         }
 
         public AutomationElement OkCapture()
         {
+            var entityId = EntityId;
             return Element.CaptureWindow(
             action: () => ButtonBar.OkButton.ButtonInvoke(),
-            actionDescription: () => "Waiting to capture window after OK {0}".Formato(EntityId));
+            actionDescription: () => "Waiting to capture window after OK {0}".Formato(entityId));
         }
 
         public void Reload()
         {
+            var entityId = EntityId;
             Element.WaitDataContextChangedAfter(
             action: () => ButtonBar.ReloadButton.ButtonInvoke(),
-            actionDescription: () => "Reload " + EntityId);
+            actionDescription: () => "Reload " + entityId);
         }
 
         public void Reload(bool confirm)
@@ -98,29 +100,29 @@ namespace Signum.Windows.UIAutomation
         public void Execute(Enum operationKey, int? timeOut = null)
         {
             var time = timeOut ?? OperationTimeouts.ExecuteTimeout;
-
+            var entityId = EntityId;
             Element.WaitDataContextChangedAfter(
             action: () => ButtonBar.GetButton(operationKey).ButtonInvoke(),
-            actionDescription: () => "Executing {0} from {1}".Formato(OperationDN.UniqueKey(operationKey), EntityId));
+            actionDescription: () => "Executing {0} from {1}".Formato(OperationDN.UniqueKey(operationKey), entityId));
         }
 
         public AutomationElement ExecuteCapture(Enum operationKey, int? timeOut = null)
         {
             var time = timeOut ?? OperationTimeouts.ExecuteTimeout;
-
+            var entityId = EntityId;
             return Element.CaptureWindow(
             action: () => ButtonBar.GetButton(operationKey).ButtonInvoke(),
-            actionDescription: () => "Executing {0} from {1} and waiting to capture window".Formato(OperationDN.UniqueKey(operationKey), EntityId));
+            actionDescription: () => "Executing {0} from {1} and waiting to capture window".Formato(OperationDN.UniqueKey(operationKey), entityId));
         }
 
 
         public AutomationElement ConstructFromCapture(Enum operationKey, int? timeOut = null)
         {
             var time = timeOut ?? OperationTimeouts.ConstructFromTimeout;
-
+            var entityId = EntityId;
             return Element.CaptureWindow(
                 () => GetConstructorButton(operationKey).ButtonInvoke(),
-                () => "Finding a window after {0} from {1} took more than {2} ms".Formato(OperationDN.UniqueKey(operationKey), EntityId, time));
+                () => "Finding a window after {0} from {1} took more than {2} ms".Formato(OperationDN.UniqueKey(operationKey), entityId, time));
         }
 
         private AutomationElement GetConstructorButton(Enum operationKey)
