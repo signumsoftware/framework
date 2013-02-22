@@ -69,6 +69,11 @@ namespace Signum.Entities.Reflection
             return typeof(IIdentifiable).IsAssignableFrom(type);
         }
 
+        public static bool IsIRootEntity(this Type type)
+        {
+            return typeof(IRootEntity).IsAssignableFrom(type);
+        }
+
         public static bool IsModifiableEntity(this Type type)
         {
             return typeof(ModifiableEntity).IsAssignableFrom(type);
