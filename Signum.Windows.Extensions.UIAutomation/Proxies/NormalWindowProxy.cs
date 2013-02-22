@@ -35,14 +35,9 @@ namespace Signum.Windows.UIAutomation
             get { return new ButtonBarProxy(Element.ChildById("buttonBar")); }
         }
 
-        public AutomationElement LeftExpander
+        public LeftPanelProxy LeftExpander
         {
-            get { return Element.ChildById("widgetPanel").ChildById("expander"); }
-        }
-
-        public AutomationElement LeftExpanderButton
-        {
-            get { return LeftExpander.ChildById("HeaderSite"); }
+            get { return new LeftPanelProxy(Element.ChildById("widgetPanel").ChildById("expander")); }
         }
 
         AutomationElement mainControl;
@@ -276,4 +271,34 @@ namespace Signum.Windows.UIAutomation
         }
     }
 
+
+    public class LeftPanelProxy
+    {
+        public AutomationElement Element {get;set;}
+
+        public LeftPanelProxy(AutomationElement element)
+        {
+            this.Element = element;
+        }
+
+        public AutomationElement LeftExpanderButton
+        {
+            get { return Element.ChildById("HeaderSite"); }
+        }
+    }
+
+    public static class QuickLinkExtensions
+    {
+        public static AutomationElement Button(this LeftPanelProxy left, string name)
+        {
+            return left.Element.Descendant(el => el.Current.ControlType == ControlType.Button && el.Current.Name == name);
+        }
+
+        public static AutomationElement InvokeQuickLink(this LeftPanelProxy left, string name)
+        {
+            return left.Element.CaptureWindow(
+            action: () => left.Button(name).ButtonInvoke(),
+            actionDescription: () => "Waiting to capture window after click {0} on LeftPanel".Formato(name));
+        }
+    }
 }
