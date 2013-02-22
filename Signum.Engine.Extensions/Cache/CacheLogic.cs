@@ -83,6 +83,15 @@ ALTER AUTHORIZATION ON DATABASE::{0} TO {2}".Formato(connector.DatabaseName(), p
                 }
 
                 SqlDependency.Start(connector.ConnectionString);
+
+                SafeConsole.SetConsoleCtrlHandler(ct =>
+                {
+                    Shutdown();
+                    return true;
+                }, true);
+
+                AppDomain.CurrentDomain.ProcessExit += (o, a) => Shutdown(); ;
+
             }
             catch (InvalidOperationException ex)
             {
