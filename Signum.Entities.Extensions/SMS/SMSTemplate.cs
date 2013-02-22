@@ -126,6 +126,7 @@ namespace Signum.Entities.SMS
             return IsActiveNowExpression.Evaluate(this);
         }
 
+        [ImplementedBy()]
         IIdentifiable aditionalData;
         public IIdentifiable AditionalData
         {
