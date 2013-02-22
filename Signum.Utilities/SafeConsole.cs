@@ -8,14 +8,14 @@ namespace Signum.Utilities
     public static class SafeConsole
     {
         public static readonly object SyncKey = new object();
-        public static bool needToClear = false;
+        static bool needToClear = false;
 
         public static void WriteSameLine(string format, params object[] parameters)
         {
             string str = string.Format(format, parameters);
 
             if (needToClear)
-                str = str.PadChopRight(Console.WindowWidth);
+                str = str.PadChopRight(Console.BufferWidth - 1);
 
             Console.WriteLine(str);
 
@@ -27,7 +27,7 @@ namespace Signum.Utilities
         {
             if (needToClear)
             {
-                Console.WriteLine(new string(' ', Console.WindowWidth));
+                Console.WriteLine(new string(' ', Console.BufferWidth - 1));
 
                 Console.SetCursorPosition(Console.CursorLeft, Console.CursorTop - 1);
             }
