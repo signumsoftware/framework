@@ -8,12 +8,10 @@ namespace Signum.Services
 {
     public static class Security
     {
-        static MD5CryptoServiceProvider provider = new MD5CryptoServiceProvider();
-
         public static string EncodePassword(string originalPassword)
         {
             byte[] originalBytes = ASCIIEncoding.Default.GetBytes(originalPassword);
-            byte[] encodedBytes = provider.ComputeHash(originalBytes);
+            byte[] encodedBytes = new MD5CryptoServiceProvider().ComputeHash(originalBytes);
             return BitConverter.ToString(encodedBytes);
         }
 
