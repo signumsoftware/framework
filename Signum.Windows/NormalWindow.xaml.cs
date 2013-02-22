@@ -21,8 +21,6 @@ namespace Signum.Windows
 {
     public partial class NormalWindow
     {
-        public static event GetButtonBarElementDelegate GetButtonBarElement;
-
         public static readonly DependencyProperty MainControlProperty =
             DependencyProperty.Register("MainControl", typeof(Control), typeof(NormalWindow));
         public Control MainControl
@@ -114,6 +112,10 @@ namespace Signum.Windows
         {
             RefreshEnabled();
 
+            var entity = e.NewValue;
+            if(entity == null)
+                return;
+
             ButtonBarEventArgs ctx = new ButtonBarEventArgs
             {
                 MainControl = MainControl,
@@ -122,19 +124,7 @@ namespace Signum.Windows
                 ShowOperations = ShowOperations,
             };
 
-            List<FrameworkElement> elements = new List<FrameworkElement>();
-            if (GetButtonBarElement != null)
-            {
-                elements.AddRange(GetButtonBarElement.GetInvocationList()
-                    .Cast<GetButtonBarElementDelegate>()
-                    .Select(d => d(e.NewValue, ctx))
-                    .NotNull().SelectMany(d => d).NotNull().ToList());
-            }
-
-            if (MainControl is IHaveToolBarElements)
-            {
-                elements.AddRange(((IHaveToolBarElements)ctx.MainControl).GetToolBarElements(this.DataContext, ctx));
-            }
+            List<FrameworkElement> elements = Navigator.Manager.GetToolbarButtons(entity, ctx);
 
             ButtonBar.SetButtons(elements);
         }
@@ -288,8 +278,6 @@ namespace Signum.Windows
         Yes,
         No,
     }
-
-    public delegate List<FrameworkElement> GetButtonBarElementDelegate(object entity, ButtonBarEventArgs context);
 
     public interface IHaveToolBarElements
     {

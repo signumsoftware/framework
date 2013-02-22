@@ -33,7 +33,7 @@ namespace Signum.Windows.Operations
 
                 Navigator.AddSetting(new EntitySettings<OperationLogDN>() { View = e => new OperationLog() });
 
-                NormalWindow.GetButtonBarElement += Manager.ButtonBar_GetButtonBarElement;
+                Navigator.Manager.GetButtonBarElementGlobal += Manager.ButtonBar_GetButtonBarElement;
 
                 Constructor.Manager.GeneralConstructor += Manager.ConstructorManager_GeneralConstructor;
 

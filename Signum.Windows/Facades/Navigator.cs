@@ -919,5 +919,46 @@ namespace Signum.Windows
                 return Server.FindImplementations(pr);
             }
         }
+
+        public event Func<object, ButtonBarEventArgs, List<FrameworkElement>> GetButtonBarElementGlobal;
+        public Dictionary<Type, Func<object, ButtonBarEventArgs, FrameworkElement>> GetButtonBarElementByType = new Dictionary<Type,Func<object, ButtonBarEventArgs, FrameworkElement>>();
+
+        public void RegisterGetButtonBarElement<T>(Func<T, ButtonBarEventArgs, FrameworkElement> action)
+        {
+            Func<object, ButtonBarEventArgs, FrameworkElement> casted = (obj, args) => action((T)obj, args);
+
+            var prev = GetButtonBarElementByType.TryGetC(typeof(T));
+
+            GetButtonBarElementByType[typeof(T)] = prev + casted;
+        }
+
+        internal List<FrameworkElement> GetToolbarButtons(object entity, ButtonBarEventArgs ctx)
+        {
+            List<FrameworkElement> elements = new List<FrameworkElement>();
+
+            if (GetButtonBarElementGlobal != null)
+            {
+                elements.AddRange(GetButtonBarElementGlobal.GetInvocationList()
+                    .Cast<Func<object, ButtonBarEventArgs, List<FrameworkElement>>>()
+                    .Select(d => d(entity, ctx))
+                    .NotNull().SelectMany(d => d).NotNull().ToList());
+            }
+
+            var getButtons = GetButtonBarElementByType.TryGetC(entity.GetType());
+            if(getButtons != null)
+            {
+                elements.AddRange(getButtons.GetInvocationList()
+                    .Cast<Func<object, ButtonBarEventArgs, FrameworkElement>>()
+                    .Select(d => d(entity, ctx))
+                    .NotNull().ToList());
+            }
+
+            if (ctx.MainControl is IHaveToolBarElements)
+            {
+                elements.AddRange(((IHaveToolBarElements)ctx.MainControl).GetToolBarElements(entity, ctx));
+            }
+
+            return elements;
+        }
     }
 }
