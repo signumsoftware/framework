@@ -10,7 +10,7 @@ using System.Collections;
 namespace Signum.Entities.Basics
 {
     [Serializable, EntityKind(EntityKind.System)]
-    public class ExceptionDN : Entity
+    public class ExceptionDN : IdentifiableEntity
     {
         public const string ExceptionDataKey = "exceptionEntity";
 
