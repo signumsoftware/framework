@@ -129,13 +129,16 @@ namespace Signum.Windows.UIAutomation
 
             var parentWindow = WindowProxy.Normalize(element);
 
+            var previous = parentWindow.Children(a=>a.Current.ControlType == ControlType.Window).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
+
             action();
 
             AutomationElement newWindow = null;
 
             element.Wait(() =>
             {
-                newWindow = parentWindow.TryChild(a => a.Current.ControlType == ControlType.Window);
+                var currentWindows = parentWindow.Children(a => a.Current.ControlType == ControlType.Window);
+                newWindow = currentWindows.FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
 
                 MessageBoxProxy.AssertNoErrorWindow(newWindow);
 
