@@ -294,7 +294,7 @@ namespace Signum.Windows.UIAutomation
             return left.Element.Descendant(el => el.Current.ControlType == ControlType.Button && el.Current.Name == name);
         }
 
-        public static AutomationElement InvokeQuickLink(this LeftPanelProxy left, string name)
+        public static AutomationElement InvokeQuickLinkCapture(this LeftPanelProxy left, string name)
         {
             return left.Element.CaptureWindow(
             action: () => left.Button(name).ButtonInvoke(),
