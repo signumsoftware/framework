@@ -54,7 +54,19 @@ namespace Signum.Utilities
             Console.ForegroundColor = old;
         }
 
-     
+
+        public static string AskString(string question, Func<string, bool> stringValidator)
+        {
+            Console.Write(question);
+            do
+            {
+                var userAnswer = Console.ReadLine().ToLower();
+
+                if (stringValidator(userAnswer))
+                    return userAnswer;
+            } while (true);
+        }
+
 
         public static bool Ask(string question)
         {
