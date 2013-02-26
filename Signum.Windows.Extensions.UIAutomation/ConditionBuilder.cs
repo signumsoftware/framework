@@ -10,113 +10,193 @@ using System.Reflection;
 
 namespace Signum.Windows.UIAutomation
 {
-    public static class ConditionBuilder
+    public class ConditionBuilder :
+        ExpressionVisitor
     {
+        public enum AutomationExpressionType
+        {
+            Condition = 1000,
+            Property,
+            Pattern,
+            Current,
+        }
+
+        abstract class AutomationExpresion : Expression
+        {
+            readonly Type type;
+            public override Type Type
+            {
+                get { return type; }
+            }
+
+            readonly AutomationExpressionType nodeType;
+            public override ExpressionType NodeType
+            {
+                get { return (ExpressionType)nodeType; }
+            }
+
+            protected AutomationExpresion(AutomationExpressionType nodeType, Type type)
+            {
+                this.type = type;
+                this.nodeType = nodeType;
+            }
+
+            public abstract override string ToString();
+        }
+
+        class AutomationConditionExpression : AutomationExpresion
+        {  
+            public readonly Condition AutomationCondition;
+
+            public AutomationConditionExpression(Condition condition): base(AutomationExpressionType.Condition, typeof(bool)) 
+            {   
+                this.AutomationCondition = condition;
+            }
+
+            public override string ToString()
+            {
+                return "Condition({0})".Formato(AutomationCondition.NiceToString());
+            }
+        }
+
+        class AutomationPropertyExpression : AutomationExpresion
+        {
+            public readonly AutomationProperty AutomationProperty;
+
+            public AutomationPropertyExpression(AutomationProperty property, Type type) : base(AutomationExpressionType.Property, type)
+            {
+                this.AutomationProperty = property;
+            }
+
+            public override string ToString()
+            {
+                return "Property({0})".Formato(AutomationProperty);
+            }
+        }
+
+        class AutomationPatternExpression : AutomationExpresion
+        {
+            public readonly Type AutomationPattern;
+
+            public AutomationPatternExpression(Type pattern, Type type) : base(AutomationExpressionType.Pattern, type)
+            {
+                this.AutomationPattern = pattern;
+            }
+
+            public override string ToString()
+            {
+                return "Pattern<{0}>".Formato(AutomationPattern.Name);
+            }
+        }
+
+        class AutomationCurrentExpression : AutomationExpresion
+        {
+            public AutomationCurrentExpression(Type type)
+                : base(AutomationExpressionType.Current, type)
+            {
+            }
+
+            public override string ToString()
+            {
+                return "Current";
+            }
+        }
+
+
+
+        ParameterExpression parameter;
+
         public static Condition ToCondition(Expression<Func<AutomationElement, bool>> condition)
         {
-            return ToCondition(condition.Parameters.Single(), condition.Body);
+            Expression<Func<AutomationElement, bool>> clean = (Expression<Func<AutomationElement, bool>>)ExpressionCleaner.Clean(condition);
+
+            AutomationConditionExpression ce = (AutomationConditionExpression)new ConditionBuilder { parameter = clean.Parameters.Single() }.Visit(clean.Body);
+
+            return ce.AutomationCondition;
         }
 
-        static Condition ToCondition(ParameterExpression p, Expression body)
+        public override Expression Visit(Expression node)
         {
-            if (body.NodeType == ExpressionType.Not)
-                return new NotCondition(ToCondition(p, ((UnaryExpression)body).Operand));
+            var result = base.Visit(node);
+            if (result.Type == typeof(bool) && result.NodeType != (ExpressionType)AutomationExpressionType.Condition)
+                throw new InvalidOperationException("Impossible to translate to UIAutomation condition: {0}".Formato(node.NiceToString()));
 
-            BinaryExpression be = body as BinaryExpression;
-            if (be != null)
+            return result;
+        }
+
+        protected override Expression VisitConstant(ConstantExpression node)
+        {
+            if (node.Type == typeof(bool))
+                return new AutomationConditionExpression(((bool)node.Value) ? Condition.TrueCondition : Condition.FalseCondition);
+
+            return base.VisitConstant(node);
+        }
+
+        protected override Expression VisitBinary(BinaryExpression node)
+        {
+            var left = Visit(node.Left);
+            var right = Visit(node.Right);
+
+            if (node.NodeType == ExpressionType.And || node.NodeType == ExpressionType.AndAlso)
+                return new AutomationConditionExpression(new AndCondition(
+                    ((AutomationConditionExpression)left).AutomationCondition,
+                    ((AutomationConditionExpression)right).AutomationCondition));
+
+            if (node.NodeType == ExpressionType.Or || node.NodeType == ExpressionType.OrElse)
+                return new AutomationConditionExpression(new OrCondition(
+                  ((AutomationConditionExpression)left).AutomationCondition,
+                  ((AutomationConditionExpression)right).AutomationCondition));
+
+            if (node.NodeType == ExpressionType.Equal || node.NodeType == ExpressionType.NotEqual)
             {
-                if (be.NodeType == ExpressionType.And || be.NodeType == ExpressionType.AndAlso)
-                    return new AndCondition(ToCondition(p, be.Left), ToCondition(p, be.Right));
+                PropertyCondition property = AsPropertyCondition(left, right) ?? AsPropertyCondition(right, left);
 
-                if (be.NodeType == ExpressionType.Or || be.NodeType == ExpressionType.OrElse)
-                    return new OrCondition(ToCondition(p, be.Left), ToCondition(p, be.Right));
-
-                if (be.NodeType == ExpressionType.Equal || be.NodeType == ExpressionType.NotEqual)
-                {
-                    var cond = ToPropertyCondition(p, be.Left, be.Right);
-
-                    if (cond != null)
-                    {
-                        if (be.NodeType == ExpressionType.Equal)
-                            return cond;
-
-                        if (cond.Value is bool)
-                            new PropertyCondition(cond.Property, !(bool)cond.Value);
-
-                        return new NotCondition(cond);
-                    }
-                }
+                if (property != null)
+                    return new AutomationConditionExpression(property);
             }
 
-            var constant = ExpressionEvaluator.PartialEval(body);
-            if (constant is ConstantExpression && ((ConstantExpression)constant).Value is bool)
-                return ((bool)((ConstantExpression)constant).Value) ? PropertyCondition.TrueCondition : PropertyCondition.FalseCondition;
-
-            throw new InvalidOperationException("The expression can not be translated to a UIAutomation Condition {0}".Formato(ExpressionEvaluator.PartialEval(body).NiceToString()));
+            return Expression.MakeBinary(node.NodeType, left, right);
         }
 
-        static PropertyCondition ToPropertyCondition(ParameterExpression p, Expression left, Expression right)
+        private PropertyCondition AsPropertyCondition(Expression exp, Expression value)
         {
-            AutomationProperty prop = ToAutomationProperty(p, left);
+            ConstantExpression ce = value as ConstantExpression;
+            if(ce == null)
+                return null;
+
+            AutomationPropertyExpression prop = exp as AutomationPropertyExpression;
             if (prop != null)
-                return new PropertyCondition(prop, ExpressionEvaluator.Eval(right));
+                return new PropertyCondition(((AutomationPropertyExpression)exp).AutomationProperty, ce.Value);
 
-            Type pattern = GetPattern(p, left);
-            if (pattern != null && IsNull(right))
-                return new PropertyCondition(GetCachedProperty(pattern, "Is{0}AvailableProperty".Formato(pattern.Name)), false);
-
-            prop = ToAutomationProperty(p, right);
-            if (prop != null)
-                return new PropertyCondition(prop, ExpressionEvaluator.Eval(left));
-
-
-            pattern = GetPattern(p, right);
-            if (pattern != null && IsNull(left))
-                return new PropertyCondition(GetCachedProperty(pattern, "Is{0}AvailableProperty".Formato(pattern.Name)), false);
+            AutomationPatternExpression pattern = exp as AutomationPatternExpression;
+            if (pattern != null && ce.Value == null)
+                return new PropertyCondition(GetCachedProperty(pattern.AutomationPattern, "Is{0}AvailableProperty".Formato(pattern.AutomationPattern.Name)), false);
 
             return null;
         }
 
-        static bool IsNull(Expression right)
+        protected override Expression VisitMember(MemberExpression node)
         {
-            return right.NodeType == ExpressionType.Constant && ((ConstantExpression)right).Value == null;
+            var expression = Visit(node.Expression);
+
+            if (expression == parameter && (node.Member.Name == "Current" || node.Member.Name == "Cached"))
+                return new AutomationCurrentExpression(node.Type);
+
+            if (expression is AutomationCurrentExpression)
+                return new AutomationPropertyExpression(GetCachedProperty(typeof(AutomationElement), node.Member.Name), node.Type);
+
+            if (expression is AutomationPatternExpression)
+                return new AutomationPropertyExpression(GetCachedProperty(((AutomationPatternExpression)expression).AutomationPattern, node.Member.Name), node.Type);
+
+            return Expression.MakeMemberAccess(expression, node.Member);
         }
 
-
-        static AutomationProperty ToAutomationProperty(ParameterExpression p, Expression node)
+        protected override Expression VisitMethodCall(MethodCallExpression node)
         {
-            if (node.NodeType == ExpressionType.MemberAccess)
-            {
-                MemberExpression me = (MemberExpression)node;
+            if (node.GetArgument("ae") == parameter && (node.Method.Name == "Pattern" || node.Method.Name == "TryPattern"))
+                return new AutomationPatternExpression(node.Method.GetGenericArguments()[0], node.Type);
 
-                MemberExpression cme = me.Expression as MemberExpression;
-
-                if (cme != null && (cme.Member.Name == "Current" || cme.Member.Name == "Cached"))
-                {
-                    if (cme.Expression == p)
-                        return GetCachedProperty(typeof(AutomationElement), me.Member.Name);
-
-                    Type pattern = GetPattern(p, cme.Expression);
-
-                    if (pattern != null)
-                        return GetCachedProperty(pattern, me.Member.Name);
-                }
-            }
-
-            return null;
-        }
-
-        static Type GetPattern(ParameterExpression p, Expression node)
-        {
-            if (node.NodeType == ExpressionType.Call)
-            {
-                MethodCallExpression mce = (MethodCallExpression)node;
-
-                if (mce.GetArgument("ae") == p && (mce.Method.Name == "Pattern" || mce.Method.Name == "TryPattern"))
-                    return mce.Method.GetGenericArguments()[0];
-            }
-
-            return null;
+            return base.VisitMethodCall(node);
         }
 
 
@@ -134,6 +214,11 @@ namespace Signum.Windows.UIAutomation
                 throw new InvalidOperationException("Property {0} is not accessible on UIAutomation queries".Formato(propertyName));
 
             return result;
+        }
+
+        public ConditionBuilder()
+        {
+            // TODO: Complete member initialization
         }
     }
 }
