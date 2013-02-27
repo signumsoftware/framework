@@ -60,6 +60,12 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void StringFunctionsPolymorphic()
+        {
+            Assert.IsTrue(Database.Query<AlbumDN>().Any(a => a.Author.Name.Contains("Jackson")));
+        }
+
+        [TestMethod]
         public void StringContains()
         {
             var list = Database.Query<AlbumDN>().Where(a => !a.Author.ToString().Contains("Hola")).ToList();
@@ -243,6 +249,14 @@ namespace Signum.Test.LinqProvider
 
             Assert.IsTrue(PerfCounter.ToMilliseconds(t1, t2) < PerfCounter.ToMilliseconds(t3, t4));
             Assert.IsTrue(PerfCounter.ToMilliseconds(t2, t3) < PerfCounter.ToMilliseconds(t3, t4));
+        }
+
+        [TestMethod]
+        public void SimplifyMinimumTableValued()
+        {
+            var result = (from b in Database.Query<BandDN>()
+                          let min = MinimumExtensions.MinimumTableValued(b.Id, b.Id).FirstOrDefault().MinValue
+                          select b.Name).ToList();
         }
     }
 }

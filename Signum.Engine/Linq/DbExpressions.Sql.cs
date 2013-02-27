@@ -469,6 +469,16 @@ namespace Signum.Engine.Linq
                 GroupBy.TryCC(gb => "GROUP BY " + gb.ToString(g => g.NiceToString(), " ,") + "\r\n"),
                 Alias);
         }
+
+        internal bool IsOneRow()
+        {
+            ConstantExpression ce = Top as ConstantExpression;
+
+            if (ce != null && ((int)ce.Value) == 1)
+                return true;
+
+            return false;
+        }
     }
 
     internal enum JoinType
