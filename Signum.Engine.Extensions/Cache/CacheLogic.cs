@@ -100,6 +100,8 @@ ALTER AUTHORIZATION ON DATABASE::{0} TO {2}".Formato(connector.DatabaseName(), p
 ALTER DATABASE {0} SET ENABLE_BROKER
 If you have problems, try first: 
 ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
+
+                throw;
             }
         }
 
