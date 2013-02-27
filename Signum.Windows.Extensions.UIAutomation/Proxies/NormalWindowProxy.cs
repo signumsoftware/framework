@@ -93,6 +93,7 @@ namespace Signum.Windows.UIAutomation
                     mb.CancelButton.ButtonInvoke();
             }
         }
+
         public void Execute(Enum operationKey, int? timeOut = null)
         {
             var time = timeOut ?? OperationTimeouts.ExecuteTimeout;
@@ -115,6 +116,22 @@ namespace Signum.Windows.UIAutomation
                 actionDescription: () => "Executing {0} from {1} and waiting to capture window".Formato(OperationDN.UniqueKey(operationKey), entityId));
         }
 
+        public void ExecuteCaptureDialog(Enum operationKey, Action<AutomationElement> dialogAction, int? timeOut = null)
+        {
+            var time = timeOut ?? OperationTimeouts.ExecuteTimeout;
+            var entityId = EntityId;
+            var button = ButtonBar.GetButton(operationKey);
+
+            Element.WaitDataContextChangedAfter(
+                action: () =>
+                {
+                    var dialog = Element.CaptureWindow(action: () => button.ButtonInvoke(),
+                        actionDescription: () => "Executing {0} from {1} and waiting to capture window".Formato(OperationDN.UniqueKey(operationKey), entityId));
+
+                    dialogAction(dialog);
+                },
+                actionDescription: () => "Executing {0} from {1}".Formato(OperationDN.UniqueKey(operationKey), entityId));
+        }
 
         public AutomationElement ConstructFromCapture(Enum operationKey, int? timeOut = null)
         {

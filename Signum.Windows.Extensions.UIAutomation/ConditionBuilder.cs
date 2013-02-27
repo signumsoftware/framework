@@ -102,23 +102,23 @@ namespace Signum.Windows.UIAutomation
             }
         }
 
-
-
         ParameterExpression parameter;
 
         public static Condition ToCondition(Expression<Func<AutomationElement, bool>> condition)
         {
             Expression<Func<AutomationElement, bool>> clean = (Expression<Func<AutomationElement, bool>>)ExpressionCleaner.Clean(condition);
 
-            AutomationConditionExpression ce = (AutomationConditionExpression)new ConditionBuilder { parameter = clean.Parameters.Single() }.Visit(clean.Body);
+            ConditionBuilder builder = new ConditionBuilder { parameter = clean.Parameters.Single() };
 
-            return ce.AutomationCondition;
+            Expression expression = builder.Visit(clean.Body);
+
+            return AsCondition(expression);
         }
 
         public override Expression Visit(Expression node)
         {
             var result = base.Visit(node);
-            if (result.Type == typeof(bool) && result.NodeType != (ExpressionType)AutomationExpressionType.Condition)
+            if (result.Type == typeof(bool) && !(result is AutomationConditionExpression || result is AutomationPropertyExpression))
                 throw new InvalidOperationException("Impossible to translate to UIAutomation condition: {0}".Formato(node.NiceToString()));
 
             return result;
@@ -136,10 +136,23 @@ namespace Signum.Windows.UIAutomation
         {
             var operand = Visit(node.Operand);
 
-            if (node.NodeType == ExpressionType.Not && node.NodeType == (ExpressionType)AutomationExpressionType.Condition)
-                return new AutomationConditionExpression(new NotCondition(((AutomationConditionExpression)operand).AutomationCondition));
+            if (node.NodeType == ExpressionType.Not)
+                return new AutomationConditionExpression(new NotCondition(AsCondition(operand)));
 
             return Expression.MakeUnary(node.NodeType, operand, node.Type);
+        }
+
+        public static Condition AsCondition(Expression operand)
+        {
+            var ace = operand as AutomationConditionExpression;
+            if (ace != null)
+                return ace.AutomationCondition;
+
+            var ape = operand as AutomationPropertyExpression;
+            if (ape != null)
+                return new PropertyCondition(ape.AutomationProperty, true);
+
+            throw new InvalidOperationException("{0} is not a Condition");
         }
 
         protected override Expression VisitBinary(BinaryExpression node)
@@ -148,19 +161,14 @@ namespace Signum.Windows.UIAutomation
             var right = Visit(node.Right);
 
             if (node.NodeType == ExpressionType.And || node.NodeType == ExpressionType.AndAlso)
-                return new AutomationConditionExpression(new AndCondition(
-                    ((AutomationConditionExpression)left).AutomationCondition,
-                    ((AutomationConditionExpression)right).AutomationCondition));
+                return new AutomationConditionExpression(new AndCondition(AsCondition(left), AsCondition(right)));
 
             if (node.NodeType == ExpressionType.Or || node.NodeType == ExpressionType.OrElse)
-                return new AutomationConditionExpression(new OrCondition(
-                  ((AutomationConditionExpression)left).AutomationCondition,
-                  ((AutomationConditionExpression)right).AutomationCondition));
+                return new AutomationConditionExpression(new OrCondition(AsCondition(left), AsCondition(right)));
 
             if (node.NodeType == ExpressionType.Equal || node.NodeType == ExpressionType.NotEqual)
             {
                 PropertyCondition property = AsPropertyCondition(left, right) ?? AsPropertyCondition(right, left);
-
 
                 if (property != null)
                 {
