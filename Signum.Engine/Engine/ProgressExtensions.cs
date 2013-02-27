@@ -49,7 +49,7 @@ namespace Signum.Engine
             if (string.IsNullOrEmpty(fileName))
                 return null;
 
-            var result = File.CreateText(fileName);
+            var result = new StreamWriter(fileName, append: true);
             result.AutoFlush = true;
             return result;
         }
