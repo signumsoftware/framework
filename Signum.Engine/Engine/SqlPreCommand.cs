@@ -186,6 +186,9 @@ namespace Signum.Engine
             if (value is SqlHierarchyId)
                 return "CAST('{0}' AS hierarchyid)".Formato(value);
 
+            if (value.GetType().IsEnum)
+                return Convert.ToInt32(value).ToString();
+
             return value.ToString();
         }
 
