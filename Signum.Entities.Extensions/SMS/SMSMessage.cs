@@ -28,8 +28,9 @@ namespace Signum.Entities.SMS
             set { Set(ref template, value, () => Template); }
         }
 
+        [SqlDbType(Size=int.MaxValue)]
         string message;
-        [StringLengthValidator(AllowNulls = false, Max = SMSCharacters.SMSMaxTextLength)]
+        [NotNullValidator]
         public string Message
         {
             get { return message; }
