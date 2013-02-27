@@ -132,6 +132,16 @@ namespace Signum.Windows.UIAutomation
             return base.VisitConstant(node);
         }
 
+        protected override Expression VisitUnary(UnaryExpression node)
+        {
+            var operand = Visit(node.Operand);
+
+            if (node.NodeType == ExpressionType.Not && node.NodeType == (ExpressionType)AutomationExpressionType.Condition)
+                return new AutomationConditionExpression(new NotCondition(((AutomationConditionExpression)operand).AutomationCondition));
+
+            return Expression.MakeUnary(node.NodeType, operand, node.Type);
+        }
+
         protected override Expression VisitBinary(BinaryExpression node)
         {
             var left = Visit(node.Left);
@@ -151,8 +161,14 @@ namespace Signum.Windows.UIAutomation
             {
                 PropertyCondition property = AsPropertyCondition(left, right) ?? AsPropertyCondition(right, left);
 
+
                 if (property != null)
+                {
+                    if(node.NodeType == ExpressionType.NotEqual)
+                        return new AutomationConditionExpression(new NotCondition(property));
+
                     return new AutomationConditionExpression(property);
+                }
             }
 
             return Expression.MakeBinary(node.NodeType, left, right);
