@@ -106,6 +106,18 @@ namespace Signum.Engine.Linq
                     return Visit(join.Left);
             }
 
+            if (join.JoinType == JoinType.OuterApply ||join.JoinType == JoinType.LeftOuterJoin)
+            {
+                var sql = join.Right as SelectExpression;
+
+                if (sql != null && sql.IsOneRow())
+                {
+                    var hs = allColumnsUsed.TryGetC(sql.Alias);
+                    if (hs == null || hs.Count == 0)
+                        return Visit(join.Left);
+                }
+            }
+
             // visit join in reverse order
             Expression condition = this.Visit(join.Condition);
             SourceExpression right = this.VisitSource(join.Right);

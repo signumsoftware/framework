@@ -220,11 +220,16 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
-        public void RootSumWhere()
+        public void SumWhere()
         {
             var songsAlbum = Database.Query<BandDN>().Where(a => a.Members.Sum(m => m.Name.Length) > 0).ToList();
         }
 
+        [TestMethod]
+        public void SumSimplification()
+        {
+            var songsAlbum = Database.Query<BandDN>().Select(a => new { a.Name, Sum = a.Members.Sum(m => m.Name.Length) }).Select(a => a.Name).ToList();
+        }
 
         [TestMethod]
         public void RootSumZero()
