@@ -31,7 +31,6 @@ namespace Signum.Windows
             {
                 ServerTypes = current.ServerTypes();
                 NameToType = ServerTypes.ToDictionary(a => a.Value.CleanName, a => a.Key);
-                EntityKinds = current.EntityKinds();
             };
         }
 
@@ -284,7 +283,6 @@ namespace Signum.Windows
         }
 
         public static Dictionary<Type, TypeDN> ServerTypes { get; private set; }
-        public static Dictionary<Type, EntityKind> EntityKinds { get; private set; }
         public static Dictionary<string, Type> NameToType { get; private set; }
 
         public static Type TryGetType(string cleanName)
@@ -316,7 +314,12 @@ namespace Signum.Windows
 
         internal static EntityKind GetEntityKind(Type type)
         {
-            return EntityKinds.GetOrThrow(type, "Type {0} not found in the Server");
+            var eta = type.SingleAttributeInherit<EntityKindAttribute>();
+
+            if (eta == null)
+                throw new InvalidOperationException("Type {0} does not have an EntityTypeAttribute".Formato(type.Name));
+
+            return eta.EntityType;
         }
     }
 

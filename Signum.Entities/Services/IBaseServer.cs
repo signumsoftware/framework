@@ -47,9 +47,6 @@ namespace Signum.Services
         Dictionary<Type, TypeDN> ServerTypes();
 
         [OperationContract, NetDataContract]
-        Dictionary<Type, EntityKind> EntityKinds();
-
-        [OperationContract, NetDataContract]
         DateTime ServerNow();
 
         [OperationContract, NetDataContract]
@@ -57,6 +54,5 @@ namespace Signum.Services
 
         [OperationContract, NetDataContract]
         bool Exists(Type type, int id);
-
     }
 }
