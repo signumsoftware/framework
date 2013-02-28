@@ -271,5 +271,21 @@ namespace Signum.Test.LinqProvider
                           let min = MinimumExtensions.MinimumTableValued(b.Id, b.Id).FirstOrDefault().MinValue
                           select b.Name).ToList();
         }
+
+        [TestMethod]
+        public void NominateEnumSwitch()
+        {
+            var list = Database.Query<AlbumDN>().Select(a =>
+                (a.Songs.Count > 10 ? AlbumSize.Large :
+                a.Songs.Count > 5 ? AlbumSize.Medium :
+                 AlbumSize.Small).InSql()).ToList();
+        }
+
+        public enum AlbumSize
+        {
+            Small,
+            Medium,
+            Large
+        }
     }
 }
