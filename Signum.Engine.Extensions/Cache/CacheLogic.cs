@@ -54,44 +54,40 @@ namespace Signum.Engine.Cache
             if (GloballyDisabled)
                 return;
 
+            SqlConnector connector = (SqlConnector)Connector.Current;
+
+            if (AssertOnStart)
+            {
+                string currentUser = (string)Executor.ExecuteScalar("select SYSTEM_USER");
+
+                var type = Database.View<SysServerPrincipals>().Where(a => a.name == currentUser).Select(a => a.type_desc).Single();
+
+                if (type != "SQL_LOGIN")
+                    throw new InvalidOperationException("The current login '{0}' is a {1} instead of a SQL_LOGIN. Avoid using Integrated Security with Cache Logic".Formato(currentUser, type));
+
+                var serverPrincipalName = (from db in Database.View<SysDatabases>()
+                                           where db.name == connector.DatabaseName()
+                                           join spl in Database.View<SysServerPrincipals>().DefaultIfEmpty() on db.owner_sid equals spl.sid
+                                           select spl.name).Single();
+
+
+                if (currentUser != serverPrincipalName)
+                    throw new InvalidOperationException(@"The current owner of {0} is '{1}', but the current user is '{2}'. Change the login or call:
+ALTER AUTHORIZATION ON DATABASE::{0} TO {2}".Formato(connector.DatabaseName(), serverPrincipalName, currentUser));
+
+                var databasePrincipalName = (from db in Database.View<SysDatabases>()
+                                             where db.name == connector.DatabaseName()
+                                             join dpl in Database.View<SysDatabasePrincipals>().DefaultIfEmpty() on db.owner_sid equals dpl.sid
+                                             select dpl.name).Single();
+
+                if (!databasePrincipalName.HasText() || databasePrincipalName != "dbo")
+                    throw new InvalidOperationException(@"The database principal of {0} is '{1}', not associated with the current user '{2}'. Call:
+ALTER AUTHORIZATION ON DATABASE::{0} TO {2}".Formato(connector.DatabaseName(), databasePrincipalName.DefaultText("Unknown"), currentUser));
+            }
+
             try
             {
-                SqlConnector connector = (SqlConnector)Connector.Current;
-
-                if (AssertOnStart)
-                {
-                    string currentUser = (string)Executor.ExecuteScalar("select SYSTEM_USER");
-
-                    var type = Database.View<SysServerPrincipals>().Where(a => a.name == currentUser).Select(a => a.type_desc).Single();
-
-                    if (type != "SQL_LOGIN")
-                        throw new InvalidOperationException("The current login '{0}' is a {1} instead of a SQL_LOGIN. Avoid using Integrated Security with Cache Logic".Formato(currentUser, type));
-
-                    var pair = (from db in Database.View<SysDatabases>()
-                                 where db.name == connector.DatabaseName()
-                                 join spl in Database.View<SysServerPrincipals>().DefaultIfEmpty() on db.owner_sid equals spl.sid
-                                join dpl in Database.View<SysDatabasePrincipals>().DefaultIfEmpty() on db.owner_sid equals dpl.sid
-                                 select new
-                                 {
-                                     ServerPrincipalName = spl.name,
-                                     DatabasePrincipalName = dpl.name,
-                                 }).Single();
-
-                    if (currentUser != pair.ServerPrincipalName)
-                        throw new InvalidOperationException(@"The current owner of the database {0} is '{1}', but the current user is '{2}'. Change the login or call:
-ALTER AUTHORIZATION ON DATABASE::{0} TO {2}".Formato(connector.DatabaseName(), pair.ServerPrincipalName ?? ("DatabasePrincipal " + pair.DatabasePrincipalName), currentUser));
-                }
-
                 SqlDependency.Start(connector.ConnectionString);
-
-                SafeConsole.SetConsoleCtrlHandler(ct =>
-                {
-                    Shutdown();
-                    return true;
-                }, true);
-
-                AppDomain.CurrentDomain.ProcessExit += (o, a) => Shutdown(); ;
-
             }
             catch (InvalidOperationException ex)
             {
@@ -103,6 +99,14 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
 
                 throw;
             }
+
+            SafeConsole.SetConsoleCtrlHandler(ct =>
+            {
+                Shutdown();
+                return true;
+            }, true);
+
+            AppDomain.CurrentDomain.ProcessExit += (o, a) => Shutdown();
         }
 
         public static void Shutdown()
