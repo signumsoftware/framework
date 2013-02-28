@@ -138,7 +138,7 @@ namespace Signum.Entities.SMS
         {
             if (pi.Is(() => StartDate) || pi.Is(() => EndDate))
             {
-                if (EndDate != null && EndDate >= StartDate)
+                if (EndDate != null && StartDate >= EndDate)
                     return Resources.EndDateMustBeHigherThanStartDate;
             }
 
