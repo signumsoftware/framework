@@ -53,85 +53,6 @@ namespace Signum.Engine.Chart
             throw new NotImplementedException(); 
         }
 
-        static GenericInvoker<Func<IEnumerable<object>, Delegate, Delegate, IEnumerable<object>>> giGroupByE =
-            new GenericInvoker<Func<IEnumerable<object>, Delegate, Delegate, IEnumerable<object>>>(
-                (col, ks, rs) => (IEnumerable<object>)Enumerable.GroupBy<string, int, double>((IEnumerable<string>)col, (Func<string, int>)ks, (Func<int, IEnumerable<string>, double>)rs)); 
-        static DEnumerable<T> GroupBy<T>(this DEnumerable<T> collection, HashSet<QueryToken> keyTokens, HashSet<AggregateToken> aggregateTokens)
-        {
-            var keySelector = KeySelector(collection.Context, keyTokens);
-
-            BuildExpressionContext newContext;
-            LambdaExpression resultSelector = ResultSelectSelectorAndContext(collection.Context, keyTokens, aggregateTokens, keySelector.Type, out newContext);
-
-            var resultCollection = giGroupByE.GetInvoker(typeof(object), keySelector.Body.Type, typeof(object))(collection.Collection, keySelector.Compile(), resultSelector.Compile());
-
-            return new DEnumerable<T>(resultCollection, newContext);
-        }
-
-        static MethodInfo miGroupByQ = ReflectionTools.GetMethodInfo(() => Queryable.GroupBy<string, int, double>((IQueryable<string>)null, (Expression<Func<string, int>>)null, (Expression<Func<int, IEnumerable<string>, double>>)null)).GetGenericMethodDefinition();
-        static DQueryable<T> GroupBy<T>(this DQueryable<T> query, HashSet<QueryToken> keyTokens, HashSet<AggregateToken> aggregateTokens)
-        {
-            var keySelector = KeySelector(query.Context, keyTokens);
-
-            BuildExpressionContext newContext;
-            LambdaExpression resultSelector = ResultSelectSelectorAndContext(query.Context, keyTokens, aggregateTokens, keySelector.Body.Type, out newContext);
-
-            var resultQuery = (IQueryable<object>)query.Query.Provider.CreateQuery<object>(Expression.Call(null, miGroupByQ.MakeGenericMethod(typeof(object), keySelector.Body.Type, typeof(object)),
-                new Expression[] { query.Query.Expression, Expression.Quote(keySelector), Expression.Quote(resultSelector) }));
-
-            return new DQueryable<T>(resultQuery, newContext);
-        }
-
-        static LambdaExpression ResultSelectSelectorAndContext(BuildExpressionContext context, HashSet<QueryToken> keyTokens, HashSet<AggregateToken> aggregateTokens, Type keyTupleType, out BuildExpressionContext newContext)
-        {
-            Dictionary<QueryToken, Expression> resultExpressions = new Dictionary<QueryToken, Expression>();
-            ParameterExpression pk = Expression.Parameter(keyTupleType, "key");
-            resultExpressions.AddRange(keyTokens.Select((kt, i) => KVP.Create(kt,
-                TupleReflection.TupleChainProperty(pk, i))));
-
-            ParameterExpression pe = Expression.Parameter(typeof(IEnumerable<object>), "e");
-            resultExpressions.AddRange(aggregateTokens.Select(at => KVP.Create((QueryToken)at,
-                BuildAggregateExpression(pe, at, context))));
-
-            var resultConstructor = TupleReflection.TupleChainConstructor(resultExpressions.Values);
-
-            ParameterExpression pg = Expression.Parameter(typeof(object), "gr");
-            newContext = new BuildExpressionContext(resultConstructor.Type, pg,
-                resultExpressions.Keys.Select((t, i) => KVP.Create(t, TupleReflection.TupleChainProperty(Expression.Convert(pg, resultConstructor.Type), i))).ToDictionary());
-
-            return Expression.Lambda(Expression.Convert(resultConstructor, typeof(object)), pk, pe);
-        }
-
-        static LambdaExpression KeySelector(BuildExpressionContext context, HashSet<QueryToken> keyTokens)
-        {
-            var keySelector = Expression.Lambda(
-              TupleReflection.TupleChainConstructor(keyTokens.Select(t => t.BuildExpression(context)).ToList()),
-              context.Parameter);
-            return keySelector;
-        }
-
-        static Expression BuildAggregateExpression(Expression collection, AggregateToken at, BuildExpressionContext context)
-        {
-            Type groupType = collection.Type.GetGenericInterfaces(typeof(IEnumerable<>)).SingleEx(() => "expression should be a IEnumerable").GetGenericArguments()[0];
-
-            if (at.AggregateFunction == AggregateFunction.Count)
-                return Expression.Call(typeof(Enumerable), "Count", new[] { groupType }, new[] { collection });
-
-            var body = at.Parent.BuildExpression(context);
-
-            var type = at.ConvertTo();
-
-            if (type != null)
-                body = body.TryConvert(type); 
-
-             var lambda = Expression.Lambda(body, context.Parameter); 
-
-            if (at.AggregateFunction == AggregateFunction.Min || at.AggregateFunction  == AggregateFunction.Max)
-                return Expression.Call(typeof(Enumerable), at.AggregateFunction.ToString(), new[] { groupType, lambda.Body.Type }, new[] { collection, lambda });
-
-            return Expression.Call(typeof(Enumerable), at.AggregateFunction.ToString(), new[] { groupType }, new[] { collection, lambda });
-        }
-
         static GenericInvoker<Func<ChartRequest, IDynamicQueryCore, ResultTable>> miExecuteChart =
             new GenericInvoker<Func<ChartRequest, IDynamicQueryCore, ResultTable>>((req, dq) => ExecuteChart<int>(req, (DynamicQueryCore<int>)dq));
         static ResultTable ExecuteChart<T>(ChartRequest request, DynamicQueryCore<T> dq)
@@ -142,76 +63,25 @@ namespace Signum.Engine.Chart
 
             if (!request.GroupResults)
             {
-                columns.Add(new _EntityColumn(dq.EntityColumn().BuildColumnDescription()));
-
-                if (dq is AutoDynamicQueryCore<T>)
+                return dq.ExecuteQuery(new QueryRequest
                 {
-                    DQueryable<T> query = ((AutoDynamicQueryCore<T>)dq).Query.ToDQueryable(dq.GetColumnDescriptions())
-                        .SelectMany(multiplications)
-                        .Where(request.Filters)
-                        .OrderBy(request.Orders)
-                        .Select(columns);
-
-                    return ResultTable(query.Query.ToArray(), columns, query.Context);
-                }
-                else
-                {
-                    DEnumerableCount<T> collection = ((ManualDynamicQueryCore<T>)dq).Execute(new QueryRequest
-                    {
-                        Columns = columns,
-                        Filters = request.Filters,
-                        QueryName = request.QueryName,
-                        Orders = request.Orders,
-                    }, dq.GetColumnDescriptions());
-
-                    return ResultTable(collection.Collection.ToArray(), columns, collection.Context);
-                }
+                    QueryName = request.QueryName,
+                    Columns = columns,
+                    Filters = request.Filters,
+                    Orders = request.Orders,
+                    ElementsPerPage = QueryRequest.AllElements,
+                });
             }
             else
             {
-                var simpleFilters = request.Filters.Where(f => !(f.Token is AggregateToken)).ToList();
-                var aggregateFilters = request.Filters.Where(f => f.Token is AggregateToken).ToList();
-
-                var keys = columns.Select(t=>t.Token).Where(t => !(t is AggregateToken)).ToHashSet(); 
-
-                var allAggregates = request.AllTokens().OfType<AggregateToken>().ToHashSet(); 
-                
-                if (dq is AutoDynamicQueryCore<T>)
+                return dq.ExecuteQueryGroup(new GroupQueryRequest
                 {
-                    DQueryable<T> query = ((AutoDynamicQueryCore<T>)dq).Query.ToDQueryable(dq.GetColumnDescriptions())
-                        .SelectMany(multiplications)
-                        .Where(simpleFilters)
-                        .GroupBy(keys, allAggregates)
-                        .Where(aggregateFilters)
-                        .OrderBy(request.Orders);    
-                        
-                    return ResultTable(query.Query.ToArray(), columns, query.Context);
-                }
-                else
-                {
-                    DEnumerableCount<T> plainCollection = ((ManualDynamicQueryCore<T>)dq).Execute(new QueryRequest
-                    { 
-                        Columns = keys.Concat(allAggregates.Select(at=>at.Parent).NotNull()).Distinct().Select(t=>new Column(t, t.NiceName())).ToList(),
-                        Filters = simpleFilters,
-                        QueryName = request.QueryName,
-                    }, dq.GetColumnDescriptions());
-
-                    var groupCollection = plainCollection
-                        .GroupBy(keys, allAggregates)
-                        .Where(aggregateFilters)
-                        .OrderBy(request.Orders);
-
-                    return ResultTable(groupCollection.Collection.ToArray(), columns, groupCollection.Context);
-                }
+                    QueryName = request.QueryName,
+                    Columns = columns, 
+                    Filters = request.Filters,
+                    Orders = request.Orders
+                }); 
             }
-        }
-
-        static ResultTable ResultTable(object[] values, List<Column> columns, BuildExpressionContext context)
-        {
-            var cols = columns.Select(c => Tuple.Create(c,
-                Expression.Lambda(c.Token.BuildExpression(context), context.Parameter))).ToList();
-
-            return values.ToResultTable(cols, values.Length, 0, QueryRequest.AllElements);
         }
     }
 }
