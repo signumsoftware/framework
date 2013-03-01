@@ -38,33 +38,7 @@ namespace Signum.Windows
             Manager.Explore(options);
         }
 
-        public static Lite<T> FindUnique<T>(string columnName, object value, UniqueType uniqueType)
-            where T:class, IIdentifiable
-        {
-            return (Lite<T>)Manager.FindUnique(new FindUniqueOptions(typeof(T))
-            {
-                UniqueType = uniqueType,
-                FilterOptions = new List<FilterOption>()
-                {
-                    new FilterOption(columnName, value)
-                }
-            });
-        }
-
-        public static Lite<T> FindUnique<T>(FindUniqueOptions options)
-            where T : class, IIdentifiable
-        {
-            if (options.QueryName == null)
-                options.QueryName = typeof(T);
-
-            return (Lite<T>)Manager.FindUnique(options);
-        }
-
-        public static Lite<IdentifiableEntity> FindUnique(FindUniqueOptions options)
-        {
-            return Manager.FindUnique(options);
-        }
-
+      
 
         public static Lite<T> Find<T>()
             where T : IdentifiableEntity
@@ -114,17 +88,6 @@ namespace Signum.Windows
 
             return result.Cast<Lite<T>>().ToArray();
         }
-
-        public static int QueryCount(CountOptions options)
-        {
-            return Manager.QueryCount(options);
-        }
-
-        public static void QueryCountBatch(CountOptions options, Action<int> onResult, Action @finally)
-        {
-            Manager.QueryCountBatch(options, onResult, @finally);
-        }
-
         public static void NavigateUntyped(object entity)
         {
             Manager.Navigate(entity, new NavigateOptions());
@@ -315,7 +278,7 @@ namespace Signum.Windows
 
             Lite.SetTypeNameAndResolveType(Server.GetCleanName, Server.TryGetType);
         }
-
+        
         public event Action Initializing;
         bool initialized;
         internal void Initialize()
@@ -324,7 +287,7 @@ namespace Signum.Windows
             {
                 //Looking for a better place to do this
                 PropertyRoute.SetFindImplementationsCallback(Navigator.FindImplementations);
-                QueryToken.EntityExtensions = GetExtensionToken;
+                QueryToken.EntityExtensions = DynamicQueryClient.GetExtensionToken;
 
                 EventManager.RegisterClassHandler(typeof(TextBox), TextBox.GotFocusEvent, new RoutedEventHandler(TextBox_GotFocus));
 
@@ -342,11 +305,6 @@ namespace Signum.Windows
             }
         }
 
-        ConcurrentDictionary<QueryToken, IEnumerable<QueryToken>> extensionCache = new ConcurrentDictionary<QueryToken, IEnumerable<QueryToken>>(); 
-        IEnumerable<QueryToken> GetExtensionToken(QueryToken token)
-        {
-            return extensionCache.GetOrAdd(token, t => Server.Return((IDynamicQueryServer server) => server.ExternalQueryToken(t)));
-        }
 
         void CompleteQuerySettings()
         {
@@ -440,7 +398,7 @@ namespace Signum.Windows
 
             if (options.ReturnIfOne)
             {
-                Lite<IdentifiableEntity> lite = FindUnique(new FindUniqueOptions(options.QueryName)
+                Lite<IdentifiableEntity> lite = DynamicQueryClient.FindUnique(new FindUniqueOptions(options.QueryName)
                 {
                     FilterOptions = options.FilterOptions,
                     UniqueType = UniqueType.SingleOrMany
@@ -481,7 +439,7 @@ namespace Signum.Windows
 
             if (options.NavigateIfOne)
             {
-                Lite<IdentifiableEntity> lite = FindUnique(new FindUniqueOptions(options.QueryName)
+                Lite<IdentifiableEntity> lite = DynamicQueryClient.FindUnique(new FindUniqueOptions(options.QueryName)
                 {
                     FilterOptions = options.FilterOptions,
                     UniqueType = UniqueType.Only,
@@ -500,84 +458,6 @@ namespace Signum.Windows
                 sw.Closed += options.Closed;
 
             sw.Show();
-        }
-
-        public virtual Lite<IdentifiableEntity> FindUnique(FindUniqueOptions options)
-        {
-            AssertFindable(options.QueryName);
-
-            SetFilterTokens(options.QueryName, options.FilterOptions);
-            SetOrderTokens(options.QueryName, options.OrderOptions);
-
-            var request = new UniqueEntityRequest
-            {
-                 QueryName = options.QueryName,
-                 Filters = options.FilterOptions.Select(f => f.ToFilter()).ToList(),
-                 Orders = options.OrderOptions.Select(f => f.ToOrder()).ToList(),
-                 UniqueType = options.UniqueType,
-            };
-
-            return Server.Return((IDynamicQueryServer s) => s.ExecuteUniqueEntity(request));
-        }
-
-        public int QueryCount(CountOptions options)
-        {
-            AssertFindable(options.QueryName);
-
-            SetFilterTokens(options.QueryName, options.FilterOptions);
-
-            var request = new QueryCountRequest
-            {
-                QueryName = options.QueryName,
-                Filters = options.FilterOptions.Select(f => f.ToFilter()).ToList()
-            };
-
-            return Server.Return((IDynamicQueryServer s) => s.ExecuteQueryCount(request));
-        }
-
-        public void QueryCountBatch(CountOptions options, Action<int> onResult, Action @finally)
-        {
-            AssertFindable(options.QueryName);
-
-            SetFilterTokens(options.QueryName, options.FilterOptions);
-
-            var request = new QueryCountRequest
-            {
-                QueryName = options.QueryName,
-                Filters = options.FilterOptions.Select(f => f.ToFilter()).ToList()
-            };
-
-            DynamicQueryBachRequest.Enqueue(request, obj => onResult((int)obj), @finally);
-        }
-
-        public void SetFilterTokens(object queryName, IEnumerable<FilterOption> filters)
-        {
-            QueryDescription description = GetQueryDescription(queryName);
-
-            foreach (var f in filters)
-            {
-                if (f.Token == null && f.Path.HasText())
-                    f.Token = QueryUtils.Parse(f.Path, t => QueryUtils.SubTokens(t, description.Columns));
-
-                f.RefreshRealValue();
-            }
-        }
-
-        public void SetOrderTokens(object queryName, IEnumerable<OrderOption> orders)
-        {
-            QueryDescription description = GetQueryDescription(queryName);
-
-            foreach (var o in orders)
-            {
-                o.Token = QueryUtils.Parse(o.Path, t => QueryUtils.SubTokens(t, description.Columns)); 
-            }
-        }
-
-        public QueryDescription GetQueryDescription(object queryName)
-        {
-            QuerySettings settings = GetQuerySettings(queryName);
-            return settings.QueryDescription ??
-                (settings.QueryDescription = Server.Return((IDynamicQueryServer s) => s.GetQueryDescription(queryName))); 
         }
 
         protected virtual SearchWindow CreateSearchWindow(FindOptionsBase options)

@@ -147,7 +147,7 @@
     <Compile Include="ProgressWindow.xaml.cs">
       <DependentUpon>ProgressWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="DynamicQuery\DynamicQueryBachRequest.cs" />
+    <Compile Include="DynamicQuery\DynamicQueryClient.cs" />
     <Compile Include="DynamicQuery\ElementsInPageLabel.xaml.cs">
       <DependentUpon>ElementsInPageLabel.xaml</DependentUpon>
     </Compile>

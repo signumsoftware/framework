@@ -133,7 +133,7 @@ namespace Signum.Windows
             if (DesignerProperties.GetIsInDesignMode(this) || QueryName == null)
                 return;
 
-            Navigator.Manager.SetFilterTokens(QueryName, FilterOptions);
+            DynamicQueryClient.SetFilterTokens(QueryName, FilterOptions);
 
             Search();
         }
@@ -146,7 +146,7 @@ namespace Signum.Windows
                 Filters = FilterOptions.Select(f => f.ToFilter()).ToList()
             };
 
-            DynamicQueryBachRequest.Enqueue(request, obj =>
+            DynamicQueryClient.Enqueue(request, obj =>
             {
                 ItemsCount = (int)obj;
                 if (ItemsCount == 0)
@@ -196,11 +196,11 @@ namespace Signum.Windows
            
             FilterOptions.Clear();
             FilterOptions.AddRange(filters);
-            Navigator.Manager.SetFilterTokens(QueryName, FilterOptions);
+            DynamicQueryClient.SetFilterTokens(QueryName, FilterOptions);
 
             OrderOptions.Clear();
             OrderOptions.AddRange(orders);
-            Navigator.Manager.SetOrderTokens(QueryName, OrderOptions);
+            DynamicQueryClient.SetOrderTokens(QueryName, OrderOptions);
         }
     }
 }

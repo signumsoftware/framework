@@ -325,7 +325,7 @@ namespace Signum.Windows
 
             Settings = Navigator.GetQuerySettings(s.NewValue);
 
-            Description = Navigator.Manager.GetQueryDescription(s.NewValue);
+            Description = DynamicQueryClient.GetQueryDescription(s.NewValue);
 
             if (Settings.SimpleFilterBuilder != null)
             {
@@ -406,12 +406,12 @@ namespace Signum.Windows
 
             GenerateListViewColumns();
 
-            Navigator.Manager.SetFilterTokens(QueryName, FilterOptions);
+            DynamicQueryClient.SetFilterTokens(QueryName, FilterOptions);
 
             filterBuilder.Filters = FilterOptions;
             ((INotifyCollectionChanged)FilterOptions).CollectionChanged += FilterOptions_CollectionChanged;
 
-            Navigator.Manager.SetOrderTokens(QueryName, OrderOptions);
+            DynamicQueryClient.SetOrderTokens(QueryName, OrderOptions);
 
             SortGridViewColumnHeader.SetColumnAdorners(gvResults, OrderOptions);
 
@@ -601,7 +601,7 @@ namespace Signum.Windows
 
             var request = UpdateMultiplyMessage(true);
 
-            DynamicQueryBachRequest.Enqueue(request,          
+            DynamicQueryClient.Enqueue(request,          
                 obj =>
                 {
                     hasBeenLoaded = true;
@@ -654,7 +654,7 @@ namespace Signum.Windows
                 FilterOptions.Clear();
                 var newFilters = SimpleFilterBuilder.GenerateFilterOptions();
 
-                Navigator.Manager.SetFilterTokens(QueryName, newFilters);
+                DynamicQueryClient.SetFilterTokens(QueryName, newFilters);
                 FilterOptions.AddRange(newFilters);
             }
         }
@@ -982,13 +982,13 @@ namespace Signum.Windows
                     SimpleFilterBuilder = null;
 
                 FilterOptions.Clear();
-                Navigator.Manager.SetFilterTokens(QueryName, filters);
+                DynamicQueryClient.SetFilterTokens(QueryName, filters);
                 FilterOptions.AddRange(filters);
             }
 
             OrderOptions.Clear();
             OrderOptions.AddRange(orders);
-            Navigator.Manager.SetOrderTokens(QueryName, OrderOptions);
+            DynamicQueryClient.SetOrderTokens(QueryName, OrderOptions);
             SortGridViewColumnHeader.SetColumnAdorners(gvResults, OrderOptions);
 
 

@@ -198,7 +198,7 @@ namespace Signum.Windows
             ShowResultCount = showCount;
 
             if (ShowResultCount && IsVisible)
-                Navigator.QueryCountBatch(new CountOptions(Options.QueryName)
+                DynamicQueryClient.QueryCountBatch(new CountOptions(Options.QueryName)
                 {
                     FilterOptions = options.FilterOptions,
                 }, count =>
@@ -252,7 +252,7 @@ namespace Signum.Windows
 
         public override void Execute()
         {
-            Lite<T> lite = Navigator.FindUnique<T>(FindUniqueOptions);
+            Lite<T> lite = DynamicQueryClient.FindUnique<T>(FindUniqueOptions);
 
             if (lite == null)
                 return;
