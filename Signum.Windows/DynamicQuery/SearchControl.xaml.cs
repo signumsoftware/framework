@@ -325,7 +325,7 @@ namespace Signum.Windows
 
             Settings = Navigator.GetQuerySettings(s.NewValue);
 
-            Description = DynamicQueryClient.GetQueryDescription(s.NewValue);
+            Description = DynamicQueryServer.GetQueryDescription(s.NewValue);
 
             if (Settings.SimpleFilterBuilder != null)
             {
@@ -404,14 +404,16 @@ namespace Signum.Windows
                 Create = Implementations.IsByAll ? false :
                          Implementations.Types.Any(t => Navigator.IsCreable(t, isSearchEntity: true));
 
+            DynamicQueryServer.SetColumnTokens(ColumnOptions, Description);
+
             GenerateListViewColumns();
 
-            DynamicQueryClient.SetFilterTokens(QueryName, FilterOptions);
+            DynamicQueryServer.SetFilterTokens(FilterOptions, Description);
 
             filterBuilder.Filters = FilterOptions;
             ((INotifyCollectionChanged)FilterOptions).CollectionChanged += FilterOptions_CollectionChanged;
 
-            DynamicQueryClient.SetOrderTokens(QueryName, OrderOptions);
+            DynamicQueryServer.SetOrderTokens(OrderOptions, Description);
 
             SortGridViewColumnHeader.SetColumnAdorners(gvResults, OrderOptions);
 
@@ -451,7 +453,7 @@ namespace Signum.Windows
             btCreateFilter.IsEnabled = string.IsNullOrEmpty(canFilter);
             btCreateFilter.ToolTip = canFilter;
 
-            return QueryUtils.SubTokens(arg, Description.Columns);
+            return arg.SubTokens(Description, canAggregate: false);
         }
 
         private void btCreateFilter_Click(object sender, RoutedEventArgs e)
@@ -523,7 +525,7 @@ namespace Signum.Windows
                     contextMenu.Items.Add(new MenuItem { Header = new TextBlock(new Italic(new Run(Signum.Windows.Properties.Resources.NoActionsFound))), IsEnabled = false });
             }
         }
-
+        
         void UpdateViewSelection()
         {
             btNavigate.Visibility = Navigate && lvResult.SelectedItem != null ? Visibility.Visible : Visibility.Collapsed;
@@ -538,29 +540,13 @@ namespace Signum.Windows
 
         void GenerateListViewColumns()
         {
-            List<Column> columns = MergeColumns();
+            List<Column> columns = DynamicQueryServer.MergeColumns(ColumnOptions, ColumnOptionsMode, Description);
 
             gvResults.Columns.Clear();
 
             foreach (var co in columns)
             {
                 AddListViewColumn(co);
-            }
-        }
-
-        private List<Column> MergeColumns()
-        {
-            switch (ColumnOptionsMode)
-            {
-                case ColumnOptionsMode.Add:
-                    return Description.Columns.Where(cd => !cd.IsEntity).Select(cd => new Column(cd)).Concat(
-                        ColumnOptions.Select(co => co.CreateColumn(Description))).ToList();
-                case ColumnOptionsMode.Remove:
-                    return Description.Columns.Where(cd => !cd.IsEntity && !ColumnOptions.Any(co => co.Path == cd.Name)).Select(cd => new Column(cd)).ToList();
-                case ColumnOptionsMode.Replace:
-                    return ColumnOptions.Select(co => co.CreateColumn(Description)).ToList();
-                default:
-                    throw new InvalidOperationException("{0} is not a valid ColumnOptionMode".Formato(ColumnOptionsMode));
             }
         }
 
@@ -599,22 +585,20 @@ namespace Signum.Windows
 
             btFind.IsEnabled = false;
 
-            var request = UpdateMultiplyMessage(true);
+            QueryRequest request = UpdateMultiplyMessage(true);
 
-            DynamicQueryClient.Enqueue(request,          
-                obj =>
+            request.QueryBatch(rt =>
+            {
+                hasBeenLoaded = true;
+
+                resultTable = rt;
+
+                if (rt != null)
                 {
-                    hasBeenLoaded = true;
-
-                    var rt = (ResultTable)obj;
-                    resultTable = rt;
-
-                    if (rt != null)
-                    {
-                        SetResults(rt);
-                    }
-                },
-                () => { btFind.IsEnabled = true; });
+                    SetResults(rt);
+                }
+            },
+            () => { btFind.IsEnabled = true; });
         }
 
         public QueryRequest UpdateMultiplyMessage(bool updateSimpleFilters)
@@ -654,7 +638,7 @@ namespace Signum.Windows
                 FilterOptions.Clear();
                 var newFilters = SimpleFilterBuilder.GenerateFilterOptions();
 
-                DynamicQueryClient.SetFilterTokens(QueryName, newFilters);
+                DynamicQueryServer.SetFilterTokens(newFilters, Description);
                 FilterOptions.AddRange(newFilters);
             }
         }
@@ -982,13 +966,13 @@ namespace Signum.Windows
                     SimpleFilterBuilder = null;
 
                 FilterOptions.Clear();
-                DynamicQueryClient.SetFilterTokens(QueryName, filters);
+                DynamicQueryServer.SetFilterTokens(filters, Description);
                 FilterOptions.AddRange(filters);
             }
 
             OrderOptions.Clear();
             OrderOptions.AddRange(orders);
-            DynamicQueryClient.SetOrderTokens(QueryName, OrderOptions);
+            DynamicQueryServer.SetOrderTokens(OrderOptions, Description);
             SortGridViewColumnHeader.SetColumnAdorners(gvResults, OrderOptions);
 
 

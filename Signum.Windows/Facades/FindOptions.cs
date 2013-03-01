@@ -12,12 +12,12 @@ using System.Windows.Data;
 
 namespace Signum.Windows
 {
-    public class CountOptions
+    public class QueryCountOptions
     {
         public object QueryName { get; set; }
 
-        public CountOptions() { }
-        public CountOptions(object queryName)
+        public QueryCountOptions() { }
+        public QueryCountOptions(object queryName)
         {
             this.QueryName = queryName;
         }
@@ -30,9 +30,36 @@ namespace Signum.Windows
         }
     }
 
-    public abstract class FindOptionsBase 
+
+    public class QueryGroupOptions : QueryOptions
     {
-        public static int DefaultElementsPerPage = 200; 
+        public object QueryName { get; set; }
+
+        List<FilterOption> filterOptions = new List<FilterOption>();
+        public List<FilterOption> FilterOptions
+        {
+            get { return filterOptions; }
+            set { this.filterOptions = value; }
+        }
+
+        List<OrderOption> orderOptions = new List<OrderOption>();
+        public List<OrderOption> OrderOptions
+        {
+            get { return orderOptions; }
+            set { this.orderOptions = value; }
+        }
+
+        List<ColumnOption> columnOptions = new List<ColumnOption>();
+        public List<ColumnOption> ColumnOptions
+        {
+            get { return columnOptions; }
+            set { this.columnOptions = value; }
+        }
+    }
+
+    public class QueryOptions
+    {
+        public static int DefaultElementsPerPage = 200;
 
         public object QueryName { get; set; }
 
@@ -50,13 +77,6 @@ namespace Signum.Windows
             set { this.orderOptions = value; }
         }
 
-        ColumnOptionsMode columnOptionsMode = ColumnOptionsMode.Add;
-        public ColumnOptionsMode ColumnOptionsMode
-        {
-            get { return columnOptionsMode; }
-            set { this.columnOptionsMode = value; }
-        }        
-
         List<ColumnOption> columnOptions = new List<ColumnOption>();
         public List<ColumnOption> ColumnOptions
         {
@@ -64,18 +84,23 @@ namespace Signum.Windows
             set { this.columnOptions = value; }
         }
 
+        ColumnOptionsMode columnOptionsMode = ColumnOptionsMode.Add;
+        public ColumnOptionsMode ColumnOptionsMode
+        {
+            get { return columnOptionsMode; }
+            set { this.columnOptionsMode = value; }
+        }
+ 
         int? elementsPerPage;
         public int? ElementsPerPage
         {
             get { return elementsPerPage; }
             set { this.elementsPerPage = value; }
         }
+    }
 
-        public FindOptionsBase()
-        {
-            this.ShowFilterButton = this.ShowFilters = this.ShowFooter = this.ShowHeader = true;
-        }
-
+    public abstract class FindOptionsBase : QueryOptions
+    {
         public bool SearchOnLoad { get; set; }
 
         public bool ShowFilters { get; set; }
@@ -88,6 +113,11 @@ namespace Signum.Windows
         internal abstract SearchMode GetSearchMode();
 
         public Action<SearchControl> InitializeSearchControl;
+
+        public FindOptionsBase()
+        {
+            this.ShowFilterButton = this.ShowFilters = this.ShowFooter = this.ShowHeader = true;
+        }
     }
 
     public class FindManyOptions : FindOptionsBase
@@ -157,7 +187,7 @@ namespace Signum.Windows
         }
     }
 
-    public class FindUniqueOptions
+    public class UniqueOptions
     {
         public object QueryName { get; set; }
 
@@ -175,12 +205,12 @@ namespace Signum.Windows
             set { this.orderOptions = value; }
         }
 
-        public FindUniqueOptions() 
+        public UniqueOptions() 
         {
             UniqueType = UniqueType.Single;
         }
 
-        public FindUniqueOptions(object queryName)
+        public UniqueOptions(object queryName)
         {
             UniqueType = UniqueType.Single;
             QueryName = queryName;
@@ -317,15 +347,14 @@ namespace Signum.Windows
             throw new NotImplementedException();
         }
 
-
         //For temporaly XAML only
         public string Path { get; set; }
+        public QueryToken Token { get; set; }
         public string DisplayName { get; set; }
 
-        internal Column CreateColumn(QueryDescription description)
+        internal Column ToColumn()
         {
-            QueryToken token = QueryUtils.Parse(Path, t => QueryUtils.SubTokens(t, description.Columns));
-            return new Column(token, DisplayName.DefaultText(token.NiceName()));
+            return new Column(Token, DisplayName.DefaultText(Token.NiceName()));
         }
     }
 }

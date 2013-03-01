@@ -126,6 +126,8 @@ namespace Signum.Windows
             }
         }
 
+        QueryDescription qd;
+
         void SearchControl_Loaded(object sender, RoutedEventArgs e)
         {
             this.Loaded -= SearchControl_Loaded;
@@ -133,22 +135,24 @@ namespace Signum.Windows
             if (DesignerProperties.GetIsInDesignMode(this) || QueryName == null)
                 return;
 
-            DynamicQueryClient.SetFilterTokens(QueryName, FilterOptions);
+            qd = DynamicQueryServer.GetQueryDescription(QueryName);
+
+            DynamicQueryServer.SetFilterTokens(FilterOptions, qd);
 
             Search();
         }
 
         public void Search()
         {
-            var request = new QueryCountRequest
+            var options = new QueryCountOptions
             {
                 QueryName = QueryName, 
-                Filters = FilterOptions.Select(f => f.ToFilter()).ToList()
+                FilterOptions = FilterOptions.ToList()
             };
 
-            DynamicQueryClient.Enqueue(request, obj =>
+            DynamicQueryServer.QueryCountBatch(options, count =>
             {
-                ItemsCount = (int)obj;
+                ItemsCount = count;
                 if (ItemsCount == 0)
                 {
                     FormattedText = (TextZeroItems ?? Properties.Resources.ThereIsNo0)
@@ -161,7 +165,7 @@ namespace Signum.Windows
                         .Formato(ItemsCount);
                     tb.FontWeight = FontWeights.Bold;
                 }
-            }, 
+            },
             () => { });
         }
 
@@ -196,11 +200,11 @@ namespace Signum.Windows
            
             FilterOptions.Clear();
             FilterOptions.AddRange(filters);
-            DynamicQueryClient.SetFilterTokens(QueryName, FilterOptions);
+            DynamicQueryServer.SetFilterTokens(FilterOptions, qd);
 
             OrderOptions.Clear();
             OrderOptions.AddRange(orders);
-            DynamicQueryClient.SetOrderTokens(QueryName, OrderOptions);
+            DynamicQueryServer.SetOrderTokens(OrderOptions, qd);
         }
     }
 }

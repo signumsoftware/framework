@@ -215,7 +215,7 @@ namespace Signum.Web.Controllers
             if (fo.Token == null)
             {
                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                fo.Token = QueryUtils.Parse(tokenName, qd);
+                fo.Token = QueryUtils.Parse(tokenName, qd, canAggregate: false);
             }
             fo.Operation = QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(fo.Token.Type)).FirstEx();
 
@@ -227,7 +227,7 @@ namespace Signum.Web.Controllers
         {
             object queryName = Navigator.ResolveQueryName(webQueryName);
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-            QueryToken token = QueryUtils.Parse(tokenName, qd);
+            QueryToken token = QueryUtils.Parse(tokenName, qd, canAggregate: false);
             return Content(token.NiceName());
         }
 
@@ -270,7 +270,7 @@ namespace Signum.Web.Controllers
             if (fo.Token == null)
             {
                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                fo.Token = QueryUtils.Parse(tokenName, qd); 
+                fo.Token = QueryUtils.Parse(tokenName, qd, canAggregate: false); 
             }
             fo.Operation = QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(fo.Token.Type)).FirstEx();
             
@@ -291,10 +291,9 @@ namespace Signum.Web.Controllers
         {
             object queryName = Navigator.ResolveQueryName(webQueryName);
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-            var token = QueryUtils.Parse(tokenName, t => QueryUtils.SubTokens(t, qd.Columns));
+            var token = QueryUtils.Parse(tokenName, qd, canAggregate: false);
 
-            var combo = CreateHtmlHelper(this).QueryTokenCombo(token, null, new Context(null, prefix), index + 1, queryName,
-                qt => QueryUtils.SubTokens(qt, qd.Columns));
+            var combo = CreateHtmlHelper(this).QueryTokenCombo(token, null, new Context(null, prefix), index + 1, qd, canAggregate: false);
 
             return Content(combo.ToHtmlString());
         }

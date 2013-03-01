@@ -56,9 +56,9 @@ namespace Signum.Web
 
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
-            Navigator.SetTokens(queryDescription, findOptions.FilterOptions);
-            Navigator.SetTokens(queryDescription, findOptions.OrderOptions);
-            Navigator.SetTokens(queryDescription, findOptions.ColumnOptions);
+            Navigator.SetTokens(findOptions.FilterOptions, queryDescription, false);
+            Navigator.SetTokens(findOptions.OrderOptions, queryDescription, false);
+            Navigator.SetTokens(findOptions.ColumnOptions, queryDescription, false);
             Navigator.SetSearchViewableAndCreable(findOptions);
 
             var viewData = new ViewDataDictionary(context);
@@ -146,7 +146,7 @@ namespace Signum.Web
             if (filterOptions.Token == null)
             {
                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                filterOptions.Token = QueryUtils.Parse(filterOptions.ColumnName, qd);
+                filterOptions.Token = QueryUtils.Parse(filterOptions.ColumnName, qd, canAggregate: false);
             }
 
             FilterType filterType = QueryUtils.GetFilterType(filterOptions.Token.Type);
@@ -222,12 +222,12 @@ namespace Signum.Web
 
         public static Func<QueryToken, bool> AllowSubTokens = null; 
 
-        public static MvcHtmlString QueryTokenCombo(this HtmlHelper helper, QueryToken previous, QueryToken selected, Context context, int index, object queryName, Func<QueryToken, List<QueryToken>> subTokens)
+        public static MvcHtmlString QueryTokenCombo(this HtmlHelper helper, QueryToken previous, QueryToken selected, Context context, int index, QueryDescription qd, bool canAggregate)
         {
             if (previous != null && AllowSubTokens != null && !AllowSubTokens(previous))
                 return MvcHtmlString.Create("");
 
-            var queryTokens = subTokens(previous);
+            var queryTokens = previous.SubTokens(qd, canAggregate);
 
             if (queryTokens.IsEmpty())
                 return MvcHtmlString.Create("");
@@ -260,7 +260,7 @@ namespace Signum.Web
             HtmlTag dropdown = new HtmlTag("select")
                 .IdName(context.Compose("ddlTokens_" + index))
                 .InnerHtml(options.ToHtml())
-                .Attr("onchange", "SF.FindNavigator.newSubTokensCombo('{0}','{1}',{2})".Formato(Navigator.ResolveWebQueryName(queryName), context.ControlID, index));
+                .Attr("onchange", "SF.FindNavigator.newSubTokensCombo('{0}','{1}',{2})".Formato(Navigator.ResolveWebQueryName(qd.QueryName), context.ControlID, index));
 
             if(selected != null)
             {
@@ -271,12 +271,7 @@ namespace Signum.Web
             return dropdown.ToHtml();
         }
 
-        public static MvcHtmlString QueryTokenBuilder(this HtmlHelper helper, QueryToken queryToken, Context context, QueryDescription desc)
-        {
-            return helper.QueryTokenBuilder(queryToken, context, desc.QueryName, qt => QueryUtils.SubTokens(qt, desc.Columns));
-        }
-
-        public static MvcHtmlString QueryTokenBuilder(this HtmlHelper helper, QueryToken queryToken, Context context, object queryName, Func<QueryToken, List<QueryToken>> subTokens)
+        public static MvcHtmlString QueryTokenBuilder(this HtmlHelper helper, QueryToken queryToken, Context context, QueryDescription qd, bool canAggregate = false)
         {
             var tokenPath = queryToken.FollowC(qt => qt.Parent).Reverse().NotNull().ToList();
 
@@ -284,10 +279,10 @@ namespace Signum.Web
 
             for (int i = 0; i < tokenPath.Count; i++)
             {
-                sb.AddLine(helper.QueryTokenCombo(i == 0 ? null : tokenPath[i - 1], tokenPath[i], context, i, queryName, subTokens));
+                sb.AddLine(helper.QueryTokenCombo(i == 0 ? null : tokenPath[i - 1], tokenPath[i], context, i, qd, canAggregate));
             }
 
-            sb.AddLine(helper.QueryTokenCombo(queryToken, null, context, tokenPath.Count, queryName, subTokens));
+            sb.AddLine(helper.QueryTokenCombo(queryToken, null, context, tokenPath.Count, qd, canAggregate));
 
             return sb.ToHtml();
         }

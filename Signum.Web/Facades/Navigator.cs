@@ -187,19 +187,19 @@ namespace Signum.Web
             return Manager.SearchTitle(queryName);
         }
 
-        public static void SetTokens(QueryDescription queryDescription, List<FilterOption> filters)
+        public static void SetTokens(List<FilterOption> filters, QueryDescription queryDescription, bool canAggregate)
         {
-            Manager.SetTokens(queryDescription, filters);
+            Manager.SetTokens(filters, queryDescription, canAggregate);
         }
 
-        public static void SetTokens(QueryDescription queryDescription, List<OrderOption> orders)
+        public static void SetTokens(List<OrderOption> orders, QueryDescription queryDescription, bool canAggregate)
         {
-            Manager.SetTokens(queryDescription, orders);
+            Manager.SetTokens(orders, queryDescription, canAggregate);
         }
 
-        public static void SetTokens(QueryDescription queryDescription, List<ColumnOption> columns)
+        public static void SetTokens(List<ColumnOption> columns, QueryDescription queryDescription, bool canAggregate)
         {
-            Manager.SetTokens(queryDescription, columns);
+            Manager.SetTokens(columns, queryDescription, canAggregate);
         }
 
         public static void SetSearchViewableAndCreable(FindOptions findOptions)
@@ -687,7 +687,7 @@ namespace Signum.Web
 
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
-            Navigator.SetTokens(queryDescription, findOptions.FilterOptions);
+            Navigator.SetTokens(findOptions.FilterOptions, queryDescription, canAggregate: false);
             SetSearchViewableAndCreable(findOptions);
 
             controller.ViewData.Model = new Context(null, "");
@@ -712,8 +712,8 @@ namespace Signum.Web
         {
             var queryDescription = DynamicQueryManager.Current.QueryDescription(options.QueryName);
 
-            SetTokens(queryDescription, options.FilterOptions);
-            SetTokens(queryDescription, options.OrderOptions);
+            SetTokens(options.FilterOptions, queryDescription, canAggregate: false);
+            SetTokens(options.OrderOptions, queryDescription, canAggregate: false);
 
             var request = new UniqueEntityRequest
             {
@@ -730,7 +730,7 @@ namespace Signum.Web
         {
             var queryDescription = DynamicQueryManager.Current.QueryDescription(options.QueryName);
 
-            SetTokens(queryDescription, options.FilterOptions);
+            SetTokens(options.FilterOptions, queryDescription, canAggregate: false);
 
             var request = new QueryCountRequest
             { 
@@ -741,22 +741,22 @@ namespace Signum.Web
             return DynamicQueryManager.Current.ExecuteQueryCount(request);
         }
 
-        protected internal void SetTokens(QueryDescription queryDescription, List<FilterOption> filters)
+        protected internal void SetTokens(List<FilterOption> filters, QueryDescription queryDescription, bool canAggregate)
         {
             foreach (var f in filters)
-                f.Token = QueryUtils.Parse(f.ColumnName, queryDescription);
+                f.Token = QueryUtils.Parse(f.ColumnName, queryDescription, canAggregate);
         }
 
-        protected internal void SetTokens(QueryDescription queryDescription, List<OrderOption> orders)
+        protected internal void SetTokens(List<OrderOption> orders, QueryDescription queryDescription, bool canAggregate)
         {
             foreach (var o in orders)
-                o.Token = QueryUtils.Parse(o.ColumnName, queryDescription);
+                o.Token = QueryUtils.Parse(o.ColumnName, queryDescription, canAggregate);
         }
 
-        protected internal void SetTokens(QueryDescription queryDescription, List<ColumnOption> columns)
+        protected internal void SetTokens(List<ColumnOption> columns, QueryDescription queryDescription, bool canAggregate)
         {
             foreach (var o in columns)
-                o.Token = QueryUtils.Parse(o.ColumnName, queryDescription);
+                o.Token = QueryUtils.Parse(o.ColumnName, queryDescription, canAggregate);
         }
 
         protected internal virtual void SetSearchViewableAndCreable(FindOptions findOptions)

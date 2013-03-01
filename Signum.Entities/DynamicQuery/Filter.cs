@@ -19,11 +19,6 @@ namespace Signum.Entities.DynamicQuery
         public FilterOperation Operation { get; private set; }
         public object Value { get; private set; }
 
-        public Filter(QueryDescription qd, string tokenString, FilterOperation operation, object value)
-            :this(QueryUtils.Parse(tokenString, qd), operation, value)
-        {
-        }
-
         public Filter(QueryToken token, FilterOperation operation, object value)
         {
             this.Token = token;

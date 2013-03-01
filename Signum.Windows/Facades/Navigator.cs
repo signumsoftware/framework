@@ -287,7 +287,7 @@ namespace Signum.Windows
             {
                 //Looking for a better place to do this
                 PropertyRoute.SetFindImplementationsCallback(Navigator.FindImplementations);
-                QueryToken.EntityExtensions = DynamicQueryClient.GetExtensionToken;
+                QueryToken.EntityExtensions = DynamicQueryServer.GetExtensionToken;
 
                 EventManager.RegisterClassHandler(typeof(TextBox), TextBox.GotFocusEvent, new RoutedEventHandler(TextBox_GotFocus));
 
@@ -398,7 +398,7 @@ namespace Signum.Windows
 
             if (options.ReturnIfOne)
             {
-                Lite<IdentifiableEntity> lite = DynamicQueryClient.FindUnique(new FindUniqueOptions(options.QueryName)
+                Lite<IdentifiableEntity> lite = DynamicQueryServer.QueryUnique(new UniqueOptions(options.QueryName)
                 {
                     FilterOptions = options.FilterOptions,
                     UniqueType = UniqueType.SingleOrMany
@@ -439,7 +439,7 @@ namespace Signum.Windows
 
             if (options.NavigateIfOne)
             {
-                Lite<IdentifiableEntity> lite = DynamicQueryClient.FindUnique(new FindUniqueOptions(options.QueryName)
+                Lite<IdentifiableEntity> lite = DynamicQueryServer.QueryUnique(new UniqueOptions(options.QueryName)
                 {
                     FilterOptions = options.FilterOptions,
                     UniqueType = UniqueType.Only,

@@ -44,9 +44,9 @@ namespace Signum.Web
 
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(fo.QueryName);
 
-            fo.FilterOptions = ExtractFilterOptions(controllerContext.HttpContext, t => QueryUtils.SubTokens(t, queryDescription.Columns));
-            fo.OrderOptions = ExtractOrderOptions(controllerContext.HttpContext, t => QueryUtils.SubTokens(t, queryDescription.Columns));
-            fo.ColumnOptions = ExtractColumnsOptions(controllerContext.HttpContext, t => QueryUtils.SubTokens(t, queryDescription.Columns));
+            fo.FilterOptions = ExtractFilterOptions(controllerContext.HttpContext, queryDescription);
+            fo.OrderOptions = ExtractOrderOptions(controllerContext.HttpContext, queryDescription);
+            fo.ColumnOptions = ExtractColumnsOptions(controllerContext.HttpContext, queryDescription);
 
             if (parameters.AllKeys.Contains("allowMultiple"))
             {
@@ -96,7 +96,7 @@ namespace Signum.Web
             "(?<token>[^;,]+),(?<op>[^;,]+),(?<value>'(?:[^']+|'')*'|[^;,]*);".Replace('\'', '"'),
             RegexOptions.Multiline | RegexOptions.ExplicitCapture);
 
-        public static List<FilterOption> ExtractFilterOptions(HttpContextBase httpContext, Func<QueryToken, List<QueryToken>> subTokens)
+        public static List<FilterOption> ExtractFilterOptions(HttpContextBase httpContext, QueryDescription qd, bool canAggregate = false)
         {
             List<FilterOption> result = new List<FilterOption>();
 
@@ -112,7 +112,7 @@ namespace Signum.Web
             return matches.Select(m =>
             {
                 string name = m.Groups["token"].Value;
-                var token = QueryUtils.Parse(name, subTokens);
+                var token = QueryUtils.Parse(name, qd, canAggregate);
                 return new FilterOption
                 {
                     ColumnName = name,
@@ -129,7 +129,7 @@ namespace Signum.Web
             "(?<token>-?[^;,]+);".Replace('\'', '"'),
             RegexOptions.Multiline | RegexOptions.ExplicitCapture);
 
-        public static List<OrderOption> ExtractOrderOptions(HttpContextBase httpContext, Func<QueryToken, List<QueryToken>> subTokens)
+        public static List<OrderOption> ExtractOrderOptions(HttpContextBase httpContext, QueryDescription qd, bool canAggregate = false)
         {
             List<OrderOption> result = new List<OrderOption>();
 
@@ -149,7 +149,7 @@ namespace Signum.Web
                 return new OrderOption
                 {
                     ColumnName = token,
-                    Token = QueryUtils.Parse(token, subTokens),
+                    Token = QueryUtils.Parse(token, qd, canAggregate),
                     OrderType = orderType
                 };
             }).ToList();
@@ -160,7 +160,7 @@ namespace Signum.Web
             "(?<token>[^;,]+)(,(?<name>'(?:[^']+|'')*'|[^;,]*))?;".Replace('\'', '"'),
             RegexOptions.Multiline | RegexOptions.ExplicitCapture);
 
-        public static List<ColumnOption> ExtractColumnsOptions(HttpContextBase httpContext, Func<QueryToken, List<QueryToken>> subTokens)
+        public static List<ColumnOption> ExtractColumnsOptions(HttpContextBase httpContext, QueryDescription qd, bool canAggregate = false)
         {
             List<ColumnOption> result = new List<ColumnOption>();
 
@@ -176,7 +176,7 @@ namespace Signum.Web
             {
                 var colName = m.Groups["token"].Value;
                 var displayCapture = m.Groups["name"].Captures;
-                var token = QueryUtils.Parse(colName, subTokens);
+                var token = QueryUtils.Parse(colName, qd, canAggregate);
                 return new ColumnOption
                 {
                     Token = token,
