@@ -74,7 +74,7 @@ namespace Signum.Engine.Chart
             }
             else
             {
-                return dq.ExecuteQueryGroup(new GroupQueryRequest
+                return dq.ExecuteQueryGroup(new QueryGroupRequest
                 {
                     QueryName = request.QueryName,
                     Columns = columns, 

@@ -45,7 +45,7 @@ namespace Signum.Web.Chart
                     var chart = ((UserChartDN)ctx.Parent.Parent.Parent.UntypedValue);
 
                     QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                    return QueryUtils.Parse(tokenStr, qt => qt.SubTokensChart(qd.Columns, chart.GroupResults));
+                    return QueryUtils.Parse(tokenStr, qd, canAggregate: chart.GroupResults);
                 };
 
                 Navigator.AddSettings(new List<EntitySettings>

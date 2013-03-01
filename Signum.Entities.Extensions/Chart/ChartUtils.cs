@@ -78,38 +78,7 @@ namespace Signum.Entities.Chart
             return false;
         }
 
-        public static List<QueryToken> SubTokensChart(this QueryToken token, IEnumerable<ColumnDescription> columnDescriptions, bool canAggregate)
-        {
-            var result = QueryUtils.SubTokens(token, columnDescriptions);
-
-            if (canAggregate)
-            {
-                if (token == null)
-                {
-                    result.Add(new AggregateToken(null, AggregateFunction.Count));
-                }
-                else if (!(token is AggregateToken))
-                {
-                    FilterType? ft = QueryUtils.TryGetFilterType(token.Type);
-
-                    if (ft == FilterType.Integer || ft == FilterType.Decimal || ft == FilterType.Boolean)
-                    {
-                        result.Add(new AggregateToken(token, AggregateFunction.Average));
-                        result.Add(new AggregateToken(token, AggregateFunction.Sum));
-
-                        result.Add(new AggregateToken(token, AggregateFunction.Min));
-                        result.Add(new AggregateToken(token, AggregateFunction.Max));
-                    }
-                    else if (ft == FilterType.DateTime) /*ft == FilterType.String || */
-                    {
-                        result.Add(new AggregateToken(token, AggregateFunction.Min));
-                        result.Add(new AggregateToken(token, AggregateFunction.Max));
-                    }
-                }
-            }
-
-            return result;
-        }
+        
         
         public static bool SyncronizeColumns(this ChartScriptDN chartScript, IChartBase chart, bool changeParameters)
         {

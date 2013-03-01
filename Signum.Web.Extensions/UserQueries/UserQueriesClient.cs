@@ -53,7 +53,7 @@ namespace Signum.Web.UserQueries
                     string queryKey = ctx.Parent.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", "Key")];
                     object queryName = QueryLogic.ToQueryName(queryKey);
                     QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                    return QueryUtils.Parse(tokenStr, qd);
+                    return QueryUtils.Parse(tokenStr, qd, canAggregate: false);
                 };
 
                 Navigator.AddSettings(new List<EntitySettings>

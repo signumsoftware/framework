@@ -118,7 +118,7 @@ namespace Signum.Engine.Mailing
             {
                 try
                 {
-                    QueryUtils.Parse(t, qd);
+                    QueryUtils.Parse(t, qd, canAggregate: false);
                     return null;
                 }
                 catch (Exception e)
@@ -139,7 +139,7 @@ namespace Signum.Engine.Mailing
 
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
             List<string> errors = new List<string>();
-            return tokens.Select(t => QueryUtils.Parse(t, qd)).ToList();
+            return tokens.Select(t => QueryUtils.Parse(t, qd, canAggregate: false)).ToList();
         }
 
         public static readonly Regex TokenRegex = new Regex(@"\{(?<token>[^\}]*)\}");
@@ -254,8 +254,8 @@ namespace Signum.Engine.Mailing
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
 
             var columns = new List<QueryToken>();
-            columns.Add(QueryUtils.Parse("Entity.NewsletterDeliveries.Element", qd));
-            columns.Add(QueryUtils.Parse("Entity.Email", qd));
+            columns.Add(QueryUtils.Parse("Entity.NewsletterDeliveries.Element", qd, canAggregate: false));
+            columns.Add(QueryUtils.Parse("Entity.Email", qd, canAggregate: false));
             columns.AddRange(NewsletterLogic.GetTokens(queryName, newsletter.Subject));
             columns.AddRange(NewsletterLogic.GetTokens(queryName, newsletter.HtmlBody));
 
@@ -266,8 +266,8 @@ namespace Signum.Engine.Mailing
                 QueryName = queryName,
                 Filters = new List<Filter>
                 { 
-                    new Filter(qd, "Entity.NewsletterDeliveries.Element.Newsletter",  FilterOperation.EqualTo, newsletter.ToLite()),
-                    new Filter(qd, "Entity.NewsletterDeliveries.Element.Sent", FilterOperation.EqualTo, false),
+                    new Filter(QueryUtils.Parse("Entity.NewsletterDeliveries.Element.Newsletter", qd, canAggregate: false),  FilterOperation.EqualTo, newsletter.ToLite()),
+                    new Filter(QueryUtils.Parse("Entity.NewsletterDeliveries.Element.Sent", qd, canAggregate: false), FilterOperation.EqualTo, false),
                 },
                 Orders = new List<Order>(),
                 Columns = columns.Select(t => new Column(t, t.NiceName())).ToList(),

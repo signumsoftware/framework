@@ -54,7 +54,7 @@ namespace Signum.Windows.Chart
 
         QueryDescription Description
         {
-            get { return DynamicQueryClient.GetQueryDescription(ChartRequest.QueryName); }
+            get { return DynamicQueryServer.GetQueryDescription(ChartRequest.QueryName); }
         }
 
         private void UpdateCurrent(UserChartDN current)

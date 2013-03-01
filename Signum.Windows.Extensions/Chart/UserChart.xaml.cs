@@ -44,7 +44,7 @@ namespace Signum.Windows.Chart
             {
                 UserChartDN uq = (UserChartDN)DataContext;
 
-                QueryDescription = DynamicQueryClient.GetQueryDescription(QueryClient.GetQueryName(uq.Query.Key));
+                QueryDescription = DynamicQueryServer.GetQueryDescription(QueryClient.GetQueryName(uq.Query.Key));
             }
             chartBuilder.Description = QueryDescription;
         }
@@ -55,7 +55,7 @@ namespace Signum.Windows.Chart
             if (cr == null || QueryDescription == null)
                 return new List<QueryToken>();
 
-            return token.SubTokensChart(QueryDescription.Columns, cr.GroupResults);
+            return token.SubTokens(QueryDescription, canAggregate: cr.GroupResults);
         }
 
         private List<QueryToken> QueryTokenBuilderOrders_SubTokensEvent(QueryToken token)
@@ -64,7 +64,7 @@ namespace Signum.Windows.Chart
             if (cr == null || QueryDescription == null)
                 return new List<QueryToken>();
 
-            return token.SubTokensChart(QueryDescription.Columns, cr.GroupResults);
+            return token.SubTokens(QueryDescription, canAggregate: cr.GroupResults);
         }
     }
 }

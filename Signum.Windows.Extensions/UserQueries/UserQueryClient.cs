@@ -83,7 +83,7 @@ namespace Signum.Windows.UserQueries
 
         internal static UserQueryDN FromSearchControl(SearchControl searchControl)
         {
-            QueryDescription description = DynamicQueryClient.GetQueryDescription(searchControl.QueryName);
+            QueryDescription description = DynamicQueryServer.GetQueryDescription(searchControl.QueryName);
 
             return searchControl.GetQueryRequest(true).ToUserQuery(description, QueryClient.GetQuery(searchControl.QueryName), FindOptions.DefaultElementsPerPage, searchControl.SimpleFilterBuilder != null);
         }

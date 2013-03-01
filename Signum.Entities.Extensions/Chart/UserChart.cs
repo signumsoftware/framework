@@ -127,15 +127,15 @@ namespace Signum.Entities.Chart
         {
             if (Filters != null)
                 foreach (var f in Filters)
-                    f.ParseData(t => t.SubTokensChart(description.Columns, this.GroupResults), this);
+                    f.ParseData(this, description, canAggregate: this.GroupResults);
 
             if (Columns != null)
                 foreach (var c in Columns)
-                    c.ParseData(description, this);
+                    c.ParseData(this, description, canAggregate: c.IsGroupKey == false);
 
             if (Orders != null)
                 foreach (var o in Orders)
-                    o.ParseData(t => t.SubTokensChart(description.Columns, this.GroupResults), this);
+                    o.ParseData(this, description, canAggregate: this.GroupResults);
         }
 
         static Func<QueryDN, object> ToQueryName;

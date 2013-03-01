@@ -106,7 +106,7 @@ namespace Signum.Windows.Notes
                 return;
             }
 
-            DynamicQueryClient.QueryCountBatch(new CountOptions(typeof(NoteDN))
+            DynamicQueryServer.QueryCountBatch(new QueryCountOptions(typeof(NoteDN))
             {
                 FilterOptions = { new FilterOption("Target", DataContext) }
             }, count =>

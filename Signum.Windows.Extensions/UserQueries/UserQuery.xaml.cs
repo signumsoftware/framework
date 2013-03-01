@@ -43,13 +43,13 @@ namespace Signum.Windows.UserQueries
             {
                 UserQueryDN uq = (UserQueryDN)DataContext;
 
-                QueryDescription = DynamicQueryClient.GetQueryDescription(QueryClient.GetQueryName(uq.Query.Key));
+                QueryDescription = DynamicQueryServer.GetQueryDescription(QueryClient.GetQueryName(uq.Query.Key));
             }
         }
 
         private List<QueryToken> QueryTokenBuilder_SubTokensEvent(QueryToken token)
         {
-            return QueryUtils.SubTokens(token, QueryDescription.Columns);
+            return token.SubTokens(QueryDescription, canAggregate: false);
         }
     }
 }

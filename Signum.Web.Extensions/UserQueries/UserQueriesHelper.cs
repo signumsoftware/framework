@@ -39,24 +39,20 @@ namespace Signum.Web.UserQueries
             return helper.CountSearchControl(findOptions, settinsModifier);
         }
 
-        public static MvcHtmlString QueryTokenDNBuilder(this HtmlHelper helper, QueryTokenDN queryToken, Context context, QueryDescription desc)
-        {
-            return helper.QueryTokenDNBuilder(queryToken, context, desc.QueryName, qt => QueryUtils.SubTokens(qt, desc.Columns));
-        }
 
-        public static MvcHtmlString QueryTokenDNBuilder(this HtmlHelper helper, QueryTokenDN queryToken, Context context, object queryName, Func<QueryToken, List<QueryToken>> subTokens)
+        public static MvcHtmlString QueryTokenDNBuilder(this HtmlHelper helper, QueryTokenDN queryToken, Context context, QueryDescription qd, bool canAggregate = false)
         {
             if (queryToken.TryCC(qt => qt.ParseException) != null)
             {
                 HtmlStringBuilder sb = new HtmlStringBuilder();
                 sb.Add(new HtmlTag("div").Class("ui-state-error").SetInnerText(queryToken.ParseException.Message).ToHtml());
                 sb.Add(new HtmlTag("pre").SetInnerText(queryToken.TokenString).ToHtml());
-                sb.Add(helper.QueryTokenBuilder(null, context, queryName, subTokens));
+                sb.Add(helper.QueryTokenBuilder(null, context, qd, canAggregate));
                 return sb.ToHtml();
             }
             else
             {
-                return helper.QueryTokenBuilder(queryToken.TryCC(ct => ct.Token), context, queryName, subTokens);
+                return helper.QueryTokenBuilder(queryToken.TryCC(ct => ct.Token), context, qd, canAggregate);
             }
         }
     }

@@ -33,7 +33,7 @@ namespace Signum.Web.Chart
 
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
-            Navigator.SetTokens(queryDescription, findOptions.FilterOptions);
+            Navigator.SetTokens(findOptions.FilterOptions, queryDescription, false);
 
             var request = new ChartRequest(findOptions.QueryName)
             {
@@ -86,10 +86,10 @@ namespace Signum.Web.Chart
 
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(request.QueryName);
 
-            QueryToken token = QueryUtils.Parse(tokenName, qt => qt.SubTokensChart(qd.Columns, request.GroupResults));
+            QueryToken token = QueryUtils.Parse(tokenName, qd, request.GroupResults);
 
             return Content(SignumController.CreateHtmlHelper(this).QueryTokenCombo(token, null,
-                new Context(null, prefix), index + 1, qd.QueryName, t => token.SubTokensChart(qd.Columns, request.GroupResults)).ToHtmlString());
+                new Context(null, prefix), index + 1, qd, canAggregate: request.GroupResults).ToHtmlString());
         }
 
         [HttpPost]
@@ -104,7 +104,7 @@ namespace Signum.Web.Chart
             FilterOption fo = new FilterOption(tokenName, null);
             if (fo.Token == null)
             {
-                fo.Token = QueryUtils.Parse(tokenName, qt => qt.SubTokensChart(qd.Columns, request.GroupResults));
+                fo.Token = QueryUtils.Parse(tokenName, qd, canAggregate: request.GroupResults);
             }
             fo.Operation = QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(fo.Token.Type)).FirstEx();
 
