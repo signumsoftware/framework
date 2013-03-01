@@ -117,13 +117,6 @@ namespace Signum.Services
                 () => Schema.Current.TypeToDN);
         }
 
-
-        public Dictionary<Type, EntityKind> EntityKinds()
-        {
-            return Return(MethodInfo.GetCurrentMethod(),
-                 () => TypeLogic.EntityKinds);
-        }
-
         public virtual DateTime ServerNow()
         {
             return Return(MethodInfo.GetCurrentMethod(),

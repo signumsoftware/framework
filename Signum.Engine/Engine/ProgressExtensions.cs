@@ -24,19 +24,20 @@ namespace Signum.Engine
 
                 foreach (var item in collection.ToProgressEnumerator(out pi))
                 {
-                    try
-                    {
-                        using (Transaction tr = new Transaction())
+                    using (HeavyProfiler.Log("ProgressForeach", () => elementID(item)))
+                        try
                         {
-                            action(item, writer);
-                            tr.Commit();
+                            using (Transaction tr = new Transaction())
+                            {
+                                action(item, writer);
+                                tr.Commit();
+                            }
                         }
-                    }
-                    catch (Exception e)
-                    {
-                        writer(ConsoleColor.Red, "Error in {0}: {1}", elementID(item), e.Message);
-                        writer(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
-                    }
+                        catch (Exception e)
+                        {
+                            writer(ConsoleColor.Red, "Error in {0}: {1}", elementID(item), e.Message);
+                            writer(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
+                        }
 
                     SafeConsole.WriteSameLine(pi.ToString());
                 }
