@@ -914,12 +914,12 @@ namespace Signum.Utilities
             return collection.Skip(firstIncluded).Take(toNotIncluded - firstIncluded);
         }
 
-        public static IOrderedEnumerable<T> Order<T>(this IEnumerable<T> collection) where T : IComparable<T>
+        public static IOrderedEnumerable<T> OrderBy<T>(this IEnumerable<T> collection) where T : IComparable<T>
         {
             return collection.OrderBy(a => a);
         }
 
-        public static IOrderedEnumerable<T> OrderDescending<T>(this IEnumerable<T> collection) where T : IComparable<T>
+        public static IOrderedEnumerable<T> OrderByDescending<T>(this IEnumerable<T> collection) where T : IComparable<T>
         {
             return collection.OrderByDescending(a => a);
         }

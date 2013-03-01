@@ -109,7 +109,7 @@ namespace Signum.Windows
             return View((T)entity);
         }
 
-        public void OverrideView(Func<IdentifiableEntity, Control, Control> overrideView)
+        public void OverrideView(Func<T, Control, Control> overrideView)
         {
             var view = View;
             View = e => overrideView(e, view(e));
