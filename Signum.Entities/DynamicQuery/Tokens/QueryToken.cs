@@ -35,7 +35,7 @@ namespace Signum.Entities.DynamicQuery
         public abstract string Unit { get; }
         public abstract Type Type { get; }
         public abstract string Key { get; }
-        protected abstract List<QueryToken> SubTokensInternal();
+        protected abstract List<QueryToken> SubTokensOverride();
 
         public Expression BuildExpression(BuildExpressionContext context)
         {
@@ -66,9 +66,9 @@ namespace Signum.Entities.DynamicQuery
             return new ColumnToken(column);
         }
 
-        public List<QueryToken> SubTokens()
+        public List<QueryToken> SubTokensInternal()
         {
-            var result = this.SubTokensInternal();
+            var result = this.SubTokensOverride();
 
             result.AddRange(OnEntityExtension(this));
 
@@ -88,6 +88,7 @@ namespace Signum.Entities.DynamicQuery
 
             return result;
         }
+
 
         public int? PriorityCompare(string a, string b, Func<string, bool> isPriority)
         {

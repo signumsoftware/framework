@@ -48,7 +48,7 @@ namespace Signum.Entities.DynamicQuery
             get { return "Date"; }
         }
 
-        protected override List<QueryToken> SubTokensInternal()
+        protected override List<QueryToken> SubTokensOverride()
         {
             return new List<QueryToken>();
         }

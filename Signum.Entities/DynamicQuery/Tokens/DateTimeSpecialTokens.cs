@@ -49,7 +49,7 @@ namespace Signum.Entities.DynamicQuery
             get { return "MonthStart"; }
         }
 
-        protected override List<QueryToken> SubTokensInternal()
+        protected override List<QueryToken> SubTokensOverride()
         {
             return new List<QueryToken>();
         }
@@ -122,7 +122,7 @@ namespace Signum.Entities.DynamicQuery
             get { return "DayOfYear"; }
         }
 
-        protected override List<QueryToken> SubTokensInternal()
+        protected override List<QueryToken> SubTokensOverride()
         {
             return new List<QueryToken>();
         }
@@ -199,7 +199,7 @@ namespace Signum.Entities.DynamicQuery
             get { return "DayOfWeek"; }
         }
 
-        protected override List<QueryToken> SubTokensInternal()
+        protected override List<QueryToken> SubTokensOverride()
         {
             return new List<QueryToken>();
         }

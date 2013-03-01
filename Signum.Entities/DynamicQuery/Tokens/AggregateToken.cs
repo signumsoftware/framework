@@ -94,7 +94,7 @@ namespace Signum.Entities.DynamicQuery
             get { return AggregateFunction.ToString(); }
         }
 
-        protected override List<QueryToken> SubTokensInternal()
+        protected override List<QueryToken> SubTokensOverride()
         {
             return new List<QueryToken>();
         }

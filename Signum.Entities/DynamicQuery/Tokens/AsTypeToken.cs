@@ -49,7 +49,7 @@ namespace Signum.Entities.DynamicQuery
             return result.BuildLite();
         }
 
-        protected override List<QueryToken> SubTokensInternal()
+        protected override List<QueryToken> SubTokensOverride()
         {
             return SubTokensBase(entityType, GetImplementations());
         }
