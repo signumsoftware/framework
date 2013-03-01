@@ -106,7 +106,7 @@ namespace Signum.Windows.Notes
                 return;
             }
 
-            Navigator.QueryCountBatch(new CountOptions(typeof(NoteDN))
+            DynamicQueryClient.QueryCountBatch(new CountOptions(typeof(NoteDN))
             {
                 FilterOptions = { new FilterOption("Target", DataContext) }
             }, count =>
@@ -115,7 +115,6 @@ namespace Signum.Windows.Notes
                 {
                     tbNotes.FontWeight = FontWeights.Normal;
                     btnExploreNotes.Visibility = Visibility.Collapsed;
-
                 }
                 else
                 {

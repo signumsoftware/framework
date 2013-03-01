@@ -79,7 +79,7 @@ namespace Signum.Windows.Chart
             ((INotifyCollectionChanged)filterBuilder.Filters).CollectionChanged += Filters_CollectionChanged;
             Request.ChartRequestChanged += Request_ChartRequestChanged;
 
-            chartBuilder.Description = Navigator.Manager.GetQueryDescription(Request.QueryName);
+            chartBuilder.Description = DynamicQueryClient.GetQueryDescription(Request.QueryName);
 
             var entityColumn = chartBuilder.Description.Columns.SingleOrDefaultEx(a => a.IsEntity);
             EntityType = Lite.Extract(entityColumn.Type);

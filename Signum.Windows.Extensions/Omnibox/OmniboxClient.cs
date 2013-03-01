@@ -102,7 +102,7 @@ namespace Signum.Windows.Omnibox
 
         public override QueryDescription GetDescription(object queryName)
         {
-            return Navigator.Manager.GetQueryDescription(queryName);
+            return DynamicQueryClient.GetQueryDescription(queryName);
         }
 
         public override List<Lite<IdentifiableEntity>> AutoComplete(Implementations implementations, string subString, int count)

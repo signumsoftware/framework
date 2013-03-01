@@ -100,7 +100,7 @@ namespace Signum.Windows.Alerts
 
         void CountAlerts(IdentifiableEntity entity, string filterColumn, string resource, Button button)
         {
-            Navigator.QueryCountBatch(new CountOptions(typeof(AlertDN))
+            DynamicQueryClient.QueryCountBatch(new CountOptions(typeof(AlertDN))
             {
                 FilterOptions = new List<FilterOption>
                 {

@@ -44,7 +44,7 @@ namespace Signum.Windows.Chart
             {
                 UserChartDN uq = (UserChartDN)DataContext;
 
-                QueryDescription = Navigator.Manager.GetQueryDescription(QueryClient.GetQueryName(uq.Query.Key));
+                QueryDescription = DynamicQueryClient.GetQueryDescription(QueryClient.GetQueryName(uq.Query.Key));
             }
             chartBuilder.Description = QueryDescription;
         }

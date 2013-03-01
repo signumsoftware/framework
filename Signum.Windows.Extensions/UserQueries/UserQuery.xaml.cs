@@ -43,7 +43,7 @@ namespace Signum.Windows.UserQueries
             {
                 UserQueryDN uq = (UserQueryDN)DataContext;
 
-                QueryDescription = Navigator.Manager.GetQueryDescription(QueryClient.GetQueryName(uq.Query.Key));
+                QueryDescription = DynamicQueryClient.GetQueryDescription(QueryClient.GetQueryName(uq.Query.Key));
             }
         }
 
