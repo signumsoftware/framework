@@ -68,7 +68,7 @@ namespace Signum.Engine.DynamicQuery
             return (Lite<IdentifiableEntity>)orderQuery.Query.Select(exp).Unique(request.UniqueType);
         }
 
-        public override ResultTable ExecuteQueryGroup(GroupQueryRequest request)
+        public override ResultTable ExecuteQueryGroup(QueryGroupRequest request)
         {
             var simpleFilters = request.Filters.Where(f => !(f.Token is AggregateToken)).ToList();
             var aggregateFilters = request.Filters.Where(f => f.Token is AggregateToken).ToList();

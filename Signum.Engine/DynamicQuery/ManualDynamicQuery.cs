@@ -80,7 +80,7 @@ namespace Signum.Engine.DynamicQuery
             return  Expression.Lambda<Func<object, Lite<IIdentifiable>>>(TupleReflection.TupleChainProperty(pe, 0), pe).Compile();
         }, true);
 
-        public override ResultTable ExecuteQueryGroup(GroupQueryRequest request)
+        public override ResultTable ExecuteQueryGroup(QueryGroupRequest request)
         {
             var simpleFilters = request.Filters.Where(f => !(f.Token is AggregateToken)).ToList();
             var aggregateFilters = request.Filters.Where(f => f.Token is AggregateToken).ToList();

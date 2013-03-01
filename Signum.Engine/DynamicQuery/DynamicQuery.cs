@@ -80,7 +80,7 @@ namespace Signum.Engine.DynamicQuery
         ResultTable ExecuteQuery(QueryRequest request);
         int ExecuteQueryCount(QueryCountRequest request);
         Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request);
-        ResultTable ExecuteQueryGroup(GroupQueryRequest request);
+        ResultTable ExecuteQueryGroup(QueryGroupRequest request);
     }
 
     public abstract class DynamicQueryCore<T> : IDynamicQueryCore
@@ -90,7 +90,7 @@ namespace Signum.Engine.DynamicQuery
         public abstract ResultTable ExecuteQuery(QueryRequest request);
         public abstract int ExecuteQueryCount(QueryCountRequest request);
         public abstract Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request);
-        public abstract ResultTable ExecuteQueryGroup(GroupQueryRequest request);
+        public abstract ResultTable ExecuteQueryGroup(QueryGroupRequest request);
 
         protected virtual ColumnDescriptionFactory[] InitializeColumns()
         {

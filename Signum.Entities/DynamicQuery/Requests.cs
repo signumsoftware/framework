@@ -58,7 +58,7 @@ namespace Signum.Entities.DynamicQuery
     }
 
     [Serializable]
-    public class GroupQueryRequest : BaseQueryRequest
+    public class QueryGroupRequest : BaseQueryRequest
     {
         public List<Column> Columns { get; set; }
 
