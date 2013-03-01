@@ -92,7 +92,16 @@ namespace Signum.Engine.Linq
                 }
                 else
                 {
-                    return generator.NewColumn(expression).GetReference(newAlias); ;
+                    if (expression.Type.UnNullify().IsEnum)
+                    {
+                        var convert = expression.TryConvert(expression.Type.IsNullable() ? typeof(int?) : typeof(int));
+
+                        return generator.NewColumn(convert).GetReference(newAlias).TryConvert(expression.Type);
+                    }
+                    else
+                    {
+                        return generator.NewColumn(expression).GetReference(newAlias);
+                    }
                 }
             }
             else
