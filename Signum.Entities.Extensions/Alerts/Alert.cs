@@ -99,11 +99,11 @@ namespace Signum.Entities.Alerts
             return text.EtcLines(100);
         }
 
-        static Expression<Func<AlertDN, bool>> NotAttendedExpression = 
+        static Expression<Func<AlertDN, bool>> AlertedExpression = 
             a => (a.AlertDate.HasValue && a.AlertDate <= TimeZoneManager.Now) && !a.AttendedDate.HasValue;
-        public bool NotAttended
+        public bool Alerted
         {
-            get{ return NotAttendedExpression.Evaluate(this); }
+            get{ return AlertedExpression.Evaluate(this); }
         }
 
         static Expression<Func<AlertDN, bool>> AttendedExpression = 

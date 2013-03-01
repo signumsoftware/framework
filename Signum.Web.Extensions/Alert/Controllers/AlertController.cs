@@ -26,7 +26,7 @@ namespace Signum.Web.Alerts
             var entity = (IdentifiableEntity)this.UntypedExtractEntity(); //Related entity always sent with no prefix
             return Json(new
             {
-                warned = AlertWidgetHelper.CountAlerts(entity, "NotAttended"),
+                warned = AlertWidgetHelper.CountAlerts(entity, "Alerted"),
                 future = AlertWidgetHelper.CountAlerts(entity, "Future"),
                 attended = AlertWidgetHelper.CountAlerts(entity, "Attended"),
             });

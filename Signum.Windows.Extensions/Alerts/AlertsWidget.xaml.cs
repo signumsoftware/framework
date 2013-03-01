@@ -94,8 +94,8 @@ namespace Signum.Windows.Alerts
 
             tbAlerts.FontWeight = FontWeights.Normal;
             CountAlerts(entity, "Future", Properties.Resources.FutureAlerts, btnFutureAlerts);
-            CountAlerts(entity, "Attended", Properties.Resources.CheckedAlerts, btnCheckedAlerts);
-            CountAlerts(entity, "NotAttended", Properties.Resources.WarnedAlerts, btnWarnedAlerts);
+            CountAlerts(entity, "Attended", Properties.Resources.CheckedAlerts, btnAttendedAlerts);
+            CountAlerts(entity, "Alerted", Properties.Resources.WarnedAlerts, btnAlertedAlerts);
         }
 
         void CountAlerts(IdentifiableEntity entity, string filterColumn, string resource, Button button)
@@ -136,8 +136,8 @@ namespace Signum.Windows.Alerts
 
             string field =
                 sender == btnFutureAlerts ? "Future" :
-                sender == btnCheckedAlerts ? "Attended" :
-                sender == btnWarnedAlerts ? "NotAttended" : null;
+                sender == btnAttendedAlerts  ? "Attended" :
+                sender == btnAlertedAlerts ? "Alerted" : null;
 
             Navigator.Explore(new ExploreOptions(typeof(AlertDN))
             {

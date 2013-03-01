@@ -50,7 +50,7 @@ namespace Signum.Web.Alerts
             var alertList = new[]
             {
                 new { Count = CountAlerts(identifiable, "Attended"), Query = "Attended", AlertClass = "sf-alert-attended", Title = Properties.Resources.Alerts_Attended },
-                new { Count = CountAlerts(identifiable, "NotAttended"), Query = "NotAttended", AlertClass = "sf-alert-warned", Title = Properties.Resources.Alerts_NotAttended },
+                new { Count = CountAlerts(identifiable, "Alerted"), Query = "Alerted", AlertClass = "sf-alert-warned", Title = Properties.Resources.Alerts_NotAttended },
                 new { Count = CountAlerts(identifiable, "Future"), Query = "Future", AlertClass = "sf-alert-future", Title = Properties.Resources.Alerts_Future },
             };
 
