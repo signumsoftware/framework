@@ -143,6 +143,12 @@ namespace Signum.Services
                 () => DynamicQueryManager.Current.ExecuteQuery(request));
         }
 
+        public ResultTable ExecuteGroupQuery(GroupQueryRequest request)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), request.QueryName.ToString(),
+                () => DynamicQueryManager.Current.ExecuteGroupQuery(request));
+        }
+
         public virtual int ExecuteQueryCount(QueryCountRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(), request.QueryName.ToString(),
@@ -248,7 +254,5 @@ namespace Signum.Services
         }
 
         #endregion
-
-
     }
 }

@@ -48,12 +48,46 @@ namespace Signum.Entities.DynamicQuery
             get
             {
                 HashSet<QueryToken> allTokens = 
-                            Columns.Select(a => a.Token)
+                    Columns.Select(a => a.Token)
                     .Concat(Filters.Select(a => a.Token))
                     .Concat(Orders.Select(a => a.Token)).ToHashSet();
 
                 return CollectionElementToken.GetElements(allTokens);
             }
+        }
+    }
+
+    [Serializable]
+    public class GroupQueryRequest : BaseQueryRequest
+    {
+        public List<Column> Columns { get; set; }
+
+        public List<Order> Orders { get; set; }
+
+        public List<CollectionElementToken> Multiplications
+        {
+            get
+            {
+                HashSet<QueryToken> allTokens =
+                    Columns.Select(a => a.Token)
+                    .Concat(Orders.Select(a => a.Token))
+                    .Concat(Filters.Select(a => a.Token)).ToHashSet();
+
+                return CollectionElementToken.GetElements(allTokens);
+            }
+        }
+
+        public List<QueryToken> AllTokens()
+        {
+            var allTokens = Columns.Select(a => a.Token).ToList();
+
+            if (Filters != null)
+                allTokens.AddRange(Filters.Select(a => a.Token));
+
+            if (Orders != null)
+                allTokens.AddRange(Orders.Select(a => a.Token));
+
+            return allTokens;
         }
     }
 

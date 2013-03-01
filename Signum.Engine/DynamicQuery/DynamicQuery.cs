@@ -17,6 +17,7 @@ using Signum.Entities.Reflection;
 using Signum.Utilities.DataStructures;
 using Signum.Services;
 using Signum.Entities.Basics;
+using DQ = Signum.Engine.DynamicQuery;
 
 namespace Signum.Engine.DynamicQuery
 {
@@ -74,11 +75,12 @@ namespace Signum.Engine.DynamicQuery
         Expression Expression { get; } //Optional
 
         ColumnDescriptionFactory EntityColumn();
+        List<ColumnDescription> GetColumnDescriptions();
+
         ResultTable ExecuteQuery(QueryRequest request);
         int ExecuteQueryCount(QueryCountRequest request);
         Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request);
-
-        List<ColumnDescription> GetColumnDescriptions();
+        ResultTable ExecuteQueryGroup(GroupQueryRequest request);
     }
 
     public abstract class DynamicQueryCore<T> : IDynamicQueryCore
@@ -88,6 +90,7 @@ namespace Signum.Engine.DynamicQuery
         public abstract ResultTable ExecuteQuery(QueryRequest request);
         public abstract int ExecuteQueryCount(QueryCountRequest request);
         public abstract Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request);
+        public abstract ResultTable ExecuteQueryGroup(GroupQueryRequest request);
 
         protected virtual ColumnDescriptionFactory[] InitializeColumns()
         {
@@ -126,6 +129,7 @@ namespace Signum.Engine.DynamicQuery
 
             return StaticColumns.Where(f => f.IsAllowed() == null).Select(f => f.BuildColumnDescription()).ToList();
         }
+
     }
 
     public interface IDynamicInfo
@@ -209,20 +213,26 @@ namespace Signum.Engine.DynamicQuery
 
         public static DQueryable<T> Select<T>(this DQueryable<T> query, List<Column> columns)
         {
-            HashSet<QueryToken> tokens = new HashSet<QueryToken>(columns.Select(c => c.Token));
+            return Select<T>(query, new HashSet<QueryToken>(columns.Select(c => c.Token)));
+        }
 
+        public static DQueryable<T> Select<T>(this DQueryable<T> query, HashSet<QueryToken> columns)
+        {
             BuildExpressionContext newContext; 
-            var selector = TupleConstructor(query.Context, tokens, out newContext);
+            var selector = TupleConstructor(query.Context, columns, out newContext);
 
             return new DQueryable<T>(query.Query.Select(selector), newContext);
         }
 
-        public static DEnumerable<T> Select<T>(this DEnumerable<T> collection, List<Column> columns)
+        public static DEnumerable<T> Select<T>(this DEnumerable<T> query, List<Column> columns)
         {
-            HashSet<QueryToken> tokens = new HashSet<QueryToken>(columns.Select(c => c.Token));
+            return Select<T>(query, new HashSet<QueryToken>(columns.Select(c => c.Token)));
+        }
 
+        public static DEnumerable<T> Select<T>(this DEnumerable<T> collection, HashSet<QueryToken> columns)
+        {
             BuildExpressionContext newContext;
-            var selector = TupleConstructor(collection.Context, tokens, out newContext);
+            var selector = TupleConstructor(collection.Context, columns, out newContext);
 
             return new DEnumerable<T>(collection.Collection.Select(selector.Compile()), newContext);
         }
@@ -601,6 +611,88 @@ namespace Signum.Engine.DynamicQuery
         }
 
         #endregion
+
+#region GroupBy
+
+        static GenericInvoker<Func<IEnumerable<object>, Delegate, Delegate, IEnumerable<object>>> giGroupByE =
+            new GenericInvoker<Func<IEnumerable<object>, Delegate, Delegate, IEnumerable<object>>>(
+                (col, ks, rs) => (IEnumerable<object>)Enumerable.GroupBy<string, int, double>((IEnumerable<string>)col, (Func<string, int>)ks, (Func<int, IEnumerable<string>, double>)rs));
+        public static DEnumerable<T> GroupBy<T>(this DEnumerable<T> collection, HashSet<QueryToken> keyTokens, HashSet<AggregateToken> aggregateTokens)
+        {
+            var keySelector = KeySelector(collection.Context, keyTokens);
+
+            BuildExpressionContext newContext;
+            LambdaExpression resultSelector = ResultSelectSelectorAndContext(collection.Context, keyTokens, aggregateTokens, keySelector.Type, out newContext);
+
+            var resultCollection = giGroupByE.GetInvoker(typeof(object), keySelector.Body.Type, typeof(object))(collection.Collection, keySelector.Compile(), resultSelector.Compile());
+
+            return new DEnumerable<T>(resultCollection, newContext);
+        }
+
+        static MethodInfo miGroupByQ = ReflectionTools.GetMethodInfo(() => Queryable.GroupBy<string, int, double>((IQueryable<string>)null, (Expression<Func<string, int>>)null, (Expression<Func<int, IEnumerable<string>, double>>)null)).GetGenericMethodDefinition();
+        public static DQueryable<T> GroupBy<T>(this DQueryable<T> query, HashSet<QueryToken> keyTokens, HashSet<AggregateToken> aggregateTokens)
+        {
+            var keySelector = KeySelector(query.Context, keyTokens);
+
+            BuildExpressionContext newContext;
+            LambdaExpression resultSelector = ResultSelectSelectorAndContext(query.Context, keyTokens, aggregateTokens, keySelector.Body.Type, out newContext);
+
+            var resultQuery = (IQueryable<object>)query.Query.Provider.CreateQuery<object>(Expression.Call(null, miGroupByQ.MakeGenericMethod(typeof(object), keySelector.Body.Type, typeof(object)),
+                new Expression[] { query.Query.Expression, Expression.Quote(keySelector), Expression.Quote(resultSelector) }));
+
+            return new DQueryable<T>(resultQuery, newContext);
+        }
+
+        static LambdaExpression ResultSelectSelectorAndContext(BuildExpressionContext context, HashSet<QueryToken> keyTokens, HashSet<AggregateToken> aggregateTokens, Type keyTupleType, out BuildExpressionContext newContext)
+        {
+            Dictionary<QueryToken, Expression> resultExpressions = new Dictionary<QueryToken, Expression>();
+            ParameterExpression pk = Expression.Parameter(keyTupleType, "key");
+            resultExpressions.AddRange(keyTokens.Select((kt, i) => KVP.Create(kt,
+                TupleReflection.TupleChainProperty(pk, i))));
+
+            ParameterExpression pe = Expression.Parameter(typeof(IEnumerable<object>), "e");
+            resultExpressions.AddRange(aggregateTokens.Select(at => KVP.Create((QueryToken)at,
+                BuildAggregateExpression(pe, at, context))));
+
+            var resultConstructor = TupleReflection.TupleChainConstructor(resultExpressions.Values);
+
+            ParameterExpression pg = Expression.Parameter(typeof(object), "gr");
+            newContext = new BuildExpressionContext(resultConstructor.Type, pg,
+                resultExpressions.Keys.Select((t, i) => KVP.Create(t, TupleReflection.TupleChainProperty(Expression.Convert(pg, resultConstructor.Type), i))).ToDictionary());
+
+            return Expression.Lambda(Expression.Convert(resultConstructor, typeof(object)), pk, pe);
+        }
+
+        static LambdaExpression KeySelector(BuildExpressionContext context, HashSet<QueryToken> keyTokens)
+        {
+            var keySelector = Expression.Lambda(
+              TupleReflection.TupleChainConstructor(keyTokens.Select(t => t.BuildExpression(context)).ToList()),
+              context.Parameter);
+            return keySelector;
+        }
+
+        static Expression BuildAggregateExpression(Expression collection, AggregateToken at, BuildExpressionContext context)
+        {
+            Type groupType = collection.Type.GetGenericInterfaces(typeof(IEnumerable<>)).SingleEx(() => "expression should be a IEnumerable").GetGenericArguments()[0];
+
+            if (at.AggregateFunction == Signum.Entities.DynamicQuery.AggregateFunction.Count)
+                return Expression.Call(typeof(Enumerable), "Count", new[] { groupType }, new[] { collection });
+
+            var body = at.Parent.BuildExpression(context);
+
+            var type = at.ConvertTo();
+
+            if (type != null)
+                body = body.TryConvert(type);
+
+            var lambda = Expression.Lambda(body, context.Parameter);
+
+            if (at.AggregateFunction == Signum.Entities.DynamicQuery.AggregateFunction.Min || at.AggregateFunction == Signum.Entities.DynamicQuery.AggregateFunction.Max)
+                return Expression.Call(typeof(Enumerable), at.AggregateFunction.ToString(), new[] { groupType, lambda.Body.Type }, new[] { collection, lambda });
+
+            return Expression.Call(typeof(Enumerable), at.AggregateFunction.ToString(), new[] { groupType }, new[] { collection, lambda });
+        }
+#endregion
 
 
         public static Dictionary<string, Meta> QueryMetadata(IQueryable query)

@@ -67,6 +67,33 @@ namespace Signum.Engine.DynamicQuery
 
             return (Lite<IdentifiableEntity>)orderQuery.Query.Select(exp).Unique(request.UniqueType);
         }
+
+        public override ResultTable ExecuteQueryGroup(GroupQueryRequest request)
+        {
+            var simpleFilters = request.Filters.Where(f => !(f.Token is AggregateToken)).ToList();
+            var aggregateFilters = request.Filters.Where(f => f.Token is AggregateToken).ToList();
+
+            var keys = request.Columns.Select(t => t.Token).Where(t => !(t is AggregateToken)).ToHashSet();
+
+            var allAggregates = request.AllTokens().OfType<AggregateToken>().ToHashSet();
+
+            DQueryable<T> query = Query
+                .ToDQueryable(GetColumnDescriptions())
+                .SelectMany(request.Multiplications)
+                .Where(request.Filters)
+                .GroupBy(keys, allAggregates)
+                .Where(aggregateFilters)
+                .OrderBy(request.Orders);
+
+            var cols = request.Columns
+                .Select(c => Tuple.Create(c, Expression.Lambda(c.Token.BuildExpression(query.Context), query.Context.Parameter))).ToList();
+
+            var values = query.Query.ToArray();
+
+            return values.ToResultTable(cols, values.Length, 0, QueryRequest.AllElements);
+        }
+
+
         public override Expression Expression
         {
             get { return Query.Expression; }
