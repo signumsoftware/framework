@@ -145,7 +145,7 @@ namespace Signum.Engine.Operations
                           let sp = IsSaveProtected(t)
                           select et == null ? "{0} has no EntityTypeAttribute set".Formato(t.FullName) :
                           sp != RequiresSaveProtected(et.Value) ? "{0} is {1} but is {2}save protected".Formato(t.FullName, et, sp ? "" : "NOT ") :
-                          null).NotNull().Order().ToString("\r\n");
+                          null).NotNull().OrderBy().ToString("\r\n");
 
             if (errors.HasText())
                 throw new InvalidOperationException("EntitySetting - SaveProtected inconsistencies: \r\n" + errors);
