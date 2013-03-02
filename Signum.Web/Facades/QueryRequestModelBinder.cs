@@ -85,7 +85,7 @@ namespace Signum.Web
             return matches.Select(m =>
             {
                 string name = m.Groups["token"].Value;
-                var token = QueryUtils.Parse(name, description, canAggregate);
+                var token = QueryUtils.Parse(name, queryDescription, canAggregate);
                 return new Signum.Entities.DynamicQuery.Filter(token,
                     EnumExtensions.ToEnum<FilterOperation>(m.Groups["op"].Value),
                     FindOptionsModelBinder.Convert(FindOptionsModelBinder.DecodeValue(m.Groups["value"].Value), token.Type));
@@ -136,7 +136,5 @@ namespace Signum.Web
                 return new Column(QueryUtils.Parse(colName, description, canAggregate), displayName);
             }).ToList();
         }
-
-        public static QueryDescription description { get; set; }
     }
 }
