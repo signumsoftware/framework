@@ -23,7 +23,6 @@
 					    x:Name="tbAlerts" Text="{m:Loc Alerts}" TextWrapping="Wrap" Margin="15,0,0,0"/>
                     </Grid>
                 </Expander.Header>
-
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -31,9 +30,15 @@
                     </Grid.RowDefinitions>
                     <StackPanel>
                         <Line StrokeThickness="2" Fill="Black" />
-                        <Button FontFamily="Calibri, Segoe UI" x:Name="btnAlertedAlerts" Click="btnAlerts_Click" Content="{m:Loc WarnedAlerts}" Style="{DynamicResource LinkButtonStyle}"  VerticalAlignment="Top" Foreground="#ff375e5f" Margin="21,0,5,0" HorizontalAlignment="Left" />
-                        <Button FontFamily="Calibri, Segoe UI" x:Name="btnAttendedAlerts" Click="btnAlerts_Click" Content="{m:Loc CheckedAlerts}" Style="{DynamicResource LinkButtonStyle}"  VerticalAlignment="Top" Foreground="#ff375e5f" Margin="21,0,5,0" HorizontalAlignment="Left" />
-                        <Button FontFamily="Calibri, Segoe UI" x:Name="btnFutureAlerts" Click="btnAlerts_Click" Content="{m:Loc FutureAlerts}" Style="{DynamicResource LinkButtonStyle}"  VerticalAlignment="Top" Foreground="#ff375e5f" Margin="21,0,5,0" HorizontalAlignment="Left" />
+                        <ItemsControl x:Name="icAlerts">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button FontFamily="Calibri, Segoe UI" Click="btnAlerts_Click" Style="{DynamicResource LinkButtonStyle}"  
+                                        VerticalAlignment="Top" Foreground="#ff375e5f" Margin="21,0,5,0" HorizontalAlignment="Left" 
+                                            Content="{Binding Converter={x:Static m:Converters.LabelCount}}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                         <Button FontFamily="Calibri, Segoe UI" x:Name="btnNewAlert" Click="btnNewAlert_Click" Content="{m:Loc NewAlert}" Style="{DynamicResource LinkButtonStyle}" VerticalAlignment="Top" Foreground="#ff375e5f" Margin="21,0,5,0" HorizontalAlignment="Left" />
                     </StackPanel>
                 </Grid>
