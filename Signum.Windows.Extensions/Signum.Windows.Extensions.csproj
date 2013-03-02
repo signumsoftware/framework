@@ -945,9 +945,7 @@
   <ItemGroup>
     <Resource Include="Images\execute.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Exception\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Resource Include="Images\alert.png" />
   </ItemGroup>
