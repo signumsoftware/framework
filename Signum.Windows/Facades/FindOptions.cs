@@ -31,9 +31,15 @@ namespace Signum.Windows
     }
 
 
-    public class QueryGroupOptions : QueryOptions
+    public class QueryGroupOptions
     {
         public object QueryName { get; set; }
+
+        public QueryGroupOptions() { }
+        public QueryGroupOptions(object queryName)
+        {
+            this.QueryName = queryName;
+        }
 
         List<FilterOption> filterOptions = new List<FilterOption>();
         public List<FilterOption> FilterOptions
