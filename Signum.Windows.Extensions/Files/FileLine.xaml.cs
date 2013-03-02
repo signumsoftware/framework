@@ -82,6 +82,14 @@ namespace Signum.Windows.Files
             set { SetValue(RemoveProperty, value); }
         }
 
+        public static readonly DependencyProperty DropFileProperty =
+            DependencyProperty.Register("DropFile", typeof(bool), typeof(FileLine), new PropertyMetadata(true));
+        public bool DropFile
+        {
+            get { return (bool)GetValue(DropFileProperty); }
+            set { SetValue(DropFileProperty, value); }
+        }
+
         protected override DependencyProperty CommonRouteValue()
         {
             return EntityProperty;
@@ -157,13 +165,21 @@ namespace Signum.Windows.Files
             else if (typeof(IFile).IsAssignableFrom(cleanType))
             {
                 IFile file = (IFile)Server.Convert(entity, cleanType);
-                string filePath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), file.FileName);
-                File.WriteAllBytes(filePath, file.BinaryFile ?? OnResolveBinaryFile(file));
-                Process.Start(filePath);
+                DefaultViewFile(file, OnResolveBinaryFile);
             }
             else
                 throw new InvalidOperationException(Signum.Windows.Extensions.Properties.Resources.ViewingHasNotDefaultImplementationFor0
                     .Formato(Type));
+        }
+
+        public static void DefaultViewFile(IFile file, Func<IFile, byte[]> resolveBinaryFile = null)
+        {
+            if (resolveBinaryFile == null)
+                resolveBinaryFile = DefaultResolveBinaryFile;
+
+            string filePath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), file.FileName);
+            File.WriteAllBytes(filePath, file.BinaryFile ?? resolveBinaryFile(file));
+            Process.Start(filePath);
         }
 
         private void OnSaving(object entity)
@@ -212,19 +228,23 @@ namespace Signum.Windows.Files
 
                 if (ofd.ShowDialog() == true)
                 {
-
-                    IFile file = Creating != null ? Creating() :
-                        (IFile)Activator.CreateInstance(cleanType);
-                    file.FileName = System.IO.Path.GetFileName(ofd.FileName);
-                    file.BinaryFile = File.ReadAllBytes(ofd.FileName);
-
-                    return Server.Convert(file, Type);
+                    return CreateFile(ofd.FileName);
                 }
 
                 return null;
             }
 
             throw new NotSupportedException(Signum.Windows.Extensions.Properties.Resources.OpeningHasNotDefaultImplementationFor0.Formato(Type)); 
+        }
+
+        object CreateFile(string fileName)
+        {
+            IFile file = Creating != null ? Creating() :
+                (IFile)Activator.CreateInstance(cleanType);
+            file.FileName = System.IO.Path.GetFileName(fileName);
+            file.BinaryFile = File.ReadAllBytes(fileName);
+
+            return Server.Convert(file, Type);
         }
 
         protected bool OnRemoving(object entity)
@@ -283,5 +303,29 @@ namespace Signum.Windows.Files
             }
         }
 
+        private void fileLine_DragEnter(object sender, DragEventArgs e)
+        {
+            if (!e.Data.GetDataPresent(DataFormats.FileDrop) || ((string[])e.Data.GetData(DataFormats.FileDrop)).Length != 1)
+            {
+                e.Effects = DragDropEffects.None;
+                e.Handled = true;
+            }
+        }
+
+        private void fileLine_Drop(object sender, DragEventArgs e)
+        {
+            if (!e.Data.GetDataPresent(DataFormats.FileDrop))
+                return;
+
+            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+            if (files.Length != 1)
+                throw new ApplicationException("Only one file supported");
+
+            object file = CreateFile(files.Single());
+
+            if (file != null)
+                this.Entity = file;
+        }
     }
 }
