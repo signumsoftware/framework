@@ -172,7 +172,7 @@ namespace Signum.Engine.Linq
         static ConstantExpression False = Expression.Constant(false);
         static ConstantExpression True = Expression.Constant(true);
 
-        Expression SmartAnd(Expression left, Expression right)
+        Expression SmartAnd(Expression left, Expression right, bool sortCircuit)
         {
             if (IsFalse(left) || IsFalse(right))
                 return False;
@@ -183,10 +183,13 @@ namespace Signum.Engine.Linq
             if (IsTrue(right))
                 return left;
 
-            return Expression.And(MakeSqlCondition(left), MakeSqlCondition(right));
+            if (sortCircuit)
+                return Expression.AndAlso(MakeSqlCondition(left), MakeSqlCondition(right));
+            else
+                return Expression.And(MakeSqlCondition(left), MakeSqlCondition(right));
         }
 
-        Expression SmartOr(Expression left, Expression right)
+        Expression SmartOr(Expression left, Expression right, bool sortCircuit)
         {
             if (IsTrue(left) || IsTrue(right))
                 return True;
@@ -197,18 +200,21 @@ namespace Signum.Engine.Linq
             if (IsFalse(right))
                 return left;
 
-            return Expression.Or(MakeSqlCondition(left), MakeSqlCondition(right));
+            if(sortCircuit)
+                return Expression.OrElse(MakeSqlCondition(left), MakeSqlCondition(right));
+            else
+                return Expression.Or(MakeSqlCondition(left), MakeSqlCondition(right));
         }
 
         protected override Expression VisitBinary(BinaryExpression b)
         {
             if (b.NodeType == ExpressionType.And || b.NodeType == ExpressionType.AndAlso)
             {
-                return SmartAnd(this.Visit(b.Left), this.Visit(b.Right));
+                return SmartAnd(this.Visit(b.Left), this.Visit(b.Right), b.NodeType == ExpressionType.AndAlso);
             }
             else if (b.NodeType == ExpressionType.Or || b.NodeType == ExpressionType.OrElse)
             {
-                return SmartOr(this.Visit(b.Left), this.Visit(b.Right));
+                return SmartOr(this.Visit(b.Left), this.Visit(b.Right), b.NodeType == ExpressionType.OrElse);
             }
             else if (b.NodeType == ExpressionType.ExclusiveOr)
             {
@@ -265,12 +271,14 @@ namespace Signum.Engine.Linq
         {
             if (IsBooleanExpression(cex))
             {
-                var result = cex.Whens.IsNullOrEmpty() ? False : cex.Whens.Select(a => SmartAnd(Visit(a.Condition), Visit(a.Value))).Aggregate(SmartOr);
+                var result = cex.Whens.IsNullOrEmpty() ? False : cex.Whens
+                    .Select(a => SmartAnd(Visit(a.Condition), Visit(a.Value), true))
+                    .Aggregate((a, b) => SmartOr(a, b, true));
 
                 if (cex.DefaultValue == null)
                     return result;
 
-                return SmartOr(result, MakeSqlCondition(Visit(cex.DefaultValue)));
+                return SmartOr(result, MakeSqlCondition(Visit(cex.DefaultValue)), true);
             }
             else
             {
