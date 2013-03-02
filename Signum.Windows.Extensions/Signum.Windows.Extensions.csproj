@@ -960,6 +960,12 @@
   <ItemGroup>
     <Resource Include="Images\config.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\smstemplate.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\sms.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
