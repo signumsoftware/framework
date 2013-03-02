@@ -349,13 +349,15 @@ namespace Signum.Windows
         public QuerySettings Settings { get; private set; }
         public QueryDescription Description { get; private set; }
 
-        public static readonly RoutedEvent QueryResultChangedEvent = EventManager.RegisterRoutedEvent(
-            "QueryResultChanged", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(SearchControl));
-        public event RoutedEventHandler QueryResultChanged
+        public static readonly RoutedEvent ResultChangedEvent = EventManager.RegisterRoutedEvent(
+            "ResultChangedEvent", RoutingStrategy.Bubble, typeof(ResultChangedEventHandler), typeof(SearchControl));
+        public event ResultChangedEventHandler ResultChanged
         {
-            add { AddHandler(QueryResultChangedEvent, value); }
-            remove { RemoveHandler(QueryResultChangedEvent, value); }
+            add { AddHandler(ResultChangedEvent, value); }
+            remove { RemoveHandler(ResultChangedEvent, value); }
         }
+
+      
 
         void SearchControl_Loaded(object sender, RoutedEventArgs e)
         {
@@ -736,7 +738,7 @@ namespace Signum.Windows
             if (!cleaning && CollapseOnNoResults)
                 Visibility = resultTable.Rows.Length == 0 ? Visibility.Collapsed : Visibility.Visible;
 
-            RaiseEvent(new RoutedEventArgs(QueryResultChangedEvent));
+            RaiseEvent(new ResultChangedEventArgs(ResultChangedEvent, cleaning));
         }
 
         void btView_Click(object sender, RoutedEventArgs e)
@@ -983,8 +985,18 @@ namespace Signum.Windows
         {
             rowFilters.Height = new GridLength(); //Auto
         }
+    }
 
-      
+    public delegate void ResultChangedEventHandler(object sender, ResultChangedEventArgs e);
+
+    public class ResultChangedEventArgs : RoutedEventArgs
+    {
+        public bool Cleaning { get; private set; }
+        public ResultChangedEventArgs(RoutedEvent routedEvent, bool cleaning)
+            : base(routedEvent)
+        {
+            this.Cleaning = cleaning;
+        }
     }
 
     public interface ISimpleFilterBuilder
