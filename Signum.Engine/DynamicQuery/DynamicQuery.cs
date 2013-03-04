@@ -207,6 +207,17 @@ namespace Signum.Engine.DynamicQuery
             return new DQueryable<T>(query.Select(a => (object)a), new BuildExpressionContext(typeof(T), pe, dic));
         }
 
+
+        public static DEnumerableCount<T> AllQueryOperations<T>(this DQueryable<T> query, QueryRequest request)
+        {
+            return query
+                .SelectMany(request.Multiplications)
+                .Where(request.Filters)
+                .OrderBy(request.Orders)
+                .Select(request.Columns)
+                .TryPaginatePartial(request.MaxElementIndex);
+        }
+
         #endregion 
 
         #region Select
@@ -518,12 +529,18 @@ namespace Signum.Engine.DynamicQuery
         #region TryPaginatePartial
         public static DEnumerableCount<T> TryPaginatePartial<T>(this DQueryable<T> query, int? maxElementIndex)
         {
-            int count = query.Query.Count();
-
             if (maxElementIndex.HasValue)
-                return new DEnumerableCount<T>(query.Query.Take(maxElementIndex.Value).ToList(), query.Context, count);
+            {
+                List<object> list = query.Query.Take(maxElementIndex.Value).ToList();
+                int count = list.Count < maxElementIndex.Value ? list.Count : query.Query.Count();
 
-            return new DEnumerableCount<T>(query.Query.ToList(), query.Context, count);
+                return new DEnumerableCount<T>(list, query.Context, count);
+            }
+            else
+            {
+                List<object> list = query.Query.ToList();
+                return new DEnumerableCount<T>(list, query.Context, list.Count);
+            }
         }
 
         public static DEnumerableCount<T> TryPaginatePartial<T>(this DEnumerable<T> collection, int? maxElementIndex)
@@ -537,7 +554,7 @@ namespace Signum.Engine.DynamicQuery
         }
         #endregion
 
-        #region Paginate
+        #region TryPaginate
 
         public static DEnumerableCount<T> TryPaginate<T>(this DQueryable<T> query, int elementsPerPage, int currentPage)
         {
@@ -622,7 +639,7 @@ namespace Signum.Engine.DynamicQuery
             var keySelector = KeySelector(collection.Context, keyTokens);
 
             BuildExpressionContext newContext;
-            LambdaExpression resultSelector = ResultSelectSelectorAndContext(collection.Context, keyTokens, aggregateTokens, keySelector.Type, out newContext);
+            LambdaExpression resultSelector = ResultSelectSelectorAndContext(collection.Context, keyTokens, aggregateTokens, keySelector.Body.Type, out newContext);
 
             var resultCollection = giGroupByE.GetInvoker(typeof(object), keySelector.Body.Type, typeof(object))(collection.Collection, keySelector.Compile(), resultSelector.Compile());
 

@@ -90,10 +90,12 @@ namespace Signum.Engine.DynamicQuery
             var allAggregates = request.AllTokens().OfType<AggregateToken>().ToHashSet();
 
             DEnumerableCount<T> plainCollection = Execute(new QueryRequest
-            {
+            {   
                 Columns = keys.Concat(allAggregates.Select(at => at.Parent).NotNull()).Distinct().Select(t => new Column(t, t.NiceName())).ToList(),
+                Orders = new List<Order>(),
                 Filters = simpleFilters,
                 QueryName = request.QueryName,
+                ElementsPerPage = QueryRequest.AllElements,
             }, GetColumnDescriptions());
 
             var groupCollection = plainCollection
