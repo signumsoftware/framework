@@ -25,10 +25,7 @@ namespace Signum.Engine
 
             Debug.WriteLine("UserConnection's file found on {0}".Formato(FileName));
             Debug.WriteLine("{0}".Formato(File.ReadAllText(FileName)));
-            return File.ReadAllLines(FileName)
-                .Where(s=>s.HasText() && !s.StartsWith("-") && !s.StartsWith("/"))
-                .Select(s => s.Split('>'))
-                .ToDictionary(a => a[0], a => a[1], "user connections");          
+            return File.ReadAllLines(FileName).Where(s=> !string.IsNullOrWhiteSpace(s) && !s.StartsWith("-") && !s.StartsWith("/")).ToDictionary(a => a.Before('>'), a => a.After('>'));          
         }
 
         public static string Replace(string connectionString)
