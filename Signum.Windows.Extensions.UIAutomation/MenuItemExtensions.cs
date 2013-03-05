@@ -26,15 +26,39 @@ namespace Signum.Windows.UIAutomation
                 throw new ArgumentNullException("menuNames");
 
             var menuItem = menu.Child(mi => mi.Current.Name == menuNames[0]);
-            var window = menu.Normalize(mi => mi.Current.ControlType == ControlType.Window); 
+            var window = menu.Normalize(mi => mi.Current.ControlType == ControlType.Window);
 
             for (int i = 1; i < menuNames.Length; i++)
             {
-                window = window.CaptureChildWindow(() =>
-                    menuItem.Pattern<ExpandCollapsePattern>().Expand(),
-                    actionDescription: () => "Popup window after expanding MenuItem {0}".Formato(menuNames[i - 1]));
-                
-                menuItem = window.Child(mi => mi.Current.Name == menuNames[i]);
+                menuItem.Pattern<ExpandCollapsePattern>().Expand();
+
+                AutomationElement result = null;
+                window.Wait(() =>
+                {
+                    //result = menuItem.TryChild(mi => mi.Current.Name == menuNames[i]);
+                    //if (result != null)
+                    //    return true;
+
+                    if (window != null)
+                    {
+                        result = window.TryChild(a => a.Current.ControlType == ControlType.Window);
+                        if (result != null)
+                            return true;
+                    }
+
+                    return false;
+                }, actionDescription: () => "Popup window or MenuItem after expanding MenuItem {0}".Formato(menuNames[i - 1]));
+
+                if (result.Current.ControlType == ControlType.Window)
+                {
+                    window = result;
+                    menuItem = window.TryChild(mi => mi.Current.Name == menuNames[i]);
+                }
+                else
+                {
+                    window = null;
+                    menuItem = result;
+                }
             }
             return menuItem;
         }
