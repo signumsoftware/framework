@@ -11,7 +11,8 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class ColumnToken : QueryToken
     {
-        public ColumnDescription Column { get; private set; }
+        ColumnDescription column;
+        public ColumnDescription Column { get { return column; } }
 
         internal ColumnToken(ColumnDescription column)
             : base(null)
@@ -19,7 +20,7 @@ namespace Signum.Entities.DynamicQuery
             if (column == null)
                 throw new ArgumentNullException("column");
 
-            this.Column = column;
+            this.column = column;
         }
 
         public override string Key

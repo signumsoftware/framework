@@ -16,7 +16,12 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public abstract class QueryToken : IEquatable<QueryToken>
     {
-        public bool Subordinated { get; set; }
+        bool subordianted;
+        public bool Subordinated
+        {
+            get { return subordianted; }
+            set { subordianted = value; }
+        }
 
         public string SubordinatedToString
         {
@@ -54,11 +59,15 @@ namespace Signum.Entities.DynamicQuery
 
         public abstract QueryToken Clone();
 
-        public QueryToken Parent { get; private set; }
+        QueryToken parent;
+        public QueryToken Parent
+        {
+            get { return parent; }
+        }
 
         public QueryToken(QueryToken parent)
         {
-            this.Parent = parent;
+            this.parent = parent;
         }
 
         public static QueryToken NewColumn(ColumnDescription column)

@@ -13,6 +13,7 @@ using Signum.Utilities.DataStructures;
 using System.Collections;
 using System.Linq.Expressions;
 using Signum.Entities.Properties;
+using System.Runtime.Serialization;
 
 namespace Signum.Entities.DynamicQuery
 {
@@ -41,7 +42,7 @@ namespace Signum.Entities.DynamicQuery
     }
 
     [Serializable]
-    public class ColumnDescription
+    public class ColumnDescription :ISerializable
     {
         public const string Entity = "Entity";
 
@@ -108,6 +109,51 @@ namespace Signum.Entities.DynamicQuery
         public override string ToString()
         {
             return DisplayName;
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("name", name);
+            info.AddValue("type", type.AssemblyQualifiedName);
+
+            if (unit != null)
+                info.AddValue("unit", unit);
+
+            if (format != null)
+                info.AddValue("format", format);
+
+            if (implementations != null)
+                info.AddValue("implementations", implementations);
+
+            if (propertyRoutes != null)
+            {
+                if (propertyRoutes.Length == 1)
+                    info.AddValue("propertyRoute", propertyRoutes.Single());
+                else
+                    info.AddValue("propertyRoutes", propertyRoutes);
+            }
+
+            if (displayName != null)
+                info.AddValue("displayName", displayName);
+        }
+
+        
+        ColumnDescription(SerializationInfo info, StreamingContext context)
+        {
+            foreach (SerializationEntry entry in info)
+            {
+                switch (entry.Name)
+                {
+                    case "name": name = (string)entry.Value; break;
+                    case "type": type = Type.GetType((string)entry.Value); break;
+                    case "unit": unit = (string)entry.Value; break;
+                    case "format": format = (string)entry.Value; break;
+                    case "implementations": implementations = (Implementations)entry.Value; break;
+                    case "propertyRoutes": propertyRoutes = (PropertyRoute[])entry.Value; break;
+                    case "propertyRoute": propertyRoutes = new[] { (PropertyRoute)entry.Value }; break;
+                    case "displayName": displayName = (string)entry.Value; break;
+                }
+            }
         }
     }    
 }

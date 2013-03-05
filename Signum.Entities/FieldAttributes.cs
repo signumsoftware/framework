@@ -23,10 +23,10 @@ namespace Signum.Entities
         public bool AllowMultipleNulls { get; set; }
     }
 
-    
+
 
     [Serializable]
-    public struct Implementations : IEquatable<Implementations>
+    public struct Implementations : IEquatable<Implementations>, ISerializable
     {
         object arrayOrType;
 
@@ -103,22 +103,22 @@ namespace Signum.Entities
             if (types.Length == 1)
                 return By(types[0]);
 
-           var error = types.Select(Error).NotNull().ToString("\r\n");
+            var error = types.Select(Error).NotNull().ToString("\r\n");
 
-           if (error.HasText())
-               throw new InvalidOperationException(error);
+            if (error.HasText())
+                throw new InvalidOperationException(error);
 
-           return new Implementations { arrayOrType = types };
+            return new Implementations { arrayOrType = types };
         }
 
         static string Error(Type type)
         {
-            if(!type.IsIdentifiableEntity())
-                return  "{0} is not {1}".Formato(type.Name, typeof(IdentifiableEntity).Name);
+            if (!type.IsIdentifiableEntity())
+                return "{0} is not {1}".Formato(type.Name, typeof(IdentifiableEntity).Name);
 
             if (type.IsAbstract)
                 return "{0} is abstract".Formato(type.Name);
-            
+
             return null;
         }
 
@@ -132,12 +132,12 @@ namespace Signum.Entities
 
         public override bool Equals(object obj)
         {
-            return  obj is Implementations || Equals((Implementations)obj);
+            return obj is Implementations || Equals((Implementations)obj);
         }
-        
+
         public bool Equals(Implementations other)
         {
-            return IsByAll && other.IsByAll || 
+            return IsByAll && other.IsByAll ||
                 arrayOrType == other.arrayOrType ||
                 Enumerable.SequenceEqual(Types, other.Types);
         }
@@ -145,6 +145,25 @@ namespace Signum.Entities
         public override int GetHashCode()
         {
             return arrayOrType == null ? 0 : Types.Aggregate(0, (acum, type) => acum ^ type.GetHashCode());
+        }
+
+        Implementations(SerializationInfo info, StreamingContext context)
+        {
+            string str = info.GetString("arrayOrType");
+
+            arrayOrType = str == "ALL" ? null :
+                str.Split('|').Select(Type.GetType).ToArray();
+
+            var array = arrayOrType as Type[];
+            if(array != null && array.Length == 1)
+                arrayOrType = array[0]; 
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("arrayOrType", arrayOrType == null ? "ALL" :
+                arrayOrType is Type ? ((Type)arrayOrType).AssemblyQualifiedName :
+                arrayOrType is Type[] ? ((Type[])arrayOrType).ToString(a => a.AssemblyQualifiedName, "|") : null);
         }
     }
 

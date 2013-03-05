@@ -358,29 +358,43 @@ namespace Signum.Entities
 
         private PropertyRoute(SerializationInfo info, StreamingContext ctxt)
         {
-            Type type = Type.GetType(info.GetString("type"));
+            string rootName = info.GetString("rootType");
 
-            string route = info.GetString("route");
+            Type root = Type.GetType(rootName);
+
+            string route = info.GetString("property");
 
             if (route == null)
-                this.SetRootType(type);
+                this.SetRootType(root);
             else
             {
                 string before = route.TryBeforeLast(".");
 
                 if (before != null)
                 {
-                    var parent = Parse(type, before);
+                    var parent = Parse(root, before);
 
                     SetParentAndProperty(parent, parent.GetMember(route.AfterLast('.')));
+                }
+                else
+                {
+                    var parent = Root(root);
+
+                    SetParentAndProperty(parent, parent.GetMember(route)); 
                 }
             }
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            info.AddValue("type", info.FullTypeName);
-            info.AddValue("property", PropertyRouteType == Entities.PropertyRouteType.Root ? null : this.PropertyString().Replace("/", ".Item.").TrimEnd('.'));
+            info.AddValue("rootType", RootType.AssemblyQualifiedName);
+
+            string property = 
+                PropertyRouteType == Entities.PropertyRouteType.Root ? null :
+                (PropertyRouteType == Entities.PropertyRouteType.LiteEntity ? this.Parent.PropertyString() + ".Entity" :
+                this.PropertyString()).Replace("/", ".Item.").TrimEnd('.');
+
+            info.AddValue("property", property);
         }
     }
 
