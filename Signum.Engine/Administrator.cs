@@ -140,6 +140,14 @@ namespace Signum.Engine
             return ident;
         }
 
+        public static T SetNotModified<T>(this T ident)
+            where T : IdentifiableEntity
+        {
+            ident.IsNew = false;
+            ident.Modified = ModifiedState.Clean;
+            return ident;
+        }
+
         /// <summary>
         /// Disables Identity in a table for the current transaction
         /// </summary>
