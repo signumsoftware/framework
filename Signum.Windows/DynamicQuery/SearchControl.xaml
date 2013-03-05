@@ -144,17 +144,14 @@
                   Background="WhiteSmoke"
                   SelectionChanged="lvResult_SelectionChanged" 
 			      SelectionMode="{Binding MultiSelection, Converter={x:Static m:Converters.BoolToSelectionMode}, ElementName=me}"
-			      VirtualizingStackPanel.IsVirtualizing="True"
-                  AllowDrop="{Binding AllowChangeColumns, ElementName=me}"
-                  DragOver="lvResult_DragOver"
-                  Drop="lvResult_Drop">
+			      VirtualizingStackPanel.IsVirtualizing="True">
             <ListView.ContextMenu>
                 <ContextMenu x:Name="contextMenu" Opened="contextMenu_Opened"/>
             </ListView.ContextMenu>
             <ListView.View>
-                <GridView x:Name="gvResults" AllowsColumnReorder="True">
+                <GridView x:Name="gvResults" AllowsColumnReorder="{Binding AllowChangeColumns, ElementName=me}">
                     <GridView.ColumnHeaderContainerStyle>
-                        <Style TargetType="{x:Type GridViewColumnHeader}">                           
+                        <Style TargetType="{x:Type GridViewColumnHeader}">
                             <EventSetter Event="Click" Handler="GridViewColumnHeader_Click"/>
                         </Style>
                     </GridView.ColumnHeaderContainerStyle>
