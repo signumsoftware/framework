@@ -35,9 +35,9 @@ namespace Signum.Windows.UIAutomation
                 AutomationElement result = null;
                 window.Wait(() =>
                 {
-                    //result = menuItem.TryChild(mi => mi.Current.Name == menuNames[i]);
-                    //if (result != null)
-                    //    return true;
+                    result = menuItem.TryChild(mi => mi.Current.Name == menuNames[i]);
+                    if (result != null)
+                        return true;
 
                     if (window != null)
                     {
