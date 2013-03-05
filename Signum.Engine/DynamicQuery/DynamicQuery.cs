@@ -60,11 +60,7 @@ namespace Signum.Engine.DynamicQuery
 
         public QueryDescription GetDescription()
         {
-            return new QueryDescription
-            {
-                QueryName = QueryName,
-                Columns = Core.Value.GetColumnDescriptions()
-            };
+            return new QueryDescription(QueryName, Core.Value.GetColumnDescriptions());
         }
     }
 

@@ -15,15 +15,20 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class Filter
     {
-        public QueryToken Token { get; private set; }
-        public FilterOperation Operation { get; private set; }
-        public object Value { get; private set; }
+        QueryToken token;
+        public QueryToken Token { get { return token; } }
+
+        FilterOperation operation;
+        public FilterOperation Operation { get { return operation; } }
+
+        object value;
+        public object Value { get { return value; } }
 
         public Filter(QueryToken token, FilterOperation operation, object value)
         {
-            this.Token = token;
-            this.Operation = operation;
-            this.Value = ReflectionTools.ChangeType(value, operation == FilterOperation.IsIn ? typeof(IEnumerable<>).MakeGenericType(Token.Type.Nullify()) : Token.Type);
+            this.token = token;
+            this.operation = operation;
+            this.value = ReflectionTools.ChangeType(value, operation == FilterOperation.IsIn ? typeof(IEnumerable<>).MakeGenericType(Token.Type.Nullify()) : Token.Type);
         }
 
         static MethodInfo miContainsEnumerable = ReflectionTools.GetMethodInfo((IEnumerable<int> s) => s.Contains(2)).GetGenericMethodDefinition();
@@ -115,7 +120,6 @@ namespace Signum.Entities.DynamicQuery
             return "{0} {1} {2}".Formato(Token.FullKey(), Operation, Value);
         }
     }
-
 
     public enum FilterOperation
     {

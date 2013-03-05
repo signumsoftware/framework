@@ -10,13 +10,20 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class Column : IEquatable<Column>
     {
-        public string DisplayName { get; set; }
-        public QueryToken Token { get; private set; }
+        string displayName;
+        public string DisplayName
+        {
+            get { return displayName; }
+            set { displayName = value; }
+        }
+
+        QueryToken token;
+        public QueryToken Token { get { return token; } }
 
         public Column(QueryToken token, string displayName)
         {
-            Token = token;
-            DisplayName = displayName;
+            this.token = token;
+            this.displayName = displayName;
         }
 
         public Column(ColumnDescription cd)
