@@ -15,6 +15,7 @@ using System.Diagnostics;
 using Signum.Entities.Basics;
 using System.Collections.Concurrent;
 using System.Runtime.Serialization;
+using System.ComponentModel;
 
 namespace Signum.Entities
 {

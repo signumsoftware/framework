@@ -6,7 +6,6 @@ using System.Text;
 using System.IO;
 using Signum.Utilities.Reflection;
 using System.Text.RegularExpressions;
-using Signum.Utilities.Properties;
 using System.Globalization;
 using System.Reflection;
 using System.Collections.Concurrent;

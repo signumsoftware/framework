@@ -148,11 +148,6 @@
     <Compile Include="ExpressionTrees\ExpressionExpanderSamples.cs" />
     <Compile Include="ListExtensions.cs" />
     <Compile Include="MyRandom.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Reflection\ReflectionTools.cs" />
     <Compile Include="RegexExtensions.cs" />
     <Compile Include="SafeConsole.cs" />
@@ -174,7 +169,6 @@
     <EmbeddedResource Include="Properties\Resources.it.resx" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.pt.resx" />

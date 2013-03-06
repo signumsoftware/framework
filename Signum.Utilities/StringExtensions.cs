@@ -5,7 +5,6 @@ using System.Text;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Runtime.Serialization.Formatters.Binary;
-using Signum.Utilities.Properties;
 using System.Globalization;
 using System.Linq.Expressions;
 

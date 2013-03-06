@@ -14,7 +14,6 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Data;
 using System.Text.RegularExpressions;
-using Signum.Utilities.Properties;
 using System.Collections;
 using Signum.Utilities.ExpressionTrees;
 using System.ComponentModel;

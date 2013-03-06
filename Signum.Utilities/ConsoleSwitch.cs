@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
-using Signum.Utilities.Properties;
 using System.ComponentModel;
 
 namespace Signum.Utilities
@@ -58,7 +57,7 @@ namespace Signum.Utilities
 
         public WithDescription<V> ChooseTuple()
         {
-            return ChooseTuple(Resources.EnterYourSelection);
+            return ChooseTuple(ConsoleMessage.EnterYourSelection.NiceToString());
         }
 
         public WithDescription<V> ChooseTuple(string endMessage)
@@ -124,7 +123,7 @@ namespace Signum.Utilities
 
         public WithDescription<V>[] ChooseMultipleWithDescription()
         {
-            return ChooseMultipleWithDescription(Resources.EnterYoutSelectionsSeparatedByComma);
+            return ChooseMultipleWithDescription(ConsoleMessage.EnterYoutSelectionsSeparatedByComma.NiceToString());
         }
 
         public WithDescription<V>[] ChooseMultipleWithDescription(string endMessage)
@@ -180,14 +179,14 @@ namespace Signum.Utilities
         {
             int index = dictionary.Keys.IndexOf(value);
             if (index == -1)
-                throw new KeyNotFoundException(Resources.NoOptionWithKey0Found.Formato(value));
+                throw new KeyNotFoundException(ConsoleMessage.NoOptionWithKey0Found.NiceToString().Formato(value));
 
             return index;
         }
 
         WithDescription<V> GetValue(string value)
         {
-            return dictionary.GetOrThrow(value, ConsoleMessage.NoOptionWithKey0Found.NiceToString()).Item1;
+            return dictionary.GetOrThrow(value, ConsoleMessage.NoOptionWithKey0Found.NiceToString());
         }
    
         public IEnumerator<KeyValuePair<string, WithDescription<V>>> GetEnumerator()

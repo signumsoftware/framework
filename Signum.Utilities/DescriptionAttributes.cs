@@ -9,7 +9,6 @@ using System.Text.RegularExpressions;
 using Signum.Utilities;
 using System.Reflection;
 using Signum.Utilities.Reflection;
-using Signum.Utilities.Properties;
 using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
 using System.Collections.Concurrent;
@@ -183,7 +182,7 @@ namespace Signum.Utilities
             return Path.Combine(TranslationDirectory, "{0}.{1}.xml".Formato(assembly.GetName().Name, cultureInfo.Name));
         }
 
-        public static event Func<Type, DescriptionOptions?> DefaultDescriptionOptions = t => t.Name.EndsWith("Message") ? DescriptionOptions.Members : null; 
+        public static event Func<Type, DescriptionOptions?> DefaultDescriptionOptions = t => t.Name.EndsWith("Message") ? DescriptionOptions.Members : (DescriptionOptions?)null; 
 
         static Dictionary<Type, LocalizedType> LoadTranslatedAssembly(Assembly assembly, CultureInfo cultureInfo)
         {
@@ -221,8 +220,10 @@ namespace Signum.Utilities
             {
                 var result = action(type);
                 if (result != null)
-                    return result;
+                    return result.Value;
             }
+
+            return DescriptionOptions.None;
         }
 
         const BindingFlags bf = BindingFlags.Public | BindingFlags.Instance;

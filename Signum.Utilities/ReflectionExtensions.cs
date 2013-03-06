@@ -7,7 +7,6 @@ using System.Linq.Expressions;
 using Signum.Utilities.Reflection;
 using System.Reflection.Emit;
 using System.Collections;
-using Signum.Utilities.Properties;
 using Signum.Utilities.ExpressionTrees;
 using System.Runtime.CompilerServices;
 
