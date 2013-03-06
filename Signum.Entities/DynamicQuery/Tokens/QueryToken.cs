@@ -263,8 +263,8 @@ namespace Signum.Entities.DynamicQuery
                     case FilterType.String:
                     case FilterType.Guid: 
                     case FilterType.Boolean: return "#000000";
-                    case FilterType.DateTime: return "#8000FF";
-                    case FilterType.Enum: return "#B00061";
+                    case FilterType.DateTime: return "#5100A1";
+                    case FilterType.Enum: return "#800046";
                     case FilterType.Lite: return "#2B91AF";
                     case FilterType.Embedded: return "#156F8A";
                     default: return "#7D7D7D";

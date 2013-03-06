@@ -112,7 +112,7 @@ namespace Signum.Entities.DynamicQuery
             get
             {
                 if (Column.IsEntity)
-                    return "#0000FF";
+                    return "#2B78AF";
 
                 return base.TypeColor;
             }
