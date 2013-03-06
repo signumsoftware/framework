@@ -107,12 +107,9 @@
     <Compile Include="Authorization\FacadeMethodAuthLogic.cs" />
     <Compile Include="Authorization\QueryAuthLogic.cs" />
     <Compile Include="Authorization\UserGraph.cs" />
-    <Compile Include="Localization\LocalizedTypeLogic.cs" />
-    <Compile Include="Localization\LocalizedInstanceLogic.cs" />
-    <Compile Include="Localization\CultureInfoLogic.cs" />
+    <Compile Include="Basics\PropertyRouteLogic.cs" />
     <Compile Include="Basics\TypeConditionLogic.cs" />
     <Compile Include="Basics\FacadeMethodLogic.cs" />
-    <Compile Include="Basics\PropertyRouteLogic.cs" />
     <Compile Include="Basics\QueryLogic.cs" />
     <Compile Include="Cache\CacheLogic.cs" />
     <Compile Include="Cache\CachedTable.cs" />
@@ -138,6 +135,8 @@
     <Compile Include="Help\HelpTools.cs" />
     <Compile Include="Help\HelpUtilities.cs" />
     <Compile Include="Help\NamespaceHelp.cs" />
+    <Compile Include="Localization\CultureInfoLogic.cs" />
+    <Compile Include="Localization\LocalizedInstanceLogic.cs" />
     <Compile Include="Mailing\EmailLogic.cs" />
     <Compile Include="Mailing\EmailPackageLogic.cs" />
     <Compile Include="Mailing\EmailRenderer.cs" />
