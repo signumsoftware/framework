@@ -50,6 +50,7 @@ namespace Signum.Test.Environment
         Save
     }
 
+    [DescriptionOptions(DescriptionOptions.All)]
     public interface IAuthorDN : IIdentifiable
     {
         string Name { get; }

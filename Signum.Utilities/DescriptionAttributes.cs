@@ -18,7 +18,7 @@ using System.Xml.Linq;
 
 namespace Signum.Utilities
 {
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property |AttributeTargets.Field | AttributeTargets.Enum, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property |AttributeTargets.Field | AttributeTargets.Enum | AttributeTargets.Interface, Inherited = true)]
     public class DescriptionOptionsAttribute : Attribute
     {
         public DescriptionOptions Options { get; set; }
@@ -85,22 +85,58 @@ namespace Signum.Utilities
         {
             type = CleanType(type);
 
-            var cc = CultureInfo.CurrentUICulture;
+            var result = Fallback(type, lt => lt.Description);
 
-            return GetLocalizedType(type, cc).TryCC(lt => lt.PluralDescription) ??
-                (cc.Parent.Name.HasText() ? GetLocalizedType(type, cc.Parent).TryCC(lt => lt.PluralDescription) : null) ??
-                GetLocalizedType(type, CultureInfo.GetCultureInfo(GetDefaultAssemblyCulture(type.Assembly))).PluralDescription;
+            if (result == null)
+                throw new InvalidOperationException("Description not found on {0}".Formato(type.Name));
+
+            return result;
+        }
+
+        static string Fallback(Type type,  Func<LocalizedType, string> typeValue)
+        {
+            var cc = CultureInfo.CurrentUICulture;
+            {
+                var loc = GetLocalizedType(type, cc);
+                if (loc != null)
+                {
+                    string result = typeValue(loc);
+                    if (result != null)
+                        return result;
+                }
+            }
+
+            if (cc.Parent.Name.HasText())
+            {
+                var loc = GetLocalizedType(type, cc.Parent);
+                if (loc != null)
+                {
+                    string result = typeValue(loc);
+                    if (result != null)
+                        return result;
+                }
+            }
+
+            var global = CultureInfo.GetCultureInfo(GetDefaultAssemblyCulture(type.Assembly));
+            {
+                var loc = GetLocalizedType(type, global);
+                if (loc == null)
+                    throw new InvalidOperationException("Type {0} is not localizable".Formato(type.TypeName()));
+
+                return typeValue(loc);
+            }
         }
 
         public static string NicePluralName(this Type type)
         {
             type = CleanType(type);
 
-            var cc = CultureInfo.CurrentUICulture;
+            var result = Fallback(type, lt => lt.PluralDescription);
 
-            return GetLocalizedType(type, cc).TryCC(lt => lt.PluralDescription) ??
-                (cc.Parent.Name.HasText() ? GetLocalizedType(type, cc.Parent).TryCC(lt => lt.PluralDescription) : null) ??
-                GetLocalizedType(type, CultureInfo.GetCultureInfo(GetDefaultAssemblyCulture(type.Assembly))).PluralDescription;
+            if (result == null)
+                throw new InvalidOperationException("PluralDescription not found on {0}".Formato(type.Name));
+
+            return result;
         }
 
         public static string NiceToString(this Enum a)
@@ -134,9 +170,9 @@ namespace Signum.Utilities
 
             var type = memberInfo.DeclaringType;
 
-            return GetLocalizedType(type, cc).TryCC(lt => lt.Members.TryGetC(memberInfo.Name)) ??
-                (cc.Parent.Name.HasText() ? GetLocalizedType(type, cc.Parent).TryCC(lt => lt.Members.TryGetC(memberInfo.Name)) : null) ??
-                GetLocalizedType(type, CultureInfo.GetCultureInfo(GetDefaultAssemblyCulture(type.Assembly))).Members.TryGetC(memberInfo.Name);
+            var result = Fallback(type, lt => lt.Members.TryGetC(memberInfo.Name));
+
+            return result;
         }
 
 
@@ -201,8 +237,9 @@ namespace Signum.Utilities
 
             return (from t in assembly.GetTypes()
                     let opts = GetDescriptionOptions(t)
+                    where opts != DescriptionOptions.None
                     let x = file.TryGetC(t.Name)
-                    where opts != DescriptionOptions.None && (x != null || isDefault)
+                    where x != null || isDefault
                     select LoadTranslatedType(t, opts, cultureInfo, x, isDefault))
                     .ToDictionary(lt => lt.Type);
         }
@@ -223,6 +260,9 @@ namespace Signum.Utilities
                     return result.Value;
             }
 
+            if (type.IsEnum)
+                return DescriptionOptions.Members | DescriptionOptions.Description;
+
             return DescriptionOptions.None;
         }
 
@@ -232,9 +272,9 @@ namespace Signum.Utilities
         {
             string name = !opts.IsSetAssert(DescriptionOptions.Description, type) ? null :
                 (x == null ? null : x.Attribute("Description").TryCC(xa => xa.Value)) ??
-                (isDefault ? null : DefaultTypeDescription(type));
+                (!isDefault ? null : DefaultTypeDescription(type));
 
-            var members = x == null ? null : x.Elements("Member")
+            var xMembers = x == null ? null : x.Elements("Member")
                 .Select(m => KVP.Create(m.Attribute("Name").Value, m.Attribute("Description").Value))
                 .Distinct(m => m.Key)
                 .ToDictionary();
@@ -244,25 +284,33 @@ namespace Signum.Utilities
                 Description = name,
                 PluralDescription = !opts.IsSetAssert(DescriptionOptions.PluralDescription, type) ? null :
                              ((x == null ? null : x.Attribute("PluralDescription").TryCC(xa => xa.Value)) ??
-                             (isDefault ? type.SingleAttribute<PluralDescriptionAttribute>().TryCC(t => t.PluralDescription) : null) ??
+                             (!isDefault ? null : type.SingleAttribute<PluralDescriptionAttribute>().TryCC(t => t.PluralDescription)) ??
                              (name == null ? null : NaturalLanguageTools.Pluralize(name, cultureInfo))),
 
                 Gender = !opts.IsSetAssert(DescriptionOptions.Gender, type) ? null :
                          ((x == null ? null : x.Attribute("Gender").TryCS(xa => xa.Value.Single())) ??
-                         (isDefault ? type.SingleAttribute<GenderAttribute>().TryCS(t => t.Gender) : null) ??
+                         (!isDefault ? null : type.SingleAttribute<GenderAttribute>().TryCS(t => t.Gender)) ??
                          (name == null ? null : NaturalLanguageTools.GetGender(name, cultureInfo))),
 
                 Members = !opts.IsSetAssert(DescriptionOptions.Members, type) ? null :
-                          (from m in type.GetProperties(bf).Cast<MemberInfo>().Concat(type.GetFields(bf))
+                          (from m in GetMembers(type)
                            let mta = m.SingleAttribute<DescriptionOptionsAttribute>()
                            where mta == null || mta.Options.IsSetAssert(DescriptionOptions.Description, m)
-                           let value = members.TryGetC(m.Name) ?? (isDefault ? DefaultMemberDescription(m) : null)
+                           let value = xMembers.TryGetC(m.Name) ?? (!isDefault ? null : DefaultMemberDescription(m))
                            where value != null
                            select KVP.Create(m.Name, value))
                            .ToDictionary()
             };
 
             return result;
+        }
+
+        static IEnumerable<MemberInfo> GetMembers(Type type)
+        {
+            if (type.IsEnum)
+                return EnumFieldCache.Get(type).Values;
+            else
+                return type.GetProperties(bf).Concat(type.GetFields(bf).Cast<MemberInfo>());
         }
 
         private static string DefaultTypeDescription(Type type)

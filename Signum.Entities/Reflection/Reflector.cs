@@ -38,8 +38,9 @@ namespace Signum.Entities.Reflection
         static Reflector()
         {
             DescriptionManager.CleanTypeName = CleanTypeName; //To allow MyEntityDN
-            DescriptionManager.CleanType = t=> EnumEntity.Extract(t) ?? t.CleanType(); //To allow Lite<T>
-            DescriptionManager.DefaultDescriptionOptions += t => t.Name.EndsWith("Operation") || t.Name.EndsWith("Message") || t.Name.EndsWith("Query") ? DescriptionOptions.Members : DescriptionOptions.None; 
+            DescriptionManager.CleanType = t => EnumEntity.Extract(t) ?? t.CleanType(); //To allow Lite<T>
+            DescriptionManager.DefaultDescriptionOptions += t => t.Name.EndsWith("Operation") || t.Name.EndsWith("Message") || t.Name.EndsWith("Query") ? DescriptionOptions.Members : (DescriptionOptions?)null;
+            DescriptionManager.DefaultDescriptionOptions += t => t.IsInterface && typeof(IIdentifiable).IsAssignableFrom(t) ? DescriptionOptions.All : (DescriptionOptions?)null;
         }
 
         public static string CleanTypeName(Type t)
