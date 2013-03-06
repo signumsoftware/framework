@@ -32,7 +32,7 @@ namespace Signum.Windows
         {
             itemsControl.ItemsSource = token.FollowC(a => a.Parent).Reverse().ToArray();
 
-            AutomationProperties.SetHelpText(this, token.FullKey());
+            AutomationProperties.SetName(this, token.FullKey());
         }
      
         public QueryTokenRenderer()

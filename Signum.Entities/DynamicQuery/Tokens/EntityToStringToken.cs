@@ -46,7 +46,7 @@ namespace Signum.Entities.DynamicQuery
             return Expression.Call(baseExpression, miToString); 
         }
 
-        protected override List<QueryToken> SubTokensInternal()
+        protected override List<QueryToken> SubTokensOverride()
         {
             return SubTokensBase(typeof(string), GetImplementations());
         }

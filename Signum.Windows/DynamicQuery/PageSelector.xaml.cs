@@ -31,7 +31,8 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty TotalPagesProperty =
-            DependencyProperty.Register("TotalPages", typeof(int), typeof(PageSelector), new UIPropertyMetadata(1, (s, e) => ((PageSelector)s).RefreshButtons()));
+            DependencyProperty.Register("TotalPages", typeof(int), typeof(PageSelector), new UIPropertyMetadata(1, 
+                (s, e) => ((PageSelector)s).RefreshButtons()));
         public int TotalPages
         {
             get { return (int)GetValue(TotalPagesProperty); }
@@ -121,11 +122,11 @@ namespace Signum.Windows
             SetPage((int)((Button)e.OriginalSource).Content);
         }
 
-        private void SetPage(int p)
+        private void SetPage(int currentPage)
         {
-            if (1 <= p && p <= TotalPages)
+            if (1 <= currentPage && currentPage <= TotalPages)
             {
-                CurrentPage = p;
+                CurrentPage = currentPage;
                 RaiseEvent(new RoutedEventArgs(PageChangedEvent));
             }
         }

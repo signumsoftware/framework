@@ -653,7 +653,7 @@ namespace Signum.Engine.Maps
 
             ee.Saving += e =>
             {
-                if (!e.IsNew && e.Modified == true)
+                if (!e.IsNew && e.IsGraphModified)
                     action();
             };
             ee.PreUnsafeUpdate += q => action();
@@ -666,7 +666,7 @@ namespace Signum.Engine.Maps
 
             ee.Saving += e =>
             {
-                if (e.Modified == true)
+                if (e.IsGraphModified)
                     action();
             };
             ee.PreUnsafeUpdate += q => action();

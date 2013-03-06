@@ -28,6 +28,9 @@ namespace Signum.Windows
         public static readonly IValueConverter EntityKey =
             ConverterFactory.New((ResultRow row) => row.Entity.Key());
 
+        public static readonly IValueConverter LiteKey =
+          ConverterFactory.New((Lite<IIdentifiable> lite) => lite.Key());
+
         public static readonly IValueConverter ToLite =
            ConverterFactory.New((IIdentifiable ei) => ei == null ? null : ei.ToLite());
 
@@ -135,7 +138,10 @@ namespace Signum.Windows
             (bool a, bool b) => a || b);
 
         public static readonly IMultiValueConverter OrToVisibility = ConverterFactory.New(
-                (bool a, bool b) => a || b ? Visibility.Visible : Visibility.Collapsed);
+            (bool a, bool b) => a || b ? Visibility.Visible : Visibility.Collapsed);
+
+        public static readonly IValueConverter LabelCount = ConverterFactory.New(
+            (ResultRow r) => "{0} ({1})".Formato(r[0] is Enum ? ((Enum)r[0]).NiceToString() : r[0], r[1]));
     }
 
     public static class ColorExtensions

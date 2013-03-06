@@ -27,6 +27,9 @@ namespace Signum.Engine.Linq
             return new Disposable(() => inSql = oldInSelect); 
         }
 
+        static BinaryExpression TrueCondition = Expression.Equal(new SqlConstantExpression(1), new SqlConstantExpression(1));
+        static BinaryExpression FalseCondition = Expression.Equal(new SqlConstantExpression(1), new SqlConstantExpression(0));
+
         Expression MakeSqlCondition(Expression exp)
         {
             if (exp == null)
@@ -38,11 +41,8 @@ namespace Signum.Engine.Linq
             if (exp.NodeType == ExpressionType.Constant)
             {
                 bool? value = ((bool?)((ConstantExpression)exp).Value);
-                
-                if(value == true)
-                    return Expression.Equal(new SqlConstantExpression(1), new SqlConstantExpression(1));
-                else 
-                    return Expression.Equal(new SqlConstantExpression(1), new SqlConstantExpression(0));
+
+                return value == true ? TrueCondition : FalseCondition;
             }
 
             if (IsSqlCondition(exp))
@@ -52,6 +52,7 @@ namespace Signum.Engine.Linq
 
             return exp.Type.IsNullable() ? result.Nullify() : result;
         }
+ 
 
         Expression MakeSqlValue(Expression exp)
         {
@@ -140,7 +141,15 @@ namespace Signum.Engine.Linq
         {
             if (u.NodeType == ExpressionType.Not)
             {
-                Expression operand = MakeSqlCondition(this.Visit(u.Operand));
+                var op = this.Visit(u.Operand);
+
+                if (IsTrue(op))
+                    return FalseCondition;
+
+                if (IsFalse(op))
+                    return TrueCondition;
+
+                Expression operand = MakeSqlCondition(op);
                 if (operand != u.Operand)
                 {
                     return Expression.Not(operand);
@@ -149,27 +158,73 @@ namespace Signum.Engine.Linq
             return base.VisitUnary(u);
         }
 
+
+        private bool IsTrue(Expression operand)
+        {
+            return operand == TrueCondition || (operand is SqlConstantExpression && ((SqlConstantExpression)operand).Value.Equals(1));
+        }
+
+        private bool IsFalse(Expression operand)
+        {
+            return operand == FalseCondition || (operand is SqlConstantExpression && ((SqlConstantExpression)operand).Value.Equals(0));
+        }
+
+        static ConstantExpression False = Expression.Constant(false);
+        static ConstantExpression True = Expression.Constant(true);
+
+        Expression SmartAnd(Expression left, Expression right, bool sortCircuit)
+        {
+            if (IsFalse(left) || IsFalse(right))
+                return False;
+
+            if (IsTrue(left))
+                return right;
+
+            if (IsTrue(right))
+                return left;
+
+            if (sortCircuit)
+                return Expression.AndAlso(MakeSqlCondition(left), MakeSqlCondition(right));
+            else
+                return Expression.And(MakeSqlCondition(left), MakeSqlCondition(right));
+        }
+
+        Expression SmartOr(Expression left, Expression right, bool sortCircuit)
+        {
+            if (IsTrue(left) || IsTrue(right))
+                return True;
+
+            if (IsFalse(left))
+                return right;
+
+            if (IsFalse(right))
+                return left;
+
+            if(sortCircuit)
+                return Expression.OrElse(MakeSqlCondition(left), MakeSqlCondition(right));
+            else
+                return Expression.Or(MakeSqlCondition(left), MakeSqlCondition(right));
+        }
+
         protected override Expression VisitBinary(BinaryExpression b)
         {
-            if (b.NodeType == ExpressionType.And ||
-                b.NodeType == ExpressionType.AndAlso ||
-                b.NodeType == ExpressionType.Or ||
-                b.NodeType == ExpressionType.OrElse ||
-                b.NodeType == ExpressionType.ExclusiveOr)
+            if (b.NodeType == ExpressionType.And || b.NodeType == ExpressionType.AndAlso)
             {
-                Expression left = MakeSqlCondition(this.Visit(b.Left));
-                Expression right = MakeSqlCondition(this.Visit(b.Right));
-                if (left != b.Left || right != b.Right)
-                {
-                    return Expression.MakeBinary(b.NodeType, left, right, b.IsLiftedToNull, b.Method);
-                }
-                return b;
+                return SmartAnd(this.Visit(b.Left), this.Visit(b.Right), b.NodeType == ExpressionType.AndAlso);
+            }
+            else if (b.NodeType == ExpressionType.Or || b.NodeType == ExpressionType.OrElse)
+            {
+                return SmartOr(this.Visit(b.Left), this.Visit(b.Right), b.NodeType == ExpressionType.OrElse);
+            }
+            else if (b.NodeType == ExpressionType.ExclusiveOr)
+            {
+                return Expression.ExclusiveOr(MakeSqlCondition(Visit(b.Left)), MakeSqlCondition(Visit(b.Right)));
             }
             else if (
                 b.NodeType == ExpressionType.Equal ||
                 b.NodeType == ExpressionType.NotEqual ||
                 b.NodeType == ExpressionType.GreaterThan ||
-                b.NodeType == ExpressionType.GreaterThanOrEqual||
+                b.NodeType == ExpressionType.GreaterThanOrEqual ||
                 b.NodeType == ExpressionType.LessThan ||
                 b.NodeType == ExpressionType.LessThanOrEqual)
             {
@@ -216,12 +271,14 @@ namespace Signum.Engine.Linq
         {
             if (IsBooleanExpression(cex))
             {
-                var result = cex.Whens.Select(a => Expression.And(MakeSqlCondition(Visit(a.Condition)), MakeSqlCondition(Visit(a.Value)))).AggregateOr();
+                var result = cex.Whens.IsNullOrEmpty() ? False : cex.Whens
+                    .Select(a => SmartAnd(Visit(a.Condition), Visit(a.Value), true))
+                    .Aggregate((a, b) => SmartOr(a, b, true));
 
                 if (cex.DefaultValue == null)
                     return result;
 
-                return Expression.Or(result, MakeSqlCondition(Visit(cex.DefaultValue)));
+                return SmartOr(result, MakeSqlCondition(Visit(cex.DefaultValue)), true);
             }
             else
             {
@@ -261,7 +318,7 @@ namespace Signum.Engine.Linq
             ReadOnlyCollection<Expression> groupBy = select.GroupBy.NewIfChange(e => MakeSqlValue(Visit(e)));
 
             if (top != select.Top || from != select.From || where != select.Where || columns != select.Columns || orderBy != select.OrderBy || groupBy != select.GroupBy)
-                return new SelectExpression(select.Alias, select.IsDistinct, select.IsReverse, top, columns, from, where, orderBy, groupBy);
+                return new SelectExpression(select.Alias, select.IsDistinct, select.IsReverse, top, columns, from, where, orderBy, groupBy, select.ForXmlPathEmpty);
 
             return select;
         }

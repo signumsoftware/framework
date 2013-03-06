@@ -49,7 +49,7 @@ namespace Signum.Entities.DynamicQuery
             get { return "Floor"; }
         }
 
-        protected override List<QueryToken> SubTokensInternal()
+        protected override List<QueryToken> SubTokensOverride()
         {
             return new List<QueryToken>();
         }
@@ -126,7 +126,7 @@ namespace Signum.Entities.DynamicQuery
             get { return "Ceil"; }
         }
 
-        protected override List<QueryToken> SubTokensInternal()
+        protected override List<QueryToken> SubTokensOverride()
         {
             return new List<QueryToken>();
         }

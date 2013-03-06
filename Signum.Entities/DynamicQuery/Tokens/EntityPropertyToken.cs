@@ -65,7 +65,7 @@ namespace Signum.Entities.DynamicQuery
             return result.BuildLite().Nullify();
         }
 
-        protected override List<QueryToken> SubTokensInternal()
+        protected override List<QueryToken> SubTokensOverride()
         {
             if (PropertyInfo.PropertyType.UnNullify() == typeof(DateTime))
             {

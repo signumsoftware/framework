@@ -15,13 +15,12 @@ using System.Linq;
 using System.Collections.Generic;
 using Signum.Entities.Reflection;
 using System.Windows.Input;
+using System.Windows.Automation.Peers;
 
 namespace Signum.Windows
 {
     public partial class NormalWindow
     {
-        public static event GetButtonBarElementDelegate GetButtonBarElement;
-
         public static readonly DependencyProperty MainControlProperty =
             DependencyProperty.Register("MainControl", typeof(Control), typeof(NormalWindow));
         public Control MainControl
@@ -113,6 +112,10 @@ namespace Signum.Windows
         {
             RefreshEnabled();
 
+            var entity = e.NewValue;
+            if(entity == null)
+                return;
+
             ButtonBarEventArgs ctx = new ButtonBarEventArgs
             {
                 MainControl = MainControl,
@@ -121,19 +124,7 @@ namespace Signum.Windows
                 ShowOperations = ShowOperations,
             };
 
-            List<FrameworkElement> elements = new List<FrameworkElement>();
-            if (GetButtonBarElement != null)
-            {
-                elements.AddRange(GetButtonBarElement.GetInvocationList()
-                    .Cast<GetButtonBarElementDelegate>()
-                    .Select(d => d(e.NewValue, ctx))
-                    .NotNull().SelectMany(d => d).NotNull().ToList());
-            }
-
-            if (MainControl is IHaveToolBarElements)
-            {
-                elements.AddRange(((IHaveToolBarElements)ctx.MainControl).GetToolBarElements(this.DataContext, ctx));
-            }
+            List<FrameworkElement> elements = Navigator.Manager.GetToolbarButtons(entity, ctx);
 
             ButtonBar.SetButtons(elements);
         }
@@ -198,7 +189,7 @@ namespace Signum.Windows
 
             MoveFocus();
 
-            if (this.HasChanges())
+            if (this.DataContext != null && this.HasChanges())
             {
                 if (buttonBar.ViewMode == ViewMode.Navigate)
                 {
@@ -274,6 +265,11 @@ namespace Signum.Windows
         }
 
         public ChangeDataContextHandler ChangeDataContext { get; set; }
+
+        protected override AutomationPeer OnCreateAutomationPeer()
+        {
+            return new NormalWindowAutomationPeer(this);
+        }
     }
 
     public enum AllowErrors
@@ -282,8 +278,6 @@ namespace Signum.Windows
         Yes,
         No,
     }
-
-    public delegate List<FrameworkElement> GetButtonBarElementDelegate(object entity, ButtonBarEventArgs context);
 
     public interface IHaveToolBarElements
     {
@@ -296,6 +290,19 @@ namespace Signum.Windows
         public ViewMode ViewButtons { get; set; }
         public bool SaveProtected { get; set; }
         public bool ShowOperations { get; set; }
+    }
+
+    public class NormalWindowAutomationPeer : WindowAutomationPeer
+    {
+        public NormalWindowAutomationPeer(NormalWindow normalWindow)
+            : base(normalWindow)
+        {
+        }
+
+        protected override string GetClassNameCore()
+        {
+            return "NormalWindow";
+        }
     }
 
 }

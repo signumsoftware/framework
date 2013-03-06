@@ -17,7 +17,12 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public abstract class QueryToken : IEquatable<QueryToken>
     {
-        public bool Subordinated { get; set; }
+        bool subordianted;
+        public bool Subordinated
+        {
+            get { return subordianted; }
+            set { subordianted = value; }
+        }
 
         public string SubordinatedToString
         {
@@ -36,7 +41,7 @@ namespace Signum.Entities.DynamicQuery
         public abstract string Unit { get; }
         public abstract Type Type { get; }
         public abstract string Key { get; }
-        protected abstract List<QueryToken> SubTokensInternal();
+        protected abstract List<QueryToken> SubTokensOverride();
 
         public Expression BuildExpression(BuildExpressionContext context)
         {
@@ -55,11 +60,15 @@ namespace Signum.Entities.DynamicQuery
 
         public abstract QueryToken Clone();
 
-        public QueryToken Parent { get; private set; }
+        QueryToken parent;
+        public QueryToken Parent
+        {
+            get { return parent; }
+        }
 
         public QueryToken(QueryToken parent)
         {
-            this.Parent = parent;
+            this.parent = parent;
         }
 
         public static QueryToken NewColumn(ColumnDescription column)
@@ -67,9 +76,9 @@ namespace Signum.Entities.DynamicQuery
             return new ColumnToken(column);
         }
 
-        public List<QueryToken> SubTokens()
+        public List<QueryToken> SubTokensInternal()
         {
-            var result = this.SubTokensInternal();
+            var result = this.SubTokensOverride();
 
             result.AddRange(OnEntityExtension(this));
 
@@ -89,6 +98,7 @@ namespace Signum.Entities.DynamicQuery
 
             return result;
         }
+
 
         public int? PriorityCompare(string a, string b, Func<string, bool> isPriority)
         {
@@ -225,11 +235,6 @@ namespace Signum.Entities.DynamicQuery
             return Parent.FullKey() + "." + Key;
         }
 
-        public virtual QueryToken MatchPart(string key)
-        {
-            return key == Key ? this : null;
-        }
-
         public override bool Equals(object obj)
         {
             return obj is QueryToken && obj.GetType() == this.GetType() && Equals((QueryToken)obj);
@@ -259,8 +264,8 @@ namespace Signum.Entities.DynamicQuery
                     case FilterType.String:
                     case FilterType.Guid: 
                     case FilterType.Boolean: return "#000000";
-                    case FilterType.DateTime: return "#8000FF";
-                    case FilterType.Enum: return "#B00061";
+                    case FilterType.DateTime: return "#5100A1";
+                    case FilterType.Enum: return "#800046";
                     case FilterType.Lite: return "#2B91AF";
                     case FilterType.Embedded: return "#156F8A";
                     default: return "#7D7D7D";

@@ -304,10 +304,15 @@ namespace Signum.Utilities
                 );
         }
 
-        public static void ImportXml(XDocument doc)
+        public static void ImportXml(XDocument doc, bool rebaseTime)
         {
             var list = doc.Element("Logs").Elements("Log").Select(xLog => HeavyProfilerEntry.ImportXml(xLog, null)).ToList();
 
+            ImportEntries(list, rebaseTime);
+        }
+
+        public static void ImportEntries(List<HeavyProfilerEntry> list, bool rebaseTime)
+        {
             if (list.Any())
             {
                 lock (Entries)
@@ -316,14 +321,13 @@ namespace Signum.Utilities
                     foreach (var e in list)
                         e.Index += indexDelta;
 
-                    if (Entries.Any())
+
+                    if (rebaseTime && Entries.Any())
                     {
                         long timeDelta = Entries.Any() ? (Entries.Min(a => a.BeforeStart) - list.Min(a => a.BeforeStart)) : 0;
 
                         foreach (var e in list)
                             e.ReBaseTime(timeDelta);
-
-                     
                     }
 
                     Entries.AddRange(list);

@@ -17,14 +17,15 @@ using System.Threading;
 using System.Text;
 using Signum.Utilities.DataStructures;
 using System.Data.Common;
+using System.Collections.Concurrent;
 
 namespace Signum.Engine.Maps
 {
     public struct Forbidden
     {
-        public Forbidden(IdentifiableEntity entity)
+        public Forbidden(HashSet<IdentifiableEntity> set)
         {
-            this.set = new HashSet<IdentifiableEntity> { entity }; 
+            this.set = set;
         }
 
         public Forbidden(DirectedGraph<IdentifiableEntity> graph, IdentifiableEntity entity)
@@ -32,7 +33,19 @@ namespace Signum.Engine.Maps
             this.set = graph == null ? null : graph.TryRelatedTo(entity);
         }
 
-        HashSet<IdentifiableEntity> set;
+        public Forbidden(DirectedGraph<IdentifiableEntity> graph, List<IdentifiableEntity> entities)
+        {
+            if (graph == null)
+                this.set = null;
+            else
+            {
+                this.set = new HashSet<IdentifiableEntity>();
+                foreach (var entity in entities)
+                    this.set.AddRange(graph.TryRelatedTo(entity));
+            }
+        }
+
+        readonly HashSet<IdentifiableEntity> set;
 
         public bool IsEmpty
         {
@@ -47,157 +60,286 @@ namespace Signum.Engine.Maps
 
     public partial class Table
     {
+        ResetLazy<InsertCacheIdentity> inserterIdentity;
+        ResetLazy<InsertCacheDisableIdentity> inserterDisableIdentity;
+
         internal void InsertMany(List<IdentifiableEntity> list, DirectedGraph<IdentifiableEntity> backEdges)
         {
-            using (HeavyProfiler.LogNoStackTrace("InsertMany"))
+            using (HeavyProfiler.LogNoStackTrace("InsertMany", () => this.Type.TypeName()))
             {
-                var ic = inserter.Value;
-
-                if (!Connector.Current.AllowsMultipleQueries)
+                if (Identity)
                 {
-                    foreach (var item in list)
-                        ic.Insert(item, backEdges);
+                    InsertCacheIdentity ic = inserterIdentity.Value;
+                    list.SplitStatements(ls => ic.GetInserter(ls.Count)(ls, backEdges));
                 }
                 else
                 {
-                    list.Split_1_2_4_8_16(ls =>
-                    {
-                        switch (ls.Count)
-                        {
-                            case 1: ic.Insert(ls[0], backEdges); break;
-                            case 2: ic.Insert2(ls, backEdges); break;
-                            case 4: ic.Insert4(ls, backEdges); break;
-                            case 8: ic.Insert8(ls, backEdges); break;
-                            case 16: ic.Insert16(ls, backEdges); break;
-                        }
-                    });
+                    InsertCacheDisableIdentity ic = inserterDisableIdentity.Value;
+                    list.SplitStatements(ls => ic.GetInserter(ls.Count)(ls, backEdges));
                 }
             }
         }
 
 
-        class InsertCache
+        class InsertCacheDisableIdentity
         {
-            public Func<string, bool, string> SqlInsertPattern;
+            internal Table table;
+
+            public Func<string, string> SqlInsertPattern;
             public Func<IdentifiableEntity, Forbidden, string, List<DbParameter>> InsertParameters;
-            public Action<IdentifiableEntity, DirectedGraph<IdentifiableEntity>> Insert;
-            public Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> Insert2;
-            public Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> Insert4;
-            public Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> Insert8;
-            public Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> Insert16;
 
-            public List<DbParameter> InsertParametersMany(List<IdentifiableEntity> entities, DirectedGraph<IdentifiableEntity> graph)
+            ConcurrentDictionary<int, Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>>> insertDisableIdentityCache = 
+                new ConcurrentDictionary<int, Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>>>();
+
+           
+            internal Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> GetInserter(int numElements)
             {
-                List<DbParameter> result = new List<DbParameter>();
-                int i = 0;
-                foreach (var item in entities)
-                    result.AddRange(InsertParameters(item, new Forbidden(graph, item), (i++).ToString()));
-                return result;
+                return insertDisableIdentityCache.GetOrAdd(numElements, (int num) => num == 1 ? GetInsertDisableIdentity() : GetInsertMultiDisableIdentity(num));
             }
-        }
 
-        ResetLazy<InsertCache> inserter;
-
-        InsertCache InitializeInsert()
-        {
-            using (HeavyProfiler.LogNoStackTrace("InitializeInsert"))
+       
+            Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> GetInsertDisableIdentity()
             {
-                InsertCache result = new InsertCache();
+                string sqlSingle = SqlInsertPattern("");
 
-                var trios = new List<Table.Trio>();
-                var assigments = new List<Expression>();
-                var paramIdent = Expression.Parameter(typeof(IdentifiableEntity), "ident");
-                var paramForbidden = Expression.Parameter(typeof(Forbidden), "forbidden");
-                var paramPostfix = Expression.Parameter(typeof(string), "postfix");
-
-                var cast = Expression.Parameter(Type, "casted");
-                assigments.Add(Expression.Assign(cast, Expression.Convert(paramIdent, Type)));
-
-                foreach (var item in Fields.Values.Where(a => !Identity || !(a.Field is FieldPrimaryKey)))
+                return (list, graph) =>
                 {
-                    item.Field.CreateParameter(trios, assigments, Expression.Field(cast, item.FieldInfo), paramForbidden, paramPostfix);
-                }
+                    IdentifiableEntity ident = list.Single();
 
-                result.SqlInsertPattern = (post, output) =>
-                    "INSERT {0} ({1})\r\n{2} VALUES ({3})".Formato(Name,
-                    trios.ToString(p => p.SourceColumn.SqlScape(), ", "),
-                    output ? "OUTPUT INSERTED.Id into @MyTable \r\n" : null,
-                    trios.ToString(p => p.ParameterName + post, ", "));
-
-
-                var expr = Expression.Lambda<Func<IdentifiableEntity, Forbidden, string, List<DbParameter>>>(
-                    CreateBlock(trios.Select(a => a.ParameterBuilder), assigments), paramIdent, paramForbidden, paramPostfix);
-
-                result.InsertParameters = expr.Compile();
-
-                result.Insert = GetInsert(result);
-                result.Insert2 = GetInsertMulti(2, result);
-                result.Insert4 = GetInsertMulti(4, result);
-                result.Insert8 = GetInsertMulti(8, result);
-                result.Insert16 = GetInsertMulti(16, result);
-
-                return result;
-            }
-        }
-
-        public IColumn ToStrColumn
-        {
-            get
-            {
-                EntityField entity;
-                
-                if(Fields.TryGetValue("toStr", out entity))
-                    return (IColumn)entity.Field;
-
-                return null;
-            }
-        }
-
-        private Action<IdentifiableEntity, DirectedGraph<IdentifiableEntity>> GetInsert(InsertCache result)
-        {
-            if (Identity)
-            {
-                string sqlSingle = result.SqlInsertPattern("", false) + ";SELECT CONVERT(Int,@@Identity) AS [newID]";
-
-                return (ident, graph) =>
-                {
-                    AssertNoId(ident);
-
-                    Entity entity = ident as Entity;
-                    if (entity != null)
-                        entity.Ticks = TimeZoneManager.Now.Ticks;
-
-                    SetToStrField(ident);
-
-                    var forbidden = new Forbidden(graph, ident);
-
-                    ident.id = (int)new SqlPreCommandSimple(sqlSingle, result.InsertParameters(ident, forbidden, "")).ExecuteScalar();
-
-                    ident.IsNew = false;
-                    FinishInsert(ident, forbidden);
-                };
-            }
-            else
-            {
-                string sqlSingle = result.SqlInsertPattern("", false);
-
-                return (ident, graph) =>
-                {
                     AssertHasId(ident);
 
                     Entity entity = ident as Entity;
                     if (entity != null)
                         entity.Ticks = TimeZoneManager.Now.Ticks;
 
-                    SetToStrField(ident);
+                    table.SetToStrField(ident);
 
                     var forbidden = new Forbidden(graph, ident);
 
-                    new SqlPreCommandSimple(sqlSingle, result.InsertParameters(ident, forbidden, "")).ExecuteNonQuery();
+                    new SqlPreCommandSimple(sqlSingle, InsertParameters(ident, forbidden, "")).ExecuteNonQuery();
 
                     ident.IsNew = false;
-                    FinishInsert(ident, forbidden);
+                    if (table.saveCollections.Value != null)
+                        table.saveCollections.Value.InsertCollections(new List<IdentifiableEntity> { ident }, forbidden);
                 };
+            }
+
+
+            Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> GetInsertMultiDisableIdentity(int num)
+            {
+                string sqlMulti = Enumerable.Range(0, num).ToString(i => SqlInsertPattern(i.ToString()), ";\r\n");
+
+                return (idents, graph) =>
+                {
+                    for (int i = 0; i < num; i++)
+                    {
+                        var ident = idents[i];
+                        AssertHasId(ident);
+
+                        Entity entity = ident as Entity;
+                        if (entity != null)
+                            entity.Ticks = TimeZoneManager.Now.Ticks;
+
+                        table.SetToStrField(ident);
+                    }
+
+                    List<DbParameter> result = new List<DbParameter>();
+                    for (int i = 0; i < idents.Count; i++)
+                        result.AddRange(InsertParameters(idents[i], new Forbidden(graph, idents[i]), i.ToString()));
+
+                    new SqlPreCommandSimple(sqlMulti, result).ExecuteNonQuery();
+                    for (int i = 0; i < num; i++)
+                    {
+                        IdentifiableEntity ident = idents[i];
+
+                        ident.IsNew = false;
+                    }
+
+                    if (table.saveCollections.Value != null)
+                        table.saveCollections.Value.InsertCollections(idents, new Forbidden(graph, idents));
+                };
+            }
+
+            internal static InsertCacheDisableIdentity InitializeInsertDisableIdentity(Table table)
+            {
+                using (HeavyProfiler.LogNoStackTrace("InitializeInsertDisableIdentity", () => table.Type.TypeName()))
+                {
+                    InsertCacheDisableIdentity result = new InsertCacheDisableIdentity { table = table };
+
+                    var trios = new List<Table.Trio>();
+                    var assigments = new List<Expression>();
+                    var paramIdent = Expression.Parameter(typeof(IdentifiableEntity), "ident");
+                    var paramForbidden = Expression.Parameter(typeof(Forbidden), "forbidden");
+                    var paramPostfix = Expression.Parameter(typeof(string), "postfix");
+
+                    var cast = Expression.Parameter(table.Type, "casted");
+                    assigments.Add(Expression.Assign(cast, Expression.Convert(paramIdent, table.Type)));
+
+                    foreach (var item in table.Fields.Values)
+                    {
+                        item.Field.CreateParameter(trios, assigments, Expression.Field(cast, item.FieldInfo), paramForbidden, paramPostfix);
+                    }
+
+                    result.SqlInsertPattern = (post) =>
+                        "INSERT {0} ({1})\r\n VALUES ({2})".Formato(table.Name,
+                        trios.ToString(p => p.SourceColumn.SqlScape(), ", "),
+                        trios.ToString(p => p.ParameterName + post, ", "));
+
+                    var expr = Expression.Lambda<Func<IdentifiableEntity, Forbidden, string, List<DbParameter>>>(
+                        CreateBlock(trios.Select(a => a.ParameterBuilder), assigments), paramIdent, paramForbidden, paramPostfix);
+
+                    result.InsertParameters = expr.Compile();
+
+                    return result;
+                }
+            }
+        }
+
+        class InsertCacheIdentity
+        {
+            internal Table table;
+
+            public Func<string, bool, string> SqlInsertPattern;
+            public Func<IdentifiableEntity, Forbidden, string, List<DbParameter>> InsertParameters;
+
+            ConcurrentDictionary<int, Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>>> insertIdentityCache =
+               new ConcurrentDictionary<int, Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>>>();
+
+            internal Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> GetInserter(int numElements)
+            {
+                return insertIdentityCache.GetOrAdd(numElements, (int num) => num == 1 ? GetInsertIdentity() : GetInsertMultiIdentity(num));
+            }
+
+            private Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> GetInsertIdentity()
+            {
+                string sqlSingle = SqlInsertPattern("", false) + ";SELECT CONVERT(Int,@@Identity) AS [newID]";
+
+                return (list, graph) =>
+                {
+                    IdentifiableEntity ident = list.Single();
+
+                    AssertNoId(ident);
+
+                    Entity entity = ident as Entity;
+                    if (entity != null)
+                        entity.Ticks = TimeZoneManager.Now.Ticks;
+
+                    table.SetToStrField(ident);
+
+                    var forbidden = new Forbidden(graph, ident);
+
+                    ident.id = (int)new SqlPreCommandSimple(sqlSingle, InsertParameters(ident, forbidden, "")).ExecuteScalar();
+
+                    ident.IsNew = false;
+
+                    if (table.saveCollections.Value != null)
+                        table.saveCollections.Value.InsertCollections(new List<IdentifiableEntity> { ident }, forbidden);
+                };
+            }
+
+
+            Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> GetInsertMultiIdentity(int num)
+            {
+                string sqlMulti = new StringBuilder()
+                    .AppendLine("DECLARE @MyTable TABLE (Id INT);")
+                    .AppendLines(Enumerable.Range(0, num).Select(i => SqlInsertPattern(i.ToString(), true)))
+                    .AppendLine("SELECT Id from @MyTable").ToString();
+
+                return (idents, graph) =>
+                {
+                    for (int i = 0; i < num; i++)
+                    {
+                        var ident = idents[i];
+                        AssertNoId(ident);
+
+                        Entity entity = ident as Entity;
+                        if (entity != null)
+                            entity.Ticks = TimeZoneManager.Now.Ticks;
+
+                        table.SetToStrField(ident);
+                    }
+
+                    List<DbParameter> result = new List<DbParameter>();
+                    for (int i = 0; i < idents.Count; i++)
+                        result.AddRange(InsertParameters(idents[i], new Forbidden(graph, idents[i]), i.ToString()));
+
+                    DataTable dt = new SqlPreCommandSimple(sqlMulti, result).ExecuteDataTable();
+
+                    for (int i = 0; i < num; i++)
+                    {
+                        IdentifiableEntity ident = idents[i];
+
+                        ident.id = (int)dt.Rows[i][0];
+                        ident.IsNew = false;
+                    }
+
+                    if (table.saveCollections.Value != null)
+                        table.saveCollections.Value.InsertCollections(idents, new Forbidden(graph, idents));
+                };
+
+            }
+
+            internal static InsertCacheIdentity InitializeInsertIdentity(Table table)
+            {
+                using (HeavyProfiler.LogNoStackTrace("InitializeInsertIdentity", () => table.Type.TypeName()))
+                {
+                    InsertCacheIdentity result = new InsertCacheIdentity { table = table };
+
+                    var trios = new List<Table.Trio>();
+                    var assigments = new List<Expression>();
+                    var paramIdent = Expression.Parameter(typeof(IdentifiableEntity), "ident");
+                    var paramForbidden = Expression.Parameter(typeof(Forbidden), "forbidden");
+                    var paramPostfix = Expression.Parameter(typeof(string), "postfix");
+
+                    var cast = Expression.Parameter(table.Type, "casted");
+                    assigments.Add(Expression.Assign(cast, Expression.Convert(paramIdent, table.Type)));
+
+                    foreach (var item in table.Fields.Values.Where(a => !(a.Field is FieldPrimaryKey)))
+                    {
+                        item.Field.CreateParameter(trios, assigments, Expression.Field(cast, item.FieldInfo), paramForbidden, paramPostfix);
+                    }
+
+                    result.SqlInsertPattern = (post, output) =>
+                        "INSERT {0} ({1})\r\n{2} VALUES ({3})".Formato(table.Name,
+                        trios.ToString(p => p.SourceColumn.SqlScape(), ", "),
+                        output ? "OUTPUT INSERTED.Id into @MyTable \r\n" : null,
+                        trios.ToString(p => p.ParameterName + post, ", "));
+
+
+                    var expr = Expression.Lambda<Func<IdentifiableEntity, Forbidden, string, List<DbParameter>>>(
+                        CreateBlock(trios.Select(a => a.ParameterBuilder), assigments), paramIdent, paramForbidden, paramPostfix);
+
+                    result.InsertParameters = expr.Compile();
+
+                    return result;
+                }
+            }
+        }
+
+
+        static void AssertHasId(IdentifiableEntity ident)
+        {
+            if (ident.IdOrNull == null)
+                throw new InvalidOperationException("{0} should have an Id, since the table has no Identity".Formato(ident, ident.IdOrNull));
+        }
+
+        static void AssertNoId(IdentifiableEntity ident)
+        {
+            if (ident.IdOrNull != null)
+                throw new InvalidOperationException("{0} is new, but has Id {1}".Formato(ident, ident.IdOrNull));
+        }
+
+
+        public IColumn ToStrColumn
+        {
+            get
+            {
+                EntityField entity;
+
+                if (Fields.TryGetValue("toStr", out entity))
+                    return (IColumn)entity.Field;
+
+                return null;
             }
         }
 
@@ -220,363 +362,248 @@ namespace Signum.Engine.Maps
             return false;
         }
 
-        private Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> GetInsertMulti(int num, InsertCache result)
-        {
-            if (Identity)
-            {
-                string sqlMulti = new StringBuilder()
-                    .AppendLine("DECLARE @MyTable TABLE (Id INT);")
-                    .AppendLines(Enumerable.Range(0, num).Select(i=>result.SqlInsertPattern(i.ToString(), true)))
-                    .AppendLine("SELECT Id from @MyTable").ToString();
-
-
-                return (idents, graph) =>
-                {
-                    for (int i = 0; i < num; i++)
-                    {
-                        var ident = idents[i];
-                        AssertNoId(ident);
-
-                        Entity entity = ident as Entity;
-                        if (entity != null)
-                            entity.Ticks = TimeZoneManager.Now.Ticks;
-
-                        SetToStrField(ident);
-                    }
-
-                    DataTable table = new SqlPreCommandSimple(sqlMulti, result.InsertParametersMany(idents, graph)).ExecuteDataTable();
-
-                    for (int i = 0; i < num; i++)
-                    {
-                        var forbidden = new Forbidden(graph, idents[i]);
-                        idents[i].id = (int)table.Rows[i][0];
-                        FinishInsert(idents[i], forbidden);
-                    }
-                };
-
-            }
-            else
-            {
-                string sqlMulti = Enumerable.Range(0, num).ToString(i => result.SqlInsertPattern(i.ToString(), false), ";\r\n");
-
-                return (idents, graph) =>
-                {
-                    for (int i = 0; i < num; i++)
-                    {
-                        var ident = idents[i];
-                        AssertHasId(ident);
-                        Entity entity = ident as Entity;
-                        if (entity != null)
-                            entity.Ticks = TimeZoneManager.Now.Ticks;
-
-                        SetToStrField(ident);
-                    }
-
-                    new SqlPreCommandSimple(sqlMulti, result.InsertParametersMany(idents, graph)).ExecuteNonQuery();
-                    for (int i = 0; i < num; i++)
-                    {
-                        FinishInsert(idents[i], new Forbidden(graph, idents[i]));
-                    }
-                };
-
-            }
-        }
-
-        private void AssertHasId(IdentifiableEntity ident)
-        {
-            if (ident.IdOrNull == null)
-                throw new InvalidOperationException("{0} should have an Id, since the table has no Identity".Formato(ident, ident.IdOrNull));
-        }
-
-        private void AssertNoId(IdentifiableEntity ident)
-        {
-            if (ident.IdOrNull != null)
-                throw new InvalidOperationException("{0} is new, but has Id {1}".Formato(ident, ident.IdOrNull));
-        }
 
         static FieldInfo fiId = ReflectionTools.GetFieldInfo((IdentifiableEntity i) => i.id);
-        static FieldInfo fiTicks = ReflectionTools.GetFieldInfo((Entity i) => i.ticks);
-
-
-
 
         internal void UpdateMany(List<IdentifiableEntity> list, DirectedGraph<IdentifiableEntity> backEdges)
         {
-            using (HeavyProfiler.LogNoStackTrace("InsertMany"))
+            using (HeavyProfiler.LogNoStackTrace("UpdateMany", () => this.Type.TypeName()))
             {
                 var uc = updater.Value;
-
-                if (!Connector.Current.AllowsMultipleQueries)
-                {
-                    foreach (var item in list)
-                        uc.Update(item, backEdges);
-                }
-                else
-                {
-                    list.Split_1_2_4_8_16(ls =>
-                    {
-                        switch (ls.Count)
-                        {
-                            case 1: uc.Update(ls[0], backEdges); break;
-                            case 2: uc.Update2(ls, backEdges); break;
-                            case 4: uc.Update4(ls, backEdges); break;
-                            case 8: uc.Update8(ls, backEdges); break;
-                            case 16: uc.Update16(ls, backEdges); break;
-                        }
-                    });
-                }
+                list.SplitStatements(ls => uc.GetUpdater(ls.Count)(ls, backEdges));
             }
         }
 
         class UpdateCache
         {
+            internal Table table; 
+
             public Func<string, bool, string> SqlUpdatePattern;
             public Func<IdentifiableEntity, long, Forbidden, string, List<DbParameter>> UpdateParameters;
-            public Action<IdentifiableEntity, DirectedGraph<IdentifiableEntity>> Update;
-            public Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> Update2;
-            public Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> Update4;
-            public Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> Update8;
-            public Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> Update16; 
-        }
 
-        ResetLazy<UpdateCache> updater;
+            ConcurrentDictionary<int, Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>>> updateCache = 
+                new ConcurrentDictionary<int, Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>>>();
 
-        UpdateCache InitializeUpdate()
-        {
-            using (HeavyProfiler.LogNoStackTrace("InitializeUpdate"))
+
+            public Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> GetUpdater(int numElements)
             {
-                UpdateCache result = new UpdateCache();
-
-                var trios = new List<Trio>();
-                var assigments = new List<Expression>();
-                var paramIdent = Expression.Parameter(typeof(IdentifiableEntity), "ident");
-                var paramForbidden = Expression.Parameter(typeof(Forbidden), "forbidden");
-                var paramOldTicks = Expression.Parameter(typeof(long), "oldTicks");
-                var paramPostfix = Expression.Parameter(typeof(string), "postfix");
-
-                var cast = Expression.Parameter(Type);
-                assigments.Add(Expression.Assign(cast, Expression.Convert(paramIdent, Type)));
-
-                foreach (var item in Fields.Values.Where(a => !(a.Field is FieldPrimaryKey)))
-                {
-                    item.Field.CreateParameter(trios, assigments, Expression.Field(cast, item.FieldInfo), paramForbidden, paramPostfix);
-                }
-
-                var pb = Connector.Current.ParameterBuilder;
-
-                string idParamName = ParameterBuilder.GetParameterName("id");
-
-                string oldTicksParamName = ParameterBuilder.GetParameterName("old_ticks");
-
-                result.SqlUpdatePattern = (post, output) =>
-                {
-                    string update = "UPDATE {0} SET \r\n{1}\r\n WHERE id = {2}".Formato(
-                        Name,
-                        trios.ToString(p => "{0} = {1}".Formato(p.SourceColumn.SqlScape(), p.ParameterName + post).Indent(2), ",\r\n"),
-                        idParamName + post);
-
-                    if (typeof(Entity).IsAssignableFrom(this.Type))
-                        update += " AND ticks = {0}".Formato(oldTicksParamName + post);
-
-                    if (!output)
-                        return update;
-                    else
-                        return update + "\r\nIF @@ROWCOUNT = 0 INSERT INTO @NotFound (id) VALUES ({0})".Formato(idParamName + post);
-                };
-
-                List<Expression> parameters = trios.Select(a => (Expression)a.ParameterBuilder).ToList();
-
-                parameters.Add(pb.ParameterFactory(Trio.Concat(idParamName, paramPostfix), SqlBuilder.PrimaryKeyType, null, false, Expression.Field(paramIdent, fiId)));
-
-                if (typeof(Entity).IsAssignableFrom(this.Type))
-                    parameters.Add(pb.ParameterFactory(Trio.Concat(oldTicksParamName, paramPostfix), SqlDbType.BigInt, null, false, paramOldTicks));
-
-                var expr = Expression.Lambda<Func<IdentifiableEntity, long, Forbidden, string, List<DbParameter>>>(
-                    CreateBlock(parameters, assigments), paramIdent, paramOldTicks, paramForbidden, paramPostfix);
-
-                result.UpdateParameters = expr.Compile();
-
-                result.Update = GetUpdate(result);
-                result.Update2 = GetUpdateMultiple(result, 2);
-                result.Update4 = GetUpdateMultiple(result, 4);
-                result.Update8 = GetUpdateMultiple(result, 8);
-                result.Update16 = GetUpdateMultiple(result, 16);
-
-                return result;
+                return updateCache.GetOrAdd(numElements, num => num == 1 ? GenerateUpdate() : GetUpdateMultiple(num)); 
             }
-        }
 
-
-        private Action<IdentifiableEntity, DirectedGraph<IdentifiableEntity>> GetUpdate(UpdateCache result)
-        {
-            string sqlUpdate = result.SqlUpdatePattern("", false);
-
-            if (typeof(Entity).IsAssignableFrom(this.Type))
+            Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> GenerateUpdate()
             {
-                return (ident, graph) =>
+                string sqlUpdate = SqlUpdatePattern("", false);
+
+                if (typeof(Entity).IsAssignableFrom(table.Type))
                 {
-                    Entity entity = (Entity)ident;
-
-                    long oldTicks = entity.Ticks;
-                    entity.Ticks = TimeZoneManager.Now.Ticks;
-
-                    SetToStrField(ident);
-
-                    var forbidden = new Forbidden(graph, ident);
-
-                    int num = (int)new SqlPreCommandSimple(sqlUpdate, result.UpdateParameters(ident, oldTicks, forbidden, "")).ExecuteNonQuery();
-                    if (num != 1)
-                        throw new ConcurrencyException(ident.GetType(), ident.Id);
-
-                    FinishUpdate(ident, forbidden); 
-                };
-            }
-            else
-            {
-                return (ident, graph) =>
-                {
-                    SetToStrField(ident);
-
-                    var forbidden = new Forbidden(graph, ident);
-
-                    int num = (int)new SqlPreCommandSimple(sqlUpdate, result.UpdateParameters(ident, -1, forbidden, "")).ExecuteNonQuery();
-                    if (num != 1)
-                        throw new EntityNotFoundException(ident.GetType(), ident.Id);
-
-                    FinishUpdate(ident, forbidden); 
-                };
-            }
-        }
-
-        private Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> GetUpdateMultiple(UpdateCache result, int num)
-        {
-              string sqlMulti = new StringBuilder()
-                    .AppendLine("DECLARE @NotFound TABLE (Id INT);")
-                    .AppendLines(Enumerable.Range(0, num).Select(i=>result.SqlUpdatePattern(i.ToString(), true)))
-                    .AppendLine("SELECT Id from @NotFound").ToString(); 
-
-            if (typeof(Entity).IsAssignableFrom(this.Type))
-            {
-                return (idents, graph) =>
-                {
-                    List<DbParameter> parameters = new List<DbParameter>();
-                    for (int i = 0; i < num; i++)
-			        {    
-                        Entity entity = (Entity)idents[i];
+                    return (uniList, graph) =>
+                    {
+                        IdentifiableEntity ident = uniList.Single();
+                        Entity entity = (Entity)ident;
 
                         long oldTicks = entity.Ticks;
                         entity.Ticks = TimeZoneManager.Now.Ticks;
 
-                        parameters.AddRange(result.UpdateParameters(entity, oldTicks, new Forbidden(graph, entity), i.ToString()));
-			        }
+                        table.SetToStrField(ident);
 
-                    DataTable table = new SqlPreCommandSimple(sqlMulti, parameters).ExecuteDataTable();
+                        var forbidden = new Forbidden(graph, ident);
 
-                    if (table.Rows.Count > 0)
-                        throw new ConcurrencyException(Type, table.Rows.Cast<DataRow>().Select(r=>(int)r[0]).ToArray());
+                        int num = (int)new SqlPreCommandSimple(sqlUpdate, UpdateParameters(ident, oldTicks, forbidden, "")).ExecuteNonQuery();
+                        if (num != 1)
+                            throw new ConcurrencyException(ident.GetType(), ident.Id);
 
-                    for (int i = 0; i < num; i++)
-                    {
-                        FinishUpdate(idents[i], new Forbidden(graph, idents[i])); 
-                    }
-                };
-            }
-            else
-            {
-                return (idents, graph) =>
-                {
-                    List<DbParameter> parameters = new List<DbParameter>();
-                    for (int i = 0; i < num; i++)
-			        {   
-                        var ident = idents[i];
-                        parameters.AddRange(result.UpdateParameters(ident, -1, new Forbidden(graph, ident), i.ToString()));
-			        }
-  
-                    DataTable table = new SqlPreCommandSimple(sqlMulti, parameters).ExecuteDataTable();
-
-                    if (table.Rows.Count > 0)
-                        throw new EntityNotFoundException(Type, table.Rows.Cast<DataRow>().Select(r => (int)r[0]).ToArray());
-
-                    for (int i = 0; i < num; i++)
-                    {
-                        FinishUpdate(idents[i], new Forbidden(graph, idents[i]));
-                    }
-                };
-            }
-        }
-
-        class CollectionsCache
-        {
-            public Func<IdentifiableEntity, SqlPreCommand> SaveCollectionsSync; 
-            public Action<IdentifiableEntity, Forbidden, bool> SaveCollections;
-        }
-
-        ResetLazy<CollectionsCache> saveCollections;
-
-        static GenericInvoker<Func<RelationalTable, RelationalTable.IInsertCache>> giCreateCache = new GenericInvoker<Func<RelationalTable, RelationalTable.IInsertCache>>(
-            (RelationalTable rt)=>rt.CreateCache<int>());
-
-        CollectionsCache InitializeCollections()
-        {
-            using (HeavyProfiler.LogNoStackTrace("InitializeCollections"))
-            {
-                var paramIdent = Expression.Parameter(typeof(IdentifiableEntity), "ident");
-                var paramForbidden = Expression.Parameter(typeof(Forbidden), "forbidden");
-                var paramIsNew = Expression.Parameter(typeof(bool), "isNew");
-
-                var entity = Expression.Parameter(Type);
-
-                var castEntity = Expression.Assign(entity, Expression.Convert(paramIdent, Type));
-
-                var list = (from ef in Fields.Values
-                            where ef.Field is FieldMList
-                            let rt = ((FieldMList)ef.Field).RelationalTable
-                            let cache = giCreateCache.GetInvoker(rt.Field.FieldType)(rt)
-                            select new
-                            {
-                                saveCollection = (Expression)Expression.Call(Expression.Constant(cache),
-                                   cache.GetType().GetMethod("RelationalInserts", BindingFlags.NonPublic | BindingFlags.Instance),
-                                   Expression.Field(entity, ef.FieldInfo), paramIdent, paramIsNew, paramForbidden),
-
-                                ef.Getter,
-                                cache
-                            }).ToList();
-
-                if (list.IsEmpty())
-                    return null;
+                        if (table.saveCollections.Value != null)
+                            table.saveCollections.Value.UpdateCollections(new List<IdentifiableEntity> { ident }, forbidden);
+                    };
+                }
                 else
                 {
-                    var miniList = list.Select(a => new { a.Getter, a.cache }).ToList();
-                    return new CollectionsCache
+                    return (uniList, graph) =>
                     {
-                        SaveCollections = Expression.Lambda<Action<IdentifiableEntity, Forbidden, bool>>(Expression.Block(new[] { entity },
-                                    list.Select(a => a.saveCollection).PreAnd(castEntity)), paramIdent, paramForbidden, paramIsNew).Compile(),
+                        IdentifiableEntity ident = uniList.Single();
 
-                        SaveCollectionsSync = ident => miniList.Select(a => a.cache.RelationalInsertsSync((Modifiable)a.Getter(ident), ident)).Combine(Spacing.Double)
+                        table.SetToStrField(ident);
+
+                        var forbidden = new Forbidden(graph, ident);
+
+                        int num = (int)new SqlPreCommandSimple(sqlUpdate, UpdateParameters(ident, -1, forbidden, "")).ExecuteNonQuery();
+                        if (num != 1)
+                            throw new EntityNotFoundException(ident.GetType(), ident.Id);
+
+                        if (table.saveCollections.Value != null)
+                            table.saveCollections.Value.UpdateCollections(new List<IdentifiableEntity> { ident }, forbidden);
                     };
+                }
+            }
+
+            Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> GetUpdateMultiple(int num)
+            {
+                string sqlMulti = new StringBuilder()
+                      .AppendLine("DECLARE @NotFound TABLE (Id INT);")
+                      .AppendLines(Enumerable.Range(0, num).Select(i => SqlUpdatePattern(i.ToString(), true)))
+                      .AppendLine("SELECT Id from @NotFound").ToString();
+
+                if (typeof(Entity).IsAssignableFrom(table.Type))
+                {
+                    return (idents, graph) =>
+                    {
+                        List<DbParameter> parameters = new List<DbParameter>();
+                        for (int i = 0; i < num; i++)
+                        {
+                            Entity entity = (Entity)idents[i];
+
+                            long oldTicks = entity.Ticks;
+                            entity.Ticks = TimeZoneManager.Now.Ticks;
+
+                            parameters.AddRange(UpdateParameters(entity, oldTicks, new Forbidden(graph, entity), i.ToString()));
+                        }
+
+                        DataTable dt = new SqlPreCommandSimple(sqlMulti, parameters).ExecuteDataTable();
+
+                        if (dt.Rows.Count > 0)
+                            throw new ConcurrencyException(table.Type, dt.Rows.Cast<DataRow>().Select(r => (int)r[0]).ToArray());
+
+                        if (table.saveCollections.Value != null)
+                            table.saveCollections.Value.UpdateCollections(idents, new Forbidden(graph, idents));
+                    };
+                }
+                else
+                {
+                    return (idents, graph) =>
+                    {
+                        List<DbParameter> parameters = new List<DbParameter>();
+                        for (int i = 0; i < num; i++)
+                        {
+                            var ident = idents[i];
+                            parameters.AddRange(UpdateParameters(ident, -1, new Forbidden(graph, ident), i.ToString()));
+                        }
+
+                        DataTable dt = new SqlPreCommandSimple(sqlMulti, parameters).ExecuteDataTable();
+
+                        if (dt.Rows.Count > 0)
+                            throw new EntityNotFoundException(table.Type, dt.Rows.Cast<DataRow>().Select(r => (int)r[0]).ToArray());
+
+                        for (int i = 0; i < num; i++)
+                        {
+                            IdentifiableEntity ident = idents[i];
+                        }
+
+                        if (table.saveCollections.Value != null)
+                            table.saveCollections.Value.UpdateCollections(idents, new Forbidden(graph, idents));
+                    };
+                }
+            }
+
+            internal static UpdateCache InitializeUpdate(Table table)
+            {
+                using (HeavyProfiler.LogNoStackTrace("InitializeUpdate", () => table.Type.TypeName()))
+                {
+                    UpdateCache result = new UpdateCache { table = table };
+
+                    var trios = new List<Trio>();
+                    var assigments = new List<Expression>();
+                    var paramIdent = Expression.Parameter(typeof(IdentifiableEntity), "ident");
+                    var paramForbidden = Expression.Parameter(typeof(Forbidden), "forbidden");
+                    var paramOldTicks = Expression.Parameter(typeof(long), "oldTicks");
+                    var paramPostfix = Expression.Parameter(typeof(string), "postfix");
+
+                    var cast = Expression.Parameter(table.Type);
+                    assigments.Add(Expression.Assign(cast, Expression.Convert(paramIdent, table.Type)));
+
+                    foreach (var item in table.Fields.Values.Where(a => !(a.Field is FieldPrimaryKey)))
+                        item.Field.CreateParameter(trios, assigments, Expression.Field(cast, item.FieldInfo), paramForbidden, paramPostfix);
+
+                    var pb = Connector.Current.ParameterBuilder;
+
+                    string idParamName = ParameterBuilder.GetParameterName("id");
+
+                    string oldTicksParamName = ParameterBuilder.GetParameterName("old_ticks");
+
+                    result.SqlUpdatePattern = (post, output) =>
+                    {
+                        string update = "UPDATE {0} SET \r\n{1}\r\n WHERE id = {2}".Formato(
+                            table.Name,
+                            trios.ToString(p => "{0} = {1}".Formato(p.SourceColumn.SqlScape(), p.ParameterName + post).Indent(2), ",\r\n"),
+                            idParamName + post);
+
+                        if (typeof(Entity).IsAssignableFrom(table.Type))
+                            update += " AND ticks = {0}".Formato(oldTicksParamName + post);
+
+                        if (!output)
+                            return update;
+                        else
+                            return update + "\r\nIF @@ROWCOUNT = 0 INSERT INTO @NotFound (id) VALUES ({0})".Formato(idParamName + post);
+                    };
+
+                    List<Expression> parameters = trios.Select(a => (Expression)a.ParameterBuilder).ToList();
+
+                    parameters.Add(pb.ParameterFactory(Trio.Concat(idParamName, paramPostfix), SqlBuilder.PrimaryKeyType, null, false, Expression.Field(paramIdent, fiId)));
+
+                    if (typeof(Entity).IsAssignableFrom(table.Type))
+                        parameters.Add(pb.ParameterFactory(Trio.Concat(oldTicksParamName, paramPostfix), SqlDbType.BigInt, null, false, paramOldTicks));
+
+                    var expr = Expression.Lambda<Func<IdentifiableEntity, long, Forbidden, string, List<DbParameter>>>(
+                        CreateBlock(parameters, assigments), paramIdent, paramOldTicks, paramForbidden, paramPostfix);
+
+                    result.UpdateParameters = expr.Compile();
+
+                    return result;
+                }
+            }
+
+        }
+
+        ResetLazy<UpdateCache> updater;
+
+   
+        class CollectionsCache
+        {
+            public Func<IdentifiableEntity, SqlPreCommand> InsertCollectionsSync;
+
+            public Action<List<IdentifiableEntity>, Forbidden> InsertCollections;
+            public Action<List<IdentifiableEntity>, Forbidden> UpdateCollections;
+
+            internal static CollectionsCache InitializeCollections(Table table)
+            {
+                using (HeavyProfiler.LogNoStackTrace("InitializeCollections", () => table.Type.TypeName()))
+                {
+                    List<RelationalTable.IRelationalCache> caches =
+                        (from ef in table.Fields.Values
+                         where ef.Field is FieldMList
+                         let rt = ((FieldMList)ef.Field).RelationalTable
+                         select giCreateCache.GetInvoker(rt.Field.FieldType)(rt, ef.Getter)).ToList();
+
+                    if (caches.IsEmpty())
+                        return null;
+                    else
+                    {
+                        return new CollectionsCache
+                        {
+                            InsertCollections = (idents, forbidden) =>
+                            {
+                                foreach (var rc in caches)
+                                    rc.RelationalInserts(idents, forbidden);
+                            },
+
+                            UpdateCollections = (idents, forbidden) =>
+                            {
+                                foreach (var rc in caches)
+                                    rc.RelationalUpdates(idents, forbidden);
+                            },
+
+                            InsertCollectionsSync = ident =>
+                                caches.Select(rc => rc.RelationalUpdateSync(ident)).Combine(Spacing.Double)
+                        };
+                    }
                 }
             }
         }
 
-        internal void FinishInsert(IdentifiableEntity ident, Forbidden forbidden)
-        {
-            ident.IsNew = false;
+        ResetLazy<CollectionsCache> saveCollections;
 
-            if (forbidden.IsEmpty)
-                ident.Modified = null;
-
-            if (saveCollections.Value != null)
-                saveCollections.Value.SaveCollections(ident, forbidden, true);
-        }
-
-        internal void FinishUpdate(IdentifiableEntity ident, Forbidden forbidden)
-        {
-            if (forbidden.IsEmpty)
-                ident.Modified = null;
-
-            if (saveCollections.Value != null)
-                saveCollections.Value.SaveCollections(ident, forbidden, false);
-        }
+        static GenericInvoker<Func<RelationalTable, Func<object, object>, RelationalTable.IRelationalCache>> giCreateCache =
+            new GenericInvoker<Func<RelationalTable, Func<object, object>, RelationalTable.IRelationalCache>>(
+            (RelationalTable rt, Func<object, object> d) => rt.CreateCache<int>(d));
 
         public SqlPreCommand InsertSqlSync(IdentifiableEntity ident, string comment = null)
         {
@@ -584,33 +611,38 @@ namespace Signum.Engine.Maps
             ident.PreSaving(ref dirty);
             SetToStrField(ident);
 
-            var ic = inserter.Value;
-            SqlPreCommandSimple insert = new SqlPreCommandSimple(ic.SqlInsertPattern("", false), ic.InsertParameters(ident, new Forbidden(), "")).AddComment(comment);
-            
+            SqlPreCommandSimple insert = Identity ?
+                new SqlPreCommandSimple(
+                    inserterIdentity.Value.SqlInsertPattern("", false), 
+                    inserterIdentity.Value.InsertParameters(ident, new Forbidden(), "")).AddComment(comment) :
+                new SqlPreCommandSimple(
+                    inserterDisableIdentity.Value.SqlInsertPattern(""), 
+                    inserterDisableIdentity.Value.InsertParameters(ident, new Forbidden(), "")).AddComment(comment);
+
             var cc = saveCollections.Value;
-            if(cc == null)
+            if (cc == null)
                 return insert;
 
-            SqlPreCommand collections = cc.SaveCollectionsSync(ident);
+            SqlPreCommand collections = cc.InsertCollectionsSync(ident);
 
             if (collections == null)
                 return insert;
 
-            SqlPreCommand setParent = new SqlPreCommandSimple("SET @idParent = @@Identity"); 
+            SqlPreCommand setParent = new SqlPreCommandSimple("SET @idParent = @@Identity");
 
-            return SqlPreCommand.Combine(Spacing.Simple, insert, setParent, collections); 
+            return SqlPreCommand.Combine(Spacing.Simple, insert, setParent, collections);
         }
 
-        
+
 
         public SqlPreCommand UpdateSqlSync(IdentifiableEntity ident, string comment = null)
-        {   
+        {
             bool dirty = false;
             ident.PreSaving(ref dirty);
-            if (SetToStrField(ident)) 
+            if (SetToStrField(ident))
                 ident.SetSelfModified();
 
-            if (!ident.SelfModified)
+            if (ident.Modified == ModifiedState.Clean || ident.Modified == ModifiedState.Sealed)
                 return null;
 
             var uc = updater.Value;
@@ -621,9 +653,9 @@ namespace Signum.Engine.Maps
             if (cc == null)
                 return update;
 
-            SqlPreCommand collections = cc.SaveCollectionsSync(ident);
+            SqlPreCommand collections = cc.InsertCollectionsSync(ident);
 
-            return SqlPreCommand.Combine(Spacing.Simple, update, collections); 
+            return SqlPreCommand.Combine(Spacing.Simple, update, collections);
         }
 
         public class Trio
@@ -662,87 +694,134 @@ namespace Signum.Engine.Maps
                 parameters)));
         }
     }
- 
+
 
     public partial class RelationalTable
     {
-        internal interface IInsertCache
+        internal interface IRelationalCache
         {
-            SqlPreCommand RelationalInsertsSync(Modifiable mlist, IdentifiableEntity parent);
+            SqlPreCommand RelationalUpdateSync(IdentifiableEntity parent);
+            void RelationalInserts(List<IdentifiableEntity> idents, Forbidden forbidden);
+            void RelationalUpdates(List<IdentifiableEntity> idents, Forbidden forbidden);
         }
 
-        internal class InsertCache<T> : IInsertCache
+        internal class RelationalCache<T> : IRelationalCache
         {
-            public string sqlDelete;
-            public Func<string, string> sqlInsert;
-            public Func<IdentifiableEntity, T, Forbidden, string, List<DbParameter>> InsertParameters;
-            public Func<IdentifiableEntity, DbParameter> DeleteParameter;
+            public Func<string, string> sqlDelete;
+            public Func<IdentifiableEntity, string, DbParameter> DeleteParameter;
+            public ConcurrentDictionary<int, Action<List<IdentifiableEntity>>> deleteCache = new ConcurrentDictionary<int, Action<List<IdentifiableEntity>>>();
 
-            public Action<List<T>, IdentifiableEntity, Forbidden> Insert1;
-            public Action<List<T>, IdentifiableEntity, Forbidden> Insert2;
-            public Action<List<T>, IdentifiableEntity, Forbidden> Insert4;
-            public Action<List<T>, IdentifiableEntity, Forbidden> Insert8;
-            public Action<List<T>, IdentifiableEntity, Forbidden> Insert16;
-
-            internal void RelationalInserts(MList<T> collection, IdentifiableEntity ident, bool newEntity, Forbidden forbidden)
+            Action<List<IdentifiableEntity>> GetDelete(int numElements)
             {
-                if (collection == null)
+                return deleteCache.GetOrAdd(numElements, num =>
                 {
-                    if (!newEntity)
-                        new SqlPreCommandSimple(sqlDelete, new List<DbParameter> { DeleteParameter(ident) }).ExecuteNonQuery();
-                }
-                else
-                {
-                    if (collection.Modified == false)
-                        return;
+                    string sql = Enumerable.Range(0, num).ToString(i => sqlDelete(i.ToString()), ";\r\n");
 
-                    if (forbidden.IsEmpty)
-                        collection.Modified = null;
-
-                    if (!newEntity)
-                        new SqlPreCommandSimple(sqlDelete, new List<DbParameter> { DeleteParameter(ident) }).ExecuteNonQuery();
-
-                    if (!Connector.Current.AllowsMultipleQueries)
+                    return list =>
                     {
-                        List<T> uniList = new List<T>() { default(T) };
-                        foreach (var item in collection)
+                        List<DbParameter> parameters = new List<DbParameter>();
+                        for (int i = 0; i < num; i++)
                         {
-                            uniList[0] = item;
-                            Insert1(uniList, ident, forbidden);
+                            parameters.Add(DeleteParameter(list[i], i.ToString()));
                         }
-                    }
-                    else
-                    {
-                        collection.Split_1_2_4_8_16(list =>
-                        {
-                            switch (list.Count)
-                            {
-                                case 1: Insert1(list, ident, forbidden); break;
-                                case 2: Insert2(list, ident, forbidden); break;
-                                case 4: Insert4(list, ident, forbidden); break;
-                                case 8: Insert8(list, ident, forbidden); break;
-                                case 16: Insert16(list, ident, forbidden); break;
-                                default: throw new InvalidOperationException("Unexpected list.Count {0}".Formato(list.Count));
-                            }
-                        });
-                    }
-                }
+                        new SqlPreCommandSimple(sql, parameters).ExecuteNonQuery();
+                    };
+                }); 
             }
 
-            public SqlPreCommand RelationalInsertsSync(Modifiable mlist, IdentifiableEntity parent)
-            {
-                var list = (MList<T>)mlist;
+            public Func<string, string> sqlInsert;
+            public Func<IdentifiableEntity, T, Forbidden, string, List<DbParameter>> InsertParameters;
+            public ConcurrentDictionary<int, Action<List<MListPair<T>>, Forbidden>> insertCache = 
+                new ConcurrentDictionary<int, Action<List<MListPair<T>>, Forbidden>>();
 
-                if (list.Modified == false)
+            Action<List<MListPair<T>>, Forbidden> GetInsert(int numElements)
+            {
+                return insertCache.GetOrAdd(numElements, num =>
+                {
+                    string sql = Enumerable.Range(0, num).ToString(i => sqlInsert(i.ToString()), ";\r\n");
+
+                    return (list, forbidden) =>
+                    {
+                        List<DbParameter> parameters = new List<DbParameter>();
+                        for (int i = 0; i < num; i++)
+                        {
+                            var pair = list[i];
+                            parameters.AddRange(InsertParameters(pair.Entity, pair.Item, forbidden, i.ToString()));
+                        }
+                        new SqlPreCommandSimple(sql, parameters).ExecuteNonQuery();
+                    };
+                });
+            }
+
+
+            public Func<IdentifiableEntity, MList<T>> Getter;
+
+            public void RelationalInserts(List<IdentifiableEntity> idents, Forbidden forbidden)
+            {
+                List<MListPair<T>> toInsert = new List<MListPair<T>>();
+
+                foreach (var entity in idents)
+                {
+                    MList<T> collection = Getter(entity);
+
+                    if (collection == null)
+                        continue;
+
+                    if (collection.Modified == ModifiedState.Clean)
+                        continue;
+
+                    foreach (var item in collection)
+                        toInsert.Add(new MListPair<T>(entity, item));
+                }
+
+                toInsert.SplitStatements(list => GetInsert(list.Count)(list, forbidden));
+            }
+
+            public void RelationalUpdates(List<IdentifiableEntity> idents, Forbidden forbidden)
+            {
+                List<IdentifiableEntity> toDelete = new List<IdentifiableEntity>();
+                List<MListPair<T>> toInsert = new List<MListPair<T>>();
+
+                foreach (var entity in idents)
+                {
+                    MList<T> collection = Getter(entity);
+
+                    if (collection == null)
+                        toDelete.Add(entity);
+                    else
+                    {
+                        if (collection.Modified == ModifiedState.Clean)
+                            continue;
+
+                        toDelete.Add(entity);
+
+                        foreach (var item in collection)
+                            toInsert.Add(new MListPair<T>(entity, item));
+                    }
+                }
+
+                toDelete.SplitStatements(list => GetDelete(list.Count)(list));
+
+                toInsert.SplitStatements(list => GetInsert(list.Count)(list, forbidden));
+            }
+
+            public SqlPreCommand RelationalUpdateSync(IdentifiableEntity parent)
+            {
+                MList<T> collection = Getter(parent);
+
+                if (collection == null)
                     return null;
 
-                var sqlIns = sqlInsert(""); 
+                if (collection.Modified == ModifiedState.Clean)
+                    return null;
+
+                var sqlIns = sqlInsert("");
 
                 if (parent.IsNew)
                 {
-                    return list.Select(e =>
+                    return collection.Select(e =>
                     {
-                        var parameters = InsertParameters(parent, e, new Forbidden(parent), "");
+                        var parameters = InsertParameters(parent, e, new Forbidden(new HashSet<IdentifiableEntity> { parent }), "");
                         parameters.RemoveAt(0);
                         return new SqlPreCommandSimple(sqlIns, parameters).AddComment(e.ToString());
                     }).Combine(Spacing.Simple);
@@ -750,18 +829,23 @@ namespace Signum.Engine.Maps
                 else
                 {
                     return SqlPreCommand.Combine(Spacing.Simple,
-                        new SqlPreCommandSimple(sqlDelete, new List<DbParameter> { DeleteParameter(parent) }),
-                        list.Select(e => new SqlPreCommandSimple(sqlIns, InsertParameters(parent, e, new Forbidden(), "")).AddComment(e.ToString())).Combine(Spacing.Simple)); 
+                        new SqlPreCommandSimple(sqlDelete(""), new List<DbParameter> { DeleteParameter(parent, "") }),
+                        collection.Select(e => new SqlPreCommandSimple(sqlIns, InsertParameters(parent, e, new Forbidden(), "")).AddComment(e.ToString())).Combine(Spacing.Simple));
                 }
             }
         }
 
-        internal InsertCache<T> CreateCache<T>()
+        internal RelationalCache<T> CreateCache<T>(Func<object, object> getter)
         {
-            InsertCache<T> result = new InsertCache<T>();
+            RelationalCache<T> result = new RelationalCache<T>();
 
-            result.sqlDelete = "DELETE {0} WHERE {1} = @{1}".Formato(Name, BackReference.Name);
-            result.DeleteParameter = ident => Connector.Current.ParameterBuilder.CreateReferenceParameter(ParameterBuilder.GetParameterName(BackReference.Name), false, ident.Id);
+            result.Getter = ident => (MList<T>)getter(ident);
+
+            result.sqlDelete = post => "DELETE {0} WHERE {1} = @{2}".Formato(Name, BackReference.Name.SqlScape(), BackReference.Name + post);
+
+            var pb = Connector.Current.ParameterBuilder;
+            result.DeleteParameter = (ident, post) => pb.CreateReferenceParameter(ParameterBuilder.GetParameterName(BackReference.Name + post), false, ident.Id);
+
 
             var trios = new List<Table.Trio>();
             var assigments = new List<Expression>();
@@ -774,7 +858,7 @@ namespace Signum.Engine.Maps
             BackReference.CreateParameter(trios, assigments, paramIdent, paramForbidden, paramPostfix);
             Field.CreateParameter(trios, assigments, paramItem, paramForbidden, paramPostfix);
 
-            result.sqlInsert = post=> "INSERT {0} ({1})\r\n VALUES ({2})".Formato(Name,
+            result.sqlInsert = post => "INSERT {0} ({1})\r\n VALUES ({2})".Formato(Name,
                 trios.ToString(p => p.SourceColumn.SqlScape(), ", "),
                 trios.ToString(p => p.ParameterName + post, ", "));
 
@@ -783,65 +867,52 @@ namespace Signum.Engine.Maps
 
             result.InsertParameters = expr.Compile();
 
-            result.Insert1 = GetInsert(result, 1);
-            result.Insert2 = GetInsert(result, 2);
-            result.Insert4 = GetInsert(result, 4);
-            result.Insert8 = GetInsert(result, 8);
-            result.Insert16 = GetInsert(result, 16);
-
             return result;
         }
-
-        private Action<List<T>, IdentifiableEntity, Forbidden> GetInsert<T>(InsertCache<T> result, int num)
+        public struct MListPair<T>
         {
-            string sql = Enumerable.Range(0, num).ToString(i => result.sqlInsert(i.ToString()), ";\r\n");
+            public IdentifiableEntity Entity;
+            public T Item;
 
-            return (list, ident, forbidden) =>
+            public MListPair(IdentifiableEntity ident, T item)
             {
-                List<DbParameter> parameters = new List<DbParameter>();
-                for (int i = 0; i < num; i++)
-                {
-                    parameters.AddRange(result.InsertParameters(ident, list[i], forbidden, i.ToString()));
-                }
-                new SqlPreCommandSimple(sql, parameters).ExecuteNonQuery();
-            };
+                this.Entity = ident;
+                this.Item = item;
+            }
         }
     }
 
     internal static class SaveUtils
     {
-        public static void Split_1_2_4_8_16<T>(this IList<T> original, Action<List<T>> action)
-        { 
-            List<T> part = new List<T>(16);
-            int i = 0;
-            for (; i <= original.Count - 16; i += 16)
+        public static void SplitStatements<T>(this IList<T> original, Action<List<T>> action)
+        {
+            if (!Connector.Current.AllowsMultipleQueries)
             {
-                Fill(part, original, i, 16);
-                action(part);
+                List<T> part = new List<T>(1);
+                for (int i = 0; i < original.Count; i++)
+                {
+                    part[0] = original[i];
+                    action(part);
+                }
             }
-
-            for (; i <= original.Count - 8; i += 8)
+            else
             {
-                Fill(part, original, i, 8);
-                action(part);
-            }
+                int max = Schema.Current.Settings.MaxNumberOfStatementsInSaveQueries;
 
-            for (; i <= original.Count - 4; i += 4)
-            {
-                Fill(part, original, i, 4);
-                action(part);
-            }
+                List<T> part = new List<T>(max);
+                int i = 0;
+                for (; i <= original.Count - max; i += max)
+                {
+                    Fill(part, original, i, max);
+                    action(part);
+                }
 
-            for (; i <= original.Count - 2; i += 2)
-            {
-                Fill(part, original, i, 2);
-                action(part);
-            }
-
-            for (; i <= original.Count - 1; i += 1)
-            {
-                Fill(part, original, i, 1);
-                action(part);
+                int remaining = original.Count - i;
+                if (remaining > 0)
+                {
+                    Fill(part, original, i, remaining);
+                    action(part);
+                }
             }
         }
 
@@ -869,7 +940,7 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public partial class FieldValue 
+    public partial class FieldValue
     {
         protected internal override void CreateParameter(List<Table.Trio> trios, List<Expression> assigments, Expression value, Expression forbidden, Expression postfix)
         {
@@ -995,15 +1066,11 @@ namespace Signum.Engine.Maps
         {
             ParameterExpression embedded = Expression.Parameter(this.FieldType, "embedded");
 
-            Expression notModifiedCondition = Expression.Property(forbidden, "IsEmpty"); 
-
             if (HasValue != null)
             {
                 trios.Add(new Table.Trio(HasValue, Expression.NotEqual(value, Expression.Constant(null, FieldType)), postfix));
 
                 assigments.Add(Expression.Assign(embedded, Expression.Convert(value, this.FieldType)));
-             
-                notModifiedCondition = Expression.And(Expression.NotEqual(embedded, Expression.Constant(null, this.FieldType)), notModifiedCondition); 
 
                 foreach (var ef in EmbeddedFields.Values)
                 {
@@ -1016,25 +1083,20 @@ namespace Signum.Engine.Maps
             }
             else
             {
-  
-                assigments.Add(Expression.Assign(embedded, Expression.Convert(value.NodeType == ExpressionType.Conditional? value: Expression.Call(Expression.Constant(this), miCheckNull, value), this.FieldType)));
-                assigments.Add(Expression.IfThen(Expression.Property(forbidden, "IsEmpty"),
-                    Expression.Assign(Expression.Property(embedded, "Modified"), Expression.Constant(null, typeof(bool?)))));
+
+                assigments.Add(Expression.Assign(embedded, Expression.Convert(value.NodeType == ExpressionType.Conditional ? value : Expression.Call(Expression.Constant(this), miCheckNull, value), this.FieldType)));
                 foreach (var ef in EmbeddedFields.Values)
                 {
                     ef.Field.CreateParameter(trios, assigments,
                         Expression.Field(embedded, ef.FieldInfo), forbidden, postfix);
                 }
             }
-
-            assigments.Add(Expression.IfThen(notModifiedCondition,
-                 Expression.Assign(Expression.Property(embedded, "Modified"), Expression.Constant(null, typeof(bool?)))));
         }
 
         static MethodInfo miCheckNull = ReflectionTools.GetMethodInfo((FieldEmbedded fe) => fe.CheckNull(null));
         object CheckNull(object obj)
         {
-            if(obj == null)
+            if (obj == null)
                 throw new InvalidOperationException("Impossible to save 'null' on the not-nullable embedded field of type '{0}'".Formato(this.FieldType.Name));
 
             return obj;
@@ -1049,7 +1111,7 @@ namespace Signum.Engine.Maps
             ParameterExpression ibId = Expression.Parameter(typeof(int?), "ibId");
 
             assigments.Add(Expression.Assign(ibType, Expression.Call(Expression.Constant(this), miCheckType, this.GetTypeFactory(value, forbidden))));
-            assigments.Add(Expression.Assign(ibId, this.GetIdFactory(value, forbidden))); 
+            assigments.Add(Expression.Assign(ibId, this.GetIdFactory(value, forbidden)));
 
             var nullId = Expression.Constant(null, typeof(int?));
 
@@ -1062,11 +1124,11 @@ namespace Signum.Engine.Maps
         }
 
         static MethodInfo miCheckType = ReflectionTools.GetMethodInfo((FieldImplementedBy fe) => fe.CheckType(null));
-        
+
         Type CheckType(Type type)
         {
-            if(type != null && !ImplementationColumns.ContainsKey(type))
-                throw new InvalidOperationException("Type {0} is not in the list of ImplementedBy:\r\n{1}".Formato(type.Name, ImplementationColumns.ToString(kvp =>"{0} -> {1}".Formato(kvp.Key.Name, kvp.Value.Name), "\r\n")));
+            if (type != null && !ImplementationColumns.ContainsKey(type))
+                throw new InvalidOperationException("Type {0} is not in the list of ImplementedBy:\r\n{1}".Formato(type.Name, ImplementationColumns.ToString(kvp => "{0} -> {1}".Formato(kvp.Key.Name, kvp.Value.Name), "\r\n")));
 
             return type;
         }
@@ -1092,9 +1154,9 @@ namespace Signum.Engine.Maps
             if (type == null)
                 return null;
 
-            return Schema.Current.TypeToId.GetOrThrow(type, "{0} not registered in the schema"); 
+            return Schema.Current.TypeToId.GetOrThrow(type, "{0} not registered in the schema");
         }
     }
 
-    
+
 }

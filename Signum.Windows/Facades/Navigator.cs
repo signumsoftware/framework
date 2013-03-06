@@ -20,6 +20,7 @@ using Signum.Services;
 using System.Windows.Threading;
 using System.Collections.ObjectModel;
 using Signum.Windows.Operations;
+using System.Collections.Concurrent;
 
 namespace Signum.Windows
 {
@@ -37,33 +38,7 @@ namespace Signum.Windows
             Manager.Explore(options);
         }
 
-        public static Lite<T> FindUnique<T>(string columnName, object value, UniqueType uniqueType)
-            where T:class, IIdentifiable
-        {
-            return (Lite<T>)Manager.FindUnique(new FindUniqueOptions(typeof(T))
-            {
-                UniqueType = uniqueType,
-                FilterOptions = new List<FilterOption>()
-                {
-                    new FilterOption(columnName, value)
-                }
-            });
-        }
-
-        public static Lite<T> FindUnique<T>(FindUniqueOptions options)
-            where T : class, IIdentifiable
-        {
-            if (options.QueryName == null)
-                options.QueryName = typeof(T);
-
-            return (Lite<T>)Manager.FindUnique(options);
-        }
-
-        public static Lite<IdentifiableEntity> FindUnique(FindUniqueOptions options)
-        {
-            return Manager.FindUnique(options);
-        }
-
+      
 
         public static Lite<T> Find<T>()
             where T : IdentifiableEntity
@@ -113,17 +88,6 @@ namespace Signum.Windows
 
             return result.Cast<Lite<T>>().ToArray();
         }
-
-        public static int QueryCount(CountOptions options)
-        {
-            return Manager.QueryCount(options);
-        }
-
-        public static void QueryCountBatch(CountOptions options, Action<int> onResult, Action @finally)
-        {
-            Manager.QueryCountBatch(options, onResult, @finally);
-        }
-
         public static void NavigateUntyped(object entity)
         {
             Manager.Navigate(entity, new NavigateOptions());
@@ -314,7 +278,7 @@ namespace Signum.Windows
 
             Lite.SetTypeNameAndResolveType(Server.GetCleanName, Server.TryGetType);
         }
-
+        
         public event Action Initializing;
         bool initialized;
         internal void Initialize()
@@ -323,7 +287,7 @@ namespace Signum.Windows
             {
                 //Looking for a better place to do this
                 PropertyRoute.SetFindImplementationsCallback(Navigator.FindImplementations);
-                QueryToken.EntityExtensions = parent => Server.Return((IDynamicQueryServer server) => server.ExternalQueryToken(parent));
+                QueryToken.EntityExtensions = DynamicQueryServer.GetExtensionToken;
 
                 EventManager.RegisterClassHandler(typeof(TextBox), TextBox.GotFocusEvent, new RoutedEventHandler(TextBox_GotFocus));
 
@@ -340,6 +304,7 @@ namespace Signum.Windows
                 initialized = true;
             }
         }
+
 
         void CompleteQuerySettings()
         {
@@ -433,7 +398,7 @@ namespace Signum.Windows
 
             if (options.ReturnIfOne)
             {
-                Lite<IdentifiableEntity> lite = FindUnique(new FindUniqueOptions(options.QueryName)
+                Lite<IdentifiableEntity> lite = DynamicQueryServer.QueryUnique(new UniqueOptions(options.QueryName)
                 {
                     FilterOptions = options.FilterOptions,
                     UniqueType = UniqueType.SingleOrMany
@@ -474,7 +439,7 @@ namespace Signum.Windows
 
             if (options.NavigateIfOne)
             {
-                Lite<IdentifiableEntity> lite = FindUnique(new FindUniqueOptions(options.QueryName)
+                Lite<IdentifiableEntity> lite = DynamicQueryServer.QueryUnique(new UniqueOptions(options.QueryName)
                 {
                     FilterOptions = options.FilterOptions,
                     UniqueType = UniqueType.Only,
@@ -493,84 +458,6 @@ namespace Signum.Windows
                 sw.Closed += options.Closed;
 
             sw.Show();
-        }
-
-        public virtual Lite<IdentifiableEntity> FindUnique(FindUniqueOptions options)
-        {
-            AssertFindable(options.QueryName);
-
-            SetFilterTokens(options.QueryName, options.FilterOptions);
-            SetOrderTokens(options.QueryName, options.OrderOptions);
-
-            var request = new UniqueEntityRequest
-            {
-                 QueryName = options.QueryName,
-                 Filters = options.FilterOptions.Select(f => f.ToFilter()).ToList(),
-                 Orders = options.OrderOptions.Select(f => f.ToOrder()).ToList(),
-                 UniqueType = options.UniqueType,
-            };
-
-            return Server.Return((IDynamicQueryServer s) => s.ExecuteUniqueEntity(request));
-        }
-
-        public int QueryCount(CountOptions options)
-        {
-            AssertFindable(options.QueryName);
-
-            SetFilterTokens(options.QueryName, options.FilterOptions);
-
-            var request = new QueryCountRequest
-            {
-                QueryName = options.QueryName,
-                Filters = options.FilterOptions.Select(f => f.ToFilter()).ToList()
-            };
-
-            return Server.Return((IDynamicQueryServer s) => s.ExecuteQueryCount(request));
-        }
-
-        public void QueryCountBatch(CountOptions options, Action<int> onResult, Action @finally)
-        {
-            AssertFindable(options.QueryName);
-
-            SetFilterTokens(options.QueryName, options.FilterOptions);
-
-            var request = new QueryCountRequest
-            {
-                QueryName = options.QueryName,
-                Filters = options.FilterOptions.Select(f => f.ToFilter()).ToList()
-            };
-
-            DynamicQueryBachRequest.Enqueue(request, obj => onResult((int)obj), @finally);
-        }
-
-        public void SetFilterTokens(object queryName, IEnumerable<FilterOption> filters)
-        {
-            QueryDescription description = GetQueryDescription(queryName);
-
-            foreach (var f in filters)
-            {
-                if (f.Token == null && f.Path.HasText())
-                    f.Token = QueryUtils.Parse(f.Path, t => QueryUtils.SubTokens(t, description.Columns));
-
-                f.RefreshRealValue();
-            }
-        }
-
-        public void SetOrderTokens(object queryName, IEnumerable<OrderOption> orders)
-        {
-            QueryDescription description = GetQueryDescription(queryName);
-
-            foreach (var o in orders)
-            {
-                o.Token = QueryUtils.Parse(o.Path, t => QueryUtils.SubTokens(t, description.Columns)); 
-            }
-        }
-
-        public QueryDescription GetQueryDescription(object queryName)
-        {
-            QuerySettings settings = GetQuerySettings(queryName);
-            return settings.QueryDescription ??
-                (settings.QueryDescription = Server.Return((IDynamicQueryServer s) => s.GetQueryDescription(queryName))); 
         }
 
         protected virtual SearchWindow CreateSearchWindow(FindOptionsBase options)
@@ -911,6 +798,47 @@ namespace Signum.Windows
             {
                 return Server.FindImplementations(pr);
             }
+        }
+
+        public event Func<object, ButtonBarEventArgs, List<FrameworkElement>> GetButtonBarElementGlobal;
+        public Dictionary<Type, Func<object, ButtonBarEventArgs, FrameworkElement>> GetButtonBarElementByType = new Dictionary<Type,Func<object, ButtonBarEventArgs, FrameworkElement>>();
+
+        public void RegisterGetButtonBarElement<T>(Func<T, ButtonBarEventArgs, FrameworkElement> action)
+        {
+            Func<object, ButtonBarEventArgs, FrameworkElement> casted = (obj, args) => action((T)obj, args);
+
+            var prev = GetButtonBarElementByType.TryGetC(typeof(T));
+
+            GetButtonBarElementByType[typeof(T)] = prev + casted;
+        }
+
+        internal List<FrameworkElement> GetToolbarButtons(object entity, ButtonBarEventArgs ctx)
+        {
+            List<FrameworkElement> elements = new List<FrameworkElement>();
+
+            if (GetButtonBarElementGlobal != null)
+            {
+                elements.AddRange(GetButtonBarElementGlobal.GetInvocationList()
+                    .Cast<Func<object, ButtonBarEventArgs, List<FrameworkElement>>>()
+                    .Select(d => d(entity, ctx))
+                    .NotNull().SelectMany(d => d).NotNull().ToList());
+            }
+
+            var getButtons = GetButtonBarElementByType.TryGetC(entity.GetType());
+            if(getButtons != null)
+            {
+                elements.AddRange(getButtons.GetInvocationList()
+                    .Cast<Func<object, ButtonBarEventArgs, FrameworkElement>>()
+                    .Select(d => d(entity, ctx))
+                    .NotNull().ToList());
+            }
+
+            if (ctx.MainControl is IHaveToolBarElements)
+            {
+                elements.AddRange(((IHaveToolBarElements)ctx.MainControl).GetToolBarElements(entity, ctx));
+            }
+
+            return elements;
         }
     }
 }

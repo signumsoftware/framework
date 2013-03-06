@@ -9,9 +9,19 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public abstract class BaseQueryRequest
     {
-        public object QueryName { get; set; }
+        object queryName;
+        public object QueryName
+        {
+            get { return queryName; }
+            set { queryName = value; }
+        }
 
-        public List<Filter> Filters { get; set; }
+        List<Filter> filters;
+        public List<Filter> Filters
+        {
+            get { return filters; }
+            set { filters = value; }
+        }
 
         public override string ToString()
         {
@@ -22,24 +32,44 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class QueryRequest : BaseQueryRequest
     {
-        public List<Column> Columns { get; set; }
+        List<Column> columns;
+        public List<Column> Columns
+        {
+            get { return columns; }
+            set { columns = value; }
+        }
 
-        public List<Order> Orders { get; set; }
+        List<Order> orders;
+        public List<Order> Orders
+        {
+            get { return orders; }
+            set { orders = value; }
+        }
 
-        public int ElementsPerPage { get; set; }
+        int elementsPerPage;
+        public int ElementsPerPage
+        {
+            get { return elementsPerPage; }
+            set { elementsPerPage = value; }
+        }
 
         public const int AllElements = -1;
 
-        public int CurrentPage { get; set; }
+        int currentPage;
+        public int CurrentPage
+        {
+            get { return currentPage; }
+            set { currentPage = value; }
+        }
 
         public int? MaxElementIndex
         {
             get
             {
-                if (ElementsPerPage  == AllElements)
+                if (ElementsPerPage == AllElements)
                     return null;
 
-                return (ElementsPerPage * (CurrentPage + 1)) - 1; 
+                return (ElementsPerPage * (CurrentPage + 1)) - 1;
             }
         }
 
@@ -47,13 +77,57 @@ namespace Signum.Entities.DynamicQuery
         {
             get
             {
-                HashSet<QueryToken> allTokens = 
-                            Columns.Select(a => a.Token)
+                HashSet<QueryToken> allTokens =
+                    Columns.Select(a => a.Token)
                     .Concat(Filters.Select(a => a.Token))
                     .Concat(Orders.Select(a => a.Token)).ToHashSet();
 
                 return CollectionElementToken.GetElements(allTokens);
             }
+        }
+    }
+
+    [Serializable]
+    public class QueryGroupRequest : BaseQueryRequest
+    {
+        List<Column> columns;
+        public List<Column> Columns
+        {
+            get { return columns; }
+            set { columns = value; }
+        }
+
+        List<Order> orders;
+        public List<Order> Orders
+        {
+            get { return orders; }
+            set { orders = value; }
+        }
+
+        public List<CollectionElementToken> Multiplications
+        {
+            get
+            {
+                HashSet<QueryToken> allTokens =
+                    Columns.Select(a => a.Token)
+                    .Concat(Orders.Select(a => a.Token))
+                    .Concat(Filters.Select(a => a.Token)).ToHashSet();
+
+                return CollectionElementToken.GetElements(allTokens);
+            }
+        }
+
+        public List<QueryToken> AllTokens()
+        {
+            var allTokens = Columns.Select(a => a.Token).ToList();
+
+            if (Filters != null)
+                allTokens.AddRange(Filters.Select(a => a.Token));
+
+            if (Orders != null)
+                allTokens.AddRange(Orders.Select(a => a.Token));
+
+            return allTokens;
         }
     }
 
@@ -69,9 +143,19 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class UniqueEntityRequest : BaseQueryRequest
     {
-        public List<Order> Orders { get; set; }
+        List<Order> orders;
+        public List<Order> Orders
+        {
+            get { return orders; }
+            set { orders = value; }
+        }
 
-        public UniqueType UniqueType { get; set; }
+        UniqueType uniqueType;
+        public UniqueType UniqueType
+        {
+            get { return uniqueType; }
+            set { uniqueType = value; }
+        }
 
         public List<CollectionElementToken> Multiplications
         {

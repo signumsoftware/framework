@@ -65,14 +65,6 @@ namespace Signum.Entities
 
         #endregion
 
-        public bool selfModified = true;
-        public override bool SelfModified { get { return selfModified; } }
-
-        protected override void CleanSelfModified()
-        {
-            selfModified = false;
-        }
-
         public MList()
         {
             innerList = new List<T>();
@@ -100,15 +92,15 @@ namespace Signum.Entities
             {
                 T old = innerList[index];
                 innerList[index] = value;
-                selfModified = true;
+                SetSelfModified();
                 OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, value, old));
             }
         }
 
         public void Add(T item)
         {
-            innerList.Add(item);
-            selfModified = true;
+            innerList.Add(item); 
+            SetSelfModified();
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item));
         }
 
@@ -175,14 +167,14 @@ namespace Signum.Entities
                 {
                     if (!innerList.Remove(item))
                     {
-                        selfModified = true;
+                        SetSelfModified();
                         break;
                     }
                 }
             }
             else
             {
-                selfModified = true;
+                SetSelfModified();
             }
 
             innerList = list;
@@ -193,7 +185,7 @@ namespace Signum.Entities
         public void Clear()
         {
             if (innerList.Count > 0)
-                selfModified = true;
+                SetSelfModified();
             innerList.Clear();
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)); 
         }
@@ -211,7 +203,7 @@ namespace Signum.Entities
         public void Insert(int index, T item)
         {
             innerList.Insert(index, item);
-            selfModified = true;
+            SetSelfModified();
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item, index));
         }
 
@@ -222,7 +214,7 @@ namespace Signum.Entities
                 return false;
          
             innerList.RemoveAt(index);
-            selfModified = true;
+            SetSelfModified();
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item, index));
             return true;
         }
@@ -239,7 +231,7 @@ namespace Signum.Entities
         {
             T item = innerList[index];
             innerList.RemoveAt(index);
-            selfModified = true;
+            SetSelfModified();
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item, index));
         }
 

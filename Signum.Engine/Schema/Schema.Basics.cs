@@ -55,20 +55,7 @@ namespace Signum.Engine.Maps
 
         public ObjectName Name { get; set; }
 
-        bool identity = true;
-        public bool Identity
-        {
-            get { return identity; }
-            set
-            {
-                if (identity != value)
-                {
-                    identity = value;
-                    if (inserter != null && inserter.IsValueCreated) // not too fast
-                        inserter.Reset();
-                }
-            }
-        }
+        public bool Identity {get; set;}
         public bool IsView { get; internal set; }
         public string CleanTypeName { get; set; }
 
@@ -91,9 +78,10 @@ namespace Signum.Engine.Maps
         {
             Columns = Fields.Values.SelectMany(c => c.Field.Columns()).ToDictionary(c => c.Name);
 
-            inserter = new ResetLazy<InsertCache>(InitializeInsert);
-            updater = new ResetLazy<UpdateCache>(InitializeUpdate);
-            saveCollections = new ResetLazy<CollectionsCache>(InitializeCollections);
+            inserterDisableIdentity = new ResetLazy<InsertCacheDisableIdentity>(() => InsertCacheDisableIdentity.InitializeInsertDisableIdentity(this));
+            inserterIdentity = new ResetLazy<InsertCacheIdentity>(() => InsertCacheIdentity.InitializeInsertIdentity(this));
+            updater = new ResetLazy<UpdateCache>(() => UpdateCache.InitializeUpdate(this));
+            saveCollections = new ResetLazy<CollectionsCache>(() => CollectionsCache.InitializeCollections(this));
         }
 
         public Field GetField(MemberInfo member)

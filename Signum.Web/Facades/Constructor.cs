@@ -152,7 +152,7 @@ namespace Signum.Web
 
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(queryName);
 
-            var filters = FindOptionsModelBinder.ExtractFilterOptions(httpContext, t => QueryUtils.SubTokens(t, queryDescription.Columns))
+            var filters = FindOptionsModelBinder.ExtractFilterOptions(httpContext, queryDescription)
                 .Where(fo => fo.Operation == FilterOperation.EqualTo);
 
             var pairs = from pi in type.GetProperties(BindingFlags.Public | BindingFlags.Instance)

@@ -150,7 +150,7 @@ namespace Signum.Web
         {
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(QueryName);
 
-            Navigator.SetTokens(queryDescription, FilterOptions);
+            Navigator.SetTokens(FilterOptions, queryDescription, canAggregate: false);
 
             string options = new Sequence<string>
             {
@@ -178,7 +178,7 @@ namespace Signum.Web
         {
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(QueryName);
 
-            Navigator.SetTokens(queryDescription, this.FilterOptions);
+            Navigator.SetTokens(this.FilterOptions, queryDescription, false);
 
             op.Add("webQueryName", QueryName.TryCC(qn => Navigator.ResolveWebQueryName(qn).SingleQuote()));
             op.Add("searchOnLoad", SearchOnLoad == true ? "true" : null);

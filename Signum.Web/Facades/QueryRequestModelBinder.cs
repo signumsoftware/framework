@@ -44,9 +44,9 @@ namespace Signum.Web
 
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(qr.QueryName);
 
-            qr.Filters = ExtractFilterOptions(controllerContext.HttpContext, queryDescription);
-            qr.Orders = ExtractOrderOptions(controllerContext.HttpContext, queryDescription);
-            qr.Columns = ExtractColumnsOptions(controllerContext.HttpContext, queryDescription);
+            qr.Filters = ExtractFilterOptions(controllerContext.HttpContext, queryDescription, canAggregate: false);
+            qr.Orders = ExtractOrderOptions(controllerContext.HttpContext, queryDescription, canAggregate: false);
+            qr.Columns = ExtractColumnsOptions(controllerContext.HttpContext, queryDescription, canAggregate: false);
 
             if (parameters.AllKeys.Contains("elems"))
             {
@@ -69,7 +69,7 @@ namespace Signum.Web
             return qr;
         }
 
-        public static List<Signum.Entities.DynamicQuery.Filter> ExtractFilterOptions(HttpContextBase httpContext, QueryDescription queryDescription)
+        public static List<Signum.Entities.DynamicQuery.Filter> ExtractFilterOptions(HttpContextBase httpContext, QueryDescription queryDescription, bool canAggregate)
         {
             List<Signum.Entities.DynamicQuery.Filter> result = new List<Signum.Entities.DynamicQuery.Filter>();
 
@@ -85,14 +85,14 @@ namespace Signum.Web
             return matches.Select(m =>
             {
                 string name = m.Groups["token"].Value;
-                var token = QueryUtils.Parse(name, queryDescription);
+                var token = QueryUtils.Parse(name, queryDescription, canAggregate);
                 return new Signum.Entities.DynamicQuery.Filter(token,
                     EnumExtensions.ToEnum<FilterOperation>(m.Groups["op"].Value),
                     FindOptionsModelBinder.Convert(FindOptionsModelBinder.DecodeValue(m.Groups["value"].Value), token.Type));
             }).ToList();
         }
 
-        public static List<Order> ExtractOrderOptions(HttpContextBase httpContext, QueryDescription queryDescription)
+        public static List<Order> ExtractOrderOptions(HttpContextBase httpContext, QueryDescription description, bool canAggregate)
         {
             List<Order> result = new List<Order>();
 
@@ -110,12 +110,12 @@ namespace Signum.Web
                 
                 OrderType orderType = tokenCapture.StartsWith("-") ? OrderType.Descending : OrderType.Ascending;
                 string token = orderType == OrderType.Ascending ? tokenCapture : tokenCapture.Substring(1, tokenCapture.Length - 1);
-                
-                return new Order(QueryUtils.Parse(token, queryDescription), orderType);
+
+                return new Order(QueryUtils.Parse(token, description, canAggregate), orderType);
             }).ToList();
         }
 
-        public static List<Column> ExtractColumnsOptions(HttpContextBase httpContext, QueryDescription queryDescription)
+        public static List<Column> ExtractColumnsOptions(HttpContextBase httpContext, QueryDescription description, bool canAggregate)
         {
             List<Column> result = new List<Column>();
 
@@ -132,8 +132,8 @@ namespace Signum.Web
                 var colName = m.Groups["token"].Value;
                 var displayCapture = m.Groups["name"].Captures;
                 string displayName = displayCapture.Count > 0 ? FindOptionsModelBinder.DecodeValue(m.Groups["name"].Value) : colName;
-                
-                return new Column(QueryUtils.Parse(colName, queryDescription), displayName);
+
+                return new Column(QueryUtils.Parse(colName, description, canAggregate), displayName);
             }).ToList();
         }
     }

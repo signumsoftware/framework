@@ -197,8 +197,8 @@ namespace Signum.Windows
             IsVisible = Navigator.IsFindable(Options.QueryName);
             ShowResultCount = showCount;
 
-            if (ShowResultCount)
-                Navigator.QueryCountBatch(new CountOptions(Options.QueryName)
+            if (ShowResultCount && IsVisible)
+                DynamicQueryServer.QueryCountBatch(new QueryCountOptions(Options.QueryName)
                 {
                     FilterOptions = options.FilterOptions,
                 }, count =>
@@ -218,7 +218,7 @@ namespace Signum.Windows
     {
         public NavigateOptions NavigateOptions { get; set; }
 
-        public FindUniqueOptions FindUniqueOptions { get; set; }
+        public UniqueOptions FindUniqueOptions { get; set; }
 
         public QuickLinkNavigate(string columnName, object value)
             : this(typeof(T), columnName, value, UniqueType.Single)
@@ -231,7 +231,7 @@ namespace Signum.Windows
         }
 
         public QuickLinkNavigate(object queryName, string columnName, object value, UniqueType unique) :
-            this(new FindUniqueOptions(queryName)
+            this(new UniqueOptions(queryName)
              {
                  UniqueType = unique,
                  FilterOptions = new List<FilterOption>()
@@ -242,7 +242,7 @@ namespace Signum.Windows
         {
         }
 
-        public QuickLinkNavigate(FindUniqueOptions options)
+        public QuickLinkNavigate(UniqueOptions options)
         {
             FindUniqueOptions = options;
             Label = typeof(T).NiceName();
@@ -252,7 +252,7 @@ namespace Signum.Windows
 
         public override void Execute()
         {
-            Lite<T> lite = Navigator.FindUnique<T>(FindUniqueOptions);
+            Lite<T> lite = DynamicQueryServer.QueryUnique<T>(FindUniqueOptions);
 
             if (lite == null)
                 return;

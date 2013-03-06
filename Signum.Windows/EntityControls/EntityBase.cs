@@ -351,7 +351,7 @@ namespace Signum.Windows
             if (EntityChanged != null)
                 EntityChanged(this, isUserInteraction, oldValue, newValue);
 
-            AutomationProperties.SetHelpText(this, Common.GetEntityStringAndHashCode(newValue));
+            AutomationProperties.SetItemStatus(this, Common.GetEntityStringAndHashCode(newValue));
 
             UpdateVisibility();
         }
@@ -376,7 +376,7 @@ namespace Signum.Windows
             object value;
             if (Creating == null)
             {
-                Type type = SelectType(Navigator.IsFindable);
+                Type type = SelectType(t => Navigator.IsCreable(t, isSearchEntity: false));
                 if (type == null)
                     return null;
 
@@ -406,7 +406,7 @@ namespace Signum.Windows
             object value;
             if (Finding == null)
             {
-                Type type = SelectType(t => Navigator.IsCreable(t, isSearchEntity: false));
+                Type type = SelectType(Navigator.IsFindable);
                 if (type == null)
                     return null;
 

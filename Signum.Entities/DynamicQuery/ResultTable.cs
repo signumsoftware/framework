@@ -8,58 +8,265 @@ using System.Collections;
 using System.Reflection;
 using Signum.Utilities;
 using Signum.Entities.Properties;
+using System.Runtime.Serialization;
+using System.Globalization;
 
 namespace Signum.Entities.DynamicQuery
 {
     [Serializable]
-    public class ResultColumn
+    public class ResultColumn :ISerializable
     {
-        public ResultColumn(Column column, Array values)
+        Column column;
+        public Column Column
         {
-            this.Column = column;
+            get { return column; }
+        }
+
+        int index;
+        public int Index
+        {
+            get { return index; }
+            internal set { index = value; }
+        }
+
+        internal IList Values;
+
+        public ResultColumn(Column column, IList values)
+        {
+            this.column = column;
             this.Values = values;
         }
-        public Column Column { get; private set; }
-        public int Index { get; internal set; }
-        internal Array Values;
+
+
+        ResultColumn(SerializationInfo info, StreamingContext context)
+        {
+            foreach (SerializationEntry entry in info)
+            {
+                switch (entry.Name)
+                {
+                    case "column": column = (Column)entry.Value; break;
+                    case "valuesList": Values = (IList)entry.Value; break;
+                    case "valuesString": Values = Split((string)entry.Value, GetValueDeserializer()); break;
+                }
+            }
+        }
+
+        GenericInvoker<Func<int, IList>> listBuilder = new GenericInvoker<Func<int, IList>>(num => new List<int>(num));
+
+        private IList Split(string concatenated, Func<string, object> deserialize)
+        {
+            string[] splitted = concatenated.Split('|');
+
+            IList result = listBuilder.GetInvoker(column.Type)(splitted.Length);
+
+            for (int i = 1; i < splitted.Length - 1; i++)
+            {
+                string str = splitted[i];
+                if (string.IsNullOrEmpty(str))
+                    result.Add(null);
+                else
+                    result.Add(deserialize(str));
+            }
+
+            return result;
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("column", column);
+
+            Func<object, string> serializer = GetValueSerializer();
+
+            if (serializer == null)
+                info.AddValue("valuesList", Values);
+            else
+            {
+                string result = Join(Values, serializer);
+                info.AddValue("valuesString", result);
+            }
+        }
+
+        static string Join(IList values, Func<object, string> serializer)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append('|');
+            foreach (var item in values)
+            {
+                if (item != null)
+                    sb.Append(serializer(item));
+
+                sb.Append('|');
+            }
+
+            return sb.ToString();
+        }
+
+        Func<string, object> GetValueDeserializer()
+        {
+            if (column.Type.IsLite())
+            {
+                var type = column.Type.GetGenericArguments()[0];
+                return str => DeserializeLite(Decode(str), type);
+            }
+
+            if (column.Type == typeof(string))
+                return str => str == "&&" ? "&" :
+                    str == "&" ? "" : 
+                    Decode(str);
+
+            var uType = column.Type.UnNullify();
+            if (uType.IsEnum)
+            {
+                return str => Enum.ToObject(uType, int.Parse(str));
+            }
+
+            switch (Type.GetTypeCode(uType))
+            {
+                case TypeCode.Boolean: return str => str == "1";
+                case TypeCode.Byte: return str => Byte.Parse(str, CultureInfo.InvariantCulture);
+                case TypeCode.Decimal: return str => Decimal.Parse(str, CultureInfo.InvariantCulture);
+                case TypeCode.Double: return str => Double.Parse(str, CultureInfo.InvariantCulture);
+                case TypeCode.Int16: return str => Int16.Parse(str, CultureInfo.InvariantCulture);
+                case TypeCode.Int32: return str => Int32.Parse(str, CultureInfo.InvariantCulture);
+                case TypeCode.Int64: return str => Int64.Parse(str, CultureInfo.InvariantCulture);
+                case TypeCode.SByte: return str => SByte.Parse(str, CultureInfo.InvariantCulture);
+                case TypeCode.Single: return str => Single.Parse(str, CultureInfo.InvariantCulture);
+                case TypeCode.UInt16: return str => UInt16.Parse(str, CultureInfo.InvariantCulture);
+                case TypeCode.UInt32: return str => UInt32.Parse(str, CultureInfo.InvariantCulture);
+                case TypeCode.UInt64: return str => UInt32.Parse(str, CultureInfo.InvariantCulture);
+                case TypeCode.DateTime: return str => DateTime.ParseExact(str, "O", CultureInfo.InvariantCulture); 
+            }
+
+            throw new InvalidOperationException("Impossible to deserialize a ResultColumn of {0}".Formato(column.Type));
+        }
+
+        Func<object, string> GetValueSerializer()
+        {
+            if (column.Type.IsLite())
+            {
+                var type = column.Type.GetGenericArguments()[0];
+                return obj => Encode(SerializeLite(obj, type));
+            }
+            
+            if (column.Type == typeof(string))
+                return obj =>
+                {
+                    string str = (string)obj;
+                    return str == "&" ? "&&" :
+                        str == "" ? "&" :
+                        Encode(str);
+                };
+
+            if (column.Type.UnNullify().IsEnum)
+                return obj => Convert.ChangeType(obj, typeof(int)).ToString();
+            
+            switch (Type.GetTypeCode(column.Type.UnNullify()))
+            {
+                case TypeCode.Boolean: return obj => ((bool)obj) ? "1" : "0";
+                case TypeCode.Byte:
+                case TypeCode.Decimal:
+                case TypeCode.Double:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.SByte:
+                case TypeCode.Single:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64: return obj => ((IFormattable)obj).ToString(null, CultureInfo.InvariantCulture);
+                case TypeCode.DateTime: return obj => ((DateTime)obj).ToString("O", CultureInfo.InvariantCulture);
+            }
+
+            return null;
+        }
+
+        static string Encode(string p)
+        {
+            return p.Replace("{%%}", "{%%%}").Replace("|", "{%%}"); 
+        }
+
+        static string Decode(string p)
+        {
+            return p.Replace("{%%}", "|").Replace("{%%%}", "{%%}");
+        }
+
+        static string SerializeLite(object obj, Type defaultEntityType)
+        {
+            var lite = ((Lite<IdentifiableEntity>)obj);
+
+            if (lite.EntityType == defaultEntityType)
+            {
+                return lite.Id + ";" + lite.ToString();
+            }
+            else
+            {
+                return lite.Id + ";" + Lite.UniqueTypeName(lite.EntityType) + ";" + lite.ToString();
+            }
+        }
+
+        static object DeserializeLite(string str, Type defaultEntityType)
+        {
+            int id = int.Parse(str.Before(';'));
+
+            string after = str.After(';');
+
+            string type = after.TryBefore(';');
+
+            if (type == null)
+                return Lite.Create(defaultEntityType, id, toStr: after);
+            else
+                return Lite.Create(Lite.ResolveType(type), id, toStr: after.After(';'));
+        }
     }
 
     [Serializable]
-    public class ResultTable
+    public class ResultTable 
     {
-        public bool HasEntities
+        public ResultColumn entityColumn;
+        public ColumnDescription EntityColumn
         {
-            get { return entityValues != null; }
+            get { return entityColumn == null ? null : ((ColumnToken)entityColumn.Column.Token).Column; }
         }
 
-        internal Array entityValues;
-        public ColumnDescription EntityColumn { get; private set; }
-        public ResultColumn[] Columns { get; private set; }
+        public bool HasEntities
+        {
+            get { return entityColumn != null; }
+        }
 
-        public ResultRow[] Rows { get; private set; }
+        ResultColumn[] columns;
+        public ResultColumn[] Columns { get { return columns; } }
+
+        [NonSerialized]
+        ResultRow[] rows;
+        public ResultRow[] Rows { get { return rows; } }
 
         public ResultTable(ResultColumn[] columns, int totalElements, int currentPage, int elementsPerPage)
-        {
-            int rows = columns.Select(a => a.Values.Length).Distinct().SingleEx(() => "Unsyncronized number of rows in the results");
+        { 
+            this.entityColumn = columns.Where(c => c.Column is _EntityColumn).SingleOrDefaultEx();
+            this.columns = columns.Where(c => !(c.Column is _EntityColumn) && c.Column.Token.IsAllowed() == null).ToArray();
 
-            ResultColumn entityColumn = columns.Where(c => c.Column is _EntityColumn).SingleOrDefaultEx(); ;
-            if (entityColumn != null)
-            {
-                this.EntityColumn = ((ColumnToken)entityColumn.Column.Token).Column;
-                entityValues = entityColumn.Values;
-            }
-            this.Columns = columns.Where(c => !(c.Column is _EntityColumn) && c.Column.Token.IsAllowed() == null).ToArray();
+            CreateIndices(columns);
+
+            this.totalElements = totalElements;
+            this.currentPage = currentPage;
+            this.elementsPerPage = elementsPerPage;
+        }
+
+        [OnDeserialized]
+        private void OnDeserialized(StreamingContext context)
+        {
+            CreateIndices(columns);
+        }
+
+        void CreateIndices(ResultColumn[] columns)
+        {
+            int rows = columns.Select(a => a.Values.Count).Distinct().SingleEx(() => "Unsyncronized number of rows in the results");
 
             for (int i = 0; i < Columns.Length; i++)
                 Columns[i].Index = i;
 
-            this.Rows = 0.To(rows).Select(i => new ResultRow(i, this)).ToArray();
-
-            this.TotalElements = totalElements;
-            this.CurrentPage = currentPage;
-            this.ElementsPerPage = elementsPerPage;
+            this.rows = 0.To(rows).Select(i => new ResultRow(i, this)).ToArray();
         }
-
 
         public DataTable ToDataTable()
         {
@@ -81,10 +288,14 @@ namespace Signum.Entities.DynamicQuery
             return p;
         }
 
-        public int TotalElements { get; private set; }
-        public int CurrentPage { get; private set; }
+        int totalElements;
+        public int TotalElements { get { return totalElements; } }
 
-        public int ElementsPerPage { get; private set; }
+        int currentPage;
+        public int CurrentPage { get { return currentPage; } }
+
+        int elementsPerPage;
+        public int ElementsPerPage { get { return elementsPerPage; } }
 
         public int TotalPages
         {
@@ -111,12 +322,12 @@ namespace Signum.Entities.DynamicQuery
 
         public object this[int columnIndex]
         {
-            get { return Table.Columns[columnIndex].Values.GetValue(Index); }
+            get { return Table.Columns[columnIndex].Values[Index]; }
         }
 
         public object this[ResultColumn column]
         {
-            get { return column.Values.GetValue(Index); }
+            get { return column.Values[Index]; }
         }
 
         internal ResultRow(int index, ResultTable table)
@@ -127,7 +338,7 @@ namespace Signum.Entities.DynamicQuery
 
         public Lite<IdentifiableEntity> Entity
         {
-            get { return (Lite<IdentifiableEntity>)Table.entityValues.GetValue(Index); }
+            get { return (Lite<IdentifiableEntity>)Table.entityColumn.Values[Index]; }
         }
 
         public T GetValue<T>(string columnName)

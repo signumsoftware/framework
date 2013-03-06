@@ -49,4 +49,22 @@ namespace Signum.Entities.Patterns
         [Description("Attempt to modify locked entity {0}")]
         AttemptToModifyLockedEntity0
     }
+
+    public class AllowTemporalUnlock : IDisposable
+    {
+        bool locked;
+        LockableEntity Entity;
+
+        public AllowTemporalUnlock(LockableEntity entity) 
+        {
+            locked = entity.Locked;
+            Entity = entity;
+            Entity.Locked = false;
+        }
+
+        public void Dispose()
+        {
+            Entity.Locked = locked;
+        }
+    }
 }

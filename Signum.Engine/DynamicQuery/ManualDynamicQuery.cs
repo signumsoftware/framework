@@ -79,5 +79,36 @@ namespace Signum.Engine.DynamicQuery
             ParameterExpression pe = Expression.Parameter(typeof(object), "p");
             return  Expression.Lambda<Func<object, Lite<IIdentifiable>>>(TupleReflection.TupleChainProperty(pe, 0), pe).Compile();
         }, true);
+
+        public override ResultTable ExecuteQueryGroup(QueryGroupRequest request)
+        {
+            var simpleFilters = request.Filters.Where(f => !(f.Token is AggregateToken)).ToList();
+            var aggregateFilters = request.Filters.Where(f => f.Token is AggregateToken).ToList();
+
+            var keys = request.Columns.Select(t => t.Token).Where(t => !(t is AggregateToken)).ToHashSet();
+
+            var allAggregates = request.AllTokens().OfType<AggregateToken>().ToHashSet();
+
+            DEnumerableCount<T> plainCollection = Execute(new QueryRequest
+            {   
+                Columns = keys.Concat(allAggregates.Select(at => at.Parent).NotNull()).Distinct().Select(t => new Column(t, t.NiceName())).ToList(),
+                Orders = new List<Order>(),
+                Filters = simpleFilters,
+                QueryName = request.QueryName,
+                ElementsPerPage = QueryRequest.AllElements,
+            }, GetColumnDescriptions());
+
+            var groupCollection = plainCollection
+                     .GroupBy(keys, allAggregates)
+                     .Where(aggregateFilters)
+                     .OrderBy(request.Orders);
+
+            var cols = request.Columns
+                .Select(c => Tuple.Create(c, Expression.Lambda(c.Token.BuildExpression(groupCollection.Context), groupCollection.Context.Parameter))).ToList();
+
+            var values = groupCollection.Collection.ToArray();
+
+            return values.ToResultTable(cols, values.Length, 0, QueryRequest.AllElements);
+        }
     }
 }

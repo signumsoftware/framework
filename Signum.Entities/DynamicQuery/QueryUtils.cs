@@ -201,20 +201,53 @@ namespace Signum.Entities.DynamicQuery
 
         public static Func<bool> MergeEntityColumns = null;
 
-        public static List<QueryToken> SubTokens(QueryToken token, IEnumerable<ColumnDescription> columnDescriptions)
+        public static List<QueryToken> SubTokens(this QueryToken token, QueryDescription qd, bool canAggregate)
+        {
+            var result = SubTokensBasic(token, qd);
+
+            if (canAggregate)
+            {
+                if (token == null)
+                {
+                    result.Add(new AggregateToken(null, AggregateFunction.Count));
+                }
+                else if (!(token is AggregateToken))
+                {
+                    FilterType? ft = QueryUtils.TryGetFilterType(token.Type);
+
+                    if (ft == FilterType.Integer || ft == FilterType.Decimal || ft == FilterType.Boolean)
+                    {
+                        result.Add(new AggregateToken(token, AggregateFunction.Average));
+                        result.Add(new AggregateToken(token, AggregateFunction.Sum));
+
+                        result.Add(new AggregateToken(token, AggregateFunction.Min));
+                        result.Add(new AggregateToken(token, AggregateFunction.Max));
+                    }
+                    else if (ft == FilterType.DateTime) /*ft == FilterType.String || */
+                    {
+                        result.Add(new AggregateToken(token, AggregateFunction.Min));
+                        result.Add(new AggregateToken(token, AggregateFunction.Max));
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        static List<QueryToken> SubTokensBasic(QueryToken token, QueryDescription qd)
         {
             if (token == null)
             {
                 if (MergeEntityColumns != null && !MergeEntityColumns())
-                    return columnDescriptions.Select(s => QueryToken.NewColumn(s)).ToList();
+                    return qd.Columns.Select(s => QueryToken.NewColumn(s)).ToList();
 
-                var dictonary = columnDescriptions.Where(a=>!a.IsEntity).Select(s => QueryToken.NewColumn(s)).ToDictionary(t => t.Key);
+                var dictonary = qd.Columns.Where(a => !a.IsEntity).Select(s => QueryToken.NewColumn(s)).ToDictionary(t => t.Key);
 
-                var entity = QueryToken.NewColumn(columnDescriptions.SingleEx(a => a.IsEntity));
+                var entity = QueryToken.NewColumn(qd.Columns.SingleEx(a => a.IsEntity));
 
                 dictonary.Add(entity.Key, entity);
 
-                foreach (var item in entity.SubTokens().OrderBy(a => a.ToString()))
+                foreach (var item in entity.SubTokensInternal().OrderBy(a => a.ToString()))
                 {
                     if (!dictonary.ContainsKey(item.Key))
                     {
@@ -226,15 +259,10 @@ namespace Signum.Entities.DynamicQuery
                 return dictonary.Values.ToList();
             }
             else
-                return token.SubTokens();
+                return token.SubTokensInternal();
         }
 
-        public static QueryToken Parse(string tokenString, QueryDescription qd)
-        {
-            return Parse(tokenString, t => SubTokens(t, qd.Columns)); 
-        }
-
-        public static QueryToken Parse(string tokenString, Func<QueryToken, List<QueryToken>> subTokens)
+        public static QueryToken Parse(string tokenString, QueryDescription qd, bool canAggregate)
         {
             try
             {
@@ -245,15 +273,15 @@ namespace Signum.Entities.DynamicQuery
 
                 string firstPart = parts.FirstEx();
 
-                QueryToken result = subTokens(null).Select(t => t.MatchPart(firstPart)).NotNull().SingleEx(
-                    ()=>QueryTokenMessage.Column0NotFound.NiceToString().Formato(firstPart),
-                    () => QueryTokenMessage.MoreThanOneColumnNamed0.NiceToString().Formato(firstPart));
+                QueryToken result = SubTokens(null, qd, canAggregate).Where(t => t.Key == firstPart).SingleEx(
+                    () => "Column {0} not found".Formato(firstPart),
+                    () => "More than one column named {0}".Formato(firstPart));
 
                 foreach (var part in parts.Skip(1))
                 {
-                    var list = subTokens(result);
+                    var list = SubTokens(result, qd, canAggregate);
 
-                    result = list.Select(t => t.MatchPart(part)).NotNull().SingleEx(
+                    result = list.Where(t => t.Key == part).SingleEx(
                           () => "Token with key '{0}' not found on {1}".Formato(part, result),
                           () => "More than one token with key '{0}' found on {1}".Formato(part, result));
                 }

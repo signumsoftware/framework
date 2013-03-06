@@ -35,11 +35,13 @@ namespace Signum.Windows.Operations
             Description = () => OperationMessage.Create.NiceToString(),
             SimplifyName = cs => Regex.Replace(cs, OperationMessage.CreateFromRegex.NiceToString(), m => m.Groups[1].Value, RegexOptions.IgnoreCase),
             Background = Brushes.Green,
+            AutomationName = "Create"
         }; 
 
         public Func<string> Description;
         public Func<string, string> SimplifyName;
         public Brush Background;
+        public string AutomationName; 
     }
 
     public class EntityOperationSettings : OperationSettings

@@ -50,7 +50,7 @@ namespace Signum.Entities.DynamicQuery
             return result.BuildLite().Nullify();
         }
 
-        protected override List<QueryToken> SubTokensInternal()
+        protected override List<QueryToken> SubTokensOverride()
         {
             return SubTokensBase(PropertyInfo.PropertyType, GetImplementations());
         }

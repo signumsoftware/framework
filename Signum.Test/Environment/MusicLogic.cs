@@ -146,12 +146,7 @@ namespace Signum.Test.Environment
                                        a.Name,
                                        Lonely = a.Lonely(),
                                        LastAward = a.LastAward.ToLite()
-                                   }).ToDQueryable(descriptions)
-                                    .SelectMany(request.Multiplications)
-                                    .Where(request.Filters)
-                                    .OrderBy(request.Orders)
-                                    .Select(request.Columns)
-                                    .TryPaginatePartial(request.MaxElementIndex);
+                                   }).ToDQueryable(descriptions).AllQueryOperations(request);
 
                         var two = (from a in Database.Query<BandDN>()
                                    select new
@@ -162,12 +157,7 @@ namespace Signum.Test.Environment
                                        a.Name,
                                        Lonely = a.Lonely(),
                                        LastAward = a.LastAward.ToLite()
-                                   }).ToDQueryable(descriptions)
-                                    .SelectMany(request.Multiplications)
-                                    .Where(request.Filters)
-                                    .OrderBy(request.Orders)
-                                    .Select(request.Columns)
-                                    .TryPaginatePartial(request.MaxElementIndex);
+                                   }).ToDQueryable(descriptions).AllQueryOperations(request);
 
                         return one.Concat(two).OrderBy(request.Orders).TryPaginate(request.ElementsPerPage, request.CurrentPage);
 

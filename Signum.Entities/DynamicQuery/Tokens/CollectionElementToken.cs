@@ -16,8 +16,8 @@ namespace Signum.Entities.DynamicQuery
     public class CollectionElementToken : QueryToken
     {
         public CollectionElementType CollectionElementType { get; private set; }
-        Type elementType;
 
+        Type elementType;
         internal CollectionElementToken(QueryToken parent, CollectionElementType type)
             : base(parent)
         {
@@ -43,7 +43,7 @@ namespace Signum.Entities.DynamicQuery
             get { return CollectionElementType.ToString(); }
         }
 
-        protected override List<QueryToken> SubTokensInternal()
+        protected override List<QueryToken> SubTokensOverride()
         {
             return SubTokensBase(Type, GetImplementations());
         }

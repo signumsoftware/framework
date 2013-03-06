@@ -13,6 +13,8 @@ using System.Windows.Shapes;
 using System.Windows.Controls.Primitives;
 using Signum.Utilities;
 using Signum.Entities;
+using System.Windows.Automation;
+using System.Windows.Automation.Peers;
 
 namespace Signum.Windows
 {
@@ -98,7 +100,9 @@ namespace Signum.Windows
         {
             InitializeComponent();
 
-            this.Message = SearchMessage.SelectAnElement.NiceToString();
+			AutomationProperties.SetName(this, "SelectorWindow");
+            
+			this.Message = SearchMessage.SelectAnElement.NiceToString();
         }
 
         private void ToggleButton_Checked(object sender, RoutedEventArgs e)
@@ -106,6 +110,23 @@ namespace Signum.Windows
             SelectedElement = ((ElementInfo)((ToggleButton)sender).DataContext).Element;
             DialogResult = true;
             Close();
+        }
+
+        protected override AutomationPeer OnCreateAutomationPeer()
+        {
+            return new SelectorWindowAutomationPeer(this);
+        }
+    }
+
+    public class SelectorWindowAutomationPeer : WindowAutomationPeer
+    {
+        public SelectorWindowAutomationPeer(SelectorWindow selectorWindow) : base(selectorWindow)
+        {
+        }
+
+        protected override string GetClassNameCore()
+        {
+            return "SelectorWindow";
         }
     }
 }

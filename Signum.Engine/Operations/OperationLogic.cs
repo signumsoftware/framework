@@ -145,7 +145,7 @@ namespace Signum.Engine.Operations
                           let sp = IsSaveProtected(t)
                           select et == null ? "{0} has no EntityTypeAttribute set".Formato(t.FullName) :
                           sp != RequiresSaveProtected(et.Value) ? "{0} is {1} but is {2}save protected".Formato(t.FullName, et, sp ? "" : "NOT ") :
-                          null).NotNull().Order().ToString("\r\n");
+                          null).NotNull().OrderBy().ToString("\r\n");
 
             if (errors.HasText())
                 throw new InvalidOperationException("EntitySetting - SaveProtected inconsistencies: \r\n" + errors);
@@ -194,7 +194,7 @@ namespace Signum.Engine.Operations
 
         static void EntityEventsGlobal_Saving(IdentifiableEntity ident)
         {
-            if (ident.Modified == true && 
+            if (ident.IsGraphModified && 
                 IsSaveProtected(ident.GetType()) && 
                 !IsSaveProtectedAllowed(ident.GetType()))
                 throw new InvalidOperationException("Saving '{0}' is controlled by the operations. Use OperationLogic.AllowSave<{0}>() or execute {1}".Formato(
@@ -478,7 +478,7 @@ namespace Signum.Engine.Operations
         {
             if (result.Lite)
             {
-                var list = GraphExplorer.FromRoot(entity).Where(a => a.SelfModified);
+                var list = GraphExplorer.FromRoot(entity).Where(a => a.Modified == ModifiedState.SelfModified);
                 if (list.Any())
                     throw new InvalidOperationException("Operation {0} needs a Lite or a clean entity, but the entity has changes:\r\n {1}".Formato(result.Key, list.ToString("\r\n")));
             }

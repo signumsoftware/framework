@@ -153,14 +153,14 @@ namespace Signum.Windows
             else if (e.Key == Key.Tab)
             {
                 if (lstBox.SelectedItem != null)
-                    Commit(CloseReason.Tab);
+                    e.Handled = Commit(CloseReason.Tab);
                 else if (lstBox.Items.Count == 1)
                 {
                     MoveDown();
-                    Commit(CloseReason.Tab);
+                    e.Handled = Commit(CloseReason.Tab);
                 }
                 else
-                    Close(CloseReason.TabExit);
+                    e.Handled = Close(CloseReason.TabExit);
                 
                 //e.Handled = true;
             }
@@ -216,7 +216,7 @@ namespace Signum.Windows
             return false;
         }
 
-        public void Close(CloseReason reason)
+        public bool Close(CloseReason reason)
         {
             pop.IsOpen = false;
             if (SelectedItem.TryToString() != txtBox.Text)
@@ -226,21 +226,27 @@ namespace Signum.Windows
                 else if (AllowFreeText)
                     SelectedItem = txtBox.Text;
             }
-            RaiseEvent(new CloseEventArgs(reason));
+            var args = new CloseEventArgs(reason);
+            RaiseEvent(args);
+            return args.Handled;
         }
 
 
-        void Commit(CloseReason reason)
+        bool Commit(CloseReason reason)
         {
             pop.IsOpen = false;
             if (lstBox.SelectedItem != null)
             {
                 SelectedItem = lstBox.SelectedItem;
 
-                Close(reason); 
+                var result = Close(reason); 
 
                 itemsSelected = true;
+
+                return result;
             }
+
+            return false;
         }
 
         private void txtBox_GotFocus(object sender, RoutedEventArgs e)

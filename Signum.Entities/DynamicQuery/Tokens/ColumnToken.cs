@@ -11,7 +11,8 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class ColumnToken : QueryToken
     {
-        public ColumnDescription Column { get; private set; }
+        ColumnDescription column;
+        public ColumnDescription Column { get { return column; } }
 
         internal ColumnToken(ColumnDescription column)
             : base(null)
@@ -19,7 +20,7 @@ namespace Signum.Entities.DynamicQuery
             if (column == null)
                 throw new ArgumentNullException("column");
 
-            this.Column = column;
+            this.column = column;
         }
 
         public override string Key
@@ -52,7 +53,7 @@ namespace Signum.Entities.DynamicQuery
             throw new InvalidOperationException("BuildExpressionInternal not supported for ColumnToken");
         }
 
-        protected override List<QueryToken> SubTokensInternal()
+        protected override List<QueryToken> SubTokensOverride()
         {
             if (Column.Type.UnNullify() == typeof(DateTime))
             {
@@ -111,7 +112,7 @@ namespace Signum.Entities.DynamicQuery
             get
             {
                 if (Column.IsEntity)
-                    return "#0000FF";
+                    return "#2B78AF";
 
                 return base.TypeColor;
             }

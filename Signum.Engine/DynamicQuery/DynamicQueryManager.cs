@@ -79,6 +79,12 @@ namespace Signum.Engine.DynamicQuery
                 return queries[request.QueryName].Core.Value.ExecuteQueryCount(request);
         }
 
+        internal ResultTable ExecuteGroupQuery(QueryGroupRequest request)
+        {
+            using (ExecutionMode.UserInterface())
+                return queries[request.QueryName].Core.Value.ExecuteQueryGroup(request);
+        }
+
         public Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request)
         {
             using (ExecutionMode.UserInterface())
@@ -233,6 +239,9 @@ namespace Signum.Engine.DynamicQuery
 
                 if (r is UniqueEntityRequest)
                     return ExecuteUniqueEntity((UniqueEntityRequest)r);
+
+                if (r is QueryGroupRequest)
+                    return ExecuteGroupQuery((QueryGroupRequest)r);
 
                 return (object)null;
             }).ToArray(); 

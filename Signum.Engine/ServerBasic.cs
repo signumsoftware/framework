@@ -117,13 +117,6 @@ namespace Signum.Services
                 () => Schema.Current.TypeToDN);
         }
 
-
-        public Dictionary<Type, EntityKind> EntityKinds()
-        {
-            return Return(MethodInfo.GetCurrentMethod(),
-                 () => TypeLogic.EntityKinds);
-        }
-
         public virtual DateTime ServerNow()
         {
             return Return(MethodInfo.GetCurrentMethod(),
@@ -148,6 +141,12 @@ namespace Signum.Services
         {
             return Return(MethodInfo.GetCurrentMethod(), request.QueryName.ToString(),
                 () => DynamicQueryManager.Current.ExecuteQuery(request));
+        }
+
+        public ResultTable ExecuteQueryGroup(QueryGroupRequest request)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), request.QueryName.ToString(),
+                () => DynamicQueryManager.Current.ExecuteGroupQuery(request));
         }
 
         public virtual int ExecuteQueryCount(QueryCountRequest request)
@@ -255,7 +254,5 @@ namespace Signum.Services
         }
 
         #endregion
-
-
     }
 }

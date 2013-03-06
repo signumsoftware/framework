@@ -484,6 +484,12 @@ namespace Signum.Engine.Linq
                 }
             }
 
+            if (select.ForXmlPathEmpty)
+            {
+                this.AppendNewLine(Indentation.Same);
+                sb.Append("FOR XML PATH('')");
+            }
+
             if (!isFirst)
             {
                 sb.Append(")");

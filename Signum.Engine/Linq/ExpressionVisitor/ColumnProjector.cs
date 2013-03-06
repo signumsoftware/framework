@@ -92,7 +92,16 @@ namespace Signum.Engine.Linq
                 }
                 else
                 {
-                    return generator.NewColumn(expression).GetReference(newAlias); ;
+                    if (expression.Type.UnNullify().IsEnum)
+                    {
+                        var convert = expression.TryConvert(expression.Type.IsNullable() ? typeof(int?) : typeof(int));
+
+                        return generator.NewColumn(convert).GetReference(newAlias).TryConvert(expression.Type);
+                    }
+                    else
+                    {
+                        return generator.NewColumn(expression).GetReference(newAlias);
+                    }
                 }
             }
             else
@@ -111,7 +120,7 @@ namespace Signum.Engine.Linq
         public ColumnGenerator(IEnumerable<ColumnDeclaration> columns)
         {
             foreach (var item in columns)
-                this.columns.Add(item.Name, item);
+                this.columns.Add(item.Name ?? "-", item);
         }
 
         public IEnumerable<ColumnDeclaration> Columns { get { return columns.Values; } }
