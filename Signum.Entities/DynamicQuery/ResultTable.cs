@@ -117,12 +117,12 @@ namespace Signum.Entities.DynamicQuery
             var uType = column.Type.UnNullify();
             if (uType.IsEnum)
             {
-                return str => Enum.Parse(uType, str);
+                return str => Enum.ToObject(uType, int.Parse(str));
             }
 
             switch (Type.GetTypeCode(uType))
             {
-                case TypeCode.Boolean: return str => Boolean.Parse(str);
+                case TypeCode.Boolean: return str => str == "1";
                 case TypeCode.Byte: return str => Byte.Parse(str, CultureInfo.InvariantCulture);
                 case TypeCode.Decimal: return str => Decimal.Parse(str, CultureInfo.InvariantCulture);
                 case TypeCode.Double: return str => Double.Parse(str, CultureInfo.InvariantCulture);
@@ -158,11 +158,11 @@ namespace Signum.Entities.DynamicQuery
                 };
 
             if (column.Type.UnNullify().IsEnum)
-                return obj => obj.ToString();
+                return obj => Convert.ChangeType(obj, typeof(int)).ToString();
             
             switch (Type.GetTypeCode(column.Type.UnNullify()))
             {
-                case TypeCode.Boolean: return obj => obj.ToString();
+                case TypeCode.Boolean: return obj => ((bool)obj) ? "1" : "0";
                 case TypeCode.Byte:
                 case TypeCode.Decimal:
                 case TypeCode.Double:
