@@ -93,31 +93,38 @@ namespace Signum.Windows.Alerts
             }
 
             tbAlerts.FontWeight = FontWeights.Normal;
-            CountAlerts(entity, "Future", AlertMessage.FutureAlerts.NiceToString(), btnFutureAlerts);
-            CountAlerts(entity, "Attended",  AlertMessage.CheckedAlerts.NiceToString(), btnCheckedAlerts);
-            CountAlerts(entity, "NotAttended", AlertMessage.WarnedAlerts.NiceToString(), btnWarnedAlerts);
+
+            CountAlerts(entity);
         }
 
-        void CountAlerts(IdentifiableEntity entity, string filterColumn, string resource, Button button)
+        void CountAlerts(IdentifiableEntity entity)
         {
-            Navigator.QueryCountBatch(new CountOptions(typeof(AlertDN))
+            DynamicQueryServer.QueryGroupBatch(new QueryGroupOptions(typeof(AlertDN))
             {
                 FilterOptions = new List<FilterOption>
                 {
                     new FilterOption("Target" , DataContext),
-                    new FilterOption("Entity." + filterColumn, true),
+                },
+                ColumnOptions = new List<ColumnOption>
+                {
+                    new ColumnOption("Entity.CurrentState"),
+                    new ColumnOption("Count")
+                },
+                OrderOptions = new List<OrderOption>
+                {
+                    new OrderOption("Entity.CurrentState"),
                 }
             },
-            count =>
+            resultTable =>
             {
-                if (count == 0)
+                if (resultTable.Rows.Length == 0)
                 {
-                    button.Visibility = Visibility.Collapsed;
+                    icAlerts.Visibility = Visibility.Collapsed;
                 }
                 else
                 {
-                    button.Visibility = Visibility.Visible;
-                    button.Content = "{0} ({1})".Formato(resource, count);
+                    icAlerts.Visibility = Visibility.Visible;
+                    icAlerts.ItemsSource = resultTable.Rows;
 
                     tbAlerts.FontWeight = FontWeights.Bold;
 
@@ -133,11 +140,9 @@ namespace Signum.Windows.Alerts
                 return;
 
             IdentifiableEntity entity = DataContext as IdentifiableEntity;
+            ResultRow row = (ResultRow)((Button)sender).DataContext;
 
-            string field =
-                sender == btnFutureAlerts ? "Future" :
-                sender == btnCheckedAlerts ? "Attended" :
-                sender == btnWarnedAlerts ? "NotAttended" : null;
+            AlertCurrentState state = (AlertCurrentState)row[0];
 
             Navigator.Explore(new ExploreOptions(typeof(AlertDN))
             {
@@ -146,7 +151,7 @@ namespace Signum.Windows.Alerts
                 FilterOptions = 
                 { 
                     new FilterOption("Target", entity) { Frozen = true }, 
-                    new FilterOption("Entity." + field, true)
+                    new FilterOption("Entity.CurrentState", state)
                 },
                 ColumnOptions = { new ColumnOption("Target") },
                 ColumnOptionsMode = ColumnOptionsMode.Remove,

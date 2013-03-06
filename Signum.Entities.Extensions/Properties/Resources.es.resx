@@ -1717,7 +1717,7 @@
     <value>Buscar entre 'apóstrofe' hará consultas a la base de datos</value>
   </data>
   <data name="Omnibox_Disambiguate" xml:space="preserve">
-    <value>Con Mayús+entrar eliminará la ambigüedad de la consulta</value>
+    <value>Con [Tab] eliminará la ambigüedad de la consulta</value>
   </data>
   <data name="Omnibox_Field" xml:space="preserve">
     <value>Campo</value>

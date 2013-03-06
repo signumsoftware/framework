@@ -9,6 +9,8 @@ using Signum.Entities;
 using Signum.Engine.Basics;
 using System.Windows;
 using Signum.Entities.Basics;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace Signum.Windows.UIAutomation
 {
@@ -19,6 +21,8 @@ namespace Signum.Windows.UIAutomation
         public SearchWindowProxy(AutomationElement element)
             : base(element)
         {
+            element.AssertClassName("SearchWindow");
+
             SearchControl = new SearchControlProxy(element.ChildById("searchControl"));
         }
 
@@ -41,6 +45,13 @@ namespace Signum.Windows.UIAutomation
         {
             SearchControl.Search();
         }
+       
+        public SearchWindowProxy SearchSelectAt(int index)
+        {
+            Search();
+            SelectElementAt(index);
+            return this;
+        }
 
         public void WaitSearch()
         {
@@ -54,7 +65,7 @@ namespace Signum.Windows.UIAutomation
 
         public NormalWindowProxy<T> ViewElementAt<T>(int index) where T : IdentifiableEntity
         {
-            return SearchControl.ViewElementAt<T>(index); 
+            return SearchControl.ViewElementAt<T>(index);
         }
 
         public void SelectElementAt(int index)
@@ -122,7 +133,7 @@ namespace Signum.Windows.UIAutomation
             this.Element = element;
             this.HeaderMap = new ResetLazy<Dictionary<string, int>>(() =>
                 HeaderItems
-                .Select((e, i) => KVP.Create(e.Current.ItemStatus, i))
+                .Select((e, i) => KVP.Create(e.Current.Name, i))
                 .AgGroupToDictionary(a => a.Key, gr => gr.First().Value));
         }
 
@@ -133,7 +144,7 @@ namespace Signum.Windows.UIAutomation
             var tb = Element.ChildById("tokenBuilder");
 
             for (int i = 0; i < tokens.Length; i++)
-			{
+            {
                 List<AutomationElement> combos = null;
 
                 tb.Wait(() =>
@@ -142,7 +153,7 @@ namespace Signum.Windows.UIAutomation
                     return combos.Count > i;
                 }, () => "Finding combo for token " + token[i] + (i == 0 ? "" : " after token {0}".Formato(token[i - 1])));
 
-                combos[i].ComboSelectItem(a => a.Current.ItemStatus == tokens[i]);
+                combos[i].ComboSelectItem(a => a.Current.Name == tokens[i]);
             }
         }
 
@@ -155,7 +166,7 @@ namespace Signum.Windows.UIAutomation
         {
             TreeWalker tw = new TreeWalker(ConditionBuilder.ToCondition(ae => ae.Current.ClassName == "FilterLine"));
 
-            var filterLine =  tw.GetLastChild(FilterBuilderControl);
+            var filterLine = tw.GetLastChild(FilterBuilderControl);
 
             if (filterLine == null)
                 throw new ElementNotAvailableException("Last FilterLine not found");
@@ -165,21 +176,21 @@ namespace Signum.Windows.UIAutomation
 
         public AutomationElement FilterBuilderControl
         {
-            get{ return Element.ChildById("filterBuilder");}
+            get { return Element.ChildById("filterBuilder"); }
         }
 
         public AutomationElement SearchButton
         {
-            get{ return Element.ChildById("btFind");}
+            get { return Element.ChildById("btFind"); }
         }
 
         public List<AutomationElement> HeaderItems
         {
-            get 
+            get
             {
                 return Element.Descendants(e => e.Current.ControlType == ControlType.HeaderItem);
             }
-        
+
         }
 
         public void Search()
@@ -191,11 +202,12 @@ namespace Signum.Windows.UIAutomation
         public void WaitSearch()
         {
             Element.Wait(
-                () =>{
-                        Element.AssertMessageBoxChild();
-                        return SearchButton.Current.IsEnabled;
-                     },
-                () => "Waiting after search on SearchControl {0}".Formato(Element.Current.ItemStatus));
+                () =>
+                {
+                    Element.AssertMessageBoxChild();
+                    return SearchButton.Current.IsEnabled;
+                },
+                () => "Waiting after search on SearchControl {0}".Formato(Element.Current.Name));
         }
 
         public FilterOptionProxy AddFilterString(string token, FilterOperation operation, string value)
@@ -218,9 +230,9 @@ namespace Signum.Windows.UIAutomation
             SelectToken(token);
 
             var win = Element.CaptureChildWindow(() => Element.ChildById("btCreateColumn").ButtonInvoke(),
-                () => "Adding new column for {0} on SearchControl {1}".Formato(token, Element.Current.ItemStatus));
+                () => "Adding new column for {0} on SearchControl {1}".Formato(token, Element.Current.Name));
 
-            using(WindowProxy wp = new WindowProxy(win))
+            using (WindowProxy wp = new WindowProxy(win))
             {
                 if (displayName != null)
                     wp.Element.Descendant(a => a.Current.ControlType == ControlType.Edit).Pattern<ValuePattern>().SetValue(displayName);
@@ -231,30 +243,36 @@ namespace Signum.Windows.UIAutomation
 
         public NormalWindowProxy<T> Navigate<T>(int? timeOut = null) where T : IdentifiableEntity
         {
+            if (NavigateButton.Current.IsOffscreen)
+                throw new InvalidOperationException("Navigate button not visible on SearchControl {0}".Formato(Element.Current.Name));
+
             var win = Element.CaptureWindow(
                 () => NavigateButton.ButtonInvoke(),
-                () => "View selected entity on SearchControl ({0})".Formato(Element.Current.ItemStatus), timeOut);
+                () => "Navigate selected entity on SearchControl ({0})".Formato(Element.Current.Name), timeOut);
 
             return new NormalWindowProxy<T>(win);
         }
 
-        public NormalWindowProxy<T> Create<T>() where T:IdentifiableEntity
+        public NormalWindowProxy<T> Create<T>() where T : IdentifiableEntity
         {
-            return new NormalWindowProxy<T>(CreateCapture());
+            return CreateCapture().ToNormalWindow<T>();
         }
 
         public AutomationElement CreateCapture(int? timeOut = null)
         {
+            if (CreateButton.Current.IsOffscreen)
+                throw new InvalidOperationException("Create button not visible on SearchControl {0}".Formato(Element.Current.Name));
+
             var win = Element.CaptureWindow(
                 () => CreateButton.ButtonInvoke(),
-                () => "Create a new entity on SearchControl ({0})".Formato(Element.Current.ItemStatus), timeOut);
+                () => "Create a new entity on SearchControl ({0})".Formato(Element.Current.Name), timeOut);
 
             return win;
         }
 
         public AutomationElement CreateButton
         {
-            get{return Element.ChildById("btCreate");}
+            get { return Element.ChildById("btCreate"); }
         }
 
         public AutomationElement NavigateButton
@@ -280,11 +298,11 @@ namespace Signum.Windows.UIAutomation
 
         public void SortColumn(string token, OrderType orderType)
         {
-            var columnHeader = ResultColumns.Child(a => a.Current.ControlType == ControlType.HeaderItem && a.Current.ItemStatus == token);
+            var columnHeader = ResultColumns.Child(a => a.Current.ControlType == ControlType.HeaderItem && a.Current.Name == token);
 
             columnHeader.ButtonInvoke();
 
-            while (columnHeader.Current.HelpText != orderType.ToString())
+            while (columnHeader.Current.ItemStatus != orderType.ToString())
                 columnHeader.ButtonInvoke();
 
             WaitSearch();
@@ -317,11 +335,11 @@ namespace Signum.Windows.UIAutomation
 
         public class ListViewItemProxy
         {
-            public ListViewItemProxy( AutomationElement element, SearchControlProxy sc)
+            public ListViewItemProxy(AutomationElement element, SearchControlProxy sc)
             {
                 this.Element = element;
-                this.SearchControl = sc; 
-                this.Columns = element.Children(a=>a.Current.ClassName =="ContentPresenter");
+                this.SearchControl = sc;
+                this.Columns = element.Children(a => a.Current.ClassName == "ContentPresenter");
             }
 
             public SearchControlProxy SearchControl { get; private set; }
@@ -333,7 +351,7 @@ namespace Signum.Windows.UIAutomation
             public AutomationElement Column(string tokenName)
             {
                 return Columns[SearchControl.HeaderMap.Value.GetOrThrow(tokenName,
-                    tb => new KeyNotFoundException("{0} not found on query {1}".Formato(tb, SearchControl.Element.Current.ItemStatus)))];
+                    tb => new ElementNotFoundException("{0} not found on query {1}".Formato(tb, SearchControl.Element.Current.Name)))];
             }
         }
 
@@ -342,7 +360,7 @@ namespace Signum.Windows.UIAutomation
             var rows = GetRows();
 
             if (rows.Count <= index)
-                throw new IndexOutOfRangeException("Row with index {0} not found, only {1} results on SearchControl {2}".Formato(index, rows.Count, Element.Current.ItemStatus));
+                throw new IndexOutOfRangeException("Row with index {0} not found, only {1} results on SearchControl {2}".Formato(index, rows.Count, Element.Current.Name));
 
             var row = rows[index];
             return row;
@@ -395,7 +413,7 @@ namespace Signum.Windows.UIAutomation
 
         public string QueryNameKey
         {
-            get { return Element.Current.ItemStatus; }
+            get { return Element.Current.Name; }
         }
 
         public object QueryName
@@ -412,7 +430,12 @@ namespace Signum.Windows.UIAutomation
 
         public AutomationElement GetOperationButton(Enum operationKey)
         {
-            return Element.Child(a => a.Current.ItemStatus == OperationDN.UniqueKey(operationKey));
+            return Element.Child(a => a.Current.ControlType == ControlType.Button && a.Current.Name == OperationDN.UniqueKey(operationKey));
+        }
+
+        public AutomationElement TryGetOperationButton(Enum operationKey)
+        {
+            return Element.TryChild(a => a.Current.ControlType == ControlType.Button && a.Current.Name == OperationDN.UniqueKey(operationKey));
         }
 
         public void ValidateHeadersItems()
@@ -420,21 +443,30 @@ namespace Signum.Windows.UIAutomation
             StringBuilder sb = new StringBuilder();
 
             foreach (var columnHeader in HeaderItems)
-	        {
+            {
                 try
                 {
                     columnHeader.ButtonInvoke();
+
+                    var mb = Element.TryMessageBoxChild();
+                    if (mb != null && !mb.IsError) //Not order
+                    {
+                        mb.OkButton.ButtonInvoke();
+
+                        continue;
+                    }
+
                     WaitSearch();
                 }
                 catch (MessageBoxErrorException e)
                 {
-                    sb.AppendFormat("{0} ==> {1}\r\n", columnHeader.Current.ItemStatus, e.Message);
+                    sb.AppendFormat("Query '{0}' Column '{1}':\r\n{2}", Element.Current.Name, columnHeader.Current.Name, e.Message);
                 }
-	        }
+            }
 
             if (sb.Length > 0)
                 throw new MessageBoxErrorException(sb.ToString());
-        
+
         }
     }
 
@@ -514,9 +546,15 @@ namespace Signum.Windows.UIAutomation
 
         public static SearchControlProxy GetSearchControl(this AutomationElement element, object queryName)
         {
-            var sc = element.Descendant(a => a.Current.ClassName == "SearchControl" && a.Current.ItemStatus == QueryUtils.GetQueryUniqueKey(queryName));
+            var sc = element.Descendant(a => a.Current.ClassName == "SearchControl" && a.Current.Name == QueryUtils.GetQueryUniqueKey(queryName));
 
             return new SearchControlProxy(sc);
         }
+
+        public static SearchWindowProxy ToSearchWindow(this AutomationElement element)
+        {
+            return new SearchWindowProxy(element);
+        }
+
     }
 }

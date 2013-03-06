@@ -133,7 +133,7 @@ namespace Signum.Engine.Processes
 
         static void ProcessExecution_Saving(ProcessExecutionDN pe)
         {
-            if (pe.Modified.Value)
+            if (pe.IsGraphModified)
                 Transaction.PostRealCommit += ud =>
                 {
                     switch (pe.State)
@@ -210,7 +210,7 @@ namespace Signum.Engine.Processes
                 throw new InvalidOperationException("ProcessLogic is running");
 
             using (ExecutionMode.Global())
-            using (new EntityCache(true))
+            using (new EntityCache(EntityCacheType.ForceNew))
             {
                 var pes = (from pe in Database.Query<ProcessExecutionDN>()
                            where pe.State == ProcessState.Executing ||
@@ -292,7 +292,7 @@ namespace Signum.Engine.Processes
 
         static void RefreshPlan()
         {
-            using (new EntityCache(true))
+            using (new EntityCache(EntityCacheType.ForceNew))
             using (AuthLogic.Disable())
             {
                 nextPlannedExecution = Database.Query<ProcessExecutionDN>()
@@ -317,7 +317,7 @@ namespace Signum.Engine.Processes
 
         static void DispatchEvents(object obj)
         {
-            using (new EntityCache(true))
+            using (new EntityCache(EntityCacheType.ForceNew))
             using (AuthLogic.Disable())
             {
                 var pes = (from pe in Database.Query<ProcessExecutionDN>()

@@ -23,17 +23,6 @@ namespace Signum.Engine.Cache
 {
     public abstract class CachedTableBase
     {
-        protected static ConstructorInfo ciKVPIntString = ReflectionTools.GetConstuctorInfo(() => new KeyValuePair<int, string>(1, ""));
-        protected static Action<Modifiable> resetModifiedAction;
-        static CachedTableBase()
-        {
-            ParameterExpression param = Expression.Parameter(typeof(Modifiable));
-            var piModified = ReflectionTools.GetPropertyInfo((Modifiable me) => me.Modified);
-            resetModifiedAction = Expression.Lambda<Action<Modifiable>>(
-                Expression.Assign(Expression.Property(param, piModified), Expression.Constant(null, typeof(bool?))),
-                param).Compile();
-        }
-
         public abstract ITable Table { get; }
 
         List<CachedTableBase> subTables;
@@ -137,9 +126,7 @@ namespace Signum.Engine.Cache
             public ITable table;
 
             public ParameterExpression origin;
-            public ParameterExpression originObject;
-            public ParameterExpression retriever;
-
+        
             public AliasGenerator aliasGenerator;
             public Alias currentAlias;
             public Type tupleType;
@@ -155,8 +142,6 @@ namespace Signum.Engine.Cache
 
                 this.tupleType = TupleReflection.TupleChainType(table.Columns.Values.Select(GetColumnType));
 
-                this.retriever = Expression.Parameter(typeof(IRetriever), "retriever");
-                this.originObject = Expression.Parameter(typeof(object), "originObject");
                 this.origin = Expression.Parameter(tupleType, "origin");
             }
 
@@ -330,7 +315,8 @@ namespace Signum.Engine.Cache
                     Expression lite;
                     if (CacheLogic.GetCacheType(type) == CacheType.Cached)
                     {
-                        lite = Expression.Call(retriever, miRequestLite.MakeGenericMethod(type), Lite.NewExpression(type, id.UnNullify(), Expression.Constant(null, typeof(string))));
+                        lite = Expression.Call(retriever, miRequestLite.MakeGenericMethod(type),
+                            Lite.NewExpression(type, id.UnNullify(), Expression.Constant(null, typeof(string)), peModified));
                     }
                     else
                     {
@@ -343,7 +329,7 @@ namespace Signum.Engine.Cache
 
                         cachedTable.subTables.Add(ctb);
 
-                        lite = Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod("GetLite"), id.UnNullify());
+                        lite = Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod("GetLite"), id.UnNullify(), retriever);
                     }
 
                     if (!id.Type.IsNullable())
@@ -380,9 +366,31 @@ namespace Signum.Engine.Cache
             static MethodInfo miRequest = ReflectionTools.GetMethodInfo((IRetriever r) => r.Request<IdentifiableEntity>(null)).GetGenericMethodDefinition();
             static MethodInfo miComplete = ReflectionTools.GetMethodInfo((IRetriever r) => r.Complete<IdentifiableEntity>(0, null)).GetGenericMethodDefinition();
 
-            static MemberBinding resetModified = Expression.Bind(ReflectionTools.GetPropertyInfo((Modifiable me) => me.Modified), Expression.Constant(null, typeof(bool?)));
+            internal static ParameterExpression originObject = Expression.Parameter(typeof(object), "originObject");
+            internal static ParameterExpression retriever = Expression.Parameter(typeof(IRetriever), "retriever");
 
+            static MemberBinding resetModified = Expression.Bind(
+                ReflectionTools.GetPropertyInfo((Modifiable me) => me.Modified),
+                Expression.Property(retriever, ReflectionTools.GetPropertyInfo((IRetriever re) => re.ModifiedState)));
+                
             static MethodInfo miLiteCreate = ReflectionTools.GetMethodInfo(() => Lite.Create(null, 0, null));
+
+            public static MemberExpression peModified = Expression.Property(retriever, ReflectionTools.GetPropertyInfo((IRetriever me) => me.ModifiedState));
+
+            public static ConstructorInfo ciKVPIntString = ReflectionTools.GetConstuctorInfo(() => new KeyValuePair<int, string>(1, ""));
+
+
+            public static Action<IRetriever, Modifiable> resetModifiedAction; 
+
+            static CachedTableConstructor()
+            {
+                ParameterExpression modif = Expression.Parameter(typeof(Modifiable));
+
+                resetModifiedAction = Expression.Lambda<Action<IRetriever, Modifiable>>(Expression.Assign(
+                    Expression.Property(modif, ReflectionTools.GetPropertyInfo((Modifiable me) => me.Modified)), 
+                    CachedTableConstructor.peModified),
+                    CachedTableConstructor.retriever, modif).Compile();
+            }
 
 
             static MethodInfo miGetType = ReflectionTools.GetMethodInfo((Schema s) => s.GetType(1));
@@ -403,6 +411,7 @@ namespace Signum.Engine.Cache
 
         Func<FieldReader, object> rowReader;
         Action<object, IRetriever, T> completer;
+        Expression<Action<object, IRetriever, T>> completerExpression;
         Func<object, int> idGetter;
         Func<object, string> toStrGetter;
 
@@ -438,7 +447,7 @@ namespace Signum.Engine.Cache
                 ParameterExpression me = Expression.Parameter(typeof(T), "me");
 
                 List<Expression> instructions = new List<Expression>();
-                instructions.Add(Expression.Assign(ctr.origin, Expression.Convert(ctr.originObject, ctr.tupleType)));
+                instructions.Add(Expression.Assign(ctr.origin, Expression.Convert(CachedTableConstructor.originObject, ctr.tupleType)));
 
                 foreach (var f in table.Fields.Values.Where(f => !(f.Field is FieldPrimaryKey)))
                 {
@@ -448,9 +457,9 @@ namespace Signum.Engine.Cache
                 }
 
                 var block = Expression.Block(new[] { ctr.origin }, instructions);
-                var lambda = Expression.Lambda<Action<object, IRetriever, T>>(block, ctr.originObject, ctr.retriever, me);
+                completerExpression = Expression.Lambda<Action<object, IRetriever, T>>(block, CachedTableConstructor.originObject, CachedTableConstructor.retriever, me);
 
-                completer = lambda.Compile();
+                completer = completerExpression.Compile();
 
                 idGetter = ctr.GetGetter<int>((IColumn)table.Fields.Values.Select(ef => ef.Field).Single(f => f is FieldPrimaryKey));
                 toStrGetter = ctr.GetGetter<string>((IColumn)table.Fields[SchemaBuilder.GetToStringFieldInfo(typeof(T)).Name].Field);
@@ -529,6 +538,7 @@ namespace Signum.Engine.Cache
         ResetLazy<Dictionary<int, Dictionary<int, object>>> relationalRows;
 
         Func<FieldReader, object> rowReader;
+        Expression<Func<object, IRetriever, T>> activatorExpression;
         Func<object, IRetriever, T> activator;
         Func<object, int> parentIdGetter;
         Func<object, int> rowIdGetter;
@@ -561,14 +571,14 @@ namespace Signum.Engine.Cache
             {
                 List<Expression> instructions = new List<Expression>();
 
-                instructions.Add(Expression.Assign(ctr.origin, Expression.Convert(ctr.originObject, ctr.tupleType)));
+                instructions.Add(Expression.Assign(ctr.origin, Expression.Convert(CachedTableConstructor.originObject, ctr.tupleType)));
                 instructions.Add(ctr.Materialize(table.Field));
 
                 var block = Expression.Block(table.Field.FieldType, new[] { ctr.origin }, instructions);
 
-                var lambda = Expression.Lambda<Func<object, IRetriever, T>>(block, ctr.originObject, ctr.retriever);
+                activatorExpression = Expression.Lambda<Func<object, IRetriever, T>>(block, CachedTableConstructor.originObject, CachedTableConstructor.retriever);
 
-                activator = lambda.Compile();
+                activator = activatorExpression.Compile();
 
                 parentIdGetter = ctr.GetGetter<int>(table.BackReference);
                 rowIdGetter = ctr.GetGetter<int>(table.PrimaryKey);
@@ -625,7 +635,7 @@ namespace Signum.Engine.Cache
                 }
             }
 
-            resetModifiedAction(result);
+            CachedTableConstructor.resetModifiedAction(retriever, result);
 
             return result;
         }
@@ -680,7 +690,7 @@ namespace Signum.Engine.Cache
             {
                 ParameterExpression reader = Expression.Parameter(typeof(FieldReader));
 
-                var kvpConstructor = Expression.New(ciKVPIntString,
+                var kvpConstructor = Expression.New(CachedTableConstructor.ciKVPIntString,
                     FieldReader.GetExpression(reader, 0, typeof(int)),
                     FieldReader.GetExpression(reader, 1, typeof(string)));
 
@@ -717,11 +727,11 @@ namespace Signum.Engine.Cache
         }
 
 
-        public Lite<T> GetLite(int id)
+        public Lite<T> GetLite(int id, IRetriever retriever)
         {
             Interlocked.Increment(ref hits);
 
-            return Lite.Create<T>(id, toStrings.Value[id]);
+            return Lite.Create<T>(id, toStrings.Value[id], retriever.ModifiedState);
         }
 
         public override int? Count

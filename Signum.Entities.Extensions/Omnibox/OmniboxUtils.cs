@@ -175,7 +175,7 @@ namespace Signum.Entities.Omnibox
         NotFound,
         [Description("Searching between 'apostrophe' will make queries to the database")]
         Omnibox_DatabaseAccess,
-        [Description("With Shift+Enter you disambiguate you query")]
+        [Description("With [Tab] you disambiguate you query")]
         Omnibox_Disambiguate,
         [Description("Field")]
         Omnibox_Field,

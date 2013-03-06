@@ -226,30 +226,16 @@ namespace Signum.Entities.Chart
             tokenString = token == null ? null : token.FullKey();
         }
 
-        public override void ParseData(QueryDescription description, IdentifiableEntity context)
-        {
-            ParseData(t => SubTokensChart(t, description.Columns), context);
-        }
-
-        public override void ParseData(Func<QueryToken, List<QueryToken>> subTokens, IdentifiableEntity context)
+        public override void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)
         {
             try
             {
-                token = string.IsNullOrEmpty(tokenString) ? null : QueryUtils.Parse(tokenString, subTokens);
+                token = string.IsNullOrEmpty(tokenString) ? null : QueryUtils.Parse(tokenString, description, canAggregate);
             }
             catch (Exception e)
             {
                 parseException = new FormatException("{0} {1}: {2}\r\n{3}".Formato(context.GetType().Name, context.IdOrNull, context, e.Message));
             }
-
-            CleanSelfModified();
-        }
-
-        public List<QueryToken> SubTokensChart(QueryToken token, IEnumerable<ColumnDescription> columnDescriptions)
-        {
-            var result = token.SubTokensChart(columnDescriptions, this.IsGroupKey == false);
-
-            return result;
         }
 
         internal Column CreateColumn()

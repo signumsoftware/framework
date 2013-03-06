@@ -22,11 +22,14 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Data.SqlTypes;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Engine.SchemaInfoTables;
 
 namespace Signum.Engine.Cache
 {
     public static class CacheLogic
     {
+        public static bool AssertOnStart = true;
+
         /// <summary>
         /// If you have invalidation problems look at exceptions in: select * from sys.transmission_queue 
         /// If there are exceptions like: 'Could not obtain information about Windows NT group/user'
@@ -51,9 +54,40 @@ namespace Signum.Engine.Cache
             if (GloballyDisabled)
                 return;
 
+            SqlConnector connector = (SqlConnector)Connector.Current;
+
+            if (AssertOnStart)
+            {
+                string currentUser = (string)Executor.ExecuteScalar("select SYSTEM_USER");
+
+                var type = Database.View<SysServerPrincipals>().Where(a => a.name == currentUser).Select(a => a.type_desc).Single();
+
+                if (type != "SQL_LOGIN")
+                    throw new InvalidOperationException("The current login '{0}' is a {1} instead of a SQL_LOGIN. Avoid using Integrated Security with Cache Logic".Formato(currentUser, type));
+
+                var serverPrincipalName = (from db in Database.View<SysDatabases>()
+                                           where db.name == connector.DatabaseName()
+                                           join spl in Database.View<SysServerPrincipals>().DefaultIfEmpty() on db.owner_sid equals spl.sid
+                                           select spl.name).Single();
+
+
+                if (currentUser != serverPrincipalName)
+                    throw new InvalidOperationException(@"The current owner of {0} is '{1}', but the current user is '{2}'. Change the login or call:
+ALTER AUTHORIZATION ON DATABASE::{0} TO {2}".Formato(connector.DatabaseName(), serverPrincipalName, currentUser));
+
+                var databasePrincipalName = (from db in Database.View<SysDatabases>()
+                                             where db.name == connector.DatabaseName()
+                                             join dpl in Database.View<SysDatabasePrincipals>().DefaultIfEmpty() on db.owner_sid equals dpl.sid
+                                             select dpl.name).Single();
+
+                if (!databasePrincipalName.HasText() || databasePrincipalName != "dbo")
+                    throw new InvalidOperationException(@"The database principal of {0} is '{1}', not associated with the current user '{2}'. Call:
+ALTER AUTHORIZATION ON DATABASE::{0} TO {2}".Formato(connector.DatabaseName(), databasePrincipalName.DefaultText("Unknown"), currentUser));
+            }
+
             try
             {
-                SqlDependency.Start(((SqlConnector)Connector.Current).ConnectionString);
+                SqlDependency.Start(connector.ConnectionString);
             }
             catch (InvalidOperationException ex)
             {
@@ -62,7 +96,17 @@ namespace Signum.Engine.Cache
 ALTER DATABASE {0} SET ENABLE_BROKER
 If you have problems, try first: 
 ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
+
+                throw;
             }
+
+            SafeConsole.SetConsoleCtrlHandler(ct =>
+            {
+                Shutdown();
+                return true;
+            }, true);
+
+            AppDomain.CurrentDomain.ProcessExit += (o, a) => Shutdown();
         }
 
         public static void Shutdown()
@@ -117,7 +161,7 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
 
             void Saving(T ident)
             {
-                if (ident.Modified.Value)
+                if (ident.IsGraphModified)
                 {
                     if (ident.IsNew)
                     {

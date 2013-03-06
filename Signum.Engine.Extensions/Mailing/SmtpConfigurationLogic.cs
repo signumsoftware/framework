@@ -82,7 +82,7 @@ namespace Signum.Engine.Mailing
 
         static void EmailClientSettingsLogic_Saving(SMTPConfigurationDN ident)
         {
-            if (ident.Modified.Value)
+            if (ident.IsGraphModified)
                 Transaction.PostRealCommit += ud => smtpConfigurations = null;
         }
 

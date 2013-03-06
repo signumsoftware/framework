@@ -5,8 +5,7 @@
     x:Class="Signum.Windows.Files.FileLine"
     x:Name="me" xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="332.993" 
-    
-    Style="{DynamicResource toolTip}">
+    Style="{DynamicResource toolTip}" AllowDrop="{Binding DropFile, ElementName=me}" DragEnter="fileLine_DragEnter" DragOver="fileLine_DragEnter" Drop="fileLine_Drop">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

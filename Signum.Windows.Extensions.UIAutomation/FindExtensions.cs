@@ -50,7 +50,7 @@ namespace Signum.Windows.UIAutomation
             var result = parent.FindFirst(scope, new PropertyCondition(AutomationElement.AutomationIdProperty, automationId));
 
             if (result == null)
-                throw new KeyNotFoundException("No AutomationElement found with AutomationID '{0}'".Formato(automationId));
+                throw new ElementNotFoundException("No AutomationElement found with AutomationID '{0}'".Formato(automationId));
 
             return result;
         }
@@ -62,7 +62,7 @@ namespace Signum.Windows.UIAutomation
             var result = tw.Normalize(parent);
 
             if (result == null)
-                throw new KeyNotFoundException("No AutomationElement found with AutomationID '{0}'".Formato(automationId));
+                throw new ElementNotFoundException("No AutomationElement found with AutomationID '{0}'".Formato(automationId));
 
             return result;
         }
@@ -98,7 +98,7 @@ namespace Signum.Windows.UIAutomation
             var result = parent.FindFirst(scope, condition);
 
             if (result == null)
-                throw new KeyNotFoundException("No AutomationElement found: {0}".Formato(condition.NiceToString()));
+                throw new ElementNotFoundException("No AutomationElement found: {0}".Formato(condition.NiceToString()));
 
             return result;
         }
@@ -110,7 +110,7 @@ namespace Signum.Windows.UIAutomation
             var result = tw.Normalize(parent);
 
             if (result == null)
-                throw new KeyNotFoundException("No AutomationElement found with AutomationID '{0}'".Formato(condition.NiceToString()));
+                throw new ElementNotFoundException("No AutomationElement found with AutomationID '{0}'".Formato(condition.NiceToString()));
 
             return result;
         }
@@ -165,7 +165,7 @@ namespace Signum.Windows.UIAutomation
             var result = parent.FindFirst(scope, c);
 
             if (result == null)
-                throw new KeyNotFoundException("No AutomationElement found with condition {0}".Formato(ExpressionEvaluator.PartialEval(condition).NiceToString()));
+                throw new ElementNotFoundException("No AutomationElement found with condition {0}".Formato(ExpressionEvaluator.PartialEval(condition).NiceToString()));
 
             return result;
         }
@@ -179,7 +179,7 @@ namespace Signum.Windows.UIAutomation
             var result = tw.Normalize(parent);
 
             if (result == null)
-                throw new KeyNotFoundException("No AutomationElement found with AutomationID '{0}'".Formato(condition.NiceToString()));
+                throw new ElementNotFoundException("No AutomationElement found with AutomationID '{0}'".Formato(condition.NiceToString()));
 
             return result;
         }
@@ -213,5 +213,17 @@ namespace Signum.Windows.UIAutomation
             return parent.ElementsByCondition(TreeScope.Children, PropertyCondition.TrueCondition);
         }
 
+    }
+
+    [Serializable]
+    public class ElementNotFoundException : Exception
+    {
+        public ElementNotFoundException() { }
+        public ElementNotFoundException(string message) : base(message) { }
+        public ElementNotFoundException(string message, Exception inner) : base(message, inner) { }
+        protected ElementNotFoundException(
+          System.Runtime.Serialization.SerializationInfo info,
+          System.Runtime.Serialization.StreamingContext context)
+            : base(info, context) { }
     }
 }

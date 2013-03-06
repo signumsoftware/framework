@@ -99,11 +99,11 @@ namespace Signum.Entities.Alerts
             return text.EtcLines(100);
         }
 
-        static Expression<Func<AlertDN, bool>> NotAttendedExpression = 
+        static Expression<Func<AlertDN, bool>> AlertedExpression = 
             a => (a.AlertDate.HasValue && a.AlertDate <= TimeZoneManager.Now) && !a.AttendedDate.HasValue;
-        public bool NotAttended
+        public bool Alerted
         {
-            get{ return NotAttendedExpression.Evaluate(this); }
+            get{ return AlertedExpression.Evaluate(this); }
         }
 
         static Expression<Func<AlertDN, bool>> AttendedExpression = 
@@ -119,6 +119,15 @@ namespace Signum.Entities.Alerts
         {
             get{ return FutureExpression.Evaluate(this); }
         }
+
+        static Expression<Func<AlertDN, AlertCurrentState>> CurrentStateExpression = 
+            a =>a.attendedDate.HasValue ? AlertCurrentState.Attended: 
+                a.alertDate == null ? AlertCurrentState.None :  
+                a.alertDate <= TimeZoneManager.Now ? AlertCurrentState.Alerted:  AlertCurrentState.Future;
+        public AlertCurrentState CurrentState
+        {
+            get{ return CurrentStateExpression.Evaluate(this); }
+        }
     }
 
     public enum AlertState
@@ -127,6 +136,14 @@ namespace Signum.Entities.Alerts
         New,
         Saved,
         Attended
+    }
+
+    public enum AlertCurrentState
+    {
+        None,
+        Attended,
+        Alerted,
+        Future,
     }
 
     public enum AlertOperation

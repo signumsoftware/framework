@@ -50,7 +50,7 @@ namespace Signum.Windows.Chart
             cw.Show();
         }
 
-        public override string GetItemStatus(ChartOmniboxResult result)
+        public override string GetName(ChartOmniboxResult result)
         {
             return "C:" + result.QueryName.TryCC(QueryUtils.GetQueryUniqueKey);
         }

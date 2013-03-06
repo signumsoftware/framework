@@ -52,7 +52,7 @@ namespace Signum.Windows.Reports
                 }
             };
 
-            sc.QueryResultChanged += (object sender, RoutedEventArgs e)=>
+            sc.ResultChanged += (object sender, ResultChangedEventArgs e)=>
             {
                 ResultTable qr = sc.ResultTable;
                 miResult.IsEnabled = (qr != null && qr.Rows.Length > 0);

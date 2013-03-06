@@ -64,7 +64,7 @@ namespace Signum.Engine.Disconnected
             foreach (var item in dic.Values.Where(a => a.Strategy.DisableForeignKeys == null))
                 item.Strategy.DisableForeignKeys = false;
 
-            graph.RemoveAll(feedback.Edges);
+            graph.RemoveEdges(feedback.Edges);
 
             uploadTables = graph.CompilationOrder().Select(t => dic[t]).ToList();
         }
@@ -479,7 +479,7 @@ table.Name.OnDatabase(newDatabaseName));
 
                     Executor.ExecuteNonQuery(delete);
 
-                    SqlPreCommandSimple insert = InsertUpdatedRelationalTableScript(rt, machine, table, newDatabaseName);
+                    SqlPreCommandSimple insert = InsertUpdatedRelationalTableScript(machine, table, rt, newDatabaseName);
 
                     Executor.ExecuteNonQuery(insert);
                 }
@@ -488,7 +488,7 @@ table.Name.OnDatabase(newDatabaseName));
             }
         }
 
-        protected virtual SqlPreCommandSimple InsertUpdatedRelationalTableScript(RelationalTable rt, DisconnectedMachineDN machine, Table table, DatabaseName newDatabaseName)
+        protected virtual SqlPreCommandSimple InsertUpdatedRelationalTableScript(DisconnectedMachineDN machine, Table table, RelationalTable rt, DatabaseName newDatabaseName)
         {
             ParameterBuilder pb = Connector.Current.ParameterBuilder;
             var columns = rt.Columns.Values.Where(c => !c.Identity);

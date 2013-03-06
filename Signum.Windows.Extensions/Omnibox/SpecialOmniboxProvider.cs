@@ -50,7 +50,7 @@ namespace Signum.Windows.Omnibox
             ((SpecialOmniboxAction)result.Match.Value).OnClick(window);
         }
 
-        public override string GetItemStatus(SpecialOmniboxResult result)
+        public override string GetName(SpecialOmniboxResult result)
         {
             return ((SpecialOmniboxAction)result.Match.Value).Key;
         }

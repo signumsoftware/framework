@@ -37,17 +37,7 @@ namespace Signum.Engine.Authorization
                         ut.ConnectionDate,
                         ut.Device,
                     });
-
-                sb.Schema.EntityEvents<UserDN>().Saving += UserTicketLogic_Saving;
             }
-        }
-
-        static void UserTicketLogic_Saving(UserDN ident)
-        {
-            Transaction.PreRealCommit += () =>
-            {
-                CleanExpiredTickets(ident);
-            };
         }
 
         static Expression<Func<UserDN, IQueryable<UserTicketDN>>> TicketsExpression =

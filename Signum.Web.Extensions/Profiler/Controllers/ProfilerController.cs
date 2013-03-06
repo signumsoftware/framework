@@ -25,13 +25,17 @@ namespace Signum.Web.Profiler
 {
     public class ProfilerController : Controller
     {
-        public ActionResult Heavy()
+        public ActionResult Heavy(bool orderByTime = false)
         {
             ProfilerPermission.ViewHeavyProfiler.Authorize();
 
             ViewData[ViewDataKeys.Title] = "Root entries";
 
-            return View(ProfilerClient.ViewPrefix.Formato("HeavyList"), HeavyProfiler.Entries);
+            ViewBag.OrderByTime = orderByTime;
+
+            var entries = orderByTime ? HeavyProfiler.Entries.OrderBy(a=>a.BeforeStart).ToList() : HeavyProfiler.Entries;
+
+            return View(ProfilerClient.ViewPrefix.Formato("HeavyList"), entries);
         }
 
         public ActionResult Statistics(SqlProfileResumeOrder order)
@@ -109,7 +113,7 @@ namespace Signum.Web.Profiler
             using (StreamReader sr = new StreamReader(hpf.InputStream))
             {
                 var doc = XDocument.Load(sr);
-                HeavyProfiler.ImportXml(doc);
+                HeavyProfiler.ImportXml(doc, true);
             }
 
             return RedirectToAction("Heavy");

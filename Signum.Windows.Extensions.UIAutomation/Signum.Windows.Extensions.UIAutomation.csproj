@@ -81,11 +81,12 @@
     <Compile Include="BasicExtensions.cs" />
     <Compile Include="ConditionBuilder.cs" />
     <Compile Include="Proxies\LineUIPoxy.cs" />
+    <Compile Include="Proxies\LoginWindowProxy.cs" />
     <Compile Include="Proxies\ValueLineWindowProxy.cs" />
     <Compile Include="Proxies\LineContainer.cs" />
     <Compile Include="Proxies\MessageBoxProxy.cs" />
     <Compile Include="Proxies\OmniBoxProxy.cs" />
-    <Compile Include="Proxies\SelectWindoProxy.cs" />
+    <Compile Include="Proxies\SelectorWindowProxy.cs" />
     <Compile Include="Proxies\LineProxy.cs" />
     <Compile Include="FindExtensions.cs" />
     <Compile Include="MenuItemExtensions.cs" />

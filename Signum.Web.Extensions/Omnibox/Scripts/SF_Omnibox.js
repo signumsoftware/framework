@@ -26,8 +26,9 @@ SF.Omnibox = (function () {
             });
         },
         select: function (event, ui) {
-            if (event.shiftKey) {
+            if (event.keyCode == 9) {
                 $omnibox.val(ui.item.cleanText);
+                event.preventDefault();
             }
             else {
                 var url = $(ui.item.label).attr("href");

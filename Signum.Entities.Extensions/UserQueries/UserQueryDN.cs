@@ -138,15 +138,15 @@ namespace Signum.Entities.UserQueries
         {
             if (Filters != null)
                 foreach (var f in Filters)
-                    f.ParseData(description, this);
+                    f.ParseData(this, description, canAggregate: false);
 
             if (Columns != null)
                 foreach (var c in Columns)
-                    c.ParseData(description, this);
+                    c.ParseData(this, description, canAggregate: false);
 
             if (Orders != null)
                 foreach (var o in Orders)
-                    o.ParseData(description, this);
+                    o.ParseData(this, description, canAggregate: false);
         }
     }
 
@@ -207,12 +207,7 @@ namespace Signum.Entities.UserQueries
             tokenString = token.FullKey();
         }
 
-        public virtual void ParseData(QueryDescription desc, IdentifiableEntity context)
-        {
-            ParseData(t => QueryUtils.SubTokens(t, desc.Columns), context);
-        }
-
-        public abstract void ParseData(Func<QueryToken, List<QueryToken>> subTokens, IdentifiableEntity context);
+        public abstract void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate);
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
@@ -250,17 +245,16 @@ namespace Signum.Entities.UserQueries
             set { Set(ref orderType, value, () => OrderType); }
         }
 
-        public override void ParseData(Func<QueryToken, List<QueryToken>> subTokens, IdentifiableEntity context)
+        public override void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)
         {
             try
             {
-                Token = QueryUtils.Parse(tokenString, subTokens);
+                token = QueryUtils.Parse(tokenString, description, canAggregate);
             }
             catch (Exception e)
             {
                 parseException = new FormatException("{0} {1}: {2}\r\n{3}".Formato(context.GetType().Name, context.IdOrNull, context, e.Message));
             }
-            CleanSelfModified();
         }
 
     }
@@ -292,17 +286,16 @@ namespace Signum.Entities.UserQueries
         }
 
 
-        public override void ParseData(Func<QueryToken,List<QueryToken>> subTokens, IdentifiableEntity context)
+        public override void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)
         {
             try
             {
-                Token = QueryUtils.Parse(tokenString, subTokens);
+                token = QueryUtils.Parse(tokenString, description, canAggregate);
             }
             catch (Exception e)
             {
                 parseException = new FormatException("{0} {1}: {2}\r\n{3}".Formato(context.GetType().Name, context.IdOrNull, context, e.Message));
             }
-            CleanSelfModified();
         }
     }
 
@@ -347,11 +340,11 @@ namespace Signum.Entities.UserQueries
             set { this.value = value; }
         }
 
-        public override void ParseData(Func<QueryToken, List<QueryToken>> subTokens, IdentifiableEntity context)
+        public override void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)
         {
             try
             {
-                Token = QueryUtils.Parse(tokenString, subTokens);
+                token = QueryUtils.Parse(tokenString, description, canAggregate);
             }
             catch (Exception e)
             {
@@ -373,8 +366,6 @@ namespace Signum.Entities.UserQueries
                     string error = FilterValueConverter.TryParse(ValueString, Token.Type, out val);
                     if (string.IsNullOrEmpty(error))
                         Value = val; //Executed on server only
-
-                    CleanSelfModified();
                 }
             }
         }

@@ -36,9 +36,9 @@ namespace Signum.Windows.UIAutomation
 
         public static void WaitDataContextChangedAfter(this AutomationElement element, Action action, int? timeOut = null, Func<string> actionDescription = null)
         {
-            string oldValue = element.Current.HelpText;
+            string oldValue = element.Current.ItemStatus;
             if (string.IsNullOrEmpty(oldValue))
-                throw new InvalidOperationException("Element does not has HelpText set. Consider setting m:Common.AutomationHelpTextFromDataContext on the WPF control");
+                throw new InvalidOperationException("Element does not has ItemStatus set. Consider setting m:Common.AutomationItemStatusFromDataContext on the WPF control");
 
             action();
 
@@ -47,7 +47,7 @@ namespace Signum.Windows.UIAutomation
 
             element.Wait(() =>
             {
-                var newValue = element.Current.HelpText;
+                var newValue = element.Current.ItemStatus;
                 if (newValue != null && newValue != oldValue)
                     return true;
 
@@ -64,7 +64,7 @@ namespace Signum.Windows.UIAutomation
 
             element.Wait(() =>
             {
-                var newValue = element.Current.HelpText;
+                var newValue = element.Current.ItemStatus;
                 if (newValue.HasText())
                     return true;
 
@@ -83,15 +83,14 @@ namespace Signum.Windows.UIAutomation
 
             var previous = GetAllProcessWindows(element).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
 
-            bool bla = element.Current.IsPassword;
-
             action();
 
             AutomationElement newWindow = null;
 
             element.Wait(() =>
             {
-                newWindow = GetAllProcessWindows(element).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
+                var currentWindows = GetAllProcessWindows(element);
+                newWindow = currentWindows.FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
 
                 MessageBoxProxy.AssertNoErrorWindow(newWindow);
 
@@ -123,9 +122,14 @@ namespace Signum.Windows.UIAutomation
             return result;
         }
 
-        public static AutomationElement CaptureChildWindow(this AutomationElement element, Action action, Func<string> actionDescription, int? timeOut = null)
+        public static AutomationElement CaptureChildWindow(this AutomationElement element, Action action, Func<string> actionDescription = null, int? timeOut = null)
         {
+            if (actionDescription == null)
+                actionDescription = () => "Get Windows after";
+
             var parentWindow = WindowProxy.Normalize(element);
+
+            var previous = parentWindow.Children(a=>a.Current.ControlType == ControlType.Window).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
 
             action();
 
@@ -133,7 +137,8 @@ namespace Signum.Windows.UIAutomation
 
             element.Wait(() =>
             {
-                newWindow = parentWindow.TryChild(a => a.Current.ControlType == ControlType.Window);
+                var currentWindows = parentWindow.Children(a => a.Current.ControlType == ControlType.Window);
+                newWindow = currentWindows.FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
 
                 MessageBoxProxy.AssertNoErrorWindow(newWindow);
 
@@ -210,7 +215,7 @@ namespace Signum.Windows.UIAutomation
                     return result;
 
                 if (((PerfCounter.Ticks - start) / PerfCounter.FrequencyMilliseconds) > (timeOut ?? DefaultTimeOut))
-                    throw new InvalidOperationException("Element not foud after {0} ms: AutomationID = ".Formato((timeOut ?? DefaultTimeOut), automationId));
+                    throw new InvalidOperationException("Element not foud after {0} ms: AutomationID = {1}".Formato((timeOut ?? DefaultTimeOut), automationId));
             }
         }
 
@@ -244,7 +249,7 @@ namespace Signum.Windows.UIAutomation
                     return result;
 
                 if (((PerfCounter.Ticks - start) / PerfCounter.FrequencyMilliseconds) > (timeOut ?? DefaultTimeOut))
-                    throw new InvalidOperationException("Element not foud after {0} ms: AutomationID = ".Formato((timeOut ?? DefaultTimeOut), condition.NiceToString()));
+                    throw new InvalidOperationException("Element not foud after {0} ms: {1}".Formato((timeOut ?? DefaultTimeOut), condition.NiceToString()));
             }
         }
     }

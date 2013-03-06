@@ -115,7 +115,7 @@ namespace Signum.Windows.Omnibox
             return new Run("({0})".Formato(typeof(QueryDN).NiceName())) { Foreground = Brushes.Orange };
         }
 
-        public override string GetItemStatus(DynamicQueryOmniboxResult result)
+        public override string GetName(DynamicQueryOmniboxResult result)
         {
             return "Q:" + QueryUtils.GetQueryUniqueKey(result.QueryName);
         }

@@ -34,7 +34,7 @@ namespace Signum.Web.Chart
                 Mapping<QueryToken> qtMapping = ctx =>
                 {
                     string tokenStr = "";
-                    foreach (string key in ctx.Parent.Inputs.Keys.Where(k => k.Contains("ddlTokens")).Order())
+                    foreach (string key in ctx.Parent.Inputs.Keys.Where(k => k.Contains("ddlTokens")).OrderBy())
                         tokenStr += ctx.Parent.Inputs[key] + ".";
                     while (tokenStr.EndsWith("."))
                         tokenStr = tokenStr.Substring(0, tokenStr.Length - 1);
@@ -45,7 +45,7 @@ namespace Signum.Web.Chart
                     var chart = ((UserChartDN)ctx.Parent.Parent.Parent.UntypedValue);
 
                     QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                    return QueryUtils.Parse(tokenStr, qt => qt.SubTokensChart(qd.Columns, chart.GroupResults));
+                    return QueryUtils.Parse(tokenStr, qd, canAggregate: chart.GroupResults);
                 };
 
                 Navigator.AddSettings(new List<EntitySettings>

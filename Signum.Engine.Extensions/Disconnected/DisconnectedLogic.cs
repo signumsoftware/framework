@@ -158,7 +158,7 @@ namespace Signum.Engine.Disconnected
 
         static void EntityEventsGlobal_Saving(IdentifiableEntity ident)
         {
-            if (ident.Modified.Value)
+            if (ident.IsGraphModified)
             {
                 strategies[ident.GetType()].Saving(ident);
             }

@@ -53,10 +53,10 @@ namespace Signum.Windows.Chart
                 string processName = Path.GetFileName(Process.GetCurrentProcess().MainModule.FileName);
 
                 var main = Registry.CurrentUser
-                    .OpenSubKey("Software")
-                    .OpenSubKey("Microsoft")
-                    .OpenSubKey("Internet Explorer")
-                    .OpenSubKey("Main", true)
+                    .CreateSubKey("Software")
+                    .CreateSubKey("Microsoft")
+                    .CreateSubKey("Internet Explorer")
+                    .CreateSubKey("Main")
                     .CreateSubKey("FeatureControl")
                     .CreateSubKey("FEATURE_BROWSER_EMULATION");
 
@@ -74,7 +74,6 @@ namespace Signum.Windows.Chart
                 ChartUtils.RemoveNotNullValidators();
             }
         }
-
 
         static MenuItem SearchControl_GetCustomMenuItems(SearchControl sc)
         {

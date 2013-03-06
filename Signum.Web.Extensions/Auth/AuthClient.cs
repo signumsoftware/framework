@@ -238,7 +238,7 @@ namespace Signum.Web.Auth
 
         static void AuthClient_Saving(UserDN ident)
         {
-            if (ident.Modified == true && ident.Is(UserDN.Current))
+            if (ident.IsGraphModified && ident.Is(UserDN.Current))
                 Transaction.PostRealCommit += ud =>
                 {
                      AuthController.UpdateSessionUser();

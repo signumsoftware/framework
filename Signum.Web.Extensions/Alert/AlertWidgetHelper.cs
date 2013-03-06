@@ -51,7 +51,7 @@ namespace Signum.Web.Alerts
             var alertList = new[]
             {
                 new { Count = CountAlerts(identifiable, "Attended"), Query = "Attended", AlertClass = "sf-alert-attended", Title = AlertMessage.Alerts_Attended.NiceToString() },
-                new { Count = CountAlerts(identifiable, "NotAttended"), Query = "NotAttended", AlertClass = "sf-alert-warned", Title = AlertMessage.Alerts_NotAttended.NiceToString() },
+                new { Count = CountAlerts(identifiable, "Alerted"), Query = "Alerted", AlertClass = "sf-alert-warned", Title = AlertMessage.Alerts_NotAttended.NiceToString() },
                 new { Count = CountAlerts(identifiable, "Future"), Query = "Future", AlertClass = "sf-alert-future", Title = AlertMessage.Alerts_Future.NiceToString() },
             };
 

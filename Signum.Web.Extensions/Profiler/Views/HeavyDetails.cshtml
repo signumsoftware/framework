@@ -8,7 +8,7 @@
         }
     @Model.Index.ToString())
 </h2>
-@Html.ActionLink("(View all)", (ProfilerController pc) => pc.Heavy())
+@Html.ActionLink("(View all)", (ProfilerController pc) => pc.Heavy(false))
 @Html.ActionLink("Download", (ProfilerController pc) => pc.DownloadFile(Model.FullIndex()))
 <br />
 <h3>Breakdown</h3>

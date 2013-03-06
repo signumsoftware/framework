@@ -47,8 +47,8 @@ namespace Signum.Windows.Authorization
 
                 UpdateCache();
 
-                Navigator.AddSetting(new EntitySettings<UserDN> { View = e => new User() });
-                Navigator.AddSetting(new EntitySettings<RoleDN> { View = e => new Role() });
+                Navigator.AddSetting(new EntitySettings<UserDN> { View = e => new User(), Icon = ImageLoader.GetImageSortName("user.png") });
+                Navigator.AddSetting(new EntitySettings<RoleDN> { View = e => new Role(), Icon = ImageLoader.GetImageSortName("role.png") });
 
                 if (defaultPasswordExpiresLogic)
                     Navigator.AddSetting(new EntitySettings<PasswordExpiresIntervalDN> { View = e => new PasswordExpiresInterval() });

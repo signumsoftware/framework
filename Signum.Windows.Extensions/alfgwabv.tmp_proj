@@ -61,35 +61,6 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="PresentationFramework.Aero" />
-    <Reference Include="System" />
-    <Reference Include="System.Core">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Web.Extensions" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xaml" />
-    <Reference Include="System.Xml.Linq">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Data.DataSetExtensions">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-    <Reference Include="UIAutomationProvider">
-      <RequiredTargetFramework>3.0</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="WindowsBase">
-      <RequiredTargetFramework>3.0</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="PresentationCore">
-      <RequiredTargetFramework>3.0</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="PresentationFramework">
-      <RequiredTargetFramework>3.0</RequiredTargetFramework>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Alerts\Alert.xaml.cs">
@@ -392,390 +363,6 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Alerts\Alert.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Alerts\AlertsWidget.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Alerts\AlertType.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Authorization\AuthResources.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Authorization\NewPassword.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Authorization\PasswordExpiresInterval.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Authorization\OperationRules.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Authorization\PermissionRules.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Authorization\PropertyRules.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Authorization\TreeViewColumnResources.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Authorization\TypeRules.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Authorization\FacadeMethodRules.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Authorization\Role.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Authorization\DoublePassword.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Authorization\Login.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Authorization\QueryRules.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Authorization\User.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Basic\DateSpan.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Calendars\CalendarStripHeader.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Calendars\CalendarStripList.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Calendars\CalendarStripTreeView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Calendars\CalendarStripWallpaper.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Calendars\CalendarStripWithTitles.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Chart\ChartBuilder.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Chart\ChartRenderer.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Chart\ChartScript.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Chart\ChartScriptParameter.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Chart\UserChart.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Chart\ChartColumn.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Chart\ChartRequestWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="ControlPanels\Admin\ControlPanelEdit.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="ControlPanels\UserChartPartView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="ControlPanels\LinkListPartView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="ControlPanels\CountSearchControlPartView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="ControlPanels\UserQueryPartView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="ControlPanels\Admin\CountSearchControlPartEdit.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="ControlPanels\Admin\LinkListPartEdit.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="ControlPanels\Admin\UserChartPartEdit.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="ControlPanels\Admin\UserQueryPartEdit.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="ControlPanels\ControlPanelView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Disconnected\UploadProgress.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Disconnected\DisconnectedImport.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Disconnected\DisconnectedMachine.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Disconnected\DownloadProgress.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Disconnected\DisconnectedExport.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Files\FileLine.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Files\FilePath.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Files\FileRepository.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Mailing\ClientCertificationFile.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Mailing\SMTPConfiguration.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Notes\Note.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Notes\NotesWidget.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Omnibox\OmniboxAutocomplete.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Omnibox\OmniboxTemplate.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Processes\PackageOperation.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Processes\Package.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Processes\PackageLine.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Processes\ProcessUI.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Processes\ProcessExecution.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Profiler\ProfilerUploader.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="SMS\SMSMessage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="SMS\SMSSendPackage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="SMS\SMSUpdatePackage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="SynthaxHighlight\SyntaxHighlightBox.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="UserQueries\UserQuery.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Reports\ExcelReport.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Scheduler\Calendar.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Scheduler\CustomTask.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Scheduler\CustomTaskExecution.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Scheduler\ScheduledTask.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Scheduler\ScheduleRuleDaily.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Scheduler\ScheduleRuleWeekDays.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Scheduler\ScheduleRuleWeekly.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="SMS\SMSTemplate.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Themes\generic.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Themes\ZoomViewer.generic.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Framework\Signum.Windows\Signum.Windows.csproj">
@@ -796,108 +383,54 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\excelDoc.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\excel.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\folderedit.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\keys.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\keysicon.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\close.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\save.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\reload.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\factory.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\pause.png" />
-    <Resource Include="Images\plan.png" />
-    <Resource Include="Images\play.png" />
-    <Resource Include="Images\stop.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\customTask.png" />
-    <Resource Include="Images\customTaskExecution.png" />
-    <Resource Include="Images\package.png" />
-    <Resource Include="Images\packageLine.png" />
-    <Resource Include="Images\process.png" />
-    <Resource Include="Images\processExecution.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\open.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\fondoLogin.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\bcerrar.png" />
-    <Resource Include="Images\bminimizar.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\bcerrar-on.png" />
-    <Resource Include="Images\bminimizar-on.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\document_view.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\documentMusic.png" />
-    <Resource Include="Images\email2.png" />
-    <Resource Include="Images\film.png" />
-    <Resource Include="Images\html.png" />
-    <Resource Include="Images\pdf.png" />
-    <Resource Include="Images\photoshop.png" />
-    <Resource Include="Images\pics2.png" />
-    <Resource Include="Images\rar.png" />
-    <Resource Include="Images\rtf.png" />
-    <Resource Include="Images\text.png" />
-    <Resource Include="Images\textCodeCsharp.png" />
-    <Resource Include="Images\word.png" />
-    <Resource Include="Images\zip.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\unknown.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\download.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\column.png" />
-    <Resource Include="Images\filter.png" />
-    <Resource Include="Images\order.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\favorite.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\add.png" />
-    <Resource Include="Images\edit.png" />
-    <Resource Include="Images\remove.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\excelPlain.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\word9703.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\clock.png" />
-    <Resource Include="Images\operation.png" />
-    <Resource Include="Images\property.png" />
-    <Resource Include="Images\query.png" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -917,12 +450,8 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\ppt.png" />
-    <Resource Include="Images\pptx.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\chartIcon.png" />
-    <Resource Include="Images\groupby.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\Signum.Web.Extensions\Chart\Scripts\SF_Chart_Utils.js">
@@ -943,26 +472,17 @@
     <EmbeddedResource Include="Chart\Html\d3.v2.min.js" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\execute.png" />
-  </ItemGroup>
-  <ItemGroup />
-  <ItemGroup>
-    <Resource Include="Images\alert.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\note2.png" />
+    <Folder Include="Exception\" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\pin.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\config.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\smstemplate.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\sms.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
@@ -976,4 +496,101 @@ if not exist "$(TargetPath).locked" if exist "$(TargetPath)" move "$(TargetPath)
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup>
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\mscorlib.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\PresentationCore.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\PresentationFramework.Aero.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\PresentationFramework.dll" />
+    <ReferencePath Include="D:\Signum\Seguros\Framework\Signum.Entities\bin\Debug\Signum.Entities.dll" />
+    <ReferencePath Include="D:\Signum\Seguros\Extensions\Signum.Entities.Extensions\bin\Debug\Signum.Entities.Extensions.dll" />
+    <ReferencePath Include="D:\Signum\Seguros\Framework\Signum.Utilities\bin\Debug\Signum.Utilities.dll" />
+    <ReferencePath Include="D:\Signum\Seguros\Framework\Signum.Windows\bin\Debug\Signum.Windows.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Core.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Data.DataSetExtensions.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Data.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Drawing.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Web.Extensions.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Windows.Forms.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Xaml.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Xml.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Xml.Linq.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\UIAutomationProvider.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\WindowsBase.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Alerts\Alert.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Alerts\AlertsWidget.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Alerts\AlertType.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Authorization\NewPassword.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Authorization\PasswordExpiresInterval.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Authorization\OperationRules.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Authorization\PermissionRules.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Authorization\PropertyRules.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Authorization\TypeRules.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Authorization\FacadeMethodRules.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Authorization\Role.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Authorization\DoublePassword.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Authorization\Login.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Authorization\QueryRules.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Authorization\User.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Basic\DateSpan.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Calendars\CalendarStripHeader.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Calendars\CalendarStripList.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Calendars\CalendarStripTreeView.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Calendars\CalendarStripWallpaper.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Calendars\CalendarStripWithTitles.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Chart\ChartBuilder.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Chart\ChartRenderer.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Chart\ChartScript.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Chart\ChartScriptParameter.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Chart\UserChart.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Chart\ChartColumn.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Chart\ChartRequestWindow.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\ControlPanels\Admin\ControlPanelEdit.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\ControlPanels\UserChartPartView.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\ControlPanels\LinkListPartView.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\ControlPanels\CountSearchControlPartView.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\ControlPanels\UserQueryPartView.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\ControlPanels\Admin\CountSearchControlPartEdit.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\ControlPanels\Admin\LinkListPartEdit.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\ControlPanels\Admin\UserChartPartEdit.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\ControlPanels\Admin\UserQueryPartEdit.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\ControlPanels\ControlPanelView.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Disconnected\UploadProgress.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Disconnected\DisconnectedImport.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Disconnected\DisconnectedMachine.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Disconnected\DownloadProgress.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Disconnected\DisconnectedExport.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Files\FileLine.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Files\FilePath.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Files\FileRepository.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Mailing\ClientCertificationFile.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Mailing\SMTPConfiguration.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Notes\Note.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Notes\NotesWidget.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Omnibox\OmniboxAutocomplete.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Omnibox\OmniboxTemplate.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Processes\PackageOperation.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Processes\Package.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Processes\PackageLine.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Processes\ProcessUI.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Processes\ProcessExecution.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Profiler\ProfilerUploader.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\SMS\SMSMessage.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\SMS\SMSSendPackage.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\SMS\SMSUpdatePackage.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\SynthaxHighlight\SyntaxHighlightBox.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\UserQueries\UserQuery.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Reports\ExcelReport.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Scheduler\Calendar.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Scheduler\CustomTask.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Scheduler\CustomTaskExecution.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Scheduler\ScheduledTask.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Scheduler\ScheduleRuleDaily.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Scheduler\ScheduleRuleWeekDays.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Scheduler\ScheduleRuleWeekly.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\SMS\SMSTemplate.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\GeneratedInternalTypeHelper.g.cs" />
+  </ItemGroup>
 </Project>

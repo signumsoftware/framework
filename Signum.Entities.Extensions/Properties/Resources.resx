@@ -366,7 +366,7 @@
     <comment>OmniboxMessage</comment>
   </data>
   <data name="Omnibox_Disambiguate" xml:space="preserve">
-    <value>With Shift+Enter you disambiguate you query</value>
+    <value>With [Tab] you disambiguate you query</value>
     <comment>OmniboxMessage</comment>
   </data>
 </root>

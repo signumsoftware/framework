@@ -14,6 +14,7 @@ using System.Linq.Expressions;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
 using System.Web.Routing;
+using Signum.Engine;
 #endregion
 
 namespace Signum.Web.Files
@@ -134,6 +135,17 @@ namespace Signum.Web.Files
         protected override string DefaultCreate()
         {
             return null;
+        }
+
+        public IFile GetFileValue()
+        {
+            Lite<IdentifiableEntity> lite = UntypedValue as Lite<IdentifiableEntity>;
+
+            if (lite != null)
+                return (IFile)lite.Retrieve();
+
+
+            return (IFile)UntypedValue;
         }
     }
 }

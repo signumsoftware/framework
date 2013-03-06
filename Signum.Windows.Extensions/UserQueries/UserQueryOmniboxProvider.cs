@@ -42,7 +42,7 @@ namespace Signum.Windows.UserQueries
             });
         }
 
-        public override string GetItemStatus(UserQueryOmniboxResult result)
+        public override string GetName(UserQueryOmniboxResult result)
         {
             return "UQ:" + result.UserQuery.Key();
         }

@@ -10,12 +10,6 @@ namespace Signum.Entities.Basics
     [Serializable]
     public class DateSpanDN : EmbeddedEntity
     {
-        public DateSpanDN(){}
-
-        protected override void SetSelfModified()
-        {
-            base.SetSelfModified();
-        }
         int years;
         public int Years
         {

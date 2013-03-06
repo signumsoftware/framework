@@ -25,17 +25,24 @@ namespace Signum.Engine.Authorization
 
         public static readonly DefaultBehaviour<TypeAllowedAndConditions> MaxType = new DefaultBehaviour<TypeAllowedAndConditions>(
             new TypeAllowedAndConditions(TypeAllowed.Create),
-            baseRules => Merge(baseRules, MaxTypeAllowed));
+            baseRules => Merge(baseRules, MaxTypeAllowed, TypeAllowed.Create, TypeAllowed.None));
 
         public static readonly DefaultBehaviour<TypeAllowedAndConditions> MinType = new DefaultBehaviour<TypeAllowedAndConditions>(
               new TypeAllowedAndConditions(TypeAllowed.None),
-           baseRules => Merge(baseRules, MinTypeAllowed));
+           baseRules => Merge(baseRules, MinTypeAllowed, TypeAllowed.None, TypeAllowed.Create));
 
-        static TypeAllowedAndConditions Merge(IEnumerable<TypeAllowedAndConditions> baseRules, Func<IEnumerable<TypeAllowed>, TypeAllowed> merge)
+        static TypeAllowedAndConditions Merge(IEnumerable<TypeAllowedAndConditions> baseRules, Func<IEnumerable<TypeAllowed>, TypeAllowed> merge, TypeAllowed current, TypeAllowed oposite)
         {
-            var only = baseRules.Only();
+            TypeAllowedAndConditions only = baseRules.Only();
             if (only != null)
                 return only;
+
+            if (baseRules.Any(a => a.Exactly(current)))
+                return new TypeAllowedAndConditions(current);
+
+            TypeAllowedAndConditions onlyNotOposite = baseRules.Where(a => !a.Exactly(oposite)).Only();
+            if (onlyNotOposite != null)
+                return onlyNotOposite;
 
             var conditions = baseRules.First().Conditions.Select(c => c.ConditionName).ToList();
 

@@ -81,7 +81,7 @@ namespace Signum.Entities.Omnibox
                         {
                             QueryDescription description = OmniboxParser.Manager.GetDescription(match.Value);
 
-                            foreach (var qt in QueryUtils.SubTokens(null, description.Columns))
+                            foreach (var qt in QueryUtils.SubTokens(null, description, canAggregate: false))
                             {
                                 yield return new DynamicQueryOmniboxResult
                                 {
@@ -127,7 +127,7 @@ namespace Signum.Entities.Omnibox
                 {
                     if (tokens[operatorIndex - 1].Next(rawQuery) == '.' && pair.Item2.All(a => ((QueryToken)a.Value).Key == a.Text))
                     {
-                        foreach (var qt in QueryUtils.SubTokens(pair.Item1, queryDescription.Columns))
+                        foreach (var qt in QueryUtils.SubTokens(pair.Item1, queryDescription, canAggregate: false))
                         {
                             result.Add(new FilterQuery(distance, syntax, qt, tokenMatches));
                         }
@@ -395,7 +395,7 @@ namespace Signum.Entities.Omnibox
             bool isPascal = OmniboxUtils.IsPascalCasePattern(omniboxToken.Value);
 
             var matches = OmniboxUtils.Matches(
-                QueryUtils.SubTokens(queryToken, queryDescription.Columns).ToDictionary(qt => qt.Key),
+                QueryUtils.SubTokens(queryToken, queryDescription, canAggregate: false).ToDictionary(qt => qt.Key),
                 qt => qt.ToString(), omniboxToken.Value, isPascal);
 
             if (index == operatorIndex - 1)

@@ -45,7 +45,7 @@ namespace Signum.Web.UserQueries
                 Mapping<QueryToken> qtMapping = ctx=>
                 {
                     string tokenStr = "";
-                    foreach (string key in ctx.Parent.Inputs.Keys.Where(k => k.Contains("ddlTokens")).Order())
+                    foreach (string key in ctx.Parent.Inputs.Keys.Where(k => k.Contains("ddlTokens")).OrderBy())
                         tokenStr += ctx.Parent.Inputs[key] + ".";
                     while (tokenStr.EndsWith("."))
                         tokenStr = tokenStr.Substring(0, tokenStr.Length - 1);
@@ -53,7 +53,7 @@ namespace Signum.Web.UserQueries
                     string queryKey = ctx.Parent.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", "Key")];
                     object queryName = QueryLogic.ToQueryName(queryKey);
                     QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                    return QueryUtils.Parse(tokenStr, qd);
+                    return QueryUtils.Parse(tokenStr, qd, canAggregate: false);
                 };
 
                 Navigator.AddSettings(new List<EntitySettings>
