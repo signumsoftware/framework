@@ -209,7 +209,7 @@ namespace Signum.Entities.DynamicQuery
             {
                 if (token == null)
                 {
-                    result.Add(new AggregateToken(null, AggregateFunction.Count));
+                    result.Add(new AggregateToken(AggregateFunction.Count, qd.QueryName));
                 }
                 else if (!(token is AggregateToken))
                 {
@@ -217,16 +217,16 @@ namespace Signum.Entities.DynamicQuery
 
                     if (ft == FilterType.Integer || ft == FilterType.Decimal || ft == FilterType.Boolean)
                     {
-                        result.Add(new AggregateToken(token, AggregateFunction.Average));
-                        result.Add(new AggregateToken(token, AggregateFunction.Sum));
+                        result.Add(new AggregateToken(AggregateFunction.Average, token));
+                        result.Add(new AggregateToken(AggregateFunction.Sum, token));
 
-                        result.Add(new AggregateToken(token, AggregateFunction.Min));
-                        result.Add(new AggregateToken(token, AggregateFunction.Max));
+                        result.Add(new AggregateToken(AggregateFunction.Min, token));
+                        result.Add(new AggregateToken(AggregateFunction.Max, token));
                     }
                     else if (ft == FilterType.DateTime) /*ft == FilterType.String || */
                     {
-                        result.Add(new AggregateToken(token, AggregateFunction.Min));
-                        result.Add(new AggregateToken(token, AggregateFunction.Max));
+                        result.Add(new AggregateToken(AggregateFunction.Min, token));
+                        result.Add(new AggregateToken(AggregateFunction.Max, token));
                     }
                 }
             }
@@ -239,11 +239,11 @@ namespace Signum.Entities.DynamicQuery
             if (token == null)
             {
                 if (MergeEntityColumns != null && !MergeEntityColumns())
-                    return qd.Columns.Select(s => QueryToken.NewColumn(s)).ToList();
+                    return qd.Columns.Select(cd => (QueryToken)new ColumnToken(cd, qd.QueryName)).ToList();
 
-                var dictonary = qd.Columns.Where(a => !a.IsEntity).Select(s => QueryToken.NewColumn(s)).ToDictionary(t => t.Key);
+                var dictonary = qd.Columns.Where(a => !a.IsEntity).Select(cd => (QueryToken)new ColumnToken(cd, qd.QueryName)).ToDictionary(t => t.Key);
 
-                var entity = QueryToken.NewColumn(qd.Columns.SingleEx(a => a.IsEntity));
+                var entity = new ColumnToken(qd.Columns.SingleEx(a => a.IsEntity), qd.QueryName);
 
                 dictonary.Add(entity.Key, entity);
 

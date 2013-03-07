@@ -19,7 +19,8 @@ namespace Signum.Windows
         static ConcurrentDictionary<QueryToken, IEnumerable<QueryToken>> extensionCache = new ConcurrentDictionary<QueryToken, IEnumerable<QueryToken>>();
         internal static IEnumerable<QueryToken> GetExtensionToken(QueryToken token)
         {
-            return extensionCache.GetOrAdd(token, t => Server.Return((IDynamicQueryServer server) => server.ExternalQueryToken(t)));
+            var result = extensionCache.GetOrAdd(token, t => Server.Return((IDynamicQueryServer server) => server.ExternalQueryToken(t)));
+            return result;
         }
 
         static ConcurrentDictionary<object, QueryDescription> descriptionsCache = new ConcurrentDictionary<object, QueryDescription>();
@@ -249,10 +250,10 @@ namespace Signum.Windows
             switch (mode)
             {
                 case ColumnOptionsMode.Add:
-                    return qd.Columns.Where(cd => !cd.IsEntity).Select(cd => new Column(cd)).Concat(
+                    return qd.Columns.Where(cd => !cd.IsEntity).Select(cd => new Column(cd, qd.QueryName)).Concat(
                         columns.Select(co => co.ToColumn())).ToList();
                 case ColumnOptionsMode.Remove:
-                    return qd.Columns.Where(cd => !cd.IsEntity && !columns.Any(co => co.Path == cd.Name)).Select(cd => new Column(cd)).ToList();
+                    return qd.Columns.Where(cd => !cd.IsEntity && !columns.Any(co => co.Path == cd.Name)).Select(cd => new Column(cd, qd.QueryName)).ToList();
                 case ColumnOptionsMode.Replace:
                     return columns.Select(co => co.ToColumn()).ToList();
                 default:

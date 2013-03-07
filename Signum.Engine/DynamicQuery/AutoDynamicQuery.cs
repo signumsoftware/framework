@@ -29,10 +29,10 @@ namespace Signum.Engine.DynamicQuery
 
         public override ResultTable ExecuteQuery(QueryRequest request)
         {
-            request.Columns.Insert(0, new _EntityColumn(EntityColumn().BuildColumnDescription()));
+            request.Columns.Insert(0, new _EntityColumn(EntityColumn().BuildColumnDescription(), QueryName));
 
             DQueryable<T> query = Query
-                .ToDQueryable(GetColumnDescriptions())
+                .ToDQueryable(GetQueryDescription())
                 .SelectMany(request.Multiplications)
                 .Where(request.Filters)
                 .OrderBy(request.Orders)
@@ -45,7 +45,7 @@ namespace Signum.Engine.DynamicQuery
 
         public override int ExecuteQueryCount(QueryCountRequest request)
         {
-            return Query.ToDQueryable(GetColumnDescriptions())
+            return Query.ToDQueryable(GetQueryDescription())
                 .SelectMany(request.Multiplications)
                 .Where(request.Filters)
                 .Query
@@ -54,10 +54,10 @@ namespace Signum.Engine.DynamicQuery
 
         public override Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request)
         {
-            var ex = new _EntityColumn(EntityColumn().BuildColumnDescription());
+            var ex = new _EntityColumn(EntityColumn().BuildColumnDescription(), QueryName);
 
             DQueryable<T> orderQuery = Query
-                .ToDQueryable(GetColumnDescriptions())
+                .ToDQueryable(GetQueryDescription())
                 .SelectMany(request.Multiplications)
                 .Where(request.Filters)
                 .OrderBy(request.Orders)
@@ -78,7 +78,7 @@ namespace Signum.Engine.DynamicQuery
             var allAggregates = request.AllTokens().OfType<AggregateToken>().ToHashSet();
 
             DQueryable<T> query = Query
-                .ToDQueryable(GetColumnDescriptions())
+                .ToDQueryable(GetQueryDescription())
                 .SelectMany(request.Multiplications)
                 .Where(request.Filters)
                 .GroupBy(keys, allAggregates)
