@@ -194,14 +194,7 @@ namespace Signum.Entities.DynamicQuery
         {
             var lite = ((Lite<IdentifiableEntity>)obj);
 
-            if (lite.EntityType == defaultEntityType)
-            {
-                return lite.Id + ";" + lite.ToString();
-            }
-            else
-            {
-                return lite.Id + ";" + Lite.UniqueTypeName(lite.EntityType) + ";" + lite.ToString();
-            }
+            return lite.Id + ";" + (lite.EntityType == defaultEntityType ? null : Lite.UniqueTypeName(lite.EntityType)) + ";" + lite.ToString();
         }
 
         static object DeserializeLite(string str, Type defaultEntityType)
@@ -210,12 +203,11 @@ namespace Signum.Entities.DynamicQuery
 
             string after = str.After(';');
 
-            string type = after.TryBefore(';');
+            string type = after.Before(';');
 
-            if (type == null)
-                return Lite.Create(defaultEntityType, id, toStr: after);
-            else
-                return Lite.Create(Lite.ResolveType(type), id, toStr: after.After(';'));
+            string toStr = after.After(';');
+
+            return Lite.Create(string.IsNullOrEmpty(type) ? defaultEntityType : Lite.ResolveType(type), id, toStr);
         }
     }
 
