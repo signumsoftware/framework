@@ -80,7 +80,7 @@ namespace Signum.Engine.DynamicQuery
             DQueryable<T> query = Query
                 .ToDQueryable(GetColumnDescriptions())
                 .SelectMany(request.Multiplications)
-                .Where(request.Filters)
+                .Where(simpleFilters)
                 .GroupBy(keys, allAggregates)
                 .Where(aggregateFilters)
                 .OrderBy(request.Orders);
