@@ -47,12 +47,9 @@ namespace Signum.Web.Selenium
 
             StartSelenium(selenium);
 
-            selenium.SetTimeout("600000");
-            selenium.SetSpeed("200");
-            //selenium.SetSpeed("1000");
-
-
-
+            selenium.SetTimeout("0");
+            //selenium.SetSpeed("200");
+            
             selenium.AddLocationStrategy("jq",
             "var loc = locator; " +
             "var attr = null; " +
