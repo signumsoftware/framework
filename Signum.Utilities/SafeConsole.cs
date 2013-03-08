@@ -149,7 +149,7 @@ namespace Signum.Utilities
                     { 
                         Console.SetCursorPosition(left, Console.CursorTop);
 
-                        SafeConsole.WriteColor(ConsoleColor.DarkGray, " (" + (DateTime.Now - dt).NiceToString() + ")");
+                        SafeConsole.WriteColor(ConsoleColor.DarkGray, " (" + (DateTime.Now - dt).NiceToString(DateTimePrecision.Seconds) + ")");
 
                         Thread.Sleep(1000);
                     }
