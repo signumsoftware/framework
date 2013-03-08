@@ -128,6 +128,14 @@ namespace Signum.Entities.Alerts
         {
             get{ return CurrentStateExpression.Evaluate(this); }
         }
+
+        [ImplementedBy()]
+        Lite<IIdentifiable> aditionalData;
+        public Lite<IIdentifiable> AditionalData
+        {
+            get { return aditionalData; }
+            set { Set(ref aditionalData, value, () => AditionalData); }
+        }
     }
 
     public enum AlertState
