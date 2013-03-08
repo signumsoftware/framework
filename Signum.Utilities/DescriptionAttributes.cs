@@ -41,6 +41,28 @@ namespace Signum.Utilities
         All = Members | Description | PluralDescription | Gender,
     }
 
+    static class DescriptionOptionsExtensions
+    {
+        public static bool IsSetAssert(this DescriptionOptions opts, DescriptionOptions flag, MemberInfo member)
+        {
+            if ((opts.IsSet(DescriptionOptions.PluralDescription) || opts.IsSet(DescriptionOptions.Gender)) && !opts.IsSet(DescriptionOptions.Description))
+                throw new InvalidOperationException("{0} has {1} set also requires {2}".Formato(member.Name, opts, DescriptionOptions.Description));
+
+            if ((member is PropertyInfo || member is FieldInfo) &&
+                (opts.IsSet(DescriptionOptions.PluralDescription) ||
+                 opts.IsSet(DescriptionOptions.Gender) ||
+                 opts.IsSet(DescriptionOptions.Members)))
+                throw new InvalidOperationException("Member {0} has {1} set".Formato(member.Name, opts));
+
+            return opts.IsSet(flag);
+        }
+
+        public static bool IsSet(this DescriptionOptions opts, DescriptionOptions flag)
+        {
+            return (opts & flag) == flag;
+        }
+    }
+
     [AttributeUsage(AttributeTargets.Class)]
     public class PluralDescriptionAttribute : Attribute
     {
@@ -81,6 +103,11 @@ namespace Signum.Utilities
         public static Func<Type, string> CleanTypeName = t => t.Name; //To allow MyEntityDN
         public static Func<Type, Type> CleanType = t => t; //To allow Lite<T>
 
+        public static string TranslationDirectory = Path.Combine(Path.GetDirectoryName(new Uri(typeof(DescriptionManager).Assembly.CodeBase).LocalPath), "Translations");
+
+        public static event Func<Type, DescriptionOptions?> DefaultDescriptionOptions = t => t.Name.EndsWith("Message") ? DescriptionOptions.Members : (DescriptionOptions?)null;
+
+
         public static string NiceName(this Type type)
         {
             type = CleanType(type);
@@ -117,7 +144,7 @@ namespace Signum.Utilities
                 }
             }
 
-            var global = CultureInfo.GetCultureInfo(GetDefaultAssemblyCulture(type.Assembly));
+            var global = CultureInfo.GetCultureInfo(LocalizedAssembly.GetDefaultAssemblyCulture(type.Assembly));
             {
                 var loc = GetLocalizedType(type, global);
                 if (loc == null)
@@ -175,17 +202,6 @@ namespace Signum.Utilities
             return result;
         }
 
-
-        private static string GetDefaultAssemblyCulture(Assembly assembly)
-        {
-            var defaultLoc = assembly.SingleAttribute<DefaultAssemblyCultureAttribute>();
-
-            if (defaultLoc == null)
-                throw new InvalidOperationException("Assembly {0} does not have {1}".Formato(assembly.GetName().Name, typeof(DefaultAssemblyCultureAttribute).Name));
-
-            return defaultLoc.DefaultCulture;
-        }
-
         public static char? GetGender(this Type type)
         {
             type = CleanType(type);
@@ -196,31 +212,98 @@ namespace Signum.Utilities
                 (cc.Parent.Name.HasText() ? GetLocalizedType(type, cc.Parent).TryCS(lt => lt.Gender) : null);
         }
 
-        static ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Assembly, Dictionary<Type, LocalizedType>>> localizations = 
-            new ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Assembly, Dictionary<Type, LocalizedType>>>();
+        static ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Assembly, LocalizedAssembly>> localizations = 
+            new ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Assembly, LocalizedAssembly>>();
 
         public static LocalizedType GetLocalizedType(Type type, CultureInfo cultureInfo)
         {
-            return GetLocalizedAssembly(type.Assembly, cultureInfo).TryGetC(type); 
+            return GetLocalizedAssembly(type.Assembly, cultureInfo).Types.TryGetC(type); 
         }
 
-        private static Dictionary<Type, LocalizedType> GetLocalizedAssembly(Assembly assembly, CultureInfo cultureInfo)
+        public static LocalizedAssembly GetLocalizedAssembly(Assembly assembly, CultureInfo cultureInfo)
         {
             return localizations
-                .GetOrAdd(cultureInfo, ci => new ConcurrentDictionary<Assembly, Dictionary<Type, LocalizedType>>())
-                .GetOrAdd(assembly, (Assembly a) => LoadTranslatedAssembly(assembly, cultureInfo));
+                .GetOrAdd(cultureInfo, ci => new ConcurrentDictionary<Assembly, LocalizedAssembly>())
+                .GetOrAdd(assembly, (Assembly a) => LocalizedAssembly.ImportXml(assembly, cultureInfo));
         }
 
-        public static string TranslationDirectory = Path.Combine(Path.GetDirectoryName(new Uri(typeof(DescriptionManager).Assembly.CodeBase).LocalPath), "Translations");
-
-        public static string TranslationFileName(Assembly assembly, CultureInfo cultureInfo)
+        internal static DescriptionOptions? OnDefaultDescriptionOptions(Type type)
         {
-            return Path.Combine(TranslationDirectory, "{0}.{1}.xml".Formato(assembly.GetName().Name, cultureInfo.Name));
+            if (DescriptionManager.DefaultDescriptionOptions == null)
+                return null;
+
+            foreach (Func<Type, DescriptionOptions?> action in DescriptionManager.DefaultDescriptionOptions.GetInvocationList())
+            {
+                var result = action(type);
+                if (result != null)
+                    return result.Value;
+            }
+
+            return null;
+        }
+    }
+
+
+    public class LocalizedAssembly
+    {
+        public Assembly Assembly;
+        public CultureInfo Culture;
+        public bool IsDefault;
+
+        private LocalizedAssembly() { }
+
+        public Dictionary<Type, LocalizedType> Types = new Dictionary<Type, LocalizedType>();
+
+        static string TranslationFileName(Assembly assembly, CultureInfo cultureInfo)
+        {
+            return Path.Combine(DescriptionManager.TranslationDirectory, "{0}.{1}.xml".Formato(assembly.GetName().Name, cultureInfo.Name));
         }
 
-        public static event Func<Type, DescriptionOptions?> DefaultDescriptionOptions = t => t.Name.EndsWith("Message") ? DescriptionOptions.Members : (DescriptionOptions?)null; 
+        static DescriptionOptions GetDescriptionOptions(Type type)
+        {
+            var doa = type.SingleAttributeInherit<DescriptionOptionsAttribute>();
+            if (doa != null)
+                return doa.Options;
 
-        static Dictionary<Type, LocalizedType> LoadTranslatedAssembly(Assembly assembly, CultureInfo cultureInfo)
+            DescriptionOptions? def = DescriptionManager.OnDefaultDescriptionOptions(type);
+            if (def != null)
+                return def.Value;
+
+            if (type.IsEnum)
+                return DescriptionOptions.Members | DescriptionOptions.Description;
+
+            return DescriptionOptions.None;
+        }
+
+        public static string GetDefaultAssemblyCulture(Assembly assembly)
+        {
+            var defaultLoc = assembly.SingleAttribute<DefaultAssemblyCultureAttribute>();
+
+            if (defaultLoc == null)
+                throw new InvalidOperationException("Assembly {0} does not have {1}".Formato(assembly.GetName().Name, typeof(DefaultAssemblyCultureAttribute).Name));
+
+            return defaultLoc.DefaultCulture;
+        }
+
+        public void ExportXml()
+        {
+            var doc = new XDocument(new XDeclaration("1.0", "UTF8", "yes"),
+                new XElement("Translations",
+                    from kvp in Types
+                    let type = kvp.Key
+                    let lt = kvp.Value
+                    let doa = GetDescriptionOptions(type)
+                    where doa != DescriptionOptions.None
+                    select lt.ExportXml(doa, Culture, IsDefault)
+                )
+            );
+
+            string fileName = TranslationFileName(Assembly, Culture);
+
+            doc.Save(fileName);
+        }
+
+        public static LocalizedAssembly ImportXml(Assembly assembly, CultureInfo cultureInfo)
         {
             bool isDefault = cultureInfo.Name == GetDefaultAssemblyCulture(assembly);
 
@@ -235,40 +318,75 @@ namespace Signum.Utilities
             if (!isDefault && file == null)
                 return null;
 
-            return (from t in assembly.GetTypes()
-                    let opts = GetDescriptionOptions(t)
-                    where opts != DescriptionOptions.None
-                    let x = file.TryGetC(t.Name)
-                    where x != null || isDefault
-                    select LoadTranslatedType(t, opts, cultureInfo, x, isDefault))
-                    .ToDictionary(lt => lt.Type);
-        }
+            var types = (from t in assembly.GetTypes()
+                         let opts = GetDescriptionOptions(t)
+                         where opts != DescriptionOptions.None
+                         let x = file.TryGetC(t.Name)
+                         select LocalizedType.ImportXml(t, opts, cultureInfo, x, isDefault))
+                         .ToDictionary(lt => lt.Type);
 
-        static DescriptionOptions GetDescriptionOptions(Type type)
-        {
-            var doa = type.SingleAttributeInherit<DescriptionOptionsAttribute>();
-            if (doa != null)
-                return doa.Options;
-
-            if (DefaultDescriptionOptions == null)
-                return DescriptionOptions.None;
-
-            foreach (Func<Type, DescriptionOptions?> action in DefaultDescriptionOptions.GetInvocationList())
+            return new LocalizedAssembly
             {
-                var result = action(type);
-                if (result != null)
-                    return result.Value;
-            }
+                Assembly = assembly,
+                Culture = cultureInfo,
+                IsDefault = isDefault,
+                Types = types
+            };
+        }
+    }
 
-            if (type.IsEnum)
-                return DescriptionOptions.Members | DescriptionOptions.Description;
+    public class LocalizedType
+    {
+        public Type Type { get; private set; }
+        public string Description { get; set; }
+        public string PluralDescription { get; set; }
+        public char? Gender { get; set; }
 
-            return DescriptionOptions.None;
+        public Dictionary<string, string> Members = new Dictionary<string, string>();
+
+        LocalizedType() { }
+
+        public XElement ExportXml(DescriptionOptions doa, CultureInfo cultureInfo, bool isDefault)
+        {
+            return new XElement("Type",
+                    new XAttribute("Name", Type.Name),
+
+                    !doa.IsSetAssert(DescriptionOptions.Description, Type) ||
+                    Description == null ||
+                    (isDefault && Description == (Type.SingleAttribute<DescriptionAttribute>().TryCC(t => t.Description) ?? DescriptionManager.CleanTypeName(Type).SpacePascal())) ? null :
+                    new XAttribute("Description", Description),
+
+                    !doa.IsSetAssert(DescriptionOptions.PluralDescription, Type) ||
+                    PluralDescription == null ||
+                    (PluralDescription == NaturalLanguageTools.Pluralize(Description, cultureInfo)) ? null :
+                    new XAttribute("PluralDescription", PluralDescription),
+
+                    !doa.IsSetAssert(DescriptionOptions.Gender, Type) ||
+                    Gender == null ||
+                    (Gender == NaturalLanguageTools.GetGender(Description, cultureInfo)) ? null :
+                    new XAttribute("Gender", Gender),
+
+                    !doa.IsSetAssert(DescriptionOptions.Members, Type) ? null :
+                     (from m in Type.GetProperties(bf).Cast<MemberInfo>().Concat(Type.GetFields(bf))
+                      let doam = m.SingleAttribute<DescriptionOptionsAttribute>()
+                      where doa == null || doam.Options.IsSetAssert(DescriptionOptions.Description, m)
+                      let value = Members.TryGetC(m.Name)
+                      where value != null && (!isDefault || ((Type.SingleAttribute<DescriptionAttribute>().TryCC(t => t.Description) ?? m.Name.NiceName()) != value))
+                      select new XElement("Member", new XAttribute("MemberName", m.Name), new XAttribute("Name", value)))
+                );
         }
 
         const BindingFlags bf = BindingFlags.Public | BindingFlags.Instance;
 
-        static LocalizedType LoadTranslatedType(Type type, DescriptionOptions opts, CultureInfo cultureInfo, XElement x, bool isDefault)
+        static IEnumerable<MemberInfo> GetMembers(Type type)
+        {
+            if (type.IsEnum)
+                return EnumFieldCache.Get(type).Values;
+            else
+                return type.GetProperties(bf).Concat(type.GetFields(bf).Cast<MemberInfo>());
+        }
+
+        internal static LocalizedType ImportXml(Type type, DescriptionOptions opts, CultureInfo cultureInfo, XElement x, bool isDefault)
         {
             string name = !opts.IsSetAssert(DescriptionOptions.Description, type) ? null :
                 (x == null ? null : x.Attribute("Description").TryCC(xa => xa.Value)) ??
@@ -279,8 +397,9 @@ namespace Signum.Utilities
                 .Distinct(m => m.Key)
                 .ToDictionary();
 
-            LocalizedType result = new LocalizedType(type)
+            LocalizedType result = new LocalizedType
             {
+                Type = type,
                 Description = name,
                 PluralDescription = !opts.IsSetAssert(DescriptionOptions.PluralDescription, type) ? null :
                              ((x == null ? null : x.Attribute("PluralDescription").TryCC(xa => xa.Value)) ??
@@ -305,103 +424,15 @@ namespace Signum.Utilities
             return result;
         }
 
-        static IEnumerable<MemberInfo> GetMembers(Type type)
+        static string DefaultTypeDescription(Type type)
         {
-            if (type.IsEnum)
-                return EnumFieldCache.Get(type).Values;
-            else
-                return type.GetProperties(bf).Concat(type.GetFields(bf).Cast<MemberInfo>());
+            return type.SingleAttribute<DescriptionAttribute>().TryCC(t => t.Description) ?? DescriptionManager.CleanTypeName(type).SpacePascal();
         }
 
-        private static string DefaultTypeDescription(Type type)
-        {
-            return type.SingleAttribute<DescriptionAttribute>().TryCC(t => t.Description) ?? CleanTypeName(type).SpacePascal();
-        }
-
-        private static string DefaultMemberDescription(MemberInfo m)
+        static string DefaultMemberDescription(MemberInfo m)
         {
             return (m.SingleAttribute<DescriptionAttribute>().TryCC(t => t.Description) ?? m.Name.NiceName());
         }
-
-        static bool IsSetAssert(this DescriptionOptions opts, DescriptionOptions flag, MemberInfo member)
-        {
-            if ((opts.IsSet(DescriptionOptions.PluralDescription) || opts.IsSet(DescriptionOptions.Gender)) && !opts.IsSet(DescriptionOptions.Description))
-                throw new InvalidOperationException("{0} has {1} set also requires {2}".Formato(member.Name, opts, DescriptionOptions.Description));
-
-            if ((member is PropertyInfo || member is FieldInfo) &&
-                (opts.IsSet(DescriptionOptions.PluralDescription) ||
-                 opts.IsSet(DescriptionOptions.Gender) ||
-                 opts.IsSet(DescriptionOptions.Members)))
-                throw new InvalidOperationException("Member {0} has {1} set".Formato(member.Name, opts));
-
-            return opts.IsSet(flag);
-        }
-
-        private static bool IsSet(this DescriptionOptions opts, DescriptionOptions flag)
-        {
-            return (opts & flag) == flag;
-        }
-
-        static void SaveTranslatedAssembly(Assembly assembly, CultureInfo cultureInfo)
-        {
-            bool isDefault = cultureInfo.Name == GetDefaultAssemblyCulture(assembly);
-
-            string fileName = TranslationFileName(assembly, cultureInfo);
-
-            Dictionary<Type, LocalizedType> localizedAssembly = GetLocalizedAssembly(assembly, cultureInfo);
-
-            var doc = new XDocument(new XDeclaration("1.0", "UTF8", "yes"),
-                new XElement("Translations",
-                    from kvp in localizedAssembly
-                    let type = kvp.Key
-                    let tt = kvp.Value
-                    let doa = GetDescriptionOptions(type)
-                    where doa != DescriptionOptions.None
-                    select new XElement("Type",
-                        new XAttribute("Name", type.Name),
-
-                        !doa.IsSetAssert(DescriptionOptions.Description, type) ||
-                        tt.Description == null ||
-                        (isDefault && tt.Description == (type.SingleAttribute<DescriptionAttribute>().TryCC(t => t.Description) ?? CleanTypeName(type).SpacePascal())) ? null : 
-                        new XAttribute("Description", tt.Description),
-
-                        !doa.IsSetAssert(DescriptionOptions.PluralDescription, type) ||
-                        tt.PluralDescription == null ||
-                        (tt.PluralDescription == NaturalLanguageTools.Pluralize(tt.Description, cultureInfo)) ? null :
-                        new XAttribute("PluralDescription", tt.PluralDescription),
-
-                        !doa.IsSetAssert(DescriptionOptions.Gender, type) ||
-                        tt.Gender == null ||
-                        (tt.Gender == NaturalLanguageTools.GetGender(tt.Description, cultureInfo)) ? null : 
-                        new XAttribute("Gender", tt.Gender),
-
-                        !doa.IsSetAssert(DescriptionOptions.Members, type) ? null :
-                         (from m in type.GetProperties(bf).Cast<MemberInfo>().Concat(type.GetFields(bf))
-                          let doam = m.SingleAttribute<DescriptionOptionsAttribute>()
-                          where doa == null || doam.Options.IsSetAssert(DescriptionOptions.Description, m)
-                          let value = tt.Members.TryGetC(m.Name)
-                          where value != null && (!isDefault || ((type.SingleAttribute<DescriptionAttribute>().TryCC(t => t.Description) ?? m.Name.NiceName()) != value))
-                          select new XElement("Member", new XAttribute("MemberName", m.Name), new XAttribute("Name", value)))
-                    )
-                )
-            );
-
-            doc.Save(fileName);
-        }
-
-        public class LocalizedType
-        {
-            public Type Type { get; private set; }
-            public string Description { get; set; }
-            public string PluralDescription { get; set; }
-            public char? Gender { get; set; }
-
-            public Dictionary<string, string> Members = new Dictionary<string, string>();
-
-            public LocalizedType(Type type)
-            {
-                this.Type = type;
-            }
-        }
     }
+
 }
