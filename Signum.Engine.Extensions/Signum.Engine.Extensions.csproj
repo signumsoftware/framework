@@ -137,6 +137,7 @@
     <Compile Include="Help\NamespaceHelp.cs" />
     <Compile Include="Localization\CultureInfoLogic.cs" />
     <Compile Include="Localization\LocalizedInstanceLogic.cs" />
+    <Compile Include="Localization\Translator.cs" />
     <Compile Include="Mailing\EmailLogic.cs" />
     <Compile Include="Mailing\EmailPackageLogic.cs" />
     <Compile Include="Mailing\EmailRenderer.cs" />
