@@ -1780,7 +1780,7 @@ namespace Signum.Engine.Linq
                 }
             }
 
-            throw new NotImplementedException("{0} can not be assigned from {1}".Formato(colExpression.Type.Name, expression.Type.Name)); 
+            throw new NotImplementedException("{0} can not be assigned from expression:\n{1}".Formato(colExpression.Type.TypeName(), expression.NiceToString())); 
         }
 
         private ColumnAssignment[] AssignNull(Expression colExpression)

@@ -27,8 +27,8 @@ namespace Signum.Entities.DynamicQuery
             this.displayName = displayName;
         }
 
-        public Column(ColumnDescription cd)
-            : this(QueryToken.NewColumn(cd), cd.DisplayName)
+        public Column(ColumnDescription cd, object queryName)
+            : this(new ColumnToken(cd, queryName), cd.DisplayName)
         {
         }
 
@@ -63,8 +63,8 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     internal class _EntityColumn : Column
     {
-        public _EntityColumn(ColumnDescription entityColumn)
-            : base(QueryToken.NewColumn(entityColumn), null)
+        public _EntityColumn(ColumnDescription entityColumn, object queryName)
+            : base(new ColumnToken(entityColumn, queryName), null)
         {
             if (!entityColumn.IsEntity)
                 throw new ArgumentException("entityColumn");
