@@ -21,11 +21,11 @@ namespace Signum.Engine.Alerts
 {
     public static class AlertLogic
     {
-        static Expression<Func<IdentifiableEntity, IQueryable<AlertDN>>> AlertasExpression =
+        static Expression<Func<IdentifiableEntity, IQueryable<AlertDN>>> AlertsExpression =
             e => Database.Query<AlertDN>().Where(a => a.Target.RefersTo(e));
-        public static IQueryable<AlertDN> Alertas(this IdentifiableEntity e)
+        public static IQueryable<AlertDN> Alerts(this IdentifiableEntity e)
         {
-            return AlertasExpression.Evaluate(e);
+            return AlertsExpression.Evaluate(e);
         }
 
         public static HashSet<Enum> SystemAlertTypes = new HashSet<Enum>();

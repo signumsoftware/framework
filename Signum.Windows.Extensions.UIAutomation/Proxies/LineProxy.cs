@@ -289,7 +289,7 @@ namespace Signum.Windows.UIAutomation
                 return null;
 
             var result = this.PropertyRoute;
-            if (result.Type.IsIRootEntity())
+            if (result.Type.IsIRootEntity() || result.Type.IsLite())
                 return null;
 
             return result; 
@@ -500,7 +500,7 @@ namespace Signum.Windows.UIAutomation
                 return null;
 
             var result = this.PropertyRoute.Add("Item");
-            if (result.Type.IsIRootEntity())
+            if (result.Type.IsIRootEntity() || result.Type.IsLite())
                 return null;
 
             return result;
@@ -539,7 +539,7 @@ namespace Signum.Windows.UIAutomation
                 return null;
 
             var result = this.PropertyRoute.Add("Item");
-            if ( result.Type.IsIRootEntity())
+            if (result.Type.IsIRootEntity() || result.Type.IsLite())
                 return null;
 
             return result;

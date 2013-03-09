@@ -25,13 +25,14 @@ using Signum.Entities.Reflection;
 using Signum.Entities.Files;
 using System.Net;
 using Signum.Services;
+using Signum.Windows.Extensions.Files;
 
 namespace Signum.Windows.Files
 {
     /// <summary>
     /// Interaction logic for UserControl1.xaml
     /// </summary>
-    public partial class FileLine: LineBase
+    public partial class FileLine : LineBase
     {
         public static readonly DependencyProperty EntityProperty =
             DependencyProperty.Register("Entity", typeof(object), typeof(FileLine), new FrameworkPropertyMetadata(null,
@@ -105,7 +106,7 @@ namespace Signum.Windows.Files
         public event Action<object> Viewing;
         public event Func<object, bool> Removing;
 
-        public event Action<FileDialog> CustomizeFileDialog; 
+        public event Action<FileDialog> CustomizeFileDialog;
 
         Type cleanType;
 
@@ -136,7 +137,7 @@ namespace Signum.Windows.Files
                 cleanType = Type;
             }
 
-            UpdateVisibility(); 
+            UpdateVisibility();
         }
 
 
@@ -149,10 +150,10 @@ namespace Signum.Windows.Files
         {
             btSave.Visibility = Save && Entity != null ? Visibility.Visible : Visibility.Collapsed;
             btOpen.Visibility = Open && Entity == null ? Visibility.Visible : Visibility.Collapsed;
-            btView.Visibility = View && Entity != null? Visibility.Visible : Visibility.Collapsed;
+            btView.Visibility = View && Entity != null ? Visibility.Visible : Visibility.Collapsed;
             btRemove.Visibility = Remove && Entity != null ? Visibility.Visible : Visibility.Collapsed;
         }
-      
+
         private void OnViewing(object entity)
         {
             if (Entity == null || !View)
@@ -195,7 +196,7 @@ namespace Signum.Windows.Files
                 SaveFileDialog sfd = new SaveFileDialog();
                 sfd.FileName = file.FileName;
                 if (CustomizeFileDialog != null)
-                    CustomizeFileDialog(sfd); 
+                    CustomizeFileDialog(sfd);
 
                 if (sfd.ShowDialog() == true)
                     File.WriteAllBytes(sfd.FileName, file.BinaryFile ?? OnResolveBinaryFile(file));
@@ -224,7 +225,7 @@ namespace Signum.Windows.Files
             {
                 OpenFileDialog ofd = new OpenFileDialog();
                 if (CustomizeFileDialog != null)
-                    CustomizeFileDialog(ofd); 
+                    CustomizeFileDialog(ofd);
 
                 if (ofd.ShowDialog() == true)
                 {
@@ -277,7 +278,7 @@ namespace Signum.Windows.Files
             if (Entity == null || !Save)
                 return;
 
-            OnSaving(Entity); 
+            OnSaving(Entity);
         }
 
         private void btOpen_Click(object sender, RoutedEventArgs e)
@@ -299,13 +300,13 @@ namespace Signum.Windows.Files
             }
             else
             {
-                return Server.Return((IFileServer s)=>s.GetBinaryFile(f)); 
+                return Server.Return((IFileServer s) => s.GetBinaryFile(f));
             }
         }
 
         private void fileLine_DragEnter(object sender, DragEventArgs e)
         {
-            if (!e.Data.GetDataPresent(DataFormats.FileDrop) || ((string[])e.Data.GetData(DataFormats.FileDrop)).Length != 1)
+            if (!e.Data.GetDataPresent(DataFormats.FileDrop) && !e.CanHandleOutlookAttachment())
             {
                 e.Effects = DragDropEffects.None;
                 e.Handled = true;
@@ -314,13 +315,45 @@ namespace Signum.Windows.Files
 
         private void fileLine_Drop(object sender, DragEventArgs e)
         {
-            if (!e.Data.GetDataPresent(DataFormats.FileDrop))
+            string[] files = null;
+
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                files = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+                if (files == null || files.IsEmpty())
+                    return;
+
+                if (files.Length != 1)
+                    throw new ApplicationException(Signum.Windows.Extensions.Properties.Resources.OnlyOneFileSupported);
+            }
+            else if (e.CanHandleOutlookAttachment())
+            {
+                var tuples = e.DropOutlookAttachment();
+
+                if (tuples.Count != 1)
+                    throw new ApplicationException(Signum.Windows.Extensions.Properties.Resources.OnlyOneFileSupported);
+
+                var tuple = tuples.SingleEx();
+
+                int i = 0;
+                var tPath = System.IO.Path.GetTempPath();
+                while (File.Exists(System.IO.Path.Combine(tPath, tuple.Item1)))
+                {
+                    tPath = System.IO.Path.Combine(tPath, i.ToString());
+                    if (!Directory.Exists(tPath))
+                        Directory.CreateDirectory(tPath);
+                    i++;
+                }
+                string fileName = System.IO.Path.Combine(tPath, tuple.Item1);
+                File.WriteAllBytes(fileName, tuple.Item2);
+
+                files = new[] { fileName };
+            }
+            else
+            {
                 return;
-
-            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-
-            if (files.Length != 1)
-                throw new ApplicationException("Only one file supported");
+            }
 
             object file = CreateFile(files.Single());
 

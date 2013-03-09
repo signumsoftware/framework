@@ -60,6 +60,14 @@ namespace Signum.Entities.Notes
         {
             return " - ".Combine(title, text.EtcLines(100)).Etc(100);
         }
+
+        [ImplementedBy()]
+        Lite<IIdentifiable> aditionalData;
+        public Lite<IIdentifiable> AditionalData
+        {
+            get { return aditionalData; }
+            set { Set(ref aditionalData, value, () => AditionalData); }
+        }
     }
 
     public enum NoteOperation

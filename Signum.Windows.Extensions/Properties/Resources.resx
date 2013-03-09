@@ -285,4 +285,7 @@
     <value>Authorization cache successfully updated</value>
     <comment>AuthMessage</comment>
   </data>
+  <data name="OnlyOneFileSupported" xml:space="preserve">
+    <value>Only one file supported</value>
+  </data>
 </root>
