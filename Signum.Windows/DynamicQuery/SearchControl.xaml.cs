@@ -942,6 +942,7 @@ namespace Signum.Windows
         {
             ColumnOptions.Clear();
             ColumnOptions.AddRange(columns);
+            DynamicQueryServer.SetColumnTokens(ColumnOptions, Description);
             ColumnOptionsMode = columnOptionsMode; 
             GenerateListViewColumns();
 

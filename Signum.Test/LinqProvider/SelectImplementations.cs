@@ -302,5 +302,41 @@ namespace Signum.Test.LinqProvider
 
             query.ToList();
         }
+
+        [TestMethod]
+        public void SelectIsIBLite()
+        {
+            var query = (from n in Database.Query<NoteWithDateDN>()
+                         where n.Target.ToLite() is Lite<AlbumDN>
+                         select n.Target.ToLite()).ToList();
+
+        }
+
+        [TestMethod]
+        public void SelectIsIBALite()
+        {
+            var query = (from a in Database.Query<AwardNominationDN>()
+                         where a.Author is Lite<BandDN>
+                         select a.Author).ToList();
+
+        }
+
+        [TestMethod]
+        public void SelectCastIBALite()
+        {
+            var query = (from n in Database.Query<NoteWithDateDN>()
+                         select (Lite<AlbumDN>)n.Target.ToLite()).ToList();
+
+        }
+
+        [TestMethod]
+        public void SelectCastIBLite()
+        {
+            var query = (from a in Database.Query<AwardNominationDN>()
+                         select (Lite<BandDN>)a.Author).ToList();
+
+        }
+
+        //AwardNominationDN
     }
 }

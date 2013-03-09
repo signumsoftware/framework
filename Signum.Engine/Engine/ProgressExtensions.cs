@@ -45,102 +45,6 @@ namespace Signum.Engine
             }
         }
 
-        private static StreamWriter TryOpenAutoFlush(string fileName)
-        {
-            if (string.IsNullOrEmpty(fileName))
-                return null;
-
-            var result = new StreamWriter(fileName, append: true);
-            result.AutoFlush = true;
-            return result;
-        }
-
-        private static LogWriter GetLogWriter(StreamWriter logStreamWriter)
-        {
-            if (logStreamWriter != null)
-            {
-                return (color, str, parameters) =>
-                {
-                    string f = parameters == null ? str : str.Formato(parameters);
-                    lock (logStreamWriter)
-                        logStreamWriter.WriteLine(f);
-                    lock (SafeConsole.SyncKey)
-                    {
-                        SafeConsole.ClearSameLine();
-                        SafeConsole.WriteLineColor(color, str, parameters);
-                    }
-                };
-            }
-            else
-            {
-                return (color, str, parameters) =>
-                {
-                    lock (SafeConsole.SyncKey)
-                    {
-                        SafeConsole.ClearSameLine();
-                        SafeConsole.WriteLineColor(color, str, parameters);
-                    }
-                };
-            }
-        }
-
-        public static void ProgressForeachDisableIdentity<T>(this IEnumerable<T> collection, Type tableType, Func<T, string> elementID, string fileName, Action<T, LogWriter> action)
-        {
-            Table table = Schema.Current.Table(tableType);
-            table.Identity = false;
-            try
-            {
-                collection.ProgressForeach(elementID, fileName, (item, writer) =>
-                {
-                    using (Transaction tr = new Transaction())
-                    {
-                        using (Administrator.DisableIdentity(table.Name))
-                            action(item, writer);
-                        tr.Commit();
-                    }
-                });
-            }
-            finally
-            {
-                table.Identity = false;
-                SafeConsole.ClearSameLine();
-            }
-        }
-
-        public static void ProgressForeachDisableIdentity<T>(this IEnumerable<T> collection, bool isParallel, Type tableType, Func<T, string> elementID, string fileName, Action<T, LogWriter> action)
-        {
-            Table table = Schema.Current.Table(tableType);
-            table.Identity = false;
-            try
-            {
-                if (isParallel)
-                    collection.ProgressForeachParallel(elementID, fileName, (item, writer) =>
-                    {
-                        using (Transaction tr = new Transaction())
-                        {
-                            using (Administrator.DisableIdentity(table.Name))
-                                action(item, writer);
-                            tr.Commit();
-                        }
-                    });
-                else
-                    collection.ProgressForeach(elementID, fileName, (item, writer) =>
-                    {
-                        using (Transaction tr = new Transaction())
-                        {
-                            using (Administrator.DisableIdentity(table.Name))
-                                action(item, writer);
-                            tr.Commit();
-                        }
-                    });
-            }
-            finally
-            {
-                table.Identity = false;
-                SafeConsole.ClearSameLine();
-            }
-        }
-
         public static void ProgressForeachParallel<T>(this IEnumerable<T> collection, Func<T, string> elementID, string fileName, Action<T, LogWriter> action)
         {
             using (StreamWriter log = TryOpenAutoFlush(fileName))
@@ -184,6 +88,39 @@ namespace Signum.Engine
             }
         }
 
+        public static void ProgressForeach<T>(this IEnumerable<T> collection, bool isParallel, Func<T, string> elementID, string fileName, Action<T, LogWriter> action)
+        {
+            if (isParallel)
+                collection.ProgressForeachParallel(elementID, fileName, action);
+            else
+                collection.ProgressForeach(elementID, fileName, action);
+        }
+
+        public static void ProgressForeachDisableIdentity<T>(this IEnumerable<T> collection, Type tableType, Func<T, string> elementID, string fileName, Action<T, LogWriter> action)
+        {
+            Table table = Schema.Current.Table(tableType);
+            table.Identity = false;
+            try
+            {
+                collection.ProgressForeach(elementID, fileName, (item, writer) =>
+                {
+                    using (Transaction tr = new Transaction())
+                    {
+                        using (Administrator.DisableIdentity(table.Name))
+                            action(item, writer);
+                        tr.Commit();
+                    }
+                });
+            }
+            finally
+            {
+                table.Identity = false;
+                SafeConsole.ClearSameLine();
+            }
+        }
+
+       
+
         public static void ProgressForeachParallelDisableIdentity<T>(this IEnumerable<T> collection, Type tableType, Func<T, string> elementID, string fileName, Action<T, LogWriter> action)
         {
             Table table = Schema.Current.Table(tableType);
@@ -206,6 +143,52 @@ namespace Signum.Engine
             }
         }
 
+        public static void ProgressForeachDisableIdentity<T>(this IEnumerable<T> collection, bool isParallel, Type tableType, Func<T, string> elementID, string fileName, Action<T, LogWriter> action)
+        {
+            if (isParallel)
+                collection.ProgressForeachParallelDisableIdentity(tableType, elementID, fileName, action);
+            else
+                collection.ProgressForeachDisableIdentity(tableType, elementID, fileName, action);
+        }
+
+        private static StreamWriter TryOpenAutoFlush(string fileName)
+        {
+            if (string.IsNullOrEmpty(fileName))
+                return null;
+
+            var result = new StreamWriter(fileName, append: true);
+            result.AutoFlush = true;
+            return result;
+        }
+
+        private static LogWriter GetLogWriter(StreamWriter logStreamWriter)
+        {
+            if (logStreamWriter != null)
+            {
+                return (color, str, parameters) =>
+                {
+                    string f = parameters == null ? str : str.Formato(parameters);
+                    lock (logStreamWriter)
+                        logStreamWriter.WriteLine(f);
+                    lock (SafeConsole.SyncKey)
+                    {
+                        SafeConsole.ClearSameLine();
+                        SafeConsole.WriteLineColor(color, str, parameters);
+                    }
+                };
+            }
+            else
+            {
+                return (color, str, parameters) =>
+                {
+                    lock (SafeConsole.SyncKey)
+                    {
+                        SafeConsole.ClearSameLine();
+                        SafeConsole.WriteLineColor(color, str, parameters);
+                    }
+                };
+            }
+        }
 
         public delegate void LogWriter(ConsoleColor color, string text, params object[] parameters);
 

@@ -43,6 +43,12 @@ namespace Signum.Entities.DynamicQuery
         public abstract string Key { get; }
         protected abstract List<QueryToken> SubTokensOverride();
 
+
+        public virtual object QueryName
+        {
+            get { return this.parent.QueryName; }
+        }
+
         public Expression BuildExpression(BuildExpressionContext context)
         {
             Expression result;
@@ -69,11 +75,6 @@ namespace Signum.Entities.DynamicQuery
         public QueryToken(QueryToken parent)
         {
             this.parent = parent;
-        }
-
-        public static QueryToken NewColumn(ColumnDescription column)
-        {
-            return new ColumnToken(column);
         }
 
         public List<QueryToken> SubTokensInternal()
@@ -242,12 +243,12 @@ namespace Signum.Entities.DynamicQuery
 
         public bool Equals(QueryToken other)
         {
-            return other != null && other.FullKey() == this.FullKey();
+            return other != null && other.QueryName.Equals(this.QueryName) && other.FullKey() == this.FullKey();
         }
 
         public override int GetHashCode()
         {
-            return this.FullKey().GetHashCode();
+            return this.FullKey().GetHashCode() ^ this.QueryName.GetHashCode();
         }
 
         public virtual string TypeColor

@@ -1327,10 +1327,21 @@ namespace Signum.Engine.Linq
         protected override Expression VisitTypeIs(TypeBinaryExpression b)
         {
             Expression operand = Visit(b.Expression);
+            Type type = b.TypeOperand;
+
+            if (operand.NodeType == (ExpressionType)DbExpressionType.Lite)
+            {
+                if (!type.IsLite())
+                    throw new InvalidCastException("Impossible the type {0} (non-lite) with the expression {1}".Formato(type.TypeName(), b.Expression.NiceToString()));
+
+                operand = ((LiteExpression)(operand)).Reference;
+                type = type.CleanType();
+            }
+
             if (operand.NodeType == (ExpressionType)DbExpressionType.Entity)
             {
                 EntityExpression ee = (EntityExpression)operand;
-                if (b.TypeOperand.IsAssignableFrom(ee.Type)) // upcasting
+                if (type.IsAssignableFrom(ee.Type)) // upcasting
                 {
                     return new IsNotNullExpression(ee.ExternalId); //Usefull mainly for Shy<T>
                 }
@@ -1343,14 +1354,14 @@ namespace Signum.Engine.Linq
             {
                 ImplementedByExpression ib = (ImplementedByExpression)operand;
 
-                EntityExpression[] fies = ib.Implementations.Where(imp => b.TypeOperand.IsAssignableFrom(imp.Type)).Select(imp=>imp.Reference).ToArray();
+                EntityExpression[] fies = ib.Implementations.Where(imp => type.IsAssignableFrom(imp.Type)).Select(imp => imp.Reference).ToArray();
 
                 return fies.Select(f => (Expression)Expression.NotEqual(f.ExternalId.Nullify(), NullId)).AggregateOr();
             }
             else if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedByAll)
             {
                 ImplementedByAllExpression riba = (ImplementedByAllExpression)operand;
-                return SmartEqualizer.EqualNullable(riba.TypeId.TypeColumn, TypeConstant(b.TypeOperand));
+                return SmartEqualizer.EqualNullable(riba.TypeId.TypeColumn, TypeConstant(type));
             }
             return base.VisitTypeIs(b); 
         }
@@ -1780,7 +1791,7 @@ namespace Signum.Engine.Linq
                 }
             }
 
-            throw new NotImplementedException("{0} can not be assigned from {1}".Formato(colExpression.Type.Name, expression.Type.Name)); 
+            throw new NotImplementedException("{0} can not be assigned from expression:\n{1}".Formato(colExpression.Type.TypeName(), expression.NiceToString())); 
         }
 
         private ColumnAssignment[] AssignNull(Expression colExpression)

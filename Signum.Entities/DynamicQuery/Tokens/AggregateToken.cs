@@ -13,19 +13,34 @@ namespace Signum.Entities.DynamicQuery
     {
         public AggregateFunction AggregateFunction { get; private set; }
 
-        public AggregateToken(QueryToken parent, AggregateFunction function)
+        object queryName; 
+        public override object QueryName
+        {
+            get { return AggregateFunction == AggregateFunction.Count ? queryName : base.QueryName; }
+        }
+
+        public AggregateToken(AggregateFunction function, object queryName)
+            : base(null)
+        {
+            if (function != AggregateFunction.Count)
+                throw new ArgumentException("function should be Count for this overload");
+
+            if (queryName == null)
+                throw new ArgumentNullException("queryName");
+
+            this.queryName = queryName;
+            this.AggregateFunction = function;
+        }
+
+
+        public AggregateToken(AggregateFunction function, QueryToken parent)
             : base(parent)
         {
             if (function == AggregateFunction.Count)
-            {
-                if (parent != null)
-                    throw new ArgumentException("parent should be null for Count function");
-            }
-            else
-            {
-                if (parent == null)
-                    throw new ArgumentNullException("parent");
-            }
+                throw new ArgumentException("function should not different than Count for this overload");
+
+            if (parent == null)
+                throw new ArgumentNullException("parent");
 
             this.AggregateFunction = function;
         }
@@ -128,9 +143,9 @@ namespace Signum.Entities.DynamicQuery
         public override QueryToken Clone()
         {
             if (AggregateFunction == AggregateFunction.Count)
-                return new AggregateToken(null, AggregateFunction.Count);
+                return new AggregateToken(AggregateFunction.Count, this.queryName);
             else
-                return new AggregateToken(Parent.Clone(), AggregateFunction);
+                return new AggregateToken(AggregateFunction, Parent.Clone());
         }
 
         internal Type ConvertTo()

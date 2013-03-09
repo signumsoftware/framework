@@ -14,13 +14,23 @@ namespace Signum.Entities.DynamicQuery
         ColumnDescription column;
         public ColumnDescription Column { get { return column; } }
 
-        internal ColumnToken(ColumnDescription column)
+        object queryName;
+        public override object QueryName
+        {
+            get { return queryName; }
+        }
+
+        internal ColumnToken(ColumnDescription column, object queryName)
             : base(null)
         {
             if (column == null)
                 throw new ArgumentNullException("column");
 
+            if (queryName == null)
+                throw new ArgumentNullException("queryName");
+
             this.column = column;
+            this.queryName = queryName;
         }
 
         public override string Key
@@ -104,7 +114,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override QueryToken Clone()
         {
-            return new ColumnToken(Column);
+            return new ColumnToken(Column, queryName);
         }
 
         public override string TypeColor
