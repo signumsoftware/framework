@@ -102,7 +102,7 @@ namespace Signum.Windows.Alerts
 
         private FilterOption GetFilter()
         {
-            var func = FilterByAditionalData.GetValue(DataContext.GetType());
+            var func = FilterByAditionalData.TryGetValue(DataContext.GetType());
 
             if (func == null)
                 return new FilterOption("Target", (IdentifiableEntity)DataContext) { Frozen = true };
@@ -157,7 +157,7 @@ namespace Signum.Windows.Alerts
 
             AlertCurrentState state = (AlertCurrentState)row[0];
 
-            Navigator.Explore(new ExploreOptions(typeof(AlertDN))
+            var eo = new ExploreOptions(typeof(AlertDN))
             {
                 ShowFilters = false,
                 SearchOnLoad = true,
@@ -166,10 +166,16 @@ namespace Signum.Windows.Alerts
                     GetFilter(),
                     new FilterOption("Entity.CurrentState", state)
                 },
-                ColumnOptions = { new ColumnOption("Target") },
-                ColumnOptionsMode = ColumnOptionsMode.Remove,
                 Closed = (o, ea) => ReloadAlerts(),
-            });
+            };
+
+            if (eo.FilterOptions.Single().Path == "Target")
+            {
+                eo.ColumnOptions = new List<ColumnOption> { new ColumnOption("Target") };
+                eo.ColumnOptionsMode = ColumnOptionsMode.Remove;
+            }
+
+            Navigator.Explore(eo);
         }
     }
 }

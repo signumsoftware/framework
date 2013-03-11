@@ -79,7 +79,7 @@ namespace Signum.Windows.Notes
 
         private FilterOption GetFilter()
         {
-            var func = FilterByAditionalData.GetValue(DataContext.GetType());
+            var func = FilterByAditionalData.TryGetValue(DataContext.GetType());
 
             if (func == null)
                 return new FilterOption("Target", (IdentifiableEntity)DataContext) { Frozen = true };
@@ -89,16 +89,22 @@ namespace Signum.Windows.Notes
 
         private void btnExploreNotes_Click(object sender, RoutedEventArgs e)
         {
-            Navigator.Explore(new ExploreOptions(typeof(NoteDN))
+            var eo = new ExploreOptions(typeof(NoteDN))
             {
                 ShowFilters = false,
                 SearchOnLoad = true,
                 FilterOptions = { GetFilter() },
-                ColumnOptions = { new ColumnOption("Target") },
-                ColumnOptionsMode = ColumnOptionsMode.Remove,
                 OrderOptions = { new OrderOption("CreationDate", OrderType.Ascending) },
                 Closed = (_, __) => ReloadNotes()
-            });
+            };
+
+            if (eo.FilterOptions.Single().Path == "Target")
+            {
+                eo.ColumnOptions = new List<ColumnOption> { new ColumnOption("Target") };
+                eo.ColumnOptionsMode = ColumnOptionsMode.Remove;
+            }
+
+            Navigator.Explore(eo);
         }
 
         void ViewNote(NoteDN note)
