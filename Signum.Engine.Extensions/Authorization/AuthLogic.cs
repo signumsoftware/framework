@@ -421,8 +421,23 @@ namespace Signum.Engine.Authorization
                 new SqlPreCommandSimple("-- END AUTH SYNC SCRIPT"));
         }
 
+        public static void LoadRoles(XDocument doc)
+        {
+            Dictionary<string, string[]> rolesXml = doc.Root.Element("Roles").Elements("Role").ToDictionary(
+                x => x.Attribute("Name").Value,
+                x => x.Attribute("Contains").Value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
 
-        public static void ImportRoleGraphScript(XDocument doc)
+            var dic = rolesXml.Keys.Select(k => new RoleDN { Name = k }).ToDictionary(a => a.Name);
+
+            foreach (var item in dic.Values)
+            {
+                item.Roles = rolesXml[item.Name].Select(r => dic.GetOrThrow(r).ToLite()).ToMList();
+            }
+
+            dic.Values.SaveList();
+        }
+
+        public static void SynchronizeRoles(XDocument doc)
         {
             Table table = Schema.Current.Table(typeof(RoleDN));
             RelationalTable relationalTable = table.RelationalTables().Single();
@@ -513,7 +528,7 @@ namespace Signum.Engine.Authorization
 
         public static void ImportExportAuthRules(string fileName)
         {
-            Console.WriteLine("You want to export (e), import (i), import roles (r) or suggest (s) AuthRules? (nothing to exit)".Formato(fileName));
+            Console.WriteLine("You want to export (e), import (i), sync roles (r) or suggest (s) AuthRules? (nothing to exit)".Formato(fileName));
 
             string answer = Console.ReadLine();
 
@@ -566,9 +581,9 @@ namespace Signum.Engine.Authorization
                         Console.WriteLine("Ok");
 
 
-                        Console.WriteLine("Generating script to modifty database roles...");
+                        Console.WriteLine("Generating script to synchronize roles...");
 
-                        ImportRoleGraphScript(doc);
+                        SynchronizeRoles(doc);
                         if (SafeConsole.Ask("Import rules now?"))
                             goto case "i";
 
