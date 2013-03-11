@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Signum.Windows.Operations;
 
 namespace Signum.Windows.Alerts
 {
@@ -19,6 +20,11 @@ namespace Signum.Windows.Alerts
             });
 
             Navigator.AddSetting(new EntitySettings<AlertTypeDN> { View = e => new AlertType() });
+
+            OperationClient.AddSettings(new List<OperationSettings> 
+            {
+                new EntityOperationSettings(AlertOperation.SaveNew){ IsVisible = a => a.Entity.IsNew }
+            });
 
 
             WidgetPanel.GetWidgets += (obj, mainControl) =>

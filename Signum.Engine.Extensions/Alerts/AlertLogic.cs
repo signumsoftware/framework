@@ -160,7 +160,6 @@ namespace Signum.Engine.Alerts
             {
                 FromStates = new[] { AlertState.Saved },
                 ToState = AlertState.Attended,
-                Lite = false,
                 Execute = (a, _) =>
                 {
                     a.State = AlertState.Attended;
