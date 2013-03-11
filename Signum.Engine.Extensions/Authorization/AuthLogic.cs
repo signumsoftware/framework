@@ -431,7 +431,7 @@ namespace Signum.Engine.Authorization
 
             foreach (var item in dic.Values)
             {
-                item.Roles = rolesXml[item.Name].Select(r => dic.GetOrThrow(r).ToLite()).ToMList();
+                item.Roles = rolesXml[item.Name].Select(r => dic.GetOrThrow(r).ToLiteFat()).ToMList();
             }
 
             dic.Values.SaveList();
