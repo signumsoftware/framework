@@ -75,13 +75,25 @@ namespace Signum.Windows.Notes
             ViewNote(nota);
         }
 
+        public static Polymorphic<Func<IdentifiableEntity, Lite<IIdentifiable>>> FilterByAditionalData = new Polymorphic<Func<IdentifiableEntity, Lite<IIdentifiable>>>();
+
+        private FilterOption GetFilter()
+        {
+            var func = FilterByAditionalData.GetValue(DataContext.GetType());
+
+            if (func == null)
+                return new FilterOption("Target", (IdentifiableEntity)DataContext) { Frozen = true };
+
+            return new FilterOption("AditionalData", func((IdentifiableEntity)DataContext)) { Frozen = true };
+        }
+
         private void btnExploreNotes_Click(object sender, RoutedEventArgs e)
         {
             Navigator.Explore(new ExploreOptions(typeof(NoteDN))
             {
                 ShowFilters = false,
                 SearchOnLoad = true,
-                FilterOptions = { new FilterOption("Target", DataContext) { Frozen = true } },
+                FilterOptions = { GetFilter() },
                 ColumnOptions = { new ColumnOption("Target") },
                 ColumnOptionsMode = ColumnOptionsMode.Remove,
                 OrderOptions = { new OrderOption("CreationDate", OrderType.Ascending) },
@@ -108,7 +120,7 @@ namespace Signum.Windows.Notes
 
             DynamicQueryServer.QueryCountBatch(new QueryCountOptions(typeof(NoteDN))
             {
-                FilterOptions = { new FilterOption("Target", DataContext) }
+                FilterOptions = { GetFilter() }
             }, count =>
             {
                 if (count == 0)

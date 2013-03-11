@@ -97,13 +97,26 @@ namespace Signum.Windows.Alerts
             CountAlerts(entity);
         }
 
+        public static Polymorphic<Func<IdentifiableEntity, Lite<IIdentifiable>>> FilterByAditionalData = new Polymorphic<Func<IdentifiableEntity, Lite<IIdentifiable>>>();
+
+
+        private FilterOption GetFilter()
+        {
+            var func = FilterByAditionalData.GetValue(DataContext.GetType());
+
+            if (func == null)
+                return new FilterOption("Target", (IdentifiableEntity)DataContext) { Frozen = true };
+
+            return new FilterOption("AditionalData", func((IdentifiableEntity)DataContext)) { Frozen = true };
+        }
+
         void CountAlerts(IdentifiableEntity entity)
         {
             DynamicQueryServer.QueryGroupBatch(new QueryGroupOptions(typeof(AlertDN))
             {
                 FilterOptions = new List<FilterOption>
                 {
-                    new FilterOption("Target" , DataContext),
+                    GetFilter(),
                 },
                 ColumnOptions = new List<ColumnOption>
                 {
@@ -150,7 +163,7 @@ namespace Signum.Windows.Alerts
                 SearchOnLoad = true,
                 FilterOptions = 
                 { 
-                    new FilterOption("Target", entity) { Frozen = true }, 
+                    GetFilter(),
                     new FilterOption("Entity.CurrentState", state)
                 },
                 ColumnOptions = { new ColumnOption("Target") },
