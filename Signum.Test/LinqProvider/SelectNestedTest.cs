@@ -235,6 +235,24 @@ namespace Signum.Test.LinqProvider
         }
 
 
+
+        [TestMethod]
+        public void SelectContainsInt()
+        {
+            var result = (from b in Database.Query<BandDN>()
+                          where b.Members.Select(a => a.Id).Contains(1)
+                          select b.ToLite()).ToList();
+        }
+
+        [TestMethod]
+        public void SelectContainsEnum()
+        {
+            var result = (from b in Database.Query<BandDN>()
+                          where b.Members.Select(a => a.Sex).Contains(Sex.Female)
+                          select b.ToLite()).ToList();
+        }
+
+
         //[TestMethod]
         //public void SelecteNestedAsQueryable()
         //{

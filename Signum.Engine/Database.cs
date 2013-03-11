@@ -298,7 +298,7 @@ namespace Signum.Engine
 
                 if (ids.Count > 0)
                 {
-                    var retrieved = Database.Query<T>().Where(a => ids.Contains(a.Id)).ToDictionary(a => a.Id);
+                    var retrieved = ids.GroupsOf(Schema.Current.Settings.MaxNumberOfParameters).SelectMany(gr => Database.Query<T>().Where(a => gr.Contains(a.Id))).ToDictionary(a => a.Id);
 
                     var missing = ids.Except(retrieved.Keys);
 
@@ -345,7 +345,7 @@ namespace Signum.Engine
                     return ids.Select(id => (Lite<T>)new LiteImp<T>(id, cc.GetToString(id))).ToList();
                 }
 
-                var retrieved = Database.Query<T>().Where(a => ids.Contains(a.Id)).Select(a => a.ToLite()).ToDictionary(a => a.Id);
+                var retrieved = ids.GroupsOf(Schema.Current.Settings.MaxNumberOfParameters).SelectMany(gr => Database.Query<T>().Where(a => gr.Contains(a.Id)).Select(a => a.ToLite())).ToDictionary(a => a.Id);
 
                 var missing = ids.Except(retrieved.Keys);
 
