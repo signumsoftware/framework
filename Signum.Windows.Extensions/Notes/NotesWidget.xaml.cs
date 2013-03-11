@@ -75,30 +75,25 @@ namespace Signum.Windows.Notes
             ViewNote(nota);
         }
 
-        public static Polymorphic<Func<IdentifiableEntity, Lite<IIdentifiable>>> FilterByAditionalData = new Polymorphic<Func<IdentifiableEntity, Lite<IIdentifiable>>>();
-
-        private FilterOption GetFilter()
-        {
-            var func = FilterByAditionalData.TryGetValue(DataContext.GetType());
-
-            if (func == null)
-                return new FilterOption("Target", (IdentifiableEntity)DataContext) { Frozen = true };
-
-            return new FilterOption("AditionalData", func((IdentifiableEntity)DataContext)) { Frozen = true };
-        }
+        public static Polymorphic<Func<IdentifiableEntity, FilterOption>> CustomFilter = new Polymorphic<Func<IdentifiableEntity, FilterOption>>();
 
         private void btnExploreNotes_Click(object sender, RoutedEventArgs e)
         {
+            var func = CustomFilter.TryGetValue(DataContext.GetType());
+
             var eo = new ExploreOptions(typeof(NoteDN))
             {
                 ShowFilters = false,
                 SearchOnLoad = true,
-                FilterOptions = { GetFilter() },
+                FilterOptions =
+                {
+                    func != null ?  func((IdentifiableEntity)DataContext) : new FilterOption("Target", DataContext) { Frozen = true },
+                },
                 OrderOptions = { new OrderOption("CreationDate", OrderType.Ascending) },
                 Closed = (_, __) => ReloadNotes()
             };
 
-            if (eo.FilterOptions.Single().Path == "Target")
+            if (func != null)
             {
                 eo.ColumnOptions = new List<ColumnOption> { new ColumnOption("Target") };
                 eo.ColumnOptionsMode = ColumnOptionsMode.Remove;
@@ -124,9 +119,14 @@ namespace Signum.Windows.Notes
                 return;
             }
 
+            var func = CustomFilter.TryGetValue(DataContext.GetType());
+
             DynamicQueryServer.QueryCountBatch(new QueryCountOptions(typeof(NoteDN))
             {
-                FilterOptions = { GetFilter() }
+                FilterOptions = 
+                { 
+                    func != null ? func(entity) : new FilterOption("Target", DataContext) { Frozen = true }
+                }
             }, count =>
             {
                 if (count == 0)
