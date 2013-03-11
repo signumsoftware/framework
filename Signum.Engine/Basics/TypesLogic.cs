@@ -110,7 +110,7 @@ namespace Signum.Engine.Basics
                     c.FullClassName = s.FullClassName;
                     c.TableName = s.TableName;
                     c.CleanName = s.CleanName;
-                    return table.UpdateSqlSync(c, originalName);
+                    return table.UpdateSqlSync(c, comment: originalName);
                 }, Spacing.Double);
         }
 

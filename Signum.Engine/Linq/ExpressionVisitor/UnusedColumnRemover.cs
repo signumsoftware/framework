@@ -70,7 +70,7 @@ namespace Signum.Engine.Linq
                 subquery.Select != null)
             {
                 if (subquery.Select.Columns.Count != 1)
-                    throw new InvalidOperationException("Subquery with {0} columns".Formato(subquery.Select.Columns.Count));
+                    throw new InvalidOperationException("Subquery has {0} columns: {1}".Formato(subquery.Select.Columns.Count, subquery.NiceToString()));
                 allColumnsUsed.GetOrCreate(subquery.Select.Alias).Add(subquery.Select.Columns[0].Name);
             }
             return base.VisitSubquery(subquery);
