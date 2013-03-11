@@ -235,7 +235,10 @@ namespace Signum.Engine
                 return ids.ToDictionary(a => a, a => cc.GetToString(a));
             }
             else
-                return Database.Query<T>().Where(e => ids.Contains(e.Id)).Select(a => KVP.Create(a.Id, a.ToString())).ToDictionary();
+                return ids.GroupsOf(Schema.Current.Settings.MaxNumberOfParameters)
+                    .SelectMany(gr =>
+                        Database.Query<T>().Where(e => gr.Contains(e.Id)).Select(a => KVP.Create(a.Id, a.ToString())))
+                    .ToDictionary();
         }
 
         public ModifiedState ModifiedState
