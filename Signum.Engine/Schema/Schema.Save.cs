@@ -605,7 +605,7 @@ namespace Signum.Engine.Maps
             new GenericInvoker<Func<RelationalTable, Func<object, object>, RelationalTable.IRelationalCache>>(
             (RelationalTable rt, Func<object, object> d) => rt.CreateCache<int>(d));
 
-        public SqlPreCommand InsertSqlSync(IdentifiableEntity ident, string comment = null)
+        public SqlPreCommand InsertSqlSync(IdentifiableEntity ident, bool includeCollections = true, string comment = null)
         {
             bool dirty = false;
             ident.PreSaving(ref dirty);
@@ -613,11 +613,14 @@ namespace Signum.Engine.Maps
 
             SqlPreCommandSimple insert = Identity ?
                 new SqlPreCommandSimple(
-                    inserterIdentity.Value.SqlInsertPattern("", false), 
+                    inserterIdentity.Value.SqlInsertPattern("", false),
                     inserterIdentity.Value.InsertParameters(ident, new Forbidden(), "")).AddComment(comment) :
                 new SqlPreCommandSimple(
-                    inserterDisableIdentity.Value.SqlInsertPattern(""), 
+                    inserterDisableIdentity.Value.SqlInsertPattern(""),
                     inserterDisableIdentity.Value.InsertParameters(ident, new Forbidden(), "")).AddComment(comment);
+
+            if (!includeCollections)
+                return insert;
 
             var cc = saveCollections.Value;
             if (cc == null)
@@ -635,7 +638,7 @@ namespace Signum.Engine.Maps
 
 
 
-        public SqlPreCommand UpdateSqlSync(IdentifiableEntity ident, string comment = null)
+        public SqlPreCommand UpdateSqlSync(IdentifiableEntity ident, bool includeCollections = true, string comment = null)
         {
             bool dirty = false;
             ident.PreSaving(ref dirty);
@@ -648,6 +651,9 @@ namespace Signum.Engine.Maps
             var uc = updater.Value;
             SqlPreCommandSimple update = new SqlPreCommandSimple(uc.SqlUpdatePattern("", false),
                 uc.UpdateParameters(ident, (ident as Entity).TryCS(a => a.Ticks) ?? -1, new Forbidden(), "")).AddComment(comment);
+
+            if (!includeCollections)
+                return update;
 
             var cc = saveCollections.Value;
             if (cc == null)

@@ -73,17 +73,17 @@ namespace Signum.Engine.Basics
             List<T> current = Administrator.TryRetrieveAll<T>(replacements);
             List<T> should = GenerateEntities();
 
-            return Synchronizer.SynchronizeScriptReplacing(replacements, typeof(T).Name, 
-                should.ToDictionary(s => s.Key), 
-                current.ToDictionary(c => c.Key), 
-                (k, s) => table.InsertSqlSync(s), 
-                (k, c) => table.DeleteSqlSync(c), 
+            return Synchronizer.SynchronizeScriptReplacing(replacements, typeof(T).Name,
+                should.ToDictionary(s => s.Key),
+                current.ToDictionary(c => c.Key),
+                (k, s) => table.InsertSqlSync(s),
+                (k, c) => table.DeleteSqlSync(c),
                 (k, s, c) =>
                 {
                     var originalName = c.Name;
                     c.Name = s.Name;
                     c.Key = s.Key;
-                    return table.UpdateSqlSync(c, originalName);
+                    return table.UpdateSqlSync(c, comment: originalName);
                 }, Spacing.Double);
         }
 
