@@ -6,6 +6,8 @@ using Selenium;
 using Signum.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq.Expressions;
+using Signum.Entities;
+using Signum.Engine.Basics;
 
 namespace Signum.Web.Selenium
 {
@@ -384,29 +386,30 @@ namespace Signum.Web.Selenium
             return selenium.IsElementPresent("{0}[data-entity='{1}']".Formato(RowSelector(selenium, rowIndexBase1, prefix), liteKey));
         }
 
-        public static string EntityRowSelector(string liteKey)
+        public static string EntityRowSelector(Lite<IdentifiableEntity> lite)
         {
-            return EntityRowSelector(liteKey, "");
+            return EntityRowSelector(lite, "");
         }
 
-        public static string EntityRowSelector(string liteKey, string prefix)
+        public static string EntityRowSelector(Lite<IdentifiableEntity> lite, string prefix)
         {
-            return "{0}[data-entity='{1}']".Formato(RowSelector(prefix), liteKey);
+            //TypeLogic.TypeToName.TryGetC(tipo) ?? Reflector.CleanTypeName(tipo),
+            return "{0}[data-entity='{1}']".Formato(RowSelector(prefix), lite.Key());
         }
 
-        public static void EntityClick(this ISelenium selenium, string liteKey)
+        public static void EntityClick(this ISelenium selenium, Lite<IdentifiableEntity> lite)
         {
-            EntityClick(selenium, liteKey, "");
+            EntityClick(selenium, lite, "");
         }
 
-        public static void EntityClick(this ISelenium selenium, string liteKey, string prefix)
+        public static void EntityClick(this ISelenium selenium, Lite<IdentifiableEntity> lite, string prefix)
         {
-            EntityClick(selenium, liteKey, prefix, true);
+            EntityClick(selenium, lite, prefix, true);
         }
 
-        public static void EntityClick(this ISelenium selenium, string liteKey, string prefix, bool allowMultiple)
+        public static void EntityClick(this ISelenium selenium, Lite<IdentifiableEntity> lite, string prefix, bool allowMultiple)
         {
-            selenium.Click("{0} > td:nth-child({1}) > a".Formato(EntityRowSelector(liteKey, prefix), allowMultiple ? 2 : 1));
+            selenium.Click("{0} > td:nth-child({1}) > a".Formato(EntityRowSelector(lite, prefix), allowMultiple ? 2 : 1));
         }
 
         public static void EntityClick(this ISelenium selenium, int rowIndexBase1)
