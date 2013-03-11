@@ -169,7 +169,7 @@ namespace Signum.Windows.Alerts
                 Closed = (o, ea) => ReloadAlerts(),
             };
 
-            if (eo.FilterOptions.Single().Path == "Target")
+            if (eo.FilterOptions.First().Path == "Target")
             {
                 eo.ColumnOptions = new List<ColumnOption> { new ColumnOption("Target") };
                 eo.ColumnOptionsMode = ColumnOptionsMode.Remove;
