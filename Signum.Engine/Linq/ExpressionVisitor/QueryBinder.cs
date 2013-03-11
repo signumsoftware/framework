@@ -525,7 +525,7 @@ namespace Signum.Engine.Linq
 
                 SubqueryExpression se = null;
                 if (Schema.Current.Settings.IsDbType(pc.Projector.Type))
-                    se = new InExpression(newItem, projection.Select);
+                    se = new InExpression(newItem, new SelectExpression(alias, false, false, null, pc.Columns, projection.Select, null, null, null, false));
                 else
                 {
                     Expression where = DbExpressionNominator.FullNominate(SmartEqualizer.PolymorphicEqual(projection.Projector, newItem));

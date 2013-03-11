@@ -234,6 +234,16 @@ namespace Signum.Test.LinqProvider
                                            select "{0} - {1} - {2}".Formato(l.Name, a.Name, s.Name)).ToList()).ToList()).ToList();
         }
 
+
+
+        [TestMethod]
+        public void SelectContainsInt()
+        {
+            var result = (from b in Database.Query<BandDN>()
+                          where b.Members.Select(a => a.Id).Contains(1)
+                          select b.ToLite()).ToList();
+        }
+
         [TestMethod]
         public void SelectContainsEnum()
         {
