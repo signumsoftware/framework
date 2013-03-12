@@ -202,6 +202,11 @@ namespace Signum.Web.Selenium
             return selenium.IsElementPresent("jq=#{0}divMainControl.sf-changed".Formato(prefix));
         }
 
+        public static bool MainWindowHasUnsavedChanges(this ISelenium selenium)
+        {
+            return selenium.IsElementPresent("jq=#divMainControl.sf-changed");
+        }
+
         public static string RuntimeInfoSelector(string prefix)
         {
             return RuntimeInfoSelector(prefix, -1);
