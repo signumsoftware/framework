@@ -131,15 +131,15 @@ namespace Signum.Web.Controllers
         }
 
         [HttpPost]
-        public JsonResult ValidatePartial(string prefix)
+        public JsonResult ValidatePartial(string prefix, string parentPrefix = "")
         {
             ModifiableEntity mod = this.UntypedExtractEntity(prefix);
             MappingContext context = null;
             bool isEmbedded = mod as EmbeddedEntity != null && !(mod is ModelEntity);
             if (isEmbedded)
             {
-                mod = this.UntypedExtractEntity(); //apply changes to the parent entity
-                context = mod.UntypedApplyChanges(ControllerContext, "", true).UntypedValidateGlobal();
+                mod = this.UntypedExtractEntity(parentPrefix); //apply changes to the parent entity
+                context = mod.UntypedApplyChanges(ControllerContext, parentPrefix, true).UntypedValidateGlobal();
             }
             else
             {
@@ -153,7 +153,9 @@ namespace Signum.Web.Controllers
             IIdentifiable ident = context.UntypedValue as IIdentifiable;
             if (isEmbedded)
             {
-                newToStr = MappingContext.FindSubEntity((IdentifiableEntity)context.UntypedValue, prefix).ToString();
+                newToStr = MappingContext.FindSubEntity(
+                    (ModelEntity)context.UntypedValue, 
+                    prefix.Substring(parentPrefix.Length)).ToString();
             }
             else if (context.UntypedValue == null)
             {
