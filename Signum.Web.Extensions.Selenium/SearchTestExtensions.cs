@@ -25,9 +25,19 @@ namespace Signum.Web.Selenium
 
         public static void Search(this ISelenium selenium, string prefix)
         {
+            selenium.Click(SearchSelector(prefix));
+            WaitSearchCompleted(selenium, prefix);
+        }
+
+        public static void WaitSearchCompleted(this ISelenium selenium)
+        {
+            WaitSearchCompleted(selenium, "");
+        }
+
+        public static void WaitSearchCompleted(this ISelenium selenium, string prefix)
+        {
             string searchButton = SearchSelector(prefix);
-            selenium.Click(searchButton);
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(searchButton) && 
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(searchButton) &&
                 !selenium.IsElementPresent("{0}.sf-searching".Formato(searchButton)));
         }
 
@@ -344,6 +354,7 @@ namespace Signum.Web.Selenium
         {
             selenium.Click(TableHeaderSelector(columnIndexBase1, prefix));
             selenium.TableHeaderMarkedAsSorted(columnIndexBase1, ascending, true, prefix);
+            selenium.WaitSearchCompleted(prefix);
         }
 
         public static void SortMultiple(this ISelenium selenium, int columnIndexBase1, bool ascending)
@@ -357,6 +368,7 @@ namespace Signum.Web.Selenium
             selenium.Click(TableHeaderSelector(columnIndexBase1, prefix));
             selenium.ShiftKeyUp();
             selenium.TableHeaderMarkedAsSorted(columnIndexBase1, ascending, true, prefix);
+            selenium.WaitSearchCompleted(prefix);
         }
 
         public static void TableHeaderMarkedAsSorted(this ISelenium selenium, int columnIndexBase1, bool ascending, bool marked)
