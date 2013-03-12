@@ -160,14 +160,17 @@ namespace Signum.Web.Selenium
         public static void PopupCancel(this ISelenium selenium, string prefix)
         {
             selenium.Click("jq=.ui-dialog-titlebar-close:visible");
-            Assert.IsFalse(selenium.IsElementPresent("{0}:visible".Formato(PopupSelector(prefix))));
+            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("{0}:visible".Formato(PopupSelector(prefix))));
         }
 
         public static void PopupCancelDiscardChanges(this ISelenium selenium, string prefix)
         {
             selenium.Click("jq=.ui-dialog-titlebar-close:visible");
+            
+            selenium.WaitAjaxFinished(() => selenium.IsConfirmationPresent());
             Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
-            Assert.IsFalse(selenium.IsElementPresent("{0}:visible".Formato(PopupSelector(prefix))));
+            
+            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("{0}:visible".Formato(PopupSelector(prefix))));
         }
 
         public static void PopupOk(this ISelenium selenium, string prefix)
@@ -197,6 +200,11 @@ namespace Signum.Web.Selenium
         public static bool PopupEntityHasUnsavedChanges(this ISelenium selenium, string prefix)
         {
             return selenium.IsElementPresent("jq=#{0}divMainControl.sf-changed".Formato(prefix));
+        }
+
+        public static bool MainWindowHasUnsavedChanges(this ISelenium selenium)
+        {
+            return selenium.IsElementPresent("jq=#divMainControl.sf-changed");
         }
 
         public static string RuntimeInfoSelector(string prefix)

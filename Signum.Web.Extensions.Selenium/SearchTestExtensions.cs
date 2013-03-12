@@ -25,9 +25,19 @@ namespace Signum.Web.Selenium
 
         public static void Search(this ISelenium selenium, string prefix)
         {
+            selenium.Click(SearchSelector(prefix));
+            WaitSearchCompleted(selenium, prefix);
+        }
+
+        public static void WaitSearchCompleted(this ISelenium selenium)
+        {
+            WaitSearchCompleted(selenium, "");
+        }
+
+        public static void WaitSearchCompleted(this ISelenium selenium, string prefix)
+        {
             string searchButton = SearchSelector(prefix);
-            selenium.Click(searchButton);
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(searchButton) && 
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(searchButton) &&
                 !selenium.IsElementPresent("{0}.sf-searching".Formato(searchButton)));
         }
 
@@ -236,14 +246,24 @@ namespace Signum.Web.Selenium
             return "{0} > td:nth-child({1})".Formato(RowSelector(selenium, rowIndexBase1, prefix), columnIndexBase1);
         }
 
-        public static void SelectRowCheckbox(this ISelenium selenium, int rowIndexBase0)
+        public static void SelectRow(this ISelenium selenium, int rowIndexBase0)
         {
-            SelectRowCheckbox(selenium, rowIndexBase0, "");
+            SelectRow(selenium, rowIndexBase0, "");
         }
 
-        public static void SelectRowCheckbox(this ISelenium selenium, int rowIndexBase0, string prefix)
+        public static void SelectRow(this ISelenium selenium, int rowIndexBase0, string prefix)
         {
             selenium.Click("{0}rowSelection_{1}".Formato(prefix, rowIndexBase0));
+        }
+
+        public static void SelectEntityRow(this ISelenium selenium, Lite<IdentifiableEntity> lite)
+        {
+            SelectEntityRow(selenium, lite, "");
+        }
+
+        public static void SelectEntityRow(this ISelenium selenium, Lite<IdentifiableEntity> lite, string prefix)
+        {
+            selenium.Click("{0} .sf-td-selection".Formato(EntityRowSelector(lite, prefix)));
         }
 
         public static string TableHeaderSelector()
@@ -334,6 +354,7 @@ namespace Signum.Web.Selenium
         {
             selenium.Click(TableHeaderSelector(columnIndexBase1, prefix));
             selenium.TableHeaderMarkedAsSorted(columnIndexBase1, ascending, true, prefix);
+            selenium.WaitSearchCompleted(prefix);
         }
 
         public static void SortMultiple(this ISelenium selenium, int columnIndexBase1, bool ascending)
@@ -347,6 +368,7 @@ namespace Signum.Web.Selenium
             selenium.Click(TableHeaderSelector(columnIndexBase1, prefix));
             selenium.ShiftKeyUp();
             selenium.TableHeaderMarkedAsSorted(columnIndexBase1, ascending, true, prefix);
+            selenium.WaitSearchCompleted(prefix);
         }
 
         public static void TableHeaderMarkedAsSorted(this ISelenium selenium, int columnIndexBase1, bool ascending, bool marked)
@@ -393,7 +415,6 @@ namespace Signum.Web.Selenium
 
         public static string EntityRowSelector(Lite<IdentifiableEntity> lite, string prefix)
         {
-            //TypeLogic.TypeToName.TryGetC(tipo) ?? Reflector.CleanTypeName(tipo),
             return "{0}[data-entity='{1}']".Formato(RowSelector(prefix), lite.Key());
         }
 
