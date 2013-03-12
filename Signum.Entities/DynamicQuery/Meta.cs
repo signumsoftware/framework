@@ -22,7 +22,7 @@ namespace Signum.Entities.DynamicQuery
     {
         public PropertyRoute[] PropertyRoutes;
 
-        public CleanMeta(PropertyRoute[] propertyRoutes)
+        public CleanMeta(params PropertyRoute[] propertyRoutes)
         {
             this.PropertyRoutes = propertyRoutes;
         }
