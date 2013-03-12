@@ -236,14 +236,24 @@ namespace Signum.Web.Selenium
             return "{0} > td:nth-child({1})".Formato(RowSelector(selenium, rowIndexBase1, prefix), columnIndexBase1);
         }
 
-        public static void SelectRowCheckbox(this ISelenium selenium, int rowIndexBase0)
+        public static void SelectRow(this ISelenium selenium, int rowIndexBase0)
         {
-            SelectRowCheckbox(selenium, rowIndexBase0, "");
+            SelectRow(selenium, rowIndexBase0, "");
         }
 
-        public static void SelectRowCheckbox(this ISelenium selenium, int rowIndexBase0, string prefix)
+        public static void SelectRow(this ISelenium selenium, int rowIndexBase0, string prefix)
         {
             selenium.Click("{0}rowSelection_{1}".Formato(prefix, rowIndexBase0));
+        }
+
+        public static void SelectEntityRow(this ISelenium selenium, Lite<IdentifiableEntity> lite)
+        {
+            SelectEntityRow(selenium, lite, "");
+        }
+
+        public static void SelectEntityRow(this ISelenium selenium, Lite<IdentifiableEntity> lite, string prefix)
+        {
+            selenium.Click("{0} .sf-td-selection".Formato(EntityRowSelector(lite, prefix)));
         }
 
         public static string TableHeaderSelector()
@@ -393,7 +403,6 @@ namespace Signum.Web.Selenium
 
         public static string EntityRowSelector(Lite<IdentifiableEntity> lite, string prefix)
         {
-            //TypeLogic.TypeToName.TryGetC(tipo) ?? Reflector.CleanTypeName(tipo),
             return "{0}[data-entity='{1}']".Formato(RowSelector(prefix), lite.Key());
         }
 
