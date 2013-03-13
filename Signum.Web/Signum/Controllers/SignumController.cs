@@ -154,7 +154,7 @@ namespace Signum.Web.Controllers
             if (isEmbedded)
             {
                 newToStr = MappingContext.FindSubEntity(
-                    (ModelEntity)context.UntypedValue, 
+                    (ModifiableEntity)context.UntypedValue, 
                     prefix.Substring(parentPrefix.Length)).ToString();
             }
             else if (context.UntypedValue == null)
