@@ -232,7 +232,7 @@ namespace Signum.Engine.Linq
 
                     return new MetaProjectorExpression(expression.Type,
                         new MetaExpression(elementType,
-                            new CleanMeta(new[] { route })));
+                            new CleanMeta(route)));
                 }
 
                 return new MetaProjectorExpression(expression.Type,
@@ -371,7 +371,26 @@ namespace Signum.Engine.Linq
         {
             Type type = TableType(c.Value);
             if (type != null)
-                return new MetaProjectorExpression(c.Type, new MetaExpression(type, new CleanMeta(new[] { PropertyRoute.Root(type) })));
+            {
+                if (typeof(IRootEntity).IsAssignableFrom(type))
+                    return new MetaProjectorExpression(c.Type, new MetaExpression(type, new CleanMeta(PropertyRoute.Root(type))));
+
+                if(type.IsInstantiationOf(typeof(MListElement<,>)))
+                {
+                    var parentType = type.GetGenericArguments()[0];
+                    PropertyRoute parent = PropertyRoute.Root(parentType);
+
+                    ISignumTable st =  (ISignumTable)c.Value;
+                    var rt = (RelationalTable)st.Table;
+
+                    Table table = rt.BackReference.ReferenceTable;
+                    FieldInfo fieldInfo = table.Fields.Values.Single(f=>f.Field is FieldMList && ((FieldMList)f.Field).RelationalTable == rt).FieldInfo; 
+
+                    PropertyRoute element = parent.Add(fieldInfo).Add("Item");
+
+                    return new MetaProjectorExpression(c.Type, new MetaMListExpression(type, new CleanMeta(parent), new CleanMeta(element))); 
+                }
+            }
 
             return MakeVoidMeta(c.Type);
         }
@@ -408,8 +427,19 @@ namespace Signum.Engine.Linq
                         PropertyInfo pi = (PropertyInfo)member;
                         return nex.Members.Zip(nex.Arguments).SingleEx(p => ReflectionTools.PropertyEquals((PropertyInfo)p.Item1, pi)).Item2;
                     }
-
                     break;
+                case (ExpressionType)MetaExpressionType.MetaMListExpression:
+                    {
+                        MetaMListExpression mme = (MetaMListExpression)source;
+                        var ga = mme.Type.GetGenericArguments();
+                        if (member.Name == "Parent")
+                            return new MetaExpression(ga[0], mme.Parent);
+
+                        if (member.Name == "Element")
+                            return new MetaExpression(ga[1], mme.Element);
+
+                        throw new InvalidOperationException("Property {0} not found on {1}".Formato(member.Name, mme.Type.TypeName()));
+                    }
             }
 
             if (typeof(ModifiableEntity).IsAssignableFrom(source.Type) || typeof(IIdentifiable).IsAssignableFrom(source.Type))
@@ -423,13 +453,13 @@ namespace Signum.Engine.Linq
 
                 if (meta.Meta is CleanMeta)
                 {
-                    PropertyRoute[] routes = ((CleanMeta)meta.Meta).PropertyRoutes.SelectMany(r=>GetRoutes(r, source.Type, pi.Name)).ToArray();
+                    PropertyRoute[] routes = ((CleanMeta)meta.Meta).PropertyRoutes.SelectMany(r => GetRoutes(r, source.Type, pi.Name)).ToArray();
 
                     return new MetaExpression(memberType, new CleanMeta(routes));
                 }
 
                 if (typeof(IdentifiableEntity).IsAssignableFrom(source.Type) && !source.Type.IsAbstract) //Works for simple entities and also for interface casting
-                    return new MetaExpression(memberType, new CleanMeta(new[]{ PropertyRoute.Root(source.Type).Add(pi)}));
+                    return new MetaExpression(memberType, new CleanMeta(PropertyRoute.Root(source.Type).Add(pi)));
             }
 
             if (source.Type.IsLite() && member.Name == "Entity")
