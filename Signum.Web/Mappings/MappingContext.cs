@@ -150,7 +150,7 @@ namespace Signum.Web
         }
 
 
-        public static ModifiableEntity FindSubEntity(ModelEntity entity, string prefix)
+        public static ModifiableEntity FindSubEntity(ModifiableEntity entity, string prefix)
         {
             if (!prefix.HasText())
                 return entity;
