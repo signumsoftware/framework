@@ -31,7 +31,12 @@ namespace Signum.Windows
 
         public static TabControl AddTab(this TabControl tabControl, string header, FrameworkElement content)
         {
-            tabControl.Items.Add(new TabItem { Header = header, Content = content });
+            var ti = new TabItem { Header = header, Content = content };
+
+            tabControl.Items.Add(ti);
+
+            Common.RefreshAutoHide(content);
+
             return tabControl;
         }
     }

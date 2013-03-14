@@ -314,9 +314,9 @@ namespace Signum.Windows
                 return;
             }
 
-            if(!Navigator.IsFindable(s.NewValue))
+            if (!Navigator.IsFindable(s.NewValue))
             {
-                 Common.VoteCollapsed(this);
+                Common.VoteCollapsed(this);
                 return;
             }
 

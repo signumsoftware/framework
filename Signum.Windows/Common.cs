@@ -50,23 +50,23 @@ namespace Signum.Windows
         {
             var fe = d as FrameworkElement;
 
-            if(fe != null && e.NewValue is AutoHide)
-                fe.Loaded+=new RoutedEventHandler(Common_Loaded);
+            if (fe != null && e.NewValue is AutoHide)
+                fe.Loaded += new RoutedEventHandler(Common_Loaded);
         }
 
         static void Common_Loaded(object sender, RoutedEventArgs e)
         {
-            var fe = (FrameworkElement)sender; 
+            var fe = (FrameworkElement)sender;
 
-            fe.Loaded -= Common_Loaded; 
+            fe.Loaded -= Common_Loaded;
 
-            if(Common.GetAutoHide(fe) == AutoHide.Collapsed)
-                fe.Visibility =  Visibility.Collapsed;
+            if (Common.GetAutoHide(fe) == AutoHide.Collapsed)
+                fe.Visibility = Visibility.Collapsed;
         }
 
         public static void VoteVisible(FrameworkElement fe)
         {
-            foreach (var item in fe.LogicalParents().TakeWhile(a=>GetAutoHide(a) != AutoHide.Visible))
+            foreach (var item in fe.LogicalParents().TakeWhile(a => GetAutoHide(a) != AutoHide.Visible))
             {
                 SetAutoHide(item, AutoHide.Visible);
             }
@@ -74,7 +74,7 @@ namespace Signum.Windows
 
         public static void VoteCollapsed(FrameworkElement fe)
         {
-            foreach (var item in fe.LogicalParents().TakeWhile(a=>GetAutoHide(a) == AutoHide.Undefined))
+            foreach (var item in fe.LogicalParents().TakeWhile(a => GetAutoHide(a) == AutoHide.Undefined))
             {
                 SetAutoHide(item, AutoHide.Collapsed);
             }
@@ -644,6 +644,23 @@ namespace Signum.Windows
             return new Disposable(() => Mouse.OverrideCursor = null);
         }
 
+        internal static void RefreshAutoHide(FrameworkElement content)
+        {
+            var list = content.Children<FrameworkElement>(fe => GetAutoHide(fe) != AutoHide.Undefined, WhereFlags.StartOnParent).ToList();
+
+            foreach (var item in list)
+            {
+                var ah = Common.GetAutoHide(item);
+
+                if (item.Parent is FrameworkElement)
+                {
+                    if (ah == AutoHide.Visible)
+                        Common.VoteVisible((FrameworkElement)item.Parent);
+                    else if (ah == AutoHide.Collapsed)
+                        Common.VoteCollapsed((FrameworkElement)item.Parent);
+                }
+            }
+        }
     }
 
     public delegate void ChangeDataContextHandler(object sender, ChangeDataContextEventArgs e);
