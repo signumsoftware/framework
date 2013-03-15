@@ -203,7 +203,7 @@ namespace Signum.Windows
                     FilterOptions = options.FilterOptions,
                 }, count =>
                 {
-                    Label = "{0}({1})".Formato(QueryUtils.GetNiceName(Options.QueryName), count);
+                    Label = "{0} ({1})".Formato(Label, count);
                 }, () => { });
         }
 
