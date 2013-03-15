@@ -42,23 +42,12 @@ namespace Signum.Entities.Patterns
             
             return base.Set<T>(ref field, value, property);
         }
-    }
 
-    public class AllowTemporalUnlock : IDisposable
-    {
-        bool locked;
-        LockableEntity Entity;
-
-        public AllowTemporalUnlock(LockableEntity entity) 
+        public IDisposable AllowTemporalUnlock()
         {
-            locked = entity.Locked;
-            Entity = entity;
-            Entity.Locked = false;
-        }
-
-        public void Dispose()
-        {
-            Entity.Locked = locked;
+            bool old = this.locked;
+            this.locked = false;
+            return new Disposable(() => this.locked = old);
         }
     }
 }
