@@ -33,9 +33,9 @@ namespace Signum.Engine.Linq
 
         bool IsFullNominate { get { return tempFullNominate || existingAliases == null; } }
 
-        bool IsFullNominateOrAggresive { get { return IsFullNominate || isAggressive; } }
+        bool IsFullNominateOrAggresive { get { return IsFullNominate || isGroupKey; } }
 
-        bool isAggressive = false;
+        bool isGroupKey = false;
 
         bool innerProjection = false; 
 
@@ -54,9 +54,9 @@ namespace Signum.Engine.Linq
 
         private DbExpressionNominator() { }
 
-        static internal HashSet<Expression> Nominate(Expression expression, Alias[] existingAliases, out Expression newExpression, bool isAggressive = false)
+        static internal HashSet<Expression> Nominate(Expression expression, Alias[] existingAliases, out Expression newExpression, bool isGroupKey = false)
         {
-            DbExpressionNominator n = new DbExpressionNominator { existingAliases = existingAliases, isAggressive = isAggressive };
+            DbExpressionNominator n = new DbExpressionNominator { existingAliases = existingAliases, isGroupKey = isGroupKey };
             newExpression = n.Visit(expression);
             return n.candidates;
         }
@@ -693,7 +693,7 @@ namespace Signum.Engine.Linq
                        (untu == typeof(int) || untu == typeof(long)))
                         return Add(new SqlCastExpression(u.Type, operand));
 
-                    if (IsFullNominate || isAggressive && optu == untu)
+                    if (IsFullNominate || isGroupKey && optu == untu)
                         return Add(result);
 
                     if ("Sql" + untu.Name == optu.Name)

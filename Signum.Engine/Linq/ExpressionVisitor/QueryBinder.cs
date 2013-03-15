@@ -339,7 +339,7 @@ namespace Signum.Engine.Linq
                 Expression.Call(projection.Projector, OverloadingSimplifier.miToString);
 
             Expression nominated;
-            var set = DbExpressionNominator.Nominate(projector, projection.Select.KnownAliases, out nominated, isAggressive: true);
+            var set = DbExpressionNominator.Nominate(projector, projection.Select.KnownAliases, out nominated, isGroupKey: true);
 
             if(!set.Contains(nominated))
                 return Expression.Call(mi, newSource, separator);
@@ -521,7 +521,7 @@ namespace Signum.Engine.Linq
                 ProjectionExpression projection = this.VisitCastProjection(source);
 
                 Alias alias = NextSelectAlias();
-                var pc = ColumnProjector.ProjectColumns(projection.Projector, alias, projection.Select.KnownAliases, aggresiveNomination: false, selectTrivialColumns: true);
+                var pc = ColumnProjector.ProjectColumns(projection.Projector, alias, projection.Select.KnownAliases, isGroupKey: false, selectTrivialColumns: true);
 
                 SubqueryExpression se = null;
                 if (Schema.Current.Settings.IsDbType(pc.Projector.Type))
@@ -685,12 +685,12 @@ namespace Signum.Engine.Linq
 
             SourceExpression newSource = projection.Select;
             Expression key = GroupEntityCleaner.Clean(MapVisitExpand(keySelector, projection.Projector, ref newSource));
-            ProjectedColumns keyPC = ColumnProjector.ProjectColumns(key, alias, newSource.KnownAliases, aggresiveNomination: true, selectTrivialColumns: true);  // Use ProjectColumns to get group-by expressions from key expression
+            ProjectedColumns keyPC = ColumnProjector.ProjectColumns(key, alias, newSource.KnownAliases, isGroupKey: true, selectTrivialColumns: true);  // Use ProjectColumns to get group-by expressions from key expression
             Expression elemExpr = elementSelector == null ? projection.Projector : MapVisitExpand(elementSelector, projection.Projector, ref newSource);
 
             SourceExpression subQueryNewSource = subqueryProjection.Select;
             Expression subqueryKey = GroupEntityCleaner.Clean(MapVisitExpand(keySelector, subqueryProjection.Projector, ref subQueryNewSource));// recompute key columns for group expressions relative to subquery (need these for doing the correlation predicate
-            ProjectedColumns subqueryKeyPC = ColumnProjector.ProjectColumns(subqueryKey, aliasGenerator.Raw("basura"), subQueryNewSource.KnownAliases, aggresiveNomination: true, selectTrivialColumns: true); // use same projection trick to get group-by expressions based on subquery
+            ProjectedColumns subqueryKeyPC = ColumnProjector.ProjectColumns(subqueryKey, aliasGenerator.Raw("basura"), subQueryNewSource.KnownAliases, isGroupKey: true, selectTrivialColumns: true); // use same projection trick to get group-by expressions based on subquery
             Expression subqueryElemExpr = elementSelector == null ? subqueryProjection.Projector : MapVisitExpand(elementSelector, subqueryProjection.Projector, ref subQueryNewSource); // compute element based on duplicated subquery
 
             Expression subqueryCorrelation = keyPC.Columns.IsEmpty() ? null : 
