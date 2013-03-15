@@ -400,5 +400,18 @@ namespace Signum.Test.LinqProvider
         {
             var first = Database.Query<AlbumDN>().GroupBy(a => a.Year).Select(gr => gr.Max(a => a.Label.Name)).ToList();
         }
+
+        [TestMethod]
+        public void GroupByTake()
+        {
+            var list = (from a in Database.Query<AlbumDN>()
+                        group a by a.Author into g
+                        select new
+                        {
+                            Author = g.Key,
+                            Count = g.Count()
+                        }).Take(10).ToList();
+        }
+
     }
 }
