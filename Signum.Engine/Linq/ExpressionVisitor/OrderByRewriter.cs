@@ -12,7 +12,7 @@ namespace Signum.Engine.Linq
 {
     internal class OrderByRewriter : DbExpressionVisitor
     {
-        List<ColumnExpression> gatheredKeys;
+        List<Expression> gatheredKeys;
         ReadOnlyCollection<OrderExpression> gatheredOrderings;
         SelectExpression outerMostSelect;
 
@@ -57,11 +57,14 @@ namespace Signum.Engine.Linq
             bool isOuterMost = select == outerMostSelect;
 
             if (select.Top != null && gatheredKeys == null)
-                gatheredKeys = new List<ColumnExpression>();
+                gatheredKeys = new List<Expression>();
 
             select = (SelectExpression)base.VisitSelect(select);
             if (select.GroupBy != null && select.GroupBy.Any())
+            {
                 gatheredOrderings = null;
+                gatheredKeys = new List<Expression>(select.GroupBy);
+            }
 
             if (select.IsReverse && !gatheredOrderings.IsNullOrEmpty())
                 gatheredOrderings = gatheredOrderings.Select(o => new OrderExpression(
