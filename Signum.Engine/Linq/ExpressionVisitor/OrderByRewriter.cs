@@ -64,7 +64,7 @@ namespace Signum.Engine.Linq
             {
                 gatheredOrderings = null;
                 gatheredKeys = new List<Expression>(select.GroupBy);
-            }
+            } 
 
             if (select.IsReverse && !gatheredOrderings.IsNullOrEmpty())
                 gatheredOrderings = gatheredOrderings.Select(o => new OrderExpression(
