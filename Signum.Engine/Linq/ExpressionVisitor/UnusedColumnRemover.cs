@@ -76,12 +76,6 @@ namespace Signum.Engine.Linq
             return base.VisitSubquery(subquery);
         }
 
-
-        protected override Expression VisitLite(LiteExpression lite)
-        {   
-            return base.VisitLite(lite);
-        }
-
         protected override Expression VisitProjection(ProjectionExpression projection)
         {
             // visit mapping in reverse order

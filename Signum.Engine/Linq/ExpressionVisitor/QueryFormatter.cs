@@ -769,9 +769,14 @@ namespace Signum.Engine.Linq
             throw InvalidSqlExpression(init);
         }
 
-        protected override Expression VisitLite(LiteExpression lite)
+        protected override Expression VisitLiteValue(LiteValueExpression lite)
         {
             throw InvalidSqlExpression(lite);
+        }
+
+        protected override Expression VisitLiteReference(LiteReferenceExpression lite)
+        {
+            return base.VisitLiteReference(lite);
         }
 
         protected override Expression VisitInvocation(InvocationExpression iv)
