@@ -12,7 +12,7 @@ namespace Signum.Engine.Linq
 {
     internal class OrderByRewriter : DbExpressionVisitor
     {
-        List<Expression> gatheredKeys;
+        List<ColumnExpression> gatheredKeys;
         ReadOnlyCollection<OrderExpression> gatheredOrderings;
         SelectExpression outerMostSelect;
 
@@ -57,13 +57,38 @@ namespace Signum.Engine.Linq
             bool isOuterMost = select == outerMostSelect;
 
             if (select.Top != null && gatheredKeys == null)
-                gatheredKeys = new List<Expression>();
+                gatheredKeys = new List<ColumnExpression>();
 
             select = (SelectExpression)base.VisitSelect(select);
+
+            List<ColumnDeclaration> newColumns = null;
+
             if (select.GroupBy != null && select.GroupBy.Any())
             {
                 gatheredOrderings = null;
-                gatheredKeys = new List<Expression>(select.GroupBy);
+
+                if (gatheredKeys != null)
+                {
+                    ColumnGenerator cg = new ColumnGenerator(select.Columns);
+
+                    var newKeys = new List<ColumnDeclaration>();
+
+                    foreach (var ge in select.GroupBy)
+                    {
+                        var cd = cg.Columns.FirstOrDefault(a => DbExpressionComparer.AreEqual(a.Expression, ge));
+
+                        if (cd != null)
+                            newKeys.Add(cd);
+                        else
+                            newKeys.Add(cg.NewColumn(ge));
+                    }
+
+                    if (cg.Columns.Count() != select.Columns.Count)
+                        newColumns = cg.Columns.ToList();
+
+                    gatheredKeys.Clear();
+                    gatheredKeys.AddRange(newKeys.Select(cd => new ColumnExpression(cd.Expression.Type, select.Alias, cd.Name)));
+                }
             } 
 
             if (select.IsReverse && !gatheredOrderings.IsNullOrEmpty())
@@ -85,10 +110,11 @@ namespace Signum.Engine.Linq
                 gatheredOrderings = null;
             }
 
-            if (AreEqual(select.OrderBy, orderings) && !select.IsReverse)
+            if (AreEqual(select.OrderBy, orderings) && !select.IsReverse && newColumns == null)
                 return select;
 
-            return new SelectExpression(select.Alias, select.IsDistinct, false, select.Top, select.Columns, select.From, select.Where, orderings, select.GroupBy, select.ForXmlPathEmpty);
+            return new SelectExpression(select.Alias, select.IsDistinct, false, select.Top, (IEnumerable<ColumnDeclaration>)newColumns ?? select.Columns,
+                select.From, select.Where, orderings, select.GroupBy, select.ForXmlPathEmpty);
         }
 
 
