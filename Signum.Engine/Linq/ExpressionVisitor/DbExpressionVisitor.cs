@@ -141,8 +141,10 @@ namespace Signum.Engine.Linq
                     return this.VisitImplementedBy((ImplementedByExpression)exp);
                 case (ExpressionType)DbExpressionType.ImplementedByAll:
                     return this.VisitImplementedByAll((ImplementedByAllExpression)exp);
-                case (ExpressionType)DbExpressionType.Lite:
-                    return this.VisitLite((LiteExpression)exp);
+                case (ExpressionType)DbExpressionType.LiteReference:
+                    return this.VisitLiteReference((LiteReferenceExpression)exp);
+                case (ExpressionType)DbExpressionType.LiteValue:
+                    return this.VisitLiteValue((LiteValueExpression)exp);
                 case (ExpressionType)DbExpressionType.TypeEntity:
                     return this.VisitTypeFieldInit((TypeEntityExpression)exp);
                 case (ExpressionType)DbExpressionType.TypeImplementedBy:
@@ -208,14 +210,22 @@ namespace Signum.Engine.Linq
             return src;
         }
 
-        protected virtual Expression VisitLite(LiteExpression lite)
+        protected virtual Expression VisitLiteReference(LiteReferenceExpression lite)
         {
             var newRef = Visit(lite.Reference);
-            var newToStr = Visit(lite.ToStr);
-            var newId = Visit(lite.Id);
+            var newToStr = Visit(lite.CustomToStr);
+            if (newRef != lite.Reference || newToStr != lite.CustomToStr)
+                return new LiteReferenceExpression(lite.Type,  newRef, newToStr);
+            return lite;
+        }
+
+        protected virtual Expression VisitLiteValue(LiteValueExpression lite)
+        {
             var newTypeId = Visit(lite.TypeId);
-            if (newRef != lite.Reference || newToStr != lite.ToStr || newId != lite.Id || newTypeId != lite.TypeId)
-                return new LiteExpression(lite.Type, newRef, newId, newToStr, newTypeId, lite.CustomToString);
+            var newId = Visit(lite.Id);
+            var newToStr = Visit(lite.ToStr);
+            if (newTypeId != lite.TypeId || newId != lite.Id || newToStr != lite.ToStr)
+                return new LiteValueExpression(lite.Type, newTypeId, newId, newToStr);
             return lite;
         }
 

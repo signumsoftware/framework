@@ -508,7 +508,7 @@ namespace Signum.Engine.Linq
 
                 switch ((DbExpressionType)newItem.NodeType)
                 {
-                    case DbExpressionType.Lite: return SmartEqualizer.EntityIn((LiteExpression)newItem, col == null ? Enumerable.Empty<Lite<IIdentifiable>>() : col.Cast<Lite<IIdentifiable>>().ToList());
+                    case DbExpressionType.LiteReference: return SmartEqualizer.EntityIn((LiteReferenceExpression)newItem, col == null ? Enumerable.Empty<Lite<IIdentifiable>>() : col.Cast<Lite<IIdentifiable>>().ToList());
                     case DbExpressionType.Entity:
                     case DbExpressionType.ImplementedBy:
                     case DbExpressionType.ImplementedByAll: return SmartEqualizer.EntityIn(newItem, col == null ? Enumerable.Empty<IdentifiableEntity>() : col.Cast<IdentifiableEntity>().ToList());
@@ -760,10 +760,10 @@ namespace Signum.Engine.Linq
             Expression expr = Visit(lambda.Body);
             map.Remove(lambda.Parameters[0]);
 
-            if (expr is LiteExpression)
+            if (expr is LiteReferenceExpression)
             {
-                LiteExpression lite = (LiteExpression)expr;
-                expr = lite.Reference is ImplementedByAllExpression ? ((LiteExpression)expr).Id :
+                LiteReferenceExpression lite = (LiteReferenceExpression)expr;
+                expr = lite.Reference is ImplementedByAllExpression ? ((ImplementedByAllExpression)lite.Reference).Id :
                       BindMethodCall(Expression.Call(lite.Reference, EntityExpression.ToStringMethod));
             }
             else if (expr is EntityExpression || expr is ImplementedByExpression)
@@ -1004,9 +1004,9 @@ namespace Signum.Engine.Linq
 
                     throw new InvalidOperationException("ToString expression should already been expanded at this stage");
                 }
-                else if (source.NodeType == (ExpressionType)DbExpressionType.Lite)
+                else if (source.NodeType == (ExpressionType)DbExpressionType.LiteReference)
                 {
-                    LiteExpression lite = (LiteExpression)source;
+                    LiteReferenceExpression lite = (LiteReferenceExpression)source;
 
                     var toStr = BindMethodCall(Expression.Call(lite.Reference, EntityExpression.ToStringMethod));
 
@@ -1139,26 +1139,20 @@ namespace Signum.Engine.Linq
                     Expression result = eee.GetBinding(fi);
                     return result;
                 }
-                case (ExpressionType)DbExpressionType.Lite:
+                case (ExpressionType)DbExpressionType.LiteReference:
                 {
-                    LiteExpression liteRef = (LiteExpression)source;
+                    LiteReferenceExpression liteRef = (LiteReferenceExpression)source;
                     PropertyInfo pi = m.Member as PropertyInfo;
                     if (pi != null)
                     {
                         if (pi.Name == "Id")
-                            return liteRef.Id.UnNullify();
+                            return GetId(liteRef.Reference).UnNullify();
                         if (pi.Name == "EntityOrNull" || pi.Name == "Entity")
                             return liteRef.Reference;
-                        if (pi.Name == "ToStr")
-                        {
-                            if (liteRef.ToStr == null)
-                                throw new InvalidOperationException("ToStr is not accesible on queries for ImplementedByAll");
-                            return liteRef.ToStr;
-                        }
                     }
 
                     if (pi.Name == "EntityType")
-                        return liteRef.TypeId;
+                        return GetEntityType(liteRef.Reference);
                     
                     throw new InvalidOperationException("The member {0} of Lite is not accessible on queries".Formato(m.Member));
                 }
@@ -1208,10 +1202,10 @@ namespace Signum.Engine.Linq
             if (whens.Count == 1)
                 return whens.SingleEx().Value;
 
-            if (whens.All(e => e.Value is LiteExpression))
+            if (whens.All(e => e.Value is LiteReferenceExpression))
             {
                 Expression entity = CombineWhens(whens.Select(w => new When(w.Condition,
-                    ((LiteExpression)w.Value).Reference)).ToList(), Lite.Extract(returnType));
+                    ((LiteReferenceExpression)w.Value).Reference)).ToList(), Lite.Extract(returnType));
 
                 return MakeLite(entity, null);
             }
@@ -1329,12 +1323,12 @@ namespace Signum.Engine.Linq
             Expression operand = Visit(b.Expression);
             Type type = b.TypeOperand;
 
-            if (operand.NodeType == (ExpressionType)DbExpressionType.Lite)
+            if (operand.NodeType == (ExpressionType)DbExpressionType.LiteReference)
             {
                 if (!type.IsLite())
                     throw new InvalidCastException("Impossible the type {0} (non-lite) with the expression {1}".Formato(type.TypeName(), b.Expression.NiceToString()));
 
-                operand = ((LiteExpression)(operand)).Reference;
+                operand = ((LiteReferenceExpression)(operand)).Reference;
                 type = type.CleanType();
             }
 
@@ -1447,9 +1441,9 @@ namespace Signum.Engine.Linq
                 return new EntityExpression(uType, conditionalId, null, null);
             }
 
-            else if (operand.NodeType == (ExpressionType)DbExpressionType.Lite)
+            else if (operand.NodeType == (ExpressionType)DbExpressionType.LiteReference)
             {
-                LiteExpression lite = (LiteExpression)operand;
+                LiteReferenceExpression lite = (LiteReferenceExpression)operand;
 
                 if (!uType.IsLite())
                     throw new InvalidCastException("Impossible to convert an expression of type {0} to {1}".Formato(lite.Type.TypeName(), uType.TypeName())); 
@@ -1694,11 +1688,11 @@ namespace Signum.Engine.Linq
             {
                 return new[] { AssignColumn(((UnaryExpression)colExpression).Operand, expression) };
             }
-            else if (colExpression is LiteExpression)
+            else if (colExpression is LiteReferenceExpression)
             {
-                Expression reference = ((LiteExpression)colExpression).Reference;
-                if (expression is LiteExpression)
-                    return Assign(reference, ((LiteExpression)expression).Reference);
+                Expression reference = ((LiteReferenceExpression)colExpression).Reference;
+                if (expression is LiteReferenceExpression)
+                    return Assign(reference, ((LiteReferenceExpression)expression).Reference);
 
             }
             else if (colExpression is EmbeddedEntityExpression)
@@ -1806,9 +1800,9 @@ namespace Signum.Engine.Linq
 
                 return new[] { AssignColumn(col2, new SqlConstantExpression(null, colExpression.Type)) };
             }
-            else if (colExpression is LiteExpression)
+            else if (colExpression is LiteReferenceExpression)
             {
-                Expression reference = ((LiteExpression)colExpression).Reference;
+                Expression reference = ((LiteReferenceExpression)colExpression).Reference;
                 return AssignNull(reference); 
             }
             else if (colExpression is EmbeddedEntityExpression)
@@ -1935,9 +1929,7 @@ namespace Signum.Engine.Linq
 
         public Expression MakeLite(Expression entity, Expression customToStr)
         {
-            Expression id = GetId(entity);
-            Expression typeId = GetEntityType(entity);
-            return new LiteExpression(Lite.Generate(entity.Type), entity, id, customToStr, typeId, customToStr != null);
+            return new LiteReferenceExpression(Lite.Generate(entity.Type), entity, customToStr);
         }
 
         public Expression GetId(Expression expression)

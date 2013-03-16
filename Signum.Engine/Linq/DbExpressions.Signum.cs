@@ -204,36 +204,48 @@ namespace Signum.Engine.Linq
         }
     }
 
-    internal class LiteExpression : DbExpression
+    internal class LiteReferenceExpression : DbExpression
     {
         public readonly Expression Reference; //Fie, ImplementedBy, ImplementedByAll or Constant to NullEntityExpression
+        public readonly Expression CustomToStr; //Not readonly
 
-        public readonly Expression Id;
-        public readonly Expression ToStr; //Not readonly
-        public readonly Expression TypeId;
-        public readonly bool CustomToString;
-
-        public LiteExpression(Type type, Expression reference, Expression id, Expression toStr, Expression typeId, bool customToString) :
-            base(DbExpressionType.Lite, type)
+        public LiteReferenceExpression(Type type, Expression reference, Expression customToStr) :
+            base(DbExpressionType.LiteReference, type)
         {
-            if (reference != null)
-            {
-                Type cleanType = Lite.Extract(type);
+            Type cleanType = Lite.Extract(type);
 
-                if (cleanType != reference.Type)
-                    throw new ArgumentException("The type {0} is not the Lite version of {1}".Formato(type.TypeName(), reference.Type.TypeName()));
-            }
+            if (cleanType != reference.Type)
+                throw new ArgumentException("The type {0} is not the Lite version of {1}".Formato(type.TypeName(), reference.Type.TypeName()));
 
             this.Reference = reference;
-            this.Id = id;
-            this.ToStr = toStr;
-            this.TypeId = typeId;
-            this.CustomToString = customToString;
+
+            this.CustomToStr = customToStr;
         }
 
         public override string ToString()
         {
-            return "({0}).ToLite({1},{2},{3})".Formato(Reference.NiceToString(), Id.NiceToString(), ToStr.NiceToString(), TypeId.NiceToString());
+            return "({0}).ToLite({1})".Formato(Reference.NiceToString(), CustomToStr == null ? null : ("customToStr: " + CustomToStr.NiceToString()));
+        }
+    }
+
+    internal class LiteValueExpression : DbExpression
+    {
+        public readonly Expression TypeId;
+        public readonly Expression Id;
+        public readonly Expression ToStr; //Not readonly
+        
+
+        public LiteValueExpression(Type type, Expression typeId, Expression id, Expression toStr) :
+            base(DbExpressionType.LiteValue, type)
+        {
+            this.TypeId = typeId;
+            this.Id = id;
+            this.ToStr = toStr;
+        }
+
+        public override string ToString()
+        {
+            return "new Lite<{0}>({1},{2},{3})".Formato(Type.CleanType().TypeName(), TypeId.NiceToString(), Id.NiceToString(), ToStr.NiceToString());
         }
     }
 

@@ -405,10 +405,12 @@ namespace Signum.Test.LinqProvider
         public void GroupByTake()
         {
             var list = (from a in Database.Query<AlbumDN>()
-                        group a by a.Author into g
+                        //group a by new { Author = a.Author.ToLite(), Year = a.Year / 2 } into g
+                        group a by a.Author.ToLite() into g
                         select new
                         {
                             Author = g.Key,
+                            //Year = g.Key.Year,
                             Count = g.Count()
                         }).Take(10).ToList();
         }
