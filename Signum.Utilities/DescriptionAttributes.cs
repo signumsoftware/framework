@@ -294,7 +294,7 @@ namespace Signum.Utilities
                     let lt = kvp.Value
                     let doa = GetDescriptionOptions(type)
                     where doa != DescriptionOptions.None
-                    select lt.ExportXml(doa, Culture, IsDefault)
+                    select lt.ExportXml()
                 )
             );
 
@@ -318,26 +318,30 @@ namespace Signum.Utilities
             if (!isDefault && file == null)
                 return null;
 
-            var types = (from t in assembly.GetTypes()
-                         let opts = GetDescriptionOptions(t)
-                         where opts != DescriptionOptions.None
-                         let x = file.TryGetC(t.Name)
-                         select LocalizedType.ImportXml(t, opts, cultureInfo, x, isDefault))
-                         .ToDictionary(lt => lt.Type);
-
-            return new LocalizedAssembly
+            var result = new LocalizedAssembly
             {
                 Assembly = assembly,
                 Culture = cultureInfo,
-                IsDefault = isDefault,
-                Types = types
+                IsDefault = isDefault
             };
+
+            result.Types = (from t in assembly.GetTypes()
+                            let opts = GetDescriptionOptions(t)
+                            where opts != DescriptionOptions.None
+                            let x = file.TryGetC(t.Name)
+                            select LocalizedType.ImportXml(t, opts, result, x))
+                            .ToDictionary(lt => lt.Type);
+
+            return result;
         }
     }
 
     public class LocalizedType
     {
         public Type Type { get; private set; }
+        public LocalizedAssembly Assembly { get; private set; }
+        public DescriptionOptions Options { get; private set; }
+
         public string Description { get; set; }
         public string PluralDescription { get; set; }
         public char? Gender { get; set; }
@@ -346,32 +350,32 @@ namespace Signum.Utilities
 
         LocalizedType() { }
 
-        public XElement ExportXml(DescriptionOptions doa, CultureInfo cultureInfo, bool isDefault)
+        public XElement ExportXml()
         {
             return new XElement("Type",
                     new XAttribute("Name", Type.Name),
 
-                    !doa.IsSetAssert(DescriptionOptions.Description, Type) ||
+                    !Options.IsSetAssert(DescriptionOptions.Description, Type) ||
                     Description == null ||
-                    (isDefault && Description == (Type.SingleAttribute<DescriptionAttribute>().TryCC(t => t.Description) ?? DescriptionManager.CleanTypeName(Type).SpacePascal())) ? null :
+                    (Assembly.IsDefault && Description == (Type.SingleAttribute<DescriptionAttribute>().TryCC(t => t.Description) ?? DescriptionManager.CleanTypeName(Type).SpacePascal())) ? null :
                     new XAttribute("Description", Description),
 
-                    !doa.IsSetAssert(DescriptionOptions.PluralDescription, Type) ||
+                    !Options.IsSetAssert(DescriptionOptions.PluralDescription, Type) ||
                     PluralDescription == null ||
-                    (PluralDescription == NaturalLanguageTools.Pluralize(Description, cultureInfo)) ? null :
+                    (PluralDescription == NaturalLanguageTools.Pluralize(Description, Assembly.Culture)) ? null :
                     new XAttribute("PluralDescription", PluralDescription),
 
-                    !doa.IsSetAssert(DescriptionOptions.Gender, Type) ||
+                    !Options.IsSetAssert(DescriptionOptions.Gender, Type) ||
                     Gender == null ||
-                    (Gender == NaturalLanguageTools.GetGender(Description, cultureInfo)) ? null :
+                    (Gender == NaturalLanguageTools.GetGender(Description, Assembly.Culture)) ? null :
                     new XAttribute("Gender", Gender),
 
-                    !doa.IsSetAssert(DescriptionOptions.Members, Type) ? null :
+                    !Options.IsSetAssert(DescriptionOptions.Members, Type) ? null :
                      (from m in Type.GetProperties(bf).Cast<MemberInfo>().Concat(Type.GetFields(bf))
                       let doam = m.SingleAttribute<DescriptionOptionsAttribute>()
-                      where doa == null || doam.Options.IsSetAssert(DescriptionOptions.Description, m)
+                      where doam == null || doam.Options.IsSetAssert(DescriptionOptions.Description, m)
                       let value = Members.TryGetC(m.Name)
-                      where value != null && (!isDefault || ((Type.SingleAttribute<DescriptionAttribute>().TryCC(t => t.Description) ?? m.Name.NiceName()) != value))
+                      where value != null && (!Assembly.IsDefault || ((Type.SingleAttribute<DescriptionAttribute>().TryCC(t => t.Description) ?? m.Name.NiceName()) != value))
                       select new XElement("Member", new XAttribute("MemberName", m.Name), new XAttribute("Name", value)))
                 );
         }
@@ -386,11 +390,11 @@ namespace Signum.Utilities
                 return type.GetProperties(bf).Concat(type.GetFields(bf).Cast<MemberInfo>());
         }
 
-        internal static LocalizedType ImportXml(Type type, DescriptionOptions opts, CultureInfo cultureInfo, XElement x, bool isDefault)
+        internal static LocalizedType ImportXml(Type type, DescriptionOptions opts, LocalizedAssembly assembly, XElement x)
         {
             string name = !opts.IsSetAssert(DescriptionOptions.Description, type) ? null :
                 (x == null ? null : x.Attribute("Description").TryCC(xa => xa.Value)) ??
-                (!isDefault ? null : DefaultTypeDescription(type));
+                (!assembly.IsDefault ? null : DefaultTypeDescription(type));
 
             var xMembers = x == null ? null : x.Elements("Member")
                 .Select(m => KVP.Create(m.Attribute("Name").Value, m.Attribute("Description").Value))
@@ -400,22 +404,25 @@ namespace Signum.Utilities
             LocalizedType result = new LocalizedType
             {
                 Type = type,
+                Options = opts,
+                Assembly = assembly,
+
                 Description = name,
                 PluralDescription = !opts.IsSetAssert(DescriptionOptions.PluralDescription, type) ? null :
                              ((x == null ? null : x.Attribute("PluralDescription").TryCC(xa => xa.Value)) ??
-                             (!isDefault ? null : type.SingleAttribute<PluralDescriptionAttribute>().TryCC(t => t.PluralDescription)) ??
-                             (name == null ? null : NaturalLanguageTools.Pluralize(name, cultureInfo))),
+                             (!assembly.IsDefault ? null : type.SingleAttribute<PluralDescriptionAttribute>().TryCC(t => t.PluralDescription)) ??
+                             (name == null ? null : NaturalLanguageTools.Pluralize(name, assembly.Culture))),
 
                 Gender = !opts.IsSetAssert(DescriptionOptions.Gender, type) ? null :
                          ((x == null ? null : x.Attribute("Gender").TryCS(xa => xa.Value.Single())) ??
-                         (!isDefault ? null : type.SingleAttribute<GenderAttribute>().TryCS(t => t.Gender)) ??
-                         (name == null ? null : NaturalLanguageTools.GetGender(name, cultureInfo))),
+                         (!assembly.IsDefault ? null : type.SingleAttribute<GenderAttribute>().TryCS(t => t.Gender)) ??
+                         (name == null ? null : NaturalLanguageTools.GetGender(name, assembly.Culture))),
 
                 Members = !opts.IsSetAssert(DescriptionOptions.Members, type) ? null :
                           (from m in GetMembers(type)
                            let mta = m.SingleAttribute<DescriptionOptionsAttribute>()
                            where mta == null || mta.Options.IsSetAssert(DescriptionOptions.Description, m)
-                           let value = xMembers.TryGetC(m.Name) ?? (!isDefault ? null : DefaultMemberDescription(m))
+                           let value = xMembers.TryGetC(m.Name) ?? (!assembly.IsDefault ? null : DefaultMemberDescription(m))
                            where value != null
                            select KVP.Create(m.Name, value))
                            .ToDictionary()
