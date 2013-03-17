@@ -71,6 +71,7 @@ namespace Signum.Engine
                             catch (Exception e)
                             {
                                 writer(ConsoleColor.Red, "Error in {0}: {1}", elementID(item), e.Message);
+                                writer(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
                             }
                             lock (SafeConsole.SyncKey)
                                 SafeConsole.WriteSameLine(pi.ToString());
@@ -104,12 +105,8 @@ namespace Signum.Engine
             {
                 collection.ProgressForeach(elementID, fileName, (item, writer) =>
                 {
-                    using (Transaction tr = new Transaction())
-                    {
-                        using (Administrator.DisableIdentity(table.Name))
-                            action(item, writer);
-                        tr.Commit();
-                    }
+                    using (Administrator.DisableIdentity(table.Name))
+                        action(item, writer);
                 });
             }
             finally
@@ -129,12 +126,8 @@ namespace Signum.Engine
             {
                 collection.ProgressForeachParallel(elementID, fileName, (item, writer) =>
                 {
-                    using (Transaction tr = new Transaction())
-                    {
-                        using (Administrator.DisableIdentity(table.Name))
-                            action(item, writer);
-                        tr.Commit();
-                    }
+                    using (Administrator.DisableIdentity(table.Name))
+                        action(item, writer);
                 });
             }
             finally

@@ -28,7 +28,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string ToString()
         {
-            return LiteMessage.ToStr.NiceToString();
+            return "[" + LiteMessage.ToStr.NiceToString() + "]";
         }
 
         public override string Key

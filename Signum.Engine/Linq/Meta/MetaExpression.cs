@@ -16,6 +16,7 @@ namespace Signum.Engine.Linq
     {
         MetaProjector = 2000,
         MetaExpression,
+        MetaMListExpression,
         MetaConstant
     }
 
@@ -79,6 +80,36 @@ namespace Signum.Engine.Linq
                 return new MetaExpression(type.UnNullify().CleanType(), new DirtyMeta(new Meta[0]));
 
             return new MetaExpression(type.UnNullify().CleanType(), new CleanMeta(new[] { pr }));
+        }
+    }
+
+    internal class MetaMListExpression : Expression
+    {
+        readonly Type type;
+        public override Type Type
+        {
+            get { return type; }
+        }
+
+        public override ExpressionType NodeType
+        {
+            get { return (ExpressionType)MetaExpressionType.MetaMListExpression; }
+        }
+
+        public readonly CleanMeta Parent;
+        public readonly CleanMeta Element;
+
+        public MetaMListExpression(Type type, CleanMeta parent, CleanMeta element)
+        {
+            this.type = type;
+            this.Parent = parent;
+            this.Element = element;
+        }
+
+
+        public override string ToString()
+        {
+            return "ExpMList({0}, {1})".Formato(Parent, Element);
         }
     }
 }

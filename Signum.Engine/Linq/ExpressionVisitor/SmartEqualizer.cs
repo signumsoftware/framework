@@ -355,7 +355,7 @@ namespace Signum.Engine.Linq
             return EntityIn(newItem, entityIDs);
         }
 
-        internal static Expression EntityIn(LiteExpression liteReference, IEnumerable<Lite<IIdentifiable>> collection)
+        internal static Expression EntityIn(LiteReferenceExpression liteReference, IEnumerable<Lite<IIdentifiable>> collection)
         {
             if (collection.IsEmpty())
                 return False;
@@ -388,7 +388,7 @@ namespace Signum.Engine.Linq
 
         public static Expression LiteEquals(Expression e1, Expression e2)
         {
-            if (e1 is LiteExpression || e2 is LiteExpression)
+            if (e1 is LiteReferenceExpression || e2 is LiteReferenceExpression)
             {
                 e1 = ConstantToLite(e1) ?? e1;
                 e2 = ConstantToLite(e2) ?? e2;
@@ -402,9 +402,9 @@ namespace Signum.Engine.Linq
             return null;
         }
 
-        private static LiteExpression AssertLite(Expression exp)
+        private static LiteReferenceExpression AssertLite(Expression exp)
         {
-            var liteExp = exp as LiteExpression;
+            var liteExp = exp as LiteReferenceExpression;
             if (liteExp == null)
                 throw new InvalidCastException("Impossible to convert a {0} to Lite".Formato(exp.Type.TypeName()));
 
@@ -552,7 +552,7 @@ namespace Signum.Engine.Linq
 
                 EntityExpression ere = new EntityExpression(lite.EntityType, id, null, null);
 
-                return new LiteExpression(Lite.Generate(lite.EntityType), ere, id, Expression.Constant(lite.ToString()), Expression.Constant(lite.EntityType), false);
+                return new LiteReferenceExpression(Lite.Generate(lite.EntityType), ere, null);
             }
 
             return null;

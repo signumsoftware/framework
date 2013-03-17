@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -42,29 +42,18 @@ namespace Signum.Entities.Patterns
             
             return base.Set<T>(ref field, value, property);
         }
+
+        public IDisposable AllowTemporalUnlock()
+        {
+            bool old = this.locked;
+            this.locked = false;
+            return new Disposable(() => this.locked = old);
+        }
     }
 
     public enum EntityMessage
     {
         [Description("Attempt to modify locked entity {0}")]
         AttemptToModifyLockedEntity0
-    }
-
-    public class AllowTemporalUnlock : IDisposable
-    {
-        bool locked;
-        LockableEntity Entity;
-
-        public AllowTemporalUnlock(LockableEntity entity) 
-        {
-            locked = entity.Locked;
-            Entity = entity;
-            Entity.Locked = false;
-        }
-
-        public void Dispose()
-        {
-            Entity.Locked = locked;
-        }
     }
 }

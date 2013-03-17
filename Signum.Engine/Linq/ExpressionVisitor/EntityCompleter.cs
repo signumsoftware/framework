@@ -24,30 +24,27 @@ namespace Signum.Engine.Linq
             return pc.Visit(source);
         }
 
-        protected override Expression VisitLite(LiteExpression lite)
+        protected override Expression VisitLiteReference(LiteReferenceExpression lite)
         {
-            var newId = Visit(lite.Id);
-            var newTypeId = Visit(lite.TypeId);
-            var toStr = LiteToString(lite);
+            var id = binder.GetId(lite.Reference);
+            var typeId = binder.GetEntityType(lite.Reference);
+            var toStr = LiteToString(lite, typeId);
 
-            return new LiteExpression(lite.Type, null, newId, toStr, newTypeId, lite.CustomToString);
+            return new LiteValueExpression(lite.Type, typeId, id, toStr);
         }
 
-        private Expression LiteToString(LiteExpression lite)
+        private Expression LiteToString(LiteReferenceExpression lite, Expression typeId)
         {
-            if (lite.CustomToString)
-                return Visit(lite.ToStr);
+            if (lite.CustomToStr != null)
+                return Visit(lite.CustomToStr);
 
             if (lite.Reference is ImplementedByAllExpression)
                 return null;
 
-            if (IsCacheable(lite.TypeId))
+            if (IsCacheable(typeId))
                 return null;
 
-            if (lite.ToStr == null)
-                return binder.BindMethodCall(Expression.Call(lite.Reference, EntityExpression.ToStringMethod));
-
-            return Visit(lite.ToStr);
+            return binder.BindMethodCall(Expression.Call(lite.Reference, EntityExpression.ToStringMethod));
         }
 
         private bool IsCacheable(Expression newTypeId)

@@ -267,28 +267,7 @@ namespace Signum.Entities
             {
                 var validators = Validator.GetPropertyValidators(GetType());
 
-                StringBuilder sb = null;
-
-                foreach (IPropertyValidator pv in validators.Values)
-                {
-                    log.Switch("PropertyCheck", pv.PropertyInfo.Name);
-                    string error = pv.PropertyCheck(this);
-
-                    if (error != null)
-                    {
-                        if (sb == null)
-                            sb = new StringBuilder();
-                        else
-                            sb.Append("\r\n");
-                        
-                        sb.Append(error);
-                    }
-                }
-
-                if (sb == null)
-                    return null;
-
-                return sb.ToString();
+                return validators.Values.Select(pv => pv.PropertyCheck(this)).NotNull().ToString("\r\n").DefaultText(null);
             }
         }
 

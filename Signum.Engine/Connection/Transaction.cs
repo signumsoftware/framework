@@ -57,7 +57,7 @@ namespace Signum.Engine
             public FakedTransaction(ICoreTransaction parent)
             {
                 if (parent != null && parent.IsRolledback)
-                    throw new InvalidOperationException("The transation can not be created because a parent transaction is rolled back");
+                    throw new InvalidOperationException("The transaction can not be created because a parent transaction is rolled back");
 
                 this.parent = parent;
             }
@@ -229,7 +229,7 @@ namespace Signum.Engine
             public NamedTransaction(ICoreTransaction parent, string savePointName)
             {
                 if (parent != null && parent.IsRolledback)
-                    throw new InvalidOperationException("The transation can not be created because a parent transaction is rolled back");
+                    throw new InvalidOperationException("The transaction can not be created because a parent transaction is rolled back");
 
                 this.parent = parent;
                 this.savePointName = savePointName;

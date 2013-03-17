@@ -141,7 +141,7 @@ namespace Signum.Windows
                 INotifyPropertyChanged newDC = e.OldValue as INotifyPropertyChanged;
                 if (newDC != null)
                     newDC.PropertyChanged += propertyChanged;
-            }; 
+            };
         }
 
         public static void OnEntityPropertyChanged(this EntityBase eb, PropertyChangedEventHandler propertyChanged)
@@ -158,6 +158,7 @@ namespace Signum.Windows
             };
         }
     }
+
 
     class RouteVisitor : SimpleExpressionVisitor
     {
