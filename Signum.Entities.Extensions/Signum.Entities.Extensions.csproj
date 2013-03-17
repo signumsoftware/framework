@@ -96,7 +96,7 @@
     <Compile Include="Authorization\ServicesData.cs" />
     <Compile Include="Authorization\User.cs" />
     <Compile Include="Help\HelpMessage.cs" />
-    <Compile Include="Localization\CultureInfoDN.cs" />
+    <Compile Include="Translation\CultureInfoDN.cs" />
     <Compile Include="Basics\HourMinuteDN.cs" />
     <Compile Include="Basics\DateSpanDN.cs" />
     <Compile Include="Basics\TypeConditionName.cs" />
@@ -129,8 +129,8 @@
     <Compile Include="Files\FilePath.cs" />
     <Compile Include="Files\FileRepository.cs" />
     <Compile Include="Files\IFileServer.cs" />
-    <Compile Include="Localization\LocalizedInstance.cs" />
-    <Compile Include="Localization\Translator.cs" />
+    <Compile Include="Translation\LocalizedInstance.cs" />
+    <Compile Include="Translation\Translator.cs" />
     <Compile Include="Mailing\EmailMessage.cs" />
     <Compile Include="Mailing\EmailTemplate.cs" />
     <Compile Include="Mailing\Newsletter.cs" />

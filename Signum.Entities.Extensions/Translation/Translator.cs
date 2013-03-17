@@ -7,7 +7,7 @@ using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Utilities;
 
-namespace Signum.Entities.Localization
+namespace Signum.Entities.Translation
 {
     [Serializable, EntityKind(EntityKind.String)]
     public class TranslatorDN : Entity

@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 using System.Globalization;
 using Signum.Utilities;
 
-namespace Signum.Entities.Localization
+namespace Signum.Entities.Translation
 {
     [Serializable]
     public class CultureInfoDN : Entity

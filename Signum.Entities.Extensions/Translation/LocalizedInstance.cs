@@ -1,12 +1,11 @@
 ﻿using Signum.Entities.Basics;
-using Signum.Entities.Localization;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Signum.Entities.Extensions.Localization
+namespace Signum.Entities.Translation
 {
     [Serializable, EntityKind(EntityKind.Main)]
     public class LocalizedInstanceDN : Entity

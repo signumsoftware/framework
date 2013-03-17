@@ -114,8 +114,9 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="Localization\TranslationService.cs" />
-    <Compile Include="Localization\TranslationSyncronizer.cs" />
+    <Compile Include="Translation\TranslationClient.cs" />
+    <Compile Include="Translation\TranslationService.cs" />
+    <Compile Include="Translation\TranslationSyncronizer.cs" />
     <Compile Include="Note\Controllers\NoteController.cs" />
     <Compile Include="AuthAdmin\AuthAdminClient.cs" />
     <Compile Include="AuthAdmin\Controllers\AuthAdminController.cs" />
@@ -764,6 +765,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>SMSUpdatePackage.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Translation\Views\Web.generated.cs">
+      <DependentUpon>Web.config</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="UserQueries\Controller\UserQueriesController.cs" />
     <Compile Include="UserQueries\UserQueriesOmniboxProvider.cs" />
     <Compile Include="UserQueries\UserQueriesClient.cs" />
@@ -1362,6 +1368,12 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>MultipleSMS.generated.cs</LastGenOutput>
     </Content>
+    <Content Include="Translation\Views\Translator.cshtml" />
+    <Content Include="Translation\Views\Web.config">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>Web.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Translation\Views\TranslatedCulture.cshtml" />
     <None Include="UserQueries\Views\QueryColumn.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>QueryColumn.generated.cs</LastGenOutput>
@@ -1422,7 +1434,10 @@
       <Name>Signum.Entities.Extensions</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Translation\Content\" />
+    <Folder Include="Translation\Controllers\" />
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

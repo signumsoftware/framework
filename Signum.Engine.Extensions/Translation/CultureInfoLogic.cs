@@ -9,9 +9,9 @@ using Signum.Entities.Basics;
 using System.Linq.Expressions;
 using System.Globalization;
 using Signum.Utilities;
-using Signum.Entities.Localization;
+using Signum.Entities.Translation;
 
-namespace Signum.Engine.Localization
+namespace Signum.Engine.Translation
 {
     public static class CultureInfoLogic
     {

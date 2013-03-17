@@ -1,16 +1,15 @@
 ﻿using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
-using Signum.Entities.Extensions.Localization;
-using Signum.Entities.Localization;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Signum.Entities.Translation;
 
-namespace Signum.Engine.Extensions.Localization
+namespace Signum.Engine.Translation
 {
     public static class LocalizedInstanceLogic
     {

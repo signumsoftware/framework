@@ -9,10 +9,10 @@ using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.Entities.Basics;
-using Signum.Entities.Localization;
+using Signum.Entities.Translation;
 using Signum.Utilities;
 
-namespace Signum.Engine.Extensions.Localization
+namespace Signum.Engine.Translation
 {
     public static class TranslatorLogic
     {
