@@ -12,6 +12,7 @@ namespace Signum.Windows.UIAutomation
         public LoginWindowProxy(AutomationElement element)
             : base(element)
         {
+            element.AssertClassName("Login");
         }
 
         AutomationElement LoginCapture(string userName, string password, int? timeOut = null)

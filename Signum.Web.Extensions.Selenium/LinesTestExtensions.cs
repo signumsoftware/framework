@@ -279,7 +279,7 @@ namespace Signum.Web.Selenium
             selenium.Search(prefix);
 
             foreach (int index in rowIndexesBase0)
-                SearchTestExtensions.SelectRowCheckbox(selenium, index, prefix);
+                SearchTestExtensions.SelectRow(selenium, index, prefix);
             
             selenium.PopupOk(prefix);
         }
@@ -301,7 +301,7 @@ namespace Signum.Web.Selenium
             selenium.Type(prefix + "value_0", elementId.ToString());
 
             selenium.Search(prefix);
-            SearchTestExtensions.SelectRowCheckbox(selenium, 0, prefix);
+            SearchTestExtensions.SelectRow(selenium, 0, prefix);
 
             selenium.PopupOk(prefix);
         }
@@ -321,7 +321,7 @@ namespace Signum.Web.Selenium
             selenium.Search(prefix);
 
             foreach (int index in rowIndexesBase0)
-                SearchTestExtensions.SelectRowCheckbox(selenium, index, prefix);
+                SearchTestExtensions.SelectRow(selenium, index, prefix);
             
             selenium.PopupOk(prefix);
         }

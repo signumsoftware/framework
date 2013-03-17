@@ -409,7 +409,7 @@ namespace Signum.Entities.Authorization
                         Resource = kvp.Key,
                         Role = role,
                         Allowed = kvp.Value
-                    }, Comment(role, kvp.Key, kvp.Value))).Combine(Spacing.Simple);
+                    }, comment: Comment(role, kvp.Key, kvp.Value))).Combine(Spacing.Simple);
 
                     return SqlPreCommand.Combine(Spacing.Simple, defSql, restSql);
                 }, 
@@ -432,14 +432,14 @@ namespace Signum.Entities.Authorization
                         (r, xr) =>
                         {
                             var a = parseAllowed(xr.Attribute("Allowed").Value);
-                            return table.InsertSqlSync(new RT { Resource = r, Role = role, Allowed = a }, Comment(role, r, a));
+                            return table.InsertSqlSync(new RT { Resource = r, Role = role, Allowed = a }, comment: Comment(role, r, a));
                         }, 
                         (r, rt) => table.DeleteSqlSync(rt, Comment(role, r, rt.Allowed)), 
                         (r, xr, rt) =>
                         {
                             var oldA = rt.Allowed;
                             rt.Allowed = parseAllowed(xr.Attribute("Allowed").Value);
-                            return table.UpdateSqlSync(rt, Comment(role, r, oldA, rt.Allowed));
+                            return table.UpdateSqlSync(rt, comment: Comment(role, r, oldA, rt.Allowed));
                         }, Spacing.Simple);
 
                     return SqlPreCommand.Combine(Spacing.Simple, defSql, restSql);
@@ -478,13 +478,13 @@ namespace Signum.Entities.Authorization
                         Role = role,
                         Resource = null,
                         Allowed = Min.BaseAllowed
-                    }, comment + " ({0})".Formato(Min.BaseAllowed));
+                    }, comment: comment + " ({0})".Formato(Min.BaseAllowed));
                 }
                 else if (!def.Allowed.Equals(Min.BaseAllowed))
                 {
                     var old = def.Allowed;
                     def.Allowed = Min.BaseAllowed;
-                    return table.UpdateSqlSync(def, comment + "({0} -> {1})".Formato(old, Min.BaseAllowed));
+                    return table.UpdateSqlSync(def, comment: comment + "({0} -> {1})".Formato(old, Min.BaseAllowed));
                 }
 
                 return null;

@@ -97,13 +97,17 @@ namespace Signum.Windows.Alerts
             CountAlerts(entity);
         }
 
+        public static Polymorphic<Func<IdentifiableEntity, FilterOption>> CustomFilter = new Polymorphic<Func<IdentifiableEntity, FilterOption>>();
+
         void CountAlerts(IdentifiableEntity entity)
         {
+            var func = CustomFilter.TryGetValue(DataContext.GetType());
+
             DynamicQueryServer.QueryGroupBatch(new QueryGroupOptions(typeof(AlertDN))
             {
                 FilterOptions = new List<FilterOption>
                 {
-                    new FilterOption("Target" , DataContext),
+                     func != null ?  func((IdentifiableEntity)DataContext) : new FilterOption("Target", DataContext) { Frozen = true },
                 },
                 ColumnOptions = new List<ColumnOption>
                 {
@@ -144,19 +148,27 @@ namespace Signum.Windows.Alerts
 
             AlertCurrentState state = (AlertCurrentState)row[0];
 
-            Navigator.Explore(new ExploreOptions(typeof(AlertDN))
+            var func = CustomFilter.TryGetValue(DataContext.GetType());
+
+            var eo = new ExploreOptions(typeof(AlertDN))
             {
                 ShowFilters = false,
                 SearchOnLoad = true,
                 FilterOptions = 
                 { 
-                    new FilterOption("Target", entity) { Frozen = true }, 
+                    func != null ? func(entity) : new FilterOption("Target", DataContext) { Frozen = true },
                     new FilterOption("Entity.CurrentState", state)
                 },
-                ColumnOptions = { new ColumnOption("Target") },
-                ColumnOptionsMode = ColumnOptionsMode.Remove,
                 Closed = (o, ea) => ReloadAlerts(),
-            });
+            };
+
+            if (func == null)
+            {
+                eo.ColumnOptions = new List<ColumnOption> { new ColumnOption("Target") };
+                eo.ColumnOptionsMode = ColumnOptionsMode.Remove;
+            }
+
+            Navigator.Explore(eo);
         }
     }
 }

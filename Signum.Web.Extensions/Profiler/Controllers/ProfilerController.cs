@@ -129,6 +129,8 @@ namespace Signum.Web.Profiler
             {
                 HeavyProfiler.ExportXml().Save(ms);
 
+                Response.AddHeader("Content-Disposition", "attachment; filename=Profile-{0}.xml".Formato(DateTime.Now.ToString("o").Replace(":", "."))); 
+
                 return File(ms.ToArray(), "text/xml");
             }
         }
