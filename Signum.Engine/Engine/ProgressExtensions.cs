@@ -151,7 +151,13 @@ namespace Signum.Engine
             if (string.IsNullOrEmpty(fileName))
                 return null;
 
-            fileName = Path.IsPathRooted(fileName) ? fileName : Path.Combine(DefaultLogFolder, fileName);
+            if (!Path.IsPathRooted(fileName))
+            {
+                if (!Directory.Exists(DefaultLogFolder))
+                    Directory.CreateDirectory(DefaultLogFolder);
+
+                fileName = Path.Combine(DefaultLogFolder, fileName);
+            }
 
             var result = new StreamWriter(fileName, append: true);
             result.AutoFlush = true;
