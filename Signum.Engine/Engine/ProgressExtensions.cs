@@ -144,10 +144,14 @@ namespace Signum.Engine
                 collection.ProgressForeachDisableIdentity(tableType, elementID, fileName, action);
         }
 
+        public static string DefaultLogFolder = "Log";
+
         private static StreamWriter TryOpenAutoFlush(string fileName)
         {
             if (string.IsNullOrEmpty(fileName))
                 return null;
+
+            fileName = Path.IsPathRooted(fileName) ? fileName : Path.Combine(DefaultLogFolder, fileName);
 
             var result = new StreamWriter(fileName, append: true);
             result.AutoFlush = true;
