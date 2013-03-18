@@ -111,7 +111,7 @@ namespace Signum.Engine
             }
             finally
             {
-                table.Identity = false;
+                table.Identity = true;
                 SafeConsole.ClearSameLine();
             }
         }
@@ -132,7 +132,7 @@ namespace Signum.Engine
             }
             finally
             {
-                table.Identity = false;
+                table.Identity = true;
             }
         }
 
