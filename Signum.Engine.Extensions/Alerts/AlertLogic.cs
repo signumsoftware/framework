@@ -33,10 +33,10 @@ namespace Signum.Engine.Alerts
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null, null)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Type[] registerExpressionsFor)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -78,6 +78,13 @@ namespace Signum.Engine.Alerts
                     Lite = false,
                     Execute = (a, _) => { }
                 }.Register();
+
+                if (registerExpressionsFor != null)
+                {
+                    var exp = Signum.Utilities.ExpressionTrees.Linq.Expr((IdentifiableEntity ident) => ident.Alerts());
+                    foreach (var type in registerExpressionsFor)
+                        dqm.RegisterExpression(new ExtensionInfo(type, exp, exp.Body.Type, "Alerts", () => typeof(AlertDN).NicePluralName()));
+                }
 
                 started = true;
             }

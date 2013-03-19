@@ -21,7 +21,14 @@ namespace Signum.Engine.Notes
 {
     public static class NoteLogic
     {
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        static Expression<Func<IdentifiableEntity, IQueryable<NoteDN>>> NotesExpression =
+            ident => Database.Query<NoteDN>().Where(n => n.Target.RefersTo(ident));
+        public static IQueryable<NoteDN> Notes(this IdentifiableEntity ident)
+        {
+            return NotesExpression.Evaluate(ident);
+        }
+
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Type[] registerExpressionsFor)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -45,6 +52,15 @@ namespace Signum.Engine.Notes
                     Lite = false,
                     Execute = (a, _) => { }
                 }.Register();
+
+
+
+                if (registerExpressionsFor != null)
+                {
+                    var exp = Signum.Utilities.ExpressionTrees.Linq.Expr((IdentifiableEntity ident) => ident.Notes());
+                    foreach (var type in registerExpressionsFor)
+                        dqm.RegisterExpression(new ExtensionInfo(type, exp, exp.Body.Type, "Notes", () => typeof(NoteDN).NicePluralName()));
+                }
             }
         }
     }
