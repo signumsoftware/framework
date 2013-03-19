@@ -83,7 +83,7 @@ namespace Signum.Web
                 MvcHtmlString result = MvcHtmlString.Empty;
                 if (valueLine.WriteHiddenOnReadonly)
                     result = result.Concat(helper.Hidden(valueLine.ControlID, valueLine.UntypedValue.ToString()));
-                return result.Concat(helper.Span("", value != null ? value.NiceToString() : valueLine.UntypedValue.TryToString(), "sf-value-line"));
+                return result.Concat(helper.Span("", value != null ? value.NiceToString() : valueLine.UntypedValue.TryToString(), "sf-value-line", valueLine.ValueHtmlProps));
             }
 
             StringBuilder sb = new StringBuilder();
@@ -131,7 +131,7 @@ namespace Signum.Web
                 MvcHtmlString result = MvcHtmlString.Empty;
                 if (valueLine.WriteHiddenOnReadonly)
                     result = result.Concat(helper.Hidden(valueLine.ControlID, value.TryToString(valueLine.Format)));
-                return result.Concat(helper.Span("", value.TryToString(valueLine.Format), "sf-value-line"));
+                return result.Concat(helper.Span("", value.TryToString(valueLine.Format), "sf-value-line", valueLine.ValueHtmlProps));
             }
 
             valueLine.ValueHtmlProps.AddCssClass("maskedEdit");
@@ -181,7 +181,7 @@ namespace Signum.Web
                 MvcHtmlString result = MvcHtmlString.Empty;
                 if (valueLine.WriteHiddenOnReadonly)
                     result = result.Concat(helper.Hidden(valueLine.ControlID, value));
-                return result.Concat(helper.Span("", value, "sf-value-line"));
+                return result.Concat(helper.Span("", value, "sf-value-line", valueLine.ValueHtmlProps));
             }
 
             if (!valueLine.ValueHtmlProps.ContainsKey("autocomplete"))
@@ -211,7 +211,7 @@ namespace Signum.Web
                 MvcHtmlString result = MvcHtmlString.Empty;
                 if (valueLine.WriteHiddenOnReadonly)
                     result = result.Concat(helper.Hidden(valueLine.ControlID, (string)valueLine.UntypedValue));
-                return result.Concat(helper.Span("", (string)valueLine.UntypedValue, "sf-value-line"));
+                return result.Concat(helper.Span("", (string)valueLine.UntypedValue, "sf-value-line", valueLine.ValueHtmlProps));
             }
 
             valueLine.ValueHtmlProps.Add("autocomplete", "off");

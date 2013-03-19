@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -35,7 +35,7 @@ namespace Signum.Engine
                         }
                         catch (Exception e)
                         {
-                            writer(ConsoleColor.Red, "Error in {0}: {1}", elementID(item), e.Message);
+                            writer(ConsoleColor.Red, "{0:u} Error in {1}: {2}", DateTime.Now, elementID(item), e.Message);
                             writer(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
                         }
 
@@ -71,7 +71,7 @@ namespace Signum.Engine
                                 }
                                 catch (Exception e)
                                 {
-                                    writer(ConsoleColor.Red, "Error in {0}: {1}", elementID(item), e.Message);
+                                    writer(ConsoleColor.Red, "{0:u} Error in {1}: {2}", DateTime.Now, elementID(item), e.Message);
                                     writer(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
                                 }
                             lock (SafeConsole.SyncKey)
