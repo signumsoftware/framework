@@ -19,6 +19,8 @@ namespace Signum.Utilities
 
             if (needToClear)
                 str = str.PadChopRight(Console.BufferWidth - 1);
+            else
+                str = str.TryStart(Console.BufferWidth - 1);
 
             Console.WriteLine(str);
 
