@@ -377,7 +377,7 @@ SF.registerModule("Globals", function () {
 
 
     $(function () {
-        $("body").click(function (e) {
+        $(document).on("click touchstart", function (e) {
             $(".sf-dropdown").removeClass("sf-open");
         });
     });

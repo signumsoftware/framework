@@ -3,12 +3,11 @@
 SF.Widgets = (function () {
     var highlightClass = "sf-alert-active";
 
-    $(".sf-widget").live("mouseover mouseout", function (evt) {
-        var $this = $(this);
-        SF.Dropdowns.toggle(evt, this);
-    });
+    //$(document).on("mouseover mouseout", ".sf-widget", function (evt) {
+    //    SF.Dropdowns.toggle(evt, this);
+    //});
 
-    $(".sf-widget").live("click", function (evt) {
+    $(document).on("click touchstart", ".sf-widget", function (evt) {
         SF.Dropdowns.toggle(evt, this);
     });
 
