@@ -30,9 +30,9 @@
                 <Button Focusable="False" x:Name="btRemove" Click="btRemove_Click" Style="{StaticResource RoundButton}" Content="{StaticResource Remove}" ToolTip="{m:Loc Remove}"/>
             </StackPanel>
         </Grid>
-        <Border BorderBrush="{DynamicResource LightBlue}" BorderThickness="1" Grid.Row="1">
+        <m:AutomationBorder BorderBrush="{DynamicResource LightBlue}" BorderThickness="1" Grid.Row="1">
             <ContentControl  Margin="1,1,1,1" x:Name="contentPresenter"
                             Content="{Binding EntityControl, ElementName=me, Mode=Default}"/>
-        </Border>
+        </m:AutomationBorder>
     </Grid>
 </m:EntityBase>
