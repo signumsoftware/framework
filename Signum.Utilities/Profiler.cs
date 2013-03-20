@@ -139,12 +139,12 @@ namespace Signum.Utilities
             return tracer;
         }
 
-        public static Tracer Log(string role, Func<string> aditionalData)
+        public static Tracer Log(string role, Func<string> additionalData)
         {
             if (!enabled)
                 return null;
 
-            var tracer = CreateNewEntry(role, aditionalData, stackTrace: true);
+            var tracer = CreateNewEntry(role, additionalData, stackTrace: true);
 
             return tracer;
         }
@@ -159,12 +159,12 @@ namespace Signum.Utilities
             return tracer;
         }
 
-        public static Tracer LogNoStackTrace(string role, Func<string> aditionalData)
+        public static Tracer LogNoStackTrace(string role, Func<string> additionalData)
         {
             if (!enabled)
                 return null;
 
-            var tracer = CreateNewEntry(role, aditionalData, stackTrace: false);
+            var tracer = CreateNewEntry(role, additionalData, stackTrace: false);
 
             return tracer;
         }
@@ -180,7 +180,7 @@ namespace Signum.Utilities
             }
         }
 
-        private static Tracer CreateNewEntry(string role, Func<string> aditionalData, bool stackTrace)
+        private static Tracer CreateNewEntry(string role, Func<string> additionalData, bool stackTrace)
         {
             long beforeStart = PerfCounter.Ticks;
 
@@ -197,7 +197,7 @@ namespace Signum.Utilities
             {
                 BeforeStart = beforeStart,
                 Role = role,
-                AditionalData = aditionalData == null ? null: aditionalData(),
+                AdditionalData = additionalData == null ? null: additionalData(),
                 StackTrace = stackTrace ? new StackTrace(2, true) : null,
             };
 
@@ -238,7 +238,7 @@ namespace Signum.Utilities
             }
         }
 
-        public static void Switch(this Tracer tracer, string role, Func<string> aditionalData = null)
+        public static void Switch(this Tracer tracer, string role, Func<string> additionalData = null)
         {
             if (tracer == null)
                 return;
@@ -247,7 +247,7 @@ namespace Signum.Utilities
 
             tracer.Dispose();
 
-            var newTracer = CreateNewEntry(role, aditionalData, hasStackTrace);
+            var newTracer = CreateNewEntry(role, additionalData, hasStackTrace);
 
             if (newTracer != null)
             {
@@ -322,7 +322,7 @@ namespace Signum.Utilities
 
         public static IOrderedEnumerable<SqlProfileResume> SqlStatistics()
         {
-            var statistics = AllEntries().Where(a => a.Role == "SQL").GroupBy(a => (string)a.AditionalData).Select(gr =>
+            var statistics = AllEntries().Where(a => a.Role == "SQL").GroupBy(a => (string)a.AdditionalData).Select(gr =>
                         new SqlProfileResume
                         {
                             Query = gr.Key,
@@ -394,13 +394,13 @@ namespace Signum.Utilities
             return this.FollowC(a => a.Parent).Reverse().ToString(a => a.Index.ToString(), ".");
         }
 
-        public string AditionalData;
-        public string AditionalDataPreview()
+        public string AdditionalData;
+        public string AdditionalDataPreview()
         {
-            if (string.IsNullOrEmpty(AditionalData))
+            if (string.IsNullOrEmpty(AdditionalData))
                 return "";
 
-            return Regex.Match(AditionalData, @"^[^\r\n]{0,100}").Value;
+            return Regex.Match(AdditionalData, @"^[^\r\n]{0,100}").Value;
         }
 
         public long BeforeStart;
@@ -465,8 +465,8 @@ namespace Signum.Utilities
                 new XAttribute("BeforeStart", this.BeforeStart),
                 new XAttribute("Start", this.Start),
                 new XAttribute("End", this.End),
-                this.AditionalData == null ? null :
-                new XAttribute("AditionalData", this.AditionalData),
+                this.AdditionalData == null ? null :
+                new XAttribute("AditionalData", this.AdditionalData),
                 Entries == null ? null :
                 Entries.Select(e => e.ExportXml()).ToList());
         }
@@ -489,7 +489,7 @@ namespace Signum.Utilities
                 BeforeStart = long.Parse(xLog.Attribute("BeforeStart").Value),
                 Start = long.Parse(xLog.Attribute("Start").Value),
                 End = long.Parse(xLog.Attribute("End").Value),
-                AditionalData = xLog.Attribute("AditionalData").TryCC(ad => ad.Value),
+                AdditionalData = xLog.Attribute("AditionalData").TryCC(ad => ad.Value),
             };
 
             if (xLog.Element("Log") != null)
