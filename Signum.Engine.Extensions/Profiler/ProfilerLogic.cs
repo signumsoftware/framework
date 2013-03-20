@@ -28,10 +28,10 @@ namespace Signum.Engine.Profiler
                     PermissionAuthLogic.RegisterPermissions(ProfilerPermission.ViewTimeTracker);
 
                 if (heavyProfiler)
-                    PermissionAuthLogic.RegisterPermissions(ProfilerPermission.ViewHeavyProfiler); 
+                    PermissionAuthLogic.RegisterPermissions(ProfilerPermission.ViewHeavyProfiler);
 
-                if(overrideSessionTimeout)
-                    PermissionAuthLogic.RegisterPermissions(ProfilerPermission.OverrideSessionTimeout); 
+                if (overrideSessionTimeout)
+                    PermissionAuthLogic.RegisterPermissions(ProfilerPermission.OverrideSessionTimeout);
             }
         }
 
