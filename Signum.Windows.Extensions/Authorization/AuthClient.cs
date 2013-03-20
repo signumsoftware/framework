@@ -53,14 +53,11 @@ namespace Signum.Windows.Authorization
                 if (defaultPasswordExpiresLogic)
                     Navigator.AddSetting(new EntitySettings<PasswordExpiresIntervalDN> { View = e => new PasswordExpiresInterval() });
 
-                OperationClient.AddSetting(new EntityOperationSettings(UserOperation.SaveNew)
+                OperationClient.AddSettings(new List<OperationSettings>()
                 {
-                    IsVisible = e => e.Entity.IsNew,
-                });
-
-                OperationClient.AddSetting(new EntityOperationSettings(UserOperation.Save)
-                {
-                    IsVisible = e => !e.Entity.IsNew,
+                    new EntityOperationSettings(UserOperation.SetPassword){ IsVisible = e => false },
+                    new EntityOperationSettings(UserOperation.SaveNew){ IsVisible = e => e.Entity.IsNew },
+                    new EntityOperationSettings(UserOperation.Save) { IsVisible = e => !e.Entity.IsNew }
                 });
 
                 SpecialOmniboxProvider.Register(new SpecialOmniboxAction("UpdateAuthCache",
