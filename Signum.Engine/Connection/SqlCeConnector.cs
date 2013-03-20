@@ -92,7 +92,7 @@ namespace Signum.Engine
         {
             using (SqlCeConnection con = EnsureConnection())
             using (SqlCeCommand cmd = NewCommand(preCommand, con))
-            using (HeavyProfiler.Log("SQL", cmd.CommandText))
+            using (HeavyProfiler.Log("SQL", () => cmd.CommandText))
             {
                 try
                 {
@@ -149,7 +149,7 @@ namespace Signum.Engine
         {
             using (SqlCeConnection con = EnsureConnection())
             using (SqlCeCommand cmd = NewCommand(preCommand, con))
-            using (HeavyProfiler.Log("SQL", cmd.CommandText))
+            using (HeavyProfiler.Log("SQL", () => cmd.CommandText))
             {
                 try
                 {
@@ -186,7 +186,7 @@ namespace Signum.Engine
         {
             using (SqlCeConnection con = EnsureConnection())
             using (SqlCeCommand cmd = NewCommand(preCommand, con))
-            using (HeavyProfiler.Log("SQL", cmd.CommandText))
+            using (HeavyProfiler.Log("SQL", () => cmd.CommandText))
             {
                 try
                 {
@@ -210,7 +210,7 @@ namespace Signum.Engine
         {
             using (SqlCeConnection con = EnsureConnection())
             using (SqlCeCommand cmd = NewCommand(preCommand, con))
-            using (HeavyProfiler.Log("SQL", cmd.CommandText))
+            using (HeavyProfiler.Log("SQL", () => cmd.CommandText))
             {
                 try
                 {

@@ -139,22 +139,12 @@ namespace Signum.Utilities
             return tracer;
         }
 
-        public static Tracer Log(string role, string aditionalData)
-        {
-            if (!enabled)
-                return null;
-
-            var tracer = CreateNewEntry(role, aditionalData, stackTrace: true);
-
-            return tracer;
-        }
-
         public static Tracer Log(string role, Func<string> aditionalData)
         {
             if (!enabled)
                 return null;
 
-            var tracer = CreateNewEntry(role, aditionalData(), stackTrace: true);
+            var tracer = CreateNewEntry(role, aditionalData, stackTrace: true);
 
             return tracer;
         }
@@ -169,22 +159,12 @@ namespace Signum.Utilities
             return tracer;
         }
 
-        public static Tracer LogNoStackTrace(string role, string aditionalData)
-        {
-            if (!enabled)
-                return null;
-
-            var tracer = CreateNewEntry(role, aditionalData, stackTrace: false);
-
-            return tracer;
-        }
-
         public static Tracer LogNoStackTrace(string role, Func<string> aditionalData)
         {
             if (!enabled)
                 return null;
 
-            var tracer = CreateNewEntry(role, aditionalData(), stackTrace: false);
+            var tracer = CreateNewEntry(role, aditionalData, stackTrace: false);
 
             return tracer;
         }
@@ -200,7 +180,7 @@ namespace Signum.Utilities
             }
         }
 
-        private static Tracer CreateNewEntry(string role, string aditionalData, bool stackTrace)
+        private static Tracer CreateNewEntry(string role, Func<string> aditionalData, bool stackTrace)
         {
             long beforeStart = PerfCounter.Ticks;
 
@@ -213,14 +193,11 @@ namespace Signum.Utilities
 
             var saveCurrent = current.Value;
 
-            if (aditionalData != null)
-                aditionalData = string.Intern((string)aditionalData);
-
             var newCurrent = current.Value = new HeavyProfilerEntry()
             {
                 BeforeStart = beforeStart,
                 Role = role,
-                AditionalData = aditionalData,
+                AditionalData = aditionalData == null ? null: aditionalData(),
                 StackTrace = stackTrace ? new StackTrace(2, true) : null,
             };
 
@@ -261,15 +238,7 @@ namespace Signum.Utilities
             }
         }
 
-        public static void Switch(this Tracer tracer, string role, Func<string> aditionalData)
-        {
-            if (tracer == null)
-                return;
-
-            tracer.Switch(role, aditionalData()); 
-        }
-
-        public static void Switch(this Tracer tracer, string role, string aditionalData = null)
+        public static void Switch(this Tracer tracer, string role, Func<string> aditionalData = null)
         {
             if (tracer == null)
                 return;
