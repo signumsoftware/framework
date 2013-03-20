@@ -1437,7 +1437,7 @@ namespace Signum.Engine.Linq
                 if (uType.IsAssignableFrom(iba.Type))
                     return new ImplementedByAllExpression(uType, iba.Id, iba.TypeId);
 
-                var conditionalId = Expression.Condition(SmartEqualizer.EqualNullable(iba.TypeId.TypeColumn, TypeConstant(uType)), iba.Id, NullId);
+                var conditionalId = Expression.Condition(SmartEqualizer.EqualNullable(iba.TypeId.TypeColumn, TypeConstant(uType)), iba.Id.Nullify(), NullId);
                 return new EntityExpression(uType, conditionalId, null, null);
             }
 
