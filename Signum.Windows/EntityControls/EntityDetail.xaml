@@ -5,32 +5,34 @@
     x:Class="Signum.Windows.EntityDetail"
     x:Name="me" 
     Style="{DynamicResource toolTip}">
-	<m:EntityBase.Resources>
-		<ResourceDictionary>
-			<ResourceDictionary.MergedDictionaries>
-				<ResourceDictionary Source="../Resources.xaml"/>
-			</ResourceDictionary.MergedDictionaries>
-		</ResourceDictionary>
-	</m:EntityBase.Resources>
-
-	<Grid>
-		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="Auto"/>
-			<ColumnDefinition Width="*"/>
-			<ColumnDefinition Width="Auto"/>
-		</Grid.ColumnDefinitions>
-		<Label Content="{Binding Path=LabelText, ElementName=me, Mode=Default}" VerticalContentAlignment="Center" HorizontalAlignment="Left" 
-		Target="{Binding ElementName=contentPresenter, Mode=OneWay}" MinWidth="{Binding Path=(m:Common.MinLabelWidth), ElementName=me, Mode=OneWay}"
-		 Visibility="{Binding ElementName=me, Path=(m:Common.LabelVisible), Converter={x:Static m:Converters.BoolToVisibility}}"/>
-        <ContentControl Grid.ColumnSpan="1" Grid.Column="1" Margin="1,1,1,1" x:Name="contentPresenter"
-                        Content="{Binding EntityControl, ElementName=me, Mode=Default}"/>
-		<StackPanel Orientation="{Binding Orientation, ElementName=me, Mode=Default}" Grid.Column="2" x:Name="buttons">
-			<Button Focusable="False" x:Name="btCreate" Click="btCreate_Click" Style="{StaticResource RoundButton}" Content="{StaticResource Create}" ToolTip="{m:Loc Create}"/>
-			<Button Focusable="False" x:Name="btFind" Click="btFind_Click" Style="{StaticResource RoundButton}" Content="{StaticResource Find}" ToolTip="{m:Loc Find}"/>
-            <Button Focusable="False" x:Name="btView" Click="btView_Click"  Style="{StaticResource RoundButton}" Content="{StaticResource View}" ToolTip="{m:Loc View}"/>
-            <Button Focusable="False" x:Name="btNavigate" Click="btNavigate_Click" Style="{StaticResource RoundButton}" Content="{StaticResource Navigate}" ToolTip="{m:Loc Navigate}"/>
-            <Button Focusable="False" x:Name="btRemove" Click="btRemove_Click" Style="{StaticResource RoundButton}" Content="{StaticResource Remove}" ToolTip="{m:Loc Remove}"/>
-		</StackPanel>
-	</Grid>
-
+    <m:EntityBase.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Resources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </m:EntityBase.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid Background="{DynamicResource LightBlueBackground}">
+            <StackPanel>
+                <Image Stretch="None" Source="{Binding Icon, ElementName=me, Mode=Default}" SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                <Label Content="{Binding LabelText, ElementName=me, Mode=Default}" VerticalAlignment="Center" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,1.5">
+                <Button Focusable="False" x:Name="btCreate" Click="btCreate_Click" Style="{StaticResource RoundButton}" Content="{StaticResource Create}" ToolTip="{m:Loc Create}"/>
+                <Button Focusable="False" x:Name="btFind" Click="btFind_Click" Style="{StaticResource RoundButton}" Content="{StaticResource Find}" ToolTip="{m:Loc Find}"/>
+                <Button Focusable="False" x:Name="btView" Click="btView_Click"  Style="{StaticResource RoundButton}" Content="{StaticResource View}" ToolTip="{m:Loc View}"/>
+                <Button Focusable="False" x:Name="btNavigate" Click="btNavigate_Click" Style="{StaticResource RoundButton}" Content="{StaticResource Navigate}" ToolTip="{m:Loc Navigate}"/>
+                <Button Focusable="False" x:Name="btRemove" Click="btRemove_Click" Style="{StaticResource RoundButton}" Content="{StaticResource Remove}" ToolTip="{m:Loc Remove}"/>
+            </StackPanel>
+        </Grid>
+        <m:AutomationBorder BorderBrush="{DynamicResource LightBlue}" BorderThickness="1" Grid.Row="1">
+            <ContentControl  Margin="1,1,1,1" x:Name="contentPresenter"
+                            Content="{Binding EntityControl, ElementName=me, Mode=Default}"/>
+        </m:AutomationBorder>
+    </Grid>
 </m:EntityBase>

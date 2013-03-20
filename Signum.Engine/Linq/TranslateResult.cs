@@ -49,7 +49,7 @@ namespace Signum.Engine.Linq
         public void Fill(Dictionary<LookupToken, IEnumerable> lookups, IRetriever retriever)
         {
             SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, GetParameters().ToList());
-            using (HeavyProfiler.Log("SQL", command.Sql))
+            using (HeavyProfiler.Log("SQL", () => command.Sql))
             using (DbDataReader reader = Executor.UnsafeExecuteDataReader(command))
             {
                 ProjectionRowEnumerator<KeyValuePair<K, V>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, V>>(reader, ProjectorExpression, lookups, retriever);
@@ -102,7 +102,7 @@ namespace Signum.Engine.Linq
                 return;
 
             SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, GetParameters().ToList());
-            using (HeavyProfiler.Log("SQL", command.Sql))
+            using (HeavyProfiler.Log("SQL", () => command.Sql))
             using (DbDataReader reader = Executor.UnsafeExecuteDataReader(command))
             {
                 ProjectionRowEnumerator<KeyValuePair<K, V>> enumerator = new ProjectionRowEnumerator<KeyValuePair<K, V>>(reader, ProjectorExpression, lookups, retriever);
@@ -172,7 +172,7 @@ namespace Signum.Engine.Linq
 
                     SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, GetParameters().ToList());
 
-                    using (HeavyProfiler.Log("SQL", command.Sql))
+                    using (HeavyProfiler.Log("SQL", () => command.Sql))
                     using (DbDataReader reader = Executor.UnsafeExecuteDataReader(command))
                     {
                         ProjectionRowEnumerator<T> enumerator = new ProjectionRowEnumerator<T>(reader, ProjectorExpression, lookups, retriever);

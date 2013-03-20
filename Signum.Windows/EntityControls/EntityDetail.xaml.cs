@@ -35,12 +35,21 @@ namespace Signum.Windows
 
         public static readonly DependencyProperty EntityControlProperty =
             DependencyProperty.Register("EntityControl", typeof(object), typeof(EntityDetail));
-
         public object EntityControl
         {
             get { return (object)GetValue(EntityControlProperty); }
             set { SetValue(EntityControlProperty, value); }
         }
+
+
+        public static readonly DependencyProperty IconProperty =
+            DependencyProperty.Register("Icon", typeof(ImageSource), typeof(EntityDetail), new UIPropertyMetadata(null));
+        public ImageSource Icon
+        {
+            get { return (ImageSource)GetValue(IconProperty); }
+            set { SetValue(IconProperty, value); }
+        }
+
 
         static EntityDetail()
         {

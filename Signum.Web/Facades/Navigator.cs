@@ -894,9 +894,12 @@ namespace Signum.Web
 
         protected internal virtual MappingContext<T> ApplyChanges<T>(ControllerContext controllerContext, T entity, string prefix, Mapping<T> mapping, SortedList<string, string> inputs) where T : IRootEntity
         {
-            RootContext<T> ctx = new RootContext<T>(prefix, inputs, controllerContext) { Value = entity };
-            mapping(ctx);
-            return ctx;
+            using (HeavyProfiler.Log("ApplyChanges", () => typeof(T).TypeName()))
+            {
+                RootContext<T> ctx = new RootContext<T>(prefix, inputs, controllerContext) { Value = entity };
+                mapping(ctx);
+                return ctx;
+            }
         }
 
         protected internal virtual ModifiableEntity ExtractEntity(ControllerBase controller, string prefix)
