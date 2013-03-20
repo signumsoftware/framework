@@ -39,7 +39,7 @@ namespace Signum.Engine
         public static void SaveParams(params IIdentifiable[] entities)
         {
             using (new EntityCache())
-            using (HeavyProfiler.Log("DBSave", "SaveParams"))
+            using (HeavyProfiler.Log("DBSave", () => "SaveParams"))
             using (Transaction tr = new Transaction())
             {
 

@@ -538,27 +538,52 @@ namespace Signum.Web
             this.ControlID = controlID + TypeContext.Separator;
 
             Debug.Assert(csl == null || ControlID.StartsWith(csl.ControlID));
-            int startParent = csl == null ? 0 : csl.startIndex;
-            int endParent = csl == null ? sortedList.Count : csl.endIndex;
+
             this.global = csl == null ? (SortedList<string, V>)sortedList : csl.global;
 
-            for (int i = startParent; i < endParent; i++)
+            var parentStart = csl == null ? 0 : csl.startIndex;
+            var parentEnd = csl == null ? sortedList.Count : csl.endIndex;
+
+            startIndex = this.BinarySearch(parentStart, parentEnd);
+
+            endIndex = BinarySearchStartsWith(startIndex, parentEnd);
+        }
+
+        int BinarySearch(int start, int end)
+        {
+            while (start <= end)
             {
-                if (global.Keys[i].StartsWith(ControlID))
-                {
-                    this.startIndex = i;
-                    break;
-                }
+                int mid = (start + end) / 2;
+
+                var num = global.Keys[mid].CompareTo(ControlID);
+
+                if (num > 0)
+                    end = mid - 1;
+                else if (num < 0)
+                    start = mid + 1;
+                else
+                    return mid;
             }
 
-            for (int i = endParent - 1; i >= startParent; i--)
+            return start;
+        }
+
+        int BinarySearchStartsWith(int start, int end)
+        {
+            if (!global.Keys[start].StartsWith(ControlID))
+                return start;
+
+            while (start < end)
             {
-                if (global.Keys[i].StartsWith(ControlID))
-                {
-                    this.endIndex = i + 1;
-                    break;
-                }
+                int mid = (start + end) / 2;
+
+                if (global.Keys[mid].StartsWith(ControlID))
+                    start = mid + 1;
+                else
+                    end = mid;
             }
+
+            return start;
         }
 
         public void Add(string key, V value)
