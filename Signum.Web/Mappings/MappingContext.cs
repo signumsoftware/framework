@@ -551,7 +551,7 @@ namespace Signum.Web
 
         int BinarySearch(int start, int end)
         {
-            while (start <= end)
+            while (start <= end && start < global.Keys.Count)
             {
                 int mid = (start + end) / 2;
 
@@ -570,10 +570,10 @@ namespace Signum.Web
 
         int BinarySearchStartsWith(int start, int end)
         {
-            if (!global.Keys[start].StartsWith(ControlID))
+            if (!(start < global.Keys.Count && global.Keys[start].StartsWith(ControlID)))
                 return start;
 
-            while (start < end)
+            while (start < end && start < global.Keys.Count)
             {
                 int mid = (start + end) / 2;
 
