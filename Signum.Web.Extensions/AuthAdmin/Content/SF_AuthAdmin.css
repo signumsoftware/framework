@@ -53,13 +53,17 @@
 {
     font-style: italic;
 }
-.sf-auth-rules .sf-line-button
+.sf-auth-rules .sf-auth-condition-button 
 {
     margin: 5px 0 5px 3px;    
+    width: 1.2em;
+    background: none repeat scroll 0px 0px transparent !important;
+    border: 0px none !important;
 }
 .sf-auth-rules .sf-auth-label
 {
     margin-left: 3px;    
+    vertical-align: top;
 }
 
 .sf-auth-chooser

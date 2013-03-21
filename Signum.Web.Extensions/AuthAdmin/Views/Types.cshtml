@@ -78,8 +78,10 @@
                     </div>
                     @if (!item.Value.AvailableConditions.IsNullOrEmpty())
                     {
-                        <a title="@Resources.AuthAdmin_AddCondition" class="sf-line-button sf-create" data-icon="ui-icon-circle-plus" data-text="false" style="@(item.Value.Allowed.Conditions.Count == item.Value.AvailableConditions.Count ? "display:none" : "")">
+                        <a title="@Resources.AuthAdmin_AddCondition" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only sf-create sf-auth-condition-button" style="@(item.Value.Allowed.Conditions.Count == item.Value.AvailableConditions.Count ? "display:none" : "")">
+                            <span class="ui-button-icon-primary ui-icon ui-icon-circle-plus"></span>
                         </a>
+                        
                         <input type="hidden" disabled="disabled" class="sf-auth-available-conditions" value="@item.Value.AvailableConditions.ToString(ac => "{0}|{1}".Formato(TypeConditionNameDN.UniqueKey(ac), ac.NiceToString()), ",")" />
                     }
                     <span class="sf-auth-label">@item.Value.Resource.ToType().NiceName()</span>
@@ -167,8 +169,12 @@
                     </div>
                     <div class="sf-auth-tree @(conditionIter.IsLast ? "sf-auth-leaf-last" : "sf-auth-leaf")">
                     </div>
-                    <a title="@Resources.AuthAdmin_RemoveCondition" class="sf-line-button sf-remove" data-icon="ui-icon-circle-close" data-text="false">
-                    </a><span class="sf-auth-label">@condition.ConditionName.NiceToString()</span>
+                    
+                    <a class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only sf-remove sf-auth-condition-button" title="@Resources.AuthAdmin_RemoveCondition">
+                        <span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span>
+                    </a>
+                    
+                    <span class="sf-auth-label">@condition.ConditionName.NiceToString()</span>
                     @Html.Hidden(TypeContextUtilities.Compose(controlId, "ConditionName"), TypeConditionNameDN.UniqueKey(condition.ConditionName))
                 </td>
                 
