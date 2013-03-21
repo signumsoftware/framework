@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using Signum.Utilities;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities.DataStructures;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Linq
 {
@@ -233,11 +234,19 @@ namespace Signum.Engine.Linq
                 this.gatheredOrderings = this.gatheredKeys.Select(a => new OrderExpression(OrderType.Ascending, a)).ToReadOnly();
             else
             {
-                var hs = this.gatheredOrderings.Select(a=>a.Expression).OfType<ColumnExpression>().ToHashSet();
-                var postOrders = this.gatheredKeys.Where(e => !hs.Contains(e)).Select(a => new OrderExpression(OrderType.Ascending, a));
+                var hs = this.gatheredOrderings.Select(a => CleanCast(a.Expression)).OfType<ColumnExpression>().ToHashSet();
+                var postOrders = this.gatheredKeys.Where(e => !hs.Contains(CleanCast(e))).Select(a => new OrderExpression(OrderType.Ascending, a));
 
                 this.gatheredOrderings = this.gatheredOrderings.Concat(postOrders).ToReadOnly();
             }
+        }
+
+        static Expression CleanCast(Expression exp)
+        {
+            while (exp.NodeType == ExpressionType.Convert)
+                exp = ((UnaryExpression)exp).Operand;
+
+            return exp;
         }
 
         protected void PrependOrderings(ReadOnlyCollection<OrderExpression> newOrderings)
