@@ -317,7 +317,7 @@ SF.registerModule("Globals", function () {
 
     SF.Dropdowns =
     {
-        toggle: function (event, elem) {
+        toggle: function (event, elem, topFix) {
             var $elem = $(elem),
                 clss = "sf-open";
 
@@ -330,15 +330,21 @@ SF.registerModule("Globals", function () {
                 $elem.removeClass(clss);
             }
             else {
+                //topFix is used to correct top when the toggler element is inside another panel with borders or anything
+                if (typeof topFix == "undefined") {
+                    topFix = 0;
+                }
+
                 $(".sf-dropdown").removeClass(clss);
                 var $content = $elem.find(".sf-menu-button");
                 var left = $elem.width() - $content.width(); 
                 $content.css({
-                    top: $elem.outerHeight(),
+                    top: $elem.outerHeight() + topFix,
                     left: ($elem.position().left - $elem.parents("div").first().position().left) < Math.abs(left) ? 0 : left
                 });
                 $elem.addClass(clss);
             }
+
             SF.stopPropagation(event);
         }
     };
@@ -377,7 +383,7 @@ SF.registerModule("Globals", function () {
 
 
     $(function () {
-        $(document).on("click touchstart", function (e) {
+        $(document).on("click", function (e) {
             $(".sf-dropdown").removeClass("sf-open");
         });
     });
