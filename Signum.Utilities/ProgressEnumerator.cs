@@ -148,10 +148,12 @@ namespace Signum.Utilities
             IProgressInfo me = (IProgressInfo)this;
             TimeSpan rem = me.Remaining;
             TimeSpan ela = me.Elapsed;
-            return "{0:0.00}% | {1}/{2} | Elap: {3}  + Rem: {4}  = Total: {5} -> Finish: {6}  {7}".Formato(
+            return "{0:0.00}% | {1}/{2} | Elap: {3} + Rem: {4} = Total: {5} -> Finish: {6:u}".Formato(
                 me.Percentage, current, count,  
-                ela, rem, ela + rem,
-                (DateTime.UtcNow + rem).ToLocalTime(), current - lastLastCurrent);
+                ela.NiceToString(DateTimePrecision.Seconds),
+                rem.NiceToString(DateTimePrecision.Seconds),
+                (ela + rem).NiceToString(DateTimePrecision.Seconds),
+                (DateTime.UtcNow + rem).ToLocalTime());
         }
     }
 

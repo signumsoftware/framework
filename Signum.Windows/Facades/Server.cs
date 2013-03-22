@@ -79,7 +79,7 @@ namespace Signum.Windows
             
             try
             {
-                using (HeavyProfiler.Log("WCFClient", "{0}".Formato(typeof(S).TypeName())))
+                using (HeavyProfiler.Log("WCFClient", () => "{0}".Formato(typeof(S).TypeName())))
                 {
                     action(server);
                 }

@@ -80,6 +80,24 @@ namespace Signum.Windows
             }
         }
 
+        public static void RefreshAutoHide(FrameworkElement content)
+        {
+            var list = content.Children<FrameworkElement>(fe => GetAutoHide(fe) != AutoHide.Undefined, WhereFlags.StartOnParent).ToList();
+
+            foreach (var item in list)
+            {
+                var ah = Common.GetAutoHide(item);
+
+                if (item.Parent is FrameworkElement)
+                {
+                    if (ah == AutoHide.Visible)
+                        Common.VoteVisible((FrameworkElement)item.Parent);
+                    else if (ah == AutoHide.Collapsed)
+                        Common.VoteCollapsed((FrameworkElement)item.Parent);
+                }
+            }
+        }
+
         public static readonly DependencyProperty MinLabelWidthProperty =
            DependencyProperty.RegisterAttached("MinLabelWidth", typeof(double), typeof(Common), new FrameworkPropertyMetadata(120.0, FrameworkPropertyMetadataOptions.Inherits));
         public static double GetMinLabelWidth(DependencyObject obj)
@@ -644,23 +662,6 @@ namespace Signum.Windows
             return new Disposable(() => Mouse.OverrideCursor = null);
         }
 
-        internal static void RefreshAutoHide(FrameworkElement content)
-        {
-            var list = content.Children<FrameworkElement>(fe => GetAutoHide(fe) != AutoHide.Undefined, WhereFlags.StartOnParent).ToList();
-
-            foreach (var item in list)
-            {
-                var ah = Common.GetAutoHide(item);
-
-                if (item.Parent is FrameworkElement)
-                {
-                    if (ah == AutoHide.Visible)
-                        Common.VoteVisible((FrameworkElement)item.Parent);
-                    else if (ah == AutoHide.Collapsed)
-                        Common.VoteCollapsed((FrameworkElement)item.Parent);
-                }
-            }
-        }
     }
 
     public delegate void ChangeDataContextHandler(object sender, ChangeDataContextEventArgs e);

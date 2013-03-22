@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -35,7 +35,7 @@ namespace Signum.Engine
                         }
                         catch (Exception e)
                         {
-                            writer(ConsoleColor.Red, "Error in {0}: {1}", elementID(item), e.Message);
+                            writer(ConsoleColor.Red, "{0:u} Error in {1}: {2}", DateTime.Now, elementID(item), e.Message);
                             writer(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
                         }
 
@@ -60,19 +60,20 @@ namespace Signum.Engine
                     {
                         foreach (var item in col)
                         {
-                            try
-                            {
-                                using (Transaction tr = new Transaction())
+                            using (HeavyProfiler.Log("ProgressForeach", () => elementID(item)))
+                                try
                                 {
-                                    action(item, writer);
-                                    tr.Commit();
+                                    using (Transaction tr = new Transaction())
+                                    {
+                                        action(item, writer);
+                                        tr.Commit();
+                                    }
                                 }
-                            }
-                            catch (Exception e)
-                            {
-                                writer(ConsoleColor.Red, "Error in {0}: {1}", elementID(item), e.Message);
-                                writer(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
-                            }
+                                catch (Exception e)
+                                {
+                                    writer(ConsoleColor.Red, "{0:u} Error in {1}: {2}", DateTime.Now, elementID(item), e.Message);
+                                    writer(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
+                                }
                             lock (SafeConsole.SyncKey)
                                 SafeConsole.WriteSameLine(pi.ToString());
                         }
@@ -111,7 +112,7 @@ namespace Signum.Engine
             }
             finally
             {
-                table.Identity = false;
+                table.Identity = true;
                 SafeConsole.ClearSameLine();
             }
         }
@@ -132,7 +133,7 @@ namespace Signum.Engine
             }
             finally
             {
-                table.Identity = false;
+                table.Identity = true;
             }
         }
 
@@ -144,10 +145,20 @@ namespace Signum.Engine
                 collection.ProgressForeachDisableIdentity(tableType, elementID, fileName, action);
         }
 
+        public static string DefaultLogFolder = "Log";
+
         private static StreamWriter TryOpenAutoFlush(string fileName)
         {
             if (string.IsNullOrEmpty(fileName))
                 return null;
+
+            if (!Path.IsPathRooted(fileName))
+            {
+                if (!Directory.Exists(DefaultLogFolder))
+                    Directory.CreateDirectory(DefaultLogFolder);
+
+                fileName = Path.Combine(DefaultLogFolder, fileName);
+            }
 
             var result = new StreamWriter(fileName, append: true);
             result.AutoFlush = true;

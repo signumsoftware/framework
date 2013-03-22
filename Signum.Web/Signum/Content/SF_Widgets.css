@@ -7,7 +7,6 @@
     display: inline-block;
     position: relative; 
     border-left: solid 1px #AAA;
-    padding: 1px 2px; /*Change SF.Widgets .sf-item onmouseover accordingly*/     
 }
 .sf-widget-content
 {
@@ -17,8 +16,12 @@
 .sf-widget-toggler
 {
     vertical-align: top;    
-    line-height: 18px;
+    line-height: 20px;
+    height: 20px;
     text-align: left !important;
+    display: block;
+    padding: 0 2px;
+    cursor: pointer;
 }
 .sf-widget-toggler:hover,.sf-widget-toggler:hover
 {
@@ -29,7 +32,14 @@
     display: inline-block;
     vertical-align: top;
 }
-
+.sf-widget-toggler .ui-icon 
+{
+    margin-top: 2px;
+}
+.sf-widget-toggler .sf-widget-count 
+{
+    margin-top: 1px \0/;
+}
 a.sf-widget-toggler-active
 {
     color:#000;
