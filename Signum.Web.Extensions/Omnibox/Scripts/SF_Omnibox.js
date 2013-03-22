@@ -28,7 +28,6 @@ SF.Omnibox = (function () {
         select: function (event, ui) {
             if (event.keyCode == 9) {
                 $omnibox.val(ui.item.cleanText);
-                event.preventDefault();
             }
             else {
                 var url = $(ui.item.label).attr("href");
@@ -39,6 +38,7 @@ SF.Omnibox = (function () {
                     window.location = url;
                 }
             }
+            event.preventDefault();
             return false;
         },
         focus: function (event, ui) {

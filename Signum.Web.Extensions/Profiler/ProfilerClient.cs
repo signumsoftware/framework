@@ -75,7 +75,7 @@ namespace Signum.Web.Profiler
                 e.Role,
                 Color = GetColor(e.Role),
                 e.Depth,
-                AditionalData = e.AditionalDataPreview(),
+                AditionalData = e.AdditionalDataPreview(),
                 FullIndex = e.FullIndex()
             }));
         }
