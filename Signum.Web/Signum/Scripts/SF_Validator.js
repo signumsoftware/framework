@@ -234,7 +234,10 @@ SF.registerModule("Validator", function () {
         this.constructRequestDataForSaving = function () {
             SF.log("PartialValidator constructRequestDataForSaving");
             var prefix = this.valOptions.prefix;
-            var formChildren = $("#" + this.valOptions.parentDiv + " :input, #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]").add(SF.getInfoParams(prefix));
+            var formChildren = $("#" + this.valOptions.parentDiv + " :input")
+                .add("#" + SF.Keys.tabId)
+                .add("input:hidden[name=" + SF.Keys.antiForgeryToken + "]")
+                .add(SF.getInfoParams(prefix));
             formChildren = formChildren.not(".sf-search-control *");
 
             var serializer = new SF.Serializer();
@@ -309,7 +312,9 @@ SF.registerModule("Validator", function () {
                     }
                 }
                 if (typeof (parentPrefix) == "undefined") {
-                    formChildren = $("form :input:not('#" + myRuntimeInfoKey + "'), #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
+                    formChildren = $("form :input:not('#" + myRuntimeInfoKey + "')")
+                        .add("#" + SF.Keys.tabId)
+                        .add("input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
                 }
                 if (!SF.isEmpty(this.valOptions.parentDiv) && $("form").find("#" + this.valOptions.parentDiv).length == 0) {
                     formChildren = formChildren.add($("#" + this.valOptions.parentDiv + " :input:not('#" + myRuntimeInfoKey + "')"));
@@ -317,7 +322,9 @@ SF.registerModule("Validator", function () {
             }
             else if (!SF.isEmpty(this.valOptions.parentDiv)) {
                 if (formChildren == null) {
-                    formChildren = $("#" + this.valOptions.parentDiv + " :input, #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
+                    formChildren = $("#" + this.valOptions.parentDiv + " :input")
+                        .add("#" + SF.Keys.tabId)
+                        .add("input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
                 }
                 else {
                     formChildren = formChildren.add($("#" + this.valOptions.parentDiv + " :input"));
