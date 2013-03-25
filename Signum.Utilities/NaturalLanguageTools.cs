@@ -6,6 +6,7 @@ using Signum.Utilities;
 using System.Globalization;
 using System.Resources;
 using System.Text.RegularExpressions;
+using System.Collections.ObjectModel;
 
 namespace Signum.Utilities
 {
@@ -28,10 +29,39 @@ namespace Signum.Utilities
                 culture = CultureInfo.CurrentUICulture;
 
             IGenderDetector detector = GenderDetectors.TryGetC(culture.TwoLetterISOLanguageName);
-            if (detector != null)
-                return detector.GetGender(name);
 
-            return null;
+            if (detector == null)
+                return null;
+
+            return detector.GetGender(name);
+        }
+
+        
+        public static bool HasGenders(CultureInfo cultureInfo)
+        {
+            IGenderDetector detector = GenderDetectors.TryGetC(cultureInfo.TwoLetterISOLanguageName);
+
+            if (detector == null)
+                return false;
+
+            return !detector.Pronoms.IsNullOrEmpty();
+        }
+
+        public static string GetPronom(char gender, bool plural, CultureInfo culture = null)
+        {
+            if (culture == null)
+                culture = CultureInfo.CurrentUICulture;
+
+            IGenderDetector detector = GenderDetectors.TryGetC(culture.TwoLetterISOLanguageName);
+            if (detector == null)
+                return null;
+
+            var pro = detector.Pronoms.FirstOrDefault(a => a.Gender == gender);
+
+            if (pro == null)
+                return null;
+
+            return plural ? pro.Plural : pro.Singular;
         }
 
         public static string Pluralize(string singularName, CultureInfo culture = null)
@@ -40,10 +70,10 @@ namespace Signum.Utilities
                 culture = CultureInfo.CurrentUICulture;
 
             IPluralizer pluralizer = Pluralizers.TryGetC(culture.TwoLetterISOLanguageName);
-            if (pluralizer != null)
-                return pluralizer.MakePlural(singularName);
+            if (pluralizer == null)
+                return singularName;
 
-            return singularName;
+            return pluralizer.MakePlural(singularName);
         }
 
 
@@ -187,6 +217,7 @@ namespace Signum.Utilities
               });
         }
 
+
     }
 
     public interface IPluralizer
@@ -280,6 +311,22 @@ namespace Signum.Utilities
     public interface IGenderDetector
     {
         char? GetGender(string name);
+
+        ReadOnlyCollection<PronomInfo> Pronoms { get; }
+    }
+
+    public class PronomInfo
+    {
+        public char Gender { get; private set; }
+        public string Singular { get; private set; }
+        public string Plural { get; private set; }
+
+        public PronomInfo(char gender, string singular, string plural)
+        {
+            this.Gender = gender;
+            this.Singular = singular;
+            this.Plural = plural;
+        }
     }
 
     public class SpanishGenderDetector : IGenderDetector
@@ -329,6 +376,17 @@ namespace Signum.Utilities
             }
 
             return null;
+        }
+
+        ReadOnlyCollection<PronomInfo> pronoms = new ReadOnlyCollection<PronomInfo>(new []
+        {
+            new PronomInfo('m', "el", "los"),
+            new PronomInfo('f', "la", "las")
+        });
+
+        public ReadOnlyCollection<PronomInfo> Pronoms
+        {
+            get { return pronoms; }
         }
     }
 }

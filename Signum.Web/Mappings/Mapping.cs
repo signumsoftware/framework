@@ -581,7 +581,7 @@ namespace Signum.Web
             PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
 
             PropertyMapping<P> propertyMapping = (PropertyMapping<P>)properties.GetOrCreate(pi.Name,
-                () => new PropertyMapping<P>(Validator.TryGetPropertyValidator(typeof(T), pi.Name)));
+                () => new PropertyMapping<P>(Validator.TryGetPropertyValidator(typeof(T), pi.Name) ?? new PropertyValidator<T>(pi)));
 
             propertyMapping.Mapping = mapping;
             

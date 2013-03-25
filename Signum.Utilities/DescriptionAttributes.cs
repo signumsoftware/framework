@@ -18,7 +18,7 @@ using System.Xml.Linq;
 
 namespace Signum.Utilities
 {
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property |AttributeTargets.Field | AttributeTargets.Enum | AttributeTargets.Interface, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Interface, Inherited = true)]
     public class DescriptionOptionsAttribute : Attribute
     {
         public DescriptionOptions Options { get; set; }
@@ -41,7 +41,7 @@ namespace Signum.Utilities
         All = Members | Description | PluralDescription | Gender,
     }
 
-    static class DescriptionOptionsExtensions
+    public static class DescriptionOptionsExtensions
     {
         public static bool IsSetAssert(this DescriptionOptions opts, DescriptionOptions flag, MemberInfo member)
         {
@@ -106,7 +106,7 @@ namespace Signum.Utilities
         public static string TranslationDirectory = Path.Combine(Path.GetDirectoryName(new Uri(typeof(DescriptionManager).Assembly.CodeBase).LocalPath), "Translations");
 
         public static event Func<Type, DescriptionOptions?> DefaultDescriptionOptions = t => t.Name.EndsWith("Message") ? DescriptionOptions.Members : (DescriptionOptions?)null;
-
+        public static event Func<MemberInfo, bool> ShouldLocalizeMemeber = m => true;
 
         public static string NiceName(this Type type)
         {
@@ -217,7 +217,9 @@ namespace Signum.Utilities
 
         public static LocalizedType GetLocalizedType(Type type, CultureInfo cultureInfo)
         {
-            return GetLocalizedAssembly(type.Assembly, cultureInfo).Types.TryGetC(type); 
+            var la = GetLocalizedAssembly(type.Assembly, cultureInfo);
+
+            return la == null ? null : la.Types.TryGetC(type);
         }
 
         public static LocalizedAssembly GetLocalizedAssembly(Assembly assembly, CultureInfo cultureInfo)
@@ -241,6 +243,21 @@ namespace Signum.Utilities
 
             return null;
         }
+
+
+        internal static bool OnShouldLocalizeMember(MemberInfo m)
+        {
+            if (ShouldLocalizeMemeber == null)
+                return true;
+
+            foreach (Func<MemberInfo, bool> func in ShouldLocalizeMemeber.GetInvocationList())
+            {
+                if (!func(m))
+                    return false;
+            }
+
+            return true;
+        }
     }
 
 
@@ -254,7 +271,7 @@ namespace Signum.Utilities
 
         public Dictionary<Type, LocalizedType> Types = new Dictionary<Type, LocalizedType>();
 
-        static string TranslationFileName(Assembly assembly, CultureInfo cultureInfo)
+        public static string TranslationFileName(Assembly assembly, CultureInfo cultureInfo)
         {
             return Path.Combine(DescriptionManager.TranslationDirectory, "{0}.{1}.xml".Formato(assembly.GetName().Name, cultureInfo.Name));
         }
@@ -268,9 +285,6 @@ namespace Signum.Utilities
             DescriptionOptions? def = DescriptionManager.OnDefaultDescriptionOptions(type);
             if (def != null)
                 return def.Value;
-
-            if (type.IsEnum)
-                return DescriptionOptions.Members | DescriptionOptions.Description;
 
             return DescriptionOptions.None;
         }
@@ -420,8 +434,7 @@ namespace Signum.Utilities
 
                 Members = !opts.IsSetAssert(DescriptionOptions.Members, type) ? null :
                           (from m in GetMembers(type)
-                           let mta = m.SingleAttribute<DescriptionOptionsAttribute>()
-                           where mta == null || mta.Options.IsSetAssert(DescriptionOptions.Description, m)
+                           where DescriptionManager.OnShouldLocalizeMember(m)
                            let value = xMembers.TryGetC(m.Name) ?? (!assembly.IsDefault ? null : DefaultMemberDescription(m))
                            where value != null
                            select KVP.Create(m.Name, value))
