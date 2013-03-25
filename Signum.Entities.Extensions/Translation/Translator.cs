@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
@@ -30,6 +32,19 @@ namespace Signum.Entities.Translation
             set { Set(ref cultures, value, () => Cultures); }
         }
 
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Is(() => Cultures))
+            {
+                var error = Cultures.GroupBy(a => a.Culture).Where(a => a.Count() > 1).ToString(a => a.Key.ToString(), ", ");
+
+                if (error.HasText())
+                    return TranslationMessages.RepeatedCultures0.NiceToString().Formato(error); 
+            }
+
+            return base.PropertyValidation(pi);
+        }
+
         public override string ToString()
         {
             return user.TryToString();
@@ -39,34 +54,39 @@ namespace Signum.Entities.Translation
     [Serializable]
     public class TranslatedCultureDN : EmbeddedEntity
     {
+        [NotNullable]
         CultureInfoDN culture;
+        [NotNullValidator]
         public CultureInfoDN Culture
         {
             get { return culture; }
             set { Set(ref culture, value, () => Culture); }
         }
 
-        TranslatedCultureType type;
-        public TranslatedCultureType Type
+        TranslatedCultureAction action;
+        public TranslatedCultureAction Action
         {
-            get { return type; }
-            set { Set(ref type, value, () => Type); }
+            get { return action; }
+            set { Set(ref action, value, () => Action); }
         }
     }
 
-    public enum TranslatedCultureType
+    public enum TranslatedCultureAction
     {
-        Target,
-        Reference,
+        Translate,
+        Read,
     }
 
-    public enum FooOperation
-    {
-        Save
-    }
 
     public enum TranslatorOperation
     {
-        Save
+        Save,
+        Delete,
+    }
+
+    public enum TranslationMessages
+    {
+        [Description("Repeated cultures {0}")]
+        RepeatedCultures0
     }
 }

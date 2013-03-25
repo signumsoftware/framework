@@ -112,7 +112,7 @@ namespace Signum.Entities.Chart
 
         [NonSerialized]
         bool needNewQuery;
-        [DescriptionOptions(DescriptionOptions.None)]
+        [HiddenProperty]
         public bool NeedNewQuery
         {
             get { return needNewQuery; }

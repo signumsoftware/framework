@@ -14,10 +14,10 @@ using Signum.Utilities;
 
 namespace Signum.Engine.Translation
 {
-    public static class TranslatorLogic
+    public static class TranslationLogic
     {
         static Expression<Func<IUserDN, TranslatorDN>> TranslatorExpression =
-             user => Database.Query<TranslatorDN>().Single(a => a.User.RefersTo(user));
+             user => Database.Query<TranslatorDN>().SingleOrDefault(a => a.User.RefersTo(user));
         public static TranslatorDN Translator(this IUserDN entity)
         {
             return TranslatorExpression.Evaluate(entity);
@@ -46,6 +46,11 @@ namespace Signum.Engine.Translation
                     AllowsNew = true,
                     Lite = false,
                     Execute = (e, _) => { }
+                }.Register();
+
+                new BasicDelete<TranslatorDN>(TranslatorOperation.Delete)
+                {
+                    Delete = (e, _) => { e.Delete(); }
                 }.Register();
             }
         }

@@ -114,6 +114,7 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="Translation\Controllers\TranslationController.cs" />
     <Compile Include="Translation\TranslationClient.cs" />
     <Compile Include="Translation\TranslationService.cs" />
     <Compile Include="Translation\TranslationSyncronizer.cs" />
@@ -619,7 +620,6 @@
     <Compile Include="Help\HelpClient.cs" />
     <Compile Include="Help\Controllers\HelpController.cs" />
     <Compile Include="Help\HelpModels.cs" />
-    <Compile Include="HttpModules\WhitespaceModule.cs" />
     <Compile Include="Mailing\EmailClient.cs" />
     <Compile Include="Processes\ProcessesClient.cs" />
     <Compile Include="Processes\Controllers\ProcessController.cs" />
@@ -765,8 +765,38 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>SMSUpdatePackage.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Translation\Views\CultureInfoView.generated.cs">
+      <DependentUpon>CultureInfoView.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Translation\Views\Index.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Index.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Translation\Views\TranslatedCulture.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TranslatedCulture.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Translation\Views\Translator.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Translator.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Translation\Views\View.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>View.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Translation\Views\Web.generated.cs">
       <DependentUpon>Web.config</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Translation\Views\_ViewStart.generated.cs">
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
@@ -1179,6 +1209,7 @@
     </None>
     <Content Include="SMS\Content\SMS.css" />
     <Content Include="SMS\Scripts\SF_SMS.js" />
+    <Content Include="Translation\Content\Translation.css" />
     <Content Include="Web.config" />
     <Content Include="Basic\Views\Web.config" />
     <Content Include="Captcha\Views\Web.config" />
@@ -1368,12 +1399,34 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>MultipleSMS.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Translation\Views\Translator.cshtml" />
     <Content Include="Translation\Views\Web.config">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Web.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Translation\Views\TranslatedCulture.cshtml" />
+    <Content Include="Translation\Views\Index.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>Index.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Translation\Views\_ViewStart.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Translation\Views\CultureInfoView.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>CultureInfoView.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Translation\Views\TranslatedCulture.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>TranslatedCulture.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Translation\Views\Translator.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>Translator.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Translation\Views\View.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>View.generated.cs</LastGenOutput>
+    </Content>
     <None Include="UserQueries\Views\QueryColumn.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>QueryColumn.generated.cs</LastGenOutput>
@@ -1434,10 +1487,7 @@
       <Name>Signum.Entities.Extensions</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Translation\Content\" />
-    <Folder Include="Translation\Controllers\" />
-  </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

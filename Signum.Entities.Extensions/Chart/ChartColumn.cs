@@ -94,26 +94,26 @@ namespace Signum.Entities.Chart
         [Ignore]
         internal IChartBase parentChart;
 
-        [DescriptionOptions(DescriptionOptions.None)]
+        [HiddenProperty]
         public IChartBase ParentChart { get { return parentChart; } }
 
-        [DescriptionOptions(DescriptionOptions.None)]
+        [HiddenProperty]
         public bool? IsGroupKey { get { return (!parentChart.GroupResults) ? (bool?)null: ScriptColumn.IsGroupKey; } }
 
-        [DescriptionOptions(DescriptionOptions.None)]
+        [HiddenProperty]
         public bool GroupByVisible { get { return parentChart.ChartScript.GroupBy != GroupByChart.Never && ScriptColumn.IsGroupKey; } }
 
-        [DescriptionOptions(DescriptionOptions.None)]
+        [HiddenProperty]
         public bool GroupByEnabled { get { return parentChart.ChartScript.GroupBy != GroupByChart.Always; } }
 
-        [DescriptionOptions(DescriptionOptions.None)]
+        [HiddenProperty]
         public bool GroupByChecked
         {
             get { return parentChart.GroupResults; }
             set { parentChart.GroupResults = value; }
         }
 
-        [DescriptionOptions(DescriptionOptions.None)]
+        [HiddenProperty]
         public string PropertyLabel { get { return ScriptColumn.DisplayName; } }
 
         int index;

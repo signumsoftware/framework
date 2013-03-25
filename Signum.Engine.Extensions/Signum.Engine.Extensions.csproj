@@ -137,7 +137,6 @@
     <Compile Include="Help\NamespaceHelp.cs" />
     <Compile Include="Translation\CultureInfoLogic.cs" />
     <Compile Include="Translation\LocalizedInstanceLogic.cs" />
-    <Compile Include="Translation\Translator.cs" />
     <Compile Include="Mailing\EmailLogic.cs" />
     <Compile Include="Mailing\EmailPackageLogic.cs" />
     <Compile Include="Mailing\EmailRenderer.cs" />
@@ -158,6 +157,7 @@
     <Compile Include="Reports\ExcelExtensions.cs" />
     <Compile Include="Reports\PlainExcelGenerator.cs" />
     <Compile Include="Reports\ReportsLogic.cs" />
+    <Compile Include="Translation\TranslationLogic.cs" />
     <Compile Include="UserQueries\UserQueryLogic.cs" />
     <Compile Include="Scheduler\SchedulerLogic.cs" />
     <Compile Include="Scheduler\CustomTaskLogic.cs" />
