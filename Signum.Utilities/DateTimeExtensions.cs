@@ -373,7 +373,17 @@ namespace Signum.Utilities
                 throw new InvalidOperationException("dateTime should be UTC"); 
 
             return (long)new TimeSpan(dateTime.Ticks - new DateTime(1970, 1, 1).Ticks).TotalMilliseconds;
-        } 
+        }
+
+        public static string ToMonthName(this DateTime dateTime)
+        {
+            return CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(dateTime.Month);
+        }
+
+        public static string ToShortMonthName(this DateTime dateTime)
+        {
+            return CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(dateTime.Month);
+        }
     }
 
     public enum DateTimePrecision
