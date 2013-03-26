@@ -148,56 +148,73 @@ namespace Signum.Engine
             }
         }
 
-        public void ExecuteDataReaderDependency(SqlPreCommandSimple preCommand, OnChangeEventHandler change, Action<FieldReader> forEach)
+        public void ExecuteDataReaderDependency(SqlPreCommandSimple preCommand, OnChangeEventHandler change, Action reconect, Action<FieldReader> forEach)
         {
-            using (SqlConnection con = EnsureConnection())
-            using (SqlCommand cmd = NewCommand(preCommand, con))
-            using (HeavyProfiler.Log("SQL", cmd.CommandText))
+            bool reconected = false; 
+            retry:
+            try
             {
-                try
+                using (SqlConnection con = EnsureConnection())
+                using (SqlCommand cmd = NewCommand(preCommand, con))
+                using (HeavyProfiler.Log("SQL", cmd.CommandText))
                 {
-                    if (change != null)
+                    try
                     {
-                        SqlDependency dep = new SqlDependency(cmd);
-                        dep.OnChange += change;
-                    }
-
-                    using (SqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        FieldReader fr = new FieldReader(reader);
-                        int row = -1;
-                        try
+                        if (change != null)
                         {
-                            while (reader.Read())
+                            SqlDependency dep = new SqlDependency(cmd);
+                            dep.OnChange += change;
+                        }
+
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            FieldReader fr = new FieldReader(reader);
+                            int row = -1;
+                            try
                             {
-                                row++;
-                                forEach(fr);
+                                while (reader.Read())
+                                {
+                                    row++;
+                                    forEach(fr);
+                                }
+                            }
+                            catch (SqlTypeException ex)
+                            {
+                                FieldReaderException fieldEx = fr.CreateFieldReaderException(ex);
+                                fieldEx.Command = preCommand;
+                                fieldEx.Row = row;
+                                throw fieldEx;
                             }
                         }
-                        catch (SqlTypeException ex)
-                        {
-                            FieldReaderException fieldEx = fr.CreateFieldReaderException(ex);
-                            fieldEx.Command = preCommand;
-                            fieldEx.Row = row;
-                            throw fieldEx;
-                        }
+                    }
+                    catch (SqlTypeException ex)
+                    {
+                        var nex = HandleSqlTypeException(ex, preCommand);
+                        if (nex == ex)
+                            throw;
+                        throw nex;
+                    }
+                    catch (SqlException ex)
+                    {
+                        var nex = HandleSqlException(ex, preCommand);
+                        if (nex == ex)
+                            throw;
+                        throw nex;
                     }
                 }
-                catch (SqlTypeException ex)
+            }
+            catch (InvalidOperationException ioe)
+            {
+                if (ioe.Message.Contains("SqlDependency.Start()") && !reconected)
                 {
-                    var nex = HandleSqlTypeException(ex, preCommand);
-                    if (nex == ex)
-                        throw;
-                    throw nex;
-                }
-                catch (SqlException ex)
-                {
-                    var nex = HandleSqlException(ex, preCommand);
-                    if (nex == ex)
-                        throw;
-                    throw nex;
+                    reconect();
+
+                    reconected = true;
+
+                    goto retry;
                 }
 
+                throw;
             }
         }
 
@@ -363,11 +380,6 @@ namespace Signum.Engine
         public override bool AllowsMultipleQueries
         {
             get { return true; }
-        }
-
-        public void ExecuteDataReaderDependency(SqlPreCommandSimple query, object OnChange, Action<FieldReader> action)
-        {
-            throw new NotImplementedException();
         }
     }
 
