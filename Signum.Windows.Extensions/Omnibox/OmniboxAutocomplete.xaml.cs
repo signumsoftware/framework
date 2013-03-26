@@ -38,12 +38,18 @@ namespace Signum.Windows.Omnibox
 
         private void autoCompleteTb_Closed(object sender, CloseEventArgs e)
         {
-            var selected = autoCompleteTb.SelectedItem as OmniboxResult;
-
-            if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
+            if (e.Reason == CloseReason.Tab)
+            {
                 autoCompleteTb.SelectEnd();
-            else if (selected != null && !(selected is HelpOmniboxResult))
-                OmniboxClient.Providers.GetOrThrow(selected.GetType()).OnSelectedBase(selected, Window.GetWindow((DependencyObject)sender));
+                e.Handled = true;
+            }
+
+            if (e.Reason == CloseReason.ClickList || e.Reason == CloseReason.Enter)
+            {
+                var selected = autoCompleteTb.SelectedItem as OmniboxResult;
+                if (selected != null && !(selected is HelpOmniboxResult))
+                    OmniboxClient.Providers.GetOrThrow(selected.GetType()).OnSelectedBase(selected, Window.GetWindow((DependencyObject)sender));
+            }
         }
     }
 }

@@ -29,10 +29,10 @@ namespace Signum.Web.Selenium
             seleniumServerProcess.StartInfo.FileName = "java";
             if (Explorer == WebExplorer.Firefox && System.IO.Directory.Exists("D:\\Selenium"))
                 seleniumServerProcess.StartInfo.Arguments =
-                    "-jar c:/selenium/selenium-server.jar -firefoxProfileTemplate D:\\Selenium -timeout 3600";
+                    "-jar c:/selenium/selenium-server.jar -firefoxProfileTemplate D:\\Selenium -timeout 180";
             else
                 seleniumServerProcess.StartInfo.Arguments =
-                    "-jar c:/selenium/selenium-server.jar -log selenium.log -timeout 3600";
+                    "-jar c:/selenium/selenium-server.jar -log selenium.log -timeout 180"; /*timeout in seconds*/
 
             seleniumServerProcess.Start();
             return seleniumServerProcess;
@@ -47,12 +47,9 @@ namespace Signum.Web.Selenium
 
             StartSelenium(selenium);
 
-            selenium.SetTimeout("600000");
-            selenium.SetSpeed("200");
-            //selenium.SetSpeed("1000");
-
-
-
+            selenium.SetTimeout("180000"); //timeout in ms => 3mins
+            //selenium.SetSpeed("200");
+            
             selenium.AddLocationStrategy("jq",
             "var loc = locator; " +
             "var attr = null; " +
@@ -163,14 +160,17 @@ namespace Signum.Web.Selenium
         public static void PopupCancel(this ISelenium selenium, string prefix)
         {
             selenium.Click("jq=.ui-dialog-titlebar-close:visible");
-            Assert.IsFalse(selenium.IsElementPresent("{0}:visible".Formato(PopupSelector(prefix))));
+            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("{0}:visible".Formato(PopupSelector(prefix))));
         }
 
         public static void PopupCancelDiscardChanges(this ISelenium selenium, string prefix)
         {
             selenium.Click("jq=.ui-dialog-titlebar-close:visible");
+            
+            selenium.WaitAjaxFinished(() => selenium.IsConfirmationPresent());
             Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
-            Assert.IsFalse(selenium.IsElementPresent("{0}:visible".Formato(PopupSelector(prefix))));
+            
+            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("{0}:visible".Formato(PopupSelector(prefix))));
         }
 
         public static void PopupOk(this ISelenium selenium, string prefix)
@@ -200,6 +200,11 @@ namespace Signum.Web.Selenium
         public static bool PopupEntityHasUnsavedChanges(this ISelenium selenium, string prefix)
         {
             return selenium.IsElementPresent("jq=#{0}divMainControl.sf-changed".Formato(prefix));
+        }
+
+        public static bool MainWindowHasUnsavedChanges(this ISelenium selenium)
+        {
+            return selenium.IsElementPresent("jq=#divMainControl.sf-changed");
         }
 
         public static string RuntimeInfoSelector(string prefix)

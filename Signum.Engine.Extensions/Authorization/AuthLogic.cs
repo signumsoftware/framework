@@ -363,30 +363,37 @@ namespace Signum.Engine.Authorization
 
         public static SqlPreCommand ImportRulesScript(XDocument doc)
         {
-            Replacements replacements = new Replacements();
+           Replacements replacements = new Replacements();
 
-            var rolesDic = roles.Value.ToDictionary(a => a.ToString());
-            var rolesXml = doc.Root.Element("Roles").Elements("Role").ToDictionary(x => x.Attribute("Name").Value);
+            Dictionary<string, Lite<RoleDN>> rolesDic = roles.Value.ToDictionary(a => a.ToString());
+            Dictionary<string, XElement> rolesXml = doc.Root.Element("Roles").Elements("Role").ToDictionary(x => x.Attribute("Name").Value);
 
             replacements.AskForReplacements(rolesXml.Keys.ToHashSet(), rolesDic.Keys.ToHashSet(), "Roles");
 
             rolesDic = replacements.ApplyReplacementsToNew(rolesDic, "Roles");
 
-            var xmlOnly = rolesXml.Keys.Except(rolesDic.Keys).ToList();
-            if (xmlOnly.Any())
-                throw new InvalidOperationException("Roles not found in database: {0}".Formato(xmlOnly.ToString(", ")));
-
-            foreach (var kvp in rolesXml)
+            try
             {
-                var r = rolesDic[kvp.Key];
+                var xmlOnly = rolesXml.Keys.Except(rolesDic.Keys).ToList();
+                if (xmlOnly.Any())
+                    throw new InvalidOperationException("roles {0} not found on the database".Formato(xmlOnly.ToString(", ")));
 
-                EnumerableExtensions.JoinStrict(
-                    roles.Value.RelatedTo(r),
-                    kvp.Value.Attribute("Contains").Value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries),
-                    sr => sr.ToString(),
-                    s => rolesDic[s].ToString(),
-                    (sr, s) => 0,
-                    "Checking SubRoles of {0}".Formato(r));
+                foreach (var kvp in rolesXml)
+                {
+                    var r = rolesDic[kvp.Key];
+
+                    EnumerableExtensions.JoinStrict(
+                        roles.Value.RelatedTo(r),
+                        kvp.Value.Attribute("Contains").Value.Split(new []{','},  StringSplitOptions.RemoveEmptyEntries),
+                        sr => sr.ToString(),
+                        s => rolesDic[s].ToString(),
+                        (sr, s) => 0,
+                        "subRoles of {0}".Formato(r));
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new InvalidRoleGraphException("The role graph does not match:\r\n" + ex.Message); 
             }
 
             var dbOnlyWarnings = rolesDic.Keys.Except(rolesXml.Keys).Select(n =>
@@ -414,6 +421,106 @@ namespace Signum.Engine.Authorization
                 new SqlPreCommandSimple("-- END AUTH SYNC SCRIPT"));
         }
 
+        public static void LoadRoles(XDocument doc)
+        {
+            Dictionary<string, string[]> rolesXml = doc.Root.Element("Roles").Elements("Role").ToDictionary(
+                x => x.Attribute("Name").Value,
+                x => x.Attribute("Contains").Value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
+
+            var dic = rolesXml.Keys.Select(k => new RoleDN { Name = k }).ToDictionary(a => a.Name);
+
+            foreach (var item in dic.Values)
+            {
+                item.Roles = rolesXml[item.Name].Select(r => dic.GetOrThrow(r).ToLiteFat()).ToMList();
+            }
+
+            dic.Values.SaveList();
+        }
+
+        public static void SynchronizeRoles(XDocument doc)
+        {
+            Table table = Schema.Current.Table(typeof(RoleDN));
+            RelationalTable relationalTable = table.RelationalTables().Single();
+
+            Dictionary<string, XElement> rolesXml = doc.Root.Element("Roles").Elements("Role").ToDictionary(x => x.Attribute("Name").Value);
+
+            {
+                Dictionary<string, RoleDN> rolesDic = Database.Query<RoleDN>().ToDictionary(a => a.ToString());
+                Replacements replacements = new Replacements();
+                replacements.AskForReplacements(rolesDic.Keys.ToHashSet(), rolesXml.Keys.ToHashSet(), "Roles");
+                rolesDic = replacements.ApplyReplacementsToOld(rolesDic, "Roles");
+
+                Console.WriteLine("Part 1: Syncronize roles without relationships");
+
+                var roleInsertsDeletes = Synchronizer.SynchronizeScript(rolesXml, rolesDic,
+                    (name, xelement) => table.InsertSqlSync(new RoleDN { Name = name }, includeCollections: false),
+                    (name, role) => SqlPreCommand.Combine(Spacing.Simple,
+                            new SqlPreCommandSimple("DELETE {0} WHERE {1} = {2} --{3}"
+                                .Formato(relationalTable.Name, ((IColumn)relationalTable.Field).Name.SqlScape(), role.Id, role.Name)),
+                            table.DeleteSqlSync(role)),
+                    (name, xElement, role) =>
+                    {
+                        var oldName = role.Name;
+                        role.Name = name;
+                        return table.UpdateSqlSync(role, includeCollections: false, comment: oldName);
+                    }, Spacing.Double);
+
+                if (roleInsertsDeletes != null)
+                {
+                    SqlPreCommand.Combine(Spacing.Triple,
+                       new SqlPreCommandSimple("-- BEGIN ROLE SYNC SCRIPT"),
+                       new SqlPreCommandSimple("use {0}".Formato(Connector.Current.DatabaseName())),
+                       roleInsertsDeletes,
+                       new SqlPreCommandSimple("-- END ROLE  SYNC SCRIPT")).OpenSqlFileRetry();
+
+                    Console.WriteLine("Press any key when executed...");
+                    Console.ReadLine();
+                }
+                else
+                {
+                    SafeConsole.WriteLineColor(ConsoleColor.Green, "Already syncronized");
+                }
+            }
+
+            {
+                Console.WriteLine("Part 2: Syncronize roles relationships");
+                Dictionary<string, RoleDN> rolesDic = Database.Query<RoleDN>().ToDictionary(a => a.ToString());
+
+                var roleRelationships = Synchronizer.SynchronizeScript(rolesXml, rolesDic,
+                 (name, xelement) => { throw new InvalidOperationException("No new roles should be at this stage. Did you execute the script?"); },
+                 (name, role) => { throw new InvalidOperationException("No old roles should be at this stage. Did you execute the script?"); },
+                 (name, xElement, role) =>
+                 {
+                     var should = xElement.Attribute("Contains").Value.Split(new []{','},  StringSplitOptions.RemoveEmptyEntries);
+                     var current = role.Roles.Select(a=>a.ToString());
+
+                     if(should.OrderBy().SequenceEqual(current.OrderBy()))
+                         return null;
+
+                     role.Roles = should.Select(rs => rolesDic.GetOrThrow(rs).ToLite()).ToMList();
+
+                     return table.UpdateSqlSync(role);
+                 }, Spacing.Double);
+
+                if (roleRelationships != null)
+                {
+                    SqlPreCommand.Combine(Spacing.Triple,
+                       new SqlPreCommandSimple("-- BEGIN ROLE SYNC SCRIPT"),
+                       new SqlPreCommandSimple("use {0}".Formato(Connector.Current.DatabaseName())),
+                       roleRelationships,
+                       new SqlPreCommandSimple("-- END ROLE  SYNC SCRIPT")).OpenSqlFileRetry();
+
+                    Console.WriteLine("Press any key when executed...");
+                    Console.ReadLine();
+                }
+                else
+                {
+                    SafeConsole.WriteLineColor(ConsoleColor.Green, "Already syncronized");
+                }
+            }
+        }
+
+
         public static void ImportExportAuthRules()
         {
             ImportExportAuthRules("AuthRules.xml");
@@ -421,7 +528,7 @@ namespace Signum.Engine.Authorization
 
         public static void ImportExportAuthRules(string fileName)
         {
-            Console.WriteLine("You want to export (e), import (i) or suggest (s) AuthRules? (nothing to exit)".Formato(fileName));
+            Console.WriteLine("You want to export (e), import (i), sync roles (r) or suggest (s) AuthRules? (nothing to exit)".Formato(fileName));
 
             string answer = Console.ReadLine();
 
@@ -443,14 +550,42 @@ namespace Signum.Engine.Authorization
                         Console.Write("Reading {0}...".Formato(fileName));
                         var doc = XDocument.Load(fileName);
                         Console.WriteLine("Ok");
-                        Console.Write("Importing...");
-                        SqlPreCommand command = ImportRulesScript(doc);
-                        Console.WriteLine("Ok");
+
+                        Console.WriteLine("Generating SQL script to import auth rules (without modifying the role graph or entities):");
+                        SqlPreCommand command;
+                        try
+                        {
+                             command = ImportRulesScript(doc);
+                        }
+                        catch (InvalidRoleGraphException ex)
+                        {
+                            SafeConsole.WriteLineColor(ConsoleColor.Red, ex.Message);
+
+                            if(SafeConsole.Ask("Import roles first?"))
+                                goto case "r";
+
+                            return;
+                        }
 
                         if (command == null)
-                            Console.WriteLine("No changes necessary!");
+                            SafeConsole.WriteLineColor(ConsoleColor.Green, "Already syncronized");
                         else
                             command.OpenSqlFileRetry();
+
+                        break;
+                    }
+                case "r":
+                    {
+                        Console.Write("Reading {0}...".Formato(fileName));
+                        var doc = XDocument.Load(fileName);
+                        Console.WriteLine("Ok");
+
+
+                        Console.WriteLine("Generating script to synchronize roles...");
+
+                        SynchronizeRoles(doc);
+                        if (SafeConsole.Ask("Import rules now?"))
+                            goto case "i";
 
                         break;
                     }
@@ -479,5 +614,17 @@ namespace Signum.Engine.Authorization
         {
             return UserDN.Current != null && !UserDN.Current.Is(AnonymousUser);
         }
+    }
+
+    [Serializable]
+    public class InvalidRoleGraphException : Exception
+    {
+        public InvalidRoleGraphException() { }
+        public InvalidRoleGraphException(string message) : base(message) { }
+        public InvalidRoleGraphException(string message, Exception inner) : base(message, inner) { }
+        protected InvalidRoleGraphException(
+          System.Runtime.Serialization.SerializationInfo info,
+          System.Runtime.Serialization.StreamingContext context)
+            : base(info, context) { }
     }
 }

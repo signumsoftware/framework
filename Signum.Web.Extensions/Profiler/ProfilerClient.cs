@@ -65,7 +65,8 @@ namespace Signum.Web.Profiler
 
         public static string HeavyDetailsToJson(this IEnumerable<HeavyProfilerEntry> entries)
         {
-            return new JavaScriptSerializer().Serialize(entries.Select(e => new 
+            var serializer = new JavaScriptSerializer() { MaxJsonLength = int.MaxValue };
+            return serializer.Serialize(entries.Select(e => new 
             {
                 e.BeforeStart,
                 e.Start,
@@ -74,7 +75,7 @@ namespace Signum.Web.Profiler
                 e.Role,
                 Color = GetColor(e.Role),
                 e.Depth,
-                AditionalData = e.AditionalDataPreview(),
+                AditionalData = e.AdditionalDataPreview(),
                 FullIndex = e.FullIndex()
             }));
         }

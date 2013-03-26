@@ -19,7 +19,7 @@ namespace Signum.Web.Profiler
 
             viewData.Add("elapsed", TimeTracker.Start(action));
 
-            IDisposable profiler = HeavyProfiler.Log(role: "MvcRequest", aditionalData: filterContext.HttpContext.Request.Url.PathAndQuery);
+            IDisposable profiler = HeavyProfiler.Log("MvcRequest", () => filterContext.HttpContext.Request.Url.PathAndQuery);
             if (profiler != null)
                 viewData.Add("profiler", profiler);
 
@@ -49,7 +49,7 @@ namespace Signum.Web.Profiler
         {
             if (filterContext.Controller.ViewData.ContainsKey("profiler"))
             {
-                IDisposable viewProfiler = HeavyProfiler.Log(role: "MvcResult", aditionalData: filterContext.Result.ToString());
+                IDisposable viewProfiler = HeavyProfiler.Log("MvcResult", () => filterContext.Result.ToString());
                 if (viewProfiler != null)
                     filterContext.Controller.ViewData.Add("viewProfiler", viewProfiler);
             }

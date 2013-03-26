@@ -403,7 +403,7 @@ namespace Signum.Entities.UserQueries
     {
         public static UserQueryDN ToUserQuery(this QueryRequest request, QueryDescription qd, QueryDN query, int defaultElementsPerPage, bool preserveFilters)
         {
-            var tuple = SmartColumns(request.Columns, qd.Columns);
+            var tuple = SmartColumns(request.Columns, qd);
 
             return new UserQueryDN
             {
@@ -426,11 +426,11 @@ namespace Signum.Entities.UserQueries
             };
         }
 
-        public static Tuple<ColumnOptionsMode, MList<QueryColumnDN>> SmartColumns(List<Column> current, List<ColumnDescription> descriptions)
+        public static Tuple<ColumnOptionsMode, MList<QueryColumnDN>> SmartColumns(List<Column> current, QueryDescription qd)
         {
-            var ideal = (from cd in descriptions
+            var ideal = (from cd in qd.Columns
                          where !cd.IsEntity
-                         select new Column(cd)).ToList();
+                         select new Column(cd, qd.QueryName)).ToList();
 
             if (current.Count < ideal.Count)
             {

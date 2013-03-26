@@ -289,7 +289,7 @@ namespace Signum.Windows.UIAutomation
                 return null;
 
             var result = this.PropertyRoute;
-            if (result.Type.IsIRootEntity())
+            if (result.Type.IsIRootEntity() || result.Type.IsLite())
                 return null;
 
             return result; 
@@ -410,11 +410,11 @@ namespace Signum.Windows.UIAutomation
 
     public class EntityDetailProxy : EntityBaseProxy
     {
-        public static Condition DetailCondition = ConditionBuilder.ToCondition(a => a.Current.ControlType != ControlType.Text && a.Current.ControlType != ControlType.Button); 
+        static Condition BorderCondition = ConditionBuilder.ToCondition(a => a.Current.ClassName == "AutomationBorder"); 
 
         public AutomationElement GetDetailControl()
         {
-            return Element.ChildByCondition(DetailCondition);
+            return Element.ChildByCondition(BorderCondition).ChildByCondition(Condition.TrueCondition);
         }
 
         public ILineContainer<T> GetDetailControl<T>() where T : ModifiableEntity
@@ -424,7 +424,7 @@ namespace Signum.Windows.UIAutomation
 
         public AutomationElement TryDetailControl()
         {
-            return Element.TryChildByCondition(DetailCondition);
+            return Element.ChildByCondition(BorderCondition).TryChildByCondition(Condition.TrueCondition);
         }
 
         public ILineContainer<T> TryDetailControl<T>() where T : ModifiableEntity
@@ -500,7 +500,7 @@ namespace Signum.Windows.UIAutomation
                 return null;
 
             var result = this.PropertyRoute.Add("Item");
-            if (result.Type.IsIRootEntity())
+            if (result.Type.IsIRootEntity() || result.Type.IsLite())
                 return null;
 
             return result;
@@ -539,7 +539,7 @@ namespace Signum.Windows.UIAutomation
                 return null;
 
             var result = this.PropertyRoute.Add("Item");
-            if ( result.Type.IsIRootEntity())
+            if (result.Type.IsIRootEntity() || result.Type.IsLite())
                 return null;
 
             return result;

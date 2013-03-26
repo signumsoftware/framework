@@ -264,4 +264,7 @@
   <data name="AuthorizationCacheSuccessfullyUpdated" xml:space="preserve">
     <value>Authorization cache successfully updated</value>
   </data>
+  <data name="OnlyOneFileSupported" xml:space="preserve">
+    <value>Only one file supported</value>
+  </data>
 </root>

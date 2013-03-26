@@ -74,12 +74,9 @@ namespace Signum.Windows.UIAutomation
 
                 return true;
             }
-            catch (ElementNotAvailableException ena)
+            catch (ElementNotAvailableException)
             {
-                if (ena.Message.Contains("The target element corresponds to UI that is no longer available (for example, the parent window has closed)."))
-                    return false;
-
-                throw ena;
+                return false;
             }
         }
 

@@ -242,6 +242,7 @@
     <Compile Include="Disconnected\DisconnectedExport.xaml.cs">
       <DependentUpon>DisconnectedExport.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Files\DropFileExtensions.cs" />
     <Compile Include="Files\FileLine.xaml.cs">
       <DependentUpon>FileLine.xaml</DependentUpon>
     </Compile>

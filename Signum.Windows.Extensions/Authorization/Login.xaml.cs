@@ -14,6 +14,7 @@ using Signum.Windows;
 using System.Windows.Threading;
 using System.Windows.Media.Imaging;
 using Signum.Windows.Extensions;
+using System.Windows.Automation.Peers;
 
 namespace Signum.Windows.Authorization
 {
@@ -184,6 +185,24 @@ namespace Signum.Windows.Authorization
         private void SaleCerrar(object sender, System.Windows.Input.MouseEventArgs e)
         {
             iCerrar.Source = _cerrarNoFocus;
+        }
+
+        protected override AutomationPeer OnCreateAutomationPeer()
+        {
+            return new LoginWindowAutomationPeer(this);
+        }
+    }
+
+    public class LoginWindowAutomationPeer : WindowAutomationPeer
+    {
+        public LoginWindowAutomationPeer(Login login)
+            : base(login)
+        {
+        }
+
+        protected override string GetClassNameCore()
+        {
+            return "Login";
         }
     }
 }
