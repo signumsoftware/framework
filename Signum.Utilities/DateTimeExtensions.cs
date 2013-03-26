@@ -444,7 +444,7 @@ namespace Signum.Utilities
 
         public override string ToString()
         {
-            string resultado= ", ".Combine(
+            string result= ", ".Combine(
                          Years == 0 ? null :
                          Years == 1 ? Resources._0Year.Formato(Years) :
                                      Resources._0Years.Formato(Years),
@@ -455,10 +455,10 @@ namespace Signum.Utilities
                          Days == 1 ? Resources._0Day.Formato(Days) :
                                     Resources._0Days.Formato(Days));
 
-            if (string.IsNullOrEmpty(resultado))
-                resultado = Resources._0Day.Formato(0);
+            if (string.IsNullOrEmpty(result))
+                result = Resources._0Day.Formato(0);
 
-            return resultado;
+            return result;
 
         }
     }
