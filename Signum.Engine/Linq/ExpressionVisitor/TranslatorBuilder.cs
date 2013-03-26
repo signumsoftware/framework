@@ -374,7 +374,7 @@ namespace Signum.Engine.Linq
                 return Expression.Call(Expression.Constant(Schema.Current), miGetType, Visit(typeIba.TypeColumn).UnNullify());
             }
 
-            protected override Expression VisitLite(LiteExpression lite)
+            protected override Expression VisitLiteValue(LiteValueExpression lite)
             {
                 var id = Visit(NullifyColumn(lite.Id));
 

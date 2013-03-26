@@ -81,6 +81,7 @@ namespace Signum.Engine
      
         public static void OpenSqlFileRetry(this SqlPreCommand command)
         {
+            SafeConsole.WriteLineColor(ConsoleColor.Yellow, "There are changes!");
             string file = command.OpenSqlFile();
             if (SafeConsole.Ask("Open again?"))
                 Process.Start(file);

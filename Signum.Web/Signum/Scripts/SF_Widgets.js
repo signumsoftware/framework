@@ -3,13 +3,9 @@
 SF.Widgets = (function () {
     var highlightClass = "sf-alert-active";
 
-    $(".sf-widget").live("mouseover mouseout", function (evt) {
-        var $this = $(this);
-        SF.Dropdowns.toggle(evt, this);
-    });
-
-    $(".sf-widget").live("click", function (evt) {
-        SF.Dropdowns.toggle(evt, this);
+    $(document).on("click", ".sf-widget-toggler", function (evt) {
+        SF.Dropdowns.toggle(evt, this, 1);
+        return false;
     });
 
     var onNoteCreated = function (url, prefix, successMessage) {
@@ -18,7 +14,6 @@ SF.Widgets = (function () {
             data: { sfRuntimeInfo: new SF.RuntimeInfo(prefix).find().val() },
             success: function (newCount) {
                 var $notesWidget = $("#" + SF.compose(prefix, "notesWidget"));
-                //$notesWidget.find(".sf-widget-toggler").addClass(highlightClass);
                 $notesWidget.find(".sf-widget-count").html(newCount);
                 window.alert(successMessage);
             }

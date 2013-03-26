@@ -218,7 +218,7 @@ namespace Signum.Engine.DynamicQuery
             return RegisterExpression(extension);
         }
 
-        private ExtensionInfo RegisterExpression(ExtensionInfo extension)
+        public ExtensionInfo RegisterExpression(ExtensionInfo extension)
         {
             registeredExtensions.GetOrAddDefinition(extension.SourceType)[extension.Key] = extension;
 

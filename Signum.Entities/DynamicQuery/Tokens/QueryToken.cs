@@ -16,7 +16,12 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public abstract class QueryToken : IEquatable<QueryToken>
     {
-        public bool Subordinated { get; set; }
+        bool subordianted;
+        public bool Subordinated
+        {
+            get { return subordianted; }
+            set { subordianted = value; }
+        }
 
         public string SubordinatedToString
         {
@@ -37,6 +42,12 @@ namespace Signum.Entities.DynamicQuery
         public abstract string Key { get; }
         protected abstract List<QueryToken> SubTokensOverride();
 
+
+        public virtual object QueryName
+        {
+            get { return this.parent.QueryName; }
+        }
+
         public Expression BuildExpression(BuildExpressionContext context)
         {
             Expression result;
@@ -54,16 +65,15 @@ namespace Signum.Entities.DynamicQuery
 
         public abstract QueryToken Clone();
 
-        public QueryToken Parent { get; private set; }
+        QueryToken parent;
+        public QueryToken Parent
+        {
+            get { return parent; }
+        }
 
         public QueryToken(QueryToken parent)
         {
-            this.Parent = parent;
-        }
-
-        public static QueryToken NewColumn(ColumnDescription column)
-        {
-            return new ColumnToken(column);
+            this.parent = parent;
         }
 
         public List<QueryToken> SubTokensInternal()
@@ -232,12 +242,12 @@ namespace Signum.Entities.DynamicQuery
 
         public bool Equals(QueryToken other)
         {
-            return other != null && other.FullKey() == this.FullKey();
+            return other != null && other.QueryName.Equals(this.QueryName) && other.FullKey() == this.FullKey();
         }
 
         public override int GetHashCode()
         {
-            return this.FullKey().GetHashCode();
+            return this.FullKey().GetHashCode() ^ this.QueryName.GetHashCode();
         }
 
         public virtual string TypeColor
@@ -254,8 +264,8 @@ namespace Signum.Entities.DynamicQuery
                     case FilterType.String:
                     case FilterType.Guid: 
                     case FilterType.Boolean: return "#000000";
-                    case FilterType.DateTime: return "#8000FF";
-                    case FilterType.Enum: return "#B00061";
+                    case FilterType.DateTime: return "#5100A1";
+                    case FilterType.Enum: return "#800046";
                     case FilterType.Lite: return "#2B91AF";
                     case FilterType.Embedded: return "#156F8A";
                     default: return "#7D7D7D";

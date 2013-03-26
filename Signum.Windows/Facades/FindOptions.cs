@@ -65,7 +65,7 @@ namespace Signum.Windows
 
     public class QueryOptions
     {
-        public static int DefaultElementsPerPage = 200;
+        public static int DefaultElementsPerPage = 50;
 
         public object QueryName { get; set; }
 

@@ -323,32 +323,44 @@ namespace Signum.Utilities
         {
             StringBuilder sb = new StringBuilder();
             bool any = false;
-            if (timeSpan.Days != 0 && precission >= DateTimePrecision.Days)
+            if (timeSpan.Days != 0/* && precission >= DateTimePrecision.Days*/)
             {
-                sb.AppendFormat("{0}d ", timeSpan.Days);
+                sb.AppendFormat("{0}d", timeSpan.Days);
                 any = true;
             }
 
             if ((any || timeSpan.Hours != 0) && precission >= DateTimePrecision.Hours)
             {
-                sb.AppendFormat("{0,2}h ", timeSpan.Hours);
+                if (any)
+                    sb.Append(" ");
+
+                sb.AppendFormat("{0,2}h", timeSpan.Hours);
                 any = true;
             }
 
             if ((any || timeSpan.Minutes != 0) && precission >= DateTimePrecision.Minutes)
             {
-                sb.AppendFormat("{0,2}m ", timeSpan.Minutes);
+                if (any)
+                    sb.Append(" ");
+
+                sb.AppendFormat("{0,2}m", timeSpan.Minutes);
                 any = true;
             }
 
             if ((any || timeSpan.Seconds != 0) && precission >= DateTimePrecision.Seconds)
             {
-                sb.AppendFormat("{0,2}s ", timeSpan.Seconds);
+                if (any)
+                    sb.Append(" ");
+
+                sb.AppendFormat("{0,2}s", timeSpan.Seconds);
                 any = true;
             }
 
             if ((any || timeSpan.Milliseconds != 0) && precission >= DateTimePrecision.Milliseconds)
             {
+                if (any)
+                    sb.Append(" ");
+
                 sb.AppendFormat("{0,3}ms", timeSpan.Milliseconds);
             }
 
@@ -361,7 +373,17 @@ namespace Signum.Utilities
                 throw new InvalidOperationException("dateTime should be UTC"); 
 
             return (long)new TimeSpan(dateTime.Ticks - new DateTime(1970, 1, 1).Ticks).TotalMilliseconds;
-        } 
+        }
+
+        public static string ToMonthName(this DateTime dateTime)
+        {
+            return CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(dateTime.Month);
+        }
+
+        public static string ToShortMonthName(this DateTime dateTime)
+        {
+            return CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(dateTime.Month);
+        }
     }
 
     public enum DateTimePrecision

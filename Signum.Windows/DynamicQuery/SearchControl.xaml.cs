@@ -314,9 +314,9 @@ namespace Signum.Windows
                 return;
             }
 
-            if(!Navigator.IsFindable(s.NewValue))
+            if (!Navigator.IsFindable(s.NewValue))
             {
-                 Common.VoteCollapsed(this);
+                Common.VoteCollapsed(this);
                 return;
             }
 
@@ -899,23 +899,6 @@ namespace Signum.Windows
             }
         }
 
-        private void lvResult_DragOver(object sender, DragEventArgs e)
-        {
-            e.Effects = e.Data.GetDataPresent(typeof(FilterOption)) ? DragDropEffects.Copy : DragDropEffects.None;
-        }
-
-        private void lvResult_Drop(object sender, DragEventArgs e)
-        {
-            if (e.Data.GetDataPresent(typeof(FilterOption)))
-            {
-                FilterOption filter = (FilterOption)e.Data.GetData(typeof(FilterOption));
-
-                QueryToken token = filter.Token;
-
-                AddColumn(filter.Token);
-            }
-        }
-
         private void renameMenu_Click(object sender, RoutedEventArgs e)
         {
             if (!AllowChangeColumns)
@@ -959,6 +942,7 @@ namespace Signum.Windows
         {
             ColumnOptions.Clear();
             ColumnOptions.AddRange(columns);
+            DynamicQueryServer.SetColumnTokens(ColumnOptions, Description);
             ColumnOptionsMode = columnOptionsMode; 
             GenerateListViewColumns();
 

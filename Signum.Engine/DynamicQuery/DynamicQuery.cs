@@ -44,6 +44,8 @@ namespace Signum.Engine.DynamicQuery
             {
                 var core = lazyQueryCore();
 
+                core.QueryName = QueryName;
+
                 core.StaticColumns.Where(sc => sc.IsEntity).SingleEx(() => "Entity column not found {0}".Formato(QueryUtils.GetQueryUniqueKey(QueryName)));
 
                 core.EntityColumn().Implementations = entityImplementations;
@@ -60,22 +62,19 @@ namespace Signum.Engine.DynamicQuery
 
         public QueryDescription GetDescription()
         {
-            return new QueryDescription
-            {
-                QueryName = QueryName,
-                Columns = Core.Value.GetColumnDescriptions()
-            };
+            return Core.Value.GetQueryDescription();
         }
     }
 
 
     public interface IDynamicQueryCore
     {
+        object QueryName { get; set; }
         ColumnDescriptionFactory[] StaticColumns { get; }
         Expression Expression { get; } //Optional
 
         ColumnDescriptionFactory EntityColumn();
-        List<ColumnDescription> GetColumnDescriptions();
+        QueryDescription GetQueryDescription();
 
         ResultTable ExecuteQuery(QueryRequest request);
         int ExecuteQueryCount(QueryCountRequest request);
@@ -85,7 +84,9 @@ namespace Signum.Engine.DynamicQuery
 
     public abstract class DynamicQueryCore<T> : IDynamicQueryCore
     {
-        public ColumnDescriptionFactory[] StaticColumns { get; protected set; } 
+        public object QueryName { get; set; }
+
+        public ColumnDescriptionFactory[] StaticColumns { get; protected set; }
 
         public abstract ResultTable ExecuteQuery(QueryRequest request);
         public abstract int ExecuteQueryCount(QueryCountRequest request);
@@ -111,7 +112,7 @@ namespace Signum.Engine.DynamicQuery
 
         public ColumnDescriptionFactory EntityColumn()
         {
-            return StaticColumns.Where(c => c.IsEntity).SingleEx(() => "There's no Entity column");
+            return StaticColumns.Where(c => c.IsEntity).SingleEx(() => "There's no Entity column on {0}".Formato(QueryUtils.GetQueryUniqueKey(QueryName)));
         }
 
         public virtual Expression Expression
@@ -119,17 +120,18 @@ namespace Signum.Engine.DynamicQuery
             get { return null; }
         }
 
-        public List<ColumnDescription> GetColumnDescriptions()
+        public QueryDescription GetQueryDescription()
         {
             var entity = EntityColumn();
             string allowed = entity.IsAllowed();
             if (allowed != null)
                 throw new InvalidOperationException(
-                    "Not authorized to see Entity column because {0}".Formato(allowed));
+                    "Not authorized to see Entity column on {0} because {1}".Formato(QueryUtils.GetQueryUniqueKey(QueryName), allowed));
 
-            return StaticColumns.Where(f => f.IsAllowed() == null).Select(f => f.BuildColumnDescription()).ToList();
+            var columns = StaticColumns.Where(f => f.IsAllowed() == null).Select(f => f.BuildColumnDescription()).ToList();
+
+            return new QueryDescription(QueryName, columns);
         }
-
     }
 
     public interface IDynamicInfo
@@ -190,7 +192,7 @@ namespace Signum.Engine.DynamicQuery
             return new AutoDynamicQueryCore<T>(query); 
         }
 
-        public static ManualDynamicQueryCore<T> Manual<T>(Func<QueryRequest, List<ColumnDescription>, DEnumerableCount<T>> execute)
+        public static ManualDynamicQueryCore<T> Manual<T>(Func<QueryRequest, QueryDescription, DEnumerableCount<T>> execute)
         {
             return new ManualDynamicQueryCore<T>(execute); 
         }
@@ -198,11 +200,11 @@ namespace Signum.Engine.DynamicQuery
 
         #region ToDQueryable
 
-        public static DQueryable<T> ToDQueryable<T>(this IQueryable<T> query, List<ColumnDescription> descriptions)
+        public static DQueryable<T> ToDQueryable<T>(this IQueryable<T> query, QueryDescription description)
         {
             ParameterExpression pe = Expression.Parameter(typeof(object));
 
-            var dic = descriptions.ToDictionary(cd => (QueryToken)new ColumnToken(cd), cd => Expression.PropertyOrField(Expression.Convert(pe, typeof(T)), cd.Name).BuildLite());
+            var dic = description.Columns.ToDictionary(cd => (QueryToken)new ColumnToken(cd, description.QueryName), cd => Expression.PropertyOrField(Expression.Convert(pe, typeof(T)), cd.Name).BuildLite());
 
             return new DQueryable<T>(query.Select(a => (object)a), new BuildExpressionContext(typeof(T), pe, dic));
         }

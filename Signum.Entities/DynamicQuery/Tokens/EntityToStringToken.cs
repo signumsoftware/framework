@@ -28,7 +28,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string ToString()
         {
-            return Resources.IdentifiableEntity_ToStr;
+            return "[" + Resources.IdentifiableEntity_ToStr + "]";
         }
 
         public override string Key

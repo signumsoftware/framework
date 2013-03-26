@@ -35,10 +35,14 @@ SF.registerModule("Operations", function () {
         requestData: function (newPrefix) {
             var formChildren = "";
             if (SF.isFalse(this.options.isLite)) {
-                if (SF.isEmpty(this.options.prefix)) //NormalWindow 
+                if (SF.isEmpty(this.options.prefix)) { //NormalWindow 
                     formChildren = SF.isEmpty(this.options.parentDiv) ? $(this.options.sender).closest("form").find(":input") : $("#" + this.options.parentDiv + " :input");
-                else //PopupWindow
-                    formChildren = $(this.pf("panelPopup :input") + ", #" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
+                }
+                else { //PopupWindow
+                    formChildren = $(this.pf("panelPopup :input"))
+                        .add("#" + SF.Keys.tabId)
+                        .add("input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
+                }
             }
             else {
                 formChildren = $('#' + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "], " + this.pf(SF.Keys.runtimeInfo));

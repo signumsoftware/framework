@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Signum.Utilities
 {
@@ -17,6 +19,8 @@ namespace Signum.Utilities
 
             if (needToClear)
                 str = str.PadChopRight(Console.BufferWidth - 1);
+            else
+                str = str.TryStart(Console.BufferWidth - 1);
 
             Console.WriteLine(str);
 
@@ -53,7 +57,6 @@ namespace Signum.Utilities
             Console.WriteLine(str);
             Console.ForegroundColor = old;
         }
-
 
         public static string AskString(string question, Func<string, bool> stringValidator)
         {
@@ -129,6 +132,39 @@ namespace Signum.Utilities
 
                     Console.Write("Possible answers: ({0} - !forAll)".Formato(answers.ToString("/")));
                 } while (true);
+            }
+        }
+
+        public static void Wait(string startingText, Func<int> updateOrDelete)
+        {
+            Console.Write(startingText);
+            int? result = null;
+            try
+            {
+                int left  = Console.CursorLeft;
+               
+                DateTime dt = DateTime.Now;
+
+                Task t = Task.Factory.StartNew(() =>
+                {
+                    while (result == null)
+                    { 
+                        Console.SetCursorPosition(left, Console.CursorTop);
+
+                        SafeConsole.WriteColor(ConsoleColor.DarkGray, " (" + (DateTime.Now - dt).NiceToString(DateTimePrecision.Seconds) + ")");
+
+                        Thread.Sleep(1000);
+                    }
+                });
+
+                result = updateOrDelete();
+
+                SafeConsole.WriteColor(ConsoleColor.White, " {0} ", result);
+                SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "rows afected");
+            }
+            finally
+            {
+                result = -1;
             }
         }
 

@@ -14,9 +14,9 @@ namespace Signum.Engine.DynamicQuery
 {
     public class ManualDynamicQueryCore<T> : DynamicQueryCore<T>
     {
-        public Func<QueryRequest, List<ColumnDescription>, DEnumerableCount<T>> Execute { get; private set; }
+        public Func<QueryRequest, QueryDescription, DEnumerableCount<T>> Execute { get; private set; }
 
-        public ManualDynamicQueryCore(Func<QueryRequest, List<ColumnDescription>, DEnumerableCount<T>> execute)
+        public ManualDynamicQueryCore(Func<QueryRequest, QueryDescription, DEnumerableCount<T>> execute)
         {
             if (execute == null)
                 throw new ArgumentNullException("execute");
@@ -37,9 +37,9 @@ namespace Signum.Engine.DynamicQuery
 
         public override ResultTable ExecuteQuery(QueryRequest request)
         {
-            request.Columns.Insert(0, new _EntityColumn(EntityColumn().BuildColumnDescription()));
+            request.Columns.Insert(0, new _EntityColumn(EntityColumn().BuildColumnDescription(), QueryName));
 
-            DEnumerableCount<T> manualResult = Execute(request, GetColumnDescriptions());
+            DEnumerableCount<T> manualResult = Execute(request, GetQueryDescription());
 
             return manualResult.ToResultTable(request); 
         }
@@ -50,12 +50,12 @@ namespace Signum.Engine.DynamicQuery
             {
                 QueryName = request.QueryName,
                 Filters = request.Filters,
-                Columns = new List<Column>() { new Column(this.EntityColumn().BuildColumnDescription()) },
+                Columns = new List<Column>() { new Column(this.EntityColumn().BuildColumnDescription(), QueryName) },
                 Orders = new List<Order>(),
                 ElementsPerPage = QueryRequest.AllElements,
             };
 
-            return Execute(req, GetColumnDescriptions()).Collection.Count();
+            return Execute(req, GetQueryDescription()).Collection.Count();
         }
 
         public override Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request)
@@ -66,10 +66,10 @@ namespace Signum.Engine.DynamicQuery
                 Filters = request.Filters,
                 ElementsPerPage = 2,
                 Orders = request.Orders,
-                Columns = new List<Column> { new Column(this.EntityColumn().BuildColumnDescription()) }
+                Columns = new List<Column> { new Column(this.EntityColumn().BuildColumnDescription(), QueryName) }
             };
 
-            DEnumerable<T> mr = Execute(req, GetColumnDescriptions());
+            DEnumerable<T> mr = Execute(req, GetQueryDescription());
 
             return (Lite<IdentifiableEntity>)mr.Collection.Select(entitySelector.Value).Unique(request.UniqueType);
         }
@@ -96,7 +96,7 @@ namespace Signum.Engine.DynamicQuery
                 Filters = simpleFilters,
                 QueryName = request.QueryName,
                 ElementsPerPage = QueryRequest.AllElements,
-            }, GetColumnDescriptions());
+            }, GetQueryDescription());
 
             var groupCollection = plainCollection
                      .GroupBy(keys, allAggregates)

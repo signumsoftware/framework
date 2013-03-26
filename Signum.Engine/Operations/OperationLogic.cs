@@ -22,11 +22,20 @@ namespace Signum.Engine.Operations
 {
     public static class OperationLogic
     {
-        static Expression<Func<OperationDN, IQueryable<OperationLogDN>>> LogOperationsExpression =
-            o => Database.Query<OperationLogDN>().Where(a => a.Operation == o);
-        public static IQueryable<OperationLogDN> LogOperations(this OperationDN o)
+
+        static Expression<Func<IdentifiableEntity, IQueryable<OperationLogDN>>> OperationLogsEntityExpression =
+            e => Database.Query<OperationLogDN>().Where(a => a.Target.RefersTo(e));
+        [ExpressionField("OperationLogsEntityExpression")]
+        public static IQueryable<OperationLogDN> OperationLogs(this IdentifiableEntity e)
         {
-            return LogOperationsExpression.Evaluate(o);
+            return OperationLogsEntityExpression.Evaluate(e);
+        }
+
+        static Expression<Func<OperationDN, IQueryable<OperationLogDN>>> OperationLogsExpression =
+            o => Database.Query<OperationLogDN>().Where(a => a.Operation == o);
+        public static IQueryable<OperationLogDN> OperationLogs(this OperationDN o)
+        {
+            return OperationLogsExpression.Evaluate(o);
         }
 
         static Polymorphic<Dictionary<Enum, IOperation>> operations = new Polymorphic<Dictionary<Enum, IOperation>>(PolymorphicMerger.InheritDictionaryInterfaces, typeof(IIdentifiable));
@@ -127,7 +136,8 @@ namespace Signum.Engine.Operations
                         lo.Key,
                     });
 
-                dqm.RegisterExpression((OperationDN o) => o.LogOperations());
+                dqm.RegisterExpression((OperationDN o) => o.OperationLogs());
+                dqm.RegisterExpression((IdentifiableEntity o) => o.OperationLogs());
 
                 sb.Schema.EntityEventsGlobal.Saving += EntityEventsGlobal_Saving;
 

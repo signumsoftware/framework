@@ -207,7 +207,7 @@ namespace Signum.Web
             Value = value;
         }
 
-        protected TypeContext(T value, TypeContext parent, string controlID, PropertyRoute route)
+        public TypeContext(T value, TypeContext parent, string controlID, PropertyRoute route)
             : base(parent, controlID, route)
         {
             Value = value;

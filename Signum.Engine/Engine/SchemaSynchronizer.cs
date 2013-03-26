@@ -316,8 +316,8 @@ namespace Signum.Engine
                         should.ToDictionary(s => s.Id),
                         current.ToDictionary(c => c.Id),
                         (id, s) => table.InsertSqlSync(s),
-                        (id, c) => SqlPreCommand.Combine(Spacing.Simple, updateRelatedTables(c), table.DeleteSqlSync(c, c.toStr)),
-                        (id, s, c) => SqlPreCommand.Combine(Spacing.Simple, updateRelatedTables(c), table.UpdateSqlSync(c, c.toStr)),
+                        (id, c) => SqlPreCommand.Combine(Spacing.Simple, updateRelatedTables(c), table.DeleteSqlSync(c, comment: c.toStr)),
+                        (id, s, c) => SqlPreCommand.Combine(Spacing.Simple, updateRelatedTables(c), table.UpdateSqlSync(c, comment: c.toStr)),
                         Spacing.Double);
 
                     commands.Add(com);

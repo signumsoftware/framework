@@ -44,6 +44,7 @@ namespace Signum.Engine.Maps
         }
 
 
+        public int MaxNumberOfParameters = 2000;
         public int MaxNumberOfStatementsInSaveQueries = 16; 
 
         public DBMS DBMS { get; private set; }

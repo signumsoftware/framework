@@ -214,9 +214,9 @@ namespace Signum.Web
             switch (ColumnOptionsMode)
             {
                 case ColumnOptionsMode.Add:
-                    return qd.Columns.Where(cd => !cd.IsEntity).Select(cd => new Column(cd)).Concat(ColumnOptions.Select(co => co.ToColumn(qd))).ToList();
+                    return qd.Columns.Where(cd => !cd.IsEntity).Select(cd => new Column(cd, qd.QueryName)).Concat(ColumnOptions.Select(co => co.ToColumn(qd))).ToList();
                 case ColumnOptionsMode.Remove:
-                    return qd.Columns.Where(cd => !cd.IsEntity && !ColumnOptions.Any(co => co.ColumnName == cd.Name)).Select(cd => new Column(cd)).ToList();
+                    return qd.Columns.Where(cd => !cd.IsEntity && !ColumnOptions.Any(co => co.ColumnName == cd.Name)).Select(cd => new Column(cd, qd.QueryName)).ToList();
                 case ColumnOptionsMode.Replace:
                     return ColumnOptions.Select(co => co.ToColumn(qd)).ToList();
                 default:

@@ -165,7 +165,7 @@ namespace Signum.Engine.Linq
                     ColumnExpression colExp = expr as ColumnExpression;
                     if (colExp != null)
                     {
-                        ColumnDeclaration cd = cg.Columns.FirstOrDefault(c => c.Expression.Equals(col));
+                        ColumnDeclaration cd = cg.Columns.FirstOrDefault(c => c.Expression.Equals(colExp));
                         if (cd == null)
                         {
                             cd = cg.MapColumn(colExp);

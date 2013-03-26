@@ -16,6 +16,7 @@ using Signum.Entities.DynamicQuery;
 using Signum.Entities;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
+using Signum.Windows.Properties;
 
 namespace Signum.Windows
 {
@@ -203,7 +204,7 @@ namespace Signum.Windows
                     FilterOptions = options.FilterOptions,
                 }, count =>
                 {
-                    Label = "{0}({1})".Formato(QueryUtils.GetNiceName(Options.QueryName), count);
+                    Label = "{0} ({1})".Formato(Label, count);
                 }, () => { });
         }
 
@@ -255,7 +256,10 @@ namespace Signum.Windows
             Lite<T> lite = DynamicQueryServer.QueryUnique<T>(FindUniqueOptions);
 
             if (lite == null)
+            {
+                MessageBox.Show(Resources.No0Found.Formato(typeof(T).NiceName()));
                 return;
+            }
 
             if (NavigateOptions != null)
                 Navigator.Navigate(lite, NavigateOptions);
