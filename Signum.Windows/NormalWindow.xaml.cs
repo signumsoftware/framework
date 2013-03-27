@@ -264,8 +264,6 @@ namespace Signum.Windows
             this.entityTitle.SetTitleText(text);
         }
 
-        public ChangeDataContextHandler ChangeDataContext { get; set; }
-
         protected override AutomationPeer OnCreateAutomationPeer()
         {
             return new NormalWindowAutomationPeer(this);
