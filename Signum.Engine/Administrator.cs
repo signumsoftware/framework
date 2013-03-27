@@ -303,7 +303,7 @@ namespace Signum.Engine
                 Database.Query<T>().UnsafeUpdate(a => new T { toStr = expression.Evaluate(a) }));
         }
 
-        public static IDisposable PrepareForBatchLoad<T>(bool disableForeignKeys, bool disableMultipleIndexes, bool disableUniqueIndexes) where T : IdentifiableEntity
+        public static IDisposable PrepareForBatchLoad<T>(bool disableForeignKeys = true, bool disableMultipleIndexes = true, bool disableUniqueIndexes = false) where T : IdentifiableEntity
         {
             Table table = Schema.Current.Table(typeof(T));
 
