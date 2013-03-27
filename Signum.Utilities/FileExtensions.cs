@@ -21,5 +21,58 @@ namespace Signum.Utilities
                     return fullPath;
             }
         }
+
+        public class TemporalFile : IDisposable
+        {
+            string tempFile;
+            public string Path
+            {
+                get { return tempFile; }
+            }
+
+            bool ignoreError = true;
+
+            public TemporalFile(byte[] data, string extension)
+            {
+                Create(data, extension);
+            }
+
+            public TemporalFile(byte[] data, string extension, bool ignoreDisposingError)
+            {
+                ignoreError = ignoreDisposingError;
+                Create(data, extension);
+            }
+
+            private void Create(byte[] data, string extension)
+            {
+                tempFile = System.IO.Path.Combine(System.IO.Path.GetTempPath(),
+                    "{0}{1}".Formato(System.IO.Path.GetTempFileName(), extension.HasText() ? "." + extension.Replace(".", null) : null));
+                File.WriteAllBytes(tempFile, data);
+            }
+
+            public void Dispose()
+            {
+                try
+                {
+                    File.Delete(tempFile);
+                }
+                catch
+                {
+                    if (!ignoreError)
+                        throw;
+                }
+            }
+        }
+
+        public static TemporalFile GetTemporalFile(this byte[] data, string extension)
+        {
+            return new TemporalFile(data, extension);
+        }
+
+        public static TemporalFile GetTemporalFile(this byte[] data, string extension, bool ignoreDisposingErrors)
+        {
+            return new TemporalFile(data, extension, ignoreDisposingErrors);
+        }
     }
+
 }

@@ -145,7 +145,7 @@ namespace Signum.Web
                 throw new ArgumentException("Action target must end in controller", "action");
             }
             controllerName = controllerName.RemoveEnd("Controller".Length);
-           
+
 
             // TODO: How do we know that this method is even web callable?
             //      For now, we just let the call itself throw an exception.
@@ -159,12 +159,11 @@ namespace Signum.Web
 
         public static List<IParameterConverter> ParameterConverters = new List<IParameterConverter> { new LiteConverter() };
 
-        static ConcurrentDictionary<int, ParameterInfo[]> paramsCache = new ConcurrentDictionary<int, ParameterInfo[]>();
-
+        static ConcurrentDictionary<ExpressionEvaluator.MethodKey, ParameterInfo[]> paramsCache = new ConcurrentDictionary<ExpressionEvaluator.MethodKey, ParameterInfo[]>();
 
         static void AddParameterValuesFromExpressionToDictionary(RouteValueDictionary rvd, MethodCallExpression call)
         {
-            ParameterInfo[] parameters = paramsCache.GetOrAdd(call.Method.MetadataToken, mt=>call.Method.GetParameters());
+            ParameterInfo[] parameters = paramsCache.GetOrAdd(new ExpressionEvaluator.MethodKey(call.Method), mt => call.Method.GetParameters());
 
             if (parameters.Length > 0)
             {
@@ -177,7 +176,7 @@ namespace Signum.Web
                     var conv = ParameterConverters.FirstOrDefault(c => c.CanConvert(value));
                     if (conv != null)
                         value = conv.Convert(value, parameters[i].ParameterType);
-                   
+
                     rvd.Add(parameters[i].Name, value);
                 }
             }

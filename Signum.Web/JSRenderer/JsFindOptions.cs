@@ -86,5 +86,10 @@ namespace Signum.Web
         {
             return new JsInstruction(() => "{0}.requestDataForSearch()".Formato(this.ToJS()));
         }
+
+        public JsInstruction create()
+        {
+            return new JsInstruction(() => "{0}.create()".Formato(this.ToJS()));
+        }
     }
 }

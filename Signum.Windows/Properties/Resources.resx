@@ -350,4 +350,7 @@ Lose changes?</value>
   <data name="PleaseSelectAConstructor" xml:space="preserve">
     <value>Please Select a Constructor</value>
   </data>
+  <data name="No0Found" xml:space="preserve">
+    <value>No {0} found</value>
+  </data>
 </root>
