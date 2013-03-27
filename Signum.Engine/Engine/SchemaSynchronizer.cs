@@ -43,7 +43,8 @@ namespace Signum.Engine
 
             Dictionary<string, DiffTable> database = DefaultGetDatabaseDescription(Schema.Current.DatabaseNames());
 
-            Dictionary<ITable, Dictionary<string, UniqueIndex>> modelIndices = model.Values.ToDictionary(t => t, t => t.GeneratUniqueIndexes().ToDictionary(a => a.IndexName, "Indexes for {0}".Formato(t.Name)));
+            Dictionary<ITable, Dictionary<string, UniqueIndex>> modelIndices = model.Values
+                .ToDictionary(t => t, t => t.GeneratUniqueIndexes().ToDictionary(a => a.IndexName, "Indexes for {0}".Formato(t.Name)));
 
             //use database without replacements to just remove indexes
             SqlPreCommand dropIndices =
