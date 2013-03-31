@@ -96,8 +96,6 @@ namespace Signum.Utilities
         }
     }
 
-
-
     public static class DescriptionManager
     {
         public static Func<Type, string> CleanTypeName = t => t.Name; //To allow MyEntityDN
@@ -303,11 +301,10 @@ namespace Signum.Utilities
         {
             var doc = new XDocument(new XDeclaration("1.0", "UTF8", "yes"),
                 new XElement("Translations",
-                    from kvp in Types
-                    let type = kvp.Key
-                    let lt = kvp.Value
-                    let doa = GetDescriptionOptions(type)
+                    from lt in Types.Values
+                    let doa = GetDescriptionOptions(lt.Type)
                     where doa != DescriptionOptions.None
+                    orderby lt.Type.Name
                     select lt.ExportXml()
                 )
             );
@@ -348,6 +345,11 @@ namespace Signum.Utilities
 
             return result;
         }
+
+        public override string ToString()
+        {
+            return "Localized {0}".Formato(Assembly.GetName().Name);
+        }
     }
 
     public class LocalizedType
@@ -382,15 +384,15 @@ namespace Signum.Utilities
                     !Options.IsSetAssert(DescriptionOptions.Gender, Type) ||
                     Gender == null ||
                     (Gender == NaturalLanguageTools.GetGender(Description, Assembly.Culture)) ? null :
-                    new XAttribute("Gender", Gender),
+                    new XAttribute("Gender", Gender.ToString()),
 
                     !Options.IsSetAssert(DescriptionOptions.Members, Type) ? null :
-                     (from m in Type.GetProperties(bf).Cast<MemberInfo>().Concat(Type.GetFields(bf))
-                      let doam = m.SingleAttribute<DescriptionOptionsAttribute>()
-                      where doam == null || doam.Options.IsSetAssert(DescriptionOptions.Description, m)
+                     (from m in GetMembers(Type)
+                      where DescriptionManager.OnShouldLocalizeMember(m)
+                      orderby m.Name
                       let value = Members.TryGetC(m.Name)
                       where value != null && (!Assembly.IsDefault || ((Type.SingleAttribute<DescriptionAttribute>().TryCC(t => t.Description) ?? m.Name.NiceName()) != value))
-                      select new XElement("Member", new XAttribute("MemberName", m.Name), new XAttribute("Name", value)))
+                      select new XElement("Member", new XAttribute("Name", m.Name), new XAttribute("Description", value)))
                 );
         }
 
@@ -452,6 +454,11 @@ namespace Signum.Utilities
         static string DefaultMemberDescription(MemberInfo m)
         {
             return (m.SingleAttribute<DescriptionAttribute>().TryCC(t => t.Description) ?? m.Name.NiceName());
+        }
+
+        public override string ToString()
+        {
+            return "Localized {0}".Formato(Type.Name);
         }
     }
 
