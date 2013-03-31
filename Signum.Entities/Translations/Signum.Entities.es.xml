@@ -117,7 +117,7 @@
     <Member Name="Locked" Description="Bloqueado" />
   </Type>
   <Type Name="ModelEntity" />
-  <Type Name="ModifiableEntity" />
+  <Type Name="ModifiableEntity" Description="Entidad modificable" PluralDescription="Entidades modificables" />
   <Type Name="ModifiedState" />
   <Type Name="MultiEnumDN">
     <Member Name="Key" Description="Clave" />
