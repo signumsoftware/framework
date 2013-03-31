@@ -106,11 +106,12 @@ else
             
             #line default
             #line hidden
-WriteLiteral("    <table class=\"st\">\r\n        <tr>\r\n            <th></th>\r\n");
+WriteLiteral("    <table class=\"st\">\r\n        <tr>\r\n            <th></th>\r\n            <th>All<" +
+"/th>\r\n");
 
 
             
-            #line 22 "..\..\Translation\Views\Index.cshtml"
+            #line 23 "..\..\Translation\Views\Index.cshtml"
              foreach (var ci in langs)
             {
 
@@ -121,7 +122,7 @@ WriteLiteral("                <th>");
 
 
             
-            #line 24 "..\..\Translation\Views\Index.cshtml"
+            #line 25 "..\..\Translation\Views\Index.cshtml"
                Write(ci.Name);
 
             
@@ -131,7 +132,7 @@ WriteLiteral("</th>\r\n");
 
 
             
-            #line 25 "..\..\Translation\Views\Index.cshtml"
+            #line 26 "..\..\Translation\Views\Index.cshtml"
             }
 
             
@@ -141,7 +142,7 @@ WriteLiteral("        </tr>\r\n");
 
 
             
-            #line 27 "..\..\Translation\Views\Index.cshtml"
+            #line 28 "..\..\Translation\Views\Index.cshtml"
          foreach (var assembly in Model)
         {
 
@@ -152,20 +153,29 @@ WriteLiteral("            <tr>\r\n                <th>");
 
 
             
-            #line 30 "..\..\Translation\Views\Index.cshtml"
+            #line 31 "..\..\Translation\Views\Index.cshtml"
                Write(assembly.Key.GetName().Name);
 
             
             #line default
             #line hidden
-WriteLiteral("</th>\r\n");
+WriteLiteral("</th>\r\n                <td>\r\n                    ");
 
 
             
-            #line 31 "..\..\Translation\Views\Index.cshtml"
+            #line 33 "..\..\Translation\Views\Index.cshtml"
+               Write(Html.ActionLink("view", (TranslationController tc) => tc.View(assembly.Key.GetName().Name, null)));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n                </td>\r\n");
+
+
+            
+            #line 35 "..\..\Translation\Views\Index.cshtml"
                  foreach (var tf in assembly.Value.Values)
                 {
-                    var status = tf.Status().ToString();
 
             
             #line default
@@ -174,27 +184,55 @@ WriteLiteral("                    <td>\r\n                        ");
 
 
             
-            #line 35 "..\..\Translation\Views\Index.cshtml"
-                   Write(Html.ActionLink("view", (TranslationController tc) => tc.View(tf.Assembly.GetName().Name, tf.CultureInfo.Name), new { @class = "status-" + status }));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n                        ");
-
-
-            
-            #line 36 "..\..\Translation\Views\Index.cshtml"
-                   Write(Html.ActionLink("sync", (TranslationController tc) => tc.Sync(tf.Assembly.GetName().Name, tf.CultureInfo.Name), new { @class = "status-" + status }));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n                    </td>\r\n");
-
-
-            
             #line 38 "..\..\Translation\Views\Index.cshtml"
+                   Write(Html.ActionLink("view", (TranslationController tc) => tc.View(tf.Assembly.GetName().Name, tf.CultureInfo.Name)));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n                        <br />\r\n");
+
+
+            
+            #line 40 "..\..\Translation\Views\Index.cshtml"
+                         if(tf.IsDefault)
+                        {
+
+            
+            #line default
+            #line hidden
+WriteLiteral("                            <p>sync</p>\r\n");
+
+
+            
+            #line 43 "..\..\Translation\Views\Index.cshtml"
+                        }
+                        else
+                        {
+                        
+            
+            #line default
+            #line hidden
+            
+            #line 46 "..\..\Translation\Views\Index.cshtml"
+                   Write(Html.ActionLink("sync", (TranslationController tc) => tc.Sync(tf.Assembly.GetName().Name, tf.CultureInfo.Name), new { @class = "status-" + tf.Status().ToString() }));
+
+            
+            #line default
+            #line hidden
+            
+            #line 46 "..\..\Translation\Views\Index.cshtml"
+                                                                                                                                                                                                 
+                        }
+
+            
+            #line default
+            #line hidden
+WriteLiteral("                    </td>\r\n");
+
+
+            
+            #line 49 "..\..\Translation\Views\Index.cshtml"
                 }
 
             
@@ -204,7 +242,7 @@ WriteLiteral("            </tr>\r\n");
 
 
             
-            #line 40 "..\..\Translation\Views\Index.cshtml"
+            #line 51 "..\..\Translation\Views\Index.cshtml"
         }
 
             
@@ -214,7 +252,7 @@ WriteLiteral("    </table>\r\n");
 
 
             
-            #line 42 "..\..\Translation\Views\Index.cshtml"
+            #line 53 "..\..\Translation\Views\Index.cshtml"
 }
             
             #line default

@@ -116,8 +116,8 @@
     </Compile>
     <Compile Include="Translation\Controllers\TranslationController.cs" />
     <Compile Include="Translation\TranslationClient.cs" />
-    <Compile Include="Translation\TranslationService.cs" />
-    <Compile Include="Translation\TranslationSyncronizer.cs" />
+    <Compile Include="Translation\ITranslator.cs" />
+    <Compile Include="Translation\TranslationSynchronizer.cs" />
     <Compile Include="Note\Controllers\NoteController.cs" />
     <Compile Include="AuthAdmin\AuthAdminClient.cs" />
     <Compile Include="AuthAdmin\Controllers\AuthAdminController.cs" />
@@ -765,6 +765,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>SMSUpdatePackage.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Translation\Views\Sync.generated.cs">
+      <DependentUpon>Sync.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Translation\Views\CultureInfoView.generated.cs">
       <DependentUpon>CultureInfoView.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -1210,6 +1215,7 @@
     <Content Include="SMS\Content\SMS.css" />
     <Content Include="SMS\Scripts\SF_SMS.js" />
     <Content Include="Translation\Content\Translation.css" />
+    <Content Include="Translation\Content\Translation.js" />
     <Content Include="Web.config" />
     <Content Include="Basic\Views\Web.config" />
     <Content Include="Captcha\Views\Web.config" />
@@ -1426,6 +1432,10 @@
     <Content Include="Translation\Views\View.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>View.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Translation\Views\Sync.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>Sync.generated.cs</LastGenOutput>
     </Content>
     <None Include="UserQueries\Views\QueryColumn.cshtml">
       <Generator>RazorGenerator</Generator>

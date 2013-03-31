@@ -19,6 +19,7 @@ else
     <table class="st">
         <tr>
             <th></th>
+            <th>All</th>
             @foreach (var ci in langs)
             {
                 <th>@ci.Name</th>
@@ -28,12 +29,22 @@ else
         {
             <tr>
                 <th>@assembly.Key.GetName().Name</th>
+                <td>
+                    @Html.ActionLink("view", (TranslationController tc) => tc.View(assembly.Key.GetName().Name, null))
+                </td>
                 @foreach (var tf in assembly.Value.Values)
                 {
-                    var status = tf.Status().ToString();
                     <td>
-                        @Html.ActionLink("view", (TranslationController tc) => tc.View(tf.Assembly.GetName().Name, tf.CultureInfo.Name), new { @class = "status-" + status })
-                        @Html.ActionLink("sync", (TranslationController tc) => tc.Sync(tf.Assembly.GetName().Name, tf.CultureInfo.Name), new { @class = "status-" + status })
+                        @Html.ActionLink("view", (TranslationController tc) => tc.View(tf.Assembly.GetName().Name, tf.CultureInfo.Name))
+                        <br />
+                        @if(tf.IsDefault)
+                        {
+                            <p>sync</p>
+                        }
+                        else
+                        {
+                        @Html.ActionLink("sync", (TranslationController tc) => tc.Sync(tf.Assembly.GetName().Name, tf.CultureInfo.Name), new { @class = "status-" + tf.Status().ToString() })    
+                        }
                     </td>
                 }
             </tr>

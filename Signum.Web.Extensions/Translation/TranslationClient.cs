@@ -15,7 +15,9 @@ namespace Signum.Web.Translation
     {
         public static string ViewPrefix = "~/Translation/Views/{0}.cshtml";
 
-        public static void Start()
+        public static ITranslator Translator; 
+
+        public static void Start(ITranslator translator)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -26,6 +28,8 @@ namespace Signum.Web.Translation
                      new EntitySettings<TranslatorDN>{ PartialViewName = t=>ViewPrefix.Formato("Translator")},
                     new EmbeddedEntitySettings<TranslatedCultureDN>{ PartialViewName = t=>ViewPrefix.Formato("Translator")},
                 });
+
+                Translator = translator;
 
                 SpecialOmniboxProvider.Register(new SpecialOmniboxAction("Translation",
                     () => TranslationPermission.TranslateCode.IsAuthorized(),

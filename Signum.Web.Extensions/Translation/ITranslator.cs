@@ -9,7 +9,7 @@ using System.Web;
 using System.Web.Script.Serialization;
 using Signum.Utilities;
 
-namespace Signum.Web.Localization
+namespace Signum.Web.Translation
 {
     public interface ITranslator
     {

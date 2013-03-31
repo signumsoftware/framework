@@ -2,12 +2,13 @@
 @using System.Globalization
 @using System.Reflection
 @using Signum.Utilities
+@using Signum.Web.Translation.Controllers
 @{
     CultureInfo culture = ViewBag.Culture;
     CultureInfo defaultCulture = ViewBag.DefaultCulture;
     Assembly assembly = ViewBag.Assembly;
 
-    ViewBag.Title = "View {0} in {1}".Formato(assembly.GetName().Name, culture.DisplayName);
+    ViewBag.Title = "View {0} in {1}".Formato(assembly.GetName().Name, culture == null ? "all languages" : culture.DisplayName);
 
 
     Func<CultureInfo, bool> editCulture = c => culture == null || culture.Name == c.Name;
@@ -17,10 +18,11 @@
     var defaultLocAssembly = Model.GetOrThrow(defaultCulture);
 }
 @Html.DynamicCss("~/Translation/Content/Translation.css")
+@Html.ScriptsJs("~/Translation/Content/Translation.js")
 
 @using (Html.BeginForm())
 {
-    <table id="results" style="width: 100%; margin: 0px" class="st">
+    <table id="results" style="width: 100%; margin: 0px" class="st" pluralAndGender="@Url.Action((TranslationController tc)=>tc.PluralAndGender())">
         @foreach (var defaultLocType in defaultLocAssembly.Types.Values)
         {
             bool hasDescription = defaultLocType.Options.IsSet(DescriptionOptions.Description);
@@ -40,7 +42,7 @@
             
             if (defaultLocType.Options.IsSet(DescriptionOptions.Description))
             {
-                foreach (var locType in Model.Values.Select(la => la.Types[defaultLocType.Type]).Where(lt=>lt.Description.HasText()))
+                foreach (var locType in Model.Values.Select(la => la.Types[defaultLocType.Type]).Where(lt=>editCulture(lt.Assembly.Culture) || lt.Description.HasText()))
                 {
                     bool hasGender = hasGenderOption && NaturalLanguageTools.HasGenders(locType.Assembly.Culture);
 
@@ -53,12 +55,18 @@
                         {
                             var gd = NaturalLanguageTools.GenderDetectors.TryGetC(locType.Assembly.Culture.TwoLetterISOLanguageName); 
                              
-                        @Html.DropDownList(locKey(locType) + ".Gender", gd.TryCC(a => a.Pronoms).EmptyIfNull()
-                             .Select(pi => new SelectListItem { Value = pi.Gender.ToString(), Text = pi.Singular, Selected = pi.Gender == locType.Gender }));
+                            var list = gd.TryCC(a => a.Pronoms).EmptyIfNull()
+                             .Select(pi => new SelectListItem { Value = pi.Gender.ToString(), Text = pi.Singular, Selected = pi.Gender == locType.Gender }).ToList();
+                            
+                            if(locType.Gender == null)
+                            {
+                                list.Insert(0, new SelectListItem{ Value = "", Text = "-", Selected = true});
+                            }
+                        @Html.DropDownList(locKey(locType) + ".Gender", list);
                         }
                         else
                         {
-                        @(locType.Gender != null ? NaturalLanguageTools.GetPronom(locType.Gender.Value, plural: false, culture: locType.Assembly.Culture) : "??")
+                        @(locType.Gender != null ? NaturalLanguageTools.GetPronom(locType.Gender.Value, plural: false, culture: locType.Assembly.Culture) : "-")
                         }
                     }
                 </th>
@@ -75,7 +83,7 @@
                 <th class="smallCell">
                     @if (hasPlural && hasGender)
                     {
-                        @(locType.Gender != null ? NaturalLanguageTools.GetPronom(locType.Gender.Value, plural: true, culture: locType.Assembly.Culture) : "??")
+                        @(locType.Gender != null ? NaturalLanguageTools.GetPronom(locType.Gender.Value, plural: true, culture: locType.Assembly.Culture) : "-")
                     }
                 </th>
                 <th class="monospaceCell">
@@ -107,7 +115,7 @@
                 </th>
             </tr>
             
-                    foreach (var locType in Model.Values.Select(la => la.Types[defaultLocType.Type]).Where(lt=>lt.Members.ContainsKey(key)))
+                    foreach (var locType in Model.Values.Select(la => la.Types[defaultLocType.Type]).Where(lt => editCulture(lt.Assembly.Culture) || lt.Members.ContainsKey(key)))
                     {
             <tr>
                 <td class="leftCell">@locType.Assembly.Culture.Name</td>
@@ -130,4 +138,3 @@
     </table>
     <input type="submit" value="Save" />
 }
-

@@ -47,6 +47,12 @@ namespace Signum.Web.Extensions.Translation.Views
     #line hidden
     using Signum.Web;
     
+    #line 5 "..\..\Translation\Views\View.cshtml"
+    using Signum.Web.Translation.Controllers;
+    
+    #line default
+    #line hidden
+    
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.5.4.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Translation/Views/View.cshtml")]
     public partial class View : System.Web.Mvc.WebViewPage<Dictionary<CultureInfo, LocalizedAssembly>>
@@ -61,14 +67,15 @@ namespace Signum.Web.Extensions.Translation.Views
 
 
 
+
             
-            #line 5 "..\..\Translation\Views\View.cshtml"
+            #line 6 "..\..\Translation\Views\View.cshtml"
   
     CultureInfo culture = ViewBag.Culture;
     CultureInfo defaultCulture = ViewBag.DefaultCulture;
     Assembly assembly = ViewBag.Assembly;
 
-    ViewBag.Title = "View {0} in {1}".Formato(assembly.GetName().Name, culture.DisplayName);
+    ViewBag.Title = "View {0} in {1}".Formato(assembly.GetName().Name, culture == null ? "all languages" : culture.DisplayName);
 
 
     Func<CultureInfo, bool> editCulture = c => culture == null || culture.Name == c.Name;
@@ -83,8 +90,18 @@ namespace Signum.Web.Extensions.Translation.Views
             #line hidden
 
             
-            #line 19 "..\..\Translation\Views\View.cshtml"
+            #line 20 "..\..\Translation\Views\View.cshtml"
 Write(Html.DynamicCss("~/Translation/Content/Translation.css"));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n");
+
+
+            
+            #line 21 "..\..\Translation\Views\View.cshtml"
+Write(Html.ScriptsJs("~/Translation/Content/Translation.js"));
 
             
             #line default
@@ -93,18 +110,29 @@ WriteLiteral("\r\n\r\n");
 
 
             
-            #line 21 "..\..\Translation\Views\View.cshtml"
+            #line 23 "..\..\Translation\Views\View.cshtml"
  using (Html.BeginForm())
 {
 
             
             #line default
             #line hidden
-WriteLiteral("    <table id=\"results\" style=\"width: 100%; margin: 0px\" class=\"st\">\r\n");
+WriteLiteral("    <table id=\"results\" style=\"width: 100%; margin: 0px\" class=\"st\" pluralAndGend" +
+"er=\"");
 
 
             
-            #line 24 "..\..\Translation\Views\View.cshtml"
+            #line 25 "..\..\Translation\Views\View.cshtml"
+                                                                                Write(Url.Action((TranslationController tc)=>tc.PluralAndGender()));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\">\r\n");
+
+
+            
+            #line 26 "..\..\Translation\Views\View.cshtml"
          foreach (var defaultLocType in defaultLocAssembly.Types.Values)
         {
             bool hasDescription = defaultLocType.Options.IsSet(DescriptionOptions.Description);
@@ -124,7 +152,7 @@ WriteLiteral("            <thead>\r\n                <tr>\r\n                   
 
 
             
-            #line 37 "..\..\Translation\Views\View.cshtml"
+            #line 39 "..\..\Translation\Views\View.cshtml"
                                                  Write(defaultLocType.Type.Name);
 
             
@@ -134,7 +162,7 @@ WriteLiteral(" (");
 
 
             
-            #line 37 "..\..\Translation\Views\View.cshtml"
+            #line 39 "..\..\Translation\Views\View.cshtml"
                                                                              Write("/".Combine(hasDescription ? "Singular" : null, hasPlural ? "Plural" : null, hasGenderOption ? "Gender" : null, hasMembers ? "Members" : null));
 
             
@@ -144,11 +172,11 @@ WriteLiteral(")</th>\r\n                </tr>\r\n            </thead>\r\n");
 
 
             
-            #line 40 "..\..\Translation\Views\View.cshtml"
+            #line 42 "..\..\Translation\Views\View.cshtml"
             
             if (defaultLocType.Options.IsSet(DescriptionOptions.Description))
             {
-                foreach (var locType in Model.Values.Select(la => la.Types[defaultLocType.Type]).Where(lt=>lt.Description.HasText()))
+                foreach (var locType in Model.Values.Select(la => la.Types[defaultLocType.Type]).Where(lt=>editCulture(lt.Assembly.Culture) || lt.Description.HasText()))
                 {
                     bool hasGender = hasGenderOption && NaturalLanguageTools.HasGenders(locType.Assembly.Culture);
 
@@ -160,7 +188,7 @@ WriteLiteral("            <tr>\r\n                <th class=\"leftCell\">");
 
 
             
-            #line 48 "..\..\Translation\Views\View.cshtml"
+            #line 50 "..\..\Translation\Views\View.cshtml"
                                 Write(locType.Assembly.Culture.Name);
 
             
@@ -170,28 +198,34 @@ WriteLiteral("</th>\r\n                <th class=\"smallCell monospaceCell\">\r\
 
 
             
-            #line 50 "..\..\Translation\Views\View.cshtml"
+            #line 52 "..\..\Translation\Views\View.cshtml"
                      if (hasGender)
                     {
                         if (editCulture(locType.Assembly.Culture))
                         {
                             var gd = NaturalLanguageTools.GenderDetectors.TryGetC(locType.Assembly.Culture.TwoLetterISOLanguageName); 
                              
+                            var list = gd.TryCC(a => a.Pronoms).EmptyIfNull()
+                             .Select(pi => new SelectListItem { Value = pi.Gender.ToString(), Text = pi.Singular, Selected = pi.Gender == locType.Gender }).ToList();
+                            
+                            if(locType.Gender == null)
+                            {
+                                list.Insert(0, new SelectListItem{ Value = "", Text = "-", Selected = true});
+                            }
                         
             
             #line default
             #line hidden
             
-            #line 56 "..\..\Translation\Views\View.cshtml"
-                   Write(Html.DropDownList(locKey(locType) + ".Gender", gd.TryCC(a => a.Pronoms).EmptyIfNull()
-                             .Select(pi => new SelectListItem { Value = pi.Gender.ToString(), Text = pi.Singular, Selected = pi.Gender == locType.Gender })));
+            #line 65 "..\..\Translation\Views\View.cshtml"
+                   Write(Html.DropDownList(locKey(locType) + ".Gender", list));
 
             
             #line default
             #line hidden
             
-            #line 57 "..\..\Translation\Views\View.cshtml"
-                                                                                                                                                            ;
+            #line 65 "..\..\Translation\Views\View.cshtml"
+                                                                             ;
                         }
                         else
                         {
@@ -200,15 +234,15 @@ WriteLiteral("</th>\r\n                <th class=\"smallCell monospaceCell\">\r\
             #line default
             #line hidden
             
-            #line 61 "..\..\Translation\Views\View.cshtml"
-                    Write(locType.Gender != null ? NaturalLanguageTools.GetPronom(locType.Gender.Value, plural: false, culture: locType.Assembly.Culture) : "??");
+            #line 69 "..\..\Translation\Views\View.cshtml"
+                    Write(locType.Gender != null ? NaturalLanguageTools.GetPronom(locType.Gender.Value, plural: false, culture: locType.Assembly.Culture) : "-");
 
             
             #line default
             #line hidden
             
-            #line 61 "..\..\Translation\Views\View.cshtml"
-                                                                                                                                                                 
+            #line 69 "..\..\Translation\Views\View.cshtml"
+                                                                                                                                                                
                         }
                     }
 
@@ -219,7 +253,7 @@ WriteLiteral("                </th>\r\n                <th class=\"monospaceCell
 
 
             
-            #line 66 "..\..\Translation\Views\View.cshtml"
+            #line 74 "..\..\Translation\Views\View.cshtml"
                      if (editCulture(locType.Assembly.Culture))
                     {
                         
@@ -227,14 +261,14 @@ WriteLiteral("                </th>\r\n                <th class=\"monospaceCell
             #line default
             #line hidden
             
-            #line 68 "..\..\Translation\Views\View.cshtml"
+            #line 76 "..\..\Translation\Views\View.cshtml"
                    Write(Html.TextArea(locKey(locType) + ".Description", locType.Description, new { style = "width:90%;height:16px" }));
 
             
             #line default
             #line hidden
             
-            #line 68 "..\..\Translation\Views\View.cshtml"
+            #line 76 "..\..\Translation\Views\View.cshtml"
                                                                                                                                       
                     }
                     else
@@ -244,14 +278,14 @@ WriteLiteral("                </th>\r\n                <th class=\"monospaceCell
             #line default
             #line hidden
             
-            #line 72 "..\..\Translation\Views\View.cshtml"
+            #line 80 "..\..\Translation\Views\View.cshtml"
                    Write(locType.Description);
 
             
             #line default
             #line hidden
             
-            #line 72 "..\..\Translation\Views\View.cshtml"
+            #line 80 "..\..\Translation\Views\View.cshtml"
                                                
                     }
 
@@ -262,7 +296,7 @@ WriteLiteral("                </th>\r\n                <th class=\"smallCell\">\
 
 
             
-            #line 76 "..\..\Translation\Views\View.cshtml"
+            #line 84 "..\..\Translation\Views\View.cshtml"
                      if (hasPlural && hasGender)
                     {
                         
@@ -270,15 +304,15 @@ WriteLiteral("                </th>\r\n                <th class=\"smallCell\">\
             #line default
             #line hidden
             
-            #line 78 "..\..\Translation\Views\View.cshtml"
-                    Write(locType.Gender != null ? NaturalLanguageTools.GetPronom(locType.Gender.Value, plural: true, culture: locType.Assembly.Culture) : "??");
+            #line 86 "..\..\Translation\Views\View.cshtml"
+                    Write(locType.Gender != null ? NaturalLanguageTools.GetPronom(locType.Gender.Value, plural: true, culture: locType.Assembly.Culture) : "-");
 
             
             #line default
             #line hidden
             
-            #line 78 "..\..\Translation\Views\View.cshtml"
-                                                                                                                                                                
+            #line 86 "..\..\Translation\Views\View.cshtml"
+                                                                                                                                                               
                     }
 
             
@@ -288,7 +322,7 @@ WriteLiteral("                </th>\r\n                <th class=\"monospaceCell
 
 
             
-            #line 82 "..\..\Translation\Views\View.cshtml"
+            #line 90 "..\..\Translation\Views\View.cshtml"
                      if (hasPlural)
                     {
                         if (editCulture(locType.Assembly.Culture))
@@ -298,14 +332,14 @@ WriteLiteral("                </th>\r\n                <th class=\"monospaceCell
             #line default
             #line hidden
             
-            #line 86 "..\..\Translation\Views\View.cshtml"
+            #line 94 "..\..\Translation\Views\View.cshtml"
                    Write(Html.TextArea(locKey(locType) + ".PluralDescription", locType.PluralDescription, new { style = "width:90%;height:16px" }));
 
             
             #line default
             #line hidden
             
-            #line 86 "..\..\Translation\Views\View.cshtml"
+            #line 94 "..\..\Translation\Views\View.cshtml"
                                                                                                                                                      
                         }
                         else
@@ -315,14 +349,14 @@ WriteLiteral("                </th>\r\n                <th class=\"monospaceCell
             #line default
             #line hidden
             
-            #line 90 "..\..\Translation\Views\View.cshtml"
+            #line 98 "..\..\Translation\Views\View.cshtml"
                    Write(locType.PluralDescription);
 
             
             #line default
             #line hidden
             
-            #line 90 "..\..\Translation\Views\View.cshtml"
+            #line 98 "..\..\Translation\Views\View.cshtml"
                                                   
                         }
                     }
@@ -334,7 +368,7 @@ WriteLiteral("                </th>\r\n            </tr>\r\n");
 
 
             
-            #line 95 "..\..\Translation\Views\View.cshtml"
+            #line 103 "..\..\Translation\Views\View.cshtml"
                 }
             }
 
@@ -352,7 +386,7 @@ WriteLiteral("            <tr>\r\n                <th class=\"leftCell\">Member\
 
 
             
-            #line 106 "..\..\Translation\Views\View.cshtml"
+            #line 114 "..\..\Translation\Views\View.cshtml"
                             Write(key);
 
             
@@ -362,9 +396,9 @@ WriteLiteral("\r\n                </th>\r\n            </tr>\r\n");
 
 
             
-            #line 109 "..\..\Translation\Views\View.cshtml"
+            #line 117 "..\..\Translation\Views\View.cshtml"
             
-                    foreach (var locType in Model.Values.Select(la => la.Types[defaultLocType.Type]).Where(lt=>lt.Members.ContainsKey(key)))
+                    foreach (var locType in Model.Values.Select(la => la.Types[defaultLocType.Type]).Where(lt => editCulture(lt.Assembly.Culture) || lt.Members.ContainsKey(key)))
                     {
 
             
@@ -374,7 +408,7 @@ WriteLiteral("            <tr>\r\n                <td class=\"leftCell\">");
 
 
             
-            #line 113 "..\..\Translation\Views\View.cshtml"
+            #line 121 "..\..\Translation\Views\View.cshtml"
                                 Write(locType.Assembly.Culture.Name);
 
             
@@ -384,7 +418,7 @@ WriteLiteral("</td>\r\n                <td colspan=\"4\" class=\"monospaceCell\"
 
 
             
-            #line 116 "..\..\Translation\Views\View.cshtml"
+            #line 124 "..\..\Translation\Views\View.cshtml"
                      if (editCulture(locType.Assembly.Culture))
                     {
                         
@@ -392,14 +426,14 @@ WriteLiteral("</td>\r\n                <td colspan=\"4\" class=\"monospaceCell\"
             #line default
             #line hidden
             
-            #line 118 "..\..\Translation\Views\View.cshtml"
+            #line 126 "..\..\Translation\Views\View.cshtml"
                    Write(Html.TextArea(locKey(locType) + ".Member." + key, locType.Members.TryGetC(key), new { style = "width:90%;height:16px" }));
 
             
             #line default
             #line hidden
             
-            #line 118 "..\..\Translation\Views\View.cshtml"
+            #line 126 "..\..\Translation\Views\View.cshtml"
                                                                                                                                                  
                     }
                     else
@@ -409,14 +443,14 @@ WriteLiteral("</td>\r\n                <td colspan=\"4\" class=\"monospaceCell\"
             #line default
             #line hidden
             
-            #line 122 "..\..\Translation\Views\View.cshtml"
+            #line 130 "..\..\Translation\Views\View.cshtml"
                    Write(locType.Members.TryGetC(key));
 
             
             #line default
             #line hidden
             
-            #line 122 "..\..\Translation\Views\View.cshtml"
+            #line 130 "..\..\Translation\Views\View.cshtml"
                                                      
                     }
 
@@ -427,7 +461,7 @@ WriteLiteral("                </td>\r\n            </tr>\r\n");
 
 
             
-            #line 126 "..\..\Translation\Views\View.cshtml"
+            #line 134 "..\..\Translation\Views\View.cshtml"
                     }
                 }
             }
@@ -444,14 +478,12 @@ WriteLiteral("    <input type=\"submit\" value=\"Save\" />\r\n");
 
 
             
-            #line 132 "..\..\Translation\Views\View.cshtml"
+            #line 140 "..\..\Translation\Views\View.cshtml"
 }
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n");
-
 
         }
     }
