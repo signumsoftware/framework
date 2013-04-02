@@ -43,7 +43,7 @@ namespace Signum.Engine
                             writer(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
 
                             if (StopOnException != null && StopOnException(elementID(item), fileName, e))
-                                break;
+                                throw; 
                         }
 
                     SafeConsole.WriteSameLine(pi.ToString());
@@ -62,7 +62,7 @@ namespace Signum.Engine
 
                     IProgressInfo pi;
                     var col = collection.ToProgressEnumerator(out pi).AsThreadSafe();
-                    bool stop = false; 
+                    Exception stopException = null; 
                     List<Thread> t = 0.To(4).Select(i => new Thread(() =>
                     {
                         foreach (var item in col)
@@ -82,12 +82,12 @@ namespace Signum.Engine
                                     writer(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
 
                                     if (StopOnException != null && StopOnException(elementID(item), fileName, e))
-                                        stop = true;
+                                        stopException = e;
                                 }
                             lock (SafeConsole.SyncKey)
                                 SafeConsole.WriteSameLine(pi.ToString());
 
-                            if (stop)
+                            if (stopException != null)
                                 break;
                         }
                     })).ToList();
@@ -95,6 +95,9 @@ namespace Signum.Engine
                     t.ForEach(a => a.Start());
 
                     t.ForEach(a => a.Join());
+
+                    if (stopException != null)
+                        throw stopException;
                 }
                 finally
                 {
