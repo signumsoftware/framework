@@ -52,7 +52,7 @@ namespace Signum.Entities.Reflection
             return !(arg is PropertyInfo && arg.HasAttribute<HiddenPropertyAttribute>());
         }
 
-        static Lazy<HashSet<Type>> EnumsInEntities = new Lazy<HashSet<Type>>(() =>
+        static ResetLazy<HashSet<Type>> EnumsInEntities = new ResetLazy<HashSet<Type>>(() =>
         {
             return (from a in AppDomain.CurrentDomain.GetAssemblies().Where(a => a.HasAttribute<DefaultAssemblyCultureAttribute>())
                     from t in a.GetTypes()

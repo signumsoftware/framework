@@ -297,7 +297,7 @@ namespace Signum.Entities
 
         public static Type Extract(Type liteType)
         {
-            if (liteType.IsGenericType && liteType.GetGenericTypeDefinition() == typeof(Lite<>))
+            if (liteType.IsInstantiationOf(typeof(Lite<>)) || typeof(LiteImp).IsAssignableFrom(liteType))
                 return liteType.GetGenericArguments()[0];
             return null;
         }

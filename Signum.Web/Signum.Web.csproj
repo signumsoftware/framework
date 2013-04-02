@@ -217,7 +217,6 @@
     <Compile Include="TypeContext\TypeContextExpression.cs" />
     <Compile Include="TypeContext\TypeContextHelper.cs" />
     <Compile Include="TypeContext\TypeContextUtilities.cs" />
-    <Compile Include="Signum\Models\ValueLineBoxModel.cs" />
     <Compile Include="LineHelpers\EntityInfo.cs" />
     <Compile Include="JSRenderer\JsValidatorOptions.cs" />
     <Compile Include="JSRenderer\JsFindOptions.cs" />

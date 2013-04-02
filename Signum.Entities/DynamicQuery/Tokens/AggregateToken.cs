@@ -170,6 +170,7 @@ namespace Signum.Entities.DynamicQuery
         }
     }
 
+    [DescriptionOptions(DescriptionOptions.Members)]
     public enum AggregateFunction
     {
         Count,

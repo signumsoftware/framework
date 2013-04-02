@@ -16,6 +16,7 @@ using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Test
 {
+    [DescriptionOptions(DescriptionOptions.Members)]
     public enum EnumPruebas
     {
         Test,
