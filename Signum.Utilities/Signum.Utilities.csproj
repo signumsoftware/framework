@@ -89,7 +89,6 @@
     <Compile Include="NaturalLanguageTools.cs" />
     <Compile Include="Pagination.cs" />
     <Compile Include="Polymorphic.cs" />
-    <Compile Include="QueryableExtensions.cs" />
     <Compile Include="Reflection\GenericInvoker.cs" />
     <Compile Include="Reflection\TupleExtensions.cs" />
     <Compile Include="Synchronization\ResetLazy.cs" />

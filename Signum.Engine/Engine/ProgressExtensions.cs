@@ -9,8 +9,12 @@ using System.IO;
 
 namespace Signum.Engine
 {
+    public delegate bool StopOnExceptionDelegate(string id, string fileName, Exception exception);
+
     public static class ProgressExtensions
     {
+        public static StopOnExceptionDelegate StopOnException = null;
+
         public static void ProgressForeach<T>(this IEnumerable<T> collection, Func<T, string> elementID, string fileName, Action<T, LogWriter> action)
         {
             using (StreamWriter log = TryOpenAutoFlush(fileName))
@@ -37,6 +41,9 @@ namespace Signum.Engine
                         {
                             writer(ConsoleColor.Red, "{0:u} Error in {1}: {2}", DateTime.Now, elementID(item), e.Message);
                             writer(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
+
+                            if (StopOnException != null && StopOnException(elementID(item), fileName, e))
+                                throw; 
                         }
 
                     SafeConsole.WriteSameLine(pi.ToString());
@@ -55,7 +62,7 @@ namespace Signum.Engine
 
                     IProgressInfo pi;
                     var col = collection.ToProgressEnumerator(out pi).AsThreadSafe();
-
+                    Exception stopException = null; 
                     List<Thread> t = 0.To(4).Select(i => new Thread(() =>
                     {
                         foreach (var item in col)
@@ -73,15 +80,24 @@ namespace Signum.Engine
                                 {
                                     writer(ConsoleColor.Red, "{0:u} Error in {1}: {2}", DateTime.Now, elementID(item), e.Message);
                                     writer(ConsoleColor.DarkRed, e.StackTrace.Indent(4));
+
+                                    if (StopOnException != null && StopOnException(elementID(item), fileName, e))
+                                        stopException = e;
                                 }
                             lock (SafeConsole.SyncKey)
                                 SafeConsole.WriteSameLine(pi.ToString());
+
+                            if (stopException != null)
+                                break;
                         }
                     })).ToList();
 
                     t.ForEach(a => a.Start());
 
                     t.ForEach(a => a.Join());
+
+                    if (stopException != null)
+                        throw stopException;
                 }
                 finally
                 {

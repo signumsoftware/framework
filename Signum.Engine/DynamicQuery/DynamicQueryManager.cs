@@ -69,30 +69,35 @@ namespace Signum.Engine.DynamicQuery
         public ResultTable ExecuteQuery(QueryRequest request)
         {
             using (ExecutionMode.UserInterface())
+            using (HeavyProfiler.Log("ExecuteQuery", () => QueryUtils.GetQueryUniqueKey(request.QueryName)))
                 return queries[request.QueryName].Core.Value.ExecuteQuery(request);
         }
 
         public int ExecuteQueryCount(QueryCountRequest request)
         {
             using (ExecutionMode.UserInterface())
+            using (HeavyProfiler.Log("ExecuteQueryCount", () => QueryUtils.GetQueryUniqueKey(request.QueryName)))
                 return queries[request.QueryName].Core.Value.ExecuteQueryCount(request);
         }
 
         internal ResultTable ExecuteGroupQuery(QueryGroupRequest request)
         {
             using (ExecutionMode.UserInterface())
+            using (HeavyProfiler.Log("ExecuteGroupQuery", () => QueryUtils.GetQueryUniqueKey(request.QueryName)))
                 return queries[request.QueryName].Core.Value.ExecuteQueryGroup(request);
         }
 
         public Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request)
         {
             using (ExecutionMode.UserInterface())
+            using (HeavyProfiler.Log("ExecuteUniqueEntity", () => QueryUtils.GetQueryUniqueKey(request.QueryName)))
                 return queries[request.QueryName].Core.Value.ExecuteUniqueEntity(request);
         }
 
         public QueryDescription QueryDescription(object queryName)
         {
             using (ExecutionMode.UserInterface())
+            using (HeavyProfiler.Log("QueryDescription", () => QueryUtils.GetQueryUniqueKey(queryName)))
                 return queries[queryName].GetDescription();
         }
 

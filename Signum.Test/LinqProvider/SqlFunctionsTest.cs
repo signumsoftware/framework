@@ -207,7 +207,7 @@ namespace Signum.Test.LinqProvider
         public void Etc()
         {
             Assert.IsTrue(Enumerable.SequenceEqual(
-                Database.Query<AlbumDN>().Select(a => a.Name.Etc(10)).Order().ToList(),
+                Database.Query<AlbumDN>().Select(a => a.Name.Etc(10)).OrderBy().ToList(),
                 Database.Query<AlbumDN>().Select(a => a.Name).ToList().Select(l => l.Etc(10)).OrderBy().ToList()));
 
             Assert.AreEqual(

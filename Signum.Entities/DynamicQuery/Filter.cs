@@ -80,7 +80,7 @@ namespace Signum.Entities.DynamicQuery
                     hasNull = true;
                 }
 
-                Expression right = Expression.Constant(clone, typeof(MList<>).MakeGenericType(Token.Type.Nullify()));
+                Expression right = Expression.Constant(clone, typeof(IEnumerable<>).MakeGenericType(Token.Type.Nullify()));
                 var contains =  Expression.Call(miContainsEnumerable.MakeGenericMethod(Token.Type.Nullify()), right, left.Nullify());
 
                 if (!hasNull)

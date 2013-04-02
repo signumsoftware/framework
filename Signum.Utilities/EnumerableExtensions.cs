@@ -901,7 +901,7 @@ namespace Signum.Utilities
                 if (newList.Count == groupSize)
                 {
                     yield return newList;
-                    newList = new List<T>();
+                    newList = new List<T>(groupSize);
                 }
             }
 

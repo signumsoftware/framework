@@ -208,8 +208,10 @@ namespace Signum.Engine.Maps
 
             var bindings = (from kvp in EmbeddedFields
                             let fi = kvp.Value.FieldInfo
-                            select new FieldBinding(fi,
-                                dic.TryGetC(fi.Name) ?? tools.VisitConstant(Expression.Constant(null, fi.FieldType), fi.FieldType))).ToReadOnly();
+                            select new FieldBinding(fi, 
+                                !(fi.FieldType.IsByRef || fi.FieldType.IsNullable()) ?  dic.GetOrThrow(fi.Name, "No value defined for non-nullable field {0}") : 
+                                (dic.TryGetC(fi.Name) ?? tools.VisitConstant(Expression.Constant(null, fi.FieldType), fi.FieldType))
+                            )).ToReadOnly();
 
             return new EmbeddedEntityExpression(this.FieldType, Expression.Constant(true), bindings, this);
         }

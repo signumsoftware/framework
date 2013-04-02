@@ -301,5 +301,104 @@ namespace Signum.Engine
             SafeConsole.Wait("UnsafeUpdate toStr for {0}".Formato(typeof(T).TypeName()), () =>
                 Database.Query<T>().UnsafeUpdate(a => new T { toStr = expression.Evaluate(a) }));
         }
+
+        public static void UpdateToStrings<T>(IQueryable<T> query, Expression<Func<T, string>> expression) where T : IdentifiableEntity, new()
+        {
+            SafeConsole.Wait("UnsafeUpdate toStr for {0}".Formato(typeof(T).TypeName()), () =>
+                query.UnsafeUpdate(a => new T { toStr = expression.Evaluate(a) }));
+        }
+
+        public static IDisposable PrepareForBatchLoad<T>(bool disableForeignKeys = true, bool disableMultipleIndexes = true, bool disableUniqueIndexes = false) where T : IdentifiableEntity
+        {
+            Table table = Schema.Current.Table(typeof(T));
+
+            return table.PrepareForBathLoad(disableForeignKeys, disableMultipleIndexes, disableUniqueIndexes);
+        }
+
+        private static IDisposable PrepareForBathLoad(this Table table, bool disableForeignKeys, bool disableMultipleIndexes, bool disableUniqueIndexes)
+        {
+            IDisposable disp = PrepareTableForBatchLoad(table, disableForeignKeys, disableMultipleIndexes, disableUniqueIndexes);
+
+            var list = table.RelationalTables().Select(rt => PrepareTableForBatchLoad(rt, disableForeignKeys, disableMultipleIndexes, disableUniqueIndexes)).ToList();
+
+            return new Disposable(() =>
+            {
+                disp.Dispose();
+
+                foreach (var d in list)
+                    d.Dispose();
+            });
+        }
+
+        public static IDisposable PrepareTableForBatchLoad(ITable table, bool disableForeignKeys, bool disableMultipleIndexes, bool disableUniqueIndexes)
+        {
+            SafeConsole.WriteColor(ConsoleColor.Magenta, table.Name + ":");
+            Action onDispose = () => SafeConsole.WriteColor(ConsoleColor.Magenta, table.Name + ":");
+
+            if (disableForeignKeys)
+            {
+                SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " NOCHECK  Foreign Keys");
+                Executor.ExecuteNonQuery("ALTER TABLE {0} NOCHECK CONSTRAINT ALL".Formato(table.Name));
+
+                onDispose += ()=>
+                {
+                    SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " RE-CHECK Foreign Keys");
+                    Executor.ExecuteNonQuery("ALTER TABLE {0}  WITH CHECK CHECK CONSTRAINT ALL".Formato(table.Name));
+                }; 
+            }
+
+            if (disableMultipleIndexes)
+            {
+                var multiIndexes = GetIndixesNames(table, unique: false);
+
+                if (multiIndexes.Any())
+                {
+                    SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " DISABLE Multiple Indexes");
+                    Executor.ExecuteNonQuery(multiIndexes.ToString(i => "ALTER INDEX [{0}] ON {1} DISABLE".Formato(i, table.Name), "\r\n"));
+
+                    onDispose += () =>
+                    {
+                        SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " REBUILD Multiple Indexes");
+                        Executor.ExecuteNonQuery(multiIndexes.ToString(i => "ALTER INDEX [{0}] ON {1} REBUILD".Formato(i, table.Name), "\r\n"));
+                    };
+                }
+            }
+
+            if (disableUniqueIndexes)
+            {
+                var uniqueIndexes = GetIndixesNames(table, unique: true);
+
+                if (uniqueIndexes.Any())
+                {
+                    SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " DISABLE Unique Indexes");
+                    Executor.ExecuteNonQuery(uniqueIndexes.ToString(i => "ALTER INDEX [{0}] ON {1} DISABLE".Formato(i, table.Name), "\r\n"));
+
+                    onDispose += () =>
+                    {
+                        SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " REBUILD Unique Indexes");
+                        Executor.ExecuteNonQuery(uniqueIndexes.ToString(i => "ALTER INDEX [{0}] ON {1} REBUILD".Formato(i, table.Name), "\r\n"));
+                    };
+                }
+            }
+
+            Console.WriteLine();
+            onDispose += () => Console.WriteLine();
+
+            return new Disposable(onDispose);
+        }
+
+        private static List<string> GetIndixesNames(this ITable table, bool unique)
+        {
+            using (OverrideDatabaseInViews(table.Name.Schema.Database))
+            {
+                return (from s in Database.View<SysSchemas>()
+                               where s.name == table.Name.Schema.Name
+                               from t in s.Tables()
+                               where t.name == table.Name.Name
+                               from i in t.Indices()
+                               where i.is_unique == unique
+                               select i.name).ToList();
+            }
+        }
     }
 }
