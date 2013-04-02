@@ -18,7 +18,6 @@ using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 using System.Windows.Media;
 using Signum.Services;
-using Signum.Windows.Properties;
 using System.Windows.Automation;
 
 namespace Signum.Windows

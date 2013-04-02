@@ -9,7 +9,6 @@ using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.DataStructures;
 using System.ComponentModel;
-using Signum.Entities.Properties;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using Signum.Utilities.ExpressionTrees;

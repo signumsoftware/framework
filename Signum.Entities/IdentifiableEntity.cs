@@ -6,7 +6,6 @@ using Signum.Utilities;
 using System.Runtime.Serialization;
 using System.Reflection;
 using System.Collections.Specialized;
-using Signum.Entities.Properties;
 using Signum.Utilities.DataStructures;
 using Signum.Entities.Reflection;
 using System.ComponentModel;

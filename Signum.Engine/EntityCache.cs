@@ -7,7 +7,6 @@ using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using Signum.Engine;
 using Signum.Entities.Reflection;
-using Signum.Engine.Properties;
 using Signum.Engine.Maps;
 using System.Collections;
 using Signum.Engine.Linq;

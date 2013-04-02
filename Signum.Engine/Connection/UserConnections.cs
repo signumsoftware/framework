@@ -8,7 +8,6 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using Signum.Engine.Maps;
 using Signum.Utilities;
-using Signum.Engine.Properties;
 
 namespace Signum.Engine
 {

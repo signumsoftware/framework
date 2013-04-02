@@ -15,7 +15,6 @@ using System.Xml.Linq;
 using System.ComponentModel;
 using System.Linq.Expressions;
 using Signum.Entities.Basics;
-using Signum.Engine.Properties;
 
 namespace Signum.Engine.Operations
 {

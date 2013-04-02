@@ -6,7 +6,6 @@ using System.Reflection;
 using Signum.Entities;
 using Signum.Utilities;
 using System.Globalization;
-using Signum.Engine.Properties;
 using System.Diagnostics;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.DataStructures;

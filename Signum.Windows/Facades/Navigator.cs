@@ -11,7 +11,6 @@ using System.ComponentModel;
 using System.Windows.Data;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
-using Signum.Windows.Properties;
 using System.Reflection;
 using Signum.Entities.Reflection;
 using Signum.Entities.DynamicQuery;

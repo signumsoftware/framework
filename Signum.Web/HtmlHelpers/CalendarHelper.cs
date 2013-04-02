@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Web.Mvc;
 using Signum.Utilities;
-using Signum.Web.Properties;
 using System.Globalization;
 using System.Web.Script.Serialization;
 using System.Web;

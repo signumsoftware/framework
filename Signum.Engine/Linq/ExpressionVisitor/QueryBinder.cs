@@ -13,7 +13,6 @@ using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Maps;
 using Signum.Entities.Reflection;
-using Signum.Engine.Properties;
 using Signum.Entities.DynamicQuery;
 using System.Collections.ObjectModel;
 using Microsoft.SqlServer.Server;

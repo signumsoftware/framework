@@ -12,7 +12,6 @@ using Signum.Entities.Basics;
 using Signum.Entities.Reflection;
 using Signum.Engine.Maps;
 using Signum.Engine.Basics;
-using Signum.Web.Properties;
 using Signum.Engine;
 using Signum.Utilities.ExpressionTrees;
 using System.Collections.Concurrent;

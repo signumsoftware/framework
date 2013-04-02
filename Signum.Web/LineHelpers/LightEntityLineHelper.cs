@@ -8,7 +8,6 @@ using Signum.Utilities;
 using System.Web.Mvc.Html;
 using Signum.Entities;
 using Signum.Entities.Reflection;
-using Signum.Web.Properties;
 using System.Web;
 using Signum.Engine;
 

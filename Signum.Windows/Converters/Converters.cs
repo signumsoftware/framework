@@ -15,7 +15,6 @@ using System.Windows.Media;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.DynamicQuery;
-using Signum.Windows.Properties;
 using Signum.Entities.Reflection;
 
 namespace Signum.Windows

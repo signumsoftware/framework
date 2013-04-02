@@ -10,7 +10,6 @@ using System.Collections;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
 using System.Reflection;
-using Signum.Web.Properties;
 using Signum.Engine;
 using Signum.Utilities.DataStructures;
 using System.Web.Mvc;

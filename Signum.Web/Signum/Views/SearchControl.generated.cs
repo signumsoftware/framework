@@ -55,8 +55,7 @@ namespace Signum.Web.Views
     using Signum.Web;
     
     #line 1 "..\..\Signum\Views\SearchControl.cshtml"
-    using Signum.Web.Properties;
-    
+        
     #line default
     #line hidden
     

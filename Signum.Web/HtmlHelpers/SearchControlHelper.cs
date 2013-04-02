@@ -12,7 +12,6 @@ using Signum.Entities.Reflection;
 using System.Linq.Expressions;
 using System.Reflection;
 using Signum.Utilities.Reflection;
-using Signum.Web.Properties;
 using Signum.Engine;
 using Signum.Engine.DynamicQuery;
 #endregion

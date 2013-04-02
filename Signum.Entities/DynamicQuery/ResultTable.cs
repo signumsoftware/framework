@@ -7,7 +7,6 @@ using Signum.Utilities.Reflection;
 using System.Collections;
 using System.Reflection;
 using Signum.Utilities;
-using Signum.Entities.Properties;
 using System.Runtime.Serialization;
 using System.Globalization;
 

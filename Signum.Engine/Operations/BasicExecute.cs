@@ -9,7 +9,6 @@ using Signum.Engine.Exceptions;
 using Signum.Entities.Basics;
 using Signum.Engine.Maps;
 using Signum.Engine.Basics;
-using Signum.Engine.Properties;
 
 namespace Signum.Engine.Operations
 {

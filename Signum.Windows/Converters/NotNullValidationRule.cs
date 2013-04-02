@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Windows.Controls;
 using System.Globalization;
-using Signum.Windows.Properties;
 using Signum.Entities;
 using Signum.Utilities;
 

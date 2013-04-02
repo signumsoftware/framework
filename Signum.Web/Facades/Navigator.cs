@@ -13,7 +13,6 @@ using Signum.Utilities.DataStructures;
 using System.Reflection;
 using Signum.Utilities.Reflection;
 using System.Collections.Specialized;
-using Signum.Web.Properties;
 using Signum.Entities.Reflection;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine.DynamicQuery;

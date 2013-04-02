@@ -8,7 +8,6 @@ using System.Data.SqlClient;
 using Signum.Engine;
 using Signum.Entities;
 using Signum.Utilities.DataStructures;
-using Signum.Engine.Properties;
 using Signum.Engine.Maps;
 using System.Globalization;
 using Microsoft.SqlServer.Types;

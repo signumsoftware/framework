@@ -6,7 +6,6 @@ using Signum.Utilities;
 using System.Data;
 using System.Reflection;
 using Signum.Entities.DynamicQuery;
-using Signum.Engine.Properties;
 using Signum.Entities;
 using System.Diagnostics;
 using Signum.Engine.Maps;

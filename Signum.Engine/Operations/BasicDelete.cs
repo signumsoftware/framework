@@ -8,7 +8,6 @@ using Signum.Utilities;
 using Signum.Engine.Exceptions;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
-using Signum.Engine.Properties;
 
 namespace Signum.Engine.Operations
 {

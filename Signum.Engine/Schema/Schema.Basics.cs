@@ -11,7 +11,6 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Engine;
 using System.Linq.Expressions;
 using Signum.Entities.Reflection;
-using Signum.Engine.Properties;
 using Signum.Utilities.Reflection;
 using System.Collections;
 using Signum.Utilities.DataStructures;

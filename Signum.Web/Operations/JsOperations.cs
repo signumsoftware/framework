@@ -6,7 +6,6 @@ using System.Web.Mvc;
 using System.Web.Mvc.Html;
 using Signum.Utilities;
 using Signum.Entities;
-using Signum.Web.Properties;
 
 namespace Signum.Web.Operations
 {

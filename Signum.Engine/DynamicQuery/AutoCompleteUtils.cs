@@ -9,7 +9,6 @@ using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using System.Data;
 using Signum.Entities.DynamicQuery;
-using Signum.Engine.Properties;
 using Signum.Entities;
 using Signum.Engine.Linq;
 using System.Collections;

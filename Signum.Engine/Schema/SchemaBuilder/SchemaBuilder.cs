@@ -11,7 +11,6 @@ using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using System.Diagnostics;
 using Signum.Entities.Reflection;
-using Signum.Engine.Properties;
 using System.Linq.Expressions;
 using System.Runtime.Remoting.Contexts;
 using Signum.Engine.Linq;

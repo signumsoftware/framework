@@ -49,8 +49,7 @@ namespace Signum.Web.Views
     using Signum.Web;
     
     #line 3 "..\..\Signum\Views\SearchResults.cshtml"
-    using Signum.Web.Properties;
-    
+        
     #line default
     #line hidden
     

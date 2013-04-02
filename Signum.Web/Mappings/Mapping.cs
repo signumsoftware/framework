@@ -9,7 +9,6 @@ using Signum.Entities;
 using Signum.Engine.Maps;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.ExpressionTrees;
-using Signum.Web.Properties;
 using Signum.Engine;
 using Signum.Entities.Reflection;
 using System.Reflection;

@@ -9,7 +9,6 @@ using Signum.Utilities.ExpressionTrees;
 using System.Reflection;
 using Signum.Utilities.Reflection;
 using System.Collections;
-using Signum.Engine.Properties;
 using System.Collections.ObjectModel;
 using Signum.Engine.Maps;
 using System.Data;

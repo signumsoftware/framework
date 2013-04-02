@@ -49,8 +49,7 @@ namespace Signum.Web.Views
     using Signum.Web;
     
     #line 4 "..\..\Signum\Views\FilterBuilder.cshtml"
-    using Signum.Web.Properties;
-    
+        
     #line default
     #line hidden
     

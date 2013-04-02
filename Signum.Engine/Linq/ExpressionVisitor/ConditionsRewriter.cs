@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
 using Signum.Utilities;
-using Signum.Engine.Properties;
 using System.Collections.ObjectModel;
 using Signum.Utilities.ExpressionTrees;
 using System.Data.SqlTypes;

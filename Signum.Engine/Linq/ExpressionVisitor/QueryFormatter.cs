@@ -10,7 +10,6 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.DataStructures;
 using Signum.Entities;
 using Signum.Utilities.Reflection;
-using Signum.Engine.Properties;
 using System.Data;
 using Signum.Engine.Maps;
 using Signum.Entities.DynamicQuery;

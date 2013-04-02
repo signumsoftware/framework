@@ -43,8 +43,7 @@ namespace Signum.Web.Views
     using Signum.Web;
     
     #line 2 "..\..\Signum\Views\PopupControl.cshtml"
-    using Signum.Web.Properties;
-    
+        
     #line default
     #line hidden
     

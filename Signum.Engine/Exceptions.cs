@@ -6,7 +6,6 @@ using System.Runtime.Serialization;
 using System.Data.SqlClient;
 using System.Text.RegularExpressions;
 using Signum.Utilities;
-using Signum.Engine.Properties;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Reflection;

@@ -12,7 +12,6 @@ using System.Resources;
 using System.Collections.Concurrent;
 using System.Web;
 using System.Web.Mvc;
-using Signum.Web.Properties;
 using System.Web.Script.Serialization;
 using Signum.Entities;
 
