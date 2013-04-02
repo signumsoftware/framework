@@ -9,7 +9,6 @@ using Signum.Engine;
 using Signum.Engine.Authorization;
 using Signum.Services;
 using Signum.Utilities;
-using Signum.Web.Extensions.Properties;
 using System.Net.Mail;
 using System.Net;
 using System.Text;

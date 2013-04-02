@@ -5,7 +5,6 @@ using System.Text;
 using System.Globalization;
 using Signum.Utilities;
 using System.ComponentModel;
-using Signum.Entities.Extensions.Properties;
 using System.Reflection;
 
 namespace Signum.Entities.Scheduler

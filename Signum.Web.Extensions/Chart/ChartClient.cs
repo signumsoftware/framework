@@ -4,7 +4,6 @@ using System.Linq;
 using System.Web;
 using System.Reflection;
 using Signum.Web;
-using Signum.Web.Extensions.Properties;
 using Signum.Entities.Chart;
 using Signum.Utilities;
 using Signum.Engine.DynamicQuery;

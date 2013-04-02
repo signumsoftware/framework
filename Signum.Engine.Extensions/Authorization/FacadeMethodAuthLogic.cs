@@ -11,7 +11,6 @@ using System.Reflection;
 using Signum.Utilities;
 using Signum.Entities;
 using Signum.Services;
-using Signum.Engine.Extensions.Properties;
 
 namespace Signum.Engine.Authorization
 {

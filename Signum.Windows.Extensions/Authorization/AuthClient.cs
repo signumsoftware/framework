@@ -16,7 +16,6 @@ using Signum.Utilities.Reflection;
 using Signum.Utilities.DataStructures;
 using Signum.Windows.Operations;
 using Signum.Windows.Omnibox;
-using Signum.Windows.Extensions.Properties;
 using System.IO;
 using Microsoft.Win32;
 

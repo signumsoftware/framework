@@ -7,7 +7,6 @@ using Signum.Entities.Reports;
 using Signum.Entities.UserQueries;
 using Signum.Entities.Chart;
 using System.Reflection;
-using Signum.Entities.Extensions.Properties;
 using System.Linq.Expressions;
 
 namespace Signum.Entities.ControlPanel

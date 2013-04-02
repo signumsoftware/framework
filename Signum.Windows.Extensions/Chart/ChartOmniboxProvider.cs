@@ -11,7 +11,6 @@ using Signum.Utilities;
 using Signum.Windows.Authorization;
 using Signum.Entities.Chart;
 using Signum.Entities.DynamicQuery;
-using Signum.Windows.Extensions.Properties;
 using System.Windows;
 
 namespace Signum.Windows.Chart

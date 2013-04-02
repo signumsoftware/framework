@@ -11,7 +11,6 @@ using Signum.Utilities.DataStructures;
 using Signum.Engine;
 using System.Web.Mvc;
 using Signum.Entities.Authorization;
-using Signum.Web.Extensions.Properties;
 using Signum.Services;
 #endregion
 

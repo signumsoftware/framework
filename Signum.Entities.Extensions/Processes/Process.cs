@@ -9,7 +9,6 @@ using System.Reflection;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using System.ComponentModel;
-using Signum.Entities.Extensions.Properties;
 using Signum.Entities.Basics;
 using Signum.Entities.Scheduler;
 using Signum.Entities.Authorization;

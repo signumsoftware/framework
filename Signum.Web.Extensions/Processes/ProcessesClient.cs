@@ -19,7 +19,6 @@ using System.Web.Routing;
 using Signum.Entities.Processes;
 using Signum.Engine.Operations;
 using Signum.Web.Omnibox;
-using Signum.Web.Extensions.Properties;
 
 namespace Signum.Web.Processes
 {

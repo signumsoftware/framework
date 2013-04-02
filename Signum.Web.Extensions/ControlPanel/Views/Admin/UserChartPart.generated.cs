@@ -67,8 +67,7 @@ namespace Signum.Web.Extensions.ControlPanel.Views.Admin
     #line hidden
     
     #line 2 "..\..\ControlPanel\Views\Admin\UserChartPart.cshtml"
-    using Signum.Web.Properties;
-    
+        
     #line default
     #line hidden
     

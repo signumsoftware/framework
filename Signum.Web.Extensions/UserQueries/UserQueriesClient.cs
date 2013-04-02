@@ -14,7 +14,6 @@ using Signum.Entities.DynamicQuery;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Reports;
 using Signum.Engine;
-using Signum.Web.Extensions.Properties;
 using Signum.Engine.Basics;
 using Signum.Entities.UserQueries;
 using Signum.Engine.UserQueries;

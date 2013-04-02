@@ -88,8 +88,7 @@ namespace Signum.Web.Extensions.Chart.Views
     #line hidden
     
     #line 2 "..\..\Chart\Views\ChartBuilder.cshtml"
-    using Signum.Web.Extensions.Properties;
-    
+        
     #line default
     #line hidden
     

@@ -11,7 +11,6 @@ using Signum.Entities.Authorization;
 using Signum.Windows.Authorization;
 using System.Windows;
 using Signum.Utilities;
-using Signum.Windows.Properties;
 using Microsoft.Win32;
 using System.Diagnostics;
 using System.IO;

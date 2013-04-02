@@ -8,7 +8,6 @@ using Signum.Entities;
 using Signum.Engine.Basics;
 using Signum.Utilities;
 using System.IO;
-using Signum.Engine.Extensions.Properties;
 using Signum.Engine.DynamicQuery;
 using System.Reflection;
 using System.Diagnostics;

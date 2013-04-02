@@ -1,5 +1,4 @@
 ﻿using Signum.Entities.Profiler;
-using Signum.Windows.Extensions.Properties;
 using Signum.Windows.Omnibox;
 using System;
 using System.Collections.Generic;

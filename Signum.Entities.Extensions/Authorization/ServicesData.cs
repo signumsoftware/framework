@@ -5,7 +5,6 @@ using System.Text;
 using Signum.Entities.Basics;
 using Signum.Entities;
 using Signum.Utilities;
-using Signum.Entities.Extensions.Properties;
 using System.Collections.ObjectModel;
 
 namespace Signum.Entities.Authorization

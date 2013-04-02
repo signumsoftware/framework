@@ -15,7 +15,6 @@ using System.Threading;
 using Signum.Services;
 using Signum.Utilities.Reflection;
 using System.Reflection;
-using Signum.Engine.Extensions.Properties;
 using Signum.Engine.Mailing;
 using Signum.Engine.Operations;
 using System.Xml.Linq;

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Entities;
-using Signum.Entities.Extensions.Properties;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using Signum.Entities.Basics;

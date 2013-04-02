@@ -83,8 +83,7 @@ namespace Signum.Web.Extensions.Chart.Views
     #line hidden
     
     #line 2 "..\..\Chart\Views\UserChart.cshtml"
-    using Signum.Web.Extensions.Properties;
-    
+        
     #line default
     #line hidden
     

@@ -4,7 +4,6 @@ using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Utilities;
 using System.Web.Mvc;
-using Signum.Web.Properties;
 using Signum.Web.Controllers;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Notes;

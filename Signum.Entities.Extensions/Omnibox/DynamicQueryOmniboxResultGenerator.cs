@@ -6,7 +6,6 @@ using Signum.Utilities;
 using Signum.Entities.DynamicQuery;
 using System.Text.RegularExpressions;
 using Signum.Utilities.Reflection;
-using Signum.Entities.Extensions.Properties;
 using Signum.Entities.Reflection;
 using Signum.Utilities.DataStructures;
 using Signum.Entities.Basics;

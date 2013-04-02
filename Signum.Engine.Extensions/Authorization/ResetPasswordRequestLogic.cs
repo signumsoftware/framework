@@ -8,8 +8,8 @@ using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Engine.Mailing;
-using Signum.Engine.Extensions.Properties;
 using Signum.Utilities;
+using System.Globalization;
 
 namespace Signum.Engine.Authorization
 {
@@ -46,7 +46,7 @@ namespace Signum.Engine.Authorization
                     {
                         Subject = AuthMessage.ResetPasswordCode.NiceToString(),
                         Body = EmailRenderer.Replace(typeof(AuthLogic).Assembly.ReadResourceStream("Signum.Engine.Extensions.Authorization.ResetPasswordRequestMail.htm"),
-                               model, null, Resources.ResourceManager)
+                               model, null, DescriptionManager.GetLocalizedAssembly(typeof(AuthMessage).Assembly, CultureInfo.CurrentUICulture))
                     };
                 });
             }

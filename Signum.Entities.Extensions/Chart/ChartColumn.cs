@@ -9,7 +9,6 @@ using System.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using System.ComponentModel;
 using Signum.Entities.Reports;
-using Signum.Entities.Extensions.Properties;
 using Signum.Entities.UserQueries;
 using Signum.Entities.Reflection;
 

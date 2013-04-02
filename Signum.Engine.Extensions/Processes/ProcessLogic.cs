@@ -14,7 +14,6 @@ using Signum.Utilities.DataStructures;
 using System.Diagnostics;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
-using Signum.Engine.Extensions.Properties;
 using Signum.Entities.Scheduler;
 using System.Reflection;
 using Signum.Utilities.Reflection;

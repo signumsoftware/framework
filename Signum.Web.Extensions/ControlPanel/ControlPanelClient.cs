@@ -11,7 +11,6 @@ using System.Web.Routing;
 using Signum.Web.UserQueries;
 using Signum.Entities;
 using Signum.Entities.Reports;
-using Signum.Web.Extensions.Properties;
 using Signum.Web.Controllers;
 
 namespace Signum.Web.ControlPanel

@@ -50,8 +50,7 @@ namespace Signum.Web.Extensions.AuthAdmin.Views
     
     #line default
     #line hidden
-    using Signum.Web.Extensions.Properties;
-    
+        
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.5.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/AuthAdmin/Views/Types.cshtml")]
     public class Types : System.Web.Mvc.WebViewPage<dynamic>

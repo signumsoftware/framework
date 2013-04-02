@@ -7,7 +7,6 @@ using System.Reflection;
 using Signum.Utilities;
 using System.Linq.Expressions;
 using Signum.Utilities.DataStructures;
-using Signum.Entities.Extensions.Properties;
 using System.ComponentModel;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Basics;

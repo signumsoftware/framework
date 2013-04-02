@@ -61,8 +61,7 @@ namespace Signum.Web.Extensions.ControlPanel.Views
     #line hidden
     
     #line 2 "..\..\ControlPanel\Views\SearchControlPart.cshtml"
-    using Signum.Web.Properties;
-    
+        
     #line default
     #line hidden
     

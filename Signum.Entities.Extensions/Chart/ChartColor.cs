@@ -5,7 +5,6 @@ using System.Text;
 using System.Linq.Expressions;
 using Signum.Entities.Basics;
 using Signum.Utilities;
-using Signum.Entities.Extensions.Properties;
 
 namespace Signum.Entities.Chart
 {

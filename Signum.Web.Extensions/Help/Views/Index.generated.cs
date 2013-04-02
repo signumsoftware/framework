@@ -49,8 +49,7 @@ namespace Signum.Web.Extensions.Help.Views
     #line hidden
     
     #line 2 "..\..\Help\Views\Index.cshtml"
-    using Signum.Web.Extensions.Properties;
-    
+        
     #line default
     #line hidden
     

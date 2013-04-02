@@ -10,7 +10,6 @@ using Signum.Entities.Authorization;
 using Signum.Engine.DynamicQuery;
 using System.Reflection;
 using Signum.Entities.Reflection;
-using Signum.Engine.Extensions.Properties;
 using Signum.Entities.Disconnected;
 using Signum.Utilities.Reflection;
 using System.IO;

@@ -16,7 +16,6 @@ using Signum.Entities.Reflection;
 using System.Linq.Expressions;
 using Signum.Engine.Maps;
 using System.Web.Routing;
-using Signum.Web.Extensions.Properties;
 using Signum.Engine.Basics;
 using Signum.Web.Basic;
 using Signum.Web.Omnibox;

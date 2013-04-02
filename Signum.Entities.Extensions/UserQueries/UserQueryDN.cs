@@ -10,7 +10,6 @@ using System.Globalization;
 using System.Reflection;
 using Signum.Entities.Reports;
 using System.Linq.Expressions;
-using Signum.Entities.Extensions.Properties;
 using System.ComponentModel;
 
 namespace Signum.Entities.UserQueries

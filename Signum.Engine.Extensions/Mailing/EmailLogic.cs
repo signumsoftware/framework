@@ -14,7 +14,6 @@ using Signum.Entities.Processes;
 using Signum.Entities;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Operations;
-using Signum.Engine.Extensions.Properties;
 using System.Net;
 using Signum.Engine.Authorization;
 using Signum.Utilities.Reflection;

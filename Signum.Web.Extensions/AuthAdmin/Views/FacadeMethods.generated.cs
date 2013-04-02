@@ -32,8 +32,7 @@ namespace Signum.Web.Extensions.AuthAdmin.Views
     using Signum.Utilities;
     using Signum.Web;
     using Signum.Web.Auth;
-    using Signum.Web.Extensions.Properties;
-    
+        
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.5.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/AuthAdmin/Views/FacadeMethods.cshtml")]
     public class FacadeMethods : System.Web.Mvc.WebViewPage<dynamic>

@@ -186,7 +186,9 @@ namespace Signum.Entities.Authorization
         WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow,
         [Description("You can reset your password by following the link below:")]
         YouCanResetYourPasswordByFollowingTheLinkBelow,
-        YouMustRepeatTheNewPassword
+        YouMustRepeatTheNewPassword,
+        YouRecentlyRequestedANewPassword,
+        YourUsernameIs0,
     }
 
 }

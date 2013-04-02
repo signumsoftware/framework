@@ -13,7 +13,6 @@ using Signum.Utilities.DataStructures;
 using Signum.Utilities;
 using System.Globalization;
 using Signum.Entities.Reflection;
-using Signum.Engine.Extensions.Properties;
 using Signum.Entities;
 using Signum.Entities.Reports;
 #endregion

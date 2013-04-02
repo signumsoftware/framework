@@ -325,14 +325,14 @@ namespace Signum.Windows.Files
                     return;
 
                 if (files.Length != 1)
-                    throw new ApplicationException(Signum.Windows.Extensions.Properties.Resources.OnlyOneFileSupported);
+                    throw new ApplicationException(FileMessage.OnlyOneFileIsSupported.NiceToString());
             }
             else if (e.CanHandleOutlookAttachment())
             {
                 var tuples = e.DropOutlookAttachment();
 
                 if (tuples.Count != 1)
-                    throw new ApplicationException(Signum.Windows.Extensions.Properties.Resources.OnlyOneFileSupported);
+                    throw new ApplicationException(FileMessage.OnlyOneFileIsSupported.NiceToString());
 
                 var tuple = tuples.SingleEx();
 

@@ -12,7 +12,6 @@ using Signum.Entities;
 using Signum.Utilities;
 using System.Reflection;
 using System.Security.Authentication;
-using Signum.Engine.Extensions.Properties;
 using Signum.Entities.Reflection;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities.DataStructures;

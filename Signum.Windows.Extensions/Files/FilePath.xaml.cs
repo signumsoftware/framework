@@ -16,7 +16,6 @@ using Signum.Entities;
 using Signum.Entities.Files;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Reflection;
-using Signum.Windows.Extensions.Properties;
 using Signum.Windows.Files;
 using System.Diagnostics;
 using System.IO;

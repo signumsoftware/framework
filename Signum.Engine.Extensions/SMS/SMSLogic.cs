@@ -6,7 +6,6 @@ using Signum.Engine.Maps;
 using Signum.Engine.DynamicQuery;
 using System.Reflection;
 using Signum.Entities.SMS;
-using Signum.Engine.Extensions.Properties;
 using Signum.Entities;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;

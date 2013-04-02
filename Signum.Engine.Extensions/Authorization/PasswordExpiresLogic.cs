@@ -8,7 +8,6 @@ using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Engine.Mailing;
-using Signum.Engine.Extensions.Properties;
 using Signum.Engine.Operations;
 using Signum.Utilities;
 

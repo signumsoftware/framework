@@ -76,8 +76,7 @@ namespace Signum.Web.Extensions.Chart.Views
     #line hidden
     
     #line 3 "..\..\Chart\Views\ChartResultsTable.cshtml"
-    using Signum.Web.Properties;
-    
+        
     #line default
     #line hidden
     

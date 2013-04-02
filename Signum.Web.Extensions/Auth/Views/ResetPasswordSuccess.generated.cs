@@ -31,8 +31,7 @@ namespace Signum.Web.Extensions.Auth.Views
     using Signum.Utilities;
     using Signum.Web;
     using Signum.Web.Auth;
-    using Signum.Web.Extensions.Properties;
-    
+        
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.5.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Auth/Views/ResetPasswordSuccess.cshtml")]
     public class ResetPasswordSuccess : System.Web.Mvc.WebViewPage<dynamic>

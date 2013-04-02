@@ -7,7 +7,6 @@ using System.Reflection;
 using System.Web.Mvc;
 using Signum.Utilities;
 using System.Web.UI;
-using Signum.Web.Extensions.Properties;
 using Signum.Entities.Reports;
 using Signum.Entities.Basics;
 using Signum.Entities;

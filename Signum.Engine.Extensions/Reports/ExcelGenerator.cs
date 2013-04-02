@@ -16,7 +16,6 @@ using Signum.Entities.Reflection;
 using Signum.Engine;
 using Signum.Entities.Reports;
 using Signum.Entities;
-using Signum.Engine.Extensions.Properties;
 using Signum.Engine.DynamicQuery;
 #endregion
 

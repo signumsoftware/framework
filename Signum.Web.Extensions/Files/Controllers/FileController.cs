@@ -14,7 +14,6 @@ using Signum.Web;
 using Signum.Engine;
 using Signum.Engine.Operations;
 using Signum.Engine.Basics;
-using Signum.Web.Extensions.Properties;
 using System.IO;
 using Signum.Entities.Files;
 using Signum.Entities.Basics;

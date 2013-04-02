@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using System.Security.Authentication;
-using Signum.Entities.Extensions.Properties;
 using System.Linq.Expressions;
 
 namespace Signum.Entities.Authorization

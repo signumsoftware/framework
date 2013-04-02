@@ -36,7 +36,8 @@ namespace Signum.Entities.Files
         SelectFile,
         ViewFile,
         [Description("Viewing has no default implementation for {0}")]
-        ViewingHasNotDefaultImplementationFor0
+        ViewingHasNotDefaultImplementationFor0,
+        OnlyOneFileIsSupported
     }
 
 

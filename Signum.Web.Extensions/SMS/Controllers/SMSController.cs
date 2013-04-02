@@ -9,7 +9,6 @@ using Signum.Utilities;
 using Signum.Engine;
 using Signum.Entities;
 using Signum.Engine.Maps;
-using Signum.Web.Extensions.Properties;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.Reflection;
 using Signum.Entities.DynamicQuery;

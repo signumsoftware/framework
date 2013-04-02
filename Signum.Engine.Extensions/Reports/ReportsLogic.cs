@@ -8,7 +8,6 @@ using Signum.Entities;
 using Signum.Engine.Maps;
 using Signum.Engine.Linq;
 using Signum.Entities.DynamicQuery;
-using Signum.Engine.Extensions.Properties;
 using Signum.Engine.Basics;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;

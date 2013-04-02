@@ -13,7 +13,6 @@ using System.Text.RegularExpressions;
 using System.Diagnostics;
 using Signum.Web.Extensions;
 using System.Text;
-using Signum.Web.Extensions.Properties;
 using Signum.Engine;
 using Signum.Engine.WikiMarkup;
 using Signum.Engine.Basics;
