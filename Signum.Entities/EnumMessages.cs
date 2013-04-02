@@ -275,6 +275,8 @@ Lose changes?")]
     public enum QuickLinkMessage
     {
         [Description("Quick links")]
-        Quicklinks
+        Quicklinks,
+        [Description("No {0} found")]
+        No0Found
     }
 }
