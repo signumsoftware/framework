@@ -95,6 +95,7 @@ namespace Signum.Entities.Files
             fileTypeEnum = ftEnum;
         }
 
+        [NotNullable]
         FileTypeDN fileType;
         public FileTypeDN FileType
         {
@@ -102,6 +103,7 @@ namespace Signum.Entities.Files
             internal set { Set(ref fileType, value, () => FileType); }
         }
 
+        [NotNullable]
         FileRepositoryDN repository;
         public FileRepositoryDN Repository
         {

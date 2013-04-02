@@ -49,7 +49,7 @@ namespace Signum.Engine.Cache
             }
         }
 
-        static void OnStart()
+        internal static void OnStart()
         {
             if (GloballyDisabled)
                 return;

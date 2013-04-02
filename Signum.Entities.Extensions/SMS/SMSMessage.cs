@@ -17,7 +17,7 @@ namespace Signum.Entities.SMS
     }
 
     [Serializable, EntityKind(EntityKind.Main)]
-    public class SMSMessageDN : Entity, IProcessLineDN
+    public class SMSMessageDN : CorruptEntity, IProcessLineDN
     {
         public static string DefaultFrom;
 

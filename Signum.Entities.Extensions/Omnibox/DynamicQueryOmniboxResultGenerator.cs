@@ -18,7 +18,7 @@ namespace Signum.Entities.Omnibox
 
         public DynamicQueryOmniboxResultGenerator(IEnumerable<object> queryNames)
         {
-            queries = queryNames.ToDictionary(QueryUtils.GetCleanName);
+            queries = queryNames.ToDictionary(QueryUtils.GetCleanName, "Omnibox queryNames");
         }
 
 
