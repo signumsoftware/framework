@@ -346,28 +346,34 @@ namespace Signum.Engine
             {
                 var multiIndexes = GetIndixesNames(table, unique: false);
 
-                SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " DISABLE Multiple Indexes");
-                Executor.ExecuteNonQuery(multiIndexes.ToString(i => "ALTER INDEX [{0}] ON {1} DISABLE".Formato(i, table.Name), "\r\n"));
-
-                onDispose += () =>
+                if (multiIndexes.Any())
                 {
-                    SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " REBUILD Multiple Indexes");
-                    Executor.ExecuteNonQuery(multiIndexes.ToString(i => "ALTER INDEX [{0}] ON {1} REBUILD".Formato(i, table.Name), "\r\n"));
-                };
+                    SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " DISABLE Multiple Indexes");
+                    Executor.ExecuteNonQuery(multiIndexes.ToString(i => "ALTER INDEX [{0}] ON {1} DISABLE".Formato(i, table.Name), "\r\n"));
+
+                    onDispose += () =>
+                    {
+                        SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " REBUILD Multiple Indexes");
+                        Executor.ExecuteNonQuery(multiIndexes.ToString(i => "ALTER INDEX [{0}] ON {1} REBUILD".Formato(i, table.Name), "\r\n"));
+                    };
+                }
             }
 
             if (disableUniqueIndexes)
             {
                 var uniqueIndexes = GetIndixesNames(table, unique: true);
 
-                SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " DISABLE Unique Indexes");
-                Executor.ExecuteNonQuery(uniqueIndexes.ToString(i => "ALTER INDEX [{0}] ON {1} DISABLE".Formato(i, table.Name), "\r\n"));
-
-                onDispose += () =>
+                if (uniqueIndexes.Any())
                 {
-                    SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " REBUILD Unique Indexes");
-                    Executor.ExecuteNonQuery(uniqueIndexes.ToString(i => "ALTER INDEX [{0}] ON {1} REBUILD".Formato(i, table.Name), "\r\n"));
-                };
+                    SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " DISABLE Unique Indexes");
+                    Executor.ExecuteNonQuery(uniqueIndexes.ToString(i => "ALTER INDEX [{0}] ON {1} DISABLE".Formato(i, table.Name), "\r\n"));
+
+                    onDispose += () =>
+                    {
+                        SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " REBUILD Unique Indexes");
+                        Executor.ExecuteNonQuery(uniqueIndexes.ToString(i => "ALTER INDEX [{0}] ON {1} REBUILD".Formato(i, table.Name), "\r\n"));
+                    };
+                }
             }
 
             Console.WriteLine();
