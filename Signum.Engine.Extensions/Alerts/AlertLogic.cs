@@ -71,6 +71,7 @@ namespace Signum.Engine.Alerts
                 AlertGraph.Register();
 
                 AlertTypeEnumLogic.Start(sb, () => SystemAlertTypes);
+                DescriptionManager.DefaultDescriptionOptions += DescriptionManager_DefaultDescriptionOptions; 
 
                 new BasicExecute<AlertTypeDN>(AlertTypeOperation.Save)
                 {
@@ -88,6 +89,11 @@ namespace Signum.Engine.Alerts
 
                 started = true;
             }
+        }
+
+        static DescriptionOptions? DescriptionManager_DefaultDescriptionOptions(Type type)
+        {
+            return type.IsEnum && type.Name.EndsWith("Alert") ? DescriptionOptions.Members : (DescriptionOptions?)null;
         }
 
         public static void RegisterAlertType(Enum alertType)
