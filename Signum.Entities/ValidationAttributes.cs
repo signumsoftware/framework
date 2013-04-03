@@ -645,7 +645,7 @@ namespace Signum.Entities
     {
         Func<E, S> getState;
         string[] propertyNames;
-        string[] propertyNiceNames;
+        PropertyInfo[] properties;
         Func<E, object>[] getters;
 
         Dictionary<S, bool?[]> dictionary = new Dictionary<S, bool?[]>();
@@ -653,10 +653,9 @@ namespace Signum.Entities
         public StateValidator(Func<E, S> getState, params Expression<Func<E, object>>[] properties)
         {
             this.getState = getState;
-            PropertyInfo[] pis = properties.Select(p => ReflectionTools.GetPropertyInfo(p)).ToArray();
-            propertyNames = pis.Select(pi => pi.Name).ToArray();
-            propertyNiceNames = pis.Select(pi => pi.NiceName()).ToArray();
-            getters = properties.Select(p => p.Compile()).ToArray();
+            this.properties = properties.Select(p => ReflectionTools.GetPropertyInfo(p)).ToArray();
+            this.propertyNames = properties.Select(pi => pi.Name).ToArray();
+            this.getters = properties.Select(p => p.Compile()).ToArray();
         }
 
         public void Add(S state, params bool?[] necessary)
@@ -707,12 +706,12 @@ namespace Signum.Entities
                 val = null;
 
             if (val != null && !necessary.Value)
-                return showState ? ValidationMessage._0IsNotAllowedOnState1.NiceToString().Formato(propertyNiceNames[index], state) :
-                                   ValidationMessage._0IsNotAllowed.NiceToString().Formato(propertyNiceNames[index]);
+                return showState ? ValidationMessage._0IsNotAllowedOnState1.NiceToString().Formato(properties[index].NiceName(), state) :
+                                   ValidationMessage._0IsNotAllowed.NiceToString().Formato(properties[index].NiceName());
 
             if (val == null && necessary.Value)
-                return showState ? ValidationMessage._0IsNecessaryOnState1.NiceToString().Formato(propertyNiceNames[index], state) :
-                                   ValidationMessage._0IsNecessary.NiceToString().Formato(propertyNiceNames[index]);
+                return showState ? ValidationMessage._0IsNecessaryOnState1.NiceToString().Formato(properties[index].NiceName(), state) :
+                                   ValidationMessage._0IsNecessary.NiceToString().Formato(properties[index].NiceName());
 
             return null;
         }
