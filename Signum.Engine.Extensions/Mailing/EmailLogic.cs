@@ -84,7 +84,6 @@ namespace Signum.Engine.Mailing
                         Entity = e,
                         e.Id,
                         e.FullClassName,
-                        e.FriendlyName,
                     });
 
                 dqm.RegisterQuery(typeof(EmailMessageDN), () =>
@@ -149,7 +148,6 @@ namespace Signum.Engine.Mailing
                 (tn, s, c) =>
                 {
                     c.FullClassName = s.FullClassName;
-                    c.FriendlyName = s.FriendlyName;
                     return table.UpdateSqlSync(c);
                 },
                 Spacing.Double);
@@ -169,7 +167,6 @@ namespace Signum.Engine.Mailing
                          select new EmailTemplateDN
                          {
                              FullClassName = type.FullName,
-                             FriendlyName = type.NiceName()
                          }).ToList();
             return lista;
         }
