@@ -77,10 +77,6 @@ namespace Signum.Entities.Mailing
         }
     }
 
-    public enum SMTPConfigurationQueries
-    {
-        NoCredentialsData
-    }
 
     public enum SMTPConfigurationOperation
     {
