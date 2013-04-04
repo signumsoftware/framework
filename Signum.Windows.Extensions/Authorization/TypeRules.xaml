@@ -4,12 +4,12 @@
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:m2="clr-namespace:Signum.Windows.Extensions"
     xmlns:auth="clr-namespace:Signum.Windows.Authorization"
-    xmlns:authdn="clr-namespace:Signum.Entities.Authorization;assembly=Signum.Entities.Extensions"
+    xmlns:d="clr-namespace:Signum.Entities.Authorization;assembly=Signum.Entities.Extensions"
     m:Monitors.AdjustToMonitor="true"
     WindowStartupLocation="CenterOwner"    
     TextOptions.TextFormattingMode="Display"
     UseLayoutRounding="True" 
-    Title="Type Rules" x:Name="me" MinWidth="300" MinHeight="300" m:Common.TypeContext="{x:Type authdn:TypeRulePack}">
+    Title="Type Rules" x:Name="me" MinWidth="300" MinHeight="300" m:Common.TypeContext="{x:Type d:TypeRulePack}">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

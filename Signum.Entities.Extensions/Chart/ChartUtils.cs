@@ -385,7 +385,9 @@ namespace Signum.Entities.Chart
         UserChart_ExportData,
         [Description("User charts")]
         UserChart_UserCharts,
-        ViewPalette
+        ViewPalette,
+        [Description("Chart for")]
+        ChartsFor,
     }
 
 }

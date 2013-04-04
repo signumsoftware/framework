@@ -167,7 +167,8 @@ namespace Signum.Entities.Alerts
     {
         static AlertTypeDN()
         {
-            DescriptionManager.DefaultDescriptionOptions+=DescriptionManager_DefaultDescriptionOptions;
+            DescriptionManager.DefaultDescriptionOptions += DescriptionManager_DefaultDescriptionOptions;
+            DescriptionManager.Invalidate();
         }
 
         static DescriptionOptions? DescriptionManager_DefaultDescriptionOptions(Type type)

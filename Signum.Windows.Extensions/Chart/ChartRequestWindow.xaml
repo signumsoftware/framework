@@ -4,12 +4,12 @@
     xmlns:e="clr-namespace:Signum.Entities;assembly=Signum.Entities"
     xmlns:c="clr-namespace:Signum.Windows.Chart"
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
-    xmlns:dn="clr-namespace:Signum.Entities.Chart;assembly=Signum.Entities.Extensions"
+    xmlns:d="clr-namespace:Signum.Entities.Chart;assembly=Signum.Entities.Extensions"
     Title="ChartWindow" SizeToContent="WidthAndHeight" 
     TextOptions.TextFormattingMode="Display"
     UseLayoutRounding="True" 
     m:Monitors.AdjustToMonitor="True"
-    m:Common.TypeContext="{x:Type dn:ChartRequest}">
+    m:Common.TypeContext="{x:Type d:ChartRequest}">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -35,7 +35,7 @@
                 </LinearGradientBrush>
             </Border.Background>
             <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Margin="5">
-                <TextBox IsReadOnly="True" Foreground="#ff333333" BorderThickness="0" FontSize="18" Background="{x:Null}" Text="{m:Loc {x:Static d:}}" />
+                <TextBox IsReadOnly="True" Foreground="#ff333333" BorderThickness="0" FontSize="18" Background="{x:Null}" Text="{m:Loc {x:Static d:ChartMessage.ChartFor}}" />
                 <TextBox x:Name="tbEntityType" IsReadOnly="True" Foreground="#ff333333" BorderThickness="0" FontSize="18" Background="{x:Null}" TextBlock.FontWeight="SemiBold" />
                 <TextBox x:Name="tbQueryName" IsReadOnly="True"  Foreground="#ff666666"  BorderThickness="0" FontSize="18" Background="{x:Null}" />
             </StackPanel>
