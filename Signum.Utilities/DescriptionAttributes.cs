@@ -256,6 +256,11 @@ namespace Signum.Utilities
 
             return true;
         }
+
+        public static void Invalidate()
+        {
+            localizations.Clear();
+        }
     }
 
 

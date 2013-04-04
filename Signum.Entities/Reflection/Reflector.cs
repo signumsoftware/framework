@@ -45,6 +45,7 @@ namespace Signum.Entities.Reflection
             DescriptionManager.DefaultDescriptionOptions += DescriptionManager_IsIIdentifiable;
 
             DescriptionManager.ShouldLocalizeMemeber += DescriptionManager_ShouldLocalizeMemeber;
+            DescriptionManager.Invalidate();
         }
 
         static bool DescriptionManager_ShouldLocalizeMemeber(MemberInfo arg)

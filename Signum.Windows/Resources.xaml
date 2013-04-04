@@ -3,10 +3,8 @@
     xmlns:sys="clr-namespace:System;assembly=mscorlib" 
     xmlns:m="clr-namespace:Signum.Windows"
 	xmlns:Microsoft_Windows_Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero" 
-	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-	xmlns:dn="clr-namespace:Signum.Entities;assembly=Signum.Entities" 
-	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-	mc:Ignorable="d">
+	xmlns:d="clr-namespace:Signum.Entities;assembly=Signum.Entities"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" >
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="MiniExpander.xaml"/>
     </ResourceDictionary.MergedDictionaries>
@@ -282,7 +280,7 @@
                                 </Border.Background>
                             </Border>
                         </Border>
-                        <Viewbox Margin="{TemplateBinding Padding}" d:LayoutOverrides="GridBox" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                        <Viewbox Margin="{TemplateBinding Padding}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
                             <ContentPresenter x:Name="contentPresenter" Opacity="0.5" RenderTransformOrigin="0.5,0.5"/>
                         </Viewbox>
                     </Grid>
@@ -325,7 +323,7 @@
         </Style.Triggers>
     </Style>
 
-    <DataTemplate x:Key="{x:Type dn:ModifiableEntity}"  DataType="{x:Type dn:ModifiableEntity}">
+    <DataTemplate x:Key="{x:Type d:ModifiableEntity}"  DataType="{x:Type d:ModifiableEntity}">
         <Border
             ToolTip="{Binding Error, Converter = {x:Static m:Converters.CollapseStringEmpty}}"
             BorderThickness="{Binding Error, Converter = {x:Static m:Converters.ErrorToInt}}"
@@ -334,7 +332,7 @@
         </Border>
     </DataTemplate>
 
-    <DataTemplate x:Key="{x:Static dn:Lite.BaseImplementationType}"  DataType="{x:Static dn:Lite.BaseImplementationType}">
+    <DataTemplate x:Key="{x:Static d:Lite.BaseImplementationType}"  DataType="{x:Static d:Lite.BaseImplementationType}">
         <TextBlock Text="{Binding}" VerticalAlignment="Center" />
     </DataTemplate>
 
@@ -642,7 +640,7 @@
                 <ControlTemplate TargetType="{x:Type Expander}">
                     <Border SnapsToDevicePixels="True" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="3">
                         <DockPanel>
-                            <ToggleButton x:Name="HeaderSite" Margin="1" MinHeight="0" MinWidth="0" Content="{TemplateBinding Header}" ContentTemplate="{TemplateBinding HeaderTemplate}" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" FontStretch="{TemplateBinding FontStretch}" FontStyle="{TemplateBinding FontStyle}" FontWeight="{TemplateBinding FontWeight}" Foreground="{TemplateBinding Foreground}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" Padding="{TemplateBinding Padding}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" DockPanel.Dock="Top" d:IsLocked="True">
+                            <ToggleButton x:Name="HeaderSite" Margin="1" MinHeight="0" MinWidth="0" Content="{TemplateBinding Header}" ContentTemplate="{TemplateBinding HeaderTemplate}" FontFamily="{TemplateBinding FontFamily}" FontSize="{TemplateBinding FontSize}" FontStretch="{TemplateBinding FontStretch}" FontStyle="{TemplateBinding FontStyle}" FontWeight="{TemplateBinding FontWeight}" Foreground="{TemplateBinding Foreground}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" Padding="{TemplateBinding Padding}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" DockPanel.Dock="Top">
                                 <ToggleButton.Style>
                                     <Style TargetType="{x:Type ToggleButton}">
                                         <Setter Property="Template">

@@ -1,11 +1,10 @@
 <UserControl
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:d="clr-namespace:Signum.Entities;assembly=Signum.Entities"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:m="clr-namespace:Signum.Windows"
     xmlns:dq="clr-namespace:Signum.Entities.DynamicQuery;assembly=Signum.Entities"
-	mc:Ignorable="d"
 	x:Class="Signum.Windows.FilterBuilder"
 	x:Name="me">
     <UserControl.Resources>

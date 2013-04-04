@@ -3,7 +3,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:m="clr-namespace:Signum.Windows"
     x:Class="Signum.Windows.EntityCombo"
-    x:Name="me" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="332.993" Style="{DynamicResource toolTip}">
+    x:Name="me" 
+    xmlns:d="clr-namespace:Signum.Entities;assembly=Signum.Entities"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Style="{DynamicResource toolTip}">
     <m:EntityBase.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

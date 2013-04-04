@@ -3,9 +3,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:m="clr-namespace:Signum.Windows"
     x:Class="Signum.Windows.EntityLine"
-    x:Name="me" xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="332.993" 
-    
+    xmlns:d="clr-namespace:Signum.Entities;assembly=Signum.Entities"
+    x:Name="me"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"    
     Style="{DynamicResource toolTip}">
     <m:EntityBase.Resources>
         <ResourceDictionary>
@@ -63,7 +63,7 @@
                     Visibility="Hidden"/>
             </Grid>
             <!--HorizontalContentAlignment="Center"
-                VerticalContentAlignment="Center"  />-->
+                VerticalContentAlignment="Center"  />-->  
         </Border>
         <StackPanel Orientation="Horizontal" Grid.Column="2" x:Name="buttons">
             <Button Focusable="False" x:Name="btCreate" Style="{StaticResource RoundButton}" Click="btCreate_Click"  Content="{StaticResource Create}" ToolTip="{m:Loc {x:Static d:OperationMessage.Create}}"/>
