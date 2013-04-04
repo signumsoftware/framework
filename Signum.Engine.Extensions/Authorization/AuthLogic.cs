@@ -78,7 +78,7 @@ namespace Signum.Engine.Authorization
                         r.Name,
                     });
 
-                dqm.RegisterQuery(RoleQueries.ReferedBy, () =>
+                dqm.RegisterQuery(RoleQuery.RolesReferedBy, () =>
                     from r in Database.Query<RoleDN>()
                     from rc in r.Roles
                     select new
