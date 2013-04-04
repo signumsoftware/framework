@@ -165,6 +165,16 @@ namespace Signum.Entities.Alerts
     [Serializable, EntityKind(EntityKind.String)]
     public class AlertTypeDN : IdentifiableEntity
     {
+        static AlertTypeDN()
+        {
+            DescriptionManager.DefaultDescriptionOptions+=DescriptionManager_DefaultDescriptionOptions;
+        }
+
+        static DescriptionOptions? DescriptionManager_DefaultDescriptionOptions(Type type)
+        {
+            return type.IsEnum && type.Name.EndsWith("Alert") ? DescriptionOptions.Members : (DescriptionOptions?)null;
+        }
+
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         string name;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
