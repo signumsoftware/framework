@@ -93,7 +93,7 @@ namespace Signum.Windows.Notes
                 Closed = (_, __) => ReloadNotes()
             };
 
-            if (func != null)
+            if (func == null)
             {
                 eo.ColumnOptions = new List<ColumnOption> { new ColumnOption("Target") };
                 eo.ColumnOptionsMode = ColumnOptionsMode.Remove;

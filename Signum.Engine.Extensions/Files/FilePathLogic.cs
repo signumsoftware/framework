@@ -112,7 +112,6 @@ namespace Signum.Engine.Files
         }
 
 
-        const long ERROR_DISK_FULL = 112L;
 
         static readonly Variable<bool> unsafeMode = Statics.ThreadVariable<bool>("filePathUnsafeMode");
 
@@ -174,6 +173,8 @@ namespace Signum.Engine.Files
                 }
             }
         }
+
+        const long ERROR_DISK_FULL = 112L;
 
         private static bool SaveFile(FilePathDN fp)
         {
