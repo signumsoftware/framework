@@ -229,6 +229,13 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectCastIBPolymorphicForceNullify()
+        {
+            var list = (from a in Database.Query<AwardNominationDN>()
+                        select (int?)a.Award.Entity.Year).ToList();
+        }
+
+        [TestMethod]
         public void SelectCastIBPolymorphicIB()
         {
             var list = (from a in Database.Query<AlbumDN>()
