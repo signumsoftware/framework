@@ -66,6 +66,7 @@ namespace Signum.Windows.UserQueries
                 e.Handled = true;
 
                 UserQueryDN userQuery = UserQueryClient.FromSearchControl(sc);
+                userQuery.Related = UserDN.Current.ToLite();
 
                 Navigator.Navigate(userQuery, new NavigateOptions
                 {
