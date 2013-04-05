@@ -148,9 +148,12 @@ namespace Signum.Web
 
         public override string ToString()
         {
-            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(QueryName);
+            if (FilterOptions.Any())
+            {
+                QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(QueryName);
 
-            Navigator.SetTokens(FilterOptions, queryDescription, canAggregate: false);
+                Navigator.SetTokens(FilterOptions, queryDescription, canAggregate: false);
+            }
 
             string options = new Sequence<string>
             {
@@ -176,9 +179,12 @@ namespace Signum.Web
 
         public void Fill(JsOptionsBuilder op)
         {
-            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(QueryName);
+            if (FilterOptions.Any())
+            {
+                QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(QueryName);
 
-            Navigator.SetTokens(this.FilterOptions, queryDescription, false);
+                Navigator.SetTokens(this.FilterOptions, queryDescription, false);
+            }
 
             op.Add("webQueryName", QueryName.TryCC(qn => Navigator.ResolveWebQueryName(qn).SingleQuote()));
             op.Add("searchOnLoad", SearchOnLoad == true ? "true" : null);
