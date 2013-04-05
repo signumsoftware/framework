@@ -1951,14 +1951,14 @@ namespace Signum.Engine.Linq
             if (expression.NodeType == ExpressionType.Conditional)
             {
                 var con = (ConditionalExpression)expression;
-                return Condition(con.Test, GetId(con.IfTrue), GetId(con.IfFalse));
+                return Condition(con.Test, GetId(con.IfTrue).Nullify(), GetId(con.IfFalse).Nullify());
             }
 
             if (expression.NodeType == ExpressionType.Coalesce)
             {
                 var bin = (BinaryExpression)expression;
 
-                return Condition(Expression.NotEqual(GetId(bin.Left).Nullify(), NullId), GetId(bin.Left), GetId(bin.Right));
+                return Condition(Expression.NotEqual(GetId(bin.Left).Nullify(), NullId), GetId(bin.Left).Nullify(), GetId(bin.Right).Nullify());
             }
 
             if (expression.IsNull())
