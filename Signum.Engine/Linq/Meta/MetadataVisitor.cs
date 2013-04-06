@@ -503,12 +503,30 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitBinary(BinaryExpression b)
         {
-            return MakeDirtyMeta(b.Type, Visit(b.Right), Visit(b.Left)); 
+            var right = ((MetaExpression)Visit(b.Right));
+            var left = ((MetaExpression)Visit(b.Left));
+
+            if(b.NodeType == ExpressionType.Coalesce &&  right.Meta is CleanMeta && left.Meta is CleanMeta)
+            {
+                if(((CleanMeta)right.Meta).PropertyRoutes.SequenceEqual(((CleanMeta)left.Meta).PropertyRoutes))
+                    return new MetaExpression(b.Type, right.Meta); 
+            } 
+
+            return MakeDirtyMeta(b.Type,  left,  right); 
         }
 
         protected override Expression VisitConditional(ConditionalExpression c)
         {
-            return MakeDirtyMeta(c.Type, Visit(c.Test), Visit(c.IfTrue), Visit(c.IfFalse));
+            var ifTrue = ((MetaExpression)Visit(c.IfTrue));
+            var ifFalse = ((MetaExpression)Visit(c.IfFalse));
+
+            if (ifTrue.Meta is CleanMeta && ifFalse.Meta is CleanMeta)
+            {
+                if (((CleanMeta)ifTrue.Meta).PropertyRoutes.SequenceEqual(((CleanMeta)ifFalse.Meta).PropertyRoutes))
+                    return new MetaExpression(c.Type,  ifTrue.Meta);
+            }
+
+            return MakeDirtyMeta(c.Type, Visit(c.Test), ifTrue, ifFalse);
         }
     }
 }
