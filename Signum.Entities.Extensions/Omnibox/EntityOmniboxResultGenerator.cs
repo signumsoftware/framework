@@ -14,7 +14,9 @@ namespace Signum.Entities.Omnibox
 
         public EntityOmniboxResultGenenerator(IEnumerable<Type> schemaTypes)
         {
-            types = schemaTypes.Where(t => !t.IsEnumEntity()).ToDictionary(Lite.UniqueTypeName);
+            var manager = OmniboxParser.Manager;
+
+            types = schemaTypes.Where(t => !t.IsEnumEntity() && manager.AllowedType(t)).ToDictionary(Lite.UniqueTypeName);
         }
 
         public int AutoCompleteLimit = 5;
@@ -32,9 +34,8 @@ namespace Signum.Entities.Omnibox
 
             bool isPascalCase = OmniboxUtils.IsPascalCasePattern(ident);
 
-            var manager = OmniboxParser.Manager;
 
-            var matches = OmniboxUtils.Matches(types, t => t.NiceName(), ident, isPascalCase).Where(a => manager.AllowedType((Type)a.Value));
+            var matches = OmniboxUtils.Matches(types, t => t.NiceName(), ident, isPascalCase);
 
             if (tokens.Count == 1)
             {
