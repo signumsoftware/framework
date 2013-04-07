@@ -321,10 +321,29 @@ namespace Signum.Entities
             if (Type != other.Type)
                 return false;
 
-            if (!ReflectionTools.FieldEquals(FieldInfo, other.FieldInfo))
+            if (!FieldsEquals(other))
                 return false;
 
-            return object.Equals(Parent, other.Parent); 
+            if (!PropertyEquals(other))
+                return false;
+
+            return object.Equals(Parent, other.Parent);
+        }
+
+        private bool FieldsEquals(PropertyRoute other)
+        {
+            if (FieldInfo == null)
+                return other.FieldInfo == null;
+
+            return other.FieldInfo != null && ReflectionTools.FieldEquals(FieldInfo, other.FieldInfo);
+        }
+
+        private bool PropertyEquals(PropertyRoute other)
+        {
+            if (PropertyInfo == null)
+                return other.PropertyInfo == null;
+
+            return other.PropertyInfo != null && ReflectionTools.PropertyEquals(PropertyInfo, other.PropertyInfo);
         }
 
         public override int GetHashCode()
