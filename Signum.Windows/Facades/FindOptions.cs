@@ -168,7 +168,6 @@ namespace Signum.Windows
         {
             this.QueryName = queryName;
             this.FilterOptions.Add(new FilterOption(path, value));
-            this.NavigateIfOne = true;
         }
 
         public EventHandler Closed { get; set; }

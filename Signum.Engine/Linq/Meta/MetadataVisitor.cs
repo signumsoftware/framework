@@ -504,12 +504,36 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitBinary(BinaryExpression b)
         {
-            return MakeDirtyMeta(b.Type, Visit(b.Right), Visit(b.Left)); 
+            var right = Visit(b.Right);
+            var left = Visit(b.Left);
+
+            var mRight = right as MetaExpression;
+            var mLeft = left as MetaExpression;
+
+            if(b.NodeType == ExpressionType.Coalesce &&  mRight.Meta is CleanMeta && mLeft.Meta is CleanMeta)
+            {
+                if(((CleanMeta)mRight.Meta).PropertyRoutes.SequenceEqual(((CleanMeta)mLeft.Meta).PropertyRoutes))
+                    return new MetaExpression(b.Type, mRight.Meta); 
+            } 
+
+            return MakeDirtyMeta(b.Type,  left,  right); 
         }
 
         protected override Expression VisitConditional(ConditionalExpression c)
         {
-            return MakeDirtyMeta(c.Type, Visit(c.Test), Visit(c.IfTrue), Visit(c.IfFalse));
+            var ifTrue = Visit(c.IfTrue);
+            var ifFalse = Visit(c.IfFalse);
+
+            var mIfTrue = ifTrue as MetaExpression;
+            var mIfFalse = ifFalse as MetaExpression;
+
+            if (mIfTrue != null && mIfTrue != null && mIfTrue.Meta is CleanMeta && mIfFalse.Meta is CleanMeta)
+            {
+                if (((CleanMeta)mIfTrue.Meta).PropertyRoutes.SequenceEqual(((CleanMeta)mIfFalse.Meta).PropertyRoutes))
+                    return new MetaExpression(c.Type, mIfTrue.Meta);
+            }
+
+            return MakeDirtyMeta(c.Type, Visit(c.Test), ifTrue, ifFalse);
         }
     }
 }

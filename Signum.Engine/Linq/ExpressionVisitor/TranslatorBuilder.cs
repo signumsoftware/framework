@@ -411,13 +411,13 @@ namespace Signum.Engine.Linq
                 else if (typeId.NodeType == (ExpressionType)DbExpressionType.TypeImplementedByAll)
                 {
                     TypeImplementedByAllExpression tiba = (TypeImplementedByAllExpression)typeId;
-                    liteConstructor = Expression.Condition(Expression.NotEqual(id, NullId),
+                    liteConstructor = Expression.Condition(Expression.NotEqual(id.Nullify(), NullId),
                                     Expression.Convert(Expression.Call(miLiteCreate, SchemaGetType(tiba), id.UnNullify(), toStringOrNull, peModifiableState), lite.Type),
                                      nothing);
                 }
                 else
                 {
-                    liteConstructor = Expression.Condition(Expression.NotEqual(id, NullId),
+                    liteConstructor = Expression.Condition(Expression.NotEqual(id.Nullify(), NullId),
                                        Expression.Convert(Expression.Call(miLiteCreate, Visit(typeId), id.UnNullify(), toStringOrNull, peModifiableState), lite.Type),
                                         nothing);
                 }
