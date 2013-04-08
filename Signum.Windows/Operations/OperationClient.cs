@@ -321,8 +321,8 @@ namespace Signum.Windows.Operations
                                   OperationInfo = oi,
                               }
                               where os == null ? oi.Lite == true :
-                                    os.Contextual == null ? (oi.Lite == true && os.Click == null && os.IsVisible == null) :
-                                    (os.Contextual.IsVisible == null || os.Contextual.IsVisible(coc))
+                                    os.Contextual.IsVisible == null ? (oi.Lite == true && os.IsVisible == null && (os.Click == null || os.Contextual.Click != null)) :
+                                    os.Contextual.IsVisible(coc)
                               select coc).ToList();
 
             if (operations.IsEmpty())
