@@ -36,8 +36,7 @@ namespace Signum.Entities.Authorization
     }
 
 
-    //Only for client-side communication
-    [Serializable, DescriptionOptions(DescriptionOptions.None)]
+    [Serializable]
     public abstract class BaseRulePack<T> : ModelEntity
     {
         Lite<RoleDN> role;
