@@ -99,8 +99,8 @@ namespace Signum.Web.Processes
                                 CanExecute = OperationDN.NotDefinedFor(g.Key, types.Except(g.Select(a => a.t))),
                             }
                             where os == null ? oi.Lite == true && oi.OperationType != OperationType.ConstructorFrom :
-                            os.ContextualFromMany == null ? (oi.Lite == true && os.OnClick == null && os.IsVisible == null &&  oi.OperationType != OperationType.ConstructorFrom) :
-                            (os.ContextualFromMany.IsVisible == null || os.ContextualFromMany.IsVisible(context))
+                            os.ContextualFromMany.IsVisible == null ? (oi.Lite == true && os.IsVisible == null && oi.OperationType != OperationType.ConstructorFrom && (os.OnClick == null || os.ContextualFromMany.OnClick != null)) :
+                            os.ContextualFromMany.IsVisible(context)
                             select context).ToList();
 
             if (contexts.IsEmpty())
