@@ -79,12 +79,12 @@ namespace Signum.Windows.Processes
                               Entities = sc.SelectedItems,
                               SearchControl = sc,
                               OperationInfo = oi,
-                              OperationSettings = os.TryCC(a=>a.ContextualFromMany),
-                              CanExecute = OperationDN.NotDefinedFor(g.Key, types.Except(g.Select(a=>a.t))),
+                              OperationSettings = os.TryCC(a => a.ContextualFromMany),
+                              CanExecute = OperationDN.NotDefinedFor(g.Key, types.Except(g.Select(a => a.t))),
                           }
                           where os == null ? oi.Lite == true && oi.OperationType != OperationType.ConstructorFrom :
-                              os.ContextualFromMany == null ? (oi.Lite == true && os.Click == null && os.IsVisible == null && oi.OperationType != OperationType.ConstructorFrom) :
-                              (os.ContextualFromMany.IsVisible == null || os.ContextualFromMany.IsVisible(coc))
+                              os.ContextualFromMany.IsVisible == null ? (oi.Lite == true && os.IsVisible == null && oi.OperationType != OperationType.ConstructorFrom && (os.Click == null || os.ContextualFromMany != null)) :
+                              os.ContextualFromMany.IsVisible(coc)
                           select coc).ToList();
 
             if (result.IsEmpty())
