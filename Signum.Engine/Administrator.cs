@@ -309,18 +309,18 @@ namespace Signum.Engine
                 query.UnsafeUpdate(a => new T { toStr = expression.Evaluate(a) }));
         }
 
-        public static IDisposable PrepareForBatchLoad<T>(bool disableForeignKeys = true, bool disableMultipleIndexes = true, bool disableUniqueIndexes = false) where T : IdentifiableEntity
+        public static IDisposable PrepareForBatchLoadScope<T>(bool disableForeignKeys = true, bool disableMultipleIndexes = true, bool disableUniqueIndexes = false) where T : IdentifiableEntity
         {
             Table table = Schema.Current.Table(typeof(T));
 
-            return table.PrepareForBathLoad(disableForeignKeys, disableMultipleIndexes, disableUniqueIndexes);
+            return table.PrepareForBathLoadScope(disableForeignKeys, disableMultipleIndexes, disableUniqueIndexes);
         }
 
-        private static IDisposable PrepareForBathLoad(this Table table, bool disableForeignKeys, bool disableMultipleIndexes, bool disableUniqueIndexes)
+        static IDisposable PrepareForBathLoadScope(this Table table, bool disableForeignKeys, bool disableMultipleIndexes, bool disableUniqueIndexes)
         {
-            IDisposable disp = PrepareTableForBatchLoad(table, disableForeignKeys, disableMultipleIndexes, disableUniqueIndexes);
+            IDisposable disp = PrepareTableForBatchLoadScope(table, disableForeignKeys, disableMultipleIndexes, disableUniqueIndexes);
 
-            var list = table.RelationalTables().Select(rt => PrepareTableForBatchLoad(rt, disableForeignKeys, disableMultipleIndexes, disableUniqueIndexes)).ToList();
+            var list = table.RelationalTables().Select(rt => PrepareTableForBatchLoadScope(rt, disableForeignKeys, disableMultipleIndexes, disableUniqueIndexes)).ToList();
 
             return new Disposable(() =>
             {
@@ -331,7 +331,7 @@ namespace Signum.Engine
             });
         }
 
-        public static IDisposable PrepareTableForBatchLoad(ITable table, bool disableForeignKeys, bool disableMultipleIndexes, bool disableUniqueIndexes)
+        public static IDisposable PrepareTableForBatchLoadScope(ITable table, bool disableForeignKeys, bool disableMultipleIndexes, bool disableUniqueIndexes)
         {
             SafeConsole.WriteColor(ConsoleColor.Magenta, table.Name + ":");
             Action onDispose = () => SafeConsole.WriteColor(ConsoleColor.Magenta, table.Name + ":");

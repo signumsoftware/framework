@@ -25,12 +25,15 @@ namespace Signum.Entities
                 string integrity = base.IdentifiableIntegrityCheck(); // So, no corruption allowed
                 if (string.IsNullOrEmpty(integrity))
                     this.Corrupt = false;
+                else 
+                    Corruption.OnSaveCorrupted(this, integrity);
+                    
             }
         }
 
         public override string IdentifiableIntegrityCheck()
         {
-            using (Corrupt ? Corruption.Allow() : null)
+            using (Corrupt ? Corruption.AllowScope() : null)
             {
                 return base.IdentifiableIntegrityCheck();
             }
@@ -43,18 +46,26 @@ namespace Signum.Entities
 
         public static bool Strict { get { return !allowed.Value; } }
 
-        public static IDisposable Allow()
+        public static IDisposable AllowScope()
         {
             if (allowed.Value) return null;
             allowed.Value = true;
             return new Disposable(() => allowed.Value = false);
         }
 
-        public static IDisposable Deny()
+        public static IDisposable DenyScope()
         {
             if (!allowed.Value) return null;
             allowed.Value = false;
             return new Disposable(() => allowed.Value = true);
+        }
+
+        public static event Action<IdentifiableEntity, string> SaveCorrupted;
+
+        public static void OnSaveCorrupted(IdentifiableEntity corruptEntity, string integrity)
+        {
+            if (SaveCorrupted != null)
+                SaveCorrupted(corruptEntity, integrity);
         }
     }
 
