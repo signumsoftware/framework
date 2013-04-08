@@ -39,18 +39,23 @@ namespace Signum.Windows
             getServer = server;
         }
 
-        public static void Connect()
+        static void AssertConnected()
         {
-            if (!Connected)
-            {
-                current = getServer();
+            if (Connected)
+                return;
 
-                if (current == null)
-                    throw new NotConnectedToServerException(Properties.Resources.AConnectionWithTheServerIsNecessaryToContinue);
+            if (!Connect())
+                throw new NotConnectedToServerException(Properties.Resources.AConnectionWithTheServerIsNecessaryToContinue);
 
-                if (Connecting != null)
-                    Connecting();                     
-            }
+            if (Connecting != null)
+                Connecting();    
+        }
+
+        public static bool Connect()
+        {
+            current = getServer();
+
+            return current != null;
         }
 
         public static bool Connected
@@ -71,7 +76,7 @@ namespace Signum.Windows
             where S : class
         {
         retry:
-            Connect();
+            AssertConnected();
 
             S server = current as S;
             if (server == null)
@@ -96,7 +101,7 @@ namespace Signum.Windows
           where S : class
         {
         retry:
-            Connect();
+            AssertConnected();
 
             S server = current as S;
             if (server == null)
