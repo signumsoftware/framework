@@ -35,9 +35,9 @@ namespace Signum.Engine.Maps
 
         Dictionary<string, IColumn> Columns { get; }
 
-        List<UniqueIndex> MultiIndexes { get; set; }
+        List<Index> MultiColumnIndexes { get; set; }
 
-        List<UniqueIndex> GeneratUniqueIndexes();
+        List<Index> GeneratAllIndexes();
 
         void GenerateColumns();
     }
@@ -61,7 +61,7 @@ namespace Signum.Engine.Maps
         public Dictionary<string, EntityField> Fields { get; set; }
         public Dictionary<string, IColumn> Columns { get; set; }
 
-        public List<UniqueIndex> MultiIndexes { get; set; }
+        public List<Index> MultiColumnIndexes { get; set; }
 
         public Table(Type type)
         {
@@ -110,12 +110,12 @@ namespace Signum.Engine.Maps
             return field.Field;
         }
 
-        public List<UniqueIndex> GeneratUniqueIndexes()
+        public List<Index> GeneratAllIndexes()
         {
-            var result = Fields.SelectMany(f => f.Value.Field.GeneratUniqueIndexes(this)).ToList();
+            var result = Fields.SelectMany(f => f.Value.Field.GeneratIndexes(this)).ToList();
 
-            if (MultiIndexes != null)
-                result.AddRange(MultiIndexes);
+            if (MultiColumnIndexes != null)
+                result.AddRange(MultiColumnIndexes);
 
             return result;
         }
@@ -179,11 +179,11 @@ namespace Signum.Engine.Maps
 
         public abstract IEnumerable<IColumn> Columns();
 
-        public virtual IEnumerable<UniqueIndex> GeneratUniqueIndexes(ITable table)
+        public virtual IEnumerable<Index> GeneratIndexes(ITable table)
         {
             switch (IndexType)
             {
-                case IndexType.None: return Enumerable.Empty<UniqueIndex>();
+                case IndexType.None: return Enumerable.Empty<Index>();
                 case IndexType.Unique: return new[] { new UniqueIndex(table, this) };
                 case IndexType.UniqueMultipleNulls: return new[] { new UniqueIndex(table, this).WhereNotNull(this) };
             }
@@ -280,12 +280,12 @@ namespace Signum.Engine.Maps
             return new[] { this };
         }
 
-        public override IEnumerable<UniqueIndex> GeneratUniqueIndexes(ITable table)
+        public override IEnumerable<Index> GeneratIndexes(ITable table)
         {
             if (IndexType != Maps.IndexType.None)
                 throw new InvalidOperationException("Changing IndexType is not allowed for FieldPrimaryKey");
 
-            return Enumerable.Empty<UniqueIndex>();
+            return Enumerable.Empty<Index>();
         }
 
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
@@ -403,9 +403,9 @@ namespace Signum.Engine.Maps
             return result;
         }
 
-        public override IEnumerable<UniqueIndex> GeneratUniqueIndexes(ITable table)
+        public override IEnumerable<Index> GeneratIndexes(ITable table)
         {
-            return this.EmbeddedFields.Values.SelectMany(f => f.Field.GeneratUniqueIndexes(table));
+            return this.EmbeddedFields.Values.SelectMany(f => f.Field.GeneratIndexes(table));
         }
 
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
@@ -459,6 +459,14 @@ namespace Signum.Engine.Maps
                  IsCollection = false,
                  IsNullable = Nullable
             }); 
+        }
+
+        public override IEnumerable<Index> GeneratIndexes(ITable table)
+        {
+            if (IndexType == Maps.IndexType.None)
+                return new[] { new Index(table, (Field)this) };
+
+            return base.GeneratIndexes(table);
         }
 
         bool clearEntityOnSaving;
@@ -532,6 +540,11 @@ namespace Signum.Engine.Maps
             }));
         }
 
+        public override IEnumerable<Index> GeneratIndexes(ITable table)
+        {
+            return this.Columns().Select(c => new Index(table, c)).Concat(base.GeneratIndexes(table));
+        }
+
         bool clearEntityOnSaving;
         public bool ClearEntityOnSaving
         {
@@ -580,6 +593,14 @@ namespace Signum.Engine.Maps
                 this.clearEntityOnSaving = value;
             }
         }
+
+        public override IEnumerable<Index> GeneratIndexes(ITable table)
+        {
+            if (IndexType == Maps.IndexType.None)
+                return new[] { new Index(table, (Field)this) };
+
+            return base.GeneratIndexes(table);
+        }
     }
 
     public partial class ImplementationColumn : IColumn
@@ -627,12 +648,12 @@ namespace Signum.Engine.Maps
             return new IColumn[0];
         }
 
-        public override IEnumerable<UniqueIndex> GeneratUniqueIndexes(ITable table)
+        public override IEnumerable<Index> GeneratIndexes(ITable table)
         {
             if (IndexType != Maps.IndexType.None)
                 throw new InvalidOperationException("Changing IndexType is not allowed for FieldMList");
 
-            return Enumerable.Empty<UniqueIndex>();
+            return Enumerable.Empty<Index>();
         }
 
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
@@ -661,7 +682,7 @@ namespace Signum.Engine.Maps
         }
 
         public Dictionary<string, IColumn> Columns { get; set; }
-        public List<UniqueIndex> MultiIndexes { get; set; }
+        public List<Index> MultiColumnIndexes { get; set; }
 
         public ObjectName Name { get; set; }
         public PrimaryKeyColumn PrimaryKey { get; set; }
@@ -686,12 +707,12 @@ namespace Signum.Engine.Maps
             Columns = new IColumn[] { PrimaryKey, BackReference }.Concat(Field.Columns()).ToDictionary(a => a.Name);
         }
 
-        public List<UniqueIndex> GeneratUniqueIndexes()
+        public List<Index> GeneratAllIndexes()
         {
-            var result = Field.GeneratUniqueIndexes(this).ToList();
+            var result = Field.GeneratIndexes(this).ToList();
 
-            if (MultiIndexes != null)
-                result.AddRange(MultiIndexes);
+            if (MultiColumnIndexes != null)
+                result.AddRange(MultiColumnIndexes);
 
             return result;
         }

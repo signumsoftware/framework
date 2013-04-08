@@ -66,7 +66,7 @@ namespace Signum.Engine.Maps
             Field[] colFields = fieldLambdas.Select(fun => schema.Field<T>(fun)).ToArray();
             Field[] colFieldsNotNull = fieldsNotNullLambdas.Select(fun => schema.Field<T>(fun)).ToArray();
 
-            AddUniqueIndex(new UniqueIndex(schema.Table<T>(), colFields).WhereNotNull(colFieldsNotNull));
+            AddIndex(new UniqueIndex(schema.Table<T>(), colFields).WhereNotNull(colFieldsNotNull));
         }
         public void AddUniqueIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList, Expression<Func<MListElement<T, V>, object>> fields)
            where T : IdentifiableEntity
@@ -107,22 +107,22 @@ namespace Signum.Engine.Maps
 
         public void AddUniqueIndex(ITable table, Field[] fields, Field[] notNullFields)
         {
-            AddUniqueIndex(new UniqueIndex(table, fields).WhereNotNull(notNullFields));
+            AddIndex(new UniqueIndex(table, fields).WhereNotNull(notNullFields));
         }
 
         public void AddUniqueIndex(ITable table, IColumn[] columns, IColumn[] notNullColumns)
         {
-            AddUniqueIndex(new UniqueIndex(table, columns).WhereNotNull(notNullColumns));
+            AddIndex(new UniqueIndex(table, columns).WhereNotNull(notNullColumns));
         }
 
-        private void AddUniqueIndex(UniqueIndex uniqueIndex)
+        private void AddIndex(Index index)
         {
-            ITable table = uniqueIndex.Table;
+            ITable table = index.Table;
 
-            if (table.MultiIndexes == null)
-                table.MultiIndexes = new List<UniqueIndex>();
+            if (table.MultiColumnIndexes == null)
+                table.MultiColumnIndexes = new List<Index>();
 
-            table.MultiIndexes.Add(uniqueIndex);
+            table.MultiColumnIndexes.Add(index);
         }
 
         public Table Include<T>() where T : IdentifiableEntity

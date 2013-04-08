@@ -49,8 +49,8 @@ namespace Signum.Windows.Operations
         public Func<EntityOperationContext, IdentifiableEntity> Click { get; set; }
         public Func<EntityOperationContext, bool> IsVisible { get; set; }
 
-        public ContextualOperationSettings ContextualFromMany { get; set; }
-        public ContextualOperationSettings Contextual { get; set; }
+        public ContextualOperationSettings ContextualFromMany { get; private set; }
+        public ContextualOperationSettings Contextual { get; private set; }
 
         public bool AvoidMoveToSearchControl { get; set; }
 
@@ -59,6 +59,8 @@ namespace Signum.Windows.Operations
         public EntityOperationSettings(Enum key)
             : base(key)
         {
+            Contextual = new ContextualOperationSettings(key);
+            ContextualFromMany = new ContextualOperationSettings(key); 
         }
     }
 

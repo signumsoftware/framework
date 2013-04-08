@@ -121,16 +121,7 @@ namespace Signum.Engine
 
         public static SqlPreCommand CreateAllIndices(ITable t)
         {
-            return CreateAllIndices(t, t.GeneratUniqueIndexes());
-        }
-
-        public static SqlPreCommand CreateAllIndices(ITable t, IEnumerable<UniqueIndex> tableIndexes)
-        {
-            var uniqueIndices = tableIndexes.Select(ix => CreateUniqueIndex(ix)).Combine(Spacing.Simple);
-
-            var freeIndexes = t.Columns.Values.Where(c => c.ReferenceTable != null).Select(c => CreateFreeIndex(t, c)).Combine(Spacing.Simple);
-
-            return new[] { uniqueIndices, freeIndexes }.Combine(Spacing.Simple);
+            return t.GeneratAllIndexes().Select(CreateIndex).Combine(Spacing.Simple);
         }
 
         public static SqlPreCommand DropIndex(ObjectName tableName, DiffIndex index)
@@ -165,46 +156,50 @@ namespace Signum.Engine
                  columns));
         }
 
-        public static SqlPreCommand CreateFreeIndex(ITable table, IColumn column)
-        {
-            string indexName = "FIX_{0}_{1}".Formato(table.Name.Name, column.Name);
-
-            return new SqlPreCommandSimple("CREATE INDEX {0} ON {1}({2})".Formato(
-                 indexName.SqlScape(),
-                 table.Name,
-                 column.Name.SqlScape()));
-        }
-
-        public static SqlPreCommand CreateUniqueIndex(UniqueIndex index)
+        public static SqlPreCommand CreateIndex(Index index)
         {
             string columns = index.Columns.ToString(c => c.Name.SqlScape(), ", ");
 
-            if (string.IsNullOrEmpty(index.Where))
+            if (!(index is UniqueIndex))
             {
-                return new SqlPreCommandSimple("CREATE UNIQUE INDEX {0} ON {1}({2})".Formato(
-                    index.IndexName,
-                    index.Table.Name,
-                    columns));
-            }
+                return new SqlPreCommandSimple("CREATE INDEX {0} ON {1}({2})".Formato(
+                  index.IndexName,
+                  index.Table.Name,
+                  columns));
 
-            if (index.ViewName != null)
-            {
-                ObjectName viewName = new ObjectName(index.Table.Name.Schema, index.ViewName);
-
-                SqlPreCommandSimple viewSql = new SqlPreCommandSimple(@"CREATE VIEW {0} WITH SCHEMABINDING AS SELECT {1} FROM {2} WHERE {3}"
-                    .Formato(viewName, columns, index.Table.Name.ToStringDbo(), index.Where)) { AddGo = true };
-
-                SqlPreCommandSimple indexSql = new SqlPreCommandSimple(@"CREATE UNIQUE CLUSTERED INDEX {0} ON {1}({2})"
-                    .Formato(index.IndexName, viewName, index.Columns.ToString(c => c.Name.SqlScape(), ", ")));
-
-                return SqlPreCommand.Combine(Spacing.Simple, viewSql, indexSql);
             }
             else
             {
-                return new SqlPreCommandSimple("CREATE UNIQUE INDEX {0} ON {1}({2}) WHERE {3}".Formato(
-                      index.IndexName,
-                      index.Table.Name,
-                      columns, index.Where));
+                var uIndex = (UniqueIndex)index;
+
+                if (string.IsNullOrEmpty(uIndex.Where))
+                {
+                    return new SqlPreCommandSimple("CREATE {0}INDEX {1} ON {2}({3})".Formato(
+                        uIndex is UniqueIndex ? "UNIQUE " : null,
+                        uIndex.IndexName,
+                        uIndex.Table.Name,
+                        columns));
+                }
+
+                if (uIndex.ViewName != null)
+                {
+                    ObjectName viewName = new ObjectName(uIndex.Table.Name.Schema, uIndex.ViewName);
+
+                    SqlPreCommandSimple viewSql = new SqlPreCommandSimple(@"CREATE VIEW {0} WITH SCHEMABINDING AS SELECT {1} FROM {2} WHERE {3}"
+                        .Formato(viewName, columns, uIndex.Table.Name.ToStringDbo(), uIndex.Where)) { AddGo = true };
+
+                    SqlPreCommandSimple indexSql = new SqlPreCommandSimple(@"CREATE UNIQUE CLUSTERED INDEX {0} ON {1}({2})"
+                        .Formato(uIndex.IndexName, viewName, uIndex.Columns.ToString(c => c.Name.SqlScape(), ", ")));
+
+                    return SqlPreCommand.Combine(Spacing.Simple, viewSql, indexSql);
+                }
+                else
+                {
+                    return new SqlPreCommandSimple("CREATE UNIQUE INDEX {0} ON {1}({2}) WHERE {3}".Formato(
+                          uIndex.IndexName,
+                          uIndex.Table.Name,
+                          columns, uIndex.Where));
+                }
             }
         }
 

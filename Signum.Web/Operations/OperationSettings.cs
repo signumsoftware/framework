@@ -57,12 +57,14 @@ namespace Signum.Web.Operations
 
     public class EntityOperationSettings : OperationSettings
     {
-        public ContextualOperationSettings ContextualFromMany { get; set; }
-        public ContextualOperationSettings Contextual { get; set; }
+        public ContextualOperationSettings ContextualFromMany { get; private set; }
+        public ContextualOperationSettings Contextual { get; private set; }
 
         public EntityOperationSettings(Enum operationKey)
             : base(operationKey)
         {
+            this.Contextual = new ContextualOperationSettings(operationKey);
+            this.ContextualFromMany = new ContextualOperationSettings(operationKey); 
         }
 
         static EntityOperationSettings()

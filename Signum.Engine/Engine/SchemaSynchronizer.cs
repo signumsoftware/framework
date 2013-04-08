@@ -42,8 +42,8 @@ namespace Signum.Engine
 
             Dictionary<string, DiffTable> database = DefaultGetDatabaseDescription(Schema.Current.DatabaseNames());
 
-            Dictionary<ITable, Dictionary<string, UniqueIndex>> modelIndices = model.Values
-                .ToDictionary(t => t, t => t.GeneratUniqueIndexes().ToDictionary(a => a.IndexName, "Indexes for {0}".Formato(t.Name)));
+            Dictionary<ITable, Dictionary<string, Index>> modelIndices = model.Values
+                .ToDictionary(t => t, t => t.GeneratAllIndexes().ToDictionary(a => a.IndexName, "Indexes for {0}".Formato(t.Name)));
 
             //use database without replacements to just remove indexes
             SqlPreCommand dropIndices =
@@ -52,20 +52,17 @@ namespace Signum.Engine
                 (tn, dif) => dif.Indices.Values.Select(ix => SqlBuilder.DropIndex(dif.Name, ix)).Combine(Spacing.Simple),
                 (tn, tab, dif) =>
                 {
-                    Dictionary<string, UniqueIndex> modelIxs = modelIndices[tab];
+                    Dictionary<string, Index> modelIxs = modelIndices[tab];
 
                     var changedColumns = ChangedColumns(dif, tab, null);
 
-                    var controlledIndices = Synchronizer.SynchronizeScript(modelIxs, dif.Indices.Where(kvp => kvp.Value.IsControlledIndex).ToDictionary(),
-                            null,
-                        (i, dix) => SqlBuilder.DropIndex(dif.Name, dix),
-                        (i, mix, dix) => dix.Columns.Any(a => changedColumns[a] == ColumnAction.Changed) ? SqlBuilder.DropIndex(dif.Name, dix) : null,
+                    var changes = Synchronizer.SynchronizeScript(modelIxs, dif.Indices,
+                        null,
+                        (i, dix) => dix.IsControlledIndex || dix.Columns.Any(a => changedColumns[a] != ColumnAction.Equals) ? SqlBuilder.DropIndex(dif.Name, dix) : null,
+                        (i, mix, dix) => dix.IsControlledIndex && dix.Columns.Any(a => changedColumns[a] == ColumnAction.Changed) ? SqlBuilder.DropIndex(dif.Name, dix) : null,
                         Spacing.Simple);
 
-                    var freeIndexes = dif.Indices.Values.Where(dix => !dix.IsControlledIndex && dix.Columns.Any(a => changedColumns[a] != ColumnAction.Equals))
-                         .Select(dix => SqlBuilder.DropIndex(dif.Name, dix)).Combine(Spacing.Simple);
-
-                    return SqlPreCommand.Combine(Spacing.Simple, controlledIndices, freeIndexes);
+                    return changes;
                 },
                  Spacing.Double);
 
@@ -127,9 +124,11 @@ namespace Signum.Engine
                      Spacing.Simple),
                  Spacing.Double);
 
+            bool? createMissingFreeIndexes = null;
+
             SqlPreCommand addIndices =
                 Synchronizer.SynchronizeScript(model, database,
-                 (tn, tab) => SqlBuilder.CreateAllIndices(tab, modelIndices[tab].Values),
+                 (tn, tab) => modelIndices[tab].Values.Select(SqlBuilder.CreateIndex).Combine(Spacing.Simple),
                  null,
                 (tn, tab, dif) =>
                 {
@@ -137,13 +136,14 @@ namespace Signum.Engine
 
                     var changedColumns = ChangedColumns(dif, tab, columnReplacements);
 
-                    Dictionary<string, UniqueIndex> modelIxs = modelIndices[tab];
+                    Dictionary<string, Index> modelIxs = modelIndices[tab];
 
-                    var controlledIndexes = Synchronizer.SynchronizeScript(modelIxs, dif.Indices.Where(kvp => kvp.Value.IsControlledIndex).ToDictionary(),
-                         (i, mix) => SqlBuilder.CreateUniqueIndex(mix),
+                    var controlledIndexes = Synchronizer.SynchronizeScript(modelIxs, dif.Indices,
+                        (i, mix) => mix is UniqueIndex || SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index too?") ?
+                            SqlBuilder.CreateIndex(mix) : null,
                         null,
-                        (i, mix, dix) => dix.Columns.Any(a => changedColumns[a] == ColumnAction.Changed) ? SqlBuilder.CreateUniqueIndex(mix) : null,
-                                Spacing.Simple);
+                        (i, mix, dix) => dix.Columns.Any(a => changedColumns[a] == ColumnAction.Changed) ? SqlBuilder.CreateIndex(mix) : null,
+                        Spacing.Simple);
 
                     var recreatedFreeIndexes = dif.Indices.Values.Where(dix => !dix.IsControlledIndex &&
                         dix.Columns.Any(a => changedColumns[a] != ColumnAction.Equals) &&
@@ -151,13 +151,7 @@ namespace Signum.Engine
                         .Select(dix => SqlBuilder.ReCreateFreeIndex(tab, dix, dif.Name.Name, columnReplacements))
                         .Combine(Spacing.Simple);
 
-                    var newFreeIndexes = Synchronizer.SynchronizeScript(tab.Columns, replacements.ApplyReplacementsToOld(dif.Colums, Replacements.KeyColumnsForTable(tn)),
-                        (cn, colModel) => colModel.ReferenceTable != null ? SqlBuilder.CreateFreeIndex(tab, colModel) : null,
-                        null,
-                        null,
-                        Spacing.Simple);
-
-                    return SqlPreCommand.Combine(Spacing.Simple, controlledIndexes, recreatedFreeIndexes, newFreeIndexes);
+                    return SqlPreCommand.Combine(Spacing.Simple, controlledIndexes, recreatedFreeIndexes);
                 }, Spacing.Double);
 
             return SqlPreCommand.Combine(Spacing.Triple, dropIndices, dropForeignKeys, tables, syncEnums, addForeingKeys, addIndices);
