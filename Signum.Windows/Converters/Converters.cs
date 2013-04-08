@@ -37,7 +37,7 @@ namespace Signum.Windows
                    ConverterFactory.New((Lite<IIdentifiable> lite) => lite == null ? null : Server.Retrieve(lite));
 
         public static readonly IValueConverter NullableEnum =
-            ConverterFactory.New((object v) => v == null ?  VoidEnum.Instance : v, (object v) => v.Equals(VoidEnum.Instance) ? null : v);
+            ConverterFactory.New((object v) => v == null ? VoidEnumMessage.Instance : v, (object v) => v.Equals(VoidEnumMessage.Instance) ? null : v);
 
         public static readonly IValueConverter EnumDescription =
             ConverterFactory.New((object v) => v is Enum? ((Enum)v).NiceToString(): v);

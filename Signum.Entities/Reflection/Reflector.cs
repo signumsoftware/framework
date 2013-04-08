@@ -59,8 +59,9 @@ namespace Signum.Entities.Reflection
                     from t in a.GetTypes()
                     where typeof(IIdentifiable).IsAssignableFrom(t) || typeof(ModifiableEntity).IsAssignableFrom(t)
                     from p in t.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                    where p.PropertyType.IsEnum || p.PropertyType.UnNullify().IsEnum
-                    select p.PropertyType.UnNullify()).ToHashSet();
+                    let et = p.PropertyType.UnNullify()
+                    where et.IsEnum && et.Assembly.HasAttribute<DefaultAssemblyCultureAttribute>()
+                    select et).ToHashSet();
         });
 
         static DescriptionOptions? DescriptionManager_IsEnumsInEntities(Type t)

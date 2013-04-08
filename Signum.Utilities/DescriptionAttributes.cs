@@ -217,7 +217,18 @@ namespace Signum.Utilities
         {
             var la = GetLocalizedAssembly(type.Assembly, cultureInfo);
 
-            return la == null ? null : la.Types.TryGetC(type);
+            if (la == null)
+                return null;
+
+            var result = la.Types.TryGetC(type);
+            
+            if(result != null)
+                return result;
+
+            if(type.IsGenericType && !type.IsGenericTypeDefinition)
+                return la.Types.TryGetC(type.GetGenericTypeDefinition());
+
+            return null;
         }
 
         public static LocalizedAssembly GetLocalizedAssembly(Assembly assembly, CultureInfo cultureInfo)
@@ -279,7 +290,7 @@ namespace Signum.Utilities
             return Path.Combine(DescriptionManager.TranslationDirectory, "{0}.{1}.xml".Formato(assembly.GetName().Name, cultureInfo.Name));
         }
 
-        static DescriptionOptions GetDescriptionOptions(Type type)
+        public static DescriptionOptions GetDescriptionOptions(Type type)
         {
             var doa = type.SingleAttributeInherit<DescriptionOptionsAttribute>();
             if (doa != null)

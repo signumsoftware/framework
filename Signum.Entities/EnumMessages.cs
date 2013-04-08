@@ -1,6 +1,7 @@
 
 
 using System.ComponentModel;
+using Signum.Utilities;
 
 namespace Signum.Entities
 {
@@ -278,5 +279,11 @@ Lose changes?")]
         Quicklinks,
         [Description("No {0} found")]
         No0Found
+    }
+
+    public enum VoidEnumMessage
+    {
+        [Description("-")]
+        Instance
     }
 }

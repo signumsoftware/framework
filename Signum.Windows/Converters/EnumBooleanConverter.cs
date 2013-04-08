@@ -7,6 +7,7 @@ using System.Windows;
 using System.Globalization;
 using Signum.Utilities;
 using System.ComponentModel;
+using Signum.Entities;
 
 namespace Signum.Windows
 {
@@ -37,20 +38,14 @@ namespace Signum.Windows
     {
         public static IEnumerable<Enum> PreAndNull(this IEnumerable<Enum> collection)
         {
-            return collection.PreAnd(VoidEnum.Instance);
+            return collection.PreAnd(VoidEnumMessage.Instance);
         }
 
         public static IEnumerable<Enum> PreAndNull(this IEnumerable<Enum> collection, bool isNullable)
         {
             if (isNullable)
-                return collection.PreAnd(VoidEnum.Instance);
+                return collection.PreAnd(VoidEnumMessage.Instance);
             return collection;
         }
-    }
-
-    public enum VoidEnum
-    {
-        [Description("-")]
-        Instance
     }
 }
