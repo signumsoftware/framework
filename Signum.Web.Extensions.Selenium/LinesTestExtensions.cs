@@ -298,7 +298,7 @@ namespace Signum.Web.Selenium
 
             selenium.FilterSelectToken(0, "Id", false, prefix);
             selenium.AddFilter(0, prefix);
-            selenium.Type(prefix + "value_0", elementId.ToString());
+            selenium.Type("jq=#{0}tblFilters > tbody > tr:last td:last :text".Formato(prefix), elementId.ToString());
 
             selenium.Search(prefix);
             SearchTestExtensions.SelectRow(selenium, 0, prefix);
