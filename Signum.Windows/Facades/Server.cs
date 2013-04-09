@@ -47,15 +47,19 @@ namespace Signum.Windows
             if (!Connect())
                 throw new NotConnectedToServerException(ConnectionMessage.AConnectionWithTheServerIsNecessaryToContinue.NiceToString());
 
-            if (Connecting != null)
-                Connecting();    
         }
 
         public static bool Connect()
         {
             current = getServer();
 
-            return current != null;
+            if (current == null)
+                return false;
+
+            if (Connecting != null)
+                Connecting();
+
+            return true;
         }
 
         public static bool Connected
