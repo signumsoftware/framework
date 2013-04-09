@@ -710,7 +710,9 @@ namespace Signum.Engine.Maps
 
         public List<Index> GeneratAllIndexes()
         {
-            var result = Field.GeneratIndexes(this).ToList();
+            var result = BackReference.GeneratIndexes(this).ToList();
+
+            result.AddRange(Field.GeneratIndexes(this));
 
             if (MultiColumnIndexes != null)
                 result.AddRange(MultiColumnIndexes);
