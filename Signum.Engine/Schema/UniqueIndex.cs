@@ -42,7 +42,7 @@ namespace Signum.Engine.Maps
 
         public virtual string IndexName
         {
-            get { return "FIX_{0}_{1}".Formato(Table.Name.Name, ColumnSignature()).TryStart(Connector.Current.MaxNameLength); }
+            get { return "IX_{0}".Formato(ColumnSignature()).TryStart(Connector.Current.MaxNameLength); }
         }
 
         protected virtual string ColumnSignature()
@@ -62,7 +62,7 @@ namespace Signum.Engine.Maps
 
         public override string IndexName
         {
-            get { return "IX_{0}_{1}".Formato(Table.Name.Name, ColumnSignature()).TryStart(Connector.Current.MaxNameLength); }
+            get { return "UIX_{0}".Formato(ColumnSignature()).TryStart(Connector.Current.MaxNameLength); }
         }
 
         public string ViewName

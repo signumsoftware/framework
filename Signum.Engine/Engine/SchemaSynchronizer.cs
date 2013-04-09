@@ -8,6 +8,7 @@ using Signum.Engine.Maps;
 using Signum.Utilities;
 using Signum.Entities;
 using Signum.Engine.SchemaInfoTables;
+using System.Text.RegularExpressions;
 
 namespace Signum.Engine
 {
@@ -38,6 +39,29 @@ namespace Signum.Engine
 
         public static SqlPreCommand SynchronizeTablesScript(Replacements replacements)
         {
+            //Temproal HACK
+            if (Database.View<SysIndexes>().Any(a => a.name.StartsWith("FIX")) && SafeConsole.Ask("Old index naming convention...rename first?"))
+            {   
+                return Schema.Current.DatabaseNames().Select(db=>
+                {
+                    using (Administrator.OverrideDatabaseInViews(db))
+                    {
+                        var indexes =
+                            (from s in Database.View<SysSchemas>()
+                             from t in s.Tables()
+                             from ix in t.Indices()
+                             where !ix.is_primary_key
+                             select new { schemaName = s.name, tableName = t.name, ix.is_unique, indexName = ix.name }).ToList();
+
+                        return (from ix in indexes
+                                let newName = ix.is_unique ? Regex.Replace(ix.indexName, @"^IX_\w+?_", "UIX_") : Regex.Replace(ix.indexName, @"^F?IX_\w+?_", "IX_")
+                                where ix.indexName != newName
+                                select new SqlPreCommandSimple("EXEC SP_RENAME '{0}.{1}' , '{2}', 'INDEX' ".Formato(
+                                    new ObjectName(new SchemaName(db, ix.schemaName), ix.tableName), ix.indexName, newName))).Combine(Spacing.Simple);
+                    }
+                }).Combine(Spacing.Double);
+            }
+
             Dictionary<string, ITable> model = Schema.Current.GetDatabaseTables().ToDictionary(a => a.Name.ToString());
 
             Dictionary<string, DiffTable> database = DefaultGetDatabaseDescription(Schema.Current.DatabaseNames());
@@ -59,7 +83,7 @@ namespace Signum.Engine
                     var changes = Synchronizer.SynchronizeScript(modelIxs, dif.Indices,
                         null,
                         (i, dix) => dix.IsControlledIndex || dix.Columns.Any(a => changedColumns[a] != ColumnAction.Equals) ? SqlBuilder.DropIndex(dif.Name, dix) : null,
-                        (i, mix, dix) => dix.IsControlledIndex && dix.Columns.Any(a => changedColumns[a] == ColumnAction.Changed) ? SqlBuilder.DropIndex(dif.Name, dix) : null,
+                        (i, mix, dix) => dix.Columns.Any(a => changedColumns[a] == ColumnAction.Changed) ? SqlBuilder.DropIndex(dif.Name, dix) : null,
                         Spacing.Simple);
 
                     return changes;
@@ -139,8 +163,7 @@ namespace Signum.Engine
                     Dictionary<string, Index> modelIxs = modelIndices[tab];
 
                     var controlledIndexes = Synchronizer.SynchronizeScript(modelIxs, dif.Indices,
-                        (i, mix) => mix is UniqueIndex || SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index too?") ?
-                            SqlBuilder.CreateIndex(mix) : null,
+                        (i, mix) => mix is UniqueIndex || SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index too?") ? SqlBuilder.CreateIndex(mix) : null,
                         null,
                         (i, mix, dix) => dix.Columns.Any(a => changedColumns[a] == ColumnAction.Changed) ? SqlBuilder.CreateIndex(mix) : null,
                         Spacing.Simple);
@@ -156,6 +179,7 @@ namespace Signum.Engine
 
             return SqlPreCommand.Combine(Spacing.Triple, dropIndices, dropForeignKeys, tables, syncEnums, addForeingKeys, addIndices);
         }
+
 
         private static Dictionary<string, ColumnAction> ChangedColumns(DiffTable dif, ITable tab, Dictionary<string, string> replacements)
         {
@@ -333,6 +357,7 @@ namespace Signum.Engine
             get { return Indices.Values.ToList(); }
             set { Indices.AddRange(value, a => a.IndexName, a => a); }
         }
+
         public List<DiffIndex> ViewIndices
         {
             get { return Indices.Values.ToList(); }
@@ -356,7 +381,7 @@ namespace Signum.Engine
 
         public bool IsControlledIndex
         {
-            get { return IsUnique && IndexName.StartsWith("IX_"); }
+            get { return IndexName.StartsWith("IX_") || IndexName.StartsWith("UIX_"); }
         }
     }
 
