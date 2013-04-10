@@ -41,7 +41,7 @@ namespace Signum.Windows
 
         public bool Completed { get; set; }
 
-        public static void Wait(string title, string message, Action backgroundThread)
+        public static void Wait(string title, string message, Action backgroundThread, Action endAction = null)
         {
             ProgressWindow rd = new ProgressWindow
             {
@@ -51,7 +51,7 @@ namespace Signum.Windows
 
             Async.Do(
                 backgroundThread: backgroundThread,
-                endAction: null,
+                endAction: endAction,
                 finallyAction: () =>
                 {
                     rd.Completed = true;
