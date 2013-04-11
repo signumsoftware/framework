@@ -163,9 +163,9 @@ namespace Signum.Entities.Alerts
     }
 
     [Serializable, EntityKind(EntityKind.String)]
-    public class AlertTypeDN : IdentifiableEntity
+    public class AlertTypeDN : MultiOptionalEnumDN
     {
-        static AlertTypeDN()
+      static AlertTypeDN()
         {
             DescriptionManager.DefaultDescriptionOptions += DescriptionManager_DefaultDescriptionOptions;
             DescriptionManager.Invalidate();
@@ -174,35 +174,6 @@ namespace Signum.Entities.Alerts
         static DescriptionOptions? DescriptionManager_DefaultDescriptionOptions(Type type)
         {
             return type.IsEnum && type.Name.EndsWith("Alert") ? DescriptionOptions.Members : (DescriptionOptions?)null;
-        }
-
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
-        string name;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            set
-            {
-                if (key != null)
-                    throw new ApplicationException("This alert type is protected");
-
-                SetToStr(ref name, value, () => Name);
-            }
-        }
-
-        [SqlDbType(Size = 100), UniqueIndex(AllowMultipleNulls=true)]
-        string key;
-        public string Key
-        {
-            get { return key; }
-            set { Set(ref key, value, () => Key); }
-        }
-
-        static readonly Expression<Func<AlertTypeDN, string>> ToStringExpression = e => e.name;
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
         }
     }
 

@@ -193,7 +193,12 @@ namespace Signum.Engine.Authorization
 
         public static UserDN RetrieveUser(string username)
         {
-            return Database.Query<UserDN>().SingleOrDefaultEx(u => u.UserName == username);
+            var result = Database.Query<UserDN>().SingleOrDefaultEx(u => u.UserName == username);
+
+            if (result != null && result.State == UserState.Disabled)
+                throw new ApplicationException(Resources.User0IsDisabled.Formato(result.UserName));
+
+            return result; 
         }
 
         public static IEnumerable<Lite<RoleDN>> RolesInOrder()

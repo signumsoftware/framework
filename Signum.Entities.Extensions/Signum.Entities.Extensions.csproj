@@ -99,6 +99,7 @@
     <Compile Include="Translation\CultureInfoDN.cs" />
     <Compile Include="Basics\HourMinuteDN.cs" />
     <Compile Include="Basics\DateSpanDN.cs" />
+    <Compile Include="Basics\MultiOptionalEnumDN.cs" />
     <Compile Include="Basics\TypeConditionName.cs" />
     <Compile Include="Basics\PropertyRouteDN.cs" />
     <Compile Include="Basics\QueryDN.cs" />

@@ -16,6 +16,7 @@ using Signum.Engine.Operations;
 using System.Linq.Expressions;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Notes;
+using Signum.Engine.Extensions.Basics;
 
 namespace Signum.Engine.Notes
 {
@@ -27,6 +28,8 @@ namespace Signum.Engine.Notes
         {
             return NotesExpression.Evaluate(ident);
         }
+
+        static HashSet<Enum> SystemNoteTypes = new HashSet<Enum>(); 
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Type[] registerExpressionsFor)
         {
@@ -53,7 +56,24 @@ namespace Signum.Engine.Notes
                     Execute = (a, _) => { }
                 }.Register();
 
+                dqm.RegisterQuery(typeof(NoteTypeDN), () =>
+                    from t in Database.Query<NoteTypeDN>()
+                    select new
+                    {
+                        Entity = t,
+                        t.Id,
+                        Nombre = t.Name,
+                        t.Key,
+                    });
 
+                MultiOptionalEnumLogic<NoteTypeDN>.Start(sb, () => SystemNoteTypes);
+
+                new BasicExecute<NoteTypeDN>(NoteTypeOperation.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (a, _) => { }
+                }.Register();
 
                 if (registerExpressionsFor != null)
                 {
@@ -62,6 +82,16 @@ namespace Signum.Engine.Notes
                         dqm.RegisterExpression(new ExtensionInfo(type, exp, exp.Body.Type, "Notes", () => typeof(NoteDN).NicePluralName()));
                 }
             }
+        }
+
+        public static void RegisterNoteType(Enum noteType)
+        {
+            SystemNoteTypes.Add(noteType);
+        }
+
+        public static NoteTypeDN GetAlertType(Enum noteType)
+        {
+            return MultiOptionalEnumLogic<NoteTypeDN>.ToEntity(noteType);
         }
     }
 }

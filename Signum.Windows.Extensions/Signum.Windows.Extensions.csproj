@@ -262,6 +262,9 @@
       <DependentUpon>SMTPConfiguration.xaml</DependentUpon>
     </Compile>
     <Compile Include="Mailing\SMTPConfigurationClient.cs" />
+    <Compile Include="Notes\NoteType.xaml.cs">
+      <DependentUpon>NoteType.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Notes\Note.xaml.cs">
       <DependentUpon>Note.xaml</DependentUpon>
     </Compile>
@@ -622,6 +625,10 @@
     <Page Include="Mailing\SMTPConfiguration.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Notes\NoteType.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Notes\Note.xaml">
       <Generator>MSBuild:Compile</Generator>
