@@ -196,7 +196,7 @@ namespace Signum.Engine.Authorization
             var result = Database.Query<UserDN>().SingleOrDefaultEx(u => u.UserName == username);
 
             if (result != null && result.State == UserState.Disabled)
-                throw new ApplicationException(Resources.User0IsDisabled.Formato(result.UserName));
+                throw new ApplicationException(AuthMessage.User0IsDisabled.NiceToString().Formato(result.UserName));
 
             return result; 
         }

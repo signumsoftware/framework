@@ -189,6 +189,8 @@ namespace Signum.Entities.Authorization
         YouMustRepeatTheNewPassword,
         YouRecentlyRequestedANewPassword,
         YourUsernameIs0,
+       [Description("User {0} is disabled")]
+        User0IsDisabled,
     }
 
 }
