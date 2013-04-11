@@ -289,4 +289,7 @@
   <data name="TheProperty0" xml:space="preserve">
     <value>the property {0}</value>
   </data>
+  <data name="User0IsDisabled" xml:space="preserve">
+    <value>User {0} is disabled</value>
+  </data>
 </root>

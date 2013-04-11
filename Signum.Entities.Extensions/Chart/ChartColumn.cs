@@ -23,7 +23,7 @@ namespace Signum.Entities.Chart
         public ChartScriptColumnDN ScriptColumn
         {
             get { return scriptColumn; }
-            set { Set(ref scriptColumn, value, () => ScriptColumn); }
+            set { scriptColumn = value; }
         }
         
         public ChartColumnDN()
