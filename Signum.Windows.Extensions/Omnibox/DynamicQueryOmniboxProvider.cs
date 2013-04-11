@@ -54,7 +54,7 @@ namespace Signum.Windows.Omnibox
                         Value = value,
                     };
                 }).ToList(),
-                SearchOnLoad = true,
+                SearchOnLoad = r.Filters.Any(),
             });
         }
 

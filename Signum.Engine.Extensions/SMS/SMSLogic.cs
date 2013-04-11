@@ -233,8 +233,6 @@ namespace Signum.Engine.SMS
                         throw new ArgumentException("The SMS template is associated with the type {0} instead of {1}"
                             .Formato(template.AssociatedType.FullClassName, typeof(T).FullName));
 
-                    template.MessageLengthExceeded = MessageLengthExceeded.Allowed;
-
                     return new SMSMessageDN
                     {
                         Message = template.ComposeMessage(func.Evaluate(provider)),
