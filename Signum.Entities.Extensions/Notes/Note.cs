@@ -61,6 +61,13 @@ namespace Signum.Entities.Notes
             return " - ".Combine(title, text.EtcLines(100)).Etc(100);
         }
 
+        NoteTypeDN noteType;
+        public NoteTypeDN NoteType
+        {
+            get { return noteType; }
+            set { Set(ref noteType, value, () => NoteType); }
+        }
+
         [ImplementedBy()]
         Lite<IIdentifiable> aditionalData;
         public Lite<IIdentifiable> AditionalData
@@ -71,6 +78,18 @@ namespace Signum.Entities.Notes
     }
 
     public enum NoteOperation
+    {
+        Save,
+    }
+
+
+    [Serializable, EntityKind(EntityKind.String)]
+    public class NoteTypeDN : MultiOptionalEnumDN
+    {
+
+    }
+
+    public enum NoteTypeOperation
     {
         Save,
     }

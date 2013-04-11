@@ -469,6 +469,11 @@
     </Compile>
     <Compile Include="Note\NoteClient.cs" />
     <Compile Include="Note\NoteWidgetHelper.cs" />
+    <Compile Include="Note\Views\NoteType.generated.cs">
+      <DependentUpon>NoteType.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Note\Views\Note1.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -1104,6 +1109,10 @@
     <Content Include="Note\Views\Note.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Note1.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Note\Views\NoteType.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>NoteType.generated.cs</LastGenOutput>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>RazorGenerator</Generator>

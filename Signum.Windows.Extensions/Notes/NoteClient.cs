@@ -24,6 +24,7 @@ namespace Signum.Windows.Notes
                     return null;
                 };
 
+                Navigator.AddSetting(new EntitySettings<NoteTypeDN> { View = e => new NoteType() });
                 Navigator.AddSetting(new EntitySettings<NoteDN>
                 {
                     View = e => new Note(),
