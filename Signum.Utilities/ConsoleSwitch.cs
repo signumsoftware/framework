@@ -138,7 +138,10 @@ namespace Signum.Utilities
                 string line = Console.ReadLine();
 
                 if (string.IsNullOrEmpty(line))
+                {
+                    Console.Clear();
                     return null;
+                }
 
                 Console.WriteLine();
 
