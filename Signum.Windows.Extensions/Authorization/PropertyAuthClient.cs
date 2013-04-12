@@ -33,7 +33,7 @@ namespace Signum.Windows.Authorization
         }
 
 
-        static PropertyAllowed GetPropertyAllowed(this PropertyRoute route)
+        public static PropertyAllowed GetPropertyAllowed(this PropertyRoute route)
         {
             if (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
                 return GetPropertyAllowed(route.Parent);
@@ -44,7 +44,7 @@ namespace Signum.Windows.Authorization
             return propertyRules.GetAllowed(route);
         }
 
-        static string GetAllowedFor(this PropertyRoute route, PropertyAllowed requested)
+        public static string GetAllowedFor(this PropertyRoute route, PropertyAllowed requested)
         {
             if (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
                 return GetAllowedFor(route.Parent, requested);
