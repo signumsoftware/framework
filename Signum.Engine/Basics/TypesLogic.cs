@@ -5,7 +5,6 @@ using System.Text;
 using Signum.Entities;
 using Signum.Engine.Maps;
 using Signum.Entities.Reflection;
-using Signum.Engine.Properties;
 using Signum.Utilities;
 using System.Reflection;
 using System.Text.RegularExpressions;

@@ -13,7 +13,6 @@ using Signum.Utilities.DataStructures;
 using System.Reflection;
 using System.Windows.Media;
 using Signum.Entities.Reflection;
-using Signum.Windows.Properties;
 using System.Collections;
 using Signum.Services;
 using Signum.Entities;

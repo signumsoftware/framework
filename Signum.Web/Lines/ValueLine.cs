@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Web.Mvc;
 using Signum.Entities;
 using System.Web.Routing;
-using Signum.Web.Properties;
+using Signum.Utilities;
 
 namespace Signum.Web
 {
@@ -20,8 +20,8 @@ namespace Signum.Web
         public List<SelectListItem> EnumComboItems { get; set; }
         public DatePickerOptions DatePickerOptions { get; set; }
 
-        public string RadioButtonLabelTrue = Resources.Yes;
-        public string RadioButtonLabelFalse = Resources.No;
+        public string RadioButtonLabelTrue = EntityControlMessage.Yes.NiceToString();
+        public string RadioButtonLabelFalse = EntityControlMessage.No.NiceToString();
 
         public bool WriteHiddenOnReadonly { get; set; }
 

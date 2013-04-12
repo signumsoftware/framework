@@ -1,4 +1,4 @@
-﻿#region usings
+#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,6 @@ using Signum.Utilities;
 using Signum.Engine;
 using Signum.Entities;
 using Signum.Engine.Maps;
-using Signum.Web.Properties;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.Reflection;
 using Signum.Entities.DynamicQuery;
@@ -237,7 +236,7 @@ namespace Signum.Web.Controllers
         public ContentResult SelectedItemsContextMenu(string liteKeys, string webQueryName, string implementationsKey, string prefix)
         {
             var noResults = new HtmlTag("li").Class("sf-search-ctxitem sf-search-ctxitem-no-results")
-                .InnerHtml(new HtmlTag("span").InnerHtml(Resources.NoResults.EncodeHtml()).ToHtml())
+                .InnerHtml(new HtmlTag("span").InnerHtml(SearchMessage.NoResults.NiceToString().EncodeHtml()).ToHtml())
                 .ToHtml().ToString();
 
             if (string.IsNullOrEmpty(liteKeys))
@@ -325,7 +324,7 @@ namespace Signum.Web.Controllers
 
             ViewData.Model = new Context(null, prefix);
             ViewData[ViewDataKeys.CustomHtml] = sb.ToHtml();
-            ViewData[ViewDataKeys.Title] = Resources.ChooseAType;
+            ViewData[ViewDataKeys.Title] = SelectorMessage.ChooseAType.NiceToString();
 
             return PartialView(Navigator.Manager.PopupCancelControlView);
         }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,7 +15,6 @@ using System.Windows.Media;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.DynamicQuery;
-using Signum.Windows.Properties;
 using Signum.Entities.Reflection;
 
 namespace Signum.Windows
@@ -38,7 +37,7 @@ namespace Signum.Windows
                    ConverterFactory.New((Lite<IIdentifiable> lite) => lite == null ? null : Server.Retrieve(lite));
 
         public static readonly IValueConverter NullableEnum =
-            ConverterFactory.New((object v) => v == null ?  VoidEnum.Instance : v, (object v) => v.Equals(VoidEnum.Instance) ? null : v);
+            ConverterFactory.New((object v) => v == null ? VoidEnumMessage.Instance : v, (object v) => v.Equals(VoidEnumMessage.Instance) ? null : v);
 
         public static readonly IValueConverter EnumDescription =
             ConverterFactory.New((object v) => v is Enum? ((Enum)v).NiceToString(): v);
@@ -49,9 +48,9 @@ namespace Signum.Windows
         public static readonly IValueConverter ErrorListToErrorCount =
             ConverterFactory.New((string[] str) => str == null ? null :
                                                  new Switch<int, string>(str.Length)
-                                                 .Case(0, Properties.Resources.NoDirectErrors)
-                                                 .Case(1, v => Properties.Resources._1Error.Formato(str[0]))
-                                                 .Default(v => Properties.Resources._0Errors1.Formato(v, str[0])));
+                                                 .Case(0, NormalWindowMessage.NoDirectErrors.NiceToString())
+                                                 .Case(1, v => NormalWindowMessage._1Error.NiceToString().Formato(str[0]))
+                                                 .Default(v => NormalWindowMessage._0Errors1.NiceToString().Formato(v, str[0])));
 
         public static readonly IValueConverter ErrorListToBool =
             ConverterFactory.New((string[] str) => str != null && str.Length > 0);

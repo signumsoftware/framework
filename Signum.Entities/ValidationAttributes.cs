@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,7 +8,6 @@ using System.Reflection;
 using System.Resources;
 using System.Text;
 using System.Text.RegularExpressions;
-using Signum.Entities.Properties;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
@@ -21,7 +20,7 @@ namespace Signum.Entities
     public abstract class ValidatorAttribute : Attribute
     {
         public Func<ModifiableEntity, bool> IsApplicable; 
-        public string ErrorMessage { get; set; }
+        public Func<string> ErrorMessage { get; set; }
 
         public int Order { get; set; }
 
@@ -39,26 +38,13 @@ namespace Signum.Entities
             if (defaultError == null)
                 return null;
 
-            string error = GetLocalizedErrorMessage(property, this) ?? ErrorMessage ?? defaultError;
+            string error = ErrorMessage == null ? defaultError : ErrorMessage();
             if (error != null)
                 error = error.Formato(property.NiceName());
 
             return error; 
         }
 
-        static string GetLocalizedErrorMessage(PropertyInfo property, ValidatorAttribute validator)
-        {
-            Assembly assembly = property.DeclaringType.Assembly;
-            if (assembly.HasAttribute<LocalizeDescriptionsAttribute>())
-            {
-                string key = property.DeclaringType.Name.Add("_", property.Name).Add("_", validator.GetType().Name);
-                string result = assembly.GetDefaultResourceManager().GetString(key);
-                if (result != null)
-                    return result;
-            }
-
-            return null;
-        }
 
         /// <summary>
         /// When overriden, validates the value against this validator rule
@@ -73,14 +59,14 @@ namespace Signum.Entities
         protected override string OverrideError(object obj)
         {
             if (obj == null)
-                return Resources._0IsNotSet;
+                return ValidationMessage._0IsNotSet.NiceToString();
 
             return null;
         }
 
         public override string HelpMessage
         {
-            get { return Resources.BeNotNull; }
+            get { return ValidationMessage.BeNotNull.NiceToString(); }
         }
     }
 
@@ -113,16 +99,16 @@ namespace Signum.Entities
             string val = (string)value;
 
             if (string.IsNullOrEmpty(val))
-                return allowNulls ? null : Resources._0IsNotSet;
+                return allowNulls ? null : ValidationMessage._0IsNotSet.NiceToString();
 
             if (min == max && min != -1 && val.Length != min)
-                return Resources.TheLenghtOf0HasToBeEqualTo0.Formato(min);
+                return ValidationMessage.TheLenghtOf0HasToBeEqualTo0.NiceToString().Formato(min);
 
             if (min != -1 && val.Length < min)
-                return Resources.TheLengthOf0HasToBeGreaterOrEqualTo0.Formato(min);
+                return ValidationMessage.TheLengthOf0HasToBeGreaterOrEqualTo0.NiceToString().Formato(min);
 
             if (max != -1 && val.Length > max)
-                return Resources.TheLengthOf0HasToBeLesserOrEqualTo0.Formato(max);
+                return ValidationMessage.TheLengthOf0HasToBeLesserOrEqualTo0.NiceToString().Formato(max);
 
             return null;
         }
@@ -132,12 +118,12 @@ namespace Signum.Entities
             get
             {
                 string result =
-                    min != -1 && max != -1 ? Resources.HaveBetween0And1Characters.Formato(min, max) :
-                    min != -1 ? Resources.HaveMinimum0Characters.Formato(min) :
-                    max != -1 ? Resources.HaveMaximun0Characters.Formato(max) : null;
+                    min != -1 && max != -1 ? ValidationMessage.HaveBetween0And1Characters.NiceToString().Formato(min, max) :
+                    min != -1 ? ValidationMessage.HaveMinimum0Characters.NiceToString().Formato(min) :
+                    max != -1 ? ValidationMessage.HaveMaximun0Characters.NiceToString().Formato(max) : null;
 
                 if (allowNulls)
-                    result = result.Add(" ", Resources.OrBeNull);
+                    result = result.Add(" ", ValidationMessage.OrBeNull.NiceToString());
 
                 return result;
             }
@@ -175,16 +161,16 @@ namespace Signum.Entities
                 return null;
 
             if (formatName == null)
-                return Resources._0HasNoCorrectFormat;
+                return ValidationMessage._0HasNoCorrectFormat.NiceToString();
             else
-                return Resources._0DoesNotHaveAValid0Format.Formato(formatName);
+                return ValidationMessage._0DoesNotHaveAValid0Format.NiceToString().Formato(formatName);
         }
 
         public override string HelpMessage
         {
             get
             {
-                return Resources.HaveValid0Format.Formato(formatName);
+                return ValidationMessage.HaveValid0Format.NiceToString().Formato(formatName);
             }
         }
     }
@@ -212,7 +198,7 @@ namespace Signum.Entities
         public TelephoneValidatorAttribute()
             : base(TelephoneRegex)
         {
-            this.FormatName = Resources.Telephone;
+            this.FormatName = ValidationMessage.Telephone.NiceToString();
         }
     }
 
@@ -243,7 +229,7 @@ namespace Signum.Entities
         public FileNameValidatorAttribute()
             : base(FileNameRegex)
         {
-            this.FormatName = Resources.FileName;
+            this.FormatName = ValidationMessage.FileName.NiceToString();
         }
     }
 
@@ -268,7 +254,7 @@ namespace Signum.Entities
 
             if (value is decimal && Math.Round((decimal)value, DecimalPlaces) != (decimal)value)
             {
-                return Resources._0HasMoreThan0DecimalPlaces.Formato(DecimalPlaces);
+                return ValidationMessage._0HasMoreThan0DecimalPlaces.NiceToString().Formato(DecimalPlaces);
             }
 
             return null;
@@ -276,7 +262,7 @@ namespace Signum.Entities
 
         public override string HelpMessage
         {
-            get { return Resources.Have0Decimals.Formato(DecimalPlaces); }
+            get { return ValidationMessage.Have0Decimals.NiceToString().Formato(DecimalPlaces); }
         }
     }
 
@@ -342,12 +328,12 @@ namespace Signum.Entities
             if (ok)
                 return null;
 
-            return Resources._0HasToBe0Than1.Formato(ComparisonType.NiceToString(), number.ToString());
+            return ValidationMessage._0HasToBe0Than1.NiceToString().Formato(ComparisonType.NiceToString(), number.ToString());
         }
 
         public override string HelpMessage
         {
-            get { return Resources.Be + ComparisonType.NiceToString() + " " + number.ToString(); }
+            get { return ValidationMessage.Be.NiceToString() + ComparisonType.NiceToString() + " " + number.ToString(); }
         }
     }
 
@@ -410,12 +396,12 @@ namespace Signum.Entities
                 val.CompareTo(max) <= 0)
                 return null;
 
-            return Resources._0HasToBeBetween0And1.Formato(min, max);
+            return ValidationMessage._0HasToBeBetween0And1.NiceToString().Formato(min, max);
         }
 
         public override string HelpMessage
         {
-            get { return Resources.BeBetween0And1.Formato(min, max); }
+            get { return ValidationMessage.BeBetween0And1.NiceToString().Formato(min, max); }
         }
     }
 
@@ -428,13 +414,13 @@ namespace Signum.Entities
                 return null;
             string ex = list.Cast<object>().GroupCount().Where(kvp => kvp.Value > 1).ToString(e => "{0} x {1}".Formato(e.Key, e.Value), ", ");
             if (ex.HasText())
-                return Properties.Resources._0HasSomeRepeatedElements0.Formato(ex);
+                return ValidationMessage._0HasSomeRepeatedElements0.NiceToString().Formato(ex);
             return null;
         }
 
         public override string HelpMessage
         {
-            get { return Resources.HaveNoRepeatedElements; }
+            get { return ValidationMessage.HaveNoRepeatedElements.NiceToString(); }
         }
 
         public static string ByKey<T, K>(IEnumerable<T> collection, Func<T, K> keySelector)
@@ -473,12 +459,12 @@ namespace Signum.Entities
                 (ComparisonType == ComparisonType.LessThanOrEqual && val.CompareTo(number) <= 0))
                 return null;
 
-            return Resources.TheNumberOfElementsOf0HasToBe01.Formato(ComparisonType.NiceToString(), number.ToString());
+            return ValidationMessage.TheNumberOfElementsOf0HasToBe01.NiceToString().Formato(ComparisonType.NiceToString(), number.ToString());
         }
 
         public override string HelpMessage
         {
-            get { return Resources.HaveANumberOfElements01.Formato(ComparisonType.NiceToString(), number.ToString()); }
+            get { return ValidationMessage.HaveANumberOfElements01.NiceToString().Formato(ComparisonType.NiceToString(), number.ToString()); }
         }
     }
 
@@ -546,7 +532,7 @@ namespace Signum.Entities
         {
             get
             {
-                return Resources.HaveAPrecisionOf + " " + Precision.NiceToString().ToLower();
+                return ValidationMessage.HaveAPrecisionOf.NiceToString() + " " + Precision.NiceToString().ToLower();
             }
         }
     }
@@ -595,7 +581,7 @@ namespace Signum.Entities
         {
             get
             {
-                return Resources.HaveAPrecisionOf + " " + Precision.NiceToString().ToLower();
+                return ValidationMessage.HaveAPrecisionOf.NiceToString() + " " + Precision.NiceToString().ToLower();
             }
         }
     }
@@ -621,27 +607,28 @@ namespace Signum.Entities
             string str = (string)value;
 
             if ((this.textCase == Case.Uppercase) && (str != str.ToUpper()))
-                return Resources._0HasToBeUppercase;
+                return ValidationMessage._0HasToBeUppercase.NiceToString();
 
             if ((this.textCase == Case.Lowercase) && (str != str.ToLower()))
-                return Resources._0HasToBeLowercase;
+                return ValidationMessage._0HasToBeLowercase.NiceToString();
 
             return null;
         }
 
         public override string HelpMessage
         {
-            get { return Resources.Be + (textCase == Case.Uppercase ? Resources.Uppercase : Resources.Lowercase); }
+            get { return ValidationMessage.Be.NiceToString() + textCase.NiceToString(); }
         }
     }
 
+    [DescriptionOptions(DescriptionOptions.Members)]
     public enum Case
     {
         Uppercase,
         Lowercase
     }
     
-    [ForceLocalization]
+    [DescriptionOptions(DescriptionOptions.Members)]
     public enum ComparisonType
     {
         EqualTo,
@@ -658,7 +645,7 @@ namespace Signum.Entities
     {
         Func<E, S> getState;
         string[] propertyNames;
-        string[] propertyNiceNames;
+        PropertyInfo[] properties;
         Func<E, object>[] getters;
 
         Dictionary<S, bool?[]> dictionary = new Dictionary<S, bool?[]>();
@@ -666,10 +653,9 @@ namespace Signum.Entities
         public StateValidator(Func<E, S> getState, params Expression<Func<E, object>>[] properties)
         {
             this.getState = getState;
-            PropertyInfo[] pis = properties.Select(p => ReflectionTools.GetPropertyInfo(p)).ToArray();
-            propertyNames = pis.Select(pi => pi.Name).ToArray();
-            propertyNiceNames = pis.Select(pi => pi.NiceName()).ToArray();
-            getters = properties.Select(p => p.Compile()).ToArray();
+            this.properties = properties.Select(p => ReflectionTools.GetPropertyInfo(p)).ToArray();
+            this.propertyNames = properties.Select(pi => pi.Name).ToArray();
+            this.getters = properties.Select(p => p.Compile()).ToArray();
         }
 
         public void Add(S state, params bool?[] necessary)
@@ -720,12 +706,12 @@ namespace Signum.Entities
                 val = null;
 
             if (val != null && !necessary.Value)
-                return showState ? Resources._0IsNotAllowedOnState1.Formato(propertyNiceNames[index], state) :
-                                   Resources._0IsNotAllowed.Formato(propertyNiceNames[index]);
+                return showState ? ValidationMessage._0IsNotAllowedOnState1.NiceToString().Formato(properties[index].NiceName(), state) :
+                                   ValidationMessage._0IsNotAllowed.NiceToString().Formato(properties[index].NiceName());
 
             if (val == null && necessary.Value)
-                return showState ? Resources._0IsNecessaryOnState1.Formato(propertyNiceNames[index], state) :
-                                   Resources._0IsNecessary.Formato(propertyNiceNames[index]);
+                return showState ? ValidationMessage._0IsNecessaryOnState1.NiceToString().Formato(properties[index].NiceName(), state) :
+                                   ValidationMessage._0IsNecessary.NiceToString().Formato(properties[index].NiceName());
 
             return null;
         }
@@ -756,5 +742,82 @@ namespace Signum.Entities
             return string.IsNullOrEmpty(result) ? null : result;
         }
     }
+
+
+    public enum ValidationMessage
+    {
+        [Description("{{0}} does not have a valid {0} format")]
+        _0DoesNotHaveAValid0Format,
+        [Description("{0} has an invalid format")]
+        _0HasAnInvalidFormat,
+        [Description("{{0}} has more than {0} decimal places")]
+        _0HasMoreThan0DecimalPlaces,
+        [Description("{0} has no correct format")]
+        _0HasNoCorrectFormat,
+        [Description("{{0}} has some repeated elements: {0}")]
+        _0HasSomeRepeatedElements0,
+        [Description("{{0}} has to be {0} {1}")]
+        _0HasToBe0Than1,
+        [Description("{{0}} Has to be between {0} and {1}")]
+        _0HasToBeBetween0And1,
+        [Description("{0} has to be lowercase")]
+        _0HasToBeLowercase,
+        [Description("{0} has to be uppercase")]
+        _0HasToBeUppercase,
+        [Description("{0} is necessary")]
+        _0IsNecessary,
+        [Description("{0} is necessary on state {1}")]
+        _0IsNecessaryOnState1,
+        [Description("{0} is not allowed")]
+        _0IsNotAllowed,
+        [Description("{0} is not allowed on state {1}")]
+        _0IsNotAllowedOnState1,
+        [Description("{0} is not set")]
+        _0IsNotSet,
+        [Description("be ")]
+        Be,
+        [Description("be between {0} and {1}")]
+        BeBetween0And1,
+        [Description("be not null")]
+        BeNotNull,
+        [Description("file name")]
+        FileName,
+        [Description("have {0} decimals")]
+        Have0Decimals,
+        [Description("have a number of elements {0} {1}")]
+        HaveANumberOfElements01,
+        [Description("have a precision of ")]
+        HaveAPrecisionOf,
+        [Description("have between {0} and {1} characters")]
+        HaveBetween0And1Characters,
+        [Description("have maximun {0} characters")]
+        HaveMaximun0Characters,
+        [Description("have minimum {0} characters")]
+        HaveMinimum0Characters,
+        [Description("have no repeated elements")]
+        HaveNoRepeatedElements,
+        [Description("have a valid {0} format")]
+        HaveValid0Format,
+        InvalidDateFormat,
+        InvalidFormat,
+        [Description("Not possible to assign {0}")]
+        NotPossibleToaAssign0,
+        [Description("or be null")]
+        OrBeNull,
+        Telephone,
+        [Description("The lenght of {{0}} has to be equal to {0}")]
+        TheLenghtOf0HasToBeEqualTo0,
+        [Description("The length of {{0}} has to be greater than or equal to {0}")]
+        TheLengthOf0HasToBeGreaterOrEqualTo0,
+        [Description("The length of {{0}} has to be less than or equal to {0}")]
+        TheLengthOf0HasToBeLesserOrEqualTo0,
+        [Description("The number of {0} is being multiplied by {1}")]
+        TheNumberOf0IsBeingMultipliedBy1,
+        [Description("The number of elements of {{0}} has to be {0} {1}")]
+        TheNumberOfElementsOf0HasToBe01,
+        [Description("Type {0} not allowed")]
+        Type0NotAllowed
+    }
+
 
 }

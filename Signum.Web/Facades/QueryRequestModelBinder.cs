@@ -7,7 +7,6 @@ using System.Web.Mvc;
 using System.Collections.Specialized;
 using Signum.Utilities;
 using Signum.Entities.DynamicQuery;
-using Signum.Web.Properties;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities;
 using System.Web;

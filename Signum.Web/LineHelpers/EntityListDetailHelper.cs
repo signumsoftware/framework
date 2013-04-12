@@ -1,4 +1,4 @@
-﻿#region usings
+#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +11,6 @@ using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
 using System.Configuration;
-using Signum.Web.Properties;
 #endregion
 
 namespace Signum.Web
@@ -102,7 +101,7 @@ namespace Signum.Web
             {
                 using (sb.Surround(new HtmlTag("fieldset")))
                 {
-                    sb.AddLine(new HtmlTag("legend").InnerHtml(new MvcHtmlString(Resources.Detail)));
+                    sb.AddLine(new HtmlTag("legend").InnerHtml(new MvcHtmlString(EntityControlMessage.Detail.NiceToString())));
                     sb.AddLine(helper.Div(listDetail.DetailDiv, null, "sf-entity-list-detail"));
                 }
             }

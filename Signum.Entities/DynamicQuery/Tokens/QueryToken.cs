@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,10 +6,10 @@ using Signum.Utilities.Reflection;
 using System.Linq.Expressions;
 using System.Reflection;
 using Signum.Utilities;
-using Signum.Entities.Properties;
 using Signum.Entities.Reflection;
 using Signum.Utilities.ExpressionTrees; 
 using System.Text.RegularExpressions;
+using System.ComponentModel;
 
 namespace Signum.Entities.DynamicQuery
 {
@@ -174,18 +174,18 @@ namespace Signum.Entities.DynamicQuery
 
             return new List<QueryToken>
             {
-                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Year), utc + Resources.Year), 
-                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Month), utc + Resources.Month), 
+                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Year), utc + QueryTokenMessage.Year.NiceToString()), 
+                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Month), utc + QueryTokenMessage.Month.NiceToString()), 
                 new MonthStartToken(parent), 
 
-                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Day), utc + Resources.Day),
+                new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Day), utc + QueryTokenMessage.Day.NiceToString()),
                 new DayOfYearToken(parent), 
                 new DayOfWeekToken(parent), 
                 new DateToken(parent), 
-                precission < DateTimePrecision.Hours ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Hour), utc + Resources.Hour), 
-                precission < DateTimePrecision.Minutes ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Minute), utc + Resources.Minute), 
-                precission < DateTimePrecision.Seconds ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Second), utc + Resources.Second), 
-                precission < DateTimePrecision.Milliseconds? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Millisecond), utc + Resources.Millisecond), 
+                precission < DateTimePrecision.Hours ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Hour), utc + QueryTokenMessage.Hour.NiceToString()), 
+                precission < DateTimePrecision.Minutes ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Minute), utc + QueryTokenMessage.Minute.NiceToString()), 
+                precission < DateTimePrecision.Seconds ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Second), utc + QueryTokenMessage.Second.NiceToString()), 
+                precission < DateTimePrecision.Milliseconds? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Millisecond), utc + QueryTokenMessage.Millisecond.NiceToString()), 
             }.NotNull().ToList();
         }
 
@@ -281,7 +281,7 @@ namespace Signum.Entities.DynamicQuery
 
                 if (IsCollecction(type))
                 {
-                    return Resources.ListOf0.Formato(GetNiceTypeName(Type.ElementType(), GetElementImplementations()));
+                    return QueryTokenMessage.ListOf0.NiceToString().Formato(GetNiceTypeName(Type.ElementType(), GetElementImplementations()));
                 }
 
                 return GetNiceTypeName(Type, GetImplementations());
@@ -306,12 +306,12 @@ namespace Signum.Entities.DynamicQuery
         {
             switch (QueryUtils.TryGetFilterType(type))
             {
-                case FilterType.Integer: return Resources.Number;
-                case FilterType.Decimal: return Resources.DecimalNumber;
-                case FilterType.String: return Resources.Text;
-                case FilterType.DateTime:  return Resources.DateTime;
-                case FilterType.Boolean: return Resources.Check;
-                case FilterType.Guid: return Resources.GlobalUniqueIdentifier;
+                case FilterType.Integer: return QueryTokenMessage.Number.NiceToString();
+                case FilterType.Decimal: return QueryTokenMessage.DecimalNumber.NiceToString();
+                case FilterType.String: return QueryTokenMessage.Text.NiceToString();
+                case FilterType.DateTime:  return QueryTokenMessage.DateTime.NiceToString();
+                case FilterType.Boolean: return QueryTokenMessage.Check.NiceToString();
+                case FilterType.Guid: return QueryTokenMessage.GlobalUniqueIdentifier.NiceToString();
                 case FilterType.Enum: return type.UnNullify().NiceName();
                 case FilterType.Lite:
                 {
@@ -319,7 +319,7 @@ namespace Signum.Entities.DynamicQuery
                     var imp = implementations.Value;
 
                     if (imp.IsByAll)
-                        return Combine(cleanType, Resources.AnyEntity);
+                        return Combine(cleanType, QueryTokenMessage.AnyEntity.NiceToString());
                             
 
                     if (imp.Types.Only() == type.CleanType())
@@ -327,7 +327,7 @@ namespace Signum.Entities.DynamicQuery
 
                     return Combine(cleanType, imp.Types.CommaOr(t => t.NiceName()));
                 }
-                case FilterType.Embedded: return Resources.Embedded0.Formato(type.NiceName());
+                case FilterType.Embedded: return QueryTokenMessage.Embedded0.NiceToString().Formato(type.NiceName());
                 default: return type.TypeName();
             }
         }
@@ -352,5 +352,52 @@ namespace Signum.Entities.DynamicQuery
         public readonly Type TupleType;
         public readonly ParameterExpression Parameter;
         public readonly Dictionary<QueryToken, Expression> Replacemens; 
+    }
+
+    public enum QueryTokenMessage
+    {
+        [Description("({0} as {1})")]
+        _0As1,
+        [Description(" and ")]
+        And,
+        [Description("any entity")]
+        AnyEntity,
+        [Description("As {0}")]
+        As0,
+        [Description("check")]
+        Check,
+        [Description("Column {0} not found")]
+        Column0NotFound,
+        Count,
+        Date,
+        [Description("date and time")]
+        DateTime,
+        Day,
+        DayOfWeek,
+        DayOfYear,
+        [Description("decimal number")]
+        DecimalNumber,
+        [Description("embedded {0}")]
+        Embedded0,
+        [Description("global unique identifier")]
+        GlobalUniqueIdentifier,
+        Hour,
+        [Description("list of {0}")]
+        ListOf0,
+        Millisecond,
+        Minute,
+        Month,
+        [Description("Month Start ")]
+        MonthStart,
+        [Description("More than one column named {0}")]
+        MoreThanOneColumnNamed0,
+        [Description("number")]
+        Number,
+        [Description(" of ")]
+        Of,
+        Second,
+        [Description("text")]
+        Text,
+        Year
     }
 }

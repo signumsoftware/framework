@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -524,7 +524,7 @@ namespace Signum.Windows
                 }
 
                 if (contextMenu.Items.Count == 0)
-                    contextMenu.Items.Add(new MenuItem { Header = new TextBlock(new Italic(new Run(Signum.Windows.Properties.Resources.NoActionsFound))), IsEnabled = false });
+                    contextMenu.Items.Add(new MenuItem { Header = new TextBlock(new Italic(new Run(SearchMessage.NoActionsFound.NiceToString()))), IsEnabled = false });
             }
         }
         
@@ -891,7 +891,7 @@ namespace Signum.Windows
                 return;
 
             string result = token.NiceName();
-            if (ValueLineBox.Show<string>(ref result, Properties.Resources.NewColumnSName, Properties.Resources.ChooseTheDisplayNameOfTheNewColumn, Properties.Resources.Name, null, null, Window.GetWindow(this)))
+            if (ValueLineBox.Show<string>(ref result, SearchMessage.NewColumnSName.NiceToString(), SearchMessage.ChooseTheDisplayNameOfTheNewColumn.NiceToString(), SearchMessage.Name.NiceToString(), null, null, Window.GetWindow(this)))
             {
                 ClearResults();
 
@@ -907,7 +907,7 @@ namespace Signum.Windows
             SortGridViewColumnHeader gvch = GetMenuItemHeader(sender);
 
             string result = gvch.RequestColumn.DisplayName;
-            if (ValueLineBox.Show<string>(ref result, Properties.Resources.NewColumnSName, Properties.Resources.ChooseTheDisplayNameOfTheNewColumn, Properties.Resources.Name, null, null, Window.GetWindow(this)))
+            if (ValueLineBox.Show<string>(ref result, SearchMessage.NewColumnSName.NiceToString(), SearchMessage.ChooseTheDisplayNameOfTheNewColumn.NiceToString(), SearchMessage.Name.NiceToString(), null, null, Window.GetWindow(this)))
             {
                 gvch.RequestColumn.DisplayName = result;
                 gvch.Content = result;

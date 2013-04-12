@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
-using Signum.Engine.Properties;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;

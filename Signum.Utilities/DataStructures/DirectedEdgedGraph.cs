@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using System.Collections;
-using Signum.Utilities.Properties;
 using System.Xml.Linq;
 
 namespace Signum.Utilities.DataStructures

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,9 +14,9 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Data;
 using System.Text.RegularExpressions;
-using Signum.Utilities.Properties;
 using System.Collections;
 using Signum.Utilities.ExpressionTrees;
+using System.ComponentModel;
 
 namespace Signum.Utilities
 {
@@ -460,22 +460,22 @@ namespace Signum.Utilities
 
         public static string CommaAnd<T>(this IEnumerable<T> collection)
         {
-            return CommaString(collection.Select(a => a.ToString()).ToArray(), Resources.And);
+            return CommaString(collection.Select(a => a.ToString()).ToArray(), CollectionMessage.And.NiceToString());
         }
 
         public static string CommaAnd<T>(this IEnumerable<T> collection, Func<T, string> toString)
         {
-            return CommaString(collection.Select(toString).ToArray(), Resources.And);
+            return CommaString(collection.Select(toString).ToArray(), CollectionMessage.And.NiceToString());
         }
 
         public static string CommaOr<T>(this IEnumerable<T> collection)
         {
-            return CommaString(collection.Select(a => a.ToString()).ToArray(), Resources.Or);
+            return CommaString(collection.Select(a => a.ToString()).ToArray(), CollectionMessage.Or.NiceToString());
         }
 
         public static string CommaOr<T>(this IEnumerable<T> collection, Func<T, string> toString)
         {
-            return CommaString(collection.Select(toString).ToArray(), Resources.Or);
+            return CommaString(collection.Select(toString).ToArray(), CollectionMessage.Or.NiceToString());
         }
 
         public static string Comma<T>(this IEnumerable<T> collection, string lastSeparator)
@@ -1170,6 +1170,13 @@ namespace Signum.Utilities
         }
     }
 
+    public enum CollectionMessage
+    {
+        [Description(" and ")]
+        And,
+        [Description(" or ")]
+        Or
+    }
 
     public class JoinStrictResult<O, N, R>
     {

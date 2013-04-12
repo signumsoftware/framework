@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +8,6 @@ using Signum.Utilities;
 using Signum.Engine.Exceptions;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
-using Signum.Engine.Properties;
 
 namespace Signum.Engine.Operations
 {
@@ -49,7 +48,7 @@ namespace Signum.Engine.Operations
         protected virtual string OnCanDelete(T entity)
         {
             if (entity.IsNew)
-                return Resources.TheEntity0IsNew.Formato(entity);
+                return EngineMessage.TheEntity0IsNew.NiceToString().Formato(entity);
 
             if (CanDelete != null)
                 return CanDelete(entity);

@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Controls;
 using System.Globalization;
-using Signum.Windows.Properties;
+using Signum.Entities;
+using Signum.Utilities;
 
 namespace Signum.Windows
 {
@@ -15,7 +16,7 @@ namespace Signum.Windows
         public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
             if (value == null)
-                return new ValidationResult(false, Resources.NullValueNotAllowed);
+                return new ValidationResult(false, EntityControlMessage.NullValueNotAllowed.NiceToString());
             else
                 return new ValidationResult(true, null);
         }

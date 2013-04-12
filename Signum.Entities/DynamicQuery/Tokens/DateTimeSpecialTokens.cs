@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +6,6 @@ using System.Reflection;
 using System.Linq.Expressions;
 using Signum.Utilities.Reflection;
 using Signum.Utilities;
-using Signum.Entities.Properties;
 using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.DynamicQuery
@@ -21,12 +20,12 @@ namespace Signum.Entities.DynamicQuery
 
         public override string ToString()
         {
-            return Resources.MonthStart;
+            return QueryTokenMessage.MonthStart.NiceToString();
         }
 
         public override string NiceName()
         {
-            return Resources.MonthStart + Resources.Of + Parent.ToString();
+            return QueryTokenMessage.MonthStart.NiceToString() + QueryTokenMessage.Of.NiceToString() + Parent.ToString();
         }
 
         public override string Format
@@ -94,12 +93,12 @@ namespace Signum.Entities.DynamicQuery
 
         public override string ToString()
         {
-            return Resources.DayOfYear;
+            return QueryTokenMessage.DayOfYear.NiceToString();
         }
 
         public override string NiceName()
         {
-            return Resources.DayOfYear + Resources.Of + Parent.ToString();
+            return QueryTokenMessage.DayOfYear.NiceToString() + QueryTokenMessage.Of.NiceToString() + Parent.ToString();
         }
 
         public override string Format
@@ -171,12 +170,12 @@ namespace Signum.Entities.DynamicQuery
         public override string ToString()
         {
 
-            return Resources.DayOfWeek;
+            return QueryTokenMessage.DayOfWeek.NiceToString();
         }
 
         public override string NiceName()
         {
-            return Resources.DayOfWeek + Resources.Of + Parent.ToString();
+            return QueryTokenMessage.DayOfWeek.NiceToString() + QueryTokenMessage.Of.NiceToString() + Parent.ToString();
         }
 
         public override string Format

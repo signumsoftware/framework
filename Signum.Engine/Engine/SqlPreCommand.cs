@@ -6,7 +6,6 @@ using System.Data.SqlClient;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using Signum.Entities;
-using Signum.Engine.Properties;
 using System.Text.RegularExpressions;
 using System.IO;
 using System.Threading;

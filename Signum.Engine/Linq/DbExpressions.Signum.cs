@@ -13,7 +13,6 @@ using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Maps;
 using Signum.Entities.Reflection;
-using Signum.Engine.Properties;
 using System.Diagnostics;
 
 namespace Signum.Engine.Linq

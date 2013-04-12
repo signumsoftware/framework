@@ -5,7 +5,6 @@ using System.Text;
 using System.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Entities;
-using Signum.Web.Properties;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities;
 using System.Web.Mvc;

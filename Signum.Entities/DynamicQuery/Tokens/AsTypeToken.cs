@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Signum.Entities.Properties;
 using Signum.Utilities;
 using System.Linq.Expressions;
 
@@ -32,7 +31,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string ToString()
         {
-            return Resources.As0.Formato(Type.NiceName());
+            return QueryTokenMessage.As0.NiceToString().Formato(Type.NiceName());
         }
 
         public override string Key
@@ -75,7 +74,7 @@ namespace Signum.Entities.DynamicQuery
             var routes = GetPropertyRoute().IsAllowed();
 
             if (parent.HasText() && routes.HasText())
-                Resources.And.Combine(parent, routes);
+                QueryTokenMessage.And.NiceToString().Combine(parent, routes);
 
             return parent ?? routes;
         }
@@ -87,7 +86,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            return Resources._0As1.Formato(Parent.ToString(), entityType.NiceName());
+            return QueryTokenMessage._0As1.NiceToString().Formato(Parent.ToString(), entityType.NiceName());
         }
 
         public override QueryToken Clone()

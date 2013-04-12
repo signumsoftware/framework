@@ -1,10 +1,9 @@
-﻿<UserControl x:Class="Signum.Windows.PageSizeSelector"
+<UserControl x:Class="Signum.Windows.PageSizeSelector"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:m="clr-namespace:Signum.Windows"
-             mc:Ignorable="d" x:Name="me">
+             xmlns:d="clr-namespace:Signum.Entities;assembly=Signum.Entities"
+             xmlns:m="clr-namespace:Signum.Windows" x:Name="me">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -15,7 +14,7 @@
         
     </UserControl.Resources>
     <StackPanel Orientation="Horizontal">
-        <Label Content="{m:Loc Rows}"/>
+        <Label Content="{m:Loc {x:Static d:SearchMessage.Rows}}"/>
         <ComboBox SelectedValue="{Binding PageSize, ElementName=me}" SelectedValuePath="Tag" VerticalAlignment="Center">
             <ComboBox.Items>
                 <ComboBoxItem Content="5" Tag="5"/>
@@ -24,7 +23,7 @@
                 <ComboBoxItem Content="50" Tag="50"/>
                 <ComboBoxItem Content="100" Tag="100"/>
                 <ComboBoxItem Content="200" Tag="200"/>
-                <ComboBoxItem Content="{m:Loc All}" Tag="-1"/>
+                <ComboBoxItem Content="{m:Loc {x:Static d:PaginationMessage.All}}" Tag="-1"/>
             </ComboBox.Items>
         </ComboBox>
     </StackPanel>

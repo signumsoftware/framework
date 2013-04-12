@@ -9,11 +9,11 @@ using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.DataStructures;
 using System.ComponentModel;
-using Signum.Entities.Properties;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using Signum.Utilities.ExpressionTrees;
 using System.Text.RegularExpressions;
+using System.Collections.Concurrent;
 
 namespace Signum.Entities.Reflection
 {
@@ -38,7 +38,45 @@ namespace Signum.Entities.Reflection
         static Reflector()
         {
             DescriptionManager.CleanTypeName = CleanTypeName; //To allow MyEntityDN
-            DescriptionManager.CleanType = t=> EnumEntity.Extract(t) ?? t.CleanType(); //To allow Lite<T>
+            DescriptionManager.CleanType = t => EnumEntity.Extract(t) ?? t.CleanType(); //To allow Lite<T>
+
+            DescriptionManager.DefaultDescriptionOptions += DescriptionManager_IsEnumsInEntities;
+            DescriptionManager.DefaultDescriptionOptions += DescriptionManager_IsOperationMessageOrQuery;
+            DescriptionManager.DefaultDescriptionOptions += DescriptionManager_IsIIdentifiable;
+
+            DescriptionManager.ShouldLocalizeMemeber += DescriptionManager_ShouldLocalizeMemeber;
+            DescriptionManager.Invalidate();
+        }
+
+        static bool DescriptionManager_ShouldLocalizeMemeber(MemberInfo arg)
+        {
+            return !(arg is PropertyInfo && arg.HasAttribute<HiddenPropertyAttribute>());
+        }
+
+        static ResetLazy<HashSet<Type>> EnumsInEntities = new ResetLazy<HashSet<Type>>(() =>
+        {
+            return (from a in AppDomain.CurrentDomain.GetAssemblies().Where(a => a.HasAttribute<DefaultAssemblyCultureAttribute>())
+                    from t in a.GetTypes()
+                    where typeof(IIdentifiable).IsAssignableFrom(t) || typeof(ModifiableEntity).IsAssignableFrom(t)
+                    from p in t.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                    let et = p.PropertyType.UnNullify()
+                    where et.IsEnum && et.Assembly.HasAttribute<DefaultAssemblyCultureAttribute>()
+                    select et).ToHashSet();
+        });
+
+        static DescriptionOptions? DescriptionManager_IsEnumsInEntities(Type t)
+        {
+            return EnumsInEntities.Value.Contains(t) ? DescriptionOptions.Members | DescriptionOptions.Description : (DescriptionOptions?)null;
+        }
+
+        static DescriptionOptions? DescriptionManager_IsIIdentifiable(Type t)
+        {
+             return t.IsInterface && typeof(IIdentifiable).IsAssignableFrom(t) ? DescriptionOptions.Members : (DescriptionOptions?)null;
+        }
+
+        static DescriptionOptions? DescriptionManager_IsOperationMessageOrQuery(Type t)
+        {
+            return t.IsEnum && (t.Name.EndsWith("Operation") || t.Name.EndsWith("Message") || t.Name.EndsWith("Query")) ? DescriptionOptions.Members : (DescriptionOptions?)null;
         }
 
         public static string CleanTypeName(Type t)

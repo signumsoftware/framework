@@ -12,7 +12,6 @@ using System.CodeDom.Compiler;
 using System.ComponentModel;
 using System.ComponentModel.Design.Serialization;
 using Signum.Utilities.Reflection;
-using Signum.Utilities.Properties;
 
 namespace Signum.Utilities.ExpressionTrees
 {

@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
-using Signum.Entities.Properties;
 using System.Reflection;
 using Signum.Utilities.Reflection;
 using System.Linq.Expressions;
@@ -267,7 +266,7 @@ namespace Signum.Entities.DynamicQuery
             try
             {
                 if (string.IsNullOrEmpty(tokenString))
-                    throw new ArgumentNullException("tokenString");
+                    throw new ArgumentNullException("tokenString"); 
 
                 string[] parts = tokenString.Split('.');
 

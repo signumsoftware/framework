@@ -8,7 +8,6 @@ using Signum.Entities;
 using Signum.Utilities;
 using System.Text.RegularExpressions;
 using Signum.Engine;
-using Signum.Web.Properties;
 using System.Globalization;
 
 namespace Signum.Web.Controllers

@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Linq.Expressions;
 using Signum.Engine.Maps;
-using Signum.Engine.Properties;
 using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Utilities;

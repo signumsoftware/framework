@@ -8,7 +8,6 @@ using Signum.Engine.Maps;
 using Signum.Utilities;
 using Signum.Entities;
 using Signum.Engine.SchemaInfoTables;
-using Signum.Engine.Properties;
 using System.Text.RegularExpressions;
 
 namespace Signum.Engine

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -45,8 +45,7 @@ namespace Signum.Windows
 
             if (ident.IsNew)
             {
-                Gender gender = ident.GetType().GetGender();
-                return Properties.Resources.ResourceManager.GetGenderAwareResource("New", gender) + " " + niceName; 
+                return LiteMessage.New.NiceToString().ForGenderAndNumber(ident.GetType().GetGender()) + " " + niceName; 
             }
             return niceName + " " + ident.Id;
         }

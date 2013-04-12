@@ -1,13 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Signum.Utilities.Properties;
 using System.Globalization;
 using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
 using System.Text.RegularExpressions;
 using System.Reflection;
+using System.ComponentModel;
 
 namespace Signum.Utilities
 {
@@ -261,19 +261,19 @@ namespace Signum.Utilities
             int datediff = (date.Date - currentdate).Days;
 
             if (-7 <= datediff && datediff <= -2)
-                return Resources.DateLast.Formato(CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(date.DayOfWeek).FirstUpper());
+                return DateTimeMessage.DateLast.NiceToString().Formato(CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(date.DayOfWeek).FirstUpper());
 
             if (datediff == -1)
-                return Resources.Yesterday;
+                return DateTimeMessage.Yesterday.NiceToString();
 
             if (datediff == 0)
-                return Resources.Today;
+                return DateTimeMessage.Today.NiceToString();
 
             if (datediff == 1)
-                return Resources.Tomorrow;
+                return DateTimeMessage.Tomorrow.NiceToString();
 
             if (2 <= datediff && datediff <= 7)
-                return Resources.DateThis.Formato(CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(date.DayOfWeek).FirstUpper());
+                return DateTimeMessage.DateThis.NiceToString().Formato(CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(date.DayOfWeek).FirstUpper());
 
             if (date.Year == currentdate.Year)
             {
@@ -292,21 +292,21 @@ namespace Signum.Utilities
             TimeSpan ts = now.Subtract(dateTime);
             string resource = null;
             if (ts.TotalMilliseconds < 0)
-                resource = Resources.In;
+                resource = DateTimeMessage.In.NiceToString();
             else
-                resource = Resources.Ago;
+                resource = DateTimeMessage.Ago.NiceToString();
 
             int months = Math.Abs(ts.Days) / 30;
             if (months > 0)
-                return resource.Formato((months == 1 ? Resources._0Month : Resources._0Months).Formato(Math.Abs(months))).ToLower();
+                return resource.Formato((months == 1 ? DateTimeMessage._0Month.NiceToString() : DateTimeMessage._0Months.NiceToString()).Formato(Math.Abs(months))).ToLower();
             if (Math.Abs(ts.Days) > 0)
-                return resource.Formato((ts.Days == 1 ? Resources._0Day : Resources._0Days).Formato(Math.Abs(ts.Days))).ToLower();
+                return resource.Formato((ts.Days == 1 ? DateTimeMessage._0Day.NiceToString() : DateTimeMessage._0Days.NiceToString()).Formato(Math.Abs(ts.Days))).ToLower();
             if (Math.Abs(ts.Hours) > 0)
-                return resource.Formato((ts.Hours == 1 ? Resources._0Hour : Resources._0Hours).Formato(Math.Abs(ts.Hours))).ToLower();
+                return resource.Formato((ts.Hours == 1 ? DateTimeMessage._0Hour.NiceToString() : DateTimeMessage._0Hours.NiceToString()).Formato(Math.Abs(ts.Hours))).ToLower();
             if (Math.Abs(ts.Minutes) > 0)
-                return resource.Formato((ts.Minutes == 1 ? Resources._0Minute : Resources._0Minutes).Formato(Math.Abs(ts.Minutes))).ToLower();
+                return resource.Formato((ts.Minutes == 1 ? DateTimeMessage._0Minute.NiceToString() : DateTimeMessage._0Minutes.NiceToString()).Formato(Math.Abs(ts.Minutes))).ToLower();
 
-            return resource.Formato((ts.Seconds == 1 ? Resources._0Second : Resources._0Seconds).Formato(Math.Abs(ts.Seconds))).ToLower();
+            return resource.Formato((ts.Seconds == 1 ? DateTimeMessage._0Second.NiceToString() : DateTimeMessage._0Seconds.NiceToString()).Formato(Math.Abs(ts.Seconds))).ToLower();
         }
         
         public static DateTime MonthStart(this DateTime dateTime)
@@ -446,20 +446,59 @@ namespace Signum.Utilities
         {
             string result= ", ".Combine(
                          Years == 0 ? null :
-                         Years == 1 ? Resources._0Year.Formato(Years) :
-                                     Resources._0Years.Formato(Years),
+                         Years == 1 ? DateTimeMessage._0Year.NiceToString().Formato(Years) :
+                                     DateTimeMessage._0Years.NiceToString().Formato(Years),
                          Months == 0 ? null :
-                         Months == 1 ? Resources._0Month.Formato(Months) :
-                                      Resources._0Months.Formato(Months),
+                         Months == 1 ? DateTimeMessage._0Month.NiceToString().Formato(Months) :
+                                      DateTimeMessage._0Months.NiceToString().Formato(Months),
                          Days == 0 ? null :
-                         Days == 1 ? Resources._0Day.Formato(Days) :
-                                    Resources._0Days.Formato(Days));
+                         Days == 1 ? DateTimeMessage._0Day.NiceToString().Formato(Days) :
+                                    DateTimeMessage._0Days.NiceToString().Formato(Days));
 
             if (string.IsNullOrEmpty(result))
-                result = Resources._0Day.Formato(0);
+                result = DateTimeMessage._0Day.NiceToString().Formato(0);
 
             return result;
 
         }
+    }
+
+    public enum DateTimeMessage
+    {
+        [Description("{0} Day")]
+        _0Day,
+        [Description("{0} Days")]
+        _0Days,
+        [Description("{0} Hour")]
+        _0Hour,
+        [Description("{0} Hours")]
+        _0Hours,
+        [Description("{0} Minute")]
+        _0Minute,
+        [Description("{0} Minutes")]
+        _0Minutes,
+        [Description("{0} Month")]
+        _0Month,
+        [Description("{0} Months")]
+        _0Months,
+        [Description("{0} Second")]
+        _0Second,
+        [Description("{0} Seconds")]
+        _0Seconds,
+        [Description("{0} Year")]
+        _0Year,
+        [Description("{0} Years")]
+        _0Years,
+        [Description("{0} ago ")]
+        Ago,
+        [Description("Last {0}")]
+        DateLast,
+        [Description("This {0}")]
+        DateThis,
+        [Description("In {0}")]
+        In,
+        Today,
+        Tomorrow,
+        Yesterday
     }
 }

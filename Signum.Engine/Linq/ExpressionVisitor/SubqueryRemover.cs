@@ -7,7 +7,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using Signum.Utilities;
-using Signum.Engine.Properties; 
 
 namespace Signum.Engine.Linq
 {

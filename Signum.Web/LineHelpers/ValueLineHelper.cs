@@ -6,7 +6,6 @@ using System.Web.Mvc;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using System.Web.Mvc.Html;
-using Signum.Web.Properties;
 using Signum.Entities.Reflection;
 using Signum.Entities;
 
@@ -76,6 +75,7 @@ namespace Signum.Web
 
         public static MvcHtmlString EnumComboBox(this HtmlHelper helper, ValueLine valueLine)
         {
+            var uType = valueLine.Type.UnNullify();
             Enum value = valueLine.UntypedValue as Enum;
 
             if (valueLine.ReadOnly)
@@ -83,7 +83,12 @@ namespace Signum.Web
                 MvcHtmlString result = MvcHtmlString.Empty;
                 if (valueLine.WriteHiddenOnReadonly)
                     result = result.Concat(helper.Hidden(valueLine.ControlID, valueLine.UntypedValue.ToString()));
-                return result.Concat(helper.Span("", value != null ? value.NiceToString() : valueLine.UntypedValue.TryToString(), "sf-value-line", valueLine.ValueHtmlProps));
+
+                string str =
+                    value == null ? null :
+                    LocalizedAssembly.GetDescriptionOptions(uType).IsSet(DescriptionOptions.Members) ? value.NiceToString() : value.ToString();
+
+                return result.Concat(helper.Span("", str, "sf-value-line", valueLine.ValueHtmlProps));
             }
 
             StringBuilder sb = new StringBuilder();
@@ -98,16 +103,30 @@ namespace Signum.Web
                     items.Add(new SelectListItem() { Text = "-", Value = "" });
                 }
 
-                items.AddRange(
-                    Enum.GetValues(valueLine.Type.UnNullify())
+
+                if (LocalizedAssembly.GetDescriptionOptions(uType).IsSet(DescriptionOptions.Members))
+                {
+                    items.AddRange(Enum.GetValues(uType)
                         .Cast<Enum>()
                         .Select(v => new SelectListItem()
-                            {
-                                Text = v.NiceToString(),
-                                Value = v.ToString(),
-                                Selected = object.Equals(value, v),
-                            })
-                    );
+                        {
+                            Text = v.NiceToString(),
+                            Value = v.ToString(),
+                            Selected = object.Equals(value, v),
+                        }));
+
+                }
+                else
+                {
+                    items.AddRange(Enum.GetValues(uType)
+                        .Cast<Enum>()
+                        .Select(v => new SelectListItem()
+                        {
+                            Text = v.ToString(),
+                            Value = v.ToString(),
+                            Selected = object.Equals(value, v),
+                        }));
+                }
             }
             else
                 if (value != null)

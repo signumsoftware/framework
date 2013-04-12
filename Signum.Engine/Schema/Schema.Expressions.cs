@@ -14,7 +14,6 @@ using System.Diagnostics;
 using System.Collections.ObjectModel;
 using Signum.Engine.Linq;
 using Signum.Entities.Reflection;
-using Signum.Engine.Properties;
 using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Maps

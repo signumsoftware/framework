@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +6,6 @@ using System.Web.Mvc;
 using System.Web.Mvc.Html;
 using Signum.Utilities;
 using Signum.Entities;
-using Signum.Web.Properties;
 
 namespace Signum.Web.Operations
 {
@@ -129,7 +128,7 @@ namespace Signum.Web.Operations
         public JsInstruction confirmAndAjax(IdentifiableEntity entity)
         {
             return new JsInstruction(() => Js.Confirm(
-                Resources.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem + ": {0} ({1}-{2})".Formato(entity.ToString(), entity.GetType().NiceName(), entity.Id),
+                OperationMessage.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem.NiceToString() + ": {0} ({1}-{2})".Formato(entity.ToString(), entity.GetType().NiceName(), entity.Id),
                 "{0}.ajax()".Formato(this.ToJS())).ToJS());
         }
 
@@ -138,13 +137,13 @@ namespace Signum.Web.Operations
             if (entities.Count == 1)
             {
                 return new JsInstruction(() => Js.Confirm(
-                    Resources.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem + ": {0} ({1}-{2})".Formato(entities[0].ToString(), entities[0].GetType().NiceName(), entities[0].Id),
+                    OperationMessage.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem.NiceToString() + ": {0} ({1}-{2})".Formato(entities[0].ToString(), entities[0].GetType().NiceName(), entities[0].Id),
                     "{0}.contextualDelete()".Formato(this.ToJS())).ToJS());
             }
             else
             {
                 return new JsInstruction(() => Js.Confirm(
-                    Resources.PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem,
+                    OperationMessage.PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem.NiceToString(),
                     "{0}.contextualDelete()".Formato(this.ToJS())).ToJS());
             }
         }

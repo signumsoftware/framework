@@ -5,7 +5,6 @@ using System.Text;
 using Signum.Utilities;
 using System.Web.Mvc;
 using System.Web;
-using Signum.Web.Properties;
 using Signum.Entities;
  
 namespace Signum.Web

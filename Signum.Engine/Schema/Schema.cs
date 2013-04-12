@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +6,6 @@ using System.Reflection;
 using Signum.Entities;
 using Signum.Utilities;
 using System.Globalization;
-using Signum.Engine.Properties;
 using System.Diagnostics;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.DataStructures;
@@ -124,7 +123,7 @@ namespace Signum.Engine.Maps
             string error = IsAllowed(type);
 
             if (error != null)
-                throw new UnauthorizedAccessException(Resources.UnauthorizedAccessTo0Because1.Formato(type.NiceName(), error));
+                throw new UnauthorizedAccessException(EngineMessage.UnauthorizedAccessTo0Because1.NiceToString().Formato(type.NiceName(), error));
         }
 
         readonly IEntityEvents entityEventsGlobal = new EntityEvents<IdentifiableEntity>();
@@ -270,11 +269,11 @@ namespace Signum.Engine.Maps
                         r.Value.Select(a => new SqlPreCommandSimple("--   {0} -> {1}".Formato(a.Key, a.Value))).Combine(Spacing.Simple)));
 
                 return SqlPreCommand.Combine(Spacing.Double,
-                    new SqlPreCommandSimple(Resources.StartOfSyncScriptGeneratedOn0.Formato(DateTime.Now)),
+                    new SqlPreCommandSimple(SynchronizerMessage.StartOfSyncScriptGeneratedOn0.NiceToString().Formato(DateTime.Now)),
 
                     new SqlPreCommandSimple("use {0}".Formato(schemaName)),
                     command,
-                    new SqlPreCommandSimple(Resources.EndOfSyncScript));
+                    new SqlPreCommandSimple(SynchronizerMessage.EndOfSyncScript.NiceToString()));
             }
         }
 

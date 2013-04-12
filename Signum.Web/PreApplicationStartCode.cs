@@ -7,7 +7,6 @@ using System.Web.Mvc;
 using System.Web.Hosting;
 using Signum.Web.PortableAreas;
 using System.Web.Compilation;
-using Signum.Web.Properties;
 using Signum.Web.Controllers;
 using Signum.Entities.DynamicQuery;
 

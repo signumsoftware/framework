@@ -11,7 +11,6 @@ using Signum.Entities.Reflection;
 using Signum.Entities.DynamicQuery;
 using System.Web.Mvc;
 using Signum.Engine;
-using Signum.Web.Properties;
 using Signum.Engine.DynamicQuery;
 
 namespace Signum.Web

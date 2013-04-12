@@ -1,0 +1,237 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="">
+    <Member Name="0IsNotAValidIdentifier" Description="'{0}' non è un identificatore valido" />
+  </Type>
+  <Type Name="AlertDN" Description="Avviso">
+    <Member Name="AlertDate" Description="Data di avviso" />
+    <Member Name="CheckDate" Description="Data di verifica" />
+    <Member Name="Entity" Description="Entità" />
+    <Member Name="Text" Description="Testo" />
+  </Type>
+  <Type Name="AlertMessage">
+    <Member Name="Alerts" Description="Avvisi" />
+    <Member Name="CreateAlert" Description="Crea un avviso" />
+  </Type>
+  <Type Name="Average" Description="Media" />
+  <Type Name="CalendarMessage">
+    <Member Name="CalendarClose" Description="Chiudere" />
+    <Member Name="CalendarNext" Description="Succ" />
+    <Member Name="CalendarPrevious" Description="Prec" />
+    <Member Name="CalendarToday" Description="Oggi" />
+    <Member Name="ShowCalendar" Description="Mostra calendario" />
+  </Type>
+  <Type Name="CannotInsertDuplicatedFields0On1Table" Description="Impossibile inserire duplicati nel campo {0} della tabella {1}" />
+  <Type Name="Checked" Description="Controllato" />
+  <Type Name="ColorDN" Description="Colore">
+    <Member Name="Hex" Description="Hex" />
+  </Type>
+  <Type Name="ComparisonType">
+    <Member Name="DistinctTo" Description="diverso da" />
+    <Member Name="EqualTo" Description="uguale a" />
+    <Member Name="GreaterThan" Description="maggiore di" />
+    <Member Name="GreaterThanOrEqual" Description="maggiore o uguale a" />
+    <Member Name="LessThan" Description="minore di" />
+    <Member Name="LessThanOrEqual" Description="minore o uguale a" />
+  </Type>
+  <Type Name="CorruptEntity" Description="Entità corruttibili">
+    <Member Name="Corrupt" Description="Danneggiato" />
+  </Type>
+  <Type Name="EngineMessage">
+    <Member Name="ConcurrencyErrorOnDatabaseTable0Id1" Description="Concorrenza nel database, tabella errore = {0}, Id = {1}" />
+    <Member Name="EntityWithType0AndId1NotFound" Description="Entità di tipo {0} con Id {1} non trovata" />
+    <Member Name="NoWayOfMappingType0Found" Description="Mappatura di {0} non trovata" />
+    <Member Name="ThereAre0ThatReferThisEntity" Description="Ci sono '{0}' che fanno riferimento a questa entità" />
+    <Member Name="ThereAreRecordsIn0PointingToThisTableByColumn1" Description="Ci sono record in '{0}' che fanno riferimento a questa tabella mediante la colonna '{1}'" />
+    <Member Name="UnauthorizedAccessTo0Because1" Description="Accesso negato a {0} a causa di {1}" />
+  </Type>
+  <Type Name="EntityControlMessage">
+    <Member Name="Create" Description="Creare" />
+    <Member Name="Find" Description="Cercare" />
+    <Member Name="Remove" Description="Rimuovere" />
+    <Member Name="View" Description="Vedere" />
+    <Member Name="No" Description="no" />
+    <Member Name="Remove" Description="Elimina" />
+    <Member Name="Yes" Description="si" />
+  </Type>
+  <Type Name="EntityMessage">
+    <Member Name="AttemptToModifyLockedEntity0" Description="Si è tentato di modificare l'entità bloccata {0}" />
+  </Type>
+  <Type Name="Excel" Description="Excel" />
+  <Type Name="ExecutedXTimes" Description="Eseguito x volte" />
+  <Type Name="FilterOperation">
+    <Member Name="Contains" Description="contiene" />
+    <Member Name="DistinctTo" Description="diverso da" />
+    <Member Name="EndsWith" Description="finisce con" />
+    <Member Name="EqualTo" Description="uguale a" />
+    <Member Name="GreaterThan" Description="maggiore di" />
+    <Member Name="GreaterThanOrEqual" Description="maggiore o uguale a" />
+    <Member Name="LessThan" Description="minore di" />
+    <Member Name="LessThanOrEqual" Description="minore o uguale a" />
+    <Member Name="Like" Description="come" />
+    <Member Name="StartsWith" Description="inizia con" />
+  </Type>
+  <Type Name="Future" Description="Prossimo" />
+  <Type Name="IdentifiableEntity">
+    <Member Name="ToStr" Description="Testo" />
+  </Type>
+  <Type Name="ImmutableEntity" Description="Entità immutabile">
+    <Member Name="AllowChange" Description="Consentire modifiche" />
+  </Type>
+  <Type Name="IncorrectEntityInSessionYouMustReloadThePageToContinue" Description="I dati della sessione non sono corretti. Ricarica la pagina per continuare" />
+  <Type Name="JavascriptMessage">
+    <Member Name="addFilter" Description="Aggiungi filtro" />
+    <Member Name="editColumnName" Description="Modificare il nome della colonna" />
+    <Member Name="enterTheNewColumnName" Description="Immettere il nuovo nome della colonna" />
+    <Member Name="error" Description="Errore" />
+    <Member Name="executed" Description="Eseguito" />
+    <Member Name="hideFilters" Description="Nascondi filtri" />
+    <Member Name="noElementsSelected" Description="Nessun elemento selezionato" />
+    <Member Name="noResults" Description="Nessun risultato trovato" />
+    <Member Name="popupErrors" Description="Ci sono errori nell'entità, continuare?" />
+    <Member Name="popupErrorsStop" Description="Ci sono errori nell'entità" />
+    <Member Name="removeColumn" Description="Eliminare colonna" />
+    <Member Name="reorderColumn_MoveLeft" Description="Spostare a sinistra" />
+    <Member Name="reorderColumn_MoveRight" Description="Spostare a destra" />
+    <Member Name="saved" Description="Salvato" />
+    <Member Name="search" Description="Cerca" />
+    <Member Name="showFilters" Description="Mostra filtri" />
+  </Type>
+  <Type Name="LiteMessage">
+    <Member Name="IdNotValid" Description="Id non valido" />
+    <Member Name="InvalidFormat" Description="Formato non valido" />
+    <Member Name="New" Description="Nuovo" />
+    <Member Name="TypeNotFound" Description="Tipo non trovato" />
+  </Type>
+  <Type Name="LockableEntity">
+    <Member Name="Locked" Description="Bloccato" />
+  </Type>
+  <Type Name="LockeableEntity">
+    <Member Name="Locked" Description="Bloccato" />
+  </Type>
+  <Type Name="Maximum" Description="Massimo" />
+  <Type Name="Minimum" Description="Minimo" />
+  <Type Name="MoreThanOneTokenWithKey0FoundOn1" Description="Più di un token con chiave {0} in {1}" />
+  <Type Name="Name" Description="Nome" />
+  <Type Name="New">
+    <Member Name="f" Description="Nuova" />
+    <Member Name="m" Description="Nuovo" />
+  </Type>
+  <Type Name="NormalControlMessage">
+    <Member Name="New" Description="Nuovo" />
+    <Member Name="Save" Description="Salva" />
+    <Member Name="ViewForType0IsNotAllowed" Description="Non è consentita la visualizzazione del tipo {0}" />
+  </Type>
+  <Type Name="NotAuthorizedToRetrieve01" Description="Non autorizzato a recuperare {0} {1}" />
+  <Type Name="NoteDN" Description="Nota">
+    <Member Name="Target" Description="Destinatario" />
+    <Member Name="Text" Description="Testo" />
+  </Type>
+  <Type Name="NoteMessage">
+    <Member Name="CreateNote" Description="Crea una nota" />
+    <Member Name="Notes" Description="Note" />
+  </Type>
+  <Type Name="NotesMessage">
+    <Member Name="ViewNotes" Description="Visualizza note" />
+  </Type>
+  <Type Name="QueryTokenMessage">
+    <Member Name="0As1" Description="({0} come {1})" />
+    <Member Name="And" Description=" e " />
+    <Member Name="As0" Description="Come {0}" />
+    <Member Name="Column0NotFound" Description="Colonna {0} non trovata" />
+    <Member Name="Count" Description="[Num]" />
+    <Member Name="Date" Description="Data" />
+    <Member Name="Day" Description="Giorno" />
+    <Member Name="Hour" Description="Ora" />
+    <Member Name="Millisecond" Description="Millisecondo" />
+    <Member Name="Minute" Description="Minuto" />
+    <Member Name="Month" Description="Mese" />
+    <Member Name="MonthStart" Description="Inizio mese " />
+    <Member Name="MoreThanOneColumnNamed0" Description="Più di una colonna denominata {0}" />
+    <Member Name="Of" Description=" di " />
+    <Member Name="Second" Description="Secondo" />
+    <Member Name="Year" Description="Anno" />
+  </Type>
+  <Type Name="SearchControl">
+    <Member Name="RowsFound" Description="righe trovate" />
+    <Member Name="ShowNRows_Rows" Description="righe" />
+    <Member Name="ShowNRows_Show" Description="Visualizza" />
+  </Type>
+  <Type Name="SearchMessage">
+    <Member Name="Field" Description="Campo" />
+    <Member Name="AddColumn" Description="Aggiungi colonna" />
+    <Member Name="AddFilter" Description="Aggiungi filtro" />
+    <Member Name="DeleteFilter" Description="Elimina filtro" />
+    <Member Name="NoFiltersSpecified" Description="Nessun filtro specificato" />
+    <Member Name="NoResults" Description="Nessun risultato" />
+    <Member Name="Operation" Description="Operazione" />
+    <Member Name="Search" Description="Cerca" />
+    <Member Name="Create" Description="Creare" />
+    <Member Name="Value" Description="Valore" />
+    <Member Name="View" Description="Visualizza" />
+  </Type>
+  <Type Name="SelectorMessage">
+    <Member Name="ValueMustBeSpecifiedFor0" Description="È necessario specificare un valore per {0}" />
+  </Type>
+  <Type Name="Signum">
+    <Member Name="executing" Description="In esecuzione..." />
+    <Member Name="saving" Description="Salvando" />
+    <Member Name="searching" Description="Ricerca in corso..." />
+  </Type>
+  <Type Name="State0NotRegisteredInStateValidator" Description="Stato {0} non registrato in StateValidator" />
+  <Type Name="SynchronizerMessage">
+    <Member Name="0HasBeenRenamedIn1" Description="'{0}' è stata rinominata {1}?" />
+    <Member Name="EndOfSyncScript" Description="--- FINE DELLO SCRIPT DI SINCRONIZZAZIONE" />
+    <Member Name="NNone" Description="- n: nessuno" />
+    <Member Name="StartOfSyncScriptGeneratedOn0" Description="--- INIZIO DELLO SCRIPT DI SINCRONIZZAZIONE GENERATO SU {0}" />
+  </Type>
+  <Type Name="Token0NotCompatibleWith1" Description="Token {0} non compatibile con {1}" />
+  <Type Name="TypeDN" Description="Tipo">
+    <Member Name="ClassName" Description="Class Name" />
+    <Member Name="CleanName" Description="Clean Name" />
+    <Member Name="FriendlyName" Description="Friendly Name" />
+    <Member Name="FullClassName" Description="Full Class Name" />
+    <Member Name="Namespace" Description="Namespace" />
+    <Member Name="TableName" Description="Table Name" />
+  </Type>
+  <Type Name="Uppercase" Description="maiuscolo" />
+  <Type Name="ValidationMessage">
+    <Member Name="0DoesNotHaveAValid0Format" Description="{{0}} non ha un formato valido per {0}" />
+    <Member Name="0HasAnInvalidFormat" Description="{0} ha un formato non valido" />
+    <Member Name="0HasMoreThan0DecimalPlaces" Description="{{0}} ha più di {0} decimali" />
+    <Member Name="0HasNoCorrectFormat" Description="Il formato di {0} non è corretto" />
+    <Member Name="0HasSomeRepeatedElements0" Description="{{0}} ha alcuni elementi ripetuti: {0}" />
+    <Member Name="0HasToBe0Than1" Description="{{0}} deve essere {0} {1}" />
+    <Member Name="0HasToBeBetween0And1" Description="{{0}} deve essere compreso tra {0} e {1}" />
+    <Member Name="0HasToBeLowercase" Description="{0} deve essere tutto minuscolo" />
+    <Member Name="0HasToBeUppercase" Description="{0} deve essere tutto maiuscolo" />
+    <Member Name="0IsNecessary" Description="{0} è necessario" />
+    <Member Name="0IsNecessaryOnState1" Description="{0} è necessario nello stato {1}" />
+    <Member Name="0IsNotAllowed" Description="{0} non è consentito" />
+    <Member Name="0IsNotAllowedOnState1" Description="{0} non è consentito in stato {1}" />
+    <Member Name="0IsNotSet" Description="{0} non è impostato" />
+    <Member Name="Be" Description="essere " />
+    <Member Name="BeBetween0And1" Description="essere tra {0} e {1}" />
+    <Member Name="BeNotNull" Description="non essere nullo" />
+    <Member Name="FileName" Description="Nome del file" />
+    <Member Name="Have0Decimals" Description="avere {0} decimali" />
+    <Member Name="HaveANumberOfElements01" Description="ha un numero di elementi {0} {1}" />
+    <Member Name="HaveAPrecisionOf" Description="avere una precisione di " />
+    <Member Name="HaveBetween0And1Characters" Description="avere tra {0} e {1} caratteri" />
+    <Member Name="HaveMaximun0Characters" Description="avere massimo {0} caratteri" />
+    <Member Name="HaveMinimum0Characters" Description="avere minimo {0} caratteri" />
+    <Member Name="HaveNoRepeatedElements" Description="non deve avere elementi ripetuti" />
+    <Member Name="HaveValid0Format" Description="deve avere un formato {0} valido" />
+    <Member Name="Lowercase" Description="minuscolo" />
+    <Member Name="NotPossibleToaAssign0" Description="Non è possibile assegnare {0}" />
+    <Member Name="OrBeNull" Description="o essere nullo" />
+    <Member Name="Telephone" Description="Telefono" />
+    <Member Name="TheLenghtOf0HasToBeEqualTo0" Description="La lunghezza di {{0}} deve essere uguale a {0}" />
+    <Member Name="TheLengthOf0HasToBeGreaterOrEqualTo0" Description="La lunghezza di {{0}} deve essere maggiore o uguale a {0}" />
+    <Member Name="TheLengthOf0HasToBeLesserOrEqualTo0" Description="La lunghezza di {{0}} deve essere minore o uguale a {0}" />
+    <Member Name="TheNumberOfElementsOf0HasToBe01" Description="Il numero di elementi di {{0}} deve essere {0} {1}" />
+    <Member Name="Type0NotAllowed" Description="Tipo {0} non consentito" />
+  </Type>
+  <Type Name="Warned" Description="Avvisato" />
+  <Type Name="YourSessionHasTimedOutClickF5ToReloadTheEntity" Description="La sessione è scaduta, fare clic su F5 per ricaricare l'entità dal database" />
+</Translations>

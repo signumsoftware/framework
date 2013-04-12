@@ -1,9 +1,7 @@
-﻿@using Signum.Web.Properties
 @using Signum.Entities.DynamicQuery
 @using Signum.Engine.DynamicQuery
 @using System.Configuration
 @using Signum.Entities.Reflection
-@using Signum.Web.Properties
 @model Context
 @{ 
     Model.ReadOnly = false; /*SearchControls Context should never inherit Readonly property of parent context */
@@ -42,9 +40,9 @@
                 
                     @Html.Href(
                             Model.Compose("btnAddFilter"), 
-                            Resources.FilterBuilder_AddFilter, 
+                            SearchMessage.FilterBuilder_AddFilter.NiceToString(), 
                             "",
-                            Resources.Signum_selectToken,
+                            JavascriptMessage.Signum_selectToken.NiceToString(),
                             "sf-query-button sf-add-filter sf-disabled", 
                             new Dictionary<string, object> 
                             { 
@@ -55,9 +53,9 @@
                     {
                         @Html.Href(
                             Model.Compose("btnAddColumn"), 
-                            Resources.FilterBuilder_AddColumn, 
+                            SearchMessage.FilterBuilder_AddColumn.NiceToString(), 
                             "",
-                            Resources.Signum_selectToken,
+                            JavascriptMessage.Signum_selectToken.NiceToString(),
                             "sf-query-button sf-add-column sf-disabled", 
                             new Dictionary<string, object> 
                             { 
@@ -77,9 +75,9 @@
     @if (!filtersAlwaysHidden)
     {
         @Html.Href("",
-                (filtersVisible ? Resources.Signum_hideFilters : Resources.Signum_showFilters),
+                (filtersVisible ? JavascriptMessage.Signum_hideFilters.NiceToString() : JavascriptMessage.Signum_showFilters.NiceToString()),
                 "",
-                (filtersVisible ? Resources.Signum_hideFilters : Resources.Signum_showFilters),
+                (filtersVisible ? JavascriptMessage.Signum_hideFilters.NiceToString() : JavascriptMessage.Signum_showFilters.NiceToString()),
                 "sf-query-button sf-filters-header" + (filtersVisible ? "" : " close"),
                 new Dictionary<string, object> 
                 { 
@@ -102,13 +100,13 @@
     }
     
     <div class="sf-query-button-bar" style="display:@((findOptions.FilterMode != FilterMode.OnlyResults) ? "block" : "none")">
-        <button type="submit" class="sf-query-button sf-search" data-icon="ui-icon-search" id="@Model.Compose("qbSearch")" onclick="@(jsFindNavigator.search().ToJS() + ";return false")">@Resources.Search</button>
+        <button type="submit" class="sf-query-button sf-search" data-icon="ui-icon-search" id="@Model.Compose("qbSearch")" onclick="@(jsFindNavigator.search().ToJS() + ";return false")">@SearchMessage.Search.NiceToString()</button>
         @if (findOptions.Create)
         {
             string creating = findOptions.Creating.HasText() ? 
                     findOptions.Creating :
                     "{0}.create();return false;".Formato(jsFindNavigator.ToJS());
-            <a class="sf-query-button" data-icon="ui-icon-plusthick" data-text="false" id="@Model.Compose("qbSearchCreate")" onclick="@creating">@Resources.Search_Create</a>
+            <a class="sf-query-button" data-icon="ui-icon-plusthick" data-text="false" id="@Model.Compose("qbSearchCreate")" onclick="@creating">@SearchMessage.Search_Create.NiceToString()</a>
         }
         @ButtonBarQueryHelper.GetButtonBarElementsForQuery(new QueryButtonContext
    {
@@ -160,7 +158,7 @@
             <tbody class="ui-widget-content">
                 @{ int columnsCount = columns.Count + (findOptions.Navigate ? 1 : 0) + (findOptions.AllowMultiple ? 1 : 0); }
                 <tr>
-                    <td colspan="@columnsCount">@Resources.Signum_noResults</td>
+                    <td colspan="@columnsCount">@JavascriptMessage.Signum_noResults.NiceToString()</td>
                 </tr>
                 @{ 
                     ViewData[ViewDataKeys.ElementsPerPage] = findOptions.ElementsPerPage;

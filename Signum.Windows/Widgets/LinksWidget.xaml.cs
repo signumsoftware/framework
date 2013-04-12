@@ -16,7 +16,6 @@ using Signum.Entities.DynamicQuery;
 using Signum.Entities;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
-using Signum.Windows.Properties;
 
 namespace Signum.Windows
 {
@@ -257,7 +256,7 @@ namespace Signum.Windows
 
             if (lite == null)
             {
-                MessageBox.Show(Resources.No0Found.Formato(typeof(T).NiceName()));
+                MessageBox.Show(QuickLinkMessage.No0Found.NiceToString().ForGenderAndNumber(typeof(T).GetGender()).Formato(typeof(T).NiceName()));
                 return;
             }
 
