@@ -27,6 +27,8 @@ namespace Signum.Engine.Translation
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                CultureInfoLogic.AssertStarted(sb); 
+
                 sb.Include<TranslatorDN>();
 
                 dqm.RegisterQuery(typeof(TranslatorDN), () =>

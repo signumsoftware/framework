@@ -67,18 +67,22 @@ namespace Signum.Web.Extensions.Translation.Views
 Write(Html.ValueLine(tc, t => t.Name, vl => 
     { 
         vl.ValueLineType = ValueLineType.Combo;
-        vl.EnumComboItems = CultureInfo.GetCultures(CultureTypes.NeutralCultures | CultureTypes.SpecificCultures).Select(ci => new SelectListItem
-        {
-            Text = "{0} {1}".Formato(ci.Name, ci.DisplayName),
-            Value = ci.Name,
-        }).ToList(); 
+        vl.EnumComboItems = CultureInfo.GetCultures(CultureTypes.NeutralCultures | CultureTypes.SpecificCultures)
+            .OrderBy(a=>a.Name)
+            .Select(ci => new SelectListItem
+            {
+                Text = "{0} :  {1}".Formato(ci.Name, ci.DisplayName),
+                Value = ci.Name,
+                Selected = object.Equals(tc.Value.Name, ci.Name),
+            }).ToList();
+        vl.ValueHtmlProps.Clear();
     }));
 
             
             #line default
             #line hidden
             
-            #line 13 "..\..\Translation\Views\CultureInfoView.cshtml"
+            #line 17 "..\..\Translation\Views\CultureInfoView.cshtml"
       ;
 }
             

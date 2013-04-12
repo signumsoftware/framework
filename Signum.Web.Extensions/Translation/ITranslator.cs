@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
@@ -90,4 +92,42 @@ namespace Signum.Web.Translation
     //        return result.Select(a => a.TranslatedText).ToList();
     //    }
     //}
+
+    public static class AdmAuthentication
+    {
+        [DataContract]
+        public class AdmAccessToken
+        {
+            [DataMember]
+            public string access_token { get; set; }
+            [DataMember]
+            public string token_type { get; set; }
+            [DataMember]
+            public string expires_in { get; set; }
+            [DataMember]
+            public string scope { get; set; }
+        }
+
+        public static string GetAccessToken(string clientId, string clientSecret)
+        {
+            //Prepare OAuth request 
+            WebRequest webRequest = WebRequest.Create("https://datamarket.accesscontrol.windows.net/v2/OAuth2-13");
+            webRequest.ContentType = "application/x-www-form-urlencoded";
+            webRequest.Method = "POST";
+            byte[] bytes = Encoding.ASCII.GetBytes(string.Format("grant_type=client_credentials&client_id={0}&client_secret={1}&scope=http://api.microsofttranslator.com",
+                HttpUtility.UrlEncode(clientId), HttpUtility.UrlEncode(clientSecret)));
+            webRequest.ContentLength = bytes.Length;
+            using (Stream outputStream = webRequest.GetRequestStream())
+            {
+                outputStream.Write(bytes, 0, bytes.Length);
+            }
+            using (WebResponse webResponse = webRequest.GetResponse())
+            {
+                DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(AdmAccessToken));
+                //Get deserialized object from JSON stream
+                AdmAccessToken token = (AdmAccessToken)serializer.ReadObject(webResponse.GetResponseStream());
+                return token.access_token;
+            }
+        }
+    }
 }
