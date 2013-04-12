@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
-using Signum.Entities.Extensions.Properties;
 using System.Text.RegularExpressions;
 
 namespace Signum.Entities.Omnibox
@@ -15,7 +14,9 @@ namespace Signum.Entities.Omnibox
 
         public EntityOmniboxResultGenenerator(IEnumerable<Type> schemaTypes)
         {
-            types = schemaTypes.Where(t => !t.IsEnumEntity()).ToDictionary(Lite.UniqueTypeName);
+            var manager = OmniboxParser.Manager;
+
+            types = schemaTypes.Where(t => !t.IsEnumEntity() && manager.AllowedType(t)).ToDictionary(Lite.UniqueTypeName);
         }
 
         public int AutoCompleteLimit = 5;
@@ -33,9 +34,8 @@ namespace Signum.Entities.Omnibox
 
             bool isPascalCase = OmniboxUtils.IsPascalCasePattern(ident);
 
-            var manager = OmniboxParser.Manager;
 
-            var matches = OmniboxUtils.Matches(types, t => t.NiceName(), ident, isPascalCase).Where(a => manager.AllowedType((Type)a.Value));
+            var matches = OmniboxUtils.Matches(types, t => t.NiceName(), ident, isPascalCase);
 
             if (tokens.Count == 1)
             {
@@ -105,7 +105,7 @@ namespace Signum.Entities.Omnibox
         public override List<HelpOmniboxResult> GetHelp()
         {
             var resultType = typeof(EntityOmniboxResult);
-            var entityTypeName = Signum.Entities.Extensions.Properties.Resources.Omnibox_Type;
+            var entityTypeName = OmniboxMessage.Omnibox_Type.NiceToString();
 
             return new List<HelpOmniboxResult>
             {
@@ -130,10 +130,10 @@ namespace Signum.Entities.Omnibox
         public override string ToString()
         {
             if (Id.HasValue)
-                return "{0} {1}".Formato(Reflector.CleanTypeName(Type), Id, Lite.TryToString() ?? Resources.NotFound);
+                return "{0} {1}".Formato(Reflector.CleanTypeName(Type), Id, Lite.TryToString() ?? OmniboxMessage.NotFound.NiceToString());
 
             if (ToStr != null)
-                return "{0} \"{1}\"".Formato(Reflector.CleanTypeName(Type), ToStr, Lite.TryToString() ?? Resources.NotFound);
+                return "{0} \"{1}\"".Formato(Reflector.CleanTypeName(Type), ToStr, Lite.TryToString() ?? OmniboxMessage.NotFound.NiceToString());
 
             return Reflector.CleanTypeName(Type);
         }

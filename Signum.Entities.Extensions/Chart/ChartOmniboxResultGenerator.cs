@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
-using Signum.Entities.Extensions.Properties;
 using System.Text.RegularExpressions;
 using Signum.Entities.Chart;
 using Signum.Entities.Omnibox;
@@ -21,7 +20,7 @@ namespace Signum.Entities.Chart
         }
 
         public string Keyword = "Chart";
-        public Func<string> NiceName = () => Resources.Chart;
+        public Func<string> NiceName = () => ChartMessage.Chart.NiceToString();
 
         Regex regex = new Regex(@"^II?$", RegexOptions.ExplicitCapture);
         public override IEnumerable<ChartOmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern)
@@ -65,7 +64,7 @@ namespace Signum.Entities.Chart
             {
                 new HelpOmniboxResult 
                 { 
-                    Text = "Chart {0}".Formato(Signum.Entities.Extensions.Properties.Resources.Omnibox_Query), 
+                    Text = "Chart {0}".Formato(OmniboxMessage.Omnibox_Query.NiceToString()), 
                     OmniboxResultType = resultType 
                 }
             };

@@ -7,7 +7,6 @@ using Signum.Web.Omnibox;
 using Signum.Entities.Omnibox;
 using Signum.Engine.DynamicQuery;
 using System.Web.Mvc;
-using Signum.Web.Extensions.Properties;
 using Signum.Utilities;
 
 namespace Signum.Web.Chart

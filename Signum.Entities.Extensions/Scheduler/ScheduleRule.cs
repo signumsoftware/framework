@@ -1,11 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Globalization;
 using Signum.Utilities;
 using System.ComponentModel;
-using Signum.Entities.Extensions.Properties;
 using System.Reflection;
 
 namespace Signum.Entities.Scheduler
@@ -77,7 +76,7 @@ namespace Signum.Entities.Scheduler
 
         public override string ToString()
         {
-            return Resources.Each0MinutesFrom1.Formato(eachMinute.ToString(), startingOn.ToUserInterface().ToShortDateString());
+            return SchedulerMessage.Each0MinutesFrom1.NiceToString().Formato(eachMinute.ToString(), startingOn.ToUserInterface().ToShortDateString());
         }
 
         protected override string PropertyValidation(PropertyInfo pi)
@@ -85,7 +84,7 @@ namespace Signum.Entities.Scheduler
             if (pi.Is(() => EachMinute))
             {
                 if ((60 % EachMinute) != 0)
-                    return Resources._0IsNotMultiple1.Formato(pi.NiceName(), 60);
+                    return SchedulerMessage._0IsNotMultiple1.NiceToString().Formato(pi.NiceName(), 60);
             }
 
             return base.PropertyValidation(pi);
@@ -131,7 +130,7 @@ namespace Signum.Entities.Scheduler
 
         public override string ToString()
         {
-            return Resources.Each0HoursFrom1.Formato(eachHour.ToString(), startingOn.ToUserInterface().ToShortDateString());
+            return SchedulerMessage.Each0HoursFrom1.NiceToString().Formato(eachHour.ToString(), startingOn.ToUserInterface().ToShortDateString());
         }
 
         protected override string PropertyValidation(PropertyInfo pi)
@@ -139,7 +138,7 @@ namespace Signum.Entities.Scheduler
             if (pi.Is(() => EachHour))
             {
                 if ((24 % EachHour) != 0)
-                    return Resources._0IsNotMultiple1.Formato(pi.NiceName(), 24);
+                    return SchedulerMessage._0IsNotMultiple1.NiceToString().Formato(pi.NiceName(), 24);
             }
 
             return base.PropertyValidation(pi);
@@ -151,7 +150,7 @@ namespace Signum.Entities.Scheduler
     {
         public override string ToString()
         {
-            return Resources.ScheduleRuleDailyDN_Everydayat + base.ToString();
+            return SchedulerMessage.ScheduleRuleDailyDN_Everydayat.NiceToString() + base.ToString();
         }
 
         public override DateTime Next()
@@ -174,7 +173,7 @@ namespace Signum.Entities.Scheduler
         {
             return "{0} {1} {2}".Formato(
                 CultureInfo.CurrentCulture.DateTimeFormat.DayNames[(int)dayOfTheWeek],
-                Resources.ScheduleRuleWeekDaysDN_At,
+                SchedulerMessage.ScheduleRuleWeekDaysDN_At.NiceToString(),
                 base.ToString());
         }
 
@@ -292,15 +291,15 @@ namespace Signum.Entities.Scheduler
         public override string ToString()
         {
             return "{0} {1} {2} {3}".Formato(
-                (monday ? Resources.ScheduleRuleWeekDaysDN_M : "") +
-                (tuesday ? Resources.ScheduleRuleWeekDaysDN_T : "") +
-                (wednesday ? Resources.ScheduleRuleWeekDaysDN_W : "") +
-                (thursday ? Resources.ScheduleRuleWeekDaysDN_Th : "") +
-                (friday ? Resources.ScheduleRuleWeekDaysDN_F : "") +
-                (saturday ? Resources.ScheduleRuleWeekDaysDN_Sa : "") +
-                (sunday ? Resources.ScheduleRuleWeekDaysDN_S : ""),
-                (holiday.HasValue ? (holiday.Value ? Resources.ScheduleRuleWeekDaysDN_AndHoliday : Resources.ScheduleRuleWeekDaysDN_ButHoliday) : null),
-                Resources.ScheduleRuleWeekDaysDN_At,
+                (monday ? SchedulerMessage.ScheduleRuleWeekDaysDN_M.NiceToString() : "") +
+                (tuesday ? SchedulerMessage.ScheduleRuleWeekDaysDN_T.NiceToString() : "") +
+                (wednesday ? SchedulerMessage.ScheduleRuleWeekDaysDN_W.NiceToString() : "") +
+                (thursday ? SchedulerMessage.ScheduleRuleWeekDaysDN_Th.NiceToString() : "") +
+                (friday ? SchedulerMessage.ScheduleRuleWeekDaysDN_F.NiceToString() : "") +
+                (saturday ? SchedulerMessage.ScheduleRuleWeekDaysDN_Sa.NiceToString() : "") +
+                (sunday ? SchedulerMessage.ScheduleRuleWeekDaysDN_S.NiceToString() : ""),
+                (holiday.HasValue ? (holiday.Value ? SchedulerMessage.ScheduleRuleWeekDaysDN_AndHoliday.NiceToString() : SchedulerMessage.ScheduleRuleWeekDaysDN_ButHoliday.NiceToString()) : null),
+                SchedulerMessage.ScheduleRuleWeekDaysDN_At.NiceToString(),
                 base.ToString());
         }
 
@@ -309,14 +308,83 @@ namespace Signum.Entities.Scheduler
             if (pi.Is(()=>Holiday))
             {
                 if (calendar != null && holiday == null)
-                    return Resources.Holidayhavetobetrueorfalsewhenacalendarisset;
+                    return SchedulerMessage.Holidayhavetobetrueorfalsewhenacalendarisset.NiceToString();
 
                 if (calendar == null && holiday != null)
-                    return Resources.Holidayhavetobenullwhennocalendarisset;
+                    return SchedulerMessage.Holidayhavetobenullwhennocalendarisset.NiceToString();
             }
 
             return base.PropertyValidation(pi);
         }
 
     }
+
+    public enum SchedulerMessage
+    {
+        [Description("{0} is not multiple of {1}")]
+        _0IsNotMultiple1,
+        [Description("Each {0} hours from {1}")]
+        Each0HoursFrom1,
+        [Description("Each {0} minutes from {1}")]
+        Each0MinutesFrom1,
+        [Description("Holiday have to be null when no calendar is set")]
+        Holidayhavetobenullwhennocalendarisset,
+        [Description("Holiday have to be true or false when a calendar is set")]
+        Holidayhavetobetrueorfalsewhenacalendarisset,
+        [Description("Dialy")]
+        ScheduleRuleDailyDN,
+        [Description("Every day at ")]
+        ScheduleRuleDailyDN_Everydayat,
+        [Description("Starting On")]
+        ScheduleRuleDayDN_StartingOn,
+        [Description("Each X Hours")]
+        ScheduleRuleHourlyDN,
+        [Description("Each X Minutes")]
+        ScheduleRuleMinutelyDN,
+        [Description("Days of week")]
+        ScheduleRuleWeekDaysDN,
+        [Description("and holidays")]
+        ScheduleRuleWeekDaysDN_AndHoliday,
+        [Description("at")]
+        ScheduleRuleWeekDaysDN_At,
+        [Description("but holidays")]
+        ScheduleRuleWeekDaysDN_ButHoliday,
+        [Description("Calendar")]
+        ScheduleRuleWeekDaysDN_Calendar,
+        [Description("F")]
+        ScheduleRuleWeekDaysDN_F,
+        [Description("Friday")]
+        ScheduleRuleWeekDaysDN_Friday,
+        [Description("Holiday")]
+        ScheduleRuleWeekDaysDN_Holiday,
+        [Description("M")]
+        ScheduleRuleWeekDaysDN_M,
+        [Description("Monday")]
+        ScheduleRuleWeekDaysDN_Monday,
+        [Description("S")]
+        ScheduleRuleWeekDaysDN_S,
+        [Description("Sa")]
+        ScheduleRuleWeekDaysDN_Sa,
+        [Description("Saturday")]
+        ScheduleRuleWeekDaysDN_Saturday,
+        [Description("Sunday")]
+        ScheduleRuleWeekDaysDN_Sunday,
+        [Description("T")]
+        ScheduleRuleWeekDaysDN_T,
+        [Description("Th")]
+        ScheduleRuleWeekDaysDN_Th,
+        [Description("Thursday")]
+        ScheduleRuleWeekDaysDN_Thursday,
+        [Description("Tuesday")]
+        ScheduleRuleWeekDaysDN_Tuesday,
+        [Description("W")]
+        ScheduleRuleWeekDaysDN_W,
+        [Description("Wednesday")]
+        ScheduleRuleWeekDaysDN_Wednesday,
+        [Description("Weekly")]
+        ScheduleRuleWeeklyDN,
+        [Description("Day of the week")]
+        ScheduleRuleWeeklyDN_DayOfTheWeek
+    }
+
 }

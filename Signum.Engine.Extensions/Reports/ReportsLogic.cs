@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +8,6 @@ using Signum.Entities;
 using Signum.Engine.Maps;
 using Signum.Engine.Linq;
 using Signum.Entities.DynamicQuery;
-using Signum.Engine.Extensions.Properties;
 using Signum.Engine.Basics;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
@@ -68,7 +67,7 @@ namespace Signum.Engine.Reports
             ExcelReportDN report = excelReport.RetrieveAndForget();
             string extension = Path.GetExtension(report.File.FileName);
             if (extension != ".xlsx")
-                throw new ApplicationException(Resources.ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0.Formato(extension));
+                throw new ApplicationException(ExcelMessage.ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0.NiceToString().Formato(extension));
 
             return ExcelGenerator.WriteDataInExcelFile(queryResult, report.File.BinaryFile);
         }

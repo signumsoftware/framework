@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,7 +15,6 @@ using System.Threading;
 using Signum.Services;
 using Signum.Utilities.Reflection;
 using System.Reflection;
-using Signum.Engine.Extensions.Properties;
 using Signum.Engine.Mailing;
 using Signum.Engine.Operations;
 using System.Xml.Linq;
@@ -79,7 +78,7 @@ namespace Signum.Engine.Authorization
                         r.Name,
                     });
 
-                dqm.RegisterQuery(RoleQueries.ReferedBy, () =>
+                dqm.RegisterQuery(RoleQuery.RolesReferedBy, () =>
                     from r in Database.Query<RoleDN>()
                     from rc in r.Roles
                     select new
@@ -143,7 +142,7 @@ namespace Signum.Engine.Authorization
 
                     if (problems.Count > 0)
                         throw new ApplicationException(
-                            Signum.Engine.Extensions.Properties.Resources._0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships.Formato(problems.Count) +
+                            AuthMessage._0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships.NiceToString().Formato(problems.Count) +
                             problems.ToString("\r\n"));
                 }
             }
@@ -165,7 +164,7 @@ namespace Signum.Engine.Authorization
 
                 if (problems.Count > 0)
                     throw new ApplicationException(
-                        Signum.Engine.Extensions.Properties.Resources._0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships.Formato(problems.Count) +
+                        AuthMessage._0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships.NiceToString().Formato(problems.Count) +
                         problems.ToString("\r\n"));
 
                 return newRoles;
@@ -179,7 +178,7 @@ namespace Signum.Engine.Authorization
             {
                 user = RetrieveUser(username);
                 if (user == null)
-                    throw new ApplicationException(Signum.Engine.Extensions.Properties.Resources.Username0IsNotValid.Formato(username));
+                    throw new ApplicationException(AuthMessage.Username0IsNotValid.NiceToString().Formato(username));
             }
 
             return UserSession(user);
@@ -197,7 +196,7 @@ namespace Signum.Engine.Authorization
             var result = Database.Query<UserDN>().SingleOrDefaultEx(u => u.UserName == username);
 
             if (result != null && result.State == UserState.Disabled)
-                throw new ApplicationException(Resources.User0IsDisabled.Formato(result.UserName));
+                throw new ApplicationException(AuthMessage.User0IsDisabled.NiceToString().Formato(result.UserName));
 
             return result; 
         }
@@ -276,10 +275,10 @@ namespace Signum.Engine.Authorization
             {
                 UserDN user = RetrieveUser(username);
                 if (user == null)
-                    throw new IncorrectUsernameException(Resources.Username0IsNotValid.Formato(username));
+                    throw new IncorrectUsernameException(AuthMessage.Username0IsNotValid.NiceToString().Formato(username));
 
                 if (user.PasswordHash != passwordHash)
-                    throw new IncorrectPasswordException(Resources.IncorrectPassword);
+                    throw new IncorrectPasswordException(AuthMessage.IncorrectPassword.NiceToString());
 
                 return user;
             }

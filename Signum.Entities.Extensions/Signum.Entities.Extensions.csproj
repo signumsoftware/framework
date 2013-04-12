@@ -84,6 +84,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Alerts\Alert.cs" />
+    <Compile Include="Authorization\AuthMessages.cs" />
     <Compile Include="Authorization\PasswordValidInterval.cs" />
     <Compile Include="Authorization\ResetPasswordRequest.cs" />
     <Compile Include="Authorization\SessionLog.cs" />
@@ -94,11 +95,13 @@
     <Compile Include="Authorization\Role.cs" />
     <Compile Include="Authorization\ServicesData.cs" />
     <Compile Include="Authorization\User.cs" />
+    <Compile Include="Help\HelpMessage.cs" />
+    <Compile Include="Translation\CultureInfoDN.cs" />
     <Compile Include="Basics\HourMinuteDN.cs" />
     <Compile Include="Basics\DateSpanDN.cs" />
     <Compile Include="Basics\MultiOptionalEnumDN.cs" />
     <Compile Include="Basics\TypeConditionName.cs" />
-    <Compile Include="Basics\PropertyDN.cs" />
+    <Compile Include="Basics\PropertyRouteDN.cs" />
     <Compile Include="Basics\QueryDN.cs" />
     <Compile Include="Basics\FacadeMethodDN.cs" />
     <Compile Include="Cache\CachePermissions.cs" />
@@ -127,6 +130,8 @@
     <Compile Include="Files\FilePath.cs" />
     <Compile Include="Files\FileRepository.cs" />
     <Compile Include="Files\IFileServer.cs" />
+    <Compile Include="Translation\LocalizedInstance.cs" />
+    <Compile Include="Translation\Translator.cs" />
     <Compile Include="Mailing\EmailMessage.cs" />
     <Compile Include="Mailing\EmailTemplate.cs" />
     <Compile Include="Mailing\Newsletter.cs" />
@@ -148,11 +153,6 @@
     <Compile Include="UserQueries\IUserQueryServer.cs" />
     <Compile Include="Reports\ExcelReportDN.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="UserQueries\FilterValueConverter.cs" />
     <Compile Include="Reports\IExcelReportServer.cs" />
     <Compile Include="UserQueries\UserQueryDN.cs" />
@@ -176,29 +176,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.es.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.fr.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.it.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.pt.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.de.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Authorization\Authorization.cd" />
     <None Include="Scheduler\Scheduler.cd" />
   </ItemGroup>
   <ItemGroup>
@@ -218,8 +195,26 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <Folder Include="Exceptions\" />
+    <Content Include="Translations\Signum.Entities.Extensions.de.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Translations\Signum.Entities.Extensions.en.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Translations\Signum.Entities.Extensions.es.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Translations\Signum.Entities.Extensions.fr.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Translations\Signum.Entities.Extensions.it.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Translations\Signum.Entities.Extensions.pt.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

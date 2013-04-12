@@ -23,7 +23,7 @@ namespace Signum.Entities.Basics
 
         [NotNullable, SqlDbType(Size = 100)]
         string interfaceName;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100), AvoidLocalization]
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string InterfaceName
         {
             get { return interfaceName; }
@@ -32,7 +32,7 @@ namespace Signum.Entities.Basics
 
         [NotNullable, SqlDbType(Size = 100)]
         string methodName;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100), AvoidLocalization]
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string MethodName
         {
             get { return methodName; }

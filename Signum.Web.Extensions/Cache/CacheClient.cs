@@ -9,7 +9,6 @@ using System.Reflection;
 using Signum.Web.Operations;
 using Signum.Entities;
 using System.Web.Mvc;
-using Signum.Web.Properties;
 using System.Diagnostics;
 using Signum.Engine;
 using Signum.Entities.Basics;

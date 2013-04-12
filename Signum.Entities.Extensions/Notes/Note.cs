@@ -82,6 +82,21 @@ namespace Signum.Entities.Notes
         Save,
     }
 
+    public enum NoteMessage
+    {
+        [Description("New Note")]
+        NewNote,
+        [Description("Note:")]
+        Note,
+        [Description("note")]
+        _note,
+        [Description("notes")]
+        _notes,
+        CreateNote,
+        NoteCreated,
+        Notes,
+        ViewNotes
+    }
 
     [Serializable, EntityKind(EntityKind.String)]
     public class NoteTypeDN : MultiOptionalEnumDN

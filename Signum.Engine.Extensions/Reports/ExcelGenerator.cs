@@ -1,4 +1,4 @@
-﻿#region usings
+#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +16,6 @@ using Signum.Entities.Reflection;
 using Signum.Engine;
 using Signum.Entities.Reports;
 using Signum.Entities;
-using Signum.Engine.Extensions.Properties;
 using Signum.Engine.DynamicQuery;
 #endregion
 
@@ -46,7 +45,7 @@ namespace Signum.Engine.Reports
         public static void WriteDataInExcelFile(ResultTable results, Stream stream)
         {
             if (results == null)
-                throw new ApplicationException(Resources.ThereAreNoResultsToWrite);
+                throw new ApplicationException(ExcelMessage.ThereAreNoResultsToWrite.NiceToString());
 
             using (SpreadsheetDocument document = SpreadsheetDocument.Open(stream, true))
             {
@@ -55,7 +54,7 @@ namespace Signum.Engine.Reports
 
                 WorkbookPart workbookPart = document.WorkbookPart;
 
-                WorksheetPart worksheetPart = document.GetWorksheetPartByName(Resources.Data);
+                WorksheetPart worksheetPart = document.GetWorksheetPartByName(ExcelMessage.Data.NiceToString());
                 
                 CellBuilder cb = PlainExcelGenerator.CellBuilder;
                 
@@ -80,7 +79,7 @@ namespace Signum.Engine.Reports
 
                 var pivotTableParts = workbookPart.PivotTableCacheDefinitionParts
                     .Where(ptpart => ptpart.PivotCacheDefinition.Descendants<WorksheetSource>()
-                                                                .Any(wss => wss.Sheet.Value == Resources.Data));
+                                                                .Any(wss => wss.Sheet.Value == ExcelMessage.Data.NiceToString()));
 
                 foreach (PivotTableCacheDefinitionPart ptpart in pivotTableParts)
                 {
@@ -112,7 +111,7 @@ namespace Signum.Engine.Reports
             var dic = templateCols.OuterJoinDictionaryCC(resultsCols, (name, cell, resultCol) =>
             {
                 if (resultCol == null)
-                    throw new ApplicationException(Resources.TheExcelTemplateHasAColumn0NotPresentInTheFindWindow.Formato(name));
+                    throw new ApplicationException(ExcelMessage.TheExcelTemplateHasAColumn0NotPresentInTheFindWindow.NiceToString().Formato(name));
                 
                 if (cell != null)
                 {

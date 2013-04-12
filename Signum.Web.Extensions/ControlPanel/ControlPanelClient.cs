@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -11,7 +11,6 @@ using System.Web.Routing;
 using Signum.Web.UserQueries;
 using Signum.Entities;
 using Signum.Entities.Reports;
-using Signum.Web.Extensions.Properties;
 using Signum.Web.Controllers;
 
 namespace Signum.Web.ControlPanel
@@ -78,9 +77,9 @@ namespace Signum.Web.ControlPanel
                         new ToolBarButton
                         {
                             Id = TypeContextUtilities.Compose(ctx.Prefix, "CreatePart"),
-                            Text = Resources.ControlPanel_CreateNewPart,
+                            Text = ControlPanelMessage.ControlPanel_CreateNewPart.NiceToString(),
                             Enabled = !panel.IsNew,
-                            AltText = panel.IsNew ? Resources.ControlPanel_YouMustSaveThePanelBeforeAddingParts : Resources.ControlPanel_CreateNewPart,
+                            AltText = panel.IsNew ? ControlPanelMessage.ControlPanel_YouMustSaveThePanelBeforeAddingParts.NiceToString() : ControlPanelMessage.ControlPanel_CreateNewPart.NiceToString(),
                             OnClick = panel.IsNew ? "" : 
                                 JsValidator.EntityIsValid(new JsValidatorOptions
                                 {
@@ -107,7 +106,7 @@ namespace Signum.Web.ControlPanel
 
                     return new QuickLink[]
                     {
-                        new QuickLinkAction(Signum.Web.Properties.Resources.View, RouteHelper.New().Action<ControlPanelController>(cpc => cpc.View(entity.ToLite())))
+                        new QuickLinkAction(AuthMessage.View.NiceToString(), RouteHelper.New().Action<ControlPanelController>(cpc => cpc.View(entity.ToLite())))
                     };
                 });
             }

@@ -1,4 +1,4 @@
-﻿@using Signum.Engine
+@using Signum.Engine
 @using Signum.Entities.SMS
 @using Signum.Entities
 @using Signum.Web
@@ -20,11 +20,11 @@
         })
         <div id="sfCharactersLeft" data-url="@(Url.Action<SMSController>(s => s.GetDictionaries()))">
             <p>
-                <span>@Signum.Web.Extensions.Properties.Resources.RemainingCharacters</span>: <span id="sfCharsLeft"></span>
+                <span>@SmsMessage.RemainingCharacters.NiceToString()</span>: <span id="sfCharsLeft"></span>
             </p>
         </div>
         <div>
-            <input type="button" class="sf-button" id="sfRemoveNoSMSChars" value="@Signum.Web.Extensions.Properties.Resources.RemoveNonValidCharacters" data-url="@(Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")))"/>
+            <input type="button" class="sf-button" id="sfRemoveNoSMSChars" value="@SmsMessage.RemoveNonValidCharacters.NiceToString()" data-url="@(Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")))"/>
         </div>
     </div>
     
@@ -42,7 +42,7 @@
         }
         @(new HtmlTag("select").Attr("multiple", "multiple").Id("sfLiterals").ToHtml())
         <br />
-        <input type="button" class="sf-button" id="sfInsertLiteral" value="@Signum.Web.Extensions.Properties.Resources.Insert" />
+        <input type="button" class="sf-button" id="sfInsertLiteral" value="@SmsMessage.Insert.NiceToString()" />
     </div>
     
     <div class="clearall"></div>

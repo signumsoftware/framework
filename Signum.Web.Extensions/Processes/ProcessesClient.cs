@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,7 +19,6 @@ using System.Web.Routing;
 using Signum.Entities.Processes;
 using Signum.Engine.Operations;
 using Signum.Web.Omnibox;
-using Signum.Web.Extensions.Properties;
 
 namespace Signum.Web.Processes
 {
@@ -129,7 +128,7 @@ namespace Signum.Web.Processes
 
                 content.AddLine(new HtmlTag("li")
                     .Class(ctxItemClass + " sf-search-ctxitem-header")
-                    .InnerHtml(new HtmlTag("span").InnerHtml(Signum.Web.Properties.Resources.Search_CtxMenuItem_Operations.EncodeHtml())));
+                    .InnerHtml(new HtmlTag("span").InnerHtml(SearchMessage.Search_CtxMenuItem_Operations.NiceToString().EncodeHtml())));
 
                 foreach (var operation in operations)
                 {

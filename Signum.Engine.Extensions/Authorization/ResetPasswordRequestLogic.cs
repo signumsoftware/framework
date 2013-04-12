@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,8 +8,8 @@ using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Engine.Mailing;
-using Signum.Engine.Extensions.Properties;
 using Signum.Utilities;
+using System.Globalization;
 
 namespace Signum.Engine.Authorization
 {
@@ -44,9 +44,9 @@ namespace Signum.Engine.Authorization
                 {
                     return new EmailContent
                     {
-                        Subject = Resources.ResetPasswordCode,
+                        Subject = AuthMessage.ResetPasswordCode.NiceToString(),
                         Body = EmailRenderer.Replace(typeof(AuthLogic).Assembly.ReadResourceStream("Signum.Engine.Extensions.Authorization.ResetPasswordRequestMail.htm"),
-                               model, null, Resources.ResourceManager)
+                               model, null, DescriptionManager.GetLocalizedAssembly(typeof(AuthMessage).Assembly, CultureInfo.CurrentUICulture))
                     };
                 });
             }
@@ -83,7 +83,7 @@ namespace Signum.Engine.Authorization
             UserDN user = Database.Query<UserDN>().Where(u => u.Email == email).SingleOrDefaultEx();
 
             if (user == null)
-                throw new ApplicationException(Resources.ThereSNotARegisteredUserWithThatEmailAddress);
+                throw new ApplicationException(AuthMessage.ThereSNotARegisteredUserWithThatEmailAddress.NiceToString());
 
             return user;
         };

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -139,7 +139,7 @@ namespace Signum.Windows.Notes
                     tbNotes.FontWeight = FontWeights.Bold;
                     btnExploreNotes.FontWeight = FontWeights.Bold;
                     btnExploreNotes.Visibility = Visibility.Visible;
-                    btnExploreNotes.Content = count + " " + (count > 1 ? Properties.Resources._notes : Properties.Resources._note);
+                    btnExploreNotes.Content = count + " " + (count > 1 ? NoteMessage._note.NiceToString() :  NoteMessage._notes.NiceToString());
                 }
 
                 if (count > 0 && ForceShow != null)

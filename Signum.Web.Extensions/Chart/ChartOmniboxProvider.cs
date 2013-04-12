@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -7,7 +7,6 @@ using Signum.Web.Omnibox;
 using Signum.Entities.Omnibox;
 using Signum.Engine.DynamicQuery;
 using System.Web.Mvc;
-using Signum.Web.Extensions.Properties;
 using Signum.Utilities;
 
 namespace Signum.Web.Chart
@@ -38,7 +37,7 @@ namespace Signum.Web.Chart
 
         public override MvcHtmlString Icon()
         {
-            return ColoredSpan(" ({0})".Formato(Resources.Chart_Chart), "violet");
+            return ColoredSpan(" ({0})".Formato(ChartMessage.Chart.NiceToString()), "violet");
         }
     }
 }

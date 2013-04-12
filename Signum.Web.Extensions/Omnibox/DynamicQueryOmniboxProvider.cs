@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -60,7 +60,7 @@ namespace Signum.Web.Omnibox
                         new MvcHtmlString(DynamicQueryOmniboxResultGenerator.ToStringOperation(item.Operation.Value))).ToHtml());
 
                     if (item.Value == DynamicQueryOmniboxResultGenerator.UnknownValue)
-                        html = html.Concat(ColoredSpan(Signum.Web.Extensions.Properties.Resources.Unknown, "red"));
+                        html = html.Concat(ColoredSpan(OmniboxMessage.Unknown.NiceToString(), "red"));
                     else if (item.ValuePack != null)
                         html = html.Concat(item.ValuePack.ToHtml());
                     else if (item.Syntax != null && item.Syntax.Completion == FilterSyntaxCompletion.Complete)

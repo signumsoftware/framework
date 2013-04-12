@@ -45,19 +45,6 @@ namespace Signum.Engine.Mailing
                         s.EnableSSL
                     });
 
-                dqm.RegisterQuery(SMTPConfigurationQueries.NoCredentialsData, () =>
-                    from s in Database.Query<SMTPConfigurationDN>()
-                    select new
-                    {
-                        Entity = s,
-                        s.Id,
-                        s.Name,
-                        s.Host,
-                        s.Port,
-                        s.UseDefaultCredentials,
-                        s.EnableSSL
-                    });
-
                 dqm.RegisterQuery(typeof(ClientCertificationFileDN), () =>
                     from c in Database.Query<ClientCertificationFileDN>()
                     select new

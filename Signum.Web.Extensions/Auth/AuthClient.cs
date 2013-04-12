@@ -20,7 +20,6 @@ using System.Web.Routing;
 using System.Web;
 using Signum.Utilities.Reflection;
 using Signum.Web.Omnibox;
-using Signum.Web.Extensions.Properties;
 using Signum.Web.AuthAdmin;
 #endregion
 

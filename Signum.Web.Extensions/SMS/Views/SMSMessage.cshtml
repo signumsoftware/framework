@@ -1,6 +1,7 @@
-﻿@using Signum.Engine
+@using Signum.Engine
 @using Signum.Entities.SMS;
 @using Signum.Web;
+@using Signum.Utilities;
 @using Signum.Web.SMS;
 
 @Html.ScriptCss("~/SMS/Content/SMS.css")
@@ -8,31 +9,32 @@
 @using (var e = Html.TypeContext<SMSMessageDN>())
 {   
     @Html.ValueLine(e, s => s.MessageID, vl =>
-    {
-        vl.Visible = !e.Value.IsNew;
-        vl.ReadOnly = true;
-    })
-    @Html.EntityLine(e, s => s.Template, vl => 
-    {
-        vl.Create = false;
-        vl.Remove = false;
-        vl.HideIfNull = true;
-    })
+{
+    vl.Visible = !e.Value.IsNew;
+    vl.ReadOnly = true;
+})
+    @Html.EntityLine(e, s => s.Template, vl =>
+{
+    vl.Create = false;
+    vl.Remove = false;
+    vl.HideIfNull = true;
+})
     @Html.ValueLine(e, s => s.Certified, vl => vl.ReadOnly = (e.Value.State != SMSMessageState.Created))
     @Html.ValueLine(e, s => s.DestinationNumber, vl => vl.ReadOnly = !e.Value.IsNew)
     @Html.ValueLine(e, s => s.Message, vl =>
-        {
-            vl.ValueLineType = ValueLineType.TextArea;
-            vl.ValueHtmlProps["cols"] = "30";
-            vl.ValueHtmlProps["rows"] = "6";
-            vl.ReadOnly = (!e.Value.EditableMessage || e.Value.State != SMSMessageState.Created);
-        })
-    if(e.Value.State == SMSMessageState.Created && e.Value.EditableMessage) {
+{
+    vl.ValueLineType = ValueLineType.TextArea;
+    vl.ValueHtmlProps["cols"] = "30";
+    vl.ValueHtmlProps["rows"] = "6";
+    vl.ReadOnly = (!e.Value.EditableMessage || e.Value.State != SMSMessageState.Created);
+})
+    if (e.Value.State == SMSMessageState.Created && e.Value.EditableMessage)
+    {
         <div id="sfCharactersLeft" data-url="@(Url.Action<SMSController>(s => s.GetDictionaries()))">
-            <p><span>@Signum.Web.Extensions.Properties.Resources.RemainingCharacters</span>: <span id="sfCharsLeft"></span></p>
+            <p><span>@SmsMessage.RemainingCharacters.NiceToString()</span>: <span id="sfCharsLeft"></span></p>
         </div>
         <div>
-            <input type="button" class="sf-button" id="sfRemoveNoSMSChars" value="@Signum.Web.Extensions.Properties.Resources.RemoveNonValidCharacters" data-url="@(Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")))"/>
+            <input type="button" class="sf-button" id="sfRemoveNoSMSChars" value="@SmsMessage.RemoveNonValidCharacters.NiceToString()" data-url="@(Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")))"/>
         </div>
     }
     <br />

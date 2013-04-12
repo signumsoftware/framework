@@ -1,11 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Entities.Basics;
 using Signum.Entities;
 using Signum.Utilities;
-using Signum.Entities.Extensions.Properties;
 using System.Collections.ObjectModel;
 
 namespace Signum.Entities.Authorization
@@ -37,8 +36,7 @@ namespace Signum.Entities.Authorization
     }
 
 
-    //Only for client-side communication
-    [Serializable, AvoidLocalization]
+    [Serializable]
     public abstract class BaseRulePack<T> : ModelEntity
     {
         Lite<RoleDN> role;
@@ -92,7 +90,7 @@ namespace Signum.Entities.Authorization
         Min,
     }
 
-    [Serializable, AvoidLocalization]
+    [Serializable, DescriptionOptions(DescriptionOptions.None)]
     public abstract class AllowedRule<R, A> : ModelEntity
         where R : IdentifiableEntity
     {
@@ -145,7 +143,7 @@ namespace Signum.Entities.Authorization
     {
         public override string ToString()
         {
-            return Resources._0RulesFor1.Formato(typeof(TypeDN).NiceName(), Role);
+            return AuthMessage._0RulesFor1.NiceToString().Formato(typeof(TypeDN).NiceName(), Role);
         }
     }
 
@@ -181,7 +179,7 @@ namespace Signum.Entities.Authorization
         }
     }
 
-    [Serializable, AvoidLocalization]
+    [Serializable, DescriptionOptions(DescriptionOptions.None)]
     public class TypeAllowedAndConditions : ModelEntity, IEquatable<TypeAllowedAndConditions>
     {
         public TypeAllowedAndConditions(TypeAllowed fallback, ReadOnlyCollection<TypeConditionRule> conditions)
@@ -291,7 +289,7 @@ namespace Signum.Entities.Authorization
         }
     }
 
-    [Serializable, AvoidLocalization]
+    [Serializable, DescriptionOptions(DescriptionOptions.None)]
     public class TypeConditionRule : EmbeddedEntity, IEquatable<TypeConditionRule>
     {
         public TypeConditionRule(Enum conditionName, TypeAllowed allowed)
@@ -334,11 +332,11 @@ namespace Signum.Entities.Authorization
     {
         public override string ToString()
         {
-            return Resources._0RulesFor1.Formato(typeof(PropertyDN).NiceName(), Role);
+            return AuthMessage._0RulesFor1.NiceToString().Formato(typeof(PropertyRouteDN).NiceName(), Role);
         }
     }
     [Serializable]
-    public class PropertyAllowedRule : AllowedRule<PropertyDN, PropertyAllowed>{}
+    public class PropertyAllowedRule : AllowedRule<PropertyRouteDN, PropertyAllowed>{}
 
 
     [Serializable]
@@ -346,7 +344,7 @@ namespace Signum.Entities.Authorization
     {
         public override string ToString()
         {
-            return Resources._0RulesFor1.Formato(typeof(QueryDN).NiceName(), Role);
+            return AuthMessage._0RulesFor1.NiceToString().Formato(typeof(QueryDN).NiceName(), Role);
         }
     }
     [Serializable]
@@ -358,7 +356,7 @@ namespace Signum.Entities.Authorization
     {
         public override string ToString()
         {
-            return Resources._0RulesFor1.Formato(typeof(OperationDN).NiceName(), Role);
+            return AuthMessage._0RulesFor1.NiceToString().Formato(typeof(OperationDN).NiceName(), Role);
         }
     }
     [Serializable]
@@ -370,7 +368,7 @@ namespace Signum.Entities.Authorization
     {
         public override string ToString()
         {
-            return Resources._0RulesFor1.Formato(typeof(PermissionDN).NiceName(), Role);
+            return AuthMessage._0RulesFor1.NiceToString().Formato(typeof(PermissionDN).NiceName(), Role);
         }
     }
     [Serializable]
@@ -381,7 +379,7 @@ namespace Signum.Entities.Authorization
     {
         public override string ToString()
         {
-            return Resources._0RulesFor1.Formato(typeof(FacadeMethodDN).NiceName(), Role);
+            return AuthMessage._0RulesFor1.NiceToString().Formato(typeof(FacadeMethodDN).NiceName(), Role);
         }
     }
     [Serializable]

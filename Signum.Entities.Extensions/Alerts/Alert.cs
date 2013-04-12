@@ -165,11 +165,42 @@ namespace Signum.Entities.Alerts
     [Serializable, EntityKind(EntityKind.String)]
     public class AlertTypeDN : MultiOptionalEnumDN
     {
-       
+      static AlertTypeDN()
+        {
+            DescriptionManager.DefaultDescriptionOptions += DescriptionManager_DefaultDescriptionOptions;
+            DescriptionManager.Invalidate();
+        }
+
+        static DescriptionOptions? DescriptionManager_DefaultDescriptionOptions(Type type)
+        {
+            return type.IsEnum && type.Name.EndsWith("Alert") ? DescriptionOptions.Members : (DescriptionOptions?)null;
+        }
     }
 
     public enum AlertTypeOperation
     {
         Save,
+    }
+
+    public enum AlertMessage
+    {
+        Alert,
+        [Description("New Alert")]
+        NewAlert,
+        AlertCreated,
+        Alerts,
+        [Description("Attended")]
+        Alerts_Attended,
+        [Description("Future")]
+        Alerts_Future,
+        [Description("Not attended")]
+        Alerts_NotAttended,
+        [Description("Checked")]
+        CheckedAlerts,
+        CreateAlert,
+        [Description("Futures")]
+        FutureAlerts,
+        [Description("Warned")]
+        WarnedAlerts
     }
 }

@@ -1,4 +1,4 @@
-﻿@Html.DynamicCss("~/authAdmin/Content/SF_AuthAdmin.css")
+@Html.DynamicCss("~/authAdmin/Content/SF_AuthAdmin.css")
 @Html.ScriptsJs("~/authAdmin/Scripts/SF_AuthAdmin.js")
 <script type="text/javascript">
     $(function () {
@@ -14,16 +14,16 @@
         <thead>
             <tr>
                 <th>
-                    @Resources.FacadeMethodsAscx_FacadeMethod
+                    @AuthMessage.FacadeMethodsAscx_FacadeMethod.NiceToString()
                 </th>
                 <th>
-                    @Resources.FacadeMethodsAscx_Allow
+                    @AuthMessage.FacadeMethodsAscx_Allow.NiceToString()
                 </th>
                 <th>
-                    @Resources.FacadeMethodsAscx_Deny
+                    @AuthMessage.FacadeMethodsAscx_Deny.NiceToString()
                 </th>
                 <th>
-                    @Resources.FacadeMethodsAscx_Overriden
+                    @AuthMessage.FacadeMethodsAscx_Overriden.NiceToString()
                 </th>
             </tr>
         </thead>

@@ -27,12 +27,18 @@ namespace Signum.Web.Extensions.Help.Views
     using System.Web.UI;
     using System.Web.WebPages;
     
-    #line 4 "..\..\Help\Views\Index.cshtml"
+    #line 5 "..\..\Help\Views\Index.cshtml"
     using Signum.Engine.Help;
     
     #line default
     #line hidden
     using Signum.Entities;
+    
+    #line 4 "..\..\Help\Views\Index.cshtml"
+    using Signum.Entities.Help;
+    
+    #line default
+    #line hidden
     using Signum.Utilities;
     using Signum.Web;
     
@@ -43,8 +49,7 @@ namespace Signum.Web.Extensions.Help.Views
     #line hidden
     
     #line 2 "..\..\Help\Views\Index.cshtml"
-    using Signum.Web.Extensions.Properties;
-    
+        
     #line default
     #line hidden
     
@@ -68,10 +73,11 @@ namespace Signum.Web.Extensions.Help.Views
 
 
 
+
             
-            #line 5 "..\..\Help\Views\Index.cshtml"
+            #line 6 "..\..\Help\Views\Index.cshtml"
     
-    ViewBag.Title = Resources.HelpDocumentation;
+    ViewBag.Title = HelpMessage.HelpDocumentation.NiceToString();
 
 
             
@@ -86,7 +92,7 @@ WriteLiteral("\r\n    ");
 
 
             
-            #line 11 "..\..\Help\Views\Index.cshtml"
+            #line 12 "..\..\Help\Views\Index.cshtml"
 Write(Html.ScriptCss("~/help/Content/help.css"));
 
             
@@ -101,8 +107,8 @@ WriteLiteral("\r\n<div id=\"entityContent\">\r\n    <h1>");
 
 
             
-            #line 14 "..\..\Help\Views\Index.cshtml"
-   Write(Resources.HelpDocumentation);
+            #line 15 "..\..\Help\Views\Index.cshtml"
+   Write(HelpMessage.HelpDocumentation.NiceToString());
 
             
             #line default
@@ -111,7 +117,7 @@ WriteLiteral("</h1>\r\n    <table>\r\n        <tr>\r\n");
 
 
             
-            #line 17 "..\..\Help\Views\Index.cshtml"
+            #line 18 "..\..\Help\Views\Index.cshtml"
              foreach (NamespaceModel item in ((NamespaceModel)Model).Namespaces)
             {
 
@@ -122,7 +128,7 @@ WriteLiteral("                <td>\r\n");
 
 
             
-            #line 20 "..\..\Help\Views\Index.cshtml"
+            #line 21 "..\..\Help\Views\Index.cshtml"
                        Html.RenderPartial(HelpClient.NamespaceControlUrl, item); 
 
             
@@ -132,7 +138,7 @@ WriteLiteral("                </td>\r\n");
 
 
             
-            #line 22 "..\..\Help\Views\Index.cshtml"
+            #line 23 "..\..\Help\Views\Index.cshtml"
             }
 
             
@@ -142,7 +148,7 @@ WriteLiteral("        </tr>\r\n    </table>\r\n");
 
 
             
-            #line 25 "..\..\Help\Views\Index.cshtml"
+            #line 26 "..\..\Help\Views\Index.cshtml"
      if (ViewData.TryGetC("appendices") != null)
     {
         List<AppendixHelp> appendices = (List<AppendixHelp>)ViewData["appendices"];
@@ -156,8 +162,8 @@ WriteLiteral("        <h2>");
 
 
             
-            #line 30 "..\..\Help\Views\Index.cshtml"
-       Write(Resources.Appendices);
+            #line 31 "..\..\Help\Views\Index.cshtml"
+       Write(HelpMessage.Appendices.NiceToString());
 
             
             #line default
@@ -170,7 +176,7 @@ WriteLiteral("        <ul>\r\n");
 
 
             
-            #line 32 "..\..\Help\Views\Index.cshtml"
+            #line 33 "..\..\Help\Views\Index.cshtml"
              foreach (var a in appendices)
             {
 
@@ -181,7 +187,7 @@ WriteLiteral("                <li>\r\n                    ");
 
 
             
-            #line 35 "..\..\Help\Views\Index.cshtml"
+            #line 36 "..\..\Help\Views\Index.cshtml"
                Write(Html.ActionLink(a.Title, "ViewAppendix", new { appendix = a.Name }));
 
             
@@ -191,7 +197,7 @@ WriteLiteral("\r\n                </li>\r\n");
 
 
             
-            #line 37 "..\..\Help\Views\Index.cshtml"
+            #line 38 "..\..\Help\Views\Index.cshtml"
             }
 
             
@@ -201,7 +207,7 @@ WriteLiteral("        </ul>\r\n");
 
 
             
-            #line 39 "..\..\Help\Views\Index.cshtml"
+            #line 40 "..\..\Help\Views\Index.cshtml"
         }
     }
 

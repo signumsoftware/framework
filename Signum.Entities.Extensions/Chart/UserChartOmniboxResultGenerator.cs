@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
-using Signum.Entities.Extensions.Properties;
 using System.Text.RegularExpressions;
 using Signum.Entities.Omnibox;
 
@@ -44,7 +43,7 @@ namespace Signum.Entities.Chart
             {
                 new HelpOmniboxResult 
                 { 
-                    Text = "'{0}'".Formato(Signum.Entities.Extensions.Properties.Resources.Omnibox_UserChart), 
+                    Text = "'{0}'".Formato(OmniboxMessage.Omnibox_UserChart.NiceToString()), 
                     OmniboxResultType = resultType 
                 }
             };

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Utilities;
+using System.ComponentModel;
 
 namespace Signum.Entities.Omnibox
 {
@@ -163,5 +164,37 @@ namespace Signum.Entities.Omnibox
 
             yield return Tuple.Create(Text.Substring(lastIndex, Text.Length - lastIndex), lastIsBool);
         }
+    }
+
+
+    public enum OmniboxMessage
+    {
+        [Description("no")]
+        No,
+        [Description("[Not found]")]
+        NotFound,
+        [Description("Searching between 'apostrophe' will make queries to the database")]
+        Omnibox_DatabaseAccess,
+        [Description("With [Tab] you disambiguate you query")]
+        Omnibox_Disambiguate,
+        [Description("Field")]
+        Omnibox_Field,
+        [Description("Help")]
+        Omnibox_Help,
+        [Description("You can match results by (st)art, mid(dle) or (U)pper(C)ase")]
+        Omnibox_MatchingOptions,
+        [Description("Query")]
+        Omnibox_Query,
+        [Description("Type")]
+        Omnibox_Type,
+        [Description("UserChart")]
+        Omnibox_UserChart,
+        [Description("UserQuery")]
+        Omnibox_UserQuery,
+        [Description("Value")]
+        Omnibox_Value,
+        Unknown,
+        [Description("yes")]
+        Yes
     }
 }

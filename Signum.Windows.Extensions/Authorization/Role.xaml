@@ -9,7 +9,7 @@
         <GroupBox Header="Sub-Roles">
             <m:EntityList m:Common.Route="Roles" Height="100"/>
         </GroupBox>
-        <m:CountSearchControl x:Name="ReferedBySc" QueryName="{x:Static d:RoleQueries.ReferedBy}">
+        <m:CountSearchControl x:Name="ReferedBySc" QueryName="{x:Static d:RoleQuery.RolesReferedBy}">
             <m:CountSearchControl.FilterOptions>
                 <m:FilterOption Path="Refered" Operation="EqualTo" Value="{Binding DataContext, ElementName=ReferedBySc}"  Frozen="True"/>
             </m:CountSearchControl.FilterOptions>

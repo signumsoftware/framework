@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Signum.Entities.Extensions;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities;
 using System.Windows;
@@ -11,10 +10,8 @@ using System.Windows.Controls;
 using System.IO;
 using Microsoft.Win32;
 using Signum.Entities.Reports;
-using Prop = Signum.Windows.Extensions.Properties;
 using Signum.Services;
 using Signum.Utilities;
-using Signum.Windows.Extensions.Properties;
 using Signum.Windows;
 using System.Windows.Data;
 using System.Windows.Media;

@@ -18,7 +18,6 @@ using Signum.Engine.Linq;
 using System.IO;
 using System.Xml;
 using System.Resources;
-using Signum.Engine.Extensions.Properties;
 using Signum.Utilities.Reflection;
 using System.Diagnostics;
 using Signum.Entities.DynamicQuery;

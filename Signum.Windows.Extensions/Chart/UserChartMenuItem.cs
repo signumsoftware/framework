@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Signum.Entities.Extensions;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities;
 using System.Windows;
@@ -10,7 +9,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Controls;
 using System.IO;
 using Microsoft.Win32;
-using Prop = Signum.Windows.Extensions.Properties;
 using Signum.Services;
 using System.Windows.Documents;
 using Signum.Utilities;
@@ -19,6 +17,7 @@ using Signum.Windows.Reports;
 using Signum.Entities.Authorization;
 using Signum.Windows.Authorization;
 using System.Windows.Data;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Windows.Chart
 {
@@ -64,7 +63,7 @@ namespace Signum.Windows.Chart
                 Inlines = 
                 { 
                     new Run(
-                    current == null ? Prop.Resources.MyCharts : current.DisplayName), 
+                    current == null ? ChartMessage.MyCharts.NiceToString() : current.DisplayName), 
                     UserCharts == null || UserCharts.Count==0 ? (Inline)new Run():  new Bold(new Run(" (" + UserCharts.Count + ")")) 
                 }
             };
@@ -113,21 +112,21 @@ namespace Signum.Windows.Chart
             {
                 Items.Add(new MenuItem()
                 {
-                    Header = Signum.Windows.Extensions.Properties.Resources.Create,
+                    Header = EntityControlMessage.Create.NiceToString(),
                     Icon = ExtensionsImageLoader.GetImageSortName("add.png").ToSmallImage()
                 }.Handle(MenuItem.ClickEvent, New_Clicked));
             }
 
             Items.Add(new MenuItem()
             {
-                Header = Signum.Windows.Extensions.Properties.Resources.Edit,
+                Header = UserQueryMessage.Edit.NiceToString(),
                 Icon = ExtensionsImageLoader.GetImageSortName("edit.png").ToSmallImage()
             }.Handle(MenuItem.ClickEvent, Edit_Clicked)
             .Bind(MenuItem.IsEnabledProperty, this, "CurrentUserChart", notNullAndEditable));
 
             Items.Add(new MenuItem()
             {
-                Header = Signum.Windows.Extensions.Properties.Resources.Remove,
+                Header = EntityControlMessage.Remove.NiceToString(),
                 Icon = ExtensionsImageLoader.GetImageSortName("remove.png").ToSmallImage()
             }.Handle(MenuItem.ClickEvent, Remove_Clicked)
             .Bind(MenuItem.IsEnabledProperty, this, "CurrentUserChart", notNullAndEditable));
@@ -197,7 +196,7 @@ namespace Signum.Windows.Chart
         {
             e.Handled = true;
 
-            if (MessageBox.Show(Window.GetWindow(this), Prop.Resources.AreYouSureToRemove0.Formato(CurrentUserChart), Prop.Resources.RemoveUserQuery,
+            if (MessageBox.Show(Window.GetWindow(this), UserQueryMessage.AreYouSureToRemove0.NiceToString().Formato(CurrentUserChart), UserQueryMessage.RemoveUserQuery.NiceToString(),
                 MessageBoxButton.YesNo, MessageBoxImage.Exclamation, MessageBoxResult.No) == MessageBoxResult.Yes)
             {
                 Server.Execute((IChartServer s) => s.RemoveUserChart(CurrentUserChart.ToLite()));

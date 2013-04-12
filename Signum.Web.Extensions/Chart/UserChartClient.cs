@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -9,7 +9,6 @@ using Signum.Engine.Basics;
 using Signum.Entities.Chart;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.UserQueries;
-using Signum.Web.Extensions.Properties;
 using Signum.Entities;
 using Signum.Web.Reports;
 using Signum.Entities.Authorization;
@@ -114,7 +113,7 @@ namespace Signum.Web.Chart
 
             if (Navigator.IsCreable(typeof(UserChartDN), isSearchEntity: true))
             {
-                string uqNewText = Resources.UserChart_CreateNew;
+                string uqNewText = ChartMessage.UserChart_CreateNew.NiceToString();
                 items.Add(new ToolBarButton
                 {
                     Id = TypeContextUtilities.Compose(prefix, "qbUserChartNew"),
@@ -127,7 +126,7 @@ namespace Signum.Web.Chart
             
             if (currentUserChart != null && currentUserChart.IsAllowedFor(TypeAllowedBasic.Modify, inUserInterface: true))
             {
-                string ucEditText = Resources.UserChart_Edit;
+                string ucEditText = ChartMessage.UserChart_Edit.NiceToString();
                 items.Add(new ToolBarButton
                 {
                     Id = TypeContextUtilities.Compose(prefix, "qbUserChartEdit"),
@@ -138,7 +137,7 @@ namespace Signum.Web.Chart
                 });
             }
 
-            string ucUserChartText = Resources.UserChart_UserCharts;
+            string ucUserChartText = ChartMessage.UserChart_UserCharts.NiceToString();
             var buttons = new List<ToolBarButton> 
             {
                 new ToolBarMenu
@@ -153,7 +152,7 @@ namespace Signum.Web.Chart
 
             if (ReportsClient.ToExcelPlain)
             {
-                string ucExportDataText = Resources.UserChart_ExportData;
+                string ucExportDataText = ChartMessage.UserChart_ExportData.NiceToString();
                 buttons.Add(new ToolBarButton
                 {
                     Id = TypeContextUtilities.Compose(prefix, "qbUserChartExportData"),
