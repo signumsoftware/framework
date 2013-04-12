@@ -129,5 +129,29 @@ namespace Signum.Windows.UIAutomation
 
             return new MessageBoxProxy(win);
         }
+
+        public static MessageBoxProxy WaitMessageBox(this AutomationElement element, Action action, Func<string> actionDescription = null, int? timeOut = null)
+        {
+            if (actionDescription == null)
+                actionDescription = () => "Get Windows after";
+
+            var previous = WaitExtensions.GetAllProcessWindows(element).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
+
+            action();
+
+            AutomationElement newWindow = null;
+
+            element.Wait(() =>
+            {
+                newWindow = WaitExtensions.GetAllProcessWindows(element).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
+
+                if (newWindow != null)
+                    MessageBoxProxy.AssertNoErrorWindow(newWindow);
+
+                return false;
+            }, actionDescription, timeOut);
+
+            return new MessageBoxProxy(newWindow);
+        }
     }
 }

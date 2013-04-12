@@ -61,7 +61,18 @@ namespace Signum.Windows.UIAutomation
             var entityId = EntityId;
             ButtonBar.OkButton.ButtonInvoke();
             Element.Wait(
-                () => IsClosed,
+                () => 
+                {
+                    var childWindows = Element.TryChild(a => a.Current.ControlType == ControlType.Window);
+
+                    if (childWindows != null)
+                    {
+                        MessageBoxProxy.AssertNoErrorWindow(childWindows);
+                        throw new InvalidOperationException("A window was open after pressing Ok on {0}. Consider using OkCapture".Formato(entityId));
+                    }
+
+                    return IsClosed;
+                },
                 actionDescription: () => "Waiting to close window after OK {0}".Formato(entityId));
         }
 
