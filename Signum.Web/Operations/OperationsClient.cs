@@ -381,8 +381,8 @@ namespace Signum.Web.Operations
                      Prefix = ctx.Prefix
                  }
                  where os == null ? oi.Lite == true :
-                       os.Contextual == null ? (oi.Lite == true && os.OnClick == null && os.IsVisible == null) :
-                       (os.Contextual.IsVisible == null || os.Contextual.IsVisible(coc))
+                       os.Contextual.IsVisible == null ? (oi.Lite == true && os.IsVisible == null && (os.OnClick == null || os.Contextual.OnClick != null)) :
+                       os.Contextual.IsVisible(coc)
                  select coc).ToList();
 
             if (context.IsEmpty())
