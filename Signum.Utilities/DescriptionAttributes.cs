@@ -106,19 +106,7 @@ namespace Signum.Utilities
         public static event Func<Type, DescriptionOptions?> DefaultDescriptionOptions = t => t.Name.EndsWith("Message") ? DescriptionOptions.Members : (DescriptionOptions?)null;
         public static event Func<MemberInfo, bool> ShouldLocalizeMemeber = m => true;
 
-        public static string NiceName(this Type type)
-        {
-            type = CleanType(type);
-
-            var result = Fallback(type, lt => lt.Description);
-
-            if (result == null)
-                throw new InvalidOperationException("Description not found on {0}".Formato(type.Name));
-
-            return result;
-        }
-
-        static string Fallback(Type type,  Func<LocalizedType, string> typeValue)
+        static string Fallback(Type type, Func<LocalizedType, string> typeValue)
         {
             var cc = CultureInfo.CurrentUICulture;
             {
@@ -142,16 +130,33 @@ namespace Signum.Utilities
                 }
             }
 
-            var global = CultureInfo.GetCultureInfo(LocalizedAssembly.GetDefaultAssemblyCulture(type.Assembly));
+            var defaultCulture = LocalizedAssembly.GetDefaultAssemblyCulture(type.Assembly);
+            if (defaultCulture != null)
             {
-                var loc = GetLocalizedType(type, global);
+                var loc = GetLocalizedType(type, CultureInfo.GetCultureInfo(defaultCulture));
                 if (loc == null)
                     throw new InvalidOperationException("Type {0} is not localizable".Formato(type.TypeName()));
 
                 return typeValue(loc);
             }
+
+            return null;
         }
 
+
+        public static string NiceName(this Type type)
+        {
+            type = CleanType(type);
+
+            var result = Fallback(type, lt => lt.Description);
+
+            if (result != null)
+                return result;
+
+            return DefaultTypeDescription(type);
+        }
+
+     
         public static string NicePluralName(this Type type)
         {
             type = CleanType(type);
@@ -161,14 +166,15 @@ namespace Signum.Utilities
             if (result == null)
                 throw new InvalidOperationException("PluralDescription not found on {0}".Formato(type.Name));
 
-            return result;
+            return type.SingleAttribute<PluralDescriptionAttribute>().TryCC(a => a.PluralDescription) ??
+                NaturalLanguageTools.Pluralize(DefaultTypeDescription(type)); 
         }
 
         public static string NiceToString(this Enum a)
         {
             var fi = EnumFieldCache.Get(a.GetType()).TryGetC(a);
             if (fi != null)
-                return GetMemberNiceName(fi);
+                return GetMemberNiceName(fi) ?? DefaultMemberDescription(fi);
 
             return a.ToString().NiceName();
         }
@@ -176,7 +182,7 @@ namespace Signum.Utilities
         public static string NiceName(this PropertyInfo pi)
         {
             return GetMemberNiceName(pi) ??
-                (pi.IsDefaultName() ? pi.PropertyType.NiceName() : pi.Name.NiceName());
+                (pi.IsDefaultName() ? pi.PropertyType.NiceName() : DefaultMemberDescription(pi));
         }
 
         public static bool IsDefaultName(this PropertyInfo pi)
@@ -186,16 +192,20 @@ namespace Signum.Utilities
 
         static string GetMemberNiceName(MemberInfo memberInfo)
         {
-            if (memberInfo.DeclaringType == typeof(DayOfWeek))
-            {
-                return CultureInfo.CurrentCulture.DateTimeFormat.DayNames[(int)((FieldInfo)memberInfo).GetValue(null)];
-            }
-
             var cc = CultureInfo.CurrentUICulture;
-
             var type = memberInfo.DeclaringType;
 
+            if (LocalizedAssembly.GetDefaultAssemblyCulture(type.Assembly) == null)
+            {
+                if (type == typeof(DayOfWeek))
+                    return CultureInfo.CurrentCulture.DateTimeFormat.DayNames[(int)((FieldInfo)memberInfo).GetValue(null)];
+
+                return memberInfo.SingleAttribute<DescriptionAttribute>().TryCC(a => a.Description) ?? memberInfo.Name.NiceName();
+            }
+       
             var result = Fallback(type, lt => lt.Members.TryGetC(memberInfo.Name));
+            if (result != null)
+                return result;
 
             return result;
         }
@@ -206,8 +216,22 @@ namespace Signum.Utilities
 
             var cc = CultureInfo.CurrentUICulture;
 
-            return GetLocalizedType(type, cc).TryCS(lt => lt.Gender) ??
-                (cc.Parent.Name.HasText() ? GetLocalizedType(type, cc.Parent).TryCS(lt => lt.Gender) : null);
+            if(LocalizedAssembly.GetDefaultAssemblyCulture(type.Assembly) == null)
+                return type.SingleAttribute<GenderAttribute>().TryCS(a => a.Gender) ??
+                    NaturalLanguageTools.GetGender(type.NiceName());
+
+            var lt = GetLocalizedType(type, cc);
+            if (lt != null && lt.Gender != null)
+                return lt.Gender;
+
+            if (cc.Parent.Name.HasText())
+            {
+                lt = GetLocalizedType(type, cc.Parent);
+                if (lt != null)
+                    return lt.Gender;
+            }
+
+            return null;
         }
 
         static ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Assembly, LocalizedAssembly>> localizations = 
@@ -272,6 +296,16 @@ namespace Signum.Utilities
         {
             localizations.Clear();
         }
+
+        internal static string DefaultTypeDescription(Type type)
+        {
+            return type.SingleAttribute<DescriptionAttribute>().TryCC(t => t.Description) ?? DescriptionManager.CleanTypeName(type).SpacePascal();
+        }
+
+        internal static string DefaultMemberDescription(MemberInfo m)
+        {
+            return m.SingleAttribute<DescriptionAttribute>().TryCC(t => t.Description) ?? m.Name.NiceName();
+        }
     }
 
 
@@ -308,7 +342,7 @@ namespace Signum.Utilities
             var defaultLoc = assembly.SingleAttribute<DefaultAssemblyCultureAttribute>();
 
             if (defaultLoc == null)
-                throw new InvalidOperationException("Assembly {0} does not have {1}".Formato(assembly.GetName().Name, typeof(DefaultAssemblyCultureAttribute).Name));
+                return null;
 
             return defaultLoc.DefaultCulture;
         }
@@ -332,7 +366,12 @@ namespace Signum.Utilities
 
         public static LocalizedAssembly ImportXml(Assembly assembly, CultureInfo cultureInfo)
         {
-            bool isDefault = cultureInfo.Name == GetDefaultAssemblyCulture(assembly);
+            var defaultCulture = GetDefaultAssemblyCulture(assembly);
+
+            if(defaultCulture == null)
+                return null;
+
+            bool isDefault = cultureInfo.Name == defaultCulture;
 
             string fileName = TranslationFileName(assembly, cultureInfo);
 
@@ -426,7 +465,7 @@ namespace Signum.Utilities
         {
             string name = !opts.IsSetAssert(DescriptionOptions.Description, type) ? null :
                 (x == null ? null : x.Attribute("Description").TryCC(xa => xa.Value)) ??
-                (!assembly.IsDefault ? null : DefaultTypeDescription(type));
+                (!assembly.IsDefault ? null : DescriptionManager.DefaultTypeDescription(type));
 
             var xMembers = x == null ? null : x.Elements("Member")
                 .Select(m => KVP.Create(m.Attribute("Name").Value, m.Attribute("Description").Value))
@@ -453,23 +492,13 @@ namespace Signum.Utilities
                 Members = !opts.IsSetAssert(DescriptionOptions.Members, type) ? null :
                           (from m in GetMembers(type)
                            where DescriptionManager.OnShouldLocalizeMember(m)
-                           let value = xMembers.TryGetC(m.Name) ?? (!assembly.IsDefault ? null : DefaultMemberDescription(m))
+                           let value = xMembers.TryGetC(m.Name) ?? (!assembly.IsDefault ? null : DescriptionManager.DefaultMemberDescription(m))
                            where value != null
                            select KVP.Create(m.Name, value))
                            .ToDictionary()
             };
 
             return result;
-        }
-
-        static string DefaultTypeDescription(Type type)
-        {
-            return type.SingleAttribute<DescriptionAttribute>().TryCC(t => t.Description) ?? DescriptionManager.CleanTypeName(type).SpacePascal();
-        }
-
-        static string DefaultMemberDescription(MemberInfo m)
-        {
-            return (m.SingleAttribute<DescriptionAttribute>().TryCC(t => t.Description) ?? m.Name.NiceName());
         }
 
         public override string ToString()
