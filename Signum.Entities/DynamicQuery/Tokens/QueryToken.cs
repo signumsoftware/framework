@@ -319,25 +319,13 @@ namespace Signum.Entities.DynamicQuery
                     var imp = implementations.Value;
 
                     if (imp.IsByAll)
-                        return Combine(cleanType, QueryTokenMessage.AnyEntity.NiceToString());
-                            
+                        return QueryTokenMessage.AnyEntity.NiceToString();
 
-                    if (imp.Types.Only() == type.CleanType())
-                        return cleanType.NiceName();
-
-                    return Combine(cleanType, imp.Types.CommaOr(t => t.NiceName()));
+                    return imp.Types.CommaOr(t => t.NiceName());
                 }
                 case FilterType.Embedded: return QueryTokenMessage.Embedded0.NiceToString().Formato(type.NiceName());
                 default: return type.TypeName();
             }
-        }
-
-        private static string Combine(Type cleanType, string implementations)
-        {
-            if(cleanType == typeof(IIdentifiable) || cleanType == typeof(IdentifiableEntity))
-                return implementations;
-
-            return "{0} ({1})".Formato(cleanType.NiceName(), implementations);
         }
     }
 
