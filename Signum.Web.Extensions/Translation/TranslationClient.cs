@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Web;
@@ -17,7 +18,9 @@ namespace Signum.Web.Translation
 
         public static ITranslator Translator; 
 
-        public static void Start(ITranslator translator)
+
+        /// <param name="copyTranslationsToRootFolder">avoids Web Application restart when translations change</param>
+        public static void Start(ITranslator translator, bool copyNewTranslationsToRootFolder = true)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -34,6 +37,28 @@ namespace Signum.Web.Translation
                 SpecialOmniboxProvider.Register(new SpecialOmniboxAction("Translation",
                     () => TranslationPermission.TranslateCode.IsAuthorized(),
                     uh => uh.Action((TranslationController tc) => tc.Index())));
+
+                if (copyNewTranslationsToRootFolder)
+                {
+                    string path = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(new Uri(typeof(DescriptionManager).Assembly.CodeBase).LocalPath)), "Translations");
+
+                    if (!Directory.Exists(path))
+                        Directory.CreateDirectory(path);
+
+                    var existingFiles = Directory.GetFiles(path).ToHashSet();
+
+                    foreach (string fromFile in Directory.GetFiles(DescriptionManager.TranslationDirectory))
+                    {
+                        string toFile = Path.Combine(path, Path.GetFileName(fromFile));
+
+                        if (!existingFiles.Contains(toFile) || File.GetLastWriteTime(toFile) < File.GetLastWriteTime(fromFile))
+                        {
+                            File.Copy(fromFile, toFile, overwrite: true);
+                        }
+                    }
+
+                    DescriptionManager.TranslationDirectory = path;
+                }
             }
         }
     }

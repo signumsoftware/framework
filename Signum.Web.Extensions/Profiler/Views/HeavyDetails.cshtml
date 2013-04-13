@@ -90,10 +90,10 @@ else
                 "~/Profiler/Scripts/SF_Profiler.js")
 @{ 
     var fullTree = Model.FollowC(e => e.Parent).ToList();
-    fullTree.AddRange(Model.DescendantsAndSelf()); 
+    fullTree.AddRange(Model.Descendants()); 
 }
 <script type="text/javascript">
     $(function() {
-        SF.Profiler.heavyDetailsChart(@Html.Raw(fullTree.Distinct().HeavyDetailsToJson()), @Model.Depth);
+        SF.Profiler.heavyDetailsChart(@Html.Raw(fullTree.HeavyDetailsToJson()), @Model.Depth);
     });
 </script>

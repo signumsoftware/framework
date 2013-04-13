@@ -83,13 +83,26 @@ namespace Signum.Web.Translation
 
     //public class BingTranslator : ITranslator
     //{
-
     //    public List<string> TranslateBatch(List<string> list, string from, string to)
     //    {
-    //        LanguageServiceClient cliente = new LanguageServiceClient();
-    //        TranslateArrayResponse[] result = cliente.TranslateArray(YourAppId, list.ToArray(), from, to, new TranslateOptions());
+    //        string token = AdmAuthentication.GetAccessToken( "ClientId", "Secret"); //find one in https://datamarket.azure.com/developer/applications/register
+    //        LanguageServiceClient client = new LanguageServiceClient();
+    //        using (OperationContextScope scope = new OperationContextScope(client.InnerChannel))
+    //        {
+    //            System.ServiceModel.OperationContext.Current.OutgoingMessageProperties[HttpRequestMessageProperty.Name] = new HttpRequestMessageProperty
+    //            {
+    //                Method = "POST",
+    //                Headers = { { "Authorization", "Bearer " + token } }
+    //            };
 
-    //        return result.Select(a => a.TranslatedText).ToList();
+    //            return list.GroupsOf(50).SelectMany(gr =>
+    //            {
+    //                TranslateArrayResponse[] result = client.TranslateArray("", gr.ToArray(), from, to, new TranslateOptions());
+
+    //                return result.Select(a => a.TranslatedText).ToList();
+
+    //            }).ToList();
+    //        }
     //    }
     //}
 

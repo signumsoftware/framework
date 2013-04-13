@@ -315,7 +315,7 @@ WriteLiteral("\r\n");
             #line 91 "..\..\Profiler\Views\HeavyDetails.cshtml"
    
     var fullTree = Model.FollowC(e => e.Parent).ToList();
-    fullTree.AddRange(Model.DescendantsAndSelf()); 
+    fullTree.AddRange(Model.Descendants()); 
 
 
             
@@ -327,7 +327,7 @@ WriteLiteral("<script type=\"text/javascript\">\r\n    $(function() {\r\n       
 
             
             #line 97 "..\..\Profiler\Views\HeavyDetails.cshtml"
-                                 Write(Html.Raw(fullTree.Distinct().HeavyDetailsToJson()));
+                                 Write(Html.Raw(fullTree.HeavyDetailsToJson()));
 
             
             #line default
@@ -337,7 +337,7 @@ WriteLiteral(", ");
 
             
             #line 97 "..\..\Profiler\Views\HeavyDetails.cshtml"
-                                                                                      Write(Model.Depth);
+                                                                           Write(Model.Depth);
 
             
             #line default
