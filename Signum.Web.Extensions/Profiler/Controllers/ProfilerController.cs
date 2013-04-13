@@ -32,7 +32,9 @@ namespace Signum.Web.Profiler
 
             ViewBag.OrderByTime = orderByTime;
 
-            var entries = orderByTime ? HeavyProfiler.Entries.OrderBy(a=>a.BeforeStart).ToList() : HeavyProfiler.Entries;
+            List<HeavyProfilerEntry> entries;
+            lock (HeavyProfiler.Entries)
+                entries = orderByTime ? HeavyProfiler.Entries.OrderBy(a => a.BeforeStart).ToList() : HeavyProfiler.Entries.ToList();
 
             return View(ProfilerClient.ViewPrefix.Formato("HeavyList"), entries);
         }
