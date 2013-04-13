@@ -163,8 +163,8 @@ namespace Signum.Utilities
 
             var result = Fallback(type, lt => lt.PluralDescription);
 
-            if (result == null)
-                throw new InvalidOperationException("PluralDescription not found on {0}".Formato(type.Name));
+            if (result != null)
+                return result;
 
             return type.SingleAttribute<PluralDescriptionAttribute>().TryCC(a => a.PluralDescription) ??
                 NaturalLanguageTools.Pluralize(DefaultTypeDescription(type)); 
