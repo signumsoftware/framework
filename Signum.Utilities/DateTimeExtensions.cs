@@ -386,6 +386,7 @@ namespace Signum.Utilities
         }
     }
 
+    [DescriptionOptions(DescriptionOptions.Members)]
     public enum DateTimePrecision
     {
         Days,
