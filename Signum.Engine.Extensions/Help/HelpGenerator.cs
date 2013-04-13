@@ -88,7 +88,7 @@ namespace Signum.Engine.Help
                     HelpMessage.OfThe0.NiceToString().ForGenderAndNumber(pr.Parent.Type.GetGender()).Formato(pr.Parent.Type.NiceName());
             else
                 return
-                    HelpMessage._0IsA1.NiceToString().Formato(propertyType.GetGender()).Formato(pr.PropertyInfo.NiceName(), typeName);
+                    HelpMessage._0IsA1.NiceToString().ForGenderAndNumber(propertyType.GetGender()).Formato(pr.PropertyInfo.NiceName(), typeName);
         }
 
         static string ValueType(PropertyRoute pr)
