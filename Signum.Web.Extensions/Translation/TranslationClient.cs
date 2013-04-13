@@ -40,7 +40,7 @@ namespace Signum.Web.Translation
 
                 if (copyNewTranslationsToRootFolder)
                 {
-                    string path = HttpContext.Current.Server.MapPath("/Translations");
+                    string path = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(new Uri(typeof(DescriptionManager).Assembly.CodeBase).LocalPath)), "Translations");
 
                     if (!Directory.Exists(path))
                         Directory.CreateDirectory(path);
