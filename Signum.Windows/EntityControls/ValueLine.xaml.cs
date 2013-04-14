@@ -264,7 +264,7 @@ namespace Signum.Windows
             {ValueLineType.Enum, vl =>new ComboBox()
             { 
                 ItemsSource = vl.ItemSource ??  EnumExtensions.UntypedGetValues(vl.Type.UnNullify()).PreAndNull(vl.Type.IsNullable()).ToObservableCollection(),
-                ItemTemplate = LocalizedAssembly.GetDescriptionOptions(vl.Type.UnNullify()).IsSet(DescriptionOptions.Members) ? comboEnumDescriptionTemplate : null, 
+                ItemTemplate = comboEnumDescriptionTemplate, 
                 VerticalContentAlignment = VerticalAlignment.Center
             }},
             {ValueLineType.Boolean, vl =>new CheckBox(){ VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Left}},

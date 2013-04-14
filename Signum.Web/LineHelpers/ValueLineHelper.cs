@@ -103,30 +103,14 @@ namespace Signum.Web
                     items.Add(new SelectListItem() { Text = "-", Value = "" });
                 }
 
-
-                if (LocalizedAssembly.GetDescriptionOptions(uType).IsSet(DescriptionOptions.Members))
-                {
-                    items.AddRange(Enum.GetValues(uType)
-                        .Cast<Enum>()
-                        .Select(v => new SelectListItem()
-                        {
-                            Text = v.NiceToString(),
-                            Value = v.ToString(),
-                            Selected = object.Equals(value, v),
-                        }));
-
-                }
-                else
-                {
-                    items.AddRange(Enum.GetValues(uType)
-                        .Cast<Enum>()
-                        .Select(v => new SelectListItem()
-                        {
-                            Text = v.ToString(),
-                            Value = v.ToString(),
-                            Selected = object.Equals(value, v),
-                        }));
-                }
+                items.AddRange(Enum.GetValues(uType)
+                    .Cast<Enum>()
+                    .Select(v => new SelectListItem()
+                    {
+                        Text = v.NiceToString(),
+                        Value = v.ToString(),
+                        Selected = object.Equals(value, v),
+                    }));
             }
             else
                 if (value != null)
