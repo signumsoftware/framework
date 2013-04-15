@@ -125,6 +125,7 @@ namespace Signum.Entities.Authorization
         }
     }
 
+    [DescriptionOptions(DescriptionOptions.Members)]
     public enum OperationAllowed
     {
         None = 0, 
@@ -132,6 +133,7 @@ namespace Signum.Entities.Authorization
         Allow = 2,
     }
 
+    [DescriptionOptions(DescriptionOptions.Members)]
     public enum PropertyAllowed
     {
         None,
@@ -139,7 +141,7 @@ namespace Signum.Entities.Authorization
         Modify,
     }
 
-    [DescriptionOptions(DescriptionOptions.None)]
+    [DescriptionOptions(DescriptionOptions.Members)]
     public enum TypeAllowed
     {
         None =             TypeAllowedBasic.None << 2 | TypeAllowedBasic.None,
