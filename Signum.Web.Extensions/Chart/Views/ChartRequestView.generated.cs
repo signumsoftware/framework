@@ -225,7 +225,7 @@ WriteLiteral("\r\n                    ");
                             Model.Compose("btnAddFilter"),
                             SearchMessage.FilterBuilder_AddFilter.NiceToString(),
                             "",
-                            JavascriptMessage.Signum_selectToken.NiceToString(),
+                            JavascriptMessage.selectToken.NiceToString(),
                             "sf-query-button sf-add-filter sf-disabled",
                             new Dictionary<string, object> 
                             { 
