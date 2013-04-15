@@ -105,7 +105,6 @@ namespace Signum.Entities
 
     }
 
-    [DescriptionOptions(DescriptionOptions.None)]
     public interface IIdentifiable : INotifyPropertyChanged, IDataErrorInfo, IRootEntity
     {
         int Id { get; }
