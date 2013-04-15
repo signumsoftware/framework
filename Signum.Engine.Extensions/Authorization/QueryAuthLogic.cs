@@ -12,7 +12,6 @@ using Signum.Utilities.DataStructures;
 using System.Threading;
 using Signum.Entities;
 using System.Reflection;
-using Signum.Engine.Extensions.Properties;
 using Signum.Entities.DynamicQuery;
 
 namespace Signum.Engine.Authorization

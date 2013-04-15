@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -169,7 +169,7 @@ namespace Signum.Windows.Files
                 DefaultViewFile(file, OnResolveBinaryFile);
             }
             else
-                throw new InvalidOperationException(Signum.Windows.Extensions.Properties.Resources.ViewingHasNotDefaultImplementationFor0
+                throw new InvalidOperationException(FileMessage.ViewingHasNotDefaultImplementationFor0.NiceToString()
                     .Formato(Type));
         }
 
@@ -202,7 +202,7 @@ namespace Signum.Windows.Files
                     File.WriteAllBytes(sfd.FileName, file.BinaryFile ?? OnResolveBinaryFile(file));
             }
             else
-                throw new NotSupportedException(Signum.Windows.Extensions.Properties.Resources.SavingHasNotDefaultImplementationFor0.Formato(Type));
+                throw new NotSupportedException(FileMessage.SavingHasNotDefaultImplementationFor0.NiceToString().Formato(Type)); 
         }
 
 
@@ -235,7 +235,7 @@ namespace Signum.Windows.Files
                 return null;
             }
 
-            throw new NotSupportedException(Signum.Windows.Extensions.Properties.Resources.OpeningHasNotDefaultImplementationFor0.Formato(Type));
+            throw new NotSupportedException(FileMessage.OpeningHasNotDefaultImplementationFor0.NiceToString().Formato(Type)); 
         }
 
         object CreateFile(string fileName)
@@ -325,14 +325,14 @@ namespace Signum.Windows.Files
                     return;
 
                 if (files.Length != 1)
-                    throw new ApplicationException(Signum.Windows.Extensions.Properties.Resources.OnlyOneFileSupported);
+                    throw new ApplicationException(FileMessage.OnlyOneFileIsSupported.NiceToString());
             }
             else if (e.CanHandleOutlookAttachment())
             {
                 var tuples = e.DropOutlookAttachment();
 
                 if (tuples.Count != 1)
-                    throw new ApplicationException(Signum.Windows.Extensions.Properties.Resources.OnlyOneFileSupported);
+                    throw new ApplicationException(FileMessage.OnlyOneFileIsSupported.NiceToString());
 
                 var tuple = tuples.SingleEx();
 

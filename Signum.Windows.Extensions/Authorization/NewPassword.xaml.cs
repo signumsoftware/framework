@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,6 +16,7 @@ using Signum.Windows;
 
 using Signum.Entities.Authorization;
 using Signum.Entities;
+using Signum.Utilities;
 
 namespace Signum.Windows.Authorization
 {
@@ -39,7 +40,7 @@ namespace Signum.Windows.Authorization
         {
             if (pb1.Password != pb2.Password)
             {
-                MessageBox.Show(this, Signum.Windows.Extensions.Properties.Resources.PasswordsDoNotMatch, MessageBoxImage.Error.ToString(), MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(this, AuthMessage.PasswordsDoNotMatch.NiceToString(), MessageBoxImage.Error.ToString(), MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,7 +14,6 @@ using Signum.Entities.DynamicQuery;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Reports;
 using Signum.Engine;
-using Signum.Web.Extensions.Properties;
 using Signum.Engine.Basics;
 using Signum.Entities.UserQueries;
 using Signum.Engine.UserQueries;
@@ -135,7 +134,7 @@ namespace Signum.Web.UserQueries
 
             if (Navigator.IsCreable(typeof(UserQueryDN), isSearchEntity:true))
             {
-                string uqNewText = Resources.UserQueries_CreateNew;
+                string uqNewText = UserQueryMessage.UserQueries_CreateNew.NiceToString();
                 items.Add(new ToolBarButton
                 {
                     Id = TypeContextUtilities.Compose(ctx.Prefix, "qbUserQueryNew"),
@@ -148,7 +147,7 @@ namespace Signum.Web.UserQueries
 
             if (currentUserQuery != null && currentUserQuery.IsAllowedFor(TypeAllowedBasic.Modify, inUserInterface: true))
             {
-                string uqEditText = Resources.UserQueries_Edit;
+                string uqEditText = UserQueryMessage.UserQueries_Edit.NiceToString();
                 items.Add(new ToolBarButton
                 {
                     Id = TypeContextUtilities.Compose(ctx.Prefix, "qbUserQueryEdit"),
@@ -159,7 +158,7 @@ namespace Signum.Web.UserQueries
                 });
             }
 
-            string uqUserQueriesText = Resources.UserQueries_UserQueries;
+            string uqUserQueriesText = UserQueryMessage.UserQueries_UserQueries.NiceToString();
             return new ToolBarButton[]
             {
                 new ToolBarMenu

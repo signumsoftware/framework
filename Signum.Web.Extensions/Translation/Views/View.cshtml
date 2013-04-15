@@ -1,0 +1,140 @@
+﻿@model Dictionary<CultureInfo, LocalizedAssembly>
+@using System.Globalization
+@using System.Reflection
+@using Signum.Utilities
+@using Signum.Web.Translation.Controllers
+@{
+    CultureInfo culture = ViewBag.Culture;
+    CultureInfo defaultCulture = ViewBag.DefaultCulture;
+    Assembly assembly = ViewBag.Assembly;
+
+    ViewBag.Title = "View {0} in {1}".Formato(assembly.GetName().Name, culture == null ? "all languages" : culture.DisplayName);
+
+
+    Func<CultureInfo, bool> editCulture = c => culture == null || culture.Name == c.Name;
+
+    Func<LocalizedType, string> locKey = lt => lt.Type.Name + "." + lt.Assembly.Culture.Name;
+    
+    var defaultLocAssembly = Model.GetOrThrow(defaultCulture);
+}
+@Html.DynamicCss("~/Translation/Content/Translation.css")
+@Html.ScriptsJs("~/Translation/Content/Translation.js")
+
+@using (Html.BeginForm())
+{
+    <table id="results" style="width: 100%; margin: 0px" class="st" pluralAndGender="@Url.Action((TranslationController tc)=>tc.PluralAndGender())">
+        @foreach (var defaultLocType in defaultLocAssembly.Types.Values)
+        {
+            bool hasDescription = defaultLocType.Options.IsSet(DescriptionOptions.Description);
+
+            bool hasPlural = defaultLocType.Options.IsSet(DescriptionOptions.PluralDescription);
+
+            bool hasGenderOption = defaultLocType.Options.IsSet(DescriptionOptions.Gender);
+
+            bool hasMembers = defaultLocType.Options.IsSet(DescriptionOptions.Members);  
+                  
+            <thead>
+                <tr>
+                    <th class="leftCell">Type</th>
+                    <th colspan="4" class="titleCell">@defaultLocType.Type.Name (@("/".Combine(hasDescription ? "Singular" : null, hasPlural ? "Plural" : null, hasGenderOption ? "Gender" : null, hasMembers ? "Members" : null)))</th>
+                </tr>
+            </thead>
+            
+            if (defaultLocType.Options.IsSet(DescriptionOptions.Description))
+            {
+                foreach (var locType in Model.Values.Select(la => la.Types[defaultLocType.Type]).Where(lt=>editCulture(lt.Assembly.Culture) || lt.Description.HasText()))
+                {
+                    bool hasGender = hasGenderOption && NaturalLanguageTools.HasGenders(locType.Assembly.Culture);
+
+            <tr>
+                <th class="leftCell">@locType.Assembly.Culture.Name</th>
+                <th class="smallCell monospaceCell">
+                    @if (hasGender)
+                    {
+                        if (editCulture(locType.Assembly.Culture))
+                        {
+                            var gd = NaturalLanguageTools.GenderDetectors.TryGetC(locType.Assembly.Culture.TwoLetterISOLanguageName); 
+                             
+                            var list = gd.TryCC(a => a.Pronoms).EmptyIfNull()
+                             .Select(pi => new SelectListItem { Value = pi.Gender.ToString(), Text = pi.Singular, Selected = pi.Gender == locType.Gender }).ToList();
+                            
+                            if(locType.Gender == null)
+                            {
+                                list.Insert(0, new SelectListItem{ Value = "", Text = "-", Selected = true});
+                            }
+                        @Html.DropDownList(locKey(locType) + ".Gender", list);
+                        }
+                        else
+                        {
+                        @(locType.Gender != null ? NaturalLanguageTools.GetPronom(locType.Gender.Value, plural: false, culture: locType.Assembly.Culture) : "-")
+                        }
+                    }
+                </th>
+                <th class="monospaceCell">
+                    @if (editCulture(locType.Assembly.Culture))
+                    {
+                        @Html.TextArea(locKey(locType) + ".Description", locType.Description, new { style = "width:90%;height:16px" })
+                    }
+                    else
+                    {
+                        @locType.Description   
+                    }
+                </th>
+                <th class="smallCell">
+                    @if (hasPlural && hasGender)
+                    {
+                        @(locType.Gender != null ? NaturalLanguageTools.GetPronom(locType.Gender.Value, plural: true, culture: locType.Assembly.Culture) : "-")
+                    }
+                </th>
+                <th class="monospaceCell">
+                    @if (hasPlural)
+                    {
+                        if (editCulture(locType.Assembly.Culture))
+                        {
+                        @Html.TextArea(locKey(locType) + ".PluralDescription", locType.PluralDescription, new { style = "width:90%;height:16px" })   
+                        }
+                        else
+                        {    
+                        @locType.PluralDescription
+                        }
+                    }
+                </th>
+            </tr>
+                }
+            }
+
+
+            if (defaultLocType.Options.IsSet(DescriptionOptions.Members))
+            {
+                foreach (string key in defaultLocType.Members.Keys)
+                {
+            <tr>
+                <th class="leftCell">Member
+                </th>
+                <th colspan="4">@(key)
+                </th>
+            </tr>
+            
+                    foreach (var locType in Model.Values.Select(la => la.Types[defaultLocType.Type]).Where(lt => editCulture(lt.Assembly.Culture) || lt.Members.ContainsKey(key)))
+                    {
+            <tr>
+                <td class="leftCell">@locType.Assembly.Culture.Name</td>
+                <td colspan="4" class="monospaceCell">
+
+                    @if (editCulture(locType.Assembly.Culture))
+                    {
+                        @Html.TextArea(locKey(locType) + ".Member." + key, locType.Members.TryGetC(key), new { style = "width:90%;height:16px" })
+                    }
+                    else
+                    {
+                        @locType.Members.TryGetC(key)
+                    }
+                </td>
+            </tr>
+                    }
+                }
+            }
+        }
+    </table>
+    <input type="submit" value="Save" />
+}

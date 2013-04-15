@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Reflection;
 using Signum.Web;
-using Signum.Web.Extensions.Properties;
 using Signum.Entities.Chart;
 using Signum.Utilities;
 using Signum.Engine.DynamicQuery;
@@ -181,7 +180,7 @@ namespace Signum.Web.Chart
             if (!ChartPermission.ViewCharting.IsAuthorized())
                 return null;
 
-            string chartNewText = Resources.Chart_Chart;
+            string chartNewText = ChartMessage.Chart.NiceToString();
 
             return
                 new ToolBarButton

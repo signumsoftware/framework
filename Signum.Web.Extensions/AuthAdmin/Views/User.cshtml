@@ -1,13 +1,13 @@
-﻿@using (var e = Html.TypeContext<UserDN>())
+@using (var e = Html.TypeContext<UserDN>())
 {
     @Html.ValueLine(e, f => f.UserName, vl => vl.ValueHtmlProps["size"] = 50)
     if (e.Value.IsNew || (ViewData["NewPwd"] != null && bool.Parse(ViewData["NewPwd"].ToString())))
     {
-        @Html.Field(Resources.ChangePasswordAspx_NewPassword,
+        @Html.Field(AuthMessage.ChangePasswordAspx_NewPassword.NiceToString(),
             Html.Password(UserMapping.NewPasswordKey, "", new Dictionary<string, string> { { "class", "sf-value-line" } }).Concat(
             Html.ValidationMessage(UserMapping.NewPasswordKey) ?? MvcHtmlString.Empty))
     
-        @Html.Field(Resources.ChangePasswordAspx_ConfirmNewPassword, 
+        @Html.Field(AuthMessage.ChangePasswordAspx_ConfirmNewPassword.NiceToString(), 
             Html.Password(UserMapping.NewPasswordBisKey, "", new Dictionary<string, string> { { "class", "sf-value-line" } }).Concat(
             Html.ValidationMessage(UserMapping.NewPasswordBisKey) ?? MvcHtmlString.Empty))
     }

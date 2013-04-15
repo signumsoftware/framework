@@ -1,0 +1,1023 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="">
+    <Member Name="0IsA1_f" Description="{0} es una {1}" />
+    <Member Name="0IsA1_m" Description="{0} es un {1}" />
+  </Type>
+  <Type Name="AlertDN" Description="Alerta">
+    <Member Name="AlertDate" Description="Fecha alerta" />
+    <Member Name="AlertType" Description="Tipo de alerta" />
+    <Member Name="Attended" Description="Atendida" />
+    <Member Name="AttendedBy" Description="Atendida por" />
+    <Member Name="AttendedDate" Description="Fecha revisión" />
+    <Member Name="CreatedBy" Description="Creado por" />
+    <Member Name="CreationDate" Description="Fecha de creación" />
+    <Member Name="Future" Description="Futura" />
+    <Member Name="NotAttended" Description="No atendida" />
+    <Member Name="State" Description="Estado" />
+    <Member Name="Target" Description="Destino" />
+    <Member Name="Text" Description="Texto" />
+    <Member Name="Title" Description="Título" />
+  </Type>
+  <Type Name="AlertMessage">
+    <Member Name="Alert" Description="Alerta" />
+    <Member Name="Alerts" Description="Alertas" />
+    <Member Name="NewAlert" Description="Nueva alerta" />
+  </Type>
+  <Type Name="AlertOperation">
+    <Member Name="Attend" Description="Atender" />
+    <Member Name="Save" Description="Guardar" />
+    <Member Name="SaveNew" Description="Guardar nuevo" />
+    <Member Name="Unattend" Description="Desatender" />
+  </Type>
+  <Type Name="AlertState">
+    <Member Name="Attended" Description="Atentida" />
+    <Member Name="New" Description="Nuevo" />
+    <Member Name="Saved" Description="Guardado" />
+  </Type>
+  <Type Name="AlertTypeDN" Description="Tipo de alerta">
+    <Member Name="Key" Description="Clave" />
+    <Member Name="Name" Description="Nombre" />
+  </Type>
+  <Type Name="AlertTypeOperation">
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="AreYouSureOfDeletingReport0" Description="¿Está seguro de eliminar el informe {0}?" />
+  <Type Name="AuthMessage">
+    <Member Name="0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships" Description="Se han encontrado {0} ciclos en el grafo de roles Roles debido a las relaciones:&#xD;&#xA;" />
+    <Member Name="0Rules" Description="reglas de {0}" />
+    <Member Name="0RulesFor1" Description="reglas de {0} para {1}" />
+    <Member Name="AccessToFacadeMethod0IsNotAllowed" Description="El acceso a el Método de Fachada '{0}' no está permitido" />
+    <Member Name="AddCondition" Description="Agregar condición" />
+    <Member Name="ChooseACondition" Description="Elija una condición" />
+    <Member Name="RemoveCondition" Description="Quitar condición" />
+    <Member Name="AuthorizationCacheSuccessfullyUpdated" Description="Caché de autorización se actualizó correctamente" />
+    <Member Name="ChangePassword" Description="Cambiar contraseña" />
+    <Member Name="ActualPassword" Description="Contraseña actual" />
+    <Member Name="ChangePassword" Description="Cambiar contraseña" />
+    <Member Name="ConfirmNewPassword" Description="Confirmar contraseña" />
+    <Member Name="NewPassword" Description="Nueva contraseña" />
+    <Member Name="WriteActualPasswordAndNewOne" Description="Escriba su contraseña actual y la nueva contraseña" />
+    <Member Name="ConfirmNewPassword" Description="Confirmar nueva contraseña" />
+    <Member Name="EmailMustHaveAValue" Description="El correo electrónico debe tener un valor" />
+    <Member Name="EmailSent" Description="Email enviado" />
+    <Member Name="EnterTheNewPassword" Description="Escriba la nueva contraseña" />
+    <Member Name="EntityGroup" Description="Grupos de Entidades" />
+    <Member Name="Overriden" Description="Sobrescrito" />
+    <Member Name="ExpectedUserLogged" Description="Se esperaba que un usuario hubiera iniciado sesión" />
+    <Member Name="ExpiredPassword" Description="Contraseña caducada" />
+    <Member Name="ExpiredPasswordMessage" Description="Su contraseña ha caducado. Debe cambiarla" />
+    <Member Name="Allow" Description="Permitir" />
+    <Member Name="Deny" Description="Denegar" />
+    <Member Name="FacadeMethod" Description="Método de fachada" />
+    <Member Name="Overriden" Description="Sobrescrito" />
+    <Member Name="ForgotYourPassword" Description="Olvidó su contraseña, Introduzca su correo electrónico a continuación. Le enviaremos un email con un enlace para restablecer su contraseña." />
+    <Member Name="IHaveForgottenMyPassword" Description="He olvidado mi contraseña" />
+    <Member Name="IncorrectPassword" Description="Contraseña incorrecta" />
+    <Member Name="IntroduceYourUserNameAndPassword" Description="Introduzca su nombre de usuario y contraseña" />
+    <Member Name="InvalidUsernameOrPassword" Description="El nombre de usuario o la contraseña son incorrectos" />
+    <Member Name="New" Description="Nueva:" />
+    <Member Name="Password" Description="Contraseña:" />
+    <Member Name="Repeat" Description="Repetir:" />
+    <Member Name="UserName" Description="Usuario:" />
+    <Member Name="UserName_Watermark" Description="usuario" />
+    <Member Name="LoginEnter" Description="Entrar" />
+    <Member Name="NewPassword" Description="Nueva contraseña" />
+    <Member Name="NotAllowedToSaveThis0WhileOffline" Description="No se puede guardar este {0} en modo desconectado" />
+    <Member Name="NotAuthorizedTo0The1WithId2" Description="No autorizado para {0} la entidad {1} con Id {2}" />
+    <Member Name="NotAuthorizedToRetrieve0" Description="No autorizado para recuperar '{0}'" />
+    <Member Name="NotAuthorizedToSave0" Description="Not autorizado para guardar '{0}'" />
+    <Member Name="NotUserLogged" Description="Ningún usuario logado" />
+    <Member Name="Allow" Description="Permitir" />
+    <Member Name="DBOnly" Description="DB sólo" />
+    <Member Name="None" Description="Ninguno" />
+    <Member Name="Operation" Description="Operación" />
+    <Member Name="Overriden" Description="Sobrescrito" />
+    <Member Name="Password" Description="Contraseña" />
+    <Member Name="PasswordChanged" Description="Contraseña cambiada" />
+    <Member Name="PasswordDoesNotMatchCurrent" Description="La contraseña indicada no coincide con la actual" />
+    <Member Name="PasswordHasBeenChangedSuccessfully" Description="La contraseña se ha cambiado con éxito" />
+    <Member Name="PasswordMustHaveAValue" Description="Se debe especificar la contraseña" />
+    <Member Name="PasswordNearExpired" Description="Tu contraseña está a punto de caducar" />
+    <Member Name="PasswordsAreDifferent" Description="Las contraseñas son diferentes" />
+    <Member Name="PasswordsDoNotMatch" Description="Las contraseñas no coinciden" />
+    <Member Name="Allow" Description="Permitir" />
+    <Member Name="Deny" Description="Denegar" />
+    <Member Name="Overriden" Description="Sobrescrito" />
+    <Member Name="Permission" Description="Permiso" />
+    <Member Name="Please0IntoYourAccount" Description="Por favor, vaya al {0} para acceder a la aplicación" />
+    <Member Name="PleaseEnterYourChosenNewPassword" Description="Por favor, introduzca su nueva contraseña" />
+    <Member Name="Modify" Description="Modicar" />
+    <Member Name="None" Description="Ninguno" />
+    <Member Name="Overriden" Description="Sobrescrito" />
+    <Member Name="Property" Description="Propiedad" />
+    <Member Name="Read" Description="Leer" />
+    <Member Name="Allow" Description="Permitir" />
+    <Member Name="Deny" Description="Denegar" />
+    <Member Name="Overriden" Description="Sobrescrito" />
+    <Member Name="Query" Description="Query" />
+    <Member Name="Remember" Description="Recordar" />
+    <Member Name="RememberMe" Description="Recordarme" />
+    <Member Name="ResetPassword" Description="Restablecer contraseña" />
+    <Member Name="ResetPasswordCode" Description="Código para restablecer la contraseña" />
+    <Member Name="ResetPasswordCodeHasBeenSent" Description="Se ha enviado a su cuenta de correo un código para restablecer su contraseña" />
+    <Member Name="ResetPasswordSuccess" Description="Su contraseña ha sido modificada con éxito" />
+    <Member Name="Save" Description="Guardar" />
+    <Member Name="TheConfirmationCodeThatYouHaveJustSentIsInvalid" Description="El código de confirmación proporcionado es inválido" />
+    <Member Name="ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter" Description="La contraseña debe tener entre 7 y 15 caracteres, siendo cada uno de ellos un número de 0 a 9 o una letra" />
+    <Member Name="ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin" Description="Se ha producido un error con tu solicitud de cambio de contraseña. Por favor, introduzca su email." />
+    <Member Name="ThereSNotARegisteredUserWithThatEmailAddress" Description="No hay ningún usuario registrado con esa dirección de correo electrónico" />
+    <Member Name="TheSpecifiedPasswordsDontMatch" Description="Las contraseñas especificadas no coinciden" />
+    <Member Name="TheUserStateMustBeDisabled" Description="El estado del usuario debe ser deshabilitado" />
+    <Member Name="Create" Description="Crear" />
+    <Member Name="Modify" Description="Modificar" />
+    <Member Name="None" Description="Ninguno" />
+    <Member Name="Operations" Description="Operaciones" />
+    <Member Name="Overriden" Description="Sobrescrito" />
+    <Member Name="Properties" Description="Propiedades" />
+    <Member Name="Queries" Description="Consultas" />
+    <Member Name="Read" Description="Leer" />
+    <Member Name="Type" Description="Tipo" />
+    <Member Name="User" Description="Usuario" />
+    <Member Name="Username0IsNotValid" Description="El nombre de usuario {0} no es válido" />
+    <Member Name="UserNameMustHaveAValue" Description="Se debe introducir el nombre de usuario" />
+    <Member Name="View" Description="Ver" />
+    <Member Name="WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow" Description="Ha solicitado crear una cuenta. Para confirmarlo haga click en el siguiente enlace:" />
+    <Member Name="YouCanResetYourPasswordByFollowingTheLinkBelow" Description="Puedes crear una nueva contraseña haciendo click en el siguiente enlace:" />
+    <Member Name="YouMustRepeatTheNewPassword" Description="Debes repetir la nueva contraseña" />
+  </Type>
+  <Type Name="CalendarDN" Description="Calendario">
+    <Member Name="Holidays" Description="Festivos" />
+    <Member Name="Name" Description="Nombre" />
+  </Type>
+  <Type Name="CalendarOperation">
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="Call0Over1OfThe2">
+    <Member Name="f" Description="Ejecuta {0} sobre {1} de la {2}" />
+    <Member Name="m" Description="Ejecuta {0} sobre {1} del {2}" />
+  </Type>
+  <Type Name="CertFileType">
+    <Member Name="CertFile" Description="Archivo de certificado" />
+    <Member Name="SignedFile" Description="Archivo firmado" />
+  </Type>
+  <Type Name="ChartColorDN" Description="Color de gráfico">
+    <Member Name="Color" Description="Color" />
+    <Member Name="Related" Description="Relacionado" />
+  </Type>
+  <Type Name="ChartColumnDN" Description="Columna de gráfico">
+    <Member Name="DisplayName" Description="Nombre para Mostrar" />
+    <Member Name="Index" Description="Índice" />
+    <Member Name="Parameter1" Description="Parámetro1" />
+    <Member Name="Parameter2" Description="Parámetro2" />
+    <Member Name="Parameter3" Description="Parámetro3" />
+    <Member Name="ScriptColumn" Description="Columna de script" />
+  </Type>
+  <Type Name="ChartColumnType">
+    <Member Name="Date" Description="Fecha" />
+    <Member Name="DateTime" Description="Fecha hora" />
+    <Member Name="Enum" Description="Enum" />
+    <Member Name="Groupable" Description="Agrupable" />
+    <Member Name="Integer" Description="Entero" />
+    <Member Name="Lite" Description="Lite" />
+    <Member Name="Magnitude" Description="Magnitud" />
+    <Member Name="Positionable" Description="Posicionable" />
+    <Member Name="Real" Description="Real" />
+    <Member Name="String" Description="Cadena" />
+  </Type>
+  <Type Name="ChartMessage">
+    <Member Name="0CanOnlyBeCreatedFromTheChartWindow" Description="{0} sólo se puede crear desde la ventana del gráfico" />
+    <Member Name="0CanOnlyBeCreatedFromTheSearchWindow" Description="{0} sólo se puede crear desde la ventana de búsqueda" />
+    <Member Name="Chart" Description="Gráfico" />
+    <Member Name="Chart" Description="Gráfico" />
+    <Member Name="Chart" Description="Gráfico" />
+    <Member Name="ChartSettings" Description="Configuración del gráfico" />
+    <Member Name="Dimension" Description="Dimensión" />
+    <Member Name="Draw" Description="Dibujar" />
+    <Member Name="Group" Description="Grupo" />
+    <Member Name="Query0IsNotAllowed" Description="No se permite la consulta {0}" />
+    <Member Name="ToggleInfo" Description="Más opciones" />
+    <Member Name="Edit" Description="Editar Script" />
+    <Member Name="ColorsFor0" Description="Colores para {0}" />
+    <Member Name="CreatePalette" Description="Crear paleta" />
+    <Member Name="MyCharts" Description="Mis Gráficos" />
+    <Member Name="CreateNew" Description="Crear" />
+    <Member Name="Edit" Description="Editar" />
+    <Member Name="ExportData" Description="Exportar datos" />
+    <Member Name="UserCharts" Description="Gráficos de usuario" />
+    <Member Name="ViewPalette" Description="Ver paleta" />
+  </Type>
+  <Type Name="ChartPaletteModel" Description="Paleta de gráfico">
+    <Member Name="Colors" Description="Colores" />
+    <Member Name="Type" Description="Tipo" />
+  </Type>
+  <Type Name="ChartParameterType">
+    <Member Name="Enum" Description="Enum" />
+    <Member Name="Number" Description="Número" />
+    <Member Name="String" Description="Cadena" />
+  </Type>
+  <Type Name="ChartRequest" Description="Solicitud de gráfico">
+    <Member Name="ChartScript" Description="Script de Gráfico" />
+    <Member Name="Columns" Description="Columnas" />
+    <Member Name="Filters" Description="Filtros" />
+    <Member Name="GroupResults" Description="Resultados de grupo" />
+    <Member Name="Multiplications" Description="Multiplicaciones" />
+    <Member Name="Orders" Description="Órdenes" />
+    <Member Name="QueryName" Description="Nombre consulta" />
+  </Type>
+  <Type Name="ChartScriptColumnDN" Description="Columna de Script de Gráfico">
+    <Member Name="ColumnType" Description="Tipo de columna" />
+    <Member Name="DisplayName" Description="Nombre para Mostrar" />
+    <Member Name="Index" Description="Índice" />
+    <Member Name="IsGroupKey" Description="Es clave de grupo" />
+    <Member Name="IsOptional" Description="Es opcional" />
+    <Member Name="Parameter1" Description="Parámetro1" />
+    <Member Name="Parameter2" Description="Parámetro2" />
+    <Member Name="Parameter3" Description="Parámetro3" />
+  </Type>
+  <Type Name="ChartScriptDN" Description="Script de gráfico">
+    <Member Name="Columns" Description="Columnas" />
+    <Member Name="ColumnsStructure" Description="Estructura de columnas" />
+    <Member Name="GroupBy" Description="Agrupar por" />
+    <Member Name="Icon" Description="Icono" />
+    <Member Name="Name" Description="Nombre" />
+    <Member Name="Script" Description="Script" />
+  </Type>
+  <Type Name="ChartScriptOperation">
+    <Member Name="Clone" Description="Clonar" />
+    <Member Name="Delete" Description="Eliminar" />
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="ChartScriptParameterDN" Description="Parámetro de script de gráfico">
+    <Member Name="Name" Description="Nombre" />
+    <Member Name="Type" Description="Tipo" />
+    <Member Name="ValueDefinition" Description="Definición de valor" />
+  </Type>
+  <Type Name="ClientCertificationFileDN" Description="Archivo de certificado de cliente">
+    <Member Name="CertFileType" Description="Tipo de archivo de certificado" />
+    <Member Name="FullFilePath" Description="Ruta completa del archivo" />
+    <Member Name="Name" Description="Nombre" />
+  </Type>
+  <Type Name="Close" Description="Cerrar" />
+  <Type Name="ConstructsANew0">
+    <Member Name="f" Description="Construye una nueva {0}" />
+    <Member Name="m" Description="Construye un nuevo {0}" />
+  </Type>
+  <Type Name="ControlPanelDN" Description="Panel de control">
+    <Member Name="DisplayName" Description="Nombre" />
+    <Member Name="HomePagePriority" Description="Prioridad de la página de inicio" />
+    <Member Name="NumberOfColumns" Description="Número de columnas" />
+    <Member Name="Parts" Description="Partes" />
+    <Member Name="Related" Description="Relacionado" />
+  </Type>
+  <Type Name="ControlPanelMessage">
+    <Member Name="CreateNewPart" Description="Crear nueva parte" />
+    <Member Name="YouMustSaveThePanelBeforeAddingParts" Description="Debe guardar el panel antes de agregar partes" />
+    <Member Name="Part0IsInColumn1ButPanelHasOnly2Columns" Description="La parte {0} está en la columna {1} pero el panel sólo tiene {2} columnas" />
+    <Member Name="Part0IsInColumn1WhichAlreadyHasOtherParts" Description="La parte {0} está en la columna {1} de la fila {2} que ya contiene otras partes" />
+    <Member Name="Rows0DontHaveAnyParts" Description="No hay ninguna parte en las filas {{{0}}}" />
+    <Member Name="TitleMustBeSpecifiedFor0" Description="Se debe especificar el título para {0}" />
+    <Member Name="CountSearchControlPartDN" Description="Lista de contadores" />
+    <Member Name="CountUserQueryElement" Description="Contador" />
+  </Type>
+  <Type Name="ControlPanelOperation">
+    <Member Name="Clone" Description="Clonar" />
+    <Member Name="Delete" Description="Eliminar" />
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="CountSearchControlPartDN">
+    <Member Name="RequiresTitle" Description="Requiere título" />
+    <Member Name="UserQueries" Description="Consultas de usuario" />
+  </Type>
+  <Type Name="CountUserQueryElement">
+    <Member Name="Href" Description="Href" />
+    <Member Name="Label" Description="Etiqueta" />
+    <Member Name="UserQuery" Description="Consulta de usuario" />
+  </Type>
+  <Type Name="Create" Description="Crear" />
+  <Type Name="CustomTaskDN" Description="Tarea personalizada" />
+  <Type Name="CustomTaskExecutionDN" Description="Ejecución tarea personalizada">
+    <Member Name="CustomTask" Description="Tarea" />
+    <Member Name="EndTime" Description="Fin" />
+    <Member Name="Exception" Description="Excepción" />
+    <Member Name="StartTime" Description="Inicio" />
+  </Type>
+  <Type Name="CustomTaskOperation">
+    <Member Name="Execute" Description="Nueva ejecución" />
+  </Type>
+  <Type Name="DateSpanDN" Description="Intervalo de fecha">
+    <Member Name="Days" Description="Días" />
+    <Member Name="Months" Description="Meses" />
+    <Member Name="Years" Description="Años" />
+  </Type>
+  <Type Name="Delete" Description="Eliminar" />
+  <Type Name="Deleted" Description="(Eliminado)" />
+  <Type Name="DisconnectedExportDN" Description="Exportación desconectada">
+    <Member Name="BackupDatabase" Description="Copia de seguridad de base de datos" />
+    <Member Name="Copies" Description="Copias" />
+    <Member Name="CreateDatabase" Description="Crear base de datos" />
+    <Member Name="CreateSchema" Description="Crear esquema" />
+    <Member Name="CreationDate" Description="Fecha de creación" />
+    <Member Name="DisableForeignKeys" Description="Desactivar Foreign Keys" />
+    <Member Name="DropDatabase" Description="Eliminar Base de Datos" />
+    <Member Name="EnableForeignKeys" Description="Activar Foreign Keys" />
+    <Member Name="Exception" Description="Excepción" />
+    <Member Name="Lock" Description="Bloqueado" />
+    <Member Name="Machine" Description="Máquina" />
+    <Member Name="ReseedIds" Description="Reinicio Ids" />
+    <Member Name="State" Description="Estado" />
+    <Member Name="Total" Description="Total" />
+  </Type>
+  <Type Name="DisconnectedExportState">
+    <Member Name="Completed" Description="Completado" />
+    <Member Name="Error" Description="Error" />
+    <Member Name="InProgress" Description="En progreso" />
+  </Type>
+  <Type Name="DisconnectedExportTableDN" Description="Tabla de exportación desconectada">
+    <Member Name="CopyTable" Description="Copiar tabla" />
+    <Member Name="Errors" Description="Errores" />
+    <Member Name="MaxIdInRange" Description="Máximo Id en rango" />
+    <Member Name="Order" Description="Orden" />
+    <Member Name="Type" Description="Tipo" />
+  </Type>
+  <Type Name="DisconnectedImportDN" Description="Importación desconectada">
+    <Member Name="Copies" Description="Copias" />
+    <Member Name="CreationDate" Description="Fecha de creación" />
+    <Member Name="DisableForeignKeys" Description="Desactivar Foreign Keys" />
+    <Member Name="DropDatabase" Description="Eliminar Base de Datos" />
+    <Member Name="EnableForeignKeys" Description="Activar Foreign Keys" />
+    <Member Name="Exception" Description="Excepción" />
+    <Member Name="Machine" Description="Máquina" />
+    <Member Name="RestoreDatabase" Description="Restaurar base de datos" />
+    <Member Name="State" Description="Estado" />
+    <Member Name="SynchronizeSchema" Description="Sincronizar el esquema" />
+    <Member Name="Total" Description="Total" />
+    <Member Name="Unlock" Description="Desbloquear" />
+  </Type>
+  <Type Name="DisconnectedImportState">
+    <Member Name="Completed" Description="Completado" />
+    <Member Name="Error" Description="Error" />
+    <Member Name="InProgress" Description="En progreso" />
+  </Type>
+  <Type Name="DisconnectedImportTableDN" Description="Tabla de importación desconectada">
+    <Member Name="CopyTable" Description="Copiar tabla" />
+    <Member Name="DisableForeignKeys" Description="Desactivar las claves externas" />
+    <Member Name="InsertedOrUpdated" Description="Insertar o actualizar" />
+    <Member Name="InsertedRows" Description="Filas insertadas" />
+    <Member Name="Order" Description="Orden" />
+    <Member Name="Type" Description="Tipo" />
+    <Member Name="UpdatedRows" Description="Filas actualizadas" />
+  </Type>
+  <Type Name="DisconnectedMachineDN" Description="Máquina desconectada">
+    <Member Name="CreationDate" Description="Fecha de creación" />
+    <Member Name="MachineName" Description="Nombre de la máquina" />
+    <Member Name="SeedMax" Description="Semilla Máxima" />
+    <Member Name="SeedMin" Description="Semilla Mínima" />
+    <Member Name="State" Description="Estado" />
+  </Type>
+  <Type Name="DisconnectedMachineOperation">
+    <Member Name="FixImport" Description="Arreglar Importación" />
+    <Member Name="Save" Description="Guardar" />
+    <Member Name="UnsafeUnlock" Description="Desbloqueo Inseguro" />
+  </Type>
+  <Type Name="DisconnectedMachineState">
+    <Member Name="Connected" Description="Conectado" />
+    <Member Name="Disconnected" Description="Desconectado" />
+    <Member Name="Faulted" Description="Con errores" />
+    <Member Name="Fixed" Description="Fijo" />
+  </Type>
+  <Type Name="DisconnectedMessage">
+    <Member Name="NotAllowedToSave0WhileOffline" Description="No se puede guardar {0} en modo descaonectado" />
+    <Member Name="The0WithId12IsLockedBy3" Description="El {0} con Id {1} ({2}) está bloqueado por {3}" />
+  </Type>
+  <Type Name="EmailMessageDN" Description="Mensaje de e-mail">
+    <Member Name="Bcc" Description="CCO" />
+    <Member Name="Body" Description="Cuerpo" />
+    <Member Name="Cc" Description="CC" />
+    <Member Name="CreationTime" Description="Fecha de creación" />
+    <Member Name="Exception" Description="Error" />
+    <Member Name="Package" Description="Paquete" />
+    <Member Name="Received" Description="Recibido" />
+    <Member Name="Recipient" Description="Destinatario" />
+    <Member Name="Sent" Description="Enviado" />
+    <Member Name="State" Description="Estado" />
+    <Member Name="Subject" Description="Asunto" />
+    <Member Name="Template" Description="Plantilla" />
+  </Type>
+  <Type Name="EmailMessageOperation">
+    <Member Name="ReSendEmails" Description="Re enviar correos electrónicos" />
+  </Type>
+  <Type Name="EmailMessageState">
+    <Member Name="Created" Description="Creado" />
+    <Member Name="Exception" Description="Excepción" />
+    <Member Name="Received" Description="Recibido" />
+    <Member Name="Sent" Description="Enviado" />
+  </Type>
+  <Type Name="EmailOperations">
+    <Member Name="ReSendEmails" Description="Reenviar emails" />
+  </Type>
+  <Type Name="EmailPackageDN" Description="Paquete de e-mail">
+    <Member Name="Name" Description="Nombre" />
+    <Member Name="NumErrors" Description="Num errores" />
+    <Member Name="NumLines" Description="Num líneas" />
+  </Type>
+  <Type Name="EmailTemplateDN" Description="Plantillas de email">
+    <Member Name="FriendlyName" Description="Nombre descriptivo" />
+    <Member Name="FullClassName" Description="Full Class Name" />
+  </Type>
+  <Type Name="EmailTemplateOperation">
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="EmbeddedFileDN" Description="Archivo incrustado">
+    <Member Name="BinaryFile" Description="Archivo binario" />
+    <Member Name="FileName" Description="Nombre de archivo" />
+    <Member Name="FullWebPath" Description="Ruta web completa" />
+  </Type>
+  <Type Name="ExcelMessage">
+    <Member Name="Data" Description="Datos" />
+    <Member Name="Download" Description="Descargar" />
+    <Member Name="Excel2007Spreadsheet" Description="Hoja de cálculo de Microsoft Office Excel 2007(*.xlsx)|*.xlsx" />
+    <Member Name="ExcelAdminister" Description="Administrar" />
+    <Member Name="ExcelReport" Description="Informe Excel" />
+    <Member Name="ExcelReport" Description="Informe Excel" />
+    <Member Name="ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0" Description="El template Excel debe tener extensión .xlsx, pero el actual tiene extensión {0}" />
+    <Member Name="FindLocationFoExcelReport" Description="Elija la ubicación del informe Excel" />
+    <Member Name="Reports" Description="Informe" />
+    <Member Name="TheExcelTemplateHasAColumn0NotPresentInTheFindWindow" Description="La plantilla Excel tiene una columna {0} que no está presente en el buscador" />
+    <Member Name="ThereAreNoResultsToWrite" Description="No hay resultados que exportar al informe" />
+  </Type>
+  <Type Name="ExcelReportDN" Description="Informe excel">
+    <Member Name="DisplayName" Description="Nombre del informe" />
+    <Member Name="File" Description="Fichero" />
+    <Member Name="Query" Description="Consulta" />
+  </Type>
+  <Type Name="ExcelReportOperation">
+    <Member Name="Delete" Description="Eliminar" />
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="ExpressionCanNotBeAnAggregate" Description="La expresión no puede ser un agregado" />
+  <Type Name="ExpressionShouldBeSomeKindOfAggregate" Description="Expresión debería ser algún tipo de agregado" />
+  <Type Name="ExpressionShouldHaveAContinousAmountOfValues" Description="Expresión debe tener una cantidad continua de valores" />
+  <Type Name="ExpressionShouldHaveADiscreteAmountOfValues" Description="Expresión debe tener una cantidad discreta de valores" />
+  <Type Name="FacadeMethodDN" Description="Método de fachada" />
+  <Type Name="Field" Description="Campo" />
+  <Type Name="FileDN" Description="Archivo">
+    <Member Name="BinaryFile" Description="Archivo binario" />
+    <Member Name="FileName" Description="Nombre" />
+    <Member Name="FullWebPath" Description="Ruta web completa" />
+    <Member Name="Hash" Description="Hash" />
+    <Member Name="WebPath" Description="Ruta web" />
+  </Type>
+  <Type Name="FileMessage">
+    <Member Name="DownloadFile" Description="Descargar archivo" />
+    <Member Name="ErrorSavingFile" Description="Error guardadndo el archivo" />
+    <Member Name="FileTypes" Description="Tipos de archivo" />
+    <Member Name="Open" Description="Abrir" />
+    <Member Name="OpeningHasNotDefaultImplementationFor0" Description="Abrir no tiene una implementación por defecto para {0}" />
+    <Member Name="WebDownload" Description="Descargar" />
+    <Member Name="WebImage" Description="Imagen" />
+  </Type>
+  <Type Name="FilePathDN" Description="Ruta archivo">
+    <Member Name="BinaryFile" Description="Archivo binario" />
+    <Member Name="FileLength" Description="Longitud" />
+    <Member Name="FileLengthString" Description="Tamaño" />
+    <Member Name="FileName" Description="Nombre de archivo" />
+    <Member Name="FileType" Description="Tipo de archivo" />
+    <Member Name="FileTypeEnum" Description="Tipo de archivo" />
+    <Member Name="FullPhysicalPath" Description="Ruta física" />
+    <Member Name="FullWebPath" Description="URL" />
+    <Member Name="Repository" Description="Repositorio" />
+    <Member Name="Sufix" Description="Sufijo" />
+  </Type>
+  <Type Name="FileRepositoryDN" Description="Repositorio de archivos">
+    <Member Name="Active" Description="Activo" />
+    <Member Name="FileTypes" Description="Tipos de archivo" />
+    <Member Name="FullPhysicalPrefix" Description="Prefijo físico" />
+    <Member Name="Name" Description="Nombre" />
+    <Member Name="PhysicalPrefix" Description="Prefijo físico" />
+    <Member Name="WebPrefix" Description="Prefijo web" />
+  </Type>
+  <Type Name="FileRepositoryOperation">
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="FilesMessage">
+    <Member Name="Remove" Description="Eliminar" />
+    <Member Name="SavingHasNotDefaultImplementationFor0" Description="Guardar no tiene una implementación por defecto para {0}" />
+    <Member Name="SelectFile" Description="Seleccionar archivo" />
+    <Member Name="ViewFile" Description="Ver archivo" />
+    <Member Name="ViewingHasNotDefaultImplementationFor0" Description="Ver no tiene una implementación por defecto para {0}" />
+  </Type>
+  <Type Name="FileTypeDN" Description="Tipo de archivo" />
+  <Type Name="From0OfThe1">
+    <Member Name="f" Description="desde {0} de la {1}" />
+    <Member Name="m" Description="desde {0} del {1}" />
+  </Type>
+  <Type Name="FromMany0">
+    <Member Name="f" Description="desde muchas {0}" />
+    <Member Name="m" Description="desde muchos {0}" />
+  </Type>
+  <Type Name="GoBackToLoginPage" Description="Volver a la página de login" />
+  <Type Name="GroupByChart">
+    <Member Name="Always" Description="Siempre" />
+    <Member Name="Never" Description="Nunca" />
+    <Member Name="Optional" Description="Opcional" />
+  </Type>
+  <Type Name="HelpMessage">
+    <Member Name="0IsA1" Description="{0} es un {1}" />
+    <Member Name="0IsA1AndShows2" Description="{0} es un {1} y muestra {2}" />
+    <Member Name="0IsACalculated1" Description="{0} es un {1} calculado" />
+    <Member Name="0IsACollectionOfElements1" Description="{0} es una colección de elementos {1}" />
+    <Member Name="Amount" Description="importe" />
+    <Member Name="Any" Description="algún" />
+    <Member Name="Appendices" Description="Apéndices" />
+    <Member Name="Buscador" Description="Buscador" />
+    <Member Name="Call0Over1OfThe2" Description="Ejecuta {0} sobre {1} del {2}" />
+    <Member Name="Character" Description="carácter" />
+    <Member Name="Check" Description="check" />
+    <Member Name="ConstructsANew0" Description="Construye un nuevo {0}" />
+    <Member Name="Date" Description="fecha" />
+    <Member Name="DateTime" Description="fecha y hora" />
+    <Member Name="ExpressedIn" Description="expresado en " />
+    <Member Name="From0OfThe1" Description="desde {0} del {1} " />
+    <Member Name="FromMany0" Description="desde muchos {0}" />
+    <Member Name="HelpDocumentation" Description="Documentación de ayuda" />
+    <Member Name="HelpNotLoaded" Description="Ayuda no cargada" />
+    <Member Name="Integer" Description="entero" />
+    <Member Name="Key0NotFound" Description="Clave {0} no encontrada" />
+    <Member Name="OfThe0" Description="del {0}" />
+    <Member Name="OrNull" Description="o nulo" />
+    <Member Name="Property0NotExistsInType1" Description="La propiedad {0} no existe en el tipo {1}" />
+    <Member Name="QueryOf0" Description="Consulta de {0}" />
+    <Member Name="RemovesThe0FromTheDatabase" Description="Elimina {0} de la base de datos" />
+    <Member Name="Should" Description=". Debe  " />
+    <Member Name="String" Description="cadena de texto" />
+    <Member Name="The0" Description="El {0}" />
+    <Member Name="TheDatabaseVersion" Description="la versión de la base de datos" />
+    <Member Name="TheProperty0" Description="la propiedad {0}" />
+    <Member Name="Value" Description="valor" />
+    <Member Name="ValueLike0" Description="valor entre {0}" />
+    <Member Name="YourVersion" Description="tu versión" />
+  </Type>
+  <Type Name="HolidayDN" Description="Festivo">
+    <Member Name="Date" Description="Fecha" />
+    <Member Name="Name" Description="Nombre" />
+  </Type>
+  <Type Name="HourMinuteDN" Description="Hora y minutos">
+    <Member Name="Hour" Description="Hora" />
+    <Member Name="Minute" Description="Minuto" />
+  </Type>
+  <Type Name="LinkElement" Description="Enlace">
+    <Member Name="Label" Description="Etiqueta" />
+    <Member Name="Link" Description="Enlace" />
+  </Type>
+  <Type Name="LinkListPartDN" Description="Elemento de lista de vínculo">
+    <Member Name="Links" Description="Enlaces" />
+    <Member Name="RequiresTitle" Description="Requiere título" />
+  </Type>
+  <Type Name="Message" Description="Mensaje" />
+  <Type Name="MessageLengthExceeded">
+    <Member Name="Allowed" Description="Permitido" />
+    <Member Name="NotAllowed" Description="No está permitido" />
+    <Member Name="TextPruning" Description="Poda de texto" />
+  </Type>
+  <Type Name="Name" Description="Nombre" />
+  <Type Name="NewsletterDeliveryDN" Description="Entrega de Newsletter">
+    <Member Name="Exception" Description="Excepción" />
+    <Member Name="Newsletter" Description="Newsletter" />
+    <Member Name="Recipient" Description="Destinatario" />
+    <Member Name="SendDate" Description="Fecha de envío" />
+    <Member Name="Sent" Description="Enviado" />
+  </Type>
+  <Type Name="NewsletterDN" Description="Newsletter">
+    <Member Name="DisplayFrom" Description="Visualizarlo desde" />
+    <Member Name="From" Description="De" />
+    <Member Name="HtmlBody" Description="Cuerpo HTML" />
+    <Member Name="Name" Description="Nombre" />
+    <Member Name="Query" Description="Consulta" />
+    <Member Name="SMTPConfig" Description="SMTPConfig" />
+    <Member Name="State" Description="Estado" />
+    <Member Name="Subject" Description="Asunto" />
+  </Type>
+  <Type Name="NewsletterOperation">
+    <Member Name="AddRecipients" Description="Agregar destinatarios" />
+    <Member Name="Clone" Description="Clonar" />
+    <Member Name="RemoveRecipients" Description="Quitar destinatarios" />
+    <Member Name="Save" Description="Guardar" />
+    <Member Name="Send" Description="Enviar" />
+  </Type>
+  <Type Name="NewsletterState">
+    <Member Name="Created" Description="Creado" />
+    <Member Name="Saved" Description="Guardado" />
+    <Member Name="Sent" Description="Enviado" />
+  </Type>
+  <Type Name="NotAllowedToModifyExisting0WhileOffline" Description="No se pueden modificar los/las {0} existentes en modo desconectado" />
+  <Type Name="NotAuthorizedTo01" Description="No autorizado a {0} {1}" />
+  <Type Name="NoteDN" Description="Nota">
+    <Member Name="CreatedBy" Description="Creado por" />
+    <Member Name="CreationDate" Description="Fecha de creación" />
+    <Member Name="Target" Description="Destino" />
+    <Member Name="Text" Description="Texto" />
+    <Member Name="Title" Description="Título" />
+  </Type>
+  <Type Name="NoteMessage">
+    <Member Name="NewNote" Description="Nueva Nota" />
+    <Member Name="Note" Description="Nota:" />
+    <Member Name="Notes" Description="Notas" />
+  </Type>
+  <Type Name="NoteOperation">
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="OfThe0">
+    <Member Name="f" Description="de la {0}" />
+    <Member Name="m" Description="del {0}" />
+  </Type>
+  <Type Name="OmniboxMessage">
+    <Member Name="No" Description="No" />
+    <Member Name="NotFound" Description="[No encontrada]" />
+    <Member Name="DatabaseAccess" Description="Buscar entre 'apóstrofe' hará consultas a la base de datos" />
+    <Member Name="Disambiguate" Description="Con Mayús+entrar eliminará la ambigüedad de la consulta" />
+    <Member Name="Field" Description="Campo" />
+    <Member Name="Help" Description="Ayuda" />
+    <Member Name="MatchingOptions" Description="Puede buscar resultados por el (co)mienzo, el me(di)o o por (L)etras(M)ayúsculas" />
+    <Member Name="Query" Description="Consulta" />
+    <Member Name="Type" Description="Tipo" />
+    <Member Name="UserChart" Description="UserChart" />
+    <Member Name="UserQuery" Description="UserQuery" />
+    <Member Name="Value" Description="Valor" />
+    <Member Name="Unknown" Description="Desconocido" />
+    <Member Name="Unknown" Description="Desconocido" />
+    <Member Name="Yes" Description="sí" />
+  </Type>
+  <Type Name="PackageDN" Description="Paquete">
+    <Member Name="Name" Description="Nombre" />
+  </Type>
+  <Type Name="PackageLineDN" Description="Línea paquete">
+    <Member Name="Entity" Description="Entidad" />
+    <Member Name="Exception" Description="Excepción" />
+    <Member Name="FinishTime" Description="Fin" />
+    <Member Name="Package" Description="Paquete" />
+    <Member Name="Result" Description="Resultado" />
+  </Type>
+  <Type Name="PackageOperationDN" Description="Operación de paquete">
+    <Member Name="Operation" Description="Operación" />
+  </Type>
+  <Type Name="PanelPart" Description="Elemento de panel">
+    <Member Name="Column" Description="Columna" />
+    <Member Name="Content" Description="Contenido" />
+    <Member Name="Row" Description="Fila" />
+    <Member Name="Title" Description="Título" />
+  </Type>
+  <Type Name="PasswordExpiresIntervalDN" Description="Intervalo caducidad contraseña">
+    <Member Name="Days" Description="Días" />
+    <Member Name="DaysWarning" Description="Días de alerta" />
+    <Member Name="Enabled" Description="Habilitado" />
+  </Type>
+  <Type Name="PasswordExpiresIntervalOperation">
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="PermissionDN" Description="Permiso" />
+  <Type Name="ProcessDN" Description="Proceso" />
+  <Type Name="ProcessExecutionDN" Description="Ejecución proceso">
+    <Member Name="CancelationDate" Description="F. Cancelación" />
+    <Member Name="CreationDate" Description="F. Creación" />
+    <Member Name="Exception" Description="Excepción" />
+    <Member Name="ExceptionDate" Description="Fecha de excepción" />
+    <Member Name="ExecutionEnd" Description="F. fin ejecución" />
+    <Member Name="ExecutionStart" Description="F. inicio ejecución" />
+    <Member Name="PlannedDate" Description="F. planificada" />
+    <Member Name="Process" Description="Proceso" />
+    <Member Name="ProcessData" Description="Datos" />
+    <Member Name="Progress" Description="Progreso" />
+    <Member Name="QueuedDate" Description="F. ejec. solicitada" />
+    <Member Name="SessionData" Description="Datos de sesión" />
+    <Member Name="State" Description="Estado" />
+    <Member Name="SuspendDate" Description="F. suspensión" />
+  </Type>
+  <Type Name="ProcessMessage">
+    <Member Name="ProcessExecution0IsNotRunningAnymore" Description="El ProcessExecution {0} ya no está ejecutándose" />
+    <Member Name="ProcessStartIsGreaterThanProcessEnd" Description="Process Start es mayor que Process End" />
+    <Member Name="ProcessStartIsNullButProcessEndIsNot" Description="Process Start es nulo, pero Process End no" />
+  </Type>
+  <Type Name="ProcessOperation">
+    <Member Name="Cancel" Description="Cancelar" />
+    <Member Name="Execute" Description="Ejecutar" />
+    <Member Name="FromProcess" Description="Nueva ejecución" />
+    <Member Name="Plan" Description="Planificar" />
+    <Member Name="Retry" Description="Reintentar" />
+    <Member Name="Save" Description="Guardar" />
+    <Member Name="Suspend" Description="Suspender" />
+  </Type>
+  <Type Name="ProcessState">
+    <Member Name="Canceled" Description="Cancelado" />
+    <Member Name="Created" Description="Creado" />
+    <Member Name="Error" Description="Error" />
+    <Member Name="Executing" Description="Ejecutándose" />
+    <Member Name="Finished" Description="Finalizado" />
+    <Member Name="Planned" Description="Planeado" />
+    <Member Name="Queued" Description="Encolado" />
+    <Member Name="Suspended" Description="Suspendido" />
+    <Member Name="Suspending" Description="Suspendiéndose" />
+  </Type>
+  <Type Name="PropertyDN" Description="Propiedad">
+    <Member Name="Path" Description="Ruta de acceso" />
+    <Member Name="Route" Description="Ruta" />
+    <Member Name="Type" Description="Tipo" />
+  </Type>
+  <Type Name="QueryColumnDN" Description="Columna de consulta">
+    <Member Name="DisplayName" Description="Nombre" />
+  </Type>
+  <Type Name="QueryDN" Description="Query">
+    <Member Name="Key" Description="Clave" />
+    <Member Name="Name" Description="Nombre" />
+  </Type>
+  <Type Name="QueryFilterDN" Description="Filtro de consulta">
+    <Member Name="Operation" Description="Operación" />
+    <Member Name="Value" Description="Valor" />
+    <Member Name="ValueString" Description="Valor cadena" />
+  </Type>
+  <Type Name="QueryOrderDN" Description="Orden de consulta">
+    <Member Name="Index" Description="Índice" />
+    <Member Name="OrderType" Description="Tipo de orden" />
+  </Type>
+  <Type Name="QueryTokenDN">
+    <Member Name="TryToken" Description="Intentar Recuperar Token" />
+  </Type>
+  <Type Name="Reload" Description="Volver a cargar" />
+  <Type Name="ResetPasswordRequestDN" Description="Solicitud nueva contraseña">
+    <Member Name="Code" Description="Código" />
+    <Member Name="RequestDate" Description="Fecha de solicitud" />
+    <Member Name="User" Description="Usuario" />
+  </Type>
+  <Type Name="RoleDN" Description="Rol">
+    <Member Name="Name" Description="Nombre" />
+    <Member Name="Roles" Description="Roles" />
+  </Type>
+  <Type Name="RoleOperation">
+    <Member Name="Delete" Description="Eliminar" />
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="RoleQueries">
+    <Member Name="ReferedBy" Description="Referido por" />
+  </Type>
+  <Type Name="RuleTypeConditionDN" Description="Condición del tipo de regla">
+    <Member Name="Allowed" Description="Permitido" />
+    <Member Name="Condition" Description="Condición" />
+    <Member Name="Order" Description="Orden" />
+  </Type>
+  <Type Name="ScheduledTaskDN" Description="Tarea programada">
+    <Member Name="NextDate" Description="Proxima fecha" />
+    <Member Name="Rule" Description="Regla" />
+    <Member Name="Suspended" Description="Suspendido" />
+    <Member Name="Task" Description="Tarea programada" />
+  </Type>
+  <Type Name="ScheduledTaskOperation">
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="SchedulerMessage">
+    <Member Name="0IsNotMultiple1" Description="{0} no es múltiple de {1}" />
+    <Member Name="Each0HoursFrom1" Description="Cada hora {0} desde {1}" />
+    <Member Name="Each0MinutesFrom1" Description="Cada minuto {0} desde {1}" />
+    <Member Name="Holidayhavetobenullwhennocalendarisset" Description="Festivos debe ser nulo si no hay calendario" />
+    <Member Name="Holidayhavetobetrueorfalsewhenacalendarisset" Description="Festivos debe ser verdadero o falso cuando hay un calendario" />
+    <Member Name="ScheduleRuleDailyDN" Description="Diariamente" />
+    <Member Name="Everydayat" Description="Todos los días a las " />
+    <Member Name="StartingOn" Description="A partir de" />
+    <Member Name="ScheduleRuleHourlyDN" Description="Cada x horas" />
+    <Member Name="ScheduleRuleMinutelyDN" Description="Cada x minutos" />
+    <Member Name="ScheduleRuleWeekDaysDN" Description="Días de la semana" />
+    <Member Name="AndHoliday" Description="y festivos" />
+    <Member Name="At" Description="a las" />
+    <Member Name="ButHoliday" Description="excepto festivos" />
+    <Member Name="Calendar" Description="Calendario" />
+    <Member Name="F" Description="V" />
+    <Member Name="Friday" Description="Viernes" />
+    <Member Name="Holiday" Description="Festivo" />
+    <Member Name="M" Description="L" />
+    <Member Name="Monday" Description="Lunes" />
+    <Member Name="S" Description="D" />
+    <Member Name="Sa" Description="S" />
+    <Member Name="Saturday" Description="Sábado" />
+    <Member Name="Sunday" Description="Domingo" />
+    <Member Name="T" Description="M" />
+    <Member Name="Th" Description="J" />
+    <Member Name="Thursday" Description="Jueves" />
+    <Member Name="Tuesday" Description="Martes" />
+    <Member Name="W" Description="X" />
+    <Member Name="Wednesday" Description="Miércoles" />
+    <Member Name="ScheduleRuleWeeklyDN" Description="Semanalmente" />
+    <Member Name="DayOfTheWeek" Description="Dia semana" />
+  </Type>
+  <Type Name="ScheduleRuleHourlyDN">
+    <Member Name="EachHour" Description="Cada hora" />
+    <Member Name="StartingOn" Description="A partir de" />
+  </Type>
+  <Type Name="ScheduleRuleMinutelyDN">
+    <Member Name="EachMinute" Description="Cada minuto" />
+    <Member Name="StartingOn" Description="A partir de" />
+  </Type>
+  <Type Name="SelectSomeRowsFirst" Description="Selecciona algunos elementos primero" />
+  <Type Name="SendData" Description="Enviar datos" />
+  <Type Name="SessionLogDN" Description="Registro de sesión">
+    <Member Name="Duration" Description="Duración" />
+    <Member Name="SessionEnd" Description="Final sesión" />
+    <Member Name="SessionStart" Description="Inicio sesión" />
+    <Member Name="SessionTimeOut" Description="Time out sesión" />
+    <Member Name="User" Description="Usuario" />
+    <Member Name="UserAgent" Description="User Agent" />
+    <Member Name="UserHostAddress" Description="User Host Address" />
+  </Type>
+  <Type Name="SmsMessage">
+    <Member Name="Insert" Description="Insertar" />
+    <Member Name="Insert" Description="Insertar" />
+    <Member Name="Message" Description="Mensaje" />
+    <Member Name="RemainingCharacters" Description="Caracteres restantes" />
+    <Member Name="RemainingCharacters" Description="Caracteres restantes" />
+    <Member Name="RemoveNonValidCharacters" Description="Quitar caracteres no válidos" />
+    <Member Name="RemoveNonValidCharacters" Description="Quitar caracteres no válidos" />
+    <Member Name="StatusCanNotBeUpdatedForNonSentMessages" Description="Estado no puede ser actualizado para mensajes no enviados" />
+    <Member Name="TheTemplateMustBeActiveToConstructSMSMessages" Description="La plantilla debe estar activa para crear un SMS" />
+    <Member Name="TheTextForTheSMSMessageExceedsTheLengthLimit" Description="El texto del mensaje SMS supera el límite de longitud" />
+  </Type>
+  <Type Name="SMSMessageDN" Description="Mensaje SMS">
+    <Member Name="Certified" Description="Certificado" />
+    <Member Name="DestinationNumber" Description="Número de destino" />
+    <Member Name="EditableMessage" Description="Mensaje editable" />
+    <Member Name="Exception" Description="Excepción" />
+    <Member Name="From" Description="De" />
+    <Member Name="Message" Description="Mensaje" />
+    <Member Name="MessageID" Description="ID de mensaje" />
+    <Member Name="Referred" Description="Relacionado" />
+    <Member Name="SendDate" Description="Fecha de envío" />
+    <Member Name="SendPackage" Description="Enviar paquete" />
+    <Member Name="State" Description="Estado" />
+    <Member Name="Template" Description="Plantilla" />
+    <Member Name="UpdatePackage" Description="Paquete de actualización" />
+  </Type>
+  <Type Name="SMSMessageOperation">
+    <Member Name="CreateSMSFromEntity" Description="Crear SMS desde entidad" />
+    <Member Name="CreateSMSFromSMSTemplate" Description="Crear SMS desde plantilla SMS" />
+    <Member Name="CreateSMSWithTemplateFromEntity" Description="Crear SMS con plantilla desde entidad" />
+    <Member Name="CreateUpdateStatusPackage" Description="Crear paquete de actualización de estado" />
+    <Member Name="Send" Description="Enviar" />
+    <Member Name="UpdateStatus" Description="Actualización de estado" />
+  </Type>
+  <Type Name="SmsMessages">
+    <Member Name="EndDateMustBeHigherThanStartDate" Description="La fecha de finalización debe ser mayor que la fecha de inicio" />
+  </Type>
+  <Type Name="SMSMessageState">
+    <Member Name="Created" Description="Creado" />
+    <Member Name="Delivered" Description="Entregado" />
+    <Member Name="Failed" Description="Fallido" />
+    <Member Name="Sent" Description="Enviado" />
+  </Type>
+  <Type Name="SMSPackageDN">
+    <Member Name="Name" Description="Nombre" />
+  </Type>
+  <Type Name="SMSProviderOperation">
+    <Member Name="SendSMSMessage" Description="Enviar mensaje SMS" />
+    <Member Name="SendSMSMessagesFromTemplate" Description="Enviar mensajes SMS de plantilla" />
+  </Type>
+  <Type Name="SMSSendPackageDN" Description="Paquete de envios SMS" />
+  <Type Name="SMSTemplateDN" Description="Plantilla SMS">
+    <Member Name="Active" Description="Activo" />
+    <Member Name="AssociatedType" Description="Tipo asociado" />
+    <Member Name="Certified" Description="Certificado" />
+    <Member Name="EditableMessage" Description="Mensaje editable" />
+    <Member Name="EndDate" Description="Fecha de finalización" />
+    <Member Name="From" Description="De" />
+    <Member Name="Message" Description="Mensaje" />
+    <Member Name="MessageLengthExceeded" Description="Longitud del mensaje superada" />
+    <Member Name="Name" Description="Nombre" />
+    <Member Name="RemoveNoSMSCharacters" Description="Quitar No SMSCharacters" />
+    <Member Name="StartDate" Description="Fecha de inicio" />
+    <Member Name="State" Description="Estado" />
+  </Type>
+  <Type Name="SMSTemplateOperation">
+    <Member Name="Create" Description="Crear" />
+    <Member Name="Disable" Description="Deshabilitar" />
+    <Member Name="Enable" Description="Habilitar" />
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="SMSTemplateState">
+    <Member Name="Created" Description="Creado" />
+    <Member Name="Modified" Description="Modificado" />
+  </Type>
+  <Type Name="SMSUpdatePackageDN" Description="Paquete de actualización de SMS" />
+  <Type Name="SMTPConfigurationDN" Description="Configuración SMTP">
+    <Member Name="ClientCertificationFiles" Description="Archivos de certificado de cliente" />
+    <Member Name="EnableSSL" Description="Habilitar SSL" />
+    <Member Name="Host" Description="Host" />
+    <Member Name="Name" Description="Nombre" />
+    <Member Name="Password" Description="Contraseña" />
+    <Member Name="Port" Description="Puerto" />
+    <Member Name="UseDefaultCredentials" Description="Utilizar credenciales predeterminadas" />
+    <Member Name="Username" Description="Nombre de usuario" />
+  </Type>
+  <Type Name="SMTPConfigurationOperation">
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="SMTPConfigurationQueries">
+    <Member Name="NoCredentialsData" Description="No hay datos de credenciales" />
+  </Type>
+  <Type Name="Source" Description="Fuente" />
+  <Type Name="StackTrace" Description="StackTrace" />
+  <Type Name="TargetSite" Description="Origen" />
+  <Type Name="The0">
+    <Member Name="f" Description="La {0}" />
+    <Member Name="m" Description="El {0}" />
+  </Type>
+  <Type Name="ThePasswordMustHaveBetween7And15CharactersEachOfThemBeingANumber09OrALetter" Description="La contraseña debe tener entre 7 y 15 caracteres, siendo cada uno de ellos un número de 0 a 9 o una letra" />
+  <Type Name="TypeAllowedBasic" Description="Permiso tipo básico">
+    <Member Name="Create" Description="Crear" />
+    <Member Name="Modify" Description="Modificar" />
+    <Member Name="None" Description="Ninguno" />
+    <Member Name="Read" Description="Lectura" />
+  </Type>
+  <Type Name="TypeConditionNameDN" Description="Nombre condición de tipo" />
+  <Type Name="UserChartDN" Description="Gráfico de usuario">
+    <Member Name="ChartScript" Description="Script de gráfico" />
+    <Member Name="Columns" Description="Columnas" />
+    <Member Name="DisplayName" Description="Nombre para mostrar" />
+    <Member Name="Filters" Description="Filtros" />
+    <Member Name="GroupResults" Description="Agrupar Resultados" />
+    <Member Name="Orders" Description="Órdenes" />
+    <Member Name="Query" Description="Consulta" />
+    <Member Name="Related" Description="Relacionado" />
+  </Type>
+  <Type Name="UserChartOperation">
+    <Member Name="Delete" Description="Eliminar" />
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="UserChartPartDN" Description="Gráfico de usuario parte">
+    <Member Name="RequiresTitle" Description="Requiere título" />
+    <Member Name="ShowData" Description="Mostrar datos" />
+    <Member Name="UserChart" Description="Gráfico de usuario" />
+  </Type>
+  <Type Name="UserDN" Description="Usuario">
+    <Member Name="AnulationDate" Description="Fecha de Anulation" />
+    <Member Name="CultureInfo" Description="Info de la cultura" />
+    <Member Name="Email" Description="e-Mail" />
+    <Member Name="PasswordHash" Description="Hash de la contraseña" />
+    <Member Name="PasswordNeverExpires" Description="La contraseña nunca caduca" />
+    <Member Name="PasswordSetDate" Description="Establecer fecha de contraseña" />
+    <Member Name="Related" Description="Relacionado" />
+    <Member Name="Role" Description="Rol" />
+    <Member Name="State" Description="Estado" />
+    <Member Name="UserName" Description="Login" />
+  </Type>
+  <Type Name="UserOperation">
+    <Member Name="Create" Description="Crear" />
+    <Member Name="Disable" Description="Deshabilitar" />
+    <Member Name="Enable" Description="Habilitar" />
+    <Member Name="Save" Description="Guardar" />
+    <Member Name="SaveNew" Description="Alta" />
+    <Member Name="SetPassword" Description="Establecer la contraseña" />
+  </Type>
+  <Type Name="UserProcessSessionDN" Description="Sesión de proceso de usuario">
+    <Member Name="User" Description="Usuario" />
+  </Type>
+  <Type Name="UserQueryDN" Description="Consulta de Usuario">
+    <Member Name="Columns" Description="Columnas" />
+    <Member Name="ColumnsMode" Description="Modo columnas" />
+    <Member Name="DisplayName" Description="Nombre" />
+    <Member Name="ElementsPerPage" Description="Elementos por página" />
+    <Member Name="Filters" Description="Filtros" />
+    <Member Name="Orders" Description="Ordenes" />
+    <Member Name="PreserveFilters" Description="Preservar Filtros" />
+    <Member Name="Query" Description="Consulta" />
+    <Member Name="Related" Description="Relacionado" />
+  </Type>
+  <Type Name="UserQueryMessage">
+    <Member Name="AreYouSureToRemove0" Description="¿Estás seguro de eliminar '{0}'?" />
+    <Member Name="Edit" Description="Editar" />
+    <Member Name="MyQueries" Description="Mis Queries" />
+    <Member Name="RemoveUserQuery" Description="¿Eliminar consulta personalizada?" />
+    <Member Name="ShouldBe1AllEmptyDefaultOrANumberGreaterThanZero" Description="{0} debe ser -1 (todos), vacío (por defecto) o un número mayor que cero" />
+    <Member Name="CreateNew" Description="Crear" />
+    <Member Name="Edit" Description="Editar" />
+    <Member Name="UserQueries" Description="Consultas de usuarios" />
+  </Type>
+  <Type Name="UserQueryOperation">
+    <Member Name="Delete" Description="Eliminar" />
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="UserQueryPartDN" Description="Parte consulta de usuario">
+    <Member Name="RequiresTitle" Description="Requiere título" />
+    <Member Name="UserQuery" Description="Consulta de usuario" />
+  </Type>
+  <Type Name="UserState">
+    <Member Name="Created" Description="Creado" />
+    <Member Name="Disabled" Description="Deshabilitado" />
+    <Member Name="New" Description="Nuevo" />
+  </Type>
+  <Type Name="UserTicketDN" Description="Ticket usuario">
+    <Member Name="ConnectionDate" Description="Fecha de conexión" />
+    <Member Name="Device" Description="Dispositivo" />
+    <Member Name="Ticket" Description="Ticket" />
+    <Member Name="User" Description="Usuario" />
+  </Type>
+  <Type Name="ViewName" Description="Nombre de la vista" />
+  <Type Name="ViewsChecker" Description="Comprobador de Vistas" />
+  <Type Name="YouRecentlyRequestedANewPassword" Description="Has solicitado recientemente una nueva contraseña" />
+  <Type Name="YourUsernameIs0" Description="Su nombre de usuario es: {0}" />
+</Translations>

@@ -1,4 +1,4 @@
-﻿@Html.DynamicCss("~/authAdmin/Content/SF_AuthAdmin.css")
+@Html.DynamicCss("~/authAdmin/Content/SF_AuthAdmin.css")
 @using (var tc = Html.TypeContext<QueryRulePack>())
 {
     @Html.EntityLine(tc, f => f.Role)
@@ -9,16 +9,16 @@
         <thead>
             <tr>
                 <th>
-                    @Resources.QueriesAscx_Query
+                    @AuthMessage.QueriesAscx_Query.NiceToString()
                 </th>
                 <th>
-                    @Resources.QueriesAscx_Allow
+                    @AuthMessage.QueriesAscx_Allow.NiceToString()
                 </th>
                 <th>
-                    @Resources.QueriesAscx_Deny
+                    @AuthMessage.QueriesAscx_Deny.NiceToString()
                 </th>
                 <th>
-                    @Resources.QueriesAscx_Overriden
+                    @AuthMessage.QueriesAscx_Overriden.NiceToString()
                 </th>
             </tr>
         </thead>

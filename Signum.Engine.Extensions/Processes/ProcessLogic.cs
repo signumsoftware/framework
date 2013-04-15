@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,7 +14,6 @@ using Signum.Utilities.DataStructures;
 using System.Diagnostics;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
-using Signum.Engine.Extensions.Properties;
 using Signum.Entities.Scheduler;
 using System.Reflection;
 using Signum.Utilities.Reflection;
@@ -180,7 +179,7 @@ namespace Signum.Engine.Processes
             ExecutingProcess execProc;
 
             if (!executing.TryGetValue(pe.Id, out execProc))
-                throw new ApplicationException(Resources.ProcessExecution0IsNotRunningAnymore.Formato(pe.Id));
+                throw new ApplicationException(ProcessMessage.ProcessExecution0IsNotRunningAnymore.NiceToString().Formato(pe.Id));
 
             execProc.Execution = pe;
             execProc.CancelationSource.Cancel();

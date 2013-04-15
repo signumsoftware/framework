@@ -1,6 +1,5 @@
-﻿@using Signum.Entities.DynamicQuery
+@using Signum.Entities.DynamicQuery
 @using Signum.Entities.Reflection
-@using Signum.Web.Properties
 @using Signum.Engine
 @using System.Web.Mvc
 @using Signum.Entities
@@ -15,7 +14,7 @@
 }
 @if (queryResult == null)
 { 
-    @Resources.Signum_noResults
+    @JavascriptMessage.Signum_noResults.NiceToString()
 }
 else
 {

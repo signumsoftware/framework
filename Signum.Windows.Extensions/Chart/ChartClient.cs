@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,7 +11,6 @@ using Signum.Entities.Authorization;
 using Signum.Windows.Authorization;
 using System.Windows;
 using Signum.Utilities;
-using Signum.Windows.Properties;
 using Microsoft.Win32;
 using System.Diagnostics;
 using System.IO;
@@ -65,8 +64,8 @@ namespace Signum.Windows.Chart
                 Constructor.Register<UserChartDN>(elem =>
                 {
                     MessageBox.Show(Window.GetWindow(elem),
-                        Signum.Windows.Extensions.Properties.Resources._0CanOnlyBeCreatedFromTheChartWindow.Formato(typeof(UserChartDN).NicePluralName()),
-                        Signum.Windows.Extensions.Properties.Resources.Create,
+                        ChartMessage._0CanOnlyBeCreatedFromTheChartWindow.NiceToString().Formato(typeof(UserChartDN).NicePluralName()),
+                        ChartMessage.UserChart_CreateNew.NiceToString(),
                         MessageBoxButton.OK, MessageBoxImage.Information);
                     return null;
                 }); 
@@ -82,7 +81,7 @@ namespace Signum.Windows.Chart
 
             var miResult = new MenuItem
             {
-                Header = Signum.Windows.Extensions.Properties.Resources.Chart,
+                Header = ChartMessage.Chart.NiceToString(),
                 Icon = ExtensionsImageLoader.GetImageSortName("chartIcon.png").ToSmallImage()
             };
 

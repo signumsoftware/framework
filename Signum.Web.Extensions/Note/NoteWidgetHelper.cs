@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Utilities;
 using System.Web.Mvc;
-using Signum.Web.Properties;
 using Signum.Web.Controllers;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Notes;
@@ -63,7 +62,7 @@ namespace Signum.Web.Notes
                 Prefix = prefix,
                 ControllerUrl = RouteHelper.New().Action<NoteController>(nc => nc.CreateNote(prefix)),
                 RequestExtraJsonData = "function(){{ return {{ {0}: new SF.RuntimeInfo('{1}').find().val() }}; }}".Formato(EntityBaseKeys.RuntimeInfo, prefix),
-                OnOkClosed = new JsFunction() { JsOnNoteCreated(prefix, Resources.NoteCreated) }
+                OnOkClosed = new JsFunction() { JsOnNoteCreated(prefix, NoteMessage.ViewNotes.NiceToString()) }
             };
 
             HtmlStringBuilder content = new HtmlStringBuilder();
@@ -74,7 +73,7 @@ namespace Signum.Web.Notes
                     content.AddLine(new HtmlTag("a")
                         .Class("sf-note-view")
                         .Attr("onclick", JsFindNavigator.openFinder(foptions).ToJS())
-                        .InnerHtml(Resources.ViewNotes.EncodeHtml())
+                        .InnerHtml(NoteMessage.ViewNotes.NiceToString().EncodeHtml())
                         .ToHtml());
                 }
 
@@ -83,7 +82,7 @@ namespace Signum.Web.Notes
                     content.AddLine(new HtmlTag("a")
                        .Class("sf-note-create")
                        .Attr("onclick", new JsViewNavigator(voptions).createSave(RouteHelper.New().SignumAction("TrySavePartial")).ToJS())
-                       .InnerHtml(Resources.CreateNote.EncodeHtml())
+                       .InnerHtml(NoteMessage.CreateNote.NiceToString().EncodeHtml())
                        .ToHtml());
                 }
             }
@@ -94,13 +93,13 @@ namespace Signum.Web.Notes
             
             var toggler = new HtmlTag("a")
                 .Class("sf-widget-toggler sf-notes-toggler").Class(count > 0 ? "sf-widget-toggler-active" : null)
-                .Attr("title", Resources.Notes);
+                .Attr("title", NoteMessage.Notes.NiceToString());
             
             using (label.Surround(toggler))
             {
                 label.Add(new HtmlTag("span")
                     .Class("ui-icon ui-icon-pin-w")
-                    .InnerHtml(Resources.Notes.EncodeHtml())
+                    .InnerHtml(NoteMessage.Notes.NiceToString().EncodeHtml())
                     .ToHtml());
                                 
                 label.Add(new HtmlTag("span")

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,7 +16,6 @@ using Signum.Entities.Reflection;
 using System.Linq.Expressions;
 using Signum.Engine.Maps;
 using System.Web.Routing;
-using Signum.Web.Extensions.Properties;
 using Signum.Engine.Basics;
 using Signum.Web.Basic;
 using Signum.Web.Omnibox;
@@ -48,7 +47,7 @@ namespace Signum.Web.AuthAdmin
                 }
 
                 if (properties)
-                    Register<PropertyRulePack, PropertyAllowedRule, PropertyDN, PropertyAllowed, string>("properties", a => a.Resource.Path,
+                    Register<PropertyRulePack, PropertyAllowedRule, PropertyRouteDN, PropertyAllowed, string>("properties", a => a.Resource.Path,
                         Mapping.New<PropertyAllowed>(), "Resource_Path", true);
 
                 if (queries)
@@ -76,9 +75,9 @@ namespace Signum.Web.AuthAdmin
                      entity.IsNew || !BasicPermission.AdminRules.IsAuthorized() ? null :
                      new[]
                      {
-                         types ? new QuickLinkAction(Resources._0Rules.Formato(typeof(TypeDN).NiceName()), RouteHelper.New().Action((AuthAdminController c)=>c.Types(entity.ToLite()))): null,
-                         permissions ? new QuickLinkAction(Resources._0Rules.Formato(typeof(PermissionDN).NiceName()), RouteHelper.New().Action((AuthAdminController c)=>c.Permissions(entity.ToLite()))): null,
-                         facadeMethods ? new QuickLinkAction(Resources._0Rules.Formato(typeof(FacadeMethodDN).NiceName()), RouteHelper.New().Action((AuthAdminController c)=>c.FacadeMethods(entity.ToLite()))): null
+                         types ? new QuickLinkAction(AuthMessage._0Rules.NiceToString().Formato(typeof(TypeDN).NiceName()), RouteHelper.New().Action((AuthAdminController c)=>c.Types(entity.ToLite()))): null,
+                         permissions ? new QuickLinkAction(AuthMessage._0Rules.NiceToString().Formato(typeof(PermissionDN).NiceName()), RouteHelper.New().Action((AuthAdminController c)=>c.Permissions(entity.ToLite()))): null,
+                         facadeMethods ? new QuickLinkAction(AuthMessage._0Rules.NiceToString().Formato(typeof(FacadeMethodDN).NiceName()), RouteHelper.New().Action((AuthAdminController c)=>c.FacadeMethods(entity.ToLite()))): null
                      });
 
                 SpecialOmniboxProvider.Register(new SpecialOmniboxAction("DownloadAuthRules",
@@ -154,7 +153,7 @@ namespace Signum.Web.AuthAdmin
                 new[] { new ToolBarButton { 
                     OnClick = (embedded ? "SF.Auth.postDialog('{0}', '{1}')" :  "SF.submit('{0}', '{1}')").Formato(
                         new UrlHelper(ctx.ControllerContext.RequestContext).Action((embedded? "save" : "") +  partialViewName, "AuthAdmin"), ctx.Prefix), 
-                    Text = Signum.Web.Properties.Resources.Save,
+                    Text = AuthMessage.Save.NiceToString(),
                     DivCssClass = ToolBarButton.DefaultEntityDivCssClass 
                 } 
                 });

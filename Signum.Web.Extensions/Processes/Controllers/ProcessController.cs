@@ -14,7 +14,6 @@ using Signum.Web;
 using Signum.Engine;
 using Signum.Engine.Operations;
 using Signum.Engine.Basics;
-using Signum.Web.Extensions.Properties;
 using Signum.Entities.Processes;
 using Signum.Engine.Processes;
 using Signum.Engine.Authorization;

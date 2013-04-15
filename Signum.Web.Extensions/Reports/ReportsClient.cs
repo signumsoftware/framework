@@ -1,4 +1,4 @@
-﻿#region usings
+#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +7,6 @@ using System.Reflection;
 using System.Web.Mvc;
 using Signum.Utilities;
 using System.Web.UI;
-using Signum.Web.Extensions.Properties;
 using Signum.Entities.Reports;
 using Signum.Entities.Basics;
 using Signum.Entities;
@@ -63,7 +62,7 @@ namespace Signum.Web.Reports
                             new ToolBarButton
                             {
                                 Id = TypeContextUtilities.Compose(ctx.Prefix, "ebReportDownload"),
-                                Text = Resources.Download,
+                                Text = ExcelMessage.Download.NiceToString(),
                                 OnClick = "window.open('" + RouteHelper.New().Action("DownloadTemplate", "Report", new { excelReport = entity.Id } ) + "');",
                             }
                         }.ToArray();
@@ -111,8 +110,8 @@ namespace Signum.Web.Reports
             ToolBarButton plain = new ToolBarButton
             {
                 Id = TypeContextUtilities.Compose(ctx.Prefix, "qbToExcelPlain"),
-                AltText = Resources.ExcelReport,
-                Text = Resources.ExcelReport,
+                AltText = ExcelMessage.ExcelReport.NiceToString(),
+                Text = ExcelMessage.ExcelReport.NiceToString(),
                 OnClick = Js.SubmitOnly(RouteHelper.New().Action("ToExcelPlain", "Report"), "$.extend({{userQuery:'{0}'}}, SF.FindNavigator.getFor('{1}').requestDataForSearch())".Formato((currentUserQuery != null ? currentUserQuery.IdOrNull : null), ctx.Prefix)).ToJS(),
                 DivCssClass = ToolBarButton.DefaultQueryCssClass
             };
@@ -148,8 +147,8 @@ namespace Signum.Web.Reports
                 items.Add(new ToolBarButton
                 {
                     Id = TypeContextUtilities.Compose(ctx.Prefix, "qbReportAdminister"),
-                    AltText = Resources.ExcelAdminister,
-                    Text = Resources.ExcelAdminister,
+                    AltText = ExcelMessage.ExcelAdminister.NiceToString(),
+                    Text = ExcelMessage.ExcelAdminister.NiceToString(),
                     OnClick = Js.SubmitOnly(RouteHelper.New().Action("Administer", "Report"), "{{webQueryName:'{0}'}}".Formato(Navigator.ResolveWebQueryName(ctx.QueryName))).ToJS(),
                     DivCssClass = ToolBarButton.DefaultQueryCssClass
                 });

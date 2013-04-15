@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +14,7 @@ using Signum.Windows.Omnibox;
 using System.Windows;
 using Signum.Utilities;
 using System.Windows.Controls;
+using Signum.Entities.Chart;
 
 namespace Signum.Windows.UserQueries
 {
@@ -65,8 +66,8 @@ namespace Signum.Windows.UserQueries
                 Constructor.Register<UserQueryDN>(elem =>
                 {
                     MessageBox.Show(Window.GetWindow(elem),
-                        Signum.Windows.Extensions.Properties.Resources._0CanOnlyBeCreatedFromTheSearchWindow.Formato(typeof(UserQueryDN).NicePluralName()),
-                        Signum.Windows.Extensions.Properties.Resources.Create,
+                        ChartMessage._0CanOnlyBeCreatedFromTheSearchWindow.NiceToString().Formato(typeof(UserQueryDN).NicePluralName()),
+                        ChartMessage.UserChart_CreateNew.NiceToString(),
                         MessageBoxButton.OK, MessageBoxImage.Information);
                     return null;
                 }); 

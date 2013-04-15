@@ -8,7 +8,6 @@ using Signum.Engine;
 using Signum.Engine.Authorization;
 using Signum.Services;
 using Signum.Utilities;
-using Signum.Web.Extensions.Properties;
 using System.Net.Mail;
 using System.Net;
 using System.Text;
@@ -33,7 +32,9 @@ namespace Signum.Web.Profiler
 
             ViewBag.OrderByTime = orderByTime;
 
-            var entries = orderByTime ? HeavyProfiler.Entries.OrderBy(a=>a.BeforeStart).ToList() : HeavyProfiler.Entries;
+            List<HeavyProfilerEntry> entries;
+            lock (HeavyProfiler.Entries)
+                entries = orderByTime ? HeavyProfiler.Entries.OrderBy(a => a.BeforeStart).ToList() : HeavyProfiler.Entries.ToList();
 
             return View(ProfilerClient.ViewPrefix.Formato("HeavyList"), entries);
         }

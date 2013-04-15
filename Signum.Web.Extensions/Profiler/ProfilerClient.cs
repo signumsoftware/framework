@@ -22,7 +22,6 @@ using System.Web.Script.Serialization;
 using System.Drawing;
 using Signum.Web.Omnibox;
 using Signum.Entities.Profiler;
-using Signum.Web.Extensions.Properties;
 
 namespace Signum.Web.Profiler
 {

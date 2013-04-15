@@ -8,7 +8,6 @@ using System.Threading;
 using System.Security.Cryptography;
 using System.ComponentModel;
 using System.Reflection;
-using Signum.Entities.Extensions.Properties;
 using Signum.Utilities.DataStructures;
 using System.Text.RegularExpressions;
 

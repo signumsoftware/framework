@@ -1,4 +1,4 @@
-﻿#region usings
+#region usings
 using System;
 using System.Web;
 using System.Web.Mvc;
@@ -9,7 +9,6 @@ using Signum.Engine;
 using Signum.Engine.Authorization;
 using Signum.Services;
 using Signum.Utilities;
-using Signum.Web.Extensions.Properties;
 using System.Net.Mail;
 using System.Net;
 using System.Text;
@@ -97,7 +96,7 @@ namespace Signum.Web.Auth
                 Prefix = prefix,
             }).validateAndAjax().ToJS();
 
-            ViewData[ViewDataKeys.Title] = Resources.EnterTheNewPassword;
+            ViewData[ViewDataKeys.Title] = AuthMessage.EnterTheNewPassword.NiceToString();
 
             TypeContext tc = TypeContextUtilities.UntypedNew(model, prefix);
             return this.PopupOpen(new PopupViewOptions(tc));
@@ -120,7 +119,7 @@ namespace Signum.Web.Auth
             if (TempData.ContainsKey("message") && TempData["message"] != null)
                 ViewData["message"] = TempData["message"].ToString();
 
-            ViewData["Title"] = Resources.ChangePassword;
+            ViewData["Title"] = AuthMessage.ChangePassword.NiceToString();
             return View(AuthClient.ChangePasswordView);
         }
 
@@ -144,7 +143,7 @@ namespace Signum.Web.Auth
                 if (context.GlobalErrors.Any())
                 {
                     ViewData["username"] = username;
-                    ViewData["Title"] = Resources.ChangePassword;
+                    ViewData["Title"] = AuthMessage.ChangePassword.NiceToString();
                     ModelState.FromContext(context);
                     return View(AuthClient.ChangePasswordView);
                 }
@@ -153,7 +152,7 @@ namespace Signum.Web.Auth
                 if (errorPasswordValidation.HasText())
                 {
                     ViewData["username"] = username;
-                    ViewData["Title"] = Resources.ChangePassword;
+                    ViewData["Title"] = AuthMessage.ChangePassword.NiceToString();
                     ModelState.AddModelError("password", errorPasswordValidation);
                     return View(AuthClient.ChangePasswordView);
                 }
@@ -165,7 +164,7 @@ namespace Signum.Web.Auth
                 var context = UserDN.Current.ApplyChanges(this.ControllerContext, "", UserMapping.ChangePasswordOld).ValidateGlobal();
                 if (context.GlobalErrors.Any())
                 {
-                    ViewData["Title"] = Resources.ChangePassword;
+                    ViewData["Title"] = AuthMessage.ChangePassword.NiceToString();
                     ModelState.FromContext(context);
                     RefreshSessionUserChanges();
                     return View(AuthClient.ChangePasswordView);
@@ -199,8 +198,8 @@ namespace Signum.Web.Auth
 
         public ActionResult ChangePasswordSuccess()
         {
-            ViewData["Message"] = Resources.PasswordHasBeenChangedSuccessfully;
-            ViewData["Title"] = Resources.ChangePassword;
+            ViewData["Message"] = AuthMessage.PasswordHasBeenChangedSuccessfully.NiceToString();
+            ViewData["Title"] = AuthMessage.ChangePassword.NiceToString();
 
             return View(AuthClient.ChangePasswordSuccessView);
         }
@@ -223,7 +222,7 @@ namespace Signum.Web.Auth
 
             if (string.IsNullOrEmpty(email))
             {
-                ModelState.AddModelError("email", Resources.EmailMustHaveAValue);
+                ModelState.AddModelError("email", AuthMessage.EmailMustHaveAValue.NiceToString());
                 return View(AuthClient.ResetPasswordView);
             }
 
@@ -246,7 +245,7 @@ namespace Signum.Web.Auth
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult ResetPasswordSend()
         {
-            ViewData["Message"] = Resources.ResetPasswordCodeHasBeenSent.Formato(ViewData["email"]);
+            ViewData["Message"] = AuthMessage.ResetPasswordCodeHasBeenSent.NiceToString().Formato(ViewData["email"]);
 
             return View(AuthClient.ResetPasswordSendView);
         }
@@ -259,7 +258,7 @@ namespace Signum.Web.Auth
             {
                 rpr = Database.Query<ResetPasswordRequestDN>()
                     .Where(r => r.User.Email == email && r.Code == code)
-                    .SingleOrDefaultEx(()=>Resources.TheConfirmationCodeThatYouHaveJustSentIsInvalid);
+                    .SingleOrDefaultEx(()=>AuthMessage.TheConfirmationCodeThatYouHaveJustSentIsInvalid.NiceToString());
             }
             TempData["ResetPasswordRequest"] = rpr;
 
@@ -272,7 +271,7 @@ namespace Signum.Web.Auth
             ResetPasswordRequestDN rpr = (ResetPasswordRequestDN)TempData["ResetPasswordRequest"];
             if (rpr == null)
             {
-                TempData["Error"] = Resources.ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin;
+                TempData["Error"] = AuthMessage.ThereHasBeenAnErrorWithYourRequestToResetYourPasswordPleaseEnterYourLogin.NiceToString();
                 return RedirectToAction("ResetPassword");
             }
             ViewData["rpr"] = rpr.Id;
@@ -297,7 +296,7 @@ namespace Signum.Web.Auth
             if (!context.Errors.TryGetC(UserMapping.NewPasswordKey).IsNullOrEmpty() ||
                 !context.Errors.TryGetC(UserMapping.NewPasswordBisKey).IsNullOrEmpty())
             {
-                ViewData["Title"] = Resources.ChangePassword;
+                ViewData["Title"] = AuthMessage.ChangePassword.NiceToString();
                 ModelState.FromContext(context);
                 return ResetPasswordSetNewError(request.Id, "");
             }
@@ -353,10 +352,10 @@ namespace Signum.Web.Auth
         {
             // Basic parameter validation
             if (!username.HasText())
-                return LoginErrorAjaxOrForm("username", Resources.UserNameMustHaveAValue);
+                return LoginErrorAjaxOrForm("username", AuthMessage.UserNameMustHaveAValue.NiceToString());
 
             if (string.IsNullOrEmpty(password))
-                return LoginErrorAjaxOrForm("password", Resources.PasswordMustHaveAValue);
+                return LoginErrorAjaxOrForm("password", AuthMessage.PasswordMustHaveAValue.NiceToString());
 
             // Attempt to login
             UserDN user = null;
@@ -366,21 +365,21 @@ namespace Signum.Web.Auth
             }
             catch (PasswordExpiredException)
             {
-                TempData["message"] = Resources.ExpiredPasswordMessage;
+                TempData["message"] = AuthMessage.ExpiredPasswordMessage.NiceToString();
                 TempData["username"] = username;
                 return RedirectToAction("ChangePassword");
             }
             catch (IncorrectUsernameException)
             {
-                return LoginErrorAjaxOrForm(Request.IsAjaxRequest() ? "username" : "_FORM", Resources.InvalidUsernameOrPassword);
+                return LoginErrorAjaxOrForm(Request.IsAjaxRequest() ? "username" : "_FORM", AuthMessage.InvalidUsernameOrPassword.NiceToString());
             }
             catch (IncorrectPasswordException)
             {
-                return LoginErrorAjaxOrForm(Request.IsAjaxRequest() ? "password" : "_FORM", Resources.InvalidUsernameOrPassword);
+                return LoginErrorAjaxOrForm(Request.IsAjaxRequest() ? "password" : "_FORM", AuthMessage.InvalidUsernameOrPassword.NiceToString());
             }
 
             if (user == null)
-                throw new Exception(Resources.ExpectedUserLogged);
+                throw new Exception(AuthMessage.ExpectedUserLogged.NiceToString());
 
 
             if (OnUserPreLogin != null)

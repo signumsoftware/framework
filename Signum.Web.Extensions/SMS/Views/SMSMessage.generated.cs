@@ -39,13 +39,19 @@ namespace Signum.Web.Extensions.SMS.Views
     #line default
     #line hidden
     
+    #line 4 "..\..\SMS\Views\SMSMessage.cshtml"
+    using Signum.Utilities;
+    
+    #line default
+    #line hidden
+    
     #line 3 "..\..\SMS\Views\SMSMessage.cshtml"
     using Signum.Web;
     
     #line default
     #line hidden
     
-    #line 4 "..\..\SMS\Views\SMSMessage.cshtml"
+    #line 5 "..\..\SMS\Views\SMSMessage.cshtml"
     using Signum.Web.SMS;
     
     #line default
@@ -64,11 +70,12 @@ namespace Signum.Web.Extensions.SMS.Views
 
 
 
+
 WriteLiteral("\r\n");
 
 
             
-            #line 6 "..\..\SMS\Views\SMSMessage.cshtml"
+            #line 7 "..\..\SMS\Views\SMSMessage.cshtml"
 Write(Html.ScriptCss("~/SMS/Content/SMS.css"));
 
             
@@ -78,7 +85,7 @@ WriteLiteral("\r\n\r\n");
 
 
             
-            #line 8 "..\..\SMS\Views\SMSMessage.cshtml"
+            #line 9 "..\..\SMS\Views\SMSMessage.cshtml"
  using (var e = Html.TypeContext<SMSMessageDN>())
 {   
     
@@ -86,87 +93,88 @@ WriteLiteral("\r\n\r\n");
             #line default
             #line hidden
             
-            #line 10 "..\..\SMS\Views\SMSMessage.cshtml"
+            #line 11 "..\..\SMS\Views\SMSMessage.cshtml"
 Write(Html.ValueLine(e, s => s.MessageID, vl =>
-    {
-        vl.Visible = !e.Value.IsNew;
-        vl.ReadOnly = true;
-    }));
+{
+    vl.Visible = !e.Value.IsNew;
+    vl.ReadOnly = true;
+}));
 
-            
-            #line default
-            #line hidden
-            
-            #line 14 "..\..\SMS\Views\SMSMessage.cshtml"
-      
-    
             
             #line default
             #line hidden
             
             #line 15 "..\..\SMS\Views\SMSMessage.cshtml"
-Write(Html.EntityLine(e, s => s.Template, vl => 
-    {
-        vl.Create = false;
-        vl.Remove = false;
-        vl.HideIfNull = true;
-    }));
-
-            
-            #line default
-            #line hidden
-            
-            #line 20 "..\..\SMS\Views\SMSMessage.cshtml"
-      
+  
     
             
             #line default
             #line hidden
             
+            #line 16 "..\..\SMS\Views\SMSMessage.cshtml"
+Write(Html.EntityLine(e, s => s.Template, vl =>
+{
+    vl.Create = false;
+    vl.Remove = false;
+    vl.HideIfNull = true;
+}));
+
+            
+            #line default
+            #line hidden
+            
             #line 21 "..\..\SMS\Views\SMSMessage.cshtml"
+  
+    
+            
+            #line default
+            #line hidden
+            
+            #line 22 "..\..\SMS\Views\SMSMessage.cshtml"
 Write(Html.ValueLine(e, s => s.Certified, vl => vl.ReadOnly = (e.Value.State != SMSMessageState.Created)));
 
             
             #line default
             #line hidden
             
-            #line 21 "..\..\SMS\Views\SMSMessage.cshtml"
+            #line 22 "..\..\SMS\Views\SMSMessage.cshtml"
                                                                                                         
     
             
             #line default
             #line hidden
             
-            #line 22 "..\..\SMS\Views\SMSMessage.cshtml"
+            #line 23 "..\..\SMS\Views\SMSMessage.cshtml"
 Write(Html.ValueLine(e, s => s.DestinationNumber, vl => vl.ReadOnly = !e.Value.IsNew));
 
             
             #line default
             #line hidden
             
-            #line 22 "..\..\SMS\Views\SMSMessage.cshtml"
+            #line 23 "..\..\SMS\Views\SMSMessage.cshtml"
                                                                                     
     
             
             #line default
             #line hidden
             
-            #line 23 "..\..\SMS\Views\SMSMessage.cshtml"
+            #line 24 "..\..\SMS\Views\SMSMessage.cshtml"
 Write(Html.ValueLine(e, s => s.Message, vl =>
-        {
-            vl.ValueLineType = ValueLineType.TextArea;
-            vl.ValueHtmlProps["cols"] = "30";
-            vl.ValueHtmlProps["rows"] = "6";
-            vl.ReadOnly = (!e.Value.EditableMessage || e.Value.State != SMSMessageState.Created);
-        }));
+{
+    vl.ValueLineType = ValueLineType.TextArea;
+    vl.ValueHtmlProps["cols"] = "30";
+    vl.ValueHtmlProps["rows"] = "6";
+    vl.ReadOnly = (!e.Value.EditableMessage || e.Value.State != SMSMessageState.Created);
+}));
 
             
             #line default
             #line hidden
             
-            #line 29 "..\..\SMS\Views\SMSMessage.cshtml"
-          
-    if(e.Value.State == SMSMessageState.Created && e.Value.EditableMessage) {
+            #line 30 "..\..\SMS\Views\SMSMessage.cshtml"
+  
+    if (e.Value.State == SMSMessageState.Created && e.Value.EditableMessage)
+    {
 
             
             #line default
@@ -175,7 +183,7 @@ WriteLiteral("        <div id=\"sfCharactersLeft\" data-url=\"");
 
 
             
-            #line 31 "..\..\SMS\Views\SMSMessage.cshtml"
+            #line 33 "..\..\SMS\Views\SMSMessage.cshtml"
                                          Write(Url.Action<SMSController>(s => s.GetDictionaries()));
 
             
@@ -185,8 +193,8 @@ WriteLiteral("\">\r\n            <p><span>");
 
 
             
-            #line 32 "..\..\SMS\Views\SMSMessage.cshtml"
-                Write(Signum.Web.Extensions.Properties.Resources.RemainingCharacters);
+            #line 34 "..\..\SMS\Views\SMSMessage.cshtml"
+                Write(SmsMessage.RemainingCharacters.NiceToString());
 
             
             #line default
@@ -200,8 +208,8 @@ WriteLiteral("        <div>\r\n            <input type=\"button\" class=\"sf-but
 
 
             
-            #line 35 "..\..\SMS\Views\SMSMessage.cshtml"
-                                                                             Write(Signum.Web.Extensions.Properties.Resources.RemoveNonValidCharacters);
+            #line 37 "..\..\SMS\Views\SMSMessage.cshtml"
+                                                                             Write(SmsMessage.RemoveNonValidCharacters.NiceToString());
 
             
             #line default
@@ -210,8 +218,8 @@ WriteLiteral("\" data-url=\"");
 
 
             
-            #line 35 "..\..\SMS\Views\SMSMessage.cshtml"
-                                                                                                                                                              Write(Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")));
+            #line 37 "..\..\SMS\Views\SMSMessage.cshtml"
+                                                                                                                                             Write(Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")));
 
             
             #line default
@@ -220,7 +228,7 @@ WriteLiteral("\"/>\r\n        </div>\r\n");
 
 
             
-            #line 37 "..\..\SMS\Views\SMSMessage.cshtml"
+            #line 39 "..\..\SMS\Views\SMSMessage.cshtml"
     }
 
             
@@ -230,20 +238,20 @@ WriteLiteral("    <br />\r\n");
 
 
             
-            #line 39 "..\..\SMS\Views\SMSMessage.cshtml"
+            #line 41 "..\..\SMS\Views\SMSMessage.cshtml"
     
             
             #line default
             #line hidden
             
-            #line 39 "..\..\SMS\Views\SMSMessage.cshtml"
+            #line 41 "..\..\SMS\Views\SMSMessage.cshtml"
 Write(Html.ValueLine(e, s => s.From, vl => vl.ReadOnly = (e.Value.State != SMSMessageState.Created)));
 
             
             #line default
             #line hidden
             
-            #line 39 "..\..\SMS\Views\SMSMessage.cshtml"
+            #line 41 "..\..\SMS\Views\SMSMessage.cshtml"
                                                                                                    
 
     if (e.Value.State != SMSMessageState.Created)
@@ -253,28 +261,28 @@ Write(Html.ValueLine(e, s => s.From, vl => vl.ReadOnly = (e.Value.State != SMSMe
             #line default
             #line hidden
             
-            #line 43 "..\..\SMS\Views\SMSMessage.cshtml"
+            #line 45 "..\..\SMS\Views\SMSMessage.cshtml"
    Write(Html.ValueLine(e, s => s.SendDate, vl => vl.ReadOnly = true));
 
             
             #line default
             #line hidden
             
-            #line 43 "..\..\SMS\Views\SMSMessage.cshtml"
+            #line 45 "..\..\SMS\Views\SMSMessage.cshtml"
                                                                      
         
             
             #line default
             #line hidden
             
-            #line 44 "..\..\SMS\Views\SMSMessage.cshtml"
+            #line 46 "..\..\SMS\Views\SMSMessage.cshtml"
    Write(Html.ValueLine(e, s => s.State, vl => vl.ReadOnly = true));
 
             
             #line default
             #line hidden
             
-            #line 44 "..\..\SMS\Views\SMSMessage.cshtml"
+            #line 46 "..\..\SMS\Views\SMSMessage.cshtml"
                                                                   
     }
 }
@@ -284,7 +292,7 @@ Write(Html.ValueLine(e, s => s.From, vl => vl.ReadOnly = (e.Value.State != SMSMe
             #line hidden
 
             
-            #line 47 "..\..\SMS\Views\SMSMessage.cshtml"
+            #line 49 "..\..\SMS\Views\SMSMessage.cshtml"
 Write(Html.ScriptsJs("~/SMS/Scripts/SF_SMS.js"));
 
             

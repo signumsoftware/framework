@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,7 +22,7 @@ namespace Signum.Windows.Reports
         {
             MenuItem miResult = new MenuItem()
             {
-                Header = Prop.Resources.ExcelReport,
+                Header = ExcelMessage.ExcelReport.NiceToString(),
                 Icon = ExtensionsImageLoader.GetImageSortName("excelPlain.png").ToSmallImage(),
             };
 
@@ -34,10 +34,10 @@ namespace Signum.Windows.Reports
                 {
                     AddExtension = true,
                     DefaultExt = ".xlsx",
-                    Filter = Prop.Resources.Excel2007Spreadsheet,
+                    Filter = ExcelMessage.Excel2007Spreadsheet.NiceToString(),
                     OverwritePrompt = true,
                     FileName = "{0}.xlsx".Formato(QueryUtils.GetNiceName(sc.QueryName)),
-                    Title = Prop.Resources.FindLocationFoExcelReport
+                    Title = ExcelMessage.FindLocationFoExcelReport.NiceToString()
                 };
 
                 if (sfd.ShowDialog(Window.GetWindow(sc)) == true)

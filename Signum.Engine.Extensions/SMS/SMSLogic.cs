@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +6,6 @@ using Signum.Engine.Maps;
 using Signum.Engine.DynamicQuery;
 using System.Reflection;
 using Signum.Entities.SMS;
-using Signum.Engine.Extensions.Properties;
 using Signum.Entities;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
@@ -311,7 +310,7 @@ namespace Signum.Engine.SMS
                 switch (onExceeded)
                 {
                     case MessageLengthExceeded.NotAllowed:
-                        throw new ApplicationException(Signum.Engine.Extensions.Properties.Resources.TheTextForTheSMSMessageExceedsTheLengthLimit);
+                        throw new ApplicationException(SmsMessage.TheTextForTheSMSMessageExceedsTheLengthLimit.NiceToString());
                     case MessageLengthExceeded.Allowed:
                         break;
                     case MessageLengthExceeded.TextPruning:
@@ -489,7 +488,7 @@ namespace Signum.Engine.SMS
 
             new ConstructFrom<SMSTemplateDN>(SMSMessageOperation.CreateSMSFromSMSTemplate)
             {
-                CanConstruct = t => !t.Active ? Resources.TheTemplateMustBeActiveToConstructSMSMessages : null,
+                CanConstruct = t => !t.Active ? SmsMessage.TheTemplateMustBeActiveToConstructSMSMessages.NiceToString() : null,
                 ToState = SMSMessageState.Created,
                 Construct = (t, args) =>
                 {
@@ -517,7 +516,7 @@ namespace Signum.Engine.SMS
 
             new BasicExecute<SMSMessageDN>(SMSMessageOperation.UpdateStatus)
             {
-                CanExecute = m => m.State != SMSMessageState.Created ? null : Resources.StatusCanNotBeUpdatedForNonSentMessages,
+                CanExecute = m => m.State != SMSMessageState.Created ? null : SmsMessage.StatusCanNotBeUpdatedForNonSentMessages.NiceToString(),
                 Execute = (sms, args) =>
                 {
                     var func = args.TryGetArgC<Func<SMSMessageDN, SMSMessageState>>();

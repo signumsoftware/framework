@@ -9,7 +9,6 @@ using System.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using System.ComponentModel;
 using Signum.Entities.Reports;
-using Signum.Entities.Extensions.Properties;
 using Signum.Entities.UserQueries;
 using Signum.Entities.Reflection;
 
@@ -94,26 +93,26 @@ namespace Signum.Entities.Chart
         [Ignore]
         internal IChartBase parentChart;
 
-        [AvoidLocalization]
+        [HiddenProperty]
         public IChartBase ParentChart { get { return parentChart; } }
 
-        [AvoidLocalization]
+        [HiddenProperty]
         public bool? IsGroupKey { get { return (!parentChart.GroupResults) ? (bool?)null: ScriptColumn.IsGroupKey; } }
 
-        [AvoidLocalization]
+        [HiddenProperty]
         public bool GroupByVisible { get { return parentChart.ChartScript.GroupBy != GroupByChart.Never && ScriptColumn.IsGroupKey; } }
 
-        [AvoidLocalization]
+        [HiddenProperty]
         public bool GroupByEnabled { get { return parentChart.ChartScript.GroupBy != GroupByChart.Always; } }
 
-        [AvoidLocalization]
+        [HiddenProperty]
         public bool GroupByChecked
         {
             get { return parentChart.GroupResults; }
             set { parentChart.GroupResults = value; }
         }
 
-        [AvoidLocalization]
+        [HiddenProperty]
         public string PropertyLabel { get { return ScriptColumn.DisplayName; } }
 
         int index;

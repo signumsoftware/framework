@@ -1,9 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using Signum.Web.Extensions.Properties;
 using Signum.Entities.Chart;
 using Signum.Engine.DynamicQuery;
 using Signum.Utilities;
@@ -29,7 +28,7 @@ namespace Signum.Web.Chart
         public ActionResult Index(FindOptions findOptions)
         {
             if (!Navigator.IsFindable(findOptions.QueryName))
-                throw new UnauthorizedAccessException(Resources.Chart_Query0IsNotAllowed.Formato(findOptions.QueryName));
+                throw new UnauthorizedAccessException(ChartMessage.Chart_Query0IsNotAllowed.NiceToString().Formato(findOptions.QueryName));
 
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
@@ -221,7 +220,7 @@ namespace Signum.Web.Chart
             var request = ExtractChartRequestCtx(prefix, null).Value;
 
             if (!Navigator.IsFindable(request.QueryName))
-                throw new UnauthorizedAccessException(Resources.Chart_Query0IsNotAllowed.Formato(request.QueryName));
+                throw new UnauthorizedAccessException(ChartMessage.Chart_Query0IsNotAllowed.NiceToString().Formato(request.QueryName));
 
             var resultTable = ChartLogic.ExecuteChart(request);
 
@@ -262,7 +261,7 @@ namespace Signum.Web.Chart
             var request = ExtractChartRequestCtx(prefix, null).Value;
 
             if (!Navigator.IsFindable(request.QueryName))
-                throw new UnauthorizedAccessException(Resources.Chart_Query0IsNotAllowed.Formato(request.QueryName));
+                throw new UnauthorizedAccessException(ChartMessage.Chart_Query0IsNotAllowed.NiceToString().Formato(request.QueryName));
 
             var userChart = request.ToUserChart();
 

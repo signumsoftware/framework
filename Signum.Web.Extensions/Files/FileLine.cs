@@ -9,7 +9,6 @@ using Signum.Utilities;
 using Signum.Entities.Files;
 using Signum.Entities;
 using Signum.Entities.Reflection;
-using Signum.Web.Extensions.Properties;
 using System.Linq.Expressions;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;

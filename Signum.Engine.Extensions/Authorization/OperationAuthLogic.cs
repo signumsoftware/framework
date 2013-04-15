@@ -13,7 +13,6 @@ using System.Threading;
 using Signum.Entities;
 using Signum.Engine.Operations;
 using System.Reflection;
-using Signum.Engine.Extensions.Properties;
 using Signum.Entities.DynamicQuery;
 
 namespace Signum.Engine.Authorization

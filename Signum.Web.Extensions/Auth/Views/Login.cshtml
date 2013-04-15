@@ -1,5 +1,5 @@
-﻿@{  
-    ViewBag.Title = Resources.LoginEnter;
+@{  
+    ViewBag.Title = AuthMessage.LoginEnter.NiceToString();
 }
 <script type="text/javascript">
     $(function () { $("#username").focus(); });
@@ -8,7 +8,7 @@
 <h2>
     Login</h2>
 <p>
-    @Resources.IntroduceYourUserNameAndPassword
+    @AuthMessage.IntroduceYourUserNameAndPassword.NiceToString()
 </p>
 @Html.ValidationSummary()
 @using (Html.BeginForm())
@@ -17,7 +17,7 @@
         <table>
             <tr>
                 <td>
-                    @Resources.User:
+                    @AuthMessage.User.NiceToString():
                 </td>
                 <td>
                     @Html.TextBox("username")
@@ -26,7 +26,7 @@
             </tr>
             <tr>
                 <td>
-                    @Resources.Password:
+                    @AuthMessage.Password.NiceToString():
                 </td>
                 <td>
                     @Html.Password("password")
@@ -39,7 +39,7 @@
                 <td>
                     @if (Request.Browser.Cookies)
                     {
-                        @Html.CheckBox("rememberMe") @Resources.RememberMe
+                        @Html.CheckBox("rememberMe") @AuthMessage.RememberMe.NiceToString()
                     }
                 </td>
             </tr>
@@ -47,7 +47,7 @@
                 <td>
                 </td>
                 <td>
-                    <input class="sf-button login" type="submit" value="@Resources.LoginEnter" />
+                    <input class="sf-button login" type="submit" value="@AuthMessage.LoginEnter.NiceToString()" />
                 </td>
             </tr>
             @if (AuthClient.ResetPasswordStarted)
@@ -56,7 +56,7 @@
                     <td>
                     </td>
                     <td>
-                        <div id="sf-login-reset-password">@Html.ActionLink(Resources.IHaveForgottenMyPassword, "resetPassword", "auth")</div>
+                        <div id="sf-login-reset-password">@Html.ActionLink(AuthMessage.IHaveForgottenMyPassword.NiceToString(), "resetPassword", "auth")</div>
                     </td>
                 </tr>
             }

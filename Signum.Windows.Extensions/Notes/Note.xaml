@@ -25,23 +25,34 @@
     </UserControl.Background>
 
     <Grid x:Name="LayoutRoot">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <m:EntityLine  m:Common.Route="CreatedBy" 
+        
+        <m:EntityLine Grid.Row="0" Grid.Column="0" 
+                      m:Common.Route="CreatedBy" 
                       FontFamily="Comic Sans MS" FontWeight="Bold" 
-                      FontSize="14" m:Common.IsReadOnly="True" Grid.Row="0" />
-        <m:ValueLine Grid.Row="1" 
-                     m:Common.Route="CreationDate" FontFamily="Comic Sans MS" 
-                     FontWeight="Bold" FontSize="14" m:Common.IsReadOnly="True"/>
-        <m:ValueLine Grid.Row="3" 
+                      FontSize="14" m:Common.IsReadOnly="True" />
+        <m:ValueLine Grid.Row="0"  Grid.Column="1" 
+                     m:Common.Route="CreationDate" FontFamily="Comic Sans MS" FontWeight="Bold" 
+                     FontSize="14" m:Common.IsReadOnly="True"/>
+        
+        <m:EntityCombo Grid.Row="1" Grid.ColumnSpan="2"
+                     m:Common.Route="NoteType" FontFamily="Comic Sans MS" 
+                     FontWeight="Bold" FontSize="14" Remove="True" />
+        
+        <m:ValueLine Grid.Row="2" Grid.ColumnSpan="2"
                      m:Common.Route="Title" FontFamily="Comic Sans MS" 
                      FontWeight="Bold" FontSize="14"/>
-        <TextBox TextWrapping="Wrap" Grid.Row="4" Margin="8,8,8,8"  
+
+        <TextBox TextWrapping="Wrap" Grid.Row="3"  Grid.ColumnSpan="2" Margin="8,8,8,8"  
                  Background="#7FFFFFFF" Style="{DynamicResource toolTip}" AcceptsReturn="True"
 			Text="{Binding Path=Text, Mode=Default, 
             ValidatesOnDataErrors=True, 

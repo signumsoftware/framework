@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Signum.Entities.Extensions;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities;
 using System.Windows;
@@ -10,7 +9,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Controls;
 using System.IO;
 using Microsoft.Win32;
-using Prop = Signum.Windows.Extensions.Properties;
 using Signum.Services;
 using System.Windows.Documents;
 using Signum.Utilities;
@@ -45,7 +43,7 @@ namespace Signum.Windows.UserQueries
                     Inlines = 
                     { 
                         new Run(
-                        current == null ? Prop.Resources.MyQueries : current.DisplayName), 
+                        current == null ? UserQueryMessage.MyQueries.NiceToString() : current.DisplayName), 
                         userQueries.IsNullOrEmpty() ? (Inline)new Run():  new Bold(new Run(" (" + userQueries.Count + ")")) 
                     }
                 };
@@ -104,7 +102,7 @@ namespace Signum.Windows.UserQueries
             {
                 e.Handled = true;
 
-                if (MessageBox.Show(Prop.Resources.AreYouSureToRemove0.Formato(current), Prop.Resources.RemoveUserQuery,
+                if (MessageBox.Show(UserQueryMessage.AreYouSureToRemove0.NiceToString().Formato(current), UserQueryMessage.RemoveUserQuery.NiceToString(),
                     MessageBoxButton.YesNo, MessageBoxImage.Exclamation, MessageBoxResult.No) == MessageBoxResult.Yes)
                 {
                     Server.Execute((IUserQueryServer s) => s.RemoveUserQuery(current.ToLite()));
@@ -166,20 +164,20 @@ namespace Signum.Windows.UserQueries
                 {
                     miResult.Items.Add(new MenuItem()
                     {
-                        Header = Signum.Windows.Extensions.Properties.Resources.Create,
+                        Header = EntityControlMessage.Create.NiceToString(),
                         Icon = ExtensionsImageLoader.GetImageSortName("add.png").ToSmallImage()
                     }.Handle(MenuItem.ClickEvent, new_Clicked));
                 }
 
                 miResult.Items.Add(edit = new MenuItem()
                 {
-                    Header = Signum.Windows.Extensions.Properties.Resources.Edit,
+                    Header = UserQueryMessage.Edit.NiceToString(),
                     Icon = ExtensionsImageLoader.GetImageSortName("edit.png").ToSmallImage()
                 }.Handle(MenuItem.ClickEvent, edit_Clicked));
 
                 miResult.Items.Add(remove = new MenuItem()
                 {
-                    Header = Signum.Windows.Extensions.Properties.Resources.Remove,
+                    Header = EntityControlMessage.Remove.NiceToString(),
                     Icon = ExtensionsImageLoader.GetImageSortName("remove.png").ToSmallImage()
                 }.Handle(MenuItem.ClickEvent, remove_Clicked));
             };

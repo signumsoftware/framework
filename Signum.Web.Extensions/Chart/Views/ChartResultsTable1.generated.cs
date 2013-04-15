@@ -76,8 +76,7 @@ namespace Signum.Web.Extensions.Chart.Views
     #line hidden
     
     #line 3 "..\..\Chart\Views\ChartResultsTable.cshtml"
-    using Signum.Web.Properties;
-    
+        
     #line default
     #line hidden
     
@@ -123,14 +122,14 @@ namespace Signum.Web.Extensions.Chart.Views
             #line hidden
             
             #line 18 "..\..\Chart\Views\ChartResultsTable.cshtml"
-Write(Resources.Signum_noResults);
+Write(JavascriptMessage.Signum_noResults.NiceToString());
 
             
             #line default
             #line hidden
             
             #line 18 "..\..\Chart\Views\ChartResultsTable.cshtml"
-                               
+                                                      
 }
 else
 {
@@ -255,7 +254,7 @@ WriteLiteral("\">");
 
             
             #line 52 "..\..\Chart\Views\ChartResultsTable.cshtml"
-                                                                                 Write(Resources.Signum_noResults);
+                                                                                 Write(JavascriptMessage.Signum_noResults.NiceToString());
 
             
             #line default

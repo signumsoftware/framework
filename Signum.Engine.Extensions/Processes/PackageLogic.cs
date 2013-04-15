@@ -10,7 +10,6 @@ using Signum.Engine.Basics;
 using System.Reflection;
 using Signum.Entities.Scheduler;
 using Signum.Utilities.Reflection;
-using Signum.Engine.Extensions.Properties;
 using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
 using Signum.Engine.Exceptions;

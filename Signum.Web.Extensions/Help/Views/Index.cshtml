@@ -1,9 +1,10 @@
-﻿@using Signum.Web.Extensions
+@using Signum.Web.Extensions
 @using Signum.Web.Extensions.Properties
 @using Signum.Web.Help
+@using Signum.Entities.Help
 @using Signum.Engine.Help
 @{  
-    ViewBag.Title = Resources.HelpDocumentation;
+    ViewBag.Title = HelpMessage.HelpDocumentation.NiceToString();
 }
 
 @section head
@@ -11,7 +12,7 @@
     @Html.ScriptCss("~/help/Content/help.css")
 }
 <div id="entityContent">
-    <h1>@Resources.HelpDocumentation</h1>
+    <h1>@HelpMessage.HelpDocumentation.NiceToString()</h1>
     <table>
         <tr>
             @foreach (NamespaceModel item in ((NamespaceModel)Model).Namespaces)
@@ -27,7 +28,7 @@
         List<AppendixHelp> appendices = (List<AppendixHelp>)ViewData["appendices"];
         if (appendices.Count > 0)
         {
-        <h2>@Resources.Appendices</h2>
+        <h2>@HelpMessage.Appendices.NiceToString()</h2>
         <ul>
             @foreach (var a in appendices)
             {

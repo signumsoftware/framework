@@ -19,16 +19,7 @@ namespace Signum.Entities.Mailing
             set { Set(ref fullClassName, value, () => FullClassName); }
         }
 
-        [NotNullable]
-        string friendlyName;
-        [StringLengthValidator(Min = 1)]
-        public string FriendlyName
-        {
-            get { return friendlyName; }
-            set { Set(ref friendlyName, value, () => FriendlyName); }
-        }
-
-        static readonly Expression<Func<EmailTemplateDN, string>> ToStringExpression = e => e.friendlyName;
+        static readonly Expression<Func<EmailTemplateDN, string>> ToStringExpression = e => e.fullClassName;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

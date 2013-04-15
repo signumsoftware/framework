@@ -23,6 +23,7 @@ namespace Signum.Web.Notes
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
+                    new EntitySettings<NoteTypeDN>{ PartialViewName = _ => ViewPrefix.Formato("NoteType") },
                     new EntitySettings<NoteDN> 
                     { 
                         PartialViewName = _ => ViewPrefix.Formato("Note"), 

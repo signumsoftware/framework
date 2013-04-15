@@ -1,5 +1,4 @@
 ﻿@using System.Configuration
-@using Signum.Web.Properties
 @using Signum.Entities.ControlPanel
 @using Signum.Web.ControlPanel
 @using Signum.Entities.DynamicQuery
@@ -9,5 +8,5 @@
 @using(var tc = Html.TypeContext<UserChartPartDN>())
 {
     @Html.EntityLine(tc, ucp => ucp.UserChart, el => el.Create = false)
-    @Html.ValueLine(tc, ucp => ucp.OnlyData)
+    @Html.ValueLine(tc, ucp => ucp.ShowData)
 }

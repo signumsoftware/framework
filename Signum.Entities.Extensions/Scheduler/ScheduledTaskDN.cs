@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using Signum.Entities;
 using Signum.Utilities;
-using Signum.Entities.Extensions.Properties;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Processes;
 

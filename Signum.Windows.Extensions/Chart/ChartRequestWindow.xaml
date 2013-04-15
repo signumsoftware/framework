@@ -1,14 +1,15 @@
-﻿<Window x:Class="Signum.Windows.Chart.ChartRequestWindow"
+<Window x:Class="Signum.Windows.Chart.ChartRequestWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:e="clr-namespace:Signum.Entities;assembly=Signum.Entities"
     xmlns:c="clr-namespace:Signum.Windows.Chart"
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
-    xmlns:dn="clr-namespace:Signum.Entities.Chart;assembly=Signum.Entities.Extensions"
+    xmlns:d="clr-namespace:Signum.Entities.Chart;assembly=Signum.Entities.Extensions"
     Title="ChartWindow" SizeToContent="WidthAndHeight" 
     TextOptions.TextFormattingMode="Display"
     UseLayoutRounding="True" 
     m:Monitors.AdjustToMonitor="True"
-    m:Common.TypeContext="{x:Type dn:ChartRequest}">
+    m:Common.TypeContext="{x:Type d:ChartRequest}">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -34,7 +35,7 @@
                 </LinearGradientBrush>
             </Border.Background>
             <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Margin="5">
-                <TextBox IsReadOnly="True" Foreground="#ff333333" BorderThickness="0" FontSize="18" Background="{x:Null}" Text="{m:Loc ChartFor0}" />
+                <TextBox IsReadOnly="True" Foreground="#ff333333" BorderThickness="0" FontSize="18" Background="{x:Null}" Text="{m:Loc {x:Static d:ChartMessage.ChartFor}}" />
                 <TextBox x:Name="tbEntityType" IsReadOnly="True" Foreground="#ff333333" BorderThickness="0" FontSize="18" Background="{x:Null}" TextBlock.FontWeight="SemiBold" />
                 <TextBox x:Name="tbQueryName" IsReadOnly="True"  Foreground="#ff666666"  BorderThickness="0" FontSize="18" Background="{x:Null}" />
             </StackPanel>
@@ -47,7 +48,7 @@
                 </Grid.RowDefinitions>
                 <StackPanel Orientation="Horizontal" >
                     <m:QueryTokenBuilder x:Name="qtbFilters" SubTokensEvent="qtbFilters_SubTokensEvent" />
-                    <m:ImageButton Image="pack://application:,,,/Signum.Windows;component/Images/newFilter.png" Content="{m:Loc NewFilter, AssemblyType=m:SearchControl}" x:Name="btCreateFilter" Margin="2,2,2,2" VerticalAlignment="Center" Click="btCreateFilter_Click" ToolTipService.ShowOnDisabled="True" />
+                    <m:ImageButton Image="pack://application:,,,/Signum.Windows;component/Images/newFilter.png" Content="{m:Loc {x:Static e:SearchMessage.NewFilter}}" x:Name="btCreateFilter" Margin="2,2,2,2" VerticalAlignment="Center" Click="btCreateFilter_Click" ToolTipService.ShowOnDisabled="True" />
                 </StackPanel>
                 <m:FilterBuilder x:Name="filterBuilder" Grid.Row="1"/>
             </Grid>

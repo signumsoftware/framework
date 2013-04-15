@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using System.Security.Authentication;
-using Signum.Entities.Extensions.Properties;
 using System.Linq.Expressions;
 
 namespace Signum.Entities.Authorization
@@ -41,16 +40,16 @@ namespace Signum.Entities.Authorization
             {
                 UserDN user = UserDN.Current;
                 if (user == null)
-                    throw new AuthenticationException(Resources.NotUserLogged);
+                    throw new AuthenticationException(AuthMessage.NotUserLogged.NiceToString());
 
                return user.Role;
             }
         }
     }
 
-    public enum RoleQueries
+    public enum RoleQuery
     {
-        ReferedBy
+        RolesReferedBy
     }
 
     public enum RoleOperation

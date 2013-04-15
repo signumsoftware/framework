@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace Signum.Entities.Authorization
 {
-    [Serializable, EntityKind(EntityKind.System), AvoidLocalization]
+    [Serializable, EntityKind(EntityKind.System)]
     public class RuleDN<R, A> : IdentifiableEntity
         where R: IdentifiableEntity
     {
@@ -59,7 +59,7 @@ namespace Signum.Entities.Authorization
     public class RuleOperationDN : RuleDN<OperationDN, OperationAllowed> { }
 
     [Serializable]
-    public class RulePropertyDN : RuleDN<PropertyDN, PropertyAllowed> { }
+    public class RulePropertyDN : RuleDN<PropertyRouteDN, PropertyAllowed> { }
    
     [Serializable]
     public class RuleTypeDN : RuleDN<TypeDN, TypeAllowed> 
@@ -125,6 +125,7 @@ namespace Signum.Entities.Authorization
         }
     }
 
+    [DescriptionOptions(DescriptionOptions.Members)]
     public enum OperationAllowed
     {
         None = 0, 
@@ -132,6 +133,7 @@ namespace Signum.Entities.Authorization
         Allow = 2,
     }
 
+    [DescriptionOptions(DescriptionOptions.Members)]
     public enum PropertyAllowed
     {
         None,
@@ -139,7 +141,7 @@ namespace Signum.Entities.Authorization
         Modify,
     }
 
-    [AvoidLocalization]
+    [DescriptionOptions(DescriptionOptions.Members)]
     public enum TypeAllowed
     {
         None =             TypeAllowedBasic.None << 2 | TypeAllowedBasic.None,
@@ -217,7 +219,7 @@ namespace Signum.Entities.Authorization
         }
     }
 
-    [ForceLocalization]
+    [DescriptionOptions(DescriptionOptions.Members)]
     public enum TypeAllowedBasic
     {
         None = 0,

@@ -40,18 +40,22 @@ namespace Signum.Windows.UIAutomation
             if (string.IsNullOrEmpty(oldValue))
                 throw new InvalidOperationException("Element does not has ItemStatus set. Consider setting m:Common.AutomationItemStatusFromDataContext on the WPF control");
 
+            var previous = GetAllProcessWindows(element).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
+
             action();
 
             if (actionDescription == null)
                 actionDescription = () => "DataContextChanged for {0}".Formato(oldValue);
-
+         
             element.Wait(() =>
             {
                 var newValue = element.Current.ItemStatus;
                 if (newValue != null && newValue != oldValue)
                     return true;
 
-                element.AssertMessageBoxChild();
+                var newWindow = GetAllProcessWindows(element).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
+
+                MessageBoxProxy.AssertNoErrorWindow(newWindow);
 
                 return false;
             }, actionDescription, timeOut);
@@ -89,8 +93,7 @@ namespace Signum.Windows.UIAutomation
 
             element.Wait(() =>
             {
-                var currentWindows = GetAllProcessWindows(element);
-                newWindow = currentWindows.FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
+                newWindow = GetAllProcessWindows(element).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
 
                 MessageBoxProxy.AssertNoErrorWindow(newWindow);
 
