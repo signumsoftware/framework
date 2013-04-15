@@ -293,7 +293,7 @@ WriteLiteral("\">");
 
             
             #line 68 "..\..\Signum\Views\SearchResults.cshtml"
-                               Write(JavascriptMessage.Signum_noResults.NiceToString());
+                               Write(JavascriptMessage.noResults.NiceToString());
 
             
             #line default

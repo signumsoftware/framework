@@ -88,26 +88,26 @@ namespace Signum.Web
                     {
                         sb.AddLine(
                             helper.Span(itemTC.Compose("btnUp"),
-                                JavascriptMessage.Signum_entityRepeater_moveUp.NiceToString(),
+                                JavascriptMessage.entityRepeater_moveUp.NiceToString(),
                                 "sf-line-button sf-move-up",
                                 new Dictionary<string, object> 
                                 {  
                                    { "onclick", "{0}.moveUp('{1}');".Formato(entityRepeater.ToJS(), itemTC.ControlID) },
                                    { "data-icon", "ui-icon-triangle-1-n" },
                                    { "data-text", false },
-                                   { "title", JavascriptMessage.Signum_entityRepeater_moveUp.NiceToString() }
+                                   { "title", JavascriptMessage.entityRepeater_moveUp.NiceToString() }
                                 }));
 
                         sb.AddLine(
                             helper.Span(itemTC.Compose("btnDown"),
-                                JavascriptMessage.Signum_entityRepeater_moveDown.NiceToString(),
+                                JavascriptMessage.entityRepeater_moveDown.NiceToString(),
                                 "sf-line-button sf-move-down",
                                 new Dictionary<string, object> 
                                 {   
                                    { "onclick", "{0}.moveDown('{1}');".Formato(entityRepeater.ToJS(), itemTC.ControlID) },
                                    { "data-icon", "ui-icon-triangle-1-s" },
                                    { "data-text", false },
-                                   { "title", JavascriptMessage.Signum_entityRepeater_moveDown.NiceToString() }
+                                   { "title", JavascriptMessage.entityRepeater_moveDown.NiceToString() }
                                 }));
                     }
                 }

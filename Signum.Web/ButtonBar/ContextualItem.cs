@@ -41,7 +41,7 @@ namespace Signum.Web
 
             ButtonBarQueryHelper.RegisterGlobalButtons(ctx =>
             {
-                var selectedText = JavascriptMessage.Signum_searchControlMenuSelected.NiceToString();
+                var selectedText = JavascriptMessage.searchControlMenuSelected.NiceToString();
                 return new ToolBarButton[]
                 {
                     new ToolBarMenu

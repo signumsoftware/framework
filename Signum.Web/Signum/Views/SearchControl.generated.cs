@@ -185,7 +185,7 @@ WriteLiteral("\r\n                \r\n                    ");
                             Model.Compose("btnAddFilter"), 
                             SearchMessage.FilterBuilder_AddFilter.NiceToString(), 
                             "",
-                            JavascriptMessage.Signum_selectToken.NiceToString(),
+                            JavascriptMessage.selectToken.NiceToString(),
                             "sf-query-button sf-add-filter sf-disabled", 
                             new Dictionary<string, object> 
                             { 
@@ -212,7 +212,7 @@ WriteLiteral("\r\n\r\n");
                             Model.Compose("btnAddColumn"), 
                             SearchMessage.FilterBuilder_AddColumn.NiceToString(), 
                             "",
-                            JavascriptMessage.Signum_selectToken.NiceToString(),
+                            JavascriptMessage.selectToken.NiceToString(),
                             "sf-query-button sf-add-column sf-disabled", 
                             new Dictionary<string, object> 
                             { 
@@ -258,9 +258,9 @@ WriteLiteral("            </div>\r\n        </div>\r\n    </div>\r\n    \r\n");
             
             #line 77 "..\..\Signum\Views\SearchControl.cshtml"
    Write(Html.Href("",
-                (filtersVisible ? JavascriptMessage.Signum_hideFilters.NiceToString() : JavascriptMessage.Signum_showFilters.NiceToString()),
+                (filtersVisible ? JavascriptMessage.hideFilters.NiceToString() : JavascriptMessage.showFilters.NiceToString()),
                 "",
-                (filtersVisible ? JavascriptMessage.Signum_hideFilters.NiceToString() : JavascriptMessage.Signum_showFilters.NiceToString()),
+                (filtersVisible ? JavascriptMessage.hideFilters.NiceToString() : JavascriptMessage.showFilters.NiceToString()),
                 "sf-query-button sf-filters-header" + (filtersVisible ? "" : " close"),
                 new Dictionary<string, object> 
                 { 
@@ -612,7 +612,7 @@ WriteLiteral("\">");
 
             
             #line 161 "..\..\Signum\Views\SearchControl.cshtml"
-                                           Write(JavascriptMessage.Signum_noResults.NiceToString());
+                                           Write(JavascriptMessage.noResults.NiceToString());
 
             
             #line default

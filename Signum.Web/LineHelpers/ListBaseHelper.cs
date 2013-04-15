@@ -148,9 +148,9 @@ namespace Signum.Web
                 htmlAttr.Add("style", "display:none");
 
             return helper.Href(listBase.Compose("btnUp"),
-                  JavascriptMessage.Signum_entityRepeater_moveUp.NiceToString(),
+                  JavascriptMessage.entityRepeater_moveUp.NiceToString(),
                   "",
-                  JavascriptMessage.Signum_entityRepeater_moveUp.NiceToString(),
+                  JavascriptMessage.entityRepeater_moveUp.NiceToString(),
                   "sf-line-button move-up",
                   htmlAttr);
         }
@@ -173,9 +173,9 @@ namespace Signum.Web
                 htmlAttr.Add("style", "display:none");
 
             return helper.Href(listBase.Compose("btnDown"),
-                  JavascriptMessage.Signum_entityRepeater_moveDown.NiceToString(),
+                  JavascriptMessage.entityRepeater_moveDown.NiceToString(),
                   "",
-                  JavascriptMessage.Signum_entityRepeater_moveDown.NiceToString(),
+                  JavascriptMessage.entityRepeater_moveDown.NiceToString(),
                   "sf-line-button move-down",
                   htmlAttr);
         }

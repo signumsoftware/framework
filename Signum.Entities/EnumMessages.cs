@@ -225,52 +225,52 @@ Lose changes?")]
     public enum JavascriptMessage
     {
         [Description("Add filter")]
-        Signum_addFilter,
+        addFilter,
         [Description("Edit column name")]
-        Signum_editColumnName,
+        editColumnName,
         [Description("Enter the new column name")]
-        Signum_enterTheNewColumnName,
+        enterTheNewColumnName,
         [Description("Move down")]
-        Signum_entityRepeater_moveDown,
+        entityRepeater_moveDown,
         [Description("Move up")]
-        Signum_entityRepeater_moveUp,
+        entityRepeater_moveUp,
         [Description("Error")]
-        Signum_error,
+        error,
         [Description("Executed")]
-        Signum_executed,
+        executed,
         [Description("Hide filters")]
-        Signum_hideFilters,
+        hideFilters,
         [Description("Loading...")]
-        Signum_loading,
+        loading,
         [Description(@"There are changes that haven't been saved. 
 Lose changes?")]
-        Signum_loseChanges,
+        loseChanges,
         [Description("No elements selected")]
-        Signum_noElementsSelected,
+        noElementsSelected,
         [Description("No results found")]
-        Signum_noResults,
+        noResults,
         [Description("You can select only one element")]
-        Signum_onlyOneElement,
+        onlyOneElement,
         [Description("There are errors in the entity, you want to continue?")]
-        Signum_popupErrors,
+        popupErrors,
         [Description("There are errors in the entity")]
-        Signum_popupErrorsStop,
+        popupErrorsStop,
         [Description("Remove column")]
-        Signum_removeColumn,
+        removeColumn,
         [Description("Move left")]
-        Signum_reorderColumn_MoveLeft,
+        reorderColumn_MoveLeft,
         [Description("Move right")]
-        Signum_reorderColumn_MoveRight,
+        reorderColumn_MoveRight,
         [Description("Saved")]
-        Signum_saved,
+        saved,
         [Description("Search")]
-        Signum_search,
+        search,
         [Description("selected")]
-        Signum_searchControlMenuSelected,
+        searchControlMenuSelected,
         [Description("Select a token")]
-        Signum_selectToken,
+        selectToken,
         [Description("Show filters")]
-        Signum_showFilters
+        showFilters
     }
 
     public enum QuickLinkMessage
