@@ -123,5 +123,24 @@ namespace Signum.Windows.Processes
         {
             return ImageLoader.LoadIcon(PackUriHelper.Reference("Images/" + name, typeof(ProcessClient)));
         }
+
+        public static void HandleSearchControl(SearchControl sc)
+        {
+            FilterOption filterOption = new FilterOption("ProcessExecution", null);
+            sc.DataContextChanged += (sender, args) =>
+            {
+                var parent = sc.VisualParents().OfType<ProcessExecution>().FirstOrDefault();
+                var pe = parent == null ? null : parent.DataContext as ProcessExecutionDN;
+
+                if (pe == null || pe.IsNew)
+                    sc.FilterOptions.Remove(filterOption);
+                else
+                {
+                    filterOption.Value = pe;
+                    if (sc.FilterOptions.Contains(filterOption))
+                        sc.FilterOptions.Add(filterOption);
+                }
+            }; 
+        }
     }
 }

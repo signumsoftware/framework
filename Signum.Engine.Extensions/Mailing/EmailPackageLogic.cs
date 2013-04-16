@@ -92,9 +92,12 @@ namespace Signum.Engine.Mailing
 
     public class SendEmailProcessAlgorithm : IProcessAlgorithm
     {
-        public void Execute(IExecutingProcess executingProcess)
+        public void Execute(ExecutingProcess executingProcess)
         {
             EmailPackageDN package = (EmailPackageDN)executingProcess.Data;
+
+
+            
 
             List<Lite<EmailMessageDN>> emails = package.RemainingMessages()
                                                 .Select(e => e.ToLite())

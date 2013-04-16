@@ -8,5 +8,6 @@
     @Html.EntityLine(e, f => f.Entity)
     @Html.EntityLine(e, f => f.Result)
     @Html.ValueLine(e, f => f.FinishTime)
-    @Html.EntityLine(e, f => f.Exception)
+
+    @Html.SearchControl(new FindOptions(typeof(ProcessExceptionLineDN), "Line", e.Value), new Context(e, "Exceptions"))
 } 
