@@ -595,7 +595,13 @@ namespace Signum.Engine.Maps
 
         public ResetLazy<T> GlobalLazy<T>(Func<T> func, InvalidateWith invalidateWith) where T : class
         {
-            var result = Signum.Engine.GlobalLazy.WithoutInvalidations(func);
+            var result = Signum.Engine.GlobalLazy.WithoutInvalidations(() =>
+            {
+                foreach (var t in invalidateWith.Types)
+                    this.schema.CacheController(t).Load();
+
+                return func();
+            });
 
             GlobalLazyManager.AttachInvalidations(this, invalidateWith, (sender, args) => result.Reset());
 
