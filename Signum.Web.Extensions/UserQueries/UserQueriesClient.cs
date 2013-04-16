@@ -38,6 +38,10 @@ namespace Signum.Web.UserQueries
 
                 Navigator.RegisterArea(typeof(UserQueriesClient));
 
+                var defaultScripts = Navigator.Manager.DefaultScripts();
+                defaultScripts.Add("~/UserQueries/Scripts/SF_UserQuery.js");
+                Navigator.Manager.DefaultScripts = () => defaultScripts;
+
                 RouteTable.Routes.MapRoute(null, "UQ/{webQueryName}/{lite}",
                     new { controller = "UserQueries", action = "View" });
 
@@ -124,8 +128,8 @@ namespace Signum.Web.UserQueries
                 {
                     Text = uq.ToString(),
                     AltText = uq.ToString(),
-                    Href = RouteHelper.New().Action<UserQueriesController>(uqc => uqc.View(uq)),
-                    DivCssClass = ToolBarButton.DefaultQueryCssClass + (currentUserQuery.Is(uq) ? " sf-userquery-selected" : "")
+                    Href = RouteHelper.New().Action<UserQueriesController>(uqc => uqc.View(uq, null)), 
+                    DivCssClass = ToolBarButton.DefaultQueryCssClass + " sf-userquery" + (currentUserQuery.Is(uq) ? " sf-userquery-selected" : "")
                 });
             }
 
@@ -174,9 +178,10 @@ namespace Signum.Web.UserQueries
 
         public static void ApplyUserQuery(this FindOptions findOptions, UserQueryDN userQuery)
         {
-            findOptions.FilterOptions.RemoveAll(fo => !fo.Frozen);
-
             if (!userQuery.PreserveFilters)
+            {
+                findOptions.FilterOptions.RemoveAll(fo => !fo.Frozen);
+
                 findOptions.FilterOptions.AddRange(userQuery.Filters.Select(qf => new FilterOption
                 {
                     Token = qf.Token,
@@ -184,6 +189,7 @@ namespace Signum.Web.UserQueries
                     Operation = qf.Operation,
                     Value = qf.Value
                 }));
+            }
 
             findOptions.ColumnOptionsMode = userQuery.ColumnsMode;
 
