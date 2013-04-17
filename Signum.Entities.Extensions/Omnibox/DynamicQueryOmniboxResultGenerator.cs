@@ -49,7 +49,7 @@ namespace Signum.Entities.Omnibox
 
             List<FilterSyntax> syntaxSequence = null;
 
-            foreach (var match in OmniboxUtils.Matches(queries, QueryUtils.GetNiceName, pattern, isPascalCase).OrderBy(ma => ma.Distance))
+            foreach (var match in OmniboxUtils.Matches(queries, OmniboxParser.Manager.AllowedQuery, QueryUtils.GetNiceName, pattern, isPascalCase).OrderBy(ma => ma.Distance))
             {
                 var queryName = match.Value;
                 if (OmniboxParser.Manager.AllowedQuery(queryName))
@@ -298,7 +298,7 @@ namespace Signum.Entities.Omnibox
                         bool isPascalValue = OmniboxUtils.IsPascalCasePattern(value);
                         var dic = EnumEntity.GetValues(queryToken.Type.UnNullify()).ToDictionary(a => a.ToString(), a => (object)a);
 
-                        var result = OmniboxUtils.Matches(dic, e => ((Enum)e).NiceToString(), value, isPascalValue)
+                        var result = OmniboxUtils.Matches(dic, e => true, e => ((Enum)e).NiceToString(), value, isPascalValue)
                             .Select(m => new ValueTuple { Value = m.Value, Match = m })
                             .ToArray();
 
@@ -393,8 +393,9 @@ namespace Signum.Entities.Omnibox
 
             bool isPascal = OmniboxUtils.IsPascalCasePattern(omniboxToken.Value);
 
-            var matches = OmniboxUtils.Matches(
-                QueryUtils.SubTokens(queryToken, queryDescription, canAggregate: false).ToDictionary(qt => qt.Key),
+            var dic = QueryUtils.SubTokens(queryToken, queryDescription, canAggregate: false).ToDictionary(qt => qt.Key);
+
+            var matches = OmniboxUtils.Matches(dic, qt => qt.IsAllowed() == null,
                 qt => qt.ToString(), omniboxToken.Value, isPascal);
 
             if (index == operatorIndex - 1)

@@ -60,16 +60,16 @@ namespace Signum.Entities.Omnibox
                 boldIndices: indices);
         }
 
-        public static IEnumerable<OmniboxMatch> Matches<T>(Dictionary<string, T> values, Func<T, string> niceName, string pattern, bool isPascalCase)
+        public static IEnumerable<OmniboxMatch> Matches<T>(Dictionary<string, T> values, Func<T, bool> filter, Func<T, string> niceName, string pattern, bool isPascalCase)
         {
             T val;
-            if (values.TryGetValue(pattern, out val))
+            if (values.TryGetValue(pattern, out val) && filter(val))
             {
                 yield return new OmniboxMatch(val, 0, pattern, 0.To(pattern.Length).ToArray());
             }
             else
             {
-                foreach (var kvp in values)
+                foreach (var kvp in values.Where(kvp => filter(kvp.Value)))
                 {
                     OmniboxMatch result;
                     if (isPascalCase)
