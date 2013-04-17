@@ -154,14 +154,23 @@ namespace Signum.Engine.Disconnected
                             }
 
                         using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { ReseedIds = l })))
-                        using (Connector.Override(newDatabase))
-                        using (SchemaName.AvoidDatabaseName())
                         {
-                            foreach (var table in Schema.Current.Tables.Values.Where(t => DisconnectedLogic.GetStrategy(t.Type).Upload != Upload.None))
-                            {
-                                token.ThrowIfCancellationRequested();
+                            var tablesToUpload = Schema.Current.Tables.Values.Where(t => DisconnectedLogic.GetStrategy(t.Type).Upload != Upload.None);
 
-                                Reseed(machine, table);
+                            var maxIdDictionary = tablesToUpload.ToDictionary(t => t, 
+                                t => DisconnectedTools.MaxIdInRange(t, machine.SeedMin, machine.SeedMax));
+
+                            using (Connector.Override(newDatabase))
+                            using (SchemaName.AvoidDatabaseName())
+                            {
+                                foreach (var table in tablesToUpload)
+                                {
+                                    token.ThrowIfCancellationRequested();
+
+                                    int? max = maxIdDictionary.GetOrThrow(table);
+
+                                    DisconnectedTools.SetNextId(table, (max + 1) ?? machine.SeedMin);
+                                }
                             }
                         }
 
@@ -312,14 +321,6 @@ namespace Signum.Engine.Disconnected
             foreach (var rt in table.RelationalTables())
                 DisconnectedTools.DisableForeignKeys(rt);
         }
-
-        protected virtual void Reseed(DisconnectedMachineDN machine, Table table)
-        {
-            int? max = DisconnectedTools.MaxIdInRange(table, machine.SeedMin, machine.SeedMax);
-
-            DisconnectedTools.SetNextId(table, (max + 1) ?? machine.SeedMin);
-        }
-
 
         protected virtual void BackupDatabase(DisconnectedMachineDN machine, Lite<DisconnectedExportDN> export, Connector newDatabase)
         {
