@@ -52,55 +52,53 @@ namespace Signum.Entities.Omnibox
             foreach (var match in OmniboxUtils.Matches(queries, OmniboxParser.Manager.AllowedQuery, QueryUtils.GetNiceName, pattern, isPascalCase).OrderBy(ma => ma.Distance))
             {
                 var queryName = match.Value;
-                if (OmniboxParser.Manager.AllowedQuery(queryName))
-                {
-                    if (syntaxSequence == null)
-                        syntaxSequence = SyntaxSequence(m);
 
-                    if (syntaxSequence.Any())
+                if (syntaxSequence == null)
+                    syntaxSequence = SyntaxSequence(m);
+
+                if (syntaxSequence.Any())
+                {
+                    QueryDescription description = OmniboxParser.Manager.GetDescription(match.Value);
+
+                    IEnumerable<IEnumerable<FilterQuery>> bruteFilters = syntaxSequence.Select(a => GetFilterQueries(rawQuery, description, a, tokens));
+
+                    foreach (var list in bruteFilters.CartesianProduct())
+                    {
+                        yield return new DynamicQueryOmniboxResult
+                        {
+                            QueryName = match.Value,
+                            QueryNameMatch = match,
+                            Distance = match.Distance + list.Average(a => a.Distance),
+                            Filters = list.ToList(),
+                        };
+                    }
+                }
+                else
+                {
+                    if (match.Text == pattern && tokens.Count == 1 && tokens[0].Next(rawQuery) == ' ')
                     {
                         QueryDescription description = OmniboxParser.Manager.GetDescription(match.Value);
 
-                        IEnumerable<IEnumerable<FilterQuery>> bruteFilters = syntaxSequence.Select(a => GetFilterQueries(rawQuery, description, a, tokens));
-
-                        foreach (var list in bruteFilters.CartesianProduct())
-                        {
-                            yield return new DynamicQueryOmniboxResult
-                            {
-                                QueryName = match.Value,
-                                QueryNameMatch = match,
-                                Distance = match.Distance + list.Average(a => a.Distance),
-                                Filters = list.ToList(),
-                            };
-                        }
-                    }
-                    else
-                    {
-                        if (match.Text == pattern && tokens.Count == 1 && tokens[0].Next(rawQuery) == ' ')
-                        {
-                            QueryDescription description = OmniboxParser.Manager.GetDescription(match.Value);
-
-                            foreach (var qt in QueryUtils.SubTokens(null, description, canAggregate: false))
-                            {
-                                yield return new DynamicQueryOmniboxResult
-                                {
-                                    QueryName = match.Value,
-                                    QueryNameMatch = match,
-                                    Distance = match.Distance,
-                                    Filters = new List<FilterQuery> { new FilterQuery(0, null, qt, null) },
-                                };
-                            }
-                        }
-                        else
+                        foreach (var qt in QueryUtils.SubTokens(null, description, canAggregate: false))
                         {
                             yield return new DynamicQueryOmniboxResult
                             {
                                 QueryName = match.Value,
                                 QueryNameMatch = match,
                                 Distance = match.Distance,
-                                Filters = new List<FilterQuery>()
+                                Filters = new List<FilterQuery> { new FilterQuery(0, null, qt, null) },
                             };
                         }
+                    }
+                    else
+                    {
+                        yield return new DynamicQueryOmniboxResult
+                        {
+                            QueryName = match.Value,
+                            QueryNameMatch = match,
+                            Distance = match.Distance,
+                            Filters = new List<FilterQuery>()
+                        };
                     }
                 }
             }
