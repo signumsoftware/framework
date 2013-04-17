@@ -112,7 +112,6 @@ namespace Signum.Windows
             this.Loaded += new RoutedEventHandler(SearchControl_Loaded);
             this.DataContextChanged += new DependencyPropertyChangedEventHandler(CountSearchControl_DataContextChanged);
 
-            this.Bind(AutomationProperties.NameProperty, this, "QueryName");
             this.Bind(AutomationProperties.ItemStatusProperty, this, "ItemsCount"); 
         }
 
@@ -137,6 +136,8 @@ namespace Signum.Windows
             qd = DynamicQueryServer.GetQueryDescription(QueryName);
 
             DynamicQueryServer.SetFilterTokens(FilterOptions, qd);
+
+            AutomationProperties.SetName(this, QueryUtils.GetQueryUniqueKey(QueryName));
 
             Search();
         }
