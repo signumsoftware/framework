@@ -74,7 +74,12 @@ namespace Signum.Engine.Authorization
 
                 if (log != null && log.SessionEnd == null)
                 {
-                    log.SessionEnd = timeOut.HasValue ? TimeZoneManager.Now.Subtract(timeOut.Value).TrimToSeconds() : TimeZoneManager.Now.TrimToSeconds();
+                    var sessionEnd = timeOut.HasValue ? TimeZoneManager.Now.Subtract(timeOut.Value).TrimToSeconds() : TimeZoneManager.Now.TrimToSeconds();
+                    
+                    if (sessionEnd < log.SessionStart) //caused by an IIS reset for example
+                        sessionEnd = log.SessionStart;
+
+                    log.SessionEnd = sessionEnd;
                     log.SessionTimeOut = timeOut.HasValue;
                     log.Save();
                 }

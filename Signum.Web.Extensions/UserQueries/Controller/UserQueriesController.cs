@@ -29,13 +29,20 @@ namespace Signum.Web.UserQueries
 {
     public class UserQueriesController : Controller
     {
-        public ActionResult View(Lite<UserQueryDN> lite)
+        public ActionResult View(Lite<UserQueryDN> lite, FindOptions findOptions)
         {
             UserQueryDN uq = Database.Retrieve<UserQueryDN>(lite);
 
-            FindOptions fo = uq.ToFindOptions();
-           
-            return Navigator.Find(this, fo);
+            if (findOptions == null)
+            {
+                findOptions = uq.ToFindOptions();
+                return Navigator.Find(this, findOptions);
+            }
+            else
+            {
+                findOptions.ApplyUserQuery(uq);
+                return Navigator.Find(this, findOptions);
+            }
         }
 
         public ActionResult Create(QueryRequest request)

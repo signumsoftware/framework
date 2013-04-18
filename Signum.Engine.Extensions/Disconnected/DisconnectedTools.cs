@@ -15,20 +15,20 @@ namespace Signum.Engine.Disconnected
 {
     public static class DisconnectedTools
     {
-        public static void DropDatabase(string databaseName)
+        public static void DropDatabase(DatabaseName databaseName)
         {
             Executor.ExecuteNonQuery(
-@"ALTER DATABASE [{0}] SET single_user WITH ROLLBACK IMMEDIATE
-DROP DATABASE {0}".Formato(databaseName.SqlScape()));
+@"ALTER DATABASE {0} SET single_user WITH ROLLBACK IMMEDIATE
+DROP DATABASE {0}".Formato(databaseName));
         }
 
-        public static void DropIfExists(string databaseName)
+        public static void DropIfExists(DatabaseName databaseName)
         {
             string dropDatabase =
 @"IF EXISTS(SELECT name FROM sys.databases WHERE name = '{0}')
 BEGIN
-     ALTER DATABASE [{0}] SET single_user WITH ROLLBACK IMMEDIATE
-     DROP DATABASE [{0}]
+     ALTER DATABASE {0} SET single_user WITH ROLLBACK IMMEDIATE
+     DROP DATABASE {0}
 END".Formato(databaseName);
 
             Executor.ExecuteNonQuery(dropDatabase);
@@ -44,9 +44,9 @@ END".Formato(databaseName);
         }
 
 
-        public static void CreateDatabase(string databaseName, string databaseFile, string databaseLogFile)
+        public static void CreateDatabase(DatabaseName databaseName, string databaseFile, string databaseLogFile)
         {
-            string script = @"CREATE DATABASE [{0}] ON  PRIMARY 
+            string script = @"CREATE DATABASE {0} ON  PRIMARY 
     ( NAME = N'{0}_Data', FILENAME = N'{1}' , SIZE = 167872KB , MAXSIZE = UNLIMITED, FILEGROWTH = 16384KB )
 LOG ON 
     ( NAME = N'{0}_Log', FILENAME =  N'{2}' , SIZE = 2048KB , MAXSIZE = 2048GB , FILEGROWTH = 16384KB )".Formato(databaseName, databaseFile, databaseLogFile);
@@ -54,12 +54,12 @@ LOG ON
             Executor.ExecuteNonQuery(script);
         }
 
-        public static void BackupDatabase(string databaseName, string backupFile)
+        public static void BackupDatabase(DatabaseName databaseName, string backupFile)
         {
-            Executor.ExecuteNonQuery(@"BACKUP DATABASE {0} TO DISK = '{1}'WITH FORMAT".Formato(databaseName.SqlScape(), backupFile));
+            Executor.ExecuteNonQuery(@"BACKUP DATABASE {0} TO DISK = '{1}'WITH FORMAT".Formato(databaseName, backupFile));
         }
 
-        public static void RestoreDatabase(string databaseName, string backupFile, string databaseFile, string databaseLogFile)
+        public static void RestoreDatabase(DatabaseName databaseName, string backupFile, string databaseFile, string databaseLogFile)
         {
             DataTable dataTable = Executor.ExecuteDataTable("RESTORE FILELISTONLY FROM DISK ='{0}'".Formato(backupFile));
 
@@ -129,9 +129,9 @@ MOVE '{4}' TO '{5}'".Formato(databaseName, backupFile,
 
                 if (message == null)
                     throw new InvalidOperationException("DBCC CHECKIDENT didn't write a message");
-
-                Match m = Regex.Match(message, @"Checking identity information: current identity value '(?<identity>.*)', current column value '(?<column>.*)'\.");
-
+                 
+                Match m = IdentityMessageRegex.Match(message);
+                
                 if (!m.Success)
                     throw new InvalidOperationException("DBCC CHECKIDENT messege has invalid format");
 
@@ -144,6 +144,10 @@ MOVE '{4}' TO '{5}'".Formato(databaseName, backupFile,
                 return tr.Commit(result);
             }
         }
+
+        public static Regex IdentityMessageRegex = new Regex(@"Checking identity information: current identity value '(?<identity>.*)', current column value '(?<column>.*)'\.");
+
+            
 
         static bool IsEmpty(ITable table)
         {

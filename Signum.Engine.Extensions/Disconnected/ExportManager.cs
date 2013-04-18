@@ -154,14 +154,23 @@ namespace Signum.Engine.Disconnected
                             }
 
                         using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { ReseedIds = l })))
-                        using (Connector.Override(newDatabase))
-                        using (SchemaName.AvoidDatabaseName())
                         {
-                            foreach (var table in Schema.Current.Tables.Values.Where(t => DisconnectedLogic.GetStrategy(t.Type).Upload != Upload.None))
-                            {
-                                token.ThrowIfCancellationRequested();
+                            var tablesToUpload = Schema.Current.Tables.Values.Where(t => DisconnectedLogic.GetStrategy(t.Type).Upload != Upload.None);
 
-                                Reseed(machine, table);
+                            var maxIdDictionary = tablesToUpload.ToDictionary(t => t, 
+                                t => DisconnectedTools.MaxIdInRange(t, machine.SeedMin, machine.SeedMax));
+
+                            using (Connector.Override(newDatabase))
+                            using (SchemaName.AvoidDatabaseName())
+                            {
+                                foreach (var table in tablesToUpload)
+                                {
+                                    token.ThrowIfCancellationRequested();
+
+                                    int? max = maxIdDictionary.GetOrThrow(table);
+
+                                    DisconnectedTools.SetNextId(table, (max + 1) ?? machine.SeedMin);
+                                }
                             }
                         }
 
@@ -263,7 +272,7 @@ namespace Signum.Engine.Disconnected
 
         protected virtual void DropDatabase(Connector newDatabase)
         {
-            DisconnectedTools.DropDatabase(newDatabase.DatabaseName());
+            DisconnectedTools.DropDatabase(new DatabaseName(null, newDatabase.DatabaseName()));
         }
 
         protected virtual string DatabaseFileName(DisconnectedMachineDN machine)
@@ -276,14 +285,14 @@ namespace Signum.Engine.Disconnected
             return Path.Combine(DisconnectedLogic.DatabaseFolder, Connector.Current.DatabaseName() + "_Export_" + machine.MachineName + "_Log.ldf");
         }
 
-        protected virtual string DatabaseName(DisconnectedMachineDN machine)
+        protected virtual DatabaseName DatabaseName(DisconnectedMachineDN machine)
         {
-            return Connector.Current.DatabaseName() + "_Export_" + machine.MachineName;
+            return new DatabaseName(null, Connector.Current.DatabaseName() + "_Export_" + machine.MachineName);
         }
 
         protected virtual string CreateDatabase(DisconnectedMachineDN machine)
         {
-            string databaseName = DatabaseName(machine);
+            DatabaseName databaseName = DatabaseName(machine);
 
             DisconnectedTools.DropIfExists(databaseName);
 
@@ -294,7 +303,7 @@ namespace Signum.Engine.Disconnected
             DisconnectedTools.CreateDatabaseDirectory(logFileName);
             DisconnectedTools.CreateDatabase(databaseName, fileName, logFileName);
 
-            return ((SqlConnector)Connector.Current).ConnectionString.Replace(Connector.Current.DatabaseName(), databaseName);
+            return ((SqlConnector)Connector.Current).ConnectionString.Replace(Connector.Current.DatabaseName(), databaseName.Name);
         }
 
         protected virtual void EnableForeignKeys(Table table)
@@ -313,19 +322,11 @@ namespace Signum.Engine.Disconnected
                 DisconnectedTools.DisableForeignKeys(rt);
         }
 
-        protected virtual void Reseed(DisconnectedMachineDN machine, Table table)
-        {
-            int? max = DisconnectedTools.MaxIdInRange(table, machine.SeedMin, machine.SeedMax);
-
-            DisconnectedTools.SetNextId(table, (max + 1) ?? machine.SeedMin);
-        }
-
-
         protected virtual void BackupDatabase(DisconnectedMachineDN machine, Lite<DisconnectedExportDN> export, Connector newDatabase)
         {
             string backupFileName = Path.Combine(DisconnectedLogic.BackupFolder, BackupFileName(machine, export));
             DisconnectedTools.CreateDatabaseDirectory(backupFileName);
-            DisconnectedTools.BackupDatabase(newDatabase.DatabaseName(), backupFileName);
+            DisconnectedTools.BackupDatabase(new DatabaseName(null, newDatabase.DatabaseName()), backupFileName);
         }
 
         public virtual string BackupNetworkFileName(DisconnectedMachineDN machine, Lite<DisconnectedExportDN> export)

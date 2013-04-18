@@ -85,6 +85,12 @@ ALTER AUTHORIZATION ON DATABASE::{0} TO {2}".Formato(connector.DatabaseName(), s
 ALTER AUTHORIZATION ON DATABASE::{0} TO {2}".Formato(connector.DatabaseName(), databasePrincipalName.DefaultText("Unknown"), currentUser));
             }
 
+            var enabled = Database.View<SysDatabases>().Where(db => db.name == Connector.Current.DatabaseName()).Select(a => a.is_broker_enabled).Single();
+            if (!enabled)
+            {
+                Executor.ExecuteNonQuery("ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()));
+            }
+
             try
             {
                 SqlDependency.Start(connector.ConnectionString);
@@ -446,6 +452,12 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
 
                     GetController(t).Invalidated += onInvalidation;
                 }
+            }
+
+            public override void OnLoad(SchemaBuilder sb, InvalidateWith invalidateWith)
+            {
+                foreach (var t in invalidateWith.Types)
+                    sb.Schema.CacheController(t).Load();
             }
         }
     }

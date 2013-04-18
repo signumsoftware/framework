@@ -46,7 +46,7 @@ namespace Signum.Entities.Chart
 
                 bool isPascalCase = OmniboxUtils.IsPascalCasePattern(pattern);
 
-                foreach (var match in OmniboxUtils.Matches(queries, QueryUtils.GetNiceName, pattern, isPascalCase).OrderBy(ma => ma.Distance))
+                foreach (var match in OmniboxUtils.Matches(queries, OmniboxParser.Manager.AllowedQuery,  QueryUtils.GetNiceName, pattern, isPascalCase).OrderBy(ma => ma.Distance))
                 {
                     var queryName = match.Value;
                     if (OmniboxParser.Manager.AllowedQuery(queryName))
