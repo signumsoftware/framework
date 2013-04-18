@@ -124,7 +124,7 @@ namespace Signum.Windows.Processes
             return ImageLoader.LoadIcon(PackUriHelper.Reference("Images/" + name, typeof(ProcessClient)));
         }
 
-        public static void HandleSearchControl(SearchControl sc)
+        public static void BindToParentProcessExecution(SearchControl sc)
         {
             FilterOption filterOption = new FilterOption("ProcessExecution", null);
             sc.DataContextChanged += (sender, args) =>

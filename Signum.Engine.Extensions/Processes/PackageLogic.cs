@@ -188,7 +188,7 @@ namespace Signum.Engine.Processes
 
             Enum operationKey = MultiEnumLogic<OperationDN>.ToEnum(package.Operation);
 
-            executingProcess.ForEachLine(package.Lines(), line =>
+            executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
             {
                 OperationType operationType = OperationLogic.OperationType(line.Entity.EntityType, operationKey);
 
