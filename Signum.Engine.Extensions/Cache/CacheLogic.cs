@@ -428,36 +428,50 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
         {
             public override void AttachInvalidations(SchemaBuilder sb, InvalidateWith invalidateWith, EventHandler invalidate)
             {
-                EventHandler<CacheEventArgs> onInvalidation = (sender, args) =>
+                if (CacheLogic.GloballyDisabled)
                 {
-                    if (args == CacheEventArgs.Invalidated)
+                    base.AttachInvalidations(sb, invalidateWith, invalidate);
+                }
+                else
+                {
+                    EventHandler<CacheEventArgs> onInvalidation = (sender, args) =>
                     {
-                        invalidate(sender, args);
-                    }
-                    else if (args == CacheEventArgs.Disabled)
-                    {
-                        if (Transaction.InTestTransaction)
+                        if (args == CacheEventArgs.Invalidated)
                         {
                             invalidate(sender, args);
-                            Transaction.Rolledback += () => invalidate(sender, args);
                         }
+                        else if (args == CacheEventArgs.Disabled)
+                        {
+                            if (Transaction.InTestTransaction)
+                            {
+                                invalidate(sender, args);
+                                Transaction.Rolledback += () => invalidate(sender, args);
+                            }
 
-                        Transaction.PostRealCommit += dic => invalidate(sender, args);
+                            Transaction.PostRealCommit += dic => invalidate(sender, args);
+                        }
+                    };
+
+                    foreach (var t in invalidateWith.Types)
+                    {
+                        CacheLogic.TryCacheTable(sb, t);
+
+                        GetController(t).Invalidated += onInvalidation;
                     }
-                };
-
-                foreach (var t in invalidateWith.Types)
-                {
-                    CacheLogic.TryCacheTable(sb, t);
-
-                    GetController(t).Invalidated += onInvalidation;
                 }
             }
 
             public override void OnLoad(SchemaBuilder sb, InvalidateWith invalidateWith)
             {
-                foreach (var t in invalidateWith.Types)
-                    sb.Schema.CacheController(t).Load();
+                if (CacheLogic.GloballyDisabled)
+                {
+                    base.OnLoad(sb, invalidateWith); 
+                }
+                else
+                {
+                    foreach (var t in invalidateWith.Types)
+                        sb.Schema.CacheController(t).Load();
+                }
             }
         }
     }
