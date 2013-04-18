@@ -260,7 +260,7 @@ namespace Signum.Engine.Disconnected
 
         private void DropDatabase(SqlConnector newDatabase)
         {
-            DisconnectedTools.DropDatabase(newDatabase.DatabaseName());
+            DisconnectedTools.DropDatabase(new DatabaseName(null, newDatabase.DatabaseName()));
         }
 
         protected virtual void EnableForeignKeys(Table table)
@@ -294,7 +294,7 @@ namespace Signum.Engine.Disconnected
 
         private string GetImportConnectionString(DisconnectedMachineDN machine)
         {
-            return ((SqlConnector)Connector.Current).ConnectionString.Replace(Connector.Current.DatabaseName(), DatabaseName(machine));
+            return ((SqlConnector)Connector.Current).ConnectionString.Replace(Connector.Current.DatabaseName(), DatabaseName(machine).Name);
         }
 
         protected virtual string DatabaseFileName(DisconnectedMachineDN machine)
@@ -307,9 +307,9 @@ namespace Signum.Engine.Disconnected
             return Path.Combine(DisconnectedLogic.DatabaseFolder, Connector.Current.DatabaseName() + "_Import_" + machine.MachineName + "_Log.ldf");
         }
 
-        protected virtual string DatabaseName(DisconnectedMachineDN machine)
+        protected virtual DatabaseName DatabaseName(DisconnectedMachineDN machine)
         {
-            return Connector.Current.DatabaseName() + "_Import_" + machine.MachineName;
+            return new DatabaseName(null, Connector.Current.DatabaseName() + "_Import_" + machine.MachineName);
         }
 
         public virtual string BackupNetworkFileName(DisconnectedMachineDN machine, Lite<DisconnectedImportDN> import)
