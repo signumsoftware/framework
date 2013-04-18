@@ -597,9 +597,8 @@ namespace Signum.Engine.Maps
         {
             var result = Signum.Engine.GlobalLazy.WithoutInvalidations(() =>
             {
-                foreach (var t in invalidateWith.Types)
-                    this.schema.CacheController(t).Load();
-
+                GlobalLazyManager.OnLoad(this, invalidateWith);
+              
                 return func();
             });
 
@@ -676,6 +675,10 @@ namespace Signum.Engine.Maps
             };
             ee.PreUnsafeUpdate += q => action();
             ee.PreUnsafeDelete += q => action();
+        }
+
+        public virtual void OnLoad(SchemaBuilder sb, InvalidateWith invalidateWith)
+        {
         }
     }
 

@@ -195,7 +195,7 @@ namespace Signum.Engine.Maps
                 ee.OnPreUnsafeUpdate(query);
         }
 
-        internal ICacheController CacheController(Type type)
+        public ICacheController CacheController(Type type)
         {
             IEntityEvents ee = entityEvents.TryGetC(type);
 
