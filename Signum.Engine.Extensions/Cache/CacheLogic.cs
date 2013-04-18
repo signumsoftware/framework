@@ -453,6 +453,12 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
                     GetController(t).Invalidated += onInvalidation;
                 }
             }
+
+            public override void OnLoad(SchemaBuilder sb, InvalidateWith invalidateWith)
+            {
+                foreach (var t in invalidateWith.Types)
+                    sb.Schema.CacheController(t).Load();
+            }
         }
     }
 
