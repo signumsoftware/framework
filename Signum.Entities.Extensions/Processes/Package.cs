@@ -62,17 +62,17 @@ namespace Signum.Entities.Processes
         }
 
         [NotNullable, ImplementedByAll]
-        Lite<IIdentifiable> entity;
+        IdentifiableEntity target;
         [NotNullValidator]
-        public Lite<IIdentifiable> Entity
+        public IdentifiableEntity Target
         {
-            get { return entity; }
-            set { Set(ref entity, value, () => Entity); }
+            get { return target; }
+            set { Set(ref target, value, () => Target); }
         }
 
         [ImplementedByAll]
-        Lite<IIdentifiable> result;
-        public Lite<IIdentifiable> Result //ConstructFrom only!
+        Lite<IdentifiableEntity> result;
+        public Lite<IdentifiableEntity> Result //ConstructFrom only!
         {
             get { return result; }
             set { Set(ref result, value, () => Result); }

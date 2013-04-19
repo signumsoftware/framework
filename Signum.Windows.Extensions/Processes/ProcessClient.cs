@@ -127,18 +127,35 @@ namespace Signum.Windows.Processes
         public static void BindToParentProcessExecution(SearchControl sc)
         {
             FilterOption filterOption = new FilterOption("ProcessExecution", null);
+            ColumnOption columnOption = new ColumnOption("ProcessExecution");
             sc.DataContextChanged += (sender, args) =>
             {
-                var parent = sc.VisualParents().OfType<ProcessExecution>().FirstOrDefault();
+                var parent = sc.LogicalParents().OfType<ProcessExecution>().FirstOrDefault();
                 var pe = parent == null ? null : parent.DataContext as ProcessExecutionDN;
 
                 if (pe == null || pe.IsNew)
+                {
                     sc.FilterOptions.Remove(filterOption);
+
+                    if (sc.ColumnOptions.Contains(columnOption))
+                    {
+                        sc.ColumnOptions.Remove(columnOption);
+                        if (sc.IsLoaded)
+                            sc.GenerateListViewColumns();
+                    }
+                }
                 else
                 {
                     filterOption.Value = pe;
-                    if (sc.FilterOptions.Contains(filterOption))
+                    if (!sc.FilterOptions.Contains(filterOption))
                         sc.FilterOptions.Add(filterOption);
+
+                    if (!sc.ColumnOptions.Contains(columnOption))
+                    {
+                        sc.ColumnOptions.Add(columnOption);
+                        if (sc.IsLoaded)
+                            sc.GenerateListViewColumns(); 
+                    }
                 }
             }; 
         }

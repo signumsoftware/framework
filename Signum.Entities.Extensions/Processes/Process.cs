@@ -261,7 +261,7 @@ namespace Signum.Entities.Processes
         ProcessStartIsNullButProcessEndIsNot
     }
 
-    [Serializable, EntityKind(EntityKind.Main)]
+    [Serializable, EntityKind(EntityKind.System)]
     public class ProcessExceptionLineDN : Entity
     {
         [NotNullable]

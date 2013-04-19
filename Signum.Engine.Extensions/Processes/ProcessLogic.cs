@@ -460,7 +460,7 @@ namespace Signum.Engine.Processes
 
                 new ConstructFrom<ProcessExecutionDN>(ProcessOperation.Retry)
                 {
-                    CanConstruct = pe=>pe.State.InState(ProcessOperation.Retry, ProcessState.Error),
+                    CanConstruct = pe => pe.State.InState(ProcessOperation.Retry, ProcessState.Error, ProcessState.Canceled, ProcessState.Finished, ProcessState.Suspended),
                     ToState = ProcessState.Created,
                     Construct = (pe, _) =>
                         pe.Process.Create(pe.ProcessData, pe.SessionData)

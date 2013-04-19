@@ -75,7 +75,7 @@ Write(Html.EntityLine(e, f => f.Package));
             #line hidden
             
             #line 8 "..\..\Processes\Views\PackageLine.cshtml"
-Write(Html.EntityLine(e, f => f.Entity));
+Write(Html.EntityLine(e, f => f.Target));
 
             
             #line default
