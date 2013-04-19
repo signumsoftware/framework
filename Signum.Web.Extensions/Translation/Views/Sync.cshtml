@@ -29,7 +29,7 @@
     Func<LocalizedType, string> locKey = lt => lt.Type.Name + "." + lt.Assembly.Culture.Name;
 }
 
-@Html.DynamicCss("~/Translation/Content/Translation.css")
+@Html.ScriptCss("~/Translation/Content/Translation.css")
 @Html.ScriptsJs("~/Translation/Content/Translation.js")
 
 @using (Html.BeginForm())

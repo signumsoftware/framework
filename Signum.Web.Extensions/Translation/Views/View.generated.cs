@@ -91,7 +91,7 @@ namespace Signum.Web.Extensions.Translation.Views
 
             
             #line 20 "..\..\Translation\Views\View.cshtml"
-Write(Html.DynamicCss("~/Translation/Content/Translation.css"));
+Write(Html.ScriptCss("~/Translation/Content/Translation.css"));
 
             
             #line default

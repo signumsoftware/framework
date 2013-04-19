@@ -114,13 +114,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="Translation\Controllers\TranslationController.cs" />
-    <Compile Include="Translation\TranslationClient.cs" />
-    <Compile Include="Translation\ITranslator.cs" />
-    <Compile Include="Translation\TranslationSynchronizer.cs" />
-    <Compile Include="Note\Controllers\NoteController.cs" />
-    <Compile Include="AuthAdmin\AuthAdminClient.cs" />
-    <Compile Include="AuthAdmin\Controllers\AuthAdminController.cs" />
     <Compile Include="AuthAdmin\Views\FacadeMethods.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -161,6 +154,13 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Types.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Translation\Controllers\TranslationController.cs" />
+    <Compile Include="Translation\TranslationClient.cs" />
+    <Compile Include="Translation\ITranslator.cs" />
+    <Compile Include="Translation\TranslationSynchronizer.cs" />
+    <Compile Include="Note\Controllers\NoteController.cs" />
+    <Compile Include="AuthAdmin\AuthAdminClient.cs" />
+    <Compile Include="AuthAdmin\Controllers\AuthAdminController.cs" />
     <Compile Include="AuthAdmin\Views\User.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

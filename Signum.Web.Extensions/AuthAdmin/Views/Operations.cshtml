@@ -1,4 +1,4 @@
-@Html.DynamicCss("~/authAdmin/Content/SF_AuthAdmin.css")
+@Html.ScriptCss("~/authAdmin/Content/SF_AuthAdmin.css")
 @using (var tc = Html.TypeContext<OperationRulePack>())
 {
     @Html.EntityLine(tc, f => f.Role)

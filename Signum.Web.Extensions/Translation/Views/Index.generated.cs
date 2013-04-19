@@ -76,7 +76,7 @@ WriteLiteral("\r\n");
 
             
             #line 9 "..\..\Translation\Views\Index.cshtml"
-Write(Html.DynamicCss("~/Translation/Content/Translation.css"));
+Write(Html.ScriptCss("~/Translation/Content/Translation.css"));
 
             
             #line default

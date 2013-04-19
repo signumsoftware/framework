@@ -1,7 +1,7 @@
 @using Signum.Web.AuthAdmin
 @using Signum.Entities.Basics
 @using Signum.Engine.Basics
-@Html.DynamicCss("~/authAdmin/Content/SF_AuthAdmin.css")
+@Html.ScriptCss("~/authAdmin/Content/SF_AuthAdmin.css")
 @Html.ScriptsJs("~/authAdmin/Scripts/SF_AuthAdmin.js")
 <script type="text/javascript">
     $(function () {
@@ -169,12 +169,12 @@
                     </div>
                     <div class="sf-auth-tree @(conditionIter.IsLast ? "sf-auth-leaf-last" : "sf-auth-leaf")">
                     </div>
-                    <a title="@Resources.AuthAdmin_RemoveCondition" class="sf-line-button sf-remove" data-icon="ui-icon-circle-close" data-text="false">
+                    <a title="@(AuthMessage.AuthAdmin_RemoveCondition.NiceToString())" class="sf-line-button sf-remove" data-icon="ui-icon-circle-close" data-text="false">
                     </a><span class="sf-auth-label">@condition.ConditionName.NiceToString()</span>
                     <a title="@AuthMessage.AuthAdmin_RemoveCondition.NiceToString()" class="sf-line-button sf-remove" data-icon="ui-icon-circle-close" data-text="false">
                     </a><span class="sf-auth-label">@condition.ConditionName.NiceToString()</span>
                     
-                    <a class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only sf-remove sf-auth-condition-button" title="@Resources.AuthAdmin_RemoveCondition">
+                    <a class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only sf-remove sf-auth-condition-button" title="@(AuthMessage.AuthAdmin_RemoveCondition.NiceToString())">
                         <span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span>
                     </a>
                     

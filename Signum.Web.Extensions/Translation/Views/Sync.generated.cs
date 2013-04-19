@@ -110,7 +110,7 @@ WriteLiteral("\r\n");
 
             
             #line 32 "..\..\Translation\Views\Sync.cshtml"
-Write(Html.DynamicCss("~/Translation/Content/Translation.css"));
+Write(Html.ScriptCss("~/Translation/Content/Translation.css"));
 
             
             #line default
