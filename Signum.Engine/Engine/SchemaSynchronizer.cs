@@ -83,7 +83,7 @@ namespace Signum.Engine
                     var changes = Synchronizer.SynchronizeScript(modelIxs, dif.Indices,
                         null,
                         (i, dix) => dix.IsControlledIndex || dix.Columns.Any(a => changedColumns[a] != ColumnAction.Equals) ? SqlBuilder.DropIndex(dif.Name, dix) : null,
-                        (i, mix, dix) => dix.Columns.Any(a => changedColumns[a] == ColumnAction.Changed) ? SqlBuilder.DropIndex(dif.Name, dix) : null,
+                        (i, mix, dix) => dix.Columns.Any(a => changedColumns[a] == ColumnAction.Changed) || dix.ViewName != (mix as UniqueIndex).TryCC(a => a.ViewName) ? SqlBuilder.DropIndex(dif.Name, dix) : null,
                         Spacing.Simple);
 
                     return changes;
@@ -163,9 +163,9 @@ namespace Signum.Engine
                     Dictionary<string, Index> modelIxs = modelIndices[tab];
 
                     var controlledIndexes = Synchronizer.SynchronizeScript(modelIxs, dif.Indices,
-                        (i, mix) => mix is UniqueIndex || SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index too?") ? SqlBuilder.CreateIndex(mix) : null,
+                        (i, mix) => mix is UniqueIndex || mix.Columns.Any(c=>!changedColumns.ContainsKey(c.Name)) || SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index too?") ? SqlBuilder.CreateIndex(mix) : null,
                         null,
-                        (i, mix, dix) => dix.Columns.Any(a => changedColumns[a] == ColumnAction.Changed) ? SqlBuilder.CreateIndex(mix) : null,
+                        (i, mix, dix) => dix.Columns.Any(a => changedColumns[a] == ColumnAction.Changed) || dix.ViewName != (mix as UniqueIndex).TryCC(a => a.ViewName) ? SqlBuilder.CreateIndex(mix) : null,
                         Spacing.Simple);
 
                     var recreatedFreeIndexes = dif.Indices.Values.Where(dix => !dix.IsControlledIndex &&
