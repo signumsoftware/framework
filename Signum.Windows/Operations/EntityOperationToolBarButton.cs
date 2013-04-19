@@ -166,7 +166,7 @@ namespace Signum.Windows.Operations
                     if (MessageBox.Show(Window.GetWindow(eoc.EntityControl), "Are you sure of deleting the entity?", "Delete?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                     {
                         Lite<IdentifiableEntity> lite = ident.ToLite();
-                        Server.Return((IOperationServer s) => s.Delete(lite, eoc.OperationInfo.Key, null));
+                        Server.Execute((IOperationServer s) => s.Delete(lite, eoc.OperationInfo.Key, null));
                         Window.GetWindow(eoc.EntityControl).Close();
                     }
                 }

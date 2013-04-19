@@ -296,7 +296,7 @@ namespace Signum.Web.Operations
             if (constructor == null)
                 return null;
 
-            return (ModifiableEntity)OperationLogic.ServiceConstruct(type, constructor.Key);
+            return OperationLogic.Construct(type, constructor.Key);
         }
 
         protected internal virtual ActionResult ConstructorManager_VisualGeneralConstructor(ConstructContext ctx)
