@@ -272,7 +272,7 @@ namespace Signum.Engine.Disconnected
 
         protected virtual void DropDatabase(Connector newDatabase)
         {
-            DisconnectedTools.DropDatabase(newDatabase.DatabaseName());
+            DisconnectedTools.DropDatabase(new DatabaseName(null, newDatabase.DatabaseName()));
         }
 
         protected virtual string DatabaseFileName(DisconnectedMachineDN machine)
@@ -285,14 +285,14 @@ namespace Signum.Engine.Disconnected
             return Path.Combine(DisconnectedLogic.DatabaseFolder, Connector.Current.DatabaseName() + "_Export_" + machine.MachineName + "_Log.ldf");
         }
 
-        protected virtual string DatabaseName(DisconnectedMachineDN machine)
+        protected virtual DatabaseName DatabaseName(DisconnectedMachineDN machine)
         {
-            return Connector.Current.DatabaseName() + "_Export_" + machine.MachineName;
+            return new DatabaseName(null, Connector.Current.DatabaseName() + "_Export_" + machine.MachineName);
         }
 
         protected virtual string CreateDatabase(DisconnectedMachineDN machine)
         {
-            string databaseName = DatabaseName(machine);
+            DatabaseName databaseName = DatabaseName(machine);
 
             DisconnectedTools.DropIfExists(databaseName);
 
@@ -303,7 +303,7 @@ namespace Signum.Engine.Disconnected
             DisconnectedTools.CreateDatabaseDirectory(logFileName);
             DisconnectedTools.CreateDatabase(databaseName, fileName, logFileName);
 
-            return ((SqlConnector)Connector.Current).ConnectionString.Replace(Connector.Current.DatabaseName(), databaseName);
+            return ((SqlConnector)Connector.Current).ConnectionString.Replace(Connector.Current.DatabaseName(), databaseName.Name);
         }
 
         protected virtual void EnableForeignKeys(Table table)
@@ -326,7 +326,7 @@ namespace Signum.Engine.Disconnected
         {
             string backupFileName = Path.Combine(DisconnectedLogic.BackupFolder, BackupFileName(machine, export));
             DisconnectedTools.CreateDatabaseDirectory(backupFileName);
-            DisconnectedTools.BackupDatabase(newDatabase.DatabaseName(), backupFileName);
+            DisconnectedTools.BackupDatabase(new DatabaseName(null, newDatabase.DatabaseName()), backupFileName);
         }
 
         public virtual string BackupNetworkFileName(DisconnectedMachineDN machine, Lite<DisconnectedExportDN> export)
