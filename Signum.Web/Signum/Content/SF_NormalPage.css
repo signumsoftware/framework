@@ -169,10 +169,16 @@ legend
     width: 100%;    
 }
 
-.sf-popup-fullscreen
-{
-    float:left; 
-    display:block; 
-    margin-left:5px; 
+.sf-popup-fullscreen {
+    float: left;
+    display: block;
+    margin-left: 5px;
     cursor: pointer;
+}   
+
+/*----------------
+--popup-----------
+----------------*/
+.ui-dialog-title {
+    line-height: 16px;
 }

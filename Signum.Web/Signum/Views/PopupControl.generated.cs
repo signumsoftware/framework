@@ -82,8 +82,8 @@ WriteLiteral("\" class=\"sf-popup-control\" data-prefix=\"");
             
             #line default
             #line hidden
-WriteLiteral("\">\r\n    <span class=\"sf-popup-title\">\r\n    <span style=\"float:left; display:block" +
-"\">\r\n    ");
+WriteLiteral("\">\r\n    <span class=\"sf-popup-title\" style=\"display:none\">\r\n    <span style=\"floa" +
+"t:left; display:block\">\r\n    ");
 
 
             
