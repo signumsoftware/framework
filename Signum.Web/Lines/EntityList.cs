@@ -28,7 +28,7 @@ namespace Signum.Web
 
         public override string ToJS()
         {
-            return "$('#{0}').data('entityList')".Formato(ControlID);
+            return "$('#{0}').data('SF-entityList')".Formato(ControlID);
         }
 
         protected override string DefaultView()

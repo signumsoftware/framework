@@ -39,7 +39,7 @@ namespace Signum.Web
 
         public override string ToJS()
         {
-            return "$('#{0}').data('entityLine')".Formato(ControlID);
+            return "$('#{0}').data('SF-entityLine')".Formato(ControlID);
         }
 
         protected override string DefaultView()

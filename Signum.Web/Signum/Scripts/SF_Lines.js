@@ -325,7 +325,7 @@ SF.registerModule("Lines", function () {
                     select: function (event, ui) {
                         var controlId = $elem.attr("id");
                         var prefix = controlId.substr(0, controlId.indexOf(SF.Keys.toStr) - 1);
-                        $("#" + prefix).data("entityLine").onAutocompleteSelected(controlId, ui.item.value);
+                        $("#" + prefix).data("SF-entityLine").onAutocompleteSelected(controlId, ui.item.value);
                     }
                 });
             },
@@ -1066,7 +1066,7 @@ SF.registerModule("Lines", function () {
             },
 
             _getRepeaterCall: function () {
-                return "$('#" + this.options.prefix + "').data('entityRepeater')";
+                return "$('#" + this.options.prefix + "').data('SF-entityRepeater')";
             },
 
             _getRemoving: function (itemPrefix) {

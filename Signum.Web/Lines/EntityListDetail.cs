@@ -32,7 +32,7 @@ namespace Signum.Web
 
         public override string ToJS()
         {
-            return "$('#{0}').data('entityListDetail')".Formato(ControlID);
+            return "$('#{0}').data('SF-entityListDetail')".Formato(ControlID);
         }
 
         protected override JsOptionsBuilder OptionsJSInternal()

@@ -41,7 +41,7 @@ namespace Signum.Web
 
         public override string ToJS()
         {
-            return "$('#{0}').data('entityRepeater')".Formato(ControlID);
+            return "$('#{0}').data('SF-entityRepeater')".Formato(ControlID);
         }
 
         protected override JsOptionsBuilder OptionsJSInternal()
