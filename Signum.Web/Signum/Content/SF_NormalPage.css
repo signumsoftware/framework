@@ -25,9 +25,7 @@
 .sf-dropdown.sf-open .sf-menu-button
 {
 	display:block;
-	-moz-border-shadow: 0 2px 8px #ddd;
-	-webkit-border-shadow: 0 2px 8px #ddd;
-	border-shadow: 0 2px 8px #ddd;	
+	border-shadow: 0 2px 8px #ddd;
 }
 .sf-dropdown.sf-open .sf-menu-button:hover
 {
@@ -138,7 +136,6 @@
     background-color:#eee;
     -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
     filter:alpha(opacity=50);
-    -moz-opacity:0.5;
     -khtml-opacity:0.5;
     opacity:0.5;
 }

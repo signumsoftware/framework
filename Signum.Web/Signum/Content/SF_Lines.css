@@ -185,8 +185,6 @@ fieldset.sf-repeater-field
     border:2px solid #ff6666;
     padding:4px;
     background:url(../images/sign_error.gif) no-repeat 3px 3px #ffeeee;
-    -moz-border-radius:2px;
-    -webkit-border-radius:2px;
     border-radius:2px;
 }
 
