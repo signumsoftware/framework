@@ -2,7 +2,7 @@
 
 SF.Chart = (function () {
     var getFor = function (prefix) {
-        return $("#" + SF.compose(prefix, "sfChartBuilderContainer")).data("chartBuilder");
+        return $("#" + SF.compose(prefix, "sfChartBuilderContainer")).data("SF-chartBuilder");
     };
 
     return {
