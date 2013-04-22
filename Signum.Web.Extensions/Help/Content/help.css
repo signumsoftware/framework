@@ -88,10 +88,7 @@ margin-bottom:1em; display:none;}
 }
 
 #content .sidebar {
--moz-border-radius-bottomleft:5px;
--moz-border-radius-bottomright:5px;
--moz-border-radius-topleft:5px;
--moz-border-radius-topright:5px;
+border-radius: 5px;
 background-color:#eee;
 border-color:#E5E5E5;
 font-size:12px;
@@ -161,10 +158,10 @@ span.hover
 	font-size:90%;
 	color:#fff;
 	cursor:pointer;
-	-moz-border-radius:4px;
+	border-radius:4px;
 	padding:0 3px;
 	border:1px solid #78a752;
-	 background: #78a752 repeat-x;
+	background: #78a752 repeat-x;
 }
 
 textarea{width:100%;}
@@ -173,8 +170,6 @@ textarea{width:100%;}
 dd.hover .editor{display:block !important;}*/
 
 a.action, input[type=submit]{
--moz-border-radius:3px;
--webkit-border-radius:3px;
 border-radius:3px;
 color:#fff;
 padding:0 4px;
@@ -200,23 +195,15 @@ input[type=submit]:hover{background-color:#ccb86a;cursor:pointer;}
 #search{float:right;}
 #search input[type=submit]
 {
-	border-radius-topleft:0px;
-	-webkit-border-radius-topleft:0px;
-	-moz-border-radius-topleft:0px;
-	border-radius-bottomleft:0px;
-	-webkit-border-radius-bottomleft:0px;
-	-moz-border-radius-bottomleft:0px;
+    border-top-left-radius:0px;
+	border-bottom-left-radius:0px;
 }
 #search #q
 {
 	border:1px solid #999;
 	border-right:0px;
-	border-radius-topleft:3px;
-	-webkit-border-radius-topleft:3px;
-	-moz-border-radius-topleft:3px;
-	border-radius-bottomleft:3px;
-	-webkit-border-radius-bottomleft:3px;
-	-moz-border-radius-bottomleft:3px;
+	border-top-left-radius:3px;
+	border-bottom-left-radius:3px;
 }
 
 #search #q:hover, #search #q:focus{border-color:#666;}
@@ -233,8 +220,6 @@ line-height:1.4;
 margin:15px 0 8px;
 padding:0 5px;
 border-radius:3px;
--webkit-border-radius:3px;
--moz-border-radius:3px;
 }
 
 dd input, dd textarea, #entityName textarea {display:none !important}
@@ -252,10 +237,7 @@ display:none;
 
 div.imageright {
 	border-radius:4px;
-	-webkit-border-radius:4px;
-	-moz-border-radius:4px;
 	background-color:#fff;
-/*	border:1px solid #ccc;*/
 	float:right;
 	margin:4px 0 4px 8px;
 	padding:4px;
@@ -263,10 +245,7 @@ div.imageright {
 
 div.imageleft {
 	border-radius:4px;
-	-webkit-border-radius:4px;
-	-moz-border-radius:4px;
 	background-color:#fff;
-/*	border:1px solid #ccc;*/
 	float:left;
 	margin:4px 8px 4px 0;
 	padding:4px;
@@ -274,10 +253,7 @@ div.imageleft {
 
 div.imagecentre {
 	border-radius:4px;
-	-webkit-border-radius:4px;
-	-moz-border-radius:4px;
 	background-color:#fff;
-/*	border:1px solid #ccc;*/
 	text-align:center;
 	margin:4px 8px 4px 0;
 	padding:4px;
@@ -289,7 +265,6 @@ border:1px solid #eee;
 
 #syntax-list 
 {
-	-moz-box-shadow: 0 2px 9px 1px #aaa;
 	-webkit-box-shadow: 0 2px 9px 1px #aaa;
 	padding:10px;
 	margin-bottom:10px;
