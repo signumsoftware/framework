@@ -82,7 +82,7 @@ SF.Auth = (function () {
     };
 
     var treeView = function () {
-        $(".sf-auth-namespace").live("click", function (e) {
+        $(document).on("click", ".sf-auth-namespace", function (e) {
             e.preventDefault();
             var $this = $(this);
             $this.find(".sf-auth-expanded-last,.sf-auth-closed-last").toggleClass("sf-auth-expanded-last").toggleClass("sf-auth-closed-last");

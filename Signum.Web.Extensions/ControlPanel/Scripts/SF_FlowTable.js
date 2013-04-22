@@ -98,7 +98,7 @@ SF.FlowTable = (function () {
         });
     };
 
-    $(".sf-ftbl-part-header .sf-remove").live("click", function () {
+    $(document).on("click", ".sf-ftbl-part-header .sf-remove", function () {
         $(this).closest(".sf-ftbl-part-container").html("");
     });
 

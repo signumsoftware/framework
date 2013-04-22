@@ -87,8 +87,8 @@ WriteLiteral(@"
         SF.Auth.multiSelRadios($(document));
         SF.Auth.treeView();
         $("".sf-auth-rules .sf-submodule-trigger"").click(SF.Auth.openDialog);
-        $("".sf-auth-rules .sf-remove"").live('click', SF.Auth.removeCondition);
-        $("".sf-auth-rules .sf-create"").live('click', function (e) {
+        $(document).on(""click"", "".sf-auth-rules .sf-remove"", SF.Auth.removeCondition);
+        $(document).on(""click"", "".sf-auth-rules .sf-create"", function (e) {
             e.preventDefault();
             SF.Auth.chooseConditionToAdd($(this), '");
 
