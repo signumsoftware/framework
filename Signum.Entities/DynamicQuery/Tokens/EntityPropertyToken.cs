@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +8,6 @@ using Signum.Utilities.Reflection;
 using System.Reflection;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
-using Signum.Entities.Properties;
 
 namespace Signum.Entities.DynamicQuery
 {
@@ -109,7 +108,7 @@ namespace Signum.Entities.DynamicQuery
             string route = pr == null ? null : pr.IsAllowed();
 
             if (parent.HasText() && route.HasText())
-                return Resources.And.Combine(parent, route);
+                return QueryTokenMessage.And.NiceToString().Combine(parent, route);
 
             return parent ?? route;
         }
@@ -129,7 +128,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            return PropertyInfo.NiceName() + Resources.Of + Parent.ToString();
+            return PropertyInfo.NiceName() + QueryTokenMessage.Of.NiceToString() + Parent.ToString();
         }
 
         public override QueryToken Clone()

@@ -50,6 +50,7 @@ namespace Signum.Test.Environment
         Save
     }
 
+    [DescriptionOptions(DescriptionOptions.All)]
     public interface IAuthorDN : IIdentifiable
     {
         string Name { get; }
@@ -403,6 +404,7 @@ namespace Signum.Test.Environment
         }
     }
 
+    [DescriptionOptions(DescriptionOptions.Members)]
     public enum AlbumState
     {
         New,

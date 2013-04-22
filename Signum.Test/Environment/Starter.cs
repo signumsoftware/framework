@@ -5,7 +5,6 @@ using System.Text;
 using Signum.Entities;
 using Signum.Engine.Maps;
 using Signum.Engine;
-using Signum.Test.Properties;
 using System.IO;
 using System.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -16,6 +15,7 @@ using Signum.Utilities;
 using Microsoft.SqlServer.Types;
 using Signum.Engine.Operations;
 using Signum.Engine.Basics;
+using Signum.Test.Properties;
 
 namespace Signum.Test.Environment
 {

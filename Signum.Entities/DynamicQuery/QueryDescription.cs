@@ -12,7 +12,6 @@ using Signum.Entities.Reflection;
 using Signum.Utilities.DataStructures;
 using System.Collections;
 using System.Linq.Expressions;
-using Signum.Entities.Properties;
 using System.Runtime.Serialization;
 
 namespace Signum.Entities.DynamicQuery

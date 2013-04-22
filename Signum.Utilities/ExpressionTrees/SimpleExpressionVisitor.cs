@@ -5,7 +5,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Signum.Utilities;
 using System.Linq;
-using Signum.Utilities.Properties;
 
 namespace Signum.Utilities.ExpressionTrees
 {

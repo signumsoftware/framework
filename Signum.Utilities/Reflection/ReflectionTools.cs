@@ -9,7 +9,6 @@ using System.Collections;
 using System.ComponentModel;
 using System.Resources;
 using System.Globalization;
-using Signum.Utilities.Properties;
 using System.Collections.Concurrent;
 
 namespace Signum.Utilities.Reflection

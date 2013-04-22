@@ -1,4 +1,4 @@
-﻿#region usings
+#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,6 @@ using Signum.Entities;
 using Signum.Engine.Maps;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.ExpressionTrees;
-using Signum.Web.Properties;
 using Signum.Engine;
 using Signum.Entities.Reflection;
 using System.Reflection;
@@ -256,7 +255,7 @@ namespace Signum.Web
                 }
                 catch (FormatException)
                 {
-                    return ctx.None(ctx.PropertyValidator != null ? Resources._0HasAnInvalidFormat.Formato(ctx.PropertyValidator.PropertyInfo.NiceName()) : Resources.InvalidFormat);
+                    return ctx.None(ctx.PropertyValidator != null ? ValidationMessage._0HasAnInvalidFormat.NiceToString().Formato(ctx.PropertyValidator.PropertyInfo.NiceName()) : ValidationMessage.InvalidFormat.NiceToString());
                 }
             };
         }
@@ -278,7 +277,7 @@ namespace Signum.Web
                 }
                 catch (FormatException)
                 {
-                    return ctx.None(ctx.PropertyValidator != null ? Resources._0HasAnInvalidFormat.Formato(ctx.PropertyValidator.PropertyInfo.NiceName()) : Resources.InvalidFormat);
+                    return ctx.None(ctx.PropertyValidator != null ? ValidationMessage._0HasAnInvalidFormat.NiceToString().Formato(ctx.PropertyValidator.PropertyInfo.NiceName()) : ValidationMessage.InvalidFormat.NiceToString());
                 }
             };
         }
@@ -372,7 +371,7 @@ namespace Signum.Web
         {
             if (AllowedMappings != null && !AllowedMappings.ContainsKey(typeof(R)))
             {
-                return (R)(object)ctx.None(Resources.Type0NotAllowed.Formato(typeof(R)));
+                return (R)(object)ctx.None(ValidationMessage.Type0NotAllowed.NiceToString().Formato(typeof(R)));
             }
 
             Mapping<R> mapping =  (Mapping<R>)(AllowedMappings.TryGetC(typeof(R)) ?? Navigator.EntitySettings(typeof(R)).UntypedMappingLine);
@@ -436,7 +435,7 @@ namespace Signum.Web
                 }
                 catch (Exception e)
                 {
-                    string error = e is FormatException ? Resources._0HasAnInvalidFormat : Resources.NotPossibleToaAssign0;
+                    string error = e is FormatException ? ValidationMessage._0HasAnInvalidFormat.NiceToString() : ValidationMessage.NotPossibleToaAssign0.NiceToString();
 
                     ctx.Error.Add(error.Formato(PropertyValidator.PropertyInfo.NiceName()));
                 }
@@ -581,7 +580,7 @@ namespace Signum.Web
             PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
 
             PropertyMapping<P> propertyMapping = (PropertyMapping<P>)properties.GetOrCreate(pi.Name,
-                () => new PropertyMapping<P>(Validator.TryGetPropertyValidator(typeof(T), pi.Name)));
+                () => new PropertyMapping<P>(Validator.TryGetPropertyValidator(typeof(T), pi.Name) ?? new PropertyValidator<T>(pi)));
 
             propertyMapping.Mapping = mapping;
             

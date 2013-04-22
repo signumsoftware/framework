@@ -1,4 +1,4 @@
-﻿#region usings
+#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +11,6 @@ using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
 using System.Configuration;
-using Signum.Web.Properties;
 using Signum.Engine;
 #endregion
 
@@ -89,26 +88,26 @@ namespace Signum.Web
                     {
                         sb.AddLine(
                             helper.Span(itemTC.Compose("btnUp"),
-                                Resources.Signum_entityRepeater_moveUp,
+                                JavascriptMessage.entityRepeater_moveUp.NiceToString(),
                                 "sf-line-button sf-move-up",
                                 new Dictionary<string, object> 
                                 {  
                                    { "onclick", "{0}.moveUp('{1}');".Formato(entityRepeater.ToJS(), itemTC.ControlID) },
                                    { "data-icon", "ui-icon-triangle-1-n" },
                                    { "data-text", false },
-                                   { "title", Resources.Signum_entityRepeater_moveUp }
+                                   { "title", JavascriptMessage.entityRepeater_moveUp.NiceToString() }
                                 }));
 
                         sb.AddLine(
                             helper.Span(itemTC.Compose("btnDown"),
-                                Resources.Signum_entityRepeater_moveDown,
+                                JavascriptMessage.entityRepeater_moveDown.NiceToString(),
                                 "sf-line-button sf-move-down",
                                 new Dictionary<string, object> 
                                 {   
                                    { "onclick", "{0}.moveDown('{1}');".Formato(entityRepeater.ToJS(), itemTC.ControlID) },
                                    { "data-icon", "ui-icon-triangle-1-s" },
                                    { "data-text", false },
-                                   { "title", Resources.Signum_entityRepeater_moveDown }
+                                   { "title", JavascriptMessage.entityRepeater_moveDown.NiceToString() }
                                 }));
                     }
                 }

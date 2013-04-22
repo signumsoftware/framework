@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -18,7 +18,6 @@ using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 using System.Windows.Media;
 using Signum.Services;
-using Signum.Windows.Properties;
 using System.Windows.Automation;
 
 namespace Signum.Windows
@@ -113,7 +112,6 @@ namespace Signum.Windows
             this.Loaded += new RoutedEventHandler(SearchControl_Loaded);
             this.DataContextChanged += new DependencyPropertyChangedEventHandler(CountSearchControl_DataContextChanged);
 
-            this.Bind(AutomationProperties.NameProperty, this, "QueryName");
             this.Bind(AutomationProperties.ItemStatusProperty, this, "ItemsCount"); 
         }
 
@@ -139,6 +137,8 @@ namespace Signum.Windows
 
             DynamicQueryServer.SetFilterTokens(FilterOptions, qd);
 
+            AutomationProperties.SetName(this, QueryUtils.GetQueryUniqueKey(QueryName));
+
             Search();
         }
 
@@ -155,7 +155,7 @@ namespace Signum.Windows
                 ItemsCount = count;
                 if (ItemsCount == 0)
                 {
-                    FormattedText = (TextZeroItems ?? Properties.Resources.ThereIsNo0)
+                    FormattedText = (TextZeroItems ?? SearchMessage.ThereIsNo0.NiceToString())
                         .Formato(QueryUtils.GetNiceName(QueryName));
                     tb.FontWeight = FontWeights.Regular;
                 }

@@ -6,7 +6,6 @@ using Signum.Utilities.DataStructures;
 using Signum.Utilities;
 using System.Diagnostics;
 using System.IO;
-using Signum.Engine.Properties;
 using Signum.Entities;
 using System.Data.Common;
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +8,6 @@ using System.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Reflection;
-using Signum.Entities.Properties;
 
 namespace Signum.Entities.DynamicQuery
 {
@@ -167,7 +166,7 @@ namespace Signum.Entities.DynamicQuery
             if (elements.IsEmpty())
                 return null;
 
-            return Resources.TheNumberOf0IsBeingMultipliedBy1.Formato(entityType.NiceName(), elements.CommaAnd(a => a.Parent.ToString()));
+            return ValidationMessage.TheNumberOf0IsBeingMultipliedBy1.NiceToString().Formato(entityType.NiceName(), elements.CommaAnd(a => a.Parent.ToString()));
         }
 
         public override string TypeColor
@@ -178,7 +177,7 @@ namespace Signum.Entities.DynamicQuery
 
 
 
-    [ForceLocalization]
+    [DescriptionOptions(DescriptionOptions.Members)]
     public enum CollectionElementType
     {
         Element,

@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
-using Signum.Utilities.Properties;
+using System.ComponentModel;
 
 namespace Signum.Utilities
 {
@@ -15,7 +15,7 @@ namespace Signum.Utilities
         string welcomeMessage;
 
         public ConsoleSwitch()
-            : this(Resources.SelectOneOfTheFollowingOptions)
+            : this(ConsoleMessage.SelectOneOfTheFollowingOptions.NiceToString())
         {
         }
 
@@ -42,7 +42,7 @@ namespace Signum.Utilities
 
         public V Choose()
         {
-            return Choose(Resources.EnterYourSelection);
+            return Choose(ConsoleMessage.EnterYourSelection.NiceToString());
         }
 
         public V Choose(string endMessage)
@@ -57,7 +57,7 @@ namespace Signum.Utilities
 
         public WithDescription<V> ChooseTuple()
         {
-            return ChooseTuple(Resources.EnterYourSelection);
+            return ChooseTuple(ConsoleMessage.EnterYourSelection.NiceToString());
         }
 
         public WithDescription<V> ChooseTuple(string endMessage)
@@ -70,7 +70,7 @@ namespace Signum.Utilities
 
                 Console.WriteLine(endMessage);
                 string line = Console.ReadLine();
-
+                
                 if (string.IsNullOrEmpty(line))
                     return null;
 
@@ -106,7 +106,7 @@ namespace Signum.Utilities
 
         public V[] ChooseMultiple()
         {
-            return ChooseMultiple(Resources.EnterYoutSelectionsSeparatedByComma);
+            return ChooseMultiple(ConsoleMessage.EnterYoutSelectionsSeparatedByComma.NiceToString());
         }
 
 
@@ -123,7 +123,7 @@ namespace Signum.Utilities
 
         public WithDescription<V>[] ChooseMultipleWithDescription()
         {
-            return ChooseMultipleWithDescription(Resources.EnterYoutSelectionsSeparatedByComma);
+            return ChooseMultipleWithDescription(ConsoleMessage.EnterYoutSelectionsSeparatedByComma.NiceToString());
         }
 
         public WithDescription<V>[] ChooseMultipleWithDescription(string endMessage)
@@ -143,7 +143,7 @@ namespace Signum.Utilities
                     return null;
                 }
 
-                Console.WriteLine();
+                Console.WriteLine(); 
 
                 return line.Split(',').SelectMany(GetValuesRange).ToArray();
             }
@@ -182,16 +182,16 @@ namespace Signum.Utilities
         {
             int index = dictionary.Keys.IndexOf(value);
             if (index == -1)
-                throw new KeyNotFoundException(Resources.NoOptionWithKey0Found.Formato(value));
+                throw new KeyNotFoundException(ConsoleMessage.NoOptionWithKey0Found.NiceToString().Formato(value));
 
             return index;
         }
 
         WithDescription<V> GetValue(string value)
         {
-            return dictionary.GetOrThrow(value, Resources.NoOptionWithKey0Found);
+            return dictionary.GetOrThrow(value, ConsoleMessage.NoOptionWithKey0Found.NiceToString());
         }
-
+   
         public IEnumerator<KeyValuePair<string, WithDescription<V>>> GetEnumerator()
         {
             return dictionary.GetEnumerator();
@@ -199,8 +199,20 @@ namespace Signum.Utilities
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
-            return GetEnumerator();
+          return GetEnumerator(); 
         }
+    }
+
+    public enum ConsoleMessage
+    {
+        [Description("Enter your selection (nothing to exit): ")]
+        EnterYourSelection,
+        [Description("Enter your selections separated by comma or hyphen (nothing to exit): ")]
+        EnterYoutSelectionsSeparatedByComma,
+        [Description("No option with key {0} found")]
+        NoOptionWithKey0Found,
+        [Description("Select one of the following options:")]
+        SelectOneOfTheFollowingOptions
     }
 
     public class WithDescription<T>

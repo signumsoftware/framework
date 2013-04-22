@@ -10,7 +10,6 @@ using System.Web.Mvc.Html;
 using System.Linq.Expressions;
 using Signum.Engine;
 using Signum.Web.Controllers;
-using Signum.Web.Properties;
 
 namespace Signum.Web
 {

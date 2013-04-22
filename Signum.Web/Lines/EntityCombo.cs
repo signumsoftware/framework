@@ -12,7 +12,6 @@ using System.Reflection;
 using Signum.Entities.Reflection;
 using Signum.Engine;
 using System.Configuration;
-using Signum.Web.Properties;
 using System.Web.Routing;
 #endregion
 

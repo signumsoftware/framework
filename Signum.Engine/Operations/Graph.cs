@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,7 +15,6 @@ using System.Xml.Linq;
 using System.ComponentModel;
 using System.Linq.Expressions;
 using Signum.Entities.Basics;
-using Signum.Engine.Properties;
 
 namespace Signum.Engine.Operations
 {
@@ -120,7 +119,7 @@ namespace Signum.Engine.Operations
             {
                 S state = Graph<E, S>.GetStateFunc(entity);
                 if (FromStates != null && !FromStates.Contains(state))
-                    return Resources.ImpossibleToExecute0FromState1.Formato(key, ((Enum)(object)state).NiceToString());
+                    return OperationMessage.ImpossibleToExecute0FromState1.NiceToString().Formato(key, ((Enum)(object)state).NiceToString());
 
                 return base.OnCanDelete(entity);
             }

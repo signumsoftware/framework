@@ -4,7 +4,6 @@ using System.Text;
 using System.Collections;
 using System.Reflection;
 using System.Linq;
-using Signum.Utilities.Properties;
 using Signum.Utilities;
 using System.Diagnostics;
 

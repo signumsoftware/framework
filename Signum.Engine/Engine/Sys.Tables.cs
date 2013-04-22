@@ -38,6 +38,8 @@ namespace Signum.Engine.SchemaInfoTables
         public int database_id;
         public string name;
         public byte[] owner_sid;
+
+        public bool is_broker_enabled;
     }
 
 

@@ -1,4 +1,4 @@
-﻿#region usings
+#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +13,6 @@ using Signum.Utilities.DataStructures;
 using System.Reflection;
 using Signum.Utilities.Reflection;
 using System.Collections.Specialized;
-using Signum.Web.Properties;
 using Signum.Entities.Reflection;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine.DynamicQuery;
@@ -532,7 +531,7 @@ namespace Signum.Web
                 }
 
                 Navigator.RegisterArea(typeof(Navigator), "signum");
-                FileRepositoryManager.Register(new LocalizedJavaScriptRepository(Resources.ResourceManager, "signum"));
+                FileRepositoryManager.Register(new LocalizedJavaScriptRepository(typeof(JavascriptMessage), "signum"));
                 FileRepositoryManager.Register(new CalendarLocalizedJavaScriptRepository("~/signum/calendarResources/"));
 
                 if (Initializing != null)
@@ -619,9 +618,7 @@ namespace Signum.Web
 
             if (ident.IsNew)
             {
-                Gender gender = ident.GetType().GetGender();
-                return Properties.Resources.ResourceManager.GetGenderAwareResource("New", gender) + " " + niceName;
-
+                return LiteMessage.New.NiceToString().ForGenderAndNumber(ident.GetType().GetGender()) + " " + niceName;
             }
             return niceName + " " + ident.Id;
         }
@@ -665,7 +662,7 @@ namespace Signum.Web
             Type cleanType = cleanTC.UntypedValue.GetType();
 
             if (!Navigator.IsViewable(cleanType))
-                throw new Exception(Resources.ViewForType0IsNotAllowed.Formato(cleanType.Name));
+                throw new Exception(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().Formato(cleanType.Name));
 
             controller.ViewData.Model = cleanTC;
 
@@ -683,7 +680,7 @@ namespace Signum.Web
         protected internal virtual ViewResult Find(ControllerBase controller, FindOptions findOptions)
         {
             if (!Navigator.IsFindable(findOptions.QueryName))
-                throw new UnauthorizedAccessException(Resources.Query0IsNotAllowed.Formato(findOptions.QueryName));
+                throw new UnauthorizedAccessException(SearchMessage.Query0IsNotAllowed.NiceToString().Formato(findOptions.QueryName));
 
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
@@ -781,7 +778,7 @@ namespace Signum.Web
         protected internal virtual PartialViewResult PartialFind(ControllerBase controller, FindOptions findOptions, Context context)
         {
             if (!Navigator.IsFindable(findOptions.QueryName))
-                throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(findOptions.QueryName));
+                throw new UnauthorizedAccessException(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().Formato(findOptions.QueryName));
 
             SetSearchViewableAndCreable(findOptions);
 
@@ -814,7 +811,7 @@ namespace Signum.Web
         protected internal virtual PartialViewResult Search(ControllerBase controller, QueryRequest request, bool allowMultiple, bool view, FilterMode filterMode, Context context)
         {
             if (!Navigator.IsFindable(request.QueryName))
-                throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(request.QueryName));
+                throw new UnauthorizedAccessException(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().Formato(request.QueryName));
 
             ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
             

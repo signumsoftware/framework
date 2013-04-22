@@ -26,4 +26,4 @@ using Signum.Utilities;
 [assembly: InternalsVisibleTo("Signum.Engine")]
 [assembly: InternalsVisibleTo("Signum.Web")]
 
-[assembly: LocalizeDescriptions]
+[assembly: DefaultAssemblyCulture("en")]

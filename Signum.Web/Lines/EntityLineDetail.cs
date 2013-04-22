@@ -11,7 +11,6 @@ using Signum.Entities;
 using System.Reflection;
 using Signum.Entities.Reflection;
 using System.Configuration;
-using Signum.Web.Properties;
 #endregion
 
 namespace Signum.Web

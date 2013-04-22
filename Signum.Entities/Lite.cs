@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
-using Signum.Entities.Properties;
 using System.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using System.Linq.Expressions;
@@ -15,6 +14,7 @@ using System.Diagnostics;
 using Signum.Entities.Basics;
 using System.Collections.Concurrent;
 using System.Runtime.Serialization;
+using System.ComponentModel;
 
 namespace Signum.Entities
 {
@@ -297,7 +297,7 @@ namespace Signum.Entities
 
         public static Type Extract(Type liteType)
         {
-            if (liteType.IsGenericType && liteType.GetGenericTypeDefinition() == typeof(Lite<>))
+            if (liteType.IsInstantiationOf(typeof(Lite<>)) || typeof(LiteImp).IsAssignableFrom(liteType))
                 return liteType.GetGenericArguments()[0];
             return null;
         }
@@ -327,15 +327,15 @@ namespace Signum.Entities
 
             Match match = regex.Match(liteKey);
             if (!match.Success)
-                return Resources.InvalidFormat;
+                return ValidationMessage.InvalidFormat.NiceToString();
 
             Type type = ResolveType(match.Groups["type"].Value);
             if (type == null)
-                return Resources.TypeNotFound;
+                return LiteMessage.TypeNotFound.NiceToString();
 
             int id;
             if (!int.TryParse(match.Groups["id"].Value, out id))
-                return Resources.IdNotValid;
+                return LiteMessage.IdNotValid.NiceToString();
 
             string toStr = match.Groups["toStr"].Value; //maybe null
 
@@ -554,5 +554,16 @@ namespace Signum.Entities
         {
             return Expression.New(Lite.LiteConstructor(type), id.UnNullify(), toString, modified);
         }
+    }
+
+    public enum LiteMessage
+    {
+        IdNotValid,
+        [Description("Invalid Format")]
+        InvalidFormat,
+        New,
+        TypeNotFound,
+        [Description("Text")]
+        ToStr
     }
 }

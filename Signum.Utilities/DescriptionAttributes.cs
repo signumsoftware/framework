@@ -9,13 +9,60 @@ using System.Text.RegularExpressions;
 using Signum.Utilities;
 using System.Reflection;
 using Signum.Utilities.Reflection;
-using Signum.Utilities.Properties;
 using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
+using System.Collections.Concurrent;
+using System.IO;
+using System.Xml.Linq;
 
 
 namespace Signum.Utilities
 {
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Interface, Inherited = true)]
+    public class DescriptionOptionsAttribute : Attribute
+    {
+        public DescriptionOptions Options { get; set; }
+
+        public DescriptionOptionsAttribute(DescriptionOptions options)
+        {
+            this.Options = options;
+        }
+    }
+
+    public enum DescriptionOptions
+    {
+        None = 0,
+
+        Members = 1,
+        Description = 2,
+        PluralDescription = 4,
+        Gender = 8,
+
+        All = Members | Description | PluralDescription | Gender,
+    }
+
+    public static class DescriptionOptionsExtensions
+    {
+        public static bool IsSetAssert(this DescriptionOptions opts, DescriptionOptions flag, MemberInfo member)
+        {
+            if ((opts.IsSet(DescriptionOptions.PluralDescription) || opts.IsSet(DescriptionOptions.Gender)) && !opts.IsSet(DescriptionOptions.Description))
+                throw new InvalidOperationException("{0} has {1} set also requires {2}".Formato(member.Name, opts, DescriptionOptions.Description));
+
+            if ((member is PropertyInfo || member is FieldInfo) &&
+                (opts.IsSet(DescriptionOptions.PluralDescription) ||
+                 opts.IsSet(DescriptionOptions.Gender) ||
+                 opts.IsSet(DescriptionOptions.Members)))
+                throw new InvalidOperationException("Member {0} has {1} set".Formato(member.Name, opts));
+
+            return opts.IsSet(flag);
+        }
+
+        public static bool IsSet(this DescriptionOptions opts, DescriptionOptions flag)
+        {
+            return (opts & flag) == flag;
+        }
+    }
+
     [AttributeUsage(AttributeTargets.Class)]
     public class PluralDescriptionAttribute : Attribute
     {
@@ -30,56 +77,112 @@ namespace Signum.Utilities
     [AttributeUsage(AttributeTargets.Class)]
     public class GenderAttribute : Attribute
     {
-        public Gender Gender { get; private set; }
+        public char Gender { get; set; }
 
-        public GenderAttribute(Gender gender)
+        public GenderAttribute(char gender)
         {
             this.Gender = gender;
         }
     }
 
-    [AttributeUsage(AttributeTargets.Assembly)]
-    public class LocalizeDescriptionsAttribute : Attribute
+    [AttributeUsage(AttributeTargets.Assembly, Inherited = true)]
+    public class DefaultAssemblyCultureAttribute : Attribute
     {
+        public string DefaultCulture { get; private set; }
 
-    }
-    
-    [AttributeUsage(AttributeTargets.All, Inherited = true)]
-    public class ForceLocalization : Attribute
-    {
-    }  
-
-    [AttributeUsage(AttributeTargets.All, Inherited = true)]
-    public class AvoidLocalization : Attribute
-    {
+        public DefaultAssemblyCultureAttribute(string defaultCulture)
+        {
+            this.DefaultCulture = defaultCulture;
+        }
     }
 
     public static class DescriptionManager
     {
-        public static string NiceToString(this Enum a)
-        {
-            var fi = EnumFieldCache.Get(a.GetType()).TryGetC(a);
-            if (fi != null)
-                return DescriptionManager.GetDescription(fi) ?? a.ToString().NiceName();
-
-            return a.ToString().NiceName();
-        }
-
         public static Func<Type, string> CleanTypeName = t => t.Name; //To allow MyEntityDN
         public static Func<Type, Type> CleanType = t => t; //To allow Lite<T>
+
+        public static string TranslationDirectory = Path.Combine(Path.GetDirectoryName(new Uri(typeof(DescriptionManager).Assembly.CodeBase).LocalPath), "Translations");
+
+        public static event Func<Type, DescriptionOptions?> DefaultDescriptionOptions = t => t.Name.EndsWith("Message") ? DescriptionOptions.Members : (DescriptionOptions?)null;
+        public static event Func<MemberInfo, bool> ShouldLocalizeMemeber = m => true;
+
+        static string Fallback(Type type, Func<LocalizedType, string> typeValue)
+        {
+            var cc = CultureInfo.CurrentUICulture;
+            {
+                var loc = GetLocalizedType(type, cc);
+                if (loc != null)
+                {
+                    string result = typeValue(loc);
+                    if (result != null)
+                        return result;
+                }
+            }
+
+            if (cc.Parent.Name.HasText())
+            {
+                var loc = GetLocalizedType(type, cc.Parent);
+                if (loc != null)
+                {
+                    string result = typeValue(loc);
+                    if (result != null)
+                        return result;
+                }
+            }
+
+            var defaultCulture = LocalizedAssembly.GetDefaultAssemblyCulture(type.Assembly);
+            if (defaultCulture != null)
+            {
+                var loc = GetLocalizedType(type, CultureInfo.GetCultureInfo(defaultCulture));
+                if (loc == null)
+                    throw new InvalidOperationException("Type {0} is not localizable".Formato(type.TypeName()));
+
+                return typeValue(loc);
+            }
+
+            return null;
+        }
+
 
         public static string NiceName(this Type type)
         {
             type = CleanType(type);
 
-            return DescriptionManager.GetDescription(type) ??
-                CleanTypeName(type).SpacePascal();
+            var result = Fallback(type, lt => lt.Description);
+
+            if (result != null)
+                return result;
+
+            return DefaultTypeDescription(type);
+        }
+
+     
+        public static string NicePluralName(this Type type)
+        {
+            type = CleanType(type);
+
+            var result = Fallback(type, lt => lt.PluralDescription);
+
+            if (result != null)
+                return result;
+
+            return type.SingleAttribute<PluralDescriptionAttribute>().TryCC(a => a.PluralDescription) ??
+                NaturalLanguageTools.Pluralize(DefaultTypeDescription(type)); 
+        }
+
+        public static string NiceToString(this Enum a)
+        {
+            var fi = EnumFieldCache.Get(a.GetType()).TryGetC(a);
+            if (fi != null)
+                return GetMemberNiceName(fi) ?? DefaultMemberDescription(fi);
+
+            return a.ToString().NiceName();
         }
 
         public static string NiceName(this PropertyInfo pi)
         {
-            return DescriptionManager.GetDescription(pi) ??
-                (pi.IsDefaultName() ? pi.PropertyType.NiceName() : pi.Name.NiceName());
+            return GetMemberNiceName(pi) ??
+                (pi.IsDefaultName() ? pi.PropertyType.NiceName() : DefaultMemberDescription(pi));
         }
 
         public static bool IsDefaultName(this PropertyInfo pi)
@@ -87,108 +190,321 @@ namespace Signum.Utilities
             return pi.Name == CleanTypeName(CleanType(pi.PropertyType)); 
         }
 
-        public static string NicePluralName(this Type type)
+        static string GetMemberNiceName(MemberInfo memberInfo)
         {
-            return DescriptionManager.GetPluralDescription(type) ??
-                   NaturalLanguageTools.Pluralize(type.NiceName());
-        }
+            var cc = CultureInfo.CurrentUICulture;
+            var type = memberInfo.DeclaringType;
 
-        public static string GetGenderAwareResource(this ResourceManager resource, string resourceKey, Gender gender)
-        {
-            string compoundKey = resourceKey + 
-                (gender == Gender.Masculine ? "_m" :
-                 gender == Gender.Femenine ? "_f" : "_n");
-
-            return resource.GetString(compoundKey) ?? resource.GetString(resourceKey);
-        }
-
-        public static string GetGenderAwareResource(this Type type, Expression<Func<string>> resource)
-        {
-            MemberExpression me = (MemberExpression)resource.Body;
-            PropertyInfo pi = me.Member.DeclaringType.GetProperty("ResourceManager", BindingFlags.Static| BindingFlags.NonPublic | BindingFlags.Public);
-            ResourceManager rm = (ResourceManager)pi.GetValue(null, null);
-            return rm.GetGenderAwareResource(me.Member.Name, type.GetGender());
-        }
-
-        static string GetDescription(MemberInfo memberInfo)
-        {
-            if (memberInfo.DeclaringType == typeof(DayOfWeek))
+            if (LocalizedAssembly.GetDefaultAssemblyCulture(type.Assembly) == null)
             {
-                return CultureInfo.CurrentCulture.DateTimeFormat.DayNames[(int)((FieldInfo)memberInfo).GetValue(null)];
+                if (type == typeof(DayOfWeek))
+                    return CultureInfo.CurrentCulture.DateTimeFormat.DayNames[(int)((FieldInfo)memberInfo).GetValue(null)];
+
+                return memberInfo.SingleAttribute<DescriptionAttribute>().TryCC(a => a.Description) ?? memberInfo.Name.NiceName();
             }
+       
+            var result = Fallback(type, lt => lt.Members.TryGetC(memberInfo.Name));
+            if (result != null)
+                return result;
 
-            Assembly assembly = (memberInfo as Type ?? memberInfo.DeclaringType).Assembly;
+            return result;
+        }
 
-            if (assembly.HasAttribute<LocalizeDescriptionsAttribute>())
+        public static char? GetGender(this Type type)
+        {
+            type = CleanType(type);
+
+            var cc = CultureInfo.CurrentUICulture;
+
+            if(LocalizedAssembly.GetDefaultAssemblyCulture(type.Assembly) == null)
+                return type.SingleAttribute<GenderAttribute>().TryCS(a => a.Gender) ??
+                    NaturalLanguageTools.GetGender(type.NiceName());
+
+            var lt = GetLocalizedType(type, cc);
+            if (lt != null && lt.Gender != null)
+                return lt.Gender;
+
+            if (cc.Parent.Name.HasText())
             {
-                string key = memberInfo.DeclaringType.TryCC(d => d.Name).Add("_", memberInfo.Name);
-                string result = assembly.GetDefaultResourceManager().GetString(key);
-                if (result != null)
-                    return result;
-            }
-
-            DescriptionAttribute desc = memberInfo.SingleAttribute<DescriptionAttribute>();
-            if (desc != null)
-            {
-                return desc.Description;
+                lt = GetLocalizedType(type, cc.Parent);
+                if (lt != null)
+                    return lt.Gender;
             }
 
             return null;
         }
 
-        static string GetPluralDescription(Type type)
-        {
-            Assembly assembly = type.Assembly;
-            if (assembly.HasAttribute<LocalizeDescriptionsAttribute>())
-            {
-                string key = type.Name + "_Plural";
-                string result = assembly.GetDefaultResourceManager().GetString(key);
-                if (result != null)
-                    return result;
-            }
+        static ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Assembly, LocalizedAssembly>> localizations = 
+            new ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Assembly, LocalizedAssembly>>();
 
-            PluralDescriptionAttribute desc = type.SingleAttribute<PluralDescriptionAttribute>();
-            if (desc != null)
+        public static LocalizedType GetLocalizedType(Type type, CultureInfo cultureInfo)
+        {
+            var la = GetLocalizedAssembly(type.Assembly, cultureInfo);
+
+            if (la == null)
+                return null;
+
+            var result = la.Types.TryGetC(type);
+            
+            if(result != null)
+                return result;
+
+            if(type.IsGenericType && !type.IsGenericTypeDefinition)
+                return la.Types.TryGetC(type.GetGenericTypeDefinition());
+
+            return null;
+        }
+
+        public static LocalizedAssembly GetLocalizedAssembly(Assembly assembly, CultureInfo cultureInfo)
+        {
+            return localizations
+                .GetOrAdd(cultureInfo, ci => new ConcurrentDictionary<Assembly, LocalizedAssembly>())
+                .GetOrAdd(assembly, (Assembly a) => LocalizedAssembly.ImportXml(assembly, cultureInfo));
+        }
+
+        internal static DescriptionOptions? OnDefaultDescriptionOptions(Type type)
+        {
+            if (DescriptionManager.DefaultDescriptionOptions == null)
+                return null;
+
+            foreach (Func<Type, DescriptionOptions?> action in DescriptionManager.DefaultDescriptionOptions.GetInvocationList())
             {
-                return desc.PluralDescription;
+                var result = action(type);
+                if (result != null)
+                    return result.Value;
             }
 
             return null;
         }
 
-        public static Gender GetGender(this Type type)
+
+        internal static bool OnShouldLocalizeMember(MemberInfo m)
         {
-            Assembly assembly = type.Assembly;
-            if (assembly.HasAttribute<LocalizeDescriptionsAttribute>())
+            if (ShouldLocalizeMemeber == null)
+                return true;
+
+            foreach (Func<MemberInfo, bool> func in ShouldLocalizeMemeber.GetInvocationList())
             {
-                string key = type.Name + "_Gender";
-                string gender = assembly.GetDefaultResourceManager().GetString(key);
-                if (gender != null)
-                    return ParseGender(gender);
+                if (!func(m))
+                    return false;
             }
 
-            var ga = type.SingleAttribute<GenderAttribute>();
-            if (ga != null)
-                return ga.Gender;
-
-            return NaturalLanguageTools.GetGender(type.NiceName());
+            return true;
         }
 
-        static Gender ParseGender(string str)
+        public static void Invalidate()
         {
-            str = str.Trim().ToLower();
-            if (str == "m") return Gender.Masculine;
-            if (str == "f") return Gender.Femenine;
-            if (str == "n") return Gender.Neuter;
-
-            throw new FormatException("{0} is not a valid Gender. Use m, f or n");
+            localizations.Clear();
         }
 
-        public static ResourceManager GetDefaultResourceManager(this Assembly assembly)
+        internal static string DefaultTypeDescription(Type type)
         {
-            string[] resourceFiles = assembly.GetManifestResourceNames();
-            string name = resourceFiles.SingleEx(a => a.Contains("Resources.resources"));
-            return new ResourceManager(name.Replace(".resources", ""), assembly);
+            return type.SingleAttribute<DescriptionAttribute>().TryCC(t => t.Description) ?? DescriptionManager.CleanTypeName(type).SpacePascal();
+        }
+
+        internal static string DefaultMemberDescription(MemberInfo m)
+        {
+            return m.SingleAttribute<DescriptionAttribute>().TryCC(t => t.Description) ?? m.Name.NiceName();
         }
     }
+
+
+    public class LocalizedAssembly
+    {
+        public Assembly Assembly;
+        public CultureInfo Culture;
+        public bool IsDefault;
+
+        private LocalizedAssembly() { }
+
+        public Dictionary<Type, LocalizedType> Types = new Dictionary<Type, LocalizedType>();
+
+        public static string TranslationFileName(Assembly assembly, CultureInfo cultureInfo)
+        {
+            return Path.Combine(DescriptionManager.TranslationDirectory, "{0}.{1}.xml".Formato(assembly.GetName().Name, cultureInfo.Name));
+        }
+
+        public static DescriptionOptions GetDescriptionOptions(Type type)
+        {
+            var doa = type.SingleAttributeInherit<DescriptionOptionsAttribute>();
+            if (doa != null)
+                return doa.Options;
+
+            DescriptionOptions? def = DescriptionManager.OnDefaultDescriptionOptions(type);
+            if (def != null)
+                return def.Value;
+
+            return DescriptionOptions.None;
+        }
+
+        public static string GetDefaultAssemblyCulture(Assembly assembly)
+        {
+            var defaultLoc = assembly.SingleAttribute<DefaultAssemblyCultureAttribute>();
+
+            if (defaultLoc == null)
+                return null;
+
+            return defaultLoc.DefaultCulture;
+        }
+
+        public void ExportXml()
+        {
+            var doc = new XDocument(new XDeclaration("1.0", "UTF8", "yes"),
+                new XElement("Translations",
+                    from lt in Types.Values
+                    let doa = GetDescriptionOptions(lt.Type)
+                    where doa != DescriptionOptions.None
+                    orderby lt.Type.Name
+                    select lt.ExportXml()
+                )
+            );
+
+            string fileName = TranslationFileName(Assembly, Culture);
+
+            doc.Save(fileName);
+        }
+
+        public static LocalizedAssembly ImportXml(Assembly assembly, CultureInfo cultureInfo)
+        {
+            var defaultCulture = GetDefaultAssemblyCulture(assembly);
+
+            if(defaultCulture == null)
+                return null;
+
+            bool isDefault = cultureInfo.Name == defaultCulture;
+
+            string fileName = TranslationFileName(assembly, cultureInfo);
+
+            Dictionary<string, XElement> file = !File.Exists(fileName) ? null :
+                XDocument.Load(fileName).Element("Translations").Elements("Type")
+                .Select(x => KVP.Create(x.Attribute("Name").Value, x))
+                .Distinct(x => x.Key)
+                .ToDictionary();
+
+            if (!isDefault && file == null)
+                return null;
+
+            var result = new LocalizedAssembly
+            {
+                Assembly = assembly,
+                Culture = cultureInfo,
+                IsDefault = isDefault
+            };
+
+            result.Types = (from t in assembly.GetTypes()
+                            let opts = GetDescriptionOptions(t)
+                            where opts != DescriptionOptions.None
+                            let x = file.TryGetC(t.Name)
+                            select LocalizedType.ImportXml(t, opts, result, x))
+                            .ToDictionary(lt => lt.Type);
+
+            return result;
+        }
+
+        public override string ToString()
+        {
+            return "Localized {0}".Formato(Assembly.GetName().Name);
+        }
+    }
+
+    public class LocalizedType
+    {
+        public Type Type { get; private set; }
+        public LocalizedAssembly Assembly { get; private set; }
+        public DescriptionOptions Options { get; private set; }
+
+        public string Description { get; set; }
+        public string PluralDescription { get; set; }
+        public char? Gender { get; set; }
+
+        public Dictionary<string, string> Members = new Dictionary<string, string>();
+
+        LocalizedType() { }
+
+        public XElement ExportXml()
+        {
+            return new XElement("Type",
+                    new XAttribute("Name", Type.Name),
+
+                    !Options.IsSetAssert(DescriptionOptions.Description, Type) ||
+                    Description == null ||
+                    (Assembly.IsDefault && Description == (Type.SingleAttribute<DescriptionAttribute>().TryCC(t => t.Description) ?? DescriptionManager.CleanTypeName(Type).SpacePascal())) ? null :
+                    new XAttribute("Description", Description),
+
+                    !Options.IsSetAssert(DescriptionOptions.PluralDescription, Type) ||
+                    PluralDescription == null ||
+                    (PluralDescription == NaturalLanguageTools.Pluralize(Description, Assembly.Culture)) ? null :
+                    new XAttribute("PluralDescription", PluralDescription),
+
+                    !Options.IsSetAssert(DescriptionOptions.Gender, Type) ||
+                    Gender == null ||
+                    (Gender == NaturalLanguageTools.GetGender(Description, Assembly.Culture)) ? null :
+                    new XAttribute("Gender", Gender.ToString()),
+
+                    !Options.IsSetAssert(DescriptionOptions.Members, Type) ? null :
+                     (from m in GetMembers(Type)
+                      where DescriptionManager.OnShouldLocalizeMember(m)
+                      orderby m.Name
+                      let value = Members.TryGetC(m.Name)
+                      where value != null && (!Assembly.IsDefault || ((Type.SingleAttribute<DescriptionAttribute>().TryCC(t => t.Description) ?? m.Name.NiceName()) != value))
+                      select new XElement("Member", new XAttribute("Name", m.Name), new XAttribute("Description", value)))
+                );
+        }
+
+        const BindingFlags bf = BindingFlags.Public | BindingFlags.Instance;
+
+        static IEnumerable<MemberInfo> GetMembers(Type type)
+        {
+            if (type.IsEnum)
+                return EnumFieldCache.Get(type).Values;
+            else
+                return type.GetProperties(bf).Concat(type.GetFields(bf).Cast<MemberInfo>());
+        }
+
+        internal static LocalizedType ImportXml(Type type, DescriptionOptions opts, LocalizedAssembly assembly, XElement x)
+        {
+            string name = !opts.IsSetAssert(DescriptionOptions.Description, type) ? null :
+                (x == null ? null : x.Attribute("Description").TryCC(xa => xa.Value)) ??
+                (!assembly.IsDefault ? null : DescriptionManager.DefaultTypeDescription(type));
+
+            var xMembers = x == null ? null : x.Elements("Member")
+                .Select(m => KVP.Create(m.Attribute("Name").Value, m.Attribute("Description").Value))
+                .Distinct(m => m.Key)
+                .ToDictionary();
+
+            LocalizedType result = new LocalizedType
+            {
+                Type = type,
+                Options = opts,
+                Assembly = assembly,
+
+                Description = name,
+                PluralDescription = !opts.IsSetAssert(DescriptionOptions.PluralDescription, type) ? null :
+                             ((x == null ? null : x.Attribute("PluralDescription").TryCC(xa => xa.Value)) ??
+                             (!assembly.IsDefault ? null : type.SingleAttribute<PluralDescriptionAttribute>().TryCC(t => t.PluralDescription)) ??
+                             (name == null ? null : NaturalLanguageTools.Pluralize(name, assembly.Culture))),
+
+                Gender = !opts.IsSetAssert(DescriptionOptions.Gender, type) ? null :
+                         ((x == null ? null : x.Attribute("Gender").TryCS(xa => xa.Value.Single())) ??
+                         (!assembly.IsDefault ? null : type.SingleAttribute<GenderAttribute>().TryCS(t => t.Gender)) ??
+                         (name == null ? null : NaturalLanguageTools.GetGender(name, assembly.Culture))),
+
+                Members = !opts.IsSetAssert(DescriptionOptions.Members, type) ? null :
+                          (from m in GetMembers(type)
+                           where DescriptionManager.OnShouldLocalizeMember(m)
+                           let value = xMembers.TryGetC(m.Name) ?? (!assembly.IsDefault ? null : DescriptionManager.DefaultMemberDescription(m))
+                           where value != null
+                           select KVP.Create(m.Name, value))
+                           .ToDictionary()
+            };
+
+            return result;
+        }
+
+        public override string ToString()
+        {
+            return "Localized {0}".Formato(Type.Name);
+        }
+    }
+
 }

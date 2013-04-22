@@ -8,7 +8,6 @@ using Signum.Entities;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Maps;
 using Signum.Utilities.ExpressionTrees;
-using Signum.Engine.Properties;
 using Signum.Entities.Reflection;
 
 namespace Signum.Engine.Linq

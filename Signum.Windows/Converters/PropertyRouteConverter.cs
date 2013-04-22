@@ -5,7 +5,6 @@ using System.Text;
 using System.ComponentModel;
 using Signum.Entities;
 using System.Windows.Markup;
-using Signum.Windows.Properties;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using Signum.Utilities;

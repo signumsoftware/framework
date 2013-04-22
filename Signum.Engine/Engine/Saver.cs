@@ -10,7 +10,6 @@ using Signum.Engine;
 using System.Data;
 using Signum.Entities.Reflection;
 using Signum.Engine.Maps;
-using Signum.Engine.Properties;
 
 namespace Signum.Engine
 {

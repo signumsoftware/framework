@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Win32;
+using System.ComponentModel;
 
 namespace Signum.Utilities
 {
@@ -49,7 +50,7 @@ namespace Signum.Utilities
                     break;
             }
 
-            return Properties.Resources.OS_Unknown0.Formato(os.VersionString);
+            return AboutMessage.OS_Unknown0.NiceToString().Formato(os.VersionString);
         }
 
         public static DateTime CompilationTime(this Version v)
@@ -115,6 +116,11 @@ namespace Signum.Utilities
                 return GlobalVersion + (ServicePack != null ? " SP" + ServicePack : "");
             }
         }
+    }
 
+    public enum AboutMessage
+    {
+        [Description("Unknown ({0})")]
+        OS_Unknown0
     }
 }
