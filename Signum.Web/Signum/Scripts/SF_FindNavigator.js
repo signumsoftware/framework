@@ -171,7 +171,7 @@ SF.registerModule("FindNavigator", function () {
             },
 
             changeRowSelection: function ($rowSelectors, select) {
-                $rowSelectors.attr("checked", select);
+                $rowSelectors.prop("checked", select);
                 $rowSelectors.closest("tr").toggleClass("ui-state-active", select);
 
                 var $control = $(this.pf("sfSearchControl"));
@@ -820,7 +820,7 @@ SF.registerModule("FindNavigator", function () {
 
             toggleSelectAll: function () {
                 var select = $(this.pf("cbSelectAll:checked"));
-                $(this.pf("sfSearchControl .sf-td-selection")).attr('checked', (select.length > 0) ? true : false);
+                $(this.pf("sfSearchControl .sf-td-selection")).prop('checked', (select.length > 0) ? true : false);
             },
 
             searchOnLoadFinished: false,
@@ -855,7 +855,7 @@ SF.registerModule("FindNavigator", function () {
     SF.FindNavigator = (function () {
 
         var getFor = function (prefix) {
-            return $("#" + SF.compose(prefix, "sfSearchControl")).data("findNavigator");
+            return $("#" + SF.compose(prefix, "sfSearchControl")).data("SF-findNavigator");
         };
 
         var openFinder = function (findOptions) {
