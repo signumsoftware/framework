@@ -35,7 +35,7 @@ namespace Signum.Web.Files
 
         public override string ToJS()
         {
-            return "$('#{0}').data('fileRepeater')".Formato(ControlID);
+            return "$('#{0}').data('SF-fileRepeater')".Formato(ControlID);
         }
 
         protected override string DefaultCreate()

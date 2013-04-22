@@ -75,7 +75,7 @@ namespace Signum.Web.Files
 
         public override string ToJS()
         {
-            return "$('#{0}').data('fileLine')".Formato(ControlID);
+            return "$('#{0}').data('SF-fileLine')".Formato(ControlID);
         }
 
         protected override JsOptionsBuilder OptionsJSInternal()

@@ -13,7 +13,7 @@ SF.registerModule("Files", function () {
             options: {}, //baseLine options + asyncUpload + uploadUrl + uploadDroppedUrl + downloadUrl
 
             _create: function () {
-                $("#" + this.options.prefix).data("fileLine").initDragDrop($(this.pf("DivNew")));
+                $("#" + this.options.prefix).data("SF-fileLine").initDragDrop($(this.pf("DivNew")));
             },
 
             initDragDrop: function ($divNew) {
@@ -178,7 +178,7 @@ SF.registerModule("Files", function () {
             },
 
             _getRemoving: function (itemPrefix) {
-                return "$('#" + this.options.prefix + "').data('fileRepeater').remove('" + itemPrefix + "');";
+                return "$('#" + this.options.prefix + "').data('SF-fileRepeater').remove('" + itemPrefix + "');";
             }
         });
     })(jQuery);
