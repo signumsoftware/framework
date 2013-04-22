@@ -842,8 +842,8 @@ SF.registerModule("FindNavigator", function () {
                 }
                 else {
                     var self = this;
-                    $tabContainer.bind("tabsshow", function (evt, ui) {
-                        if ($(ui.panel).find(self.element).length > 0) {
+                    $tabContainer.bind("tabsactivate", function (evt, ui) {
+                        if ($(ui.newPanel).find(self.element).length > 0) {
                             makeSearch();
                         }
                     });

@@ -400,10 +400,14 @@ SF.NewContentProcessor = {
                 throw "No id set for tab with legend: " + legend;
             }
             else {
-                $tabContainer.tabs("add", "#" + id, legend);
+                $("<li><a href='#" + id + "'>" + legend + "</a></li>")
+                    .appendTo($tabContainer.find(".ui-tabs-nav"));
                 $legend.remove();
             }
         });
+
+        $tabContainer.tabs("refresh");
+        $tabContainer.tabs("option", "active", 0);
     },
 
     defaultSlider: function ($newContent) {
