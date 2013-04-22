@@ -137,6 +137,17 @@ namespace Signum.Utilities
 
         public static void Wait(string startingText, Func<int> updateOrDelete)
         {
+            Wait(startingText, () =>
+            {
+                int result = updateOrDelete();
+
+                SafeConsole.WriteColor(ConsoleColor.White, " {0} ", result);
+                SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "rows afected");
+            }); 
+        }
+
+        public static void Wait(string startingText, Action action)
+        {
             Console.Write(startingText);
             int? result = null;
             try
@@ -157,10 +168,7 @@ namespace Signum.Utilities
                     }
                 });
 
-                result = updateOrDelete();
-
-                SafeConsole.WriteColor(ConsoleColor.White, " {0} ", result);
-                SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "rows afected");
+                action(); 
             }
             finally
             {
