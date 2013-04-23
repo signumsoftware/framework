@@ -18,6 +18,54 @@ SF.registerModule = (function () {
     }
 })();
 
+    SF.Loader = (function () {
+
+        var _jsSet = [],
+            _jsloaded = [];
+
+        function setLoaded(url, position) {
+            _jsloaded[url] = true;
+            _jsSet[position].count--;
+
+            if (_jsSet[position].count === 0) {
+                _jsSet[position].func && _jsSet[position].func();
+                delete _jsSet[position];
+            }
+        }
+
+        function _loadJs(url, position) {
+            if (!_jsloaded[url]) {
+                $.getScript(url, function () {
+                    setLoaded(url, position);
+                });
+            } else {
+                setLoaded(url, position);
+            }
+        }
+
+        function loadJs(url, fn) {
+            if (typeof url === "object") {  //more than one file
+                var position = _jsSet.length;
+
+                _jsSet[position] = {
+                    count: url.length,
+                    func: fn
+                };
+
+                var i;
+                for (i = 0; i < url.length; i++) {
+                    _loadJs(url[i], position);
+                }
+            } else {
+                $.getScript(url, fn);
+            }
+        }
+
+        return {
+            loadJs: loadJs
+};
+})();
+
 (function (options) {
     var pendingRequests = 0;
 
