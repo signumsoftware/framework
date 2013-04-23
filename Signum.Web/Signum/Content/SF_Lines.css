@@ -196,3 +196,7 @@ fieldset.sf-repeater-field
     list-style-type:none;
     text-indent: 20px;
 }
+
+.ui-autocomplete.ui-front {
+    z-index: 200;
+}
