@@ -95,7 +95,7 @@ namespace Signum.Web.Files
 
                     using (sb.Surround(new HtmlTag("div").Class("sf-value-container")))
                     {
-                        if (fileLine.Download && !(value is EmbeddedEntity))
+                        if (fileLine.Download && (fileLine.Type.IsIIdentifiable() || fileLine.Type.IsLite()))
                         {
                             sb.AddLine(
                                     helper.Href(fileLine.Compose(EntityBaseKeys.ToStrLink),
