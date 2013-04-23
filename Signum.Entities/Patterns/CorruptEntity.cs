@@ -24,8 +24,12 @@ namespace Signum.Entities
             {
                 string integrity = base.IdentifiableIntegrityCheck(); // So, no corruption allowed
                 if (string.IsNullOrEmpty(integrity))
+                {
                     this.Corrupt = false;
-                else 
+                    if (!this.IsNew)
+                        Corruption.OnCorruptionRemoved(this);
+                }
+                else if(this.IsNew)
                     Corruption.OnSaveCorrupted(this, integrity);
                     
             }
@@ -66,6 +70,15 @@ namespace Signum.Entities
         {
             if (SaveCorrupted != null)
                 SaveCorrupted(corruptEntity, integrity);
+        }
+
+
+        public static event Action<IdentifiableEntity> CorruptionRemoved;
+
+        public static void OnCorruptionRemoved(IdentifiableEntity corruptEntity)
+        {
+            if (CorruptionRemoved != null)
+                CorruptionRemoved(corruptEntity);
         }
     }
 
