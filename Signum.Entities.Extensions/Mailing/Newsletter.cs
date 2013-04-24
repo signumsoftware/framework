@@ -92,7 +92,7 @@ namespace Signum.Entities.Mailing
     }
 
     [Serializable, EntityKind(EntityKind.System)]
-    public class NewsletterDeliveryDN : Entity
+    public class NewsletterDeliveryDN : Entity, IProcessLineDataDN
     {
         bool sent;
         public bool Sent
@@ -121,13 +121,6 @@ namespace Signum.Entities.Mailing
         {
             get { return newsletter; }
             set { Set(ref newsletter, value, () => Newsletter); }
-        }
-
-        Lite<ExceptionDN> exception;
-        public Lite<ExceptionDN> Exception
-        {
-            get { return exception; }
-            set { Set(ref exception, value, () => Exception); }
         }
     }
 
