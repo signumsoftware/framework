@@ -125,9 +125,9 @@ SF.registerModule("Validator", function () {
         showErrors: function (modelState, showPathErrors) {
             SF.log("Validator showErrors");
             //Remove previous errors
-            $('.' + this.fieldErrorClass).replaceWith("");
+            $('.' + this.fieldErrorClass).remove()
             $('.' + this.inputErrorClass).removeClass(this.inputErrorClass);
-            $('.' + this.summaryErrorClass).replaceWith("");
+            $('.' + this.summaryErrorClass).remove();
 
             var allErrors = [];
             var inlineErrorStart = '<span class="' + this.fieldErrorClass + '">';
