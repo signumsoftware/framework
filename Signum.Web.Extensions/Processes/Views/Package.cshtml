@@ -2,10 +2,22 @@
 
 @using (var e = Html.TypeContext<PackageDN>())
 {
+    Lite<ProcessExecutionDN> pe = ViewBag.ProcessExecution; 
     @Html.ValueLine(e, f => f.Name)
     @Html.ValueLine(e, f => f.IdOrNull, f => f.ReadOnly = true)
     <fieldset>
         <legend>Lines</legend>
-        @Html.SearchControl(new FindOptions(typeof(PackageLineDN), "Package", e.Value), e)
+        @if(pe == null)
+        {
+        @Html.SearchControl(new FindOptions(PackageQuery.PackageLineInProcess, "Package", e.Value), e)
+        }
+        else
+        {
+        @Html.SearchControl(new FindOptions(PackageQuery.PackageLineInProcess, "Package", e.Value)
+        {
+            FilterOptions = { new FilterOption("ProcessExecution", pe) },
+            ColumnOptions = { new ColumnOption("ProcessExecution") }
+        }, e)
+        }
     </fieldset>
 }
