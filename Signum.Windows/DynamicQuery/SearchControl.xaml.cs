@@ -540,7 +540,7 @@ namespace Signum.Windows
                 SelectedItems = null;
         }
 
-        void GenerateListViewColumns()
+        public void GenerateListViewColumns()
         {
             List<Column> columns = DynamicQueryServer.MergeColumns(ColumnOptions, ColumnOptionsMode, Description);
 

@@ -327,21 +327,6 @@ namespace Signum.Engine.Operations
 
 
         #region Execute
-        public static IdentifiableEntity ServiceExecute(IIdentifiable entity, Enum operationKey, params object[] args)
-        {
-            var op = Find<IExecuteOperation>(entity.GetType(), operationKey).AssertEntity((IdentifiableEntity)entity);
-            op.Execute(entity, args);
-            return (IdentifiableEntity)entity;
-        }
-
-        public static IdentifiableEntity ServiceExecuteLite(Lite<IIdentifiable> lite, Enum operationKey, params object[] args)
-        {
-            IIdentifiable entity = Database.RetrieveAndForget(lite);
-            var op = Find<IExecuteOperation>(lite.EntityType, operationKey).AssertLite();
-            op.Execute(entity, args);
-            return (IdentifiableEntity)entity;
-        }
-
         public static T Execute<T>(this T entity, Enum operationKey, params object[] args)
            where T : class, IIdentifiable
         {
@@ -368,13 +353,6 @@ namespace Signum.Engine.Operations
         #endregion
 
         #region Delete
-        public static IdentifiableEntity ServiceDelete(Lite<IIdentifiable> lite, Enum operationKey, params object[] args)
-        {
-            IIdentifiable entity = Database.RetrieveAndForget(lite);
-            var op = Find<IDeleteOperation>(lite.EntityType, operationKey);
-            op.Delete(entity, args);
-            return (IdentifiableEntity)entity;
-        }
 
         public static void Delete<T>(this Lite<T> lite, Enum operationKey, params object[] args)
             where T : class, IIdentifiable
@@ -393,7 +371,7 @@ namespace Signum.Engine.Operations
         #endregion
 
         #region Construct
-        public static IdentifiableEntity ServiceConstruct(Type type, Enum operationKey, params object[] args)
+        public static IdentifiableEntity Construct(Type type, Enum operationKey, params object[] args)
         {
             var op = Find<IConstructOperation>(type, operationKey);
             return (IdentifiableEntity)op.Construct(args);
@@ -408,17 +386,6 @@ namespace Signum.Engine.Operations
         #endregion
 
         #region ConstructFrom
-        public static IdentifiableEntity ServiceConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args)
-        {
-            var op = Find<IConstructorFromOperation>(entity.GetType(), operationKey).AssertEntity((IdentifiableEntity)entity);
-            return (IdentifiableEntity)op.Construct(entity, args);
-        }
-
-        public static IdentifiableEntity ServiceConstructFromLite(Lite<IIdentifiable> lite, Enum operationKey, params object[] args)
-        {
-            var op = Find<IConstructorFromOperation>(lite.EntityType, operationKey).AssertLite();
-            return (IdentifiableEntity)op.Construct(Database.RetrieveAndForget(lite), args);
-        }
 
         public static T ConstructFrom<T>(this IIdentifiable entity, Enum operationKey, params object[] args)
               where T : class, IIdentifiable
