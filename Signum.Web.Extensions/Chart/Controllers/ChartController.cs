@@ -87,8 +87,15 @@ namespace Signum.Web.Chart
 
             QueryToken token = QueryUtils.Parse(tokenName, qd, request.GroupResults);
 
-            return Content(SignumController.CreateHtmlHelper(this).QueryTokenCombo(token, null,
-                new Context(null, prefix), index + 1, qd, canAggregate: request.GroupResults).ToHtmlString());
+            var combo = SignumController.CreateHtmlHelper(this).QueryTokenCombo(token, null,
+                new Context(null, prefix), index + 1, qd, canAggregate: request.GroupResults);
+
+            var content = combo.ToHtmlString();
+
+            if (content.HasText())
+                return Content(content);
+            else
+                return Content("<span>no-results</span>");
         }
 
         [HttpPost]
