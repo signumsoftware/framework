@@ -48,7 +48,9 @@ namespace Signum.Web.Selenium
 
         public static void SetElementsPerPageToFinder(this ISelenium selenium, string elementsPerPage, string prefix)
         {
-            selenium.Select("{0}sfElems".Formato(prefix), "value=" + elementsPerPage);
+            var combo = "{0}sfElems".Formato(prefix);
+            selenium.Select(combo, "value=" + elementsPerPage);
+            selenium.FireEvent(combo, "change");
         }
 
         public static void ToggleFilters(this ISelenium selenium, bool show)
