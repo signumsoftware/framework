@@ -13,11 +13,11 @@ namespace Signum.Engine.SMS
 {
     public class SMSMessageSendProcessAlgortihm : IProcessAlgorithm
     {
-        public void Execute(IExecutingProcess executingProcess)
+        public void Execute(ExecutingProcess executingProcess)
         {
             SMSSendPackageDN package = (SMSSendPackageDN)executingProcess.Data;
 
-            executingProcess.ForEachLine(package.SMSMessages().Where(s => s.State == SMSMessageState.Created && s.Exception == null),
+            executingProcess.ForEachLine(package.SMSMessages().Where(s => s.State == SMSMessageState.Created),
                 sms => sms.Execute(SMSMessageOperation.Send));
 
         }
@@ -25,11 +25,11 @@ namespace Signum.Engine.SMS
 
     public class SMSMessageUpdateStatusProcessAlgorithm : IProcessAlgorithm
     {
-        public void Execute(IExecutingProcess executingProcess)
+        public void Execute(ExecutingProcess executingProcess)
         {
             SMSUpdatePackageDN package = (SMSUpdatePackageDN)executingProcess.Data;
 
-            executingProcess.ForEachLine(package.SMSMessages().Where(sms => sms.State == SMSMessageState.Sent && sms.Exception == null), sms =>
+            executingProcess.ForEachLine(package.SMSMessages().Where(sms => sms.State == SMSMessageState.Sent), sms =>
                 sms.Execute(SMSMessageOperation.UpdateStatus));
         }
     }

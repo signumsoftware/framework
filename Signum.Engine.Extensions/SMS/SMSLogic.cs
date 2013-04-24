@@ -359,24 +359,28 @@ namespace Signum.Engine.SMS
 
                 dqm.RegisterQuery(typeof(SMSSendPackageDN), () =>
                     from e in Database.Query<SMSSendPackageDN>()
+                    from pe in e.ProcessExecutions().DefaultIfEmpty()
                     select new
                     {
                         Entity = e,
                         e.Id,
                         e.Name,
                         NumLines = e.SMSMessages().Count(),
-                        NumErrors = e.SMSMessages().Count(s => s.Exception != null),
+                        ProcessExecution = pe,
+                        NumErrors = e.SMSMessages().Count(s => s.Exception(pe) != null),
                     });
 
                 dqm.RegisterQuery(typeof(SMSUpdatePackageDN), () =>
                     from e in Database.Query<SMSUpdatePackageDN>()
+                    from pe in e.ProcessExecutions().DefaultIfEmpty()
                     select new
                     {
                         Entity = e,
                         e.Id,
                         e.Name,
                         NumLines = e.SMSMessages().Count(),
-                        NumErrors = e.SMSMessages().Count(s => s.Exception != null),
+                        ProcessExecution = pe,
+                        NumErrors = e.SMSMessages().Count(s => s.Exception(pe) != null),
                     });
             }
         }

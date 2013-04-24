@@ -36,20 +36,6 @@ namespace Signum.Engine.Mailing
             return DeliveriesExpression.Evaluate(n);
         }
 
-        static Expression<Func<NewsletterDN, IQueryable<NewsletterDeliveryDN>>> RemainingDeliveriesExpression =
-            n => n.Deliveries().Where(nd => nd.Exception != null && !nd.Sent);
-        public static IQueryable<NewsletterDeliveryDN> RemainingDeliveries(this NewsletterDN n)
-        {
-            return RemainingDeliveriesExpression.Evaluate(n);
-        }
-
-        static Expression<Func<NewsletterDN, IQueryable<NewsletterDeliveryDN>>> ExceptionDeliveriesExpression =
-            n => Database.Query<NewsletterDeliveryDN>().Where(nd => nd.Newsletter.RefersTo(n));
-        public static IQueryable<NewsletterDeliveryDN> ExceptionDeliveries(this NewsletterDN n)
-        {
-            return ExceptionDeliveriesExpression.Evaluate(n);
-        }
-
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -62,18 +48,23 @@ namespace Signum.Engine.Mailing
 
                 dqm.RegisterQuery(typeof(NewsletterDN), () =>
                     from n in Database.Query<NewsletterDN>()
+                    from pe in n.ProcessExecutions().DefaultIfEmpty()
                     select new
                     {
                         Entity = n,
                         n.Id,
                         Nombre = n.Name,
                         Texto = n.HtmlBody.Etc(100),
-                        Estado = n.State
+                        Estado = n.State,
+                        NumDeliveries = n.Deliveries().Count(),
+                        ProcessExecution = pe,
+                        NumErrors = n.Deliveries().Count(d => d.Exception(pe) != null)
                     });
 
 
                 dqm.RegisterQuery(typeof(NewsletterDeliveryDN), () =>
                     from e in Database.Query<NewsletterDeliveryDN>()
+                    from pe in e.Newsletter.Entity.ProcessExecutions()
                     select new
                     {
                         Entity = e,
@@ -82,7 +73,8 @@ namespace Signum.Engine.Mailing
                         e.Recipient,
                         e.Sent,
                         e.SendDate,
-                        e.Exception
+                        ProcessExecution = pe,
+                        Exception =  e.Exception(pe)
                     });
 
                 NewsletterGraph.Register();
@@ -238,14 +230,14 @@ namespace Signum.Engine.Mailing
         class SendLine
         {
             public ResultRow Row;
-            public Lite<NewsletterDeliveryDN> Send;
+            public Lite<NewsletterDeliveryDN> NewsletterDelivery;
             public string Email;
-            public Exception Error;
+            public Exception Exception;
         }
 
         public int NotificationSteps = 100;
 
-        public void Execute(IExecutingProcess executingProcess)
+        public void Execute(ExecutingProcess executingProcess)
         {
             NewsletterDN newsletter = (NewsletterDN)executingProcess.Data;
 
@@ -276,7 +268,7 @@ namespace Signum.Engine.Mailing
 
             var lines = resultTable.Rows.Select(r => new SendLine
                 {
-                    Send = (Lite<NewsletterDeliveryDN>)r[0],
+                    NewsletterDelivery = (Lite<NewsletterDeliveryDN>)r[0],
                     Email = (string)r[1],
                     Row = r,
                 }).ToList();
@@ -317,28 +309,26 @@ namespace Signum.Engine.Mailing
                         }
                         catch (Exception ex)
                         {
-                            s.Error = ex;
+                            s.Exception = ex;
                         }
                     });
                 }
 
-                var failed = group.Extract(sl => sl.Error != null).GroupBy(sl => sl.Error, sl => sl.Send);
+                var failed = group.Extract(sl => sl.Exception != null);
                 foreach (var f in failed)
                 {
-                    var exLog = f.Key.LogException().ToLite();
-
-                    Database.Query<NewsletterDeliveryDN>().Where(nd => f.Contains(nd.ToLite()))
-                        .UnsafeUpdate(nd => new NewsletterDeliveryDN
-                        {
-                            Sent = true,
-                            SendDate = TimeZoneManager.Now.TrimToSeconds(),
-                            Exception = exLog
-                        });
+                    new ProcessExceptionLineDN
+                    {
+                        Exception = f.Exception.LogException().ToLite(), 
+                        Line = f.NewsletterDelivery,
+                        ProcessExecution = executingProcess.CurrentExecution.ToLite(),
+                    }.Save();
                 }
 
-                if (group.Any())
+
+                var sent = group.Select(sl => sl.NewsletterDelivery).ToList();
+                if (sent.Any())
                 {
-                    var sent = group.Select(sl => sl.Send).ToList();
                     Database.Query<NewsletterDeliveryDN>().Where(nd => sent.Contains(nd.ToLite()))
                         .UnsafeUpdate(nd => new NewsletterDeliveryDN
                         {

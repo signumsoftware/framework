@@ -88,7 +88,24 @@ ALTER AUTHORIZATION ON DATABASE::{0} TO {2}".Formato(connector.DatabaseName(), d
             var enabled = Database.View<SysDatabases>().Where(db => db.name == Connector.Current.DatabaseName()).Select(a => a.is_broker_enabled).Single();
             if (!enabled)
             {
-                Executor.ExecuteNonQuery("ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()));
+                try
+                {
+                    try
+                    {
+                        Executor.ExecuteNonQuery("ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()));
+                    }
+                    catch (SqlException e)
+                    {
+                        if (e.Number == 9772)
+                            Executor.ExecuteNonQuery("ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
+                        else 
+                            throw;
+                    }
+                }
+                catch (TimeoutException)
+                {
+                    throw EnableBlocker();
+                }
             }
 
             try
@@ -98,10 +115,7 @@ ALTER AUTHORIZATION ON DATABASE::{0} TO {2}".Formato(connector.DatabaseName(), d
             catch (InvalidOperationException ex)
             {
                 if (ex.Message.Contains("SQL Server Service Broker"))
-                    throw new InvalidOperationException(@"CacheLogic requires SQL Server Service Broker to be activated. Execute: 
-ALTER DATABASE {0} SET ENABLE_BROKER
-If you have problems, try first: 
-ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
+                    throw EnableBlocker();
 
                 throw;
             }
@@ -115,6 +129,14 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
             AppDomain.CurrentDomain.ProcessExit += (o, a) => Shutdown();
         }
 
+        private static InvalidOperationException EnableBlocker()
+        {
+            return new InvalidOperationException(@"CacheLogic requires SQL Server Service Broker to be activated. Execute: 
+ALTER DATABASE {0} SET ENABLE_BROKER
+If you have problems, try first: 
+ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
+        }
+
         public static void Shutdown()
         {
             if (GloballyDisabled)
@@ -126,7 +148,7 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
         static SqlPreCommandSimple GetDependencyQuery(ITable table)
         {
             return new SqlPreCommandSimple("SELECT {0} FROM {1}".Formato(table.Columns.Keys.ToString(c => c.SqlScape(), ", "), table.Name));
-        }      
+        }
 
         class CacheController<T> : CacheControllerBase<T>, ICacheLogicController
                 where T : IdentifiableEntity
@@ -270,7 +292,7 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
                 Transaction.UserData[DisabledCachesKey] = hs = new HashSet<Type>();
             }
 
-            return hs; 
+            return hs;
         }
 
         static bool IsDisabledInTransaction(Type type)
@@ -341,7 +363,7 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
                 inverseDependencies.Add(rType, type);
             }
         }
-    
+
         static ICacheLogicController GetController(Type type)
         {
             var controller = controllers.GetOrThrow(type, "{0} is not registered in CacheLogic");
@@ -354,7 +376,7 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
 
         static void NotifyInvalidateAllConnectedTypes(Type type)
         {
-            var connected = inverseDependencies.IndirectlyRelatedTo(type, includeParentNode : true);
+            var connected = inverseDependencies.IndirectlyRelatedTo(type, includeParentNode: true);
 
             foreach (var stype in connected)
             {
@@ -465,7 +487,7 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
             {
                 if (CacheLogic.GloballyDisabled)
                 {
-                    base.OnLoad(sb, invalidateWith); 
+                    base.OnLoad(sb, invalidateWith);
                 }
                 else
                 {
@@ -478,7 +500,7 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
 
     internal interface ICacheLogicController : ICacheController
     {
-        event EventHandler<CacheEventArgs> Invalidated; 
+        event EventHandler<CacheEventArgs> Invalidated;
 
         CachedTableBase CachedTable { get; }
 

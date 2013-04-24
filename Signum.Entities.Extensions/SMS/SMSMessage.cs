@@ -17,7 +17,7 @@ namespace Signum.Entities.SMS
     }
 
     [Serializable, EntityKind(EntityKind.Main)]
-    public class SMSMessageDN : CorruptEntity, IProcessLineDN
+    public class SMSMessageDN : CorruptEntity, IProcessLineDataDN
     {
         public static string DefaultFrom;
 
@@ -117,13 +117,6 @@ namespace Signum.Entities.SMS
         public override string ToString()
         {
             return "SMS " + MessageID;
-        }
-
-        Lite<ExceptionDN> exception;
-        public Lite<ExceptionDN> Exception
-        {
-            get { return exception; }
-            set { Set(ref exception, value, () => Exception); }
         }
     }
 

@@ -195,6 +195,11 @@ namespace Signum.Entities.Processes
     {
     }
 
+    public interface IProcessLineDataDN : IIdentifiable
+    {
+
+    }
+
     public interface ISessionDataDN : IIdentifiable
     {
     }
@@ -254,6 +259,42 @@ namespace Signum.Entities.Processes
         ProcessStartIsGreaterThanProcessEnd,
         [Description("Process Start is null but Process End is not")]
         ProcessStartIsNullButProcessEndIsNot
+    }
+
+    [Serializable, EntityKind(EntityKind.System)]
+    public class ProcessExceptionLineDN : Entity
+    {
+        [NotNullable]
+        Lite<IProcessLineDataDN> line;
+        [NotNullValidator]
+        public Lite<IProcessLineDataDN> Line
+        {
+            get { return line; }
+            set { Set(ref line, value, () => Line); }
+        }
+
+        [NotNullable]
+        Lite<ProcessExecutionDN> processExecution;
+        [NotNullValidator]
+        public Lite<ProcessExecutionDN> ProcessExecution
+        {
+            get { return processExecution; }
+            set { Set(ref processExecution, value, () => ProcessExecution); }
+        }
+
+        [NotNullable]
+        Lite<ExceptionDN> exception;
+        [NotNullValidator]
+        public Lite<ExceptionDN> Exception
+        {
+            get { return exception; }
+            set { Set(ref exception, value, () => Exception); }
+        }
+    }
+
+    public enum ProcessExceptionOperation
+    {
+        Save
     }
 
 }
