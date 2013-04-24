@@ -296,7 +296,12 @@ namespace Signum.Web.Controllers
 
             var combo = CreateHtmlHelper(this).QueryTokenCombo(token, null, new Context(null, prefix), index + 1, qd, canAggregate: false);
 
-            return Content(combo.ToHtmlString());
+            var content = combo.ToHtmlString();
+
+            if (content.HasText())
+                return Content(content);
+            else
+                return Content("<span>no-results</span>");
         }
 
         [HttpPost]

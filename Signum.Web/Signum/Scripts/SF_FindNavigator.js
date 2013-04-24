@@ -956,9 +956,9 @@ SF.registerModule("FindNavigator", function () {
             $.ajax({
                 url: controllerUrl || SF.Urls.subTokensCombo,
                 data: serializer.serialize(),
-                dataType: "text",
+                dataType: "html",
                 success: function (newCombo) {
-                    if (!SF.isEmpty(newCombo)) {
+                    if (newCombo != "<span>no-results</span>") {
                         $("#" + SF.compose(prefix, "ddlTokens_" + index)).after(newCombo);
                     }
                 }
