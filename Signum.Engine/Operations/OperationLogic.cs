@@ -131,7 +131,6 @@ namespace Signum.Engine.Operations
                     {
                         Entity = lo,
                         lo.Id,
-                        lo.Name,
                         lo.Key,
                     });
 

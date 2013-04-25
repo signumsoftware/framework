@@ -16,6 +16,11 @@ namespace Signum.Engine.Basics
         {
             return MultiEnumLogic<T>.ToEntity(key);
         }
+
+        public static Enum ToEnum<T>(this T entity) where T : MultiEnumDN, new()
+        {
+            return MultiEnumLogic<T>.ToEnum(entity);
+        }
     }
 
     public static class MultiEnumLogic<T>
@@ -80,10 +85,9 @@ namespace Signum.Engine.Basics
                 (k, c) => table.DeleteSqlSync(c),
                 (k, s, c) =>
                 {
-                    var originalName = c.Name;
-                    c.Name = s.Name;
+                    var originalName = c.Key;
                     c.Key = s.Key;
-                    return table.UpdateSqlSync(c, comment: originalName);
+                    return table.UpdateSqlSync(c, comment: c.Key);
                 }, Spacing.Double);
         }
 
@@ -93,7 +97,6 @@ namespace Signum.Engine.Basics
             return getKeys().Select(k => new T
             {
                 Key = MultiEnumDN.UniqueKey(k),
-                Name = k.ToString(),
             }).ToList();
         }
 
