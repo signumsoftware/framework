@@ -1,4 +1,6 @@
+
 @Html.ScriptCss("~/authAdmin/Content/SF_AuthAdmin.css")
+@using Signum.Engine.Basics
 @using (var tc = Html.TypeContext<OperationRulePack>())
 {
     @Html.EntityLine(tc, f => f.Role)
@@ -29,7 +31,7 @@
         {
             <tr>
                 <td>
-                    @Html.Span(null, item.Value.Resource.Name)
+                    @Html.Span(null, item.Value.Resource.ToEnum().NiceToString())
                     @Html.HiddenRuntimeInfo(item, i => i.Resource)
                     @Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase)
                 </td>

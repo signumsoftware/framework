@@ -158,7 +158,7 @@ WriteLiteral("            <tr>\r\n                <td>\r\n                    ")
 
             
             #line 34 "..\..\AuthAdmin\Views\Permissions.cshtml"
-               Write(Html.Span(null, item.Value.Resource.Name));
+               Write(Html.Span(null, item.Value.Resource.Key));
 
             
             #line default

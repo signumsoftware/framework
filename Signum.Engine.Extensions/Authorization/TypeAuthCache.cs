@@ -78,7 +78,7 @@ namespace Signum.Entities.Authorization
             if (conditions.IsEmpty())
                 return null;
 
-            return "Type {0} has no definitions for the conditions: {1}".Formato(type.Name, conditions.CommaAnd(a => a.Condition.Name));
+            return "Type {0} has no definitions for the conditions: {1}".Formato(type.Name, conditions.CommaAnd(a => a.Condition.Key));
         }
 
         static SqlPreCommand AuthCache_PreDeleteSqlSync(IdentifiableEntity arg)

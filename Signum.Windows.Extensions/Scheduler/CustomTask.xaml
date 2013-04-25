@@ -6,7 +6,6 @@
     m:Common.TypeContext="{x:Type d:CustomTaskDN}"
     MinWidth="300" x:Name="ctrl">
     <StackPanel m:Common.IsReadOnly="True">
-        <m:ValueLine m:Common.Route="Name" />
         <m:ValueLine m:Common.Route="Key" />
         <GroupBox Header="Executions">
             <m:SearchControl ShowFooter="False" ShowFilters="False" QueryName="{x:Type d:CustomTaskExecutionDN}" MaxHeight="400" FilterColumn="CustomTask"/>
