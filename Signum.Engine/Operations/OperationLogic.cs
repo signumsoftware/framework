@@ -354,16 +354,14 @@ namespace Signum.Engine.Operations
 
         #region Delete
 
-        public static void Delete<T>(this Lite<T> lite, Enum operationKey, params object[] args)
-            where T : class, IIdentifiable
+        public static void Delete(this Lite<IIdentifiable> lite, Enum operationKey, params object[] args)
         {
-            T entity = lite.RetrieveAndForget();
+            IIdentifiable entity = lite.RetrieveAndForget();
             var op = Find<IDeleteOperation>(lite.EntityType, operationKey);
             op.Delete(entity, args);
         }
 
-        public static void Delete<T>(this T entity, Enum operationKey, params object[] args)
-            where T : class, IIdentifiable
+        public static void Delete(this IIdentifiable entity, Enum operationKey, params object[] args)
         {
             var op = Find<IDeleteOperation>(entity.GetType(), operationKey).AssertEntity((IdentifiableEntity)(IIdentifiable)entity);
             op.Delete(entity, args);
