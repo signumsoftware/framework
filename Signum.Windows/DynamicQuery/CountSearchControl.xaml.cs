@@ -25,7 +25,7 @@ namespace Signum.Windows
     public partial class CountSearchControl
     {
         public static readonly DependencyProperty TextProperty =
-        DependencyProperty.Register("Text", typeof(string), typeof(CountSearchControl), new UIPropertyMetadata(null));
+            DependencyProperty.Register("Text", typeof(string), typeof(CountSearchControl), new UIPropertyMetadata(null));
         public string Text
         {
             get { return (string)GetValue(TextProperty); }
@@ -33,15 +33,23 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty TextZeroItemsProperty =
-        DependencyProperty.Register("TextZeroItems", typeof(string), typeof(CountSearchControl), new UIPropertyMetadata(null));
+            DependencyProperty.Register("TextZeroItems", typeof(string), typeof(CountSearchControl), new UIPropertyMetadata(null));
         public string TextZeroItems
         {
             get { return (string)GetValue(TextZeroItemsProperty); }
             set { SetValue(TextZeroItemsProperty, value); }
         }
 
+        public static readonly DependencyProperty TextWaitingProperty =
+            DependencyProperty.Register("TextWaiting", typeof(string), typeof(CountSearchControl), new UIPropertyMetadata(null));
+        public string TextWaiting
+        {
+            get { return (string)GetValue(TextWaitingProperty); }
+            set { SetValue(TextWaitingProperty, value); }
+        }
+
         private static readonly DependencyProperty FormattedTextProperty =
-        DependencyProperty.Register("FormattedText", typeof(string), typeof(CountSearchControl), new UIPropertyMetadata("Total: 0"));
+            DependencyProperty.Register("FormattedText", typeof(string), typeof(CountSearchControl), new UIPropertyMetadata("Total: 0"));
         private string FormattedText
         {
             get { return (string)GetValue(FormattedTextProperty); }
@@ -59,7 +67,7 @@ namespace Signum.Windows
 
 
         public static readonly DependencyProperty OrderOptionsProperty =
-          DependencyProperty.Register("OrderOptions", typeof(ObservableCollection<OrderOption>), typeof(CountSearchControl), new UIPropertyMetadata(null));
+            DependencyProperty.Register("OrderOptions", typeof(ObservableCollection<OrderOption>), typeof(CountSearchControl), new UIPropertyMetadata(null));
         public ObservableCollection<OrderOption> OrderOptions
         {
             get { return (ObservableCollection<OrderOption>)GetValue(OrderOptionsProperty); }
@@ -67,7 +75,7 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty FilterOptionsProperty =
-          DependencyProperty.Register("FilterOptions", typeof(FreezableCollection<FilterOption>), typeof(CountSearchControl), new UIPropertyMetadata(null));
+            DependencyProperty.Register("FilterOptions", typeof(FreezableCollection<FilterOption>), typeof(CountSearchControl), new UIPropertyMetadata(null));
         public FreezableCollection<FilterOption> FilterOptions
         {
             get { return (FreezableCollection<FilterOption>)GetValue(FilterOptionsProperty); }
@@ -93,11 +101,19 @@ namespace Signum.Windows
 
 
         public static readonly DependencyProperty ItemsCountProperty =
-        DependencyProperty.Register("ItemsCount", typeof(int), typeof(CountSearchControl), new UIPropertyMetadata(0));
+            DependencyProperty.Register("ItemsCount", typeof(int), typeof(CountSearchControl), new UIPropertyMetadata(0));
         public int ItemsCount
         {
             get { return (int)GetValue(ItemsCountProperty); }
             set { SetValue(ItemsCountProperty, value); }
+        }
+
+        public static readonly DependencyProperty IsSearchingProperty =
+           DependencyProperty.Register("IsSearching", typeof(bool), typeof(CountSearchControl), new PropertyMetadata(false));
+        public bool IsSearching
+        {
+            get { return (bool)GetValue(IsSearchingProperty); }
+            set { SetValue(IsSearchingProperty, value); }
         }
 
         public event EventHandler LinkClick; 
@@ -140,13 +156,25 @@ namespace Signum.Windows
             AutomationProperties.SetName(this, QueryUtils.GetQueryUniqueKey(QueryName));
 
             Search();
-        }
+        }   
+        
+        
+        bool searchQueued;
 
         public void Search()
         {
+            if (IsSearching)
+            {
+                searchQueued = true;
+                return;
+            }
+
+            FormattedText = (TextWaiting ?? QueryUtils.GetNiceName(QueryName) + "...");
+            tb.FontWeight = FontWeights.Regular;
+
             var options = new QueryCountOptions
             {
-                QueryName = QueryName, 
+                QueryName = QueryName,
                 FilterOptions = FilterOptions.ToList()
             };
 
@@ -155,15 +183,19 @@ namespace Signum.Windows
                 ItemsCount = count;
                 if (ItemsCount == 0)
                 {
-                    FormattedText = (TextZeroItems ?? SearchMessage.ThereIsNo0.NiceToString())
-                        .Formato(QueryUtils.GetNiceName(QueryName));
+                    FormattedText = (TextZeroItems ?? SearchMessage.ThereIsNo0.NiceToString()).Formato(QueryUtils.GetNiceName(QueryName));
                     tb.FontWeight = FontWeights.Regular;
                 }
                 else
                 {
-                    FormattedText = (Text ?? (QueryUtils.GetNiceName(QueryName) + ": {0}"))
-                        .Formato(ItemsCount);
+                    FormattedText = (Text ?? (QueryUtils.GetNiceName(QueryName) + ": {0}")).Formato(ItemsCount);
                     tb.FontWeight = FontWeights.Bold;
+                }
+
+                if (searchQueued)
+                {
+                    searchQueued = false;
+                    Search();
                 }
             },
             () => { });

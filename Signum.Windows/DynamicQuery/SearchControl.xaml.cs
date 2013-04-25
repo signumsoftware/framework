@@ -234,10 +234,18 @@ namespace Signum.Windows
             get { return (string)GetValue(FilterRouteProperty); }
             set { SetValue(FilterRouteProperty, value); }
         }
-        
+
+        public static readonly DependencyProperty IsSearchingProperty =
+           DependencyProperty.Register("IsSearching", typeof(bool), typeof(SearchControl), new PropertyMetadata(false));
+        public bool IsSearching
+        {
+            get { return (bool)GetValue(IsSearchingProperty); }
+            set { SetValue(IsSearchingProperty, value); }
+        }
+
         private void AssetNotLoaded(DependencyPropertyChangedEventArgs e)
         {
-            if(IsLoaded)
+            if (IsLoaded)
                 throw new InvalidProgramException("You can not change {0} property once loaded".Formato(e.Property));
         }
 
@@ -581,11 +589,19 @@ namespace Signum.Windows
 
         bool hasBeenLoaded = false;
 
+        bool searchQueued; 
+
         public void Search()
         {
+            if (IsSearching)
+            {
+                searchQueued = true;
+                return;
+            }
+
             ClearResults();
 
-            btFind.IsEnabled = false;
+            IsSearching = true;
 
             QueryRequest request = UpdateMultiplyMessage(true);
 
@@ -600,7 +616,15 @@ namespace Signum.Windows
                     SetResults(rt);
                 }
             },
-            () => { btFind.IsEnabled = true; });
+            () =>
+            {
+                IsSearching = false;
+                if (searchQueued)
+                {
+                    searchQueued = false;
+                    Search(); 
+                }
+            });
         }
 
         public QueryRequest UpdateMultiplyMessage(bool updateSimpleFilters)
