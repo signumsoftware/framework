@@ -248,7 +248,7 @@ namespace Signum.Engine.Processes
 
             executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
             {
-                ((Lite<T>)line.Target).Delete<T>(OperationKey);
+                line.Target.Delete(OperationKey);
 
                 line.FinishTime = TimeZoneManager.Now;
                 line.Save();
@@ -274,7 +274,7 @@ namespace Signum.Engine.Processes
 
             executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
             {
-                ((Lite<T>)line.Target).ExecuteLite(OperationKey);
+                line.Target.Execute(OperationKey);
                 line.FinishTime = TimeZoneManager.Now;
                 line.Save();
             });
