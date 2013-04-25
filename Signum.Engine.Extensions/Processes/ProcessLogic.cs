@@ -127,7 +127,7 @@ namespace Signum.Engine.Processes
                               {
                                   Entity = p,
                                   p.Id,
-                                  p.Name
+                                  p.Key
                               });
 
                 dqm.RegisterQuery(typeof(ProcessExecutionDN), ()=>

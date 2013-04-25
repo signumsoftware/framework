@@ -6,7 +6,6 @@
     m:Common.TypeContext="{x:Type d:ProcessDN}"
     MinWidth="300">
     <StackPanel>
-        <m:ValueLine m:Common.Route="Name" />
         <m:ValueLine m:Common.Route="Key" />
     </StackPanel>
 </UserControl>

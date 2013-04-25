@@ -58,7 +58,7 @@ namespace Signum.Engine.Scheduler
                        {
                            Entity = ct,
                            ct.Id,
-                           ct.Name,
+                           ct.Key,
                        });
 
                 dqm.RegisterQuery(typeof(CustomTaskExecutionDN), ()=>

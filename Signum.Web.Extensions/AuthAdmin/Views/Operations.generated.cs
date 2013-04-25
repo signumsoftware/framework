@@ -27,6 +27,12 @@ namespace Signum.Web.Extensions.AuthAdmin.Views
     using System.Web.UI;
     using System.Web.WebPages;
     using Signum.Engine;
+    
+    #line 3 "..\..\AuthAdmin\Views\Operations.cshtml"
+    using Signum.Engine.Basics;
+    
+    #line default
+    #line hidden
     using Signum.Entities;
     using Signum.Entities.Authorization;
     using Signum.Utilities;
@@ -42,9 +48,11 @@ namespace Signum.Web.Extensions.AuthAdmin.Views
         }
         public override void Execute()
         {
+WriteLiteral("\r\n");
+
 
             
-            #line 1 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 2 "..\..\AuthAdmin\Views\Operations.cshtml"
 Write(Html.ScriptCss("~/authAdmin/Content/SF_AuthAdmin.css"));
 
             
@@ -53,8 +61,9 @@ Write(Html.ScriptCss("~/authAdmin/Content/SF_AuthAdmin.css"));
 WriteLiteral("\r\n");
 
 
+
             
-            #line 2 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 4 "..\..\AuthAdmin\Views\Operations.cshtml"
  using (var tc = Html.TypeContext<OperationRulePack>())
 {
     
@@ -62,42 +71,42 @@ WriteLiteral("\r\n");
             #line default
             #line hidden
             
-            #line 4 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 6 "..\..\AuthAdmin\Views\Operations.cshtml"
 Write(Html.EntityLine(tc, f => f.Role));
 
             
             #line default
             #line hidden
             
-            #line 4 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 6 "..\..\AuthAdmin\Views\Operations.cshtml"
                                      
     
             
             #line default
             #line hidden
             
-            #line 5 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 7 "..\..\AuthAdmin\Views\Operations.cshtml"
 Write(Html.ValueLine(tc, f => f.DefaultRule, vl => { vl.UnitText = tc.Value.DefaultLabel; }));
 
             
             #line default
             #line hidden
             
-            #line 5 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 7 "..\..\AuthAdmin\Views\Operations.cshtml"
                                                                                            
     
             
             #line default
             #line hidden
             
-            #line 6 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 8 "..\..\AuthAdmin\Views\Operations.cshtml"
 Write(Html.EntityLine(tc, f => f.Type));
 
             
             #line default
             #line hidden
             
-            #line 6 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 8 "..\..\AuthAdmin\Views\Operations.cshtml"
                                      
 
 
@@ -109,7 +118,7 @@ WriteLiteral("    <table class=\"sf-auth-rules\" id=\"operations\">\r\n        <
 
 
             
-            #line 12 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 14 "..\..\AuthAdmin\Views\Operations.cshtml"
                Write(AuthMessage.OperationsAscx_Operation.NiceToString());
 
             
@@ -119,7 +128,7 @@ WriteLiteral("\r\n                </th>\r\n                <th>\r\n             
 
 
             
-            #line 15 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 17 "..\..\AuthAdmin\Views\Operations.cshtml"
                Write(AuthMessage.OperationsAscx_Allow.NiceToString());
 
             
@@ -129,7 +138,7 @@ WriteLiteral("\r\n                </th> \r\n                <th>\r\n            
 
 
             
-            #line 18 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 20 "..\..\AuthAdmin\Views\Operations.cshtml"
                Write(AuthMessage.OperationsAscx_DBOnly.NiceToString());
 
             
@@ -139,7 +148,7 @@ WriteLiteral("\r\n                </th>\r\n                <th>\r\n             
 
 
             
-            #line 21 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 23 "..\..\AuthAdmin\Views\Operations.cshtml"
                Write(AuthMessage.OperationsAscx_None.NiceToString());
 
             
@@ -149,7 +158,7 @@ WriteLiteral("\r\n                </th>\r\n                <th>\r\n             
 
 
             
-            #line 24 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 26 "..\..\AuthAdmin\Views\Operations.cshtml"
                Write(AuthMessage.OperationsAscx_Overriden.NiceToString());
 
             
@@ -159,7 +168,7 @@ WriteLiteral("\r\n                </th>\r\n            </tr>\r\n        </thead>
 
 
             
-            #line 28 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 30 "..\..\AuthAdmin\Views\Operations.cshtml"
          foreach (var item in tc.TypeElementContext(p => p.Rules))
         {
 
@@ -170,8 +179,8 @@ WriteLiteral("            <tr>\r\n                <td>\r\n                    ")
 
 
             
-            #line 32 "..\..\AuthAdmin\Views\Operations.cshtml"
-               Write(Html.Span(null, item.Value.Resource.Name));
+            #line 34 "..\..\AuthAdmin\Views\Operations.cshtml"
+               Write(Html.Span(null, item.Value.Resource.ToEnum().NiceToString()));
 
             
             #line default
@@ -180,7 +189,7 @@ WriteLiteral("\r\n                    ");
 
 
             
-            #line 33 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 35 "..\..\AuthAdmin\Views\Operations.cshtml"
                Write(Html.HiddenRuntimeInfo(item, i => i.Resource));
 
             
@@ -190,7 +199,7 @@ WriteLiteral("\r\n                    ");
 
 
             
-            #line 34 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 36 "..\..\AuthAdmin\Views\Operations.cshtml"
                Write(Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase));
 
             
@@ -201,7 +210,7 @@ WriteLiteral("\r\n                </td>\r\n                 <td>\r\n            
 
 
             
-            #line 38 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 40 "..\..\AuthAdmin\Views\Operations.cshtml"
                    Write(Html.RadioButton(item.Compose("Allowed"), "Allow", item.Value.Allowed == OperationAllowed.Allow));
 
             
@@ -212,7 +221,7 @@ WriteLiteral("\r\n                    </a>\r\n                </td>\r\n         
 
 
             
-            #line 43 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 45 "..\..\AuthAdmin\Views\Operations.cshtml"
                    Write(Html.RadioButton(item.Compose("Allowed"), "DBOnly", item.Value.Allowed == OperationAllowed.DBOnly));
 
             
@@ -223,7 +232,7 @@ WriteLiteral("\r\n                    </a>\r\n                </td>\r\n         
 
 
             
-            #line 48 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 50 "..\..\AuthAdmin\Views\Operations.cshtml"
                    Write(Html.RadioButton(item.Compose("Allowed"), "None", item.Value.Allowed == OperationAllowed.None));
 
             
@@ -234,7 +243,7 @@ WriteLiteral("\r\n                    </a>\r\n                </td>\r\n         
 
 
             
-            #line 52 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 54 "..\..\AuthAdmin\Views\Operations.cshtml"
                Write(Html.CheckBox(item.Compose("Overriden"), item.Value.Overriden, new { disabled = "disabled", @class = "sf-auth-overriden" }));
 
             
@@ -244,7 +253,7 @@ WriteLiteral("\r\n                </td>\r\n            </tr>\r\n");
 
 
             
-            #line 55 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 57 "..\..\AuthAdmin\Views\Operations.cshtml"
         }
 
             
@@ -254,7 +263,7 @@ WriteLiteral("    </table>\r\n");
 
 
             
-            #line 57 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 59 "..\..\AuthAdmin\Views\Operations.cshtml"
 }
             
             #line default

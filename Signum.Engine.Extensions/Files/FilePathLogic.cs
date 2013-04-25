@@ -76,7 +76,7 @@ namespace Signum.Engine.Files
                     select new
                     {
                         Entity = f,
-                        f.Name
+                        f.Key
                     });
 
                 sb.AddUniqueIndex<FilePathDN>(f => new { f.Sufix, f.Repository });
