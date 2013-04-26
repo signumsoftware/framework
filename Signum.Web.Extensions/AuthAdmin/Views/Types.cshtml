@@ -169,15 +169,9 @@
                     </div>
                     <div class="sf-auth-tree @(conditionIter.IsLast ? "sf-auth-leaf-last" : "sf-auth-leaf")">
                     </div>
-                    <a title="@(AuthMessage.AuthAdmin_RemoveCondition.NiceToString())" class="sf-line-button sf-remove" data-icon="ui-icon-circle-close" data-text="false">
-                    </a><span class="sf-auth-label">@condition.ConditionName.NiceToString()</span>
-                    <a title="@AuthMessage.AuthAdmin_RemoveCondition.NiceToString()" class="sf-line-button sf-remove" data-icon="ui-icon-circle-close" data-text="false">
-                    </a><span class="sf-auth-label">@condition.ConditionName.NiceToString()</span>
-                    
                     <a class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only sf-remove sf-auth-condition-button" title="@(AuthMessage.AuthAdmin_RemoveCondition.NiceToString())">
                         <span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span>
                     </a>
-                    
                     <span class="sf-auth-label">@condition.ConditionName.NiceToString()</span>
                     @Html.Hidden(TypeContextUtilities.Compose(controlId, "ConditionName"), TypeConditionNameDN.UniqueKey(condition.ConditionName))
                 </td>
