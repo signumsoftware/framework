@@ -183,6 +183,7 @@ namespace Signum.Web.Translation.Controllers
             var master = reference.Extract(defaultCulture);
             
             var target = reference.Extract(targetCI);
+            DictionaryByTypeName(target); //To avoid finding duplicated types on save
             var changes = TranslationSynchronizer.GetAssemblyChanges(TranslationClient.Translator, target, master, reference.Values.ToList());
 
             ViewBag.Culture = targetCI;
@@ -198,7 +199,7 @@ namespace Signum.Web.Translation.Controllers
 
             List<TranslationRecord> list = GetTranslationRecords();
 
-            list.GroupToDictionary(a => a.Type).JoinDictionaryForeach(locAssembly.Types.Values.ToDictionary(a => a.Type.Name), (tn, tuples, lt) =>
+            list.GroupToDictionary(a => a.Type).JoinDictionaryForeach(DictionaryByTypeName(locAssembly), (tn, tuples, lt) =>
             {
                 foreach (var t in tuples)
                     t.Apply(lt);
@@ -207,6 +208,11 @@ namespace Signum.Web.Translation.Controllers
             locAssembly.ExportXml();
 
             return RedirectToAction("Index");
+        }
+
+        private static Dictionary<string, LocalizedType> DictionaryByTypeName(LocalizedAssembly locAssembly)
+        {
+            return locAssembly.Types.Values.ToDictionary(a => a.Type.Name, "LocalizedTypes");
         }
     }
 
