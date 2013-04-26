@@ -550,6 +550,12 @@ namespace Signum.Windows
 
         public void GenerateListViewColumns()
         {
+            if (IsSearching)
+            {
+                generateListViewColumnsQueued = true;
+                return;
+            }
+
             List<Column> columns = DynamicQueryServer.MergeColumns(ColumnOptions, ColumnOptionsMode, Description);
 
             gvResults.Columns.Clear();
@@ -589,7 +595,8 @@ namespace Signum.Windows
 
         bool hasBeenLoaded = false;
 
-        bool searchQueued; 
+        bool searchQueued;
+        bool generateListViewColumnsQueued; 
 
         public void Search()
         {
@@ -619,6 +626,11 @@ namespace Signum.Windows
             () =>
             {
                 IsSearching = false;
+                if (generateListViewColumnsQueued)
+                {
+                    generateListViewColumnsQueued = false;
+                    GenerateListViewColumns();
+                }
                 if (searchQueued)
                 {
                     searchQueued = false;
@@ -681,7 +693,9 @@ namespace Signum.Windows
                 {
                     var header = (SortGridViewColumnHeader)gvc.Header;
 
-                    Debug.Assert(rc.Column.Token.Equals(header.RequestColumn.Token));
+                    if (!rc.Column.Token.Equals(header.RequestColumn.Token))
+                        throw new InvalidOperationException("The token in the ResultColumn ({0}) does not match with the token in the GridView ({1})"
+                            .Formato(rc.Column.Token.FullKey(), header.RequestColumn.Token.FullKey()));
 
                     if (header.ResultColumn == null || header.ResultColumn.Index != rc.Index)
                         gvc.CellTemplate = CreateDataTemplate(rc);
