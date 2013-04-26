@@ -44,8 +44,8 @@ namespace Signum.Engine.Linq
 
             Expression<Func<IProjectionRow, T>> lambda = ProjectionBuilder.Build<T>(proj.Projector, scope);
 
-            Expression<Func<DbParameter[]>> createParams;
-            string sql = QueryFormatter.Format(proj.Select, out createParams);
+            List<DbParameter> parameters;
+            string sql = QueryFormatter.Format(proj.Select, out parameters);
 
             var result = new TranslateResult<T>
             {
@@ -56,8 +56,7 @@ namespace Signum.Engine.Linq
 
                 ProjectorExpression = lambda,
 
-                GetParameters = createParams.Compile(),
-                GetParametersExpression = createParams,
+                Parameters = parameters,
 
                 Unique = proj.UniqueFunction,
             };
@@ -91,9 +90,8 @@ namespace Signum.Engine.Linq
 
             Expression<Func<IProjectionRow, KeyValuePair<K, V>>> lambda = ProjectionBuilder.Build<KeyValuePair<K, V>>(proj.Projector, scope);
 
-            Expression<Func<DbParameter[]>> createParamsExpression;
-            string sql = QueryFormatter.Format(proj.Select, out createParamsExpression);
-            Func<DbParameter[]> createParams = createParamsExpression.Compile();
+            List<DbParameter> parameters;
+            string sql = QueryFormatter.Format(proj.Select, out parameters);
 
             if (childProj.IsLazyMList)
                 return new LazyChildProjection<K, V>
@@ -103,8 +101,7 @@ namespace Signum.Engine.Linq
                     CommandText = sql,
                     ProjectorExpression = lambda,
 
-                    GetParameters = createParams,
-                    GetParametersExpression = createParamsExpression,
+                    Parameters = parameters,
                 };
             else
                 return new EagerChildProjection<K, V>
@@ -114,20 +111,18 @@ namespace Signum.Engine.Linq
                     CommandText = sql,
                     ProjectorExpression = lambda,
 
-                    GetParameters = createParams,
-                    GetParametersExpression = createParamsExpression,
+                    Parameters = parameters,
                 };
         }
 
         public static CommandResult BuildCommandResult(CommandExpression command)
         {
-            Expression<Func<DbParameter[]>> createParams;
-            string sql = QueryFormatter.Format(command, out createParams);
+            List<DbParameter> parameters;
+            string sql = QueryFormatter.Format(command, out parameters);
 
             return new CommandResult
             {
-                GetParameters = createParams.Compile(),
-                GetParametersExpression = createParams,
+                Parameters = parameters,
                 CommandText = sql,
             }; 
         }
