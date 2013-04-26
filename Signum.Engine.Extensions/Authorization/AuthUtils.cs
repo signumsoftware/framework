@@ -31,26 +31,31 @@ namespace Signum.Engine.Authorization
               new TypeAllowedAndConditions(TypeAllowed.None),
            baseRules => Merge(baseRules, MinTypeAllowed, TypeAllowed.None, TypeAllowed.Create));
 
-        static TypeAllowedAndConditions Merge(IEnumerable<TypeAllowedAndConditions> baseRules, Func<IEnumerable<TypeAllowed>, TypeAllowed> merge, TypeAllowed current, TypeAllowed oposite)
+        static TypeAllowedAndConditions Merge(IEnumerable<TypeAllowedAndConditions> baseRules, Func<IEnumerable<TypeAllowed>, TypeAllowed> maxMerge, TypeAllowed max, TypeAllowed min)
         {
             TypeAllowedAndConditions only = baseRules.Only();
             if (only != null)
                 return only;
 
-            if (baseRules.Any(a => a.Exactly(current)))
-                return new TypeAllowedAndConditions(current);
+            if (baseRules.Any(a => a.Exactly(max)))
+                return new TypeAllowedAndConditions(max);
 
-            TypeAllowedAndConditions onlyNotOposite = baseRules.Where(a => !a.Exactly(oposite)).Only();
+            TypeAllowedAndConditions onlyNotOposite = baseRules.Where(a => !a.Exactly(min)).Only();
             if (onlyNotOposite != null)
                 return onlyNotOposite;
 
-            var conditions = baseRules.First().Conditions.Select(c => c.ConditionName).ToList();
+            var first = baseRules.FirstOrDefault(c => !c.Conditions.IsNullOrEmpty());
 
-            if (baseRules.Skip(1).Any(br => !br.Conditions.Select(c => c.ConditionName).SequenceEqual(conditions)))
+            if (first == null)
+                return new TypeAllowedAndConditions(maxMerge(baseRules.Select(a => a.Fallback)));
+
+            var conditions = first.Conditions.Select(c => c.ConditionName).ToList();
+
+            if (baseRules.Where(c => !c.Conditions.IsNullOrEmpty() && c != first).Any(br => !br.Conditions.Select(c => c.ConditionName).SequenceEqual(conditions)))
                 return new TypeAllowedAndConditions(TypeAllowed.None);
 
-            return new TypeAllowedAndConditions(merge(baseRules.Select(a => a.Fallback)),
-                conditions.Select((c, i) => new TypeConditionRule(c, merge(baseRules.Select(br => br.Conditions[i].Allowed)))).ToArray());
+            return new TypeAllowedAndConditions(maxMerge(baseRules.Select(a => a.Fallback)),
+                conditions.Select((c, i) => new TypeConditionRule(c, maxMerge(baseRules.Where(br => !br.Conditions.IsNullOrEmpty()).Select(br => br.Conditions[i].Allowed)))).ToArray());
         }   
 
         static TypeAllowed MaxTypeAllowed(this IEnumerable<TypeAllowed> collection)
