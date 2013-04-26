@@ -205,6 +205,7 @@
     </Content>
     <Content Include="Translations\Signum.Entities.Extensions.es.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </Content>
     <Content Include="Translations\Signum.Entities.Extensions.fr.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
