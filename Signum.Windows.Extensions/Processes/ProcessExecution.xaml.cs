@@ -32,7 +32,14 @@ namespace Signum.Windows.Processes
             timer.Interval = TimeSpan.FromSeconds(2);
             timer.IsEnabled = false;
             timer.Tick += new EventHandler(timer_Tick);
-            this.DataContextChanged+=new DependencyPropertyChangedEventHandler(ProcessExecution_DataContextChanged);
+            this.DataContextChanged += new DependencyPropertyChangedEventHandler(ProcessExecution_DataContextChanged);
+            this.Unloaded += ProcessExecution_Unloaded;
+        }
+
+        void ProcessExecution_Unloaded(object sender, RoutedEventArgs e)
+        {
+            timer.IsEnabled = false;
+            timer = null; 
         }
 
         void timer_Tick(object sender, EventArgs e)

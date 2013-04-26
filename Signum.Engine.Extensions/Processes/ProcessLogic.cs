@@ -614,7 +614,7 @@ namespace Signum.Engine.Processes
 
         public void ProgressChanged(int position, int count)
         {
-            decimal progress = (100 * position) / count;
+            decimal progress = ((decimal)position) / count;
 
             ProgressChanged(progress);
         }
