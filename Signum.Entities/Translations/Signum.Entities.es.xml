@@ -1,5 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
+  <Type Name="AggregateFunction">
+    <Member Name="Average" Description="Media" />
+    <Member Name="Count" Description="Cuantos" />
+    <Member Name="Max" Description="Max" />
+    <Member Name="Min" Description="Min" />
+    <Member Name="Sum" Description="Suma" />
+  </Type>
   <Type Name="CalendarMessage">
     <Member Name="CalendarClose" Description="Cerrar" />
     <Member Name="CalendarNext" Description="Sig" />
@@ -7,7 +14,10 @@
     <Member Name="CalendarToday" Description="Hoy" />
     <Member Name="ShowCalendar" Description="Mostrar calendario" />
   </Type>
-  <Type Name="Case" />
+  <Type Name="Case">
+    <Member Name="Lowercase" Description="Minúsculas" />
+    <Member Name="Uppercase" Description="Mayúsculas" />
+  </Type>
   <Type Name="CollectionElementType">
     <Member Name="All" Description="Todos" />
     <Member Name="Any" Description="Alguno" />
@@ -16,7 +26,11 @@
   <Type Name="ColorDN" Description="Color">
     <Member Name="Argb" Description="Argb" />
   </Type>
-  <Type Name="ColumnOptionsMode" />
+  <Type Name="ColumnOptionsMode" Description="Modo de las columnas">
+    <Member Name="Add" Description="Añadir" />
+    <Member Name="Remove" Description="Quitar" />
+    <Member Name="Replace" Description="Reemplazar" />
+  </Type>
   <Type Name="ComparisonType">
     <Member Name="DistinctTo" Description="distinto a" />
     <Member Name="EqualTo" Description="igual a" />
@@ -42,7 +56,7 @@
     <Member Name="ThereAreRecordsIn0PointingToThisTableByColumn1" Description="Hay registros en '{0}' que refieren a esta tabla por la columna '{1}'" />
     <Member Name="UnauthorizedAccessTo0Because1" Description="Acceso denegado a {0} porque {1}" />
   </Type>
-  <Type Name="Entity" />
+  <Type Name="Entity" Description="Entidad" />
   <Type Name="EntityControlMessage">
     <Member Name="Create" Description="Crear" />
     <Member Name="Detail" Description="Detalle" />
@@ -84,7 +98,7 @@
     <Member Name="UserHostName" Description="Nombre de Host del usuario" />
     <Member Name="Version" Description="Versión" />
   </Type>
-  <Type Name="FilterOperation">
+  <Type Name="FilterOperation" Description="Operación de filtro">
     <Member Name="Contains" Description="contiene" />
     <Member Name="DistinctTo" Description="distinto de" />
     <Member Name="EndsWith" Description="acaba por" />
@@ -102,15 +116,43 @@
     <Member Name="StartsWith" Description="empieza por" />
   </Type>
   <Type Name="IdentifiableEntity" />
+  <Type Name="IIdentifiable">
+    <Member Name="Id" Description="ID" />
+  </Type>
   <Type Name="ImmutableEntity" Description="Entidad inmutable">
     <Member Name="AllowChange" Description="Permitir cambios" />
   </Type>
   <Type Name="IUserDN" />
-  <Type Name="JavascriptMessage" />
+  <Type Name="JavascriptMessage">
+    <Member Name="addFilter" Description="Añadir filtro" />
+    <Member Name="editColumnName" Description="Editar nombre de columna" />
+    <Member Name="enterTheNewColumnName" Description="Introduzca el nuevo nombre de la columna" />
+    <Member Name="entityRepeater_moveDown" Description="Bajar" />
+    <Member Name="entityRepeater_moveUp" Description="Subir" />
+    <Member Name="error" Description="Error" />
+    <Member Name="executed" Description="Ejecutado" />
+    <Member Name="hideFilters" Description="Ocultar filtros" />
+    <Member Name="loading" Description="Cargando..." />
+    <Member Name="loseChanges" Description="Hay cambios que no han sido guardados. &#xD;&#xA;¿Perder cambios?" />
+    <Member Name="noElementsSelected" Description="No hay elementos seleccionados" />
+    <Member Name="noResults" Description="No se encontraron resultados" />
+    <Member Name="onlyOneElement" Description="Puede seleccionar un único elemento" />
+    <Member Name="popupErrors" Description="¿Hay errores en la entidad, que desea continuar?" />
+    <Member Name="popupErrorsStop" Description="Hay errores en la entidad" />
+    <Member Name="removeColumn" Description="Eliminar columna" />
+    <Member Name="reorderColumn_MoveLeft" Description="Mover a la izquierda" />
+    <Member Name="reorderColumn_MoveRight" Description="Mover a la derecha" />
+    <Member Name="saved" Description="Guardado" />
+    <Member Name="search" Description="Búsqueda" />
+    <Member Name="searchControlMenuSelected" Description="seleccionado" />
+    <Member Name="selectToken" Description="Seleccione un símbolo (token)" />
+    <Member Name="showFilters" Description="Mostrar filtros" />
+  </Type>
   <Type Name="LiteMessage">
     <Member Name="IdNotValid" Description="Id no válido" />
     <Member Name="InvalidFormat" Description="Formato inválido" />
     <Member Name="New" Description="Nuevo" />
+    <Member Name="ToStr" Description="Texto" />
     <Member Name="TypeNotFound" Description="Tipo no encontrado" />
   </Type>
   <Type Name="LockableEntity">
@@ -118,7 +160,7 @@
   </Type>
   <Type Name="ModelEntity" />
   <Type Name="ModifiableEntity" Description="Entidad modificable" PluralDescription="Entidades modificables" />
-  <Type Name="ModifiedState" />
+  <Type Name="ModifiedState" Description="Estado modificado" />
   <Type Name="MultiEnumDN">
     <Member Name="Key" Description="Clave" />
     <Member Name="Name" Description="Nombre" />
@@ -129,6 +171,8 @@
     <Member Name="ViewForType0IsNotAllowed" Description="View para el tipo {0} no está permitido" />
   </Type>
   <Type Name="NormalWindowMessage">
+    <Member Name="_0Errors1" Description="{0} Errores: {1}" />
+    <Member Name="_1Error" Description="1 Error: {0}" />
     <Member Name="Cancel" Description="Cancelar" />
     <Member Name="ContinueAnyway" Description="Continuar de todas formas?" />
     <Member Name="ContinueWithErrors" Description="Continuar con errores?" />
@@ -144,7 +188,10 @@
     <Member Name="ThereAreChangesContinue" Description="Existen cambios no guardados y se perderán.&#xD;&#xA;&#xD;&#xA;&#x9;¿Continuamos?" />
     <Member Name="ThereAreErrors" Description="Hay errores" />
   </Type>
-  <Type Name="OperationDN" Description="Operación" />
+  <Type Name="OperationDN" Description="Operación">
+    <Member Name="Key" Description="Clave" />
+    <Member Name="Name" Description="Nombre" />
+  </Type>
   <Type Name="OperationLogDN" Description="Registro de la operación">
     <Member Name="Duration" Description="Duración" />
     <Member Name="End" Description="Final" />
@@ -163,11 +210,15 @@
     <Member Name="PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem" Description="Confirme que desea eliminar esta entidad del sistema" />
     <Member Name="PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem" Description="Confirme que desea eliminar las entidades seleccionadas del sistema" />
   </Type>
-  <Type Name="OrderType" />
+  <Type Name="OrderType" Description="Tipo de órden">
+    <Member Name="Ascending" Description="Ascendente" />
+    <Member Name="Descending" Description="Descendente" />
+  </Type>
   <Type Name="PaginationMessage">
     <Member Name="All" Description="Todas" />
   </Type>
   <Type Name="QueryTokenMessage">
+    <Member Name="_0As1" Description="({0} como {1})" />
     <Member Name="And" Description=" y " />
     <Member Name="AnyEntity" Description="cualquier entidad" />
     <Member Name="As0" Description="As {0}" />
@@ -196,12 +247,16 @@
     <Member Name="Year" Description="Año" />
   </Type>
   <Type Name="QuickLinkMessage">
+    <Member Name="No0Found" Description="No {0} encontrado" />
     <Member Name="Quicklinks" Description="Vínculos rápidos" />
   </Type>
   <Type Name="SearchMessage">
     <Member Name="ChooseTheDisplayNameOfTheNewColumn" Description="Elige el nombre que se verá en la nueva columna" />
     <Member Name="CreateNew" Description="Crear nueva" />
     <Member Name="Field" Description="Campo" />
+    <Member Name="FilterBuilder_AddColumn" Description="Añadir columna" />
+    <Member Name="FilterBuilder_AddFilter" Description="Añadir filtro" />
+    <Member Name="FilterBuilder_DeleteFilter" Description="Eliminar filtro" />
     <Member Name="Filters" Description="Filtros" />
     <Member Name="Find" Description="Buscar" />
     <Member Name="FinderOf0" Description="Buscador de {0}" />
@@ -222,6 +277,12 @@
     <Member Name="Results" Description="resultados." />
     <Member Name="Rows" Description="Filas:" />
     <Member Name="Search" Description="Buscar" />
+    <Member Name="Search_Create" Description="Crear" />
+    <Member Name="Search_CtxMenuItem_Operations" Description="Operaciones" />
+    <Member Name="SearchControl_Pagination_All" Description="Todos" />
+    <Member Name="SearchControl_Pagination_Of" Description="de" />
+    <Member Name="SearchControl_Pagination_Results" Description="resultados" />
+    <Member Name="SearchControl_Pagination_Rows" Description="Filas" />
     <Member Name="SelectAnElement" Description="Seleccione un elemento" />
     <Member Name="ThereIsNo0" Description="No hay {0}" />
     <Member Name="Value" Description="Valor" />
@@ -239,6 +300,7 @@
     <Member Name="ValueMustBeSpecifiedFor0" Description="Se debe indicar un valor para {0}" />
   </Type>
   <Type Name="SynchronizerMessage">
+    <Member Name="_0HasBeenRenamedIn1" Description="     ¿' {0}' ha sido renombrada en {1}?" />
     <Member Name="EndOfSyncScript" Description="--- FIN DEL SCRIPT DE SINCRONIZACION" />
     <Member Name="NNone" Description="- n: Ninguno" />
     <Member Name="StartOfSyncScriptGeneratedOn0" Description="--- INICIO DEL SCRIPT DE SINCRONIZACION GENERADO EL {0}" />
@@ -251,6 +313,20 @@
     <Member Name="TableName" Description="Table Name" />
   </Type>
   <Type Name="ValidationMessage">
+    <Member Name="_0DoesNotHaveAValid0Format" Description="{{0}} no tiene un formato válido {0}" />
+    <Member Name="_0HasAnInvalidFormat" Description="{0} tiene un formato inválido" />
+    <Member Name="_0HasMoreThan0DecimalPlaces" Description="{{0}} tiene más de {0} decimales" />
+    <Member Name="_0HasNoCorrectFormat" Description="{0} no tiene un formato correcto" />
+    <Member Name="_0HasSomeRepeatedElements0" Description="{{0}} tiene algunos elementos repetidos: {0}" />
+    <Member Name="_0HasToBe0Than1" Description="{{0}} tiene que ser {0} {1}" />
+    <Member Name="_0HasToBeBetween0And1" Description="{{0}} Tiene que estar entre {0} y {1}" />
+    <Member Name="_0HasToBeLowercase" Description="{0} debe estar en minúsculas" />
+    <Member Name="_0HasToBeUppercase" Description="{0} debe estar en mayúsculas" />
+    <Member Name="_0IsNecessary" Description="es necesario {0}" />
+    <Member Name="_0IsNecessaryOnState1" Description="{0} es necesario en estado {1}" />
+    <Member Name="_0IsNotAllowed" Description="{0} no está permitido" />
+    <Member Name="_0IsNotAllowedOnState1" Description="{0} no se permite en estado {1}" />
+    <Member Name="_0IsNotSet" Description="{0} no establecido" />
     <Member Name="Be" Description="ser " />
     <Member Name="BeBetween0And1" Description="estar entre {0} y {1}" />
     <Member Name="BeNotNull" Description="ser no nulo" />
@@ -274,5 +350,12 @@
     <Member Name="TheNumberOf0IsBeingMultipliedBy1" Description="El número de {0} está siendo multiplicado por {1}" />
     <Member Name="TheNumberOfElementsOf0HasToBe01" Description="El número de elementos en {{0}} ha de ser {0} {1}" />
     <Member Name="Type0NotAllowed" Description="El tipo {0} no está permitido" />
+  </Type>
+  <Type Name="ValueLineBoxModel">
+    <Member Name="Related" Description="Relacionado" />
+  </Type>
+  <Type Name="ValueLineBoxType" />
+  <Type Name="VoidEnumMessage">
+    <Member Name="Instance" Description="-" />
   </Type>
 </Translations>
