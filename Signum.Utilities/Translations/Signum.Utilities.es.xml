@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
   <Type Name="AboutMessage">
-    <Member Name="Unknown0" Description="Desconocido {{0}}" />
+    <Member Name="OS_Unknown0" Description="Desconocido ({0})" />
   </Type>
   <Type Name="CollectionMessage">
     <Member Name="And" Description=" y " />
@@ -14,18 +14,18 @@
     <Member Name="SelectOneOfTheFollowingOptions" Description="Elige una de las siguientes opciones:" />
   </Type>
   <Type Name="DateTimeMessage">
-    <Member Name="0Day" Description="{0} día" />
-    <Member Name="0Days" Description="{0} días" />
-    <Member Name="0Hour" Description="{0} hora" />
-    <Member Name="0Hours" Description="{0} horas" />
-    <Member Name="0Minute" Description="{0} minuto" />
-    <Member Name="0Minutes" Description="{0} minutos" />
-    <Member Name="0Month" Description="{0} mes" />
-    <Member Name="0Months" Description="{0} meses" />
-    <Member Name="0Second" Description="{0} segundo" />
-    <Member Name="0Seconds" Description="{0} segundos" />
-    <Member Name="0Year" Description="{0} año" />
-    <Member Name="0Years" Description="{0} años" />
+    <Member Name="_0Day" Description="{0} Día" />
+    <Member Name="_0Days" Description="{0} Días" />
+    <Member Name="_0Hour" Description="{0} Hora" />
+    <Member Name="_0Hours" Description="{0} Horas" />
+    <Member Name="_0Minute" Description="{0} Minuto" />
+    <Member Name="_0Minutes" Description="{0} Minutos" />
+    <Member Name="_0Month" Description="{0} Mes" />
+    <Member Name="_0Months" Description="{0} Meses" />
+    <Member Name="_0Second" Description="{0} Segundo" />
+    <Member Name="_0Seconds" Description="{0} Segundos" />
+    <Member Name="_0Year" Description="{0} Año" />
+    <Member Name="_0Years" Description="{0} Años" />
     <Member Name="Ago" Description="hace {0} " />
     <Member Name="DateLast" Description="{0} pasado" />
     <Member Name="DateThis" Description="Este {0}" />
@@ -34,5 +34,11 @@
     <Member Name="Tomorrow" Description="Mañana" />
     <Member Name="Yesterday" Description="Ayer" />
   </Type>
-  <Type Name="Unavailable" Description="No disponible" />
+  <Type Name="DateTimePrecision">
+    <Member Name="Days" Description="Días" />
+    <Member Name="Hours" Description="Horas" />
+    <Member Name="Milliseconds" Description="Milisegundos" />
+    <Member Name="Minutes" Description="Minutos" />
+    <Member Name="Seconds" Description="Segundos" />
+  </Type>
 </Translations>
