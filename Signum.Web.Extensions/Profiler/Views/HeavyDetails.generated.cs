@@ -262,12 +262,22 @@ WriteLiteral("\r\n                    </td>\r\n                    <td>\r\n     
 
             
             #line 80 "..\..\Profiler\Views\HeavyDetails.cshtml"
-                   Write(frame.GetFileLineAndNumber());
+                   Write(frame.GetFileName());
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                    </td>\r\n                </tr>\r\n");
+WriteLiteral(" (");
+
+
+            
+            #line 80 "..\..\Profiler\Views\HeavyDetails.cshtml"
+                                         Write(frame.GetFileLineNumber());
+
+            
+            #line default
+            #line hidden
+WriteLiteral(")\r\n                    </td>\r\n                </tr>\r\n");
 
 
             
