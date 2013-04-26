@@ -15,9 +15,6 @@ namespace Signum.Engine.Linq
 {
     interface ITranslateResult
     {
-        string CommandText { get; }
-        UniqueFunction? Unique { get; }
-
         string CleanCommandText();
 
         SqlPreCommandSimple MainPreCommand();
@@ -41,14 +38,13 @@ namespace Signum.Engine.Linq
     {
         public LookupToken Token { get; set; }
 
-        public string CommandText { get; set; }
-        internal Expression<Func<DbParameter[]>> GetParametersExpression;
-        internal Func<DbParameter[]> GetParameters;
+        public string CommandText;
+        internal List<DbParameter> Parameters;
         internal Expression<Func<IProjectionRow, KeyValuePair<K, V>>> ProjectorExpression;
 
         public void Fill(Dictionary<LookupToken, IEnumerable> lookups, IRetriever retriever)
         {
-            SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, GetParameters().ToList());
+            SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, Parameters);
             using (HeavyProfiler.Log("SQL", () => command.Sql))
             using (DbDataReader reader = Executor.UnsafeExecuteDataReader(command))
             {
@@ -75,7 +71,7 @@ namespace Signum.Engine.Linq
 
         public SqlPreCommandSimple PreCommand()
         {
-            return new SqlPreCommandSimple(CommandText, GetParameters().ToList());
+            return new SqlPreCommandSimple(CommandText, Parameters);
         }
 
         public bool IsLazy
@@ -89,9 +85,8 @@ namespace Signum.Engine.Linq
     {
         public LookupToken Token { get; set; }
 
-        public string CommandText { get; set; }
-        internal Expression<Func<DbParameter[]>> GetParametersExpression;
-        internal Func<DbParameter[]> GetParameters;
+        public string CommandText;
+        internal List<DbParameter> Parameters;
         internal Expression<Func<IProjectionRow, KeyValuePair<K, V>>> ProjectorExpression;
 
         public void Fill(Dictionary<LookupToken, IEnumerable> lookups, IRetriever retriever)
@@ -101,7 +96,7 @@ namespace Signum.Engine.Linq
             if (requests == null)
                 return;
 
-            SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, GetParameters().ToList());
+            SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, Parameters);
             using (HeavyProfiler.Log("SQL", () => command.Sql))
             using (DbDataReader reader = Executor.UnsafeExecuteDataReader(command))
             {
@@ -133,7 +128,7 @@ namespace Signum.Engine.Linq
 
         public SqlPreCommandSimple PreCommand()
         {
-            return new SqlPreCommandSimple(CommandText, GetParameters().ToList());
+            return new SqlPreCommandSimple(CommandText, Parameters);
         }
 
         public bool IsLazy
@@ -151,9 +146,8 @@ namespace Signum.Engine.Linq
 
         Dictionary<LookupToken, IEnumerable> lookups;
 
-        public string CommandText { get; set; }
-        internal Expression<Func<DbParameter[]>> GetParametersExpression;
-        internal Func<DbParameter[]> GetParameters;
+        public string CommandText;
+        internal List<DbParameter> Parameters;
         internal Expression<Func<IProjectionRow, T>> ProjectorExpression;
 
         public object Execute()
@@ -170,7 +164,7 @@ namespace Signum.Engine.Linq
                     foreach (var chils in EagerProjections)
                         chils.Fill(lookups, retriever);
 
-                    SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, GetParameters().ToList());
+                    SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, Parameters);
 
                     using (HeavyProfiler.Log("SQL", () => command.Sql))
                     using (DbDataReader reader = Executor.UnsafeExecuteDataReader(command))
@@ -245,15 +239,14 @@ namespace Signum.Engine.Linq
 
         public SqlPreCommandSimple MainPreCommand()
         {
-            return new SqlPreCommandSimple(CommandText, GetParameters().ToList());
+            return new SqlPreCommandSimple(CommandText, Parameters);
         }
     }
 
     class CommandResult
     {
-        public string CommandText { get; set; }
-        internal Expression<Func<DbParameter[]>> GetParametersExpression;
-        internal Func<DbParameter[]> GetParameters;
+        public string CommandText;
+        public List<DbParameter> Parameters;
 
         public int ExecuteScalar()
         {
@@ -264,7 +257,7 @@ namespace Signum.Engine.Linq
 
         public SqlPreCommandSimple ToPreCommand()
         {
-            SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, GetParameters().ToList());
+            SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, Parameters);
             return command;
         }
     }

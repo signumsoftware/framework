@@ -336,21 +336,6 @@ namespace Signum.Utilities
             return statistics;
         }
 
-
-        public static string GetFileLineAndNumber(this StackFrame frame)
-        {
-            string fileName = frame.GetFileName();
-
-            if (fileName == null)
-                return null;
-
-            if (fileName.Length > 70)
-                fileName = "..." + fileName.TryEnd(67);
-
-            return fileName + " ({0})".Formato(frame.GetFileLineNumber());
-        }
-        
-
         public static HeavyProfilerEntry Find(string indices)
         {
             var array = indices.Split('.').Select(a => int.Parse(a)).ToArray();
