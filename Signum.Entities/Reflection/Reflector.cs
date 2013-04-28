@@ -76,7 +76,7 @@ namespace Signum.Entities.Reflection
 
         static DescriptionOptions? DescriptionManager_IsOperationMessageOrQuery(Type t)
         {
-            return t.IsEnum && (t.Name.EndsWith("Operation") || t.Name.EndsWith("Message") || t.Name.EndsWith("Query")) ? DescriptionOptions.Members : (DescriptionOptions?)null;
+            return t.IsEnum && (t.Name.EndsWith("Operation") || t.Name.EndsWith("Query")) ? DescriptionOptions.Members : (DescriptionOptions?)null;
         }
 
         public static string CleanTypeName(Type t)

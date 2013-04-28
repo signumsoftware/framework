@@ -103,7 +103,7 @@ namespace Signum.Utilities
 
         public static string TranslationDirectory = Path.Combine(Path.GetDirectoryName(new Uri(typeof(DescriptionManager).Assembly.CodeBase).LocalPath), "Translations");
 
-        public static event Func<Type, DescriptionOptions?> DefaultDescriptionOptions = t => t.Name.EndsWith("Message") ? DescriptionOptions.Members : (DescriptionOptions?)null;
+        public static event Func<Type, DescriptionOptions?> DefaultDescriptionOptions = t => t.IsEnum && t.Name.EndsWith("Message") ? DescriptionOptions.Members : (DescriptionOptions?)null;
         public static event Func<MemberInfo, bool> ShouldLocalizeMemeber = m => true;
 
         static string Fallback(Type type, Func<LocalizedType, string> typeValue)
@@ -362,6 +362,8 @@ namespace Signum.Utilities
             string fileName = TranslationFileName(Assembly, Culture);
 
             doc.Save(fileName);
+
+            DescriptionManager.Invalidate();
         }
 
         public static LocalizedAssembly ImportXml(Assembly assembly, CultureInfo cultureInfo)
