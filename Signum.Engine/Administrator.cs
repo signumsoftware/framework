@@ -140,11 +140,27 @@ namespace Signum.Engine
         }
 
         public static T SetNotModified<T>(this T ident)
-            where T : IdentifiableEntity
+            where T : Modifiable
         {
-            ident.IsNew = false;
+            if (ident is IdentifiableEntity)
+                ((IdentifiableEntity)(Modifiable)ident).IsNew = false;
             ident.Modified = ModifiedState.Clean;
             return ident;
+        }
+
+        public static T SetNotModifiedGraph<T>(this T ident, int id) 
+            where T: IdentifiableEntity
+        {
+            foreach (var item in GraphExplorer.FromRoot(ident).Where(a => a.Modified != ModifiedState.Sealed))
+            {
+                 item.SetNotModified();
+                if (item is IdentifiableEntity)
+                    ((IdentifiableEntity)item).SetId(-1);
+            }
+
+            ident.SetId(id);
+
+            return ident; 
         }
 
         /// <summary>
