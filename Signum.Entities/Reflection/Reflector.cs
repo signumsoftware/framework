@@ -204,7 +204,7 @@ namespace Signum.Entities.Reflection
                 case ExpressionType.MemberAccess:
                 {
                     MemberExpression me = (MemberExpression)e;
-                    if (me.Member.DeclaringType.IsLite() && me.Member.Name.StartsWith("Entity"))
+                    if (me.Member.DeclaringType.IsLite() && !me.Member.Name.StartsWith("Entity"))
                         throw new InvalidOperationException("Members of Lite not supported"); 
 
                     return me.Member;
