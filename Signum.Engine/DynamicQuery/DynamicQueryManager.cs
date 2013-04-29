@@ -66,6 +66,12 @@ namespace Signum.Engine.DynamicQuery
             return queries.GetOrThrow(queryName);
         }
 
+        public Implementations GetEntityImplementations(object queryName)
+        {
+            //AssertQueryAllowed(queryName);
+            return queries.GetOrThrow(queryName).EntityImplementations;
+        }
+
         public ResultTable ExecuteQuery(QueryRequest request)
         {
             using (ExecutionMode.UserInterface())
