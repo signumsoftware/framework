@@ -112,8 +112,7 @@ namespace Signum.Services
         [OperationContract, NetDataContract]
         void SetOperationRules(OperationRulePack rules);
 
-
         [OperationContract, NetDataContract]
-        DefaultDictionary<Enum, OperationAllowed> OperationRules();
+        Dictionary<Enum, OperationAllowed> AllowedOperations();
     }
 }

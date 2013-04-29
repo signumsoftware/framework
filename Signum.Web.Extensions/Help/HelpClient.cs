@@ -195,23 +195,23 @@ namespace Signum.Web.Help
                     case WikiFormat.OperationLink:
                         Enum operation = MultiEnumLogic<OperationDN>.TryToEnum(link);
 
-                            Type[] types = OperationLogic.FindTypes(operation);
-                            if (types.Length == 1)
+                        List<Type> types = OperationLogic.FindTypes(operation).Where(TypeLogic.TypeToDN.ContainsKey).ToList();
+                        if (types.Count == 1)
+                        {
+                            return new WikiLink(
+                                HelpLogic.OperationUrl(types[0], operation),
+                                text.HasText() ? text : operation.NiceToString());
+                        }
+                        else
+                        {
+                            return new MultiWikiLink(operation.NiceToString())
                             {
-                                return new WikiLink(
-                                    HelpLogic.OperationUrl(types[0], operation),
-                                    text.HasText() ? text : operation.NiceToString());
-                            }
-                            else
-                            {
-                                return new MultiWikiLink(operation.NiceToString())
-                                {
-                                    Links = types.Select(currentType =>
-                                        new WikiLink(
-                                            HelpLogic.OperationUrl(currentType, operation),
-                                            currentType.NiceName(), operation.NiceToString())).ToList()
-                                };
-                            }
+                                Links = types.Select(currentType =>
+                                    new WikiLink(
+                                        HelpLogic.OperationUrl(currentType, operation),
+                                        currentType.NiceName(), operation.NiceToString())).ToList()
+                            };
+                        }
 
                     case WikiFormat.PropertyLink:
                         int index= link.IndexOf("."); 
