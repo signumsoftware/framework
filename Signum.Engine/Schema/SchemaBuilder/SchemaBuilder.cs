@@ -202,7 +202,7 @@ namespace Signum.Engine.Maps
             {
                 PropertyRoute route = root.Add(fi); 
 
-                if (!Settings.Attributes(route).Any(a=>a is IgnoreAttribute))
+                if (!Settings.FieldAttributes(route).Any(a=>a is IgnoreAttribute))
                 {
                     if (Reflector.TryFindPropertyInfo(fi) == null && !fi.IsPublic && !fi.HasAttribute<FieldWithoutPropertyAttribute>())
                         throw new InvalidOperationException("Field {0} of type {1} has no property".Formato(fi.Name, type.Name));

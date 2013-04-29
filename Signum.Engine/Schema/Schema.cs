@@ -492,9 +492,12 @@ namespace Signum.Engine.Maps
                 return implementations.Value;
 
             var ss = Schema.Current.Settings;
-            if (route.FollowC(r => r.Parent).SelectMany(r => ss.Attributes(r)).Any(a => a is IgnoreAttribute))
+            if (route.FollowC(r => r.Parent)
+                .TakeWhile(t => t.PropertyRouteType != PropertyRouteType.Root)
+                .SelectMany(r => ss.FieldAttributes(r))
+                .Any(a => a is IgnoreAttribute))
             {
-                var atts = ss.Attributes(route);
+                var atts = ss.FieldAttributes(route);
 
                 return Implementations.TryFromAttributes(route.GetType().CleanType(), atts, route) ?? Implementations.By();
             }
