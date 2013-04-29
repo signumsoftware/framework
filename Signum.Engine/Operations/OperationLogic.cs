@@ -39,6 +39,15 @@ namespace Signum.Engine.Operations
 
         static Polymorphic<Dictionary<Enum, IOperation>> operations = new Polymorphic<Dictionary<Enum, IOperation>>(PolymorphicMerger.InheritDictionaryInterfaces, typeof(IIdentifiable));
 
+        static ResetLazy<Dictionary<Enum, List<Type>>> operationsFromKey = new ResetLazy<Dictionary<Enum, List<Type>>>(() =>
+            {
+                return (from t in operations.OverridenTypes
+                        from d in operations.GetDefinition(t).Keys
+                        group t by d into g
+                        select KVP.Create(g.Key, g.ToList())).ToDictionary();
+            }); 
+
+
         public static HashSet<Enum> RegisteredOperations
         {
             get { return operations.OverridenValues.SelectMany(a => a.Keys).ToHashSet(); }
@@ -268,6 +277,8 @@ namespace Signum.Engine.Operations
 
             operations.GetOrAddDefinition(operation.Type).AddOrThrow(operation.Key, operation, "Operation {0} has already been registered");
 
+            operationsFromKey.Reset();
+
             if (IsExecuteNoLite(operation))
             {
                 SetProtectedSave(operation.Type, true);
@@ -287,6 +298,8 @@ namespace Signum.Engine.Operations
             operation.AssertIsValid();
 
             operations.GetOrAddDefinition(operation.Type)[operation.Key] = operation;
+
+            operationsFromKey.Reset(); //unnecesarry?
         }
 
         public static List<OperationInfo> ServiceGetOperationInfos(Type entityType)
@@ -299,6 +312,16 @@ namespace Signum.Engine.Operations
         public static List<OperationInfo> GetAllOperationInfos(Type entityType)
         {
             return TypeOperations(entityType).Select(o => ToOperationInfo(o)).ToList();
+        }
+
+        public static OperationInfo GetOperationInfo(Type type, Enum operationKey)
+        {
+            return ToOperationInfo(FindOperation(type, operationKey));
+        }
+
+        public static IEnumerable<Enum> AllKeys()
+        {
+            return operationsFromKey.Value.Keys;
         }
 
         private static OperationInfo ToOperationInfo(IOperation oper)
@@ -461,10 +484,13 @@ namespace Signum.Engine.Operations
 
         public static bool IsLite(Enum operationKey)
         {
-            return operations.OverridenTypes.Select(t => operations.GetDefinition(t)).NotNull()
-                .Select(d => d.TryGetC(operationKey)).NotNull().OfType<IEntityOperation>().Select(a => a.Lite).FirstOrDefault();
+            return operationsFromKey.Value.TryGetC(operationKey)
+                .EmptyIfNull()
+                .Select(t => FindOperation(t, operationKey))
+                .OfType<IEntityOperation>()
+                .Select(a => a.Lite)
+                .FirstOrDefault();
         }
-
 
         static IEnumerable<IOperation> TypeOperations(Type type)
         {
@@ -515,9 +541,12 @@ namespace Signum.Engine.Operations
             return OperationMessage.ImpossibleToExecute0FromState1.NiceToString().Formato(operationKey.NiceToString(), ((Enum)(object)state).NiceToString());
         }
 
-        public static Type[] FindTypes(Enum operation)
+        public static List<Type> FindTypes(Enum operation)
         {
-            return TypeLogic.DnToType.Values.Where(t => operations.TryGetValue(t).TryGetC(operation) != null).ToArray();
+            return operationsFromKey.Value
+                .TryGetC(operation)
+                .EmptyIfNull()
+                .ToList();
         }
 
         internal static IEnumerable<Graph<E, S>.IGraphOperation> GraphOperations<E, S>()
