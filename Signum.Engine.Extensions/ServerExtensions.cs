@@ -240,10 +240,10 @@ namespace Signum.Services
                () => QueryAuthLogic.SetQueryRules(rules));
         }
 
-        public DefaultDictionary<object, bool> QueriesRules()
+        public HashSet<object> AllowedQueries()
         {
             return Return(MethodInfo.GetCurrentMethod(),
-            () => QueryAuthLogic.QueryRules());
+            () => DynamicQueryManager.Current.GetAllowedQueryNames().ToHashSet());
         }
 
         #endregion

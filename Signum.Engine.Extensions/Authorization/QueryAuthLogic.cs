@@ -38,7 +38,8 @@ namespace Signum.Engine.Authorization
                     qn => QueryLogic.ToQueryName(qn.Key),
                     QueryLogic.RetrieveOrGenerateQuery,
                     AuthUtils.MaxBool,
-                    AuthUtils.MinBool);
+                    AuthUtils.MinBool,
+                    coercer: new QueryCoercer());
 
                 AuthLogic.SuggestRuleChanges += SuggestQueryRules;
                 AuthLogic.ExportToXml += () => cache.ExportXml("Queries", "Query", p => p.Key, b => b.ToString());
@@ -175,6 +176,41 @@ namespace Signum.Engine.Authorization
         public static AuthThumbnail? GetAllowedThumbnail(Lite<RoleDN> role, Type entityType)
         {
             return DynamicQueryManager.Current.GetQueries(entityType).Keys.Select(qn => cache.GetAllowed(role, qn)).Collapse(); 
+        }
+    }
+
+    public class QueryCoercer : Coercer<bool, object>
+    {
+        public override Func<object, bool, bool> GetCoerceValue(Lite<RoleDN> role)
+        {
+            return (queryName, allowed) =>
+            {
+                if (!allowed)
+                    return allowed;
+
+                var implementations = DynamicQueryManager.Current.GetEntityImplementations(queryName);
+
+                if (implementations.IsByAll)
+                    return allowed;
+
+                return implementations.Types.All(t => TypeAuthLogic.GetAllowed(role, t).MaxUI() != TypeAllowedBasic.None);
+            };
+        }
+
+        public override Func<Lite<RoleDN>, bool, bool> GetCoerceValueManual(object queryName)
+        {
+            return (role, allowed) =>
+            {
+                if (!allowed)
+                    return false;
+
+                var implementations = DynamicQueryManager.Current.GetEntityImplementations(queryName);
+
+                if (implementations.IsByAll)
+                    return allowed;
+
+                return implementations.Types.All(t => TypeAuthLogic.Manual.GetAllowed(role, t).MaxUI() != TypeAllowedBasic.None);
+            };
         }
     }
 }

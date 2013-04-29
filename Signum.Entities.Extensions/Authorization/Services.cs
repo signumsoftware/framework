@@ -100,7 +100,7 @@ namespace Signum.Services
         void SetQueryRules(QueryRulePack rules);
 
         [OperationContract, NetDataContract]
-        DefaultDictionary<object, bool> QueriesRules();
+        HashSet<object> AllowedQueries();
     }
 
     [ServiceContract]
