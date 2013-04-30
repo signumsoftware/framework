@@ -217,6 +217,14 @@ namespace Signum.Entities.Authorization
 
             return "{0},{1}".Formato(db, ui); 
         }
+
+        public static PropertyAllowed ToPropertyAllowed(this TypeAllowedBasic ta)
+        {
+            PropertyAllowed pa =
+                ta == TypeAllowedBasic.None ? PropertyAllowed.None :
+                ta == TypeAllowedBasic.Read ? PropertyAllowed.Read : PropertyAllowed.Modify;
+            return pa;
+        }
     }
 
     [DescriptionOptions(DescriptionOptions.Members)]

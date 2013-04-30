@@ -85,7 +85,9 @@ namespace Signum.Windows.UIAutomation
             PropertyRoute route = property.Body.NodeType != ExpressionType.Convert ? container.GetRoute(property) :
                  container.GetRoute(Expression.Lambda<Func<T, IIdentifiable>>(((UnaryExpression)property.Body).Operand, property.Parameters));
 
-            var subContainer = container.Element.Element(scope,  a => a.Current.Name == route.ToString());
+            string str = route.PropertyRouteType == PropertyRouteType.LiteEntity ? route.Parent.ToString() : route.ToString();
+
+            var subContainer = container.Element.Element(scope, a => a.Current.Name == str);
 
             return new LineContainer<C> { Element = subContainer, PreviousRoute = typeof(C).IsEmbeddedEntity() ? route : null };
         }

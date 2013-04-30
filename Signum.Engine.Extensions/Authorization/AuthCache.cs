@@ -42,6 +42,14 @@ namespace Signum.Entities.Authorization
         void SetAllowed(Lite<RoleDN> role, K key, A allowed);
     }
 
+    public class Coercer<A, K>
+    {
+        public static readonly Coercer<A, K> Default = new Coercer<A, K>();
+
+        public virtual Func<Lite<RoleDN>, A, A> GetCoerceValueManual(K key) { return (role, allowed) => allowed; }
+        public virtual Func<K, A, A> GetCoerceValue(Lite<RoleDN> role) { return (key, allowed) => allowed; } 
+    }
+
     class AuthCache<RT, AR, R, K, A>: IManualAuth<K, A> 
         where RT : RuleDN<R, A>, new()
         where AR : AllowedRule<R, A>, new()
@@ -53,13 +61,15 @@ namespace Signum.Entities.Authorization
         Func<K, R> ToEntity;
         DefaultBehaviour<A> Min;
         DefaultBehaviour<A> Max;
+        Coercer<A, K> coercer;
 
-        public AuthCache(SchemaBuilder sb, Func<R, K> toKey, Func<K, R> toEntity, DefaultBehaviour<A> max, DefaultBehaviour<A> min)
+        public AuthCache(SchemaBuilder sb, Func<R, K> toKey, Func<K, R> toEntity, DefaultBehaviour<A> max, DefaultBehaviour<A> min, Coercer<A, K> coercer = null)
         {
             this.ToKey = toKey;
             this.ToEntity = toEntity;
             this.Max = max;
             this.Min = min;
+            this.coercer = coercer ?? Coercer<A, K>.Default; 
 
             sb.Include<RT>();
 
@@ -80,8 +90,6 @@ namespace Signum.Entities.Authorization
 
             return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".Formato(t.Name, f.Name.SqlScape(), param.ParameterName), new List<DbParameter> { param });
         }
-
-
 
         DefaultRule IManualAuth<K, A>.GetDefaultRule(Lite<RoleDN> role)
         {
@@ -117,7 +125,7 @@ namespace Signum.Entities.Authorization
         {
             R resource = ToEntity(key);
 
-            ManualResourceCache miniCache = new ManualResourceCache(resource, Min, Max);
+            ManualResourceCache miniCache = new ManualResourceCache(resource, Min, Max, coercer.GetCoerceValueManual(key));
 
             return miniCache.GetAllowed(role);
         }
@@ -126,7 +134,11 @@ namespace Signum.Entities.Authorization
         {
             R resource = ToEntity(key);
 
-            ManualResourceCache miniCache = new ManualResourceCache(resource, Min, Max); 
+            var keyCoercer = coercer.GetCoerceValueManual(key);
+
+            ManualResourceCache miniCache = new ManualResourceCache(resource, Min, Max, keyCoercer); 
+
+            allowed = keyCoercer(role, allowed);
 
             if (miniCache.GetAllowed(role).Equals(allowed))
                 return;
@@ -157,7 +169,9 @@ namespace Signum.Entities.Authorization
             readonly DefaultBehaviour<A> Min;
             readonly DefaultBehaviour<A> Max;
 
-            public ManualResourceCache(R resource, DefaultBehaviour<A> min, DefaultBehaviour<A> max)
+            readonly Func<Lite<RoleDN>, A, A> coercer; 
+
+            public ManualResourceCache(R resource, DefaultBehaviour<A> min, DefaultBehaviour<A> max, Func<Lite<RoleDN>, A, A> coercer)
             {
                 var list = (from r in Database.Query<RT>()
                             where r.Resource == resource || r.Resource == null
@@ -166,6 +180,7 @@ namespace Signum.Entities.Authorization
                 defaultRules = list.Where(a => a.Default).ToDictionary(a => a.Role, a => a.Allowed);
                 specificRules = list.Where(a => !a.Default).ToDictionary(a => a.Role, a => a.Allowed);
 
+                this.coercer = coercer;
                 this.Min = min;
                 this.Max = max;
             }
@@ -174,7 +189,7 @@ namespace Signum.Entities.Authorization
             {
                 A result;
                 if (specificRules.TryGetValue(role, out result))
-                    return result;
+                    return coercer(role, result);
 
                 return GetAllowedBase(role);
             }
@@ -188,10 +203,10 @@ namespace Signum.Entities.Authorization
             {
                 var behaviour = GetBehaviour(role);
                 var related = AuthLogic.RelatedTo(role);
-                if (related.IsEmpty())
-                    return behaviour.BaseAllowed;
-                else
-                    return behaviour.MergeAllowed(related.Select(r => GetAllowed(r)));
+
+                var result = related.IsEmpty() ? behaviour.BaseAllowed : behaviour.MergeAllowed(related.Select(r => GetAllowed(r)));
+
+                return coercer(role, result);
             }
         }
 
@@ -216,7 +231,10 @@ namespace Signum.Entities.Authorization
 
                 var behaviour = defaultBehaviours.TryGet(role, Max.BaseAllowed).Equals(Max.BaseAllowed) ? Max : Min;
 
-                newRules.Add(role, new RoleAllowedCache(behaviour, related.Select(r => newRules[r]).ToList(), realRules.TryGetC(role)));
+                newRules.Add(role, new RoleAllowedCache(behaviour,
+                    related.Select(r => newRules[r]).ToList(),
+                    realRules.TryGetC(role),
+                    coercer.GetCoerceValue(role)));
             }
 
             return newRules;
@@ -284,21 +302,23 @@ namespace Signum.Entities.Authorization
             readonly DefaultBehaviour<A> behaviour;
             readonly DefaultDictionary<K, A> rules; 
             readonly List<RoleAllowedCache> baseCaches;
+            readonly Func<K, A, A> coercer; 
 
-            public RoleAllowedCache(DefaultBehaviour<A> behaviour, List<RoleAllowedCache> baseCaches, Dictionary<K, A> newValues)
+            public RoleAllowedCache(DefaultBehaviour<A> behaviour, List<RoleAllowedCache> baseCaches, Dictionary<K, A> newValues, Func<K, A, A> coercer)
             {
                 this.behaviour = behaviour;
+                this.coercer = coercer;
 
                 this.baseCaches = baseCaches;
 
                 A defaultAllowed;
-                Dictionary<K, A> tmpRules; 
+                Dictionary<K, A> tmpRules;
 
-                if(baseCaches.IsEmpty())
+                if (baseCaches.IsEmpty())
                 {
                     defaultAllowed = behaviour.BaseAllowed;
 
-                    tmpRules = newValues; 
+                    tmpRules = newValues;
                 }
                 else
                 {
@@ -306,16 +326,9 @@ namespace Signum.Entities.Authorization
 
                     var keys = baseCaches.Where(b => b.rules.DefaultAllowed.Equals(defaultAllowed) && b.rules != null).SelectMany(a => a.rules.ExplicitKeys).ToHashSet();
 
-                    if (keys != null)
-                    {
-                        tmpRules = keys.ToDictionary(k => k, k => behaviour.MergeAllowed(baseCaches.Select(b => b.GetAllowed(k))));
-                        if (newValues != null)
-                            tmpRules.SetRange(newValues);
-                    }
-                    else
-                    {
-                        tmpRules = newValues; 
-                    }
+                    tmpRules = keys.ToDictionary(k => k, k => behaviour.MergeAllowed(baseCaches.Select(b => b.GetAllowed(k))));
+                    if (newValues != null)
+                        tmpRules.SetRange(newValues);
                 }
 
                 tmpRules = Simplify(tmpRules, defaultAllowed);
@@ -323,12 +336,12 @@ namespace Signum.Entities.Authorization
                 rules = new DefaultDictionary<K, A>(defaultAllowed, tmpRules);
             }
 
-            internal static Dictionary<K, A> Simplify(Dictionary<K, A> dictionary, A defaultAllowed)
+            internal Dictionary<K, A> Simplify(Dictionary<K, A> dictionary, A defaultAllowed)
             {
                 if (dictionary == null || dictionary.Count == 0)
                     return null;
 
-                dictionary.RemoveRange(dictionary.Where(p => p.Value.Equals(defaultAllowed)).Select(p => p.Key).ToList());
+                dictionary.RemoveRange(dictionary.Where(p => coercer(p.Key, p.Value).Equals(coercer(p.Key, defaultAllowed))).Select(p => p.Key).ToList());
 
                 if (dictionary.Count == 0)
                     return null;
@@ -338,13 +351,17 @@ namespace Signum.Entities.Authorization
 
             public A GetAllowed(K k)
             {
-                return rules.GetAllowed(k);
+                var raw = rules.GetAllowed(k);
+
+                return coercer(k, raw);
             }
 
             public A GetAllowedBase(K k)
             {
-                return baseCaches.IsEmpty() ? rules.DefaultAllowed :
-                       behaviour.MergeAllowed(baseCaches.Select(b => b.GetAllowed(k)));
+                var raw = baseCaches.IsEmpty() ? rules.DefaultAllowed :
+                        behaviour.MergeAllowed(baseCaches.Select(b => b.GetAllowed(k)));
+
+                return coercer(k, raw);
             }
 
             public DefaultRule GetDefaultRule(DefaultBehaviour<A> max)

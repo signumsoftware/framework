@@ -38,7 +38,8 @@ namespace Signum.Engine.Authorization
                      MultiEnumLogic<OperationDN>.ToEnum,
                      MultiEnumLogic<OperationDN>.ToEntity,
                      AuthUtils.MaxOperation,
-                     AuthUtils.MinOperation);
+                     AuthUtils.MinOperation,
+                     coercer:  new OperationCoercer());
 
                 AuthLogic.SuggestRuleChanges += SuggestOperationRules;
                 AuthLogic.ExportToXml += () => cache.ExportXml("Operations", "Operation", p => p.Key, b => b.ToString());
@@ -183,9 +184,9 @@ namespace Signum.Engine.Authorization
             return OperationLogic.GetAllOperationInfos(entityType).Select(oi => cache.GetAllowed(role, oi.Key)).Collapse();
         }
 
-        public static DefaultDictionary<Enum, OperationAllowed> OperationRules()
+        public static Dictionary<Enum, OperationAllowed> AllowedOperations()
         {
-            return cache.GetDefaultDictionary();
+            return OperationLogic.AllKeys().ToDictionary(k => k, k => cache.GetAllowed(RoleDN.Current.ToLite(), k));
         }
 
         static readonly Variable<ImmutableStack<Enum>> tempAllowed = Statics.ThreadVariable<ImmutableStack<Enum>>("authTempOperationsAllowed");
@@ -204,6 +205,60 @@ namespace Signum.Engine.Authorization
                 return false;
 
             return ta.Contains(operationKey);
+        }
+    }
+
+    public class OperationCoercer : Coercer<OperationAllowed, Enum>
+    {
+        public override Func<Enum, OperationAllowed, OperationAllowed> GetCoerceValue(Lite<RoleDN> role)
+        {
+            return (operationKey, allowed) =>
+            {
+                var required = OperationLogic.FindTypes(operationKey).Max(t =>
+                {
+                    if (!TypeLogic.TypeToDN.ContainsKey(t))
+                        return OperationAllowed.Allow;
+
+                    var typeAllowed = TypeAuthLogic.GetAllowed(role, t);
+
+                    var minimum = IsSaveLike(t, operationKey) ? TypeAllowedBasic.Modify : TypeAllowedBasic.None;
+
+                    return minimum <= typeAllowed.MaxUI() ? OperationAllowed.Allow:
+                        minimum <= typeAllowed.MaxDB() ? OperationAllowed.DBOnly :  
+                        OperationAllowed.None;
+                });
+
+                return allowed < required ? allowed : required;
+            };
+        }
+
+        private bool IsSaveLike(Type t, Enum operationKey)
+        {
+            var oi = OperationLogic.GetOperationInfo(t, operationKey);
+
+            return oi.OperationType == OperationType.Execute && oi.Lite == false;
+        }
+
+        public override Func<Lite<RoleDN>, OperationAllowed, OperationAllowed> GetCoerceValueManual(Enum operationKey)
+        {
+            return (role, allowed) =>
+            {
+                var required = OperationLogic.FindTypes(operationKey).Max(t =>
+                {
+                    if (!TypeLogic.TypeToDN.ContainsKey(t))
+                        return OperationAllowed.Allow;
+
+                    var typeAllowed = TypeAuthLogic.Manual.GetAllowed(role, t);
+
+                    var minimum = IsSaveLike(t, operationKey) ? TypeAllowedBasic.Modify : TypeAllowedBasic.None;
+
+                    return minimum <= typeAllowed.MaxUI() ? OperationAllowed.Allow :
+                        minimum <= typeAllowed.MaxDB() ? OperationAllowed.DBOnly :
+                        OperationAllowed.None;
+                });
+
+                return allowed < required ? allowed : required;
+            };
         }
     }
 }

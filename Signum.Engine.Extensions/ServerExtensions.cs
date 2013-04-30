@@ -240,10 +240,10 @@ namespace Signum.Services
                () => QueryAuthLogic.SetQueryRules(rules));
         }
 
-        public DefaultDictionary<object, bool> QueriesRules()
+        public HashSet<object> AllowedQueries()
         {
             return Return(MethodInfo.GetCurrentMethod(),
-            () => QueryAuthLogic.QueryRules());
+            () => DynamicQueryManager.Current.GetAllowedQueryNames().ToHashSet());
         }
 
         #endregion
@@ -283,10 +283,10 @@ namespace Signum.Services
                () => OperationAuthLogic.SetOperationRules(rules));
         }
 
-        public DefaultDictionary<Enum, OperationAllowed> OperationRules()
+        public Dictionary<Enum, OperationAllowed> AllowedOperations()
         {
             return Return(MethodInfo.GetCurrentMethod(),
-            () => OperationAuthLogic.OperationRules());
+            () => OperationAuthLogic.AllowedOperations());
         }
         #endregion
 

@@ -7,12 +7,13 @@ using Signum.Services;
 using System.Windows.Markup;
 using System.Windows;
 using Signum.Windows.Operations;
+using Signum.Utilities;
 
 namespace Signum.Windows.Authorization
 {
     public static class OperationAuthClient
     {
-        static DefaultDictionary<Enum, OperationAllowed> authorizedOperations;
+        static Dictionary<Enum, OperationAllowed> authorizedOperations;
 
         public static bool Started { get; private set; }
 
@@ -25,12 +26,12 @@ namespace Signum.Windows.Authorization
 
         static void AuthClient_UpdateCacheEvent()
         {
-            authorizedOperations = Server.Return((IOperationAuthServer s) => s.OperationRules());
+            authorizedOperations = Server.Return((IOperationAuthServer s) => s.AllowedOperations());
         }
 
         public static bool GetAllowed(Enum operationKey, bool inUserInterface)
         {
-            var allowed = authorizedOperations.GetAllowed(operationKey);
+            var allowed = authorizedOperations.GetOrThrow(operationKey);
 
             return allowed == OperationAllowed.Allow || allowed == OperationAllowed.DBOnly && !inUserInterface;
         }
