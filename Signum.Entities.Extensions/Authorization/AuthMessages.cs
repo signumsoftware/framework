@@ -193,4 +193,12 @@ namespace Signum.Entities.Authorization
         User0IsDisabled,
     }
 
+    public enum AuthAdminMessage
+    {
+        [Description("{0} of {1}")]
+        _0of1,
+        Nothing,
+        Everything,
+    }
+
 }

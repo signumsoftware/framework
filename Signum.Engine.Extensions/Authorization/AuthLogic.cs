@@ -30,7 +30,6 @@ namespace Signum.Engine.Authorization
         public static event Action<UserDN> UserLogingIn;
         public static event Func<string> LoginMessage;
 
-
         public static string SystemUserName { get; private set; }
         static ResetLazy<UserDN> systemUserLazy = GlobalLazy.WithoutInvalidations(() => SystemUserName == null ? null :
             Database.Query<UserDN>().Where(u => u.UserName == SystemUserName)
@@ -50,6 +49,8 @@ namespace Signum.Engine.Authorization
         }
 
         static ResetLazy<DirectedGraph<Lite<RoleDN>>> roles;
+        static ResetLazy<Dictionary<Lite<RoleDN>, MergeStrategy>> mergeStrategies;
+
         public static void AssertStarted(SchemaBuilder sb)
         {
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => AuthLogic.Start(null, null, null, null)));
@@ -66,6 +67,9 @@ namespace Signum.Engine.Authorization
                 sb.Include<RoleDN>();
 
                 roles = sb.GlobalLazy(CacheRoles, new InvalidateWith(typeof(RoleDN)));
+                mergeStrategies = sb.GlobalLazy(() =>
+                    Database.Query<RoleDN>().Select(r => KVP.Create(r.ToLite(), r.MergeStrategy)).ToDictionary(),
+                    new InvalidateWith(typeof(RoleDN)));
 
                 sb.Schema.EntityEvents<RoleDN>().Saving += Schema_Saving;
 
@@ -211,21 +215,14 @@ namespace Signum.Engine.Authorization
             return roles.Value;
         }
 
-
-        public static int Compare(Lite<RoleDN> role1, Lite<RoleDN> role2)
-        {
-            if (roles.Value.IndirectlyRelatedTo(role1).Contains(role2))
-                return 1;
-
-            if (roles.Value.IndirectlyRelatedTo(role2).Contains(role1))
-                return -1;
-
-            return 0;
-        }
-
         public static IEnumerable<Lite<RoleDN>> RelatedTo(Lite<RoleDN> role)
         {
             return roles.Value.RelatedTo(role);
+        }
+
+        public static MergeStrategy GetMergeStrategy(Lite<RoleDN> role)
+        {
+            return mergeStrategies.Value.GetOrThrow(role);
         }
 
         static bool gloaballyEnabled = true;
@@ -361,6 +358,7 @@ namespace Signum.Engine.Authorization
                     new XElement("Roles",
                         RolesInOrder().Select(r => new XElement("Role",
                             new XAttribute("Name", r.ToString()),
+                            GetMergeStrategy(r) == MergeStrategy.Intersection? new XAttribute("MergeStrategy", MergeStrategy.Intersection) : null,
                             new XAttribute("Contains", roles.Value.RelatedTo(r).ToString(","))))),
                      ExportToXml == null ? null : ExportToXml.GetInvocationList().Cast<Func<XElement>>().Select(a => a()).NotNull().OrderBy(a => a.Name.ToString())));
         }
@@ -385,6 +383,12 @@ namespace Signum.Engine.Authorization
                 foreach (var kvp in rolesXml)
                 {
                     var r = rolesDic[kvp.Key];
+
+                    var current = GetMergeStrategy(r);
+                    var should = kvp.Value.Attribute("MergeStrategy").TryCS(t => t.Value.ToEnum<MergeStrategy>()) ?? MergeStrategy.Union;
+
+                    if (current != should)
+                        throw new InvalidOperationException("Merge strategy of {0} is {1} in the database but is {2} in the file".Formato(r, current, should));
 
                     EnumerableExtensions.JoinStrict(
                         roles.Value.RelatedTo(r),
@@ -466,6 +470,7 @@ namespace Signum.Engine.Authorization
                     {
                         var oldName = role.Name;
                         role.Name = name;
+                        role.MergeStrategy = xElement.Attribute("MergeStrategy").TryCS(t => t.Value.ToEnum<MergeStrategy>()) ?? MergeStrategy.Union;
                         return table.UpdateSqlSync(role, includeCollections: false, comment: oldName);
                     }, Spacing.Double);
 
@@ -618,6 +623,8 @@ namespace Signum.Engine.Authorization
         {
             return UserDN.Current != null && !UserDN.Current.Is(AnonymousUser);
         }
+
+       
     }
 
     [Serializable]

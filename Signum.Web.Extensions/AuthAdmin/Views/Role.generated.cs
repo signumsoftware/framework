@@ -81,13 +81,27 @@ Write(Html.ValueLine(e, f => f.Name));
             #line hidden
             
             #line 6 "..\..\AuthAdmin\Views\Role.cshtml"
-Write(Html.EntityList(e, f => f.Roles));
+Write(Html.ValueLine(e, f => f.MergeStrategy, vl=>vl.UnitText = e.Value.StrategyHint));
 
             
             #line default
             #line hidden
             
             #line 6 "..\..\AuthAdmin\Views\Role.cshtml"
+                                                                                    
+    
+            
+            #line default
+            #line hidden
+            
+            #line 7 "..\..\AuthAdmin\Views\Role.cshtml"
+Write(Html.EntityList(e, f => f.Roles));
+
+            
+            #line default
+            #line hidden
+            
+            #line 7 "..\..\AuthAdmin\Views\Role.cshtml"
                                      
 }
             

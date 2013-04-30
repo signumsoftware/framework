@@ -77,14 +77,14 @@ Write(Html.EntityLine(tc, f => f.Role));
             #line hidden
             
             #line 5 "..\..\AuthAdmin\Views\Queries.cshtml"
-Write(Html.ValueLine(tc, f => f.DefaultRule, vl => { vl.UnitText = tc.Value.DefaultLabel; }));
+Write(Html.ValueLine(tc, f => f.Strategy));
 
             
             #line default
             #line hidden
             
             #line 5 "..\..\AuthAdmin\Views\Queries.cshtml"
-                                                                                           
+                                        
     
             
             #line default

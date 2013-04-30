@@ -32,8 +32,7 @@ namespace Signum.Engine.Authorization
                 cache = new AuthCache<RuleFacadeMethodDN, FacadeMethodAllowedRule, FacadeMethodDN, string, bool>(sb,
                      fm => fm.ToString(),
                      n => FacadeMethodLogic.RetrieveOrGenerateFacadeMethod(n),
-                     AuthUtils.MaxBool,
-                     AuthUtils.MinBool);
+                     merger: new FacadeMethodMerger());
 
 
                 AuthLogic.ExportToXml += () => cache.ExportXml("FacadeMethods", "FacadeMethod", fm => fm.ToString(), b => b.ToString());
@@ -98,6 +97,19 @@ namespace Signum.Engine.Authorization
         public static DefaultDictionary<string, bool> FacadeMethodRules()
         {
             return cache.GetDefaultDictionary();
+        }
+    }
+
+    class FacadeMethodMerger : Merger<string, bool>
+    {
+        protected override bool Union(string key, Lite<RoleDN> role, IEnumerable<bool> baseValues)
+        {
+            return baseValues.Any(a => a);
+        }
+
+        protected override bool Intersection(string key, Lite<RoleDN> role, IEnumerable<bool> baseValues)
+        {
+            return baseValues.All(a => a);
         }
     }
 }

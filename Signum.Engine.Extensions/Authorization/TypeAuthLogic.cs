@@ -48,9 +48,7 @@ namespace Signum.Engine.Authorization
                     }
                 };
 
-                cache = new TypeAuthCache(sb,
-                    AuthUtils.MaxType,
-                    AuthUtils.MinType);
+                cache = new TypeAuthCache(sb, merger: new TypeAllowedMerger());
 
                 AuthLogic.ExportToXml += () => cache.ExportXml();
                 AuthLogic.ImportFromXml += (x, roles, replacements) => cache.ImportXml(x, roles, replacements);
@@ -195,10 +193,10 @@ namespace Signum.Engine.Authorization
         public static TypeAllowedAndConditions GetAllowed(Type type)
         {
             if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
-                return AuthUtils.MaxType.BaseAllowed;
+                return new TypeAllowedAndConditions(TypeAllowed.Create);
 
             if (!TypeLogic.TypeToDN.ContainsKey(type))
-                return AuthUtils.MaxType.BaseAllowed;
+                return new TypeAllowedAndConditions(TypeAllowed.Create);
 
             if (EnumEntity.Extract(type) != null)
                 return new TypeAllowedAndConditions(TypeAllowed.Read);
@@ -245,6 +243,77 @@ namespace Signum.Engine.Authorization
         }
     }
 
+    class TypeAllowedMerger : Merger<Type, TypeAllowedAndConditions>
+    {
+        protected override TypeAllowedAndConditions Union(Type key, Lite<RoleDN> role, IEnumerable<TypeAllowedAndConditions> baseValues)
+        {
+            return MergeBase(baseValues, MaxTypeAllowed, TypeAllowed.Create, TypeAllowed.None);
+        }
+
+        static TypeAllowed MaxTypeAllowed(IEnumerable<TypeAllowed> collection)
+        {
+            TypeAllowed result = TypeAllowed.None;
+
+            foreach (var item in collection)
+            {
+                if (item > result)
+                    result = item;
+
+                if (result == TypeAllowed.Create)
+                    return result;
+
+            }
+            return result;
+        }
+
+        protected override TypeAllowedAndConditions Intersection(Type key, Lite<RoleDN> role, IEnumerable<TypeAllowedAndConditions> baseValues)
+        {
+            return MergeBase(baseValues, MinTypeAllowed, TypeAllowed.None, TypeAllowed.Create);
+        }
+
+        static TypeAllowed MinTypeAllowed(IEnumerable<TypeAllowed> collection)
+        {
+            TypeAllowed result = TypeAllowed.Create;
+
+            foreach (var item in collection)
+            {
+                if (item < result)
+                    result = item;
+
+                if (result == TypeAllowed.None)
+                    return result;
+
+            }
+            return result;
+        }
+
+        public static TypeAllowedAndConditions MergeBase(IEnumerable<TypeAllowedAndConditions> baseRules, Func<IEnumerable<TypeAllowed>, TypeAllowed> maxMerge, TypeAllowed max, TypeAllowed min)
+        {
+            TypeAllowedAndConditions only = baseRules.Only();
+            if (only != null)
+                return only;
+
+            if (baseRules.Any(a => a.Exactly(max)))
+                return new TypeAllowedAndConditions(max);
+
+            TypeAllowedAndConditions onlyNotOposite = baseRules.Where(a => !a.Exactly(min)).Only();
+            if (onlyNotOposite != null)
+                return onlyNotOposite;
+
+            var first = baseRules.FirstOrDefault(c => !c.Conditions.IsNullOrEmpty());
+
+            if (first == null)
+                return new TypeAllowedAndConditions(maxMerge(baseRules.Select(a => a.Fallback)));
+
+            var conditions = first.Conditions.Select(c => c.ConditionName).ToList();
+
+            if (baseRules.Where(c => !c.Conditions.IsNullOrEmpty() && c != first).Any(br => !br.Conditions.Select(c => c.ConditionName).SequenceEqual(conditions)))
+                return new TypeAllowedAndConditions(TypeAllowed.None);
+
+            return new TypeAllowedAndConditions(maxMerge(baseRules.Select(a => a.Fallback)),
+                conditions.Select((c, i) => new TypeConditionRule(c, maxMerge(baseRules.Where(br => !br.Conditions.IsNullOrEmpty()).Select(br => br.Conditions[i].Allowed)))).ToArray());
+        }
+    }
 
     public static class AuthThumbnailExtensions
     {

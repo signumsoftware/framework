@@ -24,10 +24,7 @@
     <DockPanel>
         <m:ButtonBar DockPanel.Dock="Top" SaveClick="btSave_Click" SaveVisible="True" ReloadClick="btReload_Click" ReloadVisible="True"/>
         <m:EntityLine m:Common.Route="Role" m:Common.IsReadOnly="True" DockPanel.Dock="Top"/>
-        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
-            <m:ValueLine m:Common.Route="DefaultRule" />
-            <TextBlock Text="{Binding DefaultLabel}" VerticalAlignment="Center" Margin="5"/>
-        </StackPanel>
+        <m:ValueLine m:Common.Route="Strategy" DockPanel.Dock="Top" />
         <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
             <Label Content="Find Type"/>
             <TextBox x:Name="tbType" VerticalAlignment="Center" Margin="5,0,5,0" KeyUp="tbType_KeyUp"  KeyDown="tbType_KeyDown" MinWidth="200"/>

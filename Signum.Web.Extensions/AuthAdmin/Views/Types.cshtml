@@ -23,7 +23,7 @@
 @using (var tc = Html.TypeContext<TypeRulePack>())
 {
     @Html.EntityLine(tc, f => f.Role)
-    @Html.ValueLine(tc, f => f.DefaultRule, vl => { vl.UnitText = tc.Value.DefaultLabel; })
+    @Html.ValueLine(tc, f => f.Strategy)
 
     <table class="sf-auth-rules">
         <thead>

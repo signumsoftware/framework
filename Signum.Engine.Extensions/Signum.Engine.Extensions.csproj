@@ -97,7 +97,6 @@
     <Compile Include="Authorization\PasswordExpiresLogic.cs" />
     <Compile Include="Authorization\ResetPasswordRequestLogic.cs" />
     <Compile Include="Authorization\UserTicketLogic.cs" />
-    <Compile Include="Authorization\AuthUtils.cs" />
     <Compile Include="Authorization\AuthLogic.cs" />
     <Compile Include="Authorization\TypeAuthLogic.Conditions.cs" />
     <Compile Include="Authorization\PropertyAuthLogic.cs" />

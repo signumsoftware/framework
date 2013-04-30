@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Utilities;
 using System.Security.Authentication;
 using System.Linq.Expressions;
+using System.Collections.Specialized;
 
 namespace Signum.Entities.Authorization
 {
@@ -20,12 +21,39 @@ namespace Signum.Entities.Authorization
             set { SetToStr(ref name, value, () => Name); }
         }
 
-        [NotNullable]
+        MergeStrategy mergeStrategy;
+        public MergeStrategy MergeStrategy
+        {
+            get { return mergeStrategy; }
+            set
+            {
+                if (Set(ref mergeStrategy, value, () => MergeStrategy))
+                    Notify(() => StrategyHint);
+            }
+        }
+    
+        [NotNullable, NotifyCollectionChanged]
         MList<Lite<RoleDN>> roles = new MList<Lite<RoleDN>>();
         public MList<Lite<RoleDN>> Roles
         {
             get { return roles; }
             set { Set(ref roles, value, () => Roles); }
+        }
+
+        protected override void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
+        {
+            Notify(() => StrategyHint); 
+        }
+
+        public string StrategyHint
+        {
+            get
+            {
+                if (roles.Any())
+                    return null;
+
+                return ("(-> " + (mergeStrategy == MergeStrategy.Union ? AuthAdminMessage.Nothing : AuthAdminMessage.Everything).NiceToString() + ")");
+            }
         }
 
         static readonly Expression<Func<RoleDN, string>> ToStringExpression = e => e.name;
@@ -45,6 +73,12 @@ namespace Signum.Entities.Authorization
                return user.Role;
             }
         }
+    }
+
+    public enum MergeStrategy
+    {
+        Union,
+        Intersection,
     }
 
     public enum RoleQuery

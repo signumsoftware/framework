@@ -33,8 +33,7 @@ namespace Signum.Engine.Authorization
                 cache = new AuthCache<RulePropertyDN, PropertyAllowedRule, PropertyRouteDN, PropertyRoute, PropertyAllowed>(sb,
                     PropertyRouteLogic.GetPropertyRoute,
                     PropertyRouteLogic.GetEntity,
-                    AuthUtils.MaxProperty,
-                    AuthUtils.MinProperty,
+                    merger: new PropertyMergerMax(),
                     coercer: new PropertyCoercer());
 
                 if (queries)
@@ -167,7 +166,42 @@ namespace Signum.Engine.Authorization
         }
     }
 
-    public class PropertyCoercer : Coercer<PropertyAllowed, PropertyRoute>
+    class PropertyMergerMax : Merger<PropertyRoute, PropertyAllowed>
+    {
+        protected override PropertyAllowed Union(PropertyRoute key, Lite<RoleDN> role, IEnumerable<PropertyAllowed> baseValues)
+        {
+            PropertyAllowed result = PropertyAllowed.None;
+
+            foreach (var item in baseValues)
+            {
+                if (item > result)
+                    result = item;
+
+                if (result == PropertyAllowed.Modify)
+                    return result;
+
+            }
+            return result;
+        }
+
+        protected override PropertyAllowed Intersection(PropertyRoute key, Lite<RoleDN> role, IEnumerable<PropertyAllowed> baseValues)
+        {
+            PropertyAllowed result = PropertyAllowed.Modify;
+
+            foreach (var item in baseValues)
+            {
+                if (item < result)
+                    result = item;
+
+                if (result == PropertyAllowed.None)
+                    return result;
+
+            }
+            return result;
+        }
+    }
+
+    class PropertyCoercer : Coercer<PropertyAllowed, PropertyRoute>
     {
         public override Func<PropertyRoute, PropertyAllowed, PropertyAllowed> GetCoerceValue(Lite<RoleDN> role)
         {

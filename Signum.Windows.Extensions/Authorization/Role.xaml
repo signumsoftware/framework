@@ -5,7 +5,8 @@
     xmlns:d="clr-namespace:Signum.Entities.Authorization;assembly=Signum.Entities.Extensions"
     m:Common.TypeContext="{x:Type d:RoleDN}" MinWidth="300">
     <StackPanel >
-        <m:ValueLine LabelText="_Name" m:Common.Route="Name"/>
+        <m:ValueLine m:Common.Route="Name"/>
+        <m:ValueLine m:Common.Route="MergeStrategy" UnitText="{Binding StrategyHint}"/>
         <GroupBox Header="Sub-Roles">
             <m:EntityList m:Common.Route="Roles" Height="100"/>
         </GroupBox>

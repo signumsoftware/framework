@@ -37,8 +37,7 @@ namespace Signum.Engine.Authorization
                 cache = new AuthCache<RuleOperationDN, OperationAllowedRule, OperationDN, Enum, OperationAllowed>(sb,
                      MultiEnumLogic<OperationDN>.ToEnum,
                      MultiEnumLogic<OperationDN>.ToEntity,
-                     AuthUtils.MaxOperation,
-                     AuthUtils.MinOperation,
+                     merger: new OperationMerger(),
                      coercer:  new OperationCoercer());
 
                 AuthLogic.SuggestRuleChanges += SuggestOperationRules;
@@ -208,7 +207,42 @@ namespace Signum.Engine.Authorization
         }
     }
 
-    public class OperationCoercer : Coercer<OperationAllowed, Enum>
+    class OperationMerger : Merger<Enum, OperationAllowed>
+    {
+        protected override OperationAllowed Union(Enum key, Lite<RoleDN> role, IEnumerable<OperationAllowed> baseValues)
+        {
+            OperationAllowed result = OperationAllowed.None;
+
+            foreach (var item in baseValues)
+            {
+                if (item > result)
+                    result = item;
+
+                if (result == OperationAllowed.Allow)
+                    return result;
+
+            }
+            return result;
+        }
+
+        protected override OperationAllowed Intersection(Enum key, Lite<RoleDN> role, IEnumerable<OperationAllowed> baseValues)
+        {
+            OperationAllowed result = OperationAllowed.Allow;
+
+            foreach (var item in baseValues)
+            {
+                if (item < result)
+                    result = item;
+
+                if (result == OperationAllowed.None)
+                    return result;
+
+            }
+            return result;
+        }
+    }
+
+    class OperationCoercer : Coercer<OperationAllowed, Enum>
     {
         public override Func<Enum, OperationAllowed, OperationAllowed> GetCoerceValue(Lite<RoleDN> role)
         {

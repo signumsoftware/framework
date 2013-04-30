@@ -108,7 +108,6 @@ namespace Signum.Web.AuthAdmin
             {
                 PartialViewName = e => viewPrefix.Formato(partialViewName),
                 MappingDefault = new EntityMapping<T>(false)
-                    .CreateProperty(m => m.DefaultRule)
                     .SetProperty(m => m.Rules,
                         new MListDictionaryMapping<AR, K>(getKey, getKeyRoute)
                         {
@@ -128,7 +127,6 @@ namespace Signum.Web.AuthAdmin
             {
                 PartialViewName = e => viewPrefix.Formato("types"),
                 MappingDefault = new EntityMapping<TypeRulePack>(false)
-                    .CreateProperty(m => m.DefaultRule)
                     .SetProperty(m => m.Rules,
                         new MListDictionaryMapping<TypeAllowedRule, TypeDN>(a => a.Resource, "Resource")
                         {

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -47,6 +47,13 @@ namespace Signum.Entities.Authorization
             internal set { Set(ref role, value, () => Role); }
         }
 
+        MergeStrategy mergeStrategy;
+        public MergeStrategy MergeStrategy
+        {
+            get { return mergeStrategy; }
+            set { Set(ref mergeStrategy, value, () => MergeStrategy); }
+        }
+
         [NotNullable]
         MList<Lite<RoleDN>> subRoles = new MList<Lite<RoleDN>>();
         public MList<Lite<RoleDN>> SubRoles
@@ -55,17 +62,16 @@ namespace Signum.Entities.Authorization
             set { Set(ref subRoles, value, () => SubRoles); }
         }
 
-        public string DefaultLabel
+        public string Strategy
         {
-            get { return subRoles == null || subRoles.IsEmpty() ? "Value" : "of " + subRoles.CommaAnd(); }
+            get
+            {
+                return AuthAdminMessage._0of1.NiceToString().Formato(
+                    mergeStrategy.NiceToString(),
+                    subRoles.IsNullOrEmpty() ? "∅  -> " + (mergeStrategy == MergeStrategy.Union ? AuthAdminMessage.Nothing : AuthAdminMessage.Everything).NiceToString() :
+                    subRoles.CommaAnd());
+            }
         }
-
-        DefaultRule defaultRule;
-        public DefaultRule DefaultRule
-        {
-            get { return defaultRule; }
-            set { Set(ref defaultRule, value, () => DefaultRule); }
-        } 
 
         TypeDN type;
         [NotNullValidator]
@@ -82,12 +88,6 @@ namespace Signum.Entities.Authorization
             get { return rules; }
             set { Set(ref rules, value, () => Rules); }
         }
-    }
-
-    public enum DefaultRule
-    {
-        Max, 
-        Min,
     }
 
     [Serializable, DescriptionOptions(DescriptionOptions.None)]

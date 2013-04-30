@@ -37,8 +37,7 @@ namespace Signum.Engine.Authorization
                 cache = new AuthCache<RuleQueryDN, QueryAllowedRule, QueryDN, object, bool>(sb,
                     qn => QueryLogic.ToQueryName(qn.Key),
                     QueryLogic.RetrieveOrGenerateQuery,
-                    AuthUtils.MaxBool,
-                    AuthUtils.MinBool,
+                    merger: new QueryMerger(), 
                     coercer: new QueryCoercer());
 
                 AuthLogic.SuggestRuleChanges += SuggestQueryRules;
@@ -179,7 +178,20 @@ namespace Signum.Engine.Authorization
         }
     }
 
-    public class QueryCoercer : Coercer<bool, object>
+    class QueryMerger : Merger<object, bool>
+    {
+        protected override bool Union(object key, Lite<RoleDN> role, IEnumerable<bool> baseValues)
+        {
+            return baseValues.Any(a => a);
+        }
+
+        protected override bool Intersection(object key, Lite<RoleDN> role, IEnumerable<bool> baseValues)
+        {
+            return baseValues.All(a => a);
+        }
+    }
+
+    class QueryCoercer : Coercer<bool, object>
     {
         public override Func<object, bool, bool> GetCoerceValue(Lite<RoleDN> role)
         {

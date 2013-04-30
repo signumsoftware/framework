@@ -66,8 +66,7 @@ namespace Signum.Engine.Authorization
                 cache = new AuthCache<RulePermissionDN, PermissionAllowedRule, PermissionDN, Enum, bool>(sb,
                     MultiEnumLogic<PermissionDN>.ToEnum,
                     MultiEnumLogic<PermissionDN>.ToEntity,
-                    AuthUtils.MaxBool,
-                    AuthUtils.MinBool);
+                    merger: new PermissionMerger());
 
                 RegisterPermissions(BasicPermission.AdminRules);
 
@@ -129,6 +128,21 @@ namespace Signum.Engine.Authorization
         public static void SetPermissionRules(PermissionRulePack rules)
         {
             cache.SetRules(rules, r => true);
+        }
+    }
+
+
+
+    class PermissionMerger : Merger<Enum, bool>
+    {
+        protected override bool Union(Enum key, Lite<RoleDN> role, IEnumerable<bool> baseValues)
+        {
+            return baseValues.Any(a => a);
+        }
+
+        protected override bool Intersection(Enum key, Lite<RoleDN> role, IEnumerable<bool> baseValues)
+        {
+            return baseValues.All(a => a);
         }
     }
 }

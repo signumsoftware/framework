@@ -21,7 +21,9 @@ namespace Signum.Entities.Authorization
             set { Set(ref role, value, () => Role); }
         }
 
+        [NotNullable]
         R resource;
+        [NotNullValidator]
         public R Resource
         {
             get { return resource; }
