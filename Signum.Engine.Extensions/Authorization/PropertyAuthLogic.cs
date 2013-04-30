@@ -173,6 +173,9 @@ namespace Signum.Engine.Authorization
         {
             return (pr, a) =>
             {
+                if (!TypeLogic.TypeToDN.ContainsKey(pr.RootType))
+                    return PropertyAllowed.Modify;
+
                 TypeAllowedAndConditions aac = TypeAuthLogic.GetAllowed(role, pr.RootType);
 
                 TypeAllowedBasic ta = aac.Max(ExecutionMode.InUserInterface);
@@ -187,6 +190,9 @@ namespace Signum.Engine.Authorization
         {
             return (role, a) =>
             {
+                if (!TypeLogic.TypeToDN.ContainsKey(pr.RootType))
+                    return PropertyAllowed.Modify;
+
                 TypeAllowedAndConditions aac = TypeAuthLogic.Manual.GetAllowed(role, pr.RootType);
 
                 TypeAllowedBasic ta = aac.Max(ExecutionMode.InUserInterface);
