@@ -193,7 +193,7 @@ namespace Signum.Engine.Authorization
                 if (implementations.IsByAll)
                     return allowed;
 
-                return implementations.Types.All(t => TypeAuthLogic.GetAllowed(role, t).MaxUI() != TypeAllowedBasic.None);
+                return implementations.Types.All(t => TypeAuthLogic.GetAllowed(role, t).MaxDB() != TypeAllowedBasic.None);
             };
         }
 
@@ -209,7 +209,7 @@ namespace Signum.Engine.Authorization
                 if (implementations.IsByAll)
                     return allowed;
 
-                return implementations.Types.All(t => TypeAuthLogic.Manual.GetAllowed(role, t).MaxUI() != TypeAllowedBasic.None);
+                return implementations.Types.All(t => TypeAuthLogic.Manual.GetAllowed(role, t).MaxDB() != TypeAllowedBasic.None);
             };
         }
     }
