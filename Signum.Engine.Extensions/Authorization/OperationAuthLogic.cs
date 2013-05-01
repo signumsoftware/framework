@@ -205,11 +205,43 @@ namespace Signum.Engine.Authorization
 
             return ta.Contains(operationKey);
         }
+
+        public static OperationAllowed MaxTypePermission(Enum operationKey, Func<Type, TypeAllowedAndConditions> allowed)
+        {
+            return OperationLogic.FindTypes(operationKey).Max(t =>
+            {
+                if (!TypeLogic.TypeToDN.ContainsKey(t))
+                    return OperationAllowed.Allow;
+
+                var typeAllowed = allowed(t);
+
+                var oi = OperationLogic.GetOperationInfo(t, operationKey);
+
+                bool isSaveLike = oi.OperationType == OperationType.Execute && oi.Lite == false;
+
+                var minimum = isSaveLike ? TypeAllowedBasic.Modify : TypeAllowedBasic.None;
+
+                return minimum <= typeAllowed.MaxUI() ? OperationAllowed.Allow :
+                    minimum <= typeAllowed.MaxDB() ? OperationAllowed.DBOnly :
+                    OperationAllowed.None;
+            });
+        }
     }
 
     class OperationMerger : Merger<Enum, OperationAllowed>
     {
         protected override OperationAllowed Union(Enum key, Lite<RoleDN> role, IEnumerable<OperationAllowed> baseValues)
+        {
+            var result = Max(baseValues);
+
+            if (result == OperationAuthLogic.MaxTypePermission(key, t => TypeAuthLogic.GetAllowedBase(role, t)))
+                return OperationAuthLogic.MaxTypePermission(key, t => TypeAuthLogic.GetAllowed(role, t));
+
+            return result;
+        }
+
+
+        static OperationAllowed Max(IEnumerable<OperationAllowed> baseValues)
         {
             OperationAllowed result = OperationAllowed.None;
 
@@ -226,6 +258,16 @@ namespace Signum.Engine.Authorization
         }
 
         protected override OperationAllowed Intersection(Enum key, Lite<RoleDN> role, IEnumerable<OperationAllowed> baseValues)
+        {
+            var result = Min(baseValues);
+
+            if (result == OperationAuthLogic.MaxTypePermission(key, t => TypeAuthLogic.GetAllowedBase(role, t)))
+                return OperationAuthLogic.MaxTypePermission(key, t => TypeAuthLogic.GetAllowed(role, t));
+
+            return result;
+        }
+
+        private static OperationAllowed Min(IEnumerable<OperationAllowed> baseValues)
         {
             OperationAllowed result = OperationAllowed.Allow;
 
@@ -248,48 +290,17 @@ namespace Signum.Engine.Authorization
         {
             return (operationKey, allowed) =>
             {
-                var required = OperationLogic.FindTypes(operationKey).Max(t =>
-                {
-                    if (!TypeLogic.TypeToDN.ContainsKey(t))
-                        return OperationAllowed.Allow;
-
-                    var typeAllowed = TypeAuthLogic.GetAllowed(role, t);
-
-                    var minimum = IsSaveLike(t, operationKey) ? TypeAllowedBasic.Modify : TypeAllowedBasic.None;
-
-                    return minimum <= typeAllowed.MaxUI() ? OperationAllowed.Allow:
-                        minimum <= typeAllowed.MaxDB() ? OperationAllowed.DBOnly :  
-                        OperationAllowed.None;
-                });
+                var required = OperationAuthLogic.MaxTypePermission(operationKey, t => TypeAuthLogic.GetAllowed(role, t));
 
                 return allowed < required ? allowed : required;
             };
-        }
-
-        private bool IsSaveLike(Type t, Enum operationKey)
-        {
-            var oi = OperationLogic.GetOperationInfo(t, operationKey);
-
-            return oi.OperationType == OperationType.Execute && oi.Lite == false;
         }
 
         public override Func<Lite<RoleDN>, OperationAllowed, OperationAllowed> GetCoerceValueManual(Enum operationKey)
         {
             return (role, allowed) =>
             {
-                var required = OperationLogic.FindTypes(operationKey).Max(t =>
-                {
-                    if (!TypeLogic.TypeToDN.ContainsKey(t))
-                        return OperationAllowed.Allow;
-
-                    var typeAllowed = TypeAuthLogic.Manual.GetAllowed(role, t);
-
-                    var minimum = IsSaveLike(t, operationKey) ? TypeAllowedBasic.Modify : TypeAllowedBasic.None;
-
-                    return minimum <= typeAllowed.MaxUI() ? OperationAllowed.Allow :
-                        minimum <= typeAllowed.MaxDB() ? OperationAllowed.DBOnly :
-                        OperationAllowed.None;
-                });
+                var required = OperationAuthLogic.MaxTypePermission(operationKey, t => TypeAuthLogic.Manual.GetAllowed(role, t));
 
                 return allowed < required ? allowed : required;
             };

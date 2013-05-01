@@ -48,7 +48,7 @@ namespace Signum.Engine.Authorization
                     }
                 };
 
-                cache = new TypeAuthCache(sb, merger: new TypeAllowedMerger());
+                cache = new TypeAuthCache(sb, merger: TypeAllowedMerger.Instance);
 
                 AuthLogic.ExportToXml += () => cache.ExportXml();
                 AuthLogic.ImportFromXml += (x, roles, replacements) => cache.ImportXml(x, roles, replacements);
@@ -208,9 +208,16 @@ namespace Signum.Engine.Authorization
             return cache.GetAllowed(RoleDN.Current.ToLite(), type);
         }
 
+
+
         public static TypeAllowedAndConditions GetAllowed(Lite<RoleDN> role, Type type)
         {
             return cache.GetAllowed(role, type);
+        }
+
+        public static TypeAllowedAndConditions GetAllowedBase(Lite<RoleDN> role, Type type)
+        {
+            return cache.GetAllowedBase(role, type);
         }
 
         public static DefaultDictionary<Type, TypeAllowedAndConditions> AuthorizedTypes()
@@ -245,6 +252,10 @@ namespace Signum.Engine.Authorization
 
     class TypeAllowedMerger : Merger<Type, TypeAllowedAndConditions>
     {
+        public static readonly TypeAllowedMerger Instance = new TypeAllowedMerger();
+
+        TypeAllowedMerger() { }
+
         protected override TypeAllowedAndConditions Union(Type key, Lite<RoleDN> role, IEnumerable<TypeAllowedAndConditions> baseValues)
         {
             return MergeBase(baseValues, MaxTypeAllowed, TypeAllowed.Create, TypeAllowed.None);

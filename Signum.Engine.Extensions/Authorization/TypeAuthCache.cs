@@ -224,6 +224,11 @@ namespace Signum.Entities.Authorization
             return runtimeRules.Value[role].GetAllowed(key);
         }
 
+        internal TypeAllowedAndConditions GetAllowedBase(Lite<RoleDN> role, Type key)
+        {
+            return runtimeRules.Value[role].GetAllowedBase(key);
+        }
+
         internal DefaultDictionary<Type, TypeAllowedAndConditions> GetDefaultDictionary()
         {
             return runtimeRules.Value[RoleDN.Current.ToLite()].DefaultDictionary();

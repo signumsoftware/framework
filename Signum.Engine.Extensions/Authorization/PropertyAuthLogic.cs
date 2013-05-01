@@ -33,7 +33,7 @@ namespace Signum.Engine.Authorization
                 cache = new AuthCache<RulePropertyDN, PropertyAllowedRule, PropertyRouteDN, PropertyRoute, PropertyAllowed>(sb,
                     PropertyRouteLogic.GetPropertyRoute,
                     PropertyRouteLogic.GetEntity,
-                    merger: new PropertyMergerMax(),
+                    merger: new PropertyMerger(),
                     coercer: new PropertyCoercer());
 
                 if (queries)
@@ -166,9 +166,20 @@ namespace Signum.Engine.Authorization
         }
     }
 
-    class PropertyMergerMax : Merger<PropertyRoute, PropertyAllowed>
+    class PropertyMerger : Merger<PropertyRoute, PropertyAllowed>
     {
         protected override PropertyAllowed Union(PropertyRoute key, Lite<RoleDN> role, IEnumerable<PropertyAllowed> baseValues)
+        {
+            var result = Max(baseValues);
+
+            if (result == TypeAllowedBase(key, role))
+                return TypeAllowed(key, role);
+
+            return result;
+        }
+
+
+        static PropertyAllowed Max(IEnumerable<PropertyAllowed> baseValues)
         {
             PropertyAllowed result = PropertyAllowed.None;
 
@@ -179,12 +190,21 @@ namespace Signum.Engine.Authorization
 
                 if (result == PropertyAllowed.Modify)
                     return result;
-
             }
             return result;
         }
 
         protected override PropertyAllowed Intersection(PropertyRoute key, Lite<RoleDN> role, IEnumerable<PropertyAllowed> baseValues)
+        {
+            var result = Min(baseValues);
+
+            if (result == TypeAllowedBase(key, role))
+                return TypeAllowed(key, role);
+
+            return result;
+        }
+
+        static PropertyAllowed Min(IEnumerable<PropertyAllowed> baseValues)
         {
             PropertyAllowed result = PropertyAllowed.Modify;
 
@@ -195,9 +215,18 @@ namespace Signum.Engine.Authorization
 
                 if (result == PropertyAllowed.None)
                     return result;
-
             }
             return result;
+        }
+
+        static PropertyAllowed TypeAllowedBase(PropertyRoute key, Lite<RoleDN> role)
+        {
+            return TypeAuthLogic.GetAllowedBase(role, key.RootType).Max(ExecutionMode.InUserInterface).ToPropertyAllowed();
+        }
+
+        static PropertyAllowed TypeAllowed(PropertyRoute key, Lite<RoleDN> role)
+        {
+            return TypeAuthLogic.GetAllowed(role, key.RootType).Max(ExecutionMode.InUserInterface).ToPropertyAllowed();
         }
     }
 

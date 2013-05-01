@@ -176,18 +176,40 @@ namespace Signum.Engine.Authorization
         {
             return DynamicQueryManager.Current.GetQueries(entityType).Keys.Select(qn => cache.GetAllowed(role, qn)).Collapse(); 
         }
+
+        internal static bool AllCanRead(this Implementations implementations, Func<Type, TypeAllowedAndConditions> getAllowed)
+        {
+            if (implementations.IsByAll)
+                return true;
+
+            return implementations.Types.All(t => getAllowed(t).MaxDB() != TypeAllowedBasic.None);
+        }
     }
 
     class QueryMerger : Merger<object, bool>
     {
         protected override bool Union(object key, Lite<RoleDN> role, IEnumerable<bool> baseValues)
         {
-            return baseValues.Any(a => a);
+            var result = baseValues.Any(a => a);
+
+            var implementations = DynamicQueryManager.Current.GetEntityImplementations(key);
+
+            if (result == implementations.AllCanRead(t => TypeAuthLogic.GetAllowedBase(role, t)))
+                return implementations.AllCanRead(t => TypeAuthLogic.GetAllowed(role, t));
+
+            return result;
         }
 
         protected override bool Intersection(object key, Lite<RoleDN> role, IEnumerable<bool> baseValues)
         {
-            return baseValues.All(a => a);
+            var result = baseValues.All(a => a);
+
+            var implementations = DynamicQueryManager.Current.GetEntityImplementations(key);
+
+            if (result == implementations.AllCanRead(t => TypeAuthLogic.GetAllowedBase(role, t)))
+                return implementations.AllCanRead(t => TypeAuthLogic.GetAllowed(role, t));
+
+            return result;
         }
     }
 
@@ -198,14 +220,11 @@ namespace Signum.Engine.Authorization
             return (queryName, allowed) =>
             {
                 if (!allowed)
-                    return allowed;
+                    return false;
 
                 var implementations = DynamicQueryManager.Current.GetEntityImplementations(queryName);
 
-                if (implementations.IsByAll)
-                    return allowed;
-
-                return implementations.Types.All(t => TypeAuthLogic.GetAllowed(role, t).MaxDB() != TypeAllowedBasic.None);
+                return implementations.AllCanRead(t => TypeAuthLogic.GetAllowed(role, t));
             };
         }
 
@@ -218,10 +237,7 @@ namespace Signum.Engine.Authorization
 
                 var implementations = DynamicQueryManager.Current.GetEntityImplementations(queryName);
 
-                if (implementations.IsByAll)
-                    return allowed;
-
-                return implementations.Types.All(t => TypeAuthLogic.Manual.GetAllowed(role, t).MaxDB() != TypeAllowedBasic.None);
+                return implementations.AllCanRead(t => TypeAuthLogic.Manual.GetAllowed(role, t));
             };
         }
     }
