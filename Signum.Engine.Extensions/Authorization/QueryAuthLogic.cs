@@ -38,7 +38,8 @@ namespace Signum.Engine.Authorization
                     qn => QueryLogic.ToQueryName(qn.Key),
                     QueryLogic.RetrieveOrGenerateQuery,
                     merger: new QueryMerger(), 
-                    coercer: new QueryCoercer());
+                    invalidateWithTypes : true,
+                    coercer: QueryCoercer.Instance);
 
                 AuthLogic.SuggestRuleChanges += SuggestQueryRules;
                 AuthLogic.ExportToXml += () => cache.ExportXml("Queries", "Query", p => p.Key, b => b.ToString());
@@ -145,10 +146,16 @@ namespace Signum.Engine.Authorization
             return cache.GetDefaultDictionary();
         }
 
-        public static QueryRulePack GetQueryRules(Lite<RoleDN> roleLite, TypeDN typeDN)
+        public static QueryRulePack GetQueryRules(Lite<RoleDN> role, TypeDN typeDN)
         {
-            var result = new QueryRulePack { Role = roleLite, Type = typeDN };
+            var result = new QueryRulePack { Role = role, Type = typeDN };
             cache.GetRules(result, QueryLogic.RetrieveOrGenerateQueries(typeDN));
+
+            var coercer = QueryCoercer.Instance.GetCoerceValue(role);
+            result.Rules.ForEach(r => r.CoercedValues = new []{ false, true }
+                .Where(a => !coercer(QueryLogic.ToQueryName(r.Resource.Key), a).Equals(a))
+                .ToArray());
+
             return result;
         }
 
@@ -208,13 +215,24 @@ namespace Signum.Engine.Authorization
 
             if (result == implementations.AllCanRead(t => TypeAuthLogic.GetAllowedBase(role, t)))
                 return implementations.AllCanRead(t => TypeAuthLogic.GetAllowed(role, t));
-
+            
             return result;
+        }
+
+        public override Func<object, bool> MergeDefault(Lite<RoleDN> role, IEnumerable<Func<object, bool>> baseDefaultValues)
+        {
+            return key => DynamicQueryManager.Current.GetEntityImplementations(key).AllCanRead(t => TypeAuthLogic.GetAllowed(role, t));
         }
     }
 
     class QueryCoercer : Coercer<bool, object>
     {
+        public static readonly QueryCoercer Instance = new QueryCoercer();
+
+        private QueryCoercer()
+        {
+        }
+
         public override Func<object, bool, bool> GetCoerceValue(Lite<RoleDN> role)
         {
             return (queryName, allowed) =>

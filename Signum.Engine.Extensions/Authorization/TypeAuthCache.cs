@@ -178,6 +178,7 @@ namespace Signum.Entities.Authorization
         {
             RoleAllowedCache cache = runtimeRules.Value[rules.Role];
 
+            rules.MergeStrategy = AuthLogic.GetMergeStrategy(rules.Role);
             rules.SubRoles = AuthLogic.RelatedTo(rules.Role).ToMList();
             rules.Rules = (from r in resources
                            let type = TypeLogic.DnToType[r]
@@ -249,9 +250,9 @@ namespace Signum.Entities.Authorization
 
                 this.baseCaches = baseCaches;
 
-                TypeAllowedAndConditions defaultAllowed = merger.Merge(null, role, baseCaches.Select(a => a.rules.DefaultAllowed));
+                Func<Type, TypeAllowedAndConditions> defaultAllowed = merger.MergeDefault(role, baseCaches.Select(a => a.rules.DefaultAllowed));
 
-                var keys = baseCaches.Where(b => b.rules.DefaultAllowed.Equals(defaultAllowed) && b.rules != null).SelectMany(a => a.rules.ExplicitKeys).ToHashSet();
+                var keys = baseCaches.Where(b => b.rules.OverrideDictionary != null).SelectMany(a => a.rules.OverrideDictionary.Keys).ToHashSet();
 
                 Dictionary<Type, TypeAllowedAndConditions> tmpRules = keys.ToDictionary(k => k, k =>
                 {
@@ -267,12 +268,12 @@ namespace Signum.Entities.Authorization
                 rules = new DefaultDictionary<Type, TypeAllowedAndConditions>(defaultAllowed, tmpRules);
             }
 
-            internal static Dictionary<Type, TypeAllowedAndConditions> Simplify(Dictionary<Type, TypeAllowedAndConditions> dictionary, TypeAllowedAndConditions defaultAllowed)
+            internal static Dictionary<Type, TypeAllowedAndConditions> Simplify(Dictionary<Type, TypeAllowedAndConditions> dictionary, Func<Type, TypeAllowedAndConditions> defaultAllowed)
             {
                 if (dictionary == null || dictionary.Count == 0)
                     return null;
 
-                dictionary.RemoveRange(dictionary.Where(p => p.Value.Equals(defaultAllowed)).Select(p => p.Key).ToList());
+                dictionary.RemoveRange(dictionary.Where(p => p.Value.Equals(defaultAllowed(p.Key))).Select(p => p.Key).ToList());
 
                 if (dictionary.Count == 0)
                     return null;

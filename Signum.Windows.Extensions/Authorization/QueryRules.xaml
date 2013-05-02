@@ -36,14 +36,20 @@
                     <GridViewColumn Header="Allow" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <RadioButton IsChecked="{Binding Path=Allowed }" Style="{StaticResource SphereRadioButton}" Background="Lime"  />
+                                <RadioButton 
+                                    Visibility="{Binding CoercedValues, Converter={auth:VisibleIfNotContains {auth:Bool True}}}"
+                                    IsChecked="{Binding Allowed, Converter={m:Equals {auth:Bool True}}}" 
+                                    Style="{StaticResource SphereRadioButton}" Background="Lime"  />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Header="Deny" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <RadioButton  IsChecked="{Binding Path=Allowed, Converter={x:Static m:Converters.Not}}" Style="{StaticResource SphereRadioButton}" Background="Red" />
+                                <RadioButton 
+                                    Visibility="{Binding CoercedValues, Converter={auth:VisibleIfNotContains {auth:Bool False}}}"
+                                    IsChecked="{Binding Allowed, Converter={m:Equals {auth:Bool False}}}" 
+                                    Style="{StaticResource SphereRadioButton}" Background="Red" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

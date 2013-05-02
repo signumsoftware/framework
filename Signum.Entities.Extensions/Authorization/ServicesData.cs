@@ -12,26 +12,60 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class DefaultDictionary<K, A>
     {
-        public DefaultDictionary(A defaultAllowed, Dictionary<K, A> dictionary)
+        public DefaultDictionary(Func<K, A> defaultAllowed, Dictionary<K, A> overridesDictionary)
         {
-            this.DefaultAllowed = defaultAllowed;
-            this.dictionary = dictionary;
+            this.defaultAllowed = defaultAllowed;
+            this.overrideDictionary = overridesDictionary;
         }
 
-        readonly Dictionary<K, A> dictionary;
-        public readonly A DefaultAllowed;
+        readonly Dictionary<K, A> overrideDictionary;
+        readonly Func<K, A> defaultAllowed;
 
         public A GetAllowed(K key)
         {
-            return dictionary.TryGet(key, DefaultAllowed);
+            A result;
+            if (overrideDictionary != null && overrideDictionary.TryGetValue(key, out result))
+                return result;
+
+            return defaultAllowed(key);
         }
 
-        public IEnumerable<K> ExplicitKeys
+        public Dictionary<K, A> OverrideDictionary
         {
-            get
-            {
-                return dictionary == null ? Enumerable.Empty<K>() : dictionary.Keys;
-            }
+            get { return overrideDictionary; }
+        }
+
+        public Func<K, A> DefaultAllowed
+        {
+            get { return defaultAllowed; }
+        }
+    }
+
+    [Serializable]
+    public class ConstantFunction<K, A>
+    {
+        internal A Allowed;
+        public ConstantFunction(A allowed)
+        {
+            this.Allowed = allowed;
+        }
+
+        public A GetValue(K key)
+        {
+            return this.Allowed;
+        }
+
+        public override string ToString()
+        {
+            return "Constant {0}".Formato(Allowed);
+        }
+    }
+
+    public static class ConstantFunction
+    {
+        public static A GetConstantValue<K, A>(Func<K, A> defaultConstant)
+        {
+            return ((ConstantFunction<K, A>)defaultConstant.Target).Allowed;
         }
     }
 
@@ -326,6 +360,17 @@ namespace Signum.Entities.Authorization
         None,
     }
 
+    [Serializable]
+    public abstract class AllowedRuleCoerced<R, A> : AllowedRule<R,A>
+         where R : IdentifiableEntity
+    {
+        A[] coercedValues;
+        public A[] CoercedValues
+        {
+            get { return coercedValues; }
+            internal set { Set(ref coercedValues, value, () => CoercedValues); }
+        }
+    }
 
     [Serializable]
     public class PropertyRulePack : BaseRulePack<PropertyAllowedRule>
@@ -336,7 +381,9 @@ namespace Signum.Entities.Authorization
         }
     }
     [Serializable]
-    public class PropertyAllowedRule : AllowedRule<PropertyRouteDN, PropertyAllowed>{}
+    public class PropertyAllowedRule : AllowedRuleCoerced<PropertyRouteDN, PropertyAllowed>
+    {
+    }
 
 
     [Serializable]
@@ -348,7 +395,7 @@ namespace Signum.Entities.Authorization
         }
     }
     [Serializable]
-    public class QueryAllowedRule : AllowedRule<QueryDN, bool> { }
+    public class QueryAllowedRule : AllowedRuleCoerced<QueryDN, bool> { }
 
 
     [Serializable]
@@ -360,7 +407,7 @@ namespace Signum.Entities.Authorization
         }
     }
     [Serializable]
-    public class OperationAllowedRule : AllowedRule<OperationDN, OperationAllowed> { } 
+    public class OperationAllowedRule : AllowedRuleCoerced<OperationDN, OperationAllowed> { } 
 
 
     [Serializable]

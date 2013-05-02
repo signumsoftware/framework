@@ -17,7 +17,7 @@ using Signum.Engine.Cache;
 
 namespace Signum.Entities.Authorization
 {
-    abstract class Merger<K , A> where K: class
+    abstract class Merger<K , A>
     {
         public A Merge(K key, Lite<RoleDN> role, IEnumerable<A> baseValues)
         {
@@ -29,6 +29,8 @@ namespace Signum.Entities.Authorization
 
         protected abstract A Intersection(K key, Lite<RoleDN> role, IEnumerable<A> baseValues);
         protected abstract A Union(K key, Lite<RoleDN> role, IEnumerable<A> baseValues);
+
+        public abstract Func<K, A> MergeDefault(Lite<RoleDN> role, IEnumerable<Func<K, A>> baseDefaultValues);
     }
 
     public interface IManualAuth<K, A>
@@ -49,7 +51,6 @@ namespace Signum.Entities.Authorization
         where RT : RuleDN<R, A>, new()
         where AR : AllowedRule<R, A>, new()
         where R : IdentifiableEntity
-        where K : class
     {
         readonly ResetLazy<Dictionary<Lite<RoleDN>, RoleAllowedCache>> runtimeRules; 
 
@@ -58,7 +59,7 @@ namespace Signum.Entities.Authorization
         Merger<K, A> merger;
         Coercer<A, K> coercer;
 
-        public AuthCache(SchemaBuilder sb, Func<R, K> toKey, Func<K, R> toEntity, Merger<K, A> merger, Coercer<A, K> coercer = null)
+        public AuthCache(SchemaBuilder sb, Func<R, K> toKey, Func<K, R> toEntity, Merger<K, A> merger, bool invalidateWithTypes, Coercer<A, K> coercer = null)
         {
             this.ToKey = toKey;
             this.ToEntity = toEntity;
@@ -68,7 +69,9 @@ namespace Signum.Entities.Authorization
             sb.Include<RT>();
 
             runtimeRules = sb.GlobalLazy(this.NewCache,
-              new InvalidateWith(typeof(RT), typeof(RoleDN)));
+                invalidateWithTypes ?
+                new InvalidateWith(typeof(RT), typeof(RoleDN), typeof(RuleTypeDN)) :
+                new InvalidateWith(typeof(RT), typeof(RoleDN)));
 
             sb.AddUniqueIndex<RT>(rt => new { rt.Resource, rt.Role });
 
@@ -127,7 +130,6 @@ namespace Signum.Entities.Authorization
 
         public class ManualResourceCache
         {
-            readonly Dictionary<Lite<RoleDN>, A> defaultRules;
             readonly Dictionary<Lite<RoleDN>, A> specificRules;
 
             readonly Merger<K, A> merger;
@@ -141,11 +143,10 @@ namespace Signum.Entities.Authorization
                 this.key = key;
 
                 var list = (from r in Database.Query<RT>()
-                            where r.Resource == resource || r.Resource == null
-                            select new { Default = r.Resource == null, r.Role, r.Allowed }).ToList();
+                            where r.Resource == resource
+                            select new { r.Role, r.Allowed }).ToList();
 
-                defaultRules = list.Where(a => a.Default).ToDictionary(a => a.Role, a => a.Allowed);
-                specificRules = list.Where(a => !a.Default).ToDictionary(a => a.Role, a => a.Allowed);
+                specificRules = list.ToDictionary(a => a.Role, a => a.Allowed);
 
                 this.coercer = coercer;
                 this.merger = merger;
@@ -198,6 +199,7 @@ namespace Signum.Entities.Authorization
         {
             RoleAllowedCache cache = runtimeRules.Value[rules.Role];
 
+            rules.MergeStrategy = AuthLogic.GetMergeStrategy(rules.Role);
             rules.SubRoles = AuthLogic.RelatedTo(rules.Role).ToMList();
             rules.Rules = (from r in resources
                            let k = ToKey(r)
@@ -257,11 +259,11 @@ namespace Signum.Entities.Authorization
 
                 this.baseCaches = baseCaches;
 
-                A defaultAllowed = merger.Merge((K)null, role, baseCaches.Select(a => a.rules.DefaultAllowed));
+                Func<K, A> defaultAllowed = merger.MergeDefault(role, baseCaches.Select(a => a.rules.DefaultAllowed));
 
                 var keys = baseCaches
-                    .Where(b => b.rules.DefaultAllowed.Equals(defaultAllowed) && b.rules != null)
-                    .SelectMany(a => a.rules.ExplicitKeys)
+                    .Where(b => b.rules.OverrideDictionary != null)
+                    .SelectMany(a => a.rules.OverrideDictionary.Keys)
                     .ToHashSet();
 
                 Dictionary<K, A> tmpRules = keys.ToDictionary(k => k, k => merger.Merge(k, role, baseCaches.Select(b => b.GetAllowed(k))));
@@ -274,12 +276,12 @@ namespace Signum.Entities.Authorization
                 rules = new DefaultDictionary<K, A>(defaultAllowed, tmpRules);
             }
 
-            internal Dictionary<K, A> Simplify(Dictionary<K, A> dictionary, A defaultAllowed)
+            internal Dictionary<K, A> Simplify(Dictionary<K, A> dictionary, Func<K, A> defaultAllowed)
             {
                 if (dictionary == null || dictionary.Count == 0)
                     return null;
 
-                dictionary.RemoveRange(dictionary.Where(p => coercer(p.Key, p.Value).Equals(coercer(p.Key, defaultAllowed))).Select(p => p.Key).ToList());
+                dictionary.RemoveRange(dictionary.Where(p => p.Value.Equals(defaultAllowed(p.Key))).Select(p => p.Key).ToList());
 
                 if (dictionary.Count == 0)
                     return null;

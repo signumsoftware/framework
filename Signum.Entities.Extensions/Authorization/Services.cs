@@ -87,7 +87,7 @@ namespace Signum.Services
         void SetPropertyRules(PropertyRulePack rules);
 
         [OperationContract, NetDataContract]
-        DefaultDictionary<PropertyRoute, PropertyAllowed> AuthorizedProperties();
+        Dictionary<PropertyRoute, PropertyAllowed> OverridenProperties();
     }
 
     [ServiceContract]

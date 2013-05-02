@@ -29,7 +29,11 @@ namespace Signum.Windows.Authorization
 
         static void AuthClient_UpdateCacheEvent()
         {
-            propertyRules = Server.Return((IPropertyAuthServer s) => s.AuthorizedProperties());
+            var overrides = Server.Return((IPropertyAuthServer s) => s.OverridenProperties());
+
+            propertyRules = new DefaultDictionary<PropertyRoute, PropertyAllowed>
+                (pr => TypeAuthClient.GetAllowed(pr.RootType).MaxUI().ToPropertyAllowed(),
+                overrides);
         }
 
         public static PropertyAllowed GetPropertyAllowed(this PropertyRoute route)

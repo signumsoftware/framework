@@ -27,6 +27,12 @@ namespace Signum.Web.Extensions.AuthAdmin.Views
     using System.Web.UI;
     using System.Web.WebPages;
     using Signum.Engine;
+    
+    #line 2 "..\..\AuthAdmin\Views\Queries.cshtml"
+    using Signum.Engine.Authorization;
+    
+    #line default
+    #line hidden
     using Signum.Entities;
     using Signum.Entities.Authorization;
     using Signum.Utilities;
@@ -53,8 +59,9 @@ Write(Html.ScriptCss("~/authAdmin/Content/SF_AuthAdmin.css"));
 WriteLiteral("\r\n");
 
 
+
             
-            #line 2 "..\..\AuthAdmin\Views\Queries.cshtml"
+            #line 3 "..\..\AuthAdmin\Views\Queries.cshtml"
  using (var tc = Html.TypeContext<QueryRulePack>())
 {
     
@@ -62,42 +69,42 @@ WriteLiteral("\r\n");
             #line default
             #line hidden
             
-            #line 4 "..\..\AuthAdmin\Views\Queries.cshtml"
+            #line 5 "..\..\AuthAdmin\Views\Queries.cshtml"
 Write(Html.EntityLine(tc, f => f.Role));
 
             
             #line default
             #line hidden
             
-            #line 4 "..\..\AuthAdmin\Views\Queries.cshtml"
+            #line 5 "..\..\AuthAdmin\Views\Queries.cshtml"
                                      
     
             
             #line default
             #line hidden
             
-            #line 5 "..\..\AuthAdmin\Views\Queries.cshtml"
+            #line 6 "..\..\AuthAdmin\Views\Queries.cshtml"
 Write(Html.ValueLine(tc, f => f.Strategy));
 
             
             #line default
             #line hidden
             
-            #line 5 "..\..\AuthAdmin\Views\Queries.cshtml"
+            #line 6 "..\..\AuthAdmin\Views\Queries.cshtml"
                                         
     
             
             #line default
             #line hidden
             
-            #line 6 "..\..\AuthAdmin\Views\Queries.cshtml"
+            #line 7 "..\..\AuthAdmin\Views\Queries.cshtml"
 Write(Html.EntityLine(tc, f => f.Type));
 
             
             #line default
             #line hidden
             
-            #line 6 "..\..\AuthAdmin\Views\Queries.cshtml"
+            #line 7 "..\..\AuthAdmin\Views\Queries.cshtml"
                                      
 
 
@@ -109,7 +116,7 @@ WriteLiteral("    <table class=\"sf-auth-rules\" id=\"queries\">\r\n        <the
 
 
             
-            #line 12 "..\..\AuthAdmin\Views\Queries.cshtml"
+            #line 13 "..\..\AuthAdmin\Views\Queries.cshtml"
                Write(AuthMessage.QueriesAscx_Query.NiceToString());
 
             
@@ -119,7 +126,7 @@ WriteLiteral("\r\n                </th>\r\n                <th>\r\n             
 
 
             
-            #line 15 "..\..\AuthAdmin\Views\Queries.cshtml"
+            #line 16 "..\..\AuthAdmin\Views\Queries.cshtml"
                Write(AuthMessage.QueriesAscx_Allow.NiceToString());
 
             
@@ -129,7 +136,7 @@ WriteLiteral("\r\n                </th>\r\n                <th>\r\n             
 
 
             
-            #line 18 "..\..\AuthAdmin\Views\Queries.cshtml"
+            #line 19 "..\..\AuthAdmin\Views\Queries.cshtml"
                Write(AuthMessage.QueriesAscx_Deny.NiceToString());
 
             
@@ -139,7 +146,7 @@ WriteLiteral("\r\n                </th>\r\n                <th>\r\n             
 
 
             
-            #line 21 "..\..\AuthAdmin\Views\Queries.cshtml"
+            #line 22 "..\..\AuthAdmin\Views\Queries.cshtml"
                Write(AuthMessage.QueriesAscx_Overriden.NiceToString());
 
             
@@ -149,7 +156,7 @@ WriteLiteral("\r\n                </th>\r\n            </tr>\r\n        </thead>
 
 
             
-            #line 25 "..\..\AuthAdmin\Views\Queries.cshtml"
+            #line 26 "..\..\AuthAdmin\Views\Queries.cshtml"
          foreach (var item in tc.TypeElementContext(p => p.Rules))
         {
 
@@ -160,7 +167,7 @@ WriteLiteral("            <tr>\r\n                <td>\r\n                    ")
 
 
             
-            #line 29 "..\..\AuthAdmin\Views\Queries.cshtml"
+            #line 30 "..\..\AuthAdmin\Views\Queries.cshtml"
                Write(Html.Span(null, item.Value.Resource.Name));
 
             
@@ -170,7 +177,7 @@ WriteLiteral("\r\n                    ");
 
 
             
-            #line 30 "..\..\AuthAdmin\Views\Queries.cshtml"
+            #line 31 "..\..\AuthAdmin\Views\Queries.cshtml"
                Write(Html.Hidden(item.Compose("Resource_Key"), item.Value.Resource.Key));
 
             
@@ -180,41 +187,81 @@ WriteLiteral("\r\n                    ");
 
 
             
-            #line 31 "..\..\AuthAdmin\Views\Queries.cshtml"
+            #line 32 "..\..\AuthAdmin\Views\Queries.cshtml"
                Write(Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                </td>\r\n                <td>\r\n                    <a class=\"sf-a" +
-"uth-chooser sf-auth-allowed\">\r\n                        ");
+WriteLiteral("\r\n                </td>\r\n                <td>\r\n");
 
 
             
             #line 35 "..\..\AuthAdmin\Views\Queries.cshtml"
-                   Write(Html.RadioButton(item.Compose("Allowed"), "True", item.Value.Allowed));
+                     if (!item.Value.CoercedValues.Contains(true))
+                    {
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                    </a>\r\n                </td>\r\n                <td>\r\n        " +
-"            <a class=\"sf-auth-chooser sf-auth-not-allowed\">\r\n                   " +
-"     ");
+WriteLiteral("                        <a class=\"sf-auth-chooser sf-auth-allowed\">\r\n            " +
+"                ");
+
+
+            
+            #line 38 "..\..\AuthAdmin\Views\Queries.cshtml"
+                       Write(Html.RadioButton(item.Compose("Allowed"), "True", item.Value.Allowed));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n                        </a>\r\n");
 
 
             
             #line 40 "..\..\AuthAdmin\Views\Queries.cshtml"
-                   Write(Html.RadioButton(item.Compose("Allowed"), "False", !item.Value.Allowed));
+                    }
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                    </a>\r\n                </td>\r\n                <td>\r\n        " +
-"            ");
+WriteLiteral("                </td>\r\n                <td>\r\n");
 
 
             
-            #line 44 "..\..\AuthAdmin\Views\Queries.cshtml"
+            #line 43 "..\..\AuthAdmin\Views\Queries.cshtml"
+                     if (!item.Value.CoercedValues.Contains(false))
+                    {
+
+            
+            #line default
+            #line hidden
+WriteLiteral("                        <a class=\"sf-auth-chooser sf-auth-not-allowed\">\r\n        " +
+"                    ");
+
+
+            
+            #line 46 "..\..\AuthAdmin\Views\Queries.cshtml"
+                       Write(Html.RadioButton(item.Compose("Allowed"), "False", !item.Value.Allowed));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n                        </a> \r\n");
+
+
+            
+            #line 48 "..\..\AuthAdmin\Views\Queries.cshtml"
+                    }
+
+            
+            #line default
+            #line hidden
+WriteLiteral("                </td>\r\n                <td>\r\n                    ");
+
+
+            
+            #line 51 "..\..\AuthAdmin\Views\Queries.cshtml"
                Write(Html.CheckBox(item.Compose("Overriden"), item.Value.Overriden, new { disabled = "disabled", @class = "sf-auth-overriden" }));
 
             
@@ -224,7 +271,7 @@ WriteLiteral("\r\n                </td>\r\n            </tr>\r\n");
 
 
             
-            #line 47 "..\..\AuthAdmin\Views\Queries.cshtml"
+            #line 54 "..\..\AuthAdmin\Views\Queries.cshtml"
         }
 
             
@@ -234,7 +281,7 @@ WriteLiteral("    </table>\r\n");
 
 
             
-            #line 49 "..\..\AuthAdmin\Views\Queries.cshtml"
+            #line 56 "..\..\AuthAdmin\Views\Queries.cshtml"
 }
             
             #line default

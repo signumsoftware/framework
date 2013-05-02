@@ -66,7 +66,8 @@ namespace Signum.Engine.Authorization
                 cache = new AuthCache<RulePermissionDN, PermissionAllowedRule, PermissionDN, Enum, bool>(sb,
                     MultiEnumLogic<PermissionDN>.ToEnum,
                     MultiEnumLogic<PermissionDN>.ToEntity,
-                    merger: new PermissionMerger());
+                    merger: new PermissionMerger(),
+                    invalidateWithTypes: false);
 
                 RegisterPermissions(BasicPermission.AdminRules);
 
@@ -137,12 +138,32 @@ namespace Signum.Engine.Authorization
     {
         protected override bool Union(Enum key, Lite<RoleDN> role, IEnumerable<bool> baseValues)
         {
+            return Max(baseValues);
+        }
+
+        static bool Max(IEnumerable<bool> baseValues)
+        {
             return baseValues.Any(a => a);
         }
 
         protected override bool Intersection(Enum key, Lite<RoleDN> role, IEnumerable<bool> baseValues)
         {
+            return Min(baseValues);
+        }
+
+        static bool Min(IEnumerable<bool> baseValues)
+        {
             return baseValues.All(a => a);
+        }
+
+        public override Func<Enum, bool> MergeDefault(Lite<RoleDN> role, IEnumerable<Func<Enum, bool>> baseDefaultValues)
+        {
+            var baseValues = baseDefaultValues.Select(f => ConstantFunction.GetConstantValue(f)).ToList();
+
+            if (AuthLogic.GetMergeStrategy(role) == MergeStrategy.Intersection)
+                return new ConstantFunction<Enum, bool>(Min(baseValues)).GetValue;
+            else
+                return new ConstantFunction<Enum, bool>(Max(baseValues)).GetValue;
         }
     }
 }

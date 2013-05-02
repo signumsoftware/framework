@@ -32,7 +32,8 @@ namespace Signum.Engine.Authorization
                 cache = new AuthCache<RuleFacadeMethodDN, FacadeMethodAllowedRule, FacadeMethodDN, string, bool>(sb,
                      fm => fm.ToString(),
                      n => FacadeMethodLogic.RetrieveOrGenerateFacadeMethod(n),
-                     merger: new FacadeMethodMerger());
+                     merger: new FacadeMethodMerger(),
+                     invalidateWithTypes : false);
 
 
                 AuthLogic.ExportToXml += () => cache.ExportXml("FacadeMethods", "FacadeMethod", fm => fm.ToString(), b => b.ToString());
@@ -104,12 +105,32 @@ namespace Signum.Engine.Authorization
     {
         protected override bool Union(string key, Lite<RoleDN> role, IEnumerable<bool> baseValues)
         {
+            return Max(baseValues);
+        }
+
+        static bool Max(IEnumerable<bool> baseValues)
+        {
             return baseValues.Any(a => a);
         }
 
         protected override bool Intersection(string key, Lite<RoleDN> role, IEnumerable<bool> baseValues)
         {
+            return Min(baseValues);
+        }
+
+        static bool Min(IEnumerable<bool> baseValues)
+        {
             return baseValues.All(a => a);
+        }
+
+        public override Func<string, bool> MergeDefault(Lite<RoleDN> role, IEnumerable<Func<string, bool>> baseDefaultValues)
+        {
+            var baseValues = baseDefaultValues.Select(f => ConstantFunction.GetConstantValue(f)).ToList();
+
+            if (AuthLogic.GetMergeStrategy(role) == MergeStrategy.Intersection)
+                return new ConstantFunction<string, bool>(Min(baseValues)).GetValue;
+            else
+                return new ConstantFunction<string, bool>(Max(baseValues)).GetValue;
         }
     }
 }

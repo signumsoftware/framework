@@ -150,10 +150,10 @@ namespace Signum.Services
              () => PropertyAuthLogic.SetPropertyRules(rules));
         }
 
-        public DefaultDictionary<PropertyRoute, PropertyAllowed> AuthorizedProperties()
+        public Dictionary<PropertyRoute, PropertyAllowed> OverridenProperties()
         {
             return Return(MethodInfo.GetCurrentMethod(),
-              () => PropertyAuthLogic.AuthorizedProperties());
+              () => PropertyAuthLogic.OverridenProperties());
         }
         #endregion
 

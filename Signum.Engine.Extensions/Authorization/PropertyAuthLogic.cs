@@ -34,7 +34,8 @@ namespace Signum.Engine.Authorization
                     PropertyRouteLogic.GetPropertyRoute,
                     PropertyRouteLogic.GetEntity,
                     merger: new PropertyMerger(),
-                    coercer: new PropertyCoercer());
+                    invalidateWithTypes : true,
+                    coercer: PropertyCoercer.Instance);
 
                 if (queries)
                 {
@@ -106,10 +107,16 @@ namespace Signum.Engine.Authorization
         }
 
 
-        public static PropertyRulePack GetPropertyRules(Lite<RoleDN> roleLite, TypeDN typeDN)
+        public static PropertyRulePack GetPropertyRules(Lite<RoleDN> role, TypeDN typeDN)
         {
-            var result = new PropertyRulePack { Role = roleLite, Type = typeDN }; 
+            var result = new PropertyRulePack { Role = role, Type = typeDN }; 
             cache.GetRules(result, PropertyRouteLogic.RetrieveOrGenerateProperties(typeDN));
+
+            var coercer = PropertyCoercer.Instance.GetCoerceValue(role);
+            result.Rules.ForEach(r => r.CoercedValues = EnumExtensions.GetValues<PropertyAllowed>()
+                .Where(a => !coercer(PropertyRouteLogic.GetPropertyRoute(r.Resource), a).Equals(a))
+                .ToArray());
+
             return result;
         }
 
@@ -155,15 +162,18 @@ namespace Signum.Engine.Authorization
             return null;
         }
 
-        public static DefaultDictionary<PropertyRoute, PropertyAllowed> AuthorizedProperties()
+        public static Dictionary<PropertyRoute, PropertyAllowed> OverridenProperties()
         {
-            return cache.GetDefaultDictionary();
+            var dd = cache.GetDefaultDictionary();
+
+            return dd.OverrideDictionary;
         }
 
         public static AuthThumbnail? GetAllowedThumbnail(Lite<RoleDN> role, Type entityType)
         {
             return PropertyRoute.GenerateRoutes(entityType).Select(pr => cache.GetAllowed(role, pr)).Collapse();
         }
+
     }
 
     class PropertyMerger : Merger<PropertyRoute, PropertyAllowed>
@@ -221,17 +231,28 @@ namespace Signum.Engine.Authorization
 
         static PropertyAllowed TypeAllowedBase(PropertyRoute key, Lite<RoleDN> role)
         {
-            return TypeAuthLogic.GetAllowedBase(role, key.RootType).Max(ExecutionMode.InUserInterface).ToPropertyAllowed();
+            return TypeAuthLogic.GetAllowedBase(role, key.RootType).MaxUI().ToPropertyAllowed();
         }
 
         static PropertyAllowed TypeAllowed(PropertyRoute key, Lite<RoleDN> role)
         {
-            return TypeAuthLogic.GetAllowed(role, key.RootType).Max(ExecutionMode.InUserInterface).ToPropertyAllowed();
+            return TypeAuthLogic.GetAllowed(role, key.RootType).MaxUI().ToPropertyAllowed();
+        }
+
+        public override Func<PropertyRoute, PropertyAllowed> MergeDefault(Lite<RoleDN> role, IEnumerable<Func<PropertyRoute, PropertyAllowed>> baseDefaultValues)
+        {
+            return pr => TypeAllowed(pr, role); 
         }
     }
 
     class PropertyCoercer : Coercer<PropertyAllowed, PropertyRoute>
     {
+        public static readonly PropertyCoercer Instance = new PropertyCoercer();
+
+        private PropertyCoercer()
+        {
+        }
+
         public override Func<PropertyRoute, PropertyAllowed, PropertyAllowed> GetCoerceValue(Lite<RoleDN> role)
         {
             return (pr, a) =>
@@ -241,7 +262,7 @@ namespace Signum.Engine.Authorization
 
                 TypeAllowedAndConditions aac = TypeAuthLogic.GetAllowed(role, pr.RootType);
 
-                TypeAllowedBasic ta = aac.Max(ExecutionMode.InUserInterface);
+                TypeAllowedBasic ta = aac.MaxUI();
 
                 PropertyAllowed pa = ta.ToPropertyAllowed();
 
@@ -258,7 +279,7 @@ namespace Signum.Engine.Authorization
 
                 TypeAllowedAndConditions aac = TypeAuthLogic.Manual.GetAllowed(role, pr.RootType);
 
-                TypeAllowedBasic ta = aac.Max(ExecutionMode.InUserInterface);
+                TypeAllowedBasic ta = aac.MaxUI();
 
                 PropertyAllowed pa = ta.ToPropertyAllowed();
 

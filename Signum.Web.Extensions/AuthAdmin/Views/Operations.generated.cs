@@ -28,7 +28,7 @@ namespace Signum.Web.Extensions.AuthAdmin.Views
     using System.Web.WebPages;
     using Signum.Engine;
     
-    #line 3 "..\..\AuthAdmin\Views\Operations.cshtml"
+    #line 2 "..\..\AuthAdmin\Views\Operations.cshtml"
     using Signum.Engine.Basics;
     
     #line default
@@ -48,11 +48,9 @@ namespace Signum.Web.Extensions.AuthAdmin.Views
         }
         public override void Execute()
         {
-WriteLiteral("\r\n");
-
 
             
-            #line 2 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 1 "..\..\AuthAdmin\Views\Operations.cshtml"
 Write(Html.ScriptCss("~/authAdmin/Content/SF_AuthAdmin.css"));
 
             
@@ -63,7 +61,7 @@ WriteLiteral("\r\n");
 
 
             
-            #line 4 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 3 "..\..\AuthAdmin\Views\Operations.cshtml"
  using (var tc = Html.TypeContext<OperationRulePack>())
 {
     
@@ -71,29 +69,43 @@ WriteLiteral("\r\n");
             #line default
             #line hidden
             
-            #line 6 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 5 "..\..\AuthAdmin\Views\Operations.cshtml"
 Write(Html.EntityLine(tc, f => f.Role));
 
             
             #line default
             #line hidden
             
-            #line 6 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 5 "..\..\AuthAdmin\Views\Operations.cshtml"
                                      
     
             
             #line default
             #line hidden
             
+            #line 6 "..\..\AuthAdmin\Views\Operations.cshtml"
+Write(Html.ValueLine(tc, f => f.Strategy));
+
+            
+            #line default
+            #line hidden
+            
+            #line 6 "..\..\AuthAdmin\Views\Operations.cshtml"
+                                        
+    
+            
+            #line default
+            #line hidden
+            
             #line 7 "..\..\AuthAdmin\Views\Operations.cshtml"
-Write(Html.EntityLine(tc, f => f.Strategy));
+Write(Html.EntityLine(tc, f => f.Type));
 
             
             #line default
             #line hidden
             
             #line 7 "..\..\AuthAdmin\Views\Operations.cshtml"
-                                         
+                                     
 
 
             
@@ -120,7 +132,7 @@ WriteLiteral("\r\n                </th>\r\n                <th>\r\n             
             
             #line default
             #line hidden
-WriteLiteral("\r\n                </th> \r\n                <th>\r\n                    ");
+WriteLiteral("\r\n                </th>\r\n                <th>\r\n                    ");
 
 
             
@@ -191,45 +203,107 @@ WriteLiteral("\r\n                    ");
             
             #line default
             #line hidden
-WriteLiteral("\r\n                </td>\r\n                 <td>\r\n                    <a class=\"sf-" +
-"auth-chooser sf-auth-modify\">\r\n                        ");
+WriteLiteral("\r\n                </td>\r\n                <td>\r\n");
 
 
             
-            #line 39 "..\..\AuthAdmin\Views\Operations.cshtml"
-                   Write(Html.RadioButton(item.Compose("Allowed"), "Allow", item.Value.Allowed == OperationAllowed.Allow));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n                    </a>\r\n                </td>\r\n                <td>\r\n        " +
-"            <a class=\"sf-auth-chooser sf-auth-read\">\r\n                        ");
-
-
-            
-            #line 44 "..\..\AuthAdmin\Views\Operations.cshtml"
-                   Write(Html.RadioButton(item.Compose("Allowed"), "DBOnly", item.Value.Allowed == OperationAllowed.DBOnly));
+            #line 38 "..\..\AuthAdmin\Views\Operations.cshtml"
+                     if (!item.Value.CoercedValues.Contains(OperationAllowed.Allow))
+                    {
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                    </a>\r\n                </td>\r\n                <td>\r\n        " +
-"            <a class=\"sf-auth-chooser sf-auth-none\">\r\n                        ");
+WriteLiteral("                        <a class=\"sf-auth-chooser sf-auth-modify\">\r\n             " +
+"               ");
+
+
+            
+            #line 41 "..\..\AuthAdmin\Views\Operations.cshtml"
+                       Write(Html.RadioButton(item.Compose("Allowed"), "Allow", item.Value.Allowed == OperationAllowed.Allow));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n                        </a>\r\n");
+
+
+            
+            #line 43 "..\..\AuthAdmin\Views\Operations.cshtml"
+                    }
+
+            
+            #line default
+            #line hidden
+WriteLiteral("                </td>\r\n                <td>\r\n");
+
+
+            
+            #line 46 "..\..\AuthAdmin\Views\Operations.cshtml"
+                     if (!item.Value.CoercedValues.Contains(OperationAllowed.DBOnly))
+                    {
+
+            
+            #line default
+            #line hidden
+WriteLiteral("                        <a class=\"sf-auth-chooser sf-auth-read\">\r\n               " +
+"             ");
 
 
             
             #line 49 "..\..\AuthAdmin\Views\Operations.cshtml"
-                   Write(Html.RadioButton(item.Compose("Allowed"), "None", item.Value.Allowed == OperationAllowed.None));
+                       Write(Html.RadioButton(item.Compose("Allowed"), "DBOnly", item.Value.Allowed == OperationAllowed.DBOnly));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                    </a>\r\n                </td>\r\n                <td>\r\n        " +
-"            ");
+WriteLiteral("\r\n                        </a>\r\n");
 
 
             
-            #line 53 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 51 "..\..\AuthAdmin\Views\Operations.cshtml"
+                    }
+
+            
+            #line default
+            #line hidden
+WriteLiteral("                </td>\r\n                <td>\r\n");
+
+
+            
+            #line 54 "..\..\AuthAdmin\Views\Operations.cshtml"
+                     if (!item.Value.CoercedValues.Contains(OperationAllowed.None))
+                    {
+
+            
+            #line default
+            #line hidden
+WriteLiteral("                        <a class=\"sf-auth-chooser sf-auth-none\">\r\n               " +
+"             ");
+
+
+            
+            #line 57 "..\..\AuthAdmin\Views\Operations.cshtml"
+                       Write(Html.RadioButton(item.Compose("Allowed"), "None", item.Value.Allowed == OperationAllowed.None));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n                        </a>\r\n");
+
+
+            
+            #line 59 "..\..\AuthAdmin\Views\Operations.cshtml"
+                    }
+
+            
+            #line default
+            #line hidden
+WriteLiteral("                </td>\r\n                <td>\r\n                    ");
+
+
+            
+            #line 62 "..\..\AuthAdmin\Views\Operations.cshtml"
                Write(Html.CheckBox(item.Compose("Overriden"), item.Value.Overriden, new { disabled = "disabled", @class = "sf-auth-overriden" }));
 
             
@@ -239,7 +313,7 @@ WriteLiteral("\r\n                </td>\r\n            </tr>\r\n");
 
 
             
-            #line 56 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 65 "..\..\AuthAdmin\Views\Operations.cshtml"
         }
 
             
@@ -249,7 +323,7 @@ WriteLiteral("    </table>\r\n");
 
 
             
-            #line 58 "..\..\AuthAdmin\Views\Operations.cshtml"
+            #line 67 "..\..\AuthAdmin\Views\Operations.cshtml"
 }
             
             #line default

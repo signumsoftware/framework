@@ -10,6 +10,9 @@ using System.Windows.Controls;
 using Signum.Utilities;
 using Signum.Services;
 using System.Windows;
+using System.Globalization;
+using System.Windows.Data;
+using System.Windows.Markup;
 
 namespace Signum.Windows.Authorization
 {
@@ -138,6 +141,51 @@ namespace Signum.Windows.Authorization
                         menuItem.Visibility = Visibility.Collapsed;
                 }
             }
+        }
+    }
+
+    public class VisibleIfNotContainsExtension : MarkupExtension, IValueConverter
+    {
+        object Element { get; set; }
+
+        public VisibleIfNotContainsExtension(object element)
+        {
+            this.Element = element;
+        }
+
+        public override object ProvideValue(IServiceProvider serviceProvider)
+        {
+            return this;
+        }
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value == null || !value.GetType().IsArray || value.GetType().GetElementType().UnNullify() != Element.GetType().UnNullify())
+                return DependencyProperty.UnsetValue;
+
+            return Array.IndexOf((Array)value, Element) == -1 ? Visibility.Visible : Visibility.Hidden; /*bool*/
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
+    }
+
+    public class BoolExtension : MarkupExtension
+    {
+        public BoolExtension() { }
+
+        public BoolExtension(string value)
+        {
+            Value = value;
+        }
+
+        string Value { get; set; }
+
+        public override object ProvideValue(IServiceProvider serviceProvider)
+        {
+            return bool.Parse(Value);
         }
     }
 }
