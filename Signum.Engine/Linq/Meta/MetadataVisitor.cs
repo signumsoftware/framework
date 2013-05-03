@@ -169,6 +169,8 @@ namespace Signum.Engine.Linq
                 }
             }
 
+            if (m.Method.DeclaringType == typeof(LinqHints))
+                return Visit(m.Arguments[0]);
 
             if (m.Method.DeclaringType == typeof(Lite) && m.Method.Name == "ToLite")
                 return MakeCleanMeta(m.Type, Visit(m.Arguments[0]));
