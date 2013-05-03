@@ -431,18 +431,21 @@ namespace Signum.Engine.Authorization
 
         public static void LoadRoles(XDocument doc)
         {
-            Dictionary<string, string[]> rolesXml = doc.Root.Element("Roles").Elements("Role").ToDictionary(
-                x => x.Attribute("Name").Value,
-                x => x.Attribute("Contains").Value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
-
-            var dic = rolesXml.Keys.Select(k => new RoleDN { Name = k }).ToDictionary(a => a.Name);
-
-            foreach (var item in dic.Values)
+            var roleInfos = doc.Root.Element("Roles").Elements("Role").Select(x => new
             {
-                item.Roles = rolesXml[item.Name].Select(r => dic.GetOrThrow(r).ToLiteFat()).ToMList();
+                Name = x.Attribute("Name").Value,
+                MergeStrategy = x.Attribute("MergeStrategy").TryCS(ms => ms.Value.ToEnum<MergeStrategy>()) ?? MergeStrategy.Union,
+                SubRoles = x.Attribute("Contains").Value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+            }).ToList();
+
+            var roles = roleInfos.ToDictionary(a => a.Name, a => new RoleDN { Name = a.Name, MergeStrategy = a.MergeStrategy });
+
+            foreach (var ri in roleInfos)
+            {
+                roles[ri.Name].Roles = ri.SubRoles.Select(r => roles.GetOrThrow(r).ToLiteFat()).ToMList();
             }
 
-            dic.Values.SaveList();
+            roles.Values.SaveList();
         }
 
         public static void SynchronizeRoles(XDocument doc)
