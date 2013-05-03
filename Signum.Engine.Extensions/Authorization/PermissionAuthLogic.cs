@@ -71,7 +71,7 @@ namespace Signum.Engine.Authorization
 
                 RegisterPermissions(BasicPermission.AdminRules);
 
-                AuthLogic.ExportToXml += () => cache.ExportXml("Permissions", "Permission", p => p.Key, b => b.ToString());
+                AuthLogic.ExportToXml += () => cache.ExportXml("Permissions", "Permission", PermissionDN.UniqueKey, b => b.ToString());
                 AuthLogic.ImportFromXml += (x, roles, replacements) =>
                 {
                     string replacementKey = typeof(PermissionDN).Name;

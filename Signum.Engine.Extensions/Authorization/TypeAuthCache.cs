@@ -299,28 +299,31 @@ namespace Signum.Entities.Authorization
 
         internal XElement ExportXml()
         {
-            var list = Database.RetrieveAll<RuleTypeDN>();
-
-            var rules = list.AgGroupToDictionary(a => a.Role, gr => gr.ToDictionary(a => a.Resource));
+            var rules = runtimeRules.Value;
 
             return new XElement("Types",
                 (from r in AuthLogic.RolesInOrder()
+                 let rac = rules[r]
                  select new XElement("Role",
                      new XAttribute("Name", r.ToString()),
-                     rules.TryGetC(r).TryCC(dic =>
-                         from kvp in dic
-                         let resource = kvp.Key.CleanName
+                         from k in rac.DefaultDictionary().OverrideDictionary.TryCC(dic => dic.Keys).EmptyIfNull()
+                         let allowedBase = rac.GetAllowedBase(k)
+                         let allowed = rac.GetAllowed(k)
+                         where !allowed.Equals(allowedBase)
+                         let resource = TypeLogic.GetCleanName(k)
                          orderby resource
                          select new XElement("Type",
                             new XAttribute("Resource", resource),
-                            new XAttribute("Allowed", kvp.Value.Allowed.ToString()),
-                            from c in kvp.Value.Conditions
+                            new XAttribute("Allowed", allowed.ToString()),
+                            from c in allowed.Conditions
+                            let conditionName = TypeConditionNameDN.UniqueKey(c.ConditionName)
+                            orderby conditionName
                             select new XElement("Condition",
-                                new XAttribute("Name", c.Condition.Key),
+                                new XAttribute("Name", conditionName),
                                 new XAttribute("Allowed", c.Allowed.ToString()))
                          )
-                     ))
-                 ));
+                     )
+                ));
         }
 
 

@@ -309,26 +309,25 @@ namespace Signum.Entities.Authorization
             }
         }
 
-        internal XElement ExportXml(XName rootName, XName elementName, Func<R, string> resourceToString, Func<A, string> allowedToString)
+        internal XElement ExportXml(XName rootName, XName elementName, Func<K, string> resourceToString, Func<A, string> allowedToString)
         {
-            var list = Database.RetrieveAll<RT>();
-
-            var rules = list.AgGroupToDictionary(a => a.Role, gr => gr.ToDictionary(a => a.Resource, a => a.Allowed));
+            var rules = runtimeRules.Value;
 
             return new XElement(rootName,
                 (from r in AuthLogic.RolesInOrder()
+                 let rac = rules[r]
                  select new XElement("Role",
                      new XAttribute("Name", r.ToString()),
-                     rules.TryGetC(r).TryCC(dic =>
-                         from kvp in dic
-                         let resource = resourceToString(kvp.Key)
-                         let allowed = allowedToString(kvp.Value)
+                         from k in rac.DefaultDictionary().OverrideDictionary.TryCC(dic=>dic.Keys).EmptyIfNull()
+                         let allowedBase = rac.GetAllowedBase(k)
+                         let allowed = rac.GetAllowed(k)
+                         where !allowed.Equals(allowedBase)
+                         let resource = resourceToString(k)
                          orderby resource
                          select new XElement(elementName,
                             new XAttribute("Resource", resource),
-                            new XAttribute("Allowed", allowed))
-                     ))
-                 ));
+                            new XAttribute("Allowed", allowedToString(allowed)))
+                ));
         }
 
 
