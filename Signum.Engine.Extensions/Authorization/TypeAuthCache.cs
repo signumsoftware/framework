@@ -314,7 +314,7 @@ namespace Signum.Entities.Authorization
                          orderby resource
                          select new XElement("Type",
                             new XAttribute("Resource", resource),
-                            new XAttribute("Allowed", allowed.ToString()),
+                            new XAttribute("Allowed", allowed.Fallback.ToString()),
                             from c in allowed.Conditions
                             let conditionName = TypeConditionNameDN.UniqueKey(c.ConditionName)
                             orderby conditionName
