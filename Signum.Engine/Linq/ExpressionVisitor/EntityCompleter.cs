@@ -41,6 +41,12 @@ namespace Signum.Engine.Linq
             if (lite.Reference is ImplementedByAllExpression)
                 return null;
 
+            if (lite.Reference is EntityExpression && ((EntityExpression)lite.Reference).AvoidExpandOnRetrieving)
+                return null;
+
+            if (lite.Reference is ImplementedByExpression && ((ImplementedByExpression)lite.Reference).Implementations.Any(imp => imp.Reference.AvoidExpandOnRetrieving))
+                return null;
+
             if (IsCacheable(typeId))
                 return null;
 
@@ -64,9 +70,9 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitEntity(EntityExpression ee)
         {
-            if (previousTypes.Contains(ee.Type) || IsCached(ee.Type))
+            if (previousTypes.Contains(ee.Type) || IsCached(ee.Type) || ee.AvoidExpandOnRetrieving)
             {
-                ee = new EntityExpression(ee.Type, ee.ExternalId, null, null);
+                ee = new EntityExpression(ee.Type, ee.ExternalId, null, null, ee.AvoidExpandOnRetrieving);
             }
             else
                 ee = binder.Completed(ee);
@@ -77,7 +83,7 @@ namespace Signum.Engine.Linq
 
             var id = Visit(ee.ExternalId);
 
-            var result = new EntityExpression(ee.Type, id, ee.TableAlias, bindings);
+            var result = new EntityExpression(ee.Type, id, ee.TableAlias, bindings, ee.AvoidExpandOnRetrieving);
 
             previousTypes = previousTypes.Pop();
 

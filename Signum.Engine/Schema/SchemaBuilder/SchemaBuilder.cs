@@ -366,7 +366,7 @@ namespace Signum.Engine.Maps
                 Nullable = Settings.IsNullable(route, forceNull),
                 IsLite = false,
                 IndexType = Settings.GetIndexType(route),
-                ReferenceTable = cleanEnum.HasAttribute<FlagsAttribute>() && !route.FieldInfo.HasAttribute<ForceForeignKey>() ? null : table,
+                ReferenceTable = cleanEnum.HasAttribute<FlagsAttribute>() && !route.FieldInfo.HasAttribute<ForceForeignKeyAttribute>() ? null : table,
             };
         }
 
@@ -379,6 +379,7 @@ namespace Signum.Engine.Maps
                 Nullable = Settings.IsNullable(route, forceNull),
                 IsLite  = route.Type.IsLite(),
                 ReferenceTable = Include(Lite.Extract(route.Type) ?? route.Type, route),
+                AvoidExpandOnRetrieving = Settings.FieldAttributes(route).OfType<AvoidExpandQueryAttribute>().Any()
             };
         }
 
@@ -400,7 +401,8 @@ namespace Signum.Engine.Maps
                     Name = name.Add(TypeLogic.GetCleanName(t)).ToString(),
                     Nullable = nullable,
                 }),
-                IsLite = route.Type.IsLite()
+                IsLite = route.Type.IsLite(),
+                AvoidExpandOnRetrieving = Settings.FieldAttributes(route).OfType<AvoidExpandQueryAttribute>().Any()
             };
         }
 
@@ -423,7 +425,8 @@ namespace Signum.Engine.Maps
                     Nullable = nullable,
                     ReferenceTable = Include(typeof(TypeDN), route)
                 },
-                IsLite = route.Type.IsLite()
+                IsLite = route.Type.IsLite(),
+                AvoidExpandOnRetrieving = Settings.FieldAttributes(route).OfType<AvoidExpandQueryAttribute>().Any()
             };
         }
 

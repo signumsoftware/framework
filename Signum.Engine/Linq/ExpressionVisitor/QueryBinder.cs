@@ -1235,7 +1235,7 @@ namespace Signum.Engine.Linq
                 var implementations = groups.Select(g =>
                     new ImplementationColumn(g.Key,
                         new EntityExpression(g.Key,
-                            CombineWhens(g.Value.Select(w => new When(w.Condition, w.Fie.ExternalId)).ToList(), typeof(int?)), null, null))).ToReadOnly();
+                            CombineWhens(g.Value.Select(w => new When(w.Condition, w.Fie.ExternalId)).ToList(), typeof(int?)), null, null, g.Value.Any(a => a.Fie.AvoidExpandOnRetrieving)))).ToReadOnly();
 
                 if(implementations.Count == 1)
                     return implementations[0].Reference;
@@ -1411,7 +1411,7 @@ namespace Signum.Engine.Linq
                 }
                 else
                 {
-                    return new EntityExpression(uType, Expression.Constant(null, typeof(int?)), null, null);
+                    return new EntityExpression(uType, Expression.Constant(null, typeof(int?)), null, null, ee.AvoidExpandOnRetrieving);
                 }
             }
             if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedBy)
@@ -1422,7 +1422,7 @@ namespace Signum.Engine.Linq
 
                 if (fies.IsEmpty())
                 {
-                    return new EntityExpression(uType, Expression.Constant(null, typeof(int?)), null, null);
+                    return new EntityExpression(uType, Expression.Constant(null, typeof(int?)), null, null, avoidExpandOnRetrieving: true);
                 }
                 if (fies.Length == 1 && fies[0].Type == uType)
                     return fies[0];
@@ -1437,7 +1437,7 @@ namespace Signum.Engine.Linq
                     return new ImplementedByAllExpression(uType, iba.Id, iba.TypeId);
 
                 var conditionalId = Expression.Condition(SmartEqualizer.EqualNullable(iba.TypeId.TypeColumn, TypeConstant(uType)), iba.Id.Nullify(), NullId);
-                return new EntityExpression(uType, conditionalId, null, null);
+                return new EntityExpression(uType, conditionalId, null, null, avoidExpandOnRetrieving: false);
             }
 
             else if (operand.NodeType == (ExpressionType)DbExpressionType.LiteReference)
@@ -1863,7 +1863,7 @@ namespace Signum.Engine.Linq
                 var newAlias = NextTableAlias(table.Name);
                 var bindings = table.Bindings(newAlias, this);
 
-                var result = new EntityExpression(entity.Type, entity.ExternalId, newAlias, bindings);
+                var result = new EntityExpression(entity.Type, entity.ExternalId, newAlias, bindings, avoidExpandOnRetrieving: false); 
 
                 requests.Add(new TableRequest
                 {
