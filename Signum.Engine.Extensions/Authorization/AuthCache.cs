@@ -327,7 +327,7 @@ namespace Signum.Entities.Authorization
                          select new XElement(elementName,
                             new XAttribute("Resource", resource),
                             new XAttribute("Allowed", allowedToString(allowed)))
-                ));
+                )));
         }
 
 
