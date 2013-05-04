@@ -187,7 +187,7 @@ namespace Signum.Engine
                         var entity = retrieved.TryGetC(item.Key);
                         if (entity != null)
                         {
-                            var toStr = item.ToString();
+                            var toStr = entity.ToString();
 
                             foreach (var lite in item.Value)
                                 lite.SetToString(toStr);
