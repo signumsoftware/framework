@@ -63,13 +63,28 @@ namespace Signum.Windows.UIAutomation
                 element.UnCheck();
         }
 
+        public static bool? GetCheckState(this AutomationElement element)
+        {
+            var ck = element.Pattern<TogglePattern>();
+            switch (ck.Current.ToggleState)
+            {
+                case ToggleState.Off:
+                    return false;
+                case ToggleState.On:
+                    return true;
+                case ToggleState.Indeterminate:
+                default:
+                    return null;
+            }
+        }
+
         public static void Check(this AutomationElement element)
         {
-            var  ck= element.Pattern<TogglePattern>();
+            var ck = element.Pattern<TogglePattern>();
             if (ck.Current.ToggleState == ToggleState.Indeterminate)
                 ck.Toggle();
 
-            if(ck.Current.ToggleState != ToggleState.On)
+            if (ck.Current.ToggleState != ToggleState.On)
                 ck.Toggle();
 
             if (ck.Current.ToggleState != ToggleState.On)
@@ -77,7 +92,7 @@ namespace Signum.Windows.UIAutomation
         }
 
         public static void UnCheck(this AutomationElement element)
-        { 
+        {
             var ck = element.Pattern<TogglePattern>();
 
             if (ck.Current.ToggleState != ToggleState.Off)
