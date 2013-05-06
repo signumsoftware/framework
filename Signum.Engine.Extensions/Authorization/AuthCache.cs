@@ -261,27 +261,30 @@ namespace Signum.Entities.Authorization
 
                 Func<K, A> defaultAllowed = merger.MergeDefault(role, baseCaches.Select(a => a.rules.DefaultAllowed));
 
+                Func<K, A> baseAllowed =  k => merger.Merge(k, role, baseCaches.Select(b => b.GetAllowed(k)));
+
                 var keys = baseCaches
                     .Where(b => b.rules.OverrideDictionary != null)
                     .SelectMany(a => a.rules.OverrideDictionary.Keys)
                     .ToHashSet();
 
-                Dictionary<K, A> tmpRules = keys.ToDictionary(k => k, k => merger.Merge(k, role, baseCaches.Select(b => b.GetAllowed(k))));
+                Dictionary<K, A> tmpRules = keys.ToDictionary(k => k, baseAllowed);
                 if (newValues != null)
                     tmpRules.SetRange(newValues);
 
-
-                tmpRules = Simplify(tmpRules, defaultAllowed);
+                tmpRules = Simplify(tmpRules, defaultAllowed, baseAllowed);
 
                 rules = new DefaultDictionary<K, A>(defaultAllowed, tmpRules);
             }
 
-            internal Dictionary<K, A> Simplify(Dictionary<K, A> dictionary, Func<K, A> defaultAllowed)
+            internal Dictionary<K, A> Simplify(Dictionary<K, A> dictionary, Func<K, A> defaultAllowed, Func<K, A> baseAllowed)
             {
                 if (dictionary == null || dictionary.Count == 0)
                     return null;
 
-                dictionary.RemoveRange(dictionary.Where(p => p.Value.Equals(defaultAllowed(p.Key))).Select(p => p.Key).ToList());
+                dictionary.RemoveRange(dictionary.Where(p =>
+                    p.Value.Equals(defaultAllowed(p.Key)) &&
+                    p.Value.Equals(baseAllowed(p.Key))).Select(p => p.Key).ToList());
 
                 if (dictionary.Count == 0)
                     return null;
