@@ -189,7 +189,7 @@ namespace Signum.Engine.Authorization
             if (implementations.IsByAll)
                 return true;
 
-            return implementations.Types.All(t => getAllowed(t).MaxDB() != TypeAllowedBasic.None);
+            return implementations.Types.All(t => getAllowed(t).MaxUI() != TypeAllowedBasic.None);
         }
     }
 
