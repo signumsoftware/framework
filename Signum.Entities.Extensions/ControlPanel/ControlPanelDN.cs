@@ -175,6 +175,7 @@ namespace Signum.Entities.ControlPanel
         [Description("Counter list")]
         CountSearchControlPartDN,
         [Description("Counter")]
-        CountUserQueryElement
+        CountUserQueryElement,
+        Preview
     }
 }

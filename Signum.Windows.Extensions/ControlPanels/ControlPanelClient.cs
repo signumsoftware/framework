@@ -10,6 +10,7 @@ using Signum.Entities;
 using System.Windows;
 using Signum.Utilities;
 using System.Linq.Expressions;
+using Signum.Windows.Extensions.ControlPanels;
 
 namespace Signum.Windows.ControlPanels
 {
@@ -30,6 +31,7 @@ namespace Signum.Windows.ControlPanels
                     new EntitySettings<UserQueryPartDN>() { View = e => new UserQueryPartEdit() },                
                     new EntitySettings<UserChartPartDN>() { View = e => new UserChartPartEdit() }
                 });
+
                 PartViews.Add(typeof(UserQueryPartDN), new PartView
                 {
                     ViewControl = () => new UserQueryPartView(),
@@ -57,6 +59,10 @@ namespace Signum.Windows.ControlPanels
                 {
                     ViewControl = () => new LinkListPartView()
                 });
+
+                LinksClient.RegisterEntityLinks<ControlPanelDN>((cp, ctrl) => new[]{
+                    new QuickLinkAction(ControlPanelMessage.Preview.NiceToString(), () => ControlPanelWindow.View(cp))
+                }); 
             }
         }
     }

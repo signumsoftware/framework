@@ -8,13 +8,6 @@
              xmlns:secp="clr-namespace:Signum.Entities.ControlPanel;assembly=Signum.Entities.Extensions"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
-    <DockPanel LastChildFill="True">
-        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
-            <m:EntityCombo x:Name="cpCombo" EntityChanged="cpCombo_EntityChanged"/>
-            <Button x:Name="reload" Click="reload_Click" Style="{StaticResource RoundButton}">
-                <Image Source="pack://application:,,,/Signum.Windows;component/Images/reload.png" Width="16" Height="16" /> 
-            </Button>
-        </StackPanel>
         <ItemsControl ItemsSource="{Binding Parts}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
@@ -42,5 +35,4 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
-    </DockPanel>
 </UserControl>
