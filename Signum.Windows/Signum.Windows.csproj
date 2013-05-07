@@ -504,6 +504,7 @@
       <DependentUpon>EntityCombo.xaml</DependentUpon>
     </Compile>
     <Compile Include="ImageLoader.cs" />
+    <Compile Include="Widgets\LinksClient.cs" />
     <Compile Include="Widgets\LinksWidget.xaml.cs">
       <DependentUpon>LinksWidget.xaml</DependentUpon>
     </Compile>

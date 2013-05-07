@@ -228,6 +228,12 @@ namespace Signum.Windows
     {
         public FilterOption(){}
 
+        public FilterOption(string path, Func<object> value):
+            this(path, (object)value)
+        {
+
+        }
+
         public FilterOption(string path, object value)
         {
             this.Path = path;
@@ -267,7 +273,10 @@ namespace Signum.Windows
 
         public void RefreshRealValue()
         {
-            var newRealValue = (Token == null || Operation == FilterOperation.IsIn) ? Value : Server.Convert(Value, Token.Type);
+            if (Token == null || Operation == FilterOperation.IsIn || Value is Func<object>)
+                return;
+
+            var newRealValue = Server.Convert(Value, Token.Type);
 
             if (!object.Equals(newRealValue, RealValue))
             {
