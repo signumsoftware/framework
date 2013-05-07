@@ -10,8 +10,8 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="..\Resources.xaml"/>
-                <ResourceDictionary Source="..\BlueMenu.xaml"/>
+                <m:DesignTimeResourceDictionary Source="..\Resources.xaml"/>
+                <m:DesignTimeResourceDictionary Source="..\BlueMenu.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <ContextMenu x:Key="contextMenu">
                 <MenuItem Header="{m:Loc {x:Static d:SearchMessage.NewFilter}}"  Click="filter_Click"/>

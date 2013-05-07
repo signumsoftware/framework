@@ -146,6 +146,7 @@
     <Compile Include="Converters\EnumWindowsExtensions.cs" />
     <Compile Include="Converters\PropertyRouteConverter.cs" />
     <Compile Include="Converters\TimeSpanConverter.cs" />
+    <Compile Include="DesignTimeResourceDictionary.cs" />
     <Compile Include="ProgressWindow.xaml.cs">
       <DependentUpon>ProgressWindow.xaml</DependentUpon>
     </Compile>
