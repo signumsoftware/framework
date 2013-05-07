@@ -485,7 +485,7 @@ namespace Signum.Engine.Authorization
                        roleInsertsDeletes,
                        new SqlPreCommandSimple("-- END ROLE  SYNC SCRIPT")).OpenSqlFileRetry();
 
-                    Console.WriteLine("Press any key when executed...");
+                    Console.WriteLine("Press [Enter] when executed...");
                     Console.ReadLine();
                 }
                 else
@@ -522,7 +522,7 @@ namespace Signum.Engine.Authorization
                        roleRelationships,
                        new SqlPreCommandSimple("-- END ROLE  SYNC SCRIPT")).OpenSqlFileRetry();
 
-                    Console.WriteLine("Press any key when executed...");
+                    Console.WriteLine("Press [Enter] when executed...");
                     Console.ReadLine();
                 }
                 else

@@ -71,13 +71,13 @@ namespace Signum.Web.AuthAdmin
                     Register<FacadeMethodRulePack, FacadeMethodAllowedRule, FacadeMethodDN, bool, string>("facadeMethods", a => a.Resource.ToString(),
                         Mapping.New<bool>(), "Resource_Key", false);
 
-                QuickLinkWidgetHelper.RegisterEntityLinks<RoleDN>((RoleDN entity, string partialViewName, string prefix) =>
-                     entity.IsNew || !BasicPermission.AdminRules.IsAuthorized() ? null :
+                LinksClient.RegisterEntityLinks<RoleDN>((role, ctx) =>
+                     !BasicPermission.AdminRules.IsAuthorized() ? null :
                      new[]
                      {
-                         types ? new QuickLinkAction(AuthMessage._0Rules.NiceToString().Formato(typeof(TypeDN).NiceName()), RouteHelper.New().Action((AuthAdminController c)=>c.Types(entity.ToLite()))): null,
-                         permissions ? new QuickLinkAction(AuthMessage._0Rules.NiceToString().Formato(typeof(PermissionDN).NiceName()), RouteHelper.New().Action((AuthAdminController c)=>c.Permissions(entity.ToLite()))): null,
-                         facadeMethods ? new QuickLinkAction(AuthMessage._0Rules.NiceToString().Formato(typeof(FacadeMethodDN).NiceName()), RouteHelper.New().Action((AuthAdminController c)=>c.FacadeMethods(entity.ToLite()))): null
+                         types ? new QuickLinkAction(AuthMessage._0Rules.NiceToString().Formato(typeof(TypeDN).NiceName()), RouteHelper.New().Action((AuthAdminController c)=>c.Types(role))): null,
+                         permissions ? new QuickLinkAction(AuthMessage._0Rules.NiceToString().Formato(typeof(PermissionDN).NiceName()), RouteHelper.New().Action((AuthAdminController c)=>c.Permissions(role))): null,
+                         facadeMethods ? new QuickLinkAction(AuthMessage._0Rules.NiceToString().Formato(typeof(FacadeMethodDN).NiceName()), RouteHelper.New().Action((AuthAdminController c)=>c.FacadeMethods(role))): null
                      });
 
                 SpecialOmniboxProvider.Register(new SpecialOmniboxAction("DownloadAuthRules",

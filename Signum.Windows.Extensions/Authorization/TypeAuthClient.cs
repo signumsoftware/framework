@@ -36,7 +36,7 @@ namespace Signum.Windows.Authorization
 
             manager.IsViewable += manager_IsViewable;
 
-            Links.RegisterEntityLinks<RoleDN>((r, c) =>
+            LinksClient.RegisterEntityLinks<RoleDN>((r, c) =>
             {
                 bool authorized = BasicPermission.AdminRules.TryIsAuthorized() ?? true;
                 return new QuickLink[]
@@ -45,7 +45,7 @@ namespace Signum.Windows.Authorization
                         new TypeRules 
                         { 
                             Owner = Window.GetWindow(c),
-                            Role = r.ToLite(), 
+                            Role = r, 
                             Properties = PropertyAuthClient.Started, 
                             Operations = OperationAuthClient.Started,
                             Queries = QueryAuthClient.Started

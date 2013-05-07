@@ -20,12 +20,12 @@ namespace Signum.Windows.Authorization
         {
             Started = true;
 
-            Links.RegisterEntityLinks<RoleDN>((r, c) =>
+            LinksClient.RegisterEntityLinks<RoleDN>((r, c) =>
             {
                 bool authorized = BasicPermission.AdminRules.TryIsAuthorized() ?? true;
                 return new QuickLink[]
                 {
-                    new QuickLinkAction("Facade Method Rules", () => new FacadeMethodRules { Role = r.ToLite(), Owner = Window.GetWindow(c) }.Show())
+                    new QuickLinkAction("Facade Method Rules", () => new FacadeMethodRules { Role = r, Owner = Window.GetWindow(c) }.Show())
                     { 
                         IsVisible = authorized
                     },

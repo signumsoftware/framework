@@ -99,15 +99,9 @@ namespace Signum.Web.ControlPanel
                     };
                 });
 
-                QuickLinkWidgetHelper.RegisterEntityLinks<ControlPanelDN>((entity, partialview, prefix) =>
+                LinksClient.RegisterEntityLinks<ControlPanelDN>((cp, ctx) => new[]
                 {
-                    if (entity.IsNew)
-                        return null;
-
-                    return new QuickLink[]
-                    {
-                        new QuickLinkAction(AuthMessage.View.NiceToString(), RouteHelper.New().Action<ControlPanelController>(cpc => cpc.View(entity.ToLite())))
-                    };
+                    new QuickLinkAction(AuthMessage.View.NiceToString(), RouteHelper.New().Action<ControlPanelController>(cpc => cpc.View(cp)))
                 });
             }
         }

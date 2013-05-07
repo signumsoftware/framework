@@ -23,12 +23,12 @@ namespace Signum.Windows.Authorization
 
             AuthClient.UpdateCacheEvent += new Action(AuthClient_UpdateCacheEvent);
 
-            Links.RegisterEntityLinks<RoleDN>((r, c) =>
+            LinksClient.RegisterEntityLinks<RoleDN>((r, c) =>
             {
                 bool authorized = BasicPermission.AdminRules.TryIsAuthorized() ?? true;
                 return new QuickLink[]
                 {
-                    new QuickLinkAction("Permission Rules", () => new PermissionRules { Role = r.ToLite(), Owner = Window.GetWindow(c) }.Show())
+                    new QuickLinkAction("Permission Rules", () => new PermissionRules { Role = r, Owner = Window.GetWindow(c) }.Show())
                     {
                         IsVisible = authorized
                     },
