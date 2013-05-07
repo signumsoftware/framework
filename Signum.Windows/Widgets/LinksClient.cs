@@ -71,11 +71,15 @@ namespace Signum.Windows
         {
             ObservableCollection<QuickLink> links = new ObservableCollection<QuickLink>();
 
-            foreach (var item in entityLinks.GetValue(ident.EntityType).GetInvocationList().Cast<Func<Lite<IdentifiableEntity>, Control, QuickLink[]>>())
+            var func = entityLinks.TryGetValue(ident.EntityType);
+            if (func != null)
             {
-                var array = item(ident, control);
-                if (array != null)
-                    links.AddRange(array.NotNull().Where(l => l.IsVisible));
+                foreach (var item in func.GetInvocationList().Cast<Func<Lite<IdentifiableEntity>, Control, QuickLink[]>>())
+                {
+                    var array = item(ident, control);
+                    if (array != null)
+                        links.AddRange(array.NotNull().Where(l => l.IsVisible));
+                }
             }
 
             return links;

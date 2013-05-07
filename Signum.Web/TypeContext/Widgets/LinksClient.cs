@@ -131,11 +131,15 @@ namespace Signum.Web
 
             QuickLinkContext ctx = new QuickLinkContext { PartialViewName = partialViewName, Prefix = prefix }; 
 
-            foreach (var item in entityLinks.GetValue(ident.EntityType).GetInvocationList().Cast<Func<Lite<IdentifiableEntity>, QuickLinkContext, QuickLink[]>>())
+            var func  =  entityLinks.TryGetValue(ident.EntityType);
+            if (func != null)
             {
-                var array = item(ident, ctx);
-                if (array != null)
-                    links.AddRange(array.NotNull().Where(l => l.IsVisible));
+                foreach (var item in func.GetInvocationList().Cast<Func<Lite<IdentifiableEntity>, QuickLinkContext, QuickLink[]>>())
+                {
+                    var array = item(ident, ctx);
+                    if (array != null)
+                        links.AddRange(array.NotNull().Where(l => l.IsVisible));
+                }
             }
 
             return links;
