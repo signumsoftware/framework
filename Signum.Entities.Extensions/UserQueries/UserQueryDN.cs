@@ -174,8 +174,9 @@ namespace Signum.Entities.UserQueries
         {
             get
             {
-                if (parseException != null)
+                if (parseException != null && token == null)
                     throw parseException;
+
                 return token;
             }
             set { if (Set(ref token, value, () => Token)) TokenChanged(); }
@@ -199,6 +200,8 @@ namespace Signum.Entities.UserQueries
         public virtual void TokenChanged()
         {
             parseException = null;
+            Notify(() => Token);
+            Notify(() => TryToken);
         }
 
         protected override void PreSaving(ref bool graphModified)
@@ -210,9 +213,9 @@ namespace Signum.Entities.UserQueries
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => Token) && parseException != null)
+            if (pi.Is(() => Token) && token == null)
             {
-                return parseException.Message;
+                return parseException != null ? parseException.Message : ValidationMessage._0IsNotSet.NiceToString().Formato(pi.NiceName());
             }
 
             return base.PropertyValidation(pi);
@@ -381,12 +384,15 @@ namespace Signum.Entities.UserQueries
         {
             if (token != null)
             {
-                FilterType filterType = QueryUtils.GetFilterType(Token.Type);
-
                 if (pi.Is(() => Operation))
                 {
-                    if (!QueryUtils.GetFilterOperations(filterType).Contains(operation))
-                        return "The Filter Operation {0} is not compatible with {1}".Formato(operation, filterType);
+                    FilterType? filterType = QueryUtils.TryGetFilterType(Token.Type);
+
+                    if (filterType == null)
+                        return UserQueryMessage._0IsNotFilterable.NiceToString().Formato(token);
+
+                    if (!QueryUtils.GetFilterOperations(filterType.Value).Contains(operation))
+                        return UserQueryMessage.TheFilterOperation0isNotCompatibleWith1.NiceToString().Formato(operation, filterType);
                 }
 
                 if (pi.Is(() => ValueString))
@@ -475,7 +481,11 @@ namespace Signum.Entities.UserQueries
         [Description("Edit")]
         UserQueries_Edit,
         [Description("User Queries")]
-        UserQueries_UserQueries
+        UserQueries_UserQueries,
+        [Description("The Filter Operation {0} is not compatible with {1}")]
+        TheFilterOperation0isNotCompatibleWith1,
+        [Description("{0} is not filterable")]
+        _0IsNotFilterable
     }
 
 }

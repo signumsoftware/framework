@@ -320,6 +320,9 @@
       <DependentUpon>SyntaxHighlightBox.xaml</DependentUpon>
     </Compile>
     <Compile Include="SynthaxHighlight\TextUtilities.cs" />
+    <Compile Include="UserQueries\QueryTokenDNBuilder.xaml.cs">
+      <DependentUpon>QueryTokenDNBuilder.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserQueries\UserQueryOmniboxProvider.cs" />
     <Compile Include="UserQueries\UserQueryClient.cs" />
     <Compile Include="UserQueries\UserQueryMenuItem.cs" />
@@ -693,6 +696,10 @@
     <Page Include="SynthaxHighlight\SyntaxHighlightBox.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UserQueries\QueryTokenDNBuilder.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserQueries\UserQuery.xaml">
       <Generator>MSBuild:Compile</Generator>

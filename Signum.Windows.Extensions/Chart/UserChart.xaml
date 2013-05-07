@@ -3,6 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:c="clr-namespace:Signum.Windows.Chart"
+    xmlns:uq="clr-namespace:Signum.Windows.UserQueries"
     xmlns:dn="clr-namespace:Signum.Entities.Chart;assembly=Signum.Entities.Extensions"
     m:Common.TypeContext="{x:Type dn:UserChartDN}">
     <StackPanel>
@@ -18,10 +19,10 @@
                             <ColumnDefinition SharedSizeGroup="operation" MinWidth="100" Width="Auto"/>
                             <ColumnDefinition SharedSizeGroup="value" MinWidth="100" Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <m:QueryTokenBuilder SubTokensEvent="QueryTokenBuilderFilter_SubTokensEvent" Token="{Binding Token}" />
+                        <uq:QueryTokenDNBuilder SubTokensEvent="QueryTokenBuilderFilter_SubTokensEvent" />
                         <ComboBox Grid.Column="1" VerticalAlignment="Center"
                                   SelectedItem="{Binding Operation}" 
-                                  ItemsSource="{Binding Token, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={x:Static m:Converters.TokenOperations}}">
+                                  ItemsSource="{Binding TryToken, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={x:Static m:Converters.TokenOperations}}">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Converter={x:Static m:Converters.EnumDescription}}"/>
@@ -51,7 +52,7 @@
                                 <ColumnDefinition SharedSizeGroup="orderType" MinWidth="100" Width="Auto"/>
                                 <ColumnDefinition SharedSizeGroup="token" MinWidth="100" Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <m:QueryTokenBuilder SubTokensEvent="QueryTokenBuilderOrders_SubTokensEvent"  Token="{Binding Token}"/>
+                            <uq:QueryTokenDNBuilder SubTokensEvent="QueryTokenBuilderOrders_SubTokensEvent" />
                             <m:ValueLine m:Common.Route="OrderType" Grid.Column="1" VerticalAlignment="Center" />
                         </Grid>
                     </DataTemplate>
