@@ -154,6 +154,16 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Types.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Files\Views\FileRepository.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>FileRepository.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Files\Views\_ViewStart.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Translation\Controllers\TranslationController.cs" />
     <Compile Include="Translation\TranslationClient.cs" />
     <Compile Include="Translation\ITranslator.cs" />
@@ -1151,6 +1161,14 @@
     <Content Include="Note\Views\NoteType.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>NoteType.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Files\Views\FileRepository.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>FileRepository.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Files\Views\_ViewStart.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>RazorGenerator</Generator>
