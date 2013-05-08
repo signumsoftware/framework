@@ -452,7 +452,7 @@ namespace Signum.Engine.Operations
             return (T)result;
         }
 
-        private static IOperation FindOperation(Type type, Enum operationKey)
+        public static IOperation FindOperation(Type type, Enum operationKey)
         {
             IOperation result = operations.TryGetValue(type).TryGetC(operationKey);
             if (result == null)
