@@ -10,7 +10,7 @@ using Signum.Entities;
 using System.Windows;
 using Signum.Utilities;
 using System.Linq.Expressions;
-using Signum.Windows.Extensions.ControlPanels;
+using Signum.Windows.ControlPanels;
 
 namespace Signum.Windows.ControlPanels
 {

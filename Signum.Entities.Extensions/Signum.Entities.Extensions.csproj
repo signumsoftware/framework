@@ -95,6 +95,7 @@
     <Compile Include="Authorization\Role.cs" />
     <Compile Include="Authorization\ServicesData.cs" />
     <Compile Include="Authorization\User.cs" />
+    <Compile Include="ControlPanel\ControlPanelOmniboxResultGenerator.cs" />
     <Compile Include="Help\HelpMessage.cs" />
     <Compile Include="Translation\CultureInfoDN.cs" />
     <Compile Include="Basics\HourMinuteDN.cs" />

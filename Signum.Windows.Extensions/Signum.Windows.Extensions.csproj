@@ -208,6 +208,7 @@
     <Compile Include="ControlPanels\CountSearchControlPartView.xaml.cs">
       <DependentUpon>CountSearchControlPartView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ControlPanels\ControlPanelOmniboxProvider.cs" />
     <Compile Include="ControlPanels\UserQueryPartView.xaml.cs">
       <DependentUpon>UserQueryPartView.xaml</DependentUpon>
     </Compile>

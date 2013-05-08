@@ -14,7 +14,7 @@ using Signum.Entities;
 using Signum.Entities.ControlPanel;
 using Signum.Utilities;
 
-namespace Signum.Windows.Extensions.ControlPanels
+namespace Signum.Windows.ControlPanels
 {
     /// <summary>
     /// Interaction logic for ControlPanelWindow.xaml
