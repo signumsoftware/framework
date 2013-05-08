@@ -214,16 +214,39 @@ namespace Signum.Engine.Authorization
 
         public static OperationAllowed MaxTypePermission(Enum operationKey, TypeAllowedBasic minimum,  Func<Type, TypeAllowedAndConditions> allowed)
         {
-            return OperationLogic.FindTypes(operationKey).Max(t =>
+            Func<Type, OperationAllowed> operationAllowed = t =>
             {
                 if (!TypeLogic.TypeToDN.ContainsKey(t))
                     return OperationAllowed.Allow;
+                
+                var ta = allowed(t);
 
-                var typeAllowed = allowed(t);
-
-                return minimum <= typeAllowed.MaxUI() ? OperationAllowed.Allow :
-                    minimum <= typeAllowed.MaxDB() ? OperationAllowed.DBOnly :
+                return minimum <= ta.MaxUI() ? OperationAllowed.Allow :
+                    minimum <= ta.MaxDB() ? OperationAllowed.DBOnly :
                     OperationAllowed.None;
+            };
+
+            return OperationLogic.FindTypes(operationKey).Max(t =>
+            {
+                var operation = OperationLogic.FindOperation(t, operationKey);
+
+                Type resultType = operation.OperationType == OperationType.ConstructorFrom ||
+                    operation.OperationType == OperationType.ConstructorFromMany ? operation.ReturnType : operation.Type;
+
+                var result = operationAllowed(resultType);
+
+                if (result == OperationAllowed.None)
+                    return result;
+
+                Type fromType = operation.OperationType == OperationType.ConstructorFrom ||
+                    operation.OperationType == OperationType.ConstructorFromMany ? operation.Type : null;
+
+                if (fromType == null)
+                    return result;
+
+                var fromTypeAllowed = operationAllowed(fromType);
+
+                return result < fromTypeAllowed ? result : fromTypeAllowed;
             });
         }
     }
