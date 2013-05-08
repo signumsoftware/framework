@@ -91,4 +91,24 @@ namespace Signum.Entities.Authorization
         Save,
         Delete
     }
+
+    [Serializable, EntityKind(EntityKind.System)]
+    public class LastAuthRulesImportDN : IdentifiableEntity
+    {
+        [UniqueIndex, FieldWithoutProperty]
+        string uniqueKey = "Unique";
+
+        DateTime date;
+        public DateTime Date
+        {
+            get { return date; }
+            set { Set(ref date, value, () => Date); }
+        }
+
+        static Expression<Func<LastAuthRulesImportDN, string>> ToStringExpression = e => e.uniqueKey;
+        public override string ToString()
+        {
+            return ToStringExpression.Evaluate(this);
+        }
+    }
 }

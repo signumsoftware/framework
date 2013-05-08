@@ -65,6 +65,7 @@ namespace Signum.Engine.Authorization
 
                 sb.Include<UserDN>();
                 sb.Include<RoleDN>();
+                sb.Include<LastAuthRulesImportDN>(); 
 
                 roles = sb.GlobalLazy(CacheRoles, new InvalidateWith(typeof(RoleDN)));
                 mergeStrategies = sb.GlobalLazy(() =>
@@ -352,9 +353,13 @@ namespace Signum.Engine.Authorization
 
         public static XDocument ExportRules()
         {
+            var imported = Database.Query<LastAuthRulesImportDN>().SingleOrDefault();
+
             return new XDocument(
                 new XDeclaration("1.0", "utf-8", "yes"),
                 new XElement("Auth",
+                    imported == null ? null : new XElement("Imported", new XAttribute("On", imported.Date.ToString("s"))),
+                    new XElement("Exported", new XAttribute("On", DateTime.Now.ToString("s"))),
                     new XElement("Roles",
                         RolesInOrder().Select(r => new XElement("Role",
                             new XAttribute("Name", r.ToString()),
@@ -408,9 +413,12 @@ namespace Signum.Engine.Authorization
                     new SqlPreCommandSimple("-- Alien role {0} not configured!!".Formato(n))
                 ).Combine(Spacing.Simple);
 
-            var result = ImportFromXml.GetInvocationList()
+            SqlPreCommand result = ImportFromXml.GetInvocationList()
                 .Cast<Func<XElement, Dictionary<string, Lite<RoleDN>>, Replacements, SqlPreCommand>>()
                 .Select(inv => inv(doc.Root, rolesDic, replacements)).Combine(Spacing.Triple);
+
+            result = SqlPreCommand.Combine(Spacing.Triple, result, UpdateLastAuthRules(doc.Root.Element("Exported")));
+            
 
             if (replacements.Values.Any(a => a.Any()))
                 SafeConsole.WriteLineColor(ConsoleColor.Red, "There are renames! Remember to export after executing the script");
@@ -427,6 +435,30 @@ namespace Signum.Engine.Authorization
                 declareParent,
                 result,
                 new SqlPreCommandSimple("-- END AUTH SYNC SCRIPT"));
+        }
+
+        private static SqlPreCommand UpdateLastAuthRules(XElement exported)
+        {
+            var table = Schema.Current.Table(typeof(LastAuthRulesImportDN)); 
+
+            LastAuthRulesImportDN last = Database.Query<LastAuthRulesImportDN>().SingleOrDefaultEx();
+
+            if (exported == null)
+            {
+                if (last == null)
+                    return null;
+
+                return table.DeleteSqlSync(last);
+            }
+
+            DateTime dt = DateTime.ParseExact(exported.Attribute("On").Value, "s", null);
+
+            if (last == null)
+                return table.InsertSqlSync(new LastAuthRulesImportDN { Date = dt });
+
+            last.Date = dt;
+
+            return table.UpdateSqlSync(last); 
         }
 
         public static void LoadRoles(XDocument doc)
