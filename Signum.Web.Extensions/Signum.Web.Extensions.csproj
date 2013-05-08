@@ -164,6 +164,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="ControlPanel\ControlPanelOmniboxProvider.cs" />
     <Compile Include="Translation\Controllers\TranslationController.cs" />
     <Compile Include="Translation\TranslationClient.cs" />
     <Compile Include="Translation\ITranslator.cs" />

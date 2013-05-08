@@ -193,6 +193,12 @@
     </Compile>
     <Compile Include="Chart\UserChartMenuItem.cs" />
     <Compile Include="Chart\UserChartOmniboxProvider.cs" />
+    <Compile Include="ControlPanels\ControlPanelSelector.xaml.cs">
+      <DependentUpon>ControlPanelSelector.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\ControlPanelWindow.xaml.cs">
+      <DependentUpon>ControlPanelWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ControlPanels\UserChartPartView.xaml.cs">
       <DependentUpon>UserChartPartView.xaml</DependentUpon>
     </Compile>
@@ -202,6 +208,7 @@
     <Compile Include="ControlPanels\CountSearchControlPartView.xaml.cs">
       <DependentUpon>CountSearchControlPartView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ControlPanels\ControlPanelOmniboxProvider.cs" />
     <Compile Include="ControlPanels\UserQueryPartView.xaml.cs">
       <DependentUpon>UserQueryPartView.xaml</DependentUpon>
     </Compile>
@@ -546,6 +553,14 @@
     <Page Include="ControlPanels\Admin\ControlPanelEdit.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ControlPanels\ControlPanelSelector.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ControlPanels\ControlPanelWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="ControlPanels\UserChartPartView.xaml">
       <Generator>MSBuild:Compile</Generator>

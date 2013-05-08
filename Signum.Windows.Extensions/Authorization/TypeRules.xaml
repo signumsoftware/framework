@@ -17,7 +17,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="AuthResources.xaml"/>
                 <ResourceDictionary Source="TreeViewColumnResources.xaml"/>
-                <ResourceDictionary Source="pack://application:,,,/Signum.Windows;Component/Resources.xaml"/>
+                <m:DesignTimeResourceDictionary Source="pack://application:,,,/Signum.Windows;Component/Resources.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
