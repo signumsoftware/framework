@@ -6,7 +6,7 @@
 	xmlns:d="clr-namespace:Signum.Entities;assembly=Signum.Entities"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" >
     <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="MiniExpander.xaml"/>
+        <m:DesignTimeResourceDictionary Source="MiniExpander.xaml"/>
     </ResourceDictionary.MergedDictionaries>
 
     <SolidColorBrush x:Key="BlueBorder" Color="#FF0046AD"/>

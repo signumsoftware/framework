@@ -179,7 +179,29 @@ namespace Signum.Engine
 
             if (liteRequests != null)
             {
-                var groups = liteRequests.GroupBy(kvp => kvp.Key.Type);
+
+                {
+                    List<IdentityTuple> toRemove = null;
+                    foreach (var item in liteRequests)
+                    {
+                        var entity = retrieved.TryGetC(item.Key);
+                        if (entity != null)
+                        {
+                            var toStr = entity.ToString();
+
+                            foreach (var lite in item.Value)
+                                lite.SetToString(toStr);
+
+                            if (toRemove == null)
+                                toRemove = new List<IdentityTuple>();
+
+                            toRemove.Add(item.Key);
+                        }
+                    }
+
+                    if (toRemove != null)
+                        liteRequests.RemoveRange(toRemove);
+                }
 
                 while (liteRequests.Count > 0)
                 {

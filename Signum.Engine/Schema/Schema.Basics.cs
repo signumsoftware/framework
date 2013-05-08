@@ -248,6 +248,7 @@ namespace Signum.Engine.Maps
     {
         bool IsLite { get; }
         bool ClearEntityOnSaving { get; set; }
+        bool AvoidExpandOnRetrieving { get; }
         Type FieldType { get; }
     }
 
@@ -433,6 +434,7 @@ namespace Signum.Engine.Maps
         public Table ReferenceTable { get; set; }
 
         public bool IsLite { get; internal set; }
+        public bool AvoidExpandOnRetrieving { get; internal set; }
 
         public FieldReference(Type fieldType) : base(fieldType) { }
 
@@ -515,6 +517,7 @@ namespace Signum.Engine.Maps
     public partial class FieldImplementedBy : Field, IFieldReference
     {
         public bool IsLite { get; internal set; }
+        public bool AvoidExpandOnRetrieving { get; internal set; }
 
         public Dictionary<Type, ImplementationColumn> ImplementationColumns { get; set; }
 
@@ -564,6 +567,9 @@ namespace Signum.Engine.Maps
     public partial class FieldImplementedByAll : Field, IFieldReference
     {
         public bool IsLite { get; internal set; }
+
+        public bool AvoidExpandOnRetrieving { get; internal set; }
+
         public ImplementationColumn Column { get; set; }
         public ImplementationColumn ColumnTypes { get; set; }
 

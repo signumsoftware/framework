@@ -150,13 +150,17 @@ namespace Signum.Entities.Reflection
 
         public static PropertyInfo[] PublicInstancePropertiesInOrder(Type type)
         {
-            var result = type.FollowC(t => t.BaseType)
-                .Reverse()
-                .SelectMany(t => PublicInstanceDeclaredPropertiesInOrder(t))
-                .Distinct(a => a.Name) //Overriden properties
-                .ToArray();
+            Dictionary<string, PropertyInfo> properties = new Dictionary<string,PropertyInfo>();
 
-            return result;
+            foreach (var t in type.FollowC(t => t.BaseType).Reverse())
+            {
+                foreach (var pi in PublicInstanceDeclaredPropertiesInOrder(t))
+	            {
+                    properties[pi.Name] = pi;
+	            }
+            }
+
+            return properties.Values.ToArray();
         }
 
         public static MemberInfo[] GetMemberList<T, S>(Expression<Func<T, S>> lambdaToField)

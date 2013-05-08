@@ -149,7 +149,8 @@ namespace Signum.Windows
             if (DesignerProperties.GetIsInDesignMode(this) || QueryName == null)
                 return;
 
-            qd = DynamicQueryServer.GetQueryDescription(QueryName);
+            if (qd == null)
+                qd = DynamicQueryServer.GetQueryDescription(QueryName);
 
             DynamicQueryServer.SetFilterTokens(FilterOptions, qd);
 
@@ -226,6 +227,9 @@ namespace Signum.Windows
 
         public void Reinitialize(IEnumerable<FilterOption> filters, List<ColumnOption> columns, ColumnOptionsMode columnOptionsMode, List<OrderOption> orders)
         {
+            if (qd == null)
+                qd = DynamicQueryServer.GetQueryDescription(QueryName);
+
             ColumnOptions.Clear();
             ColumnOptions.AddRange(columns);
             ColumnOptionsMode = columnOptionsMode;

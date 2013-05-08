@@ -30,7 +30,9 @@ namespace Signum.Engine.Linq
         public readonly Alias TableAlias;
         public readonly ReadOnlyCollection<FieldBinding> Bindings;
 
-        public EntityExpression(Type type, Expression externalId, Alias tableAlias, IEnumerable<FieldBinding> bindings)
+        public readonly bool AvoidExpandOnRetrieving;
+
+        public EntityExpression(Type type, Expression externalId, Alias tableAlias, IEnumerable<FieldBinding> bindings, bool avoidExpandOnRetrieving)
             : base(DbExpressionType.Entity, type)
         {
             if (type == null) 
@@ -47,6 +49,8 @@ namespace Signum.Engine.Linq
 
             this.TableAlias = tableAlias;
             this.Bindings = bindings.ToReadOnly();
+
+            this.AvoidExpandOnRetrieving = avoidExpandOnRetrieving;
         }
      
         public override string ToString()
