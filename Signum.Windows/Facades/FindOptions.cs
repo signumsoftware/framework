@@ -273,9 +273,14 @@ namespace Signum.Windows
 
         public void RefreshRealValue()
         {
-            if (Token == null || Operation == FilterOperation.IsIn || Value is Func<object>)
+            if (Token == null || Value is Func<object>)
                 return;
 
+            if (Operation == FilterOperation.IsIn)
+            {
+                RealValue = Value;
+                return;
+            }
             var newRealValue = Server.Convert(Value, Token.Type);
 
             if (!object.Equals(newRealValue, RealValue))
