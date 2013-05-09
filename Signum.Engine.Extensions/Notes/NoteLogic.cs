@@ -29,7 +29,8 @@ namespace Signum.Engine.Notes
             return NotesExpression.Evaluate(ident);
         }
 
-        static HashSet<Enum> SystemNoteTypes = new HashSet<Enum>(); 
+        static HashSet<Enum> SystemNoteTypes = new HashSet<Enum>();
+        static bool started = false;
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Type[] registerExpressionsFor)
         {
@@ -81,6 +82,8 @@ namespace Signum.Engine.Notes
                     foreach (var type in registerExpressionsFor)
                         dqm.RegisterExpression(new ExtensionInfo(type, exp, exp.Body.Type, "Notes", () => typeof(NoteDN).NicePluralName()));
                 }
+
+                started = true;
             }
         }
 
@@ -92,6 +95,22 @@ namespace Signum.Engine.Notes
         public static NoteTypeDN GetAlertType(Enum noteType)
         {
             return MultiOptionalEnumLogic<NoteTypeDN>.ToEntity(noteType);
+        }
+
+
+        public static NoteDN CreateNote<T>(this Lite<T> entity, string text, Enum noteType,  Lite<UserDN> user = null, string title = null) where T : class, IIdentifiable
+        {
+            if (started == false)
+                return null;
+
+            return new NoteDN
+            {               
+                CreatedBy = user ?? UserDN.Current.ToLite(),
+                Text = text,
+                Title = title,
+                Target = (Lite<IdentifiableEntity>)Lite.Create(entity.EntityType, entity.Id, entity.ToString()),
+                NoteType = MultiOptionalEnumLogic<NoteTypeDN>.ToEntity(noteType)
+            }.Execute(NoteOperation.Save);
         }
     }
 }
