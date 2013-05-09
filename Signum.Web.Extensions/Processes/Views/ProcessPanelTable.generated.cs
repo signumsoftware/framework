@@ -172,7 +172,7 @@ WriteLiteral("                <tr>\r\n                    <td>");
 
             
             #line 51 "..\..\Processes\Views\ProcessPanelTable.cshtml"
-                   Write(Html.LightEntityLine(item.ProcessExecution, true));
+                   Write(Html.LightEntityLine(item.Process, true));
 
             
             #line default
@@ -244,7 +244,7 @@ WriteLiteral("                <tr>\r\n                    <td>");
 
             
             #line 69 "..\..\Processes\Views\ProcessPanelTable.cshtml"
-                   Write(Html.LightEntityLine(item.ProcessExecution, true));
+                   Write(Html.LightEntityLine(item.Process, true));
 
             
             #line default
@@ -295,7 +295,7 @@ WriteLiteral("        </tbody>\r\n    </table>\r\n\r\n    <br />\r\n    <h2>Late
 
             
             #line 85 "..\..\Processes\Views\ProcessPanelTable.cshtml"
-Write(Html.SearchControl(new FindOptions(typeof(Signum.Entities.Processes.ProcessExecutionDN))
+Write(Html.SearchControl(new FindOptions(typeof(Signum.Entities.Processes.ProcessDN))
 {
     OrderOptions = { new OrderOption("CreationDate", Signum.Entities.DynamicQuery.OrderType.Descending) },
     FilterMode = Signum.Web.FilterMode.Hidden,

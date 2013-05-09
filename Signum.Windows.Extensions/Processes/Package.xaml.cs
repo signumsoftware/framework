@@ -25,7 +25,6 @@ namespace Signum.Windows.Processes
         public Package()
         {
             InitializeComponent();
-            ProcessClient.BindToParentProcessExecution(sc);
         }
     }
 }

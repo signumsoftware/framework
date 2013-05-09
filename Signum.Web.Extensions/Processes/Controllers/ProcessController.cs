@@ -27,7 +27,7 @@ namespace Signum.Web.Processes
         [HttpPost]
         public ContentResult GetProgressExecution(int id)
         {
-            decimal progress = Database.Query<ProcessExecutionDN>().Where(pe => 
+            decimal progress = Database.Query<ProcessDN>().Where(pe => 
                     pe.Id == id).Select(pe => pe.Progress).SingleEx() ?? 100;
 
             return Content(Math.Round(progress, 0).ToString());
@@ -36,7 +36,7 @@ namespace Signum.Web.Processes
         [HttpPost]
         public PartialViewResult FinishProcessNormalPage()
         {
-            ProcessExecutionDN process = this.ExtractEntity<ProcessExecutionDN>()
+            ProcessDN process = this.ExtractEntity<ProcessDN>()
                 .ThrowIfNullC("Entity was not possible to Extract");
 
             return Navigator.NormalControl(this, process);
@@ -86,9 +86,9 @@ namespace Signum.Web.Processes
         {
             var lites = Navigator.ParseLiteKeys<IdentifiableEntity>(liteKeys);
 
-            ProcessExecutionDN process = PackageLogic.CreatePackageOperation(lites, OperationsClient.GetOperationKeyAssert(operationFullKey));
+            ProcessDN process = PackageLogic.CreatePackageOperation(lites, OperationsClient.GetOperationKeyAssert(operationFullKey));
 
-            return Navigator.PopupOpen(this, new PopupNavigateOptions(new TypeContext<ProcessExecutionDN>(process, prefix)));
+            return Navigator.PopupOpen(this, new PopupNavigateOptions(new TypeContext<ProcessDN>(process, prefix)));
         }
     }
 }

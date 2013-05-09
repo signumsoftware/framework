@@ -300,12 +300,12 @@
     <Compile Include="Processes\PackageLine.xaml.cs">
       <DependentUpon>PackageLine.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Processes\ProcessUI.xaml.cs">
-      <DependentUpon>ProcessUI.xaml</DependentUpon>
+    <Compile Include="Processes\ProcessAlgorithm.xaml.cs">
+      <DependentUpon>ProcessAlgorithm.xaml</DependentUpon>
     </Compile>
     <Compile Include="Processes\ProcessClient.cs" />
-    <Compile Include="Processes\ProcessExecution.xaml.cs">
-      <DependentUpon>ProcessExecution.xaml</DependentUpon>
+    <Compile Include="Processes\ProcessUI.xaml.cs">
+      <DependentUpon>ProcessUI.xaml</DependentUpon>
     </Compile>
     <Compile Include="Profiler\ProfilerClient.cs" />
     <Compile Include="Profiler\ProfilerUploader.xaml.cs">
@@ -354,11 +354,11 @@
     <Compile Include="Scheduler\Calendar.xaml.cs">
       <DependentUpon>Calendar.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Scheduler\CustomTask.xaml.cs">
-      <DependentUpon>CustomTask.xaml</DependentUpon>
+    <Compile Include="Scheduler\ActionTask.xaml.cs">
+      <DependentUpon>ActionTask.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Scheduler\CustomTaskExecution.xaml.cs">
-      <DependentUpon>CustomTaskExecution.xaml</DependentUpon>
+    <Compile Include="Scheduler\ActionTaskLog.xaml.cs">
+      <DependentUpon>ActionTaskLog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Scheduler\ScheduledTask.xaml.cs">
       <DependentUpon>ScheduledTask.xaml</DependentUpon>
@@ -680,13 +680,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Processes\ProcessUI.xaml">
+    <Page Include="Processes\ProcessAlgorithm.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Processes\ProcessExecution.xaml">
+    <Page Include="Processes\ProcessUI.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
@@ -734,13 +734,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Scheduler\CustomTask.xaml">
+    <Page Include="Scheduler\ActionTask.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Scheduler\CustomTaskExecution.xaml">
+    <Page Include="Scheduler\ActionTaskLog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
@@ -839,12 +839,12 @@
     <Resource Include="Images\stop.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\customTask.png" />
-    <Resource Include="Images\customTaskExecution.png" />
+    <Resource Include="Images\actionTask.png" />
+    <Resource Include="Images\actionTaskLog.png" />
     <Resource Include="Images\package.png" />
     <Resource Include="Images\packageLine.png" />
+    <Resource Include="Images\processAlgorithm.png" />
     <Resource Include="Images\process.png" />
-    <Resource Include="Images\processExecution.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\open.png" />

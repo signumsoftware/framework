@@ -10,7 +10,7 @@ using Signum.Entities.Authorization;
 
 namespace Signum.Entities.Scheduler
 {
-    public enum CustomTaskOperation
+    public enum ActionTaskOperation
     {
         Execute,
     }
@@ -20,19 +20,19 @@ namespace Signum.Entities.Scheduler
     }
 
     [Serializable, EntityKind(EntityKind.SystemString)]
-    public class CustomTaskDN : MultiEnumDN, ITaskDN
+    public class ActionTaskDN : MultiEnumDN, ITaskDN
     {
         
     }
 
     [Serializable, EntityKind(EntityKind.System)]
-    public class CustomTaskExecutionDN : IdentifiableEntity
+    public class ActionTaskLogDN : IdentifiableEntity
     {
-        CustomTaskDN customTask;
-        public CustomTaskDN CustomTask
+        ActionTaskDN actionTask;
+        public ActionTaskDN ActionTask
         {
-            get { return customTask; }
-            set { Set(ref customTask, value, () => CustomTask); }
+            get { return actionTask; }
+            set { Set(ref actionTask, value, () => ActionTask); }
         }
 
         DateTime startTime;

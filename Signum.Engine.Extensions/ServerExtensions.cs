@@ -121,7 +121,7 @@ namespace Signum.Services
         #endregion
 
         #region IProcessServer
-        public ProcessExecutionDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> lites, Enum operationKey)
+        public ProcessDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> lites, Enum operationKey)
         {
             return Return(MethodInfo.GetCurrentMethod(), null,
                 () => PackageLogic.CreatePackageOperation(lites, operationKey));

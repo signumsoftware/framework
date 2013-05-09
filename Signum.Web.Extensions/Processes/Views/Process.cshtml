@@ -1,6 +1,69 @@
 ﻿@using Signum.Entities.Processes
 
+@Html.ScriptCss("~/processes/Content/Processes.css")
+
 @using (var e = Html.TypeContext<ProcessDN>())
 {
-    @Html.ValueLine(e, f => f.Key)
+    @Html.ValueLine(e, f => f.State, f => f.ReadOnly = true)
+    @Html.EntityLine(e, f => f.Algorithm)
+    @Html.EntityLine(e, f => f.Data, f => f.ReadOnly = true)
+    @Html.ValueLine(e, f => f.CreationDate)
+    @Html.ValueLine(e, f => f.PlannedDate, f => { f.HideIfNull = true; f.ReadOnly = true; })
+    @Html.ValueLine(e, f => f.CancelationDate, f => { f.HideIfNull = true; f.ReadOnly = true; })
+    @Html.ValueLine(e, f => f.QueuedDate, f => { f.HideIfNull = true; f.ReadOnly = true; })
+    @Html.ValueLine(e, f => f.ExecutionStart, f => { f.HideIfNull = true; f.ReadOnly = true; })
+    @Html.ValueLine(e, f => f.ExecutionEnd, f => { f.HideIfNull = true; f.ReadOnly = true; })
+    @Html.ValueLine(e, f => f.SuspendDate, f => { f.HideIfNull = true; f.ReadOnly = true; })
+    @Html.ValueLine(e, f => f.ExceptionDate, f => { f.HideIfNull = true; f.ReadOnly = true; })
+    @Html.EntityLine(e, f => f.Exception, f => { f.HideIfNull = true; f.ReadOnly = true; })
+    
+    if (e.Value.State == ProcessState.Executing || e.Value.State == ProcessState.Queued)
+    {
+    @:Progress:
+    <br />
+    <br />
+    <div class="progressContainer">
+        <div class="progressBar" id="progressBar" style="height: 100%; width: @Math.Round((double?)e.Value.Progress ?? 0, 0)%;">
+        </div>
+    </div>
+
+    <script type="text/javascript">
+    $(function() {
+        var idProcess = '@e.Value.Id';
+        var prefix = '@e.ControlID';
+
+        refreshUpdate(idProcess, prefix);
+    })
+
+    function refreshUpdate(idProcess, prefix) {
+        setTimeout(function() {
+            $.post("@Url.Action("GetProgressExecution", "Process")", { id: idProcess }, function(data) {
+                $("#progressBar").width(data + '%');
+                if (data < 100) {
+                    refreshUpdate(idProcess, prefix);
+                }
+                else {
+                    if (SF.isEmpty(prefix)) {
+                        /*SF.reloadEntity("@Url.Action("FinishProcessNormalPage", "Process")", idPrefix);*/
+                    }
+                    else {
+                        var oldViewNav = new SF.ViewNavigator({ prefix: prefix });
+                        var tempDivId = oldViewNav.tempDivId();
+                    
+                        SF.closePopup(prefix);
+
+                        new SF.ViewNavigator({
+                            type: "Process",
+                            id: idProcess,
+                            prefix: prefix,
+                            containerDiv: tempDivId
+                        }).viewSave();
+                    }
+                }
+            });
+        }, 2000);
+     }
+    </script>
+
+    }
 } 

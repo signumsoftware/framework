@@ -18,11 +18,11 @@ using Signum.Entities.Processes;
 namespace Signum.Windows.Processes
 {
     /// <summary>
-    /// Interaction logic for PackageOperation.xaml
+    /// Interaction logic for Process.xaml
     /// </summary>
-    public partial class PackageOperation : UserControl
+    public partial class ProcessAlgorithm : UserControl
     {
-        public PackageOperation()
+        public ProcessAlgorithm()
         {
             InitializeComponent();
         }

@@ -47,24 +47,24 @@ namespace Signum.Engine.Mailing
 
 
                 dqm.RegisterQuery(typeof(NewsletterDN), () =>
-                    from n in Database.Query<NewsletterDN>()
-                    from pe in n.ProcessExecutions().DefaultIfEmpty()
-                    select new
-                    {
-                        Entity = n,
-                        n.Id,
-                        Nombre = n.Name,
-                        Texto = n.HtmlBody.Etc(100),
-                        Estado = n.State,
-                        NumDeliveries = n.Deliveries().Count(),
-                        ProcessExecution = pe,
-                        NumErrors = n.Deliveries().Count(d => d.Exception(pe) != null)
-                    });
-
+                 from n in Database.Query<NewsletterDN>()
+                 let p = n.LastProcess()
+                 select new
+                 {
+                     Entity = n,
+                     n.Id,
+                     Nombre = n.Name,
+                     Texto = n.HtmlBody.Etc(100),
+                     Estado = n.State,
+                     NumDeliveries = n.Deliveries().Count(),
+                     LastProcess = p,
+                     NumErrors = n.Deliveries().Count(d => d.Exception(p) != null)
+                 });
+           
 
                 dqm.RegisterQuery(typeof(NewsletterDeliveryDN), () =>
                     from e in Database.Query<NewsletterDeliveryDN>()
-                    from pe in e.Newsletter.Entity.ProcessExecutions()
+                    let p = e.Newsletter.Entity.LastProcess()
                     select new
                     {
                         Entity = e,
@@ -73,9 +73,11 @@ namespace Signum.Engine.Mailing
                         e.Recipient,
                         e.Sent,
                         e.SendDate,
-                        ProcessExecution = pe,
-                        Exception =  e.Exception(pe)
+                        LastProcess = p,
+                        Exception = e.Exception(p)
                     });
+
+
 
                 NewsletterGraph.Register();
                 sb.AddUniqueIndex<NewsletterDeliveryDN>(nd => new { nd.Newsletter, nd.Recipient });
@@ -321,7 +323,7 @@ namespace Signum.Engine.Mailing
                     {
                         Exception = f.Exception.LogException().ToLite(), 
                         Line = f.NewsletterDelivery,
-                        ProcessExecution = executingProcess.CurrentExecution.ToLite(),
+                        Process = executingProcess.CurrentExecution.ToLite(),
                     }.Save();
                 }
 

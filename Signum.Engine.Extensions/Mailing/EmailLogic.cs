@@ -404,7 +404,7 @@ namespace Signum.Engine.Mailing
             return message;
         }
 
-        public static ProcessExecutionDN SendAll<T>(List<T> emails)
+        public static ProcessDN SendAll<T>(List<T> emails)
             where T : IEmailModel
         {
             EmailPackageDN emailPackage = new EmailPackageDN
@@ -422,7 +422,7 @@ namespace Signum.Engine.Mailing
             return process;
         }
 
-        public static ProcessExecutionDN SendToMany<T>(EmailModel<T> model, List<T> recipientList)
+        public static ProcessDN SendToMany<T>(EmailModel<T> model, List<T> recipientList)
             where T : class, IEmailOwnerDN
         {
             if (model.To != null)

@@ -21,7 +21,7 @@ namespace Signum.Entities.Scheduler
             set { SetToStr(ref rule, value, () => Rule); }
         }
 
-        [ImplementedBy(typeof(CustomTaskDN))]
+        [ImplementedBy(typeof(ActionTaskDN))]
         ITaskDN task;
         [NotNullValidator]
         public ITaskDN Task

@@ -13,6 +13,6 @@ namespace Signum.Services
     public interface IProcessServer
     {
         [OperationContract, NetDataContract]
-        ProcessExecutionDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> lites, Enum operationKey);
+        ProcessDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> lites, Enum operationKey);
     }
 }

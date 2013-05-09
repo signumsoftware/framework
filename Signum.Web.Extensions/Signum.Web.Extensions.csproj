@@ -574,15 +574,15 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>PackageLine.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Processes\Views\ProcessAlgorithm.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ProcessAlgorithm.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Processes\Views\Process.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Process.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="Processes\Views\ProcessExecution.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ProcessExecution.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Processes\Views\ProcessPanel.generated.cs">
       <AutoGen>True</AutoGen>
@@ -692,21 +692,21 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Scheduler\CustomTaskClient.cs" />
+    <Compile Include="Scheduler\ActionTaskClient.cs" />
     <Compile Include="Scheduler\Views\Calendar.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Calendar.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Scheduler\Views\CustomTask.generated.cs">
+    <Compile Include="Scheduler\Views\ActionTask.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>CustomTask.cshtml</DependentUpon>
+      <DependentUpon>ActionTask.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Scheduler\Views\CustomTaskExecution.generated.cs">
+    <Compile Include="Scheduler\Views\ActionTaskLog.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>CustomTaskExecution.cshtml</DependentUpon>
+      <DependentUpon>ActionTaskLog.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Scheduler\Views\Holiday.generated.cs">
       <AutoGen>True</AutoGen>
@@ -1207,9 +1207,9 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ScheduleRuleHourly.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Scheduler\Views\CustomTask.cshtml">
+    <Content Include="Scheduler\Views\ActionTask.cshtml">
       <Generator>RazorGenerator</Generator>
-      <LastGenOutput>CustomTask.generated.cs</LastGenOutput>
+      <LastGenOutput>ActionTask.generated.cs</LastGenOutput>
     </Content>
     <None Include="Scheduler\Views\ScheduleRuleDaily.cshtml">
       <Generator>RazorGenerator</Generator>
@@ -1227,9 +1227,9 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ScheduledTask.generated.cs</LastGenOutput>
     </None>
-    <None Include="Scheduler\Views\CustomTaskExecution.cshtml">
+    <None Include="Scheduler\Views\ActionTaskLog.cshtml">
       <Generator>RazorGenerator</Generator>
-      <LastGenOutput>CustomTaskExecution.generated.cs</LastGenOutput>
+      <LastGenOutput>ActionTaskLog.generated.cs</LastGenOutput>
     </None>
     <None Include="Scheduler\Views\Holiday.cshtml">
       <Generator>RazorGenerator</Generator>
@@ -1387,13 +1387,13 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>PackageLine.generated.cs</LastGenOutput>
     </None>
+    <None Include="Processes\Views\ProcessAlgorithm.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>ProcessAlgorithm.generated.cs</LastGenOutput>
+    </None>
     <None Include="Processes\Views\Process.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Process.generated.cs</LastGenOutput>
-    </None>
-    <None Include="Processes\Views\ProcessExecution.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>ProcessExecution.generated.cs</LastGenOutput>
     </None>
     <Content Include="Scheduler\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>

@@ -51,7 +51,7 @@ namespace Signum.Engine.Scheduler
 
                 ExecuteTask.Register((ITaskDN t) => { throw new NotImplementedException("SchedulerLogic.ExecuteTask not registered for {0}".Formato(t.GetType().Name)); });
 
-                CustomTaskLogic.Start(sb, dqm);
+                ActionTaskLogic.Start(sb, dqm);
                 sb.Include<ScheduledTaskDN>();
                 sb.Schema.Initializing[InitLevel.Level4BackgroundProcesses] += Schema_InitializingApplicaton;
                 sb.Schema.EntityEvents<ScheduledTaskDN>().Saving += Schema_Saving;

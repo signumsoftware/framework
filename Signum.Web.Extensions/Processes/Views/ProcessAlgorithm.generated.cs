@@ -28,7 +28,7 @@ namespace Signum.Web.Extensions.Processes.Views
     using System.Web.WebPages;
     using Signum.Entities;
     
-    #line 1 "..\..\Processes\Views\Package.cshtml"
+    #line 1 "..\..\Processes\Views\ProcessAlgorithm.cshtml"
     using Signum.Entities.Processes;
     
     #line default
@@ -37,10 +37,10 @@ namespace Signum.Web.Extensions.Processes.Views
     using Signum.Web;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.5.4.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/Processes/Views/Package.cshtml")]
-    public partial class Package : System.Web.Mvc.WebViewPage<dynamic>
+    [System.Web.WebPages.PageVirtualPathAttribute("~/Processes/Views/ProcessAlgorithm.cshtml")]
+    public partial class ProcessAlgorithm : System.Web.Mvc.WebViewPage<dynamic>
     {
-        public Package()
+        public ProcessAlgorithm()
         {
         }
         public override void Execute()
@@ -50,60 +50,29 @@ WriteLiteral("\r\n");
 
 
             
-            #line 3 "..\..\Processes\Views\Package.cshtml"
- using (var e = Html.TypeContext<PackageDN>())
+            #line 3 "..\..\Processes\Views\ProcessAlgorithm.cshtml"
+ using (var e = Html.TypeContext<ProcessAlgorithmDN>())
 {
     
             
             #line default
             #line hidden
             
-            #line 5 "..\..\Processes\Views\Package.cshtml"
-Write(Html.ValueLine(e, f => f.Name));
+            #line 5 "..\..\Processes\Views\ProcessAlgorithm.cshtml"
+Write(Html.ValueLine(e, f => f.Key));
 
             
             #line default
             #line hidden
             
-            #line 5 "..\..\Processes\Views\Package.cshtml"
-                                   
-    
-            
-            #line default
-            #line hidden
-            
-            #line 6 "..\..\Processes\Views\Package.cshtml"
-Write(Html.ValueLine(e, f => f.IdOrNull, f => f.ReadOnly = true));
-
-            
-            #line default
-            #line hidden
-            
-            #line 6 "..\..\Processes\Views\Package.cshtml"
-                                                               
-
-            
-            #line default
-            #line hidden
-WriteLiteral("    <fieldset>\r\n        <legend>Lines</legend>\r\n        ");
-
-
-            
-            #line 9 "..\..\Processes\Views\Package.cshtml"
-   Write(Html.SearchControl(new FindOptions(typeof(PackageLineDN)), e));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n    </fieldset>\r\n");
-
-
-            
-            #line 11 "..\..\Processes\Views\Package.cshtml"
+            #line 5 "..\..\Processes\Views\ProcessAlgorithm.cshtml"
+                                  
 }
             
             #line default
             #line hidden
+WriteLiteral(" ");
+
 
         }
     }

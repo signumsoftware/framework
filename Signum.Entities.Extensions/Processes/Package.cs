@@ -85,11 +85,4 @@ namespace Signum.Entities.Processes
             set { Set(ref finishTime, value, () => FinishTime); }
         }
     }
-
-    public enum PackageQuery
-    {
-        PackageLineInProcess,
-        PackageInProcess,
-        PackageOperationInProcess,
-    }
 }

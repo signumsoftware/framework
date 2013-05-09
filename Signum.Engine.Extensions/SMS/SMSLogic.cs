@@ -96,7 +96,7 @@ namespace Signum.Engine.SMS
         {
             phoneNumberProviders[typeof(T)] = exp;
 
-            new BasicConstructFromMany<T, ProcessExecutionDN>(SMSProviderOperation.SendSMSMessage)
+            new BasicConstructFromMany<T, ProcessDN>(SMSProviderOperation.SendSMSMessage)
             {
                 Construct = (providers, args) =>
                 {
@@ -178,7 +178,7 @@ namespace Signum.Engine.SMS
         {
             dataObjectProviders[typeof(T)] = func;
 
-            new BasicConstructFromMany<T, ProcessExecutionDN>(SMSProviderOperation.SendSMSMessagesFromTemplate)
+            new BasicConstructFromMany<T, ProcessDN>(SMSProviderOperation.SendSMSMessagesFromTemplate)
             {
                 Construct = (providers, args) =>
                 {
@@ -352,40 +352,40 @@ namespace Signum.Engine.SMS
                 ProcessLogic.Register(SMSMessageProcess.Send, new SMSMessageSendProcessAlgortihm());
                 ProcessLogic.Register(SMSMessageProcess.UpdateStatus, new SMSMessageUpdateStatusProcessAlgorithm());
 
-                new BasicConstructFromMany<SMSMessageDN, ProcessExecutionDN>(SMSMessageOperation.CreateUpdateStatusPackage)
+                new BasicConstructFromMany<SMSMessageDN, ProcessDN>(SMSMessageOperation.CreateUpdateStatusPackage)
                 {
                     Construct = (messages, _) => UpdateMessages(messages.RetrieveFromListOfLite())
                 }.Register();
 
                 dqm.RegisterQuery(typeof(SMSSendPackageDN), () =>
                     from e in Database.Query<SMSSendPackageDN>()
-                    from pe in e.ProcessExecutions().DefaultIfEmpty()
+                    let p  = e.LastProcess()
                     select new
                     {
                         Entity = e,
                         e.Id,
                         e.Name,
                         NumLines = e.SMSMessages().Count(),
-                        ProcessExecution = pe,
-                        NumErrors = e.SMSMessages().Count(s => s.Exception(pe) != null),
+                        LastProcess = p,
+                        NumErrors = e.SMSMessages().Count(s => s.Exception(p) != null),
                     });
 
                 dqm.RegisterQuery(typeof(SMSUpdatePackageDN), () =>
                     from e in Database.Query<SMSUpdatePackageDN>()
-                    from pe in e.ProcessExecutions().DefaultIfEmpty()
+                    let p = e.LastProcess()
                     select new
                     {
                         Entity = e,
                         e.Id,
                         e.Name,
                         NumLines = e.SMSMessages().Count(),
-                        ProcessExecution = pe,
-                        NumErrors = e.SMSMessages().Count(s => s.Exception(pe) != null),
+                        LastProcess = p,
+                        NumErrors = e.SMSMessages().Count(s => s.Exception(p) != null),
                     });
             }
         }
 
-        private static ProcessExecutionDN UpdateMessages(List<SMSMessageDN> messages)
+        private static ProcessDN UpdateMessages(List<SMSMessageDN> messages)
         {
             SMSUpdatePackageDN package = new SMSUpdatePackageDN().Save();
 

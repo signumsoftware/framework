@@ -45,71 +45,52 @@ namespace Signum.Engine.Processes
                 sb.Include<PackageLineDN>();
                 dqm.RegisterQuery(typeof(PackageLineDN), () =>
                     from pl in Database.Query<PackageLineDN>()
+                    let p = pl.Package.Entity.LastProcess()
                     select new
                     {
                         Entity = pl,
-                        Package = pl.Package,
+                        pl.Package,
                         pl.Id,
-                        Target = pl.Target,
+                        pl.Target,
                         pl.FinishTime,
+                        LastProcess = p,
+                        Exception = pl.Exception(p)
                     });
 
-                dqm.RegisterQuery(PackageQuery.PackageLineInProcess, () =>
-                    from pl in Database.Query<PackageLineDN>()
-                    from pe in pl.Package.Entity.ProcessExecutions().DefaultIfEmpty()
-                    select new
-                    {
-                        Entity = pl,
-                        Package = pl.Package,
-                        pl.Id,
-                        Target = pl.Target,
-                        pl.FinishTime,
-                        ProcessExecution = pe,
-                        Exception = pl.Exception(pe)
-                    });
 
                 dqm.RegisterExpression((PackageDN p) => p.Lines());
 
                 if (packages)
                 {
                     sb.Settings.AssertImplementedBy((PackageLineDN pl) => pl.Package, typeof(PackageDN));
-                    sb.Settings.AssertImplementedBy((ProcessExecutionDN pe) => pe.ProcessData, typeof(PackageDN));
+                    sb.Settings.AssertImplementedBy((ProcessDN pe) => pe.Data, typeof(PackageDN));
 
                     sb.Include<PackageDN>();
 
-                    dqm.RegisterQuery(typeof(PackageDN), ()=>
-                        from p in Database.Query<PackageDN>()
+                    dqm.RegisterQuery(typeof(PackageDN), () =>
+                        from pk in Database.Query<PackageDN>()
+                        let pe = pk.LastProcess()
                         select new
                         {
-                            Entity = p,
-                            p.Id,
-                            p.Name,
-                            NumLines = p.Lines().Count()
-                        });
-
-                    dqm.RegisterQuery(PackageQuery.PackageInProcess, () =>
-                        from p in Database.Query<PackageDN>()
-                        from pe in p.ProcessExecutions().DefaultIfEmpty()
-                        select new
-                        {
-                            Entity = p,
-                            p.Id,
-                            p.Name,
-                            NumLines = p.Lines().Count(),
-                            ProcessExecution = pe,
-                            NumErrors = p.Lines().Count(l => l.Exception(pe) != null),
+                            Entity = pk,
+                            pk.Id,
+                            pk.Name,
+                            NumLines = pk.Lines().Count(),
+                            LastProcess = pe,
+                            NumErrors = pk.Lines().Count(l => l.Exception(pe) != null),
                         });
                 }
 
                 if (packageOperations)
                 {
                     sb.Settings.AssertImplementedBy((PackageLineDN pl) => pl.Package, typeof(PackageOperationDN));
-                    sb.Settings.AssertImplementedBy((ProcessExecutionDN pe) => pe.ProcessData, typeof(PackageOperationDN));
+                    sb.Settings.AssertImplementedBy((ProcessDN pe) => pe.Data, typeof(PackageOperationDN));
 
                     sb.Include<PackageOperationDN>();
 
                     dqm.RegisterQuery(typeof(PackageOperationDN), () =>
                         from p in Database.Query<PackageOperationDN>()
+                        let pe = p.LastProcess()
                         select new
                         {
                             Entity = p,
@@ -117,20 +98,8 @@ namespace Signum.Engine.Processes
                             p.Name,
                             p.Operation,
                             NumLines = p.Lines().Count(),
-                        });
-
-                    dqm.RegisterQuery(PackageQuery.PackageOperationInProcess, () =>
-                        from p in Database.Query<PackageOperationDN>()
-                        from pe in p.ProcessExecutions().DefaultIfEmpty()
-                        select new
-                        {
-                            Entity = p,
-                            p.Id,
-                            p.Name,
-                            p.Operation,
-                            NumLines = p.Lines().Count(),
-                            ProcessExecution = pe,
-                            NumErrors = p.Lines().Count(l => l.Exception(pe) != null)
+                            LastProcess = pe,
+                            NumErrors = p.Lines().Count(l => l.Exception(pe) != null),
                         });
 
                     ProcessLogic.Register(PackageOperationProcess.PackageOperation, new PackageOperationAlgorithm());
@@ -165,12 +134,12 @@ namespace Signum.Engine.Processes
             return package;
         }
 
-        public static ProcessExecutionDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> entities, Enum operationKey)
+        public static ProcessDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> entities, Enum operationKey)
         {
             return CreatePackageOperation(entities, MultiEnumLogic<OperationDN>.ToEntity((Enum)operationKey));
         }
 
-        public static ProcessExecutionDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> entities, OperationDN operation)
+        public static ProcessDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> entities, OperationDN operation)
         {
             return ProcessLogic.Create(PackageOperationProcess.PackageOperation, new PackageOperationDN()
             {
@@ -183,11 +152,11 @@ namespace Signum.Engine.Processes
             TypeConditionLogic.Register<UserProcessSessionDN>(conditionName,
                se => se.User.RefersTo(UserDN.Current));
 
-            TypeConditionLogic.Register<ProcessExecutionDN>(conditionName,
-                pe => ((UserProcessSessionDN)pe.SessionData).InCondition(conditionName));
+            TypeConditionLogic.Register<ProcessDN>(conditionName,
+                pe => ((UserProcessSessionDN)pe.Session).InCondition(conditionName));
 
             TypeConditionLogic.Register<PackageOperationDN>(conditionName,
-                po => Database.Query<ProcessExecutionDN>().WhereCondition(conditionName).Any(pe => pe.ProcessData == po));
+                po => Database.Query<ProcessDN>().WhereCondition(conditionName).Any(pe => pe.Data == po));
 
             TypeConditionLogic.Register<PackageLineDN>(conditionName,
                 pl => ((PackageOperationDN)pl.Package.Entity).InCondition(conditionName));
