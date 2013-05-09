@@ -13,7 +13,7 @@ namespace Signum.Windows.UIAutomation
     {
         static int DefaultTimeout = 20 * 1000;
 
-        public static void PlayAndWait(this NormalWindowProxy<ProcessExecutionDN> pe, Func<string> actionDescription  = null, int? timeout = null)
+        public static void PlayAndWait(this NormalWindowProxy<ProcessDN> pe, Func<string> actionDescription  = null, int? timeout = null)
         {
             using (pe)
             {
@@ -26,7 +26,7 @@ namespace Signum.Windows.UIAutomation
 
         public static void ConstructProcessAndPlay<T>(this NormalWindowProxy<T> normalWnindow, Enum processOperation, int? timeout = null) where T : ModifiableEntity
         {
-            var pe = normalWnindow.ConstructFrom<ProcessExecutionDN>(processOperation);
+            var pe = normalWnindow.ConstructFrom<ProcessDN>(processOperation);
             pe.PlayAndWait(() => "Waiting for process after {0} to finish".Formato(OperationDN.UniqueKey(processOperation)));
         }
     }
