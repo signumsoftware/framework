@@ -36,7 +36,7 @@ namespace Signum.Windows.UIAutomation
 
         public bool WaitForInputIdle(int? timeOut = null)
         {
-            return wp.WaitForInputIdle(timeOut ?? WaitExtensions.DefaultTimeOut);
+            return wp.WaitForInputIdle(timeOut ?? WaitExtensions.DefaultTimeout);
         }
 
 

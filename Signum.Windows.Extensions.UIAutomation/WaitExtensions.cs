@@ -13,7 +13,7 @@ namespace Signum.Windows.UIAutomation
     public static class WaitExtensions
     {
         public static int DefaultSleep = 200;
-        public static int DefaultTimeOut = 2 * 1000;
+        public static int DefaultTimeout = 2 * 1000;
 
         public static void Wait(this AutomationElement automationElement, Func<bool> waitCondition, Func<string> actionDescription, int? timeOut = null)
         {
@@ -29,8 +29,8 @@ namespace Signum.Windows.UIAutomation
                 if (waitCondition())
                     return;
 
-                if (((PerfCounter.Ticks - start) / PerfCounter.FrequencyMilliseconds) > (timeOut ?? DefaultTimeOut))
-                    throw new TimeoutException("Wait condition failed after {0} ms: ".Formato(timeOut ?? DefaultTimeOut) + actionDescription == null ? null : actionDescription());
+                if (((PerfCounter.Ticks - start) / PerfCounter.FrequencyMilliseconds) > (timeOut ?? DefaultTimeout))
+                    throw new TimeoutException("Wait condition failed after {0} ms: ".Formato(timeOut ?? DefaultTimeout) + actionDescription == null ? null : actionDescription());
             }
         }
 
@@ -182,8 +182,8 @@ namespace Signum.Windows.UIAutomation
                 if (result != null)
                     return result;
 
-                if (((PerfCounter.Ticks - start) / PerfCounter.FrequencyMilliseconds) > (timeOut ?? DefaultTimeOut))
-                    throw new TimeoutException("Element not found after {0} ms: {1}".Formato((timeOut ?? DefaultTimeOut), ExpressionEvaluator.PartialEval(condition).NiceToString()));
+                if (((PerfCounter.Ticks - start) / PerfCounter.FrequencyMilliseconds) > (timeOut ?? DefaultTimeout))
+                    throw new TimeoutException("Element not found after {0} ms: {1}".Formato((timeOut ?? DefaultTimeout), ExpressionEvaluator.PartialEval(condition).NiceToString()));
             }
         }
 
@@ -217,8 +217,8 @@ namespace Signum.Windows.UIAutomation
                 if (result != null)
                     return result;
 
-                if (((PerfCounter.Ticks - start) / PerfCounter.FrequencyMilliseconds) > (timeOut ?? DefaultTimeOut))
-                    throw new InvalidOperationException("Element not foud after {0} ms: AutomationID = {1}".Formato((timeOut ?? DefaultTimeOut), automationId));
+                if (((PerfCounter.Ticks - start) / PerfCounter.FrequencyMilliseconds) > (timeOut ?? DefaultTimeout))
+                    throw new InvalidOperationException("Element not foud after {0} ms: AutomationID = {1}".Formato((timeOut ?? DefaultTimeout), automationId));
             }
         }
 
@@ -251,8 +251,8 @@ namespace Signum.Windows.UIAutomation
                 if (result != null)
                     return result;
 
-                if (((PerfCounter.Ticks - start) / PerfCounter.FrequencyMilliseconds) > (timeOut ?? DefaultTimeOut))
-                    throw new InvalidOperationException("Element not foud after {0} ms: {1}".Formato((timeOut ?? DefaultTimeOut), condition.NiceToString()));
+                if (((PerfCounter.Ticks - start) / PerfCounter.FrequencyMilliseconds) > (timeOut ?? DefaultTimeout))
+                    throw new InvalidOperationException("Element not foud after {0} ms: {1}".Formato((timeOut ?? DefaultTimeout), condition.NiceToString()));
             }
         }
     }
