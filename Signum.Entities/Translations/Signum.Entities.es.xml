@@ -300,7 +300,7 @@
     <Member Name="ValueMustBeSpecifiedFor0" Description="Se debe indicar un valor para {0}" />
   </Type>
   <Type Name="SynchronizerMessage">
-    <Member Name="_0HasBeenRenamedIn1" Description="     ¿' {0}' ha sido renombrada en {1}?" />
+    <Member Name="_0HasBeenRenamedIn1" Description="    ¿'{0}' ha sido renombrada en {1}?" />
     <Member Name="EndOfSyncScript" Description="--- FIN DEL SCRIPT DE SINCRONIZACION" />
     <Member Name="NNone" Description="- n: Ninguno" />
     <Member Name="StartOfSyncScriptGeneratedOn0" Description="--- INICIO DEL SCRIPT DE SINCRONIZACION GENERADO EL {0}" />
