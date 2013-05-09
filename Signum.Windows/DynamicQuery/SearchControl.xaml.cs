@@ -217,6 +217,14 @@ namespace Signum.Windows
             set { SetValue(NavigateOnCreateProperty, value); }
         }
 
+        public static readonly DependencyProperty IsSearchingProperty =
+          DependencyProperty.Register("IsSearching", typeof(bool), typeof(SearchControl), new PropertyMetadata(false));
+        public bool IsSearching
+        {
+            get { return (bool)GetValue(IsSearchingProperty); }
+            set { SetValue(IsSearchingProperty, value); }
+        }
+
         public static readonly DependencyProperty FilterColumnProperty =
         DependencyProperty.Register("FilterColumn", typeof(string), typeof(SearchControl), new UIPropertyMetadata(null, 
             (d, e) => ((SearchControl)d).AssetNotLoaded(e)));
@@ -233,14 +241,6 @@ namespace Signum.Windows
         {
             get { return (string)GetValue(FilterRouteProperty); }
             set { SetValue(FilterRouteProperty, value); }
-        }
-
-        public static readonly DependencyProperty IsSearchingProperty =
-           DependencyProperty.Register("IsSearching", typeof(bool), typeof(SearchControl), new PropertyMetadata(false));
-        public bool IsSearching
-        {
-            get { return (bool)GetValue(IsSearchingProperty); }
-            set { SetValue(IsSearchingProperty, value); }
         }
 
         private void AssetNotLoaded(DependencyPropertyChangedEventArgs e)

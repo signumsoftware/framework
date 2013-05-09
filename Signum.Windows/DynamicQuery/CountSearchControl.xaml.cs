@@ -116,6 +116,30 @@ namespace Signum.Windows
             set { SetValue(IsSearchingProperty, value); }
         }
 
+        public static readonly DependencyProperty FilterColumnProperty =
+            DependencyProperty.Register("FilterColumn", typeof(string), typeof(CountSearchControl), new UIPropertyMetadata(null,
+          (d, e) => ((CountSearchControl)d).AssetNotLoaded(e)));
+        public string FilterColumn
+        {
+            get { return (string)GetValue(FilterColumnProperty); }
+            set { SetValue(FilterColumnProperty, value); }
+        }
+
+        public static readonly DependencyProperty FilterRouteProperty =
+            DependencyProperty.Register("FilterRoute", typeof(string), typeof(CountSearchControl), new UIPropertyMetadata(null,
+                (d, e) => ((CountSearchControl)d).AssetNotLoaded(e)));
+        public string FilterRoute
+        {
+            get { return (string)GetValue(FilterRouteProperty); }
+            set { SetValue(FilterRouteProperty, value); }
+        }
+
+        private void AssetNotLoaded(DependencyPropertyChangedEventArgs e)
+        {
+            if (IsLoaded)
+                throw new InvalidProgramException("You can not change {0} property once loaded".Formato(e.Property));
+        }
+
         public event EventHandler LinkClick; 
 
         public CountSearchControl()
@@ -151,6 +175,18 @@ namespace Signum.Windows
 
             if (qd == null)
                 qd = DynamicQueryServer.GetQueryDescription(QueryName);
+
+            if (FilterColumn.HasText())
+            {
+                FilterOptions.Add(new FilterOption
+                {
+                    Path = FilterColumn,
+                    Operation = FilterOperation.EqualTo,
+                    Frozen = true,
+                }.Bind(FilterOption.ValueProperty, new Binding("DataContext" + (FilterRoute.HasText() ? "." + FilterRoute : null)) { Source = this }));
+                ColumnOptions.Add(new ColumnOption(FilterColumn));
+                ColumnOptionsMode = ColumnOptionsMode.Remove;
+            }
 
             DynamicQueryServer.SetFilterTokens(FilterOptions, qd);
 
