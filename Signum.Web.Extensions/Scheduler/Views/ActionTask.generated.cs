@@ -27,14 +27,14 @@ namespace Signum.Web.Extensions.Scheduler.Views
     using System.Web.UI;
     using System.Web.WebPages;
     
-    #line 1 "..\..\Scheduler\Views\CustomTask.cshtml"
+    #line 1 "..\..\Scheduler\Views\ActionTask.cshtml"
     using Signum.Engine;
     
     #line default
     #line hidden
     using Signum.Entities;
     
-    #line 2 "..\..\Scheduler\Views\CustomTask.cshtml"
+    #line 2 "..\..\Scheduler\Views\ActionTask.cshtml"
     using Signum.Entities.Scheduler;
     
     #line default
@@ -43,10 +43,10 @@ namespace Signum.Web.Extensions.Scheduler.Views
     using Signum.Web;
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.5.4.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/Scheduler/Views/CustomTask.cshtml")]
-    public partial class CustomTask : System.Web.Mvc.WebViewPage<dynamic>
+    [System.Web.WebPages.PageVirtualPathAttribute("~/Scheduler/Views/ActionTask.cshtml")]
+    public partial class ActionTask : System.Web.Mvc.WebViewPage<dynamic>
     {
-        public CustomTask()
+        public ActionTask()
         {
         }
         public override void Execute()
@@ -57,22 +57,22 @@ WriteLiteral("\r\n");
 
 
             
-            #line 4 "..\..\Scheduler\Views\CustomTask.cshtml"
- using (var e = Html.TypeContext<CustomTaskDN>()) 
+            #line 4 "..\..\Scheduler\Views\ActionTask.cshtml"
+ using (var e = Html.TypeContext<ActionTaskDN>()) 
 {
     
             
             #line default
             #line hidden
             
-            #line 6 "..\..\Scheduler\Views\CustomTask.cshtml"
+            #line 6 "..\..\Scheduler\Views\ActionTask.cshtml"
 Write(Html.ValueLine(e, f => f.Key));
 
             
             #line default
             #line hidden
             
-            #line 6 "..\..\Scheduler\Views\CustomTask.cshtml"
+            #line 6 "..\..\Scheduler\Views\ActionTask.cshtml"
                                    
 }
             

@@ -18,18 +18,18 @@ using Signum.Engine.Exceptions;
 
 namespace Signum.Engine.Scheduler
 {
-    public static class CustomTaskLogic
+    public static class ActionTaskLogic
     {
-        static Expression<Func<CustomTaskDN, IQueryable<CustomTaskExecutionDN>>> ExecutionsExpression =
-            ct => Database.Query<CustomTaskExecutionDN>().Where(a => a.CustomTask == ct);
-        public static IQueryable<CustomTaskExecutionDN> Executions(this CustomTaskDN e)
+        static Expression<Func<ActionTaskDN, IQueryable<ActionTaskLogDN>>> ExecutionsExpression =
+            ct => Database.Query<ActionTaskLogDN>().Where(a => a.ActionTask == ct);
+        public static IQueryable<ActionTaskLogDN> Executions(this ActionTaskDN e)
         {
             return ExecutionsExpression.Evaluate(e);
         }
 
-        static Expression<Func<CustomTaskDN, IQueryable<CustomTaskExecutionDN>>> LastExecutionExpression =
+        static Expression<Func<ActionTaskDN, IQueryable<ActionTaskLogDN>>> LastExecutionExpression =
             e => e.Executions().OrderByDescending(a => a.StartTime).Take(1);
-        public static IQueryable<CustomTaskExecutionDN> LastExecution(this CustomTaskDN e)
+        public static IQueryable<ActionTaskLogDN> LastExecution(this ActionTaskDN e)
         {
             return LastExecutionExpression.Evaluate(e);
         }
@@ -40,20 +40,20 @@ namespace Signum.Engine.Scheduler
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                MultiEnumLogic<CustomTaskDN>.Start(sb, () => tasks.Keys.ToHashSet());
+                MultiEnumLogic<ActionTaskDN>.Start(sb, () => tasks.Keys.ToHashSet());
 
-                sb.Include<CustomTaskExecutionDN>();
+                sb.Include<ActionTaskLogDN>();
 
-                new BasicExecute<CustomTaskDN>(CustomTaskOperation.Execute)
+                new BasicExecute<ActionTaskDN>(ActionTaskOperation.Execute)
                 {
-                    Execute = (ct, _) => Execute(MultiEnumLogic<CustomTaskDN>.ToEnum(ct.Key))
+                    Execute = (ct, _) => Execute(MultiEnumLogic<ActionTaskDN>.ToEnum(ct.Key))
                 }.Register();
 
-                SchedulerLogic.ExecuteTask.Register((CustomTaskDN ct) =>
-                    Execute(MultiEnumLogic<CustomTaskDN>.ToEnum(ct.Key)));
+                SchedulerLogic.ExecuteTask.Register((ActionTaskDN ct) =>
+                    Execute(MultiEnumLogic<ActionTaskDN>.ToEnum(ct.Key)));
 
-                dqm.RegisterQuery(typeof(CustomTaskDN), ()=>
-                      from ct in Database.Query<CustomTaskDN>()
+                dqm.RegisterQuery(typeof(ActionTaskDN), ()=>
+                      from ct in Database.Query<ActionTaskDN>()
                        select new
                        {
                            Entity = ct,
@@ -61,28 +61,28 @@ namespace Signum.Engine.Scheduler
                            ct.Key,
                        });
 
-                dqm.RegisterQuery(typeof(CustomTaskExecutionDN), ()=>
-                     from cte in Database.Query<CustomTaskExecutionDN>()
+                dqm.RegisterQuery(typeof(ActionTaskLogDN), ()=>
+                     from cte in Database.Query<ActionTaskLogDN>()
                       select new
                       {
                           Entity = cte,
                           cte.Id,
-                          cte.CustomTask,
+                          cte.ActionTask,
                           cte.StartTime,
                           cte.EndTime,
                           cte.Exception,
                       });
 
-                dqm.RegisterExpression((CustomTaskDN ct) => ct.Executions());
-                dqm.RegisterExpression((CustomTaskDN ct) => ct.LastExecution());
+                dqm.RegisterExpression((ActionTaskDN ct) => ct.Executions());
+                dqm.RegisterExpression((ActionTaskDN ct) => ct.LastExecution());
             }
         }
 
         public static void Execute(Enum key)
         {
-            CustomTaskExecutionDN cte = new CustomTaskExecutionDN
+            ActionTaskLogDN cte = new ActionTaskLogDN
             {
-                CustomTask = MultiEnumLogic<CustomTaskDN>.ToEntity(key),
+                ActionTask = MultiEnumLogic<ActionTaskDN>.ToEntity(key),
                 StartTime = TimeZoneManager.Now,
             };
 
@@ -109,9 +109,9 @@ namespace Signum.Engine.Scheduler
 
                 using (Transaction tr2 = Transaction.ForceNew())
                 {
-                    CustomTaskExecutionDN cte2 = new CustomTaskExecutionDN
+                    ActionTaskLogDN cte2 = new ActionTaskLogDN
                     {
-                        CustomTask = cte.CustomTask,
+                        ActionTask = cte.ActionTask,
                         StartTime = cte.StartTime,
                         EndTime = TimeZoneManager.Now,
                         Exception = exLog,

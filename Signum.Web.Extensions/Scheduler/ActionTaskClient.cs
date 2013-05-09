@@ -5,7 +5,7 @@ using Signum.Utilities;
 
 namespace Signum.Web.Extensions.Scheduler
 {
-    public static class CustomTaskClient
+    public static class ActionTaskClient
     {
         public static string ViewPrefix = "~/scheduler/Views/{0}.cshtml";
         public static void Start()
@@ -14,8 +14,8 @@ namespace Signum.Web.Extensions.Scheduler
             {
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<CustomTaskDN>{ PartialViewName = _ => ViewPrefix.Formato("CustomTask") },
-                    new EntitySettings<CustomTaskExecutionDN>{ PartialViewName = _ => ViewPrefix.Formato("CustomTaskExecution") },
+                    new EntitySettings<ActionTaskDN>{ PartialViewName = _ => ViewPrefix.Formato("ActionTask") },
+                    new EntitySettings<ActionTaskLogDN>{ PartialViewName = _ => ViewPrefix.Formato("ActionTaskLog") },
                 });
             }
         }

@@ -18,11 +18,11 @@ using Signum.Entities.Scheduler;
 namespace Signum.Windows.Scheduler
 {
     /// <summary>
-    /// Interaction logic for CustomTaskExecution.xaml
+    /// Interaction logic for ActionTask.xaml
     /// </summary>
-    public partial class CustomTaskExecution : UserControl
+    public partial class ActionTask : UserControl
     {
-        public CustomTaskExecution()
+        public ActionTask()
         {
             InitializeComponent();
         }
