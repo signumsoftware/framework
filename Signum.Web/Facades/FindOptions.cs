@@ -277,8 +277,7 @@ namespace Signum.Web
         {
             this.ColumnName = columnName;
             this.Operation = FilterOperation.EqualTo;
-            this.Value = value;
-            this.Frozen = true;
+            this.Value = value;         
         }
 
         public Filter ToFilter()
