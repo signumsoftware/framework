@@ -33,6 +33,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         
@@ -52,7 +53,12 @@
                      m:Common.Route="Title" FontFamily="Comic Sans MS" 
                      FontWeight="Bold" FontSize="14"/>
 
-        <TextBox TextWrapping="Wrap" Grid.Row="3"  Grid.ColumnSpan="2" Margin="8,8,8,8"  
+        <m:EntityLine  Grid.Row="3" Grid.ColumnSpan="2"
+                      m:Common.Route="Target" 
+                      FontFamily="Comic Sans MS" FontWeight="Bold" 
+                      FontSize="14" m:Common.IsReadOnly="True" />
+
+        <TextBox TextWrapping="Wrap" Grid.Row="4"  Grid.ColumnSpan="2" Margin="8,8,8,8"  
                  Background="#7FFFFFFF" Style="{DynamicResource toolTip}" AcceptsReturn="True"
 			Text="{Binding Path=Text, Mode=Default, 
             ValidatesOnDataErrors=True, 
