@@ -259,6 +259,8 @@ namespace Signum.Windows
 
         public override void Execute()
         {
+            EvaluateFunValues();
+
             Lite<T> lite = DynamicQueryServer.QueryUnique<T>(FindUniqueOptions);
 
             if (lite == null)
