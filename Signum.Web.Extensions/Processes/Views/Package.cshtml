@@ -7,12 +7,6 @@
     <fieldset>
         <legend>Lines</legend>
         @Html.SearchControl(
-        new FindOptions()
-        {
-            QueryName = typeof(PackageLineDN),
-            FilterOptions = { new FilterOption("Package", e.Value.ToLite())},
-            FilterMode=FilterMode.Hidden,
-            SearchOnLoad=true,
-        }, e)
+        new FindOptions(typeof(PackageLineDN),"Package",e.Value.ToLite()), e)
     </fieldset>
 }
