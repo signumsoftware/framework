@@ -17,7 +17,7 @@ using Signum.Entities.Basics;
 
 namespace Signum.Engine.DynamicQuery
 {
-    public static class AutoCompleteUtils
+    public static class AutocompleteUtils
     {
         public static List<Lite<IdentifiableEntity>> FindLiteLike(Implementations implementations, string subString, int count)
         {
@@ -64,6 +64,36 @@ namespace Signum.Engine.DynamicQuery
                 if (results.Count >= count)
                     return results;
             }
+
+            return results;
+        }
+
+        public static List<Lite<T>> Autocomplete<T>(this IQueryable<T> query, string subString, int count)
+            where T : IdentifiableEntity
+        {
+            List<Lite<T>> results = new List<Lite<T>>();
+
+            int? id = subString.ToInt();
+            if (id.HasValue)
+            {
+                Lite<T> entity = query.Select(a => a.ToLite()).SingleOrDefaultEx(e => e.Id == id);
+
+                if (entity != null)
+                    results.Add(entity);
+
+                if (results.Count >= count)
+                    return results;
+            }
+
+            results.AddRange(query.Where(a => a.ToString().StartsWith(subString)).Select(a => a.ToLite()).Take(results.Count - count));
+
+            if (results.Count >= count)
+                return results;
+
+            results.AddRange(query.Where(a => !a.ToString().StartsWith(subString) && a.ToString().Contains(subString)).Select(a => a.ToLite()).Take(results.Count - count));
+
+            if (results.Count >= count)
+                return results;
 
             return results;
         }

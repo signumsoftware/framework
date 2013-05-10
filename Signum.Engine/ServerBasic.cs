@@ -90,13 +90,13 @@ namespace Signum.Services
         public virtual List<Lite<IdentifiableEntity>> FindAllLite(Implementations implementations)
         {
             return Return(MethodInfo.GetCurrentMethod(), implementations.ToString(),
-                () => AutoCompleteUtils.FindAllLite(implementations));
+                () => AutocompleteUtils.FindAllLite(implementations));
         }
 
         public virtual List<Lite<IdentifiableEntity>> FindLiteLike(Implementations implementations, string subString, int count)
         {
             return Return(MethodInfo.GetCurrentMethod(), implementations.ToString(),
-                () => AutoCompleteUtils.FindLiteLike(implementations, subString, count));
+                () => AutocompleteUtils.FindLiteLike(implementations, subString, count));
         }
 
         public virtual Dictionary<PropertyRoute, Implementations> FindAllImplementations(Type root)

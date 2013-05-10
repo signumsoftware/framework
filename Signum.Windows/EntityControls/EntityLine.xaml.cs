@@ -34,8 +34,8 @@ namespace Signum.Windows
         public event Func<string, IEnumerable<Lite<IdentifiableEntity>>> AutoCompleting;
 
         public static readonly DependencyProperty AutoCompleteProperty =
-            DependencyProperty.Register("AutoComplete", typeof(bool), typeof(EntityLine), new FrameworkPropertyMetadata(true));
-        public bool AutoComplete
+            DependencyProperty.Register("Autocomplete", typeof(bool), typeof(EntityLine), new FrameworkPropertyMetadata(true));
+        public bool Autocomplete
         {
             get { return (bool)GetValue(AutoCompleteProperty); }
             set { SetValue(AutoCompleteProperty, value); }
@@ -58,7 +58,7 @@ namespace Signum.Windows
             base.OnLoad(sender, e);
 
             if (Implementations == null || Implementations.Value.IsByAll)
-                AutoComplete = false;
+                Autocomplete = false;
         }
 
         protected override void UpdateVisibility()
@@ -72,7 +72,7 @@ namespace Signum.Windows
 
         public bool CanAutoComplete()
         {
-            return !Common.GetIsReadOnly(this) && AutoComplete;
+            return !Common.GetIsReadOnly(this) && Autocomplete;
         }
 
         private IEnumerable autoCompleteTextBox_AutoCompleting(string arg, CancellationToken ct)
@@ -190,8 +190,8 @@ namespace Signum.Windows
 
         public void Invoke()
         {
-            if (!base.IsEnabled() || !((EntityLine)Owner).AutoComplete)
-                throw new InvalidOperationException("AutoComplete not enabled");
+            if (!base.IsEnabled() || !((EntityLine)Owner).Autocomplete)
+                throw new InvalidOperationException("Autocomplete not enabled");
 
             base.Dispatcher.BeginInvoke(DispatcherPriority.Input, new DispatcherOperationCallback(obj =>
             {
