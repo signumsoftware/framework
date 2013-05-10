@@ -11,7 +11,8 @@
         {
             QueryName = typeof(PackageLineDN),
             FilterOptions = { new FilterOption("Package", e.Value.ToLite())},
-            FilterMode=FilterMode.Hidden
+            FilterMode=FilterMode.Hidden,
+            SearchOnLoad=true,
         }, e)
     </fieldset>
 }

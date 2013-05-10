@@ -95,7 +95,8 @@ WriteLiteral("    <fieldset>\r\n        <legend>Lines</legend>\r\n        ");
         {
             QueryName = typeof(PackageLineDN),
             FilterOptions = { new FilterOption("Package", e.Value.ToLite())},
-            FilterMode=FilterMode.Hidden
+            FilterMode=FilterMode.Hidden,
+            SearchOnLoad=true,
         }, e));
 
             
@@ -105,7 +106,7 @@ WriteLiteral("\r\n    </fieldset>\r\n");
 
 
             
-            #line 17 "..\..\Processes\Views\Package.cshtml"
+            #line 18 "..\..\Processes\Views\Package.cshtml"
 }
             
             #line default
