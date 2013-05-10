@@ -6,6 +6,12 @@
     @Html.ValueLine(e, f => f.IdOrNull, f => f.ReadOnly = true)
     <fieldset>
         <legend>Lines</legend>
-        @Html.SearchControl(new FindOptions(typeof(PackageLineDN)), e)
+        @Html.SearchControl(
+        new FindOptions()
+        {
+            QueryName = typeof(PackageLineDN),
+            FilterOptions = { new FilterOption("Package", e.Value.ToLite())},
+            FilterMode=FilterMode.Hidden
+        }, e)
     </fieldset>
 }
