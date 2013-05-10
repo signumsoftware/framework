@@ -11,7 +11,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Signum.Entities;
+using Signum.Entities.Basics;
 using Signum.Entities.ControlPanel;
+using Signum.Entities.Reflection;
+using Signum.Entities.UserQueries;
 using Signum.Utilities;
 
 namespace Signum.Windows.ControlPanels
@@ -27,9 +30,23 @@ namespace Signum.Windows.ControlPanels
             set { DataContext = value; }
         }
 
+        public static readonly DependencyProperty CurrentEntityProperty =
+         DependencyProperty.Register("CurrentEntity", typeof(IdentifiableEntity), typeof(ControlPanelWindow), new PropertyMetadata(null));
+        public IdentifiableEntity CurrentEntity
+        {
+            get { return (IdentifiableEntity)GetValue(CurrentEntityProperty); }
+            set { SetValue(CurrentEntityProperty, value); }
+        }
+
         public ControlPanelWindow()
         {
             InitializeComponent();
+            this.DataContextChanged += ControlPanelWindow_DataContextChanged;
+        }
+
+        void ControlPanelWindow_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+ 	        this.tbControlPanel.Text = e.NewValue.TryToString();
         }
 
         private void reload_Click(object sender, RoutedEventArgs e)
@@ -42,16 +59,6 @@ namespace Signum.Windows.ControlPanels
         private void navigate_Click(object sender, RoutedEventArgs e)
         {
             Navigator.Navigate(Current.ToLite());
-        }
-
-        public static void View(Lite<ControlPanelDN> controlPanel)
-        {
-            ControlPanelWindow win = new ControlPanelWindow();
-
-            win.tbEntityId.Text = NormalWindowMessage.Loading0.NiceToString().Formato(controlPanel.EntityType.NiceName());
-            win.Show();
-
-            win.DataContext = controlPanel.Retrieve();
         }
     }
 }

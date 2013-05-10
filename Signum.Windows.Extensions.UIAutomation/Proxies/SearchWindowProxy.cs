@@ -523,7 +523,7 @@ namespace Signum.Windows.UIAutomation
                     break;
 
                 case "EntityLine":
-                    new EntityLineProxy(valueControl, null).AutoComplete(value);
+                    new EntityLineProxy(valueControl, null).Autocomplete(value);
                     break;
                 default: throw new InvalidOperationException();
             }

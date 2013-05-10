@@ -55,7 +55,7 @@ namespace Signum.Web.ControlPanel
                 Navigator.AddSettings(new List<EntitySettings>
                 {
                     new EntitySettings<ControlPanelDN> { PartialViewName = e => AdminViewPrefix.Formato("ControlPanelAdmin") },
-                    new EmbeddedEntitySettings<PanelPart>(),
+                    new EmbeddedEntitySettings<PanelPartDN>(),
                     
                     new EntitySettings<UserChartPartDN>(),
                     new EntitySettings<UserQueryPartDN>(),

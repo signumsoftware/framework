@@ -64,7 +64,6 @@ namespace Signum.Windows.UserQueries
                 e.Handled = true;
 
                 UserQueryDN userQuery = UserQueryClient.FromSearchControl(sc);
-                userQuery.Related = UserDN.Current.ToLite();
 
                 Navigator.Navigate(userQuery, new NavigateOptions
                 {
@@ -105,7 +104,7 @@ namespace Signum.Windows.UserQueries
                 if (MessageBox.Show(UserQueryMessage.AreYouSureToRemove0.NiceToString().Formato(current), UserQueryMessage.RemoveUserQuery.NiceToString(),
                     MessageBoxButton.YesNo, MessageBoxImage.Exclamation, MessageBoxResult.No) == MessageBoxResult.Yes)
                 {
-                    Server.Execute((IUserQueryServer s) => s.RemoveUserQuery(current.ToLite()));
+                    current.ToLite().Delete(UserQueryOperation.Delete);
 
                     initialize();
 

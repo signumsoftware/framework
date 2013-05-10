@@ -105,7 +105,7 @@ WriteLiteral("\">\r\n                    <div class=\"sf-ftbl-droppable\"></div>
             #line 15 "..\..\ControlPanel\Views\Admin\PanelParts.cshtml"
                      for (int row = 0; row < rowNumber; row++)
                     {
-                        PanelPart pp = Model.Parts.SingleOrDefaultEx(p => p.Row == row && p.Column == col);
+                        PanelPartDN pp = Model.Parts.SingleOrDefaultEx(p => p.Row == row && p.Column == col);
                         if (pp != null)
                         {
 

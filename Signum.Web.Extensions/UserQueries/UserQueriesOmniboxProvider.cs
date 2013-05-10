@@ -8,6 +8,7 @@ using Signum.Entities.Omnibox;
 using Signum.Engine.DynamicQuery;
 using System.Web.Mvc;
 using Signum.Utilities;
+using Signum.Engine.UserQueries;
 
 namespace Signum.Web.UserQueries
 {
@@ -15,7 +16,7 @@ namespace Signum.Web.UserQueries
     {
         public override OmniboxResultGenerator<UserQueryOmniboxResult> CreateGenerator()
         {
-            return new UserQueryOmniboxResultGenerator();
+            return new UserQueryOmniboxResultGenerator(UserQueryLogic.Autocomplete);
         }
 
         public override MvcHtmlString RenderHtml(UserQueryOmniboxResult result)

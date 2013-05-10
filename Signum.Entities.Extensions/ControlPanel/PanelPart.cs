@@ -12,7 +12,7 @@ using System.Linq.Expressions;
 namespace Signum.Entities.ControlPanel
 {
     [Serializable]
-    public class PanelPart : EmbeddedEntity
+    public class PanelPartDN : EmbeddedEntity
     {
         string title;
         public string Title
@@ -61,9 +61,9 @@ namespace Signum.Entities.ControlPanel
             return base.PropertyValidation(pi);
         }
 
-        public PanelPart Clone()
+        public PanelPartDN Clone()
         {
-            return new PanelPart
+            return new PanelPartDN
             {
                 Column = Column,
                 Row = Row,

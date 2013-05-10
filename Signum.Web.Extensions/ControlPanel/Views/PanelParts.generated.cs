@@ -117,7 +117,7 @@ WriteLiteral("\">\r\n");
             #line 15 "..\..\ControlPanel\Views\PanelParts.cshtml"
                  for (int row = 0; row < rowNumber; row++)
                 {
-                    PanelPart pp = Model.Parts.SingleOrDefaultEx(p => p.Row == row && p.Column == col);
+                    PanelPartDN pp = Model.Parts.SingleOrDefaultEx(p => p.Row == row && p.Column == col);
                     if (pp != null)
                     {
 

@@ -63,7 +63,7 @@ namespace Signum.Web.UserQueries
                 DynamicQueryManager.Current.QueryDescription(request.QueryName),
                 QueryLogic.RetrieveOrGenerateQuery(request.QueryName),
                 FindOptions.DefaultElementsPerPage,
-                preserveFilters: false /*Implement Simple Filter Builder*/);
+                withoutFilters: false /*Implement Simple Filter Builder*/);
         }
 
         [HttpPost]

@@ -210,7 +210,7 @@ Write(Html.ValueLine(e, f => f.ElementsPerPage));
             #line hidden
             
             #line 43 "..\..\UserQueries\Views\UserQuery.cshtml"
-Write(Html.ValueLine(e, f => f.PreserveFilters));
+Write(Html.ValueLine(e, f => f.WithoutFilters));
 
             
             #line default

@@ -67,7 +67,7 @@ namespace Signum.Web.Extensions.ControlPanel.Views
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.5.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/ControlPanel/Views/LinkListPart.cshtml")]
-    public class LinkListPart : System.Web.Mvc.WebViewPage<PanelPart>
+    public class LinkListPart : System.Web.Mvc.WebViewPage<PanelPartDN>
     {
         public LinkListPart()
         {

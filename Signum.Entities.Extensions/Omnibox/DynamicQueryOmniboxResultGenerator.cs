@@ -258,7 +258,7 @@ namespace Signum.Entities.Omnibox
                     {
                         var patten = OmniboxUtils.CleanCommas(omniboxToken.Value);
 
-                        var result = OmniboxParser.Manager.AutoComplete(queryToken.GetImplementations().Value, patten, AutoCompleteLimit);
+                        var result = OmniboxParser.Manager.Autocomplete(queryToken.GetImplementations().Value, patten, AutoCompleteLimit);
 
                         return result.Select(lite => new ValueTuple { Value = lite, Match = OmniboxUtils.Contains(lite, lite.ToString(), patten) }).ToArray();  
                     }

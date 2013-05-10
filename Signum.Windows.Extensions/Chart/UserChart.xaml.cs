@@ -16,6 +16,8 @@ using Signum.Entities.Chart;
 using Signum.Entities.Reports;
 using Signum.Entities;
 using Signum.Entities.UserQueries;
+using Signum.Windows.Basics;
+using Signum.Utilities;
 
 namespace Signum.Windows.Chart
 {
@@ -47,6 +49,8 @@ namespace Signum.Windows.Chart
                 QueryDescription = DynamicQueryServer.GetQueryDescription(QueryClient.GetQueryName(uq.Query.Key));
             }
             chartBuilder.Description = QueryDescription;
+
+            tbCurrentEntity.Text = UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().Formato(CurrentEntityConverter.CurrentEntityKey);
         }
 
         private List<QueryToken> QueryTokenBuilderFilter_SubTokensEvent(QueryToken token)
@@ -65,6 +69,11 @@ namespace Signum.Windows.Chart
                 return new List<QueryToken>();
 
             return token.SubTokens(QueryDescription, canAggregate: cr.GroupResults);
+        }
+
+        IEnumerable<Lite<IdentifiableEntity>> EntityType_AutoCompleting(string text)
+        {
+            return TypeClient.ViewableServerTypes(text).Take(5);
         }
     }
 }

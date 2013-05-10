@@ -68,7 +68,7 @@ namespace Signum.Web.Extensions.ControlPanel.Views
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.5.4.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/ControlPanel/Views/SearchControlPart.cshtml")]
-    public partial class SearchControlPart : System.Web.Mvc.WebViewPage<PanelPart>
+    public partial class SearchControlPart : System.Web.Mvc.WebViewPage<PanelPartDN>
     {
         public SearchControlPart()
         {

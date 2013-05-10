@@ -11,6 +11,7 @@ using Signum.Utilities;
 using Signum.Windows.Authorization;
 using System.Windows;
 using Signum.Windows.ControlPanels;
+using Signum.Services;
 
 namespace Signum.Windows.ControlPanels
 {
@@ -18,7 +19,7 @@ namespace Signum.Windows.ControlPanels
     {
         public override OmniboxResultGenerator<ControlPanelOmniboxResult> CreateGenerator()
         {
-            return new ControlPanelOmniboxResultGenerator();
+            return new ControlPanelOmniboxResultGenerator((subString,  limit) => Server.Return((IControlPanelServer s) => s.AutocompleteControlPanel(subString, limit)));
         }
 
         public override void RenderLines(ControlPanelOmniboxResult result, InlineCollection lines)
@@ -33,7 +34,7 @@ namespace Signum.Windows.ControlPanels
 
         public override void OnSelected(ControlPanelOmniboxResult result, Window window)
         {
-            ControlPanelWindow.View(result.ControlPanel);
+            ControlPanelClient.View(result.ControlPanel, null);
         }
 
         public override string GetName(ControlPanelOmniboxResult result)

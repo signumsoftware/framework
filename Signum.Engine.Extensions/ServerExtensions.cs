@@ -303,12 +303,17 @@ namespace Signum.Services
             () => UserChartLogic.GetUserCharts(queryName));
         }
 
-        public void RemoveUserChart(Lite<UserChartDN> lite)
+        public List<Lite<UserChartDN>> GetUserChartsEntity(Type entityType)
         {
-            Execute(MethodInfo.GetCurrentMethod(),
-              () => UserChartLogic.RemoveUserChart(lite));
+            return Return(MethodInfo.GetCurrentMethod(),
+            () => UserChartLogic.GetUserChartsEntity(entityType));
         }
 
+        public List<Lite<UserChartDN>> AutoCompleteUserChart(string subString, int limit)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => ChartLogic.Autocomplete(subString, limit));
+        }
         #endregion
 
         #region IExcelReportServer Members
@@ -340,10 +345,16 @@ namespace Signum.Services
             () => UserQueryLogic.GetUserQueries(queryName));
         }
 
-        public void RemoveUserQuery(Lite<UserQueryDN> lite)
+        public List<Lite<UserQueryDN>> GetUserQueriesEntity(Type entityType)
         {
-            Execute(MethodInfo.GetCurrentMethod(),
-              () => UserQueryLogic.RemoveUserQuery(lite));
+            return Return(MethodInfo.GetCurrentMethod(),
+            () => UserQueryLogic.GetUserQueriesEntity(entityType));
+        }
+
+        public List<Lite<UserQueryDN>> AutoCompleteUserQueries(string subString, int limit)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                  () => UserQueryLogic.Autocomplete(subString, limit));
         }
         #endregion
 
@@ -376,10 +387,24 @@ namespace Signum.Services
         }
         #endregion
 
+        #region IControlPanelServer
         public ControlPanelDN GetHomePageControlPanel()
         {
             return Return(MethodInfo.GetCurrentMethod(),
                 () => ControlPanelLogic.GetHomePageControlPanel());
         }
+
+        public List<Lite<ControlPanelDN>> GetControlPanelsEntity(Type entityType)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => ControlPanelLogic.GetControlPanelsEntity(entityType));
+        }
+
+        public List<Lite<ControlPanelDN>> AutocompleteControlPanel(string subString, int limit)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                  () => ControlPanelLogic.Autocomplete(subString, limit));
+        } 
+        #endregion
     }
 }

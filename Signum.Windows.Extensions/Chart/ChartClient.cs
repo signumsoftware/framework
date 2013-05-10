@@ -15,6 +15,10 @@ using Microsoft.Win32;
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Controls;
+using Signum.Entities;
+using Signum.Windows.Basics;
+using Signum.Entities.UserQueries;
+using Signum.Services;
 
 namespace Signum.Windows.Chart
 {
@@ -36,6 +40,7 @@ namespace Signum.Windows.Chart
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                TypeClient.Start();
                 QueryClient.Start();
 
                 Navigator.AddSettings(new List<EntitySettings>()
@@ -71,6 +76,30 @@ namespace Signum.Windows.Chart
                 }); 
 
                 ChartUtils.RemoveNotNullValidators();
+
+                LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, ctrl) =>
+                    Server.Return((IChartServer us) => us.GetUserChartsEntity(entity.EntityType))
+                    .Select(cp => new UserChartQuickLink (cp, entity)).ToArray());
+            }
+        }
+
+        class UserChartQuickLink : QuickLink
+        {
+            Lite<UserChartDN> userChart;
+            Lite<IdentifiableEntity> entity;
+
+            public UserChartQuickLink(Lite<UserChartDN> userChart, Lite<IdentifiableEntity> entity)
+            {
+                this.ToolTip = userChart.ToString();
+                this.Label = userChart.ToString();
+                this.userChart = userChart;
+                this.entity = entity;
+                this.IsVisible = true;
+            }
+
+            public override void Execute()
+            {
+                ChartClient.View(userChart.Retrieve(), entity.Retrieve());
             }
         }
 
@@ -99,6 +128,35 @@ namespace Signum.Windows.Chart
             };
 
             return miResult;
+        }
+
+        internal static void View(UserChartDN uc, IdentifiableEntity currentEntity)
+        {
+            var query = QueryClient.GetQueryName(uc.Query.Key);
+
+            if (uc.EntityType != null)
+            {
+                if (currentEntity == null)
+                {
+                    var entity = Navigator.Find(new FindOptions(Server.GetType(uc.EntityType.ToString())));
+
+                    if (entity == null)
+                        return;
+
+                    currentEntity = entity.Retrieve();
+                }
+
+                CurrentEntityConverter.SetFilterValues(uc.Filters, currentEntity);
+            }
+
+            ChartRequestWindow cw = new ChartRequestWindow()
+            {
+                DataContext = new ChartRequest(query)
+            };
+
+            ChartClient.SetUserChart(cw, uc);
+
+            cw.Show();
         }
     }
 }

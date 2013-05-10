@@ -11,6 +11,13 @@ namespace Signum.Entities.ControlPanel
 {
     public class ControlPanelOmniboxResultGenerator : OmniboxResultGenerator<ControlPanelOmniboxResult>
     {
+        Func<string, int, IEnumerable<Lite<ControlPanelDN>>> autoComplete;
+
+        public ControlPanelOmniboxResultGenerator(Func<string, int, IEnumerable<Lite<ControlPanelDN>>> autoComplete)
+        {
+            this.autoComplete = autoComplete;
+        }
+
         public int AutoCompleteLimit = 5;
 
         public override IEnumerable<ControlPanelOmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern)
@@ -20,7 +27,7 @@ namespace Signum.Entities.ControlPanel
 
             string ident = OmniboxUtils.CleanCommas(tokens[0].Value);
 
-            var controlPanel = OmniboxParser.Manager.AutoComplete(typeof(ControlPanelDN), ident, AutoCompleteLimit);
+            var controlPanel = autoComplete(ident, AutoCompleteLimit);
 
             foreach (var uq in controlPanel)
             {

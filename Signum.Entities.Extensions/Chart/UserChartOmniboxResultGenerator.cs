@@ -11,6 +11,13 @@ namespace Signum.Entities.Chart
 {
     public class UserChartOmniboxResultGenerator : OmniboxResultGenerator<UserChartOmniboxResult>
     {
+        Func<string, int, IEnumerable<Lite<UserChartDN>>> autoComplete;
+
+        public UserChartOmniboxResultGenerator(Func<string, int, IEnumerable<Lite<UserChartDN>>> autoComplete)
+        {
+            this.autoComplete = autoComplete;
+        }
+
         public int AutoCompleteLimit = 5;
 
         public override IEnumerable<UserChartOmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern)
@@ -20,7 +27,7 @@ namespace Signum.Entities.Chart
 
             string ident = OmniboxUtils.CleanCommas(tokens[0].Value);
 
-            var userCharts = OmniboxParser.Manager.AutoComplete(typeof(UserChartDN), ident, AutoCompleteLimit);
+            var userCharts = autoComplete(ident, AutoCompleteLimit);
 
             foreach (var uq in userCharts)
             {

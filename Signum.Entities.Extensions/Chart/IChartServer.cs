@@ -19,24 +19,16 @@ namespace Signum.Services
         List<Lite<UserChartDN>> GetUserCharts(object queryName);
 
         [OperationContract, NetDataContract]
-        void RemoveUserChart(Lite<UserChartDN> lite);
+        List<Lite<UserChartDN>> GetUserChartsEntity(Type entityType);
+
+        [OperationContract, NetDataContract]
+        List<Lite<UserChartDN>> AutoCompleteUserChart(string subString, int limit);
     }
 
-    //public ResultTable ExecuteChart(ChartRequest request)
-    //{
-    //    return Return(MethodInfo.GetCurrentMethod(),
-    //    () => ChartLogic.ExecuteChart(request));
-    //}
-
-    //public List<Lite<UserChartDN>> GetUserCharts(object queryName)
-    //{
-    //    return Return(MethodInfo.GetCurrentMethod(),
-    //    () => ChartLogic.GetUserCharts(queryName));
-    //}
-
-    //public void RemoveUserChart(Lite<UserChartDN> lite)
-    //{
-    //    Execute(MethodInfo.GetCurrentMethod(),
-    //      () => ChartLogic.RemoveUserChart(lite));
-    //}
+    [ServiceContract]
+    public interface IResourcesByEntityServer
+    {
+        [OperationContract, NetDataContract]
+        List<Lite<IdentifiableEntity>> GetResourcesByEntity(Type entityType);
+    }
 }

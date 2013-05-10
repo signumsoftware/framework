@@ -16,7 +16,7 @@
         <m:EntityLine m:Common.Route="Task" Create="False"/>
         <GroupBox Style="{DynamicResource EntityGroupBox}">
             <GroupBox.Header>
-                <m:EntityLine m:Common.Route="Rule" AutoComplete="False" Find="False" View="False" />
+                <m:EntityLine m:Common.Route="Rule" Autocomplete="False" Find="False" View="False" />
             </GroupBox.Header>
             <m:DataBorder m:Common.Route="Rule" AutoChild="True"/>
         </GroupBox>

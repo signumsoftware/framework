@@ -12,6 +12,7 @@ using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Engine.Authorization;
 using Signum.Engine.Operations;
+using Signum.Utilities;
 
 namespace Signum.Engine.Chart
 {
@@ -88,13 +89,23 @@ namespace Signum.Engine.Chart
         public static List<Lite<UserChartDN>> GetUserCharts(object queryName)
         {
             return (from er in Database.Query<UserChartDN>()
-                    where er.Query.Key == QueryUtils.GetQueryUniqueKey(queryName)
+                    where er.Query.Key == QueryUtils.GetQueryUniqueKey(queryName) && er.EntityType == null
                     select er.ToLite()).ToList();
         }
 
-        public static void RemoveUserChart(Lite<UserChartDN> lite)
+        public static List<Lite<UserChartDN>> Autocomplete(string content, int limit)
         {
-            Database.Delete(lite);
+            return (from er in Database.Query<UserChartDN>()
+                    where er.Query.Key == QueryUtils.GetQueryUniqueKey(content) && er.EntityType == null
+                    select er.ToLite()).ToList();
+        }
+
+
+        public static List<Lite<UserChartDN>> GetUserChartsEntity(Type entityType)
+        {
+            return (from er in Database.Query<UserChartDN>()
+                    where er.EntityType == entityType.ToTypeDN().ToLite()
+                    select er.ToLite()).ToList();
         }
 
         public static void RegisterUserTypeCondition(SchemaBuilder sb, Enum newEntityGroupKey)

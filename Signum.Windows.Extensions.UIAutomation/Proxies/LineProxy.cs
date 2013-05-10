@@ -321,7 +321,7 @@ namespace Signum.Windows.UIAutomation
 
         public static int AutoCompleteTimeout = 2 * 1000;
 
-        public void AutoComplete(string toString, int? timeOut = null)
+        public void Autocomplete(string toString, int? timeOut = null)
         {
             Element.ButtonInvoke();
 

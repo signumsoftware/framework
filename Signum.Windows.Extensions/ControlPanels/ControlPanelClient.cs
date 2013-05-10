@@ -11,6 +11,10 @@ using System.Windows;
 using Signum.Utilities;
 using System.Linq.Expressions;
 using Signum.Windows.ControlPanels;
+using Signum.Windows.Basics;
+using Signum.Entities.UserQueries;
+using Signum.Entities.Reflection;
+using Signum.Services;
 
 namespace Signum.Windows.ControlPanels
 {
@@ -22,6 +26,8 @@ namespace Signum.Windows.ControlPanels
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                TypeClient.Start();
+
                 Navigator.AddSettings(new List<EntitySettings>()
                 {
                     new EntitySettings<ControlPanelDN>() { View = e => new ControlPanelEdit() },
@@ -61,9 +67,54 @@ namespace Signum.Windows.ControlPanels
                 });
 
                 LinksClient.RegisterEntityLinks<ControlPanelDN>((cp, ctrl) => new[]{
-                    new QuickLinkAction(ControlPanelMessage.Preview.NiceToString(), () => ControlPanelWindow.View(cp))
-                }); 
+                    new QuickLinkAction(ControlPanelMessage.Preview.NiceToString(), () => View(cp, null))
+                });
+
+                LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, ctrl) =>
+                    Server.Return((IControlPanelServer us) => us.GetControlPanelsEntity(entity.EntityType))
+                    .Select(cp => new ControlPanelQuickLink(cp, entity)).ToArray());
             }
+        }
+
+        class ControlPanelQuickLink : QuickLink
+        {
+            Lite<ControlPanelDN> controlPanel;
+            Lite<IdentifiableEntity> entity;
+
+            public ControlPanelQuickLink(Lite<ControlPanelDN> controlPanel, Lite<IdentifiableEntity> entity)
+            {
+                this.ToolTip = controlPanel.ToString(); 
+                this.Label = controlPanel.ToString();
+                this.controlPanel = controlPanel;
+                this.entity = entity;
+                this.IsVisible = true;
+            }
+
+            public override void Execute()
+            {
+                ControlPanelClient.View(controlPanel, entity.Retrieve());
+            }
+        }
+
+        public static void View(Lite<ControlPanelDN> controlPanel, IdentifiableEntity currentEntity)
+        {
+            ControlPanelWindow win = new ControlPanelWindow();
+
+            win.tbControlPanel.Text = NormalWindowMessage.Loading0.NiceToString().Formato(controlPanel.EntityType.NiceName());
+            win.Show();
+
+            var cp = controlPanel.Retrieve();
+
+            if (cp.EntityType != null)
+            {
+                var filters = GraphExplorer.FromRoot(cp).OfType<QueryFilterDN>();
+
+                CurrentEntityConverter.SetFilterValues(filters, currentEntity);
+
+                win.CurrentEntity = currentEntity;
+            }
+
+            win.DataContext = controlPanel.Retrieve();
         }
     }
 

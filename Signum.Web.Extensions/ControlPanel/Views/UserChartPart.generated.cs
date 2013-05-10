@@ -85,7 +85,7 @@ namespace Signum.Web.Extensions.ControlPanel.Views
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.5.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/ControlPanel/Views/UserChartPart.cshtml")]
-    public class UserChartPart : System.Web.Mvc.WebViewPage<PanelPart>
+    public class UserChartPart : System.Web.Mvc.WebViewPage<PanelPartDN>
     {
         public UserChartPart()
         {

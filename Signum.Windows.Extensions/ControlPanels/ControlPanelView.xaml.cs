@@ -38,7 +38,7 @@ namespace Signum.Windows.ControlPanels
         private void GroupBox_Loaded(object sender, RoutedEventArgs e)
         {
             GroupBox gb = (GroupBox)sender;
-            PanelPart pp = (PanelPart)gb.DataContext;
+            PanelPartDN pp = (PanelPartDN)gb.DataContext;
             PartView pv = ControlPanelClient.PartViews.GetOrThrow(pp.Content.GetType());
             if (pv.OnTitleClick != null)
             {
@@ -51,7 +51,7 @@ namespace Signum.Windows.ControlPanels
         private void TextBlock_MouseUp(object sender, MouseButtonEventArgs e)
         {
             TextBlock tb = (TextBlock)sender;
-            PanelPart pp = (PanelPart)tb.DataContext;
+            PanelPartDN pp = (PanelPartDN)tb.DataContext;
             ControlPanelClient.PartViews.GetOrThrow(pp.Content.GetType()).OnTitleClick(pp.Content);
         }
     }

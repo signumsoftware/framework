@@ -12,6 +12,8 @@ using Signum.Entities.Reflection;
 using Signum.Services;
 using Signum.Entities.Authorization;
 using System.Collections;
+using System.Reflection;
+using Signum.Entities.Chart;
 
 namespace Signum.Entities.UserQueries
 {
@@ -22,7 +24,7 @@ namespace Signum.Entities.UserQueries
         public static Dictionary<FilterType, List<IFilterValueConverter>> SpecificFilters = new Dictionary<FilterType, List<IFilterValueConverter>>()
         {
             {FilterType.DateTime, new List<IFilterValueConverter>{ new SmartDateTimeFilterValueConverter()} },
-            {FilterType.Lite, new List<IFilterValueConverter>{ new CurrentUserConverter(), new LiteFilterValueConverter() } },
+            {FilterType.Lite, new List<IFilterValueConverter>{ new CurrentUserConverter(), new CurrentEntityConverter(), new LiteFilterValueConverter() } },
         };
 
         public static string ToString(object value, Type type)
@@ -389,6 +391,81 @@ namespace Signum.Entities.UserQueries
                 result = null;
                 return error;
             }
+        }
+    }
+
+    public class CurrentEntityConverter : IFilterValueConverter
+    {
+        public static string CurrentEntityKey = "[CurrentEntity]";
+
+        static readonly ThreadVariable<IdentifiableEntity> currentEntityVariable = Statics.ThreadVariable<IdentifiableEntity>("currentFilterValueEntity");
+
+        public static void SetFilterValues(IEnumerable<QueryFilterDN> filters, IdentifiableEntity currentEntity)
+        {
+            if (currentEntity == null)
+                throw new InvalidOperationException("currentEntity is null"); 
+
+            try
+            {
+                currentEntityVariable.Value = currentEntity;
+
+                foreach (var f in filters)
+                    f.SetValue();
+            }
+            finally
+            {
+                currentEntityVariable.Value = null;
+            }
+        }
+
+        public string TryToString(object value, Type type, out string result)
+        {
+            var lite = value as Lite<IdentifiableEntity>;
+
+            if (lite != null && lite.RefersTo(currentEntityVariable.Value))
+            {
+                result = CurrentEntityKey;
+                return null;
+            }
+
+            result = null;
+            return FilterValueConverter.Continue;
+        }
+
+        public string TryParse(string value, Type type, out object result)
+        {
+            if (value.HasText() && value.StartsWith(CurrentEntityKey))
+            {
+                string after = value.Substring(CurrentEntityKey.Length);
+
+                string[] parts = after.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+
+                result = currentEntityVariable.Value;
+
+                if (result == null)
+                    return null;
+
+                foreach (var part in parts)
+                {
+                    var prop = result.GetType().GetProperty(part, BindingFlags.Instance | BindingFlags.Public);
+
+                    if (prop == null)
+                        return "Property {0} not found on {1}".Formato(part, type.FullName);
+
+                    result = prop.GetValue(result, null);
+
+                    if (result == null)
+                        return null;
+                }
+
+                if (result is IdentifiableEntity)
+                    result = ((IdentifiableEntity)result).ToLite();
+
+                return null;
+            }
+
+            result = null;
+            return FilterValueConverter.Continue;
         }
     }
 

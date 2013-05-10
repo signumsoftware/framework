@@ -15,6 +15,8 @@ using System.Windows;
 using Signum.Utilities;
 using System.Windows.Controls;
 using Signum.Entities.Chart;
+using Signum.Windows.Basics;
+using Signum.Entities.Reflection;
 
 namespace Signum.Windows.UserQueries
 {
@@ -59,6 +61,7 @@ namespace Signum.Windows.UserQueries
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                TypeClient.Start();
                 QueryClient.Start();
                 Navigator.AddSetting(new EntitySettings<UserQueryDN> { View = _ => new UserQuery() });
                 SearchControl.GetMenuItems += SearchControl_GetCustomMenuItems;
@@ -70,9 +73,34 @@ namespace Signum.Windows.UserQueries
                         ChartMessage.UserChart_CreateNew.NiceToString(),
                         MessageBoxButton.OK, MessageBoxImage.Information);
                     return null;
-                }); 
+                });
+
+                LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, ctrl) =>
+                        Server.Return((IUserQueryServer us) => us.GetUserQueriesEntity(entity.EntityType))
+                        .Select(cp => new UserQueryQuickLink(cp, entity)).ToArray());
             }
         }
+
+        class UserQueryQuickLink : QuickLink
+        {
+            Lite<UserQueryDN> userQuery;
+            Lite<IdentifiableEntity> entity;
+
+            public UserQueryQuickLink(Lite<UserQueryDN> userQuery, Lite<IdentifiableEntity> entity)
+            {
+                this.ToolTip = userQuery.ToString();
+                this.Label = userQuery.ToString();
+                this.userQuery = userQuery;
+                this.entity = entity;
+                this.IsVisible = true;
+            }
+
+            public override void Execute()
+            {
+                UserQueryClient.Explore(userQuery.Retrieve(), entity.Retrieve());
+            }
+        }
+
 
         static MenuItem SearchControl_GetCustomMenuItems(SearchControl seachControl)
         {
@@ -86,12 +114,15 @@ namespace Signum.Windows.UserQueries
         {
             QueryDescription description = DynamicQueryServer.GetQueryDescription(searchControl.QueryName);
 
-            return searchControl.GetQueryRequest(true).ToUserQuery(description, QueryClient.GetQuery(searchControl.QueryName), FindOptions.DefaultElementsPerPage, searchControl.SimpleFilterBuilder != null);
+            return searchControl.GetQueryRequest(true).ToUserQuery(description, 
+                QueryClient.GetQuery(searchControl.QueryName), 
+                FindOptions.DefaultElementsPerPage, 
+                searchControl.SimpleFilterBuilder != null);
         }
 
         internal static void ToSearchControl(UserQueryDN uq, SearchControl searchControl)
         {
-            var filters = uq.PreserveFilters ? searchControl.FilterOptions.ToList() : 
+            var filters = uq.WithoutFilters ? searchControl.FilterOptions.ToList() : 
                 searchControl.FilterOptions.Where(f => f.Frozen).Concat(uq.Filters.Select(qf => new FilterOption
             {
                 Path = qf.Token.FullKey(),
@@ -118,7 +149,7 @@ namespace Signum.Windows.UserQueries
 
         internal static void ToCountSearchControl(UserQueryDN uq, CountSearchControl countSearchControl)
         {
-            var filters = uq.PreserveFilters ? countSearchControl.FilterOptions.ToList() :
+            var filters = uq.WithoutFilters ? countSearchControl.FilterOptions.ToList() :
                 countSearchControl.FilterOptions.Where(f => f.Frozen).Concat(uq.Filters.Select(qf => new FilterOption
                 {
                     Path = qf.Token.FullKey(),
@@ -148,6 +179,31 @@ namespace Signum.Windows.UserQueries
                     InitializeSearchControl = sc => UserQueryClient.SetUserQuery(sc, uq)
                 });
             };
+        }
+
+        internal static void Explore(UserQueryDN userQuery, IdentifiableEntity currentEntity)
+        {
+            if (userQuery.EntityType != null)
+            {
+                if (currentEntity == null)
+                {
+                    var entity = Navigator.Find(new FindOptions(Server.GetType(userQuery.EntityType.ToString())));
+
+                    if (entity == null)
+                        return;
+
+                    currentEntity = entity.Retrieve();
+                }
+
+                CurrentEntityConverter.SetFilterValues(userQuery.Filters, currentEntity);
+            }
+
+            var query = QueryClient.GetQueryName(userQuery.Query.Key);
+
+            Navigator.Explore(new ExploreOptions(query)
+            {
+                InitializeSearchControl = sc => UserQueryClient.SetUserQuery(sc, userQuery)
+            });
         }
     }
 }

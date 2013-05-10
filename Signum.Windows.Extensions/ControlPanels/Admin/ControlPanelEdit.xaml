@@ -11,16 +11,19 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <m:EntityLine m:Common.Route="Related" Grid.Column="0" Grid.Row="0"/>
-        <m:ValueLine m:Common.Route="DisplayName" Grid.Column="0" Grid.Row="1"/>
-        <m:ValueLine m:Common.Route="HomePagePriority" Grid.Column="1" Grid.Row="0"/>
-        <m:ValueLine m:Common.Route="NumberOfColumns" Grid.Column="1" Grid.Row="1"/>
-        <m:EntityRepeater m:Common.Route="Parts" Creating="EntityRepeater_Creating" ViewOnCreate="False" Grid.Row="2" Grid.ColumnSpan="2">
+
+        <m:ValueLine m:Common.Route="DisplayName" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2"/>
+        <m:EntityLine m:Common.Route="Related" Grid.Column="0" Grid.Row="1"/>
+        <m:EntityLine m:Common.Route="EntityType"  Grid.Column="0" Grid.Row="2" AutoCompleting="EntityType_AutoCompleting" Find="False"/>
+        <m:ValueLine m:Common.Route="HomePagePriority" Grid.Column="1" Grid.Row="1"/>
+        <m:ValueLine m:Common.Route="NumberOfColumns" Grid.Column="1" Grid.Row="2"/>
+        <m:EntityRepeater m:Common.Route="Parts" Creating="EntityRepeater_Creating" ViewOnCreate="False" Grid.Row="3" Grid.ColumnSpan="2">
             <m:EntityRepeater.ItemContainerStyle>
                 <Style TargetType="{x:Type m:EntityRepeaterContentControl}" BasedOn="{StaticResource {x:Type m:EntityRepeaterContentControl}}">
                     <Setter Property="swcp:StackColumnPanel.Column" Value="{Binding Column}"/>
@@ -34,7 +37,7 @@
                 </ItemsPanelTemplate>
             </m:EntityRepeater.ItemsPanel>
             <m:EntityRepeater.EntityTemplate>
-                <DataTemplate DataType="{x:Type d:PanelPart}">
+                <DataTemplate DataType="{x:Type d:PanelPartDN}">
                     <Grid >
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>

@@ -12,6 +12,7 @@ using Signum.Windows.Authorization;
 using Signum.Entities.Chart;
 using Signum.Entities.DynamicQuery;
 using System.Windows;
+using Signum.Services;
 
 namespace Signum.Windows.Chart
 {
@@ -19,7 +20,7 @@ namespace Signum.Windows.Chart
     {
         public override OmniboxResultGenerator<UserChartOmniboxResult> CreateGenerator()
         {
-            return new UserChartOmniboxResultGenerator();
+            return new UserChartOmniboxResultGenerator((subString, limit) => Server.Return((IChartServer cs) => cs.AutoCompleteUserChart(subString, limit)));
         }
 
         public override void RenderLines(UserChartOmniboxResult result, InlineCollection lines)
@@ -36,16 +37,7 @@ namespace Signum.Windows.Chart
         {
             UserChartDN uc = result.UserChart.RetrieveAndForget();
 
-            var query = QueryClient.queryNames[uc.Query.Key];
-
-            ChartRequestWindow cw = new ChartRequestWindow()
-            {
-                DataContext = new ChartRequest(query)
-            };
-
-            ChartClient.SetUserChart(cw, uc);
-
-            cw.Show();
+            ChartClient.View(uc, null);
         }
 
         public override string GetName(UserChartOmniboxResult result)

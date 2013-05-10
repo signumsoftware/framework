@@ -8,6 +8,7 @@ using Signum.Entities.Omnibox;
 using Signum.Engine.DynamicQuery;
 using System.Web.Mvc;
 using Signum.Utilities;
+using Signum.Engine.ControlPanel;
 
 namespace Signum.Web.ControlPanel
 {
@@ -15,7 +16,7 @@ namespace Signum.Web.ControlPanel
     {
         public override OmniboxResultGenerator<ControlPanelOmniboxResult> CreateGenerator()
         {
-            return new ControlPanelOmniboxResultGenerator();
+            return new ControlPanelOmniboxResultGenerator(ControlPanelLogic.Autocomplete);
         }
 
         public override MvcHtmlString RenderHtml(ControlPanelOmniboxResult result)

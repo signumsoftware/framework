@@ -65,7 +65,7 @@ WriteLiteral("\r\n");
 
             
             #line 5 "..\..\ControlPanel\Views\Admin\PanelPartView.cshtml"
- using (var tc = Html.TypeContext<PanelPart>())
+ using (var tc = Html.TypeContext<PanelPartDN>())
 {
     
             

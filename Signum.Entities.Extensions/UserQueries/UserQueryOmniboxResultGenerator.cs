@@ -11,6 +11,13 @@ namespace Signum.Entities.UserQueries
 {
     public class UserQueryOmniboxResultGenerator : OmniboxResultGenerator<UserQueryOmniboxResult>
     {
+        Func<string, int, IEnumerable<Lite<UserQueryDN>>> autoComplete;
+
+        public UserQueryOmniboxResultGenerator(Func<string, int, IEnumerable<Lite<UserQueryDN>>> autoComplete)
+        {
+            this.autoComplete = autoComplete;
+        }
+
         public int AutoCompleteLimit = 5;
 
         public override IEnumerable<UserQueryOmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern)
@@ -20,9 +27,9 @@ namespace Signum.Entities.UserQueries
 
             string ident = OmniboxUtils.CleanCommas(tokens[0].Value);
 
-            var userQueries = OmniboxParser.Manager.AutoComplete(typeof(UserQueryDN), ident, AutoCompleteLimit);
+            var userQueries = autoComplete(ident, AutoCompleteLimit);
 
-            foreach (var uq in userQueries)
+            foreach (Lite<UserQueryDN> uq in userQueries)
             {
                 var match = OmniboxUtils.Contains(uq, uq.ToString(), ident);
 

@@ -199,7 +199,7 @@ namespace Signum.Windows.Chart
             if (MessageBox.Show(Window.GetWindow(this), UserQueryMessage.AreYouSureToRemove0.NiceToString().Formato(CurrentUserChart), UserQueryMessage.RemoveUserQuery.NiceToString(),
                 MessageBoxButton.YesNo, MessageBoxImage.Exclamation, MessageBoxResult.No) == MessageBoxResult.Yes)
             {
-                Server.Execute((IChartServer s) => s.RemoveUserChart(CurrentUserChart.ToLite()));
+                CurrentUserChart.ToLite().Delete(UserChartOperation.Delete);
 
                 CurrentUserChart = null;
 

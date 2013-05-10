@@ -14,6 +14,7 @@ using Signum.Engine.Authorization;
 using Signum.Engine.Basics;
 using Signum.Engine.UserQueries;
 using Signum.Engine.Operations;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Engine.ControlPanel
 {
@@ -60,6 +61,11 @@ namespace Signum.Engine.ControlPanel
 
         private static void RegisterOperations()
         {
+            new BasicConstruct<ControlPanelDN>(ControlPanelOperation.Create)
+            {
+                Construct = (_) => new ControlPanelDN { Related = UserQueryUtils.DefaultRelated() }
+            }.Register();
+
             new BasicExecute<ControlPanelDN>(ControlPanelOperation.Save)
             {
                 AllowsNew = true,
@@ -75,7 +81,6 @@ namespace Signum.Engine.ControlPanel
                     var parts = cp.Parts.Select(a => a.Content).ToList();
                     cp.Delete();
                     Database.DeleteList(parts);
-
                 }
             }.Register();
 
@@ -127,6 +132,18 @@ namespace Signum.Engine.ControlPanel
 
             TypeConditionLogic.Register<LinkListPartDN>(newEntityGroupKey,
                  uq => Database.Query<ControlPanelDN>().WhereCondition(newEntityGroupKey).Any(cp => cp.ContainsContent(uq)));
+        }
+
+        public static List<Lite<ControlPanelDN>> GetControlPanelsEntity(Type entityType)
+        {
+            return (from er in Database.Query<ControlPanelDN>()
+                    where er.EntityType == entityType.ToTypeDN().ToLite()
+                    select er.ToLite()).ToList();
+        }
+
+        public static List<Lite<ControlPanelDN>> Autocomplete(string subString, int limit)
+        {
+            return Database.Query<ControlPanelDN>().Where(cp => cp.EntityType == null).Autocomplete(subString, limit);
         }
     }
 }

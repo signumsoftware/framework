@@ -32,7 +32,9 @@ namespace Signum.Entities.Alerts
             private set { Set(ref creationDate, value, () => CreationDate); }
         }
 
+        [NotNullable]
         DateTime? alertDate;
+        [NotNullValidator]
         public DateTime? AlertDate
         {
             get { return alertDate; }
@@ -122,7 +124,6 @@ namespace Signum.Entities.Alerts
 
         static Expression<Func<AlertDN, AlertCurrentState>> CurrentStateExpression = 
             a =>a.attendedDate.HasValue ? AlertCurrentState.Attended: 
-                a.alertDate == null ? AlertCurrentState.None :  
                 a.alertDate <= TimeZoneManager.Now ? AlertCurrentState.Alerted:  AlertCurrentState.Future;
         public AlertCurrentState CurrentState
         {
@@ -148,7 +149,6 @@ namespace Signum.Entities.Alerts
 
     public enum AlertCurrentState
     {
-        None,
         Attended,
         Alerted,
         Future,

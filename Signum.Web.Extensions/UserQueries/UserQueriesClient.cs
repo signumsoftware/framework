@@ -178,7 +178,7 @@ namespace Signum.Web.UserQueries
 
         public static void ApplyUserQuery(this FindOptions findOptions, UserQueryDN userQuery)
         {
-            if (!userQuery.PreserveFilters)
+            if (!userQuery.WithoutFilters)
             {
                 findOptions.FilterOptions.RemoveAll(fo => !fo.Frozen);
 

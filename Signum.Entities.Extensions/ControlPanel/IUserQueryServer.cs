@@ -15,5 +15,11 @@ namespace Signum.Services
     {
         [OperationContract, NetDataContract]
         ControlPanelDN GetHomePageControlPanel();
+
+        [OperationContract, NetDataContract]
+        List<Lite<ControlPanelDN>> GetControlPanelsEntity(Type entityType);
+
+        [OperationContract, NetDataContract]
+        List<Lite<ControlPanelDN>> AutocompleteControlPanel(string subString, int limit);
     }
 }

@@ -105,7 +105,7 @@ namespace Signum.Windows.Omnibox
             return DynamicQueryServer.GetQueryDescription(queryName);
         }
 
-        public override List<Lite<IdentifiableEntity>> AutoComplete(Implementations implementations, string subString, int count)
+        public override List<Lite<IdentifiableEntity>> Autocomplete(Implementations implementations, string subString, int count)
         {
             if (string.IsNullOrEmpty(subString))
                 return new List<Lite<IdentifiableEntity>>();

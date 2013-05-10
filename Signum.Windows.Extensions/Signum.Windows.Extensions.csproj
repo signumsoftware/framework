@@ -199,17 +199,17 @@
     <Compile Include="ControlPanels\ControlPanelWindow.xaml.cs">
       <DependentUpon>ControlPanelWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanels\UserChartPartView.xaml.cs">
+    <Compile Include="ControlPanels\PartView\UserChartPartView.xaml.cs">
       <DependentUpon>UserChartPartView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanels\LinkListPartView.xaml.cs">
+    <Compile Include="ControlPanels\PartView\LinkListPartView.xaml.cs">
       <DependentUpon>LinkListPartView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanels\CountSearchControlPartView.xaml.cs">
+    <Compile Include="ControlPanels\PartView\CountSearchControlPartView.xaml.cs">
       <DependentUpon>CountSearchControlPartView.xaml</DependentUpon>
     </Compile>
     <Compile Include="ControlPanels\ControlPanelOmniboxProvider.cs" />
-    <Compile Include="ControlPanels\UserQueryPartView.xaml.cs">
+    <Compile Include="ControlPanels\PartView\UserQueryPartView.xaml.cs">
       <DependentUpon>UserQueryPartView.xaml</DependentUpon>
     </Compile>
     <Compile Include="ControlPanels\Admin\CountSearchControlPartEdit.xaml.cs">
@@ -562,19 +562,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ControlPanels\UserChartPartView.xaml">
+    <Page Include="ControlPanels\PartView\UserChartPartView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="ControlPanels\LinkListPartView.xaml">
+    <Page Include="ControlPanels\PartView\LinkListPartView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="ControlPanels\CountSearchControlPartView.xaml">
+    <Page Include="ControlPanels\PartView\CountSearchControlPartView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="ControlPanels\UserQueryPartView.xaml">
+    <Page Include="ControlPanels\PartView\UserQueryPartView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

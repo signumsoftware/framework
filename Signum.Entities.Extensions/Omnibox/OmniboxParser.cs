@@ -126,12 +126,12 @@ namespace Signum.Entities.Omnibox
 
         public abstract Lite<IdentifiableEntity> RetrieveLite(Type type, int id);
 
-        public List<Lite<IdentifiableEntity>> AutoComplete(Type type, string subString, int count)
+        public List<Lite<IdentifiableEntity>> Autocomplete(Type type, string subString, int count)
         {
-            return AutoComplete(Implementations.By(type), subString, count);
+            return Autocomplete(Implementations.By(type), subString, count);
         }
 
-        public abstract List<Lite<IdentifiableEntity>> AutoComplete(Implementations implementations, string subString, int count);
+        public abstract List<Lite<IdentifiableEntity>> Autocomplete(Implementations implementations, string subString, int count);
     }
 
     public abstract class OmniboxResult

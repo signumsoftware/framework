@@ -83,5 +83,10 @@ namespace Signum.Engine.Chart
                 }); 
             }
         }
+
+        public static List<Lite<UserChartDN>> Autocomplete(string subString, int limit)
+        {
+            return Database.Query<UserChartDN>().Where(uq => uq.EntityType == null).Autocomplete(subString, limit);
+        }
     }
 }
