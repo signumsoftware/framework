@@ -342,8 +342,9 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
-                    <TextBlock x:Name="tb" Background="{x:Null}" 
-					Cursor="Hand" TextDecorations="Underline" Text="{TemplateBinding Content}" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock x:Name="tb" Background="{x:Null}" Cursor="Hand" TextDecorations="Underline" 
+                               Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static m:Converters.ToStringConverter}}" 
+                               TextTrimming="CharacterEllipsis"/>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsPressed" Value="true" >
                             <Setter Property="Cursor" Value="Hand" />
