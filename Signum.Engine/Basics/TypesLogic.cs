@@ -39,12 +39,12 @@ namespace Signum.Engine.Basics
 
         public static Type ToType(this TypeDN type)
         {
-            return DnToType[type];
+            return DnToType.GetOrThrow(type);
         }
 
         public static TypeDN ToTypeDN(this Type type)
         {
-            return TypeToDN[type];
+            return TypeToDN.GetOrThrow(type);
         }
 
         internal static void Schema_Initializing()

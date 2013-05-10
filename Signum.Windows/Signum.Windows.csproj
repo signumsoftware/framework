@@ -99,6 +99,10 @@
     <Reference Include="PresentationFramework">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
+    <Page Include="Basics\TypeUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Basics\Exception.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -137,6 +141,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Compile Include="Basics\TypeUI.xaml.cs">
+      <DependentUpon>TypeUI.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Basics\Exception.xaml.cs">
       <DependentUpon>Exception.xaml</DependentUpon>
     </Compile>
@@ -180,7 +187,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Controls\AutoCompleteTextBox.xaml">
+    <Page Include="Controls\AutocompleteTextBox.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -396,8 +403,8 @@
       <DependentUpon>ButtonBar.xaml</DependentUpon>
     </Compile>
     <Compile Include="Common.cs" />
-    <Compile Include="Controls\AutoCompleteTextBox.xaml.cs">
-      <DependentUpon>AutoCompleteTextBox.xaml</DependentUpon>
+    <Compile Include="Controls\AutocompleteTextBox.xaml.cs">
+      <DependentUpon>AutocompleteTextBox.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\DragDropController.cs" />
     <Compile Include="Controls\WatermarkTextBox.cs" />
