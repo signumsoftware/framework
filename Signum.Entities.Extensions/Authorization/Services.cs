@@ -52,19 +52,6 @@ namespace Signum.Services
     }
 
     [ServiceContract]
-    public interface IFacadeMethodAuthServer
-    {
-        [OperationContract, NetDataContract]
-        FacadeMethodRulePack GetFacadeMethodRules(Lite<RoleDN> role);
-
-        [OperationContract, NetDataContract]
-        void SetFacadeMethodRules(FacadeMethodRulePack rules);
-
-        [OperationContract, NetDataContract]
-        DefaultDictionary<string, bool> FacadeMethodRules();
-    }
-
-    [ServiceContract]
     public interface IPermissionAuthServer
     {
         [OperationContract, NetDataContract]

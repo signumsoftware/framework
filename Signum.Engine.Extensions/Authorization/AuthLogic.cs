@@ -300,14 +300,10 @@ namespace Signum.Engine.Authorization
                 userEntity.Execute(UserOperation.Save);
         }
 
-        public static void StartAllModules(SchemaBuilder sb, DynamicQueryManager dqm, params Type[] serviceInterfaces)
+        public static void StartAllModules(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             TypeAuthLogic.Start(sb);
             PropertyAuthLogic.Start(sb, true);
-
-            if (serviceInterfaces != null && serviceInterfaces.Any())
-                FacadeMethodAuthLogic.Start(sb, serviceInterfaces);
-
             QueryAuthLogic.Start(sb, dqm);
             OperationAuthLogic.Start(sb);
             PermissionAuthLogic.Start(sb);

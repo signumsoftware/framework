@@ -104,7 +104,6 @@
     <Compile Include="Basics\TypeConditionName.cs" />
     <Compile Include="Basics\PropertyRouteDN.cs" />
     <Compile Include="Basics\QueryDN.cs" />
-    <Compile Include="Basics\FacadeMethodDN.cs" />
     <Compile Include="Cache\CachePermissions.cs" />
     <Compile Include="Chart\ChartColor.cs" />
     <Compile Include="Chart\ChartOmniboxResultGenerator.cs">

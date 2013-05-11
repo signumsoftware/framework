@@ -26,7 +26,7 @@ namespace Signum.Web.AuthAdmin
     {
         public static string ViewPrefix = "~/authAdmin/Views/{0}.cshtml";
 
-        public static void Start(bool types, bool properties, bool queries, bool operations, bool permissions, bool facadeMethods)
+        public static void Start(bool types, bool properties, bool queries, bool operations, bool permissions)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -66,18 +66,12 @@ namespace Signum.Web.AuthAdmin
                     Register<PermissionRulePack, PermissionAllowedRule, PermissionDN, bool, PermissionDN>("permissions", a => a.Resource,
                         Mapping.New<bool>(), "Resource", false);
 
-
-                if (facadeMethods)
-                    Register<FacadeMethodRulePack, FacadeMethodAllowedRule, FacadeMethodDN, bool, string>("facadeMethods", a => a.Resource.ToString(),
-                        Mapping.New<bool>(), "Resource_Key", false);
-
                 LinksClient.RegisterEntityLinks<RoleDN>((role, ctx) =>
                      !BasicPermission.AdminRules.IsAuthorized() ? null :
                      new[]
                      {
                          types ? new QuickLinkAction(AuthMessage._0Rules.NiceToString().Formato(typeof(TypeDN).NiceName()), RouteHelper.New().Action((AuthAdminController c)=>c.Types(role))): null,
                          permissions ? new QuickLinkAction(AuthMessage._0Rules.NiceToString().Formato(typeof(PermissionDN).NiceName()), RouteHelper.New().Action((AuthAdminController c)=>c.Permissions(role))): null,
-                         facadeMethods ? new QuickLinkAction(AuthMessage._0Rules.NiceToString().Formato(typeof(FacadeMethodDN).NiceName()), RouteHelper.New().Action((AuthAdminController c)=>c.FacadeMethods(role))): null
                      });
 
                 SpecialOmniboxProvider.Register(new SpecialOmniboxAction("DownloadAuthRules",

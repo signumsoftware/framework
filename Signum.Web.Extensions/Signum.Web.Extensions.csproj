@@ -114,11 +114,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="AuthAdmin\Views\FacadeMethods.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>FacadeMethods.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="AuthAdmin\Views\Operations.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -895,10 +890,6 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Web.generated.cs</LastGenOutput>
     </Content>
-    <None Include="AuthAdmin\Views\FacadeMethods.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>FacadeMethods.generated.cs</LastGenOutput>
-    </None>
     <None Include="AuthAdmin\Views\Operations.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Operations.generated.cs</LastGenOutput>

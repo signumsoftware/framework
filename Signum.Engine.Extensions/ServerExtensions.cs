@@ -37,7 +37,7 @@ namespace Signum.Services
 {
     public abstract class ServerExtensions : ServerBasic, ILoginServer, IQueryServer, IProcessServer, IControlPanelServer,
         IChartServer, IExcelReportServer, IUserQueryServer, IQueryAuthServer, IPropertyAuthServer,
-        ITypeAuthServer, IFacadeMethodAuthServer, IPermissionAuthServer, IOperationAuthServer, ISmsServer,
+        ITypeAuthServer, IPermissionAuthServer, IOperationAuthServer, ISmsServer,
         IProfilerServer
     {
         protected override T Return<T>(MethodBase mi, string description, Func<T> function, bool checkLogin = true)
@@ -47,9 +47,6 @@ namespace Signum.Services
                 using (ScopeSessionFactory.OverrideSession(session))
                 using (ExecutionMode.Global())
                 {
-                    if (checkLogin)
-                        FacadeMethodAuthLogic.AuthorizeAccess((MethodInfo)mi);
-
                     return function();
                 }
             }
@@ -198,30 +195,6 @@ namespace Signum.Services
                       return ms.ToArray();
                   }
               });
-        }
-
-        #endregion
-
-        #region IFacadeMethodAuthServer Members
-
-        public FacadeMethodRulePack GetFacadeMethodRules(Lite<RoleDN> role)
-        {
-            return Return(MethodInfo.GetCurrentMethod(),
-              () => FacadeMethodAuthLogic.GetFacadeMethodRules(role));
-        }
-
-        public void SetFacadeMethodRules(FacadeMethodRulePack rules)
-        {
-            Execute(MethodInfo.GetCurrentMethod(),
-              () => FacadeMethodAuthLogic.SetFacadeMethodRules(rules));
-        }
-
-        public DefaultDictionary<string, bool> FacadeMethodRules()
-        {
-            return Return(MethodInfo.GetCurrentMethod(),
-             () => FacadeMethodAuthLogic.FacadeMethodRules());
-
-            throw new NotImplementedException();
         }
 
         #endregion

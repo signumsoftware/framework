@@ -52,9 +52,6 @@ namespace Signum.Entities.Authorization
     public class RuleQueryDN : RuleDN<QueryDN, bool> { }
 
     [Serializable]
-    public class RuleFacadeMethodDN : RuleDN<FacadeMethodDN, bool> { }
-
-    [Serializable]
     public class RulePermissionDN : RuleDN<PermissionDN, bool> { }
 
     [Serializable]

@@ -420,15 +420,4 @@ namespace Signum.Entities.Authorization
     }
     [Serializable]
     public class PermissionAllowedRule : AllowedRule<PermissionDN, bool> { } 
-
-    [Serializable]
-    public class FacadeMethodRulePack : BaseRulePack<FacadeMethodAllowedRule>
-    {
-        public override string ToString()
-        {
-            return AuthMessage._0RulesFor1.NiceToString().Formato(typeof(FacadeMethodDN).NiceName(), Role);
-        }
-    }
-    [Serializable]
-    public class FacadeMethodAllowedRule : AllowedRule<FacadeMethodDN, bool> { } 
 }

@@ -110,7 +110,6 @@
       <DependentUpon>PasswordExpiresInterval.xaml</DependentUpon>
     </Compile>
     <Compile Include="Authorization\QueryAuthClient.cs" />
-    <Compile Include="Authorization\FacadeMethodAuthClient.cs" />
     <Compile Include="Authorization\TypeAuthClient.cs" />
     <Compile Include="Authorization\PropertyAuthClient.cs" />
     <Compile Include="Authorization\PermissionAuthClient.cs" />
@@ -126,9 +125,6 @@
     </Compile>
     <Compile Include="Authorization\TypeRules.xaml.cs">
       <DependentUpon>TypeRules.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Authorization\FacadeMethodRules.xaml.cs">
-      <DependentUpon>FacadeMethodRules.xaml</DependentUpon>
     </Compile>
     <Compile Include="Authorization\Role.xaml.cs">
       <DependentUpon>Role.xaml</DependentUpon>
@@ -437,12 +433,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Authorization\TypeRules.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Authorization\FacadeMethodRules.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

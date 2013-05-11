@@ -103,13 +103,11 @@
     <Compile Include="Authorization\OperationAuthLogic.cs" />
     <Compile Include="Authorization\PermissionAuthLogic.cs" />
     <Compile Include="Authorization\TypeAuthLogic.cs" />
-    <Compile Include="Authorization\FacadeMethodAuthLogic.cs" />
     <Compile Include="Authorization\QueryAuthLogic.cs" />
     <Compile Include="Authorization\UserGraph.cs" />
     <Compile Include="Basics\PropertyRouteLogic.cs" />
     <Compile Include="Basics\MultiOptionalEnumLogic.cs" />
     <Compile Include="Basics\TypeConditionLogic.cs" />
-    <Compile Include="Basics\FacadeMethodLogic.cs" />
     <Compile Include="Basics\QueryLogic.cs" />
     <Compile Include="Cache\CacheLogic.cs" />
     <Compile Include="Cache\CachedTable.cs" />
