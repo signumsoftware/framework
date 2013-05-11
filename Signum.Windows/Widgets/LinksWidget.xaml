@@ -11,31 +11,33 @@
     </UserControl.Resources>
     <Border>
         <StackPanel>
-    <Expander Style="{DynamicResource WidgetExpander}" Margin="5" x:Name="expQuickLinks" IsExpanded="True">
-        <Expander.Header>
-            <Grid HorizontalAlignment="Stretch" MinWidth="100">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Image Source="..\Images\star.png" Stretch="Fill" Margin="-8,-1.5,-2,-2.5" Width="20" Height="20" />
-                <TextBlock FontFamily="Calibri, Segoe UI" Foreground="#FF1d3132" FontSize="14" VerticalAlignment="Center" Grid.Column="0" Grid.ColumnSpan="2"
+            <Expander Style="{DynamicResource WidgetExpander}" Margin="5" x:Name="expQuickLinks" IsExpanded="True">
+                <Expander.Header>
+                    <Grid HorizontalAlignment="Stretch" MinWidth="100">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Image Source="..\Images\star.png" Stretch="Fill" Margin="-8,-1.5,-2,-2.5" Width="20" Height="20" />
+                        <TextBlock FontFamily="Calibri, Segoe UI" Foreground="#FF1d3132" FontSize="14" VerticalAlignment="Center" Grid.Column="0" Grid.ColumnSpan="2"
 				Text="Links" TextWrapping="Wrap" Margin="15,0,0,0"/>
 
-            </Grid>
-        </Expander.Header>
-        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-            <ItemsControl x:Name="lvQuickLinks">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-					<Button FontFamily="Calibri, Segoe UI" Content="{Binding Path=Label}" Style="{DynamicResource LinkButtonStyle}" 
-						HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="#ff375e5f" Cursor="Hand" Margin="21,0,5,0" ToolTip="{Binding Path=ToolTip}"/>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
-    </Expander>
+                    </Grid>
+                </Expander.Header>
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl x:Name="lvQuickLinks">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="21,0,5,0" Cursor="Hand" ToolTip="{Binding ToolTip}">
+                                    <Image SnapsToDevicePixels="True" Stretch="None" Source="{Binding Icon}" VerticalAlignment="Center"/>
+                                    <Button FontFamily="Calibri, Segoe UI" Content="{Binding Label}" Style="{DynamicResource LinkButtonStyle}" Foreground="#ff375e5f"  VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Expander>
             <Separator Margin="0,5,0,0"/>
         </StackPanel>
-        </Border>
+    </Border>
 </UserControl>

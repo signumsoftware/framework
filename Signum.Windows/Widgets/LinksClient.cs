@@ -34,7 +34,7 @@ namespace Signum.Windows
             var mi = new MenuItem
             {
                 Header = ql.Label,
-                Icon = ql.Icon,
+                Icon = ql.Icon.ToSmallImage(),
             };
 
             if (ql.ToolTip.HasText())
