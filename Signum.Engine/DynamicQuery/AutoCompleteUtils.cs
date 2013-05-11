@@ -85,12 +85,12 @@ namespace Signum.Engine.DynamicQuery
                     return results;
             }
 
-            results.AddRange(query.Where(a => a.ToString().StartsWith(subString)).Select(a => a.ToLite()).Take(results.Count - count));
+            results.AddRange(query.Where(a => a.ToString().StartsWith(subString)).Select(a => a.ToLite()).Take(count - results.Count));
 
             if (results.Count >= count)
                 return results;
 
-            results.AddRange(query.Where(a => !a.ToString().StartsWith(subString) && a.ToString().Contains(subString)).Select(a => a.ToLite()).Take(results.Count - count));
+            results.AddRange(query.Where(a => !a.ToString().StartsWith(subString) && a.ToString().Contains(subString)).Select(a => a.ToLite()).Take(count - results.Count));
 
             if (results.Count >= count)
                 return results;

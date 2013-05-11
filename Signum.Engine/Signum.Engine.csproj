@@ -110,7 +110,7 @@
     <Compile Include="Exceptions.cs" />
     <Compile Include="Database.cs" />
     <Compile Include="DynamicQuery\DynamicQueryManager.cs" />
-    <Compile Include="DynamicQuery\AutoCompleteUtils.cs" />
+    <Compile Include="DynamicQuery\AutocompleteUtils.cs" />
     <Compile Include="Engine\Sys.Tables.cs" />
     <Compile Include="Engine\Synchronizer.cs" />
     <Compile Include="ExecutionContext.cs" />
