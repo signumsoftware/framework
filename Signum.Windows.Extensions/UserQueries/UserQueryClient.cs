@@ -63,7 +63,7 @@ namespace Signum.Windows.UserQueries
             {
                 TypeClient.Start();
                 QueryClient.Start();
-                Navigator.AddSetting(new EntitySettings<UserQueryDN> { View = _ => new UserQuery() });
+                Navigator.AddSetting(new EntitySettings<UserQueryDN> { View = _ => new UserQuery(), Icon = ExtensionsImageLoader.GetImageSortName("userQuery.png")  });
                 SearchControl.GetMenuItems += SearchControl_GetCustomMenuItems;
 
                 Constructor.Register<UserQueryDN>(elem =>
@@ -92,6 +92,7 @@ namespace Signum.Windows.UserQueries
                 this.Label = userQuery.ToString();
                 this.userQuery = userQuery;
                 this.entity = entity;
+                this.Icon = ExtensionsImageLoader.GetImageSortName("userQuery.png");
                 this.IsVisible = true;
             }
 

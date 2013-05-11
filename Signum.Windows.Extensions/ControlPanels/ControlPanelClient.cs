@@ -30,7 +30,7 @@ namespace Signum.Windows.ControlPanels
 
                 Navigator.AddSettings(new List<EntitySettings>()
                 {
-                    new EntitySettings<ControlPanelDN>() { View = e => new ControlPanelEdit() },
+                    new EntitySettings<ControlPanelDN>() { View = e => new ControlPanelEdit(), Icon = ExtensionsImageLoader.GetImageSortName("controlPanel.png") },
 
                     new EntitySettings<CountSearchControlPartDN>() { View = e => new CountSearchControlPartEdit() },
                     new EntitySettings<LinkListPartDN>() { View = e => new LinkListPartEdit() },
@@ -88,6 +88,7 @@ namespace Signum.Windows.ControlPanels
                 this.controlPanel = controlPanel;
                 this.entity = entity;
                 this.IsVisible = true;
+                this.Icon = ExtensionsImageLoader.GetImageSortName("controlPanel.png");
             }
 
             public override void Execute()

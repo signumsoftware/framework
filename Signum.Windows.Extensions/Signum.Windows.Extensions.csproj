@@ -945,7 +945,9 @@
   <ItemGroup>
     <Resource Include="Images\execute.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Images\userQuery.png" />
+  </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\alert.png" />
   </ItemGroup>
@@ -963,6 +965,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\sms.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\controlPanel.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\chartScript.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

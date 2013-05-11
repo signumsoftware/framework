@@ -45,8 +45,8 @@ namespace Signum.Windows.Chart
 
                 Navigator.AddSettings(new List<EntitySettings>()
                 {
-                    new EntitySettings<UserChartDN> { View = e => new UserChart() },
-                    new EntitySettings<ChartScriptDN> { View = e => new ChartScript() },
+                    new EntitySettings<UserChartDN> { View = e => new UserChart(), Icon = ExtensionsImageLoader.GetImageSortName("chartIcon.png") },
+                    new EntitySettings<ChartScriptDN> { View = e => new ChartScript(), Icon = ExtensionsImageLoader.GetImageSortName("chartScript.png") },
                     new EmbeddedEntitySettings<ChartScriptParameterDN> { View = (e,p) => new ChartScriptParameter(p) }
                 });
 
@@ -95,6 +95,7 @@ namespace Signum.Windows.Chart
                 this.userChart = userChart;
                 this.entity = entity;
                 this.IsVisible = true;
+                this.Icon = ExtensionsImageLoader.GetImageSortName("chartIcon.png");
             }
 
             public override void Execute()
