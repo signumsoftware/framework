@@ -23,7 +23,7 @@ namespace Signum.Services
         IdentifiableEntity Retrieve(Type type, int id);
 
         [OperationContract, NetDataContract]
-        IdentifiableEntity Save(IdentifiableEntity entidad); 
+        IdentifiableEntity Save(IdentifiableEntity entity); 
 
         [OperationContract, NetDataContract]
         List<IdentifiableEntity> RetrieveAll(Type type);
@@ -54,5 +54,8 @@ namespace Signum.Services
 
         [OperationContract, NetDataContract]
         bool Exists(Type type, int id);
+
+        [OperationContract, NetDataContract]
+        long Ticks(Lite<Entity> entity);
     }
 }

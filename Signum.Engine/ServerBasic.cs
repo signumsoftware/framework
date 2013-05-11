@@ -128,6 +128,13 @@ namespace Signum.Services
             return Return(MethodInfo.GetCurrentMethod(),
                 () => Database.GetToStr(type, id));
         }
+
+        public virtual long Ticks(Lite<Entity> entity)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => entity.InDB(e => e.Ticks));
+        }
+
         #endregion
 
         #region IDynamicQueryServer
@@ -254,5 +261,7 @@ namespace Signum.Services
         }
 
         #endregion
+
+
     }
 }
