@@ -91,6 +91,7 @@
     </Compile>
     <Compile Include="AspNetSessionFactory.cs" />
     <Compile Include="ButtonBar\ButtonBar.cs" />
+    <Compile Include="Facades\TypeClient.cs" />
     <Compile Include="Facades\ExceptionClient.cs" />
     <Compile Include="Facades\QueryRequestModelBinder.cs" />
     <Compile Include="Facades\ViewOptions.cs" />
@@ -138,6 +139,11 @@
     <Compile Include="Mappings\MappingContext.cs" />
     <Compile Include="ModelStateExtensions.cs" />
     <Compile Include="ButtonBar\ToolBarButton.cs" />
+    <Compile Include="Signum\Views\TypeView.generated.cs">
+      <DependentUpon>TypeView.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Signum\Views\Error.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -260,6 +266,11 @@
     <Content Include="Signum\Views\Exception.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Exception.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
+    </Content>
+    <Content Include="Signum\Views\TypeView.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>TypeView.generated.cs</LastGenOutput>
       <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </Content>
     <None Include="Signum\Views\PopupOkControl.cshtml">
