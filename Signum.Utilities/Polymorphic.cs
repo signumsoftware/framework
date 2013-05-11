@@ -98,18 +98,10 @@ namespace Signum.Utilities
                 throw new InvalidOperationException("{0} is not a {1}".Formato(type.Name, minimumType.Name));
         }
 
-        public Polymorphic(PolymorphicMerger<T> merger, Type minimumType)
+        public Polymorphic(PolymorphicMerger<T> merger = null, Type minimumType = null)
         {
-            this.merger = merger;
-            this.minimumType = minimumType;
-        }
-
-        public Polymorphic(PolymorphicMerger<T> merger): this(merger, GetDefaultType(typeof(T)))
-        {
-        }
-
-        public Polymorphic() : this(PolymorphicMerger.Inheritance<T>, GetDefaultType(typeof(T)))
-        {
+            this.merger = merger ?? PolymorphicMerger.Inheritance<T>;
+            this.minimumType = minimumType ?? GetDefaultType(typeof(T));
         }
 
         private static Type GetDefaultType(Type type)

@@ -103,6 +103,7 @@
     <Compile Include="EnumMessages.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FieldNotificationAttributes.cs" />
     <Compile Include="ModelEntity.cs" />
     <Compile Include="DynamicQuery\Column.cs" />
     <Compile Include="DynamicQuery\Filter.cs" />

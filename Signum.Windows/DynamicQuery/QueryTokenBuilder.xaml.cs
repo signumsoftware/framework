@@ -35,8 +35,6 @@ namespace Signum.Windows
             set { SetValue(TokenProperty, value); }
         }
 
-        
-
         List<QueryToken> tokens = new List<QueryToken>(); 
         private void UpdateTokenList(QueryToken queryToken)
         {

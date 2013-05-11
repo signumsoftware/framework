@@ -321,6 +321,11 @@ namespace Signum.Entities
             return GraphExplorer.IntegrityDictionary(graph);
         }
 
+        protected static string NicePropertyName<R>(Expression<Func<R>> property)
+        {
+            return ReflectionTools.GetPropertyInfo(property).NiceName();
+        }
+
         #endregion
 
         #region ICloneable Members

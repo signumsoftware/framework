@@ -34,7 +34,7 @@ namespace Signum.Engine.Maps
 
                 Schema.Current.AssertAllowed(Type);
 
-                var result = new EntityExpression(this.Type, id, tableAlias, bindings);
+                var result = new EntityExpression(this.Type, id, tableAlias, bindings, avoidExpandOnRetrieving: false);
 
                 return result; 
             }
@@ -153,7 +153,7 @@ namespace Signum.Engine.Maps
         {
             Type cleanType = IsLite ? Lite.Extract(FieldType) : FieldType;
 
-            var result = new EntityExpression(cleanType, new ColumnExpression(this.ReferenceType(), tableAlias, Name), null, null);
+            var result = new EntityExpression(cleanType, new ColumnExpression(this.ReferenceType(), tableAlias, Name), null, null, AvoidExpandOnRetrieving);
 
             if(this.IsLite)
                 return binder.MakeLite(result, null);
@@ -223,7 +223,7 @@ namespace Signum.Engine.Maps
         {
             var implementations = (from kvp in ImplementationColumns
                                    select new Linq.ImplementationColumn(kvp.Key,
-                                            new EntityExpression(kvp.Key, new ColumnExpression(kvp.Value.ReferenceType(), tableAlias, kvp.Value.Name), null, null))
+                                            new EntityExpression(kvp.Key, new ColumnExpression(kvp.Value.ReferenceType(), tableAlias, kvp.Value.Name), null, null, AvoidExpandOnRetrieving))
                                     ).ToReadOnly();
 
             var result = new ImplementedByExpression(IsLite ? Lite.Extract(FieldType) : FieldType, implementations);

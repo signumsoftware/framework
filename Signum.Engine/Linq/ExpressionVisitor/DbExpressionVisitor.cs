@@ -352,7 +352,7 @@ namespace Signum.Engine.Linq
             var id = Visit(ee.ExternalId);
 
             if (ee.Bindings != bindings || ee.ExternalId != id)
-                return new EntityExpression(ee.Type, id, ee.TableAlias, bindings);
+                return new EntityExpression(ee.Type, id, ee.TableAlias, bindings, ee.AvoidExpandOnRetrieving);
 
             return ee;
         }

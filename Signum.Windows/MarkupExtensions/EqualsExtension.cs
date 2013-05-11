@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Markup;
 
@@ -28,7 +29,10 @@ namespace Signum.Windows
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            throw new NotSupportedException(); 
+            if (value is bool && (bool)value)
+                return Other;
+
+            return DependencyProperty.UnsetValue;
         }
     }
 
@@ -56,4 +60,6 @@ namespace Signum.Windows
             throw new NotSupportedException();
         }
     }
+
+   
 }

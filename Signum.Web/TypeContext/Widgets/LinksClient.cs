@@ -8,55 +8,21 @@ using Signum.Utilities;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine;
+using System.Reflection;
 
 namespace Signum.Web
 {
-    public delegate QuickLink[] GetQuickLinkItemDelegate<T>(T entity, string partialViewName, string prefix);  
+   
 
-    public static class QuickLinkWidgetHelper
-    {
-        static Dictionary<Type, List<Delegate>> entityLinks = new Dictionary<Type, List<Delegate>>();
-        static List<GetQuickLinkItemDelegate<IdentifiableEntity>> globalLinks = new List<GetQuickLinkItemDelegate<IdentifiableEntity>>();
-
-        public static void RegisterEntityLinks<T>(GetQuickLinkItemDelegate<T> getQuickLinks)
-            where T : IdentifiableEntity
+    static class QuickLinkWidgetHelper
+    {  
+        internal static WidgetItem CreateWidget(IdentifiableEntity identifiable, string partialViewName, string prefix)
         {
-            entityLinks.GetOrCreate(typeof(T)).Add(getQuickLinks);
-        }
+            if (identifiable.IsNew)
+                return null;
 
-        public static void RegisterGlobalLinks(GetQuickLinkItemDelegate<IdentifiableEntity> getQuickLinks)
-        {
-            globalLinks.Add(getQuickLinks);
-        }
-
-        public static List<QuickLink> GetForEntity(IdentifiableEntity ident, string partialViewName, string prefix)
-        {
-            List<QuickLink> links = new List<QuickLink>();
-
-            links.AddRange(globalLinks.SelectMany(a => (a(ident, partialViewName, prefix) ?? Empty)).NotNull());
-
-            List<Delegate> list = entityLinks.TryGetC(ident.GetType());
-            if (list != null)
-                links.AddRange(list.SelectMany(a => (QuickLink[])a.DynamicInvoke(ident, partialViewName, prefix) ?? Empty).NotNull());
-
-            links = links.Where(l => l.IsVisible).ToList();
-
-            return links;
-        }
-
-        static QuickLink[] Empty = new QuickLink[0];
-
-        public static void Start()
-        {
-            WidgetsHelper.GetWidgetsForView += (entity, partialViewName, prefix) => entity is IdentifiableEntity ? CreateWidget((IdentifiableEntity)entity, partialViewName, prefix) : null;
-
-            ContextualItemsHelper.GetContextualItemsForLites += new GetContextualItemDelegate(ContextualItemsHelper_GetContextualItemsForLite);
-        }
-
-        public static WidgetItem CreateWidget(IdentifiableEntity identifiable, string partialViewName, string prefix)
-        {
-            List<QuickLink> quicklinks = GetForEntity(identifiable, partialViewName, prefix);
-            if (quicklinks == null || quicklinks.Count == 0) 
+            List<QuickLink> quicklinks = LinksClient.GetForEntity(identifiable.ToLiteFat(), partialViewName, prefix);
+            if (quicklinks == null || quicklinks.Count == 0)
                 return null;
 
             HtmlStringBuilder content = new HtmlStringBuilder();
@@ -84,7 +50,7 @@ namespace Signum.Web
                     .SetInnerText(quicklinks.Count.ToString())
                     .ToHtml());
             }
-            
+
             return new WidgetItem
             {
                 Id = TypeContextUtilities.Compose(prefix, "quicklinksWidget"),
@@ -92,14 +58,16 @@ namespace Signum.Web
                 Content = content.ToHtml()
             };
         }
+    }
 
-        static ContextualItem ContextualItemsHelper_GetContextualItemsForLite(SelectedItemsMenuContext ctx)
+    static class QuickLinkContextualMenu
+    {
+        internal static ContextualItem ContextualItemsHelper_GetContextualItemsForLite(SelectedItemsMenuContext ctx)
         {
             if (ctx.Lites.IsNullOrEmpty() || ctx.Lites.Count > 1)
                 return null;
 
-            IdentifiableEntity ie = Database.Retrieve(ctx.Lites[0]);
-            List<QuickLink> quicklinks = GetForEntity(ie, Navigator.EntitySettings(ie.GetType()).OnPartialViewName(ie), ctx.Prefix);
+            List<QuickLink> quicklinks = LinksClient.GetForEntity(ctx.Lites[0], null, ctx.Prefix);
             if (quicklinks == null || quicklinks.Count == 0)
                 return null;
 
@@ -128,6 +96,67 @@ namespace Signum.Web
                 Id = TypeContextUtilities.Compose(ctx.Prefix, "ctxItemQuickLinks"),
                 Content = content.ToHtml().ToString()
             };
+        }
+    }
+
+    public class QuickLinkContext
+    {
+        public string PartialViewName { get; internal set; }
+        public string Prefix { get; internal set; }
+    }
+
+
+    public static class LinksClient
+    {
+        static Polymorphic<Func<Lite<IdentifiableEntity>, QuickLinkContext, QuickLink[]>> entityLinks =
+            new Polymorphic<Func<Lite<IdentifiableEntity>, QuickLinkContext, QuickLink[]>>(
+                merger: (currentVal, baseVal, interfaces) => currentVal.Value + baseVal.Value,
+                minimumType: typeof(IdentifiableEntity));
+
+
+        public static void RegisterEntityLinks<T>(Func<Lite<T>, QuickLinkContext, QuickLink[]> getQuickLinks)
+            where T : IdentifiableEntity
+        {
+            var current = entityLinks.GetDefinition(typeof(T));
+
+            current += (t, p0) => getQuickLinks((Lite<T>)t, p0);
+
+            entityLinks.SetDefinition(typeof(T), current);
+        }
+
+
+        public static List<QuickLink> GetForEntity(Lite<IdentifiableEntity> ident, string partialViewName, string prefix)
+        {
+            List<QuickLink> links = new List<QuickLink>();
+
+            QuickLinkContext ctx = new QuickLinkContext { PartialViewName = partialViewName, Prefix = prefix }; 
+
+            var func  =  entityLinks.TryGetValue(ident.EntityType);
+            if (func != null)
+            {
+                foreach (var item in func.GetInvocationList().Cast<Func<Lite<IdentifiableEntity>, QuickLinkContext, QuickLink[]>>())
+                {
+                    var array = item(ident, ctx);
+                    if (array != null)
+                        links.AddRange(array.NotNull().Where(l => l.IsVisible));
+                }
+            }
+
+            return links;
+        }
+
+        static QuickLink[] Empty = new QuickLink[0];
+
+        public static void Start(bool widget, bool contextualItems)
+        {
+            if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
+            {
+                if (widget)
+                    WidgetsHelper.GetWidgetsForView += (entity, partialViewName, prefix) => entity is IdentifiableEntity ? QuickLinkWidgetHelper.CreateWidget((IdentifiableEntity)entity, partialViewName, prefix) : null;
+
+                if (contextualItems)
+                    ContextualItemsHelper.GetContextualItemsForLites += QuickLinkContextualMenu.ContextualItemsHelper_GetContextualItemsForLite;
+            }
         }
     }
 

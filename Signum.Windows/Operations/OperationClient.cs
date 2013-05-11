@@ -39,7 +39,7 @@ namespace Signum.Windows.Operations
                 SearchControl.GetContextMenuItems += Manager.SearchControl_GetConstructorFromManyMenuItems;
                 SearchControl.GetContextMenuItems += Manager.SearchControl_GetEntityOperationMenuItem;
 
-                Links.RegisterGlobalLinks((entity, control) => new[]
+                LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, control) => new[]
                 { 
                     entity.GetType() == typeof(OperationLogDN) ? null : 
                         new QuickLinkExplore(new ExploreOptions(typeof(OperationLogDN), "Target", entity)

@@ -198,7 +198,7 @@ namespace Signum.Windows
                 {
                     Type = type,
                     Create = false,
-                    AutoComplete = false,
+                    Autocomplete = false,
                     Find = false,
                     Implementations = null,
                 };

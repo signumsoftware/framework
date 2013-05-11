@@ -99,6 +99,10 @@
     <Reference Include="PresentationFramework">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
+    <Page Include="Basics\TypeUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Basics\Exception.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -137,14 +141,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Compile Include="Basics\TypeUI.xaml.cs">
+      <DependentUpon>TypeUI.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Basics\Exception.xaml.cs">
       <DependentUpon>Exception.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\TimePicker.xaml.cs">
       <DependentUpon>TimePicker.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Converters\EnumWindowsExtensions.cs" />
     <Compile Include="Converters\PropertyRouteConverter.cs" />
     <Compile Include="Converters\TimeSpanConverter.cs" />
+    <Compile Include="DesignTimeResourceDictionary.cs" />
     <Compile Include="ProgressWindow.xaml.cs">
       <DependentUpon>ProgressWindow.xaml</DependentUpon>
     </Compile>
@@ -178,7 +187,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Controls\AutoCompleteTextBox.xaml">
+    <Page Include="Controls\AutocompleteTextBox.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -394,15 +403,14 @@
       <DependentUpon>ButtonBar.xaml</DependentUpon>
     </Compile>
     <Compile Include="Common.cs" />
-    <Compile Include="Controls\AutoCompleteTextBox.xaml.cs">
-      <DependentUpon>AutoCompleteTextBox.xaml</DependentUpon>
+    <Compile Include="Controls\AutocompleteTextBox.xaml.cs">
+      <DependentUpon>AutocompleteTextBox.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\DragDropController.cs" />
     <Compile Include="Controls\WatermarkTextBox.cs" />
     <Compile Include="Controls\ShyControl.cs" />
     <Compile Include="Controls\ToolBarButton.cs" />
     <Compile Include="AutoControl.cs" />
-    <Compile Include="Converters\EnumBooleanConverter.cs" />
     <Compile Include="Converters\TypeDataTemplateSelector.cs" />
     <Compile Include="DynamicQuery\QueryTokenBuilder.xaml.cs">
       <DependentUpon>QueryTokenBuilder.xaml</DependentUpon>
@@ -504,6 +512,7 @@
       <DependentUpon>EntityCombo.xaml</DependentUpon>
     </Compile>
     <Compile Include="ImageLoader.cs" />
+    <Compile Include="Widgets\LinksClient.cs" />
     <Compile Include="Widgets\LinksWidget.xaml.cs">
       <DependentUpon>LinksWidget.xaml</DependentUpon>
     </Compile>

@@ -524,11 +524,11 @@ namespace Signum.Engine.Linq
 
             if (c.Type.IsIIdentifiable())
             {
-                var ei = (IdentifiableEntity)c.Value; 
+                var ei = (IdentifiableEntity)c.Value;
 
                 return new EntityExpression(
                     ei.GetType(),
-                    Expression.Constant(ei.IdOrNull ?? int.MinValue), null, null);
+                    Expression.Constant(ei.IdOrNull ?? int.MinValue), null, null, avoidExpandOnRetrieving: true);
             }
             
             return null;
@@ -549,7 +549,7 @@ namespace Signum.Engine.Linq
 
                 Expression id = Expression.Constant(lite.IdOrNull ?? int.MinValue);
 
-                EntityExpression ere = new EntityExpression(lite.EntityType, id, null, null);
+                EntityExpression ere = new EntityExpression(lite.EntityType, id, null, null, false);
 
                 return new LiteReferenceExpression(Lite.Generate(lite.EntityType), ere, null);
             }
