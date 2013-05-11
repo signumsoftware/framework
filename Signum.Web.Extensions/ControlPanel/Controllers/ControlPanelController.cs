@@ -8,14 +8,25 @@ using Signum.Entities.ControlPanel;
 using Signum.Entities.Authorization;
 using Signum.Entities;
 using Signum.Engine;
+using Signum.Entities.Reflection;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Web.ControlPanel
 {
     public class ControlPanelController : Controller
     {
-        public ViewResult View(Lite<ControlPanelDN> panel)
-        { 
-            return View(ControlPanelClient.ViewPrefix.Formato("ControlPanel"), panel.Retrieve());
+        public ViewResult View(Lite<ControlPanelDN> panel, Lite<IdentifiableEntity> currentEntity)
+        {
+            var cp = panel.Retrieve();
+
+            if (cp.EntityType != null)
+            {
+                var filters = GraphExplorer.FromRoot(cp).OfType<QueryFilterDN>();
+                var entity = currentEntity.Retrieve();
+                CurrentEntityConverter.SetFilterValues(filters, entity);
+            }
+
+            return View(ControlPanelClient.ViewPrefix.Formato("ControlPanel"), cp);
         }
 
         public ActionResult AddNewPart()

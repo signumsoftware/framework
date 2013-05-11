@@ -1,5 +1,4 @@
 ﻿@using Signum.Web
-@using Signum.Web.Extensions.Properties
 @using Signum.Entities.DynamicQuery
 @using Signum.Engine.DynamicQuery
 @using System.Configuration
@@ -56,6 +55,9 @@
     
         @Html.EntityLine(uc, tc => tc.Related, el => el.Create = false)
         @Html.ValueLine(uc, tc => tc.DisplayName)
+        
+        @Html.EntityLine(uc, f => f.EntityType)
+        <p>(@Signum.Entities.UserQueries.CurrentEntityConverter.CurrentEntityKey)</p>
 
         @Html.EntityRepeater(uc, tc => tc.Filters, er => { er.PreserveViewData = true; er.PartialViewName = "~/Chart/Views/UserChartFilter.cshtml"; })
 

@@ -40,6 +40,8 @@
     
     @Html.ValueLine(e, f => f.DisplayName)
     @Html.ValueLine(e, f => f.ElementsPerPage)
+    @Html.EntityLine(e, f => f.EntityType)
+    <p>(@Signum.Entities.UserQueries.CurrentEntityConverter.CurrentEntityKey)</p>
     @Html.ValueLine(e, f => f.WithoutFilters)
     @Html.EntityRepeater(e, f => f.Filters, er => { er.PreserveViewData = true; })
     @Html.ValueLine(e, f => f.ColumnsMode)

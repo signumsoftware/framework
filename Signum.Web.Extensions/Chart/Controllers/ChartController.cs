@@ -279,9 +279,12 @@ namespace Signum.Web.Chart
             return Navigator.NormalPage(this, userChart);
         }
 
-        public ActionResult ViewUserChart(Lite<UserChartDN> lite)
+        public ActionResult ViewUserChart(Lite<UserChartDN> lite, Lite<IdentifiableEntity> currentEntity)
         {
             UserChartDN uc = Database.Retrieve<UserChartDN>(lite);
+
+            if (uc.EntityType != null)
+                CurrentEntityConverter.SetFilterValues(uc.Filters, currentEntity.Retrieve());
 
             ChartRequest request = uc.ToRequest();
 

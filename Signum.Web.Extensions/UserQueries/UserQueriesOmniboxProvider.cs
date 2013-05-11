@@ -26,7 +26,7 @@ namespace Signum.Web.UserQueries
             html = html.Concat(Icon());
 
             html = new HtmlTag("a")
-                .Attr("href", RouteHelper.New().Action<UserQueriesController>(uqc => uqc.View(result.UserQuery, null)))
+                .Attr("href", RouteHelper.New().Action<UserQueriesController>(uqc => uqc.View(result.UserQuery, null, null)))
                 .InnerHtml(html);
                 
             return html;

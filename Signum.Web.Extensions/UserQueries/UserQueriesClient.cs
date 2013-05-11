@@ -104,9 +104,32 @@ namespace Signum.Web.UserQueries
                             .confirmAndAjax(ctx.Entity)
                     }
                 });
+
+                LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, ctrl) =>
+                            UserQueryLogic.GetUserQueriesEntity(entity.EntityType)
+                             .Select(cp => new UserQueryQuickLink(cp, entity)).ToArray());
             }
         }
-        
+
+        class UserQueryQuickLink : QuickLink
+        {
+            Lite<UserQueryDN> userQuery;
+            Lite<IdentifiableEntity> entity;
+
+            public UserQueryQuickLink(Lite<UserQueryDN> userQuery, Lite<IdentifiableEntity> entity)
+            {
+                this.Text = userQuery.ToString();
+                this.userQuery = userQuery;
+                this.entity = entity;
+                this.IsVisible = true;
+            }
+
+            public override MvcHtmlString Execute()
+            {
+                return new HtmlTag("a").Attr("href", RouteHelper.New().Action((UserQueriesController c) => c.View(userQuery, null, entity))).SetInnerText(Text);
+            }
+        }
+
         static ToolBarButton[] ButtonBarQueryHelper_GetButtonBarForQueryName(QueryButtonContext ctx)
         {
             if (ctx.Prefix.HasText())
@@ -128,7 +151,7 @@ namespace Signum.Web.UserQueries
                 {
                     Text = uq.ToString(),
                     AltText = uq.ToString(),
-                    Href = RouteHelper.New().Action<UserQueriesController>(uqc => uqc.View(uq, null)), 
+                    Href = RouteHelper.New().Action<UserQueriesController>(uqc => uqc.View(uq, null, null)), 
                     DivCssClass = ToolBarButton.DefaultQueryCssClass + " sf-userquery" + (currentUserQuery.Is(uq) ? " sf-userquery-selected" : "")
                 });
             }

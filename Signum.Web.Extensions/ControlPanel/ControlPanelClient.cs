@@ -12,6 +12,7 @@ using Signum.Web.UserQueries;
 using Signum.Entities;
 using Signum.Entities.Reports;
 using Signum.Web.Controllers;
+using Signum.Engine.ControlPanel;
 
 namespace Signum.Web.ControlPanel
 {
@@ -101,8 +102,31 @@ namespace Signum.Web.ControlPanel
 
                 LinksClient.RegisterEntityLinks<ControlPanelDN>((cp, ctx) => new[]
                 {
-                    new QuickLinkAction(AuthMessage.View.NiceToString(), RouteHelper.New().Action<ControlPanelController>(cpc => cpc.View(cp)))
+                    new QuickLinkAction(AuthMessage.View.NiceToString(), RouteHelper.New().Action<ControlPanelController>(cpc => cpc.View(cp, null)))
                 });
+           
+                LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, ctrl) =>
+                    ControlPanelLogic.GetControlPanelsEntity(entity.EntityType)
+                    .Select(cp => new ControlPanelQuickLink(cp, entity)).ToArray());
+            }
+        }
+
+        class ControlPanelQuickLink : QuickLink
+        {
+            Lite<ControlPanelDN> controlPanel;
+            Lite<IdentifiableEntity> entity;
+
+            public ControlPanelQuickLink(Lite<ControlPanelDN> controlPanel, Lite<IdentifiableEntity> entity)
+            {
+                this.Text = controlPanel.ToString();
+                this.controlPanel = controlPanel;
+                this.entity = entity;
+                this.IsVisible = true;
+            }
+
+            public override MvcHtmlString Execute()
+            {
+                return new HtmlTag("a").Attr("href", RouteHelper.New().Action((ControlPanelController c) => c.View(controlPanel, entity))).SetInnerText(Text);
             }
         }
     }

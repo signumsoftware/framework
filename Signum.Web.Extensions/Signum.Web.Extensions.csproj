@@ -149,6 +149,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Types.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="ControlPanel\Views\Admin\ControlPanelAdmin.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ControlPanelAdmin.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Files\Views\FileRepository.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -597,11 +602,6 @@
     <Compile Include="Profiler\ProfilerFilterAttribute.cs" />
     <Compile Include="ControlPanel\Controllers\ControlPanelController.cs" />
     <Compile Include="ControlPanel\ControlPanelClient.cs" />
-    <Compile Include="ControlPanel\Views\Admin\ControlPanelAdmin.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ControlPanelAdmin.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="ControlPanel\Views\Admin\CountSearchControlPart.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -1303,7 +1303,7 @@
     </None>
     <None Include="ControlPanel\Views\Admin\ControlPanelAdmin.cshtml">
       <Generator>RazorGenerator</Generator>
-      <LastGenOutput>ControlPanelAdmin.cs</LastGenOutput>
+      <LastGenOutput>ControlPanelAdmin.generated.cs</LastGenOutput>
     </None>
     <None Include="ControlPanel\Views\Admin\LinkElement.cshtml">
       <Generator>RazorGenerator</Generator>

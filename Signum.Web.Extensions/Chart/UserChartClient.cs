@@ -82,6 +82,29 @@ namespace Signum.Web.Chart
                     OnClick = ctx => new JsOperationDelete(ctx.Options("DeleteUserChart", "Chart"))
                         .confirmAndAjax(ctx.Entity)
                 });
+
+                LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, ctrl) =>
+                    UserChartLogic.GetUserChartsEntity(entity.EntityType)
+                    .Select(cp => new UserChartQuickLink(cp, entity)).ToArray());
+            }
+        }
+
+        class UserChartQuickLink : QuickLink
+        {
+            Lite<UserChartDN> userChart;
+            Lite<IdentifiableEntity> entity;
+
+            public UserChartQuickLink(Lite<UserChartDN> userChart, Lite<IdentifiableEntity> entity)
+            {
+                this.Text = userChart.ToString();
+                this.userChart = userChart;
+                this.entity = entity;
+                this.IsVisible = true;
+            }
+
+            public override MvcHtmlString Execute()
+            {
+                return new HtmlTag("a").Attr("href", RouteHelper.New().Action((ChartController c) => c.ViewUserChart(userChart, entity))).SetInnerText(Text);
             }
         }
 
@@ -103,7 +126,7 @@ namespace Signum.Web.Chart
                 {
                     Text = uc.ToString(),
                     AltText = uc.ToString(),
-                    Href = RouteHelper.New().Action<ChartController>(c => c.ViewUserChart(uc)),
+                    Href = RouteHelper.New().Action<ChartController>(c => c.ViewUserChart(uc, null)),
                     DivCssClass = ToolBarButton.DefaultQueryCssClass + (currentUserChart.Is(uc) ? " sf-userchart-selected" : "")
                 });
             }
