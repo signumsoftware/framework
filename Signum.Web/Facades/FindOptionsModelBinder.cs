@@ -29,12 +29,11 @@ namespace Signum.Web
             if (parameters.AllKeys.Any(name => !name.HasText()))
                 throw new Exception("Incorrect URL: " + controllerContext.HttpContext.Request.Url.ToString());
 
-            string webQueryName = "";
             object rawValue = bindingContext.ValueProvider.GetValue("webQueryName").TryCC(vp => vp.RawValue);
-            if (rawValue.GetType() == typeof(string[]))
-                webQueryName = ((string[])rawValue)[0];
-            else 
-                webQueryName = (string)rawValue;
+            if (rawValue == null)
+                return null;
+
+            string webQueryName = rawValue.GetType() == typeof(string[]) ? ((string[])rawValue)[0]: (string)rawValue;
 
             if (!webQueryName.HasText())
                 throw new InvalidOperationException("webQueryName not provided");
