@@ -56,7 +56,7 @@ namespace Signum.Windows.ControlPanels.Admin
 
         IEnumerable<Lite<IdentifiableEntity>> EntityType_AutoCompleting(string text)
         {
-            return TypeClient.ViewableServerTypes(text).Take(5);
+            return TypeClient.ViewableServerTypes().Where(t => t.CleanName.Contains(text, StringComparison.InvariantCultureIgnoreCase)).Select(t => t.ToLite()).Take(5);
         }
     }
 }
