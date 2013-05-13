@@ -34,6 +34,7 @@ namespace Signum.Engine.ControlPanel
                     {
                         Entity = cp,
                         cp.DisplayName,
+                        cp.EntityType,
                         cp.Related,
                     });
 

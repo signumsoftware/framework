@@ -153,13 +153,8 @@ namespace Signum.Entities.Authorization
                 if (errors.HasText())
                     throw new InvalidOperationException(errors); 
 
-                Dictionary<Lite<RoleDN>, TypeAllowedAndConditions> mergerRules =
-                    rules.Where(a => a.Resource == null)
-                    .ToDictionary(ru => ru.Role, ru => ru.ToTypeAllowedAndConditions());
-
                 Dictionary<Lite<RoleDN>, Dictionary<Type, TypeAllowedAndConditions>> realRules =
-                   rules.Where(a => a.Resource != null)
-                      .AgGroupToDictionary(ru => ru.Role, gr => gr
+                   rules.AgGroupToDictionary(ru => ru.Role, gr => gr
                           .ToDictionary(ru => TypeLogic.DnToType[ru.Resource], ru => ru.ToTypeAllowedAndConditions()));
 
                 Dictionary<Lite<RoleDN>, RoleAllowedCache> newRules = new Dictionary<Lite<RoleDN>, RoleAllowedCache>();
