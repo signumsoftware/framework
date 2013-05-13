@@ -7,6 +7,7 @@
 @using Signum.Entities.Chart
 @using Signum.Web.Chart
 @using Signum.Engine.Basics
+@using Signum.Entities.UserQueries
 @Html.ScriptsJs("~/Chart/Scripts/SF_Chart.js")
 @Html.ScriptCss("~/Chart/Content/SF_Chart.css")
 <style type="text/css">
@@ -14,11 +15,12 @@
     {
         padding: 2px 10px;
     }
-    .sf-chart-control .sf-repeater-element legend
-    {
-        float: left;
-        margin-right: 10px;
-    }
+
+        .sf-chart-control .sf-repeater-element legend
+        {
+            float: left;
+            margin-right: 10px;
+        }
 </style>
 <div class="sf-chart-control" 
     data-subtokens-url="@Url.Action("NewSubTokensCombo", "Chart")" 
@@ -26,7 +28,7 @@
     data-prefix="@Model.ControlID">
     @using (var uc = Html.TypeContext<UserChartDN>())
     {
-        
+
         object queryName = QueryLogic.ToQueryName(uc.Value.Query.Key);
 
         QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
@@ -56,8 +58,12 @@
         @Html.EntityLine(uc, tc => tc.Related, el => el.Create = false)
         @Html.ValueLine(uc, tc => tc.DisplayName)
         
-        @Html.EntityLine(uc, f => f.EntityType)
-        <p>(@Signum.Entities.UserQueries.CurrentEntityConverter.CurrentEntityKey)</p>
+        var entityTypePrefix = uc.SubContext(a => a.EntityType).ControlID;
+        
+        @Html.EntityLine(uc, f => f.EntityType, el => { el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Signum"); el.OnEntityChanged = "showOnEntity()"; })
+        <p id="@TypeContextUtilities.Compose(entityTypePrefix, "CurrentEntityMessage")">
+            @UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().Formato(CurrentEntityConverter.CurrentEntityKey)
+        </p>
 
         @Html.EntityRepeater(uc, tc => tc.Filters, er => { er.PreserveViewData = true; er.PartialViewName = "~/Chart/Views/UserChartFilter.cshtml"; })
 
@@ -67,7 +73,18 @@
             @Html.Partial(ChartClient.ChartBuilderView, uc.Value)
         </div>
         <script type="text/javascript">
-                $('#@uc.Compose("sfChartBuilderContainer")').chartBuilder($.extend({ prefix: '@uc.ControlID' }, @MvcHtmlString.Create(uc.Value.ToJS())));
+            $('#@uc.Compose("sfChartBuilderContainer")').chartBuilder($.extend({ prefix: '@uc.ControlID' }, @MvcHtmlString.Create(uc.Value.ToJS())));
+
+            var showOnEntity = function () {
+
+                var ri = SF.RuntimeInfo("@entityTypePrefix");
+
+                $("#" + SF.compose("@entityTypePrefix", "CurrentEntityMessage")).toggle(ri.entityType() != "");
+            };
+
+            $(function () {
+                showOnEntity();
+            });
         </script>
         
     }
