@@ -2,7 +2,7 @@
 @using Signum.Web.ControlPanel
 @using Signum.Entities.Reports
 
-@using (var tc = Html.TypeContext<PanelPart>())
+@using (var tc = Html.TypeContext<PanelPartDN>())
 {
     @Html.HiddenRuntimeInfo(tc)
     var part = tc.Value;
