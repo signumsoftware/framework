@@ -14,9 +14,8 @@
         @Html.ValueLine(tc, cp => cp.HomePagePriority)
         @Html.ValueLine(tc, cp => cp.NumberOfColumns)
         
-        @Html.EntityLine(tc, f => f.EntityType)
-        <p>(@Signum.Entities.UserQueries.CurrentEntityConverter.CurrentEntityKey)</p>
-    
+        @Html.EntityLine(tc, cp => cp.EntityType, el => { el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Signum"); })
+        
         Html.RenderPartial(ControlPanelClient.AdminViewPrefix.Formato("PanelParts"), tc.Value);
         <div class="clearall"></div>   
     }

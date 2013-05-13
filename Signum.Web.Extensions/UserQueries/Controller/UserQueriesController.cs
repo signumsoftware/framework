@@ -103,18 +103,5 @@ namespace Signum.Web.UserQueries
 
             return JsonAction.Redirect(Navigator.FindRoute(queryName));
         }
-
-        [HttpPost]
-        public JsonResult TypeAutocomplete(string types, string q, int l)
-        {
-            var result = TypeClient.ViewableServerTypes(q).Take(l).Select(o => new
-            {
-                id = o.Id,
-                text = o.ToString(),
-                type = Navigator.ResolveWebTypeName(o.EntityType)
-            }).ToList();
-
-            return Json(result);
-        }
     }
 }

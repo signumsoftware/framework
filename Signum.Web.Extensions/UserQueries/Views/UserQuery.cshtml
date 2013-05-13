@@ -3,29 +3,34 @@
 @using Signum.Entities.Basics
 @using Signum.Engine.Basics
 @using Signum.Engine.DynamicQuery
+@using Signum.Web.UserQueries
+@using Signum.Entities.UserQueries
 
 <style type="text/css">
-.sf-user-query-edit .sf-repeater-element
-{
-    padding: 2px 10px;
-}
-.sf-user-query-edit .sf-repeater-element legend
-{
-    float: left;
-    margin-right: 10px;
-}
-</style>
-    
-<div class="sf-user-query-edit">
-@using (var e = Html.TypeContext<UserQueryDN>())
-{
-    object queryName = QueryLogic.ToQueryName(e.Value.Query.Key);
-    ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(queryName); //To be use inside Repeaters
-    
-    @Html.EntityLine(e, f => f.Related, el => el.Create = false)
-    
-    using (var query = e.SubContext(f => f.Query))
+    .sf-user-query-edit .sf-repeater-element
     {
+        padding: 2px 10px;
+    }
+
+        .sf-user-query-edit .sf-repeater-element legend
+        {
+            float: left;
+            margin-right: 10px;
+        }
+</style>
+
+@Html.ScriptsJs("~/UserQueries/Scripts/SF_UserQuery.js")
+
+<div class="sf-user-query-edit">
+    @using (var e = Html.TypeContext<UserQueryDN>())
+    {
+        object queryName = QueryLogic.ToQueryName(e.Value.Query.Key);
+        ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(queryName); //To be use inside Repeaters
+    
+        @Html.EntityLine(e, f => f.Related, el => el.Create = false)
+    
+        using (var query = e.SubContext(f => f.Query))
+        {
         @Html.HiddenRuntimeInfo(query)
         
         @Html.Hidden(query.Compose("Key"), query.Value.Key)
@@ -36,16 +41,34 @@
                  Html.Span("spanQuery", query.Value.Name, "sf-value-line"))
 
         <div class="clearall"></div>
-    }
+        }
     
-    @Html.ValueLine(e, f => f.DisplayName)
-    @Html.ValueLine(e, f => f.ElementsPerPage)
-    @Html.EntityLine(e, f => f.EntityType)
-    <p>(@Signum.Entities.UserQueries.CurrentEntityConverter.CurrentEntityKey)</p>
-    @Html.ValueLine(e, f => f.WithoutFilters)
-    @Html.EntityRepeater(e, f => f.Filters, er => { er.PreserveViewData = true; })
-    @Html.ValueLine(e, f => f.ColumnsMode)
-    @Html.EntityRepeater(e, f => f.Columns, er => { er.PreserveViewData = true; })
-    @Html.EntityRepeater(e, f => f.Orders, er => { er.PreserveViewData = true; })
-} 
+        @Html.ValueLine(e, f => f.DisplayName)
+        @Html.ValueLine(e, f => f.ElementsPerPage)
+        
+        var entityTypePrefix = e.SubContext(a => a.EntityType).ControlID;
+        
+        @Html.EntityLine(e, f => f.EntityType, el => { el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Signum"); el.OnEntityChanged = "showOnEntity()"; })
+        <p id="@TypeContextUtilities.Compose(entityTypePrefix, "CurrentEntityMessage")">
+            @UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().Formato(CurrentEntityConverter.CurrentEntityKey)
+        </p>
+        @Html.ValueLine(e, f => f.WithoutFilters)
+        @Html.EntityRepeater(e, f => f.Filters, er => { er.PreserveViewData = true; })
+        @Html.ValueLine(e, f => f.ColumnsMode)
+        @Html.EntityRepeater(e, f => f.Columns, er => { er.PreserveViewData = true; })
+        @Html.EntityRepeater(e, f => f.Orders, er => { er.PreserveViewData = true; })
+        <script>
+            var showOnEntity = function () {
+
+                var ri = SF.RuntimeInfo("@entityTypePrefix");
+
+                $("#" + SF.compose("@entityTypePrefix", "CurrentEntityMessage")).toggle(ri.entityType() != "");
+            };
+
+            $(function () {
+                showOnEntity();
+            });
+
+        </script>
+    }
 </div>

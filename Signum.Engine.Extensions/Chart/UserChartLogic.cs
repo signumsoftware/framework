@@ -35,6 +35,7 @@ namespace Signum.Engine.Chart
                     {
                         Entity = uq,
                         uq.Query,
+                        uq.EntityType,
                         uq.Id,
                         uq.DisplayName,
                         uq.ChartScript,

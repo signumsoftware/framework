@@ -151,34 +151,15 @@ WriteLiteral("\r\n\r\n<div>\r\n");
             #line hidden
             
             #line 17 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
-   Write(Html.EntityLine(tc, f => f.EntityType));
+   Write(Html.EntityLine(tc, cp => cp.EntityType, el => { el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Signum"); }));
 
             
             #line default
             #line hidden
             
             #line 17 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
-                                               
-
-            
-            #line default
-            #line hidden
-WriteLiteral("        <p>(");
-
-
-            
-            #line 18 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
-       Write(Signum.Entities.UserQueries.CurrentEntityConverter.CurrentEntityKey);
-
-            
-            #line default
-            #line hidden
-WriteLiteral(")</p>\r\n");
-
-
-            
-            #line 19 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
-    
+                                                                                                                           
+        
         Html.RenderPartial(ControlPanelClient.AdminViewPrefix.Formato("PanelParts"), tc.Value);
 
             
@@ -188,7 +169,7 @@ WriteLiteral("        <div class=\"clearall\"></div>   \r\n");
 
 
             
-            #line 22 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
+            #line 21 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
     }
 
             
