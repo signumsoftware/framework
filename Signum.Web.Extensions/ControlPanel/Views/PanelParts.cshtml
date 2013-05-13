@@ -13,7 +13,7 @@
             <div class="sf-ftbl-column"@(hasChart ? " style=min-width:" + equalColumnWidth + "%" : "") data-column="@col">
                 @for (int row = 0; row < rowNumber; row++)
                 {
-                    PanelPart pp = Model.Parts.SingleOrDefaultEx(p => p.Row == row && p.Column == col);
+                    PanelPartDN pp = Model.Parts.SingleOrDefaultEx(p => p.Row == row && p.Column == col);
                     if (pp != null)
                     {
                         <div class="sf-ftbl-part-container">
