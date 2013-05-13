@@ -55,10 +55,10 @@ namespace Signum.Web
 
                         if (entityLine.Autocomplete)
                         {
-                            htmlAttr.AddRange(new Dictionary<string, object>
-                            {
-                                { "data-types", new StaticInfo(entityLine.Type, entityLine.Implementations).Types.ToString(t => Navigator.ResolveWebTypeName(t), ",") }
-                            });
+                            htmlAttr.Add("data-types", new StaticInfo(entityLine.Type, entityLine.Implementations).Types.ToString(t => Navigator.ResolveWebTypeName(t), ","));
+
+                            if (entityLine.AutocompleteUrl.HasText())
+                                htmlAttr.Add("data-url", entityLine.AutocompleteUrl); 
                         }
 
                         sb.AddLine(helper.TextBox(

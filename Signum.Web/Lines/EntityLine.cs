@@ -21,6 +21,8 @@ namespace Signum.Web
     {
         public bool Autocomplete { get; set; }
 
+        public string AutocompleteUrl { get; set; }
+
         public EntityLine(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
             : base(type, untypedValue, parent, controlID, propertyRoute)
         {
