@@ -15,8 +15,6 @@ using Signum.Utilities;
 
 namespace Signum.Windows
 {
-
-
     public static class QuickLinkContextualMenu
     {
         internal static IEnumerable<MenuItem> SearchControl_GetContextMenuItems(SearchControl sc)
@@ -189,7 +187,7 @@ namespace Signum.Windows
         {
             Options = options;
             Label = QueryUtils.GetNiceName(Options.QueryName);
-            Icon = Navigator.Manager.GetFindIcon(Options.QueryName, false);
+            //Icon = Navigator.Manager.GetFindIcon(Options.QueryName, false);
             IsVisible = Navigator.IsFindable(Options.QueryName);
             ShowResultCount = showCount;
 
@@ -253,7 +251,7 @@ namespace Signum.Windows
         {
             FindUniqueOptions = options;
             Label = typeof(T).NiceName();
-            Icon = Navigator.Manager.GetEntityIcon(typeof(T), false);
+            //Icon = Navigator.Manager.GetEntityIcon(typeof(T), false);
             IsVisible = Navigator.IsFindable(FindUniqueOptions.QueryName) && Navigator.IsNavigable(typeof(T), isSearchEntity: false);
         }
 
