@@ -43,19 +43,9 @@ namespace Signum.Windows.Basics
         public static IEnumerable<TypeDN> ViewableServerTypes()
         {
             return from t in Navigator.Manager.EntitySettings.Keys
-                   where Navigator.IsViewable(t)
-                   select Server.ServerTypes.TryGetC(t) into tdn
-                   where tdn != null
+                   let tdn = Server.ServerTypes.TryGetC(t)
+                   where tdn != null && Navigator.IsViewable(t)
                    select tdn;
-        }
-
-        public static IEnumerable<Lite<TypeDN>> ViewableServerTypes(string text)
-        {
-            return from t in Navigator.Manager.EntitySettings.Keys
-                   where Navigator.IsViewable(t) && t.Name.Contains(text, StringComparison.InvariantCultureIgnoreCase) || t.NiceName().Contains(text, StringComparison.InvariantCultureIgnoreCase)
-                   select Server.ServerTypes.TryGetC(t) into tdn
-                   where tdn != null
-                   select tdn.ToLite();
         }
     }
 }

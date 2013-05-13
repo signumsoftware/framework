@@ -190,6 +190,22 @@ namespace Signum.Web.Controllers
             return Json(result);
         }
 
+        [HttpPost]
+        public JsonResult TypeAutocomplete(string types, string q, int l)
+        {
+            var result = TypeClient.ViewableServerTypes()
+                .Where(t => t.CleanName.Contains(q, StringComparison.InvariantCultureIgnoreCase)).
+                Take(l)
+                .Select(o => new
+                {
+                    id = o.Id,
+                    text = o.ToString(),
+                    type = Navigator.ResolveWebTypeName(o.GetType())
+                }).ToList();
+
+            return Json(result);
+        }
+
         public ActionResult Find(FindOptions findOptions)
         {
             return Navigator.Find(this, findOptions);
