@@ -158,7 +158,7 @@
     <Member Name="YouCanResetYourPasswordByFollowingTheLinkBelow" Description="Puedes crear una nueva contraseña haciendo click en el siguiente enlace:" />
     <Member Name="YouMustRepeatTheNewPassword" Description="Debes repetir la nueva contraseña" />
     <Member Name="YouRecentlyRequestedANewPassword" Description="Recientemente solicitó una nueva contraseña" />
-    <Member Name="YourUsernameIs0" Description="Su nombre de usuario es0" />
+    <Member Name="YourUsernameIs0" Description="Su nombre de usuario es: {0}" />
   </Type>
   <Type Name="AuthThumbnail" Description="Auth miniatura">
     <Member Name="All" Description="Todos" />

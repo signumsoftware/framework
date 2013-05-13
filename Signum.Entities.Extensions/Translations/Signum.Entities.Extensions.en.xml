@@ -107,6 +107,9 @@
     <Member Name="WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow" Description="We received a request to create an account. You can create it following the link below:" />
     <Member Name="YouCanResetYourPasswordByFollowingTheLinkBelow" Description="You can reset your password by following the link below:" />
     <Member Name="YouMustRepeatTheNewPassword" Description="You must repeat the new password" />
+    <Member Name="YouRecentlyRequestedANewPassword" Description="You recently requested a new password" />
+    <Member Name="YourUsernameIs0" Description="Your username is: {0}" />
+    <Member Name="User0IsDisabled" Description="User {0} is disabled" />
   </Type>
   <Type Name="ChartMessage">
     <Member Name="0CanOnlyBeCreatedFromTheChartWindow" Description="{0} can only be created from the chart window" />

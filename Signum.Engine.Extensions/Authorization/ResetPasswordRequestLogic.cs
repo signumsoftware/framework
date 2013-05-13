@@ -16,6 +16,21 @@ namespace Signum.Engine.Authorization
     public class ResetPasswordRequestMail : EmailModel<UserDN>
     {
         public string Link;
+
+        public string YouRecentlyRequestedANewPassword
+        {
+            get { return AuthMessage.YouRecentlyRequestedANewPassword.NiceToString(); }
+        }
+
+        public string YourUsernameIs0
+        {
+            get { return AuthMessage.YourUsernameIs0.NiceToString().Formato(To.UserName); }
+        }
+
+        public string YouCanResetYourPasswordByFollowingTheLinkBelow
+        {
+            get { return AuthMessage.YouCanResetYourPasswordByFollowingTheLinkBelow.NiceToString(); }
+        }
     }
 
     public static class ResetPasswordRequestLogic
