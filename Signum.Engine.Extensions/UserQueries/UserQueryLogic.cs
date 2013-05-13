@@ -36,6 +36,7 @@ namespace Signum.Engine.UserQueries
                         uq.Query,
                         uq.Id,
                         uq.DisplayName,
+                        uq.EntityType,
                         Filters = uq.Filters.Count,
                         Columns = uq.Columns.Count,
                         Orders = uq.Orders.Count,
