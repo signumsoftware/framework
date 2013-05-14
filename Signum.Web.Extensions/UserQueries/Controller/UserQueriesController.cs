@@ -23,6 +23,7 @@ using Signum.Entities.Authorization;
 using Signum.Entities.UserQueries;
 using Signum.Engine.UserQueries;
 using Signum.Engine.Operations;
+using Signum.Engine.Authorization;
 #endregion
 
 namespace Signum.Web.UserQueries
@@ -30,7 +31,9 @@ namespace Signum.Web.UserQueries
     public class UserQueriesController : Controller
     {
         public ActionResult View(Lite<UserQueryDN> lite, FindOptions findOptions, Lite<IdentifiableEntity> currentEntity)
-        {
+        {   
+            UserQueryPermission.ViewUserQuery.Authorize(); 
+
             UserQueryDN uq = Database.Retrieve<UserQueryDN>(lite);
 
             if (uq.EntityType != null)

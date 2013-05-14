@@ -106,8 +106,13 @@ namespace Signum.Web.UserQueries
                 });
 
                 LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, ctrl) =>
-                            UserQueryLogic.GetUserQueriesEntity(entity.EntityType)
-                             .Select(cp => new UserQueryQuickLink(cp, entity)).ToArray());
+                {
+                    if (!UserQueryPermission.ViewUserQuery.IsAuthorized())
+                        return null;
+
+                    return UserQueryLogic.GetUserQueriesEntity(entity.EntityType)
+                        .Select(cp => new UserQueryQuickLink(cp, entity)).ToArray();
+                });
             }
         }
 

@@ -68,7 +68,7 @@ namespace Signum.Windows.Authorization
                     }));
 
                 SpecialOmniboxProvider.Register(new SpecialOmniboxAction("DownloadAuthRules",
-                    () => BasicPermission.AdminRules.TryIsAuthorized() ?? true,
+                    () => BasicPermission.AdminRules.IsAuthorized(),
                     win =>
                     {
                         SaveFileDialog sfc = new SaveFileDialog();

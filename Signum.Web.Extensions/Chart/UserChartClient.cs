@@ -74,18 +74,24 @@ namespace Signum.Web.Chart
                 RouteTable.Routes.MapRoute(null, "UC/{webQueryName}/{lite}",
                      new { controller = "Chart", action = "ViewUserChart" });
 
-                UserChartDN.SetConverters(query => QueryLogic.ToQueryName(query.Key), queryname => 
+                UserChartDN.SetConverters(query => QueryLogic.ToQueryName(query.Key), queryname =>
                     QueryLogic.RetrieveOrGenerateQuery(queryname));
 
-                OperationsClient.AddSetting(new EntityOperationSettings(UserChartOperation.Delete) 
-                { 
+                OperationsClient.AddSetting(new EntityOperationSettings(UserChartOperation.Delete)
+                {
                     OnClick = ctx => new JsOperationDelete(ctx.Options("DeleteUserChart", "Chart"))
                         .confirmAndAjax(ctx.Entity)
                 });
 
                 LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, ctrl) =>
-                    UserChartLogic.GetUserChartsEntity(entity.EntityType)
-                    .Select(cp => new UserChartQuickLink(cp, entity)).ToArray());
+                {
+                    if (!ChartPermission.ViewCharting.IsAuthorized())
+                        return null;
+
+                    return UserChartLogic.GetUserChartsEntity(entity.EntityType)
+                        .Select(cp => new UserChartQuickLink(cp, entity)).ToArray();
+                });
+
             }
         }
 

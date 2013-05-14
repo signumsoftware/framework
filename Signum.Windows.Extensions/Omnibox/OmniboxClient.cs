@@ -88,11 +88,9 @@ namespace Signum.Windows.Omnibox
             return Navigator.IsNavigable(type, isSearchEntity: true);
         }
 
-        public override Lite<IdentifiableEntity> RetrieveLite(Type type, int id)
+        public override bool AllowedPermission(Enum permission)
         {
-            if (!Server.Return((IBaseServer bs) => bs.Exists(type, id)))
-                return null;
-            return Server.FillToStr(Lite.Create(type, id));
+            return permission.IsAuthorized();
         }
 
         public override bool AllowedQuery(object queryName)
@@ -100,6 +98,15 @@ namespace Signum.Windows.Omnibox
             return Navigator.IsFindable(queryName);
         }
 
+
+        public override Lite<IdentifiableEntity> RetrieveLite(Type type, int id)
+        {
+            if (!Server.Return((IBaseServer bs) => bs.Exists(type, id)))
+                return null;
+            return Server.FillToStr(Lite.Create(type, id));
+        }
+
+       
         public override QueryDescription GetDescription(object queryName)
         {
             return DynamicQueryServer.GetQueryDescription(queryName);
@@ -112,5 +119,6 @@ namespace Signum.Windows.Omnibox
 
             return Server.Return((IBaseServer bs) => bs.FindLiteLike(implementations, subString, 5));
         }
+
     }
 }

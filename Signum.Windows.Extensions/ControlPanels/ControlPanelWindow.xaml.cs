@@ -16,6 +16,7 @@ using Signum.Entities.ControlPanel;
 using Signum.Entities.Reflection;
 using Signum.Entities.UserQueries;
 using Signum.Utilities;
+using Signum.Windows.Authorization;
 
 namespace Signum.Windows.ControlPanels
 {
@@ -39,13 +40,15 @@ namespace Signum.Windows.ControlPanels
         }
 
         public ControlPanelWindow()
-        {
+        {   
+            ControlPanelPermission.ViewControlPanel.Authorize();
             InitializeComponent();
             this.DataContextChanged += ControlPanelWindow_DataContextChanged;
         }
 
         void ControlPanelWindow_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
+            navigate.Visibility = (e.NewValue != null && Navigator.IsNavigable((IIdentifiable)e.NewValue, isSearchEntity: true)).ToVisibility(); 
  	        this.tbControlPanel.Text = e.NewValue.TryToString();
         }
 

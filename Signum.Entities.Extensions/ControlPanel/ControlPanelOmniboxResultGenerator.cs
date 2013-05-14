@@ -22,7 +22,7 @@ namespace Signum.Entities.ControlPanel
 
         public override IEnumerable<ControlPanelOmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern)
         {
-            if (tokenPattern != "S" || !OmniboxParser.Manager.AllowedType(typeof(ControlPanelDN)))
+            if (tokenPattern != "S" || !OmniboxParser.Manager.AllowedPermission(ControlPanelPermission.ViewControlPanel))
                 yield break;
 
             string ident = OmniboxUtils.CleanCommas(tokens[0].Value);

@@ -25,7 +25,7 @@ namespace Signum.Windows.Authorization
 
             LinksClient.RegisterEntityLinks<RoleDN>((r, c) =>
             {
-                bool authorized = BasicPermission.AdminRules.TryIsAuthorized() ?? true;
+                bool authorized = BasicPermission.AdminRules.IsAuthorized();
                 return new QuickLink[]
                 {
                     new QuickLinkAction("Permission Rules", () => new PermissionRules { Role = r, Owner = Window.GetWindow(c) }.Show())
@@ -41,20 +41,22 @@ namespace Signum.Windows.Authorization
             permissionRules = Server.Return((IPermissionAuthServer s) => s.PermissionRules());
         }
 
-        public static bool? TryIsAuthorized(this Enum permissionKey)
-        {
-            if (permissionRules == null)
-                return null;
-
-            return permissionRules.GetAllowed(permissionKey);
-        }
 
         public static bool IsAuthorized(this Enum permissionKey)
         {
+            if (!Started)
+                return true;
+
             if (permissionRules == null)
                 throw new InvalidOperationException("Permissions not enabled in AuthClient");
 
             return permissionRules.GetAllowed(permissionKey);
+        }
+
+        public static void Authorize(this Enum permissionKey)
+        {
+            if (IsAuthorized(permissionKey) == false)
+                throw new UnauthorizedAccessException("Permission '{0}' is denied".Formato(permissionKey));
         }
     }
 

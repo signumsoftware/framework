@@ -22,7 +22,7 @@ namespace Signum.Entities.UserQueries
 
         public override IEnumerable<UserQueryOmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern)
         {
-            if (tokenPattern != "S" || !OmniboxParser.Manager.AllowedType(typeof(UserQueryDN)))
+            if (tokenPattern != "S" || !OmniboxParser.Manager.AllowedPermission(UserQueryPermission.ViewUserQuery))
                 yield break;
 
             string ident = OmniboxUtils.CleanCommas(tokens[0].Value);

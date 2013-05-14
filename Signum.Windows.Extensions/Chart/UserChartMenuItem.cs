@@ -106,30 +106,36 @@ namespace Signum.Windows.Chart
 
             UpdateCurrent(CurrentUserChart);
 
-            Items.Add(new Separator());
-
-            if (Navigator.IsCreable(typeof(UserChartDN),  true))
+            if (Navigator.IsNavigable(typeof(UserChartDN), true))
             {
-                Items.Add(new MenuItem()
+                Items.Add(new Separator());
+
+                if (Navigator.IsCreable(typeof(UserChartDN), true))
                 {
-                    Header = EntityControlMessage.Create.NiceToString(),
-                    Icon = ExtensionsImageLoader.GetImageSortName("add.png").ToSmallImage()
-                }.Handle(MenuItem.ClickEvent, New_Clicked));
+                    Items.Add(new MenuItem()
+                    {
+                        Header = EntityControlMessage.Create.NiceToString(),
+                        Icon = ExtensionsImageLoader.GetImageSortName("add.png").ToSmallImage()
+                    }.Handle(MenuItem.ClickEvent, New_Clicked));
+                }
+
+                if (CurrentUserChart != null && !Navigator.IsReadOnly(CurrentUserChart))
+                {
+                    Items.Add(new MenuItem()
+                    {
+                        Header = UserQueryMessage.Edit.NiceToString(),
+                        Icon = ExtensionsImageLoader.GetImageSortName("edit.png").ToSmallImage()
+                    }.Handle(MenuItem.ClickEvent, Edit_Clicked)
+                    .Bind(MenuItem.IsEnabledProperty, this, "CurrentUserChart", notNullAndEditable));
+
+                    Items.Add(new MenuItem()
+                    {
+                        Header = EntityControlMessage.Remove.NiceToString(),
+                        Icon = ExtensionsImageLoader.GetImageSortName("remove.png").ToSmallImage()
+                    }.Handle(MenuItem.ClickEvent, Remove_Clicked)
+                    .Bind(MenuItem.IsEnabledProperty, this, "CurrentUserChart", notNullAndEditable));
+                }
             }
-
-            Items.Add(new MenuItem()
-            {
-                Header = UserQueryMessage.Edit.NiceToString(),
-                Icon = ExtensionsImageLoader.GetImageSortName("edit.png").ToSmallImage()
-            }.Handle(MenuItem.ClickEvent, Edit_Clicked)
-            .Bind(MenuItem.IsEnabledProperty, this, "CurrentUserChart", notNullAndEditable));
-
-            Items.Add(new MenuItem()
-            {
-                Header = EntityControlMessage.Remove.NiceToString(),
-                Icon = ExtensionsImageLoader.GetImageSortName("remove.png").ToSmallImage()
-            }.Handle(MenuItem.ClickEvent, Remove_Clicked)
-            .Bind(MenuItem.IsEnabledProperty, this, "CurrentUserChart", notNullAndEditable));
 
             var autoSet = ChartClient.GetUserChart(ChartWindow);
 

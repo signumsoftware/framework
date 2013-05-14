@@ -163,6 +163,11 @@ namespace Signum.Entities.UserQueries
         }
     }
 
+    public enum UserQueryPermission
+    {
+        ViewUserQuery
+    }
+
     public enum UserQueryOperation
     { 
         Save, 

@@ -22,7 +22,7 @@ namespace Signum.Entities.Chart
 
         public override IEnumerable<UserChartOmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern)
         {
-            if (tokenPattern != "S")
+            if (tokenPattern != "S" || !OmniboxParser.Manager.AllowedPermission(ChartPermission.ViewCharting))
                 yield break;
 
             string ident = OmniboxUtils.CleanCommas(tokens[0].Value);

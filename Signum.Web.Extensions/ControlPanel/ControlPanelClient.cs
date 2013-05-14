@@ -13,6 +13,7 @@ using Signum.Entities;
 using Signum.Entities.Reports;
 using Signum.Web.Controllers;
 using Signum.Engine.ControlPanel;
+using Signum.Engine.Authorization;
 
 namespace Signum.Web.ControlPanel
 {
@@ -102,12 +103,18 @@ namespace Signum.Web.ControlPanel
 
                 LinksClient.RegisterEntityLinks<ControlPanelDN>((cp, ctx) => new[]
                 {
-                    new QuickLinkAction(AuthMessage.View.NiceToString(), RouteHelper.New().Action<ControlPanelController>(cpc => cpc.View(cp, null)))
+                    !ControlPanelPermission.ViewControlPanel.IsAuthorized() ? null:
+                     new QuickLinkAction(ControlPanelMessage.Preview.NiceToString(), RouteHelper.New().Action<ControlPanelController>(cpc => cpc.View(cp, null)))
                 });
            
                 LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, ctrl) =>
-                    ControlPanelLogic.GetControlPanelsEntity(entity.EntityType)
-                    .Select(cp => new ControlPanelQuickLink(cp, entity)).ToArray());
+                {
+                    if (!ControlPanelPermission.ViewControlPanel.IsAuthorized())
+                        return null;
+
+                    return ControlPanelLogic.GetControlPanelsEntity(entity.EntityType)
+                        .Select(cp => new ControlPanelQuickLink(cp, entity)).ToArray(); 
+                });
             }
         }
 

@@ -11,6 +11,7 @@ using Signum.Engine;
 using Signum.Engine.Maps;
 using System.Web.Mvc;
 using Signum.Utilities;
+using Signum.Engine.Authorization;
 
 namespace Signum.Web.Omnibox
 {
@@ -99,16 +100,21 @@ namespace Signum.Web.Omnibox
                 return Navigator.IsNavigable(type, isSearchEntity: true);
             }
 
-            public override Lite<IdentifiableEntity> RetrieveLite(Type type, int id)
+            public override bool AllowedPermission(Enum permission)
             {
-                if (!Database.Exists(type, id))
-                    return null;
-                return Database.FillToString(Lite.Create(type, id));
+                return permission.IsAuthorized();
             }
 
             public override bool AllowedQuery(object queryName)
             {
                 return Navigator.IsFindable(queryName);
+            }
+
+            public override Lite<IdentifiableEntity> RetrieveLite(Type type, int id)
+            {
+                if (!Database.Exists(type, id))
+                    return null;
+                return Database.FillToString(Lite.Create(type, id));
             }
 
             public override QueryDescription GetDescription(object queryName)

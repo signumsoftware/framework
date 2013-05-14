@@ -40,7 +40,7 @@ namespace Signum.Windows.ControlPanels
             GroupBox gb = (GroupBox)sender;
             PanelPartDN pp = (PanelPartDN)gb.DataContext;
             PartView pv = ControlPanelClient.PartViews.GetOrThrow(pp.Content.GetType());
-            if (pv.OnTitleClick != null)
+            if (pv.OnTitleClick != null && (pv.IsTitleEnabled == null || pv.IsTitleEnabled()))
             {
                 TextBlock tb = (TextBlock)gb.FindName("tb");
                 tb.Cursor = Cursors.Hand;

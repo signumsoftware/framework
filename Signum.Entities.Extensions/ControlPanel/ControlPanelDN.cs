@@ -174,6 +174,11 @@ namespace Signum.Entities.ControlPanel
         }
     }
 
+    public enum ControlPanelPermission
+    {
+        ViewControlPanel,
+    }
+
     public enum ControlPanelOperation
     {
         Create,

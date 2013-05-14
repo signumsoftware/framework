@@ -14,6 +14,7 @@ using Signum.Entities;
 using Signum.Entities.ControlPanel;
 using Signum.Services;
 using Signum.Utilities;
+using Signum.Windows.Authorization;
 
 namespace Signum.Windows.ControlPanels
 {
@@ -30,6 +31,7 @@ namespace Signum.Windows.ControlPanels
 
         public ControlPanelSelector()
         {
+            ControlPanelPermission.ViewControlPanel.Authorize();
             InitializeComponent();
             
             cpCombo.LoadData += cpCombo_LoadData;

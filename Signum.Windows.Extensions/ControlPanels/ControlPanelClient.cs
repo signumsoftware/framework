@@ -15,6 +15,8 @@ using Signum.Windows.Basics;
 using Signum.Entities.UserQueries;
 using Signum.Entities.Reflection;
 using Signum.Services;
+using Signum.Windows.Authorization;
+using Signum.Entities.Chart;
 
 namespace Signum.Windows.ControlPanels
 {
@@ -41,6 +43,7 @@ namespace Signum.Windows.ControlPanels
                 PartViews.Add(typeof(UserQueryPartDN), new PartView
                 {
                     ViewControl = () => new UserQueryPartView(),
+                    IsTitleEnabled = () => Navigator.IsNavigable(typeof(UserQueryDN), true),
                     OnTitleClick = part =>
                     {
                         Navigator.Navigate(((UserQueryPartDN)part).UserQuery);
@@ -50,6 +53,7 @@ namespace Signum.Windows.ControlPanels
                 PartViews.Add(typeof(UserChartPartDN), new PartView
                 {
                     ViewControl = () => new UserChartPartView(),
+                    IsTitleEnabled = ()=> Navigator.IsNavigable(typeof(UserChartDN), true),
                     OnTitleClick = part =>
                     {
                         Navigator.Navigate(((UserChartPartDN)part).UserChart);
@@ -66,13 +70,19 @@ namespace Signum.Windows.ControlPanels
                     ViewControl = () => new LinkListPartView()
                 });
 
-                LinksClient.RegisterEntityLinks<ControlPanelDN>((cp, ctrl) => new[]{
+                LinksClient.RegisterEntityLinks<ControlPanelDN>((cp, ctrl) => new[]{  
+                    !ControlPanelPermission.ViewControlPanel.IsAuthorized() ? null:  
                     new QuickLinkAction(ControlPanelMessage.Preview.NiceToString(), () => View(cp, null))
                 });
 
                 LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, ctrl) =>
-                    Server.Return((IControlPanelServer us) => us.GetControlPanelsEntity(entity.EntityType))
-                    .Select(cp => new ControlPanelQuickLink(cp, entity)).ToArray());
+                {       
+                    if(!ControlPanelPermission.ViewControlPanel.IsAuthorized())
+                        return null;
+
+                    return Server.Return((IControlPanelServer us) => us.GetControlPanelsEntity(entity.EntityType))
+                        .Select(cp => new ControlPanelQuickLink(cp, entity)).ToArray();
+                });
             }
         }
 
@@ -123,6 +133,7 @@ namespace Signum.Windows.ControlPanels
     {
         public Expression<Func<FrameworkElement>> ViewControl;
         public Action<IPartDN> OnTitleClick;
+        public Func<bool> IsTitleEnabled;
     }
 
     public class ControlPanelViewDataTemplateSelector : DataTemplateSelector

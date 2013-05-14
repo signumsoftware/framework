@@ -19,6 +19,7 @@ using Signum.Engine.Reports;
 using Signum.Web.Controllers;
 using Signum.Engine.Chart;
 using Signum.Entities.Basics;
+using Signum.Engine.Authorization;
 
 namespace Signum.Web.Chart
 {
@@ -27,6 +28,8 @@ namespace Signum.Web.Chart
         #region chart
         public ActionResult Index(FindOptions findOptions)
         {
+            ChartPermission.ViewCharting.Authorize(); 
+
             if (!Navigator.IsFindable(findOptions.QueryName))
                 throw new UnauthorizedAccessException(ChartMessage.Chart_Query0IsNotAllowed.NiceToString().Formato(findOptions.QueryName));
 

@@ -157,28 +157,34 @@ namespace Signum.Windows.UserQueries
                     }
                 }
 
-                miResult.Items.Add(new Separator());
-
-                if (Navigator.IsCreable(typeof(UserQueryDN), true))
+                if (Navigator.IsNavigable(typeof(UserQueryDN), isSearchEntity: true))
                 {
-                    miResult.Items.Add(new MenuItem()
+                    miResult.Items.Add(new Separator());
+
+                    if (Navigator.IsCreable(typeof(UserQueryDN), true))
                     {
-                        Header = EntityControlMessage.Create.NiceToString(),
-                        Icon = ExtensionsImageLoader.GetImageSortName("add.png").ToSmallImage()
-                    }.Handle(MenuItem.ClickEvent, new_Clicked));
+                        miResult.Items.Add(new MenuItem()
+                        {
+                            Header = EntityControlMessage.Create.NiceToString(),
+                            Icon = ExtensionsImageLoader.GetImageSortName("add.png").ToSmallImage()
+                        }.Handle(MenuItem.ClickEvent, new_Clicked));
+                    }
+
+                    if (current != null && !Navigator.IsReadOnly(current))
+                    {
+                        miResult.Items.Add(edit = new MenuItem()
+                        {
+                            Header = UserQueryMessage.Edit.NiceToString(),
+                            Icon = ExtensionsImageLoader.GetImageSortName("edit.png").ToSmallImage()
+                        }.Handle(MenuItem.ClickEvent, edit_Clicked));
+
+                        miResult.Items.Add(remove = new MenuItem()
+                        {
+                            Header = EntityControlMessage.Remove.NiceToString(),
+                            Icon = ExtensionsImageLoader.GetImageSortName("remove.png").ToSmallImage()
+                        }.Handle(MenuItem.ClickEvent, remove_Clicked));
+                    }
                 }
-
-                miResult.Items.Add(edit = new MenuItem()
-                {
-                    Header = UserQueryMessage.Edit.NiceToString(),
-                    Icon = ExtensionsImageLoader.GetImageSortName("edit.png").ToSmallImage()
-                }.Handle(MenuItem.ClickEvent, edit_Clicked));
-
-                miResult.Items.Add(remove = new MenuItem()
-                {
-                    Header = EntityControlMessage.Remove.NiceToString(),
-                    Icon = ExtensionsImageLoader.GetImageSortName("remove.png").ToSmallImage()
-                }.Handle(MenuItem.ClickEvent, remove_Clicked));
             };
 
             initialize();

@@ -26,6 +26,8 @@ namespace Signum.Engine.ControlPanel
             {
                 UserQueryLogic.Start(sb, dqm);
 
+                PermissionAuthLogic.RegisterPermissions(ControlPanelPermission.ViewControlPanel);
+
                 sb.Include<ControlPanelDN>();
 
                 dqm.RegisterQuery(typeof(ControlPanelDN), () =>

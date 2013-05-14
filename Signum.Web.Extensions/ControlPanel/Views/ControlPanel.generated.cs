@@ -125,11 +125,22 @@ WriteLiteral("\r\n\r\n");
             
             #line default
             #line hidden
-WriteLiteral("    <h1>\r\n        <a href=\"");
+WriteLiteral("    <h1>\r\n");
 
 
             
             #line 25 "..\..\ControlPanel\Views\ControlPanel.cshtml"
+         if(Navigator.IsNavigable(cp, isSearchEntity: true))
+        { 
+
+            
+            #line default
+            #line hidden
+WriteLiteral("        <a href=\"");
+
+
+            
+            #line 27 "..\..\ControlPanel\Views\ControlPanel.cshtml"
             Write(Navigator.NavigateRoute(typeof(ControlPanelDN), cp.Id));
 
             
@@ -139,17 +150,42 @@ WriteLiteral("\">");
 
 
             
-            #line 25 "..\..\ControlPanel\Views\ControlPanel.cshtml"
+            #line 27 "..\..\ControlPanel\Views\ControlPanel.cshtml"
                                                                      Write(cp.DisplayName);
 
             
             #line default
             #line hidden
-WriteLiteral("</a>\r\n    </h1>\r\n");
+WriteLiteral("</a>\r\n");
 
 
             
-            #line 27 "..\..\ControlPanel\Views\ControlPanel.cshtml"
+            #line 28 "..\..\ControlPanel\Views\ControlPanel.cshtml"
+        }else{
+            
+            
+            #line default
+            #line hidden
+            
+            #line 29 "..\..\ControlPanel\Views\ControlPanel.cshtml"
+       Write(cp.DisplayName);
+
+            
+            #line default
+            #line hidden
+            
+            #line 29 "..\..\ControlPanel\Views\ControlPanel.cshtml"
+                           
+        }
+
+            
+            #line default
+            #line hidden
+WriteLiteral("    </h1>\r\n");
+
+
+            
+            #line 32 "..\..\ControlPanel\Views\ControlPanel.cshtml"
     Html.RenderPartial(ControlPanelClient.ViewPrefix.Formato("PanelParts"), cp);
 
             
@@ -159,7 +195,7 @@ WriteLiteral("    <div class=\"clearall\"></div>   \r\n");
 
 
             
-            #line 29 "..\..\ControlPanel\Views\ControlPanel.cshtml"
+            #line 34 "..\..\ControlPanel\Views\ControlPanel.cshtml"
 }
 
             

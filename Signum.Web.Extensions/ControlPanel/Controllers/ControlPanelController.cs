@@ -10,6 +10,7 @@ using Signum.Entities;
 using Signum.Engine;
 using Signum.Entities.Reflection;
 using Signum.Entities.UserQueries;
+using Signum.Engine.Authorization;
 
 namespace Signum.Web.ControlPanel
 {
@@ -17,6 +18,8 @@ namespace Signum.Web.ControlPanel
     {
         public ViewResult View(Lite<ControlPanelDN> panel, Lite<IdentifiableEntity> currentEntity)
         {
+            ControlPanelPermission.ViewControlPanel.Authorize(); 
+         
             var cp = panel.Retrieve();
 
             if (cp.EntityType != null)

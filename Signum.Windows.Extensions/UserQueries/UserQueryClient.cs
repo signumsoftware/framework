@@ -36,6 +36,8 @@ namespace Signum.Windows.UserQueries
 
         private static void OnUserQueryChanged(DependencyObject s, UserQueryDN uc)
         {
+            UserQueryPermission.ViewUserQuery.Authorize();
+
             var csc = s as CountSearchControl;
             if (csc != null)
             {
@@ -76,8 +78,13 @@ namespace Signum.Windows.UserQueries
                 });
 
                 LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, ctrl) =>
-                        Server.Return((IUserQueryServer us) => us.GetUserQueriesEntity(entity.EntityType))
-                        .Select(cp => new UserQueryQuickLink(cp, entity)).ToArray());
+                {
+                    if (!UserQueryPermission.ViewUserQuery.IsAuthorized())
+                        return null;
+
+                    return Server.Return((IUserQueryServer us) => us.GetUserQueriesEntity(entity.EntityType))
+                        .Select(cp => new UserQueryQuickLink(cp, entity)).ToArray();
+                });
             }
         }
 
