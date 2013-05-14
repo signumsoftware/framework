@@ -37,7 +37,7 @@ namespace Signum.Windows.UserQueries
             MenuItem remove = null;
 
             Action updatecurrent = () =>
-            {   
+            {
                 miResult.Header = new TextBlock
                 {
                     Inlines = 
@@ -53,8 +53,13 @@ namespace Signum.Windows.UserQueries
                     item.IsChecked = ((Lite<UserQueryDN>)item.Tag).RefersTo(current);
                 }
 
-                edit.IsEnabled = current != null;
-                remove.IsEnabled = current != null;
+                bool isEnabled = current != null && Navigator.IsReadOnly(current);
+
+                if (edit != null)
+                    edit.IsEnabled = isEnabled;
+
+                if (remove != null)
+                    remove.IsEnabled = isEnabled;
             };
 
             Action initialize = null;
@@ -170,7 +175,7 @@ namespace Signum.Windows.UserQueries
                         }.Handle(MenuItem.ClickEvent, new_Clicked));
                     }
 
-                    if (current != null && !Navigator.IsReadOnly(current))
+                    if (current != null && !Navigator.IsReadOnly(typeof(UserQueryDN)))
                     {
                         miResult.Items.Add(edit = new MenuItem()
                         {
