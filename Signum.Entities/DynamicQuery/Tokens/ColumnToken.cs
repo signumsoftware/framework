@@ -58,9 +58,9 @@ namespace Signum.Entities.DynamicQuery
             get { return Column.Unit; }
         }
 
-        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
+        public override Expression BuildExpression(BuildExpressionContext context)
         {
-            throw new InvalidOperationException("BuildExpressionInternal not supported for ColumnToken");
+            return context.Replacemens.GetOrThrow(this, "ColumnToken {0} not found on replacements");
         }
 
         protected override List<QueryToken> SubTokensOverride()

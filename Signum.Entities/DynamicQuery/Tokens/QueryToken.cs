@@ -48,16 +48,7 @@ namespace Signum.Entities.DynamicQuery
             get { return this.parent.QueryName; }
         }
 
-        public Expression BuildExpression(BuildExpressionContext context)
-        {
-            Expression result;
-            if (context.Replacemens != null && context.Replacemens.TryGetValue(this, out result))
-                return result;
-
-            return BuildExpressionInternal(context); 
-        }
-
-        protected abstract Expression BuildExpressionInternal(BuildExpressionContext context);
+        public abstract Expression BuildExpression(BuildExpressionContext context);
 
         public abstract PropertyRoute GetPropertyRoute();
         public abstract Implementations? GetImplementations();
@@ -87,14 +78,15 @@ namespace Signum.Entities.DynamicQuery
 
             result.RemoveAll(t => t.IsAllowed() != null);
 
-            result.Sort((a, b) =>
-            {
-                return
-                    PriorityCompare(a.Key, b.Key, s => s == "Id") ??
-                    PriorityCompare(a.Key, b.Key, s => s == "ToString") ??
-                    PriorityCompare(a.Key, b.Key, s => s.StartsWith("(")) ??
-                    string.Compare(a.ToString(), b.ToString());
-            }); 
+            if (!IsCollecction(Type))
+                result.Sort((a, b) =>
+                {
+                    return
+                        PriorityCompare(a.Key, b.Key, s => s == "Id") ??
+                        PriorityCompare(a.Key, b.Key, s => s == "ToString") ??
+                        PriorityCompare(a.Key, b.Key, s => s.StartsWith("(")) ??
+                        string.Compare(a.ToString(), b.ToString());
+                });
 
             return result;
         }
@@ -200,13 +192,15 @@ namespace Signum.Entities.DynamicQuery
 
         public static List<QueryToken> CollectionProperties(QueryToken parent)
         {
-            return new QueryToken[]
-            {
-                new CountToken(parent),
-                parent.HasAllOrAny() ?null: new CollectionElementToken(parent, CollectionElementType.Element),
-                new CollectionElementToken(parent, CollectionElementType.Any),
-                new CollectionElementToken(parent, CollectionElementType.All),
-            }.NotNull().ToList();
+            var hasAllOrAny = parent.HasAllOrAny();
+
+            List<QueryToken> tokens = new List<QueryToken>() { new CountToken(parent) };
+
+            tokens.AddRange(from cet in EnumExtensions.GetValues<CollectionElementType>()
+                            where !cet.IsElement() || !hasAllOrAny
+                            select new CollectionElementToken(parent, cet));
+
+            return tokens;
         }
 
         public virtual bool HasAllOrAny()
@@ -341,6 +335,7 @@ namespace Signum.Entities.DynamicQuery
         public readonly ParameterExpression Parameter;
         public readonly Dictionary<QueryToken, Expression> Replacemens; 
     }
+
 
     public enum QueryTokenMessage
     {

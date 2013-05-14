@@ -114,7 +114,7 @@ namespace Signum.Entities.DynamicQuery
             return new List<QueryToken>();
         }
 
-        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
+        public override Expression BuildExpression(BuildExpressionContext context)
         {
             throw new InvalidOperationException("AggregateToken does not support this method");
         }

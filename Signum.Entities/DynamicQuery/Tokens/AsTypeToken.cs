@@ -39,7 +39,7 @@ namespace Signum.Entities.DynamicQuery
             get { return "({0})".Formato(Lite.UniqueTypeName(entityType)); }
         }
 
-        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
+        public override Expression BuildExpression(BuildExpressionContext context)
         {
             Expression baseExpression = Parent.BuildExpression(context);
 

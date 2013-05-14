@@ -36,33 +36,34 @@ namespace Signum.Entities.DynamicQuery
         static MethodInfo miEndsWith = ReflectionTools.GetMethodInfo((string s) => s.EndsWith(s));
         static MethodInfo miLike = ReflectionTools.GetMethodInfo((string s) => s.Like(s));
 
-        public Expression GetCondition(BuildExpressionContext context)
+        public void GenerateCondition(FilterBuildExpressionContext filterContext)
         {
             List<CollectionElementToken> allAny = Token.FollowC(a => a.Parent)
                 .OfType<CollectionElementToken>()
-                .Where(a => a.CollectionElementType == CollectionElementType.Any ||
-                            a.CollectionElementType == CollectionElementType.All).ToList();
+                .Where(a => !a.CollectionElementType.IsElement())
+                .Reverse()
+                .ToList();
 
-            if (allAny.IsEmpty())
-                return GetConditionBasic(context);
-
-            var parameters = allAny.ToDictionary(a => a, a => a.CreateParameter());
-            var expressions = allAny.ToDictionary(a => (QueryToken)a, a => a.CreateExpression(parameters[a]));
-
-            context.Replacemens.AddRange(expressions);
-
-            Expression exp = GetConditionBasic(context);
-
-            foreach (CollectionElementToken cet in allAny)
+            List<IFilterExpression> filters = filterContext.Filters;
+            foreach (var ct in allAny)
             {
-                LambdaExpression lambda = Expression.Lambda(exp, parameters[cet]);
+                var allAnyFilter = filterContext.AllAnyFilters.GetOrCreate(ct, () =>
+                {
+                    var newAllAnyFilter = new AnyAllFilter(ct);
 
-                exp = cet.BuildExpressionLambda(context, lambda);
+                    filterContext.Replacemens.Add(ct, ct.CreateExpression(newAllAnyFilter.Parameter));
+
+                    filters.Add(newAllAnyFilter);
+
+                    return newAllAnyFilter;
+                });
+
+                filters = allAnyFilter.Filters;
             }
 
-            context.Replacemens.RemoveRange(expressions.Keys);
+            var exp = GetConditionBasic(filterContext);
 
-            return exp;
+            filters.Add(new FilterExpression(exp));
         }
 
         private Expression GetConditionBasic(BuildExpressionContext context)
@@ -72,9 +73,9 @@ namespace Signum.Entities.DynamicQuery
             if (Operation == FilterOperation.IsIn)
             {
                 if (Value == null)
-                    return Expression.Constant(false); 
+                    return Expression.Constant(false);
 
-                IList clone =(IList)Activator.CreateInstance(Value.GetType(), Value);
+                IList clone = (IList)Activator.CreateInstance(Value.GetType(), Value);
 
                 bool hasNull = false;
                 while (clone.Contains(null))

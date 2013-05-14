@@ -55,7 +55,7 @@ namespace Signum.Entities.DynamicQuery
 
         static MethodInfo miMonthStart = ReflectionTools.GetMethodInfo(() => DateTimeExtensions.MonthStart(DateTime.MinValue));
 
-        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
+        public override Expression BuildExpression(BuildExpressionContext context)
         {
             var exp = Parent.BuildExpression(context);
             
@@ -128,7 +128,7 @@ namespace Signum.Entities.DynamicQuery
 
         static PropertyInfo piDayOfYear = ReflectionTools.GetPropertyInfo(() => DateTime.MinValue.DayOfYear);
 
-        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
+        public override Expression BuildExpression(BuildExpressionContext context)
         {
             var exp = Parent.BuildExpression(context);
 
@@ -205,7 +205,7 @@ namespace Signum.Entities.DynamicQuery
 
         static PropertyInfo piDayOfWeek = ReflectionTools.GetPropertyInfo(() => DateTime.MinValue.DayOfWeek);
 
-        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
+        public override Expression BuildExpression(BuildExpressionContext context)
         {
             var exp = Parent.BuildExpression(context);
 

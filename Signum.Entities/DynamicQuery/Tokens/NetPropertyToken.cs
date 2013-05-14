@@ -53,7 +53,7 @@ namespace Signum.Entities.DynamicQuery
             get { return PropertyInfo.Name; }
         }
 
-        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
+        public override Expression BuildExpression(BuildExpressionContext context)
         {   
             var result = Parent.BuildExpression(context);
 

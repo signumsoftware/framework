@@ -69,7 +69,7 @@ namespace Signum.Entities.DynamicQuery
 
         public static Func<Type, string, Expression, Expression> BuildExtension;
 
-        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
+        public override Expression BuildExpression(BuildExpressionContext context)
         {
             if (BuildExtension == null)
                 throw new InvalidOperationException("ExtensionToken.BuildExtension not set");

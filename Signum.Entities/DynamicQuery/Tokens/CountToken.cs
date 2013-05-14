@@ -38,7 +38,7 @@ namespace Signum.Entities.DynamicQuery
 
         static MethodInfo miCount = ReflectionTools.GetMethodInfo((IEnumerable<string> q) => q.Count()).GetGenericMethodDefinition();
 
-        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
+        public override Expression BuildExpression(BuildExpressionContext context)
         {
             var parentResult = Parent.BuildExpression(context);
 
