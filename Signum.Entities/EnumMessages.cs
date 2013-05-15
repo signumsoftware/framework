@@ -50,7 +50,9 @@ namespace Signum.Entities
         [Description("There are records in '{0}' refearing to this table by column '{1}'")]
         ThereAreRecordsIn0PointingToThisTableByColumn1,
         [Description("Unautorized access to {0} because {1}")]
-        UnauthorizedAccessTo0Because1
+        UnauthorizedAccessTo0Because1,
+        [Description("There's already a '{0}' with '{1}' {2}")]
+        TheresAlreadyA0With12
     }
 
     public enum NormalWindowMessage

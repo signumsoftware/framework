@@ -10,6 +10,8 @@ using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Entities.Reflection;
 using System.Data.SqlServerCe;
+using System.Collections.Concurrent;
+using System.Reflection;
 
 namespace Signum.Engine.Exceptions
 {
@@ -17,33 +19,74 @@ namespace Signum.Engine.Exceptions
     public class UniqueKeyException : ApplicationException
     {
         public string TableName { get; private set; }
-        public string[] Fields { get; private set; }
+        public Table Table { get; private set; }
+
+        public string IndexName { get; private set; }
+        public UniqueIndex Index { get; private set; }
+        public List<PropertyInfo> Properties { get; private set; }
+
+        public string Values { get; private set; }
 
         protected UniqueKeyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
-        static Regex indexRegex = new Regex(@"\'IX_(?<table>[^_]+)(_(?<field>[^_]+))+.*\'"); 
+        static Regex[] regexes = new []
+        {   
+            new Regex(@"Cannot insert duplicate key row in object '(?<table>.*)' with unique index '(?<index>.*)'\. The duplicate key value is \((?<value>.*)\)")
+        };
 
         public UniqueKeyException(Exception inner) : base(null, inner) 
         {
-            Match m = indexRegex.Match(inner.Message);
-            if (m.Success)
+            foreach (var rx in regexes)
             {
-                TableName = m.Groups["table"].Value;
-                Fields = m.Groups["field"].Captures.Cast<Capture>().Select(a => a.Value).ToArray();
+                Match m = rx.Match(inner.Message);
+                if (m.Success)
+                {
+                    TableName = m.Groups["table"].Value;
+                    IndexName = m.Groups["index"].Value;
+                    Values = m.Groups["value"].Value;
+
+                    Table = cachedTables.GetOrAdd(TableName, tn=>Schema.Current.Tables.Values.FirstOrDefault(t => t.Name.ToStringDbo() == tn));
+
+                    if(Table != null)
+                    {
+                        var tuple = cachedLookups.GetOrAdd(Tuple.Create(Table, IndexName), tup=>
+                        {
+                            var index = tup.Item1.GeneratAllIndexes().OfType<UniqueIndex>().FirstOrDefault(ix => ix.IndexName == tup.Item2);
+
+                            if(index == null)
+                                return null;
+
+                            var properties = tup.Item1.Fields.Values.Where(f=>f.Field.Columns().All(index.Columns.Contains)).Select(f=>Reflector.TryFindPropertyInfo(f.FieldInfo)).NotNull().ToList();
+
+                            return Tuple.Create(index, properties); 
+                        });
+ 
+                        if(tuple != null)
+                        {
+                            Index = tuple.Item1;
+                            Properties = tuple.Item2;
+                        }
+                    }
+                }
             }
         }
+
+        static ConcurrentDictionary<string, Table> cachedTables = new ConcurrentDictionary<string, Table>();
+        static ConcurrentDictionary<Tuple<Table, string>, Tuple<UniqueIndex, List<PropertyInfo>>> cachedLookups = new ConcurrentDictionary<Tuple<Table, string>, Tuple<UniqueIndex, List<PropertyInfo>>>();
 
         public override string Message
         {
             get
             {
-                if (TableName == null)
+                if (Table == null)
                     return InnerException.Message;
 
-                string fieldStr = Fields.Length == 1 ? Fields[0] :
-                        Fields.Take(Fields.Length - 1).ToString(", ") + " and " + Fields[Fields.Length - 1]; 
-
-                return "There's already a '{0}' with the same {1}".Formato(TableName, fieldStr);
+                return EngineMessage.TheresAlreadyA0With12.NiceToString().Formato(
+                    Table == null ? TableName : Table.Type.NiceName(),
+                    Index == null ? IndexName :
+                    Properties.IsNullOrEmpty() ? Index.Columns.CommaAnd(c => c.Name) : 
+                    Properties.CommaAnd(p=>p.NiceName()),
+                    Values);
             }
         }
     }
