@@ -587,7 +587,7 @@ namespace Signum.Windows
             return dt;
         }
 
-        void FilterBuilder_SearchClicked(object sender, RoutedEventArgs e)
+        void btSeach_Click(object sender, RoutedEventArgs e)
         {
             Search();
         }
@@ -1006,6 +1006,11 @@ namespace Signum.Windows
         private void btFilters_Unchecked(object sender, RoutedEventArgs e)
         {
             rowFilters.Height = new GridLength(); //Auto
+        }
+
+        public void FocusSearch()
+        {
+            Keyboard.Focus(btSeach);
         }
     }
 
