@@ -16,6 +16,7 @@ using Signum.Entities.UserQueries;
 using Signum.Entities.Authorization;
 using System.Windows.Data;
 using Signum.Windows.Authorization;
+using System.Windows.Input;
 
 namespace Signum.Windows.UserQueries
 {
@@ -67,6 +68,8 @@ namespace Signum.Windows.UserQueries
             RoutedEventHandler new_Clicked = (object sender, RoutedEventArgs e) =>
             {
                 e.Handled = true;
+
+                sc.FocusSearch(); //Commit RealValue bindings
 
                 UserQueryDN userQuery = UserQueryClient.FromSearchControl(sc);
 
