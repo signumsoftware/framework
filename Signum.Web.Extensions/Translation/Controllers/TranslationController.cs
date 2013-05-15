@@ -68,8 +68,6 @@ namespace Signum.Web.Translation.Controllers
             return base.View(TranslationClient.ViewPrefix.Formato("View"), reference);
         }
 
-        static Regex regex = new Regex(@"(?<type>[_\w][_\w\d]*)\.(?<lang>[\w_\-]+)\.(?<kind>\w+)(\.(?<member>[_\w][_\w\d]*))?");
-
         [HttpPost]
         public ActionResult View(string assembly, string culture, string bla)
         {   
@@ -109,6 +107,8 @@ namespace Signum.Web.Translation.Controllers
             return RedirectToAction("View", new { assembly = assembly, culture = culture });
         }
 
+        static Regex regex = new Regex(@"^(?<type>[_\w][_\w\d]*(`\d)?)\.(?<lang>[\w_\-]+)\.(?<kind>\w+)(\.(?<member>[_\w][_\w\d]*))?$");
+
         private List<TranslationRecord> GetTranslationRecords()
         {
             var list = (from k in Request.Form.AllKeys
@@ -124,6 +124,22 @@ namespace Signum.Web.Translation.Controllers
                         }).ToList();
             return list;
         }
+
+        public JsonResult PluralAndGender()
+        {
+            string name = Request.Form["name"];
+
+            CultureInfo ci = CultureInfo.GetCultureInfo(regex.Match(name).Groups["lang"].Value);
+
+            string text = Request.Form["text"];
+
+            return Json(new
+            {
+                gender = NaturalLanguageTools.GetGender(text, ci),
+                plural = NaturalLanguageTools.Pluralize(text, ci)
+            });
+        }
+
 
         class TranslationRecord
         {
@@ -152,21 +168,6 @@ namespace Signum.Web.Translation.Controllers
             PluralDescription,
             Gender,
             Member,
-        }
-
-        public JsonResult PluralAndGender()
-        {
-            string name = Request.Form["name"];
-
-            CultureInfo ci = CultureInfo.GetCultureInfo(regex.Match(name).Groups["lang"].Value);
-
-            string text = Request.Form["text"];
-
-            return Json(new
-            {
-                gender = NaturalLanguageTools.GetGender(text, ci),
-                plural = NaturalLanguageTools.Pluralize(text, ci)
-            }); 
         }
 
         public ActionResult Sync(string assembly, string culture)

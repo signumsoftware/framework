@@ -82,6 +82,7 @@ namespace Signum.Entities.Authorization
         }
 
         MergeStrategy mergeStrategy;
+        [HiddenProperty]
         public MergeStrategy MergeStrategy
         {
             get { return mergeStrategy; }
@@ -90,6 +91,7 @@ namespace Signum.Entities.Authorization
 
         [NotNullable]
         MList<Lite<RoleDN>> subRoles = new MList<Lite<RoleDN>>();
+        [HiddenProperty]
         public MList<Lite<RoleDN>> SubRoles
         {
             get { return subRoles; }

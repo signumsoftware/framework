@@ -45,6 +45,7 @@ namespace Signum.Entities.Authorization
             Notify(() => StrategyHint); 
         }
 
+        [HiddenProperty]
         public string StrategyHint
         {
             get

@@ -79,6 +79,7 @@ namespace Signum.Entities.Disconnected
         FixImport,
     }
 
+    [DescriptionOptions(DescriptionOptions.None)]
     public interface IDisconnectedEntity : IIdentifiable
     {
         long Ticks { get; set; }
