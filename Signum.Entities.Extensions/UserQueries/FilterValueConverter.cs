@@ -119,7 +119,7 @@ namespace Signum.Entities.UserQueries
                 }
             }
 
-            if (ReflectionTools.TryParse(stringValue, type, out result))
+            if (ReflectionTools.TryParse(stringValue, type, CultureInfo.InvariantCulture, out result))
                 return null;
             else
             {
