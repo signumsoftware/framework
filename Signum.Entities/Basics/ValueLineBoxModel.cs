@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace Signum.Web
 {
-    [Serializable]
+    [Serializable, DescriptionOptions(DescriptionOptions.None)]
     public class ValueLineBoxModel : ModelEntity
     {
         public ValueLineBoxModel()

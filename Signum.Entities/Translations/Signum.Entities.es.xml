@@ -20,8 +20,14 @@
   </Type>
   <Type Name="CollectionElementType">
     <Member Name="All" Description="Todos" />
+    <Member Name="All2" Description="Todos (2)" />
+    <Member Name="All3" Description="Todos (3)" />
     <Member Name="Any" Description="Alguno" />
+    <Member Name="Any2" Description="Alguno (2)" />
+    <Member Name="Any3" Description="Alguno (3)" />
     <Member Name="Element" Description="Elemento" />
+    <Member Name="Element2" Description="Elemento (2)" />
+    <Member Name="Element3" Description="Elemento (3)" />
   </Type>
   <Type Name="ColorDN" Description="Color">
     <Member Name="Argb" Description="Argb" />
@@ -46,7 +52,7 @@
   <Type Name="CorruptEntity" Description="Entidad corruptible">
     <Member Name="Corrupt" Description="Corrupta" />
   </Type>
-  <Type Name="EmbeddedEntity" />
+  <Type Name="EmbeddedEntity" Description="Entidad embebida" />
   <Type Name="EngineMessage">
     <Member Name="ConcurrencyErrorOnDatabaseTable0Id1" Description="Error de concurrencia en la base de datos, Tabla = {0}, Id = {1}" />
     <Member Name="EntityWithType0AndId1NotFound" Description="No se han encontrado {0} con Id {1}" />
@@ -115,7 +121,7 @@
     <Member Name="NotStartsWith" Description="no empieza por" />
     <Member Name="StartsWith" Description="empieza por" />
   </Type>
-  <Type Name="IdentifiableEntity" />
+  <Type Name="IdentifiableEntity" Description="Entidad identificable" />
   <Type Name="IIdentifiable">
     <Member Name="Id" Description="ID" />
   </Type>
@@ -155,15 +161,13 @@
     <Member Name="ToStr" Description="Texto" />
     <Member Name="TypeNotFound" Description="Tipo no encontrado" />
   </Type>
-  <Type Name="LockableEntity">
+  <Type Name="LockableEntity" Description="Entidad bloqueable">
     <Member Name="Locked" Description="Bloqueado" />
   </Type>
-  <Type Name="ModelEntity" />
+  <Type Name="ModelEntity" Description="Entidad modelo" />
   <Type Name="ModifiableEntity" Description="Entidad modificable" PluralDescription="Entidades modificables" />
-  <Type Name="ModifiedState" Description="Estado modificado" />
-  <Type Name="MultiEnumDN">
+  <Type Name="MultiEnumDN" Description="Multi enum" PluralDescription="Multi enums">
     <Member Name="Key" Description="Clave" />
-    <Member Name="Name" Description="Nombre" />
   </Type>
   <Type Name="NormalControlMessage">
     <Member Name="New" Description="Nuevo" />
@@ -188,10 +192,7 @@
     <Member Name="ThereAreChangesContinue" Description="Existen cambios no guardados y se perderán.&#xD;&#xA;&#xD;&#xA;&#x9;¿Continuamos?" />
     <Member Name="ThereAreErrors" Description="Hay errores" />
   </Type>
-  <Type Name="OperationDN" Description="Operación">
-    <Member Name="Key" Description="Clave" />
-    <Member Name="Name" Description="Nombre" />
-  </Type>
+  <Type Name="OperationDN" Description="Operación" />
   <Type Name="OperationLogDN" Description="Registro de la operación">
     <Member Name="Duration" Description="Duración" />
     <Member Name="End" Description="Final" />
@@ -351,10 +352,6 @@
     <Member Name="TheNumberOfElementsOf0HasToBe01" Description="El número de elementos en {{0}} ha de ser {0} {1}" />
     <Member Name="Type0NotAllowed" Description="El tipo {0} no está permitido" />
   </Type>
-  <Type Name="ValueLineBoxModel">
-    <Member Name="Related" Description="Relacionado" />
-  </Type>
-  <Type Name="ValueLineBoxType" />
   <Type Name="VoidEnumMessage">
     <Member Name="Instance" Description="-" />
   </Type>
