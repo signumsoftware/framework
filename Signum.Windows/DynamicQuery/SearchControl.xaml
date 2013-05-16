@@ -124,7 +124,7 @@
                     <TextBlock Text="{m:Loc {x:Static d:SearchMessage.Filters}}" VerticalAlignment="Center" Margin="3,0,0,0"/>
                 </StackPanel>
             </ToggleButton>
-            <Button x:Name="btSeach" Click="btSeach_Click"  ToolTip="{m:Loc {x:Static d:SearchMessage.Find}}" 
+            <Button x:Name="btSearch" Click="btSearch_Click"  ToolTip="{m:Loc {x:Static d:SearchMessage.Find}}" 
                     Style="{DynamicResource RoundBigButton}" Margin="0,2" Padding="2,0"
                     IsEnabled="{Binding IsSearching, ElementName=me, Converter={x:Static m:Converters.Not}}">
                 <StackPanel Orientation="Horizontal">

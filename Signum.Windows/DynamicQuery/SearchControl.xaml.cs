@@ -587,7 +587,7 @@ namespace Signum.Windows
             return dt;
         }
 
-        void btSeach_Click(object sender, RoutedEventArgs e)
+        void btSearch_Click(object sender, RoutedEventArgs e)
         {
             Search();
         }
@@ -1010,7 +1010,7 @@ namespace Signum.Windows
 
         public void FocusSearch()
         {
-            Keyboard.Focus(btSeach);
+            Keyboard.Focus(btSearch);
         }
     }
 
