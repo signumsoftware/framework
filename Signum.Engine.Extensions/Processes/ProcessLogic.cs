@@ -544,7 +544,7 @@ namespace Signum.Engine.Processes
             var ramainingNotExceptionsLines = remainingLines.Where(li => li.Exception(executingProcess.CurrentExecution) == null);
 
             var totalCount = ramainingNotExceptionsLines.Count();
-
+            int j = 0; 
             while (true)
             {
                 List<T> lines = ramainingNotExceptionsLines.Take(groupsOf).ToList();
@@ -585,7 +585,7 @@ namespace Signum.Engine.Processes
                         }
                     }
 
-                    executingProcess.ProgressChanged(i, totalCount);
+                    executingProcess.ProgressChanged(j++, totalCount);
                 }
             }
         }
