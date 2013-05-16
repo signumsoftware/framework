@@ -48,7 +48,16 @@ namespace Signum.Entities.DynamicQuery
             get { return this.parent.QueryName; }
         }
 
-        public abstract Expression BuildExpression(BuildExpressionContext context);
+        public Expression BuildExpression(BuildExpressionContext context)
+        {
+            Expression result;
+            if (context.Replacemens != null && context.Replacemens.TryGetValue(this, out result))
+                return result;
+
+            return BuildExpressionInternal(context); 
+        }
+
+        protected abstract Expression BuildExpressionInternal(BuildExpressionContext context);
 
         public abstract PropertyRoute GetPropertyRoute();
         public abstract Implementations? GetImplementations();

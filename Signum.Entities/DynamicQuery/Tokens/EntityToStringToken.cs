@@ -38,7 +38,7 @@ namespace Signum.Entities.DynamicQuery
         static MethodInfo miToString = ReflectionTools.GetMethodInfo((object o) => o.ToString());
         static PropertyInfo miToStringProperty = ReflectionTools.GetPropertyInfo((IdentifiableEntity o) => o.ToStringProperty);
 
-        public override Expression BuildExpression(BuildExpressionContext context)
+        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
             var baseExpression = Parent.BuildExpression(context);
 

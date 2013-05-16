@@ -55,7 +55,7 @@ namespace Signum.Entities.DynamicQuery
 
         static PropertyInfo miDate = ReflectionTools.GetPropertyInfo((DateTime d) => d.Date);
 
-        public override Expression BuildExpression(BuildExpressionContext context)
+        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
             var exp = Parent.BuildExpression(context);
             

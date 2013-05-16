@@ -120,12 +120,8 @@ namespace Signum.Entities.DynamicQuery
             return new CollectionElementToken(Parent.Clone(), CollectionElementType);
         }
 
-        public override Expression BuildExpression(BuildExpressionContext context)
+        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
-            Expression result;
-            if (context.Replacemens != null && context.Replacemens.TryGetValue(this, out result))
-                return result;
-
             throw new InvalidOperationException("CollectionElementToken should have a replacement at this stage");
         }
 
