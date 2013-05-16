@@ -389,25 +389,24 @@ namespace Signum.Engine.Linq
         {
             if (e1.Type.IsLite() || e2.Type.IsLite())
             {
-                e1 = ConstantToLite(e1) ?? e1;
-                e2 = ConstantToLite(e2) ?? e2;
-
-                e1 = e1.IsNull() ? e1 : AssertLite(e1).Reference;
-                e2 = e2.IsNull() ? e2 : AssertLite(e2).Reference;
-
-                return PolymorphicEqual(e1, e2); //Conditional and Coalesce could be inside
+                return PolymorphicEqual(GetEntity(e1), GetEntity(e2)); //Conditional and Coalesce could be inside
             }
 
             return null;
         }
 
-        private static LiteReferenceExpression AssertLite(Expression exp)
+        private static Expression GetEntity(Expression exp)
         {
+            exp = ConstantToLite(exp) ?? exp;
+
+            if (exp.IsNull())
+                return Expression.Constant(null, exp.Type.CleanType()); 
+
             var liteExp = exp as LiteReferenceExpression;
             if (liteExp == null)
                 throw new InvalidCastException("Impossible to convert expression to Lite: {0}".Formato(exp.NiceToString()));
 
-            return liteExp; 
+            return liteExp.Reference; 
         }
 
         public static Expression EntityEquals(Expression e1, Expression e2)
