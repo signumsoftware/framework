@@ -181,7 +181,7 @@ namespace Signum.Windows.UIAutomation
 
         public AutomationElement SearchButton
         {
-            get { return Element.ChildById("btFind"); }
+            get { return Element.ChildById("btSearch"); }
         }
 
         public List<AutomationElement> HeaderItems
