@@ -36,7 +36,6 @@ namespace Signum.Entities
         }
 
         [HiddenProperty]
-        [Description("Id")]
         public int? IdOrNull
         {
             get { return id; }
@@ -108,8 +107,14 @@ namespace Signum.Entities
     public interface IIdentifiable : INotifyPropertyChanged, IDataErrorInfo, IRootEntity
     {
         int Id { get; }
+
+        [HiddenProperty]
         int? IdOrNull { get; }
+
+        [HiddenProperty]
         bool IsNew { get; }
+
+        [HiddenProperty]
         string ToStringProperty { get; }
     }
 

@@ -327,7 +327,6 @@ namespace Signum.Engine.DynamicQuery
 
             var parameter = Expression.Parameter(typeof(object));
 
-
             var newReplacements = query.Context.Replacemens.Keys.And(cet).Select((a, i) => new
             {
                 Token = a,
@@ -381,7 +380,14 @@ namespace Signum.Engine.DynamicQuery
             if (str == null)
                 throw new ApplicationException(str);
 
-            Expression body = filters.Select(f => f.GetCondition(context)).AggregateAnd();
+            FilterBuildExpressionContext filterContext = new FilterBuildExpressionContext(context);
+
+            foreach (var f in filters)
+            {
+                f.GenerateCondition(filterContext);
+            }
+
+            Expression body = filterContext.Filters.Select(f => f.ToExpression(filterContext)).AggregateAnd();
 
             return Expression.Lambda<Func<object, bool>>(body, context.Parameter);
         }

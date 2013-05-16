@@ -444,6 +444,11 @@ namespace Signum.Utilities.Reflection
 
         public static bool TryParse(string value, Type type, out object result)
         {
+            return TryParse(value, type, CultureInfo.CurrentCulture, out result);
+        }
+
+        public static bool TryParse(string value, Type type, CultureInfo ci, out object result)
+        {
             if (type == typeof(string))
             {
                 result = value;
@@ -495,7 +500,7 @@ namespace Signum.Utilities.Reflection
             else if (utype == typeof(SByte))
             {
                 SByte _result;
-                if (SByte.TryParse(value, out _result))
+                if (SByte.TryParse(value, NumberStyles.Integer, ci, out _result))
                 {
                     result = _result;
                     return true;
@@ -505,7 +510,7 @@ namespace Signum.Utilities.Reflection
             else if (utype == typeof(byte))
             {
                 byte _result;
-                if (byte.TryParse(value, out _result))
+                if (byte.TryParse(value, NumberStyles.Integer, ci, out _result))
                 {
                     result = _result;
                     return true;
@@ -515,7 +520,7 @@ namespace Signum.Utilities.Reflection
             else if (utype == typeof(Int16))
             {
                 Int16 _result;
-                if (Int16.TryParse(value, out _result))
+                if (Int16.TryParse(value, NumberStyles.Integer, ci, out _result))
                 {
                     result = _result;
                     return true;
@@ -525,7 +530,7 @@ namespace Signum.Utilities.Reflection
             else if (utype == typeof(UInt16))
             {
                 UInt16 _result;
-                if (UInt16.TryParse(value, out _result))
+                if (UInt16.TryParse(value, NumberStyles.Integer, ci, out _result))
                 {
                     result = _result;
                     return true;
@@ -535,7 +540,7 @@ namespace Signum.Utilities.Reflection
             else if (utype == typeof(Int32))
             {
                 Int32 _result;
-                if (Int32.TryParse(value, out _result))
+                if (Int32.TryParse(value, NumberStyles.Integer, ci, out _result))
                 {
                     result = _result;
                     return true;
@@ -545,7 +550,7 @@ namespace Signum.Utilities.Reflection
             else if (utype == typeof(UInt32))
             {
                 UInt32 _result;
-                if (UInt32.TryParse(value, out _result))
+                if (UInt32.TryParse(value, NumberStyles.Integer, ci, out _result))
                 {
                     result = _result;
                     return true;
@@ -555,7 +560,7 @@ namespace Signum.Utilities.Reflection
             else if (utype == typeof(Int64))
             {
                 Int64 _result;
-                if (Int64.TryParse(value, out _result))
+                if (Int64.TryParse(value, NumberStyles.Integer, ci, out _result))
                 {
                     result = _result;
                     return true;
@@ -565,7 +570,7 @@ namespace Signum.Utilities.Reflection
             else if (utype == typeof(UInt64))
             {
                 UInt64 _result;
-                if (UInt64.TryParse(value, out _result))
+                if (UInt64.TryParse(value, NumberStyles.Integer, ci, out _result))
                 {
                     result = _result;
                     return true;
@@ -575,7 +580,7 @@ namespace Signum.Utilities.Reflection
             else if (utype == typeof(float))
             {
                 float _result;
-                if (float.TryParse(value, out _result))
+                if (float.TryParse(value, NumberStyles.Number, ci, out _result))
                 {
                     result = _result;
                     return true;
@@ -585,7 +590,7 @@ namespace Signum.Utilities.Reflection
             else if (utype == typeof(double))
             {
                 double _result;
-                if (double.TryParse(value, out _result))
+                if (double.TryParse(value, NumberStyles.Number, ci, out _result))
                 {
                     result = _result;
                     return true;
@@ -595,7 +600,7 @@ namespace Signum.Utilities.Reflection
             else if (utype == typeof(decimal))
             {
                 decimal _result;
-                if (decimal.TryParse(value, out _result))
+                if (decimal.TryParse(value, NumberStyles.Number, ci, out _result))
                 {
                     result = _result;
                     return true;
@@ -605,7 +610,7 @@ namespace Signum.Utilities.Reflection
             else if (utype == typeof(DateTime))
             {
                 DateTime _result;
-                if (DateTime.TryParse(value, out _result))
+                if (DateTime.TryParse(value, ci, DateTimeStyles.None, out _result))
                 {
                     result = _result;
                     return true;
@@ -634,7 +639,7 @@ namespace Signum.Utilities.Reflection
                 {
                     try
                     {
-                        result = converter.ConvertFromString(value);
+                        result = converter.ConvertFromString(null, ci, value);
                         return true;
                     }
                     catch (Exception)

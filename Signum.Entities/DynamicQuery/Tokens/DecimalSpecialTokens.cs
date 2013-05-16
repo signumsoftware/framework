@@ -56,7 +56,7 @@ namespace Signum.Entities.DynamicQuery
         static MethodInfo miFloorDouble = ReflectionTools.GetMethodInfo(() => Math.Floor(0.0));
         static MethodInfo miFloorDecimal= ReflectionTools.GetMethodInfo(() => Math.Floor(0.0m));
 
-        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
+        public override Expression BuildExpression(BuildExpressionContext context)
         {
             var exp = Parent.BuildExpression(context);
 
@@ -133,7 +133,7 @@ namespace Signum.Entities.DynamicQuery
         static MethodInfo miFloorDouble = ReflectionTools.GetMethodInfo(() => Math.Floor(0.0));
         static MethodInfo miFloorDecimal = ReflectionTools.GetMethodInfo(() => Math.Floor(0.0m));
 
-        protected override Expression BuildExpressionInternal(BuildExpressionContext context)
+        public override Expression BuildExpression(BuildExpressionContext context)
         {
             var exp = Parent.BuildExpression(context);
 

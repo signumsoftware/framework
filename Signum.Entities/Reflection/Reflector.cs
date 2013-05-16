@@ -50,7 +50,7 @@ namespace Signum.Entities.Reflection
 
         static bool DescriptionManager_ShouldLocalizeMemeber(MemberInfo arg)
         {
-            return !(arg is PropertyInfo && arg.HasAttribute<HiddenPropertyAttribute>());
+            return !arg.HasAttribute<HiddenPropertyAttribute>();
         }
 
         static ResetLazy<HashSet<Type>> EnumsInEntities = new ResetLazy<HashSet<Type>>(() =>
@@ -58,7 +58,10 @@ namespace Signum.Entities.Reflection
             return (from a in AppDomain.CurrentDomain.GetAssemblies().Where(a => a.HasAttribute<DefaultAssemblyCultureAttribute>())
                     from t in a.GetTypes()
                     where typeof(IIdentifiable).IsAssignableFrom(t) || typeof(ModifiableEntity).IsAssignableFrom(t)
+                    let da = t.SingleAttributeInherit<DescriptionOptionsAttribute>()
+                    where da == null || da.Options.IsSet(DescriptionOptions.Members)
                     from p in t.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                    where DescriptionManager.OnShouldLocalizeMember(p)
                     let et = p.PropertyType.UnNullify()
                     where et.IsEnum && et.Assembly.HasAttribute<DefaultAssemblyCultureAttribute>()
                     select et).ToHashSet();

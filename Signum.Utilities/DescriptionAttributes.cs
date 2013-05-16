@@ -278,7 +278,7 @@ namespace Signum.Utilities
         }
 
 
-        internal static bool OnShouldLocalizeMember(MemberInfo m)
+        public static bool OnShouldLocalizeMember(MemberInfo m)
         {
             if (ShouldLocalizeMemeber == null)
                 return true;
@@ -328,11 +328,11 @@ namespace Signum.Utilities
         {
             var doa = type.SingleAttributeInherit<DescriptionOptionsAttribute>();
             if (doa != null)
-                return doa.Options;
+                return type.IsGenericTypeDefinition ? doa.Options  & DescriptionOptions.Members : doa.Options;
 
             DescriptionOptions? def = DescriptionManager.OnDefaultDescriptionOptions(type);
             if (def != null)
-                return def.Value;
+                return type.IsGenericTypeDefinition ? def.Value  & DescriptionOptions.Members : def.Value;
 
             return DescriptionOptions.None;
         }
@@ -453,7 +453,7 @@ namespace Signum.Utilities
                 );
         }
 
-        const BindingFlags bf = BindingFlags.Public | BindingFlags.Instance;
+        const BindingFlags bf = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
 
         static IEnumerable<MemberInfo> GetMembers(Type type)
         {
