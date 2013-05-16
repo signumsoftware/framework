@@ -387,7 +387,7 @@ namespace Signum.Engine.Linq
 
         public static Expression LiteEquals(Expression e1, Expression e2)
         {
-            if (e1 is LiteReferenceExpression || e2 is LiteReferenceExpression)
+            if (e1.Type.IsLite() || e2.Type.IsLite())
             {
                 e1 = ConstantToLite(e1) ?? e1;
                 e2 = ConstantToLite(e2) ?? e2;
@@ -405,7 +405,7 @@ namespace Signum.Engine.Linq
         {
             var liteExp = exp as LiteReferenceExpression;
             if (liteExp == null)
-                throw new InvalidCastException("Impossible to convert a {0} to Lite".Formato(exp.Type.TypeName()));
+                throw new InvalidCastException("Impossible to convert expression to Lite: {0}".Formato(exp.NiceToString()));
 
             return liteExp; 
         }
