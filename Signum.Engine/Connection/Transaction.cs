@@ -399,16 +399,18 @@ namespace Signum.Engine
 
         class TestTransaction : RealTransaction 
         {
+            bool oldTestTransaction;
             public TestTransaction(ICoreTransaction parent, IsolationLevel? isolation)
                 : base(parent, isolation)
             {
+                oldTestTransaction = inTestTransaction.Value;
                 inTestTransaction.Value = true;
             }
 
     
             public override void Finish()
             {
-                inTestTransaction.Value = false;
+                inTestTransaction.Value = oldTestTransaction;
 
                 base.Finish();
             }
