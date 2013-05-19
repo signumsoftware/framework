@@ -266,6 +266,10 @@ namespace Signum.Engine.Linq
                 throw new InvalidOperationException("No ProjectionExpressions expected at this stage"); 
             }
 
+            protected override MixinEntityExpression VisitMixinEntity(MixinEntityExpression me)
+            {
+                throw new InvalidOperationException("Impossible to retrieve MixinEntity {0} without their main entity".Formato(me.Type.Name)); 
+            }
 
             protected override Expression VisitEntity(EntityExpression fieldInit)
             {
@@ -276,7 +280,7 @@ namespace Signum.Engine.Linq
 
                 ParameterExpression e = Expression.Parameter(fieldInit.Type, fieldInit.Type.Name.ToLower().Substring(0, 1));
 
-                var block = Expression.Block(
+                var bindings = 
                     fieldInit.Bindings
                     .Where(a => !ReflectionTools.FieldEquals(EntityExpression.IdField, a.FieldInfo))
                     .Select(b =>
@@ -287,13 +291,43 @@ namespace Signum.Engine.Linq
                                 VisitMListChildProjection((ChildProjectionExpression)b.Binding, field) :
                                 Convert(Visit(b.Binding), b.FieldInfo.FieldType);
 
-                            return Expression.Assign(field, value);
-                        }
-                    ));
+                            return (Expression)Expression.Assign(field, value);
+                        }).ToList();
 
-                LambdaExpression lambda = Expression.Lambda(typeof(Action<>).MakeGenericType(fieldInit.Type), block, e);
+                if (fieldInit.Mixins != null)
+                {
+                    var blocks = fieldInit.Mixins.Select(m => AssignMixin(e, m)).ToList();
+
+                    bindings.AddRange(blocks);
+                }
+
+                LambdaExpression lambda = Expression.Lambda(typeof(Action<>).MakeGenericType(fieldInit.Type), Expression.Block(bindings), e);
 
                 return Expression.Call(retriever, miCached.MakeGenericMethod(fieldInit.Type), id, lambda);
+            }
+
+            BlockExpression AssignMixin(ParameterExpression e, MixinEntityExpression m)
+            {
+                var mixParam = Expression.Parameter(m.Type);
+
+                var mixAssign = Expression.Assign(mixParam, Expression.Call(e, MixinDeclarations.miMixin.MakeGenericMethod(m.Type)));
+
+                var mixBindings = m.Bindings.Select(b =>
+                {
+                    var field = Expression.Field(mixParam, b.FieldInfo);
+
+                    var value = b.Binding is ChildProjectionExpression ?
+                        VisitMListChildProjection((ChildProjectionExpression)b.Binding, field) :
+                        Convert(Visit(b.Binding), b.FieldInfo.FieldType);
+
+                    return Expression.Assign(field, value);
+                }).ToList();
+
+                mixBindings.Insert(0, mixAssign);
+
+                mixBindings.Add(Expression.Assign(Expression.Property(mixParam, piModified), peModifiableState));
+
+                return Expression.Block(new[] { mixParam }, mixBindings);
             }
 
             private Expression Convert(Expression expression, Type type)

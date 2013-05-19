@@ -72,7 +72,7 @@ namespace Signum.Engine.Linq
         {
             if (previousTypes.Contains(ee.Type) || IsCached(ee.Type) || ee.AvoidExpandOnRetrieving)
             {
-                ee = new EntityExpression(ee.Type, ee.ExternalId, null, null, ee.AvoidExpandOnRetrieving);
+                ee = new EntityExpression(ee.Type, ee.ExternalId, null, null, null, ee.AvoidExpandOnRetrieving);
             }
             else
                 ee = binder.Completed(ee);
@@ -80,10 +80,11 @@ namespace Signum.Engine.Linq
             previousTypes = previousTypes.Push(ee.Type);
 
             var bindings = ee.Bindings.NewIfChange(VisitFieldBinding);
+            var mixins = ee.Mixins.NewIfChange(VisitMixinEntity);
 
             var id = Visit(ee.ExternalId);
 
-            var result = new EntityExpression(ee.Type, id, ee.TableAlias, bindings, ee.AvoidExpandOnRetrieving);
+            var result = new EntityExpression(ee.Type, id, ee.TableAlias, bindings, mixins, ee.AvoidExpandOnRetrieving);
 
             previousTypes = previousTypes.Pop();
 

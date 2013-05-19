@@ -112,6 +112,8 @@ namespace Signum.Engine.Linq
                     return CompareEntityInit((EntityExpression)a, (EntityExpression)b);
                 case DbExpressionType.EmbeddedInit:
                     return CompareEmbeddedFieldInit((EmbeddedEntityExpression)a, (EmbeddedEntityExpression)b);
+                case DbExpressionType.MixinInit:
+                    return CompareMixinFieldInit((MixinEntityExpression)a, (MixinEntityExpression)b);
                 case DbExpressionType.ImplementedBy:
                     return CompareImplementedBy((ImplementedByExpression)a, (ImplementedByExpression)b);
                 case DbExpressionType.ImplementedByAll:
@@ -412,7 +414,8 @@ namespace Signum.Engine.Linq
             return a.Table == b.Table
                 && CompareAlias(a.TableAlias, b.TableAlias)
                 && Compare(a.ExternalId, b.ExternalId)
-                && CompareList(a.Bindings, b.Bindings, CompareFieldBinding);
+                && CompareList(a.Bindings, b.Bindings, CompareFieldBinding)
+                && CompareList(a.Mixins, b.Mixins, CompareMixinFieldInit);
         }
 
         protected virtual bool CompareEmbeddedFieldInit(EmbeddedEntityExpression a, EmbeddedEntityExpression b)
@@ -420,6 +423,12 @@ namespace Signum.Engine.Linq
             return Compare(a.HasValue, b.HasValue)
                 && a.FieldEmbedded == b.FieldEmbedded
                 && CompareList(a.Bindings, b.Bindings, CompareFieldBinding); 
+        }
+
+        protected virtual bool CompareMixinFieldInit(MixinEntityExpression a, MixinEntityExpression b)
+        {
+            return a.FieldMixin == b.FieldMixin
+                && CompareList(a.Bindings, b.Bindings, CompareFieldBinding);
         }
 
         protected virtual bool CompareFieldBinding(FieldBinding a, FieldBinding b)

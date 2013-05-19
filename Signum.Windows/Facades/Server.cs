@@ -31,6 +31,8 @@ namespace Signum.Windows
             {
                 ServerTypes = current.ServerTypes();
                 NameToType = ServerTypes.ToDictionary(a => a.Value.CleanName, a => a.Key);
+
+                MixinDeclarations.Import(current.FindAllMixins()); 
             };
         }
 

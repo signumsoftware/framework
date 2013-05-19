@@ -60,6 +60,15 @@ namespace Signum.Entities.Reflection
 
                     yield return (Modifiable)field;
                 }
+
+                IdentifiableEntity ident = obj as IdentifiableEntity;
+                if (ident != null)
+                {
+                    foreach (var mixin in ident.AllMixin)
+                    {
+                        yield return mixin;
+                    }
+                }
             }
         }
 
@@ -90,6 +99,15 @@ namespace Signum.Entities.Reflection
                         continue;
 
                     yield return (Modifiable)field;
+                }
+
+                IdentifiableEntity ident = obj as IdentifiableEntity;
+                if (ident != null)
+                {
+                    foreach (var mixin in ident.AllMixin)
+                    {
+                        yield return mixin;
+                    }
                 }
             }
         }

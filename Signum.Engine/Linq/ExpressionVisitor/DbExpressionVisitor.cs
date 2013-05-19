@@ -137,6 +137,8 @@ namespace Signum.Engine.Linq
                     return this.VisitEntity((EntityExpression)exp);
                 case (ExpressionType)DbExpressionType.EmbeddedInit:
                     return this.VisitEmbeddedEntity((EmbeddedEntityExpression)exp);
+                case (ExpressionType)DbExpressionType.MixinInit:
+                    return this.VisitMixinEntity((MixinEntityExpression)exp);
                 case (ExpressionType)DbExpressionType.ImplementedBy:
                     return this.VisitImplementedBy((ImplementedByExpression)exp);
                 case (ExpressionType)DbExpressionType.ImplementedByAll:
@@ -348,11 +350,12 @@ namespace Signum.Engine.Linq
         protected virtual Expression VisitEntity(EntityExpression ee)
         {
             var bindings = ee.Bindings.NewIfChange(VisitFieldBinding);
+            var mixins = ee.Mixins.NewIfChange(VisitMixinEntity);
 
             var id = Visit(ee.ExternalId);
 
-            if (ee.Bindings != bindings || ee.ExternalId != id)
-                return new EntityExpression(ee.Type, id, ee.TableAlias, bindings, ee.AvoidExpandOnRetrieving);
+            if (ee.Bindings != bindings || ee.ExternalId != id || ee.Mixins != mixins)
+                return new EntityExpression(ee.Type, id, ee.TableAlias, bindings, mixins, ee.AvoidExpandOnRetrieving);
 
             return ee;
         }
@@ -367,6 +370,17 @@ namespace Signum.Engine.Linq
                 return new EmbeddedEntityExpression(eee.Type, hasValue, bindings, eee.FieldEmbedded);
             }
             return eee;
+        }
+
+        protected virtual MixinEntityExpression VisitMixinEntity(MixinEntityExpression me)
+        {
+            var bindings = me.Bindings.NewIfChange(VisitFieldBinding);
+
+            if (me.Bindings != bindings)
+            {
+                return new MixinEntityExpression(me.Type, bindings, me.FieldMixin);
+            }
+            return me;
         }
 
         protected virtual FieldBinding VisitFieldBinding(FieldBinding fb)

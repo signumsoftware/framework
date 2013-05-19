@@ -178,6 +178,12 @@ namespace Signum.Engine.Maps
                     {
                         item.Field.CreateParameter(trios, assigments, Expression.Field(cast, item.FieldInfo), paramForbidden, paramPostfix);
                     }
+                    
+                    if(table.Mixins != null)
+                        foreach (var item in table.Mixins.Values)
+                        {
+                            item.CreateParameter(trios, assigments, cast, paramForbidden, paramPostfix);
+                        }
 
                     result.SqlInsertPattern = (post) =>
                         "INSERT {0} ({1})\r\n VALUES ({2})".Formato(table.Name,
@@ -209,7 +215,7 @@ namespace Signum.Engine.Maps
                 return insertIdentityCache.GetOrAdd(numElements, (int num) => num == 1 ? GetInsertIdentity() : GetInsertMultiIdentity(num));
             }
 
-            private Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> GetInsertIdentity()
+            Action<List<IdentifiableEntity>, DirectedGraph<IdentifiableEntity>> GetInsertIdentity()
             {
                 string sqlSingle = SqlInsertPattern("", false) + ";SELECT CONVERT(Int,@@Identity) AS [newID]";
 
@@ -297,6 +303,13 @@ namespace Signum.Engine.Maps
                     {
                         item.Field.CreateParameter(trios, assigments, Expression.Field(cast, item.FieldInfo), paramForbidden, paramPostfix);
                     }
+
+
+                    if (table.Mixins != null)
+                        foreach (var item in table.Mixins.Values)
+                        {
+                            item.CreateParameter(trios, assigments, cast, paramForbidden, paramPostfix);
+                        }
 
                     result.SqlInsertPattern = (post, output) =>
                         "INSERT {0} ({1})\r\n{2} VALUES ({3})".Formato(table.Name,
@@ -1110,13 +1123,11 @@ namespace Signum.Engine.Maps
 
     public partial class FieldMixin
     {
-        static readonly MethodInfo miMixin = ReflectionTools.GetMethodInfo((IdentifiableEntity i) => i.Mixin<CorruptMixin>()).GetGenericMethodDefinition();
-
         protected internal override void CreateParameter(List<Table.Trio> trios, List<Expression> assigments, Expression value, Expression forbidden, Expression postfix)
         {
             ParameterExpression mixin = Expression.Parameter(this.FieldType, "mixin");
 
-            assigments.Add(Expression.Assign(mixin, Expression.Call(miMixin.MakeGenericMethod(this.FieldType))));
+            assigments.Add(Expression.Assign(mixin, Expression.Call(value, MixinDeclarations.miMixin.MakeGenericMethod(this.FieldType))));
             foreach (var ef in Fields.Values)
             {
                 ef.Field.CreateParameter(trios, assigments,

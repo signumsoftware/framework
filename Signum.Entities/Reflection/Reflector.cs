@@ -249,7 +249,6 @@ namespace Signum.Entities.Reflection
             FieldInfo fi = null;
             for (Type tempType = type; tempType != null && fi == null; tempType = tempType.BaseType)
             {
-
                 fi = (tempType.GetField(pi.Name, privateFlags) ??
                       tempType.GetField("m" + pi.Name, privateFlags) ??
                       tempType.GetField("_" + pi, privateFlags));

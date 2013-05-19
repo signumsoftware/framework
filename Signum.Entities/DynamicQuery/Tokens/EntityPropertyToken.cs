@@ -15,19 +15,24 @@ namespace Signum.Entities.DynamicQuery
     public class EntityPropertyToken : QueryToken
     {
         public PropertyInfo PropertyInfo { get; private set; }
-       
+
+        public PropertyRoute PropertyRoute { get; private set; }
+
+        static readonly PropertyInfo piId = ReflectionTools.GetPropertyInfo((IdentifiableEntity e) => e.Id); 
+
         public static QueryToken IdProperty(QueryToken parent)
         {
-            return new EntityPropertyToken(parent, ReflectionTools.GetPropertyInfo((IdentifiableEntity e) => e.Id));
+            return new EntityPropertyToken(parent, piId, PropertyRoute.Root(parent.Type.CleanType()).Add(piId));
         }
 
-        internal EntityPropertyToken(QueryToken parent, PropertyInfo pi)
+        internal EntityPropertyToken(QueryToken parent, PropertyInfo pi, PropertyRoute pr)
             : base(parent)
         {
             if (pi == null)
                 throw new ArgumentNullException("pi");
 
             this.PropertyInfo = pi;
+            this.PropertyRoute = pr;
         }
 
         public override Type Type
@@ -52,16 +57,21 @@ namespace Signum.Entities.DynamicQuery
             if (PropertyInfo.Is((IdentifiableEntity ident) => ident.Id) ||
                 PropertyInfo.Is((IdentifiableEntity ident) => ident.ToStringProperty))
             {
-                baseExpression = baseExpression.ExtractEntity(true);
+                var entityExpression = baseExpression.ExtractEntity(true);
 
-                return Expression.Property(baseExpression, PropertyInfo.Name).Nullify(); // Late binding over Lite or Identifiable
+                return Expression.Property(entityExpression, PropertyInfo.Name).Nullify(); // Late binding over Lite or Identifiable
             }
+            else
+            {
+                var entityExpression = baseExpression.ExtractEntity(false);
 
-            baseExpression = baseExpression.ExtractEntity(false);
+                if (PropertyRoute != null && PropertyRoute.Parent != null && PropertyRoute.Parent.PropertyRouteType == PropertyRouteType.Mixin)
+                    entityExpression = Expression.Call(entityExpression, MixinDeclarations.miMixin.MakeGenericMethod(PropertyRoute.Parent.Type));
 
-            Expression result = Expression.Property(baseExpression, PropertyInfo);
+                Expression result = Expression.Property(entityExpression, PropertyInfo);
 
-            return result.BuildLite().Nullify();
+                return result.BuildLite().Nullify();
+            }
         }
 
         protected override List<QueryToken> SubTokensOverride()
@@ -115,15 +125,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override PropertyRoute GetPropertyRoute()
         {
-            Type type = Lite.Extract(Parent.Type); //Because Add doesn't work with lites
-            if (type != null)
-                return PropertyRoute.Root(type).Add(PropertyInfo);
-
-            PropertyRoute pr = Parent.GetPropertyRoute();
-            if (pr == null)
-                return null;
-
-            return pr.Add(PropertyInfo);
+            return PropertyRoute;
         }
 
         public override string NiceName()
@@ -133,7 +135,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override QueryToken Clone()
         {
-            return new EntityPropertyToken(Parent.Clone(), PropertyInfo);
+            return new EntityPropertyToken(Parent.Clone(), PropertyInfo, PropertyRoute);
         }
     }
 }

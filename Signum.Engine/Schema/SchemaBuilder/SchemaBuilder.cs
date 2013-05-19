@@ -180,7 +180,7 @@ namespace Signum.Engine.Maps
         private Dictionary<Type, FieldMixin> GenerateMixins(PropertyRoute propertyRoute, Table table, NameSequence nameSequence)
         {
             Dictionary<Type, FieldMixin> mixins = null;
-            foreach (var t in MixinsDeclarations.GetMixinDeclarations(table.Type))
+            foreach (var t in MixinDeclarations.GetMixinDeclarations(table.Type))
             {
                 if (mixins == null)
                     mixins = new Dictionary<Type, FieldMixin>();

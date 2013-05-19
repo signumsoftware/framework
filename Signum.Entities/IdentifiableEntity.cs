@@ -112,7 +112,7 @@ namespace Signum.Entities
 
         public IdentifiableEntity()
         {
-            mixin = MixinsDeclarations.CreateMixins(this);
+            mixin = MixinDeclarations.CreateMixins(this);
         }
 
         [Ignore]
@@ -139,13 +139,13 @@ namespace Signum.Entities
                 var current = mixin;
                 while (current != null)
                 {
-                    if (current.GetType().Name == "mixinName")
+                    if (current.GetType().Name == mixinName)
                         return current;
                     current = current.Next;
                 }
 
                 throw new InvalidOperationException("Mixin {0} not declared for {1} in MixinDeclarations"
-                    .Formato(mixin, GetType().TypeName()));
+                    .Formato(mixinName, GetType().TypeName()));
             }
         }
 

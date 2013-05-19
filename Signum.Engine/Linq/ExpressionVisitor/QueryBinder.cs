@@ -1013,6 +1013,21 @@ namespace Signum.Engine.Linq
                 }
             }
 
+            if (m.Method.Name == "Mixin" && source.NodeType == (ExpressionType)DbExpressionType.Entity && m.Method.GetParameters().Length == 0)
+            {
+                EntityExpression ee = (EntityExpression)source;
+              
+                var type = m.Method.GetGenericArguments().SingleEx();
+
+                Expression result = Completed(ee)
+                    .Mixins
+                    .EmptyIfNull()
+                    .Where(mx => mx.Type == type)
+                    .SingleOrDefaultEx(() => "{0} not found in mixins of {1}".Formato(type.Name, source.Type.Name));
+
+                return result;
+            }
+
             return m;
         }
 
@@ -1138,6 +1153,17 @@ namespace Signum.Engine.Linq
                     Expression result = eee.GetBinding(fi);
                     return result;
                 }
+                case (ExpressionType)DbExpressionType.MixinInit:
+                {
+                    MixinEntityExpression mee = (MixinEntityExpression)source;
+                    FieldInfo fi = m.Member as FieldInfo ?? Reflector.FindFieldInfo(mee.Type, (PropertyInfo)m.Member);
+
+                    if (fi == null)
+                        throw new InvalidOperationException("The member {0} of {1} is not accesible on queries".Formato(m.Member.Name, mee.Type.TypeName()));
+
+                    Expression result = mee.GetBinding(fi);
+                    return result;
+                }
                 case (ExpressionType)DbExpressionType.LiteReference:
                 {
                     LiteReferenceExpression liteRef = (LiteReferenceExpression)source;
@@ -1235,7 +1261,8 @@ namespace Signum.Engine.Linq
                 var implementations = groups.Select(g =>
                     new ImplementationColumn(g.Key,
                         new EntityExpression(g.Key,
-                            CombineWhens(g.Value.Select(w => new When(w.Condition, w.Fie.ExternalId)).ToList(), typeof(int?)), null, null, g.Value.Any(a => a.Fie.AvoidExpandOnRetrieving)))).ToReadOnly();
+                            CombineWhens(g.Value.Select(w => new When(w.Condition, w.Fie.ExternalId)).ToList(), typeof(int?)),
+                            null, null, null, g.Value.Any(a => a.Fie.AvoidExpandOnRetrieving)))).ToReadOnly();
 
                 if(implementations.Count == 1)
                     return implementations[0].Reference;
@@ -1245,8 +1272,6 @@ namespace Signum.Engine.Linq
 
             if(whens.All(e=>e.Value is EmbeddedEntityExpression))
             {
-                var lc = new LambdaComparer<FieldInfo, string>(fi=>fi.Name);
-
                 var groups = (from w in whens
                              from b in ((EmbeddedEntityExpression)w.Value).Bindings
                              group new When(w.Condition, b.Binding) by b.FieldInfo into g
@@ -1257,6 +1282,17 @@ namespace Signum.Engine.Linq
 
                 return new EmbeddedEntityExpression(returnType,
                     hasValue, 
+                    groups.Select(k => new FieldBinding(k.Key, CombineWhens(k.Value, k.Key.FieldType))), null);
+            }
+
+            if (whens.All(e => e.Value is MixinEntityExpression))
+            {
+                var groups = (from w in whens
+                              from b in ((MixinEntityExpression)w.Value).Bindings
+                              group new When(w.Condition, b.Binding) by b.FieldInfo into g
+                              select KVP.Create(g.Key, g.ToList())).ToDictionary();
+
+                return new MixinEntityExpression(returnType,
                     groups.Select(k => new FieldBinding(k.Key, CombineWhens(k.Value, k.Key.FieldType))), null);
             }
 
@@ -1411,7 +1447,7 @@ namespace Signum.Engine.Linq
                 }
                 else
                 {
-                    return new EntityExpression(uType, Expression.Constant(null, typeof(int?)), null, null, ee.AvoidExpandOnRetrieving);
+                    return new EntityExpression(uType, Expression.Constant(null, typeof(int?)), null, null, null, ee.AvoidExpandOnRetrieving);
                 }
             }
             if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedBy)
@@ -1422,7 +1458,7 @@ namespace Signum.Engine.Linq
 
                 if (fies.IsEmpty())
                 {
-                    return new EntityExpression(uType, Expression.Constant(null, typeof(int?)), null, null, avoidExpandOnRetrieving: true);
+                    return new EntityExpression(uType, Expression.Constant(null, typeof(int?)), null, null, null, avoidExpandOnRetrieving: true);
                 }
                 if (fies.Length == 1 && fies[0].Type == uType)
                     return fies[0];
@@ -1437,7 +1473,7 @@ namespace Signum.Engine.Linq
                     return new ImplementedByAllExpression(uType, iba.Id, iba.TypeId);
 
                 var conditionalId = Expression.Condition(SmartEqualizer.EqualNullable(iba.TypeId.TypeColumn, TypeConstant(uType)), iba.Id.Nullify(), NullId);
-                return new EntityExpression(uType, conditionalId, null, null, avoidExpandOnRetrieving: false);
+                return new EntityExpression(uType, conditionalId, null, null, null, avoidExpandOnRetrieving: false);
             }
 
             else if (operand.NodeType == (ExpressionType)DbExpressionType.LiteReference)
@@ -1597,6 +1633,7 @@ namespace Signum.Engine.Linq
         }
 
         static readonly MethodInfo miSetReadonly = ReflectionTools.GetMethodInfo(() => Administrator.SetReadonly(null, (IdentifiableEntity a) => a.Id, 1)).GetGenericMethodDefinition();
+        static readonly MethodInfo miSetMixin = ReflectionTools.GetMethodInfo(() => ((IdentifiableEntity)null).SetMixin((CorruptMixin m) => m.Corrupt, true)).GetGenericMethodDefinition();
 
         public void FillColumnAssigments(List<ColumnAssignment> assignments, Expression param, Expression body)
         {
@@ -1604,20 +1641,34 @@ namespace Signum.Engine.Linq
             {
                 var mce = (MethodCallExpression)body;
 
-                if (!mce.Method.IsInstantiationOf(miSetReadonly))
+                if (mce.Method.IsInstantiationOf(miSetReadonly))
+                {
+                    var prev = mce.Arguments[0];
+                    if (prev.NodeType != ExpressionType.New)
+                        FillColumnAssigments(assignments, param, prev);
+
+                    var pi = ReflectionTools.BasePropertyInfo(mce.Arguments[1].StripQuotes());
+
+                    Expression colExpression = Visit(Expression.MakeMemberAccess(param, Reflector.FindFieldInfo(body.Type, pi)));
+                    Expression cleaned = DbQueryProvider.Clean(mce.Arguments[2], true, null);
+                    Expression expression = Visit(cleaned);
+                    assignments.AddRange(Assign(colExpression, expression));
+                }
+                else if (mce.Method.IsInstantiationOf(miSetMixin))
+                {
+                    Type mixinType = mce.Method.GetGenericArguments()[1];
+
+                    var mi = ReflectionTools.BaseMemberInfo(mce.Arguments[1].StripQuotes());
+
+                    Expression mixin = Expression.Call(param, MixinDeclarations.miMixin.MakeGenericMethod(mixinType));
+
+                    Expression colExpression = Visit(Expression.MakeMemberAccess(mixin, mi));
+                    Expression cleaned = DbQueryProvider.Clean(mce.Arguments[2], true, null);
+                    Expression expression = Visit(cleaned);
+                    assignments.AddRange(Assign(colExpression, expression));
+                }
+                else
                     throw InvalidBody();
-
-                var prev = mce.Arguments[0];
-                if (prev.NodeType != ExpressionType.New)
-                    FillColumnAssigments(assignments, param, prev);
-
-                var pi = ReflectionTools.BasePropertyInfo(mce.Arguments[1].StripQuotes());
-
-                Expression colExpression = Visit(Expression.MakeMemberAccess(param, Reflector.FindFieldInfo(body.Type, pi)));
-                Expression cleaned = DbQueryProvider.Clean(mce.Arguments[2], true, null);
-                Expression expression = Visit(cleaned);
-                assignments.AddRange(Assign(colExpression, expression));
-
             }
             else if (body is MemberInitExpression)
             {
@@ -1632,7 +1683,7 @@ namespace Signum.Engine.Linq
 
         private Exception InvalidBody()
         {
-            throw new InvalidOperationException("The only allowed expressions on UnsafeUpdate are: object initializers, or calling Administrator.SetReadonly");
+            throw new InvalidOperationException("The only allowed expressions on UnsafeUpdate are: object initializers, calling method SetMixin, or or calling Administrator.SetReadonly");
         }
 
         private ColumnAssignment[] ColumnAssigments(Expression obj, MemberBinding m)
@@ -1861,9 +1912,11 @@ namespace Signum.Engine.Linq
             {
                 var table = entity.Table;
                 var newAlias = NextTableAlias(table.Name);
-                var bindings = table.Bindings(newAlias, this);
+                var id = table.GetIdExpression(newAlias);
+                var bindings = table.GenerateBindings(newAlias, this, id);
+                var mixins = table.GenerateMixins(newAlias, this, id);
 
-                var result = new EntityExpression(entity.Type, entity.ExternalId, newAlias, bindings, avoidExpandOnRetrieving: false); 
+                var result = new EntityExpression(entity.Type, entity.ExternalId, newAlias, bindings, mixins, avoidExpandOnRetrieving: false); 
 
                 requests.Add(new TableRequest
                 {

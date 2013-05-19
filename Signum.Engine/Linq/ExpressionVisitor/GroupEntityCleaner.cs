@@ -44,7 +44,7 @@ namespace Signum.Engine.Linq
         {
             Expression newID = Visit(fieldInit.ExternalId);
 
-            return new EntityExpression(fieldInit.Type, newID, null, null, fieldInit.AvoidExpandOnRetrieving); // remove bindings
+            return new EntityExpression(fieldInit.Type, newID, null, null, null, fieldInit.AvoidExpandOnRetrieving); // remove bindings
         }
 
         protected override Expression VisitImplementedBy(ImplementedByExpression reference)

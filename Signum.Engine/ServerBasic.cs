@@ -105,6 +105,12 @@ namespace Signum.Services
                 () => Schema.Current.FindAllImplementations(root));
         }
 
+        public virtual Dictionary<Type, HashSet<Type>> FindAllMixins()
+        {
+            return Return(MethodInfo.GetCurrentMethod(), null,
+             () => MixinDeclarations.Declarations);
+        }
+
         public virtual bool Exists(Type type, int id)
         {
             return Return(MethodInfo.GetCurrentMethod(),

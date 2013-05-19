@@ -60,6 +60,20 @@ namespace Signum.Entities.DynamicQuery
         protected abstract Expression BuildExpressionInternal(BuildExpressionContext context);
 
         public abstract PropertyRoute GetPropertyRoute();
+
+        internal PropertyRoute AddPropertyRoute(PropertyInfo pi)
+        {
+            Type type = Lite.Extract(Type); //Because Add doesn't work with lites
+            if (type != null)
+                return PropertyRoute.Root(type).Add(pi);
+
+            PropertyRoute pr = Parent.GetPropertyRoute();
+            if (pr == null)
+                return null;
+
+            return pr.Add(pi);
+        }
+
         public abstract Implementations? GetImplementations();
         public abstract string IsAllowed();
 
@@ -219,9 +233,19 @@ namespace Signum.Entities.DynamicQuery
 
         IEnumerable<QueryToken> EntityProperties(Type type)
         {
-            return Reflector.PublicInstancePropertiesInOrder(type)
-                  .Where(p => Reflector.QueryableProperty(type, p))
-                  .Select(p => (QueryToken)new EntityPropertyToken(this, p));
+            var result = from p in Reflector.PublicInstancePropertiesInOrder(type)
+                         where Reflector.QueryableProperty(type, p)
+                         select (QueryToken)new EntityPropertyToken(this, p, this.AddPropertyRoute(p));
+
+            if (!type.IsIdentifiableEntity())
+                return result;
+
+            var mixinProperties = from mt in MixinDeclarations.GetMixinDeclarations(type)
+                                  from p in Reflector.PublicInstancePropertiesInOrder(mt)
+                                  where Reflector.QueryableProperty(mt, p)
+                                  select (QueryToken)new EntityPropertyToken(this, p, PropertyRoute.Root(type).Add(mt).Add(p));
+
+            return result.Concat(mixinProperties);
         }
 
         IEnumerable<QueryToken> BagProperties(Type type)

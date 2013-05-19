@@ -20,21 +20,27 @@ namespace Signum.Entities
             this.next = next;
         }
 
+        [Ignore]
         readonly MixinEntity next;
+        [HiddenProperty]
         public MixinEntity Next
         {
             get { return next; }
         }
 
+        [Ignore]
         readonly IdentifiableEntity mainEntity;
+        [HiddenProperty]
         public IdentifiableEntity MainEntity
         {
             get { return mainEntity; }
         }
     }
 
-    public static class MixinsDeclarations
+    public static class MixinDeclarations
     {
+        internal static readonly MethodInfo miMixin = ReflectionTools.GetMethodInfo((IdentifiableEntity i) => i.Mixin<CorruptMixin>()).GetGenericMethodDefinition();
+
         public static Dictionary<Type, HashSet<Type>> Declarations = new Dictionary<Type, HashSet<Type>>();
 
         public static Dictionary<Type, Func<IdentifiableEntity, MixinEntity, MixinEntity>> Constructors =
@@ -60,7 +66,15 @@ namespace Signum.Entities
             AddConstructor(mixinEntity);
         }
 
-        private static void AddConstructor(Type mixinEntity)
+        public static void Import(Dictionary<Type, HashSet<Type>> declarations)
+        {
+            Declarations = declarations;
+
+            foreach (var t in declarations.SelectMany(d => d.Value).Distinct())
+                AddConstructor(t);
+        }
+
+        static void AddConstructor(Type mixinEntity)
         {
             Constructors.GetOrCreate(mixinEntity, () =>
             {
@@ -101,9 +115,9 @@ namespace Signum.Entities
                 });
         }
 
-        public static void AssertDefined(IdentifiableEntity mainEntity, Type mixinType)
+        public static void AssertDefined(Type mainEntity, Type mixinType)
         {
-            var hs = GetMixinDeclarations(mainEntity.GetType());
+            var hs = GetMixinDeclarations(mainEntity);
 
             if (!hs.Contains(mixinType))
                 throw new InvalidOperationException("Mixin {0} is not Registered for {1} in MixinsDeclarations"); 
