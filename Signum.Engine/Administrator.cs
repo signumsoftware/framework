@@ -112,7 +112,7 @@ namespace Signum.Engine
         {
             var pi = ReflectionTools.BasePropertyInfo(readonlyProperty);
 
-            Action<T, V> setter = ReadonlySetterCache<T>.Getter<V>(pi);
+            Action<T, V> setter = ReadonlySetterCache<T>.Setter<V>(pi);
 
             setter(ident, value);
 
@@ -121,11 +121,11 @@ namespace Signum.Engine
             return ident;
         }
 
-        class ReadonlySetterCache<T> where T : ModifiableEntity
+        static class ReadonlySetterCache<T> where T : ModifiableEntity
         {
             static ConcurrentDictionary<string, Delegate> cache = new ConcurrentDictionary<string, Delegate>();
 
-            internal static Action<T, V> Getter<V>(PropertyInfo pi)
+            internal static Action<T, V> Setter<V>(PropertyInfo pi)
             {
                 return (Action<T, V>)cache.GetOrAdd(pi.Name, s => ReflectionTools.CreateSetter<T, V>(Reflector.FindFieldInfo(typeof(T), pi)));
             }

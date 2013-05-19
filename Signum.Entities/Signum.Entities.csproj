@@ -104,6 +104,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FieldNotificationAttributes.cs" />
+    <Compile Include="MixinEntity.cs" />
     <Compile Include="ModelEntity.cs" />
     <Compile Include="DynamicQuery\Column.cs" />
     <Compile Include="DynamicQuery\Filter.cs" />

@@ -217,6 +217,32 @@ namespace Signum.Engine.Maps
         }
     }
 
+    public partial class FieldMixin
+    {
+        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id)
+        {
+            var bindings = (from kvp in Fields
+                            let fi = kvp.Value.FieldInfo
+                            select new FieldBinding(fi, kvp.Value.Field.GetExpression(tableAlias, binder, null))).ToReadOnly();
+
+            return new MixinEntityExpression(this.FieldType, bindings, this);
+        }
+
+        //internal EmbeddedEntityExpression FromMemberInitiExpression(MemberInitExpression mie, QueryBinder tools)
+        //{
+        //    var dic = mie.Bindings.OfType<MemberAssignment>().ToDictionary(a => (a.Member as FieldInfo ?? Reflector.FindFieldInfo(mie.Type, (PropertyInfo)a.Member)).Name, a => a.Expression);
+
+        //    var bindings = (from kvp in EmbeddedFields
+        //                    let fi = kvp.Value.FieldInfo
+        //                    select new FieldBinding(fi,
+        //                        !(fi.FieldType.IsByRef || fi.FieldType.IsNullable()) ? dic.GetOrThrow(fi.Name, "No value defined for non-nullable field {0}") :
+        //                        (dic.TryGetC(fi.Name) ?? tools.VisitConstant(Expression.Constant(null, fi.FieldType), fi.FieldType))
+        //                    )).ToReadOnly();
+
+        //    return new EmbeddedEntityExpression(this.FieldType, Expression.Constant(true), bindings, this);
+        //}
+    }
+
     public partial class FieldImplementedBy
     {
         internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id)

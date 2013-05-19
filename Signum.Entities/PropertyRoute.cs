@@ -90,7 +90,6 @@ namespace Signum.Entities
 
             this.Parent = parent;
 
-
             if (parent.Type.IsIIdentifiable() && parent.PropertyRouteType != PropertyRouteType.Root)
                 throw new ArgumentException("Parent can not be a non-root Identifiable");
 

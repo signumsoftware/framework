@@ -59,7 +59,10 @@ namespace Signum.Engine.Maps
         public string CleanTypeName { get; set; }
 
         public Dictionary<string, EntityField> Fields { get; set; }
+        public Dictionary<Type, FieldMixin> Mixins { get; set; }
+        
         public Dictionary<string, IColumn> Columns { get; set; }
+        
 
         public List<Index> MultiColumnIndexes { get; set; }
 
@@ -75,7 +78,12 @@ namespace Signum.Engine.Maps
 
         public void GenerateColumns()
         {
-            Columns = Fields.Values.SelectMany(c => c.Field.Columns()).ToDictionary(c => c.Name);
+            var columns = Fields.Values.SelectMany(c => c.Field.Columns()).ToDictionary(c => c.Name);
+
+            if (Mixins != null)
+                columns.AddRange(Mixins.Values.SelectMany(m => m.Fields.Values).SelectMany(f => f.Field.Columns()).ToDictionary(c => c.Name));
+
+            Columns = columns;
 
             inserterDisableIdentity = new ResetLazy<InsertCacheDisableIdentity>(() => InsertCacheDisableIdentity.InitializeInsertDisableIdentity(this));
             inserterIdentity = new ResetLazy<InsertCacheIdentity>(() => InsertCacheIdentity.InitializeInsertIdentity(this));
@@ -85,6 +93,20 @@ namespace Signum.Engine.Maps
 
         public Field GetField(MemberInfo member)
         {
+            if (member is MethodInfo)
+            {
+                var mi = (MethodInfo)member;
+
+                if (mi.IsGenericMethod && mi.GetGenericMethodDefinition().Name == "Mixin")
+                {
+                    if(Mixins == null)
+                        throw new InvalidOperationException("{0} has not mixins".Formato(this.Type.Name));
+
+                    return Mixins.GetOrThrow(mi.GetGenericArguments().Single());
+                }
+            }
+
+
             FieldInfo fi = member as FieldInfo ?? Reflector.FindFieldInfo(Type, (PropertyInfo)member);
 
             if (fi == null)
@@ -97,6 +119,21 @@ namespace Signum.Engine.Maps
 
         public Field TryGetField(MemberInfo member)
         {
+            if (member is MethodInfo)
+            {
+                var mi = (MethodInfo)member;
+
+                if (mi.IsGenericMethod && mi.GetGenericMethodDefinition().Name == "Mixin")
+                {
+                    if (Mixins == null)
+                        return null;
+
+                    return Mixins.TryGetC(mi.GetGenericArguments().Single());
+                }
+
+                return null;
+            }
+
             FieldInfo fi = member as FieldInfo ??  Reflector.TryFindFieldInfo(Type, (PropertyInfo)member);
 
             if (fi == null)
@@ -412,6 +449,72 @@ namespace Signum.Engine.Maps
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
             foreach (var f in EmbeddedFields.Values)
+            {
+                foreach (var kvp in f.Field.GetTables())
+                {
+                    yield return kvp;
+                }
+            }
+        }
+    }
+
+    public partial class FieldMixin : Field, IFieldFinder
+    {
+        public Dictionary<string, EntityField> Fields { get; set; }
+   
+        public FieldMixin(Type fieldType)
+            : base(fieldType)
+        {
+        }
+
+        public override string ToString()
+        {
+            return "Mixin\r\n{0}".Formato(Fields.ToString(c => "{0} : {1}".Formato(c.Key, c.Value), "\r\n").Indent(2));
+        }
+
+        public Field GetField(MemberInfo member)
+        {
+            FieldInfo fi = member as FieldInfo ?? Reflector.FindFieldInfo(FieldType, (PropertyInfo)member);
+
+            if (fi == null)
+                throw new InvalidOperationException("Field {0} not found on {1}".Formato(member.Name, FieldType));
+
+            EntityField field = Fields.GetOrThrow(fi.Name, "Field {0} not found on schema");
+
+            return field.Field;
+        }
+
+        public Field TryGetField(MemberInfo value)
+        {
+            FieldInfo fi = value as FieldInfo ?? Reflector.TryFindFieldInfo(FieldType, (PropertyInfo)value);
+
+            if (fi == null)
+                return null;
+
+            EntityField field = Fields.TryGetC(fi.Name);
+
+            if (field == null)
+                return null;
+
+            return field.Field;
+        }
+     
+        public override IEnumerable<IColumn> Columns()
+        {
+            var result = new List<IColumn>();
+            result.AddRange(Fields.Values.SelectMany(c => c.Field.Columns()));
+
+            return result;
+        }
+
+        public override IEnumerable<Index> GeneratIndexes(ITable table)
+        {
+            return this.Fields.Values.SelectMany(f => f.Field.GeneratIndexes(table));
+        }
+
+        internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
+        {
+            foreach (var f in Fields.Values)
             {
                 foreach (var kvp in f.Field.GetTables())
                 {
@@ -757,24 +860,6 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public enum KindOfField
-    {
-        PrimaryKey,
-        Value,
-        Reference,
-        Enum,
-        Embedded,
-        MList,
-    }
-
-    [Flags]
-    public enum Contexts
-    {
-        Normal = 1,
-        Embedded = 2,
-        MList = 4,
-        View = 8,
-    }
 
     public enum InitLevel
     {

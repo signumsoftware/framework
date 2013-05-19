@@ -117,6 +117,40 @@ namespace Signum.Engine.Linq
         }
     }
 
+    internal class MixinEntityExpression : DbExpression
+    {
+        public readonly ReadOnlyCollection<FieldBinding> Bindings;
+
+        public readonly FieldMixin FieldMixin; //used for updates
+
+        public MixinEntityExpression(Type type, IEnumerable<FieldBinding> bindings, FieldMixin fieldMixin)
+            : base(DbExpressionType.MixinInit, type)
+        {
+            if (bindings == null)
+                throw new ArgumentNullException("bindings");
+
+            Bindings = bindings.ToReadOnly();
+
+            FieldMixin = fieldMixin;
+        }
+
+        public Expression GetBinding(FieldInfo fi)
+        {
+            return Bindings.SingleEx(fb => ReflectionTools.FieldEquals(fi, fb.FieldInfo)).Binding;
+        }
+
+        public override string ToString()
+        {
+            string constructor = "new {0}".Formato(Type.TypeName());
+
+            string bindings = Bindings.TryCC(b => b.ToString(",\r\n ")) ?? "";
+
+            return bindings.HasText() ?
+                constructor + "\r\n{" + bindings.Indent(4) + "\r\n}" :
+                constructor;
+        }
+    }
+
    
 
     internal class FieldBinding

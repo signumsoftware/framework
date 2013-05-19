@@ -12,7 +12,7 @@ using Signum.Engine.Maps;
 
 namespace Signum.Test.Environment
 {
-    [Serializable, EntityKind(EntityKind.Shared)]
+    [Serializable, EntityKind(EntityKind.Shared), Mixin(typeof(CorruptMixin))]
     public class NoteWithDateDN : Entity
     {
         [SqlDbType(Size = int.MaxValue)]

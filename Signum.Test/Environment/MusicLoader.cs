@@ -25,7 +25,8 @@ namespace Signum.Test.Environment
 
         public static void Load()
         {
-            var ama = new AmericanMusicAwardDN { Category = "Indie Rock", Year = 1991, Result = AwardResult.Nominated }.Execute(AwardOperation.Save);
+            var ama = new AmericanMusicAwardDN { Category = "Indie Rock", Year = 1991, Result = AwardResult.Nominated }
+                .Execute(AwardOperation.Save);
 
             BandDN smashingPumpkins = new BandDN
             {
@@ -42,9 +43,11 @@ namespace Signum.Test.Environment
 
             smashingPumpkins.Execute(BandOperation.Save);
 
-            new NoteWithDateDN { CreationTime = DateTime.Now.AddHours(+8), Text = "American alternative rock band", Target = smashingPumpkins }.Execute(NoteWithDateOperation.Save);
+            new NoteWithDateDN { CreationTime = DateTime.Now.AddHours(+8), Text = "American alternative rock band", Target = smashingPumpkins }
+                .Execute(NoteWithDateOperation.Save);
 
-            LabelDN virgin = new LabelDN { Name = "Virgin", Country = usa, Node = SqlHierarchyId.GetRoot().FirstChild() }.Execute(LabelOperation.Save);
+            LabelDN virgin = new LabelDN { Name = "Virgin", Country = usa, Node = SqlHierarchyId.GetRoot().FirstChild() }
+                .Execute(LabelOperation.Save);
 
             new AlbumDN
             {
@@ -70,9 +73,11 @@ namespace Signum.Test.Environment
                 Label = virgin
             }.Execute(AlbumOperation.Save);
 
-            new NoteWithDateDN { CreationTime = DateTime.Now.AddDays(-100).AddHours(-8), Text = "The blue one with the angel", Target = mellon }.Execute(NoteWithDateOperation.Save);
+            new NoteWithDateDN { CreationTime = DateTime.Now.AddDays(-100).AddHours(-8), Text = "The blue one with the angel", Target = mellon }
+                .Execute(NoteWithDateOperation.Save);
 
-            LabelDN wea = new LabelDN { Name = "WEA International", Country = usa, Owner = virgin.ToLite(), Node = virgin.Node.FirstChild() }.Execute(LabelOperation.Save);
+            LabelDN wea = new LabelDN { Name = "WEA International", Country = usa, Owner = virgin.ToLite(), Node = virgin.Node.FirstChild() }
+                .Execute(LabelOperation.Save);
             
             new AlbumDN
             {
@@ -103,9 +108,15 @@ namespace Signum.Test.Environment
                 Status = Status.Single,
             }.Execute(ArtistOperation.Save); ;
 
-            new NoteWithDateDN { CreationTime = new DateTime(2009, 6, 25, 0, 0, 0), Text = "Death on June, 25th", Target = michael }.Execute(NoteWithDateOperation.Save);
+            new NoteWithDateDN { CreationTime = new DateTime(2009, 6, 25, 0, 0, 0), Text = "Death on June, 25th", Target = michael }
+                .Execute(NoteWithDateOperation.Save);
 
-            LabelDN universal = new LabelDN { Name = "UMG Recordings", Country = usa, Node = virgin.Node.NextSibling() }.Execute(LabelOperation.Save);
+            new NoteWithDateDN { CreationTime = new DateTime(2000, 1, 1, 0, 0, 0), Text = null, Target = michael }
+                .SetMixin((CorruptMixin c) => c.Corrupt, true)
+                .Execute(NoteWithDateOperation.Save);
+
+            LabelDN universal = new LabelDN { Name = "UMG Recordings", Country = usa, Node = virgin.Node.NextSibling() }
+                .Execute(LabelOperation.Save);
 
             new AlbumDN
             {
@@ -117,7 +128,8 @@ namespace Signum.Test.Environment
                 Label = universal,
             }.Execute(AlbumOperation.Save);
 
-            LabelDN sony = new LabelDN { Name = "Sony", Country = japan, Node = universal.Node.NextSibling() }.Execute(LabelOperation.Save);
+            LabelDN sony = new LabelDN { Name = "Sony", Country = japan, Node = universal.Node.NextSibling() }
+                .Execute(LabelOperation.Save);
 
             new AlbumDN
             {
@@ -130,7 +142,8 @@ namespace Signum.Test.Environment
                 Label = sony
             }.Execute(AlbumOperation.Save);
 
-            LabelDN mjj = new LabelDN { Name = "MJJ", Country = usa, Owner = sony.ToLite(), Node = sony.Node.FirstChild() }.Execute(LabelOperation.Save);
+            LabelDN mjj = new LabelDN { Name = "MJJ", Country = usa, Owner = sony.ToLite(), Node = sony.Node.FirstChild() }
+                .Execute(LabelOperation.Save);
 
             new AlbumDN
             {
@@ -173,7 +186,8 @@ namespace Signum.Test.Environment
                 Label = mjj
             }.Execute(AlbumOperation.Save); ;
 
-            var ga = new GrammyAwardDN { Category = "Foreing Band", Year = 2001, Result = AwardResult.Won }.Execute(AwardOperation.Save);
+            var ga = new GrammyAwardDN { Category = "Foreing Band", Year = 2001, Result = AwardResult.Won }
+                .Execute(AwardOperation.Save);
 
             BandDN sigurRos = new BandDN
             {
@@ -183,7 +197,8 @@ namespace Signum.Test.Environment
                 LastAward = ga,
             }.Execute(BandOperation.Save);
 
-            LabelDN fatCat = new LabelDN { Name = "FatCat Records", Country = usa, Owner = universal.ToLite(), Node = universal.Node.FirstChild() }.Execute(LabelOperation.Save);
+            LabelDN fatCat = new LabelDN { Name = "FatCat Records", Country = usa, Owner = universal.ToLite(), Node = universal.Node.FirstChild() }
+                .Execute(LabelOperation.Save);
 
             new AlbumDN
             {

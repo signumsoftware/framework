@@ -164,6 +164,9 @@ namespace Signum.Test.Environment
                     }).Column(a => a.LastAward, cl => cl.Implementations = Implementations.ByAll),
                     entityImplementations: Implementations.By(typeof(ArtistDN), typeof(BandDN)));
 
+                Validator.PropertyValidator((NoteWithDateDN n) => n.Text)
+                    .IsApplicableValidator<StringLengthValidatorAttribute>(n => Corruption.Strict); 
+
                 AlbumGraph.Register();
 
                 RegisterOperations();
