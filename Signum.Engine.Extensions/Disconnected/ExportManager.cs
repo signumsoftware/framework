@@ -242,12 +242,12 @@ namespace Signum.Engine.Disconnected
         }
 
         readonly MethodInfo miUnsafeLock;
-        protected virtual int UnsafeLock<T>(Lite<DisconnectedMachineDN> machine, DisconnectedStrategy<T> strategy, Lite<DisconnectedExportDN> stats) where T : IdentifiableEntity, IDisconnectedEntity, new()
+        protected virtual int UnsafeLock<T>(Lite<DisconnectedMachineDN> machine, DisconnectedStrategy<T> strategy, Lite<DisconnectedExportDN> stats) where T : Entity, new()
         {
             using (ExecutionMode.Global())
             {
-                var result = Database.Query<T>().Where(strategy.UploadSubset).Where(a => a.DisconnectedMachine != null).Select(a =>
-                    "{0} locked in {1}".Formato(a.Id, a.DisconnectedMachine.Entity.MachineName)).ToString("\r\n");
+                var result = Database.Query<T>().Where(strategy.UploadSubset).Where(a => a.Mixin<DisconnectedMixin>().DisconnectedMachine != null).Select(a =>
+                    "{0} locked in {1}".Formato(a.Id, a.Mixin<DisconnectedMixin>().DisconnectedMachine.Entity.MachineName)).ToString("\r\n");
 
                 if (result.HasText())
                     ExportTableQuery(stats, typeof(T).ToTypeDN()).UnsafeUpdate(e =>
@@ -256,7 +256,9 @@ namespace Signum.Engine.Disconnected
                                 Element = { Errors = result }
                             });
 
-                return Database.Query<T>().Where(strategy.UploadSubset).UnsafeUpdate(a => new T { DisconnectedMachine = machine, LastOnlineTicks = a.Ticks });
+                return Database.Query<T>().Where(strategy.UploadSubset).UnsafeUpdate(a => new T()
+                    .SetMixin((DisconnectedMixin dm) => dm.DisconnectedMachine, machine)
+                    .SetMixin((DisconnectedMixin dm) => dm.LastOnlineTicks, a.Ticks));
             }
         }
 

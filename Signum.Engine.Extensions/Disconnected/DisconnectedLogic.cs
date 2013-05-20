@@ -196,17 +196,17 @@ namespace Signum.Engine.Disconnected
             return Register(new DisconnectedStrategy<T>(Download.Subset, downloadSubset, upload, null, new BasicImporter<T>()));
         }
 
-        public static DisconnectedStrategy<T> Register<T>(Download download, Expression<Func<T, bool>> uploadSubset) where T : IdentifiableEntity, IDisconnectedEntity
+        public static DisconnectedStrategy<T> Register<T>(Download download, Expression<Func<T, bool>> uploadSubset) where T : Entity
         {
             return Register(new DisconnectedStrategy<T>(download, null, Upload.Subset, uploadSubset, new UpdateImporter<T>()));
         }
 
-        public static DisconnectedStrategy<T> Register<T>(Expression<Func<T, bool>> downloadSuperset, Expression<Func<T, bool>> uploadSubset) where T : IdentifiableEntity, IDisconnectedEntity
+        public static DisconnectedStrategy<T> Register<T>(Expression<Func<T, bool>> downloadSuperset, Expression<Func<T, bool>> uploadSubset) where T : Entity
         {
             return Register(new DisconnectedStrategy<T>(Download.Subset, downloadSuperset, Upload.Subset, uploadSubset, new UpdateImporter<T>()));
         }
 
-        public static DisconnectedStrategy<T> Register<T>(Expression<Func<T, bool>> subset) where T : IdentifiableEntity, IDisconnectedEntity
+        public static DisconnectedStrategy<T> Register<T>(Expression<Func<T, bool>> subset) where T : Entity
         {
             return Register(new DisconnectedStrategy<T>(Download.Subset, subset, Upload.Subset, subset, new UpdateImporter<T>()));
         }
@@ -332,9 +332,9 @@ namespace Signum.Engine.Disconnected
                 if (download == Download.None)
                     throw new InvalidOperationException("Upload.Subset is not compatible with Download.None, choose Upload.New instead");
 
-                if (!typeof(IDisconnectedEntity).IsAssignableFrom(typeof(T)))
-                    throw new InvalidOperationException("Upload.Subset requires that {0} implements {1}".Formato(typeof(T).Name, typeof(IDisconnectedEntity).Name));
+                MixinDeclarations.AssertDefined(typeof(T), typeof(DisconnectedMixin));
             }
+
             this.Upload = upload;
             this.UploadSubset = uploadSubset;
 
@@ -361,12 +361,12 @@ namespace Signum.Engine.Disconnected
 
                 if (Upload == Upload.Subset)
                 {
-                    var de = ((IDisconnectedEntity)ident);
+                    var dm = ident.Mixin<DisconnectedMixin>();
 
-                    if (de.DisconnectedMachine != null)
+                    if (dm.DisconnectedMachine != null)
                     {
-                        if (!de.DisconnectedMachine.Is(DisconnectedMachineDN.Current))
-                            throw new ApplicationException(DisconnectedMessage.The0WithId12IsLockedBy3.NiceToString().Formato(ident.GetType().NiceName(), ident.Id, ident.ToString(), ((IDisconnectedEntity)ident).DisconnectedMachine));
+                        if (!dm.DisconnectedMachine.Is(DisconnectedMachineDN.Current))
+                            throw new ApplicationException(DisconnectedMessage.The0WithId12IsLockedBy3.NiceToString().Formato(ident.GetType().NiceName(), ident.Id, ident.ToString(), dm.DisconnectedMachine));
                         else
                             return;
                     }
@@ -378,9 +378,13 @@ namespace Signum.Engine.Disconnected
             }
             else
             {
-                if (Upload == Upload.Subset && ((IDisconnectedEntity)ident).DisconnectedMachine != null)
-                    throw new ApplicationException(DisconnectedMessage.The0WithId12IsLockedBy3.NiceToString().Formato(ident.GetType().NiceName(), ident.Id, ident.ToString(), ((IDisconnectedEntity)ident).DisconnectedMachine));
+                if (Upload == Upload.Subset)
+                {
+                    var dm = ident.Mixin<DisconnectedMixin>();
 
+                    if (dm.DisconnectedMachine != null)
+                        throw new ApplicationException(DisconnectedMessage.The0WithId12IsLockedBy3.NiceToString().Formato(ident.GetType().NiceName(), ident.Id, ident.ToString(), dm.DisconnectedMachine));
+                }
             }
         }
 

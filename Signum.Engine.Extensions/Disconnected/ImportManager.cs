@@ -337,10 +337,13 @@ namespace Signum.Engine.Disconnected
         }
 
         static readonly MethodInfo miUnlockTable = typeof(ImportManager).GetMethod("UnlockTable", BindingFlags.NonPublic | BindingFlags.Static);
-        static int UnlockTable<T>(Lite<DisconnectedMachineDN> machine) where T : IdentifiableEntity, IDisconnectedEntity, new()
+        static int UnlockTable<T>(Lite<DisconnectedMachineDN> machine) where T : Entity, new()
         {
             using (ExecutionMode.Global())
-                return Database.Query<T>().Where(a => a.DisconnectedMachine == machine).UnsafeUpdate(a => new T { DisconnectedMachine = null, LastOnlineTicks = null });
+                return Database.Query<T>().Where(a => a.Mixin<DisconnectedMixin>().DisconnectedMachine == machine)
+                    .UnsafeUpdate(a => new T()
+                        .SetMixin((DisconnectedMixin d) => d.DisconnectedMachine, null)
+                        .SetMixin((DisconnectedMixin d) => d.LastOnlineTicks, null));
         }
     }
 
@@ -454,7 +457,7 @@ table.Name.OnDatabase(newDatabaseName));
         }
     }
 
-    public class UpdateImporter<T> : BasicImporter<T> where T : IdentifiableEntity, IDisconnectedEntity
+    public class UpdateImporter<T> : BasicImporter<T> where T : Entity
     {
         public override ImportResult Import(DisconnectedMachineDN machine, Table table, IDisconnectedStrategy strategy, SqlConnector newDatabase)
         {
@@ -537,16 +540,14 @@ INNER JOIN {1} as [table] ON {0}.id = [table].id
 
         protected virtual string GetUpdateWhere(Table table)
         {
+            var s = Schema.Current;
+
             var where = "\r\nWHERE [table].{0} = @machineId AND [table].{1} != [table].{2}".Formato(
-                ((FieldReference)table.GetField(piDisconnectedMachine)).Name.SqlScape(),
-                ((FieldValue)table.GetField(piTicks)).Name.SqlScape(),
-                ((FieldValue)table.GetField(piLastOnlineTicks)).Name.SqlScape());
+                ((FieldReference)s.Field<T>(t => t.Mixin<DisconnectedMixin>().DisconnectedMachine)).Name.SqlScape(),
+                ((FieldValue)s.Field<T>(t => t.Ticks)).Name.SqlScape(),
+                ((FieldValue)s.Field<T>(t => t.Mixin<DisconnectedMixin>().LastOnlineTicks)).Name.SqlScape());
             return where;
         }
-
-        static PropertyInfo piDisconnectedMachine = ReflectionTools.GetPropertyInfo((IDisconnectedEntity de) => de.DisconnectedMachine);
-        static PropertyInfo piTicks = ReflectionTools.GetPropertyInfo((IDisconnectedEntity de) => de.Ticks);
-        static PropertyInfo piLastOnlineTicks = ReflectionTools.GetPropertyInfo((IDisconnectedEntity de) => de.LastOnlineTicks);
     }
 
     public class ImportResult

@@ -79,12 +79,24 @@ namespace Signum.Entities.Disconnected
         FixImport,
     }
 
-    [DescriptionOptions(DescriptionOptions.None)]
-    public interface IDisconnectedEntity : IIdentifiable
+    [Serializable]
+    public class DisconnectedMixin : MixinEntity
     {
-        long Ticks { get; set; }
-        long? LastOnlineTicks { get; set; }
-        Lite<DisconnectedMachineDN> DisconnectedMachine { get; set; }
+        DisconnectedMixin(IdentifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next) { }
+
+        long? lastOnlineTicks;
+        public long? LastOnlineTicks
+        {
+            get { return lastOnlineTicks; }
+            set { Set(ref lastOnlineTicks, value, () => LastOnlineTicks); }
+        }
+
+        Lite<DisconnectedMachineDN> disconnectedMachine;
+        public Lite<DisconnectedMachineDN> DisconnectedMachine
+        {
+            get { return disconnectedMachine; }
+            set { Set(ref disconnectedMachine, value, () => DisconnectedMachine); }
+        }
     }
 
     [Serializable]
