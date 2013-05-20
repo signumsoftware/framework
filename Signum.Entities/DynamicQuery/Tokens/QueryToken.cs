@@ -67,7 +67,7 @@ namespace Signum.Entities.DynamicQuery
             if (type != null)
                 return PropertyRoute.Root(type).Add(pi);
 
-            PropertyRoute pr = Parent.GetPropertyRoute();
+            PropertyRoute pr = GetPropertyRoute();
             if (pr == null)
                 return null;
 

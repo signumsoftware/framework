@@ -135,6 +135,14 @@ namespace Signum.Engine.Maps
                 return null;
             }
 
+            if (member is Type)
+            {
+                if (Mixins == null)
+                    return null;
+
+                return Mixins.TryGetC((Type)member);
+            }
+
             FieldInfo fi = member as FieldInfo ??  Reflector.TryFindFieldInfo(Type, (PropertyInfo)member);
 
             if (fi == null)

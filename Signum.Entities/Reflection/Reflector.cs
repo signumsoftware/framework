@@ -174,7 +174,7 @@ namespace Signum.Entities.Reflection
             if (ue != null && ue.NodeType == ExpressionType.Convert && ue.Type == typeof(object))
                 e = ue.Operand;
 
-            MemberInfo[] result = e.FollowC(NextExpression).Select(a => GetMember(a)).NotNull().Reverse().ToArray();
+            MemberInfo[] result = e.FollowC(NextExpression).Select(GetMember).NotNull().Reverse().ToArray();
 
             return result;
         }
@@ -190,7 +190,7 @@ namespace Signum.Entities.Reflection
 
                         var parent = mce.Method.IsExtensionMethod() ? mce.Arguments.FirstEx() : mce.Object;
 
-                        if (parent != null && parent.Type.ElementType() == e.Type)
+                        if (parent != null)
                             return parent;
 
                         break;

@@ -24,7 +24,12 @@ namespace Signum.Entities
 
         public MemberInfo[] Members
         {
-            get { return this.FollowC(a => a.Parent).Select(a => a.FieldInfo ?? (MemberInfo)a.PropertyInfo).Reverse().Skip(1).ToArray(); }
+            get
+            {
+                return this.FollowC(a => a.Parent).Select(a =>
+                    a.PropertyRouteType == Entities.PropertyRouteType.Mixin ? a.type :
+                    a.FieldInfo ?? (MemberInfo)a.PropertyInfo).Reverse().Skip(1).ToArray();
+            }
         }
 
         public PropertyInfo[] Properties
