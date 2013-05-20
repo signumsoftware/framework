@@ -127,7 +127,13 @@ namespace Signum.Web
             if (settingsModifier != null)
                 settingsModifier(ec);
 
-            return helper.InternalEntityCombo(ec);
+            var result = helper.InternalEntityCombo(ec);
+
+            var vo = ec.ViewOverrides;
+            if (vo == null)
+                return result;
+
+            return vo.SurroundLine(ec.PropertyRoute, helper, (TypeContext)ec.Parent, result);
         }
 
         public static MvcHtmlString RenderOption(this SelectListItem item)

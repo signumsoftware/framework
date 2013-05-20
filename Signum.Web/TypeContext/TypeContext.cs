@@ -13,6 +13,7 @@ using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Engine;
 using Signum.Utilities.ExpressionTrees;
+using System.IO;
 
 namespace Signum.Web
 {
@@ -156,6 +157,24 @@ namespace Signum.Web
     #region TypeContext
     public abstract class TypeContext : Context
     {
+        ViewOverrides viewOverrides;
+        public ViewOverrides ViewOverrides
+        {
+            get
+            {
+                if (viewOverrides != null)
+                    return viewOverrides;
+
+                TypeContext parent = Parent as TypeContext;
+
+                if (parent != null)
+                    return parent.ViewOverrides;
+
+                return null;
+            }
+            set { viewOverrides = value; }
+        }
+
         public abstract object UntypedValue { get; }
 
         public abstract Type Type { get; }
@@ -280,4 +299,46 @@ namespace Signum.Web
         }
     }
     #endregion
+
+
+
+    public class ViewOverrides
+    {
+        public Dictionary<string, Func<HtmlHelper, TypeContext, MvcHtmlString>> PreTab;
+        public MvcHtmlString OnPreTab(string tabId, HtmlHelper helper, TypeContext tc)
+        {
+            var func = PreTab.TryGetC(tabId);
+
+            if (func == null)
+                return null;
+
+            return func(helper, tc);
+        }
+
+        public Dictionary<string, Func<HtmlHelper, TypeContext, MvcHtmlString>> PostTab;
+        public MvcHtmlString OnPostTab(string tabId, HtmlHelper helper, TypeContext tc)
+        {
+            var func = PostTab.TryGetC(tabId);
+
+            if (func == null)
+                return null;
+
+            return func(helper, tc);
+        }
+
+        public Dictionary<PropertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString>> PreLine;
+        public Dictionary<PropertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString>> PostLine;
+        public MvcHtmlString SurroundLine(PropertyRoute route, HtmlHelper helper, TypeContext tc, MvcHtmlString result)
+        {
+            var pre = PreLine.TryGetC(route);
+            if (pre != null)
+                result = pre(helper, tc).Concat(result);
+
+            var post = PreLine.TryGetC(route);
+            if (post != null)
+                result = result.Concat(post(helper, tc));
+
+            return result;
+        }
+    }
 }

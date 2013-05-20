@@ -156,16 +156,22 @@ namespace Signum.Web
         {
             TypeContext<MList<S>> context = Common.WalkExpression(tc, property);
 
-            EntityListDetail el = new EntityListDetail(context.Type, context.UntypedValue, context, null, context.PropertyRoute);
+            EntityListDetail eld = new EntityListDetail(context.Type, context.UntypedValue, context, null, context.PropertyRoute);
 
-            EntityBaseHelper.ConfigureEntityBase(el, typeof(S).CleanType());
+            EntityBaseHelper.ConfigureEntityBase(eld, typeof(S).CleanType());
 
-            Common.FireCommonTasks(el);
+            Common.FireCommonTasks(eld);
 
             if (settingsModifier != null)
-                settingsModifier(el);
+                settingsModifier(eld);
 
-            return helper.InternalEntityListDetail<S>(el);
+            var result = helper.InternalEntityListDetail<S>(eld);
+
+            var vo = eld.ViewOverrides;
+            if (vo == null)
+                return result;
+
+            return vo.SurroundLine(eld.PropertyRoute, helper, (TypeContext)eld.Parent, result);
         }
     }
 }

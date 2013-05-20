@@ -30,6 +30,8 @@ namespace Signum.Web
         internal abstract bool OnIsNavigable(bool isSearchEntity);
         internal abstract bool OnIsReadonly();
 
+        public ViewOverrides ViewOverrides { get; set; }
+
         public abstract string OnPartialViewName(ModifiableEntity entity);
     }
 

@@ -281,13 +281,6 @@ namespace Signum.Web
             return new MvcHtmlString(serializer.Serialize(value));
         }
 
-        public static HelperResult If(this WebPageBase webPage, bool condition, Func<HelperResult> html)
-        {
-            if (condition)
-                return html();
-            return null;
-        }
-
         public static MvcHtmlString JQueryNotification(this HtmlHelper helper, string strongText, string normalText, int? marginTop = 10)
         { 
             var pContent = new HtmlTag("span").Class("ui-icon ui-icon-info").Attr("style", "float: left; margin-right: .3em;").ToHtml();
