@@ -78,10 +78,12 @@ namespace Signum.Engine.Maps
 
         public void GenerateColumns()
         {
-            var columns = Fields.Values.SelectMany(c => c.Field.Columns()).ToDictionary(c => c.Name);
+            var tableName = "columns in table " + this.Name;
+
+            var columns = Fields.Values.SelectMany(c => c.Field.Columns()).ToDictionary(c => c.Name, tableName);
 
             if (Mixins != null)
-                columns.AddRange(Mixins.Values.SelectMany(m => m.Fields.Values).SelectMany(f => f.Field.Columns()).ToDictionary(c => c.Name));
+                columns.AddRange(Mixins.Values.SelectMany(m => m.Fields.Values).SelectMany(f => f.Field.Columns()).ToDictionary(c => c.Name, tableName), tableName);
 
             Columns = columns;
 
@@ -105,7 +107,6 @@ namespace Signum.Engine.Maps
                     return Mixins.GetOrThrow(mi.GetGenericArguments().Single());
                 }
             }
-
 
             FieldInfo fi = member as FieldInfo ?? Reflector.FindFieldInfo(Type, (PropertyInfo)member);
 
@@ -151,6 +152,9 @@ namespace Signum.Engine.Maps
         {
             var result = Fields.SelectMany(f => f.Value.Field.GeneratIndexes(this)).ToList();
 
+            if (Mixins != null)
+                result.AddRange(Mixins.SelectMany(f => f.Value.GeneratIndexes(this)).ToList());
+
             if (MultiColumnIndexes != null)
                 result.AddRange(MultiColumnIndexes);
 
@@ -164,8 +168,17 @@ namespace Signum.Engine.Maps
 
         public IEnumerable<RelationalTable> RelationalTables()
         {
-            return Fields.Values.Select(a => a.Field).OfType<FieldMList>().Select(f => f.RelationalTable);
+            var tables = Fields.Values.SelectMany(a => a.Field.RelationalTables(a.Getter)).ToList();
+
+            if (Mixins != null)
+                tables.AddRange(from m in Mixins.Values
+                                from rt in m.RelationalTables(m.Getter)
+                                select rt);
+
+            return tables; 
         }
+
+        
 
         public void ToDatabase(DatabaseName databaseName)
         {
@@ -227,7 +240,9 @@ namespace Signum.Engine.Maps
             throw new InvalidOperationException("IndexType {0} not expected".Formato(IndexType));
         }
 
-        internal abstract IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables(); 
+        internal abstract IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables();
+
+        internal abstract IEnumerable<RelationalTable> RelationalTables(Func<IdentifiableEntity, object> getter); 
     }
 
     public enum IndexType
@@ -330,6 +345,11 @@ namespace Signum.Engine.Maps
         {
             return Enumerable.Empty<KeyValuePair<Table, RelationInfo>>();
         }
+
+        internal override IEnumerable<RelationalTable> RelationalTables(Func<IdentifiableEntity, object> getter)
+        {
+            return Enumerable.Empty<RelationalTable>();
+        }
     }
 
     public partial class FieldValue : Field, IColumn
@@ -368,6 +388,11 @@ namespace Signum.Engine.Maps
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
             return Enumerable.Empty<KeyValuePair<Table, RelationInfo>>();
+        }
+
+        internal override IEnumerable<RelationalTable> RelationalTables(Func<IdentifiableEntity, object> getter)
+        {
+            return Enumerable.Empty<RelationalTable>();
         }
     }
 
@@ -456,6 +481,19 @@ namespace Signum.Engine.Maps
                 }
             }
         }
+
+        internal override IEnumerable<RelationalTable> RelationalTables(Func<IdentifiableEntity, object> getter)
+        {
+            return EmbeddedFields.Values.SelectMany(e => e.Field.RelationalTables(obj =>
+            {
+                var embedded = getter(obj);
+
+                if (embedded == null)
+                    return null;
+
+                return e.Getter(embedded);
+            })); 
+        }
     }
 
     public partial class FieldMixin : Field, IFieldFinder
@@ -521,6 +559,16 @@ namespace Signum.Engine.Maps
                     yield return kvp;
                 }
             }
+        }
+
+        internal override IEnumerable<RelationalTable> RelationalTables(Func<IdentifiableEntity, object> getter)
+        {
+            return Fields.Values.SelectMany(e => e.Field.RelationalTables(ident => e.Getter(getter(ident))));
+        }
+
+        internal MixinEntity Getter(IdentifiableEntity ident)
+        {
+            return ((IdentifiableEntity)ident).AllMixin.Single(mo => mo.GetType() == FieldType);
         }
     }
 
@@ -588,6 +636,11 @@ namespace Signum.Engine.Maps
                 this.clearEntityOnSaving = value;
             }
         }
+
+        internal override IEnumerable<RelationalTable> RelationalTables(Func<IdentifiableEntity, object> getter)
+        {
+            return Enumerable.Empty<RelationalTable>();
+        }
     }
 
     public partial class FieldEnum : FieldReference
@@ -614,6 +667,11 @@ namespace Signum.Engine.Maps
                 IsCollection = false,
                 IsNullable = Nullable
             });
+        }
+
+        internal override IEnumerable<RelationalTable> RelationalTables(Func<IdentifiableEntity, object> getter)
+        {
+            return Enumerable.Empty<RelationalTable>();
         }
     }
 
@@ -665,6 +723,11 @@ namespace Signum.Engine.Maps
                 this.clearEntityOnSaving = value;
             }
         }
+
+        internal override IEnumerable<RelationalTable> RelationalTables(Func<IdentifiableEntity, object> getter)
+        {
+            return Enumerable.Empty<RelationalTable>();
+        }
     }
 
     public partial class FieldImplementedByAll : Field, IFieldReference
@@ -709,6 +772,11 @@ namespace Signum.Engine.Maps
                 return new[] { new Index(table, (Field)this) };
 
             return base.GeneratIndexes(table);
+        }
+
+        internal override IEnumerable<RelationalTable> RelationalTables(Func<IdentifiableEntity, object> getter)
+        {
+            return Enumerable.Empty<RelationalTable>();
         }
     }
 
@@ -773,6 +841,13 @@ namespace Signum.Engine.Maps
                 yield return kvp;
             }
         }
+
+        internal override IEnumerable<RelationalTable> RelationalTables(Func<IdentifiableEntity, object> getter)
+        {
+            RelationalTable.FullGetter = getter;
+
+            return new[] { RelationalTable };
+        }
     }
 
     public partial class RelationalTable : ITable, IFieldFinder, ITablePrivate
@@ -800,6 +875,8 @@ namespace Signum.Engine.Maps
 
         public Type CollectionType { get; private set; }
         public Func<IList> Constructor { get; private set; }
+
+        public Func<IdentifiableEntity, object> FullGetter { get; internal set; }
 
         public RelationalTable(Type collectionType)
         {

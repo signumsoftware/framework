@@ -1151,6 +1151,10 @@ namespace Signum.Engine.Linq
                         throw new InvalidOperationException("The member {0} of {1} is not accesible on queries".Formato(m.Member.Name, eee.Type.TypeName()));
 
                     Expression result = eee.GetBinding(fi);
+
+                    if (result is MListExpression)
+                        return MListProjection((MListExpression)result);
+                    
                     return result;
                 }
                 case (ExpressionType)DbExpressionType.MixinInit:
@@ -1162,6 +1166,10 @@ namespace Signum.Engine.Linq
                         throw new InvalidOperationException("The member {0} of {1} is not accesible on queries".Formato(m.Member.Name, mee.Type.TypeName()));
 
                     Expression result = mee.GetBinding(fi);
+
+                    if (result is MListExpression)
+                        return MListProjection((MListExpression)result);
+
                     return result;
                 }
                 case (ExpressionType)DbExpressionType.LiteReference:

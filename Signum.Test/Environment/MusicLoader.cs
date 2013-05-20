@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Signum.Utilities;
 
 namespace Signum.Test.Environment
 {
@@ -72,7 +73,7 @@ namespace Signum.Test.Environment
                 BonusTrack = new SongDN { Name = "Jellybelly" },
                 Label = virgin
             }.Execute(AlbumOperation.Save);
-
+            
             new NoteWithDateDN { CreationTime = DateTime.Now.AddDays(-100).AddHours(-8), Text = "The blue one with the angel", Target = mellon }
                 .Execute(NoteWithDateOperation.Save);
 
@@ -113,6 +114,7 @@ namespace Signum.Test.Environment
 
             new NoteWithDateDN { CreationTime = new DateTime(2000, 1, 1, 0, 0, 0), Text = null, Target = michael }
                 .SetMixin((CorruptMixin c) => c.Corrupt, true)
+                .Do(n => n.Mixin<ColaboratorsMixin>().Colaborators.Add(michael))
                 .Execute(NoteWithDateOperation.Save);
 
             LabelDN universal = new LabelDN { Name = "UMG Recordings", Country = usa, Node = virgin.Node.NextSibling() }

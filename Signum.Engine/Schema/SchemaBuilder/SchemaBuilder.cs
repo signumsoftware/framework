@@ -185,7 +185,7 @@ namespace Signum.Engine.Maps
                 if (mixins == null)
                     mixins = new Dictionary<Type, FieldMixin>();
 
-                mixins.Add(t, this.GenerateFieldMixin(propertyRoute.Add(t), nameSequence));
+                mixins.Add(t, this.GenerateFieldMixin(propertyRoute.Add(t), nameSequence, table));
             }
 
             return mixins;
@@ -302,9 +302,9 @@ namespace Signum.Engine.Maps
                 case KindOfField.Enum:
                     return GenerateFieldEnum(route, name, forceNull);
                 case KindOfField.Embedded:
-                    return GenerateFieldEmbedded(route, name, forceNull, inMList);
+                    return GenerateFieldEmbedded(route, name, table, forceNull, inMList);
                 case KindOfField.MList:
-                    return GenerateFieldMList(route, table, name);
+                    return GenerateFieldMList(route, name, table);
                 default:
                     throw new NotSupportedException(EngineMessage.NoWayOfMappingType0Found.NiceToString().Formato(route.Type));
             }
@@ -445,7 +445,7 @@ namespace Signum.Engine.Maps
             };
         }
 
-        protected virtual FieldMList GenerateFieldMList(PropertyRoute route, Table table, NameSequence name)
+        protected virtual FieldMList GenerateFieldMList(PropertyRoute route, NameSequence name, Table table)
         {
             Type elementType = route.Type.ElementType();
 
@@ -453,17 +453,17 @@ namespace Signum.Engine.Maps
 
             RelationalTable relationalTable = new RelationalTable(route.Type)
             {
-                Name = GenerateTableNameCollection(type, name),
+                Name = GenerateTableNameCollection(table, name),
                 BackReference = new FieldReference(table.Type)
                 {
                     Name = GenerateBackReferenceName(type),
                     ReferenceTable = table
                 },
                 PrimaryKey = new RelationalTable.PrimaryKeyColumn(),
-                Field = GenerateField(route.Add("Item"), null, NameSequence.Void, forceNull: false, inMList: true) 
+                Field = GenerateField(route.Add("Item"), null, NameSequence.Void, forceNull: false, inMList: true)
             };
 
-            relationalTable.GenerateColumns(); 
+            relationalTable.GenerateColumns();
 
             return new FieldMList(route.Type)
             {
@@ -471,22 +471,22 @@ namespace Signum.Engine.Maps
             };
         }
 
-        protected virtual FieldEmbedded GenerateFieldEmbedded(PropertyRoute route, NameSequence name, bool forceNull, bool inMList)
+        protected virtual FieldEmbedded GenerateFieldEmbedded(PropertyRoute route, NameSequence name, Table table, bool forceNull, bool inMList)
         {
             bool nullable = Settings.IsNullable(route, false);
 
             return new FieldEmbedded(route.Type)
             {
                 HasValue = nullable ? new FieldEmbedded.EmbeddedHasValueColumn() { Name = name.Add("HasValue").ToString() } : null,
-                EmbeddedFields = GenerateFields(route, null, name, forceNull: nullable || forceNull, inMList: inMList)
+                EmbeddedFields = GenerateFields(route, table, name, forceNull: nullable || forceNull, inMList: inMList)
             };
         }
 
-        protected virtual FieldMixin GenerateFieldMixin(PropertyRoute route, NameSequence name)
+        protected virtual FieldMixin GenerateFieldMixin(PropertyRoute route, NameSequence name, Table table)
         {
             return new FieldMixin(route.Type)
             {
-                Fields = GenerateFields(route, null, name, forceNull: false, inMList: false)
+                Fields = GenerateFields(route, table, name, forceNull: false, inMList: false)
             };
         }
         #endregion
@@ -516,9 +516,9 @@ namespace Signum.Engine.Maps
             return type;
         }
 
-        public virtual ObjectName GenerateTableNameCollection(Type type, NameSequence name)
+        public virtual ObjectName GenerateTableNameCollection(Table table, NameSequence name)
         {
-            return new ObjectName(SchemaName.Default, CleanType(type).Name + name.ToString());
+            return new ObjectName(SchemaName.Default, table.Name.Name + name.ToString());
         }
 
         public virtual string GenerateFieldName(Type type, KindOfField kindOfField)

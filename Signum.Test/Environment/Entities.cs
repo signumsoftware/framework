@@ -12,7 +12,7 @@ using Signum.Engine.Maps;
 
 namespace Signum.Test.Environment
 {
-    [Serializable, EntityKind(EntityKind.Shared), Mixin(typeof(CorruptMixin))]
+    [Serializable, EntityKind(EntityKind.Shared), Mixin(typeof(CorruptMixin)), Mixin(typeof(ColaboratorsMixin))]
     public class NoteWithDateDN : Entity
     {
         [SqlDbType(Size = int.MaxValue)]
@@ -42,6 +42,21 @@ namespace Signum.Test.Environment
         public override string ToString()
         {
             return "{0} -> {1}".Formato(creationTime, text);
+        }
+    }
+
+    [Serializable] // Just a pattern
+    public class ColaboratorsMixin : MixinEntity
+    {
+        ColaboratorsMixin(IdentifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next) { }
+
+        [NotNullable]
+        MList<ArtistDN> colaborators = new MList<ArtistDN>();
+        [NotNullValidator, NoRepeatValidator]
+        public MList<ArtistDN> Colaborators
+        {
+            get { return colaborators; }
+            set { Set(ref colaborators, value, () => Colaborators); }
         }
     }
 
@@ -184,7 +199,6 @@ namespace Signum.Test.Environment
             get { return members; }
             set { Set(ref members, value, () => Members); }
         }
-
 
         [ImplementedBy(typeof(GrammyAwardDN), typeof(AmericanMusicAwardDN))]
         AwardDN lastAward;

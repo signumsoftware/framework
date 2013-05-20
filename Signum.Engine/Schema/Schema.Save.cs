@@ -580,10 +580,8 @@ namespace Signum.Engine.Maps
                 using (HeavyProfiler.LogNoStackTrace("InitializeCollections", () => table.Type.TypeName()))
                 {
                     List<RelationalTable.IRelationalCache> caches =
-                        (from ef in table.Fields.Values
-                         where ef.Field is FieldMList
-                         let rt = ((FieldMList)ef.Field).RelationalTable
-                         select giCreateCache.GetInvoker(rt.Field.FieldType)(rt, ef.Getter)).ToList();
+                        (from rt in table.RelationalTables()
+                         select giCreateCache.GetInvoker(rt.Field.FieldType)(rt)).ToList();
 
                     if (caches.IsEmpty())
                         return null;
@@ -613,9 +611,9 @@ namespace Signum.Engine.Maps
 
         ResetLazy<CollectionsCache> saveCollections;
 
-        static GenericInvoker<Func<RelationalTable, Func<object, object>, RelationalTable.IRelationalCache>> giCreateCache =
-            new GenericInvoker<Func<RelationalTable, Func<object, object>, RelationalTable.IRelationalCache>>(
-            (RelationalTable rt, Func<object, object> d) => rt.CreateCache<int>(d));
+        static GenericInvoker<Func<RelationalTable, RelationalTable.IRelationalCache>> giCreateCache =
+            new GenericInvoker<Func<RelationalTable, RelationalTable.IRelationalCache>>(
+            (RelationalTable rt) => rt.CreateCache<int>());
 
         public SqlPreCommand InsertSqlSync(IdentifiableEntity ident, bool includeCollections = true, string comment = null)
         {
@@ -853,11 +851,11 @@ namespace Signum.Engine.Maps
             }
         }
 
-        internal RelationalCache<T> CreateCache<T>(Func<object, object> getter)
+        internal RelationalCache<T> CreateCache<T>()
         {
             RelationalCache<T> result = new RelationalCache<T>();
 
-            result.Getter = ident => (MList<T>)getter(ident);
+            result.Getter = ident => (MList<T>)FullGetter(ident);
 
             result.sqlDelete = post => "DELETE {0} WHERE {1} = @{2}".Formato(Name, BackReference.Name.SqlScape(), BackReference.Name + post);
 
