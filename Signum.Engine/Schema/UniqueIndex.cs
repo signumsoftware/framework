@@ -21,7 +21,7 @@ namespace Signum.Engine.Maps
             if (fields == null || fields.IsEmpty())
                 throw new InvalidOperationException("No fields");
 
-            if (fields.OfType<FieldEmbedded>().Any())
+            if (fields.Any(f => f is FieldEmbedded || f is FieldMixin))
                 throw new InvalidOperationException("Embedded fields not supported for indexes");
 
             this.Table = table;
@@ -132,7 +132,7 @@ namespace Signum.Engine.Maps
                 return this;
             }
 
-            if (notNullFields.OfType<FieldEmbedded>().Any())
+            if (notNullFields.Any(a => a is FieldEmbedded || a is FieldMixin))
                 throw new InvalidOperationException("Embedded fields not supported for indexes");
 
             this.WhereNotNull(notNullFields.Where(a => !IsComplexIB(a)).SelectMany(a => a.Columns()).ToArray());

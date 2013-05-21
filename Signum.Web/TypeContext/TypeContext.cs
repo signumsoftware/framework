@@ -13,6 +13,8 @@ using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Engine;
 using Signum.Utilities.ExpressionTrees;
+using System.IO;
+using System.Web.WebPages;
 
 namespace Signum.Web
 {
@@ -156,6 +158,24 @@ namespace Signum.Web
     #region TypeContext
     public abstract class TypeContext : Context
     {
+        IViewOverrides viewOverrides;
+        public IViewOverrides ViewOverrides
+        {
+            get
+            {
+                if (viewOverrides != null)
+                    return viewOverrides;
+
+                TypeContext parent = Parent as TypeContext;
+
+                if (parent != null)
+                    return parent.ViewOverrides;
+
+                return null;
+            }
+            set { viewOverrides = value; }
+        }
+
         public abstract object UntypedValue { get; }
 
         public abstract Type Type { get; }
@@ -280,4 +300,109 @@ namespace Signum.Web
         }
     }
     #endregion
+
+    public interface IViewOverrides
+    {
+        HelperResult OnSurrondFieldset(string id, HtmlHelper helper, TypeContext tc, HelperResult result);
+        MvcHtmlString OnSurroundLine(PropertyRoute route, HtmlHelper helper, TypeContext tc, MvcHtmlString result);
+    }
+
+    public class ViewOverrides : IViewOverrides
+    {
+        Dictionary<string, Func<HtmlHelper, TypeContext, MvcHtmlString>> beforeFieldset;
+        public ViewOverrides BeforeFieldset(string id, Func<HtmlHelper, TypeContext, MvcHtmlString> constructor)
+        {
+            if (beforeFieldset == null)
+                beforeFieldset = new Dictionary<string, Func<HtmlHelper, TypeContext, MvcHtmlString>>();
+
+            beforeFieldset.Add(id, constructor);
+
+            return this;
+        }
+
+        Dictionary<string, Func<HtmlHelper, TypeContext, MvcHtmlString>> afterFieldset;
+        public ViewOverrides AfterFieldset(string id, Func<HtmlHelper, TypeContext, MvcHtmlString> constructor)
+        {
+            if (afterFieldset == null)
+                afterFieldset = new Dictionary<string, Func<HtmlHelper, TypeContext, MvcHtmlString>>();
+
+            afterFieldset.Add(id, constructor);
+
+            return this;
+        }
+
+
+        HelperResult IViewOverrides.OnSurrondFieldset(string id, HtmlHelper helper, TypeContext tc, HelperResult result)
+        {
+            var before = beforeFieldset.TryGetC(id);
+            var after = afterFieldset.TryGetC(id);
+
+            if (before == null && after == null)
+                return result;
+
+            return new HelperResult(writer =>
+            {
+                var b = before(helper, tc);
+                if (!MvcHtmlString.IsNullOrEmpty(b))
+                    writer.WriteLine(b);
+
+                result.WriteTo(writer);
+
+                var a = after(helper, tc);
+                if (!MvcHtmlString.IsNullOrEmpty(a))
+                    writer.WriteLine(a);
+            }); 
+        }
+
+
+        Dictionary<PropertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString>> beforeLine;
+        public ViewOverrides BeforeLine<T>(Expression<Func<T, object>> expression, Func<HtmlHelper, TypeContext, MvcHtmlString> constructor)
+            where T : IRootEntity
+        {
+            return BeforeLine(PropertyRoute.Construct<T>(expression), constructor);
+        }
+
+        public ViewOverrides BeforeLine(PropertyRoute route, Func<HtmlHelper, TypeContext, MvcHtmlString> constructor)
+        {
+            if (beforeLine == null)
+                beforeLine = new Dictionary<PropertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString>>();
+
+            beforeLine.Add(route, constructor);
+
+            return this; 
+        }
+
+
+        Dictionary<PropertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString>> afterLine;
+        public ViewOverrides AfterLine<T>(Expression<Func<T, object>> expression, Func<HtmlHelper, TypeContext<T>, MvcHtmlString> constructor)
+            where T : IRootEntity
+        {
+            return AfterLine(PropertyRoute.Construct<T>(expression), (helper, tc) => constructor(helper, (TypeContext<T>)tc));
+        }
+
+        public ViewOverrides AfterLine(PropertyRoute route, Func<HtmlHelper, TypeContext, MvcHtmlString> constructor)
+        {
+            if (afterLine == null)
+                afterLine = new Dictionary<PropertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString>>();
+
+            afterLine.Add(route, constructor);
+
+            return this;
+        }
+
+
+        MvcHtmlString IViewOverrides.OnSurroundLine(PropertyRoute route, HtmlHelper helper, TypeContext tc, MvcHtmlString result)
+        {
+            var before = beforeLine.TryGetC(route);
+            if (before != null)
+                result = before(helper, tc).Concat(result);
+
+            var after = afterLine.TryGetC(route);
+            if (after != null)
+                result = result.Concat(after(helper, tc));
+
+            return result;
+        }
+
+    }
 }

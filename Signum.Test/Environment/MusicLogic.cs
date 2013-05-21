@@ -164,6 +164,9 @@ namespace Signum.Test.Environment
                     }).Column(a => a.LastAward, cl => cl.Implementations = Implementations.ByAll),
                     entityImplementations: Implementations.By(typeof(ArtistDN), typeof(BandDN)));
 
+                Validator.PropertyValidator((NoteWithDateDN n) => n.Text)
+                    .IsApplicableValidator<StringLengthValidatorAttribute>(n => Corruption.Strict); 
+
                 AlbumGraph.Register();
 
                 RegisterOperations();
@@ -172,7 +175,7 @@ namespace Signum.Test.Environment
 
         private static void RegisterOperations()
         {
-            new BasicExecute<AwardDN>(AwardOperation.Save)
+            new Graph<AwardDN>.Execute(AwardOperation.Save)
             {
                 AllowsNew = true,
                 Lite = false,
@@ -180,21 +183,21 @@ namespace Signum.Test.Environment
             }.Register();
 
 
-            new BasicExecute<NoteWithDateDN>(NoteWithDateOperation.Save)
+            new Graph<NoteWithDateDN>.Execute(NoteWithDateOperation.Save)
             {
                 AllowsNew = true,
                 Lite = false,
                 Execute = (n, _) => { }
             }.Register();
 
-            new BasicExecute<ArtistDN>(ArtistOperation.Save)
+            new Graph<ArtistDN>.Execute(ArtistOperation.Save)
             {
                 AllowsNew = true,
                 Lite = false,
                 Execute = (a, _) => { }
             }.Register();
 
-            new BasicExecute<ArtistDN>(ArtistOperation.AssignPersonalAward)
+            new Graph<ArtistDN>.Execute(ArtistOperation.AssignPersonalAward)
             {
                 Lite = true,
                 AllowsNew = false,
@@ -202,7 +205,7 @@ namespace Signum.Test.Environment
                 Execute = (a, para) => a.LastAward = new PersonalAwardDN() { Category = "Best Artist", Year = DateTime.Now.Year, Result = AwardResult.Won }.Execute(AwardOperation.Save)
             }.Register();
 
-            new BasicExecute<BandDN>(BandOperation.Save)
+            new Graph<BandDN>.Execute(BandOperation.Save)
             {
                 AllowsNew = true,
                 Lite = false,
@@ -215,7 +218,7 @@ namespace Signum.Test.Environment
                 }
             }.Register();
 
-            new BasicExecute<LabelDN>(LabelOperation.Save)
+            new Graph<LabelDN>.Execute(LabelOperation.Save)
             {
                 AllowsNew = true,
                 Lite = false,
@@ -232,7 +235,7 @@ namespace Signum.Test.Environment
 
             new Execute(AlbumOperation.Save)
             {
-                FromStates = new[] { AlbumState.New },
+                FromStates = { AlbumState.New },
                 ToState = AlbumState.Saved,
                 AllowsNew = true,
                 Lite = false,
@@ -241,7 +244,7 @@ namespace Signum.Test.Environment
 
             new Execute(AlbumOperation.Modify)
             {
-                FromStates = new[] { AlbumState.Saved },
+                FromStates = { AlbumState.Saved },
                 ToState = AlbumState.Saved,
                 AllowsNew = false,
                 Lite = false,
@@ -315,8 +318,9 @@ namespace Signum.Test.Environment
             }.Register();
 
 
-            new BasicDelete<AlbumDN>(AlbumOperation.Delete)
+            new Delete(AlbumOperation.Delete)
             {
+                FromStates = { AlbumState.Saved },
                 Delete = (album, _) => album.Delete()
             }.Register();
         }

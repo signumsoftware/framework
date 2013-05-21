@@ -18,27 +18,28 @@ namespace Signum.Web
 
         private static MvcHtmlString InternalValueLine(this HtmlHelper helper, ValueLine valueLine)
         {
-            if (!valueLine.Visible || (valueLine.HideIfNull && valueLine.UntypedValue == null))
-                return MvcHtmlString.Empty;
-
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            if (valueLine.OnlyValue)
+
+            if (valueLine.Visible && (!valueLine.HideIfNull || valueLine.UntypedValue != null))
             {
-                InternalValueLineValue(helper, valueLine, sb);
-            }
-            else
-            {
-                using (sb.Surround(new HtmlTag("div").Class("sf-field")))
-                using (valueLine.LabelVisible && valueLine.ValueFirst ? sb.Surround(new HtmlTag("div").Class("sf-value-first")) : null)
+                if (valueLine.OnlyValue)
                 {
-                    if (!valueLine.ValueFirst)
-                        InternalValueLineLabel(helper, valueLine, sb);
+                    InternalValueLineValue(helper, valueLine, sb);
+                }
+                else
+                {
+                    using (sb.Surround(new HtmlTag("div").Class("sf-field")))
+                    using (valueLine.LabelVisible && valueLine.ValueFirst ? sb.Surround(new HtmlTag("div").Class("sf-value-first")) : null)
+                    {
+                        if (!valueLine.ValueFirst)
+                            InternalValueLineLabel(helper, valueLine, sb);
 
-                    using (sb.Surround(new HtmlTag("div").Class("sf-value-container")))
-                        InternalValueLineValue(helper, valueLine, sb);
+                        using (sb.Surround(new HtmlTag("div").Class("sf-value-container")))
+                            InternalValueLineValue(helper, valueLine, sb);
 
-                    if (valueLine.ValueFirst)
-                        InternalValueLineLabel(helper, valueLine, sb);
+                        if (valueLine.ValueFirst)
+                            InternalValueLineLabel(helper, valueLine, sb);
+                    }
                 }
             }
 
@@ -262,10 +263,11 @@ namespace Signum.Web
             return sb.ToHtml();
         }
 
-        public static MvcHtmlString ValueLine<T>(this HtmlHelper helper, ValueLine valueLine)
+        public static MvcHtmlString ValueLine(this HtmlHelper helper, ValueLine valueLine)
         {
             return helper.InternalValueLine(valueLine);
         }
+
 
         public static MvcHtmlString ValueLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
         {
@@ -283,7 +285,13 @@ namespace Signum.Web
             if (settingsModifier != null)
                 settingsModifier(vl);
 
-            return InternalValueLine(helper, vl);
+            var result = helper.InternalValueLine(vl);
+
+            var vo = vl.ViewOverrides;
+            if (vo == null)
+                return result;
+
+            return vo.OnSurroundLine(vl.PropertyRoute, helper, tc, result);
         }
 
         public static MvcHtmlString HiddenLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)

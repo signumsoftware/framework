@@ -155,6 +155,12 @@ namespace Signum.Web
     {
         public static MvcHtmlString Concat(this MvcHtmlString one, MvcHtmlString other)
         {
+            if (MvcHtmlString.IsNullOrEmpty(one))
+                return other;
+
+            if (MvcHtmlString.IsNullOrEmpty(other))
+                return one;
+
             return MvcHtmlString.Create(one.ToHtmlString() + other.ToHtmlString());
         }
 

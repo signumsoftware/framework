@@ -52,6 +52,7 @@ namespace Signum.Engine.Linq
         SelectRowCount,
         Entity = 2000,
         EmbeddedInit,
+        MixinInit,
         ImplementedBy,
         ImplementedByAll,
         LiteReference,

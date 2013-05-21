@@ -241,6 +241,16 @@ namespace Signum.Test.LinqProviderUpdateDelete
         }
 
         [TestMethod]
+        public void UpdateMixin()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                int count = Database.Query<NoteWithDateDN>().UnsafeUpdate(a => new NoteWithDateDN().SetMixin((CorruptMixin ce) => ce.Corrupt, true));
+                //tr.Commit();
+            }
+        }
+
+        [TestMethod]
         public void UpdateFieToLite()
         {
             using (Transaction tr = new Transaction())

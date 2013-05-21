@@ -392,22 +392,33 @@ namespace Signum.Entities
             this.target = target;
         }
 
+        const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
+
         private List<Member> BuildMemberList()
         {
             var list = new List<Member>();
             if (target == null)
                 return list;
-
-            BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
+         
             var type = target.GetType();
             list.Add(new Member("Type", type, typeof(Type)));
 
-            foreach (var t in type.FollowC(t => t.BaseType).TakeWhile(t=> t!= typeof(ModifiableEntity) && t!= typeof(Modifiable)).Reverse())
+            foreach (var t in type.FollowC(t => t.BaseType).TakeWhile(t => t != typeof(ModifiableEntity) && t != typeof(Modifiable) && t != typeof(MixinEntity)).Reverse())
             {
-                foreach (var fi in t.GetFields(flags).OrderBy(f => f.MetadataToken))
+                foreach (var fi in t.GetFields(flags).Where(fi => fi.Name != "mixin").OrderBy(f => f.MetadataToken))
                 {
                     object value = fi.GetValue(target);
                     list.Add(new Member(fi.Name, value, fi.FieldType));
+                }
+            }
+
+            IdentifiableEntity ident = target as IdentifiableEntity;
+
+            if (ident != null)
+            {
+                foreach (var m in ident.AllMixin)
+                {
+                    list.Add(new Member(m.GetType().Name, m, m.GetType()));
                 }
             }
 

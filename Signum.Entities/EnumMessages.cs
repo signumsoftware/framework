@@ -11,8 +11,8 @@ namespace Signum.Entities
         Create,
         [Description("^Create (.*) from .*$")]
         CreateFromRegex,
-        [Description("Impossible to execute {0} from state {1}")]
-        ImpossibleToExecute0FromState1,
+        [Description("State should be {0} (instead of {1})")]
+        StateShouldBe0InsteadOf1,
         [Description("(in user interface)")]
         InUserInterface,
         [Description("Operation {0} ({1}) is not Authorized")]

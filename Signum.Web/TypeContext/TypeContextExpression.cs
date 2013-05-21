@@ -18,7 +18,7 @@ namespace Signum.Web
 {
     enum TypeContextNodeType
     {
-        TypeContext,
+        TypeContext = 1000,
     }
 
 
@@ -135,6 +135,13 @@ namespace Signum.Web
                 replacements.Add(lambda.Parameters[0], tce);
 
                 return Cast(Visit(lambda.Body));
+            }
+
+            if (m.Method.IsInstantiationOf(MixinDeclarations.miMixin))
+            {
+                var tce = Cast(Visit(m.Object));
+                var mixinType = m.Method.GetGenericArguments().SingleEx();
+                return new TypeContextExpression(tce.Properties, mixinType, tce.Route.Add(mixinType));
             }
 
             return base.VisitMethodCall(m);

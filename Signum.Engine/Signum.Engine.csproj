@@ -160,12 +160,9 @@
     <Compile Include="Linq\ViewAttributes.cs" />
     <Compile Include="Engine\SchemaSynchronizer.cs" />
     <Compile Include="Basics\MultiEnumLogic.cs" />
-    <Compile Include="Operations\BasicConstruct.cs" />
-    <Compile Include="Operations\BasicConstructFrom.cs" />
-    <Compile Include="Operations\BasicConstructFromMany.cs" />
-    <Compile Include="Operations\BasicDelete.cs" />
-    <Compile Include="Operations\BasicExecute.cs" />
     <Compile Include="Operations\Graph.cs" />
+    <Compile Include="Operations\GraphState.cs" />
+    <Compile Include="Operations\Internal.cs" />
     <Compile Include="Operations\OperationLogic.cs" />
     <Compile Include="Operations\Typle.cs" />
     <Compile Include="Retriever.cs" />

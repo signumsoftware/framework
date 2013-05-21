@@ -591,18 +591,19 @@ namespace Signum.Web
             TypeContext tc = TypeContextUtilities.UntypedNew(options.Entity, "");
             controller.ViewData.Model = tc;
 
-            var modifiable = (ModifiableEntity)options.Entity;
+            var entity = (ModifiableEntity)options.Entity;
 
-            controller.ViewData[ViewDataKeys.PartialViewName] = options.PartialViewName ?? Navigator.OnPartialViewName(modifiable);
-            
+            controller.ViewData[ViewDataKeys.PartialViewName] = options.PartialViewName ?? Navigator.OnPartialViewName(entity);
+            tc.ViewOverrides = Navigator.EntitySettings(entity.GetType()).ViewOverrides;
+
             if (controller.ViewData[ViewDataKeys.TabId] == null)
                 controller.ViewData[ViewDataKeys.TabId] = GetOrCreateTabID(controller);
 
             controller.ViewData[ViewDataKeys.ShowOperations] = options.ShowOperations;
 
-            AssertViewableEntitySettings(modifiable);
-            
-            tc.ReadOnly = options.ReadOnly ?? Navigator.IsReadOnly(modifiable);
+            AssertViewableEntitySettings(entity);
+
+            tc.ReadOnly = options.ReadOnly ?? Navigator.IsReadOnly(entity);
         }
 
         public string GetTypeTitle(ModifiableEntity mod)
@@ -633,6 +634,7 @@ namespace Signum.Web
             
             controller.ViewData.Model = typeContext;
             controller.ViewData[ViewDataKeys.PartialViewName] = viewOptions.PartialViewName ?? Navigator.OnPartialViewName(entity);
+            typeContext.ViewOverrides = Navigator.EntitySettings(entity.GetType()).ViewOverrides;
 
             bool isReadOnly = viewOptions.ReadOnly ?? Navigator.IsReadOnly(entity);
             if (isReadOnly)
@@ -668,6 +670,8 @@ namespace Signum.Web
 
             if (Navigator.IsReadOnly(cleanType))
                 cleanTC.ReadOnly = true;
+
+            cleanTC.ViewOverrides = Navigator.EntitySettings(cleanType).ViewOverrides;
 
             return new PartialViewResult
             {

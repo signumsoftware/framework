@@ -44,6 +44,9 @@ namespace Signum.Services
         Dictionary<PropertyRoute, Implementations> FindAllImplementations(Type root);
 
         [OperationContract, NetDataContract]
+        Dictionary<Type, HashSet<Type>> FindAllMixins();
+
+        [OperationContract, NetDataContract]
         Dictionary<Type, TypeDN> ServerTypes();
 
         [OperationContract, NetDataContract]

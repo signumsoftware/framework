@@ -26,7 +26,7 @@ namespace Signum.Test
             throw new AssertFailedException("No {0} has been thrown".Formato(typeof(T).Name));
         }
 
-        public static void Throws<T>(Action action, string messageToContain)
+        public static void Throws<T>(string messageToContain, Action action)
            where T : Exception
         {
             try

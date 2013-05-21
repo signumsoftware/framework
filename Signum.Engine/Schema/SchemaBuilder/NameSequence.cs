@@ -38,7 +38,10 @@ namespace Signum.Engine.Maps
 
         public override string ToString()
         {
-            return this.FollowC(a => a.PreSequence).Reverse().Skip(1).ToString(a => a.Value, "_");
+            if(PreSequence is VoidNameSequence)
+                return Value;
+
+            return "_".Combine(PreSequence.ToString(), Value);
         }
     }
 }

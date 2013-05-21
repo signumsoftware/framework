@@ -137,7 +137,13 @@ namespace Signum.Web
             if (settingsModifier != null)
                 settingsModifier(el);
 
-            return helper.InternalEntityList<S>(el);
+            var result = helper.InternalEntityList<S>(el);
+
+            var vo = el.ViewOverrides;
+            if (vo == null)
+                return result;
+
+            return vo.OnSurroundLine(el.PropertyRoute, helper, tc, result);
         }
     }
 }

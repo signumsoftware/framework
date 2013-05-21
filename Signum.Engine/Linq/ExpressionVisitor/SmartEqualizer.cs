@@ -527,7 +527,7 @@ namespace Signum.Engine.Linq
 
                 return new EntityExpression(
                     ei.GetType(),
-                    Expression.Constant(ei.IdOrNull ?? int.MinValue), null, null, avoidExpandOnRetrieving: true);
+                    Expression.Constant(ei.IdOrNull ?? int.MinValue), null, null, null, avoidExpandOnRetrieving: true);
             }
             
             return null;
@@ -548,7 +548,7 @@ namespace Signum.Engine.Linq
 
                 Expression id = Expression.Constant(lite.IdOrNull ?? int.MinValue);
 
-                EntityExpression ere = new EntityExpression(lite.EntityType, id, null, null, false);
+                EntityExpression ere = new EntityExpression(lite.EntityType, id, null, null, null, false);
 
                 return new LiteReferenceExpression(Lite.Generate(lite.EntityType), ere, null);
             }

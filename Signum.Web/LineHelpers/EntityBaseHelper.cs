@@ -37,8 +37,7 @@ namespace Signum.Web
         {
             Type cleanEntityType = (typeContext.UntypedValue as Lite<IIdentifiable>).TryCC(l => l.EntityType) ?? typeContext.UntypedValue.GetType();
 
-            EntitySettings es = Navigator.Manager.EntitySettings.TryGetC(cleanEntityType)
-                .ThrowIfNullC("There's no EntitySettings registered for type {0}".Formato(cleanEntityType));
+    
 
             TypeContext tc = TypeContextUtilities.CleanTypeContext((TypeContext)typeContext);
 
@@ -54,8 +53,12 @@ namespace Signum.Web
             }
             
             string partialViewName = line.PartialViewName;
-            if (string.IsNullOrEmpty(partialViewName))
+            if (partialViewName == null)
+            {
+                EntitySettings es = Navigator.EntitySettings(cleanEntityType);
                 partialViewName = es.OnPartialViewName((ModifiableEntity)tc.UntypedValue);
+                tc.ViewOverrides = es.ViewOverrides;
+            }
 
             switch (mode)
             {

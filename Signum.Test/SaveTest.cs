@@ -168,8 +168,8 @@ namespace Signum.Test
             }
 
         }
-
-          [TestMethod]
+        
+        [TestMethod]
         public void RetrieveSealed()
         {
             using (Transaction tr = new Transaction())
@@ -178,8 +178,8 @@ namespace Signum.Test
                 var albums = Database.Query<AlbumDN>().ToList();
 
                 Assert2.AssertAll(GraphExplorer.FromRoots(albums), a => a.Modified == ModifiedState.Sealed);
-                
-                Assert2.Throws<InvalidOperationException>(() => albums.First().Name = "New name", "sealed");
+
+                Assert2.Throws<InvalidOperationException>("sealed", () => albums.First().Name = "New name");
 
 
                 var notes = Database.Query<NoteWithDateDN>().ToList();

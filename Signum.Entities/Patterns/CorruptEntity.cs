@@ -7,8 +7,10 @@ using Signum.Utilities;
 namespace Signum.Entities
 {
     [Serializable] // Just a pattern
-    public class CorruptEntity : Entity
+    public class CorruptMixin : MixinEntity
     {
+        CorruptMixin(IdentifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next) { }
+
         bool corrupt;
         public bool Corrupt
         {
@@ -22,24 +24,15 @@ namespace Signum.Entities
 
             if (Corrupt)
             {
-                string integrity = base.IdentifiableIntegrityCheck(); // So, no corruption allowed
+                string integrity = MainEntity.IdentifiableIntegrityCheckBase(); // So, no corruption allowed
                 if (string.IsNullOrEmpty(integrity))
                 {
                     this.Corrupt = false;
-                    if (!this.IsNew)
-                        Corruption.OnCorruptionRemoved(this);
+                    if (!MainEntity.IsNew)
+                        Corruption.OnCorruptionRemoved(MainEntity);
                 }
-                else if(this.IsNew)
-                    Corruption.OnSaveCorrupted(this, integrity);
-                    
-            }
-        }
-
-        public override string IdentifiableIntegrityCheck()
-        {
-            using (Corrupt ? Corruption.AllowScope() : null)
-            {
-                return base.IdentifiableIntegrityCheck();
+                else if (MainEntity.IsNew)
+                    Corruption.OnSaveCorrupted(MainEntity, integrity);
             }
         }
     }
@@ -71,7 +64,6 @@ namespace Signum.Entities
             if (SaveCorrupted != null)
                 SaveCorrupted(corruptEntity, integrity);
         }
-
 
         public static event Action<IdentifiableEntity> CorruptionRemoved;
 

@@ -301,6 +301,28 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectMixinThrows()
+        {
+            Assert2.Throws<InvalidOperationException>("without their main entity", () =>
+                Database.Query<NoteWithDateDN>().Select(a => a.Mixin<CorruptMixin>()).ToArray());
+        }
+
+
+        [TestMethod]
+        public void SelectMixinField()
+        {
+            Database.Query<NoteWithDateDN>().Select(a => a.Mixin<CorruptMixin>().Corrupt).ToArray();
+        }
+
+        [TestMethod]
+        public void SelectMixinCollection()
+        {
+            var result = (from n in Database.Query<NoteWithDateDN>()
+                          from c in n.Mixin<ColaboratorsMixin>().Colaborators
+                          select c).ToArray();
+        }
+
+        [TestMethod]
         public void SelectNullable()
         {
             var durations = (from a in Database.Query<AlbumDN>()

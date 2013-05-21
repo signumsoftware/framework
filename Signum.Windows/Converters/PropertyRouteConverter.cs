@@ -54,8 +54,6 @@ namespace Signum.Windows
 
             foreach (var step in steps)
             {
-                Reflector.AssertValidIdentifier(step);
-
                 context = context.Add(step);
             }
 

@@ -23,8 +23,6 @@ namespace Signum.Entities
         public bool AllowMultipleNulls { get; set; }
     }
 
-
-
     [Serializable]
     public struct Implementations : IEquatable<Implementations>, ISerializable
     {

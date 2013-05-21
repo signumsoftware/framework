@@ -1,347 +1,570 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Signum.Utilities;
-using Signum.Utilities.ExpressionTrees;
-using Signum.Engine.Maps;
-using System.Threading;
+using Signum.Engine.Basics;
+using Signum.Entine.Operations.Internal;
 using Signum.Entities;
-using System.Diagnostics;
-using Signum.Engine.SchemaInfoTables;
-using Signum.Utilities.Reflection;
-using Signum.Utilities.DataStructures;
-using System.Xml.Linq;
-using System.ComponentModel;
-using System.Linq.Expressions;
 using Signum.Entities.Basics;
+using Signum.Utilities;
 
 namespace Signum.Engine.Operations
 {
-    public interface IGraphHasFromStatesOperation
+    public class Graph<T>
+         where T : class, IIdentifiable
     {
-        bool HasFromStates { get; }
-    }
-
-    public class Graph<E, S>
-        where E : IdentifiableEntity
-        where S : struct
-    {
-        public interface IGraphOperation : IOperation
+        public class Construct : _Construct<T>, IConstructOperation
         {
-        }
+            protected readonly Enum key;
+            Enum IOperation.Key { get { return key; } }
+            Type IOperation.Type { get { return typeof(T); } }
+            OperationType IOperation.OperationType { get { return OperationType.Constructor; } }
+            bool IOperation.Returns { get { return true; } }
+            Type IOperation.ReturnType { get { return typeof(T); } }
 
-        public interface IGraphToStateOperation : IGraphOperation
-        {
-            S ToState { get; }
-        }
+            //public Func<object[], T> Construct { get; set; } (inherited)
+            public bool Lite { get { return false; } }
 
-        public interface IGraphFromStatesOperation : IGraphOperation, IGraphHasFromStatesOperation
-        {
-            S[] FromStates { get; }
-        }
-
-        public class Execute : BasicExecute<E>, IGraphToStateOperation, IGraphFromStatesOperation, IEntityOperation
-        {
-            S? toState;
-            public S ToState
-            {
-                get { return toState.Value; }
-                set { toState = value; }
-            }
-            
-            public S[] FromStates { get; set; }
-
-            bool IGraphHasFromStatesOperation.HasFromStates
-            {
-                get { return !FromStates.IsNullOrEmpty(); }
-            }
-
-            public Execute(Enum key)
-                : base(key)
-            {
-            }
-
-            bool IEntityOperation.HasCanExecute { get { return true; } }
-
-            protected override string OnCanExecute(E entity)
-            {
-                S state = Graph<E, S>.GetStateFunc(entity);
-
-                string stateError = state.InState(key, FromStates);
-                if (stateError.HasText())
-                    return stateError;
-
-                return base.OnCanExecute(entity);
-            }
-
-            protected override void OnBeginOperation(E entity)
-            {
-                base.OnBeginOperation(entity);
-
-                S oldState = Graph<E, S>.GetStateFunc(entity);
-            }
-
-            protected override void OnEndOperation(E entity)
-            {
-                Graph<E, S>.AssertEnterState(entity, this);
-
-                base.OnEndOperation(entity);
-            }
-
-            public override void AssertIsValid()
-            {
-                base.AssertIsValid();
-
-                if (toState == null)
-                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".Formato(key));
-
-                if (FromStates == null)
-                    throw new InvalidOperationException("Operation {0} does not have FromStates initialized".Formato(key));
-            }
-        }
-
-        public class Delete : BasicDelete<E>, IGraphOperation, IGraphFromStatesOperation
-        {
-            public S[] FromStates { get; set; }
-
-            bool IGraphHasFromStatesOperation.HasFromStates
-            {
-                get { return !FromStates.IsNullOrEmpty(); }
-            }
-
-            public Delete(Enum key)
-                : base(key)
-            {
-            }
-
-            protected override string OnCanDelete(E entity)
-            {
-                S state = Graph<E, S>.GetStateFunc(entity);
-                if (FromStates != null && !FromStates.Contains(state))
-                    return OperationMessage.ImpossibleToExecute0FromState1.NiceToString().Formato(key, ((Enum)(object)state).NiceToString());
-
-                return base.OnCanDelete(entity);
-            }
-
-            protected override void OnDelete(E entity, object[] args)
-            {
-                S oldState = Graph<E, S>.GetStateFunc(entity);
-
-                base.OnDelete(entity, args);
-            }
-
-            public override void AssertIsValid()
-            {
-                base.AssertIsValid();
-
-                if (FromStates == null)
-                    throw new InvalidOperationException("Operation {0} does not have FromStates initialized".Formato(key));
-            }
-        }
-
-        public class Construct : BasicConstruct<E>, IGraphToStateOperation
-        {
-            S? toState;
-            public S ToState
-            {
-                get { return toState.Value; }
-                set { toState = value; }
-            }
 
             public Construct(Enum key)
-                : base(key)
             {
+                this.key = key;
             }
 
-            protected override void OnEndOperation(E entity)
+            IIdentifiable IConstructOperation.Construct(params object[] args)
             {
-                Graph<E, S>.AssertEnterState((E)entity, this);
-
-                base.OnEndOperation(entity);
-            }
-
-            public override string ToString()
-            {
-                return base.ToString() + " in state " + ToState;
-            }
-
-            public override void AssertIsValid()
-            {
-                base.AssertIsValid();
-
-                if (toState == null)
-                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".Formato(key));
-
-            }
-        }
-
-        public class ConstructFrom<F> : BasicConstructFrom<F, E>, IGraphToStateOperation
-            where F : class, IIdentifiable
-        {
-            S? toState;
-            public S ToState
-            {
-                get { return toState.Value; }
-                set { toState = value; }
-            }
-
-            public ConstructFrom(Enum key)
-                : base(key)
-            {
-            }
-
-            protected override void OnEndOperation(E result)
-            {
-                Graph<E, S>.AssertEnterState(result, this);
-
-                base.OnEndOperation(result);
-            }
-
-
-            public override string ToString()
-            {
-                return base.ToString() + " in state " + ToState;
-            }
-
-            public override void AssertIsValid()
-            {
-                base.AssertIsValid();
-
-                if (toState == null)
-                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".Formato(key));
-            }
-        }
-
-        public class ConstructFromMany<F> : BasicConstructFromMany<F, E>, IGraphToStateOperation
-            where F : class, IIdentifiable
-        {
-            S? toState;
-            public S ToState
-            {
-                get { return toState.Value; }
-                set { toState = value; }
-            }
-
-            public ConstructFromMany(Enum key)
-                : base(key)
-            {
-            }
-
-            protected override void OnEndOperation(E result)
-            {
-                Graph<E, S>.AssertEnterState(result, this);
-
-                base.OnEndOperation(result);
-            }
-
-            public override string ToString()
-            {
-                return base.ToString() + " in state " + ToState;
-            }
-
-            public override void AssertIsValid()
-            {
-                base.AssertIsValid();
-
-                if (toState == null)
-                    throw new InvalidOperationException("Operation {0} does not have ToState initialized".Formato(key));
-            }
-        }
-
-        protected Graph()
-        {
-            throw new InvalidOperationException("OperationGraphs should not be instantiated");
-        }
-
-        static Expression<Func<E, S>> getState;
-        public static Expression<Func<E, S>> GetState
-        {
-            get { return getState; }
-            set
-            {
-                getState = value;
-                GetStateFunc = getState == null ? null : getState.Compile();
-            }
-        }
-
-        public static Func<E, S> GetStateFunc{get; private set;}
-
-
-        public static Action<E, S> EnterState { get; set; }
-        public static Action<E, S> ExitState { get; set; }
-
-
-
-        public static XDocument ToDGML()
-        {
-            return ToDirectedGraph().ToDGML();
-        }
-
-        public static DirectedEdgedGraph<string, string> ToDirectedGraph()
-        {
-            DirectedEdgedGraph<string, string> result = new DirectedEdgedGraph<string, string>();
-
-            Action<string, string, Enum> Add = (from, to, key) =>
+                using (HeavyProfiler.Log("Construct", () => OperationDN.UniqueKey(key)))
                 {
-                    Dictionary<string, string> dic = result.TryRelatedTo(from);
-                    if (dic == null || !dic.ContainsKey(to))
-                        result.Add(from, to, key.ToString());
-                    else
-                        result.Add(from, to, dic[to] + ", " + key.ToString());
-                };
+                    OperationLogic.AssertOperationAllowed(key, inUserInterface: false);
 
-            foreach (var item in OperationLogic.GraphOperations<E, S>())
-            {
-                switch (item.OperationType)
-                {
-                    case OperationType.Execute:
+                    using (OperationLogic.AllowSave<T>())
+                    {
+                        try
                         {
-                            Execute gOp = (Execute)item;
+                            using (Transaction tr = new Transaction())
+                            {
+                                OperationLogDN log = new OperationLogDN
+                                {
+                                    Operation = MultiEnumLogic<OperationDN>.ToEntity(key),
+                                    Start = TimeZoneManager.Now,
+                                    User = UserHolder.Current.ToLite()
+                                };
 
-                            if (gOp.FromStates == null)
-                                Add("[All States]", gOp.ToState.ToString(), item.Key);
-                            else
-                                foreach (var s in gOp.FromStates)
-                                    Add(s.ToString(), gOp.ToState.ToString(), item.Key);
+                                OnBeginOperation();
 
+                                T entity = Construct(args);
 
-                        } break;
-                    case OperationType.Delete:
+                                OnEndOperation(entity);
+
+                                if (!entity.IsNew)
+                                {
+                                    log.Target = entity.ToLite();
+                                    log.End = TimeZoneManager.Now;
+                                    using (ExecutionMode.Global())
+                                        log.Save();
+                                }
+
+                                return tr.Commit(entity);
+                            }
+                        }
+                        catch (Exception ex)
                         {
-                            Delete dOp = (Delete)item;
-                            if (dOp.FromStates == null)
-                                Add("[All States]", "[Deleted]", item.Key);
-                            else
-                                foreach (var s in dOp.FromStates)
-                                    Add(s.ToString(), "[Deleted]", item.Key);
-
-
-                        } break;
-                    case OperationType.Constructor:
-                    case OperationType.ConstructorFrom:
-                    case OperationType.ConstructorFromMany:
-                        {
-                            string from = item.OperationType == OperationType.Constructor ? "[New]" :
-                                            item.OperationType == OperationType.ConstructorFrom ? "[From {0}]".Formato(item.GetType().GetGenericArguments()[2].TypeName()) :
-                                            item.OperationType == OperationType.ConstructorFromMany ? "[FromMany {0}]".Formato(item.GetType().GetGenericArguments()[2].TypeName()) : "";
-
-                            Add(from, ((IGraphToStateOperation)item).ToState.ToString(), item.Key);
-
-
-                        } break;
+                            OperationLogic.OnErrorOperation(this, null, args, ex);
+                            throw;
+                        }
+                    }
                 }
             }
 
-            return result;
+            protected virtual void OnBeginOperation()
+            {
+                OperationLogic.OnBeginOperation(this, null);
+            }
+
+            protected virtual void OnEndOperation(T entity)
+            {
+                OperationLogic.OnEndOperation(this, entity);
+            }
+
+            public virtual void AssertIsValid()
+            {
+                if (Construct == null)
+                    throw new InvalidOperationException("Operation {0} does not have Constructor initialized".Formato(key));
+            }
+
+            public override string ToString()
+            {
+                return "{0} Construct {1}".Formato(key, typeof(T));
+            }
         }
 
-        internal static void AssertEnterState(E entity, IGraphToStateOperation operation)
+        public class ConstructFrom<F> : IConstructorFromOperation
+            where F : class, IIdentifiable
         {
-            S state = GetStateFunc(entity);
+            protected readonly Enum key;
+            Enum IOperation.Key { get { return key; } }
+            Type IOperation.Type { get { return typeof(F); } }
+            OperationType IOperation.OperationType { get { return OperationType.ConstructorFrom; } }
 
-            if (!state.Equals(operation.ToState))
-                throw new InvalidOperationException("After executing {0} the state should be {1}, but is {2}".Formato(operation.Key, operation.ToState, state));
+            public bool Lite { get; set; }
+            bool IOperation.Returns { get { return true; } }
+            Type IOperation.ReturnType { get { return typeof(T); } }
+
+            bool IEntityOperation.HasCanExecute { get { return CanConstruct != null; } }
+
+            public bool AllowsNew { get; set; }
+
+            public Func<F, object[], T> Construct { get; set; }
+            public Func<F, string> CanConstruct { get; set; }
+
+            public ConstructFrom(Enum key)
+            {
+                this.key = key;
+                this.Lite = true;
+            }
+
+            string IEntityOperation.CanExecute(IIdentifiable entity)
+            {
+                return OnCanConstruct(entity);
+            }
+
+            string OnCanConstruct(IIdentifiable entity)
+            {
+                if (entity.IsNew && !AllowsNew)
+                    return EngineMessage.TheEntity0IsNew.NiceToString().Formato(entity);
+
+                if (CanConstruct != null)
+                    return CanConstruct((F)entity);
+
+                return null;
+            }
+
+            IIdentifiable IConstructorFromOperation.Construct(IIdentifiable entity, params object[] args)
+            {
+                using (HeavyProfiler.Log("ConstructFrom", () => OperationDN.UniqueKey(key)))
+                {
+                    OperationLogic.AssertOperationAllowed(key, inUserInterface: false);
+
+                    string error = OnCanConstruct(entity);
+                    if (error != null)
+                        throw new ApplicationException(error);
+
+                    using (OperationLogic.AllowSave(entity.GetType()))
+                    using (OperationLogic.AllowSave<T>())
+                    {
+                        try
+                        {
+                            using (Transaction tr = new Transaction())
+                            {
+                                OperationLogDN log = new OperationLogDN
+                                {
+                                    Operation = MultiEnumLogic<OperationDN>.ToEntity(key),
+                                    Start = TimeZoneManager.Now,
+                                    User = UserHolder.Current.ToLite()
+                                };
+
+                                OnBeginOperation((IdentifiableEntity)entity);
+
+                                T result = Construct((F)entity, args);
+
+                                OnEndOperation(result);
+
+                                if (!result.IsNew)
+                                {
+                                    log.Target = result.ToLite();
+                                    log.End = TimeZoneManager.Now;
+                                    using (ExecutionMode.Global())
+                                        log.Save();
+                                }
+
+                                return tr.Commit(result);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, args, e);
+                            throw;
+                        }
+                    }
+                }
+            }
+
+            protected virtual void OnBeginOperation(IdentifiableEntity entity)
+            {
+                OperationLogic.OnBeginOperation(this, entity);
+            }
+
+            protected virtual void OnEndOperation(T result)
+            {
+                OperationLogic.OnEndOperation(this, result);
+            }
+
+
+            public virtual void AssertIsValid()
+            {
+                if (Construct == null)
+                    throw new InvalidOperationException("Operation {0} does not hace Construct initialized".Formato(key));
+            }
+
+            public override string ToString()
+            {
+                return "{0} ConstructFrom {1} -> {2}".Formato(key, typeof(F), typeof(T));
+            }
+
+        }
+
+        public class ConstructFromMany<F> : IConstructorFromManyOperation
+            where F : class, IIdentifiable
+        {
+            protected readonly Enum key;
+            Enum IOperation.Key { get { return key; } }
+            Type IOperation.Type { get { return typeof(F); } }
+            OperationType IOperation.OperationType { get { return OperationType.ConstructorFromMany; } }
+
+            bool IOperation.Returns { get { return true; } }
+            Type IOperation.ReturnType { get { return typeof(T); } }
+
+            public Func<List<Lite<F>>, object[], T> Construct { get; set; }
+
+            public ConstructFromMany(Enum key)
+            {
+                this.key = key;
+            }
+
+            IIdentifiable IConstructorFromManyOperation.Construct(IEnumerable<Lite<IIdentifiable>> lites, params object[] args)
+            {
+                using (HeavyProfiler.Log("ConstructFromMany", () => OperationDN.UniqueKey(key)))
+                {
+                    OperationLogic.AssertOperationAllowed(key, inUserInterface: false);
+
+                    using (OperationLogic.AllowSave<F>())
+                    using (OperationLogic.AllowSave<T>())
+                    {
+                        try
+                        {
+                            using (Transaction tr = new Transaction())
+                            {
+                                OperationLogDN log = new OperationLogDN
+                                {
+                                    Operation = MultiEnumLogic<OperationDN>.ToEntity(key),
+                                    Start = TimeZoneManager.Now,
+                                    User = UserHolder.Current.ToLite()
+                                };
+
+                                OnBeginOperation();
+
+                                T result = OnConstruct(lites.Cast<Lite<F>>().ToList(), args);
+
+                                OnEndOperation(result);
+
+                                if (!result.IsNew)
+                                {
+                                    log.Target = result.ToLite();
+                                    log.End = TimeZoneManager.Now;
+                                    using (ExecutionMode.Global())
+                                        log.Save();
+                                }
+
+                                return tr.Commit(result);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            OperationLogic.OnErrorOperation(this, null, args, e);
+                            throw;
+                        }
+                    }
+                }
+            }
+
+            protected virtual void OnBeginOperation()
+            {
+                OperationLogic.OnBeginOperation(this, null);
+            }
+
+            protected virtual void OnEndOperation(T result)
+            {
+                OperationLogic.OnEndOperation(this, result);
+            }
+
+            protected virtual T OnConstruct(List<Lite<F>> lites, object[] args)
+            {
+                return Construct(lites, args);
+            }
+
+            public virtual void AssertIsValid()
+            {
+                if (Construct == null)
+                    throw new InvalidOperationException("Operation {0} Constructor initialized".Formato(key));
+            }
+
+            public override string ToString()
+            {
+                return "{0} ConstructFromMany {1} -> {2}".Formato(key, typeof(F), typeof(T));
+            }
+
+        }
+
+        public class Execute : _Execute<T>, IExecuteOperation
+        {
+            protected readonly Enum key;
+            Enum IOperation.Key { get { return key; } }
+            Type IOperation.Type { get { return typeof(T); } }
+            OperationType IOperation.OperationType { get { return OperationType.Execute; } }
+            public bool Lite { get; set; }
+            bool IOperation.Returns { get { return true; } }
+            Type IOperation.ReturnType { get { return null; } }
+
+            bool IEntityOperation.HasCanExecute { get { return CanExecute != null; } }
+
+            public bool AllowsNew { get; set; }
+
+            //public Action<T, object[]> Execute { get; set; } (inherited)
+            public Func<T, string> CanExecute { get; set; }
+
+            public Execute(Enum key)
+            {
+                this.key = key;
+                this.Lite = true;
+            }
+
+            string IEntityOperation.CanExecute(IIdentifiable entity)
+            {
+                return OnCanExecute((T)entity);
+            }
+
+            protected virtual string OnCanExecute(T entity)
+            {
+                if (entity.IsNew && !AllowsNew)
+                    return EngineMessage.TheEntity0IsNew.NiceToString().Formato(entity);
+
+                if (CanExecute != null)
+                    return CanExecute(entity);
+
+                return null;
+            }
+
+            void IExecuteOperation.Execute(IIdentifiable entity, params object[] parameters)
+            {
+                using (HeavyProfiler.Log("Execute", () => OperationDN.UniqueKey(key)))
+                {
+                    OperationLogic.AssertOperationAllowed(key, inUserInterface: false);
+
+                    string error = OnCanExecute((T)entity);
+                    if (error != null)
+                        throw new ApplicationException(error);
+
+                    OperationLogDN log = new OperationLogDN
+                    {
+                        Operation = MultiEnumLogic<OperationDN>.ToEntity(key),
+                        Start = TimeZoneManager.Now,
+                        User = UserHolder.Current.ToLite()
+                    };
+
+                    using (OperationLogic.AllowSave(entity.GetType()))
+                    {
+                        try
+                        {
+                            using (Transaction tr = new Transaction())
+                            {
+                                OnBeginOperation((T)entity);
+
+                                Execute((T)entity, parameters);
+
+                                OnEndOperation((T)entity);
+
+                                entity.Save(); //Nothing happens if already saved
+
+                                log.Target = entity.ToLite(); //in case AllowsNew == true
+                                log.End = TimeZoneManager.Now;
+                                using (ExecutionMode.Global())
+                                    log.Save();
+
+                                tr.Commit();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, parameters, ex);
+
+                            if (!entity.IsNew)
+                            {
+                                if (Transaction.InTestTransaction)
+                                    throw;
+
+                                var exLog = ex.LogException();
+
+                                using (Transaction tr2 = Transaction.ForceNew())
+                                {
+                                    OperationLogDN log2 = new OperationLogDN
+                                    {
+                                        Operation = log.Operation,
+                                        Start = log.Start,
+                                        User = log.User,
+                                        Target = entity.ToLite(),
+                                        Exception = exLog.ToLite(),
+                                        End = TimeZoneManager.Now
+                                    };
+
+                                    using (ExecutionMode.Global())
+                                        log2.Save();
+
+                                    tr2.Commit();
+                                }
+                            }
+                            throw;
+                        }
+                    }
+                }
+            }
+
+            protected virtual void OnBeginOperation(T entity)
+            {
+                OperationLogic.OnBeginOperation(this, entity);
+            }
+
+            protected virtual void OnEndOperation(T entity)
+            {
+                OperationLogic.OnEndOperation(this, entity);
+            }
+
+            public virtual void AssertIsValid()
+            {
+                if (Execute == null)
+                    throw new InvalidOperationException("Operation {0} does not have Execute initialized".Formato(key));
+            }
+
+            public override string ToString()
+            {
+                return "{0} Execute on {1}".Formato(key, typeof(T));
+            }
+        }
+
+        public class Delete : _Delete<T>, IDeleteOperation
+        {
+            protected readonly Enum key;
+            Enum IOperation.Key { get { return key; } }
+            Type IOperation.Type { get { return typeof(T); } }
+            OperationType IOperation.OperationType { get { return OperationType.Delete; } }
+            public bool Lite { get; set; }
+            bool IOperation.Returns { get { return false; } }
+            Type IOperation.ReturnType { get { return null; } }
+
+            public bool AllowsNew { get { return false; } }
+
+            bool IEntityOperation.HasCanExecute { get { return CanDelete != null; } }
+
+            //public Action<T, object[]> Delete { get; set; } (inherited)
+            public Func<T, string> CanDelete { get; set; }
+
+            public Delete(Enum key)
+            {
+                this.key = key;
+                this.Lite = true;
+            }
+
+            string IEntityOperation.CanExecute(IIdentifiable entity)
+            {
+                return OnCanDelete((T)entity);
+            }
+
+            protected virtual string OnCanDelete(T entity)
+            {
+                if (entity.IsNew)
+                    return EngineMessage.TheEntity0IsNew.NiceToString().Formato(entity);
+
+                if (CanDelete != null)
+                    return CanDelete(entity);
+
+                return null;
+            }
+
+            void IDeleteOperation.Delete(IIdentifiable entity, params object[] parameters)
+            {
+                using (HeavyProfiler.Log("Delete", () => OperationDN.UniqueKey(key)))
+                {
+                    OperationLogic.AssertOperationAllowed(key, inUserInterface: false);
+
+                    string error = OnCanDelete((T)entity);
+                    if (error != null)
+                        throw new ApplicationException(error);
+
+                    OperationLogDN log = new OperationLogDN
+                    {
+                        Operation = MultiEnumLogic<OperationDN>.ToEntity(key),
+                        Start = TimeZoneManager.Now,
+                        User = UserHolder.Current.ToLite()
+                    };
+
+                    using (OperationLogic.AllowSave(entity.GetType()))
+                    {
+                        try
+                        {
+                            using (Transaction tr = new Transaction())
+                            {
+                                OperationLogic.OnBeginOperation(this, (IdentifiableEntity)entity);
+
+                                OnDelete((T)entity, parameters);
+
+                                OperationLogic.OnEndOperation(this, (IdentifiableEntity)entity);
+
+                                log.Target = entity.ToLite(); //in case AllowsNew == true
+                                log.End = TimeZoneManager.Now;
+                                using (ExecutionMode.Global())
+                                    log.Save();
+
+                                tr.Commit();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            OperationLogic.OnErrorOperation(this, (IdentifiableEntity)entity, parameters, ex);
+
+                            if (Transaction.InTestTransaction)
+                                throw;
+
+                            var exLog = ex.LogException();
+
+                            using (Transaction tr2 = Transaction.ForceNew())
+                            {
+                                var log2 = new OperationLogDN
+                                {
+                                    Operation = log.Operation,
+                                    Start = log.Start,
+                                    End = TimeZoneManager.Now,
+                                    Target = entity.ToLite(),
+                                    Exception = exLog.ToLite(),
+                                    User = log.User
+                                };
+
+                                using (ExecutionMode.Global())
+                                    log2.Save();
+
+                                tr2.Commit();
+                            }
+
+                            throw;
+                        }
+                    }
+                }
+            }
+
+            protected virtual void OnDelete(T entity, object[] args)
+            {
+                Delete(entity, args);
+            }
+
+
+            public virtual void AssertIsValid()
+            {
+                if (Delete == null)
+                    throw new InvalidOperationException("Operation {0} does not have Delete initialized".Formato(key));
+            }
+
+            public override string ToString()
+            {
+                return "{0} Delete {1}".Formato(key, typeof(T));
+            }
         }
     }
 }
