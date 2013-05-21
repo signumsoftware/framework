@@ -44,14 +44,14 @@ namespace Signum.Engine.Chart
 
                 sb.Schema.EntityEvents<UserChartDN>().Retrieved += ChartLogic_Retrieved;
 
-                new BasicExecute<UserChartDN>(UserChartOperation.Save)
+                new Graph<UserChartDN>.Execute(UserChartOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
                     Execute = (uc, _) => { }
                 }.Register();
 
-                new BasicDelete<UserChartDN>(UserChartOperation.Delete)
+                new Graph<UserChartDN>.Delete(UserChartOperation.Delete)
                 {
                     Lite = true,
                     Delete = (uc, _) => { uc.Delete(); }

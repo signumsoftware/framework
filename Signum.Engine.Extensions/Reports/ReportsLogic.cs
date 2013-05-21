@@ -38,14 +38,14 @@ namespace Signum.Engine.Reports
                         s.DisplayName,
                     });
 
-                new BasicExecute<ExcelReportDN>(ExcelReportOperation.Save)
+                new Graph<ExcelReportDN>.Execute(ExcelReportOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
                     Execute = (er, _) => { }
                 }.Register();
 
-                new BasicDelete<ExcelReportDN>(ExcelReportOperation.Delete)
+                new Graph<ExcelReportDN>.Delete(ExcelReportOperation.Delete)
                 {
                     Lite = true,
                     Delete = (er, _) => { er.Delete(); }

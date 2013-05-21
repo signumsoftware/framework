@@ -58,7 +58,7 @@ namespace Signum.Engine.Mailing
 
                 sb.Schema.Initializing[InitLevel.Level2NormalEntities] += SetCache;
 
-                new BasicExecute<SMTPConfigurationDN>(SMTPConfigurationOperation.Save)
+                new Graph<SMTPConfigurationDN>.Execute(SMTPConfigurationOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,

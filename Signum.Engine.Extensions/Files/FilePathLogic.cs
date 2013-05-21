@@ -84,7 +84,7 @@ namespace Signum.Engine.Files
                 dqm.RegisterExpression((FilePathDN fp) => fp.WebImage(), () => typeof(WebImage).NiceName(), "Image");
                 dqm.RegisterExpression((FilePathDN fp) => fp.WebDownload(), () => typeof(WebDownload).NiceName(), "Download");
 
-                new BasicExecute<FileRepositoryDN>(FileRepositoryOperation.Save)
+                new Graph<FileRepositoryDN>.Execute(FileRepositoryOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,

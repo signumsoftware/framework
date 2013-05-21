@@ -52,7 +52,7 @@ namespace Signum.Engine.Mailing
                 ProcessLogic.AssertStarted(sb);
                 ProcessLogic.Register(EmailMessageProcesses.SendEmails, new SendEmailProcessAlgorithm());
 
-                new BasicConstructFromMany<EmailMessageDN, ProcessDN>(EmailMessageOperation.ReSendEmails)
+                new Graph<ProcessDN>.ConstructFromMany<EmailMessageDN>(EmailMessageOperation.ReSendEmails)
                 {
                     Construct = (messages, args) =>
                     {

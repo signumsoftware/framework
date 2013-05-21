@@ -48,14 +48,14 @@ namespace Signum.Engine.Chart
 
         private static void RegisterOperations()
         {
-            new BasicExecute<ChartScriptDN>(ChartScriptOperation.Save)
+            new Graph<ChartScriptDN>.Execute(ChartScriptOperation.Save)
             {
                 AllowsNew = true,
                 Lite = false,
                 Execute = (cs, _) => { }
             }.Register();
 
-            new BasicConstructFrom<ChartScriptDN, ChartScriptDN>(ChartScriptOperation.Clone)
+            new Graph<ChartScriptDN>.ConstructFrom<ChartScriptDN>(ChartScriptOperation.Clone)
             {
                 Construct = (cs, _) => new ChartScriptDN
                 {
@@ -74,7 +74,7 @@ namespace Signum.Engine.Chart
             }.Register();
 
 
-            new BasicDelete<ChartScriptDN>(ChartScriptOperation.Delete)
+            new Graph<ChartScriptDN>.Delete(ChartScriptOperation.Delete)
             {
                 CanDelete = c => Database.Query<UserChartDN>().Any(a => a.ChartScript == c) ? "There are {0} in the database using {1}".Formato(typeof(UserChartDN).NicePluralName(), c) : null,
                 Delete = (c, _) => c.Delete(),

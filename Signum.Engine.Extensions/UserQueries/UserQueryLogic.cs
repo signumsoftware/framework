@@ -46,14 +46,14 @@ namespace Signum.Engine.UserQueries
 
                 sb.Schema.EntityEvents<UserQueryDN>().Retrieved += UserQueryLogic_Retrieved;
 
-                new BasicExecute<UserQueryDN>(UserQueryOperation.Save)
+                new Graph<UserQueryDN>.Execute(UserQueryOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
                     Execute = (uq, _) => { }
                 }.Register();
 
-                new BasicDelete<UserQueryDN>(UserQueryOperation.Delete)
+                new Graph<UserQueryDN>.Delete(UserQueryOperation.Delete)
                 {
                     Lite = true,
                     Delete = (uq, _) => uq.Delete()

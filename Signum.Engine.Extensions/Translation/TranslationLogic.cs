@@ -43,14 +43,14 @@ namespace Signum.Engine.Translation
 
                 dqm.RegisterExpression((IUserDN e) => e.Translator());
 
-                new BasicExecute<TranslatorDN>(TranslatorOperation.Save)
+                new Graph<TranslatorDN>.Execute(TranslatorOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
                     Execute = (e, _) => { }
                 }.Register();
 
-                new BasicDelete<TranslatorDN>(TranslatorOperation.Delete)
+                new Graph<TranslatorDN>.Delete(TranslatorOperation.Delete)
                 {
                     Delete = (e, _) => { e.Delete(); }
                 }.Register();

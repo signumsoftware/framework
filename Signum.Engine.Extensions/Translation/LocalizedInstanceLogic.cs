@@ -29,7 +29,7 @@ namespace Signum.Engine.Translation
                         e.Instance,
                     });
 
-                new BasicExecute<LocalizedInstanceDN>(LocalizedInstanceOperation.Save)
+                new Graph<LocalizedInstanceDN>.Execute(LocalizedInstanceOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,

@@ -73,7 +73,7 @@ namespace Signum.Engine.Alerts
 
                 MultiOptionalEnumLogic<AlertTypeDN>.Start(sb, () => SystemAlertTypes);
 
-                new BasicExecute<AlertTypeDN>(AlertTypeOperation.Save)
+                new Graph<AlertTypeDN>.Execute(AlertTypeOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
@@ -149,7 +149,7 @@ namespace Signum.Engine.Alerts
 
             new Execute(AlertOperation.SaveNew)
             {
-                FromStates = new[] { AlertState.New },
+                FromStates = { AlertState.New },
                 ToState = AlertState.Saved,
                 AllowsNew = true,
                 Lite = false,
@@ -158,7 +158,7 @@ namespace Signum.Engine.Alerts
 
             new Execute(AlertOperation.Save)
             {
-                FromStates = new[] { AlertState.Saved },
+                FromStates = { AlertState.Saved },
                 ToState = AlertState.Saved,
                 Lite = false,
                 Execute = (a, _) => { a.State = AlertState.Saved; }
@@ -166,7 +166,7 @@ namespace Signum.Engine.Alerts
 
             new Execute(AlertOperation.Attend)
             {
-                FromStates = new[] { AlertState.Saved },
+                FromStates = { AlertState.Saved },
                 ToState = AlertState.Attended,
                 Execute = (a, _) =>
                 {
@@ -178,7 +178,7 @@ namespace Signum.Engine.Alerts
 
             new Execute(AlertOperation.Unattend)
             {
-                FromStates = new[] { AlertState.Attended },
+                FromStates = { AlertState.Attended },
                 ToState = AlertState.Saved,
                 Execute = (a, _) =>
                 {

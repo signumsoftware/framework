@@ -96,7 +96,7 @@ namespace Signum.Engine.SMS
         {
             phoneNumberProviders[typeof(T)] = exp;
 
-            new BasicConstructFromMany<T, ProcessDN>(SMSProviderOperation.SendSMSMessage)
+            new Graph<ProcessDN>.ConstructFromMany<T>(SMSProviderOperation.SendSMSMessage)
             {
                 Construct = (providers, args) =>
                 {
@@ -178,7 +178,7 @@ namespace Signum.Engine.SMS
         {
             dataObjectProviders[typeof(T)] = func;
 
-            new BasicConstructFromMany<T, ProcessDN>(SMSProviderOperation.SendSMSMessagesFromTemplate)
+            new Graph<ProcessDN>.ConstructFromMany<T>(SMSProviderOperation.SendSMSMessagesFromTemplate)
             {
                 Construct = (providers, args) =>
                 {
@@ -221,7 +221,7 @@ namespace Signum.Engine.SMS
                 }
             }.Register();
 
-            new BasicConstructFrom<T, SMSMessageDN>(SMSMessageOperation.CreateSMSWithTemplateFromEntity)
+            new Graph<SMSMessageDN>.ConstructFrom<T>(SMSMessageOperation.CreateSMSWithTemplateFromEntity)
             {
                 Construct = (provider, args) =>
                 {
@@ -352,7 +352,7 @@ namespace Signum.Engine.SMS
                 ProcessLogic.Register(SMSMessageProcess.Send, new SMSMessageSendProcessAlgortihm());
                 ProcessLogic.Register(SMSMessageProcess.UpdateStatus, new SMSMessageUpdateStatusProcessAlgorithm());
 
-                new BasicConstructFromMany<SMSMessageDN, ProcessDN>(SMSMessageOperation.CreateUpdateStatusPackage)
+                new Graph<ProcessDN>.ConstructFromMany<SMSMessageDN>(SMSMessageOperation.CreateUpdateStatusPackage)
                 {
                     Construct = (messages, _) => UpdateMessages(messages.RetrieveFromListOfLite())
                 }.Register();
@@ -506,7 +506,7 @@ namespace Signum.Engine.SMS
             {
                 AllowsNew = true,
                 Lite = false,
-                FromStates = new[] { SMSMessageState.Created },
+                FromStates = { SMSMessageState.Created },
                 ToState = SMSMessageState.Sent,
                 Execute = (t, args) =>
                 {
@@ -518,7 +518,7 @@ namespace Signum.Engine.SMS
                 }
             }.Register();
 
-            new BasicExecute<SMSMessageDN>(SMSMessageOperation.UpdateStatus)
+            new Graph<SMSMessageDN>.Execute(SMSMessageOperation.UpdateStatus)
             {
                 CanExecute = m => m.State != SMSMessageState.Created ? null : SmsMessage.StatusCanNotBeUpdatedForNonSentMessages.NiceToString(),
                 Execute = (sms, args) =>

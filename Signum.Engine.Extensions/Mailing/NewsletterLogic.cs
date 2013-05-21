@@ -169,14 +169,14 @@ namespace Signum.Engine.Mailing
             {
                 AllowsNew = true,
                 Lite = false,
-                FromStates = new[] { NewsletterState.Created, NewsletterState.Saved },
+                FromStates = { NewsletterState.Created, NewsletterState.Saved },
                 ToState = NewsletterState.Saved,
                 Execute = (n, _) => n.State = NewsletterState.Saved
             }.Register();
 
             new Execute(NewsletterOperation.AddRecipients)
             {
-                FromStates = new[] { NewsletterState.Saved },
+                FromStates = { NewsletterState.Saved },
                 ToState = NewsletterState.Saved,
                 Execute = (n, args) =>
                 {
@@ -194,7 +194,7 @@ namespace Signum.Engine.Mailing
 
             new Execute(NewsletterOperation.RemoveRecipients)
             {
-                FromStates = new[] { NewsletterState.Saved },
+                FromStates = { NewsletterState.Saved },
                 ToState = NewsletterState.Saved,
                 Execute = (n, args) =>
                 {
@@ -212,7 +212,7 @@ namespace Signum.Engine.Mailing
 
             new Execute(NewsletterOperation.Send)
             {
-                FromStates = new[] { NewsletterState.Saved },
+                FromStates = { NewsletterState.Saved },
                 ToState = NewsletterState.Sent,
                 CanExecute = n => Database.Query<NewsletterDeliveryDN>().Any(d =>
                     d.Newsletter.RefersTo(n)) ? null : "There is not any delivery for this newsletter",

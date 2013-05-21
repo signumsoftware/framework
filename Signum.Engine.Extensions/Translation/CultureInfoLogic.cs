@@ -44,7 +44,7 @@ namespace Signum.Engine.Translation
                 CultureInfoDictionary = sb.GlobalLazy(() => Database.Query<CultureInfoDN>().ToDictionary(ci => CultureInfo.GetCultureInfo(ci.Name)),
                     invalidateWith: new InvalidateWith(typeof(CultureInfoDN)));
 
-                new BasicExecute<CultureInfoDN>(CultureInfoOperation.Save)
+                new Graph<CultureInfoDN>.Execute(CultureInfoOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,

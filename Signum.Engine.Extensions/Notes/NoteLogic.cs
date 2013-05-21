@@ -50,7 +50,7 @@ namespace Signum.Engine.Notes
                         n.Target
                     });
 
-                new BasicExecute<NoteDN>(NoteOperation.Save)
+                new Graph<NoteDN>.Execute(NoteOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
@@ -69,7 +69,7 @@ namespace Signum.Engine.Notes
 
                 MultiOptionalEnumLogic<NoteTypeDN>.Start(sb, () => SystemNoteTypes);
 
-                new BasicExecute<NoteTypeDN>(NoteTypeOperation.Save)
+                new Graph<NoteTypeDN>.Execute(NoteTypeOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,

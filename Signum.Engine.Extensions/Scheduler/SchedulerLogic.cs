@@ -79,14 +79,14 @@ namespace Signum.Engine.Scheduler
                          st.Rule,
                      });
 
-                new BasicExecute<CalendarDN>(CalendarOperation.Save)
+                new Graph<CalendarDN>.Execute(CalendarOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
                     Execute = (c, _) => { },
                 }.Register();
 
-                new BasicExecute<ScheduledTaskDN>(ScheduledTaskOperation.Save)
+                new Graph<ScheduledTaskDN>.Execute(ScheduledTaskOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,

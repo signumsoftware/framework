@@ -32,7 +32,7 @@ namespace Signum.Engine.Authorization
                          e.DaysWarning
                      });
 
-                new BasicExecute<PasswordExpiresIntervalDN>(PasswordExpiresIntervalOperation.Save)
+                new Graph<PasswordExpiresIntervalDN>.Execute(PasswordExpiresIntervalOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,

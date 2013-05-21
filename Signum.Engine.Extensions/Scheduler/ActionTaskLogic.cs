@@ -44,7 +44,7 @@ namespace Signum.Engine.Scheduler
 
                 sb.Include<ActionTaskLogDN>();
 
-                new BasicExecute<ActionTaskDN>(ActionTaskOperation.Execute)
+                new Graph<ActionTaskDN>.Execute(ActionTaskOperation.Execute)
                 {
                     Execute = (ct, _) => Execute(MultiEnumLogic<ActionTaskDN>.ToEnum(ct.Key))
                 }.Register();

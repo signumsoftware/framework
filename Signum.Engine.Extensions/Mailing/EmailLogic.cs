@@ -107,7 +107,7 @@ namespace Signum.Engine.Mailing
                 sb.Schema.Generating += Schema_Generating;
                 sb.Schema.Synchronizing += Schema_Synchronizing;
 
-                new BasicExecute<EmailTemplateDN>(EmailTemplateOperation.Save)
+                new Graph<EmailTemplateDN>.Execute(EmailTemplateOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,

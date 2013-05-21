@@ -64,19 +64,19 @@ namespace Signum.Engine.ControlPanel
 
         private static void RegisterOperations()
         {
-            new BasicConstruct<ControlPanelDN>(ControlPanelOperation.Create)
+            new Graph<ControlPanelDN>.Construct(ControlPanelOperation.Create)
             {
                 Construct = (_) => new ControlPanelDN { Related = UserQueryUtils.DefaultRelated() }
             }.Register();
 
-            new BasicExecute<ControlPanelDN>(ControlPanelOperation.Save)
+            new Graph<ControlPanelDN>.Execute(ControlPanelOperation.Save)
             {
                 AllowsNew = true,
                 Lite = false,
                 Execute = (cp, _) => { }
             }.Register();
 
-            new BasicDelete<ControlPanelDN>(ControlPanelOperation.Delete)
+            new Graph<ControlPanelDN>.Delete(ControlPanelOperation.Delete)
             {
                 Lite = false,
                 Delete = (cp, _) =>
@@ -87,7 +87,7 @@ namespace Signum.Engine.ControlPanel
                 }
             }.Register();
 
-            new BasicConstructFrom<ControlPanelDN, ControlPanelDN>(ControlPanelOperation.Clone)
+            new Graph<ControlPanelDN>.ConstructFrom<ControlPanelDN>(ControlPanelOperation.Clone)
             {
                 Lite = true,
                 AllowsNew = false,
