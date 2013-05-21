@@ -175,15 +175,11 @@ namespace Signum.Engine.Maps
                     assigments.Add(Expression.Assign(cast, Expression.Convert(paramIdent, table.Type)));
 
                     foreach (var item in table.Fields.Values)
-                    {
                         item.Field.CreateParameter(trios, assigments, Expression.Field(cast, item.FieldInfo), paramForbidden, paramPostfix);
-                    }
                     
                     if(table.Mixins != null)
                         foreach (var item in table.Mixins.Values)
-                        {
                             item.CreateParameter(trios, assigments, cast, paramForbidden, paramPostfix);
-                        }
 
                     result.SqlInsertPattern = (post) =>
                         "INSERT {0} ({1})\r\n VALUES ({2})".Formato(table.Name,
@@ -300,16 +296,11 @@ namespace Signum.Engine.Maps
                     assigments.Add(Expression.Assign(cast, Expression.Convert(paramIdent, table.Type)));
 
                     foreach (var item in table.Fields.Values.Where(a => !(a.Field is FieldPrimaryKey)))
-                    {
                         item.Field.CreateParameter(trios, assigments, Expression.Field(cast, item.FieldInfo), paramForbidden, paramPostfix);
-                    }
-
 
                     if (table.Mixins != null)
                         foreach (var item in table.Mixins.Values)
-                        {
                             item.CreateParameter(trios, assigments, cast, paramForbidden, paramPostfix);
-                        }
 
                     result.SqlInsertPattern = (post, output) =>
                         "INSERT {0} ({1})\r\n{2} VALUES ({3})".Formato(table.Name,
@@ -524,6 +515,10 @@ namespace Signum.Engine.Maps
 
                     foreach (var item in table.Fields.Values.Where(a => !(a.Field is FieldPrimaryKey)))
                         item.Field.CreateParameter(trios, assigments, Expression.Field(cast, item.FieldInfo), paramForbidden, paramPostfix);
+
+                    if (table.Mixins != null)
+                        foreach (var item in table.Mixins.Values)
+                            item.CreateParameter(trios, assigments, cast, paramForbidden, paramPostfix);
 
                     var pb = Connector.Current.ParameterBuilder;
 
