@@ -200,7 +200,7 @@ namespace Signum.Engine.Cache
 
             static Expression NullId = Expression.Constant(null, typeof(int?));
 
-            public Expression Materialize(Field field)
+            public Expression MaterializeField(Field field)
             {
                 if (field is FieldValue)
                 {
@@ -271,8 +271,8 @@ namespace Signum.Engine.Cache
                     var fe = (FieldEmbedded)field;
 
                     Expression ctor = Expression.MemberInit(Expression.New(fe.FieldType),
-                        fe.EmbeddedFields.Values.Select(f => Expression.Bind(f.FieldInfo, Materialize(f.Field)))
-                        .And(resetModified));
+                        fe.EmbeddedFields.Values.Select(f => Expression.Bind(f.FieldInfo, MaterializeField(f.Field)))
+                        .And(Expression.Bind(piModified, retrieverModifiedState)));
 
                     if (fe.HasValue == null)
                         return ctor;
@@ -282,6 +282,7 @@ namespace Signum.Engine.Cache
                         ctor,
                         Expression.Constant(null, field.FieldType));
                 }
+
 
                 if (field is FieldMList)
                 {
@@ -360,7 +361,6 @@ namespace Signum.Engine.Cache
                 }
             }
 
-
             static MethodInfo miRequestLite = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestLite<IdentifiableEntity>(null)).GetGenericMethodDefinition();
             static MethodInfo miRequestIBA = ReflectionTools.GetMethodInfo((IRetriever r) => r.RequestIBA<IdentifiableEntity>(null, null)).GetGenericMethodDefinition();
             static MethodInfo miRequest = ReflectionTools.GetMethodInfo((IRetriever r) => r.Request<IdentifiableEntity>(null)).GetGenericMethodDefinition();
@@ -369,9 +369,9 @@ namespace Signum.Engine.Cache
             internal static ParameterExpression originObject = Expression.Parameter(typeof(object), "originObject");
             internal static ParameterExpression retriever = Expression.Parameter(typeof(IRetriever), "retriever");
 
-            static MemberBinding resetModified = Expression.Bind(
-                ReflectionTools.GetPropertyInfo((Modifiable me) => me.Modified),
-                Expression.Property(retriever, ReflectionTools.GetPropertyInfo((IRetriever re) => re.ModifiedState)));
+            static PropertyInfo piModified = ReflectionTools.GetPropertyInfo((Modifiable me) => me.Modified);
+            static MemberExpression retrieverModifiedState = Expression.Property(retriever, ReflectionTools.GetPropertyInfo((IRetriever re) => re.ModifiedState));
+
                 
             static MethodInfo miLiteCreate = ReflectionTools.GetMethodInfo(() => Lite.Create(null, 0, null));
 
@@ -394,9 +394,63 @@ namespace Signum.Engine.Cache
 
 
             static MethodInfo miGetType = ReflectionTools.GetMethodInfo((Schema s) => s.GetType(1));
-            private MethodCallExpression SchemaGetType(Expression idtype)
+            MethodCallExpression SchemaGetType(Expression idtype)
             {
                 return Expression.Call(Expression.Constant(Schema.Current), miGetType, idtype);
+            }
+
+
+            static readonly MethodInfo miMixin = ReflectionTools.GetMethodInfo((IdentifiableEntity i) => i.Mixin<CorruptMixin>()).GetGenericMethodDefinition();
+            Expression GetMixin(ParameterExpression me, Type mixinType)
+            {
+                return Expression.Call(me, miMixin.MakeGenericMethod(mixinType));
+            }
+
+            internal BlockExpression MaterializeEntity(ParameterExpression me, Table table)
+            {
+                List<Expression> instructions = new List<Expression>();
+                instructions.Add(Expression.Assign(origin, Expression.Convert(CachedTableConstructor.originObject, tupleType)));
+
+                foreach (var f in table.Fields.Values.Where(f => !(f.Field is FieldPrimaryKey)))
+                {
+                    Expression value = MaterializeField(f.Field);
+                    var assigment = Expression.Assign(Expression.Field(me, f.FieldInfo), value);
+                    instructions.Add(assigment);
+                }
+
+                if (table.Mixins != null)
+                {
+                    foreach (var mixin in table.Mixins.Values)
+                    {
+                        ParameterExpression mixParam = Expression.Parameter(mixin.FieldType);
+
+                        var mixBlock = MaterializeMixin(me, mixin, mixParam);
+
+                        instructions.Add(mixBlock);
+                    }
+                }
+
+                var block = Expression.Block(new[] { origin }, instructions);
+
+                return block;
+            }
+
+            private BlockExpression MaterializeMixin(ParameterExpression me, FieldMixin mixin, ParameterExpression mixParam)
+            {
+                List<Expression> mixBindings = new List<Expression>();
+                mixBindings.Add(Expression.Assign(mixParam, GetMixin(me, mixin.FieldType)));
+
+                foreach (var f in mixin.Fields.Values)
+                {
+                    Expression value = MaterializeField(f.Field);
+                    var assigment = Expression.Assign(Expression.Field(mixParam, f.FieldInfo), value);
+                    mixBindings.Add(assigment);
+                }
+
+                mixBindings.Add(Expression.Assign(Expression.Property(mixParam, piModified), retrieverModifiedState));
+
+                var mixBlock = Expression.Block(new[] { mixParam }, mixBindings);
+                return mixBlock;
             }
         }
     }
@@ -446,17 +500,8 @@ namespace Signum.Engine.Cache
             {
                 ParameterExpression me = Expression.Parameter(typeof(T), "me");
 
-                List<Expression> instructions = new List<Expression>();
-                instructions.Add(Expression.Assign(ctr.origin, Expression.Convert(CachedTableConstructor.originObject, ctr.tupleType)));
+                var block = ctr.MaterializeEntity(me, table);
 
-                foreach (var f in table.Fields.Values.Where(f => !(f.Field is FieldPrimaryKey)))
-                {
-                    Expression value = ctr.Materialize(f.Field);
-                    var assigment = Expression.Assign(Expression.Field(me, f.FieldInfo), value);
-                    instructions.Add(assigment);
-                }
-
-                var block = Expression.Block(new[] { ctr.origin }, instructions);
                 completerExpression = Expression.Lambda<Action<object, IRetriever, T>>(block, CachedTableConstructor.originObject, CachedTableConstructor.retriever, me);
 
                 completer = completerExpression.Compile();
@@ -482,6 +527,7 @@ namespace Signum.Engine.Cache
                 return result;
             }, mode: LazyThreadSafetyMode.ExecutionAndPublication);
         }
+
 
         protected override void Reset()
         {
@@ -572,7 +618,7 @@ namespace Signum.Engine.Cache
                 List<Expression> instructions = new List<Expression>();
 
                 instructions.Add(Expression.Assign(ctr.origin, Expression.Convert(CachedTableConstructor.originObject, ctr.tupleType)));
-                instructions.Add(ctr.Materialize(table.Field));
+                instructions.Add(ctr.MaterializeField(table.Field));
 
                 var block = Expression.Block(table.Field.FieldType, new[] { ctr.origin }, instructions);
 
