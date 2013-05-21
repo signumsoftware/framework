@@ -224,6 +224,11 @@ namespace Signum.Utilities
 
         static readonly ThreadVariable<Dictionary<string, object>> overridenSession = Statics.ThreadVariable<Dictionary<string, object>>("overridenSession");
 
+        public static bool IsOverriden
+        {
+            get { return overridenSession.Value != null; }
+        }
+
         public ScopeSessionFactory(ISessionFactory factory)
         {
             this.Factory = factory;
