@@ -22,6 +22,7 @@ namespace Signum.Web
 
             if (string.IsNullOrEmpty(lite.ToString()))
                 Database.FillToString(lite);
+
             MvcHtmlString result = Navigator.IsNavigable(lite.EntityType, isSearchEntity) ?
                 helper.Href("",
                     lite.ToString(),

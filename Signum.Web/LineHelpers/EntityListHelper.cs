@@ -143,7 +143,7 @@ namespace Signum.Web
             if (vo == null)
                 return result;
 
-            return vo.SurroundLine(el.PropertyRoute, helper, (TypeContext)el.Parent, result);
+            return vo.OnSurroundLine(el.PropertyRoute, helper, tc, result);
         }
     }
 }

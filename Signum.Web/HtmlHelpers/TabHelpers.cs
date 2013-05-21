@@ -9,20 +9,83 @@ namespace Signum.Web.HtmlHelpers
 {
     public static class TabHelpers
     {
-        public static HelperResult Tab(this HtmlHelper helper, TypeContext tc, string tabId, Func<object, HelperResult> title, Func<object, HelperResult> body)
+        public static HelperResult Fieldset(this HtmlHelper helper, TypeContext tc, string id, string title, MvcHtmlString body)
         {
+            var result = new HelperResult(writer =>
+            {
+                writer.WriteLine("<fieldset id=" + tc.Compose(id) + ">");
+                writer.WriteLine("   <legend> " + HttpUtility.HtmlEncode(title) + "</legend>");
+                writer.WriteLine(body.ToHtmlString());
+                writer.WriteLine("</fieldset>");
+            });
+
             var vo = tc.ViewOverrides;
 
-            return new HelperResult(writer =>
-            {
-                if (vo != null)
-                {
-                    var pre = vo.OnPreTab(tabId, helper, tc);
-                    if (pre != null)
-                        writer.WriteLine(pre.ToString());
-                }
+            if (vo != null)
+                return vo.OnSurrondFieldset(id, helper, tc, result);
 
-                writer.WriteLine("<fieldset id=" + tc.Compose(tabId) + ">");
+            return result;
+        }
+
+        public static HelperResult Fieldset(this HtmlHelper helper, TypeContext tc, string id, string title, Func<object, HelperResult> body)
+        {
+            var result = new HelperResult(writer =>
+            {
+                writer.WriteLine("<fieldset id=" + tc.Compose(id) + ">");
+                writer.WriteLine("   <legend> " + HttpUtility.HtmlEncode(title) + "</legend>");
+                body(null).WriteTo(writer);
+                writer.WriteLine("</fieldset>");
+            });
+
+            var vo = tc.ViewOverrides;
+
+            if (vo != null)
+                return vo.OnSurrondFieldset(id, helper, tc, result);
+
+            return result;
+        }
+
+        public static HelperResult Fieldset(this HtmlHelper helper, TypeContext tc, string id, MvcHtmlString title, MvcHtmlString body)
+        {
+            var result = new HelperResult(writer =>
+            {
+                writer.WriteLine("<fieldset id=" + tc.Compose(id) + ">");
+                writer.WriteLine("   <legend> " + title.ToHtmlString() + "</legend>");
+                writer.WriteLine(body.ToHtmlString());
+                writer.WriteLine("</fieldset>");
+            });
+
+            var vo = tc.ViewOverrides;
+
+            if (vo != null)
+                return vo.OnSurrondFieldset(id, helper, tc, result);
+
+            return result;
+        }
+
+        public static HelperResult Fieldset(this HtmlHelper helper, TypeContext tc, string id, MvcHtmlString title, Func<object, HelperResult> body)
+        {
+            var result = new HelperResult(writer =>
+            {
+                writer.WriteLine("<fieldset id=" + tc.Compose(id) + ">");
+                writer.WriteLine("   <legend> " + title.ToHtmlString() + "</legend>");
+                body(null).WriteTo(writer);
+                writer.WriteLine("</fieldset>");
+            });
+
+            var vo = tc.ViewOverrides;
+
+            if (vo != null)
+                return vo.OnSurrondFieldset(id, helper, tc, result);
+
+            return result;
+        }
+
+        public static HelperResult Fieldset(this HtmlHelper helper, TypeContext tc, string id, Func<object, HelperResult> title, Func<object, HelperResult> body)
+        {
+            var result = new HelperResult(writer =>
+            {
+                writer.WriteLine("<fieldset id=" + tc.Compose(id) + ">");
 
                 writer.WriteLine("   <legend> ");
                 title(null).WriteTo(writer);
@@ -30,41 +93,14 @@ namespace Signum.Web.HtmlHelpers
 
                 body(null).WriteTo(writer);
                 writer.WriteLine("</fieldset>");
-
-                if (vo != null)
-                {
-                    var post = vo.OnPostTab(tabId, helper, tc);
-                    if (post != null)
-                        writer.WriteLine(post.ToString());
-                }
             });
-        }
 
-        public static HelperResult Tab(this HtmlHelper helper, TypeContext tc, string tabId, string title, Func<object, HelperResult> html)
-        {
             var vo = tc.ViewOverrides;
 
-            return new HelperResult(writer =>
-            {
-                if (vo != null)
-                {
-                    var pre = vo.OnPreTab(tabId, helper, tc);
-                    if (pre != null)
-                        writer.WriteLine(pre.ToString());
-                }
+            if (vo != null)
+                return vo.OnSurrondFieldset(id, helper, tc, result);
 
-                writer.WriteLine("<fieldset id=" + tc.Compose(tabId) + ">");
-                writer.WriteLine("   <legend> " + HttpUtility.HtmlEncode(title) + "</legend>");
-                html(null).WriteTo(writer);
-                writer.WriteLine("</fieldset>");
-
-                if (vo != null)
-                {
-                    var post = vo.OnPostTab(tabId, helper, tc);
-                    if (post != null)
-                        writer.WriteLine(post.ToString());
-                }
-            });
+            return result;
         }
     }
 }

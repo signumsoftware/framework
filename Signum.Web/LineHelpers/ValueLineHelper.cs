@@ -20,7 +20,6 @@ namespace Signum.Web
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-
             if (valueLine.Visible && (!valueLine.HideIfNull || valueLine.UntypedValue != null))
             {
                 if (valueLine.OnlyValue)
@@ -44,11 +43,7 @@ namespace Signum.Web
                 }
             }
 
-            var vo = valueLine.ViewOverrides;
-            if (vo == null)
-                return sb.ToHtml();
-
-            return vo.SurroundLine(valueLine.PropertyRoute, helper, (TypeContext)valueLine.Parent, sb.ToHtml());
+            return sb.ToHtml();
         }
 
         private static void InternalValueLineLabel(HtmlHelper helper, ValueLine valueLine, HtmlStringBuilder sb)
@@ -268,10 +263,11 @@ namespace Signum.Web
             return sb.ToHtml();
         }
 
-        public static MvcHtmlString ValueLine<T>(this HtmlHelper helper, ValueLine valueLine)
+        public static MvcHtmlString ValueLine(this HtmlHelper helper, ValueLine valueLine)
         {
             return helper.InternalValueLine(valueLine);
         }
+
 
         public static MvcHtmlString ValueLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
         {
@@ -289,7 +285,13 @@ namespace Signum.Web
             if (settingsModifier != null)
                 settingsModifier(vl);
 
-            return helper.InternalValueLine(vl);
+            var result = helper.InternalValueLine(vl);
+
+            var vo = vl.ViewOverrides;
+            if (vo == null)
+                return result;
+
+            return vo.OnSurroundLine(vl.PropertyRoute, helper, tc, result);
         }
 
         public static MvcHtmlString HiddenLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)

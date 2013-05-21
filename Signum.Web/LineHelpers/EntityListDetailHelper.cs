@@ -171,7 +171,7 @@ namespace Signum.Web
             if (vo == null)
                 return result;
 
-            return vo.SurroundLine(eld.PropertyRoute, helper, (TypeContext)eld.Parent, result);
+            return vo.OnSurroundLine(eld.PropertyRoute, helper, tc, result);
         }
     }
 }

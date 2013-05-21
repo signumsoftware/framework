@@ -133,7 +133,7 @@ namespace Signum.Web
             if (vo == null)
                 return result;
 
-            return vo.SurroundLine(ec.PropertyRoute, helper, (TypeContext)ec.Parent, result);
+            return vo.OnSurroundLine(ec.PropertyRoute, helper, tc, result);
         }
 
         public static MvcHtmlString RenderOption(this SelectListItem item)
