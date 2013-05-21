@@ -112,7 +112,15 @@ namespace Signum.Windows
         public void OverrideView(Func<T, Control, Control> overrideView)
         {
             var view = View;
-            View = e => overrideView(e, view(e));
+            View = e =>
+            {
+                var ctrl = view(e);
+
+                using (Common.DelayRoutes())
+                    ctrl = overrideView(e, ctrl);
+
+                return ctrl;
+            };
         }
 
         public override Implementations FindImplementations(PropertyRoute route)

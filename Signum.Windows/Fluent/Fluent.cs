@@ -10,6 +10,7 @@ using System.Windows.Data;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Entities;
 using System.ComponentModel;
+using System.Windows.Controls;
 
 namespace Signum.Windows
 {
@@ -115,6 +116,21 @@ namespace Signum.Windows
         {
             Common.SetIsReadOnly(uiElement, false);
             return uiElement;
+        }
+
+        public static void After(this FrameworkElement element, FrameworkElement newElement)
+        {
+            var parent = (Panel)element.Parent;
+
+            parent.Children.Insert(parent.Children.IndexOf(element) + 1, newElement);
+        }
+
+
+        public static void Before(this FrameworkElement element, FrameworkElement newElement)
+        {
+            var parent = (Panel)element.Parent;
+
+            parent.Children.Insert(parent.Children.IndexOf(element), newElement);
         }
 
         public static DataTemplate GetDataTemplate(System.Linq.Expressions.Expression<Func<FrameworkElement>> constructor)
