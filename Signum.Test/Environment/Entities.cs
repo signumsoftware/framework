@@ -421,6 +421,7 @@ namespace Signum.Test.Environment
     [DescriptionOptions(DescriptionOptions.Members)]
     public enum AlbumState
     {
+        [Ignore]
         New,
         Saved
     }

@@ -16,6 +16,7 @@ using Signum.Entities.Reflection;
 using System.Linq.Expressions;
 using Signum.Entities.Basics;
 using System.Data.Common;
+using Signum.Entine.Operations.Internal;
 
 namespace Signum.Engine.Operations
 {
@@ -533,12 +534,14 @@ namespace Signum.Engine.Operations
             return args.OfType<T>(); 
         }
 
-        public static string InState<T>(this T state, Enum operationKey, params T[] validStates) where T : struct
+        public static string InState<T>(this T state, params T[] fromStates) where T : struct
         {
-            if (validStates.Contains(state))
-                return null;
+            if (!fromStates.Contains(state))
+                return OperationMessage.StateShouldBe0InsteadOf1.NiceToString().Formato(
+                    fromStates.CommaOr(v => ((Enum)(object)v).NiceToString()),
+                    ((Enum)(object)state).NiceToString());
 
-            return OperationMessage.ImpossibleToExecute0FromState1.NiceToString().Formato(operationKey.NiceToString(), ((Enum)(object)state).NiceToString());
+            return null;
         }
 
         public static List<Type> FindTypes(Enum operation)
@@ -607,10 +610,12 @@ namespace Signum.Engine.Operations
                 Database.Query<T>().Where(e => list.Contains(e.ToLite())).Select(getState).Distinct()).Distinct().ToList();
 
             return (from o in operations.Cast<Graph<E, S>.IGraphFromStatesOperation>()
-                    let list = states.Where(s => !o.FromStates.Contains(s)).ToList()
-                    where list.Any()
+                    let invalid = states.Where(s => !o.FromStates.Contains(s)).ToList()
+                    where invalid.Any()
                     select KVP.Create(o.Key,
-                        OperationMessage.ImpossibleToExecute0FromState1.NiceToString().Formato(o.Key.NiceToString(), list.CommaOr(s => ((Enum)(object)s).NiceToString())))).ToDictionary();
+                        OperationMessage.StateShouldBe0InsteadOf1.NiceToString().Formato(
+                        o.FromStates.CommaOr(v => ((Enum)(object)v).NiceToString()),
+                        invalid.CommaOr(v => ((Enum)(object)v).NiceToString())))).ToDictionary();
         }
     }
 

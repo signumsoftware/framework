@@ -62,7 +62,7 @@
 
                 dqm.RegisterExpression(($entityName$DN $entityParam$) => $entityParam$.$methodName$());
                 
-                new BasicExecute<$entityName$DN>($entityName$Operation.Save)
+                new Graph<$entityName$DN>.Execute($entityName$Operation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
