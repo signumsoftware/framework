@@ -1,5 +1,6 @@
 @using (var e = Html.TypeContext<UserDN>())
 {
+    @Html.ValueLine(e, f => f.State, v => v.ReadOnly = true)
     @Html.ValueLine(e, f => f.UserName, vl => vl.ValueHtmlProps["size"] = 50)
     if (e.Value.IsNew || (ViewData["NewPwd"] != null && bool.Parse(ViewData["NewPwd"].ToString())))
     {
@@ -16,6 +17,5 @@
 
     @Html.ValueLine(e, f => f.Email, vl => vl.ValueHtmlProps["size"] = 30)
     @Html.EntityLine(e, f => f.Role)
-    @Html.ValueLine(e, f => f.State, v => v.ReadOnly = true)
     @Html.EntityLine(e, f => f.Related)
 }

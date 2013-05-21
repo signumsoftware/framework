@@ -53,13 +53,27 @@ namespace Signum.Web.Extensions.AuthAdmin.Views
             #line hidden
             
             #line 3 "..\..\AuthAdmin\Views\User.cshtml"
-Write(Html.ValueLine(e, f => f.UserName, vl => vl.ValueHtmlProps["size"] = 50));
+Write(Html.ValueLine(e, f => f.State, v => v.ReadOnly = true));
 
             
             #line default
             #line hidden
             
             #line 3 "..\..\AuthAdmin\Views\User.cshtml"
+                                                            
+    
+            
+            #line default
+            #line hidden
+            
+            #line 4 "..\..\AuthAdmin\Views\User.cshtml"
+Write(Html.ValueLine(e, f => f.UserName, vl => vl.ValueHtmlProps["size"] = 50));
+
+            
+            #line default
+            #line hidden
+            
+            #line 4 "..\..\AuthAdmin\Views\User.cshtml"
                                                                              
     if (e.Value.IsNew || (ViewData["NewPwd"] != null && bool.Parse(ViewData["NewPwd"].ToString())))
     {
@@ -68,7 +82,7 @@ Write(Html.ValueLine(e, f => f.UserName, vl => vl.ValueHtmlProps["size"] = 50));
             #line default
             #line hidden
             
-            #line 6 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 7 "..\..\AuthAdmin\Views\User.cshtml"
    Write(Html.Field(AuthMessage.ChangePasswordAspx_NewPassword.NiceToString(),
             Html.Password(UserMapping.NewPasswordKey, "", new Dictionary<string, string> { { "class", "sf-value-line" } }).Concat(
             Html.ValidationMessage(UserMapping.NewPasswordKey) ?? MvcHtmlString.Empty)));
@@ -77,7 +91,7 @@ Write(Html.ValueLine(e, f => f.UserName, vl => vl.ValueHtmlProps["size"] = 50));
             #line default
             #line hidden
             
-            #line 8 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 9 "..\..\AuthAdmin\Views\User.cshtml"
                                                                                        
     
         
@@ -85,7 +99,7 @@ Write(Html.ValueLine(e, f => f.UserName, vl => vl.ValueHtmlProps["size"] = 50));
             #line default
             #line hidden
             
-            #line 10 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 11 "..\..\AuthAdmin\Views\User.cshtml"
    Write(Html.Field(AuthMessage.ChangePasswordAspx_ConfirmNewPassword.NiceToString(), 
             Html.Password(UserMapping.NewPasswordBisKey, "", new Dictionary<string, string> { { "class", "sf-value-line" } }).Concat(
             Html.ValidationMessage(UserMapping.NewPasswordBisKey) ?? MvcHtmlString.Empty)));
@@ -94,7 +108,7 @@ Write(Html.ValueLine(e, f => f.UserName, vl => vl.ValueHtmlProps["size"] = 50));
             #line default
             #line hidden
             
-            #line 12 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 13 "..\..\AuthAdmin\Views\User.cshtml"
                                                                                           
     }
     
@@ -102,28 +116,28 @@ Write(Html.ValueLine(e, f => f.UserName, vl => vl.ValueHtmlProps["size"] = 50));
             #line default
             #line hidden
             
-            #line 14 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 15 "..\..\AuthAdmin\Views\User.cshtml"
 Write(Html.ValueLine(e, f => f.PasswordNeverExpires));
 
             
             #line default
             #line hidden
             
-            #line 14 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 15 "..\..\AuthAdmin\Views\User.cshtml"
                                                    
     
             
             #line default
             #line hidden
             
-            #line 15 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 16 "..\..\AuthAdmin\Views\User.cshtml"
 Write(Html.ValueLine(e, f => f.PasswordSetDate));
 
             
             #line default
             #line hidden
             
-            #line 15 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 16 "..\..\AuthAdmin\Views\User.cshtml"
                                               
 
     
@@ -131,43 +145,29 @@ Write(Html.ValueLine(e, f => f.PasswordSetDate));
             #line default
             #line hidden
             
-            #line 17 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 18 "..\..\AuthAdmin\Views\User.cshtml"
 Write(Html.ValueLine(e, f => f.Email, vl => vl.ValueHtmlProps["size"] = 30));
 
             
             #line default
             #line hidden
             
-            #line 17 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 18 "..\..\AuthAdmin\Views\User.cshtml"
                                                                           
     
             
             #line default
             #line hidden
             
-            #line 18 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 19 "..\..\AuthAdmin\Views\User.cshtml"
 Write(Html.EntityLine(e, f => f.Role));
 
             
             #line default
             #line hidden
             
-            #line 18 "..\..\AuthAdmin\Views\User.cshtml"
+            #line 19 "..\..\AuthAdmin\Views\User.cshtml"
                                     
-    
-            
-            #line default
-            #line hidden
-            
-            #line 19 "..\..\AuthAdmin\Views\User.cshtml"
-Write(Html.ValueLine(e, f => f.State, v => v.ReadOnly = true));
-
-            
-            #line default
-            #line hidden
-            
-            #line 19 "..\..\AuthAdmin\Views\User.cshtml"
-                                                            
     
             
             #line default

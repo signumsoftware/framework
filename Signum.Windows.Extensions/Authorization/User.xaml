@@ -4,21 +4,19 @@
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:d="clr-namespace:Signum.Entities.Authorization;assembly=Signum.Entities.Extensions"
     xmlns:auth="clr-namespace:Signum.Windows.Authorization"
-    m:Common.TypeContext="{x:Type d:UserDN}" MinWidth="300">
-    <StackPanel >
-     
-        <m:ValueLine m:Common.Route="State"  m:Common.IsReadOnly="True"  m:Common.MinLabelWidth="130"/>
-        <m:ValueLine m:Common.Route="UserName"  m:Common.IsReadOnly="False"  m:Common.MinLabelWidth="130"/>
-    	<!--<auth:DoublePassword PasswordHash="{Binding Path=PasswordHash}"/>-->
+    m:Common.TypeContext="{x:Type d:UserDN}" MinWidth="300" m:Common.MinLabelWidth="130">
+    <StackPanel>
+        <m:ValueLine m:Common.Route="State"  m:Common.IsReadOnly="True" />
+        <m:ValueLine m:Common.Route="UserName"  m:Common.IsReadOnly="False" />
+        <!--<auth:DoublePassword PasswordHash="{Binding Path=PasswordHash}"/>-->
         <DockPanel LastChildFill="True">
             <Button  Content="Change password" Width="120" Margin="5" x:Name="changePassword" Click="changePassword_Click" DockPanel.Dock="Right" m:Common.LabelOnlyRoute="PasswordHash"/>
+            <m:ValueLine m:Common.Route="PasswordNeverExpires"  />
+        </DockPanel>
 
-            <m:ValueLine m:Common.Route="PasswordNeverExpires"  m:Common.MinLabelWidth="130"/>
-            </DockPanel>
-       
-        <m:ValueLine m:Common.Route="PasswordSetDate" m:Common.MinLabelWidth="130" />
-        <m:EntityLine m:Common.Route="Role" m:Common.MinLabelWidth="130" />
-        <m:EntityLine m:Common.Route="Related"  m:Common.MinLabelWidth="130"/>
-        <m:ValueLine m:Common.Route="Email"   m:Common.MinLabelWidth="130"/>
+        <m:ValueLine m:Common.Route="PasswordSetDate" />
+        <m:EntityLine m:Common.Route="Role" />
+        <m:EntityLine m:Common.Route="Related"  />
+        <m:ValueLine m:Common.Route="Email"  />
     </StackPanel>
 </UserControl>
