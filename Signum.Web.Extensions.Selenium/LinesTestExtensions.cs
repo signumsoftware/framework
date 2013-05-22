@@ -279,7 +279,7 @@ namespace Signum.Web.Selenium
             selenium.Search(prefix);
 
             foreach (int index in rowIndexesBase0)
-                SearchTestExtensions.SelectRowCheckbox(selenium, index, prefix);
+                SearchTestExtensions.SelectRow(selenium, index, prefix);
             
             selenium.PopupOk(prefix);
         }
@@ -298,10 +298,10 @@ namespace Signum.Web.Selenium
 
             selenium.FilterSelectToken(0, "Id", false, prefix);
             selenium.AddFilter(0, prefix);
-            selenium.Type(prefix + "value_0", elementId.ToString());
+            selenium.Type("jq=#{0}tblFilters > tbody > tr:last td:last :text".Formato(prefix), elementId.ToString());
 
             selenium.Search(prefix);
-            SearchTestExtensions.SelectRowCheckbox(selenium, 0, prefix);
+            SearchTestExtensions.SelectRow(selenium, 0, prefix);
 
             selenium.PopupOk(prefix);
         }
@@ -321,7 +321,7 @@ namespace Signum.Web.Selenium
             selenium.Search(prefix);
 
             foreach (int index in rowIndexesBase0)
-                SearchTestExtensions.SelectRowCheckbox(selenium, index, prefix);
+                SearchTestExtensions.SelectRow(selenium, index, prefix);
             
             selenium.PopupOk(prefix);
         }

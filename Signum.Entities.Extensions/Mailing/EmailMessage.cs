@@ -9,6 +9,7 @@ using Signum.Entities;
 using Signum.Entities.Mailing;
 using Signum.Entities.Basics;
 using System.Globalization;
+using System.ComponentModel;
 
 namespace Signum.Entities.Mailing
 {
@@ -70,13 +71,6 @@ namespace Signum.Entities.Mailing
             get { return template; }
             set { Set(ref template, value, () => Template); }
         }
-
-        //Lite<EmailTemplateOldDN> templateOld;
-        //public Lite<EmailTemplateOldDN> TemplateOld
-        //{
-        //    get { return templateOld; }
-        //    set { Set(ref templateOld, value, () => TemplateOld); }
-        //}
 
         DateTime creationTime = TimeZoneManager.Now;
         public DateTime CreationTime
@@ -195,6 +189,14 @@ namespace Signum.Entities.Mailing
         ReSendEmails,
         CreateMailFromTemplate,
         CreateMail
+    }
+
+    public enum EmailMessageMessage
+    {
+        [Description("The email message cannot be sent from state {0}")]
+        TheEmailMessageCannotBeSentFromState0,
+        [Description("Message")]
+        Message,
     }
 
     [Serializable, EntityKind(EntityKind.System)]

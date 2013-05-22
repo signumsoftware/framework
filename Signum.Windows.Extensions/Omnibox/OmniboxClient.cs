@@ -49,7 +49,7 @@ namespace Signum.Windows.Omnibox
 
         public abstract void OnSelectedBase(OmniboxResult result, Window window);
 
-        public abstract string GetItemStatusBase(OmniboxResult result);
+        public abstract string GetNameBase(OmniboxResult result);
 
         public abstract Run GetIcon();
 
@@ -63,7 +63,7 @@ namespace Signum.Windows.Omnibox
 
         public abstract void OnSelected(T result, Window window);
 
-        public abstract string GetItemStatus(T result);
+        public abstract string GetName(T result);
     
         public override void RenderLinesBase(OmniboxResult result, InlineCollection lines)
         {
@@ -75,9 +75,9 @@ namespace Signum.Windows.Omnibox
             OnSelected((T)result, window);
         }
 
-        public override string GetItemStatusBase(OmniboxResult result)
+        public override string GetNameBase(OmniboxResult result)
         {
-            return GetItemStatus((T)result);
+            return GetName((T)result);
         }
     }
 
@@ -88,11 +88,9 @@ namespace Signum.Windows.Omnibox
             return Navigator.IsNavigable(type, isSearchEntity: true);
         }
 
-        public override Lite<IdentifiableEntity> RetrieveLite(Type type, int id)
+        public override bool AllowedPermission(Enum permission)
         {
-            if (!Server.Return((IBaseServer bs) => bs.Exists(type, id)))
-                return null;
-            return Server.FillToStr(Lite.Create(type, id));
+            return permission.IsAuthorized();
         }
 
         public override bool AllowedQuery(object queryName)
@@ -100,17 +98,27 @@ namespace Signum.Windows.Omnibox
             return Navigator.IsFindable(queryName);
         }
 
-        public override QueryDescription GetDescription(object queryName)
+
+        public override Lite<IdentifiableEntity> RetrieveLite(Type type, int id)
         {
-            return Navigator.Manager.GetQueryDescription(queryName);
+            if (!Server.Return((IBaseServer bs) => bs.Exists(type, id)))
+                return null;
+            return Server.FillToStr(Lite.Create(type, id));
         }
 
-        public override List<Lite<IdentifiableEntity>> AutoComplete(Implementations implementations, string subString, int count)
+       
+        public override QueryDescription GetDescription(object queryName)
+        {
+            return DynamicQueryServer.GetQueryDescription(queryName);
+        }
+
+        public override List<Lite<IdentifiableEntity>> Autocomplete(Implementations implementations, string subString, int count)
         {
             if (string.IsNullOrEmpty(subString))
                 return new List<Lite<IdentifiableEntity>>();
 
             return Server.Return((IBaseServer bs) => bs.FindLiteLike(implementations, subString, 5));
         }
+
     }
 }

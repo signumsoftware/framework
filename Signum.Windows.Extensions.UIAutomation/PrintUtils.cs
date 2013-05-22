@@ -62,7 +62,7 @@ namespace Signum.Windows.UIAutomation
                 .GroupBy(p => p.ProgrammaticName.Split('.')[0].CleanEnd("PatternIdentifiers"))
                 .OrderBy(a => a.Key).ToString(gr => gr.Key + "\r\n" +
                     gr.Select(a => "  " + a.CleanPropertyName() + " = " + ae.GetCurrentPropertyValue(a).TryToString())
-                    .Order()
+                    .OrderBy()
                     .ToString("\r\n"),
                     "\r\n");
         }

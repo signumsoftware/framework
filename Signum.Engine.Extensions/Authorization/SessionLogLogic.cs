@@ -18,21 +18,22 @@ namespace Signum.Engine.Authorization
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AuthLogic.AssertStarted(sb);
-                
+
                 sb.Include<SessionLogDN>();
 
                 PermissionAuthLogic.RegisterPermissions(SessionLogPermission.TrackSession);
 
-                dqm[typeof(SessionLogDN)] = (from sl in Database.Query<SessionLogDN>()
-                                             select new
-                                             {
-                                                 Entity = sl,
-                                                 sl.Id,
-                                                 sl.User,
-                                                 sl.SessionStart,
-                                                 sl.SessionEnd,
-                                                 sl.SessionTimeOut
-                                             }).ToDynamic();
+                dqm.RegisterQuery(typeof(SessionLogDN), () =>
+                    from sl in Database.Query<SessionLogDN>()
+                    select new
+                    {
+                        Entity = sl,
+                        sl.Id,
+                        sl.User,
+                        sl.SessionStart,
+                        sl.SessionEnd,
+                        sl.SessionTimeOut
+                    });
             }
         }
 
@@ -73,7 +74,12 @@ namespace Signum.Engine.Authorization
 
                 if (log != null && log.SessionEnd == null)
                 {
-                    log.SessionEnd = timeOut.HasValue ? TimeZoneManager.Now.Subtract(timeOut.Value).TrimToSeconds() : TimeZoneManager.Now.TrimToSeconds();
+                    var sessionEnd = timeOut.HasValue ? TimeZoneManager.Now.Subtract(timeOut.Value).TrimToSeconds() : TimeZoneManager.Now.TrimToSeconds();
+                    
+                    if (sessionEnd < log.SessionStart) //caused by an IIS reset for example
+                        sessionEnd = log.SessionStart;
+
+                    log.SessionEnd = sessionEnd;
                     log.SessionTimeOut = timeOut.HasValue;
                     log.Save();
                 }

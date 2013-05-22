@@ -24,10 +24,10 @@ namespace Signum.Windows.SMS
             {
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<SMSMessageDN> { View = e => new SMSMessage() },
-                    new EntitySettings<SMSTemplateDN> { View = e => new SMSTemplate() },
-                    new EntitySettings<SMSSendPackageDN> { View = e => new SMSSendPackage()},
-                    new EntitySettings<SMSUpdatePackageDN> { View = e => new SMSUpdatePackage()},
+                    new EntitySettings<SMSMessageDN> { View = e => new SMSMessage(), Icon = ExtensionsImageLoader.GetImageSortName("sms.png") },
+                    new EntitySettings<SMSTemplateDN> { View = e => new SMSTemplate(), Icon = ExtensionsImageLoader.GetImageSortName("smstemplate.png") },
+                    new EntitySettings<SMSSendPackageDN> { View = e => new SMSSendPackage(), Icon = ExtensionsImageLoader.GetImageSortName("package.png") },
+                    new EntitySettings<SMSUpdatePackageDN> { View = e => new SMSUpdatePackage(), Icon = ExtensionsImageLoader.GetImageSortName("package.png") },
                 });
 
                 OperationClient.AddSetting(new EntityOperationSettings(SMSMessageOperation.CreateSMSWithTemplateFromEntity)

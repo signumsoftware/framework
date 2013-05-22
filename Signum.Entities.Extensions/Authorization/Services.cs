@@ -52,19 +52,6 @@ namespace Signum.Services
     }
 
     [ServiceContract]
-    public interface IFacadeMethodAuthServer
-    {
-        [OperationContract, NetDataContract]
-        FacadeMethodRulePack GetFacadeMethodRules(Lite<RoleDN> role);
-
-        [OperationContract, NetDataContract]
-        void SetFacadeMethodRules(FacadeMethodRulePack rules);
-
-        [OperationContract, NetDataContract]
-        DefaultDictionary<string, bool> FacadeMethodRules();
-    }
-
-    [ServiceContract]
     public interface IPermissionAuthServer
     {
         [OperationContract, NetDataContract]
@@ -87,7 +74,7 @@ namespace Signum.Services
         void SetPropertyRules(PropertyRulePack rules);
 
         [OperationContract, NetDataContract]
-        DefaultDictionary<PropertyRoute, PropertyAllowed> AuthorizedProperties();
+        Dictionary<PropertyRoute, PropertyAllowed> OverridenProperties();
     }
 
     [ServiceContract]
@@ -100,7 +87,7 @@ namespace Signum.Services
         void SetQueryRules(QueryRulePack rules);
 
         [OperationContract, NetDataContract]
-        DefaultDictionary<object, bool> QueriesRules();
+        HashSet<object> AllowedQueries();
     }
 
     [ServiceContract]
@@ -112,8 +99,7 @@ namespace Signum.Services
         [OperationContract, NetDataContract]
         void SetOperationRules(OperationRulePack rules);
 
-
         [OperationContract, NetDataContract]
-        DefaultDictionary<Enum, OperationAllowed> OperationRules();
+        Dictionary<Enum, OperationAllowed> AllowedOperations();
     }
 }

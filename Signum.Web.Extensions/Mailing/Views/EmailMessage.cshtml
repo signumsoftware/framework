@@ -10,8 +10,7 @@
     @Html.ValueLine(e, f => f.State, f => f.ReadOnly = true)
     @Html.EntityLine(e, f => f.Package, f => f.ReadOnly = true)
     @Html.ValueLine(e, f => f.Subject)
-    <h3>
-        @Signum.Web.Extensions.Properties.Resources.Message:</h3>
+    <h3>@EmailMessageMessage.Message.NiceToString():</h3>
     <div>
         @if (e.Value.IsBodyHtml)
         {

@@ -8,7 +8,6 @@ using Signum.Engine;
 using Signum.Engine.Authorization;
 using Signum.Services;
 using Signum.Utilities;
-using Signum.Web.Extensions.Properties;
 using System.Net.Mail;
 using System.Net;
 using System.Text;
@@ -61,7 +60,7 @@ namespace Signum.Web.Cache
         {
             CachePermission.InvalidateCache.Authorize();
 
-            CacheLogic.InvalidateAll();
+            CacheLogic.ForceReset();
             GlobalLazy.ResetAll(); 
             return null;
         }

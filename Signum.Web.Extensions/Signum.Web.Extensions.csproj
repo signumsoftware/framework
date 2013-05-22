@@ -114,14 +114,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="Note\Controllers\NoteController.cs" />
-    <Compile Include="AuthAdmin\AuthAdminClient.cs" />
-    <Compile Include="AuthAdmin\Controllers\AuthAdminController.cs" />
-    <Compile Include="AuthAdmin\Views\FacadeMethods.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>FacadeMethods.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="AuthAdmin\Views\Operations.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -157,6 +149,39 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Types.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="ControlPanel\Views\Admin\ControlPanelAdmin.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ControlPanelAdmin.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Files\Views\FileRepository.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>FileRepository.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Files\Views\_ViewStart.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanel\ControlPanelOmniboxProvider.cs" />
+    <Compile Include="Mailing\Views\EmailMasterTemplate.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>EmailMasterTemplate.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Mailing\Views\EmailTemplateMessage.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>EmailTemplateMessage.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Translation\Controllers\TranslationController.cs" />
+    <Compile Include="Translation\TranslationClient.cs" />
+    <Compile Include="Translation\ITranslator.cs" />
+    <Compile Include="Translation\TranslationSynchronizer.cs" />
+    <Compile Include="Note\Controllers\NoteController.cs" />
+    <Compile Include="AuthAdmin\AuthAdminClient.cs" />
+    <Compile Include="AuthAdmin\Controllers\AuthAdminController.cs" />
     <Compile Include="AuthAdmin\Views\User.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -457,20 +482,10 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Menu.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Mailing\Views\EmailMasterTemplate.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>EmailMasterTemplate.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="Mailing\Views\EmailTemplate.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>EmailTemplate.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="Mailing\Views\EmailTemplateMessage.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>EmailTemplateMessage.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Help\Views\NamespaceControl.generated.cs">
       <AutoGen>True</AutoGen>
@@ -484,6 +499,11 @@
     </Compile>
     <Compile Include="Note\NoteClient.cs" />
     <Compile Include="Note\NoteWidgetHelper.cs" />
+    <Compile Include="Note\Views\NoteType.generated.cs">
+      <DependentUpon>NoteType.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Note\Views\Note1.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -569,15 +589,15 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>PackageLine.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Processes\Views\ProcessAlgorithm.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ProcessAlgorithm.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Processes\Views\Process.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Process.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="Processes\Views\ProcessExecution.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ProcessExecution.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Processes\Views\ProcessPanel.generated.cs">
       <AutoGen>True</AutoGen>
@@ -597,11 +617,6 @@
     <Compile Include="Profiler\ProfilerFilterAttribute.cs" />
     <Compile Include="ControlPanel\Controllers\ControlPanelController.cs" />
     <Compile Include="ControlPanel\ControlPanelClient.cs" />
-    <Compile Include="ControlPanel\Views\Admin\ControlPanelAdmin.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ControlPanelAdmin.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="ControlPanel\Views\Admin\CountSearchControlPart.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -631,7 +646,6 @@
     <Compile Include="Help\HelpClient.cs" />
     <Compile Include="Help\Controllers\HelpController.cs" />
     <Compile Include="Help\HelpModels.cs" />
-    <Compile Include="HttpModules\WhitespaceModule.cs" />
     <Compile Include="Mailing\EmailClient.cs" />
     <Compile Include="Processes\ProcessesClient.cs" />
     <Compile Include="Processes\Controllers\ProcessController.cs" />
@@ -678,11 +692,6 @@
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Reports\Views\ExcelReport.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -693,21 +702,21 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Scheduler\CustomTaskClient.cs" />
+    <Compile Include="Scheduler\ActionTaskClient.cs" />
     <Compile Include="Scheduler\Views\Calendar.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Calendar.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Scheduler\Views\CustomTask.generated.cs">
+    <Compile Include="Scheduler\Views\ActionTask.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>CustomTask.cshtml</DependentUpon>
+      <DependentUpon>ActionTask.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Scheduler\Views\CustomTaskExecution.generated.cs">
+    <Compile Include="Scheduler\Views\ActionTaskLog.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>CustomTaskExecution.cshtml</DependentUpon>
+      <DependentUpon>ActionTaskLog.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Scheduler\Views\Holiday.generated.cs">
       <AutoGen>True</AutoGen>
@@ -776,6 +785,46 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>SMSUpdatePackage.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Translation\Views\Sync.generated.cs">
+      <DependentUpon>Sync.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Translation\Views\CultureInfoView.generated.cs">
+      <DependentUpon>CultureInfoView.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Translation\Views\Index.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Index.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Translation\Views\TranslatedCulture.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TranslatedCulture.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Translation\Views\Translator.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Translator.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Translation\Views\View.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>View.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Translation\Views\Web.generated.cs">
+      <DependentUpon>Web.config</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Translation\Views\_ViewStart.generated.cs">
+      <DependentUpon>_ViewStart.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="UserQueries\Controller\UserQueriesController.cs" />
     <Compile Include="UserQueries\UserQueriesOmniboxProvider.cs" />
@@ -856,10 +905,6 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Web.generated.cs</LastGenOutput>
     </Content>
-    <None Include="AuthAdmin\Views\FacadeMethods.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>FacadeMethods.generated.cs</LastGenOutput>
-    </None>
     <None Include="AuthAdmin\Views\Operations.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Operations.generated.cs</LastGenOutput>
@@ -1093,7 +1138,7 @@
     </Content>
     <Content Include="Mailing\Views\EmailMasterTemplate.cshtml">
       <Generator>RazorGenerator</Generator>
-      <LastGenOutput>EmailMasterTemplate.cs</LastGenOutput>
+      <LastGenOutput>EmailMasterTemplate.generated.cs</LastGenOutput>
     </Content>
     <Content Include="Mailing\Views\EmailTemplate.cshtml">
       <Generator>RazorGenerator</Generator>
@@ -1101,7 +1146,7 @@
     </Content>
     <Content Include="Mailing\Views\EmailTemplateMessage.cshtml">
       <Generator>RazorGenerator</Generator>
-      <LastGenOutput>EmailTemplateMessage.cs</LastGenOutput>
+      <LastGenOutput>EmailTemplateMessage.generated.cs</LastGenOutput>
     </Content>
     <Content Include="Processes\Views\PackageOperation.cshtml">
       <Generator>RazorGenerator</Generator>
@@ -1131,6 +1176,18 @@
     <Content Include="Note\Views\Note.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Note1.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Note\Views\NoteType.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>NoteType.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Files\Views\FileRepository.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>FileRepository.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Files\Views\_ViewStart.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>RazorGenerator</Generator>
@@ -1168,9 +1225,9 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ScheduleRuleHourly.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Scheduler\Views\CustomTask.cshtml">
+    <Content Include="Scheduler\Views\ActionTask.cshtml">
       <Generator>RazorGenerator</Generator>
-      <LastGenOutput>CustomTask.generated.cs</LastGenOutput>
+      <LastGenOutput>ActionTask.generated.cs</LastGenOutput>
     </Content>
     <None Include="Scheduler\Views\ScheduleRuleDaily.cshtml">
       <Generator>RazorGenerator</Generator>
@@ -1188,9 +1245,9 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ScheduledTask.generated.cs</LastGenOutput>
     </None>
-    <None Include="Scheduler\Views\CustomTaskExecution.cshtml">
+    <None Include="Scheduler\Views\ActionTaskLog.cshtml">
       <Generator>RazorGenerator</Generator>
-      <LastGenOutput>CustomTaskExecution.generated.cs</LastGenOutput>
+      <LastGenOutput>ActionTaskLog.generated.cs</LastGenOutput>
     </None>
     <None Include="Scheduler\Views\Holiday.cshtml">
       <Generator>RazorGenerator</Generator>
@@ -1198,6 +1255,9 @@
     </None>
     <Content Include="SMS\Content\SMS.css" />
     <Content Include="SMS\Scripts\SF_SMS.js" />
+    <Content Include="Translation\Content\Translation.css" />
+    <Content Include="Translation\Content\Translation.js" />
+    <Content Include="UserQueries\Scripts\SF_UserQuery.js" />
     <Content Include="Web.config" />
     <Content Include="Basic\Views\Web.config" />
     <Content Include="Captcha\Views\Web.config" />
@@ -1260,16 +1320,6 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ResetPasswordSetNew.generated.cs</LastGenOutput>
     </None>
-    <EmbeddedResource Include="Properties\Resources.fr.resx" />
-    <EmbeddedResource Include="Properties\Resources.it.resx" />
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.es.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <None Include="Basic\Views\DateSpan.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>DateSpan.generated.cs</LastGenOutput>
@@ -1280,7 +1330,7 @@
     </None>
     <None Include="ControlPanel\Views\Admin\ControlPanelAdmin.cshtml">
       <Generator>RazorGenerator</Generator>
-      <LastGenOutput>ControlPanelAdmin.cs</LastGenOutput>
+      <LastGenOutput>ControlPanelAdmin.generated.cs</LastGenOutput>
     </None>
     <None Include="ControlPanel\Views\Admin\LinkElement.cshtml">
       <Generator>RazorGenerator</Generator>
@@ -1355,13 +1405,13 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>PackageLine.generated.cs</LastGenOutput>
     </None>
+    <None Include="Processes\Views\ProcessAlgorithm.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>ProcessAlgorithm.generated.cs</LastGenOutput>
+    </None>
     <None Include="Processes\Views\Process.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Process.generated.cs</LastGenOutput>
-    </None>
-    <None Include="Processes\Views\ProcessExecution.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>ProcessExecution.generated.cs</LastGenOutput>
     </None>
     <Content Include="Scheduler\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
@@ -1386,6 +1436,38 @@
     <Content Include="SMS\Views\MultipleSMS.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>MultipleSMS.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Translation\Views\Web.config">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>Web.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Translation\Views\Index.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>Index.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Translation\Views\_ViewStart.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Translation\Views\CultureInfoView.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>CultureInfoView.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Translation\Views\TranslatedCulture.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>TranslatedCulture.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Translation\Views\Translator.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>Translator.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Translation\Views\View.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>View.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Translation\Views\Sync.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>Sync.generated.cs</LastGenOutput>
     </Content>
     <None Include="UserQueries\Views\QueryColumn.cshtml">
       <Generator>RazorGenerator</Generator>
@@ -1415,10 +1497,6 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
-    <EmbeddedResource Include="Properties\Resources.pt.resx" />
-    <EmbeddedResource Include="Properties\Resources.de.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <Content Include="Auth\Views\Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -1447,6 +1525,7 @@
       <Name>Signum.Entities.Extensions</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

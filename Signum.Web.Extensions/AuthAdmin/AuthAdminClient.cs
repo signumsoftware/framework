@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,7 +16,6 @@ using Signum.Entities.Reflection;
 using System.Linq.Expressions;
 using Signum.Engine.Maps;
 using System.Web.Routing;
-using Signum.Web.Extensions.Properties;
 using Signum.Engine.Basics;
 using Signum.Web.Basic;
 using Signum.Web.Omnibox;
@@ -27,7 +26,7 @@ namespace Signum.Web.AuthAdmin
     {
         public static string ViewPrefix = "~/authAdmin/Views/{0}.cshtml";
 
-        public static void Start(bool types, bool properties, bool queries, bool operations, bool permissions, bool facadeMethods)
+        public static void Start(bool types, bool properties, bool queries, bool operations, bool permissions)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -48,7 +47,7 @@ namespace Signum.Web.AuthAdmin
                 }
 
                 if (properties)
-                    Register<PropertyRulePack, PropertyAllowedRule, PropertyDN, PropertyAllowed, string>("properties", a => a.Resource.Path,
+                    Register<PropertyRulePack, PropertyAllowedRule, PropertyRouteDN, PropertyAllowed, string>("properties", a => a.Resource.Path,
                         Mapping.New<PropertyAllowed>(), "Resource_Path", true);
 
                 if (queries)
@@ -67,18 +66,12 @@ namespace Signum.Web.AuthAdmin
                     Register<PermissionRulePack, PermissionAllowedRule, PermissionDN, bool, PermissionDN>("permissions", a => a.Resource,
                         Mapping.New<bool>(), "Resource", false);
 
-
-                if (facadeMethods)
-                    Register<FacadeMethodRulePack, FacadeMethodAllowedRule, FacadeMethodDN, bool, string>("facadeMethods", a => a.Resource.ToString(),
-                        Mapping.New<bool>(), "Resource_Key", false);
-
-                QuickLinkWidgetHelper.RegisterEntityLinks<RoleDN>((RoleDN entity, string partialViewName, string prefix) =>
-                     entity.IsNew || !BasicPermission.AdminRules.IsAuthorized() ? null :
+                LinksClient.RegisterEntityLinks<RoleDN>((role, ctx) =>
+                     !BasicPermission.AdminRules.IsAuthorized() ? null :
                      new[]
                      {
-                         types ? new QuickLinkAction(Resources._0Rules.Formato(typeof(TypeDN).NiceName()), RouteHelper.New().Action((AuthAdminController c)=>c.Types(entity.ToLite()))): null,
-                         permissions ? new QuickLinkAction(Resources._0Rules.Formato(typeof(PermissionDN).NiceName()), RouteHelper.New().Action((AuthAdminController c)=>c.Permissions(entity.ToLite()))): null,
-                         facadeMethods ? new QuickLinkAction(Resources._0Rules.Formato(typeof(FacadeMethodDN).NiceName()), RouteHelper.New().Action((AuthAdminController c)=>c.FacadeMethods(entity.ToLite()))): null
+                         types ? new QuickLinkAction(AuthMessage._0Rules.NiceToString().Formato(typeof(TypeDN).NiceName()), RouteHelper.New().Action((AuthAdminController c)=>c.Types(role))): null,
+                         permissions ? new QuickLinkAction(AuthMessage._0Rules.NiceToString().Formato(typeof(PermissionDN).NiceName()), RouteHelper.New().Action((AuthAdminController c)=>c.Permissions(role))): null,
                      });
 
                 SpecialOmniboxProvider.Register(new SpecialOmniboxAction("DownloadAuthRules",
@@ -109,7 +102,6 @@ namespace Signum.Web.AuthAdmin
             {
                 PartialViewName = e => viewPrefix.Formato(partialViewName),
                 MappingDefault = new EntityMapping<T>(false)
-                    .CreateProperty(m => m.DefaultRule)
                     .SetProperty(m => m.Rules,
                         new MListDictionaryMapping<AR, K>(getKey, getKeyRoute)
                         {
@@ -129,7 +121,6 @@ namespace Signum.Web.AuthAdmin
             {
                 PartialViewName = e => viewPrefix.Formato("types"),
                 MappingDefault = new EntityMapping<TypeRulePack>(false)
-                    .CreateProperty(m => m.DefaultRule)
                     .SetProperty(m => m.Rules,
                         new MListDictionaryMapping<TypeAllowedRule, TypeDN>(a => a.Resource, "Resource")
                         {
@@ -154,7 +145,7 @@ namespace Signum.Web.AuthAdmin
                 new[] { new ToolBarButton { 
                     OnClick = (embedded ? "SF.Auth.postDialog('{0}', '{1}')" :  "SF.submit('{0}', '{1}')").Formato(
                         new UrlHelper(ctx.ControllerContext.RequestContext).Action((embedded? "save" : "") +  partialViewName, "AuthAdmin"), ctx.Prefix), 
-                    Text = Signum.Web.Properties.Resources.Save,
+                    Text = AuthMessage.Save.NiceToString(),
                     DivCssClass = ToolBarButton.DefaultEntityDivCssClass 
                 } 
                 });

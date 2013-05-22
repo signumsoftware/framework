@@ -13,8 +13,8 @@
                    vl.ValueHtmlProps["class"] = "sf-email-htmlwrite";
                })
         <br />
-        <input type="button" class="sf-button" id="insertMasterTemplateTokenButton" value="@Signum.Web.Extensions.Properties.Resources.InsertMessageContent" />
-        <input type="button" class="sf-button" id="messagePreviewContentButton" value="@Signum.Web.Extensions.Properties.Resources.PreviewContent" />
+        <input type="button" class="sf-button" id="insertMasterTemplateTokenButton" value="@(EmailTemplateViewMessage.InsertMessageContent.NiceToString())" />
+        <input type="button" class="sf-button" id="messagePreviewContentButton" value="@(EmailTemplateViewMessage.PreviewContent.NiceToString())" />
     </div>
     <div id="messagePreviewContent">
         <fieldset>
@@ -22,7 +22,7 @@
             <iframe id="messageBodyContentPreview" name="frameNewImage" src="about:blank" class="sf-email-htmlbody"
                 frameborder="0"></iframe>
             <br />
-            <input type="button" class="sf-button" id="messageEditContentButton" value="@Signum.Web.Extensions.Properties.Resources.EditContent" />
+            <input type="button" class="sf-button" id="messageEditContentButton" value="@(EmailTemplateViewMessage.EditContent.NiceToString())" />
         </fieldset>
     </div>
 }

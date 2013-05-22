@@ -14,17 +14,48 @@ using System.Windows.Shapes;
 using Signum.Windows;
 using Signum.Entities;
 using Signum.Entities.Processes;
+using System.Windows.Threading;
 
 namespace Signum.Windows.Processes
 {
     /// <summary>
-    /// Interaction logic for Process.xaml
+    /// Interaction logic for ProcessUI.xaml
     /// </summary>
     public partial class ProcessUI : UserControl
     {
+        DispatcherTimer timer;
+
         public ProcessUI()
         {
             InitializeComponent();
+            timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromSeconds(2);
+            timer.IsEnabled = false;
+            timer.Tick += new EventHandler(timer_Tick);
+            this.DataContextChanged += new DependencyPropertyChangedEventHandler(Process_DataContextChanged);
+            this.Unloaded += Process_Unloaded;
+        }
+
+        void Process_Unloaded(object sender, RoutedEventArgs e)
+        {
+            timer.IsEnabled = false;
+            timer = null; 
+        }
+
+        void timer_Tick(object sender, EventArgs e)
+        {
+            ProcessDN pe = DataContext as ProcessDN;
+            if (pe != null && (pe.State == ProcessState.Queued || pe.State == ProcessState.Executing || pe.State == ProcessState.Suspending))
+            {
+                ProcessDN npe = pe.ToLite().RetrieveAndForget();
+                RaiseEvent(new ChangeDataContextEventArgs(npe));
+            }
+        }
+
+        void Process_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            ProcessDN pe = e.NewValue as ProcessDN;
+            timer.IsEnabled = pe != null && (pe.State == ProcessState.Queued || pe.State == ProcessState.Executing || pe.State == ProcessState.Suspending); 
         }
     }
 }

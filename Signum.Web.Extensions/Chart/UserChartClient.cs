@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -9,7 +9,6 @@ using Signum.Engine.Basics;
 using Signum.Entities.Chart;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.UserQueries;
-using Signum.Web.Extensions.Properties;
 using Signum.Entities;
 using Signum.Web.Reports;
 using Signum.Entities.Authorization;
@@ -34,7 +33,7 @@ namespace Signum.Web.Chart
                 Mapping<QueryToken> qtMapping = ctx =>
                 {
                     string tokenStr = "";
-                    foreach (string key in ctx.Parent.Inputs.Keys.Where(k => k.Contains("ddlTokens")).Order())
+                    foreach (string key in ctx.Parent.Inputs.Keys.Where(k => k.Contains("ddlTokens")).OrderBy())
                         tokenStr += ctx.Parent.Inputs[key] + ".";
                     while (tokenStr.EndsWith("."))
                         tokenStr = tokenStr.Substring(0, tokenStr.Length - 1);
@@ -45,7 +44,7 @@ namespace Signum.Web.Chart
                     var chart = ((UserChartDN)ctx.Parent.Parent.Parent.UntypedValue);
 
                     QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                    return QueryUtils.Parse(tokenStr, qt => qt.SubTokensChart(qd.Columns, chart.GroupResults));
+                    return QueryUtils.Parse(tokenStr, qd, canAggregate: chart.GroupResults);
                 };
 
                 Navigator.AddSettings(new List<EntitySettings>
@@ -75,14 +74,43 @@ namespace Signum.Web.Chart
                 RouteTable.Routes.MapRoute(null, "UC/{webQueryName}/{lite}",
                      new { controller = "Chart", action = "ViewUserChart" });
 
-                UserChartDN.SetConverters(query => QueryLogic.ToQueryName(query.Key), queryname => 
+                UserChartDN.SetConverters(query => QueryLogic.ToQueryName(query.Key), queryname =>
                     QueryLogic.RetrieveOrGenerateQuery(queryname));
 
-                OperationsClient.AddSetting(new EntityOperationSettings(UserChartOperation.Delete) 
-                { 
+                OperationsClient.AddSetting(new EntityOperationSettings(UserChartOperation.Delete)
+                {
                     OnClick = ctx => new JsOperationDelete(ctx.Options("DeleteUserChart", "Chart"))
                         .confirmAndAjax(ctx.Entity)
                 });
+
+                LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, ctrl) =>
+                {
+                    if (!ChartPermission.ViewCharting.IsAuthorized())
+                        return null;
+
+                    return UserChartLogic.GetUserChartsEntity(entity.EntityType)
+                        .Select(cp => new UserChartQuickLink(cp, entity)).ToArray();
+                });
+
+            }
+        }
+
+        class UserChartQuickLink : QuickLink
+        {
+            Lite<UserChartDN> userChart;
+            Lite<IdentifiableEntity> entity;
+
+            public UserChartQuickLink(Lite<UserChartDN> userChart, Lite<IdentifiableEntity> entity)
+            {
+                this.Text = userChart.ToString();
+                this.userChart = userChart;
+                this.entity = entity;
+                this.IsVisible = true;
+            }
+
+            public override MvcHtmlString Execute()
+            {
+                return new HtmlTag("a").Attr("href", RouteHelper.New().Action((ChartController c) => c.ViewUserChart(userChart, entity))).SetInnerText(Text);
             }
         }
 
@@ -104,7 +132,7 @@ namespace Signum.Web.Chart
                 {
                     Text = uc.ToString(),
                     AltText = uc.ToString(),
-                    Href = RouteHelper.New().Action<ChartController>(c => c.ViewUserChart(uc)),
+                    Href = RouteHelper.New().Action<ChartController>(c => c.ViewUserChart(uc, null)),
                     DivCssClass = ToolBarButton.DefaultQueryCssClass + (currentUserChart.Is(uc) ? " sf-userchart-selected" : "")
                 });
             }
@@ -114,7 +142,7 @@ namespace Signum.Web.Chart
 
             if (Navigator.IsCreable(typeof(UserChartDN), isSearchEntity: true))
             {
-                string uqNewText = Resources.UserChart_CreateNew;
+                string uqNewText = ChartMessage.UserChart_CreateNew.NiceToString();
                 items.Add(new ToolBarButton
                 {
                     Id = TypeContextUtilities.Compose(prefix, "qbUserChartNew"),
@@ -127,7 +155,7 @@ namespace Signum.Web.Chart
             
             if (currentUserChart != null && currentUserChart.IsAllowedFor(TypeAllowedBasic.Modify, inUserInterface: true))
             {
-                string ucEditText = Resources.UserChart_Edit;
+                string ucEditText = ChartMessage.UserChart_Edit.NiceToString();
                 items.Add(new ToolBarButton
                 {
                     Id = TypeContextUtilities.Compose(prefix, "qbUserChartEdit"),
@@ -138,7 +166,7 @@ namespace Signum.Web.Chart
                 });
             }
 
-            string ucUserChartText = Resources.UserChart_UserCharts;
+            string ucUserChartText = ChartMessage.UserChart_UserCharts.NiceToString();
             var buttons = new List<ToolBarButton> 
             {
                 new ToolBarMenu
@@ -153,7 +181,7 @@ namespace Signum.Web.Chart
 
             if (ReportsClient.ToExcelPlain)
             {
-                string ucExportDataText = Resources.UserChart_ExportData;
+                string ucExportDataText = ChartMessage.UserChart_ExportData.NiceToString();
                 buttons.Add(new ToolBarButton
                 {
                     Id = TypeContextUtilities.Compose(prefix, "qbUserChartExportData"),

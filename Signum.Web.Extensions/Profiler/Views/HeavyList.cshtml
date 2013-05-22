@@ -1,12 +1,22 @@
 ﻿@using Signum.Utilities.ExpressionTrees
 @using Signum.Web.Profiler
 @model List<HeavyProfilerEntry>
-
+@{
+    bool orderByTime = ViewBag.OrderByTime;
+}
 <h2>@ViewData[ViewDataKeys.Title]</h2>
 <div>
     @Html.Partial(ProfilerClient.ViewPrefix.Formato("ProfilerButtons"))
+       @Html.ActionLink(orderByTime ?  "Order by ID": "Order by Time", (ProfilerController pc) => pc.Heavy(!orderByTime))
     @Html.ActionLink("Slowest SQLs", (ProfilerController pc) => pc.Statistics(SqlProfileResumeOrder.Sum))
+    @Html.ActionLink("Download", (ProfilerController pc) => pc.DownloadFile(null))
+    @using (Html.BeginForm((ProfilerController pc) => pc.UploadFile(), new { enctype = "multipart/form-data", encoding = "multipart/form-data" }))
+    {
+        <input type="file" name="xmlFile" />
+        <input type="submit" value="Upload" class="sf-button" />
+    }
 </div>
+
 
 @if (Model != null)
 {
@@ -25,13 +35,13 @@
     $(function () {
         SF.Profiler.init(function () {
             $.ajax({
-                url: "@Url.Action((ProfilerController p) => p.Heavy())",
+                url: "@Url.Action((ProfilerController p) => p.Heavy(orderByTime))",
                 success: function (data) {
                     $("table.sf-profiler-table").replaceWith(data);
                 }
             });
         });
 
-        SF.Profiler.heavyListChart(@Html.Raw(Model.OrderBy(e => e.Start).HeavyDetailsToJson()));
+        SF.Profiler.heavyListChart(@Html.Raw(Model.HeavyDetailsToJson()));
     });
 </script>

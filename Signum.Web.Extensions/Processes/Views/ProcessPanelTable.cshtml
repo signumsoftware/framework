@@ -48,11 +48,11 @@
             @foreach (var item in Model.Executing)
             {
                 <tr>
-                    <td>@Html.LightEntityLine(item.ProcessExecution, true)
+                    <td>@Html.LightEntityLine(item.Process, true)
                     </td>
                     <td>@item.State
                     </td>
-                    <td>@item.Progress
+                    <td>@item.Progress.TryToString("p")
                     </td>
                     <td>@item.IsCancellationRequested
                     </td>
@@ -66,7 +66,7 @@
             @foreach (var item in Model.Queue)
             {
                 <tr>
-                    <td>@Html.LightEntityLine(item.ProcessExecution, true)
+                    <td>@Html.LightEntityLine(item.Process, true)
                     </td>
                     <td>@item.State
                     </td>
@@ -82,7 +82,7 @@
     <br />
     <h2>Latest Processes</h2>
 
-    @Html.SearchControl(new FindOptions(typeof(Signum.Entities.Processes.ProcessExecutionDN))
+    @Html.SearchControl(new FindOptions(typeof(Signum.Entities.Processes.ProcessDN))
 {
     OrderOptions = { new OrderOption("CreationDate", Signum.Entities.DynamicQuery.OrderType.Descending) },
     FilterMode = Signum.Web.FilterMode.Hidden,

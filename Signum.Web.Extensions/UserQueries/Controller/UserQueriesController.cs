@@ -1,4 +1,4 @@
-﻿#region usings
+#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,6 @@ using Signum.Utilities;
 using Signum.Engine;
 using Signum.Entities;
 using Signum.Engine.Maps;
-using Signum.Web.Properties;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.Reflection;
 using Signum.Entities.DynamicQuery;
@@ -24,25 +23,38 @@ using Signum.Entities.Authorization;
 using Signum.Entities.UserQueries;
 using Signum.Engine.UserQueries;
 using Signum.Engine.Operations;
+using Signum.Engine.Authorization;
 #endregion
 
 namespace Signum.Web.UserQueries
 {
     public class UserQueriesController : Controller
     {
-        public ActionResult View(Lite<UserQueryDN> lite)
-        {
+        public ActionResult View(Lite<UserQueryDN> lite, FindOptions findOptions, Lite<IdentifiableEntity> currentEntity)
+        {   
+            UserQueryPermission.ViewUserQuery.Authorize(); 
+
             UserQueryDN uq = Database.Retrieve<UserQueryDN>(lite);
 
-            FindOptions fo = uq.ToFindOptions();
-           
-            return Navigator.Find(this, fo);
+            if (uq.EntityType != null)
+                CurrentEntityConverter.SetFilterValues(uq.Filters, currentEntity.Retrieve());
+
+            if (findOptions == null)
+            {
+                findOptions = uq.ToFindOptions();
+                return Navigator.Find(this, findOptions);
+            }
+            else
+            {
+                findOptions.ApplyUserQuery(uq);
+                return Navigator.Find(this, findOptions);
+            }
         }
 
         public ActionResult Create(QueryRequest request)
         {
             if (!Navigator.IsFindable(request.QueryName))
-                throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(request.QueryName));
+                throw new UnauthorizedAccessException(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().Formato(request.QueryName));
 
             var userQuery = ToUserQuery(request);
 
@@ -55,7 +67,9 @@ namespace Signum.Web.UserQueries
         {
             return request.ToUserQuery(
                 DynamicQueryManager.Current.QueryDescription(request.QueryName),
-                QueryLogic.RetrieveOrGenerateQuery(request.QueryName), FindOptions.DefaultElementsPerPage);
+                QueryLogic.RetrieveOrGenerateQuery(request.QueryName),
+                FindOptions.DefaultElementsPerPage,
+                withoutFilters: false /*Implement Simple Filter Builder*/);
         }
 
         [HttpPost]

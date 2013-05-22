@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Entities.Authorization;
 using System.Linq.Expressions;
 using Signum.Utilities;
+using System.ComponentModel;
 
 namespace Signum.Entities.Disconnected
 {
@@ -78,11 +79,24 @@ namespace Signum.Entities.Disconnected
         FixImport,
     }
 
-    public interface IDisconnectedEntity : IIdentifiable
+    [Serializable]
+    public class DisconnectedMixin : MixinEntity
     {
-        long Ticks { get; set; }
-        long? LastOnlineTicks { get; set; }
-        Lite<DisconnectedMachineDN> DisconnectedMachine { get; set; }
+        DisconnectedMixin(IdentifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next) { }
+
+        long? lastOnlineTicks;
+        public long? LastOnlineTicks
+        {
+            get { return lastOnlineTicks; }
+            set { Set(ref lastOnlineTicks, value, () => LastOnlineTicks); }
+        }
+
+        Lite<DisconnectedMachineDN> disconnectedMachine;
+        public Lite<DisconnectedMachineDN> DisconnectedMachine
+        {
+            get { return disconnectedMachine; }
+            set { Set(ref disconnectedMachine, value, () => DisconnectedMachine); }
+        }
     }
 
     [Serializable]
@@ -106,5 +120,13 @@ namespace Signum.Entities.Disconnected
         None,
         New,
         Subset
+    }
+
+    public enum DisconnectedMessage
+    {
+        [Description("Not allowed to save {0} while offline")]
+        NotAllowedToSave0WhileOffline,
+        [Description("The {0} with Id {1} ({2}) is locked by {3}")]
+        The0WithId12IsLockedBy3
     }
 }

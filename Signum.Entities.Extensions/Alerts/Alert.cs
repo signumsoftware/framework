@@ -32,7 +32,9 @@ namespace Signum.Entities.Alerts
             private set { Set(ref creationDate, value, () => CreationDate); }
         }
 
+        [NotNullable]
         DateTime? alertDate;
+        [NotNullValidator]
         public DateTime? AlertDate
         {
             get { return alertDate; }
@@ -99,11 +101,11 @@ namespace Signum.Entities.Alerts
             return text.EtcLines(100);
         }
 
-        static Expression<Func<AlertDN, bool>> NotAttendedExpression = 
+        static Expression<Func<AlertDN, bool>> AlertedExpression = 
             a => (a.AlertDate.HasValue && a.AlertDate <= TimeZoneManager.Now) && !a.AttendedDate.HasValue;
-        public bool NotAttended
+        public bool Alerted
         {
-            get{ return NotAttendedExpression.Evaluate(this); }
+            get{ return AlertedExpression.Evaluate(this); }
         }
 
         static Expression<Func<AlertDN, bool>> AttendedExpression = 
@@ -119,13 +121,37 @@ namespace Signum.Entities.Alerts
         {
             get{ return FutureExpression.Evaluate(this); }
         }
+
+        static Expression<Func<AlertDN, AlertCurrentState>> CurrentStateExpression = 
+            a =>a.attendedDate.HasValue ? AlertCurrentState.Attended: 
+                a.alertDate <= TimeZoneManager.Now ? AlertCurrentState.Alerted:  AlertCurrentState.Future;
+        public AlertCurrentState CurrentState
+        {
+            get{ return CurrentStateExpression.Evaluate(this); }
+        }
+
+        [ImplementedBy()]
+        Lite<IIdentifiable> aditionalData;
+        public Lite<IIdentifiable> AditionalData
+        {
+            get { return aditionalData; }
+            set { Set(ref aditionalData, value, () => AditionalData); }
+        }
     }
 
     public enum AlertState
     {
+        [Ignore]
         New,
         Saved,
         Attended
+    }
+
+    public enum AlertCurrentState
+    {
+        Attended,
+        Alerted,
+        Future,
     }
 
     public enum AlertOperation
@@ -137,40 +163,44 @@ namespace Signum.Entities.Alerts
     }
 
     [Serializable, EntityKind(EntityKind.String)]
-    public class AlertTypeDN : IdentifiableEntity
+    public class AlertTypeDN : MultiOptionalEnumDN
     {
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
-        string name;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name
+      static AlertTypeDN()
         {
-            get { return name; }
-            set
-            {
-                if (key != null)
-                    throw new ApplicationException("This alert type is protected");
-
-                SetToStr(ref name, value, () => Name);
-            }
+            DescriptionManager.DefaultDescriptionOptions += DescriptionManager_DefaultDescriptionOptions;
+            DescriptionManager.Invalidate();
         }
 
-        [SqlDbType(Size = 100), UniqueIndex(AllowMultipleNulls=true)]
-        string key;
-        public string Key
+        static DescriptionOptions? DescriptionManager_DefaultDescriptionOptions(Type type)
         {
-            get { return key; }
-            set { Set(ref key, value, () => Key); }
-        }
-
-        static readonly Expression<Func<AlertTypeDN, string>> ToStringExpression = e => e.name;
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
+            return type.IsEnum && type.Name.EndsWith("Alert") ? DescriptionOptions.Members : (DescriptionOptions?)null;
         }
     }
 
     public enum AlertTypeOperation
     {
         Save,
+    }
+
+    public enum AlertMessage
+    {
+        Alert,
+        [Description("New Alert")]
+        NewAlert,
+        AlertCreated,
+        Alerts,
+        [Description("Attended")]
+        Alerts_Attended,
+        [Description("Future")]
+        Alerts_Future,
+        [Description("Not attended")]
+        Alerts_NotAttended,
+        [Description("Checked")]
+        CheckedAlerts,
+        CreateAlert,
+        [Description("Futures")]
+        FutureAlerts,
+        [Description("Warned")]
+        WarnedAlerts
     }
 }

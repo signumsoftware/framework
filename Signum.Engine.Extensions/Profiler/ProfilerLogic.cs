@@ -28,18 +28,16 @@ namespace Signum.Engine.Profiler
                     PermissionAuthLogic.RegisterPermissions(ProfilerPermission.ViewTimeTracker);
 
                 if (heavyProfiler)
-                    PermissionAuthLogic.RegisterPermissions(ProfilerPermission.ViewHeavyProfiler); 
+                    PermissionAuthLogic.RegisterPermissions(ProfilerPermission.ViewHeavyProfiler);
 
-                if(overrideSessionTimeout)
-                    PermissionAuthLogic.RegisterPermissions(ProfilerPermission.OverrideSessionTimeout); 
+                if (overrideSessionTimeout)
+                    PermissionAuthLogic.RegisterPermissions(ProfilerPermission.OverrideSessionTimeout);
             }
         }
 
         public static void ProfilerEntries(List<HeavyProfilerEntry> entries)
         {
-            int index = HeavyProfiler.Entries.Count;
-            entries.ForEach(e => e.Index += index);
-            HeavyProfiler.Entries.AddRange(entries);
+            HeavyProfiler.ImportEntries(entries, rebaseTime: false);
         }
     }
 }

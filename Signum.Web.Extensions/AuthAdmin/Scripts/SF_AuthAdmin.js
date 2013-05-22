@@ -3,7 +3,7 @@
 SF.Auth = (function () {
     var updateColoredBackground = function () {
         var $this = $(this);
-        $this.toggleClass("sf-auth-chooser-disabled", !$this.find(":radio").attr("checked"));
+        $this.toggleClass("sf-auth-chooser-disabled", !$this.find(":radio").prop("checked"));
     };
 
     var coloredRadios = function ($ctx) {
@@ -15,17 +15,17 @@ SF.Auth = (function () {
         $links.click(function () {
             var $this = $(this);
             var $tr = $this.closest("tr");
-            $tr.find(".sf-auth-chooser :radio").attr("checked", false);
+            $tr.find(".sf-auth-chooser :radio").prop("checked", false);
             var $radio = $this.find(":radio");
-            $radio.attr("checked", true);
-            $tr.find(".sf-auth-overriden").attr("checked", $radio.val() != $tr.find("input[name$=AllowedBase]").val());
+            $radio.prop("checked", true);
+            $tr.find(".sf-auth-overriden").prop("checked", $radio.val() != $tr.find("input[name$=AllowedBase]").val());
             $tr.find(".sf-auth-chooser").each(updateColoredBackground);
         });
     };
 
     var updateMultiSelBackground = function () {
         var $this = $(this);
-        $this.toggleClass("sf-auth-chooser-disabled", !$this.find(":checkbox").attr("checked"));
+        $this.toggleClass("sf-auth-chooser-disabled", !$this.find(":checkbox").prop("checked"));
     };
 
     var multiSelToStringParts = function ($tr) {
@@ -47,15 +47,15 @@ SF.Auth = (function () {
             var $cb = $this.find(":checkbox");
 
             if (!e.shiftKey) {
-                $tr.find(".sf-auth-chooser :checkbox").attr("checked", false);
-                $cb.attr("checked", true);
+                $tr.find(".sf-auth-chooser :checkbox").prop("checked", false);
+                $cb.prop("checked", true);
             } else {
                 var num = $tr.find(".sf-auth-chooser :checkbox:checked").length;
-                if (!$cb.attr("checked") && num == 1) {
-                    $cb.attr("checked", true);
+                if (!$cb.prop("checked") && num == 1) {
+                    $cb.prop("checked", true);
                 }
-                else if ($cb.attr("checked") && num >= 2) {
-                    $cb.attr("checked", false);
+                else if ($cb.prop("checked") && num >= 2) {
+                    $cb.prop("checked", false);
                 }
             }
 
@@ -63,7 +63,7 @@ SF.Auth = (function () {
             var type = $tr.attr("data-type");
             if (typeof type == "undefined") {
                 total = multiSelToStringParts($tr);
-                $tr.find(".sf-auth-overriden").attr("checked", total != $tr.find("input[name$=AllowedBase]").val());
+                $tr.find(".sf-auth-overriden").prop("checked", total != $tr.find("input[name$=AllowedBase]").val());
             }
             else {
                 var $groupTrs = findTrsInGroup($tr.attr("data-ns"), type);
@@ -74,7 +74,7 @@ SF.Auth = (function () {
                     var $ctr = $(e);
                     total += ";" + $ctr.attr("data-condition") + "-" + multiSelToStringParts($ctr);
                 });
-                $typeTr.find(".sf-auth-overriden").attr("checked", total != $typeTr.find("input[name$=AllowedBase]").val());
+                $typeTr.find(".sf-auth-overriden").prop("checked", total != $typeTr.find("input[name$=AllowedBase]").val());
             }
 
             $tr.find(".sf-auth-chooser").each(updateMultiSelBackground);
@@ -82,7 +82,7 @@ SF.Auth = (function () {
     };
 
     var treeView = function () {
-        $(".sf-auth-namespace").live("click", function (e) {
+        $(document).on("click", ".sf-auth-namespace", function (e) {
             e.preventDefault();
             var $this = $(this);
             $this.find(".sf-auth-expanded-last,.sf-auth-closed-last").toggleClass("sf-auth-expanded-last").toggleClass("sf-auth-closed-last");

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,7 +16,6 @@ using Signum.Utilities.Reflection;
 using Signum.Utilities.DataStructures;
 using Signum.Windows.Operations;
 using Signum.Windows.Omnibox;
-using Signum.Windows.Extensions.Properties;
 using System.IO;
 using Microsoft.Win32;
 
@@ -32,7 +31,7 @@ namespace Signum.Windows.Authorization
                 UpdateCacheEvent();
         }
 
-        public static void Start(bool types, bool property, bool queries, bool permissions, bool operations, bool facadeMethods, bool defaultPasswordExpiresLogic)
+        public static void Start(bool types, bool property, bool queries, bool permissions, bool operations, bool defaultPasswordExpiresLogic)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -42,25 +41,21 @@ namespace Signum.Windows.Authorization
                 if (property) PropertyAuthClient.Start();
                 if (queries) QueryAuthClient.Start();
                 if (permissions) PermissionAuthClient.Start();
-                if (facadeMethods) FacadeMethodAuthClient.Start();
                 if (operations) OperationAuthClient.Start();
 
                 UpdateCache();
 
-                Navigator.AddSetting(new EntitySettings<UserDN> { View = e => new User() });
-                Navigator.AddSetting(new EntitySettings<RoleDN> { View = e => new Role() });
+                Navigator.AddSetting(new EntitySettings<UserDN> { View = e => new User(), Icon = ImageLoader.GetImageSortName("user.png") });
+                Navigator.AddSetting(new EntitySettings<RoleDN> { View = e => new Role(), Icon = ImageLoader.GetImageSortName("role.png") });
 
                 if (defaultPasswordExpiresLogic)
                     Navigator.AddSetting(new EntitySettings<PasswordExpiresIntervalDN> { View = e => new PasswordExpiresInterval() });
 
-                OperationClient.AddSetting(new EntityOperationSettings(UserOperation.SaveNew)
+                OperationClient.AddSettings(new List<OperationSettings>()
                 {
-                    IsVisible = e => e.Entity.IsNew,
-                });
-
-                OperationClient.AddSetting(new EntityOperationSettings(UserOperation.Save)
-                {
-                    IsVisible = e => !e.Entity.IsNew,
+                    new EntityOperationSettings(UserOperation.SetPassword){ IsVisible = e => false },
+                    new EntityOperationSettings(UserOperation.SaveNew){ IsVisible = e => e.Entity.IsNew },
+                    new EntityOperationSettings(UserOperation.Save) { IsVisible = e => !e.Entity.IsNew }
                 });
 
                 SpecialOmniboxProvider.Register(new SpecialOmniboxAction("UpdateAuthCache",
@@ -69,11 +64,11 @@ namespace Signum.Windows.Authorization
                     {
                         UpdateCache();
 
-                        MessageBox.Show(Resources.AuthorizationCacheSuccessfullyUpdated);
+                        MessageBox.Show(AuthMessage.AuthorizationCacheSuccessfullyUpdated.NiceToString());
                     }));
 
                 SpecialOmniboxProvider.Register(new SpecialOmniboxAction("DownloadAuthRules",
-                    () => BasicPermission.AdminRules.TryIsAuthorized() ?? true,
+                    () => BasicPermission.AdminRules.IsAuthorized(),
                     win =>
                     {
                         SaveFileDialog sfc = new SaveFileDialog();

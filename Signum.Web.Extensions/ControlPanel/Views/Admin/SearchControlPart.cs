@@ -41,8 +41,7 @@ namespace ASP
     using System.Web.UI.WebControls.WebParts;
     using System.Web.UI.HtmlControls;
     using System.Xml.Linq;
-    using Signum.Web.Properties;
-    using Signum.Entities.ControlPanel;
+        using Signum.Entities.ControlPanel;
     using Signum.Web.ControlPanel;
     using Signum.Entities.DynamicQuery;
     using Signum.Entities.Reports;

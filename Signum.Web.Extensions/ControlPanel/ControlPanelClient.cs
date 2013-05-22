@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -11,8 +11,9 @@ using System.Web.Routing;
 using Signum.Web.UserQueries;
 using Signum.Entities;
 using Signum.Entities.Reports;
-using Signum.Web.Extensions.Properties;
 using Signum.Web.Controllers;
+using Signum.Engine.ControlPanel;
+using Signum.Engine.Authorization;
 
 namespace Signum.Web.ControlPanel
 {
@@ -56,7 +57,7 @@ namespace Signum.Web.ControlPanel
                 Navigator.AddSettings(new List<EntitySettings>
                 {
                     new EntitySettings<ControlPanelDN> { PartialViewName = e => AdminViewPrefix.Formato("ControlPanelAdmin") },
-                    new EmbeddedEntitySettings<PanelPart>(),
+                    new EmbeddedEntitySettings<PanelPartDN>(),
                     
                     new EntitySettings<UserChartPartDN>(),
                     new EntitySettings<UserQueryPartDN>(),
@@ -78,9 +79,9 @@ namespace Signum.Web.ControlPanel
                         new ToolBarButton
                         {
                             Id = TypeContextUtilities.Compose(ctx.Prefix, "CreatePart"),
-                            Text = Resources.ControlPanel_CreateNewPart,
+                            Text = ControlPanelMessage.ControlPanel_CreateNewPart.NiceToString(),
                             Enabled = !panel.IsNew,
-                            AltText = panel.IsNew ? Resources.ControlPanel_YouMustSaveThePanelBeforeAddingParts : Resources.ControlPanel_CreateNewPart,
+                            AltText = panel.IsNew ? ControlPanelMessage.ControlPanel_YouMustSaveThePanelBeforeAddingParts.NiceToString() : ControlPanelMessage.ControlPanel_CreateNewPart.NiceToString(),
                             OnClick = panel.IsNew ? "" : 
                                 JsValidator.EntityIsValid(new JsValidatorOptions
                                 {
@@ -100,16 +101,39 @@ namespace Signum.Web.ControlPanel
                     };
                 });
 
-                QuickLinkWidgetHelper.RegisterEntityLinks<ControlPanelDN>((entity, partialview, prefix) =>
+                LinksClient.RegisterEntityLinks<ControlPanelDN>((cp, ctx) => new[]
                 {
-                    if (entity.IsNew)
+                    !ControlPanelPermission.ViewControlPanel.IsAuthorized() ? null:
+                     new QuickLinkAction(ControlPanelMessage.Preview.NiceToString(), RouteHelper.New().Action<ControlPanelController>(cpc => cpc.View(cp, null)))
+                });
+           
+                LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, ctrl) =>
+                {
+                    if (!ControlPanelPermission.ViewControlPanel.IsAuthorized())
                         return null;
 
-                    return new QuickLink[]
-                    {
-                        new QuickLinkAction(Signum.Web.Properties.Resources.View, RouteHelper.New().Action<ControlPanelController>(cpc => cpc.View(entity.ToLite())))
-                    };
+                    return ControlPanelLogic.GetControlPanelsEntity(entity.EntityType)
+                        .Select(cp => new ControlPanelQuickLink(cp, entity)).ToArray(); 
                 });
+            }
+        }
+
+        class ControlPanelQuickLink : QuickLink
+        {
+            Lite<ControlPanelDN> controlPanel;
+            Lite<IdentifiableEntity> entity;
+
+            public ControlPanelQuickLink(Lite<ControlPanelDN> controlPanel, Lite<IdentifiableEntity> entity)
+            {
+                this.Text = controlPanel.ToString();
+                this.controlPanel = controlPanel;
+                this.entity = entity;
+                this.IsVisible = true;
+            }
+
+            public override MvcHtmlString Execute()
+            {
+                return new HtmlTag("a").Attr("href", RouteHelper.New().Action((ControlPanelController c) => c.View(controlPanel, entity))).SetInnerText(Text);
             }
         }
     }

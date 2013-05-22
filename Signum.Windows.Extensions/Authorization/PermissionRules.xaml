@@ -9,7 +9,7 @@
     TextOptions.TextFormattingMode="Display"
     UseLayoutRounding="True" 
     WindowStartupLocation="CenterOwner"
-    Title="Permission Rules" x:Name="me" MinWidth="500" MinHeight="300" m:Common.TypeContext="authdn:PermissionRulePack">
+    Title="Permission Rules" x:Name="me" MinWidth="500" MinHeight="300" m:Common.TypeContext="{x:Type authdn:PermissionRulePack}">
 	<Window.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
@@ -20,10 +20,7 @@
     <DockPanel>
         <m:ButtonBar  DockPanel.Dock="Top" SaveClick="btSave_Click" SaveVisible="True" ReloadClick="btReload_Click" ReloadVisible="True"/> 
         <m:EntityLine VerticalAlignment="Top"  m:Common.IsReadOnly="True" m:Common.Route="Role" DockPanel.Dock="Top"/>
-        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
-            <m:ValueLine m:Common.Route="DefaultRule" />
-            <TextBlock Text="{Binding DefaultLabel}" VerticalAlignment="Center" Margin="5"/>
-        </StackPanel>
+        <m:ValueLine m:Common.Route="Strategy" DockPanel.Dock="Top" />
         <ListView x:Name="listView" IsSynchronizedWithCurrentItem="True" ItemsSource="{Binding Rules}">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">

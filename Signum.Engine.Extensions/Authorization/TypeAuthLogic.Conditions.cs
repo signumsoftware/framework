@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,7 +17,6 @@ using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.Linq;
-using Signum.Engine.Extensions.Properties;
 using Signum.Engine.Exceptions;
 using System.Data.SqlClient;
 using System.Xml.Linq;
@@ -142,7 +141,7 @@ namespace Signum.Engine.Authorization
 
                     string details = debugInfo.ToString(a => "  {0} because {1}".Formato(a.Lite, a.Error), "\r\n");
 
-                    throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(
+                    throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().Formato(
                         typeAllowed.NiceToString(),
                         notFound.Length == 1 ? typeof(T).NiceName() : typeof(T).NicePluralName(), notFound.CommaAnd()) + "\r\n" + details);
                 }
@@ -157,7 +156,7 @@ namespace Signum.Engine.Authorization
         public static void AssertAllowed(this IIdentifiable ident, TypeAllowedBasic allowed, bool inUserInterface)
         {
             if (!ident.IsAllowedFor(allowed, inUserInterface))
-                throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(allowed.NiceToString().ToLower(), ident.GetType().NiceName(), ident.Id));
+                throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().Formato(allowed.NiceToString().ToLower(), ident.GetType().NiceName(), ident.Id));
         }
 
         public static void AssertAllowed(this Lite<IIdentifiable> lite, TypeAllowedBasic allowed)
@@ -171,7 +170,7 @@ namespace Signum.Engine.Authorization
                 AssertAllowed(lite.UntypedEntityOrNull, allowed, inUserInterface);
 
             if (!lite.IsAllowedFor(allowed, inUserInterface))
-                throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(allowed.NiceToString().ToLower(), lite.EntityType.NiceName(), lite.Id));
+                throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().Formato(allowed.NiceToString().ToLower(), lite.EntityType.NiceName(), lite.Id));
         }
 
         [MethodExpander(typeof(IsAllowedForExpander))]
@@ -438,7 +437,7 @@ namespace Signum.Engine.Authorization
                 this.UserInterface = userInterface;
                 this.Conditions = groups;
             }
-
+            
             public Lite<IIdentifiable> Lite { get; private set; }
             public TypeAllowedBasic Requested { get; private set; }
             public TypeAllowed Fallback { get; private set; }
@@ -468,11 +467,11 @@ namespace Signum.Engine.Authorization
                     {
                         if (cond.InGroup)
                             return Requested <= cond.Allowed.Get(UserInterface) ? null :
-                                "{0} belongs to {1} that is {2} (less than {3})".Formato(Lite, cond.ConditionName, cond.Allowed.Get(UserInterface), Requested);
+                                "is a {0} that belongs to condition {1} that is {2} (less than {3})".Formato(Lite.EntityType.TypeName(), cond.ConditionName, cond.Allowed.Get(UserInterface), Requested);
                     }
 
                     return Requested <= Fallback.Get(UserInterface) ? null :
-                        "The base value for {0} is {1} (less than {2}) and {3} does not belong to any condition".Formato(Lite.EntityType.TypeName(), Fallback.Get(UserInterface), Requested, Lite);
+                        "is a {0} but does not belong to any condition and the base value is {1} (less than {2})".Formato(Lite.EntityType.TypeName(), Fallback.Get(UserInterface), Requested);
                 }
             }
         }
@@ -491,14 +490,14 @@ namespace Signum.Engine.Authorization
             }
         }
      
-        public static DynamicQuery<T> ToDynamicDisableAutoFilter<T>(this IQueryable<T> query)
+        public static DynamicQueryCore<T> ToDynamicDisableAutoFilter<T>(this IQueryable<T> query)
         {
-            return new AutoDynamicQueryNoFilter<T>(query);
+            return new AutoDynamicQueryNoFilterCore<T>(query);
         }
 
-        internal class AutoDynamicQueryNoFilter<T> : AutoDynamicQuery<T>
+        internal class AutoDynamicQueryNoFilterCore<T> : AutoDynamicQueryCore<T>
         {
-            public AutoDynamicQueryNoFilter(IQueryable<T> query)
+            public AutoDynamicQueryNoFilterCore(IQueryable<T> query)
                 : base(query)
             { }
 

@@ -1,17 +1,17 @@
-﻿@using Signum.Web.AuthAdmin
+@using Signum.Web.AuthAdmin
 @using Signum.Entities.Basics
 @using Signum.Engine.Basics
-@Html.DynamicCss("~/authAdmin/Content/SF_AuthAdmin.css")
+@Html.ScriptCss("~/authAdmin/Content/SF_AuthAdmin.css")
 @Html.ScriptsJs("~/authAdmin/Scripts/SF_AuthAdmin.js")
 <script type="text/javascript">
     $(function () {
         SF.Auth.multiSelRadios($(document));
         SF.Auth.treeView();
         $(".sf-auth-rules .sf-submodule-trigger").click(SF.Auth.openDialog);
-        $(".sf-auth-rules .sf-remove").live('click', SF.Auth.removeCondition);
-        $(".sf-auth-rules .sf-create").live('click', function (e) {
+        $(document).on("click", ".sf-auth-rules .sf-remove", SF.Auth.removeCondition);
+        $(document).on("click", ".sf-auth-rules .sf-create", function (e) {
             e.preventDefault();
-            SF.Auth.chooseConditionToAdd($(this), '@Url.Action("GetChooser", "Signum")', '@Resources.AuthAdmin_ChooseACondition');
+            SF.Auth.chooseConditionToAdd($(this), '@Url.Action("GetChooser", "Signum")', '@AuthMessage.AuthAdmin_ChooseACondition.NiceToString()');
         });
     });
 </script>
@@ -23,36 +23,36 @@
 @using (var tc = Html.TypeContext<TypeRulePack>())
 {
     @Html.EntityLine(tc, f => f.Role)
-    @Html.ValueLine(tc, f => f.DefaultRule, vl => { vl.UnitText = tc.Value.DefaultLabel; })
+    @Html.ValueLine(tc, f => f.Strategy)
 
     <table class="sf-auth-rules">
         <thead>
             <tr>
-                <th>@Resources.TypesAscx_Type
+                <th>@AuthMessage.TypesAscx_Type.NiceToString()
                 </th>
-                <th>@Resources.TypesAscx_Create
+                <th>@AuthMessage.TypesAscx_Create.NiceToString()
                 </th>
-                <th>@Resources.TypesAscx_Modify
+                <th>@AuthMessage.TypesAscx_Modify.NiceToString()
                 </th>
-                <th>@Resources.TypesAscx_Read
+                <th>@AuthMessage.TypesAscx_Read.NiceToString()
                 </th>
-                <th>@Resources.TypesAscx_None
+                <th>@AuthMessage.TypesAscx_None.NiceToString()
                 </th>
-                <th>@Resources.TypesAscx_Overriden
+                <th>@AuthMessage.TypesAscx_Overriden.NiceToString()
                 </th>
                 @if (propertyRules)
                 {
-                    <th>@Resources.TypesAscx_Properties
+                    <th>@AuthMessage.TypesAscx_Properties.NiceToString()
                     </th>
                 }
                 @if (operationRules)
                 {
-                    <th>@Resources.TypesAscx_Operations
+                    <th>@AuthMessage.TypesAscx_Operations.NiceToString()
                     </th>
                 }
                 @if (queryRules)
                 {
-                    <th>@Resources.TypesAscx_Queries
+                    <th>@AuthMessage.TypesAscx_Queries.NiceToString()
                     </th>
                 }
             </tr>
@@ -78,8 +78,10 @@
                     </div>
                     @if (!item.Value.AvailableConditions.IsNullOrEmpty())
                     {
-                        <a title="@Resources.AuthAdmin_AddCondition" class="sf-line-button sf-create" data-icon="ui-icon-circle-plus" data-text="false" style="@(item.Value.Allowed.Conditions.Count == item.Value.AvailableConditions.Count ? "display:none" : "")">
+                        <a title="@AuthMessage.AuthAdmin_AddCondition.NiceToString()" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only sf-create sf-auth-condition-button" style="@(item.Value.Allowed.Conditions.Count == item.Value.AvailableConditions.Count ? "display:none" : "")">
+                            <span class="ui-button-icon-primary ui-icon ui-icon-circle-plus"></span>
                         </a>
+                        
                         <input type="hidden" disabled="disabled" class="sf-auth-available-conditions" value="@item.Value.AvailableConditions.ToString(ac => "{0}|{1}".Formato(TypeConditionNameDN.UniqueKey(ac), ac.NiceToString()), ",")" />
                     }
                     <span class="sf-auth-label">@item.Value.Resource.ToType().NiceName()</span>
@@ -167,8 +169,10 @@
                     </div>
                     <div class="sf-auth-tree @(conditionIter.IsLast ? "sf-auth-leaf-last" : "sf-auth-leaf")">
                     </div>
-                    <a title="@Resources.AuthAdmin_RemoveCondition" class="sf-line-button sf-remove" data-icon="ui-icon-circle-close" data-text="false">
-                    </a><span class="sf-auth-label">@condition.ConditionName.NiceToString()</span>
+                    <a class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only sf-remove sf-auth-condition-button" title="@(AuthMessage.AuthAdmin_RemoveCondition.NiceToString())">
+                        <span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span>
+                    </a>
+                    <span class="sf-auth-label">@condition.ConditionName.NiceToString()</span>
                     @Html.Hidden(TypeContextUtilities.Compose(controlId, "ConditionName"), TypeConditionNameDN.UniqueKey(condition.ConditionName))
                 </td>
                 

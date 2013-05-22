@@ -28,8 +28,8 @@ namespace Signum.Windows.Processes
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                Navigator.AddSetting(new EntitySettings<ProcessAlgorithmDN> { View = e => new ProcessAlgorithm(), Icon = Image("processAlgorithm.png") });
                 Navigator.AddSetting(new EntitySettings<ProcessDN> { View = e => new ProcessUI(), Icon = Image("process.png") });
-                Navigator.AddSetting(new EntitySettings<ProcessExecutionDN> { View = e => new ProcessExecution(), Icon = Image("processExecution.png") });
 
                 OperationClient.AddSettings(new List<OperationSettings>()
                 {
@@ -79,12 +79,12 @@ namespace Signum.Windows.Processes
                               Entities = sc.SelectedItems,
                               SearchControl = sc,
                               OperationInfo = oi,
-                              OperationSettings = os.TryCC(a=>a.ContextualFromMany),
-                              CanExecute = OperationDN.NotDefinedFor(g.Key, types.Except(g.Select(a=>a.t))),
+                              OperationSettings = os.TryCC(a => a.ContextualFromMany),
+                              CanExecute = OperationDN.NotDefinedFor(g.Key, types.Except(g.Select(a => a.t))),
                           }
                           where os == null ? oi.Lite == true && oi.OperationType != OperationType.ConstructorFrom :
-                              os.ContextualFromMany == null ? (oi.Lite == true && os.Click == null && oi.OperationType != OperationType.ConstructorFrom) :
-                              (os.ContextualFromMany.IsVisible == null || os.ContextualFromMany.IsVisible(coc))
+                              os.ContextualFromMany.IsVisible == null ? (oi.Lite == true && os.IsVisible == null && oi.OperationType != OperationType.ConstructorFrom && (os.Click == null || os.ContextualFromMany.Click != null)) :
+                              os.ContextualFromMany.IsVisible(coc)
                           select coc).ToList();
 
             if (result.IsEmpty())
@@ -109,12 +109,12 @@ namespace Signum.Windows.Processes
         }
 
 
-        static ProcessExecutionDN ProcessOperation_Plan(EntityOperationContext args)
+        static ProcessDN ProcessOperation_Plan(EntityOperationContext args)
         {
             DateTime plan = TimeZoneManager.Now;
             if (ValueLineBox.Show(ref plan, "Choose planned date", "Please, choose the date you want the process to start", "Planned date", null, null, Window.GetWindow(args.SenderButton)))
             {
-                return  ((ProcessExecutionDN)args.Entity).ToLite().ExecuteLite(ProcessOperation.Plan, plan); 
+                return  ((ProcessDN)args.Entity).ToLite().ExecuteLite(ProcessOperation.Plan, plan); 
             }
             return null; 
         }

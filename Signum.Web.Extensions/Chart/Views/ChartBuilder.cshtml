@@ -1,4 +1,4 @@
-﻿@using Signum.Web
+@using Signum.Web
 @using Signum.Web.Extensions.Properties
 @using Signum.Entities.DynamicQuery
 @using Signum.Engine.DynamicQuery
@@ -40,12 +40,12 @@
                 }
             </td>
             <td class="ui-widget ui-widget-content ui-corner-all sf-chart-tokens">
-                <div class="ui-widget-header">@Resources.Chart_ChartSettings</div>
+                <div class="ui-widget-header">@ChartMessage.Chart_ChartSettings.NiceToString()</div>
                 <table>
                     <tr>
-                        <th class="sf-chart-token-narrow">@Resources.Chart_Dimension
+                        <th class="sf-chart-token-narrow">@ChartMessage.Chart_Dimension.NiceToString()
                         </th>
-                        <th class="sf-chart-token-narrow">@Resources.Chart_Group
+                        <th class="sf-chart-token-narrow">@ChartMessage.Chart_Group.NiceToString()
                         </th>
                         <th class="sf-chart-token-wide">
                             Token

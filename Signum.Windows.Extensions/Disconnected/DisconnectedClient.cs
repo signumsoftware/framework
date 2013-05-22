@@ -94,10 +94,10 @@ namespace Signum.Windows.Disconnected
 
                 if (upload == Upload.Subset)
                 {
-                    var de = ((IDisconnectedEntity)entity);
+                    var dm =  entity.Mixin<DisconnectedMixin>();
 
-                    if(de.DisconnectedMachine != null)
-                        return de.DisconnectedMachine.Is(DisconnectedMachineDN.Current);
+                    if(dm.DisconnectedMachine != null)
+                        return dm.DisconnectedMachine.Is(DisconnectedMachineDN.Current);
                 }
 
                 return DisconnectedExportRanges.InModifiableRange(type, entity.Id);
@@ -105,7 +105,7 @@ namespace Signum.Windows.Disconnected
             else
             {
                 if (upload == Upload.Subset && entity != null)
-                    return ((IDisconnectedEntity)entity).DisconnectedMachine == null;
+                    return entity.Mixin<DisconnectedMixin>().DisconnectedMachine == null;
 
                 return true;
             }

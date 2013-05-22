@@ -1,13 +1,17 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using System.Reflection;
-using Signum.Entities.Extensions.Properties;
 using System.Linq.Expressions;
 using System.ComponentModel;
 using System.Collections.Specialized;
+using Signum.Entities.Basics;
+using Signum.Entities.Reflection;
+using Signum.Entities.Chart;
+using Signum.Utilities.Reflection;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Entities.ControlPanel
 {
@@ -19,8 +23,14 @@ namespace Signum.Entities.ControlPanel
             RebindEvents();
         }
 
+        Lite<TypeDN> entityType;
+        public Lite<TypeDN> EntityType
+        {
+            get { return entityType; }
+            set { Set(ref entityType, value, () => EntityType); }
+        }
+
         Lite<IdentifiableEntity> related;
-        [NotNullValidator]
         public Lite<IdentifiableEntity> Related
         {
             get { return related; }
@@ -51,9 +61,9 @@ namespace Signum.Entities.ControlPanel
         }
 
         [ValidateChildProperty, NotifyCollectionChanged, NotifyChildProperty, NotNullable]
-        MList<PanelPart> parts = new MList<PanelPart>();
+        MList<PanelPartDN> parts = new MList<PanelPartDN>();
         [NoRepeatValidator]
-        public MList<PanelPart> Parts
+        public MList<PanelPartDN> Parts
         {
             get { return parts; }
             set { Set(ref parts, value, () => Parts); }
@@ -68,14 +78,14 @@ namespace Signum.Entities.ControlPanel
 
         protected override string ChildPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
         {
-            if (sender is PanelPart)
+            if (sender is PanelPartDN)
             {
-                PanelPart part = (PanelPart)sender;
+                PanelPartDN part = (PanelPartDN)sender;
 
                 if (pi.Is(() => part.Column))
                 {
                     if (part.Column >= NumberOfColumns)
-                        return Resources.ControlPanelDN_Part0IsInColumn1ButPanelHasOnly2Columns.Formato(part.Title, part.Column, NumberOfColumns);
+                        return ControlPanelMessage.ControlPanelDN_Part0IsInColumn1ButPanelHasOnly2Columns.NiceToString().Formato(part.Title, part.Column, NumberOfColumns);
                 }
 
                 if (pi.Is(() => part.Row))
@@ -87,7 +97,19 @@ namespace Signum.Entities.ControlPanel
                 if (pi.Is(() => part.Row) || pi.Is(() => part.Column))
                 {
                     if (parts.Any(p => p != part && p.Row == part.Row && p.Column == part.Column))
-                        return Resources.ControlPanelDN_Part0IsInColumn1WhichAlreadyHasOtherParts.Formato(part.Title, part.Column, part.Row);
+                        return ControlPanelMessage.ControlPanelDN_Part0IsInColumn1WhichAlreadyHasOtherParts.NiceToString().Formato(part.Title, part.Column, part.Row);
+                }
+
+                if (entityType != null && pi.Is(() => part.Content) && part.Content != null)
+                {
+                    var idents = GraphExplorer.FromRoot((IdentifiableEntity)part.Content).OfType<IdentifiableEntity>();
+
+                    string errorsUserQuery = idents.OfType<IHasEntitytype>()
+                        .Where(uc => uc.EntityType != null && !uc.EntityType.Is(EntityType))
+                        .ToString(uc => ControlPanelMessage._0Is1InstedOf2In3.NiceToString().Formato(
+                        NicePropertyName(() => EntityType), uc.EntityType, entityType, uc), "\r\n");
+
+                    return errorsUserQuery.DefaultText(null);
                 }
             }
 
@@ -102,7 +124,7 @@ namespace Signum.Entities.ControlPanel
         //        int maxRow = rows.Max();
         //        var numbers = 0.To(maxRow);
         //        if (maxRow != rows.Count)
-        //            return Resources.ControlPanelDN_Rows0DontHaveAnyParts.Formato(numbers.Where(n => !rows.Contains(n)).ToString(n => n.ToString(), ", "));
+        //            return ControlPanelMessage.ControlPanelDN_Rows0DontHaveAnyParts.NiceToString().Formato(numbers.Where(n => !rows.Contains(n)).ToString(n => n.ToString(), ", "));
         //    }
 
         //    return base.PropertyValidation(pi);
@@ -122,7 +144,7 @@ namespace Signum.Entities.ControlPanel
         bool invalidating = false;
         protected override void ChildPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (!invalidating && sender is PanelPart && (e.PropertyName == "Row" || e.PropertyName == "Column"))
+            if (!invalidating && sender is PanelPartDN && (e.PropertyName == "Row" || e.PropertyName == "Column"))
             {
                 invalidating = true;
                 foreach (var pp in Parts)
@@ -152,10 +174,39 @@ namespace Signum.Entities.ControlPanel
         }
     }
 
+    public enum ControlPanelPermission
+    {
+        ViewControlPanel,
+    }
+
     public enum ControlPanelOperation
     {
+        Create,
         Save,
         Clone,
         Delete,
+    }
+
+    public enum ControlPanelMessage
+    {
+        [Description("Create new part")]
+        ControlPanel_CreateNewPart,
+        [Description("You must save the panel before adding parts")]
+        ControlPanel_YouMustSaveThePanelBeforeAddingParts,
+        [Description("Part {0} is in column {1} but panel has only {2} columns")]
+        ControlPanelDN_Part0IsInColumn1ButPanelHasOnly2Columns,
+        [Description("Part {0} is in column {1} of row {2} which already has other parts")]
+        ControlPanelDN_Part0IsInColumn1WhichAlreadyHasOtherParts,
+        [Description("There are not any parts in rows {0}")]
+        ControlPanelDN_Rows0DontHaveAnyParts,
+        [Description("Title must be specified for {0}")]
+        ControlPanelDN_TitleMustBeSpecifiedFor0,
+        [Description("Counter list")]
+        CountSearchControlPartDN,
+        [Description("Counter")]
+        CountUserQueryElement,
+        Preview,
+        [Description("{0} is {1} (instead of {2}) in {3}")]
+        _0Is1InstedOf2In3
     }
 }

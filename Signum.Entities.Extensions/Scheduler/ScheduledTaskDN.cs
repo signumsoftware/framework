@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using Signum.Entities;
 using Signum.Utilities;
-using Signum.Entities.Extensions.Properties;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Processes;
 
@@ -22,7 +21,7 @@ namespace Signum.Entities.Scheduler
             set { SetToStr(ref rule, value, () => Rule); }
         }
 
-        [ImplementedBy(typeof(CustomTaskDN))]
+        [ImplementedBy(typeof(ActionTaskDN))]
         ITaskDN task;
         [NotNullValidator]
         public ITaskDN Task

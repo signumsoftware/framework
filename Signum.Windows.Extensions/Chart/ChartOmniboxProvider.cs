@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,7 +11,6 @@ using Signum.Utilities;
 using Signum.Windows.Authorization;
 using Signum.Entities.Chart;
 using Signum.Entities.DynamicQuery;
-using Signum.Windows.Extensions.Properties;
 using System.Windows;
 
 namespace Signum.Windows.Chart
@@ -37,7 +36,7 @@ namespace Signum.Windows.Chart
 
         public override Run GetIcon()
         {
-            return new Run(" ({0})".Formato(Signum.Windows.Extensions.Properties.Resources.Chart)) { Foreground = Brushes.Violet };
+            return new Run(" ({0})".Formato(ChartMessage.Chart.NiceToString())) { Foreground = Brushes.Violet };
         }
 
         public override void OnSelected(ChartOmniboxResult result, Window window)
@@ -50,7 +49,7 @@ namespace Signum.Windows.Chart
             cw.Show();
         }
 
-        public override string GetItemStatus(ChartOmniboxResult result)
+        public override string GetName(ChartOmniboxResult result)
         {
             return "C:" + result.QueryName.TryCC(QueryUtils.GetQueryUniqueKey);
         }

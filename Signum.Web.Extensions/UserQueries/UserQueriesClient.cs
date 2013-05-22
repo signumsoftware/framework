@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,7 +14,6 @@ using Signum.Entities.DynamicQuery;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Reports;
 using Signum.Engine;
-using Signum.Web.Extensions.Properties;
 using Signum.Engine.Basics;
 using Signum.Entities.UserQueries;
 using Signum.Engine.UserQueries;
@@ -39,13 +38,17 @@ namespace Signum.Web.UserQueries
 
                 Navigator.RegisterArea(typeof(UserQueriesClient));
 
+                var defaultScripts = Navigator.Manager.DefaultScripts();
+                defaultScripts.Add("~/UserQueries/Scripts/SF_UserQuery.js");
+                Navigator.Manager.DefaultScripts = () => defaultScripts;
+
                 RouteTable.Routes.MapRoute(null, "UQ/{webQueryName}/{lite}",
                     new { controller = "UserQueries", action = "View" });
 
                 Mapping<QueryToken> qtMapping = ctx=>
                 {
                     string tokenStr = "";
-                    foreach (string key in ctx.Parent.Inputs.Keys.Where(k => k.Contains("ddlTokens")).Order())
+                    foreach (string key in ctx.Parent.Inputs.Keys.Where(k => k.Contains("ddlTokens")).OrderBy())
                         tokenStr += ctx.Parent.Inputs[key] + ".";
                     while (tokenStr.EndsWith("."))
                         tokenStr = tokenStr.Substring(0, tokenStr.Length - 1);
@@ -53,7 +56,7 @@ namespace Signum.Web.UserQueries
                     string queryKey = ctx.Parent.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", "Key")];
                     object queryName = QueryLogic.ToQueryName(queryKey);
                     QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                    return QueryUtils.Parse(tokenStr, qd);
+                    return QueryUtils.Parse(tokenStr, qd, canAggregate: false);
                 };
 
                 Navigator.AddSettings(new List<EntitySettings>
@@ -101,9 +104,37 @@ namespace Signum.Web.UserQueries
                             .confirmAndAjax(ctx.Entity)
                     }
                 });
+
+                LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, ctrl) =>
+                {
+                    if (!UserQueryPermission.ViewUserQuery.IsAuthorized())
+                        return null;
+
+                    return UserQueryLogic.GetUserQueriesEntity(entity.EntityType)
+                        .Select(cp => new UserQueryQuickLink(cp, entity)).ToArray();
+                });
             }
         }
-        
+
+        class UserQueryQuickLink : QuickLink
+        {
+            Lite<UserQueryDN> userQuery;
+            Lite<IdentifiableEntity> entity;
+
+            public UserQueryQuickLink(Lite<UserQueryDN> userQuery, Lite<IdentifiableEntity> entity)
+            {
+                this.Text = userQuery.ToString();
+                this.userQuery = userQuery;
+                this.entity = entity;
+                this.IsVisible = true;
+            }
+
+            public override MvcHtmlString Execute()
+            {
+                return new HtmlTag("a").Attr("href", RouteHelper.New().Action((UserQueriesController c) => c.View(userQuery, null, entity))).SetInnerText(Text);
+            }
+        }
+
         static ToolBarButton[] ButtonBarQueryHelper_GetButtonBarForQueryName(QueryButtonContext ctx)
         {
             if (ctx.Prefix.HasText())
@@ -125,8 +156,8 @@ namespace Signum.Web.UserQueries
                 {
                     Text = uq.ToString(),
                     AltText = uq.ToString(),
-                    Href = RouteHelper.New().Action<UserQueriesController>(uqc => uqc.View(uq)),
-                    DivCssClass = ToolBarButton.DefaultQueryCssClass + (currentUserQuery.Is(uq) ? " sf-userquery-selected" : "")
+                    Href = RouteHelper.New().Action<UserQueriesController>(uqc => uqc.View(uq, null, null)), 
+                    DivCssClass = ToolBarButton.DefaultQueryCssClass + " sf-userquery" + (currentUserQuery.Is(uq) ? " sf-userquery-selected" : "")
                 });
             }
 
@@ -135,7 +166,7 @@ namespace Signum.Web.UserQueries
 
             if (Navigator.IsCreable(typeof(UserQueryDN), isSearchEntity:true))
             {
-                string uqNewText = Resources.UserQueries_CreateNew;
+                string uqNewText = UserQueryMessage.UserQueries_CreateNew.NiceToString();
                 items.Add(new ToolBarButton
                 {
                     Id = TypeContextUtilities.Compose(ctx.Prefix, "qbUserQueryNew"),
@@ -148,7 +179,7 @@ namespace Signum.Web.UserQueries
 
             if (currentUserQuery != null && currentUserQuery.IsAllowedFor(TypeAllowedBasic.Modify, inUserInterface: true))
             {
-                string uqEditText = Resources.UserQueries_Edit;
+                string uqEditText = UserQueryMessage.UserQueries_Edit.NiceToString();
                 items.Add(new ToolBarButton
                 {
                     Id = TypeContextUtilities.Compose(ctx.Prefix, "qbUserQueryEdit"),
@@ -159,7 +190,7 @@ namespace Signum.Web.UserQueries
                 });
             }
 
-            string uqUserQueriesText = Resources.UserQueries_UserQueries;
+            string uqUserQueriesText = UserQueryMessage.UserQueries_UserQueries.NiceToString();
             return new ToolBarButton[]
             {
                 new ToolBarMenu
@@ -175,14 +206,18 @@ namespace Signum.Web.UserQueries
 
         public static void ApplyUserQuery(this FindOptions findOptions, UserQueryDN userQuery)
         {
-            findOptions.FilterOptions.RemoveAll(fo => !fo.Frozen);
-            findOptions.FilterOptions.AddRange(userQuery.Filters.Select(qf => new FilterOption
+            if (!userQuery.WithoutFilters)
             {
-                Token = qf.Token,
-                ColumnName = qf.TokenString,
-                Operation = qf.Operation,
-                Value = qf.Value
-            }));
+                findOptions.FilterOptions.RemoveAll(fo => !fo.Frozen);
+
+                findOptions.FilterOptions.AddRange(userQuery.Filters.Select(qf => new FilterOption
+                {
+                    Token = qf.Token,
+                    ColumnName = qf.TokenString,
+                    Operation = qf.Operation,
+                    Value = qf.Value
+                }));
+            }
 
             findOptions.ColumnOptionsMode = userQuery.ColumnsMode;
 

@@ -1,4 +1,4 @@
-﻿#region usings
+#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,6 @@ using Signum.Utilities;
 using Signum.Engine;
 using Signum.Entities;
 using Signum.Engine.Maps;
-using Signum.Web.Extensions.Properties;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.Reflection;
 using Signum.Entities.DynamicQuery;
@@ -31,7 +30,7 @@ namespace Signum.Web.Reports
         public ActionResult ToExcelPlain(QueryRequest request, string prefix)
         {
             if (!Navigator.IsFindable(request.QueryName))
-                throw new UnauthorizedAccessException(Signum.Web.Properties.Resources.ViewForType0IsNotAllowed.Formato(request.QueryName));
+                throw new UnauthorizedAccessException(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().Formato(request.QueryName));
 
             ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
             byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(queryResult);
@@ -43,7 +42,7 @@ namespace Signum.Web.Reports
         public ActionResult ExcelReport(QueryRequest request, Lite<ExcelReportDN> excelReport, string prefix)
         {
             if (!Navigator.IsFindable(request.QueryName))
-                throw new UnauthorizedAccessException(Signum.Web.Properties.Resources.ViewForType0IsNotAllowed.Formato(request.QueryName));
+                throw new UnauthorizedAccessException(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().Formato(request.QueryName));
 
             byte[] file = ReportsLogic.ExecuteExcelReport(excelReport, request);
 

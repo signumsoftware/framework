@@ -1,14 +1,14 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Utilities;
 using Signum.Entities.DynamicQuery;
-using Signum.Web.Properties;
 using Signum.Web.Controllers;
 using System.Web.Mvc;
 using Signum.Entities.Alerts;
+using Signum.Entities.Notes;
 
 namespace Signum.Web.Alerts
 {
@@ -49,9 +49,9 @@ namespace Signum.Web.Alerts
 
             var alertList = new[]
             {
-                new { Count = CountAlerts(identifiable, "Attended"), Query = "Attended", AlertClass = "sf-alert-attended", Title = Properties.Resources.Alerts_Attended },
-                new { Count = CountAlerts(identifiable, "NotAttended"), Query = "NotAttended", AlertClass = "sf-alert-warned", Title = Properties.Resources.Alerts_NotAttended },
-                new { Count = CountAlerts(identifiable, "Future"), Query = "Future", AlertClass = "sf-alert-future", Title = Properties.Resources.Alerts_Future },
+                new { Count = CountAlerts(identifiable, "Attended"), Query = "Attended", AlertClass = "sf-alert-attended", Title = AlertMessage.Alerts_Attended.NiceToString() },
+                new { Count = CountAlerts(identifiable, "Alerted"), Query = "Alerted", AlertClass = "sf-alert-warned", Title = AlertMessage.Alerts_NotAttended.NiceToString() },
+                new { Count = CountAlerts(identifiable, "Future"), Query = "Future", AlertClass = "sf-alert-future", Title = AlertMessage.Alerts_Future.NiceToString() },
             };
 
             JsViewOptions voptions = new JsViewOptions
@@ -60,7 +60,7 @@ namespace Signum.Web.Alerts
                 Prefix = prefix,
                 ControllerUrl = RouteHelper.New().Action<AlertController>(ac => ac.CreateAlert(prefix)),
                 RequestExtraJsonData = "function(){{ return {{ {0}: new SF.RuntimeInfo('{1}').find().val() }}; }}".Formato(EntityBaseKeys.RuntimeInfo, prefix),
-                OnOkClosed = new JsFunction() { JsOnAlertCreated(prefix, Resources.AlertCreated) }
+                OnOkClosed = new JsFunction() { JsOnAlertCreated(prefix, AlertMessage.AlertCreated.NiceToString()) }
             };
 
             HtmlStringBuilder content = new HtmlStringBuilder();
@@ -87,7 +87,7 @@ namespace Signum.Web.Alerts
                     content.AddLine(new HtmlTag("a")
                        .Class("sf-alert-create")
                        .Attr("onclick", new JsViewNavigator(voptions).createSave(RouteHelper.New().SignumAction("TrySavePartial")).ToJS())
-                       .InnerHtml(Resources.CreateAlert.EncodeHtml())
+                       .InnerHtml(AlertMessage.CreateAlert.NiceToString().EncodeHtml())
                        .ToHtml());
                 }
             }
@@ -95,12 +95,12 @@ namespace Signum.Web.Alerts
             HtmlStringBuilder label = new HtmlStringBuilder();
             var toggler = new HtmlTag("a")
                 .Class("sf-widget-toggler sf-alerts-toggler")
-                .Attr("title", Resources.Alerts);
+                .Attr("title", AlertMessage.Alerts.NiceToString());
             using (label.Surround(toggler))
             {
                 label.Add(new HtmlTag("span")
                     .Class("ui-icon ui-icon-calendar")
-                    .InnerHtml(Resources.Notes.EncodeHtml())
+                    .InnerHtml(NoteMessage.Notes.NiceToString().EncodeHtml())
                     .ToHtml());
 
                 int count = alertList.Length;

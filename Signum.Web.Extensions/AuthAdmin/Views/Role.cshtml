@@ -3,5 +3,6 @@
 @using (var e = Html.TypeContext<RoleDN>())
 {
     @Html.ValueLine(e, f => f.Name)
+    @Html.ValueLine(e, f => f.MergeStrategy, vl=>vl.UnitText = e.Value.StrategyHint)
     @Html.EntityList(e, f => f.Roles)
 } 

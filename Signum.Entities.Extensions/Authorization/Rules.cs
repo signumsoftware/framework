@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace Signum.Entities.Authorization
 {
-    [Serializable, EntityKind(EntityKind.System), AvoidLocalization]
+    [Serializable, EntityKind(EntityKind.System)]
     public class RuleDN<R, A> : IdentifiableEntity
         where R: IdentifiableEntity
     {
@@ -21,7 +21,9 @@ namespace Signum.Entities.Authorization
             set { Set(ref role, value, () => Role); }
         }
 
+        [NotNullable]
         R resource;
+        [NotNullValidator]
         public R Resource
         {
             get { return resource; }
@@ -50,16 +52,13 @@ namespace Signum.Entities.Authorization
     public class RuleQueryDN : RuleDN<QueryDN, bool> { }
 
     [Serializable]
-    public class RuleFacadeMethodDN : RuleDN<FacadeMethodDN, bool> { }
-
-    [Serializable]
     public class RulePermissionDN : RuleDN<PermissionDN, bool> { }
 
     [Serializable]
     public class RuleOperationDN : RuleDN<OperationDN, OperationAllowed> { }
 
     [Serializable]
-    public class RulePropertyDN : RuleDN<PropertyDN, PropertyAllowed> { }
+    public class RulePropertyDN : RuleDN<PropertyRouteDN, PropertyAllowed> { }
    
     [Serializable]
     public class RuleTypeDN : RuleDN<TypeDN, TypeAllowed> 
@@ -125,6 +124,7 @@ namespace Signum.Entities.Authorization
         }
     }
 
+    [DescriptionOptions(DescriptionOptions.Members)]
     public enum OperationAllowed
     {
         None = 0, 
@@ -132,6 +132,7 @@ namespace Signum.Entities.Authorization
         Allow = 2,
     }
 
+    [DescriptionOptions(DescriptionOptions.Members)]
     public enum PropertyAllowed
     {
         None,
@@ -139,7 +140,7 @@ namespace Signum.Entities.Authorization
         Modify,
     }
 
-    [AvoidLocalization]
+    [DescriptionOptions(DescriptionOptions.Members)]
     public enum TypeAllowed
     {
         None =             TypeAllowedBasic.None << 2 | TypeAllowedBasic.None,
@@ -215,9 +216,17 @@ namespace Signum.Entities.Authorization
 
             return "{0},{1}".Formato(db, ui); 
         }
+
+        public static PropertyAllowed ToPropertyAllowed(this TypeAllowedBasic ta)
+        {
+            PropertyAllowed pa =
+                ta == TypeAllowedBasic.None ? PropertyAllowed.None :
+                ta == TypeAllowedBasic.Read ? PropertyAllowed.Read : PropertyAllowed.Modify;
+            return pa;
+        }
     }
 
-    [ForceLocalization]
+    [DescriptionOptions(DescriptionOptions.Members)]
     public enum TypeAllowedBasic
     {
         None = 0,

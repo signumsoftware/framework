@@ -1,11 +1,10 @@
 ﻿@using System.Configuration
-@using Signum.Web.Properties
 @using Signum.Entities.ControlPanel
 @using Signum.Web.ControlPanel
 @using Signum.Entities.DynamicQuery
 @using Signum.Entities.Reports
 @using Signum.Web.UserQueries
-@model PanelPart
+@model PanelPartDN
 
 <div class="sf-cp-count-uq-list">
     @foreach (CountUserQueryElement uq in ((CountSearchControlPartDN)Model.Content).UserQueries)

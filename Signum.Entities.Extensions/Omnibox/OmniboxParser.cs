@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -34,8 +34,8 @@ namespace Signum.Entities.Omnibox
 (?<ident>[a-zA-Z_][a-zA-Z0-9_]*)|
 (?<number>[+-]?\d+(\.\d+)?)|
 (?<string>("".*?(""|$)|\'.*?(\'|$)))|
-(?<symbol>[\.\,;!?@#$%&/\\\(\)\^\*\[\]\{\}\-+])|
-(?<comparer>(==?|<=|>=|<|>|\^=|\$=|%=|\*=|\!=|\!\^=|\!\$=|\!%=|\!\*=))", 
+(?<comparer>(==?|<=|>=|<|>|\^=|\$=|%=|\*=|\!=|\!\^=|\!\$=|\!%=|\!\*=))|
+(?<symbol>[\.\,;!?@#$%&/\\\(\)\^\*\[\]\{\}\-+])", 
   RegexOptions.ExplicitCapture | RegexOptions.IgnorePatternWhitespace);
 
         public static int MaxResults = 20;
@@ -44,7 +44,7 @@ namespace Signum.Entities.Omnibox
         {
             var rawQuery = omniboxQuery.ToLower();
             return rawQuery == "help" || 
-                rawQuery == Signum.Entities.Extensions.Properties.Resources.Omnibox_Help.ToLower() || 
+                rawQuery == OmniboxMessage.Omnibox_Help.NiceToString().ToLower() || 
                 rawQuery == "?";
         }
 
@@ -62,13 +62,13 @@ namespace Signum.Entities.Omnibox
                     result.AddRange(generator.GetHelp());
                 }
 
-                string matchingOptions = Signum.Entities.Extensions.Properties.Resources.Omnibox_MatchingOptions;
+                string matchingOptions = OmniboxMessage.Omnibox_MatchingOptions.NiceToString();
                 result.Add(new HelpOmniboxResult { Text = matchingOptions });
 
-                string databaseAccess = Signum.Entities.Extensions.Properties.Resources.Omnibox_DatabaseAccess;
+                string databaseAccess = OmniboxMessage.Omnibox_DatabaseAccess.NiceToString();
                 result.Add(new HelpOmniboxResult { Text = databaseAccess });
 
-                string disambiguate = Signum.Entities.Extensions.Properties.Resources.Omnibox_Disambiguate;
+                string disambiguate = OmniboxMessage.Omnibox_Disambiguate.NiceToString();
                 result.Add(new HelpOmniboxResult { Text = disambiguate });
 
                 return result.ToList();
@@ -120,18 +120,20 @@ namespace Signum.Entities.Omnibox
     public abstract class OmniboxManager
     {
         public abstract bool AllowedType(Type type);
-
+        public abstract bool AllowedPermission(Enum permission);
         public abstract bool AllowedQuery(object queryName);
+
         public abstract QueryDescription GetDescription(object queryName);
 
         public abstract Lite<IdentifiableEntity> RetrieveLite(Type type, int id);
 
-        public List<Lite<IdentifiableEntity>> AutoComplete(Type type, string subString, int count)
+        public List<Lite<IdentifiableEntity>> Autocomplete(Type type, string subString, int count)
         {
-            return AutoComplete(Implementations.By(type), subString, count);
+            return Autocomplete(Implementations.By(type), subString, count);
         }
 
-        public abstract List<Lite<IdentifiableEntity>> AutoComplete(Implementations implementations, string subString, int count);
+        public abstract List<Lite<IdentifiableEntity>> Autocomplete(Implementations implementations, string subString, int count);
+
     }
 
     public abstract class OmniboxResult

@@ -77,8 +77,7 @@ namespace Signum.Web.Extensions.Chart.Views
     #line hidden
     
     #line 2 "..\..\Chart\Views\ChartRequestView.cshtml"
-    using Signum.Web.Extensions.Properties;
-    
+        
     #line default
     #line hidden
     
@@ -138,7 +137,7 @@ WriteLiteral("\r\n");
     List<FilterOption> filterOptions = (List<FilterOption>)ViewData[ViewDataKeys.FilterOptions];
 
     var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
-    Type entitiesType = Lite.Extract(entityColumn.Type);
+    Type entitiesType = entityColumn.Type.CleanType();
 
 
             
@@ -224,9 +223,9 @@ WriteLiteral("\r\n                    ");
             #line 42 "..\..\Chart\Views\ChartRequestView.cshtml"
                Write(Html.Href(
                             Model.Compose("btnAddFilter"),
-                            Signum.Web.Properties.Resources.FilterBuilder_AddFilter,
+                            SearchMessage.FilterBuilder_AddFilter.NiceToString(),
                             "",
-                            Signum.Web.Properties.Resources.Signum_selectToken,
+                            JavascriptMessage.selectToken.NiceToString(),
                             "sf-query-button sf-add-filter sf-disabled",
                             new Dictionary<string, object> 
                             { 
@@ -326,7 +325,7 @@ WriteLiteral("\">");
 
             
             #line 68 "..\..\Chart\Views\ChartRequestView.cshtml"
-                                                                                                                                                                                                   Write(Resources.Chart_Draw);
+                                                                                                                                                                                                   Write(ChartMessage.Chart_Draw.NiceToString());
 
             
             #line default
@@ -347,7 +346,7 @@ WriteLiteral("\">");
 
             
             #line 69 "..\..\Chart\Views\ChartRequestView.cshtml"
-                                                                                                                 Write(Resources.UserChart_Edit);
+                                                                                                                 Write(ChartMessage.UserChart_Edit.NiceToString());
 
             
             #line default

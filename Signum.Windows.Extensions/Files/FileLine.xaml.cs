@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,13 +25,14 @@ using Signum.Entities.Reflection;
 using Signum.Entities.Files;
 using System.Net;
 using Signum.Services;
+using Signum.Windows.Extensions.Files;
 
 namespace Signum.Windows.Files
 {
     /// <summary>
     /// Interaction logic for UserControl1.xaml
     /// </summary>
-    public partial class FileLine: LineBase
+    public partial class FileLine : LineBase
     {
         public static readonly DependencyProperty EntityProperty =
             DependencyProperty.Register("Entity", typeof(object), typeof(FileLine), new FrameworkPropertyMetadata(null,
@@ -82,6 +83,14 @@ namespace Signum.Windows.Files
             set { SetValue(RemoveProperty, value); }
         }
 
+        public static readonly DependencyProperty DropFileProperty =
+            DependencyProperty.Register("DropFile", typeof(bool), typeof(FileLine), new PropertyMetadata(true));
+        public bool DropFile
+        {
+            get { return (bool)GetValue(DropFileProperty); }
+            set { SetValue(DropFileProperty, value); }
+        }
+
         protected override DependencyProperty CommonRouteValue()
         {
             return EntityProperty;
@@ -97,7 +106,7 @@ namespace Signum.Windows.Files
         public event Action<object> Viewing;
         public event Func<object, bool> Removing;
 
-        public event Action<FileDialog> CustomizeFileDialog; 
+        public event Action<FileDialog> CustomizeFileDialog;
 
         Type cleanType;
 
@@ -128,7 +137,7 @@ namespace Signum.Windows.Files
                 cleanType = Type;
             }
 
-            UpdateVisibility(); 
+            UpdateVisibility();
         }
 
 
@@ -141,10 +150,10 @@ namespace Signum.Windows.Files
         {
             btSave.Visibility = Save && Entity != null ? Visibility.Visible : Visibility.Collapsed;
             btOpen.Visibility = Open && Entity == null ? Visibility.Visible : Visibility.Collapsed;
-            btView.Visibility = View && Entity != null? Visibility.Visible : Visibility.Collapsed;
+            btView.Visibility = View && Entity != null ? Visibility.Visible : Visibility.Collapsed;
             btRemove.Visibility = Remove && Entity != null ? Visibility.Visible : Visibility.Collapsed;
         }
-      
+
         private void OnViewing(object entity)
         {
             if (Entity == null || !View)
@@ -157,13 +166,21 @@ namespace Signum.Windows.Files
             else if (typeof(IFile).IsAssignableFrom(cleanType))
             {
                 IFile file = (IFile)Server.Convert(entity, cleanType);
-                string filePath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), file.FileName);
-                File.WriteAllBytes(filePath, file.BinaryFile ?? OnResolveBinaryFile(file));
-                Process.Start(filePath);
+                DefaultViewFile(file, OnResolveBinaryFile);
             }
             else
-                throw new InvalidOperationException(Signum.Windows.Extensions.Properties.Resources.ViewingHasNotDefaultImplementationFor0
+                throw new InvalidOperationException(FileMessage.ViewingHasNotDefaultImplementationFor0.NiceToString()
                     .Formato(Type));
+        }
+
+        public static void DefaultViewFile(IFile file, Func<IFile, byte[]> resolveBinaryFile = null)
+        {
+            if (resolveBinaryFile == null)
+                resolveBinaryFile = DefaultResolveBinaryFile;
+
+            string filePath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), file.FileName);
+            File.WriteAllBytes(filePath, file.BinaryFile ?? resolveBinaryFile(file));
+            Process.Start(filePath);
         }
 
         private void OnSaving(object entity)
@@ -179,13 +196,13 @@ namespace Signum.Windows.Files
                 SaveFileDialog sfd = new SaveFileDialog();
                 sfd.FileName = file.FileName;
                 if (CustomizeFileDialog != null)
-                    CustomizeFileDialog(sfd); 
+                    CustomizeFileDialog(sfd);
 
                 if (sfd.ShowDialog() == true)
                     File.WriteAllBytes(sfd.FileName, file.BinaryFile ?? OnResolveBinaryFile(file));
             }
             else
-                throw new NotSupportedException(Signum.Windows.Extensions.Properties.Resources.SavingHasNotDefaultImplementationFor0.Formato(Type)); 
+                throw new NotSupportedException(FileMessage.SavingHasNotDefaultImplementationFor0.NiceToString().Formato(Type)); 
         }
 
 
@@ -208,23 +225,27 @@ namespace Signum.Windows.Files
             {
                 OpenFileDialog ofd = new OpenFileDialog();
                 if (CustomizeFileDialog != null)
-                    CustomizeFileDialog(ofd); 
+                    CustomizeFileDialog(ofd);
 
                 if (ofd.ShowDialog() == true)
                 {
-
-                    IFile file = Creating != null ? Creating() :
-                        (IFile)Activator.CreateInstance(cleanType);
-                    file.FileName = System.IO.Path.GetFileName(ofd.FileName);
-                    file.BinaryFile = File.ReadAllBytes(ofd.FileName);
-
-                    return Server.Convert(file, Type);
+                    return CreateFile(ofd.FileName);
                 }
 
                 return null;
             }
 
-            throw new NotSupportedException(Signum.Windows.Extensions.Properties.Resources.OpeningHasNotDefaultImplementationFor0.Formato(Type)); 
+            throw new NotSupportedException(FileMessage.OpeningHasNotDefaultImplementationFor0.NiceToString().Formato(Type)); 
+        }
+
+        object CreateFile(string fileName)
+        {
+            IFile file = Creating != null ? Creating() :
+                (IFile)Activator.CreateInstance(cleanType);
+            file.FileName = System.IO.Path.GetFileName(fileName);
+            file.BinaryFile = File.ReadAllBytes(fileName);
+
+            return Server.Convert(file, Type);
         }
 
         protected bool OnRemoving(object entity)
@@ -257,7 +278,7 @@ namespace Signum.Windows.Files
             if (Entity == null || !Save)
                 return;
 
-            OnSaving(Entity); 
+            OnSaving(Entity);
         }
 
         private void btOpen_Click(object sender, RoutedEventArgs e)
@@ -279,9 +300,65 @@ namespace Signum.Windows.Files
             }
             else
             {
-                return Server.Return((IFileServer s)=>s.GetBinaryFile(f)); 
+                return Server.Return((IFileServer s) => s.GetBinaryFile(f));
             }
         }
 
+        private void fileLine_DragEnter(object sender, DragEventArgs e)
+        {
+            if (!e.Data.GetDataPresent(DataFormats.FileDrop) && !e.CanHandleOutlookAttachment())
+            {
+                e.Effects = DragDropEffects.None;
+                e.Handled = true;
+            }
+        }
+
+        private void fileLine_Drop(object sender, DragEventArgs e)
+        {
+            string[] files = null;
+
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                files = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+                if (files == null || files.IsEmpty())
+                    return;
+
+                if (files.Length != 1)
+                    throw new ApplicationException(FileMessage.OnlyOneFileIsSupported.NiceToString());
+            }
+            else if (e.CanHandleOutlookAttachment())
+            {
+                var tuples = e.DropOutlookAttachment();
+
+                if (tuples.Count != 1)
+                    throw new ApplicationException(FileMessage.OnlyOneFileIsSupported.NiceToString());
+
+                var tuple = tuples.SingleEx();
+
+                int i = 0;
+                var tPath = System.IO.Path.GetTempPath();
+                while (File.Exists(System.IO.Path.Combine(tPath, tuple.Item1)))
+                {
+                    tPath = System.IO.Path.Combine(tPath, i.ToString());
+                    if (!Directory.Exists(tPath))
+                        Directory.CreateDirectory(tPath);
+                    i++;
+                }
+                string fileName = System.IO.Path.Combine(tPath, tuple.Item1);
+                File.WriteAllBytes(fileName, tuple.Item2);
+
+                files = new[] { fileName };
+            }
+            else
+            {
+                return;
+            }
+
+            object file = CreateFile(files.Single());
+
+            if (file != null)
+                this.Entity = file;
+        }
     }
 }

@@ -26,7 +26,7 @@ namespace Signum.Windows.UIAutomation
 
         public string PropertyRouteString
         {
-            get { return Element.Current.ItemStatus; }
+            get { return Element.Current.Name; }
         }
 
         public string Label
@@ -69,6 +69,8 @@ namespace Signum.Windows.UIAutomation
                         return ValueControl.ChildById("textBox").Value();
                     case "DateTimePicker":
                         return ValueControl.ChildById("PART_EditableTextBox").Value();
+                    case "CheckBox":
+                        return ValueControl.GetCheckState().TryToString();
                     default:
                         throw new NotImplementedException("Unexpected Value Control of type {0}".Formato(ValueControl.Current.ClassName));
                 }
@@ -168,9 +170,7 @@ namespace Signum.Windows.UIAutomation
         {
             get
             {
-                return
-                    string.IsNullOrEmpty(Element.Current.HelpText) ? null :
-                    Lite.Parse(Element.Current.HelpText.Split(new[] { " Hash:" }, StringSplitOptions.None)[0]);
+                return NormalWindowExtensions.ParseLiteHash(Element.Current.ItemStatus);
             }
             set
             {
@@ -192,13 +192,14 @@ namespace Signum.Windows.UIAutomation
             {
                 using (var selector = new SelectorWindowProxy(win))
                 {
-                    win = selector.CheckCapture(value.EntityType);
+                    win = selector.SelectCapture(value.EntityType.FullName);
                 }
             }
 
             using (var sw = new SearchWindowProxy(win))
             {
                 sw.AddFilterString("Entity.Id", FilterOperation.EqualTo, value.Id.ToString());
+                sw.Search();
                 sw.SelectElementAt(0);
                 sw.Ok();
             }
@@ -214,14 +215,18 @@ namespace Signum.Windows.UIAutomation
 
         public NormalWindowProxy<T> Create<T>(int? timeOut = null) where T: ModifiableEntity
         {
-            return new NormalWindowProxy<T>(CreateCapture(timeOut ?? NormalWindowTimeout));
+            var win = CreateCapture(timeOut); 
+            return new NormalWindowProxy<T>(win) { PreviousRoute = GetElementRoute() };
         }
 
         public AutomationElement CreateCapture(int? timeOut = null)
         {
+            if (CreateButton.Current.IsOffscreen)
+                throw new InvalidOperationException("CreateButton is not visible on {0}".Formato(this));
+
             var win = Element.CaptureWindow(
                 () => CreateButton.ButtonInvoke(),
-                () => "Create a new entity on {0}".Formato(this), timeOut);
+                () => "Create a new entity on {0}".Formato(this), timeOut ?? NormalWindowTimeout);
             return win;
         }
 
@@ -253,23 +258,50 @@ namespace Signum.Windows.UIAutomation
 
         public AutomationElement FindCapture(int? timeOut = null)
         {
+            if (FindButton.Current.IsOffscreen)
+                throw new InvalidOperationException("FindButton is not visible on {0}".Formato(this));
+
             var win = Element.CaptureWindow(
                 () => FindButton.ButtonInvoke(),
-                () => "Search entity on {0}".Formato(this), timeOut);
+                () => "Search entity on {0}".Formato(this), timeOut ?? SearchWindowTimeout);
             return win;
         }
 
         public NormalWindowProxy<T> View<T>(int? timeOut = null) where T: ModifiableEntity
         {
+            var win = ViewCapture(timeOut);
+
+            return new NormalWindowProxy<T>(win) { PreviousRoute = GetElementRoute() };
+        }
+
+        public AutomationElement ViewCapture(int? timeOut = null)
+        {
+            if (ViewButton.Current.IsOffscreen)
+                throw new InvalidOperationException("ViewButton is not visible on {0}".Formato(this));
+
             var win = Element.CaptureWindow(
                 () => ViewButton.ButtonInvoke(),
-                () => "View entity on {0}".Formato(this), timeOut);
+                () => "View entity on {0}".Formato(this), timeOut ?? NormalWindowTimeout);
+            return win;
+        }
 
-            return new NormalWindowProxy<T>(win);
+        protected virtual PropertyRoute GetElementRoute()
+        {
+            if (this.PropertyRoute == null)
+                return null;
+
+            var result = this.PropertyRoute;
+            if (result.Type.IsIRootEntity() || result.Type.IsLite())
+                return null;
+
+            return result; 
         }
 
         public void Remove()
         {
+            if (RemoveButton.Current.IsOffscreen)
+                throw new InvalidOperationException("RemoveButton is not visible on {0}".Formato(this));
+
             RemoveButton.ButtonInvoke();
         }
     }
@@ -289,7 +321,7 @@ namespace Signum.Windows.UIAutomation
 
         public static int AutoCompleteTimeout = 2 * 1000;
 
-        public void AutoComplete(string toString, int? timeOut = null)
+        public void Autocomplete(string toString, int? timeOut = null)
         {
             Element.ButtonInvoke();
 
@@ -299,9 +331,7 @@ namespace Signum.Windows.UIAutomation
 
             var lb = AutoCompleteControl.WaitChildById("lstBox", timeOut);
 
-            var list = lb.Children(a => a.Current.ControlType == ControlType.ListItem);
-
-            list.SelectByName(toString, ()=>this.ToString());
+            lb.SelectListItemByName(toString, () => this.ToString());
         }
 
         protected override bool FastSelect(Lite<IIdentifiable> value)
@@ -348,9 +378,7 @@ namespace Signum.Windows.UIAutomation
         {
             ComboBox.Pattern<ExpandCollapsePattern>().Expand();
 
-            var list = ComboBox.ChildrenAll();
-
-            list.SelectByName(toString, ()=>this.ToString());
+            ComboBox.SelectListItemByName(toString, ()=>this.ToString());
         }
 
         protected override bool FastSelect(Lite<IIdentifiable> lite)
@@ -366,30 +394,72 @@ namespace Signum.Windows.UIAutomation
 
             return true;
         }
+
+        public void WaitHasItems(int? timeOut = null)
+        {
+            ComboBox.WaitComboBoxHasItems(() => "EntityCombo {0} has items".Formato(this), timeOut);
+        }
+
+        public void SelectFirstElement()
+        {
+            ComboBox.Pattern<ExpandCollapsePattern>().Expand();
+
+            var item = ComboBox.Child(a => a.Current.ControlType == ControlType.ListItem);
+
+            item.Pattern<SelectionItemPattern>().Select();
+        }
     }
 
     public class EntityDetailProxy : EntityBaseProxy
     {
-        public static Condition DetailCondition = ConditionBuilder.ToCondition(a => a.Current.ControlType != ControlType.Text && a.Current.ControlType != ControlType.Button); 
+        static Condition BorderCondition = ConditionBuilder.ToCondition(a => a.Current.ClassName == "AutomationBorder"); 
 
         public AutomationElement GetDetailControl()
         {
-            return Element.ChildByCondition(DetailCondition);
+            return Element.ChildByCondition(BorderCondition).ChildByCondition(Condition.TrueCondition);
+        }
+
+        public ILineContainer<T> GetDetailControl<T>() where T : ModifiableEntity
+        {
+            return GetDetailControl().ToLineContainer<T>(GetElementRoute());
         }
 
         public AutomationElement TryDetailControl()
         {
-            return Element.TryChildByCondition(DetailCondition);
+            return Element.ChildByCondition(BorderCondition).TryChildByCondition(Condition.TrueCondition);
+        }
+
+        public ILineContainer<T> TryDetailControl<T>() where T : ModifiableEntity
+        {
+            var detail = TryDetailControl();
+            if (detail == null)
+                return null;
+
+            return detail.ToLineContainer<T>(GetElementRoute());
         }
 
         public AutomationElement GetOrCreateDetailControl()
         {
             var result = TryDetailControl();
 
-            if (result == null)
-                CreateButton.ButtonInvoke();
+            if (result != null)
+                return result;
+              
+            CreateButton.ButtonInvoke();
 
             return GetDetailControl();
+        }
+
+        public ILineContainer<T> GetOrCreateDetailControl<T>() where T : ModifiableEntity
+        {
+            var result = TryDetailControl<T>();
+
+            if (result != null)
+                return result;
+
+            CreateButton.ButtonInvoke();
+
+            return GetDetailControl<T>();
         }
 
         public EntityDetailProxy(AutomationElement element, PropertyRoute route)
@@ -423,9 +493,19 @@ namespace Signum.Windows.UIAutomation
 
         public void SelectElementToString(string toString)
         {
-            var list = ListBox.ChildrenAll();
+            ListBox.SelectListItemByName(toString, () => this.ToString());
+        }
 
-            list.SelectByName(toString, () => this.ToString());
+        protected override PropertyRoute GetElementRoute()
+        {
+            if (this.PropertyRoute == null)
+                return null;
+
+            var result = this.PropertyRoute.Add("Item");
+            if (result.Type.IsIRootEntity() || result.Type.IsLite())
+                return null;
+
+            return result;
         }
     }
 
@@ -436,19 +516,44 @@ namespace Signum.Windows.UIAutomation
         {
         }
 
-        public List<RepeaterLineProxy> GetRepeaterElements()
+        public RepeaterLineProxy<T> CreateLineContainer<T>() where T : ModifiableEntity
         {
-            return Element.Descendants(a => a.Current.ClassName == "EntityRepeaterLineBorder").Select(ae => new RepeaterLineProxy(ae)).ToList();
+            CreateButton.ButtonInvoke();
+            return GetRepeaterElements<T>().Last();
+        }
+
+        public void CreateLineContainer<T>(Action<ILineContainer<T>> action) where T : ModifiableEntity
+        {
+            CreateButton.ButtonInvoke();
+            var lineContainer = GetRepeaterElements<T>().Last();
+            action(lineContainer);
+        }
+
+        public List<RepeaterLineProxy<T>> GetRepeaterElements<T>() where T : ModifiableEntity
+        {
+            return Element.Descendants(a => a.Current.ClassName == "EntityRepeaterContentControl")
+                .Select(ae => new RepeaterLineProxy<T>(ae, GetElementRoute())).ToList();
+        }
+
+        protected override PropertyRoute GetElementRoute()
+        {
+            if (this.PropertyRoute == null)
+                return null;
+
+            var result = this.PropertyRoute.Add("Item");
+            if (result.Type.IsIRootEntity() || result.Type.IsLite())
+                return null;
+
+            return result;
         }
     }
 
-    public class RepeaterLineProxy
+    public class RepeaterLineProxy<T> : LineContainer<T> where T : ModifiableEntity
     {
-        public AutomationElement Element { get; private set; }
-
-        public RepeaterLineProxy(AutomationElement element)
+        public RepeaterLineProxy(AutomationElement element, PropertyRoute previousRoute)
         {
             this.Element = element;
+            this.PreviousRoute = previousRoute;
         }
 
         public AutomationElement RemoveButton

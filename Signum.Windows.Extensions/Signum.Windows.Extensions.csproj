@@ -110,7 +110,6 @@
       <DependentUpon>PasswordExpiresInterval.xaml</DependentUpon>
     </Compile>
     <Compile Include="Authorization\QueryAuthClient.cs" />
-    <Compile Include="Authorization\FacadeMethodAuthClient.cs" />
     <Compile Include="Authorization\TypeAuthClient.cs" />
     <Compile Include="Authorization\PropertyAuthClient.cs" />
     <Compile Include="Authorization\PermissionAuthClient.cs" />
@@ -126,9 +125,6 @@
     </Compile>
     <Compile Include="Authorization\TypeRules.xaml.cs">
       <DependentUpon>TypeRules.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Authorization\FacadeMethodRules.xaml.cs">
-      <DependentUpon>FacadeMethodRules.xaml</DependentUpon>
     </Compile>
     <Compile Include="Authorization\Role.xaml.cs">
       <DependentUpon>Role.xaml</DependentUpon>
@@ -193,16 +189,23 @@
     </Compile>
     <Compile Include="Chart\UserChartMenuItem.cs" />
     <Compile Include="Chart\UserChartOmniboxProvider.cs" />
-    <Compile Include="ControlPanels\UserChartPartView.xaml.cs">
+    <Compile Include="ControlPanels\ControlPanelSelector.xaml.cs">
+      <DependentUpon>ControlPanelSelector.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\ControlPanelWindow.xaml.cs">
+      <DependentUpon>ControlPanelWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\PartView\UserChartPartView.xaml.cs">
       <DependentUpon>UserChartPartView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanels\LinkListPartView.xaml.cs">
+    <Compile Include="ControlPanels\PartView\LinkListPartView.xaml.cs">
       <DependentUpon>LinkListPartView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanels\CountSearchControlPartView.xaml.cs">
+    <Compile Include="ControlPanels\PartView\CountSearchControlPartView.xaml.cs">
       <DependentUpon>CountSearchControlPartView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ControlPanels\UserQueryPartView.xaml.cs">
+    <Compile Include="ControlPanels\ControlPanelOmniboxProvider.cs" />
+    <Compile Include="ControlPanels\PartView\UserQueryPartView.xaml.cs">
       <DependentUpon>UserQueryPartView.xaml</DependentUpon>
     </Compile>
     <Compile Include="ControlPanels\Admin\CountSearchControlPartEdit.xaml.cs">
@@ -242,6 +245,7 @@
     <Compile Include="Disconnected\DisconnectedExport.xaml.cs">
       <DependentUpon>DisconnectedExport.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Files\DropFileExtensions.cs" />
     <Compile Include="Files\FileLine.xaml.cs">
       <DependentUpon>FileLine.xaml</DependentUpon>
     </Compile>
@@ -261,6 +265,9 @@
       <DependentUpon>SMTPConfiguration.xaml</DependentUpon>
     </Compile>
     <Compile Include="Mailing\SMTPConfigurationClient.cs" />
+    <Compile Include="Notes\NoteType.xaml.cs">
+      <DependentUpon>NoteType.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Notes\Note.xaml.cs">
       <DependentUpon>Note.xaml</DependentUpon>
     </Compile>
@@ -289,12 +296,12 @@
     <Compile Include="Processes\PackageLine.xaml.cs">
       <DependentUpon>PackageLine.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Processes\ProcessUI.xaml.cs">
-      <DependentUpon>ProcessUI.xaml</DependentUpon>
+    <Compile Include="Processes\ProcessAlgorithm.xaml.cs">
+      <DependentUpon>ProcessAlgorithm.xaml</DependentUpon>
     </Compile>
     <Compile Include="Processes\ProcessClient.cs" />
-    <Compile Include="Processes\ProcessExecution.xaml.cs">
-      <DependentUpon>ProcessExecution.xaml</DependentUpon>
+    <Compile Include="Processes\ProcessUI.xaml.cs">
+      <DependentUpon>ProcessUI.xaml</DependentUpon>
     </Compile>
     <Compile Include="Profiler\ProfilerClient.cs" />
     <Compile Include="Profiler\ProfilerUploader.xaml.cs">
@@ -316,6 +323,9 @@
       <DependentUpon>SyntaxHighlightBox.xaml</DependentUpon>
     </Compile>
     <Compile Include="SynthaxHighlight\TextUtilities.cs" />
+    <Compile Include="UserQueries\QueryTokenDNBuilder.xaml.cs">
+      <DependentUpon>QueryTokenDNBuilder.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserQueries\UserQueryOmniboxProvider.cs" />
     <Compile Include="UserQueries\UserQueryClient.cs" />
     <Compile Include="UserQueries\UserQueryMenuItem.cs" />
@@ -331,16 +341,6 @@
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Properties\Resources.es.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.es.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -350,11 +350,11 @@
     <Compile Include="Scheduler\Calendar.xaml.cs">
       <DependentUpon>Calendar.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Scheduler\CustomTask.xaml.cs">
-      <DependentUpon>CustomTask.xaml</DependentUpon>
+    <Compile Include="Scheduler\ActionTask.xaml.cs">
+      <DependentUpon>ActionTask.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Scheduler\CustomTaskExecution.xaml.cs">
-      <DependentUpon>CustomTaskExecution.xaml</DependentUpon>
+    <Compile Include="Scheduler\ActionTaskLog.xaml.cs">
+      <DependentUpon>ActionTaskLog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Scheduler\ScheduledTask.xaml.cs">
       <DependentUpon>ScheduledTask.xaml</DependentUpon>
@@ -375,16 +375,6 @@
       <DependentUpon>SMSTemplate.xaml</DependentUpon>
     </Compile>
     <Compile Include="ZoomViewer.cs" />
-    <EmbeddedResource Include="Properties\Resources.es.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.es.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -443,12 +433,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Authorization\TypeRules.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Authorization\FacadeMethodRules.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -560,19 +544,27 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="ControlPanels\UserChartPartView.xaml">
+    <Page Include="ControlPanels\ControlPanelSelector.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ControlPanels\ControlPanelWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ControlPanels\PartView\UserChartPartView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="ControlPanels\LinkListPartView.xaml">
+    <Page Include="ControlPanels\PartView\LinkListPartView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="ControlPanels\CountSearchControlPartView.xaml">
+    <Page Include="ControlPanels\PartView\CountSearchControlPartView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="ControlPanels\UserQueryPartView.xaml">
+    <Page Include="ControlPanels\PartView\UserQueryPartView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -642,6 +634,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Notes\NoteType.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Notes\Note.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -674,13 +670,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Processes\ProcessUI.xaml">
+    <Page Include="Processes\ProcessAlgorithm.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Processes\ProcessExecution.xaml">
+    <Page Include="Processes\ProcessUI.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
@@ -706,6 +702,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="UserQueries\QueryTokenDNBuilder.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="UserQueries\UserQuery.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -724,13 +724,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Scheduler\CustomTask.xaml">
+    <Page Include="Scheduler\ActionTask.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Scheduler\CustomTaskExecution.xaml">
+    <Page Include="Scheduler\ActionTaskLog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
@@ -829,12 +829,12 @@
     <Resource Include="Images\stop.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\customTask.png" />
-    <Resource Include="Images\customTaskExecution.png" />
+    <Resource Include="Images\actionTask.png" />
+    <Resource Include="Images\actionTaskLog.png" />
     <Resource Include="Images\package.png" />
     <Resource Include="Images\packageLine.png" />
+    <Resource Include="Images\processAlgorithm.png" />
     <Resource Include="Images\process.png" />
-    <Resource Include="Images\processExecution.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\open.png" />
@@ -946,7 +946,7 @@
     <Resource Include="Images\execute.png" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Exception\" />
+    <Resource Include="Images\userQuery.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\alert.png" />
@@ -956,6 +956,21 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\pin.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\config.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\smstemplate.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\sms.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\controlPanel.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\chartScript.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

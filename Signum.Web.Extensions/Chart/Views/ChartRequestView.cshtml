@@ -1,4 +1,4 @@
-﻿@using Signum.Web
+@using Signum.Web
 @using Signum.Web.Extensions.Properties
 @using Signum.Entities.DynamicQuery
 @using Signum.Engine.DynamicQuery
@@ -24,7 +24,7 @@
     List<FilterOption> filterOptions = (List<FilterOption>)ViewData[ViewDataKeys.FilterOptions];
 
     var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
-    Type entitiesType = LiteUtils.Extract(entityColumn.Type);
+    Type entitiesType = entityColumn.Type.CleanType();
 }
 <div id="@Model.Compose("sfChartControl")" 
     class="sf-search-control sf-chart-control" 
@@ -41,9 +41,9 @@
                     @Html.ChartTokenBuilder(null, Model.Value, queryDescription, Model)
                     @Html.Href(
                             Model.Compose("btnAddFilter"),
-                            Signum.Web.Properties.Resources.FilterBuilder_AddFilter,
+                            SearchMessage.FilterBuilder_AddFilter.NiceToString(),
                             "",
-                            Signum.Web.Properties.Resources.Signum_selectToken,
+                            JavascriptMessage.selectToken.NiceToString(),
                             "sf-query-button sf-add-filter sf-disabled",
                             new Dictionary<string, object> 
                             { 
@@ -65,8 +65,8 @@
         $('#@Model.Compose("sfChartBuilderContainer")').chartBuilder($.extend({ prefix: '@Model.ControlID' }, str));
     </script>
     <div class="sf-query-button-bar">
-        <button type="submit" class="sf-query-button sf-chart-draw" data-icon="ui-icon-refresh" id="@Model.Compose("qbDraw")" data-url="@(Url.Action<ChartController>(cc => cc.Draw(Model.ControlID)))">@Resources.Chart_Draw</button>
-        <button class="sf-query-button sf-chart-script-edit" data-icon="ui-icon-script" id="@Model.Compose("qbEdit")">@Resources.UserChart_Edit</button>
+        <button type="submit" class="sf-query-button sf-chart-draw" data-icon="ui-icon-refresh" id="@Model.Compose("qbDraw")" data-url="@(Url.Action<ChartController>(cc => cc.Draw(Model.ControlID)))">@ChartMessage.Chart_Draw.NiceToString()</button>
+        <button class="sf-query-button sf-chart-script-edit" data-icon="ui-icon-script" id="@Model.Compose("qbEdit")">@ChartMessage.UserChart_Edit.NiceToString()</button>
         @UserChartClient.GetChartMenu(this.ViewContext, queryDescription.QueryName, entitiesType, Model.ControlID).ToString(Html)
     </div>
     <div class="clearall">

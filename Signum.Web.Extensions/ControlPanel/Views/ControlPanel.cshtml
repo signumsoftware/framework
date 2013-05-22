@@ -1,5 +1,4 @@
 ﻿@using System.Configuration
-@using Signum.Web.Properties
 @using Signum.Entities.ControlPanel
 @using Signum.Web.ControlPanel
 
@@ -23,8 +22,13 @@
 {
     ControlPanelDN cp = (ControlPanelDN)Model;
     <h1>
+        @if(Navigator.IsNavigable(cp, isSearchEntity: true))
+        { 
         <a href="@Navigator.NavigateRoute(typeof(ControlPanelDN), cp.Id)">@cp.DisplayName</a>
+        }else{
+            @cp.DisplayName
+        }
     </h1>
     Html.RenderPartial(ControlPanelClient.ViewPrefix.Formato("PanelParts"), cp);
     <div class="clearall"></div>   
- } 
+}

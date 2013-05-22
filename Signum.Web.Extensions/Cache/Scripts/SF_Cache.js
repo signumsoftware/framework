@@ -10,7 +10,7 @@ SF.Cache = (function () {
     };
 
     var initStats = function () {
-        $("table.sf-stats-table a.sf-stats-show").live("click", function (e) {
+        $(document).on("click", "table.sf-stats-table a.sf-stats-show", function (e) {
             e.preventDefault();
             $(this).closest("tr").next().toggle();
         });

@@ -1,9 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Entities;
-using Signum.Entities.Extensions.Properties;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using Signum.Entities.Basics;
@@ -126,12 +125,20 @@ namespace Signum.Entities.SMS
             return IsActiveNowExpression.Evaluate(this);
         }
 
+        [ImplementedBy()]
+        IIdentifiable aditionalData;
+        public IIdentifiable AditionalData
+        {
+            get { return aditionalData; }
+            set { Set(ref aditionalData, value, () => AditionalData); }
+        }
+
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
         {
             if (pi.Is(() => StartDate) || pi.Is(() => EndDate))
             {
-                if (EndDate != null && EndDate >= StartDate)
-                    return Resources.EndDateMustBeHigherThanStartDate;
+                if (EndDate != null && StartDate >= EndDate)
+                    return SmsMessages.EndDateMustBeHigherThanStartDate.NiceToString();
             }
 
             return base.PropertyValidation(pi);

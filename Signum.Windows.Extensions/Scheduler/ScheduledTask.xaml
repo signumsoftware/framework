@@ -3,20 +3,20 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:d="clr-namespace:Signum.Entities.Scheduler;assembly=Signum.Entities.Extensions"
-    m:Common.TypeContext="d:ScheduledTaskDN"
+    m:Common.TypeContext="{x:Type d:ScheduledTaskDN}"
     MinWidth="300">
 	<UserControl.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
-				<ResourceDictionary Source="pack://application:,,,/Signum.Windows;Component/Resources.xaml"/>
+                <m:DesignTimeResourceDictionary Source="pack://application:,,,/Signum.Windows;Component/Resources.xaml"/>
 			</ResourceDictionary.MergedDictionaries>
 		</ResourceDictionary>
 	</UserControl.Resources>
     <StackPanel m:Common.MinLabelWidth="110">
-        <m:EntityLine m:Common.Route="Task" Find="False" View="False" Create="False"/>
+        <m:EntityLine m:Common.Route="Task" Create="False"/>
         <GroupBox Style="{DynamicResource EntityGroupBox}">
             <GroupBox.Header>
-                <m:EntityLine m:Common.Route="Rule" AutoComplete="False" Find="False" View="False" />
+                <m:EntityLine m:Common.Route="Rule" Autocomplete="False" Find="False" View="False" />
             </GroupBox.Header>
             <m:DataBorder m:Common.Route="Rule" AutoChild="True"/>
         </GroupBox>

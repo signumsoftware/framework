@@ -11,7 +11,6 @@ using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
 using System.Configuration;
-using Signum.Web.Properties;
 using Signum.Engine;
 using Signum.Entities.Files;
 #endregion

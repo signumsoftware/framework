@@ -1,0 +1,53 @@
+﻿@model Dictionary<Assembly, Dictionary<CultureInfo, TranslationFile>>
+@using System.Reflection
+@using Signum.Web.Translation.Controllers
+@using System.Globalization;
+@{
+    ViewBag.Title = "Translation files";        
+}
+
+@Html.ScriptCss("~/Translation/Content/Translation.css")
+
+@if (Model.IsEmpty())
+{
+    <pre>No assembly to translate</pre>   
+}
+else
+{
+    var langs = Model.First().Value.Keys;
+
+    <table class="st">
+        <tr>
+            <th></th>
+            <th>All</th>
+            @foreach (var ci in langs)
+            {
+                <th>@ci.Name</th>
+            }
+        </tr>
+        @foreach (var assembly in Model)
+        {
+            <tr>
+                <th>@assembly.Key.GetName().Name</th>
+                <td>
+                    @Html.ActionLink("view", (TranslationController tc) => tc.View(assembly.Key.GetName().Name, null))
+                </td>
+                @foreach (var tf in assembly.Value.Values)
+                {
+                    <td>
+                        @Html.ActionLink("view", (TranslationController tc) => tc.View(tf.Assembly.GetName().Name, tf.CultureInfo.Name))
+                        <br />
+                        @if(tf.IsDefault)
+                        {
+                            <p>sync</p>
+                        }
+                        else
+                        {
+                        @Html.ActionLink("sync", (TranslationController tc) => tc.Sync(tf.Assembly.GetName().Name, tf.CultureInfo.Name), new { @class = "status-" + tf.Status().ToString() })    
+                        }
+                    </td>
+                }
+            </tr>
+        }
+    </table>
+}

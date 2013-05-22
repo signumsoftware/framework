@@ -45,7 +45,7 @@ namespace Signum.Windows.UIAutomation
             return new SearchWindowProxy(SelectCapture(cleanName, "UQ:" + userQuery.Key())); 
         }
 
-        public AutomationElement SelectCapture(string autoCompleteText, string itemsStatus, int? timeOut = null)
+        public AutomationElement SelectCapture(string autoCompleteText, string name, int? timeOut = null)
         {
             return Element.CaptureWindow(
                 () =>
@@ -56,16 +56,16 @@ namespace Signum.Windows.UIAutomation
 
                     var lb = Element.WaitChildById("lstBox", timeOut);
 
-                    var item = lb.TryDescendant(e => e.Current.ItemStatus == itemsStatus);
+                    var item = lb.TryDescendant(e => e.Current.Name == name);
 
                     if (item == null)
-                        throw new KeyNotFoundException("{0} not found after writing {1} on the Omnibox".Formato(itemsStatus, autoCompleteText));
+                        throw new ElementNotFoundException("{0} not found after writing {1} on the Omnibox".Formato(name, autoCompleteText));
 
                     var listItem = item.Normalize(a => a.Current.ControlType == ControlType.ListItem);
 
                     listItem.Pattern<SelectionItemPattern>().Select();
                 },
-                () => "window after selecting {0} on the omnibox".Formato(itemsStatus), timeOut);
+                () => "window after selecting {0} on the omnibox".Formato(name), timeOut);
         }
     }
 }

@@ -5,12 +5,12 @@
     xmlns:d="clr-namespace:Signum.Entities.Scheduler;assembly=Signum.Entities.Extensions"
     xmlns:m2 ="clr-namespace:Signum.Windows.Extensions"
     xmlns:sws="clr-namespace:Signum.Windows.Scheduler"
-    m:Common.TypeContext="d:ScheduleRuleWeekDaysDN"
+    m:Common.TypeContext="{x:Type d:ScheduleRuleWeekDaysDN}"
     Padding="2">
 	<UserControl.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
-				<ResourceDictionary Source="pack://application:,,,/Signum.Windows;Component/Resources.xaml"/>
+                <m:DesignTimeResourceDictionary Source="pack://application:,,,/Signum.Windows;Component/Resources.xaml"/>
 			</ResourceDictionary.MergedDictionaries>
 		</ResourceDictionary>
 	</UserControl.Resources>

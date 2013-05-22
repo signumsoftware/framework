@@ -154,14 +154,23 @@ namespace Signum.Engine.Disconnected
                             }
 
                         using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { ReseedIds = l })))
-                        using (Connector.Override(newDatabase))
-                        using (SchemaName.AvoidDatabaseName())
                         {
-                            foreach (var table in Schema.Current.Tables.Values.Where(t => DisconnectedLogic.GetStrategy(t.Type).Upload != Upload.None))
-                            {
-                                token.ThrowIfCancellationRequested();
+                            var tablesToUpload = Schema.Current.Tables.Values.Where(t => DisconnectedLogic.GetStrategy(t.Type).Upload != Upload.None);
 
-                                Reseed(machine, table);
+                            var maxIdDictionary = tablesToUpload.ToDictionary(t => t, 
+                                t => DisconnectedTools.MaxIdInRange(t, machine.SeedMin, machine.SeedMax));
+
+                            using (Connector.Override(newDatabase))
+                            using (SchemaName.AvoidDatabaseName())
+                            {
+                                foreach (var table in tablesToUpload)
+                                {
+                                    token.ThrowIfCancellationRequested();
+
+                                    int? max = maxIdDictionary.GetOrThrow(table);
+
+                                    DisconnectedTools.SetNextId(table, (max + 1) ?? machine.SeedMin);
+                                }
                             }
                         }
 
@@ -233,12 +242,12 @@ namespace Signum.Engine.Disconnected
         }
 
         readonly MethodInfo miUnsafeLock;
-        protected virtual int UnsafeLock<T>(Lite<DisconnectedMachineDN> machine, DisconnectedStrategy<T> strategy, Lite<DisconnectedExportDN> stats) where T : IdentifiableEntity, IDisconnectedEntity, new()
+        protected virtual int UnsafeLock<T>(Lite<DisconnectedMachineDN> machine, DisconnectedStrategy<T> strategy, Lite<DisconnectedExportDN> stats) where T : Entity, new()
         {
             using (ExecutionMode.Global())
             {
-                var result = Database.Query<T>().Where(strategy.UploadSubset).Where(a => a.DisconnectedMachine != null).Select(a =>
-                    "{0} locked in {1}".Formato(a.Id, a.DisconnectedMachine.Entity.MachineName)).ToString("\r\n");
+                var result = Database.Query<T>().Where(strategy.UploadSubset).Where(a => a.Mixin<DisconnectedMixin>().DisconnectedMachine != null).Select(a =>
+                    "{0} locked in {1}".Formato(a.Id, a.Mixin<DisconnectedMixin>().DisconnectedMachine.Entity.MachineName)).ToString("\r\n");
 
                 if (result.HasText())
                     ExportTableQuery(stats, typeof(T).ToTypeDN()).UnsafeUpdate(e =>
@@ -247,7 +256,9 @@ namespace Signum.Engine.Disconnected
                                 Element = { Errors = result }
                             });
 
-                return Database.Query<T>().Where(strategy.UploadSubset).UnsafeUpdate(a => new T { DisconnectedMachine = machine, LastOnlineTicks = a.Ticks });
+                return Database.Query<T>().Where(strategy.UploadSubset).UnsafeUpdate(a => new T()
+                    .SetMixin((DisconnectedMixin dm) => dm.DisconnectedMachine, machine)
+                    .SetMixin((DisconnectedMixin dm) => dm.LastOnlineTicks, a.Ticks));
             }
         }
 
@@ -263,7 +274,7 @@ namespace Signum.Engine.Disconnected
 
         protected virtual void DropDatabase(Connector newDatabase)
         {
-            DisconnectedTools.DropDatabase(newDatabase.DatabaseName());
+            DisconnectedTools.DropDatabase(new DatabaseName(null, newDatabase.DatabaseName()));
         }
 
         protected virtual string DatabaseFileName(DisconnectedMachineDN machine)
@@ -276,14 +287,14 @@ namespace Signum.Engine.Disconnected
             return Path.Combine(DisconnectedLogic.DatabaseFolder, Connector.Current.DatabaseName() + "_Export_" + machine.MachineName + "_Log.ldf");
         }
 
-        protected virtual string DatabaseName(DisconnectedMachineDN machine)
+        protected virtual DatabaseName DatabaseName(DisconnectedMachineDN machine)
         {
-            return Connector.Current.DatabaseName() + "_Export_" + machine.MachineName;
+            return new DatabaseName(null, Connector.Current.DatabaseName() + "_Export_" + machine.MachineName);
         }
 
         protected virtual string CreateDatabase(DisconnectedMachineDN machine)
         {
-            string databaseName = DatabaseName(machine);
+            DatabaseName databaseName = DatabaseName(machine);
 
             DisconnectedTools.DropIfExists(databaseName);
 
@@ -294,7 +305,7 @@ namespace Signum.Engine.Disconnected
             DisconnectedTools.CreateDatabaseDirectory(logFileName);
             DisconnectedTools.CreateDatabase(databaseName, fileName, logFileName);
 
-            return ((SqlConnector)Connector.Current).ConnectionString.Replace(Connector.Current.DatabaseName(), databaseName);
+            return ((SqlConnector)Connector.Current).ConnectionString.Replace(Connector.Current.DatabaseName(), databaseName.Name);
         }
 
         protected virtual void EnableForeignKeys(Table table)
@@ -313,19 +324,11 @@ namespace Signum.Engine.Disconnected
                 DisconnectedTools.DisableForeignKeys(rt);
         }
 
-        protected virtual void Reseed(DisconnectedMachineDN machine, Table table)
-        {
-            int? max = DisconnectedTools.MaxIdInRange(table, machine.SeedMin, machine.SeedMax);
-
-            DisconnectedTools.SetNextId(table, (max + 1) ?? machine.SeedMin);
-        }
-
-
         protected virtual void BackupDatabase(DisconnectedMachineDN machine, Lite<DisconnectedExportDN> export, Connector newDatabase)
         {
             string backupFileName = Path.Combine(DisconnectedLogic.BackupFolder, BackupFileName(machine, export));
             DisconnectedTools.CreateDatabaseDirectory(backupFileName);
-            DisconnectedTools.BackupDatabase(newDatabase.DatabaseName(), backupFileName);
+            DisconnectedTools.BackupDatabase(new DatabaseName(null, newDatabase.DatabaseName()), backupFileName);
         }
 
         public virtual string BackupNetworkFileName(DisconnectedMachineDN machine, Lite<DisconnectedExportDN> export)
@@ -370,7 +373,7 @@ namespace Signum.Engine.Disconnected
             string command =
 @"INSERT INTO {0} ({2})
 SELECT {3}
-FROM {1} as [table]".Formato(
+                    from {1} as [table]".Formato(
                     newTableName,
                     table.Name,
                     table.Columns.Keys.ToString(a => a.SqlScape(), ", "),

@@ -2,13 +2,17 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
+    xmlns:m2="clr-namespace:Signum.Windows.Extensions"
     xmlns:c="clr-namespace:Signum.Windows.Chart"
+    xmlns:uq="clr-namespace:Signum.Windows.UserQueries"
     xmlns:dn="clr-namespace:Signum.Entities.Chart;assembly=Signum.Entities.Extensions"
-    m:Common.TypeContext="dn:UserChartDN">
+    m:Common.TypeContext="{x:Type dn:UserChartDN}">
     <StackPanel>
         <m:EntityLine m:Common.Route="Query" m:Common.IsReadOnly="True" />
         <m:ValueLine m:Common.Route="DisplayName"/>
         <m:EntityLine m:Common.Route="Related"  />
+        <m:EntityLine m:Common.Route="EntityType" AutoCompleting="EntityType_AutoCompleting" Find="False" />
+        <TextBox Visibility="{Binding EntityType, Converter={x:Static m:Converters.NullToVisibility}}" IsReadOnly="True" x:Name="tbCurrentEntity" BorderThickness="0" Background="{x:Null}"/>
         <m:EntityRepeater m:Common.Route="Filters" Grid.IsSharedSizeScope="true" Margin="4" Icon="../Images/filter.png" MinHeight="100">
             <m:EntityRepeater.EntityTemplate>
                 <DataTemplate>
@@ -18,13 +22,13 @@
                             <ColumnDefinition SharedSizeGroup="operation" MinWidth="100" Width="Auto"/>
                             <ColumnDefinition SharedSizeGroup="value" MinWidth="100" Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <m:QueryTokenBuilder SubTokensEvent="QueryTokenBuilderFilter_SubTokensEvent" Token="{Binding Token}" />
+                        <uq:QueryTokenDNBuilder SubTokensEvent="QueryTokenBuilderFilter_SubTokensEvent" />
                         <ComboBox Grid.Column="1" VerticalAlignment="Center"
                                   SelectedItem="{Binding Operation}" 
-                                  ItemsSource="{Binding Token, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={x:Static m:Converters.TokenOperations}}">
+                                  ItemsSource="{Binding TryToken, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={x:Static m:Converters.TokenOperations}}">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding Converter={x:Static m:Converters.EnumDescriptionConverter}}"/>
+                                    <TextBlock Text="{Binding Converter={x:Static m:Converters.EnumDescription}}"/>
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>
                         </ComboBox>
@@ -46,12 +50,12 @@
             <m:EntityList m:Common.Route="Orders" Grid.IsSharedSizeScope="true" Move="True"  >
                 <m:EntityList.EntityTemplate>
                     <DataTemplate>
-                        <Grid m:Common.LabelVisible="False" m:Common.TypeContext="{m:ContinueRoute /}">
+                        <Grid m:Common.LabelVisible="False" m:Common.PropertyRoute="{m:ContinueRoute /}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition SharedSizeGroup="orderType" MinWidth="100" Width="Auto"/>
                                 <ColumnDefinition SharedSizeGroup="token" MinWidth="100" Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <m:QueryTokenBuilder SubTokensEvent="QueryTokenBuilderOrders_SubTokensEvent"  Token="{Binding Token}"/>
+                            <uq:QueryTokenDNBuilder SubTokensEvent="QueryTokenBuilderOrders_SubTokensEvent" />
                             <m:ValueLine m:Common.Route="OrderType" Grid.Column="1" VerticalAlignment="Center" />
                         </Grid>
                     </DataTemplate>

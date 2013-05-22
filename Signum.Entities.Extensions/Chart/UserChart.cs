@@ -10,8 +10,13 @@ using Signum.Utilities;
 
 namespace Signum.Entities.Chart
 {
+    public interface IHasEntitytype
+    {
+        Lite<TypeDN> EntityType { get; } 
+    }
+
     [Serializable, EntityKind(EntityKind.Main)]
-    public class UserChartDN : IdentifiableEntity, IChartBase
+    public class UserChartDN : IdentifiableEntity, IChartBase, IHasEntitytype
     {
         public UserChartDN() { }
         public UserChartDN(object queryName)
@@ -38,7 +43,13 @@ namespace Signum.Entities.Chart
             set { Set(ref query, value, () => Query); }
         }
 
-        [ImplementedBy()]
+        Lite<TypeDN> entityType;
+        public Lite<TypeDN> EntityType
+        {
+            get { return entityType; }
+            set { Set(ref entityType, value, () => EntityType); }
+        }
+
         Lite<IdentifiableEntity> related;
         public Lite<IdentifiableEntity> Related
         {
@@ -127,15 +138,15 @@ namespace Signum.Entities.Chart
         {
             if (Filters != null)
                 foreach (var f in Filters)
-                    f.ParseData(t => t.SubTokensChart(description.Columns, this.GroupResults), this);
+                    f.ParseData(this, description, canAggregate: this.GroupResults);
 
             if (Columns != null)
                 foreach (var c in Columns)
-                    c.ParseData(description, this);
+                    c.ParseData(this, description, canAggregate: c.IsGroupKey == false);
 
             if (Orders != null)
                 foreach (var o in Orders)
-                    o.ParseData(t => t.SubTokensChart(description.Columns, this.GroupResults), this);
+                    o.ParseData(this, description, canAggregate: this.GroupResults);
         }
 
         static Func<QueryDN, object> ToQueryName;
@@ -168,6 +179,13 @@ namespace Signum.Entities.Chart
         public void InvalidateResults(bool needNewQuery)
         {
 
+        }
+
+        public void SetFilterValues()
+        {
+            if (Filters != null)
+                foreach (var f in Filters)
+                    f.SetValue();
         }
     }
 

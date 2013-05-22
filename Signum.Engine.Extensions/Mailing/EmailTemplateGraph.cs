@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using Signum.Entities.Mailing;
 using Signum.Engine.Operations;
-using Signum.Engine.Extensions.Properties;
 using Signum.Utilities;
 
 namespace Signum.Engine.Mailing
@@ -35,23 +34,23 @@ namespace Signum.Engine.Mailing
                 ToState = EmailTemplateState.Modified,
                 AllowsNew = true,
                 Lite = false,
-                FromStates = new[] { EmailTemplateState.Created, EmailTemplateState.Modified },
+                FromStates = { EmailTemplateState.Created, EmailTemplateState.Modified },
                 Execute = (t, _) => t.State = EmailTemplateState.Modified
             }.Register();
 
             new Execute(EmailTemplateOperation.Enable) 
             {
                 ToState = EmailTemplateState.Modified,
-                FromStates = new[] { EmailTemplateState.Modified },
-                CanExecute = t => t.Active ? Resources.TheTemplateIsAlreadyActive : null,
+                FromStates = { EmailTemplateState.Modified },
+                CanExecute = t => t.Active ? EmailTemplateMessage.TheTemplateIsAlreadyActive.NiceToString() : null,
                 Execute = (t, _) => t.Active = true
             }.Register();
 
             new Execute(EmailTemplateOperation.Disable) 
             {
                 ToState = EmailTemplateState.Modified,
-                FromStates = new[] { EmailTemplateState.Modified },
-                CanExecute = t => !t.Active ? Resources.TheTemplateIsAlreadyInactive : null,
+                FromStates = { EmailTemplateState.Modified },
+                CanExecute = t => !t.Active ? EmailTemplateMessage.TheTemplateIsAlreadyInactive.NiceToString() : null,
                 Execute = (t, _) => t.Active = false
             }.Register();
 

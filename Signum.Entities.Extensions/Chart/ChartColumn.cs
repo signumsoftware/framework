@@ -9,7 +9,6 @@ using System.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using System.ComponentModel;
 using Signum.Entities.Reports;
-using Signum.Entities.Extensions.Properties;
 using Signum.Entities.UserQueries;
 using Signum.Entities.Reflection;
 
@@ -23,7 +22,7 @@ namespace Signum.Entities.Chart
         public ChartScriptColumnDN ScriptColumn
         {
             get { return scriptColumn; }
-            set { Set(ref scriptColumn, value, () => ScriptColumn); }
+            set { scriptColumn = value; }
         }
         
         public ChartColumnDN()
@@ -94,26 +93,26 @@ namespace Signum.Entities.Chart
         [Ignore]
         internal IChartBase parentChart;
 
-        [AvoidLocalization]
+        [HiddenProperty]
         public IChartBase ParentChart { get { return parentChart; } }
 
-        [AvoidLocalization]
+        [HiddenProperty]
         public bool? IsGroupKey { get { return (!parentChart.GroupResults) ? (bool?)null: ScriptColumn.IsGroupKey; } }
 
-        [AvoidLocalization]
+        [HiddenProperty]
         public bool GroupByVisible { get { return parentChart.ChartScript.GroupBy != GroupByChart.Never && ScriptColumn.IsGroupKey; } }
 
-        [AvoidLocalization]
+        [HiddenProperty]
         public bool GroupByEnabled { get { return parentChart.ChartScript.GroupBy != GroupByChart.Always; } }
 
-        [AvoidLocalization]
+        [HiddenProperty]
         public bool GroupByChecked
         {
             get { return parentChart.GroupResults; }
             set { parentChart.GroupResults = value; }
         }
 
-        [AvoidLocalization]
+        [HiddenProperty]
         public string PropertyLabel { get { return ScriptColumn.DisplayName; } }
 
         int index;
@@ -226,30 +225,16 @@ namespace Signum.Entities.Chart
             tokenString = token == null ? null : token.FullKey();
         }
 
-        public override void ParseData(QueryDescription description, IdentifiableEntity context)
-        {
-            ParseData(t => SubTokensChart(t, description.Columns), context);
-        }
-
-        public override void ParseData(Func<QueryToken, List<QueryToken>> subTokens, IdentifiableEntity context)
+        public override void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)
         {
             try
             {
-                token = string.IsNullOrEmpty(tokenString) ? null : QueryUtils.Parse(tokenString, subTokens);
+                token = string.IsNullOrEmpty(tokenString) ? null : QueryUtils.Parse(tokenString, description, canAggregate);
             }
             catch (Exception e)
             {
                 parseException = new FormatException("{0} {1}: {2}\r\n{3}".Formato(context.GetType().Name, context.IdOrNull, context, e.Message));
             }
-
-            CleanSelfModified();
-        }
-
-        public List<QueryToken> SubTokensChart(QueryToken token, IEnumerable<ColumnDescription> columnDescriptions)
-        {
-            var result = token.SubTokensChart(columnDescriptions, this.IsGroupKey == false);
-
-            return result;
         }
 
         internal Column CreateColumn()

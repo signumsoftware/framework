@@ -7,6 +7,7 @@ using Signum.Utilities;
 using System.Data.SqlClient;
 using Signum.Entities.Disconnected;
 using System.Data;
+using Signum.Engine.Maps;
 
 namespace Signum.Engine.Disconnected
 {
@@ -16,7 +17,7 @@ namespace Signum.Engine.Disconnected
         {
             var csb = new SqlConnectionStringBuilder(connectionString);
 
-            string databaseName = csb.InitialCatalog;
+            DatabaseName databaseName = new DatabaseName(null, csb.InitialCatalog);
 
             csb.InitialCatalog = "";
 
@@ -28,12 +29,12 @@ namespace Signum.Engine.Disconnected
             }
         }
 
-        protected virtual void DropIfExists(string databaseName)
+        protected virtual void DropIfExists(DatabaseName databaseName)
         {
             DisconnectedTools.DropIfExists(databaseName);
         }
 
-        protected virtual void RestoreDatabase(string databaseName, string backupFile, string databaseFile, string databaseLogFile)
+        protected virtual void RestoreDatabase(DatabaseName databaseName, string backupFile, string databaseFile, string databaseLogFile)
         {
             DisconnectedTools.RestoreDatabase(databaseName, 
                 Absolutize(backupFile), 
@@ -41,7 +42,7 @@ namespace Signum.Engine.Disconnected
                 Absolutize(databaseLogFile));
         }
 
-        public virtual void BackupDatabase(string databaseName, string backupFile)
+        public virtual void BackupDatabase(DatabaseName databaseName, string backupFile)
         {
             DisconnectedTools.BackupDatabase(databaseName, Absolutize(backupFile));
         }
@@ -54,7 +55,7 @@ namespace Signum.Engine.Disconnected
             return Path.Combine(Directory.GetCurrentDirectory(), backupFile);
         }
 
-        public void DropDatabase(string databaseName)
+        public void DropDatabase(DatabaseName databaseName)
         {
             DisconnectedTools.DropDatabase(databaseName);
         }

@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Reflection;
 using Signum.Web;
-using Signum.Web.Extensions.Properties;
 using Signum.Entities.Chart;
 using Signum.Utilities;
 using Signum.Engine.DynamicQuery;
@@ -91,7 +90,7 @@ namespace Signum.Web.Chart
 
                 var chartToken = (ChartColumnDN)ctx.Parent.UntypedValue;
 
-                var token = QueryUtils.Parse(tokenName, qt => qt.SubTokensChart(qd.Columns, true /* chartToken.ParentChart.GroupResults*/));
+                var token = QueryUtils.Parse(tokenName, qd, canAggregate: true /* chartToken.ParentChart.GroupResults*/);
 
                 if (token is AggregateToken && !chartToken.ParentChart.GroupResults)
                     token = token.Parent;
@@ -153,7 +152,7 @@ namespace Signum.Web.Chart
 
             ChartRequest chartRequest = (ChartRequest)ctx.Parent.UntypedValue;
 
-            return FindOptionsModelBinder.ExtractFilterOptions(ctx.ControllerContext.HttpContext, qt => qt.SubTokensChart(qd.Columns, chartRequest.GroupResults))
+            return FindOptionsModelBinder.ExtractFilterOptions(ctx.ControllerContext.HttpContext, qd, canAggregate: chartRequest.GroupResults)
                 .Select(fo => fo.ToFilter()).ToList();
         }
 
@@ -164,8 +163,7 @@ namespace Signum.Web.Chart
 
             ChartRequest chartRequest = (ChartRequest)ctx.Parent.UntypedValue;
 
-            return FindOptionsModelBinder.ExtractOrderOptions(ctx.ControllerContext.HttpContext, 
-                        qt => qt.SubTokensChart(qd.Columns, true/*chartRequest.GroupResults*/))
+            return FindOptionsModelBinder.ExtractOrderOptions(ctx.ControllerContext.HttpContext, qd, canAggregate: true/*chartRequest.GroupResults*/)
                     .Select(fo => fo.ToOrder()).ToList();
         }
 
@@ -182,7 +180,7 @@ namespace Signum.Web.Chart
             if (!ChartPermission.ViewCharting.IsAuthorized())
                 return null;
 
-            string chartNewText = Resources.Chart_Chart;
+            string chartNewText = ChartMessage.Chart.NiceToString();
 
             return
                 new ToolBarButton
@@ -199,9 +197,7 @@ namespace Signum.Web.Chart
         {
             bool canAggregate = (chartToken as ChartColumnDN).TryCS(ct => ct.IsGroupKey == false) ?? true;
 
-            return helper.QueryTokenDNBuilder(chartToken, context, qd.QueryName, t =>
-                t.SubTokensChart(qd.Columns, chart.GroupResults && canAggregate)
-            );
+            return helper.QueryTokenDNBuilder(chartToken, context, qd, canAggregate: chart.GroupResults && canAggregate);
         }
 
         public static string ChartTypeImgClass(IChartBase chartBase, ChartScriptDN current, ChartScriptDN script)

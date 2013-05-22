@@ -17,7 +17,7 @@ namespace Signum.Engine.Authorization
 {
     public static class PropertyAuthLogic
     {
-        static AuthCache<RulePropertyDN, PropertyAllowedRule, PropertyDN, PropertyRoute, PropertyAllowed> cache;
+        static AuthCache<RulePropertyDN, PropertyAllowedRule, PropertyRouteDN, PropertyRoute, PropertyAllowed> cache;
 
         public static IManualAuth<PropertyRoute, PropertyAllowed> Manual { get { return cache; } }
 
@@ -28,20 +28,21 @@ namespace Signum.Engine.Authorization
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 AuthLogic.AssertStarted(sb);
-                PropertyLogic.Start(sb);
+                PropertyRouteLogic.Start(sb);
 
-                cache = new AuthCache<RulePropertyDN, PropertyAllowedRule, PropertyDN, PropertyRoute, PropertyAllowed>(sb,
-                    PropertyLogic.GetPropertyRoute,
-                    PropertyLogic.GetEntity,
-                    AuthUtils.MaxProperty,
-                    AuthUtils.MinProperty);
+                cache = new AuthCache<RulePropertyDN, PropertyAllowedRule, PropertyRouteDN, PropertyRoute, PropertyAllowed>(sb,
+                    PropertyRouteLogic.GetPropertyRoute,
+                    PropertyRouteLogic.GetEntity,
+                    merger: new PropertyMerger(),
+                    invalidateWithTypes : true,
+                    coercer: PropertyCoercer.Instance);
 
                 if (queries)
                 {
                     PropertyRoute.SetIsAllowedCallback(pp => pp.GetAllowedFor(PropertyAllowed.Read));
                 }
 
-                AuthLogic.ExportToXml += () => cache.ExportXml("Properties", "Property", p => p.Type.CleanName + "|" + p.Path, pa => pa.ToString());
+                AuthLogic.ExportToXml += () => cache.ExportXml("Properties", "Property", p => TypeLogic.GetCleanName(p.RootType) + "|" + p.PropertyString(), pa => pa.ToString());
                 AuthLogic.ImportFromXml += (x, roles, replacements) =>
                 {
                     Dictionary<Type, Dictionary<string, PropertyRoute>> routesDicCache = new Dictionary<Type, Dictionary<string, PropertyRoute>>();
@@ -82,7 +83,7 @@ namespace Signum.Engine.Authorization
                         if (route == null)
                             return null;
 
-                        var property = PropertyLogic.GetEntity(route);
+                        var property = PropertyRouteLogic.GetEntity(route);
                         if (property.IsNew)
                             property.Save();
                             
@@ -106,10 +107,16 @@ namespace Signum.Engine.Authorization
         }
 
 
-        public static PropertyRulePack GetPropertyRules(Lite<RoleDN> roleLite, TypeDN typeDN)
+        public static PropertyRulePack GetPropertyRules(Lite<RoleDN> role, TypeDN typeDN)
         {
-            var result = new PropertyRulePack {Role = roleLite, Type = typeDN }; 
-            cache.GetRules(result, PropertyLogic.RetrieveOrGenerateProperties(typeDN));
+            var result = new PropertyRulePack { Role = role, Type = typeDN }; 
+            cache.GetRules(result, PropertyRouteLogic.RetrieveOrGenerateProperties(typeDN));
+
+            var coercer = PropertyCoercer.Instance.GetCoerceValue(role);
+            result.Rules.ForEach(r => r.CoercedValues = EnumExtensions.GetValues<PropertyAllowed>()
+                .Where(a => !coercer(PropertyRouteLogic.GetPropertyRoute(r.Resource), a).Equals(a))
+                .ToArray());
+
             return result;
         }
 
@@ -128,16 +135,8 @@ namespace Signum.Engine.Authorization
             if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
                 return PropertyAllowed.Modify;
 
-            if (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
-                return GetPropertyAllowed(route.Parent);
-
-            var typeRule = TypeAuthLogic.GetAllowed(route.RootType).Max(ExecutionMode.InUserInterface);
-
-            if (typeRule == TypeAllowedBasic.None)
-                return PropertyAllowed.None;
-
-            if (typeRule == TypeAllowedBasic.Read)
-                return PropertyAllowed.Read;
+            while (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
+                route = route.Parent;
 
             return cache.GetAllowed(RoleDN.Current.ToLite(), route);
         }
@@ -147,28 +146,145 @@ namespace Signum.Engine.Authorization
             if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
                 return null;
 
-            if (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
-                return GetAllowedFor(route.Parent, requested);
+            while (route.PropertyRouteType == PropertyRouteType.MListItems || route.PropertyRouteType == PropertyRouteType.LiteEntity)
+                route = route.Parent;
 
-            if (TypeAuthLogic.GetAllowed(route.RootType).Max(ExecutionMode.InUserInterface) == TypeAllowedBasic.None)
-                return "Type {0} is set to None for {1}".Formato(route.RootType.NiceName(), RoleDN.Current);
+            PropertyAllowed paProperty = cache.GetAllowed(RoleDN.Current.ToLite(), route);
+            if (paProperty < requested)
+            {
+                PropertyAllowed paType = TypeAuthLogic.GetAllowed(route.RootType).Max(ExecutionMode.InUserInterface).ToPropertyAllowed();
+                if (paType < requested)
+                    return "Type {0} is set to {1} for {2}".Formato(route.RootType.NiceName(), paType, RoleDN.Current);
 
-            var current = cache.GetAllowed(RoleDN.Current.ToLite(), route);
-
-            if (current < requested)
-                return "Property {0} is set to {1} for {2}".Formato(route, current, RoleDN.Current);
+                return "Property {0} is set to {1} for {2}".Formato(route, paProperty, RoleDN.Current);
+            }
 
             return null;
         }
 
-        public static DefaultDictionary<PropertyRoute, PropertyAllowed> AuthorizedProperties()
+        public static Dictionary<PropertyRoute, PropertyAllowed> OverridenProperties()
         {
-            return cache.GetDefaultDictionary();
+            var dd = cache.GetDefaultDictionary();
+
+            return dd.OverrideDictionary;
         }
 
         public static AuthThumbnail? GetAllowedThumbnail(Lite<RoleDN> role, Type entityType)
         {
             return PropertyRoute.GenerateRoutes(entityType).Select(pr => cache.GetAllowed(role, pr)).Collapse();
+        }
+
+    }
+
+    class PropertyMerger : Merger<PropertyRoute, PropertyAllowed>
+    {
+        protected override PropertyAllowed Union(PropertyRoute key, Lite<RoleDN> role, IEnumerable<PropertyAllowed> baseValues)
+        {
+            var result = Max(baseValues);
+
+            if (result == TypeAllowedBase(key, role))
+                return TypeAllowed(key, role);
+
+            return result;
+        }
+
+
+        static PropertyAllowed Max(IEnumerable<PropertyAllowed> baseValues)
+        {
+            PropertyAllowed result = PropertyAllowed.None;
+
+            foreach (var item in baseValues)
+            {
+                if (item > result)
+                    result = item;
+
+                if (result == PropertyAllowed.Modify)
+                    return result;
+            }
+            return result;
+        }
+
+        protected override PropertyAllowed Intersection(PropertyRoute key, Lite<RoleDN> role, IEnumerable<PropertyAllowed> baseValues)
+        {
+            var result = Min(baseValues);
+
+            if (result == TypeAllowedBase(key, role))
+                return TypeAllowed(key, role);
+
+            return result;
+        }
+
+        static PropertyAllowed Min(IEnumerable<PropertyAllowed> baseValues)
+        {
+            PropertyAllowed result = PropertyAllowed.Modify;
+
+            foreach (var item in baseValues)
+            {
+                if (item < result)
+                    result = item;
+
+                if (result == PropertyAllowed.None)
+                    return result;
+            }
+            return result;
+        }
+
+        static PropertyAllowed TypeAllowedBase(PropertyRoute key, Lite<RoleDN> role)
+        {
+            return TypeAuthLogic.GetAllowedBase(role, key.RootType).MaxUI().ToPropertyAllowed();
+        }
+
+        static PropertyAllowed TypeAllowed(PropertyRoute key, Lite<RoleDN> role)
+        {
+            return TypeAuthLogic.GetAllowed(role, key.RootType).MaxUI().ToPropertyAllowed();
+        }
+
+        public override Func<PropertyRoute, PropertyAllowed> MergeDefault(Lite<RoleDN> role, IEnumerable<Func<PropertyRoute, PropertyAllowed>> baseDefaultValues)
+        {
+            return pr => TypeAllowed(pr, role); 
+        }
+    }
+
+    class PropertyCoercer : Coercer<PropertyAllowed, PropertyRoute>
+    {
+        public static readonly PropertyCoercer Instance = new PropertyCoercer();
+
+        private PropertyCoercer()
+        {
+        }
+
+        public override Func<PropertyRoute, PropertyAllowed, PropertyAllowed> GetCoerceValue(Lite<RoleDN> role)
+        {
+            return (pr, a) =>
+            {
+                if (!TypeLogic.TypeToDN.ContainsKey(pr.RootType))
+                    return PropertyAllowed.Modify;
+
+                TypeAllowedAndConditions aac = TypeAuthLogic.GetAllowed(role, pr.RootType);
+
+                TypeAllowedBasic ta = aac.MaxUI();
+
+                PropertyAllowed pa = ta.ToPropertyAllowed();
+
+                return a < pa ? a : pa; ;
+            };
+        }
+
+        public override Func<Lite<RoleDN>, PropertyAllowed, PropertyAllowed> GetCoerceValueManual(PropertyRoute pr)
+        {
+            return (role, a) =>
+            {
+                if (!TypeLogic.TypeToDN.ContainsKey(pr.RootType))
+                    return PropertyAllowed.Modify;
+
+                TypeAllowedAndConditions aac = TypeAuthLogic.Manual.GetAllowed(role, pr.RootType);
+
+                TypeAllowedBasic ta = aac.MaxUI();
+
+                PropertyAllowed pa = ta.ToPropertyAllowed();
+
+                return a < pa ? a : pa; ;
+            };
         }
     }
 }

@@ -9,7 +9,6 @@ using Signum.Utilities;
 using Signum.Engine;
 using Signum.Entities;
 using Signum.Engine.Maps;
-using Signum.Web.Extensions.Properties;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.Reflection;
 using Signum.Entities.DynamicQuery;
@@ -153,14 +152,15 @@ namespace Signum.Web.SMS
         {
             var model = this.ExtractEntity<MultipleSMSModel>(null).ApplyChanges(this.ControllerContext, null, true).Value;
 
+            Type entitiesType = Navigator.ResolveType(model.WebTypeName);
+            var providers = model.ProviderKeys.Split('_').Select(key => Lite.Parse(key)).ToList();
+
             var cp = new Signum.Engine.SMS.SMSLogic.CreateMessageParams
             {
                 Message = model.Message,
-                From = model.From
+                From = model.From,
+                Referreds = providers
             };
-
-            Type entitiesType = Navigator.ResolveType(model.WebTypeName);
-            var providers = model.ProviderKeys.Split('_').Select(key => Lite.Parse(key)).ToList();
 
             var process = OperationLogic.ServiceConstructFromMany(providers.Cast<Lite<IIdentifiable>>(), entitiesType,
                 SMSProviderOperation.SendSMSMessage, cp);

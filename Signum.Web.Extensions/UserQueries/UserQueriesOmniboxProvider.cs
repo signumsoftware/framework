@@ -7,8 +7,8 @@ using Signum.Web.Omnibox;
 using Signum.Entities.Omnibox;
 using Signum.Engine.DynamicQuery;
 using System.Web.Mvc;
-using Signum.Web.Extensions.Properties;
 using Signum.Utilities;
+using Signum.Engine.UserQueries;
 
 namespace Signum.Web.UserQueries
 {
@@ -16,7 +16,7 @@ namespace Signum.Web.UserQueries
     {
         public override OmniboxResultGenerator<UserQueryOmniboxResult> CreateGenerator()
         {
-            return new UserQueryOmniboxResultGenerator();
+            return new UserQueryOmniboxResultGenerator(UserQueryLogic.Autocomplete);
         }
 
         public override MvcHtmlString RenderHtml(UserQueryOmniboxResult result)
@@ -26,7 +26,7 @@ namespace Signum.Web.UserQueries
             html = html.Concat(Icon());
 
             html = new HtmlTag("a")
-                .Attr("href", RouteHelper.New().Action<UserQueriesController>(uqc => uqc.View(result.UserQuery)))
+                .Attr("href", RouteHelper.New().Action<UserQueriesController>(uqc => uqc.View(result.UserQuery, null, null)))
                 .InnerHtml(html);
                 
             return html;

@@ -11,7 +11,6 @@ using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
 using System.Configuration;
-using Signum.Web.Properties;
 using Signum.Engine;
 #endregion
 
@@ -36,7 +35,7 @@ namespace Signum.Web.Files
 
         public override string ToJS()
         {
-            return "$('#{0}').data('fileRepeater')".Formato(ControlID);
+            return "$('#{0}').data('SF-fileRepeater')".Formato(ControlID);
         }
 
         protected override string DefaultCreate()

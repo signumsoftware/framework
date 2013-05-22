@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +12,6 @@ using Signum.Entities;
 using Signum.Utilities;
 using System.Reflection;
 using System.Security.Authentication;
-using Signum.Engine.Extensions.Properties;
 using Signum.Entities.Reflection;
 using Signum.Entities.DynamicQuery;
 using Signum.Utilities.DataStructures;
@@ -49,9 +48,7 @@ namespace Signum.Engine.Authorization
                     }
                 };
 
-                cache = new TypeAuthCache(sb,
-                    AuthUtils.MaxType,
-                    AuthUtils.MinType);
+                cache = new TypeAuthCache(sb, merger: TypeAllowedMerger.Instance);
 
                 AuthLogic.ExportToXml += () => cache.ExportXml();
                 AuthLogic.ImportFromXml += (x, roles, replacements) => cache.ImportXml(x, roles, replacements);
@@ -62,7 +59,7 @@ namespace Signum.Engine.Authorization
         static Action<Lite<RoleDN>> SuggestTypeRules()
         {
             var graph = Schema.Current.ToDirectedGraph();
-            graph.RemoveAll(graph.FeedbackEdgeSet().Edges);
+            graph.RemoveEdges(graph.FeedbackEdgeSet().Edges);
             var compilationOrder = graph.CompilationOrder().ToList();
             var entityTypes = graph.ToDictionary(t => t.Type, t => TypeLogic.GetEntityKind(t.Type));
 
@@ -137,7 +134,7 @@ namespace Signum.Engine.Authorization
 
         static void Schema_Saving(IdentifiableEntity ident)
         {
-            if (ident.Modified.Value && !saveDisabled.Value)
+            if (ident.IsGraphModified && !saveDisabled.Value)
             {
                 TypeAllowedAndConditions access = GetAllowed(ident.GetType());
 
@@ -149,7 +146,7 @@ namespace Signum.Engine.Authorization
                     return;
 
                 if (max < requested)
-                    throw new UnauthorizedAccessException(Resources.NotAuthorizedTo0The1WithId2.Formato(requested.NiceToString(), ident.GetType().NiceName(), ident.IdOrNull));
+                    throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().Formato(requested.NiceToString(), ident.GetType().NiceName(), ident.IdOrNull));
 
                 Schema_Saving_Instance(ident);
             }
@@ -161,7 +158,7 @@ namespace Signum.Engine.Authorization
             Type type = ident.GetType();
             TypeAllowedBasic access = GetAllowed(type).MaxDB();
             if (access < TypeAllowedBasic.Read)
-                throw new UnauthorizedAccessException(Resources.NotAuthorizedToRetrieve0.Formato(type.NicePluralName()));
+                throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedToRetrieve0.NiceToString().Formato(type.NicePluralName()));
         }
 
         public static TypeRulePack GetTypeRules(Lite<RoleDN> roleLite)
@@ -196,10 +193,10 @@ namespace Signum.Engine.Authorization
         public static TypeAllowedAndConditions GetAllowed(Type type)
         {
             if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
-                return AuthUtils.MaxType.BaseAllowed;
+                return new TypeAllowedAndConditions(TypeAllowed.Create);
 
             if (!TypeLogic.TypeToDN.ContainsKey(type))
-                return AuthUtils.MaxType.BaseAllowed;
+                return new TypeAllowedAndConditions(TypeAllowed.Create);
 
             if (EnumEntity.Extract(type) != null)
                 return new TypeAllowedAndConditions(TypeAllowed.Read);
@@ -211,9 +208,16 @@ namespace Signum.Engine.Authorization
             return cache.GetAllowed(RoleDN.Current.ToLite(), type);
         }
 
+
+
         public static TypeAllowedAndConditions GetAllowed(Lite<RoleDN> role, Type type)
         {
             return cache.GetAllowed(role, type);
+        }
+
+        public static TypeAllowedAndConditions GetAllowedBase(Lite<RoleDN> role, Type type)
+        {
+            return cache.GetAllowedBase(role, type);
         }
 
         public static DefaultDictionary<Type, TypeAllowedAndConditions> AuthorizedTypes()
@@ -246,6 +250,91 @@ namespace Signum.Engine.Authorization
         }
     }
 
+    class TypeAllowedMerger : Merger<Type, TypeAllowedAndConditions>
+    {
+        public static readonly TypeAllowedMerger Instance = new TypeAllowedMerger();
+
+        TypeAllowedMerger() { }
+
+        protected override TypeAllowedAndConditions Union(Type key, Lite<RoleDN> role, IEnumerable<TypeAllowedAndConditions> baseValues)
+        {
+            return MergeBase(baseValues, MaxTypeAllowed, TypeAllowed.Create, TypeAllowed.None);
+        }
+
+        static TypeAllowed MaxTypeAllowed(IEnumerable<TypeAllowed> collection)
+        {
+            TypeAllowed result = TypeAllowed.None;
+
+            foreach (var item in collection)
+            {
+                if (item > result)
+                    result = item;
+
+                if (result == TypeAllowed.Create)
+                    return result;
+
+            }
+            return result;
+        }
+
+        protected override TypeAllowedAndConditions Intersection(Type key, Lite<RoleDN> role, IEnumerable<TypeAllowedAndConditions> baseValues)
+        {
+            return MergeBase(baseValues, MinTypeAllowed, TypeAllowed.None, TypeAllowed.Create);
+        }
+
+        static TypeAllowed MinTypeAllowed(IEnumerable<TypeAllowed> collection)
+        {
+            TypeAllowed result = TypeAllowed.Create;
+
+            foreach (var item in collection)
+            {
+                if (item < result)
+                    result = item;
+
+                if (result == TypeAllowed.None)
+                    return result;
+
+            }
+            return result;
+        }
+
+        public override Func<Type, TypeAllowedAndConditions> MergeDefault(Lite<RoleDN> role, IEnumerable<Func<Type, TypeAllowedAndConditions>> baseDefaultValues)
+        {
+            var baseValues = baseDefaultValues.Select(f => ConstantFunction.GetConstantValue(f).Fallback).ToList();
+
+            if (AuthLogic.GetMergeStrategy(role) == MergeStrategy.Intersection)
+                return new ConstantFunction<Type, TypeAllowedAndConditions>(new TypeAllowedAndConditions(MinTypeAllowed(baseValues))).GetValue;
+            else
+                return new ConstantFunction<Type, TypeAllowedAndConditions>(new TypeAllowedAndConditions(MaxTypeAllowed(baseValues))).GetValue;
+        }
+
+        public static TypeAllowedAndConditions MergeBase(IEnumerable<TypeAllowedAndConditions> baseRules, Func<IEnumerable<TypeAllowed>, TypeAllowed> maxMerge, TypeAllowed max, TypeAllowed min)
+        {
+            TypeAllowedAndConditions only = baseRules.Only();
+            if (only != null)
+                return only;
+
+            if (baseRules.Any(a => a.Exactly(max)))
+                return new TypeAllowedAndConditions(max);
+
+            TypeAllowedAndConditions onlyNotOposite = baseRules.Where(a => !a.Exactly(min)).Only();
+            if (onlyNotOposite != null)
+                return onlyNotOposite;
+
+            var first = baseRules.FirstOrDefault(c => !c.Conditions.IsNullOrEmpty());
+
+            if (first == null)
+                return new TypeAllowedAndConditions(maxMerge(baseRules.Select(a => a.Fallback)));
+
+            var conditions = first.Conditions.Select(c => c.ConditionName).ToList();
+
+            if (baseRules.Where(c => !c.Conditions.IsNullOrEmpty() && c != first).Any(br => !br.Conditions.Select(c => c.ConditionName).SequenceEqual(conditions)))
+                return new TypeAllowedAndConditions(TypeAllowed.None);
+
+            return new TypeAllowedAndConditions(maxMerge(baseRules.Select(a => a.Fallback)),
+                conditions.Select((c, i) => new TypeConditionRule(c, maxMerge(baseRules.Where(br => !br.Conditions.IsNullOrEmpty()).Select(br => br.Conditions[i].Allowed)))).ToArray());
+        }
+    }
 
     public static class AuthThumbnailExtensions
     {

@@ -27,8 +27,11 @@ namespace Signum.Web.Selenium
 
         public static void QuickLinkClick(this ISelenium selenium, int quickLinkIndexBase1, string prefix)
         {
-            selenium.MouseOver("{0} .sf-quicklink-toggler".Formato(WidgetContainerSelector(prefix)));
-            selenium.Click("{0} .sf-quicklinks > .sf-quicklink:nth-child({1}) > a".Formato(WidgetContainerSelector(prefix), quickLinkIndexBase1));
+            selenium.Click("{0} .sf-quicklink-toggler".Formato(WidgetContainerSelector(prefix)));
+
+            string quickLinkSelector = "{0} .sf-quicklinks > .sf-quicklink:nth-child({1}) > a".Formato(WidgetContainerSelector(prefix), quickLinkIndexBase1);
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("{0}:visible".Formato(quickLinkSelector)));
+            selenium.Click(quickLinkSelector);
         }
 
         static string notesTogglerClass = "sf-notes-toggler";
@@ -41,8 +44,11 @@ namespace Signum.Web.Selenium
 
         public static void NotesCreateClick(this ISelenium selenium, string prefix)
         {
-            selenium.MouseOver("{0} .{1}".Formato(WidgetContainerSelector(prefix), notesTogglerClass));
-            selenium.Click("{0} .{1} .sf-note-create".Formato(WidgetContainerSelector(prefix), notesDropDownClass));
+            selenium.Click("{0} .{1}".Formato(WidgetContainerSelector(prefix), notesTogglerClass));
+
+            string createSelector = "{0} .{1} .sf-note-create".Formato(WidgetContainerSelector(prefix), notesDropDownClass);
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("{0}:visible".Formato(createSelector)));
+            selenium.Click(createSelector);
         }
 
         public static void NotesViewClick(this ISelenium selenium)
@@ -52,8 +58,11 @@ namespace Signum.Web.Selenium
 
         public static void NotesViewClick(this ISelenium selenium, string prefix)
         {
-            selenium.MouseOver("{0} .{1}".Formato(WidgetContainerSelector(prefix), notesTogglerClass));
-            selenium.Click("{0} .{1} .sf-note-view".Formato(WidgetContainerSelector(prefix), notesDropDownClass));
+            selenium.Click("{0} .{1}".Formato(WidgetContainerSelector(prefix), notesTogglerClass));
+
+            string viewSelector = "{0} .{1} .sf-note-view".Formato(WidgetContainerSelector(prefix), notesDropDownClass);
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("{0}:visible".Formato(viewSelector)));
+            selenium.Click(viewSelector);
         }
 
         public static bool EntityHasNNotes(this ISelenium selenium, int notesNumber)
@@ -83,8 +92,11 @@ namespace Signum.Web.Selenium
 
         public static void AlertsCreateClick(this ISelenium selenium, string prefix)
         {
-            selenium.MouseOver("{0} .{1}".Formato(WidgetContainerSelector(prefix), alertsTogglerClass));
-            selenium.Click("{0} .{1} .sf-alert-create".Formato(WidgetContainerSelector(prefix), alertsDropDownClass));
+            selenium.Click("{0} .{1}".Formato(WidgetContainerSelector(prefix), alertsTogglerClass));
+
+            string createSelector = "{0} .{1} .sf-alert-create".Formato(WidgetContainerSelector(prefix), alertsDropDownClass);
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("{0}:visible".Formato(createSelector)));
+            selenium.Click(createSelector);
         }
 
         public static void AlertsViewClick(this ISelenium selenium, string alertTypeClass)
@@ -94,11 +106,15 @@ namespace Signum.Web.Selenium
 
         public static void AlertsViewClick(this ISelenium selenium, string alertTypeClass, string prefix)
         {
-            selenium.MouseOver("{0} .{1}".Formato(WidgetContainerSelector(prefix), alertsTogglerClass));
-            selenium.Click("{0} .{1} .sf-alert-view .{2}".Formato(
-                WidgetContainerSelector(prefix), 
+            selenium.Click("{0} .{1}".Formato(WidgetContainerSelector(prefix), alertsTogglerClass));
+
+            string viewSelector = "{0} .{1} .sf-alert-view .{2}".Formato(
+                WidgetContainerSelector(prefix),
                 alertsDropDownClass,
-                alertTypeClass));
+                alertTypeClass);
+
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("{0}:visible".Formato(viewSelector)));
+            selenium.Click(viewSelector);
         }
 
         public static bool EntityHasNAlerts(this ISelenium selenium, int alertsNumber, string alertTypeClass)

@@ -33,7 +33,7 @@ SF.Calendar = (function () {
         }
     }
 
-    $(".sf-annual-calendar td:not(.sf-annual-calendar-month)").live("mousedown", function (e) {
+    $(document).on("mousedown", ".sf-annual-calendar td:not(.sf-annual-calendar-month)", function (e) {
         var $this = $(this);
 
         if ($this.children("." + inactiveDivClass).length > 0) {
@@ -65,7 +65,7 @@ SF.Calendar = (function () {
         e.preventDefault();
     });
 
-    $(".sf-annual-calendar td:not(.sf-annual-calendar-month)").live("mouseover mouseup", function (e) {
+    $(document).on("mouseover mouseup", ".sf-annual-calendar td:not(.sf-annual-calendar-month)", function (e) {
         var $this = $(this);
         if ($this.children("." + inactiveDivClass).length > 0) {
             return;

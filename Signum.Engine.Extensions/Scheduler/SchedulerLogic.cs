@@ -51,24 +51,24 @@ namespace Signum.Engine.Scheduler
 
                 ExecuteTask.Register((ITaskDN t) => { throw new NotImplementedException("SchedulerLogic.ExecuteTask not registered for {0}".Formato(t.GetType().Name)); });
 
-                CustomTaskLogic.Start(sb, dqm);
+                ActionTaskLogic.Start(sb, dqm);
                 sb.Include<ScheduledTaskDN>();
                 sb.Schema.Initializing[InitLevel.Level4BackgroundProcesses] += Schema_InitializingApplicaton;
                 sb.Schema.EntityEvents<ScheduledTaskDN>().Saving += Schema_Saving;
                 
-                dqm[typeof(CalendarDN)] =
-                     (from st in Database.Query<CalendarDN>()
+                dqm.RegisterQuery(typeof(CalendarDN), ()=>
+                     from st in Database.Query<CalendarDN>()
                       select new
                       {
                           Entity = st,
                           st.Id,
                           st.Name,
                           Holidays = st.Holidays.Count,
-                      }).ToDynamic();
+                      });
 
 
-                dqm[typeof(ScheduledTaskDN)] =
-                    (from st in Database.Query<ScheduledTaskDN>()
+                dqm.RegisterQuery(typeof(ScheduledTaskDN), ()=>
+                    from st in Database.Query<ScheduledTaskDN>()
                      select new
                      {
                          Entity = st,
@@ -77,16 +77,16 @@ namespace Signum.Engine.Scheduler
                          st.NextDate,
                          st.Suspended,
                          st.Rule,
-                     }).ToDynamic();
+                     });
 
-                new BasicExecute<CalendarDN>(CalendarOperation.Save)
+                new Graph<CalendarDN>.Execute(CalendarOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
                     Execute = (c, _) => { },
                 }.Register();
 
-                new BasicExecute<ScheduledTaskDN>(ScheduledTaskOperation.Save)
+                new Graph<ScheduledTaskDN>.Execute(ScheduledTaskOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
@@ -102,7 +102,7 @@ namespace Signum.Engine.Scheduler
 
         static void Schema_Saving(ScheduledTaskDN task)
         {
-            if (!avoidReloadPlan.Value && task.Modified.Value)
+            if (!avoidReloadPlan.Value && task.IsGraphModified)
             {
                 Transaction.PostRealCommit -= Transaction_RealCommit;
                 Transaction.PostRealCommit += Transaction_RealCommit;
@@ -131,7 +131,7 @@ namespace Signum.Engine.Scheduler
             if (!enabled)
                 return;
 
-            using (new EntityCache(true))
+            using (new EntityCache(EntityCacheType.ForceNew))
             using (AuthLogic.Disable())
                 lock (priorityQueue)
                 {
@@ -179,7 +179,7 @@ namespace Signum.Engine.Scheduler
 
         static void DispatchEvents(object obj) // obj ignored
         {
-            using (new EntityCache(true))
+            using (new EntityCache(EntityCacheType.ForceNew))
             using (AuthLogic.Disable())
                 lock (priorityQueue)
                 {

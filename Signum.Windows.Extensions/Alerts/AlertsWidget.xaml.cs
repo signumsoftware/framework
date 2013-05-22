@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -93,31 +93,42 @@ namespace Signum.Windows.Alerts
             }
 
             tbAlerts.FontWeight = FontWeights.Normal;
-            CountAlerts(entity, "Future", Properties.Resources.FutureAlerts, btnFutureAlerts);
-            CountAlerts(entity, "Attended", Properties.Resources.CheckedAlerts, btnCheckedAlerts);
-            CountAlerts(entity, "NotAttended", Properties.Resources.WarnedAlerts, btnWarnedAlerts);
+
+            CountAlerts(entity);
         }
 
-        void CountAlerts(IdentifiableEntity entity, string filterColumn, string resource, Button button)
+        public static Polymorphic<Func<IdentifiableEntity, FilterOption>> CustomFilter = new Polymorphic<Func<IdentifiableEntity, FilterOption>>();
+
+        void CountAlerts(IdentifiableEntity entity)
         {
-            Navigator.QueryCountBatch(new CountOptions(typeof(AlertDN))
+            var func = CustomFilter.TryGetValue(DataContext.GetType());
+
+            DynamicQueryServer.QueryGroupBatch(new QueryGroupOptions(typeof(AlertDN))
             {
                 FilterOptions = new List<FilterOption>
                 {
-                    new FilterOption("Target" , DataContext),
-                    new FilterOption("Entity." + filterColumn, true),
+                     func != null ?  func((IdentifiableEntity)DataContext) : new FilterOption("Target", DataContext) { Frozen = true },
+                },
+                ColumnOptions = new List<ColumnOption>
+                {
+                    new ColumnOption("Entity.CurrentState"),
+                    new ColumnOption("Count")
+                },
+                OrderOptions = new List<OrderOption>
+                {
+                    new OrderOption("Entity.CurrentState"),
                 }
             },
-            count =>
+            resultTable =>
             {
-                if (count == 0)
+                if (resultTable.Rows.Length == 0)
                 {
-                    button.Visibility = Visibility.Collapsed;
+                    icAlerts.Visibility = Visibility.Collapsed;
                 }
                 else
                 {
-                    button.Visibility = Visibility.Visible;
-                    button.Content = "{0} ({1})".Formato(resource, count);
+                    icAlerts.Visibility = Visibility.Visible;
+                    icAlerts.ItemsSource = resultTable.Rows;
 
                     tbAlerts.FontWeight = FontWeights.Bold;
 
@@ -133,25 +144,31 @@ namespace Signum.Windows.Alerts
                 return;
 
             IdentifiableEntity entity = DataContext as IdentifiableEntity;
+            ResultRow row = (ResultRow)((Button)sender).DataContext;
 
-            string field =
-                sender == btnFutureAlerts ? "Future" :
-                sender == btnCheckedAlerts ? "Attended" :
-                sender == btnWarnedAlerts ? "NotAttended" : null;
+            AlertCurrentState state = (AlertCurrentState)row[0];
 
-            Navigator.Explore(new ExploreOptions(typeof(AlertDN))
+            var func = CustomFilter.TryGetValue(DataContext.GetType());
+
+            var eo = new ExploreOptions(typeof(AlertDN))
             {
                 ShowFilters = false,
                 SearchOnLoad = true,
                 FilterOptions = 
                 { 
-                    new FilterOption("Target", entity) { Frozen = true }, 
-                    new FilterOption("Entity." + field, true)
+                    func != null ? func(entity) : new FilterOption("Target", DataContext) { Frozen = true },
+                    new FilterOption("Entity.CurrentState", state)
                 },
-                ColumnOptions = { new ColumnOption("Target") },
-                ColumnOptionsMode = ColumnOptionsMode.Remove,
                 Closed = (o, ea) => ReloadAlerts(),
-            });
+            };
+
+            if (func == null)
+            {
+                eo.ColumnOptions = new List<ColumnOption> { new ColumnOption("Target") };
+                eo.ColumnOptionsMode = ColumnOptionsMode.Remove;
+            }
+
+            Navigator.Explore(eo);
         }
     }
 }

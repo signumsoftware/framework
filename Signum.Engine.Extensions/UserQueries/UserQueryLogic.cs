@@ -26,30 +26,34 @@ namespace Signum.Engine.UserQueries
             {
                 QueryLogic.Start(sb);
 
+                PermissionAuthLogic.RegisterPermissions(UserQueryPermission.ViewUserQuery); 
+
                 sb.Include<UserQueryDN>();
 
-                dqm[typeof(UserQueryDN)] = (from uq in Database.Query<UserQueryDN>()
-                                            select new
-                                            {
-                                                Entity = uq,
-                                                uq.Query,
-                                                uq.Id,
-                                                uq.DisplayName,
-                                                Filters = uq.Filters.Count,
-                                                Columns = uq.Columns.Count,
-                                                Orders = uq.Orders.Count,
-                                            }).ToDynamic();
+                dqm.RegisterQuery(typeof(UserQueryDN), () =>
+                    from uq in Database.Query<UserQueryDN>()
+                    select new
+                    {
+                        Entity = uq,
+                        uq.Query,
+                        uq.Id,
+                        uq.DisplayName,
+                        uq.EntityType,
+                        Filters = uq.Filters.Count,
+                        Columns = uq.Columns.Count,
+                        Orders = uq.Orders.Count,
+                    });
 
                 sb.Schema.EntityEvents<UserQueryDN>().Retrieved += UserQueryLogic_Retrieved;
 
-                new BasicExecute<UserQueryDN>(UserQueryOperation.Save)
+                new Graph<UserQueryDN>.Execute(UserQueryOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
                     Execute = (uq, _) => { }
                 }.Register();
 
-                new BasicDelete<UserQueryDN>(UserQueryOperation.Delete)
+                new Graph<UserQueryDN>.Delete(UserQueryOperation.Delete)
                 {
                     Lite = true,
                     Delete = (uq, _) => uq.Delete()
@@ -83,13 +87,15 @@ namespace Signum.Engine.UserQueries
         public static List<Lite<UserQueryDN>> GetUserQueries(object queryName)
         {
             return (from er in Database.Query<UserQueryDN>()
-                    where er.Query.Key == QueryUtils.GetQueryUniqueKey(queryName)
+                    where er.Query.Key == QueryUtils.GetQueryUniqueKey(queryName) && er.EntityType == null
                     select er.ToLite()).ToList();
         }
 
-        public static void RemoveUserQuery(Lite<UserQueryDN> lite)
+        public static List<Lite<UserQueryDN>> GetUserQueriesEntity(Type entityType)
         {
-            Database.Delete(lite);
+            return (from er in Database.Query<UserQueryDN>()
+                    where er.EntityType == entityType.ToTypeDN().ToLite()
+                    select er.ToLite()).ToList();
         }
 
         public static void RegisterUserTypeCondition(SchemaBuilder sb, Enum newEntityGroupKey)
@@ -106,6 +112,11 @@ namespace Signum.Engine.UserQueries
 
             TypeConditionLogic.Register<UserQueryDN>(newEntityGroupKey,
                 uq => AuthLogic.CurrentRoles().Contains(uq.Related));
+        }
+
+        public static List<Lite<UserQueryDN>> Autocomplete(string subString, int limit)
+        {
+            return Database.Query<UserQueryDN>().Where(uq => uq.EntityType == null).Autocomplete(subString, limit);
         }
     }
 }

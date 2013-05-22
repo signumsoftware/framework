@@ -7,8 +7,8 @@ using Signum.Web.Omnibox;
 using Signum.Entities.Omnibox;
 using Signum.Engine.DynamicQuery;
 using System.Web.Mvc;
-using Signum.Web.Extensions.Properties;
 using Signum.Utilities;
+using Signum.Engine.Chart;
 
 namespace Signum.Web.Chart
 {
@@ -16,7 +16,7 @@ namespace Signum.Web.Chart
     {
         public override OmniboxResultGenerator<UserChartOmniboxResult> CreateGenerator()
         {
-            return new UserChartOmniboxResultGenerator();
+            return new UserChartOmniboxResultGenerator(ChartLogic.Autocomplete);
         }
 
         public override MvcHtmlString RenderHtml(UserChartOmniboxResult result)
@@ -26,7 +26,7 @@ namespace Signum.Web.Chart
             html = html.Concat(Icon());
 
             html = new HtmlTag("a")
-                .Attr("href", RouteHelper.New().Action<ChartController>(cc => cc.ViewUserChart(result.UserChart)))
+                .Attr("href", RouteHelper.New().Action<ChartController>(cc => cc.ViewUserChart(result.UserChart, null)))
                 .InnerHtml(html);
                 
             return html;

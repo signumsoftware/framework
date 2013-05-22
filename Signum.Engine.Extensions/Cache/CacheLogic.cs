@@ -18,264 +18,146 @@ using Signum.Engine.Authorization;
 using System.Drawing;
 using Signum.Entities.Basics;
 using System.Xml.Linq;
+using System.Data.SqlClient;
+using System.Diagnostics;
+using System.Data.SqlTypes;
+using Signum.Utilities.ExpressionTrees;
+using Signum.Engine.SchemaInfoTables;
 
 namespace Signum.Engine.Cache
 {
     public static class CacheLogic
     {
-        interface ICacheLogicController : ICacheController
+        public static bool AssertOnStart = true;
+
+        /// <summary>
+        /// If you have invalidation problems look at exceptions in: select * from sys.transmission_queue 
+        /// If there are exceptions like: 'Could not obtain information about Windows NT group/user'
+        ///    Change login to a SqlServer authentication (i.e.: sa)
+        ///    Change Server Authentication mode and enable SA: http://msdn.microsoft.com/en-us/library/ms188670.aspx
+        ///    Change Database ownership to sa: ALTER AUTHORIZATION ON DATABASE::yourDatabase TO sa
+        /// </summary>
+        public static void Start(SchemaBuilder sb)
         {
-            int? Count { get; }
-
-            void Invalidate(bool isClean);
-
-            int Invalidations { get; }
-            int Loads { get; }
-
-            int Hits { get; }
-
-            void OnDisabled();
-        }
-
-        interface ISemiCacheController
-        {
-            void SetEntities(Type referingType, DirectedGraph<Modifiable> entities);
-        }
-
-
-        static readonly ThreadVariable<bool> inCache = Statics.ThreadVariable<bool>("inCache");
-
-        static IDisposable SetInCache()
-        {
-            var oldInCache = inCache.Value;
-            inCache.Value = true;
-            return new Disposable(() => inCache.Value = oldInCache);
-        }
-
-        class SemiCacheController<T> : CacheController<T>, ICacheLogicController, ISemiCacheController
-            where T : IdentifiableEntity
-        {
-            ConcurrentDictionary<Type, Dictionary<int, T>> cachedEntities = new ConcurrentDictionary<Type, Dictionary<int, T>>();
-            ConcurrentDictionary<Type, HashSet<Lite<T>>> sensibleLites = new ConcurrentDictionary<Type, HashSet<Lite<T>>>();
-
-            public int? Count
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                get { return cachedEntities.Sum(a => a.Value.Count); }
-            }
+                PermissionAuthLogic.RegisterTypes(typeof(CachePermission));
 
-            int invalidations;
-            public int Invalidations { get { return invalidations; } }
-            int hits;
-            public int Hits { get { return hits; } }
-            int loads;
-            public int Loads { get { return loads; } }
+                sb.SwitchGlobalLazyManager(new CacheGlobalLazyManager());
 
-            public void Invalidate(bool isClean)
-            {
-                cachedEntities.Clear();
-                sensibleLites.Clear();
-                if (isClean)
-                {
-                    invalidations = 0;
-                    hits = 0;
-                    loads = 0;
-                }
-                else
-                {
-                    Interlocked.Increment(ref invalidations);
-                }
-            }
-
-            public SemiCacheController(Schema schema)
-            {
-                var ee = schema.EntityEvents<T>();
-
-                ee.Saving += Saving;
-                ee.PreUnsafeUpdate += new QueryHandler<T>(PreUnsafeUpdated);
-            }
-
-            void PreUnsafeUpdated(IQueryable<T> query)
-            {
-                foreach (var kvp in sensibleLites)
-                {
-                    if (query.Any(e => kvp.Value.Contains(e.ToLite())))
-                    {
-                        DisableAndInvalidateAllConnected(kvp.Key);
-                    }
-                }
-            }
-
-            void Saving(T ident)
-            {
-                if (!ident.IsNew && ident.Modified.Value)
-                {
-                    foreach (var kvp in sensibleLites)
-                    {
-                        if(kvp.Value.Contains(ident.ToLite()))
-                        {
-                            DisableAndInvalidateAllConnected(kvp.Key);
-                        }
-                    }
-                }
-            }
-
-            private void DisableAndInvalidateAllConnected(Type referingType)
-            {
-                DisableAllConnectedTypesInTransaction(typeof(T));
-
-                Transaction.PostRealCommit += ud =>
-                {
-                    Interlocked.Increment(ref invalidations);
-                    cachedEntities[referingType].Clear();
-                    sensibleLites[referingType].Clear();
-
-                    InvalidateAllConnectedTypes(typeof(T), false);
-                };
-            }
-
-            public void SetEntities(Type referingType, DirectedGraph<Modifiable> entities)
-            {
-                Interlocked.Increment(ref loads);
-
-                var dic = entities.OfType<T>().Where(t => t.GetType() == typeof(T)).ToDictionary(a => a.Id);
-                cachedEntities[referingType] = dic;
-
-                var lites = dic.Values.Select(a=>a.ToLite()).ToHashSet();
-                lites.AddRange(entities.OfType<Lite<T>>().Where(l => l.EntityType == typeof(T)));
-                sensibleLites[referingType] = lites;
-
-                var semis = semiControllersFor.TryGetC(typeof(T));
-                if (semis != null)
-                {
-                    foreach (var item in semis)
-                    {
-                        item.SetEntities(typeof(T), entities);
-                    }
-                }
-            }
-
-            public override bool Enabled
-            {
-                get { return !GloballyDisabled && !tempDisabled.Value && !IsDisabledInTransaction(typeof(T)); }
-            }
-
-            public override bool IsComplete
-            {
-                get { return false; }
-            }
-
-            public override void Load()
-            {
-                throw NoComplete();
-            }
-
-            public override IEnumerable<int> GetAllIds()
-            {
-                throw NoComplete();
-            }
-
-            public override string GetToString(int id)
-            {
-                throw NoComplete();
-            }
-
-            static Exception NoComplete()
-            {
-                return new InvalidOperationException("Cache for {0} is not complete".Formato(typeof(T)));
-            }
-
-            readonly Action<T, T, IRetriever> completer = Completer.GetCompleter<T>();
-
-            public override bool CompleteCache(T entity, IRetriever retriver)
-            {
-                Interlocked.Increment(ref hits);
-                foreach (var item in cachedEntities)
-                {
-                    if (item.Value.IsEmpty())
-                        controllers[item.Key].Load();
-
-                    var orig = item.Value.TryGetC(entity.Id);
-
-                    if (orig != null)
-                    {
-                        completer(entity, orig, retriver);
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-
-            public override event Action Invalidation
-            {
-                add { throw NoComplete(); }
-                remove { throw NoComplete(); }
-            }
-
-            public override event Action Disabled
-            {
-                add { throw NoComplete(); }
-                remove { throw NoComplete(); }
-            }
-
-
-            public void OnDisabled()
-            {
+                sb.Schema.Initializing[InitLevel.Level_0BeforeAnyQuery] += OnStart;
             }
         }
 
-        class FullCacheController<T> : CacheController<T>, ICacheLogicController
-            where T : IdentifiableEntity
+        internal static void OnStart()
         {
-            class Pack
-            {
-                public Pack(List<T> list)
-                {
-                    this.List = list;
-                    this.Dictionary = list.ToDictionary(a => a.Id); 
-                }
+            if (GloballyDisabled)
+                return;
 
-                public readonly List<T> List;
-                public readonly Dictionary<int, T> Dictionary;
+            SqlConnector connector = (SqlConnector)Connector.Current;
+
+            if (AssertOnStart)
+            {
+                string currentUser = (string)Executor.ExecuteScalar("select SYSTEM_USER");
+
+                var type = Database.View<SysServerPrincipals>().Where(a => a.name == currentUser).Select(a => a.type_desc).Single();
+
+                if (type != "SQL_LOGIN")
+                    throw new InvalidOperationException("The current login '{0}' is a {1} instead of a SQL_LOGIN. Avoid using Integrated Security with Cache Logic".Formato(currentUser, type));
+
+                var serverPrincipalName = (from db in Database.View<SysDatabases>()
+                                           where db.name == connector.DatabaseName()
+                                           join spl in Database.View<SysServerPrincipals>().DefaultIfEmpty() on db.owner_sid equals spl.sid
+                                           select spl.name).Single();
+
+
+                if (currentUser != serverPrincipalName)
+                    throw new InvalidOperationException(@"The current owner of {0} is '{1}', but the current user is '{2}'. Change the login or call:
+ALTER AUTHORIZATION ON DATABASE::{0} TO {2}".Formato(connector.DatabaseName(), serverPrincipalName, currentUser));
+
+                var databasePrincipalName = (from db in Database.View<SysDatabases>()
+                                             where db.name == connector.DatabaseName()
+                                             join dpl in Database.View<SysDatabasePrincipals>().DefaultIfEmpty() on db.owner_sid equals dpl.sid
+                                             select dpl.name).Single();
+
+                if (!databasePrincipalName.HasText() || databasePrincipalName != "dbo")
+                    throw new InvalidOperationException(@"The database principal of {0} is '{1}', not associated with the current user '{2}'. Call:
+ALTER AUTHORIZATION ON DATABASE::{0} TO {2}".Formato(connector.DatabaseName(), databasePrincipalName.DefaultText("Unknown"), currentUser));
             }
 
-            public List<T> List { get { return pack.Value.List; } }
-            public Dictionary<int, T> Dictionary { get { return pack.Value.Dictionary; } }
-         
-            ResetLazy<Pack> pack;
-            
-
-            public FullCacheController(Schema schema)
+            var enabled = Database.View<SysDatabases>().Where(db => db.name == Connector.Current.DatabaseName()).Select(a => a.is_broker_enabled).Single();
+            if (!enabled)
             {
-                pack = new ResetLazy<Pack>(() =>
+                try
                 {
-                    using (new EntityCache(true))
-                    using (ExecutionMode.Global())
-                    using (Transaction tr = inCache.Value ? new Transaction(): Transaction.ForceNew())
-                    using (SetInCache())
-                    using (HeavyProfiler.Log("CACHE"))
+                    try
                     {
-                        DisabledTypesDuringTransaction().Add(typeof(T)); //do not raise Disabled event
-
-                        List<T> result = Database.Query<T>().ToList();
-
-                        var semis = semiControllersFor.TryGetC(typeof(T));
-                        if (semis != null)
-                        {
-                            var graph = GraphExplorer.FromRootsIdentifiable(result);
-
-                            foreach (var item in semis)
-                            {
-                                item.SetEntities(typeof(T), graph);
-                            }
-                        }
-
-                        Interlocked.Increment(ref loads);
-
-                        return tr.Commit(new Pack(result));
+                        Executor.ExecuteNonQuery("ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()));
                     }
-                });
+                    catch (SqlException e)
+                    {
+                        if (e.Number == 9772)
+                            Executor.ExecuteNonQuery("ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
+                        else 
+                            throw;
+                    }
+                }
+                catch (TimeoutException)
+                {
+                    throw EnableBlocker();
+                }
+            }
 
+            try
+            {
+                SqlDependency.Start(connector.ConnectionString);
+            }
+            catch (InvalidOperationException ex)
+            {
+                if (ex.Message.Contains("SQL Server Service Broker"))
+                    throw EnableBlocker();
+
+                throw;
+            }
+
+            SafeConsole.SetConsoleCtrlHandler(ct =>
+            {
+                Shutdown();
+                return true;
+            }, true);
+
+            AppDomain.CurrentDomain.ProcessExit += (o, a) => Shutdown();
+        }
+
+        private static InvalidOperationException EnableBlocker()
+        {
+            return new InvalidOperationException(@"CacheLogic requires SQL Server Service Broker to be activated. Execute: 
+ALTER DATABASE {0} SET ENABLE_BROKER
+If you have problems, try first: 
+ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
+        }
+
+        public static void Shutdown()
+        {
+            if (GloballyDisabled)
+                return;
+
+            SqlDependency.Stop(((SqlConnector)Connector.Current).ConnectionString);
+        }
+
+        static SqlPreCommandSimple GetDependencyQuery(ITable table)
+        {
+            return new SqlPreCommandSimple("SELECT {0} FROM {1}".Formato(table.Columns.Keys.ToString(c => c.SqlScape(), ", "), table.Name));
+        }
+
+        class CacheController<T> : CacheControllerBase<T>, ICacheLogicController
+                where T : IdentifiableEntity
+        {
+            public CachedTable<T> cachedTable;
+            public CachedTableBase CachedTable { get { return cachedTable; } }
+
+            public CacheController(Schema schema)
+            {
                 var ee = schema.EntityEvents<T>();
 
                 ee.CacheController = this;
@@ -284,152 +166,121 @@ namespace Signum.Engine.Cache
                 ee.PreUnsafeUpdate += UnsafeUpdated;
             }
 
+            public void BuildCachedTable()
+            {
+                cachedTable = new CachedTable<T>(this, new Linq.AliasGenerator(), null, null);
+            }
+
             void UnsafeUpdated(IQueryable<T> query)
             {
-                DisableAndInvalidateAllConnected();
+                DisableAllConnectedTypesInTransaction(typeof(T));
+
+                Transaction.PostRealCommit -= Transaction_PostRealCommit;
+                Transaction.PostRealCommit += Transaction_PostRealCommit;
             }
 
             void PreUnsafeDelete(IQueryable<T> query)
             {
-                DisableAndInvalidate();
+                DisableTypeInTransaction(typeof(T));
+
+                Transaction.PostRealCommit -= Transaction_PostRealCommit;
+                Transaction.PostRealCommit += Transaction_PostRealCommit;
             }
 
             void Saving(T ident)
             {
-                if (ident.Modified.Value)
+                if (ident.IsGraphModified)
                 {
                     if (ident.IsNew)
                     {
-                        DisableAndInvalidate();
+                        DisableTypeInTransaction(typeof(T));
                     }
                     else
                     {
-                        DisableAndInvalidateAllConnected();
+                        DisableAllConnectedTypesInTransaction(typeof(T));
                     }
+
+                    Transaction.PostRealCommit -= Transaction_PostRealCommit;
+                    Transaction.PostRealCommit += Transaction_PostRealCommit;
                 }
             }
 
-
-            void DisableAndInvalidate()
+            void Transaction_PostRealCommit(Dictionary<string, object> obj)
             {
-                DisableTypeInTransaction(typeof(T));
-                Transaction.PostRealCommit += ud => Invalidate(false);
+                cachedTable.ResetAll(forceReset: false);
+                NotifyInvalidateAllConnectedTypes(typeof(T));
             }
-
-          
-
-            private void DisableAndInvalidateAllConnected()
-            {
-                DisableAllConnectedTypesInTransaction(typeof(T));
-
-                Transaction.PostRealCommit += ud =>
-                {
-                    InvalidateAllConnectedTypes(typeof(T), true);
-                }; 
-            }
-
 
             public override bool Enabled
             {
-                get { return !GloballyDisabled && !tempDisabled.Value && !IsDisabledInTransaction(typeof(T));  }
+                get { return !GloballyDisabled && !ExecutionMode.IsCacheDisabled && !IsDisabledInTransaction(typeof(T)); }
             }
 
-            public override bool IsComplete
+            private void AssertEnabled()
             {
-                get { return true; }
+                if (!Enabled)
+                    throw new InvalidOperationException("Cache for {0} is not enabled".Formato(typeof(T).TypeName()));
             }
 
-            public int? Count
+            public event EventHandler<CacheEventArgs> Invalidated;
+
+            public void OnChange(object sender, SqlNotificationEventArgs args)
             {
-                get { return pack.IsValueCreated ? pack.Value.List.Count : (int?)null; }
+                NotifyInvalidateAllConnectedTypes(typeof(T));
             }
 
-            int invalidations;
-            public int Invalidations { get { return invalidations; } }
-            int hits;
-            public int Hits { get { return hits; } }
-            int loads;
-            public int Loads { get { return loads; } }
-
-            public override event Action Invalidation;
-            public override event Action Disabled;
-
-
-            public void Invalidate(bool isClean)
-            {
-                pack.Reset();
-                if (Invalidation != null)
-                    Invalidation();
-
-                if (isClean)
-                {
-                    invalidations = 0;
-                    hits = 0;
-                    loads = 0;
-                }
-                else
-                {
-                    Interlocked.Increment(ref invalidations);
-                }
-
-            }
+            static object syncLock = new object();
 
             public override void Load()
             {
-                if (pack.IsValueCreated)
-                    return;
+                cachedTable.LoadAll();
+            }
 
-                pack.Load();
+            public void ForceReset()
+            {
+                cachedTable.ResetAll(forceReset: true);
             }
 
             public override IEnumerable<int> GetAllIds()
             {
-                Interlocked.Increment(ref hits);
-                return pack.Value.Dictionary.Keys;
+                AssertEnabled();
+
+                return cachedTable.GetAllIds();
             }
 
-            public override string GetToString(int id) 
+            public override string GetToString(int id)
             {
-                Interlocked.Increment(ref hits); 
-                return pack.Value.Dictionary[id].ToString(); 
+                AssertEnabled();
+
+                return cachedTable.GetToString(id);
             }
 
-            readonly Action<T, T, IRetriever> completer = Completer.GetCompleter<T>();
-
-            public override bool CompleteCache(T entity, IRetriever retriver)
+            public override void Complete(T entity, IRetriever retriver)
             {
-                Interlocked.Increment(ref hits); 
-                var origin = pack.Value.Dictionary.TryGetC(entity.Id);
-                if(origin == null)
-                    throw new EntityNotFoundException(typeof(T), entity.Id);
-                completer(entity, origin, retriver);
-                return true;
+                AssertEnabled();
+
+                cachedTable.Complete(entity, retriver);
             }
 
-
-            public void OnDisabled()
+            public void NotifyDisabled()
             {
-                if (Disabled != null)
-                    Disabled();
+                if (Invalidated != null)
+                    Invalidated(this, CacheEventArgs.Disabled);
+            }
+
+            public void NotifyInvalidated()
+            {
+                if (Invalidated != null)
+                    Invalidated(this, CacheEventArgs.Invalidated);
             }
         }
+
 
         static Dictionary<Type, ICacheLogicController> controllers = new Dictionary<Type, ICacheLogicController>(); //CachePack
 
-        static DirectedGraph<Type> invalidations = new DirectedGraph<Type>();
-
-        static Dictionary<Type, List<ISemiCacheController>> semiControllersFor = new Dictionary<Type, List<ISemiCacheController>>();
+        static DirectedGraph<Type> inverseDependencies = new DirectedGraph<Type>();
 
         public static bool GloballyDisabled { get; set; }
-
-        static readonly Variable<bool> tempDisabled = Statics.ThreadVariable<bool>("cacheTempDisabled");
-
-        public static IDisposable Disable()
-        {
-            if (tempDisabled.Value) return null;
-            tempDisabled.Value = true;
-            return new Disposable(() => tempDisabled.Value = false); 
-        }
 
         const string DisabledCachesKey = "disabledCaches";
 
@@ -441,7 +292,7 @@ namespace Signum.Engine.Cache
                 Transaction.UserData[DisabledCachesKey] = hs = new HashSet<Type>();
             }
 
-            return hs; 
+            return hs;
         }
 
         static bool IsDisabledInTransaction(Type type)
@@ -454,138 +305,110 @@ namespace Signum.Engine.Cache
             return disabledTypes != null && disabledTypes.Contains(type);
         }
 
-        private static void DisableTypeInTransaction(Type type)
+        static void DisableTypeInTransaction(Type type)
         {
             DisabledTypesDuringTransaction().Add(type);
 
-            controllers[type].OnDisabled();
+            controllers[type].NotifyDisabled();
         }
 
-        private static void DisableAllConnectedTypesInTransaction(Type type)
+        static void DisableAllConnectedTypesInTransaction(Type type)
         {
-            var connected = invalidations.IndirectlyRelatedTo(type, true);
+            var connected = inverseDependencies.IndirectlyRelatedTo(type, true);
 
             var hs = DisabledTypesDuringTransaction();
 
             foreach (var stype in connected)
             {
                 hs.Add(stype);
-                controllers[stype].OnDisabled();
+                controllers[stype].NotifyDisabled();
             }
         }
 
-        public static void Start(SchemaBuilder sb)
+        static void TryCacheTable(SchemaBuilder sb, Type type)
         {
-            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
-            {
-                PermissionAuthLogic.RegisterTypes(typeof(CachePermission));
-            }
+            if (!controllers.ContainsKey(type))
+                giCacheTable.GetInvoker(type)(sb);
         }
 
         static GenericInvoker<Action<SchemaBuilder>> giCacheTable = new GenericInvoker<Action<SchemaBuilder>>(sb => CacheTable<IdentifiableEntity>(sb));
         public static void CacheTable<T>(SchemaBuilder sb) where T : IdentifiableEntity
         {
-            var cc = new FullCacheController<T>(sb.Schema);
+            var cc = new CacheController<T>(sb.Schema);
             controllers.AddOrThrow(typeof(T), cc, "{0} already registered");
 
             TryCacheSubTables(typeof(T), sb);
+
+            cc.BuildCachedTable();
         }
 
         public static void SemiCacheTable<T>(SchemaBuilder sb) where T : IdentifiableEntity
         {
-            var cc = new SemiCacheController<T>(sb.Schema);
-            controllers.AddOrThrow(typeof(T), cc, "{0} already registered");
-
-            TryCacheSubTables(typeof(T), sb);
+            controllers.AddOrThrow(typeof(T), null, "{0} already registered");
         }
 
-        private static void TryCacheSubTables(Type type, SchemaBuilder sb)
+        static void TryCacheSubTables(Type type, SchemaBuilder sb)
         {
             List<Type> relatedTypes = sb.Schema.Table(type).DependentTables()
-                .Where(kvp =>!kvp.Key.Type.IsInstantiationOf(typeof(EnumEntity<>)))
+                .Where(kvp => !kvp.Key.Type.IsEnumEntity())
                 .Select(t => t.Key.Type).ToList();
 
-            invalidations.Add(type); 
+            inverseDependencies.Add(type);
 
             foreach (var rType in relatedTypes)
             {
                 if (!controllers.ContainsKey(rType))
-                    giCacheTable.GetInvoker(rType)(sb); ;
+                    giCacheTable.GetInvoker(rType)(sb);
 
-                var ic = controllers[rType] as ISemiCacheController;
-                if (ic != null && rType != type) //Cycles of semis could create StackOverflow, but the only possible cycle is an auto-cycle
-                    semiControllersFor.GetOrCreate(type).Add(ic);
-
-                invalidations.Add(rType, type);
+                inverseDependencies.Add(rType, type);
             }
         }
-    
-        static FullCacheController<T> GetController<T>() where T : IdentifiableEntity
+
+        static ICacheLogicController GetController(Type type)
         {
-            var controller = controllers.GetOrThrow(typeof(T), "{0} is not registered in CacheLogic");
+            var controller = controllers.GetOrThrow(type, "{0} is not registered in CacheLogic");
 
-            var result = controller as FullCacheController<T>;
+            if (controller == null)
+                throw new InvalidOperationException("{0} is just semi cached");
 
-            if (result == null)
-                throw new InvalidOperationException("{0} is not registered"); 
-
-            return result;
+            return controller;
         }
 
-        private static void InvalidateAllConnectedTypes(Type type, bool includeParentNode)
+        static void NotifyInvalidateAllConnectedTypes(Type type)
         {
-            var connected = invalidations.IndirectlyRelatedTo(type, includeParentNode);
+            var connected = inverseDependencies.IndirectlyRelatedTo(type, includeParentNode: true);
 
             foreach (var stype in connected)
             {
-                controllers[stype].Invalidate(false);
+                var controller = controllers[stype];
+                if (controller != null)
+                    controller.NotifyInvalidated();
             }
         }
 
-       
-
-        public static List<CacheStatistics> Statistics()
+        public static List<CachedTableBase> Statistics()
         {
-            return (from kvp in controllers
-                    orderby kvp.Value.Count descending
-                    select new CacheStatistics
-                    {
-                        Type = kvp.Key,
-                        CacheType = CacheLogic.GetCacheType(kvp.Key).Value,
-                        Count = kvp.Value.Count, 
-                        Hits = kvp.Value.Hits,
-                        Loads = kvp.Value.Loads,
-                        Invalidations = kvp.Value.Invalidations,
-                    }).ToList();
+            return controllers.Values.NotNull().Select(a => a.CachedTable).OrderByDescending(a => a.Count).ToList();
         }
 
-        public static CacheType? GetCacheType(Type type)
+        public static CacheType GetCacheType(Type type)
         {
-            var controller = controllers.TryGetC(type);
+            ICacheLogicController controller;
+            if (!controllers.TryGetValue(type, out controller))
+                return CacheType.None;
 
             if (controller == null)
-                return null;
-
-            if(controller.GetType().IsInstantiationOf(typeof(FullCacheController<>)))
-                return CacheType.Cached;
-
-            if (controller.GetType().IsInstantiationOf(typeof(SemiCacheController<>)))
                 return CacheType.Semi;
 
-            throw new InvalidOperationException("Not expected");
+            return CacheType.Cached;
         }
 
-        public static void InvalidateAll()
+        public static void ForceReset()
         {
-            foreach (var item in controllers)
+            foreach (var controller in controllers.Values.NotNull())
             {
-                item.Value.Invalidate(true);
+                controller.ForceReset();
             }
-        }
-
-        public static void OnInvalidation<T>(Action action) where T : IdentifiableEntity
-        {
-            GetController<T>().Invalidation += action;
         }
 
         public static XDocument SchemaGraph(Func<Type, bool> cacheHint)
@@ -608,12 +431,11 @@ namespace Signum.Engine.Cache
             if (type.IsEnumEntity())
                 return Color.Red;
 
-            var ct = CacheLogic.GetCacheType(type);
-            if (ct == CacheType.Cached)
-                return Color.Purple;
-
-            if (ct == CacheType.Semi)
-                return Color.Pink;
+            switch (CacheLogic.GetCacheType(type))
+            {
+                case CacheType.Cached: return Color.Purple;
+                case CacheType.Semi: return Color.Pink;
+            }
 
             if (typeof(MultiEnumDN).IsAssignableFrom(type))
                 return Color.Orange;
@@ -623,21 +445,86 @@ namespace Signum.Engine.Cache
 
             return Color.Green;
         }
+
+        public class CacheGlobalLazyManager : GlobalLazyManager
+        {
+            public override void AttachInvalidations(SchemaBuilder sb, InvalidateWith invalidateWith, EventHandler invalidate)
+            {
+                if (CacheLogic.GloballyDisabled)
+                {
+                    base.AttachInvalidations(sb, invalidateWith, invalidate);
+                }
+                else
+                {
+                    EventHandler<CacheEventArgs> onInvalidation = (sender, args) =>
+                    {
+                        if (args == CacheEventArgs.Invalidated)
+                        {
+                            invalidate(sender, args);
+                        }
+                        else if (args == CacheEventArgs.Disabled)
+                        {
+                            if (Transaction.InTestTransaction)
+                            {
+                                invalidate(sender, args);
+                                Transaction.Rolledback += () => invalidate(sender, args);
+                            }
+
+                            Transaction.PostRealCommit += dic => invalidate(sender, args);
+                        }
+                    };
+
+                    foreach (var t in invalidateWith.Types)
+                    {
+                        CacheLogic.TryCacheTable(sb, t);
+
+                        GetController(t).Invalidated += onInvalidation;
+                    }
+                }
+            }
+
+            public override void OnLoad(SchemaBuilder sb, InvalidateWith invalidateWith)
+            {
+                if (CacheLogic.GloballyDisabled)
+                {
+                    base.OnLoad(sb, invalidateWith);
+                }
+                else
+                {
+                    foreach (var t in invalidateWith.Types)
+                        sb.Schema.CacheController(t).Load();
+                }
+            }
+        }
+    }
+
+    internal interface ICacheLogicController : ICacheController
+    {
+        event EventHandler<CacheEventArgs> Invalidated;
+
+        CachedTableBase CachedTable { get; }
+
+        void NotifyDisabled();
+
+        void NotifyInvalidated();
+
+        void OnChange(object sender, SqlNotificationEventArgs args);
+
+        void ForceReset();
+    }
+
+    public class CacheEventArgs : EventArgs
+    {
+        private CacheEventArgs() { }
+
+        public static readonly CacheEventArgs Invalidated = new CacheEventArgs();
+        public static readonly CacheEventArgs Disabled = new CacheEventArgs();
     }
 
     public enum CacheType
     {
         Cached,
-        Semi, 
-    }
-
-    public class CacheStatistics
-    {
-        public Type Type;
-        public CacheType CacheType;
-        public int? Count;
-        public int Hits;
-        public int Loads;
-        public int Invalidations; 
+        Semi,
+        None
     }
 }

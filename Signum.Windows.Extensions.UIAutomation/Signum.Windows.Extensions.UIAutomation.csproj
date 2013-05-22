@@ -35,7 +35,7 @@
     <OutputPath>bin\x86\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <DebugType>full</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <CodeAnalysisLogFile>bin\Debug\Signum.Window.Extensions.UIAutomation.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
     <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
     <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
@@ -81,11 +81,13 @@
     <Compile Include="BasicExtensions.cs" />
     <Compile Include="ConditionBuilder.cs" />
     <Compile Include="Proxies\LineUIPoxy.cs" />
+    <Compile Include="Proxies\LoginWindowProxy.cs" />
+    <Compile Include="Proxies\ProcessExecutionExtensions.cs" />
     <Compile Include="Proxies\ValueLineWindowProxy.cs" />
     <Compile Include="Proxies\LineContainer.cs" />
     <Compile Include="Proxies\MessageBoxProxy.cs" />
     <Compile Include="Proxies\OmniBoxProxy.cs" />
-    <Compile Include="Proxies\SelectWindoProxy.cs" />
+    <Compile Include="Proxies\SelectorWindowProxy.cs" />
     <Compile Include="Proxies\LineProxy.cs" />
     <Compile Include="FindExtensions.cs" />
     <Compile Include="MenuItemExtensions.cs" />

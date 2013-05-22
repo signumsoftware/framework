@@ -12,14 +12,14 @@ using Signum.Utilities;
 using System.IO;
 using System.Xml.Linq;
 using Signum.Engine.Authorization;
+using Signum.Engine.Cache;
 
 namespace Signum.Engine.Chart
 {
     public static class ChartScriptLogic
     {
-        public static ResetLazy<List<ChartScriptDN>> Scripts = GlobalLazy.Create(() =>
-            Database.Query<ChartScriptDN>().ToList())
-            .InvalidateWith(typeof(ChartScriptDN));
+        public static ResetLazy<List<ChartScriptDN>> Scripts { get; private set; }
+
 
         internal static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -27,17 +27,20 @@ namespace Signum.Engine.Chart
             {
                 sb.Include<ChartScriptDN>();
 
-                dqm[typeof(ChartScriptDN)] = (from uq in Database.Query<ChartScriptDN>()
-                                              select new
-                                              {
-                                                  Entity = uq,
-                                                  uq.Id,
-                                                  uq.Name,
-                                                  uq.GroupBy,
-                                                  uq.Columns.Count,
-                                                  uq.Icon,
-                                              }).ToDynamic();
+                dqm.RegisterQuery(typeof(ChartScriptDN), () =>
+                    from uq in Database.Query<ChartScriptDN>()
+                    select new
+                    {
+                        Entity = uq,
+                        uq.Id,
+                        uq.Name,
+                        uq.GroupBy,
+                        uq.Columns.Count,
+                        uq.Icon,
+                    });
 
+                Scripts = sb.GlobalLazy(() => Database.Query<ChartScriptDN>().ToList(),
+                    new InvalidateWith(typeof(ChartScriptDN)));
 
                 RegisterOperations();
             }
@@ -45,14 +48,14 @@ namespace Signum.Engine.Chart
 
         private static void RegisterOperations()
         {
-            new BasicExecute<ChartScriptDN>(ChartScriptOperation.Save)
+            new Graph<ChartScriptDN>.Execute(ChartScriptOperation.Save)
             {
                 AllowsNew = true,
                 Lite = false,
                 Execute = (cs, _) => { }
             }.Register();
 
-            new BasicConstructFrom<ChartScriptDN, ChartScriptDN>(ChartScriptOperation.Clone)
+            new Graph<ChartScriptDN>.ConstructFrom<ChartScriptDN>(ChartScriptOperation.Clone)
             {
                 Construct = (cs, _) => new ChartScriptDN
                 {
@@ -71,16 +74,21 @@ namespace Signum.Engine.Chart
             }.Register();
 
 
-            new BasicDelete<ChartScriptDN>(ChartScriptOperation.Delete)
+            new Graph<ChartScriptDN>.Delete(ChartScriptOperation.Delete)
             {
                 CanDelete = c => Database.Query<UserChartDN>().Any(a => a.ChartScript == c) ? "There are {0} in the database using {1}".Formato(typeof(UserChartDN).NicePluralName(), c) : null,
                 Delete = (c, _) => c.Delete(),
             }.Register();
         }
 
-        public static void ImportExportScripts(string folderName)
+        public static void ImportExportChartScripts()
         {
-            Console.WriteLine("You want to export (e), import (i) ChartScripts? (nothing to exit)".Formato(folderName));
+            ImportExportChartScripts(GetDefaultFolderName());
+        }
+
+        public static void ImportExportChartScripts(string folderName)
+        {
+            Console.WriteLine("You want to export (e), import (i) ChartScripts? (nothing to exit)");
 
             string answer = Console.ReadLine();
 
@@ -92,6 +100,24 @@ namespace Signum.Engine.Chart
             {
                 ImportAllScripts(folderName);
             }
+        }
+
+        public static string DefaultFolderDevelopment = @"..\..\..\Extensions\Signum.Engine.Extensions\Chart\ChartScripts";
+        public static string DefaultFolderProduction = @"ChartScripts";
+        private static string GetDefaultFolderName()
+        {
+            if (Directory.Exists(DefaultFolderDevelopment))
+            {
+                if (Directory.Exists(DefaultFolderProduction))
+                    return SafeConsole.Ask("In Production?") ? DefaultFolderProduction : DefaultFolderDevelopment;
+
+                return DefaultFolderDevelopment;
+            }
+
+            if (Directory.Exists(DefaultFolderProduction))
+                return DefaultFolderProduction;
+
+            throw new InvalidOperationException("Default ChartScripts folder not found");
         }
 
         public static void ExportAllScripts(string folderName)
@@ -124,7 +150,7 @@ namespace Signum.Engine.Chart
                         File.Delete(file);
 
                     if (script.Icon != null)
-                        script.Icon.Retrieve(); 
+                        script.Icon.Retrieve();
 
                     script.ExportXml().Save(newFileName);
                 });

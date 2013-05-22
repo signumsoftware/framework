@@ -67,10 +67,10 @@ namespace Signum.Entities.Mailing
         [NotNullable, SqlDbType(Size = 50)]
         string displayFrom = DefaultDisplayFrom;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 50)]
-        public string DiplayFrom
+        public string DisplayFrom
         {
             get { return displayFrom; }
-            set { Set(ref displayFrom, value, () => DiplayFrom); }
+            set { Set(ref displayFrom, value, () => DisplayFrom); }
         }
 
         static readonly Expression<Func<NewsletterDN, string>> ToStringExpression = e => e.name;
@@ -92,7 +92,7 @@ namespace Signum.Entities.Mailing
     }
 
     [Serializable, EntityKind(EntityKind.System)]
-    public class NewsletterDeliveryDN : Entity
+    public class NewsletterDeliveryDN : Entity, IProcessLineDataDN
     {
         bool sent;
         public bool Sent
@@ -121,13 +121,6 @@ namespace Signum.Entities.Mailing
         {
             get { return newsletter; }
             set { Set(ref newsletter, value, () => Newsletter); }
-        }
-
-        Lite<ExceptionDN> exception;
-        public Lite<ExceptionDN> Exception
-        {
-            get { return exception; }
-            set { Set(ref exception, value, () => Exception); }
         }
     }
 

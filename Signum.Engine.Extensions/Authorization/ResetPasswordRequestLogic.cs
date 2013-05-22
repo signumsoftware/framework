@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,18 +8,14 @@ using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Engine.Mailing;
-using Signum.Engine.Extensions.Properties;
 using Signum.Utilities;
 using Signum.Entities.Mailing;
 using Signum.Engine.Basics;
+using System.Globalization;
+using Signum.Engine.Translation;
 
 namespace Signum.Engine.Authorization
 {
-    //public class ResetPasswordRequestMail : EmailModel<UserDN>
-    //{
-    //    public string Link;
-    //}
-
     public static class ResetPasswordRequestLogic
     {
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
@@ -28,30 +24,31 @@ namespace Signum.Engine.Authorization
             {
                 sb.Include<ResetPasswordRequestDN>();
 
-                dqm[typeof(ResetPasswordRequestDN)] = (from e in Database.Query<ResetPasswordRequestDN>()
-                                                       select new
-                                                       {
-                                                           Entity = e,
-                                                           e.Id,
-                                                           e.RequestDate,
-                                                           e.Code,
-                                                           e.User,
-                                                           e.User.Email
-                                                       }).ToDynamic();
+                dqm.RegisterQuery(typeof(ResetPasswordRequestDN), () =>
+                    from e in Database.Query<ResetPasswordRequestDN>()
+                    select new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.RequestDate,
+                        e.Code,
+                        e.User,
+                        e.User.Email
+                    });
 
                 EmailLogic.AssertStarted(sb);
 
-                EmailLogic.RegisterEmailModel <ResetPasswordRequestMail>(() => new EmailTemplateDN
+                EmailLogic.RegisterEmailModel<ResetPasswordRequestMail>(() => new EmailTemplateDN
                 {
                     Name = "Reset Password Request",
                     Active = true,
                     IsBodyHtml = true,
                     AssociatedType = typeof(ResetPasswordRequestDN).ToTypeDN(),
                     Recipient = new TemplateQueryTokenDN { TokenString = "User" },
-                    Messages = CultureInfoLogic.ForEachCulture(() => new EmailTemplateMessageDN
+                    Messages = CultureInfoLogic.ForEachCulture((culture) => new EmailTemplateMessageDN
                     {
-                        Text = Resources.ResetPasswordRequestMail,
-                        Subject = Resources.ResetPasswordRequestSubject
+                        Text = AuthEmailMessage.ResetPasswordRequestBody.NiceToString(),
+                        Subject = AuthEmailMessage.ResetPasswordRequestSubject.NiceToString()
                     }).ToMList()
                 });
             }
@@ -85,7 +82,7 @@ namespace Signum.Engine.Authorization
             UserDN user = Database.Query<UserDN>().Where(u => u.Email == email).SingleOrDefaultEx();
 
             if (user == null)
-                throw new ApplicationException(Resources.ThereSNotARegisteredUserWithThatEmailAddress);
+                throw new ApplicationException(AuthMessage.ThereSNotARegisteredUserWithThatEmailAddress.NiceToString());
 
             return user;
         };

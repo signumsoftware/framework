@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,7 +7,6 @@ using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Linq;
-using Signum.Engine.Extensions.Properties;
 using Signum.Utilities.ExpressionTrees;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -16,6 +15,7 @@ using Signum.Engine.Maps;
 using System.IO;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
+using Signum.Entities.Help;
 
 namespace Signum.Engine.Help
 {
@@ -23,10 +23,10 @@ namespace Signum.Engine.Help
     {
         public static string GetPropertyHelp(PropertyRoute pr)
         {
-            string validations = Validator.GetOrCreatePropertyPack(pr).Validators.CommaAnd(v => v.HelpMessage);
+            string validations = Validator.TryGetPropertyValidator(pr).Validators.CommaAnd(v => v.HelpMessage);
 
             if (validations.HasText())
-                validations = Resources.Should + validations;
+                validations = HelpMessage.Should.NiceToString() + validations;
 
             if (Reflector.IsIIdentifiable(pr.Type))
             {
@@ -54,31 +54,29 @@ namespace Signum.Engine.Help
                 {
                     Implementations imp = Schema.Current.FindImplementations(pr.Add("Item")); 
 
-                    return Resources._0IsACollectionOfElements1.Formato(pr.PropertyInfo.NiceName(), imp.TypeLinks(elemType)) + validations;
+                    return HelpMessage._0IsACollectionOfElements1.NiceToString().Formato(pr.PropertyInfo.NiceName(), imp.TypeLinks(elemType)) + validations;
                 }
                 else if (elemType.IsLite())
                 {   
                     Implementations imp = Schema.Current.FindImplementations(pr.Add("Item"));
 
-                    return Resources._0IsACollectionOfElements1.Formato(pr.PropertyInfo.NiceName(), imp.TypeLinks(Lite.Extract(elemType))) + validations;
+                    return HelpMessage._0IsACollectionOfElements1.NiceToString().Formato(pr.PropertyInfo.NiceName(), imp.TypeLinks(Lite.Extract(elemType))) + validations;
                 }
                 else if (Reflector.IsEmbeddedEntity(elemType))
                 {
-                    return Resources._0IsACollectionOfElements1.Formato(pr.PropertyInfo.NiceName(), elemType.NiceName()) + validations;
+                    return HelpMessage._0IsACollectionOfElements1.NiceToString().Formato(pr.PropertyInfo.NiceName(), elemType.NiceName()) + validations;
                 }
                 else
                 {
                     string valueType = ValueType(pr.Add("Item"));
-                    return Resources._0IsACollectionOfElements1.Formato(pr.PropertyInfo.NiceName(), valueType) + validations;
+                    return HelpMessage._0IsACollectionOfElements1.NiceToString().Formato(pr.PropertyInfo.NiceName(), valueType) + validations;
                 }
             }
             else
             {
                 string valueType = ValueType(pr);
 
-                Gender gender = NaturalLanguageTools.GetGender(valueType);
-
-                return Resources.ResourceManager.GetGenderAwareResource("_0IsA1", gender).Formato(pr.PropertyInfo.NiceName(), valueType) + validations;
+                return HelpMessage._0IsA1.NiceToString().ForGenderAndNumber(NaturalLanguageTools.GetGender(valueType)).Formato(pr.PropertyInfo.NiceName(), valueType) + validations;
             }
         }
 
@@ -86,11 +84,11 @@ namespace Signum.Engine.Help
         {
             if (pr.PropertyInfo.IsDefaultName())
                 return
-                    propertyType.GetGenderAwareResource(() => Resources.The0).Formato(typeName) + " " +
-                    pr.Parent.Type.GetGenderAwareResource(() => Resources.OfThe0).Formato(pr.Parent.Type.NiceName());
+                    HelpMessage.The0.NiceToString().ForGenderAndNumber(propertyType.GetGender()).Formato(typeName) + " " +
+                    HelpMessage.OfThe0.NiceToString().ForGenderAndNumber(pr.Parent.Type.GetGender()).Formato(pr.Parent.Type.NiceName());
             else
                 return
-                    propertyType.GetGenderAwareResource(() => Resources._0IsA1).Formato(pr.PropertyInfo.NiceName(), typeName);
+                    HelpMessage._0IsA1.NiceToString().ForGenderAndNumber(propertyType.GetGender()).Formato(pr.PropertyInfo.NiceName(), typeName);
         }
 
         static string ValueType(PropertyRoute pr)
@@ -106,20 +104,20 @@ namespace Signum.Engine.Help
             Type cleanType = Nullable.GetUnderlyingType(type) ?? type;
 
             string typeName =
-                    cleanType.IsEnum ? Resources.ValueLike0.Formato(Enum.GetValues(cleanType).Cast<Enum>().CommaOr(e => e.NiceToString())) :
-                    cleanType == typeof(decimal) && unit != null && unit == "€" ? Resources.Amount :
-                    cleanType == typeof(DateTime) && format == "d" ? Resources.Date :
+                    cleanType.IsEnum ? HelpMessage.ValueLike0.NiceToString().Formato(Enum.GetValues(cleanType).Cast<Enum>().CommaOr(e => e.NiceToString())) :
+                    cleanType == typeof(decimal) && unit != null && unit == "€" ? HelpMessage.Amount.NiceToString() :
+                    cleanType == typeof(DateTime) && format == "d" ? HelpMessage.Date.NiceToString() :
                     NaturalTypeDescription(cleanType);
 
-            string orNull = Nullable.GetUnderlyingType(type) != null ? Resources.OrNull : null;
+            string orNull = Nullable.GetUnderlyingType(type) != null ? HelpMessage.OrNull.NiceToString() : null;
 
-            return typeName.Add(" ", unit != null ? Resources.ExpressedIn + unit : null).Add(" ", orNull);
+            return typeName.Add(" ", unit != null ? HelpMessage.ExpressedIn.NiceToString() + unit : null).Add(" ", orNull);
         }
 
         static string TypeLinks(this Implementations implementations, Type type)
         {
             if (implementations.IsByAll)
-                return Resources.Any + " " + type.TypeLink();
+                return HelpMessage.Any.NiceToString() + " " + type.TypeLink();
 
             return implementations.Types.CommaOr(TypeLink);
         }
@@ -143,13 +141,13 @@ namespace Signum.Engine.Help
             switch (Type.GetTypeCode(type))
             {
                 case TypeCode.Boolean:
-                    return Resources.Check;
+                    return HelpMessage.Check.NiceToString();
 
                 case TypeCode.Char:
-                    return Resources.Character;
+                    return HelpMessage.Character.NiceToString();
 
                 case TypeCode.DateTime:
-                    return Resources.DateTime;
+                    return HelpMessage.DateTime.NiceToString();
 
                 case TypeCode.SByte:
                 case TypeCode.Byte:
@@ -159,15 +157,15 @@ namespace Signum.Engine.Help
                 case TypeCode.Int16:
                 case TypeCode.Int32:
                 case TypeCode.Int64:
-                    return Resources.Integer;
+                    return HelpMessage.Integer.NiceToString();
 
                 case TypeCode.Decimal:
                 case TypeCode.Double:
                 case TypeCode.Single:
-                    return Resources.Value;
+                    return HelpMessage.Value.NiceToString();
 
                 case TypeCode.String:
-                    return Resources.String;
+                    return HelpMessage.String.NiceToString();
             }
 
             return type.Name;
@@ -177,29 +175,29 @@ namespace Signum.Engine.Help
         {
             switch (operationInfo.OperationType)
             {
-                case OperationType.Execute: return type.GetGenderAwareResource(()=>Resources.Call0Over1OfThe2).Formato(
+                case OperationType.Execute: return HelpMessage.Call0Over1OfThe2.NiceToString().ForGenderAndNumber(type.GetGender()).Formato(
                     operationInfo.Key.NiceToString(),
-                    operationInfo.Lite.Value ? Resources.TheDatabaseVersion : Resources.YourVersion, 
+                    operationInfo.Lite.Value ? HelpMessage.TheDatabaseVersion.NiceToString() : HelpMessage.YourVersion.NiceToString(), 
                     type.NiceName());
-                case OperationType.Delete: return Resources.RemovesThe0FromTheDatabase.Formato(type.NiceName());
+                case OperationType.Delete: return HelpMessage.RemovesThe0FromTheDatabase.NiceToString().Formato(type.NiceName());
                 case OperationType.Constructor: return
-                    type.GetGenderAwareResource(() => Resources.ConstructsANew0).Formato(type.NiceName());
+                    HelpMessage.ConstructsANew0.NiceToString().ForGenderAndNumber(type.GetGender()).Formato(type.NiceName());
                 case OperationType.ConstructorFrom: return
-                    operationInfo.ReturnType.GetGenderAwareResource(() => Resources.ConstructsANew0).Formato(operationInfo.ReturnType.NiceName()) + " " +
-                    type.GetGenderAwareResource(()=>Resources.From0OfThe1).Formato(operationInfo.Lite.Value ? Resources.TheDatabaseVersion  : Resources.YourVersion, type.NiceName());
+                    HelpMessage.ConstructsANew0.NiceToString().ForGenderAndNumber(operationInfo.ReturnType.GetGender()).Formato(operationInfo.ReturnType.NiceName()) + " " +
+                    HelpMessage.From0OfThe1.NiceToString().ForGenderAndNumber(type.GetGender()).Formato(operationInfo.Lite.Value ? HelpMessage.TheDatabaseVersion.NiceToString() : HelpMessage.YourVersion.NiceToString(), type.NiceName());
                 case OperationType.ConstructorFromMany: return
-                    operationInfo.ReturnType.GetGenderAwareResource(()=>Resources.ConstructsANew0).Formato(operationInfo.ReturnType.NiceName()) + " " +
-                    type.GetGenderAwareResource(()=>Resources.FromMany0).Formato(type.NicePluralName());
+                    HelpMessage.ConstructsANew0.NiceToString().ForGenderAndNumber(operationInfo.ReturnType.GetGender()).Formato(operationInfo.ReturnType.NiceName()) + " " +
+                    HelpMessage.FromMany0.NiceToString().ForGenderAndNumber(type.GetGender()).Formato(type.NicePluralName());
             }
 
             return "";
         }
 
-        public static string GetQueryHelp(IDynamicQuery dynamicQuery)
+        public static string GetQueryHelp(IDynamicQueryCore dynamicQuery)
         {
             ColumnDescriptionFactory cdf = dynamicQuery.EntityColumn();
 
-            return Resources.QueryOf0.Formato(cdf.Implementations.Value.TypeLinks(Lite.Extract(cdf.Type)));
+            return HelpMessage.QueryOf0.NiceToString().Formato(cdf.Implementations.Value.TypeLinks(Lite.Extract(cdf.Type)));
         }
 
         internal static string GetQueryColumnHelp(ColumnDescriptionFactory kvp)
@@ -207,11 +205,11 @@ namespace Signum.Engine.Help
             string typeDesc = QueryColumnType(kvp);
 
             if (kvp.PropertyRoutes != null)
-                return Resources._0IsA1AndShows2.Formato(kvp.DisplayName(), typeDesc, kvp.PropertyRoutes.CommaAnd(pr =>
+                return HelpMessage._0IsA1AndShows2.NiceToString().Formato(kvp.DisplayName(), typeDesc, kvp.PropertyRoutes.CommaAnd(pr =>
                     pr.PropertyRouteType == PropertyRouteType.Root ? TypeLink(pr.RootType) :
-                    Resources.TheProperty0.Formato(PropertyLink(pr.PropertyRouteType == PropertyRouteType.LiteEntity ? pr.Parent: pr))));
+                    HelpMessage.TheProperty0.NiceToString().Formato(PropertyLink(pr.PropertyRouteType == PropertyRouteType.LiteEntity ? pr.Parent: pr))));
             else
-                return Resources._0IsACalculated1.Formato(kvp.DisplayName(), typeDesc);
+                return HelpMessage._0IsACalculated1.NiceToString().Formato(kvp.DisplayName(), typeDesc);
         }
 
         private static string QueryColumnType(ColumnDescriptionFactory kvp)

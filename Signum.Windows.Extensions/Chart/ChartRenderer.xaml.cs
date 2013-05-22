@@ -79,7 +79,7 @@ namespace Signum.Windows.Chart
                 return;
 
             Settings = Navigator.GetQuerySettings(Request.QueryName);
-            Description = Navigator.Manager.GetQueryDescription(Request.QueryName);
+            Description = DynamicQueryServer.GetQueryDescription(Request.QueryName);
         }
 
         void ChartRenderer_Loaded(object sender, RoutedEventArgs e)

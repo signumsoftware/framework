@@ -1,24 +1,25 @@
-﻿@Html.DynamicCss("~/authAdmin/Content/SF_AuthAdmin.css")
+@Html.ScriptCss("~/authAdmin/Content/SF_AuthAdmin.css")
+@using Signum.Engine.Authorization
 @using (var tc = Html.TypeContext<QueryRulePack>())
 {
     @Html.EntityLine(tc, f => f.Role)
-    @Html.ValueLine(tc, f => f.DefaultRule, vl => { vl.UnitText = tc.Value.DefaultLabel; })
+    @Html.ValueLine(tc, f => f.Strategy)
     @Html.EntityLine(tc, f => f.Type)
 
     <table class="sf-auth-rules" id="queries">
         <thead>
             <tr>
                 <th>
-                    @Resources.QueriesAscx_Query
+                    @AuthMessage.QueriesAscx_Query.NiceToString()
                 </th>
                 <th>
-                    @Resources.QueriesAscx_Allow
+                    @AuthMessage.QueriesAscx_Allow.NiceToString()
                 </th>
                 <th>
-                    @Resources.QueriesAscx_Deny
+                    @AuthMessage.QueriesAscx_Deny.NiceToString()
                 </th>
                 <th>
-                    @Resources.QueriesAscx_Overriden
+                    @AuthMessage.QueriesAscx_Overriden.NiceToString()
                 </th>
             </tr>
         </thead>
@@ -31,14 +32,20 @@
                     @Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase)
                 </td>
                 <td>
-                    <a class="sf-auth-chooser sf-auth-allowed">
-                        @Html.RadioButton(item.Compose("Allowed"), "True", item.Value.Allowed)
-                    </a>
+                    @if (!item.Value.CoercedValues.Contains(true))
+                    {
+                        <a class="sf-auth-chooser sf-auth-allowed">
+                            @Html.RadioButton(item.Compose("Allowed"), "True", item.Value.Allowed)
+                        </a>
+                    }
                 </td>
                 <td>
-                    <a class="sf-auth-chooser sf-auth-not-allowed">
-                        @Html.RadioButton(item.Compose("Allowed"), "False", !item.Value.Allowed)
-                    </a>
+                    @if (!item.Value.CoercedValues.Contains(false))
+                    {
+                        <a class="sf-auth-chooser sf-auth-not-allowed">
+                            @Html.RadioButton(item.Compose("Allowed"), "False", !item.Value.Allowed)
+                        </a> 
+                    }
                 </td>
                 <td>
                     @Html.CheckBox(item.Compose("Overriden"), item.Value.Overriden, new { disabled = "disabled", @class = "sf-auth-overriden" })

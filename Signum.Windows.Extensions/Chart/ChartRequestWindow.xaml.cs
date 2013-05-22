@@ -79,7 +79,7 @@ namespace Signum.Windows.Chart
             ((INotifyCollectionChanged)filterBuilder.Filters).CollectionChanged += Filters_CollectionChanged;
             Request.ChartRequestChanged += Request_ChartRequestChanged;
 
-            chartBuilder.Description = Navigator.Manager.GetQueryDescription(Request.QueryName);
+            chartBuilder.Description = DynamicQueryServer.GetQueryDescription(Request.QueryName);
 
             var entityColumn = chartBuilder.Description.Columns.SingleOrDefaultEx(a => a.IsEntity);
             EntityType = Lite.Extract(entityColumn.Type);
@@ -129,7 +129,7 @@ namespace Signum.Windows.Chart
             if (cr == null || chartRenderer.Description == null)
                 return new List<QueryToken>();
 
-            return ChartUtils.SubTokensChart(token, chartRenderer.Description.Columns, cr.GroupResults);
+            return token.SubTokens(chartRenderer.Description, canAggregate: cr.GroupResults);
         }
 
         private void btCreateFilter_Click(object sender, RoutedEventArgs e)

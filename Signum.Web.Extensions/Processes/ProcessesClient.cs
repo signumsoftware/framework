@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,7 +19,6 @@ using System.Web.Routing;
 using Signum.Entities.Processes;
 using Signum.Engine.Operations;
 using Signum.Web.Omnibox;
-using Signum.Web.Extensions.Properties;
 
 namespace Signum.Web.Processes
 {
@@ -43,8 +42,8 @@ namespace Signum.Web.Processes
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<ProcessExecutionDN>{ PartialViewName = e => ViewPrefix.Formato("ProcessExecution"), },
-                    new EntitySettings<ProcessDN>{ PartialViewName = e => ViewPrefix.Formato("Process")},
+                    new EntitySettings<ProcessDN>{ PartialViewName = e => ViewPrefix.Formato("Process"), },
+                    new EntitySettings<ProcessAlgorithmDN>{ PartialViewName = e => ViewPrefix.Formato("ProcessAlgorithm")},
                 });
 
                 if (packages || packageOperations)
@@ -99,8 +98,8 @@ namespace Signum.Web.Processes
                                 CanExecute = OperationDN.NotDefinedFor(g.Key, types.Except(g.Select(a => a.t))),
                             }
                             where os == null ? oi.Lite == true && oi.OperationType != OperationType.ConstructorFrom :
-                            os.ContextualFromMany == null ? (oi.Lite == true && os.OnClick == null && oi.OperationType != OperationType.ConstructorFrom) :
-                            (os.ContextualFromMany.IsVisible == null || os.ContextualFromMany.IsVisible(context))
+                            os.ContextualFromMany.IsVisible == null ? (oi.Lite == true && os.IsVisible == null && oi.OperationType != OperationType.ConstructorFrom && (os.OnClick == null || os.ContextualFromMany.OnClick != null)) :
+                            os.ContextualFromMany.IsVisible(context)
                             select context).ToList();
 
             if (contexts.IsEmpty())
@@ -129,7 +128,7 @@ namespace Signum.Web.Processes
 
                 content.AddLine(new HtmlTag("li")
                     .Class(ctxItemClass + " sf-search-ctxitem-header")
-                    .InnerHtml(new HtmlTag("span").InnerHtml(Signum.Web.Properties.Resources.Search_CtxMenuItem_Operations.EncodeHtml())));
+                    .InnerHtml(new HtmlTag("span").InnerHtml(SearchMessage.Search_CtxMenuItem_Operations.NiceToString().EncodeHtml())));
 
                 foreach (var operation in operations)
                 {

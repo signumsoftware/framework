@@ -1,5 +1,4 @@
 ﻿@using System.Configuration
-@using Signum.Web.Properties
 @using Signum.Entities.ControlPanel
 @using Signum.Web.ControlPanel
 @using Signum.Entities.DynamicQuery
@@ -7,7 +6,7 @@
 @using Signum.Web.Chart
 @using Signum.Engine.Chart
 @using Signum.Engine.DynamicQuery
-@model PanelPart
+@model PanelPartDN
 @Html.ScriptsJs("~/Chart/Scripts/SF_Chart.js",
                 "~/Chart/Scripts/SF_Chart_Utils.js",
                 "~/scripts/d3.v2.min.js",
@@ -41,7 +40,7 @@
             </script>
         </div>
         <div id="@crc.Compose("sfChartContainer")">
-            <div class="sf-chart-container" style="display:@(ucPart.OnlyData ? "none" : "block")" 
+            <div class="sf-chart-container" style="display:@(ucPart.ShowData ? "none" : "block")" 
                     data-open-url="@(Url.Action<ChartController>(cc => cc.OpenSubgroup(crc.ControlID)))" 
                     data-fullscreen-url="@(Url.Action<ChartController>(cc => cc.FullScreen(crc.ControlID)))"
                     data-json="@Html.Json(ChartUtils.DataJson(crc.Value, resultTable)).ToString()">
@@ -49,7 +48,7 @@
         </div>
     </div>
     
-        if (ucPart.OnlyData)
+        if (ucPart.ShowData)
         {
             ViewData[ViewDataKeys.Results] = resultTable;
             ViewData[ViewDataKeys.Navigate] = false;

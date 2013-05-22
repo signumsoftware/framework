@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,13 +7,12 @@ using Signum.Entities.Reports;
 using Signum.Entities.UserQueries;
 using Signum.Entities.Chart;
 using System.Reflection;
-using Signum.Entities.Extensions.Properties;
 using System.Linq.Expressions;
 
 namespace Signum.Entities.ControlPanel
 {
     [Serializable]
-    public class PanelPart : EmbeddedEntity
+    public class PanelPartDN : EmbeddedEntity
     {
         string title;
         public string Title
@@ -56,15 +55,15 @@ namespace Signum.Entities.ControlPanel
             if (pi.Is(() => Title) && string.IsNullOrEmpty(title))
             {
                 if (content != null && content.RequiresTitle)
-                    return  Resources.ControlPanelDN_TitleMustBeSpecifiedFor0.Formato(content.GetType().NicePluralName());
+                    return  ControlPanelMessage.ControlPanelDN_TitleMustBeSpecifiedFor0.NiceToString().Formato(content.GetType().NicePluralName());
             }
 
             return base.PropertyValidation(pi);
         }
 
-        public PanelPart Clone()
+        public PanelPartDN Clone()
         {
-            return new PanelPart
+            return new PanelPartDN
             {
                 Column = Column,
                 Row = Row,
@@ -98,10 +97,9 @@ namespace Signum.Entities.ControlPanel
             set { Set(ref userQuery, value, () => UserQuery); }
         }
 
-        static readonly Expression<Func<UserQueryPartDN, string>> ToStringExpression = e => e.userQuery.ToString();
         public override string ToString()
         {
-            return userQuery == null ? null : ToStringExpression.Evaluate(this);
+            return userQuery.TryToString();
         }
 
         public bool RequiresTitle
@@ -137,10 +135,9 @@ namespace Signum.Entities.ControlPanel
             set { Set(ref showData, value, () => ShowData); }
         }
 
-        static readonly Expression<Func<UserChartPartDN, string>> ToStringExpression = e => e.userChart.ToString();
         public override string ToString()
         {
-            return userChart == null ? null : ToStringExpression.Evaluate(this);
+            return userChart.TryToString();
         }
 
         public bool RequiresTitle

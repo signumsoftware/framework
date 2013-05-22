@@ -9,11 +9,11 @@ using Signum.Utilities;
 using Signum.Entities.Files;
 using Signum.Entities;
 using Signum.Entities.Reflection;
-using Signum.Web.Extensions.Properties;
 using System.Linq.Expressions;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
 using System.Web.Routing;
+using Signum.Engine;
 #endregion
 
 namespace Signum.Web.Files
@@ -75,7 +75,7 @@ namespace Signum.Web.Files
 
         public override string ToJS()
         {
-            return "$('#{0}').data('fileLine')".Formato(ControlID);
+            return "$('#{0}').data('SF-fileLine')".Formato(ControlID);
         }
 
         protected override JsOptionsBuilder OptionsJSInternal()
@@ -134,6 +134,17 @@ namespace Signum.Web.Files
         protected override string DefaultCreate()
         {
             return null;
+        }
+
+        public IFile GetFileValue()
+        {
+            Lite<IdentifiableEntity> lite = UntypedValue as Lite<IdentifiableEntity>;
+
+            if (lite != null)
+                return (IFile)lite.Retrieve();
+
+
+            return (IFile)UntypedValue;
         }
     }
 }

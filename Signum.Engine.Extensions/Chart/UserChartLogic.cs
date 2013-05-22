@@ -12,6 +12,7 @@ using Signum.Entities;
 using Signum.Entities.Authorization;
 using Signum.Engine.Authorization;
 using Signum.Engine.Operations;
+using Signum.Utilities;
 
 namespace Signum.Engine.Chart
 {
@@ -21,31 +22,36 @@ namespace Signum.Engine.Chart
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                if (sb.Schema.Tables.ContainsKey(typeof(UserChartDN)))
+                    throw new InvalidOperationException("UserChart has already been registered");
+
                 sb.Settings.OverrideAttributes((UserChartDN uc) => uc.Columns.First().TokenString, new Attribute[0]);
 
                 sb.Include<UserChartDN>();
 
-                dqm[typeof(UserChartDN)] = (from uq in Database.Query<UserChartDN>()
-                                            select new
-                                            {
-                                                Entity = uq,
-                                                uq.Query,
-                                                uq.Id,
-                                                uq.DisplayName,
-                                                uq.ChartScript,
-                                                uq.GroupResults,
-                                            }).ToDynamic();
+                dqm.RegisterQuery(typeof(UserChartDN), () =>
+                    from uq in Database.Query<UserChartDN>()
+                    select new
+                    {
+                        Entity = uq,
+                        uq.Query,
+                        uq.EntityType,
+                        uq.Id,
+                        uq.DisplayName,
+                        uq.ChartScript,
+                        uq.GroupResults,
+                    });
 
                 sb.Schema.EntityEvents<UserChartDN>().Retrieved += ChartLogic_Retrieved;
 
-                new BasicExecute<UserChartDN>(UserChartOperation.Save)
+                new Graph<UserChartDN>.Execute(UserChartOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
                     Execute = (uc, _) => { }
                 }.Register();
 
-                new BasicDelete<UserChartDN>(UserChartOperation.Delete)
+                new Graph<UserChartDN>.Delete(UserChartOperation.Delete)
                 {
                     Lite = true,
                     Delete = (uc, _) => { uc.Delete(); }
@@ -84,13 +90,23 @@ namespace Signum.Engine.Chart
         public static List<Lite<UserChartDN>> GetUserCharts(object queryName)
         {
             return (from er in Database.Query<UserChartDN>()
-                    where er.Query.Key == QueryUtils.GetQueryUniqueKey(queryName)
+                    where er.Query.Key == QueryUtils.GetQueryUniqueKey(queryName) && er.EntityType == null
                     select er.ToLite()).ToList();
         }
 
-        public static void RemoveUserChart(Lite<UserChartDN> lite)
+        public static List<Lite<UserChartDN>> Autocomplete(string content, int limit)
         {
-            Database.Delete(lite);
+            return (from er in Database.Query<UserChartDN>()
+                    where er.Query.Key == QueryUtils.GetQueryUniqueKey(content) && er.EntityType == null
+                    select er.ToLite()).ToList();
+        }
+
+
+        public static List<Lite<UserChartDN>> GetUserChartsEntity(Type entityType)
+        {
+            return (from er in Database.Query<UserChartDN>()
+                    where er.EntityType == entityType.ToTypeDN().ToLite()
+                    select er.ToLite()).ToList();
         }
 
         public static void RegisterUserTypeCondition(SchemaBuilder sb, Enum newEntityGroupKey)

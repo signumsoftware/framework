@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,8 +8,8 @@ using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Engine.Mailing;
-using Signum.Engine.Extensions.Properties;
 using Signum.Engine.Operations;
+using Signum.Utilities;
 
 namespace Signum.Engine.Authorization
 {
@@ -21,8 +21,8 @@ namespace Signum.Engine.Authorization
             {
                 sb.Include<PasswordExpiresIntervalDN>();
 
-                dqm[typeof(PasswordExpiresIntervalDN)] =
-                    (from e in Database.Query<PasswordExpiresIntervalDN>()
+                dqm.RegisterQuery(typeof(PasswordExpiresIntervalDN), ()=>
+                    from e in Database.Query<PasswordExpiresIntervalDN>()
                      select new
                      {
                          Entity = e,
@@ -30,9 +30,9 @@ namespace Signum.Engine.Authorization
                          e.Enabled,
                          e.Days,
                          e.DaysWarning
-                     }).ToDynamic();
+                     });
 
-                new BasicExecute<PasswordExpiresIntervalDN>(PasswordExpiresIntervalOperation.Save)
+                new Graph<PasswordExpiresIntervalDN>.Execute(PasswordExpiresIntervalOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
@@ -47,9 +47,9 @@ namespace Signum.Engine.Authorization
                     var ivp = Database.Query<PasswordExpiresIntervalDN>().Where(p => p.Enabled).FirstOrDefault();
                     if (ivp == null)
                         return;
-
+                    
                     if (TimeZoneManager.Now > u.PasswordSetDate.AddDays((double)ivp.Days))
-                        throw new PasswordExpiredException(Signum.Engine.Extensions.Properties.Resources.ExpiredPassword);
+                        throw new PasswordExpiredException(AuthMessage.ExpiredPassword.NiceToString());
                 });
 
                 AuthLogic.LoginMessage += (() =>
@@ -67,7 +67,7 @@ namespace Signum.Engine.Authorization
                         return null;
 
                     if (TimeZoneManager.Now > u.PasswordSetDate.AddDays((double)ivp.Days).AddDays((double)-ivp.DaysWarning))
-                        return Resources.PasswordNearExpired;
+                        return AuthMessage.PasswordNearExpired.NiceToString();
 
                     return null;
                 });

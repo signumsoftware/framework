@@ -5,12 +5,13 @@ using System.Text;
 using Signum.Entities.Basics;
 using System.Linq.Expressions;
 using Signum.Utilities;
-using Signum.Entities.Extensions.Properties;
 using Signum.Entities.UserQueries;
 using Signum.Entities.DynamicQuery;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Collections.Specialized;
+using System.ComponentModel;
+using Signum.Entities.Translation;
 
 namespace Signum.Entities.Mailing
 {
@@ -199,33 +200,33 @@ namespace Signum.Entities.Mailing
             if (pi.Is(() => StartDate) || pi.Is(() => EndDate))
             {
                 if (EndDate != null && EndDate >= StartDate)
-                    return Resources.EndDateMustBeHigherThanStartDate;
+                    return EmailTemplateMessage.EndDateMustBeHigherThanStartDate.NiceToString();
             }
 
             if (pi.Is(() => Recipient) && AssociatedType != null && !AssociatedTypeIsEmailOwner(AssociatedType) 
                 && Recipient == null && Model == null)
             {
-                return Resources.RouteToGetRecipientNotSet;
+                return EmailTemplateMessage.RouteToGetRecipientNotSet.NiceToString();
             }
 
             if (pi.Is(() => Messages))
             {
                 if (Messages == null || !Messages.Any())
-                    return Resources.ThereIsNotAnyMessageForTheTemplate;
+                    return EmailTemplateMessage.ThereAreNoMessagesForTheTemplate.NiceToString();
                 if (!Messages.Any(m => m.CultureInfo.Is(DefaultCulture)))
                 {
-                    return Resources.OneOfTheMessagesMustBeSetFor0.Formato(DefaultCulture.DisplayName);
+                    return EmailTemplateMessage.ThereMustBeAMessageFor0.NiceToString().Formato(DefaultCulture.DisplayName);
                 }
                 if (Messages.GroupCount(m => m.CultureInfo).Any(c => c.Value > 1))
                 {
-                    return Resources.ThereAreMoreThanOneMessageForTheSameLanguage;
+                    return EmailTemplateMessage.TheresMoreThanOneMessageForTheSameLanguage.NiceToString();
                 }
             }
 
             if (pi.Is(() => Model) || pi.Is(() => AssociatedType))
             {
                 if (Model != null && AssociatedType != null && Model.FullClassName != AssociatedType.FullClassName)
-                    return Resources.TheAssociatedTypeAndTheModelDoNotMatch;
+                    return EmailTemplateMessage.TheAssociatedTypeAndTheModelDoNotMatch.NiceToString();
             }
 
             return base.PropertyValidation(pi);
@@ -316,7 +317,7 @@ namespace Signum.Entities.Mailing
     [Serializable]
     public class TemplateQueryTokenDN : QueryTokenDN
     {
-        public override void ParseData(Func<QueryToken, List<QueryToken>> subTokens, IdentifiableEntity context)
+        public override void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)
         {
             throw new NotImplementedException("ParseData is ambiguous on {0}".Formato(GetType().NiceName()));
         }
@@ -327,8 +328,6 @@ namespace Signum.Entities.Mailing
         Create,
         Save
 	}
-
-
 
     [Serializable, EntityKind(EntityKind.Main)]
     public class EmailMasterTemplateDN : Entity
@@ -371,10 +370,54 @@ namespace Signum.Entities.Mailing
         {
             if (pi.Is(() => Text) && !MasterTemplateContentRegex.IsMatch(Text))
             {
-                throw new ApplicationException(Resources.TheTextMustContaintThe0IndicatingReplacementPoint.Formato("@[content]"));
+                throw new ApplicationException(EmailTemplateMessage.TheTextMustContain0IndicatingReplacementPoint.NiceToString().Formato("@[content]"));
             }
 
             return base.PropertyValidation(pi);
         }
+    }
+
+    public enum EmailTemplateMessage
+    {
+        [Description("End date must be higher than start date")]
+        EndDateMustBeHigherThanStartDate,
+        [Description("Route to get recipient not set")]
+        RouteToGetRecipientNotSet,
+        [Description("There are no messages for the template")]
+        ThereAreNoMessagesForTheTemplate,
+        [Description("There must be a message for {0}")]
+        ThereMustBeAMessageFor0,
+        [Description("There's more than one message for the same language")]
+        TheresMoreThanOneMessageForTheSameLanguage,
+        [Description("The associated type and the model do not match")]
+        TheAssociatedTypeAndTheModelDoNotMatch,
+        [Description("The text must contain {0} indicating replacement point")]
+        TheTextMustContain0IndicatingReplacementPoint,
+        [Description("The template is already active")]
+        TheTemplateIsAlreadyActive,
+        [Description("The template is already inactive")]
+        TheTemplateIsAlreadyInactive,
+        [Description("The model {0} does not have any field with the token {1}")]
+        TheModel0DoesNotHaveAnyFieldWithTheToken1
+    }
+
+    public enum EmailTemplateViewMessage
+    { 
+        [Description("Insert message content")]
+        InsertMessageContent,
+        [Description("Insert in text")]
+        InsertInText,
+        [Description("Insert iteration in text")]
+        InsertIterationInText,
+        [Description("Insert in subject")]
+        InsertInSubject,
+        [Description("Insert iteration in subject")]
+        InsertIterationInSubject,
+        [Description("Preview content")]
+        PreviewContent,
+        [Description("Edit content")]
+        EditContent,
+        [Description("Language")]
+        Language
     }
 }

@@ -37,7 +37,7 @@ namespace Signum.Services
 {
     public abstract class ServerExtensions : ServerBasic, ILoginServer, IQueryServer, IProcessServer, IControlPanelServer,
         IChartServer, IExcelReportServer, IUserQueryServer, IQueryAuthServer, IPropertyAuthServer,
-        ITypeAuthServer, IFacadeMethodAuthServer, IPermissionAuthServer, IOperationAuthServer, ISmsServer,
+        ITypeAuthServer, IPermissionAuthServer, IOperationAuthServer, ISmsServer,
         IProfilerServer
     {
         protected override T Return<T>(MethodBase mi, string description, Func<T> function, bool checkLogin = true)
@@ -47,9 +47,6 @@ namespace Signum.Services
                 using (ScopeSessionFactory.OverrideSession(session))
                 using (ExecutionMode.Global())
                 {
-                    if (checkLogin)
-                        FacadeMethodAuthLogic.AuthorizeAccess((MethodInfo)mi);
-
                     return function();
                 }
             }
@@ -121,7 +118,7 @@ namespace Signum.Services
         #endregion
 
         #region IProcessServer
-        public ProcessExecutionDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> lites, Enum operationKey)
+        public ProcessDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> lites, Enum operationKey)
         {
             return Return(MethodInfo.GetCurrentMethod(), null,
                 () => PackageLogic.CreatePackageOperation(lites, operationKey));
@@ -150,10 +147,10 @@ namespace Signum.Services
              () => PropertyAuthLogic.SetPropertyRules(rules));
         }
 
-        public DefaultDictionary<PropertyRoute, PropertyAllowed> AuthorizedProperties()
+        public Dictionary<PropertyRoute, PropertyAllowed> OverridenProperties()
         {
             return Return(MethodInfo.GetCurrentMethod(),
-              () => PropertyAuthLogic.AuthorizedProperties());
+              () => PropertyAuthLogic.OverridenProperties());
         }
         #endregion
 
@@ -202,30 +199,6 @@ namespace Signum.Services
 
         #endregion
 
-        #region IFacadeMethodAuthServer Members
-
-        public FacadeMethodRulePack GetFacadeMethodRules(Lite<RoleDN> role)
-        {
-            return Return(MethodInfo.GetCurrentMethod(),
-              () => FacadeMethodAuthLogic.GetFacadeMethodRules(role));
-        }
-
-        public void SetFacadeMethodRules(FacadeMethodRulePack rules)
-        {
-            Execute(MethodInfo.GetCurrentMethod(),
-              () => FacadeMethodAuthLogic.SetFacadeMethodRules(rules));
-        }
-
-        public DefaultDictionary<string, bool> FacadeMethodRules()
-        {
-            return Return(MethodInfo.GetCurrentMethod(),
-             () => FacadeMethodAuthLogic.FacadeMethodRules());
-
-            throw new NotImplementedException();
-        }
-
-        #endregion
-
         #region IQueryAuthServer Members
 
         public QueryRulePack GetQueryRules(Lite<RoleDN> role, TypeDN typeDN)
@@ -240,10 +213,10 @@ namespace Signum.Services
                () => QueryAuthLogic.SetQueryRules(rules));
         }
 
-        public DefaultDictionary<object, bool> QueriesRules()
+        public HashSet<object> AllowedQueries()
         {
             return Return(MethodInfo.GetCurrentMethod(),
-            () => QueryAuthLogic.QueryRules());
+            () => DynamicQueryManager.Current.GetAllowedQueryNames().ToHashSet());
         }
 
         #endregion
@@ -283,10 +256,10 @@ namespace Signum.Services
                () => OperationAuthLogic.SetOperationRules(rules));
         }
 
-        public DefaultDictionary<Enum, OperationAllowed> OperationRules()
+        public Dictionary<Enum, OperationAllowed> AllowedOperations()
         {
             return Return(MethodInfo.GetCurrentMethod(),
-            () => OperationAuthLogic.OperationRules());
+            () => OperationAuthLogic.AllowedOperations());
         }
         #endregion
 
@@ -303,12 +276,17 @@ namespace Signum.Services
             () => UserChartLogic.GetUserCharts(queryName));
         }
 
-        public void RemoveUserChart(Lite<UserChartDN> lite)
+        public List<Lite<UserChartDN>> GetUserChartsEntity(Type entityType)
         {
-            Execute(MethodInfo.GetCurrentMethod(),
-              () => UserChartLogic.RemoveUserChart(lite));
+            return Return(MethodInfo.GetCurrentMethod(),
+            () => UserChartLogic.GetUserChartsEntity(entityType));
         }
 
+        public List<Lite<UserChartDN>> AutoCompleteUserChart(string subString, int limit)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => ChartLogic.Autocomplete(subString, limit));
+        }
         #endregion
 
         #region IExcelReportServer Members
@@ -340,10 +318,16 @@ namespace Signum.Services
             () => UserQueryLogic.GetUserQueries(queryName));
         }
 
-        public void RemoveUserQuery(Lite<UserQueryDN> lite)
+        public List<Lite<UserQueryDN>> GetUserQueriesEntity(Type entityType)
         {
-            Execute(MethodInfo.GetCurrentMethod(),
-              () => UserQueryLogic.RemoveUserQuery(lite));
+            return Return(MethodInfo.GetCurrentMethod(),
+            () => UserQueryLogic.GetUserQueriesEntity(entityType));
+        }
+
+        public List<Lite<UserQueryDN>> AutoCompleteUserQueries(string subString, int limit)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                  () => UserQueryLogic.Autocomplete(subString, limit));
         }
         #endregion
 
@@ -376,10 +360,24 @@ namespace Signum.Services
         }
         #endregion
 
+        #region IControlPanelServer
         public ControlPanelDN GetHomePageControlPanel()
         {
             return Return(MethodInfo.GetCurrentMethod(),
                 () => ControlPanelLogic.GetHomePageControlPanel());
         }
+
+        public List<Lite<ControlPanelDN>> GetControlPanelsEntity(Type entityType)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => ControlPanelLogic.GetControlPanelsEntity(entityType));
+        }
+
+        public List<Lite<ControlPanelDN>> AutocompleteControlPanel(string subString, int limit)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                  () => ControlPanelLogic.Autocomplete(subString, limit));
+        } 
+        #endregion
     }
 }

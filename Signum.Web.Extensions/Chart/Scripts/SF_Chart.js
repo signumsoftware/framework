@@ -2,7 +2,7 @@
 
 SF.Chart = (function () {
     var getFor = function (prefix) {
-        return $("#" + SF.compose(prefix, "sfChartBuilderContainer")).data("chartBuilder");
+        return $("#" + SF.compose(prefix, "sfChartBuilderContainer")).data("SF-chartBuilder");
     };
 
     return {
@@ -20,7 +20,7 @@ SF.Chart = (function () {
             var self = this;
             var $chartControl = self.element.closest(".sf-chart-control");
             self.$chartControl = $chartControl;
-            $(".sf-chart-img").live("click", function () {
+            $(document).on("click", ".sf-chart-img", function () {
                 var $this = $(this);
                 $this.closest(".sf-chart-type").find(".ui-widget-header .sf-chart-type-value").val($this.attr("data-related"));
 
@@ -38,16 +38,16 @@ SF.Chart = (function () {
                 self.updateChartBuilder();
             });
 
-            $(".sf-chart-group-trigger").live("change", function () {
+            $(document).on("change", ".sf-chart-group-trigger", function () {
                 self.element.find(".sf-chart-group-results").val($(this).is(":checked"));
                 self.updateChartBuilder();
             });
 
-            $(".sf-chart-token-config-trigger").live("click", function () {
+            $(document).on("click", ".sf-chart-token-config-trigger", function () {
                 $(this).closest(".sf-chart-token").next().toggle();
             });
 
-            $(".sf-query-token select").live("change", function () {
+            $(document).on("change", ".sf-query-token select", function () {
                 var $this = $(this);
                 self.updateChartBuilder($this.closest("tr").attr("data-token"));
             });
@@ -56,7 +56,7 @@ SF.Chart = (function () {
                 self.reDraw();
             });
 
-            $(".sf-chart-draw").live("click", function (e) {
+            $(document).on("click", ".sf-chart-draw", function (e) {
                 e.preventDefault();
                 var $this = $(this);
                 $.ajax({
@@ -101,7 +101,7 @@ SF.Chart = (function () {
                 return temp;
             };
 
-            $(".sf-chart-script-edit").live("click", function (e) {
+            $(document).on("click", ".sf-chart-script-edit", function (e) {
                 e.preventDefault();
 
                 var $textArea = self.element.find("textarea.sf-chart-currentScript");

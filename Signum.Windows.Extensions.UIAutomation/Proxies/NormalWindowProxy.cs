@@ -25,6 +25,8 @@ namespace Signum.Windows.UIAutomation
         public NormalWindowProxy(AutomationElement element)
             : base(element)
         {
+            element.AssertClassName("NormalWindow");
+
             Element.WaitDataContextSet(() => "DataContextSet for {0}".Formato(typeof(T).Name));
         }
 
@@ -33,14 +35,9 @@ namespace Signum.Windows.UIAutomation
             get { return new ButtonBarProxy(Element.ChildById("buttonBar")); }
         }
 
-        public AutomationElement LeftExpander
+        public LeftPanelProxy LeftExpander
         {
-            get { return Element.ChildById("widgetPanel").ChildById("expander"); }
-        }
-
-        public AutomationElement LeftExpanderButton
-        {
-            get { return LeftExpander.ChildById("HeaderSite"); }
+            get { return new LeftPanelProxy(Element.ChildById("widgetPanel").ChildById("expander")); }
         }
 
         AutomationElement mainControl;
@@ -51,35 +48,48 @@ namespace Signum.Windows.UIAutomation
 
         public string EntityId
         {
-            get { return Element.ChildById("entityTitle").ChildById("entityId").Value(); }
+            get { return Element.ChildById("entityTitle").ChildById("tbEntityId").Value(); }
         }
 
         public string EntityToStr
         {
-            get { return Element.ChildById("entityTitle").ChildById("entityToStr").Value(); }
+            get { return Element.ChildById("entityTitle").ChildById("tbEntityToStr").Value(); }
         }
-
 
         public void Ok()
         {
+            var entityId = EntityId;
             ButtonBar.OkButton.ButtonInvoke();
+            Element.Wait(
+                () => 
+                {
+                    var childWindows = Element.TryChild(a => a.Current.ControlType == ControlType.Window);
 
-            Element.Wait(() => IsClosed,
-            actionDescription: () => "Waiting to close window after OK {0}".Formato(EntityId));
+                    if (childWindows != null)
+                    {
+                        MessageBoxProxy.AssertNoErrorWindow(childWindows);
+                        throw new InvalidOperationException("A window was open after pressing Ok on {0}. Consider using OkCapture".Formato(entityId));
+                    }
+
+                    return IsClosed;
+                },
+                actionDescription: () => "Waiting to close window after OK {0}".Formato(entityId));
         }
 
         public AutomationElement OkCapture()
         {
+            var entityId = EntityId;
             return Element.CaptureWindow(
-            action: () => ButtonBar.OkButton.ButtonInvoke(),
-            actionDescription: () => "Waiting to capture window after OK {0}".Formato(EntityId));
+                action: () => ButtonBar.OkButton.ButtonInvoke(),
+                actionDescription: () => "Waiting to capture window after OK {0}".Formato(entityId));
         }
 
         public void Reload()
         {
+            var entityId = EntityId;
             Element.WaitDataContextChangedAfter(
-            action: () => ButtonBar.ReloadButton.ButtonInvoke(),
-            actionDescription: () => "Reload " + EntityId);
+                action: () => ButtonBar.ReloadButton.ButtonInvoke(),
+                actionDescription: () => "Reload " + entityId);
         }
 
         public void Reload(bool confirm)
@@ -94,39 +104,77 @@ namespace Signum.Windows.UIAutomation
                     mb.CancelButton.ButtonInvoke();
             }
         }
+
         public void Execute(Enum operationKey, int? timeOut = null)
         {
             var time = timeOut ?? OperationTimeouts.ExecuteTimeout;
+            var entityId = EntityId;
+            var button = ButtonBar.GetButton(operationKey);
 
             Element.WaitDataContextChangedAfter(
-            action: () => ButtonBar.GetOperationButton(operationKey).ButtonInvoke(),
-            actionDescription: () => "Executing {0} from {1}".Formato(OperationDN.UniqueKey(operationKey), EntityId));
+                action: () => button.ButtonInvoke(),
+                actionDescription: () => "Executing {0} from {1}".Formato(OperationDN.UniqueKey(operationKey), entityId));
         }
 
         public AutomationElement ExecuteCapture(Enum operationKey, int? timeOut = null)
         {
             var time = timeOut ?? OperationTimeouts.ExecuteTimeout;
+            var entityId = EntityId;
+            var button = ButtonBar.GetButton(operationKey);
 
             return Element.CaptureWindow(
-            action: () => ButtonBar.GetOperationButton(operationKey).ButtonInvoke(),
-            actionDescription: () => "Executing {0} from {1} and waiting to capture window".Formato(OperationDN.UniqueKey(operationKey), EntityId));
+                action: () => button.ButtonInvoke(),
+                actionDescription: () => "Executing {0} from {1} and waiting to capture window".Formato(OperationDN.UniqueKey(operationKey), entityId));
         }
 
+        public void ExecuteCaptureDialog(Enum operationKey, Action<AutomationElement> dialogAction, int? timeOut = null)
+        {
+            var time = timeOut ?? OperationTimeouts.ExecuteTimeout;
+            var entityId = EntityId;
+            var button = ButtonBar.GetButton(operationKey);
 
-        public AutomationElement ConstructFrom(Enum operationKey, int? timeOut = null)
+            Element.WaitDataContextChangedAfter(
+                action: () =>
+                {
+                    var dialog = Element.CaptureWindow(action: () => button.ButtonInvoke(),
+                        actionDescription: () => "Executing {0} from {1} and waiting to capture window".Formato(OperationDN.UniqueKey(operationKey), entityId));
+
+                    dialogAction(dialog);
+                },
+                actionDescription: () => "Executing {0} from {1}".Formato(OperationDN.UniqueKey(operationKey), entityId));
+        }
+
+        public AutomationElement ConstructFromCapture(Enum operationKey, int? timeOut = null)
         {
             var time = timeOut ?? OperationTimeouts.ConstructFromTimeout;
+            var entityId = EntityId;
+
+            var button = GetConstructorButton(operationKey);
 
             return Element.CaptureWindow(
-                () => ButtonBar.GetOperationButton(operationKey).ButtonInvoke(),
-                () => "Finding a window after {0} from {1} took more than {2} ms".Formato(OperationDN.UniqueKey(operationKey), EntityId, time));
+                () => button.ButtonInvoke(),
+                () => "Finding a window after {0} from {1} took more than {2} ms".Formato(OperationDN.UniqueKey(operationKey), entityId, time));
         }
 
-        public NormalWindowProxy<T> ConstructFrom<T>(Enum operationKey, int? timeOut = null) where T : IdentifiableEntity
+        private AutomationElement GetConstructorButton(Enum operationKey)
         {
-            AutomationElement element = ConstructFrom(operationKey, timeOut);
+            var result = ButtonBar.TryGetButton(operationKey);
+            if (result != null)
+                return result;
+            
+            result = (from sc in MainControl.Descendants(a => a.Current.ClassName == "SearchControl").Select(sc => new SearchControlProxy(sc))
+                      select sc.GetOperationButton(operationKey)).NotNull().FirstOrDefault();
+            if (result != null)
+                return result;
 
-            return new NormalWindowProxy<T>(element);
+            throw new ElementNotFoundException("Button for operation {0} not found on the ButtonBar or any visible SearchControl".Formato(OperationDN.UniqueKey(operationKey)));
+        }
+
+        public NormalWindowProxy<R> ConstructFrom<R>(Enum operationKey, int? timeOut = null) where R : IdentifiableEntity
+        {
+            AutomationElement element = ConstructFromCapture(operationKey, timeOut);
+
+            return new NormalWindowProxy<R>(element);
         }
 
 
@@ -158,13 +206,33 @@ namespace Signum.Windows.UIAutomation
 
             OnDisposed();
         }
+
+        public void CloseLooseChanges()
+        {
+            Element.CaptureChildWindow(
+                () => Close(), 
+                ()=>"Waiting for loose changes dialog");
+        }
     }
 
     public static class NormalWindowExtensions
     {
-        public static NormalWindowProxy<T> ToNormalWindow<T>(this AutomationElement element) where T : IdentifiableEntity
+        public static NormalWindowProxy<T> ToNormalWindow<T>(this AutomationElement element) where T : ModifiableEntity
         {
             return new NormalWindowProxy<T>(element);
+        }
+
+        public static Lite<IIdentifiable> ParseLiteHash(string itemStatus)
+        {
+            if (string.IsNullOrEmpty(itemStatus))
+                return null;
+
+            return Signum.Entities.Lite.Parse(itemStatus.Split(new[] { " Hash:" }, StringSplitOptions.None)[0]);
+        }
+
+        public static Lite<T> Lite<T>(this NormalWindowProxy<T> entity) where T : IdentifiableEntity
+        {
+            return (Lite<T>)NormalWindowExtensions.ParseLiteHash(entity.Element.Current.ItemStatus);
         }
     }
 
@@ -195,11 +263,70 @@ namespace Signum.Windows.UIAutomation
             get { return Element.ChildById("btReload"); }
         }
 
-        public AutomationElement GetOperationButton(Enum operationKey)
+        public AutomationElement GetButton(Enum operationKey)
         {
-            return Element.Child(a => a.Current.ItemStatus == OperationDN.UniqueKey(operationKey));
+            var button = TryGetButton(operationKey);
+            if (button == null)
+                throw new ElementNotFoundException("No button for operation {0} found".Formato(OperationDN.UniqueKey(operationKey)));
+
+            return button;
+        }
+
+        public AutomationElement TryGetButton(Enum operationKey)
+        {
+            var directButton = Element.TryChild(a => a.Current.ControlType == ControlType.Button && a.Current.Name == OperationDN.UniqueKey(operationKey));
+
+            if (directButton != null)
+                return directButton;
+
+            foreach (var groupButton in Element.Children(a => a.Current.ControlType == ControlType.Button && a.Current.ItemStatus == "Group"))
+            {
+                string groupName = groupButton.Current.Name;
+
+                var window = Element.CaptureChildWindow(
+                    () => groupButton.ButtonInvoke(),
+                    actionDescription: () => "Waiting for ContextMenu after click on {0}".Formato(groupName));
+
+                var menuItem = window
+                    .Child(a => a.Current.ControlType == ControlType.Menu)
+                    .TryChild(a => a.Current.ControlType == ControlType.MenuItem && a.Current.Name == OperationDN.UniqueKey(operationKey));
+
+                if (menuItem != null)
+                    return menuItem;
+            }
+
+            return null;
         }
     }
 
 
+    public class LeftPanelProxy
+    {
+        public AutomationElement Element {get;set;}
+
+        public LeftPanelProxy(AutomationElement element)
+        {
+            this.Element = element;
+        }
+
+        public AutomationElement LeftExpanderButton
+        {
+            get { return Element.ChildById("HeaderSite"); }
+        }
+    }
+
+    public static class QuickLinkExtensions
+    {
+        public static AutomationElement Button(this LeftPanelProxy left, string name)
+        {
+            return left.Element.Descendant(el => el.Current.ControlType == ControlType.Button && el.Current.Name == name);
+        }
+
+        public static AutomationElement InvokeQuickLinkCapture(this LeftPanelProxy left, string name)
+        {
+            return left.Element.CaptureWindow(
+            action: () => left.Button(name).ButtonInvoke(),
+            actionDescription: () => "Waiting to capture window after click {0} on LeftPanel".Formato(name));
+        }
+    }
 }

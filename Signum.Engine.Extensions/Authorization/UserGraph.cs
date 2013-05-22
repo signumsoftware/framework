@@ -26,7 +26,7 @@ namespace Signum.Engine.Authorization
 
             new Execute(UserOperation.SaveNew)
             {
-                FromStates = new[] { UserState.New },
+                FromStates = { UserState.New },
                 ToState = UserState.Created,
                 Execute = (u, _) => { u.State = UserState.Created; },
                 AllowsNew = true,
@@ -35,7 +35,7 @@ namespace Signum.Engine.Authorization
 
             new Execute(UserOperation.Save)
             {
-                FromStates = new[] { UserState.Created },
+                FromStates = { UserState.Created },
                 ToState = UserState.Created,
                 Execute = (u, _) => { },
                 Lite = false
@@ -43,7 +43,7 @@ namespace Signum.Engine.Authorization
 
             new Execute(UserOperation.Disable)
             {
-                FromStates = new[] { UserState.Created },
+                FromStates = { UserState.Created },
                 ToState = UserState.Disabled,
                 Execute = (u, _) =>
                 {
@@ -56,7 +56,7 @@ namespace Signum.Engine.Authorization
 
             new Execute(UserOperation.Enable)
             {
-                FromStates = new[] { UserState.Disabled },
+                FromStates = { UserState.Disabled },
                 ToState = UserState.Created,
                 Execute = (u, _) =>
                 {
@@ -67,7 +67,7 @@ namespace Signum.Engine.Authorization
                 Lite = true
             }.Register();
 
-            new BasicExecute<UserDN>(UserOperation.SetPassword)
+            new Graph<UserDN>.Execute(UserOperation.SetPassword)
             {
                 Lite = true,
                 Execute = (u, args) =>

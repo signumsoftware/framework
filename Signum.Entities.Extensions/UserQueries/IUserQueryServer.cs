@@ -16,6 +16,9 @@ namespace Signum.Services
         List<Lite<UserQueryDN>> GetUserQueries(object queryName);
 
         [OperationContract, NetDataContract]
-        void RemoveUserQuery(Lite<UserQueryDN> lite);
+        List<Lite<UserQueryDN>> GetUserQueriesEntity(Type entityType);
+
+        [OperationContract, NetDataContract]
+        List<Lite<UserQueryDN>> AutoCompleteUserQueries(string subString, int limit);
     }
 }

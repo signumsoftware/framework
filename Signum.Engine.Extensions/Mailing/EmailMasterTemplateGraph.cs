@@ -19,7 +19,7 @@ namespace Signum.Engine.Mailing
                 Construct = _ => new EmailMasterTemplateDN { State = EmailTemplateState.Created }
             }.Register();
 
-            new BasicExecute<EmailMasterTemplateDN>(EmailMasterTemplateOperation.Save)
+            new Execute(EmailMasterTemplateOperation.Save)
             {
                 AllowsNew = true,
                 Lite = false,

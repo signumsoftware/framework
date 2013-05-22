@@ -71,6 +71,7 @@ namespace Signum.Windows.UIAutomation
 
         public static bool IsMessageBox(AutomationElement windowElement)
         {
+            
             return windowElement.Current.ControlType == ControlType.Window && windowElement.Current.ClassName == "#32770";
         }
 
@@ -129,33 +130,28 @@ namespace Signum.Windows.UIAutomation
             return new MessageBoxProxy(win);
         }
 
-        public static void AssertCapturesMessageBoxError(this AutomationElement element, Action action, Func<string> actionDescription = null, int? timeOut = null)
+        public static MessageBoxProxy WaitMessageBox(this AutomationElement element, Action action, Func<string> actionDescription = null, int? timeOut = null)
         {
             if (actionDescription == null)
-                actionDescription = () => "Capture MessageBox Error";
+                actionDescription = () => "Get Windows after";
 
-            var parentWindow = WindowProxy.Normalize(element);
+            var previous = WaitExtensions.GetAllProcessWindows(element).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
 
             action();
 
+            AutomationElement newWindow = null;
 
             element.Wait(() =>
             {
-                AutomationElement newWindow = parentWindow.TryChild(a => a.Current.ControlType == ControlType.Window);
-                if (newWindow == null)
-                    return false;
-                if (MessageBoxProxy.IsMessageBox(newWindow))
-                {
-                    MessageBoxProxy winMessage = new MessageBoxProxy(newWindow);
-                    if (winMessage.IsError)
-                    {
-                        winMessage.Close();
-                        return true;
-                    }
-                }
-                throw new AssertFailedException(actionDescription());
+                newWindow = WaitExtensions.GetAllProcessWindows(element).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
 
-            }, actionDescription, timeOut ?? WaitExtensions.CapturaWindowTimeout);
+                if (newWindow != null)
+                    MessageBoxProxy.AssertNoErrorWindow(newWindow);
+
+                return false;
+            }, actionDescription, timeOut);
+
+            return new MessageBoxProxy(newWindow);
         }
     }
 }

@@ -1,5 +1,5 @@
 ﻿@using Signum.Entities.Mailing
-@using Signum.Engine.Basics
+@using Signum.Engine.Translation
 @using (var ec = Html.TypeContext<EmailTemplateMessageDN>())
 {
     <div class="sf-email-messageContainer">
@@ -19,10 +19,10 @@
         <fieldset>
             <legend>Replacement</legend>
             <textarea cols="30" rows="6"></textarea>
-            <input type="button" class="sf-button sf-email-insertTokenTextButton" value="@Signum.Web.Extensions.Properties.Resources.InsertInText" />
-            <input type="button" class="sf-button sf-email-insertIterationTextButton" value="@Signum.Web.Extensions.Properties.Resources.InsertIterationInText" />
-            <input type="button" class="sf-button sf-email-insertTokenSubjectButton" value="@Signum.Web.Extensions.Properties.Resources.InsertInSubject" />
-            <input type="button" class="sf-button sf-email-insertIterationSubjectButton" value="@Signum.Web.Extensions.Properties.Resources.InsertIterationInSubject" />
+            <input type="button" class="sf-button sf-email-insertTokenTextButton" value="@(EmailTemplateViewMessage.InsertInText.NiceToString())" />
+            <input type="button" class="sf-button sf-email-insertIterationTextButton" value="@(EmailTemplateViewMessage.InsertIterationInText.NiceToString())" />
+            <input type="button" class="sf-button sf-email-insertTokenSubjectButton" value="@(EmailTemplateViewMessage.InsertInSubject.NiceToString())" />
+            <input type="button" class="sf-button sf-email-insertIterationSubjectButton" value="@(EmailTemplateViewMessage.InsertIterationInSubject.NiceToString())" />
         </fieldset>
         @Html.ValueLine(ec, e => e.Subject)
         <div class="sf-email-messageEditContent">
@@ -34,7 +34,7 @@
                 vl.ValueHtmlProps["class"] = "sf-email-htmlwrite";
             })
             <br />
-            <input type="button" class="sf-button sf-email-messagePreviewContentButton" value="@Signum.Web.Extensions.Properties.Resources.PreviewContent" />
+            <input type="button" class="sf-button sf-email-messagePreviewContentButton" value="@(EmailTemplateViewMessage.PreviewContent.NiceToString())" />
         </div>
         <div class="sf-email-messagePreviewContent" style="display: none;">
             <fieldset>
@@ -42,7 +42,7 @@
                 <iframe name="frameNewImage" src="about:blank" class="sf-email-htmlBody"
                     frameborder="0"></iframe>
                 <br />
-                <input type="button" class="sf-button sf-email-messageEditContentButton" value="@Signum.Web.Extensions.Properties.Resources.EditContent" />
+                <input type="button" class="sf-button sf-email-messageEditContentButton" value="@(EmailTemplateViewMessage.EditContent.NiceToString())" />
             </fieldset>
         </div>
     </div>

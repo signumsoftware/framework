@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +9,6 @@ using System.Reflection;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using System.ComponentModel;
-using Signum.Entities.Extensions.Properties;
 using Signum.Entities.Basics;
 using Signum.Entities.Scheduler;
 using Signum.Entities.Authorization;
@@ -17,41 +16,41 @@ using Signum.Entities.Authorization;
 namespace Signum.Entities.Processes
 {
     [Serializable, EntityKind(EntityKind.SystemString)]
-    public class ProcessDN : MultiEnumDN
+    public class ProcessAlgorithmDN : MultiEnumDN
     {
        
     }
 
     [Serializable, EntityKind(EntityKind.Main)]
-    public class ProcessExecutionDN : IdentifiableEntity
+    public class ProcessDN : IdentifiableEntity
     {
-        internal ProcessExecutionDN() { }
+        internal ProcessDN() { }
 
-        public ProcessExecutionDN(ProcessDN process)
+        public ProcessDN(ProcessAlgorithmDN process)
         {
-            this.process = process;
+            this.algorithm = process;
         }
 
-        ProcessDN process;
+        ProcessAlgorithmDN algorithm;
         [NotNullValidator]
-        public ProcessDN Process
+        public ProcessAlgorithmDN Algorithm
         {
-            get { return process; }
+            get { return algorithm; }
         }
 
-        IProcessDataDN processData;
-        public IProcessDataDN ProcessData
+        IProcessDataDN data;
+        public IProcessDataDN Data
         {
-            get { return processData; }
-            set { Set(ref processData, value, () => ProcessData); }
+            get { return data; }
+            set { Set(ref data, value, () => Data); }
         }
 
         [ImplementedBy(typeof(UserProcessSessionDN))]
-        ISessionDataDN sessionData;
-        public ISessionDataDN SessionData
+        IProcessSessionDN session;
+        public IProcessSessionDN Session
         {
-            get { return sessionData; }
-            set { Set(ref sessionData, value, () => SessionData); }
+            get { return session; }
+            set { Set(ref session, value, () => Session); }
         }
 
         ProcessState state;
@@ -126,14 +125,14 @@ namespace Signum.Entities.Processes
         }
 
         decimal? progress;
-        [NumberBetweenValidator(0, 100)]
+        [NumberBetweenValidator(0, 1), Format("p")]
         public decimal? Progress
         {
             get { return progress; }
             set { Set(ref progress, value, () => Progress); }
         }
 
-        static StateValidator<ProcessExecutionDN, ProcessState> stateValidator = new StateValidator<ProcessExecutionDN, ProcessState>
+        static StateValidator<ProcessDN, ProcessState> stateValidator = new StateValidator<ProcessDN, ProcessState>
         (e => e.State, e => e.PlannedDate, e => e.CancelationDate, e => e.QueuedDate, e => e.ExecutionStart, e => e.ExecutionEnd, e => e.SuspendDate, e => e.Progress, e => e.ExceptionDate, e => e.Exception)
         {
        {ProcessState.Created,   false,          false,                  false,             false,                 false,               false,              false,           false,               false}, 
@@ -152,10 +151,10 @@ namespace Signum.Entities.Processes
             if (pi.Is(() => ExecutionStart) || pi.Is(() => ExecutionEnd))
             {
                 if (this.ExecutionEnd < this.ExecutionStart)
-                    return Resources.ProcessStartIsGreaterThanProcessEnd;
+                    return ProcessMessage.ProcessStartIsGreaterThanProcessEnd.NiceToString();
 
                 if (this.ExecutionStart == null && this.ExecutionEnd != null)
-                    return Resources.ProcessStartIsNullButProcessEndIsNot;
+                    return ProcessMessage.ProcessStartIsNullButProcessEndIsNot.NiceToString();
             }
 
             return stateValidator.Validate(this, pi) ?? base.PropertyValidation(pi);
@@ -166,16 +165,16 @@ namespace Signum.Entities.Processes
         {
             switch (state)
             {
-                case ProcessState.Created: return "{0} {1} on {2}".Formato(process, ProcessState.Created.NiceToString(), creationDate);
-                case ProcessState.Planned: return "{0} {1} for {2}".Formato(process, ProcessState.Planned.NiceToString(), plannedDate);
-                case ProcessState.Canceled: return "{0} {1} on {2}".Formato(process, ProcessState.Canceled.NiceToString(), cancelationDate);
-                case ProcessState.Queued: return "{0} {1} on {2}".Formato(process, ProcessState.Queued.NiceToString(), queuedDate);
-                case ProcessState.Executing: return "{0} {1} since {2}".Formato(process, ProcessState.Executing.NiceToString(), executionStart);
-                case ProcessState.Suspending: return "{0} {1} since {2}".Formato(process, ProcessState.Suspending.NiceToString(), suspendDate);
-                case ProcessState.Suspended: return "{0} {1} on {2}".Formato(process, ProcessState.Suspended.NiceToString(), suspendDate);
-                case ProcessState.Finished: return "{0} {1} on {2}".Formato(process, ProcessState.Finished.NiceToString(), executionEnd);
-                case ProcessState.Error: return "{0} {1} on {2}".Formato(process, ProcessState.Error.NiceToString(), executionEnd);
-                default: return "{0} ??".Formato(process);
+                case ProcessState.Created: return "{0} {1} on {2}".Formato(algorithm, ProcessState.Created.NiceToString(), creationDate);
+                case ProcessState.Planned: return "{0} {1} for {2}".Formato(algorithm, ProcessState.Planned.NiceToString(), plannedDate);
+                case ProcessState.Canceled: return "{0} {1} on {2}".Formato(algorithm, ProcessState.Canceled.NiceToString(), cancelationDate);
+                case ProcessState.Queued: return "{0} {1} on {2}".Formato(algorithm, ProcessState.Queued.NiceToString(), queuedDate);
+                case ProcessState.Executing: return "{0} {1} since {2}".Formato(algorithm, ProcessState.Executing.NiceToString(), executionStart);
+                case ProcessState.Suspending: return "{0} {1} since {2}".Formato(algorithm, ProcessState.Suspending.NiceToString(), suspendDate);
+                case ProcessState.Suspended: return "{0} {1} on {2}".Formato(algorithm, ProcessState.Suspended.NiceToString(), suspendDate);
+                case ProcessState.Finished: return "{0} {1} on {2}".Formato(algorithm, ProcessState.Finished.NiceToString(), executionEnd);
+                case ProcessState.Error: return "{0} {1} on {2}".Formato(algorithm, ProcessState.Error.NiceToString(), executionEnd);
+                default: return "{0} ??".Formato(algorithm);
             }
         }
 
@@ -196,12 +195,17 @@ namespace Signum.Entities.Processes
     {
     }
 
-    public interface ISessionDataDN : IIdentifiable
+    public interface IProcessLineDataDN : IIdentifiable
+    {
+
+    }
+
+    public interface IProcessSessionDN : IIdentifiable
     {
     }
 
     [Serializable, EntityKind(EntityKind.System)]
-    public class UserProcessSessionDN : Entity, ISessionDataDN
+    public class UserProcessSessionDN : Entity, IProcessSessionDN
     {
         Lite<UserDN> user;
         public Lite<UserDN> User
@@ -239,10 +243,58 @@ namespace Signum.Entities.Processes
         Cancel,
         Execute,
         Suspend,
+        Retry,
     }
 
     public enum ProcessPermission
     {
         ViewProcessControlPanel
     }
+
+    public enum ProcessMessage
+    {
+        [Description("Process {0} is not running anymore")]
+        Process0IsNotRunningAnymore,
+        [Description("Process Start is greater than Process End")]
+        ProcessStartIsGreaterThanProcessEnd,
+        [Description("Process Start is null but Process End is not")]
+        ProcessStartIsNullButProcessEndIsNot
+    }
+
+    [Serializable, EntityKind(EntityKind.System)]
+    public class ProcessExceptionLineDN : Entity
+    {
+        [NotNullable]
+        Lite<IProcessLineDataDN> line;
+        [NotNullValidator]
+        public Lite<IProcessLineDataDN> Line
+        {
+            get { return line; }
+            set { Set(ref line, value, () => Line); }
+        }
+
+        [NotNullable]
+        Lite<ProcessDN> process;
+        [NotNullValidator]
+        public Lite<ProcessDN> Process
+        {
+            get { return process; }
+            set { Set(ref process, value, () => Process); }
+        }
+
+        [NotNullable]
+        Lite<ExceptionDN> exception;
+        [NotNullValidator]
+        public Lite<ExceptionDN> Exception
+        {
+            get { return exception; }
+            set { Set(ref exception, value, () => Exception); }
+        }
+    }
+
+    public enum ProcessExceptionOperation
+    {
+        Save
+    }
+
 }

@@ -15,6 +15,7 @@ using Signum.Windows;
 using Signum.Entities;
 using Signum.Entities.ControlPanel;
 using Signum.Utilities;
+using Signum.Windows.Basics;
 
 namespace Signum.Windows.ControlPanels.Admin
 {
@@ -44,13 +45,18 @@ namespace Signum.Windows.ControlPanels.Admin
 
             var lastColumn = 0.To(Panel.NumberOfColumns).WithMin(c => Panel.Parts.Count(p => p.Column == c));
 
-            return new PanelPart
+            return new PanelPartDN
             {
                 Column = lastColumn,
                 Row = (Panel.Parts.Where(a => a.Column == lastColumn).Max(a => (int?)a.Row + 1) ?? 0),
                 Content = (IPartDN)Constructor.Construct(type, this),
                 Title = null,
             };
+        }
+
+        IEnumerable<Lite<IdentifiableEntity>> EntityType_AutoCompleting(string text)
+        {
+            return TypeClient.ViewableServerTypes().Where(t => t.CleanName.Contains(text, StringComparison.InvariantCultureIgnoreCase)).Select(t => t.ToLite()).Take(5);
         }
     }
 }

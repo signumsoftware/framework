@@ -16,47 +16,30 @@ using Signum.Engine.Basics;
 using Signum.Entities.Basics;
 using System.Reflection;
 using System.Data.Common;
+using Signum.Engine.Cache;
 
 namespace Signum.Entities.Authorization
 {
-    class TypeDefaultBehaviour
-    {
-        public TypeAllowed BaseAllowed { get; private set;  }
-        public Func<IEnumerable<TypeAllowed>, TypeAllowed> MergeAllowed;
-
-        public TypeDefaultBehaviour(TypeAllowed baseAllowed, Func<IEnumerable<TypeAllowed>, TypeAllowed> merge)
-        {
-            this.BaseAllowed = baseAllowed;
-            this.MergeAllowed = merge;
-        }
-
-        public override string ToString()
-        {
-            return "DefaulBehaviour {0}".Formato(BaseAllowed);
-        }
-    }
-
     class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions> 
     {
         readonly ResetLazy<Dictionary<Lite<RoleDN>, RoleAllowedCache>> runtimeRules;
 
-        DefaultBehaviour<TypeAllowedAndConditions> Min;
-        DefaultBehaviour<TypeAllowedAndConditions> Max;
+        Merger<Type, TypeAllowedAndConditions> merger;
 
-        public TypeAuthCache(SchemaBuilder sb, DefaultBehaviour<TypeAllowedAndConditions> max, DefaultBehaviour<TypeAllowedAndConditions> min)
+        public TypeAuthCache(SchemaBuilder sb, Merger<Type, TypeAllowedAndConditions> merger)
         {
-            runtimeRules = GlobalLazy.Create(this.NewCache).InvalidateWith(typeof(RuleTypeDN), typeof(RoleDN));
-
-            this.Max = max;
-            this.Min = min;
+            this.merger = merger;
 
             sb.Include<RuleTypeDN>();
 
             sb.AddUniqueIndex<RuleTypeDN>(rt => new { rt.Resource, rt.Role });
 
+            runtimeRules = sb.GlobalLazy(NewCache,
+                new InvalidateWith(typeof(RuleTypeDN), typeof(RoleDN)));
+
             sb.Schema.Table<TypeDN>().PreDeleteSqlSync += new Func<IdentifiableEntity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
 
-            Validator.GetOrCreatePropertyPack((RuleTypeDN r) => r.Conditions).StaticPropertyValidation += TypeAuthCache_StaticPropertyValidation;
+            Validator.PropertyValidator((RuleTypeDN r) => r.Conditions).StaticPropertyValidation += TypeAuthCache_StaticPropertyValidation;
         }
 
         string TypeAuthCache_StaticPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
@@ -76,7 +59,7 @@ namespace Signum.Entities.Authorization
             if (conditions.IsEmpty())
                 return null;
 
-            return "Type {0} has no definitions for the conditions: {1}".Formato(type.Name, conditions.CommaAnd(a => a.Condition.Name));
+            return "Type {0} has no definitions for the conditions: {1}".Formato(type.Name, conditions.CommaAnd(a => a.Condition.Key));
         }
 
         static SqlPreCommand AuthCache_PreDeleteSqlSync(IdentifiableEntity arg)
@@ -87,45 +70,12 @@ namespace Signum.Entities.Authorization
 
             return command;
         }    
-
      
-
-        DefaultRule IManualAuth<Type, TypeAllowedAndConditions>.GetDefaultRule(Lite<RoleDN> role)
-        {
-            var allowed = Database.Query<RuleTypeDN>().Where(a => a.Resource == null && a.Role == role).Select(a=>a.Allowed).ToList();
-
-            return allowed.IsEmpty() || allowed[0].Equals(Max.BaseAllowed) ? DefaultRule.Max : DefaultRule.Min; 
-        }
-
-        void IManualAuth<Type, TypeAllowedAndConditions>.SetDefaultRule(Lite<RoleDN> role, DefaultRule defaultRule)
-        {
-            if (((IManualAuth<Type, TypeAllowedAndConditions>)this).GetDefaultRule(role) == defaultRule)
-                return;
-
-            IQueryable<RuleTypeDN> query = Database.Query<RuleTypeDN>().Where(a => a.Resource == null && a.Role == role);
-            if (defaultRule == DefaultRule.Max)
-            {
-                if (query.UnsafeDelete() == 0)
-                    throw new InvalidOperationException("Inconsistency in the data");
-            }
-            else
-            {
-                query.UnsafeDelete();
-
-                new RuleTypeDN
-                {
-                    Role = role,
-                    Resource = null,
-                    Allowed = Min.BaseAllowed.Fallback,
-                }.Save();
-            }
-        }
-
         TypeAllowedAndConditions IManualAuth<Type, TypeAllowedAndConditions>.GetAllowed(Lite<RoleDN> role, Type key)
         {
             TypeDN resource = TypeLogic.TypeToDN[key];
 
-            ManualResourceCache miniCache = new ManualResourceCache(resource, Min, Max);
+            ManualResourceCache miniCache = new ManualResourceCache(resource, merger);
 
             return miniCache.GetAllowed(role);
         }
@@ -134,7 +84,7 @@ namespace Signum.Entities.Authorization
         {
             TypeDN resource = TypeLogic.TypeToDN[key];
 
-            ManualResourceCache miniCache = new ManualResourceCache(resource, Min, Max); 
+            ManualResourceCache miniCache = new ManualResourceCache(resource, merger); 
 
             if (miniCache.GetAllowed(role).Equals(allowed))
                 return;
@@ -155,57 +105,45 @@ namespace Signum.Entities.Authorization
 
         public class ManualResourceCache
         {
-            readonly Dictionary<Lite<RoleDN>, TypeAllowedAndConditions> defaultRules;
-            readonly Dictionary<Lite<RoleDN>, TypeAllowedAndConditions> specificRules;
+            readonly Dictionary<Lite<RoleDN>, TypeAllowedAndConditions> rules;
 
-            readonly DefaultBehaviour<TypeAllowedAndConditions> Min;
-            readonly DefaultBehaviour<TypeAllowedAndConditions> Max;
+            readonly Merger<Type, TypeAllowedAndConditions> merger;
 
-            public ManualResourceCache(TypeDN resource, DefaultBehaviour<TypeAllowedAndConditions> min, DefaultBehaviour<TypeAllowedAndConditions> max)
+            readonly TypeDN resource;
+
+            public ManualResourceCache(TypeDN resource, Merger<Type, TypeAllowedAndConditions> merger)
             {
+                this.resource = resource;
+
                 var list =  Database.Query<RuleTypeDN>().Where(r=>r.Resource == resource || r.Resource == null).ToList();
 
-                defaultRules = list.Where(a => a.Resource == null).ToDictionary(a => a.Role, a => a.ToTypeAllowedAndConditions());
+                rules = list.Where(a => a.Resource != null).ToDictionary(a => a.Role, a => a.ToTypeAllowedAndConditions());
 
-                specificRules = list.Where(a => a.Resource != null).ToDictionary(a => a.Role, a => a.ToTypeAllowedAndConditions());
-
-                this.Min = min;
-                this.Max = max;
+                this.merger = merger;
             }
 
             public TypeAllowedAndConditions GetAllowed(Lite<RoleDN> role)
             {
                 TypeAllowedAndConditions result;
-                if (specificRules.TryGetValue(role, out result))
+                if (rules.TryGetValue(role, out result))
                     return result;
 
                 return GetAllowedBase(role);
             }
 
-            DefaultBehaviour<TypeAllowedAndConditions> GetBehaviour(Lite<RoleDN> role)
-            {
-                return defaultRules.TryGet(role, Max.BaseAllowed).Equals(Max.BaseAllowed) ? Max : Min;
-            }
-
             public TypeAllowedAndConditions GetAllowedBase(Lite<RoleDN> role)
             {
-                var behaviour = GetBehaviour(role);
-                var related = AuthLogic.RelatedTo(role);
-                if (related.IsEmpty())
-                    return behaviour.BaseAllowed;
-                else
-                {
-                    var baseRules = related.Select(r => GetAllowed(r)).ToList();
+                IEnumerable<Lite<RoleDN>> related = AuthLogic.RelatedTo(role);
 
-                    return behaviour.MergeAllowed(baseRules);
-                }     
-            }
+                return merger.Merge(resource.ToType(), role, related.Select(GetAllowed));
+            }    
+            
         }
 
         Dictionary<Lite<RoleDN>, RoleAllowedCache> NewCache()
         {
             using (AuthLogic.Disable())
-            using (new EntityCache(true))
+            using (new EntityCache(EntityCacheType.ForceNewSealed))
             {
                 List<Lite<RoleDN>> roles = AuthLogic.RolesInOrder().ToList();
 
@@ -215,13 +153,8 @@ namespace Signum.Entities.Authorization
                 if (errors.HasText())
                     throw new InvalidOperationException(errors); 
 
-                Dictionary<Lite<RoleDN>, TypeAllowedAndConditions> defaultBehaviours =
-                    rules.Where(a => a.Resource == null)
-                    .ToDictionary(ru => ru.Role, ru => ru.ToTypeAllowedAndConditions());
-
                 Dictionary<Lite<RoleDN>, Dictionary<Type, TypeAllowedAndConditions>> realRules =
-                   rules.Where(a => a.Resource != null)
-                      .AgGroupToDictionary(ru => ru.Role, gr => gr
+                   rules.AgGroupToDictionary(ru => ru.Role, gr => gr
                           .ToDictionary(ru => TypeLogic.DnToType[ru.Resource], ru => ru.ToTypeAllowedAndConditions()));
 
                 Dictionary<Lite<RoleDN>, RoleAllowedCache> newRules = new Dictionary<Lite<RoleDN>, RoleAllowedCache>();
@@ -229,9 +162,7 @@ namespace Signum.Entities.Authorization
                 {
                     var related = AuthLogic.RelatedTo(role);
 
-                    var behaviour = defaultBehaviours.TryGet(role, Max.BaseAllowed).Equals(Max.BaseAllowed) ? Max : Min;
-
-                    newRules.Add(role, new RoleAllowedCache(behaviour, related.Select(r => newRules[r]).ToList(), realRules.TryGetC(role)));
+                    newRules.Add(role, new RoleAllowedCache(role,  merger, related.Select(r => newRules[r]).ToList(), realRules.TryGetC(role)));
                 }
 
                 return newRules;
@@ -242,8 +173,8 @@ namespace Signum.Entities.Authorization
         {
             RoleAllowedCache cache = runtimeRules.Value[rules.Role];
 
+            rules.MergeStrategy = AuthLogic.GetMergeStrategy(rules.Role);
             rules.SubRoles = AuthLogic.RelatedTo(rules.Role).ToMList();
-            rules.DefaultRule = GetDefaultRule(rules.Role);
             rules.Rules = (from r in resources
                            let type = TypeLogic.DnToType[r]
                            select new TypeAllowedRule()
@@ -259,18 +190,11 @@ namespace Signum.Entities.Authorization
         {
             using (AuthLogic.Disable())
             {
-                if (rules.DefaultRule != GetDefaultRule(rules.Role))
-                {
-                    ((IManualAuth<Type, TypeAllowedAndConditions>)this).SetDefaultRule(rules.Role, rules.DefaultRule);
-                    Database.Query<RuleTypeDN>().Where(r => r.Role == rules.Role && r.Resource != null).UnsafeDelete();
-                    return;
-                }
-
                 var current = Database.Query<RuleTypeDN>().Where(r => r.Role == rules.Role && r.Resource != null).ToDictionary(a => a.Resource);
                 var should = rules.Rules.Where(a => a.Overriden).ToDictionary(r => r.Resource);
 
-                Synchronizer.Synchronize(should, current, 
-                    (type, ar) => ar.Allowed.ToRuleType(rules.Role, type).Save(), 
+                Synchronizer.Synchronize(should, current,
+                    (type, ar) => ar.Allowed.ToRuleType(rules.Role, type).Save(),
                     (type, pr) => pr.Delete(),
                     (type, ar, pr) =>
                     {
@@ -285,20 +209,20 @@ namespace Signum.Entities.Authorization
                         if (!pr.Conditions.SequenceEqual(shouldConditions))
                             pr.Conditions = shouldConditions;
 
-                        if (pr.SelfModified)
+                        if (pr.IsGraphModified)
                             pr.Save();
                     });
             }
         }
 
-        public DefaultRule GetDefaultRule(Lite<RoleDN> role)
-        {
-            return runtimeRules.Value[role].GetDefaultRule(Max);
-        }
-
         internal TypeAllowedAndConditions GetAllowed(Lite<RoleDN> role, Type key)
         {
             return runtimeRules.Value[role].GetAllowed(key);
+        }
+
+        internal TypeAllowedAndConditions GetAllowedBase(Lite<RoleDN> role, Type key)
+        {
+            return runtimeRules.Value[role].GetAllowedBase(key);
         }
 
         internal DefaultDictionary<Type, TypeAllowedAndConditions> GetDefaultDictionary()
@@ -308,59 +232,48 @@ namespace Signum.Entities.Authorization
 
         public class RoleAllowedCache
         {
-            readonly DefaultBehaviour<TypeAllowedAndConditions> behaviour;
+            readonly Merger<Type, TypeAllowedAndConditions> merger;
             readonly DefaultDictionary<Type, TypeAllowedAndConditions> rules; 
             readonly List<RoleAllowedCache> baseCaches;
+            readonly Lite<RoleDN> role;
 
-            public RoleAllowedCache(DefaultBehaviour<TypeAllowedAndConditions> behaviour, List<RoleAllowedCache> baseCaches, Dictionary<Type, TypeAllowedAndConditions> newValues)
+            public RoleAllowedCache(Lite<RoleDN> role, Merger<Type, TypeAllowedAndConditions> merger, List<RoleAllowedCache> baseCaches, Dictionary<Type, TypeAllowedAndConditions> newValues)
             {
-                this.behaviour = behaviour;
+                this.role = role;
+
+                this.merger = merger;
 
                 this.baseCaches = baseCaches;
 
-                TypeAllowedAndConditions defaultAllowed;
-                Dictionary<Type, TypeAllowedAndConditions> tmpRules; 
+                Func<Type, TypeAllowedAndConditions> defaultAllowed = merger.MergeDefault(role, baseCaches.Select(a => a.rules.DefaultAllowed));
 
-                if(baseCaches.IsEmpty())
-                {
-                    defaultAllowed = behaviour.BaseAllowed;
+                Func<Type, TypeAllowedAndConditions> baseAllowed = k => merger.Merge(k, role, baseCaches.Select(b => b.GetAllowed(k)));
 
-                    tmpRules = newValues; 
-                }
-                else
-                {
-                    defaultAllowed = behaviour.MergeAllowed(baseCaches.Select(a => a.rules.DefaultAllowed));
 
-                    var keys = baseCaches.Where(b => b.rules.DefaultAllowed.Equals(defaultAllowed) && b.rules != null).SelectMany(a => a.rules.ExplicitKeys).ToHashSet();
+                var keys = baseCaches
+                    .Where(b => b.rules.OverrideDictionary != null)
+                    .SelectMany(a => a.rules.OverrideDictionary.Keys)
+                    .ToHashSet();
 
-                    if (keys != null)
-                    {
-                        tmpRules = keys.ToDictionary(k => k, k =>
-                        {
-                            var baseRules = baseCaches.Select(b => b.GetAllowed(k)).ToList();
-                            return behaviour.MergeAllowed(baseRules);
-                        }); 
-                            
-                        if (newValues != null)
-                            tmpRules.SetRange(newValues);
-                    }
-                    else
-                    {
-                        tmpRules = newValues; 
-                    }
-                }
+                Dictionary<Type, TypeAllowedAndConditions> tmpRules = keys.ToDictionary(k => k, baseAllowed);
+                if (newValues != null)
+                    tmpRules.SetRange(newValues);
 
-                tmpRules = Simplify(tmpRules, defaultAllowed);
+                tmpRules = Simplify(tmpRules, defaultAllowed, baseAllowed);
 
                 rules = new DefaultDictionary<Type, TypeAllowedAndConditions>(defaultAllowed, tmpRules);
             }
 
-            internal static Dictionary<Type, TypeAllowedAndConditions> Simplify(Dictionary<Type, TypeAllowedAndConditions> dictionary, TypeAllowedAndConditions defaultAllowed)
+            internal static Dictionary<Type, TypeAllowedAndConditions> Simplify(Dictionary<Type, TypeAllowedAndConditions> dictionary, 
+                Func<Type, TypeAllowedAndConditions> defaultAllowed,
+                Func<Type, TypeAllowedAndConditions> baseAllowed)
             {
                 if (dictionary == null || dictionary.Count == 0)
                     return null;
 
-                dictionary.RemoveRange(dictionary.Where(p => p.Value.Equals(defaultAllowed)).Select(p => p.Key).ToList());
+                dictionary.RemoveRange(dictionary.Where(p =>
+                 p.Value.Equals(defaultAllowed(p.Key)) &&
+                 p.Value.Equals(baseAllowed(p.Key))).Select(p => p.Key).ToList());
 
                 if (dictionary.Count == 0)
                     return null;
@@ -375,17 +288,7 @@ namespace Signum.Entities.Authorization
 
             public TypeAllowedAndConditions GetAllowedBase(Type k)
             {
-                if (baseCaches.IsEmpty())
-                    return rules.DefaultAllowed;
-
-                var baseRules = baseCaches.Select(b => b.GetAllowed(k)).ToList();
-
-                return behaviour.MergeAllowed(baseRules);
-            }
-
-            public DefaultRule GetDefaultRule(DefaultBehaviour<TypeAllowedAndConditions> max)
-            {
-                return behaviour == max ? DefaultRule.Max : DefaultRule.Min;
+                return merger.Merge(k, role, baseCaches.Select(b => b.GetAllowed(k)));
             }
 
             internal DefaultDictionary<Type, TypeAllowedAndConditions> DefaultDictionary()
@@ -396,31 +299,31 @@ namespace Signum.Entities.Authorization
 
         internal XElement ExportXml()
         {
-            var list = Database.RetrieveAll<RuleTypeDN>();
-
-            var defaultRules = list.Where(a => a.Resource == null).ToDictionary(a => a.Role, a => a.ToTypeAllowedAndConditions());
-            var specificRules = list.Where(a => a.Resource != null).AgGroupToDictionary(a => a.Role, gr => gr.ToDictionary(a => a.Resource));
+            var rules = runtimeRules.Value;
 
             return new XElement("Types",
                 (from r in AuthLogic.RolesInOrder()
-                 let max = defaultRules.TryGet(r, Max.BaseAllowed).Equals(Max.BaseAllowed)
+                 let rac = rules[r]
                  select new XElement("Role",
                      new XAttribute("Name", r.ToString()),
-                     max ? null : new XAttribute("Default", "Min"),
-                     specificRules.TryGetC(r).TryCC(dic =>
-                         from kvp in dic
-                         let resource = kvp.Key.CleanName
+                         from k in rac.DefaultDictionary().OverrideDictionary.TryCC(dic => dic.Keys).EmptyIfNull()
+                         let allowedBase = rac.GetAllowedBase(k)
+                         let allowed = rac.GetAllowed(k)
+                         where !allowed.Equals(allowedBase)
+                         let resource = TypeLogic.GetCleanName(k)
                          orderby resource
                          select new XElement("Type",
                             new XAttribute("Resource", resource),
-                            new XAttribute("Allowed", kvp.Value.Allowed.ToString()),
-                            from c in kvp.Value.Conditions
+                            new XAttribute("Allowed", allowed.Fallback.ToString()),
+                            from c in allowed.Conditions
+                            let conditionName = TypeConditionNameDN.UniqueKey(c.ConditionName)
+                            orderby conditionName
                             select new XElement("Condition",
-                                new XAttribute("Name", c.Condition.Key),
+                                new XAttribute("Name", conditionName),
                                 new XAttribute("Allowed", c.Allowed.ToString()))
                          )
-                     ))
-                 ));
+                     )
+                ));
         }
 
 
@@ -453,9 +356,6 @@ namespace Signum.Entities.Authorization
             return Synchronizer.SynchronizeScript(should, current, 
                 (role, x) =>
                 {
-                    var max = x.Attribute("Default") == null || x.Attribute("Default").Value != "Min";
-                    SqlPreCommand defSql = SetDefault(table, null, max, role);
-
                     var dic = (from xr in x.Elements("Type")
                                let t = getResource(xr.Attribute("Resource").Value)
                                where t != null
@@ -471,17 +371,13 @@ namespace Signum.Entities.Authorization
                         Role = role,
                         Allowed = kvp.Value.Allowed,
                         Conditions =  kvp.Value.Condition
-                    }, Comment(role, kvp.Key, kvp.Value.Allowed))).Combine(Spacing.Simple);
+                    }, comment: Comment(role, kvp.Key, kvp.Value.Allowed))).Combine(Spacing.Simple);
 
-                    return SqlPreCommand.Combine(Spacing.Simple, defSql, restSql);
+                    return restSql;
                 },
                 (role, list) => list.Select(rt => table.DeleteSqlSync(rt)).Combine(Spacing.Simple),
                 (role, x, list) =>
                 {
-                    var def = list.SingleOrDefaultEx(a => a.Resource == null);
-                    var max = x.Attribute("Default") == null || x.Attribute("Default").Value != "Min";
-                    SqlPreCommand defSql = SetDefault(table, def, max, role);
-
                     var dic = (from xr in  x.Elements("Type")
                               let t = getResource(xr.Attribute("Resource").Value)
                                where t != null
@@ -495,7 +391,7 @@ namespace Signum.Entities.Authorization
                             var a = xr.Attribute("Allowed").Value.ToEnum<TypeAllowed>();
                             var conditions = Conditions(xr, replacements);
 
-                            return table.InsertSqlSync(new RuleTypeDN { Resource = r, Role = role, Allowed = a, Conditions = conditions}, Comment(role, r, a));
+                            return table.InsertSqlSync(new RuleTypeDN { Resource = r, Role = role, Allowed = a, Conditions = conditions }, comment: Comment(role, r, a));
                         }, 
                         (r, rt) => table.DeleteSqlSync(rt, Comment(role, r, rt.Allowed)), 
                         (r, xr, pr) =>
@@ -507,11 +403,11 @@ namespace Signum.Entities.Authorization
                             if (!pr.Conditions.SequenceEqual(conditions))
                                 pr.Conditions = conditions;
 
-                            return table.UpdateSqlSync(pr, Comment(role, r, oldA, pr.Allowed));
+                            return table.UpdateSqlSync(pr, comment: Comment(role, r, oldA, pr.Allowed));
                         }, 
                         Spacing.Simple);
 
-                    return SqlPreCommand.Combine(Spacing.Simple, defSql, restSql);
+                    return restSql;
                 }, Spacing.Double);
         }
 
@@ -538,37 +434,7 @@ namespace Signum.Entities.Authorization
             return "{0} {1} for {2} ({3} -> {4})".Formato(typeof(TypeDN).NiceName(), resource.ToString(), role, from, to);
         }
 
-        private SqlPreCommand SetDefault(Table table, RuleTypeDN def, bool max, Lite<RoleDN> role)
-        {
-            string comment = "Default {0} for {1}".Formato(typeof(TypeDN).NiceName(), role);
-
-            if (max)
-            {
-                if (def != null)
-                    return table.DeleteSqlSync(def, comment + " ({0})".Formato(def.Allowed));
-
-                return null;
-            }
-            else
-            {
-                if (def == null)
-                {
-                    return table.InsertSqlSync(new RuleTypeDN()
-                    {
-                        Role = role,
-                        Resource = null,
-                        Allowed = Min.BaseAllowed.Fallback
-                    }, comment + " ({0})".Formato(Min.BaseAllowed));
-                }
-                else if (!def.Allowed.Equals(Min.BaseAllowed))
-                {
-                    var old = def.Allowed;
-                    def.Allowed = Min.BaseAllowed.Fallback;
-                    return table.UpdateSqlSync(def, comment + "({0} -> {1})".Formato(old, Min.BaseAllowed));
-                }
-
-                return null;
-            }
-        }
     }
+
+
 }

@@ -10,7 +10,6 @@ using System.Web;
 using System.Text.RegularExpressions;
 using System.Globalization;
 using Signum.Entities;
-using Signum.Engine.Extensions.Properties;
 using Signum.Entities.Mailing;
 
 namespace Signum.Engine.Mailing
@@ -109,7 +108,7 @@ namespace Signum.Engine.Mailing
                        (MemberInfo)modelType.GetProperty(fieldOrProperty, flags);
 
                 if (Member == null)
-                    errors.Add(Resources.TheModel0DoesNotHaveAnyFieldWithTheToken1.Formato(modelType.Name, fieldOrProperty));
+                    errors.Add(EmailTemplateMessage.TheModel0DoesNotHaveAnyFieldWithTheToken1.NiceToString().Formato(modelType.Name, fieldOrProperty));
             }
 
             MemberInfo Member;

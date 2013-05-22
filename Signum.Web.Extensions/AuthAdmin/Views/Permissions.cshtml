@@ -1,4 +1,4 @@
-﻿@Html.DynamicCss("~/authAdmin/Content/SF_AuthAdmin.css")
+@Html.ScriptCss("~/authAdmin/Content/SF_AuthAdmin.css")
 @Html.ScriptsJs("~/authAdmin/Scripts/SF_AuthAdmin.js")
 <script type="text/javascript">
     $(function () {
@@ -8,22 +8,22 @@
 @using (var tc = Html.TypeContext<PermissionRulePack>())
 {
     @Html.EntityLine(tc, f => f.Role)
-    @Html.ValueLine(tc, f => f.DefaultRule, vl => { vl.UnitText = tc.Value.DefaultLabel; })
+    @Html.ValueLine(tc, f => f.Strategy)
 
     <table class="sf-auth-rules">
         <thead>
             <tr>
                 <th>
-                    @Resources.PermissionsAscx_Permission
+                    @AuthMessage.PermissionsAscx_Permission.NiceToString()
                 </th>
                 <th>
-                    @Resources.PermissionsAscx_Allow
+                    @AuthMessage.PermissionsAscx_Allow.NiceToString()
                 </th>
                 <th>
-                    @Resources.PermissionsAscx_Deny
+                    @AuthMessage.PermissionsAscx_Deny.NiceToString()
                 </th>
                 <th>
-                    @Resources.PermissionsAscx_Overriden
+                    @AuthMessage.PermissionsAscx_Overriden.NiceToString()
                 </th>
             </tr>
         </thead>
@@ -31,7 +31,7 @@
         {
             <tr>
                 <td>
-                    @Html.Span(null, item.Value.Resource.Name)
+                    @Html.Span(null, item.Value.Resource.Key)
                     @Html.HiddenRuntimeInfo(item, i => i.Resource)
                     @Html.Hidden(item.Compose("AllowedBase"), item.Value.AllowedBase)
                 </td>

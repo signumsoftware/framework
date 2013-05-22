@@ -6,6 +6,8 @@ using Selenium;
 using Signum.Utilities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq.Expressions;
+using Signum.Entities;
+using Signum.Engine.Basics;
 
 namespace Signum.Web.Selenium
 {
@@ -23,9 +25,19 @@ namespace Signum.Web.Selenium
 
         public static void Search(this ISelenium selenium, string prefix)
         {
+            selenium.Click(SearchSelector(prefix));
+            WaitSearchCompleted(selenium, prefix);
+        }
+
+        public static void WaitSearchCompleted(this ISelenium selenium)
+        {
+            WaitSearchCompleted(selenium, "");
+        }
+
+        public static void WaitSearchCompleted(this ISelenium selenium, string prefix)
+        {
             string searchButton = SearchSelector(prefix);
-            selenium.Click(searchButton);
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(searchButton) && 
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(searchButton) &&
                 !selenium.IsElementPresent("{0}.sf-searching".Formato(searchButton)));
         }
 
@@ -36,7 +48,9 @@ namespace Signum.Web.Selenium
 
         public static void SetElementsPerPageToFinder(this ISelenium selenium, string elementsPerPage, string prefix)
         {
-            selenium.Select("{0}sfElems".Formato(prefix), "value=" + elementsPerPage);
+            var combo = "{0}sfElems".Formato(prefix);
+            selenium.Select(combo, "value=" + elementsPerPage);
+            selenium.FireEvent(combo, "change");
         }
 
         public static void ToggleFilters(this ISelenium selenium, bool show)
@@ -234,14 +248,24 @@ namespace Signum.Web.Selenium
             return "{0} > td:nth-child({1})".Formato(RowSelector(selenium, rowIndexBase1, prefix), columnIndexBase1);
         }
 
-        public static void SelectRowCheckbox(this ISelenium selenium, int rowIndexBase0)
+        public static void SelectRow(this ISelenium selenium, int rowIndexBase0)
         {
-            SelectRowCheckbox(selenium, rowIndexBase0, "");
+            SelectRow(selenium, rowIndexBase0, "");
         }
 
-        public static void SelectRowCheckbox(this ISelenium selenium, int rowIndexBase0, string prefix)
+        public static void SelectRow(this ISelenium selenium, int rowIndexBase0, string prefix)
         {
             selenium.Click("{0}rowSelection_{1}".Formato(prefix, rowIndexBase0));
+        }
+
+        public static void SelectEntityRow(this ISelenium selenium, Lite<IdentifiableEntity> lite)
+        {
+            SelectEntityRow(selenium, lite, "");
+        }
+
+        public static void SelectEntityRow(this ISelenium selenium, Lite<IdentifiableEntity> lite, string prefix)
+        {
+            selenium.Click("{0} .sf-td-selection".Formato(EntityRowSelector(lite, prefix)));
         }
 
         public static string TableHeaderSelector()
@@ -332,6 +356,7 @@ namespace Signum.Web.Selenium
         {
             selenium.Click(TableHeaderSelector(columnIndexBase1, prefix));
             selenium.TableHeaderMarkedAsSorted(columnIndexBase1, ascending, true, prefix);
+            selenium.WaitSearchCompleted(prefix);
         }
 
         public static void SortMultiple(this ISelenium selenium, int columnIndexBase1, bool ascending)
@@ -345,6 +370,7 @@ namespace Signum.Web.Selenium
             selenium.Click(TableHeaderSelector(columnIndexBase1, prefix));
             selenium.ShiftKeyUp();
             selenium.TableHeaderMarkedAsSorted(columnIndexBase1, ascending, true, prefix);
+            selenium.WaitSearchCompleted(prefix);
         }
 
         public static void TableHeaderMarkedAsSorted(this ISelenium selenium, int columnIndexBase1, bool ascending, bool marked)
@@ -384,29 +410,29 @@ namespace Signum.Web.Selenium
             return selenium.IsElementPresent("{0}[data-entity='{1}']".Formato(RowSelector(selenium, rowIndexBase1, prefix), liteKey));
         }
 
-        public static string EntityRowSelector(string liteKey)
+        public static string EntityRowSelector(Lite<IdentifiableEntity> lite)
         {
-            return EntityRowSelector(liteKey, "");
+            return EntityRowSelector(lite, "");
         }
 
-        public static string EntityRowSelector(string liteKey, string prefix)
+        public static string EntityRowSelector(Lite<IdentifiableEntity> lite, string prefix)
         {
-            return "{0}[data-entity='{1}']".Formato(RowSelector(prefix), liteKey);
+            return "{0}[data-entity='{1}']".Formato(RowSelector(prefix), lite.Key());
         }
 
-        public static void EntityClick(this ISelenium selenium, string liteKey)
+        public static void EntityClick(this ISelenium selenium, Lite<IdentifiableEntity> lite)
         {
-            EntityClick(selenium, liteKey, "");
+            EntityClick(selenium, lite, "");
         }
 
-        public static void EntityClick(this ISelenium selenium, string liteKey, string prefix)
+        public static void EntityClick(this ISelenium selenium, Lite<IdentifiableEntity> lite, string prefix)
         {
-            EntityClick(selenium, liteKey, prefix, true);
+            EntityClick(selenium, lite, prefix, true);
         }
 
-        public static void EntityClick(this ISelenium selenium, string liteKey, string prefix, bool allowMultiple)
+        public static void EntityClick(this ISelenium selenium, Lite<IdentifiableEntity> lite, string prefix, bool allowMultiple)
         {
-            selenium.Click("{0} > td:nth-child({1}) > a".Formato(EntityRowSelector(liteKey, prefix), allowMultiple ? 2 : 1));
+            selenium.Click("{0} > td:nth-child({1}) > a".Formato(EntityRowSelector(lite, prefix), allowMultiple ? 2 : 1));
         }
 
         public static void EntityClick(this ISelenium selenium, int rowIndexBase1)

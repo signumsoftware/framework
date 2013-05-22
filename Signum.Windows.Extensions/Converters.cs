@@ -10,6 +10,8 @@ using Signum.Entities.Authorization;
 using System.Windows.Media;
 using System.Windows.Ink;
 using Signum.Entities.Chart;
+using Signum.Entities.Basics;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Windows.Extensions
 {
@@ -49,6 +51,6 @@ namespace Signum.Windows.Extensions
 
 
         public static readonly IValueConverter NotNullToRedBrush = ConverterFactory.New(
-            (object d) => d == null ? null : Brushes.Pink);      
+            (object d) => d == null ? null : Brushes.Pink);
     }
 }

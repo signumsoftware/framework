@@ -1,9 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using Signum.Web.Extensions.Properties;
 using Signum.Entities.Chart;
 using Signum.Engine.DynamicQuery;
 using Signum.Utilities;
@@ -20,6 +19,7 @@ using Signum.Engine.Reports;
 using Signum.Web.Controllers;
 using Signum.Engine.Chart;
 using Signum.Entities.Basics;
+using Signum.Engine.Authorization;
 
 namespace Signum.Web.Chart
 {
@@ -28,12 +28,14 @@ namespace Signum.Web.Chart
         #region chart
         public ActionResult Index(FindOptions findOptions)
         {
+            ChartPermission.ViewCharting.Authorize(); 
+
             if (!Navigator.IsFindable(findOptions.QueryName))
-                throw new UnauthorizedAccessException(Resources.Chart_Query0IsNotAllowed.Formato(findOptions.QueryName));
+                throw new UnauthorizedAccessException(ChartMessage.Chart_Query0IsNotAllowed.NiceToString().Formato(findOptions.QueryName));
 
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
-            Navigator.SetTokens(queryDescription, findOptions.FilterOptions);
+            Navigator.SetTokens(findOptions.FilterOptions, queryDescription, false);
 
             var request = new ChartRequest(findOptions.QueryName)
             {
@@ -86,10 +88,17 @@ namespace Signum.Web.Chart
 
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(request.QueryName);
 
-            QueryToken token = QueryUtils.Parse(tokenName, qt => qt.SubTokensChart(qd.Columns, request.GroupResults));
+            QueryToken token = QueryUtils.Parse(tokenName, qd, request.GroupResults);
 
-            return Content(SignumController.CreateHtmlHelper(this).QueryTokenCombo(token, null,
-                new Context(null, prefix), index + 1, qd.QueryName, t => token.SubTokensChart(qd.Columns, request.GroupResults)).ToHtmlString());
+            var combo = SignumController.CreateHtmlHelper(this).QueryTokenCombo(token, null,
+                new Context(null, prefix), index + 1, qd, canAggregate: request.GroupResults);
+
+            var content = combo.ToHtmlString();
+
+            if (content.HasText())
+                return Content(content);
+            else
+                return Content("<span>no-results</span>");
         }
 
         [HttpPost]
@@ -104,7 +113,7 @@ namespace Signum.Web.Chart
             FilterOption fo = new FilterOption(tokenName, null);
             if (fo.Token == null)
             {
-                fo.Token = QueryUtils.Parse(tokenName, qt => qt.SubTokensChart(qd.Columns, request.GroupResults));
+                fo.Token = QueryUtils.Parse(tokenName, qd, canAggregate: request.GroupResults);
             }
             fo.Operation = QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(fo.Token.Type)).FirstEx();
 
@@ -221,7 +230,7 @@ namespace Signum.Web.Chart
             var request = ExtractChartRequestCtx(prefix, null).Value;
 
             if (!Navigator.IsFindable(request.QueryName))
-                throw new UnauthorizedAccessException(Resources.Chart_Query0IsNotAllowed.Formato(request.QueryName));
+                throw new UnauthorizedAccessException(ChartMessage.Chart_Query0IsNotAllowed.NiceToString().Formato(request.QueryName));
 
             var resultTable = ChartLogic.ExecuteChart(request);
 
@@ -262,7 +271,7 @@ namespace Signum.Web.Chart
             var request = ExtractChartRequestCtx(prefix, null).Value;
 
             if (!Navigator.IsFindable(request.QueryName))
-                throw new UnauthorizedAccessException(Resources.Chart_Query0IsNotAllowed.Formato(request.QueryName));
+                throw new UnauthorizedAccessException(ChartMessage.Chart_Query0IsNotAllowed.NiceToString().Formato(request.QueryName));
 
             var userChart = request.ToUserChart();
 
@@ -273,9 +282,12 @@ namespace Signum.Web.Chart
             return Navigator.NormalPage(this, userChart);
         }
 
-        public ActionResult ViewUserChart(Lite<UserChartDN> lite)
+        public ActionResult ViewUserChart(Lite<UserChartDN> lite, Lite<IdentifiableEntity> currentEntity)
         {
             UserChartDN uc = Database.Retrieve<UserChartDN>(lite);
+
+            if (uc.EntityType != null)
+                CurrentEntityConverter.SetFilterValues(uc.Filters, currentEntity.Retrieve());
 
             ChartRequest request = uc.ToRequest();
 

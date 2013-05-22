@@ -52,7 +52,7 @@ namespace Signum.Engine.Mailing
                 ProcessLogic.AssertStarted(sb);
                 ProcessLogic.Register(EmailMessageProcesses.SendEmails, new SendEmailProcessAlgorithm());
 
-                new BasicConstructFromMany<EmailMessageDN, ProcessExecutionDN>(EmailMessageOperation.ReSendEmails)
+                new Graph<ProcessDN>.ConstructFromMany<EmailMessageDN>(EmailMessageOperation.ReSendEmails)
                 {
                     Construct = (messages, args) =>
                     {
@@ -61,7 +61,7 @@ namespace Signum.Engine.Mailing
                             Name = args.TryGetArgC<string>()
                         }.Save();
 
-                        foreach(var m in messages.Select(m => m.RetrieveAndForget()))
+                        foreach (var m in messages.Select(m => m.RetrieveAndForget()))
                         {
                             new EmailMessageDN()
                             {
@@ -78,22 +78,26 @@ namespace Signum.Engine.Mailing
                     }
                 }.Register();
 
-                dqm[typeof(EmailPackageDN)] = (from e in Database.Query<EmailPackageDN>()
-                                               select new
-                                               {
-                                                   Entity = e,
-                                                   e.Id,
-                                                   e.Name,
-                                               }).ToDynamic();
+                dqm.RegisterQuery(typeof(EmailPackageDN), () =>
+                    from e in Database.Query<EmailPackageDN>()
+                    select new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.Name,
+                    });
             }
         }
     }
 
     public class SendEmailProcessAlgorithm : IProcessAlgorithm
     {
-        public void Execute(IExecutingProcess executingProcess)
+        public void Execute(ExecutingProcess executingProcess)
         {
             EmailPackageDN package = (EmailPackageDN)executingProcess.Data;
+
+
+            
 
             List<Lite<EmailMessageDN>> emails = package.RemainingMessages()
                                                 .Select(e => e.ToLite())

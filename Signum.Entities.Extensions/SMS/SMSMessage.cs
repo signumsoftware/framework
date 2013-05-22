@@ -5,6 +5,8 @@ using System.Text;
 using System.ComponentModel;
 using System.Linq.Expressions;
 using Signum.Utilities;
+using Signum.Entities.Processes;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.SMS
 {
@@ -15,7 +17,7 @@ namespace Signum.Entities.SMS
     }
 
     [Serializable, EntityKind(EntityKind.Main)]
-    public class SMSMessageDN : Entity
+    public class SMSMessageDN : Entity, IProcessLineDataDN
     {
         public static string DefaultFrom;
 
@@ -26,8 +28,9 @@ namespace Signum.Entities.SMS
             set { Set(ref template, value, () => Template); }
         }
 
+        [SqlDbType(Size=int.MaxValue)]
         string message;
-        [StringLengthValidator(AllowNulls = false, Max = SMSCharacters.SMSMaxTextLength)]
+        [NotNullValidator]
         public string Message
         {
             get { return message; }
@@ -111,10 +114,9 @@ namespace Signum.Entities.SMS
             set { Set(ref referred, value, () => Referred); }
         }
 
-        static readonly Expression<Func<SMSMessageDN, string>> ToStringExpression = e => "SMS " + e.MessageID;
         public override string ToString()
         {
-            return ToStringExpression.Evaluate(this);
+            return "SMS " + MessageID;
         }
     }
 
@@ -140,5 +142,10 @@ namespace Signum.Entities.SMS
     {
         Send,
         UpdateStatus
+    }
+
+    public enum SmsMessages
+    {
+        EndDateMustBeHigherThanStartDate
     }
 }

@@ -14,6 +14,7 @@ using Signum.Engine.Authorization;
 using Signum.Engine.Basics;
 using Signum.Engine.UserQueries;
 using Signum.Engine.Operations;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Engine.ControlPanel
 {
@@ -25,31 +26,37 @@ namespace Signum.Engine.ControlPanel
             {
                 UserQueryLogic.Start(sb, dqm);
 
+                PermissionAuthLogic.RegisterPermissions(ControlPanelPermission.ViewControlPanel);
+
                 sb.Include<ControlPanelDN>();
 
-                dqm[typeof(ControlPanelDN)] = (from cp in Database.Query<ControlPanelDN>()
-                                            select new
-                                            {
-                                                Entity = cp,
-                                                cp.DisplayName,
-                                                cp.Related,
-                                            }).ToDynamic();
+                dqm.RegisterQuery(typeof(ControlPanelDN), () =>
+                    from cp in Database.Query<ControlPanelDN>()
+                    select new
+                    {
+                        Entity = cp,
+                        cp.DisplayName,
+                        cp.EntityType,
+                        cp.Related,
+                    });
 
-                dqm[typeof(LinkListPartDN)] = (from cp in Database.Query<LinkListPartDN>()
-                                               select new
-                                               {
-                                                   Entity = cp,
-                                                   ToStr = cp.ToString(),
-                                                   Links = cp.Links.Count
-                                               }).ToDynamic();
+                dqm.RegisterQuery(typeof(LinkListPartDN), () =>
+                    from cp in Database.Query<LinkListPartDN>()
+                    select new
+                    {
+                        Entity = cp,
+                        ToStr = cp.ToString(),
+                        Links = cp.Links.Count
+                    });
 
-                dqm[typeof(CountSearchControlPartDN)] = (from cp in Database.Query<CountSearchControlPartDN>()
-                                               select new
-                                               {
-                                                   Entity = cp,
-                                                   ToStr = cp.ToString(),
-                                                   Links = cp.UserQueries.Count
-                                               }).ToDynamic(); 
+                dqm.RegisterQuery(typeof(CountSearchControlPartDN), () =>
+                    from cp in Database.Query<CountSearchControlPartDN>()
+                    select new
+                    {
+                        Entity = cp,
+                        ToStr = cp.ToString(),
+                        Links = cp.UserQueries.Count
+                    });
 
                 RegisterOperations();
             }
@@ -57,14 +64,19 @@ namespace Signum.Engine.ControlPanel
 
         private static void RegisterOperations()
         {
-            new BasicExecute<ControlPanelDN>(ControlPanelOperation.Save)
+            new Graph<ControlPanelDN>.Construct(ControlPanelOperation.Create)
+            {
+                Construct = (_) => new ControlPanelDN { Related = UserQueryUtils.DefaultRelated() }
+            }.Register();
+
+            new Graph<ControlPanelDN>.Execute(ControlPanelOperation.Save)
             {
                 AllowsNew = true,
                 Lite = false,
                 Execute = (cp, _) => { }
             }.Register();
 
-            new BasicDelete<ControlPanelDN>(ControlPanelOperation.Delete)
+            new Graph<ControlPanelDN>.Delete(ControlPanelOperation.Delete)
             {
                 Lite = false,
                 Delete = (cp, _) =>
@@ -72,11 +84,10 @@ namespace Signum.Engine.ControlPanel
                     var parts = cp.Parts.Select(a => a.Content).ToList();
                     cp.Delete();
                     Database.DeleteList(parts);
-
                 }
             }.Register();
 
-            new BasicConstructFrom<ControlPanelDN, ControlPanelDN>(ControlPanelOperation.Clone)
+            new Graph<ControlPanelDN>.ConstructFrom<ControlPanelDN>(ControlPanelOperation.Clone)
             {
                 Lite = true,
                 AllowsNew = false,
@@ -87,7 +98,7 @@ namespace Signum.Engine.ControlPanel
         public static ControlPanelDN GetHomePageControlPanel()
         {
             var cps = Database.Query<ControlPanelDN>()
-                .Where(a=>a.HomePagePriority.HasValue)
+                .Where(a => a.HomePagePriority.HasValue)
                 .OrderByDescending(a => a.HomePagePriority)
                 .Select(a => a.ToLite())
                 .FirstOrDefault();
@@ -124,6 +135,18 @@ namespace Signum.Engine.ControlPanel
 
             TypeConditionLogic.Register<LinkListPartDN>(newEntityGroupKey,
                  uq => Database.Query<ControlPanelDN>().WhereCondition(newEntityGroupKey).Any(cp => cp.ContainsContent(uq)));
+        }
+
+        public static List<Lite<ControlPanelDN>> GetControlPanelsEntity(Type entityType)
+        {
+            return (from er in Database.Query<ControlPanelDN>()
+                    where er.EntityType == entityType.ToTypeDN().ToLite()
+                    select er.ToLite()).ToList();
+        }
+
+        public static List<Lite<ControlPanelDN>> Autocomplete(string subString, int limit)
+        {
+            return Database.Query<ControlPanelDN>().Where(cp => cp.EntityType == null).Autocomplete(subString, limit);
         }
     }
 }

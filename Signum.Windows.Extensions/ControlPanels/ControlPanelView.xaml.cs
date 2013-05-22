@@ -32,65 +32,15 @@ namespace Signum.Windows.ControlPanels
         public ControlPanelView()
         {
             InitializeComponent();
-            cpCombo.LoadData += cpCombo_LoadData;
-            cpCombo.Implementations = Implementations.By(typeof(ControlPanelDN));
-            cpCombo.Type = typeof(Lite<ControlPanelDN>);
-            cpCombo.LabelText = typeof(ControlPanelDN).NiceName();
-            cpCombo.Create = Navigator.IsCreable(typeof(ControlPanelDN));
-            cpCombo.View = Navigator.IsViewable(typeof(ControlPanelDN));
-            cpCombo.Find = false;
-            cpCombo.Remove = false;
-            this.Loaded += new RoutedEventHandler(ControlPanelView_Loaded);
-        }
-
-        IEnumerable<Lite<IIdentifiable>> cpCombo_LoadData()
-        {
-            return Server.RetrieveAllLite<ControlPanelDN>();
-        }
-
-        void ControlPanelView_Loaded(object sender, RoutedEventArgs e)
-        {
-            Current = Server.Return((IControlPanelServer cps) => cps.GetHomePageControlPanel());
-            cpCombo.Entity = Current.ToLite();
-        }
-
-        private void cpCombo_EntityChanged(object sender, bool userInteraction, object oldValue, object newValue)
-        {
-            if (userInteraction )
-            {
-                Lite<ControlPanelDN> cp = newValue as Lite<ControlPanelDN>;
-                Current = cp == null ? null : cp.RetrieveAndForget();
-            }
-
-        }
-
-
-        private void reload_Click(object sender, RoutedEventArgs e)
-        {
-            cpCombo.LoadNow();
-
-            if (Current != null)
-            {
-                var lite = Current.ToLite();
-                Current = null;
-                Current = lite.Retrieve();
-            }
-
-            cpCombo.Entity = Current.ToLite();
-        }
-
-        private void TextBlock_MouseUp_1(object sender, MouseButtonEventArgs e)
-        {
-
         }
 
 
         private void GroupBox_Loaded(object sender, RoutedEventArgs e)
         {
             GroupBox gb = (GroupBox)sender;
-            PanelPart pp = (PanelPart)gb.DataContext;
+            PanelPartDN pp = (PanelPartDN)gb.DataContext;
             PartView pv = ControlPanelClient.PartViews.GetOrThrow(pp.Content.GetType());
-            if (pv.OnTitleClick != null)
+            if (pv.OnTitleClick != null && (pv.IsTitleEnabled == null || pv.IsTitleEnabled()))
             {
                 TextBlock tb = (TextBlock)gb.FindName("tb");
                 tb.Cursor = Cursors.Hand;
@@ -98,14 +48,11 @@ namespace Signum.Windows.ControlPanels
             }
         }
 
-
         private void TextBlock_MouseUp(object sender, MouseButtonEventArgs e)
         {
             TextBlock tb = (TextBlock)sender;
-            PanelPart pp = (PanelPart)tb.DataContext;
+            PanelPartDN pp = (PanelPartDN)tb.DataContext;
             ControlPanelClient.PartViews.GetOrThrow(pp.Content.GetType()).OnTitleClick(pp.Content);
         }
-
-       
     }
 }

@@ -1,16 +1,16 @@
-﻿<UserControl x:Class="Signum.Windows.Files.FileRepository"
+<UserControl x:Class="Signum.Windows.Files.FileRepository"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:d="clr-namespace:Signum.Entities.Files;assembly=Signum.Entities.Extensions"
-    m:Common.TypeContext="d:FileRepositoryDN"
+    m:Common.TypeContext="{x:Type d:FileRepositoryDN}"
     MinWidth="300">
     <StackPanel>
         <m:ValueLine m:Common.Route="Name" />
         <m:ValueLine m:Common.Route="PhysicalPrefix" />
         <m:ValueLine m:Common.Route="WebPrefix" />
         <m:ValueLine m:Common.Route="Active" />
-        <GroupBox Header="{m:Loc FileTypes}">
+        <GroupBox Header="{m:Loc {x:Static d:FileMessage.FileTypes}}">
             <m:EntityList m:Common.Route="FileTypes" Create="False"/>
         </GroupBox>
     </StackPanel>

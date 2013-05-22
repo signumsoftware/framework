@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Entities.Basics;
+using Signum.Entities.Translation;
 
 namespace Signum.Entities.Mailing
 {

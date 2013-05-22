@@ -8,7 +8,6 @@ using Signum.Engine;
 using Signum.Engine.Authorization;
 using Signum.Services;
 using Signum.Utilities;
-using Signum.Web.Extensions.Properties;
 using System.Net.Mail;
 using System.Net;
 using System.Text;
@@ -43,24 +42,6 @@ namespace Signum.Web.AuthAdmin
             PermissionAuthLogic.SetPermissionRules(prp.Value);
 
             return RedirectToAction("Permissions", new { role = role.Id });
-        }
-
-
-        public ViewResult FacadeMethods(Lite<RoleDN> role)
-        {
-            return Navigator.NormalPage(this, FacadeMethodAuthLogic.GetFacadeMethodRules(role.FillToString()));
-        }
-
-        [HttpPost]
-        public ActionResult FacadeMethods(FormCollection form)
-        {
-            Lite<RoleDN> role = this.ExtractLite<RoleDN>("Role");
-
-            var prp = FacadeMethodAuthLogic.GetFacadeMethodRules(role).ApplyChanges(ControllerContext, "", true); ;
-
-            FacadeMethodAuthLogic.SetFacadeMethodRules(prp.Value);
-
-            return RedirectToAction("FacadeMethods", new { role = role.Id });
         }
 
         public ViewResult Types(Lite<RoleDN> role)

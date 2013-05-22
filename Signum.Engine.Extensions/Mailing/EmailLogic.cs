@@ -14,7 +14,6 @@ using Signum.Entities.Processes;
 using Signum.Entities;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Operations;
-using Signum.Engine.Extensions.Properties;
 using System.Net;
 using Signum.Engine.Authorization;
 using Signum.Utilities.Reflection;
@@ -28,6 +27,7 @@ using Signum.Entities.Basics;
 using Signum.Entities.DynamicQuery;
 using System.Text.RegularExpressions;
 using System.Globalization;
+using Signum.Engine.Translation;
 
 namespace Signum.Engine.Mailing
 {
@@ -87,44 +87,47 @@ namespace Signum.Engine.Mailing
                 sb.Include<EmailTemplateDN>();
                 sb.Include<EmailMasterTemplateDN>();
 
-                dqm[typeof(EmailMasterTemplateDN)] = (from t in Database.Query<EmailMasterTemplateDN>()
-                                                      select new
-                                                      {
-                                                          Entity = t,
-                                                          t.Id,
-                                                          t.Name,
-                                                          t.State
-                                                      }).ToDynamic();
+                dqm.RegisterQuery(typeof(EmailMasterTemplateDN), () =>
+                    from t in Database.Query<EmailMasterTemplateDN>()
+                    select new
+                    {
+                        Entity = t,
+                        t.Id,
+                        t.Name,
+                        t.State
+                    });
 
-                dqm[typeof(EmailTemplateDN)] = (from t in Database.Query<EmailTemplateDN>()
-                                                select new
-                                                {
-                                                    Entity = t,
-                                                    t.Id,
-                                                    t.Name,
-                                                    t.From,
-                                                    t.DisplayFrom,
-                                                    t.Bcc,
-                                                    t.Cc,
-                                                    Active = t.IsActiveNow(),
-                                                    t.IsBodyHtml
-                                                }).ToDynamic();
+                dqm.RegisterQuery(typeof(EmailTemplateDN), () => 
+                    from t in Database.Query<EmailTemplateDN>()
+                    select new
+                    {
+                        Entity = t,
+                        t.Id,
+                        t.Name,
+                        t.From,
+                        t.DisplayFrom,
+                        t.Bcc,
+                        t.Cc,
+                        Active = t.IsActiveNow(),
+                        t.IsBodyHtml
+                    });
 
-                dqm[typeof(EmailMessageDN)] = (from e in Database.Query<EmailMessageDN>()
-                                               select new
-                                               {
-                                                   Entity = e,
-                                                   e.Id,
-                                                   e.Recipient,
-                                                   e.State,
-                                                   e.Subject,
-                                                   Body = e.Text,
-                                                   e.Template,
-                                                   e.Sent,
-                                                   e.Received,
-                                                   e.Package,
-                                                   e.Exception,
-                                               }).ToDynamic();
+                dqm.RegisterQuery(typeof(EmailMessageDN), () => 
+                    from e in Database.Query<EmailMessageDN>()
+                    select new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.Recipient,
+                        e.State,
+                        e.Subject,
+                        Body = e.Text,
+                        e.Template,
+                        e.Sent,
+                        e.Received,
+                        e.Package,
+                        e.Exception,
+                    });
 
                 sb.Schema.Initializing[InitLevel.Level2NormalEntities] += Schema_Initializing;
                 sb.Schema.Generating += Schema_Generating;
@@ -132,11 +135,11 @@ namespace Signum.Engine.Mailing
 
                 sb.Schema.EntityEvents<EmailTemplateDN>().PreSaving += new PreSavingEventHandler<EmailTemplateDN>(EmailTemplate_PreSaving);
 
-                Validator.GetOrCreatePropertyPack((EmailTemplateMessageDN m) => m.Text).StaticPropertyValidation +=
-                    new PropertyValidationEventHandler(EmailTemplateMessageText_StaticPropertyValidation);
+                Validator.OverridePropertyValidator((EmailTemplateMessageDN m) => m.Text).StaticPropertyValidation += 
+                    EmailTemplateMessageText_StaticPropertyValidation;
 
-                Validator.GetOrCreatePropertyPack((EmailTemplateMessageDN m) => m.Subject).StaticPropertyValidation +=
-                    new PropertyValidationEventHandler(EmailTemplateMessageSubject_StaticPropertyValidation);
+                Validator.OverridePropertyValidator((EmailTemplateMessageDN m) => m.Subject).StaticPropertyValidation +=
+                    EmailTemplateMessageSubject_StaticPropertyValidation;
 
                 EmailTemplateGraph.Register();
                 EmailMasterTemplateGraph.Register();
@@ -144,7 +147,7 @@ namespace Signum.Engine.Mailing
                 EmailTemplateDN.AssociatedTypeIsEmailOwner = t =>
                     typeof(IEmailOwnerDN).IsAssignableFrom(t.ToType());
 
-                new BasicExecute<EmailTemplateDN>(EmailTemplateOperation.Save)
+                new Graph<EmailTemplateDN>.Execute(EmailTemplateOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
@@ -160,9 +163,8 @@ namespace Signum.Engine.Mailing
             SenderManager = new EmailSenderManager(config.DefaultFrom, config.DefaultDisplayFrom, config.DefaultBCC);
         }
 
-        static string EmailTemplateMessageText_StaticPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
+        static string EmailTemplateMessageText_StaticPropertyValidation(EmailTemplateMessageDN message, PropertyInfo pi)
         {
-            EmailTemplateMessageDN message = (EmailTemplateMessageDN)sender;
             EmailTemplateParser.BlockNode parsedNode = message.TextParsedNode as EmailTemplateParser.BlockNode;
 
             if (parsedNode == null)
@@ -180,9 +182,8 @@ namespace Signum.Engine.Mailing
 
             return null;
         }
-        static string EmailTemplateMessageSubject_StaticPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
+        static string EmailTemplateMessageSubject_StaticPropertyValidation(EmailTemplateMessageDN message, PropertyInfo pi)
         {
-            EmailTemplateMessageDN message = (EmailTemplateMessageDN)sender;
             EmailTemplateParser.BlockNode parsedNode = message.TextParsedNode as EmailTemplateParser.BlockNode;
 
             if (parsedNode == null)
@@ -207,7 +208,7 @@ namespace Signum.Engine.Mailing
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(query);
 
             List<QueryToken> list = new List<QueryToken>();
-            return EmailTemplateParser.Parse(text, s => QueryUtils.Parse("Entity." + s, qd), message.Template.Model.ToType());
+            return EmailTemplateParser.Parse(text, s => QueryUtils.Parse("Entity." + s, qd, false), message.Template.Model.ToType());
         }
 
         static Dictionary<Type, Func<EmailTemplateDN>> emailModels =
@@ -235,13 +236,13 @@ namespace Signum.Engine.Mailing
 
             if (!(typeof(IEmailModelWithRecipient).IsAssignableFrom(template.Model.ToType())))
             {
-                list.Add(QueryUtils.Parse(".".Combine("Entity", template.Recipient.TokenString), qd));
+                list.Add(QueryUtils.Parse(".".Combine("Entity", template.Recipient.TokenString), qd, false));
             }
 
             foreach (var message in template.Messages)
             {
-                EmailTemplateParser.Parse(message.Text, s => QueryUtils.Parse("Entity." + s, qd), template.Model.ToType()).FillQueryTokens(list);
-                EmailTemplateParser.Parse(message.Subject, s => QueryUtils.Parse("Entity." + s, qd), template.Model.ToType()).FillQueryTokens(list);
+                EmailTemplateParser.Parse(message.Text, s => QueryUtils.Parse("Entity." + s, qd, false), template.Model.ToType()).FillQueryTokens(list);
+                EmailTemplateParser.Parse(message.Subject, s => QueryUtils.Parse("Entity." + s, qd, false), template.Model.ToType()).FillQueryTokens(list);
             }
 
             var tokens = list.Distinct();
@@ -295,7 +296,6 @@ namespace Signum.Engine.Mailing
                 (tn, s, c) =>
                 {
                     c.FullClassName = s.FullClassName;
-                    c.FriendlyName = s.FriendlyName;
                     return table.UpdateSqlSync(c);
                 },
                 Spacing.Double);
@@ -388,221 +388,6 @@ namespace Signum.Engine.Mailing
         ////    return result;
         ////}
 
-        //public static void SendMail(EmailMessageDN emailMessage)
-        //{
-        //    try
-        //    {
-        //        MailMessage message = CreateMailMessage(emailMessage);
-
-        //        if (message != null)
-        //        {
-        //            SmtpClient client = SmtpClientBuilder == null ? SafeSmtpClient() : SmtpClientBuilder(emailMessage);
-        //            client.Send(message);
-        //        }
-
-        //        emailMessage.State = EmailState.Sent;
-        //        emailMessage.Sent = TimeZoneManager.Now;
-        //        emailMessage.Received = null;
-        //        emailMessage.Save();
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        if (Transaction.AvoidIndependentTransactions)
-        //            throw;
-
-        //        var exLog = e.LogException().ToLite();
-
-        //        using (Transaction tr = Transaction.ForceNew())
-        //        {
-        //            emailMessage.Exception = exLog;
-        //            emailMessage.State = EmailState.SentError;
-        //            emailMessage.Save();
-        //            tr.Commit();
-        //        }
-
-        //        throw;
-        //    }
-        //}
-
-
-
-        //public static void SendAsync(this IEmailModel model)
-        //{
-        //    EmailMessageDN message = CreateEmailMessage(model, null);
-
-        //    SendMailAsync(message);
-        //}
-
-        //class EmailUser
-        //{
-        //    public EmailMessageDN EmailMessage;
-        //    public UserDN User;
-        //}
-
-        //public static void SendMailAsync(EmailMessageDN emailMessage)
-        //{
-        //    try
-        //    {
-        //        MailMessage message = CreateMailMessage(emailMessage);
-        //        if (message != null)
-        //        {
-        //            SmtpClient client = SmtpClientBuilder == null ? SafeSmtpClient() : SmtpClientBuilder(emailMessage);
-        //            client.SendCompleted += new SendCompletedEventHandler(client_SendCompleted);
-
-        //            emailMessage.Sent = null;
-        //            emailMessage.Received = null;
-        //            emailMessage.Save();
-
-        //            client.SendAsync(message, new EmailUser { EmailMessage = emailMessage, User = UserDN.Current });
-        //        }
-        //        else
-        //        {
-        //            emailMessage.Received = null;
-        //            emailMessage.State = EmailState.Sent;
-        //            emailMessage.Sent = TimeZoneManager.Now;
-        //            emailMessage.Save();
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        if (Transaction.AvoidIndependentTransactions)
-        //            throw;
-
-        //        var exLog = ex.LogException().ToLite();
-
-        //        using (var tr = Transaction.ForceNew())
-        //        {
-        //            emailMessage.Sent = TimeZoneManager.Now;
-        //            emailMessage.State = EmailState.SentError;
-        //            emailMessage.Exception = exLog;
-        //            emailMessage.Save();
-        //            tr.Commit();
-        //        }
-        //    }
-        //}
-
-        //static void client_SendCompleted(object sender, AsyncCompletedEventArgs e)
-        //{
-        //    EmailUser emailUser = (EmailUser)e.UserState;
-        //    using (AuthLogic.UserSession(emailUser.User))
-        //    {
-        //        Expression<Func<EmailMessageDN, EmailMessageDN>> updater;
-        //        if (e.Error != null)
-        //        {
-        //            var exLog = e.Error.LogException().ToLite();
-        //            updater = em => new EmailMessageDN
-        //            {
-        //                Exception = exLog,
-        //                State = EmailState.SentError
-        //            };
-        //        }
-        //        else
-        //            updater = em => new EmailMessageDN
-        //            {
-        //                State = EmailState.Sent,
-        //                Sent = TimeZoneManager.Now
-        //            };
-
-        //        for (int i = 0; i < 4; i++)
-        //        {
-        //            if (emailUser.EmailMessage.InDB().UnsafeUpdate(updater) > 0)
-        //                return;
-
-        //            if (i != 3)
-        //                Thread.Sleep(3000);
-        //        }
-        //    }
-        //}
-
-        //static MailMessage CreateMailMessage(EmailMessageDN emailMessage)
-        //{
-        //    var address = OverrideEmailAddress();
-
-        //    if (address == DoNotSend)
-        //        return null;
-
-        //    MailMessage message = new MailMessage()
-        //    {
-        //        To = { address ?? emailMessage.Recipient.Retrieve().Email },
-        //        Subject = emailMessage.Subject,
-        //        Body = emailMessage.Text,
-        //        IsBodyHtml = true,
-        //    };
-
-        //    if (emailMessage.Bcc.HasText())
-        //        message.Bcc.AddRange(emailMessage.Bcc.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(a => new MailAddress(a)).ToList());
-        //    if (emailMessage.Cc.HasText())
-        //        message.CC.AddRange(emailMessage.Cc.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(a => new MailAddress(a)).ToList());
-        //    return message;
-        //}
-
-        //public static ProcessExecutionDN SendAll<T>(List<T> emails)
-        //    where T : IEmailModel
-        //{
-        //    EmailPackageDN package = new EmailPackageDN
-        //    {
-        //        NumLines = emails.Count
-        //    }.Save();
-
-        //    var packLite = package.ToLite();
-
-        //    emails.Select(e => CreateEmailMessage(e, packLite)).SaveList();
-
-        //    var process = ProcessLogic.Create(EmailProcesses.SendEmails, package);
-
-        //    process.Execute(ProcessOperation.Execute);
-
-        //    return process;
-        //}
-
-        //public static ProcessExecutionDN SendToMany<T>(EmailModel<T> model, List<T> recipientList)
-        //    where T : class, IEmailOwnerDN
-        //{
-        //    if (model.To != null)
-        //        throw new InvalidOperationException("model should have no To");
-
-        //    //EmailContent content = GetTemplate(model.GetType())(model);
-        //    //var template = GetTemplateDN(model.GetType());
-
-        //    EmailPackageDN package = new EmailPackageDN
-        //    {
-        //        NumLines = recipientList.Count,
-        //    }.Save();
-
-        //    var lite = package.ToLite();
-
-        //    recipientList.Select(to => new EmailMessageDN
-        //    {
-        //        State = EmailState.Created,
-        //        Recipient = to.ToLite<IEmailOwnerDN>(),
-        //        //TemplateOld = template,
-        //        //Subject = content.Subject,
-        //        //Text = content.Body,
-        //        Package = lite
-        //    }).SaveList();
-
-        //    var process = ProcessLogic.Create(EmailProcesses.SendEmails, package);
-
-        //    process.Execute(ProcessOperation.Execute);
-
-        //    return process;
-        //}
-
-        //public static Dictionary<Type, Exception> GetAllErrors()
-        //{
-        //    Dictionary<Type, Exception> exceptions = new Dictionary<Type, Exception>();
-
-        //    //foreach (var item in templates)
-        //    //{
-        //    //    try
-        //    //    {
-        //    //        item.Value((IEmailModel)Activator.CreateInstance(item.Key));
-        //    //    }
-        //    //    catch (Exception e)
-        //    //    {
-        //    //        exceptions.Add(item.Key, e);
-        //    //    }
-        //    //}
 
         //    return exceptions;
         //}
@@ -646,9 +431,9 @@ namespace Signum.Engine.Mailing
             Type query = template.AssociatedType.ToType();
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(query);
 
-            var columns = template.Tokens.Select(qt => new Column(QueryUtils.Parse("Entity." + qt.TokenString, qd), null)).ToList();
+            var columns = template.Tokens.Select(qt => new Column(QueryUtils.Parse("Entity." + qt.TokenString, qd, false), null)).ToList();
 
-            var entityToken = QueryUtils.Parse("Entity", qd);
+            var entityToken = QueryUtils.Parse("Entity", qd, false);
 
             var table = DynamicQueryManager.Current.ExecuteQuery(new QueryRequest
             {
@@ -657,12 +442,7 @@ namespace Signum.Engine.Mailing
                 ElementsPerPage = QueryRequest.AllElements,
                 Filters = new List<Filter>
                 {
-                    new Filter
-                    {
-                        Token = entityToken,
-                        Operation = FilterOperation.EqualTo,
-                        Value = Lite.Create(entityToken.Type.CleanType(), entity.Id)
-                    }
+                    new Filter(entityToken, FilterOperation.EqualTo, Lite.Create(entityToken.Type.CleanType(), entity.Id))
                 }
             });
 
@@ -675,7 +455,7 @@ namespace Signum.Engine.Mailing
             else
             {
                 recipient = EmailTemplateParser.GetRecipient(table,
-                    dicTokenColumn[QueryUtils.Parse("Entity." + template.Recipient.TokenString, qd)]);
+                    dicTokenColumn[QueryUtils.Parse("Entity." + template.Recipient.TokenString, qd, false)]);
             }
 
             var email = new EmailMessageDN
@@ -702,7 +482,7 @@ namespace Signum.Engine.Mailing
                 template.Messages.SingleOrDefault(tm => tm.CultureInfo.CultureInfo == cultureInfo.Parent) ??
                 template.Messages.SingleOrDefault(tm => tm.CultureInfo.CultureInfo == EmailTemplateDN.DefaultCulture.CultureInfo);
 
-            Func<string, QueryToken> parseToken = str => QueryUtils.Parse("Entity." + str, qd);
+            Func<string, QueryToken> parseToken = str => QueryUtils.Parse("Entity." + str, qd, false);
 
             if (message.SubjectParsedNode == null)
                 message.SubjectParsedNode = EmailTemplateParser.Parse(message.Subject, parseToken, template.Model.ToType());

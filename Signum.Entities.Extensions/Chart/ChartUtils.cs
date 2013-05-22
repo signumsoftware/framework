@@ -6,9 +6,9 @@ using Signum.Entities.DynamicQuery;
 using System.Reflection;
 using Signum.Entities;
 using Signum.Utilities;
-using Signum.Entities.Extensions.Properties;
 using Signum.Entities.UserQueries;
 using System.Drawing;
+using System.ComponentModel;
 
 namespace Signum.Entities.Chart
 {
@@ -64,7 +64,7 @@ namespace Signum.Entities.Chart
 
             if (route != null && route.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
-                var pp = Validator.GetOrCreatePropertyPack(route);
+                var pp = Validator.TryGetPropertyValidator(route);
                 if (pp != null)
                 {
                     DateTimePrecissionValidatorAttribute datetimePrecission = pp.Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefaultEx();
@@ -78,38 +78,7 @@ namespace Signum.Entities.Chart
             return false;
         }
 
-        public static List<QueryToken> SubTokensChart(this QueryToken token, IEnumerable<ColumnDescription> columnDescriptions, bool canAggregate)
-        {
-            var result = QueryUtils.SubTokens(token, columnDescriptions);
-
-            if (canAggregate)
-            {
-                if (token == null)
-                {
-                    result.Add(new AggregateToken(null, AggregateFunction.Count));
-                }
-                else if (!(token is AggregateToken))
-                {
-                    FilterType? ft = QueryUtils.TryGetFilterType(token.Type);
-
-                    if (ft == FilterType.Integer || ft == FilterType.Decimal || ft == FilterType.Boolean)
-                    {
-                        result.Add(new AggregateToken(token, AggregateFunction.Average));
-                        result.Add(new AggregateToken(token, AggregateFunction.Sum));
-
-                        result.Add(new AggregateToken(token, AggregateFunction.Min));
-                        result.Add(new AggregateToken(token, AggregateFunction.Max));
-                    }
-                    else if (ft == FilterType.DateTime) /*ft == FilterType.String || */
-                    {
-                        result.Add(new AggregateToken(token, AggregateFunction.Min));
-                        result.Add(new AggregateToken(token, AggregateFunction.Max));
-                    }
-                }
-            }
-
-            return result;
-        }
+        
         
         public static bool SyncronizeColumns(this ChartScriptDN chartScript, IChartBase chart, bool changeParameters)
         {
@@ -162,6 +131,8 @@ namespace Signum.Entities.Chart
         {
             var result = new UserChartDN
             {
+                Related = UserQueryUtils.DefaultRelated(),
+
                 QueryName = request.QueryName,
 
                 GroupResults = request.GroupResults,
@@ -199,14 +170,7 @@ namespace Signum.Entities.Chart
             {
                 GroupResults = uq.GroupResults,
                 ChartScript = uq.ChartScript,
-                
-                Filters = uq.Filters.Select(qf => new Filter
-                {
-                    Token = qf.Token,
-                    Operation = qf.Operation,
-                    Value = qf.Value
-                }).ToList(),
-
+                Filters = uq.Filters.Select(qf => new Filter(qf.Token, qf.Operation, qf.Value)).ToList(),
                 Orders = uq.Orders.Select(o => new Order(o.Token, o.OrderType)).ToList(),
             };
 
@@ -384,8 +348,48 @@ namespace Signum.Entities.Chart
 
         public static void RemoveNotNullValidators()
         {
-            Validator.GetOrCreatePropertyPack((ChartColumnDN c) => c.TokenString)
+            Validator.OverridePropertyValidator((ChartColumnDN c) => c.TokenString)
                 .Validators.OfType<StringLengthValidatorAttribute>().SingleEx().AllowNulls = true;
         }
     }
+
+    public enum ChartMessage
+    {
+        [Description("{0} can only be created from the chart window")]
+        _0CanOnlyBeCreatedFromTheChartWindow,
+        [Description("{0} can only be created from the search window")]
+        _0CanOnlyBeCreatedFromTheSearchWindow,
+        Chart,
+        [Description("Chart settings")]
+        Chart_ChartSettings,
+        [Description("Dimension")]
+        Chart_Dimension,
+        [Description("Draw")]
+        Chart_Draw,
+        [Description("Group")]
+        Chart_Group,
+        [Description("Query {0} is not allowed")]
+        Chart_Query0IsNotAllowed,
+        [Description("Toggle info")]
+        Chart_ToggleInfo,
+        [Description("Edit Script")]
+        ChartScript_Edit,
+        [Description("Colors for {0}")]
+        ColorsFor0,
+        CreatePalette,
+        [Description("My Charts")]
+        MyCharts,
+        [Description("Create")]
+        UserChart_CreateNew,
+        [Description("Edit")]
+        UserChart_Edit,
+        [Description("Export data")]
+        UserChart_ExportData,
+        [Description("User charts")]
+        UserChart_UserCharts,
+        ViewPalette,
+        [Description("Chart for")]
+        ChartFor,
+    }
+
 }

@@ -12,18 +12,15 @@ using Signum.Utilities;
 using System.Drawing;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
+using Signum.Engine.Cache;
 
 namespace Signum.Engine.Chart
 {
     public static class ChartColorLogic
     {
-        public static readonly ResetLazy<Dictionary<Type, Dictionary<int, Color>>> Colors = GlobalLazy.Create(() =>
-              Database.Query<ChartColorDN>()
-              .Select(cc => new { cc.Related.EntityType, cc.Related.Id, cc.Color.Argb })
-              .AgGroupToDictionary(a => a.EntityType, gr => gr.ToDictionary(a => a.Id, a => Color.FromArgb(a.Argb))))
-        .InvalidateWith(typeof(ChartColorDN));
+        public static ResetLazy<Dictionary<Type, Dictionary<int, Color>>> Colors;
 
-        public static readonly int Limit = 360; 
+        public static readonly int Limit = 360;
 
         internal static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -31,13 +28,20 @@ namespace Signum.Engine.Chart
             {
                 sb.Include<ChartColorDN>();
 
-                dqm[typeof(ChartColorDN)] = (from cc in Database.Query<ChartColorDN>()
-                                             select new
-                                             {
-                                                 Entity = cc,
-                                                 cc.Related,
-                                                 cc.Color,
-                                             }).ToDynamic();
+                dqm.RegisterQuery(typeof(ChartColorDN), () =>
+                    from cc in Database.Query<ChartColorDN>()
+                    select new
+                    {
+                        Entity = cc,
+                        cc.Related,
+                        cc.Color,
+                    });
+
+                Colors = sb.GlobalLazy(() =>
+                    Database.Query<ChartColorDN>()
+                        .Select(cc => new { cc.Related.EntityType, cc.Related.Id, cc.Color.Argb })
+                        .AgGroupToDictionary(a => a.EntityType, gr => gr.ToDictionary(a => a.Id, a => Color.FromArgb(a.Argb))),
+                    new InvalidateWith(typeof(ChartColorDN)));
             }
         }
 
@@ -47,10 +51,10 @@ namespace Signum.Engine.Chart
 
             var dic = Database.RetrieveAllLite(type).Select(l => new ChartColorDN { Related = (Lite<IdentifiableEntity>)l }).ToDictionary(a => a.Related);
 
-            dic.SetRange(Database.Query<ChartColorDN>().Where(c => c.Related.EntityType == type).ToDictionary(a=>a.Related));
+            dic.SetRange(Database.Query<ChartColorDN>().Where(c => c.Related.EntityType == type).ToDictionary(a => a.Related));
 
-            double[] bright = dic.Count < 18 ? new double[]{.60}:
-                            dic.Count < 72 ? new double[]{.90, .60}:
+            double[] bright = dic.Count < 18 ? new double[] { .60 } :
+                            dic.Count < 72 ? new double[] { .90, .60 } :
                             new double[] { .90, .60, .30 };
 
 

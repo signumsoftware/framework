@@ -1,0 +1,118 @@
+﻿@model Changes
+@using ResourceLocalization.Code
+@{
+    string target = ViewBag.lang;
+    ViewBag.Title = "Sync {0} in {1}".Formato((string)ViewBag.directoryName ?? "all", target);
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script type="text/javascript">
+    $(function () {
+        $("a.edit").bind("click", function () {
+            var select = $(this).parent().find("select");
+            var input = $("<input/>").attr("type", "text")
+                .attr("name", select.attr("name"))
+                .attr("value", select.attr("value"))
+                .attr("style", "width:100%");
+            select.after(input);
+            select.remove();
+            $(this).remove();
+
+            return false;
+        });
+    }); 
+</script>
+
+@if (Model.ToRemove.Count == 0 && Model.Conflicts.Count == 0)
+{
+<div>Already Syncronized!</div>
+}
+else
+{
+    using (Html.BeginForm())
+    {
+
+        if (Model.ToRemove.Count == 0)
+        {
+            <h3>No keys to remove</h3>
+        }
+        else
+        {
+            <h3>The following keys will be removed (@Model.ToRemove.Count):</h3>
+ 
+            <ul>@foreach (string str in Model.ToRemove)
+                {
+                <li>@str</li>
+                }
+            </ul> 
+            
+            @Html.Hidden("Remove", Model.ToRemove.ToString(","))
+        }
+
+        if (Model.Conflicts.Count == 0)
+        {
+            <h3>No keys to add</h3>
+        }
+        else
+        {
+            
+            <h3>The following keys will be added (@Model.Conflicts.Count):</h3>
+    
+    <table class="st" style="width:95%">
+        <thead>
+            <tr>
+                <th>
+                    Lang
+                </th>
+                <th style="width:100%">
+                    Sentence
+                </th>
+            </tr>
+        </thead>
+        @foreach (Conflict con in Model.Conflicts)
+        { 
+            <tr>
+                <th>
+                    Key
+                </th>
+                <th>@con.Key
+                </th>
+            </tr>
+    
+               foreach (Sentence sent in con.Sentences)
+               {
+            <tr>
+                <th>@sent.Lang
+                </th>
+                <td>@sent.Original
+                </td>
+            </tr>
+               }
+
+               var items = con.Sentences.Select(s => new SelectListItem { Value = s.Translated, Text = s.Translated }).ToList();
+
+               if (!con.IsMasterOnly && con.Sentences.Select(a => a.Translated).Distinct().Count() == 1)
+               {
+                   items.First().Selected = true;
+                   items.Insert(0, new SelectListItem { Value = "", Text = "-" });
+               }
+               else
+               {
+                   items.Insert(0, new SelectListItem { Value = "", Text = "-", Selected = true });
+               }
+              
+    
+        <tr>
+            <th>@target
+            </th>
+            <td>@Html.DropDownList("Create_" + con.Key, items)
+            <a href="#" class="edit">edit</a>
+            </td> 
+        </tr>
+        }
+            </table>
+        }
+        <input type="submit" value="Save" />
+    }
+}
+    

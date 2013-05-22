@@ -22,7 +22,6 @@ using System.Web.Script.Serialization;
 using System.Drawing;
 using Signum.Web.Omnibox;
 using Signum.Entities.Profiler;
-using Signum.Web.Extensions.Properties;
 
 namespace Signum.Web.Profiler
 {
@@ -38,7 +37,7 @@ namespace Signum.Web.Profiler
 
                 SpecialOmniboxProvider.Register(new SpecialOmniboxAction("ProfilerHeavy",
                     () => ProfilerPermission.ViewHeavyProfiler.IsAuthorized(),
-                    uh => uh.Action((ProfilerController pc) => pc.Heavy())));
+                    uh => uh.Action((ProfilerController pc) => pc.Heavy(false))));
 
                 SpecialOmniboxProvider.Register(new SpecialOmniboxAction("ProfilerTimeTable",
                     () => ProfilerPermission.ViewTimeTracker.IsAuthorized(),
@@ -65,7 +64,8 @@ namespace Signum.Web.Profiler
 
         public static string HeavyDetailsToJson(this IEnumerable<HeavyProfilerEntry> entries)
         {
-            return new JavaScriptSerializer().Serialize(entries.Select(e => new 
+            var serializer = new JavaScriptSerializer() { MaxJsonLength = int.MaxValue };
+            return serializer.Serialize(entries.Select(e => new 
             {
                 e.BeforeStart,
                 e.Start,
@@ -74,7 +74,7 @@ namespace Signum.Web.Profiler
                 e.Role,
                 Color = GetColor(e.Role),
                 e.Depth,
-                AditionalData = e.AditionalDataPreview(),
+                AditionalData = e.AdditionalDataPreview(),
                 FullIndex = e.FullIndex()
             }));
         }

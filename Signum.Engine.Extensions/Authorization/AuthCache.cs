@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,32 +13,38 @@ using System.IO;
 using System.Data.SqlClient;
 using System.Threading;
 using System.Data.Common;
+using Signum.Engine.Cache;
 
 namespace Signum.Entities.Authorization
 {
-    class DefaultBehaviour<A>
+    abstract class Merger<K , A>
     {
-        public A BaseAllowed { get; private set;  }
-        public Func<IEnumerable<A>, A> MergeAllowed;
-
-        public DefaultBehaviour(A baseAllowed, Func<IEnumerable<A>, A> merge)
+        public A Merge(K key, Lite<RoleDN> role, IEnumerable<A> baseValues)
         {
-            this.BaseAllowed = baseAllowed;
-            this.MergeAllowed = merge;
+            if (AuthLogic.GetMergeStrategy(role) == MergeStrategy.Intersection)
+                return Intersection(key, role, baseValues);
+            else
+                return Union(key, role, baseValues); 
         }
 
-        public override string ToString()
-        {
-            return "DefaulBehaviour {0}".Formato(BaseAllowed);
-        }
+        protected abstract A Intersection(K key, Lite<RoleDN> role, IEnumerable<A> baseValues);
+        protected abstract A Union(K key, Lite<RoleDN> role, IEnumerable<A> baseValues);
+
+        public abstract Func<K, A> MergeDefault(Lite<RoleDN> role, IEnumerable<Func<K, A>> baseDefaultValues);
     }
 
     public interface IManualAuth<K, A>
     {
-        DefaultRule GetDefaultRule(Lite<RoleDN> role);
-        void SetDefaultRule(Lite<RoleDN> role, DefaultRule behaviour);
         A GetAllowed(Lite<RoleDN> role, K key);
         void SetAllowed(Lite<RoleDN> role, K key, A allowed);
+    }
+
+    class Coercer<A, K>
+    {
+        public static readonly Coercer<A, K> Default = new Coercer<A, K>();
+
+        public virtual Func<Lite<RoleDN>, A, A> GetCoerceValueManual(K key) { return (role, allowed) => allowed; }
+        public virtual Func<K, A, A> GetCoerceValue(Lite<RoleDN> role) { return (key, allowed) => allowed; } 
     }
 
     class AuthCache<RT, AR, R, K, A>: IManualAuth<K, A> 
@@ -50,19 +56,22 @@ namespace Signum.Entities.Authorization
 
         Func<R, K> ToKey;
         Func<K, R> ToEntity;
-        DefaultBehaviour<A> Min;
-        DefaultBehaviour<A> Max;
+        Merger<K, A> merger;
+        Coercer<A, K> coercer;
 
-        public AuthCache(SchemaBuilder sb, Func<R, K> toKey, Func<K, R> toEntity, DefaultBehaviour<A> max, DefaultBehaviour<A> min)
+        public AuthCache(SchemaBuilder sb, Func<R, K> toKey, Func<K, R> toEntity, Merger<K, A> merger, bool invalidateWithTypes, Coercer<A, K> coercer = null)
         {
-            runtimeRules = GlobalLazy.Create(this.NewCache).InvalidateWith(typeof(RT), typeof(RoleDN));
-
             this.ToKey = toKey;
             this.ToEntity = toEntity;
-            this.Max = max;
-            this.Min = min;
+            this.merger = merger;
+            this.coercer = coercer ?? Coercer<A, K>.Default; 
 
             sb.Include<RT>();
+
+            runtimeRules = sb.GlobalLazy(this.NewCache,
+                invalidateWithTypes ?
+                new InvalidateWith(typeof(RT), typeof(RoleDN), typeof(RuleTypeDN)) :
+                new InvalidateWith(typeof(RT), typeof(RoleDN)));
 
             sb.AddUniqueIndex<RT>(rt => new { rt.Resource, rt.Role });
 
@@ -79,43 +88,11 @@ namespace Signum.Entities.Authorization
             return new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}".Formato(t.Name, f.Name.SqlScape(), param.ParameterName), new List<DbParameter> { param });
         }
 
-
-
-        DefaultRule IManualAuth<K, A>.GetDefaultRule(Lite<RoleDN> role)
-        {
-            var allowed = Database.Query<RT>().Where(a => a.Resource == null && a.Role == role).Select(a=>a.Allowed).ToList();
-
-            return allowed.IsEmpty() || allowed[0].Equals(Max.BaseAllowed) ? DefaultRule.Max : DefaultRule.Min; 
-        }
-
-        void IManualAuth<K, A>.SetDefaultRule(Lite<RoleDN> role, DefaultRule behaviour)
-        {
-            if (((IManualAuth<K, A>)this).GetDefaultRule(role) == behaviour)
-                return;
-
-            IQueryable<RT> query = Database.Query<RT>().Where(a => a.Resource == null && a.Role == role);
-            if (behaviour == DefaultRule.Max)
-            {
-                if (query.UnsafeDelete() == 0)
-                    throw new InvalidOperationException("Inconsistency in the data");
-            }
-            else
-            {
-                if (query.UnsafeUpdate(a => new RT { Allowed = Min.BaseAllowed }) == 0)
-                    new RT
-                    {
-                        Role = role,
-                        Resource = null,
-                        Allowed = Min.BaseAllowed,
-                    }.Save();
-            }
-        }
-
         A IManualAuth<K, A>.GetAllowed(Lite<RoleDN> role, K key)
         {
             R resource = ToEntity(key);
 
-            ManualResourceCache miniCache = new ManualResourceCache(resource, Min, Max);
+            ManualResourceCache miniCache = new ManualResourceCache(key, resource, merger, coercer.GetCoerceValueManual(key));
 
             return miniCache.GetAllowed(role);
         }
@@ -124,7 +101,11 @@ namespace Signum.Entities.Authorization
         {
             R resource = ToEntity(key);
 
-            ManualResourceCache miniCache = new ManualResourceCache(resource, Min, Max); 
+            var keyCoercer = coercer.GetCoerceValueManual(key);
+
+            ManualResourceCache miniCache = new ManualResourceCache(key, resource, merger, keyCoercer); 
+
+            allowed = keyCoercer(role, allowed);
 
             if (miniCache.GetAllowed(role).Equals(allowed))
                 return;
@@ -149,47 +130,42 @@ namespace Signum.Entities.Authorization
 
         public class ManualResourceCache
         {
-            readonly Dictionary<Lite<RoleDN>, A> defaultRules;
             readonly Dictionary<Lite<RoleDN>, A> specificRules;
 
-            readonly DefaultBehaviour<A> Min;
-            readonly DefaultBehaviour<A> Max;
+            readonly Merger<K, A> merger;
 
-            public ManualResourceCache(R resource, DefaultBehaviour<A> min, DefaultBehaviour<A> max)
+            readonly Func<Lite<RoleDN>, A, A> coercer;
+
+            readonly K key; 
+
+            public ManualResourceCache(K key, R resource, Merger<K, A> merger, Func<Lite<RoleDN>, A, A> coercer)
             {
+                this.key = key;
+
                 var list = (from r in Database.Query<RT>()
-                            where r.Resource == resource || r.Resource == null
-                            select new { Default = r.Resource == null, r.Role, r.Allowed }).ToList();
+                            where r.Resource == resource
+                            select new { r.Role, r.Allowed }).ToList();
 
-                defaultRules = list.Where(a => a.Default).ToDictionary(a => a.Role, a => a.Allowed);
-                specificRules = list.Where(a => !a.Default).ToDictionary(a => a.Role, a => a.Allowed);
+                specificRules = list.ToDictionary(a => a.Role, a => a.Allowed);
 
-                this.Min = min;
-                this.Max = max;
+                this.coercer = coercer;
+                this.merger = merger;
             }
 
             public A GetAllowed(Lite<RoleDN> role)
             {
                 A result;
                 if (specificRules.TryGetValue(role, out result))
-                    return result;
+                    return coercer(role, result);
 
                 return GetAllowedBase(role);
             }
 
-            DefaultBehaviour<A> GetBehaviour(Lite<RoleDN> role)
-            {
-                return defaultRules.TryGet(role, Max.BaseAllowed).Equals(Max.BaseAllowed) ? Max : Min;
-            }
-
             public A GetAllowedBase(Lite<RoleDN> role)
             {
-                var behaviour = GetBehaviour(role);
-                var related = AuthLogic.RelatedTo(role);
-                if (related.IsEmpty())
-                    return behaviour.BaseAllowed;
-                else
-                    return behaviour.MergeAllowed(related.Select(r => GetAllowed(r)));
+                var result = merger.Merge(key, role, AuthLogic.RelatedTo(role).Select(GetAllowed));
+
+                return coercer(role, result);
             }
         }
 
@@ -197,12 +173,8 @@ namespace Signum.Entities.Authorization
         {
             List<Lite<RoleDN>> roles = AuthLogic.RolesInOrder().ToList();
 
-            Dictionary<Lite<RoleDN>, A> defaultBehaviours =
-                Database.Query<RT>().Where(a => a.Resource == null)
-                .Select(a => new { a.Role, a.Allowed }).ToDictionary(a => a.Role, a => a.Allowed);
-
             Dictionary<Lite<RoleDN>, Dictionary<K, A>> realRules =
-               Database.Query<RT>().Where(a => a.Resource != null)
+               Database.Query<RT>()
                .Select(a => new { a.Role, a.Allowed, a.Resource })
                   .AgGroupToDictionary(ru => ru.Role, gr => gr
                       .ToDictionary(ru => ToKey(ru.Resource), ru => ru.Allowed));
@@ -212,9 +184,12 @@ namespace Signum.Entities.Authorization
             {
                 var related = AuthLogic.RelatedTo(role);
 
-                var behaviour = defaultBehaviours.TryGet(role, Max.BaseAllowed).Equals(Max.BaseAllowed) ? Max : Min;
-
-                newRules.Add(role, new RoleAllowedCache(behaviour, related.Select(r => newRules[r]).ToList(), realRules.TryGetC(role)));
+                newRules.Add(role, new RoleAllowedCache(
+                    role,
+                    merger,
+                    related.Select(r => newRules[r]).ToList(),
+                    realRules.TryGetC(role),
+                    coercer.GetCoerceValue(role)));
             }
 
             return newRules;
@@ -224,8 +199,8 @@ namespace Signum.Entities.Authorization
         {
             RoleAllowedCache cache = runtimeRules.Value[rules.Role];
 
+            rules.MergeStrategy = AuthLogic.GetMergeStrategy(rules.Role);
             rules.SubRoles = AuthLogic.RelatedTo(rules.Role).ToMList();
-            rules.DefaultRule = GetDefaultRule(rules.Role);
             rules.Rules = (from r in resources
                            let k = ToKey(r)
                            select new AR()
@@ -240,14 +215,7 @@ namespace Signum.Entities.Authorization
         {
             using (AuthLogic.Disable())
             {
-                if (rules.DefaultRule != GetDefaultRule(rules.Role))
-                {
-                    ((IManualAuth<K, A>)this).SetDefaultRule(rules.Role, rules.DefaultRule);
-                    Database.Query<RT>().Where(r => r.Role == rules.Role && r.Resource != null).UnsafeDelete();
-                    return;
-                }
-
-                var current = Database.Query<RT>().Where(r => r.Role == rules.Role && r.Resource != null && filterResources.Evaluate(r.Resource)).ToDictionary(a => a.Resource);
+                var current = Database.Query<RT>().Where(r => r.Role == rules.Role && filterResources.Evaluate(r.Resource)).ToDictionary(a => a.Resource);
                 var should = rules.Rules.Where(a => a.Overriden).ToDictionary(r => r.Resource);
 
                 Synchronizer.Synchronize(should, current, 
@@ -256,15 +224,10 @@ namespace Signum.Entities.Authorization
                     (p, ar, pr) =>
                     {
                         pr.Allowed = ar.Allowed;
-                        if (pr.SelfModified)
+                        if (pr.IsGraphModified)
                             pr.Save();
                     });
             }
-        }
-
-        public DefaultRule GetDefaultRule(Lite<RoleDN> role)
-        {
-            return runtimeRules.Value[role].GetDefaultRule(Max);
         }
 
         internal A GetAllowed(Lite<RoleDN> role, K key)
@@ -279,54 +242,49 @@ namespace Signum.Entities.Authorization
 
         public class RoleAllowedCache
         {
-            readonly DefaultBehaviour<A> behaviour;
+            readonly Lite<RoleDN> role;
+            readonly Merger<K, A> merger;
+            readonly Func<K, A, A> coercer;
+
             readonly DefaultDictionary<K, A> rules; 
             readonly List<RoleAllowedCache> baseCaches;
 
-            public RoleAllowedCache(DefaultBehaviour<A> behaviour, List<RoleAllowedCache> baseCaches, Dictionary<K, A> newValues)
+
+            public RoleAllowedCache(Lite<RoleDN> role, Merger<K, A> merger, List<RoleAllowedCache> baseCaches, Dictionary<K, A> newValues, Func<K, A, A> coercer)
             {
-                this.behaviour = behaviour;
+                this.role = role;
+
+                this.merger = merger;
+                this.coercer = coercer;
 
                 this.baseCaches = baseCaches;
 
-                A defaultAllowed;
-                Dictionary<K, A> tmpRules; 
+                Func<K, A> defaultAllowed = merger.MergeDefault(role, baseCaches.Select(a => a.rules.DefaultAllowed));
 
-                if(baseCaches.IsEmpty())
-                {
-                    defaultAllowed = behaviour.BaseAllowed;
+                Func<K, A> baseAllowed =  k => merger.Merge(k, role, baseCaches.Select(b => b.GetAllowed(k)));
 
-                    tmpRules = newValues; 
-                }
-                else
-                {
-                    defaultAllowed = behaviour.MergeAllowed(baseCaches.Select(a => a.rules.DefaultAllowed));
+                var keys = baseCaches
+                    .Where(b => b.rules.OverrideDictionary != null)
+                    .SelectMany(a => a.rules.OverrideDictionary.Keys)
+                    .ToHashSet();
 
-                    var keys = baseCaches.Where(b => b.rules.DefaultAllowed.Equals(defaultAllowed) && b.rules != null).SelectMany(a => a.rules.ExplicitKeys).ToHashSet();
+                Dictionary<K, A> tmpRules = keys.ToDictionary(k => k, baseAllowed);
+                if (newValues != null)
+                    tmpRules.SetRange(newValues);
 
-                    if (keys != null)
-                    {
-                        tmpRules = keys.ToDictionary(k => k, k => behaviour.MergeAllowed(baseCaches.Select(b => b.GetAllowed(k))));
-                        if (newValues != null)
-                            tmpRules.SetRange(newValues);
-                    }
-                    else
-                    {
-                        tmpRules = newValues; 
-                    }
-                }
-
-                tmpRules = Simplify(tmpRules, defaultAllowed);
+                tmpRules = Simplify(tmpRules, defaultAllowed, baseAllowed);
 
                 rules = new DefaultDictionary<K, A>(defaultAllowed, tmpRules);
             }
 
-            internal static Dictionary<K, A> Simplify(Dictionary<K, A> dictionary, A defaultAllowed)
+            internal Dictionary<K, A> Simplify(Dictionary<K, A> dictionary, Func<K, A> defaultAllowed, Func<K, A> baseAllowed)
             {
                 if (dictionary == null || dictionary.Count == 0)
                     return null;
 
-                dictionary.RemoveRange(dictionary.Where(p => p.Value.Equals(defaultAllowed)).Select(p => p.Key).ToList());
+                dictionary.RemoveRange(dictionary.Where(p =>
+                    p.Value.Equals(defaultAllowed(p.Key)) &&
+                    p.Value.Equals(baseAllowed(p.Key))).Select(p => p.Key).ToList());
 
                 if (dictionary.Count == 0)
                     return null;
@@ -334,20 +292,18 @@ namespace Signum.Entities.Authorization
                 return dictionary;
             }
 
-            public A GetAllowed(K k)
+            public A GetAllowed(K key)
             {
-                return rules.GetAllowed(k);
+                var raw = rules.GetAllowed(key);
+
+                return coercer(key, raw);
             }
 
-            public A GetAllowedBase(K k)
+            public A GetAllowedBase(K key)
             {
-                return baseCaches.IsEmpty() ? rules.DefaultAllowed :
-                       behaviour.MergeAllowed(baseCaches.Select(b => b.GetAllowed(k)));
-            }
+                var raw = merger.Merge(key, role, baseCaches.Select(b => b.GetAllowed(key)));
 
-            public DefaultRule GetDefaultRule(DefaultBehaviour<A> max)
-            {
-                return behaviour == max ? DefaultRule.Max : DefaultRule.Min;
+                return coercer(key, raw);
             }
 
             internal DefaultDictionary<K, A> DefaultDictionary()
@@ -356,29 +312,25 @@ namespace Signum.Entities.Authorization
             }
         }
 
-        internal XElement ExportXml(XName rootName, XName elementName, Func<R, string> resourceToString, Func<A, string> allowedToString)
+        internal XElement ExportXml(XName rootName, XName elementName, Func<K, string> resourceToString, Func<A, string> allowedToString)
         {
-            var list = Database.RetrieveAll<RT>();
-
-            var defaultRules = list.Where(a => a.Resource == null).ToDictionary(a => a.Role, a => a.Allowed);
-            var specificRules = list.Where(a => a.Resource != null).AgGroupToDictionary(a => a.Role, gr => gr.ToDictionary(a => a.Resource, a => a.Allowed));
+            var rules = runtimeRules.Value;
 
             return new XElement(rootName,
                 (from r in AuthLogic.RolesInOrder()
-                 let max = defaultRules.TryGet(r, Max.BaseAllowed).Equals(Max.BaseAllowed)
+                 let rac = rules[r]
                  select new XElement("Role",
                      new XAttribute("Name", r.ToString()),
-                     max ? null : new XAttribute("Default", "Min"),
-                     specificRules.TryGetC(r).TryCC(dic =>
-                         from kvp in dic
-                         let resource = resourceToString(kvp.Key)
-                         let allowed = allowedToString(kvp.Value)
+                         from k in rac.DefaultDictionary().OverrideDictionary.TryCC(dic => dic.Keys).EmptyIfNull()
+                         let allowedBase = rac.GetAllowedBase(k)
+                         let allowed = rac.GetAllowed(k)
+                         where !allowed.Equals(allowedBase)
+                         let resource = resourceToString(k)
                          orderby resource
                          select new XElement(elementName,
                             new XAttribute("Resource", resource),
-                            new XAttribute("Allowed", allowed))
-                     ))
-                 ));
+                            new XAttribute("Allowed", allowedToString(allowed)))
+                )));
         }
 
 
@@ -393,9 +345,6 @@ namespace Signum.Entities.Authorization
             return Synchronizer.SynchronizeScript(should, current, 
                 (role, x) =>
                 {
-                    var max = x.Attribute("Default") == null || x.Attribute("Default").Value != "Min";
-                    SqlPreCommand defSql = SetDefault(table, null, max, role);
-
                     var dic =  (from xr in x.Elements(elementName)
                                let r = toResource(xr.Attribute("Resource").Value)
                                where r != null
@@ -407,17 +356,15 @@ namespace Signum.Entities.Authorization
                         Resource = kvp.Key,
                         Role = role,
                         Allowed = kvp.Value
-                    }, Comment(role, kvp.Key, kvp.Value))).Combine(Spacing.Simple);
+                    }, comment: Comment(role, kvp.Key, kvp.Value))).Combine(Spacing.Simple);
 
-                    return SqlPreCommand.Combine(Spacing.Simple, defSql, restSql);
+                    return restSql;
                 }, 
                 (role, list) => list.Select(rt => table.DeleteSqlSync(rt)).Combine(Spacing.Simple),
                 (role, x, list) =>
                 {
                     var def = list.SingleOrDefaultEx(a => a.Resource == null);
-                    var max = x.Attribute("Default") == null || x.Attribute("Default").Value != "Min";
-                    SqlPreCommand defSql = SetDefault(table, def, max, role);
-
+                  
                     var dic = (from xr in x.Elements(elementName)
                                let r = toResource(xr.Attribute("Resource").Value)
                                where r != null
@@ -430,17 +377,17 @@ namespace Signum.Entities.Authorization
                         (r, xr) =>
                         {
                             var a = parseAllowed(xr.Attribute("Allowed").Value);
-                            return table.InsertSqlSync(new RT { Resource = r, Role = role, Allowed = a }, Comment(role, r, a));
+                            return table.InsertSqlSync(new RT { Resource = r, Role = role, Allowed = a }, comment: Comment(role, r, a));
                         }, 
                         (r, rt) => table.DeleteSqlSync(rt, Comment(role, r, rt.Allowed)), 
                         (r, xr, rt) =>
                         {
                             var oldA = rt.Allowed;
                             rt.Allowed = parseAllowed(xr.Attribute("Allowed").Value);
-                            return table.UpdateSqlSync(rt, Comment(role, r, oldA, rt.Allowed));
+                            return table.UpdateSqlSync(rt, comment: Comment(role, r, oldA, rt.Allowed));
                         }, Spacing.Simple);
 
-                    return SqlPreCommand.Combine(Spacing.Simple, defSql, restSql);
+                    return restSql;
                 }, 
                 Spacing.Double);
         }
@@ -454,39 +401,6 @@ namespace Signum.Entities.Authorization
         internal static string Comment(Lite<RoleDN> role, R resource, A from, A to)
         {
             return "{0} {1} for {2} ({3} -> {4})".Formato(typeof(R).NiceName(), resource.ToString(), role, from, to);
-        }
-
-        private SqlPreCommand SetDefault(Table table, RT def, bool max, Lite<RoleDN> role)
-        {
-            string comment = "Default {0} for {1}".Formato(typeof(R).NiceName(), role);
-
-            if (max)
-            {
-                if (def != null)
-                    return table.DeleteSqlSync(def, comment + " ({0})".Formato(def.Allowed));
-
-                return null;
-            }
-            else
-            {
-                if (def == null)
-                {
-                    return table.InsertSqlSync(new RT()
-                    {
-                        Role = role,
-                        Resource = null,
-                        Allowed = Min.BaseAllowed
-                    }, comment + " ({0})".Formato(Min.BaseAllowed));
-                }
-                else if (!def.Allowed.Equals(Min.BaseAllowed))
-                {
-                    var old = def.Allowed;
-                    def.Allowed = Min.BaseAllowed;
-                    return table.UpdateSqlSync(def, comment + "({0} -> {1})".Formato(old, Min.BaseAllowed));
-                }
-
-                return null;
-            }
         }
     }
 }

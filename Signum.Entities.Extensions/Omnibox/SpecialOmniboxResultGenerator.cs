@@ -20,9 +20,10 @@ namespace Signum.Entities.Omnibox
     public interface ISpecialOmniboxAction
     {
         string Key { get; }
+        Func<bool> Allowed { get; }
     }
 
-    public class SpecialOmniboxGenerator<T> : OmniboxResultGenerator<SpecialOmniboxResult>
+    public class SpecialOmniboxGenerator<T> : OmniboxResultGenerator<SpecialOmniboxResult> where T : ISpecialOmniboxAction
     {
         public Dictionary<string, T> Actions;
 
@@ -37,7 +38,7 @@ namespace Signum.Entities.Omnibox
 
             bool isPascalCase = OmniboxUtils.IsPascalCasePattern(ident);
 
-            return OmniboxUtils.Matches(Actions, null, ident, isPascalCase)
+            return OmniboxUtils.Matches(Actions, a => a.Allowed(), null, ident, isPascalCase)
                 .Select(m => new SpecialOmniboxResult { Match = m, Distance = m.Distance });
         }
 

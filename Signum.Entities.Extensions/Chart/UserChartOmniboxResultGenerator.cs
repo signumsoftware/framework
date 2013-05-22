@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
-using Signum.Entities.Extensions.Properties;
 using System.Text.RegularExpressions;
 using Signum.Entities.Omnibox;
 
@@ -12,16 +11,23 @@ namespace Signum.Entities.Chart
 {
     public class UserChartOmniboxResultGenerator : OmniboxResultGenerator<UserChartOmniboxResult>
     {
+        Func<string, int, IEnumerable<Lite<UserChartDN>>> autoComplete;
+
+        public UserChartOmniboxResultGenerator(Func<string, int, IEnumerable<Lite<UserChartDN>>> autoComplete)
+        {
+            this.autoComplete = autoComplete;
+        }
+
         public int AutoCompleteLimit = 5;
 
         public override IEnumerable<UserChartOmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern)
         {
-            if (tokenPattern != "S")
+            if (tokenPattern != "S" || !OmniboxParser.Manager.AllowedPermission(ChartPermission.ViewCharting))
                 yield break;
 
             string ident = OmniboxUtils.CleanCommas(tokens[0].Value);
 
-            var userCharts = OmniboxParser.Manager.AutoComplete(typeof(UserChartDN), ident, AutoCompleteLimit);
+            var userCharts = autoComplete(ident, AutoCompleteLimit);
 
             foreach (var uq in userCharts)
             {
@@ -44,7 +50,7 @@ namespace Signum.Entities.Chart
             {
                 new HelpOmniboxResult 
                 { 
-                    Text = "'{0}'".Formato(Signum.Entities.Extensions.Properties.Resources.Omnibox_UserChart), 
+                    Text = "'{0}'".Formato(OmniboxMessage.Omnibox_UserChart.NiceToString()), 
                     OmniboxResultType = resultType 
                 }
             };

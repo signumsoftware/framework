@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -75,18 +75,31 @@ namespace Signum.Windows.Notes
             ViewNote(nota);
         }
 
+        public static Polymorphic<Func<IdentifiableEntity, FilterOption>> CustomFilter = new Polymorphic<Func<IdentifiableEntity, FilterOption>>();
+
         private void btnExploreNotes_Click(object sender, RoutedEventArgs e)
         {
-            Navigator.Explore(new ExploreOptions(typeof(NoteDN))
+            var func = CustomFilter.TryGetValue(DataContext.GetType());
+
+            var eo = new ExploreOptions(typeof(NoteDN))
             {
                 ShowFilters = false,
                 SearchOnLoad = true,
-                FilterOptions = { new FilterOption("Target", DataContext) { Frozen = true } },
-                ColumnOptions = { new ColumnOption("Target") },
-                ColumnOptionsMode = ColumnOptionsMode.Remove,
+                FilterOptions =
+                {
+                    func != null ?  func((IdentifiableEntity)DataContext) : new FilterOption("Target", DataContext) { Frozen = true },
+                },
                 OrderOptions = { new OrderOption("CreationDate", OrderType.Ascending) },
                 Closed = (_, __) => ReloadNotes()
-            });
+            };
+
+            if (func == null)
+            {
+                eo.ColumnOptions = new List<ColumnOption> { new ColumnOption("Target") };
+                eo.ColumnOptionsMode = ColumnOptionsMode.Remove;
+            }
+
+            Navigator.Explore(eo);
         }
 
         void ViewNote(NoteDN note)
@@ -106,23 +119,27 @@ namespace Signum.Windows.Notes
                 return;
             }
 
-            Navigator.QueryCountBatch(new CountOptions(typeof(NoteDN))
+            var func = CustomFilter.TryGetValue(DataContext.GetType());
+
+            DynamicQueryServer.QueryCountBatch(new QueryCountOptions(typeof(NoteDN))
             {
-                FilterOptions = { new FilterOption("Target", DataContext) }
+                FilterOptions = 
+                { 
+                    func != null ? func(entity) : new FilterOption("Target", DataContext) { Frozen = true }
+                }
             }, count =>
             {
                 if (count == 0)
                 {
                     tbNotes.FontWeight = FontWeights.Normal;
                     btnExploreNotes.Visibility = Visibility.Collapsed;
-
                 }
                 else
                 {
                     tbNotes.FontWeight = FontWeights.Bold;
                     btnExploreNotes.FontWeight = FontWeights.Bold;
                     btnExploreNotes.Visibility = Visibility.Visible;
-                    btnExploreNotes.Content = count + " " + (count > 1 ? Properties.Resources._notes : Properties.Resources._note);
+                    btnExploreNotes.Content = count + " " + (count > 1 ? NoteMessage._note.NiceToString() :  NoteMessage._notes.NiceToString());
                 }
 
                 if (count > 0 && ForceShow != null)

@@ -5,7 +5,6 @@ using System.Text;
 using Signum.Entities.Basics;
 using Signum.Entities;
 using Signum.Utilities;
-using Signum.Entities.Extensions.Properties;
 using System.Collections.ObjectModel;
 
 namespace Signum.Entities.Authorization
@@ -13,32 +12,65 @@ namespace Signum.Entities.Authorization
     [Serializable]
     public class DefaultDictionary<K, A>
     {
-        public DefaultDictionary(A defaultAllowed, Dictionary<K, A> dictionary)
+        public DefaultDictionary(Func<K, A> defaultAllowed, Dictionary<K, A> overridesDictionary)
         {
-            this.DefaultAllowed = defaultAllowed;
-            this.dictionary = dictionary;
+            this.defaultAllowed = defaultAllowed;
+            this.overrideDictionary = overridesDictionary;
         }
 
-        readonly Dictionary<K, A> dictionary;
-        public readonly A DefaultAllowed;
+        readonly Dictionary<K, A> overrideDictionary;
+        readonly Func<K, A> defaultAllowed;
 
         public A GetAllowed(K key)
         {
-            return dictionary.TryGet(key, DefaultAllowed);
+            A result;
+            if (overrideDictionary != null && overrideDictionary.TryGetValue(key, out result))
+                return result;
+
+            return defaultAllowed(key);
         }
 
-        public IEnumerable<K> ExplicitKeys
+        public Dictionary<K, A> OverrideDictionary
         {
-            get
-            {
-                return dictionary == null ? Enumerable.Empty<K>() : dictionary.Keys;
-            }
+            get { return overrideDictionary; }
+        }
+
+        public Func<K, A> DefaultAllowed
+        {
+            get { return defaultAllowed; }
+        }
+    }
+
+    [Serializable]
+    public class ConstantFunction<K, A>
+    {
+        internal A Allowed;
+        public ConstantFunction(A allowed)
+        {
+            this.Allowed = allowed;
+        }
+
+        public A GetValue(K key)
+        {
+            return this.Allowed;
+        }
+
+        public override string ToString()
+        {
+            return "Constant {0}".Formato(Allowed);
+        }
+    }
+
+    public static class ConstantFunction
+    {
+        public static A GetConstantValue<K, A>(Func<K, A> defaultConstant)
+        {
+            return ((ConstantFunction<K, A>)defaultConstant.Target).Allowed;
         }
     }
 
 
-    //Only for client-side communication
-    [Serializable, AvoidLocalization]
+    [Serializable]
     public abstract class BaseRulePack<T> : ModelEntity
     {
         Lite<RoleDN> role;
@@ -49,25 +81,33 @@ namespace Signum.Entities.Authorization
             internal set { Set(ref role, value, () => Role); }
         }
 
+        MergeStrategy mergeStrategy;
+        [HiddenProperty]
+        public MergeStrategy MergeStrategy
+        {
+            get { return mergeStrategy; }
+            set { Set(ref mergeStrategy, value, () => MergeStrategy); }
+        }
+
         [NotNullable]
         MList<Lite<RoleDN>> subRoles = new MList<Lite<RoleDN>>();
+        [HiddenProperty]
         public MList<Lite<RoleDN>> SubRoles
         {
             get { return subRoles; }
             set { Set(ref subRoles, value, () => SubRoles); }
         }
 
-        public string DefaultLabel
+        public string Strategy
         {
-            get { return subRoles == null || subRoles.IsEmpty() ? "Value" : "of " + subRoles.CommaAnd(); }
+            get
+            {
+                return AuthAdminMessage._0of1.NiceToString().Formato(
+                    mergeStrategy.NiceToString(),
+                    subRoles.IsNullOrEmpty() ? "∅  -> " + (mergeStrategy == MergeStrategy.Union ? AuthAdminMessage.Nothing : AuthAdminMessage.Everything).NiceToString() :
+                    subRoles.CommaAnd());
+            }
         }
-
-        DefaultRule defaultRule;
-        public DefaultRule DefaultRule
-        {
-            get { return defaultRule; }
-            set { Set(ref defaultRule, value, () => DefaultRule); }
-        } 
 
         TypeDN type;
         [NotNullValidator]
@@ -86,13 +126,7 @@ namespace Signum.Entities.Authorization
         }
     }
 
-    public enum DefaultRule
-    {
-        Max, 
-        Min,
-    }
-
-    [Serializable, AvoidLocalization]
+    [Serializable, DescriptionOptions(DescriptionOptions.None)]
     public abstract class AllowedRule<R, A> : ModelEntity
         where R : IdentifiableEntity
     {
@@ -145,7 +179,7 @@ namespace Signum.Entities.Authorization
     {
         public override string ToString()
         {
-            return Resources._0RulesFor1.Formato(typeof(TypeDN).NiceName(), Role);
+            return AuthMessage._0RulesFor1.NiceToString().Formato(typeof(TypeDN).NiceName(), Role);
         }
     }
 
@@ -181,7 +215,7 @@ namespace Signum.Entities.Authorization
         }
     }
 
-    [Serializable, AvoidLocalization]
+    [Serializable, DescriptionOptions(DescriptionOptions.None)]
     public class TypeAllowedAndConditions : ModelEntity, IEquatable<TypeAllowedAndConditions>
     {
         public TypeAllowedAndConditions(TypeAllowed fallback, ReadOnlyCollection<TypeConditionRule> conditions)
@@ -284,9 +318,14 @@ namespace Signum.Entities.Authorization
 
             return "{0} | {1}".Formato(Fallback, conditions.ToString(c=>"{0} {1}".Formato(c.ConditionName, c.Allowed), " | "));
         }
+
+        internal bool Exactly(TypeAllowed current)
+        {
+            return Fallback == current && Conditions.IsNullOrEmpty();
+        }
     }
 
-    [Serializable, AvoidLocalization]
+    [Serializable, DescriptionOptions(DescriptionOptions.None)]
     public class TypeConditionRule : EmbeddedEntity, IEquatable<TypeConditionRule>
     {
         public TypeConditionRule(Enum conditionName, TypeAllowed allowed)
@@ -323,17 +362,30 @@ namespace Signum.Entities.Authorization
         None,
     }
 
+    [Serializable]
+    public abstract class AllowedRuleCoerced<R, A> : AllowedRule<R,A>
+         where R : IdentifiableEntity
+    {
+        A[] coercedValues;
+        public A[] CoercedValues
+        {
+            get { return coercedValues; }
+            internal set { Set(ref coercedValues, value, () => CoercedValues); }
+        }
+    }
 
     [Serializable]
     public class PropertyRulePack : BaseRulePack<PropertyAllowedRule>
     {
         public override string ToString()
         {
-            return Resources._0RulesFor1.Formato(typeof(PropertyDN).NiceName(), Role);
+            return AuthMessage._0RulesFor1.NiceToString().Formato(typeof(PropertyRouteDN).NiceName(), Role);
         }
     }
     [Serializable]
-    public class PropertyAllowedRule : AllowedRule<PropertyDN, PropertyAllowed>{}
+    public class PropertyAllowedRule : AllowedRuleCoerced<PropertyRouteDN, PropertyAllowed>
+    {
+    }
 
 
     [Serializable]
@@ -341,11 +393,11 @@ namespace Signum.Entities.Authorization
     {
         public override string ToString()
         {
-            return Resources._0RulesFor1.Formato(typeof(QueryDN).NiceName(), Role);
+            return AuthMessage._0RulesFor1.NiceToString().Formato(typeof(QueryDN).NiceName(), Role);
         }
     }
     [Serializable]
-    public class QueryAllowedRule : AllowedRule<QueryDN, bool> { }
+    public class QueryAllowedRule : AllowedRuleCoerced<QueryDN, bool> { }
 
 
     [Serializable]
@@ -353,11 +405,11 @@ namespace Signum.Entities.Authorization
     {
         public override string ToString()
         {
-            return Resources._0RulesFor1.Formato(typeof(OperationDN).NiceName(), Role);
+            return AuthMessage._0RulesFor1.NiceToString().Formato(typeof(OperationDN).NiceName(), Role);
         }
     }
     [Serializable]
-    public class OperationAllowedRule : AllowedRule<OperationDN, OperationAllowed> { } 
+    public class OperationAllowedRule : AllowedRuleCoerced<OperationDN, OperationAllowed> { } 
 
 
     [Serializable]
@@ -365,20 +417,9 @@ namespace Signum.Entities.Authorization
     {
         public override string ToString()
         {
-            return Resources._0RulesFor1.Formato(typeof(PermissionDN).NiceName(), Role);
+            return AuthMessage._0RulesFor1.NiceToString().Formato(typeof(PermissionDN).NiceName(), Role);
         }
     }
     [Serializable]
     public class PermissionAllowedRule : AllowedRule<PermissionDN, bool> { } 
-
-    [Serializable]
-    public class FacadeMethodRulePack : BaseRulePack<FacadeMethodAllowedRule>
-    {
-        public override string ToString()
-        {
-            return Resources._0RulesFor1.Formato(typeof(FacadeMethodDN).NiceName(), Role);
-        }
-    }
-    [Serializable]
-    public class FacadeMethodAllowedRule : AllowedRule<FacadeMethodDN, bool> { } 
 }

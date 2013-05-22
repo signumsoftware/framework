@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
-using Signum.Entities.Extensions.Properties;
 using System.Text.RegularExpressions;
 using Signum.Entities.Omnibox;
 
@@ -12,18 +11,25 @@ namespace Signum.Entities.UserQueries
 {
     public class UserQueryOmniboxResultGenerator : OmniboxResultGenerator<UserQueryOmniboxResult>
     {
+        Func<string, int, IEnumerable<Lite<UserQueryDN>>> autoComplete;
+
+        public UserQueryOmniboxResultGenerator(Func<string, int, IEnumerable<Lite<UserQueryDN>>> autoComplete)
+        {
+            this.autoComplete = autoComplete;
+        }
+
         public int AutoCompleteLimit = 5;
 
         public override IEnumerable<UserQueryOmniboxResult> GetResults(string rawQuery, List<OmniboxToken> tokens, string tokenPattern)
         {
-            if (tokenPattern != "S" || !OmniboxParser.Manager.AllowedType(typeof(UserQueryDN)))
+            if (tokenPattern != "S" || !OmniboxParser.Manager.AllowedPermission(UserQueryPermission.ViewUserQuery))
                 yield break;
 
             string ident = OmniboxUtils.CleanCommas(tokens[0].Value);
 
-            var userQueries = OmniboxParser.Manager.AutoComplete(typeof(UserQueryDN), ident, AutoCompleteLimit);
+            var userQueries = autoComplete(ident, AutoCompleteLimit);
 
-            foreach (var uq in userQueries)
+            foreach (Lite<UserQueryDN> uq in userQueries)
             {
                 var match = OmniboxUtils.Contains(uq, uq.ToString(), ident);
 
@@ -40,7 +46,7 @@ namespace Signum.Entities.UserQueries
         public override List<HelpOmniboxResult> GetHelp()
         {
             var resultType = typeof(UserQueryOmniboxResult);
-            var userQuery = Signum.Entities.Extensions.Properties.Resources.Omnibox_UserQuery;
+            var userQuery = OmniboxMessage.Omnibox_UserQuery.NiceToString();
             return new List<HelpOmniboxResult>
             {
                 new HelpOmniboxResult { Text = "'{0}'".Formato(userQuery), OmniboxResultType = resultType }

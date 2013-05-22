@@ -5,7 +5,6 @@ using System.Text;
 using Signum.Utilities;
 using System.Linq.Expressions;
 using System.ComponentModel;
-using Signum.Entities.Extensions.Properties;
 
 namespace Signum.Entities
 {

@@ -10,6 +10,9 @@ using System.Windows.Controls;
 using Signum.Utilities;
 using Signum.Services;
 using System.Windows;
+using System.Globalization;
+using System.Windows.Data;
+using System.Windows.Markup;
 
 namespace Signum.Windows.Authorization
 {
@@ -33,16 +36,16 @@ namespace Signum.Windows.Authorization
 
             manager.IsViewable += manager_IsViewable;
 
-            Links.RegisterEntityLinks<RoleDN>((r, c) =>
+            LinksClient.RegisterEntityLinks<RoleDN>((r, c) =>
             {
-                bool authorized = BasicPermission.AdminRules.TryIsAuthorized() ?? true;
+                bool authorized = BasicPermission.AdminRules.IsAuthorized();
                 return new QuickLink[]
                 {
                     new QuickLinkAction("Type Rules", () => 
                         new TypeRules 
                         { 
                             Owner = Window.GetWindow(c),
-                            Role = r.ToLite(), 
+                            Role = r, 
                             Properties = PropertyAuthClient.Started, 
                             Operations = OperationAuthClient.Started,
                             Queries = QueryAuthClient.Started
@@ -58,34 +61,25 @@ namespace Signum.Windows.Authorization
 
         static bool manager_IsViewable(Type type, ModifiableEntity entity)
         {
-            if (!typeof(IdentifiableEntity).IsAssignableFrom(type))
-                return true;
-
-            IdentifiableEntity ident = (IdentifiableEntity)entity;
+            IdentifiableEntity ident = entity as IdentifiableEntity;
 
             if (ident == null || ident.IsNew)
-                return typeRules.GetAllowed(type).MaxUI() >= TypeAllowedBasic.Read;
+                return GetAllowed(type).MaxUI() >= TypeAllowedBasic.Read;
 
             return ident.IsAllowedFor(TypeAllowedBasic.Read);
         }
 
         static bool manager_IsCreable(Type type)
         {
-            if(!typeof(IdentifiableEntity).IsAssignableFrom(type))
-                return true;
-
-            return typeRules.GetAllowed(type).MaxUI() == TypeAllowedBasic.Create;
+            return GetAllowed(type).MaxUI() == TypeAllowedBasic.Create;
         }
 
         static bool manager_IsReadOnly(Type type, ModifiableEntity entity)
         {
-            if (!typeof(IdentifiableEntity).IsAssignableFrom(type))
-                return false;
-
-            IdentifiableEntity ident = (IdentifiableEntity)entity;
+            IdentifiableEntity ident = entity as IdentifiableEntity;
 
             if (ident == null || ident.IsNew)
-                return typeRules.GetAllowed(type).MaxUI() < TypeAllowedBasic.Modify;
+                return GetAllowed(type).MaxUI() < TypeAllowedBasic.Modify;
             else
                 return !ident.IsAllowedFor(TypeAllowedBasic.Modify);
         }
@@ -118,6 +112,9 @@ namespace Signum.Windows.Authorization
 
         public static TypeAllowedAndConditions GetAllowed(Type type)
         {
+            if (!typeof(IdentifiableEntity).IsAssignableFrom(type))
+                return new TypeAllowedAndConditions(TypeAllowed.Create);
+
             TypeAllowedAndConditions tac = typeRules.GetAllowed(type);
             return tac;
         }
@@ -140,10 +137,55 @@ namespace Signum.Windows.Authorization
 
                 if (type != null && Navigator.Manager.EntitySettings.ContainsKey(type))
                 {
-                    if (typeRules.GetAllowed(type).MaxUI() < TypeAllowedBasic.Read)
+                    if (GetAllowed(type).MaxUI() < TypeAllowedBasic.Read)
                         menuItem.Visibility = Visibility.Collapsed;
                 }
             }
+        }
+    }
+
+    public class VisibleIfNotContainsExtension : MarkupExtension, IValueConverter
+    {
+        object Element { get; set; }
+
+        public VisibleIfNotContainsExtension(object element)
+        {
+            this.Element = element;
+        }
+
+        public override object ProvideValue(IServiceProvider serviceProvider)
+        {
+            return this;
+        }
+
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value == null || !value.GetType().IsArray || value.GetType().GetElementType().UnNullify() != Element.GetType().UnNullify())
+                return DependencyProperty.UnsetValue;
+
+            return Array.IndexOf((Array)value, Element) == -1 ? Visibility.Visible : Visibility.Hidden; /*bool*/
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotSupportedException();
+        }
+    }
+
+    public class BoolExtension : MarkupExtension
+    {
+        public BoolExtension() { }
+
+        public BoolExtension(string value)
+        {
+            Value = value;
+        }
+
+        string Value { get; set; }
+
+        public override object ProvideValue(IServiceProvider serviceProvider)
+        {
+            return bool.Parse(Value);
         }
     }
 }

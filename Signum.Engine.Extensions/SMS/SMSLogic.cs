@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +6,6 @@ using Signum.Engine.Maps;
 using Signum.Engine.DynamicQuery;
 using System.Reflection;
 using Signum.Entities.SMS;
-using Signum.Engine.Extensions.Properties;
 using Signum.Entities;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
@@ -17,11 +16,28 @@ using System.Linq.Expressions;
 using Signum.Entities.Basics;
 using System.Text.RegularExpressions;
 using Signum.Engine.Basics;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.SMS
 {
     public static class SMSLogic
     {
+        static Expression<Func<SMSSendPackageDN, IQueryable<SMSMessageDN>>> SMSMessagesSendExpression =
+            e => Database.Query<SMSMessageDN>().Where(a => a.SendPackage.RefersTo(e));
+        [ExpressionField("SMSMessagesSendExpression")]
+        public static IQueryable<SMSMessageDN> SMSMessages(this SMSSendPackageDN e)
+        {
+            return SMSMessagesSendExpression.Evaluate(e);
+        }
+
+        static Expression<Func<SMSUpdatePackageDN, IQueryable<SMSMessageDN>>> SMSMessagesUpdateExpression =
+          e => Database.Query<SMSMessageDN>().Where(a => a.UpdatePackage.RefersTo(e));
+        [ExpressionField("SMSMessagesUpdateExpression")]
+        public static IQueryable<SMSMessageDN> SMSMessages(this SMSUpdatePackageDN e)
+        {
+            return SMSMessagesUpdateExpression.Evaluate(e);
+        }
+
         static Func<SMSMessageDN, string> SMSSendAndGetTicketAction;
         static Func<CreateMessageParams, List<string>, List<string>> SMSMultipleSendAction;
         static Func<SMSMessageDN, SMSMessageState> SMSUpdateStatusAction;
@@ -37,32 +53,34 @@ namespace Signum.Engine.SMS
             {
                 sb.Include<SMSMessageDN>();
 
-                dqm[typeof(SMSMessageDN)] = (from m in Database.Query<SMSMessageDN>()
-                                             select new
-                                             {
-                                                 Entity = m,
-                                                 m.Id,
-                                                 Source = m.From,
-                                                 m.DestinationNumber,
-                                                 m.State,
-                                                 m.SendDate,
-                                                 m.Template
-                                             }).ToDynamic();
+                dqm.RegisterQuery(typeof(SMSMessageDN), () =>
+                    from m in Database.Query<SMSMessageDN>()
+                    select new
+                    {
+                        Entity = m,
+                        m.Id,
+                        Source = m.From,
+                        m.DestinationNumber,
+                        m.State,
+                        m.SendDate,
+                        m.Template
+                    });
 
-                dqm[typeof(SMSTemplateDN)] = (from t in Database.Query<SMSTemplateDN>()
-                                              select new
-                                              {
-                                                  Entity = t,
-                                                  t.Id,
-                                                  t.Name,
-                                                  IsActive = t.IsActiveNow(),
-                                                  Message = t.Message.Etc(50),
-                                                  Source = t.From,
-                                                  t.AssociatedType,
-                                                  t.State,
-                                                  t.StartDate,
-                                                  t.EndDate,
-                                              }).ToDynamic();
+                dqm.RegisterQuery(typeof(SMSTemplateDN), () =>
+                    from t in Database.Query<SMSTemplateDN>()
+                    select new
+                    {
+                        Entity = t,
+                        t.Id,
+                        t.Name,
+                        IsActive = t.IsActiveNow(),
+                        Message = t.Message.Etc(50),
+                        Source = t.From,
+                        t.AssociatedType,
+                        t.State,
+                        t.StartDate,
+                        t.EndDate,
+                    });
 
                 if (registerGraph)
                 {
@@ -78,7 +96,7 @@ namespace Signum.Engine.SMS
         {
             phoneNumberProviders[typeof(T)] = exp;
 
-            new BasicConstructFromMany<T, ProcessExecutionDN>(SMSProviderOperation.SendSMSMessage)
+            new Graph<ProcessDN>.ConstructFromMany<T>(SMSProviderOperation.SendSMSMessage)
             {
                 Construct = (providers, args) =>
                 {
@@ -90,15 +108,12 @@ namespace Signum.Engine.SMS
                     if (!createParams.Message.HasText())
                         throw new ApplicationException("The text for the SMS message has not been set");
 
-                    SMSSendPackageDN package = new SMSSendPackageDN
-                    {
-                        NumLines = numbers.Count,
-                    }.Save();
+                    SMSSendPackageDN package = new SMSSendPackageDN().Save();
 
                     var packLite = package.ToLite();
 
                     using (OperationLogic.AllowSave<SMSMessageDN>())
-                        numbers.Select(n => createParams.CreateStaticSMSMessage(n.Exp, packLite, n.Referred)).SaveList();
+                        numbers.Select(n => createParams.CreateStaticSMSMessage(n.Exp, packLite, n.Referred, createParams.Certified)).SaveList();
 
                     var process = ProcessLogic.Create(SMSMessageProcess.Send, package);
 
@@ -114,8 +129,10 @@ namespace Signum.Engine.SMS
         {
             public string Message;
             public string From;
+            public bool Certified;
+            public List<Lite<IdentifiableEntity>> Referreds;
 
-            public SMSMessageDN CreateStaticSMSMessage(string destinationNumber, Lite<SMSSendPackageDN> packLite, Lite<IdentifiableEntity> referred)
+            public SMSMessageDN CreateStaticSMSMessage(string destinationNumber, Lite<SMSSendPackageDN> packLite, Lite<IdentifiableEntity> referred, bool certified)
             {
                 return new SMSMessageDN
                 {
@@ -124,7 +141,8 @@ namespace Signum.Engine.SMS
                     State = SMSMessageState.Created,
                     DestinationNumber = destinationNumber,
                     SendPackage = packLite,
-                    Referred = referred
+                    Referred = referred,
+                    Certified = certified
                 };
             }
         }
@@ -160,7 +178,7 @@ namespace Signum.Engine.SMS
         {
             dataObjectProviders[typeof(T)] = func;
 
-            new BasicConstructFromMany<T, ProcessExecutionDN>(SMSProviderOperation.SendSMSMessagesFromTemplate)
+            new Graph<ProcessDN>.ConstructFromMany<T>(SMSProviderOperation.SendSMSMessagesFromTemplate)
             {
                 Construct = (providers, args) =>
                 {
@@ -181,7 +199,7 @@ namespace Signum.Engine.SMS
                               Referred = p.ToLite()
                           }).Where(n => n.Phone.HasText()).AsEnumerable().ToList();
 
-                    SMSSendPackageDN package = new SMSSendPackageDN { NumLines = numbers.Count, }.Save();
+                    SMSSendPackageDN package = new SMSSendPackageDN().Save();
                     var packLite = package.ToLite();
 
                     numbers.Select(n => new SMSMessageDN
@@ -203,7 +221,7 @@ namespace Signum.Engine.SMS
                 }
             }.Register();
 
-            new BasicConstructFrom<T, SMSMessageDN>(SMSMessageOperation.CreateSMSWithTemplateFromEntity)
+            new Graph<SMSMessageDN>.ConstructFrom<T>(SMSMessageOperation.CreateSMSWithTemplateFromEntity)
             {
                 Construct = (provider, args) =>
                 {
@@ -214,8 +232,6 @@ namespace Signum.Engine.SMS
                         throw new ArgumentException("The SMS template is associated with the type {0} instead of {1}"
                             .Formato(template.AssociatedType.FullClassName, typeof(T).FullName));
 
-                    template.MessageLengthExceeded = MessageLengthExceeded.Allowed;
-
                     return new SMSMessageDN
                     {
                         Message = template.ComposeMessage(func.Evaluate(provider)),
@@ -223,7 +239,8 @@ namespace Signum.Engine.SMS
                         From = template.From,
                         DestinationNumber = GetPhoneNumber(provider),
                         State = SMSMessageState.Created,
-                        Referred = provider.ToLite()
+                        Referred = provider.ToLite(),
+                        Certified = template.Certified
                     };
                 }
             }.Register();
@@ -293,7 +310,7 @@ namespace Signum.Engine.SMS
                 switch (onExceeded)
                 {
                     case MessageLengthExceeded.NotAllowed:
-                        throw new ApplicationException(Signum.Engine.Extensions.Properties.Resources.TheTextForTheSMSMessageExceedsTheLengthLimit);
+                        throw new ApplicationException(SmsMessage.TheTextForTheSMSMessageExceedsTheLengthLimit.NiceToString());
                     case MessageLengthExceeded.Allowed:
                         break;
                     case MessageLengthExceeded.TextPruning:
@@ -335,48 +352,52 @@ namespace Signum.Engine.SMS
                 ProcessLogic.Register(SMSMessageProcess.Send, new SMSMessageSendProcessAlgortihm());
                 ProcessLogic.Register(SMSMessageProcess.UpdateStatus, new SMSMessageUpdateStatusProcessAlgorithm());
 
-                new BasicConstructFromMany<SMSMessageDN, ProcessExecutionDN>(SMSMessageOperation.CreateUpdateStatusPackage)
+                new Graph<ProcessDN>.ConstructFromMany<SMSMessageDN>(SMSMessageOperation.CreateUpdateStatusPackage)
                 {
                     Construct = (messages, _) => UpdateMessages(messages.RetrieveFromListOfLite())
                 }.Register();
 
-                dqm[typeof(SMSSendPackageDN)] = (from e in Database.Query<SMSSendPackageDN>()
-                                                 select new
-                                                 {
-                                                     Entity = e,
-                                                     e.Id,
-                                                     e.Name,
-                                                     e.NumLines,
-                                                     e.NumErrors,
-                                                 }).ToDynamic();
+                dqm.RegisterQuery(typeof(SMSSendPackageDN), () =>
+                    from e in Database.Query<SMSSendPackageDN>()
+                    let p  = e.LastProcess()
+                    select new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.Name,
+                        NumLines = e.SMSMessages().Count(),
+                        LastProcess = p,
+                        NumErrors = e.SMSMessages().Count(s => s.Exception(p) != null),
+                    });
 
-                dqm[typeof(SMSUpdatePackageDN)] = (from e in Database.Query<SMSUpdatePackageDN>()
-                                                   select new
-                                                   {
-                                                       Entity = e,
-                                                       e.Id,
-                                                       e.Name,
-                                                       e.NumLines,
-                                                       e.NumErrors,
-                                                   }).ToDynamic();
+                dqm.RegisterQuery(typeof(SMSUpdatePackageDN), () =>
+                    from e in Database.Query<SMSUpdatePackageDN>()
+                    let p = e.LastProcess()
+                    select new
+                    {
+                        Entity = e,
+                        e.Id,
+                        e.Name,
+                        NumLines = e.SMSMessages().Count(),
+                        LastProcess = p,
+                        NumErrors = e.SMSMessages().Count(s => s.Exception(p) != null),
+                    });
             }
         }
 
-        private static ProcessExecutionDN UpdateMessages(List<SMSMessageDN> messages)
+        private static ProcessDN UpdateMessages(List<SMSMessageDN> messages)
         {
-            SMSUpdatePackageDN package = new SMSUpdatePackageDN
-            {
-                NumLines = messages.Count,
-            }.Save();
+            SMSUpdatePackageDN package = new SMSUpdatePackageDN().Save();
 
             var packLite = package.ToLite();
 
             if (messages.Any(m => m.State != SMSMessageState.Sent))
                 throw new ApplicationException("SMS messages must be sent prior to update the status");
 
-            messages.Select(m => m.Do(ms => m.UpdatePackage = packLite)).SaveList();
+            messages.ForEach(ms => ms.UpdatePackage = packLite);
+            messages.SaveList();
 
-            var process = ProcessLogic.Create(SMSMessageProcess.Send, package);
+            var process = ProcessLogic.Create(SMSMessageProcess.UpdateStatus, package);
 
             process.Execute(ProcessOperation.Execute);
 
@@ -406,7 +427,7 @@ namespace Signum.Engine.SMS
         {
             if (SMSSendAndGetTicketAction == null)
                 throw new InvalidOperationException("SMSSendAction was not established");
-            
+
             SendSMS(message, SMSSendAndGetTicketAction);
         }
 
@@ -471,7 +492,7 @@ namespace Signum.Engine.SMS
 
             new ConstructFrom<SMSTemplateDN>(SMSMessageOperation.CreateSMSFromSMSTemplate)
             {
-                CanConstruct = t => !t.Active ? Resources.TheTemplateMustBeActiveToConstructSMSMessages : null,
+                CanConstruct = t => !t.Active ? SmsMessage.TheTemplateMustBeActiveToConstructSMSMessages.NiceToString() : null,
                 ToState = SMSMessageState.Created,
                 Construct = (t, args) =>
                 {
@@ -485,7 +506,7 @@ namespace Signum.Engine.SMS
             {
                 AllowsNew = true,
                 Lite = false,
-                FromStates = new[] { SMSMessageState.Created },
+                FromStates = { SMSMessageState.Created },
                 ToState = SMSMessageState.Sent,
                 Execute = (t, args) =>
                 {
@@ -497,16 +518,19 @@ namespace Signum.Engine.SMS
                 }
             }.Register();
 
-            new BasicExecute<SMSMessageDN>(SMSMessageOperation.UpdateStatus)
+            new Graph<SMSMessageDN>.Execute(SMSMessageOperation.UpdateStatus)
             {
-                CanExecute = m => m.State != SMSMessageState.Created ? null : Resources.StatusCanNotBeUpdatedForNonSentMessages,
-                Execute = (t, args) => 
+                CanExecute = m => m.State != SMSMessageState.Created ? null : SmsMessage.StatusCanNotBeUpdatedForNonSentMessages.NiceToString(),
+                Execute = (sms, args) =>
                 {
                     var func = args.TryGetArgC<Func<SMSMessageDN, SMSMessageState>>();
                     if (func != null)
-                        SMSLogic.UpdateMessageStatus(t, func);
+                        SMSLogic.UpdateMessageStatus(sms, func);
                     else
-                        SMSLogic.UpdateMessageStatus(t);                
+                        SMSLogic.UpdateMessageStatus(sms);
+
+                    if (sms.State == SMSMessageState.Sent)
+                        throw new InvalidOperationException("SMS Message {0} has not updated state".Formato(sms.Id));
                 }
             }.Register();
 

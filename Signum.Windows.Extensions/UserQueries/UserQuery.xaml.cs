@@ -18,6 +18,8 @@ using Signum.Entities;
 using System.Reflection;
 using Signum.Services;
 using Signum.Entities.UserQueries;
+using Signum.Utilities;
+using Signum.Windows.Basics;
 
 namespace Signum.Windows.UserQueries
 {
@@ -43,13 +45,20 @@ namespace Signum.Windows.UserQueries
             {
                 UserQueryDN uq = (UserQueryDN)DataContext;
 
-                QueryDescription = Navigator.Manager.GetQueryDescription(QueryClient.GetQueryName(uq.Query.Key));
+                QueryDescription = DynamicQueryServer.GetQueryDescription(QueryClient.GetQueryName(uq.Query.Key));
             }
+
+            tbCurrentEntity.Text = UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().Formato(CurrentEntityConverter.CurrentEntityKey);
         }
 
         private List<QueryToken> QueryTokenBuilder_SubTokensEvent(QueryToken token)
         {
-            return QueryUtils.SubTokens(token, QueryDescription.Columns);
+            return token.SubTokens(QueryDescription, canAggregate: false);
+        }
+
+        IEnumerable<Lite<IdentifiableEntity>> EntityType_AutoCompleting(string text)
+        {
+            return TypeClient.ViewableServerTypes().Where(t => t.CleanName.Contains(text, StringComparison.InvariantCultureIgnoreCase)).Select(t => t.ToLite()).Take(5);
         }
     }
 }

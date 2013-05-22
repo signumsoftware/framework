@@ -8,7 +8,6 @@ using Signum.Engine;
 using Signum.Engine.Authorization;
 using Signum.Services;
 using Signum.Utilities;
-using Signum.Web.Extensions.Properties;
 using System.Net.Mail;
 using System.Net;
 using System.Text;
@@ -18,18 +17,26 @@ using Signum.Web.Controllers;
 using System.Collections.Generic;
 using Signum.Entities.Profiler;
 using Signum.Engine.Profiler;
+using System.Xml.Linq;
+using System.IO;
 
 namespace Signum.Web.Profiler
 {
     public class ProfilerController : Controller
     {
-        public ActionResult Heavy()
+        public ActionResult Heavy(bool orderByTime = false)
         {
             ProfilerPermission.ViewHeavyProfiler.Authorize();
 
             ViewData[ViewDataKeys.Title] = "Root entries";
 
-            return View(ProfilerClient.ViewPrefix.Formato("HeavyList"), HeavyProfiler.Entries);
+            ViewBag.OrderByTime = orderByTime;
+
+            List<HeavyProfilerEntry> entries;
+            lock (HeavyProfiler.Entries)
+                entries = orderByTime ? HeavyProfiler.Entries.OrderBy(a => a.BeforeStart).ToList() : HeavyProfiler.Entries.ToList();
+
+            return View(ProfilerClient.ViewPrefix.Formato("HeavyList"), entries);
         }
 
         public ActionResult Statistics(SqlProfileResumeOrder order)
@@ -97,6 +104,36 @@ namespace Signum.Web.Profiler
 
             Signum.Utilities.HeavyProfiler.Clean();
             return null;
+        }
+
+        [AcceptVerbs(HttpVerbs.Post)]
+        public ActionResult UploadFile()
+        {
+            HttpPostedFileBase hpf = Request.Files[Request.Files.Cast<string>().Single()];
+
+            using (StreamReader sr = new StreamReader(hpf.InputStream))
+            {
+                var doc = XDocument.Load(sr);
+                HeavyProfiler.ImportXml(doc, true);
+            }
+
+            return RedirectToAction("Heavy");
+        }
+
+        public FileResult DownloadFile(string indices)
+        {
+            XDocument doc = indices == null ?
+                HeavyProfiler.ExportXml() :
+                HeavyProfiler.Find(indices).ExportXmlDocument();
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                HeavyProfiler.ExportXml().Save(ms);
+
+                Response.AddHeader("Content-Disposition", "attachment; filename=Profile-{0}.xml".Formato(DateTime.Now.ToString("o").Replace(":", "."))); 
+
+                return File(ms.ToArray(), "text/xml");
+            }
         }
 
         [AcceptVerbs(HttpVerbs.Get)]

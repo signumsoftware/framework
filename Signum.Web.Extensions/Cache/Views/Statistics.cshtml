@@ -1,54 +1,67 @@
 ﻿@using Signum.Utilities.ExpressionTrees
 @using Signum.Engine.Cache
 @using Signum.Web.Cache
-@model List<CacheStatistics>
+@model List<CachedTableBase>
 <h2>@ViewData[ViewDataKeys.Title]</h2>
 <div>
-    <a href="@Url.Action((CacheController pc) => pc.Disable())" class="sf-button" style="@(!CacheLogic.GloballyDisabled ? "" : "display:none");color:red" id="sfCacheDisable">
-        Disable </a><a href="@Url.Action((CacheController pc) => pc.Enable())" class="sf-button"  style="@(CacheLogic.GloballyDisabled ? "" : "display:none")" id="sfCacheEnable">
-            Enable </a><a href="@Url.Action((CacheController pc) => pc.Clean())" class="sf-button" id="sfCacheClear">
-                Clean </a>
+    <a href="@Url.Action((CacheController pc) => pc.Disable())" class="sf-button" 
+        style="@(!CacheLogic.GloballyDisabled ? "" : "display:none");color:red" id="sfCacheDisable">Disable </a>
+    <a href="@Url.Action((CacheController pc) => pc.Enable())" class="sf-button"  
+        style="@(CacheLogic.GloballyDisabled ? "" : "display:none")" id="sfCacheEnable">Enable </a>
+    <a href="@Url.Action((CacheController pc) => pc.Clean())" class="sf-button" id="sfCacheClear">Clean </a>
 </div>
 <table class="sf-search-results sf-stats-table">
     <thead>
         <tr>
-            <th>
-                Type
+            <th>Table
             </th>
-            <th>
-                CacheType
+            <th>Type
             </th>
-            <th>
-                Count
+            <th>Count
             </th>
-            <th>
-                Invalidations
+            <th>Hits
             </th>
-            <th>
-                Loads
+            <th>Invalidations
             </th>
-            <th>
-                Hits
+            <th>Loads
+            </th>
+            <th>LoadTime
             </th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
-        {
+
+        @helper ShowTree(CachedTableBase table, string prefix)
+{
             <tr>
-                <td>@item.Type.Name
+                <td>@(prefix + table.Table.Name.Name)
                 </td>
-                <td>@item.CacheType.NiceToString()
+                <td>@table.Type.TypeName()
                 </td>
-                <td>@(item.Count.TryToString() ?? "-- not loaded --")
+                <td>@(table.Count.TryToString() ?? "-- not loaded --")
                 </td>
-                <td>@item.Invalidations.DefaultToNull()
+                <td>@table.Hits.DefaultToNull()
                 </td>
-                <td>@item.Loads.DefaultToNull()
+                <td>@table.Invalidations.DefaultToNull()
                 </td>
-                <td>@item.Hits.DefaultToNull()
+                <td>@table.Loads.DefaultToNull()
+                </td>
+                <td>@table.SumLoadTime.NiceToString()
                 </td>
             </tr>
+            
+    if (table.SubTables != null)
+    {
+        foreach (var st in table.SubTables)
+        {
+            @ShowTree(st, prefix + " -> ")
+        }
+    }
+        }
+
+        @foreach (var table in Model)
+        {
+            @ShowTree(table, null)
         }
     </tbody>
 </table>

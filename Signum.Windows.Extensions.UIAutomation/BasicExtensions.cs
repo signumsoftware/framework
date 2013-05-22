@@ -30,7 +30,12 @@ namespace Signum.Windows.UIAutomation
 
         public static AutomationElement TabItemSelect(this AutomationElement container, string tabItemName)
         {
-            var tabItem = container.Descendant(h => h.Current.ControlType == ControlType.TabItem && h.Current.Name == tabItemName);
+            var tabItem = container.TryDescendant(h => h.Current.ControlType == ControlType.TabItem && h.Current.Name == tabItemName);
+            if (tabItem == null)
+                tabItem = container.Descendants(h => h.Current.ControlType == ControlType.TabItem)
+                    .Where(el => el.TryChild(h => h.Current.ControlType == ControlType.Text && h.Current.Name == tabItemName) != null)
+                    .FirstEx(() => "TabItem {0} not found".Formato(tabItemName));
+
             tabItem.Pattern<SelectionItemPattern>().Select();
             return tabItem;
         }
@@ -58,13 +63,28 @@ namespace Signum.Windows.UIAutomation
                 element.UnCheck();
         }
 
+        public static bool? GetCheckState(this AutomationElement element)
+        {
+            var ck = element.Pattern<TogglePattern>();
+            switch (ck.Current.ToggleState)
+            {
+                case ToggleState.Off:
+                    return false;
+                case ToggleState.On:
+                    return true;
+                case ToggleState.Indeterminate:
+                default:
+                    return null;
+            }
+        }
+
         public static void Check(this AutomationElement element)
         {
-            var  ck= element.Pattern<TogglePattern>();
+            var ck = element.Pattern<TogglePattern>();
             if (ck.Current.ToggleState == ToggleState.Indeterminate)
                 ck.Toggle();
 
-            if(ck.Current.ToggleState != ToggleState.On)
+            if (ck.Current.ToggleState != ToggleState.On)
                 ck.Toggle();
 
             if (ck.Current.ToggleState != ToggleState.On)
@@ -72,7 +92,7 @@ namespace Signum.Windows.UIAutomation
         }
 
         public static void UnCheck(this AutomationElement element)
-        { 
+        {
             var ck = element.Pattern<TogglePattern>();
 
             if (ck.Current.ToggleState != ToggleState.Off)
@@ -82,19 +102,30 @@ namespace Signum.Windows.UIAutomation
                 throw new InvalidOperationException("The checkbox {0} has not been unchecked".Formato(element.Current.AutomationId));
         }
 
-
-
-        public static void SelectByName(this List<AutomationElement> list, string toString, Func<string> containerDescription)
+        public static void WaitComboBoxHasItems(this AutomationElement comboBox, Func<string> containerDescription = null, int? timeOut = null)
         {
-            var filtered = list.Where(a => a.Current.Name == toString).ToList();
+            if (containerDescription == null)
+                containerDescription = () => "ComboBox has items";
 
-            if (filtered.Count == 1)
+            comboBox.Wait(() =>
             {
-                filtered.SingleEx().Pattern<SelectionItemPattern>().Select();
+                comboBox.Pattern<ExpandCollapsePattern>().Expand();
+                return comboBox.TryChild(c => c.Current.ControlType == ControlType.ListItem) != null;
+            }, containerDescription, timeOut);
+        }
+
+        public static void SelectListItemByName(this AutomationElement listParent, string toString, Func<string> containerDescription)
+        {
+            var only = listParent.TryChild(a => a.Current.Name == toString);
+            if (only != null)
+            {
+                only.Pattern<SelectionItemPattern>().Select();
             }
             else
             {
-                filtered = list.Where(a => a.Current.Name.Contains(toString, StringComparison.InvariantCultureIgnoreCase)).ToList();
+                var list = listParent.ChildrenAll();
+
+                var filtered = list.Where(a => a.Current.Name.Contains(toString, StringComparison.InvariantCultureIgnoreCase)).ToList();
 
                 if (filtered.Count == 0)
                     throw new InvalidOperationException("No element found on {0} with ToString '{1}'. Found: \r\n{2}".Formato(containerDescription(), toString, list.ToString(a => a.Current.Name, "\r\n")));
@@ -118,6 +149,12 @@ namespace Signum.Windows.UIAutomation
                 actionDescription = () => "Wait Visible " + element.Current.ClassName;
 
             element.Wait(() => element.IsVisible(), actionDescription, timeOut);
+        }
+
+        public static void AssertClassName(this AutomationElement element, string expectedType)
+        {
+            if (element.Current.ClassName != expectedType)
+                throw new InvalidCastException("The AutomationElement is not a {0}, but a {1}".Formato(expectedType, element.Current.ClassName));
         }
     }
 }

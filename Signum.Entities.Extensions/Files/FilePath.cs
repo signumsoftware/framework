@@ -34,6 +34,13 @@ namespace Signum.Entities.Files
             this.BinaryFile = File.ReadAllBytes(path);
         }
 
+        public FilePathDN(Enum fileType, string fileName, byte[] fileData)
+            : this(fileType)
+        {
+            this.FileName = fileName;
+            this.BinaryFile = fileData;
+        }
+
         [NotNullable, SqlDbType(Size = 260)]
         string fileName;
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 260), FileNameValidator]
@@ -88,6 +95,7 @@ namespace Signum.Entities.Files
             fileTypeEnum = ftEnum;
         }
 
+        [NotNullable]
         FileTypeDN fileType;
         public FileTypeDN FileType
         {
@@ -95,6 +103,7 @@ namespace Signum.Entities.Files
             internal set { Set(ref fileType, value, () => FileType); }
         }
 
+        [NotNullable]
         FileRepositoryDN repository;
         public FileRepositoryDN Repository
         {

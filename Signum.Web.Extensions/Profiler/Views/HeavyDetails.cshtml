@@ -1,33 +1,30 @@
 ﻿@using Signum.Utilities.ExpressionTrees
 @using Signum.Web.Profiler
 @model HeavyProfilerEntry
-<h2>
-    Profiler Entry (
+<h2>Profiler Entry (
     @foreach (var e in Model.FollowC(a => a.Parent).Skip(1).Reverse())
     {
         @Html.ProfilerEntry(e.Index.ToString(), e.FullIndex())@:.
         }
     @Model.Index.ToString())
 </h2>
-@Html.ActionLink("(View all)", (ProfilerController pc) => pc.Heavy())
+@Html.ActionLink("(View all)", (ProfilerController pc) => pc.Heavy(false))
+@Html.ActionLink("Download", (ProfilerController pc) => pc.DownloadFile(Model.FullIndex()))
 <br />
-<h3>
-    Breakdown</h3>
+<h3>Breakdown</h3>
 <div class="sf-profiler-chart" data-detail-url="@Url.Action("HeavyRoute", "Profiler")">
 </div>
 <br />
 <table class="sf-search-results">
     <tr>
-        <th>
-            Role
+        <th>Role
         </th>
         <td>
             @Model.Role
         </td>
     </tr>
     <tr>
-        <th>
-            Time
+        <th>Time
         </th>
         <td>
             @Model.Elapsed.NiceToString()
@@ -35,18 +32,16 @@
     </tr>
 </table>
 <br />
-<h3>
-    Aditional Data</h3>
+<h3>Aditional Data</h3>
 <div>
     <pre>
     <code>
-        @Model.AditionalData
+        @Model.AdditionalData
     </code>
     </pre>
 </div>
 <br />
-<h3>
-    StackTrace</h3>
+<h3>StackTrace</h3>
 @if (Model.StackTrace == null)
 {
     <span>No StackTrace</span>
@@ -56,14 +51,11 @@ else
     <table class="sf-search-results">
         <thead>
             <tr>
-                <th>
-                    Type
+                <th>Type
                 </th>
-                <th>
-                    Method
+                <th>Method
                 </th>
-                <th>
-                    FileLine
+                <th>FileLine
                 </th>
             </tr>
         </thead>
@@ -85,7 +77,7 @@ else
                         @frame.GetMethod().Name
                     </td>
                     <td>
-                        @frame.GetFileLineAndNumber()
+                        @frame.GetFileName() (@frame.GetFileLineNumber())
                     </td>
                 </tr>
             }
@@ -98,10 +90,10 @@ else
                 "~/Profiler/Scripts/SF_Profiler.js")
 @{ 
     var fullTree = Model.FollowC(e => e.Parent).ToList();
-    fullTree.AddRange(Model.DescendantsAndSelf()); 
+    fullTree.AddRange(Model.Descendants()); 
 }
 <script type="text/javascript">
     $(function() {
-        SF.Profiler.heavyDetailsChart(@Html.Raw(fullTree.Distinct().HeavyDetailsToJson()), @Model.Depth);
+        SF.Profiler.heavyDetailsChart(@Html.Raw(fullTree.HeavyDetailsToJson()), @Model.Depth);
     });
 </script>

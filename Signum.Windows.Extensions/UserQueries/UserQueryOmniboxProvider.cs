@@ -10,6 +10,7 @@ using System.Windows.Media;
 using Signum.Utilities;
 using Signum.Windows.Authorization;
 using System.Windows;
+using Signum.Services;
 
 namespace Signum.Windows.UserQueries
 {
@@ -17,7 +18,7 @@ namespace Signum.Windows.UserQueries
     {
         public override OmniboxResultGenerator<UserQueryOmniboxResult> CreateGenerator()
         {
-            return new UserQueryOmniboxResultGenerator();
+            return new UserQueryOmniboxResultGenerator((subString, limit) => Server.Return((IUserQueryServer s) => s.AutoCompleteUserQueries(subString, limit)));
         }
 
         public override void RenderLines(UserQueryOmniboxResult result, InlineCollection lines)
@@ -34,7 +35,7 @@ namespace Signum.Windows.UserQueries
         {
             UserQueryDN uq = result.UserQuery.RetrieveAndForget();
 
-            var query = QueryClient.queryNames[uq.Query.Key];
+            var query = QueryClient.GetQueryName(uq.Query.Key);
 
             Navigator.Explore(new ExploreOptions(query)
             {
@@ -42,7 +43,7 @@ namespace Signum.Windows.UserQueries
             });
         }
 
-        public override string GetItemStatus(UserQueryOmniboxResult result)
+        public override string GetName(UserQueryOmniboxResult result)
         {
             return "UQ:" + result.UserQuery.Key();
         }

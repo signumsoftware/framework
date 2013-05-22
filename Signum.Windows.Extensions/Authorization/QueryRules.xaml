@@ -11,7 +11,7 @@
     UseLayoutRounding="True" 
     WindowStartupLocation="CenterOwner"
     Title="Query Rules" x:Name="me" MinWidth="300" MinHeight="300" 
-        m:Common.TypeContext="authdn:QueryRulePack">
+        m:Common.TypeContext="{x:Type authdn:QueryRulePack}">
 	<Window.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
@@ -23,10 +23,7 @@
         <m:ButtonBar  DockPanel.Dock="Top" SaveClick="btSave_Click" SaveVisible="True" ReloadClick="btReload_Click" ReloadVisible="True"/>
         <m:EntityLine VerticalAlignment="Top"  m:Common.Route="Role" DockPanel.Dock="Top"/>
         <m:EntityLine VerticalAlignment="Top"  m:Common.Route="Type" DockPanel.Dock="Top"/>
-        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
-            <m:ValueLine m:Common.Route="DefaultRule" />
-            <TextBlock Text="{Binding DefaultLabel}" VerticalAlignment="Center" Margin="5"/>
-        </StackPanel>
+        <m:ValueLine m:Common.Route="Strategy" DockPanel.Dock="Top" />
         <ListView x:Name="listView" IsSynchronizedWithCurrentItem="True" ItemsSource="{Binding Rules}">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
@@ -39,14 +36,20 @@
                     <GridViewColumn Header="Allow" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <RadioButton IsChecked="{Binding Path=Allowed }" Style="{StaticResource SphereRadioButton}" Background="Lime"  />
+                                <RadioButton 
+                                    Visibility="{Binding CoercedValues, Converter={auth:VisibleIfNotContains {auth:Bool True}}}"
+                                    IsChecked="{Binding Allowed, Converter={m:Equals {auth:Bool True}}}" 
+                                    Style="{StaticResource SphereRadioButton}" Background="Lime"  />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Header="Deny" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <RadioButton  IsChecked="{Binding Path=Allowed, Converter={x:Static m:Converters.Not}}" Style="{StaticResource SphereRadioButton}" Background="Red" />
+                                <RadioButton 
+                                    Visibility="{Binding CoercedValues, Converter={auth:VisibleIfNotContains {auth:Bool False}}}"
+                                    IsChecked="{Binding Allowed, Converter={m:Equals {auth:Bool False}}}" 
+                                    Style="{StaticResource SphereRadioButton}" Background="Red" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

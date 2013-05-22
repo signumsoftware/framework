@@ -100,7 +100,7 @@ namespace Signum.Engine.Help
         {
             using (AuthLogic.Disable())
             {
-                ColumnDescriptionFactory[] columns = DynamicQueryManager.Current[key].StaticColumns.Value;
+                ColumnDescriptionFactory[] columns = DynamicQueryManager.Current.GetQuery(key).Core.Value.StaticColumns;
              
                 return columns;
             }
@@ -112,7 +112,7 @@ namespace Signum.Engine.Help
             {
                 Key = key,
                 Language = CultureInfo.CurrentCulture.Name,
-                Info = HelpGenerator.GetQueryHelp(DynamicQueryManager.Current[key]),
+                Info = HelpGenerator.GetQueryHelp(DynamicQueryManager.Current.GetQuery(key).Core.Value),
                 Columns = GenerateColumns(key).ToDictionary(
                                 kvp => kvp.Name,
                                 kvp => new QueryColumnHelp() { Name = kvp.Name, Info = HelpGenerator.GetQueryColumnHelp(kvp) })

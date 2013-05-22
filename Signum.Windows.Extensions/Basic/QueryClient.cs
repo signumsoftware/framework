@@ -26,7 +26,7 @@ namespace Signum.Windows
 
         public static object GetQueryName(string uniqueQueryName)
         {
-            if(queryNames == null)
+            if (queryNames == null)
                 throw new InvalidOperationException("QueryClient not initialized, call QueryClient.Start");
 
             return queryNames.GetOrThrow(uniqueQueryName, "Query with name '{0}' is not found");
