@@ -51,13 +51,13 @@ namespace Signum.Engine.Linq
 
             ReadOnlyCollection<OrderExpression> orderbys = select.OrderBy.NewIfChange(VisitOrderBy);
             Expression where = this.Visit(select.Where);
-            ReadOnlyCollection<Expression> groupbys = select.GroupBy.NewIfChange(e => IsConstant(e) ? null : Visit(e));
+            ReadOnlyCollection<Expression> groupBy = select.GroupBy.NewIfChange(e => IsConstant(e) ? null : Visit(e));
 
             SourceExpression from = this.VisitSource(select.From);
 
-            if (columns != select.Columns || orderbys != select.OrderBy || where != select.Where || from != select.From || groupbys != select.GroupBy)
+            if (columns != select.Columns || orderbys != select.OrderBy || where != select.Where || from != select.From || groupBy != select.GroupBy)
             {
-                return new SelectExpression(select.Alias, select.IsDistinct, select.IsReverse, select.Top, columns, from, where, orderbys, groupbys);
+                return new SelectExpression(select.Alias, select.IsDistinct, select.IsReverse, select.Top, columns, from, where, orderbys, groupBy, select.ForXmlPathEmpty);
             }
 
             return select;
@@ -70,16 +70,10 @@ namespace Signum.Engine.Linq
                 subquery.Select != null)
             {
                 if (subquery.Select.Columns.Count != 1)
-                    throw new InvalidOperationException("Subquery with {0} columns".Formato(subquery.Select.Columns.Count));
+                    throw new InvalidOperationException("Subquery has {0} columns: {1}".Formato(subquery.Select.Columns.Count, subquery.NiceToString()));
                 allColumnsUsed.GetOrCreate(subquery.Select.Alias).Add(subquery.Select.Columns[0].Name);
             }
             return base.VisitSubquery(subquery);
-        }
-
-
-        protected override Expression VisitLite(LiteExpression lite)
-        {   
-            return base.VisitLite(lite);
         }
 
         protected override Expression VisitProjection(ProjectionExpression projection)
@@ -104,6 +98,18 @@ namespace Signum.Engine.Linq
 
                 if (hs == null || hs.Count == 0)
                     return Visit(join.Left);
+            }
+
+            if (join.JoinType == JoinType.OuterApply ||join.JoinType == JoinType.LeftOuterJoin)
+            {
+                var sql = join.Right as SelectExpression;
+
+                if (sql != null && sql.IsOneRow())
+                {
+                    var hs = allColumnsUsed.TryGetC(sql.Alias);
+                    if (hs == null || hs.Count == 0)
+                        return Visit(join.Left);
+                }
             }
 
             // visit join in reverse order

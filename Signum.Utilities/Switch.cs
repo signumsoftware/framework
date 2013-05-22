@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
-using Signum.Utilities.ExpressionTrees;
-using Signum.Utilities.Properties; 
+using Signum.Utilities.ExpressionTrees; 
 
 namespace Signum.Utilities
 {

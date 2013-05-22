@@ -1,4 +1,4 @@
-﻿#region usings
+#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +13,6 @@ using Signum.Utilities.DataStructures;
 using System.Reflection;
 using Signum.Utilities.Reflection;
 using System.Collections.Specialized;
-using Signum.Web.Properties;
 using Signum.Entities.Reflection;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine.DynamicQuery;
@@ -187,19 +186,19 @@ namespace Signum.Web
             return Manager.SearchTitle(queryName);
         }
 
-        public static void SetTokens(QueryDescription queryDescription, List<FilterOption> filters)
+        public static void SetTokens(List<FilterOption> filters, QueryDescription queryDescription, bool canAggregate)
         {
-            Manager.SetTokens(queryDescription, filters);
+            Manager.SetTokens(filters, queryDescription, canAggregate);
         }
 
-        public static void SetTokens(QueryDescription queryDescription, List<OrderOption> orders)
+        public static void SetTokens(List<OrderOption> orders, QueryDescription queryDescription, bool canAggregate)
         {
-            Manager.SetTokens(queryDescription, orders);
+            Manager.SetTokens(orders, queryDescription, canAggregate);
         }
 
-        public static void SetTokens(QueryDescription queryDescription, List<ColumnOption> columns)
+        public static void SetTokens(List<ColumnOption> columns, QueryDescription queryDescription, bool canAggregate)
         {
-            Manager.SetTokens(queryDescription, columns);
+            Manager.SetTokens(columns, queryDescription, canAggregate);
         }
 
         public static void SetSearchViewableAndCreable(FindOptions findOptions)
@@ -532,7 +531,7 @@ namespace Signum.Web
                 }
 
                 Navigator.RegisterArea(typeof(Navigator), "signum");
-                FileRepositoryManager.Register(new LocalizedJavaScriptRepository(Resources.ResourceManager, "signum"));
+                FileRepositoryManager.Register(new LocalizedJavaScriptRepository(typeof(JavascriptMessage), "signum"));
                 FileRepositoryManager.Register(new CalendarLocalizedJavaScriptRepository("~/signum/calendarResources/"));
 
                 if (Initializing != null)
@@ -592,18 +591,19 @@ namespace Signum.Web
             TypeContext tc = TypeContextUtilities.UntypedNew(options.Entity, "");
             controller.ViewData.Model = tc;
 
-            var modifiable = (ModifiableEntity)options.Entity;
+            var entity = (ModifiableEntity)options.Entity;
 
-            controller.ViewData[ViewDataKeys.PartialViewName] = options.PartialViewName ?? Navigator.OnPartialViewName(modifiable);
-            
+            controller.ViewData[ViewDataKeys.PartialViewName] = options.PartialViewName ?? Navigator.OnPartialViewName(entity);
+            tc.ViewOverrides = Navigator.EntitySettings(entity.GetType()).ViewOverrides;
+
             if (controller.ViewData[ViewDataKeys.TabId] == null)
                 controller.ViewData[ViewDataKeys.TabId] = GetOrCreateTabID(controller);
 
             controller.ViewData[ViewDataKeys.ShowOperations] = options.ShowOperations;
 
-            AssertViewableEntitySettings(modifiable);
-            
-            tc.ReadOnly = options.ReadOnly ?? Navigator.IsReadOnly(modifiable);
+            AssertViewableEntitySettings(entity);
+
+            tc.ReadOnly = options.ReadOnly ?? Navigator.IsReadOnly(entity);
         }
 
         public string GetTypeTitle(ModifiableEntity mod)
@@ -619,9 +619,7 @@ namespace Signum.Web
 
             if (ident.IsNew)
             {
-                Gender gender = ident.GetType().GetGender();
-                return Properties.Resources.ResourceManager.GetGenderAwareResource("New", gender) + " " + niceName;
-
+                return LiteMessage.New.NiceToString().ForGenderAndNumber(ident.GetType().GetGender()) + " " + niceName;
             }
             return niceName + " " + ident.Id;
         }
@@ -636,6 +634,7 @@ namespace Signum.Web
             
             controller.ViewData.Model = typeContext;
             controller.ViewData[ViewDataKeys.PartialViewName] = viewOptions.PartialViewName ?? Navigator.OnPartialViewName(entity);
+            typeContext.ViewOverrides = Navigator.EntitySettings(entity.GetType()).ViewOverrides;
 
             bool isReadOnly = viewOptions.ReadOnly ?? Navigator.IsReadOnly(entity);
             if (isReadOnly)
@@ -665,12 +664,14 @@ namespace Signum.Web
             Type cleanType = cleanTC.UntypedValue.GetType();
 
             if (!Navigator.IsViewable(cleanType))
-                throw new Exception(Resources.ViewForType0IsNotAllowed.Formato(cleanType.Name));
+                throw new Exception(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().Formato(cleanType.Name));
 
             controller.ViewData.Model = cleanTC;
 
             if (Navigator.IsReadOnly(cleanType))
                 cleanTC.ReadOnly = true;
+
+            cleanTC.ViewOverrides = Navigator.EntitySettings(cleanType).ViewOverrides;
 
             return new PartialViewResult
             {
@@ -683,11 +684,11 @@ namespace Signum.Web
         protected internal virtual ViewResult Find(ControllerBase controller, FindOptions findOptions)
         {
             if (!Navigator.IsFindable(findOptions.QueryName))
-                throw new UnauthorizedAccessException(Resources.Query0IsNotAllowed.Formato(findOptions.QueryName));
+                throw new UnauthorizedAccessException(SearchMessage.Query0IsNotAllowed.NiceToString().Formato(findOptions.QueryName));
 
             QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
-            Navigator.SetTokens(queryDescription, findOptions.FilterOptions);
+            Navigator.SetTokens(findOptions.FilterOptions, queryDescription, canAggregate: false);
             SetSearchViewableAndCreable(findOptions);
 
             controller.ViewData.Model = new Context(null, "");
@@ -712,8 +713,8 @@ namespace Signum.Web
         {
             var queryDescription = DynamicQueryManager.Current.QueryDescription(options.QueryName);
 
-            SetTokens(queryDescription, options.FilterOptions);
-            SetTokens(queryDescription, options.OrderOptions);
+            SetTokens(options.FilterOptions, queryDescription, canAggregate: false);
+            SetTokens(options.OrderOptions, queryDescription, canAggregate: false);
 
             var request = new UniqueEntityRequest
             {
@@ -730,7 +731,7 @@ namespace Signum.Web
         {
             var queryDescription = DynamicQueryManager.Current.QueryDescription(options.QueryName);
 
-            SetTokens(queryDescription, options.FilterOptions);
+            SetTokens(options.FilterOptions, queryDescription, canAggregate: false);
 
             var request = new QueryCountRequest
             { 
@@ -741,22 +742,22 @@ namespace Signum.Web
             return DynamicQueryManager.Current.ExecuteQueryCount(request);
         }
 
-        protected internal void SetTokens(QueryDescription queryDescription, List<FilterOption> filters)
+        protected internal void SetTokens(List<FilterOption> filters, QueryDescription queryDescription, bool canAggregate)
         {
             foreach (var f in filters)
-                f.Token = QueryUtils.Parse(f.ColumnName, queryDescription);
+                f.Token = QueryUtils.Parse(f.ColumnName, queryDescription, canAggregate);
         }
 
-        protected internal void SetTokens(QueryDescription queryDescription, List<OrderOption> orders)
+        protected internal void SetTokens(List<OrderOption> orders, QueryDescription queryDescription, bool canAggregate)
         {
             foreach (var o in orders)
-                o.Token = QueryUtils.Parse(o.ColumnName, queryDescription);
+                o.Token = QueryUtils.Parse(o.ColumnName, queryDescription, canAggregate);
         }
 
-        protected internal void SetTokens(QueryDescription queryDescription, List<ColumnOption> columns)
+        protected internal void SetTokens(List<ColumnOption> columns, QueryDescription queryDescription, bool canAggregate)
         {
             foreach (var o in columns)
-                o.Token = QueryUtils.Parse(o.ColumnName, queryDescription);
+                o.Token = QueryUtils.Parse(o.ColumnName, queryDescription, canAggregate);
         }
 
         protected internal virtual void SetSearchViewableAndCreable(FindOptions findOptions)
@@ -781,7 +782,7 @@ namespace Signum.Web
         protected internal virtual PartialViewResult PartialFind(ControllerBase controller, FindOptions findOptions, Context context)
         {
             if (!Navigator.IsFindable(findOptions.QueryName))
-                throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(findOptions.QueryName));
+                throw new UnauthorizedAccessException(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().Formato(findOptions.QueryName));
 
             SetSearchViewableAndCreable(findOptions);
 
@@ -814,7 +815,7 @@ namespace Signum.Web
         protected internal virtual PartialViewResult Search(ControllerBase controller, QueryRequest request, bool allowMultiple, bool view, FilterMode filterMode, Context context)
         {
             if (!Navigator.IsFindable(request.QueryName))
-                throw new UnauthorizedAccessException(Resources.ViewForType0IsNotAllowed.Formato(request.QueryName));
+                throw new UnauthorizedAccessException(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().Formato(request.QueryName));
 
             ResultTable queryResult = DynamicQueryManager.Current.ExecuteQuery(request);
             
@@ -894,9 +895,12 @@ namespace Signum.Web
 
         protected internal virtual MappingContext<T> ApplyChanges<T>(ControllerContext controllerContext, T entity, string prefix, Mapping<T> mapping, SortedList<string, string> inputs) where T : IRootEntity
         {
-            RootContext<T> ctx = new RootContext<T>(prefix, inputs, controllerContext) { Value = entity };
-            mapping(ctx);
-            return ctx;
+            using (HeavyProfiler.Log("ApplyChanges", () => typeof(T).TypeName()))
+            {
+                RootContext<T> ctx = new RootContext<T>(prefix, inputs, controllerContext) { Value = entity };
+                mapping(ctx);
+                return ctx;
+            }
         }
 
         protected internal virtual ModifiableEntity ExtractEntity(ControllerBase controller, string prefix)

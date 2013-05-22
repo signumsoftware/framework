@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,20 +16,38 @@ using Signum.Entities.Reflection;
 using System.Linq.Expressions;
 using Signum.Entities.Basics;
 using System.Data.Common;
-using Signum.Engine.Properties;
+using Signum.Entine.Operations.Internal;
 
 namespace Signum.Engine.Operations
 {
     public static class OperationLogic
     {
-        static Expression<Func<OperationDN, IQueryable<OperationLogDN>>> LogOperationsExpression =
-            o => Database.Query<OperationLogDN>().Where(a => a.Operation == o);
-        public static IQueryable<OperationLogDN> LogOperations(this OperationDN o)
+
+        static Expression<Func<IdentifiableEntity, IQueryable<OperationLogDN>>> OperationLogsEntityExpression =
+            e => Database.Query<OperationLogDN>().Where(a => a.Target.RefersTo(e));
+        [ExpressionField("OperationLogsEntityExpression")]
+        public static IQueryable<OperationLogDN> OperationLogs(this IdentifiableEntity e)
         {
-            return LogOperationsExpression.Evaluate(o);
+            return OperationLogsEntityExpression.Evaluate(e);
+        }
+
+        static Expression<Func<OperationDN, IQueryable<OperationLogDN>>> OperationLogsExpression =
+            o => Database.Query<OperationLogDN>().Where(a => a.Operation == o);
+        public static IQueryable<OperationLogDN> OperationLogs(this OperationDN o)
+        {
+            return OperationLogsExpression.Evaluate(o);
         }
 
         static Polymorphic<Dictionary<Enum, IOperation>> operations = new Polymorphic<Dictionary<Enum, IOperation>>(PolymorphicMerger.InheritDictionaryInterfaces, typeof(IIdentifiable));
+
+        static ResetLazy<Dictionary<Enum, List<Type>>> operationsFromKey = new ResetLazy<Dictionary<Enum, List<Type>>>(() =>
+            {
+                return (from t in operations.OverridenTypes
+                        from d in operations.GetDefinition(t).Keys
+                        group t by d into g
+                        select KVP.Create(g.Key, g.ToList())).ToDictionary();
+            }); 
+
 
         public static HashSet<Enum> RegisteredOperations
         {
@@ -103,29 +121,31 @@ namespace Signum.Engine.Operations
 
                 MultiEnumLogic<OperationDN>.Start(sb, () => RegisteredOperations);
 
-                dqm[typeof(OperationLogDN)] = (from lo in Database.Query<OperationLogDN>()
-                                               select new
-                                               {
-                                                   Entity = lo,
-                                                   lo.Id,
-                                                   Target = lo.Target,
-                                                   lo.Operation,
-                                                   User = lo.User,
-                                                   lo.Start,
-                                                   lo.End,
-                                                   lo.Exception
-                                               }).ToDynamic();
+                dqm.RegisterQuery(typeof(OperationLogDN), () =>
+                    from lo in Database.Query<OperationLogDN>()
+                    select new
+                    {
+                        Entity = lo,
+                        lo.Id,
+                        Target = lo.Target,
+                        lo.Operation,
+                        User = lo.User,
+                        lo.Start,
+                        lo.End,
+                        lo.Exception
+                    });
 
-                dqm[typeof(OperationDN)] = (from lo in Database.Query<OperationDN>()
-                                            select new
-                                            {
-                                                Entity = lo,
-                                                lo.Id,
-                                                lo.Name,
-                                                lo.Key,
-                                            }).ToDynamic();
+                dqm.RegisterQuery(typeof(OperationDN), () =>
+                    from lo in Database.Query<OperationDN>()
+                    select new
+                    {
+                        Entity = lo,
+                        lo.Id,
+                        lo.Key,
+                    });
 
-                dqm.RegisterExpression((OperationDN o) => o.LogOperations());
+                dqm.RegisterExpression((OperationDN o) => o.OperationLogs());
+                dqm.RegisterExpression((IdentifiableEntity o) => o.OperationLogs());
 
                 sb.Schema.EntityEventsGlobal.Saving += EntityEventsGlobal_Saving;
 
@@ -143,7 +163,7 @@ namespace Signum.Engine.Operations
                           let sp = IsSaveProtected(t)
                           select et == null ? "{0} has no EntityTypeAttribute set".Formato(t.FullName) :
                           sp != RequiresSaveProtected(et.Value) ? "{0} is {1} but is {2}save protected".Formato(t.FullName, et, sp ? "" : "NOT ") :
-                          null).NotNull().Order().ToString("\r\n");
+                          null).NotNull().OrderBy().ToString("\r\n");
 
             if (errors.HasText())
                 throw new InvalidOperationException("EntitySetting - SaveProtected inconsistencies: \r\n" + errors);
@@ -192,7 +212,7 @@ namespace Signum.Engine.Operations
 
         static void EntityEventsGlobal_Saving(IdentifiableEntity ident)
         {
-            if (ident.Modified == true && 
+            if (ident.IsGraphModified && 
                 IsSaveProtected(ident.GetType()) && 
                 !IsSaveProtectedAllowed(ident.GetType()))
                 throw new InvalidOperationException("Saving '{0}' is controlled by the operations. Use OperationLogic.AllowSave<{0}>() or execute {1}".Formato(
@@ -242,8 +262,8 @@ namespace Signum.Engine.Operations
         public static void AssertOperationAllowed(Enum operationKey, bool inUserInterface)
         {
             if (!OperationAllowed(operationKey, inUserInterface))
-                throw new UnauthorizedAccessException(Resources.Operation01IsNotAuthorized.Formato(operationKey.NiceToString(), MultiEnumDN.UniqueKey(operationKey)) +
-                    (inUserInterface ? " " + Resources.InUserInterface : ""));
+                throw new UnauthorizedAccessException(OperationMessage.Operation01IsNotAuthorized.NiceToString().Formato(operationKey.NiceToString(), MultiEnumDN.UniqueKey(operationKey)) +
+                    (inUserInterface ? " " + OperationMessage.InUserInterface.NiceToString() : ""));
         }
         #endregion
 
@@ -256,7 +276,9 @@ namespace Signum.Engine.Operations
 
             operation.AssertIsValid();
 
-            operations.GetOrAdd(operation.Type).AddOrThrow(operation.Key, operation, "Operation {0} has already been registered");
+            operations.GetOrAddDefinition(operation.Type).AddOrThrow(operation.Key, operation, "Operation {0} has already been registered");
+
+            operationsFromKey.Reset();
 
             if (IsExecuteNoLite(operation))
             {
@@ -276,7 +298,9 @@ namespace Signum.Engine.Operations
 
             operation.AssertIsValid();
 
-            operations.GetOrAdd(operation.Type)[operation.Key] = operation;
+            operations.GetOrAddDefinition(operation.Type)[operation.Key] = operation;
+
+            operationsFromKey.Reset(); //unnecesarry?
         }
 
         public static List<OperationInfo> ServiceGetOperationInfos(Type entityType)
@@ -289,6 +313,16 @@ namespace Signum.Engine.Operations
         public static List<OperationInfo> GetAllOperationInfos(Type entityType)
         {
             return TypeOperations(entityType).Select(o => ToOperationInfo(o)).ToList();
+        }
+
+        public static OperationInfo GetOperationInfo(Type type, Enum operationKey)
+        {
+            return ToOperationInfo(FindOperation(type, operationKey));
+        }
+
+        public static IEnumerable<Enum> AllKeys()
+        {
+            return operationsFromKey.Value.Keys;
         }
 
         private static OperationInfo ToOperationInfo(IOperation oper)
@@ -316,21 +350,6 @@ namespace Signum.Engine.Operations
 
 
         #region Execute
-        public static IdentifiableEntity ServiceExecute(IIdentifiable entity, Enum operationKey, params object[] args)
-        {
-            var op = Find<IExecuteOperation>(entity.GetType(), operationKey).AssertEntity((IdentifiableEntity)entity);
-            op.Execute(entity, args);
-            return (IdentifiableEntity)entity;
-        }
-
-        public static IdentifiableEntity ServiceExecuteLite(Lite<IIdentifiable> lite, Enum operationKey, params object[] args)
-        {
-            IIdentifiable entity = Database.RetrieveAndForget(lite);
-            var op = Find<IExecuteOperation>(lite.EntityType, operationKey).AssertLite();
-            op.Execute(entity, args);
-            return (IdentifiableEntity)entity;
-        }
-
         public static T Execute<T>(this T entity, Enum operationKey, params object[] args)
            where T : class, IIdentifiable
         {
@@ -357,24 +376,15 @@ namespace Signum.Engine.Operations
         #endregion
 
         #region Delete
-        public static IdentifiableEntity ServiceDelete(Lite<IIdentifiable> lite, Enum operationKey, params object[] args)
-        {
-            IIdentifiable entity = Database.RetrieveAndForget(lite);
-            var op = Find<IDeleteOperation>(lite.EntityType, operationKey);
-            op.Delete(entity, args);
-            return (IdentifiableEntity)entity;
-        }
 
-        public static void Delete<T>(this Lite<T> lite, Enum operationKey, params object[] args)
-            where T : class, IIdentifiable
+        public static void Delete(this Lite<IIdentifiable> lite, Enum operationKey, params object[] args)
         {
-            T entity = lite.RetrieveAndForget();
+            IIdentifiable entity = lite.RetrieveAndForget();
             var op = Find<IDeleteOperation>(lite.EntityType, operationKey);
             op.Delete(entity, args);
         }
 
-        public static void Delete<T>(this T entity, Enum operationKey, params object[] args)
-            where T : class, IIdentifiable
+        public static void Delete(this IIdentifiable entity, Enum operationKey, params object[] args)
         {
             var op = Find<IDeleteOperation>(entity.GetType(), operationKey).AssertEntity((IdentifiableEntity)(IIdentifiable)entity);
             op.Delete(entity, args);
@@ -382,7 +392,7 @@ namespace Signum.Engine.Operations
         #endregion
 
         #region Construct
-        public static IdentifiableEntity ServiceConstruct(Type type, Enum operationKey, params object[] args)
+        public static IdentifiableEntity Construct(Type type, Enum operationKey, params object[] args)
         {
             var op = Find<IConstructOperation>(type, operationKey);
             return (IdentifiableEntity)op.Construct(args);
@@ -397,17 +407,6 @@ namespace Signum.Engine.Operations
         #endregion
 
         #region ConstructFrom
-        public static IdentifiableEntity ServiceConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args)
-        {
-            var op = Find<IConstructorFromOperation>(entity.GetType(), operationKey).AssertEntity((IdentifiableEntity)entity);
-            return (IdentifiableEntity)op.Construct(entity, args);
-        }
-
-        public static IdentifiableEntity ServiceConstructFromLite(Lite<IIdentifiable> lite, Enum operationKey, params object[] args)
-        {
-            var op = Find<IConstructorFromOperation>(lite.EntityType, operationKey).AssertLite();
-            return (IdentifiableEntity)op.Construct(Database.RetrieveAndForget(lite), args);
-        }
 
         public static T ConstructFrom<T>(this IIdentifiable entity, Enum operationKey, params object[] args)
               where T : class, IIdentifiable
@@ -444,7 +443,7 @@ namespace Signum.Engine.Operations
             IOperation result = FindOperation(type, operationKey);
 
             if (!(result is T))
-                throw new InvalidOperationException("Operation {0} is a {1} not a {2} use {3} instead".Formato(operationKey, result.GetType().TypeName(), typeof(T).TypeName(),
+                throw new InvalidOperationException("Operation '{0}' is a {1} not a {2} use {3} instead".Formato(OperationDN.UniqueKey(operationKey), result.GetType().TypeName(), typeof(T).TypeName(),
                     result is IExecuteOperation ? "Execute" :
                     result is IDeleteOperation ? "Delete" :
                     result is IConstructOperation ? "Construct" :
@@ -454,11 +453,11 @@ namespace Signum.Engine.Operations
             return (T)result;
         }
 
-        private static IOperation FindOperation(Type type, Enum operationKey)
+        public static IOperation FindOperation(Type type, Enum operationKey)
         {
             IOperation result = operations.TryGetValue(type).TryGetC(operationKey);
             if (result == null)
-                throw new InvalidOperationException("Operation {0} not found for type {1}".Formato(operationKey, type));
+                throw new InvalidOperationException("Operation '{0}' not found for type {1}".Formato(OperationDN.UniqueKey(operationKey), type));
             return result;
         }
 
@@ -476,7 +475,7 @@ namespace Signum.Engine.Operations
         {
             if (result.Lite)
             {
-                var list = GraphExplorer.FromRoot(entity).Where(a => a.SelfModified);
+                var list = GraphExplorer.FromRoot(entity).Where(a => a.Modified == ModifiedState.SelfModified);
                 if (list.Any())
                     throw new InvalidOperationException("Operation {0} needs a Lite or a clean entity, but the entity has changes:\r\n {1}".Formato(result.Key, list.ToString("\r\n")));
             }
@@ -486,10 +485,13 @@ namespace Signum.Engine.Operations
 
         public static bool IsLite(Enum operationKey)
         {
-            return operations.OverridenTypes.Select(t => operations.GetDefinition(t)).NotNull()
-                .Select(d => d.TryGetC(operationKey)).NotNull().OfType<IEntityOperation>().Select(a => a.Lite).FirstOrDefault();
+            return operationsFromKey.Value.TryGetC(operationKey)
+                .EmptyIfNull()
+                .Select(t => FindOperation(t, operationKey))
+                .OfType<IEntityOperation>()
+                .Select(a => a.Lite)
+                .FirstOrDefault();
         }
-
 
         static IEnumerable<IOperation> TypeOperations(Type type)
         {
@@ -532,17 +534,22 @@ namespace Signum.Engine.Operations
             return args.OfType<T>(); 
         }
 
-        public static string InState<T>(this T state, Enum operationKey, params T[] validStates) where T : struct
+        public static string InState<T>(this T state, params T[] fromStates) where T : struct
         {
-            if (validStates.Contains(state))
-                return null;
+            if (!fromStates.Contains(state))
+                return OperationMessage.StateShouldBe0InsteadOf1.NiceToString().Formato(
+                    fromStates.CommaOr(v => ((Enum)(object)v).NiceToString()),
+                    ((Enum)(object)state).NiceToString());
 
-            return Resources.ImpossibleToExecute0FromState1.Formato(operationKey.NiceToString(), ((Enum)(object)state).NiceToString());
+            return null;
         }
 
-        public static Type[] FindTypes(Enum operation)
+        public static List<Type> FindTypes(Enum operation)
         {
-            return TypeLogic.DnToType.Values.Where(t => operations.TryGetValue(t).TryGetC(operation) != null).ToArray();
+            return operationsFromKey.Value
+                .TryGetC(operation)
+                .EmptyIfNull()
+                .ToList();
         }
 
         internal static IEnumerable<Graph<E, S>.IGraphOperation> GraphOperations<E, S>()
@@ -603,10 +610,12 @@ namespace Signum.Engine.Operations
                 Database.Query<T>().Where(e => list.Contains(e.ToLite())).Select(getState).Distinct()).Distinct().ToList();
 
             return (from o in operations.Cast<Graph<E, S>.IGraphFromStatesOperation>()
-                    let list = states.Where(s => !o.FromStates.Contains(s)).ToList()
-                    where list.Any()
+                    let invalid = states.Where(s => !o.FromStates.Contains(s)).ToList()
+                    where invalid.Any()
                     select KVP.Create(o.Key,
-                        Resources.ImpossibleToExecute0FromState1.Formato(o.Key.NiceToString(), list.CommaOr(s => ((Enum)(object)s).NiceToString())))).ToDictionary();
+                        OperationMessage.StateShouldBe0InsteadOf1.NiceToString().Formato(
+                        o.FromStates.CommaOr(v => ((Enum)(object)v).NiceToString()),
+                        invalid.CommaOr(v => ((Enum)(object)v).NiceToString())))).ToDictionary();
         }
     }
 

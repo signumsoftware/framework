@@ -11,38 +11,28 @@ using Signum.Utilities;
 
 namespace Signum.Engine.DynamicQuery
 {
-    public class AutoDynamicQuery<T> : DynamicQuery<T>
+    public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
     {
         public IQueryable<T> Query { get; private set; }
         
         Dictionary<string, Meta> metas;
 
-        public AutoDynamicQuery(IQueryable<T> query)
+        public AutoDynamicQueryCore(IQueryable<T> query)
         {
-            if (query == null)
-                throw new ArgumentNullException("query");
-
             this.Query = query;
-        }
 
-        protected override ColumnDescriptionFactory[] InitializeColumns()
-        {
             metas = DynamicQuery.QueryMetadata(Query);
 
-            var result = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Fields)
+            StaticColumns = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Fields)
               .Select((e, i) => new ColumnDescriptionFactory(i, e.MemberInfo, metas[e.MemberInfo.Name])).ToArray();
-
-            result.Where(a => a.IsEntity).SingleEx(() => "Entity column not foundon {0}".Formato(QueryUtils.GetQueryUniqueKey(QueryName)));
-            
-            return result;
         }
 
         public override ResultTable ExecuteQuery(QueryRequest request)
         {
-            request.Columns.Insert(0, new _EntityColumn(EntityColumn().BuildColumnDescription()));
+            request.Columns.Insert(0, new _EntityColumn(EntityColumn().BuildColumnDescription(), QueryName));
 
             DQueryable<T> query = Query
-                .ToDQueryable(GetColumnDescriptions())
+                .ToDQueryable(GetQueryDescription())
                 .SelectMany(request.Multiplications)
                 .Where(request.Filters)
                 .OrderBy(request.Orders)
@@ -55,7 +45,7 @@ namespace Signum.Engine.DynamicQuery
 
         public override int ExecuteQueryCount(QueryCountRequest request)
         {
-            return Query.ToDQueryable(GetColumnDescriptions())
+            return Query.ToDQueryable(GetQueryDescription())
                 .SelectMany(request.Multiplications)
                 .Where(request.Filters)
                 .Query
@@ -64,10 +54,10 @@ namespace Signum.Engine.DynamicQuery
 
         public override Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request)
         {
-            var ex = new _EntityColumn(EntityColumn().BuildColumnDescription());
+            var ex = new _EntityColumn(EntityColumn().BuildColumnDescription(), QueryName);
 
             DQueryable<T> orderQuery = Query
-                .ToDQueryable(GetColumnDescriptions())
+                .ToDQueryable(GetQueryDescription())
                 .SelectMany(request.Multiplications)
                 .Where(request.Filters)
                 .OrderBy(request.Orders)
@@ -77,6 +67,33 @@ namespace Signum.Engine.DynamicQuery
 
             return (Lite<IdentifiableEntity>)orderQuery.Query.Select(exp).Unique(request.UniqueType);
         }
+
+        public override ResultTable ExecuteQueryGroup(QueryGroupRequest request)
+        {
+            var simpleFilters = request.Filters.Where(f => !(f.Token is AggregateToken)).ToList();
+            var aggregateFilters = request.Filters.Where(f => f.Token is AggregateToken).ToList();
+
+            var keys = request.Columns.Select(t => t.Token).Where(t => !(t is AggregateToken)).ToHashSet();
+
+            var allAggregates = request.AllTokens().OfType<AggregateToken>().ToHashSet();
+
+            DQueryable<T> query = Query
+                .ToDQueryable(GetQueryDescription())
+                .SelectMany(request.Multiplications)
+                .Where(simpleFilters)
+                .GroupBy(keys, allAggregates)
+                .Where(aggregateFilters)
+                .OrderBy(request.Orders);
+
+            var cols = request.Columns
+                .Select(c => Tuple.Create(c, Expression.Lambda(c.Token.BuildExpression(query.Context), query.Context.Parameter))).ToList();
+
+            var values = query.Query.ToArray();
+
+            return values.ToResultTable(cols, values.Length, 0, QueryRequest.AllElements);
+        }
+
+
         public override Expression Expression
         {
             get { return Query.Expression; }

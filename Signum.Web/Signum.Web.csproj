@@ -91,6 +91,7 @@
     </Compile>
     <Compile Include="AspNetSessionFactory.cs" />
     <Compile Include="ButtonBar\ButtonBar.cs" />
+    <Compile Include="Facades\TypeClient.cs" />
     <Compile Include="Facades\ExceptionClient.cs" />
     <Compile Include="Facades\QueryRequestModelBinder.cs" />
     <Compile Include="Facades\ViewOptions.cs" />
@@ -102,6 +103,7 @@
     <Compile Include="ButtonBar\ContextualItem.cs" />
     <Compile Include="ControllerAttributes\SignumExceptionHandlerAttribute.cs" />
     <Compile Include="ControllerAttributes\AuthenticationRequiredAttribute.cs" />
+    <Compile Include="HtmlHelpers\TabHelpers.cs" />
     <Compile Include="Lines\HourMinuteLine.cs" />
     <Compile Include="MimeTypes.cs" />
     <Compile Include="Operations\JsOperationOptions.cs" />
@@ -126,11 +128,6 @@
     <Compile Include="PortableAreas\Repositories\EmbeddedFilesRespository.cs" />
     <Compile Include="PortableAreas\Repositories\LocalizedJavaScriptRepository.cs" />
     <Compile Include="PreApplicationStartCode.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Signum\Controllers\JsonConverters.cs" />
     <Compile Include="Signum\Controllers\OperationController.cs" />
     <Compile Include="Signum\Controllers\ResourcesController.cs" />
@@ -143,6 +140,11 @@
     <Compile Include="Mappings\MappingContext.cs" />
     <Compile Include="ModelStateExtensions.cs" />
     <Compile Include="ButtonBar\ToolBarButton.cs" />
+    <Compile Include="Signum\Views\TypeView.generated.cs">
+      <DependentUpon>TypeView.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Signum\Views\Error.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -222,7 +224,6 @@
     <Compile Include="TypeContext\TypeContextExpression.cs" />
     <Compile Include="TypeContext\TypeContextHelper.cs" />
     <Compile Include="TypeContext\TypeContextUtilities.cs" />
-    <Compile Include="Signum\Models\ValueLineBoxModel.cs" />
     <Compile Include="LineHelpers\EntityInfo.cs" />
     <Compile Include="JSRenderer\JsValidatorOptions.cs" />
     <Compile Include="JSRenderer\JsFindOptions.cs" />
@@ -241,7 +242,7 @@
     <Compile Include="LineHelpers\EmbeddedControlHelper.cs" />
     <Compile Include="Facades\FindOptionsModelBinder.cs" />
     <Compile Include="JSRenderer\JsRenderer.cs" />
-    <Compile Include="TypeContext\Widgets\QuickLinkWidgetHelper.cs" />
+    <Compile Include="TypeContext\Widgets\LinksClient.cs" />
     <Compile Include="TypeContext\Widgets\WidgetsHelper.cs" />
     <Compile Include="HtmlHelpers\MenuHelper.cs" />
     <Compile Include="LineHelpers\LightEntityLineHelper.cs" />
@@ -266,6 +267,11 @@
     <Content Include="Signum\Views\Exception.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Exception.generated.cs</LastGenOutput>
+      <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
+    </Content>
+    <Content Include="Signum\Views\TypeView.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>TypeView.generated.cs</LastGenOutput>
       <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </Content>
     <None Include="Signum\Views\PopupOkControl.cshtml">
@@ -362,23 +368,11 @@
       <LastGenOutput>Error.generated.cs</LastGenOutput>
       <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
-    <EmbeddedResource Include="Properties\Resources.es.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.fr.resx" />
-    <EmbeddedResource Include="Properties\Resources.it.resx" />
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <None Include="Signum\Views\SearchPopupControl.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>SearchPopupControl.generated.cs</LastGenOutput>
       <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
-    <EmbeddedResource Include="Properties\Resources.de.resx" />
-    <EmbeddedResource Include="Properties\Resources.pt.resx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Signum.Engine\Signum.Engine.csproj">

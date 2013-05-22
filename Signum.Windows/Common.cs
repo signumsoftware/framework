@@ -13,7 +13,6 @@ using Signum.Utilities.DataStructures;
 using System.Reflection;
 using System.Windows.Media;
 using Signum.Entities.Reflection;
-using Signum.Windows.Properties;
 using System.Collections;
 using Signum.Services;
 using Signum.Entities;
@@ -50,23 +49,23 @@ namespace Signum.Windows
         {
             var fe = d as FrameworkElement;
 
-            if(fe != null && e.NewValue is AutoHide)
-                fe.Loaded+=new RoutedEventHandler(Common_Loaded);
+            if (fe != null && e.NewValue is AutoHide)
+                fe.Loaded += new RoutedEventHandler(Common_Loaded);
         }
 
         static void Common_Loaded(object sender, RoutedEventArgs e)
         {
-            var fe = (FrameworkElement)sender; 
+            var fe = (FrameworkElement)sender;
 
-            fe.Loaded -= Common_Loaded; 
+            fe.Loaded -= Common_Loaded;
 
-            if(Common.GetAutoHide(fe) == AutoHide.Collapsed)
-                fe.Visibility =  Visibility.Collapsed;
+            if (Common.GetAutoHide(fe) == AutoHide.Collapsed)
+                fe.Visibility = Visibility.Collapsed;
         }
 
         public static void VoteVisible(FrameworkElement fe)
         {
-            foreach (var item in fe.LogicalParents().TakeWhile(a=>GetAutoHide(a) != AutoHide.Visible))
+            foreach (var item in fe.LogicalParents().TakeWhile(a => GetAutoHide(a) != AutoHide.Visible))
             {
                 SetAutoHide(item, AutoHide.Visible);
             }
@@ -74,9 +73,27 @@ namespace Signum.Windows
 
         public static void VoteCollapsed(FrameworkElement fe)
         {
-            foreach (var item in fe.LogicalParents().TakeWhile(a=>GetAutoHide(a) == AutoHide.Undefined))
+            foreach (var item in fe.LogicalParents().TakeWhile(a => GetAutoHide(a) == AutoHide.Undefined))
             {
                 SetAutoHide(item, AutoHide.Collapsed);
+            }
+        }
+
+        public static void RefreshAutoHide(FrameworkElement content)
+        {
+            var list = content.Children<FrameworkElement>(fe => GetAutoHide(fe) != AutoHide.Undefined, WhereFlags.StartOnParent).ToList();
+
+            foreach (var item in list)
+            {
+                var ah = Common.GetAutoHide(item);
+
+                if (item.Parent is FrameworkElement)
+                {
+                    if (ah == AutoHide.Visible)
+                        Common.VoteVisible((FrameworkElement)item.Parent);
+                    else if (ah == AutoHide.Collapsed)
+                        Common.VoteCollapsed((FrameworkElement)item.Parent);
+                }
             }
         }
 
@@ -115,19 +132,32 @@ namespace Signum.Windows
             obj.SetValue(IsReadOnlyProperty, value);
         }
 
-        [TypeConverter(typeof(PropertyRouteConverter))]
-        public static readonly DependencyProperty TypeContextProperty =
-            DependencyProperty.RegisterAttached("TypeContext", typeof(PropertyRoute), typeof(Common), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.Inherits));
-        [TypeConverter(typeof(PropertyRouteConverter))]
-        public static PropertyRoute GetTypeContext(DependencyObject obj)
+        public static readonly DependencyProperty PropertyRouteProperty =
+            DependencyProperty.RegisterAttached("PropertyRoute", typeof(PropertyRoute), typeof(Common), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.Inherits, (s, e) => { }));
+        public static PropertyRoute GetPropertyRoute(DependencyObject obj)
         {
-            return (PropertyRoute)obj.GetValue(TypeContextProperty);
+            return (PropertyRoute)obj.GetValue(PropertyRouteProperty);
         }
-        [TypeConverter(typeof(PropertyRouteConverter))]
-        public static void SetTypeContext(DependencyObject obj, PropertyRoute value)
+        public static void SetPropertyRoute(DependencyObject obj, PropertyRoute value)
+        {
+            obj.SetValue(PropertyRouteProperty, value);
+        }
+
+
+        //Angabanga style! http://signum.codeplex.com/discussions/407307
+        public static readonly DependencyProperty TypeContextProperty =
+            DependencyProperty.RegisterAttached("TypeContext", typeof(Type), typeof(Common), 
+            new PropertyMetadata((s,args)=>Common.SetPropertyRoute(s, PropertyRoute.Root((Type)args.NewValue))));             
+        public static Type GetTypeContext(DependencyObject obj)
+        {
+            return (Type)obj.GetValue(TypeContextProperty);
+        }
+
+        public static void SetTypeContext(DependencyObject obj, Type value)
         {
             obj.SetValue(TypeContextProperty, value);
         }
+
 
         public static readonly DependencyProperty CollapseIfNullProperty =
                    DependencyProperty.RegisterAttached("CollapseIfNull", typeof(bool), typeof(Common), new UIPropertyMetadata(false));
@@ -242,9 +272,9 @@ namespace Signum.Windows
         static void fe_Initialized(object sender, EventArgs e)
         {
             DataGrid grid = (DataGrid)sender;
-            PropertyRoute parentContext = GetTypeContext(grid).Add("Item");
+            PropertyRoute parentContext = GetPropertyRoute(grid).Add("Item");
 
-            SetTypeContext(grid, parentContext); 
+            SetPropertyRoute(grid, parentContext); 
 
             foreach (DataGridColumn column in grid.Columns)
             {
@@ -253,7 +283,7 @@ namespace Signum.Windows
                     string route = (string)column.GetValue(Common.RouteProperty);
                     PropertyRoute context = ContinueRouteExtension.Continue(parentContext, route);
 
-                    SetTypeContext(column, context);
+                    SetPropertyRoute(column, context);
 
                     foreach (ColumnCommonRouteTask task in ColumnRouteTask.GetInvocationList())
                         task(column, route, context);
@@ -272,25 +302,18 @@ namespace Signum.Windows
             }
         }
 
-        public enum RouteType
-        {
-            All, 
-            TypeContextOnly, 
-            LabelOnly, 
-        }
-
         private static void InititializeRoute(FrameworkElement fe, string route, DependencyProperty property)
         {
-            PropertyRoute parentContext = GetTypeContext(fe.Parent ?? fe);
+            PropertyRoute parentContext = GetPropertyRoute(fe.Parent ?? fe);
 
             if (parentContext == null)
-                throw new InvalidOperationException("Route attached property can not be set with null TypeContext: '{0}'".Formato(route));
+                throw new InvalidOperationException("Route attached property can not be set with null PropertyRoute: '{0}'".Formato(route));
 
             var context = ContinueRouteExtension.Continue(parentContext, route); 
 
             if (property == Common.RouteProperty)
             {
-                SetTypeContext(fe, context);
+                SetPropertyRoute(fe, context);
 
                 foreach (CommonRouteTask task in RouteTask.GetInvocationList())
                     task(fe, route, context);
@@ -320,7 +343,7 @@ namespace Signum.Windows
             RouteTask += TaskSetImplementations;
             RouteTask += TaskSetCollaspeIfNull;
             RouteTask += TaskSetNotNullItemsSource;
-            RouteTask += TaskSetAutomationItemStatus;
+            RouteTask += TaskSetAutomationName;
             RouteTask += TaskSetVoteAutoHide;
             
             LabelOnlyRouteTask += TaskSetLabelText;
@@ -503,7 +526,7 @@ namespace Signum.Windows
             EntityBase eb = fe as EntityBase;
             if (eb != null && eb.NotSet(EntityBase.ImplementationsProperty))
             {
-                PropertyRoute entityContext = eb.GetEntityTypeContext();
+                PropertyRoute entityContext = eb.GetEntityPropertyRoute();
 
                 if (entityContext != null && entityContext.Type.CleanType().IsIIdentifiable())
                 {
@@ -532,31 +555,31 @@ namespace Signum.Windows
             if (vl != null && vl.NotSet(ValueLine.ItemSourceProperty) && context.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
                 if(context.Type.IsNullable() && context.Type.UnNullify().IsEnum &&
-                   Validator.GetOrCreatePropertyPack(context).Validators.OfType<NotNullableAttribute>().Any())
+                   Validator.TryGetPropertyValidator(context).Validators.OfType<NotNullableAttribute>().Any())
                 {
                     vl.ItemSource = EnumExtensions.UntypedGetValues(vl.Type.UnNullify()).ToObservableCollection();
                 }
             }
         }
 
-        static void TaskSetAutomationItemStatus(FrameworkElement fe, string route, PropertyRoute context)
+        static void TaskSetAutomationName(FrameworkElement fe, string route, PropertyRoute context)
         {
-            if (fe.NotSet(AutomationProperties.ItemStatusProperty))
+            if (fe.NotSet(AutomationProperties.NameProperty))
             {
-                AutomationProperties.SetItemStatus(fe, context.TryToString() ?? "");
+                AutomationProperties.SetName(fe, context.TryToString() ?? "");
             }
         }
 
-        public static readonly DependencyProperty AutomationHelpTextFromDataContextProperty =
-           DependencyProperty.RegisterAttached("AutomationHelpTextFromDataContext", typeof(bool), typeof(Common), new UIPropertyMetadata(false, RegisterUpdater));
-        public static bool GetAutomationHelpTextFromDataContext(DependencyObject obj)
+        public static readonly DependencyProperty AutomationItemStatusFromDataContextProperty =
+           DependencyProperty.RegisterAttached("AutomationItemStatusFromDataContext", typeof(bool), typeof(Common), new UIPropertyMetadata(false, RegisterUpdater));
+        public static bool GetAutomationItemStatusFromDataContext(DependencyObject obj)
         {
-            return (bool)obj.GetValue(AutomationHelpTextFromDataContextProperty);
+            return (bool)obj.GetValue(AutomationItemStatusFromDataContextProperty);
         }
 
-        public static void SetAutomationHelpTextFromDataContext(DependencyObject obj, bool value)
+        public static void SetAutomationItemStatusFromDataContext(DependencyObject obj, bool value)
         {
-            obj.SetValue(AutomationHelpTextFromDataContextProperty, value);
+            obj.SetValue(AutomationItemStatusFromDataContextProperty, value);
         }
 
         static void RegisterUpdater(DependencyObject sender, DependencyPropertyChangedEventArgs args)
@@ -567,23 +590,23 @@ namespace Signum.Windows
             {
                 fe.DataContextChanged += Common_DataContextChanged;
 
-                AutomationProperties.SetHelpText(fe, GetEntityStringAndHascode(fe.DataContext));
+                AutomationProperties.SetItemStatus(fe, GetEntityStringAndHashCode(fe.DataContext));
             }
             else
             {
                 fe.DataContextChanged -= Common_DataContextChanged;
 
-                AutomationProperties.SetHelpText(fe, "");
+                AutomationProperties.SetItemStatus(fe, "");
             }
         }
 
         static void Common_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            AutomationProperties.SetHelpText((DependencyObject)sender, GetEntityStringAndHascode(e.NewValue));
+            AutomationProperties.SetItemStatus((DependencyObject)sender, GetEntityStringAndHashCode(e.NewValue));
         }
 
 
-        public static string GetEntityStringAndHascode(object newValue)
+        public static string GetEntityStringAndHashCode(object newValue)
         {
             if (newValue == null)
                 return "";

@@ -1,4 +1,4 @@
-﻿#region usings
+#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +11,6 @@ using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
 using System.Configuration;
-using Signum.Web.Properties;
 using Signum.Engine;
 #endregion
 
@@ -33,8 +32,8 @@ namespace Signum.Web
         public EntityRepeater(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
             : base(type, untypedValue, parent, controlID, propertyRoute)
         {
-            RemoveElementLinkText = Resources.Remove;
-            AddElementLinkText = Resources.New;
+            RemoveElementLinkText = EntityControlMessage.Remove.NiceToString();
+            AddElementLinkText = LiteMessage.New.NiceToString();
             Find = false;
             LabelClass = "sf-label-repeater-line";
             Reorder = false;
@@ -42,7 +41,7 @@ namespace Signum.Web
 
         public override string ToJS()
         {
-            return "$('#{0}').data('entityRepeater')".Formato(ControlID);
+            return "$('#{0}').data('SF-entityRepeater')".Formato(ControlID);
         }
 
         protected override JsOptionsBuilder OptionsJSInternal()

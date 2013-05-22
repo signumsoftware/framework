@@ -23,10 +23,8 @@ namespace Signum.Entities
         public bool AllowMultipleNulls { get; set; }
     }
 
-    
-
     [Serializable]
-    public struct Implementations : IEquatable<Implementations>
+    public struct Implementations : IEquatable<Implementations>, ISerializable
     {
         object arrayOrType;
 
@@ -103,22 +101,22 @@ namespace Signum.Entities
             if (types.Length == 1)
                 return By(types[0]);
 
-           var error = types.Select(Error).NotNull().ToString("\r\n");
+            var error = types.Select(Error).NotNull().ToString("\r\n");
 
-           if (error.HasText())
-               throw new InvalidOperationException(error);
+            if (error.HasText())
+                throw new InvalidOperationException(error);
 
-           return new Implementations { arrayOrType = types };
+            return new Implementations { arrayOrType = types };
         }
 
         static string Error(Type type)
         {
-            if(!type.IsIdentifiableEntity())
-                return  "{0} is not {1}".Formato(type.Name, typeof(IdentifiableEntity).Name);
+            if (!type.IsIdentifiableEntity())
+                return "{0} is not {1}".Formato(type.Name, typeof(IdentifiableEntity).Name);
 
             if (type.IsAbstract)
                 return "{0} is abstract".Formato(type.Name);
-            
+
             return null;
         }
 
@@ -132,12 +130,12 @@ namespace Signum.Entities
 
         public override bool Equals(object obj)
         {
-            return  obj is Implementations || Equals((Implementations)obj);
+            return obj is Implementations || Equals((Implementations)obj);
         }
-        
+
         public bool Equals(Implementations other)
         {
-            return IsByAll && other.IsByAll || 
+            return IsByAll && other.IsByAll ||
                 arrayOrType == other.arrayOrType ||
                 Enumerable.SequenceEqual(Types, other.Types);
         }
@@ -145,6 +143,25 @@ namespace Signum.Entities
         public override int GetHashCode()
         {
             return arrayOrType == null ? 0 : Types.Aggregate(0, (acum, type) => acum ^ type.GetHashCode());
+        }
+
+        Implementations(SerializationInfo info, StreamingContext context)
+        {
+            string str = info.GetString("arrayOrType");
+
+            arrayOrType = str == "ALL" ? null :
+                str.Split('|').Select(Type.GetType).ToArray();
+
+            var array = arrayOrType as Type[];
+            if(array != null && array.Length == 1)
+                arrayOrType = array[0]; 
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("arrayOrType", arrayOrType == null ? "ALL" :
+                arrayOrType is Type ? ((Type)arrayOrType).AssemblyQualifiedName :
+                arrayOrType is Type[] ? ((Type[])arrayOrType).ToString(a => a.AssemblyQualifiedName, "|") : null);
         }
     }
 
@@ -178,6 +195,10 @@ namespace Signum.Entities
     {
     }
 
+    [AttributeUsage(AttributeTargets.Field)]
+    public sealed class FieldWithoutPropertyAttribute : Attribute
+    {
+    }
 
     [AttributeUsage(AttributeTargets.Field)]
     public sealed class NotNullableAttribute : Attribute
@@ -232,99 +253,16 @@ namespace Signum.Entities
 
         public string UdtTypeName { get; set; }
     }
-
+    
     [AttributeUsage(AttributeTargets.Field)]
-    public sealed class NotifyCollectionChangedAttribute : Attribute
-    {
-
-    }
-
-    [AttributeUsage(AttributeTargets.Field)]
-    public sealed class NotifyChildPropertyAttribute : Attribute
-    {
-        
-    }
-
-    [AttributeUsage(AttributeTargets.Field)]
-    public sealed class ValidateChildPropertyAttribute : Attribute
+    public class ForceForeignKeyAttribute : Attribute
     {
 
     }
 
     [AttributeUsage(AttributeTargets.Field)]
-    public class ForceForeignKey : Attribute
+    public class AvoidExpandQueryAttribute : Attribute
     {
 
-    }
-
-    //Used by NotifyCollectionChangedAttribute, NotifyChildPropertyAttribute, ValidateChildPropertyAttribute
-    internal static class AttributeManager<T>
-        where T : Attribute
-    {
-        //Consider using ImmutableAVLTree instead
-        readonly static Dictionary<Type, TypeAttributePack> fieldAndProperties = new Dictionary<Type, TypeAttributePack>();
-       
-        static TypeAttributePack GetFieldsAndProperties(Type type)
-        {
-            lock (fieldAndProperties)
-            {
-                return fieldAndProperties.GetOrCreate(type, () =>
-                {
-                    var list = Reflector.InstanceFieldsInOrder(type).Where(fi=>fi.HasAttribute<T>()).ToList();
-
-                    if (list.Count == 0)
-                        return null;
-
-                    return new TypeAttributePack
-                    {
-                        Fields = list.Select(fi => ReflectionTools.CreateGetterUntyped(type, fi)).ToArray(),
-                        PropertyNames = list.Select(fi => Reflector.FindPropertyInfo(fi).Name).ToArray()
-                    };
-                });
-            }
-        }
-
-        public static bool FieldContainsAttribute(Type type, PropertyInfo pi)
-        {
-            TypeAttributePack pack = GetFieldsAndProperties(type);
-
-            if(pack == null)
-                return false;
-
-            return pack.PropertyNames.Contains(pi.Name);
-        }
-
-        readonly static object[] EmptyArray = new object[0];
-
-        public static object[] FieldsWithAttribute(ModifiableEntity entity)
-        {
-            TypeAttributePack pack = GetFieldsAndProperties(entity.GetType());
-
-            if (pack == null)
-                return EmptyArray;
-
-            return pack.Fields.Select(f=>f(entity)).ToArray();
-        }
-
-        public static string FindPropertyName(ModifiableEntity entity, object fieldValue)
-        {
-            TypeAttributePack pack = GetFieldsAndProperties(entity.GetType());
-
-            if (pack == null)
-                return null;
-
-            int index = pack.Fields.IndexOf(f => f(entity) == fieldValue);
-
-            if (index == -1)
-                return null;
-
-            return pack.PropertyNames[index];
-        }
-    }
-
-    internal class TypeAttributePack
-    {
-        public Func<object, object>[] Fields;
-        public string[] PropertyNames; 
     }
 }

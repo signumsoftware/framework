@@ -16,6 +16,8 @@ using Signum.Entities.DynamicQuery;
 using Signum.Entities;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
+using System.Reflection;
+using System.Windows.Automation;
 
 namespace Signum.Windows
 {
@@ -39,7 +41,7 @@ namespace Signum.Windows
         {
             IdentifiableEntity ident = e.NewValue as IdentifiableEntity;
 
-            ObservableCollection<QuickLink> links = ident != null && !ident.IsNew ? Links.GetForEntity(ident, Control) : new ObservableCollection<QuickLink>();
+            ObservableCollection<QuickLink> links = ident != null && !ident.IsNew ? LinksClient.GetForEntity(ident.ToLiteFat(), Control) : new ObservableCollection<QuickLink>();
 
             lvQuickLinks.ItemsSource = links;
 
@@ -60,175 +62,6 @@ namespace Signum.Windows
                 Button b = (Button)e.OriginalSource;
                 ((QuickLink)b.DataContext).Execute();
             }
-        }
-
-        public static void Start()
-        {
-            WidgetPanel.GetWidgets += (obj, mainControl) => new LinksWidget() { Control = mainControl } ;
-        }
-    }
-
-    public static class Links
-    {
-        static Dictionary<Type, List<Delegate>> entityLinks = new Dictionary<Type, List<Delegate>>();
-        static List<Func<IdentifiableEntity, Control, QuickLink[]>> globalLinks = new List<Func<IdentifiableEntity, Control, QuickLink[]>>();
-
-        public static void RegisterEntityLinks<T>(Func<T, Control, QuickLink[]> getQuickLinks)
-            where T : IdentifiableEntity
-        {
-            entityLinks.GetOrCreate(typeof(T)).Add(getQuickLinks);
-        }
-
-        public static void RegisterGlobalLinks(Func<IdentifiableEntity, Control, QuickLink[]> getQuickLinks)
-        {
-            globalLinks.Add(getQuickLinks);
-        }
-
-        public static ObservableCollection<QuickLink> GetForEntity(IdentifiableEntity ident, Control control)
-        {
-            ObservableCollection<QuickLink> links = new ObservableCollection<QuickLink>();
-
-            links.AddRange(globalLinks.SelectMany(a => a(ident, control).NotNull()));
-
-            List<Delegate> list = entityLinks.TryGetC(ident.GetType());
-            if (list != null)
-                links.AddRange(list.SelectMany(a => (QuickLink[])a.DynamicInvoke(ident, control)));
-
-            links.RemoveAll(a => !a.IsVisible);
-
-            return links;
-        }
-    }
-
-    ///// <summary>
-    ///// Controls must implement this interface to have the left navigation panel
-    ///// </summary>
-    //public interface IHaveQuickLinks
-    //{
-    //    List<QuickLink> QuickLinks();
-    //}
-
-    /// <summary>
-    /// Represents an item of the left navigation panel
-    /// </summary>
-    public abstract class QuickLink : INotifyPropertyChanged // http://www.benbarefield.com/blog/?p=59
-    {
-        protected QuickLink() { }
-
-        public string Label { get; set; }
-
-        public bool IsVisible { get; set;}
-
-        public bool IsShy { get; set; }
-
-        public string ToolTip { get; set; }
-
-        public ImageSource Icon { get; set; }
-
-        public abstract void Execute();
-
-
-        void Never() { PropertyChanged(null, null); }
-        public event PropertyChangedEventHandler PropertyChanged;
-    }
-
-    public class QuickLinkAction : QuickLink
-    {
-        Action action; 
-        public QuickLinkAction(string label, Action action)
-        {
-            this.Label = label;
-            this.action = action;
-            this.IsVisible = true;
-        }
-
-        public override void Execute()
-        {
-            action();
-        }
-    }
-
-    public class QuickLinkExplore : QuickLink
-    {
-        public ExploreOptions Options {get; set;} 
-
-        public QuickLinkExplore(object queryName, string columnName, object value, bool hideColumn):
-            this(new ExploreOptions(queryName)
-            { 
-                ShowFilters = false,
-                SearchOnLoad = true,
-                ColumnOptionsMode = hideColumn ? ColumnOptionsMode.Remove: ColumnOptionsMode.Add,
-                ColumnOptions = hideColumn ? new List<ColumnOption>{new ColumnOption(columnName)}: new List<ColumnOption>(),
-                FilterOptions = new List<FilterOption>
-                {
-                    new FilterOption(columnName, value),
-                }
-            })
-        {  
-        }
-
-        public QuickLinkExplore(ExploreOptions options)
-        {
-            Options = options;
-            Label = QueryUtils.GetNiceName(Options.QueryName);
-            Icon = Navigator.Manager.GetFindIcon(Options.QueryName, false);
-            IsVisible = Navigator.IsFindable(Options.QueryName);
-        }
-
-        public override void Execute()
-        {
- 	       Navigator.Explore(Options); 
-        }
-    }
-
-    public class QuickLinkNavigate<T> : QuickLink
-        where T:IdentifiableEntity
-    {
-        public NavigateOptions NavigateOptions {get; set;}
-
-        public FindUniqueOptions FindUniqueOptions { get; set; }
-
-        public QuickLinkNavigate(string columnName, object value)
-            : this(typeof(T), columnName, value, UniqueType.Single)
-        {
-        }
-
-        public QuickLinkNavigate(string columnName, object value, UniqueType unique)
-            : this(typeof(T), columnName, value, unique)
-        {
-        }
-
-        public QuickLinkNavigate(object queryName, string columnName, object value, UniqueType unique): 
-            this(new FindUniqueOptions(queryName)
-            {
-                 UniqueType = unique,
-                 FilterOptions = new List<FilterOption>()
-                 {
-                     new FilterOption(columnName, value)
-                 }
-            })
-        {
-        }
-
-        public QuickLinkNavigate(FindUniqueOptions options)
-        {
-            FindUniqueOptions = options;
-            Label = typeof(T).NiceName();
-            Icon = Navigator.Manager.GetEntityIcon(typeof(T), false);
-            IsVisible = Navigator.IsFindable(FindUniqueOptions.QueryName) && Navigator.IsNavigable(typeof(T), isSearchEntity: false);
-        }
-
-        public override void Execute()
-        {
-            Lite<T> lite = Navigator.FindUnique<T>(FindUniqueOptions);
-
-            if (lite == null)
-                return;
-
-            if (NavigateOptions != null)
-                Navigator.Navigate(lite, NavigateOptions);
-            else
-                Navigator.Navigate(lite);
         }
     }
 }

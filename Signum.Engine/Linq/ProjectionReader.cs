@@ -9,13 +9,12 @@ using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
-using Signum.Engine.Properties;
 using Signum.Utilities.ExpressionTrees;
 using System.Data.Common;
 
 namespace Signum.Engine.Linq
 {
-    public class LookupToken
+    class LookupToken
     {
         public override string ToString()
         {

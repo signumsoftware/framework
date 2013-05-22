@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Signum.Entities.Properties;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
@@ -61,7 +60,7 @@ namespace Signum.Entities.DynamicQuery
             return Expression.Property(result.UnNullify(), PropertyInfo).Nullify();
         }
 
-        protected override List<QueryToken> SubTokensInternal()
+        protected override List<QueryToken> SubTokensOverride()
         {
             return new List<QueryToken>();
         }
@@ -93,7 +92,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            return DisplayName + Resources.Of + Parent.ToString();
+            return DisplayName + QueryTokenMessage.Of.NiceToString() + Parent.ToString();
         }
 
         public override QueryToken Clone()

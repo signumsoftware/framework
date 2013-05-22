@@ -11,7 +11,6 @@ using Signum.Entities;
 using System.Reflection;
 using Signum.Entities.Reflection;
 using System.Configuration;
-using Signum.Web.Properties;
 #endregion
 
 namespace Signum.Web
@@ -74,16 +73,22 @@ namespace Signum.Web
         {
             TypeContext<S> context = Common.WalkExpression(tc, property);
 
-            EntityLineDetail edl = new EntityLineDetail(context.Type, context.Value, context, null, context.PropertyRoute); 
+            EntityLineDetail eld = new EntityLineDetail(context.Type, context.Value, context, null, context.PropertyRoute); 
            
-            EntityBaseHelper.ConfigureEntityBase(edl, edl.CleanRuntimeType ?? edl.Type.CleanType());
+            EntityBaseHelper.ConfigureEntityBase(eld, eld.CleanRuntimeType ?? eld.Type.CleanType());
 
-            Common.FireCommonTasks(edl);
+            Common.FireCommonTasks(eld);
 
             if (settingsModifier != null)
-                settingsModifier(edl);
+                settingsModifier(eld);
 
-            return helper.InternalEntityLineDetail(edl);
+            var result = helper.InternalEntityLineDetail(eld);
+
+            var vo = eld.ViewOverrides;
+            if (vo == null)
+                return result;
+
+            return vo.OnSurroundLine(eld.PropertyRoute, helper, tc, result);
         }
     }
 }

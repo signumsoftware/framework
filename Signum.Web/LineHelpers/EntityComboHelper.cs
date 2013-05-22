@@ -12,7 +12,6 @@ using System.Reflection;
 using Signum.Entities.Reflection;
 using Signum.Engine;
 using System.Configuration;
-using Signum.Web.Properties;
 using System.Web;
 using Signum.Engine.DynamicQuery;
 #endregion
@@ -56,7 +55,7 @@ namespace Signum.Web
                         {
                             int? id = entityCombo.IdOrNull;
 
-                            IEnumerable<Lite<IIdentifiable>> data = entityCombo.Data ?? AutoCompleteUtils.FindAllLite(entityCombo.Implementations.Value);
+                            IEnumerable<Lite<IIdentifiable>> data = entityCombo.Data ?? AutocompleteUtils.FindAllLite(entityCombo.Implementations.Value);
 
                             bool complexCombo = entityCombo.Implementations.Value.IsByAll || entityCombo.Implementations.Value.Types.Count() > 1;
 
@@ -128,7 +127,13 @@ namespace Signum.Web
             if (settingsModifier != null)
                 settingsModifier(ec);
 
-            return helper.InternalEntityCombo(ec);
+            var result = helper.InternalEntityCombo(ec);
+
+            var vo = ec.ViewOverrides;
+            if (vo == null)
+                return result;
+
+            return vo.OnSurroundLine(ec.PropertyRoute, helper, tc, result);
         }
 
         public static MvcHtmlString RenderOption(this SelectListItem item)

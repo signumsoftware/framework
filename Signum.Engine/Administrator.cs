@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Linq.Expressions;
 using Signum.Engine.Maps;
-using Signum.Engine.Properties;
 using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
@@ -82,6 +81,7 @@ namespace Signum.Engine
             Table table = Schema.Current.Table(type);
 
             using (Synchronizer.RenameTable(table, replacements))
+            using (ExecutionMode.DisableCache())
             {
                 if (ExistTable(table))
                     return Database.RetrieveAll(type);
@@ -112,7 +112,7 @@ namespace Signum.Engine
         {
             var pi = ReflectionTools.BasePropertyInfo(readonlyProperty);
 
-            Action<T, V> setter = ReadonlySetterCache<T>.Getter<V>(pi);
+            Action<T, V> setter = ReadonlySetterCache<T>.Setter<V>(pi);
 
             setter(ident, value);
 
@@ -121,11 +121,11 @@ namespace Signum.Engine
             return ident;
         }
 
-        class ReadonlySetterCache<T> where T : ModifiableEntity
+        static class ReadonlySetterCache<T> where T : ModifiableEntity
         {
             static ConcurrentDictionary<string, Delegate> cache = new ConcurrentDictionary<string, Delegate>();
 
-            internal static Action<T, V> Getter<V>(PropertyInfo pi)
+            internal static Action<T, V> Setter<V>(PropertyInfo pi)
             {
                 return (Action<T, V>)cache.GetOrAdd(pi.Name, s => ReflectionTools.CreateSetter<T, V>(Reflector.FindFieldInfo(typeof(T), pi)));
             }
@@ -137,6 +137,30 @@ namespace Signum.Engine
             ident.IsNew = true;
             ident.SetSelfModified();
             return ident;
+        }
+
+        public static T SetNotModified<T>(this T ident)
+            where T : Modifiable
+        {
+            if (ident is IdentifiableEntity)
+                ((IdentifiableEntity)(Modifiable)ident).IsNew = false;
+            ident.Modified = ModifiedState.Clean;
+            return ident;
+        }
+
+        public static T SetNotModifiedGraph<T>(this T ident, int id) 
+            where T: IdentifiableEntity
+        {
+            foreach (var item in GraphExplorer.FromRoot(ident).Where(a => a.Modified != ModifiedState.Sealed))
+            {
+                 item.SetNotModified();
+                if (item is IdentifiableEntity)
+                    ((IdentifiableEntity)item).SetId(-1);
+            }
+
+            ident.SetId(id);
+
+            return ident; 
         }
 
         /// <summary>
@@ -264,6 +288,133 @@ namespace Signum.Engine
             var prov = ((DbQueryProvider)query.Provider);
 
             return prov.Update(query, null, updateConstructor, cm => cm.ToPreCommand(), removeSelectRowCount: true);
+        }
+
+        public static void UpdateToStrings<T>() where T : IdentifiableEntity, new()
+        {
+            SafeConsole.WriteLineColor(ConsoleColor.Cyan, "Saving toStr for {0}".Formato(typeof(T).TypeName()));
+
+            if (!Database.Query<T>().Any())
+                return;
+
+            int min = Database.Query<T>().Min(a => a.Id);
+            int max = Database.Query<T>().Max(a => a.Id);
+
+            min.To(max + 1, 100).ProgressForeach(id => id.ToString(), null, (i, writer) =>
+            {
+                var list = Database.Query<T>().Where(a => i <= a.Id && a.Id < i + 100).ToList();
+
+                foreach (var item in list)
+                {
+                    if (item.ToString() != item.toStr)
+                        item.InDB().UnsafeUpdate(a => new T { toStr = item.ToString() });
+                }
+            });
+        }
+
+        public static void UpdateToStrings<T>(Expression<Func<T, string>> expression) where T : IdentifiableEntity, new()
+        {
+            SafeConsole.Wait("UnsafeUpdate toStr for {0}".Formato(typeof(T).TypeName()), () =>
+                Database.Query<T>().UnsafeUpdate(a => new T { toStr = expression.Evaluate(a) }));
+        }
+
+        public static void UpdateToStrings<T>(IQueryable<T> query, Expression<Func<T, string>> expression) where T : IdentifiableEntity, new()
+        {
+            SafeConsole.Wait("UnsafeUpdate toStr for {0}".Formato(typeof(T).TypeName()), () =>
+                query.UnsafeUpdate(a => new T { toStr = expression.Evaluate(a) }));
+        }
+
+        public static IDisposable PrepareForBatchLoadScope<T>(bool disableForeignKeys = true, bool disableMultipleIndexes = true, bool disableUniqueIndexes = false) where T : IdentifiableEntity
+        {
+            Table table = Schema.Current.Table(typeof(T));
+
+            return table.PrepareForBathLoadScope(disableForeignKeys, disableMultipleIndexes, disableUniqueIndexes);
+        }
+
+        static IDisposable PrepareForBathLoadScope(this Table table, bool disableForeignKeys, bool disableMultipleIndexes, bool disableUniqueIndexes)
+        {
+            IDisposable disp = PrepareTableForBatchLoadScope(table, disableForeignKeys, disableMultipleIndexes, disableUniqueIndexes);
+
+            var list = table.RelationalTables().Select(rt => PrepareTableForBatchLoadScope(rt, disableForeignKeys, disableMultipleIndexes, disableUniqueIndexes)).ToList();
+
+            return new Disposable(() =>
+            {
+                disp.Dispose();
+
+                foreach (var d in list)
+                    d.Dispose();
+            });
+        }
+
+        public static IDisposable PrepareTableForBatchLoadScope(ITable table, bool disableForeignKeys, bool disableMultipleIndexes, bool disableUniqueIndexes)
+        {
+            SafeConsole.WriteColor(ConsoleColor.Magenta, table.Name + ":");
+            Action onDispose = () => SafeConsole.WriteColor(ConsoleColor.Magenta, table.Name + ":");
+
+            if (disableForeignKeys)
+            {
+                SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " NOCHECK  Foreign Keys");
+                Executor.ExecuteNonQuery("ALTER TABLE {0} NOCHECK CONSTRAINT ALL".Formato(table.Name));
+
+                onDispose += ()=>
+                {
+                    SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " RE-CHECK Foreign Keys");
+                    Executor.ExecuteNonQuery("ALTER TABLE {0}  WITH CHECK CHECK CONSTRAINT ALL".Formato(table.Name));
+                }; 
+            }
+
+            if (disableMultipleIndexes)
+            {
+                var multiIndexes = GetIndixesNames(table, unique: false);
+
+                if (multiIndexes.Any())
+                {
+                    SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " DISABLE Multiple Indexes");
+                    Executor.ExecuteNonQuery(multiIndexes.ToString(i => "ALTER INDEX [{0}] ON {1} DISABLE".Formato(i, table.Name), "\r\n"));
+
+                    onDispose += () =>
+                    {
+                        SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " REBUILD Multiple Indexes");
+                        Executor.ExecuteNonQuery(multiIndexes.ToString(i => "ALTER INDEX [{0}] ON {1} REBUILD".Formato(i, table.Name), "\r\n"));
+                    };
+                }
+            }
+
+            if (disableUniqueIndexes)
+            {
+                var uniqueIndexes = GetIndixesNames(table, unique: true);
+
+                if (uniqueIndexes.Any())
+                {
+                    SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " DISABLE Unique Indexes");
+                    Executor.ExecuteNonQuery(uniqueIndexes.ToString(i => "ALTER INDEX [{0}] ON {1} DISABLE".Formato(i, table.Name), "\r\n"));
+
+                    onDispose += () =>
+                    {
+                        SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " REBUILD Unique Indexes");
+                        Executor.ExecuteNonQuery(uniqueIndexes.ToString(i => "ALTER INDEX [{0}] ON {1} REBUILD".Formato(i, table.Name), "\r\n"));
+                    };
+                }
+            }
+
+            Console.WriteLine();
+            onDispose += () => Console.WriteLine();
+
+            return new Disposable(onDispose);
+        }
+
+        private static List<string> GetIndixesNames(this ITable table, bool unique)
+        {
+            using (OverrideDatabaseInViews(table.Name.Schema.Database))
+            {
+                return (from s in Database.View<SysSchemas>()
+                               where s.name == table.Name.Schema.Name
+                               from t in s.Tables()
+                               where t.name == table.Name.Name
+                               from i in t.Indices()
+                               where i.is_unique == unique
+                               select i.name).ToList();
+            }
         }
     }
 }

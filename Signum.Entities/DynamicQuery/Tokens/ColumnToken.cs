@@ -11,15 +11,26 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class ColumnToken : QueryToken
     {
-        public ColumnDescription Column { get; private set; }
+        ColumnDescription column;
+        public ColumnDescription Column { get { return column; } }
 
-        internal ColumnToken(ColumnDescription column)
+        object queryName;
+        public override object QueryName
+        {
+            get { return queryName; }
+        }
+
+        internal ColumnToken(ColumnDescription column, object queryName)
             : base(null)
         {
             if (column == null)
                 throw new ArgumentNullException("column");
 
-            this.Column = column;
+            if (queryName == null)
+                throw new ArgumentNullException("queryName");
+
+            this.column = column;
+            this.queryName = queryName;
         }
 
         public override string Key
@@ -49,17 +60,17 @@ namespace Signum.Entities.DynamicQuery
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
-            throw new InvalidOperationException("BuildExpressionInternal not supported for ColumnToken");
+            throw new InvalidOperationException("ColumnToken {0} not found on replacements".Formato(this));
         }
 
-        protected override List<QueryToken> SubTokensInternal()
+        protected override List<QueryToken> SubTokensOverride()
         {
             if (Column.Type.UnNullify() == typeof(DateTime))
             {
                 if (Column.PropertyRoutes != null)
                 {
                     DateTimePrecision? precission =
-                        Column.PropertyRoutes.Select(pr => Validator.GetOrCreatePropertyPack(pr.Parent.Type, pr.PropertyInfo.Name)
+                        Column.PropertyRoutes.Select(pr => Validator.TryGetPropertyValidator(pr.Parent.Type, pr.PropertyInfo.Name)
                         .Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefaultEx())
                         .Select(dtp => dtp.TryCS(d => d.Precision)).Distinct().Only();
 
@@ -103,7 +114,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override QueryToken Clone()
         {
-            return new ColumnToken(Column);
+            return new ColumnToken(Column, queryName);
         }
 
         public override string TypeColor
@@ -111,7 +122,7 @@ namespace Signum.Entities.DynamicQuery
             get
             {
                 if (Column.IsEntity)
-                    return "#0000FF";
+                    return "#2B78AF";
 
                 return base.TypeColor;
             }

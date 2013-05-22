@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
-using Signum.Entities.Properties;
 using System.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using System.Linq.Expressions;
@@ -13,6 +12,9 @@ using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using System.Diagnostics;
 using Signum.Entities.Basics;
+using System.Collections.Concurrent;
+using System.Runtime.Serialization;
+using System.ComponentModel;
 
 namespace Signum.Entities
 {
@@ -40,18 +42,21 @@ namespace Signum.Entities
     }
 
     [Serializable]
-    abstract class LiteImp  : Modifiable{ }
+    public abstract class LiteImp  : Modifiable
+    {
+    
+    }
 
     [Serializable, DebuggerTypeProxy(typeof(FlattenHierarchyProxy))]
-    class LiteImp<T> : LiteImp, Lite<T>
+    public sealed class LiteImp<T> : LiteImp, Lite<T>, ISerializable
         where T : IdentifiableEntity
     {
         T entityOrNull;
         int? id;
-        protected string toStr;
+        string toStr;
 
         // Methods
-        protected LiteImp()
+        private LiteImp()
         {
         }
 
@@ -62,6 +67,17 @@ namespace Signum.Entities
 
             this.id = id;
             this.toStr = toStr;
+            this.Modified = ModifiedState.Clean;
+        }
+
+        public LiteImp(int id, string toStr, ModifiedState modified)
+        {
+            if (typeof(T).IsAbstract)
+                throw new InvalidOperationException(typeof(T).Name + " is abstract");
+
+            this.id = id;
+            this.toStr = toStr;
+            this.Modified = modified; 
         }
 
         public LiteImp(T entity, string toStr)
@@ -220,19 +236,44 @@ namespace Signum.Entities
             this.toStr = toStr;
         }
 
-        protected override void CleanSelfModified()
-        {
-        }
-
-        public override bool SelfModified
-        {
-            get { return false; }
-        }
-
-
         public Lite<T> Clone()
         {
             return new LiteImp<T>(Id, toStr); 
+        }
+
+        private LiteImp(SerializationInfo info, StreamingContext ctxt)
+        {
+            bool modifiedSet = false;
+
+            foreach (SerializationEntry item in info)
+            {
+                switch (item.Name)
+                {
+                    case "modified": this.Modified = (ModifiedState)Enum.Parse(typeof(ModifiedState), (string)item.Value); modifiedSet = true; break;
+                    case "entityOrNull": this.entityOrNull = (T)item.Value; break;
+                    case "id": this.id = (int)item.Value; break;
+                    case "toStr": this.toStr = (string)item.Value; break;
+                    default: throw new InvalidOperationException("Unexpected SerializationEntry");
+                }
+            }
+
+            if (!modifiedSet)
+                this.Modified = ModifiedState.Clean;
+        }
+
+        void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            if (this.Modified != ModifiedState.Clean)
+                info.AddValue("modified", this.Modified.ToString(), typeof(string));
+
+            if (this.entityOrNull != null)
+                info.AddValue("entityOrNull", this.entityOrNull, typeof(T));
+
+            if (this.id != null)
+                info.AddValue("id", this.id.Value, typeof(int));
+
+            if (this.toStr != null)
+                info.AddValue("toStr", this.toStr, typeof(string));
         }
     }
 
@@ -242,6 +283,9 @@ namespace Signum.Entities
 
         static GenericInvoker<Func<int, string, Lite<IdentifiableEntity>>> giNewLite =
             new GenericInvoker<Func<int, string, Lite<IdentifiableEntity>>>((id, str) => new LiteImp<IdentifiableEntity>(id, str));
+
+        static GenericInvoker<Func<int, string, ModifiedState, Lite<IdentifiableEntity>>> giNewLiteModified =
+            new GenericInvoker<Func<int, string, ModifiedState, Lite<IdentifiableEntity>>>((id, str, state) => new LiteImp<IdentifiableEntity>(id, str, state));
 
         static GenericInvoker<Func<IdentifiableEntity, string, Lite<IdentifiableEntity>>> giNewLiteFat =
             new GenericInvoker<Func<IdentifiableEntity, string, Lite<IdentifiableEntity>>>((entity, str) => new LiteImp<IdentifiableEntity>(entity, str));
@@ -253,7 +297,7 @@ namespace Signum.Entities
 
         public static Type Extract(Type liteType)
         {
-            if (liteType.IsGenericType && liteType.GetGenericTypeDefinition() == typeof(Lite<>))
+            if (liteType.IsInstantiationOf(typeof(Lite<>)) || typeof(LiteImp).IsAssignableFrom(liteType))
                 return liteType.GetGenericArguments()[0];
             return null;
         }
@@ -283,15 +327,15 @@ namespace Signum.Entities
 
             Match match = regex.Match(liteKey);
             if (!match.Success)
-                return Resources.InvalidFormat;
+                return ValidationMessage.InvalidFormat.NiceToString();
 
             Type type = ResolveType(match.Groups["type"].Value);
             if (type == null)
-                return Resources.TypeNotFound;
+                return LiteMessage.TypeNotFound.NiceToString();
 
             int id;
             if (!int.TryParse(match.Groups["id"].Value, out id))
-                return Resources.IdNotValid;
+                return LiteMessage.IdNotValid.NiceToString();
 
             string toStr = match.Groups["toStr"].Value; //maybe null
 
@@ -324,6 +368,11 @@ namespace Signum.Entities
         public static Lite<IdentifiableEntity> Create(Type type, int id, string toStr)
         {
             return giNewLite.GetInvoker(type)(id, toStr);
+        }
+
+        public static Lite<IdentifiableEntity> Create(Type type, int id, string toStr, ModifiedState state)
+        {
+            return giNewLiteModified.GetInvoker(type)(id, toStr, state);
         }
 
         public static Lite<T> ToLite<T>(this T entity)
@@ -488,5 +537,33 @@ namespace Signum.Entities
         {
             return new LiteImp<T>(id, toStr);
         }
+
+        public static Lite<T> Create<T>(int id, string toStr, ModifiedState modified) where T : IdentifiableEntity
+        {
+            return new LiteImp<T>(id, toStr, modified);
+        }
+
+        static ConcurrentDictionary<Type, ConstructorInfo> ciLiteConstructor = new ConcurrentDictionary<Type, ConstructorInfo>();
+
+        public static ConstructorInfo LiteConstructor(Type type)
+        {
+            return ciLiteConstructor.GetOrAdd(type, t => typeof(LiteImp<>).MakeGenericType(t).GetConstructor(new[] { typeof(int), typeof(string), typeof(ModifiedState) }));
+        }
+
+        public static NewExpression NewExpression(Type type, Expression id, Expression toString, Expression modified)
+        {
+            return Expression.New(Lite.LiteConstructor(type), id.UnNullify(), toString, modified);
+        }
+    }
+
+    public enum LiteMessage
+    {
+        IdNotValid,
+        [Description("Invalid Format")]
+        InvalidFormat,
+        New,
+        TypeNotFound,
+        [Description("Text")]
+        ToStr
     }
 }

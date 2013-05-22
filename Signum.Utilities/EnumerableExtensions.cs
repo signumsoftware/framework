@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,9 +14,9 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Data;
 using System.Text.RegularExpressions;
-using Signum.Utilities.Properties;
 using System.Collections;
 using Signum.Utilities.ExpressionTrees;
+using System.ComponentModel;
 
 namespace Signum.Utilities
 {
@@ -415,49 +415,67 @@ namespace Signum.Utilities
             return -1;
         }
 
-
-
-        public static string ToString<T>(this IEnumerable<T> collection, string separator)
+        public static string ToString<T>(this IEnumerable<T> source, string separator)
         {
-            StringBuilder sb = new StringBuilder();
-            foreach (var item in collection)
+            StringBuilder sb = null;
+            foreach (var item in source)
             {
+                if (sb == null)
+                    sb = new StringBuilder();
+                else
+                    sb.Append(separator);
+
                 sb.Append(item.ToString());
-                sb.Append(separator);
             }
-            return sb.ToString(0, Math.Max(0, sb.Length - separator.Length));  // Remove at the end is faster
+
+            if (sb == null)
+                return "";
+
+            return sb.ToString();  // Remove at the end is faster
         }
 
-        public static string ToString<T>(this IEnumerable<T> collection, Func<T, string> toString, string separator)
+        public static string ToString<T>(this IEnumerable<T> source, Func<T, string> toString, string separator)
         {
-            StringBuilder sb = new StringBuilder();
-            foreach (var item in collection)
+            StringBuilder sb = null;
+            foreach (var item in source)
             {
+                if (sb == null)
+                    sb = new StringBuilder();
+                else
+                    sb.Append(separator);
+
                 sb.Append(toString(item));
-                sb.Append(separator);
             }
-            return sb.ToString(0, Math.Max(0, sb.Length - separator.Length));  // Remove at the end is faster
+
+            if (sb == null)
+                return "";
+
+            return sb.ToString();  // Remove at the end is faster
         }
 
+        public static string ToString<T>(this IQueryable<T> source, Expression<Func<T, string>> toString, string separator)
+        {
+            return source.Select(toString).ToString(separator);
+        }
 
         public static string CommaAnd<T>(this IEnumerable<T> collection)
         {
-            return CommaString(collection.Select(a => a.ToString()).ToArray(), Resources.And);
+            return CommaString(collection.Select(a => a.ToString()).ToArray(), CollectionMessage.And.NiceToString());
         }
 
         public static string CommaAnd<T>(this IEnumerable<T> collection, Func<T, string> toString)
         {
-            return CommaString(collection.Select(toString).ToArray(), Resources.And);
+            return CommaString(collection.Select(toString).ToArray(), CollectionMessage.And.NiceToString());
         }
 
         public static string CommaOr<T>(this IEnumerable<T> collection)
         {
-            return CommaString(collection.Select(a => a.ToString()).ToArray(), Resources.Or);
+            return CommaString(collection.Select(a => a.ToString()).ToArray(), CollectionMessage.Or.NiceToString());
         }
 
         public static string CommaOr<T>(this IEnumerable<T> collection, Func<T, string> toString)
         {
-            return CommaString(collection.Select(toString).ToArray(), Resources.Or);
+            return CommaString(collection.Select(toString).ToArray(), CollectionMessage.Or.NiceToString());
         }
 
         public static string Comma<T>(this IEnumerable<T> collection, string lastSeparator)
@@ -883,7 +901,7 @@ namespace Signum.Utilities
                 if (newList.Count == groupSize)
                 {
                     yield return newList;
-                    newList = new List<T>();
+                    newList = new List<T>(groupSize);
                 }
             }
 
@@ -896,12 +914,12 @@ namespace Signum.Utilities
             return collection.Skip(firstIncluded).Take(toNotIncluded - firstIncluded);
         }
 
-        public static IOrderedEnumerable<T> Order<T>(this IEnumerable<T> collection) where T : IComparable<T>
+        public static IOrderedEnumerable<T> OrderBy<T>(this IEnumerable<T> collection) where T : IComparable<T>
         {
             return collection.OrderBy(a => a);
         }
 
-        public static IOrderedEnumerable<T> OrderDescending<T>(this IEnumerable<T> collection) where T : IComparable<T>
+        public static IOrderedEnumerable<T> OrderByDescending<T>(this IEnumerable<T> collection) where T : IComparable<T>
         {
             return collection.OrderByDescending(a => a);
         }
@@ -1152,6 +1170,13 @@ namespace Signum.Utilities
         }
     }
 
+    public enum CollectionMessage
+    {
+        [Description(" and ")]
+        And,
+        [Description(" or ")]
+        Or
+    }
 
     public class JoinStrictResult<O, N, R>
     {

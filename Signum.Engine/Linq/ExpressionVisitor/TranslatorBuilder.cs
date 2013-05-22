@@ -44,8 +44,8 @@ namespace Signum.Engine.Linq
 
             Expression<Func<IProjectionRow, T>> lambda = ProjectionBuilder.Build<T>(proj.Projector, scope);
 
-            Expression<Func<DbParameter[]>> createParams;
-            string sql = QueryFormatter.Format(proj.Select, out createParams);
+            List<DbParameter> parameters;
+            string sql = QueryFormatter.Format(proj.Select, out parameters);
 
             var result = new TranslateResult<T>
             {
@@ -56,8 +56,7 @@ namespace Signum.Engine.Linq
 
                 ProjectorExpression = lambda,
 
-                GetParameters = createParams.Compile(),
-                GetParametersExpression = createParams,
+                Parameters = parameters,
 
                 Unique = proj.UniqueFunction,
             };
@@ -91,9 +90,8 @@ namespace Signum.Engine.Linq
 
             Expression<Func<IProjectionRow, KeyValuePair<K, V>>> lambda = ProjectionBuilder.Build<KeyValuePair<K, V>>(proj.Projector, scope);
 
-            Expression<Func<DbParameter[]>> createParamsExpression;
-            string sql = QueryFormatter.Format(proj.Select, out createParamsExpression);
-            Func<DbParameter[]> createParams = createParamsExpression.Compile();
+            List<DbParameter> parameters;
+            string sql = QueryFormatter.Format(proj.Select, out parameters);
 
             if (childProj.IsLazyMList)
                 return new LazyChildProjection<K, V>
@@ -103,8 +101,7 @@ namespace Signum.Engine.Linq
                     CommandText = sql,
                     ProjectorExpression = lambda,
 
-                    GetParameters = createParams,
-                    GetParametersExpression = createParamsExpression,
+                    Parameters = parameters,
                 };
             else
                 return new EagerChildProjection<K, V>
@@ -114,20 +111,18 @@ namespace Signum.Engine.Linq
                     CommandText = sql,
                     ProjectorExpression = lambda,
 
-                    GetParameters = createParams,
-                    GetParametersExpression = createParamsExpression,
+                    Parameters = parameters,
                 };
         }
 
         public static CommandResult BuildCommandResult(CommandExpression command)
         {
-            Expression<Func<DbParameter[]>> createParams;
-            string sql = QueryFormatter.Format(command, out createParams);
+            List<DbParameter> parameters;
+            string sql = QueryFormatter.Format(command, out parameters);
 
             return new CommandResult
             {
-                GetParameters = createParams.Compile(),
-                GetParametersExpression = createParams,
+                Parameters = parameters,
                 CommandText = sql,
             }; 
         }
@@ -271,6 +266,10 @@ namespace Signum.Engine.Linq
                 throw new InvalidOperationException("No ProjectionExpressions expected at this stage"); 
             }
 
+            protected override MixinEntityExpression VisitMixinEntity(MixinEntityExpression me)
+            {
+                throw new InvalidOperationException("Impossible to retrieve MixinEntity {0} without their main entity".Formato(me.Type.Name)); 
+            }
 
             protected override Expression VisitEntity(EntityExpression fieldInit)
             {
@@ -281,7 +280,7 @@ namespace Signum.Engine.Linq
 
                 ParameterExpression e = Expression.Parameter(fieldInit.Type, fieldInit.Type.Name.ToLower().Substring(0, 1));
 
-                var block = Expression.Block(
+                var bindings = 
                     fieldInit.Bindings
                     .Where(a => !ReflectionTools.FieldEquals(EntityExpression.IdField, a.FieldInfo))
                     .Select(b =>
@@ -292,13 +291,43 @@ namespace Signum.Engine.Linq
                                 VisitMListChildProjection((ChildProjectionExpression)b.Binding, field) :
                                 Convert(Visit(b.Binding), b.FieldInfo.FieldType);
 
-                            return Expression.Assign(field, value);
-                        }
-                    ));
+                            return (Expression)Expression.Assign(field, value);
+                        }).ToList();
 
-                LambdaExpression lambda = Expression.Lambda(typeof(Action<>).MakeGenericType(fieldInit.Type), block, e);
+                if (fieldInit.Mixins != null)
+                {
+                    var blocks = fieldInit.Mixins.Select(m => AssignMixin(e, m)).ToList();
+
+                    bindings.AddRange(blocks);
+                }
+
+                LambdaExpression lambda = Expression.Lambda(typeof(Action<>).MakeGenericType(fieldInit.Type), Expression.Block(bindings), e);
 
                 return Expression.Call(retriever, miCached.MakeGenericMethod(fieldInit.Type), id, lambda);
+            }
+
+            BlockExpression AssignMixin(ParameterExpression e, MixinEntityExpression m)
+            {
+                var mixParam = Expression.Parameter(m.Type);
+
+                var mixAssign = Expression.Assign(mixParam, Expression.Call(e, MixinDeclarations.miMixin.MakeGenericMethod(m.Type)));
+
+                var mixBindings = m.Bindings.Select(b =>
+                {
+                    var field = Expression.Field(mixParam, b.FieldInfo);
+
+                    var value = b.Binding is ChildProjectionExpression ?
+                        VisitMListChildProjection((ChildProjectionExpression)b.Binding, field) :
+                        Convert(Visit(b.Binding), b.FieldInfo.FieldType);
+
+                    return Expression.Assign(field, value);
+                }).ToList();
+
+                mixBindings.Insert(0, mixAssign);
+
+                mixBindings.Add(Expression.Assign(Expression.Property(mixParam, piModified), peModifiableState));
+
+                return Expression.Block(new[] { mixParam }, mixBindings);
             }
 
             private Expression Convert(Expression expression, Type type)
@@ -310,13 +339,15 @@ namespace Signum.Engine.Linq
             }
 
             static PropertyInfo piModified = ReflectionTools.GetPropertyInfo((ModifiableEntity me) => me.Modified);
+            static Expression peModifiableState = Expression.Property(retriever, ReflectionTools.GetPropertyInfo((IRetriever re) => re.ModifiedState));
 
-            static MemberBinding resetModified = Expression.Bind(piModified, Expression.Constant(null, typeof(bool?)));
+            static MemberBinding mbModified = Expression.Bind(piModified, peModifiableState);
 
             protected override Expression VisitEmbeddedEntity(EmbeddedEntityExpression eee)
             {
                 Expression ctor = Expression.MemberInit(Expression.New(eee.Type),
-                       eee.Bindings.Select(b => Expression.Bind(b.FieldInfo, Visit(b.Binding))).And(resetModified));
+                       eee.Bindings.Select(b => Expression.Bind(b.FieldInfo, Visit(b.Binding)))
+                       .And(mbModified));
 
                 var entity = Expression.Call(retriever, miEmbeddedPostRetrieving.MakeGenericMethod(eee.Type), ctor);
 
@@ -372,7 +403,7 @@ namespace Signum.Engine.Linq
                 return Expression.Call(Expression.Constant(Schema.Current), miGetType, Visit(typeIba.TypeColumn).UnNullify());
             }
 
-            protected override Expression VisitLite(LiteExpression lite)
+            protected override Expression VisitLiteValue(LiteValueExpression lite)
             {
                 var id = Visit(NullifyColumn(lite.Id));
 
@@ -392,7 +423,7 @@ namespace Signum.Engine.Linq
                     Type type = ((TypeEntityExpression)typeId).TypeValue;
 
                     liteConstructor = Expression.Condition(Expression.NotEqual(id, NullId),
-                        Expression.Convert(Expression.New(LiteConstructor(type), id.UnNullify(), toStringOrNull), lite.Type),
+                        Expression.Convert(Lite.NewExpression(type, id, toStringOrNull, peModifiableState), lite.Type),
                         nothing);
                 }
                 else if (typeId.NodeType == (ExpressionType)DbExpressionType.TypeImplementedBy)
@@ -403,22 +434,24 @@ namespace Signum.Engine.Linq
                             {
                                 var visitId = Visit(NullifyColumn(ti.ExternalId));
                                 return Expression.Condition(Expression.NotEqual(visitId, NullId),
-                                    Expression.Convert(Expression.New(LiteConstructor(ti.Type), visitId.UnNullify(), toStringOrNull), lite.Type), acum);
+                                    Expression.Convert(Lite.NewExpression(ti.Type, visitId, toStringOrNull, peModifiableState), lite.Type), acum);
                             });
                 }
                 else if (typeId.NodeType == (ExpressionType)DbExpressionType.TypeImplementedByAll)
                 {
                     TypeImplementedByAllExpression tiba = (TypeImplementedByAllExpression)typeId;
-                    liteConstructor = Expression.Condition(Expression.NotEqual(id, NullId),
-                                    Expression.Convert(Expression.Call(miLiteCreate, SchemaGetType(tiba), id.UnNullify(), toStringOrNull), lite.Type),
+                    liteConstructor = Expression.Condition(Expression.NotEqual(id.Nullify(), NullId),
+                                    Expression.Convert(Expression.Call(miLiteCreate, SchemaGetType(tiba), id.UnNullify(), toStringOrNull, peModifiableState), lite.Type),
                                      nothing);
                 }
                 else
                 {
-                    liteConstructor = Expression.Condition(Expression.NotEqual(id, NullId),
-                                       Expression.Convert(Expression.Call(miLiteCreate, Visit(typeId), id.UnNullify(), toStringOrNull), lite.Type),
+                    liteConstructor = Expression.Condition(Expression.NotEqual(id.Nullify(), NullId),
+                                       Expression.Convert(Expression.Call(miLiteCreate, Visit(typeId), id.UnNullify(), toStringOrNull, peModifiableState), lite.Type),
                                         nothing);
                 }
+
+               
 
                 if (toStr != null)
                     return liteConstructor;
@@ -426,14 +459,7 @@ namespace Signum.Engine.Linq
                     return Expression.Call(retriever, miRequestLite.MakeGenericMethod(Lite.Extract(lite.Type)), liteConstructor);
             }
 
-            static MethodInfo miLiteCreate = ReflectionTools.GetMethodInfo(() => Lite.Create(null, 0, null));
-
-            static ConcurrentDictionary<Type, ConstructorInfo> ciLiteConstructor = new ConcurrentDictionary<Type,ConstructorInfo>();
-
-            static ConstructorInfo LiteConstructor( Type type)
-            {
-                return ciLiteConstructor.GetOrAdd(type, t => typeof(LiteImp<>).MakeGenericType(t).GetConstructor(new[] { typeof(int), typeof(string) }));
-            }
+            static MethodInfo miLiteCreate = ReflectionTools.GetMethodInfo(() => Lite.Create(null, 0, null, ModifiedState.Clean));
 
             protected override Expression VisitMListElement(MListElementExpression mle)
             {

@@ -23,7 +23,7 @@ namespace Signum.Services
         IdentifiableEntity Retrieve(Type type, int id);
 
         [OperationContract, NetDataContract]
-        IdentifiableEntity Save(IdentifiableEntity entidad); 
+        IdentifiableEntity Save(IdentifiableEntity entity); 
 
         [OperationContract, NetDataContract]
         List<IdentifiableEntity> RetrieveAll(Type type);
@@ -44,10 +44,10 @@ namespace Signum.Services
         Dictionary<PropertyRoute, Implementations> FindAllImplementations(Type root);
 
         [OperationContract, NetDataContract]
-        Dictionary<Type, TypeDN> ServerTypes();
+        Dictionary<Type, HashSet<Type>> FindAllMixins();
 
         [OperationContract, NetDataContract]
-        Dictionary<Type, EntityKind> EntityKinds();
+        Dictionary<Type, TypeDN> ServerTypes();
 
         [OperationContract, NetDataContract]
         DateTime ServerNow();
@@ -58,5 +58,7 @@ namespace Signum.Services
         [OperationContract, NetDataContract]
         bool Exists(Type type, int id);
 
+        [OperationContract, NetDataContract]
+        long Ticks(Lite<Entity> entity);
     }
 }

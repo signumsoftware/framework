@@ -12,7 +12,6 @@ using System.Reflection;
 using Signum.Entities.Reflection;
 using System.Configuration;
 using Signum.Engine;
-using Signum.Web.Properties;
 using Signum.Utilities.Reflection;
 #endregion
 
@@ -21,6 +20,8 @@ namespace Signum.Web
     public class EntityLine : EntityBase
     {
         public bool Autocomplete { get; set; }
+
+        public string AutocompleteUrl { get; set; }
 
         public EntityLine(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
             : base(type, untypedValue, parent, controlID, propertyRoute)
@@ -40,7 +41,7 @@ namespace Signum.Web
 
         public override string ToJS()
         {
-            return "$('#{0}').data('entityLine')".Formato(ControlID);
+            return "$('#{0}').data('SF-entityLine')".Formato(ControlID);
         }
 
         protected override string DefaultView()

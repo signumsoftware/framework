@@ -9,7 +9,6 @@ using Signum.Utilities.ExpressionTrees;
 using System.Reflection;
 using Signum.Utilities.Reflection;
 using System.Collections;
-using Signum.Engine.Properties;
 using System.Collections.ObjectModel;
 using Signum.Engine.Maps;
 using System.Data;
@@ -33,9 +32,9 @@ namespace Signum.Engine.Linq
 
         bool IsFullNominate { get { return tempFullNominate || existingAliases == null; } }
 
-        bool IsFullNominateOrAggresive { get { return IsFullNominate || isAggressive; } }
+        bool IsFullNominateOrAggresive { get { return IsFullNominate || isGroupKey; } }
 
-        bool isAggressive = false;
+        bool isGroupKey = false;
 
         bool innerProjection = false; 
 
@@ -54,9 +53,9 @@ namespace Signum.Engine.Linq
 
         private DbExpressionNominator() { }
 
-        static internal HashSet<Expression> Nominate(Expression expression, Alias[] existingAliases, out Expression newExpression, bool isAggressive = false)
+        static internal HashSet<Expression> Nominate(Expression expression, Alias[] existingAliases, out Expression newExpression, bool isGroupKey = false)
         {
-            DbExpressionNominator n = new DbExpressionNominator { existingAliases = existingAliases, isAggressive = isAggressive };
+            DbExpressionNominator n = new DbExpressionNominator { existingAliases = existingAliases, isGroupKey = isGroupKey };
             newExpression = n.Visit(expression);
             return n.candidates;
         }
@@ -503,9 +502,47 @@ namespace Signum.Engine.Linq
             return b;
         }
 
-        private Expression NullToStringEmpty(Expression left)
+        private Expression NullToStringEmpty(Expression exp)
         {
-            return new SqlFunctionExpression(typeof(string), null, SqlFunction.ISNULL.ToString(), new[] { left, new SqlConstantExpression("") });
+            if (exp is ConstantExpression)
+            {
+                if (((ConstantExpression)exp).Value == null)
+                    return Expression.Constant("", typeof(string));
+                else
+                    return exp;
+            }
+
+            if (exp is SqlConstantExpression)
+            {
+                if (((SqlConstantExpression)exp).Value == null)
+                    return new SqlConstantExpression("", typeof(string));
+                else
+                    return exp;
+            }
+
+            if (AlwaysHasValue(exp))
+            {
+                return exp;
+            }
+
+            return new SqlFunctionExpression(typeof(string), null, SqlFunction.ISNULL.ToString(), new[] { exp, new SqlConstantExpression("") });
+        }
+
+        private static bool AlwaysHasValue(Expression exp)
+        {
+            if (exp is SqlConstantExpression)
+                return ((SqlConstantExpression)exp).Value != null;
+
+            if (exp is ConstantExpression)
+                return ((ConstantExpression)exp).Value != null;
+
+            if (exp is BinaryExpression)
+                return AlwaysHasValue(((BinaryExpression)exp).Left) && AlwaysHasValue(((BinaryExpression)exp).Right);
+
+            if (exp is ConditionalExpression)
+                return AlwaysHasValue(((ConditionalExpression)exp).IfTrue) && AlwaysHasValue(((ConditionalExpression)exp).IfFalse);
+
+            return false;
         }
 
         private Expression ConvertToSqlComparison(BinaryExpression b)
@@ -655,7 +692,7 @@ namespace Signum.Engine.Linq
                        (untu == typeof(int) || untu == typeof(long)))
                         return Add(new SqlCastExpression(u.Type, operand));
 
-                    if (IsFullNominate || isAggressive && optu == untu)
+                    if (IsFullNominate || isGroupKey && optu == untu)
                         return Add(result);
 
                     if ("Sql" + untu.Name == optu.Name)
@@ -784,21 +821,24 @@ namespace Signum.Engine.Linq
 
             return like;
         }
-        
 
-         private LikeExpression TryLike(Expression expression, Expression pattern)
+
+        private Expression TryLike(Expression expression, Expression pattern)
         {
-             //pattern = ExpressionEvaluator.PartialEval(pattern);
-             Expression newPattern = Visit(pattern); 
-             Expression newExpression = Visit(expression);
+            if (expression.IsNull())
+                return Add(Expression.Constant(false));
 
-             LikeExpression result = new LikeExpression(newExpression,newPattern);
+            //pattern = ExpressionEvaluator.PartialEval(pattern);
+            Expression newPattern = Visit(pattern);
+            Expression newExpression = Visit(expression);
 
-             if (Has(newPattern) && Has(newExpression))
-             {
-                 return Add(result); 
-             }
-             return null;
+            LikeExpression result = new LikeExpression(newExpression, newPattern);
+
+            if (Has(newPattern) && Has(newExpression))
+            {
+                return Add(result);
+            }
+            return null;
         }
 
         protected override Expression VisitMemberAccess(MemberExpression m)
@@ -887,7 +927,7 @@ namespace Signum.Engine.Linq
                         Expression charIndex = TrySqlFunction(null, SqlFunction.CHARINDEX, m.Type, m.GetArgument("value"), m.Object, startIndex);
                         if (charIndex == null)
                             return null;
-                        Expression result = Expression.Subtract(charIndex, Expression.Constant(1));
+                        Expression result = Expression.Subtract(charIndex, new SqlConstantExpression(1));
                         if (Has(charIndex))
                             return Add(result);
                         return result;
@@ -900,9 +940,9 @@ namespace Signum.Engine.Linq
                 case "string.Trim": return TrySqlTrim(m.Object);
                 case "string.Replace": return TrySqlFunction(null, SqlFunction.REPLACE, m.Type, m.Object, m.GetArgument("oldValue"), m.GetArgument("newValue"));
                 case "string.Substring": return TrySqlFunction(null, SqlFunction.SUBSTRING, m.Type, m.Object, Expression.Add(m.GetArgument("startIndex"), new SqlConstantExpression(1)), m.TryGetArgument("length") ?? new SqlConstantExpression(int.MaxValue));
-                case "string.Contains": return TryLike(m.Object, Expression.Add(Expression.Add(Expression.Constant("%"), m.GetArgument("value"), c), Expression.Constant("%"), c));
-                case "string.StartsWith": return TryLike(m.Object, Expression.Add(m.GetArgument("value"), Expression.Constant("%"), c));
-                case "string.EndsWith": return TryLike(m.Object, Expression.Add(Expression.Constant("%"), m.GetArgument("value"), c));
+                case "string.Contains": return TryLike(m.Object, Expression.Add(Expression.Add(new SqlConstantExpression("%"), m.GetArgument("value"), c), new SqlConstantExpression("%"), c));
+                case "string.StartsWith": return TryLike(m.Object, Expression.Add(m.GetArgument("value"), new SqlConstantExpression("%"), c));
+                case "string.EndsWith": return TryLike(m.Object, Expression.Add(new SqlConstantExpression("%"), m.GetArgument("value"), c));
 
                 case "StringExtensions.Start": return TrySqlFunction(null, SqlFunction.LEFT, m.Type, m.GetArgument("str"), m.GetArgument("numChars"));
                 case "StringExtensions.End": return TrySqlFunction(null, SqlFunction.RIGHT, m.Type, m.GetArgument("str"), m.GetArgument("numChars"));
@@ -957,9 +997,32 @@ namespace Signum.Engine.Linq
                     {
                         return Visit(m.GetArgument("value"));
                     }
+                case "StringExtensions.Etc": return TryEtc(m.GetArgument("str"), m.GetArgument("max"), m.TryGetArgument("etcString"));
                 default: return null; 
             }
         }
+
+        private Expression TryEtc(Expression str, Expression max, Expression etcString)
+        {
+            var newStr = Visit(str);
+            if (!Has(newStr))
+                return null;
+
+            if (this.IsFullNominateOrAggresive)
+                return newStr;
+
+            var subString = Add(new SqlFunctionExpression(typeof(string), null, SqlFunction.SUBSTRING.ToString(), new Expression[]
+            {
+                newStr,
+                new SqlConstantExpression(1, typeof(int)),
+                Expression.Add(max, new SqlConstantExpression(1, typeof(int))),
+            }));
+
+            return etcString == null ? Expression.Call(miEtc2, subString, max) : Expression.Call(miEtc3, subString, max, etcString); 
+        }
+
+        static MethodInfo miEtc2 = ReflectionTools.GetMethodInfo(() => "".Etc(2));
+        static MethodInfo miEtc3 = ReflectionTools.GetMethodInfo(() => "".Etc(2, "..."));
 
         IDisposable ForceFullNominate()
         {

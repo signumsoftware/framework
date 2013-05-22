@@ -21,28 +21,9 @@ using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities
 {
-    [Serializable, DebuggerTypeProxy(typeof(FlattenHierarchyProxy))]
+    [Serializable, DebuggerTypeProxy(typeof(FlattenHierarchyProxy)), DescriptionOptions(DescriptionOptions.All)]
     public abstract class ModifiableEntity : Modifiable, INotifyPropertyChanged, IDataErrorInfo, ICloneable
     {
-        [Ignore]
-        bool selfModified = true;
-
-        [HiddenProperty]
-        public override bool SelfModified
-        {
-            get { return selfModified; }
-        }
-
-        protected internal virtual void SetSelfModified()
-        {
-            selfModified = true; 
-        }
-
-        protected override void CleanSelfModified()
-        {
-            selfModified = false;
-        }
-
         protected virtual bool Set<T>(ref T field, T value, Expression<Func<T>> property)
         {
             if (EqualityComparer<T>.Default.Equals(field, value))
@@ -222,7 +203,15 @@ namespace Signum.Entities
         public event PropertyChangedEventHandler PropertyChanged;
 
         [field: NonSerialized, Ignore]
-        public event PropertyValidationEventHandler ExternalPropertyValidation;
+        public event Func<ModifiableEntity, PropertyInfo, string> ExternalPropertyValidation;
+
+        internal string OnExternalPropertyValidation(PropertyInfo pi)
+        {
+            if (ExternalPropertyValidation == null)
+                return null;
+
+            return ExternalPropertyValidation(this, pi);
+        }
 
         protected void Notify<T>(Expression<Func<T>> property)
         {
@@ -274,11 +263,12 @@ namespace Signum.Entities
 
         public string IntegrityCheck()
         {
-            var packs = Validator.GetPropertyPacks(GetType());
+            using (var log = HeavyProfiler.LogNoStackTrace("IntegrityCheck"))
+            {
+                var validators = Validator.GetPropertyValidators(GetType());
 
-            var result = packs.Select(k => PropertyCheck(k.Value)).NotNull().ToString("\r\n");
-
-            return result;
+                return validators.Values.Select(pv => pv.PropertyCheck(this)).NotNull().ToString("\r\n").DefaultText(null);
+            }
         }
 
         //override for per-property checks
@@ -290,88 +280,50 @@ namespace Signum.Entities
                 if (columnName == null)
                     return ((IDataErrorInfo)this).Error;
                 else
-                {
-                    PropertyPack pp = Validator.GetOrCreatePropertyPack(GetType(), columnName);
-                    if (pp == null)
-                        return null; //Hidden properties
-
-                    return PropertyCheck(pp);
-                }
+                    return PropertyCheck(columnName);
             }
         }
 
-        public string PropertyCheck<T>(Expression<Func<T, object>> property) where T : ModifiableEntity
+        public string PropertyCheck(Expression<Func<object>> property)
         {
-            return PropertyCheck(Validator.GetOrCreatePropertyPack(property));
+            return PropertyCheck(ReflectionTools.GetPropertyInfo(property).Name);
         }
 
         public string PropertyCheck(string propertyName) 
         {
-            return PropertyCheck(Validator.GetOrCreatePropertyPack(GetType(), propertyName));
+            IPropertyValidator pp = Validator.TryGetPropertyValidator(GetType(), propertyName);
+
+            if (pp == null)
+                return null; //Hidden properties
+
+            return pp.PropertyCheck(this);
         }
 
-        public string PropertyCheck(PropertyPack pp)
+        protected internal virtual string PropertyValidation(PropertyInfo pi)
         {
-            if (pp.IsAplicable != null && !pp.IsAplicable(this))
-                return null;
-
-            if (pp.Validators.Count > 0)
-            {
-                object propertyValue = pp.GetValue(this);
-
-                //ValidatorAttributes
-                foreach (var validator in pp.Validators)
-                {
-                    string result = validator.Error(this, pp.PropertyInfo, propertyValue);
-                    if (result != null)
-                        return result;
-                }
-            }
-
-            //Internal Validation
-            if (pp.IsAplicablePropertyValidation == null || pp.IsAplicablePropertyValidation(this))
-            {
-                string result = PropertyValidation(pp.PropertyInfo);
-                if (result != null)
-                    return result;
-            }
-
-            //External Validation
-            if (ExternalPropertyValidation != null && (pp.IsAplicableExternalPropertyValidation == null || pp.IsAplicableExternalPropertyValidation(this)))
-            {
-                string result = ExternalPropertyValidation(this, pp.PropertyInfo);
-                if (result != null)
-                    return result;
-            }
-
-            //Static validation
-            if (pp.StaticPropertyValidation != null)
-            {
-                foreach (PropertyValidationEventHandler item in pp.StaticPropertyValidation.GetInvocationList())
-                {
-                    string result = item(this, pp.PropertyInfo);
-                    if (result != null)
-                        return result;
-                }
-            }
             return null;
         }
 
-        protected virtual string PropertyValidation(PropertyInfo pi)
+        protected static void Validate<T>(Expression<Func<T, object>> property, Func<T, PropertyInfo, string> validate) where T : ModifiableEntity
         {
-            return null;
+            Validator.PropertyValidator(property).StaticPropertyValidation += validate;
         }
 
         public string FullIntegrityCheck()
         {
             var graph = GraphExplorer.FromRoot(this);
-            return GraphExplorer.Integrity(graph);
+            return GraphExplorer.FullIntegrityCheck(graph, withIndependentEmbeddedEntities: !(this is IdentifiableEntity));
         }
 
         public Dictionary<ModifiableEntity, string> FullIntegrityCheckDictionary()
         {
             var graph = GraphExplorer.FromRoot(this);
             return GraphExplorer.IntegrityDictionary(graph);
+        }
+
+        protected static string NicePropertyName<R>(Expression<Func<R>> property)
+        {
+            return ReflectionTools.GetPropertyInfo(property).NiceName();
         }
 
         #endregion
@@ -440,22 +392,33 @@ namespace Signum.Entities
             this.target = target;
         }
 
+        const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
+
         private List<Member> BuildMemberList()
         {
             var list = new List<Member>();
             if (target == null)
                 return list;
-
-            BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
+         
             var type = target.GetType();
             list.Add(new Member("Type", type, typeof(Type)));
 
-            foreach (var t in type.FollowC(t => t.BaseType).TakeWhile(t=> t!= typeof(ModifiableEntity) && t!= typeof(Modifiable)).Reverse())
+            foreach (var t in type.FollowC(t => t.BaseType).TakeWhile(t => t != typeof(ModifiableEntity) && t != typeof(Modifiable) && t != typeof(MixinEntity)).Reverse())
             {
-                foreach (var fi in t.GetFields(flags).OrderBy(f => f.MetadataToken))
+                foreach (var fi in t.GetFields(flags).Where(fi => fi.Name != "mixin").OrderBy(f => f.MetadataToken))
                 {
                     object value = fi.GetValue(target);
                     list.Add(new Member(fi.Name, value, fi.FieldType));
+                }
+            }
+
+            IdentifiableEntity ident = target as IdentifiableEntity;
+
+            if (ident != null)
+            {
+                foreach (var m in ident.AllMixin)
+                {
+                    list.Add(new Member(m.GetType().Name, m, m.GetType()));
                 }
             }
 

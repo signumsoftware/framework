@@ -10,6 +10,19 @@ using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Basics
 {
+    public static class MultiEnumExtensions
+    {
+        public static T ToEntity<T>(this Enum key) where T:MultiEnumDN, new()
+        {
+            return MultiEnumLogic<T>.ToEntity(key);
+        }
+
+        public static Enum ToEnum<T>(this T entity) where T : MultiEnumDN, new()
+        {
+            return MultiEnumLogic<T>.ToEnum(entity);
+        }
+    }
+
     public static class MultiEnumLogic<T>
         where T:MultiEnumDN, new()
     {
@@ -34,7 +47,7 @@ namespace Signum.Engine.Basics
 
         static void Schema_Initializing()
         {
-            using (new EntityCache(true))
+            using (new EntityCache(EntityCacheType.ForceNewSealed))
             {
                 Keys = getKeys();
 
@@ -65,17 +78,16 @@ namespace Signum.Engine.Basics
             List<T> current = Administrator.TryRetrieveAll<T>(replacements);
             List<T> should = GenerateEntities();
 
-            return Synchronizer.SynchronizeScriptReplacing(replacements, typeof(T).Name, 
-                should.ToDictionary(s => s.Key), 
-                current.ToDictionary(c => c.Key), 
-                (k, s) => table.InsertSqlSync(s), 
-                (k, c) => table.DeleteSqlSync(c), 
+            return Synchronizer.SynchronizeScriptReplacing(replacements, typeof(T).Name,
+                should.ToDictionary(s => s.Key),
+                current.ToDictionary(c => c.Key),
+                (k, s) => table.InsertSqlSync(s),
+                (k, c) => table.DeleteSqlSync(c),
                 (k, s, c) =>
                 {
-                    var originalName = c.Name;
-                    c.Name = s.Name;
+                    var originalName = c.Key;
                     c.Key = s.Key;
-                    return table.UpdateSqlSync(c, originalName);
+                    return table.UpdateSqlSync(c, comment: c.Key);
                 }, Spacing.Double);
         }
 
@@ -85,7 +97,6 @@ namespace Signum.Engine.Basics
             return getKeys().Select(k => new T
             {
                 Key = MultiEnumDN.UniqueKey(k),
-                Name = k.ToString(),
             }).ToList();
         }
 

@@ -5,7 +5,6 @@ using System.Text;
 using Signum.Entities;
 using Signum.Engine.Maps;
 using Signum.Entities.Reflection;
-using Signum.Engine.Properties;
 using Signum.Utilities;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -40,19 +39,19 @@ namespace Signum.Engine.Basics
 
         public static Type ToType(this TypeDN type)
         {
-            return DnToType[type];
+            return DnToType.GetOrThrow(type);
         }
 
         public static TypeDN ToTypeDN(this Type type)
         {
-            return TypeToDN[type];
+            return TypeToDN.GetOrThrow(type);
         }
 
         internal static void Schema_Initializing()
         {
-            Schema current = Schema.Current; 
+            Schema current = Schema.Current;
 
-            var attributes = current.Tables.Keys.Select(t=>KVP.Create(t,t.SingleAttributeInherit<EntityKindAttribute>())).ToList();
+            var attributes = current.Tables.Keys.Select(t => KVP.Create(t, t.SingleAttributeInherit<EntityKindAttribute>())).ToList();
 
             var errors = attributes.Where(a => a.Value == null).ToString(a => "Type {0} does not have an EntityTypeAttribute".Formato(a.Key.Name), "\r\n");
 
@@ -110,7 +109,7 @@ namespace Signum.Engine.Basics
                     c.FullClassName = s.FullClassName;
                     c.TableName = s.TableName;
                     c.CleanName = s.CleanName;
-                    return table.UpdateSqlSync(c, originalName);
+                    return table.UpdateSqlSync(c, comment: originalName);
                 }, Spacing.Double);
         }
 

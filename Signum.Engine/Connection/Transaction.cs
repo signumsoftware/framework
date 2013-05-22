@@ -6,7 +6,6 @@ using Signum.Utilities.DataStructures;
 using Signum.Utilities;
 using System.Diagnostics;
 using System.IO;
-using Signum.Engine.Properties;
 using Signum.Entities;
 using System.Data.Common;
 
@@ -57,7 +56,7 @@ namespace Signum.Engine
             public FakedTransaction(ICoreTransaction parent)
             {
                 if (parent != null && parent.IsRolledback)
-                    throw new InvalidOperationException("The transation can not be created because a parent transaction is rolled back");
+                    throw new InvalidOperationException("The transaction can not be created because a parent transaction is rolled back");
 
                 this.parent = parent;
             }
@@ -229,7 +228,7 @@ namespace Signum.Engine
             public NamedTransaction(ICoreTransaction parent, string savePointName)
             {
                 if (parent != null && parent.IsRolledback)
-                    throw new InvalidOperationException("The transation can not be created because a parent transaction is rolled back");
+                    throw new InvalidOperationException("The transaction can not be created because a parent transaction is rolled back");
 
                 this.parent = parent;
                 this.savePointName = savePointName;
@@ -400,16 +399,18 @@ namespace Signum.Engine
 
         class TestTransaction : RealTransaction 
         {
+            bool oldTestTransaction;
             public TestTransaction(ICoreTransaction parent, IsolationLevel? isolation)
                 : base(parent, isolation)
             {
+                oldTestTransaction = inTestTransaction.Value;
                 inTestTransaction.Value = true;
             }
 
     
             public override void Finish()
             {
-                inTestTransaction.Value = false;
+                inTestTransaction.Value = oldTestTransaction;
 
                 base.Finish();
             }
@@ -530,8 +531,8 @@ namespace Signum.Engine
                 t.GetType().Name,
                 t.Started,
                 t.IsRolledback,
-                t.Connection == null ? "null" : t.Connection.State.ToString(),
-                t.Transaction == null ? "null" : "set"), "\r\n");
+                t.Connection == null ? "null" : (t.Connection.State.ToString() + " Hash " + t.Connection.GetHashCode()),
+                t.Transaction == null ? "null" : (" Hash " + t.Connection.GetHashCode())), "\r\n");
         }
 
         public T Commit<T>(T returnValue)

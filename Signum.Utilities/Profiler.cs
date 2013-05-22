@@ -97,8 +97,6 @@ namespace Signum.Utilities
 
         public static long? TimeLimit;
 
-        public static int MaxTotalEntriesCount = 1000;
-
 
         static bool enabled;
         public static bool Enabled
@@ -131,20 +129,42 @@ namespace Signum.Utilities
             }
         }
 
-        public static Tracer Log(string role, Func<string> aditionalData)
-        {
-            if (!Enabled)
-                return null;
-
-            return Log(role, aditionalData());
-        }
-
-        public static Tracer Log(string role = null, string aditionalData = null)
+        public static Tracer Log(string role)
         {
             if (!enabled)
                 return null;
 
-            var tracer = CreateNewEntry(role, aditionalData, true);
+            var tracer = CreateNewEntry(role, null, stackTrace: true);
+
+            return tracer;
+        }
+
+        public static Tracer Log(string role, Func<string> additionalData)
+        {
+            if (!enabled)
+                return null;
+
+            var tracer = CreateNewEntry(role, additionalData, stackTrace: true);
+
+            return tracer;
+        }
+
+        public static Tracer LogNoStackTrace(string role)
+        {
+            if (!enabled)
+                return null;
+
+            var tracer = CreateNewEntry(role, null, stackTrace: false);
+
+            return tracer;
+        }
+
+        public static Tracer LogNoStackTrace(string role, Func<string> additionalData)
+        {
+            if (!enabled)
+                return null;
+
+            var tracer = CreateNewEntry(role, additionalData, stackTrace: false);
 
             return tracer;
         }
@@ -160,37 +180,24 @@ namespace Signum.Utilities
             }
         }
 
-        public static Tracer LogNoStackTrace(string role)
-        {
-            if (!enabled)
-                return null;
-
-            var tracer = CreateNewEntry(role, null, false);
-
-            return tracer;
-        }
-
-        private static Tracer CreateNewEntry(string role, string aditionalData, bool stackTrace)
+        private static Tracer CreateNewEntry(string role, Func<string> additionalData, bool stackTrace)
         {
             long beforeStart = PerfCounter.Ticks;
 
-            if (TimeLimit.Value < beforeStart)
+            if (enabled == false || TimeLimit.Value < beforeStart)
             {
-                Enabled = false;
+                enabled = false;
                 Clean();
                 return null;
             }
 
             var saveCurrent = current.Value;
 
-            if (aditionalData != null)
-                aditionalData = string.Intern((string)aditionalData);
-
             var newCurrent = current.Value = new HeavyProfilerEntry()
             {
                 BeforeStart = beforeStart,
                 Role = role,
-                AditionalData = aditionalData,
+                AdditionalData = additionalData == null ? null: additionalData(),
                 StackTrace = stackTrace ? new StackTrace(2, true) : null,
             };
 
@@ -231,15 +238,7 @@ namespace Signum.Utilities
             }
         }
 
-        public static void Switch(this Tracer tracer, string role, Func<string> aditionalData)
-        {
-            if (tracer == null)
-                return;
-
-            tracer.Switch(role, aditionalData()); 
-        }
-
-        public static void Switch(this Tracer tracer, string role = null, string aditionalData = null)
+        public static void Switch(this Tracer tracer, string role, Func<string> additionalData = null)
         {
             if (tracer == null)
                 return;
@@ -248,7 +247,7 @@ namespace Signum.Utilities
 
             tracer.Dispose();
 
-            var newTracer = CreateNewEntry(role, aditionalData, hasStackTrace);
+            var newTracer = CreateNewEntry(role, additionalData, hasStackTrace);
 
             if (newTracer != null)
             {
@@ -267,13 +266,42 @@ namespace Signum.Utilities
             return result;
         }
 
-        public static XDocument FullXDocument()
+        public static XDocument ExportXml()
         {
-            TimeSpan timeSpan = new TimeSpan(Entries.Sum(a => a.Elapsed.Ticks));
-
             return new XDocument(
-                new XElement("Logs", new XAttribute("TotalTime", timeSpan.NiceToString()),
-                    Entries.Select(e => e.FullXml(timeSpan.TotalMilliseconds)))); 
+                new XElement("Logs", Entries.Select(e => e.ExportXml()))
+                );
+        }
+
+        public static void ImportXml(XDocument doc, bool rebaseTime)
+        {
+            var list = doc.Element("Logs").Elements("Log").Select(xLog => HeavyProfilerEntry.ImportXml(xLog, null)).ToList();
+
+            ImportEntries(list, rebaseTime);
+        }
+
+        public static void ImportEntries(List<HeavyProfilerEntry> list, bool rebaseTime)
+        {
+            if (list.Any())
+            {
+                lock (Entries)
+                {
+                    int indexDelta = Entries.Count - list.Min(e => e.Index);
+                    foreach (var e in list)
+                        e.Index += indexDelta;
+
+
+                    if (rebaseTime && Entries.Any())
+                    {
+                        long timeDelta = Entries.Any() ? (Entries.Min(a => a.BeforeStart) - list.Min(a => a.BeforeStart)) : 0;
+
+                        foreach (var e in list)
+                            e.ReBaseTime(timeDelta);
+                    }
+
+                    Entries.AddRange(list);
+                }
+            }
         }
 
         public static XDocument SqlStatisticsXDocument()
@@ -294,7 +322,7 @@ namespace Signum.Utilities
 
         public static IOrderedEnumerable<SqlProfileResume> SqlStatistics()
         {
-            var statistics = AllEntries().Where(a => a.Role == "SQL").GroupBy(a => (string)a.AditionalData).Select(gr =>
+            var statistics = AllEntries().Where(a => a.Role == "SQL").GroupBy(a => (string)a.AdditionalData).Select(gr =>
                         new SqlProfileResume
                         {
                             Query = gr.Key,
@@ -307,21 +335,6 @@ namespace Signum.Utilities
                         }).OrderByDescending(a => a.Sum);
             return statistics;
         }
-
-
-        public static string GetFileLineAndNumber(this StackFrame frame)
-        {
-            string fileName = frame.GetFileName();
-
-            if (fileName == null)
-                return null;
-
-            if (fileName.Length > 70)
-                fileName = "..." + fileName.TryEnd(67);
-
-            return fileName + " ({0})".Formato(frame.GetFileLineNumber());
-        }
-        
 
         public static HeavyProfilerEntry Find(string indices)
         {
@@ -366,13 +379,13 @@ namespace Signum.Utilities
             return this.FollowC(a => a.Parent).Reverse().ToString(a => a.Index.ToString(), ".");
         }
 
-        public string AditionalData;
-        public string AditionalDataPreview()
+        public string AdditionalData;
+        public string AdditionalDataPreview()
         {
-            if (string.IsNullOrEmpty(AditionalData))
+            if (string.IsNullOrEmpty(AdditionalData))
                 return "";
 
-            return Regex.Match(AditionalData, @"^[^\r\n]{0,100}").Value;
+            return Regex.Match(AdditionalData, @"^[^\r\n]{0,100}").Value;
         }
 
         public long BeforeStart;
@@ -429,18 +442,18 @@ namespace Signum.Utilities
             return "{0} {1}".Formato(Elapsed.NiceToString(), Role);
         }
 
-        public XElement FullXml(double elapsedParent)
+        public XElement ExportXml()
         {
-            var elapsedMs = ElapsedMilliseconds; 
-
             return new XElement("Log",
-                new XAttribute("Time", elapsedMs < 10 ? "{0:.00}ms".Formato(elapsedMs): TimeSpan.FromMilliseconds(elapsedMs).NiceToString()),
-                new XAttribute("Ratio", "{0:p}".Formato(elapsedMs / elapsedParent)),
-                new XAttribute("Role", Role ?? ""),
-                new XAttribute("FullIndex", this.FullIndex()),
-                new XAttribute("Data", (AditionalData.TryToString() ?? "").TryStart(100)),
-                Entries == null ? new XElement[0] : Entries.Select(e => e.FullXml(elapsedMs))
-                );
+                new XAttribute("Index", this.Index),
+                new XAttribute("Role", this.Role),
+                new XAttribute("BeforeStart", this.BeforeStart),
+                new XAttribute("Start", this.Start),
+                new XAttribute("End", this.End),
+                this.AdditionalData == null ? null :
+                new XAttribute("AditionalData", this.AdditionalData),
+                Entries == null ? null :
+                Entries.Select(e => e.ExportXml()).ToList());
         }
 
         public void CleanStackTrace()
@@ -449,6 +462,45 @@ namespace Signum.Utilities
             if (this.Entries != null)
                 foreach (var item in this.Entries)
                     item.CleanStackTrace();
+        }
+
+        internal static HeavyProfilerEntry ImportXml(XElement xLog, HeavyProfilerEntry parent)
+        {
+            var result = new HeavyProfilerEntry
+            {
+                Parent = parent,
+                Index = int.Parse(xLog.Attribute("Index").Value),
+                Role = xLog.Attribute("Role").Value,
+                BeforeStart = long.Parse(xLog.Attribute("BeforeStart").Value),
+                Start = long.Parse(xLog.Attribute("Start").Value),
+                End = long.Parse(xLog.Attribute("End").Value),
+                AdditionalData = xLog.Attribute("AditionalData").TryCC(ad => ad.Value),
+            };
+
+            if (xLog.Element("Log") != null)
+                result.Entries = xLog.Elements("Log").Select(x => ImportXml(x, result)).ToList();
+         
+            return result;
+        }
+
+
+
+        public XDocument ExportXmlDocument()
+        {
+            return new XDocument(
+                 new XElement("Logs", ExportXml())
+                 );
+        }
+
+        internal void ReBaseTime(long timeDelta)
+        {
+            BeforeStart += timeDelta;
+            Start += timeDelta;
+            End += timeDelta;
+
+            if (Entries != null)
+                foreach (var e in Entries)
+                    e.ReBaseTime(timeDelta);
         }
     }
 

@@ -11,7 +11,6 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Engine;
 using System.Linq.Expressions;
 using Signum.Entities.Reflection;
-using Signum.Engine.Properties;
 using Signum.Utilities.Reflection;
 using System.Collections;
 using Signum.Utilities.DataStructures;
@@ -36,9 +35,9 @@ namespace Signum.Engine.Maps
 
         Dictionary<string, IColumn> Columns { get; }
 
-        List<UniqueIndex> MultiIndexes { get; set; }
+        List<Index> MultiColumnIndexes { get; set; }
 
-        List<UniqueIndex> GeneratUniqueIndexes();
+        List<Index> GeneratAllIndexes();
 
         void GenerateColumns();
     }
@@ -55,27 +54,17 @@ namespace Signum.Engine.Maps
 
         public ObjectName Name { get; set; }
 
-        bool identity = true;
-        public bool Identity
-        {
-            get { return identity; }
-            set
-            {
-                if (identity != value)
-                {
-                    identity = value;
-                    if (inserter != null && inserter.IsValueCreated) // not too fast
-                        inserter.Reset();
-                }
-            }
-        }
+        public bool Identity {get; set;}
         public bool IsView { get; internal set; }
         public string CleanTypeName { get; set; }
 
         public Dictionary<string, EntityField> Fields { get; set; }
+        public Dictionary<Type, FieldMixin> Mixins { get; set; }
+        
         public Dictionary<string, IColumn> Columns { get; set; }
+        
 
-        public List<UniqueIndex> MultiIndexes { get; set; }
+        public List<Index> MultiColumnIndexes { get; set; }
 
         public Table(Type type)
         {
@@ -89,15 +78,36 @@ namespace Signum.Engine.Maps
 
         public void GenerateColumns()
         {
-            Columns = Fields.Values.SelectMany(c => c.Field.Columns()).ToDictionary(c => c.Name);
+            var tableName = "columns in table " + this.Name;
 
-            inserter = new ResetLazy<InsertCache>(InitializeInsert);
-            updater = new ResetLazy<UpdateCache>(InitializeUpdate);
-            saveCollections = new ResetLazy<CollectionsCache>(InitializeCollections);
+            var columns = Fields.Values.SelectMany(c => c.Field.Columns()).ToDictionary(c => c.Name, tableName);
+
+            if (Mixins != null)
+                columns.AddRange(Mixins.Values.SelectMany(m => m.Fields.Values).SelectMany(f => f.Field.Columns()).ToDictionary(c => c.Name, tableName), tableName);
+
+            Columns = columns;
+
+            inserterDisableIdentity = new ResetLazy<InsertCacheDisableIdentity>(() => InsertCacheDisableIdentity.InitializeInsertDisableIdentity(this));
+            inserterIdentity = new ResetLazy<InsertCacheIdentity>(() => InsertCacheIdentity.InitializeInsertIdentity(this));
+            updater = new ResetLazy<UpdateCache>(() => UpdateCache.InitializeUpdate(this));
+            saveCollections = new ResetLazy<CollectionsCache>(() => CollectionsCache.InitializeCollections(this));
         }
 
         public Field GetField(MemberInfo member)
         {
+            if (member is MethodInfo)
+            {
+                var mi = (MethodInfo)member;
+
+                if (mi.IsGenericMethod && mi.GetGenericMethodDefinition().Name == "Mixin")
+                {
+                    if(Mixins == null)
+                        throw new InvalidOperationException("{0} has not mixins".Formato(this.Type.Name));
+
+                    return Mixins.GetOrThrow(mi.GetGenericArguments().Single());
+                }
+            }
+
             FieldInfo fi = member as FieldInfo ?? Reflector.FindFieldInfo(Type, (PropertyInfo)member);
 
             if (fi == null)
@@ -110,6 +120,29 @@ namespace Signum.Engine.Maps
 
         public Field TryGetField(MemberInfo member)
         {
+            if (member is MethodInfo)
+            {
+                var mi = (MethodInfo)member;
+
+                if (mi.IsGenericMethod && mi.GetGenericMethodDefinition().Name == "Mixin")
+                {
+                    if (Mixins == null)
+                        return null;
+
+                    return Mixins.TryGetC(mi.GetGenericArguments().Single());
+                }
+
+                return null;
+            }
+
+            if (member is Type)
+            {
+                if (Mixins == null)
+                    return null;
+
+                return Mixins.TryGetC((Type)member);
+            }
+
             FieldInfo fi = member as FieldInfo ??  Reflector.TryFindFieldInfo(Type, (PropertyInfo)member);
 
             if (fi == null)
@@ -123,64 +156,17 @@ namespace Signum.Engine.Maps
             return field.Field;
         }
 
-        public List<UniqueIndex> GeneratUniqueIndexes()
+        public List<Index> GeneratAllIndexes()
         {
-            var result = Fields.SelectMany(f => f.Value.Field.GeneratUniqueIndexes(this)).ToList();
+            var result = Fields.SelectMany(f => f.Value.Field.GeneratIndexes(this)).ToList();
 
-            if (MultiIndexes != null)
-                result.AddRange(MultiIndexes);
+            if (Mixins != null)
+                result.AddRange(Mixins.SelectMany(f => f.Value.GeneratIndexes(this)).ToList());
+
+            if (MultiColumnIndexes != null)
+                result.AddRange(MultiColumnIndexes);
 
             return result;
-        }
-
-        internal void InsertMany(List<IdentifiableEntity> list, DirectedGraph<IdentifiableEntity> backEdges)
-        {
-            var ic = inserter.Value;
-
-            if (!Connector.Current.AllowsMultipleQueries)
-            {
-                foreach (var item in list)
-                    ic.Insert(item, backEdges);
-            }
-            else
-            {
-                foreach (var ls in list.Split_1_2_4_8_16())
-                {
-                    switch (ls.Count)
-                    {
-                        case 1: ic.Insert(ls[0], backEdges); break;
-                        case 2: ic.Insert2(ls, backEdges); break;
-                        case 4: ic.Insert4(ls, backEdges); break;
-                        case 8: ic.Insert8(ls, backEdges); break;
-                        case 16: ic.Insert16(ls, backEdges); break;
-                    }
-                }
-            }
-        }
-
-        internal void UpdateMany(List<IdentifiableEntity> list, DirectedGraph<IdentifiableEntity> backEdges)
-        {
-            var uc = updater.Value;
-
-            if (!Connector.Current.AllowsMultipleQueries)
-            {
-                foreach (var item in list)
-                    uc.Update(item, backEdges);
-            }
-            else
-            {
-                foreach (var ls in list.Split_1_2_4_8_16())
-                {
-                    switch (ls.Count)
-                    {
-                        case 1: uc.Update(ls[0], backEdges); break;
-                        case 2: uc.Update2(ls, backEdges); break;
-                        case 4: uc.Update4(ls, backEdges); break;
-                        case 8: uc.Update8(ls, backEdges); break;
-                        case 16: uc.Update16(ls, backEdges); break;
-                    }
-                }
-            }
         }
 
         public IEnumerable<KeyValuePair<Table, RelationInfo>> DependentTables()
@@ -190,8 +176,17 @@ namespace Signum.Engine.Maps
 
         public IEnumerable<RelationalTable> RelationalTables()
         {
-            return Fields.Values.Select(a => a.Field).OfType<FieldMList>().Select(f => f.RelationalTable);
+            var tables = Fields.Values.SelectMany(a => a.Field.RelationalTables(a.Getter)).ToList();
+
+            if (Mixins != null)
+                tables.AddRange(from m in Mixins.Values
+                                from rt in m.RelationalTables(m.Getter)
+                                select rt);
+
+            return tables; 
         }
+
+        
 
         public void ToDatabase(DatabaseName databaseName)
         {
@@ -242,18 +237,20 @@ namespace Signum.Engine.Maps
 
         public abstract IEnumerable<IColumn> Columns();
 
-        public virtual IEnumerable<UniqueIndex> GeneratUniqueIndexes(ITable table)
+        public virtual IEnumerable<Index> GeneratIndexes(ITable table)
         {
             switch (IndexType)
             {
-                case IndexType.None: return Enumerable.Empty<UniqueIndex>();
+                case IndexType.None: return Enumerable.Empty<Index>();
                 case IndexType.Unique: return new[] { new UniqueIndex(table, this) };
                 case IndexType.UniqueMultipleNulls: return new[] { new UniqueIndex(table, this).WhereNotNull(this) };
             }
             throw new InvalidOperationException("IndexType {0} not expected".Formato(IndexType));
         }
 
-        internal abstract IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables(); 
+        internal abstract IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables();
+
+        internal abstract IEnumerable<RelationalTable> RelationalTables(Func<IdentifiableEntity, object> getter); 
     }
 
     public enum IndexType
@@ -311,6 +308,7 @@ namespace Signum.Engine.Maps
     {
         bool IsLite { get; }
         bool ClearEntityOnSaving { get; set; }
+        bool AvoidExpandOnRetrieving { get; }
         Type FieldType { get; }
     }
 
@@ -343,17 +341,22 @@ namespace Signum.Engine.Maps
             return new[] { this };
         }
 
-        public override IEnumerable<UniqueIndex> GeneratUniqueIndexes(ITable table)
+        public override IEnumerable<Index> GeneratIndexes(ITable table)
         {
             if (IndexType != Maps.IndexType.None)
                 throw new InvalidOperationException("Changing IndexType is not allowed for FieldPrimaryKey");
 
-            return Enumerable.Empty<UniqueIndex>();
+            return Enumerable.Empty<Index>();
         }
 
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
             return Enumerable.Empty<KeyValuePair<Table, RelationInfo>>();
+        }
+
+        internal override IEnumerable<RelationalTable> RelationalTables(Func<IdentifiableEntity, object> getter)
+        {
+            return Enumerable.Empty<RelationalTable>();
         }
     }
 
@@ -393,6 +396,11 @@ namespace Signum.Engine.Maps
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
         {
             return Enumerable.Empty<KeyValuePair<Table, RelationInfo>>();
+        }
+
+        internal override IEnumerable<RelationalTable> RelationalTables(Func<IdentifiableEntity, object> getter)
+        {
+            return Enumerable.Empty<RelationalTable>();
         }
     }
 
@@ -466,9 +474,9 @@ namespace Signum.Engine.Maps
             return result;
         }
 
-        public override IEnumerable<UniqueIndex> GeneratUniqueIndexes(ITable table)
+        public override IEnumerable<Index> GeneratIndexes(ITable table)
         {
-            return this.EmbeddedFields.Values.SelectMany(f => f.Field.GeneratUniqueIndexes(table));
+            return this.EmbeddedFields.Values.SelectMany(f => f.Field.GeneratIndexes(table));
         }
 
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
@@ -480,6 +488,95 @@ namespace Signum.Engine.Maps
                     yield return kvp;
                 }
             }
+        }
+
+        internal override IEnumerable<RelationalTable> RelationalTables(Func<IdentifiableEntity, object> getter)
+        {
+            return EmbeddedFields.Values.SelectMany(e => e.Field.RelationalTables(obj =>
+            {
+                var embedded = getter(obj);
+
+                if (embedded == null)
+                    return null;
+
+                return e.Getter(embedded);
+            })); 
+        }
+    }
+
+    public partial class FieldMixin : Field, IFieldFinder
+    {
+        public Dictionary<string, EntityField> Fields { get; set; }
+   
+        public FieldMixin(Type fieldType)
+            : base(fieldType)
+        {
+        }
+
+        public override string ToString()
+        {
+            return "Mixin\r\n{0}".Formato(Fields.ToString(c => "{0} : {1}".Formato(c.Key, c.Value), "\r\n").Indent(2));
+        }
+
+        public Field GetField(MemberInfo member)
+        {
+            FieldInfo fi = member as FieldInfo ?? Reflector.FindFieldInfo(FieldType, (PropertyInfo)member);
+
+            if (fi == null)
+                throw new InvalidOperationException("Field {0} not found on {1}".Formato(member.Name, FieldType));
+
+            EntityField field = Fields.GetOrThrow(fi.Name, "Field {0} not found on schema");
+
+            return field.Field;
+        }
+
+        public Field TryGetField(MemberInfo value)
+        {
+            FieldInfo fi = value as FieldInfo ?? Reflector.TryFindFieldInfo(FieldType, (PropertyInfo)value);
+
+            if (fi == null)
+                return null;
+
+            EntityField field = Fields.TryGetC(fi.Name);
+
+            if (field == null)
+                return null;
+
+            return field.Field;
+        }
+     
+        public override IEnumerable<IColumn> Columns()
+        {
+            var result = new List<IColumn>();
+            result.AddRange(Fields.Values.SelectMany(c => c.Field.Columns()));
+
+            return result;
+        }
+
+        public override IEnumerable<Index> GeneratIndexes(ITable table)
+        {
+            return this.Fields.Values.SelectMany(f => f.Field.GeneratIndexes(table));
+        }
+
+        internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
+        {
+            foreach (var f in Fields.Values)
+            {
+                foreach (var kvp in f.Field.GetTables())
+                {
+                    yield return kvp;
+                }
+            }
+        }
+
+        internal override IEnumerable<RelationalTable> RelationalTables(Func<IdentifiableEntity, object> getter)
+        {
+            return Fields.Values.SelectMany(e => e.Field.RelationalTables(ident => e.Getter(getter(ident))));
+        }
+
+        internal MixinEntity Getter(IdentifiableEntity ident)
+        {
+            return ((IdentifiableEntity)ident).AllMixin.Single(mo => mo.GetType() == FieldType);
         }
     }
 
@@ -496,6 +593,7 @@ namespace Signum.Engine.Maps
         public Table ReferenceTable { get; set; }
 
         public bool IsLite { get; internal set; }
+        public bool AvoidExpandOnRetrieving { get; internal set; }
 
         public FieldReference(Type fieldType) : base(fieldType) { }
 
@@ -524,6 +622,14 @@ namespace Signum.Engine.Maps
             }); 
         }
 
+        public override IEnumerable<Index> GeneratIndexes(ITable table)
+        {
+            if (IndexType == Maps.IndexType.None)
+                return new[] { new Index(table, (Field)this) };
+
+            return base.GeneratIndexes(table);
+        }
+
         bool clearEntityOnSaving;
         public bool ClearEntityOnSaving
         {
@@ -537,6 +643,11 @@ namespace Signum.Engine.Maps
                 this.AssertIsLite();
                 this.clearEntityOnSaving = value;
             }
+        }
+
+        internal override IEnumerable<RelationalTable> RelationalTables(Func<IdentifiableEntity, object> getter)
+        {
+            return Enumerable.Empty<RelationalTable>();
         }
     }
 
@@ -565,11 +676,17 @@ namespace Signum.Engine.Maps
                 IsNullable = Nullable
             });
         }
+
+        internal override IEnumerable<RelationalTable> RelationalTables(Func<IdentifiableEntity, object> getter)
+        {
+            return Enumerable.Empty<RelationalTable>();
+        }
     }
 
     public partial class FieldImplementedBy : Field, IFieldReference
     {
         public bool IsLite { get; internal set; }
+        public bool AvoidExpandOnRetrieving { get; internal set; }
 
         public Dictionary<Type, ImplementationColumn> ImplementationColumns { get; set; }
 
@@ -595,6 +712,11 @@ namespace Signum.Engine.Maps
             }));
         }
 
+        public override IEnumerable<Index> GeneratIndexes(ITable table)
+        {
+            return this.Columns().Select(c => new Index(table, c)).Concat(base.GeneratIndexes(table));
+        }
+
         bool clearEntityOnSaving;
         public bool ClearEntityOnSaving
         {
@@ -609,11 +731,19 @@ namespace Signum.Engine.Maps
                 this.clearEntityOnSaving = value;
             }
         }
+
+        internal override IEnumerable<RelationalTable> RelationalTables(Func<IdentifiableEntity, object> getter)
+        {
+            return Enumerable.Empty<RelationalTable>();
+        }
     }
 
     public partial class FieldImplementedByAll : Field, IFieldReference
     {
         public bool IsLite { get; internal set; }
+
+        public bool AvoidExpandOnRetrieving { get; internal set; }
+
         public ImplementationColumn Column { get; set; }
         public ImplementationColumn ColumnTypes { get; set; }
 
@@ -642,6 +772,19 @@ namespace Signum.Engine.Maps
                 this.AssertIsLite();
                 this.clearEntityOnSaving = value;
             }
+        }
+
+        public override IEnumerable<Index> GeneratIndexes(ITable table)
+        {
+            if (IndexType == Maps.IndexType.None)
+                return new[] { new Index(table, (Field)this) };
+
+            return base.GeneratIndexes(table);
+        }
+
+        internal override IEnumerable<RelationalTable> RelationalTables(Func<IdentifiableEntity, object> getter)
+        {
+            return Enumerable.Empty<RelationalTable>();
         }
     }
 
@@ -690,12 +833,12 @@ namespace Signum.Engine.Maps
             return new IColumn[0];
         }
 
-        public override IEnumerable<UniqueIndex> GeneratUniqueIndexes(ITable table)
+        public override IEnumerable<Index> GeneratIndexes(ITable table)
         {
             if (IndexType != Maps.IndexType.None)
                 throw new InvalidOperationException("Changing IndexType is not allowed for FieldMList");
 
-            return Enumerable.Empty<UniqueIndex>();
+            return Enumerable.Empty<Index>();
         }
 
         internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
@@ -705,6 +848,13 @@ namespace Signum.Engine.Maps
                 kvp.Value.IsCollection = true;
                 yield return kvp;
             }
+        }
+
+        internal override IEnumerable<RelationalTable> RelationalTables(Func<IdentifiableEntity, object> getter)
+        {
+            RelationalTable.FullGetter = getter;
+
+            return new[] { RelationalTable };
         }
     }
 
@@ -724,7 +874,7 @@ namespace Signum.Engine.Maps
         }
 
         public Dictionary<string, IColumn> Columns { get; set; }
-        public List<UniqueIndex> MultiIndexes { get; set; }
+        public List<Index> MultiColumnIndexes { get; set; }
 
         public ObjectName Name { get; set; }
         public PrimaryKeyColumn PrimaryKey { get; set; }
@@ -733,6 +883,8 @@ namespace Signum.Engine.Maps
 
         public Type CollectionType { get; private set; }
         public Func<IList> Constructor { get; private set; }
+
+        public Func<IdentifiableEntity, object> FullGetter { get; internal set; }
 
         public RelationalTable(Type collectionType)
         {
@@ -749,12 +901,14 @@ namespace Signum.Engine.Maps
             Columns = new IColumn[] { PrimaryKey, BackReference }.Concat(Field.Columns()).ToDictionary(a => a.Name);
         }
 
-        public List<UniqueIndex> GeneratUniqueIndexes()
+        public List<Index> GeneratAllIndexes()
         {
-            var result = Field.GeneratUniqueIndexes(this).ToList();
+            var result = BackReference.GeneratIndexes(this).ToList();
 
-            if (MultiIndexes != null)
-                result.AddRange(MultiIndexes);
+            result.AddRange(Field.GeneratIndexes(this));
+
+            if (MultiColumnIndexes != null)
+                result.AddRange(MultiColumnIndexes);
 
             return result;
         }
@@ -791,27 +945,10 @@ namespace Signum.Engine.Maps
         }
     }
 
-    public enum KindOfField
-    {
-        PrimaryKey,
-        Value,
-        Reference,
-        Enum,
-        Embedded,
-        MList,
-    }
-
-    [Flags]
-    public enum Contexts
-    {
-        Normal = 1,
-        Embedded = 2,
-        MList = 4,
-        View = 8,
-    }
 
     public enum InitLevel
     {
+        Level_0BeforeAnyQuery,
         Level0SyncEntities,
         Level1SimpleEntities,
         Level2NormalEntities,

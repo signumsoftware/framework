@@ -25,9 +25,7 @@
 .sf-dropdown.sf-open .sf-menu-button
 {
 	display:block;
-	-moz-border-shadow: 0 2px 8px #ddd;
-	-webkit-border-shadow: 0 2px 8px #ddd;
-	border-shadow: 0 2px 8px #ddd;	
+	border-shadow: 0 2px 8px #ddd;
 }
 .sf-dropdown.sf-open .sf-menu-button:hover
 {
@@ -40,6 +38,7 @@
     text-decoration: none;
     white-space: nowrap;
     zoom: 1;
+    cursor: pointer;
 }
 .sf-dropdown .sf-menu-button > li
 {
@@ -74,7 +73,7 @@
 {
     font-size: 12px;
     color: black;
-    padding: 1px 5px;
+    padding: 0 5px;
     line-height: 20px;
     vertical-align: middle;
 }
@@ -137,7 +136,6 @@
     background-color:#eee;
     -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
     filter:alpha(opacity=50);
-    -moz-opacity:0.5;
     -khtml-opacity:0.5;
     opacity:0.5;
 }
@@ -168,10 +166,16 @@ legend
     width: 100%;    
 }
 
-.sf-popup-fullscreen
-{
-    float:left; 
-    display:block; 
-    margin-left:5px; 
+.sf-popup-fullscreen {
+    float: left;
+    display: block;
+    margin-left: 5px;
     cursor: pointer;
+}   
+
+/*----------------
+--popup-----------
+----------------*/
+.ui-dialog-title {
+    line-height: 16px;
 }

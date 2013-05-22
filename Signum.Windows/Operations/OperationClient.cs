@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,7 +17,6 @@ using Signum.Entities.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using System.Windows.Automation;
 using Signum.Entities.Basics;
-using Signum.Windows.Properties;
 
 namespace Signum.Windows.Operations
 {
@@ -33,14 +32,14 @@ namespace Signum.Windows.Operations
 
                 Navigator.AddSetting(new EntitySettings<OperationLogDN>() { View = e => new OperationLog() });
 
-                NormalWindow.GetButtonBarElement += Manager.ButtonBar_GetButtonBarElement;
+                Navigator.Manager.GetButtonBarElementGlobal += Manager.ButtonBar_GetButtonBarElement;
 
                 Constructor.Manager.GeneralConstructor += Manager.ConstructorManager_GeneralConstructor;
 
                 SearchControl.GetContextMenuItems += Manager.SearchControl_GetConstructorFromManyMenuItems;
                 SearchControl.GetContextMenuItems += Manager.SearchControl_GetEntityOperationMenuItem;
 
-                Links.RegisterGlobalLinks((entity, control) => new[]
+                LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, control) => new[]
                 { 
                     entity.GetType() == typeof(OperationLogDN) ? null : 
                         new QuickLinkExplore(new ExploreOptions(typeof(OperationLogDN), "Target", entity)
@@ -262,8 +261,8 @@ namespace Signum.Windows.Operations
                 if (!SelectorWindow.ShowDialog(dic.Keys.ToArray(), out selected,
                     elementIcon: k => OperationClient.GetImage(k),
                     elementText: k => OperationClient.GetText(k),
-                    title: Resources.ConstructorSelector,
-                    message: Resources.PleaseSelectAConstructor,
+                    title: SelectorMessage.ConstructorSelector.NiceToString(),
+                    message: SelectorMessage.PleaseSelectAConstructor.NiceToString(),
                     owner: win))
                     return null;
             }
@@ -321,8 +320,8 @@ namespace Signum.Windows.Operations
                                   OperationInfo = oi,
                               }
                               where os == null ? oi.Lite == true :
-                                    os.Contextual == null ? (oi.Lite == true && os.Click == null) :
-                                    (os.Contextual.IsVisible == null || os.Contextual.IsVisible(coc))
+                                    os.Contextual.IsVisible == null ? (oi.Lite == true && os.IsVisible == null && (os.Click == null || os.Contextual.Click != null)) :
+                                    os.Contextual.IsVisible(coc)
                               select coc).ToList();
 
             if (operations.IsEmpty())

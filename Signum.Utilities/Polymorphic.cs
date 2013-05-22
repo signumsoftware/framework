@@ -32,7 +32,7 @@ namespace Signum.Utilities
 
          public static Dictionary<K, V> InheritDictionary<K, V>(KeyValuePair<Type, Dictionary<K, V>> currentValue, KeyValuePair<Type, Dictionary<K, V>> baseValue, List<KeyValuePair<Type, Dictionary<K, V>>> newInterfacesValues)
         {
-            if (currentValue.Value == null || baseValue.Value == null || newInterfacesValues.All(a => a.Value == null))
+            if (currentValue.Value == null && baseValue.Value == null)
                 return null;
 
             Dictionary<K, V> newDictionary = new Dictionary<K, V>();
@@ -98,18 +98,10 @@ namespace Signum.Utilities
                 throw new InvalidOperationException("{0} is not a {1}".Formato(type.Name, minimumType.Name));
         }
 
-        public Polymorphic(PolymorphicMerger<T> merger, Type minimumType)
+        public Polymorphic(PolymorphicMerger<T> merger = null, Type minimumType = null)
         {
-            this.merger = merger;
-            this.minimumType = minimumType;
-        }
-
-        public Polymorphic(PolymorphicMerger<T> merger): this(merger, GetDefaultType(typeof(T)))
-        {
-        }
-
-        public Polymorphic() : this(PolymorphicMerger.Inheritance<T>, GetDefaultType(typeof(T)))
-        {
+            this.merger = merger ?? PolymorphicMerger.Inheritance<T>;
+            this.minimumType = minimumType ?? GetDefaultType(typeof(T));
         }
 
         private static Type GetDefaultType(Type type)
@@ -157,16 +149,19 @@ namespace Signum.Utilities
             if (cached.TryGetValue(type, out result))
                 return result;
 
-            var baseValue = type.BaseType == null  || !IsAllowed(type.BaseType) ? null : TryGetValue(type.BaseType);
+            var baseValue = type.BaseType == null || !IsAllowed(type.BaseType) ? null : TryGetValue(type.BaseType);
 
-            var currentValue = definitions.TryGetC(type); 
+            var currentValue = definitions.TryGetC(type);
+
+            if (minimumType != null && !minimumType.IsInterface)
+                return merger(KVP.Create(type, currentValue), KVP.Create(type.BaseType, baseValue), null);
 
             IEnumerable<Type> interfaces = type.GetInterfaces().Where(IsAllowed);
 
-            if(type.BaseType != null)
+            if (type.BaseType != null)
                 interfaces = interfaces.Except(type.BaseType.GetInterfaces());
 
-            return merger(KVP.Create(type, currentValue), KVP.Create(type.BaseType, baseValue), interfaces.Select(inter => KVP.Create(inter, TryGetValue(inter))).ToList()); 
+            return merger(KVP.Create(type, currentValue), KVP.Create(type.BaseType, baseValue), interfaces.Select(inter => KVP.Create(inter, TryGetValue(inter))).ToList());
         }
 
         public void SetDefinition(Type type, T value)
@@ -197,16 +192,16 @@ namespace Signum.Utilities
     [DebuggerStepThrough]
     public static class PolymorphicExtensions
     {
-        public static T GetOrAdd<T>(this Polymorphic<T> polymorophic, Type type) where T : class, new()
+        public static T GetOrAddDefinition<T>(this Polymorphic<T> polymorphic, Type type) where T : class, new()
         {
-            T value = polymorophic.GetDefinition(type);
+            T value = polymorphic.GetDefinition(type);
 
             if (value != null)
                 return value;
 
             value = new T();
 
-            polymorophic.SetDefinition(type, value);
+            polymorphic.SetDefinition(type, value);
 
             return value;
         }

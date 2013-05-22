@@ -37,7 +37,8 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -98,11 +99,23 @@
     <Reference Include="PresentationFramework">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
+    <Page Include="Basics\TypeUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Basics\Exception.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Controls\TimePicker.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="MiniExpander.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ProgressWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -128,14 +141,23 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Compile Include="Basics\TypeUI.xaml.cs">
+      <DependentUpon>TypeUI.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Basics\Exception.xaml.cs">
       <DependentUpon>Exception.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\TimePicker.xaml.cs">
       <DependentUpon>TimePicker.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Converters\EnumWindowsExtensions.cs" />
+    <Compile Include="Converters\PropertyRouteConverter.cs" />
     <Compile Include="Converters\TimeSpanConverter.cs" />
-    <Compile Include="DynamicQuery\DynamicQueryBachRequest.cs" />
+    <Compile Include="DesignTimeResourceDictionary.cs" />
+    <Compile Include="ProgressWindow.xaml.cs">
+      <DependentUpon>ProgressWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DynamicQuery\DynamicQueryServer.cs" />
     <Compile Include="DynamicQuery\ElementsInPageLabel.xaml.cs">
       <DependentUpon>ElementsInPageLabel.xaml</DependentUpon>
     </Compile>
@@ -165,7 +187,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Controls\AutoCompleteTextBox.xaml">
+    <Page Include="Controls\AutocompleteTextBox.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -381,16 +403,14 @@
       <DependentUpon>ButtonBar.xaml</DependentUpon>
     </Compile>
     <Compile Include="Common.cs" />
-    <Compile Include="Controls\AutoCompleteTextBox.xaml.cs">
-      <DependentUpon>AutoCompleteTextBox.xaml</DependentUpon>
+    <Compile Include="Controls\AutocompleteTextBox.xaml.cs">
+      <DependentUpon>AutocompleteTextBox.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\DragDropController.cs" />
     <Compile Include="Controls\WatermarkTextBox.cs" />
     <Compile Include="Controls\ShyControl.cs" />
     <Compile Include="Controls\ToolBarButton.cs" />
     <Compile Include="AutoControl.cs" />
-    <Compile Include="Converters\EnumBooleanConverter.cs" />
-    <Compile Include="Converters\PropertyRouteConverter.cs" />
     <Compile Include="Converters\TypeDataTemplateSelector.cs" />
     <Compile Include="DynamicQuery\QueryTokenBuilder.xaml.cs">
       <DependentUpon>QueryTokenBuilder.xaml</DependentUpon>
@@ -492,6 +512,7 @@
       <DependentUpon>EntityCombo.xaml</DependentUpon>
     </Compile>
     <Compile Include="ImageLoader.cs" />
+    <Compile Include="Widgets\LinksClient.cs" />
     <Compile Include="Widgets\LinksWidget.xaml.cs">
       <DependentUpon>LinksWidget.xaml</DependentUpon>
     </Compile>
@@ -506,16 +527,6 @@
     <Compile Include="NormalWindow.xaml.cs">
       <DependentUpon>NormalWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Properties\Resources.es.Designer.cs">
-      <DependentUpon>Resources.es.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Facades\Server.cs" />
     <Compile Include="EntityControls\ValueLine.xaml.cs">
@@ -540,18 +551,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\star.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.es.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.es.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Signum.Entities\Signum.Entities.csproj">
@@ -590,9 +589,17 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Images\exception.png" />
+  </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\calendar.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\user.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\role.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

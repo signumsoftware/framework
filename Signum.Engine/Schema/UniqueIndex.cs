@@ -8,13 +8,12 @@ using System.Data;
 
 namespace Signum.Engine.Maps
 {
-    public class UniqueIndex
+    public class Index
     {
         public ITable Table { get; private set; }
         public IColumn[] Columns { get; private set; }
-        public string Where { get; set; }
 
-        public UniqueIndex(ITable table, params Field[] fields)
+        public Index(ITable table, params Field[] fields)
         {
             if (table == null)
                 throw new ArgumentNullException("table");
@@ -22,15 +21,14 @@ namespace Signum.Engine.Maps
             if (fields == null || fields.IsEmpty())
                 throw new InvalidOperationException("No fields");
 
-            if (fields.OfType<FieldEmbedded>().Any())
+            if (fields.Any(f => f is FieldEmbedded || f is FieldMixin))
                 throw new InvalidOperationException("Embedded fields not supported for indexes");
 
             this.Table = table;
             this.Columns = fields.SelectMany(f => f.Columns()).ToArray();
         }
 
-
-        public UniqueIndex(ITable table, params IColumn[] columns)
+        public Index(ITable table, params IColumn[] columns)
         {
             if (table == null)
                 throw new ArgumentNullException("table");
@@ -42,9 +40,29 @@ namespace Signum.Engine.Maps
             this.Columns = columns;
         }
 
-        public string IndexName
+        public virtual string IndexName
         {
-            get { return "IX_{0}_{1}".Formato(Table.Name.Name, ColumnSignature()).TryStart(Connector.Current.MaxNameLength); }
+            get { return "IX_{0}".Formato(ColumnSignature()).TryStart(Connector.Current.MaxNameLength); }
+        }
+
+        protected virtual string ColumnSignature()
+        {
+            return Columns.ToString(c => c.Name, "_");
+        }
+    }
+
+    public class UniqueIndex : Index
+    {
+        public UniqueIndex(ITable table, params Field[] fields) : base(table, fields) { }
+
+        public UniqueIndex(ITable table, params IColumn[] columns) : base(table, columns) { }
+
+        public string Where { get; set; }
+
+
+        public override string IndexName
+        {
+            get { return "UIX_{0}".Formato(ColumnSignature()).TryStart(Connector.Current.MaxNameLength); }
         }
 
         public string ViewName
@@ -54,18 +72,18 @@ namespace Signum.Engine.Maps
                 if (string.IsNullOrEmpty(Where))
                     return null;
 
-                if( Schema.Current.Settings.DBMS > DBMS.SqlServer2005 && !ComplexWhereKeywords.Any(Where.Contains))
+                if (Schema.Current.Settings.DBMS > DBMS.SqlServer2005 && !ComplexWhereKeywords.Any(Where.Contains))
                     return null;
 
                 return "VIX_{0}_{1}".Formato(Table.Name.Name, ColumnSignature()).TryStart(Connector.Current.MaxNameLength);
             }
         }
 
-        static List<string> ComplexWhereKeywords = new List<string>(){"OR"};
+        static List<string> ComplexWhereKeywords = new List<string>() { "OR" };
 
-        string ColumnSignature()
+        protected override string ColumnSignature()
         {
-            string columns = Columns.ToString(c => c.Name, "_");
+            string columns = base.ColumnSignature();
             if (string.IsNullOrEmpty(Where))
                 return columns;
 
@@ -114,7 +132,7 @@ namespace Signum.Engine.Maps
                 return this;
             }
 
-            if (notNullFields.OfType<FieldEmbedded>().Any())
+            if (notNullFields.Any(a => a is FieldEmbedded || a is FieldMixin))
                 throw new InvalidOperationException("Embedded fields not supported for indexes");
 
             this.WhereNotNull(notNullFields.Where(a => !IsComplexIB(a)).SelectMany(a => a.Columns()).ToArray());

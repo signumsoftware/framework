@@ -171,7 +171,7 @@ SF.registerModule("FindNavigator", function () {
             },
 
             changeRowSelection: function ($rowSelectors, select) {
-                $rowSelectors.attr("checked", select);
+                $rowSelectors.prop("checked", select);
                 $rowSelectors.closest("tr").toggleClass("ui-state-active", select);
 
                 var $control = $(this.pf("sfSearchControl"));
@@ -820,7 +820,7 @@ SF.registerModule("FindNavigator", function () {
 
             toggleSelectAll: function () {
                 var select = $(this.pf("cbSelectAll:checked"));
-                $(this.pf("sfSearchControl .sf-td-selection")).attr('checked', (select.length > 0) ? true : false);
+                $(this.pf("sfSearchControl .sf-td-selection")).prop('checked', (select.length > 0) ? true : false);
             },
 
             searchOnLoadFinished: false,
@@ -842,8 +842,8 @@ SF.registerModule("FindNavigator", function () {
                 }
                 else {
                     var self = this;
-                    $tabContainer.bind("tabsshow", function (evt, ui) {
-                        if ($(ui.panel).find(self.element).length > 0) {
+                    $tabContainer.bind("tabsactivate", function (evt, ui) {
+                        if ($(ui.newPanel).find(self.element).length > 0) {
                             makeSearch();
                         }
                     });
@@ -855,7 +855,7 @@ SF.registerModule("FindNavigator", function () {
     SF.FindNavigator = (function () {
 
         var getFor = function (prefix) {
-            return $("#" + SF.compose(prefix, "sfSearchControl")).data("findNavigator");
+            return $("#" + SF.compose(prefix, "sfSearchControl")).data("SF-findNavigator");
         };
 
         var openFinder = function (findOptions) {
@@ -956,9 +956,9 @@ SF.registerModule("FindNavigator", function () {
             $.ajax({
                 url: controllerUrl || SF.Urls.subTokensCombo,
                 data: serializer.serialize(),
-                dataType: "text",
+                dataType: "html",
                 success: function (newCombo) {
-                    if (!SF.isEmpty(newCombo)) {
+                    if (newCombo != "<span>no-results</span>") {
                         $("#" + SF.compose(prefix, "ddlTokens_" + index)).after(newCombo);
                     }
                 }

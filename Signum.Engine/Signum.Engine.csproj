@@ -110,11 +110,12 @@
     <Compile Include="Exceptions.cs" />
     <Compile Include="Database.cs" />
     <Compile Include="DynamicQuery\DynamicQueryManager.cs" />
-    <Compile Include="DynamicQuery\AutoCompleteUtils.cs" />
+    <Compile Include="DynamicQuery\AutocompleteUtils.cs" />
     <Compile Include="Engine\Sys.Tables.cs" />
     <Compile Include="Engine\Synchronizer.cs" />
     <Compile Include="ExecutionContext.cs" />
     <Compile Include="GlobalLazy.cs" />
+    <Compile Include="Linq\AliasGenerator.cs" />
     <Compile Include="Linq\DbExpressions.Sql.cs" />
     <Compile Include="Linq\DbQueryProvider.cs" />
     <Compile Include="Linq\ExpressionVisitor\AliasGatherer.cs" />
@@ -159,19 +160,11 @@
     <Compile Include="Linq\ViewAttributes.cs" />
     <Compile Include="Engine\SchemaSynchronizer.cs" />
     <Compile Include="Basics\MultiEnumLogic.cs" />
-    <Compile Include="Operations\BasicConstruct.cs" />
-    <Compile Include="Operations\BasicConstructFrom.cs" />
-    <Compile Include="Operations\BasicConstructFromMany.cs" />
-    <Compile Include="Operations\BasicDelete.cs" />
-    <Compile Include="Operations\BasicExecute.cs" />
     <Compile Include="Operations\Graph.cs" />
+    <Compile Include="Operations\GraphState.cs" />
+    <Compile Include="Operations\Internal.cs" />
     <Compile Include="Operations\OperationLogic.cs" />
     <Compile Include="Operations\Typle.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-    </Compile>
     <Compile Include="Retriever.cs" />
     <Compile Include="Schema\Schema.cs" />
     <Compile Include="Schema\Schema.Delete.cs" />
@@ -203,18 +196,6 @@
       <Project>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</Project>
       <Name>Signum.Utilities</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.es.resx" />
-    <EmbeddedResource Include="Properties\Resources.fr.resx" />
-    <EmbeddedResource Include="Properties\Resources.it.resx" />
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <SubType>Designer</SubType>
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.pt.resx" />
-    <EmbeddedResource Include="Properties\Resources.de.resx" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,7 +25,7 @@ namespace Signum.Windows
                 return hch.HasChanges();
 
             var graph = GraphExplorer.FromRoot((Modifiable)element.DataContext);
-            return graph.Any(a => a.SelfModified);
+            return graph.Any(a => a.Modified == ModifiedState.SelfModified);
         }
 
         public static bool AssertErrors(this FrameworkElement element)
@@ -38,7 +38,7 @@ namespace Signum.Windows
 
             if (error.HasText())
             {
-                MessageBox.Show(Window.GetWindow(element), Properties.Resources.ImpossibleToSaveIntegrityCheckFailed + error, Properties.Resources.ThereAreErrors, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Window.GetWindow(element), NormalWindowMessage.ImpossibleToSaveIntegrityCheckFailed.NiceToString() + error, NormalWindowMessage.ThereAreErrors.NiceToString(), MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             return true;
@@ -50,7 +50,7 @@ namespace Signum.Windows
 
             if (error.HasText())
             {
-                MessageBox.Show(window, Properties.Resources.ImpossibleToSaveIntegrityCheckFailed + error, Properties.Resources.ThereAreErrors, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(window, NormalWindowMessage.ImpossibleToSaveIntegrityCheckFailed.NiceToString() + error, NormalWindowMessage.ThereAreErrors.NiceToString(), MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             return true;
@@ -81,7 +81,7 @@ namespace Signum.Windows
         public static string GetErrors(Modifiable mod)
         {
             var graph = GraphExplorer.PreSaving(() => GraphExplorer.FromRoot(mod));
-            string error = GraphExplorer.Integrity(graph);
+            string error = GraphExplorer.FullIntegrityCheck(graph, withIndependentEmbeddedEntities: !(mod is IdentifiableEntity));
             return error;
         }
 
@@ -89,8 +89,8 @@ namespace Signum.Windows
         {
             return !element.HasChanges() ||
                 MessageBox.Show(
-                Properties.Resources.ThereAreChangesContinue,
-                Properties.Resources.ThereAreChanges,
+                NormalWindowMessage.ThereAreChangesContinue.NiceToString(),
+                NormalWindowMessage.ThereAreChanges.NiceToString(),
                 MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.OK) == MessageBoxResult.OK;
         }
     }

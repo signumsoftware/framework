@@ -13,7 +13,6 @@ using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Maps;
 using Signum.Entities.Reflection;
-using Signum.Engine.Properties;
 using System.Collections.ObjectModel;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.DynamicQuery;
@@ -170,6 +169,8 @@ namespace Signum.Engine.Linq
                 }
             }
 
+            if (m.Method.DeclaringType == typeof(LinqHints))
+                return Visit(m.Arguments[0]);
 
             if (m.Method.DeclaringType == typeof(Lite) && m.Method.Name == "ToLite")
                 return MakeCleanMeta(m.Type, Visit(m.Arguments[0]));
@@ -232,7 +233,7 @@ namespace Signum.Engine.Linq
 
                     return new MetaProjectorExpression(expression.Type,
                         new MetaExpression(elementType,
-                            new CleanMeta(new[] { route })));
+                            new CleanMeta(route)));
                 }
 
                 return new MetaProjectorExpression(expression.Type,
@@ -371,7 +372,26 @@ namespace Signum.Engine.Linq
         {
             Type type = TableType(c.Value);
             if (type != null)
-                return new MetaProjectorExpression(c.Type, new MetaExpression(type, new CleanMeta(new[] { PropertyRoute.Root(type) })));
+            {
+                if (typeof(IRootEntity).IsAssignableFrom(type))
+                    return new MetaProjectorExpression(c.Type, new MetaExpression(type, new CleanMeta(PropertyRoute.Root(type))));
+
+                if(type.IsInstantiationOf(typeof(MListElement<,>)))
+                {
+                    var parentType = type.GetGenericArguments()[0];
+                    PropertyRoute parent = PropertyRoute.Root(parentType);
+
+                    ISignumTable st =  (ISignumTable)c.Value;
+                    var rt = (RelationalTable)st.Table;
+
+                    Table table = rt.BackReference.ReferenceTable;
+                    FieldInfo fieldInfo = table.Fields.Values.Single(f=>f.Field is FieldMList && ((FieldMList)f.Field).RelationalTable == rt).FieldInfo; 
+
+                    PropertyRoute element = parent.Add(fieldInfo).Add("Item");
+
+                    return new MetaProjectorExpression(c.Type, new MetaMListExpression(type, new CleanMeta(parent), new CleanMeta(element))); 
+                }
+            }
 
             return MakeVoidMeta(c.Type);
         }
@@ -408,8 +428,19 @@ namespace Signum.Engine.Linq
                         PropertyInfo pi = (PropertyInfo)member;
                         return nex.Members.Zip(nex.Arguments).SingleEx(p => ReflectionTools.PropertyEquals((PropertyInfo)p.Item1, pi)).Item2;
                     }
-
                     break;
+                case (ExpressionType)MetaExpressionType.MetaMListExpression:
+                    {
+                        MetaMListExpression mme = (MetaMListExpression)source;
+                        var ga = mme.Type.GetGenericArguments();
+                        if (member.Name == "Parent")
+                            return new MetaExpression(ga[0], mme.Parent);
+
+                        if (member.Name == "Element")
+                            return new MetaExpression(ga[1], mme.Element);
+
+                        throw new InvalidOperationException("Property {0} not found on {1}".Formato(member.Name, mme.Type.TypeName()));
+                    }
             }
 
             if (typeof(ModifiableEntity).IsAssignableFrom(source.Type) || typeof(IIdentifiable).IsAssignableFrom(source.Type))
@@ -423,13 +454,13 @@ namespace Signum.Engine.Linq
 
                 if (meta.Meta is CleanMeta)
                 {
-                    PropertyRoute[] routes = ((CleanMeta)meta.Meta).PropertyRoutes.SelectMany(r=>GetRoutes(r, source.Type, pi.Name)).ToArray();
+                    PropertyRoute[] routes = ((CleanMeta)meta.Meta).PropertyRoutes.SelectMany(r => GetRoutes(r, source.Type, pi.Name)).ToArray();
 
                     return new MetaExpression(memberType, new CleanMeta(routes));
                 }
 
                 if (typeof(IdentifiableEntity).IsAssignableFrom(source.Type) && !source.Type.IsAbstract) //Works for simple entities and also for interface casting
-                    return new MetaExpression(memberType, new CleanMeta(new[]{ PropertyRoute.Root(source.Type).Add(pi)}));
+                    return new MetaExpression(memberType, new CleanMeta(PropertyRoute.Root(source.Type).Add(pi)));
             }
 
             if (source.Type.IsLite() && member.Name == "Entity")
@@ -474,12 +505,36 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitBinary(BinaryExpression b)
         {
-            return MakeDirtyMeta(b.Type, Visit(b.Right), Visit(b.Left)); 
+            var right = Visit(b.Right);
+            var left = Visit(b.Left);
+
+            var mRight = right as MetaExpression;
+            var mLeft = left as MetaExpression;
+
+            if(b.NodeType == ExpressionType.Coalesce &&  mRight.Meta is CleanMeta && mLeft.Meta is CleanMeta)
+            {
+                if(((CleanMeta)mRight.Meta).PropertyRoutes.SequenceEqual(((CleanMeta)mLeft.Meta).PropertyRoutes))
+                    return new MetaExpression(b.Type, mRight.Meta); 
+            } 
+
+            return MakeDirtyMeta(b.Type,  left,  right); 
         }
 
         protected override Expression VisitConditional(ConditionalExpression c)
         {
-            return MakeDirtyMeta(c.Type, Visit(c.Test), Visit(c.IfTrue), Visit(c.IfFalse));
+            var ifTrue = Visit(c.IfTrue);
+            var ifFalse = Visit(c.IfFalse);
+
+            var mIfTrue = ifTrue as MetaExpression;
+            var mIfFalse = ifFalse as MetaExpression;
+
+            if (mIfTrue != null && mIfTrue != null && mIfTrue.Meta is CleanMeta && mIfFalse.Meta is CleanMeta)
+            {
+                if (((CleanMeta)mIfTrue.Meta).PropertyRoutes.SequenceEqual(((CleanMeta)mIfFalse.Meta).PropertyRoutes))
+                    return new MetaExpression(c.Type, mIfTrue.Meta);
+            }
+
+            return MakeDirtyMeta(c.Type, Visit(c.Test), ifTrue, ifFalse);
         }
     }
 }

@@ -325,7 +325,7 @@ SF.registerModule("Lines", function () {
                     select: function (event, ui) {
                         var controlId = $elem.attr("id");
                         var prefix = controlId.substr(0, controlId.indexOf(SF.Keys.toStr) - 1);
-                        $("#" + prefix).data("entityLine").onAutocompleteSelected(controlId, ui.item.value);
+                        $("#" + prefix).data("SF-entityLine").onAutocompleteSelected(controlId, ui.item.value);
                     }
                 });
             },
@@ -631,7 +631,7 @@ SF.registerModule("Lines", function () {
                 var validatorResult = this.checkValidation(valOptions, itemPrefix);
                 if (validatorResult.acceptChanges) {
                     var runtimeInfo;
-                    var $mainControl = $(".sf-main-control[data-prefix=" + this.options.prefix + "]");
+                    var $mainControl = $(".sf-main-control[data-prefix=" + itemPrefix + "]");
                     if ($mainControl.length > 0) {
                         runtimeInfo = $mainControl.data("runtimeinfo");
                     }
@@ -1066,7 +1066,7 @@ SF.registerModule("Lines", function () {
             },
 
             _getRepeaterCall: function () {
-                return "$('#" + this.options.prefix + "').data('entityRepeater')";
+                return "$('#" + this.options.prefix + "').data('SF-entityRepeater')";
             },
 
             _getRemoving: function (itemPrefix) {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -18,7 +18,6 @@ using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 using System.Windows.Media;
 using Signum.Services;
-using Signum.Windows.Properties;
 using System.Windows.Automation;
 
 namespace Signum.Windows
@@ -26,7 +25,7 @@ namespace Signum.Windows
     public partial class CountSearchControl
     {
         public static readonly DependencyProperty TextProperty =
-        DependencyProperty.Register("Text", typeof(string), typeof(CountSearchControl), new UIPropertyMetadata(null));
+            DependencyProperty.Register("Text", typeof(string), typeof(CountSearchControl), new UIPropertyMetadata(null));
         public string Text
         {
             get { return (string)GetValue(TextProperty); }
@@ -34,15 +33,23 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty TextZeroItemsProperty =
-        DependencyProperty.Register("TextZeroItems", typeof(string), typeof(CountSearchControl), new UIPropertyMetadata(null));
+            DependencyProperty.Register("TextZeroItems", typeof(string), typeof(CountSearchControl), new UIPropertyMetadata(null));
         public string TextZeroItems
         {
             get { return (string)GetValue(TextZeroItemsProperty); }
             set { SetValue(TextZeroItemsProperty, value); }
         }
 
+        public static readonly DependencyProperty TextWaitingProperty =
+            DependencyProperty.Register("TextWaiting", typeof(string), typeof(CountSearchControl), new UIPropertyMetadata(null));
+        public string TextWaiting
+        {
+            get { return (string)GetValue(TextWaitingProperty); }
+            set { SetValue(TextWaitingProperty, value); }
+        }
+
         private static readonly DependencyProperty FormattedTextProperty =
-        DependencyProperty.Register("FormattedText", typeof(string), typeof(CountSearchControl), new UIPropertyMetadata("Total: 0"));
+            DependencyProperty.Register("FormattedText", typeof(string), typeof(CountSearchControl), new UIPropertyMetadata("Total: 0"));
         private string FormattedText
         {
             get { return (string)GetValue(FormattedTextProperty); }
@@ -60,7 +67,7 @@ namespace Signum.Windows
 
 
         public static readonly DependencyProperty OrderOptionsProperty =
-          DependencyProperty.Register("OrderOptions", typeof(ObservableCollection<OrderOption>), typeof(CountSearchControl), new UIPropertyMetadata(null));
+            DependencyProperty.Register("OrderOptions", typeof(ObservableCollection<OrderOption>), typeof(CountSearchControl), new UIPropertyMetadata(null));
         public ObservableCollection<OrderOption> OrderOptions
         {
             get { return (ObservableCollection<OrderOption>)GetValue(OrderOptionsProperty); }
@@ -68,7 +75,7 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty FilterOptionsProperty =
-          DependencyProperty.Register("FilterOptions", typeof(FreezableCollection<FilterOption>), typeof(CountSearchControl), new UIPropertyMetadata(null));
+            DependencyProperty.Register("FilterOptions", typeof(FreezableCollection<FilterOption>), typeof(CountSearchControl), new UIPropertyMetadata(null));
         public FreezableCollection<FilterOption> FilterOptions
         {
             get { return (FreezableCollection<FilterOption>)GetValue(FilterOptionsProperty); }
@@ -94,11 +101,43 @@ namespace Signum.Windows
 
 
         public static readonly DependencyProperty ItemsCountProperty =
-        DependencyProperty.Register("ItemsCount", typeof(int), typeof(CountSearchControl), new UIPropertyMetadata(0));
+            DependencyProperty.Register("ItemsCount", typeof(int), typeof(CountSearchControl), new UIPropertyMetadata(0));
         public int ItemsCount
         {
             get { return (int)GetValue(ItemsCountProperty); }
             set { SetValue(ItemsCountProperty, value); }
+        }
+
+        public static readonly DependencyProperty IsSearchingProperty =
+           DependencyProperty.Register("IsSearching", typeof(bool), typeof(CountSearchControl), new PropertyMetadata(false));
+        public bool IsSearching
+        {
+            get { return (bool)GetValue(IsSearchingProperty); }
+            set { SetValue(IsSearchingProperty, value); }
+        }
+
+        public static readonly DependencyProperty FilterColumnProperty =
+            DependencyProperty.Register("FilterColumn", typeof(string), typeof(CountSearchControl), new UIPropertyMetadata(null,
+          (d, e) => ((CountSearchControl)d).AssetNotLoaded(e)));
+        public string FilterColumn
+        {
+            get { return (string)GetValue(FilterColumnProperty); }
+            set { SetValue(FilterColumnProperty, value); }
+        }
+
+        public static readonly DependencyProperty FilterRouteProperty =
+            DependencyProperty.Register("FilterRoute", typeof(string), typeof(CountSearchControl), new UIPropertyMetadata(null,
+                (d, e) => ((CountSearchControl)d).AssetNotLoaded(e)));
+        public string FilterRoute
+        {
+            get { return (string)GetValue(FilterRouteProperty); }
+            set { SetValue(FilterRouteProperty, value); }
+        }
+
+        private void AssetNotLoaded(DependencyPropertyChangedEventArgs e)
+        {
+            if (IsLoaded)
+                throw new InvalidProgramException("You can not change {0} property once loaded".Formato(e.Property));
         }
 
         public event EventHandler LinkClick; 
@@ -113,8 +152,7 @@ namespace Signum.Windows
             this.Loaded += new RoutedEventHandler(SearchControl_Loaded);
             this.DataContextChanged += new DependencyPropertyChangedEventHandler(CountSearchControl_DataContextChanged);
 
-            this.Bind(AutomationProperties.ItemStatusProperty, this, "QueryName");
-            this.Bind(AutomationProperties.HelpTextProperty, this, "ItemsCount"); 
+            this.Bind(AutomationProperties.ItemStatusProperty, this, "ItemsCount"); 
         }
 
 
@@ -126,6 +164,8 @@ namespace Signum.Windows
             }
         }
 
+        QueryDescription qd;
+
         void SearchControl_Loaded(object sender, RoutedEventArgs e)
         {
             this.Loaded -= SearchControl_Loaded;
@@ -133,35 +173,68 @@ namespace Signum.Windows
             if (DesignerProperties.GetIsInDesignMode(this) || QueryName == null)
                 return;
 
-            Navigator.Manager.SetFilterTokens(QueryName, FilterOptions);
+            if (qd == null)
+                qd = DynamicQueryServer.GetQueryDescription(QueryName);
+
+            if (FilterColumn.HasText())
+            {
+                FilterOptions.Add(new FilterOption
+                {
+                    Path = FilterColumn,
+                    Operation = FilterOperation.EqualTo,
+                    Frozen = true,
+                }.Bind(FilterOption.ValueProperty, new Binding("DataContext" + (FilterRoute.HasText() ? "." + FilterRoute : null)) { Source = this }));
+                ColumnOptions.Add(new ColumnOption(FilterColumn));
+                ColumnOptionsMode = ColumnOptionsMode.Remove;
+            }
+
+            DynamicQueryServer.SetFilterTokens(FilterOptions, qd);
+
+            AutomationProperties.SetName(this, QueryUtils.GetQueryUniqueKey(QueryName));
 
             Search();
-        }
+        }   
+        
+        
+        bool searchQueued;
 
         public void Search()
         {
-            var request = new QueryCountRequest
+            if (IsSearching)
             {
-                QueryName = QueryName, 
-                Filters = FilterOptions.Select(f => f.ToFilter()).ToList()
+                searchQueued = true;
+                return;
+            }
+
+            FormattedText = (TextWaiting ?? QueryUtils.GetNiceName(QueryName) + "...");
+            tb.FontWeight = FontWeights.Regular;
+
+            var options = new QueryCountOptions
+            {
+                QueryName = QueryName,
+                FilterOptions = FilterOptions.ToList()
             };
 
-            DynamicQueryBachRequest.Enqueue(request, obj =>
+            DynamicQueryServer.QueryCountBatch(options, count =>
             {
-                ItemsCount = (int)obj;
+                ItemsCount = count;
                 if (ItemsCount == 0)
                 {
-                    FormattedText = (TextZeroItems ?? Properties.Resources.ThereIsNo0)
-                        .Formato(QueryUtils.GetNiceName(QueryName));
+                    FormattedText = (TextZeroItems ?? SearchMessage.ThereIsNo0.NiceToString()).Formato(QueryUtils.GetNiceName(QueryName));
                     tb.FontWeight = FontWeights.Regular;
                 }
                 else
                 {
-                    FormattedText = (Text ?? (QueryUtils.GetNiceName(QueryName) + ": {0}"))
-                        .Formato(ItemsCount);
+                    FormattedText = (Text ?? (QueryUtils.GetNiceName(QueryName) + ": {0}")).Formato(ItemsCount);
                     tb.FontWeight = FontWeights.Bold;
                 }
-            }, 
+
+                if (searchQueued)
+                {
+                    searchQueued = false;
+                    Search();
+                }
+            },
             () => { });
         }
 
@@ -190,17 +263,20 @@ namespace Signum.Windows
 
         public void Reinitialize(IEnumerable<FilterOption> filters, List<ColumnOption> columns, ColumnOptionsMode columnOptionsMode, List<OrderOption> orders)
         {
+            if (qd == null)
+                qd = DynamicQueryServer.GetQueryDescription(QueryName);
+
             ColumnOptions.Clear();
             ColumnOptions.AddRange(columns);
             ColumnOptionsMode = columnOptionsMode;
            
             FilterOptions.Clear();
             FilterOptions.AddRange(filters);
-            Navigator.Manager.SetFilterTokens(QueryName, FilterOptions);
+            DynamicQueryServer.SetFilterTokens(FilterOptions, qd);
 
             OrderOptions.Clear();
             OrderOptions.AddRange(orders);
-            Navigator.Manager.SetOrderTokens(QueryName, OrderOptions);
+            DynamicQueryServer.SetOrderTokens(OrderOptions, qd);
         }
     }
 }

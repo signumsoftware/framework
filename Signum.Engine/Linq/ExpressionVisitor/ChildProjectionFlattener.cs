@@ -15,6 +15,7 @@ namespace Signum.Engine.Linq
     internal class ChildProjectionFlattener : DbExpressionVisitor
     {
         SelectExpression currentSource;
+        AliasGenerator aliasGenerator;
         private ChildProjectionFlattener(){}
 
         public bool inMList = false;
@@ -28,9 +29,9 @@ namespace Signum.Engine.Linq
             return result;
         }
 
-        static internal ProjectionExpression Flatten(ProjectionExpression proj)
+        static internal ProjectionExpression Flatten(ProjectionExpression proj, AliasGenerator aliasGenerator)
         {
-            var result = (ProjectionExpression)new ChildProjectionFlattener().Visit(proj);
+            var result = (ProjectionExpression)new ChildProjectionFlattener { aliasGenerator = aliasGenerator }.Visit(proj);
             if (result == proj)
                 return result;
 
@@ -81,11 +82,11 @@ namespace Signum.Engine.Linq
 
                     if (!IsKey(currentSource, columns))
                     {
-                        Alias aliasDistinct = Alias.GetUniqueAlias(currentSource.Alias.Name + "D");
+                        Alias aliasDistinct = aliasGenerator.GetUniqueAlias(currentSource.Alias.Name + "D");
                         ColumnGenerator generatorDistinct = new ColumnGenerator();
 
                         List<ColumnDeclaration> columnDistinct = columns.Select(ce => generatorDistinct.MapColumn(ce)).ToList();
-                        external = new SelectExpression(aliasDistinct, true, false, null, columnDistinct, currentSource, null, null, null);
+                        external = new SelectExpression(aliasDistinct, true, false, null, columnDistinct, currentSource, null, null, null, false);
 
 
                         Dictionary<ColumnExpression, ColumnExpression> distinctReplacements = columnDistinct.ToDictionary(
@@ -109,11 +110,11 @@ namespace Signum.Engine.Linq
                     List<OrderExpression> innerOrders;
                     SelectExpression @internal = ExtractOrders(proj.Select, out innerOrders);
 
-                    Alias aliasSM = Alias.GetUniqueAlias(@internal.Alias.Name + "SM");
+                    Alias aliasSM = aliasGenerator.GetUniqueAlias(@internal.Alias.Name + "SM");
                     SelectExpression selectMany = new SelectExpression(aliasSM, false, false, null, columnsSMExternal.Concat(columnsSMInternal),
                         new JoinExpression(JoinType.CrossApply,
                             external,
-                            @internal, null), null, innerOrders, null);
+                            @internal, null), null, innerOrders, null, false);
 
                     SelectExpression old = currentSource;
                     currentSource = WithoutOrder(selectMany);
@@ -147,7 +148,7 @@ namespace Signum.Engine.Linq
             if (sel.Top != null || (sel.OrderBy == null || sel.OrderBy.Count == 0))
                 return sel;
 
-            return new SelectExpression(sel.Alias, sel.IsDistinct, sel.IsReverse, sel.Top, sel.Columns, sel.From, sel.Where, null, sel.GroupBy);
+            return new SelectExpression(sel.Alias, sel.IsDistinct, sel.IsReverse, sel.Top, sel.Columns, sel.From, sel.Where, null, sel.GroupBy, sel.ForXmlPathEmpty);
         }
 
         private SelectExpression ExtractOrders(SelectExpression sel, out List<OrderExpression> innerOrders)
@@ -164,7 +165,7 @@ namespace Signum.Engine.Linq
 
                 innerOrders = newColumns.Select(kvp => new OrderExpression(kvp.Key.OrderType, kvp.Value.GetReference(sel.Alias))).ToList();
 
-                return new SelectExpression(sel.Alias, sel.IsDistinct, sel.IsReverse, sel.Top, sel.Columns.Concat(newColumns.Values), sel.From, sel.Where, null, sel.GroupBy);
+                return new SelectExpression(sel.Alias, sel.IsDistinct, sel.IsReverse, sel.Top, sel.Columns.Concat(newColumns.Values), sel.From, sel.Where, null, sel.GroupBy, sel.ForXmlPathEmpty);
             }
         }
 

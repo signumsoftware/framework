@@ -8,6 +8,7 @@ using Signum.Entities;
 using System.Diagnostics;
 using System.IO;
 using Signum.Utilities;
+using Signum.Test.Environment;
 
 namespace Signum.Test.LinqProvider
 {
@@ -103,18 +104,18 @@ namespace Signum.Test.LinqProvider
         {
             var artists = Database.Query<ArtistDN>();
 
-            Assert2.Throws<InvalidOperationException>(() => artists.Where(a => a.Dead && !a.Dead).SingleEx(() => "Y"), "Y");
-            Assert2.Throws<InvalidOperationException>(() => artists.Where(a => a.Sex == Sex.Male).SingleEx(() => "X", ()=>"Y"), "Y");
-            Assert2.Throws<InvalidOperationException>(() => artists.Where(a => a.Sex == Sex.Male).SingleOrDefaultEx(() => "Y"), "Y");
-            Assert2.Throws<InvalidOperationException>(() => artists.Where(a => a.Dead && !a.Dead).FirstEx(() => "X"), "X");
+            Assert2.Throws<InvalidOperationException>("Y", () => artists.Where(a => a.Dead && !a.Dead).SingleEx(() => "Y"));
+            Assert2.Throws<InvalidOperationException>("Y", () => artists.Where(a => a.Sex == Sex.Male).SingleEx(() => "X", () => "Y"));
+            Assert2.Throws<InvalidOperationException>("Y", () => artists.Where(a => a.Sex == Sex.Male).SingleOrDefaultEx(() => "Y"));
+            Assert2.Throws<InvalidOperationException>("X", () => artists.Where(a => a.Dead && !a.Dead).FirstEx(() => "X"));
 
-            Assert2.Throws<InvalidOperationException>(() => artists.SingleEx(a => a.Dead && !a.Dead),typeof(ArtistDN).Name);
-            Assert2.Throws<InvalidOperationException>(() => artists.SingleEx(a => a.Sex == Sex.Male), typeof(ArtistDN).Name);
-            Assert2.Throws<InvalidOperationException>(() => artists.SingleOrDefaultEx(a => a.Sex == Sex.Male), typeof(ArtistDN).Name);
-            Assert2.Throws<InvalidOperationException>(() => artists.FirstEx(a => a.Dead && !a.Dead), typeof(ArtistDN).Name);
+            Assert2.Throws<InvalidOperationException>(typeof(ArtistDN).Name, () => artists.SingleEx(a => a.Dead && !a.Dead));
+            Assert2.Throws<InvalidOperationException>(typeof(ArtistDN).Name, () => artists.SingleEx(a => a.Sex == Sex.Male));
+            Assert2.Throws<InvalidOperationException>(typeof(ArtistDN).Name, () => artists.SingleOrDefaultEx(a => a.Sex == Sex.Male));
+            Assert2.Throws<InvalidOperationException>(typeof(ArtistDN).Name, () => artists.FirstEx(a => a.Dead && !a.Dead));
 
 
-            Assert2.Throws<InvalidOperationException>(() => artists.Where(a => a.Dead && !a.Dead).SingleOrManyEx(() => "X"), "X");
+            Assert2.Throws<InvalidOperationException>("X", () => artists.Where(a => a.Dead && !a.Dead).SingleOrManyEx(() => "X"));
         }
 
 
@@ -244,6 +245,19 @@ namespace Signum.Test.LinqProvider
         public void WhereEmbeddedNotNull()
         {
             var albumsWithBonusTrack = Database.Query<AlbumDN>().Where(a => a.BonusTrack != null).ToList();
+        }
+
+        [TestMethod]
+        public void WhereMixinNullThrows()
+        {
+            Assert2.Throws<InvalidOperationException>(() =>
+               Database.Query<NoteWithDateDN>().Where(n => n.Mixin<CorruptMixin>() == null).ToList());
+        }
+
+        [TestMethod]
+        public void WhereMixinField()
+        {
+            var list = Database.Query<NoteWithDateDN>().Where(n => n.Mixin<CorruptMixin>().Corrupt == null).ToList();
         }
 
         [TestMethod]

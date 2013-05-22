@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +8,6 @@ using Signum.Utilities;
 using System.Web.Mvc.Html;
 using Signum.Entities;
 using Signum.Entities.Reflection;
-using Signum.Web.Properties;
 using System.Web;
 using Signum.Engine;
 
@@ -23,11 +22,12 @@ namespace Signum.Web
 
             if (string.IsNullOrEmpty(lite.ToString()))
                 Database.FillToString(lite);
+
             MvcHtmlString result = Navigator.IsNavigable(lite.EntityType, isSearchEntity) ?
                 helper.Href("",
                     lite.ToString(),
                     Navigator.NavigateRoute(lite),
-                    HttpUtility.HtmlEncode(Resources.View),
+                    HttpUtility.HtmlEncode(EntityControlMessage.View.NiceToString()),
                     "", null) :
                 lite.ToString().EncodeHtml();
 

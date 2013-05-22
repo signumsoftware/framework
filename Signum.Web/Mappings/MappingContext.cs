@@ -1,4 +1,4 @@
-﻿#region usings
+#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +10,6 @@ using System.Collections;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
 using System.Reflection;
-using Signum.Web.Properties;
 using Signum.Engine;
 using Signum.Utilities.DataStructures;
 using System.Web.Mvc;
@@ -29,7 +28,7 @@ namespace Signum.Web
         internal MappingContext LastChild { get; private set; }
         internal abstract MappingContext Next { get; set; }
         
-        internal readonly PropertyPack PropertyPack;
+        internal readonly IPropertyValidator PropertyValidator;
         internal readonly PropertyRoute PropertyRoute; 
 
         public void AddChild(MappingContext context)
@@ -94,10 +93,10 @@ namespace Signum.Web
 
         public abstract IDictionary<string, List<string>> Errors { get; }
 
-        public MappingContext(string controlID, PropertyPack propertyPack, PropertyRoute route)
+        public MappingContext(string controlID, IPropertyValidator propertyValidator, PropertyRoute route)
         {
             this.ControlID = controlID ?? "";
-            this.PropertyPack = propertyPack;
+            this.PropertyValidator = propertyValidator;
             this.PropertyRoute = route; 
         }
 
@@ -133,7 +132,7 @@ namespace Signum.Web
         {
             if (Inputs[property].HasText())
             {
-                this.Errors.GetOrCreate(property).Add(Resources.InvalidFormat);
+                this.Errors.GetOrCreate(property).Add(ValidationMessage.InvalidFormat.NiceToString());
                 return false;
             }
             return true;
@@ -143,14 +142,14 @@ namespace Signum.Web
         {
             if (Input.HasText())
             {
-                this.Error.Add(Resources.InvalidFormat);
+                this.Error.Add(ValidationMessage.InvalidFormat.NiceToString());
                 return false;
             }
             return true;
         }
 
 
-        public static ModifiableEntity FindSubEntity(IdentifiableEntity entity, string prefix)
+        public static ModifiableEntity FindSubEntity(ModifiableEntity entity, string prefix)
         {
             if (!prefix.HasText())
                 return entity;
@@ -249,7 +248,7 @@ namespace Signum.Web
             get { return Value; }
         }
 
-        public MappingContext(string controlID, PropertyPack propertyPack, PropertyRoute route)
+        public MappingContext(string controlID, IPropertyValidator propertyPack, PropertyRoute route)
             : base(controlID, propertyPack, route)
         {
         }
@@ -413,8 +412,8 @@ namespace Signum.Web
         ContextualDictionary<List<string>> errors;
         public override IDictionary<string, List<string>> Errors { get { return errors; } }
 
-        public SubContext(string controlID, PropertyPack propertyPack, PropertyRoute route, MappingContext parent) :
-            base(controlID, propertyPack, route)
+        public SubContext(string controlID, IPropertyValidator propertyValidator, PropertyRoute route, MappingContext parent) :
+            base(controlID, propertyValidator, route)
         {
             this.parent = parent;
             this.root = parent.Root;
@@ -538,27 +537,52 @@ namespace Signum.Web
             this.ControlID = controlID + TypeContext.Separator;
 
             Debug.Assert(csl == null || ControlID.StartsWith(csl.ControlID));
-            int startParent = csl == null ? 0 : csl.startIndex;
-            int endParent = csl == null ? sortedList.Count : csl.endIndex;
+
             this.global = csl == null ? (SortedList<string, V>)sortedList : csl.global;
 
-            for (int i = startParent; i < endParent; i++)
+            var parentStart = csl == null ? 0 : csl.startIndex;
+            var parentEnd = csl == null ? sortedList.Count : csl.endIndex;
+
+            startIndex = this.BinarySearch(parentStart, parentEnd);
+
+            endIndex = BinarySearchStartsWith(startIndex, parentEnd);
+        }
+
+        int BinarySearch(int start, int end)
+        {
+            while (start <= end && start < global.Keys.Count)
             {
-                if (global.Keys[i].StartsWith(ControlID))
-                {
-                    this.startIndex = i;
-                    break;
-                }
+                int mid = (start + end) / 2;
+
+                var num = global.Keys[mid].CompareTo(ControlID);
+
+                if (num > 0)
+                    end = mid - 1;
+                else if (num < 0)
+                    start = mid + 1;
+                else
+                    return mid;
             }
 
-            for (int i = endParent - 1; i >= startParent; i--)
+            return start;
+        }
+
+        int BinarySearchStartsWith(int start, int end)
+        {
+            if (!(start < global.Keys.Count && global.Keys[start].StartsWith(ControlID)))
+                return start;
+
+            while (start < end && start < global.Keys.Count)
             {
-                if (global.Keys[i].StartsWith(ControlID))
-                {
-                    this.endIndex = i + 1;
-                    break;
-                }
+                int mid = (start + end) / 2;
+
+                if (global.Keys[mid].StartsWith(ControlID))
+                    start = mid + 1;
+                else
+                    end = mid;
             }
+
+            return start;
         }
 
         public void Add(string key, V value)

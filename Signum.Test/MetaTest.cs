@@ -12,6 +12,7 @@ using System.Reflection;
 using Signum.Engine.Linq;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
+using Signum.Test.Environment;
 
 namespace Signum.Test
 {
@@ -74,7 +75,7 @@ namespace Signum.Test
             Assert.IsInstanceOfType(dic["Name"], typeof(CleanMeta));
             Assert.IsInstanceOfType(dic["Sum"], typeof(DirtyMeta));
 
-            Assert.AreEqual(((DirtyMeta)dic["Sum"]).Properties.Select(cm => cm.PropertyRoutes[0].ToString()).Order().ToString(","), "(AlbumDN).Name,(LabelDN).Name");
+            Assert.AreEqual(((DirtyMeta)dic["Sum"]).Properties.Select(cm => cm.PropertyRoutes[0].ToString()).OrderBy().ToString(","), "(AlbumDN).Name,(LabelDN).Name");
         }
 
         [TestMethod]

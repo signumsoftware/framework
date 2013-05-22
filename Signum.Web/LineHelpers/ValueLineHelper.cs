@@ -6,7 +6,6 @@ using System.Web.Mvc;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using System.Web.Mvc.Html;
-using Signum.Web.Properties;
 using Signum.Entities.Reflection;
 using Signum.Entities;
 
@@ -19,27 +18,28 @@ namespace Signum.Web
 
         private static MvcHtmlString InternalValueLine(this HtmlHelper helper, ValueLine valueLine)
         {
-            if (!valueLine.Visible || (valueLine.HideIfNull && valueLine.UntypedValue == null))
-                return MvcHtmlString.Empty;
-
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            if (valueLine.OnlyValue)
+
+            if (valueLine.Visible && (!valueLine.HideIfNull || valueLine.UntypedValue != null))
             {
-                InternalValueLineValue(helper, valueLine, sb);
-            }
-            else
-            {
-                using (sb.Surround(new HtmlTag("div").Class("sf-field")))
-                using (valueLine.LabelVisible && valueLine.ValueFirst ? sb.Surround(new HtmlTag("div").Class("sf-value-first")) : null)
+                if (valueLine.OnlyValue)
                 {
-                    if (!valueLine.ValueFirst)
-                        InternalValueLineLabel(helper, valueLine, sb);
+                    InternalValueLineValue(helper, valueLine, sb);
+                }
+                else
+                {
+                    using (sb.Surround(new HtmlTag("div").Class("sf-field")))
+                    using (valueLine.LabelVisible && valueLine.ValueFirst ? sb.Surround(new HtmlTag("div").Class("sf-value-first")) : null)
+                    {
+                        if (!valueLine.ValueFirst)
+                            InternalValueLineLabel(helper, valueLine, sb);
 
-                    using (sb.Surround(new HtmlTag("div").Class("sf-value-container")))
-                        InternalValueLineValue(helper, valueLine, sb);
+                        using (sb.Surround(new HtmlTag("div").Class("sf-value-container")))
+                            InternalValueLineValue(helper, valueLine, sb);
 
-                    if (valueLine.ValueFirst)
-                        InternalValueLineLabel(helper, valueLine, sb);
+                        if (valueLine.ValueFirst)
+                            InternalValueLineLabel(helper, valueLine, sb);
+                    }
                 }
             }
 
@@ -76,6 +76,7 @@ namespace Signum.Web
 
         public static MvcHtmlString EnumComboBox(this HtmlHelper helper, ValueLine valueLine)
         {
+            var uType = valueLine.Type.UnNullify();
             Enum value = valueLine.UntypedValue as Enum;
 
             if (valueLine.ReadOnly)
@@ -83,7 +84,12 @@ namespace Signum.Web
                 MvcHtmlString result = MvcHtmlString.Empty;
                 if (valueLine.WriteHiddenOnReadonly)
                     result = result.Concat(helper.Hidden(valueLine.ControlID, valueLine.UntypedValue.ToString()));
-                return result.Concat(helper.Span("", value != null ? value.NiceToString() : valueLine.UntypedValue.TryToString(), "sf-value-line"));
+
+                string str =
+                    value == null ? null :
+                    LocalizedAssembly.GetDescriptionOptions(uType).IsSet(DescriptionOptions.Members) ? value.NiceToString() : value.ToString();
+
+                return result.Concat(helper.Span("", str, "sf-value-line", valueLine.ValueHtmlProps));
             }
 
             StringBuilder sb = new StringBuilder();
@@ -93,21 +99,19 @@ namespace Signum.Web
                 items = new List<SelectListItem>();
 
                 if (valueLine.UntypedValue == null ||
-                    valueLine.Type.IsNullable() && (valueLine.PropertyRoute == null || !Validator.GetOrCreatePropertyPack(valueLine.PropertyRoute).Validators.OfType<NotNullValidatorAttribute>().Any()))
+                    valueLine.Type.IsNullable() && (valueLine.PropertyRoute == null || !Validator.TryGetPropertyValidator(valueLine.PropertyRoute).Validators.OfType<NotNullValidatorAttribute>().Any()))
                 {
                     items.Add(new SelectListItem() { Text = "-", Value = "" });
                 }
 
-                items.AddRange(
-                    Enum.GetValues(valueLine.Type.UnNullify())
-                        .Cast<Enum>()
-                        .Select(v => new SelectListItem()
-                            {
-                                Text = v.NiceToString(),
-                                Value = v.ToString(),
-                                Selected = object.Equals(value, v),
-                            })
-                    );
+                items.AddRange(Enum.GetValues(uType)
+                    .Cast<Enum>()
+                    .Select(v => new SelectListItem()
+                    {
+                        Text = v.NiceToString(),
+                        Value = v.ToString(),
+                        Selected = object.Equals(value, v),
+                    }));
             }
             else
                 if (value != null)
@@ -131,7 +135,7 @@ namespace Signum.Web
                 MvcHtmlString result = MvcHtmlString.Empty;
                 if (valueLine.WriteHiddenOnReadonly)
                     result = result.Concat(helper.Hidden(valueLine.ControlID, value.TryToString(valueLine.Format)));
-                return result.Concat(helper.Span("", value.TryToString(valueLine.Format), "sf-value-line"));
+                return result.Concat(helper.Span("", value.TryToString(valueLine.Format), "sf-value-line", valueLine.ValueHtmlProps));
             }
 
             valueLine.ValueHtmlProps.AddCssClass("maskedEdit");
@@ -181,7 +185,7 @@ namespace Signum.Web
                 MvcHtmlString result = MvcHtmlString.Empty;
                 if (valueLine.WriteHiddenOnReadonly)
                     result = result.Concat(helper.Hidden(valueLine.ControlID, value));
-                return result.Concat(helper.Span("", value, "sf-value-line"));
+                return result.Concat(helper.Span("", value, "sf-value-line", valueLine.ValueHtmlProps));
             }
 
             if (!valueLine.ValueHtmlProps.ContainsKey("autocomplete"))
@@ -211,7 +215,7 @@ namespace Signum.Web
                 MvcHtmlString result = MvcHtmlString.Empty;
                 if (valueLine.WriteHiddenOnReadonly)
                     result = result.Concat(helper.Hidden(valueLine.ControlID, (string)valueLine.UntypedValue));
-                return result.Concat(helper.Span("", (string)valueLine.UntypedValue, "sf-value-line"));
+                return result.Concat(helper.Span("", (string)valueLine.UntypedValue, "sf-value-line", valueLine.ValueHtmlProps));
             }
 
             valueLine.ValueHtmlProps.Add("autocomplete", "off");
@@ -259,10 +263,11 @@ namespace Signum.Web
             return sb.ToHtml();
         }
 
-        public static MvcHtmlString ValueLine<T>(this HtmlHelper helper, ValueLine valueLine)
+        public static MvcHtmlString ValueLine(this HtmlHelper helper, ValueLine valueLine)
         {
             return helper.InternalValueLine(valueLine);
         }
+
 
         public static MvcHtmlString ValueLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)
         {
@@ -280,7 +285,13 @@ namespace Signum.Web
             if (settingsModifier != null)
                 settingsModifier(vl);
 
-            return InternalValueLine(helper, vl);
+            var result = helper.InternalValueLine(vl);
+
+            var vo = vl.ViewOverrides;
+            if (vo == null)
+                return result;
+
+            return vo.OnSurroundLine(vl.PropertyRoute, helper, tc, result);
         }
 
         public static MvcHtmlString HiddenLine<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, S>> property)

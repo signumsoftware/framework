@@ -51,17 +51,18 @@
             {
                 sb.Include<$entityName$DN>();
 
-                dqm[typeof($entityName$DN)] = (from $entityParam$ in Database.Query<$entityName$DN>()
-                                               select new
-                                               {
-                                                   Entity = $entityParam$,
-                                                   $entityParam$.Id
-                                                   //More fields
-                                               }).ToDynamic();
+                dqm.RegisterQuery(typeof($entityName$DN), ()=>
+                    from $entityParam$ in Database.Query<$entityName$DN>()
+                    select new
+                    {
+                        Entity = $entityParam$,
+                        $entityParam$.Id
+                        //More fields
+                    });
 
                 dqm.RegisterExpression(($entityName$DN $entityParam$) => $entityParam$.$methodName$());
                 
-                new BasicExecute<$entityName$DN>($entityName$Operation.Save)
+                new Graph<$entityName$DN>.Execute($entityName$Operation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,

@@ -40,20 +40,11 @@ namespace Signum.Engine.Linq
             return new TypeImplementedByAllExpression(QueryBinder.ExtractTypeId(exp));
         }
 
-        protected override Expression VisitLite(LiteExpression lite)
-        {
-            var newId = Visit(lite.Id);
-            var newTypeId = Visit(lite.TypeId);
-            var reference = Visit(lite.Reference);
-            var toStr = Visit(lite.ToStr);
-            return new LiteExpression(lite.Type, reference, newId, toStr, newTypeId, lite.CustomToString);
-        }
-
         protected override Expression VisitEntity(EntityExpression fieldInit)
         {
             Expression newID = Visit(fieldInit.ExternalId);
 
-            return new EntityExpression(fieldInit.Type, newID, null, null); // remove bindings
+            return new EntityExpression(fieldInit.Type, newID, null, null, null, fieldInit.AvoidExpandOnRetrieving); // remove bindings
         }
 
         protected override Expression VisitImplementedBy(ImplementedByExpression reference)

@@ -85,7 +85,7 @@ namespace Signum.Web
         public FindOptions(object queryName, string parentColumn, object parentValue)
         {
             this.QueryName = queryName;
-            this.FilterOptions.Add(new FilterOption(parentColumn, parentValue));
+            this.FilterOptions.Add(new FilterOption(parentColumn, parentValue) { Frozen = true });
             this.ColumnOptionsMode = Signum.Entities.DynamicQuery.ColumnOptionsMode.Remove;
             this.ColumnOptions.Add(new ColumnOption(parentColumn));
             this.SearchOnLoad = true;
@@ -102,18 +102,18 @@ namespace Signum.Web
         public bool SearchOnLoad { get; set; }
 
         bool allowMultiple = true;
-        public bool AllowMultiple 
+        public bool AllowMultiple
         {
             get { return allowMultiple; }
             set { allowMultiple = value; }
         }
-        
+
         FilterMode filterMode = FilterMode.Visible;
         public FilterMode FilterMode
         {
             get { return filterMode; }
-            set 
-            { 
+            set
+            {
                 this.filterMode = value;
                 if (value == FilterMode.OnlyResults)
                 {
@@ -148,9 +148,12 @@ namespace Signum.Web
 
         public override string ToString()
         {
-            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(QueryName);
+            if (FilterOptions.Any())
+            {
+                QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(QueryName);
 
-            Navigator.SetTokens(queryDescription, FilterOptions);
+                Navigator.SetTokens(FilterOptions, queryDescription, canAggregate: false);
+            }
 
             string options = new Sequence<string>
             {
@@ -171,14 +174,17 @@ namespace Signum.Web
             if (options.HasText())
                 return Navigator.FindRoute(QueryName) + "?" + options;
             else
-                return Navigator.FindRoute(QueryName); 
+                return Navigator.FindRoute(QueryName);
         }
 
         public void Fill(JsOptionsBuilder op)
         {
-            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(QueryName);
+            if (FilterOptions.Any())
+            {
+                QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(QueryName);
 
-            Navigator.SetTokens(queryDescription, this.FilterOptions);
+                Navigator.SetTokens(this.FilterOptions, queryDescription, false);
+            }
 
             op.Add("webQueryName", QueryName.TryCC(qn => Navigator.ResolveWebQueryName(qn).SingleQuote()));
             op.Add("searchOnLoad", SearchOnLoad == true ? "true" : null);
@@ -190,7 +196,7 @@ namespace Signum.Web
             op.Add("allowChangeColumns", !AllowChangeColumns ? "false" : null);
             op.Add("filters", filterOptions.IsEmpty() ? null : (filterOptions.ToString(";") + ";").SingleQuote());
             op.Add("orders", OrderOptions.IsEmpty() ? null : ("[" + OrderOptions.ToString(oo => oo.ToString().SingleQuote(), ",") + "]"));
-            op.Add("columns", ColumnOptions.IsEmpty() ? null : (ColumnOptions.ToString(";") + ";").SingleQuote()); 
+            op.Add("columns", ColumnOptions.IsEmpty() ? null : (ColumnOptions.ToString(";") + ";").SingleQuote());
             op.Add("columnMode", ColumnOptionsMode != ColumnOptionsMode.Add ? ColumnOptionsMode.ToString().SingleQuote() : null);
         }
 
@@ -214,9 +220,9 @@ namespace Signum.Web
             switch (ColumnOptionsMode)
             {
                 case ColumnOptionsMode.Add:
-                    return qd.Columns.Where(cd => !cd.IsEntity).Select(cd => new Column(cd)).Concat(ColumnOptions.Select(co => co.ToColumn(qd))).ToList();
+                    return qd.Columns.Where(cd => !cd.IsEntity).Select(cd => new Column(cd, qd.QueryName)).Concat(ColumnOptions.Select(co => co.ToColumn(qd))).ToList();
                 case ColumnOptionsMode.Remove:
-                    return qd.Columns.Where(cd => !cd.IsEntity && !ColumnOptions.Any(co => co.ColumnName == cd.Name)).Select(cd => new Column(cd)).ToList();
+                    return qd.Columns.Where(cd => !cd.IsEntity && !ColumnOptions.Any(co => co.ColumnName == cd.Name)).Select(cd => new Column(cd, qd.QueryName)).ToList();
                 case ColumnOptionsMode.Replace:
                     return ColumnOptions.Select(co => co.ToColumn(qd)).ToList();
                 default:
@@ -265,24 +271,18 @@ namespace Signum.Web
         public FilterOperation Operation { get; set; }
         public object Value { get; set; }
 
-        public FilterOption(){}
+        public FilterOption() { }
 
         public FilterOption(string columnName, object value)
         {
             this.ColumnName = columnName;
             this.Operation = FilterOperation.EqualTo;
-            this.Value = value;
+            this.Value = value;         
         }
 
         public Filter ToFilter()
         {
-            Filter f = new Filter
-            {
-                Token = Token,
-                Operation = Operation,                
-            };
-
-            f.Value = Common.Convert(Value, f.Token.Type);
+            Filter f = new Filter(Token, Operation, Common.Convert(Value, Token.Type));
 
             return f;
         }
@@ -291,7 +291,7 @@ namespace Signum.Web
         public override string ToString()
         {
             string result = "";
-            
+
             string value = "";
 
             object v = Common.Convert(Value, Token.Type);
@@ -343,7 +343,7 @@ namespace Signum.Web
             this.OrderType = orderType;
         }
 
-        public QueryToken Token{ get; set; }
+        public QueryToken Token { get; set; }
         public string ColumnName { get; set; }
         public OrderType OrderType { get; set; }
 
@@ -390,5 +390,5 @@ namespace Signum.Web
         {
             return DisplayName.HasText() ? "{0},{1}".Formato(ColumnName, DisplayName) : ColumnName;
         }
-    }  
+    }
 }

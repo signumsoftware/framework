@@ -14,6 +14,8 @@ using System.Web.WebPages;
 using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Engine;
+using Signum.Utilities.ExpressionTrees;
+using System.Collections.Concurrent;
 
 namespace Signum.Web
 {
@@ -113,8 +115,12 @@ namespace Signum.Web
         public static string Action<TController>(this UrlHelper helper, Expression<Action<TController>> action)
            where TController : Controller
         {
-            RouteValueDictionary rvd = ExpressionHelper.GetRouteValuesFromExpression(action);
-            return helper.Action(null, null, rvd);
+            using (var a = HeavyProfiler.LogNoStackTrace("GetRouteValuesFromExpression"))
+            {
+                RouteValueDictionary rvd = ExpressionHelper.GetRouteValuesFromExpression(action);
+                a.Switch("Action");
+                return helper.Action(null, null, rvd);
+            }
         }
     }
 
@@ -138,11 +144,8 @@ namespace Signum.Web
             {
                 throw new ArgumentException("Action target must end in controller", "action");
             }
-            controllerName = controllerName.Substring(0, controllerName.Length - "Controller".Length);
-            if (controllerName.Length == 0)
-            {
-                throw new ArgumentException("Action cannot route to controller", "action");
-            }
+            controllerName = controllerName.RemoveEnd("Controller".Length);
+
 
             // TODO: How do we know that this method is even web callable?
             //      For now, we just let the call itself throw an exception.
@@ -156,36 +159,24 @@ namespace Signum.Web
 
         public static List<IParameterConverter> ParameterConverters = new List<IParameterConverter> { new LiteConverter() };
 
+        static ConcurrentDictionary<ExpressionEvaluator.MethodKey, ParameterInfo[]> paramsCache = new ConcurrentDictionary<ExpressionEvaluator.MethodKey, ParameterInfo[]>();
+
         static void AddParameterValuesFromExpressionToDictionary(RouteValueDictionary rvd, MethodCallExpression call)
         {
-            ParameterInfo[] parameters = call.Method.GetParameters();
+            ParameterInfo[] parameters = paramsCache.GetOrAdd(new ExpressionEvaluator.MethodKey(call.Method), mt => call.Method.GetParameters());
 
             if (parameters.Length > 0)
             {
                 for (int i = 0; i < parameters.Length; i++)
                 {
                     Expression arg = call.Arguments[i];
-                    object value = null;
-                    ConstantExpression ce = arg as ConstantExpression;
-                    if (ce != null)
-                    {
-                        // If argument is a constant expression, just get the value
-                        value = ce.Value;
-                    }
-                    else
-                    {
-                        // Otherwise, convert the argument subexpression to type object,
-                        // make a lambda out of it, compile it, and invoke it to get the value
-                        Expression<Func<object>> lambdaExpression = Expression.Lambda<Func<object>>(Expression.Convert(arg, typeof(object)));
-                        Func<object> func = lambdaExpression.Compile();
-                        value = func();
-                    }
 
-                   
+                    object value = ExpressionEvaluator.Eval(arg);
+
                     var conv = ParameterConverters.FirstOrDefault(c => c.CanConvert(value));
                     if (conv != null)
                         value = conv.Convert(value, parameters[i].ParameterType);
-                   
+
                     rvd.Add(parameters[i].Name, value);
                 }
             }

@@ -112,7 +112,7 @@ namespace Signum.Utilities.ExpressionTrees
             }
         }
 
-        struct MethodKey : IEquatable<MethodKey>
+        public struct MethodKey : IEquatable<MethodKey>
         {
             MethodInfo mi;
             Type[] arguments;
@@ -133,6 +133,9 @@ namespace Signum.Utilities.ExpressionTrees
                 if (mi.MetadataToken != other.mi.MetadataToken)
                     return false;
 
+                if (mi.DeclaringType != other.mi.DeclaringType)
+                    return false;
+
                 if (arguments == null)
                     return other.arguments == null;
 
@@ -151,7 +154,7 @@ namespace Signum.Utilities.ExpressionTrees
 
             public override int GetHashCode()
             {
-                var result = mi.MetadataToken;
+                var result = mi.MetadataToken ^ mi.DeclaringType.GetHashCode();
                 if (!mi.IsGenericMethod)
                     return result;
                 Type[] types = arguments;
@@ -162,19 +165,19 @@ namespace Signum.Utilities.ExpressionTrees
             }
         }
 
-        static ConcurrentDictionary<Tuple<Type, MethodKey>, Func<object>> cachedStaticMethods = new ConcurrentDictionary<Tuple<Type, MethodKey>, Func<object>>();
+        static ConcurrentDictionary<MethodKey, Func<object>> cachedStaticMethods = new ConcurrentDictionary<MethodKey, Func<object>>();
         private static Func<object> GetStaticMethodCaller(MethodInfo mi)
         {
-            return cachedStaticMethods.GetOrAdd(Tuple.Create(mi.DeclaringType, new MethodKey(mi)), (Tuple<Type, MethodKey> _) =>
+            return cachedStaticMethods.GetOrAdd(new MethodKey(mi), (MethodKey _) =>
             {
                 return Expression.Lambda<Func<object>>(Expression.Convert(Expression.Call(mi), typeof(object))).Compile();
             });
         }
 
-        static ConcurrentDictionary<Tuple<Type, MethodKey>, Func<object, object>> cachedExtensionMethods = new ConcurrentDictionary<Tuple<Type, MethodKey>, Func<object, object>>();
+        static ConcurrentDictionary<MethodKey, Func<object, object>> cachedExtensionMethods = new ConcurrentDictionary<MethodKey, Func<object, object>>();
         private static Func<object, object> GetExtensionMethodCaller(MethodInfo mi)
         {
-            return cachedExtensionMethods.GetOrAdd(Tuple.Create(mi.DeclaringType, new MethodKey(mi)), (Tuple<Type, MethodKey> _) =>
+            return cachedExtensionMethods.GetOrAdd(new MethodKey(mi), (MethodKey _) =>
             {
                 ParameterExpression p = Expression.Parameter(typeof(object), "p");
                 return Expression.Lambda<Func<object, object>>(Expression.Convert(Expression.Call(mi, Expression.Convert(p, mi.GetParameters()[0].ParameterType)), typeof(object)), p).Compile();
@@ -182,10 +185,10 @@ namespace Signum.Utilities.ExpressionTrees
         }
 
 
-        static ConcurrentDictionary<Tuple<Type, MethodKey>, Func<object, object>> cachedInstanceMethods = new ConcurrentDictionary<Tuple<Type, MethodKey>, Func<object, object>>();
+        static ConcurrentDictionary<MethodKey, Func<object, object>> cachedInstanceMethods = new ConcurrentDictionary<MethodKey, Func<object, object>>();
         private static Func<object, object> GetInstanceMethodCaller(MethodInfo mi)
         {
-            return cachedInstanceMethods.GetOrAdd(Tuple.Create(mi.DeclaringType, new MethodKey(mi)), (Tuple<Type, MethodKey> _) =>
+            return cachedInstanceMethods.GetOrAdd(new MethodKey(mi), (MethodKey _) =>
             {
                 ParameterExpression p = Expression.Parameter(typeof(object), "p");
                 return Expression.Lambda<Func<object, object>>(Expression.Convert(Expression.Call(Expression.Convert(p, mi.DeclaringType), mi), typeof(object)), p).Compile();

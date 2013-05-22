@@ -93,44 +93,6 @@ namespace Signum.Web
             return Manager.GerUrlsFor(files, ScriptType.Javascript);
         }
 
-        public static MvcHtmlString DynamicCss(this HtmlHelper html, params string[] files)
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine("<script type=\"text/javascript\">");
-            sb.AppendLine("SF.Loader.loadCss([{0}]);".Formato(
-                    UrlCss(files).ToString(f => '"' + f + '"', ",")
-            ));
-            sb.AppendLine("</script>");
-
-            return MvcHtmlString.Create(sb.ToString());
-        }
-
-        public static HtmlCallbackString DynamicJs(this HtmlHelper html, params string[] files)
-        {
-            return new HtmlCallbackString(callback =>
-            {
-                string[] filteredUrls = UrlJs(files);
-
-                if (filteredUrls.Length == 0 && !callback.HasText())
-                    return "";
-
-                StringBuilder sb = new StringBuilder();
-
-                string urls = filteredUrls.ToString(f => '"' + f + '"', ",");
-
-                sb.AppendLine("<script type=\"text/javascript\">");
-
-                if (callback != null)
-                    sb.AppendLine("SF.Loader.loadJs([{0}], {1});".Formato(urls, callback));
-                else
-                    sb.AppendLine("SF.Loader.loadJs([{0}]);".Formato(urls));
-
-                sb.AppendLine("</script>");
-
-                return sb.ToString();
-            });
-        }
-
         const string resourceKey = "__resources";
 
         public static List<string> LoadedResources

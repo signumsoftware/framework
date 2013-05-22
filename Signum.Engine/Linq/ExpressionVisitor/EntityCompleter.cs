@@ -24,30 +24,33 @@ namespace Signum.Engine.Linq
             return pc.Visit(source);
         }
 
-        protected override Expression VisitLite(LiteExpression lite)
+        protected override Expression VisitLiteReference(LiteReferenceExpression lite)
         {
-            var newId = Visit(lite.Id);
-            var newTypeId = Visit(lite.TypeId);
-            var toStr = LiteToString(lite);
+            var id = binder.GetId(lite.Reference);
+            var typeId = binder.GetEntityType(lite.Reference);
+            var toStr = LiteToString(lite, typeId);
 
-            return new LiteExpression(lite.Type, null, newId, toStr, newTypeId, lite.CustomToString);
+            return new LiteValueExpression(lite.Type, typeId, id, toStr);
         }
 
-        private Expression LiteToString(LiteExpression lite)
+        private Expression LiteToString(LiteReferenceExpression lite, Expression typeId)
         {
-            if (lite.CustomToString)
-                return Visit(lite.ToStr);
+            if (lite.CustomToStr != null)
+                return Visit(lite.CustomToStr);
 
             if (lite.Reference is ImplementedByAllExpression)
                 return null;
 
-            if (IsCacheable(lite.TypeId))
+            if (lite.Reference is EntityExpression && ((EntityExpression)lite.Reference).AvoidExpandOnRetrieving)
                 return null;
 
-            if (lite.ToStr == null)
-                return binder.BindMethodCall(Expression.Call(lite.Reference, EntityExpression.ToStringMethod));
+            if (lite.Reference is ImplementedByExpression && ((ImplementedByExpression)lite.Reference).Implementations.Any(imp => imp.Reference.AvoidExpandOnRetrieving))
+                return null;
 
-            return Visit(lite.ToStr);
+            if (IsCacheable(typeId))
+                return null;
+
+            return binder.BindMethodCall(Expression.Call(lite.Reference, EntityExpression.ToStringMethod));
         }
 
         private bool IsCacheable(Expression newTypeId)
@@ -55,21 +58,21 @@ namespace Signum.Engine.Linq
             TypeEntityExpression tfie= newTypeId as TypeEntityExpression;
 
             if (tfie != null)
-                return IsCompletlyCached(tfie.TypeValue);
+                return IsCached(tfie.TypeValue);
 
             TypeImplementedByExpression tibe = newTypeId as TypeImplementedByExpression;
 
             if (tibe != null)
-                return tibe.TypeImplementations.All(t => IsCompletlyCached(t.Type));
+                return tibe.TypeImplementations.All(t => IsCached(t.Type));
 
             return false;
         }
 
         protected override Expression VisitEntity(EntityExpression ee)
         {
-            if (previousTypes.Contains(ee.Type) || IsCompletlyCached(ee.Type))
+            if (previousTypes.Contains(ee.Type) || IsCached(ee.Type) || ee.AvoidExpandOnRetrieving)
             {
-                ee = new EntityExpression(ee.Type, ee.ExternalId, null, null);
+                ee = new EntityExpression(ee.Type, ee.ExternalId, null, null, null, ee.AvoidExpandOnRetrieving);
             }
             else
                 ee = binder.Completed(ee);
@@ -77,20 +80,21 @@ namespace Signum.Engine.Linq
             previousTypes = previousTypes.Push(ee.Type);
 
             var bindings = ee.Bindings.NewIfChange(VisitFieldBinding);
+            var mixins = ee.Mixins.NewIfChange(VisitMixinEntity);
 
             var id = Visit(ee.ExternalId);
 
-            var result = new EntityExpression(ee.Type, id, ee.TableAlias, bindings);
+            var result = new EntityExpression(ee.Type, id, ee.TableAlias, bindings, mixins, ee.AvoidExpandOnRetrieving);
 
             previousTypes = previousTypes.Pop();
 
             return result;
         }
 
-        private bool IsCompletlyCached(Type type)
+        private bool IsCached(Type type)
         { 
             var cc = Schema.Current.CacheController(type);
-            return cc != null && cc.Enabled && cc.IsComplete; /*just to force cache before executing the query*/
+            return cc != null && cc.Enabled; /*just to force cache before executing the query*/
         }
 
         protected override Expression VisitMList(MListExpression ml)

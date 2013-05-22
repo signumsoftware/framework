@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Signum.Entities.Properties;
 using System.Linq.Expressions;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
@@ -19,8 +18,10 @@ namespace Signum.Entities.DynamicQuery
             string isAllowed, PropertyRoute propertyRoute)
             : base(parent)
         {
-            if (typeof(IIdentifiable).IsAssignableFrom(type.CleanType()) && implementations == null)
-                throw new ArgumentException("Extension {0} of type {1} has no implementations".Formato(key, type.Name));
+            var shouldHaveImplementations = typeof(IIdentifiable).IsAssignableFrom((isProjection ? type.ElementType() : type).CleanType());
+
+            if (shouldHaveImplementations && implementations == null)
+                throw new ArgumentException("Extension {0} ({1}) registered on type {2} has no implementations".Formato(key, type.TypeName(), parent.Type.CleanType()));
 
             this.key= key;
             this.type = type;
@@ -41,7 +42,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            return DisplayName + Resources.Of + Parent.ToString();
+            return DisplayName + QueryTokenMessage.Of.NiceToString() + Parent.ToString();
         }
 
         Type type;
@@ -61,7 +62,7 @@ namespace Signum.Entities.DynamicQuery
         public override string Unit { get { return isProjection? null: unit; } }
         public string ElementUnit { get { return isProjection?  unit: null; } }
 
-        protected override List<QueryToken> SubTokensInternal()
+        protected override List<QueryToken> SubTokensOverride()
         {
             return base.SubTokensBase(type, implementations);  
         }
@@ -108,7 +109,7 @@ namespace Signum.Entities.DynamicQuery
             string parent = Parent.IsAllowed();
 
             if (isAllowed.HasText() && parent.HasText())
-                return Resources.And.Combine(isAllowed, parent);
+                return QueryTokenMessage.And.NiceToString().Combine(isAllowed, parent);
 
             return isAllowed ?? parent;
         }

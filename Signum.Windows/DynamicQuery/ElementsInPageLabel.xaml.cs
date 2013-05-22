@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,6 +13,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Signum.Utilities;
 using Signum.Entities.DynamicQuery;
+using Signum.Entities;
 
 namespace Signum.Windows
 {
@@ -71,13 +72,13 @@ namespace Signum.Windows
                 tb.Inlines.Add(new Run(" - "));
                 tb.Inlines.Add(new Run(EndElementIndex.ToString()) { FontWeight = FontWeights.Bold });
                 tb.Inlines.Add(new Run(" "));
-                tb.Inlines.Add(new Run(Signum.Windows.Properties.Resources.Of));
+                tb.Inlines.Add(new Run(QueryTokenMessage.Of.NiceToString()));
                 tb.Inlines.Add(new Run(" "));
             }
 
             tb.Inlines.Add(new Run(TotalElements.ToString()) { FontWeight = FontWeights.Bold });
             tb.Inlines.Add(new Run(" "));
-            tb.Inlines.Add(new Run(Signum.Windows.Properties.Resources.Results));
+            tb.Inlines.Add(new Run(SearchMessage.Results.NiceToString()));
         }
     }
 }

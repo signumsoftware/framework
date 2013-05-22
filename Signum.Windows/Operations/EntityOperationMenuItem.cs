@@ -51,7 +51,7 @@ namespace Signum.Windows.Operations
                             Server.Return((IOperationServer os) => os.ExecuteOperationLite(lite, coc.OperationInfo.Key)); 
                             break;
                         case OperationType.Delete: 
-                            Server.Return((IOperationServer os) => os.Delete(lite, coc.OperationInfo.Key));
+                            Server.Execute((IOperationServer os) => os.Delete(lite, coc.OperationInfo.Key));
                             break;
                         case OperationType.ConstructorFrom:
                             {

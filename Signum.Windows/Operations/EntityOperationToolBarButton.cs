@@ -58,7 +58,7 @@ namespace Signum.Windows.Operations
                 Background = man.GetBackground(eoc.OperationInfo, eoc.OperationSettings)
             };
 
-            AutomationProperties.SetItemStatus(button, OperationDN.UniqueKey(eoc.OperationInfo.Key));
+            AutomationProperties.SetName(button, OperationDN.UniqueKey(eoc.OperationInfo.Key));
 
             eoc.SenderButton = button;
 
@@ -83,13 +83,15 @@ namespace Signum.Windows.Operations
 
             MenuItem menuItem = new MenuItem
             {
-                Header = eoc.OperationSettings.TryCC(os => os.Text) ?? (group == null ? eoc.OperationInfo.Key.NiceToString() : group.SimplifyName(eoc.OperationInfo.Key.NiceToString())),
+                Header = eoc.OperationSettings.TryCC(os => os.Text) ?? 
+                (group == null || group.SimplifyName == null ? eoc.OperationInfo.Key.NiceToString() : 
+                 group.SimplifyName(eoc.OperationInfo.Key.NiceToString())),
                 Icon = man.GetImage(eoc.OperationInfo.Key, eoc.OperationSettings),
                 Tag = eoc.OperationInfo,
                 Background = man.GetBackground(eoc.OperationInfo, eoc.OperationSettings)
             };
 
-            AutomationProperties.SetItemStatus(menuItem, OperationDN.UniqueKey(eoc.OperationInfo.Key));
+            AutomationProperties.SetName(menuItem, OperationDN.UniqueKey(eoc.OperationInfo.Key));
 
             eoc.SenderButton = menuItem;
 
@@ -164,7 +166,7 @@ namespace Signum.Windows.Operations
                     if (MessageBox.Show(Window.GetWindow(eoc.EntityControl), "Are you sure of deleting the entity?", "Delete?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                     {
                         Lite<IdentifiableEntity> lite = ident.ToLite();
-                        Server.Return((IOperationServer s) => s.Delete(lite, eoc.OperationInfo.Key, null));
+                        Server.Execute((IOperationServer s) => s.Delete(lite, eoc.OperationInfo.Key, null));
                         Window.GetWindow(eoc.EntityControl).Close();
                     }
                 }
@@ -179,6 +181,11 @@ namespace Signum.Windows.Operations
                 ContextMenu = new ContextMenu(),
                 Background = group.Background,
             };
+
+            AutomationProperties.SetItemStatus(groupButton, "Group");
+
+            if (group.AutomationName.HasText())
+                AutomationProperties.SetName(groupButton, group.AutomationName);
 
             groupButton.ContextMenu = new ContextMenu
             {

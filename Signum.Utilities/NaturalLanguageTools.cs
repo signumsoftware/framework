@@ -5,6 +5,8 @@ using System.Text;
 using Signum.Utilities;
 using System.Globalization;
 using System.Resources;
+using System.Text.RegularExpressions;
+using System.Collections.ObjectModel;
 
 namespace Signum.Utilities
 {
@@ -21,23 +23,201 @@ namespace Signum.Utilities
             {"es", new SpanishGenderDetector()},
         };
 
-        public static Gender GetGender(string name)
+        public static char? GetGender(string name, CultureInfo culture = null)
         {
-            IGenderDetector detector = GenderDetectors.TryGetC(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
-            if (detector != null)
-                return detector.GetGender(name);
+            if (culture == null)
+                culture = CultureInfo.CurrentUICulture;
 
-            return Gender.Neuter;
+            IGenderDetector detector = GenderDetectors.TryGetC(culture.TwoLetterISOLanguageName);
+
+            if (detector == null)
+                return null;
+
+            return detector.GetGender(name);
         }
 
-        public static string Pluralize(string singularName)
+        
+        public static bool HasGenders(CultureInfo cultureInfo)
         {
-            IPluralizer pluralizer = Pluralizers.TryGetC(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
-            if (pluralizer != null)
-                return pluralizer.MakePlural(singularName);
+            IGenderDetector detector = GenderDetectors.TryGetC(cultureInfo.TwoLetterISOLanguageName);
 
-            return singularName;
+            if (detector == null)
+                return false;
+
+            return !detector.Pronoms.IsNullOrEmpty();
         }
+
+        public static string GetPronom(char gender, bool plural, CultureInfo culture = null)
+        {
+            if (culture == null)
+                culture = CultureInfo.CurrentUICulture;
+
+            IGenderDetector detector = GenderDetectors.TryGetC(culture.TwoLetterISOLanguageName);
+            if (detector == null)
+                return null;
+
+            var pro = detector.Pronoms.FirstOrDefault(a => a.Gender == gender);
+
+            if (pro == null)
+                return null;
+
+            return plural ? pro.Plural : pro.Singular;
+        }
+
+        public static string Pluralize(string singularName, CultureInfo culture = null)
+        {
+            if (culture == null)
+                culture = CultureInfo.CurrentUICulture;
+
+            IPluralizer pluralizer = Pluralizers.TryGetC(culture.TwoLetterISOLanguageName);
+            if (pluralizer == null)
+                return singularName;
+
+            return pluralizer.MakePlural(singularName);
+        }
+
+
+        public static string NiceName(this string memberName)
+        {
+            return memberName.Contains('_') ?
+              memberName.Replace('_', ' ') :
+              memberName.SpacePascal();
+        }
+
+        public static string SpacePascal(this string pascalStr, CultureInfo culture = null)
+        {
+            if (culture == null)
+                culture = CultureInfo.CurrentUICulture;
+
+            return SpacePascal(pascalStr, CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en");
+        }
+
+        public static string SpacePascal(this string pascalStr, bool preserveUppercase)
+        {
+            if (string.IsNullOrEmpty(pascalStr))
+                return pascalStr;
+
+            StringBuilder sb = new StringBuilder();
+
+            for (int i = 0; i < pascalStr.Length; i++)
+            {
+                switch (Kind(pascalStr, i))
+                {
+                    case CharKind.Lowecase:
+                        sb.Append(pascalStr[i]);
+                        break;
+
+                    case CharKind.StartOfWord:
+                        sb.Append(" ");
+                        sb.Append(preserveUppercase ? pascalStr[i] : char.ToLower(pascalStr[i]));
+                        break;
+
+                    case CharKind.StartOfSentence:
+                        sb.Append(pascalStr[i]);
+                        break;
+
+                    case CharKind.Abbreviation:
+                        sb.Append(pascalStr[i]);
+                        break;
+
+                    case CharKind.StartOfAbreviation:
+                        sb.Append(" ");
+                        sb.Append(pascalStr[i]);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        static CharKind Kind(string pascalStr, int i)
+        {
+            if (i == 0)
+                return CharKind.StartOfSentence;
+
+            if (!char.IsUpper(pascalStr[i]))
+                return CharKind.Lowecase;
+
+            if (i + 1 == pascalStr.Length)
+            {
+                if (char.IsUpper(pascalStr[i - 1]))
+                    return CharKind.Abbreviation;
+
+                return CharKind.StartOfWord;
+            }
+
+            if (!char.IsUpper(pascalStr[i + 1]))
+                return CharKind.StartOfWord;  // Xb
+
+            if (!char.IsUpper(pascalStr[i - 1]))
+            {
+                if (i + 2 == pascalStr.Length)
+                    return CharKind.StartOfAbreviation; //aXB|
+
+                if (!char.IsUpper(pascalStr[i + 2]))
+                    return CharKind.StartOfWord; //aXBc
+
+                return CharKind.StartOfAbreviation; //aXBC
+            }
+
+            return CharKind.Abbreviation; //AXB
+        }
+
+        public enum CharKind
+        {
+            Lowecase,
+            StartOfWord,
+            StartOfSentence,
+            StartOfAbreviation,
+            Abbreviation,
+        }
+
+
+        /// <param name="genderAwareText">Se ha[n] encontrado [1m:un|1f:una|m:unos|f:unas] {0} eliminad[1m:o|1f:a|m:os|f:as]</param>
+        /// <param name="gender">Masculine, Femenine, Neutrum, Inanimate, Animate</param>
+        public static string ForGenderAndNumber(this string genderAwareText, char? gender = null, int? number = null)
+        {
+            if (gender == null && number == null)
+                return genderAwareText;
+
+            if (number == null)
+                return GetPart(genderAwareText, gender + ":");
+
+            if (gender == null)
+            {
+                if (number.Value == 1)
+                    return GetPart(genderAwareText, number.Value + ":");
+
+                return GetPart(genderAwareText, number.Value + ":", "");
+            }
+
+            if (number.Value == 1)
+                return GetPart(genderAwareText, gender.Value + number.Value + ":", number.Value + ":");
+
+            return GetPart(genderAwareText, gender.Value + number.Value + ":", gender.Value + ":", number.Value + ":", "");
+        }
+
+        static string GetPart(string textToReplace, params string[] prefixes)
+        {
+            return Regex.Replace(textToReplace,
+              @"\[(?<gender>(\w\:)?[^\|\]]+)(\|(?<gender>(\w\:)?[^\|\]]+))*", m =>
+              {
+                  var captures = m.Captures.OfType<Capture>();
+
+                  foreach (var pr in prefixes)
+                  {
+                      Capture capture = captures.FirstOrDefault(c => c.Value.StartsWith(pr));
+                      if (capture != null)
+                          return capture.Value.RemoveStart(pr.Length);
+                  }
+
+                  return "[NO MATCH FOUND]";
+              });
+        }
+
+
     }
 
     public interface IPluralizer
@@ -130,43 +310,59 @@ namespace Signum.Utilities
 
     public interface IGenderDetector
     {
-        Gender GetGender(string name);
+        char? GetGender(string name);
+
+        ReadOnlyCollection<PronomInfo> Pronoms { get; }
+    }
+
+    public class PronomInfo
+    {
+        public char Gender { get; private set; }
+        public string Singular { get; private set; }
+        public string Plural { get; private set; }
+
+        public PronomInfo(char gender, string singular, string plural)
+        {
+            this.Gender = gender;
+            this.Singular = singular;
+            this.Plural = plural;
+        }
     }
 
     public class SpanishGenderDetector : IGenderDetector
     {
         //http://roble.pntic.mec.es/acid0002/index_archivos/Gramatica/genero_sustantivos.htm
-        Dictionary<string, Gender> terminationIsFemenine = new Dictionary<string, Gender>()
+        Dictionary<string, char> terminationIsFemenine = new Dictionary<string, char>()
         {
-            {"umbre", Gender.Femenine },
+            {"umbre", 'f' },
            
-            {"ión", Gender.Femenine },
-            {"dad", Gender.Femenine },
-            {"tad", Gender.Femenine },
+            {"ión", 'f' },
+            {"dad", 'f' },
+            {"tad", 'f' },
             
-            {"ie", Gender.Femenine },
-            {"is", Gender.Femenine }, 
+            {"ie", 'f' },
+            {"is", 'f' }, 
 
-            {"pa", Gender.Masculine},
+            {"pa", 'f'},
             //{"ta", Gender.Masculine}, Cuenta, Nota, Alerta... son femeninos
-            {"ma", Gender.Masculine},
+            {"ma", 'f'},
 
-            {"a", Gender.Femenine},
-            {"n", Gender.Masculine},
-            {"o", Gender.Masculine},
-            {"r", Gender.Masculine},
-            {"s", Gender.Masculine},
-            {"e", Gender.Masculine},
-            {"l", Gender.Masculine},
+            {"a", 'f'},
+            {"n", 'm'},
+            {"o", 'm'},
+            {"r", 'm'},
+            {"s", 'm'},
+            {"e", 'm'},
+            {"l", 'm'},
 
-            {"", Gender.Masculine},
+            {"", 'm'},
         };
 
 
-        public Gender GetGender(string name)
+        public char? GetGender(string name)
         {
             if (string.IsNullOrEmpty(name))
-                return Gender.Neuter;
+                return null;
 
             int index = name.IndexOf(' ');
 
@@ -179,14 +375,18 @@ namespace Signum.Utilities
                     return kvp.Value;
             }
 
-            return Gender.Masculine;
+            return null;
         }
-    }
 
-    public enum Gender
-    {
-        Neuter,    //_n 
-        Masculine, //_m
-        Femenine,  //_f
+        ReadOnlyCollection<PronomInfo> pronoms = new ReadOnlyCollection<PronomInfo>(new []
+        {
+            new PronomInfo('m', "el", "los"),
+            new PronomInfo('f', "la", "las")
+        });
+
+        public ReadOnlyCollection<PronomInfo> Pronoms
+        {
+            get { return pronoms; }
+        }
     }
 }

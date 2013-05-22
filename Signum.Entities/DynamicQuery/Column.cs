@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
@@ -10,17 +11,24 @@ namespace Signum.Entities.DynamicQuery
     [Serializable]
     public class Column : IEquatable<Column>
     {
-        public string DisplayName { get; set; }
-        public QueryToken Token { get; internal set; }
+        string displayName;
+        public string DisplayName
+        {
+            get { return displayName; }
+            set { displayName = value; }
+        }
+
+        QueryToken token;
+        public QueryToken Token { get { return token; } }
 
         public Column(QueryToken token, string displayName)
         {
-            Token = token;
-            DisplayName = displayName;
+            this.token = token;
+            this.displayName = displayName;
         }
 
-        public Column(ColumnDescription cd)
-            : this(QueryToken.NewColumn(cd), cd.DisplayName)
+        public Column(ColumnDescription cd, object queryName)
+            : this(new ColumnToken(cd, queryName), cd.DisplayName)
         {
         }
 
@@ -52,11 +60,11 @@ namespace Signum.Entities.DynamicQuery
         }
     }
 
-    //Temporaly used by the engine
-    public class _EntityColumn : Column
+    [Serializable]
+    internal class _EntityColumn : Column
     {
-        public _EntityColumn(ColumnDescription entityColumn)
-            : base(QueryToken.NewColumn(entityColumn), null)
+        public _EntityColumn(ColumnDescription entityColumn, object queryName)
+            : base(new ColumnToken(entityColumn, queryName), null)
         {
             if (!entityColumn.IsEntity)
                 throw new ArgumentException("entityColumn");

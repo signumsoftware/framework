@@ -13,7 +13,6 @@ using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Maps;
 using Signum.Entities.Reflection;
-using Signum.Engine.Properties;
 using System.Diagnostics;
 
 namespace Signum.Engine.Linq
@@ -30,8 +29,11 @@ namespace Signum.Engine.Linq
         //Optional
         public readonly Alias TableAlias;
         public readonly ReadOnlyCollection<FieldBinding> Bindings;
+        public readonly ReadOnlyCollection<MixinEntityExpression> Mixins;
 
-        public EntityExpression(Type type, Expression externalId, Alias tableAlias, IEnumerable<FieldBinding> bindings)
+        public readonly bool AvoidExpandOnRetrieving;
+
+        public EntityExpression(Type type, Expression externalId, Alias tableAlias, IEnumerable<FieldBinding> bindings, IEnumerable<MixinEntityExpression> mixins, bool avoidExpandOnRetrieving)
             : base(DbExpressionType.Entity, type)
         {
             if (type == null) 
@@ -48,6 +50,9 @@ namespace Signum.Engine.Linq
 
             this.TableAlias = tableAlias;
             this.Bindings = bindings.ToReadOnly();
+            this.Mixins = mixins.ToReadOnly();
+
+            this.AvoidExpandOnRetrieving = avoidExpandOnRetrieving;
         }
      
         public override string ToString()
@@ -55,10 +60,9 @@ namespace Signum.Engine.Linq
             var constructor = "new {0}({1})".Formato(Type.TypeName(),
                 ExternalId.NiceToString());
 
-            if (Bindings == null)
-                return constructor;
-
-            return constructor + "\r\n{\r\n " + Bindings.ToString(",\r\n ").Indent(4) + "\r\n}";
+            return constructor +
+                Bindings == null ? null : ("\r\n{\r\n " + Bindings.ToString(",\r\n ").Indent(4) + "\r\n}") +
+                Mixins == null ? null : ("\r\n" + Mixins.ToString(m => ".Mixin({0})".Formato(m), "\r\n"));
         }
 
         public Expression GetBinding(FieldInfo fi)
@@ -110,6 +114,40 @@ namespace Signum.Engine.Linq
 
             return bindings.HasText() ? 
                 constructor + "\r\n{" + bindings.Indent(4) + "\r\n}" : 
+                constructor;
+        }
+    }
+
+    internal class MixinEntityExpression : DbExpression
+    {
+        public readonly ReadOnlyCollection<FieldBinding> Bindings;
+
+        public readonly FieldMixin FieldMixin; //used for updates
+
+        public MixinEntityExpression(Type type, IEnumerable<FieldBinding> bindings, FieldMixin fieldMixin)
+            : base(DbExpressionType.MixinInit, type)
+        {
+            if (bindings == null)
+                throw new ArgumentNullException("bindings");
+
+            Bindings = bindings.ToReadOnly();
+
+            FieldMixin = fieldMixin;
+        }
+
+        public Expression GetBinding(FieldInfo fi)
+        {
+            return Bindings.SingleEx(fb => ReflectionTools.FieldEquals(fi, fb.FieldInfo)).Binding;
+        }
+
+        public override string ToString()
+        {
+            string constructor = "new {0}".Formato(Type.TypeName());
+
+            string bindings = Bindings.TryCC(b => b.ToString(",\r\n ")) ?? "";
+
+            return bindings.HasText() ?
+                constructor + "\r\n{" + bindings.Indent(4) + "\r\n}" :
                 constructor;
         }
     }
@@ -204,36 +242,48 @@ namespace Signum.Engine.Linq
         }
     }
 
-    internal class LiteExpression : DbExpression
+    internal class LiteReferenceExpression : DbExpression
     {
         public readonly Expression Reference; //Fie, ImplementedBy, ImplementedByAll or Constant to NullEntityExpression
+        public readonly Expression CustomToStr; //Not readonly
 
-        public readonly Expression Id;
-        public readonly Expression ToStr; //Not readonly
-        public readonly Expression TypeId;
-        public readonly bool CustomToString;
-
-        public LiteExpression(Type type, Expression reference, Expression id, Expression toStr, Expression typeId, bool customToString) :
-            base(DbExpressionType.Lite, type)
+        public LiteReferenceExpression(Type type, Expression reference, Expression customToStr) :
+            base(DbExpressionType.LiteReference, type)
         {
-            if (reference != null)
-            {
-                Type cleanType = Lite.Extract(type);
+            Type cleanType = Lite.Extract(type);
 
-                if (cleanType != reference.Type)
-                    throw new ArgumentException("The type {0} is not the Lite version of {1}".Formato(type.TypeName(), reference.Type.TypeName()));
-            }
+            if (cleanType != reference.Type)
+                throw new ArgumentException("The type {0} is not the Lite version of {1}".Formato(type.TypeName(), reference.Type.TypeName()));
 
             this.Reference = reference;
-            this.Id = id;
-            this.ToStr = toStr;
-            this.TypeId = typeId;
-            this.CustomToString = customToString;
+
+            this.CustomToStr = customToStr;
         }
 
         public override string ToString()
         {
-            return "({0}).ToLite({1},{2},{3})".Formato(Reference.NiceToString(), Id.NiceToString(), ToStr.NiceToString(), TypeId.NiceToString());
+            return "({0}).ToLite({1})".Formato(Reference.NiceToString(), CustomToStr == null ? null : ("customToStr: " + CustomToStr.NiceToString()));
+        }
+    }
+
+    internal class LiteValueExpression : DbExpression
+    {
+        public readonly Expression TypeId;
+        public readonly Expression Id;
+        public readonly Expression ToStr; //Not readonly
+        
+
+        public LiteValueExpression(Type type, Expression typeId, Expression id, Expression toStr) :
+            base(DbExpressionType.LiteValue, type)
+        {
+            this.TypeId = typeId;
+            this.Id = id;
+            this.ToStr = toStr;
+        }
+
+        public override string ToString()
+        {
+            return "new Lite<{0}>({1},{2},{3})".Formato(Type.CleanType().TypeName(), TypeId.NiceToString(), Id.NiceToString(), ToStr.NiceToString());
         }
     }
 

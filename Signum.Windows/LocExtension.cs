@@ -24,9 +24,7 @@ namespace Signum.Windows
         /// Gets or sets the resource key.
         /// </summary>
         [ConstructorArgument("key")]
-        public string Key { get; set; }
-
-        public Type AssemblyType { get; set; }
+        public Enum Key { get; set; }
 
 
         public LocExtension() { }
@@ -34,12 +32,10 @@ namespace Signum.Windows
         /// Initializes new instance of the class.
         /// </summary>
         /// <param name="key">The resource key.</param>
-        public LocExtension(string key)
+        public LocExtension(Enum key)
         {
             Key = key;
         }
-
-        static Regex regex = new Regex(@"/(?<an>[^/]*)\;component/");
 
         /// <summary>
         /// Returns the object that corresponds to the specified resource key.
@@ -48,34 +44,10 @@ namespace Signum.Windows
         /// <returns>The object that corresponds to the specified resource key.</returns>
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
-            if (string.IsNullOrEmpty(Key))
+            if (Key == null)
                 return "[null]";
-            Assembly assembly = GetAssembly(serviceProvider);
 
-            ResourceManager manager = new ResourceManager(assembly.GetName().Name + ".Properties.Resources", assembly);
-            if (manager == null)
-                return Key;
-
-            return manager.GetObject(Key);
-        }
-
-        private Assembly GetAssembly(IServiceProvider serviceProvider)
-        {
-            if (AssemblyType != null)
-                return AssemblyType.Assembly;
-
-            IUriContext uriContext = serviceProvider.GetService(typeof(IUriContext)) as IUriContext;
-            if (uriContext != null)
-            {
-                Match m = regex.Match(uriContext.BaseUri.ToString());
-                if (m != null && m.Success)
-                {
-                    string an = m.Groups["an"].Value;
-                    return AppDomain.CurrentDomain.GetAssemblies().SingleEx(a => a.GetName().Name == an);
-                }
-            }
-
-            return Assembly.GetExecutingAssembly();
+            return Key.NiceToString();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,12 +11,13 @@ using Signum.Utilities.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using System.Diagnostics;
 using Signum.Entities.Reflection;
-using Signum.Engine.Properties;
 using System.Linq.Expressions;
 using System.Runtime.Remoting.Contexts;
 using Signum.Engine.Linq;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
+using Signum.Utilities.DataStructures;
+using System.Threading;
 
 namespace Signum.Engine.Maps
 {
@@ -65,7 +66,7 @@ namespace Signum.Engine.Maps
             Field[] colFields = fieldLambdas.Select(fun => schema.Field<T>(fun)).ToArray();
             Field[] colFieldsNotNull = fieldsNotNullLambdas.Select(fun => schema.Field<T>(fun)).ToArray();
 
-            AddUniqueIndex(new UniqueIndex(schema.Table<T>(), colFields).WhereNotNull(colFieldsNotNull));
+            AddIndex(new UniqueIndex(schema.Table<T>(), colFields).WhereNotNull(colFieldsNotNull));
         }
         public void AddUniqueIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList, Expression<Func<MListElement<T, V>, object>> fields)
            where T : IdentifiableEntity
@@ -106,22 +107,22 @@ namespace Signum.Engine.Maps
 
         public void AddUniqueIndex(ITable table, Field[] fields, Field[] notNullFields)
         {
-            AddUniqueIndex(new UniqueIndex(table, fields).WhereNotNull(notNullFields));
+            AddIndex(new UniqueIndex(table, fields).WhereNotNull(notNullFields));
         }
 
         public void AddUniqueIndex(ITable table, IColumn[] columns, IColumn[] notNullColumns)
         {
-            AddUniqueIndex(new UniqueIndex(table, columns).WhereNotNull(notNullColumns));
+            AddIndex(new UniqueIndex(table, columns).WhereNotNull(notNullColumns));
         }
 
-        private void AddUniqueIndex(UniqueIndex uniqueIndex)
+        private void AddIndex(Index index)
         {
-            ITable table = uniqueIndex.Table;
+            ITable table = index.Table;
 
-            if (table.MultiIndexes == null)
-                table.MultiIndexes = new List<UniqueIndex>();
+            if (table.MultiColumnIndexes == null)
+                table.MultiColumnIndexes = new List<Index>();
 
-            table.MultiIndexes.Add(uniqueIndex);
+            table.MultiColumnIndexes.Add(index);
         }
 
         public Table Include<T>() where T : IdentifiableEntity
@@ -137,7 +138,10 @@ namespace Signum.Engine.Maps
         internal protected virtual Table Include(Type type, PropertyRoute route)
         {
             Table result;
-            if (!schema.Tables.TryGetValue(type, out result))
+            if (schema.Tables.TryGetValue(type, out result))
+                return result;
+
+            using (HeavyProfiler.LogNoStackTrace("Include", () => type.TypeName()))
             {
                 if (type.IsAbstract)
                     throw new InvalidOperationException(route.TryCC(r => "Error on field {0}: ".Formato(r)) + "Impossible to include in the Schema the type {0} because is abstract".Formato(type));
@@ -152,14 +156,14 @@ namespace Signum.Engine.Maps
                 string name = schema.Settings.desambiguatedNames.TryGetC(type) ?? Reflector.CleanTypeName(EnumEntity.Extract(type) ?? type);
 
                 if (schema.NameToType.ContainsKey(name))
-                    throw new InvalidOperationException(route.TryCC(r => "Error on field {0}: ".Formato(r)) + "Two types have the same cleanName, desambiguate using Schema.Current.Settings.Desambiguate method: \r\n {0}\r\n {1}".Formato(schema.NameToType[name].FullName, type.FullName)); 
+                    throw new InvalidOperationException(route.TryCC(r => "Error on field {0}: ".Formato(r)) + "Two types have the same cleanName, desambiguate using Schema.Current.Settings.Desambiguate method: \r\n {0}\r\n {1}".Formato(schema.NameToType[name].FullName, type.FullName));
 
                 schema.NameToType[name] = type;
                 schema.TypeToName[type] = name;
 
                 Complete(result);
+                return result;
             }
-            return result;
         }
 
         void Complete(Table table)
@@ -168,8 +172,23 @@ namespace Signum.Engine.Maps
             table.Identity = EnumEntity.Extract(type) == null;
             table.Name = GenerateTableName(type);
             table.CleanTypeName = GenerateCleanTypeName(type);
-            table.Fields = GenerateFields(PropertyRoute.Root(type), Contexts.Normal, table, NameSequence.Void, false);
+            table.Fields = GenerateFields(PropertyRoute.Root(type), table, NameSequence.Void, forceNull: false, inMList: false);
+            table.Mixins = GenerateMixins(PropertyRoute.Root(type), table, NameSequence.Void);
             table.GenerateColumns();
+        }
+
+        private Dictionary<Type, FieldMixin> GenerateMixins(PropertyRoute propertyRoute, Table table, NameSequence nameSequence)
+        {
+            Dictionary<Type, FieldMixin> mixins = null;
+            foreach (var t in MixinDeclarations.GetMixinDeclarations(table.Type))
+            {
+                if (mixins == null)
+                    mixins = new Dictionary<Type, FieldMixin>();
+
+                mixins.Add(t, this.GenerateFieldMixin(propertyRoute.Add(t), nameSequence, table));
+            }
+
+            return mixins;
         }
 
         HashSet<string> loadedModules = new HashSet<string>();
@@ -189,7 +208,7 @@ namespace Signum.Engine.Maps
         #region Field Generator
         
 
-        protected Dictionary<string, EntityField> GenerateFields(PropertyRoute root, Contexts contexto, Table table, NameSequence preName, bool forceNull)
+        protected Dictionary<string, EntityField> GenerateFields(PropertyRoute root, Table table, NameSequence preName, bool forceNull, bool inMList)
         {
             Dictionary<string, EntityField> result = new Dictionary<string, EntityField>();
             var type = root.Type;
@@ -198,12 +217,12 @@ namespace Signum.Engine.Maps
             {
                 PropertyRoute route = root.Add(fi); 
 
-                if (!Settings.Attributes(route).Any(a=>a is IgnoreAttribute))
+                if (!Settings.FieldAttributes(route).Any(a=>a is IgnoreAttribute))
                 {
-                    if (!SilentMode() && Reflector.TryFindPropertyInfo(fi) == null)
-                        Debug.WriteLine("WARNING!!: Field {0} of type {1} has no property".Formato(fi.Name, type.Name));
+                    if (Reflector.TryFindPropertyInfo(fi) == null && !fi.IsPublic && !fi.HasAttribute<FieldWithoutPropertyAttribute>())
+                        throw new InvalidOperationException("Field {0} of type {1} has no property".Formato(fi.Name, type.Name));
 
-                    Field field = GenerateField(route, contexto, table, preName, forceNull);
+                    Field field = GenerateField(route, table, preName, forceNull, inMList);
 
                     if (result.ContainsKey(fi.Name))
                         throw new InvalidOperationException("Duplicated field with name {0} on {1}, shadowing not supported".Formato(fi.Name, type.TypeName()));
@@ -212,43 +231,56 @@ namespace Signum.Engine.Maps
                 }
             }
 
-            if (type.IsIdentifiableEntity() && !ExpressionCleaner.HasExpansions(type, EntityExpression.ToStringMethod))
+            if (type.IsIdentifiableEntity())
             {
-                PropertyRoute route = root.Add(fiToStr);
+                FieldInfo fiToString = GetToStringFieldInfo(type);
 
-                Field field = GenerateField(route, contexto, table, preName, forceNull);
+                if (fiToString == fiToStr)
+                {
+                    PropertyRoute route = root.Add(fiToStr);
 
-                if (result.ContainsKey(fiToStr.Name))
-                    throw new InvalidOperationException("Duplicated field with name {0} on {1}, shadowing not supported".Formato(fiToStr.Name, type.TypeName()));
+                    Field field = GenerateField(route, table, preName, forceNull, inMList);
 
-                result.Add(fiToStr.Name, new EntityField(type, fiToStr) { Field = field });
+                    if (result.ContainsKey(fiToStr.Name))
+                        throw new InvalidOperationException("Duplicated field with name {0} on {1}, shadowing not supported".Formato(fiToStr.Name, type.TypeName()));
+
+                    result.Add(fiToStr.Name, new EntityField(type, fiToStr) { Field = field });
+                }
             }
 
             return result;
         }
 
-        static readonly FieldInfo fiToStr = ReflectionTools.GetFieldInfo((IdentifiableEntity o) => o.toStr);
-
-        protected virtual bool SilentMode()
+        public static FieldInfo GetToStringFieldInfo(Type type)
         {
-            return schema.SilentMode; 
+            LambdaExpression lambda = ExpressionCleaner.GetFieldExpansion(type, EntityExpression.ToStringMethod);
+            if (lambda == null)
+                return fiToStr;
+
+            var mae = lambda.Body as MemberExpression;
+            if (mae == null || mae.Expression != lambda.Parameters.Only())
+                throw new InvalidOperationException("ToStringExpression {0} on {1} should be a trivial accesor to a field".Formato(type.Name, mae.NiceToString()));
+
+            return mae.Member as FieldInfo ?? Reflector.FindFieldInfo(type, (PropertyInfo)mae.Member);
         }
 
-        protected virtual Field GenerateField(PropertyRoute route, Contexts context, Table table, NameSequence preName, bool forceNull)
+        static readonly FieldInfo fiToStr = ReflectionTools.GetFieldInfo((IdentifiableEntity o) => o.toStr);
+
+        protected virtual Field GenerateField(PropertyRoute route, Table table, NameSequence preName, bool forceNull, bool inMList)
         {
             //fieldType: Va variando segun se entra en colecciones o contenidos
             //fi.Type: el tipo del campo asociado
 
             KindOfField kof = GetKindOfField(route).ThrowIfNullS("Field {0} of type {1} has no database representation".Formato(route, route.Type.Name));
 
-            if ((allowedContexts[kof] & context) != context)
-                throw new InvalidOperationException("Field {0} of Type {1} should be mapped as {2} but is incompatible with context {3}".Formato(route, route.Type.Name, kof, context));
+            if(kof == KindOfField.MList && inMList)
+                throw new InvalidOperationException("Field {0} of type {1} can not be neasted in another MList".Formato(route, route.Type.TypeName(), kof));
 
             //field name generation 
             NameSequence name = preName;
-            if (context == Contexts.Normal || context == Contexts.Embedded || context == Contexts.View)
+            if (route.PropertyRouteType != PropertyRouteType.MListItems)
                 name = name.Add(GenerateFieldName(route, kof));
-            else if (context == Contexts.MList && (kof == KindOfField.Enum || kof == KindOfField.Reference))
+            else if (kof == KindOfField.Enum || kof == KindOfField.Reference)
                 name = name.Add(GenerateFieldName(Lite.Extract(route.Type) ?? route.Type, kof));
 
             switch (kof)
@@ -270,23 +302,23 @@ namespace Signum.Engine.Maps
                 case KindOfField.Enum:
                     return GenerateFieldEnum(route, name, forceNull);
                 case KindOfField.Embedded:
-                    return GenerateFieldEmbedded(route, name, forceNull);
+                    return GenerateFieldEmbedded(route, name, table, forceNull, inMList);
                 case KindOfField.MList:
-                    return GenerateFieldMList(route, table, name);
+                    return GenerateFieldMList(route, name, table);
                 default:
-                    throw new NotSupportedException(Resources.NoWayOfMappingType0Found.Formato(route.Type));
+                    throw new NotSupportedException(EngineMessage.NoWayOfMappingType0Found.NiceToString().Formato(route.Type));
             }
         }
 
-        static Dictionary<KindOfField, Contexts> allowedContexts = new Dictionary<KindOfField, Contexts>()
+        public enum KindOfField
         {
-            {KindOfField.PrimaryKey,    Contexts.Normal | Contexts.View },
-            {KindOfField.Value,         Contexts.Normal | Contexts.MList | Contexts.Embedded | Contexts.View },
-            {KindOfField.Reference,     Contexts.Normal | Contexts.MList | Contexts.Embedded | Contexts.View },
-            {KindOfField.Enum,          Contexts.Normal | Contexts.MList | Contexts.Embedded | Contexts.View },
-            {KindOfField.Embedded,      Contexts.Normal | Contexts.MList | Contexts.Embedded | Contexts.View },
-            {KindOfField.MList,         Contexts.Normal },
-        };
+            PrimaryKey,
+            Value,
+            Reference,
+            Enum,
+            Embedded,
+            MList,
+        }
 
         private KindOfField? GetKindOfField(PropertyRoute route)
         {
@@ -321,7 +353,7 @@ namespace Signum.Engine.Maps
             return new FieldPrimaryKey(route.Type, table);
         }
 
-        protected virtual Field GenerateFieldValue(PropertyRoute route, NameSequence name, bool forceNull)
+        protected virtual FieldValue GenerateFieldValue(PropertyRoute route, NameSequence name, bool forceNull)
         {
             SqlDbTypePair pair = Settings.GetSqlDbType(route);
 
@@ -337,7 +369,7 @@ namespace Signum.Engine.Maps
             };
         }
 
-        protected virtual Field GenerateFieldEnum(PropertyRoute route, NameSequence name, bool forceNull)
+        protected virtual FieldEnum GenerateFieldEnum(PropertyRoute route, NameSequence name, bool forceNull)
         {
             Type cleanEnum = route.Type.UnNullify();
 
@@ -349,11 +381,11 @@ namespace Signum.Engine.Maps
                 Nullable = Settings.IsNullable(route, forceNull),
                 IsLite = false,
                 IndexType = Settings.GetIndexType(route),
-                ReferenceTable = cleanEnum.HasAttribute<FlagsAttribute>() && !route.FieldInfo.HasAttribute<ForceForeignKey>() ? null : table,
+                ReferenceTable = cleanEnum.HasAttribute<FlagsAttribute>() && !route.FieldInfo.HasAttribute<ForceForeignKeyAttribute>() ? null : table,
             };
         }
 
-        protected virtual Field GenerateFieldReference(PropertyRoute route, NameSequence name, bool forceNull)
+        protected virtual FieldReference GenerateFieldReference(PropertyRoute route, NameSequence name, bool forceNull)
         {
             return new FieldReference(route.Type)
             {
@@ -362,10 +394,11 @@ namespace Signum.Engine.Maps
                 Nullable = Settings.IsNullable(route, forceNull),
                 IsLite  = route.Type.IsLite(),
                 ReferenceTable = Include(Lite.Extract(route.Type) ?? route.Type, route),
+                AvoidExpandOnRetrieving = Settings.FieldAttributes(route).OfType<AvoidExpandQueryAttribute>().Any()
             };
         }
 
-        protected virtual Field GenerateFieldImplmentedBy(PropertyRoute route, NameSequence name, bool forceNull, IEnumerable<Type> types)
+        protected virtual FieldImplementedBy GenerateFieldImplmentedBy(PropertyRoute route, NameSequence name, bool forceNull, IEnumerable<Type> types)
         {
             Type cleanType = Lite.Extract(route.Type) ?? route.Type;
             string errors = types.Where(t => !cleanType.IsAssignableFrom(t)).ToString(t => t.TypeName(), ", ");
@@ -383,11 +416,12 @@ namespace Signum.Engine.Maps
                     Name = name.Add(TypeLogic.GetCleanName(t)).ToString(),
                     Nullable = nullable,
                 }),
-                IsLite = route.Type.IsLite()
+                IsLite = route.Type.IsLite(),
+                AvoidExpandOnRetrieving = Settings.FieldAttributes(route).OfType<AvoidExpandQueryAttribute>().Any()
             };
         }
 
-        protected virtual Field GenerateFieldImplmentedByAll(PropertyRoute route, NameSequence preName, bool forceNull)
+        protected virtual FieldImplementedByAll GenerateFieldImplmentedByAll(PropertyRoute route, NameSequence preName, bool forceNull)
         {
             bool nullable = Settings.IsNullable(route, forceNull);
 
@@ -406,11 +440,12 @@ namespace Signum.Engine.Maps
                     Nullable = nullable,
                     ReferenceTable = Include(typeof(TypeDN), route)
                 },
-                IsLite = route.Type.IsLite()
+                IsLite = route.Type.IsLite(),
+                AvoidExpandOnRetrieving = Settings.FieldAttributes(route).OfType<AvoidExpandQueryAttribute>().Any()
             };
         }
 
-        protected virtual Field GenerateFieldMList(PropertyRoute route, Table table, NameSequence name)
+        protected virtual FieldMList GenerateFieldMList(PropertyRoute route, NameSequence name, Table table)
         {
             Type elementType = route.Type.ElementType();
 
@@ -418,17 +453,17 @@ namespace Signum.Engine.Maps
 
             RelationalTable relationalTable = new RelationalTable(route.Type)
             {
-                Name = GenerateTableNameCollection(type, name),
+                Name = GenerateTableNameCollection(table, name),
                 BackReference = new FieldReference(table.Type)
                 {
                     Name = GenerateBackReferenceName(type),
                     ReferenceTable = table
                 },
                 PrimaryKey = new RelationalTable.PrimaryKeyColumn(),
-                Field = GenerateField(route.Add("Item"), Contexts.MList, null, NameSequence.Void, false) 
+                Field = GenerateField(route.Add("Item"), null, NameSequence.Void, forceNull: false, inMList: true)
             };
 
-            relationalTable.GenerateColumns(); 
+            relationalTable.GenerateColumns();
 
             return new FieldMList(route.Type)
             {
@@ -436,14 +471,22 @@ namespace Signum.Engine.Maps
             };
         }
 
-        protected virtual Field GenerateFieldEmbedded(PropertyRoute route, NameSequence name, bool forceNull)
+        protected virtual FieldEmbedded GenerateFieldEmbedded(PropertyRoute route, NameSequence name, Table table, bool forceNull, bool inMList)
         {
             bool nullable = Settings.IsNullable(route, false);
 
             return new FieldEmbedded(route.Type)
             {
                 HasValue = nullable ? new FieldEmbedded.EmbeddedHasValueColumn() { Name = name.Add("HasValue").ToString() } : null,
-                EmbeddedFields = GenerateFields(route, Contexts.Embedded, null, name, nullable || forceNull)
+                EmbeddedFields = GenerateFields(route, table, name, forceNull: nullable || forceNull, inMList: inMList)
+            };
+        }
+
+        protected virtual FieldMixin GenerateFieldMixin(PropertyRoute route, NameSequence name, Table table)
+        {
+            return new FieldMixin(route.Type)
+            {
+                Fields = GenerateFields(route, table, name, forceNull: false, inMList: false)
             };
         }
         #endregion
@@ -473,9 +516,9 @@ namespace Signum.Engine.Maps
             return type;
         }
 
-        public virtual ObjectName GenerateTableNameCollection(Type type, NameSequence name)
+        public virtual ObjectName GenerateTableNameCollection(Table table, NameSequence name)
         {
-            return new ObjectName(SchemaName.Default, CleanType(type).Name + name.ToString());
+            return new ObjectName(SchemaName.Default, table.Name.Name + name.ToString());
         }
 
         public virtual string GenerateFieldName(Type type, KindOfField kindOfField)
@@ -495,7 +538,7 @@ namespace Signum.Engine.Maps
 
         public virtual string GenerateFieldName(PropertyRoute route, KindOfField tipoCampo)
         {
-            string name = Reflector.CleanFieldName(route.FieldInfo.Name);
+            string name = Reflector.PropertyName(route.FieldInfo.Name);
 
             switch (tipoCampo)
             {
@@ -567,22 +610,115 @@ namespace Signum.Engine.Maps
             public Action Action;
             public Type[] RegisteredTypes;
         }
+
+        GlobalLazyManager GlobalLazyManager = new GlobalLazyManager();
+
+        public void SwitchGlobalLazyManager(GlobalLazyManager manager)
+        {
+            GlobalLazyManager.AsserNotUsed();
+            GlobalLazyManager = manager;
+        }
+
+        public ResetLazy<T> GlobalLazy<T>(Func<T> func, InvalidateWith invalidateWith) where T : class
+        {
+            var result = Signum.Engine.GlobalLazy.WithoutInvalidations(() =>
+            {
+                GlobalLazyManager.OnLoad(this, invalidateWith);
+              
+                return func();
+            });
+
+            GlobalLazyManager.AttachInvalidations(this, invalidateWith, (sender, args) => result.Reset());
+
+            return result;
+        }
     }
+
+    public class GlobalLazyManager
+    {
+        bool isUsed = false;
+
+        public void AsserNotUsed()
+        {
+            if (isUsed)
+                throw new InvalidOperationException("GlobalLazyManager has already been used");
+        }
+
+        public virtual void AttachInvalidations(SchemaBuilder sb, InvalidateWith invalidateWith, EventHandler invalidate)
+        {
+            isUsed = true;
+
+            Action onInvalidation = () =>
+            {
+                if (Transaction.InTestTransaction)
+                {
+                    invalidate(this, null);
+                    Transaction.Rolledback += () => invalidate(this, null);
+                }
+
+                Transaction.PostRealCommit += dic => invalidate(this, null);
+            };
+
+            Schema schema = sb.Schema;
+
+            foreach (var type in invalidateWith.Types)
+            {
+                giAttachInvalidations.GetInvoker(type)(schema, onInvalidation);
+            }
+
+            var dependants = DirectedGraph<Table>.Generate(invalidateWith.Types.Select(t => schema.Table(t)), t => t.DependentTables().Select(kvp => kvp.Key)).Select(t => t.Type).ToHashSet();
+            dependants.ExceptWith(invalidateWith.Types);
+
+            foreach (var type in dependants)
+            {
+                giAttachInvalidationsDependant.GetInvoker(type)(schema, onInvalidation);
+            }
+        }
+
+
+        static GenericInvoker<Action<Schema, Action>> giAttachInvalidationsDependant = new GenericInvoker<Action<Schema, Action>>((s, a) => AttachInvalidationsDependant<IdentifiableEntity>(s, a));
+        static void AttachInvalidationsDependant<T>(Schema s, Action action) where T : IdentifiableEntity
+        {
+            var ee = s.EntityEvents<T>();
+
+            ee.Saving += e =>
+            {
+                if (!e.IsNew && e.IsGraphModified)
+                    action();
+            };
+            ee.PreUnsafeUpdate += q => action();
+        }
+
+        static GenericInvoker<Action<Schema, Action>> giAttachInvalidations = new GenericInvoker<Action<Schema, Action>>((s, a) => AttachInvalidations<IdentifiableEntity>(s, a));
+        static void AttachInvalidations<T>(Schema s, Action action) where T : IdentifiableEntity
+        {
+            var ee = s.EntityEvents<T>();
+
+            ee.Saving += e =>
+            {
+                if (e.IsGraphModified)
+                    action();
+            };
+            ee.PreUnsafeUpdate += q => action();
+            ee.PreUnsafeDelete += q => action();
+        }
+
+        public virtual void OnLoad(SchemaBuilder sb, InvalidateWith invalidateWith)
+        {
+        }
+    }
+
 
     internal class ViewBuilder : SchemaBuilder
     {
-        public ViewBuilder(Schema schema) : base(schema)
+        public ViewBuilder(Schema schema)
+            : base(schema)
         {
         }
 
         public override Table Include(Type type)
         {
             return Schema.Table(type);
-        }
-
-        protected override bool SilentMode()
-        {
-            return true;
         }
 
         public Table NewView(Type type)
@@ -593,7 +729,7 @@ namespace Signum.Engine.Maps
                 IsView = true
             };
 
-            table.Fields = GenerateFields(PropertyRoute.Root(type), Contexts.View, table, NameSequence.Void, false);
+            table.Fields = GenerateFields(PropertyRoute.Root(type), table, NameSequence.Void, forceNull: false, inMList: false);
 
             return table;
         }
@@ -625,7 +761,7 @@ namespace Signum.Engine.Maps
 
         protected override bool IsPrimaryKey(PropertyRoute route)
         {
-            if(route.FieldInfo == null) 
+            if (route.FieldInfo == null)
                 return false;
 
             var svca = route.FieldInfo.SingleAttribute<SqlViewColumnAttribute>();
@@ -651,6 +787,7 @@ namespace Signum.Engine.Maps
 
             return result;
         }
-    }
 
+
+    }
 }

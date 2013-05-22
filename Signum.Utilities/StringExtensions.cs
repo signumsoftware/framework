@@ -5,7 +5,6 @@ using System.Text;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Runtime.Serialization.Formatters.Binary;
-using Signum.Utilities.Properties;
 using System.Globalization;
 using System.Linq.Expressions;
 
@@ -494,101 +493,6 @@ namespace Signum.Utilities
             return result;
         }
 
-        public static string NiceName(this string memberName)
-        {
-            return memberName.Contains('_') ?
-              memberName.Replace('_', ' ') :
-              memberName.SpacePascal();
-        }
-
-        public static string SpacePascal(this string pascalStr)
-        {
-            return SpacePascal(pascalStr, CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en");
-        }
-
-        public static string SpacePascal(this string pascalStr, bool preserveUppercase)
-        {
-            if (string.IsNullOrEmpty(pascalStr))
-                return pascalStr;
-
-            StringBuilder sb = new StringBuilder();
-
-            for (int i = 0; i < pascalStr.Length; i++)
-            {
-                switch (Kind(pascalStr, i))
-                {
-                    case CharKind.Lowecase:
-                        sb.Append(pascalStr[i]);
-                        break;
-
-                    case CharKind.StartOfWord:
-                        sb.Append(" ");
-                        sb.Append(preserveUppercase ? pascalStr[i] : char.ToLower(pascalStr[i]));
-                        break;
-
-                    case CharKind.StartOfSentence:
-                        sb.Append(pascalStr[i]);
-                        break;
-
-                    case CharKind.Abbreviation:
-                        sb.Append(pascalStr[i]);
-                        break;
-
-                    case CharKind.StartOfAbreviation:
-                        sb.Append(" ");
-                        sb.Append(pascalStr[i]);
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            return sb.ToString();
-        }
-
-        static CharKind Kind(string pascalStr, int i)
-        {
-            if (i == 0)
-                return CharKind.StartOfSentence;
-
-            if(!char.IsUpper(pascalStr[i]))
-                return CharKind.Lowecase;
-
-            if (i + 1 == pascalStr.Length)
-            {
-                if (char.IsUpper(pascalStr[i - 1]))
-                    return CharKind.Abbreviation;
-
-                return CharKind.StartOfWord;
-            }
-
-            if (!char.IsUpper(pascalStr[i + 1]))
-                return CharKind.StartOfWord;  // Xb
-
-            if (!char.IsUpper(pascalStr[i - 1]))
-            {
-                if (i + 2 == pascalStr.Length)
-                    return CharKind.StartOfAbreviation; //aXB|
-
-                if (!char.IsUpper(pascalStr[i + 2]))
-                    return CharKind.StartOfWord; //aXBc
-
-                return CharKind.StartOfAbreviation; //aXBC
-            }
-
-            return CharKind.Abbreviation; //AXB
-        }
-
-        public enum CharKind
-        {
-            Lowecase,
-            StartOfWord,
-            StartOfSentence,
-            StartOfAbreviation,
-            Abbreviation,
-
-        }
-
         private static bool IsUpper(string pascalStr, int index)
         {
             if (index < 0)
@@ -686,32 +590,41 @@ namespace Signum.Utilities
 
         public static string Combine(this string separator, params object[] elements)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = null;
             foreach (var item in elements)
             {
                 if (item != null)
                 {
+                    if (sb == null)
+                        sb = new StringBuilder();
+                    else
+                        sb.Append(separator);
+
                     sb.Append(item.ToString());
-                    sb.Append(separator);
                 }
             }
 
-            return sb.ToString(0, Math.Max(0, sb.Length - separator.Length));  // Remove at the end is faster
+            return sb == null ? "" : sb.ToString();  // Remove at the end is faster
         }
 
         public static string CombineIfNotEmpty(this string separator, params object[] elements)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = null;
             foreach (var item in elements)
             {
-                if (item != null && item.ToString().HasText())
+                string str;
+                if (item != null && (str = item.ToString()).HasText())
                 {
-                    sb.Append(item.ToString());
-                    sb.Append(separator);
+                    if (sb == null)
+                        sb = new StringBuilder();
+                    else
+                        sb.Append(separator);
+
+                    sb.Append(str);
                 }
             }
 
-            return sb.ToString(0, Math.Max(0, sb.Length - separator.Length));  // Remove at the end is faster
+            return sb == null ? "" : sb.ToString();  // Remove at the end is faster
         }
 
         public static StringBuilder AppendLines(this StringBuilder sb, IEnumerable<string> strings)

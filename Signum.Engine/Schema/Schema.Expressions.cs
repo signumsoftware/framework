@@ -14,7 +14,6 @@ using System.Diagnostics;
 using System.Collections.ObjectModel;
 using Signum.Engine.Linq;
 using Signum.Entities.Reflection;
-using Signum.Engine.Properties;
 using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Maps
@@ -23,32 +22,32 @@ namespace Signum.Engine.Maps
     {
         internal Expression GetProjectorExpression(Alias tableAlias, QueryBinder binder)
         {
-            var bindings = Bindings(tableAlias, binder);
-
             if (IsView)
             {
+                var bindings = this.Fields.Values.Select(ef=>new FieldBinding(ef.FieldInfo, ef.Field.GetExpression(tableAlias, binder, null))).ToReadOnly();
+
                 return new EmbeddedEntityExpression(this.Type, null, bindings, null);
             }
             else
             {
-                Expression id = bindings.FirstEx(a => ReflectionTools.FieldEquals(a.FieldInfo, EntityExpression.IdField)).Binding;
+                Expression id = GetIdExpression(tableAlias);
+
+                var bindings = GenerateBindings(tableAlias, binder, id); 
+                var mixins = GenerateMixins(tableAlias, binder, id);
 
                 Schema.Current.AssertAllowed(Type);
 
-                var result = new EntityExpression(this.Type, id, tableAlias, bindings);
+                var result = new EntityExpression(this.Type, id, tableAlias, bindings, mixins, avoidExpandOnRetrieving: false);
 
                 return result; 
             }
         }
 
-        internal ReadOnlyCollection<FieldBinding> Bindings(Alias tableAlias, QueryBinder binder)
+        internal ReadOnlyCollection<FieldBinding> GenerateBindings(Alias tableAlias, QueryBinder binder, Expression id)
         {
             List<FieldBinding> result = new List<FieldBinding>();
 
-            var id = GetIdExpression(tableAlias);
-
-            if (id != null)
-                result.Add(new FieldBinding(Table.fiId, id));
+           result.Add(new FieldBinding(Table.fiId, id));
 
             foreach (var ef in this.Fields.Values)
             {
@@ -58,7 +57,16 @@ namespace Signum.Engine.Maps
                     result.Add(new FieldBinding(fi, ef.Field.GetExpression(tableAlias, binder, id)));
             }
 
+
             return result.ToReadOnly();
+        }
+
+        internal ReadOnlyCollection<MixinEntityExpression> GenerateMixins(Alias tableAlias, QueryBinder binder, Expression id)
+        {
+            if (this.Mixins == null)
+                return null;
+
+            return this.Mixins.Values.Select(m => (MixinEntityExpression)m.GetExpression(tableAlias, binder, id)).ToReadOnly();
         }
 
 
@@ -154,7 +162,7 @@ namespace Signum.Engine.Maps
         {
             Type cleanType = IsLite ? Lite.Extract(FieldType) : FieldType;
 
-            var result = new EntityExpression(cleanType, new ColumnExpression(this.ReferenceType(), tableAlias, Name), null, null);
+            var result = new EntityExpression(cleanType, new ColumnExpression(this.ReferenceType(), tableAlias, Name), null, null, null, AvoidExpandOnRetrieving);
 
             if(this.IsLite)
                 return binder.MakeLite(result, null);
@@ -185,7 +193,7 @@ namespace Signum.Engine.Maps
         {
             var bindings = (from kvp in EmbeddedFields
                             let fi = kvp.Value.FieldInfo
-                            select new FieldBinding(fi, kvp.Value.Field.GetExpression(tableAlias, binder, null))).ToReadOnly();
+                            select new FieldBinding(fi, kvp.Value.Field.GetExpression(tableAlias, binder, id))).ToReadOnly();
 
             ColumnExpression hasValue = HasValue == null ? null : new ColumnExpression(typeof(bool), tableAlias, HasValue.Name);
             return new EmbeddedEntityExpression(this.FieldType, hasValue, bindings, this); 
@@ -209,11 +217,39 @@ namespace Signum.Engine.Maps
 
             var bindings = (from kvp in EmbeddedFields
                             let fi = kvp.Value.FieldInfo
-                            select new FieldBinding(fi,
-                                dic.TryGetC(fi.Name) ?? tools.VisitConstant(Expression.Constant(null, fi.FieldType), fi.FieldType))).ToReadOnly();
+                            select new FieldBinding(fi, 
+                                !(fi.FieldType.IsByRef || fi.FieldType.IsNullable()) ?  dic.GetOrThrow(fi.Name, "No value defined for non-nullable field {0}") : 
+                                (dic.TryGetC(fi.Name) ?? tools.VisitConstant(Expression.Constant(null, fi.FieldType), fi.FieldType))
+                            )).ToReadOnly();
 
             return new EmbeddedEntityExpression(this.FieldType, Expression.Constant(true), bindings, this);
         }
+    }
+
+    public partial class FieldMixin
+    {
+        internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id)
+        {
+            var bindings = (from kvp in Fields
+                            let fi = kvp.Value.FieldInfo
+                            select new FieldBinding(fi, kvp.Value.Field.GetExpression(tableAlias, binder, id))).ToReadOnly();
+
+            return new MixinEntityExpression(this.FieldType, bindings, this);
+        }
+
+        //internal EmbeddedEntityExpression FromMemberInitiExpression(MemberInitExpression mie, QueryBinder tools)
+        //{
+        //    var dic = mie.Bindings.OfType<MemberAssignment>().ToDictionary(a => (a.Member as FieldInfo ?? Reflector.FindFieldInfo(mie.Type, (PropertyInfo)a.Member)).Name, a => a.Expression);
+
+        //    var bindings = (from kvp in EmbeddedFields
+        //                    let fi = kvp.Value.FieldInfo
+        //                    select new FieldBinding(fi,
+        //                        !(fi.FieldType.IsByRef || fi.FieldType.IsNullable()) ? dic.GetOrThrow(fi.Name, "No value defined for non-nullable field {0}") :
+        //                        (dic.TryGetC(fi.Name) ?? tools.VisitConstant(Expression.Constant(null, fi.FieldType), fi.FieldType))
+        //                    )).ToReadOnly();
+
+        //    return new EmbeddedEntityExpression(this.FieldType, Expression.Constant(true), bindings, this);
+        //}
     }
 
     public partial class FieldImplementedBy
@@ -222,7 +258,7 @@ namespace Signum.Engine.Maps
         {
             var implementations = (from kvp in ImplementationColumns
                                    select new Linq.ImplementationColumn(kvp.Key,
-                                            new EntityExpression(kvp.Key, new ColumnExpression(kvp.Value.ReferenceType(), tableAlias, kvp.Value.Name), null, null))
+                                            new EntityExpression(kvp.Key, new ColumnExpression(kvp.Value.ReferenceType(), tableAlias, kvp.Value.Name), null, null, null, AvoidExpandOnRetrieving))
                                     ).ToReadOnly();
 
             var result = new ImplementedByExpression(IsLite ? Lite.Extract(FieldType) : FieldType, implementations);

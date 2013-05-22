@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +8,7 @@ using System.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Reflection;
-using Signum.Entities.Properties;
+using System.ComponentModel;
 
 namespace Signum.Entities.DynamicQuery
 {
@@ -16,8 +16,8 @@ namespace Signum.Entities.DynamicQuery
     public class CollectionElementToken : QueryToken
     {
         public CollectionElementType CollectionElementType { get; private set; }
-        Type elementType;
 
+        Type elementType;
         internal CollectionElementToken(QueryToken parent, CollectionElementType type)
             : base(parent)
         {
@@ -43,7 +43,7 @@ namespace Signum.Entities.DynamicQuery
             get { return CollectionElementType.ToString(); }
         }
 
-        protected override List<QueryToken> SubTokensInternal()
+        protected override List<QueryToken> SubTokensOverride()
         {
             return SubTokensBase(Type, GetImplementations());
         }
@@ -104,7 +104,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string NiceName()
         {
-            if (CollectionElementType != CollectionElementType.Element)
+            if (!CollectionElementType.IsElement())
                 throw new InvalidOperationException("NiceName not supported for {0}".Formato(CollectionElementType));
 
             Type parentElement = elementType.CleanType();
@@ -120,26 +120,11 @@ namespace Signum.Entities.DynamicQuery
             return new CollectionElementToken(Parent.Clone(), CollectionElementType);
         }
 
-        static MethodInfo miAnyE = ReflectionTools.GetMethodInfo((IEnumerable<string> col) => col.Any(null)).GetGenericMethodDefinition();
-        static MethodInfo miAllE = ReflectionTools.GetMethodInfo((IEnumerable<string> col) => col.All(null)).GetGenericMethodDefinition();
-        static MethodInfo miAnyQ = ReflectionTools.GetMethodInfo((IQueryable<string> col) => col.Any(null)).GetGenericMethodDefinition();
-        static MethodInfo miAllQ = ReflectionTools.GetMethodInfo((IQueryable<string> col) => col.All(null)).GetGenericMethodDefinition();
-
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
         {
-            throw new InvalidOperationException("CollectionElementToken does not support this method");
+            throw new InvalidOperationException("CollectionElementToken should have a replacement at this stage");
         }
 
-        internal Expression BuildExpressionLambda(BuildExpressionContext context, LambdaExpression lambda)
-        {
-            MethodInfo mi = typeof(IQueryable).IsAssignableFrom(Parent.Type) ? 
-                    (CollectionElementType == CollectionElementType.All ? miAllQ : miAnyQ) :
-                    (CollectionElementType == CollectionElementType.All ? miAllE : miAnyE);
-
-            var collection = Parent.BuildExpression(context);
-            
-            return Expression.Call(mi.MakeGenericMethod(elementType), collection, lambda);
-        }
 
         internal ParameterExpression CreateParameter()
         {
@@ -156,7 +141,7 @@ namespace Signum.Entities.DynamicQuery
             return allTokens
                 .SelectMany(t => t.FollowC(tt => tt.Parent))
                 .OfType<CollectionElementToken>()
-                .Where(a => a.CollectionElementType == CollectionElementType.Element)
+                .Where(a => a.CollectionElementType.IsElement())
                 .Distinct()
                 .OrderBy(a => a.FullKey().Length)
                 .ToList();
@@ -167,7 +152,7 @@ namespace Signum.Entities.DynamicQuery
             if (elements.IsEmpty())
                 return null;
 
-            return Resources.TheNumberOf0IsBeingMultipliedBy1.Formato(entityType.NiceName(), elements.CommaAnd(a => a.Parent.ToString()));
+            return ValidationMessage.TheNumberOf0IsBeingMultipliedBy1.NiceToString().Formato(entityType.NiceName(), elements.CommaAnd(a => a.Parent.ToString()));
         }
 
         public override string TypeColor
@@ -177,12 +162,103 @@ namespace Signum.Entities.DynamicQuery
     }
 
 
+    public class FilterBuildExpressionContext : BuildExpressionContext
+    {
+        public FilterBuildExpressionContext(BuildExpressionContext context)
+            :base(context.TupleType, context.Parameter, context.Replacemens.ToDictionary())
+        {
+        }
 
-    [ForceLocalization]
+        public readonly Dictionary<CollectionElementToken, AnyAllFilter> AllAnyFilters = new Dictionary<CollectionElementToken, AnyAllFilter>();
+        public readonly List<IFilterExpression> Filters = new List<IFilterExpression>();
+    }
+
+    public interface IFilterExpression
+    {
+        Expression ToExpression(FilterBuildExpressionContext ctx);
+    }
+
+    public class FilterExpression : IFilterExpression
+    {
+        public FilterExpression(Expression expresion)
+        {
+            this.Expression = expresion;
+        }
+
+        public readonly Expression Expression;
+
+        public Expression ToExpression(FilterBuildExpressionContext ctx)
+        {
+            return Expression;
+        }
+    }
+
+    public class AnyAllFilter : IFilterExpression
+    {
+        public AnyAllFilter(CollectionElementToken ce)
+        {
+            if (ce.CollectionElementType.ToString().StartsWith("Element"))
+                throw new ArgumentException("ce should be non-Free Any or All");
+
+            this.Token = ce;
+            this.Parameter = ce.CreateParameter(); 
+        }
+
+
+        public readonly ParameterExpression Parameter;
+        public readonly CollectionElementToken Token;
+        public readonly List<IFilterExpression> Filters = new List<IFilterExpression>();
+
+        static MethodInfo miAnyE = ReflectionTools.GetMethodInfo((IEnumerable<string> col) => col.Any(null)).GetGenericMethodDefinition();
+        static MethodInfo miAllE = ReflectionTools.GetMethodInfo((IEnumerable<string> col) => col.All(null)).GetGenericMethodDefinition();
+        static MethodInfo miAnyQ = ReflectionTools.GetMethodInfo((IQueryable<string> col) => col.Any(null)).GetGenericMethodDefinition();
+        static MethodInfo miAllQ = ReflectionTools.GetMethodInfo((IQueryable<string> col) => col.All(null)).GetGenericMethodDefinition();
+
+        public Expression ToExpression(FilterBuildExpressionContext ctx)
+        {
+            var collection = Token.Parent.BuildExpression(ctx);
+
+            var and = Filters.Select(f => f.ToExpression(ctx)).AggregateAnd();
+
+            var lambda = Expression.Lambda(and, Parameter);
+
+            MethodInfo mi = typeof(IQueryable).IsAssignableFrom(Token.Parent.Type) ?
+                 (Token.CollectionElementType.ToString().StartsWith("All") ? miAllQ : miAnyQ) :
+                 (Token.CollectionElementType.ToString().StartsWith("All") ? miAllE : miAnyE);
+
+            return Expression.Call(mi.MakeGenericMethod(Parameter.Type), collection, lambda);
+        }
+    }
+
+    [DescriptionOptions(DescriptionOptions.Members)]
     public enum CollectionElementType
     {
         Element,
         Any,
-        All
-    }   
+        All,
+
+        [Description("Element (2)")]
+        Element2,
+        [Description("Any (2)")]
+        Any2,
+        [Description("All (2)")]
+        All2,
+
+        [Description("Element (3)")]
+        Element3,
+        [Description("Any (3)")]
+        Any3,
+        [Description("All (3)")]
+        All3,
+    }
+
+    public static class CollectionElementTypeExtensions
+    {
+        public static bool IsElement(this CollectionElementType cet)
+        {
+            return cet == CollectionElementType.Element ||
+                cet == CollectionElementType.Element2 ||
+                cet == CollectionElementType.Element3;
+        }
+    }
 }

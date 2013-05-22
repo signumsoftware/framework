@@ -35,14 +35,28 @@ namespace Signum.Web
             if (settingsModifier != null)
                 settingsModifier(ec);
 
-            string viewName = ec.ViewName ??
-                Navigator.Manager.EntitySettings[context.Type.CleanType()].OnPartialViewName((ModifiableEntity)context.UntypedValue);
+            string viewName = ec.ViewName;
+            if (viewName == null)
+            {
+                var es = Navigator.Manager.EntitySettings.GetOrThrow(context.Type.CleanType());
+
+                viewName = es.OnPartialViewName((ModifiableEntity)context.UntypedValue);
+
+                context.ViewOverrides = es.ViewOverrides;
+            }
 
             ViewDataDictionary vdd = new ViewDataDictionary(context);
             if (ec.ViewData != null)
                 vdd.AddRange(ec.ViewData);
 
-            return helper.Partial(viewName, vdd);
+            var result = helper.Partial(viewName, vdd); 
+
+            var vo = tc.ViewOverrides; 
+
+            if (vo == null)
+                return result;
+
+            return vo.OnSurroundLine(context.PropertyRoute, helper, tc, result);
         }
     }
 }

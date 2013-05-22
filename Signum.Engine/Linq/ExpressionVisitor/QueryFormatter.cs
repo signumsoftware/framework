@@ -10,7 +10,6 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.DataStructures;
 using Signum.Entities;
 using Signum.Utilities.Reflection;
-using Signum.Engine.Properties;
 using System.Data;
 using Signum.Engine.Maps;
 using Signum.Entities.DynamicQuery;
@@ -30,13 +29,13 @@ namespace Signum.Engine.Linq
         ParameterExpression row = Expression.Parameter(typeof(IProjectionRow), "row");
         static PropertyInfo miReader = ReflectionTools.GetPropertyInfo((IProjectionRow row) => row.Reader);
 
-        class ParameterInfo
+        class DbParameterPair
         {
-            internal MethodCallExpression Expression;
+            internal DbParameter Parameter;
             internal string Name; 
         }
 
-        Dictionary<Expression, ParameterInfo> parameterExpressions = new Dictionary<Expression, ParameterInfo>(); 
+        Dictionary<Expression, DbParameterPair> parameterExpressions = new Dictionary<Expression, DbParameterPair>(); 
 
         int parameter = 0; 
 
@@ -47,7 +46,7 @@ namespace Signum.Engine.Linq
 
         MethodInfo miCreateParameter = ReflectionTools.GetMethodInfo((ParameterBuilder s) => s.CreateParameter(null, SqlDbType.BigInt, null, false, null));
 
-        ParameterInfo CreateParameter(Expression value)
+        DbParameterPair CreateParameter(ConstantExpression value)
         {
             string name = GetNextParamAlias();
 
@@ -56,23 +55,13 @@ namespace Signum.Engine.Linq
             if (clrType.IsEnum)
                 clrType = typeof(int);
 
-
             var typePair = Schema.Current.Settings.GetSqlDbTypePair(clrType);
-
-            Expression valExpression = value.Type.IsNullable() ? 
-                Expression.Coalesce(Expression.Convert(value, typeof(object)), Expression.Constant(DBNull.Value)) :
-                (Expression)Expression.Convert(value, typeof(object));
 
             var pb = Connector.Current.ParameterBuilder;
 
-            return new ParameterInfo
+            return new DbParameterPair
             {
-                Expression = Expression.Call(Expression.Constant(pb), miCreateParameter,
-                   Expression.Constant(name),
-                   Expression.Constant(typePair.SqlDbType),
-                   Expression.Constant(typePair.UdtTypeName, typeof(string)),
-                   Expression.Constant(nullable),
-                   valExpression),
+                Parameter = pb.CreateParameter(name, typePair.SqlDbType, typePair.UdtTypeName, nullable, value.Value ?? DBNull.Value),
                 Name = name
             }; 
         }
@@ -80,13 +69,12 @@ namespace Signum.Engine.Linq
         private QueryFormatter() { }
 
 
-        static internal string Format(Expression expression, out Expression<Func<DbParameter[]>> getParameters)
+        static internal string Format(Expression expression, out List<DbParameter> getParameters)
         {
             QueryFormatter qf = new QueryFormatter();
             qf.Visit(expression);
 
-            getParameters = Expression.Lambda<Func<DbParameter[]>>(
-                Expression.NewArrayInit(typeof(DbParameter), qf.parameterExpressions.Values.Select(pi => pi.Expression).ToArray()));
+            getParameters = qf.parameterExpressions.Values.Select(pi => pi.Parameter).ToList();
 
             return qf.sb.ToString();
         }
@@ -484,6 +472,12 @@ namespace Signum.Engine.Linq
                 }
             }
 
+            if (select.ForXmlPathEmpty)
+            {
+                this.AppendNewLine(Indentation.Same);
+                sb.Append("FOR XML PATH('')");
+            }
+
             if (!isFirst)
             {
                 sb.Append(")");
@@ -566,7 +560,7 @@ namespace Signum.Engine.Linq
         protected override Expression VisitTable(TableExpression table)
         {
             sb.Append(table.Name.ToString());
- 
+
             return table;
         }
 
@@ -763,9 +757,14 @@ namespace Signum.Engine.Linq
             throw InvalidSqlExpression(init);
         }
 
-        protected override Expression VisitLite(LiteExpression lite)
+        protected override Expression VisitLiteValue(LiteValueExpression lite)
         {
             throw InvalidSqlExpression(lite);
+        }
+
+        protected override Expression VisitLiteReference(LiteReferenceExpression lite)
+        {
+            return base.VisitLiteReference(lite);
         }
 
         protected override Expression VisitInvocation(InvocationExpression iv)

@@ -8,6 +8,7 @@ using Signum.Entities;
 using System.Diagnostics;
 using System.IO;
 using Signum.Utilities;
+using Signum.Test.Environment;
 
 namespace Signum.Test.LinqProviderUpdateDelete
 {
@@ -235,6 +236,16 @@ namespace Signum.Test.LinqProviderUpdateDelete
                 LabelDN label = Database.Query<LabelDN>().FirstEx();
 
                 int count = Database.Query<AlbumDN>().UnsafeUpdate(a => new AlbumDN().SetReadonly(al => al.Label, label));
+                //tr.Commit();
+            }
+        }
+
+        [TestMethod]
+        public void UpdateMixin()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                int count = Database.Query<NoteWithDateDN>().UnsafeUpdate(a => new NoteWithDateDN().SetMixin((CorruptMixin ce) => ce.Corrupt, true));
                 //tr.Commit();
             }
         }

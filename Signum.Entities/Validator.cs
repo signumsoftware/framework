@@ -13,40 +13,89 @@ namespace Signum.Entities
 {
     public static class Validator
     {
-        static Dictionary<Type, Dictionary<string, PropertyPack>> validators = new Dictionary<Type, Dictionary<string, PropertyPack>>();
+        static Polymorphic<Dictionary<string, IPropertyValidator>> validators =
+            new Polymorphic<Dictionary<string, IPropertyValidator>>(PolymorphicMerger.InheritDictionary, typeof(ModifiableEntity));
 
-        public static IsApplicableOf IsApplicable<V>() where V : ValidatorAttribute
+        static void GenerateType(Type type)
         {
-            return new IsApplicableOf { validatorType = typeof(V) };
+            giGenerateType.GetInvoker(type)();
         }
 
-        public static PropertyPack GetOrCreatePropertyPack<T, S>(Expression<Func<T, S>> property) where T : ModifiableEntity
+        static GenericInvoker<Action> giGenerateType =
+            new GenericInvoker<Action>(() => GenerateType<ModifiableEntity>());
+
+        static void GenerateType<T>() where T : ModifiableEntity
         {
-            return GetOrCreatePropertyPack(typeof(T), ReflectionTools.GetPropertyInfo(property).Name);
+            if (validators.GetDefinition(typeof(T)) != null)
+                return;
+
+            if(typeof(T) != typeof(ModifiableEntity))
+                GenerateType(typeof(T).BaseType);
+
+            var dic = (from pi in typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
+                       where !Attribute.IsDefined(pi, typeof(HiddenPropertyAttribute))
+                       select KVP.Create(pi.Name, (IPropertyValidator)new PropertyValidator<T>(pi))).ToDictionary();
+
+            validators.SetDefinition(typeof(T), dic);
         }
 
-        public static PropertyPack GetOrCreatePropertyPack(PropertyRoute route)
+        public static PropertyValidator<T> OverridePropertyValidator<T>(Expression<Func<T, object>> property) where T : ModifiableEntity
+        {
+            GenerateType<T>();
+
+            var pi = ReflectionTools.GetPropertyInfo(property);
+
+            var dic = validators.GetDefinition(typeof(T));
+
+            PropertyValidator<T> result = (PropertyValidator<T>)dic.TryGetC(pi.Name);
+
+            if (result == null)
+            {
+                result = new PropertyValidator<T>(pi);
+                dic.Add(pi.Name, result);
+                validators.ClearCache();
+            }
+
+            return result;
+        }
+
+        public static PropertyValidator<T> PropertyValidator<T>(Expression<Func<T, object>> property) where T : ModifiableEntity
+        {
+            GenerateType<T>();
+
+            var pi = ReflectionTools.GetPropertyInfo(property);
+
+            var dic = validators.GetDefinition(typeof(T));
+
+            PropertyValidator<T> result = (PropertyValidator<T>)dic.TryGetC(pi.Name);
+
+            if (result == null)
+                throw new InvalidOperationException("{0} is not defined in {1}, try calling OverridePropertyValidator".Formato(pi.PropertyName(), typeof(T).TypeName()));
+
+            return result;
+        }
+
+        public static IPropertyValidator TryGetPropertyValidator(PropertyRoute route)
         {
             if (route.PropertyRouteType != PropertyRouteType.FieldOrProperty)
                 throw new InvalidOperationException("PropertyRoute of type Property expected");
 
-            return GetOrCreatePropertyPack(route.Parent.Type, route.PropertyInfo.Name);
+            return TryGetPropertyValidator(route.Parent.Type, route.PropertyInfo.Name);
         }
 
-        public static PropertyPack GetOrCreatePropertyPack(Type type, string property)
+        public static IPropertyValidator TryGetPropertyValidator(Type type, string property)
         {
-            return GetPropertyPacks(type).TryGetC(property);
+            GenerateType(type);
+
+            return validators.GetValue(type).TryGetC(property);
         }
 
-        public static Dictionary<string, PropertyPack> GetPropertyPacks(Type type)
+
+        public static Dictionary<string, IPropertyValidator> GetPropertyValidators(Type type)
         {
-            lock (validators)
-            {
-                return validators.GetOrCreate(type, () => MemberEntryFactory.GenerateIList(type, MemberOptions.Properties | MemberOptions.Getter | MemberOptions.Setters | MemberOptions.Untyped)
-                    .Cast<IMemberEntry>()
-                    .Where(p => !Attribute.IsDefined(p.MemberInfo, typeof(HiddenPropertyAttribute)))
-                    .ToDictionary(p => p.Name, p => new PropertyPack((PropertyInfo)p.MemberInfo, p.UntypedGetter, p.UntypedSetter)));
-            }
+            GenerateType(type);
+
+            return validators.GetValue(type);
         }
 
         public static bool Is<T>(this PropertyInfo pi, Expression<Func<T>> property)
@@ -61,68 +110,108 @@ namespace Signum.Entities
             return ReflectionTools.MemeberEquals(pi, pi2);
         }
 
-        public class IsApplicableOf
-        {
-            internal Type validatorType;
 
-            public IsApplicableWhen<T> Of<T, S>(Expression<Func<T, S>> property)
-            where T : ModifiableEntity
-            {
-                var pp = GetOrCreatePropertyPack(property);
-
-                var val = pp.Validators.SingleOrDefaultEx(v => v.GetType() == validatorType);
-
-                if (val == null)
-                    throw new InvalidOperationException("No '{0}' found on '{1}'".Formato(validatorType.NiceName(), pp.PropertyInfo.PropertyName()));
-
-                return new IsApplicableWhen<T> { validator = val };
-            }
-        }
-
-        public class IsApplicableWhen<T> where T : ModifiableEntity
-        {
-            internal ValidatorAttribute validator;
-
-            public void When(Func<T, bool> isApplicable)
-            {
-                if (isApplicable == null)
-                    validator.IsApplicable = null;
-                else
-                    validator.IsApplicable = m => isApplicable((T)m);
-            }
-        }
     }
 
-    public class PropertyPack
+    public interface IPropertyValidator
     {
-        internal PropertyPack(PropertyInfo pi, Func<object, object> getValue, Action<object, object> setValue)
+        PropertyInfo PropertyInfo { get; }
+        List<ValidatorAttribute> Validators { get; }
+
+        string PropertyCheck(ModifiableEntity modifiableEntity);
+    }
+
+    public class PropertyValidator<T> : IPropertyValidator
+        where T : ModifiableEntity
+    {
+        public Func<T, object> GetValue { get; private set; }
+        public Action<T, object> SetValue { get; private set; }
+        public PropertyInfo PropertyInfo { get; private set; }
+        public List<ValidatorAttribute> Validators { get; private set; }
+
+        public Func<T, bool> IsAplicable { get; set; }
+        public Func<T, bool> IsAplicablePropertyValidation { get; set; }
+        public Func<T, bool> IsAplicableExternalPropertyValidation { get; set; }
+        public Func<T, bool> IsAplicableStaticPropertyValidation { get; set; }
+
+        public Func<T, PropertyInfo, string> StaticPropertyValidation { get; set; }
+
+        internal PropertyValidator(PropertyInfo pi)
         {
             this.PropertyInfo = pi;
-            Validators = pi.GetCustomAttributes(typeof(ValidatorAttribute), true)
-                .OfType<ValidatorAttribute>()
-                .OrderBy(va => va.Order).ThenBy(va => va.GetType().Name).ToList();
 
-            this.GetValue = getValue;
-            this.SetValue = setValue;
+            this.Validators = pi.GetCustomAttributes(typeof(ValidatorAttribute), false).OfType<ValidatorAttribute>().OrderBy(va => va.Order).ThenBy(va => va.GetType().Name).ToList();
+
+            this.GetValue = ReflectionTools.CreateGetter<T>(pi);
+            this.SetValue = ReflectionTools.CreateSetter<T>(pi);
         }
 
-        public readonly Func<object, object> GetValue;
-        public readonly Action<object, object> SetValue;
-        public readonly PropertyInfo PropertyInfo;
-        public readonly List<ValidatorAttribute> Validators;
-
-        public Func<ModifiableEntity, bool> IsAplicable { get; set; }
-        public Func<ModifiableEntity, bool> IsAplicablePropertyValidation { get; set; }
-        public Func<ModifiableEntity, bool> IsAplicableExternalPropertyValidation { get; set; }
-
-        public PropertyValidationEventHandler StaticPropertyValidation { get; set; }
-        
         public void ReplaceValidators(params ValidatorAttribute[] validators)
         {
             Validators.Clear();
-            Validators.AddRange(validators); 
+            Validators.AddRange(validators);
+        }
+
+        public string PropertyCheck(T entity)
+        {
+            if (IsAplicable != null && !IsAplicable(entity))
+                return null;
+
+            if (Validators.Count > 0)
+            {
+                object propertyValue = GetValue(entity);
+
+                //ValidatorAttributes
+                foreach (var validator in Validators)
+                {
+                    string result = validator.Error(entity, PropertyInfo, propertyValue);
+                    if (result != null)
+                        return result;
+                }
+            }
+
+            //Internal Validation
+            if (IsAplicablePropertyValidation == null || IsAplicablePropertyValidation(entity))
+            {
+                string result = entity.PropertyValidation(PropertyInfo);
+                if (result != null)
+                    return result;
+            }
+
+            //External Validation
+            if (IsAplicableExternalPropertyValidation == null || IsAplicableExternalPropertyValidation(entity))
+            {
+                string result = entity.OnExternalPropertyValidation(PropertyInfo);
+                if (result != null)
+                    return result;
+            }
+
+            //Static validation
+            if (StaticPropertyValidation != null && (IsAplicableStaticPropertyValidation == null || IsAplicableStaticPropertyValidation(entity)))
+            {
+                foreach (Func<T, PropertyInfo, string> item in StaticPropertyValidation.GetInvocationList())
+                {
+                    string result = item(entity, PropertyInfo);
+                    if (result != null)
+                        return result;
+                }
+            }
+
+            return null;
+        }
+
+        public string PropertyCheck(ModifiableEntity modifiableEntity)
+        {
+            return PropertyCheck((T)modifiableEntity);
+        }
+
+        public void IsApplicableValidator<V>(Func<T, bool> isApplicable) where V : ValidatorAttribute
+        {
+            V validator = Validators.OfType<V>().SingleEx();
+            if (isApplicable == null)
+                validator.IsApplicable = null;
+            else
+                validator.IsApplicable = m => isApplicable((T)m);
         }
     }
-
-    public delegate string PropertyValidationEventHandler(ModifiableEntity sender, PropertyInfo pi);
 }

@@ -189,7 +189,7 @@ namespace Signum.Windows
             try
             {
                 isUserInteraction = true;
-                Entity = entity;
+                Entity = Server.Convert(entity, Type);
             }
             finally
             {
@@ -351,7 +351,7 @@ namespace Signum.Windows
             if (EntityChanged != null)
                 EntityChanged(this, isUserInteraction, oldValue, newValue);
 
-            AutomationProperties.SetHelpText(this, Common.GetEntityStringAndHascode(newValue));
+            AutomationProperties.SetItemStatus(this, Common.GetEntityStringAndHashCode(newValue));
 
             UpdateVisibility();
         }
@@ -376,13 +376,13 @@ namespace Signum.Windows
             object value;
             if (Creating == null)
             {
-                Type type = SelectType(Navigator.IsFindable);
+                Type type = SelectType(t => Navigator.IsCreable(t, isSearchEntity: false));
                 if (type == null)
                     return null;
 
                 object entity = Constructor.Construct(type, this);
 
-                value = Server.Convert(entity, Type);
+                value = entity;
             }
             else
                 value = Creating();
@@ -406,7 +406,7 @@ namespace Signum.Windows
             object value;
             if (Finding == null)
             {
-                Type type = SelectType(t => Navigator.IsCreable(t, isSearchEntity: false));
+                Type type = SelectType(Navigator.IsFindable);
                 if (type == null)
                     return null;
 
@@ -418,12 +418,12 @@ namespace Signum.Windows
             if (value == null)
                 return null;
 
-            return Server.Convert(value, Type);
+            return value;
         }
 
-        public virtual PropertyRoute GetEntityTypeContext()
+        public virtual PropertyRoute GetEntityPropertyRoute()
         {
-            return Common.GetTypeContext(this);
+            return Common.GetPropertyRoute(this);
         }
 
         protected object OnViewing(object entity, bool creating)
@@ -436,7 +436,7 @@ namespace Signum.Windows
 
             var options = new ViewOptions
             {
-                TypeContext = CleanType.IsEmbeddedEntity() ? GetEntityTypeContext() : null,
+                PropertyRoute = CleanType.IsEmbeddedEntity() ? GetEntityPropertyRoute() : null,
             };
 
             bool isReadOnly = Common.GetIsReadOnly(this) && !creating;

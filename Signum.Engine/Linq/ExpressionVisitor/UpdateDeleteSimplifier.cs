@@ -11,10 +11,12 @@ namespace Signum.Engine.Linq
     class UpdateDeleteSimplifier: DbExpressionVisitor
     {
         bool removeSelectRowCount;
+        AliasGenerator aliasGenerator;
 
-        public static CommandExpression Simplify(CommandExpression ce, bool removeSelectRowCount)
+
+        public static CommandExpression Simplify(CommandExpression ce, bool removeSelectRowCount, AliasGenerator aliasGenerator)
         {
-            return (CommandExpression)new UpdateDeleteSimplifier { removeSelectRowCount = removeSelectRowCount }.Visit(ce);
+            return (CommandExpression)new UpdateDeleteSimplifier { removeSelectRowCount = removeSelectRowCount, aliasGenerator = aliasGenerator }.Visit(ce);
         }
 
         protected override Expression VisitSelectRowCount(SelectRowCountExpression src)
@@ -74,7 +76,7 @@ namespace Signum.Engine.Linq
 
                 if (table.Alias == result.Alias)
                 {
-                    return new ColumnExpression(result.Type, Alias.Table(table.Name), result.Name);
+                    return new ColumnExpression(result.Type, aliasGenerator.Table(table.Name), result.Name);
                 }
 
                 return result;

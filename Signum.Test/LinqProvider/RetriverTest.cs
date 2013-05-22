@@ -14,6 +14,7 @@ using System.Data.SqlTypes;
 using System.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Entities.Reflection;
+using Signum.Test.Environment;
 
 namespace Signum.Test.LinqProvider
 {
@@ -89,8 +90,7 @@ namespace Signum.Test.LinqProvider
             var graph = GraphExplorer.FromRoots(list);
 
             var problematic = graph.Where(a =>
-                a.Modified != null ||
-                a.SelfModified ||
+                a.IsGraphModified &&
                 a is IdentifiableEntity && (((IdentifiableEntity)a).IdOrNull == null || ((IdentifiableEntity)a).IsNew));
 
             if (problematic.Any())

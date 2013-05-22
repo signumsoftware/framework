@@ -8,7 +8,7 @@
                 OK</button>                
     </div>
     @Html.ValidationSummaryAjax(Model)
-    <div id="@Model.Compose("divMainControl")" class="sf-main-control@(modifiable != null && modifiable.SelfModified ? " sf-changed" : "")">
+    <div id="@Model.Compose("divMainControl")" class="sf-main-control@(modifiable != null && modifiable.IsGraphModified ? " sf-changed" : "")">
         @{ Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);}
     </div>
 </div>

@@ -10,6 +10,7 @@ using System.Windows.Data;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Entities;
 using System.ComponentModel;
+using System.Windows.Controls;
 
 namespace Signum.Windows
 {
@@ -117,6 +118,21 @@ namespace Signum.Windows
             return uiElement;
         }
 
+        public static void After(this FrameworkElement element, FrameworkElement newElement)
+        {
+            var parent = (Panel)element.Parent;
+
+            parent.Children.Insert(parent.Children.IndexOf(element) + 1, newElement);
+        }
+
+
+        public static void Before(this FrameworkElement element, FrameworkElement newElement)
+        {
+            var parent = (Panel)element.Parent;
+
+            parent.Children.Insert(parent.Children.IndexOf(element), newElement);
+        }
+
         public static DataTemplate GetDataTemplate(System.Linq.Expressions.Expression<Func<FrameworkElement>> constructor)
         {
             return new DataTemplate
@@ -141,7 +157,7 @@ namespace Signum.Windows
                 INotifyPropertyChanged newDC = e.OldValue as INotifyPropertyChanged;
                 if (newDC != null)
                     newDC.PropertyChanged += propertyChanged;
-            }; 
+            };
         }
 
         public static void OnEntityPropertyChanged(this EntityBase eb, PropertyChangedEventHandler propertyChanged)
@@ -158,6 +174,7 @@ namespace Signum.Windows
             };
         }
     }
+
 
     class RouteVisitor : SimpleExpressionVisitor
     {

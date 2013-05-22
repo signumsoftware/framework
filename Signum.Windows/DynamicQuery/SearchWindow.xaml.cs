@@ -197,7 +197,7 @@ namespace Signum.Windows
 
             tbQueryName.Text = niceQueryName;
 
-            AutomationProperties.SetItemStatus(this, QueryUtils.GetQueryUniqueKey(QueryName));
+            AutomationProperties.SetName(this, QueryUtils.GetQueryUniqueKey(QueryName));
         }
 
         void ButtonsChanged()
@@ -255,11 +255,29 @@ namespace Signum.Windows
         }
 
         public SearchControl SearchControl { get { return searchControl; } }
+
+        protected override AutomationPeer OnCreateAutomationPeer()
+        {
+            return new SearchWindowAutomationPeer(this);
+        }
     }
 
     public enum SearchMode
     {
         Find,
         Explore
+    }
+
+    public class SearchWindowAutomationPeer : WindowAutomationPeer
+    {
+        public SearchWindowAutomationPeer(SearchWindow searchWindow)
+            : base(searchWindow)
+        {
+        }
+
+        protected override string GetClassNameCore()
+        {
+            return "SearchWindow";
+        }
     }
 }

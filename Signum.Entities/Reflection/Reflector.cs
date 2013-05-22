@@ -9,11 +9,11 @@ using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using Signum.Utilities.DataStructures;
 using System.ComponentModel;
-using Signum.Entities.Properties;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using Signum.Utilities.ExpressionTrees;
 using System.Text.RegularExpressions;
+using System.Collections.Concurrent;
 
 namespace Signum.Entities.Reflection
 {
@@ -38,7 +38,48 @@ namespace Signum.Entities.Reflection
         static Reflector()
         {
             DescriptionManager.CleanTypeName = CleanTypeName; //To allow MyEntityDN
-            DescriptionManager.CleanType = t=> EnumEntity.Extract(t) ?? t.CleanType(); //To allow Lite<T>
+            DescriptionManager.CleanType = t => EnumEntity.Extract(t) ?? t.CleanType(); //To allow Lite<T>
+
+            DescriptionManager.DefaultDescriptionOptions += DescriptionManager_IsEnumsInEntities;
+            DescriptionManager.DefaultDescriptionOptions += DescriptionManager_IsOperationMessageOrQuery;
+            DescriptionManager.DefaultDescriptionOptions += DescriptionManager_IsIIdentifiable;
+
+            DescriptionManager.ShouldLocalizeMemeber += DescriptionManager_ShouldLocalizeMemeber;
+            DescriptionManager.Invalidate();
+        }
+
+        static bool DescriptionManager_ShouldLocalizeMemeber(MemberInfo arg)
+        {
+            return !arg.HasAttribute<HiddenPropertyAttribute>();
+        }
+
+        static ResetLazy<HashSet<Type>> EnumsInEntities = new ResetLazy<HashSet<Type>>(() =>
+        {
+            return (from a in AppDomain.CurrentDomain.GetAssemblies().Where(a => a.HasAttribute<DefaultAssemblyCultureAttribute>())
+                    from t in a.GetTypes()
+                    where typeof(IIdentifiable).IsAssignableFrom(t) || typeof(ModifiableEntity).IsAssignableFrom(t)
+                    let da = t.SingleAttributeInherit<DescriptionOptionsAttribute>()
+                    where da == null || da.Options.IsSet(DescriptionOptions.Members)
+                    from p in t.GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                    where DescriptionManager.OnShouldLocalizeMember(p)
+                    let et = p.PropertyType.UnNullify()
+                    where et.IsEnum && et.Assembly.HasAttribute<DefaultAssemblyCultureAttribute>()
+                    select et).ToHashSet();
+        });
+
+        static DescriptionOptions? DescriptionManager_IsEnumsInEntities(Type t)
+        {
+            return EnumsInEntities.Value.Contains(t) ? DescriptionOptions.Members | DescriptionOptions.Description : (DescriptionOptions?)null;
+        }
+
+        static DescriptionOptions? DescriptionManager_IsIIdentifiable(Type t)
+        {
+             return t.IsInterface && typeof(IIdentifiable).IsAssignableFrom(t) ? DescriptionOptions.Members : (DescriptionOptions?)null;
+        }
+
+        static DescriptionOptions? DescriptionManager_IsOperationMessageOrQuery(Type t)
+        {
+            return t.IsEnum && (t.Name.EndsWith("Operation") || t.Name.EndsWith("Query")) ? DescriptionOptions.Members : (DescriptionOptions?)null;
         }
 
         public static string CleanTypeName(Type t)
@@ -67,6 +108,11 @@ namespace Signum.Entities.Reflection
         public static bool IsIIdentifiable(this Type type)
         {
             return typeof(IIdentifiable).IsAssignableFrom(type);
+        }
+
+        public static bool IsIRootEntity(this Type type)
+        {
+            return typeof(IRootEntity).IsAssignableFrom(type);
         }
 
         public static bool IsModifiableEntity(this Type type)
@@ -107,13 +153,17 @@ namespace Signum.Entities.Reflection
 
         public static PropertyInfo[] PublicInstancePropertiesInOrder(Type type)
         {
-            var result = type.FollowC(t => t.BaseType)
-                .Reverse()
-                .SelectMany(t => PublicInstanceDeclaredPropertiesInOrder(t))
-                .Distinct(a => a.Name) //Overriden properties
-                .ToArray();
+            Dictionary<string, PropertyInfo> properties = new Dictionary<string,PropertyInfo>();
 
-            return result;
+            foreach (var t in type.FollowC(t => t.BaseType).Reverse())
+            {
+                foreach (var pi in PublicInstanceDeclaredPropertiesInOrder(t))
+	            {
+                    properties[pi.Name] = pi;
+	            }
+            }
+
+            return properties.Values.ToArray();
         }
 
         public static MemberInfo[] GetMemberList<T, S>(Expression<Func<T, S>> lambdaToField)
@@ -124,7 +174,7 @@ namespace Signum.Entities.Reflection
             if (ue != null && ue.NodeType == ExpressionType.Convert && ue.Type == typeof(object))
                 e = ue.Operand;
 
-            MemberInfo[] result = e.FollowC(NextExpression).Select(a => GetMember(a)).NotNull().Reverse().ToArray();
+            MemberInfo[] result = e.FollowC(NextExpression).Select(GetMember).NotNull().Reverse().ToArray();
 
             return result;
         }
@@ -140,7 +190,7 @@ namespace Signum.Entities.Reflection
 
                         var parent = mce.Method.IsExtensionMethod() ? mce.Arguments.FirstEx() : mce.Object;
 
-                        if (parent != null && parent.Type.ElementType() == e.Type)
+                        if (parent != null)
                             return parent;
 
                         break;
@@ -161,7 +211,7 @@ namespace Signum.Entities.Reflection
                 case ExpressionType.MemberAccess:
                 {
                     MemberExpression me = (MemberExpression)e;
-                    if (me.Member.DeclaringType.IsLite() && me.Member.Name.StartsWith("Entity"))
+                    if (me.Member.DeclaringType.IsLite() && !me.Member.Name.StartsWith("Entity"))
                         throw new InvalidOperationException("Members of Lite not supported"); 
 
                     return me.Member;
@@ -199,7 +249,6 @@ namespace Signum.Entities.Reflection
             FieldInfo fi = null;
             for (Type tempType = type; tempType != null && fi == null; tempType = tempType.BaseType)
             {
-
                 fi = (tempType.GetField(pi.Name, privateFlags) ??
                       tempType.GetField("m" + pi.Name, privateFlags) ??
                       tempType.GetField("_" + pi, privateFlags));
@@ -220,21 +269,38 @@ namespace Signum.Entities.Reflection
 
         public static PropertyInfo TryFindPropertyInfo(FieldInfo fi)
         {
-            return (fi.DeclaringType.GetProperty(CleanFieldName(fi.Name), BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Public));
-        }
+            const BindingFlags flags = BindingFlags.IgnoreCase | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
-        public static string CleanFieldName(string name)
-        {
-            if (name.Length > 2)
+            var propertyName = PropertyName(fi.Name);
+
+            var result = fi.DeclaringType.GetProperty(propertyName, flags);
+
+            if (result != null)
+                return result;
+
+            foreach (Type i in fi.DeclaringType.GetInterfaces())
             {
-                if (name.StartsWith("_"))
-                    name = name.Substring(1);
-                else if (name.StartsWith("m") && char.IsUpper(name[1]))
-                    name = Char.ToLower(name[1]) + name.Substring(2);
+                result = fi.DeclaringType.GetProperty(i.FullName + "." + propertyName, flags);
+
+                if (result != null)
+                    return result;
             }
 
-            return name.FirstUpper();
+            return null;
         }
+        
+        public static Func<string, string> PropertyName = (string fieldName) =>
+        {
+            //if (name.Length > 2)
+            //{
+            //    if (name.StartsWith("_"))
+            //        name = name.Substring(1);
+            //    else if (name.StartsWith("m") && char.IsUpper(name[1]))
+            //        name = Char.ToLower(name[1]) + name.Substring(2);
+            //}
+
+            return fieldName.FirstUpper();
+        };
 
         public static bool QueryableProperty(Type type, PropertyInfo pi)
         {
@@ -255,7 +321,7 @@ namespace Signum.Entities.Reflection
         public static bool IsLowPopulation(Type type)
         {
             if (!typeof(IIdentifiable).IsAssignableFrom(type))
-                throw new ArgumentException("0 does not inherit from IdentifiableEntity".Formato(type));
+                throw new ArgumentException("{0} does not inherit from IdentifiableEntity".Formato(type));
 
             LowPopulationAttribute lpa = type.SingleAttribute<LowPopulationAttribute>();
             if (lpa != null)
@@ -284,13 +350,13 @@ namespace Signum.Entities.Reflection
 
         public static string FormatString(PropertyRoute route)
         {
-            var simpleRoute = route.SimplifyNoRoot();
+            PropertyRoute simpleRoute = route.SimplifyNoRoot();
 
             FormatAttribute format = simpleRoute.PropertyInfo.SingleAttribute<FormatAttribute>();
             if (format != null)
                 return format.Format;
 
-            var pp = Validator.GetOrCreatePropertyPack(simpleRoute);
+            var pp = Validator.TryGetPropertyValidator(simpleRoute);
             if (pp != null)
             {
                 DateTimePrecissionValidatorAttribute datetimePrecission = pp.Validators.OfType<DateTimePrecissionValidatorAttribute>().SingleOrDefaultEx();

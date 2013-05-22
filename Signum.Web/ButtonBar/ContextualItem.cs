@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -41,7 +41,7 @@ namespace Signum.Web
 
             ButtonBarQueryHelper.RegisterGlobalButtons(ctx =>
             {
-                var selectedText = Properties.Resources.Signum_searchControlMenuSelected;
+                var selectedText = JavascriptMessage.searchControlMenuSelected.NiceToString();
                 return new ToolBarButton[]
                 {
                     new ToolBarMenu

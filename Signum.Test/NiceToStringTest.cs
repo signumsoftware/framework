@@ -6,7 +6,6 @@ using Signum.Utilities.Reflection;
 using Signum.Utilities;
 using System.ComponentModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Signum.Test.Properties;
 using System.Reflection;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
@@ -17,6 +16,7 @@ using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Test
 {
+    [DescriptionOptions(DescriptionOptions.Members)]
     public enum EnumPruebas
     {
         Test,

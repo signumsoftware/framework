@@ -6,7 +6,6 @@ using System.Data.SqlClient;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using Signum.Entities;
-using Signum.Engine.Properties;
 using System.Text.RegularExpressions;
 using System.IO;
 using System.Threading;
@@ -81,6 +80,7 @@ namespace Signum.Engine
      
         public static void OpenSqlFileRetry(this SqlPreCommand command)
         {
+            SafeConsole.WriteLineColor(ConsoleColor.Yellow, "There are changes!");
             string file = command.OpenSqlFile();
             if (SafeConsole.Ask("Open again?"))
                 Process.Start(file);
@@ -185,6 +185,9 @@ namespace Signum.Engine
 
             if (value is SqlHierarchyId)
                 return "CAST('{0}' AS hierarchyid)".Formato(value);
+
+            if (value.GetType().IsEnum)
+                return Convert.ToInt32(value).ToString();
 
             return value.ToString();
         }

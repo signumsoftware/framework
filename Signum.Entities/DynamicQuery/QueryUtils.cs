@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
-using Signum.Entities.Properties;
 using System.Reflection;
 using Signum.Utilities.Reflection;
 using System.Linq.Expressions;
@@ -120,6 +119,7 @@ namespace Signum.Entities.DynamicQuery
                     FilterOperation.NotStartsWith,
                     FilterOperation.NotEndsWith,
                     FilterOperation.NotLike,
+                    FilterOperation.IsIn
                 }
             },
             { 
@@ -130,7 +130,8 @@ namespace Signum.Entities.DynamicQuery
                     FilterOperation.GreaterThan,
                     FilterOperation.GreaterThanOrEqual,
                     FilterOperation.LessThan,
-                    FilterOperation.LessThanOrEqual
+                    FilterOperation.LessThanOrEqual,
+                    FilterOperation.IsIn
                 }
             },
             { 
@@ -142,6 +143,7 @@ namespace Signum.Entities.DynamicQuery
                     FilterOperation.GreaterThanOrEqual,
                     FilterOperation.LessThan,
                     FilterOperation.LessThanOrEqual,
+                    FilterOperation.IsIn
                 }
             },
             { 
@@ -153,6 +155,7 @@ namespace Signum.Entities.DynamicQuery
                     FilterOperation.GreaterThanOrEqual,
                     FilterOperation.LessThan,
                     FilterOperation.LessThanOrEqual,
+                    FilterOperation.IsIn
                 }
             },
             { 
@@ -160,6 +163,7 @@ namespace Signum.Entities.DynamicQuery
                 {
                     FilterOperation.EqualTo,
                     FilterOperation.DistinctTo, 
+                    FilterOperation.IsIn
                 }
             },
             { 
@@ -167,6 +171,7 @@ namespace Signum.Entities.DynamicQuery
                 {
                     FilterOperation.EqualTo,
                     FilterOperation.DistinctTo, 
+                    FilterOperation.IsIn
                 }
             },
             { 
@@ -174,6 +179,7 @@ namespace Signum.Entities.DynamicQuery
                 {
                     FilterOperation.EqualTo,
                     FilterOperation.DistinctTo,
+                    FilterOperation.IsIn
                 }
             },
             { 
@@ -187,27 +193,60 @@ namespace Signum.Entities.DynamicQuery
                 FilterType.Boolean, new List<FilterOperation>
                 {
                     FilterOperation.EqualTo,
-                    FilterOperation.DistinctTo,    
+                    FilterOperation.DistinctTo,   
                 }
             },
         };
 
         public static Func<bool> MergeEntityColumns = null;
 
-        public static List<QueryToken> SubTokens(QueryToken token, IEnumerable<ColumnDescription> columnDescriptions)
+        public static List<QueryToken> SubTokens(this QueryToken token, QueryDescription qd, bool canAggregate)
+        {
+            var result = SubTokensBasic(token, qd);
+
+            if (canAggregate)
+            {
+                if (token == null)
+                {
+                    result.Add(new AggregateToken(AggregateFunction.Count, qd.QueryName));
+                }
+                else if (!(token is AggregateToken))
+                {
+                    FilterType? ft = QueryUtils.TryGetFilterType(token.Type);
+
+                    if (ft == FilterType.Integer || ft == FilterType.Decimal || ft == FilterType.Boolean)
+                    {
+                        result.Add(new AggregateToken(AggregateFunction.Average, token));
+                        result.Add(new AggregateToken(AggregateFunction.Sum, token));
+
+                        result.Add(new AggregateToken(AggregateFunction.Min, token));
+                        result.Add(new AggregateToken(AggregateFunction.Max, token));
+                    }
+                    else if (ft == FilterType.DateTime) /*ft == FilterType.String || */
+                    {
+                        result.Add(new AggregateToken(AggregateFunction.Min, token));
+                        result.Add(new AggregateToken(AggregateFunction.Max, token));
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        static List<QueryToken> SubTokensBasic(QueryToken token, QueryDescription qd)
         {
             if (token == null)
             {
                 if (MergeEntityColumns != null && !MergeEntityColumns())
-                    return columnDescriptions.Select(s => QueryToken.NewColumn(s)).ToList();
+                    return qd.Columns.Select(cd => (QueryToken)new ColumnToken(cd, qd.QueryName)).ToList();
 
-                var dictonary = columnDescriptions.Where(a=>!a.IsEntity).Select(s => QueryToken.NewColumn(s)).ToDictionary(t => t.Key);
+                var dictonary = qd.Columns.Where(a => !a.IsEntity).Select(cd => (QueryToken)new ColumnToken(cd, qd.QueryName)).ToDictionary(t => t.Key);
 
-                var entity = QueryToken.NewColumn(columnDescriptions.SingleEx(a => a.IsEntity));
+                var entity = new ColumnToken(qd.Columns.SingleEx(a => a.IsEntity), qd.QueryName);
 
                 dictonary.Add(entity.Key, entity);
 
-                foreach (var item in entity.SubTokens().OrderBy(a => a.ToString()))
+                foreach (var item in entity.SubTokensInternal().OrderBy(a => a.ToString()))
                 {
                     if (!dictonary.ContainsKey(item.Key))
                     {
@@ -219,15 +258,10 @@ namespace Signum.Entities.DynamicQuery
                 return dictonary.Values.ToList();
             }
             else
-                return token.SubTokens();
+                return token.SubTokensInternal();
         }
 
-        public static QueryToken Parse(string tokenString, QueryDescription qd)
-        {
-            return Parse(tokenString, t => SubTokens(t, qd.Columns)); 
-        }
-
-        public static QueryToken Parse(string tokenString, Func<QueryToken, List<QueryToken>> subTokens)
+        public static QueryToken Parse(string tokenString, QueryDescription qd, bool canAggregate)
         {
             try
             {
@@ -238,15 +272,15 @@ namespace Signum.Entities.DynamicQuery
 
                 string firstPart = parts.FirstEx();
 
-                QueryToken result = subTokens(null).Select(t => t.MatchPart(firstPart)).NotNull().SingleEx(
-                    ()=>Resources.Column0NotFound.Formato(firstPart),
-                    () => Resources.MoreThanOneColumnNamed0.Formato(firstPart));
+                QueryToken result = SubTokens(null, qd, canAggregate).Where(t => t.Key == firstPart).SingleEx(
+                    () => "Column {0} not found".Formato(firstPart),
+                    () => "More than one column named {0}".Formato(firstPart));
 
                 foreach (var part in parts.Skip(1))
                 {
-                    var list = subTokens(result);
+                    var list = SubTokens(result, qd, canAggregate);
 
-                    result = list.Select(t => t.MatchPart(part)).NotNull().SingleEx(
+                    result = list.Where(t => t.Key == part).SingleEx(
                           () => "Token with key '{0}' not found on {1}".Formato(part, result),
                           () => "More than one token with key '{0}' found on {1}".Formato(part, result));
                 }

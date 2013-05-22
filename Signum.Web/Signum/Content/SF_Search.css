@@ -271,8 +271,6 @@ sf-search-results tbody tr:hover
 	margin-bottom:3px;
 	margin-top: 3px;
 	border-radius:3px;
-	-moz-border-radius:3px;
-	-webkit-border-radius:3px;
 	cursor:pointer;
 }
 .sf-search-track:hover 
@@ -286,8 +284,6 @@ sf-search-results tbody tr:hover
 	height:10px;
 	background-color:#bbb;	
 	border-radius:3px;
- 	-moz-border-radius:3px;
-	-webkit-border-radius:3px;
 	cursor:pointer;
 }
 .sf-search-slider:hover 

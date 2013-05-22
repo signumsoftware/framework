@@ -71,9 +71,10 @@
     <Compile Include="Environment\MusicLoader.cs" />
     <Compile Include="Environment\MusicLogic.cs" />
     <Compile Include="ExtensionsTest.cs" />
-    <Compile Include="LinqProvider\Assert2.cs" />
+    <Compile Include="Assert2.cs" />
     <Compile Include="Environment\Entities.cs" />
     <Compile Include="LinqProvider\AllAnyContainsTest.cs" />
+    <Compile Include="LinqProvider\ToStringTest.cs" />
     <Compile Include="LinqProvider\InDBTest.cs" />
     <Compile Include="LinqProvider\RetriverTest.cs" />
     <Compile Include="LinqProvider\SelectSortCirtuitTest.cs" />
@@ -93,11 +94,6 @@
     <Compile Include="MetaTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="NiceToStringTest.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -106,13 +102,6 @@
     <Compile Include="SaveTest.cs" />
     <Compile Include="Environment\Starter.cs" />
     <Compile Include="StringDistanceTest.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

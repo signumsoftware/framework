@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
 using System.ComponentModel;
-using Signum.Entities.Properties;
 
 namespace Signum.Entities
 {
@@ -33,7 +32,7 @@ namespace Signum.Entities
             if (AllowChange)
                 base.PreSaving(ref graphModified);
             else
-                if (SelfModified)
+                if (Modified == ModifiedState.SelfModified)
                     throw new InvalidOperationException("Attempt to save a not new modified ImmutableEntity");
         }
     }

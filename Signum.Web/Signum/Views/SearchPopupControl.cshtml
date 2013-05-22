@@ -1,7 +1,7 @@
 ﻿@model Context
 @{  FindOptions findOptions = (FindOptions)ViewData[ViewDataKeys.FindOptions];}
 <div id="@Model.Compose("panelPopup")">
-    <span class="sf-popup-title">
+    <span class="sf-popup-title" style="display:none">
         <span style="float:left; display:block">@ViewBag.Title</span>
         @{
             <a id="@Model.Compose("sfFullScreen")" class="sf-popup-fullscreen">

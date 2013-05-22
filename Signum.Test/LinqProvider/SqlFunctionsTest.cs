@@ -13,6 +13,7 @@ using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.Maps;
 using Microsoft.SqlServer.Types;
+using Signum.Test.Environment;
 
 namespace Signum.Test.LinqProvider
 {
@@ -57,6 +58,12 @@ namespace Signum.Test.LinqProvider
             Dump((ArtistDN a) => a.Name.End(2).InSql());
             Dump((ArtistDN a) => a.Name.Reverse().InSql());
             Dump((ArtistDN a) => a.Name.Replicate(2).InSql());
+        }
+
+        [TestMethod]
+        public void StringFunctionsPolymorphic()
+        {
+            Assert.IsTrue(Database.Query<AlbumDN>().Any(a => a.Author.Name.Contains("Jackson")));
         }
 
         [TestMethod]
@@ -197,6 +204,18 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void Etc()
+        {
+            Assert.IsTrue(Enumerable.SequenceEqual(
+                Database.Query<AlbumDN>().Select(a => a.Name.Etc(10)).OrderBy().ToList(),
+                Database.Query<AlbumDN>().Select(a => a.Name).ToList().Select(l => l.Etc(10)).OrderBy().ToList()));
+
+            Assert.AreEqual(
+                Database.Query<AlbumDN>().Count(a => a.Name.Etc(10).EndsWith("s")),
+                Database.Query<AlbumDN>().Count(a => a.Name.EndsWith("s")));
+        }
+
+        [TestMethod]
         public void TableValuedFunction()
         {
             var list = Database.Query<AlbumDN>()
@@ -243,6 +262,30 @@ namespace Signum.Test.LinqProvider
 
             Assert.IsTrue(PerfCounter.ToMilliseconds(t1, t2) < PerfCounter.ToMilliseconds(t3, t4));
             Assert.IsTrue(PerfCounter.ToMilliseconds(t2, t3) < PerfCounter.ToMilliseconds(t3, t4));
+        }
+
+        [TestMethod]
+        public void SimplifyMinimumTableValued()
+        {
+            var result = (from b in Database.Query<BandDN>()
+                          let min = MinimumExtensions.MinimumTableValued(b.Id, b.Id).FirstOrDefault().MinValue
+                          select b.Name).ToList();
+        }
+
+        [TestMethod]
+        public void NominateEnumSwitch()
+        {
+            var list = Database.Query<AlbumDN>().Select(a =>
+                (a.Songs.Count > 10 ? AlbumSize.Large :
+                a.Songs.Count > 5 ? AlbumSize.Medium :
+                 AlbumSize.Small).InSql()).ToList();
+        }
+
+        public enum AlbumSize
+        {
+            Small,
+            Medium,
+            Large
         }
     }
 }

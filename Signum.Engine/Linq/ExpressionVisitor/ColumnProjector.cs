@@ -47,10 +47,10 @@ namespace Signum.Engine.Linq
             return new ColumnExpression(columnType, newAlias, declaration.Name);
         }
 
-        static internal ProjectedColumns ProjectColumns(Expression projector, Alias newAlias, Alias[] knownAliases, bool aggresiveNomination = false, bool selectTrivialColumns = false)
+        static internal ProjectedColumns ProjectColumns(Expression projector, Alias newAlias, Alias[] knownAliases, bool isGroupKey = false, bool selectTrivialColumns = false)
         {
             Expression newProj;
-            var candidates = DbExpressionNominator.Nominate(projector, knownAliases, out newProj, isAggressive : aggresiveNomination);
+            var candidates = DbExpressionNominator.Nominate(projector, knownAliases, out newProj, isGroupKey : isGroupKey);
 
             ColumnProjector cp = new ColumnProjector
             {
@@ -92,7 +92,16 @@ namespace Signum.Engine.Linq
                 }
                 else
                 {
-                    return generator.NewColumn(expression).GetReference(newAlias); ;
+                    if (expression.Type.UnNullify().IsEnum)
+                    {
+                        var convert = expression.TryConvert(expression.Type.IsNullable() ? typeof(int?) : typeof(int));
+
+                        return generator.NewColumn(convert).GetReference(newAlias).TryConvert(expression.Type);
+                    }
+                    else
+                    {
+                        return generator.NewColumn(expression).GetReference(newAlias);
+                    }
                 }
             }
             else
@@ -111,7 +120,7 @@ namespace Signum.Engine.Linq
         public ColumnGenerator(IEnumerable<ColumnDeclaration> columns)
         {
             foreach (var item in columns)
-                this.columns.Add(item.Name, item);
+                this.columns.Add(item.Name ?? "-", item);
         }
 
         public IEnumerable<ColumnDeclaration> Columns { get { return columns.Values; } }

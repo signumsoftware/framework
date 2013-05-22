@@ -8,7 +8,6 @@ using Signum.Entities;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Maps;
 using Signum.Utilities.ExpressionTrees;
-using Signum.Engine.Properties;
 using Signum.Entities.Reflection;
 
 namespace Signum.Engine.Linq
@@ -355,7 +354,7 @@ namespace Signum.Engine.Linq
             return EntityIn(newItem, entityIDs);
         }
 
-        internal static Expression EntityIn(LiteExpression liteReference, IEnumerable<Lite<IIdentifiable>> collection)
+        internal static Expression EntityIn(LiteReferenceExpression liteReference, IEnumerable<Lite<IIdentifiable>> collection)
         {
             if (collection.IsEmpty())
                 return False;
@@ -388,18 +387,26 @@ namespace Signum.Engine.Linq
 
         public static Expression LiteEquals(Expression e1, Expression e2)
         {
-            if (e1 is LiteExpression || e2 is LiteExpression)
+            if (e1.Type.IsLite() || e2.Type.IsLite())
             {
-                e1 = ConstantToLite(e1) ?? e1;
-                e2 = ConstantToLite(e2) ?? e2;
-
-                e1 = e1.IsNull() ? e1 : ((LiteExpression)e1).Reference;
-                e2 = e2.IsNull() ? e2 : ((LiteExpression)e2).Reference;
-
-                return PolymorphicEqual(e1, e2); //Conditional and Coalesce could be inside
+                return PolymorphicEqual(GetEntity(e1), GetEntity(e2)); //Conditional and Coalesce could be inside
             }
 
             return null;
+        }
+
+        private static Expression GetEntity(Expression exp)
+        {
+            exp = ConstantToLite(exp) ?? exp;
+
+            if (exp.IsNull())
+                return Expression.Constant(null, exp.Type.CleanType()); 
+
+            var liteExp = exp as LiteReferenceExpression;
+            if (liteExp == null)
+                throw new InvalidCastException("Impossible to convert expression to Lite: {0}".Formato(exp.NiceToString()));
+
+            return liteExp.Reference; 
         }
 
         public static Expression EntityEquals(Expression e1, Expression e2)
@@ -516,11 +523,11 @@ namespace Signum.Engine.Linq
 
             if (c.Type.IsIIdentifiable())
             {
-                var ei = (IdentifiableEntity)c.Value; 
+                var ei = (IdentifiableEntity)c.Value;
 
                 return new EntityExpression(
                     ei.GetType(),
-                    Expression.Constant(ei.IdOrNull ?? int.MinValue), null, null);
+                    Expression.Constant(ei.IdOrNull ?? int.MinValue), null, null, null, avoidExpandOnRetrieving: true);
             }
             
             return null;
@@ -541,9 +548,9 @@ namespace Signum.Engine.Linq
 
                 Expression id = Expression.Constant(lite.IdOrNull ?? int.MinValue);
 
-                EntityExpression ere = new EntityExpression(lite.EntityType, id, null, null);
+                EntityExpression ere = new EntityExpression(lite.EntityType, id, null, null, null, false);
 
-                return new LiteExpression(Lite.Generate(lite.EntityType), ere, id, Expression.Constant(lite.ToString()), Expression.Constant(lite.EntityType), false);
+                return new LiteReferenceExpression(Lite.Generate(lite.EntityType), ere, null);
             }
 
             return null;

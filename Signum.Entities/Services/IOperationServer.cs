@@ -31,7 +31,7 @@ namespace Signum.Services
 
 
         [OperationContract, NetDataContract]
-        IdentifiableEntity Delete(Lite<IIdentifiable> lite, Enum operationKey, params object[] args);
+        void Delete(Lite<IIdentifiable> lite, Enum operationKey, params object[] args);
 
 
         [OperationContract, NetDataContract]

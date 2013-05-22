@@ -1,4 +1,4 @@
-﻿#region usings
+#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +12,6 @@ using System.Reflection;
 using Signum.Entities.Reflection;
 using System.Configuration;
 using Signum.Engine;
-using Signum.Web.Properties;
 using Signum.Utilities.Reflection;
 using System.Collections;
 #endregion
@@ -39,9 +38,9 @@ namespace Signum.Web
                 htmlAttr.AddRange(htmlProperties);
 
             return helper.Href(listBase.Compose("btnCreate"),
-                  Resources.LineButton_Create,
+                  EntityControlMessage.Create.NiceToString(),
                   "",
-                  Resources.LineButton_Create,
+                  EntityControlMessage.Create.NiceToString(),
                   "sf-line-button sf-create",
                   htmlAttr);
         }
@@ -59,9 +58,9 @@ namespace Signum.Web
             };
 
             return helper.Href(listBase.Compose("btnView"),
-                  Resources.LineButton_View,
+                  EntityControlMessage.View.NiceToString(),
                   "",
-                  Resources.LineButton_View,
+                  EntityControlMessage.View.NiceToString(),
                   "sf-line-button sf-view",
                   htmlAttr);
         }
@@ -79,9 +78,9 @@ namespace Signum.Web
             };
 
             return helper.Href(listBase.Compose("btnNavigate"),
-                  Resources.LineButton_Navigate,
+                  EntityControlMessage.Navigate.NiceToString(),
                   "",
-                  Resources.LineButton_Navigate,
+                  EntityControlMessage.Navigate.NiceToString(),
                   "sf-line-button sf-navigate",
                   htmlAttr);
         }
@@ -99,9 +98,9 @@ namespace Signum.Web
             };
 
             return helper.Href(listBase.Compose("btnFind"),
-                  Resources.LineButton_Find,
+                  EntityControlMessage.Find.NiceToString(),
                   "",
-                  Resources.LineButton_Find,
+                  EntityControlMessage.Find.NiceToString(),
                   "sf-line-button sf-find",
                   htmlAttr);
         }
@@ -124,9 +123,9 @@ namespace Signum.Web
                 htmlAttr.Add("style", "display:none");
 
             return helper.Href(listBase.Compose("btnRemove"),
-                  Resources.LineButton_Remove,
+                  EntityControlMessage.Remove.NiceToString(),
                   "",
-                  Resources.LineButton_Remove,
+                  EntityControlMessage.Remove.NiceToString(),
                   "sf-line-button sf-remove",
                   htmlAttr);
         }
@@ -149,9 +148,9 @@ namespace Signum.Web
                 htmlAttr.Add("style", "display:none");
 
             return helper.Href(listBase.Compose("btnUp"),
-                  Resources.Signum_entityRepeater_moveUp,
+                  JavascriptMessage.entityRepeater_moveUp.NiceToString(),
                   "",
-                  Resources.Signum_entityRepeater_moveUp,
+                  JavascriptMessage.entityRepeater_moveUp.NiceToString(),
                   "sf-line-button move-up",
                   htmlAttr);
         }
@@ -174,9 +173,9 @@ namespace Signum.Web
                 htmlAttr.Add("style", "display:none");
 
             return helper.Href(listBase.Compose("btnDown"),
-                  Resources.Signum_entityRepeater_moveDown,
+                  JavascriptMessage.entityRepeater_moveDown.NiceToString(),
                   "",
-                  Resources.Signum_entityRepeater_moveDown,
+                  JavascriptMessage.entityRepeater_moveDown.NiceToString(),
                   "sf-line-button move-down",
                   htmlAttr);
         }

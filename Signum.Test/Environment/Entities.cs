@@ -10,9 +10,9 @@ using Microsoft.SqlServer.Server;
 using Signum.Engine;
 using Signum.Engine.Maps;
 
-namespace Signum.Test
+namespace Signum.Test.Environment
 {
-    [Serializable, EntityKind(EntityKind.Shared)]
+    [Serializable, EntityKind(EntityKind.Shared), Mixin(typeof(CorruptMixin)), Mixin(typeof(ColaboratorsMixin))]
     public class NoteWithDateDN : Entity
     {
         [SqlDbType(Size = int.MaxValue)]
@@ -45,11 +45,27 @@ namespace Signum.Test
         }
     }
 
+    [Serializable] // Just a pattern
+    public class ColaboratorsMixin : MixinEntity
+    {
+        ColaboratorsMixin(IdentifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next) { }
+
+        [NotNullable]
+        MList<ArtistDN> colaborators = new MList<ArtistDN>();
+        [NotNullValidator, NoRepeatValidator]
+        public MList<ArtistDN> Colaborators
+        {
+            get { return colaborators; }
+            set { Set(ref colaborators, value, () => Colaborators); }
+        }
+    }
+
     public enum NoteWithDateOperation
     { 
         Save
     }
 
+    [DescriptionOptions(DescriptionOptions.All)]
     public interface IAuthorDN : IIdentifiable
     {
         string Name { get; }
@@ -183,7 +199,6 @@ namespace Signum.Test
             get { return members; }
             set { Set(ref members, value, () => Members); }
         }
-
 
         [ImplementedBy(typeof(GrammyAwardDN), typeof(AmericanMusicAwardDN))]
         AwardDN lastAward;
@@ -396,6 +411,13 @@ namespace Signum.Test
             set { Set(ref label, value, () => Label); }
         }
 
+        AlbumState state;
+        public AlbumState State
+        {
+            get { return state; }
+            set { Set(ref state, value, () => State); }
+        }
+
         static Expression<Func<AlbumDN, string>> ToStringExpression = a => a.name;
         public override string ToString()
         {
@@ -403,8 +425,10 @@ namespace Signum.Test
         }
     }
 
+    [DescriptionOptions(DescriptionOptions.Members)]
     public enum AlbumState
     {
+        [Ignore]
         New,
         Saved
     }

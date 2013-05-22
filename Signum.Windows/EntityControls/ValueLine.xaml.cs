@@ -184,17 +184,15 @@ namespace Signum.Windows
 
     public class ValueLineConfigurator
     {
-        static DataTemplate comboDataTemplate;
+        static DataTemplate comboEnumDescriptionTemplate;
 
         static ValueLineConfigurator()
         {
-            Binding b = new Binding() { Mode = BindingMode.OneTime, Converter = Converters.EnumDescriptionConverter };
-            //System.Diagnostics.PresentationTraceSources.SetTraceLevel(b, PresentationTraceLevel.High);
-            comboDataTemplate = new DataTemplate
+            comboEnumDescriptionTemplate = new DataTemplate
             {
                 VisualTree = new FrameworkElementFactory(typeof(TextBlock))
                         .Do(f => f.SetValue(TextBlock.TextAlignmentProperty, TextAlignment.Right))
-                        .Do(f => f.SetBinding(TextBlock.TextProperty, b))
+                        .Do(f => f.SetBinding(TextBlock.TextProperty, new Binding() { Mode = BindingMode.OneTime, Converter =  Converters.EnumDescription }))
             };
         }
 
@@ -266,7 +264,7 @@ namespace Signum.Windows
             {ValueLineType.Enum, vl =>new ComboBox()
             { 
                 ItemsSource = vl.ItemSource ??  EnumExtensions.UntypedGetValues(vl.Type.UnNullify()).PreAndNull(vl.Type.IsNullable()).ToObservableCollection(),
-                ItemTemplate = comboDataTemplate, 
+                ItemTemplate = comboEnumDescriptionTemplate, 
                 VerticalContentAlignment = VerticalAlignment.Center
             }},
             {ValueLineType.Boolean, vl =>new CheckBox(){ VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Left}},
@@ -331,10 +329,10 @@ namespace Signum.Windows
         public virtual IValueConverter GetConverter(ValueLine vl)
         {
             if (vl.ValueLineType == ValueLineType.Enum && vl.Type.IsNullable())
-                return Converters.NullableEnumConverter;
+                return Converters.NullableEnum;
 
             if (vl.ValueLineType == ValueLineType.Color)
-                return Converters.ColorConverter;
+                return Converters.Color;
 
             if (vl.Type.IsNullable())
                 return Converters.Identity;

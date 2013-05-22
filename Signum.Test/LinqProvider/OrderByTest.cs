@@ -10,6 +10,7 @@ using System.IO;
 using Signum.Utilities;
 using Signum.Engine.Exceptions;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Test.Environment;
 
 namespace Signum.Test.LinqProvider
 {
@@ -106,7 +107,8 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void OrderByGroupBy()
         {
-            var songsAlbum = Database.Query<ArtistDN>().OrderBy(a => a.Dead).GroupBy(a => a.Sex, (s, gr) => new { Sex = s, Count = gr.Count() }).ToList();
+            var songsAlbum = Database.Query<ArtistDN>().OrderBy(a => a.Dead)
+                .GroupBy(a => a.Sex, (s, gr) => new { Sex = s, Count = gr.Count() }).ToList();
         }
 
 

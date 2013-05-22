@@ -52,9 +52,11 @@ namespace Signum.Engine.Linq
         SelectRowCount,
         Entity = 2000,
         EmbeddedInit,
+        MixinInit,
         ImplementedBy,
         ImplementedByAll,
-        Lite,
+        LiteReference,
+        LiteValue,
         TypeEntity,
         TypeImplementedBy,
         TypeImplementedByAll,
@@ -63,100 +65,6 @@ namespace Signum.Engine.Linq
         MListElement,
     }
 
-    class Alias
-    {
-        public static readonly Alias Unknown = new Alias("Unknown"); 
-
-        public readonly string Name;  
-
-        Alias(string name)
-        {
-            this.Name = name;
-        }
-
-        public override string ToString()
-        {
-            return Name;
-        }
-
-        static readonly Variable<AliasGenerator> current = Statics.ThreadVariable<AliasGenerator>("aliasGenerator");
-
-        public static Alias Table(ObjectName name)
-        {
-            return new Alias(name.ToString());
-        }
-
-        public static Alias Raw(string name)
-        {
-            return new Alias(name);
-        }
-
-        public static Alias NextTableAlias(string tableName)
-        {
-            string abv = tableName.Any(char.IsUpper) ? new string(tableName.Where(c => char.IsUpper(c)).ToArray()) :
-                tableName.Any(a => a == '_') ? new string(tableName.Split(new[] { '_' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s[0]).ToArray()) : null;
-
-            if (string.IsNullOrEmpty(abv))
-                abv = tableName.TryStart(3);
-            else
-                abv = abv.ToLower();
-
-            return current.Value.GetUniqueAlias(abv);
-        }
-
-        public static Alias CloneAlias(Alias alias)
-        {
-            return current.Value.GetUniqueAlias(alias.Name + "b");
-        }
-
-        public static Alias NextSelectAlias()
-        {
-            return current.Value.NextSelectAlias();
-        }
-
-        public static Alias GetUniqueAlias(string baseAlias)
-        {
-            return current.Value.GetUniqueAlias(baseAlias);
-        }
-
-        public static IDisposable NewGenerator()
-        {
-            return current.Value = new AliasGenerator { previous = current.Value };
-        }
-
-        class AliasGenerator: IDisposable
-        {
-            public AliasGenerator previous;
-
-            HashSet<string> usedAliases = new HashSet<string>();
-
-            int selectAliasCount = 0;
-            public Alias NextSelectAlias()
-            {
-                return GetUniqueAlias("s" + (selectAliasCount++));
-            }
-
-            public Alias GetUniqueAlias(string baseAlias)
-            {
-                if (usedAliases.Add(baseAlias))
-                    return new Alias(baseAlias);
-
-                for (int i = 1; ; i++)
-                {
-                    string alias = baseAlias + i;
-
-                    if (usedAliases.Add(alias))
-                        return new Alias(alias);
-
-                }
-            }
-
-            public void Dispose()
-            {
-                current.Value = previous;
-            }
-        }
-    }
 
     internal abstract class DbExpression : Expression
     {
@@ -319,7 +227,6 @@ namespace Signum.Engine.Linq
         internal ColumnDeclaration(string name, Expression expression)
         {
             if (expression == null) throw new ArgumentNullException("expression");
-            if (name == null) throw new ArgumentNullException("name");
 
             this.Name = name;
             this.Expression = expression;
@@ -327,8 +234,10 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return Name.HasText()? "{0} AS {1}".Formato(Expression.NiceToString(), Name):
-                                   Expression.NiceToString();
+            if (Name.HasText())
+                return "{0} AS {1}".Formato(Expression.NiceToString(), Name);
+
+            return Expression.NiceToString();
         }
 
         public ColumnExpression GetReference(Alias alias)
@@ -408,6 +317,7 @@ namespace Signum.Engine.Linq
         public readonly Expression Top;
         public readonly bool IsDistinct;
         public readonly bool IsReverse;
+        public readonly bool ForXmlPathEmpty;
 
         readonly Alias[] knownAliases;
         public override Alias[] KnownAliases
@@ -415,7 +325,7 @@ namespace Signum.Engine.Linq
             get { return knownAliases; }
         }
 
-        internal SelectExpression(Alias alias, bool distinct, bool reverse, Expression top, IEnumerable<ColumnDeclaration> columns, SourceExpression from, Expression where, IEnumerable<OrderExpression> orderBy, IEnumerable<Expression> groupBy)
+        internal SelectExpression(Alias alias, bool distinct, bool reverse, Expression top, IEnumerable<ColumnDeclaration> columns, SourceExpression from, Expression where, IEnumerable<OrderExpression> orderBy, IEnumerable<Expression> groupBy, bool forXmlPathEmpty)
             : base(DbExpressionType.Select, alias)
         {
             this.IsDistinct = distinct;
@@ -426,7 +336,8 @@ namespace Signum.Engine.Linq
             this.Where = where;
             this.OrderBy = orderBy.ToReadOnly();
             this.GroupBy = groupBy.ToReadOnly();
-            this.knownAliases = from == null ? new[] { alias } : from.KnownAliases.And(alias).ToArray(); 
+            this.knownAliases = from == null ? new[] { alias } : from.KnownAliases.And(alias).ToArray();
+            this.ForXmlPathEmpty = forXmlPathEmpty;
         }
 
         internal SelectRoles SelectRoles
@@ -464,15 +375,26 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "SELECT {0}{1}{2}\r\nFROM {3}\r\n{4}{5}{6}AS {7}".Formato(
+            return "SELECT {0}{1}{2}\r\nFROM {3}\r\n{4}{5}{6}{7} AS {8}".Formato(
                 IsDistinct ? "DISTINCT " : "",
                 Top.TryCC(t => "TOP {0} ".Formato(t.NiceToString())),
                 Columns.TryCC(c => c.ToString(", ")),
-                From.TryCC(f=>f.ToString().Let(a => a.Contains("\r\n") ? "\r\n" + a.Indent(4) : a)),
+                From.TryCC(f => f.ToString().Let(a => a.Contains("\r\n") ? "\r\n" + a.Indent(4) : a)),
                 Where.TryCC(a => "WHERE " + a.NiceToString() + "\r\n"),
                 OrderBy.TryCC(ob => "ORDER BY " + ob.ToString(" ,") + "\r\n"),
                 GroupBy.TryCC(gb => "GROUP BY " + gb.ToString(g => g.NiceToString(), " ,") + "\r\n"),
+                ForXmlPathEmpty ? "FOR XML PATH('')\r\n" : "",
                 Alias);
+        }
+
+        internal bool IsOneRow()
+        {
+            ConstantExpression ce = Top as ConstantExpression;
+
+            if (ce != null && ((int)ce.Value) == 1)
+                return true;
+
+            return false;
         }
     }
 
@@ -541,7 +463,7 @@ namespace Signum.Engine.Linq
         RTRIM,
         SUBSTRING,
         UPPER,
-        
+
         ABS,
         PI,
         SIN,
@@ -553,27 +475,28 @@ namespace Signum.Engine.Linq
         ATN2,
         POWER,
         SQRT,
-     
+
         EXP,
-        SQUARE, 
-        LOG10, 
+        SQUARE,
+        LOG10,
         LOG,
 
         FLOOR,
-        CEILING, 
+        CEILING,
         ROUND,
         SIGN,
 
         DAY,
         MONTH,
         YEAR,
-        DATEPART, 
+        DATEPART,
         DATEDIFF,
         DATEADD,
 
         COALESCE,
         CONVERT,
         ISNULL,
+        STUFF,
     }
 
     internal enum SqlEnums

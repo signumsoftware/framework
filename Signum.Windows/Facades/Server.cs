@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,7 +31,8 @@ namespace Signum.Windows
             {
                 ServerTypes = current.ServerTypes();
                 NameToType = ServerTypes.ToDictionary(a => a.Value.CleanName, a => a.Key);
-                EntityKinds = current.EntityKinds();
+
+                MixinDeclarations.Import(current.FindAllMixins()); 
             };
         }
 
@@ -40,18 +41,27 @@ namespace Signum.Windows
             getServer = server;
         }
 
-        public static void Connect()
+        static void AssertConnected()
         {
-            if (!Connected)
-            {
-                current = getServer();
+            if (Connected)
+                return;
 
-                if (current == null)
-                    throw new NotConnectedToServerException(Properties.Resources.AConnectionWithTheServerIsNecessaryToContinue);
+            if (!Connect())
+                throw new NotConnectedToServerException(ConnectionMessage.AConnectionWithTheServerIsNecessaryToContinue.NiceToString());
 
-                if (Connecting != null)
-                    Connecting();                     
-            }
+        }
+
+        public static bool Connect()
+        {
+            current = getServer();
+
+            if (current == null)
+                return false;
+
+            if (Connecting != null)
+                Connecting();
+
+            return true;
         }
 
         public static bool Connected
@@ -72,7 +82,7 @@ namespace Signum.Windows
             where S : class
         {
         retry:
-            Connect();
+            AssertConnected();
 
             S server = current as S;
             if (server == null)
@@ -80,7 +90,7 @@ namespace Signum.Windows
             
             try
             {
-                using (HeavyProfiler.Log("WCFClient", "{0}".Formato(typeof(S).TypeName())))
+                using (HeavyProfiler.Log("WCFClient", () => "{0}".Formato(typeof(S).TypeName())))
                 {
                     action(server);
                 }
@@ -97,7 +107,7 @@ namespace Signum.Windows
           where S : class
         {
         retry:
-            Connect();
+            AssertConnected();
 
             S server = current as S;
             if (server == null)
@@ -136,7 +146,7 @@ namespace Signum.Windows
 
         static void HandleSessionException(MessageSecurityException e)
         {
-            MessageBox.Show(Properties.Resources.SessionExpired, Properties.Resources.SessionExpired, MessageBoxButton.OK, MessageBoxImage.Hand);
+            MessageBox.Show(ConnectionMessage.SessionExpired.NiceToString(), ConnectionMessage.SessionExpired.NiceToString(), MessageBoxButton.OK, MessageBoxImage.Hand);
         }
 
         public static bool Implements<T>()
@@ -284,7 +294,6 @@ namespace Signum.Windows
         }
 
         public static Dictionary<Type, TypeDN> ServerTypes { get; private set; }
-        public static Dictionary<Type, EntityKind> EntityKinds { get; private set; }
         public static Dictionary<string, Type> NameToType { get; private set; }
 
         public static Type TryGetType(string cleanName)
@@ -295,6 +304,11 @@ namespace Signum.Windows
         public static Type GetType(string cleanName)
         {
             return NameToType.GetOrThrow(cleanName, "Type {0} not found in the Server");
+        }
+
+        public static Type ToType(this TypeDN typeDN)
+        {
+            return GetType(typeDN.CleanName);
         }
 
         public static string GetCleanName(Type type)
@@ -311,7 +325,12 @@ namespace Signum.Windows
 
         internal static EntityKind GetEntityKind(Type type)
         {
-            return EntityKinds.GetOrThrow(type, "Type {0} not found in the Server");
+            var eta = type.SingleAttributeInherit<EntityKindAttribute>();
+
+            if (eta == null)
+                throw new InvalidOperationException("Type {0} does not have an EntityTypeAttribute".Formato(type.Name));
+
+            return eta.EntityType;
         }
     }
 

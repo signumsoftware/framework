@@ -39,12 +39,12 @@ SF.registerModule("Popup", function () {
                     }
                 }
                 else {
-                    var titles = $this.find("span.sf-popup-title");
-
+                    var $htmlTitle = $this.find("span.sf-popup-title").first();
+                    
                     var o = {
                         dialogClass: 'sf-popup-dialog',
-                        title: titles.length > 0 ? titles[0] : $this.attr("data-title") || $this.children().attr("data-title"), //title causes that it is shown when mouseovering popup
                         modal: options.modal,
+                        title: $htmlTitle.length == 0 ? $this.attr("data-title") || $this.children().attr("data-title") : "",
                         width: 'auto',
                         beforeClose: function (evt, ui) {
                             return canClose($(this));
@@ -90,7 +90,17 @@ SF.registerModule("Popup", function () {
                         $this.find(".sf-save").click(options.onSave);
                     }
 
-                    $this.dialog(o);
+                    var dialog = $this.dialog(o);
+
+                    if ($htmlTitle.length > 0) {
+                        dialog.data("ui-dialog")._title = function (title) {
+                            title.html(this.options.title);
+                        };
+
+                        dialog.dialog('option', 'title', $htmlTitle.html());
+
+                        $htmlTitle.remove();
+                    }
                 }
             });
         }

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Utilities.Reflection;
-using Signum.Utilities.Properties;
 using System.ComponentModel;
 using System.Reflection;
+using System.Collections.Concurrent;
 
 namespace Signum.Utilities
 {
@@ -105,7 +105,7 @@ namespace Signum.Utilities
 
     public static class EnumFieldCache
     {
-        static Dictionary<Type, Dictionary<Enum, FieldInfo>> enumCache = new Dictionary<Type, Dictionary<Enum, FieldInfo>>();
+        static ConcurrentDictionary<Type, Dictionary<Enum, FieldInfo>> enumCache = new ConcurrentDictionary<Type, Dictionary<Enum, FieldInfo>>();
 
         public static FieldInfo Get(Enum value)
         {
@@ -115,15 +115,14 @@ namespace Signum.Utilities
             return Get(value.GetType())[value];
         }
 
+        static BindingFlags flags = BindingFlags.Static | BindingFlags.Public;
+
         public static Dictionary<Enum, FieldInfo> Get(Type type)
         {
             if (!type.IsEnum)
                 throw new ArgumentException("{0} is not an Enum".Formato(type));
 
-            lock (enumCache)
-                return enumCache.GetOrCreate(type, () => type.GetFields().Skip(1).ToDictionary(
-                    fi => (Enum)fi.GetValue(null),
-                    fi => fi));
+            return enumCache.GetOrAdd(type, t => t.GetFields(flags).ToDictionary(fi => (Enum)fi.GetValue(null), fi => fi));
         }
     }
 }

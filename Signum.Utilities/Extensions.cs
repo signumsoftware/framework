@@ -193,6 +193,16 @@ namespace Signum.Utilities
             return result;
         }
 
+        public static int DivCeiling(int a, int b)
+        {
+            return (a + b - 1) / b;
+        }
+
+        public static long DivCeiling(int a, long b)
+        {
+            return (a + b - 1) / b;
+        }
+
         #endregion
 
         public static T? DefaultToNull<T>(this T value)

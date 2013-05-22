@@ -10,27 +10,37 @@ using Signum.Entities.Reflection;
 namespace Signum.Entities
 {
     [Serializable]
-    public abstract class Modifiable
+    public abstract class Modifiable 
     {
         [Ignore]
-        bool? modified;
-
+        ModifiedState modified;
+       
         [HiddenProperty]
-        public bool? Modified
+        public ModifiedState Modified
         {
             get { return modified; }
-            internal set
+            protected internal set
             {
-                if (value == null)
-                    CleanSelfModified();
+                if(modified == ModifiedState.Sealed)
+                    throw new InvalidOperationException("The instance {0} is sealed and can not be modified".Formato(this));
+
                 modified = value;
             }
         }
 
+        /// <summary>
+        /// True if SelfModified or (saving) and Modified
+        /// </summary>
         [HiddenProperty]
-        public abstract bool SelfModified { get; }
+        public bool IsGraphModified
+        {
+            get { return Modified == ModifiedState.Modified || Modified == ModifiedState.SelfModified; }
+        }
 
-        protected abstract void CleanSelfModified();
+        protected internal virtual void SetSelfModified()
+        {
+            Modified = ModifiedState.SelfModified;
+        }
 
         protected internal virtual void PreSaving(ref bool graphModified)
         {
@@ -39,5 +49,19 @@ namespace Signum.Entities
         protected internal virtual void PostRetrieving()
         {
         }
+    }
+
+    public enum ModifiedState
+    {
+        SelfModified,
+        /// <summary>
+        /// Recursively Clean (only valid during saving)
+        /// </summary>
+        Clean,
+        /// <summary>
+        /// Recursively Modified (only valid during saving)
+        /// </summary>
+        Modified,
+        Sealed, 
     }
 }

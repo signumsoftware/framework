@@ -34,7 +34,7 @@ namespace Signum.Windows
             Clone = true;
         }
 
-        public PropertyRoute TypeContext { get; set; }
+        public PropertyRoute PropertyRoute { get; set; }
 
         public bool? SaveProtected { get; set; }
 

@@ -6,7 +6,6 @@ using Signum.Utilities;
 using System.Data;
 using System.Reflection;
 using Signum.Entities.DynamicQuery;
-using Signum.Engine.Properties;
 using Signum.Entities;
 using System.Diagnostics;
 using Signum.Engine.Maps;
@@ -17,6 +16,7 @@ using Signum.Entities.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
+using System.Threading;
 
 namespace Signum.Engine.DynamicQuery
 {
@@ -28,53 +28,83 @@ namespace Signum.Engine.DynamicQuery
 
         }
 
-        Dictionary<object, IDynamicQuery> queries = new Dictionary<object, IDynamicQuery>();
+        Dictionary<object, DynamicQueryBucket> queries = new Dictionary<object, DynamicQueryBucket>();
 
         Polymorphic<Dictionary<string, ExtensionInfo>> registeredExtensions =
-            new Polymorphic<Dictionary<string, ExtensionInfo>>(PolymorphicMerger.InheritDictionaryInterfaces, null); 
+            new Polymorphic<Dictionary<string, ExtensionInfo>>(PolymorphicMerger.InheritDictionaryInterfaces, null);
 
-        public IDynamicQuery this[object queryName]
+
+        public void RegisterQuery<T>(object queryName, Func<IQueryable<T>> lazyQuery, Implementations? entityImplementations = null)
         {
-            get
-            {
-                AssertQueryAllowed(queryName);
-                return queries.GetOrThrow(queryName, "The query {0} is not on registered");
-            }
-            set
-            {
-                value.QueryName = queryName;
-                queries[queryName] = value;
-            }
+            queries[queryName] = new DynamicQueryBucket(queryName, () => DynamicQuery.Auto(lazyQuery()), entityImplementations ?? DefaultImplementations(typeof(T), queryName));
         }
 
-        public IDynamicQuery TryGet(object queryName)
+        public void RegisterQuery<T>(object queryName, Func<DynamicQueryCore<T>> lazyQueryCore, Implementations? entityImplementations = null)
+        {
+            queries[queryName] = new DynamicQueryBucket(queryName, lazyQueryCore, entityImplementations ?? DefaultImplementations(typeof(T), queryName));
+        }
+
+        static Implementations DefaultImplementations(Type type, object queryName)
+        {
+            var property = type.GetProperty("Entity", BindingFlags.Instance | BindingFlags.Public);
+
+            if (property == null)
+                throw new InvalidOperationException("Entity property not found on query {0}".Formato(QueryUtils.GetQueryUniqueKey(queryName)));
+
+            return Implementations.By(property.PropertyType.CleanType());
+        }
+
+        public DynamicQueryBucket TryGetQuery(object queryName)
         {
             AssertQueryAllowed(queryName); 
             return queries.TryGetC(queryName);
         }
 
+        public DynamicQueryBucket GetQuery(object queryName)
+        {
+            AssertQueryAllowed(queryName);
+            return queries.GetOrThrow(queryName);
+        }
+
+        public Implementations GetEntityImplementations(object queryName)
+        {
+            //AssertQueryAllowed(queryName);
+            return queries.GetOrThrow(queryName).EntityImplementations;
+        }
+
         public ResultTable ExecuteQuery(QueryRequest request)
         {
             using (ExecutionMode.UserInterface())
-                return this[request.QueryName].ExecuteQuery(request);
+            using (HeavyProfiler.Log("ExecuteQuery", () => QueryUtils.GetQueryUniqueKey(request.QueryName)))
+                return queries[request.QueryName].Core.Value.ExecuteQuery(request);
         }
 
         public int ExecuteQueryCount(QueryCountRequest request)
         {
             using (ExecutionMode.UserInterface())
-                return this[request.QueryName].ExecuteQueryCount(request);
+            using (HeavyProfiler.Log("ExecuteQueryCount", () => QueryUtils.GetQueryUniqueKey(request.QueryName)))
+                return queries[request.QueryName].Core.Value.ExecuteQueryCount(request);
+        }
+
+        internal ResultTable ExecuteGroupQuery(QueryGroupRequest request)
+        {
+            using (ExecutionMode.UserInterface())
+            using (HeavyProfiler.Log("ExecuteGroupQuery", () => QueryUtils.GetQueryUniqueKey(request.QueryName)))
+                return queries[request.QueryName].Core.Value.ExecuteQueryGroup(request);
         }
 
         public Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request)
         {
             using (ExecutionMode.UserInterface())
-                return this[request.QueryName].ExecuteUniqueEntity(request);
+            using (HeavyProfiler.Log("ExecuteUniqueEntity", () => QueryUtils.GetQueryUniqueKey(request.QueryName)))
+                return queries[request.QueryName].Core.Value.ExecuteUniqueEntity(request);
         }
 
         public QueryDescription QueryDescription(object queryName)
         {
             using (ExecutionMode.UserInterface())
-                return this[queryName].GetDescription(queryName);
+            using (HeavyProfiler.Log("QueryDescription", () => QueryUtils.GetQueryUniqueKey(queryName)))
+                return queries[queryName].GetDescription();
         }
 
         public event Func<object, bool> AllowQuery;
@@ -108,22 +138,16 @@ namespace Signum.Engine.DynamicQuery
             return queries.Keys.Where(QueryAllowed).ToList();
         }
 
-        public List<object> GetQueryNames()
-        {
-            return queries.Keys.ToList();
-        }
-
-        public Dictionary<object, IDynamicQuery> GetQueries(Type entityType)
+        public Dictionary<object, DynamicQueryBucket> GetQueries(Type entityType)
         {
             return (from kvp in queries
-                    let ec = kvp.Value.EntityColumn()
-                    where !ec.Implementations.Value.IsByAll && ec.Implementations.Value.Types.Contains(entityType)
+                    where !kvp.Value.EntityImplementations.IsByAll && kvp.Value.EntityImplementations.Types.Contains(entityType)
                     select kvp).ToDictionary();
         }
 
-        public Dictionary<object, IDynamicQuery> GetQueries()
+        public List<object> GetQueryNames()
         {
-            return queries.ToDictionary();
+            return queries.Keys.ToList();
         }
 
         static DynamicQueryManager()
@@ -204,9 +228,9 @@ namespace Signum.Engine.DynamicQuery
             return RegisterExpression(extension);
         }
 
-        private ExtensionInfo RegisterExpression(ExtensionInfo extension)
+        public ExtensionInfo RegisterExpression(ExtensionInfo extension)
         {
-            registeredExtensions.GetOrAdd(extension.SourceType)[extension.Key] = extension;
+            registeredExtensions.GetOrAddDefinition(extension.SourceType)[extension.Key] = extension;
 
             registeredExtensions.ClearCache();
 
@@ -225,6 +249,9 @@ namespace Signum.Engine.DynamicQuery
 
                 if (r is UniqueEntityRequest)
                     return ExecuteUniqueEntity((UniqueEntityRequest)r);
+
+                if (r is QueryGroupRequest)
+                    return ExecuteGroupQuery((QueryGroupRequest)r);
 
                 return (object)null;
             }).ToArray(); 

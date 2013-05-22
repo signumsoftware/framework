@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using System.Collections;
-using Signum.Utilities.Properties;
 using System.Xml.Linq;
 
 namespace Signum.Utilities.DataStructures
@@ -100,7 +99,7 @@ namespace Signum.Utilities.DataStructures
             }
         }
 
-        public bool Remove(T from, T to)
+        public bool RemoveEdge(T from, T to)
         {
             var dic = adjacency.TryGetC(from);
             if (dic == null)
@@ -109,15 +108,15 @@ namespace Signum.Utilities.DataStructures
             return dic.Remove(to);
         }
 
-        public bool Remove(Edge<T> edge)
+        public bool RemoveEdge(Edge<T> edge)
         {
-            return Remove(edge.From, edge.To);
+            return RemoveEdge(edge.From, edge.To);
         }
 
-        public void RemoveAll(IEnumerable<Edge<T>> edges)
+        public void RemoveEdges(IEnumerable<Edge<T>> edges)
         {
             foreach (var edge in edges)
-                Remove(edge.From, edge.To);
+                RemoveEdge(edge.From, edge.To);
         }
 
         public bool RemoveFullNode(T node)
@@ -138,7 +137,7 @@ namespace Signum.Utilities.DataStructures
 
             adjacency.Remove(node);
             foreach (var n in inverseRelated)
-                Remove(n, node);
+                RemoveEdge(n, node);
 
             return true;
         }

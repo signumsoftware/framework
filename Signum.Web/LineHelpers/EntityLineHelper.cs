@@ -1,4 +1,4 @@
-﻿#region usings
+#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +12,6 @@ using System.Reflection;
 using Signum.Entities.Reflection;
 using System.Configuration;
 using Signum.Engine;
-using Signum.Web.Properties;
 using Signum.Utilities.Reflection;
 using Signum.Web.Controllers;
 #endregion
@@ -56,10 +55,10 @@ namespace Signum.Web
 
                         if (entityLine.Autocomplete)
                         {
-                            htmlAttr.AddRange(new Dictionary<string, object>
-                            {
-                                { "data-types", new StaticInfo(entityLine.Type, entityLine.Implementations).Types.ToString(t => Navigator.ResolveWebTypeName(t), ",") }
-                            });
+                            htmlAttr.Add("data-types", new StaticInfo(entityLine.Type, entityLine.Implementations).Types.ToString(t => Navigator.ResolveWebTypeName(t), ","));
+
+                            if (entityLine.AutocompleteUrl.HasText())
+                                htmlAttr.Add("data-url", entityLine.AutocompleteUrl); 
                         }
 
                         sb.AddLine(helper.TextBox(
@@ -72,7 +71,7 @@ namespace Signum.Web
                         {
                             sb.AddLine(
                                 helper.Href(entityLine.Compose(EntityBaseKeys.ToStrLink),
-                                    entityLine.UntypedValue.ToString(), Navigator.NavigateRoute(entityLine.CleanRuntimeType, id), Resources.View, "sf-value-line",
+                                    entityLine.UntypedValue.ToString(), Navigator.NavigateRoute(entityLine.CleanRuntimeType, id), EntityControlMessage.View.NiceToString(), "sf-value-line",
                                     new Dictionary<string, object> { { "style", "display:" + ((entityLine.UntypedValue == null) ? "none" : "block") } }));
                         }
                         else
@@ -141,7 +140,15 @@ namespace Signum.Web
             if (settingsModifier != null)
                 settingsModifier(el);
 
-            return helper.InternalEntityLine(el);
+            var result = helper.InternalEntityLine(el); 
+
+            var vo = el.ViewOverrides;
+            if (vo == null)
+                return result;
+
+            return vo.OnSurroundLine(el.PropertyRoute, helper, tc, result);
+
+
         }
     }
 }

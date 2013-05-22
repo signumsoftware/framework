@@ -15,6 +15,7 @@ using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
+using System.Collections;
 
 namespace Signum.Windows
 {
@@ -36,28 +37,120 @@ namespace Signum.Windows
                 Remove(this, e);
         }
 
-        private void Grid_Loaded(object sender, RoutedEventArgs e)
+        private void StackPanel_Loaded(object sender, RoutedEventArgs e)
         {
-            Grid g = (Grid)sender;
+            FilterOption f = (FilterOption)valueContainer.DataContext;
 
-            FilterOption f = (FilterOption)g.DataContext;
-
-            Common.SetIsReadOnly(g, f.Frozen);
-
-            g.Children.Add(GetValueControl(f));
+            Common.SetIsReadOnly(valueContainer, f.Frozen);
+      
+            RecreateControls();
         }
 
-        public static Control GetValueControl(FilterOption f)
+        private void ComboBoxOperation_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Type type = f.Token.Type;
+            FilterOption f = DataContext as FilterOption;
+            if (f == null)
+                return;
+
+            var newValue = e.AddedItems.Cast<FilterOperation?>().SingleOrDefault();
+
+            if (newValue == FilterOperation.IsIn)
+            {
+                if (!(f.Value is IList))
+                {
+                    valueContainer.Children.Clear();
+                    var list = (IList)Activator.CreateInstance(typeof(MList<>).MakeGenericType(f.Token.Type.Nullify()));
+                    list.Add(f.Value);
+                    f.Value = list; 
+                    RecreateControls();
+                }
+            }
+            else
+            {
+                if (f.Value is IList)
+                {
+                    valueContainer.Children.Clear();
+                    f.Value = ((IList)f.Value)[0];
+                    RecreateControls();
+                }
+            }
+        }
+
+        private void RecreateControls()
+        {
+            FilterOption f = (FilterOption)DataContext;
+
+            valueContainer.Children.Clear();
+
+            if (f.Operation != FilterOperation.IsIn)
+            {
+                FillLite(f.RealValue as Lite<IIdentifiable>);
+
+                valueContainer.Children.Add(GetValueControl(f.Token, "RealValue"));
+            }
+            else
+            {
+                StackPanel sp = new StackPanel { HorizontalAlignment = HorizontalAlignment.Stretch };
+                var list = (IList)f.Value;
+                for (int i = 0; i < list.Count; i++)
+                {
+                    FillLite(list[i] as Lite<IIdentifiable>);
+
+                    sp.Children.Add(new DockPanel
+                    {
+                        LastChildFill = true,
+                        HorizontalAlignment = HorizontalAlignment.Stretch,
+                        Children =
+                        {
+                            (i == 0? 
+                            new Button { Style = (Style)FindResource("RoundButton"), Focusable = false, Content = FindResource("Create")}.Handle(Button.ClickEvent, CreateItem):
+                            new Button { Style = (Style)FindResource("RoundButton"), Focusable = false, Content = FindResource("Remove")}.Handle(Button.ClickEvent, RemoveItem)
+                            ).Set(DockPanel.DockProperty, Dock.Left),
+                            GetValueControl(f.Token, "RealValue[" + i + "]"),
+                        }
+                    });
+                }
+                valueContainer.Children.Add(sp);
+            }
+        }
+
+        private static void FillLite(Lite<IIdentifiable> lite)
+        {
+            if (lite != null && string.IsNullOrEmpty(lite.ToString()))
+                Server.FillToStr(lite);
+        }
+
+        void RemoveItem(object sender, RoutedEventArgs args)
+        {
+            Button b = (Button)sender;
+            DockPanel line = (DockPanel)b.Parent;
+            StackPanel sp = (StackPanel)line.Parent;
+
+            int index = sp.Children.IndexOf(line);
+
+            FilterOption f = (FilterOption)DataContext;
+            var list = (IList)f.Value;
+            list.RemoveAt(index);
+
+            RecreateControls();
+        }
+
+        void CreateItem(object sender, RoutedEventArgs args)
+        {
+            FilterOption f = (FilterOption)DataContext;
+            var list = (IList)f.Value;
+            list.Add(null);
+
+            RecreateControls();
+        }
+
+
+        public static Control GetValueControl(QueryToken token, string bindingPath)
+        {
+            Type type = token.Type;
             if (type.IsLite())
             {
-                Implementations implementations = f.Token.GetImplementations().Value;
-
-                Lite<IIdentifiable> lite = f.RealValue as Lite<IIdentifiable>;
-
-                if (lite != null && string.IsNullOrEmpty(lite.ToString()))
-                    Server.FillToStr(lite);
+                Implementations implementations = token.GetImplementations().Value;
 
                 Type cleanType = Lite.Extract(type);
 
@@ -66,12 +159,12 @@ namespace Signum.Windows
                     EntityCombo ec = new EntityCombo
                     {
                         Type = type,
-                        Implementations = implementations
+                        Implementations = implementations,
                     };
 
                     ec.SetBinding(EntityCombo.EntityProperty, new Binding
                     {
-                        Path = new PropertyPath(FilterOption.RealValueProperty),
+                        Path = new PropertyPath(bindingPath),
                         NotifyOnValidationError = true,
                         ValidatesOnDataErrors = true,
                         ValidatesOnExceptions = true,
@@ -85,12 +178,12 @@ namespace Signum.Windows
                     {
                         Type = type,
                         Create = false,
-                        Implementations = implementations
+                        Implementations = implementations,
                     };
 
                     el.SetBinding(EntityLine.EntityProperty, new Binding
                     {
-                        Path = new PropertyPath(FilterOption.RealValueProperty),
+                        Path = new PropertyPath(bindingPath),
                         NotifyOnValidationError = true,
                         ValidatesOnDataErrors = true,
                         ValidatesOnExceptions = true
@@ -105,14 +198,14 @@ namespace Signum.Windows
                 {
                     Type = type,
                     Create = false,
-                    AutoComplete = false,
+                    Autocomplete = false,
                     Find = false,
-                    Implementations = null
+                    Implementations = null,
                 };
 
                 el.SetBinding(EntityLine.EntityProperty, new Binding
                 {
-                    Path = new PropertyPath(FilterOption.RealValueProperty),
+                    Path = new PropertyPath(bindingPath),
                     NotifyOnValidationError = true,
                     ValidatesOnDataErrors = true,
                     ValidatesOnExceptions = true
@@ -122,13 +215,11 @@ namespace Signum.Windows
             }
             else
             {
-                QueryToken token = f.Token;
-
                 ValueLine vl = new ValueLine()
                 {
                     Type = type,
                     Format = token.Format,
-                    UnitText = token.Unit
+                    UnitText = token.Unit,
                 };
 
                 if (type.UnNullify().IsEnum)
@@ -138,7 +229,7 @@ namespace Signum.Windows
 
                 vl.SetBinding(ValueLine.ValueProperty, new Binding
                 {
-                    Path = new PropertyPath("RealValue"), //odd
+                    Path = new PropertyPath(bindingPath), //odd
                     NotifyOnValidationError = true,
                     ValidatesOnDataErrors = true,
                     ValidatesOnExceptions = true,
@@ -148,5 +239,7 @@ namespace Signum.Windows
                 return vl;
             }
         }
+
+      
     }
 }

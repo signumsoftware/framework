@@ -2,7 +2,6 @@
 using System.Text;
 using System.Collections;
 using System.Collections.Generic;
-using Signum.Utilities.Properties;
 
 namespace Signum.Utilities.DataStructures
 {

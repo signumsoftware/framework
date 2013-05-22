@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,6 +6,7 @@ using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.Maps;
 using Signum.Utilities.DataStructures;
+using Signum.Entities;
 
 namespace Signum.Engine
 {
@@ -218,8 +219,7 @@ namespace Signum.Engine
             {
                 var old = distances.WithMin(kvp=>kvp.Value.Values.Min());
 
-                Selection selection = !Interactive ? new Selection(old.Key, old.Value.WithMin(a => a.Value).Key) :
-                                        SelectInteractive(old.Key, old.Value.OrderBy(a => a.Value).Select(a => a.Key).ToList(), replacementsKey);
+                Selection selection = SelectInteractive(old.Key, old.Value.OrderBy(a => a.Value).Select(a => a.Key).ToList(), replacementsKey, Interactive);
 
                 oldOnly.Remove(selection.OldValue);
                 distances.Remove(selection.OldValue);
@@ -248,7 +248,7 @@ namespace Signum.Engine
 
         public static Func<string, List<string>, Selection?> AutoRepacement; 
 
-        private static Selection SelectInteractive(string oldValue, List<string> newValues, string replacementsKey)
+        private static Selection SelectInteractive(string oldValue, List<string> newValues, string replacementsKey, bool interactive)
         {
             if (AutoRepacement != null)
             {
@@ -260,15 +260,21 @@ namespace Signum.Engine
                 }
             }
 
+            if (!interactive)
+                return new Selection(oldValue, newValues.First());
+
+            if (Console.Out == null)
+                throw new InvalidOperationException("Impossible to synchronize without interactive Console");
+
             int startingIndex = 0;
 
-            Console.WriteLine(Properties.Resources._0HasBeenRenamedIn1.Formato(oldValue, replacementsKey));
+            Console.WriteLine(SynchronizerMessage._0HasBeenRenamedIn1.NiceToString().Formato(oldValue, replacementsKey));
           retry:
             newValues.Skip(startingIndex).Take(MaxElements)
                 .Select((s, i) => "-{0}{1,2}: {2} ".Formato(i + startingIndex == 0 ? ">" : " ", i + startingIndex, s)).ToConsole();
             Console.WriteLine();
 
-            Console.WriteLine(Properties.Resources.NNone);
+            Console.WriteLine(SynchronizerMessage.NNone.NiceToString());
 
             int remaining = newValues.Count - startingIndex - MaxElements;
             if (remaining > 0)
@@ -276,7 +282,12 @@ namespace Signum.Engine
 
             while (true)
             {
-                string answer = Console.ReadLine().ToLower();
+                string answer = Console.ReadLine();
+
+                if (answer == null)
+                    throw new InvalidOperationException("Impossible to Syncrhonize interactively without Console");
+                
+                 answer= answer.ToLower();
 
                 if (answer == "s" && remaining > 0)
                 {

@@ -90,19 +90,25 @@ namespace Signum.Services
         public virtual List<Lite<IdentifiableEntity>> FindAllLite(Implementations implementations)
         {
             return Return(MethodInfo.GetCurrentMethod(), implementations.ToString(),
-                () => AutoCompleteUtils.FindAllLite(implementations));
+                () => AutocompleteUtils.FindAllLite(implementations));
         }
 
         public virtual List<Lite<IdentifiableEntity>> FindLiteLike(Implementations implementations, string subString, int count)
         {
             return Return(MethodInfo.GetCurrentMethod(), implementations.ToString(),
-                () => AutoCompleteUtils.FindLiteLike(implementations, subString, count));
+                () => AutocompleteUtils.FindLiteLike(implementations, subString, count));
         }
 
         public virtual Dictionary<PropertyRoute, Implementations> FindAllImplementations(Type root)
         {
             return Return(MethodInfo.GetCurrentMethod(), root.Name,
                 () => Schema.Current.FindAllImplementations(root));
+        }
+
+        public virtual Dictionary<Type, HashSet<Type>> FindAllMixins()
+        {
+            return Return(MethodInfo.GetCurrentMethod(), null,
+             () => MixinDeclarations.Declarations);
         }
 
         public virtual bool Exists(Type type, int id)
@@ -117,13 +123,6 @@ namespace Signum.Services
                 () => Schema.Current.TypeToDN);
         }
 
-
-        public Dictionary<Type, EntityKind> EntityKinds()
-        {
-            return Return(MethodInfo.GetCurrentMethod(),
-                 () => TypeLogic.EntityKinds);
-        }
-
         public virtual DateTime ServerNow()
         {
             return Return(MethodInfo.GetCurrentMethod(),
@@ -135,6 +134,13 @@ namespace Signum.Services
             return Return(MethodInfo.GetCurrentMethod(),
                 () => Database.GetToStr(type, id));
         }
+
+        public virtual long Ticks(Lite<Entity> entity)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => entity.InDB(e => e.Ticks));
+        }
+
         #endregion
 
         #region IDynamicQueryServer
@@ -148,6 +154,12 @@ namespace Signum.Services
         {
             return Return(MethodInfo.GetCurrentMethod(), request.QueryName.ToString(),
                 () => DynamicQueryManager.Current.ExecuteQuery(request));
+        }
+
+        public ResultTable ExecuteQueryGroup(QueryGroupRequest request)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), request.QueryName.ToString(),
+                () => DynamicQueryManager.Current.ExecuteGroupQuery(request));
         }
 
         public virtual int ExecuteQueryCount(QueryCountRequest request)
@@ -209,37 +221,37 @@ namespace Signum.Services
         public IdentifiableEntity ExecuteOperation(IIdentifiable entity, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-                () => OperationLogic.ServiceExecute(entity, operationKey, args));
+                () => (IdentifiableEntity)OperationLogic.Execute(entity, operationKey, args));
         }
 
         public IdentifiableEntity ExecuteOperationLite(Lite<IIdentifiable> lite, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-                () => OperationLogic.ServiceExecuteLite(lite, operationKey, args));
+                () => (IdentifiableEntity)OperationLogic.ExecuteLite(lite, operationKey, args));
         }
 
-        public IdentifiableEntity Delete(Lite<IIdentifiable> lite, Enum operationKey, params object[] args)
+        public void Delete(Lite<IIdentifiable> lite, Enum operationKey, params object[] args)
         {
-            return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-                () => OperationLogic.ServiceDelete(lite, operationKey, args));
+            Execute(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
+                () => OperationLogic.Delete(lite, operationKey, args));
         }
 
         public IdentifiableEntity Construct(Type type, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-                () => OperationLogic.ServiceConstruct(type, operationKey, args));
+                () => OperationLogic.Construct(type, operationKey, args));
         }
 
         public IdentifiableEntity ConstructFrom(IIdentifiable entity, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-                () => OperationLogic.ServiceConstructFrom(entity, operationKey, args));
+                () => OperationLogic.ConstructFrom<IdentifiableEntity>(entity, operationKey, args));
         }
 
         public IdentifiableEntity ConstructFromLite(Lite<IIdentifiable> lite, Enum operationKey, params object[] args)
         {
             return Return(MethodInfo.GetCurrentMethod(), operationKey.ToString(),
-                () => OperationLogic.ServiceConstructFromLite(lite, operationKey, args));
+                () => OperationLogic.ConstructFromLite<IdentifiableEntity>(lite, operationKey, args));
         }
 
         public IdentifiableEntity ConstructFromMany(IEnumerable<Lite<IIdentifiable>> lites, Type type, Enum operationKey, params object[] args)

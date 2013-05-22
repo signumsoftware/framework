@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="">
+    <Member Name="0HasNoFreeBits" Description="{0: X} não tem nenhuns bits livre" />
+    <Member Name="0Year1Month2Day" Description="{0} ano, {1} mês, {2} dia" />
+  </Type>
+  <Type Name="AboutMessage">
+    <Member Name="Unknown0" Description="Desconhecido {{0}}" />
+  </Type>
+  <Type Name="CollectionMessage">
+    <Member Name="And" Description=" e " />
+    <Member Name="Or" Description=" ou " />
+  </Type>
+  <Type Name="ConsoleMessage">
+    <Member Name="EnterYourSelection" Description="Introduz a tua selecção: " />
+    <Member Name="EnterYoutSelectionsSeparatedByComma" Description="Introduz as tuas selecções separadas por vírgulas: " />
+    <Member Name="NoOptionWithKey0Found" Description="Nenhuma opção com a chave {0} encontrada" />
+    <Member Name="SelectOneOfTheFollowingOptions" Description="Escolha uma das seguintes opções:" />
+  </Type>
+  <Type Name="DateTimeMessage">
+    <Member Name="0Day" Description="{0} dia" />
+    <Member Name="0Days" Description="{0} dias" />
+    <Member Name="0Hour" Description="{0} hora" />
+    <Member Name="0Hours" Description="{0} horas" />
+    <Member Name="0Minute" Description="{0} minuto" />
+    <Member Name="0Minutes" Description="{0} minutos" />
+    <Member Name="0Month" Description="{0} mês" />
+    <Member Name="0Months" Description="{0} meses" />
+    <Member Name="0Second" Description="{0} segundo" />
+    <Member Name="0Seconds" Description="{0} segundos" />
+    <Member Name="0Year" Description="{0} ano" />
+    <Member Name="0Years" Description="{0} anos" />
+    <Member Name="Ago" Description="à {0} " />
+    <Member Name="DateLast" Description="Último {0}" />
+    <Member Name="DateThis" Description="Este {0}" />
+    <Member Name="Today" Description="Hoje" />
+    <Member Name="Tomorrow" Description="Amanhã" />
+    <Member Name="Yesterday" Description="Ontem" />
+  </Type>
+  <Type Name="DateTimePrecision">
+    <Member Name="Days" Description="Dias" />
+    <Member Name="Hours" Description="Horas" />
+    <Member Name="Milliseconds" Description="Milissegundos" />
+    <Member Name="Minutes" Description="Minutos" />
+    <Member Name="Seconds" Description="Segundos" />
+  </Type>
+  <Type Name="Unavailable" Description="Indisponível" />
+</Translations>

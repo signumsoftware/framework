@@ -5,7 +5,6 @@ using System.Text;
 using Signum.Entities;
 using Signum.Engine.Maps;
 using Signum.Engine;
-using Signum.Test.Properties;
 using System.IO;
 using System.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -16,8 +15,9 @@ using Signum.Utilities;
 using Microsoft.SqlServer.Types;
 using Signum.Engine.Operations;
 using Signum.Engine.Basics;
+using Signum.Test.Properties;
 
-namespace Signum.Test
+namespace Signum.Test.Environment
 {
     public static class Starter
     {
@@ -55,7 +55,7 @@ namespace Signum.Test
             sb.Schema.Settings.OverrideAttributes((OperationLogDN ol) => ol.User, new ImplementedByAttribute());
             sb.Schema.Settings.OverrideAttributes((ExceptionDN e) => e.User, new ImplementedByAttribute());
 
-            Validator.GetOrCreatePropertyPack((OperationLogDN e) => e.User).Validators.Clear();
+            Validator.PropertyValidator((OperationLogDN e) => e.User).Validators.Clear();
 
             OperationLogic.Start(sb, dqm);
             ExceptionLogic.Start(sb, dqm);

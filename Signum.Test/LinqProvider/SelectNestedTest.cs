@@ -12,6 +12,7 @@ using Signum.Utilities;
 using System.Linq.Expressions;
 using System.Data.SqlTypes;
 using System.Reflection;
+using Signum.Test.Environment;
 
 namespace Signum.Test.LinqProvider
 {
@@ -231,6 +232,24 @@ namespace Signum.Test.LinqProvider
                                    orderby a.Name
                                    select (from s in a.Songs
                                            select "{0} - {1} - {2}".Formato(l.Name, a.Name, s.Name)).ToList()).ToList()).ToList();
+        }
+
+
+
+        [TestMethod]
+        public void SelectContainsInt()
+        {
+            var result = (from b in Database.Query<BandDN>()
+                          where b.Members.Select(a => a.Id).Contains(1)
+                          select b.ToLite()).ToList();
+        }
+
+        [TestMethod]
+        public void SelectContainsEnum()
+        {
+            var result = (from b in Database.Query<BandDN>()
+                          where b.Members.Select(a => a.Sex).Contains(Sex.Female)
+                          select b.ToLite()).ToList();
         }
 
 

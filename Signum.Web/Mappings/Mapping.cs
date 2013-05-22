@@ -1,4 +1,4 @@
-﻿#region usings
+#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,6 @@ using Signum.Entities;
 using Signum.Engine.Maps;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.ExpressionTrees;
-using Signum.Web.Properties;
 using Signum.Engine;
 using Signum.Entities.Reflection;
 using System.Reflection;
@@ -256,7 +255,7 @@ namespace Signum.Web
                 }
                 catch (FormatException)
                 {
-                    return ctx.None(ctx.PropertyPack != null ? Resources._0HasAnInvalidFormat.Formato(ctx.PropertyPack.PropertyInfo.NiceName()) : Resources.InvalidFormat);
+                    return ctx.None(ctx.PropertyValidator != null ? ValidationMessage._0HasAnInvalidFormat.NiceToString().Formato(ctx.PropertyValidator.PropertyInfo.NiceName()) : ValidationMessage.InvalidFormat.NiceToString());
                 }
             };
         }
@@ -278,7 +277,7 @@ namespace Signum.Web
                 }
                 catch (FormatException)
                 {
-                    return ctx.None(ctx.PropertyPack != null ? Resources._0HasAnInvalidFormat.Formato(ctx.PropertyPack.PropertyInfo.NiceName()) : Resources.InvalidFormat);
+                    return ctx.None(ctx.PropertyValidator != null ? ValidationMessage._0HasAnInvalidFormat.NiceToString().Formato(ctx.PropertyValidator.PropertyInfo.NiceName()) : ValidationMessage.InvalidFormat.NiceToString());
                 }
             };
         }
@@ -345,21 +344,24 @@ namespace Signum.Web
 
         public override T GetValue(MappingContext<T> ctx)
         {
-            if (ctx.Empty())
-                return ctx.None();
-            
-            string strRuntimeInfo;
-            Type entityType = ctx.Inputs.TryGetValue(EntityBaseKeys.RuntimeInfo, out strRuntimeInfo) ? 
-                RuntimeInfo.FromFormValue(strRuntimeInfo).EntityType: 
-                ctx.Value.TryCC(t=>t.GetType());
+            using (HeavyProfiler.LogNoStackTrace("GetValue", () => "AutoEntityMapping<{0}>".Formato(typeof(T).TypeName())))
+            {
+                if (ctx.Empty())
+                    return ctx.None();
 
-            if (entityType == null)
-                return (T)(object)null;
+                string strRuntimeInfo;
+                Type entityType = ctx.Inputs.TryGetValue(EntityBaseKeys.RuntimeInfo, out strRuntimeInfo) ?
+                    RuntimeInfo.FromFormValue(strRuntimeInfo).EntityType :
+                    ctx.Value.TryCC(t => t.GetType());
 
-            if (typeof(T) == entityType || typeof(T).IsEmbeddedEntity())
-                return GetRuntimeValue<T>(ctx, ctx.PropertyRoute);
+                if (entityType == null)
+                    return (T)(object)null;
 
-            return miGetRuntimeValue.GetInvoker(entityType)(this, ctx, PropertyRoute.Root(entityType));
+                if (typeof(T) == entityType || typeof(T).IsEmbeddedEntity())
+                    return GetRuntimeValue<T>(ctx, ctx.PropertyRoute);
+
+                return miGetRuntimeValue.GetInvoker(entityType)(this, ctx, PropertyRoute.Root(entityType));
+            }
         }
 
         static GenericInvoker<Func<AutoEntityMapping<T>, MappingContext<T>, PropertyRoute, T>> miGetRuntimeValue = 
@@ -369,7 +371,7 @@ namespace Signum.Web
         {
             if (AllowedMappings != null && !AllowedMappings.ContainsKey(typeof(R)))
             {
-                return (R)(object)ctx.None(Resources.Type0NotAllowed.Formato(typeof(R)));
+                return (R)(object)ctx.None(ValidationMessage.Type0NotAllowed.NiceToString().Formato(typeof(R)));
             }
 
             Mapping<R> mapping =  (Mapping<R>)(AllowedMappings.TryGetC(typeof(R)) ?? Navigator.EntitySettings(typeof(R)).UntypedMappingLine);
@@ -385,23 +387,23 @@ namespace Signum.Web
     {
         abstract class PropertyMapping
         {
-            public readonly PropertyPack PropertyPack;
+            public readonly IPropertyValidator PropertyValidator;
 
-            protected PropertyMapping(PropertyPack pp)
+            protected PropertyMapping(IPropertyValidator pv)
             {
-                this.PropertyPack = pp;
+                this.PropertyValidator = pv;
             }
 
-            public static PropertyMapping Create(PropertyPack pp)
+            public static PropertyMapping Create(IPropertyValidator pv)
             {
-                return (PropertyMapping)Activator.CreateInstance(typeof(PropertyMapping<>).MakeGenericType(typeof(T), pp.PropertyInfo.PropertyType), pp);
+                return (PropertyMapping)Activator.CreateInstance(typeof(PropertyMapping<>).MakeGenericType(typeof(T), pv.PropertyInfo.PropertyType), pv);
             }
 
             public abstract void SetProperty(MappingContext<T> parent);
 
             public override string ToString()
             {
-                return PropertyPack.PropertyInfo.PropertyName();
+                return PropertyValidator.PropertyInfo.PropertyName();
             }
         }
 
@@ -412,7 +414,8 @@ namespace Signum.Web
 
             public Mapping<P> Mapping { get; set; }
 
-            public PropertyMapping(PropertyPack pp)  : base( pp)
+            public PropertyMapping(IPropertyValidator pp)
+                : base(pp)
             {
                 GetValue = ReflectionTools.CreateGetter<T, P>(pp.PropertyInfo);
                 SetValue = ReflectionTools.CreateSetter<T, P>(pp.PropertyInfo);
@@ -432,9 +435,9 @@ namespace Signum.Web
                 }
                 catch (Exception e)
                 {
-                    string error = e is FormatException ? Resources._0HasAnInvalidFormat : Resources.NotPossibleToaAssign0;
+                    string error = e is FormatException ? ValidationMessage._0HasAnInvalidFormat.NiceToString() : ValidationMessage.NotPossibleToaAssign0.NiceToString();
 
-                    ctx.Error.Add(error.Formato(PropertyPack.PropertyInfo.NiceName()));
+                    ctx.Error.Add(error.Formato(PropertyValidator.PropertyInfo.NiceName()));
                 }
 
                 if (!ctx.Empty())
@@ -443,23 +446,23 @@ namespace Signum.Web
 
             public SubContext<P> CreateSubContext(MappingContext<T> parent)
             {
-                string newControlId = TypeContextUtilities.Compose(parent.ControlID, PropertyPack.PropertyInfo.Name);
-                PropertyRoute route = parent.PropertyRoute.Add(this.PropertyPack.PropertyInfo);
+                string newControlId = TypeContextUtilities.Compose(parent.ControlID, PropertyValidator.PropertyInfo.Name);
+                PropertyRoute route = parent.PropertyRoute.Add(this.PropertyValidator.PropertyInfo);
 
-                SubContext<P> ctx = new SubContext<P>(newControlId, PropertyPack, route, parent);
+                SubContext<P> ctx = new SubContext<P>(newControlId, PropertyValidator, route, parent);
                 if (parent.Value != null)
                     ctx.Value = GetValue(parent.Value);
                 return ctx;
             }
         }
 
-        Dictionary<string, PropertyMapping> Properties = new Dictionary<string, PropertyMapping>();
+        Dictionary<string, PropertyMapping> properties = new Dictionary<string, PropertyMapping>();
 
         public EntityMapping(bool fillProperties)
         {
             if (fillProperties)
             {
-                Properties = Validator.GetPropertyPacks(typeof(T))
+                properties = Validator.GetPropertyValidators(typeof(T))
                     .Where(kvp => !kvp.Value.PropertyInfo.IsReadOnly())
                     .ToDictionary(kvp => kvp.Key, kvp => PropertyMapping.Create(kvp.Value));
             }
@@ -467,26 +470,29 @@ namespace Signum.Web
 
         public override T GetValue(MappingContext<T> ctx)
         {
-            if (ctx.Empty())
-                return ctx.None();
+            using (HeavyProfiler.LogNoStackTrace("GetValue", () => "EntityMapping<{0}>".Formato(typeof(T).TypeName())))
+            {
+                if (ctx.Empty())
+                    return ctx.None();
 
-            var val = GetEntity(ctx);
+                var val = GetEntity(ctx);
 
-            if (val == ctx.Value)
-                ctx.SupressChange = true;
-            else
-                ctx.Value = val;
+                if (val == ctx.Value)
+                    ctx.SupressChange = true;
+                else
+                    ctx.Value = val;
 
-            SetValueProperties(ctx);
+                SetValueProperties(ctx);
 
-            RecursiveValidation(ctx);
+                RecursiveValidation(ctx);
 
-            return val;
+                return val;
+            }
         }
 
         public virtual void SetValueProperties(MappingContext<T> ctx)
         {
-            foreach (PropertyMapping item in Properties.Values)
+            foreach (PropertyMapping item in properties.Values)
             {
                 item.SetProperty(ctx);
             }
@@ -497,7 +503,7 @@ namespace Signum.Web
             ModifiableEntity entity = ctx.Value;
             foreach (MappingContext childCtx in ctx.Children())
             {
-                string error = entity.PropertyCheck(childCtx.PropertyPack);
+                string error = childCtx.PropertyValidator.PropertyCheck(entity);
                 if (error.HasText())
                     childCtx.Error.Add(error);
             }
@@ -545,8 +551,8 @@ namespace Signum.Web
         {
             PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
 
-            PropertyMapping<P> propertyMapping = (PropertyMapping<P>)Properties.GetOrCreate(pi.Name,
-                () => new PropertyMapping<P>(Validator.GetOrCreatePropertyPack(typeof(T), pi.Name)));
+            PropertyMapping<P> propertyMapping = (PropertyMapping<P>)properties.GetOrCreate(pi.Name,
+                () => new PropertyMapping<P>(Validator.TryGetPropertyValidator(typeof(T), pi.Name)));
 
             propertyMapping.Mapping = Mapping.New<P>();
 
@@ -556,7 +562,7 @@ namespace Signum.Web
         public EntityMapping<T> ReplaceProperty<P>(Expression<Func<T, P>> property, Func<Mapping<P>, Mapping<P>> replacer)
         {
             PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
-            var pm = (PropertyMapping<P>)Properties[pi.Name];
+            var pm = (PropertyMapping<P>)properties[pi.Name];
             pm.Mapping = replacer(pm.Mapping);
             return this;
         }
@@ -565,7 +571,7 @@ namespace Signum.Web
         public EntityMapping<T> GetProperty<P>(Expression<Func<T, P>> property, Action<Mapping<P>> continuation)
         {
             PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
-            continuation(((PropertyMapping<P>)Properties[pi.Name]).Mapping);
+            continuation(((PropertyMapping<P>)properties[pi.Name]).Mapping);
             return this;
         }
 
@@ -573,8 +579,8 @@ namespace Signum.Web
         {
             PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
 
-            PropertyMapping<P> propertyMapping = (PropertyMapping<P>)Properties.GetOrCreate(pi.Name,
-                () => new PropertyMapping<P>(Validator.GetOrCreatePropertyPack(typeof(T), pi.Name)));
+            PropertyMapping<P> propertyMapping = (PropertyMapping<P>)properties.GetOrCreate(pi.Name,
+                () => new PropertyMapping<P>(Validator.TryGetPropertyValidator(typeof(T), pi.Name) ?? new PropertyValidator<T>(pi)));
 
             propertyMapping.Mapping = mapping;
             
@@ -584,13 +590,13 @@ namespace Signum.Web
         public EntityMapping<T> RemoveProperty<P>(Expression<Func<T, P>> property)
         {
             PropertyInfo pi = ReflectionTools.GetPropertyInfo(property);
-            Properties.Remove(pi.Name);
+            properties.Remove(pi.Name);
             return this;
         }
 
         public EntityMapping<T> ClearProperties()
         {
-            Properties.Clear();
+            properties.Clear();
             return this;
         }
     }
@@ -609,14 +615,17 @@ namespace Signum.Web
 
         public Lite<S> GetValue(MappingContext<Lite<S>> ctx)
         {
-            if (ctx.Empty())
-                return ctx.None();
+            using (HeavyProfiler.LogNoStackTrace("GetValue", () => "LiteMapping<{0}>".Formato(typeof(S).TypeName())))
+            {
+                if (ctx.Empty())
+                    return ctx.None();
 
-            var newLite = Change(ctx);
-            if (newLite == ctx.Value)
-                ctx.SupressChange = true;
+                var newLite = Change(ctx);
+                if (newLite == ctx.Value)
+                    ctx.SupressChange = true;
 
-            return newLite;
+                return newLite;
+            }
         }
 
         public Lite<S> Change(MappingContext<Lite<S>> ctx)
@@ -720,29 +729,32 @@ namespace Signum.Web
 
         public override MList<S> GetValue(MappingContext<MList<S>> ctx)
         {
-            if (ctx.Empty())
-                return ctx.None();
-
-            MList<S> oldList = ctx.Value;
-
-            MList<S> newList = new MList<S>();
-
-            foreach (MappingContext<S> itemCtx in GenerateItemContexts(ctx))
+            using (HeavyProfiler.LogNoStackTrace("GetValue", () => "MListMapping<{0}>".Formato(typeof(S).TypeName())))
             {
-                Debug.Assert(!itemCtx.Empty());
+                if (ctx.Empty())
+                    return ctx.None();
 
-                int? oldIndex = itemCtx.Inputs.TryGetC(EntityListBaseKeys.Indexes).TryCC(s => s.Split(new [] {';'})[0]).ToInt();
+                MList<S> oldList = ctx.Value;
 
-                if (oldIndex.HasValue && oldList != null && oldList.Count > oldIndex.Value)
-                    itemCtx.Value = oldList[oldIndex.Value];
+                MList<S> newList = new MList<S>();
 
-                itemCtx.Value = ElementMapping(itemCtx);
+                foreach (MappingContext<S> itemCtx in GenerateItemContexts(ctx))
+                {
+                    Debug.Assert(!itemCtx.Empty());
 
-                ctx.AddChild(itemCtx);
-                if (itemCtx.Value != null)
-                    newList.Add(itemCtx.Value);
+                    int? oldIndex = itemCtx.Inputs.TryGetC(EntityListBaseKeys.Indexes).TryCC(s => s.Split(new[] { ';' })[0]).ToInt();
+
+                    if (oldIndex.HasValue && oldList != null && oldList.Count > oldIndex.Value)
+                        itemCtx.Value = oldList[oldIndex.Value];
+
+                    itemCtx.Value = ElementMapping(itemCtx);
+
+                    ctx.AddChild(itemCtx);
+                    if (itemCtx.Value != null)
+                        newList.Add(itemCtx.Value);
+                }
+                return newList;
             }
-            return newList;
         }
 
     }
@@ -761,23 +773,26 @@ namespace Signum.Web
 
         public override MList<S> GetValue(MappingContext<MList<S>> ctx)
         {
-            MList<S> list = ctx.Value;
-            int i = 0;
-
-            foreach (MappingContext<S> itemCtx in GenerateItemContexts(ctx).OrderBy(mc => mc.ControlID.Substring(mc.ControlID.LastIndexOf("_") + 1).ToInt().Value))
+            using (HeavyProfiler.LogNoStackTrace("GetValue", () => "MListCorrelatedMapping<{0}>".Formato(typeof(S).TypeName())))
             {
-                Debug.Assert(!itemCtx.Empty());
+                MList<S> list = ctx.Value;
+                int i = 0;
 
-                itemCtx.Value = list[i];
-                itemCtx.Value = ElementMapping(itemCtx);
+                foreach (MappingContext<S> itemCtx in GenerateItemContexts(ctx).OrderBy(mc => mc.ControlID.Substring(mc.ControlID.LastIndexOf("_") + 1).ToInt().Value))
+                {
+                    Debug.Assert(!itemCtx.Empty());
 
-                ctx.AddChild(itemCtx);
-                list[i] = itemCtx.Value;
+                    itemCtx.Value = list[i];
+                    itemCtx.Value = ElementMapping(itemCtx);
 
-                i++;
+                    ctx.AddChild(itemCtx);
+                    list[i] = itemCtx.Value;
+
+                    i++;
+                }
+
+                return list;
             }
-
-            return list;
         }
     }
 
@@ -812,30 +827,45 @@ namespace Signum.Web
 
         public override MList<S> GetValue(MappingContext<MList<S>> ctx)
         {
-            if (ctx.Empty())
-                return ctx.None();
-
-            MList<S> list = ctx.Value;
-
-            var dic = (FilterElements == null ? list : list.Where(FilterElements)).ToDictionary(GetKey);
-
-            PropertyRoute route = ctx.PropertyRoute.Add("Item");
-
-            foreach (MappingContext<S> itemCtx in GenerateItemContexts(ctx))
+            using (HeavyProfiler.LogNoStackTrace("GetValue", () => "MListDictionaryMapping<{0}>".Formato(typeof(S).TypeName())))
             {
-                Debug.Assert(!itemCtx.Empty());
+                if (ctx.Empty())
+                    return ctx.None();
 
-                SubContext<K> subContext = new SubContext<K>(TypeContextUtilities.Compose(itemCtx.ControlID, Route), null, route, itemCtx);
+                MList<S> list = ctx.Value;
 
-                subContext.Value = KeyPropertyMapping(subContext);
+                var dic = (FilterElements == null ? list : list.Where(FilterElements)).ToDictionary(GetKey);
 
-                itemCtx.Value = dic[subContext.Value];
-                itemCtx.Value = ElementMapping(itemCtx);
+                PropertyRoute route = ctx.PropertyRoute.Add("Item");
 
-                ctx.AddChild(itemCtx);
+                using(var log = HeavyProfiler.LogNoStackTrace("Log"))
+                foreach (MappingContext<S> itemCtx in GenerateItemContexts(ctx))
+                {
+                    log.Switch("SubContext");
+
+                    SubContext<K> subContext = new SubContext<K>(TypeContextUtilities.Compose(itemCtx.ControlID, Route), null, route, itemCtx);
+
+                    log.Switch("KeyPropertyMapping");
+
+                    subContext.Value = KeyPropertyMapping(subContext);
+
+                    log.Switch("Dic");
+
+                    itemCtx.Value = dic[subContext.Value];
+
+                    log.Switch("ElementMapping");
+
+                    itemCtx.Value = ElementMapping(itemCtx);
+
+                    log.Switch("AddChild");
+
+                    ctx.AddChild(itemCtx);
+
+                    log.Switch("Log");
+                }
+
+                return list;
             }
-
-            return list;
         }
     }
 }

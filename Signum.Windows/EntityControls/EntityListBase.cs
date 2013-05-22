@@ -29,7 +29,7 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty MoveProperty =
-            DependencyProperty.Register("Move", typeof(bool), typeof(EntityBase), new FrameworkPropertyMetadata(false, (d, e) => ((EntityList)d).UpdateVisibility()));
+            DependencyProperty.Register("Move", typeof(bool), typeof(EntityBase), new FrameworkPropertyMetadata(false, (d, e) => ((EntityListBase)d).UpdateVisibility()));
         public bool Move
         {
             get { return (bool)GetValue(MoveProperty); }
@@ -89,9 +89,9 @@ namespace Signum.Windows
                 return Server.Convert(value, Type);
         }
 
-        public override PropertyRoute GetEntityTypeContext()
+        public override PropertyRoute GetEntityPropertyRoute()
         {
-            PropertyRoute tc = base.GetEntityTypeContext();
+            PropertyRoute tc = base.GetEntityPropertyRoute();
             if (tc == null)
                 return null;
 

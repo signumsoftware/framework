@@ -15,11 +15,11 @@ namespace Signum.Engine.Linq
 
         private AliasReplacer() { }
 
-        public static Expression Replace(Expression source)
+        public static Expression Replace(Expression source, AliasGenerator aliasGenerator)
         {
             AliasReplacer ap = new AliasReplacer()
             {
-                aliasMap = AliasGatherer.Gather(source).Reverse().ToDictionary(a => a, a => Alias.CloneAlias(a))
+                aliasMap = AliasGatherer.Gather(source).Reverse().ToDictionary(a => a, aliasGenerator.CloneAlias)
             };
 
             return ap.Visit(source);
@@ -50,7 +50,7 @@ namespace Signum.Engine.Linq
             Alias newAlias = aliasMap.TryGetC(select.Alias) ?? select.Alias;
 
             if (top != select.Top || from != select.From || where != select.Where || columns != select.Columns || orderBy != select.OrderBy || groupBy != select.GroupBy || newAlias != select.Alias)
-                return new SelectExpression(newAlias, select.IsDistinct, select.IsReverse, top, columns, from, where, orderBy, groupBy);
+                return new SelectExpression(newAlias, select.IsDistinct, select.IsReverse, top, columns, from, where, orderBy, groupBy, select.ForXmlPathEmpty);
 
             return select;
         }

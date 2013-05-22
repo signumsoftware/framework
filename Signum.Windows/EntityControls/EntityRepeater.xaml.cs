@@ -310,9 +310,14 @@ namespace Signum.Windows
             return base.Owner.GetType().Name;
         }
 
-        protected override string GetItemStatusCore()
+        protected override string GetNameCore()
         {
-            return Common.GetTypeContext(Owner).TryToString();
+            var parentRoute = Common.GetPropertyRoute(Owner);
+
+            if (parentRoute == null)
+                return null;
+
+            return parentRoute.Add("Item").ToString();
         }
     }
 }

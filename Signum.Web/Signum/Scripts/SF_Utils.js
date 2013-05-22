@@ -61,37 +61,7 @@ SF.registerModule = (function () {
             }
         }
 
-        function loadCss(url, cb) {
-        var d = document,
-            head = d.getElementsByTagName("head")[0],
-            link = d.createElement("link");
-        link.type = "text/css";
-        link.rel = "stylesheet";
-        link.href = url;
-        if (cb) {
-            if ($.browser.msie) {
-                link.onreadystatechange = function () {
-                    /loaded|complete/.test(link.readyState) && cb();
-                };
-                } else if ($.browser.opera) {
-                link.onload = cb;
-                } else
-            //FF, Safari, Chrome
-                (function () {
-                    try {
-                        link.sheet.cssRule;
-                    } catch (e) {
-                        setTimeout(arguments.callee, 20);
-                        return;
-                    };
-                    cb();
-                })();
-        }
-        head.appendChild(link);
-    }
-
         return {
-            loadCss: loadCss,
             loadJs: loadJs
 };
 })();
@@ -478,10 +448,14 @@ SF.NewContentProcessor = {
                 throw "No id set for tab with legend: " + legend;
             }
             else {
-                $tabContainer.tabs("add", "#" + id, legend);
+                $("<li><a href='#" + id + "'>" + legend + "</a></li>")
+                    .appendTo($tabContainer.find(".ui-tabs-nav"));
                 $legend.remove();
             }
         });
+
+        $tabContainer.tabs("refresh");
+        $tabContainer.tabs("option", "active", 0);
     },
 
     defaultSlider: function ($newContent) {
@@ -497,5 +471,5 @@ SF.NewContentProcessor = {
                 $mainControl.addClass("sf-changed");
             }
         });
-    },
+    }
 };

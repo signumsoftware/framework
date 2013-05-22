@@ -112,12 +112,16 @@ namespace Signum.Engine.Linq
                     return CompareEntityInit((EntityExpression)a, (EntityExpression)b);
                 case DbExpressionType.EmbeddedInit:
                     return CompareEmbeddedFieldInit((EmbeddedEntityExpression)a, (EmbeddedEntityExpression)b);
+                case DbExpressionType.MixinInit:
+                    return CompareMixinFieldInit((MixinEntityExpression)a, (MixinEntityExpression)b);
                 case DbExpressionType.ImplementedBy:
                     return CompareImplementedBy((ImplementedByExpression)a, (ImplementedByExpression)b);
                 case DbExpressionType.ImplementedByAll:
                     return CompareImplementedByAll((ImplementedByAllExpression)a, (ImplementedByAllExpression)b);
-                case DbExpressionType.Lite:
-                    return CompareLiteReference((LiteExpression)a, (LiteExpression)b);
+                case DbExpressionType.LiteReference:
+                    return CompareLiteReference((LiteReferenceExpression)a, (LiteReferenceExpression)b);
+                case DbExpressionType.LiteValue:
+                    return CompareLiteValue((LiteValueExpression)a, (LiteValueExpression)b);
                 case DbExpressionType.TypeEntity:
                     return CompareTypeFieldInit((TypeEntityExpression)a, (TypeEntityExpression)b);
                 case DbExpressionType.TypeImplementedBy:
@@ -410,7 +414,8 @@ namespace Signum.Engine.Linq
             return a.Table == b.Table
                 && CompareAlias(a.TableAlias, b.TableAlias)
                 && Compare(a.ExternalId, b.ExternalId)
-                && CompareList(a.Bindings, b.Bindings, CompareFieldBinding);
+                && CompareList(a.Bindings, b.Bindings, CompareFieldBinding)
+                && CompareList(a.Mixins, b.Mixins, CompareMixinFieldInit);
         }
 
         protected virtual bool CompareEmbeddedFieldInit(EmbeddedEntityExpression a, EmbeddedEntityExpression b)
@@ -418,6 +423,12 @@ namespace Signum.Engine.Linq
             return Compare(a.HasValue, b.HasValue)
                 && a.FieldEmbedded == b.FieldEmbedded
                 && CompareList(a.Bindings, b.Bindings, CompareFieldBinding); 
+        }
+
+        protected virtual bool CompareMixinFieldInit(MixinEntityExpression a, MixinEntityExpression b)
+        {
+            return a.FieldMixin == b.FieldMixin
+                && CompareList(a.Bindings, b.Bindings, CompareFieldBinding);
         }
 
         protected virtual bool CompareFieldBinding(FieldBinding a, FieldBinding b)
@@ -441,13 +452,16 @@ namespace Signum.Engine.Linq
                 && Compare(a.Id, b.Id);
         }
 
-        protected virtual bool CompareLiteReference(LiteExpression a, LiteExpression b)
+        protected virtual bool CompareLiteReference(LiteReferenceExpression a, LiteReferenceExpression b)
         {
-            return a.CustomToString == b.CustomToString
-               && Compare(a.Id, b.Id)
+            return Compare(a.Reference, b.Reference) && Compare(a.CustomToStr, b.CustomToStr);
+        }
+
+        protected virtual bool CompareLiteValue(LiteValueExpression a, LiteValueExpression b)
+        {
+            return Compare(a.Id, b.Id)
                && Compare(a.ToStr, b.ToStr)
-               && Compare(a.TypeId, b.TypeId)
-               && Compare(a.Reference, b.Reference);
+               && Compare(a.TypeId, b.TypeId);
         }
 
         protected virtual bool CompareTypeFieldInit(TypeEntityExpression a, TypeEntityExpression b)

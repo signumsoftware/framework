@@ -24,7 +24,7 @@ namespace Signum.Windows
         public static void Delete<T>(this Lite<T> lite, Enum operationKey, params object[] args)
             where T : class, IIdentifiable
         {
-            Server.Return((IOperationServer s)=>s.Delete(lite, operationKey, args)); 
+            Server.Execute((IOperationServer s)=>s.Delete(lite, operationKey, args)); 
         }
 
         public static T Construct<T>(Enum operationKey, params object[] args)

@@ -10,15 +10,6 @@ namespace Signum.Entities.Basics
     [Serializable, EntityKind(EntityKind.SystemString)]
     public abstract class MultiEnumDN : IdentifiableEntity
     {
-        [NotNullable, SqlDbType(Size = 100)]
-        string name;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            internal set { SetToStr(ref name, value, () => Name); }
-        }
-
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         string key;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
@@ -28,7 +19,7 @@ namespace Signum.Entities.Basics
             internal set { Set(ref key, value, () => Key); }
         }
 
-        static readonly Expression<Func<MultiEnumDN, string>> ToStringExpression = e => e.name;
+        static readonly Expression<Func<MultiEnumDN, string>> ToStringExpression = e => e.key;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

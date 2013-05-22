@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,7 +15,6 @@ using System.Windows.Media;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.DynamicQuery;
-using Signum.Windows.Properties;
 using Signum.Entities.Reflection;
 
 namespace Signum.Windows
@@ -28,16 +27,19 @@ namespace Signum.Windows
         public static readonly IValueConverter EntityKey =
             ConverterFactory.New((ResultRow row) => row.Entity.Key());
 
+        public static readonly IValueConverter LiteKey =
+          ConverterFactory.New((Lite<IIdentifiable> lite) => lite.Key());
+
         public static readonly IValueConverter ToLite =
            ConverterFactory.New((IIdentifiable ei) => ei == null ? null : ei.ToLite());
 
         public static readonly IValueConverter Retrieve =
                    ConverterFactory.New((Lite<IIdentifiable> lite) => lite == null ? null : Server.Retrieve(lite));
 
-        public static readonly IValueConverter NullableEnumConverter =
-            ConverterFactory.New((object v) => v == null ?  VoidEnum.Instance : v, (object v) => v.Equals(VoidEnum.Instance) ? null : v);
+        public static readonly IValueConverter NullableEnum =
+            ConverterFactory.New((object v) => v == null ? VoidEnumMessage.Instance : v, (object v) => v.Equals(VoidEnumMessage.Instance) ? null : v);
 
-        public static readonly IValueConverter EnumDescriptionConverter =
+        public static readonly IValueConverter EnumDescription =
             ConverterFactory.New((object v) => v is Enum? ((Enum)v).NiceToString(): v);
 
         public static readonly IValueConverter ErrorListToToolTipString =
@@ -46,9 +48,9 @@ namespace Signum.Windows
         public static readonly IValueConverter ErrorListToErrorCount =
             ConverterFactory.New((string[] str) => str == null ? null :
                                                  new Switch<int, string>(str.Length)
-                                                 .Case(0, Properties.Resources.NoDirectErrors)
-                                                 .Case(1, v => Properties.Resources._1Error.Formato(str[0]))
-                                                 .Default(v => Properties.Resources._0Errors1.Formato(v, str[0])));
+                                                 .Case(0, NormalWindowMessage.NoDirectErrors.NiceToString())
+                                                 .Case(1, v => NormalWindowMessage._1Error.NiceToString().Formato(str[0]))
+                                                 .Default(v => NormalWindowMessage._0Errors1.NiceToString().Formato(v, str[0])));
 
         public static readonly IValueConverter ErrorListToBool =
             ConverterFactory.New((string[] str) => str != null && str.Length > 0);
@@ -98,7 +100,7 @@ namespace Signum.Windows
         public static readonly IValueConverter Not = ConverterFactory.New((bool b) => !b, (bool b) => !b);
 
         public static readonly IValueConverter TypeContextName =
-            ConverterFactory.New((FrameworkElement b) => b.TryCC(fe => Common.GetTypeContext(fe)).TryCC(c => c.Type).TryCC(t => t.NiceName()) ?? "??");
+            ConverterFactory.New((FrameworkElement b) => b.TryCC(fe => Common.GetPropertyRoute(fe)).TryCC(c => c.Type).TryCC(t => t.NiceName()) ?? "??");
 
         public static readonly IValueConverter NiceName =
             ConverterFactory.New((Type type) => type.TryCC(t => t.NiceName()) ?? "??");
@@ -116,13 +118,13 @@ namespace Signum.Windows
             });
 
         public static readonly IValueConverter ToStringConverter = ConverterFactory.New(
-            (object d) => d.TryCC(a => a.ToString()));
+            (object d) => d.TryToString());
 
         public static readonly IValueConverter TokenOperations = ConverterFactory.New(
             (QueryToken token) => token == null ? null : QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(token.Type)));
 
-        public static readonly IValueConverter ColorConverter = ConverterFactory.New(
-            (ColorDN c) => c == null ? null : (Color?)Color.FromArgb(c.A, c.R, c.G, c.B),
+        public static readonly IValueConverter Color = ConverterFactory.New(
+            (ColorDN c) => c == null ? null : (Color?)System.Windows.Media.Color.FromArgb(c.A, c.R, c.G, c.B),
             (Color? c) => c == null ? null : ColorDN.FromARGB(c.Value.A, c.Value.R, c.Value.G, c.Value.B));
 
         public static readonly IMultiValueConverter And = ConverterFactory.New(
@@ -135,11 +137,20 @@ namespace Signum.Windows
             (bool a, bool b) => a || b);
 
         public static readonly IMultiValueConverter OrToVisibility = ConverterFactory.New(
-                (bool a, bool b) => a || b ? Visibility.Visible : Visibility.Collapsed);
+            (bool a, bool b) => a || b ? Visibility.Visible : Visibility.Collapsed);
+
+        public static readonly IValueConverter LabelCount = ConverterFactory.New(
+            (ResultRow r) => "{0} ({1})".Formato(r[0] is Enum ? ((Enum)r[0]).NiceToString() : r[0], r[1]));
     }
 
     public static class ColorExtensions
     {
+        public static readonly IValueConverter ToDarkColor = ConverterFactory.New(
+                (Color color) =>new SolidColorBrush(Lerp(color, 0.8f, Colors.Black)));
+
+        public static readonly IValueConverter ToLightColor = ConverterFactory.New(
+                (Color color) =>new SolidColorBrush( Lerp(color, 0.8f, Colors.White)));
+
         public static Color Lerp(Color a, float coef, Color b)
         {
             return Color.FromScRgb(

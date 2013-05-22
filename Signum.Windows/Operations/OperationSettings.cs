@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +8,7 @@ using System.Windows.Media;
 using Signum.Entities.Basics;
 using System.Text.RegularExpressions;
 using System.Windows.Controls;
+using Signum.Utilities;
 
 namespace Signum.Windows.Operations
 {
@@ -31,14 +32,16 @@ namespace Signum.Windows.Operations
 
         public static EntityOperationGroup Create = new EntityOperationGroup
         {
-            Description = () => Signum.Entities.Properties.Resources.Create,
-            SimplifyName = cs => Regex.Replace(cs, Signum.Entities.Properties.Resources.CreateFromRegex, m => m.Groups["t"].Value, RegexOptions.IgnoreCase),
+            Description = () => OperationMessage.Create.NiceToString(),
+            SimplifyName = cs => Regex.Replace(cs, OperationMessage.CreateFromRegex.NiceToString(), m => m.Groups[1].Value, RegexOptions.IgnoreCase),
             Background = Brushes.Green,
+            AutomationName = "Create"
         }; 
 
         public Func<string> Description;
         public Func<string, string> SimplifyName;
         public Brush Background;
+        public string AutomationName; 
     }
 
     public class EntityOperationSettings : OperationSettings
@@ -46,8 +49,8 @@ namespace Signum.Windows.Operations
         public Func<EntityOperationContext, IdentifiableEntity> Click { get; set; }
         public Func<EntityOperationContext, bool> IsVisible { get; set; }
 
-        public ContextualOperationSettings ContextualFromMany { get; set; }
-        public ContextualOperationSettings Contextual { get; set; }
+        public ContextualOperationSettings ContextualFromMany { get; private set; }
+        public ContextualOperationSettings Contextual { get; private set; }
 
         public bool AvoidMoveToSearchControl { get; set; }
 
@@ -56,6 +59,8 @@ namespace Signum.Windows.Operations
         public EntityOperationSettings(Enum key)
             : base(key)
         {
+            Contextual = new ContextualOperationSettings(key);
+            ContextualFromMany = new ContextualOperationSettings(key); 
         }
     }
 

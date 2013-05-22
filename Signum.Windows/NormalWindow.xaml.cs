@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Net;
 using System.Windows;
@@ -15,13 +15,12 @@ using System.Linq;
 using System.Collections.Generic;
 using Signum.Entities.Reflection;
 using System.Windows.Input;
+using System.Windows.Automation.Peers;
 
 namespace Signum.Windows
 {
     public partial class NormalWindow
     {
-        public static event GetButtonBarElementDelegate GetButtonBarElement;
-
         public static readonly DependencyProperty MainControlProperty =
             DependencyProperty.Register("MainControl", typeof(Control), typeof(NormalWindow));
         public Control MainControl
@@ -98,7 +97,7 @@ namespace Signum.Windows
                 if (e.NewDataContext == null)
                     throw new ArgumentNullException("NewDataContext");
 
-                Type type = Common.GetTypeContext(MainControl).Type;
+                Type type = Common.GetPropertyRoute(MainControl).Type;
                 Type entityType = e.NewDataContext.GetType();
                 if (type != null && !type.IsAssignableFrom(entityType))
                     throw new InvalidCastException("The DataContext is a {0} but TypeContext is {1}".Formato(entityType.Name, type.Name));
@@ -113,6 +112,10 @@ namespace Signum.Windows
         {
             RefreshEnabled();
 
+            var entity = e.NewValue;
+            if(entity == null)
+                return;
+
             ButtonBarEventArgs ctx = new ButtonBarEventArgs
             {
                 MainControl = MainControl,
@@ -121,19 +124,7 @@ namespace Signum.Windows
                 ShowOperations = ShowOperations,
             };
 
-            List<FrameworkElement> elements = new List<FrameworkElement>();
-            if (GetButtonBarElement != null)
-            {
-                elements.AddRange(GetButtonBarElement.GetInvocationList()
-                    .Cast<GetButtonBarElementDelegate>()
-                    .Select(d => d(e.NewValue, ctx))
-                    .NotNull().SelectMany(d => d).NotNull().ToList());
-            }
-
-            if (MainControl is IHaveToolBarElements)
-            {
-                elements.AddRange(((IHaveToolBarElements)ctx.MainControl).GetToolBarElements(this.DataContext, ctx));
-            }
+            List<FrameworkElement> elements = Navigator.Manager.GetToolbarButtons(entity, ctx);
 
             ButtonBar.SetButtons(elements);
         }
@@ -147,8 +138,8 @@ namespace Signum.Windows
                 else
                 {
                     var result = MessageBox.Show(
-                        Properties.Resources.ThereAreChangesContinue,
-                        Properties.Resources.ThereAreChanges,
+                        NormalWindowMessage.ThereAreChangesContinue.NiceToString(),
+                        NormalWindowMessage.ThereAreChanges.NiceToString(),
                         MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.OK);
 
                     if (result == MessageBoxResult.Cancel)
@@ -171,15 +162,15 @@ namespace Signum.Windows
                         case AllowErrors.Yes: break;
                         case AllowErrors.No:
                             MessageBox.Show(this,
-                                type.GetGenderAwareResource(() => Properties.Resources.The0HasErrors1).Formato(type.NiceName(), errors.Indent(3)),
-                                Properties.Resources.FixErrors,
+                                NormalWindowMessage.The0HasErrors1.NiceToString().ForGenderAndNumber(type.GetGender()).Formato(type.NiceName(), errors.Indent(3)),
+                                NormalWindowMessage.FixErrors.NiceToString(),
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Exclamation);
                             return;
                         case AllowErrors.Ask:
                             if (MessageBox.Show(this,
-                                type.GetGenderAwareResource(() => Properties.Resources.The0HasErrors1).Formato(type.NiceName(), errors.Indent(3)) + "\r\n" + Properties.Resources.ContinueAnyway,
-                                Properties.Resources.ContinueWithErrors,
+                                NormalWindowMessage.The0HasErrors1.NiceToString().ForGenderAndNumber(type.GetGender()).Formato(type.NiceName(), errors.Indent(3)) + "\r\n" + NormalWindowMessage.ContinueAnyway.NiceToString(),
+                                NormalWindowMessage.ContinueWithErrors.NiceToString(),
                                 MessageBoxButton.YesNo,
                                 MessageBoxImage.Exclamation,
                                 MessageBoxResult.None) == MessageBoxResult.No)
@@ -198,13 +189,13 @@ namespace Signum.Windows
 
             MoveFocus();
 
-            if (this.HasChanges())
+            if (this.DataContext != null && this.HasChanges())
             {
                 if (buttonBar.ViewMode == ViewMode.Navigate)
                 {
                     var result = MessageBox.Show(
-                      Properties.Resources.ThereAreChangesContinue,
-                      Properties.Resources.ThereAreChanges,
+                      NormalWindowMessage.ThereAreChangesContinue.NiceToString(),
+                      NormalWindowMessage.ThereAreChanges.NiceToString(),
                       MessageBoxButton.OKCancel,
                       MessageBoxImage.Question,
                       MessageBoxResult.OK);
@@ -221,8 +212,8 @@ namespace Signum.Windows
                     if (DialogResult == null)
                     {
                         var result = MessageBox.Show(this,
-                            Properties.Resources.LoseChanges,
-                            Properties.Resources.ThereAreChanges,
+                            NormalWindowMessage.LoseChanges.NiceToString(),
+                            NormalWindowMessage.ThereAreChanges.NiceToString(),
                             MessageBoxButton.OKCancel,
                             MessageBoxImage.Question,
                             MessageBoxResult.OK);
@@ -273,7 +264,10 @@ namespace Signum.Windows
             this.entityTitle.SetTitleText(text);
         }
 
-        public ChangeDataContextHandler ChangeDataContext { get; set; }
+        protected override AutomationPeer OnCreateAutomationPeer()
+        {
+            return new NormalWindowAutomationPeer(this);
+        }
     }
 
     public enum AllowErrors
@@ -282,8 +276,6 @@ namespace Signum.Windows
         Yes,
         No,
     }
-
-    public delegate List<FrameworkElement> GetButtonBarElementDelegate(object entity, ButtonBarEventArgs context);
 
     public interface IHaveToolBarElements
     {
@@ -296,6 +288,19 @@ namespace Signum.Windows
         public ViewMode ViewButtons { get; set; }
         public bool SaveProtected { get; set; }
         public bool ShowOperations { get; set; }
+    }
+
+    public class NormalWindowAutomationPeer : WindowAutomationPeer
+    {
+        public NormalWindowAutomationPeer(NormalWindow normalWindow)
+            : base(normalWindow)
+        {
+        }
+
+        protected override string GetClassNameCore()
+        {
+            return "NormalWindow";
+        }
     }
 
 }

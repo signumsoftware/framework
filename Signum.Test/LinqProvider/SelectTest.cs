@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Signum.Engine;
 using Signum.Entities;
+using Signum.Test.Environment;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using System;
@@ -297,6 +298,28 @@ namespace Signum.Test.LinqProvider
         public void SelectEmbeddedNullable()
         {
             var bonusTracks = Database.Query<AlbumDN>().Select(a => a.BonusTrack).ToArray();
+        }
+
+        [TestMethod]
+        public void SelectMixinThrows()
+        {
+            Assert2.Throws<InvalidOperationException>("without their main entity", () =>
+                Database.Query<NoteWithDateDN>().Select(a => a.Mixin<CorruptMixin>()).ToArray());
+        }
+
+
+        [TestMethod]
+        public void SelectMixinField()
+        {
+            Database.Query<NoteWithDateDN>().Select(a => a.Mixin<CorruptMixin>().Corrupt).ToArray();
+        }
+
+        [TestMethod]
+        public void SelectMixinCollection()
+        {
+            var result = (from n in Database.Query<NoteWithDateDN>()
+                          from c in n.Mixin<ColaboratorsMixin>().Colaborators
+                          select c).ToArray();
         }
 
         [TestMethod]

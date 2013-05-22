@@ -38,7 +38,7 @@ namespace Signum.Engine.Linq
             ReadOnlyCollection<Expression> groupBy = select.GroupBy.NewIfChange(Visit);
 
             if (top != select.Top || from != select.From || where != select.Where || columns != select.Columns || orderBy != select.OrderBy || groupBy != select.GroupBy)
-                return new SelectExpression(select.Alias, select.IsDistinct, select.IsReverse, top, columns, from, where, orderBy, groupBy);
+                return new SelectExpression(select.Alias, select.IsDistinct, select.IsReverse, top, columns, from, where, orderBy, groupBy, select.ForXmlPathEmpty);
 
             return select;
         }

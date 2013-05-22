@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +11,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Controls.Primitives;
+using Signum.Entities;
+using Signum.Utilities;
+using System.Windows.Automation.Peers;
 
 namespace Signum.Windows
 {
@@ -46,9 +49,9 @@ namespace Signum.Windows
         public static bool ShowUntyped(Type type, ref object value, string title, string text, string labelText, string format, string unitText, Window owner)
         {
             ValueLineBox vlb = new ValueLineBox();
-            vlb.Title = title ?? Properties.Resources.ChooseAValue;
-
-            vlb.tb.Text = text ?? Properties.Resources.PleaseChooseAValueToContinue;
+            vlb.Title = title ?? SelectorMessage.ChooseAValue.NiceToString();
+            
+            vlb.tb.Text = text ?? SelectorMessage.PleaseChooseAValueToContinue.NiceToString();
 
             vlb.valueLine.Type = type;
 
@@ -77,6 +80,23 @@ namespace Signum.Windows
             Close(); 
         }
 
-
+        protected override AutomationPeer OnCreateAutomationPeer()
+        {
+            return new ValueLineBoxAutomationPeer(this);
+        }
     }
+
+    public class ValueLineBoxAutomationPeer : WindowAutomationPeer
+    {
+        public ValueLineBoxAutomationPeer(ValueLineBox valueLineBox)
+            : base(valueLineBox)
+        {
+        }
+
+        protected override string GetClassNameCore()
+        {
+            return "ValueLineBox";
+        }
+    }
+
 }

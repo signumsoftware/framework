@@ -11,7 +11,6 @@ using Signum.Entities;
 using System.Reflection;
 using Signum.Entities.Reflection;
 using System.Configuration;
-using Signum.Web.Properties;
 #endregion
 
 namespace Signum.Web
@@ -39,7 +38,7 @@ namespace Signum.Web
 
         public override string ToJS()
         {
-            return "$('#{0}').data('entityLineDetail')".Formato(ControlID);
+            return "$('#{0}').data('SF-entityLineDetail')".Formato(ControlID);
         }
 
         protected override JsOptionsBuilder OptionsJSInternal()

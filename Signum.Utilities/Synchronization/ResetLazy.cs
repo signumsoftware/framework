@@ -12,42 +12,65 @@ namespace Signum.Utilities
     {
         void Reset();
         void Load();
+        Type DeclaringType { get; }
     }
 
     [ComVisible(false)]
     [HostProtection(Action = SecurityAction.LinkDemand, Resources = HostProtectionResource.Synchronization | HostProtectionResource.SharedState)]
     public class ResetLazy<T>: IResetLazy where T : class
     {
-        public ResetLazy(Func<T> valueFactory, LazyThreadSafetyMode mode = LazyThreadSafetyMode.PublicationOnly)
+        class Box
+        {
+            public Box(T value)
+            {
+                this.Value = value;
+            }
+
+            public readonly T Value;
+        }
+
+        public ResetLazy(Func<T> valueFactory, LazyThreadSafetyMode mode = LazyThreadSafetyMode.PublicationOnly, Type declaringType = null)
         {
             if (valueFactory == null)
                 throw new ArgumentNullException("valueFactory");
 
             this.mode = mode;
             this.valueFactory = valueFactory;
+            this.declaringType = declaringType ?? valueFactory.Method.DeclaringType;
         }
+
         LazyThreadSafetyMode mode; 
         Func<T> valueFactory;
+
         object syncLock = new object();
 
-        bool valueCreated = false; 
-        T value;
+        Box box;
+
+        Type declaringType; 
+        public Type DeclaringType
+        {
+            get { return declaringType; }
+        }
 
         public T Value
         {
             get
             {
-                if (valueCreated)
-                    return value;
+                var b1 = this.box;
+                if (b1 != null)
+                    return b1.Value;
 
                 if (mode == LazyThreadSafetyMode.ExecutionAndPublication)
                 {
                     lock (syncLock)
                     {
-                        if (valueCreated)
-                            return value;
+                        var b2 = box;
+                        if (b2 != null)
+                            return b2.Value;
 
-                        Set(valueFactory());
+                        this.box = new Box(valueFactory());
+
+                        return box.Value;
                     }
                 }
 
@@ -57,27 +80,24 @@ namespace Signum.Utilities
 
                     lock (syncLock)
                     {
-                        if (valueCreated)
-                            return value;
+                        var b2 = box;
+                        if (b2 != null)
+                            return b2.Value;
 
-                        Set(newValue);
+                        this.box = new Box(newValue);
+
+                        return box.Value;
                     }
                 }
                 else
                 {
-                    Set(valueFactory());
+                    var b = new Box(valueFactory());
+                    this.box = b;
+                    return b.Value;
                 }
-
-                return value;
-                
             }
         }
 
-        void Set(T value)
-        {
-            this.valueCreated = true;
-            this.value = value;
-        }
 
         public void Load()
         {
@@ -86,7 +106,7 @@ namespace Signum.Utilities
        
         public bool IsValueCreated
         {
-            get { return valueCreated; }
+            get { return box != null; }
         }
 
         public void Reset()
@@ -95,25 +115,12 @@ namespace Signum.Utilities
             {
                 lock (syncLock)
                 {
-                    this.value = null;
-                    this.valueCreated = false;
+                    this.box = null;
                 }
             }
             else
             {
-                this.value = null;
-                this.valueCreated = false;
-            }
-        }
-
-        public Type DeclaredType
-        {
-            get
-            {
-                if (valueFactory == null) 
-                    return null;
-
-                return valueFactory.Method.DeclaringType;
+                this.box = null;
             }
         }
     }

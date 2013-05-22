@@ -137,12 +137,16 @@ namespace Signum.Engine.Linq
                     return this.VisitEntity((EntityExpression)exp);
                 case (ExpressionType)DbExpressionType.EmbeddedInit:
                     return this.VisitEmbeddedEntity((EmbeddedEntityExpression)exp);
+                case (ExpressionType)DbExpressionType.MixinInit:
+                    return this.VisitMixinEntity((MixinEntityExpression)exp);
                 case (ExpressionType)DbExpressionType.ImplementedBy:
                     return this.VisitImplementedBy((ImplementedByExpression)exp);
                 case (ExpressionType)DbExpressionType.ImplementedByAll:
                     return this.VisitImplementedByAll((ImplementedByAllExpression)exp);
-                case (ExpressionType)DbExpressionType.Lite:
-                    return this.VisitLite((LiteExpression)exp);
+                case (ExpressionType)DbExpressionType.LiteReference:
+                    return this.VisitLiteReference((LiteReferenceExpression)exp);
+                case (ExpressionType)DbExpressionType.LiteValue:
+                    return this.VisitLiteValue((LiteValueExpression)exp);
                 case (ExpressionType)DbExpressionType.TypeEntity:
                     return this.VisitTypeFieldInit((TypeEntityExpression)exp);
                 case (ExpressionType)DbExpressionType.TypeImplementedBy:
@@ -208,14 +212,22 @@ namespace Signum.Engine.Linq
             return src;
         }
 
-        protected virtual Expression VisitLite(LiteExpression lite)
+        protected virtual Expression VisitLiteReference(LiteReferenceExpression lite)
         {
             var newRef = Visit(lite.Reference);
-            var newToStr = Visit(lite.ToStr);
-            var newId = Visit(lite.Id);
+            var newToStr = Visit(lite.CustomToStr);
+            if (newRef != lite.Reference || newToStr != lite.CustomToStr)
+                return new LiteReferenceExpression(lite.Type,  newRef, newToStr);
+            return lite;
+        }
+
+        protected virtual Expression VisitLiteValue(LiteValueExpression lite)
+        {
             var newTypeId = Visit(lite.TypeId);
-            if (newRef != lite.Reference || newToStr != lite.ToStr || newId != lite.Id || newTypeId != lite.TypeId)
-                return new LiteExpression(lite.Type, newRef, newId, newToStr, newTypeId, lite.CustomToString);
+            var newId = Visit(lite.Id);
+            var newToStr = Visit(lite.ToStr);
+            if (newTypeId != lite.TypeId || newId != lite.Id || newToStr != lite.ToStr)
+                return new LiteValueExpression(lite.Type, newTypeId, newId, newToStr);
             return lite;
         }
 
@@ -338,11 +350,12 @@ namespace Signum.Engine.Linq
         protected virtual Expression VisitEntity(EntityExpression ee)
         {
             var bindings = ee.Bindings.NewIfChange(VisitFieldBinding);
+            var mixins = ee.Mixins.NewIfChange(VisitMixinEntity);
 
             var id = Visit(ee.ExternalId);
 
-            if (ee.Bindings != bindings || ee.ExternalId != id)
-                return new EntityExpression(ee.Type, id, ee.TableAlias, bindings);
+            if (ee.Bindings != bindings || ee.ExternalId != id || ee.Mixins != mixins)
+                return new EntityExpression(ee.Type, id, ee.TableAlias, bindings, mixins, ee.AvoidExpandOnRetrieving);
 
             return ee;
         }
@@ -357,6 +370,17 @@ namespace Signum.Engine.Linq
                 return new EmbeddedEntityExpression(eee.Type, hasValue, bindings, eee.FieldEmbedded);
             }
             return eee;
+        }
+
+        protected virtual MixinEntityExpression VisitMixinEntity(MixinEntityExpression me)
+        {
+            var bindings = me.Bindings.NewIfChange(VisitFieldBinding);
+
+            if (me.Bindings != bindings)
+            {
+                return new MixinEntityExpression(me.Type, bindings, me.FieldMixin);
+            }
+            return me;
         }
 
         protected virtual FieldBinding VisitFieldBinding(FieldBinding fb)
@@ -472,7 +496,7 @@ namespace Signum.Engine.Linq
             ReadOnlyCollection<Expression> groupBy = select.GroupBy.NewIfChange(Visit);
 
             if (top != select.Top || from != select.From || where != select.Where || columns != select.Columns || orderBy != select.OrderBy || groupBy != select.GroupBy)
-                return new SelectExpression(select.Alias, select.IsDistinct, select.IsReverse, top,  columns, from, where, orderBy, groupBy);
+                return new SelectExpression(select.Alias, select.IsDistinct, select.IsReverse, top, columns, from, where, orderBy, groupBy, select.ForXmlPathEmpty);
 
             return select;
         }

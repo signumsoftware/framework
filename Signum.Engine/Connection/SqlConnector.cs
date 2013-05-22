@@ -92,7 +92,7 @@ namespace Signum.Engine
         {
             using (SqlConnection con = EnsureConnection())
             using (SqlCommand cmd = NewCommand(preCommand, con))
-            using (HeavyProfiler.Log("SQL", cmd.CommandText))
+            using (HeavyProfiler.Log("SQL", () => cmd.CommandText))
             {
                 try
                 {
@@ -112,7 +112,7 @@ namespace Signum.Engine
                 }
                 catch (SqlException ex)
                 {
-                    var nex = HandleSqlException(ex);
+                    var nex = HandleSqlException(ex, preCommand);
                     if (nex == ex)
                         throw;
                     throw nex;
@@ -124,7 +124,7 @@ namespace Signum.Engine
         {
             using (SqlConnection con = EnsureConnection())
             using (SqlCommand cmd = NewCommand(preCommand, con))
-            using (HeavyProfiler.Log("SQL", cmd.CommandText))
+            using (HeavyProfiler.Log("SQL", () => cmd.CommandText))
             {
                 try
                 {
@@ -140,7 +140,7 @@ namespace Signum.Engine
                 }
                 catch (SqlException ex)
                 {
-                    var nex = HandleSqlException(ex);
+                    var nex = HandleSqlException(ex, preCommand);
                     if (nex == ex)
                         throw;
                     throw nex;
@@ -148,50 +148,73 @@ namespace Signum.Engine
             }
         }
 
-        protected internal override void ExecuteDataReader(SqlPreCommandSimple preCommand, Action<FieldReader> forEach)
+        public void ExecuteDataReaderDependency(SqlPreCommandSimple preCommand, OnChangeEventHandler change, Action reconect, Action<FieldReader> forEach)
         {
-            using (SqlConnection con = EnsureConnection())
-            using (SqlCommand cmd = NewCommand(preCommand, con))
-            using (HeavyProfiler.Log("SQL", cmd.CommandText))
+            bool reconected = false; 
+            retry:
+            try
             {
-                try
+                using (SqlConnection con = EnsureConnection())
+                using (SqlCommand cmd = NewCommand(preCommand, con))
+                using (HeavyProfiler.Log("SQL", () => cmd.CommandText))
                 {
-                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    try
                     {
-                        FieldReader fr = new FieldReader(reader);
-                        int row = -1;
-                        try
+                        if (change != null)
                         {
-                            while (reader.Read())
+                            SqlDependency dep = new SqlDependency(cmd);
+                            dep.OnChange += change;
+                        }
+
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            FieldReader fr = new FieldReader(reader);
+                            int row = -1;
+                            try
                             {
-                                row++;
-                                forEach(fr);
+                                while (reader.Read())
+                                {
+                                    row++;
+                                    forEach(fr);
+                                }
+                            }
+                            catch (SqlTypeException ex)
+                            {
+                                FieldReaderException fieldEx = fr.CreateFieldReaderException(ex);
+                                fieldEx.Command = preCommand;
+                                fieldEx.Row = row;
+                                throw fieldEx;
                             }
                         }
-                        catch (SqlTypeException ex)
-                        {
-                            FieldReaderException fieldEx = fr.CreateFieldReaderException(ex);
-                            fieldEx.Command = preCommand;
-                            fieldEx.Row = row;
-                            throw fieldEx;
-                        }
+                    }
+                    catch (SqlTypeException ex)
+                    {
+                        var nex = HandleSqlTypeException(ex, preCommand);
+                        if (nex == ex)
+                            throw;
+                        throw nex;
+                    }
+                    catch (SqlException ex)
+                    {
+                        var nex = HandleSqlException(ex, preCommand);
+                        if (nex == ex)
+                            throw;
+                        throw nex;
                     }
                 }
-                catch (SqlTypeException ex)
+            }
+            catch (InvalidOperationException ioe)
+            {
+                if (ioe.Message.Contains("SqlDependency.Start()") && !reconected)
                 {
-                    var nex = HandleSqlTypeException(ex, preCommand);
-                    if (nex == ex)
-                        throw;
-                    throw nex;
-                }
-                catch (SqlException ex)
-                {
-                    var nex = HandleSqlException(ex);
-                    if (nex == ex)
-                        throw;
-                    throw nex;
+                    reconect();
+
+                    reconected = true;
+
+                    goto retry;
                 }
 
+                throw;
             }
         }
 
@@ -200,6 +223,7 @@ namespace Signum.Engine
             try
             {
                 SqlCommand cmd = NewCommand(preCommand, null);
+
                 return cmd.ExecuteReader();
             }
             catch (SqlTypeException ex)
@@ -211,7 +235,7 @@ namespace Signum.Engine
             }
             catch (SqlException ex)
             {
-                var nex = HandleSqlException(ex);
+                var nex = HandleSqlException(ex, preCommand);
                 if (nex == ex)
                     throw;
                 throw nex;
@@ -222,7 +246,7 @@ namespace Signum.Engine
         {
             using (SqlConnection con = EnsureConnection())
             using (SqlCommand cmd = NewCommand(preCommand, con))
-            using (HeavyProfiler.Log("SQL", cmd.CommandText))
+            using (HeavyProfiler.Log("SQL", () => cmd.CommandText))
             {
                 try
                 {
@@ -238,10 +262,10 @@ namespace Signum.Engine
                     if (nex == ex)
                         throw;
                     throw nex;
-                } 
+                }
                 catch (SqlException ex)
                 {
-                    var nex = HandleSqlException(ex);
+                    var nex = HandleSqlException(ex, preCommand);
                     if (nex == ex)
                         throw;
                     throw nex;
@@ -253,7 +277,7 @@ namespace Signum.Engine
         {
             using (SqlConnection con = EnsureConnection())
             using (SqlCommand cmd = NewCommand(preCommand, con))
-            using (HeavyProfiler.Log("SQL", cmd.CommandText))
+            using (HeavyProfiler.Log("SQL", () => cmd.CommandText))
             {
                 try
                 {
@@ -271,7 +295,7 @@ namespace Signum.Engine
                 }
                 catch (SqlException ex)
                 {
-                    var nex = HandleSqlException(ex);
+                    var nex = HandleSqlException(ex, preCommand);
                     if (nex == ex)
                         throw;
                     throw nex;
@@ -285,22 +309,24 @@ namespace Signum.Engine
             {
                 var mins = command.Parameters.Where(a => DateTime.MinValue.Equals(a.Value));
 
-                if(mins.Any())
+                if (mins.Any())
                 {
                     return new ArgumentOutOfRangeException("{0} {1} not initialized and equal to DateTime.MinValue".Formato(
-                        mins.CommaAnd(a=>a.ParameterName),
-                        mins.Count() == 1 ? "is": "are"), ex);
+                        mins.CommaAnd(a => a.ParameterName),
+                        mins.Count() == 1 ? "is" : "are"), ex);
                 }
             }
 
             return ex;
         }
 
-        private Exception HandleSqlException(SqlException ex)
+        public Exception HandleSqlException(SqlException ex, SqlPreCommand command)
         {
             switch (ex.Number)
             {
-                case -2: return new TimeoutException(ex.Message, ex);
+                case -2: var timeout = new TimeoutException(ex.Message, ex);
+                    timeout.Data["Sql"] = command.PlainSql();
+                    return timeout;
                 case 2601: return new UniqueKeyException(ex);
                 case 547: return new ForeignKeyException(ex);
                 default: return ex;
@@ -371,7 +397,7 @@ namespace Signum.Engine
 
             result.SqlDbType = sqlType;
 
-            if(sqlType == SqlDbType.Udt)
+            if (sqlType == SqlDbType.Udt)
                 result.UdtTypeName = udtTypeName;
 
 
@@ -405,7 +431,7 @@ namespace Signum.Engine
 
     public static class SqlConnectorScripts
     {
-        public static readonly string RemoveAllConstraintsScript = 
+        public static readonly string RemoveAllConstraintsScript =
 @"declare @schema nvarchar(128), @tbl nvarchar(128), @constraint nvarchar(128) 
 DECLARE @sql nvarchar(255) 
 
@@ -418,14 +444,14 @@ open cur
     fetch next from cur into @schema, @tbl, @constraint 
     while @@fetch_status <> -1 
     begin 
-        select @sql = 'ALTER TABLE {0}' + @schema + '.' + @tbl + ' DROP CONSTRAINT ' + @constraint 
+        select @sql = 'ALTER TABLE {0}[' + @schema + '].[' + @tbl + '] DROP CONSTRAINT [' + @constraint + '];'
         exec sp_executesql @sql 
         fetch next from cur into @schema, @tbl, @constraint 
     end 
 close cur 
 deallocate cur";
 
-        public static readonly string RemoveAllTablesScript = 
+        public static readonly string RemoveAllTablesScript =
 @"declare @schema nvarchar(128), @tbl nvarchar(128)
 DECLARE @sql nvarchar(255)
  
@@ -436,14 +462,14 @@ open cur
     fetch next from cur into @schema, @tbl
     while @@fetch_status <> -1 
     begin 
-        select @sql = 'DROP TABLE {0}' + @schema + '.' + @tbl + ';'
+        select @sql = 'DROP TABLE {0}[' + @schema + '].[' + @tbl + '];'
         exec sp_executesql @sql 
         fetch next from cur into @schema, @tbl
     end 
 close cur 
 deallocate cur";
 
-        public static readonly string RemoveAllViewsScript = 
+        public static readonly string RemoveAllViewsScript =
 @"declare @schema nvarchar(128), @view nvarchar(128)
 DECLARE @sql nvarchar(255) 
 
@@ -454,7 +480,7 @@ open cur
     fetch next from cur into @schema, @view
     while @@fetch_status <> -1 
     begin 
-        select @sql = 'DROP VIEW {0}' + @schema + '.' + @view + ';'
+        select @sql = 'DROP VIEW {0}[' + @schema + '].[' + @view + '];'
         exec sp_executesql @sql 
         fetch next from cur into @schema, @view
     end 
@@ -472,7 +498,7 @@ open cur
     fetch next from cur into @schema, @proc, @type
     while @@fetch_status <> -1 
     begin 
-        select @sql = 'DROP '+ @type +' {0}' + @schema + '.' + @proc + ';'
+        select @sql = 'DROP '+ @type +' {0}[' + @schema + '].[' + @proc + '];'
         exec sp_executesql @sql 
         fetch next from cur into @schema, @proc, @type
     end 

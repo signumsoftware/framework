@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +6,6 @@ using Signum.Utilities;
 using System.Runtime.Serialization;
 using System.Reflection;
 using System.Collections.Specialized;
-using Signum.Entities.Properties;
 using Signum.Utilities.DataStructures;
 using Signum.Entities.Reflection;
 using System.ComponentModel;
@@ -37,7 +36,6 @@ namespace Signum.Entities
         }
 
         [HiddenProperty]
-        [Description("Id")]
         public int? IdOrNull
         {
             get { return id; }
@@ -73,7 +71,7 @@ namespace Signum.Entities
 
         internal string BaseToString()
         {
-            return "{0} ({1})".Formato(GetType().Name, id.HasValue ? id.ToString() : Resources.New);
+            return "{0} ({1})".Formato(GetType().Name, id.HasValue ? id.ToString() : LiteMessage.New.NiceToString());
         }
 
         public override bool Equals(object obj)
@@ -93,7 +91,16 @@ namespace Signum.Entities
 
         public virtual string IdentifiableIntegrityCheck()
         {
-            return GraphExplorer.IdentifiableIntegrityCheck(GraphExplorer.FromRootIdentifiable(this));
+            using (AllMixin.OfType<CorruptMixin>().Any(c => c.Corrupt) ? Corruption.AllowScope() : null)
+            {
+                return IdentifiableIntegrityCheckBase();
+            }
+        }
+
+        internal virtual string IdentifiableIntegrityCheckBase()
+        {
+            using (HeavyProfiler.LogNoStackTrace("IdentifiableIntegrityCheck", () => GetType().Name))
+                return GraphExplorer.IdentifiableIntegrityCheck(GraphExplorer.FromRootIdentifiable(this));
         }
 
         public override int GetHashCode()
@@ -103,13 +110,70 @@ namespace Signum.Entities
                 StringHashEncoder.GetHashCode32(GetType().FullName) ^ id.Value;
         }
 
+        public IdentifiableEntity()
+        {
+            mixin = MixinDeclarations.CreateMixins(this);
+        }
+
+        [Ignore]
+        readonly MixinEntity mixin;
+        public M Mixin<M>() where M : MixinEntity
+        {
+            var current = mixin;
+            while (current != null)
+            {
+                if (current is M)
+                    return (M)current;
+                current = current.Next;
+            }
+
+            throw new InvalidOperationException("Mixin {0} not declared for {1} in MixinDeclarations"
+                .Formato(typeof(M).TypeName(), GetType().TypeName()));
+        }
+
+
+        public MixinEntity this[string mixinName]
+        {
+            get
+            {
+                var current = mixin;
+                while (current != null)
+                {
+                    if (current.GetType().Name == mixinName)
+                        return current;
+                    current = current.Next;
+                }
+
+                throw new InvalidOperationException("Mixin {0} not declared for {1} in MixinDeclarations"
+                    .Formato(mixinName, GetType().TypeName()));
+            }
+        }
+
+        public IEnumerable<MixinEntity> AllMixin
+        {
+            get
+            {
+                var current = mixin;
+                while (current != null)
+                {
+                    yield return current;
+                    current = current.Next;
+                }
+            }
+        }
     }
 
     public interface IIdentifiable : INotifyPropertyChanged, IDataErrorInfo, IRootEntity
     {
         int Id { get; }
+
+        [HiddenProperty]
         int? IdOrNull { get; }
+
+        [HiddenProperty]
         bool IsNew { get; }
+
+        [HiddenProperty]
         string ToStringProperty { get; }
     }
 

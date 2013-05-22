@@ -31,12 +31,12 @@
         </Literal>
       </Declarations>
       <Code Language="csharp">
-        <![CDATA[new BasicExecute<$entityName$DN>($entityName$Operation.Save)
-            {
-                AllowsNew = true,
-                Lite = false,
-                Execute = ($entityParam$, _) => { },
-            }.Register();]]>
+        <![CDATA[new Graph<$entityName$DN>.Execute($entityName$Operation.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = ($entityParam$, _) => { },
+                }.Register();]]>
       </Code>
     </Snippet>
   </CodeSnippet>

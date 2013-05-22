@@ -1,4 +1,4 @@
-﻿#region usings
+#region usings
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,6 @@ using Signum.Utilities;
 using Signum.Engine;
 using Signum.Entities;
 using Signum.Engine.Maps;
-using Signum.Web.Properties;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.Reflection;
 using Signum.Entities.DynamicQuery;
@@ -131,15 +130,15 @@ namespace Signum.Web.Controllers
         }
 
         [HttpPost]
-        public JsonResult ValidatePartial(string prefix)
+        public JsonResult ValidatePartial(string prefix, string parentPrefix = "")
         {
             ModifiableEntity mod = this.UntypedExtractEntity(prefix);
             MappingContext context = null;
             bool isEmbedded = mod as EmbeddedEntity != null && !(mod is ModelEntity);
             if (isEmbedded)
             {
-                mod = this.UntypedExtractEntity(); //apply changes to the parent entity
-                context = mod.UntypedApplyChanges(ControllerContext, "", true).UntypedValidateGlobal();
+                mod = this.UntypedExtractEntity(parentPrefix); //apply changes to the parent entity
+                context = mod.UntypedApplyChanges(ControllerContext, parentPrefix, true).UntypedValidateGlobal();
             }
             else
             {
@@ -153,7 +152,9 @@ namespace Signum.Web.Controllers
             IIdentifiable ident = context.UntypedValue as IIdentifiable;
             if (isEmbedded)
             {
-                newToStr = MappingContext.FindSubEntity((IdentifiableEntity)context.UntypedValue, prefix).ToString();
+                newToStr = MappingContext.FindSubEntity(
+                    (ModifiableEntity)context.UntypedValue, 
+                    prefix.Substring(parentPrefix.Length)).ToString();
             }
             else if (context.UntypedValue == null)
             {
@@ -177,7 +178,7 @@ namespace Signum.Web.Controllers
             if (typeArray == StaticInfo.ImplementedByAll)
                 throw new ArgumentException("ImplementedBy not allowed in Autocomplete");
 
-            List<Lite<IdentifiableEntity>> lites = AutoCompleteUtils.FindLiteLike(Implementations.By(typeArray), q, l);
+            List<Lite<IdentifiableEntity>> lites = AutocompleteUtils.FindLiteLike(Implementations.By(typeArray), q, l);
 
             var result = lites.Select(o => new
             {
@@ -185,6 +186,22 @@ namespace Signum.Web.Controllers
                 text = o.ToString(),
                 type = Navigator.ResolveWebTypeName(o.EntityType)
             }).ToList();
+
+            return Json(result);
+        }
+
+        [HttpPost]
+        public JsonResult TypeAutocomplete(string types, string q, int l)
+        {
+            var result = TypeClient.ViewableServerTypes()
+                .Where(t => t.CleanName.Contains(q, StringComparison.InvariantCultureIgnoreCase)).
+                Take(l)
+                .Select(o => new
+                {
+                    id = o.Id,
+                    text = o.ToString(),
+                    type = Navigator.ResolveWebTypeName(o.GetType())
+                }).ToList();
 
             return Json(result);
         }
@@ -215,7 +232,7 @@ namespace Signum.Web.Controllers
             if (fo.Token == null)
             {
                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                fo.Token = QueryUtils.Parse(tokenName, qd);
+                fo.Token = QueryUtils.Parse(tokenName, qd, canAggregate: false);
             }
             fo.Operation = QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(fo.Token.Type)).FirstEx();
 
@@ -227,7 +244,7 @@ namespace Signum.Web.Controllers
         {
             object queryName = Navigator.ResolveQueryName(webQueryName);
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-            QueryToken token = QueryUtils.Parse(tokenName, qd);
+            QueryToken token = QueryUtils.Parse(tokenName, qd, canAggregate: false);
             return Content(token.NiceName());
         }
 
@@ -235,7 +252,7 @@ namespace Signum.Web.Controllers
         public ContentResult SelectedItemsContextMenu(string liteKeys, string webQueryName, string implementationsKey, string prefix)
         {
             var noResults = new HtmlTag("li").Class("sf-search-ctxitem sf-search-ctxitem-no-results")
-                .InnerHtml(new HtmlTag("span").InnerHtml(Resources.NoResults.EncodeHtml()).ToHtml())
+                .InnerHtml(new HtmlTag("span").InnerHtml(SearchMessage.NoResults.NiceToString().EncodeHtml()).ToHtml())
                 .ToHtml().ToString();
 
             if (string.IsNullOrEmpty(liteKeys))
@@ -270,7 +287,7 @@ namespace Signum.Web.Controllers
             if (fo.Token == null)
             {
                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                fo.Token = QueryUtils.Parse(tokenName, qd); 
+                fo.Token = QueryUtils.Parse(tokenName, qd, canAggregate: false); 
             }
             fo.Operation = QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(fo.Token.Type)).FirstEx();
             
@@ -291,12 +308,16 @@ namespace Signum.Web.Controllers
         {
             object queryName = Navigator.ResolveQueryName(webQueryName);
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-            var token = QueryUtils.Parse(tokenName, t => QueryUtils.SubTokens(t, qd.Columns));
+            var token = QueryUtils.Parse(tokenName, qd, canAggregate: false);
 
-            var combo = CreateHtmlHelper(this).QueryTokenCombo(token, null, new Context(null, prefix), index + 1, queryName,
-                qt => QueryUtils.SubTokens(qt, qd.Columns));
+            var combo = CreateHtmlHelper(this).QueryTokenCombo(token, null, new Context(null, prefix), index + 1, qd, canAggregate: false);
 
-            return Content(combo.ToHtmlString());
+            var content = combo.ToHtmlString();
+
+            if (content.HasText())
+                return Content(content);
+            else
+                return Content("<span>no-results</span>");
         }
 
         [HttpPost]
@@ -324,7 +345,7 @@ namespace Signum.Web.Controllers
 
             ViewData.Model = new Context(null, prefix);
             ViewData[ViewDataKeys.CustomHtml] = sb.ToHtml();
-            ViewData[ViewDataKeys.Title] = Resources.ChooseAType;
+            ViewData[ViewDataKeys.Title] = SelectorMessage.ChooseAType.NiceToString();
 
             return PartialView(Navigator.Manager.PopupCancelControlView);
         }

@@ -7,7 +7,6 @@ using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using System.Reflection;
 using System.Linq.Expressions;
-using Signum.Engine.Properties;
 using System.Data;
 using Signum.Entities.Reflection;
 using Microsoft.SqlServer.Types;
@@ -42,6 +41,10 @@ namespace Signum.Engine.Maps
                 UdtSqlName.Add(typeof(SqlGeometry), "Geometry");
             }
         }
+
+
+        public int MaxNumberOfParameters = 2000;
+        public int MaxNumberOfStatementsInSaveQueries = 16; 
 
         public DBMS DBMS { get; private set; }
 
@@ -124,12 +127,12 @@ namespace Signum.Engine.Maps
                 throw new InvalidOperationException("The following attributes ar not compatible with targets {0}: {1}".Formato(attributeTargets, incorrects.ToString(a => a.GetType().Name, ", ")));
         }
 
-        public Attribute[] Attributes<T>(Expression<Func<T, object>> route)
+        public Attribute[] FieldAttributes<T>(Expression<Func<T, object>> route)
         {
-            return Attributes(route);
+            return FieldAttributes(route);
         }
 
-        public Attribute[] Attributes(PropertyRoute route)
+        public Attribute[] FieldAttributes(PropertyRoute route)
         {
             if(route.PropertyRouteType == PropertyRouteType.Root || route.PropertyRouteType == PropertyRouteType.LiteEntity)
                 throw new InvalidOperationException("Route of type {0} not supported for this method".Formato(route.PropertyRouteType));
@@ -141,9 +144,13 @@ namespace Signum.Engine.Maps
 
             switch (route.PropertyRouteType)
 	        {
-                case PropertyRouteType.FieldOrProperty: 
+                case PropertyRouteType.FieldOrProperty:
+                    if (route.FieldInfo == null)
+                        return new Attribute[0];
                     return route.FieldInfo.GetCustomAttributes(false).Cast<Attribute>().ToArray(); 
-                case PropertyRouteType.MListItems: 
+                case PropertyRouteType.MListItems:
+                    if (route.Parent.FieldInfo == null)
+                        return new Attribute[0];
                     return route.Parent.FieldInfo.GetCustomAttributes(false).Cast<Attribute>().ToArray();
                 default:
                     throw new InvalidOperationException("Route of type {0} not supported for this method".Formato(route.PropertyRouteType));
@@ -155,7 +162,7 @@ namespace Signum.Engine.Maps
             if (forceNull)
                 return true;
 
-            var attrs = Attributes(route);
+            var attrs = FieldAttributes(route);
 
             if (attrs.OfType<NotNullableAttribute>().Any())
                 return false;
@@ -168,7 +175,7 @@ namespace Signum.Engine.Maps
 
         internal IndexType GetIndexType(PropertyRoute route)
         {
-            UniqueIndexAttribute at = Attributes(route).OfType<UniqueIndexAttribute>().SingleOrDefaultEx();
+            UniqueIndexAttribute at = FieldAttributes(route).OfType<UniqueIndexAttribute>().SingleOrDefaultEx();
 
             return at == null ? IndexType.None :
                 at.AllowMultipleNulls ? IndexType.UniqueMultipleNulls :
@@ -202,14 +209,14 @@ namespace Signum.Engine.Maps
             if (!route.Type.CleanType().IsIIdentifiable())
                 throw new InvalidOperationException("{0} is not a {1}".Formato(route, typeof(IIdentifiable).Name));
 
-            var fieldAtt = Attributes(route);
+            var fieldAtt = FieldAttributes(route);
 
             return Implementations.FromAttributes(cleanType, fieldAtt, route);
         }
 
         internal SqlDbTypePair GetSqlDbType(PropertyRoute route)
         {
-            SqlDbTypeAttribute att = Attributes(route).OfType<SqlDbTypeAttribute>().SingleOrDefaultEx();
+            SqlDbTypeAttribute att = FieldAttributes(route).OfType<SqlDbTypeAttribute>().SingleOrDefaultEx();
 
             if (att != null && att.HasSqlDbType)
                 return new SqlDbTypePair(att.SqlDbType, att.UdtTypeName);
@@ -219,7 +226,7 @@ namespace Signum.Engine.Maps
 
         internal int? GetSqlSize(PropertyRoute route, SqlDbType sqlDbType)
         {
-            SqlDbTypeAttribute att = Attributes(route).OfType<SqlDbTypeAttribute>().SingleOrDefaultEx();
+            SqlDbTypeAttribute att = FieldAttributes(route).OfType<SqlDbTypeAttribute>().SingleOrDefaultEx();
 
             if (att != null && att.HasSize)
                 return att.Size;
@@ -229,7 +236,7 @@ namespace Signum.Engine.Maps
 
         internal int? GetSqlScale(PropertyRoute route, SqlDbType sqlDbType)
         {
-            SqlDbTypeAttribute att = Attributes(route).OfType<SqlDbTypeAttribute>().SingleOrDefaultEx();
+            SqlDbTypeAttribute att = FieldAttributes(route).OfType<SqlDbTypeAttribute>().SingleOrDefaultEx();
 
             if (att != null && att.HasScale)
                 return att.Scale;
@@ -286,6 +293,7 @@ namespace Signum.Engine.Maps
         {
             return type.IsEnum || GetSqlDbTypePair(type) != null;
         }
+
     }
 
     public class SqlDbTypePair

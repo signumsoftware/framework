@@ -7,26 +7,27 @@ using System.Reflection;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
-using Signum.Entities.Properties;
 
 namespace Signum.Entities.DynamicQuery
 {
     [Serializable]
     public class Order
     {
+        QueryToken token;
+        public QueryToken Token { get { return token; } }
+
+        OrderType orderType;
+        public OrderType OrderType { get { return orderType; } }
+
         public Order(QueryToken token, OrderType orderType)
         {
-            this.Token = token;
-            this.OrderType = orderType;
+            this.token = token;
+            this.orderType = orderType;
         }
-
-        public QueryToken Token { get; set; }
-
-        public OrderType OrderType { get; set; }
 
         public override string ToString()
         {
-            return "{0} {1}".Formato(Token.FullKey(), OrderType);
+            return "{0} {1}".Formato(token.FullKey(), orderType);
         }
     }
 

@@ -12,12 +12,12 @@ using System.Windows.Data;
 
 namespace Signum.Windows
 {
-    public class CountOptions
+    public class QueryCountOptions
     {
         public object QueryName { get; set; }
 
-        public CountOptions() { }
-        public CountOptions(object queryName)
+        public QueryCountOptions() { }
+        public QueryCountOptions(object queryName)
         {
             this.QueryName = queryName;
         }
@@ -30,9 +30,42 @@ namespace Signum.Windows
         }
     }
 
-    public abstract class FindOptionsBase 
+
+    public class QueryGroupOptions
     {
-        public static int DefaultElementsPerPage = 200; 
+        public object QueryName { get; set; }
+
+        public QueryGroupOptions() { }
+        public QueryGroupOptions(object queryName)
+        {
+            this.QueryName = queryName;
+        }
+
+        List<FilterOption> filterOptions = new List<FilterOption>();
+        public List<FilterOption> FilterOptions
+        {
+            get { return filterOptions; }
+            set { this.filterOptions = value; }
+        }
+
+        List<OrderOption> orderOptions = new List<OrderOption>();
+        public List<OrderOption> OrderOptions
+        {
+            get { return orderOptions; }
+            set { this.orderOptions = value; }
+        }
+
+        List<ColumnOption> columnOptions = new List<ColumnOption>();
+        public List<ColumnOption> ColumnOptions
+        {
+            get { return columnOptions; }
+            set { this.columnOptions = value; }
+        }
+    }
+
+    public class QueryOptions
+    {
+        public static int DefaultElementsPerPage = 50;
 
         public object QueryName { get; set; }
 
@@ -50,13 +83,6 @@ namespace Signum.Windows
             set { this.orderOptions = value; }
         }
 
-        ColumnOptionsMode columnOptionsMode = ColumnOptionsMode.Add;
-        public ColumnOptionsMode ColumnOptionsMode
-        {
-            get { return columnOptionsMode; }
-            set { this.columnOptionsMode = value; }
-        }        
-
         List<ColumnOption> columnOptions = new List<ColumnOption>();
         public List<ColumnOption> ColumnOptions
         {
@@ -64,18 +90,23 @@ namespace Signum.Windows
             set { this.columnOptions = value; }
         }
 
+        ColumnOptionsMode columnOptionsMode = ColumnOptionsMode.Add;
+        public ColumnOptionsMode ColumnOptionsMode
+        {
+            get { return columnOptionsMode; }
+            set { this.columnOptionsMode = value; }
+        }
+ 
         int? elementsPerPage;
         public int? ElementsPerPage
         {
             get { return elementsPerPage; }
             set { this.elementsPerPage = value; }
         }
+    }
 
-        public FindOptionsBase()
-        {
-            this.ShowFilterButton = this.ShowFilters = this.ShowFooter = this.ShowHeader = true;
-        }
-
+    public abstract class FindOptionsBase : QueryOptions
+    {
         public bool SearchOnLoad { get; set; }
 
         public bool ShowFilters { get; set; }
@@ -88,6 +119,11 @@ namespace Signum.Windows
         internal abstract SearchMode GetSearchMode();
 
         public Action<SearchControl> InitializeSearchControl;
+
+        public FindOptionsBase()
+        {
+            this.ShowFilterButton = this.ShowFilters = this.ShowFooter = this.ShowHeader = true;
+        }
     }
 
     public class FindManyOptions : FindOptionsBase
@@ -132,7 +168,6 @@ namespace Signum.Windows
         {
             this.QueryName = queryName;
             this.FilterOptions.Add(new FilterOption(path, value));
-            this.NavigateIfOne = true;
         }
 
         public EventHandler Closed { get; set; }
@@ -157,7 +192,7 @@ namespace Signum.Windows
         }
     }
 
-    public class FindUniqueOptions
+    public class UniqueOptions
     {
         public object QueryName { get; set; }
 
@@ -175,12 +210,12 @@ namespace Signum.Windows
             set { this.orderOptions = value; }
         }
 
-        public FindUniqueOptions() 
+        public UniqueOptions() 
         {
             UniqueType = UniqueType.Single;
         }
 
-        public FindUniqueOptions(object queryName)
+        public UniqueOptions(object queryName)
         {
             UniqueType = UniqueType.Single;
             QueryName = queryName;
@@ -192,6 +227,12 @@ namespace Signum.Windows
     public class FilterOption : Freezable
     {
         public FilterOption(){}
+
+        public FilterOption(string path, Func<object> value):
+            this(path, (object)value)
+        {
+
+        }
 
         public FilterOption(string path, object value)
         {
@@ -207,8 +248,6 @@ namespace Signum.Windows
 
         public static readonly DependencyProperty ValueProperty =
              DependencyProperty.Register("Value", typeof(object), typeof(FilterOption), new UIPropertyMetadata((d, e) => ((FilterOption)d).ValueChanged(e)));
-
-       
         public object Value
         {
             get { return (object)GetValue(ValueProperty); }
@@ -224,7 +263,6 @@ namespace Signum.Windows
         }
 
         public event DependencyPropertyChangedEventHandler BindingValueChanged;
-
         private void ValueChanged(DependencyPropertyChangedEventArgs args)
         {
             RefreshRealValue();
@@ -235,9 +273,17 @@ namespace Signum.Windows
 
         public void RefreshRealValue()
         {
-            var newRealValue =Token != null ? Server.Convert(Value, Token.Type) : Value;
+            if (Token == null || Value is Func<object>)
+                return;
 
-            if(!object.Equals(newRealValue, RealValue))
+            if (Operation == FilterOperation.IsIn)
+            {
+                RealValue = Value;
+                return;
+            }
+            var newRealValue = Server.Convert(Value, Token.Type);
+
+            if (!object.Equals(newRealValue, RealValue))
             {
                 RealValue = newRealValue;
             }
@@ -245,12 +291,7 @@ namespace Signum.Windows
 
         public Filter ToFilter()
         {
-            return new Filter
-            {
-                Token = Token,
-                Operation = Operation,
-                Value = RealValue
-            };
+            return new Filter(Token, Operation, RealValue);
         }
 
         protected override Freezable CreateInstanceCore()
@@ -325,15 +366,14 @@ namespace Signum.Windows
             throw new NotImplementedException();
         }
 
-
         //For temporaly XAML only
         public string Path { get; set; }
+        public QueryToken Token { get; set; }
         public string DisplayName { get; set; }
 
-        internal Column CreateColumn(QueryDescription description)
+        internal Column ToColumn()
         {
-            QueryToken token = QueryUtils.Parse(Path, t => QueryUtils.SubTokens(t, description.Columns));
-            return new Column(token, DisplayName.DefaultText(token.NiceName()));
+            return new Column(Token, DisplayName.DefaultText(Token.NiceName()));
         }
     }
 }

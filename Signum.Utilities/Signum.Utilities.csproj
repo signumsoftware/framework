@@ -89,7 +89,6 @@
     <Compile Include="NaturalLanguageTools.cs" />
     <Compile Include="Pagination.cs" />
     <Compile Include="Polymorphic.cs" />
-    <Compile Include="QueryableExtensions.cs" />
     <Compile Include="Reflection\GenericInvoker.cs" />
     <Compile Include="Reflection\TupleExtensions.cs" />
     <Compile Include="Synchronization\ResetLazy.cs" />
@@ -148,11 +147,6 @@
     <Compile Include="ExpressionTrees\ExpressionExpanderSamples.cs" />
     <Compile Include="ListExtensions.cs" />
     <Compile Include="MyRandom.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Reflection\ReflectionTools.cs" />
     <Compile Include="RegexExtensions.cs" />
     <Compile Include="SafeConsole.cs" />
@@ -167,18 +161,6 @@
     <Compile Include="StringExtensions.cs" />
     <Compile Include="Properties\Version.cs" />
     <Compile Include="TreeExtensions.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.es.resx" />
-    <EmbeddedResource Include="Properties\Resources.fr.resx" />
-    <EmbeddedResource Include="Properties\Resources.it.resx" />
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.pt.resx" />
-    <EmbeddedResource Include="Properties\Resources.de.resx" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -196,6 +178,26 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Translations\Signum.Utilities.de.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Translations\Signum.Utilities.en.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Translations\Signum.Utilities.es.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Translations\Signum.Utilities.fr.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Translations\Signum.Utilities.it.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Translations\Signum.Utilities.pt.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

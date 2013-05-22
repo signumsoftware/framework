@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -217,8 +217,17 @@ namespace Signum.Windows
             set { SetValue(NavigateOnCreateProperty, value); }
         }
 
+        public static readonly DependencyProperty IsSearchingProperty =
+          DependencyProperty.Register("IsSearching", typeof(bool), typeof(SearchControl), new PropertyMetadata(false));
+        public bool IsSearching
+        {
+            get { return (bool)GetValue(IsSearchingProperty); }
+            set { SetValue(IsSearchingProperty, value); }
+        }
+
         public static readonly DependencyProperty FilterColumnProperty =
-        DependencyProperty.Register("FilterColumn", typeof(string), typeof(SearchControl), new UIPropertyMetadata(null, (d, e) => ((SearchControl)d).AssetNotLoaded(e)));
+        DependencyProperty.Register("FilterColumn", typeof(string), typeof(SearchControl), new UIPropertyMetadata(null, 
+            (d, e) => ((SearchControl)d).AssetNotLoaded(e)));
         public string FilterColumn
         {
             get { return (string)GetValue(FilterColumnProperty); }
@@ -226,19 +235,19 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty FilterRouteProperty =
-            DependencyProperty.Register("FilterRoute", typeof(string), typeof(SearchControl), new UIPropertyMetadata(null, (d, e) => ((SearchControl)d).AssetNotLoaded(e)));
+            DependencyProperty.Register("FilterRoute", typeof(string), typeof(SearchControl), new UIPropertyMetadata(null, 
+                (d, e) => ((SearchControl)d).AssetNotLoaded(e)));
         public string FilterRoute
         {
             get { return (string)GetValue(FilterRouteProperty); }
             set { SetValue(FilterRouteProperty, value); }
         }
-        
+
         private void AssetNotLoaded(DependencyPropertyChangedEventArgs e)
         {
-            if(IsLoaded)
+            if (IsLoaded)
                 throw new InvalidProgramException("You can not change {0} property once loaded".Formato(e.Property));
         }
-
 
         private void SimpleFilterBuilderChanged(DependencyPropertyChangedEventArgs e)
         {
@@ -313,9 +322,9 @@ namespace Signum.Windows
                 return;
             }
 
-            if(!Navigator.IsFindable(s.NewValue))
+            if (!Navigator.IsFindable(s.NewValue))
             {
-                 Common.VoteCollapsed(this);
+                Common.VoteCollapsed(this);
                 return;
             }
 
@@ -324,7 +333,7 @@ namespace Signum.Windows
 
             Settings = Navigator.GetQuerySettings(s.NewValue);
 
-            Description = Navigator.Manager.GetQueryDescription(s.NewValue);
+            Description = DynamicQueryServer.GetQueryDescription(s.NewValue);
 
             if (Settings.SimpleFilterBuilder != null)
             {
@@ -348,13 +357,15 @@ namespace Signum.Windows
         public QuerySettings Settings { get; private set; }
         public QueryDescription Description { get; private set; }
 
-        public static readonly RoutedEvent QueryResultChangedEvent = EventManager.RegisterRoutedEvent(
-            "QueryResultChanged", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(SearchControl));
-        public event RoutedEventHandler QueryResultChanged
+        public static readonly RoutedEvent ResultChangedEvent = EventManager.RegisterRoutedEvent(
+            "ResultChangedEvent", RoutingStrategy.Bubble, typeof(ResultChangedEventHandler), typeof(SearchControl));
+        public event ResultChangedEventHandler ResultChanged
         {
-            add { AddHandler(QueryResultChangedEvent, value); }
-            remove { RemoveHandler(QueryResultChangedEvent, value); }
+            add { AddHandler(ResultChangedEvent, value); }
+            remove { RemoveHandler(ResultChangedEvent, value); }
         }
+
+      
 
         void SearchControl_Loaded(object sender, RoutedEventArgs e)
         {
@@ -369,7 +380,18 @@ namespace Signum.Windows
             }
 
             Common.VoteVisible(this);
-          
+
+            OnLoaded();
+        }
+
+        bool loaded; 
+        public void OnLoaded()
+        {
+            if (loaded)
+                return;
+
+            loaded = true;
+
             if (FilterColumn.HasText())
             {
                 FilterOptions.Add(new FilterOption
@@ -392,14 +414,16 @@ namespace Signum.Windows
                 Create = Implementations.IsByAll ? false :
                          Implementations.Types.Any(t => Navigator.IsCreable(t, isSearchEntity: true));
 
+            DynamicQueryServer.SetColumnTokens(ColumnOptions, Description);
+
             GenerateListViewColumns();
 
-            Navigator.Manager.SetFilterTokens(QueryName, FilterOptions);
+            DynamicQueryServer.SetFilterTokens(FilterOptions, Description);
 
             filterBuilder.Filters = FilterOptions;
             ((INotifyCollectionChanged)FilterOptions).CollectionChanged += FilterOptions_CollectionChanged;
 
-            Navigator.Manager.SetOrderTokens(QueryName, OrderOptions);
+            DynamicQueryServer.SetOrderTokens(OrderOptions, Description);
 
             SortGridViewColumnHeader.SetColumnAdorners(gvResults, OrderOptions);
 
@@ -415,7 +439,7 @@ namespace Signum.Windows
 
             UpdateVisibility();
 
-            AutomationProperties.SetItemStatus(this, QueryUtils.GetQueryUniqueKey(QueryName));
+            AutomationProperties.SetName(this, QueryUtils.GetQueryUniqueKey(QueryName));
 
             foreach (var item in FilterOptions)
             {
@@ -439,7 +463,7 @@ namespace Signum.Windows
             btCreateFilter.IsEnabled = string.IsNullOrEmpty(canFilter);
             btCreateFilter.ToolTip = canFilter;
 
-            return QueryUtils.SubTokens(arg, Description.Columns);
+            return arg.SubTokens(Description, canAggregate: false);
         }
 
         private void btCreateFilter_Click(object sender, RoutedEventArgs e)
@@ -508,10 +532,10 @@ namespace Signum.Windows
                 }
 
                 if (contextMenu.Items.Count == 0)
-                    contextMenu.Items.Add(new MenuItem { Header = new TextBlock(new Italic(new Run(Signum.Windows.Properties.Resources.NoActionsFound))), IsEnabled = false });
+                    contextMenu.Items.Add(new MenuItem { Header = new TextBlock(new Italic(new Run(SearchMessage.NoActionsFound.NiceToString()))), IsEnabled = false });
             }
         }
-
+        
         void UpdateViewSelection()
         {
             btNavigate.Visibility = Navigate && lvResult.SelectedItem != null ? Visibility.Visible : Visibility.Collapsed;
@@ -524,31 +548,21 @@ namespace Signum.Windows
                 SelectedItems = null;
         }
 
-        void GenerateListViewColumns()
+        public void GenerateListViewColumns()
         {
-            List<Column> columns = MergeColumns();
+            if (IsSearching)
+            {
+                generateListViewColumnsQueued = true;
+                return;
+            }
+
+            List<Column> columns = DynamicQueryServer.MergeColumns(ColumnOptions, ColumnOptionsMode, Description);
 
             gvResults.Columns.Clear();
 
             foreach (var co in columns)
             {
                 AddListViewColumn(co);
-            }
-        }
-
-        private List<Column> MergeColumns()
-        {
-            switch (ColumnOptionsMode)
-            {
-                case ColumnOptionsMode.Add:
-                    return Description.Columns.Where(cd => !cd.IsEntity).Select(cd => new Column(cd)).Concat(
-                        ColumnOptions.Select(co => co.CreateColumn(Description))).ToList();
-                case ColumnOptionsMode.Remove:
-                    return Description.Columns.Where(cd => !cd.IsEntity && !ColumnOptions.Any(co => co.Path == cd.Name)).Select(cd => new Column(cd)).ToList();
-                case ColumnOptionsMode.Replace:
-                    return ColumnOptions.Select(co => co.CreateColumn(Description)).ToList();
-                default:
-                    throw new InvalidOperationException("{0} is not a valid ColumnOptionMode".Formato(ColumnOptionsMode));
             }
         }
 
@@ -573,7 +587,7 @@ namespace Signum.Windows
             return dt;
         }
 
-        void FilterBuilder_SearchClicked(object sender, RoutedEventArgs e)
+        void btSearch_Click(object sender, RoutedEventArgs e)
         {
             Search();
         }
@@ -581,27 +595,48 @@ namespace Signum.Windows
 
         bool hasBeenLoaded = false;
 
+        bool searchQueued;
+        bool generateListViewColumnsQueued; 
+
         public void Search()
         {
+            if (IsSearching)
+            {
+                searchQueued = true;
+                return;
+            }
+
             ClearResults();
 
-            btFind.IsEnabled = false;
+            IsSearching = true;
 
-            var request = UpdateMultiplyMessage(true);
+            QueryRequest request = UpdateMultiplyMessage(true);
 
-            DynamicQueryBachRequest.Enqueue(request,          
-                obj =>
+            request.QueryBatch(rt =>
+            {
+                hasBeenLoaded = true;
+
+                resultTable = rt;
+
+                if (rt != null)
                 {
-                    hasBeenLoaded = true;
-
-                    resultTable = (ResultTable)obj;
-
-                    if (resultTable != null)
-                    {
-                        SetResults();
-                    }
-                },
-                () => { btFind.IsEnabled = true; });
+                    SetResults(rt);
+                }
+            },
+            () =>
+            {
+                IsSearching = false;
+                if (generateListViewColumnsQueued)
+                {
+                    generateListViewColumnsQueued = false;
+                    GenerateListViewColumns();
+                }
+                if (searchQueued)
+                {
+                    searchQueued = false;
+                    Search(); 
+                }
+            });
         }
 
         public QueryRequest UpdateMultiplyMessage(bool updateSimpleFilters)
@@ -641,50 +676,64 @@ namespace Signum.Windows
                 FilterOptions.Clear();
                 var newFilters = SimpleFilterBuilder.GenerateFilterOptions();
 
-                Navigator.Manager.SetFilterTokens(QueryName, newFilters);
+                DynamicQueryServer.SetFilterTokens(newFilters, Description);
                 FilterOptions.AddRange(newFilters);
             }
         }
 
-        private void SetResults()
+
+        bool settingResults = false;
+        private void SetResults(ResultTable rt)
         {
-            gvResults.Columns.ZipForeach(resultTable.Columns, (gvc, rc) =>
+            try
             {
-                var header = (SortGridViewColumnHeader)gvc.Header;
+                settingResults = true;
 
-                Debug.Assert(rc.Column.Token.Equals(header.RequestColumn.Token));
+                gvResults.Columns.ZipForeach(rt.Columns, (gvc, rc) =>
+                {
+                    var header = (SortGridViewColumnHeader)gvc.Header;
 
-                if (header.ResultColumn == null || header.ResultColumn.Index != rc.Index)
-                    gvc.CellTemplate = CreateDataTemplate(rc);
+                    if (!rc.Column.Token.Equals(header.RequestColumn.Token))
+                        throw new InvalidOperationException("The token in the ResultColumn ({0}) does not match with the token in the GridView ({1})"
+                            .Formato(rc.Column.Token.FullKey(), header.RequestColumn.Token.FullKey()));
 
-                header.ResultColumn = rc; 
-            });             
+                    if (header.ResultColumn == null || header.ResultColumn.Index != rc.Index)
+                        gvc.CellTemplate = CreateDataTemplate(rc);
 
-            lvResult.ItemsSource = resultTable.Rows;
+                    header.ResultColumn = rc;
+                });
 
-            if (resultTable.Rows.Length > 0)
+                lvResult.ItemsSource = rt.Rows;
+
+                if (rt.Rows.Length > 0)
+                {
+                    lvResult.SelectedIndex = 0;
+                    lvResult.ScrollIntoView(rt.Rows.FirstEx());
+                }
+                ItemsCount = lvResult.Items.Count;
+                lvResult.Background = Brushes.White;
+                lvResult.Focus();
+                elementsInPageLabel.Visibility = Visibility.Visible;
+                elementsInPageLabel.TotalPages = rt.TotalPages;
+                elementsInPageLabel.StartElementIndex = rt.StartElementIndex;
+                elementsInPageLabel.EndElementIndex = rt.EndElementIndex;
+                elementsInPageLabel.TotalElements = rt.TotalElements;
+
+                pageSizeSelector.PageSize = rt.ElementsPerPage;
+
+
+                pageSelector.Visibility = System.Windows.Visibility.Visible;
+                pageSelector.CurrentPage = rt.CurrentPage;
+                pageSelector.TotalPages = rt.TotalPages;
+
+                //tbResultados.Visibility = Visibility.Visible;
+                //tbResultados.Foreground = rt.Rows.Length == ElementsPerPage ? Brushes.Red : Brushes.Black;
+                OnQueryResultChanged(false);
+            }
+            finally
             {
-                lvResult.SelectedIndex = 0;
-                lvResult.ScrollIntoView(resultTable.Rows.FirstEx());
-            }            
-            ItemsCount = lvResult.Items.Count;
-            lvResult.Background = Brushes.White;
-            lvResult.Focus();
-            elementsInPageLabel.Visibility = Visibility.Visible;
-            elementsInPageLabel.TotalPages = resultTable.TotalPages;
-            elementsInPageLabel.StartElementIndex = resultTable.StartElementIndex;
-            elementsInPageLabel.EndElementIndex = resultTable.EndElementIndex;
-            elementsInPageLabel.TotalElements = resultTable.TotalElements;
-
-            pageSizeSelector.PageSize = resultTable.ElementsPerPage;
-
-            pageSelector.Visibility = System.Windows.Visibility.Visible;
-            pageSelector.CurrentPage = resultTable.CurrentPage;
-            pageSelector.TotalPages = resultTable.TotalPages;
-            
-            //tbResultados.Visibility = Visibility.Visible;
-            //tbResultados.Foreground = resultTable.Rows.Length == ElementsPerPage ? Brushes.Red : Brushes.Black;
-            OnQueryResultChanged(false);
+                settingResults = false;
+            }
         }
 
         public void ClearResults()
@@ -699,23 +748,27 @@ namespace Signum.Windows
 
         void pageSelector_Changed(object sender, RoutedEventArgs e)
         {
+            if (!IsLoaded || settingResults)
+                return;
+
             if (FixSize != null)
-                FixSize(this, new EventArgs()); 
-            Search(); 
+                FixSize(this, new EventArgs());
+
+            Search();
         }
 
         public event EventHandler FixSize; 
-        public event EventHandler ClearSize; 
+        public event EventHandler ClearSize;
 
         void ElementsPerPage_Changed()
         {
-            if (IsLoaded)
-            {
-                CurrentPage = 1;
-                if (ClearSize != null)
-                    ClearSize(this, new EventArgs()); 
-                Search();
-            }
+            if (!IsLoaded || settingResults)
+                return;
+
+            CurrentPage = 1;
+            if (ClearSize != null)
+                ClearSize(this, new EventArgs());
+            Search();
         }
 
         void OnQueryResultChanged(bool cleaning)
@@ -723,7 +776,7 @@ namespace Signum.Windows
             if (!cleaning && CollapseOnNoResults)
                 Visibility = resultTable.Rows.Length == 0 ? Visibility.Collapsed : Visibility.Visible;
 
-            RaiseEvent(new RoutedEventArgs(QueryResultChangedEvent));
+            RaiseEvent(new ResultChangedEventArgs(ResultChangedEvent, cleaning));
         }
 
         void btView_Click(object sender, RoutedEventArgs e)
@@ -822,7 +875,9 @@ namespace Signum.Windows
             string canOrder = QueryUtils.CanOrder(header.RequestColumn.Token);
             if (canOrder.HasText())
             {
-                MessageBox.Show(canOrder);
+                //Avoid UI Automation hangs
+                Dispatcher.BeginInvoke(() => MessageBox.Show(Window.GetWindow(this), canOrder)); 
+
                 return; 
             }
 
@@ -874,28 +929,11 @@ namespace Signum.Windows
                 return;
 
             string result = token.NiceName();
-            if (ValueLineBox.Show<string>(ref result, Properties.Resources.NewColumnSName, Properties.Resources.ChooseTheDisplayNameOfTheNewColumn, Properties.Resources.Name, null, null, Window.GetWindow(this)))
+            if (ValueLineBox.Show<string>(ref result, SearchMessage.NewColumnSName.NiceToString(), SearchMessage.ChooseTheDisplayNameOfTheNewColumn.NiceToString(), SearchMessage.Name.NiceToString(), null, null, Window.GetWindow(this)))
             {
                 ClearResults();
 
                 AddListViewColumn(new Column(token, result));
-            }
-        }
-
-        private void lvResult_DragOver(object sender, DragEventArgs e)
-        {
-            e.Effects = e.Data.GetDataPresent(typeof(FilterOption)) ? DragDropEffects.Copy : DragDropEffects.None;
-        }
-
-        private void lvResult_Drop(object sender, DragEventArgs e)
-        {
-            if (e.Data.GetDataPresent(typeof(FilterOption)))
-            {
-                FilterOption filter = (FilterOption)e.Data.GetData(typeof(FilterOption));
-
-                QueryToken token = filter.Token;
-
-                AddColumn(filter.Token);
             }
         }
 
@@ -907,7 +945,7 @@ namespace Signum.Windows
             SortGridViewColumnHeader gvch = GetMenuItemHeader(sender);
 
             string result = gvch.RequestColumn.DisplayName;
-            if (ValueLineBox.Show<string>(ref result, Properties.Resources.NewColumnSName, Properties.Resources.ChooseTheDisplayNameOfTheNewColumn, Properties.Resources.Name, null, null, Window.GetWindow(this)))
+            if (ValueLineBox.Show<string>(ref result, SearchMessage.NewColumnSName.NiceToString(), SearchMessage.ChooseTheDisplayNameOfTheNewColumn.NiceToString(), SearchMessage.Name.NiceToString(), null, null, Window.GetWindow(this)))
             {
                 gvch.RequestColumn.DisplayName = result;
                 gvch.Content = result;
@@ -942,19 +980,23 @@ namespace Signum.Windows
         {
             ColumnOptions.Clear();
             ColumnOptions.AddRange(columns);
+            DynamicQueryServer.SetColumnTokens(ColumnOptions, Description);
             ColumnOptionsMode = columnOptionsMode; 
             GenerateListViewColumns();
 
-            if (SimpleFilterBuilder != null)
-                SimpleFilterBuilder = null;
+            if (!filters.SequenceEqual(FilterOptions))
+            {
+                if (SimpleFilterBuilder != null)
+                    SimpleFilterBuilder = null;
 
-            FilterOptions.Clear();
-            Navigator.Manager.SetFilterTokens(QueryName, filters);
-            FilterOptions.AddRange(filters);
+                FilterOptions.Clear();
+                DynamicQueryServer.SetFilterTokens(filters, Description);
+                FilterOptions.AddRange(filters);
+            }
 
             OrderOptions.Clear();
             OrderOptions.AddRange(orders);
-            Navigator.Manager.SetOrderTokens(QueryName, OrderOptions);
+            DynamicQueryServer.SetOrderTokens(OrderOptions, Description);
             SortGridViewColumnHeader.SetColumnAdorners(gvResults, OrderOptions);
 
 
@@ -966,7 +1008,22 @@ namespace Signum.Windows
             rowFilters.Height = new GridLength(); //Auto
         }
 
-      
+        public void FocusSearch()
+        {
+            Keyboard.Focus(btSearch);
+        }
+    }
+
+    public delegate void ResultChangedEventHandler(object sender, ResultChangedEventArgs e);
+
+    public class ResultChangedEventArgs : RoutedEventArgs
+    {
+        public bool Cleaning { get; private set; }
+        public ResultChangedEventArgs(RoutedEvent routedEvent, bool cleaning)
+            : base(routedEvent)
+        {
+            this.Cleaning = cleaning;
+        }
     }
 
     public interface ISimpleFilterBuilder

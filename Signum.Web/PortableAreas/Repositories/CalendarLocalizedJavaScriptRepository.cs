@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -12,8 +12,8 @@ using System.Resources;
 using System.Collections.Concurrent;
 using System.Web;
 using System.Web.Mvc;
-using Signum.Web.Properties;
 using System.Web.Script.Serialization;
+using Signum.Entities;
 
 namespace Signum.Web.PortableAreas
 {
@@ -50,10 +50,10 @@ namespace Signum.Web.PortableAreas
                 {
                     var config = new
                     {
-                        closeText = Resources.CalendarClose,
-                        prevText = Resources.CalendarPrevious,
-                        nextText = Resources.CalendarNext,
-                        currentText = Resources.CalendarToday,
+                        closeText = CalendarMessage.CalendarClose.NiceToString(),
+                        prevText = CalendarMessage.CalendarPrevious.NiceToString(),
+                        nextText = CalendarMessage.CalendarNext.NiceToString(),
+                        currentText = CalendarMessage.CalendarToday.NiceToString(),
                         monthNames = CultureInfo.CurrentCulture.DateTimeFormat.MonthNames,
                         monthNamesShort = CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames,
                         dayNames = CultureInfo.CurrentCulture.DateTimeFormat.DayNames,

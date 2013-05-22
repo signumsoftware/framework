@@ -281,14 +281,7 @@ namespace Signum.Web
             return new MvcHtmlString(serializer.Serialize(value));
         }
 
-        public static HelperResult If(this WebPageBase webPage, bool condition, Func<HelperResult> html)
-        {
-            if (condition)
-                return html();
-            return null;
-        }
-
-        public static MvcHtmlString JQueryNotification(this HtmlHelper helper, string strongText, string normalText)
+        public static MvcHtmlString JQueryNotification(this HtmlHelper helper, string strongText, string normalText, int? marginTop = 10)
         { 
             var pContent = new HtmlTag("span").Class("ui-icon ui-icon-info").Attr("style", "float: left; margin-right: .3em;").ToHtml();
             
@@ -298,7 +291,7 @@ namespace Signum.Web
             pContent = pContent.Concat(new MvcHtmlString(normalText));
 
             return new HtmlTag("div").Class("ui-state-highlight ui-corner-all")
-                .Attr("style", "margin-top: 10px; padding: 0 .7em; padding: 10px;")
+                .Attr("style", "margin-top: {0}px; padding: 0 .7em; padding: 10px;".Formato(marginTop))
                 .InnerHtml(new HtmlTag("p").InnerHtml(pContent).ToHtml())
                 .ToHtml();
         }

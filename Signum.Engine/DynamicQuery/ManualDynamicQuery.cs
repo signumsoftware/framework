@@ -12,21 +12,18 @@ using Signum.Entities.Reflection;
 
 namespace Signum.Engine.DynamicQuery
 {
-    public class ManualDynamicQuery<T> : DynamicQuery<T>
+    public class ManualDynamicQueryCore<T> : DynamicQueryCore<T>
     {
-        public Func<QueryRequest, List<ColumnDescription>, DEnumerableCount<T>> Execute { get; private set; }
+        public Func<QueryRequest, QueryDescription, DEnumerableCount<T>> Execute { get; private set; }
 
-        public ManualDynamicQuery(Func<QueryRequest, List<ColumnDescription>, DEnumerableCount<T>> execute)
+        public ManualDynamicQueryCore(Func<QueryRequest, QueryDescription, DEnumerableCount<T>> execute)
         {
             if (execute == null)
                 throw new ArgumentNullException("execute");
 
             this.Execute = execute;
-        }
 
-        protected override ColumnDescriptionFactory[] InitializeColumns()
-        {
-            var result = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Fields)
+            this.StaticColumns = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Fields)
               .Select((e, i) =>
               {
                   if (e.MemberInfo.ReturningType().IsIIdentifiable())
@@ -35,14 +32,14 @@ namespace Signum.Engine.DynamicQuery
                   return new ColumnDescriptionFactory(i, e.MemberInfo, null);
               })
             .ToArray();
-            return result;
         }
+
 
         public override ResultTable ExecuteQuery(QueryRequest request)
         {
-            request.Columns.Insert(0, new _EntityColumn(EntityColumn().BuildColumnDescription()));
+            request.Columns.Insert(0, new _EntityColumn(EntityColumn().BuildColumnDescription(), QueryName));
 
-            DEnumerableCount<T> manualResult = Execute(request, GetColumnDescriptions());
+            DEnumerableCount<T> manualResult = Execute(request, GetQueryDescription());
 
             return manualResult.ToResultTable(request); 
         }
@@ -53,12 +50,12 @@ namespace Signum.Engine.DynamicQuery
             {
                 QueryName = request.QueryName,
                 Filters = request.Filters,
-                Columns = new List<Column>() { new Column(this.EntityColumn().BuildColumnDescription()) },
+                Columns = new List<Column>() { new Column(this.EntityColumn().BuildColumnDescription(), QueryName) },
                 Orders = new List<Order>(),
                 ElementsPerPage = QueryRequest.AllElements,
             };
 
-            return Execute(req, GetColumnDescriptions()).Collection.Count();
+            return Execute(req, GetQueryDescription()).Collection.Count();
         }
 
         public override Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request)
@@ -69,15 +66,49 @@ namespace Signum.Engine.DynamicQuery
                 Filters = request.Filters,
                 ElementsPerPage = 2,
                 Orders = request.Orders,
-                Columns = new List<Column> { new Column(this.EntityColumn().BuildColumnDescription()) }
+                Columns = new List<Column> { new Column(this.EntityColumn().BuildColumnDescription(), QueryName) }
             };
 
-            DEnumerable<T> mr = Execute(req, GetColumnDescriptions());
+            DEnumerable<T> mr = Execute(req, GetQueryDescription());
 
+            return (Lite<IdentifiableEntity>)mr.Collection.Select(entitySelector.Value).Unique(request.UniqueType);
+        }
+
+        static readonly Lazy<Func<object, Lite<IIdentifiable>>> entitySelector = new Lazy<Func<object, Lite<IIdentifiable>>>(() =>
+        {
             ParameterExpression pe = Expression.Parameter(typeof(object), "p");
-            Func<object, Lite<IIdentifiable>> entitySelector = Expression.Lambda<Func<object, Lite<IIdentifiable>>>(TupleReflection.TupleChainProperty(pe, 0), pe).Compile();
+            return  Expression.Lambda<Func<object, Lite<IIdentifiable>>>(TupleReflection.TupleChainProperty(pe, 0), pe).Compile();
+        }, true);
 
-            return (Lite<IdentifiableEntity>)mr.Collection.Select(entitySelector).Unique(request.UniqueType);
+        public override ResultTable ExecuteQueryGroup(QueryGroupRequest request)
+        {
+            var simpleFilters = request.Filters.Where(f => !(f.Token is AggregateToken)).ToList();
+            var aggregateFilters = request.Filters.Where(f => f.Token is AggregateToken).ToList();
+
+            var keys = request.Columns.Select(t => t.Token).Where(t => !(t is AggregateToken)).ToHashSet();
+
+            var allAggregates = request.AllTokens().OfType<AggregateToken>().ToHashSet();
+
+            DEnumerableCount<T> plainCollection = Execute(new QueryRequest
+            {   
+                Columns = keys.Concat(allAggregates.Select(at => at.Parent).NotNull()).Distinct().Select(t => new Column(t, t.NiceName())).ToList(),
+                Orders = new List<Order>(),
+                Filters = simpleFilters,
+                QueryName = request.QueryName,
+                ElementsPerPage = QueryRequest.AllElements,
+            }, GetQueryDescription());
+
+            var groupCollection = plainCollection
+                     .GroupBy(keys, allAggregates)
+                     .Where(aggregateFilters)
+                     .OrderBy(request.Orders);
+
+            var cols = request.Columns
+                .Select(c => Tuple.Create(c, Expression.Lambda(c.Token.BuildExpression(groupCollection.Context), groupCollection.Context.Parameter))).ToList();
+
+            var values = groupCollection.Collection.ToArray();
+
+            return values.ToResultTable(cols, values.Length, 0, QueryRequest.AllElements);
         }
     }
 }

@@ -21,8 +21,20 @@ namespace Signum.Engine.Basics
             {
                 sb.Include<ExceptionDN>();
 
-                dqm[typeof(ExceptionDN)] =
-                    (from r in Database.Query<ExceptionDN>()
+                dqm.RegisterQuery(typeof(ExceptionDN),()=>
+                    from r in Database.Query<ExceptionDN>()
+                    select new
+                    {
+                        Entity = r,
+                        r.Id,
+                        r.CreationDate,
+                        r.ExceptionType,
+                        ExcepcionMessage = r.ExceptionMessage,
+                        r.StackTraceHash,
+                    });
+
+                dqm.RegisterQuery(typeof(ExceptionDN), ()=>
+                     from r in Database.Query<ExceptionDN>()
                      select new
                      {
                          Entity = r,
@@ -31,7 +43,7 @@ namespace Signum.Engine.Basics
                          r.ExceptionType,
                          ExcepcionMessage = r.ExceptionMessage,
                          r.StackTraceHash,
-                     }).ToDynamic();
+                     });
 
                 DefaultEnvironment = "Default"; 
             }

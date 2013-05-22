@@ -11,7 +11,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
-namespace Signum.Test
+namespace Signum.Test.Environment
 {
     public static class MusicLogic
     {
@@ -32,137 +32,140 @@ namespace Signum.Test
 
                 MinimumExtensions.IncludeFunction(sb.Schema.Assets);
 
-                dqm[typeof(AlbumDN)] = (from a in Database.Query<AlbumDN>()
-                                        select new
-                                        {
-                                            Entity = a.ToLite(),
-                                            a.Id,
-                                            Author = a.Author.ToLite(),
-                                            Label = a.Label.ToLite(),
-                                            a.Name,
-                                            a.Year
-                                        }).ToDynamic();
+                dqm.RegisterQuery(typeof(AlbumDN), ()=> 
+                    from a in Database.Query<AlbumDN>()
+                    select new
+                    {
+                        Entity = a.ToLite(),
+                        a.Id,
+                        Author = a.Author.ToLite(),
+                        Label = a.Label.ToLite(),
+                        a.Name,
+                        a.Year
+                    });
 
-                dqm[typeof(NoteWithDateDN)] = (from a in Database.Query<NoteWithDateDN>()
-                                               select new
-                                               {
-                                                   Entity = a.ToLite(),
-                                                   a.Id,
-                                                   a.Text,
-                                                   Target = a.Target.ToLite(),
-                                                   a.CreationTime,
-                                               }).ToDynamic();
+                dqm.RegisterQuery(typeof(NoteWithDateDN), ()=> 
+                    from a in Database.Query<NoteWithDateDN>()
+                    select new
+                    {
+                        Entity = a.ToLite(),
+                        a.Id,
+                        a.Text,
+                        Target = a.Target.ToLite(),
+                        a.CreationTime,
+                    });
 
-                dqm[typeof(ArtistDN)] = (from a in Database.Query<ArtistDN>()
-                                         select new
-                                         {
-                                             Entity = a.ToLite(),
-                                             a.Id,
-                                             a.Name,
-                                             a.IsMale,
-                                             a.Sex,
-                                             a.Dead,
-                                             LastAward = a.LastAward.ToLite(),
-                                         }).ToDynamic();
+                dqm.RegisterQuery(typeof(ArtistDN), ()=> 
+                    from a in Database.Query<ArtistDN>()
+                    select new
+                    {
+                        Entity = a.ToLite(),
+                        a.Id,
+                        a.Name,
+                        a.IsMale,
+                        a.Sex,
+                        a.Dead,
+                        LastAward = a.LastAward.ToLite(),
+                    });
 
                 dqm.RegisterExpression((IAuthorDN au) => Database.Query<AlbumDN>().Where(a => a.Author == au), () => "Albums", "Albums");
 
-                dqm[typeof(BandDN)] = (from a in Database.Query<BandDN>()
-                                       select new
-                                       {
-                                           Entity = a.ToLite(),
-                                           a.Id,
-                                           a.Name,
-                                           LastAward = a.LastAward.ToLite(),
-                                       }).ToDynamic();
+                dqm.RegisterQuery(typeof(BandDN), ()=> 
+                    from a in Database.Query<BandDN>()
+                    select new
+                    {
+                        Entity = a.ToLite(),
+                        a.Id,
+                        a.Name,
+                        LastAward = a.LastAward.ToLite(),
+                    });
 
 
-                dqm[typeof(LabelDN)] = (from a in Database.Query<LabelDN>()
-                                        select new
-                                        {
-                                            Entity = a.ToLite(),
-                                            a.Id,
-                                            a.Name,
-                                        }).ToDynamic();
+                dqm.RegisterQuery(typeof(LabelDN), ()=> 
+                    from a in Database.Query<LabelDN>()
+                    select new
+                    {
+                        Entity = a.ToLite(),
+                        a.Id,
+                        a.Name,
+                    });
 
 
-                dqm[typeof(AmericanMusicAwardDN)] = (from a in Database.Query<AmericanMusicAwardDN>()
-                                                     select new
-                                                     {
-                                                         Entity = a.ToLite(),
-                                                         a.Id,
-                                                         a.Year,
-                                                         a.Category,
-                                                         a.Result,
-                                                     }).ToDynamic();
+                dqm.RegisterQuery(typeof(AmericanMusicAwardDN), ()=> 
+                    from a in Database.Query<AmericanMusicAwardDN>()
+                    select new
+                    {
+                        Entity = a.ToLite(),
+                        a.Id,
+                        a.Year,
+                        a.Category,
+                        a.Result,
+                    });
 
-                dqm[typeof(GrammyAwardDN)] = (from a in Database.Query<GrammyAwardDN>()
-                                              select new
-                                              {
-                                                  Entity = a.ToLite(),
-                                                  a.Id,
-                                                  a.Year,
-                                                  a.Category,
-                                                  a.Result
-                                              }).ToDynamic();
+                dqm.RegisterQuery(typeof(GrammyAwardDN), ()=> 
+                    from a in Database.Query<GrammyAwardDN>()
+                    select new
+                    {
+                        Entity = a.ToLite(),
+                        a.Id,
+                        a.Year,
+                        a.Category,
+                        a.Result
+                    });
 
-                dqm[typeof(PersonalAwardDN)] = (from a in Database.Query<PersonalAwardDN>()
-                                                select new
-                                                {
-                                                    Entity = a.ToLite(),
-                                                    a.Id,
-                                                    a.Year,
-                                                    a.Category,
-                                                    a.Result
-                                                }).ToDynamic();
+                dqm.RegisterQuery(typeof(PersonalAwardDN), ()=> 
+                    from a in Database.Query<PersonalAwardDN>()
+                    select new
+                    {
+                        Entity = a.ToLite(),
+                        a.Id,
+                        a.Year,
+                        a.Category,
+                        a.Result
+                    });
 
-                dqm[typeof(AwardNominationDN)] = (from a in Database.Query<AwardNominationDN>()
-                                                  select new
-                                                  {
-                                                      Entity = a.ToLite(),
-                                                      a.Id,
-                                                      a.Award,
-                                                      a.Author
-                                                  }).ToDynamic();
+                dqm.RegisterQuery(typeof(AwardNominationDN), ()=> 
+                    from a in Database.Query<AwardNominationDN>()
+                    select new
+                    {
+                        Entity = a.ToLite(),
+                        a.Id,
+                        a.Award,
+                        a.Author
+                    });
 
-                dqm[typeof(IAuthorDN)] = DynamicQuery.Manual((request, descriptions) =>
-                {
-                    var one = (from a in Database.Query<ArtistDN>()
-                               select new
-                               {
-                                   Entity = a.ToLite<IAuthorDN>(),
-                                   a.Id,
-                                   Type = "Artist",
-                                   a.Name,
-                                   Lonely = a.Lonely(),
-                                   LastAward = a.LastAward.ToLite()
-                               }).ToDQueryable(descriptions)
-                                .SelectMany(request.Multiplications)
-                                .Where(request.Filters)
-                                .OrderBy(request.Orders)
-                                .Select(request.Columns)
-                                .TryPaginatePartial(request.MaxElementIndex);
 
-                    var two = (from a in Database.Query<BandDN>()
-                               select new
-                               {
-                                   Entity = a.ToLite<IAuthorDN>(),
-                                   a.Id,
-                                   Type = "Band",
-                                   a.Name,
-                                   Lonely = a.Lonely(),
-                                   LastAward = a.LastAward.ToLite()
-                               }).ToDQueryable(descriptions)
-                                .SelectMany(request.Multiplications)
-                                .Where(request.Filters)
-                                .OrderBy(request.Orders)
-                                .Select(request.Columns)
-                                .TryPaginatePartial(request.MaxElementIndex);
+                dqm.RegisterQuery(typeof(IAuthorDN), () => DynamicQuery.Manual((request, descriptions) =>
+                    {
+                        var one = (from a in Database.Query<ArtistDN>()
+                                   select new
+                                   {
+                                       Entity = a.ToLite<IAuthorDN>(),
+                                       a.Id,
+                                       Type = "Artist",
+                                       a.Name,
+                                       Lonely = a.Lonely(),
+                                       LastAward = a.LastAward.ToLite()
+                                   }).ToDQueryable(descriptions).AllQueryOperations(request);
 
-                    return one.Concat(two).OrderBy(request.Orders).TryPaginate(request.ElementsPerPage, request.CurrentPage);
-                })
-                                        .Column(a => a.Entity, cl => cl.Implementations = Implementations.By(typeof(ArtistDN), typeof(BandDN)))
-                                        .Column(a => a.LastAward, cl => cl.Implementations = Implementations.ByAll);
+                        var two = (from a in Database.Query<BandDN>()
+                                   select new
+                                   {
+                                       Entity = a.ToLite<IAuthorDN>(),
+                                       a.Id,
+                                       Type = "Band",
+                                       a.Name,
+                                       Lonely = a.Lonely(),
+                                       LastAward = a.LastAward.ToLite()
+                                   }).ToDQueryable(descriptions).AllQueryOperations(request);
+
+                        return one.Concat(two).OrderBy(request.Orders).TryPaginate(request.ElementsPerPage, request.CurrentPage);
+
+                    }).Column(a => a.LastAward, cl => cl.Implementations = Implementations.ByAll),
+                    entityImplementations: Implementations.By(typeof(ArtistDN), typeof(BandDN)));
+
+                Validator.PropertyValidator((NoteWithDateDN n) => n.Text)
+                    .IsApplicableValidator<StringLengthValidatorAttribute>(n => Corruption.Strict); 
 
                 AlbumGraph.Register();
 
@@ -172,7 +175,7 @@ namespace Signum.Test
 
         private static void RegisterOperations()
         {
-            new BasicExecute<AwardDN>(AwardOperation.Save)
+            new Graph<AwardDN>.Execute(AwardOperation.Save)
             {
                 AllowsNew = true,
                 Lite = false,
@@ -180,21 +183,21 @@ namespace Signum.Test
             }.Register();
 
 
-            new BasicExecute<NoteWithDateDN>(NoteWithDateOperation.Save)
+            new Graph<NoteWithDateDN>.Execute(NoteWithDateOperation.Save)
             {
                 AllowsNew = true,
                 Lite = false,
                 Execute = (n, _) => { }
             }.Register();
 
-            new BasicExecute<ArtistDN>(ArtistOperation.Save)
+            new Graph<ArtistDN>.Execute(ArtistOperation.Save)
             {
                 AllowsNew = true,
                 Lite = false,
                 Execute = (a, _) => { }
             }.Register();
 
-            new BasicExecute<ArtistDN>(ArtistOperation.AssignPersonalAward)
+            new Graph<ArtistDN>.Execute(ArtistOperation.AssignPersonalAward)
             {
                 Lite = true,
                 AllowsNew = false,
@@ -202,7 +205,7 @@ namespace Signum.Test
                 Execute = (a, para) => a.LastAward = new PersonalAwardDN() { Category = "Best Artist", Year = DateTime.Now.Year, Result = AwardResult.Won }.Execute(AwardOperation.Save)
             }.Register();
 
-            new BasicExecute<BandDN>(BandOperation.Save)
+            new Graph<BandDN>.Execute(BandOperation.Save)
             {
                 AllowsNew = true,
                 Lite = false,
@@ -215,7 +218,7 @@ namespace Signum.Test
                 }
             }.Register();
 
-            new BasicExecute<LabelDN>(LabelOperation.Save)
+            new Graph<LabelDN>.Execute(LabelOperation.Save)
             {
                 AllowsNew = true,
                 Lite = false,
@@ -228,20 +231,20 @@ namespace Signum.Test
     {
         public static void Register()
         {
-            GetState = f => (f.IsNew) ? AlbumState.New : AlbumState.Saved;
+            GetState = f => f.State;
 
             new Execute(AlbumOperation.Save)
             {
-                FromStates = new[] { AlbumState.New },
+                FromStates = { AlbumState.New },
                 ToState = AlbumState.Saved,
                 AllowsNew = true,
                 Lite = false,
-                Execute = (album, _) => { album.Save(); },
+                Execute = (album, _) => { album.State = AlbumState.Saved; album.Save(); },
             }.Register();
 
             new Execute(AlbumOperation.Modify)
             {
-                FromStates = new[] { AlbumState.Saved },
+                FromStates = { AlbumState.Saved },
                 ToState = AlbumState.Saved,
                 AllowsNew = false,
                 Lite = false,
@@ -259,6 +262,7 @@ namespace Signum.Test
                         Author = band,
                         Name = args.GetArg<string>(),
                         Year = args.GetArg<int>(),
+                        State = AlbumState.Saved,
                         Label = args.GetArg<LabelDN>()
                     }.Save()
             }.Register();
@@ -315,8 +319,9 @@ namespace Signum.Test
             }.Register();
 
 
-            new BasicDelete<AlbumDN>(AlbumOperation.Delete)
+            new Delete(AlbumOperation.Delete)
             {
+                FromStates = { AlbumState.Saved },
                 Delete = (album, _) => album.Delete()
             }.Register();
         }
