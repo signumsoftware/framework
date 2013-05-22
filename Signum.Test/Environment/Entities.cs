@@ -411,6 +411,13 @@ namespace Signum.Test.Environment
             set { Set(ref label, value, () => Label); }
         }
 
+        AlbumState state;
+        public AlbumState State
+        {
+            get { return state; }
+            set { Set(ref state, value, () => State); }
+        }
+
         static Expression<Func<AlbumDN, string>> ToStringExpression = a => a.name;
         public override string ToString()
         {
