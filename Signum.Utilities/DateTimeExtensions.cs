@@ -406,6 +406,9 @@ namespace Signum.Utilities
 
         public DateSpan(int years, int months, int days)
         {
+            if (years < 0 || months < 0 || days < 0)
+                throw new ArgumentException("Arguments should be greater than 0");
+
             this.Years = years;
             this.Months = months;
             this.Days = days;

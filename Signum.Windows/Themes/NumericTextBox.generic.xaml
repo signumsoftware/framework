@@ -10,17 +10,6 @@
                     <li:ListBoxChrome x:Name="Bd" SnapsToDevicePixels="true" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" RenderFocused="{TemplateBinding IsKeyboardFocusWithin}" RenderMouseOver="{TemplateBinding IsMouseOver}">
                         <Grid>
                             <ScrollViewer SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" x:Name="PART_ContentHost"/>
-                            <Ellipse HorizontalAlignment="Left" Stroke="#FF828282" x:Name="PART_Anchor" 
-							Width="{Binding Path=ActualHeight, ElementName=PART_Anchor, Mode=Default}" Cursor="SizeAll" 
-							Margin="3,3,0,3" Opacity="0.5">
-                                <!--ToolTip="{m:Loc {x:Static d:}}"-->
-                                <Ellipse.Fill>
-                                    <RadialGradientBrush GradientOrigin="0.348,0.326">
-                                        <GradientStop Color="#FFAFAFAF" Offset="1"/>
-                                        <GradientStop Color="#FFFFFFFF" Offset="0"/>
-                                    </RadialGradientBrush>
-                                </Ellipse.Fill>
-                            </Ellipse>
                         </Grid>
                     </li:ListBoxChrome>
                     <ControlTemplate.Triggers>
