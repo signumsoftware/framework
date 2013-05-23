@@ -12,11 +12,12 @@ using Signum.Entities.Reflection;
 using Signum.Entities.Chart;
 using Signum.Utilities.Reflection;
 using Signum.Entities.UserQueries;
+using System.Xml.Linq;
 
 namespace Signum.Entities.ControlPanel
 {
     [Serializable, EntityKind(EntityKind.Main)]
-    public class ControlPanelDN : Entity
+    public class ControlPanelDN : Entity, IUserAssetEntity
     {
         public ControlPanelDN()
         {
@@ -67,6 +68,14 @@ namespace Signum.Entities.ControlPanel
         {
             get { return parts; }
             set { Set(ref parts, value, () => Parts); }
+        }
+
+        [UniqueIndex]
+        Guid guid = Guid.NewGuid();
+        public Guid Guid
+        {
+            get { return guid; }
+            set { Set(ref guid, value, () => Guid); }
         }
 
         static Expression<Func<ControlPanelDN, IPartDN, bool>> ContainsContentExpression =
@@ -171,6 +180,30 @@ namespace Signum.Entities.ControlPanel
                 Parts = Parts.Select(p => p.Clone()).ToMList(),
                 Related = Related,
             };
+        }
+
+        public XElement ToXml(IToXmlContext ctx)
+        {
+            return new XElement("ControlPanel",
+                new XAttribute("Guid", Guid),
+                new XAttribute("DisplayName", DisplayName),
+                EntityType == null ? null : new XAttribute("EntityType", EntityType.Key()),
+                Related == null ? null : new XAttribute("Related", Related.Key()),
+                HomePagePriority == null ? null : new XAttribute("HomePagePriority", HomePagePriority.Value.ToString()),
+                new XAttribute("NumberOfColumns", NumberOfColumns.ToString()),
+                new XElement("Parts", Parts.Select(p => p.ToXml(ctx)))); 
+        }
+
+
+        public void FromXml(XElement element, IFromXmlContext ctx)
+        {
+            DisplayName = element.Attribute("DisplayName").Value;
+            EntityType = element.Attribute("EntityType").TryCC(a => ctx.NameToType(a.Value));
+            Related = element.Attribute("Related").TryCC(a => Lite.Parse<IdentifiableEntity>(a.Value));
+            HomePagePriority = element.Attribute("HomePagePriority").TryCS(a => int.Parse(a.Value));
+            NumberOfColumns = int.Parse(element.Attribute("NumberOfColumns").Value);
+            Parts.Syncronize(element.Element("Parts").Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
+
         }
     }
 

@@ -66,7 +66,7 @@ namespace Signum.Windows.Chart
                 Converter = EnumValues
             });
             vl.Bind(ValueLine.ValueLineTypeProperty, "ScriptColumn." + property + ".Type", ParameterType);
-            vl.Bind(ValueLine.LabelTextProperty, "ScriptColumn." + property + ".DisplayName");
+            vl.Bind(ValueLine.LabelTextProperty, "ScriptColumn." + property + ".Name");
         }
 
         public static IMultiValueConverter EnumValues = ConverterFactory.New((ChartScriptParameterDN csp, QueryToken token) =>

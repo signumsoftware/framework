@@ -19,6 +19,7 @@ using Signum.Entities;
 using Signum.Windows.Basics;
 using Signum.Entities.UserQueries;
 using Signum.Services;
+using Signum.Windows.UserQueries;
 
 namespace Signum.Windows.Chart
 {
@@ -49,6 +50,9 @@ namespace Signum.Windows.Chart
                     new EntitySettings<ChartScriptDN> { View = e => new ChartScript(), Icon = ExtensionsImageLoader.GetImageSortName("chartScript.png") },
                     new EmbeddedEntitySettings<ChartScriptParameterDN> { View = (e,p) => new ChartScriptParameter(p) }
                 });
+
+                UserAssetsClient.Start();
+                UserAssetsClient.RegisterExportAssertLink<UserChartDN>();
 
                 SearchControl.GetMenuItems += SearchControl_GetCustomMenuItems;
 

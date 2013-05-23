@@ -7,6 +7,7 @@ using Signum.Entities.DynamicQuery;
 using System.Linq.Expressions;
 using Signum.Entities.UserQueries;
 using Signum.Utilities;
+using System.Xml.Linq;
 
 namespace Signum.Entities.Chart
 {
@@ -16,7 +17,7 @@ namespace Signum.Entities.Chart
     }
 
     [Serializable, EntityKind(EntityKind.Main)]
-    public class UserChartDN : IdentifiableEntity, IChartBase, IHasEntitytype
+    public class UserChartDN : IdentifiableEntity, IChartBase, IHasEntitytype, IUserAssetEntity
     {
         public UserChartDN() { }
         public UserChartDN(object queryName)
@@ -127,6 +128,13 @@ namespace Signum.Entities.Chart
             set { Set(ref orders, value, () => Orders); }
         }
 
+        [UniqueIndex]
+        Guid guid = Guid.NewGuid();
+        public Guid Guid
+        {
+            get { return guid; }
+            set { Set(ref guid, value, () => Guid); }
+        }
 
         static readonly Expression<Func<UserChartDN, string>> ToStringExpression = e => e.displayName;
         public override string ToString()
@@ -186,6 +194,33 @@ namespace Signum.Entities.Chart
             if (Filters != null)
                 foreach (var f in Filters)
                     f.SetValue();
+        }
+
+        public XElement ToXml(IToXmlContext ctx)
+        {
+            return new XElement("UserChart",
+                new XAttribute("Guid", Guid),
+                new XAttribute("DisplayName", DisplayName),
+                new XAttribute("Query", Query.Name),
+                EntityType == null ? null : new XAttribute("EntityType", EntityType.Key()),
+                Related == null ? null : new XAttribute("Related", Related.Key()),
+                new XAttribute("ChartScript", ChartScript.ToLite().Key()),
+                new XAttribute("GroupResults", GroupResults),
+                Filters.IsNullOrEmpty() ? null : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
+                new XElement("Columns", Columns.Select(f => f.ToXml(ctx)).ToList()),
+                Orders.IsNullOrEmpty() ? null : new XElement("Orders", Orders.Select(f => f.ToXml(ctx)).ToList()));
+        }
+
+        public void FromXml(XElement element, IFromXmlContext ctx)
+        {
+            DisplayName = element.Attribute("DisplayName").Value;
+            Query = ctx.GetQuery(element.Attribute("Query").Value);
+            EntityType = element.Attribute("EntityType").TryCC(a => Lite.Parse<TypeDN>(a.Value));
+            Related = element.Attribute("Related").TryCC(a => Lite.Parse(a.Value));
+            GroupResults = bool.Parse(element.Attribute("GroupResults").Value);
+            Filters.Syncronize(element.Element("Filters").TryCC(fs => fs.Elements()).EmptyIfNull().ToList(), (f, x)=>f.FromXml(x, ctx));
+            Orders.Syncronize(element.Element("Orders").TryCC(fs => fs.Elements()).EmptyIfNull().ToList(), (o, x)=>o.FromXml(x, ctx));
+            Columns.Syncronize(element.Element("Columns").TryCC(fs => fs.Elements()).EmptyIfNull().ToList(), (c, x)=>c.FromXml(x, ctx));
         }
     }
 

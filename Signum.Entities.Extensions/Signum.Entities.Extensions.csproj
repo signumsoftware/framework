@@ -118,7 +118,7 @@
     <Compile Include="Chart\IChartServer.cs" />
     <Compile Include="Chart\UserChart.cs" />
     <Compile Include="ControlPanel\ControlPanelDN.cs" />
-    <Compile Include="ControlPanel\IUserQueryServer.cs" />
+    <Compile Include="ControlPanel\IControlPanelServer.cs" />
     <Compile Include="ControlPanel\PanelPart.cs" />
     <Compile Include="Disconnected\DisconnectedExportRanges.cs" />
     <Compile Include="Disconnected\DisconnectedImportDN.cs" />
@@ -140,6 +140,8 @@
     <Compile Include="Notes\Note.cs" />
     <Compile Include="Omnibox\SpecialOmniboxResultGenerator.cs" />
     <Compile Include="Processes\IProcessServer.cs" />
+    <Compile Include="UserQueries\IUserAssetsServer.cs" />
+    <Compile Include="UserQueries\UserAssets.cs" />
     <Compile Include="UserQueries\UserQueryOmniboxResultGenerator.cs" />
     <Compile Include="Omnibox\DynamicQueryOmniboxResultGenerator.cs" />
     <Compile Include="Omnibox\EntityOmniboxResultGenerator.cs" />

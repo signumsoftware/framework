@@ -12,11 +12,12 @@ using Signum.Entities.Reports;
 using System.Linq.Expressions;
 using System.ComponentModel;
 using Signum.Entities.Authorization;
+using System.Xml.Linq;
 
 namespace Signum.Entities.UserQueries
 {
     [Serializable, EntityKind(EntityKind.Main)]
-    public class UserQueryDN : Entity
+    public class UserQueryDN : Entity, IUserAssetEntity
     {
         public UserQueryDN() { }
         public UserQueryDN(object queryName)
@@ -108,6 +109,14 @@ namespace Signum.Entities.UserQueries
             set { Set(ref elementsPerPage, value, () => ElementsPerPage); }
         }
 
+        [UniqueIndex]
+        Guid guid = Guid.NewGuid();
+        public Guid Guid
+        {
+            get { return guid; }
+            set { Set(ref guid, value, () => Guid); }
+        }
+
         protected override void PostRetrieving()
         {
             if (Orders != null)
@@ -161,6 +170,61 @@ namespace Signum.Entities.UserQueries
                 foreach (var f in Filters)
                     f.SetValue();
         }
+
+        public XElement ToXml(IToXmlContext ctx)
+        {
+            return new XElement("UserQuery",
+                new XAttribute("Guid", Guid),
+                new XAttribute("DisplayName", DisplayName),
+                new XAttribute("Query", Query.Name),
+                EntityType == null ? null : new XAttribute("EntityType", EntityType.Key()),
+                Related == null ? null : new XAttribute("Related", Related.Key()),
+                WithoutFilters == true ? null : new XAttribute("WithoutFilters", true),
+                ElementsPerPage != null ? null : new XAttribute("ElementsPerPage", ElementsPerPage),
+                new XAttribute("ColumnsMode", ColumnsMode),
+                Filters.IsNullOrEmpty() ? null : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
+                Columns.IsNullOrEmpty() ? null : new XElement("Columns", Columns.Select(c => c.ToXml(ctx)).ToList()),
+                Orders.IsNullOrEmpty() ? null : new XElement("Orders", Orders.Select(o => o.ToXml(ctx)).ToList()));
+        }
+
+        public void FromXml(XElement element, IFromXmlContext ctx)
+        {
+            Query = ctx.GetQuery(element.Attribute("Query").Value);
+            DisplayName = element.Attribute("DisplayName").Value;
+            EntityType = element.Attribute("EntityType").TryCC(a => Lite.Parse<TypeDN>(a.Value));
+            Related = element.Attribute("Related").TryCC(a => Lite.Parse(a.Value));
+            WithoutFilters = element.Attribute("WithoutFilters").TryCS(a => a.Value == true.ToString()) ?? false;
+            ElementsPerPage = element.Attribute("ElementsPerPage").TryCS(a => int.Parse(a.Value));
+            ColumnsMode = element.Attribute("ElementsPerPage").Value.ToEnum<ColumnOptionsMode>();
+            Filters.Syncronize(element.Element("Filters").TryCC(fs => fs.Elements()).EmptyIfNull().ToList(), (f, x)=>f.FromXml(x, ctx));
+            Columns.Syncronize(element.Element("Columns").TryCC(fs => fs.Elements()).EmptyIfNull().ToList(), (c, x)=>c.FromXml(x, ctx));
+            Orders.Syncronize(element.Element("Orders").TryCC(fs => fs.Elements()).EmptyIfNull().ToList(), (o, x)=>o.FromXml(x, ctx));   
+        }
+    }
+
+    public interface IToXmlContext
+    {
+        Guid Include(IUserAssetEntity content);
+
+        string TypeToName(Lite<TypeDN> type);
+    }
+
+    public interface IFromXmlContext
+    {
+        QueryDN GetQuery(string queryName);
+
+        IUserAssetEntity GetEntity(Guid guid);
+
+        Lite<TypeDN> NameToType(string cleanName);
+    }
+
+    public interface IUserAssetEntity : IIdentifiable
+    {
+        Guid Guid { get; set; }
+
+        XElement ToXml(IToXmlContext ctx);
+
+        void FromXml(XElement element, IFromXmlContext ctx);
     }
 
     public enum UserQueryPermission
@@ -242,6 +306,32 @@ namespace Signum.Entities.UserQueries
         }
     }
 
+    public static class FromXmlExtensions
+    {
+        public static void Syncronize<T>(this MList<T> entities, List<XElement> xElements, Action<T, XElement> syncAction)
+            where T : new()
+        {
+            for (int i = 0; i < xElements.Count; i++)
+			{
+                T entity;
+                if(entities.Count == i)
+                {
+                    entity = new T();
+                    entities.Add(entity); 
+                }
+                else
+                    entity = entities[i];
+
+                syncAction(entity, xElements[i]); 
+			}
+
+            if(entities.Count > xElements.Count)
+            {
+                entities.RemoveRange(entities.Count, entities.Count - xElements.Count); 
+            }
+        }
+    }
+
     [Serializable]
     public class QueryOrderDN : QueryTokenDN
     {
@@ -279,6 +369,18 @@ namespace Signum.Entities.UserQueries
             }
         }
 
+        public XElement ToXml(IToXmlContext ctx)
+        {
+            return new XElement("Orden",
+                new XAttribute("Token", Token.FullKey()),
+                new XAttribute("OrderType", OrderType));
+        }
+
+        internal void FromXml(XElement element, IFromXmlContext ctx)
+        {
+            TokenString = element.Attribute("Token").Value;
+            OrderType = element.Attribute("OrderType").Value.ToEnum<OrderType>();
+        }
     }
 
     [Serializable]
@@ -318,6 +420,19 @@ namespace Signum.Entities.UserQueries
             {
                 parseException = new FormatException("{0} {1}: {2}\r\n{3}".Formato(context.GetType().Name, context.IdOrNull, context, e.Message));
             }
+        }
+
+        public XElement ToXml(IToXmlContext ctx)
+        {
+            return new XElement("Column",
+                new XAttribute("Token", Token.FullKey()),
+                DisplayName != null ? new XAttribute("DisplayName", DisplayName) : null);
+        }
+
+        internal void FromXml(XElement element, IFromXmlContext ctx)
+        {
+            TokenString = element.Attribute("Token").Value;
+            DisplayName = element.Attribute("DisplayName").TryCC(a => a.Value);
         }
     }
 
@@ -429,6 +544,21 @@ namespace Signum.Entities.UserQueries
 
             return null;
         }
+
+        public XElement ToXml(IToXmlContext ctx)
+        {
+            return new XElement("Filter",
+                new XAttribute("Token", Token.FullKey()),
+                new XAttribute("Operation", Operation),
+                new XAttribute("Value", ValueString));
+        }
+
+        public void FromXml(XElement element, IFromXmlContext ctx)
+        {
+            TokenString = element.Attribute("Token").Value;
+            Operation = element.Attribute("Operation").Value.ToEnum<FilterOperation>();
+            ValueString = element.Attribute("Value").Value;
+        }
     }
 
     public static class UserQueryUtils
@@ -517,5 +647,4 @@ namespace Signum.Entities.UserQueries
         [Description("Use {0} to filter current entity")]
         Use0ToFilterCurrentEntity
     }
-
 }

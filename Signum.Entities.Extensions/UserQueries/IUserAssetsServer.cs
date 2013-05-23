@@ -1,25 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.ServiceModel;
-using Signum.Entities;
-using Signum.Entities.DynamicQuery;
-using Signum.Entities.UserQueries;
+using System.Text;
 using System.Xml.Linq;
+using Signum.Entities;
+using Signum.Entities.UserQueries;
+using Signum.Services;
 
 namespace Signum.Services
 {
     [ServiceContract]
-    public interface IUserQueryServer
+    public interface IUserAssetsServer
     {
         [OperationContract, NetDataContract]
-        List<Lite<UserQueryDN>> GetUserQueries(object queryName);
+        byte[] ExportAsset(Lite<IUserAssetEntity> asset);
 
         [OperationContract, NetDataContract]
-        List<Lite<UserQueryDN>> GetUserQueriesEntity(Type entityType);
+        List<UserAssetPreview> PreviewAssetImport(byte[] document);
 
         [OperationContract, NetDataContract]
-        List<Lite<UserQueryDN>> AutoCompleteUserQueries(string subString, int limit);
+        void AssetImport(byte[] document, List<UserAssetPreview> previews);
     }
 }

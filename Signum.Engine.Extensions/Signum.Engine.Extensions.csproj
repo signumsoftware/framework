@@ -158,6 +158,7 @@
     <Compile Include="SMS\SMSLogic.cs" />
     <Compile Include="SMS\SMSProcessAlgortihms.cs" />
     <Compile Include="SMS\SMSTemplateGraph.cs" />
+    <Compile Include="UserQueries\UserAssetsLogic.cs" />
     <Compile Include="WikiMarkup\WikiParserExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -28,7 +28,17 @@ namespace Signum.Engine.ControlPanel
 
                 PermissionAuthLogic.RegisterPermissions(ControlPanelPermission.ViewControlPanel);
 
+                UserAssetsImporter.ElementNames.AddRange(new Dictionary<string, Type>
+                {
+                    {"ControlPanel", typeof(ControlPanelDN)},
+                    {"UserChartPart", typeof(UserChartPartDN)},
+                    {"UserQueryPart", typeof(UserQueryPartDN)},
+                    {"LinkListPart", typeof(LinkListPartDN)},
+                    {"CountSearchControlPart", typeof(CountSearchControlPartDN)},
+                }); 
+
                 sb.Include<ControlPanelDN>();
+
 
                 dqm.RegisterQuery(typeof(ControlPanelDN), () =>
                     from cp in Database.Query<ControlPanelDN>()
@@ -58,41 +68,44 @@ namespace Signum.Engine.ControlPanel
                         Links = cp.UserQueries.Count
                     });
 
-                RegisterOperations();
+                ControlPanelGraph.Register();
             }
         }
 
-        private static void RegisterOperations()
+        class ControlPanelGraph : Graph<ControlPanelDN>
         {
-            new Graph<ControlPanelDN>.Construct(ControlPanelOperation.Create)
+            public static void Register()
             {
-                Construct = (_) => new ControlPanelDN { Related = UserQueryUtils.DefaultRelated() }
-            }.Register();
-
-            new Graph<ControlPanelDN>.Execute(ControlPanelOperation.Save)
-            {
-                AllowsNew = true,
-                Lite = false,
-                Execute = (cp, _) => { }
-            }.Register();
-
-            new Graph<ControlPanelDN>.Delete(ControlPanelOperation.Delete)
-            {
-                Lite = false,
-                Delete = (cp, _) =>
+                new Construct(ControlPanelOperation.Create)
                 {
-                    var parts = cp.Parts.Select(a => a.Content).ToList();
-                    cp.Delete();
-                    Database.DeleteList(parts);
-                }
-            }.Register();
+                    Construct = (_) => new ControlPanelDN { Related = UserQueryUtils.DefaultRelated() }
+                }.Register();
 
-            new Graph<ControlPanelDN>.ConstructFrom<ControlPanelDN>(ControlPanelOperation.Clone)
-            {
-                Lite = true,
-                AllowsNew = false,
-                Construct = (cp, _) => cp.Clone()
-            }.Register();
+                new Execute(ControlPanelOperation.Save)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (cp, _) => { }
+                }.Register();
+
+                new Delete(ControlPanelOperation.Delete)
+                {
+                    Lite = false,
+                    Delete = (cp, _) =>
+                    {
+                        var parts = cp.Parts.Select(a => a.Content).ToList();
+                        cp.Delete();
+                        Database.DeleteList(parts);
+                    }
+                }.Register();
+
+                new ConstructFrom<ControlPanelDN>(ControlPanelOperation.Clone)
+                {
+                    Lite = true,
+                    AllowsNew = false,
+                    Construct = (cp, _) => cp.Clone()
+                }.Register();
+            }
         }
 
         public static ControlPanelDN GetHomePageControlPanel()

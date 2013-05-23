@@ -26,7 +26,9 @@ namespace Signum.Engine.UserQueries
             {
                 QueryLogic.Start(sb);
 
-                PermissionAuthLogic.RegisterPermissions(UserQueryPermission.ViewUserQuery); 
+                PermissionAuthLogic.RegisterPermissions(UserQueryPermission.ViewUserQuery);
+
+                UserAssetsImporter.ElementNames.Add("UserQuery", typeof(UserQueryDN));
 
                 sb.Include<UserQueryDN>();
 

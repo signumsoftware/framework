@@ -11,6 +11,7 @@ using System.ComponentModel;
 using Signum.Entities.Reports;
 using Signum.Entities.UserQueries;
 using Signum.Entities.Reflection;
+using System.Xml.Linq;
 
 namespace Signum.Entities.Chart
 {
@@ -240,6 +241,25 @@ namespace Signum.Entities.Chart
         internal Column CreateColumn()
         {
             return new Column(Token, DisplayName); 
+        }
+
+        internal XElement ToXml(IToXmlContext ctx)
+        {
+            return new XElement("Column",
+              Token ==  null ? null : new XAttribute("Token", this.Token.FullKey()),
+              DisplayName == null ? null : new XAttribute("DisplayName", this.DisplayName),
+              Parameter1 == null ? null : new XAttribute("Parameter1", this.Parameter1),
+              Parameter2 == null ? null : new XAttribute("Parameter2", this.Parameter2),
+              Parameter3 == null ? null : new XAttribute("Parameter3", this.Parameter3));
+        }
+
+        internal void FromXml(XElement element, IFromXmlContext ctx)
+        {
+            TokenString = element.Attribute("Token").Value;
+            DisplayName = element.Attribute("DisplayName").TryCC(a => a.Value);
+            Parameter1 = element.Attribute("Parameter1").TryCC(a => a.Value);
+            Parameter2 = element.Attribute("Parameter2").TryCC(a => a.Value);
+            Parameter3 = element.Attribute("Parameter3").TryCC(a => a.Value);
         }
     }
 }
