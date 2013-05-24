@@ -202,6 +202,8 @@ namespace Signum.Entities.Authorization
         _0of1,
         Nothing,
         Everything,
+        TypeRules,
+        PermissionRules,
     }
 
 }

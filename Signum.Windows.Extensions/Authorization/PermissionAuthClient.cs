@@ -28,7 +28,8 @@ namespace Signum.Windows.Authorization
                 bool authorized = BasicPermission.AdminRules.IsAuthorized();
                 return new QuickLink[]
                 {
-                    new QuickLinkAction("Permission Rules", () => new PermissionRules { Role = r, Owner = Window.GetWindow(c) }.Show())
+                    new QuickLinkAction(AuthAdminMessage.PermissionRules, () => 
+                        new PermissionRules { Role = r, Owner = Window.GetWindow(c) }.Show())
                     {
                         IsVisible = authorized
                     },

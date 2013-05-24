@@ -45,6 +45,16 @@ namespace Signum.Windows.UIAutomation
             button.Pattern<InvokePattern>().Invoke();
         }
 
+        public static AutomationElement ButtonInvokeCapture(this AutomationElement button, Func<string> actionDescription = null, int? timeOut = null)
+        {
+            return button.CaptureWindow(() => button.ButtonInvoke(), actionDescription, timeOut);
+        }
+
+        public static AutomationElement ButtonInvokeCaptureChild(this AutomationElement button, Func<string> actionDescription = null, int? timeOut = null)
+        {
+            return button.CaptureChildWindow(() => button.ButtonInvoke(), actionDescription, timeOut);
+        }
+
         public static void Value(this AutomationElement element, string value)
         {
             element.Pattern<ValuePattern>().SetValue(value);
