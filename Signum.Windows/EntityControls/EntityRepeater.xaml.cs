@@ -55,6 +55,14 @@ namespace Signum.Windows
             set { SetValue(MoveVisibilityProperty, value); }
         }
 
+        public static readonly DependencyProperty ButtonsOrientationProperty =
+            DependencyProperty.Register("ButtonsOrientation", typeof(Orientation), typeof(EntityRepeater), new PropertyMetadata(Orientation.Vertical));
+        public Orientation ButtonsOrientation
+        {
+            get { return (Orientation)GetValue(ButtonsOrientationProperty); }
+            set { SetValue(ButtonsOrientationProperty, value); }
+        }
+
         public static readonly DependencyProperty ItemsPanelProperty =
             DependencyProperty.Register("ItemsPanel", typeof(ItemsPanelTemplate), typeof(EntityRepeater), new FrameworkPropertyMetadata(GetDefaultItemsPanelTemplate()));
         public ItemsPanelTemplate ItemsPanel
