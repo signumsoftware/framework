@@ -138,7 +138,7 @@ namespace Signum.Engine.DynamicQuery
             return queries.Keys.Where(QueryAllowed).ToList();
         }
 
-        public Dictionary<object, DynamicQueryBucket> GetQueries(Type entityType)
+        public Dictionary<object, DynamicQueryBucket> GetTypeQueries(Type entityType)
         {
             return (from kvp in queries
                     where !kvp.Value.EntityImplementations.IsByAll && kvp.Value.EntityImplementations.Types.Contains(entityType)
