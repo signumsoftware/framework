@@ -85,7 +85,7 @@ namespace Signum.Entities.ControlPanel
                 new XAttribute("Row", Row),
                 new XAttribute("Column", Column),
                 Title == null ? null : new XAttribute("Title", Title),
-                new XAttribute("Content", ctx.Include(Content)));
+                Content.ToXml(ctx));
         }
 
         internal void FromXml(XElement x, IFromXmlContext ctx)
@@ -93,14 +93,17 @@ namespace Signum.Entities.ControlPanel
             Row = int.Parse(x.Attribute("Row").Value);
             Column = int.Parse(x.Attribute("Column").Value);
             Title = x.Attribute("Title").TryCC(a => a.Value);
-            Content = (IPartDN)ctx.GetEntity(Guid.Parse(x.Attribute("Content").Value));
+            Content = ctx.GetPart(Content, x.Elements().Single());
         }
     }
 
-    public interface IPartDN : IUserAssetEntity
+    public interface IPartDN : IIdentifiable
     {
         bool RequiresTitle { get; }
         IPartDN Clone();
+
+        XElement ToXml(IToXmlContext ctx);
+        void FromXml(XElement element, IFromXmlContext ctx);
     }
 
     [Serializable, EntityKind(EntityKind.Part)]
@@ -133,19 +136,9 @@ namespace Signum.Entities.ControlPanel
             };
         }
 
-
-        [UniqueIndex]
-        Guid guid = Guid.NewGuid();
-        public Guid Guid
-        {
-            get { return guid; }
-            set { Set(ref guid, value, () => Guid); }
-        }
-  
         public XElement ToXml(IToXmlContext ctx)
         {
             return new XElement("UserQueryPart",
-                new XAttribute("Guid", Guid),
                 new XAttribute("UserQuery", ctx.Include(UserQuery)));
         }
 
@@ -193,20 +186,10 @@ namespace Signum.Entities.ControlPanel
             };
         }
 
-
-        [UniqueIndex]
-        Guid guid = Guid.NewGuid();
-        public Guid Guid
-        {
-            get { return guid; }
-            set { Set(ref guid, value, () => Guid); }
-        }
-
         public XElement ToXml(IToXmlContext ctx)
         {
             return new XElement("UserChartPart",
                 new XAttribute("ShowData", ShowData),
-                new XAttribute("Guid", Guid),
                 new XAttribute("UserChart", ctx.Include(UserChart)));
         }
 
@@ -225,14 +208,6 @@ namespace Signum.Entities.ControlPanel
         {
             get { return userQueries; }
             set { Set(ref userQueries, value, () => UserQueries); }
-        }
-
-        [UniqueIndex]
-        Guid guid = Guid.NewGuid();
-        public Guid Guid
-        {
-            get { return guid; }
-            set { Set(ref guid, value, () => Guid); }
         }
 
         public override string ToString()
@@ -256,7 +231,6 @@ namespace Signum.Entities.ControlPanel
         public XElement ToXml(IToXmlContext ctx)
         {
             return new XElement("CountSearchControlPart",
-                new XAttribute("Guid", Guid),
                 UserQueries.Select(cuqe => cuqe.ToXml(ctx)));
         }
 
@@ -327,14 +301,6 @@ namespace Signum.Entities.ControlPanel
             set { Set(ref links, value, () => Links); }
         }
 
-        [UniqueIndex]
-        Guid guid = Guid.NewGuid();
-        public Guid Guid
-        {
-            get { return guid; }
-            set { Set(ref guid, value, () => Guid); }
-        }
-
         public override string ToString()
         {
             return "{0} {1}".Formato(links.Count, typeof(LinkElement).NicePluralName());
@@ -356,7 +322,6 @@ namespace Signum.Entities.ControlPanel
         public XElement ToXml(IToXmlContext ctx)
         {
             return new XElement("LinkListPart",
-                new XAttribute("Guid", Guid),
                 Links.Select(lin => lin.ToXml(ctx)));
         }
 

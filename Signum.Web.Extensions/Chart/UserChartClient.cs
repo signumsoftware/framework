@@ -74,8 +74,8 @@ namespace Signum.Web.Chart
                 RouteTable.Routes.MapRoute(null, "UC/{webQueryName}/{lite}",
                      new { controller = "Chart", action = "ViewUserChart" });
 
-                UserChartDN.SetConverters(query => QueryLogic.ToQueryName(query.Key), queryname =>
-                    QueryLogic.RetrieveOrGenerateQuery(queryname));
+                UserChartDN.SetConverters(query => QueryLogic.ToQueryName(query.Key), queryName =>
+                    QueryLogic.GetQuery(queryName));
 
                 OperationsClient.AddSetting(new EntityOperationSettings(UserChartOperation.Delete)
                 {

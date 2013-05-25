@@ -33,10 +33,6 @@ namespace Signum.Windows.ControlPanels
 
                 UserAssetsClient.Start();
                 UserAssetsClient.RegisterExportAssertLink<ControlPanelDN>();
-                UserAssetsClient.RegisterExportAssertLink<LinkListPartDN>();
-                UserAssetsClient.RegisterExportAssertLink<CountSearchControlPartDN>();
-                UserAssetsClient.RegisterExportAssertLink<UserQueryPartDN>();
-                UserAssetsClient.RegisterExportAssertLink<UserChartPartDN>();
 
                 Navigator.AddSettings(new List<EntitySettings>()
                 {

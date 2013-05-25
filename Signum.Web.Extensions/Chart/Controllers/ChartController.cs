@@ -39,7 +39,7 @@ namespace Signum.Web.Chart
 
             var request = new ChartRequest(findOptions.QueryName)
             {
-                ChartScript = ChartScriptLogic.Scripts.Value.FirstEx(() => "No ChartScript loaded in the database"),
+                ChartScript = ChartScriptLogic.Scripts.Value.Values.FirstEx(() => "No ChartScript loaded in the database"),
                 Filters = findOptions.FilterOptions.Select(fo => fo.ToFilter()).ToList()
             };
 

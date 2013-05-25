@@ -6,6 +6,8 @@ using System.Reflection;
 using System.Text;
 using System.Xml.Linq;
 using Signum.Engine.Basics;
+using Signum.Engine.Chart;
+using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Entities.Chart;
@@ -34,6 +36,12 @@ namespace Signum.Engine.UserQueries
             {
                 return TypeLogic.GetCleanName(TypeLogic.DnToType.GetOrThrow(type.Retrieve()));
             }
+
+
+            public string QueryToName(Lite<QueryDN> query)
+            {
+                return query.Retrieve().Key;
+            }
         }
 
         public static byte[] ToXml(params IUserAssetEntity[] entities)
@@ -54,22 +62,23 @@ namespace Signum.Engine.UserQueries
 
     public static class UserAssetsImporter
     {
-        public static Dictionary<string, Type> ElementNames = new Dictionary<string, Type>();
+        public static Dictionary<string, Type> UserAssetNames = new Dictionary<string, Type>();
+        public static Dictionary<string, Type> PartNames = new Dictionary<string, Type>();
 
         class PreviewContext :IFromXmlContext
         {
             public Dictionary<Guid, IUserAssetEntity> entities = new Dictionary<Guid, IUserAssetEntity>();
             public Dictionary<Guid, XElement> elements;
-            public Dictionary<Guid, UserAssetPreview> previews = new Dictionary<Guid, UserAssetPreview>();
+            public Dictionary<Guid, UserAssetPreviewLine> previews = new Dictionary<Guid, UserAssetPreviewLine>();
 
             public PreviewContext(XDocument doc)
             {
                 elements = doc.Element("Entities").Elements().ToDictionary(a => Guid.Parse(a.Attribute("Guid").Value));
             }
 
-            QueryDN IFromXmlContext.GetQuery(string queryName)
+            QueryDN IFromXmlContext.GetQuery(string queryKey)
             {
-                return QueryLogic.RetrieveOrGenerateQuery(queryName);
+                return QueryLogic.GetQuery(QueryLogic.ToQueryName(queryKey));
             }
 
             public IUserAssetEntity GetEntity(Guid guid)
@@ -78,13 +87,13 @@ namespace Signum.Engine.UserQueries
                 {
                     var element = elements.GetOrThrow(guid);
 
-                    Type type = ElementNames.GetOrThrow(element.Name.ToString());
+                    Type type = UserAssetNames.GetOrThrow(element.Name.ToString());
 
                     var entity = giRetrieveOrCreate.GetInvoker(type)(guid);
 
                     entity.FromXml(element, this);
 
-                    previews.Add(guid, new UserAssetPreview
+                    previews.Add(guid, new UserAssetPreviewLine
                     {
                         Text = entity.ToString(),
                         Type = entity.GetType(),
@@ -102,9 +111,31 @@ namespace Signum.Engine.UserQueries
             {
                 return TypeLogic.TypeToDN.GetOrThrow(TypeLogic.GetType(cleanName)).ToLite();
             }
+
+            public IPartDN GetPart(IPartDN old, XElement element)
+            {
+                Type type = PartNames.GetOrThrow(element.Name.ToString());
+
+                var part = old.GetType() == type ? old : (IPartDN)Activator.CreateInstance(type);
+
+                part.FromXml(element, this);
+
+                return part;
+            }
+
+
+            public Lite<TypeDN> GetType(string cleanName)
+            {
+                return TypeLogic.GetType(cleanName).ToTypeDN().ToLite();
+            }
+
+            public ChartScriptDN ChartScript(string chartScriptName)
+            {
+                return ChartScriptLogic.GetChartScript(chartScriptName);
+            }
         }
 
-        public static List<UserAssetPreview> Preview(byte[] doc)
+        public static UserAssetPreviewModel Preview(byte[] doc)
         {
             XDocument document = new MemoryStream(doc).Using(XDocument.Load);
 
@@ -113,13 +144,14 @@ namespace Signum.Engine.UserQueries
             foreach (var item in ctx.elements)
                 ctx.GetEntity(item.Key);
 
-            return ctx.previews.Values.ToList();
+            return new UserAssetPreviewModel { Lines = ctx.previews.Values.ToMList() };
         }
 
         class ImporterContext : IFromXmlContext
         {
             Dictionary<Guid, bool> overrideEntity;
             Dictionary<Guid, IUserAssetEntity> entities = new Dictionary<Guid, IUserAssetEntity>();
+            public List<IPartDN> toRemove = new List<IPartDN>();
             public Dictionary<Guid, XElement> elements;
 
             public ImporterContext(XDocument doc, Dictionary<Guid, bool> overrideEntity)
@@ -128,9 +160,9 @@ namespace Signum.Engine.UserQueries
                 elements = doc.Element("Entities").Elements().ToDictionary(a => Guid.Parse(a.Attribute("Guid").Value));
             }
 
-            QueryDN IFromXmlContext.GetQuery(string queryName)
+            QueryDN IFromXmlContext.GetQuery(string queryKey)
             {
-                return QueryLogic.RetrieveOrGenerateQuery(queryName);
+                return QueryLogic.GetQuery(QueryLogic.ToQueryName(queryKey));
             }
 
             public IUserAssetEntity GetEntity(Guid guid)
@@ -139,38 +171,71 @@ namespace Signum.Engine.UserQueries
                 {
                     var element = elements.GetOrThrow(guid);
 
-                    Type type = ElementNames.GetOrThrow(element.Name.ToString());
+                    Type type = UserAssetNames.GetOrThrow(element.Name.ToString());
 
                     var entity = giRetrieveOrCreate.GetInvoker(type)(guid);
 
                     if (entity.IsNew || overrideEntity.ContainsKey(guid))
                     {
                         entity.FromXml(element, this);
-                        entity.Save();
+                        using (OperationLogic.AllowSave(entity.GetType()))
+                            entity.Save();
                     }
 
                     return entity;
                 });
             }
 
-
             public Lite<TypeDN> NameToType(string cleanName)
             {
                 return TypeLogic.TypeToDN.GetOrThrow(TypeLogic.GetType(cleanName)).ToLite();
             }
+
+            public IPartDN GetPart(IPartDN old, XElement element)
+            {
+                Type type = PartNames.GetOrThrow(element.Name.ToString());
+
+                var part = old.GetType() == type ? old : (IPartDN)Activator.CreateInstance(type);
+
+                part.FromXml(element, this);
+
+                if (part != old)
+                    toRemove.Add(old);
+
+                return part;
+            }
+
+
+            public Lite<TypeDN> GetType(string cleanName)
+            {
+                return TypeLogic.GetType(cleanName).ToTypeDN().ToLite();
+            }
+
+            public ChartScriptDN ChartScript(string chartScriptName)
+            {
+                return ChartScriptLogic.GetChartScript(chartScriptName); 
+            }
         }
 
-        public static void Import(byte[] document, List<UserAssetPreview> overrideEntities)
+        public static void Import(byte[] document, UserAssetPreviewModel preview)
         {
-            var doc = new MemoryStream(document).Using(XDocument.Load); 
+            using (Transaction tr = new Transaction())
+            {
+                var doc = new MemoryStream(document).Using(XDocument.Load);
 
-            ImporterContext importer = new ImporterContext(doc,
-                overrideEntities
-                .Where(a => a.Action == EntityAction.Different)
-                .ToDictionary(a => a.Guid, a => a.Override));
+                ImporterContext importer = new ImporterContext(doc,
+                    preview.Lines
+                    .Where(a => a.Action == EntityAction.Different)
+                    .ToDictionary(a => a.Guid, a => a.OverrideEntity));
 
-            foreach (var item in importer.elements)
-                importer.GetEntity(item.Key);
+                foreach (var item in importer.elements)
+                    importer.GetEntity(item.Key);
+
+                Database.DeleteList(importer.toRemove);
+
+                tr.Commit();
+            }
+
         }
 
         static readonly GenericInvoker<Func<Guid, IUserAssetEntity>> giRetrieveOrCreate = new GenericInvoker<Func<Guid, IUserAssetEntity>>(

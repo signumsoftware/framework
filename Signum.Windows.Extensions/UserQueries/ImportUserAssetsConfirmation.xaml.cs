@@ -16,15 +16,7 @@ using Signum.Services;
 namespace Signum.Windows.UserQueries
 {
     public partial class ImportUserAssetsConfirmation : Window
-    {
-        public static readonly DependencyProperty PreviewsProperty =
-            DependencyProperty.Register("Previews", typeof(List<UserAssetPreview>), typeof(ImportUserAssetsConfirmation), new PropertyMetadata(null));
-        public List<UserAssetPreview> Previews
-        {
-            get { return (List<UserAssetPreview>)GetValue(PreviewsProperty); }
-            set { SetValue(PreviewsProperty, value); }
-        }
-        
+    {   
         public ImportUserAssetsConfirmation()
         {
             InitializeComponent();

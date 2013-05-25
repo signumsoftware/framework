@@ -140,7 +140,7 @@ namespace Signum.Windows.Chart
                 SetCurrent(autoSet);
         }
 
-        static IValueConverter notNullAndEditable = ConverterFactory.New((UserChartDN uq) => uq != null && !Navigator.IsReadOnly(uq) ? Visibility.Visible : Visibility.Hidden);
+        static IValueConverter notNullAndEditable = ConverterFactory.New((UserChartDN uq) => uq != null && !Navigator.IsReadOnly(uq) ? Visibility.Visible : Visibility.Collapsed);
 
 
         private void MenuItem_Clicked(object sender, RoutedEventArgs e)

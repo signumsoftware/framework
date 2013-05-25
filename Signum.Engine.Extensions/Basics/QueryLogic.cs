@@ -17,12 +17,10 @@ namespace Signum.Engine.Basics
 {
     public static class QueryLogic
     {
-        static Dictionary<string, object> queryNames;
-        public static Dictionary<string, object> QueryNames
-        {
-            get { return queryNames ?? (queryNames = CreateQueryNames()); }
-            private set { queryNames = value; }
-        }
+        public static Dictionary<string, object> QueryNames {get; set;}
+
+        public static Dictionary<object, QueryDN> QueryNameToEntity { get; set; }
+        public static Dictionary<QueryDN, object> EntityToQueryName { get; set; }
 
         public static void AssertStarted(SchemaBuilder sb)
         {
@@ -39,7 +37,14 @@ namespace Signum.Engine.Basics
                 sb.Include<QueryDN>();
 
                 sb.Schema.Synchronizing += SynchronizeQueries;
+                sb.Schema.Generating += Schema_Generating;
             }
+        }
+
+
+        public static object ToQueryName(this QueryDN query)
+        {
+            return QueryNameToEntity.GetOrThrow(query, "QueryName with unique name {0} not found");
         }
 
         public static object ToQueryName(string uniqueQueryName)
@@ -55,6 +60,16 @@ namespace Signum.Engine.Basics
         static void Schema_Initializing()
         {
             QueryNames = CreateQueryNames();
+
+            QueryNameToEntity = EnumerableExtensions.JoinStrict(
+                Database.Query<QueryDN>().ToList(),
+                QueryNames,
+                q => q.Key,
+                kvp => kvp.Key,
+                (q, kvp) => KVP.Create(kvp.Value, q),
+                "Query").ToDictionary();
+
+            EntityToQueryName = QueryNameToEntity.Inverse(); 
         }
 
         private static Dictionary<string, object> CreateQueryNames()
@@ -62,51 +77,38 @@ namespace Signum.Engine.Basics
             return DynamicQueryManager.Current.GetQueryNames().ToDictionary(qn => QueryUtils.GetQueryUniqueKey(qn));
         }
 
-        public static Dictionary<string, QueryDN> RetrieveOrGenerateQueries()
+        static IEnumerable<QueryDN> GenerateQueries()
         {
-            var current = Database.RetrieveAll<QueryDN>().ToDictionary(a => a.Key);
-            var total = DynamicQueryManager.Current.GetQueryNames().ToDictionary(qn => QueryUtils.GetQueryUniqueKey(qn), qn => CreateQuery(qn));
-
-            total.SetRange(current);
-            return total;
-        }
-
-        public static List<QueryDN> RetrieveOrGenerateQueries(TypeDN typeDN)
-        {
-            Type type = TypeLogic.DnToType[typeDN];
-
-            string[] queryNames = DynamicQueryManager.Current.GetQueries(type).Keys.Select(qn => QueryUtils.GetQueryUniqueKey(qn)).ToArray();
-
-            var current = Database.RetrieveAll<QueryDN>().Where(a => queryNames.Contains(a.Key)).ToDictionary(a => a.Key);
-            var total = DynamicQueryManager.Current.GetQueries(type).Keys.Select(qn => CreateQuery(qn)).ToDictionary(a => a.Key);
-
-            total.SetRange(current);
-            return total.Values.ToList();
-        }
-
-        public static QueryDN RetrieveOrGenerateQuery(object queryName)
-        {
-            return Database.Query<QueryDN>().SingleOrDefaultEx(a => a.Key == QueryUtils.GetQueryUniqueKey(queryName)) ??
-                CreateQuery(queryName);
-        }
-
-        static QueryDN CreateQuery(object queryName)
-        {
-            using (Sync.ChangeCulture(Schema.Current.ForceCultureInfo))
-            {
-                return new QueryDN
+            return DynamicQueryManager.Current.GetQueryNames()
+                .Select(qn => new QueryDN
                 {
-                    Key = QueryUtils.GetQueryUniqueKey(queryName),
-                    Name = QueryUtils.GetCleanName(queryName)
-                };
-            }
+                    Key = QueryUtils.GetQueryUniqueKey(qn),
+                    Name = QueryUtils.GetCleanName(qn)
+                });
         }
+
+        public static List<QueryDN> GetTypeQueries(TypeDN typeDN)
+        {
+            Type type = TypeLogic.GetType(typeDN.CleanName);
+
+            return DynamicQueryManager.Current.GetTypeQueries(type).Keys.Select(GetQuery).ToList();
+        }
+
 
         const string QueriesKey = "Queries";
 
+        static SqlPreCommand Schema_Generating()
+        {
+            Table table = Schema.Current.Table<QueryDN>();
+
+            var should = GenerateQueries();
+
+            return should.Select(s => table.InsertSqlSync(s)).Combine(Spacing.Simple);
+        }
+
         static SqlPreCommand SynchronizeQueries(Replacements replacements)
         {
-            var should = DynamicQueryManager.Current.GetQueryNames().Select(qn => CreateQuery(qn));
+            var should = GenerateQueries();
 
             var current = Administrator.TryRetrieveAll<QueryDN>(replacements);
 
@@ -117,7 +119,7 @@ namespace Signum.Engine.Basics
                 QueriesKey,
                 should.ToDictionary(a => a.Key),
                 current.ToDictionary(a => a.Key),
-                null,
+                (n, s)=>table.InsertSqlSync(s),
                 (n, c) => table.DeleteSqlSync(c),
                 (fn, s, c) =>
                 {
@@ -125,6 +127,11 @@ namespace Signum.Engine.Basics
                     c.Name = s.Name;
                     return table.UpdateSqlSync(c);
                 }, Spacing.Double);
+        }
+
+        public static QueryDN GetQuery(object queryName)
+        {
+            return QueryNameToEntity.GetOrThrow(queryName, "QueryName {0} not found on the database"); 
         }
     }
 }

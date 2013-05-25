@@ -28,9 +28,10 @@ namespace Signum.Engine.ControlPanel
 
                 PermissionAuthLogic.RegisterPermissions(ControlPanelPermission.ViewControlPanel);
 
-                UserAssetsImporter.ElementNames.AddRange(new Dictionary<string, Type>
+                UserAssetsImporter.UserAssetNames.Add("ControlPanel", typeof(ControlPanelDN));
+
+                UserAssetsImporter.PartNames.AddRange(new Dictionary<string, Type>
                 {
-                    {"ControlPanel", typeof(ControlPanelDN)},
                     {"UserChartPart", typeof(UserChartPartDN)},
                     {"UserQueryPart", typeof(UserQueryPartDN)},
                     {"LinkListPart", typeof(LinkListPartDN)},

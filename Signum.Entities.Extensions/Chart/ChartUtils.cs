@@ -303,7 +303,7 @@ namespace Signum.Entities.Chart
                 };;
         }
 
-        public static List<List<ChartScriptDN>> PackInGroups(List<ChartScriptDN> scripts, int rowWidth)
+        public static List<List<ChartScriptDN>> PackInGroups(IEnumerable<ChartScriptDN> scripts, int rowWidth)
         {
             var heigth = (scripts.Count() + rowWidth - 1) / rowWidth; //round-up division
 

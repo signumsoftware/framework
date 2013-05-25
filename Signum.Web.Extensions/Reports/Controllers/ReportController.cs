@@ -55,8 +55,8 @@ namespace Signum.Web.Reports
         public ViewResult Administer(string webQueryName)
         {
             object queryName = Navigator.ResolveQueryName(webQueryName);
-            
-            QueryDN query = QueryLogic.RetrieveOrGenerateQuery(queryName);
+
+            QueryDN query = QueryLogic.GetQuery(queryName);
 
             if (query.IsNew) //If the Query is new there won't be any reports associated => navigate directly to create one
             {

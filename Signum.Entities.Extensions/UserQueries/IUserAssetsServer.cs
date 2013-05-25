@@ -17,9 +17,9 @@ namespace Signum.Services
         byte[] ExportAsset(Lite<IUserAssetEntity> asset);
 
         [OperationContract, NetDataContract]
-        List<UserAssetPreview> PreviewAssetImport(byte[] document);
+        UserAssetPreviewModel PreviewAssetImport(byte[] document);
 
         [OperationContract, NetDataContract]
-        void AssetImport(byte[] document, List<UserAssetPreview> previews);
+        void AssetImport(byte[] document, UserAssetPreviewModel previews);
     }
 }

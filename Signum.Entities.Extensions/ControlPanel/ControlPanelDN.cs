@@ -187,7 +187,7 @@ namespace Signum.Entities.ControlPanel
             return new XElement("ControlPanel",
                 new XAttribute("Guid", Guid),
                 new XAttribute("DisplayName", DisplayName),
-                EntityType == null ? null : new XAttribute("EntityType", EntityType.Key()),
+                EntityType == null ? null : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
                 Related == null ? null : new XAttribute("Related", Related.Key()),
                 HomePagePriority == null ? null : new XAttribute("HomePagePriority", HomePagePriority.Value.ToString()),
                 new XAttribute("NumberOfColumns", NumberOfColumns.ToString()),
@@ -198,7 +198,7 @@ namespace Signum.Entities.ControlPanel
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
             DisplayName = element.Attribute("DisplayName").Value;
-            EntityType = element.Attribute("EntityType").TryCC(a => ctx.NameToType(a.Value));
+            EntityType = element.Attribute("EntityType").TryCC(a => ctx.GetType(a.Value));
             Related = element.Attribute("Related").TryCC(a => Lite.Parse<IdentifiableEntity>(a.Value));
             HomePagePriority = element.Attribute("HomePagePriority").TryCS(a => int.Parse(a.Value));
             NumberOfColumns = int.Parse(element.Attribute("NumberOfColumns").Value);

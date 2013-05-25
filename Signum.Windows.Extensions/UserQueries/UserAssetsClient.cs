@@ -36,11 +36,11 @@ namespace Signum.Windows.UserQueries
 
                     ImportUserAssetsConfirmation config = new ImportUserAssetsConfirmation
                     {
-                        Previews = Server.Return((IUserAssetsServer s) => s.PreviewAssetImport(bytes))
+                        DataContext = Server.Return((IUserAssetsServer s) => s.PreviewAssetImport(bytes))
                     };
 
                     if (config.ShowDialog() == true)
-                        Server.Execute((IUserAssetsServer s) => s.AssetImport(bytes, config.Previews));
+                        Server.Execute((IUserAssetsServer s) => s.AssetImport(bytes, (UserAssetPreviewModel)config.DataContext));
                 }));
             }
         }
@@ -54,7 +54,8 @@ namespace Signum.Windows.UserQueries
                    SaveFileDialog sfd = new SaveFileDialog
                    {
                        FileName = "{0}{1}.xml".Formato(lite.EntityType.Name, lite.Id),
-                       DefaultExt = ".xml", 
+                       DefaultExt = ".xml",
+                       Filter = "UserAssets file (*.xml)|*.xml"
                    };
 
                    Window win = Window.GetWindow(control);

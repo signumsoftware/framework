@@ -28,7 +28,7 @@ namespace Signum.Engine.Chart
 
                 sb.Settings.OverrideAttributes((UserChartDN uc) => uc.Columns.First().TokenString, new Attribute[0]);
 
-                UserAssetsImporter.ElementNames.Add("UserChart", typeof(UserChartDN));
+                UserAssetsImporter.UserAssetNames.Add("UserChart", typeof(UserChartDN));
 
                 sb.Include<UserChartDN>();
 
@@ -67,7 +67,7 @@ namespace Signum.Engine.Chart
             if (!userChart.IsNew || userChart.queryName == null)
                 throw new InvalidOperationException("userChart should be new and have queryName");
 
-            userChart.Query = QueryLogic.RetrieveOrGenerateQuery(userChart.queryName);
+            userChart.Query = QueryLogic.GetQuery(userChart.queryName);
 
             QueryDescription description = DynamicQueryManager.Current.QueryDescription(userChart.queryName);
 

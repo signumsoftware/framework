@@ -126,10 +126,10 @@ namespace Signum.Services
         #endregion
 
         #region IQueryServer Members
-        public QueryDN RetrieveOrGenerateQuery(object queryName)
+        public QueryDN GetQuery(object queryName)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => QueryLogic.RetrieveOrGenerateQuery(queryName));
+                () => QueryLogic.GetQuery(queryName));
         }
 
         #endregion
@@ -387,13 +387,13 @@ namespace Signum.Services
               () => UserAssetsExporter.ToXml(asset.Retrieve()));
         }
 
-        public List<UserAssetPreview> PreviewAssetImport(byte[] document)
+        public UserAssetPreviewModel PreviewAssetImport(byte[] document)
         {
             return Return(MethodInfo.GetCurrentMethod(),
                () => UserAssetsImporter.Preview(document));
         }
 
-        public void AssetImport(byte[] document, List<UserAssetPreview> previews)
+        public void AssetImport(byte[] document, UserAssetPreviewModel previews)
         {
             Execute(MethodInfo.GetCurrentMethod(),
               () => UserAssetsImporter.Import(document, previews));

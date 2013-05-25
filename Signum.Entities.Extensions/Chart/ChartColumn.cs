@@ -39,10 +39,6 @@ namespace Signum.Entities.Chart
 
             if (token != null)
             {
-                DisplayName =token.NiceName();
-            }
-            else
-            {
                 DisplayName = null;
             }
 
@@ -59,8 +55,12 @@ namespace Signum.Entities.Chart
         string displayName;
         public string DisplayName
         {
-            get { return displayName; }
-            set { if (Set(ref displayName, value, () => DisplayName)) NotifyChange(false); }
+            get { return displayName ?? Token.TryCC(t => t.NiceName()); }
+            set
+            {
+                var name = value == Token.TryCC(t => t.NiceName()) ? null : value;
+                Set(ref displayName, name, () => DisplayName);
+            }
         }
 
         [SqlDbType(Size = 50)]
@@ -115,13 +115,6 @@ namespace Signum.Entities.Chart
 
         [HiddenProperty]
         public string PropertyLabel { get { return ScriptColumn.DisplayName; } }
-
-        int index;
-        public int Index
-        {
-            get { return index; }
-            set { Set(ref index, value, () => Index); }
-        }
 
         public void NotifyChange(bool needNewQuery)
         {
@@ -224,6 +217,8 @@ namespace Signum.Entities.Chart
         protected override void PreSaving(ref bool graphModified)
         {
             tokenString = token == null ? null : token.FullKey();
+
+            DisplayName = displayName;
         }
 
         public override void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)
@@ -255,7 +250,7 @@ namespace Signum.Entities.Chart
 
         internal void FromXml(XElement element, IFromXmlContext ctx)
         {
-            TokenString = element.Attribute("Token").Value;
+            TokenString = element.Attribute("Token").TryCC(a => a.Value);
             DisplayName = element.Attribute("DisplayName").TryCC(a => a.Value);
             Parameter1 = element.Attribute("Parameter1").TryCC(a => a.Value);
             Parameter2 = element.Attribute("Parameter2").TryCC(a => a.Value);

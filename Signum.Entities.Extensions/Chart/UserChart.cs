@@ -171,16 +171,21 @@ namespace Signum.Entities.Chart
             base.PreSaving(ref graphModified);
 
             if (Orders != null)
-                for (int i = 0; i < Orders.Count; i++)
-                    Orders[i].Index = i;
+                Orders.ForEach((o, i) => o.Index = i);
 
             if (Columns != null)
-                for (int i = 0; i < Columns.Count; i++)
-                    Columns[i].Index = i;
+                Columns.ForEach((c, i) => c.Index = i);
+
+            if (Filters != null)
+                Filters.ForEach((f, i) => f.Index = i);
         }
 
         protected override void PostRetrieving()
         {
+            Orders.Sort(a => a.Index);
+            Columns.Sort(a => a.Index);
+            Filters.Sort(a => a.Index);
+
             chartScript.SyncronizeColumns(this, changeParameters: false);
         }
 
@@ -201,10 +206,10 @@ namespace Signum.Entities.Chart
             return new XElement("UserChart",
                 new XAttribute("Guid", Guid),
                 new XAttribute("DisplayName", DisplayName),
-                new XAttribute("Query", Query.Name),
+                new XAttribute("Query", Query.Key),
                 EntityType == null ? null : new XAttribute("EntityType", EntityType.Key()),
                 Related == null ? null : new XAttribute("Related", Related.Key()),
-                new XAttribute("ChartScript", ChartScript.ToLite().Key()),
+                new XAttribute("ChartScript", ChartScript.Name),
                 new XAttribute("GroupResults", GroupResults),
                 Filters.IsNullOrEmpty() ? null : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
                 new XElement("Columns", Columns.Select(f => f.ToXml(ctx)).ToList()),
@@ -217,10 +222,11 @@ namespace Signum.Entities.Chart
             Query = ctx.GetQuery(element.Attribute("Query").Value);
             EntityType = element.Attribute("EntityType").TryCC(a => Lite.Parse<TypeDN>(a.Value));
             Related = element.Attribute("Related").TryCC(a => Lite.Parse(a.Value));
+            ChartScript = ctx.ChartScript(element.Attribute("ChartScript").Value);
             GroupResults = bool.Parse(element.Attribute("GroupResults").Value);
             Filters.Syncronize(element.Element("Filters").TryCC(fs => fs.Elements()).EmptyIfNull().ToList(), (f, x)=>f.FromXml(x, ctx));
+            Columns.Syncronize(element.Element("Columns").TryCC(fs => fs.Elements()).EmptyIfNull().ToList(), (c, x) => c.FromXml(x, ctx));
             Orders.Syncronize(element.Element("Orders").TryCC(fs => fs.Elements()).EmptyIfNull().ToList(), (o, x)=>o.FromXml(x, ctx));
-            Columns.Syncronize(element.Element("Columns").TryCC(fs => fs.Elements()).EmptyIfNull().ToList(), (c, x)=>c.FromXml(x, ctx));
         }
     }
 
