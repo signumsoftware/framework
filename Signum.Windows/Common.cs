@@ -253,6 +253,7 @@ namespace Signum.Windows
                 return;
             }
 
+
             string route = (string)e.NewValue;
 
             if (!delayRoutes)
@@ -265,11 +266,47 @@ namespace Signum.Windows
                     fe.Loaded += (s, e2) => InititializeRoute(fe, route, e.Property);
             }
 
-            if(fe is DataGrid)
-                fe.Initialized += new EventHandler(fe_Initialized);
+            if (fe is DataGrid)
+                fe.Initialized += DataGrid_Initialized;
+
+            if (fe is ListView)
+                fe.Initialized += ListView_Initialized;
         }
 
-        static void fe_Initialized(object sender, EventArgs e)
+        static void ListView_Initialized(object sender, EventArgs e)
+        {
+            ListView lv = (ListView)sender;
+            PropertyRoute parentContext = GetPropertyRoute(lv).Add("Item");
+
+            SetPropertyRoute(lv, parentContext);
+
+            foreach (GridViewColumn column in ((GridView)lv.View).Columns)
+            {
+                if (column.IsSet(Common.RouteProperty))
+                {
+                    string route = (string)column.GetValue(Common.RouteProperty);
+                    PropertyRoute context = ContinueRouteExtension.Continue(parentContext, route);
+
+                    SetPropertyRoute(column, context);
+
+                    foreach (GridViewColumnCommonRouteTask task in GridViewColumnRouteTask.GetInvocationList())
+                        task(column, route, context);
+                }
+                else
+                {
+                    if (column.IsSet(Common.LabelOnlyRouteProperty))
+                    {
+                        string route = (string)column.GetValue(Common.LabelOnlyRouteProperty);
+                        PropertyRoute context = ContinueRouteExtension.Continue(parentContext, route);
+
+                        foreach (GridViewColumnCommonRouteTask task in GridViewColumnLabelOnlyRouteTask.GetInvocationList())
+                            task(column, route, context);
+                    }
+                }
+            }
+        }
+
+        static void DataGrid_Initialized(object sender, EventArgs e)
         {
             DataGrid grid = (DataGrid)sender;
             PropertyRoute parentContext = GetPropertyRoute(grid).Add("Item");
@@ -285,7 +322,7 @@ namespace Signum.Windows
 
                     SetPropertyRoute(column, context);
 
-                    foreach (ColumnCommonRouteTask task in ColumnRouteTask.GetInvocationList())
+                    foreach (DataGridColumnCommonRouteTask task in DataGridColumnRouteTask.GetInvocationList())
                         task(column, route, context);
                 }
                 else
@@ -295,7 +332,7 @@ namespace Signum.Windows
                         string route = (string)column.GetValue(Common.LabelOnlyRouteProperty);
                         PropertyRoute context = ContinueRouteExtension.Continue(parentContext, route);
 
-                        foreach (ColumnCommonRouteTask task in ColumnLabelOnlyRouteTask.GetInvocationList())
+                        foreach (DataGridColumnCommonRouteTask task in DataGridColumnLabelOnlyRouteTask.GetInvocationList())
                             task(column, route, context);
                     }
                 }
@@ -329,8 +366,12 @@ namespace Signum.Windows
         public static event CommonRouteTask RouteTask;
         public static event CommonRouteTask LabelOnlyRouteTask;
 
-        public static event ColumnCommonRouteTask ColumnRouteTask;
-        public static event ColumnCommonRouteTask ColumnLabelOnlyRouteTask;
+        public static event DataGridColumnCommonRouteTask DataGridColumnRouteTask;
+        public static event DataGridColumnCommonRouteTask DataGridColumnLabelOnlyRouteTask;
+
+        public static event GridViewColumnCommonRouteTask GridViewColumnRouteTask;
+        public static event GridViewColumnCommonRouteTask GridViewColumnLabelOnlyRouteTask;
+
 
         static Common()
         {
@@ -345,14 +386,17 @@ namespace Signum.Windows
             RouteTask += TaskSetNotNullItemsSource;
             RouteTask += TaskSetAutomationName;
             RouteTask += TaskSetVoteAutoHide;
-            
             LabelOnlyRouteTask += TaskSetLabelText;
             LabelOnlyRouteTask += TaskSetVoteAutoHide;
 
-            ColumnRouteTask += TaskColumnSetValueProperty;
-            ColumnRouteTask += TaskColumnSetLabelText;
-            ColumnRouteTask += TaskColumnSetReadOnly;
-            ColumnLabelOnlyRouteTask += TaskColumnSetLabelText;
+            DataGridColumnRouteTask += TaskDataGridColumnSetValueProperty;
+            DataGridColumnRouteTask += TaskDataGridColumnSetLabelText;
+            DataGridColumnRouteTask += TaskDataGridColumnSetReadOnly;
+            DataGridColumnLabelOnlyRouteTask += TaskDataGridColumnSetLabelText;
+
+            GridViewColumnRouteTask += TaskGridViewColumnSetValueProperty;
+            GridViewColumnRouteTask += TaskGridViewColumnSetLabelText;
+            GridViewColumnLabelOnlyRouteTask += TaskGridViewColumnSetLabelText; 
         }
 
         static void TaskSetVoteAutoHide(FrameworkElement fe, string route, PropertyRoute context)
@@ -371,7 +415,7 @@ namespace Signum.Windows
         }
 
         
-        static void TaskColumnSetReadOnly(DataGridColumn column, string route, PropertyRoute context)
+        static void TaskDataGridColumnSetReadOnly(DataGridColumn column, string route, PropertyRoute context)
         {
             bool isReadOnly = context.PropertyRouteType == PropertyRouteType.FieldOrProperty && context.PropertyInfo.IsReadOnly();
 
@@ -381,7 +425,7 @@ namespace Signum.Windows
             }
         }
 
-        public static void TaskColumnSetValueProperty(DataGridColumn col, string route, PropertyRoute context)
+        public static void TaskDataGridColumnSetValueProperty(DataGridColumn col, string route, PropertyRoute context)
         {
             DataGridBoundColumn colBound = col as DataGridBoundColumn;
 
@@ -419,7 +463,7 @@ namespace Signum.Windows
             return null;
         }
 
-        public static void TaskColumnSetLabelText(DataGridColumn col, string route, PropertyRoute context)
+        public static void TaskDataGridColumnSetLabelText(DataGridColumn col, string route, PropertyRoute context)
         {
             DependencyProperty labelText = DataGridColumn.HeaderProperty;
 
@@ -434,6 +478,27 @@ namespace Signum.Windows
                 col.SetValue(labelText, text);
             }
         }
+
+
+
+        public static void TaskGridViewColumnSetValueProperty(GridViewColumn col, string route, PropertyRoute context)
+        {
+            col.DisplayMemberBinding = new Binding(route);
+        }
+
+        public static void TaskGridViewColumnSetLabelText(GridViewColumn col, string route, PropertyRoute context)
+        {
+            DependencyProperty labelText = GridViewColumn.HeaderProperty;
+
+            if (labelText != null && col.NotSet(labelText))
+            {
+                string text = context.PropertyInfo.NiceName();
+
+                col.SetValue(labelText, text);
+            }
+        }
+
+
 
         public static void TaskSetValueProperty(FrameworkElement fe, string route, PropertyRoute context)
         {
@@ -457,7 +522,7 @@ namespace Signum.Windows
         private static DependencyProperty ValueProperty(FrameworkElement fe)
         {
             return fe is LineBase ? ((LineBase)fe).CommonRouteValue() :
-                            fe is DataGrid ? DataGrid.ItemsSourceProperty :
+                            fe is ItemsControl ? ItemsControl.ItemsSourceProperty :
                             FrameworkElement.DataContextProperty;
         }
 
@@ -684,5 +749,6 @@ namespace Signum.Windows
     }
 
     public delegate void CommonRouteTask(FrameworkElement fe, string route, PropertyRoute context);
-    public delegate void ColumnCommonRouteTask(DataGridColumn column, string route, PropertyRoute context);
+    public delegate void DataGridColumnCommonRouteTask(DataGridColumn column, string route, PropertyRoute context);
+    public delegate void GridViewColumnCommonRouteTask(GridViewColumn column, string route, PropertyRoute context);
 }
