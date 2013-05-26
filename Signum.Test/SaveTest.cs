@@ -110,7 +110,8 @@ namespace Signum.Test
                     Name = "System Greatest hits",
                     Author = new ArtistDN { Name = ".Net Framework" },
                     Year = 2001,
-                    Songs = types.Select(t => new SongDN() { Name = t.Name }).ToMList()
+                    Songs = types.Select(t => new SongDN() { Name = t.Name }).ToMList(),
+                    State = AlbumState.Saved
                 }.Save();
 
                 Assert2.AssertAll(GraphExplorer.FromRoot(album), a => !a.IsGraphModified);
@@ -147,7 +148,8 @@ namespace Signum.Test
                     Name = "System Greatest hits {0}".Formato(i),
                     Author = i < authors.Count ? authors[i] : new ArtistDN { Name = ".Net Framework" },
                     Year = 2001,
-                    Songs =  { new SongDN { Name = "Compilation {0}".Formato(i) }}
+                    Songs =  { new SongDN { Name = "Compilation {0}".Formato(i) }},
+                    State = AlbumState.Saved
                 }).ToList();
 
                 albums.SaveList();

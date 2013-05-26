@@ -231,7 +231,7 @@ namespace Signum.Test.Environment
     {
         public static void Register()
         {
-            GetState = f => (f.IsNew) ? AlbumState.New : AlbumState.Saved;
+            GetState = f => f.State;
 
             new Execute(AlbumOperation.Save)
             {
@@ -239,7 +239,7 @@ namespace Signum.Test.Environment
                 ToState = AlbumState.Saved,
                 AllowsNew = true,
                 Lite = false,
-                Execute = (album, _) => { album.Save(); },
+                Execute = (album, _) => { album.State = AlbumState.Saved; album.Save(); },
             }.Register();
 
             new Execute(AlbumOperation.Modify)
@@ -262,6 +262,7 @@ namespace Signum.Test.Environment
                         Author = band,
                         Name = args.GetArg<string>(),
                         Year = args.GetArg<int>(),
+                        State = AlbumState.Saved,
                         Label = args.GetArg<LabelDN>()
                     }.Save()
             }.Register();

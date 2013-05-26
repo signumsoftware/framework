@@ -36,7 +36,7 @@ namespace Signum.Web
                 settingsModifier(ec);
 
             string viewName = ec.ViewName;
-            if (viewName != null)
+            if (viewName == null)
             {
                 var es = Navigator.Manager.EntitySettings.GetOrThrow(context.Type.CleanType());
 
