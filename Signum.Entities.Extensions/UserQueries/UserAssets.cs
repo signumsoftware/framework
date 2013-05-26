@@ -77,6 +77,7 @@ namespace Signum.Entities.UserQueries
         ImportUserAssets,
         ImportPreview,
         SelectTheEntitiesToOverride,
+        SucessfullyImported,
     }
 
     public enum UserAssetPermission
