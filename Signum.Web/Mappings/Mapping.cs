@@ -700,6 +700,12 @@ namespace Signum.Web
             this.ElementMapping = elementMapping;
         }
 
+        public BaseMListMapping<S> SetElementMapping(Mapping<S> elementMapping)
+        {
+            this.ElementMapping = elementMapping;
+            return this; 
+        }
+
         public IEnumerable<MappingContext<S>> GenerateItemContexts(MappingContext<MList<S>> ctx)
         {
             PropertyRoute route = ctx.PropertyRoute.Add("Item");
