@@ -826,10 +826,17 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="UserQueries\Controller\UserAssetsController.cs" />
     <Compile Include="UserQueries\Controller\UserQueriesController.cs" />
+    <Compile Include="UserQueries\UserAssetsClient.cs" />
     <Compile Include="UserQueries\UserQueriesOmniboxProvider.cs" />
     <Compile Include="UserQueries\UserQueriesClient.cs" />
     <Compile Include="UserQueries\UserQueriesHelper.cs" />
+    <Compile Include="UserQueries\Views\ImportUserAsset.generated.cs">
+      <DependentUpon>ImportUserAsset.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="UserQueries\Views\QueryColumn.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -1468,6 +1475,10 @@
     <Content Include="Translation\Views\Sync.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Sync.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="UserQueries\Views\ImportUserAsset.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>ImportUserAsset.generated.cs</LastGenOutput>
     </Content>
     <None Include="UserQueries\Views\QueryColumn.cshtml">
       <Generator>RazorGenerator</Generator>

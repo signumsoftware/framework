@@ -13,6 +13,7 @@ using Signum.Entities.Authorization;
 using Signum.Engine.Authorization;
 using Signum.Engine.Operations;
 using Signum.Utilities;
+using Signum.Engine.UserQueries;
 
 namespace Signum.Engine.Chart
 {
@@ -26,6 +27,8 @@ namespace Signum.Engine.Chart
                     throw new InvalidOperationException("UserChart has already been registered");
 
                 sb.Settings.OverrideAttributes((UserChartDN uc) => uc.Columns.First().TokenString, new Attribute[0]);
+
+                UserAssetsImporter.UserAssetNames.Add("UserChart", typeof(UserChartDN));
 
                 sb.Include<UserChartDN>();
 
@@ -64,7 +67,7 @@ namespace Signum.Engine.Chart
             if (!userChart.IsNew || userChart.queryName == null)
                 throw new InvalidOperationException("userChart should be new and have queryName");
 
-            userChart.Query = QueryLogic.RetrieveOrGenerateQuery(userChart.queryName);
+            userChart.Query = QueryLogic.GetQuery(userChart.queryName);
 
             QueryDescription description = DynamicQueryManager.Current.QueryDescription(userChart.queryName);
 

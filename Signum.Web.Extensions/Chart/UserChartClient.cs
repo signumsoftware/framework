@@ -19,6 +19,7 @@ using System.Web.Routing;
 using Signum.Engine.Chart;
 using Signum.Web.Basic;
 using Signum.Web.Operations;
+using Signum.Web.Extensions.UserQueries;
 
 namespace Signum.Web.Chart
 {
@@ -29,6 +30,9 @@ namespace Signum.Web.Chart
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 QueryClient.Start();
+
+                UserAssetsClient.Start();
+                UserAssetsClient.RegisterExportAssertLink<UserChartDN>();
 
                 Mapping<QueryToken> qtMapping = ctx =>
                 {
@@ -74,8 +78,8 @@ namespace Signum.Web.Chart
                 RouteTable.Routes.MapRoute(null, "UC/{webQueryName}/{lite}",
                      new { controller = "Chart", action = "ViewUserChart" });
 
-                UserChartDN.SetConverters(query => QueryLogic.ToQueryName(query.Key), queryname =>
-                    QueryLogic.RetrieveOrGenerateQuery(queryname));
+                UserChartDN.SetConverters(query => QueryLogic.ToQueryName(query.Key), queryName =>
+                    QueryLogic.GetQuery(queryName));
 
                 OperationsClient.AddSetting(new EntityOperationSettings(UserChartOperation.Delete)
                 {

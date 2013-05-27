@@ -46,6 +46,6 @@ namespace Signum.Services
     public interface IQueryServer
     {
         [OperationContract, NetDataContract]
-        QueryDN RetrieveOrGenerateQuery(object queryName);
+        QueryDN GetQuery(object queryName);
     }
 }

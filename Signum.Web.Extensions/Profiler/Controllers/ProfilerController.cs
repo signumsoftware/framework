@@ -130,9 +130,11 @@ namespace Signum.Web.Profiler
             {
                 HeavyProfiler.ExportXml().Save(ms);
 
-                Response.AddHeader("Content-Disposition", "attachment; filename=Profile-{0}.xml".Formato(DateTime.Now.ToString("o").Replace(":", "."))); 
+                string fileName = "Profile-{0}.xml".Formato(DateTime.Now.ToString("o").Replace(":", "."));
 
-                return File(ms.ToArray(), "text/xml");
+                //Response.AddHeader("Content-Disposition", "attachment; filename=" + fileName); 
+
+                return File(ms.ToArray(), "text/xml", fileName);
             }
         }
 

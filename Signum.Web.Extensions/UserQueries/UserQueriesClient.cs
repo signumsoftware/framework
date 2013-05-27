@@ -21,6 +21,7 @@ using Signum.Engine.Authorization;
 using Signum.Entities.Authorization;
 using Signum.Web.Operations;
 using Signum.Web.Basic;
+using Signum.Web.Extensions.UserQueries;
 
 namespace Signum.Web.UserQueries
 {
@@ -37,6 +38,9 @@ namespace Signum.Web.UserQueries
                 QueryClient.Start();
 
                 Navigator.RegisterArea(typeof(UserQueriesClient));
+
+                UserAssetsClient.Start();
+                UserAssetsClient.RegisterExportAssertLink<UserQueryDN>();
 
                 var defaultScripts = Navigator.Manager.DefaultScripts();
                 defaultScripts.Add("~/UserQueries/Scripts/SF_UserQuery.js");

@@ -17,6 +17,7 @@ using Signum.Entities.Reflection;
 using Signum.Services;
 using Signum.Windows.Authorization;
 using Signum.Entities.Chart;
+using Signum.Windows.UserQueries;
 
 namespace Signum.Windows.ControlPanels
 {
@@ -29,6 +30,9 @@ namespace Signum.Windows.ControlPanels
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 TypeClient.Start();
+
+                UserAssetsClient.Start();
+                UserAssetsClient.RegisterExportAssertLink<ControlPanelDN>();
 
                 Navigator.AddSettings(new List<EntitySettings>()
                 {

@@ -18,8 +18,7 @@ namespace Signum.Engine.Chart
 {
     public static class ChartScriptLogic
     {
-        public static ResetLazy<List<ChartScriptDN>> Scripts { get; private set; }
-
+        public static ResetLazy<Dictionary<string, ChartScriptDN>> Scripts { get; private set; }
 
         internal static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -39,7 +38,7 @@ namespace Signum.Engine.Chart
                         uq.Icon,
                     });
 
-                Scripts = sb.GlobalLazy(() => Database.Query<ChartScriptDN>().ToList(),
+                Scripts = sb.GlobalLazy(() => Database.Query<ChartScriptDN>().ToDictionary(a=>a.Name),
                     new InvalidateWith(typeof(ChartScriptDN)));
 
                 RegisterOperations();
@@ -248,6 +247,11 @@ namespace Signum.Engine.Chart
                 else if (c == 'n')
                     return false;
             }
+        }
+
+        public static ChartScriptDN GetChartScript(string chartScriptName)
+        {
+            return Scripts.Value.GetOrThrow(chartScriptName);
         }
     }
 }

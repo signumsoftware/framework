@@ -36,7 +36,7 @@ using Signum.Engine.ControlPanel;
 namespace Signum.Services
 {
     public abstract class ServerExtensions : ServerBasic, ILoginServer, IQueryServer, IProcessServer, IControlPanelServer,
-        IChartServer, IExcelReportServer, IUserQueryServer, IQueryAuthServer, IPropertyAuthServer,
+        IChartServer, IExcelReportServer, IUserQueryServer, IQueryAuthServer, IPropertyAuthServer, IUserAssetsServer,
         ITypeAuthServer, IPermissionAuthServer, IOperationAuthServer, ISmsServer,
         IProfilerServer
     {
@@ -126,10 +126,10 @@ namespace Signum.Services
         #endregion
 
         #region IQueryServer Members
-        public QueryDN RetrieveOrGenerateQuery(object queryName)
+        public QueryDN GetQuery(object queryName)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => QueryLogic.RetrieveOrGenerateQuery(queryName));
+                () => QueryLogic.GetQuery(queryName));
         }
 
         #endregion
@@ -377,7 +377,27 @@ namespace Signum.Services
         {
             return Return(MethodInfo.GetCurrentMethod(),
                   () => ControlPanelLogic.Autocomplete(subString, limit));
-        } 
+        }
+        #endregion
+
+        #region IUserAssetsServer
+        public byte[] ExportAsset(Lite<IUserAssetEntity> asset)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+              () => UserAssetsExporter.ToXml(asset.Retrieve()));
+        }
+
+        public UserAssetPreviewModel PreviewAssetImport(byte[] document)
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+               () => UserAssetsImporter.Preview(document));
+        }
+
+        public void AssetImport(byte[] document, UserAssetPreviewModel previews)
+        {
+            Execute(MethodInfo.GetCurrentMethod(),
+              () => UserAssetsImporter.Import(document, previews));
+        }
         #endregion
     }
 }

@@ -8,6 +8,7 @@ using Signum.Entities.UserQueries;
 using Signum.Entities.Chart;
 using System.Reflection;
 using System.Linq.Expressions;
+using System.Xml.Linq;
 
 namespace Signum.Entities.ControlPanel
 {
@@ -77,12 +78,32 @@ namespace Signum.Entities.ControlPanel
             Notify(() => Row);
             Notify(() => Column);
         }
+
+        internal XElement ToXml(IToXmlContext ctx)
+        {
+            return new XElement("Part",
+                new XAttribute("Row", Row),
+                new XAttribute("Column", Column),
+                Title == null ? null : new XAttribute("Title", Title),
+                Content.ToXml(ctx));
+        }
+
+        internal void FromXml(XElement x, IFromXmlContext ctx)
+        {
+            Row = int.Parse(x.Attribute("Row").Value);
+            Column = int.Parse(x.Attribute("Column").Value);
+            Title = x.Attribute("Title").TryCC(a => a.Value);
+            Content = ctx.GetPart(Content, x.Elements().Single());
+        }
     }
 
     public interface IPartDN : IIdentifiable
     {
         bool RequiresTitle { get; }
         IPartDN Clone();
+
+        XElement ToXml(IToXmlContext ctx);
+        void FromXml(XElement element, IFromXmlContext ctx);
     }
 
     [Serializable, EntityKind(EntityKind.Part)]
@@ -113,6 +134,17 @@ namespace Signum.Entities.ControlPanel
             {
                 UserQuery = this.UserQuery,
             };
+        }
+
+        public XElement ToXml(IToXmlContext ctx)
+        {
+            return new XElement("UserQueryPart",
+                new XAttribute("UserQuery", ctx.Include(UserQuery)));
+        }
+
+        public void FromXml(XElement element, IFromXmlContext ctx)
+        {
+            UserQuery = (UserQueryDN)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery").Value));          
         }
     }
 
@@ -153,6 +185,18 @@ namespace Signum.Entities.ControlPanel
                 ShowData = this.ShowData
             };
         }
+
+        public XElement ToXml(IToXmlContext ctx)
+        {
+            return new XElement("UserChartPart",
+                new XAttribute("ShowData", ShowData),
+                new XAttribute("UserChart", ctx.Include(UserChart)));
+        }
+
+        public void FromXml(XElement element, IFromXmlContext ctx)
+        {
+            UserChart = (UserChartDN)ctx.GetEntity(Guid.Parse(element.Attribute("UserChart").Value));
+        }
     }
 
     [Serializable, EntityKind(EntityKind.Part)]
@@ -182,6 +226,17 @@ namespace Signum.Entities.ControlPanel
             {
                 UserQueries = this.UserQueries.Select(e=>e.Clone()).ToMList(),
             };
+        }
+
+        public XElement ToXml(IToXmlContext ctx)
+        {
+            return new XElement("CountSearchControlPart",
+                UserQueries.Select(cuqe => cuqe.ToXml(ctx)));
+        }
+
+        public void FromXml(XElement element, IFromXmlContext ctx)
+        {
+            UserQueries.Syncronize(element.Elements().ToList(), (cuqe, x) => cuqe.FromXml(element, ctx));
         }
     }
 
@@ -218,6 +273,21 @@ namespace Signum.Entities.ControlPanel
                 UserQuery = UserQuery,
             };
         }
+
+        internal XElement ToXml(IToXmlContext ctx)
+        {
+            return new XElement("CountUserQueryElement",
+                Label == null ? null : new XAttribute("Label", Label),
+                Href == null ? null : new XAttribute("Href", Href),
+                new XAttribute("UserQuery", ctx.Include(UserQuery)));
+        }
+
+        internal void FromXml(XElement element, IFromXmlContext ctx)
+        {
+            Label = element.Attribute("Label").TryCC(a => a.Value);
+            Href = element.Attribute("Href").TryCC(a => a.Value);
+            UserQuery = (UserQueryDN)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery").Value));
+        }
     }
 
     [Serializable, EntityKind(EntityKind.Part)]
@@ -247,6 +317,18 @@ namespace Signum.Entities.ControlPanel
             {
                 Links = this.Links.Select(e => e.Clone()).ToMList(),
             };
+        }
+
+        public XElement ToXml(IToXmlContext ctx)
+        {
+            return new XElement("LinkListPart",
+                Links.Select(lin => lin.ToXml(ctx)));
+        }
+
+
+        public void FromXml(XElement element, IFromXmlContext ctx)
+        {
+            Links.Syncronize(element.Elements().ToList(), (le, x) => le.FromXml(x));
         }
     }
 
@@ -278,5 +360,17 @@ namespace Signum.Entities.ControlPanel
             };
         }
 
+        internal XElement ToXml(IToXmlContext ctx)
+        {
+            return new XElement("LinkElement",
+                new XAttribute("Label", Label),
+                new XAttribute("Link", Link));
+        }
+
+        internal void FromXml(XElement element)
+        {
+            Label = element.Attribute("Label").Value;
+            Link = element.Attribute("Link").Value;
+        }
     }
 }

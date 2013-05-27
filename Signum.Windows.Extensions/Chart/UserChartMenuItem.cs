@@ -119,22 +119,19 @@ namespace Signum.Windows.Chart
                     }.Handle(MenuItem.ClickEvent, New_Clicked));
                 }
 
-                if (CurrentUserChart != null && !Navigator.IsReadOnly(CurrentUserChart))
+                Items.Add(new MenuItem()
                 {
-                    Items.Add(new MenuItem()
-                    {
-                        Header = UserQueryMessage.Edit.NiceToString(),
-                        Icon = ExtensionsImageLoader.GetImageSortName("edit.png").ToSmallImage()
-                    }.Handle(MenuItem.ClickEvent, Edit_Clicked)
-                    .Bind(MenuItem.IsEnabledProperty, this, "CurrentUserChart", notNullAndEditable));
+                    Header = UserQueryMessage.Edit.NiceToString(),
+                    Icon = ExtensionsImageLoader.GetImageSortName("edit.png").ToSmallImage()
+                }.Handle(MenuItem.ClickEvent, Edit_Clicked)
+                .Bind(MenuItem.VisibilityProperty, this, "CurrentUserChart", notNullAndEditable));
 
-                    Items.Add(new MenuItem()
-                    {
-                        Header = EntityControlMessage.Remove.NiceToString(),
-                        Icon = ExtensionsImageLoader.GetImageSortName("remove.png").ToSmallImage()
-                    }.Handle(MenuItem.ClickEvent, Remove_Clicked)
-                    .Bind(MenuItem.IsEnabledProperty, this, "CurrentUserChart", notNullAndEditable));
-                }
+                Items.Add(new MenuItem()
+                {
+                    Header = EntityControlMessage.Remove.NiceToString(),
+                    Icon = ExtensionsImageLoader.GetImageSortName("remove.png").ToSmallImage()
+                }.Handle(MenuItem.ClickEvent, Remove_Clicked)
+                .Bind(MenuItem.VisibilityProperty, this, "CurrentUserChart", notNullAndEditable));
             }
 
             var autoSet = ChartClient.GetUserChart(ChartWindow);
@@ -143,7 +140,7 @@ namespace Signum.Windows.Chart
                 SetCurrent(autoSet);
         }
 
-        static IValueConverter notNullAndEditable = ConverterFactory.New((UserChartDN uq) => uq != null && uq.IsAllowedFor(TypeAllowedBasic.Modify));
+        static IValueConverter notNullAndEditable = ConverterFactory.New((UserChartDN uq) => uq != null && !Navigator.IsReadOnly(uq) ? Visibility.Visible : Visibility.Collapsed);
 
 
         private void MenuItem_Clicked(object sender, RoutedEventArgs e)

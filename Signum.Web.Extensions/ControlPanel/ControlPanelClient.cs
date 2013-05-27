@@ -14,6 +14,7 @@ using Signum.Entities.Reports;
 using Signum.Web.Controllers;
 using Signum.Engine.ControlPanel;
 using Signum.Engine.Authorization;
+using Signum.Web.Extensions.UserQueries;
 
 namespace Signum.Web.ControlPanel
 {
@@ -53,6 +54,9 @@ namespace Signum.Web.ControlPanel
                 UserQueriesClient.Start();
 
                 Navigator.RegisterArea(typeof(ControlPanelClient));
+
+                UserAssetsClient.Start();
+                UserAssetsClient.RegisterExportAssertLink<ControlPanelDN>();
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {

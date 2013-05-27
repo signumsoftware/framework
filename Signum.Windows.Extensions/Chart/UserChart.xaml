@@ -37,30 +37,22 @@
                 </DataTemplate>
             </m:EntityRepeater.EntityTemplate>
         </m:EntityRepeater>
-        
+
         <c:ChartBuilder x:Name="chartBuilder"/>
 
-        <GroupBox Margin="4" Style="{StaticResource EntityGroupBox}">
-            <GroupBox.Header>
-                <StackPanel Orientation="Horizontal">
-                    <Image Source="../Images/order.png" Stretch="None"/>
-                    <TextBlock m:Common.LabelOnlyRoute="Orders"/>
-                </StackPanel>
-            </GroupBox.Header>
-            <m:EntityList m:Common.Route="Orders" Grid.IsSharedSizeScope="true" Move="True"  >
-                <m:EntityList.EntityTemplate>
-                    <DataTemplate>
-                        <Grid m:Common.LabelVisible="False" m:Common.PropertyRoute="{m:ContinueRoute /}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition SharedSizeGroup="orderType" MinWidth="100" Width="Auto"/>
-                                <ColumnDefinition SharedSizeGroup="token" MinWidth="100" Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <uq:QueryTokenDNBuilder SubTokensEvent="QueryTokenBuilderOrders_SubTokensEvent" />
-                            <m:ValueLine m:Common.Route="OrderType" Grid.Column="1" VerticalAlignment="Center" />
-                        </Grid>
-                    </DataTemplate>
-                </m:EntityList.EntityTemplate>
-            </m:EntityList>
-        </GroupBox>
+        <m:EntityRepeater m:Common.Route="Orders" Grid.IsSharedSizeScope="true" Move="True" ButtonsOrientation="Horizontal" Icon="../Images/order.png"  >
+            <m:EntityRepeater.EntityTemplate>
+                <DataTemplate>
+                    <Grid m:Common.LabelVisible="False">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition SharedSizeGroup="orderType" MinWidth="100" Width="Auto"/>
+                            <ColumnDefinition SharedSizeGroup="token" MinWidth="100" Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <uq:QueryTokenDNBuilder SubTokensEvent="QueryTokenBuilderOrders_SubTokensEvent" />
+                        <m:ValueLine m:Common.Route="OrderType" Grid.Column="1" VerticalAlignment="Center" />
+                    </Grid>
+                </DataTemplate>
+            </m:EntityRepeater.EntityTemplate>
+        </m:EntityRepeater>
     </StackPanel>
 </UserControl>
