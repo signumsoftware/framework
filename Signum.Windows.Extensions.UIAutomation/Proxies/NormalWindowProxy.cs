@@ -9,6 +9,7 @@ using System.Windows;
 using System.Linq.Expressions;
 using Signum.Entities.Reflection;
 using Signum.Entities.Basics;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Windows.UIAutomation
 {
@@ -322,11 +323,27 @@ namespace Signum.Windows.UIAutomation
             return left.Element.Descendant(el => el.Current.ControlType == ControlType.Button && el.Current.Name == name);
         }
 
-        public static AutomationElement InvokeQuickLinkCapture(this LeftPanelProxy left, string name)
+        public static AutomationElement QuickLinks(this LeftPanelProxy left)
         {
-            return left.Element.CaptureWindow(
-            action: () => left.Button(name).ButtonInvoke(),
-            actionDescription: () => "Waiting to capture window after click {0} on LeftPanel".Formato(name));
+            return left.Element.Child(c => c.Current.ClassName == "LinksWidget").ChildById("expQuickLinks").Child(c => c.Current.ControlType == ControlType.Pane);
+        }
+
+        public static AutomationElement QuickLinkCapture(this LeftPanelProxy left, string name)
+        {
+            var button = left.QuickLinks().Child(c => c.Current.Name == name).Child(c => c.Current.ControlType == ControlType.Button);
+
+            return button.ButtonInvokeCapture(
+                actionDescription: () => "Waiting to capture window after QuickLink {0} on LeftPanel".Formato(name));
+        }
+
+        public static SearchWindowProxy QuickLinkExplore(this LeftPanelProxy left, object queryName)
+        {
+            return left.QuickLinkCapture(QueryUtils.GetQueryUniqueKey(queryName)).ToSearchWindow(); 
+        }
+
+        public static NormalWindowProxy<T> QuickLinkNavigate<T>(this LeftPanelProxy left) where T : IdentifiableEntity
+        {
+            return left.QuickLinkCapture(QueryUtils.GetQueryUniqueKey(typeof(T).FullName)).ToNormalWindow<T>();
         }
     }
 }

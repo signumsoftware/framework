@@ -106,6 +106,11 @@ namespace Signum.Windows.Chart
             {
                 ChartClient.View(userChart.Retrieve(), entity.Retrieve());
             }
+
+            public override string Name
+            {
+                get { return userChart.Key(); }
+            }
         }
 
         static MenuItem SearchControl_GetCustomMenuItems(SearchControl sc)
