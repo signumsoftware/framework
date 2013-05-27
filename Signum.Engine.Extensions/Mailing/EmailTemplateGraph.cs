@@ -23,8 +23,6 @@ namespace Signum.Engine.Mailing
                 Construct = _ => new EmailTemplateDN 
                 { 
                     State = EmailTemplateState.Created,
-                    From = EmailLogic.SenderManager.TryCC(m => m.DefaultFrom),
-                    DisplayFrom = EmailLogic.SenderManager.TryCC(m => m.DefaultDisplayFrom),
                     SMTPConfiguration = EmailLogic.SenderManager.TryCC(m => m.DefaultSMTPConfiguration)
                 }
             }.Register();

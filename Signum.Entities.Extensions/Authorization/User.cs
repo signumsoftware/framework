@@ -107,13 +107,6 @@ namespace Signum.Entities.Authorization
             set { Set(ref state, value, () => State); }
         }
 
-        public static Expression<Func<UserDN, CultureInfo>> CultureInfoExpression =
-            u => null;
-        public CultureInfo CultureInfo
-        {
-            get { return CultureInfoExpression.Evaluate(this); }
-        }
-
         protected override string PropertyValidation(PropertyInfo pi)
         {
             if (pi.Is(() => State))
@@ -135,6 +128,19 @@ namespace Signum.Entities.Authorization
         {
             get { return (UserDN)UserHolder.Current; }
             set { UserHolder.Current = value; }
+        }
+
+        public static Expression<Func<UserDN, EmailOwnerData>> EmailOwnerDataExpression =
+            entity => new EmailOwnerData
+            {
+                 Owner = entity.ToLite(), 
+                 CultureInfo = null,
+                 DisplayName = entity.UserName,
+                 Email = entity.Email,
+            };
+        public EmailOwnerData EmailOwnerData
+        {
+            get{ return EmailOwnerDataExpression.Evaluate(this); }
         }
 
     }

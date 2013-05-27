@@ -41,10 +41,7 @@ namespace Signum.Engine.Authorization
                 EmailLogic.RegisterEmailModel<ResetPasswordRequestMail>(() => new EmailTemplateDN
                 {
                     Name = "Reset Password Request",
-                    Active = true,
                     IsBodyHtml = true,
-                    AssociatedType = typeof(ResetPasswordRequestDN).ToTypeDN(),
-                    Recipient = new TemplateQueryTokenDN { TokenString = "User" },
                     Messages = CultureInfoLogic.ForEachCulture((culture) => new EmailTemplateMessageDN
                     {
                         Text = AuthEmailMessage.ResetPasswordRequestBody.NiceToString(),
@@ -54,7 +51,13 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public class ResetPasswordRequestMail : EmailModel<ResetPasswordRequestDN> { }
+        public class ResetPasswordRequestMail : EmailModel<ResetPasswordRequestDN>
+        {
+            public override List<EmailRecipientDN> GetRecipients()
+            {
+                return new List<EmailRecipientDN> { new EmailRecipientDN(Entity.User.EmailOwnerData) }; 
+            }
+        }
 
         public static ResetPasswordRequestDN ResetPasswordRequest(UserDN user)
         {
@@ -74,7 +77,7 @@ namespace Signum.Engine.Authorization
         public static void ResetPasswordRequestAndSendEmail(UserDN user)
         {
             var rpr = ResetPasswordRequest(user);
-            new ResetPasswordRequestMail { Entity = rpr }.SendMailAsync();
+            new ResetPasswordRequestMail { Entity = rpr,  }.SendMailAsync();
         }
 
         public static Func<string, UserDN> GetUserByEmail = (email) =>

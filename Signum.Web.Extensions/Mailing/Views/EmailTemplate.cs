@@ -77,7 +77,7 @@ Write(Html.ValueLine(ec, e => e.State, vl => vl.ReadOnly = true));
 WriteLiteral("    <fieldset>\r\n        <legend>Properties</legend>\r\n        ");
 
 
-   Write(Html.EntityLine(ec, e => e.AssociatedType));
+   Write(Html.EntityLine(ec, e => e.Query));
 
 WriteLiteral("\r\n        ");
 

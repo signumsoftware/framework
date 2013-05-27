@@ -185,7 +185,7 @@ namespace Signum.Engine.Mailing
 
             public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
             {
-                var groups = rows.GroupBy(r => rows.DistinctSingle(p.Columns[Token])).ToList();
+                var groups = rows.GroupBy(r => r[p.Columns[Token]]).ToList();
                 if (groups.Count == 1 && groups[0].Key == null)
                     return;
                 foreach (var group in groups)
@@ -347,12 +347,6 @@ namespace Signum.Engine.Mailing
                 stack.Peek().Nodes.Add(new LiteralNode { Text = text.Substring(lastM.Index + lastM.Length) });
             stack.Pop();
             return errors;
-        }
-
-
-        internal static Lite<IEmailOwnerDN> GetRecipient(ResultTable table, ResultColumn column)
-        {
-            return (Lite<IEmailOwnerDN>)(table.Rows.DistinctSingle(column));
         }
     }
 

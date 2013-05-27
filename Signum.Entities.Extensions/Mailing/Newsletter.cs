@@ -56,7 +56,7 @@ namespace Signum.Entities.Mailing
         }
 
         [NotNullable, SqlDbType(Size = 50)]
-        string from = DefaultFrom;
+        string from;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 50)]
         public string From
         {
@@ -65,7 +65,7 @@ namespace Signum.Entities.Mailing
         }
 
         [NotNullable, SqlDbType(Size = 50)]
-        string displayFrom = DefaultDisplayFrom;
+        string displayFrom;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 50)]
         public string DisplayFrom
         {
@@ -80,8 +80,6 @@ namespace Signum.Entities.Mailing
         }
 
         public static Lite<SMTPConfigurationDN> DefaultSMTPConfig;
-        public static string DefaultFrom;
-        public static string DefaultDisplayFrom;
 
         QueryDN query;
         public QueryDN Query

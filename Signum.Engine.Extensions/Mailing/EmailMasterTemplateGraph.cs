@@ -23,6 +23,8 @@ namespace Signum.Engine.Mailing
             {
                 AllowsNew = true,
                 Lite = false,
+                FromStates = { EmailTemplateState.Created, EmailTemplateState.Modified },
+                ToState = EmailTemplateState.Modified,
                 Execute = (t, _) => t.State = EmailTemplateState.Modified
             }.Register();
         }

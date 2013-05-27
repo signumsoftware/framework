@@ -20,8 +20,6 @@ namespace Signum.Engine.Mailing
                 Construct = _ => new EmailMessageDN 
                 {
                     State = EmailMessageState.Created,
-                    From = EmailLogic.SenderManager.TryCC(m => m.DefaultFrom),
-                    DisplayFrom = EmailLogic.SenderManager.TryCC(m => m.DefaultDisplayFrom),
                 }
             }.Register();
 
@@ -48,17 +46,17 @@ namespace Signum.Engine.Mailing
                 AllowsNew = false,
                 Construct = (m, _) => new EmailMessageDN 
                 {
-                    Bcc = m.Bcc,
-                    Text = m.Text,
-                    Cc = m.Cc,
-                    DisplayFrom = m.DisplayFrom,
-                    EditableMessage = m.EditableMessage,
                     From = m.From,
+                    DisplayFrom = m.DisplayFrom,
+                    To = m.To,
+                    Cc = m.Cc,
+                    Bcc = m.Bcc,
+                    Subject = m.Subject,
+                    Text = m.Text,
                     IsBodyHtml = m.IsBodyHtml,
                     Recipient = m.Recipient,
-                    Subject = m.Subject,
                     Template = m.Template,
-                    To = m.To,
+                    EditableMessage = m.EditableMessage,
                     State = EmailMessageState.Created
                 }
             }.Register();

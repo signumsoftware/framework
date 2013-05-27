@@ -55,6 +55,25 @@ namespace Signum.Entities.Mailing
             set { Set(ref password, value, () => Password); }
         }
 
+        [NotNullable]
+        EmailContactDN defaultFrom;
+        [NotNullValidator]
+        public EmailContactDN DefaultFrom
+        {
+            get { return defaultFrom; }
+            set { Set(ref defaultFrom, value, () => DefaultFrom); }
+        }
+
+        [NotNullable]
+        MList<EmailRecipientDN> aditionalRecipients = new MList<EmailRecipientDN>();
+        [NotNullValidator, NoRepeatValidator]
+        public MList<EmailRecipientDN> AditionalRecipients
+        {
+            get { return aditionalRecipients; }
+            set { Set(ref aditionalRecipients, value, () => AditionalRecipients); }
+        }
+
+
         bool enableSSL;
         public bool EnableSSL
         {

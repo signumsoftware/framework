@@ -32,6 +32,16 @@ namespace Signum.Entities.Mailing
     [Serializable, EntityKind(EntityKind.Main)]
     public class EmailTemplateDN : Entity
     {
+        public EmailTemplateDN() { }
+
+        public EmailTemplateDN(object queryName)
+        {
+            this.queryName = queryName;
+        }
+
+        [Ignore]
+        internal object queryName;
+
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         string name;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
@@ -49,19 +59,21 @@ namespace Signum.Entities.Mailing
         }
 
         [NotNullable]
-        TypeDN associatedType;
+        QueryDN query;
         [NotNullValidator]
-        public TypeDN AssociatedType
+        public QueryDN Query
         {
-            get { return associatedType; }
-            set { Set(ref associatedType, value, () => AssociatedType); }
+            get { return query; }
+            set { Set(ref query, value, () => Query); }
         }
 
-        TemplateQueryTokenDN recipient;
-        public TemplateQueryTokenDN Recipient
+        [NotNullable]
+        MList<EmailTemplateRecipientDN> recipients = new MList<EmailTemplateRecipientDN>();
+        [NotNullValidator, NoRepeatValidator]
+        public MList<EmailTemplateRecipientDN> Recipients
         {
-            get { return recipient; }
-            set { Set(ref recipient, value, () => Recipient); }
+            get { return recipients; }
+            set { Set(ref recipients, value, () => Recipients); }
         }
 
         bool isBodyHtml = true;
@@ -71,7 +83,7 @@ namespace Signum.Entities.Mailing
             set { Set(ref isBodyHtml, value, () => IsBodyHtml); }
         }
 
-        MList<TemplateQueryTokenDN> tokens;
+        MList<TemplateQueryTokenDN> tokens = new MList<TemplateQueryTokenDN>();
         public MList<TemplateQueryTokenDN> Tokens
         {
             get { return tokens; }
@@ -79,7 +91,7 @@ namespace Signum.Entities.Mailing
         }
 
         [NotifyCollectionChanged]
-        MList<EmailTemplateMessageDN> messages;
+        MList<EmailTemplateMessageDN> messages =new MList<EmailTemplateMessageDN>();
         public MList<EmailTemplateMessageDN> Messages
         {
             get { return messages; }
@@ -105,33 +117,13 @@ namespace Signum.Entities.Mailing
             messages.ForEach(e => e.Template = this);
         }
 
-        string from;
-        [StringLengthValidator(AllowNulls = false)]
-        public string From
+        [NotNullable]
+        EmailTemplateContactDN from;
+        [NotNullValidator]
+        public EmailTemplateContactDN From
         {
             get { return from; }
             set { Set(ref from, value, () => From); }
-        }
-
-        string displayFrom;
-        public string DisplayFrom
-        {
-            get { return displayFrom; }
-            set { Set(ref displayFrom, value, () => DisplayFrom); }
-        }
-
-        string bcc;
-        public string Bcc
-        {
-            get { return bcc; }
-            set { Set(ref bcc, value, () => Bcc); }
-        }
-
-        string cc;
-        public string Cc
-        {
-            get { return cc; }
-            set { Set(ref cc, value, () => Cc); }
         }
 
         Lite<EmailMasterTemplateDN> masterTemplate;
@@ -192,7 +184,6 @@ namespace Signum.Entities.Mailing
             return IsActiveNowExpression.Evaluate(this);
         }
 
-        public static Func<TypeDN, bool> AssociatedTypeIsEmailOwner;
         public static CultureInfoDN DefaultCulture;
 
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
@@ -201,12 +192,6 @@ namespace Signum.Entities.Mailing
             {
                 if (EndDate != null && EndDate >= StartDate)
                     return EmailTemplateMessage.EndDateMustBeHigherThanStartDate.NiceToString();
-            }
-
-            if (pi.Is(() => Recipient) && AssociatedType != null && !AssociatedTypeIsEmailOwner(AssociatedType) 
-                && Recipient == null && Model == null)
-            {
-                return EmailTemplateMessage.RouteToGetRecipientNotSet.NiceToString();
             }
 
             if (pi.Is(() => Messages))
@@ -223,12 +208,6 @@ namespace Signum.Entities.Mailing
                 }
             }
 
-            if (pi.Is(() => Model) || pi.Is(() => AssociatedType))
-            {
-                if (Model != null && AssociatedType != null && Model.FullClassName != AssociatedType.FullClassName)
-                    return EmailTemplateMessage.TheAssociatedTypeAndTheModelDoNotMatch.NiceToString();
-            }
-
             return base.PropertyValidation(pi);
         }
 
@@ -237,9 +216,72 @@ namespace Signum.Entities.Mailing
         {
             return ToStringExpression.Evaluate(this);
         }
+
+        internal EmailTemplateMessageDN GetCultureMessage(CultureInfo ci)
+        {
+            EmailTemplateMessageDN result;
+            if (ci != DefaultCulture.CultureInfo)
+            {
+                result = Messages.SingleOrDefault(tm => tm.CultureInfo.CultureInfo == ci);
+                if (result != null)
+                    return result;
+
+                result = Messages.SingleOrDefault(tm => ci != null && tm.CultureInfo.CultureInfo == ci.Parent);
+                if (result != null)
+                    return result;
+            }
+
+            return Messages.SingleOrDefault(tm => tm.CultureInfo.CultureInfo == DefaultCulture.CultureInfo);
+        }
     }
 
     [Serializable]
+    public class EmailTemplateContactDN : EmbeddedEntity
+    {
+        TemplateQueryTokenDN emailOwner;
+        public TemplateQueryTokenDN EmailOwner
+        {
+            get { return emailOwner; }
+            set { Set(ref emailOwner, value, () => EmailOwner); }
+        }
+
+        string emailAddress;
+        public string EmailAddress
+        {
+            get { return emailAddress; }
+            set { Set(ref emailAddress, value, () => EmailAddress); }
+        }
+
+        string displayName;
+        public string DisplayName
+        {
+            get { return displayName; }
+            set { Set(ref displayName, value, () => DisplayName); }
+        }
+
+        public override string ToString()
+        {
+            return "{1} <{2}>".Formato(displayName, emailAddress);
+        }
+    }
+
+    [Serializable]
+    public class EmailTemplateRecipientDN : EmailTemplateContactDN
+    {
+        EmailRecipientKind kind;
+        public EmailRecipientKind Kind
+        {
+            get { return kind; }
+            set { Set(ref kind, value, () => Kind); }
+        }
+
+        public override string ToString()
+        {
+            return "{0} {1} <{2}>".Formato(kind.NiceToString(), displayName, emailAddress);
+        }
+    }
+
+    [Serializable, EntityKind(EntityKind.SystemString)]
     public class EmailModelDN : IdentifiableEntity
     {
         [NotNullable, UniqueIndex]
@@ -250,16 +292,7 @@ namespace Signum.Entities.Mailing
             set { Set(ref fullClassName, value, () => FullClassName); }
         }
 
-        [NotNullable]
-        string friendlyName;
-        [StringLengthValidator(Min = 1)]
-        public string FriendlyName
-        {
-            get { return friendlyName; }
-            set { Set(ref friendlyName, value, () => FriendlyName); }
-        }
-
-        static readonly Expression<Func<EmailModelDN, string>> ToStringExpression = e => e.FriendlyName;
+        static readonly Expression<Func<EmailModelDN, string>> ToStringExpression = e => e.fullClassName;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -381,16 +414,12 @@ namespace Signum.Entities.Mailing
     {
         [Description("End date must be higher than start date")]
         EndDateMustBeHigherThanStartDate,
-        [Description("Route to get recipient not set")]
-        RouteToGetRecipientNotSet,
         [Description("There are no messages for the template")]
         ThereAreNoMessagesForTheTemplate,
         [Description("There must be a message for {0}")]
         ThereMustBeAMessageFor0,
         [Description("There's more than one message for the same language")]
         TheresMoreThanOneMessageForTheSameLanguage,
-        [Description("The associated type and the model do not match")]
-        TheAssociatedTypeAndTheModelDoNotMatch,
         [Description("The text must contain {0} indicating replacement point")]
         TheTextMustContain0IndicatingReplacementPoint,
         [Description("The template is already active")]

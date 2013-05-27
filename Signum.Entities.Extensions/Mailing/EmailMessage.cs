@@ -10,10 +10,11 @@ using Signum.Entities.Mailing;
 using Signum.Entities.Basics;
 using System.Globalization;
 using System.ComponentModel;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Entities.Mailing
 {
-    [Serializable, EntityKind(EntityKind.Main)]
+    [Serializable, EntityKind(EntityKind.System)]
     public class EmailMessageDN : Entity
     {
         public EmailMessageDN()
@@ -21,48 +22,29 @@ namespace Signum.Entities.Mailing
             this.UniqueIdentifier = Guid.NewGuid();
         }
 
-        [ImplementedBy(typeof(UserDN))]
-        Lite<IEmailOwnerDN> recipient;
-        [NotNullValidator]
-        public Lite<IEmailOwnerDN> Recipient
+        MList<EmailRecipientDN> recipients = new MList<EmailRecipientDN>();
+        [CountIsValidator(ComparisonType.GreaterThan, 0)]
+        public MList<EmailRecipientDN> Recipients
         {
-            get { return recipient; }
-            set { Set(ref recipient, value, () => Recipient); }
+            get { return recipients; }
+            set { Set(ref recipients, value, () => Recipients); }
         }
 
-        string from;
-        public string From
+        [ImplementedByAll]
+        Lite<IdentifiableEntity> target;
+        public Lite<IdentifiableEntity> Target
+        {
+            get { return target; }
+            set { Set(ref target, value, () => Target); }
+        }
+
+        [NotNullable]
+        EmailContactDN from;
+        [NotNullValidator]
+        public EmailContactDN From
         {
             get { return from; }
             set { Set(ref from, value, () => From); }
-        }
-
-        string displayFrom;
-        public string DisplayFrom
-        {
-            get { return displayFrom; }
-            set { Set(ref displayFrom, value, () => DisplayFrom); }
-        }
-
-        string to;
-        public string To
-        {
-            get { return to; }
-            set { Set(ref to, value, () => To); }
-        }
-
-        string bcc;
-        public string Bcc
-        {
-            get { return bcc; }
-            set { Set(ref bcc, value, () => Bcc); }
-        }
-
-        string cc;
-        public string Cc
-        {
-            get { return cc; }
-            set { Set(ref cc, value, () => Cc); }
         }
 
         Lite<EmailTemplateDN> template;
@@ -163,6 +145,88 @@ namespace Signum.Entities.Mailing
             };
     }
 
+    [Serializable]
+    public class EmailRecipientDN : EmailContactDN
+    {
+        public EmailRecipientDN() { }
+
+        public EmailRecipientDN(EmailOwnerData data)
+            : base(data)
+        {
+            kind = EmailRecipientKind.To;
+        }
+
+        EmailRecipientKind kind;
+        public EmailRecipientKind Kind
+        {
+            get { return kind; }
+            set { Set(ref kind, value, () => Kind); }
+        }
+
+        public override string ToString()
+        {
+            return "{0}: {1}".Formato(kind.NiceToString(), base.ToString());
+        }
+    }
+
+    public enum EmailRecipientKind
+    { 
+        To,
+        CC,
+        BCC
+    }
+
+    [Serializable]
+    public class EmailContactDN : EmbeddedEntity
+    {
+        public EmailContactDN() { }
+
+        public EmailContactDN(EmailOwnerData data)
+        {
+            emailOwner = data.Owner;
+            emailAddress = data.Email;
+            displayName = data.DisplayName;
+        }
+
+        Lite<IEmailOwnerDN> emailOwner;
+        public Lite<IEmailOwnerDN> EmailOwner
+        {
+            get { return emailOwner; }
+            set { Set(ref emailOwner, value, () => EmailOwner); }
+        }
+
+        [NotNullable, SqlDbType(Size = 100)]
+        string emailAddress;
+        [EMailValidator, StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        public string EmailAddress
+        {
+            get { return emailAddress; }
+            set { Set(ref emailAddress, value, () => EmailAddress); }
+        }
+
+        string displayName;
+        public string DisplayName
+        {
+            get { return displayName; }
+            set { Set(ref displayName, value, () => DisplayName); }
+        }
+
+        public override string ToString()
+        {
+            return "{0} <{1}>".Formato(displayName, emailAddress);
+        }
+    }
+
+    public enum EmailSenderOperation
+    {
+        Save
+    }
+
+    public enum EmailRecipientOperation
+    {
+        Save
+    }
+
     public enum EmailMessageState
     {
         Created,
@@ -173,8 +237,15 @@ namespace Signum.Entities.Mailing
 
     public interface IEmailOwnerDN : IIdentifiable
     {
-        string Email { get; }
-        CultureInfo CultureInfo { get; }
+        EmailOwnerData EmailOwnerData { get; }
+    }
+
+    public class EmailOwnerData : IQueryTokenBag
+    {
+        public Lite<IEmailOwnerDN> Owner { get; set; }
+        public string Email { get; set; }
+        public string DisplayName { get; set; }
+        public CultureInfo CultureInfo { get; set; }
     }
 
     public enum EmailMessageProcesses

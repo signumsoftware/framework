@@ -42,9 +42,9 @@ namespace Signum.Engine.Mailing
             {
                 sb.Include<NewsletterDN>();
                 sb.Include<NewsletterDeliveryDN>();
+
                 ProcessLogic.AssertStarted(sb);
                 ProcessLogic.Register(NewsletterOperation.Send, new NewsletterProcessAlgortihm());
-
 
                 dqm.RegisterQuery(typeof(NewsletterDN), () =>
                  from n in Database.Query<NewsletterDN>()
@@ -59,8 +59,7 @@ namespace Signum.Engine.Mailing
                      NumDeliveries = n.Deliveries().Count(),
                      LastProcess = p,
                      NumErrors = n.Deliveries().Count(d => d.Exception(p) != null)
-                 });
-           
+                 });           
 
                 dqm.RegisterQuery(typeof(NewsletterDeliveryDN), () =>
                     from e in Database.Query<NewsletterDeliveryDN>()
@@ -77,9 +76,8 @@ namespace Signum.Engine.Mailing
                         Exception = e.Exception(p)
                     });
 
-
-
                 NewsletterGraph.Register();
+
                 sb.AddUniqueIndex<NewsletterDeliveryDN>(nd => new { nd.Newsletter, nd.Recipient });
 
                 Validator.PropertyValidator((NewsletterDN news) => news.HtmlBody).StaticPropertyValidation += (sender, pi) => ValidateTokens((NewsletterDN)sender, pi);
@@ -158,7 +156,9 @@ namespace Signum.Engine.Mailing
                 Construct = (n, _) => new NewsletterDN
                 {
                     Name = n.Name,
+                    SMTPConfig = n.SMTPConfig,
                     From = n.From,
+                    DisplayFrom = n.DisplayFrom,
                     Query = n.Query,
                     HtmlBody = n.HtmlBody,
                     Subject = n.Subject,
@@ -294,7 +294,10 @@ namespace Signum.Engine.Mailing
                         {
                             var client = newsletter.SMTPConfig.GenerateSmtpClient(true);
                             var message = new MailMessage();
-                            message.From = new MailAddress(newsletter.From, newsletter.DisplayFrom);
+                            message.From = new MailAddress(
+                                newsletter.From ?? newsletter.SMTPConfig.InDB(smtp => smtp.DefaultFrom),
+                                newsletter.DisplayFrom ?? newsletter.SMTPConfig.InDB(smtp => smtp.DefaultDisplayFrom));
+
                             message.To.Add(overrideEmail ?? s.Email);
                             message.IsBodyHtml = true;
                             message.Body = NewsletterLogic.TokenRegex.Replace(newsletter.HtmlBody, m =>

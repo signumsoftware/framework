@@ -41,19 +41,21 @@ namespace Signum.Engine.Mailing
     public interface IEmailModel
     {
         IdentifiableEntity UntypedEntity { get; }
+        List<EmailOwnerRecipienData> GetRecipients();
     }
 
-    public interface IEmailModelWithRecipient : IEmailModel
+    public class EmailOwnerRecipienData
     {
-        Lite<IEmailOwnerDN> Recipient { get; set; }
+        public EmailOwnerRecipienData(EmailOwnerData ownerData)
+        {
+            this.OwnerData = ownerData; 
+        }
+
+        public readonly EmailOwnerData OwnerData;
+        public EmailRecipientKind Kind; 
     }
 
-    public interface IEmailModelWithCC : IEmailModel
-    {
-        List<string> CCRecipients { get; set; }
-    }
-
-    public class EmailModel<T> : IEmailModel
+    public abstract class EmailModel<T> : IEmailModel
         where T : IdentifiableEntity
     {
         public T Entity { get; set; }
@@ -61,6 +63,13 @@ namespace Signum.Engine.Mailing
         IdentifiableEntity IEmailModel.UntypedEntity
         {
             get { return Entity; }
+        }
+
+        public abstract List<EmailOwnerRecipienData> GetRecipients();
+
+        protected static List<EmailOwnerRecipienData> To(EmailOwnerData ownerData)
+        {
+            return new List<EmailOwnerRecipienData> { new EmailOwnerRecipienData(ownerData) }; 
         }
     }
 
@@ -74,14 +83,18 @@ namespace Signum.Engine.Mailing
 
         internal static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null, null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null, null, null)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        private static Func<EmailLogicConfiguration> EmailLogicConfiguration;
+
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<EmailLogicConfiguration> emailLogicConfiguration)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 CultureInfoLogic.AssertStarted(sb);
+
+                EmailLogicConfiguration = emailLogicConfiguration;
 
                 sb.Include<EmailMessageDN>();
                 sb.Include<EmailTemplateDN>();
@@ -104,10 +117,6 @@ namespace Signum.Engine.Mailing
                         Entity = t,
                         t.Id,
                         t.Name,
-                        t.From,
-                        t.DisplayFrom,
-                        t.Bcc,
-                        t.Cc,
                         Active = t.IsActiveNow(),
                         t.IsBodyHtml
                     });
@@ -118,10 +127,9 @@ namespace Signum.Engine.Mailing
                     {
                         Entity = e,
                         e.Id,
-                        e.Recipient,
                         e.State,
                         e.Subject,
-                        Body = e.Text,
+                        e.Text,
                         e.Template,
                         e.Sent,
                         e.Received,
@@ -143,24 +151,7 @@ namespace Signum.Engine.Mailing
 
                 EmailTemplateGraph.Register();
                 EmailMasterTemplateGraph.Register();
-
-                EmailTemplateDN.AssociatedTypeIsEmailOwner = t =>
-                    typeof(IEmailOwnerDN).IsAssignableFrom(t.ToType());
-
-                new Graph<EmailTemplateDN>.Execute(EmailTemplateOperation.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (et, _) => { },
-                }.Register();
             }
-        }
-
-        public static void Configure(IEmailLogicConfiguration config)
-        {
-            EmailTemplateDN.DefaultCulture = config.DefaultCulture;
-            EmailTemplateParser.GlobalVariables.Add("UrlPrefix", _ => config.UrlPrefix);
-            SenderManager = new EmailSenderManager(config.DefaultFrom, config.DefaultDisplayFrom, config.DefaultBCC);
         }
 
         static string EmailTemplateMessageText_StaticPropertyValidation(EmailTemplateMessageDN message, PropertyInfo pi)
@@ -182,6 +173,7 @@ namespace Signum.Engine.Mailing
 
             return null;
         }
+
         static string EmailTemplateMessageSubject_StaticPropertyValidation(EmailTemplateMessageDN message, PropertyInfo pi)
         {
             EmailTemplateParser.BlockNode parsedNode = message.TextParsedNode as EmailTemplateParser.BlockNode;
@@ -204,8 +196,8 @@ namespace Signum.Engine.Mailing
 
         private static EmailTemplateParser.BlockNode ParseTemplate(EmailTemplateMessageDN message, string text)
         {
-            Type query = message.Template.AssociatedType.ToType();
-            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(query);
+            object queryName = QueryLogic.ToQueryName(message.Template.Query.Key);
+            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
 
             List<QueryToken> list = new List<QueryToken>();
             return EmailTemplateParser.Parse(text, s => QueryUtils.Parse("Entity." + s, qd, false), message.Template.Model.ToType());
@@ -229,16 +221,16 @@ namespace Signum.Engine.Mailing
 
         static void EmailTemplate_PreSaving(EmailTemplateDN template, ref bool graphModified)
         {
-            Type query = template.AssociatedType.ToType();
-            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(query);
+            var queryname = QueryLogic.ToQueryName(template.Query.Key);
+            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryname);
 
             List<QueryToken> list = new List<QueryToken>();
 
-            if (!(typeof(IEmailModelWithRecipient).IsAssignableFrom(template.Model.ToType())))
+            foreach (var tr in template.Recipients.Where(r => r.EmailOwner != null))
             {
-                list.Add(QueryUtils.Parse(".".Combine("Entity", template.Recipient.TokenString), qd, false));
+                list.Add(QueryUtils.Parse(".".Combine("Entity", tr.EmailOwner.TokenString, "EmailOwnerData"), qd, false));
             }
-
+            
             foreach (var message in template.Messages)
             {
                 EmailTemplateParser.Parse(message.Text, s => QueryUtils.Parse("Entity." + s, qd, false), template.Model.ToType()).FillQueryTokens(list);
@@ -247,17 +239,9 @@ namespace Signum.Engine.Mailing
 
             var tokens = list.Distinct();
 
-            var tokensRemoved = template.Tokens.TryCC(tt => tt.Extract(t => !tokens.Contains(t.Token))) ?? new List<TemplateQueryTokenDN>();
-
-            var tokensToAdd = tokens.Where(t =>
-                !template.Tokens.Any(tt => tt.Token == t))
-                .Select(t => new TemplateQueryTokenDN { Token = t });
-
-            if (tokensRemoved.Any() || tokensToAdd.Any())
+            if (!template.Tokens.Select(a => a.Token).ToList().SequenceEqual(tokens))
             {
-                if (template.Tokens == null)
-                    template.Tokens = new MList<TemplateQueryTokenDN>();
-                template.Tokens.AddRange(tokensToAdd);
+                template.Tokens.ResetRange(tokens.Select(t => new TemplateQueryTokenDN { Token = t }));
                 graphModified = true;
             }
         }
@@ -272,6 +256,12 @@ namespace Signum.Engine.Mailing
                 (typeDN, type) => KVP.Create(type, typeDN), "caching EmailTemplates").ToDictionary();
 
             emailModelToType = emailModelToDN.Inverse();
+
+            var emailLogicConfiguration = EmailLogicConfiguration();
+            EmailTemplateDN.DefaultCulture = emailLogicConfiguration.DefaultCulture;
+            EmailTemplateParser.GlobalVariables.Add("UrlLeft", _ => emailLogicConfiguration.UrlLeft);
+
+            SenderManager = new EmailSenderManager();
         }
 
         static readonly string systemTemplatesReplacementKey = "EmailTemplates";
@@ -306,15 +296,14 @@ namespace Signum.Engine.Mailing
             var lista = (from type in emailModels.Keys
                          select new EmailModelDN
                          {
-                             FullClassName = type.FullName,
-                             FriendlyName = type.NiceName()
+                             FullClassName = type.FullName
                          }).ToList();
             return lista;
         }
 
         static SqlPreCommand Schema_Generating()
         {
-            Table table = Schema.Current.Table<EmailTemplateDN>();
+            Table table = Schema.Current.Table<EmailModelDN>();
 
             return (from ei in GenerateTemplates()
                     select table.InsertSqlSync(ei)).Combine(Spacing.Simple);
@@ -411,13 +400,22 @@ namespace Signum.Engine.Mailing
 
         public static EmailMessageDN CreateEmailMessage(this IEmailModel model)
         {
-            var systemTemplate = ToEmailModel(model.GetType());
+            var emailModel = ToEmailModel(model.GetType());
 
             var template = Database.Query<EmailTemplateDN>().SingleOrDefaultEx(t =>
                 t.IsActiveNow() == true &&
-                t.Model == systemTemplate);
+                t.Model == emailModel);
+
             if (template == null)
-                template = emailModels[systemTemplate.GetType()]();
+            {
+                template = emailModels.GetOrThrow(model.GetType())();
+                template.Model = emailModel;
+
+                using (ExecutionMode.Global())
+                using (OperationLogic.AllowSave<EmailTemplateDN>())
+                    template.Save();                    
+            }
+
             return CreateEmailMessage(template, model.UntypedEntity, model);
         }
 
@@ -428,8 +426,8 @@ namespace Signum.Engine.Mailing
 
         public static EmailMessageDN CreateEmailMessage(this EmailTemplateDN template, IIdentifiable entity, IEmailModel model)
         {
-            Type query = template.AssociatedType.ToType();
-            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(query);
+            var queryName = QueryLogic.ToQueryName(template.Query.Key);
+            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
 
             var columns = template.Tokens.Select(qt => new Column(QueryUtils.Parse("Entity." + qt.TokenString, qd, false), null)).ToList();
 
@@ -437,7 +435,7 @@ namespace Signum.Engine.Mailing
 
             var table = DynamicQueryManager.Current.ExecuteQuery(new QueryRequest
             {
-                QueryName = query,
+                QueryName = queryName,
                 Columns = columns,
                 ElementsPerPage = QueryRequest.AllElements,
                 Filters = new List<Filter>
@@ -448,39 +446,57 @@ namespace Signum.Engine.Mailing
 
             var dicTokenColumn = table.Columns.ToDictionary(rc => rc.Column.Token);
 
-            Lite<IEmailOwnerDN> recipient = null;
+            
+            MList<EmailOwnerRecipienData> recipients = new MList<EmailOwnerRecipienData>();
+            if (model != null)
+                recipients.AddRange(model.GetRecipients());
 
-            if (model != null && model is IEmailModelWithRecipient)
-                recipient = ((IEmailModelWithRecipient)model).Recipient;
-            else
+            recipients.AddRange(template.Recipients.SelectMany(tr => 
             {
-                recipient = EmailTemplateParser.GetRecipient(table,
-                    dicTokenColumn[QueryUtils.Parse("Entity." + template.Recipient.TokenString, qd, false)]);
-            }
+                if (tr.EmailOwner != null)
+                {
+                    var owner = dicTokenColumn.GetOrThrow(QueryUtils.Parse("Entity." + tr.EmailOwner.TokenString + "EmailOwnerData", qd, false));
+
+                    var groups = table.Rows.Select(r => (EmailOwnerData)r[owner]).Distinct(a => a.Owner).ToList();
+                    if (groups.Count == 1 && groups[0] == null)
+                        return new List<EmailOwnerRecipienData>();
+
+                    return groups.Select(gr => new EmailOwnerRecipienData(g) { Kind = tr.Kind }).ToList();
+                }
+                else 
+                {
+                    return new List<EmailOwnerRecipienData>
+                    { 
+                        new EmailOwnerRecipienData(new EmailOwnerData
+                        {
+                             CultureInfo = null, 
+                             Email = tr.EmailAddress,
+                             DisplayName = tr.DisplayName
+                        }){ Kind = tr.Kind },
+                    };
+                }
+            }));
+
+
+            
+            EmailContactDN from;
+            if(template.From
+
+
+                
 
             var email = new EmailMessageDN
             {
-                Recipient = recipient,
+                Recipients = recipients.Select(r => new EmailRecipientDN(r.OwnerData) { Kind = r.Kind }).ToMList(),
                 From = template.From,
-                DisplayFrom = template.DisplayFrom,
-                Cc = template.Cc,
-                Bcc = template.Bcc,
                 IsBodyHtml = template.IsBodyHtml,
                 EditableMessage = template.EditableMessage,
                 Template = template.ToLite(),
             };
 
-            if (template.Model != null && template.Model is IEmailModelWithCC)
-            {
-                email.Cc = ",".Combine(email.Cc, ((IEmailModelWithCC)template.Model).CCRecipients.ToString(","));
-            }
+            CultureInfo ci = recipients.Where(a => a.Kind == EmailRecipientKind.To).Select(a => a.OwnerData.CultureInfo).FirstOrDefault();
 
-            var recipientCI = recipient.InDB(io => io.CultureInfo);
-            var cultureInfo = recipientCI ?? EmailTemplateDN.DefaultCulture.CultureInfo;
-
-            var message = template.Messages.SingleOrDefault(tm => tm.CultureInfo.CultureInfo == cultureInfo) ??
-                template.Messages.SingleOrDefault(tm => tm.CultureInfo.CultureInfo == cultureInfo.Parent) ??
-                template.Messages.SingleOrDefault(tm => tm.CultureInfo.CultureInfo == EmailTemplateDN.DefaultCulture.CultureInfo);
+            var message = template.GetCultureMessage(ci);
 
             Func<string, QueryToken> parseToken = str => QueryUtils.Parse("Entity." + str, qd, false);
 
@@ -602,17 +618,10 @@ namespace Signum.Engine.Mailing
 
     public class EmailSenderManager
     {
-        public EmailSenderManager(string defaultFrom, string defaultDisplayFrom, string defaultBcc)
+        public EmailSenderManager()
         {
-            DefaultFrom = defaultFrom;
-            DefaultDisplayFrom = defaultDisplayFrom;
-            DefaultBcc = defaultBcc;
+            
         }
-
-        public string DefaultFrom;
-        public string DefaultDisplayFrom;
-        public string DefaultBcc;
-
 
         protected MailMessage CreateMailMessage(EmailMessageDN email)
         {
