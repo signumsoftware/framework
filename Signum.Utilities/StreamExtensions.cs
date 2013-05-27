@@ -24,7 +24,7 @@ namespace Signum.Utilities
 
         public static void WriteAllBytes(this Stream str, byte[] data)
         {
-            str.Write(data, 0, data.Length); 
+            str.Write(data, 0, data.Length);
         }
 
         public static string ReadResourceStream(this Assembly assembly, string name)
@@ -70,6 +70,20 @@ namespace Signum.Utilities
             {
                 return StreamsAreEqual(s1, s2);
             }
+        }
+
+        public static R Using<T, R>(this T disposable, Func<T, R> function)
+            where T : IDisposable
+        {
+            using (disposable)
+                return function(disposable);
+        }
+
+        public static void EndUsing<T>(this T disposable, Action<T> action)
+            where T : IDisposable
+        {
+            using (disposable)
+                action(disposable);
         }
     }
 

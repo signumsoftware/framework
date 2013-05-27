@@ -849,7 +849,7 @@
                             <ContentPresenter 
 						                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
 						                HorizontalAlignment="Stretch"  />
-                            <StackPanel Grid.Column="1" Orientation="Vertical" MinWidth="24">
+                            <StackPanel Grid.Column="1" Orientation="{Binding ButtonsOrientation, RelativeSource={RelativeSource AncestorType={x:Type m:EntityRepeater}}}" MinWidth="24">
                                 <Button x:Name="PART_RemoveButton"
                                         Style="{StaticResource RoundButton}" 
                                         Content="{StaticResource Remove}" 

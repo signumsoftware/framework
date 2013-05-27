@@ -5,7 +5,7 @@ using System.Text;
 using Signum.Engine.Operations;
 using Signum.Entities;
 
-namespace Signum.Entine.Operations.Internal
+namespace Signum.Engine.Operations.Internal
 {
     public interface IConstructOperation : IOperation
     {
