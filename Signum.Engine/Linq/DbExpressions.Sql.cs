@@ -31,6 +31,7 @@ namespace Signum.Engine.Linq
         Projection,
         ChildProjection,
         Join,
+        SetOperator,
         Aggregate,
         AggregateSubquery,
         SqlFunction,        
@@ -62,6 +63,7 @@ namespace Signum.Engine.Linq
         MList,
         MListProjection,
         MListElement,
+        
     }
 
 
@@ -445,6 +447,45 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             return "{0}\r\n{1}\r\n{2}\r\nON {3}".Formato(Left.ToString().Indent(4), JoinType, Right.ToString().Indent(4), Condition.NiceToString());
+        }
+    }
+    
+    internal enum SetOperator
+    {
+        Union,
+        UnionAll,
+        Intersect,
+        Except
+    }
+
+    internal class SetOperatorExpression : SourceWithAliasExpression
+    {
+        public readonly SetOperator Operator;
+        public readonly SourceWithAliasExpression Left;
+        public readonly SourceWithAliasExpression Right;
+
+        public override Alias[] KnownAliases
+        {
+            get { return Left.KnownAliases.Concat(Right.KnownAliases).PreAnd(Alias).ToArray(); }
+        }
+
+        internal SetOperatorExpression(SetOperator @operator, SourceWithAliasExpression left, SourceWithAliasExpression right, Alias alias)
+            : base(DbExpressionType.SetOperator, alias)
+        {
+            if (left == null)
+                throw new ArgumentNullException("left");
+
+            if (right == null)
+                throw new ArgumentNullException("right");
+
+            this.Operator = @operator;
+            this.Left = left;
+            this.Right = right;
+        }
+
+        public override string ToString()
+        {
+            return "{0}\r\n{1}\r\n{2}".Formato(Left.ToString().Indent(4), Operator, Right.ToString().Indent(4));
         }
     }
 

@@ -76,6 +76,19 @@ namespace Signum.Engine.Linq
             return base.VisitSubquery(subquery);
         }
 
+        protected override Expression VisitSetOperator(SetOperatorExpression set)
+        {
+            HashSet<string> columnsUsed = allColumnsUsed.GetOrCreate(set.Alias); // a veces no se usa
+
+            foreach (var column in columnsUsed)
+                allColumnsUsed.GetOrCreate(set.Left.Alias).Add(column);
+
+            foreach (var column in columnsUsed)
+                allColumnsUsed.GetOrCreate(set.Right.Alias).Add(column);
+
+            return base.VisitSetOperator(set);
+        }
+
         protected override Expression VisitProjection(ProjectionExpression projection)
         {
             // visit mapping in reverse order

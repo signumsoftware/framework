@@ -93,6 +93,8 @@ namespace Signum.Engine.Linq
                     return this.VisitSelect((SelectExpression)exp);
                 case (ExpressionType)DbExpressionType.Join:
                     return this.VisitJoin((JoinExpression)exp);
+               case (ExpressionType)DbExpressionType.SetOperator:
+                    return this.VisitSetOperator((SetOperatorExpression)exp);
                 case (ExpressionType)DbExpressionType.Projection:
                     return this.VisitProjection((ProjectionExpression)exp);
                 case (ExpressionType)DbExpressionType.ChildProjection:
@@ -497,6 +499,17 @@ namespace Signum.Engine.Linq
                 return new JoinExpression(join.JoinType, left, right, condition);
             }
             return join;
+        }
+
+        protected virtual Expression VisitSetOperator(SetOperatorExpression set)
+        {
+            SourceWithAliasExpression left = (SourceWithAliasExpression)this.VisitSource(set.Left);
+            SourceWithAliasExpression right = (SourceWithAliasExpression)this.VisitSource(set.Right);
+            if (left != set.Left || right != set.Right)
+            {
+                return new SetOperatorExpression(set.Operator, left, right, set.Alias);
+            }
+            return set;
         }
 
         protected virtual SourceExpression VisitSource(SourceExpression source)

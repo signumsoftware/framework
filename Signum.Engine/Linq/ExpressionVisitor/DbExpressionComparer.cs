@@ -70,6 +70,8 @@ namespace Signum.Engine.Linq
                     return CompareSelect((SelectExpression)a, (SelectExpression)b);
                 case DbExpressionType.Join:
                     return CompareJoin((JoinExpression)a, (JoinExpression)b);
+                case DbExpressionType.SetOperator:
+                    return CompareSetOperator((SetOperatorExpression)a, (SetOperatorExpression)b);
                 case DbExpressionType.Projection:
                     return CompareProjection((ProjectionExpression)a, (ProjectionExpression)b);
                 case DbExpressionType.ChildProjection:
@@ -237,6 +239,24 @@ namespace Signum.Engine.Linq
                     && Compare(a.Condition, b.Condition);
             }
         }
+
+        protected virtual bool CompareSetOperator(SetOperatorExpression a, SetOperatorExpression b)
+        {
+            if (a.Operator != b.Operator)
+                return false;
+
+            if (!CompareAlias(a.Alias, b.Alias))
+                return false;
+            
+            if (!Compare(a.Left, b.Left))
+                return false;
+
+            if (!Compare(a.Right, b.Right))
+                return false;
+
+            return true;
+        }
+
 
         protected virtual bool CompareProjection(ProjectionExpression a, ProjectionExpression b)
         {
