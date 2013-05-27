@@ -76,7 +76,7 @@ namespace Signum.Windows.ControlPanels
 
                 LinksClient.RegisterEntityLinks<ControlPanelDN>((cp, ctrl) => new[]{  
                     !ControlPanelPermission.ViewControlPanel.IsAuthorized() ? null:  
-                    new QuickLinkAction(ControlPanelMessage.Preview.NiceToString(), () => View(cp, null))
+                    new QuickLinkAction(ControlPanelMessage.Preview, () => View(cp, null))
                 });
 
                 LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, ctrl) =>
@@ -108,6 +108,11 @@ namespace Signum.Windows.ControlPanels
             public override void Execute()
             {
                 ControlPanelClient.View(controlPanel, entity.Retrieve());
+            }
+
+            public override string Name
+            {
+                get { return controlPanel.Key(); }
             }
         }
 

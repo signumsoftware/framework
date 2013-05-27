@@ -109,6 +109,11 @@ namespace Signum.Windows.UserQueries
             {
                 UserQueryClient.Explore(userQuery.Retrieve(), entity.Retrieve());
             }
+
+            public override string Name
+            {
+                get { return userQuery.Key(); }
+            }
         }
 
 
