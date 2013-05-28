@@ -49,7 +49,7 @@ namespace Signum.Engine.Linq
             if (lite.Reference is EntityExpression && ((EntityExpression)lite.Reference).AvoidExpandOnRetrieving)
                 return null;
 
-            if (lite.Reference is ImplementedByExpression && ((ImplementedByExpression)lite.Reference).Implementations.Any(imp => imp.Reference.AvoidExpandOnRetrieving))
+            if (lite.Reference is ImplementedByExpression && ((ImplementedByExpression)lite.Reference).Implementations.Any(imp => imp.Value.AvoidExpandOnRetrieving))
                 return null;
 
             if (IsCacheable(typeId))
@@ -68,7 +68,7 @@ namespace Signum.Engine.Linq
             TypeImplementedByExpression tibe = newTypeId as TypeImplementedByExpression;
 
             if (tibe != null)
-                return tibe.TypeImplementations.All(t => IsCached(t.Type));
+                return tibe.TypeImplementations.All(t => IsCached(t.Key));
 
             return false;
         }

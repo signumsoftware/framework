@@ -295,7 +295,6 @@ namespace Signum.Engine.Linq
 
                 ExpandKnowAlias(internalAlias);
 
-
                 requests.Add(new UniqueRequest
                 {
                     Select = newProjector.Select,
@@ -971,16 +970,16 @@ namespace Signum.Engine.Linq
                 if (m.Method.IsExtensionMethod())
                 {
                     List<When> whens = ib.Implementations.Select(
-                        imp => new When(imp.Reference.ExternalId.NotEqualsNulll(),
-                            BindMethodCall(Expression.Call(null, m.Method, m.Arguments.Skip(1).PreAnd(imp.Reference))))).ToList();
+                        imp => new When(imp.Value.ExternalId.NotEqualsNulll(),
+                            BindMethodCall(Expression.Call(null, m.Method, m.Arguments.Skip(1).PreAnd(imp.Value))))).ToList();
 
                     return CombineWhens(whens, m.Type);
                 }
                 else
                 {
                     List<When> whens = ib.Implementations.Select(
-                       imp => new When(imp.Reference.ExternalId.NotEqualsNulll(),
-                           BindMethodCall(Expression.Call(imp.Reference, m.Method, m.Arguments)))).ToList();
+                       imp => new When(imp.Value.ExternalId.NotEqualsNulll(),
+                           BindMethodCall(Expression.Call(imp.Value, m.Method, m.Arguments)))).ToList();
 
                     return CombineWhens(whens, m.Type);
                 }
@@ -1155,8 +1154,8 @@ namespace Signum.Engine.Linq
                 {
                     ImplementedByExpression ib = (ImplementedByExpression)source;
                     List<When> whens = ib.Implementations.Select(imp => new When(
-                        imp.Reference.ExternalId.NotEqualsNulll(),
-                        BindMemberAccess(Expression.MakeMemberAccess(imp.Reference, m.Member)))).ToList();
+                        imp.Value.ExternalId.NotEqualsNulll(),
+                        BindMemberAccess(Expression.MakeMemberAccess(imp.Value, m.Member)))).ToList();
 
                     var result = CombineWhens(whens, m.Member.ReturningType());
 
@@ -1223,18 +1222,18 @@ namespace Signum.Engine.Linq
                 var ibs = (from e in whens
                             where e.Value is ImplementedByExpression
                             from imp in ((ImplementedByExpression)e.Value).Implementations
-                            select new {imp.Type, Fie = imp.Reference, Condition = (Expression)Expression.And(e.Condition, 
-                                Expression.NotEqual(imp.Reference.ExternalId, Expression.Constant(null, typeof(int?)))) }).ToList();
+                            select new {Type = imp.Key, Fie = imp.Value, Condition = (Expression)Expression.And(e.Condition, 
+                                Expression.NotEqual(imp.Value.ExternalId, Expression.Constant(null, typeof(int?)))) }).ToList();
 
                 var groups = fies.Concat(ibs).GroupToDictionary(a => a.Type);
 
                 var implementations = groups.Select(g =>
-                    new ImplementationColumn(g.Key,
+                    KVP.Create(g.Key,
                         new EntityExpression(g.Key,
-                            CombineWhens(g.Value.Select(w => new When(w.Condition, w.Fie.ExternalId)).ToList(), typeof(int?)), null, null, g.Value.Any(a => a.Fie.AvoidExpandOnRetrieving)))).ToReadOnly();
+                            CombineWhens(g.Value.Select(w => new When(w.Condition, w.Fie.ExternalId)).ToList(), typeof(int?)), null, null, g.Value.Any(a => a.Fie.AvoidExpandOnRetrieving)))).ToDictionary().ToReadOnly();
 
                 if(implementations.Count == 1)
-                    return implementations[0].Reference;
+                    return implementations.Single().Value;
 
                 return new ImplementedByExpression(returnType, implementations);    
             }
@@ -1288,8 +1287,8 @@ namespace Signum.Engine.Linq
                 var typeIb = (TypeImplementedByExpression)exp;
 
                 return typeIb.TypeImplementations.Reverse().Aggregate((Expression)NullId, (acum, imp) =>
-                    Expression.Condition(Expression.NotEqual(imp.ExternalId.Nullify(), NullId),
-                    TypeConstant(imp.Type), acum));
+                    Expression.Condition(Expression.NotEqual(imp.Value.Nullify(), NullId),
+                    TypeConstant(imp.Key), acum));
             }
 
             throw new InvalidOperationException("Impossible to extract TypeId from {0}".Formato(exp.NiceToString()));
@@ -1343,7 +1342,7 @@ namespace Signum.Engine.Linq
             {
                 ImplementedByExpression ib = (ImplementedByExpression)operand;
 
-                EntityExpression[] fies = ib.Implementations.Where(imp => type.IsAssignableFrom(imp.Type)).Select(imp => imp.Reference).ToArray();
+                EntityExpression[] fies = ib.Implementations.Where(imp => type.IsAssignableFrom(imp.Key)).Select(imp => imp.Value).ToArray();
 
                 return fies.Select(f => (Expression)Expression.NotEqual(f.ExternalId.Nullify(), NullId)).AggregateOr();
             }
@@ -1403,7 +1402,7 @@ namespace Signum.Engine.Linq
 
                 if (uType.IsAssignableFrom(ee.Type)) // upcasting
                 {
-                    return new ImplementedByExpression(uType, new[] { new ImplementationColumn(operand.Type, ee) }.ToReadOnly());
+                    return new ImplementedByExpression(uType, new Dictionary<Type, EntityExpression> { { operand.Type, ee } }.ToReadOnly());
                 }
                 else
                 {
@@ -1414,7 +1413,7 @@ namespace Signum.Engine.Linq
             {
                 ImplementedByExpression ib = (ImplementedByExpression)operand;
 
-                EntityExpression[] fies = ib.Implementations.Where(imp => uType.IsAssignableFrom(imp.Type)).Select(imp => imp.Reference).ToArray();
+                EntityExpression[] fies = ib.Implementations.Where(imp => uType.IsAssignableFrom(imp.Key)).Select(imp => imp.Value).ToArray();
 
                 if (fies.IsEmpty())
                 {
@@ -1423,7 +1422,7 @@ namespace Signum.Engine.Linq
                 if (fies.Length == 1 && fies[0].Type == uType)
                     return fies[0];
 
-                return new ImplementedByExpression(uType, fies.Select(f => new ImplementationColumn(f.Type, f)).ToReadOnly());
+                return new ImplementedByExpression(uType, fies.ToDictionary(f => f.Type));
             }
             else if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedByAll)
             {
@@ -1730,22 +1729,23 @@ namespace Signum.Engine.Linq
                 {
                     EntityExpression ee = (EntityExpression)expression;
 
-                    if (!colIb.Implementations.Any(i => i.Type == ee.Type))
-                        throw new InvalidOperationException("Type {0} is not in {1}".Formato(ee.Type.Name, colIb.Implementations.ToString(i => i.Type.Name, ", ")));
+                    if (!colIb.Implementations.ContainsKey(ee.Type))
+                        throw new InvalidOperationException("Type {0} is not in {1}".Formato(ee.Type.Name, colIb.Implementations.ToString(i => i.Key.Name, ", ")));
 
-                    return colIb.Implementations.Select(imp => (AssignColumn(imp.Reference.ExternalId,
-                       imp.Type == ee.Type ? ee.ExternalId : NullId))).ToArray();
+                    return colIb.Implementations
+                        .Select(imp => AssignColumn(imp.Value.ExternalId, imp.Key == ee.Type ? ee.ExternalId : NullId))
+                        .ToArray();
                 }
                 else if (expression is ImplementedByExpression)
                 {
                     ImplementedByExpression ib = (ImplementedByExpression)expression;
 
-                    Type[] types = ib.Implementations.Select(i => i.Type).Except(colIb.Implementations.Select(i => i.Type)).ToArray();
+                    Type[] types = ib.Implementations.Select(i => i.Key).Except(colIb.Implementations.Select(i => i.Key)).ToArray();
                     if (types.Any())
                         throw new InvalidOperationException("No implementation for type(s) {0} found".Formato(types.ToString(t => t.Name, ", ")));
 
-                    return colIb.Implementations.Select(cImp => AssignColumn(cImp.Reference.ExternalId,
-                            ib.Implementations.SingleOrDefaultEx(imp => imp.Type == cImp.Type).TryCC(imp => imp.Reference.ExternalId) ?? NullId)).ToArray();
+                    return colIb.Implementations.Select(cImp => AssignColumn(cImp.Value.ExternalId,
+                            ib.Implementations.TryGetC(cImp.Key).TryCC(imp => imp.ExternalId) ?? NullId)).ToArray();
                 }
 
             }
@@ -1767,9 +1767,9 @@ namespace Signum.Engine.Linq
                     ImplementedByExpression ib = (ImplementedByExpression)expression;
                     return new[]
                     {
-                        AssignColumn(colIba.Id, Coalesce(typeof(int?), ib.Implementations.Select(e => e.Reference.ExternalId))),
+                        AssignColumn(colIba.Id, Coalesce(typeof(int?), ib.Implementations.Select(e => e.Value.ExternalId))),
                         AssignColumn(colIba.TypeId.TypeColumn, ib.Implementations.Select(imp => 
-                            new When(imp.Reference.ExternalId.NotEqualsNulll(), TypeConstant(imp.Type))).ToList().ToCondition(typeof(int?)))
+                            new When(imp.Value.ExternalId.NotEqualsNulll(), TypeConstant(imp.Key))).ToList().ToCondition(typeof(int?)))
                     };
                 }
 
@@ -1822,7 +1822,7 @@ namespace Signum.Engine.Linq
             else if (colExpression is ImplementedByExpression)
             {
                 ImplementedByExpression colIb = (ImplementedByExpression)colExpression;
-                return colIb.Implementations.Select(imp => (AssignColumn(imp.Reference.ExternalId, NullId))).ToArray();
+                return colIb.Implementations.Values.Select(imp => (AssignColumn(imp.ExternalId, NullId))).ToArray();
             }
             else if (colExpression is ImplementedByAllExpression)
             {
@@ -1911,7 +1911,7 @@ namespace Signum.Engine.Linq
             {
                 ImplementedByExpression ib = (ImplementedByExpression)expression;
 
-                Expression aggregate = Coalesce(typeof(int?), ib.Implementations.Select(imp => imp.Reference.ExternalId));
+                Expression aggregate = Coalesce(typeof(int?), ib.Implementations.Select(imp => imp.Value.ExternalId));
 
                 return aggregate;
             }
@@ -1953,7 +1953,7 @@ namespace Signum.Engine.Linq
                 if (ib.Implementations.Count == 0)
                     return Expression.Constant(null, typeof(Type));
 
-                return new TypeImplementedByExpression(ib.Implementations.Select(imp => new TypeImplementationColumnExpression(imp.Type, imp.Reference.ExternalId)).ToReadOnly());
+                return new TypeImplementedByExpression(ib.Implementations.SelectDictionary(k => k, v => v.ExternalId));
             }
 
             if (expression is ImplementedByAllExpression)
@@ -1975,7 +1975,7 @@ namespace Signum.Engine.Linq
             }
 
             if (expression.IsNull())
-                return new TypeImplementedByExpression(new List<TypeImplementationColumnExpression>().ToReadOnly());
+                return new TypeImplementedByExpression(new Dictionary<Type, Expression>());
 
             throw new NotSupportedException("Id for {0}".Formato(expression.NiceToString()));
         }

@@ -282,6 +282,29 @@ namespace Signum.Utilities.ExpressionTrees
             return true;
         }
 
+        protected static bool CompareDictionaries<K, V>(ReadOnlyDictionary<K, V> a, ReadOnlyDictionary<K, V> b, Func<V, V, bool> comparer)
+        {
+            if (a == b)
+                return true;
+            if (a == null || b == null)
+                return false;
+            if (a.Count != b.Count)
+                return false;
+
+            var keys = a.Keys.Intersect(b.Keys).ToList();
+
+            if (keys.Count != a.Count)
+                return false;
+
+            foreach (var k in keys)
+            {
+                if (!comparer(a[k], b[k]))
+                    return false;
+            }
+
+            return true;
+        }
+
         protected virtual bool CompareElementInit(ElementInit a, ElementInit b)
         {
             return  ReflectionTools.MethodEqual(a.AddMethod, b.AddMethod)

@@ -54,6 +54,8 @@ namespace Signum.Engine.Linq
         Entity = 2000,
         EmbeddedInit,
         ImplementedBy,
+        ImplementedByUnion,
+        ImplementedByExpressions,
         ImplementedByAll,
         LiteReference,
         LiteValue,

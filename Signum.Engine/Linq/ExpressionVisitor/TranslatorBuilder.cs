@@ -325,7 +325,7 @@ namespace Signum.Engine.Linq
 
             protected override Expression VisitImplementedBy(ImplementedByExpression rb)
             {
-                return rb.Implementations.Select(ee => new When(Visit(ee.Reference.ExternalId).NotEqualsNulll(), Visit(ee.Reference))).ToCondition(rb.Type);
+                return rb.Implementations.Select(ee => new When(Visit(ee.Value.ExternalId).NotEqualsNulll(), Visit(ee.Value))).ToCondition(rb.Type);
             }
 
             protected override Expression VisitImplementedByAll(ImplementedByAllExpression rba)
@@ -349,8 +349,8 @@ namespace Signum.Engine.Linq
             protected override Expression VisitTypeImplementedBy(TypeImplementedByExpression typeIb)
             {
                 return typeIb.TypeImplementations.Reverse().Aggregate((Expression)NullType, (acum, imp) => Expression.Condition(
-                    Expression.NotEqual(Visit(NullifyColumn(imp.ExternalId)), NullId),
-                    Expression.Constant(imp.Type, typeof(Type)),
+                    Expression.NotEqual(Visit(NullifyColumn(imp.Value)), NullId),
+                    Expression.Constant(imp.Key, typeof(Type)),
                     acum));
             }
 
@@ -398,9 +398,9 @@ namespace Signum.Engine.Linq
                     liteConstructor = tib.TypeImplementations.Aggregate(nothing,
                         (acum, ti) =>
                             {
-                                var visitId = Visit(NullifyColumn(ti.ExternalId));
+                                var visitId = Visit(NullifyColumn(ti.Value));
                                 return Expression.Condition(Expression.NotEqual(visitId, NullId),
-                                    Expression.Convert(Lite.NewExpression(ti.Type, visitId, toStringOrNull, peModifiableState), lite.Type), acum);
+                                    Expression.Convert(Lite.NewExpression(ti.Key, visitId, toStringOrNull, peModifiableState), lite.Type), acum);
                             });
                 }
                 else if (typeId.NodeType == (ExpressionType)DbExpressionType.TypeImplementedByAll)

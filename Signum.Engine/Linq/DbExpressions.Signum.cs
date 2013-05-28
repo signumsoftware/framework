@@ -146,9 +146,9 @@ namespace Signum.Engine.Linq
 
     internal class ImplementedByExpression : DbExpression//, IPropertyInitExpression
     {
-        public readonly ReadOnlyCollection<ImplementationColumn> Implementations;
+        public readonly ReadOnlyDictionary<Type, EntityExpression> Implementations;
   
-        public ImplementedByExpression(Type type, ReadOnlyCollection<ImplementationColumn> implementations)
+        public ImplementedByExpression(Type type, IDictionary<Type, EntityExpression> implementations)
             : base(DbExpressionType.ImplementedBy, type)
         {
             this.Implementations = implementations.ToReadOnly();
@@ -156,31 +156,50 @@ namespace Signum.Engine.Linq
 
         public bool IsCompleted
         {
-            get { return Implementations.All(a => a.Reference.IsCompleted); }
+            get { return Implementations.All(a => a.Value.IsCompleted); }
         }
 
         public override string ToString()
-        { 
+        {
             return "ImplementedBy{{\r\n{0}\r\n}}".Formato(
-                Implementations.ToString(",\r\n").Indent(4)
+                Implementations.ToString(kvp => "{0} ->  {1}".Formato(kvp.Key.NiceName(), kvp.Value.NiceToString()), "\r\n").Indent(4)
                 );
         }
     }
 
-    internal class ImplementationColumn
+    internal class ImplementedByUnionExpression : DbExpression//, IPropertyInitExpression
     {
-        public readonly EntityExpression Reference; //EntityReference or EntityInit
-        public readonly Type Type;
+        public readonly ReadOnlyDictionary<Type, SourceExpression> Implementations;
 
-        public ImplementationColumn(Type type, EntityExpression reference)
+        public ImplementedByUnionExpression(Type type, IDictionary<Type, SourceExpression> implementations)
+            : base(DbExpressionType.ImplementedByUnion, type)
         {
-            this.Type = type;
-            this.Reference = reference;
+            this.Implementations = implementations.ToReadOnly();
         }
 
         public override string ToString()
         {
-            return "{0} -> {1}".Formato(Type.TypeName(), Reference.NiceToString());
+            return "ImplementedByUnion {{\r\n{0}\r\n}}".Formato(
+                Implementations.ToString(kvp => "{0} ->  {1}".Formato(kvp.Key.NiceName(), kvp.Value.NiceToString()), "\r\n").Indent(4)
+                );
+        }
+    }
+
+    internal class ImplementedByExpressionExpression : DbExpression//, IPropertyInitExpression
+    {
+        public readonly ReadOnlyDictionary<Type, SourceExpression> Implementations;
+
+        public ImplementedByExpressionExpression(Type type, IDictionary<Type, SourceExpression> implementations)
+            : base(DbExpressionType.ImplementedByExpressions, type)
+        {
+            this.Implementations = implementations.ToReadOnly();
+        }
+
+        public override string ToString()
+        {
+            return "ImplementedByExpressions {{\r\n{0}\r\n}}".Formato(
+                Implementations.ToString(kvp => "{0} ->  {1}".Formato(kvp.Key.NiceName(), kvp.Value.NiceToString()), "\r\n").Indent(4)
+                );
         }
     }
 
@@ -273,37 +292,20 @@ namespace Signum.Engine.Linq
 
     internal class TypeImplementedByExpression : DbExpression
     {
-        public readonly ReadOnlyCollection<TypeImplementationColumnExpression> TypeImplementations;
+        public readonly ReadOnlyDictionary<Type, Expression> TypeImplementations;
 
-        public TypeImplementedByExpression(ReadOnlyCollection<TypeImplementationColumnExpression> typeImplementations)
+        public TypeImplementedByExpression(IDictionary<Type, Expression> typeImplementations)
             : base(DbExpressionType.TypeImplementedBy, typeof(Type))
         {
-            if (typeImplementations == null || typeImplementations.Any(a => a.ExternalId.Type.UnNullify() != typeof(int)))
+            if (typeImplementations == null || typeImplementations.Any(a => a.Value.Type.UnNullify() != typeof(int)))
                 throw new ArgumentException("typeId");
 
-            this.TypeImplementations = typeImplementations;
+            this.TypeImplementations = typeImplementations.ToReadOnly();
         }
 
         public override string ToString()
         {
-            return "TypeIb({0})".Formato(TypeImplementations.ToString(" | "));
-        }
-    }
-
-    internal class TypeImplementationColumnExpression
-    {
-        public readonly Expression ExternalId;
-        public readonly Type Type;
-
-        public TypeImplementationColumnExpression(Type type, Expression externalId)
-        {
-            this.Type = type;
-            this.ExternalId = externalId;
-        }
-
-        public override string ToString()
-        {
-            return "{0};{1}".Formato(Type.TypeName(), ExternalId.NiceToString());
+            return "TypeIb({0})".Formato(TypeImplementations.ToString(kvp => "{0}({1})".Formato(kvp.Key.TypeName(), kvp.Value.NiceToString()), " | "));
         }
     }
 

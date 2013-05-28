@@ -449,12 +449,7 @@ namespace Signum.Engine.Linq
 
         protected virtual bool CompareImplementedBy(ImplementedByExpression a, ImplementedByExpression b)
         {
-            return CompareList(a.Implementations, b.Implementations, CompareImplementationColumn);
-        }
-
-        protected virtual bool CompareImplementationColumn(ImplementationColumn a, ImplementationColumn b)
-        {
-            return a.Type == b.Type && Compare(a.Reference, b.Reference);
+            return CompareDictionaries(a.Implementations, b.Implementations, Compare);
         }
 
         protected virtual bool CompareImplementedByAll(ImplementedByAllExpression a, ImplementedByAllExpression b)
@@ -483,12 +478,7 @@ namespace Signum.Engine.Linq
 
         protected virtual bool CompareTypeImplementedBy(TypeImplementedByExpression a, TypeImplementedByExpression b)
         {
-            return CompareList(a.TypeImplementations, b.TypeImplementations, CompareTypeImplementationColumn);
-        }
-
-        protected virtual bool CompareTypeImplementationColumn(TypeImplementationColumnExpression a, TypeImplementationColumnExpression b)
-        {
-            return a.Type == b.Type && Compare(a.ExternalId, b.ExternalId);
+            return CompareDictionaries(a.TypeImplementations, b.TypeImplementations, Compare);
         }
 
         protected virtual bool CompareTypeImplementedByAll(TypeImplementedByAllExpression a, TypeImplementedByAllExpression b)

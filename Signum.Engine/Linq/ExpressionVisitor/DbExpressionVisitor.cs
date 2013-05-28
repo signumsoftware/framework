@@ -243,20 +243,11 @@ namespace Signum.Engine.Linq
 
         protected virtual Expression VisitTypeImplementedBy(TypeImplementedByExpression typeIb)
         {
-            var implementations = typeIb.TypeImplementations.NewIfChange(VisitTypeImplementationColumn);
+            var implementations = typeIb.TypeImplementations.NewIfChange(eid => Visit(eid));
 
             if (implementations != typeIb.TypeImplementations)
                 return new TypeImplementedByExpression(implementations);
             return typeIb;
-        }
-
-        protected virtual TypeImplementationColumnExpression VisitTypeImplementationColumn(TypeImplementationColumnExpression imp)
-        {
-            var id = Visit(imp.ExternalId);
-            if(id == imp.ExternalId)
-                return imp;
-            
-            return new TypeImplementationColumnExpression(imp.Type, id);
         }
 
         protected virtual Expression VisitTypeImplementedByAll(TypeImplementedByAllExpression typeIba)
@@ -330,21 +321,11 @@ namespace Signum.Engine.Linq
 
         protected virtual Expression VisitImplementedBy(ImplementedByExpression reference)
         {
-            var implementations = reference.Implementations.NewIfChange(VisitImplementationColumn);
+            var implementations = reference.Implementations.NewIfChange(v => (EntityExpression)Visit(v));
 
             if (implementations != reference.Implementations)
                 return new ImplementedByExpression(reference.Type, implementations);
             return reference;
-        }
-
-        protected virtual ImplementationColumn VisitImplementationColumn(ImplementationColumn fb)
-        {
-            var r = Visit(fb.Reference);
-
-            if (r == fb.Reference)
-                return fb;
-
-            return new ImplementationColumn(fb.Type, (EntityExpression)r);
         }
 
         protected virtual Expression VisitEntity(EntityExpression ee)
