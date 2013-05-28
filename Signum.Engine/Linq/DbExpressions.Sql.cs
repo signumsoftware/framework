@@ -55,7 +55,6 @@ namespace Signum.Engine.Linq
         EmbeddedInit,
         ImplementedBy,
         ImplementedByUnion,
-        ImplementedByExpressions,
         ImplementedByAll,
         LiteReference,
         LiteValue,

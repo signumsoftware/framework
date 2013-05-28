@@ -53,11 +53,6 @@ namespace Signum.Engine.Linq
             this.AvoidExpandOnRetrieving = avoidExpandOnRetrieving;
         }
 
-        public bool IsCompleted
-        {
-            get { return TableAlias != null; }
-        }
-
         public override string ToString()
         {
             var constructor = "new {0}({1})".Formato(Type.TypeName(),
@@ -122,8 +117,6 @@ namespace Signum.Engine.Linq
         }
     }
 
-   
-
     internal class FieldBinding
     {
         public readonly FieldInfo FieldInfo;
@@ -147,16 +140,11 @@ namespace Signum.Engine.Linq
     internal class ImplementedByExpression : DbExpression//, IPropertyInitExpression
     {
         public readonly ReadOnlyDictionary<Type, EntityExpression> Implementations;
-  
+
         public ImplementedByExpression(Type type, IDictionary<Type, EntityExpression> implementations)
             : base(DbExpressionType.ImplementedBy, type)
         {
             this.Implementations = implementations.ToReadOnly();
-        }
-
-        public bool IsCompleted
-        {
-            get { return Implementations.All(a => a.Value.IsCompleted); }
         }
 
         public override string ToString()
@@ -167,12 +155,17 @@ namespace Signum.Engine.Linq
         }
     }
 
-    internal class ImplementedByUnionExpression : DbExpression//, IPropertyInitExpression
+    internal class ImplementedByUnionExpression : SourceWithAliasExpression//, IPropertyInitExpression
     {
-        public readonly ReadOnlyDictionary<Type, SourceExpression> Implementations;
+        public override Alias[] KnownAliases
+        {
+            get { return Implementations.Values.SelectMany(se => se.KnownAliases).PreAnd(Alias).ToArray(); }
+        }
 
-        public ImplementedByUnionExpression(Type type, IDictionary<Type, SourceExpression> implementations)
-            : base(DbExpressionType.ImplementedByUnion, type)
+        public readonly ReadOnlyDictionary<Type, TableExpression> Implementations;
+
+        public ImplementedByUnionExpression(Alias alias, IDictionary<Type, TableExpression> implementations)
+            : base(DbExpressionType.ImplementedByUnion, alias)
         {
             this.Implementations = implementations.ToReadOnly();
         }
@@ -180,24 +173,6 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             return "ImplementedByUnion {{\r\n{0}\r\n}}".Formato(
-                Implementations.ToString(kvp => "{0} ->  {1}".Formato(kvp.Key.NiceName(), kvp.Value.NiceToString()), "\r\n").Indent(4)
-                );
-        }
-    }
-
-    internal class ImplementedByExpressionExpression : DbExpression//, IPropertyInitExpression
-    {
-        public readonly ReadOnlyDictionary<Type, SourceExpression> Implementations;
-
-        public ImplementedByExpressionExpression(Type type, IDictionary<Type, SourceExpression> implementations)
-            : base(DbExpressionType.ImplementedByExpressions, type)
-        {
-            this.Implementations = implementations.ToReadOnly();
-        }
-
-        public override string ToString()
-        {
-            return "ImplementedByExpressions {{\r\n{0}\r\n}}".Formato(
                 Implementations.ToString(kvp => "{0} ->  {1}".Formato(kvp.Key.NiceName(), kvp.Value.NiceToString()), "\r\n").Indent(4)
                 );
         }
