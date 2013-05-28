@@ -131,7 +131,7 @@ namespace Signum.Entities
     }
 
 
-    public class RegexValidatorAttribute : ValidatorAttribute
+    public abstract class RegexValidatorAttribute : ValidatorAttribute
     {
         Regex regex;
         public RegexValidatorAttribute(Regex regex)
@@ -144,11 +144,9 @@ namespace Signum.Entities
             this.regex = new Regex(regexExpresion);
         }
 
-        string formatName;
-        public string FormatName
+        public abstract string FormatName
         {
-            get { return formatName; }
-            set { formatName = value; }
+            get;
         }
 
         protected override string OverrideError(object value)
@@ -160,17 +158,14 @@ namespace Signum.Entities
             if (regex.IsMatch(str))
                 return null;
 
-            if (formatName == null)
-                return ValidationMessage._0HasNoCorrectFormat.NiceToString();
-            else
-                return ValidationMessage._0DoesNotHaveAValid0Format.NiceToString().Formato(formatName);
+            return ValidationMessage._0DoesNotHaveAValid0Format.NiceToString().Formato(FormatName);
         }
 
         public override string HelpMessage
         {
             get
             {
-                return ValidationMessage.HaveValid0Format.NiceToString().Formato(formatName);
+                return ValidationMessage.HaveValid0Format.NiceToString().Formato(FormatName);
             }
         }
     }
@@ -187,7 +182,11 @@ namespace Signum.Entities
         public EMailValidatorAttribute()
             : base(EmailRegex)
         {
-            this.FormatName = "e-Mail";
+        }
+
+        public override string FormatName
+        {
+            get { return "e-Mail"; }
         }
     }
 
@@ -198,7 +197,26 @@ namespace Signum.Entities
         public TelephoneValidatorAttribute()
             : base(TelephoneRegex)
         {
-            this.FormatName = ValidationMessage.Telephone.NiceToString();
+        }
+
+        public override string FormatName
+        {
+            get { return ValidationMessage.Telephone.NiceToString(); }
+        }
+    }
+
+    public class NumericTextValidatorAttribute : RegexValidatorAttribute
+    {
+        public static readonly Regex NumericTextRegex = new Regex(@"^[0-9]*$");
+
+        public NumericTextValidatorAttribute()
+            : base(NumericTextRegex)
+        {
+        }
+
+        public override string FormatName
+        {
+            get { return ValidationMessage.Numeric.NiceToString(); }
         }
     }
 
@@ -219,7 +237,11 @@ namespace Signum.Entities
         public URLValidatorAttribute()
             : base(URLRegex)
         {
-            this.FormatName = "URL";
+        }
+
+        public override string FormatName
+        {
+            get { return "URL"; }
         }
     }
 
@@ -229,7 +251,11 @@ namespace Signum.Entities
         public FileNameValidatorAttribute()
             : base(FileNameRegex)
         {
-            this.FormatName = ValidationMessage.FileName.NiceToString();
+        }
+
+        public override string FormatName
+        {
+            get { return ValidationMessage.FileName.NiceToString(); }
         }
     }
 
@@ -752,8 +778,6 @@ namespace Signum.Entities
         _0HasAnInvalidFormat,
         [Description("{{0}} has more than {0} decimal places")]
         _0HasMoreThan0DecimalPlaces,
-        [Description("{0} has no correct format")]
-        _0HasNoCorrectFormat,
         [Description("{{0}} has some repeated elements: {0}")]
         _0HasSomeRepeatedElements0,
         [Description("{{0}} has to be {0} {1}")]
@@ -802,6 +826,7 @@ namespace Signum.Entities
         InvalidFormat,
         [Description("Not possible to assign {0}")]
         NotPossibleToaAssign0,
+        Numeric,
         [Description("or be null")]
         OrBeNull,
         Telephone,
