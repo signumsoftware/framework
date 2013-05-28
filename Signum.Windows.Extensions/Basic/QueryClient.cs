@@ -34,7 +34,7 @@ namespace Signum.Windows
 
         public static QueryDN GetQuery(object queryName)
         {
-            return Server.Return((IQueryServer s) => s.RetrieveOrGenerateQuery(queryName));
+            return Server.Return((IQueryServer s) => s.GetQuery(queryName));
         }
     }   
 }

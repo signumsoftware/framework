@@ -67,6 +67,8 @@ namespace Signum.Windows.UserQueries
                 QueryClient.Start();
                 Navigator.AddSetting(new EntitySettings<UserQueryDN> { View = _ => new UserQuery(), Icon = ExtensionsImageLoader.GetImageSortName("userQuery.png")  });
                 SearchControl.GetMenuItems += SearchControl_GetCustomMenuItems;
+                UserAssetsClient.Start();
+                UserAssetsClient.RegisterExportAssertLink<UserQueryDN>();
 
                 Constructor.Register<UserQueryDN>(elem =>
                 {
@@ -106,6 +108,11 @@ namespace Signum.Windows.UserQueries
             public override void Execute()
             {
                 UserQueryClient.Explore(userQuery.Retrieve(), entity.Retrieve());
+            }
+
+            public override string Name
+            {
+                get { return userQuery.Key(); }
             }
         }
 

@@ -210,8 +210,18 @@ namespace Signum.Windows.UIAutomation
                 () => "Waiting after search on SearchControl {0}".Formato(Element.Current.Name));
         }
 
+        public AutomationElement FilterToggle
+        {
+            get
+            {
+                return Element.ChildById("btFilters");
+            }
+        }
+
         public FilterOptionProxy AddFilterString(string token, FilterOperation operation, string value)
         {
+            FilterToggle.SetCheck(true);
+
             SelectToken(token);
 
             AddFilter();

@@ -36,7 +36,7 @@ namespace Signum.Engine.Authorization
 
                 cache = new AuthCache<RuleQueryDN, QueryAllowedRule, QueryDN, object, bool>(sb,
                     qn => QueryLogic.ToQueryName(qn.Key),
-                    QueryLogic.RetrieveOrGenerateQuery,
+                    QueryLogic.GetQuery,
                     merger: new QueryMerger(), 
                     invalidateWithTypes : true,
                     coercer: QueryCoercer.Instance);
@@ -47,23 +47,14 @@ namespace Signum.Engine.Authorization
                 {
                     string replacementKey = typeof(QueryDN).Name;
 
-                    var dic = QueryLogic.RetrieveOrGenerateQueries();
-
                     replacements.AskForReplacements(
                         x.Element("Queries").Elements("Role").SelectMany(r => r.Elements("Query")).Select(p => p.Attribute("Resource").Value).ToHashSet(),
-                        dic.Keys.ToHashSet(),
+                        QueryLogic.QueryNames.Keys.ToHashSet(),
                         replacementKey);
 
                     return cache.ImportXml(x, "Queries", "Query", roles, s =>
                     {
-                        var query = dic.TryGetC(replacements.Apply(replacementKey, s));
-                        if (query == null)
-                            return null;
-
-                        if (query.IsNew)
-                            return query.Save();
-
-                        return query;
+                        return QueryLogic.GetQuery(QueryLogic.ToQueryName(replacements.Apply(replacementKey, s)));
                     }, bool.Parse);
                 };
             }
@@ -73,7 +64,7 @@ namespace Signum.Engine.Authorization
         {
             var queries = (from type in Schema.Current.Tables.Keys
                            where TypeLogic.GetEntityKind(type) != EntityKind.Part
-                           let qs = DynamicQueryManager.Current.GetQueries(type).Keys
+                           let qs = DynamicQueryManager.Current.GetTypeQueries(type).Keys
                            where qs.Any()
                            select KVP.Create(type, qs.ToList())).ToDictionary();
 
@@ -149,7 +140,7 @@ namespace Signum.Engine.Authorization
         public static QueryRulePack GetQueryRules(Lite<RoleDN> role, TypeDN typeDN)
         {
             var result = new QueryRulePack { Role = role, Type = typeDN };
-            cache.GetRules(result, QueryLogic.RetrieveOrGenerateQueries(typeDN));
+            cache.GetRules(result, QueryLogic.GetTypeQueries(typeDN));
 
             var coercer = QueryCoercer.Instance.GetCoerceValue(role);
             result.Rules.ForEach(r => r.CoercedValues = new []{ false, true }
@@ -161,7 +152,7 @@ namespace Signum.Engine.Authorization
 
         public static void SetQueryRules(QueryRulePack rules)
         {
-            string[] queryNames = DynamicQueryManager.Current.GetQueries(TypeLogic.DnToType[rules.Type]).Keys.Select(qn => QueryUtils.GetQueryUniqueKey(qn)).ToArray();
+            string[] queryNames = DynamicQueryManager.Current.GetTypeQueries(TypeLogic.DnToType[rules.Type]).Keys.Select(qn => QueryUtils.GetQueryUniqueKey(qn)).ToArray();
 
             cache.SetRules(rules, r => queryNames.Contains(r.Key));
         }
@@ -181,7 +172,7 @@ namespace Signum.Engine.Authorization
 
         public static AuthThumbnail? GetAllowedThumbnail(Lite<RoleDN> role, Type entityType)
         {
-            return DynamicQueryManager.Current.GetQueries(entityType).Keys.Select(qn => cache.GetAllowed(role, qn)).Collapse(); 
+            return DynamicQueryManager.Current.GetTypeQueries(entityType).Keys.Select(qn => cache.GetAllowed(role, qn)).Collapse(); 
         }
 
         internal static bool AllCanRead(this Implementations implementations, Func<Type, TypeAllowedAndConditions> getAllowed)

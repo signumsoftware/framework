@@ -88,7 +88,7 @@ namespace Signum.Web.Reports
                     string queryKey = ctx.Inputs[TypeContextUtilities.Compose("Query", "Key")];
                     object queryName = Navigator.Manager.QuerySettings.Keys.FirstEx(key => QueryUtils.GetQueryUniqueKey(key) == queryKey);
 
-                    result.Query = QueryLogic.RetrieveOrGenerateQuery(queryName);
+                    result.Query = QueryLogic.GetQuery(queryName);
 
                     return result;
                 }

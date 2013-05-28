@@ -26,7 +26,9 @@ namespace Signum.Engine.UserQueries
             {
                 QueryLogic.Start(sb);
 
-                PermissionAuthLogic.RegisterPermissions(UserQueryPermission.ViewUserQuery); 
+                PermissionAuthLogic.RegisterPermissions(UserQueryPermission.ViewUserQuery);
+
+                UserAssetsImporter.UserAssetNames.Add("UserQuery", typeof(UserQueryDN));
 
                 sb.Include<UserQueryDN>();
 
@@ -39,9 +41,6 @@ namespace Signum.Engine.UserQueries
                         uq.Id,
                         uq.DisplayName,
                         uq.EntityType,
-                        Filters = uq.Filters.Count,
-                        Columns = uq.Columns.Count,
-                        Orders = uq.Orders.Count,
                     });
 
                 sb.Schema.EntityEvents<UserQueryDN>().Retrieved += UserQueryLogic_Retrieved;
@@ -66,7 +65,7 @@ namespace Signum.Engine.UserQueries
             if (!userQuery.IsNew || userQuery.queryName == null)
                 throw new InvalidOperationException("userQuery should be new and have queryName");
 
-            userQuery.Query = QueryLogic.RetrieveOrGenerateQuery(userQuery.queryName);
+            userQuery.Query = QueryLogic.GetQuery(userQuery.queryName);
 
             QueryDescription description = DynamicQueryManager.Current.QueryDescription(userQuery.queryName);
 

@@ -7,7 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     x:Class="Signum.Windows.Chart.ChartBuilder"
-    mc:Ignorable="d" x:Name="me" m:Common.DelayedRoutes="True">
+    mc:Ignorable="d" x:Name="mecb" m:Common.DelayedRoutes="True">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -21,14 +21,14 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <GroupBox Header="Chart scripts" Style="{DynamicResource EntityGroupBox}" Margin="2,0,2,2">
-            <ListBox x:Name="buttons" SelectedValue="{Binding ChartScript}" ItemsSource="{Binding ChartScripts, ElementName=me}"  BorderThickness="0">
+            <ListBox x:Name="buttons" SelectedValue="{Binding ChartScript}" ItemsSource="{Binding ChartScripts, ElementName=mecb}"  BorderThickness="0">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Border>
                             <Border.Background>
                                 <MultiBinding Converter="{x:Static c:ChartBuilder.ChartTypeBackground}">
                                     <Binding Path=""/>
-                                    <Binding Path="DataContext" ElementName="me"/>
+                                    <Binding Path="DataContext" ElementName="mecb"/>
                                     <Binding Path="IsSelected" RelativeSource="{RelativeSource AncestorType={x:Type ListBoxItem}}" />
                                 </MultiBinding>
                             </Border.Background>
@@ -73,9 +73,9 @@
             <ItemsControl Grid.IsSharedSizeScope="True" HorizontalAlignment="Stretch" ItemsSource="{Binding Columns}" x:Name="columnsControl">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="{x:Type sce:ChartColumnDN}">
-                    <c:ChartColumn
-                        m:Common.PropertyRoute="{m:ContinueRoute Columns/}"
-                        GroupResults="{Binding DataContext.GroupResults, ElementName=me}"/>
+                        <c:ChartColumn
+                            m:Common.PropertyRoute="{m:ContinueRoute Columns/}"
+                            GroupResults="{Binding DataContext.GroupResults, ElementName=mecb}"/>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>

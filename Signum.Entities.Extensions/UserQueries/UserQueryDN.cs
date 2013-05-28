@@ -12,11 +12,14 @@ using Signum.Entities.Reports;
 using System.Linq.Expressions;
 using System.ComponentModel;
 using Signum.Entities.Authorization;
+using System.Xml.Linq;
+using Signum.Entities.ControlPanel;
+using Signum.Entities.Chart;
 
 namespace Signum.Entities.UserQueries
 {
     [Serializable, EntityKind(EntityKind.Main)]
-    public class UserQueryDN : Entity
+    public class UserQueryDN : Entity, IUserAssetEntity
     {
         public UserQueryDN() { }
         public UserQueryDN(object queryName)
@@ -108,10 +111,12 @@ namespace Signum.Entities.UserQueries
             set { Set(ref elementsPerPage, value, () => ElementsPerPage); }
         }
 
-        protected override void PostRetrieving()
+        [UniqueIndex]
+        Guid guid = Guid.NewGuid();
+        public Guid Guid
         {
-            if (Orders != null)
-                Orders.Sort(a => a.Index);
+            get { return guid; }
+            set { Set(ref guid, value, () => Guid); }
         }
 
         protected override void PreSaving(ref bool graphModified)
@@ -119,8 +124,22 @@ namespace Signum.Entities.UserQueries
             base.PreSaving(ref graphModified);
 
             if (Orders != null)
-                for (int i = 0; i < Orders.Count; i++)
-                    Orders[i].Index = i;
+                Orders.ForEach((o, i) => o.Index = i);
+
+            if (Columns != null)
+                Columns.ForEach((c, i) => c.Index = i);
+
+            if (Filters != null)
+                Filters.ForEach((f, i) => f.Index = i);
+        }
+
+        protected override void PostRetrieving()
+        {
+            base.PostRetrieving();
+
+            Orders.Sort(a => a.Index);
+            Columns.Sort(a => a.Index);
+            Filters.Sort(a => a.Index);
         }
 
         static readonly Expression<Func<UserQueryDN, string>> ToStringExpression = e => e.displayName;
@@ -161,7 +180,38 @@ namespace Signum.Entities.UserQueries
                 foreach (var f in Filters)
                     f.SetValue();
         }
+
+        public XElement ToXml(IToXmlContext ctx)
+        {
+            return new XElement("UserQuery",
+                new XAttribute("Guid", Guid),
+                new XAttribute("DisplayName", DisplayName),
+                new XAttribute("Query", Query.Key),
+                EntityType == null ? null : new XAttribute("EntityType", ctx.TypeToName(EntityType)),
+                Related == null ? null : new XAttribute("Related", Related.Key()),
+                WithoutFilters == true ? null : new XAttribute("WithoutFilters", true),
+                ElementsPerPage == null ? null : new XAttribute("ElementsPerPage", ElementsPerPage),
+                new XAttribute("ColumnsMode", ColumnsMode),
+                Filters.IsNullOrEmpty() ? null : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
+                Columns.IsNullOrEmpty() ? null : new XElement("Columns", Columns.Select(c => c.ToXml(ctx)).ToList()),
+                Orders.IsNullOrEmpty() ? null : new XElement("Orders", Orders.Select(o => o.ToXml(ctx)).ToList()));
+        }
+
+        public void FromXml(XElement element, IFromXmlContext ctx)
+        {
+            Query = ctx.GetQuery(element.Attribute("Query").Value);
+            DisplayName = element.Attribute("DisplayName").Value;
+            EntityType = element.Attribute("EntityType").TryCC(a => ctx.GetType(a.Value));
+            Related = element.Attribute("Related").TryCC(a => Lite.Parse(a.Value));
+            WithoutFilters = element.Attribute("WithoutFilters").TryCS(a => a.Value == true.ToString()) ?? false;
+            ElementsPerPage = element.Attribute("ElementsPerPage").TryCS(a => int.Parse(a.Value));
+            ColumnsMode = element.Attribute("ColumnsMode").Value.ToEnum<ColumnOptionsMode>();
+            Filters.Syncronize(element.Element("Filters").TryCC(fs => fs.Elements()).EmptyIfNull().ToList(), (f, x)=>f.FromXml(x, ctx));
+            Columns.Syncronize(element.Element("Columns").TryCC(fs => fs.Elements()).EmptyIfNull().ToList(), (c, x)=>c.FromXml(x, ctx));
+            Orders.Syncronize(element.Element("Orders").TryCC(fs => fs.Elements()).EmptyIfNull().ToList(), (o, x)=>o.FromXml(x, ctx));   
+        }
     }
+
 
     public enum UserQueryPermission
     {
@@ -199,6 +249,13 @@ namespace Signum.Entities.UserQueries
                 return token;
             }
             set { if (Set(ref token, value, () => Token)) TokenChanged(); }
+        }
+
+        int index;
+        public int Index
+        {
+            get { return index; }
+            set { Set(ref index, value, () => Index); }
         }
 
         [HiddenProperty]
@@ -253,13 +310,6 @@ namespace Signum.Entities.UserQueries
             orderType = type;
         }
 
-        int index;
-        public int Index
-        {
-            get { return index; }
-            set { Set(ref index, value, () => Index); }
-        }
-
         OrderType orderType;
         public OrderType OrderType
         {
@@ -279,6 +329,18 @@ namespace Signum.Entities.UserQueries
             }
         }
 
+        public XElement ToXml(IToXmlContext ctx)
+        {
+            return new XElement("Orden",
+                new XAttribute("Token", Token.FullKey()),
+                new XAttribute("OrderType", OrderType));
+        }
+
+        internal void FromXml(XElement element, IFromXmlContext ctx)
+        {
+            TokenString = element.Attribute("Token").Value;
+            OrderType = element.Attribute("OrderType").Value.ToEnum<OrderType>();
+        }
     }
 
     [Serializable]
@@ -294,19 +356,19 @@ namespace Signum.Entities.UserQueries
         public QueryColumnDN(Column col)
         {
             Token = col.Token;
-            if (col.DisplayName != col.Token.NiceName())
-                DisplayName = col.DisplayName;
+            DisplayName = col.DisplayName;
         }
 
-        [SqlDbType(Size = 100)]
         string displayName;
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
         public string DisplayName
         {
-            get { return displayName; }
-            set { SetToStr(ref displayName, value, () => DisplayName); }
+            get { return displayName ?? Token.TryCC(t => t.NiceName()); }
+            set
+            {
+                var name = value == Token.TryCC(t => t.NiceName()) ? null : value;
+                Set(ref displayName, name, () => DisplayName);
+            }
         }
-
 
         public override void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)
         {
@@ -319,6 +381,20 @@ namespace Signum.Entities.UserQueries
                 parseException = new FormatException("{0} {1}: {2}\r\n{3}".Formato(context.GetType().Name, context.IdOrNull, context, e.Message));
             }
         }
+
+        public XElement ToXml(IToXmlContext ctx)
+        {
+            return new XElement("Column",
+                new XAttribute("Token", Token.FullKey()),
+                DisplayName != null ? new XAttribute("DisplayName", DisplayName) : null);
+        }
+
+        internal void FromXml(XElement element, IFromXmlContext ctx)
+        {
+            TokenString = element.Attribute("Token").Value;
+            DisplayName = element.Attribute("DisplayName").TryCC(a => a.Value);
+        }
+        
     }
 
     [Serializable]
@@ -429,6 +505,21 @@ namespace Signum.Entities.UserQueries
 
             return null;
         }
+
+        public XElement ToXml(IToXmlContext ctx)
+        {
+            return new XElement("Filter",
+                new XAttribute("Token", Token.FullKey()),
+                new XAttribute("Operation", Operation),
+                new XAttribute("Value", ValueString));
+        }
+
+        public void FromXml(XElement element, IFromXmlContext ctx)
+        {
+            TokenString = element.Attribute("Token").Value;
+            Operation = element.Attribute("Operation").Value.ToEnum<FilterOperation>();
+            ValueString = element.Attribute("Value").Value;
+        }
     }
 
     public static class UserQueryUtils
@@ -517,5 +608,4 @@ namespace Signum.Entities.UserQueries
         [Description("Use {0} to filter current entity")]
         Use0ToFilterCurrentEntity
     }
-
 }
