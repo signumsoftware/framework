@@ -49,7 +49,7 @@ namespace Signum.Windows.UserQueries
         {
             LinksClient.RegisterEntityLinks<T>((lite, control)=>new []
             {
-               new QuickLinkAction(UserAssetMessage.ExportToXml.NiceToString(), ()=>
+               new QuickLinkAction(UserAssetMessage.ExportToXml, ()=>
                {
                    SaveFileDialog sfd = new SaveFileDialog
                    {
