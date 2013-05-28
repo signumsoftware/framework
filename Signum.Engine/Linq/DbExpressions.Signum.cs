@@ -52,7 +52,12 @@ namespace Signum.Engine.Linq
 
             this.AvoidExpandOnRetrieving = avoidExpandOnRetrieving;
         }
-     
+
+        public bool IsCompleted
+        {
+            get { return TableAlias != null; }
+        }
+
         public override string ToString()
         {
             var constructor = "new {0}({1})".Formato(Type.TypeName(),
@@ -149,20 +154,10 @@ namespace Signum.Engine.Linq
             this.Implementations = implementations.ToReadOnly();
         }
 
-        //public Expression TryGetPropertyBinding(PropertyInfo pi)
-        //{
-        //    PropertyBinding binding = PropertyBindings.SingleOrDefaultEx(fb => ReflectionTools.PropertyEquals(pi, fb.PropertyInfo));
-
-        //    if (binding == null) 
-        //        return null;
-
-        //    return binding.Binding;
-        //}
-
-        //public void AddPropertyBinding(PropertyInfo pi, Expression binding)
-        //{
-        //    PropertyBindings.Add(new PropertyBinding(pi, binding));
-        //}
+        public bool IsCompleted
+        {
+            get { return Implementations.All(a => a.Reference.IsCompleted); }
+        }
 
         public override string ToString()
         { 

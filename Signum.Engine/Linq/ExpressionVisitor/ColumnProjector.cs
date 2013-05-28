@@ -37,7 +37,7 @@ namespace Signum.Engine.Linq
         HashSet<Expression> candidates;
         Alias[] knownAliases;
         Alias newAlias;
-        bool selectTrivialColumns;
+        bool projectTrivialColumns;
 
 
         private ColumnProjector() { }
@@ -57,7 +57,7 @@ namespace Signum.Engine.Linq
                 newAlias = newAlias,
                 knownAliases = knownAliases,
                 candidates = candidates,
-                selectTrivialColumns = selectTrivialColumns
+                projectTrivialColumns = selectTrivialColumns
             };
 
             Expression e = cp.Visit(newProj);
@@ -72,7 +72,7 @@ namespace Signum.Engine.Linq
             {
                 if (expression.NodeType == (ExpressionType)DbExpressionType.Column)
                 {
-                    if (!selectTrivialColumns)
+                    if (!projectTrivialColumns)
                         return expression;
 
                     ColumnExpression column = (ColumnExpression)expression;

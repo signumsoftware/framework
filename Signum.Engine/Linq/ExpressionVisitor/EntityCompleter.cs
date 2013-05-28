@@ -21,7 +21,12 @@ namespace Signum.Engine.Linq
         public static Expression Complete(Expression source, QueryBinder binder)
         {
             EntityCompleter pc = new EntityCompleter() { binder = binder };
-            return pc.Visit(source);
+            
+            var result = pc.Visit(source);
+
+            var expandedResul = QueryJoinExpander.ExpandJoins(result, binder, updateProjections: true);
+
+            return expandedResul;
         }
 
         protected override Expression VisitLiteReference(LiteReferenceExpression lite)
@@ -105,15 +110,15 @@ namespace Signum.Engine.Linq
             return new MListProjectionExpression(ml.Type, newProj);
         }
 
-        protected override Expression VisitProjection(ProjectionExpression proj)
-        {
-            Expression projector = this.Visit(proj.Projector);
+        //protected override Expression VisitProjection(ProjectionExpression proj)
+        //{
+        //    Expression projector = this.Visit(proj.Projector);
 
-            var result = new ProjectionExpression(proj.Select, projector, proj.UniqueFunction, proj.Type);
+        //    var result = new ProjectionExpression(proj.Select, projector, proj.UniqueFunction, proj.Type);
 
-            var expanded = binder.ApplyExpansionsProjection(result);
+        //    var expanded = binder.ApplyExpansionsProjection(result);
 
-            return expanded;
-        }
+        //    return expanded;
+        //}
     }
 }
