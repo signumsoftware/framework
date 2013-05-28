@@ -24,7 +24,7 @@ namespace Signum.Engine.Linq
     /// </summary>
     internal class DbExpressionNominator : DbExpressionVisitor
     {
-        Alias[] existingAliases;
+        HashSet<Alias> existingAliases;
 
         // existingAliases is null when used in QueryBinder, not ColumnProjector
         // this allows to make function changes in where clausules but keeping the full expression (not compressing it in one column
@@ -53,7 +53,7 @@ namespace Signum.Engine.Linq
 
         private DbExpressionNominator() { }
 
-        static internal HashSet<Expression> Nominate(Expression expression, Alias[] existingAliases, out Expression newExpression, bool isGroupKey = false)
+        static internal HashSet<Expression> Nominate(Expression expression, HashSet<Alias> existingAliases, out Expression newExpression, bool isGroupKey = false)
         {
             DbExpressionNominator n = new DbExpressionNominator { existingAliases = existingAliases, isGroupKey = isGroupKey };
             newExpression = n.Visit(expression);

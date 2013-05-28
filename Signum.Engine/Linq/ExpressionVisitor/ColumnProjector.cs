@@ -35,7 +35,7 @@ namespace Signum.Engine.Linq
 
         Dictionary<ColumnExpression, ColumnExpression> map = new Dictionary<ColumnExpression, ColumnExpression>();
         HashSet<Expression> candidates;
-        Alias[] knownAliases;
+        HashSet<Alias> knownAliases;
         Alias newAlias;
         bool projectTrivialColumns;
 
@@ -47,7 +47,7 @@ namespace Signum.Engine.Linq
             return new ColumnExpression(columnType, newAlias, declaration.Name);
         }
 
-        static internal ProjectedColumns ProjectColumns(Expression projector, Alias newAlias, Alias[] knownAliases, bool isGroupKey = false, bool selectTrivialColumns = false)
+        static internal ProjectedColumns ProjectColumns(Expression projector, Alias newAlias, HashSet<Alias> knownAliases, bool isGroupKey = false, bool selectTrivialColumns = false)
         {
             Expression newProj;
             var candidates = DbExpressionNominator.Nominate(projector, knownAliases, out newProj, isGroupKey : isGroupKey);
