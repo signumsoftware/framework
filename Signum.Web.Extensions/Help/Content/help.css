@@ -288,3 +288,44 @@ p
 {
     display:none;
 }
+
+#layoutHelp
+{
+    margin: 0 auto;
+    width: 984px;
+    color: #333;
+    font-size: 12px;
+    line-height: 1.5;
+    font-family: "Lucida Grande","Lucida Sans Unicode",Arial,Verdana,sans-serif;
+}
+#headerLeft
+{
+    float:left;    
+}
+#headerRight
+{
+    float:right;    
+}
+#content
+{
+	background-color:#fff;
+	border:1px solid #e0e0e0;
+	border-radius:4px;
+	-moz-border-radius:4px;
+	-webkit-border-radius:4px;
+    padding: 10px 1%;
+}
+#footer
+{
+    padding: 10px 0;
+    text-align: center;    
+}
+#footerAssembly
+{
+    float: left;    
+}
+hr 
+{
+	color:#eee;
+	margin:5px auto;
+}
