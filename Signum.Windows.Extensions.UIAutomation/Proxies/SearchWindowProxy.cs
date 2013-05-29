@@ -75,12 +75,12 @@ namespace Signum.Windows.UIAutomation
 
         public AutomationElement OkButton
         {
-            get { return Element.ChildById("btOk"); }
+            get { return Element.Child(c => c.Current.ClassName == "OkCancelBar").ChildById("btOk"); }
         }
 
         public AutomationElement CanelButton
         {
-            get { return Element.ChildById("btCancel"); }
+            get { return Element.Child(c => c.Current.ClassName == "OkCancelBar").ChildById("btCancel"); }
         }
 
         public void Ok()
