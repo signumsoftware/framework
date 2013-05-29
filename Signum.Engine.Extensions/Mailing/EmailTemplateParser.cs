@@ -52,6 +52,11 @@ namespace Signum.Engine.Mailing
             {
                 return;
             }
+
+            public override string ToString()
+            {
+                return "literal {0}".Formato(Text.Etc(20));
+            }
         }
 
         public class TokenNode : TextNode
@@ -75,15 +80,21 @@ namespace Signum.Engine.Mailing
             {
                 list.Add(Token);
             }
+
+            public override string ToString()
+            {
+                return "token {0}".Formato(Token.FullKey());
+            }
         }
 
         public class GlobalNode : TextNode
         {
             Func<GlobalVarDispatcher, string> globalFunc;
-
+            string globalKey;
             public GlobalNode(string globalKey, List<string> errors)
             {
-                globalFunc = GlobalVariables.TryGet(globalKey, null);
+                this.globalKey = globalKey;
+                this.globalFunc = GlobalVariables.TryGet(globalKey, null);
                 if (globalFunc == null)
                     errors.Add("The global key {0} was not found".Formato(globalKey));
             }
@@ -98,20 +109,25 @@ namespace Signum.Engine.Mailing
             {
                 return;
             }
+
+            public override string ToString()
+            {
+                return "global {0}".Formato(globalKey);
+            }
         }
 
         public class ModelNode : TextNode
         {
             public ModelNode(string fieldOrProperty, Type modelType, List<string> errors)
             {
-                var Member = (MemberInfo)modelType.GetField(fieldOrProperty, flags) ??
+                this.member = (MemberInfo)modelType.GetField(fieldOrProperty, flags) ??
                        (MemberInfo)modelType.GetProperty(fieldOrProperty, flags);
 
-                if (Member == null)
+                if (member == null)
                     errors.Add(EmailTemplateMessage.TheModel0DoesNotHaveAnyFieldWithTheToken1.NiceToString().Formato(modelType.Name, fieldOrProperty));
             }
 
-            MemberInfo Member;
+            MemberInfo member;
 
             const BindingFlags flags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
 
@@ -129,17 +145,22 @@ namespace Signum.Engine.Mailing
 
             object Getter(ISystemEmail systemEmail)
             {
-                var pi = Member as PropertyInfo;
+                var pi = member as PropertyInfo;
 
                 if (pi != null)
                     return pi.GetValue(systemEmail, null);
 
-                return ((FieldInfo)Member).GetValue(systemEmail);
+                return ((FieldInfo)member).GetValue(systemEmail);
             }
 
             public override void FillQueryTokens(List<QueryToken> list)
             {
                 return;
+            }
+
+            public override string ToString()
+            {
+                return "model {0}".Formato(member);
             }
         }
 
@@ -172,6 +193,11 @@ namespace Signum.Engine.Mailing
                     node.FillQueryTokens(list);
                 }
             }
+
+            public override string ToString()
+            {
+                return "block ({0} nodes)".Formato(Nodes.Count);
+            }
         }
 
         public class ForeachNode : BlockNode
@@ -198,6 +224,11 @@ namespace Signum.Engine.Mailing
             {
                 list.Add(Token);
                 base.FillQueryTokens(list);
+            }
+
+            public override string ToString()
+            {
+                return "foreach {0} ({1} nodes)".Formato(Token.FullKey(), Nodes.Count);
             }
         }
 
@@ -228,6 +259,11 @@ namespace Signum.Engine.Mailing
             {
                 list.Add(Token);
                 base.FillQueryTokens(list);
+            }
+
+            public override string ToString()
+            {
+                return "if {0} ({1} nodes)".Formato(Token.FullKey(), Nodes.Count);
             }
         }
 
