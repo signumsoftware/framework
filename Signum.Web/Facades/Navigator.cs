@@ -225,7 +225,7 @@ namespace Signum.Web
 
         public static void AddSetting(EntitySettings settings)
         {
-            Navigator.Manager.EntitySettings.AddOrThrow(settings.StaticType, settings, "EntitySettings for {0} allready registered");
+            Navigator.Manager.EntitySettings.AddOrThrow(settings.StaticType, settings, "EntitySettings for {0} already registered");
         }
 
         public static void AddSettings(List<EntitySettings> settings)

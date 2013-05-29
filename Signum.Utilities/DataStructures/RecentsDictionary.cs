@@ -44,7 +44,7 @@ namespace Signum.Utilities.DataStructures
         public void Add(K key, V value)
         {
             if (keyToLink.ContainsKey(key))
-                throw new ArgumentException("Key allready in the dictionary");
+                throw new ArgumentException("Key already in the dictionary");
 
             LinkedListNode<V> link = orderList.AddFirst(value);
 
