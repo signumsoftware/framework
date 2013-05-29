@@ -15,6 +15,9 @@ namespace Signum.Entities.DynamicQuery
     {
         public static string GetQueryUniqueKey(object queryName)
         {
+            if (queryName is Type)
+                queryName = EnumEntity.Extract((Type)queryName) ?? (Type)queryName;
+
             return
                 queryName is Type ? ((Type)queryName).FullName :
                 queryName is Enum ? "{0}.{1}".Formato(queryName.GetType().Name, queryName.ToString()) :
@@ -23,7 +26,10 @@ namespace Signum.Entities.DynamicQuery
 
         public static string GetCleanName(object queryName)
         {
-            return (queryName is Type ? Reflector.CleanTypeName((Type)queryName) : queryName.ToString());
+            if (queryName is Type)
+                queryName = EnumEntity.Extract((Type)queryName) ?? (Type)queryName;
+
+            return (queryName is Type ? Reflector.CleanTypeName((Type) queryName) : queryName.ToString());
         }
 
         public static string GetNiceName(object queryName)
@@ -33,6 +39,9 @@ namespace Signum.Entities.DynamicQuery
 
         public static string GetNiceName(object queryName, CultureInfo ci)
         {
+            if (queryName is Type)
+                queryName = EnumEntity.Extract((Type)queryName) ?? (Type)queryName;
+
             return
                 queryName is Type ? ((Type)queryName).NicePluralName() :
                 queryName is Enum ? ((Enum)queryName).NiceToString() :
