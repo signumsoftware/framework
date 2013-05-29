@@ -34,16 +34,16 @@ namespace Signum.Engine
         {
             using (var log = HeavyProfiler.LogNoStackTrace("PreSaving"))
             {
-                DirectedGraph<Modifiable> modifiables = GraphExplorer.PreSaving(createGraph);
-
                 Schema schema = Schema.Current;
-                modifiables = GraphExplorer.ModifyGraph(modifiables, (Modifiable m, ref bool graphModified) =>
-                    {
-                        IdentifiableEntity ident = m as IdentifiableEntity;
+                DirectedGraph<Modifiable> modifiables = GraphExplorer.PreSaving(createGraph, (Modifiable m, ref bool graphModified) =>
+                {
+                    m.PreSaving(ref graphModified);
 
-                        if (ident != null)
-                            schema.OnPreSaving(ident, ref graphModified);
-                    }, createGraph);
+                    IdentifiableEntity ident = m as IdentifiableEntity;
+
+                    if (ident != null)
+                        schema.OnPreSaving(ident, ref graphModified);
+                });
 
                 log.Switch("Integrity");
 

@@ -130,13 +130,15 @@ namespace Signum.Entities.Reflection
 
         public static DirectedGraph<Modifiable> PreSaving(Func<DirectedGraph<Modifiable>> recreate)
         {
-            return ModifyGraph(recreate(), (Modifiable m, ref bool graphModified) => m.PreSaving(ref graphModified), recreate);
+            return PreSaving(recreate, (Modifiable m, ref bool graphModified) => m.PreSaving(ref graphModified));
         }
 
         public delegate void ModifyEntityEventHandler(Modifiable m, ref bool graphModified);
 
-        public static DirectedGraph<Modifiable> ModifyGraph(DirectedGraph<Modifiable> graph, ModifyEntityEventHandler modifier, Func<DirectedGraph<Modifiable>> recreate)
+        public static DirectedGraph<Modifiable> PreSaving(Func<DirectedGraph<Modifiable>> recreate, ModifyEntityEventHandler modifier)
         {
+            DirectedGraph<Modifiable> graph = recreate(); 
+
             bool graphModified = false; 
             foreach (var m in graph)
             {
