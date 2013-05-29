@@ -70,7 +70,8 @@ namespace Signum.Test.LinqProvider
                 .Where(a => a.Author.ToLite().ToString().Length > 0)
                 .Select(a => a.Author.ToLite());
 
-            Assert.AreEqual(2, query.QueryText().CountRepetitions("LEFT OUTER JOIN"));
+            //Assert.AreEqual(2, query.QueryText().CountRepetitions("LEFT OUTER JOIN"));
+            Assert.AreEqual(3, query.QueryText().CountRepetitions("LEFT OUTER JOIN"));
             query.ToList();
         }
 

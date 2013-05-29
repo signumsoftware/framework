@@ -155,29 +155,6 @@ namespace Signum.Engine.Linq
         }
     }
 
-    internal class ImplementedByUnionExpression : SourceWithAliasExpression//, IPropertyInitExpression
-    {
-        public override Alias[] KnownAliases
-        {
-            get { return Implementations.Values.SelectMany(se => se.KnownAliases).PreAnd(Alias).ToArray(); }
-        }
-
-        public readonly ReadOnlyDictionary<Type, TableExpression> Implementations;
-
-        public ImplementedByUnionExpression(Alias alias, IDictionary<Type, TableExpression> implementations)
-            : base(DbExpressionType.ImplementedByUnion, alias)
-        {
-            this.Implementations = implementations.ToReadOnly();
-        }
-
-        public override string ToString()
-        {
-            return "ImplementedByUnion {{\r\n{0}\r\n}}".Formato(
-                Implementations.ToString(kvp => "{0} ->  {1}".Formato(kvp.Key.NiceName(), kvp.Value.NiceToString()), "\r\n").Indent(4)
-                );
-        }
-    }
-
     internal class ImplementedByAllExpression : DbExpression
     {
         public readonly Expression Id;

@@ -224,6 +224,11 @@ namespace Signum.Engine.Linq
             columns.Add(result.Name, result);
             return result; 
         }
+
+        public void AddUsedName(string name)
+        {
+            columns.Add(name, null);
+        }
     }
 }
 

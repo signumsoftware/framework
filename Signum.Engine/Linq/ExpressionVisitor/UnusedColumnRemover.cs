@@ -80,11 +80,8 @@ namespace Signum.Engine.Linq
         {
             HashSet<string> columnsUsed = allColumnsUsed.GetOrCreate(set.Alias); // a veces no se usa
 
-            foreach (var column in columnsUsed)
-                allColumnsUsed.GetOrCreate(set.Left.Alias).Add(column);
-
-            foreach (var column in columnsUsed)
-                allColumnsUsed.GetOrCreate(set.Right.Alias).Add(column);
+            allColumnsUsed.GetOrCreate(set.Left.Alias).AddRange(columnsUsed);
+            allColumnsUsed.GetOrCreate(set.Right.Alias).AddRange(columnsUsed);
 
             return base.VisitSetOperator(set);
         }
@@ -105,7 +102,7 @@ namespace Signum.Engine.Linq
         {
             if (join.JoinType == JoinType.SingleRowLeftOuterJoin)
             {
-                var table = (TableExpression)join.Right;
+                var table = (SourceWithAliasExpression)join.Right;
 
                 var hs = allColumnsUsed.TryGetC(table.Alias);
 

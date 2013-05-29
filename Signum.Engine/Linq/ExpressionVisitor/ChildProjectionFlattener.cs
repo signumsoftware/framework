@@ -186,8 +186,15 @@ namespace Signum.Engine.Linq
                     return KeysTable((TableExpression)source); 
                 if(source is JoinExpression)
                     return KeysJoin((JoinExpression)source);
+                if (source is SetOperatorExpression)
+                    return KeysSet((SetOperatorExpression)source);
 
                 throw new InvalidOperationException("Unexpected source");
+            }
+
+            private static IEnumerable<ColumnExpression> KeysSet(SetOperatorExpression set)
+            {
+                return Keys(set.Left).Concat(Keys(set.Right));
             }
 
             private static IEnumerable<ColumnExpression> KeysJoin(JoinExpression join)

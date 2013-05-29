@@ -54,7 +54,6 @@ namespace Signum.Engine.Linq
         Entity = 2000,
         EmbeddedInit,
         ImplementedBy,
-        ImplementedByUnion,
         ImplementedByAll,
         LiteReference,
         LiteValue,
@@ -436,9 +435,6 @@ namespace Signum.Engine.Linq
             if (condition == null && joinType != JoinType.CrossApply && joinType != JoinType.OuterApply && joinType != JoinType.CrossJoin)
                 throw new ArgumentNullException("condition");
 
-            if (joinType == JoinType.SingleRowLeftOuterJoin && !(right is TableExpression))
-                throw new ArgumentException("right"); 
-
             this.JoinType = joinType;
             this.Left = left;
             this.Right = right;
@@ -486,7 +482,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "{0}\r\n{1}\r\n{2}".Formato(Left.ToString().Indent(4), Operator, Right.ToString().Indent(4));
+            return "{0}\r\n{1}\r\n{2}\r\n as {3}".Formato(Left.ToString().Indent(4), Operator, Right.ToString().Indent(4), Alias);
         }
     }
 

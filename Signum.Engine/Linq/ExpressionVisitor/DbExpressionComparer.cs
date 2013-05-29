@@ -116,8 +116,6 @@ namespace Signum.Engine.Linq
                     return CompareEmbeddedFieldInit((EmbeddedEntityExpression)a, (EmbeddedEntityExpression)b);
                 case DbExpressionType.ImplementedBy:
                     return CompareImplementedBy((ImplementedByExpression)a, (ImplementedByExpression)b);
-                case DbExpressionType.ImplementedByUnion:
-                    return CompareImplementedByUnion((ImplementedByUnionExpression)a, (ImplementedByUnionExpression)b);
                 case DbExpressionType.ImplementedByAll:
                     return CompareImplementedByAll((ImplementedByAllExpression)a, (ImplementedByAllExpression)b);
                 case DbExpressionType.LiteReference:
@@ -450,11 +448,6 @@ namespace Signum.Engine.Linq
         }
 
         protected virtual bool CompareImplementedBy(ImplementedByExpression a, ImplementedByExpression b)
-        {
-            return CompareDictionaries(a.Implementations, b.Implementations, Compare);
-        }
-
-        protected virtual bool CompareImplementedByUnion(ImplementedByUnionExpression a, ImplementedByUnionExpression b)
         {
             return CompareDictionaries(a.Implementations, b.Implementations, Compare);
         }
