@@ -2288,9 +2288,15 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitJoin(JoinExpression join)
         {
-            var newSource = (SourceExpression)base.VisitJoin(join);
+            SourceExpression left = this.VisitSource(join.Left);
+            SourceExpression right = join.JoinType == JoinType.SingleRowLeftOuterJoin && join.Right is TableExpression ? join.Right : this.VisitSource(join.Right);
+            Expression condition = this.Visit(join.Condition);
 
-            var expandedSource = ApplyExpansions(newSource);
+            JoinExpression newJoin = join;
+            if (left != join.Left || right != join.Right || condition != join.Condition)
+                newJoin = new JoinExpression(join.JoinType, left, right, condition);
+
+            var expandedSource = ApplyExpansions(newJoin);
 
             return expandedSource;
         }
