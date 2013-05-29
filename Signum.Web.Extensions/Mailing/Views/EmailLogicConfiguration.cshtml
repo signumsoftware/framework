@@ -1,0 +1,7 @@
+﻿@using Signum.Entities.Mailing
+
+@using (var sc = Html.TypeContext<EmailLogicConfigurationDN>()) 
+{
+	@Html.ValueLine(sc, s => s.UrlLeft)
+	@Html.EntityLine(sc, s => s.DefaultCulture)
+}

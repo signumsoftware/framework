@@ -165,10 +165,25 @@
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
     <Compile Include="ControlPanel\ControlPanelOmniboxProvider.cs" />
+    <Compile Include="Mailing\Views\EmailAddress.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>EmailAddress.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Mailing\Views\EmailLogicConfiguration.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>EmailLogicConfiguration.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Mailing\Views\EmailMasterTemplate.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>EmailMasterTemplate.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Mailing\Views\EmailRecipient.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>EmailRecipient.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Mailing\Views\EmailTemplate.generated.cs">
       <AutoGen>True</AutoGen>
@@ -1195,6 +1210,18 @@
     <Content Include="Files\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Mailing\Views\EmailLogicConfiguration.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>EmailLogicConfiguration.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Mailing\Views\EmailRecipient.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>EmailRecipient.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Mailing\Views\EmailAddress.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>EmailAddress.generated.cs</LastGenOutput>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>RazorGenerator</Generator>

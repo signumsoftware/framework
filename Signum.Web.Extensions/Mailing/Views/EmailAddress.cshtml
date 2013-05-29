@@ -1,0 +1,8 @@
+﻿@using Signum.Entities.Mailing
+
+@using (var sc = Html.TypeContext<EmailAddressDN>()) 
+{
+	@Html.EntityLine(sc, ea => ea.EmailOwner)
+	@Html.ValueLine(sc, ea => ea.EmailAddress)
+    @Html.ValueLine(sc, ea => ea.DisplayName)
+}

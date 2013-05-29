@@ -36,6 +36,11 @@ namespace Signum.Web.Mailing
                     new EntitySettings<EmailMessageDN>{ PartialViewName = e => ViewPrefix.Formato("EmailMessage")},
                     new EntitySettings<EmailPackageDN>{ PartialViewName = e => ViewPrefix.Formato("EmailPackage")},
                     new EntitySettings<EmailTemplateDN>{ PartialViewName = e => ViewPrefix.Formato("EmailTemplate")},
+
+                    new EmbeddedEntitySettings<EmailAddressDN>{ PartialViewName = e => ViewPrefix.Formato("EmailAddress")},
+                    new EmbeddedEntitySettings<EmailRecipientDN>{ PartialViewName = e => ViewPrefix.Formato("EmailRecipient")},
+
+                    new EmbeddedEntitySettings<EmailLogicConfigurationDN> { PartialViewName = e => ViewPrefix.Formato("EmailLogicConfiguration")},
                 });
 
                 if (smtpConfig)
