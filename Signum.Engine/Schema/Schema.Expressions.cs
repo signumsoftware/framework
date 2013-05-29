@@ -221,10 +221,8 @@ namespace Signum.Engine.Maps
     {
         internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id)
         {
-            var implementations = (from kvp in ImplementationColumns
-                                   select new Linq.ImplementationColumn(kvp.Key,
-                                            new EntityExpression(kvp.Key, new ColumnExpression(kvp.Value.ReferenceType(), tableAlias, kvp.Value.Name), null, null, AvoidExpandOnRetrieving))
-                                    ).ToReadOnly();
+            var implementations = ImplementationColumns.SelectDictionary(t => t, (t, ic) =>
+                 new EntityExpression(t, new ColumnExpression(ic.ReferenceType(), tableAlias, ic.Name), null, null, AvoidExpandOnRetrieving));
 
             var result = new ImplementedByExpression(IsLite ? Lite.Extract(FieldType) : FieldType, implementations);
 

@@ -21,7 +21,12 @@ namespace Signum.Engine.Linq
         public static Expression Complete(Expression source, QueryBinder binder)
         {
             EntityCompleter pc = new EntityCompleter() { binder = binder };
-            return pc.Visit(source);
+            
+            var result = pc.Visit(source);
+
+            var expandedResul = QueryJoinExpander.ExpandJoins(result, binder);
+
+            return expandedResul;
         }
 
         protected override Expression VisitLiteReference(LiteReferenceExpression lite)
@@ -41,14 +46,31 @@ namespace Signum.Engine.Linq
             if (lite.Reference is ImplementedByAllExpression)
                 return null;
 
-            if (lite.Reference is EntityExpression && ((EntityExpression)lite.Reference).AvoidExpandOnRetrieving)
+              if (IsCacheable(typeId))
                 return null;
 
-            if (lite.Reference is ImplementedByExpression && ((ImplementedByExpression)lite.Reference).Implementations.Any(imp => imp.Reference.AvoidExpandOnRetrieving))
-                return null;
+            if (lite.Reference is EntityExpression)
+            {
+                var ee = (EntityExpression)lite.Reference;
+                
+                if(ee.AvoidExpandOnRetrieving)
+                    return null;
 
-            if (IsCacheable(typeId))
-                return null;
+                return binder.BindMethodCall(Expression.Call(lite.Reference, EntityExpression.ToStringMethod));
+            }
+                
+            if(lite.Reference is ImplementedByExpression)
+            {
+                var ibe = (ImplementedByExpression)lite.Reference;
+
+                if(ibe.Implementations.Any(imp => imp.Value.AvoidExpandOnRetrieving))
+                    return null;
+
+                return ibe.Implementations.Values.Select(ee =>
+                    new When(SmartEqualizer.NotEqualNullable(ee.ExternalId, QueryBinder.NullId),
+                     binder.BindMethodCall(Expression.Call(ee, EntityExpression.ToStringMethod)))
+                     ).ToCondition(typeof(string));
+            }
 
             return binder.BindMethodCall(Expression.Call(lite.Reference, EntityExpression.ToStringMethod));
         }
@@ -63,7 +85,7 @@ namespace Signum.Engine.Linq
             TypeImplementedByExpression tibe = newTypeId as TypeImplementedByExpression;
 
             if (tibe != null)
-                return tibe.TypeImplementations.All(t => IsCached(t.Type));
+                return tibe.TypeImplementations.All(t => IsCached(t.Key));
 
             return false;
         }
@@ -105,15 +127,15 @@ namespace Signum.Engine.Linq
             return new MListProjectionExpression(ml.Type, newProj);
         }
 
-        protected override Expression VisitProjection(ProjectionExpression proj)
-        {
-            Expression projector = this.Visit(proj.Projector);
+        //protected override Expression VisitProjection(ProjectionExpression proj)
+        //{
+        //    Expression projector = this.Visit(proj.Projector);
 
-            var result = new ProjectionExpression(proj.Select, projector, proj.UniqueFunction, proj.Type);
+        //    var result = new ProjectionExpression(proj.Select, projector, proj.UniqueFunction, proj.Type);
 
-            var expanded = binder.ApplyExpansionsProjection(result);
+        //    var expanded = binder.ApplyExpansionsProjection(result);
 
-            return expanded;
-        }
+        //    return expanded;
+        //}
     }
 }

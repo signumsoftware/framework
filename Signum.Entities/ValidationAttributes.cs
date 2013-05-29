@@ -22,6 +22,12 @@ namespace Signum.Entities
         public Func<ModifiableEntity, bool> IsApplicable; 
         public Func<string> ErrorMessage { get; set; }
 
+        public string UnlocalizableErrorMessage
+        {
+            get { return ErrorMessage == null ? null : ErrorMessage(); }
+            set { ErrorMessage = () => value; }
+        }
+
         public int Order { get; set; }
 
         //Descriptive information that continues the sentence: The property should {HelpMessage}

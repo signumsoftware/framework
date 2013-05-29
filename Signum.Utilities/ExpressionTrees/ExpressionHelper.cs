@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
 using Signum.Utilities.Reflection;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Utilities.ExpressionTrees
 {
@@ -41,6 +42,36 @@ namespace Signum.Utilities.ExpressionTrees
                 return alternate.AsReadOnly();
             }
             return collection;
+        }
+
+        [DebuggerStepThrough]
+        public static ReadOnlyDictionary<K, V> NewIfChange<K, V>(this ReadOnlyDictionary<K, V> dictionary, Func<V, V> newValue)
+            where V : class
+        {
+            if (dictionary == null)
+                return null;
+
+            Dictionary<K, V> alternate = null;
+            foreach (var k in dictionary.Keys)
+            {
+                V item = dictionary[k];
+                V newItem = newValue(item);
+                if (alternate == null && item != newItem)
+                {
+                    alternate = new Dictionary<K, V>();
+                    foreach (var k2 in dictionary.Keys.TakeWhile(k2 => !k2.Equals(k)))
+                        alternate.Add(k2, dictionary[k2]);
+                }
+                if (alternate != null && newItem != null)
+                {
+                    alternate.Add(k, newItem);
+                }
+            }
+            if (alternate != null)
+            {
+                return alternate.ToReadOnly();
+            }
+            return dictionary;
         }
 
         [DebuggerStepThrough]

@@ -217,6 +217,12 @@ namespace Signum.Engine.Linq
             return join;
         }
 
+        protected override Expression VisitSetOperator(SetOperatorExpression set)
+        {
+            using (Scope())
+                return base.VisitSetOperator(set);
+        }
+
         protected override Expression VisitTable(TableExpression table)
         {
             if (gatheredKeys != null)

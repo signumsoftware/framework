@@ -76,6 +76,16 @@ namespace Signum.Engine.Linq
             return base.VisitSubquery(subquery);
         }
 
+        protected override Expression VisitSetOperator(SetOperatorExpression set)
+        {
+            HashSet<string> columnsUsed = allColumnsUsed.GetOrCreate(set.Alias); // a veces no se usa
+
+            allColumnsUsed.GetOrCreate(set.Left.Alias).AddRange(columnsUsed);
+            allColumnsUsed.GetOrCreate(set.Right.Alias).AddRange(columnsUsed);
+
+            return base.VisitSetOperator(set);
+        }
+
         protected override Expression VisitProjection(ProjectionExpression projection)
         {
             // visit mapping in reverse order
@@ -92,7 +102,7 @@ namespace Signum.Engine.Linq
         {
             if (join.JoinType == JoinType.SingleRowLeftOuterJoin)
             {
-                var table = (TableExpression)join.Right;
+                var table = (SourceWithAliasExpression)join.Right;
 
                 var hs = allColumnsUsed.TryGetC(table.Alias);
 

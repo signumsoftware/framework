@@ -22,8 +22,6 @@ namespace Signum.Engine
             if (!File.Exists(FileName))
                 return new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
 
-            Debug.WriteLine("UserConnection's file found on {0}".Formato(FileName));
-            Debug.WriteLine("{0}".Formato(File.ReadAllText(FileName)));
             return File.ReadAllLines(FileName).Where(s=> !string.IsNullOrWhiteSpace(s) && !s.StartsWith("-") && !s.StartsWith("/")).ToDictionary(a => a.Before('>'), a => a.After('>'));          
         }
 

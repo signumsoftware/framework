@@ -82,6 +82,30 @@ namespace Signum.Engine.Linq
             return join;
         }
 
+        protected override Expression VisitSetOperator(SetOperatorExpression set)
+        {
+            List<ColumnExpression> askedColumns = CurrentScope.Keys.Where(k => k.Alias == set.Alias).ToList();
+
+            SourceWithAliasExpression left = VisitSetOperatorPart(set.Left, askedColumns);
+            SourceWithAliasExpression right = VisitSetOperatorPart(set.Right, askedColumns);
+
+            CurrentScope.SetRange(askedColumns, askedColumns);
+
+            if (left != set.Left || right != set.Right)
+                return new SetOperatorExpression(set.Operator, left, right, set.Alias);
+
+            return set;
+        }
+
+        private SourceWithAliasExpression VisitSetOperatorPart(SourceWithAliasExpression part, List<ColumnExpression> askedColumns)
+        {
+            using (NewScope())
+            {
+                CurrentScope.AddRange(askedColumns.ToDictionary(c => new ColumnExpression(c.Type, part.Alias, c.Name), c => (Expression)null));
+                return (SourceWithAliasExpression)Visit(part);
+            }
+        }
+
         protected override Expression VisitDelete(DeleteExpression delete)
         {
             Visit(delete.Where);

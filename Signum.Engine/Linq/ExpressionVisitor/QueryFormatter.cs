@@ -636,6 +636,41 @@ namespace Signum.Engine.Linq
             return join;
         }
 
+        protected override Expression VisitSetOperator(SetOperatorExpression set)
+        {
+            VisitSetPart(set.Left);
+
+            switch (set.Operator)
+            {
+                case SetOperator.Union: sb.Append("UNION"); break;
+                case SetOperator.UnionAll: sb.Append("UNION ALL"); break;
+                case SetOperator.Intersect: sb.Append("INTERSECT"); break;
+                case SetOperator.Except: sb.Append("EXCEPT"); break;
+                default:
+                    throw new InvalidOperationException("Unexpected SetOperator {0}".Formato(set.Operator));
+            }
+
+            VisitSetPart(set.Right);
+
+            return set;
+        }
+
+        void VisitSetPart(SourceWithAliasExpression source)
+        {
+            if (source is SelectExpression)
+            {
+                this.Indent(Indentation.Inner);
+                VisitSelect((SelectExpression)source);
+                this.Indent(Indentation.Outer);
+            }
+            else if (source is SetOperatorExpression)
+            {
+                VisitSetOperator((SetOperatorExpression)source);
+            }
+            else
+                throw new InvalidOperationException("{0} not expected in SetOperatorExpression".Formato(source.NiceToString()));
+        }
+
         protected override Expression VisitDelete(DeleteExpression delete)
         {
             sb.Append("DELETE ");

@@ -35,9 +35,9 @@ namespace Signum.Engine.Linq
 
         Dictionary<ColumnExpression, ColumnExpression> map = new Dictionary<ColumnExpression, ColumnExpression>();
         HashSet<Expression> candidates;
-        Alias[] knownAliases;
+        HashSet<Alias> knownAliases;
         Alias newAlias;
-        bool selectTrivialColumns;
+        bool projectTrivialColumns;
 
 
         private ColumnProjector() { }
@@ -47,7 +47,7 @@ namespace Signum.Engine.Linq
             return new ColumnExpression(columnType, newAlias, declaration.Name);
         }
 
-        static internal ProjectedColumns ProjectColumns(Expression projector, Alias newAlias, Alias[] knownAliases, bool isGroupKey = false, bool selectTrivialColumns = false)
+        static internal ProjectedColumns ProjectColumns(Expression projector, Alias newAlias, HashSet<Alias> knownAliases, bool isGroupKey = false, bool selectTrivialColumns = false)
         {
             Expression newProj;
             var candidates = DbExpressionNominator.Nominate(projector, knownAliases, out newProj, isGroupKey : isGroupKey);
@@ -57,7 +57,7 @@ namespace Signum.Engine.Linq
                 newAlias = newAlias,
                 knownAliases = knownAliases,
                 candidates = candidates,
-                selectTrivialColumns = selectTrivialColumns
+                projectTrivialColumns = selectTrivialColumns
             };
 
             Expression e = cp.Visit(newProj);
@@ -72,7 +72,7 @@ namespace Signum.Engine.Linq
             {
                 if (expression.NodeType == (ExpressionType)DbExpressionType.Column)
                 {
-                    if (!selectTrivialColumns)
+                    if (!projectTrivialColumns)
                         return expression;
 
                     ColumnExpression column = (ColumnExpression)expression;
@@ -110,6 +110,73 @@ namespace Signum.Engine.Linq
             }
         }
     }
+
+    internal class ColumnUnionProjector : DbExpressionVisitor
+    {
+        Dictionary<ColumnExpression, ColumnExpression> map = new Dictionary<ColumnExpression, ColumnExpression>();
+        HashSet<Expression> candidates;
+        HashSet<Alias> knownAliases;
+        UnionAllRequest request;
+        Type implementation; 
+
+        private ColumnUnionProjector() { }
+
+        static internal Expression Project(Expression projector, HashSet<Expression> candidates, HashSet<Alias> knownAliases, UnionAllRequest request, Type implementation)
+        {
+            ColumnUnionProjector cp = new ColumnUnionProjector
+            {
+                request = request,
+                implementation = implementation,
+                knownAliases = knownAliases,
+                candidates = candidates,
+            };
+
+            return cp.Visit(projector);;
+        }
+
+
+        protected override Expression Visit(Expression expression)
+        {
+            if (this.candidates.Contains(expression))
+            {
+                if (expression.NodeType == (ExpressionType)DbExpressionType.Column)
+                {
+                    ColumnExpression column = (ColumnExpression)expression;
+                    ColumnExpression mapped;
+                    if (this.map.TryGetValue(column, out mapped))
+                    {
+                        return mapped;
+                    }
+                    if (this.knownAliases.Contains(column.Alias))
+                    {
+                        mapped = request.AddIndependentColumn(column.Type, column.Name, implementation, column);
+                        this.map[column] = mapped;
+                        return mapped;
+                    }
+                    // must be referring to outer scope
+                    return column;
+                }
+                else
+                {
+                    if (expression.Type.UnNullify().IsEnum)
+                    {
+                        var convert = expression.TryConvert(expression.Type.IsNullable() ? typeof(int?) : typeof(int));
+
+                        return request.AddIndependentColumn(convert.Type, "v", implementation, convert).TryConvert(expression.Type);
+                    }
+                    else
+                    {
+                        return request.AddIndependentColumn(expression.Type, "v", implementation, expression);
+                    }
+                }
+            }
+            else
+            {
+                return base.Visit(expression);
+            }
+        }
+    }
+
 
     internal class ColumnGenerator
     {
@@ -156,6 +223,11 @@ namespace Signum.Engine.Linq
             var result = new ColumnDeclaration(columnName, exp);
             columns.Add(result.Name, result);
             return result; 
+        }
+
+        public void AddUsedName(string name)
+        {
+            columns.Add(name, null);
         }
     }
 }
