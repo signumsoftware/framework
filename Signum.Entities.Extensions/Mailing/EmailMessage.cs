@@ -11,6 +11,7 @@ using Signum.Entities.Basics;
 using System.Globalization;
 using System.ComponentModel;
 using Signum.Entities.DynamicQuery;
+using System.Net.Mail;
 
 namespace Signum.Entities.Mailing
 {
@@ -39,9 +40,9 @@ namespace Signum.Entities.Mailing
         }
 
         [NotNullable]
-        EmailContactDN from;
+        EmailAddressDN from;
         [NotNullValidator]
-        public EmailContactDN From
+        public EmailAddressDN From
         {
             get { return from; }
             set { Set(ref from, value, () => From); }
@@ -146,7 +147,7 @@ namespace Signum.Entities.Mailing
     }
 
     [Serializable]
-    public class EmailRecipientDN : EmailContactDN
+    public class EmailRecipientDN : EmailAddressDN
     {
         public EmailRecipientDN() { }
 
@@ -167,21 +168,32 @@ namespace Signum.Entities.Mailing
         {
             return "{0}: {1}".Formato(kind.NiceToString(), base.ToString());
         }
+
+        internal EmailRecipientDN Clone()
+        {
+            return new EmailRecipientDN
+            {
+                 DisplayName = DisplayName,
+                 EmailAddress = EmailAddress, 
+                 EmailOwner = EmailOwner,
+                 Kind = Kind,
+            };
+        }
     }
 
     public enum EmailRecipientKind
     { 
         To,
         CC,
-        BCC
+        Bcc
     }
 
     [Serializable]
-    public class EmailContactDN : EmbeddedEntity
+    public class EmailAddressDN : EmbeddedEntity
     {
-        public EmailContactDN() { }
+        public EmailAddressDN() { }
 
-        public EmailContactDN(EmailOwnerData data)
+        public EmailAddressDN(EmailOwnerData data)
         {
             emailOwner = data.Owner;
             emailAddress = data.Email;
@@ -214,6 +226,24 @@ namespace Signum.Entities.Mailing
         public override string ToString()
         {
             return "{0} <{1}>".Formato(displayName, emailAddress);
+        }
+
+        public MailAddress ToMailAddress()
+        {
+            if (DisplayName != null)
+                return new MailAddress(EmailAddress, DisplayName);
+
+            return new MailAddress(EmailAddress);
+        }
+
+        public EmailAddressDN Clone()
+        {
+            return new EmailAddressDN
+            {
+                DisplayName = DisplayName,
+                EmailAddress = EmailAddress,
+                EmailOwner = EmailOwner
+            }; 
         }
     }
 

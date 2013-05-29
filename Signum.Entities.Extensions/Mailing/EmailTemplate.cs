@@ -117,9 +117,7 @@ namespace Signum.Entities.Mailing
             messages.ForEach(e => e.Template = this);
         }
 
-        [NotNullable]
         EmailTemplateContactDN from;
-        [NotNullValidator]
         public EmailTemplateContactDN From
         {
             get { return from; }
@@ -140,11 +138,11 @@ namespace Signum.Entities.Mailing
             set { Set(ref smtpConfiguration, value, () => SMTPConfiguration); }
         }
 
-        EmailModelDN model;
-        public EmailModelDN Model
+        SystemEmailDN systemEmail;
+        public SystemEmailDN SystemEmail
         {
-            get { return model; }
-            set { Set(ref model, value, () => Model); }
+            get { return systemEmail; }
+            set { Set(ref systemEmail, value, () => SystemEmail); }
         }
 
         EmailTemplateState state = EmailTemplateState.Created;
@@ -277,12 +275,12 @@ namespace Signum.Entities.Mailing
 
         public override string ToString()
         {
-            return "{0} {1} <{2}>".Formato(kind.NiceToString(), displayName, emailAddress);
+            return "{0} {1} <{2}>".Formato(kind.NiceToString(), DisplayName, EmailAddress);
         }
     }
 
     [Serializable, EntityKind(EntityKind.SystemString)]
-    public class EmailModelDN : IdentifiableEntity
+    public class SystemEmailDN : IdentifiableEntity
     {
         [NotNullable, UniqueIndex]
         string fullClassName;
@@ -292,7 +290,7 @@ namespace Signum.Entities.Mailing
             set { Set(ref fullClassName, value, () => FullClassName); }
         }
 
-        static readonly Expression<Func<EmailModelDN, string>> ToStringExpression = e => e.fullClassName;
+        static readonly Expression<Func<SystemEmailDN, string>> ToStringExpression = e => e.fullClassName;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

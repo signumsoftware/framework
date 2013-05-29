@@ -292,11 +292,13 @@ namespace Signum.Engine.Mailing
                     {
                         try
                         {
-                            var client = newsletter.SMTPConfig.GenerateSmtpClient(true);
+                            var client = newsletter.SMTPConfig.GenerateSmtpClient();
                             var message = new MailMessage();
-                            message.From = new MailAddress(
-                                newsletter.From ?? newsletter.SMTPConfig.InDB(smtp => smtp.DefaultFrom),
-                                newsletter.DisplayFrom ?? newsletter.SMTPConfig.InDB(smtp => smtp.DefaultDisplayFrom));
+                            
+                            if (newsletter.From.HasText())
+                                message.From = new MailAddress(newsletter.From, newsletter.DisplayFrom);
+                            else
+                                message.From = newsletter.SMTPConfig.InDB(smtp => smtp.DefaultFrom).ToMailAddress();
 
                             message.To.Add(overrideEmail ?? s.Email);
                             message.IsBodyHtml = true;

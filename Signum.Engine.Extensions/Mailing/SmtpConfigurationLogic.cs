@@ -18,6 +18,8 @@ namespace Signum.Engine.Mailing
 {
     public static class SMTPConfigurationLogic
     {
+        public static ResetLazy<Dictionary<Lite<SMTPConfigurationDN>, SMTPConfigurationDN>> SmtpConfigCache; 
+
         internal static void AssertStarted(SchemaBuilder sb)
         {
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => SMTPConfigurationLogic.Start(null, null)));
@@ -28,7 +30,6 @@ namespace Signum.Engine.Mailing
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<SMTPConfigurationDN>();
-                sb.Schema.EntityEvents<SMTPConfigurationDN>().Saving += new SavingEventHandler<SMTPConfigurationDN>(EmailClientSettingsLogic_Saving);
 
                 dqm.RegisterQuery(typeof(SMTPConfigurationDN), () =>
                     from s in Database.Query<SMTPConfigurationDN>()
@@ -56,7 +57,8 @@ namespace Signum.Engine.Mailing
                         c.FullFilePath
                     });
 
-                sb.Schema.Initializing[InitLevel.Level2NormalEntities] += SetCache;
+                SmtpConfigCache = sb.GlobalLazy(() => Database.Query<SMTPConfigurationDN>().ToDictionary(a => a.ToLite()),
+                    new InvalidateWith(typeof(SMTPConfigurationDN)));
 
                 new Graph<SMTPConfigurationDN>.Execute(SMTPConfigurationOperation.Save)
                 {
@@ -67,44 +69,26 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        static void EmailClientSettingsLogic_Saving(SMTPConfigurationDN ident)
+
+        public static SmtpClient GenerateSmtpClient(this Lite<SMTPConfigurationDN> config)
         {
-            if (ident.IsGraphModified)
-                Transaction.PostRealCommit += ud => smtpConfigurations = null;
+            return config.RetrieveFromCache().GenerateSmtpClient();
         }
 
-        static void SetCache()
+        public static SMTPConfigurationDN RetrieveFromCache(this Lite<SMTPConfigurationDN> config)
         {
-            smtpConfigurations = Database.RetrieveAll<SMTPConfigurationDN>().ToDictionary(s => s.Name);
+            return SmtpConfigCache.Value.GetOrThrow(config);
         }
 
-        static Dictionary<string, SMTPConfigurationDN> smtpConfigurations;
-        public static Dictionary<string, SMTPConfigurationDN> SmtpConfigurations
+        public static SmtpClient GenerateSmtpClient(this SMTPConfigurationDN config)
         {
-            get
-            {
-                if (smtpConfigurations == null)
-                    SetCache();
-                return SMTPConfigurationLogic.smtpConfigurations;
-            }
-        }
+            SmtpClient client = EmailLogic.SafeSmtpClient(config.Host, config.Port);
 
-        public static SmtpClient GenerateSmtpClient(string smtpSettingsName, bool defaultIfNotPresent)
-        {
-            var settings = SmtpConfigurations.TryGet(smtpSettingsName, null);
-            if (settings == null)
-                if (defaultIfNotPresent)
-                    return EmailLogic.SafeSmtpClient();
-                else
-                    throw new ArgumentException("The setting {0} was not found in the SMTP settings cache".Formato(smtpSettingsName));
+            client.UseDefaultCredentials = config.UseDefaultCredentials;
+            client.Credentials = config.Username.HasText() ? new NetworkCredential(config.Username, config.Password) : null;
+            client.EnableSsl = config.EnableSSL;
 
-            SmtpClient client = EmailLogic.SafeSmtpClient(settings.Host, settings.Port);
-
-            client.UseDefaultCredentials = settings.UseDefaultCredentials;
-            client.Credentials = settings.Username.HasText() ? new NetworkCredential(settings.Username, settings.Password) : null;
-            client.EnableSsl = settings.EnableSSL;
-
-            foreach (var cc in settings.ClientCertificationFiles)
+            foreach (var cc in config.ClientCertificationFiles)
             {
                 client.ClientCertificates.Add(cc.CertFileType == CertFileType.CertFile ?
                     X509Certificate.CreateFromCertFile(cc.FullFilePath)
@@ -112,16 +96,6 @@ namespace Signum.Engine.Mailing
             }
 
             return client;
-        }
-
-        public static SmtpClient GenerateSmtpClient(this Lite<SMTPConfigurationDN> config)
-        {
-            return GenerateSmtpClient(config.ToString(), false);
-        }
-
-        public static SmtpClient GenerateSmtpClient(this Lite<SMTPConfigurationDN> config, bool defaultIfNotPresent)
-        {
-            return GenerateSmtpClient(config.TryCC(c => c.ToString()), defaultIfNotPresent);
         }
     }
 }

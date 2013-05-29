@@ -66,7 +66,7 @@ namespace Signum.Engine.Mailing
                             new EmailMessageDN()
                             {
                                 Package = emailPackage.ToLite(),
-                                Recipient = m.Recipient,
+                                Recipients = m.Recipients,
                                 Text = m.Text,
                                 Subject = m.Subject,
                                 Template = m.Template,

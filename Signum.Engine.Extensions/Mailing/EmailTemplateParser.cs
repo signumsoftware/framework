@@ -117,24 +117,24 @@ namespace Signum.Engine.Mailing
 
             public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
             {
-                if (p.Model == null)
+                if (p.SystemEmail == null)
                     throw new ArgumentException("There is not any model for the message composition");
 
-                var value = Getter(p.Model);
+                var value = Getter(p.SystemEmail);
                 if (p.IsHtml && !(value is System.Web.HtmlString))
                     p.StringBuilder.Append(HttpUtility.HtmlEncode(value.ToString()));
                 else
                     p.StringBuilder.Append(value.ToString());
             }
 
-            object Getter(IEmailModel model)
+            object Getter(ISystemEmail systemEmail)
             {
                 var pi = Member as PropertyInfo;
 
                 if (pi != null)
-                    return pi.GetValue(model, null);
+                    return pi.GetValue(systemEmail, null);
 
-                return ((FieldInfo)Member).GetValue(model);
+                return ((FieldInfo)Member).GetValue(systemEmail);
             }
 
             public override void FillQueryTokens(List<QueryToken> list)
@@ -251,6 +251,13 @@ namespace Signum.Engine.Mailing
             mainBlock = new BlockNode();
             stack.Push(mainBlock);
 
+            if (matches.Count == 0)
+            {
+                stack.Peek().Nodes.Add(new LiteralNode { Text = text });
+                stack.Pop();
+                return errors;
+            }
+
             Func<string, QueryToken> tryParseToken = token =>
             {
                 QueryToken result = null;
@@ -356,7 +363,7 @@ namespace Signum.Engine.Mailing
         public bool IsHtml;
         public CultureInfo CultureInfo;
         public IIdentifiable Entity;
-        public IEmailModel Model;
+        public ISystemEmail SystemEmail;
         public Dictionary<QueryToken, ResultColumn> Columns;
     }
 }

@@ -2,7 +2,7 @@
 @using Signum.Entities.Mailing
 @using (var e = Html.TypeContext<EmailMessageDN>())
 {
-    @Html.EntityLine(e, f => f.Recipient)
+    @Html.EntityList(e, f => f.Recipients)
     @Html.EntityLine(e, f => f.Template, f => f.ReadOnly = true)
     @Html.ValueLine(e, f => f.Sent, f => f.ReadOnly = true)
     @Html.ValueLine(e, f => f.Received, f => f.ReadOnly = true)

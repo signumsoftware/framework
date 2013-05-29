@@ -142,7 +142,6 @@ namespace Signum.Entities.Authorization
         {
             get{ return EmailOwnerDataExpression.Evaluate(this); }
         }
-
     }
 
     public enum UserState

@@ -21,7 +21,7 @@ namespace Signum.Engine.Mailing
         static readonly Regex regex = new Regex(@"\{(\s*(?<token>\w(\:|\=)[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*)\s*\|?)+\}", RegexOptions.Singleline | RegexOptions.ExplicitCapture);
         static readonly Regex tokenRegex = new Regex(@"(?<prefix>\w)(?<separator>\:|\=)(?<literal>[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*)", RegexOptions.Singleline | RegexOptions.ExplicitCapture);
 
-        public static string Replace(string content, IEmailModel model, object extendedData, LocalizedAssembly localizedAssembly)
+        public static string Replace(string content, ISystemEmail systemEmail, object extendedData, LocalizedAssembly localizedAssembly)
         {
             List<Exception> exceptions = new List<Exception>();
 
@@ -31,7 +31,7 @@ namespace Signum.Engine.Mailing
                     {
                         try
                         {
-                            return GetToken(c.Value, model, extendedData, localizedAssembly);
+                            return GetToken(c.Value, systemEmail, extendedData, localizedAssembly);
                         }
                         catch (Exception e)
                         {
@@ -52,7 +52,7 @@ namespace Signum.Engine.Mailing
             return result;
         }
 
-        static string GetToken(string capture, IEmailModel model, object extendedData, LocalizedAssembly localizedAssembly)
+        static string GetToken(string capture, ISystemEmail systemEmail, object extendedData, LocalizedAssembly localizedAssembly)
         {
             Match m = tokenRegex.Match(capture);
 
@@ -62,7 +62,7 @@ namespace Signum.Engine.Mailing
 
             string text =
                 prefix == 'X' ? GetValue(extendedData.ThrowIfNullC("extendedData is null"), literal) :
-                prefix == 'M' ? GetValue(model, literal) :
+                prefix == 'M' ? GetValue(systemEmail, literal) :
                 //prefix == 'T' ? GetValue(model.To, literal) :
                 prefix == 'R' ? GetResource(localizedAssembly, literal) : null;
 

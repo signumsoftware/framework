@@ -8,7 +8,7 @@ using Signum.Entities.Translation;
 namespace Signum.Entities.Mailing
 {
     [Serializable]
-    public class EmailLogicConfiguration : EmbeddedEntity
+    public class EmailLogicConfigurationDN : EmbeddedEntity
     {
         CultureInfoDN defaultCulture;
         [NotNullValidator]

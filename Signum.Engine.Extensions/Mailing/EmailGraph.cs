@@ -46,15 +46,11 @@ namespace Signum.Engine.Mailing
                 AllowsNew = false,
                 Construct = (m, _) => new EmailMessageDN 
                 {
-                    From = m.From,
-                    DisplayFrom = m.DisplayFrom,
-                    To = m.To,
-                    Cc = m.Cc,
-                    Bcc = m.Bcc,
+                    From = m.From.Clone(),
+                    Recipients  = m.Recipients.Select(r=>r.Clone()).ToMList(),
                     Subject = m.Subject,
                     Text = m.Text,
                     IsBodyHtml = m.IsBodyHtml,
-                    Recipient = m.Recipient,
                     Template = m.Template,
                     EditableMessage = m.EditableMessage,
                     State = EmailMessageState.Created

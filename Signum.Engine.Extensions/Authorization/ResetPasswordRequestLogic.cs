@@ -51,11 +51,11 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public class ResetPasswordRequestMail : EmailModel<ResetPasswordRequestDN>
+        public class ResetPasswordRequestMail : SystemEmail<ResetPasswordRequestDN>
         {
-            public override List<EmailRecipientDN> GetRecipients()
+            public override List<EmailOwnerRecipientData> GetRecipients()
             {
-                return new List<EmailRecipientDN> { new EmailRecipientDN(Entity.User.EmailOwnerData) }; 
+                return To(Entity.User.EmailOwnerData); 
             }
         }
 

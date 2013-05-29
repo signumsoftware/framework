@@ -28,6 +28,8 @@ using Signum.Entities.DynamicQuery;
 using System.Text.RegularExpressions;
 using System.Globalization;
 using Signum.Engine.Translation;
+using System.Net.Configuration;
+using System.Configuration;
 
 namespace Signum.Engine.Mailing
 {
@@ -38,15 +40,19 @@ namespace Signum.Engine.Mailing
         bool IsPlainText { get; set; }
     }
 
-    public interface IEmailModel
+    public interface ISystemEmail
     {
         IdentifiableEntity UntypedEntity { get; }
-        List<EmailOwnerRecipienData> GetRecipients();
+        List<EmailOwnerRecipientData> GetRecipients();
+
+        List<Filter> GetFilters(QueryDescription qd);
+
+        object DefaultQueryName { get; } 
     }
 
-    public class EmailOwnerRecipienData
+    public class EmailOwnerRecipientData
     {
-        public EmailOwnerRecipienData(EmailOwnerData ownerData)
+        public EmailOwnerRecipientData(EmailOwnerData ownerData)
         {
             this.OwnerData = ownerData; 
         }
@@ -55,21 +61,34 @@ namespace Signum.Engine.Mailing
         public EmailRecipientKind Kind; 
     }
 
-    public abstract class EmailModel<T> : IEmailModel
+    public abstract class SystemEmail<T> : ISystemEmail
         where T : IdentifiableEntity
     {
         public T Entity { get; set; }
 
-        IdentifiableEntity IEmailModel.UntypedEntity
+        IdentifiableEntity ISystemEmail.UntypedEntity
         {
             get { return Entity; }
         }
 
-        public abstract List<EmailOwnerRecipienData> GetRecipients();
+        public abstract List<EmailOwnerRecipientData> GetRecipients();
 
-        protected static List<EmailOwnerRecipienData> To(EmailOwnerData ownerData)
+        protected static List<EmailOwnerRecipientData> To(EmailOwnerData ownerData)
         {
-            return new List<EmailOwnerRecipienData> { new EmailOwnerRecipienData(ownerData) }; 
+            return new List<EmailOwnerRecipientData> { new EmailOwnerRecipientData(ownerData) }; 
+        }
+
+        public virtual List<Filter> GetFilters(QueryDescription qd)
+        {
+            return new List<Filter>
+            {
+                new Filter(QueryUtils.Parse("Entity", qd, false), FilterOperation.EqualTo, Entity.ToLite())
+            };
+        }
+
+        public object DefaultQueryName
+        {
+            get { return typeof(T); }
         }
     }
 
@@ -86,9 +105,9 @@ namespace Signum.Engine.Mailing
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null, null, null)));
         }
 
-        private static Func<EmailLogicConfiguration> EmailLogicConfiguration;
+        private static Func<EmailLogicConfigurationDN> EmailLogicConfiguration;
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<EmailLogicConfiguration> emailLogicConfiguration)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<EmailLogicConfigurationDN> emailLogicConfiguration)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -176,7 +195,7 @@ namespace Signum.Engine.Mailing
 
         static string EmailTemplateMessageSubject_StaticPropertyValidation(EmailTemplateMessageDN message, PropertyInfo pi)
         {
-            EmailTemplateParser.BlockNode parsedNode = message.TextParsedNode as EmailTemplateParser.BlockNode;
+            EmailTemplateParser.BlockNode parsedNode = message.SubjectParsedNode as EmailTemplateParser.BlockNode;
 
             if (parsedNode == null)
             {
@@ -200,23 +219,23 @@ namespace Signum.Engine.Mailing
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
 
             List<QueryToken> list = new List<QueryToken>();
-            return EmailTemplateParser.Parse(text, s => QueryUtils.Parse("Entity." + s, qd, false), message.Template.Model.ToType());
+            return EmailTemplateParser.Parse(text, s => QueryUtils.Parse("Entity." + s, qd, false), message.Template.SystemEmail.ToType());
         }
 
-        static Dictionary<Type, Func<EmailTemplateDN>> emailModels =
+        static Dictionary<Type, Func<EmailTemplateDN>> systemEmails =
             new Dictionary<Type, Func<EmailTemplateDN>>();
-        static Dictionary<Type, EmailModelDN> emailModelToDN;
-        static Dictionary<EmailModelDN, Type> emailModelToType;
+        static Dictionary<Type, SystemEmailDN> systemEmailToDN;
+        static Dictionary<SystemEmailDN, Type> systemEmailToType;
 
         public static void RegisterEmailModel<T>(Func<EmailTemplateDN> defaultTemplateConstructor = null)
-            where T : IEmailModel
+            where T : ISystemEmail
         {
             RegisterEmailModel(typeof(T), defaultTemplateConstructor);
         }
 
         public static void RegisterEmailModel(Type model, Func<EmailTemplateDN> defaultTemplateConstructor = null)
         {
-            emailModels[model] = defaultTemplateConstructor;
+            systemEmails[model] = defaultTemplateConstructor;
         }
 
         static void EmailTemplate_PreSaving(EmailTemplateDN template, ref bool graphModified)
@@ -233,8 +252,8 @@ namespace Signum.Engine.Mailing
             
             foreach (var message in template.Messages)
             {
-                EmailTemplateParser.Parse(message.Text, s => QueryUtils.Parse("Entity." + s, qd, false), template.Model.ToType()).FillQueryTokens(list);
-                EmailTemplateParser.Parse(message.Subject, s => QueryUtils.Parse("Entity." + s, qd, false), template.Model.ToType()).FillQueryTokens(list);
+                EmailTemplateParser.Parse(message.Text, s => QueryUtils.Parse("Entity." + s, qd, false), template.SystemEmail.ToType()).FillQueryTokens(list);
+                EmailTemplateParser.Parse(message.Subject, s => QueryUtils.Parse("Entity." + s, qd, false), template.SystemEmail.ToType()).FillQueryTokens(list);
             }
 
             var tokens = list.Distinct();
@@ -249,13 +268,13 @@ namespace Signum.Engine.Mailing
         #region database management
         static void Schema_Initializing()
         {
-            var dbTemplates = Database.RetrieveAll<EmailModelDN>();
+            var dbTemplates = Database.RetrieveAll<SystemEmailDN>();
 
-            emailModelToDN = EnumerableExtensions.JoinStrict(
-                dbTemplates, emailModels.Keys, typeDN => typeDN.FullClassName, type => type.FullName,
+            systemEmailToDN = EnumerableExtensions.JoinStrict(
+                dbTemplates, systemEmails.Keys, typeDN => typeDN.FullClassName, type => type.FullName,
                 (typeDN, type) => KVP.Create(type, typeDN), "caching EmailTemplates").ToDictionary();
 
-            emailModelToType = emailModelToDN.Inverse();
+            systemEmailToType = systemEmailToDN.Inverse();
 
             var emailLogicConfiguration = EmailLogicConfiguration();
             EmailTemplateDN.DefaultCulture = emailLogicConfiguration.DefaultCulture;
@@ -268,17 +287,17 @@ namespace Signum.Engine.Mailing
 
         static SqlPreCommand Schema_Synchronizing(Replacements replacements)
         {
-            Table table = Schema.Current.Table<EmailModelDN>();
+            Table table = Schema.Current.Table<SystemEmailDN>();
 
-            Dictionary<string, EmailModelDN> should = GenerateTemplates().ToDictionary(s => s.FullClassName);
-            Dictionary<string, EmailModelDN> old = Administrator.TryRetrieveAll<EmailModelDN>(replacements).ToDictionary(c =>
+            Dictionary<string, SystemEmailDN> should = GenerateTemplates().ToDictionary(s => s.FullClassName);
+            Dictionary<string, SystemEmailDN> old = Administrator.TryRetrieveAll<SystemEmailDN>(replacements).ToDictionary(c =>
                 c.FullClassName);
 
             replacements.AskForReplacements(
                 old.Keys.ToHashSet(),
                 should.Keys.ToHashSet(), systemTemplatesReplacementKey);
 
-            Dictionary<string, EmailModelDN> current = replacements.ApplyReplacementsToOld(old, systemTemplatesReplacementKey);
+            Dictionary<string, SystemEmailDN> current = replacements.ApplyReplacementsToOld(old, systemTemplatesReplacementKey);
 
             return Synchronizer.SynchronizeScript(should, current,
                 (tn, s) => table.InsertSqlSync(s),
@@ -291,10 +310,10 @@ namespace Signum.Engine.Mailing
                 Spacing.Double);
         }
 
-        internal static List<EmailModelDN> GenerateTemplates()
+        internal static List<SystemEmailDN> GenerateTemplates()
         {
-            var lista = (from type in emailModels.Keys
-                         select new EmailModelDN
+            var lista = (from type in systemEmails.Keys
+                         select new SystemEmailDN
                          {
                              FullClassName = type.FullName
                          }).ToList();
@@ -303,7 +322,7 @@ namespace Signum.Engine.Mailing
 
         static SqlPreCommand Schema_Generating()
         {
-            Table table = Schema.Current.Table<EmailModelDN>();
+            Table table = Schema.Current.Table<SystemEmailDN>();
 
             return (from ei in GenerateTemplates()
                     select table.InsertSqlSync(ei)).Combine(Spacing.Simple);
@@ -385,38 +404,48 @@ namespace Signum.Engine.Mailing
 
         public static EmailSenderManager SenderManager;
 
-        public static EmailModelDN ToEmailModel(Type type)
+        public static SystemEmailDN ToSystemEmailDN(Type type)
         {
-            return emailModelToDN.GetOrThrow(type, "The email model {0} was not registered");
+            return systemEmailToDN.GetOrThrow(type, "The system email {0} was not registered");
         }
 
-        public static Type ToType(this EmailModelDN model)
+        public static Type ToType(this SystemEmailDN systemEmail)
         {
-            if (model == null)
+            if (systemEmail == null)
                 return null;
 
-            return emailModelToType.GetOrThrow(model, "The email model {0} was not registered");
+            return systemEmailToType.GetOrThrow(systemEmail, "The system email {0} was not registered");
         }
 
-        public static EmailMessageDN CreateEmailMessage(this IEmailModel model)
+        public static EmailMessageDN CreateEmailMessage(this ISystemEmail systemEmail)
         {
-            var emailModel = ToEmailModel(model.GetType());
+            var systemEmailDN = ToSystemEmailDN(systemEmail.GetType());
 
             var template = Database.Query<EmailTemplateDN>().SingleOrDefaultEx(t =>
                 t.IsActiveNow() == true &&
-                t.Model == emailModel);
+                t.SystemEmail == systemEmailDN);
 
             if (template == null)
             {
-                template = emailModels.GetOrThrow(model.GetType())();
-                template.Model = emailModel;
+                template = systemEmails.GetOrThrow(systemEmail.GetType())();
+                template.SystemEmail = systemEmailDN;
+                template.Active = true;
+
+                if (template.Query == null)
+                {
+                    var emailModelType = systemEmail.DefaultQueryName;
+                    if (emailModelType == null)
+                        throw new Exception("Query not specified for {0}".Formato(systemEmail));
+
+                    template.Query = QueryLogic.GetQuery(emailModelType);
+                }
 
                 using (ExecutionMode.Global())
                 using (OperationLogic.AllowSave<EmailTemplateDN>())
                     template.Save();                    
             }
 
-            return CreateEmailMessage(template, model.UntypedEntity, model);
+            return CreateEmailMessage(template, systemEmail.UntypedEntity, systemEmail);
         }
 
         public static EmailMessageDN CreateEmailMessage(this EmailTemplateDN template, IIdentifiable entity)
@@ -424,32 +453,30 @@ namespace Signum.Engine.Mailing
             return CreateEmailMessage(template, entity, null);
         }
 
-        public static EmailMessageDN CreateEmailMessage(this EmailTemplateDN template, IIdentifiable entity, IEmailModel model)
+        public static EmailMessageDN CreateEmailMessage(this EmailTemplateDN template, IIdentifiable entity, ISystemEmail systemEmail)
         {
             var queryName = QueryLogic.ToQueryName(template.Query.Key);
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
 
-            var columns = template.Tokens.Select(qt => new Column(QueryUtils.Parse("Entity." + qt.TokenString, qd, false), null)).ToList();
-
-            var entityToken = QueryUtils.Parse("Entity", qd, false);
+            var smtpConfig = template.SMTPConfiguration ?? EmailLogic.SenderManager.DefaultSMTPConfiguration;
+            
+            var columns = GetTemplateColumns(template.Tokens.ToList(), qd);
 
             var table = DynamicQueryManager.Current.ExecuteQuery(new QueryRequest
             {
                 QueryName = queryName,
                 Columns = columns,
                 ElementsPerPage = QueryRequest.AllElements,
-                Filters = new List<Filter>
-                {
-                    new Filter(entityToken, FilterOperation.EqualTo, Lite.Create(entityToken.Type.CleanType(), entity.Id))
-                }
+                Filters =  systemEmail.GetFilters(qd),
+                Orders = new List<Order>(),
             });
 
             var dicTokenColumn = table.Columns.ToDictionary(rc => rc.Column.Token);
 
             
-            MList<EmailOwnerRecipienData> recipients = new MList<EmailOwnerRecipienData>();
-            if (model != null)
-                recipients.AddRange(model.GetRecipients());
+            MList<EmailOwnerRecipientData> recipients = new MList<EmailOwnerRecipientData>();
+            if (systemEmail != null)
+                recipients.AddRange(systemEmail.GetRecipients());
 
             recipients.AddRange(template.Recipients.SelectMany(tr => 
             {
@@ -459,15 +486,15 @@ namespace Signum.Engine.Mailing
 
                     var groups = table.Rows.Select(r => (EmailOwnerData)r[owner]).Distinct(a => a.Owner).ToList();
                     if (groups.Count == 1 && groups[0] == null)
-                        return new List<EmailOwnerRecipienData>();
+                        return new List<EmailOwnerRecipientData>();
 
-                    return groups.Select(gr => new EmailOwnerRecipienData(g) { Kind = tr.Kind }).ToList();
+                    return groups.Select(g => new EmailOwnerRecipientData(g) { Kind = tr.Kind }).ToList();
                 }
                 else 
                 {
-                    return new List<EmailOwnerRecipienData>
+                    return new List<EmailOwnerRecipientData>
                     { 
-                        new EmailOwnerRecipienData(new EmailOwnerData
+                        new EmailOwnerRecipientData(new EmailOwnerData
                         {
                              CultureInfo = null, 
                              Email = tr.EmailAddress,
@@ -477,18 +504,50 @@ namespace Signum.Engine.Mailing
                 }
             }));
 
+            if (smtpConfig != null)
+                recipients.AddRange(smtpConfig.RetrieveFromCache().AditionalRecipients.Select(r =>
+                    new EmailOwnerRecipientData(r.EmailOwner.Retrieve().EmailOwnerData) { Kind = r.Kind }));
 
-            
-            EmailContactDN from;
-            if(template.From
+            EmailAddressDN from = null;
+            if (template.From != null)
+            {
+                if (template.From.EmailOwner != null)
+                {
+                    var owner = dicTokenColumn.GetOrThrow(QueryUtils.Parse("Entity." + template.From.EmailOwner.TokenString + "EmailOwnerData", qd, false));
 
+                    var eod = table.Rows.Select(r => (EmailOwnerData)r[owner]).Distinct(a => a.Owner).SingleOrDefaultEx(() => "More than one distinct From value");
 
-                
+                    from = new EmailAddressDN(eod);
+                }
+                else
+                {
+                    from = new EmailAddressDN(new EmailOwnerData
+                    {
+                        CultureInfo = null,
+                        Email = template.From.EmailAddress,
+                        DisplayName = template.From.DisplayName,
+                    });
+                }
+            }
+            else if (smtpConfig != null)
+            {
+                from = smtpConfig.RetrieveFromCache().DefaultFrom;
+            }
+
+            if (from == null)
+            {
+                SmtpSection smtpSection = ConfigurationManager.GetSection("system.net/mailSettings/smtp") as SmtpSection;
+
+                from = new EmailAddressDN
+                {
+                    EmailAddress = smtpSection.From
+                }; 
+            }  
 
             var email = new EmailMessageDN
             {
                 Recipients = recipients.Select(r => new EmailRecipientDN(r.OwnerData) { Kind = r.Kind }).ToMList(),
-                From = template.From,
+                From = from,
                 IsBodyHtml = template.IsBodyHtml,
                 EditableMessage = template.EditableMessage,
                 Template = template.ToLite(),
@@ -501,30 +560,30 @@ namespace Signum.Engine.Mailing
             Func<string, QueryToken> parseToken = str => QueryUtils.Parse("Entity." + str, qd, false);
 
             if (message.SubjectParsedNode == null)
-                message.SubjectParsedNode = EmailTemplateParser.Parse(message.Subject, parseToken, template.Model.ToType());
+                message.SubjectParsedNode = EmailTemplateParser.Parse(message.Subject, parseToken, template.SystemEmail.ToType());
 
             email.Subject = ((EmailTemplateParser.BlockNode)message.SubjectParsedNode).Print(
                 new EmailTemplateParameters
                 {
                     Columns = dicTokenColumn,
                     IsHtml = false,
-                    CultureInfo = cultureInfo,
+                    CultureInfo = ci,
                     Entity = entity,
-                    Model = model
+                    SystemEmail = systemEmail
                 },
                 table.Rows);
 
             if (message.TextParsedNode == null)
-                message.TextParsedNode = EmailTemplateParser.Parse(message.Text, parseToken, template.Model.ToType());
+                message.TextParsedNode = EmailTemplateParser.Parse(message.Text, parseToken, template.SystemEmail.ToType());
 
             var body = ((EmailTemplateParser.BlockNode)message.TextParsedNode).Print(
                 new EmailTemplateParameters
                 {
                     Columns = dicTokenColumn,
                     IsHtml = template.IsBodyHtml,
-                    CultureInfo = cultureInfo,
+                    CultureInfo = ci,
                     Entity = entity,
-                    Model = model
+                    SystemEmail = systemEmail
                 },
                 table.Rows);
 
@@ -536,10 +595,20 @@ namespace Signum.Engine.Mailing
             return email;
         }
 
-
-        public static void SendMail(this IEmailModel model)
+        static List<Column> GetTemplateColumns(List<TemplateQueryTokenDN> tokens, QueryDescription queryDescription)
         {
-            var email = model.CreateEmailMessage();
+            foreach (var t in tokens)
+            {
+                if (t.Token == null)
+                    t.Token = QueryUtils.Parse(t.TokenString, queryDescription, false);
+            }
+
+            return tokens.Select(qt => new Column(qt.Token, null)).ToList();
+        }
+
+        public static void SendMail(this ISystemEmail systemEmail)
+        {
+            var email = systemEmail.CreateEmailMessage();
             SenderManager.Send(email);
         }
 
@@ -549,9 +618,9 @@ namespace Signum.Engine.Mailing
             SenderManager.Send(email);
         }
 
-        public static void SendMailAsync(this IEmailModel model)
+        public static void SendMailAsync(this ISystemEmail systemEmail)
         {
-            var email = model.CreateEmailMessage();
+            var email = systemEmail.CreateEmailMessage();
             SenderManager.SendAsync(email);
         }
 
@@ -623,40 +692,47 @@ namespace Signum.Engine.Mailing
             
         }
 
-        protected MailMessage CreateMailMessage(EmailMessageDN email)
+        protected MailMessage CreateMailMessage(EmailMessageDN email, string overrideEmailAddress)
         {
-            email.To = GetRecipient(email, null);
-
             MailMessage message = new MailMessage()
             {
-                To = { new MailAddress(email.To) },
-                From = email.DisplayFrom.HasText() ? new MailAddress(email.From, email.DisplayFrom) : new MailAddress(email.From),
+                From =  email.From.ToMailAddress(),
                 Subject = email.Subject,
                 Body = email.Text,
                 IsBodyHtml = email.IsBodyHtml,
             };
 
-            if (email.Bcc.HasText())
-                message.Bcc.AddRange(email.Bcc.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(a => new MailAddress(a)).ToList());
-            if (email.Cc.HasText())
-                message.CC.AddRange(email.Cc.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(a => new MailAddress(a)).ToList());
+            message.To.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.To).Select(r => ToMailAddress(r, overrideEmailAddress)).ToList());
+            message.CC.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.CC).Select(r => ToMailAddress(r, overrideEmailAddress)).ToList());
+            message.Bcc.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.Bcc).Select(r => ToMailAddress(r, overrideEmailAddress)).ToList());
+
             return message;
         }
 
-        protected virtual string GetRecipient(EmailMessageDN email, object[] args)
+        MailAddress ToMailAddress(EmailRecipientDN recipient, string overrideEmailAddress)
         {
-            return email.Recipient.InDB().Select(r => r.Email).SingleEx();
+            var address = overrideEmailAddress ?? recipient.EmailAddress;
+
+            if (recipient.DisplayName != null)
+                return new MailAddress(address, recipient.DisplayName);
+
+            return new MailAddress(address);
         }
 
         public virtual void Send(EmailMessageDN email)
         {
             try
             {
-                SmtpClient client = CreateSmtpClient(email);
+                var overrideEmailAddress = EmailLogic.OverrideEmailAddress();
 
-                MailMessage message = CreateMailMessage(email);
+                if (overrideEmailAddress != EmailLogic.DoNotSend)
+                {
+                    SmtpClient client = CreateSmtpClient(email);
 
-                client.Send(message);
+                    MailMessage message = CreateMailMessage(email, overrideEmailAddress);
+
+                    client.Send(message);
+                }
 
                 email.State = EmailMessageState.Sent;
                 email.Sent = TimeZoneManager.Now;
@@ -686,53 +762,71 @@ namespace Signum.Engine.Mailing
 
         SmtpClient CreateSmtpClient(EmailMessageDN email)
         {
-            return email.Template != null
-                ? email.Template.InDB().Select(t => t.SMTPConfiguration).SingleOrDefault().TryCC(c => c.GenerateSmtpClient(true))
-                : null
-                ?? DefaultSMTPConfiguration.TryCC(c => c.GenerateSmtpClient(true))
-                ?? EmailLogic.SafeSmtpClient();
+            if (email.Template != null)
+            {
+                var smtp = email.Template.InDB(t => t.SMTPConfiguration);
+                if (smtp != null)
+                    return smtp.GenerateSmtpClient();
+            }
+
+            if (DefaultSMTPConfiguration != null)
+                return DefaultSMTPConfiguration.GenerateSmtpClient();
+
+            return EmailLogic.SafeSmtpClient();
         }
 
         public virtual void SendAsync(EmailMessageDN email)
         {
             try
             {
-                SmtpClient client = CreateSmtpClient(email);
+                var overrideEmailAddress = EmailLogic.OverrideEmailAddress();
 
-                MailMessage message = CreateMailMessage(email);
-
-                email.Sent = null;
-                email.Received = null;
-                email.Save();
-
-                client.SafeSendMailAsync(message, args =>
+                if (overrideEmailAddress == EmailLogic.DoNotSend)
                 {
-                    Expression<Func<EmailMessageDN, EmailMessageDN>> updater;
-                    if (args.Error != null)
+                    email.State = EmailMessageState.Sent;
+                    email.Sent = TimeZoneManager.Now;
+                    email.Received = null;
+                    email.Save();
+                }
+                else
+                {
+                    SmtpClient client = CreateSmtpClient(email);
+
+                    MailMessage message = CreateMailMessage(email, overrideEmailAddress);
+
+                    email.Sent = null;
+                    email.Received = null;
+                    email.Save();
+
+                    client.SafeSendMailAsync(message, args =>
                     {
-                        var exLog = args.Error.LogException().ToLite();
-                        updater = em => new EmailMessageDN
-                {
-                    Exception = exLog,
-                    State = EmailMessageState.Exception
-                };
-                    }
-                    else
-                        updater = em => new EmailMessageDN
+                        Expression<Func<EmailMessageDN, EmailMessageDN>> updater;
+                        if (args.Error != null)
                         {
-                            State = EmailMessageState.Sent,
-                            Sent = TimeZoneManager.Now
-                        };
-
-                    for (int i = 0; i < 4; i++) //to allow main thread to save email asynchronously
+                            var exLog = args.Error.LogException().ToLite();
+                            updater = em => new EmailMessageDN
                     {
-                        if (email.InDB().UnsafeUpdate(updater) > 0)
-                            return;
+                        Exception = exLog,
+                        State = EmailMessageState.Exception
+                    };
+                        }
+                        else
+                            updater = em => new EmailMessageDN
+                            {
+                                State = EmailMessageState.Sent,
+                                Sent = TimeZoneManager.Now
+                            };
 
-                        if (i != 3)
-                            Thread.Sleep(3000);
-                    }
-                });
+                        for (int i = 0; i < 4; i++) //to allow main thread to save email asynchronously
+                        {
+                            if (email.InDB().UnsafeUpdate(updater) > 0)
+                                return;
+
+                            if (i != 3)
+                                Thread.Sleep(3000);
+                        }
+                    });
+                }
             }
             catch (Exception ex)
             {

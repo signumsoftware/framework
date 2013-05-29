@@ -170,6 +170,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>EmailMasterTemplate.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Mailing\Views\EmailTemplate.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>EmailTemplate.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Mailing\Views\EmailTemplateMessage.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -481,11 +486,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Menu.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="Mailing\Views\EmailTemplate.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>EmailTemplate.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Help\Views\NamespaceControl.generated.cs">
       <AutoGen>True</AutoGen>
@@ -1149,7 +1149,7 @@
     </Content>
     <Content Include="Mailing\Views\EmailTemplate.cshtml">
       <Generator>RazorGenerator</Generator>
-      <LastGenOutput>EmailTemplate.cs</LastGenOutput>
+      <LastGenOutput>EmailTemplate.generated.cs</LastGenOutput>
     </Content>
     <Content Include="Mailing\Views\EmailTemplateMessage.cshtml">
       <Generator>RazorGenerator</Generator>

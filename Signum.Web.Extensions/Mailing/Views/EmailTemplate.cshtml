@@ -5,9 +5,9 @@
     @Html.ValueLine(ec, e => e.State, vl => vl.ReadOnly = true)
     <fieldset>
         <legend>Properties</legend>
-        @Html.EntityLine(ec, e => e.AssociatedType)
-        @Html.ValueLine(ec, e => e.Recipient)
-        @Html.EntityLine(ec, e => e.SystemTemplate)
+        @Html.EntityLine(ec, e => e.Query)
+        @Html.EntityList(ec, e => e.Recipients)
+        @Html.EntityLine(ec, e => e.Model)
     </fieldset>
     <fieldset>
         <legend>Active</legend>
@@ -17,10 +17,8 @@
     </fieldset>
     <fieldset>
         <legend>From/Copies</legend>
-        @Html.ValueLine(ec, e => e.From)
-        @Html.ValueLine(ec, e => e.DisplayFrom)
-        @Html.ValueLine(ec, e => e.Bcc)
-        @Html.ValueLine(ec, e => e.Cc)
+        @Html.EntityLine(ec, e => e.From)
+        @Html.EntityList(ec, e => e.Recipients)
     </fieldset>
     @Html.EntityLine(ec, e => e.SMTPConfiguration)
     <fieldset>

@@ -56,9 +56,9 @@ namespace Signum.Entities.Mailing
         }
 
         [NotNullable]
-        EmailContactDN defaultFrom;
+        EmailAddressDN defaultFrom;
         [NotNullValidator]
-        public EmailContactDN DefaultFrom
+        public EmailAddressDN DefaultFrom
         {
             get { return defaultFrom; }
             set { Set(ref defaultFrom, value, () => DefaultFrom); }
