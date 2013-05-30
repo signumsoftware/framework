@@ -9,15 +9,15 @@ namespace Signum.Engine.Linq
     /// <summary>
     ///  returns the set of all aliases produced by a query source
     /// </summary>
-    internal class AliasGatherer : DbExpressionVisitor
+    internal class DeclaredAliasGatherer : DbExpressionVisitor
     {
         HashSet<Alias> aliases = new HashSet<Alias>();
 
-        private AliasGatherer() { }
+        private DeclaredAliasGatherer() { }
 
-        public static HashSet<Alias> Gather(Expression source)
+        public static HashSet<Alias> GatherDeclared(Expression source)
         {
-            AliasGatherer ap = new AliasGatherer();
+            DeclaredAliasGatherer ap = new DeclaredAliasGatherer();
             ap.Visit(source);
             return ap.aliases;
         }
@@ -35,20 +35,15 @@ namespace Signum.Engine.Linq
         }
     }
 
-    internal class ExternalAliasGatherer : DbExpressionVisitor
+    internal class UsedAliasGatherer : DbExpressionVisitor
     {
-        HashSet<Alias> internals;
-
         HashSet<Alias> externals = new HashSet<Alias>();
 
-        private ExternalAliasGatherer() { }
+        private UsedAliasGatherer() { }
 
-        public static HashSet<Alias> Externals(Expression source, HashSet<Alias> internals)
+        public static HashSet<Alias> Externals(Expression source)
         {
-            ExternalAliasGatherer ap = new ExternalAliasGatherer()
-            {
-                internals = internals
-            };
+            UsedAliasGatherer ap = new UsedAliasGatherer();
 
             ap.Visit(source);
 
@@ -57,8 +52,7 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitColumn(ColumnExpression column)
         {
-            if (!internals.Contains(column.Alias))
-                externals.Add(column.Alias);
+             externals.Add(column.Alias);
 
             return base.VisitColumn(column);
         }

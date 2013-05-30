@@ -138,7 +138,7 @@ namespace Signum.Engine.Linq
             var where = Visit(delete.Where);
             var source = Visit(delete.Source);
             if (source != delete.Source || where != delete.Where)
-                return new DeleteExpression(delete.Table, (SourceExpression)source, where);
+                return new DeleteExpression(delete.Table, (SourceWithAliasExpression)source, where);
             return delete;
         }
 
@@ -148,7 +148,7 @@ namespace Signum.Engine.Linq
             var assigments = update.Assigments.NewIfChange(VisitColumnAssigment);
             var source = Visit(update.Source);
             if (source != update.Source || where != update.Where || assigments != update.Assigments)
-                return new UpdateExpression(update.Table, (SourceExpression)source, where, assigments);
+                return new UpdateExpression(update.Table, (SourceWithAliasExpression)source, where, assigments);
             return update;
         }
 

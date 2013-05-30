@@ -999,10 +999,10 @@ namespace Signum.Engine.Linq
     internal class DeleteExpression : CommandExpression
     {
         public readonly ITable Table;
-        public readonly SourceExpression Source;
+        public readonly SourceWithAliasExpression Source;
         public readonly Expression Where;
 
-        public DeleteExpression(ITable table, SourceExpression source, Expression where)
+        public DeleteExpression(ITable table, SourceWithAliasExpression source, Expression where)
             :base(DbExpressionType.Delete)
         {
             this.Table = table;
@@ -1022,11 +1022,11 @@ namespace Signum.Engine.Linq
     internal class UpdateExpression : CommandExpression
     {
         public readonly ITable Table;
-        public readonly ReadOnlyCollection<ColumnAssignment> Assigments; 
-        public readonly SourceExpression Source;
+        public readonly ReadOnlyCollection<ColumnAssignment> Assigments;
+        public readonly SourceWithAliasExpression Source;
         public readonly Expression Where;
 
-        public UpdateExpression(ITable table, SourceExpression source, Expression where, IEnumerable<ColumnAssignment> assigments)
+        public UpdateExpression(ITable table, SourceWithAliasExpression source, Expression where, IEnumerable<ColumnAssignment> assigments)
             :base(DbExpressionType.Update)
         {
             this.Table = table;

@@ -79,14 +79,10 @@ namespace Signum.Engine.Linq
                     {
                         return mapped;
                     }
-                    //if (this.knownAliases.Contains(column.Alias))
-                    {
-                        mapped = generator.MapColumn(column).GetReference(newAlias);
-                        this.map[column] = mapped;
-                        return mapped;
-                    }
-                    // must be referring to outer scope
-                    return column;
+
+                    mapped = generator.MapColumn(column).GetReference(newAlias);
+                    this.map[column] = mapped;
+                    return mapped;
                 }
                 else
                 {
@@ -113,19 +109,17 @@ namespace Signum.Engine.Linq
     {
         Dictionary<ColumnExpression, ColumnExpression> map = new Dictionary<ColumnExpression, ColumnExpression>();
         HashSet<Expression> candidates;
-        HashSet<Alias> knownAliases;
         UnionAllRequest request;
         Type implementation; 
 
         private ColumnUnionProjector() { }
 
-        static internal Expression Project(Expression projector, HashSet<Expression> candidates, HashSet<Alias> knownAliases, UnionAllRequest request, Type implementation)
+        static internal Expression Project(Expression projector, HashSet<Expression> candidates, UnionAllRequest request, Type implementation)
         {
             ColumnUnionProjector cp = new ColumnUnionProjector
             {
                 request = request,
                 implementation = implementation,
-                knownAliases = knownAliases,
                 candidates = candidates,
             };
 
@@ -145,14 +139,10 @@ namespace Signum.Engine.Linq
                     {
                         return mapped;
                     }
-                    if (this.knownAliases.Contains(column.Alias))
-                    {
-                        mapped = request.AddIndependentColumn(column.Type, column.Name, implementation, column);
-                        this.map[column] = mapped;
-                        return mapped;
-                    }
-                    // must be referring to outer scope
-                    return column;
+
+                    mapped = request.AddIndependentColumn(column.Type, column.Name, implementation, column);
+                    this.map[column] = mapped;
+                    return mapped;
                 }
                 else
                 {

@@ -182,6 +182,12 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectSimpleEntity()
+        {
+            var list3 = Database.Query<ArtistDN>().ToList();
+        }
+
+        [TestMethod]
         public void SelectEntity()
         {
             var list3 = Database.Query<AlbumDN>().ToList();

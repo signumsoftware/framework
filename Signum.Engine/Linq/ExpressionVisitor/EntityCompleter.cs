@@ -127,15 +127,16 @@ namespace Signum.Engine.Linq
             return new MListProjectionExpression(ml.Type, newProj);
         }
 
-        //protected override Expression VisitProjection(ProjectionExpression proj)
-        //{
-        //    Expression projector = this.Visit(proj.Projector);
+        protected override Expression VisitProjection(ProjectionExpression proj)
+        {
+            Expression projector;
+            using (binder.SetCurrentSource(proj.Select))
+                projector = this.Visit(proj.Projector);
 
-        //    var result = new ProjectionExpression(proj.Select, projector, proj.UniqueFunction, proj.Type);
+            if (projector != proj.Projector)
+                return new ProjectionExpression(proj.Select, projector, proj.UniqueFunction, proj.Type);
 
-        //    var expanded = binder.ApplyExpansionsProjection(result);
-
-        //    return expanded;
-        //}
+            return proj;
+        }
     }
 }
