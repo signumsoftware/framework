@@ -102,9 +102,9 @@ namespace Signum.Engine.Linq
         {
             if (join.JoinType == JoinType.SingleRowLeftOuterJoin)
             {
-                var table = (SourceWithAliasExpression)join.Right;
+                var source = join.Right as SourceWithAliasExpression;
 
-                var hs = allColumnsUsed.TryGetC(table.Alias);
+                var hs = allColumnsUsed.TryGetC(source.Alias);
 
                 if (hs == null || hs.Count == 0)
                     return Visit(join.Left);

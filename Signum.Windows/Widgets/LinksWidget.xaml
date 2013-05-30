@@ -28,10 +28,12 @@
                     <ItemsControl x:Name="lvQuickLinks">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="21,0,5,0" Cursor="Hand" ToolTip="{Binding ToolTip}">
-                                    <Image SnapsToDevicePixels="True" Stretch="None" Source="{Binding Icon}" VerticalAlignment="Center"/>
-                                    <Button FontFamily="Calibri, Segoe UI" Content="{Binding Label}" Style="{DynamicResource LinkButtonStyle}" Foreground="#ff375e5f"  VerticalAlignment="Center" Margin="3,0,0,0"/>
-                                </StackPanel>
+                                <m:AutomationBorder AutomationProperties.Name="{Binding Name}" HorizontalAlignment="Left" Margin="21,0,5,0" Cursor="Hand" ToolTip="{Binding ToolTip}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image SnapsToDevicePixels="True" Stretch="None" Source="{Binding Icon}" VerticalAlignment="Center"/>
+                                        <Button FontFamily="Calibri, Segoe UI" Content="{Binding Label}" Style="{DynamicResource LinkButtonStyle}" Foreground="#ff375e5f"  VerticalAlignment="Center" Margin="3,0,0,0"/>
+                                    </StackPanel>
+                                </m:AutomationBorder>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>

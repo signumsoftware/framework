@@ -35,6 +35,8 @@ namespace Signum.Windows
                 Icon = ql.Icon.ToSmallImage(),
             };
 
+            AutomationProperties.SetName(mi, ql.Name);
+
             if (ql.ToolTip.HasText())
             {
                 mi.ToolTip = ql.ToolTip;
@@ -116,6 +118,8 @@ namespace Signum.Windows
             }
         }
 
+        public abstract string Name { get; }
+
         public bool IsVisible { get; set; }
 
         public bool IsShy { get; set; }
@@ -143,9 +147,17 @@ namespace Signum.Windows
 
     public class QuickLinkAction : QuickLink
     {
+        string name; 
         Action action;
-        public QuickLinkAction(string label, Action action)
+        public QuickLinkAction(Enum enumValue, Action action)
+            : this(enumValue.ToString(), enumValue.NiceToString(), action)
         {
+
+        }
+        
+        public QuickLinkAction(string name, string label, Action action)
+        {
+            this.name = name;
             this.Label = label;
             this.action = action;
             this.IsVisible = true;
@@ -154,6 +166,12 @@ namespace Signum.Windows
         public override void Execute()
         {
             action();
+        }
+
+
+        public override string Name
+        {
+            get { return name; }
         }
     }
 
@@ -220,6 +238,11 @@ namespace Signum.Windows
                     item.Value = ((Func<object>)item.Value)();
             }
         }
+
+        public override string Name
+        {
+            get { return QueryUtils.GetQueryUniqueKey(Options.QueryName); }
+        }
     }
 
     public class QuickLinkNavigate<T> : QuickLink
@@ -280,6 +303,11 @@ namespace Signum.Windows
                 if (item.Value is Func<object>)
                     item.Value = ((Func<object>)item.Value)();
             }
+        }
+
+        public override string Name
+        {
+            get { return typeof(T).FullName; }
         }
     }
 }

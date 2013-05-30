@@ -107,6 +107,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Controls\DateSpan.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\TimePicker.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -146,6 +150,9 @@
     </Compile>
     <Compile Include="Basics\Exception.xaml.cs">
       <DependentUpon>Exception.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\DateSpan.xaml.cs">
+      <DependentUpon>DateSpan.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\TimePicker.xaml.cs">
       <DependentUpon>TimePicker.xaml</DependentUpon>

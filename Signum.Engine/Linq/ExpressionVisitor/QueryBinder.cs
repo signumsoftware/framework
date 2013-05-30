@@ -2353,6 +2353,21 @@ namespace Signum.Engine.Linq
             return result;
         }
 
+ 		protected override Expression VisitJoin(JoinExpression join)
+        {
+            SourceExpression left = this.VisitSource(join.Left);
+            SourceExpression right = join.JoinType == JoinType.SingleRowLeftOuterJoin && join.Right is TableExpression ? join.Right : this.VisitSource(join.Right);
+            Expression condition = this.Visit(join.Condition);
+
+            JoinExpression newJoin = join;
+            if (left != join.Left || right != join.Right || condition != join.Condition)
+                newJoin = new JoinExpression(join.JoinType, left, right, condition);
+
+            var expandedSource = ApplyExpansions(newJoin);
+
+            return result;
+        }
+
         SourceExpression ApplyExpansions(SourceExpression source, List<ExpansionRequest> expansions)
         {
             foreach (var r in expansions)
