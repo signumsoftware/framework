@@ -116,8 +116,7 @@ namespace Signum.Windows
             {
                 var ctrl = view(e);
 
-                using (Common.DelayRoutes())
-                    ctrl = overrideView(e, ctrl);
+                ctrl = overrideView(e, ctrl);
 
                 return ctrl;
             };
