@@ -24,15 +24,13 @@ namespace Signum.Engine.Linq
     /// </summary>
     internal class DbExpressionNominator : DbExpressionVisitor
     {
-        HashSet<Alias> existingAliases;
-
+        
         // existingAliases is null when used in QueryBinder, not ColumnProjector
         // this allows to make function changes in where clausules but keeping the full expression (not compressing it in one column
-        bool tempFullNominate = false;
 
-        bool IsFullNominate { get { return tempFullNominate || existingAliases == null; } }
+        bool isFullNominate;
 
-        bool IsFullNominateOrAggresive { get { return IsFullNominate || isGroupKey; } }
+        bool IsFullNominateOrAggresive { get { return isFullNominate || isGroupKey; } }
 
         bool isGroupKey = false;
 
@@ -53,16 +51,16 @@ namespace Signum.Engine.Linq
 
         private DbExpressionNominator() { }
 
-        static internal HashSet<Expression> Nominate(Expression expression, HashSet<Alias> existingAliases, out Expression newExpression, bool isGroupKey = false)
+        static internal HashSet<Expression> Nominate(Expression expression, out Expression newExpression, bool isGroupKey = false)
         {
-            DbExpressionNominator n = new DbExpressionNominator { existingAliases = existingAliases, isGroupKey = isGroupKey };
+            DbExpressionNominator n = new DbExpressionNominator { isFullNominate = false, isGroupKey = isGroupKey };
             newExpression = n.Visit(expression);
             return n.candidates;
         }
         
         static internal Expression FullNominate(Expression expression)
         {
-            DbExpressionNominator n = new DbExpressionNominator { existingAliases = null };
+            DbExpressionNominator n = new DbExpressionNominator { isFullNominate = true };
             Expression result = n.Visit(expression);
 
             return result;
@@ -71,7 +69,7 @@ namespace Signum.Engine.Linq
         protected override Expression Visit(Expression exp)
         {
             Expression result = base.Visit(exp);
-            if (IsFullNominate && result != null && !Has(result) && !IsExcluded(exp.NodeType))
+            if (isFullNominate && result != null && !Has(result) && !IsExcluded(exp.NodeType))
                 throw new InvalidOperationException("The expression can not be translated to SQL: " + result.NiceToString());
 
             return result;
@@ -99,12 +97,7 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitColumn(ColumnExpression column)
         {
-            //ScalarExpression scalar;
-            //if (replacements != null && replacements.TryGetValue(column, out scalar))
-            //    return Visit(scalar);
-
-            if ((IsFullNominateOrAggresive && !innerProjection) ||
-                existingAliases.Contains(column.Alias))
+            if (IsFullNominateOrAggresive || !innerProjection)
                 return Add(column);
 
             return column;
@@ -112,7 +105,7 @@ namespace Signum.Engine.Linq
 
         protected override NewExpression VisitNew(NewExpression nex)
         {
-            if (existingAliases == null)
+            if (isFullNominate)
             {
                 ReadOnlyCollection<Expression> args = this.VisitExpressionList(nex.Arguments);
                 if (args != nex.Arguments)
@@ -315,7 +308,7 @@ namespace Signum.Engine.Linq
             Add(number);
 
             Expression result = Expression.Convert(number, typeof(DayOfWeek));
-            if (IsFullNominate)
+            if (isFullNominate)
                 Add(result);
 
             return result;
@@ -692,7 +685,7 @@ namespace Signum.Engine.Linq
                        (untu == typeof(int) || untu == typeof(long)))
                         return Add(new SqlCastExpression(u.Type, operand));
 
-                    if (IsFullNominate || isGroupKey && optu == untu)
+                    if (isFullNominate || isGroupKey && optu == untu)
                         return Add(result);
 
                     if ("Sql" + untu.Name == optu.Name)
@@ -1026,9 +1019,9 @@ namespace Signum.Engine.Linq
 
         IDisposable ForceFullNominate()
         {
-            bool oldTemp = tempFullNominate;
-            tempFullNominate = true;
-            return new Disposable(() => tempFullNominate = oldTemp); 
+            bool oldTemp = isFullNominate;
+            isFullNominate = true;
+            return new Disposable(() => isFullNominate = oldTemp); 
         }
     }      
 }
