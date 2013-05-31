@@ -2012,6 +2012,9 @@ namespace Signum.Engine.Linq
 
             return currentSource.First(s => //could be more than one on GroupBy aggregates
             {
+                if (external.IsEmpty())
+                    return true;
+
                 var knownAliases = KnownAliases(s);
 
                 return external.Intersect(knownAliases).Any();
