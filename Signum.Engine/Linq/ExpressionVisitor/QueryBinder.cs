@@ -764,32 +764,37 @@ namespace Signum.Engine.Linq
 
         private Expression GetOrderExpression(LambdaExpression lambda, ProjectionExpression projection)
         {
-            var expr = MapVisitExpand(lambda, projection);
+            using (SetCurrentSource(projection.Select))
+            {
+                map.Add(lambda.Parameters[0], projection.Projector);
+                Expression expr = Visit(lambda.Body);
+                map.Remove(lambda.Parameters[0]);
 
-            if (expr is LiteReferenceExpression)
-            {
-                LiteReferenceExpression lite = (LiteReferenceExpression)expr;
-                expr = lite.Reference is ImplementedByAllExpression ? ((ImplementedByAllExpression)lite.Reference).Id :
-                      BindMethodCall(Expression.Call(lite.Reference, EntityExpression.ToStringMethod));
-            }
-            else if (expr is EntityExpression || expr is ImplementedByExpression)
-            {
-                expr = BindMethodCall(Expression.Call(expr, EntityExpression.ToStringMethod));
-            }
-            else if (expr is ImplementedByAllExpression)
-            {
-                expr = ((ImplementedByAllExpression)expr).Id;
-            }
-            else if (expr is MethodCallExpression && ReflectionTools.MethodEqual(((MethodCallExpression)expr).Method, miToUserInterface))
-            {
-                expr = ((MethodCallExpression)expr).Arguments[0];
-            }
-            else if (expr.Type == typeof(Type))
-            {
-                expr = ExtractTypeId(expr);
-            }
+                if (expr is LiteReferenceExpression)
+                {
+                    LiteReferenceExpression lite = (LiteReferenceExpression)expr;
+                    expr = lite.Reference is ImplementedByAllExpression ? ((ImplementedByAllExpression)lite.Reference).Id :
+                          BindMethodCall(Expression.Call(lite.Reference, EntityExpression.ToStringMethod));
+                }
+                else if (expr is EntityExpression || expr is ImplementedByExpression)
+                {
+                    expr = BindMethodCall(Expression.Call(expr, EntityExpression.ToStringMethod));
+                }
+                else if (expr is ImplementedByAllExpression)
+                {
+                    expr = ((ImplementedByAllExpression)expr).Id;
+                }
+                else if (expr is MethodCallExpression && ReflectionTools.MethodEqual(((MethodCallExpression)expr).Method, miToUserInterface))
+                {
+                    expr = ((MethodCallExpression)expr).Arguments[0];
+                }
+                else if (expr.Type == typeof(Type))
+                {
+                    expr = ExtractTypeId(expr);
+                }
 
-            return DbExpressionNominator.FullNominate(expr);
+                return DbExpressionNominator.FullNominate(expr);
+            }
         }
 
         static MethodInfo miToUserInterface = ReflectionTools.GetMethodInfo(() => DateTime.MinValue.ToUserInterface()); 
@@ -2069,7 +2074,7 @@ namespace Signum.Engine.Linq
             {
                 var knownAliases = KnownAliases(s);
 
-                return external.All(knownAliases.Contains);
+                return external.Intersect(knownAliases).Any();
             });
         }
 
