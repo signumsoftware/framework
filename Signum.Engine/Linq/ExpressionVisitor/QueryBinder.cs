@@ -1196,11 +1196,6 @@ namespace Signum.Engine.Linq
             if (ib.Implementations.Count == 1)
                 return selector(ib.Implementations.Values.Single());
 
-            return ib.Implementations.Values
-                .Select(ee => new When(Expression.NotEqual(ee.ExternalId, NullId), selector(ee)))
-                .ToCondition(resultType);
-
-
             UnionAllRequest ur = Completed(ib);
 
             var dictionary = ur.Implementations.SelectDictionary(ue => 
