@@ -1261,7 +1261,7 @@ namespace Signum.Engine.Linq
 
                 Expression id = CombineImplementations(request, implementations.SelectDictionary(imp => ((EntityExpression)imp).ExternalId), typeof(int?));
 
-                return new EntityExpression(returnType, id, null, null, avoidExpandOnRetrieving);
+                return new EntityExpression(returnType, id, null, null, null, avoidExpandOnRetrieving);
             }
 
             if (implementations.Any(e => e.Value is ImplementedByAllExpression))
@@ -1314,14 +1314,27 @@ namespace Signum.Engine.Linq
                 return new EmbeddedEntityExpression(returnType, hasValue, bindings, null);
             }
 
+            if (implementations.All(e => e.Value is MixinEntityExpression))
+            {
+                var bindings = (from w in implementations
+                                from b in ((MixinEntityExpression)w.Value).Bindings
+                                group KVP.Create(w.Key, b.Binding) by b.FieldInfo into g
+                                select new FieldBinding(g.Key,
+                                  CombineImplementations(request, g.ToDictionary(), g.Key.FieldType))).ToList();
+
+                return new MixinEntityExpression(returnType, bindings, null);
+            }
+
             if (implementations.Any(e => e.Value is MListExpression))
                 throw new InvalidOperationException("MList on ImplementedBy are not supported yet");
             
             if (implementations.Any(e => e.Value is TypeImplementedByAllExpression || e.Value is TypeImplementedByExpression || e.Value is TypeEntityExpression))
             {
+                var typeId = CombineImplementations(request, implementations.SelectDictionary(exp => ExtractTypeId(exp)), typeof(int?));
 
                 return new TypeImplementedByAllExpression(typeId);
             }
+
             if (implementations.All(i => i.Value.NodeType == ExpressionType.Convert && i.Value.Type.UnNullify().IsEnum))
             {
                 var enumType = implementations.Select(i => i.Value.Type).Distinct().Only();
@@ -1331,17 +1344,13 @@ namespace Signum.Engine.Linq
                 return Expression.Convert(value, enumType); 
             }
 
-            if (whens.All(e => e.Value is MixinEntityExpression))
-            {
-                var groups = (from w in whens
-                              from b in ((MixinEntityExpression)w.Value).Bindings
-                              group new When(w.Condition, b.Binding) by b.FieldInfo into g
-                              select KVP.Create(g.Key, g.ToList())).ToDictionary();
+            if (!Schema.Current.Settings.IsDbType(returnType.UnNullify()))
+                throw new InvalidOperationException("Impossible to CombineImplementations of {0}".Formato(returnType.TypeName()));
 
-                return new MixinEntityExpression(returnType,
-                    groups.Select(k => new FieldBinding(k.Key, CombineWhens(k.Value, k.Key.FieldType))), null);
-            }
+            var values = implementations.SelectDictionary(t => t, (t, exp) => GetNominableExpression(request, t, exp));
 
+            if (values.Values.All(o => o is Expression))
+                return request.AddUnionColumn(returnType, GetDefaultName((Expression)values.Values.First()), t => (Expression)values[t]);
 
             var whens = values.Select(kvp =>
             {
