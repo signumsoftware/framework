@@ -82,15 +82,40 @@ namespace Signum.Engine.Linq
             return join;
         }
 
+        protected override Expression VisitSetOperator(SetOperatorExpression set)
+        {
+            List<ColumnExpression> askedColumns = CurrentScope.Keys.Where(k => k.Alias == set.Alias).ToList();
+
+            SourceWithAliasExpression left = VisitSetOperatorPart(set.Left, askedColumns);
+            SourceWithAliasExpression right = VisitSetOperatorPart(set.Right, askedColumns);
+
+            CurrentScope.SetRange(askedColumns, askedColumns);
+
+            if (left != set.Left || right != set.Right)
+                return new SetOperatorExpression(set.Operator, left, right, set.Alias);
+
+            return set;
+        }
+
+        private SourceWithAliasExpression VisitSetOperatorPart(SourceWithAliasExpression part, List<ColumnExpression> askedColumns)
+        {
+            using (NewScope())
+            {
+                CurrentScope.AddRange(askedColumns.ToDictionary(c => new ColumnExpression(c.Type, part.Alias, c.Name), c => (Expression)null));
+                return (SourceWithAliasExpression)Visit(part);
+            }
+        }
+
         protected override Expression VisitDelete(DeleteExpression delete)
         {
             Visit(delete.Where);
 
             var source = Visit(delete.Source);
-
             var where = Visit(delete.Where);
+
             if (source != delete.Source || where != delete.Where)
-                return new DeleteExpression(delete.Table, (SourceExpression)source, where);
+                return new DeleteExpression(delete.Table, (SourceWithAliasExpression)source, where);
+
             return delete;
         }
 
@@ -100,11 +125,11 @@ namespace Signum.Engine.Linq
             update.Assigments.NewIfChange(VisitColumnAssigment);
 
             var source = Visit(update.Source);
-
             var where = Visit(update.Where);
             var assigments = update.Assigments.NewIfChange(VisitColumnAssigment);
             if (source != update.Source || where != update.Where || assigments != update.Assigments)
-                return new UpdateExpression(update.Table, (SourceExpression)source, where, assigments);
+                return new UpdateExpression(update.Table, (SourceWithAliasExpression)source, where, assigments);
+
             return update;
         }
 

@@ -217,7 +217,7 @@ namespace Signum.Test.Environment
         }
 
         static Expression<Func<BandDN, string>> FullNameExpression =
-            b => b.Name + " (" + b.Members.Count + " members )";
+            b => b.Name + " (" + b.Members.Count + " members)";
         public string FullName
         {
             get { return FullNameExpression.Evaluate(this); }

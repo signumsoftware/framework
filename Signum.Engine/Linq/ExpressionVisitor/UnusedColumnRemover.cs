@@ -76,6 +76,16 @@ namespace Signum.Engine.Linq
             return base.VisitSubquery(subquery);
         }
 
+        protected override Expression VisitSetOperator(SetOperatorExpression set)
+        {
+            HashSet<string> columnsUsed = allColumnsUsed.GetOrCreate(set.Alias); // a veces no se usa
+
+            allColumnsUsed.GetOrCreate(set.Left.Alias).AddRange(columnsUsed);
+            allColumnsUsed.GetOrCreate(set.Right.Alias).AddRange(columnsUsed);
+
+            return base.VisitSetOperator(set);
+        }
+
         protected override Expression VisitProjection(ProjectionExpression projection)
         {
             // visit mapping in reverse order
@@ -92,9 +102,9 @@ namespace Signum.Engine.Linq
         {
             if (join.JoinType == JoinType.SingleRowLeftOuterJoin)
             {
-                var table = (TableExpression)join.Right;
+                var source = join.Right as SourceWithAliasExpression;
 
-                var hs = allColumnsUsed.TryGetC(table.Alias);
+                var hs = allColumnsUsed.TryGetC(source.Alias);
 
                 if (hs == null || hs.Count == 0)
                     return Visit(join.Left);
@@ -128,7 +138,7 @@ namespace Signum.Engine.Linq
             var where = Visit(delete.Where);
             var source = Visit(delete.Source);
             if (source != delete.Source || where != delete.Where)
-                return new DeleteExpression(delete.Table, (SourceExpression)source, where);
+                return new DeleteExpression(delete.Table, (SourceWithAliasExpression)source, where);
             return delete;
         }
 
@@ -138,7 +148,7 @@ namespace Signum.Engine.Linq
             var assigments = update.Assigments.NewIfChange(VisitColumnAssigment);
             var source = Visit(update.Source);
             if (source != update.Source || where != update.Where || assigments != update.Assigments)
-                return new UpdateExpression(update.Table, (SourceExpression)source, where, assigments);
+                return new UpdateExpression(update.Table, (SourceWithAliasExpression)source, where, assigments);
             return update;
         }
 

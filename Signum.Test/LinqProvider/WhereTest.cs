@@ -39,7 +39,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void WhereIndex()
         {
-            var list = Database.Query<AlbumDN>().Where((a,i) => i % 2 == 0).ToList();
+            var list = Database.Query<AlbumDN>().Where((a, i) => i % 2 == 0).ToList();
         }
 
         [TestMethod]

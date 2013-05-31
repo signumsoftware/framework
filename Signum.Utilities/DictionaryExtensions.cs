@@ -126,6 +126,11 @@ namespace Signum.Utilities
             dictionary.Add(key, value);
         }
 
+        public static Dictionary<K, V2> SelectDictionary<K, V1, V2>(this IDictionary<K, V1> dictionary, Func<V1, V2> mapValue)
+        {
+            return dictionary.ToDictionary(k => k.Key, p => mapValue(p.Value));
+        }
+
         public static Dictionary<K2, V2> SelectDictionary<K1, V1, K2, V2>(this IDictionary<K1, V1> dictionary, Func<K1, K2> mapKey, Func<V1, V2> mapValue)
         {
             return dictionary.ToDictionary(p => mapKey(p.Key), p => mapValue(p.Value));

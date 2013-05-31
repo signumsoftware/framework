@@ -31,6 +31,7 @@ namespace Signum.Engine.Linq
         Projection,
         ChildProjection,
         Join,
+        SetOperator,
         Aggregate,
         AggregateSubquery,
         SqlFunction,        
@@ -63,6 +64,7 @@ namespace Signum.Engine.Linq
         MList,
         MListProjection,
         MListElement,
+        
     }
 
 
@@ -434,9 +436,6 @@ namespace Signum.Engine.Linq
             if (condition == null && joinType != JoinType.CrossApply && joinType != JoinType.OuterApply && joinType != JoinType.CrossJoin)
                 throw new ArgumentNullException("condition");
 
-            if (joinType == JoinType.SingleRowLeftOuterJoin && !(right is TableExpression))
-                throw new ArgumentException("right"); 
-
             this.JoinType = joinType;
             this.Left = left;
             this.Right = right;
@@ -446,6 +445,45 @@ namespace Signum.Engine.Linq
         public override string ToString()
         {
             return "{0}\r\n{1}\r\n{2}\r\nON {3}".Formato(Left.ToString().Indent(4), JoinType, Right.ToString().Indent(4), Condition.NiceToString());
+        }
+    }
+    
+    internal enum SetOperator
+    {
+        Union,
+        UnionAll,
+        Intersect,
+        Except
+    }
+
+    internal class SetOperatorExpression : SourceWithAliasExpression
+    {
+        public readonly SetOperator Operator;
+        public readonly SourceWithAliasExpression Left;
+        public readonly SourceWithAliasExpression Right;
+
+        public override Alias[] KnownAliases
+        {
+            get { return Left.KnownAliases.Concat(Right.KnownAliases).PreAnd(Alias).ToArray(); }
+        }
+
+        internal SetOperatorExpression(SetOperator @operator, SourceWithAliasExpression left, SourceWithAliasExpression right, Alias alias)
+            : base(DbExpressionType.SetOperator, alias)
+        {
+            if (left == null)
+                throw new ArgumentNullException("left");
+
+            if (right == null)
+                throw new ArgumentNullException("right");
+
+            this.Operator = @operator;
+            this.Left = left;
+            this.Right = right;
+        }
+
+        public override string ToString()
+        {
+            return "{0}\r\n{1}\r\n{2}\r\n as {3}".Formato(Left.ToString().Indent(4), Operator, Right.ToString().Indent(4), Alias);
         }
     }
 
@@ -962,10 +1000,10 @@ namespace Signum.Engine.Linq
     internal class DeleteExpression : CommandExpression
     {
         public readonly ITable Table;
-        public readonly SourceExpression Source;
+        public readonly SourceWithAliasExpression Source;
         public readonly Expression Where;
 
-        public DeleteExpression(ITable table, SourceExpression source, Expression where)
+        public DeleteExpression(ITable table, SourceWithAliasExpression source, Expression where)
             :base(DbExpressionType.Delete)
         {
             this.Table = table;
@@ -985,11 +1023,11 @@ namespace Signum.Engine.Linq
     internal class UpdateExpression : CommandExpression
     {
         public readonly ITable Table;
-        public readonly ReadOnlyCollection<ColumnAssignment> Assigments; 
-        public readonly SourceExpression Source;
+        public readonly ReadOnlyCollection<ColumnAssignment> Assigments;
+        public readonly SourceWithAliasExpression Source;
         public readonly Expression Where;
 
-        public UpdateExpression(ITable table, SourceExpression source, Expression where, IEnumerable<ColumnAssignment> assigments)
+        public UpdateExpression(ITable table, SourceWithAliasExpression source, Expression where, IEnumerable<ColumnAssignment> assigments)
             :base(DbExpressionType.Update)
         {
             this.Table = table;

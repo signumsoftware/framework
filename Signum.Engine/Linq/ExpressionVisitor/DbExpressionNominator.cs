@@ -24,15 +24,13 @@ namespace Signum.Engine.Linq
     /// </summary>
     internal class DbExpressionNominator : DbExpressionVisitor
     {
-        Alias[] existingAliases;
-
+        
         // existingAliases is null when used in QueryBinder, not ColumnProjector
         // this allows to make function changes in where clausules but keeping the full expression (not compressing it in one column
-        bool tempFullNominate = false;
 
-        bool IsFullNominate { get { return tempFullNominate || existingAliases == null; } }
+        bool isFullNominate;
 
-        bool IsFullNominateOrAggresive { get { return IsFullNominate || isGroupKey; } }
+        bool IsFullNominateOrAggresive { get { return isFullNominate || isGroupKey; } }
 
         bool isGroupKey = false;
 
@@ -53,16 +51,16 @@ namespace Signum.Engine.Linq
 
         private DbExpressionNominator() { }
 
-        static internal HashSet<Expression> Nominate(Expression expression, Alias[] existingAliases, out Expression newExpression, bool isGroupKey = false)
+        static internal HashSet<Expression> Nominate(Expression expression, out Expression newExpression, bool isGroupKey = false)
         {
-            DbExpressionNominator n = new DbExpressionNominator { existingAliases = existingAliases, isGroupKey = isGroupKey };
+            DbExpressionNominator n = new DbExpressionNominator { isFullNominate = false, isGroupKey = isGroupKey };
             newExpression = n.Visit(expression);
             return n.candidates;
         }
         
         static internal Expression FullNominate(Expression expression)
         {
-            DbExpressionNominator n = new DbExpressionNominator { existingAliases = null };
+            DbExpressionNominator n = new DbExpressionNominator { isFullNominate = true };
             Expression result = n.Visit(expression);
 
             return result;
@@ -71,7 +69,7 @@ namespace Signum.Engine.Linq
         protected override Expression Visit(Expression exp)
         {
             Expression result = base.Visit(exp);
-            if (IsFullNominate && result != null && !Has(result) && !IsExcluded(exp.NodeType))
+            if (isFullNominate && result != null && !Has(result) && !IsExcluded(exp.NodeType))
                 throw new InvalidOperationException("The expression can not be translated to SQL: " + result.NiceToString());
 
             return result;
@@ -99,12 +97,7 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitColumn(ColumnExpression column)
         {
-            //ScalarExpression scalar;
-            //if (replacements != null && replacements.TryGetValue(column, out scalar))
-            //    return Visit(scalar);
-
-            if ((IsFullNominateOrAggresive && !innerProjection) ||
-                existingAliases.Contains(column.Alias))
+            if (IsFullNominateOrAggresive || !innerProjection)
                 return Add(column);
 
             return column;
@@ -112,7 +105,7 @@ namespace Signum.Engine.Linq
 
         protected override NewExpression VisitNew(NewExpression nex)
         {
-            if (existingAliases == null)
+            if (isFullNominate)
             {
                 ReadOnlyCollection<Expression> args = this.VisitExpressionList(nex.Arguments);
                 if (args != nex.Arguments)
@@ -315,7 +308,7 @@ namespace Signum.Engine.Linq
             Add(number);
 
             Expression result = Expression.Convert(number, typeof(DayOfWeek));
-            if (IsFullNominate)
+            if (isFullNominate)
                 Add(result);
 
             return result;
@@ -692,7 +685,7 @@ namespace Signum.Engine.Linq
                        (untu == typeof(int) || untu == typeof(long)))
                         return Add(new SqlCastExpression(u.Type, operand));
 
-                    if (IsFullNominate || isGroupKey && optu == untu)
+                    if (isFullNominate || isGroupKey && optu == untu)
                         return Add(result);
 
                     if ("Sql" + untu.Name == optu.Name)
@@ -703,8 +696,6 @@ namespace Signum.Engine.Linq
             return result;
         }
 
-
-
         protected override Expression VisitProjection(ProjectionExpression proj)
         {
             bool oldInnerProjection = this.innerProjection;
@@ -714,27 +705,32 @@ namespace Signum.Engine.Linq
             return result;
         }
 
+        protected override Expression VisitTable(TableExpression table)
+        {
+            if (!innerProjection)
+                return Add(table);
+
+            return table;
+        }
+
+        protected override Expression VisitSelect(SelectExpression select)
+        {
+            if (!innerProjection)
+                return Add(select);
+
+            return select;
+        }
+
         protected override Expression VisitIn(InExpression inExp)
         {
-            Expression exp = this.Visit(inExp.Expression);
-            SelectExpression select = (SelectExpression)this.Visit(inExp.Select);
-            Expression result = inExp;
-            if (exp != inExp.Expression)
-                result = select == null ? InExpression.FromValues(exp, inExp.Values) :
-                                         new InExpression(exp, select);
+            if (!innerProjection)
+                return Add(inExp);
 
-            if (!innerProjection && Has(exp))
-                return Add(result);
-
-            return result;
+            return inExp;
         }
 
         protected override Expression VisitExists(ExistsExpression exists)
         {
-            SelectExpression select = (SelectExpression)this.Visit(exists.Select);
-            if (select != exists.Select)
-                exists = new ExistsExpression(select);
-
             if(!innerProjection)
                 return Add(exists);
 
@@ -743,10 +739,6 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitScalar(ScalarExpression scalar)
         {
-            SelectExpression select = (SelectExpression)this.Visit(scalar.Select);
-            if (select != scalar.Select)
-                scalar = new ScalarExpression(scalar.Type, select);
-
             if (!innerProjection)
                 return Add(scalar);
 
@@ -755,10 +747,6 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitAggregate(AggregateExpression aggregate)
         {
-            Expression source = Visit(aggregate.Source);
-            if (source != aggregate.Source)
-                aggregate = new AggregateExpression(aggregate.Type, source, aggregate.AggregateFunction);
-
             if (!innerProjection)
                 return Add(aggregate);
 
@@ -767,10 +755,6 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitAggregateSubquery(AggregateSubqueryExpression aggregate)
         {
-            var subquery = (ScalarExpression)this.Visit(aggregate.Subquery);
-            if (subquery != aggregate.Subquery)
-                aggregate = new AggregateSubqueryExpression(aggregate.GroupByAlias, aggregate.Aggregate, subquery);
-
             if (!innerProjection)
                 return Add(aggregate);
 
@@ -779,11 +763,7 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitIsNotNull(IsNotNullExpression isNotNull)
         {
-            Expression exp= this.Visit(isNotNull.Expression);
-            if (exp != isNotNull.Expression)
-                isNotNull = new IsNotNullExpression(exp);
-
-            if (Has(exp) && IsFullNominateOrAggresive)
+            if (!innerProjection)
                 return Add(isNotNull);
 
             return isNotNull;
@@ -791,21 +771,17 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitIsNull(IsNullExpression isNull)
         {
-            Expression exp = this.Visit(isNull.Expression);
-            if (exp != isNull.Expression)
-                isNull = new IsNullExpression(exp);
-
-            if (Has(exp) && IsFullNominateOrAggresive)
+            if (!innerProjection)
                 return Add(isNull);
 
             return isNull;
         }
 
-
         protected override Expression VisitSqlEnum(SqlEnumExpression sqlEnum)
         {
             if (!innerProjection)
                 return Add(sqlEnum);
+
             return sqlEnum;
         }
 
@@ -1026,9 +1002,9 @@ namespace Signum.Engine.Linq
 
         IDisposable ForceFullNominate()
         {
-            bool oldTemp = tempFullNominate;
-            tempFullNominate = true;
-            return new Disposable(() => tempFullNominate = oldTemp); 
+            bool oldTemp = isFullNominate;
+            isFullNominate = true;
+            return new Disposable(() => isFullNominate = oldTemp); 
         }
     }      
 }

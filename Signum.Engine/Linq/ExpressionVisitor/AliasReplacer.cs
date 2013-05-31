@@ -19,7 +19,7 @@ namespace Signum.Engine.Linq
         {
             AliasReplacer ap = new AliasReplacer()
             {
-                aliasMap = AliasGatherer.Gather(source).Reverse().ToDictionary(a => a, aliasGenerator.CloneAlias)
+                aliasMap = DeclaredAliasGatherer.GatherDeclared(source).Reverse().ToDictionary(a => a, aliasGenerator.CloneAlias)
             };
 
             return ap.Visit(source);

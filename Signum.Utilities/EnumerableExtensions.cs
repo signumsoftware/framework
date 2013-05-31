@@ -1050,6 +1050,13 @@ namespace Signum.Utilities
                 (collection as List<T> ?? collection.ToList()).AsReadOnly();
         }
 
+        public static ReadOnlyDictionary<K, V> ToReadOnly<K, V>(this IDictionary<K, V> dictionary)
+        {
+            return dictionary == null ? null :
+                dictionary as ReadOnlyDictionary<K, V> ??
+                new ReadOnlyDictionary<K, V>(dictionary);
+        }
+
         public static ObservableCollection<T> ToObservableCollection<T>(this IEnumerable<T> collection)
         {
             return collection == null ? null :

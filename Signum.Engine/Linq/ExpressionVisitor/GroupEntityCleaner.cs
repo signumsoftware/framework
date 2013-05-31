@@ -50,7 +50,7 @@ namespace Signum.Engine.Linq
         protected override Expression VisitImplementedBy(ImplementedByExpression reference)
         {
             var implementations = reference.Implementations
-                .NewIfChange(ri => Visit(ri.Reference).Let(r => r == ri.Reference ? ri : new ImplementationColumn(ri.Type, (EntityExpression)r)));
+                .NewIfChange(ri => (EntityExpression)VisitEntity(ri));
 
             return new ImplementedByExpression(reference.Type, implementations);
         }
