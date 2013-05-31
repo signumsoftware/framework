@@ -1196,9 +1196,20 @@ namespace Signum.Engine.Linq
             if (ib.Implementations.Count == 1)
                 return selector(ib.Implementations.Values.Single());
 
+            return ib.Implementations.Values
+                .Select(ee => new When(Expression.NotEqual(ee.ExternalId, NullId), selector(ee)))
+                .ToCondition(resultType);
+
+
             UnionAllRequest ur = Completed(ib);
 
-            var dictionary = ur.Implementations.SelectDictionary(ue => selector(ue.Entity));
+            var dictionary = ur.Implementations.SelectDictionary(ue => 
+                {
+                    using(SetCurrentSource(ue.Table))
+                    {
+                        return selector(ue.Entity);
+                    }
+                });
 
             var result = CombineImplementations(ur, dictionary, resultType);
 
@@ -1282,6 +1293,15 @@ namespace Signum.Engine.Linq
                 var typeId = CombineImplementations(request, implementations.SelectDictionary(exp => ExtractTypeId(exp)), typeof(int?));
 
                 return new TypeImplementedByAllExpression(typeId);
+            }
+
+            if (implementations.All(i => i.Value.NodeType == ExpressionType.Convert && i.Value.Type.UnNullify().IsEnum))
+            {
+                var enumType = implementations.Select(i => i.Value.Type).Distinct().Only();
+
+                var value = CombineImplementations(request, implementations.SelectDictionary(exp => ((UnaryExpression)exp).Operand), typeof(int?));
+
+                return Expression.Convert(value, enumType); 
             }
 
             if (!Schema.Current.Settings.IsDbType(returnType.UnNullify()))
@@ -2353,21 +2373,6 @@ namespace Signum.Engine.Linq
             return result;
         }
 
- 		protected override Expression VisitJoin(JoinExpression join)
-        {
-            SourceExpression left = this.VisitSource(join.Left);
-            SourceExpression right = join.JoinType == JoinType.SingleRowLeftOuterJoin && join.Right is TableExpression ? join.Right : this.VisitSource(join.Right);
-            Expression condition = this.Visit(join.Condition);
-
-            JoinExpression newJoin = join;
-            if (left != join.Left || right != join.Right || condition != join.Condition)
-                newJoin = new JoinExpression(join.JoinType, left, right, condition);
-
-            var expandedSource = ApplyExpansions(newJoin);
-
-            return result;
-        }
-
         SourceExpression ApplyExpansions(SourceExpression source, List<ExpansionRequest> expansions)
         {
             foreach (var r in expansions)
@@ -2385,7 +2390,7 @@ namespace Signum.Engine.Linq
                 {
                     UniqueRequest ur = (UniqueRequest)r;
 
-                    var newSelect = (SourceExpression)Visit(ur.Select);
+                    var newSelect = (SourceExpression)VisitSource(ur.Select);
 
                     source = new JoinExpression(ur.OuterApply ? JoinType.OuterApply : JoinType.CrossApply, source, newSelect, null);
                 }
@@ -2395,7 +2400,7 @@ namespace Signum.Engine.Linq
 
                     var unionAll = ur.Implementations.Select(ue =>
                     {
-                        var table = (SourceExpression)Visit(ue.Value.Table);
+                        var table = (SourceExpression)VisitSource(ue.Value.Table);
 
                         var columns = ur.GetDeclarations(ue.Key);
 
