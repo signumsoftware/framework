@@ -2352,8 +2352,10 @@ namespace Signum.Engine.Linq
 
             var result = expander.Visit(expression);
 
-            if (expander.requests.Any())
-                throw new InvalidOperationException("There should not be any non-consumed expansion requests at this stage");
+
+            //Sometimes group bys elements produce non consumed expansiosn that will be discarded
+            //if (expander.requests.Any())
+            //    throw new InvalidOperationException("There should not be any non-consumed expansion requests at this stage");
 
             return result;
         }
