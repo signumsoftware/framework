@@ -451,15 +451,23 @@ namespace Signum.Engine.Maps
 
         public Dictionary<PropertyRoute, Implementations> FindAllImplementations(Type root)
         {
-            if (!Tables.ContainsKey(root))
-                return null;
+            try
+            {
+                if (!Tables.ContainsKey(root))
+                    return null;
 
-            var table = Table(root);
+                var table = Table(root);
 
-            return PropertyRoute.GenerateRoutes(root)
-                .Select(r => r.Type.IsMList() ? r.Add("Item") : r)
-                .Where(r => r.Type.CleanType().IsIIdentifiable())
-                .ToDictionary(r => r, r => FindImplementations(r));
+                return PropertyRoute.GenerateRoutes(root)
+                    .Select(r => r.Type.IsMList() ? r.Add("Item") : r)
+                    .Where(r => r.Type.CleanType().IsIIdentifiable())
+                    .ToDictionary(r => r, r => FindImplementations(r));
+            }
+            catch (Exception e)
+            {
+                e.Data["rootType"] = root.TypeName();
+                throw;
+            }
         }
 
         public Implementations FindImplementations(PropertyRoute route)

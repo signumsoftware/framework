@@ -304,9 +304,17 @@ namespace Signum.Engine.Operations
 
         public static List<OperationInfo> ServiceGetOperationInfos(Type entityType)
         {
-            return (from oper in TypeOperations(entityType)
-                    where OperationAllowed(oper.Key, true)
-                    select ToOperationInfo(oper)).ToList();
+            try
+            {
+                return (from oper in TypeOperations(entityType)
+                        where OperationAllowed(oper.Key, true)
+                        select ToOperationInfo(oper)).ToList();
+            }
+            catch(Exception e)
+            {
+                e.Data["EntityType"] = entityType.TypeName();
+                throw;
+            }
         }
 
         public static List<OperationInfo> GetAllOperationInfos(Type entityType)
@@ -341,10 +349,18 @@ namespace Signum.Engine.Operations
 
         public static Dictionary<Enum, string> ServiceCanExecute(IdentifiableEntity entity)
         {
-            return (from o in TypeOperations(entity.GetType())
-                    let eo = o as IEntityOperation
-                    where eo != null && (eo.AllowsNew || !entity.IsNew) && OperationAllowed(o.Key, true)
-                    select KVP.Create(eo.Key, eo.CanExecute(entity))).ToDictionary();
+            try
+            {
+                return (from o in TypeOperations(entity.GetType())
+                        let eo = o as IEntityOperation
+                        where eo != null && (eo.AllowsNew || !entity.IsNew) && OperationAllowed(o.Key, true)
+                        select KVP.Create(eo.Key, eo.CanExecute(entity))).ToDictionary();
+            }
+            catch(Exception e)
+            {
+                e.Data["entity"] = entity.BaseToString();
+                throw;
+            }
         }
 
 

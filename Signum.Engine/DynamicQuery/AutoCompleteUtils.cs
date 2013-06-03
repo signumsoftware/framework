@@ -24,8 +24,16 @@ namespace Signum.Engine.DynamicQuery
             if (implementations.IsByAll)
                 throw new InvalidOperationException("ImplementedByAll not supported for FindLiteLike");
 
-            using (ExecutionMode.UserInterface())
-                return FindLiteLike(implementations.Types, subString, count);
+            try
+            {
+                using (ExecutionMode.UserInterface())
+                    return FindLiteLike(implementations.Types, subString, count);
+            }
+            catch (Exception e)
+            {
+                e.Data["implementations"] = implementations.ToString();
+                throw;
+            }
         }
 
         static List<Lite<IdentifiableEntity>> FindLiteLike(IEnumerable<Type> types, string subString, int count)
@@ -129,8 +137,16 @@ namespace Signum.Engine.DynamicQuery
             if (implementations.IsByAll)
                 throw new InvalidOperationException("ImplementedByAll is not supported for RetrieveAllLite");
 
-            using (ExecutionMode.UserInterface())
-                return implementations.Types.SelectMany(type => Database.RetrieveAllLite(type)).ToList();
+            try
+            {
+                using (ExecutionMode.UserInterface())
+                    return implementations.Types.SelectMany(type => Database.RetrieveAllLite(type)).ToList();
+            }
+            catch (Exception e)
+            {
+                e.Data["implementations"] = implementations.ToString();
+                throw;
+            }
         }
     }
 }
