@@ -40,33 +40,6 @@ namespace Signum.Services
         ITypeAuthServer, IPermissionAuthServer, IOperationAuthServer, ISmsServer,
         IProfilerServer
     {
-        protected override T Return<T>(MethodBase mi, string description, Func<T> function, bool checkLogin = true)
-        {
-            try
-            {
-                using (ScopeSessionFactory.OverrideSession(session))
-                using (ExecutionMode.Global())
-                {
-                    return function();
-                }
-            }
-            catch (Exception e)
-            {
-                e.LogException(el =>
-                {
-                    el.ControllerName = GetType().Name;
-                    el.ActionName = mi.Name;
-                    el.QueryString = description;
-                    el.Version = Schema.Current.Version.ToString();
-                    el.Data = e.Data.Dump();
-                });
-                throw new FaultException(e.Message);
-            }
-            finally
-            {
-                Statics.CleanThreadContextAndAssert();
-            }
-        }
 
         #region ILoginServer Members
         public virtual void Login(string username, string passwordHash)
