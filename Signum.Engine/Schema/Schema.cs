@@ -237,7 +237,7 @@ namespace Signum.Engine.Maps
         }
 
         public event Func<Replacements, SqlPreCommand> Synchronizing;
-        internal SqlPreCommand SynchronizationScript(string schemaName, bool interactive = true)
+        internal SqlPreCommand SynchronizationScript(string databaseName, bool interactive = true)
         {
             if (Synchronizing == null)
                 return null;
@@ -271,7 +271,7 @@ namespace Signum.Engine.Maps
                 return SqlPreCommand.Combine(Spacing.Double,
                     new SqlPreCommandSimple(SynchronizerMessage.StartOfSyncScriptGeneratedOn0.NiceToString().Formato(DateTime.Now)),
 
-                    new SqlPreCommandSimple("use {0}".Formato(schemaName)),
+                    new SqlPreCommandSimple("use {0}".Formato(databaseName)),
                     command,
                     new SqlPreCommandSimple(SynchronizerMessage.EndOfSyncScript.NiceToString()));
             }

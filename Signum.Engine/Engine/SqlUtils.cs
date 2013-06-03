@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using System.Text.RegularExpressions;
+using Signum.Engine.SchemaInfoTables;
+using Signum.Engine.Maps;
 
 namespace Signum.Engine
 {
@@ -216,6 +218,45 @@ WRITETEXT".Lines().Select(a => a.Trim().ToUpperInvariant()).ToHashSet();
                 return "[" + ident + "]";
 
             return ident;
+        }
+
+        public static SqlPreCommand RemoveDuplicatedIndices()
+        {
+            var plainData = (from s in Database.View<SysSchemas>()
+                             from t in s.Tables()
+                             from ix in t.Indices()
+                             from ic in ix.IndexColumns()
+                             from c in t.Columns()
+                             where ic.column_id == c.column_id
+                             select new
+                             {
+                                 table = new ObjectName(new SchemaName(null, s.name), t.name),
+                                 index = ix.name,
+                                 ix.is_unique,
+                                 column = c.name
+                             }).ToList();
+
+            var tables = plainData.AgGroupToDictionary(a => a.table, gr => gr.GroupToDictionary(a => new { a.index, a.is_unique }, a => a.column));
+
+            var result = tables.SelectMany(t =>
+                t.Value.GroupBy(a => a.Value.OrderBy().ToString("|"), a => a.Key)
+                .Where(gr => gr.Count() > 1)
+                .Select(gr =>
+                {
+                    var best = gr.OrderByDescending(a => a.is_unique).ThenByDescending(a => a.index.StartsWith("IX")).ThenByDescending(a => a.index).First();
+
+                    return gr.Where(g => g != best)
+                        .Select(g => SqlBuilder.DropIndex(t.Key, g.index))
+                        .PreAnd(new SqlPreCommandSimple("-- DUPLICATIONS OF {0}".Formato(best.index))).Combine(Spacing.Simple);
+                })
+            ).Combine(Spacing.Double);
+
+            if (result == null)
+                return null;
+
+            return SqlPreCommand.Combine(Spacing.Double,
+                 new SqlPreCommandSimple("use {0}".Formato(Connector.Current.DatabaseName())),
+                 result);
         }
     }
 }
