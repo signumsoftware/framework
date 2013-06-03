@@ -428,5 +428,29 @@ namespace Signum.Test.LinqProvider
                         }).Take(10).ToList();
         }
 
+        [TestMethod]
+        public void GroupByExpandGroupBy()
+        {
+            var list = (from a in Database.Query<ArtistDN>()
+                        group a by a.Sex into g
+                        select new
+                        {
+                            g.Key,
+                            MaxFriends = g.Max(a => a.Friends.Count),
+                        }).ToList();
+        }
+
+        [TestMethod]
+        public void LetTrick()
+        {
+            var list = (from a in Database.Query<ArtistDN>()
+                        let friend = a.Friends
+                        select new
+                        {
+                            Artist = a.ToLite(),
+                            Friends = friend.Count(), // will also be expanded but then simplified
+                            FemaleFriends = friend.Count(f => f.Entity.Sex == Sex.Female)
+                        }).ToList(); 
+        }
     }
 }

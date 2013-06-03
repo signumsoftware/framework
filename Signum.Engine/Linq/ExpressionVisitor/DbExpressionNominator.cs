@@ -83,7 +83,7 @@ namespace Signum.Engine.Linq
                 case DbExpressionType.Select:
                 case DbExpressionType.Projection:
                 case DbExpressionType.Join:
-                case DbExpressionType.AggregateSubquery: //Not sure :S 
+                case DbExpressionType.AggregateRequest: //Not sure :S 
                 case DbExpressionType.Update:
                 case DbExpressionType.Delete:
                 case DbExpressionType.CommandAggregate:
@@ -753,7 +753,7 @@ namespace Signum.Engine.Linq
             return aggregate;
         }
 
-        protected override Expression VisitAggregateSubquery(AggregateSubqueryExpression aggregate)
+        protected override Expression VisitAggregateRequest(AggregateRequestsExpression aggregate)
         {
             if (!innerProjection)
                 return Add(aggregate);

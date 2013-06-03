@@ -33,7 +33,7 @@ namespace Signum.Engine.Linq
         Join,
         SetOperator,
         Aggregate,
-        AggregateSubquery,
+        AggregateRequest,
         SqlFunction,        
         SqlTableValuedFunction,
         SqlConstant,
@@ -882,22 +882,20 @@ namespace Signum.Engine.Linq
         }
     }
 
-    internal class AggregateSubqueryExpression : DbExpression
+    internal class AggregateRequestsExpression : DbExpression
     {
         public readonly Alias GroupByAlias;
         public readonly AggregateExpression Aggregate;
-        public readonly ScalarExpression Subquery;
-        public AggregateSubqueryExpression(Alias groupByAlias, AggregateExpression aggregate, ScalarExpression subquery)
-            : base(DbExpressionType.AggregateSubquery, subquery.Type)
+        public AggregateRequestsExpression(Alias groupByAlias, AggregateExpression aggregate)
+            : base(DbExpressionType.AggregateRequest, aggregate.Type)
         {
             this.Aggregate = aggregate;
             this.GroupByAlias = groupByAlias;
-            this.Subquery = subquery;
         }
 
         public override string ToString()
         {
-            return "AGGREGATE OF {0}({1}) OR\r\n {2}".Formato(GroupByAlias, Aggregate, Subquery);
+            return "AggregateRequest OF {0}({1})".Formato(GroupByAlias, Aggregate);
         }
     }
 

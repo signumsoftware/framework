@@ -747,7 +747,7 @@ namespace Signum.Engine.Linq
 
 
 
-        protected override Expression VisitAggregateSubquery(AggregateSubqueryExpression aggregate)
+        protected override Expression VisitAggregateRequest(AggregateRequestsExpression aggregate)
         {
             throw InvalidSqlExpression(aggregate);
         }

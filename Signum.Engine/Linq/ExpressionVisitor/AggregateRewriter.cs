@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
+using Signum.Utilities;
 
 namespace Signum.Engine.Linq
 {
@@ -11,8 +12,8 @@ namespace Signum.Engine.Linq
     /// </summary>
     internal class AggregateRewriter : DbExpressionVisitor
     {
-        ILookup<Alias, AggregateSubqueryExpression> lookup;
-        Dictionary<AggregateSubqueryExpression, Expression> map = new Dictionary<AggregateSubqueryExpression, Expression>();
+        ILookup<Alias, AggregateRequestsExpression> lookup;
+        Dictionary<AggregateRequestsExpression, ColumnExpression> map = new Dictionary<AggregateRequestsExpression, ColumnExpression>();
 
         private AggregateRewriter(Expression expr)
         {
@@ -30,7 +31,7 @@ namespace Signum.Engine.Linq
             if (lookup.Contains(select.Alias))
             {
                 List<ColumnDeclaration> aggColumns = new List<ColumnDeclaration>(select.Columns);
-                foreach (AggregateSubqueryExpression ae in lookup[select.Alias])
+                foreach (AggregateRequestsExpression ae in lookup[select.Alias])
                 {
                     ColumnDeclaration cd = new ColumnDeclaration("agg" + aggColumns.Count, ae.Aggregate);
                     this.map.Add(ae, cd.GetReference(ae.GroupByAlias));
@@ -41,34 +42,29 @@ namespace Signum.Engine.Linq
             return select;
         }
 
-        protected override Expression VisitAggregateSubquery(AggregateSubqueryExpression aggregate)
+        protected override Expression VisitAggregateRequest(AggregateRequestsExpression aggregate)
         {
-            Expression mapped;
-            if (this.map.TryGetValue(aggregate, out mapped))
-            {
-                return mapped;
-            }
-            return this.Visit(aggregate.Subquery);
+            return this.map.GetOrThrow(aggregate);
         }
 
         class AggregateGatherer : DbExpressionVisitor
         {
-            List<AggregateSubqueryExpression> aggregates = new List<AggregateSubqueryExpression>();
+            List<AggregateRequestsExpression> aggregates = new List<AggregateRequestsExpression>();
             private AggregateGatherer()
             {
             }
 
-            internal static List<AggregateSubqueryExpression> Gather(Expression expression)
+            internal static List<AggregateRequestsExpression> Gather(Expression expression)
             {
                 AggregateGatherer gatherer = new AggregateGatherer();
                 gatherer.Visit(expression);
                 return gatherer.aggregates;
             }
 
-            protected override Expression VisitAggregateSubquery(AggregateSubqueryExpression aggregate)
+            protected override Expression VisitAggregateRequest(AggregateRequestsExpression aggregate)
             {
                 this.aggregates.Add(aggregate);
-                return base.VisitAggregateSubquery(aggregate);
+                return base.VisitAggregateRequest(aggregate);
             }
         }
     }
