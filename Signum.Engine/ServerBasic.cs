@@ -31,12 +31,21 @@ namespace Signum.Services
             try
             {
                 using (ScopeSessionFactory.OverrideSession(session))
+                using (ExecutionMode.Global())
                 {
                     return function();
                 }
             }
             catch (Exception e)
             {
+                e.LogException(el =>
+                {
+                    el.ControllerName = GetType().Name;
+                    el.ActionName = mi.Name;
+                    el.QueryString = description;
+                    el.Version = Schema.Current.Version.ToString();
+                    el.Data = e.Data.Dump();
+                });
                 throw new FaultException(e.Message);
             }
             finally
@@ -59,7 +68,7 @@ namespace Signum.Services
         public virtual IdentifiableEntity Retrieve(Type type, int id)
         {
             return Return(MethodInfo.GetCurrentMethod(), type.Name,
-                () =>Database.Retrieve(type, id));
+                () => Database.Retrieve(type, id));
         }
 
         public virtual IdentifiableEntity Save(IdentifiableEntity entidad)
@@ -261,7 +270,5 @@ namespace Signum.Services
         }
 
         #endregion
-
-
     }
 }
