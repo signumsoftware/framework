@@ -157,10 +157,10 @@ namespace Signum.Entities
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)); 
         }
 
-        public void ResetRange(IEnumerable<T> newItems)
+        public bool ResetRange(IEnumerable<T> newItems)
         {
             var list = newItems.ToList();
-
+            bool modified = false;
             if (list.Count == innerList.Count)
             {
                 foreach (var item in list)
@@ -168,6 +168,7 @@ namespace Signum.Entities
                     if (!innerList.Remove(item))
                     {
                         SetSelfModified();
+                        modified = true;
                         break;
                     }
                 }
@@ -175,11 +176,13 @@ namespace Signum.Entities
             else
             {
                 SetSelfModified();
+                modified = true;
             }
 
             innerList = list;
 
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset)); 
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            return modified;
         }
 
         public void Clear()
