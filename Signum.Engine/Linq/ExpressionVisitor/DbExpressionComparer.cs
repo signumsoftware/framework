@@ -78,8 +78,8 @@ namespace Signum.Engine.Linq
                     return CompareChildProjection((ChildProjectionExpression)a, (ChildProjectionExpression)b);
                 case DbExpressionType.Aggregate:
                     return CompareAggregate((AggregateExpression)a, (AggregateExpression)b);
-                case DbExpressionType.AggregateSubquery:
-                    return CompareAggregateSubquery((AggregateSubqueryExpression)a, (AggregateSubqueryExpression)b);
+                case DbExpressionType.AggregateRequest:
+                    return CompareAggregateSubquery((AggregateRequestsExpression)a, (AggregateRequestsExpression)b);
                 case DbExpressionType.SqlCast:
                     return CompareSqlCast((SqlCastExpression)a, (SqlCastExpression)b);
                 case DbExpressionType.SqlFunction:
@@ -288,10 +288,9 @@ namespace Signum.Engine.Linq
             return a.AggregateFunction == b.AggregateFunction && Compare(a.Source, b.Source);
         }
 
-        protected virtual bool CompareAggregateSubquery(AggregateSubqueryExpression a, AggregateSubqueryExpression b)
+        protected virtual bool CompareAggregateSubquery(AggregateRequestsExpression a, AggregateRequestsExpression b)
         {
-            return Compare(a.Subquery, b.Subquery)
-                && Compare(a.Aggregate, b.Aggregate)
+            return Compare(a.Aggregate, b.Aggregate)
                 && a.GroupByAlias == b.GroupByAlias;
         }
 

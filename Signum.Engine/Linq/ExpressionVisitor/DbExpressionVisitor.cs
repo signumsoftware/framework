@@ -101,8 +101,8 @@ namespace Signum.Engine.Linq
                     return this.VisitChildProjection((ChildProjectionExpression)exp);
                 case (ExpressionType)DbExpressionType.Aggregate:
                     return this.VisitAggregate((AggregateExpression)exp);
-                case (ExpressionType)DbExpressionType.AggregateSubquery:
-                    return this.VisitAggregateSubquery((AggregateSubqueryExpression)exp);
+                case (ExpressionType)DbExpressionType.AggregateRequest:
+                    return this.VisitAggregateRequest((AggregateRequestsExpression)exp);
                 case (ExpressionType)DbExpressionType.SqlCast:
                     return this.VisitSqlCast((SqlCastExpression)exp);
                 case (ExpressionType)DbExpressionType.SqlEnum:
@@ -461,12 +461,13 @@ namespace Signum.Engine.Linq
             return aggregate;
         }
 
-        protected virtual Expression VisitAggregateSubquery(AggregateSubqueryExpression aggregate)
+        protected virtual Expression VisitAggregateRequest(AggregateRequestsExpression request)
         {
-            var subquery = (ScalarExpression)this.Visit(aggregate.Subquery);
-            if (subquery != aggregate.Subquery)
-                return new AggregateSubqueryExpression(aggregate.GroupByAlias, aggregate.Aggregate, subquery);
-            return aggregate;
+            var ag = (AggregateExpression)this.Visit(request.Aggregate);
+            if (ag != request.Aggregate)
+                return new AggregateRequestsExpression(request.GroupByAlias, ag);
+
+            return request;
         }
 
         protected virtual Expression VisitSelect(SelectExpression select)

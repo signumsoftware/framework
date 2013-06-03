@@ -388,8 +388,21 @@ namespace Signum.Engine.Linq
             Type enumType = ExtractEnum(ref resultType, aggregateFunction);
 
             ProjectionExpression projection = this.VisitCastProjection(source);
-            
-            SourceExpression newSource = projection.Select;
+    
+            GroupByInfo info = groupByMap.TryGetC(projection.Select.Alias);
+            if (info != null)
+            {
+                Expression exp2 = aggregateFunction == AggregateFunction.Count ? null : 
+                    selector != null ? MapVisitExpand(selector, info.Projector, info.Source):
+                    info.Projector;
+
+                var nominated2 = DbExpressionNominator.FullNominate(exp2);
+
+                var result = new AggregateRequestsExpression(info.GroupAlias,
+                    new AggregateExpression(resultType, nominated2, aggregateFunction));
+
+                return RestoreEnum(result, enumType);
+            }
 
             Expression exp = aggregateFunction == AggregateFunction.Count ? null :
                 selector != null ? MapVisitExpand(selector, projection) :
@@ -423,22 +436,6 @@ namespace Signum.Engine.Linq
                    UniqueFunction.Single, enumType ?? resultType);
 
             ScalarExpression subquery = new ScalarExpression(resultType, select);
-
-            GroupByInfo info = groupByMap.TryGetC(projection.Select.Alias);
-            if (info != null)
-            {
-                Expression exp2 = aggregateFunction == AggregateFunction.Count ? null : 
-                    selector != null ? MapVisitExpand(selector, info.Projector, info.Source):
-                    info.Projector;
-
-                var nominated2 = DbExpressionNominator.FullNominate(exp2);
-
-                var result = new AggregateSubqueryExpression(info.GroupAlias,
-                    new AggregateExpression(resultType, nominated2, aggregateFunction),
-                    subquery);
-
-                return RestoreEnum(result, enumType);
-            }
 
             return RestoreEnum(subquery, enumType);
         }
@@ -2072,6 +2069,9 @@ namespace Signum.Engine.Linq
 
             return currentSource.First(s => //could be more than one on GroupBy aggregates
             {
+                if (external.IsEmpty())
+                    return true;
+
                 var knownAliases = KnownAliases(s);
 
                 return external.Intersect(knownAliases).Any();
@@ -2299,6 +2299,8 @@ namespace Signum.Engine.Linq
     abstract class ExpansionRequest
     {
         public abstract HashSet<Alias> ExternalAlias(QueryBinder binder);
+
+        public bool Consumed { get; set; }
     }
 
     class UniqueRequest : ExpansionRequest
@@ -2412,8 +2414,15 @@ namespace Signum.Engine.Linq
 
             var result = expander.Visit(expression);
 
-            if (expander.requests.Any())
-                throw new InvalidOperationException("There should not be any non-consumed expansion requests at this stage");
+            //Sometimes group bys elements produce non consumed expansiosn that will be discarded
+            //var nonConsumed = binder.requests.SelectMany(r=>r.Value).Where(a => a.Consumed == false).ToList();
+
+            //if (nonConsumed.Any())
+            //    throw new InvalidOperationException("All the expansiosn should be consumed at this stage");
+
+
+            binder.requests.Clear(); 
+
 
             return result;
         }
@@ -2425,8 +2434,8 @@ namespace Signum.Engine.Linq
 
             var reqs = requests.TryGetC(source);
 
-            if (reqs != null)
-                requests.Remove(source);
+            //if (reqs != null)
+            //    requests.Remove(source);
 
             var result = base.VisitSource(source);
 
@@ -2480,6 +2489,8 @@ namespace Signum.Engine.Linq
 
                     source = new JoinExpression(JoinType.SingleRowLeftOuterJoin, source, unionAll, condition);
                 }
+
+                r.Consumed = true;
             }
             return source;
         }
