@@ -121,6 +121,15 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void ContainsEnum()
+        {
+            var singles = new[] { Status.Single};
+
+            var artists = Database.Query<ArtistDN>().Where(r => singles.Contains(r.Status.Value)).Select(a => a.ToLite()).ToList();
+        }
+
+
+        [TestMethod]
         public void Any()
         {
             Assert.IsTrue(Database.Query<ArtistDN>().Any(a => a.Sex == Sex.Female));
