@@ -141,8 +141,11 @@ namespace Signum.Utilities
             {
                 int result = updateOrDelete();
 
-                SafeConsole.WriteColor(ConsoleColor.White, " {0} ", result);
-                SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "rows afected");
+                lock (SafeConsole.SyncKey)
+                {
+                    SafeConsole.WriteColor(ConsoleColor.White, " {0} ", result);
+                    SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "rows afected");
+                }
             }); 
         }
 
@@ -159,10 +162,11 @@ namespace Signum.Utilities
                 Task t = Task.Factory.StartNew(() =>
                 {
                     while (result == null)
-                    { 
+                    {
                         Console.SetCursorPosition(left, Console.CursorTop);
 
-                        SafeConsole.WriteColor(ConsoleColor.DarkGray, " (" + (DateTime.Now - dt).NiceToString(DateTimePrecision.Seconds) + ")");
+                        lock (SafeConsole.SyncKey)
+                            SafeConsole.WriteColor(ConsoleColor.DarkGray, " (" + (DateTime.Now - dt).NiceToString(DateTimePrecision.Seconds) + ")");
 
                         Thread.Sleep(1000);
                     }
