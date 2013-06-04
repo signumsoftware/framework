@@ -661,7 +661,7 @@
     <Compile Include="Help\HelpClient.cs" />
     <Compile Include="Help\Controllers\HelpController.cs" />
     <Compile Include="Help\HelpModels.cs" />
-    <Compile Include="Mailing\EmailClient.cs" />
+    <Compile Include="Mailing\MailingClient.cs" />
     <Compile Include="Processes\ProcessesClient.cs" />
     <Compile Include="Processes\Controllers\ProcessController.cs" />
     <Compile Include="Profiler\ProfilerClient.cs" />

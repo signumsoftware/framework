@@ -19,10 +19,7 @@
         <fieldset>
             <legend>Replacement</legend>
             <textarea cols="30" rows="6"></textarea>
-            <input type="button" class="sf-button sf-email-insertTokenTextButton" value="@(EmailTemplateViewMessage.InsertInText.NiceToString())" />
-            <input type="button" class="sf-button sf-email-insertIterationTextButton" value="@(EmailTemplateViewMessage.InsertIterationInText.NiceToString())" />
-            <input type="button" class="sf-button sf-email-insertTokenSubjectButton" value="@(EmailTemplateViewMessage.InsertInSubject.NiceToString())" />
-            <input type="button" class="sf-button sf-email-insertIterationSubjectButton" value="@(EmailTemplateViewMessage.InsertIterationInSubject.NiceToString())" />
+
         </fieldset>
         @Html.ValueLine(ec, e => e.Subject)
         <div class="sf-email-messageEditContent">
@@ -34,15 +31,14 @@
                 vl.ValueHtmlProps["class"] = "sf-email-htmlwrite";
             })
             <br />
-            <input type="button" class="sf-button sf-email-messagePreviewContentButton" value="@(EmailTemplateViewMessage.PreviewContent.NiceToString())" />
+            <input type="button" class="sf-button sf-email-messagePreviewContentButton" value="Preview" />
         </div>
         <div class="sf-email-messagePreviewContent" style="display: none;">
             <fieldset>
                 <legend>Message</legend>
-                <iframe name="frameNewImage" src="about:blank" class="sf-email-htmlBody"
-                    frameborder="0"></iframe>
+                <iframe name="frameNewImage" src="about:blank" class="sf-email-htmlBody" frameborder="0"></iframe>
                 <br />
-                <input type="button" class="sf-button sf-email-messageEditContentButton" value="@(EmailTemplateViewMessage.EditContent.NiceToString())" />
+                <input type="button" class="sf-button sf-email-messageEditContentButton" value="Edit" />
             </fieldset>
         </div>
     </div>

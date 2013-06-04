@@ -290,7 +290,7 @@ namespace Signum.Entities.UserQueries
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => TokenString) && token == null)
+            if (pi.Is(() => TokenString) && TokenString == null)
             {
                 return parseException != null ? parseException.Message : ValidationMessage._0IsNotSet.NiceToString().Formato(pi.NiceName());
             }

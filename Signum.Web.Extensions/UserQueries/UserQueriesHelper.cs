@@ -39,7 +39,6 @@ namespace Signum.Web.UserQueries
             return helper.CountSearchControl(findOptions, settinsModifier);
         }
 
-
         public static MvcHtmlString QueryTokenDNBuilder(this HtmlHelper helper, QueryTokenDN queryToken, Context context, QueryDescription qd, bool canAggregate = false)
         {
             if (queryToken.TryCC(qt => qt.ParseException) != null)

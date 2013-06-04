@@ -192,18 +192,14 @@ namespace Signum.Entities.Mailing
                     return EmailTemplateMessage.EndDateMustBeHigherThanStartDate.NiceToString();
             }
 
-            if (pi.Is(() => Messages))
+            if (pi.Is(() => Messages) && Active)
             {
                 if (Messages == null || !Messages.Any())
                     return EmailTemplateMessage.ThereAreNoMessagesForTheTemplate.NiceToString();
                 if (!Messages.Any(m => m.CultureInfo.Is(DefaultCulture)))
-                {
                     return EmailTemplateMessage.ThereMustBeAMessageFor0.NiceToString().Formato(DefaultCulture.DisplayName);
-                }
                 if (Messages.GroupCount(m => m.CultureInfo).Any(c => c.Value > 1))
-                {
                     return EmailTemplateMessage.TheresMoreThanOneMessageForTheSameLanguage.NiceToString();
-                }
             }
 
             return base.PropertyValidation(pi);
@@ -259,7 +255,7 @@ namespace Signum.Entities.Mailing
 
         public override string ToString()
         {
-            return "{1} <{2}>".Formato(displayName, emailAddress);
+            return "{0} <{1}>".Formato(displayName, emailAddress);
         }
     }
 
@@ -301,7 +297,12 @@ namespace Signum.Entities.Mailing
     public class EmailTemplateMessageDN : EmbeddedEntity
     {
         [Ignore]
-        internal EmailTemplateDN Template;
+        EmailTemplateDN template;
+        public EmailTemplateDN Template
+        {
+            get { return template; }
+            set { Set(ref template, value, () => Template); }
+        }
 
         [NotNullable]
         CultureInfoDN cultureInfo;
@@ -432,18 +433,8 @@ namespace Signum.Entities.Mailing
     { 
         [Description("Insert message content")]
         InsertMessageContent,
-        [Description("Insert in text")]
-        InsertInText,
-        [Description("Insert iteration in text")]
-        InsertIterationInText,
-        [Description("Insert in subject")]
-        InsertInSubject,
-        [Description("Insert iteration in subject")]
-        InsertIterationInSubject,
-        [Description("Preview content")]
-        PreviewContent,
-        [Description("Edit content")]
-        EditContent,
+        [Description("Insert token")]
+        InsertToken,
         [Description("Language")]
         Language
     }

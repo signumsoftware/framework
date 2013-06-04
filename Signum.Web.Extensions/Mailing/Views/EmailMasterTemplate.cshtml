@@ -14,16 +14,6 @@
                })
         <br />
         <input type="button" class="sf-button" id="insertMasterTemplateTokenButton" value="@(EmailTemplateViewMessage.InsertMessageContent.NiceToString())" />
-        <input type="button" class="sf-button" id="messagePreviewContentButton" value="@(EmailTemplateViewMessage.PreviewContent.NiceToString())" />
-    </div>
-    <div id="messagePreviewContent">
-        <fieldset>
-            <legend>Message</legend>
-            <iframe id="messageBodyContentPreview" name="frameNewImage" src="about:blank" class="sf-email-htmlbody"
-                frameborder="0"></iframe>
-            <br />
-            <input type="button" class="sf-button" id="messageEditContentButton" value="@(EmailTemplateViewMessage.EditContent.NiceToString())" />
-        </fieldset>
     </div>
 }
 @Html.ScriptsJs("~/Mailing/Scripts/SF_Mail.js")

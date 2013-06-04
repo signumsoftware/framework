@@ -16,6 +16,7 @@ using System.Web.UI;
 using System.IO;
 using Signum.Entities.Mailing;
 using System.Web.Routing;
+using Signum.Engine;
 #endregion
 
 namespace Signum.Web.Mailing
@@ -24,6 +25,11 @@ namespace Signum.Web.Mailing
     {
         public static string ViewPrefix = "~/Mailing/Views/{0}.cshtml";
 
+        public static Mapping<EmailTemplateDN> EmailTemplateMessageTemplateMapping = ctx =>
+        {
+            var runtimeInfo = RuntimeInfo.FromFormValue(ctx.Parent.Parent.Parent.Parent.Inputs[EntityBaseKeys.RuntimeInfo]);
+            return (EmailTemplateDN)runtimeInfo.ToLite().Retrieve();
+        };
 
         public static void Start(bool smtpConfig, bool newsletter)
         {
@@ -33,10 +39,10 @@ namespace Signum.Web.Mailing
                 Navigator.AddSettings(new List<EntitySettings>
                 {
                     new EntitySettings<EmailMasterTemplateDN>{ PartialViewName =  e => ViewPrefix.Formato("EmailMasterTemplate") },
-                    new EntitySettings<EmailMessageDN>{ PartialViewName = e => ViewPrefix.Formato("EmailMessage")},
+                    
                     new EntitySettings<EmailPackageDN>{ PartialViewName = e => ViewPrefix.Formato("EmailPackage")},
-                    new EntitySettings<EmailTemplateDN>{ PartialViewName = e => ViewPrefix.Formato("EmailTemplate")},
-
+                    
+                    new EntitySettings<EmailMessageDN>{ PartialViewName = e => ViewPrefix.Formato("EmailMessage")},
                     new EmbeddedEntitySettings<EmailAddressDN>{ PartialViewName = e => ViewPrefix.Formato("EmailAddress")},
                     new EmbeddedEntitySettings<EmailRecipientDN>{ PartialViewName = e => ViewPrefix.Formato("EmailRecipient")},
 
