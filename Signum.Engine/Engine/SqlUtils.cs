@@ -233,13 +233,20 @@ WRITETEXT".Lines().Select(a => a.Trim().ToUpperInvariant()).ToHashSet();
                                  table = new ObjectName(new SchemaName(null, s.name), t.name),
                                  index = ix.name,
                                  ix.is_unique,
-                                 column = c.name
+                                 column = c.name,
+                                 ic.is_descending_key,
+                                 ic.is_included_column,
+                                 ic.key_ordinal
                              }).ToList();
 
-            var tables = plainData.AgGroupToDictionary(a => a.table, gr => gr.GroupToDictionary(a => new { a.index, a.is_unique }, a => a.column));
+            var tables = plainData.AgGroupToDictionary(a => a.table,
+                gr => gr.AgGroupToDictionary(a => new { a.index, a.is_unique },
+                    gr2 => gr2.OrderBy(a => a.key_ordinal)
+                        .Select(a => a.column + (a.is_included_column ? "(K)" : "(I)") + (a.is_descending_key ? "(D)" : "(A)"))
+                        .ToString("|")));
 
             var result = tables.SelectMany(t =>
-                t.Value.GroupBy(a => a.Value.OrderBy().ToString("|"), a => a.Key)
+                t.Value.GroupBy(a => a.Value, a => a.Key)
                 .Where(gr => gr.Count() > 1)
                 .Select(gr =>
                 {
