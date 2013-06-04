@@ -5,6 +5,9 @@ using System.Text;
 using Signum.Utilities;
 using Signum.Entities.Reflection;
 using System.Data;
+using System.Linq.Expressions;
+using Signum.Utilities.ExpressionTrees;
+using Signum.Engine.Linq;
 
 namespace Signum.Engine.Maps
 {
@@ -90,27 +93,94 @@ namespace Signum.Engine.Maps
             return columns + "__" + StringHashEncoder.Codify(Where);
         }
 
-        public UniqueIndex WhereNotNull(params IColumn[] notNullColumns)
+        static bool IsComplexIB(Field field)
         {
-            if (notNullColumns == null || notNullColumns.IsEmpty())
-            {
-                Where = null;
-                return this;
-            }
-
-            this.Where = notNullColumns.ToString(c =>
-            {
-                string res = c.Name.SqlScape() + " IS NOT NULL";
-                if (!IsString(c.SqlDbType))
-                    return res;
-
-                return res + " AND " + c.Name.SqlScape() + " <> ''";
-
-            }, " AND ");
-            return this;
+            return field is FieldImplementedBy && ((FieldImplementedBy)field).ImplementationColumns.Count > 1;
         }
 
-        private bool IsString(SqlDbType sqlDbType)
+        public override string ToString()
+        {
+            return IndexName;
+        }
+    }
+
+    class IndexWhereExpressionVisitor : SimpleExpressionVisitor
+    {
+        StringBuilder sb = new StringBuilder();
+
+        IFieldFinder RootFinder;
+
+        public static string GetIndexWhere(LambdaExpression lambda, IFieldFinder rootFiender)
+        {
+            IndexWhereExpressionVisitor visitor = new IndexWhereExpressionVisitor
+            {
+                RootFinder = rootFiender
+            };
+
+
+            visitor.Visit(lambda.Body);
+
+            return visitor.sb.ToString();
+        }
+
+        public Field GetField(Expression exp)
+        {
+            if (exp.NodeType == ExpressionType.Convert)
+                exp = ((UnaryExpression)exp).Operand;
+
+            return Schema.FindField(RootFinder, Reflector.GetMemberListBase(exp));
+        }
+
+
+        protected override Expression Visit(Expression exp)
+        {
+            switch (exp.NodeType)
+            {
+                case ExpressionType.TypeIs:
+                case ExpressionType.Conditional:
+                case ExpressionType.Constant:
+                case ExpressionType.Parameter:
+                case ExpressionType.Call:
+                case ExpressionType.Lambda:
+                case ExpressionType.New:
+                case ExpressionType.NewArrayInit:
+                case ExpressionType.NewArrayBounds:
+                case ExpressionType.Invoke:
+                case ExpressionType.MemberInit:
+                case ExpressionType.ListInit:
+                    throw new NotSupportedException("Expression of type {0} not supported: {1}".Formato(exp.NodeType, exp.NiceToString()));
+                default:
+                    return base.Visit(exp);
+            }
+        }
+
+        protected override Expression VisitUnary(UnaryExpression u)
+        {
+            switch (u.NodeType)
+            {
+                case ExpressionType.Not:
+                    sb.Append(" NOT ");
+                    this.Visit(u.Operand);
+                    break;
+                case ExpressionType.Negate:
+                    sb.Append(" - ");
+                    this.Visit(u.Operand);
+                    break;
+                case ExpressionType.UnaryPlus:
+                    sb.Append(" + ");
+                    this.Visit(u.Operand);
+                    break;
+                case ExpressionType.Convert:
+                    //Las unicas conversiones explicitas son a Binary y desde datetime a numeros
+                    this.Visit(u.Operand);
+                    break;
+                default:
+                    throw new NotSupportedException(string.Format("The unary perator {0} is not supported", u.NodeType));
+            }
+            return u;
+        }
+
+        static bool IsString(SqlDbType sqlDbType)
         {
             switch (sqlDbType)
             {
@@ -124,35 +194,152 @@ namespace Signum.Engine.Maps
             return false;
         }
 
-        public UniqueIndex WhereNotNull(params Field[] notNullFields)
+        public static string IsNull(Field field, bool equals)
         {
-            if (notNullFields == null || notNullFields.IsEmpty())
+            string isNull = equals ? "{0} IS NULL" : "{0} IS NOT NULL";
+
+            if (field is IColumn)
             {
-                Where = null;
-                return this;
+                var col = ((IColumn)field);
+
+                string result = isNull.Formato(col.Name.SqlScape());
+
+                if (!IsString(col.SqlDbType))
+                    return result;
+
+                return result + (equals ? " OR " : " AND ") + (col.Name.SqlScape() + (equals ? " == " : " <> ") + "''");
+
+            }
+            else if (field is FieldImplementedBy)
+            {
+                var ib = (FieldImplementedBy)field;
+
+                return ib.ImplementationColumns.Values.Select(ic => isNull.Formato(ic.Name.SqlScape())).ToString(equals ? " AND " : " OR ");
+            }
+            else if (field is FieldImplementedByAll)
+            {
+                var iba = (FieldImplementedByAll)field;
+
+                return isNull.Formato(iba.Column.Name.SqlScape()) +
+                    (equals ? " AND " : " OR ") +
+                    isNull.Formato(iba.ColumnTypes.Name.SqlScape());
+            }
+            else if (field is FieldEmbedded)
+            {
+                var fe = (FieldEmbedded)field;
+
+                if (fe.HasValue == null)
+                    throw new NotSupportedException("{0} is not nullable".Formato(field));
+
+                return fe.HasValue.Name.SqlScape() + " = TRUE";
             }
 
-            if (notNullFields.OfType<FieldEmbedded>().Any())
-                throw new InvalidOperationException("Embedded fields not supported for indexes");
-
-            this.WhereNotNull(notNullFields.Where(a => !IsComplexIB(a)).SelectMany(a => a.Columns()).ToArray());
-
-            if (notNullFields.Any(IsComplexIB))
-                this.Where = " AND ".CombineIfNotEmpty(this.Where, notNullFields.Where(IsComplexIB).ToString(f => "({0})".Formato(f.Columns().ToString(c => c.Name.SqlScape() + " IS NOT NULL", " OR ")), " AND "));
-
-            return this;
+            throw new NotSupportedException(isNull.Formato(field.GetType())); 
         }
 
-        static bool IsComplexIB(Field field)
+        static string Equals(Field field, object value, bool equals)
         {
-            return field is FieldImplementedBy && ((FieldImplementedBy)field).ImplementationColumns.Count > 1;
+            if (value == null)
+            {
+                return IsNull(field, equals);
+            }
+            else
+            {
+                if (field is IColumn)
+                {
+                    return ((IColumn)field).Name.SqlScape() +
+                        (equals ? " = " : " <> ") + SqlPreCommandSimple.Encode(value);
+                }
+
+                throw new NotSupportedException("Impossible to compare {0} to {1}".Formato(field, value));
+            }
         }
 
-        public override string ToString()
+        protected override Expression VisitBinary(BinaryExpression b)
         {
-            return IndexName;
-        }
+            if (b.NodeType == ExpressionType.Coalesce)
+            {
+                sb.Append("IsNull(");
+                Visit(b.Left);
+                sb.Append(",");
+                Visit(b.Right);
+                sb.Append(")");
+            }
+            else if (b.NodeType == ExpressionType.Equal || b.NodeType == ExpressionType.NotEqual)
+            {
+                if (b.Left is ConstantExpression)
+                {
+                    if (b.Right is ConstantExpression)
+                        throw new NotSupportedException("NULL == NULL not supported");
 
-        static readonly IColumn[] Empty = new IColumn[0];
+                    Field field = GetField(b.Right);
+
+                    sb.Append(Equals(field, ((ConstantExpression)b.Left).Value, b.NodeType == ExpressionType.Equal));
+                }
+                else if (b.Right is ConstantExpression)
+                {
+                    Field field = GetField(b.Left);
+
+                    sb.Append(Equals(field, ((ConstantExpression)b.Right).Value, b.NodeType == ExpressionType.Equal));
+                }
+                else
+                    throw new NotSupportedException("Impossible to translate {0}".Formato(b.NiceToString()));
+            }
+            else
+            {
+                sb.Append("(");
+                this.Visit(b.Left);
+                switch (b.NodeType)
+                {
+                    case ExpressionType.And:
+                    case ExpressionType.AndAlso:
+                        sb.Append(b.Type.UnNullify() == typeof(bool) ? " AND " : " & ");
+                        break;
+                    case ExpressionType.Or:
+                    case ExpressionType.OrElse:
+                        sb.Append(b.Type.UnNullify() == typeof(bool) ? " OR " : " | ");
+                        break;
+                    case ExpressionType.ExclusiveOr:
+                        sb.Append(" ^ ");
+                        break;
+                    case ExpressionType.LessThan:
+                        sb.Append(" < ");
+                        break;
+                    case ExpressionType.LessThanOrEqual:
+                        sb.Append(" <= ");
+                        break;
+                    case ExpressionType.GreaterThan:
+                        sb.Append(" > ");
+                        break;
+                    case ExpressionType.GreaterThanOrEqual:
+                        sb.Append(" >= ");
+                        break;
+
+                    case ExpressionType.Add:
+                    case ExpressionType.AddChecked:
+                        sb.Append(" + ");
+                        break;
+                    case ExpressionType.Subtract:
+                    case ExpressionType.SubtractChecked:
+                        sb.Append(" - ");
+                        break;
+                    case ExpressionType.Multiply:
+                    case ExpressionType.MultiplyChecked:
+                        sb.Append(" * ");
+                        break;
+                    case ExpressionType.Divide:
+                        sb.Append(" / ");
+                        break;
+                    case ExpressionType.Modulo:
+                        sb.Append(" % ");
+                        break;
+                    default:
+                        throw new NotSupportedException(string.Format("The binary operator {0} is not supported", b.NodeType));
+                }
+                this.Visit(b.Right);
+                sb.Append(")");
+            }
+            return b;
+        }
     }
 }

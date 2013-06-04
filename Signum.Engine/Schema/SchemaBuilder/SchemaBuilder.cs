@@ -37,57 +37,66 @@ namespace Signum.Engine.Maps
 
         protected SchemaBuilder(Schema schema)
         {
-            this.schema = schema; 
+            this.schema = schema;
         }
 
         public SchemaBuilder(SchemaSettings settings)
         {
             schema = new Schema(settings);
         }
-       
+
         public Schema Schema
         {
             get { return schema; }
         }
 
-    
-        public void AddUniqueIndex<T>(Expression<Func<T, object>> fields) where T : IdentifiableEntity
+
+        public UniqueIndex AddUniqueIndex<T>(Expression<Func<T, object>> fields) where T : IdentifiableEntity
         {
-            AddUniqueIndex<T>(fields, null); 
+            return AddUniqueIndex<T>(fields, null);
         }
 
-        public void AddUniqueIndex<T>(Expression<Func<T, object>> fields, Expression<Func<T, object>> fieldsAllowRepeatedNull) where T : IdentifiableEntity
+        public UniqueIndex AddUniqueIndex<T>(Expression<Func<T, object>> fields, Expression<Func<T, bool>> where) where T : IdentifiableEntity
         {
             Schema schema = Schema.Current;
 
             Expression<Func<T, object>>[] fieldLambdas = Split(fields);
-            Expression<Func<T, object>>[] fieldsNotNullLambdas = Split(fieldsAllowRepeatedNull);
 
             Field[] colFields = fieldLambdas.Select(fun => schema.Field<T>(fun)).ToArray();
-            Field[] colFieldsNotNull = fieldsNotNullLambdas.Select(fun => schema.Field<T>(fun)).ToArray();
 
-            AddIndex(new UniqueIndex(schema.Table<T>(), colFields).WhereNotNull(colFieldsNotNull));
+            var table = schema.Table<T>();
+
+            var index = AddUniqueIndex(table, colFields);
+
+            if (where != null)
+                index.Where = IndexWhereExpressionVisitor.GetIndexWhere(where, table);
+
+            return index;
         }
-        public void AddUniqueIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList, Expression<Func<MListElement<T, V>, object>> fields)
+
+        public UniqueIndex AddUniqueIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList, Expression<Func<MListElement<T, V>, object>> fields)
            where T : IdentifiableEntity
         {
-            AddUniqueIndexMList(toMList, fields, null); 
+            return AddUniqueIndexMList(toMList, fields, null);
         }
 
-        public void AddUniqueIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList, Expression<Func<MListElement<T, V>, object>> fields, Expression<Func<MListElement<T, V>, object>> fieldsNotNull)
+        public UniqueIndex AddUniqueIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList, Expression<Func<MListElement<T, V>, object>> fields, Expression<Func<MListElement<T, V>, bool>> where)
             where T : IdentifiableEntity
         {
             Schema schema = Schema.Current;
 
             Expression<Func<MListElement<T, V>, object>>[] fieldLambdas = Split(fields);
-            Expression<Func<MListElement<T, V>, object>>[] fieldsNotNullLambdas = Split(fieldsNotNull);
 
             RelationalTable table = ((FieldMList)Schema.FindField(schema.Table(typeof(T)), Reflector.GetMemberList(toMList))).RelationalTable;
 
-            Field[] colFields = fieldLambdas.Select(fun => Schema.FindField(table,  Reflector.GetMemberList(fun))).ToArray();
-            Field[] colFieldsNotNull = fieldsNotNullLambdas.Select(fun => Schema.FindField(table,  Reflector.GetMemberList(fun))).ToArray();
+            Field[] colFields = fieldLambdas.Select(fun => Schema.FindField(table, Reflector.GetMemberList(fun))).ToArray();
 
-            AddUniqueIndex(table, colFields, colFieldsNotNull);
+            var index = AddUniqueIndex(table, colFields);
+
+            if (where != null)
+                index.Where = IndexWhereExpressionVisitor.GetIndexWhere(where, table);
+
+            return index;
         }
 
         Expression<Func<T, object>>[] Split<T>(Expression<Func<T, object>> columns)
@@ -105,14 +114,18 @@ namespace Signum.Engine.Maps
             return new[] { columns };
         }
 
-        public void AddUniqueIndex(ITable table, Field[] fields, Field[] notNullFields)
+        public UniqueIndex AddUniqueIndex(ITable table, Field[] fields)
         {
-            AddIndex(new UniqueIndex(table, fields).WhereNotNull(notNullFields));
+            var index = new UniqueIndex(table, fields);
+            AddIndex(index);
+            return index;
         }
 
-        public void AddUniqueIndex(ITable table, IColumn[] columns, IColumn[] notNullColumns)
+        public UniqueIndex AddUniqueIndex(ITable table, IColumn[] columns)
         {
-            AddIndex(new UniqueIndex(table, columns).WhereNotNull(notNullColumns));
+            var index = new UniqueIndex(table, columns);
+            AddIndex(index);
+            return index;
         }
 
         private void AddIndex(Index index)
@@ -179,7 +192,7 @@ namespace Signum.Engine.Maps
         HashSet<string> loadedModules = new HashSet<string>();
         public bool NotDefined(MethodBase methodBase)
         {
-            return loadedModules.Add(methodBase.DeclaringType.FullName + "." + methodBase.Name); 
+            return loadedModules.Add(methodBase.DeclaringType.FullName + "." + methodBase.Name);
         }
 
         public void AssertDefined(MethodBase methodBase)
@@ -187,11 +200,11 @@ namespace Signum.Engine.Maps
             string name = methodBase.DeclaringType.FullName + "." + methodBase.Name;
 
             if (!loadedModules.Contains(name))
-                throw new ApplicationException("Call {0} first".Formato(name)); 
+                throw new ApplicationException("Call {0} first".Formato(name));
         }
 
         #region Field Generator
-        
+
 
         protected Dictionary<string, EntityField> GenerateFields(PropertyRoute root, Contexts contexto, Table table, NameSequence preName, bool forceNull)
         {
@@ -200,9 +213,9 @@ namespace Signum.Engine.Maps
 
             foreach (FieldInfo fi in Reflector.InstanceFieldsInOrder(type))
             {
-                PropertyRoute route = root.Add(fi); 
+                PropertyRoute route = root.Add(fi);
 
-                if (!Settings.FieldAttributes(route).Any(a=>a is IgnoreAttribute))
+                if (!Settings.FieldAttributes(route).Any(a => a is IgnoreAttribute))
                 {
                     if (Reflector.TryFindPropertyInfo(fi) == null && !fi.IsPublic && !fi.HasAttribute<FieldWithoutPropertyAttribute>())
                         throw new InvalidOperationException("Field {0} of type {1} has no property".Formato(fi.Name, type.Name));
@@ -277,9 +290,9 @@ namespace Signum.Engine.Maps
                 case KindOfField.Reference:
                     {
                         Implementations at = Settings.GetImplementations(route);
-                        if(at.IsByAll)
+                        if (at.IsByAll)
                             return GenerateFieldImplmentedByAll(route, name, forceNull);
-                        else if(at.Types.Only() == route.Type.CleanType())
+                        else if (at.Types.Only() == route.Type.CleanType())
                             return GenerateFieldReference(route, name, forceNull);
                         else
                             return GenerateFieldImplmentedBy(route, name, forceNull, at.Types);
@@ -377,7 +390,7 @@ namespace Signum.Engine.Maps
                 Name = name.ToString(),
                 IndexType = Settings.GetIndexType(route),
                 Nullable = Settings.IsNullable(route, forceNull),
-                IsLite  = route.Type.IsLite(),
+                IsLite = route.Type.IsLite(),
                 ReferenceTable = Include(Lite.Extract(route.Type) ?? route.Type, route),
                 AvoidExpandOnRetrieving = Settings.FieldAttributes(route).OfType<AvoidExpandQueryAttribute>().Any()
             };
@@ -445,10 +458,10 @@ namespace Signum.Engine.Maps
                     ReferenceTable = table
                 },
                 PrimaryKey = new RelationalTable.PrimaryKeyColumn(),
-                Field = GenerateField(route.Add("Item"), Contexts.MList, null, NameSequence.Void, false) 
+                Field = GenerateField(route.Add("Item"), Contexts.MList, null, NameSequence.Void, false)
             };
 
-            relationalTable.GenerateColumns(); 
+            relationalTable.GenerateColumns();
 
             return new FieldMList(route.Type)
             {
@@ -541,7 +554,7 @@ namespace Signum.Engine.Maps
 
         List<WhenIncludedPair> whens = new List<WhenIncludedPair>();
 
-        public void WhenIncluded<T1>(Action action) 
+        public void WhenIncluded<T1>(Action action)
             where T1 : IdentifiableEntity
         {
             WhenIncluded(new[] { typeof(T1) }, action);
@@ -559,7 +572,7 @@ namespace Signum.Engine.Maps
             where T2 : IdentifiableEntity
             where T3 : IdentifiableEntity
         {
-              WhenIncluded(new[] { typeof(T1), typeof(T2), typeof(T3) }, action);
+            WhenIncluded(new[] { typeof(T1), typeof(T2), typeof(T3) }, action);
         }
 
         public void WhenIncluded(Type[] types, Action action)
@@ -601,7 +614,7 @@ namespace Signum.Engine.Maps
             var result = Signum.Engine.GlobalLazy.WithoutInvalidations(() =>
             {
                 GlobalLazyManager.OnLoad(this, invalidateWith);
-              
+
                 return func();
             });
 
@@ -764,7 +777,5 @@ namespace Signum.Engine.Maps
 
             return result;
         }
-
-
     }
 }

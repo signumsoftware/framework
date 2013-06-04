@@ -185,7 +185,10 @@ namespace Signum.Engine.Maps
             {
                 case IndexType.None: return Enumerable.Empty<Index>();
                 case IndexType.Unique: return new[] { new UniqueIndex(table, this) };
-                case IndexType.UniqueMultipleNulls: return new[] { new UniqueIndex(table, this).WhereNotNull(this) };
+                case IndexType.UniqueMultipleNulls:
+                    var index = new UniqueIndex(table, this);
+                    index.Where = IndexWhereExpressionVisitor.IsNull(this, false);
+                    return new[] { index };
             }
             throw new InvalidOperationException("IndexType {0} not expected".Formato(IndexType));
         }
