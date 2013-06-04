@@ -526,7 +526,7 @@ namespace Signum.Engine.Linq
                     case DbExpressionType.ImplementedBy:
                     case DbExpressionType.ImplementedByAll: return SmartEqualizer.EntityIn(newItem, col == null ? Enumerable.Empty<IdentifiableEntity>() : col.Cast<IdentifiableEntity>().ToList());
                     default:
-                        return InExpression.FromValues(DbExpressionNominator.FullNominate(newItem), col == null ? new object[0] : col.Cast<object>().ToArray());
+                        return SmartEqualizer.In(newItem, col == null ? new object[0] : col.Cast<object>().ToArray());
                 }
             }
             else
