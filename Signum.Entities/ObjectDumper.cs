@@ -8,11 +8,14 @@ using System.Runtime.CompilerServices;
 using Signum.Utilities.ExpressionTrees;
 using System.Reflection;
 using Signum.Entities.Reflection;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities
 {
     public static class ObjectDumper
     {
+        public static HashSet<Type> IgnoreTypes = new HashSet<Type> { typeof(ExceptionDN) };
+
         public static bool ShowByteArrays = false;
 
         public static string Dump(this object o)
@@ -71,6 +74,11 @@ namespace Signum.Entities
                 Sb.Append("new ");
 
                 Sb.Append(CSharpRenderer.TypeName(t));
+
+                if (IgnoreTypes.Contains(t))
+                {
+                    return;
+                }
 
                 if (objects.Contains(o))
                 {

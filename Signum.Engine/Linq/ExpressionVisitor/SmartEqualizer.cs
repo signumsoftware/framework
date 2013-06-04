@@ -327,10 +327,15 @@ namespace Signum.Engine.Linq
 
                 object[] ids = collection.Select(t => (object)QueryBinder.TypeId(t)).ToArray();
 
-                return InExpression.FromValues(typeIba.TypeColumn, ids);
+                return In(typeIba.TypeColumn, ids);
             }
 
             throw new InvalidOperationException("Impossible to resolve '{0}' in '{1}'".Formato(typeExpr.NiceToString(), collection.ToString(t=>t.TypeName(), ", ")));
+        }
+
+        public static Expression In(Expression element, object[] values)
+        {
+            return InExpression.FromValues(DbExpressionNominator.FullNominate(element), values);
         }
 
         private static Expression DispachConditionalTypesIn(ConditionalExpression ce, IEnumerable<Type> collection)
@@ -365,19 +370,19 @@ namespace Signum.Engine.Linq
         {
             EntityExpression ee = newItem as EntityExpression;
             if (ee != null)
-                return InExpression.FromValues(ee.ExternalId, entityIDs.TryGetC(ee.Type) ?? new object[0]);
+                return In(ee.ExternalId, entityIDs.TryGetC(ee.Type) ?? new object[0]);
 
             ImplementedByExpression ib = newItem as ImplementedByExpression;
             if (ib != null)
                 return ib.Implementations.JoinDictionary(entityIDs,
-                    (t, f, values) => Expression.And(NotEqualToNull(f.ExternalId), InExpression.FromValues(f.ExternalId, values)))
+                    (t, f, values) => Expression.And(NotEqualToNull(DbExpressionNominator.FullNominate(f.ExternalId)), In(f.ExternalId, values)))
                     .Values.AggregateOr();
 
             ImplementedByAllExpression iba = newItem as ImplementedByAllExpression;
             if (iba != null)
                 return entityIDs.Select(kvp => Expression.And(
                     EqualNullable(QueryBinder.TypeConstant(kvp.Key), iba.TypeId.TypeColumn),
-                    InExpression.FromValues(iba.Id, kvp.Value))).AggregateOr();
+                    In(iba.Id, kvp.Value))).AggregateOr();
 
             throw new InvalidOperationException("EntityIn not defined for newItem of type {0}".Formato(newItem.Type.Name));
         }

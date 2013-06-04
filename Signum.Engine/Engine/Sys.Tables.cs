@@ -234,6 +234,9 @@ namespace Signum.Engine.SchemaInfoTables
         public int object_id;
         public int index_id;
         public int column_id;
+        public int key_ordinal; 
+        public bool is_included_column;
+        public bool is_descending_key;
     }
 
     [SqlViewName("sys", "extended_properties")]

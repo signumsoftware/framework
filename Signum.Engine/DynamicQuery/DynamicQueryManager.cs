@@ -72,39 +72,48 @@ namespace Signum.Engine.DynamicQuery
             return queries.GetOrThrow(queryName).EntityImplementations;
         }
 
-        public ResultTable ExecuteQuery(QueryRequest request)
+        T Execute<T>(string description, object queryName, Func<DynamicQueryBucket, T> executor)
         {
             using (ExecutionMode.UserInterface())
-            using (HeavyProfiler.Log("ExecuteQuery", () => QueryUtils.GetQueryUniqueKey(request.QueryName)))
-                return queries[request.QueryName].Core.Value.ExecuteQuery(request);
+            using (HeavyProfiler.Log(description, () => QueryUtils.GetQueryUniqueKey(queryName)))
+            {
+                try
+                {
+                    var qb = queries.GetOrThrow(queryName);
+
+                    return executor(qb); 
+                }
+                catch (Exception e)
+                {
+                    e.Data["QueryName"] = queryName;
+                    throw;
+                }
+            }
+        }
+
+        public ResultTable ExecuteQuery(QueryRequest request)
+        {
+            return Execute("ExecuteQuery", request.QueryName, dqb => dqb.Core.Value.ExecuteQuery(request));
         }
 
         public int ExecuteQueryCount(QueryCountRequest request)
         {
-            using (ExecutionMode.UserInterface())
-            using (HeavyProfiler.Log("ExecuteQueryCount", () => QueryUtils.GetQueryUniqueKey(request.QueryName)))
-                return queries[request.QueryName].Core.Value.ExecuteQueryCount(request);
+            return Execute("ExecuteQueryCount", request.QueryName, dqb => dqb.Core.Value.ExecuteQueryCount(request));
         }
 
         internal ResultTable ExecuteGroupQuery(QueryGroupRequest request)
         {
-            using (ExecutionMode.UserInterface())
-            using (HeavyProfiler.Log("ExecuteGroupQuery", () => QueryUtils.GetQueryUniqueKey(request.QueryName)))
-                return queries[request.QueryName].Core.Value.ExecuteQueryGroup(request);
+            return Execute("ExecuteGroupQuery", request.QueryName, dqb => dqb.Core.Value.ExecuteQueryGroup(request));
         }
 
         public Lite<IdentifiableEntity> ExecuteUniqueEntity(UniqueEntityRequest request)
         {
-            using (ExecutionMode.UserInterface())
-            using (HeavyProfiler.Log("ExecuteUniqueEntity", () => QueryUtils.GetQueryUniqueKey(request.QueryName)))
-                return queries[request.QueryName].Core.Value.ExecuteUniqueEntity(request);
+            return Execute("ExecuteUniqueEntity", request.QueryName, dqb => dqb.Core.Value.ExecuteUniqueEntity(request));
         }
 
         public QueryDescription QueryDescription(object queryName)
         {
-            using (ExecutionMode.UserInterface())
-            using (HeavyProfiler.Log("QueryDescription", () => QueryUtils.GetQueryUniqueKey(queryName)))
-                return queries[queryName].GetDescription();
+            return Execute("QueryDescription", queryName, dqb => dqb.GetDescription());
         }
 
         public event Func<object, bool> AllowQuery;

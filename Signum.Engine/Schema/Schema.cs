@@ -237,7 +237,7 @@ namespace Signum.Engine.Maps
         }
 
         public event Func<Replacements, SqlPreCommand> Synchronizing;
-        internal SqlPreCommand SynchronizationScript(string schemaName, bool interactive = true)
+        internal SqlPreCommand SynchronizationScript(string databaseName, bool interactive = true)
         {
             if (Synchronizing == null)
                 return null;
@@ -271,7 +271,7 @@ namespace Signum.Engine.Maps
                 return SqlPreCommand.Combine(Spacing.Double,
                     new SqlPreCommandSimple(SynchronizerMessage.StartOfSyncScriptGeneratedOn0.NiceToString().Formato(DateTime.Now)),
 
-                    new SqlPreCommandSimple("use {0}".Formato(schemaName)),
+                    new SqlPreCommandSimple("use {0}".Formato(databaseName)),
                     command,
                     new SqlPreCommandSimple(SynchronizerMessage.EndOfSyncScript.NiceToString()));
             }
@@ -451,15 +451,23 @@ namespace Signum.Engine.Maps
 
         public Dictionary<PropertyRoute, Implementations> FindAllImplementations(Type root)
         {
-            if (!Tables.ContainsKey(root))
-                return null;
+            try
+            {
+                if (!Tables.ContainsKey(root))
+                    return null;
 
-            var table = Table(root);
+                var table = Table(root);
 
-            return PropertyRoute.GenerateRoutes(root)
-                .Select(r => r.Type.IsMList() ? r.Add("Item") : r)
-                .Where(r => r.Type.CleanType().IsIIdentifiable())
-                .ToDictionary(r => r, r => FindImplementations(r));
+                return PropertyRoute.GenerateRoutes(root)
+                    .Select(r => r.Type.IsMList() ? r.Add("Item") : r)
+                    .Where(r => r.Type.CleanType().IsIIdentifiable())
+                    .ToDictionary(r => r, r => FindImplementations(r));
+            }
+            catch (Exception e)
+            {
+                e.Data["rootType"] = root.TypeName();
+                throw;
+            }
         }
 
         public Implementations FindImplementations(PropertyRoute route)

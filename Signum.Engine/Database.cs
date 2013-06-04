@@ -54,13 +54,22 @@ namespace Signum.Engine
             if (entity == null)
                 throw new ArgumentNullException("entity");
 
-            using (new EntityCache())
-            using (HeavyProfiler.Log("DBSave", () => "Save<{0}>".Formato(typeof(T).TypeName())))
-            using (Transaction tr = new Transaction())
+            try
             {
-                Saver.Save((IdentifiableEntity)(IIdentifiable)entity);
+                using (new EntityCache())
+                using (HeavyProfiler.Log("DBSave", () => "Save<{0}>".Formato(typeof(T).TypeName())))
+                using (Transaction tr = new Transaction())
+                {
+                    Saver.Save((IdentifiableEntity)(IIdentifiable)entity);
 
-                return tr.Commit(entity);
+                    return tr.Commit(entity);
+                }
+            }
+            catch (Exception e)
+            {
+                e.Data["entity"] = ((IdentifiableEntity)(IIdentifiable)entity).BaseToString();
+
+                throw;
             }
         }
         #endregion
@@ -151,15 +160,25 @@ namespace Signum.Engine
         {
             using (HeavyProfiler.Log("DBRetrieve", () => "Lite<{0}>".Formato(typeof(T).TypeName())))
             {
-                var cc = CanUseCache<T>();
-                if (cc != null)
-                    return new LiteImp<T>(id, cc.GetToString(id));
+                try
+                {
+                    var cc = CanUseCache<T>();
+                    if (cc != null)
+                        return new LiteImp<T>(id, cc.GetToString(id));
 
-                var result = Database.Query<T>().Select(a => a.ToLite()).SingleOrDefaultEx(a => a.Id == id);
-                if (result == null)
-                    throw new EntityNotFoundException(typeof(T), id);
+                    var result = Database.Query<T>().Select(a => a.ToLite()).SingleOrDefaultEx(a => a.Id == id);
+                    if (result == null)
+                        throw new EntityNotFoundException(typeof(T), id);
 
-                return result;
+                    return result;
+                }
+                catch (Exception e)
+                {
+                    e.Data["type"] = typeof(T).TypeName();
+                    e.Data["id"] = id;
+
+                    throw;
+                }
             }
         }
 
@@ -182,13 +201,22 @@ namespace Signum.Engine
         public static string GetToStr<T>(int id)
             where T : IdentifiableEntity
         {
-            using (HeavyProfiler.Log("DBRetrieve", () => "GetToStr<{0}>".Formato(typeof(T).TypeName())))
+            try
             {
-                var cc = CanUseCache<T>();
-                if (cc != null)
-                    return cc.GetToString(id).ToString();
+                using (HeavyProfiler.Log("DBRetrieve", () => "GetToStr<{0}>".Formato(typeof(T).TypeName())))
+                {
+                    var cc = CanUseCache<T>();
+                    if (cc != null)
+                        return cc.GetToString(id).ToString();
 
-                return Database.Query<T>().Where(a => a.Id == id).Select(a => a.ToString()).FirstEx();
+                    return Database.Query<T>().Where(a => a.Id == id).Select(a => a.ToString()).FirstEx();
+                }
+            }
+            catch (Exception e)
+            {
+                e.Data["type"] = typeof(T).TypeName();
+                e.Data["id"] = id;
+                throw;
             }
         }
 
@@ -200,7 +228,16 @@ namespace Signum.Engine
         public static bool Exists<T>(int id)
             where T : IdentifiableEntity
         {
-            return Database.Query<T>().Any(a => a.Id == id);
+            try
+            {
+                return Database.Query<T>().Any(a => a.Id == id);
+            }
+            catch (Exception e)
+            {
+                e.Data["type"] = typeof(T).TypeName();
+                e.Data["id"] = id;
+                throw;
+            }
         }
 
         public static bool Exists(Type type, int id)
@@ -214,19 +251,27 @@ namespace Signum.Engine
         public static List<T> RetrieveAll<T>()
             where T : IdentifiableEntity
         {
-            using (HeavyProfiler.Log("DBRetrieve", () => "All {0}".Formato(typeof(T).TypeName())))
+            try
             {
-                var cc = CanUseCache<T>();
-                if (cc != null)
+                using (HeavyProfiler.Log("DBRetrieve", () => "All {0}".Formato(typeof(T).TypeName())))
                 {
-                    using (new EntityCache())
-                    using (var r = EntityCache.NewRetriever())
+                    var cc = CanUseCache<T>();
+                    if (cc != null)
                     {
-                        return cc.GetAllIds().Select(id => r.Request<T>(id)).ToList();
+                        using (new EntityCache())
+                        using (var r = EntityCache.NewRetriever())
+                        {
+                            return cc.GetAllIds().Select(id => r.Request<T>(id)).ToList();
+                        }
                     }
-                }
 
-                return Database.Query<T>().ToList();
+                    return Database.Query<T>().ToList();
+                }
+            }
+            catch (Exception e)
+            {
+                e.Data["type"] = typeof(T).TypeName();
+                throw;
             }
         }
 
@@ -244,16 +289,24 @@ namespace Signum.Engine
         public static List<Lite<T>> RetrieveAllLite<T>()
             where T : IdentifiableEntity
         {
-            using (HeavyProfiler.Log("DBRetrieve", () => "All Lite<{0}>".Formato(typeof(T).TypeName())))
+            try
             {
-                var cc = CanUseCache<T>();
-                if (cc != null)
+                using (HeavyProfiler.Log("DBRetrieve", () => "All Lite<{0}>".Formato(typeof(T).TypeName())))
                 {
+                    var cc = CanUseCache<T>();
+                    if (cc != null)
+                    {
 
-                    return cc.GetAllIds().Select(id => (Lite<T>)new LiteImp<T>(id, cc.GetToString(id))).ToList();
+                        return cc.GetAllIds().Select(id => (Lite<T>)new LiteImp<T>(id, cc.GetToString(id))).ToList();
+                    }
+
+                    return Database.Query<T>().Select(e => e.ToLite()).ToList();
                 }
-
-                return Database.Query<T>().Select(e => e.ToLite()).ToList();
+            }
+            catch (Exception e)
+            {
+                e.Data["type"] = typeof(T).TypeName();
+                throw;
             }
         }
 

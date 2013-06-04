@@ -132,7 +132,7 @@ namespace Signum.Engine
                 return DropViewIndex(new ObjectName(tableName.Schema, index.ViewName), index.IndexName);
         }
 
-        static SqlPreCommand DropIndex(ObjectName objectName, string indexName)
+        public static SqlPreCommand DropIndex(ObjectName objectName, string indexName)
         {
             return new SqlPreCommandSimple("DROP INDEX {0}.{1}".Formato(objectName, indexName.SqlScape()));
         }
