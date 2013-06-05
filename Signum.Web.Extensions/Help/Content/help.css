@@ -329,3 +329,12 @@ hr
 	color:#eee;
 	margin:5px auto;
 }
+
+#nextAppendix {
+    float: right;
+    max-width: 50%;
+}
+#previousAppendix {
+    float: left;
+    max-width: 50%;
+}

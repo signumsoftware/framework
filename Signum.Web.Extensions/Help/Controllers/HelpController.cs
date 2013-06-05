@@ -75,6 +75,16 @@ namespace Signum.Web.Help
         public ActionResult ViewAppendix(string appendix)
         {
             AppendixHelp model = HelpLogic.GetAppendix(appendix);
+
+            var index = HelpLogic.State.Value.Appendices.Keys.IndexOf(appendix);
+            var prev = HelpLogic.State.Value.Appendices.Keys.ElementAtOrDefault(index - 1);
+            var next = HelpLogic.State.Value.Appendices.Keys.ElementAtOrDefault(index + 1);
+
+            if (prev != null)
+                ViewData["previousAppendix"] = HelpLogic.State.Value.Appendices[prev];
+            if (next != null)
+                ViewData["nextAppendix"] = HelpLogic.State.Value.Appendices[next];
+
             return View(HelpClient.ViewAppendixUrl, model);
         }
 
