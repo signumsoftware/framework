@@ -75,12 +75,12 @@ namespace Signum.Windows.UIAutomation
 
         public AutomationElement OkButton
         {
-            get { return Element.ChildById("btOk"); }
+            get { return Element.Child(c => c.Current.ClassName == "OkCancelBar").ChildById("btOk"); }
         }
 
         public AutomationElement CanelButton
         {
-            get { return Element.ChildById("btCancel"); }
+            get { return Element.Child(c => c.Current.ClassName == "OkCancelBar").ChildById("btCancel"); }
         }
 
         public void Ok()
@@ -318,9 +318,9 @@ namespace Signum.Windows.UIAutomation
             WaitSearch();
         }
 
-        public List<AutomationElement> GetRows()
+        public List<ListViewItemProxy> GetRows()
         {
-            return Results.Children(c => c.Current.ControlType == ControlType.DataItem);
+            return Results.Children(c => c.Current.ControlType == ControlType.DataItem).Select(ae => new ListViewItemProxy(ae, this)).ToList();
         }
 
         public bool HasRows()
@@ -339,8 +339,7 @@ namespace Signum.Windows.UIAutomation
 
         public void SelectElementAt(int index)
         {
-            var row = ElementAtPrivate(index);
-            row.Pattern<SelectionItemPattern>().Select();
+            ElementAt(index).Select();
         }
 
         public class ListViewItemProxy
@@ -349,23 +348,39 @@ namespace Signum.Windows.UIAutomation
             {
                 this.Element = element;
                 this.SearchControl = sc;
-                this.Columns = element.Children(a => a.Current.ClassName == "ContentPresenter");
             }
 
             public SearchControlProxy SearchControl { get; private set; }
 
             public AutomationElement Element { get; private set; }
 
-            public List<AutomationElement> Columns { get; private set; }
+            List<AutomationElement> columns;
+            public List<AutomationElement> Columns
+            {
+                get
+                {
+                    return columns ?? (columns = Element.Children(a => a.Current.ClassName == "ContentPresenter"));
+                }
+            }
 
             public AutomationElement Column(string tokenName)
             {
                 return Columns[SearchControl.HeaderMap.Value.GetOrThrow(tokenName,
                     tb => new ElementNotFoundException("{0} not found on query {1}".Formato(tb, SearchControl.Element.Current.Name)))];
             }
+
+            public void Select()
+            {
+                Element.Pattern<SelectionItemPattern>().Select();
+            }
+
+            public Lite<IdentifiableEntity> Entity
+            {
+                get { return Lite.Parse(Element.Current.ItemStatus); }
+            }
         }
 
-        AutomationElement ElementAtPrivate(int index)
+        public ListViewItemProxy ElementAt(int index)
         {
             var rows = GetRows();
 
@@ -374,11 +389,6 @@ namespace Signum.Windows.UIAutomation
 
             var row = rows[index];
             return row;
-        }
-
-        public ListViewItemProxy ElementAt(int index)
-        {
-            return new ListViewItemProxy(ElementAtPrivate(index), this);
         }
 
         public string GetNumResults()

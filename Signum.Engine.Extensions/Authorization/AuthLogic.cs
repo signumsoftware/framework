@@ -473,7 +473,8 @@ namespace Signum.Engine.Authorization
                 roles[ri.Name].Roles = ri.SubRoles.Select(r => roles.GetOrThrow(r).ToLiteFat()).ToMList();
             }
 
-            roles.Values.SaveList();
+            using (OperationLogic.AllowSave<RoleDN>())
+                roles.Values.SaveList();
         }
 
         public static void SynchronizeRoles(XDocument doc)
