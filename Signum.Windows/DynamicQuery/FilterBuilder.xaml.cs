@@ -48,13 +48,11 @@ namespace Signum.Windows
                 return;
             }
 
-            FilterType ft = QueryUtils.GetFilterType(queryToken.Type);
-
             FilterOption f = new FilterOption
             {
                 Token = queryToken,
                 Value = queryToken.Type.IsValueType && !queryToken.Type.IsNullable() ? Activator.CreateInstance(queryToken.Type) : null,
-                Operation = QueryUtils.GetFilterOperations(ft).FirstEx()
+                Operation = FilterOperation.EqualTo
             };
 
             Filters.Add(f);
