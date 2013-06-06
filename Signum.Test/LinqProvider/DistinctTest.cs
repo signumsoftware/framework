@@ -68,5 +68,26 @@ namespace Signum.Test.LinqProvider
             var count2 = Database.Query<AlbumDN>().Select(a => a.Name).Distinct().ToList().Count();
             Assert.AreEqual(count1, count2);
         }
+
+
+        [TestMethod]
+        public void DistinctTake()
+        {
+            var bla = Database.Query<BandDN>().SelectMany(a => a.Members.SelectMany(m => m.Friends).Distinct()).Take(4).ToList();
+        }
+
+        [TestMethod]
+        public void GroupTake()
+        {
+            var bla = (from b in Database.Query<BandDN>()
+                      from g in b.Members.GroupBy(a=>a.Sex).Select(gr=> new {gr.Key, Count = gr.Count() })
+                      select new 
+                      {
+                          Band = b.ToLite(),
+                          g.Key,
+                          g.Count
+                      }).Take(2).ToList();
+
+        }
     }
 }
