@@ -1383,9 +1383,9 @@ namespace Signum.Engine.Linq
                 return new EmbeddedEntityExpression(returnType, hasValue, bindings, null);
             }
 
- 			if (implementations.All(e => e.Value is MixinEntityExpression))
+            if (expressions.All(e => e.Value is MixinEntityExpression))
             {
-                var bindings = (from w in implementations
+                var bindings = (from w in expressions
                                 from b in ((MixinEntityExpression)w.Value).Bindings
                                 group KVP.Create(w.Key, b.Binding) by b.FieldInfo into g
                                 select new FieldBinding(g.Key,
