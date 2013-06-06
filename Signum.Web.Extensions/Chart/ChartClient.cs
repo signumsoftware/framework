@@ -83,7 +83,7 @@ namespace Signum.Web.Chart
                 }
 
                 if (string.IsNullOrEmpty(tokenName))
-                    return ctx.None();
+                    return null;
 
                 var qd = DynamicQueryManager.Current.QueryDescription(
                     Navigator.ResolveQueryName(ctx.ControllerContext.HttpContext.Request.Params["webQueryName"]));
