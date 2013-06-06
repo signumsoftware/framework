@@ -205,7 +205,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectPolyExpressionPropertyUnion()
         {
-            var list = Database.Query<AlbumDN>().Select(a => a.Author.FullName).ToArray();
+            var list = Database.Query<AlbumDN>().Select(a => a.Author.CombineUnion().FullName).ToArray();
         }
 
         [TestMethod]
@@ -217,7 +217,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectPolyExpressionMethodUnion()
         {
-            var list = Database.Query<AlbumDN>().Select(a => a.Author.Lonely()).ToArray();
+            var list = Database.Query<AlbumDN>().Select(a => a.Author.CombineUnion().Lonely()).ToArray();
         }
 
         [TestMethod]

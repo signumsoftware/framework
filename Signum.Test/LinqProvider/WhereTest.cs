@@ -202,7 +202,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void WherePolyExpressionMethodUnion()
         {
-            var list = Database.Query<AlbumDN>().Where(a => a.Author.Lonely()).ToArray();
+            var list = Database.Query<AlbumDN>().Where(a => a.Author.CombineUnion().Lonely()).ToArray();
         }
 
         [TestMethod]
