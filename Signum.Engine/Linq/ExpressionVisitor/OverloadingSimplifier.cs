@@ -26,7 +26,7 @@ namespace Signum.Engine.Linq
         static MethodInfo miGroupBySE = ReflectionTools.GetMethodInfo(() => Enumerable.GroupBy((IEnumerable<string>)null, s => s)).GetGenericMethodDefinition();
 
         static MethodInfo miGroupByNQ = ReflectionTools.GetMethodInfo(() => Queryable.GroupBy((IQueryable<string>)null, s => s, s => s)).GetGenericMethodDefinition();
-        static MethodInfo miGroupByNE = ReflectionTools.GetMethodInfo(() => Queryable.GroupBy((IQueryable<string>)null, s => s, s => s)).GetGenericMethodDefinition();
+        static MethodInfo miGroupByNE = ReflectionTools.GetMethodInfo(() => Enumerable.GroupBy((IQueryable<string>)null, s => s, s => s)).GetGenericMethodDefinition();
 
         static MethodInfo miGroupBySRQ = ReflectionTools.GetMethodInfo(() => Queryable.GroupBy((IQueryable<string>)null, s => s, (s,g)=>s)).GetGenericMethodDefinition();
         static MethodInfo miGroupBySRE = ReflectionTools.GetMethodInfo(() => Enumerable.GroupBy((IEnumerable<string>)null, s => s, (s, g) => s)).GetGenericMethodDefinition();
