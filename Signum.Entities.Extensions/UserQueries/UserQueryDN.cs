@@ -282,15 +282,14 @@ namespace Signum.Entities.UserQueries
 
         protected override void PreSaving(ref bool graphModified)
         {
-            if (token != null)
-                tokenString = token.FullKey();
+            tokenString = token.TryCC(t => t.FullKey());
         }
 
         public abstract void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate);
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => TokenString) && TokenString == null)
+            if (pi.Is(() => TokenString) && token == null)
             {
                 return parseException != null ? parseException.Message : ValidationMessage._0IsNotSet.NiceToString().Formato(pi.NiceName());
             }
