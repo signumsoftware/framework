@@ -200,9 +200,15 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
-        public void WherePolyExpressionMethod()
+        public void WherePolyExpressionMethodUnion()
         {
             var list = Database.Query<AlbumDN>().Where(a => a.Author.Lonely()).ToArray();
+        }
+
+        [TestMethod]
+        public void WherePolyExpressionMethodSwitch()
+        {
+            var list = Database.Query<AlbumDN>().Where(a => a.Author.CombineSwitch().Lonely()).ToArray();
         }
 
 

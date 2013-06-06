@@ -50,7 +50,6 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void SelectLiteIBDouble()
         {
-
             var query = Database.Query<AlbumDN>()
                 .Select(a => new
                 {
@@ -64,14 +63,24 @@ namespace Signum.Test.LinqProvider
 
 
         [TestMethod]
-        public void SelectLiteIBDoubleWhere()
+        public void SelectLiteIBDoubleWhereUnion()
         {
             var query = Database.Query<AlbumDN>()
                 .Where(a => a.Author.ToLite().ToString().Length > 0)
                 .Select(a => a.Author.ToLite());
 
-            //Assert.AreEqual(2, query.QueryText().CountRepetitions("LEFT OUTER JOIN"));
             Assert.AreEqual(3, query.QueryText().CountRepetitions("LEFT OUTER JOIN"));
+            query.ToList();
+        }
+
+        [TestMethod]
+        public void SelectLiteIBDoubleWhereSwitch()
+        {
+            var query = Database.Query<AlbumDN>()
+                .Where(a => a.Author.CombineSwitch().ToLite().ToString().Length > 0)
+                .Select(a => a.Author.CombineSwitch().ToLite());
+
+            Assert.AreEqual(2, query.QueryText().CountRepetitions("LEFT OUTER JOIN"));
             query.ToList();
         }
 
@@ -158,7 +167,7 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
-        public void SelectLiteIBRedundant()
+        public void SelectLiteIBRedundantUnion()
         {
             var list = (from a in Database.Query<AlbumDN>()
                         let band = (BandDN)a.Author
@@ -168,10 +177,28 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
-        public void SelectLiteIBWhere()
+        public void SelectLiteIBRedundantSwitch()
+        {
+            var list = (from a in Database.Query<AlbumDN>()
+                        let band = (BandDN)a.Author
+                        select new { Artist = band.ToString(), Author = a.Author.CombineSwitch().ToString() }).ToList();
+
+            Assert.AreEqual(Database.Query<AlbumDN>().Count(), list.Count);
+        }
+
+        [TestMethod]
+        public void SelectLiteIBWhereUnion()
         {
             var list = Database.Query<AlbumDN>()
                 .Select(a => a.Author.ToLite())
+                .Where(a => a.ToString().StartsWith("Michael")).ToList();
+        }
+
+        [TestMethod]
+        public void SelectLiteIBWhereSwitch()
+        {
+            var list = Database.Query<AlbumDN>()
+                .Select(a => a.Author.CombineSwitch().ToLite())
                 .Where(a => a.ToString().StartsWith("Michael")).ToList();
         }
 
@@ -206,7 +233,7 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
-        public void SelectEntityIBRedundant()
+        public void SelectEntityIBRedundan()
         {
             var list = (from a in Database.Query<AlbumDN>()
                         let aut = a.Author
@@ -229,17 +256,31 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
-        public void SelectCastIBPolymorphic()
+        public void SelectCastIBPolymorphicUnion()
         {
             var list = (from a in Database.Query<AlbumDN>()
                         select a.Author.Name).ToList();
         }
 
         [TestMethod]
-        public void SelectCastIBPolymorphicIB()
+        public void SelectCastIBPolymorphicSwitch()
+        {
+            var list = (from a in Database.Query<AlbumDN>()
+                        select a.Author.CombineSwitch().Name).ToList();
+        }
+
+        [TestMethod]
+        public void SelectCastIBPolymorphicIBUnion()
         {
             var list = (from a in Database.Query<AlbumDN>()
                         select a.Author.LastAward.ToLite()).ToList();
+        }
+
+        [TestMethod]
+        public void SelectCastIBPolymorphicIBSwitch()
+        {
+            var list = (from a in Database.Query<AlbumDN>()
+                        select a.Author.CombineSwitch().LastAward.ToLite()).ToList();
         }
 
         [TestMethod]

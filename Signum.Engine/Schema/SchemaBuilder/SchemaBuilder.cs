@@ -405,9 +405,13 @@ namespace Signum.Engine.Maps
 
             bool nullable = Settings.IsNullable(route, forceNull) || types.Count() > 1;
 
+            CombineStrategy strategy = Settings.FieldAttributes(route).OfType<CombineStrategyAttribute>().FirstOrDefault().TryCS(s => s.Strategy) ?? 
+                CombineStrategy.Union;
+
             return new FieldImplementedBy(route.Type)
             {
                 IndexType = Settings.GetIndexType(route),
+                SplitStrategy = strategy,
                 ImplementationColumns = types.ToDictionary(t => t, t => new ImplementationColumn
                 {
                     ReferenceTable = Include(t, route),

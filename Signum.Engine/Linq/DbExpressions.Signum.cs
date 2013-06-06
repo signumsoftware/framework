@@ -141,15 +141,18 @@ namespace Signum.Engine.Linq
     {
         public readonly ReadOnlyDictionary<Type, EntityExpression> Implementations;
 
-        public ImplementedByExpression(Type type, IDictionary<Type, EntityExpression> implementations)
+        public readonly CombineStrategy Strategy;
+
+        public ImplementedByExpression(Type type, CombineStrategy strategy, IDictionary<Type, EntityExpression> implementations)
             : base(DbExpressionType.ImplementedBy, type)
         {
             this.Implementations = implementations.ToReadOnly();
+            this.Strategy = strategy;
         }
 
         public override string ToString()
         {
-            return "ImplementedBy{{\r\n{0}\r\n}}".Formato(
+            return "ImplementedBy({0}){{\r\n{}\r\n}}".Formato(Strategy,
                 Implementations.ToString(kvp => "{0} ->  {1}".Formato(kvp.Key.NiceName(), kvp.Value.NiceToString()), "\r\n").Indent(4)
                 );
         }

@@ -203,16 +203,33 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
-        public void SelectPolyExpressionProperty()
+        public void SelectPolyExpressionPropertyUnion()
         {
             var list = Database.Query<AlbumDN>().Select(a => a.Author.FullName).ToArray();
         }
 
         [TestMethod]
-        public void SelectPolyExpressionMethod()
+        public void SelectPolyExpressionPropertySwitch()
         {
-            var list2 = Database.Query<AlbumDN>().Select(a => a.Author is BandDN ? ((BandDN)a.Author).Members.Count : ((ArtistDN)a.Author).Friends.Count).ToArray();
+            var list = Database.Query<AlbumDN>().Select(a => a.Author.CombineSwitch().FullName).ToArray();
+        }
+
+        [TestMethod]
+        public void SelectPolyExpressionMethodUnion()
+        {
             var list = Database.Query<AlbumDN>().Select(a => a.Author.Lonely()).ToArray();
+        }
+
+        [TestMethod]
+        public void SelectPolyExpressionMethodSwitch()
+        {
+            var list = Database.Query<AlbumDN>().Select(a => a.Author.CombineSwitch().Lonely()).ToArray();
+        }
+
+        [TestMethod]
+        public void SelectPolyExpressionMethodManual()
+        {
+            var list = Database.Query<AlbumDN>().Select(a => a.Author is BandDN ? ((BandDN)a.Author).Lonely(): ((ArtistDN)a.Author).Lonely()).ToArray();
         }
 
         [TestMethod]

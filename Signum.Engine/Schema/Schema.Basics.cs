@@ -520,6 +520,7 @@ namespace Signum.Engine.Maps
     public partial class FieldImplementedBy : Field, IFieldReference
     {
         public bool IsLite { get; internal set; }
+        public CombineStrategy SplitStrategy { get; internal set; }
         public bool AvoidExpandOnRetrieving { get; internal set; }
 
         public Dictionary<Type, ImplementationColumn> ImplementationColumns { get; set; }

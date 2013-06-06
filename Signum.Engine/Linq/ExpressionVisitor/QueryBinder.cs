@@ -128,6 +128,19 @@ namespace Signum.Engine.Linq
             {
                 return this.BindToString(m.GetArgument("source"), m.GetArgument("separator"), m.Method);
             }
+            else if (m.Method.DeclaringType == typeof(LinqHintEntities))
+            {
+                var expression = Visit(m.Arguments[0]) as ImplementedByExpression;
+
+                var ib = expression as ImplementedByExpression;
+                
+                if(ib == null)
+                    throw new InvalidOperationException("Method {0} is only meant to be used on {1}".Formato(m.Method.Name, typeof(ImplementedByExpression).Name));
+
+                CombineStrategy strategy = GetStrategy(m.Method);
+
+                return new ImplementedByExpression(ib.Type, strategy, expression.Implementations);
+            }
             else if (m.Method.DeclaringType == typeof(Lite) && m.Method.Name == "ToLite")
             {
                 Expression toStr = Visit(m.TryGetArgument("toStr")); //could be null
@@ -157,7 +170,19 @@ namespace Signum.Engine.Linq
             return BindMethodCall(result);
         }
 
-        
+
+        static MethodInfo miSplitSwitch = ReflectionTools.GetMethodInfo((IdentifiableEntity e) => e.CombineSwitch()).GetGenericMethodDefinition();
+        static MethodInfo miSplitUnion = ReflectionTools.GetMethodInfo((IdentifiableEntity e) => e.CombineUnion()).GetGenericMethodDefinition();
+        private CombineStrategy GetStrategy(MethodInfo methodInfo)
+        {
+            if (methodInfo.IsInstantiationOf(miSplitSwitch))
+                return CombineStrategy.Switch;
+
+            if (methodInfo.IsInstantiationOf(miSplitUnion))
+                return CombineStrategy.Union;
+
+            throw new InvalidOperationException("Method {0} not expected".Formato(methodInfo.Name));
+        }
 
         private Expression MapVisitExpand(LambdaExpression lambda, ProjectionExpression projection)
         {
@@ -1198,57 +1223,97 @@ namespace Signum.Engine.Linq
             if (ib.Implementations.Count == 1)
                 return selector(ib.Implementations.Values.Single());
 
-            UnionAllRequest ur = Completed(ib);
-
-            var dictionary = ur.Implementations.SelectDictionary(ue => 
+            if (ib.Strategy == CombineStrategy.Switch)
+            {
+                var dictionary = ib.Implementations.SelectDictionary(ee =>
                 {
-                    using(SetCurrentSource(ue.Table))
+                    return selector(ee);   
+                });
+
+                var strategy = new SwitchStrategy(ib);
+
+                var result = CombineImplementations(strategy, dictionary, resultType);
+
+                return result;
+            }
+            else
+            {
+                UnionAllRequest ur = Completed(ib);
+
+                var dictionary = ur.Implementations.SelectDictionary(ue =>
+                {
+                    using (SetCurrentSource(ue.Table))
                     {
                         return selector(ue.Entity);
                     }
                 });
 
-            var result = CombineImplementations(ur, dictionary, resultType);
+                var result = CombineImplementations(ur, dictionary, resultType);
 
-            return result;
+                return result;
+            }
         }
 
-        private Expression CombineImplementations(UnionAllRequest request, Dictionary<Type, Expression> implementations, Type returnType)
+
+        internal interface ICombineStrategy
         {
-            if (implementations.All(e => e.Value is LiteReferenceExpression))
+            Expression CombineValues(Dictionary<Type, Expression> implementations, Type returnType);
+        }
+
+
+        public class SwitchStrategy : ICombineStrategy
+        {
+            ImplementedByExpression ImplementedBy;
+
+            public SwitchStrategy(ImplementedByExpression implementedBy)
             {
-                Expression entity = CombineImplementations(request, implementations.SelectDictionary(ex => 
+                this.ImplementedBy = implementedBy;
+            }
+
+            public Expression CombineValues(Dictionary<Type, Expression> implementations, Type returnType)
+            {
+                return ImplementedBy.Implementations
+                    .Select(kvp => new When(Expression.NotEqual(kvp.Value.ExternalId, NullId), implementations[kvp.Key]))
+                    .ToCondition(returnType);
+            }
+        }
+
+        private Expression CombineImplementations(ICombineStrategy strategy, Dictionary<Type, Expression> expressions, Type returnType)
+        {
+            if (expressions.All(e => e.Value is LiteReferenceExpression))
+            {
+                Expression entity = CombineImplementations(strategy, expressions.SelectDictionary(ex => 
                     ((LiteReferenceExpression)ex).Reference), Lite.Extract(returnType));
 
                 return MakeLite(entity, null);
             }
 
-            if (implementations.All(e => e.Value is EntityExpression))
+            if (expressions.All(e => e.Value is EntityExpression))
             {
-                var avoidExpandOnRetrieving = implementations.Any(a => ((EntityExpression)a.Value).AvoidExpandOnRetrieving);
+                var avoidExpandOnRetrieving = expressions.Any(a => ((EntityExpression)a.Value).AvoidExpandOnRetrieving);
 
-                Expression id = CombineImplementations(request, implementations.SelectDictionary(imp => ((EntityExpression)imp).ExternalId), typeof(int?));
+                Expression id = CombineImplementations(strategy, expressions.SelectDictionary(imp => ((EntityExpression)imp).ExternalId), typeof(int?));
 
                 return new EntityExpression(returnType, id, null, null, avoidExpandOnRetrieving);
             }
 
-            if (implementations.Any(e => e.Value is ImplementedByAllExpression))
+            if (expressions.Any(e => e.Value is ImplementedByAllExpression))
             {
-                Expression id = CombineImplementations(request, implementations.SelectDictionary(w => GetId(w)), typeof(int?));
-                TypeImplementedByAllExpression typeId = (TypeImplementedByAllExpression)CombineImplementations(request, implementations.SelectDictionary(w => GetEntityType(w)), typeof(Type));
+                Expression id = CombineImplementations(strategy, expressions.SelectDictionary(w => GetId(w)), typeof(int?));
+                TypeImplementedByAllExpression typeId = (TypeImplementedByAllExpression)CombineImplementations(strategy, expressions.SelectDictionary(w => GetEntityType(w)), typeof(Type));
 
                 return new ImplementedByAllExpression(returnType, id, typeId);
             }
 
-            if(implementations.All(e=>e.Value is EntityExpression || e.Value is ImplementedByExpression))
+            if(expressions.All(e=>e.Value is EntityExpression || e.Value is ImplementedByExpression))
             {
-                var hs = implementations.Values.SelectMany(exp => exp is EntityExpression ?
+                var hs = expressions.Values.SelectMany(exp => exp is EntityExpression ?
                     new[] { ((EntityExpression)exp).Type } :
                     ((ImplementedByExpression)exp).Implementations.Keys).ToHashSet();
 
 
                 var newImplementations = hs.ToDictionary(t => t, t =>
-                    (EntityExpression)CombineImplementations(request, implementations.SelectDictionary(exp =>
+                    (EntityExpression)CombineImplementations(strategy, expressions.SelectDictionary(exp =>
                     {
                         if (exp is EntityExpression)
                         {
@@ -1265,38 +1330,40 @@ namespace Signum.Engine.Linq
                         return new EntityExpression(t, NullId, null, null, false);
                     }), t));
 
-                return new ImplementedByExpression(returnType, newImplementations);    
+                var stra = expressions.Values.OfType<ImplementedByExpression>().Select(a=>a.Strategy).Distinct().Only(); //Default Union
+
+                return new ImplementedByExpression(returnType, stra, newImplementations);   
             }
 
-            if(implementations.All(e=>e.Value is EmbeddedEntityExpression))
+            if(expressions.All(e=>e.Value is EmbeddedEntityExpression))
             {
-                var bindings = (from w in implementations
+                var bindings = (from w in expressions
                                 from b in ((EmbeddedEntityExpression)w.Value).Bindings
                                 group KVP.Create(w.Key, b.Binding) by b.FieldInfo into g
                                 select new FieldBinding(g.Key,  
-                                    CombineImplementations(request, g.ToDictionary(), g.Key.FieldType))).ToList();
+                                    CombineImplementations(strategy, g.ToDictionary(), g.Key.FieldType))).ToList();
 
-                var hasValue = implementations.All(w => ((EmbeddedEntityExpression)w.Value).HasValue == null) ? null :
-                    CombineImplementations(request, implementations.SelectDictionary(w => ((EmbeddedEntityExpression)w).HasValue ?? new SqlConstantExpression(true)), typeof(bool));
+                var hasValue = expressions.All(w => ((EmbeddedEntityExpression)w.Value).HasValue == null) ? null :
+                    CombineImplementations(strategy, expressions.SelectDictionary(w => ((EmbeddedEntityExpression)w).HasValue ?? new SqlConstantExpression(true)), typeof(bool));
 
                 return new EmbeddedEntityExpression(returnType, hasValue, bindings, null);
             }
 
-            if (implementations.Any(e => e.Value is MListExpression))
+            if (expressions.Any(e => e.Value is MListExpression))
                 throw new InvalidOperationException("MList on ImplementedBy are not supported yet");
             
-            if (implementations.Any(e => e.Value is TypeImplementedByAllExpression || e.Value is TypeImplementedByExpression || e.Value is TypeEntityExpression))
+            if (expressions.Any(e => e.Value is TypeImplementedByAllExpression || e.Value is TypeImplementedByExpression || e.Value is TypeEntityExpression))
             {
-                var typeId = CombineImplementations(request, implementations.SelectDictionary(exp => ExtractTypeId(exp)), typeof(int?));
+                var typeId = CombineImplementations(strategy, expressions.SelectDictionary(exp => ExtractTypeId(exp)), typeof(int?));
 
                 return new TypeImplementedByAllExpression(typeId);
             }
 
-            if (implementations.All(i => i.Value.NodeType == ExpressionType.Convert && i.Value.Type.UnNullify().IsEnum))
+            if (expressions.All(i => i.Value.NodeType == ExpressionType.Convert && i.Value.Type.UnNullify().IsEnum))
             {
-                var enumType = implementations.Select(i => i.Value.Type).Distinct().Only();
+                var enumType = expressions.Select(i => i.Value.Type).Distinct().Only();
 
-                var value = CombineImplementations(request, implementations.SelectDictionary(exp => ((UnaryExpression)exp).Operand), typeof(int?));
+                var value = CombineImplementations(strategy, expressions.SelectDictionary(exp => ((UnaryExpression)exp).Operand), typeof(int?));
 
                 return Expression.Convert(value, enumType); 
             }
@@ -1304,67 +1371,8 @@ namespace Signum.Engine.Linq
             if (!Schema.Current.Settings.IsDbType(returnType.UnNullify()))
                 throw new InvalidOperationException("Impossible to CombineImplementations of {0}".Formato(returnType.TypeName()));
 
-            var values = implementations.SelectDictionary(t => t, (t, exp) => GetNominableExpression(request, t, exp));
 
-            if (values.Values.All(o => o is Expression))
-                return request.AddUnionColumn(returnType, GetDefaultName((Expression)values.Values.First()), t => (Expression)values[t]);
-
-            var whens = values.Select(kvp =>
-            {
-                var condition = Expression.NotEqual(request.Implementations[kvp.Key].UnionExternalId, NullId);
-
-                if (kvp.Value is Expression)
-                {
-                    Expression exp = (Expression)kvp.Value;
-                    var newCe = request.AddIndependentColumn(exp.Type, GetDefaultName(exp), kvp.Key, exp);
-                    return new When(condition, newCe);
-                }
-
-                var dirty = (DityExpression)kvp.Value;
-
-                var table = request.Implementations[kvp.Key].Table;
-
-                var projector = ColumnUnionProjector.Project(dirty.projector, dirty.candidates, request, kvp.Key);
-
-                return new When(condition, projector);
-
-            }).ToList();
-            
-            return whens.ToCondition(returnType);
-        }
-
-        static string GetDefaultName(Expression expression)
-        {
-            if (expression is ColumnExpression)
-                return ((ColumnExpression)expression).Name;
-
-            if (expression is UnaryExpression)
-                return GetDefaultName(((UnaryExpression)expression).Operand);
-
-            return "val";
-        }
-
-        private object GetNominableExpression(UnionAllRequest request, Type type, Expression exp)
-        {
-            if (exp is ColumnExpression)
-                return exp;
-
-            //var knownAliases = KnownAliases(request.Implementations[type].Table);
-
-            Expression newExp;
-            var nominations = DbExpressionNominator.Nominate(exp, out newExp);
-
-            if (nominations.Contains(newExp))
-                return newExp;
-
-            return new DityExpression { projector = newExp, candidates = nominations };
-
-        }
-
-        class DityExpression
-        {
-            public Expression projector;
-            public HashSet<Expression> candidates; 
+            return strategy.CombineValues(expressions, returnType);
         }
 
         internal static Expression ExtractTypeId(Expression exp)
@@ -1503,7 +1511,7 @@ namespace Signum.Engine.Linq
 
                 if (uType.IsAssignableFrom(ee.Type)) // upcasting
                 {
-                    return new ImplementedByExpression(uType, new Dictionary<Type, EntityExpression> { { operand.Type, ee } }.ToReadOnly());
+                    return new ImplementedByExpression(uType, CombineStrategy.Switch, new Dictionary<Type, EntityExpression> { { operand.Type, ee } }.ToReadOnly());
                 }
                 else
                 {
@@ -1523,7 +1531,7 @@ namespace Signum.Engine.Linq
                 if (fies.Length == 1 && fies[0].Type == uType)
                     return fies[0];
 
-                return new ImplementedByExpression(uType, fies.ToDictionary(f => f.Type));
+                return new ImplementedByExpression(uType, ib.Strategy, fies.ToDictionary(f => f.Type));
             }
             else if (operand.NodeType == (ExpressionType)DbExpressionType.ImplementedByAll)
             {
@@ -1950,7 +1958,7 @@ namespace Signum.Engine.Linq
         {
             return implementedByReplacements.GetOrCreate(ib, () =>
             {
-                UnionAllRequest result = new UnionAllRequest { OriginalImplementedBy = ib }; 
+                UnionAllRequest result = new UnionAllRequest(ib); 
 
                 result.UnionAlias = aliasGenerator.NextTableAlias("Union" + ib.Type.Name);
 
@@ -2280,7 +2288,7 @@ namespace Signum.Engine.Linq
         }
     }
 
-    class UnionAllRequest : ExpansionRequest
+    class UnionAllRequest : ExpansionRequest, QueryBinder.ICombineStrategy
     {
         public ImplementedByExpression OriginalImplementedBy; 
 
@@ -2291,6 +2299,12 @@ namespace Signum.Engine.Linq
         ColumnGenerator columnGenerator = new ColumnGenerator();
 
         Dictionary<string, Dictionary<Type, Expression>> declarations = new Dictionary<string, Dictionary<Type, Expression>>();
+        private ImplementedByExpression ib;
+
+        public UnionAllRequest(ImplementedByExpression ib)
+        {
+          this.OriginalImplementedBy  = ib;
+        }
 
         public override string ToString()
         {
@@ -2323,6 +2337,72 @@ namespace Signum.Engine.Linq
         public override HashSet<Alias> ExternalAlias(QueryBinder binder)
         {
             return OriginalImplementedBy.Implementations.Values.SelectMany(ee => UsedAliasGatherer.Externals(ee.ExternalId)).ToHashSet();
+        }
+
+        public Expression CombineValues(Dictionary<Type, Expression> implementations, Type returnType)
+        {
+            var values = implementations.SelectDictionary(t => t, (t, exp) => GetNominableExpression(t, exp));
+
+            if (values.Values.All(o => o is Expression))
+                return AddUnionColumn(returnType, GetDefaultName((Expression)values.Values.First()), t => (Expression)values[t]);
+
+            var whens = values.Select(kvp =>
+            {
+                var condition = Expression.NotEqual(Implementations[kvp.Key].UnionExternalId, QueryBinder.NullId);
+
+                if (kvp.Value is Expression)
+                {
+                    Expression exp = (Expression)kvp.Value;
+                    var newCe = AddIndependentColumn(exp.Type, GetDefaultName(exp), kvp.Key, exp);
+                    return new When(condition, newCe);
+                }
+
+                var dirty = (DityExpression)kvp.Value;
+
+                var table = Implementations[kvp.Key].Table;
+
+                var projector = ColumnUnionProjector.Project(dirty.projector, dirty.candidates, this, kvp.Key);
+
+                return new When(condition, projector);
+
+            }).ToList();
+
+            return whens.ToCondition(returnType);
+        }
+
+
+        static string GetDefaultName(Expression expression)
+        {
+            if (expression is ColumnExpression)
+                return ((ColumnExpression)expression).Name;
+
+            if (expression is UnaryExpression)
+                return GetDefaultName(((UnaryExpression)expression).Operand);
+
+            return "val";
+        }
+
+        object GetNominableExpression(Type type, Expression exp)
+        {
+            if (exp is ColumnExpression)
+                return exp;
+
+            //var knownAliases = KnownAliases(request.Implementations[type].Table);
+
+            Expression newExp;
+            var nominations = DbExpressionNominator.Nominate(exp, out newExp);
+
+            if (nominations.Contains(newExp))
+                return newExp;
+
+            return new DityExpression { projector = newExp, candidates = nominations };
+
+        }
+
+        class DityExpression
+        {
+            public Expression projector;
+            public HashSet<Expression> candidates;
         }
     }
 

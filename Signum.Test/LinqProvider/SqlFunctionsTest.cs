@@ -61,15 +61,27 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
-        public void StringFunctionsPolymorphic()
+        public void StringFunctionsPolymorphicUnion()
         {
             Assert.IsTrue(Database.Query<AlbumDN>().Any(a => a.Author.Name.Contains("Jackson")));
         }
 
         [TestMethod]
-        public void StringContains()
+        public void StringFunctionsPolymorphicSwitch()
+        {
+            Assert.IsTrue(Database.Query<AlbumDN>().Any(a => a.Author.CombineSwitch().Name.Contains("Jackson")));
+        }
+
+        [TestMethod]
+        public void StringContainsUnion()
         {
             var list = Database.Query<AlbumDN>().Where(a => !a.Author.ToString().Contains("Hola")).ToList();
+        }
+
+        [TestMethod]
+        public void StringContainsSwitch()
+        {
+            var list = Database.Query<AlbumDN>().Where(a => !a.Author.CombineSwitch().ToString().Contains("Hola")).ToList();
         }
 
         [TestMethod]

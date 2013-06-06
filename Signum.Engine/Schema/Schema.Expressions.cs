@@ -224,7 +224,7 @@ namespace Signum.Engine.Maps
             var implementations = ImplementationColumns.SelectDictionary(t => t, (t, ic) =>
                  new EntityExpression(t, new ColumnExpression(ic.ReferenceType(), tableAlias, ic.Name), null, null, AvoidExpandOnRetrieving));
 
-            var result = new ImplementedByExpression(IsLite ? Lite.Extract(FieldType) : FieldType, implementations);
+            var result = new ImplementedByExpression(IsLite ? Lite.Extract(FieldType) : FieldType, SplitStrategy, implementations);
 
             if (this.IsLite)
                 return binder.MakeLite(result, null);
