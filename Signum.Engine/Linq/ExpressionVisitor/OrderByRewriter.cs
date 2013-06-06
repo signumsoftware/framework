@@ -60,11 +60,20 @@ namespace Signum.Engine.Linq
             if (select.Top != null && gatheredKeys == null)
                 gatheredKeys = new List<ColumnExpression>();
 
+
+            List<ColumnExpression> saveKeys = null;
+            if (gatheredKeys != null && (select.IsDistinct || select.GroupBy.HasItems()))
+                saveKeys = gatheredKeys.ToList();
+
+
             select = (SelectExpression)base.VisitSelect(select);
+
+            if (saveKeys != null)
+                gatheredKeys = saveKeys;
 
             List<ColumnDeclaration> newColumns = null;
 
-            if (select.GroupBy != null && select.GroupBy.Any())
+            if (select.GroupBy.HasItems())
             {
                 gatheredOrderings = null;
 
@@ -87,10 +96,19 @@ namespace Signum.Engine.Linq
                     if (cg.Columns.Count() != select.Columns.Count)
                         newColumns = cg.Columns.ToList();
 
-                    gatheredKeys.Clear();
                     gatheredKeys.AddRange(newKeys.Select(cd => new ColumnExpression(cd.Expression.Type, select.Alias, cd.Name)));
                 }
-            } 
+            }
+
+            if (select.IsDistinct)
+            {
+                gatheredOrderings = null;
+
+                if (gatheredKeys != null)
+                {
+                    gatheredKeys.AddRange(select.Columns.Select(cd => cd.GetReference(select.Alias)));
+                }
+            }
 
             if (select.IsReverse && !gatheredOrderings.IsNullOrEmpty())
                 gatheredOrderings = gatheredOrderings.Select(o => new OrderExpression(

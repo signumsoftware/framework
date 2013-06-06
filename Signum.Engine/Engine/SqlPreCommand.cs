@@ -166,7 +166,7 @@ namespace Signum.Engine
 
         static readonly Regex regex = new Regex(@"@[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*");
       
-        static string Encode(object value)
+        internal static string Encode(object value)
         {
             if (value == null || value == DBNull.Value)
                 return "NULL";

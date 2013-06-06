@@ -46,21 +46,5 @@ namespace Signum.Engine.Linq
 
             return new EntityExpression(fieldInit.Type, newID, null, null, null, fieldInit.AvoidExpandOnRetrieving); // remove bindings
         }
-
-        protected override Expression VisitImplementedBy(ImplementedByExpression reference)
-        {
-            var implementations = reference.Implementations
-                .NewIfChange(ri => (EntityExpression)VisitEntity(ri));
-
-            return new ImplementedByExpression(reference.Type, implementations);
-        }
-
-        protected override Expression VisitImplementedByAll(ImplementedByAllExpression reference)
-        {
-            var id = (ColumnExpression)Visit(reference.Id);
-            var typeId = (TypeImplementedByAllExpression)Visit(reference.TypeId);
-
-            return new ImplementedByAllExpression(reference.Type, id, typeId);
-        }
     }
 }

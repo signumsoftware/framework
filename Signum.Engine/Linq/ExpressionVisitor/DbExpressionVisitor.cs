@@ -311,23 +311,23 @@ namespace Signum.Engine.Linq
             return column;
         }
 
-        protected virtual Expression VisitImplementedByAll(ImplementedByAllExpression reference)
+        protected virtual Expression VisitImplementedByAll(ImplementedByAllExpression iba)
         {
-            var id = Visit(reference.Id);
-            var typeId = (TypeImplementedByAllExpression)Visit(reference.TypeId);
+            var id = Visit(iba.Id);
+            var typeId = (TypeImplementedByAllExpression)Visit(iba.TypeId);
 
-            if (id != reference.Id || typeId != reference.TypeId)
-                return new ImplementedByAllExpression(reference.Type, id, typeId);
-            return reference;
+            if (id != iba.Id || typeId != iba.TypeId)
+                return new ImplementedByAllExpression(iba.Type, id, typeId);
+            return iba;
         }
 
-        protected virtual Expression VisitImplementedBy(ImplementedByExpression reference)
+        protected virtual Expression VisitImplementedBy(ImplementedByExpression ib)
         {
-            var implementations = reference.Implementations.NewIfChange(v => (EntityExpression)Visit(v));
+            var implementations = ib.Implementations.NewIfChange(v => (EntityExpression)Visit(v));
 
-            if (implementations != reference.Implementations)
-                return new ImplementedByExpression(reference.Type, implementations);
-            return reference;
+            if (implementations != ib.Implementations)
+                return new ImplementedByExpression(ib.Type, ib.Strategy, implementations);
+            return ib;
         }
 
         protected virtual Expression VisitEntity(EntityExpression ee)

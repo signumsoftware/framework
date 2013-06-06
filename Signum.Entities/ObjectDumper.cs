@@ -57,6 +57,14 @@ namespace Signum.Entities
                     return;
                 }
 
+                if (o is Type)
+                {
+                    Sb.Append("typeof(");
+                    Sb.Append(CSharpRenderer.TypeName((Type)o));
+                    Sb.Append(")");
+                    return;
+                }
+
                 Type t = o.GetType();
 
                 if (IsDelegate(t))

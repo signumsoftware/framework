@@ -141,12 +141,6 @@ namespace Signum.Engine.Linq
             return u;
         }
 
-
-        bool IsNull(Expression exp)
-        {
-            return exp.NodeType == ExpressionType.Constant && ((ConstantExpression)exp).Value == null; 
-        }
-
         protected override Expression VisitBinary(BinaryExpression b)
         {
             if (b.NodeType == ExpressionType.Coalesce)

@@ -169,7 +169,7 @@ namespace Signum.Engine.Linq
                 }
             }
 
-            if (m.Method.DeclaringType == typeof(LinqHints))
+            if (m.Method.DeclaringType == typeof(LinqHints) || m.Method.DeclaringType == typeof(LinqHintEntities))
                 return Visit(m.Arguments[0]);
 
             if (m.Method.DeclaringType == typeof(Lite) && m.Method.Name == "ToLite")

@@ -174,9 +174,14 @@ namespace Signum.Entities.Reflection
             if (ue != null && ue.NodeType == ExpressionType.Convert && ue.Type == typeof(object))
                 e = ue.Operand;
 
-            MemberInfo[] result = e.FollowC(NextExpression).Select(GetMember).NotNull().Reverse().ToArray();
+            MemberInfo[] result = GetMemberListBase(e);
 
             return result;
+        }
+
+        public static MemberInfo[] GetMemberListBase(Expression e)
+        {
+            return e.FollowC(NextExpression).Select(GetMember).NotNull().Reverse().ToArray();
         }
 
         static Expression NextExpression(Expression e)

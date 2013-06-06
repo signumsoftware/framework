@@ -358,6 +358,11 @@ namespace Signum.Utilities
             return collection == null || collection.IsEmpty();
         }
 
+        public static bool HasItems<T>(this IEnumerable<T> collection)
+        {
+            return collection != null && collection.Any();
+        }
+
         public static IEnumerable<T> NotNull<T>(this IEnumerable<T> collection) where T : class
         {
             foreach (var item in collection)

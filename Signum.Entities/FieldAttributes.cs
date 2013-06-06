@@ -265,4 +265,35 @@ namespace Signum.Entities
     {
 
     }
+
+
+    [AttributeUsage(AttributeTargets.Field)]
+    public class CombineStrategyAttribute : Attribute
+    {
+        public readonly CombineStrategy Strategy;
+
+        public CombineStrategyAttribute(CombineStrategy strategy)
+        {
+            this.Strategy = strategy;
+        }
+    }
+
+    public enum CombineStrategy
+    {
+        Union,
+        Switch,
+    }
+
+    public static class LinqHintEntities
+    {
+        public static T CombineSwitch<T>(this T value) where T : IIdentifiable
+        {
+            return value;
+        }
+
+        public static T CombineUnion<T>(this T value) where T : IIdentifiable
+        {
+            return value;
+        }
+    }
 }
