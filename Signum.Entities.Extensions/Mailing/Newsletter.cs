@@ -8,6 +8,7 @@ using Signum.Entities.Mailing;
 using Signum.Utilities;
 using Signum.Entities.Basics;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Signum.Entities.Mailing
 {
@@ -28,24 +29,6 @@ namespace Signum.Entities.Mailing
         {
             get { return state; }
             set { Set(ref state, value, () => State); }
-        }
-
-        [NotNullable, SqlDbType(Size = int.MaxValue)]
-        string htmlBody;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = int.MaxValue)]
-        public string HtmlBody
-        {
-            get { return htmlBody; }
-            set { Set(ref htmlBody, value, () => HtmlBody); }
-        }
-
-        [NotNullable, SqlDbType(Size = 50)]
-        string subject;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 50)]
-        public string Subject
-        {
-            get { return subject; }
-            set { Set(ref subject, value, () => Subject); }
         }
 
         Lite<SMTPConfigurationDN> smtpConfig = DefaultSMTPConfig;
@@ -71,6 +54,37 @@ namespace Signum.Entities.Mailing
         {
             get { return displayFrom; }
             set { Set(ref displayFrom, value, () => DisplayFrom); }
+        }
+
+        [SqlDbType(Size = 50)]
+        string subject;
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 50)]
+        public string Subject
+        {
+            get { return subject; }
+            set { Set(ref subject, value, () => Subject); }
+        }
+
+        [SqlDbType(Size = int.MaxValue)]
+        string text;
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = int.MaxValue)]
+        public string Text
+        {
+            get { return text; }
+            set { Set(ref text, value, () => Text); }
+        }
+
+        static StateValidator<NewsletterDN, NewsletterState> stateValidator = new StateValidator<NewsletterDN, NewsletterState>
+            (     n => n.State,            n => n.Subject, n => n.Text)
+            {
+                { NewsletterState.Created, null,           null },
+                { NewsletterState.Saved,   null,           null },
+                { NewsletterState.Sent,    true,           true },
+            };
+
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            return stateValidator.Validate(this, pi) ?? base.PropertyValidation(pi);
         }
 
         static readonly Expression<Func<NewsletterDN, string>> ToStringExpression = e => e.name;

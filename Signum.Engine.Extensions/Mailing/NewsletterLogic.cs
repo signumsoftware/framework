@@ -53,9 +53,10 @@ namespace Signum.Engine.Mailing
                  {
                      Entity = n,
                      n.Id,
-                     Nombre = n.Name,
-                     Texto = n.HtmlBody.Etc(100),
-                     Estado = n.State,
+                     n.Name,
+                     n.Subject,
+                     Text = n.Text.Etc(100),
+                     n.State,
                      NumDeliveries = n.Deliveries().Count(),
                      LastProcess = p,
                      NumErrors = n.Deliveries().Count(d => d.Exception(p) != null)
@@ -80,23 +81,19 @@ namespace Signum.Engine.Mailing
 
                 sb.AddUniqueIndex<NewsletterDeliveryDN>(nd => new { nd.Newsletter, nd.Recipient });
 
-                Validator.PropertyValidator((NewsletterDN news) => news.HtmlBody).StaticPropertyValidation += (sender, pi) => ValidateTokens((NewsletterDN)sender, pi);
+                Validator.PropertyValidator((NewsletterDN news) => news.Text).StaticPropertyValidation += (sender, pi) => ValidateTokens((NewsletterDN)sender, pi);
                 Validator.PropertyValidator((NewsletterDN news) => news.Subject).StaticPropertyValidation += (sender, pi) => ValidateTokens((NewsletterDN)sender, pi);
             }
         }
 
         static string ValidateTokens(NewsletterDN newsletter, PropertyInfo pi)
         {
-            if (pi.Is(() => newsletter.HtmlBody))
-            {
-                return AssertTokens(QueryLogic.ToQueryName(newsletter.Query.Key), newsletter.HtmlBody);
-            }
-
-            if (pi.Is(() => newsletter.Subject))
-            {
+            if (pi.Is(() => newsletter.Subject) && newsletter.Subject.HasText())
                 return AssertTokens(QueryLogic.ToQueryName(newsletter.Query.Key), newsletter.Subject);
-            }
 
+            if (pi.Is(() => newsletter.Text) && newsletter.Text.HasText())
+                return AssertTokens(QueryLogic.ToQueryName(newsletter.Query.Key), newsletter.Text);
+            
             return null;
         }
 
@@ -158,10 +155,9 @@ namespace Signum.Engine.Mailing
                     Name = n.Name,
                     SMTPConfig = n.SMTPConfig,
                     From = n.From,
-                    DisplayFrom = n.DisplayFrom,
                     Query = n.Query,
-                    HtmlBody = n.HtmlBody,
                     Subject = n.Subject,
+                    Text = n.Text,
                 }
             }.Register();
 
@@ -214,8 +210,19 @@ namespace Signum.Engine.Mailing
             {
                 FromStates = { NewsletterState.Saved },
                 ToState = NewsletterState.Sent,
-                CanExecute = n => Database.Query<NewsletterDeliveryDN>().Any(d =>
-                    d.Newsletter.RefersTo(n)) ? null : "There is not any delivery for this newsletter",
+                CanExecute = n =>
+                {
+                    if (n.Subject.IsNullOrEmpty())
+                        return "Subject must be set";
+                    
+                    if (n.Text.IsNullOrEmpty())
+                        return "Text must be set";
+
+                    if (!Database.Query<NewsletterDeliveryDN>().Any(d => d.Newsletter.RefersTo(n))) 
+                        return "There is not any delivery for this newsletter";
+
+                    return null;
+                },
                 Execute = (n, _) =>
                 {
                     var process = ProcessLogic.Create(NewsletterOperation.Send, n);
@@ -251,7 +258,7 @@ namespace Signum.Engine.Mailing
             columns.Add(QueryUtils.Parse("Entity.NewsletterDeliveries.Element", qd, canAggregate: false));
             columns.Add(QueryUtils.Parse("Entity.Email", qd, canAggregate: false));
             columns.AddRange(NewsletterLogic.GetTokens(queryName, newsletter.Subject));
-            columns.AddRange(NewsletterLogic.GetTokens(queryName, newsletter.HtmlBody));
+            columns.AddRange(NewsletterLogic.GetTokens(queryName, newsletter.Text));
 
             columns = columns.Distinct().ToList();
 
@@ -302,7 +309,7 @@ namespace Signum.Engine.Mailing
 
                             message.To.Add(overrideEmail ?? s.Email);
                             message.IsBodyHtml = true;
-                            message.Body = NewsletterLogic.TokenRegex.Replace(newsletter.HtmlBody, m =>
+                            message.Body = NewsletterLogic.TokenRegex.Replace(newsletter.Text, m =>
                             {
                                 var index = dic[m.Groups["token"].Value];
                                 return s.Row[index].TryToString();

@@ -81,8 +81,6 @@ namespace Signum.Web.Mailing
                 Navigator.RegisterArea(typeof(MailingClient));
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<EmailMasterTemplateDN>{ PartialViewName =  e => ViewPrefix.Formato("EmailMasterTemplate") },
-                    
                     new EntitySettings<EmailPackageDN>{ PartialViewName = e => ViewPrefix.Formato("EmailPackage")},
                     
                     new EntitySettings<EmailMessageDN>{ PartialViewName = e => ViewPrefix.Formato("EmailMessage")},
@@ -101,7 +99,7 @@ namespace Signum.Web.Mailing
                 if (newsletter)
                     Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<NewsletterDN> { PartialViewName = e => ViewPrefix.Formato("Newsletter") },
+                    //new EntitySettings<NewsletterDN> { PartialViewName = e => ViewPrefix.Formato("Newsletter") },
                     new EntitySettings<NewsletterDeliveryDN> { PartialViewName = e => ViewPrefix.Formato("NewsletterDelivery") },
                 });
             }

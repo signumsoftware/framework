@@ -136,7 +136,7 @@ WriteLiteral("\r\n");
             #line hidden
             
             #line 17 "..\..\Mailing\Views\Newsletter.cshtml"
-           Write(Html.Hidden("htmlBodyContent", nc.Value.HtmlBody));
+           Write(Html.Hidden("htmlBodyContent", nc.Value.Text));
 
             
             #line default
@@ -170,7 +170,7 @@ WriteLiteral("                <div id=\"newsEditContent\">\r\n                  
 
             
             #line 27 "..\..\Mailing\Views\Newsletter.cshtml"
-               Write(Html.ValueLine(nc, n => n.HtmlBody, vl =>
+               Write(Html.ValueLine(nc, n => n.Text, vl =>
                     {
                         vl.ValueLineType = ValueLineType.TextArea;
                         vl.ValueHtmlProps["cols"] = "30";
