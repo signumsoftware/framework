@@ -114,8 +114,6 @@ namespace Signum.Engine.Mailing
                 CultureInfoLogic.AssertStarted(sb);
 
                 EmailLogicConfiguration = emailLogicConfiguration;
-                
-                sb.Settings.OverrideAttributes((EmailTemplateDN et) => et.Recipients.First().TokenString, new Attribute[0]);
 
                 sb.Include<EmailMessageDN>();
                 sb.Include<EmailTemplateDN>();
