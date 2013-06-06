@@ -114,6 +114,8 @@ namespace Signum.Engine.Mailing
                 CultureInfoLogic.AssertStarted(sb);
 
                 EmailLogicConfiguration = emailLogicConfiguration;
+                
+                sb.Settings.OverrideAttributes((EmailTemplateDN et) => et.Recipients.First().TokenString, new Attribute[0]);
 
                 sb.Include<EmailMessageDN>();
                 sb.Include<EmailTemplateDN>();
@@ -161,16 +163,42 @@ namespace Signum.Engine.Mailing
                 sb.Schema.Synchronizing += Schema_Synchronizing;
 
                 sb.Schema.EntityEvents<EmailTemplateDN>().PreSaving += new PreSavingEventHandler<EmailTemplateDN>(EmailTemplate_PreSaving);
+                sb.Schema.EntityEvents<EmailTemplateDN>().Retrieved += EmailTemplateLogic_Retrieved;
 
                 Validator.OverridePropertyValidator((EmailTemplateMessageDN m) => m.Text).StaticPropertyValidation += 
                     EmailTemplateMessageText_StaticPropertyValidation;
 
                 Validator.OverridePropertyValidator((EmailTemplateMessageDN m) => m.Subject).StaticPropertyValidation +=
                     EmailTemplateMessageSubject_StaticPropertyValidation;
+                
+                RemoveNotNullValidators();
 
                 EmailTemplateGraph.Register();
                 EmailMasterTemplateGraph.Register();
             }
+        }
+
+        static void EmailTemplateLogic_Retrieved(EmailTemplateDN emailTemplate)
+        {
+            object queryName = QueryLogic.ToQueryName(emailTemplate.Query.Key);
+            QueryDescription description = DynamicQueryManager.Current.QueryDescription(queryName);
+
+            emailTemplate.ParseData(description);
+        }
+        
+        static void RemoveNotNullValidators()
+        {
+            Validator.OverridePropertyValidator((EmailTemplateContactDN c) => c.TokenString)
+                .Validators.OfType<StringLengthValidatorAttribute>().SingleEx().AllowNulls = true;
+
+            Validator.OverridePropertyValidator((EmailTemplateRecipientDN c) => c.TokenString)
+                .Validators.OfType<StringLengthValidatorAttribute>().SingleEx().AllowNulls = true;
+
+            //Validator.OverridePropertyValidator((EmailTemplateDN et) => et.Recipients.First().TokenString)
+            //    .Validators.OfType<StringLengthValidatorAttribute>().SingleEx().AllowNulls = true;
+
+            //Validator.OverridePropertyValidator((TemplateQueryTokenDN c) => c.TokenString)
+            //    .Validators.OfType<StringLengthValidatorAttribute>().SingleEx().AllowNulls = true;
         }
 
         static string EmailTemplateMessageText_StaticPropertyValidation(EmailTemplateMessageDN message, PropertyInfo pi)
@@ -245,9 +273,9 @@ namespace Signum.Engine.Mailing
 
             List<QueryToken> list = new List<QueryToken>();
 
-            foreach (var tr in template.Recipients.Where(r => r.EmailOwner != null))
+            foreach (var tr in template.Recipients.Where(r => r.TokenString.HasText()))
             {
-                list.Add(QueryUtils.Parse(".".Combine("Entity", tr.EmailOwner.TokenString, "EmailOwnerData"), qd, false));
+                list.Add(QueryUtils.Parse(".".Combine("Entity", tr.TokenString, "EmailOwnerData"), qd, false));
             }
             
             foreach (var message in template.Messages)
@@ -480,9 +508,9 @@ namespace Signum.Engine.Mailing
 
             recipients.AddRange(template.Recipients.SelectMany(tr => 
             {
-                if (tr.EmailOwner != null)
+                if (tr.TokenString.HasText())
                 {
-                    var owner = dicTokenColumn.GetOrThrow(QueryUtils.Parse("Entity." + tr.EmailOwner.TokenString + "EmailOwnerData", qd, false));
+                    var owner = dicTokenColumn.GetOrThrow(QueryUtils.Parse("Entity." + tr.TokenString + ".EmailOwnerData", qd, false));
 
                     var groups = table.Rows.Select(r => (EmailOwnerData)r[owner]).Distinct(a => a.Owner).ToList();
                     if (groups.Count == 1 && groups[0] == null)
@@ -511,9 +539,9 @@ namespace Signum.Engine.Mailing
             EmailAddressDN from = null;
             if (template.From != null)
             {
-                if (template.From.EmailOwner != null)
+                if (template.From.TokenString.HasText())
                 {
-                    var owner = dicTokenColumn.GetOrThrow(QueryUtils.Parse("Entity." + template.From.EmailOwner.TokenString + "EmailOwnerData", qd, false));
+                    var owner = dicTokenColumn.GetOrThrow(QueryUtils.Parse("Entity." + template.From.TokenString + ".EmailOwnerData", qd, false));
 
                     var eod = table.Rows.Select(r => (EmailOwnerData)r[owner]).Distinct(a => a.Owner).SingleOrDefaultEx(() => "More than one distinct From value");
 

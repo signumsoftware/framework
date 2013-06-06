@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using Signum.Entities.Translation;
+using System.Reflection;
 
 namespace Signum.Entities.Mailing
 {
@@ -227,18 +228,25 @@ namespace Signum.Entities.Mailing
 
             return Messages.SingleOrDefault(tm => tm.CultureInfo.CultureInfo == DefaultCulture.CultureInfo);
         }
+
+        internal void ParseData(QueryDescription queryDescription)
+        {
+            if (Tokens != null)
+                foreach (var t in Tokens)
+                    t.ParseData(this, queryDescription, false);
+
+            if (Recipients != null)
+                foreach (var r in Recipients)
+                    r.ParseData(this, queryDescription, false);
+
+            if (From != null)
+                From.ParseData(this, queryDescription, false);
+        }
     }
 
     [Serializable]
-    public class EmailTemplateContactDN : EmbeddedEntity
+    public class EmailTemplateContactDN : TemplateQueryTokenDN
     {
-        TemplateQueryTokenDN emailOwner;
-        public TemplateQueryTokenDN EmailOwner
-        {
-            get { return emailOwner; }
-            set { Set(ref emailOwner, value, () => EmailOwner); }
-        }
-
         string emailAddress;
         public string EmailAddress
         {
@@ -256,6 +264,14 @@ namespace Signum.Entities.Mailing
         public override string ToString()
         {
             return "{0} <{1}>".Formato(displayName, emailAddress);
+        }
+
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Is(() => TokenString) && TokenString == null && emailAddress.IsNullOrEmpty())
+                return "Token or Email Address must be set";
+            
+            return null;
         }
     }
 
@@ -351,7 +367,14 @@ namespace Signum.Entities.Mailing
     {
         public override void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)
         {
-            throw new NotImplementedException("ParseData is ambiguous on {0}".Formato(GetType().NiceName()));
+            try
+            {
+                token = QueryUtils.Parse(tokenString, description, canAggregate);
+            }
+            catch (Exception e)
+            {
+                parseException = new FormatException("{0} {1}: {2}\r\n{3}".Formato(context.GetType().Name, context.IdOrNull, context, e.Message));
+            }
         }
     }
 

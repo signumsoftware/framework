@@ -17,6 +17,9 @@ using System.IO;
 using Signum.Entities.Mailing;
 using System.Web.Routing;
 using Signum.Engine;
+using Signum.Engine.Basics;
+using Signum.Engine.DynamicQuery;
+using Signum.Entities.DynamicQuery;
 #endregion
 
 namespace Signum.Web.Mailing
@@ -29,6 +32,46 @@ namespace Signum.Web.Mailing
         {
             var runtimeInfo = RuntimeInfo.FromFormValue(ctx.Parent.Parent.Parent.Parent.Inputs[EntityBaseKeys.RuntimeInfo]);
             return (EmailTemplateDN)runtimeInfo.ToLite().Retrieve();
+        };
+
+        private static QueryToken ParseQueryToken(string tokenString, string queryRuntimeInfoInput)
+        {
+            if (tokenString.IsNullOrEmpty())
+                return null;
+
+            var queryRuntimeInfo = RuntimeInfo.FromFormValue(queryRuntimeInfoInput);
+            var queryName = QueryLogic.ToQueryName(((Lite<QueryDN>)queryRuntimeInfo.ToLite()).InDB(q => q.Key));
+            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
+
+            return QueryUtils.Parse(tokenString, qd, canAggregate: false);
+        }
+
+        public static Mapping<QueryToken> EmailTemplateFromQueryTokenMapping = ctx =>
+        {
+            string tokenStr = "";
+            foreach (string key in ctx.Parent.Inputs.Keys.Where(k => k.Contains("ddlTokens")).OrderBy())
+                tokenStr += ctx.Parent.Inputs[key] + ".";
+            while (tokenStr.EndsWith("."))
+                tokenStr = tokenStr.Substring(0, tokenStr.Length - 1);
+
+            if (tokenStr.IsNullOrEmpty())
+                return null;
+
+            return ParseQueryToken(tokenStr, ctx.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", EntityBaseKeys.RuntimeInfo)]);
+        };
+
+        public static Mapping<QueryToken> EmailTemplateRecipientsQueryTokenMapping = ctx =>
+        {
+            string tokenStr = "";
+            foreach (string key in ctx.Parent.Inputs.Keys.Where(k => k.Contains("ddlTokens")).OrderBy())
+                tokenStr += ctx.Parent.Inputs[key] + ".";
+            while (tokenStr.EndsWith("."))
+                tokenStr = tokenStr.Substring(0, tokenStr.Length - 1);
+
+            if (tokenStr.IsNullOrEmpty())
+                return null;
+
+            return ParseQueryToken(tokenStr, ctx.Parent.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", EntityBaseKeys.RuntimeInfo)]);
         };
 
         public static void Start(bool smtpConfig, bool newsletter)
