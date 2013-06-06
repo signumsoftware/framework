@@ -66,8 +66,8 @@ namespace Signum.Test.LinqProvider
         public void SelectLiteIBDoubleWhereUnion()
         {
             var query = Database.Query<AlbumDN>()
-                .Where(a => a.Author.ToLite().ToString().Length > 0)
-                .Select(a => a.Author.ToLite());
+                .Where(a => a.Author.CombineUnion().ToLite().ToString().Length > 0)
+                .Select(a => a.Author.CombineUnion().ToLite());
 
             Assert.AreEqual(3, query.QueryText().CountRepetitions("LEFT OUTER JOIN"));
             query.ToList();
@@ -171,7 +171,7 @@ namespace Signum.Test.LinqProvider
         {
             var list = (from a in Database.Query<AlbumDN>()
                         let band = (BandDN)a.Author
-                        select new { Artist = band.ToString(), Author = a.Author.ToString() }).ToList();
+                        select new { Artist = band.ToString(), Author = a.Author.CombineUnion().ToString() }).ToList();
 
             Assert.AreEqual(Database.Query<AlbumDN>().Count(), list.Count);
         }
@@ -190,7 +190,7 @@ namespace Signum.Test.LinqProvider
         public void SelectLiteIBWhereUnion()
         {
             var list = Database.Query<AlbumDN>()
-                .Select(a => a.Author.ToLite())
+                .Select(a => a.Author.CombineUnion().ToLite())
                 .Where(a => a.ToString().StartsWith("Michael")).ToList();
         }
 
@@ -259,7 +259,7 @@ namespace Signum.Test.LinqProvider
         public void SelectCastIBPolymorphicUnion()
         {
             var list = (from a in Database.Query<AlbumDN>()
-                        select a.Author.Name).ToList();
+                        select a.Author.CombineUnion().Name).ToList();
         }
 
         [TestMethod]
@@ -273,7 +273,7 @@ namespace Signum.Test.LinqProvider
         public void SelectCastIBPolymorphicIBUnion()
         {
             var list = (from a in Database.Query<AlbumDN>()
-                        select a.Author.LastAward.ToLite()).ToList();
+                        select a.Author.CombineUnion().LastAward.ToLite()).ToList();
         }
 
         [TestMethod]

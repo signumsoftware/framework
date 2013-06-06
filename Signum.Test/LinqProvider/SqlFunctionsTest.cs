@@ -63,7 +63,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void StringFunctionsPolymorphicUnion()
         {
-            Assert.IsTrue(Database.Query<AlbumDN>().Any(a => a.Author.Name.Contains("Jackson")));
+            Assert.IsTrue(Database.Query<AlbumDN>().Any(a => a.Author.CombineUnion().Name.Contains("Jackson")));
         }
 
         [TestMethod]
@@ -75,7 +75,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void StringContainsUnion()
         {
-            var list = Database.Query<AlbumDN>().Where(a => !a.Author.ToString().Contains("Hola")).ToList();
+            var list = Database.Query<AlbumDN>().Where(a => !a.Author.CombineUnion().ToString().Contains("Hola")).ToList();
         }
 
         [TestMethod]
