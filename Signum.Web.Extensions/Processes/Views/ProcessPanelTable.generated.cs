@@ -33,6 +33,12 @@ namespace Signum.Web.Extensions.Processes.Views
     #line default
     #line hidden
     using Signum.Entities;
+    
+    #line 4 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+    using Signum.Entities.DynamicQuery;
+    
+    #line default
+    #line hidden
     using Signum.Utilities;
     
     #line 1 "..\..\Processes\Views\ProcessPanelTable.cshtml"
@@ -48,7 +54,7 @@ namespace Signum.Web.Extensions.Processes.Views
     #line default
     #line hidden
     
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.5.4.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Processes/Views/ProcessPanelTable.cshtml")]
     public partial class ProcessPanelTable : System.Web.Mvc.WebViewPage<ProcessLogicState>
     {
@@ -61,12 +67,13 @@ namespace Signum.Web.Extensions.Processes.Views
 
 
 
+
 WriteLiteral("<div id=\"processMainDiv\">\r\n        <br />\r\n    <h2>ProcessLogic state</h2>\r\n   \r\n" +
 "    State: <strong>\r\n");
 
 
             
-            #line 10 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+            #line 11 "..\..\Processes\Views\ProcessPanelTable.cshtml"
          if (Model.Running)
         {
 
@@ -77,7 +84,7 @@ WriteLiteral("            <span style=\"color: Green\">RUNNING</span>\r\n");
 
 
             
-            #line 13 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+            #line 14 "..\..\Processes\Views\ProcessPanelTable.cshtml"
         }
         else
         {
@@ -89,7 +96,7 @@ WriteLiteral("            <span style=\"color: Red\">STOPPED</span>\r\n");
 
 
             
-            #line 17 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+            #line 18 "..\..\Processes\Views\ProcessPanelTable.cshtml"
         }
             
             #line default
@@ -98,7 +105,7 @@ WriteLiteral("</strong>\r\n    <br />\r\n    MaxDegreeOfParallelism: ");
 
 
             
-            #line 19 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+            #line 20 "..\..\Processes\Views\ProcessPanelTable.cshtml"
                        Write(Model.MaxDegreeOfParallelism);
 
             
@@ -108,7 +115,7 @@ WriteLiteral("\r\n    <br />\r\n    InitialDelayMiliseconds: ");
 
 
             
-            #line 21 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+            #line 22 "..\..\Processes\Views\ProcessPanelTable.cshtml"
                         Write(Model.InitialDelayMiliseconds);
 
             
@@ -118,7 +125,7 @@ WriteLiteral("\r\n    <br />\r\n    NextPlannedExecution: ");
 
 
             
-            #line 23 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+            #line 24 "..\..\Processes\Views\ProcessPanelTable.cshtml"
                       Write(Model.NextPlannedExecution.TryToString() ?? "-None-");
 
             
@@ -150,7 +157,7 @@ WriteLiteral(@"
 
 
             
-            #line 45 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+            #line 46 "..\..\Processes\Views\ProcessPanelTable.cshtml"
                              Write(Model.Executing.Count);
 
             
@@ -160,7 +167,7 @@ WriteLiteral(")</b>\r\n                </td>\r\n            </tr>\r\n");
 
 
             
-            #line 48 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+            #line 49 "..\..\Processes\Views\ProcessPanelTable.cshtml"
              foreach (var item in Model.Executing)
             {
 
@@ -171,7 +178,7 @@ WriteLiteral("                <tr>\r\n                    <td>");
 
 
             
-            #line 51 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+            #line 52 "..\..\Processes\Views\ProcessPanelTable.cshtml"
                    Write(Html.LightEntityLine(item.Process, true));
 
             
@@ -181,7 +188,7 @@ WriteLiteral("\r\n                    </td>\r\n                    <td>");
 
 
             
-            #line 53 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+            #line 54 "..\..\Processes\Views\ProcessPanelTable.cshtml"
                    Write(item.State);
 
             
@@ -191,7 +198,7 @@ WriteLiteral("\r\n                    </td>\r\n                    <td>");
 
 
             
-            #line 55 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+            #line 56 "..\..\Processes\Views\ProcessPanelTable.cshtml"
                    Write(item.Progress.TryToString("p"));
 
             
@@ -201,7 +208,7 @@ WriteLiteral("\r\n                    </td>\r\n                    <td>");
 
 
             
-            #line 57 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+            #line 58 "..\..\Processes\Views\ProcessPanelTable.cshtml"
                    Write(item.IsCancellationRequested);
 
             
@@ -211,7 +218,7 @@ WriteLiteral("\r\n                    </td>\r\n                </tr>\r\n");
 
 
             
-            #line 60 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+            #line 61 "..\..\Processes\Views\ProcessPanelTable.cshtml"
             }
 
             
@@ -222,7 +229,7 @@ WriteLiteral("            <tr>\r\n                <td colspan=\"4\">\r\n        
 
 
             
-            #line 63 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+            #line 64 "..\..\Processes\Views\ProcessPanelTable.cshtml"
                           Write(Model.Queue.Count);
 
             
@@ -232,7 +239,7 @@ WriteLiteral(")</b>\r\n                </td>\r\n            </tr>\r\n");
 
 
             
-            #line 66 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+            #line 67 "..\..\Processes\Views\ProcessPanelTable.cshtml"
              foreach (var item in Model.Queue)
             {
 
@@ -243,7 +250,7 @@ WriteLiteral("                <tr>\r\n                    <td>");
 
 
             
-            #line 69 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+            #line 70 "..\..\Processes\Views\ProcessPanelTable.cshtml"
                    Write(Html.LightEntityLine(item.Process, true));
 
             
@@ -253,7 +260,7 @@ WriteLiteral("\r\n                    </td>\r\n                    <td>");
 
 
             
-            #line 71 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+            #line 72 "..\..\Processes\Views\ProcessPanelTable.cshtml"
                    Write(item.State);
 
             
@@ -263,7 +270,7 @@ WriteLiteral("\r\n                    </td>\r\n                    <td>");
 
 
             
-            #line 73 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+            #line 74 "..\..\Processes\Views\ProcessPanelTable.cshtml"
                    Write(item.Progress);
 
             
@@ -273,7 +280,7 @@ WriteLiteral("\r\n                    </td>\r\n                    <td>");
 
 
             
-            #line 75 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+            #line 76 "..\..\Processes\Views\ProcessPanelTable.cshtml"
                    Write(item.IsCancellationRequested);
 
             
@@ -283,7 +290,7 @@ WriteLiteral("\r\n                    </td>\r\n                </tr>\r\n");
 
 
             
-            #line 78 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+            #line 79 "..\..\Processes\Views\ProcessPanelTable.cshtml"
             }
 
             
@@ -294,13 +301,13 @@ WriteLiteral("        </tbody>\r\n    </table>\r\n\r\n    <br />\r\n    <h2>Late
 
 
             
-            #line 85 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+            #line 86 "..\..\Processes\Views\ProcessPanelTable.cshtml"
 Write(Html.SearchControl(new FindOptions(typeof(Signum.Entities.Processes.ProcessDN))
 {
     OrderOptions = { new OrderOption("CreationDate", Signum.Entities.DynamicQuery.OrderType.Descending) },
     FilterMode = Signum.Web.FilterMode.Hidden,
     SearchOnLoad = true,
-    ElementsPerPage = 10,
+    Pagination =  new Pagination.Top(10),
 },new Context(null, "sc")));
 
             
