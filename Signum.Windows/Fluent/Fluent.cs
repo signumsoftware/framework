@@ -11,6 +11,8 @@ using Signum.Utilities.ExpressionTrees;
 using Signum.Entities;
 using System.ComponentModel;
 using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Text.RegularExpressions;
 
 namespace Signum.Windows
 {
@@ -172,6 +174,33 @@ namespace Signum.Windows
                 if (newDC != null)
                     newDC.PropertyChanged += propertyChanged;
             };
+        }
+
+        public static Span FormatSpan(this string format, params Inline[] inlines)
+        {
+            var matches = Regex.Matches(format, @"\{(?<index>[0-9]+)\}")
+                .Cast<Match>()
+                .Select(a => new { a.Index, a.Length, value = int.Parse(a.Groups["index"].Value) })
+                .OrderBy(a => a.Index)
+                .ToList();
+
+            Span span = new Span();
+
+            int lastPosition = 0;
+            foreach (var m in matches)
+            {
+                if (m.Index != lastPosition)
+                    span.Inlines.Add(new Run(format.Substring(lastPosition, m.Index - lastPosition)));
+
+                span.Inlines.Add(inlines[m.value]);
+
+                lastPosition = m.Index + m.Length;
+            }
+
+            if (lastPosition != format.Length)
+                span.Inlines.Add(new Run(format.Substring(lastPosition)));
+
+            return span;
         }
     }
 
