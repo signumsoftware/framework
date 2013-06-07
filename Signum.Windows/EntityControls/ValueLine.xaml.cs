@@ -184,11 +184,11 @@ namespace Signum.Windows
 
     public class ValueLineConfigurator
     {
-        static DataTemplate comboEnumDescriptionTemplate;
+        public static DataTemplate ComboEnumDescriptionTemplate;
 
         static ValueLineConfigurator()
         {
-            comboEnumDescriptionTemplate = new DataTemplate
+            ComboEnumDescriptionTemplate = new DataTemplate
             {
                 VisualTree = new FrameworkElementFactory(typeof(TextBlock))
                         .Do(f => f.SetValue(TextBlock.TextAlignmentProperty, TextAlignment.Right))
@@ -264,7 +264,7 @@ namespace Signum.Windows
             {ValueLineType.Enum, vl =>new ComboBox()
             { 
                 ItemsSource = vl.ItemSource ??  EnumExtensions.UntypedGetValues(vl.Type.UnNullify()).PreAndNull(vl.Type.IsNullable()).ToObservableCollection(),
-                ItemTemplate = comboEnumDescriptionTemplate, 
+                ItemTemplate = ComboEnumDescriptionTemplate, 
                 VerticalContentAlignment = VerticalAlignment.Center
             }},
             {ValueLineType.Boolean, vl =>new CheckBox(){ VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Left}},

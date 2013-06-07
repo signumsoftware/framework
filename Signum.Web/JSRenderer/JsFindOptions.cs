@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using System.Web.Mvc;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Web
 {
@@ -11,7 +12,7 @@ namespace Signum.Web
     {
         public JsValue<string> Prefix { get; set; }
         public FindOptions FindOptions { get; set; }
-        public JsValue<int?> ElementsPerPage { get; set; }
+        public Pagination Pagination { get; set; }
         public JsValue<string> OpenFinderUrl { get; set; }
         /// <summary>
         /// To be called when closing the popup (if exists) with the Ok button
@@ -26,11 +27,18 @@ namespace Signum.Web
                 JsOptionsBuilder options = new JsOptionsBuilder(true)
                 {
                     { "prefix", Prefix.TryCC(t => t.ToJS()) },
-                    { "elems", ElementsPerPage.TryCC(t => t.ToJS()) },
                     { "openFinderUrl", OpenFinderUrl.TryCC(t => t.ToJS()) },
                     { "onOk", OnOk.TryCC(t => t.ToJS()) },
                     { "onCancelled", OnCancelled.TryCC(t => t.ToJS()) }
                 };
+
+                if (Pagination != null)
+                {
+                    options.Add("pagination", Pagination.GetMode().ToString());
+                    int? elems = Pagination.GetElementsPerPage();
+                    if (elems != null)
+                        options.Add("elems", elems.Value.ToString());
+                }
 
                 if (FindOptions != null)
                     FindOptions.Fill(options);

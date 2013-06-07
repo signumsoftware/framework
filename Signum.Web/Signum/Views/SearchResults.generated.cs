@@ -48,7 +48,7 @@ namespace Signum.Web.Views
     using Signum.Utilities;
     using Signum.Web;
     
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.5.4.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Signum/Views/SearchResults.cshtml")]
     public partial class SearchResults : System.Web.Mvc.WebViewPage<Context>
     {
@@ -314,7 +314,7 @@ WriteLiteral("\r\n");
             
             #line 72 "..\..\Signum\Views\SearchResults.cshtml"
    
-    ViewData[ViewDataKeys.ElementsPerPage] = queryResult.ElementsPerPage;
+    ViewData[ViewDataKeys.Pagination] = queryResult.Pagination;
     ViewData[ViewDataKeys.SearchControlColumnsCount] = columnsCount;
 
 

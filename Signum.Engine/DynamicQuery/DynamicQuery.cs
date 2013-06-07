@@ -175,13 +175,13 @@ namespace Signum.Engine.DynamicQuery
 
     public class DEnumerableCount<T> : DEnumerable<T> 
     {
-        public DEnumerableCount(IEnumerable<object> collection, BuildExpressionContext context, int totalElements) :
+        public DEnumerableCount(IEnumerable<object> collection, BuildExpressionContext context, int? totalElements) :
             base(collection, context)
         {
             this.TotalElements = totalElements;
         }
 
-        public int TotalElements {get; private set;}
+        public int? TotalElements {get; private set;}
     }
 
     public static class DynamicQuery
@@ -216,7 +216,7 @@ namespace Signum.Engine.DynamicQuery
                 .Where(request.Filters)
                 .OrderBy(request.Orders)
                 .Select(request.Columns)
-                .TryPaginatePartial(request.MaxElementIndex);
+                .TryPaginatePartial(request.Pagination.MaxElementIndex);
         }
 
         #endregion 
@@ -563,75 +563,119 @@ namespace Signum.Engine.DynamicQuery
 
         #region TryPaginate
 
-        public static DEnumerableCount<T> TryPaginate<T>(this DQueryable<T> query, int elementsPerPage, int currentPage)
+        public static DEnumerableCount<T> TryPaginate<T>(this DQueryable<T> query, Pagination pagination)
         {
-            if (elementsPerPage == QueryRequest.AllElements)
+            if (pagination == null)
+                throw new ArgumentNullException("pagination");
+
+            if (pagination is Pagination.AllElements)
             {
                 var allList = query.Query.ToList();
+
                 return new DEnumerableCount<T>(allList, query.Context, allList.Count);
             }
-
-            if (currentPage <= 0)
-                throw new InvalidOperationException("currentPage should be greater than zero");
-
-            int? totalElements = null;
-
-            var q = query.Query;
-            if (currentPage != 1)
-                q = q.Skip((currentPage - 1) * elementsPerPage);
-
-            q = q.Take(elementsPerPage);
-
-            var list = q.ToList();
-
-            if (list.Count < elementsPerPage && currentPage == 1)
-                totalElements = list.Count; 
-
-            return new DEnumerableCount<T>(list, query.Context, totalElements ?? query.Query.Count());
-        }
-
-        public static DEnumerableCount<T> TryPaginate<T>(this DEnumerable<T> collection, int? elementsPerPage, int currentPage)
-        {
-            if (elementsPerPage == QueryRequest.AllElements)
+            else if(pagination is Pagination.Top)
             {
-                var allList = collection.Collection.ToList();
-                return new DEnumerableCount<T>(allList, collection.Context, allList.Count);
+                var top = (Pagination.Top)pagination;
+                var topList = query.Query.Take(top.TopElements).ToList();
+
+                return new DEnumerableCount<T>(topList, query.Context, null); 
+            }
+            else if (pagination is Pagination.Paginate)
+            {
+                var pag = (Pagination.Paginate)pagination;
+               
+                int? totalElements = null;
+
+                var q = query.Query.OrderAlsoByKeys();
+
+                if (pag.CurrentPage != 1)
+                    q = q.Skip((pag.CurrentPage - 1) * pag.ElementsPerPage);
+
+                q = q.Take(pag.ElementsPerPage);
+
+                var list = q.ToList();
+
+                if (list.Count < pag.ElementsPerPage && pag.CurrentPage == 1)
+                    totalElements = list.Count;
+
+                return new DEnumerableCount<T>(list, query.Context, totalElements ?? query.Query.Count());
             }
 
-            if (currentPage <= 0)
-                throw new InvalidOperationException("currentPage should be greater than zero");
-
-            int? totalElements = null;
-
-            var c = collection.Collection;
-            if (currentPage != 1)
-                c = c.Skip((currentPage - 1) * elementsPerPage.Value);
-
-            c = c.Take(elementsPerPage.Value);
-
-            var list = c.ToList();
-
-            if (list.Count < elementsPerPage && currentPage == 1)
-                totalElements = list.Count; 
-
-            return new DEnumerableCount<T>(c, collection.Context, totalElements ?? collection.Collection.Count());
+            throw new InvalidOperationException("pagination type {0} not expexted".Formato(pagination.GetType().Name)); 
         }
 
-        public static DEnumerableCount<T> TryPaginate<T>(this DEnumerableCount<T> collection, int elementsPerPage, int currentPage)
+        public static DEnumerableCount<T> TryPaginate<T>(this DEnumerable<T> collection, Pagination pagination)
         {
-            if (elementsPerPage == QueryRequest.AllElements)
+            if (pagination == null)
+                throw new ArgumentNullException("pagination");
+
+            if (pagination is Pagination.AllElements)
+            {
+                var allList = collection.Collection.ToList();
+
+                return new DEnumerableCount<T>(allList, collection.Context, allList.Count);
+            }
+            else if (pagination is Pagination.Top)
+            {
+                var top = (Pagination.Top)pagination;
+                var topList = collection.Collection.Take(top.TopElements).ToList();
+
+                return new DEnumerableCount<T>(topList, collection.Context, null);
+            }
+            else if (pagination is Pagination.Paginate)
+            {
+                var pag = (Pagination.Paginate)pagination;
+
+                int? totalElements = null;
+
+                var q = collection.Collection;
+                if (pag.CurrentPage != 1)
+                    q = q.Skip((pag.CurrentPage - 1) * pag.ElementsPerPage);
+
+                q = q.Take(pag.ElementsPerPage);
+
+                var list = q.ToList();
+
+                if (list.Count < pag.ElementsPerPage && pag.CurrentPage == 1)
+                    totalElements = list.Count;
+
+                return new DEnumerableCount<T>(list, collection.Context, totalElements ?? collection.Collection.Count());
+            }
+
+            throw new InvalidOperationException("pagination type {0} not expexted".Formato(pagination.GetType().Name)); 
+        }
+
+        public static DEnumerableCount<T> TryPaginate<T>(this DEnumerableCount<T> collection, Pagination pagination)
+        {
+            if (pagination == null)
+                throw new ArgumentNullException("pagination");
+
+            if (pagination is Pagination.AllElements)
+            {
                 return new DEnumerableCount<T>(collection.Collection, collection.Context, collection.TotalElements);
+            }
+            else if (pagination is Pagination.Top)
+            {
+                var top = (Pagination.Top)pagination;
+                var topList = collection.Collection.Take(top.TopElements).ToList();
 
-            if (currentPage <= 0)
-                throw new InvalidOperationException("currentPage should be greater than zero");
+                return new DEnumerableCount<T>(topList, collection.Context, null);
+            }
+            else if (pagination is Pagination.Paginate)
+            {
+                var pag = (Pagination.Paginate)pagination;
 
-            var c = collection.Collection;
-            if (currentPage != 1)
-                c = c.Skip((currentPage - 1) * elementsPerPage);
+                var c = collection.Collection;
+                if (pag.CurrentPage != 1)
+                    c = c.Skip((pag.CurrentPage - 1) * pag.ElementsPerPage);
 
-            c = c.Take(elementsPerPage);
+                c = c.Take(pag.ElementsPerPage);
 
-            return new DEnumerableCount<T>(c, collection.Context, collection.TotalElements);
+                return new DEnumerableCount<T>(c, collection.Context, collection.TotalElements);
+            }
+
+            throw new InvalidOperationException("pagination type {0} not expexted".Formato(pagination.GetType().Name)); 
         }
 
         #endregion
@@ -732,17 +776,17 @@ namespace Signum.Engine.DynamicQuery
             var columnAccesors = req.Columns.Select(c => Tuple.Create(c,
                 Expression.Lambda(c.Token.BuildExpression(collection.Context), collection.Context.Parameter))).ToList();
 
-            return ToResultTable(array, columnAccesors, collection.TotalElements, req.CurrentPage, req.ElementsPerPage);
+            return ToResultTable(array, columnAccesors, collection.TotalElements, req.Pagination);
         }
 
-        public static ResultTable ToResultTable(this object[] result, List<Tuple<Column, LambdaExpression>> columnAccesors, int totalElements, int currentPage, int elementsPerPage)
+        public static ResultTable ToResultTable(this object[] result, List<Tuple<Column, LambdaExpression>> columnAccesors, int? totalElements,  Pagination pagination)
         {
             var columnValues = columnAccesors.Select(c => new ResultColumn(
                 c.Item1,
                 miGetValues.GetInvoker(c.Item1.Type)(result, c.Item2.Compile()))
              ).ToArray();
 
-            return new ResultTable(columnValues, totalElements, currentPage, elementsPerPage);
+            return new ResultTable(columnValues, totalElements, pagination);
         }
 
         static GenericInvoker<Func<object[], Delegate, Array>> miGetValues = new GenericInvoker<Func<object[], Delegate, Array>>((objs, del) => GetValues<int>(objs, (Func<object, int>)del));

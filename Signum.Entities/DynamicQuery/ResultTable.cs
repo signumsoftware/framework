@@ -211,7 +211,7 @@ namespace Signum.Entities.DynamicQuery
     }
 
     [Serializable]
-    public class ResultTable 
+    public class ResultTable
     {
         public ResultColumn entityColumn;
         public ColumnDescription EntityColumn
@@ -231,16 +231,15 @@ namespace Signum.Entities.DynamicQuery
         ResultRow[] rows;
         public ResultRow[] Rows { get { return rows; } }
 
-        public ResultTable(ResultColumn[] columns, int totalElements, int currentPage, int elementsPerPage)
-        { 
+        public ResultTable(ResultColumn[] columns, int? totalElements, Pagination pagination)
+        {
             this.entityColumn = columns.Where(c => c.Column is _EntityColumn).SingleOrDefaultEx();
             this.columns = columns.Where(c => !(c.Column is _EntityColumn) && c.Column.Token.IsAllowed() == null).ToArray();
 
             CreateIndices(columns);
 
             this.totalElements = totalElements;
-            this.currentPage = currentPage;
-            this.elementsPerPage = elementsPerPage;
+            this.pagination = pagination;
         }
 
         [OnDeserialized]
@@ -279,28 +278,25 @@ namespace Signum.Entities.DynamicQuery
             return p;
         }
 
-        int totalElements;
-        public int TotalElements { get { return totalElements; } }
+        int? totalElements;
+        public int? TotalElements { get { return totalElements; } }
 
-        int currentPage;
-        public int CurrentPage { get { return currentPage; } }
+        Pagination pagination; 
+        public Pagination Pagination { get { return pagination; } }
 
-        int elementsPerPage;
-        public int ElementsPerPage { get { return elementsPerPage; } }
-
-        public int TotalPages
+        public int? TotalPages
         {
-            get { return ElementsPerPage == -1 ? 1 : (TotalElements + ElementsPerPage - 1) / ElementsPerPage; } //Round up
+            get { return Pagination is Pagination.Paginate ? ((Pagination.Paginate)Pagination).TotalPages(TotalElements.Value) : (int?)null; } 
         }
 
         public int? StartElementIndex
         {
-            get { return ElementsPerPage == -1 ? (int?)null : (ElementsPerPage * (CurrentPage - 1)) + 1; }
+            get { return Pagination is Pagination.Paginate ? ((Pagination.Paginate)Pagination).StartElementIndex() : (int?)null; }
         }
 
         public int? EndElementIndex
         {
-            get { return ElementsPerPage == -1 ? (int?)null : StartElementIndex.Value + Rows.Count() - 1; }
+            get { return Pagination is Pagination.Paginate ? ((Pagination.Paginate)Pagination).EndElementIndex(Rows.Count()) : (int?)null; }
         }
     }
 

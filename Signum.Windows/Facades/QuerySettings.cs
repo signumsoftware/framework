@@ -22,7 +22,7 @@ namespace Signum.Windows
 
         public int? Top { get; set; }
         public ImageSource Icon { get; set; }
-
+        public Pagination Pagination { get; set; }
 
         internal QueryDescription QueryDescription { get; set; }
 

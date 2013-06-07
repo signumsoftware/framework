@@ -160,8 +160,6 @@ Lose changes?")]
         SearchControl_Pagination_Of,
         [Description("results")]
         SearchControl_Pagination_Results,
-        [Description("Rows")]
-        SearchControl_Pagination_Rows,
         SelectAnElement,
         [Description("There is no {0}")]
         ThereIsNo0,

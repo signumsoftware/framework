@@ -170,10 +170,10 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>NormalPage.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Signum\Views\Pagination.generated.cs">
+    <Compile Include="Signum\Views\PaginationSelector.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>Pagination.cshtml</DependentUpon>
+      <DependentUpon>PaginationSelector.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Signum\Views\PopupCancelControl.generated.cs">
       <AutoGen>True</AutoGen>
@@ -279,9 +279,9 @@
       <LastGenOutput>PopupOkControl.generated.cs</LastGenOutput>
       <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
-    <None Include="Signum\Views\Pagination.cshtml">
+    <None Include="Signum\Views\PaginationSelector.cshtml">
       <Generator>RazorGenerator</Generator>
-      <LastGenOutput>Pagination.generated.cs</LastGenOutput>
+      <LastGenOutput>PaginationSelector.generated.cs</LastGenOutput>
       <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
     <None Include="Signum\Views\SearchResults.cshtml">

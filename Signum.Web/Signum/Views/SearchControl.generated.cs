@@ -54,7 +54,7 @@ namespace Signum.Web.Views
     using Signum.Utilities;
     using Signum.Web;
     
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.5.4.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Signum/Views/SearchControl.cshtml")]
     public partial class SearchControl : System.Web.Mvc.WebViewPage<Context>
     {
@@ -78,7 +78,7 @@ namespace Signum.Web.Views
     var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
     Type entitiesType = Lite.Extract(entityColumn.Type);
     Implementations implementations = entityColumn.Implementations.Value;
-    findOptions.ElementsPerPage = findOptions.ElementsPerPage ?? (Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, "Missing QuerySettings for QueryName {0}").ElementsPerPage) ?? FindOptions.DefaultElementsPerPage;
+    findOptions.Pagination = findOptions.Pagination ?? (Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, "Missing QuerySettings for QueryName {0}").Pagination) ?? FindOptions.DefaultPagination;
     
     ViewData[ViewDataKeys.FindOptions] = findOptions;
     
@@ -623,7 +623,7 @@ WriteLiteral("</td>\r\n                </tr>\r\n");
             
             #line 163 "..\..\Signum\Views\SearchControl.cshtml"
                    
-                    ViewData[ViewDataKeys.ElementsPerPage] = findOptions.ElementsPerPage;
+                    ViewData[ViewDataKeys.Pagination] = findOptions.Pagination;
                     ViewData[ViewDataKeys.FilterMode] = findOptions.FilterMode;
                     ViewData[ViewDataKeys.SearchControlColumnsCount] = columnsCount;
                 
@@ -651,7 +651,7 @@ WriteLiteral("\r\n            </tbody>\r\n        </table>\r\n    </div>\r\n</di
     { 
         FindOptions = findOptions,
         Prefix = Model.ControlID,
-        ElementsPerPage = findOptions.ElementsPerPage
+        Pagination = findOptions.Pagination
     };
 
 

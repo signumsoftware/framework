@@ -75,10 +75,10 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty ElementsPerPageProperty =
-          DependencyProperty.Register("ElementsPerPage", typeof(int), typeof(SearchWindow), new UIPropertyMetadata(QueryRequest.AllElements));
-        public int ElementsPerPage
+          DependencyProperty.Register("Pagination", typeof(Pagination), typeof(SearchWindow), new UIPropertyMetadata(null));
+        public Pagination Pagination
         {
-            get { return (int)GetValue(ElementsPerPageProperty); }
+            get { return (Pagination)GetValue(ElementsPerPageProperty); }
             set { SetValue(ElementsPerPageProperty, value); }
         }
 

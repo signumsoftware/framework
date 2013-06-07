@@ -65,7 +65,7 @@ namespace Signum.Windows
 
     public class QueryOptions
     {
-        public static int DefaultElementsPerPage = 50;
+        public static Pagination DefaultPagination = new Pagination.Paginate(50, 1);
 
         public object QueryName { get; set; }
 
@@ -97,11 +97,11 @@ namespace Signum.Windows
             set { this.columnOptionsMode = value; }
         }
  
-        int? elementsPerPage;
-        public int? ElementsPerPage
+        Pagination pagination;
+        public Pagination Pagination
         {
-            get { return elementsPerPage; }
-            set { this.elementsPerPage = value; }
+            get { return pagination; }
+            set { this.pagination = value; }
         }
     }
 

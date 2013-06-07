@@ -38,7 +38,7 @@ namespace Signum.Engine.DynamicQuery
                 .OrderBy(request.Orders)
                 .Select(request.Columns);
 
-            var result = query.TryPaginate(request.ElementsPerPage, request.CurrentPage);
+            var result = query.TryPaginate(request.Pagination);
 
             return result.ToResultTable(request);
         }
@@ -90,7 +90,7 @@ namespace Signum.Engine.DynamicQuery
 
             var values = query.Query.ToArray();
 
-            return values.ToResultTable(cols, values.Length, 0, QueryRequest.AllElements);
+            return values.ToResultTable(cols, values.Length, new Pagination.AllElements());
         }
 
 

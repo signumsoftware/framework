@@ -5,7 +5,9 @@
 @model Context
 
 @{ 
-   int elems = (int)ViewData[ViewDataKeys.ElementsPerPage];
+   Pagination pagination = (Pagination)ViewData[ViewDataKeys.Pagination];
+   var paginate = pagination as Pagination.Paginate;
+   
    FilterMode filterMode = (FilterMode)ViewData[ViewDataKeys.FilterMode];
    int columnsCount = (int)ViewData[ViewDataKeys.SearchControlColumnsCount];
 
@@ -29,22 +31,32 @@
             }
         </div>
         <div class="sf-pagination-center">
-            <span>@SearchMessage.SearchControl_Pagination_Rows.NiceToString()</span>
-            @{ 
-                var topItems = new List<int> { 5, 10, 20, 50, 100, 200 }.Select(i => new SelectListItem { Text = i.ToString(), Value = i.ToString(), Selected = i.ToString() == elems.TryToString() }).ToList();
-                topItems.Add(new SelectListItem { Text = SearchMessage.SearchControl_Pagination_All.NiceToString(), Value = "-1", Selected = elems == -1 });
+            @{
+                var currentMode = pagination.GetMode();
+                var modes = EnumExtensions.GetValues<PaginationMode>().Select(pm => new SelectListItem
+                {
+                     Text = pm.NiceToString(),
+                     Value = pm.ToString(),
+                     Selected = currentMode == pm
+                });   
             }
-            @Html.DropDownList(Model.Compose("sfElems"), topItems, new { @class = "sf-pagination-size" })
+            @Html.DropDownList(Model.Compose("sfPagination"),  modes, new { @class = "sf-pagination-size" })
+            @{ 
+                var currentElements = pagination.GetElementsPerPage();
+                var elements = new List<int> { 5, 10, 20, 50, 100, 200 }.Select(i => new SelectListItem { Text = i.ToString(), Value = i.ToString(), Selected = i == currentElements }).ToList();
+            }
+            @Html.DropDownList(Model.Compose("sfElems"), elements, new { @class = "sf-pagination-size" })
         </div>
+
         <div class="sf-pagination-right">
-            @if (resultTable != null)
-            {
-                <input type="hidden" id="@(Model.Compose("sfPage"))" value="@resultTable.CurrentPage" />
-                <input type="button" class="sf-pagination-button" data-page="@(resultTable.CurrentPage - 1)" @((resultTable.CurrentPage <= 1) ? "disabled=\"disabled\"" : "") value="&lt;" />
+            @if (resultTable != null && paginate != null)
+            {   
+                <input type="hidden" id="@(Model.Compose("sfPage"))" value="@paginate.CurrentPage" />
+                <input type="button" class="sf-pagination-button" data-page="@(paginate.CurrentPage - 1)" @((paginate.CurrentPage <= 1) ? "disabled=\"disabled\"" : "") value="&lt;" />
             
                 MinMax<int> interval = new MinMax<int>(
-                    Math.Max(1, resultTable.CurrentPage - 2),
-                    Math.Min(resultTable.CurrentPage + 2, resultTable.TotalPages));
+                    Math.Max(1, paginate.CurrentPage - 2),
+                    Math.Min(paginate.CurrentPage + 2, resultTable.TotalPages.Value));
 
                 if (interval.Min != 1)
                 {
@@ -55,14 +67,14 @@
                     }
                 }
 
-                for (int i = interval.Min; i < resultTable.CurrentPage; i++)
+                for (int i = interval.Min; i < paginate.CurrentPage; i++)
                 {
                     <input type="button" class="sf-pagination-button" data-page="@i" value="@i" />
                 }
 
-                <span class="sf-pagination-strong">@resultTable.CurrentPage.ToString()</span>
+                <span class="sf-pagination-strong">@paginate.CurrentPage.ToString()</span>
 
-                for (int i = resultTable.CurrentPage + 1; i <= interval.Max; i++)
+                for (int i = paginate.CurrentPage + 1; i <= interval.Max; i++)
                 {
                     <input type="button" class="sf-pagination-button" data-page="@i" value="@i" />
                 }
@@ -76,7 +88,7 @@
                     <input type="button" class="sf-pagination-button" data-page="@resultTable.TotalPages" value="@resultTable.TotalPages" />
                 }
             
-                <input type="button" class="sf-pagination-button" data-page="@(resultTable.CurrentPage + 1)" @((resultTable.TotalPages <= resultTable.CurrentPage) ? "disabled=\"disabled\"" : "") value="&gt;" />
+                <input type="button" class="sf-pagination-button" data-page="@(paginate.CurrentPage + 1)" @((resultTable.TotalPages <= paginate.CurrentPage) ? "disabled=\"disabled\"" : "") value="&gt;" />
             }
         </div>
     </td>

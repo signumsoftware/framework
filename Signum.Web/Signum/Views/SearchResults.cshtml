@@ -70,7 +70,7 @@
 }
 
 @{ 
-    ViewData[ViewDataKeys.ElementsPerPage] = queryResult.ElementsPerPage;
+    ViewData[ViewDataKeys.Pagination] = queryResult.Pagination;
     ViewData[ViewDataKeys.SearchControlColumnsCount] = columnsCount;
 }
 @Html.Partial(Navigator.Manager.PaginationView, Model)

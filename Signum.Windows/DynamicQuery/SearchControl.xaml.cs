@@ -89,20 +89,13 @@ namespace Signum.Windows
             set { SetValue(AllowChangeColumnsProperty, value); }
         }
 
-        public static readonly DependencyProperty ElementsPerPageProperty =
-            DependencyProperty.Register("ElementsPerPage", typeof(int), typeof(SearchControl), new UIPropertyMetadata(QueryRequest.AllElements, (s, e) => ((SearchControl)s).ElementsPerPage_Changed()));
-        public int ElementsPerPage
+        public static readonly DependencyProperty PaginationProperty =
+            DependencyProperty.Register("Pagination", typeof(Pagination), typeof(SearchControl), new PropertyMetadata(new Pagination.AllElements(),
+                (s, e) => ((SearchControl)s).Pagination_Changed((Pagination)e.OldValue, (Pagination)e.NewValue)));
+        public Pagination Pagination
         {
-            get { return (int)GetValue(ElementsPerPageProperty); }
-            set { SetValue(ElementsPerPageProperty, value); }
-        }
-
-        public static readonly DependencyProperty CurrentPageProperty =
-           DependencyProperty.Register("CurrentPage", typeof(int), typeof(SearchControl), new UIPropertyMetadata(1));
-        public int CurrentPage
-        {
-            get { return (int)GetValue(CurrentPageProperty); }
-            set { SetValue(CurrentPageProperty, value); }
+            get { return (Pagination)GetValue(PaginationProperty); }
+            set { SetValue(PaginationProperty, value); }
         }
 
         public static readonly DependencyProperty ItemsCountProperty =
@@ -662,8 +655,7 @@ namespace Signum.Windows
                 Filters = FilterOptions.Select(f => f.ToFilter()).ToList(),
                 Orders = OrderOptions.Select(o => o.ToOrder()).ToList(),
                 Columns = gvResults.Columns.Select(gvc => ((SortGridViewColumnHeader)gvc.Header).RequestColumn).ToList(),
-                ElementsPerPage = ElementsPerPage,
-                CurrentPage = CurrentPage,
+                Pagination = Pagination,
             };
 
             return request;
@@ -714,17 +706,10 @@ namespace Signum.Windows
                 lvResult.Background = Brushes.White;
                 lvResult.Focus();
                 elementsInPageLabel.Visibility = Visibility.Visible;
-                elementsInPageLabel.TotalPages = rt.TotalPages;
-                elementsInPageLabel.StartElementIndex = rt.StartElementIndex;
-                elementsInPageLabel.EndElementIndex = rt.EndElementIndex;
-                elementsInPageLabel.TotalElements = rt.TotalElements;
+                elementsInPageLabel.SetResults(rt);
 
-                pageSizeSelector.PageSize = rt.ElementsPerPage;
-
-
-                pageSelector.Visibility = System.Windows.Visibility.Visible;
-                pageSelector.CurrentPage = rt.CurrentPage;
-                pageSelector.TotalPages = rt.TotalPages;
+                paginationSelector.Visibility = System.Windows.Visibility.Visible;
+                paginationSelector.TotalPages = rt.TotalPages;
 
                 //tbResultados.Visibility = Visibility.Visible;
                 //tbResultados.Foreground = rt.Rows.Length == ElementsPerPage ? Brushes.Red : Brushes.Black;
@@ -741,33 +726,37 @@ namespace Signum.Windows
             OnQueryResultChanged(true);
             resultTable = null;
             elementsInPageLabel.Visibility = Visibility.Hidden;
-            pageSelector.Visibility = Visibility.Hidden;
+            paginationSelector.TotalPages = null;
             lvResult.ItemsSource = null;
             lvResult.Background = Brushes.WhiteSmoke;
         }
 
-        void pageSelector_Changed(object sender, RoutedEventArgs e)
-        {
-            if (!IsLoaded || settingResults)
-                return;
-
-            if (FixSize != null)
-                FixSize(this, new EventArgs());
-
-            Search();
-        }
-
-        public event EventHandler FixSize; 
+        public event EventHandler FixSize;
         public event EventHandler ClearSize;
 
-        void ElementsPerPage_Changed()
+
+        private void Pagination_Changed(Pagination oldValue, Pagination newValue)
         {
             if (!IsLoaded || settingResults)
                 return;
 
-            CurrentPage = 1;
-            if (ClearSize != null)
-                ClearSize(this, new EventArgs());
+            var oldPaginate = oldValue as Pagination.Paginate;
+            var newPaginate = newValue as  Pagination.Paginate;
+
+            if (oldPaginate != null && newPaginate != null &&
+                oldPaginate.ElementsPerPage == newPaginate.ElementsPerPage &&
+                oldPaginate.CurrentPage != newPaginate.CurrentPage)
+            {
+
+                if (FixSize != null)
+                    FixSize(this, new EventArgs());
+            }
+            else
+            {
+                if (ClearSize != null)
+                    ClearSize(this, new EventArgs());
+            }
+
             Search();
         }
 

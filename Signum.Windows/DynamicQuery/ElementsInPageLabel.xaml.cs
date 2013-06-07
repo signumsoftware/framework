@@ -22,63 +22,45 @@ namespace Signum.Windows
     /// </summary>
     public partial class ElementsInPageLabel : UserControl
     {
-       
-        public static readonly DependencyProperty StartElementIndexProperty =
-            DependencyProperty.Register("StartElementIndex", typeof(int?), typeof(ElementsInPageLabel), new UIPropertyMetadata(0, (s,e)=>((ElementsInPageLabel)s).Refresh()));
-
-        public int? StartElementIndex
-        {
-            get { return (int?)GetValue(StartElementIndexProperty); }
-            set { SetValue(StartElementIndexProperty, value); }
-        }
-
-        public static readonly DependencyProperty EndElementIndexProperty =
-            DependencyProperty.Register("EndElementIndex", typeof(int?), typeof(ElementsInPageLabel), new UIPropertyMetadata(0, (s,e)=>((ElementsInPageLabel)s).Refresh()));
-        public int? EndElementIndex
-        {
-            get { return (int?)GetValue(EndElementIndexProperty); }
-            set { SetValue(EndElementIndexProperty, value); }
-        }
-
-        public static readonly DependencyProperty TotalElementsProperty =
-            DependencyProperty.Register("TotalElements", typeof(int), typeof(ElementsInPageLabel), new UIPropertyMetadata(0, (s, e) => ((ElementsInPageLabel)s).Refresh()));
-        public int TotalElements
-        {
-            get { return (int)GetValue(TotalElementsProperty); }
-            set { SetValue(TotalElementsProperty, value); }
-        }
-
-        public static readonly DependencyProperty TotalPagesProperty =
-          DependencyProperty.Register("TotalPages", typeof(int), typeof(ElementsInPageLabel), new UIPropertyMetadata(0, (s, e) => ((ElementsInPageLabel)s).Refresh()));
-        public int TotalPages
-        {
-            get { return (int)GetValue(TotalPagesProperty); }
-            set { SetValue(TotalPagesProperty, value); }
-        }
-
         public ElementsInPageLabel()
         {
             InitializeComponent();
         }
 
-
-        private void Refresh()
+        public void SetResults(ResultTable rt)
         {
             tb.Inlines.Clear();
 
-            if (TotalPages > 1)
+            switch (rt.Pagination.GetMode())
             {
-                tb.Inlines.Add(new Run(StartElementIndex.ToString()) { FontWeight = FontWeights.Bold });
-                tb.Inlines.Add(new Run(" - "));
-                tb.Inlines.Add(new Run(EndElementIndex.ToString()) { FontWeight = FontWeights.Bold });
-                tb.Inlines.Add(new Run(" "));
-                tb.Inlines.Add(new Run(QueryTokenMessage.Of.NiceToString()));
-                tb.Inlines.Add(new Run(" "));
-            }
+                case PaginationMode.AllElements:
+                    tb.Inlines.Add(new Run(rt.TotalElements.Value.ToString()) { FontWeight = FontWeights.Bold });
+                    tb.Inlines.Add(new Run(" "));
+                    tb.Inlines.Add(new Run(SearchMessage.Results.NiceToString()));
+                    break;
+                case PaginationMode.Top:
+                    var top = (Pagination.Top)rt.Pagination;
+                    var run = new Run(rt.TotalElements.Value.ToString());
 
-            tb.Inlines.Add(new Run(TotalElements.ToString()) { FontWeight = FontWeights.Bold });
-            tb.Inlines.Add(new Run(" "));
-            tb.Inlines.Add(new Run(SearchMessage.Results.NiceToString()));
+                    if(rt.Rows.Length == top.TopElements)
+                        run.Foreground = Brushes.Red;
+
+                    tb.Inlines.Add(run);
+                    tb.Inlines.Add(new Run(" "));
+                    tb.Inlines.Add(new Run(SearchMessage.Results.NiceToString()));
+                    break;
+                case PaginationMode.Paginate:
+                    tb.Inlines.Add(new Run(rt.StartElementIndex.Value.ToString()) { FontWeight = FontWeights.Bold });
+                    tb.Inlines.Add(new Run(" - "));
+                    tb.Inlines.Add(new Run(rt.EndElementIndex.Value.ToString()) { FontWeight = FontWeights.Bold });
+                    tb.Inlines.Add(new Run(" "));
+                    tb.Inlines.Add(new Run(QueryTokenMessage.Of.NiceToString()));
+                    tb.Inlines.Add(new Run(" "));
+                    tb.Inlines.Add(new Run(rt.TotalElements.Value.ToString()) { FontWeight = FontWeights.Bold });
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }

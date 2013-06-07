@@ -46,31 +46,11 @@ namespace Signum.Entities.DynamicQuery
             set { orders = value; }
         }
 
-        int elementsPerPage;
-        public int ElementsPerPage
+        Pagination pagination;
+        public Pagination Pagination
         {
-            get { return elementsPerPage; }
-            set { elementsPerPage = value; }
-        }
-
-        public const int AllElements = -1;
-
-        int currentPage;
-        public int CurrentPage
-        {
-            get { return currentPage; }
-            set { currentPage = value; }
-        }
-
-        public int? MaxElementIndex
-        {
-            get
-            {
-                if (ElementsPerPage == AllElements)
-                    return null;
-
-                return (ElementsPerPage * (CurrentPage + 1)) - 1;
-            }
+            get { return pagination; }
+            set { pagination = value; }
         }
 
         public List<CollectionElementToken> Multiplications
@@ -83,6 +63,138 @@ namespace Signum.Entities.DynamicQuery
                     .Concat(Orders.Select(a => a.Token)).ToHashSet();
 
                 return CollectionElementToken.GetElements(allTokens);
+            }
+        }
+    }
+
+    [DescriptionOptions(DescriptionOptions.Members)]
+    public enum PaginationMode
+    {
+        AllElements,
+        Top,
+        Paginate
+    }
+
+    [Serializable]
+    public abstract class Pagination 
+    {
+        public abstract PaginationMode GetMode();
+        public abstract int? GetElementsPerPage();
+        public abstract int? MaxElementIndex { get; }
+
+        [Serializable]
+        public class AllElements : Pagination
+        {
+            public override int? MaxElementIndex
+            {
+                get { return null; }
+            }
+
+            public override PaginationMode GetMode()
+            {
+                return PaginationMode.AllElements;
+            }
+
+            public override int? GetElementsPerPage()
+            {
+                return null;
+            }
+        }
+
+        [Serializable]
+        public class Top : Pagination
+        {
+            public static int DefaultTopElements = 50; 
+
+            public Top(int topElements)
+            {
+                this.topElements = topElements;
+            }
+
+            readonly int topElements;
+            public int TopElements
+            {
+                get { return topElements; }
+            }
+
+            public override int? MaxElementIndex
+            {
+                get { return topElements; }
+            }
+
+            public override PaginationMode GetMode()
+            {
+                return PaginationMode.Top;
+            }
+
+            public override int? GetElementsPerPage()
+            {
+                return topElements;
+            }
+        }
+
+        [Serializable]
+        public class Paginate : Pagination
+        {
+            public static int DefaultElementsPerPage = 50;
+
+            public Paginate(int elementsPerPage, int currentPage)
+            {
+                if (elementsPerPage <= 0)
+                    throw new InvalidOperationException("elementsPerPage should be greater than zero");
+
+                if (currentPage <= 0)
+                    throw new InvalidOperationException("currentPage should be greater than zero");
+
+                this.elementsPerPage = elementsPerPage;
+                this.currentPage = currentPage;
+            }
+
+            readonly int elementsPerPage;
+            public int ElementsPerPage          
+            {
+                get { return elementsPerPage; }
+            }
+
+            readonly int currentPage;
+            public int CurrentPage
+            {
+                get { return currentPage; }
+            }
+
+            public int StartElementIndex()
+            {
+                return (ElementsPerPage * (CurrentPage - 1)) + 1;
+            }
+
+            public int EndElementIndex(int rows)
+            {
+                return StartElementIndex() + rows - 1;
+            }
+
+            public int TotalPages(int totalElements)
+            {
+                return (totalElements + elementsPerPage - 1) / elementsPerPage; //Round up
+            }
+
+            public override int? MaxElementIndex
+            {
+                get { return (ElementsPerPage * (CurrentPage + 1)) - 1; }
+            }
+
+            public override PaginationMode GetMode()
+            {
+                return PaginationMode.Paginate;
+            }
+
+            public override int? GetElementsPerPage()
+            {
+                return elementsPerPage;
+            }
+
+            public Paginate WithCurrentPage(int newPage)
+            {
+                return new Paginate(this.elementsPerPage, newPage);
             }
         }
     }

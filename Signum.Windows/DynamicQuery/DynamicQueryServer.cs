@@ -66,8 +66,7 @@ namespace Signum.Windows
                 Filters = options.FilterOptions.Select(f => f.ToFilter()).ToList(),
                 Orders = options.OrderOptions.Select(f => f.ToOrder()).ToList(),
                 Columns = MergeColumns(options.ColumnOptions, options.ColumnOptionsMode, qd),
-                ElementsPerPage = options.ElementsPerPage ?? QueryOptions.DefaultElementsPerPage,
-                CurrentPage = 1,
+                Pagination = options.Pagination ?? QueryOptions.DefaultPagination,
             };
             return request;
         }

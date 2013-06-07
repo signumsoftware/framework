@@ -33,7 +33,7 @@ namespace Signum.Web
             object rawValue = bindingContext.ValueProvider.GetValue("webQueryName").TryCC(vp => vp.RawValue);
             if (rawValue.GetType() == typeof(string[]))
                 webQueryName = ((string[])rawValue)[0];
-            else 
+            else
                 webQueryName = (string)rawValue;
 
             if (!webQueryName.HasText())
@@ -47,22 +47,23 @@ namespace Signum.Web
             qr.Orders = ExtractOrderOptions(controllerContext.HttpContext, queryDescription, canAggregate: false);
             qr.Columns = ExtractColumnsOptions(controllerContext.HttpContext, queryDescription, canAggregate: false);
 
-            if (parameters.AllKeys.Contains("elems"))
+            if (parameters.AllKeys.Contains("pagination"))
             {
-                int elems;
-                if (int.TryParse(parameters["elems"], out elems))
-                    qr.ElementsPerPage = elems;
-            }
-
-            if (parameters.AllKeys.Contains("page"))
-            {
-                int page;
-                if (int.TryParse(parameters["page"], out page))
-                    qr.CurrentPage = page;
-            }
-            else
-            {
-                qr.CurrentPage = 1;
+                switch (parameters["pagination"].ToEnum<PaginationMode>())
+                {
+                    case PaginationMode.AllElements:
+                        qr.Pagination = new Pagination.AllElements();
+                        break;
+                    case PaginationMode.Top:
+                        qr.Pagination = new Pagination.Top(int.Parse(parameters["elems"]));
+                        break;
+                    case PaginationMode.Paginate:
+                        qr.Pagination = new Pagination.Paginate(int.Parse(parameters["elems"]), 
+                            parameters.AllKeys.Contains("page") ? int.Parse(parameters["page"]) : 1);
+                        break;
+                    default:
+                        break;
+                }
             }
 
             return qr;

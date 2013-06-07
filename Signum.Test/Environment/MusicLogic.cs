@@ -159,7 +159,7 @@ namespace Signum.Test.Environment
                                        LastAward = a.LastAward.ToLite()
                                    }).ToDQueryable(descriptions).AllQueryOperations(request);
 
-                        return one.Concat(two).OrderBy(request.Orders).TryPaginate(request.ElementsPerPage, request.CurrentPage);
+                        return one.Concat(two).OrderBy(request.Orders).TryPaginate(request.Pagination);
 
                     }).Column(a => a.LastAward, cl => cl.Implementations = Implementations.ByAll),
                     entityImplementations: Implementations.By(typeof(ArtistDN), typeof(BandDN)));

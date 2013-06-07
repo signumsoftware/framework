@@ -76,11 +76,23 @@ namespace Signum.Web
             if (parameters.AllKeys.Contains("view"))
                 fo.Navigate = bool.Parse(parameters["view"]);
 
-            if (parameters.AllKeys.Contains("elems"))
+            if (parameters.AllKeys.Contains("pagination"))
             {
-                int elems;
-                if (int.TryParse(parameters["elems"], out elems))
-                    fo.ElementsPerPage = elems;
+                switch (parameters["pagination"].ToEnum<PaginationMode>())
+                {
+                    case PaginationMode.AllElements:
+                        fo.Pagination = new Pagination.AllElements();
+                        break;
+                    case PaginationMode.Top:
+                        fo.Pagination = new Pagination.Top(int.Parse(parameters["elems"]));
+                        break;
+                    case PaginationMode.Paginate:
+                        fo.Pagination = new Pagination.Paginate(int.Parse(parameters["elems"]),
+                            parameters.AllKeys.Contains("page") ? int.Parse(parameters["page"]) : 1);
+                        break;
+                    default:
+                        break;
+                }
             }
 
             if (parameters.AllKeys.Contains("searchOnLoad"))

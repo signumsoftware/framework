@@ -77,5 +77,10 @@ namespace Signum.Utilities
         {
             return value;
         }
+
+        public static IQueryable<T> OrderAlsoByKeys<T>(this IQueryable<T> query)
+        {
+            return query;
+        }
     }
 }

@@ -62,17 +62,13 @@ namespace Signum.Web
             set { this.columnOptions = value; }
         }
 
-        public static int DefaultElementsPerPage = 50;
+        public static Pagination DefaultPagination = new Pagination.Paginate(50, 1);
 
-
-        int? elementsPerPage;
-        /// <summary>
-        /// If null, use QuerySettings one
-        /// </summary>
-        public int? ElementsPerPage
+        Pagination pagination;
+        public Pagination Pagination
         {
-            get { return elementsPerPage; }
-            set { elementsPerPage = value; }
+            get { return pagination; }
+            set { pagination = value; }
         }
 
         public FindOptions() { }
@@ -155,9 +151,12 @@ namespace Signum.Web
                 Navigator.SetTokens(FilterOptions, queryDescription, canAggregate: false);
             }
 
+            var elements = Pagination != null ? Pagination.GetElementsPerPage() : null;
+
             string options = new Sequence<string>
             {
-                ElementsPerPage.HasValue ? "elems=" + ElementsPerPage.Value : null,
+                Pagination != null ? "pagination=" + pagination.GetMode().ToString() : null,
+                elements != null ? "elems=" + elements : null,
                 SearchOnLoad ? "searchOnLoad=true" : null,
                 !Create ? "create=false": null, 
                 !Navigate ? "navigate=false": null, 
@@ -209,7 +208,7 @@ namespace Signum.Web
                 Filters = FilterOptions.Select(fo => fo.ToFilter()).ToList(),
                 Orders = OrderOptions.Select(fo => fo.ToOrder()).ToList(),
                 Columns = ColumnOptions.Select(co => co.ToColumn(qd)).ToList(),
-                ElementsPerPage = elementsPerPage ?? FindOptions.DefaultElementsPerPage,
+                Pagination = pagination ?? FindOptions.DefaultPagination,
             };
         }
 
