@@ -115,7 +115,7 @@ namespace Signum.Test.LinqProvider
             int pageSize = 2;
 
             var list2 = 0.To(((list.Count / pageSize) + 1)).SelectMany(page =>
-                query.Skip(pageSize * page).Take(pageSize).ToList()).ToList();
+                query.OrderAlsoByKeys().Skip(pageSize * page).Take(pageSize).ToList()).ToList();
 
             Assert.IsTrue(list.SequenceEqual(list2)); 
         }

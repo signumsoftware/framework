@@ -57,7 +57,7 @@ namespace Signum.Engine.Linq
             this.currentFrom = saveFrom;
 
             if (top != select.Top || from != select.From || where != select.Where || columns != select.Columns || orderBy != select.OrderBy || groupBy != select.GroupBy)
-                return new SelectExpression(select.Alias, select.IsDistinct, select.IsReverse, top, columns, from, where, orderBy, groupBy, select.ForXmlPathEmpty);
+                return new SelectExpression(select.Alias, select.IsDistinct, top, columns, from, where, orderBy, groupBy, select.SelectOptions);
 
             return select;
 
@@ -75,9 +75,9 @@ namespace Signum.Engine.Linq
                 var select = scalar.Select;
                 if (string.IsNullOrEmpty(select.Columns[0].Name))
                 {
-                    select = new SelectExpression(select.Alias, select.IsDistinct, select.IsReverse, select.Top,
+                    select = new SelectExpression(select.Alias, select.IsDistinct, select.Top,
                         new[] { new ColumnDeclaration("scalar", select.Columns[0].Expression) },
-                        select.From, select.Where, select.OrderBy, select.GroupBy, select.ForXmlPathEmpty);
+                        select.From, select.Where, select.OrderBy, select.GroupBy, select.SelectOptions);
                 }
                 this.currentFrom = new JoinExpression(JoinType.OuterApply, this.currentFrom, select, null);
                 return new ColumnExpression(scalar.Type, scalar.Select.Alias, select.Columns[0].Name);

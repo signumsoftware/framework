@@ -56,9 +56,7 @@ namespace Signum.Engine.Linq
             SourceExpression from = this.VisitSource(select.From);
 
             if (columns != select.Columns || orderbys != select.OrderBy || where != select.Where || from != select.From || groupBy != select.GroupBy)
-            {
-                return new SelectExpression(select.Alias, select.IsDistinct, select.IsReverse, select.Top, columns, from, where, orderbys, groupBy, select.ForXmlPathEmpty);
-            }
+                return new SelectExpression(select.Alias, select.IsDistinct, select.Top, columns, from, where, orderbys, groupBy, select.SelectOptions);
 
             return select;
         }

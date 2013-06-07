@@ -78,9 +78,14 @@ namespace Signum.Utilities
             return value;
         }
 
-        public static IQueryable<T> OrderAlsoByKeys<T>(this IQueryable<T> query)
+        public static IQueryable<T> OrderAlsoByKeys<T>(this IQueryable<T> source)
         {
-            return query;
+            if (source == null)
+                throw new ArgumentNullException("source");
+
+            return source.Provider.CreateQuery<T>(Expression.Call(null, 
+                ((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new Type[] { typeof(T) }), 
+                new Expression[] { source.Expression }));
         }
     }
 }

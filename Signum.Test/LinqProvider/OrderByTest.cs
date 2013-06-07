@@ -83,7 +83,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void OrderByTakeOrderBy()
         {
-            var michael = Database.Query<ArtistDN>().OrderByDescending(a => a.Dead).Take(2).OrderBy(a=>a.Name).FirstEx(); //reverse ignored
+            var michael = Database.Query<ArtistDN>().OrderByDescending(a => a.Dead).Take(2).OrderBy(a=>a.Name).FirstEx();
         }
 
         [TestMethod]

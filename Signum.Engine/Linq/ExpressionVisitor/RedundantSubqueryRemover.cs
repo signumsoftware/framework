@@ -188,7 +188,7 @@ namespace Signum.Engine.Linq
                         //|| skip != select.Skip
                         || top != select.Top)
                     {
-                        select = new SelectExpression(select.Alias, isDistinct, select.IsReverse, top, select.Columns, select.From, where, orderBy, groupBy, select.ForXmlPathEmpty);
+                        select = new SelectExpression(select.Alias, isDistinct, top, select.Columns, select.From, where, orderBy, groupBy, select.SelectOptions);
                     }
                 }
 

@@ -466,7 +466,7 @@ namespace Signum.Engine.Linq
                 }
             }
 
-            if (select.ForXmlPathEmpty)
+            if (select.IsForXmlPathEmpty)
             {
                 this.AppendNewLine(Indentation.Same);
                 sb.Append("FOR XML PATH('')");

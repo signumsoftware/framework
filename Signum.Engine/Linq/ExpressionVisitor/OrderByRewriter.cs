@@ -57,7 +57,7 @@ namespace Signum.Engine.Linq
         {
             bool isOuterMost = select == outerMostSelect;
 
-            if (select.Top != null && gatheredKeys == null)
+            if (select.IsOrderAlsoByKeys && gatheredKeys == null)
                 gatheredKeys = new List<ColumnExpression>();
 
 
@@ -132,14 +132,14 @@ namespace Signum.Engine.Linq
             if (AreEqual(select.OrderBy, orderings) && !select.IsReverse && newColumns == null)
                 return select;
 
-            return new SelectExpression(select.Alias, select.IsDistinct, false, select.Top, (IEnumerable<ColumnDeclaration>)newColumns ?? select.Columns,
-                select.From, select.Where, orderings, select.GroupBy, select.ForXmlPathEmpty);
+            return new SelectExpression(select.Alias, select.IsDistinct, select.Top, (IEnumerable<ColumnDeclaration>)newColumns ?? select.Columns,
+                select.From, select.Where, orderings, select.GroupBy, select.SelectOptions & ~SelectOptions.Reverse);
         }
 
 
         protected override Expression VisitScalar(ScalarExpression scalar)
         {
-            if (!scalar.Select.ForXmlPathEmpty)
+            if (!scalar.Select.IsForXmlPathEmpty)
             {
                 using (Scope())
                     return base.VisitScalar(scalar);

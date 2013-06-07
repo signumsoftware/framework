@@ -301,13 +301,18 @@ namespace Signum.Engine.Linq
         Where = 1,
         Aggregate = 2,
         GroupBy = 4,
- 	    Reverse = 8,
-        OrderBy = 16,
-        Select = 32,
-        Distinct = 64,
-        Top = 128
+        OrderBy = 8,
+        Select = 16,
+        Distinct = 32,
+        Top = 64
     }
 
+    internal enum SelectOptions
+    {
+        Reverse = 1,
+        ForXmlPathEmpty = 2,
+        OrderAlsoByKeys = 4,
+    }
 
     internal class SelectExpression : SourceWithAliasExpression
     {
@@ -318,8 +323,22 @@ namespace Signum.Engine.Linq
         public readonly ReadOnlyCollection<Expression> GroupBy;
         public readonly Expression Top;
         public readonly bool IsDistinct;
-        public readonly bool IsReverse;
-        public readonly bool ForXmlPathEmpty;
+        public readonly SelectOptions SelectOptions;
+
+        public bool IsReverse
+        {
+            get { return (SelectOptions & Linq.SelectOptions.Reverse) != 0; }
+        }
+
+        public bool IsForXmlPathEmpty
+        {
+            get { return (SelectOptions & Linq.SelectOptions.ForXmlPathEmpty) != 0; }
+        }
+
+        public bool IsOrderAlsoByKeys
+        {
+            get { return (SelectOptions & Linq.SelectOptions.OrderAlsoByKeys) != 0; }
+        }
 
         readonly Alias[] knownAliases;
         public override Alias[] KnownAliases
@@ -327,11 +346,11 @@ namespace Signum.Engine.Linq
             get { return knownAliases; }
         }
 
-        internal SelectExpression(Alias alias, bool distinct, bool reverse, Expression top, IEnumerable<ColumnDeclaration> columns, SourceExpression from, Expression where, IEnumerable<OrderExpression> orderBy, IEnumerable<Expression> groupBy, bool forXmlPathEmpty)
+        internal SelectExpression(Alias alias, bool distinct, Expression top, IEnumerable<ColumnDeclaration> columns, SourceExpression from, Expression where, IEnumerable<OrderExpression> orderBy, IEnumerable<Expression> groupBy, SelectOptions options)
             : base(DbExpressionType.Select, alias)
         {
             this.IsDistinct = distinct;
-            this.IsReverse = reverse;
+            this.SelectOptions = options;
             this.Top = top;
             this.Columns = columns.ToReadOnly();
             this.From = from;
@@ -339,7 +358,6 @@ namespace Signum.Engine.Linq
             this.OrderBy = orderBy.ToReadOnly();
             this.GroupBy = groupBy.ToReadOnly();
             this.knownAliases = from == null ? new[] { alias } : from.KnownAliases.And(alias).ToArray();
-            this.ForXmlPathEmpty = forXmlPathEmpty;
         }
 
         internal SelectRoles SelectRoles
@@ -355,9 +373,6 @@ namespace Signum.Engine.Linq
                     roles |= SelectRoles.GroupBy;
                 else if (Columns.Any(cd => AggregateFinder.HasAggregates(cd.Expression)))
                     roles |= SelectRoles.Aggregate;
-
- 				if (IsReverse)
-                    roles |= SelectRoles.Reverse;
 
                 if (OrderBy != null && OrderBy.Count > 0)
                     roles |= SelectRoles.OrderBy;
@@ -385,7 +400,7 @@ namespace Signum.Engine.Linq
                 Where.TryCC(a => "WHERE " + a.NiceToString() + "\r\n"),
                 OrderBy.TryCC(ob => "ORDER BY " + ob.ToString(" ,") + "\r\n"),
                 GroupBy.TryCC(gb => "GROUP BY " + gb.ToString(g => g.NiceToString(), " ,") + "\r\n"),
-                ForXmlPathEmpty ? "FOR XML PATH('')\r\n" : "",
+                SelectOptions.HasFlag(SelectOptions.ForXmlPathEmpty) ? "FOR XML PATH('')\r\n" : "",
                 Alias);
         }
 
