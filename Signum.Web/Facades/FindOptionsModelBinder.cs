@@ -80,15 +80,15 @@ namespace Signum.Web
             {
                 switch (parameters["pagination"].ToEnum<PaginationMode>())
                 {
-                    case PaginationMode.AllElements:
-                        fo.Pagination = new Pagination.AllElements();
+                    case PaginationMode.All:
+                        fo.Pagination = new Pagination.All();
                         break;
-                    case PaginationMode.Top:
-                        fo.Pagination = new Pagination.Top(int.Parse(parameters["elems"]));
+                    case PaginationMode.Firsts:
+                        fo.Pagination = new Pagination.Firsts(int.Parse(parameters["elems"]));
                         break;
                     case PaginationMode.Paginate:
                         fo.Pagination = new Pagination.Paginate(int.Parse(parameters["elems"]),
-                            parameters.AllKeys.Contains("page") ? int.Parse(parameters["page"]) : 1);
+                            parameters.AllKeys.Contains("page") ? parameters["page"].ToInt() ?? 1 : 1);
                         break;
                     default:
                         break;

@@ -33,30 +33,23 @@ namespace Signum.Windows
 
             switch (rt.Pagination.GetMode())
             {
-                case PaginationMode.AllElements:
-                    tb.Inlines.Add(new Run(rt.TotalElements.Value.ToString()) { FontWeight = FontWeights.Bold });
-                    tb.Inlines.Add(new Run(" "));
-                    tb.Inlines.Add(new Run(SearchMessage.Results.NiceToString()));
+                case PaginationMode.All:
+                    tb.Inlines.Add(SearchMessage._0Results.NiceToString().ForGenderAndNumber(number: rt.Rows.Length).FormatSpan(
+                        new Run(rt.TotalElements.Value.ToString()) { FontWeight = FontWeights.Bold }));
                     break;
-                case PaginationMode.Top:
-                    var top = (Pagination.Top)rt.Pagination;
-                    var run = new Run(rt.TotalElements.Value.ToString());
-
+                case PaginationMode.Firsts:
+                     var top = (Pagination.Firsts)rt.Pagination;
+                     var run = new Run(rt.Rows.Length.ToString()) { FontWeight = FontWeights.Bold };
                     if(rt.Rows.Length == top.TopElements)
                         run.Foreground = Brushes.Red;
 
-                    tb.Inlines.Add(run);
-                    tb.Inlines.Add(new Run(" "));
-                    tb.Inlines.Add(new Run(SearchMessage.Results.NiceToString()));
+                    tb.Inlines.Add(SearchMessage.First0Results.NiceToString().ForGenderAndNumber(number: rt.Rows.Length).FormatSpan(run));
                     break;
                 case PaginationMode.Paginate:
-                    tb.Inlines.Add(new Run(rt.StartElementIndex.Value.ToString()) { FontWeight = FontWeights.Bold });
-                    tb.Inlines.Add(new Run(" - "));
-                    tb.Inlines.Add(new Run(rt.EndElementIndex.Value.ToString()) { FontWeight = FontWeights.Bold });
-                    tb.Inlines.Add(new Run(" "));
-                    tb.Inlines.Add(new Run(QueryTokenMessage.Of.NiceToString()));
-                    tb.Inlines.Add(new Run(" "));
-                    tb.Inlines.Add(new Run(rt.TotalElements.Value.ToString()) { FontWeight = FontWeights.Bold });
+                    tb.Inlines.Add(SearchMessage._01of2Results.NiceToString().ForGenderAndNumber(number: rt.Rows.Length).FormatSpan(
+                        new Run(rt.StartElementIndex.Value.ToString()) { FontWeight = FontWeights.Bold },
+                        new Run(rt.EndElementIndex.Value.ToString()) { FontWeight = FontWeights.Bold },
+                        new Run(rt.TotalElements.Value.ToString()) { FontWeight = FontWeights.Bold }));
                     break;
                 default:
                     break;

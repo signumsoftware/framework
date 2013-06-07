@@ -90,7 +90,7 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty PaginationProperty =
-            DependencyProperty.Register("Pagination", typeof(Pagination), typeof(SearchControl), new PropertyMetadata(new Pagination.AllElements(),
+            DependencyProperty.Register("Pagination", typeof(Pagination), typeof(SearchControl), new PropertyMetadata(new Pagination.All(),
                 (s, e) => ((SearchControl)s).Pagination_Changed((Pagination)e.OldValue, (Pagination)e.NewValue)));
         public Pagination Pagination
         {
@@ -705,9 +705,8 @@ namespace Signum.Windows
                 ItemsCount = lvResult.Items.Count;
                 lvResult.Background = Brushes.White;
                 lvResult.Focus();
-                elementsInPageLabel.Visibility = Visibility.Visible;
-                elementsInPageLabel.SetResults(rt);
-
+                paginationSelector.elementsInPageLabel.Visibility = Visibility.Visible;
+                paginationSelector.elementsInPageLabel.SetResults(rt);
                 paginationSelector.Visibility = System.Windows.Visibility.Visible;
                 paginationSelector.TotalPages = rt.TotalPages;
 
@@ -725,7 +724,7 @@ namespace Signum.Windows
         {
             OnQueryResultChanged(true);
             resultTable = null;
-            elementsInPageLabel.Visibility = Visibility.Hidden;
+            paginationSelector.elementsInPageLabel.Visibility = Visibility.Hidden;
             paginationSelector.TotalPages = null;
             lvResult.ItemsSource = null;
             lvResult.Background = Brushes.WhiteSmoke;

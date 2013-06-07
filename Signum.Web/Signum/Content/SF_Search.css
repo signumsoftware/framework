@@ -149,12 +149,16 @@
 {
     font-weight: bold;
 }
+.sf-search-footer span.sf-pagination-overflow
+{
+    color : red;
+}
 .sf-search-footer div
 {
     float: left;
     width: 33%;
 }
-.sf-pagination-left span
+.sf-pagination-left>span
 {
     display: block;
     float: left;

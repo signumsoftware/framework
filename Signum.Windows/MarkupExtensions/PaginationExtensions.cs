@@ -16,7 +16,7 @@ namespace Signum.Windows
     {
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
-            return new Pagination.AllElements();
+            return new Pagination.All();
         }
     }
 
@@ -33,7 +33,7 @@ namespace Signum.Windows
 
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
-            return new Pagination.Top(TopElements);
+            return new Pagination.Firsts(TopElements);
         }
     }
 

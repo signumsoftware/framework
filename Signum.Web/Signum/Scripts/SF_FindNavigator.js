@@ -28,7 +28,8 @@ SF.registerModule("FindNavigator", function () {
 
             keys: {
                 elems: "sfElems",
-                page: "sfPage"
+                page: "sfPage",
+                pagination: "sfPaginationMode"
             },
 
             pf: function (s) {
@@ -315,6 +316,7 @@ SF.registerModule("FindNavigator", function () {
             requestDataForSearch: function () {
                 var requestData = new Object();
                 requestData["webQueryName"] = this.options.webQueryName;
+                requestData["pagination"] = $(this.pf(this.keys.pagination)).val();
                 requestData["elems"] = $(this.pf(this.keys.elems)).val();
                 requestData["page"] = $(this.pf(this.keys.page)).val();
                 requestData["allowMultiple"] = this.options.allowMultiple;
@@ -330,7 +332,8 @@ SF.registerModule("FindNavigator", function () {
             },
 
             requestDataForSearchInUrl: function () {
-                var url = "?elems=" + $(this.pf(this.keys.elems)).val() +
+                var url = "?pagination=" + $(this.pf(this.keys.pagination)).val() +
+                    "&elems=" + $(this.pf(this.keys.elems)).val() +
                     "&page=" + $(this.pf(this.keys.page)).val() +
                     "&filters=" + this.serializeFilters() +
                     "&filterMode=Visible" +

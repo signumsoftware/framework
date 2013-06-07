@@ -34,7 +34,7 @@ namespace Signum.Web
 
                 if (Pagination != null)
                 {
-                    options.Add("pagination", Pagination.GetMode().ToString());
+                    options.Add("pagination", Pagination.GetMode().ToString().Quote());
                     int? elems = Pagination.GetElementsPerPage();
                     if (elems != null)
                         options.Add("elems", elems.Value.ToString());

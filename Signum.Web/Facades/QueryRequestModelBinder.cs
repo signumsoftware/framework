@@ -51,14 +51,16 @@ namespace Signum.Web
             {
                 switch (parameters["pagination"].ToEnum<PaginationMode>())
                 {
-                    case PaginationMode.AllElements:
-                        qr.Pagination = new Pagination.AllElements();
+                    case PaginationMode.All:
+                        qr.Pagination = new Pagination.All();
                         break;
-                    case PaginationMode.Top:
-                        qr.Pagination = new Pagination.Top(int.Parse(parameters["elems"]));
+                    case PaginationMode.Firsts:
+                        qr.Pagination = new Pagination.Firsts(
+                            parameters.AllKeys.Contains("elems") ? int.Parse(parameters["elems"]) : Pagination.Firsts.DefaultTopElements);
                         break;
                     case PaginationMode.Paginate:
-                        qr.Pagination = new Pagination.Paginate(int.Parse(parameters["elems"]), 
+                        qr.Pagination = new Pagination.Paginate(
+                            parameters.AllKeys.Contains("elems") ? int.Parse(parameters["elems"]) : Pagination.Paginate.DefaultElementsPerPage,
                             parameters.AllKeys.Contains("page") ? int.Parse(parameters["page"]) : 1);
                         break;
                     default:

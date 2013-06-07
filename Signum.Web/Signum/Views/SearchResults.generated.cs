@@ -324,7 +324,7 @@ WriteLiteral("\r\n");
 
             
             #line 76 "..\..\Signum\Views\SearchResults.cshtml"
-Write(Html.Partial(Navigator.Manager.PaginationView, Model));
+Write(Html.Partial(Navigator.Manager.PaginationSelectorView, Model));
 
             
             #line default

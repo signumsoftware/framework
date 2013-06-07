@@ -442,7 +442,7 @@ namespace Signum.Web
         public string SearchControlView = ViewPrefix.Formato("SearchControl");
         public string SearchResultsView = ViewPrefix.Formato("SearchResults");
         public string FilterBuilderView = ViewPrefix.Formato("FilterBuilder");
-        public string PaginationView = ViewPrefix.Formato("Pagination");
+        public string PaginationSelectorView = ViewPrefix.Formato("PaginationSelector");
         public string ValueLineBoxView = ViewPrefix.Formato("ValueLineBox");
         
         protected Dictionary<string, Type> WebTypeNames { get; private set; }

@@ -52,7 +52,7 @@ namespace Signum.Engine.DynamicQuery
                 Filters = request.Filters,
                 Columns = new List<Column>() { new Column(this.EntityColumn().BuildColumnDescription(), QueryName) },
                 Orders = new List<Order>(),
-                Pagination = new Pagination.AllElements(),
+                Pagination = new Pagination.All(),
             };
 
             return Execute(req, GetQueryDescription()).Collection.Count();
@@ -66,7 +66,7 @@ namespace Signum.Engine.DynamicQuery
                 Filters = request.Filters,
                 Orders = request.Orders,
                 Columns = new List<Column> { new Column(this.EntityColumn().BuildColumnDescription(), QueryName) },
-                Pagination = new Pagination.Top(2),
+                Pagination = new Pagination.Firsts(2),
             };
 
             DEnumerable<T> mr = Execute(req, GetQueryDescription());
@@ -95,7 +95,7 @@ namespace Signum.Engine.DynamicQuery
                 Orders = new List<Order>(),
                 Filters = simpleFilters,
                 QueryName = request.QueryName,
-                Pagination = new Pagination.AllElements(),
+                Pagination = new Pagination.All(),
             }, GetQueryDescription());
 
             var groupCollection = plainCollection
@@ -108,7 +108,7 @@ namespace Signum.Engine.DynamicQuery
 
             var values = groupCollection.Collection.ToArray();
 
-            return values.ToResultTable(cols, values.Length, new Pagination.AllElements());
+            return values.ToResultTable(cols, values.Length, new Pagination.All());
         }
     }
 }

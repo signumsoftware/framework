@@ -568,15 +568,15 @@ namespace Signum.Engine.DynamicQuery
             if (pagination == null)
                 throw new ArgumentNullException("pagination");
 
-            if (pagination is Pagination.AllElements)
+            if (pagination is Pagination.All)
             {
                 var allList = query.Query.ToList();
 
                 return new DEnumerableCount<T>(allList, query.Context, allList.Count);
             }
-            else if(pagination is Pagination.Top)
+            else if(pagination is Pagination.Firsts)
             {
-                var top = (Pagination.Top)pagination;
+                var top = (Pagination.Firsts)pagination;
                 var topList = query.Query.Take(top.TopElements).ToList();
 
                 return new DEnumerableCount<T>(topList, query.Context, null); 
@@ -610,15 +610,15 @@ namespace Signum.Engine.DynamicQuery
             if (pagination == null)
                 throw new ArgumentNullException("pagination");
 
-            if (pagination is Pagination.AllElements)
+            if (pagination is Pagination.All)
             {
                 var allList = collection.Collection.ToList();
 
                 return new DEnumerableCount<T>(allList, collection.Context, allList.Count);
             }
-            else if (pagination is Pagination.Top)
+            else if (pagination is Pagination.Firsts)
             {
-                var top = (Pagination.Top)pagination;
+                var top = (Pagination.Firsts)pagination;
                 var topList = collection.Collection.Take(top.TopElements).ToList();
 
                 return new DEnumerableCount<T>(topList, collection.Context, null);
@@ -651,13 +651,13 @@ namespace Signum.Engine.DynamicQuery
             if (pagination == null)
                 throw new ArgumentNullException("pagination");
 
-            if (pagination is Pagination.AllElements)
+            if (pagination is Pagination.All)
             {
                 return new DEnumerableCount<T>(collection.Collection, collection.Context, collection.TotalElements);
             }
-            else if (pagination is Pagination.Top)
+            else if (pagination is Pagination.Firsts)
             {
-                var top = (Pagination.Top)pagination;
+                var top = (Pagination.Firsts)pagination;
                 var topList = collection.Collection.Take(top.TopElements).ToList();
 
                 return new DEnumerableCount<T>(topList, collection.Context, null);

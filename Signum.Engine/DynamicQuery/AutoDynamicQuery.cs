@@ -90,7 +90,7 @@ namespace Signum.Engine.DynamicQuery
 
             var values = query.Query.ToArray();
 
-            return values.ToResultTable(cols, values.Length, new Pagination.AllElements());
+            return values.ToResultTable(cols, values.Length, new Pagination.All());
         }
 
 

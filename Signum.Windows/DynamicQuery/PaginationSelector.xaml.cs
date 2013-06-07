@@ -20,7 +20,8 @@ namespace Signum.Windows
     public partial class PaginationSelector : UserControl
     {
         public static readonly DependencyProperty PaginationProperty =
-            DependencyProperty.Register("Pagination", typeof(Pagination), typeof(PaginationSelector), new PropertyMetadata((s, e) => ((PaginationSelector)s).PaginationChanged()));
+            DependencyProperty.Register("Pagination", typeof(Pagination), typeof(PaginationSelector), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
+                (s, e) => ((PaginationSelector)s).PaginationChanged()));
         public Pagination Pagination
         {
             get { return (Pagination)GetValue(PaginationProperty); }
@@ -68,14 +69,14 @@ namespace Signum.Windows
 
                 cbMode.SelectedItem = Pagination.TryCS(p => p.GetMode());
 
-                if (Pagination is Pagination.Paginate || Pagination is Pagination.Top)
+                if (Pagination is Pagination.Paginate || Pagination is Pagination.Firsts)
                 {
                     cbElements.Visibility = System.Windows.Visibility.Visible;
                     cbElements.SelectedItem = Pagination.GetElementsPerPage();
                 }
                 else
                 {
-                    cbElements.Visibility = System.Windows.Visibility.Hidden;
+                    cbElements.Visibility = System.Windows.Visibility.Collapsed;
                 }
 
                 if (Pagination is Pagination.Paginate && TotalPages != null)
@@ -85,7 +86,7 @@ namespace Signum.Windows
                 }
                 else
                 {
-                    spPageSelector.Visibility = System.Windows.Visibility.Hidden;
+                    spPageSelector.Visibility = System.Windows.Visibility.Collapsed;
                 }
             }
             finally
@@ -173,8 +174,8 @@ namespace Signum.Windows
             var mode = (PaginationMode)cbMode.SelectedItem;
 
             Pagination =
-                mode == PaginationMode.AllElements ? new Pagination.AllElements() :
-                mode == PaginationMode.Top ? new Pagination.Top(Pagination.Top.DefaultTopElements) :
+                mode == PaginationMode.All ? new Pagination.All() :
+                mode == PaginationMode.Firsts ? new Pagination.Firsts(Pagination.Firsts.DefaultTopElements) :
                 mode == PaginationMode.Paginate ? new Pagination.Paginate(Pagination.Paginate.DefaultElementsPerPage, 1) : (Pagination)null;
         }
 
@@ -185,10 +186,10 @@ namespace Signum.Windows
 
             switch (Pagination.GetMode())
             {
-                case PaginationMode.AllElements:
+                case PaginationMode.All:
                     break;
-                case PaginationMode.Top:
-                    Pagination = new Pagination.Top((int)cbElements.SelectedItem);
+                case PaginationMode.Firsts:
+                    Pagination = new Pagination.Firsts((int)cbElements.SelectedItem);
                     break;
                 case PaginationMode.Paginate:
                     Pagination = new Pagination.Paginate((int)cbElements.SelectedItem, 1);

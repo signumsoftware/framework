@@ -3,31 +3,46 @@
 @using Signum.Engine
 @using Signum.Utilities.DataStructures
 @model Context
-
 @{ 
-   Pagination pagination = (Pagination)ViewData[ViewDataKeys.Pagination];
-   var paginate = pagination as Pagination.Paginate;
-   
-   FilterMode filterMode = (FilterMode)ViewData[ViewDataKeys.FilterMode];
-   int columnsCount = (int)ViewData[ViewDataKeys.SearchControlColumnsCount];
+    Pagination pagination = (Pagination)ViewData[ViewDataKeys.Pagination];
+    var paginate = pagination as Pagination.Paginate;
 
-   ResultTable resultTable = (ResultTable)ViewData[ViewDataKeys.Results];
+    FilterMode filterMode = (FilterMode)ViewData[ViewDataKeys.FilterMode];
+    int columnsCount = (int)ViewData[ViewDataKeys.SearchControlColumnsCount];
+
+    ResultTable resultTable = (ResultTable)ViewData[ViewDataKeys.Results];
 }
 
-<tr class="ui-widget-header ui-corner-bottom sf-search-footer" style="@((filterMode == FilterMode.OnlyResults) ?  "display:none" : "")">
+<tr class="ui-widget-header ui-corner-bottom sf-search-footer" style="@(filterMode == FilterMode.OnlyResults ? "display:none" : null)">
     <td colspan="@columnsCount" class="sf-search-footer-pagination">
         <div class="sf-pagination-left">
             @if (resultTable != null)
             {
-                if (resultTable.TotalPages > 1)
+                if (pagination is Pagination.All)
                 {
-                    <span class="sf-pagination-strong">@resultTable.StartElementIndex.ToString()</span>
-                    <span> - </span>
-                    <span class="sf-pagination-strong">@resultTable.EndElementIndex.ToString()</span>
-                    <span>@(" {0} ".Formato(SearchMessage.SearchControl_Pagination_Of.NiceToString()))</span>
+                <span>@SearchMessage._0Results.NiceToString().ForGenderAndNumber(number: resultTable.TotalElements).FormatHtml(
+                       new HtmlTag("span").Class("sf-pagination-strong").SetInnerText(resultTable.TotalElements.ToString()))
+                </span>
+                    
                 }
-                <span class="sf-pagination-strong">@resultTable.TotalElements.ToString()</span>
-                <span>@(" {0}.".Formato(SearchMessage.SearchControl_Pagination_Results.NiceToString()))</span>
+                else if (pagination is Pagination.Firsts)
+                {
+                    var first = (Pagination.Firsts)pagination;
+                    
+                <span>@SearchMessage.First0Results.NiceToString().ForGenderAndNumber(number: resultTable.Rows.Length).FormatHtml(
+                    new HtmlTag("span").Class("sf-pagination-strong").Class(resultTable.Rows.Length == first.TopElements ? "sf-pagination-overflow" : null).SetInnerText(resultTable.Rows.Length.ToString()))
+                </span>
+                }
+                else if (pagination is Pagination.Paginate)
+                {
+                <span>
+                    @SearchMessage._01of2Results.NiceToString().ForGenderAndNumber(number: resultTable.TotalElements).FormatHtml(
+                        new HtmlTag("span").Class("sf-pagination-strong").SetInnerText(resultTable.StartElementIndex.ToString()),
+                        new HtmlTag("span").Class("sf-pagination-strong").SetInnerText(resultTable.EndElementIndex.ToString()),
+                        new HtmlTag("span").Class("sf-pagination-strong").SetInnerText(resultTable.TotalElements.ToString())
+                        )
+                </span>
+                }
             }
         </div>
         <div class="sf-pagination-center">
@@ -35,60 +50,63 @@
                 var currentMode = pagination.GetMode();
                 var modes = EnumExtensions.GetValues<PaginationMode>().Select(pm => new SelectListItem
                 {
-                     Text = pm.NiceToString(),
-                     Value = pm.ToString(),
-                     Selected = currentMode == pm
-                });   
+                    Text = pm.NiceToString(),
+                    Value = pm.ToString(),
+                    Selected = currentMode == pm
+                }).ToList();   
             }
-            @Html.DropDownList(Model.Compose("sfPagination"),  modes, new { @class = "sf-pagination-size" })
-            @{ 
+            @Html.DropDownList(Model.Compose("sfPaginationMode"), modes, new { @class = "sf-pagination-size" })
+
+            @if (!(pagination is Pagination.All))
+            {
                 var currentElements = pagination.GetElementsPerPage();
                 var elements = new List<int> { 5, 10, 20, 50, 100, 200 }.Select(i => new SelectListItem { Text = i.ToString(), Value = i.ToString(), Selected = i == currentElements }).ToList();
+            
+                @Html.DropDownList(Model.Compose("sfElems"), elements, new { @class = "sf-pagination-size" })
             }
-            @Html.DropDownList(Model.Compose("sfElems"), elements, new { @class = "sf-pagination-size" })
         </div>
 
         <div class="sf-pagination-right">
             @if (resultTable != null && paginate != null)
             {   
                 <input type="hidden" id="@(Model.Compose("sfPage"))" value="@paginate.CurrentPage" />
-                <input type="button" class="sf-pagination-button" data-page="@(paginate.CurrentPage - 1)" @((paginate.CurrentPage <= 1) ? "disabled=\"disabled\"" : "") value="&lt;" />
-            
+                <input type="button" class="sf-pagination-button" data-page="@(paginate.CurrentPage - 1)" disabled="@((paginate.CurrentPage <= 1) ? "disabled" : null)" value="&lt;" />
+
                 MinMax<int> interval = new MinMax<int>(
                     Math.Max(1, paginate.CurrentPage - 2),
                     Math.Min(paginate.CurrentPage + 2, resultTable.TotalPages.Value));
 
                 if (interval.Min != 1)
                 {
-                    <input type="button" class="sf-pagination-button" data-page="1" value="1" />
+                <input type="button" class="sf-pagination-button" data-page="1" value="1" />
                     if (interval.Min - 1 != 1)
                     {
-                        <span>...</span>
+                <span>...</span>
                     }
                 }
 
                 for (int i = interval.Min; i < paginate.CurrentPage; i++)
                 {
-                    <input type="button" class="sf-pagination-button" data-page="@i" value="@i" />
+                <input type="button" class="sf-pagination-button" data-page="@i" value="@i" />
                 }
 
                 <span class="sf-pagination-strong">@paginate.CurrentPage.ToString()</span>
 
                 for (int i = paginate.CurrentPage + 1; i <= interval.Max; i++)
                 {
-                    <input type="button" class="sf-pagination-button" data-page="@i" value="@i" />
+                <input type="button" class="sf-pagination-button" data-page="@i" value="@i" />
                 }
 
                 if (interval.Max != resultTable.TotalPages)
                 {
                     if (interval.Max + 1 != resultTable.TotalPages)
                     {
-                        <span>...</span>
+                <span>...</span>
                     }
-                    <input type="button" class="sf-pagination-button" data-page="@resultTable.TotalPages" value="@resultTable.TotalPages" />
+                <input type="button" class="sf-pagination-button" data-page="@resultTable.TotalPages" value="@resultTable.TotalPages" />
                 }
             
-                <input type="button" class="sf-pagination-button" data-page="@(paginate.CurrentPage + 1)" @((resultTable.TotalPages <= paginate.CurrentPage) ? "disabled=\"disabled\"" : "") value="&gt;" />
+                <input type="button" class="sf-pagination-button" data-page="@(paginate.CurrentPage + 1)" disabled="@(resultTable.TotalPages <= paginate.CurrentPage ? "disabled" : null)" value="&gt;" />
             }
         </div>
     </td>

@@ -70,8 +70,8 @@ namespace Signum.Entities.DynamicQuery
     [DescriptionOptions(DescriptionOptions.Members)]
     public enum PaginationMode
     {
-        AllElements,
-        Top,
+        All,
+        Firsts,
         Paginate
     }
 
@@ -83,7 +83,7 @@ namespace Signum.Entities.DynamicQuery
         public abstract int? MaxElementIndex { get; }
 
         [Serializable]
-        public class AllElements : Pagination
+        public class All : Pagination
         {
             public override int? MaxElementIndex
             {
@@ -92,7 +92,7 @@ namespace Signum.Entities.DynamicQuery
 
             public override PaginationMode GetMode()
             {
-                return PaginationMode.AllElements;
+                return PaginationMode.All;
             }
 
             public override int? GetElementsPerPage()
@@ -102,11 +102,11 @@ namespace Signum.Entities.DynamicQuery
         }
 
         [Serializable]
-        public class Top : Pagination
+        public class Firsts : Pagination
         {
             public static int DefaultTopElements = 50; 
 
-            public Top(int topElements)
+            public Firsts(int topElements)
             {
                 this.topElements = topElements;
             }
@@ -124,7 +124,7 @@ namespace Signum.Entities.DynamicQuery
 
             public override PaginationMode GetMode()
             {
-                return PaginationMode.Top;
+                return PaginationMode.Firsts;
             }
 
             public override int? GetElementsPerPage()

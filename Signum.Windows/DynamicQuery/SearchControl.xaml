@@ -168,11 +168,8 @@
                 </Style>
             </ListView.ItemContainerStyle>
         </ListView>
-        <Grid Grid.Row="5" Background="#FFC9E4FF"  Visibility="{Binding ShowFooter, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}">
-            <DockPanel Height="24"   Margin="3,3,15,3"  >
-                <m:ElementsInPageLabel x:Name="elementsInPageLabel" VerticalAlignment="Center"  MinWidth="150" Visibility="Hidden"  DockPanel.Dock="Left" />
-                <m:PaginationSelector x:Name="paginationSelector" Pagination="{Binding Pagination, ElementName=me}" />
-            </DockPanel>
-        </Grid>
+        <StackPanel Grid.Row="5" Background="#FFC9E4FF"  Visibility="{Binding ShowFooter, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}">
+            <m:PaginationSelector x:Name="paginationSelector" Pagination="{Binding Pagination, ElementName=me}"  Height="24"   Margin="3,3,16,3" HorizontalAlignment="Stretch"/>
+        </StackPanel>
     </Grid>
 </UserControl>

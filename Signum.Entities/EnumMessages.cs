@@ -145,10 +145,12 @@ Lose changes?")]
         [Description("Query {0} is not registered in the DynamicQueryManager")]
         Query0NotRegistered,
         Rename,
-        [Description("results.")]
-        Results,
-        [Description("Rows:")]
-        Rows,
+        [Description("{0} result[s].")]
+        _0Results,
+        [Description("first {0} result[s].")]
+        First0Results,
+        [Description("{0} - {1} of {2} result[s].")]
+        _01of2Results,
         Search,
         [Description("Create")]
         Search_Create,
@@ -156,10 +158,6 @@ Lose changes?")]
         Search_CtxMenuItem_Operations,
         [Description("All")]
         SearchControl_Pagination_All,
-        [Description("of")]
-        SearchControl_Pagination_Of,
-        [Description("results")]
-        SearchControl_Pagination_Results,
         SelectAnElement,
         [Description("There is no {0}")]
         ThereIsNo0,

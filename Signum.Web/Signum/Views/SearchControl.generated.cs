@@ -636,7 +636,7 @@ WriteLiteral("                ");
 
             
             #line 168 "..\..\Signum\Views\SearchControl.cshtml"
-           Write(Html.Partial(Navigator.Manager.PaginationView, Model));
+           Write(Html.Partial(Navigator.Manager.PaginationSelectorView, Model));
 
             
             #line default

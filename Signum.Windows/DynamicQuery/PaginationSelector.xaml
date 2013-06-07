@@ -12,10 +12,18 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
-    <DockPanel>
-        <ComboBox  x:Name="cbMode" VerticalAlignment="Center" DockPanel.Dock="Left" SelectionChanged="cbMode_SelectionChanged"/>
-        <ComboBox  x:Name="cbElements" DockPanel.Dock="Left" SelectionChanged="cbElements_SelectionChanged"/>
-        <StackPanel Orientation="Horizontal" x:Name="spPageSelector" DockPanel.Dock="Right">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <m:ElementsInPageLabel x:Name="elementsInPageLabel" Grid.Column="0" HorizontalAlignment="Left" MinWidth="150" Visibility="Hidden"  VerticalAlignment="Center"/>
+        <StackPanel Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="Center">
+            <ComboBox  x:Name="cbMode"  SelectionChanged="cbMode_SelectionChanged" VerticalAlignment="Center"/>
+            <ComboBox  x:Name="cbElements" SelectionChanged="cbElements_SelectionChanged" VerticalAlignment="Center"/>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" x:Name="spPageSelector" Grid.Column="2" HorizontalAlignment="Right" >
             <StackPanel.Resources>
                 <Style TargetType="Button">
                     <Setter Property="MinWidth" Value="22"/>
@@ -25,11 +33,12 @@
                     <Setter Property="Background" Value="{DynamicResource LightBlueBackground}"/>
                 </Style>
             </StackPanel.Resources>
-            <Button x:Name="btPrevious" Content="&lt;" FontWeight="Bold" Margin="0,0,5,0" Click="btPrevious_Click" />
+            <Button x:Name="btPrevious" Content="&lt;" FontWeight="Bold" Margin="0,0,5,0" Click="btPrevious_Click"  VerticalAlignment="Center"/>
             <StackPanel Orientation="Horizontal" x:Name="spPages" ButtonBase.Click="spPages_Click">
                 <StackPanel.Resources>
                     <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                         <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="VerticalAlignment" Value="Center"/>
                     </Style>
                 </StackPanel.Resources>
                 <!--<Button Content="1"/>
@@ -42,7 +51,7 @@
             <Label Content="..."/>
             <Button Content="100"/>-->
             </StackPanel>
-            <Button x:Name="btNext" Content="&gt;" FontWeight="Bold"  Margin="5,0,0,0" Click="btNext_Click" />
+            <Button x:Name="btNext" Content="&gt;" FontWeight="Bold"  Margin="5,0,0,0" Click="btNext_Click" VerticalAlignment="Center" />
         </StackPanel>
-    </DockPanel>
+    </Grid>
 </UserControl>
