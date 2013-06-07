@@ -188,13 +188,13 @@ namespace Signum.Utilities
             if (gender == null)
             {
                 if (number.Value == 1)
-                    return GetPart(genderAwareText, number.Value + ":");
+                    return GetPart(genderAwareText, "1:");
 
                 return GetPart(genderAwareText, number.Value + ":", "");
             }
 
             if (number.Value == 1)
-                return GetPart(genderAwareText, gender.Value + number.Value + ":", number.Value + ":");
+                return GetPart(genderAwareText, "1" + gender.Value + ":", "1:");
 
             return GetPart(genderAwareText, gender.Value + number.Value + ":", gender.Value + ":", number.Value + ":", "");
         }
@@ -202,9 +202,9 @@ namespace Signum.Utilities
         static string GetPart(string textToReplace, params string[] prefixes)
         {
             return Regex.Replace(textToReplace,
-              @"\[(?<gender>(\w\:)?[^\|\]]+)(\|(?<gender>(\w\:)?[^\|\]]+))*", m =>
+              @"\[(?<part>[^\|\]]+)(\|(?<part>[^\|\]]+))*\]", m =>
               {
-                  var captures = m.Captures.OfType<Capture>();
+                  var captures = m.Groups["part"].Captures.OfType<Capture>();
 
                   foreach (var pr in prefixes)
                   {
@@ -213,7 +213,7 @@ namespace Signum.Utilities
                           return capture.Value.RemoveStart(pr.Length);
                   }
 
-                  return "[NO MATCH FOUND]";
+                  return "";
               });
         }
 
