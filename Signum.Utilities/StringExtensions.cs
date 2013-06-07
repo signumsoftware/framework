@@ -109,7 +109,7 @@ namespace Signum.Utilities
             if (index == -1)
                 throw NotFound(str, separator);
 
-            return str.Substring(index + 1);
+            return str.Substring(index + separator.Length);
         }
 
         public static string TryBefore(this string str, char separator)
