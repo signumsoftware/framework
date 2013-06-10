@@ -147,7 +147,7 @@ namespace Signum.Windows
         //Angabanga style! http://signum.codeplex.com/discussions/407307
         public static readonly DependencyProperty TypeContextProperty =
             DependencyProperty.RegisterAttached("TypeContext", typeof(Type), typeof(Common), 
-            new PropertyMetadata((s,args)=>Common.SetPropertyRoute(s, PropertyRoute.Root((Type)args.NewValue))));             
+            new PropertyMetadata(OnSetTypeContext));             
         public static Type GetTypeContext(DependencyObject obj)
         {
             return (Type)obj.GetValue(TypeContextProperty);
@@ -158,6 +158,13 @@ namespace Signum.Windows
             obj.SetValue(TypeContextProperty, value);
         }
 
+        static void OnSetTypeContext(DependencyObject sender, DependencyPropertyChangedEventArgs args)
+        {
+            if(args.NewValue == null)
+                throw new ArgumentException("TypeContext set to null on {0}".Formato(sender.VisualParents().Reverse().ToString(a=>a.GetType().Name, ", "))); 
+
+            Common.SetPropertyRoute(sender, PropertyRoute.Root((Type)args.NewValue));
+        }
 
         public static readonly DependencyProperty CollapseIfNullProperty =
                    DependencyProperty.RegisterAttached("CollapseIfNull", typeof(bool), typeof(Common), new UIPropertyMetadata(false));
