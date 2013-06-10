@@ -235,6 +235,7 @@ namespace Signum.Test.Environment
             new AwardNominationDN { Author = smashingPumpkins.ToLite(), Award = ama.ToLite() }.Save();
 
             new AwardNominationDN { Author = michael.ToLite(), Award = pa.ToLite() }.Save();
+            new AwardNominationDN { Author = michael.ToLite(), Award = null}.Save();
         }
     }
 }

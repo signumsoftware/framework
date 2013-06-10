@@ -269,6 +269,13 @@ namespace Signum.Test.LinqProvider
                         select a.Author.CombineSwitch().Name).ToList();
         }
 
+       [TestMethod]
+        public void SelectCastIBPolymorphicForceNullify()
+        {
+            var list = (from a in Database.Query<AwardNominationDN>()
+                        select (int?)a.Award.Entity.Year).ToList();
+        }
+
         [TestMethod]
         public void SelectCastIBPolymorphicIBUnion()
         {
