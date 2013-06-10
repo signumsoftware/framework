@@ -69,7 +69,7 @@ namespace Signum.Engine.Chart
                     Columns = columns,
                     Filters = request.Filters,
                     Orders = request.Orders,
-                    Pagination = new Pagination.AllElements(),
+                    Pagination = new Pagination.All(),
                 });
             }
             else

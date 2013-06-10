@@ -307,7 +307,7 @@ Write(Html.SearchControl(new FindOptions(typeof(Signum.Entities.Processes.Proces
     OrderOptions = { new OrderOption("CreationDate", Signum.Entities.DynamicQuery.OrderType.Descending) },
     FilterMode = Signum.Web.FilterMode.Hidden,
     SearchOnLoad = true,
-    Pagination =  new Pagination.Top(10),
+    Pagination =  new Pagination.Firsts(10),
 },new Context(null, "sc")));
 
             

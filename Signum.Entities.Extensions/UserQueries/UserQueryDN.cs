@@ -103,19 +103,19 @@ namespace Signum.Entities.UserQueries
             set { Set(ref columns, value, () => Columns); }
         }
 
+        PaginationMode? paginationMode;
+        public PaginationMode? PaginationMode
+        {
+            get { return paginationMode; }
+            set { if (Set(ref paginationMode, value, () => PaginationMode)) Notify(() => ShouldHaveElements); }
+        }
+
         int? elementsPerPage;
         [NumberIsValidator(ComparisonType.GreaterThanOrEqual, 1)]
         public int? ElementsPerPage
         {
             get { return elementsPerPage; }
             set { Set(ref elementsPerPage, value, () => ElementsPerPage); }
-        }
-
-        PaginationMode? paginationMode;
-        public PaginationMode? PaginationMode
-        {
-            get { return paginationMode; }
-            set { if (Set(ref paginationMode, value, () => PaginationMode)) Notify(() => ShouldHaveElements); }
         }
 
         [UniqueIndex]
@@ -176,8 +176,8 @@ namespace Signum.Entities.UserQueries
         {
             get
             {
-                return PaginationMode == Signum.Entities.DynamicQuery.PaginationMode.Top ||
-                    PaginationMode == Signum.Entities.DynamicQuery.PaginationMode.Top;
+                return PaginationMode == Signum.Entities.DynamicQuery.PaginationMode.Firsts ||
+                    PaginationMode == Signum.Entities.DynamicQuery.PaginationMode.Paginate;
             }
         }
 
@@ -239,8 +239,8 @@ namespace Signum.Entities.UserQueries
         {
             switch (PaginationMode)
             {
-                case Signum.Entities.DynamicQuery.PaginationMode.AllElements: return new Pagination.AllElements();
-                case Signum.Entities.DynamicQuery.PaginationMode.Top: return new Pagination.Top(ElementsPerPage.Value);
+                case Signum.Entities.DynamicQuery.PaginationMode.All: return new Pagination.All();
+                case Signum.Entities.DynamicQuery.PaginationMode.Firsts: return new Pagination.Firsts(ElementsPerPage.Value);
                 case Signum.Entities.DynamicQuery.PaginationMode.Paginate: return new Pagination.Paginate(ElementsPerPage.Value, 1);
                 default: return null;
             }
