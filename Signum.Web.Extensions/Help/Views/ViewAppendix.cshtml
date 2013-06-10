@@ -24,4 +24,16 @@
     </div>
     <div class="clearall">
     </div>
+    var nextAppendix = (AppendixHelp)ViewData["nextAppendix"];
+    if (nextAppendix != null)
+    {        
+        <div id="nextAppendix">@Html.ActionLink(nextAppendix.Title + " >>", "ViewAppendix", new { appendix = nextAppendix.Name })</div>
+    }
+    var prevAppendix = (AppendixHelp)ViewData["previousAppendix"];
+    if (prevAppendix != null)
+    { 
+        <div id="prevAppendix">@Html.ActionLink("<< " + prevAppendix.Title, "ViewAppendix", new { appendix = prevAppendix.Name })</div>
+    }
+    <div class="clearall">
+    </div>
 } 
