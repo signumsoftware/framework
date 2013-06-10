@@ -652,6 +652,15 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitUnary(UnaryExpression u)
         {
+            if (u.NodeType == ExpressionType.Convert && u.Type.IsNullable() && u.Type.UnNullify() == u.Operand.Type && u.Operand.NodeType == ExpressionType.Conditional)
+            {
+                ConditionalExpression ce = (ConditionalExpression)u.Operand;
+
+                var newCe = Expression.Condition(ce.Test, Convert(ce.IfTrue, u.Type), Convert(ce.IfFalse, u.Type));
+
+                return Visit(newCe);
+            }
+
             if (u.NodeType == ExpressionType.Convert && u.Type.IsNullable() && u.Type.UnNullify().IsEnum)
             {
                 if (u.Operand.NodeType == ExpressionType.Convert && u.Operand.Type.IsEnum)
@@ -694,6 +703,17 @@ namespace Signum.Engine.Linq
             }
 
             return result;
+        }
+
+        private Expression Convert(Expression expression, Type type)
+        {
+            if (expression.Type == type)
+                return expression;
+
+            if (expression.NodeType == ExpressionType.Convert && ((UnaryExpression)expression).Operand.Type == type)
+                return ((UnaryExpression)expression).Operand;
+
+            return Expression.Convert(expression, type);
         }
 
         protected override Expression VisitProjection(ProjectionExpression proj)

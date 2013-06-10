@@ -92,9 +92,9 @@ namespace Signum.Engine.Linq
                             m.GetArgument("keySelector").StripQuotes(),
                             m.GetArgument("elementSelector").StripQuotes());
                     case "Any":
-                        return this.BindAnyAll(m.Type, m.GetArgument("source"), m.TryGetArgument("predicate").StripQuotes(), m.Method, m == root); 
+                        return this.BindAnyAll(m.Type, m.GetArgument("source"), m.TryGetArgument("predicate").StripQuotes(), m.Method, m == root);
                     case "All":
-                        return this.BindAnyAll(m.Type, m.GetArgument("source"), m.GetArgument("predicate").StripQuotes(), m.Method, m == root); 
+                        return this.BindAnyAll(m.Type, m.GetArgument("source"), m.GetArgument("predicate").StripQuotes(), m.Method, m == root);
                     case "Contains":
                         return this.BindContains(m.Type, m.GetArgument("source"), m.TryGetArgument("item") ?? m.GetArgument("value"), m == root);
                     case "Count":
@@ -137,8 +137,8 @@ namespace Signum.Engine.Linq
                 var expression = Visit(m.Arguments[0]) as ImplementedByExpression;
 
                 var ib = expression as ImplementedByExpression;
-                
-                if(ib == null)
+
+                if (ib == null)
                     throw new InvalidOperationException("Method {0} is only meant to be used on {1}".Formato(m.Method.Name, typeof(ImplementedByExpression).Name));
 
                 CombineStrategy strategy = GetStrategy(m.Method);
