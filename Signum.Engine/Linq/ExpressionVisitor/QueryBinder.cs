@@ -1565,6 +1565,9 @@ namespace Signum.Engine.Linq
             if (operand.Type == uType)
                 return operand;
 
+            if (operand.Type.IsLite() != uType.IsLite())
+                throw new InvalidCastException("Impossible to convert {0} to {1}".Formato(operand.Type.TypeName(), uType.TypeName())); 
+
             if (operand.NodeType == (ExpressionType)DbExpressionType.Entity)
             {
                 EntityExpression ee = (EntityExpression)operand;
