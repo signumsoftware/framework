@@ -391,35 +391,9 @@ namespace Signum.Windows.UIAutomation
             return row;
         }
 
-        public string GetNumResults()
+        public PaginationSelectorProxy PaginationSelector
         {
-            return Element.ChildById("elementsInPageLabel").Child(a => a.Current.ControlType == ControlType.Text).Current.Name;
-        }
-
-        public AutomationElement GetElementsPerPageCombo()
-        {
-            return Element.ChildById("pageSizeSelector").Child(a => a.Current.ControlType == ControlType.ComboBox);
-        }
-
-        public PagerProxy Pager
-        {
-            get { return new PagerProxy(Element.ChildById("pageSelector")); }
-        }
-
-        public int? ElementsPerPage
-        {
-            get { return GetElementsPerPageCombo().ComboGetSelectedItem().Current.Name.ToInt(); }
-            set
-            {
-                var combo = GetElementsPerPageCombo();
-                combo.Pattern<ExpandCollapsePattern>().Expand();
-
-                var item = value != null ? combo.Child(a => a.Current.Name == value.Value.ToString()) : combo.ChildrenAll().Last();
-
-                item.Pattern<SelectionItemPattern>().Select();
-
-                WaitSearch();
-            }
+            get { return new PaginationSelectorProxy(Element.ChildById("paginationSelector"), this); }
         }
 
         public AutomationElement ConstructFrom(Enum operationKey, int? timeOut = null)
@@ -490,13 +464,15 @@ namespace Signum.Windows.UIAutomation
         }
     }
 
-    public class PagerProxy
+    public class PaginationSelectorProxy
     {
         public AutomationElement Element { get; private set; }
+        public SearchControlProxy SeachControl { get; private set; }
 
-        public PagerProxy(AutomationElement element)
+        public PaginationSelectorProxy(AutomationElement element, SearchControlProxy sc)
         {
             this.Element = element;
+            this.SeachControl = sc;
         }
 
         public void PreviousPage()
@@ -513,6 +489,43 @@ namespace Signum.Windows.UIAutomation
         {
             get { return int.Parse(Element.Child(a => a.Current.ControlType == ControlType.Text).Current.Name); }
             set { Element.Child(a => a.Current.ControlType == ControlType.Button && a.Current.Name == value.ToString()).ButtonInvoke(); }
+        }
+
+        public string GetNumResults()
+        {
+            return Element.ChildById("elementsInPageLabel").Child(a => a.Current.ControlType == ControlType.Text).Current.Name;
+        }
+
+        public AutomationElement GetElementsCombo()
+        {
+            return Element.ChildById("cbElements");
+        }
+
+        public int Elements
+        {
+            get { return int.Parse(GetElementsCombo().ComboGetSelectedItem().Current.Name); }
+            set
+            {
+                GetElementsCombo().ComboSelectItem(ae => ae.Current.Name == value.ToString());
+
+                SeachControl.WaitSearch();
+            }
+        }
+
+        public AutomationElement GetPaginationModeCombo()
+        {
+            return Element.ChildById("cbMode");
+        }
+
+        public PaginationMode PaginationMode
+        {
+            get { return GetPaginationModeCombo().ComboGetSelectedItem().Current.Name.ToEnum<PaginationMode>(); }
+            set
+            {
+                GetPaginationModeCombo().ComboSelectItem(ae => ae.Current.Name == value.ToString());
+
+                SeachControl.WaitSearch();
+            }
         }
     }
 
