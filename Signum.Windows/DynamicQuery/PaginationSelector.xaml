@@ -12,15 +12,21 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
-    <Grid>
+    <Grid MinWidth="300">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <m:ElementsInPageLabel x:Name="elementsInPageLabel" Grid.Column="0" HorizontalAlignment="Left" MinWidth="150" Visibility="Hidden"  VerticalAlignment="Center"/>
+        <m:ElementsInPageLabel x:Name="elementsInPageLabel" Grid.Column="0" HorizontalAlignment="Left" Visibility="Hidden"  VerticalAlignment="Center"/>
         <StackPanel Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="Center">
-            <ComboBox  x:Name="cbMode"  SelectionChanged="cbMode_SelectionChanged" VerticalAlignment="Center"/>
+            <ComboBox  x:Name="cbMode"  SelectionChanged="cbMode_SelectionChanged" VerticalAlignment="Center">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Converter={x:Static m:Converters.EnumDescription}}"  VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
             <ComboBox  x:Name="cbElements" SelectionChanged="cbElements_SelectionChanged" VerticalAlignment="Center"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal" x:Name="spPageSelector" Grid.Column="2" HorizontalAlignment="Right" >

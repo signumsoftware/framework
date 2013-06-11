@@ -49,8 +49,8 @@
     <Member Name="AConnectionWithTheServerIsNecessaryToContinue" Description="Es necesario tener conexión con el servidor para continuar" />
     <Member Name="SessionExpired" Description="Sesión caducada" />
   </Type>
-  <Type Name="CorruptEntity" Description="Entidad corruptible">
-    <Member Name="Corrupt" Description="Corrupta" />
+  <Type Name="CorruptMixin">
+    <Member Name="Corrupt" Description="Corrupto" />
   </Type>
   <Type Name="EmbeddedEntity" Description="Entidad embebida" />
   <Type Name="EngineMessage">
@@ -60,6 +60,7 @@
     <Member Name="TheEntity0IsNew" Description="La entidad {0} es nueva" />
     <Member Name="ThereAre0ThatReferThisEntity" Description="Hay '{0}' que refieren a esta entidad" />
     <Member Name="ThereAreRecordsIn0PointingToThisTableByColumn1" Description="Hay registros en '{0}' que refieren a esta tabla por la columna '{1}'" />
+    <Member Name="TheresAlreadyA0With12" Description="Ya hay un '{0}' con '{1}' {2}" />
     <Member Name="UnauthorizedAccessTo0Because1" Description="Acceso denegado a {0} porque {1}" />
   </Type>
   <Type Name="Entity" Description="Entidad" />
@@ -164,6 +165,7 @@
   <Type Name="LockableEntity" Description="Entidad bloqueable">
     <Member Name="Locked" Description="Bloqueado" />
   </Type>
+  <Type Name="MixinEntity" />
   <Type Name="ModelEntity" Description="Entidad modelo" />
   <Type Name="ModifiableEntity" Description="Entidad modificable" PluralDescription="Entidades modificables" />
   <Type Name="MultiEnumDN" Description="Multi enum" PluralDescription="Multi enums">
@@ -205,11 +207,11 @@
   <Type Name="OperationMessage">
     <Member Name="Create" Description="Crear..." />
     <Member Name="CreateFromRegex" Description="^ Crear (. *) de. *$" />
-    <Member Name="ImpossibleToExecute0FromState1" Description="Imposible ejecutar {0} desde el estado {1}" />
     <Member Name="InUserInterface" Description="(en interfaz de usuario)" />
     <Member Name="Operation01IsNotAuthorized" Description="La operación {0} ({1}) no está autorizada" />
     <Member Name="PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem" Description="Confirme que desea eliminar esta entidad del sistema" />
     <Member Name="PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem" Description="Confirme que desea eliminar las entidades seleccionadas del sistema" />
+    <Member Name="StateShouldBe0InsteadOf1" Description="Estado debe ser {0} (en lugar de {1})" />
   </Type>
   <Type Name="OrderType" Description="Tipo de órden">
     <Member Name="Ascending" Description="Ascendente" />
@@ -217,6 +219,11 @@
   </Type>
   <Type Name="PaginationMessage">
     <Member Name="All" Description="Todas" />
+  </Type>
+  <Type Name="PaginationMode">
+    <Member Name="All" Description="Todos" />
+    <Member Name="Firsts" Description="Primeros" />
+    <Member Name="Paginate" Description="Paginar" />
   </Type>
   <Type Name="QueryTokenMessage">
     <Member Name="_0As1" Description="({0} como {1})" />
@@ -252,6 +259,8 @@
     <Member Name="Quicklinks" Description="Vínculos rápidos" />
   </Type>
   <Type Name="SearchMessage">
+    <Member Name="_01of2Results" Description="{0} - {1} de {2} resultado[s]." />
+    <Member Name="_0Results" Description="{0} resultado[s]." />
     <Member Name="ChooseTheDisplayNameOfTheNewColumn" Description="Elige el nombre que se verá en la nueva columna" />
     <Member Name="CreateNew" Description="Crear nueva" />
     <Member Name="Field" Description="Campo" />
@@ -261,6 +270,7 @@
     <Member Name="Filters" Description="Filtros" />
     <Member Name="Find" Description="Buscar" />
     <Member Name="FinderOf0" Description="Buscador de {0}" />
+    <Member Name="First0Results" Description="primer[os] {0} resultado[s]." />
     <Member Name="Name" Description="Nombre" />
     <Member Name="NewColumn" Description="Nueva columna" />
     <Member Name="NewColumnSName" Description="Nombre de la nueva columna" />
@@ -275,15 +285,10 @@
     <Member Name="Query0NotAllowed" Description="La query {0} no está permitida" />
     <Member Name="Query0NotRegistered" Description="La query {0} no está registrada en el DynamicQueryManager" />
     <Member Name="Rename" Description="Renombrar" />
-    <Member Name="Results" Description="resultados." />
-    <Member Name="Rows" Description="Filas:" />
     <Member Name="Search" Description="Buscar" />
     <Member Name="Search_Create" Description="Crear" />
     <Member Name="Search_CtxMenuItem_Operations" Description="Operaciones" />
     <Member Name="SearchControl_Pagination_All" Description="Todos" />
-    <Member Name="SearchControl_Pagination_Of" Description="de" />
-    <Member Name="SearchControl_Pagination_Results" Description="resultados" />
-    <Member Name="SearchControl_Pagination_Rows" Description="Filas" />
     <Member Name="SelectAnElement" Description="Seleccione un elemento" />
     <Member Name="ThereIsNo0" Description="No hay {0}" />
     <Member Name="Value" Description="Valor" />
@@ -317,7 +322,6 @@
     <Member Name="_0DoesNotHaveAValid0Format" Description="{{0}} no tiene un formato válido {0}" />
     <Member Name="_0HasAnInvalidFormat" Description="{0} tiene un formato inválido" />
     <Member Name="_0HasMoreThan0DecimalPlaces" Description="{{0}} tiene más de {0} decimales" />
-    <Member Name="_0HasNoCorrectFormat" Description="{0} no tiene un formato correcto" />
     <Member Name="_0HasSomeRepeatedElements0" Description="{{0}} tiene algunos elementos repetidos: {0}" />
     <Member Name="_0HasToBe0Than1" Description="{{0}} tiene que ser {0} {1}" />
     <Member Name="_0HasToBeBetween0And1" Description="{{0}} Tiene que estar entre {0} y {1}" />
@@ -343,6 +347,7 @@
     <Member Name="InvalidDateFormat" Description="Formato de fecha incorrecto" />
     <Member Name="InvalidFormat" Description="Formato inválido" />
     <Member Name="NotPossibleToaAssign0" Description="No es posible asignar {0}" />
+    <Member Name="Numeric" Description="Numérico" />
     <Member Name="OrBeNull" Description="o ser nulo" />
     <Member Name="Telephone" Description="Teléfono" />
     <Member Name="TheLenghtOf0HasToBeEqualTo0" Description="La longitud de {{0}} ha de ser {0}" />
@@ -352,6 +357,8 @@
     <Member Name="TheNumberOfElementsOf0HasToBe01" Description="El número de elementos en {{0}} ha de ser {0} {1}" />
     <Member Name="Type0NotAllowed" Description="El tipo {0} no está permitido" />
   </Type>
+  <Type Name="ValueLineBoxModel" />
+  <Type Name="ValueLineBoxType" />
   <Type Name="VoidEnumMessage">
     <Member Name="Instance" Description="-" />
   </Type>

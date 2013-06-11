@@ -131,7 +131,7 @@ namespace Signum.Entities
                 .Formato(typeof(M).TypeName(), GetType().TypeName()));
         }
 
-
+        [HiddenProperty]
         public MixinEntity this[string mixinName]
         {
             get
@@ -149,6 +149,7 @@ namespace Signum.Entities
             }
         }
 
+        [HiddenProperty]
         public IEnumerable<MixinEntity> AllMixin
         {
             get
