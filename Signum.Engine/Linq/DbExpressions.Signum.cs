@@ -61,8 +61,8 @@ namespace Signum.Engine.Linq
                 ExternalId.NiceToString());
 
             return constructor +
-                Bindings == null ? null : ("\r\n{\r\n " + Bindings.ToString(",\r\n ").Indent(4) + "\r\n}") +
-                Mixins == null ? null : ("\r\n" + Mixins.ToString(m => ".Mixin({0})".Formato(m), "\r\n"));
+                (Bindings == null ? null : ("\r\n{\r\n " + Bindings.ToString(",\r\n ").Indent(4) + "\r\n}")) +
+                (Mixins == null ? null : ("\r\n" + Mixins.ToString(m => ".Mixin({0})".Formato(m), "\r\n")));
         }
 
         public Expression GetBinding(FieldInfo fi)
