@@ -201,7 +201,7 @@ namespace Signum.Engine.Mailing
             {
                 AllowsNew = true,
                 Lite = false,
-                FromStates = { NewsletterState.Created, NewsletterState.Saved, NewsletterState.Sent },
+                FromStates = { NewsletterState.Created, NewsletterState.Saved },
                 ToState = NewsletterState.Saved,
                 Execute = (n, _) => n.State = NewsletterState.Saved
             }.Register();
@@ -244,7 +244,7 @@ namespace Signum.Engine.Mailing
 
             new Execute(NewsletterOperation.Send)
             {
-                FromStates = { NewsletterState.Saved, NewsletterState.Sent },
+                FromStates = { NewsletterState.Saved },
                 ToState = NewsletterState.Sent,
                 CanExecute = n =>
                 {
