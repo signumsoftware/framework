@@ -166,7 +166,7 @@ namespace Signum.Engine.Linq
 
                     SqlPreCommandSimple command = new SqlPreCommandSimple(CommandText, Parameters);
 
-                    using (HeavyProfiler.Log("SQL", () => command.Sql))
+                    using (HeavyProfiler.Log("SQL", () => command.PlainSql()))
                     using (DbDataReader reader = Executor.UnsafeExecuteDataReader(command))
                     {
                         ProjectionRowEnumerator<T> enumerator = new ProjectionRowEnumerator<T>(reader, ProjectorExpression, lookups, retriever);
