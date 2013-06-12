@@ -130,7 +130,6 @@
     <Compile Include="Linq\ExpressionVisitor\OrderByRewriter.cs" />
     <Compile Include="Linq\ExpressionVisitor\GroupEntityCleaner.cs" />
     <Compile Include="Linq\ExpressionVisitor\AggregateFinder.cs" />
-    <Compile Include="Linq\ExpressionVisitor\RowNumberFiller.cs" />
     <Compile Include="Linq\ExpressionVisitor\QueryFilterer.cs" />
     <Compile Include="Linq\ExpressionVisitor\QueryRebinder.cs" />
     <Compile Include="Linq\ExpressionVisitor\OverloadingSimplifier.cs" />

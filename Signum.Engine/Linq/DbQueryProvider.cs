@@ -90,10 +90,8 @@ namespace Signum.Engine.Linq
             Expression rebinded = QueryRebinder.Rebind(orderRewrited);
             log.Switch("UnusedColumn");
             Expression columnCleaned = UnusedColumnRemover.Remove(rebinded);
-            log.Switch("RowNumber");
-            Expression rowFilled = RowNumberFiller.Fill(columnCleaned);
             log.Switch("Redundant");
-            Expression subqueryCleaned = RedundantSubqueryRemover.Remove(rowFilled);
+            Expression subqueryCleaned = RedundantSubqueryRemover.Remove(columnCleaned);
             log.Switch("Condition");
             Expression rewriteConditions = ConditionsRewriter.Rewrite(subqueryCleaned);
             log.Switch("Scalar");

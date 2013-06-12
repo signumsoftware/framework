@@ -312,6 +312,7 @@ namespace Signum.Engine.Linq
         Reverse = 1,
         ForXmlPathEmpty = 2,
         OrderAlsoByKeys = 4,
+        HasIndex = 8,
     }
 
     internal class SelectExpression : SourceWithAliasExpression
@@ -339,6 +340,12 @@ namespace Signum.Engine.Linq
         {
             get { return (SelectOptions & Linq.SelectOptions.OrderAlsoByKeys) != 0; }
         }
+
+        public bool HasIndex
+        {
+            get { return (SelectOptions & Linq.SelectOptions.HasIndex) != 0; }
+        }
+
 
         readonly Alias[] knownAliases;
         public override Alias[] KnownAliases
@@ -400,7 +407,7 @@ namespace Signum.Engine.Linq
                 Where.TryCC(a => "WHERE " + a.NiceToString() + "\r\n"),
                 OrderBy.TryCC(ob => "ORDER BY " + ob.ToString(" ,") + "\r\n"),
                 GroupBy.TryCC(gb => "GROUP BY " + gb.ToString(g => g.NiceToString(), " ,") + "\r\n"),
-                SelectOptions.HasFlag(SelectOptions.ForXmlPathEmpty) ? "FOR XML PATH('')\r\n" : "",
+                SelectOptions == 0 ? "" : SelectOptions.ToString() + "\r\n",
                 Alias);
         }
 
@@ -968,11 +975,6 @@ namespace Signum.Engine.Linq
             this.Projector = projector;
             this.UniqueFunction = uniqueFunction;
         }
-    
-        //internal bool IsOneCell
-        //{
-        //    get { return this.UniqueFunction.HasValue && Select.Columns.Count == 1; }
-        //}
 
         public override string ToString()
         {

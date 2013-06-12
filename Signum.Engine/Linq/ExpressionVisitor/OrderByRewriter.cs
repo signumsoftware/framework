@@ -16,6 +16,7 @@ namespace Signum.Engine.Linq
         List<ColumnExpression> gatheredKeys;
         ReadOnlyCollection<OrderExpression> gatheredOrderings;
         SelectExpression outerMostSelect;
+        bool hasProjectionInProjector; 
 
         private OrderByRewriter() { }
 
@@ -45,10 +46,22 @@ namespace Signum.Engine.Linq
                 var oldOuterMostSelect = outerMostSelect;
                 outerMostSelect = proj.Select;
 
-                var result = base.VisitProjection(proj);
-                outerMostSelect = oldOuterMostSelect;
+                var oldHasProjectionInProjector = hasProjectionInProjector;
+                hasProjectionInProjector = false;
 
-                return result;
+                Expression projector = this.Visit(proj.Projector);
+                SelectExpression source = (SelectExpression)this.Visit(proj.Select);
+
+                hasProjectionInProjector = oldHasProjectionInProjector;
+                hasProjectionInProjector |= true;
+
+                outerMostSelect = oldOuterMostSelect;
+              
+
+                if (source != proj.Select || projector != proj.Projector)
+                    return new ProjectionExpression(source, projector, proj.UniqueFunction, proj.Type);
+
+                return proj;
             }
 
         }
@@ -57,14 +70,15 @@ namespace Signum.Engine.Linq
         {
             bool isOuterMost = select == outerMostSelect;
 
-            if (select.IsOrderAlsoByKeys && gatheredKeys == null)
-                gatheredKeys = new List<ColumnExpression>();
-
+            if (select.IsOrderAlsoByKeys || select.HasIndex || select.Top != null && hasProjectionInProjector)
+            {
+                if (gatheredKeys == null)
+                    gatheredKeys = new List<ColumnExpression>();
+            }
 
             List<ColumnExpression> saveKeys = null;
             if (gatheredKeys != null && (select.IsDistinct || select.GroupBy.HasItems()))
                 saveKeys = gatheredKeys.ToList();
-
 
             select = (SelectExpression)base.VisitSelect(select);
 
@@ -120,10 +134,9 @@ namespace Signum.Engine.Linq
 
             ReadOnlyCollection<OrderExpression> orderings = null;
 
-            if(isOuterMost && !IsCountSumOrAvg(select) || select.Top != null)
+            if (isOuterMost && !IsCountSumOrAvg(select) || select.Top != null)
             {
-                if (select.Top != null)
-                    AppendKeys();
+                AppendKeys();
 
                 orderings = gatheredOrderings;
                 gatheredOrderings = null;
@@ -134,6 +147,13 @@ namespace Signum.Engine.Linq
 
             return new SelectExpression(select.Alias, select.IsDistinct, select.Top, (IEnumerable<ColumnDeclaration>)newColumns ?? select.Columns,
                 select.From, select.Where, orderings, select.GroupBy, select.SelectOptions & ~SelectOptions.Reverse);
+        }
+
+        protected override Expression VisitRowNumber(RowNumberExpression rowNumber)
+        {
+            AppendKeys();
+
+            return new RowNumberExpression(gatheredOrderings);
         }
 
 
@@ -263,6 +283,8 @@ namespace Signum.Engine.Linq
 
                 this.gatheredOrderings = this.gatheredOrderings.Concat(postOrders).ToReadOnly();
             }
+
+            this.gatheredKeys = null;
         }
 
         static Expression CleanCast(Expression exp)

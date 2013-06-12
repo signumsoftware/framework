@@ -208,12 +208,7 @@ namespace Signum.Engine.Linq
         {
             var source = projection.Select;
 
-            var orders = source.FollowC(a => a.From as SelectExpression)
-                .TakeWhile(s => !s.IsDistinct && s.GroupBy.IsNullOrEmpty())
-                .Select(s => s.OrderBy)
-                .FirstOrDefault(o => !o.IsNullOrEmpty());
-
-            RowNumberExpression rne = new RowNumberExpression(orders); //if its null should be filled in a later stage
+            RowNumberExpression rne = new RowNumberExpression(null); //if its null should be filled in a later stage
             ColumnDeclaration cd = new ColumnDeclaration("_rowNum", Expression.Subtract(rne, new SqlConstantExpression(1)));
 
             Alias alias = NextSelectAlias();
@@ -223,7 +218,7 @@ namespace Signum.Engine.Linq
             ProjectedColumns pc = ColumnProjector.ProjectColumns(projection.Projector, alias);
 
             return new ProjectionExpression(
-                new SelectExpression(alias, false, null, pc.Columns.PreAnd(cd), source, null, null, null, 0)
+                new SelectExpression(alias, false, null, pc.Columns.PreAnd(cd), source, null, null, null, SelectOptions.HasIndex)
                 , pc.Projector, null, projection.Type); 
         }
 

@@ -79,6 +79,12 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void OrderByCommonSelectPaginate()
+        {
+            TestPaginate(Database.Query<ArtistDN>().OrderBy(a => a.Sex).Select(a => a.Name));
+        }
+
+        [TestMethod]
         public void OrderBySelectPaginate()
         {
             TestPaginate(Database.Query<ArtistDN>().OrderBy(a => a.Name).Select(a => a.Name));
