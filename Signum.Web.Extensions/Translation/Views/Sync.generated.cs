@@ -59,7 +59,7 @@ namespace Signum.Web.Extensions.Translation.Views
     #line default
     #line hidden
     
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.5.4.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Translation/Views/Sync.cshtml")]
     public partial class Sync : System.Web.Mvc.WebViewPage<AssemblyChanges>
     {
@@ -574,7 +574,7 @@ WriteLiteral(@"
             var select = $(this).parent().find(""select"");
             var input = $(""<textarea/>"").attr(""type"", ""text"")
                 .attr(""name"", select.attr(""name""))
-                .attr(""value"", select.attr(""value""))
+                .val(select.val())
                 .attr(""style"", ""width:90%; height:16px"");
             select.after(input);
             select.remove();

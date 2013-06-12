@@ -77,6 +77,7 @@
             </m:EntityRepeater.EntityTemplate>
         </m:EntityRepeater>
 
+        <m:ValueLine m:Common.Route="PaginationMode" />
         <m:ValueLine m:Common.Route="ElementsPerPage" />
     </StackPanel>
 </UserControl>

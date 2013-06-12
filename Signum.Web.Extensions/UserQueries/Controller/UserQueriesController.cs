@@ -68,7 +68,7 @@ namespace Signum.Web.UserQueries
             return request.ToUserQuery(
                 DynamicQueryManager.Current.QueryDescription(request.QueryName),
                 QueryLogic.GetQuery(request.QueryName),
-                FindOptions.DefaultElementsPerPage,
+                FindOptions.DefaultPagination,
                 withoutFilters: false /*Implement Simple Filter Builder*/);
         }
 

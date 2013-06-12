@@ -58,6 +58,7 @@ namespace Signum.Entities.UserQueries
             set { Set(ref guid, value, () => Guid); }
         }
 
+        [HiddenProperty]
         public bool OverrideVisible
         {
             get { return Action == EntityAction.Different; }

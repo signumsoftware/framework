@@ -176,7 +176,7 @@
             var select = $(this).parent().find("select");
             var input = $("<textarea/>").attr("type", "text")
                 .attr("name", select.attr("name"))
-                .attr("value", select.attr("value"))
+                .val(select.val())
                 .attr("style", "width:90%; height:16px");
             select.after(input);
             select.remove();

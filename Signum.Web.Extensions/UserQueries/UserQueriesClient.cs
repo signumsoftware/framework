@@ -241,7 +241,7 @@ namespace Signum.Web.UserQueries
                 OrderType = qo.OrderType
             }));
 
-            findOptions.ElementsPerPage = userQuery.ElementsPerPage;
+            findOptions.Pagination = userQuery.GetPagination();
         }
 
         public static FindOptions ToFindOptions(this UserQueryDN userQuery)

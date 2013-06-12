@@ -103,8 +103,15 @@ namespace Signum.Entities.UserQueries
             set { Set(ref columns, value, () => Columns); }
         }
 
+        PaginationMode? paginationMode;
+        public PaginationMode? PaginationMode
+        {
+            get { return paginationMode; }
+            set { if (Set(ref paginationMode, value, () => PaginationMode)) Notify(() => ShouldHaveElements); }
+        }
+
         int? elementsPerPage;
-        [NumberIsValidator(ComparisonType.GreaterThanOrEqual, -1)]
+        [NumberIsValidator(ComparisonType.GreaterThanOrEqual, 1)]
         public int? ElementsPerPage
         {
             get { return elementsPerPage; }
@@ -150,13 +157,28 @@ namespace Signum.Entities.UserQueries
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => ElementsPerPage) && ElementsPerPage <= 0 && ElementsPerPage != -1)
-                return UserQueryMessage.ShouldBe1AllEmptyDefaultOrANumberGreaterThanZero.NiceToString();
+            if (pi.Is(() => ElementsPerPage))
+            {
+                if (ElementsPerPage != null && !ShouldHaveElements)
+                    return UserQueryMessage._0ShouldBeNullIf1Is2.NiceToString().Formato(pi.NiceName(), NicePropertyName(() => PaginationMode), PaginationMode.NiceToString());
+
+                if (ElementsPerPage == null && ShouldHaveElements)
+                    return UserQueryMessage._0ShouldBeSetIf1Is2.NiceToString().Formato(pi.NiceName(), NicePropertyName(() => PaginationMode), PaginationMode.NiceToString());
+            }
 
             if (pi.Is(() => Filters) && WithoutFilters && Filters.Any())
-                return "{0} should be empty if {1} is set".Formato(pi.NiceName(), ReflectionTools.GetPropertyInfo(() => WithoutFilters).NiceName());
+                return UserQueryMessage._0ShouldBeEmptyIf1IsSet.NiceToString().Formato(pi.NiceName(), ReflectionTools.GetPropertyInfo(() => WithoutFilters).NiceName());
 
             return base.PropertyValidation(pi);
+        }
+
+        public bool ShouldHaveElements
+        {
+            get
+            {
+                return PaginationMode == Signum.Entities.DynamicQuery.PaginationMode.Firsts ||
+                    PaginationMode == Signum.Entities.DynamicQuery.PaginationMode.Paginate;
+            }
         }
 
         internal void ParseData(QueryDescription description)
@@ -191,6 +213,7 @@ namespace Signum.Entities.UserQueries
                 Related == null ? null : new XAttribute("Related", Related.Key()),
                 WithoutFilters == true ? null : new XAttribute("WithoutFilters", true),
                 ElementsPerPage == null ? null : new XAttribute("ElementsPerPage", ElementsPerPage),
+                PaginationMode == null ? null : new XAttribute("PaginationMode", PaginationMode),
                 new XAttribute("ColumnsMode", ColumnsMode),
                 Filters.IsNullOrEmpty() ? null : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
                 Columns.IsNullOrEmpty() ? null : new XElement("Columns", Columns.Select(c => c.ToXml(ctx)).ToList()),
@@ -205,13 +228,24 @@ namespace Signum.Entities.UserQueries
             Related = element.Attribute("Related").TryCC(a => Lite.Parse(a.Value));
             WithoutFilters = element.Attribute("WithoutFilters").TryCS(a => a.Value == true.ToString()) ?? false;
             ElementsPerPage = element.Attribute("ElementsPerPage").TryCS(a => int.Parse(a.Value));
+            PaginationMode = element.Attribute("PaginationMode").TryCS(a => a.Value.ToEnum<PaginationMode>());
             ColumnsMode = element.Attribute("ColumnsMode").Value.ToEnum<ColumnOptionsMode>();
             Filters.Syncronize(element.Element("Filters").TryCC(fs => fs.Elements()).EmptyIfNull().ToList(), (f, x)=>f.FromXml(x, ctx));
             Columns.Syncronize(element.Element("Columns").TryCC(fs => fs.Elements()).EmptyIfNull().ToList(), (c, x)=>c.FromXml(x, ctx));
             Orders.Syncronize(element.Element("Orders").TryCC(fs => fs.Elements()).EmptyIfNull().ToList(), (o, x)=>o.FromXml(x, ctx));   
         }
-    }
 
+        public Pagination GetPagination()
+        {
+            switch (PaginationMode)
+            {
+                case Signum.Entities.DynamicQuery.PaginationMode.All: return new Pagination.All();
+                case Signum.Entities.DynamicQuery.PaginationMode.Firsts: return new Pagination.Firsts(ElementsPerPage.Value);
+                case Signum.Entities.DynamicQuery.PaginationMode.Paginate: return new Pagination.Paginate(ElementsPerPage.Value, 1);
+                default: return null;
+            }
+        }
+    }
 
     public enum UserQueryPermission
     {
@@ -525,9 +559,17 @@ namespace Signum.Entities.UserQueries
     {
         public static Func<Lite<IdentifiableEntity>> DefaultRelated = () => UserDN.Current.ToLite();
 
-        public static UserQueryDN ToUserQuery(this QueryRequest request, QueryDescription qd, QueryDN query, int defaultElementsPerPage, bool withoutFilters)
+        public static UserQueryDN ToUserQuery(this QueryRequest request, QueryDescription qd, QueryDN query, Pagination defaultPagination, bool withoutFilters)
         {
             var tuple = SmartColumns(request.Columns, qd);
+
+            var defaultMode = defaultPagination.GetMode();
+            var defaultElementsPerPage = defaultPagination.GetElementsPerPage();
+
+            var mode = request.Pagination.GetMode();
+            var elementsPerPage = request.Pagination.GetElementsPerPage();
+
+            bool isDefaultPaginate = defaultMode == mode && defaultElementsPerPage == elementsPerPage;
 
             return new UserQueryDN
             {
@@ -547,7 +589,8 @@ namespace Signum.Entities.UserQueries
                     Token = oo.Token,
                     OrderType = oo.OrderType
                 }).ToMList(),
-                ElementsPerPage = (request.ElementsPerPage == defaultElementsPerPage) ? (int?)null : request.ElementsPerPage,
+                PaginationMode = isDefaultPaginate ? (PaginationMode?)null : mode,
+                ElementsPerPage = isDefaultPaginate ? (int?)null : elementsPerPage,
             };
         }
 
@@ -592,8 +635,12 @@ namespace Signum.Entities.UserQueries
         MyQueries,
         [Description("Remove User Query?")]
         RemoveUserQuery,
-        [Description("{0} should be -1 (all), empty (default), or a number greater than zero")]
-        ShouldBe1AllEmptyDefaultOrANumberGreaterThanZero,
+        [Description("{0} should be empty if {1} is set")]
+        _0ShouldBeEmptyIf1IsSet,
+        [Description("{0} should be null if {1} is '{2}'")]
+        _0ShouldBeNullIf1Is2,
+        [Description("{0} should be set if {1} is '{2}'")]
+        _0ShouldBeSetIf1Is2,
         [Description("Create")]
         UserQueries_CreateNew,
         [Description("Edit")]

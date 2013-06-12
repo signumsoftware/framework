@@ -71,7 +71,7 @@ namespace Signum.Entities.Omnibox
                     {
                         foreach (Lite<IdentifiableEntity> lite in autoComplete)
                         {
-                            OmniboxMatch distance = OmniboxUtils.Contains(lite, lite.ToString(), pattern);
+                            OmniboxMatch distance = OmniboxUtils.Contains(lite, lite.ToString() ?? "", pattern);
 
                             if (distance != null)
                                 yield return new EntityOmniboxResult

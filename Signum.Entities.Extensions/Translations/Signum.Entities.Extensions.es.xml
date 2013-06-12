@@ -64,6 +64,8 @@
     <Member Name="_0of1" Description="{0} de {1}" />
     <Member Name="Everything" Description="Todo" />
     <Member Name="Nothing" Description="Nada" />
+    <Member Name="PermissionRules" Description="Reglas de autorización" />
+    <Member Name="TypeRules" Description="Reglas de tipo" />
   </Type>
   <Type Name="AuthMessage">
     <Member Name="_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships" Description="{0} ciclos han sido encontrados en el grafo de funciones debido a las relaciones:&#xD;&#xA;" />
@@ -194,7 +196,6 @@
   </Type>
   <Type Name="ChartColumnDN" Description="Columna de gráfico">
     <Member Name="DisplayName" Description="Nombre para Mostrar" />
-    <Member Name="Index" Description="Índice" />
     <Member Name="Parameter1" Description="Parámetro1" />
     <Member Name="Parameter2" Description="Parámetro2" />
     <Member Name="Parameter3" Description="Parámetro3" />
@@ -287,6 +288,7 @@
   <Type Name="ControlPanelDN" Description="Panel de control">
     <Member Name="DisplayName" Description="Nombre" />
     <Member Name="EntityType" Description="Tipo de entidad" />
+    <Member Name="Guid" Description="Guid" />
     <Member Name="HomePagePriority" Description="Prioridad de la página de inicio" />
     <Member Name="NumberOfColumns" Description="Número de columnas" />
     <Member Name="Parts" Description="Partes" />
@@ -410,6 +412,10 @@
     <Member Name="NotAllowedToSave0WhileOffline" Description="No se puede guardar {0} en modo descaonectado" />
     <Member Name="The0WithId12IsLockedBy3" Description="El {0} con Id {1} ({2}) está bloqueado por {3}" />
   </Type>
+  <Type Name="DisconnectedMixin">
+    <Member Name="DisconnectedMachine" Description="Máquina desconectada" />
+    <Member Name="LastOnlineTicks" Description="Últimos ticks online" />
+  </Type>
   <Type Name="EmailMessageDN" Description="Mensaje de e-mail">
     <Member Name="Bcc" Description="CCO" />
     <Member Name="Body" Description="Cuerpo" />
@@ -446,6 +452,11 @@
     <Member Name="BinaryFile" Description="Archivo binario" />
     <Member Name="FileName" Description="Nombre de archivo" />
     <Member Name="FullWebPath" Description="Ruta web completa" />
+  </Type>
+  <Type Name="EntityAction" Description="Acción de la entidad">
+    <Member Name="Different" Description="Diferentes" />
+    <Member Name="Identical" Description="Idénticas" />
+    <Member Name="New" Description="Nueva" />
   </Type>
   <Type Name="ExcelMessage">
     <Member Name="Data" Description="Datos" />
@@ -575,6 +586,9 @@
   <Type Name="IProcessSessionDN" />
   <Type Name="IScheduleRuleDN" />
   <Type Name="ITaskDN" />
+  <Type Name="IUserAssetEntity">
+    <Member Name="Guid" Description="Guid" />
+  </Type>
   <Type Name="LastAuthRulesImportDN" Description="Últimas importación de AuthRules">
     <Member Name="Date" Description="Fecha" />
   </Type>
@@ -790,11 +804,11 @@
     <Member Name="ValueString" Description="Valor cadena" />
   </Type>
   <Type Name="QueryOrderDN" Description="Orden de consulta">
-    <Member Name="Index" Description="Índice" />
     <Member Name="OrderType" Description="Tipo de orden" />
   </Type>
   <Type Name="QueryRulePack" Description="Pack de reglas de consultas" />
   <Type Name="QueryTokenDN" Description="Token de consulta">
+    <Member Name="Index" Description="Índice" />
     <Member Name="TokenString" Description="Cadena del token" />
   </Type>
   <Type Name="ResetPasswordRequestDN" Description="Solicitud nueva contraseña">
@@ -1029,6 +1043,21 @@
   </Type>
   <Type Name="TypeConditionNameDN" Description="Nombre condición de tipo" />
   <Type Name="TypeRulePack" Description="Pack de reglas de tipo" />
+  <Type Name="UserAssetMessage">
+    <Member Name="ExportToXml" Description="Exportar a xml" />
+    <Member Name="ImportPreview" Description="Previsualizar importación" />
+    <Member Name="ImportUserAssets" Description="Importar recursos de usuario" />
+    <Member Name="SelectTheEntitiesToOverride" Description="Seleccione las entidades a reemplazar" />
+    <Member Name="SucessfullyImported" Description="Correctamente importado" />
+  </Type>
+  <Type Name="UserAssetPreviewLine" Description="Línea de previsualización de activos de usuario">
+    <Member Name="Action" Description="Acción" />
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="OverrideEntity" Description="Reemplazar la entidad" />
+    <Member Name="Text" Description="Texto" />
+    <Member Name="Type" Description="Tipo" />
+  </Type>
+  <Type Name="UserAssetPreviewModel" Description="Previsualización de recursos de usuario" />
   <Type Name="UserChartDN" Description="Gráfico de usuario">
     <Member Name="ChartScript" Description="Script de gráfico" />
     <Member Name="Columns" Description="Columnas" />
@@ -1036,6 +1065,7 @@
     <Member Name="EntityType" Description="Tipo de entidad" />
     <Member Name="Filters" Description="Filtros" />
     <Member Name="GroupResults" Description="Agrupar Resultados" />
+    <Member Name="Guid" Description="Guid" />
     <Member Name="Orders" Description="Órdenes" />
     <Member Name="Query" Description="Consulta" />
     <Member Name="Related" Description="Relacionado" />
@@ -1079,18 +1109,23 @@
     <Member Name="ElementsPerPage" Description="Elementos por página" />
     <Member Name="EntityType" Description="Tipo de entidad" />
     <Member Name="Filters" Description="Filtros" />
+    <Member Name="Guid" Description="Guid" />
     <Member Name="Orders" Description="Ordenes" />
+    <Member Name="PaginationMode" Description="Modo de paginación" />
     <Member Name="Query" Description="Consulta" />
     <Member Name="Related" Description="Relacionado" />
+    <Member Name="ShouldHaveElements" Description="Debe tener elementos" />
     <Member Name="WithoutFilters" Description="Sin filtros" />
   </Type>
   <Type Name="UserQueryMessage">
     <Member Name="_0IsNotFilterable" Description="{0} no es filtrable" />
+    <Member Name="_0ShouldBeEmptyIf1IsSet" Description="{0} debe estar vacío si se establece {1}" />
+    <Member Name="_0ShouldBeNullIf1Is2" Description="{0} debe ser nulo si {1} es '{2}'" />
+    <Member Name="_0ShouldBeSetIf1Is2" Description="{0} debe establecerse si {1} es '{2}'" />
     <Member Name="AreYouSureToRemove0" Description="¿Estás seguro de eliminar '{0}'?" />
     <Member Name="Edit" Description="Editar" />
     <Member Name="MyQueries" Description="Mis Queries" />
     <Member Name="RemoveUserQuery" Description="¿Eliminar consulta personalizada?" />
-    <Member Name="ShouldBe1AllEmptyDefaultOrANumberGreaterThanZero" Description="{0} debe ser -1 (todos), vacío (por defecto) o un número mayor que cero" />
     <Member Name="TheFilterOperation0isNotCompatibleWith1" Description="La operación de filtro {0} no es compatible con {1}" />
     <Member Name="Use0ToFilterCurrentEntity" Description="Utilice {0} para filtrar la entidad actual" />
     <Member Name="UserQueries_CreateNew" Description="Crear" />
