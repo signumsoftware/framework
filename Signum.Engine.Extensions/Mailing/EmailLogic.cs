@@ -492,7 +492,7 @@ namespace Signum.Engine.Mailing
             {
                 QueryName = queryName,
                 Columns = columns,
-                ElementsPerPage = QueryRequest.AllElements,
+                Pagination = new Pagination.All(),
                 Filters =  systemEmail.GetFilters(qd),
                 Orders = new List<Order>(),
             });
