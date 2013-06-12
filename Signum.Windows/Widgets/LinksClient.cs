@@ -31,9 +31,11 @@ namespace Signum.Windows
         {
             var mi = new MenuItem
             {
+                DataContext = ql,
                 Header = ql.Label,
                 Icon = ql.Icon.ToSmallImage(),
-            };
+            }
+            .Bind(MenuItem.HeaderProperty, "Label");
 
             AutomationProperties.SetName(mi, ql.Name);
 
