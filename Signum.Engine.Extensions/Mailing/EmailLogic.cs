@@ -621,7 +621,7 @@ namespace Signum.Engine.Mailing
             return email;
         }
 
-        static List<Column> GetTemplateColumns(List<TemplateQueryTokenDN> tokens, QueryDescription queryDescription)
+        public static List<Column> GetTemplateColumns(List<TemplateQueryTokenDN> tokens, QueryDescription queryDescription)
         {
             foreach (var t in tokens)
             {

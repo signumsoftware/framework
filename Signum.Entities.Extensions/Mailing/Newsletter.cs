@@ -9,6 +9,7 @@ using Signum.Utilities;
 using Signum.Entities.Basics;
 using System.Linq.Expressions;
 using System.Reflection;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Entities.Mailing
 {
@@ -65,6 +66,9 @@ namespace Signum.Entities.Mailing
             set { Set(ref subject, value, () => Subject); }
         }
 
+        [Ignore]
+        internal object SubjectParsedNode;
+
         [SqlDbType(Size = int.MaxValue)]
         string text;
         [StringLengthValidator(AllowNulls = true, Min = 3, Max = int.MaxValue)]
@@ -73,6 +77,9 @@ namespace Signum.Entities.Mailing
             get { return text; }
             set { Set(ref text, value, () => Text); }
         }
+
+        [Ignore]
+        internal object TextParsedNode;
 
         static StateValidator<NewsletterDN, NewsletterState> stateValidator = new StateValidator<NewsletterDN, NewsletterState>
             (     n => n.State,            n => n.Subject, n => n.Text)
@@ -100,6 +107,20 @@ namespace Signum.Entities.Mailing
         {
             get { return query; }
             set { Set(ref query, value, () => Query); }
+        }
+
+        MList<TemplateQueryTokenDN> tokens = new MList<TemplateQueryTokenDN>();
+        public MList<TemplateQueryTokenDN> Tokens
+        {
+            get { return tokens; }
+            set { Set(ref tokens, value, () => Tokens); }
+        }
+
+        internal void ParseData(QueryDescription queryDescription)
+        {
+            if (Tokens != null)
+                foreach (var t in Tokens)
+                    t.ParseData(this, queryDescription, false);
         }
     }
 

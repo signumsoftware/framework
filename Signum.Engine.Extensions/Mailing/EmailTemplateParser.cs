@@ -25,7 +25,7 @@ namespace Signum.Engine.Mailing
     {
         public static Dictionary<string, Func<GlobalVarDispatcher, string>> GlobalVariables = new Dictionary<string, Func<GlobalVarDispatcher, string>>();
 
-        static object DistinctSingle(this IEnumerable<ResultRow> rows, ResultColumn column)
+        public static object DistinctSingle(this IEnumerable<ResultRow> rows, ResultColumn column)
         {
             return rows.Select(r => r[column]).Distinct().SingleEx(() =>
                 "Multiple values for column {0}".Formato(column.Column.Token.FullKey()));

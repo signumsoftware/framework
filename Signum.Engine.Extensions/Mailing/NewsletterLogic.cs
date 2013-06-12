@@ -44,7 +44,7 @@ namespace Signum.Engine.Mailing
                 sb.Include<NewsletterDeliveryDN>();
 
                 ProcessLogic.AssertStarted(sb);
-                ProcessLogic.Register(NewsletterOperation.Send, new NewsletterProcessAlgortihm());
+                ProcessLogic.Register(NewsletterOperation.Send, new NewsletterProcessAlgorithm());
 
                 dqm.RegisterQuery(typeof(NewsletterDN), () =>
                  from n in Database.Query<NewsletterDN>()
@@ -83,6 +83,9 @@ namespace Signum.Engine.Mailing
 
                 Validator.PropertyValidator((NewsletterDN news) => news.Text).StaticPropertyValidation += (sender, pi) => ValidateTokens((NewsletterDN)sender, pi);
                 Validator.PropertyValidator((NewsletterDN news) => news.Subject).StaticPropertyValidation += (sender, pi) => ValidateTokens((NewsletterDN)sender, pi);
+
+                sb.Schema.EntityEvents<NewsletterDN>().PreSaving += new PreSavingEventHandler<NewsletterDN>(Newsletter_PreSaving);
+                sb.Schema.EntityEvents<NewsletterDN>().Retrieved += Newsletter_Retrieved;
             }
         }
 
@@ -120,6 +123,39 @@ namespace Signum.Engine.Mailing
                 return str;
 
             return null;
+        }
+
+        static void Newsletter_PreSaving(NewsletterDN newsletter, ref bool graphModified)
+        {
+            var queryname = QueryLogic.ToQueryName(newsletter.Query.Key);
+            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryname);
+
+            List<QueryToken> list = new List<QueryToken>();
+            list.Add(QueryUtils.Parse("Entity", qd, false));
+            list.Add(QueryUtils.Parse(".".Combine("Entity", "NewsletterDeliveries", "Element"), qd, false));
+            list.Add(QueryUtils.Parse(".".Combine("Entity", "EmailOwnerData"), qd, false));
+
+            if (newsletter.Subject != null)
+                EmailTemplateParser.Parse(newsletter.Subject, s => QueryUtils.Parse("Entity." + s, qd, false), null).FillQueryTokens(list);
+
+            if (newsletter.Text != null)
+                EmailTemplateParser.Parse(newsletter.Text, s => QueryUtils.Parse("Entity." + s, qd, false), null).FillQueryTokens(list);
+
+            var tokens = list.Distinct();
+
+            if (!newsletter.Tokens.Select(a => a.Token).ToList().SequenceEqual(tokens))
+            {
+                newsletter.Tokens.ResetRange(tokens.Select(t => new TemplateQueryTokenDN { Token = t }));
+                graphModified = true;
+            }
+        }
+
+        static void Newsletter_Retrieved(NewsletterDN newsletter)
+        {
+            object queryName = QueryLogic.ToQueryName(newsletter.Query.Key);
+            QueryDescription description = DynamicQueryManager.Current.QueryDescription(queryName);
+
+            newsletter.ParseData(description);
         }
 
         public static List<QueryToken> GetTokens(object queryName, string content)
@@ -165,7 +201,7 @@ namespace Signum.Engine.Mailing
             {
                 AllowsNew = true,
                 Lite = false,
-                FromStates = { NewsletterState.Created, NewsletterState.Saved },
+                FromStates = { NewsletterState.Created, NewsletterState.Saved, NewsletterState.Sent },
                 ToState = NewsletterState.Saved,
                 Execute = (n, _) => n.State = NewsletterState.Saved
             }.Register();
@@ -208,7 +244,7 @@ namespace Signum.Engine.Mailing
 
             new Execute(NewsletterOperation.Send)
             {
-                FromStates = { NewsletterState.Saved },
+                FromStates = { NewsletterState.Saved, NewsletterState.Sent },
                 ToState = NewsletterState.Sent,
                 CanExecute = n =>
                 {
@@ -225,22 +261,25 @@ namespace Signum.Engine.Mailing
                 },
                 Execute = (n, _) =>
                 {
-                    var process = ProcessLogic.Create(NewsletterOperation.Send, n);
-                    process.Execute(ProcessOperation.Execute);
-
+                    using (OperationLogic.AllowSave<NewsletterDN>())
+                    {
+                        var process = ProcessLogic.Create(NewsletterOperation.Send, n);
+                        process.Execute(ProcessOperation.Execute);
+                    }
+                    
                     n.State = NewsletterState.Sent;
                 }
             }.Register();
         }
     }
 
-    class NewsletterProcessAlgortihm : IProcessAlgorithm
+    class NewsletterProcessAlgorithm : IProcessAlgorithm
     {
         class SendLine
         {
-            public ResultRow Row;
+            public IGrouping<Lite<IdentifiableEntity>, ResultRow> Rows;
             public Lite<NewsletterDeliveryDN> NewsletterDelivery;
-            public string Email;
+            public EmailOwnerData Email;
             public Exception Exception;
         }
 
@@ -253,12 +292,14 @@ namespace Signum.Engine.Mailing
             var queryName = QueryLogic.ToQueryName(newsletter.Query.Key);
 
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
+            
+            var columns = EmailLogic.GetTemplateColumns(newsletter.Tokens.ToList(), qd);
 
-            var columns = new List<QueryToken>();
-            columns.Add(QueryUtils.Parse("Entity.NewsletterDeliveries.Element", qd, canAggregate: false));
-            columns.Add(QueryUtils.Parse("Entity.Email", qd, canAggregate: false));
-            columns.AddRange(NewsletterLogic.GetTokens(queryName, newsletter.Subject));
-            columns.AddRange(NewsletterLogic.GetTokens(queryName, newsletter.Text));
+            //var columns = new List<QueryToken>();
+            //columns.Add(QueryUtils.Parse("Entity.NewsletterDeliveries.Element", qd, canAggregate: false));
+            //columns.Add(QueryUtils.Parse("Entity.Email", qd, canAggregate: false));
+            //columns.AddRange(NewsletterLogic.GetTokens(queryName, newsletter.Subject));
+            //columns.AddRange(NewsletterLogic.GetTokens(queryName, newsletter.Text));
 
             columns = columns.Distinct().ToList();
 
@@ -271,18 +312,30 @@ namespace Signum.Engine.Mailing
                     new Filter(QueryUtils.Parse("Entity.NewsletterDeliveries.Element.Sent", qd, canAggregate: false), FilterOperation.EqualTo, false),
                 },
                 Orders = new List<Order>(),
-                Columns = columns.Select(t => new Column(t, t.NiceName())).ToList(),
+                Columns = columns,
                 Pagination = new Pagination.All(),
             });
 
-            var lines = resultTable.Rows.Select(r => new SendLine
+            var dicTokenColumn = resultTable.Columns.ToDictionary(rc => rc.Column.Token);
+
+            var entityColumn = resultTable.Columns.Single(c => c.Column.Token.FullKey() == "Entity");
+            var deliveryColumn = resultTable.Columns.Single(c => c.Column.Token.FullKey() == "Entity.NewsletterDeliveries.Element");
+            var emailOwnerColumn = resultTable.Columns.Single(c => c.Column.Token.FullKey() == "Entity.EmailOwnerData");
+
+            var lines = resultTable.Rows.GroupBy(r => (Lite<IdentifiableEntity>)r[entityColumn]).Select(g => new SendLine
                 {
-                    NewsletterDelivery = (Lite<NewsletterDeliveryDN>)r[0],
-                    Email = (string)r[1],
-                    Row = r,
+                    NewsletterDelivery = (Lite<NewsletterDeliveryDN>)g.DistinctSingle(deliveryColumn),
+                    Email = (EmailOwnerData)g.DistinctSingle(emailOwnerColumn),
+                    Rows = g,
                 }).ToList();
 
-            var dic = columns.Select((t, i) => KVP.Create(t.FullKey(), i)).ToDictionary();
+            Func<string, QueryToken> parseToken = str => QueryUtils.Parse("Entity." + str, qd, false);
+
+            if (newsletter.SubjectParsedNode == null)
+                newsletter.SubjectParsedNode = EmailTemplateParser.Parse(newsletter.Subject, parseToken, null);
+
+            if (newsletter.TextParsedNode == null)
+                newsletter.TextParsedNode = EmailTemplateParser.Parse(newsletter.Text, parseToken, null);
 
             string overrideEmail = EmailLogic.OverrideEmailAddress();
 
@@ -306,19 +359,27 @@ namespace Signum.Engine.Mailing
                                 message.From = new MailAddress(newsletter.From, newsletter.DisplayFrom);
                             else
                                 message.From = newsletter.SMTPConfig.InDB(smtp => smtp.DefaultFrom).ToMailAddress();
+                            
+                            message.To.Add(overrideEmail ?? s.Email.Email);
 
-                            message.To.Add(overrideEmail ?? s.Email);
+                            message.Subject = ((EmailTemplateParser.BlockNode)newsletter.SubjectParsedNode).Print(
+                                new EmailTemplateParameters
+                                {
+                                    Columns = dicTokenColumn,
+                                    IsHtml = false
+                                },
+                                s.Rows);
+
+                            message.Body = ((EmailTemplateParser.BlockNode)newsletter.TextParsedNode).Print(
+                                new EmailTemplateParameters
+                                {
+                                    Columns = dicTokenColumn,
+                                    IsHtml = true,
+                                },
+                                s.Rows);
+
                             message.IsBodyHtml = true;
-                            message.Body = NewsletterLogic.TokenRegex.Replace(newsletter.Text, m =>
-                            {
-                                var index = dic[m.Groups["token"].Value];
-                                return s.Row[index].TryToString();
-                            });
-                            message.Subject = NewsletterLogic.TokenRegex.Replace(newsletter.Subject, m =>
-                            {
-                                var index = dic[m.Groups["token"].Value];
-                                return s.Row[index].TryToString();
-                            });
+                            
                             client.Send(message);
                         }
                         catch (Exception ex)
