@@ -160,10 +160,7 @@ namespace Signum.Windows
 
         static void OnSetTypeContext(DependencyObject sender, DependencyPropertyChangedEventArgs args)
         {
-            if(args.NewValue == null)
-                throw new ArgumentException("TypeContext set to null on {0}".Formato(sender.VisualParents().Reverse().ToString(a=>a.GetType().Name, ", "))); 
-
-            Common.SetPropertyRoute(sender, PropertyRoute.Root((Type)args.NewValue));
+            Common.SetPropertyRoute(sender, args.NewValue == null ? null : PropertyRoute.Root((Type)args.NewValue));
         }
 
         public static readonly DependencyProperty CollapseIfNullProperty =
