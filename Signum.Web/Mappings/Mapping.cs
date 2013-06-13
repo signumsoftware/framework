@@ -505,7 +505,7 @@ namespace Signum.Web
             {
                 string error = childCtx.PropertyValidator.PropertyCheck(entity);
                 if (error.HasText())
-                    childCtx.Error.Add(error);
+                    childCtx.Error.AddRange(error.Lines());
             }
         }
 
