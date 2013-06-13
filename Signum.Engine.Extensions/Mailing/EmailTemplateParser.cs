@@ -31,7 +31,7 @@ namespace Signum.Engine.Mailing
                 "Multiple values for column {0}".Formato(column.Column.Token.FullKey()));
         }
 
-        public static readonly Regex TokenRegex = new Regex(@"\@(?<special>(foreach|endforeach|if|endif|global|model|))\[(?<token>[^\]]*)\]");
+        public static readonly Regex TokenRegex = new Regex(@"\@(((?<special>(foreach|if|global|model|))\[(?<token>[^\]]*)\])|(?<special>endforeach|else|endif))");
 
         public abstract class TextNode
         {
@@ -198,6 +198,11 @@ namespace Signum.Engine.Mailing
             {
                 return "block ({0} nodes)".Formato(Nodes.Count);
             }
+
+            public virtual string UserString()
+            {
+                return "block";
+            }
         }
 
         public class ForeachNode : BlockNode
@@ -230,20 +235,39 @@ namespace Signum.Engine.Mailing
             {
                 return "foreach {0} ({1} nodes)".Formato(Token.FullKey(), Nodes.Count);
             }
+
+            public override string UserString()
+            {
+                return "foreach";
+            }
         }
 
-
-        public class IfNode : BlockNode
+        public abstract class ConditionNode : BlockNode
         {
             public readonly QueryToken Token;
 
-            public IfNode(QueryToken token, List<string> errors)
+            public ConditionNode(QueryToken token, List<string> errors)
             {
                 if (token.Type.UnNullify() != typeof(bool))
                     errors.Add("Token {0} is not a boolean".Formato(token));
 
                 this.Token = token;
             }
+
+            public override void FillQueryTokens(List<QueryToken> list)
+            {
+                list.Add(Token);
+                base.FillQueryTokens(list);
+            }
+        }
+
+        public class IfNode : ConditionNode
+        {
+            public IfNode(QueryToken token, List<string> errors)
+                : base(token, errors)
+            {
+            }
+           
 
             public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
             {
@@ -255,15 +279,42 @@ namespace Signum.Engine.Mailing
                 }
             }
 
-            public override void FillQueryTokens(List<QueryToken> list)
+            public override string ToString()
             {
-                list.Add(Token);
-                base.FillQueryTokens(list);
+                return "if {0} ({1} nodes)".Formato(Token.FullKey(), Nodes.Count);
+            }
+
+            public override string UserString()
+            {
+                return "if";
+            }
+        }
+
+        public class ElseNode : ConditionNode
+        {
+            public ElseNode(QueryToken token, List<string> errors)
+                : base(token, errors)
+            {
+            }
+
+            public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
+            {
+                var value = (bool?)rows.DistinctSingle(p.Columns[Token]);
+
+                if (value != true)
+                {
+                    base.PrintList(p, rows);
+                }
             }
 
             public override string ToString()
             {
-                return "if {0} ({1} nodes)".Formato(Token.FullKey(), Nodes.Count);
+                return "else {0} ({1} nodes)".Formato(Token.FullKey(), Nodes.Count);
+            }
+
+            public override string UserString()
+            {
+                return "else";
             }
         }
 
@@ -317,7 +368,8 @@ namespace Signum.Engine.Mailing
                     stack.Peek().Nodes.Add(new LiteralNode { Text = text.Substring(index, match.Index - index) });
                 }
                 var token = match.Groups["token"].Value;
-                switch (match.Groups["special"].Value)
+                var special = match.Groups["special"].Value; 
+                switch (special)
                 {
                     case "":
                         stack.Peek().Nodes.Add(new TokenNode(tryParseToken(token)));
@@ -341,13 +393,8 @@ namespace Signum.Engine.Mailing
                             var n = stack.Pop();
                             if (n.GetType() != typeof(ForeachNode))
                             {
-                                errors.Add("Unexpected {0}".Formato(n.GetType().Name));
+                                errors.Add("Unexpected '{0}'".Formato(n.UserString()));
                                 break;
-                            }
-
-                            if (!parseToken(token).Equals(((ForeachNode)n).Token))
-                            {
-                                errors.Add("Expected 'endforeach' was {0} instead of {1}".Formato(((ForeachNode)n).Token, token));
                             }
 
                             stack.Peek().Nodes.Add(n);
@@ -356,6 +403,7 @@ namespace Signum.Engine.Mailing
                     case "if":
                         stack.Push(new IfNode(parseToken(token), errors));
                         break;
+                    case "else":
                     case "endif":
                         {
                             if (stack.Count() <= 1)
@@ -364,18 +412,16 @@ namespace Signum.Engine.Mailing
                                 break;
                             }
                             var n = stack.Pop();
-                            if (n.GetType() != typeof(IfNode))
+                            if (!(n is ConditionNode))
                             {
-                                errors.Add("Unexpected {0}".Formato(n.GetType().Name));
+                                errors.Add("Unexpected {0}".Formato(n.UserString()));
                                 break;
                             }
 
-                            if (!parseToken(token).Equals(((IfNode)n).Token))
-                            {
-                                errors.Add("Expected 'endif' was {0} instead of {1}".Formato(((IfNode)n).Token, token));
-                            }
-
                             stack.Peek().Nodes.Add(n);
+
+                            if(special == "else")
+                                stack.Push(new ElseNode(((ConditionNode)n).Token, errors));
                         }
                         break;
                     default:
