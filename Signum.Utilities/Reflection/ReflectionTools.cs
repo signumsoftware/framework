@@ -672,7 +672,6 @@ namespace Signum.Utilities.Reflection
 
                 else if (utype == typeof(Guid) && value is string)
                     return (T)(object)Guid.Parse((string)value);
-
                 else
                     return (T)Convert.ChangeType(value, utype);
             }
@@ -696,6 +695,8 @@ namespace Signum.Utilities.Reflection
                     else
                         return Enum.ToObject(utype, value);
                 }
+                else if (utype == typeof(Guid) && value is string)
+                    return Guid.Parse((string)value);
                 else
                     return Convert.ChangeType(value, utype);
             }
