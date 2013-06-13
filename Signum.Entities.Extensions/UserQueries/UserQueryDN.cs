@@ -261,16 +261,24 @@ namespace Signum.Entities.UserQueries
     [Serializable]
     public sealed class QueryTokenDN : EmbeddedEntity
     {
-        private QueryTokenDN() { }
+        private QueryTokenDN() 
+        { 
+        }
 
         public QueryTokenDN(QueryToken token) 
         {
+            if (token == null)
+                throw new ArgumentNullException("token");
+
             this.token = token;
         }
 
         public QueryTokenDN(string tokenString)
         {
-            this.tokenString = null;
+            if (string.IsNullOrEmpty(tokenString))
+                throw new ArgumentNullException("tokenString");
+
+            this.tokenString = tokenString;
         }
 
         [NotNullable]
@@ -340,14 +348,6 @@ namespace Signum.Entities.UserQueries
     [Serializable]
     public class QueryOrderDN : EmbeddedEntity
     {
-        public QueryOrderDN() {}
-
-        public QueryOrderDN(string columnName, OrderType type)
-        {
-            this.token = new QueryTokenDN(columnName);
-            orderType = type;
-        }
-
         [NotNullable]
         QueryTokenDN token;
         [NotNullValidator]
@@ -394,19 +394,6 @@ namespace Signum.Entities.UserQueries
     [Serializable]
     public class QueryColumnDN : EmbeddedEntity
     {
-        public QueryColumnDN(){}
-
-        public QueryColumnDN(string columnName)
-        {
-            Token = new QueryTokenDN(columnName);
-        }
-
-        public QueryColumnDN(Column col)
-        {
-            Token = new QueryTokenDN(col.Token);
-            DisplayName = col.DisplayName;
-        }
-
         [NotNullable]
         QueryTokenDN token;
         [NotNullValidator]
@@ -419,10 +406,10 @@ namespace Signum.Entities.UserQueries
         string displayName;
         public string DisplayName
         {
-            get { return displayName ?? Token.Token.TryCC(t => t.NiceName()); }
+            get { return displayName ?? Token.TryCC(t => t.Token.NiceName()); }
             set
             {
-                var name = value == Token.Token.TryCC(t => t.NiceName()) ? null : value;
+                var name = value == Token.TryCC(t => t.Token.NiceName()) ? null : value;
                 Set(ref displayName, name, () => DisplayName);
             }
         }
@@ -637,11 +624,19 @@ namespace Signum.Entities.UserQueries
             else
             {
                 if (current.Zip(ideal).All(t => t.Item1.Equals(t.Item2)))
-                    return Tuple.Create(ColumnOptionsMode.Add, current.Skip(ideal.Count).Select(c => new QueryColumnDN(c)).ToMList());
+                    return Tuple.Create(ColumnOptionsMode.Add, current.Skip(ideal.Count).Select(c => new QueryColumnDN
+                    {
+                        Token = new QueryTokenDN(c.Token),
+                        DisplayName = c.DisplayName
+                    }).ToMList());
 
             }
 
-            return Tuple.Create(ColumnOptionsMode.Replace, current.Select(c => new QueryColumnDN(c)).ToMList());
+            return Tuple.Create(ColumnOptionsMode.Replace, current.Select(c => new QueryColumnDN
+            {
+                Token = new QueryTokenDN(c.Token),
+                DisplayName = c.DisplayName
+            }).ToMList());
         }
     }
 

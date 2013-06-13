@@ -54,7 +54,7 @@ namespace Signum.Windows.UserQueries
                     item.IsChecked = ((Lite<UserQueryDN>)item.Tag).RefersTo(current);
                 }
 
-                bool isEnabled = current != null && Navigator.IsReadOnly(current);
+                bool isEnabled = current != null && !Navigator.IsReadOnly(current);
 
                 if (edit != null)
                     edit.IsEnabled = isEnabled;
@@ -116,8 +116,6 @@ namespace Signum.Windows.UserQueries
 
                     initialize();
 
-                    current = null;
-
                     updatecurrent();
                 }
             };
@@ -149,6 +147,8 @@ namespace Signum.Windows.UserQueries
 
                 userQueries = Server.Return((IUserQueryServer s) => s.GetUserQueries(sc.QueryName));
 
+                if (current != null && !userQueries.Contains(current.ToLite()))
+                    current = null;
 
                 if (userQueries.Count > 0)
                 {
@@ -178,20 +178,17 @@ namespace Signum.Windows.UserQueries
                         }.Handle(MenuItem.ClickEvent, new_Clicked));
                     }
 
-                    if (current != null && !Navigator.IsReadOnly(typeof(UserQueryDN)))
+                    miResult.Items.Add(edit = new MenuItem()
                     {
-                        miResult.Items.Add(edit = new MenuItem()
-                        {
-                            Header = UserQueryMessage.Edit.NiceToString(),
-                            Icon = ExtensionsImageLoader.GetImageSortName("edit.png").ToSmallImage()
-                        }.Handle(MenuItem.ClickEvent, edit_Clicked));
+                        Header = UserQueryMessage.Edit.NiceToString(),
+                        Icon = ExtensionsImageLoader.GetImageSortName("edit.png").ToSmallImage()
+                    }.Handle(MenuItem.ClickEvent, edit_Clicked));
 
-                        miResult.Items.Add(remove = new MenuItem()
-                        {
-                            Header = EntityControlMessage.Remove.NiceToString(),
-                            Icon = ExtensionsImageLoader.GetImageSortName("remove.png").ToSmallImage()
-                        }.Handle(MenuItem.ClickEvent, remove_Clicked));
-                    }
+                    miResult.Items.Add(remove = new MenuItem()
+                    {
+                        Header = EntityControlMessage.Remove.NiceToString(),
+                        Icon = ExtensionsImageLoader.GetImageSortName("remove.png").ToSmallImage()
+                    }.Handle(MenuItem.ClickEvent, remove_Clicked));
                 }
             };
 

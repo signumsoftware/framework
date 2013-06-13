@@ -205,7 +205,7 @@ WriteLiteral("\r\n    <div>\r\n        <div class=\"sf-fields-list\">\r\n       
 
             
             #line 40 "..\..\Chart\Views\ChartRequestView.cshtml"
-               Write(Html.QueryTokenBuilder(null, Model, queryDescription));
+               Write(Html.QueryTokenBuilder(null, Model, queryDescription, canAggregate: Model.Value.GroupResults));
 
             
             #line default

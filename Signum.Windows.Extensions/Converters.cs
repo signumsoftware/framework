@@ -12,6 +12,7 @@ using System.Windows.Ink;
 using Signum.Entities.Chart;
 using Signum.Entities.Basics;
 using Signum.Entities.UserQueries;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Windows.Extensions
 {
@@ -52,5 +53,9 @@ namespace Signum.Windows.Extensions
 
         public static readonly IValueConverter NotNullToRedBrush = ConverterFactory.New(
             (object d) => d == null ? null : Brushes.Pink);
+
+        public static readonly IValueConverter TokenToDN = ConverterFactory.New(
+            (QueryTokenDN qt) => qt.TryCC(t => t.TryToken),
+            (QueryToken t) => new QueryTokenDN(t));
     }
 }

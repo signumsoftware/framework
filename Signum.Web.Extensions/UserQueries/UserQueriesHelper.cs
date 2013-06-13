@@ -58,9 +58,10 @@ namespace Signum.Web.UserQueries
 
         public static string GetTokenString(MappingContext<QueryTokenDN> ctx)
         {
-            return ctx.Parent.Inputs.Keys.Where(k => k.StartsWith("ddlTokens"))
+            return ctx.Inputs.Keys
                 .OrderBy(k => int.Parse(k.After("ddlTokens_")))
-                .Select(k => ctx.Parent.Inputs[k])
+                .Select(k => ctx.Inputs[k])
+                .TakeWhile(k => k.HasText())
                 .ToString(".");
         }
     }

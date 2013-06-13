@@ -52,7 +52,6 @@ namespace Signum.Entities.Chart
             Parameter3 = scriptColumn.Parameter3.TryCC(a => a.DefaultValue(t));
         }
 
-        [NotifyChildProperty]
         QueryTokenDN token;
         public QueryTokenDN Token
         {
@@ -67,10 +66,10 @@ namespace Signum.Entities.Chart
         string displayName;
         public string DisplayName
         {
-            get { return displayName ?? Token.TryCC(t => t.Token.NiceName()); }
+            get { return displayName ?? Token.TryCC(t => t.Token.TryCC(tt => tt.NiceName())); }
             set
             {
-                var name = value == Token.TryCC(t => t.Token.NiceName()) ? null : value;
+                var name = value == Token.TryCC(t => t.Token.TryCC(tt => tt.NiceName())) ? null : value;
                 Set(ref displayName, name, () => DisplayName);
             }
         }
@@ -249,7 +248,7 @@ namespace Signum.Entities.Chart
 
         internal void FromXml(XElement element, IFromXmlContext ctx)
         {
-            Token = new QueryTokenDN(element.Attribute("Token").TryCC(a => a.Value));
+            Token = element.Attribute("Token").TryCC(a => new QueryTokenDN(a.Value));
             DisplayName = element.Attribute("DisplayName").TryCC(a => a.Value);
             Parameter1 = element.Attribute("Parameter1").TryCC(a => a.Value);
             Parameter2 = element.Attribute("Parameter2").TryCC(a => a.Value);

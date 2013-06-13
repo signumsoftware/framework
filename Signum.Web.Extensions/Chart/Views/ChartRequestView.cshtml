@@ -37,7 +37,7 @@
         <div class="sf-fields-list">
             <div class="ui-widget sf-filters">
                 <div class="ui-widget-header ui-corner-top sf-filters-body">
-                    @Html.QueryTokenBuilder(null, Model, queryDescription)
+                    @Html.QueryTokenBuilder(null, Model, queryDescription, canAggregate: Model.Value.GroupResults)
                     @Html.Href(
                             Model.Compose("btnAddFilter"),
                             SearchMessage.FilterBuilder_AddFilter.NiceToString(),
