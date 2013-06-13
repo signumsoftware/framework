@@ -31,19 +31,10 @@ namespace Signum.Windows
             set { SetValue(TypeProperty, value); }
         }
 
-        protected internal virtual DependencyProperty CommonRouteLabelText()
+        static LineBase()
         {
-            return LabelTextProperty;
-        }
-
-        protected internal virtual DependencyProperty CommonRouteValue()
-        {
-            return null;
-        }
-
-        protected internal virtual DependencyProperty CommonRouteType()
-        {
-            return TypeProperty;
+            Common.LabelPropertySelector.SetDefinition(typeof(LineBase), LabelTextProperty);
+            Common.TypePropertySelector.SetDefinition(typeof(LineBase), TypeProperty);
         }
 
         public LineBase()

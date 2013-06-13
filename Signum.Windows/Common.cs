@@ -243,12 +243,7 @@ namespace Signum.Windows
 
             if (DesignerProperties.GetIsInDesignMode(fe))
             {
-                DependencyProperty labelText =
-                    fe is LineBase ? ((LineBase)fe).CommonRouteLabelText() :
-                    fe is HeaderedContentControl ? HeaderedContentControl.HeaderProperty :
-                    fe is TextBlock ? TextBlock.TextProperty :
-                    fe is Label ? Label.ContentProperty :
-                    null;
+                DependencyProperty labelText = LabelPropertySelector.TryGetValue(fe.GetType());
 
                 if (labelText != null && fe.NotSet(labelText))
                 {
@@ -400,8 +395,19 @@ namespace Signum.Windows
 
             GridViewColumnRouteTask += TaskGridViewColumnSetValueProperty;
             GridViewColumnRouteTask += TaskGridViewColumnSetLabelText;
-            GridViewColumnLabelOnlyRouteTask += TaskGridViewColumnSetLabelText; 
+            GridViewColumnLabelOnlyRouteTask += TaskGridViewColumnSetLabelText;
+
+            ValuePropertySelector.SetDefinition(typeof(FrameworkElement), FrameworkElement.DataContextProperty);
+            ValuePropertySelector.SetDefinition(typeof(ItemsControl), ItemsControl.ItemsSourceProperty);
+
+            TypePropertySelector.SetDefinition(typeof(FrameworkElement), null);
+
+            LabelPropertySelector.SetDefinition(typeof(FrameworkElement), null);
+            LabelPropertySelector.SetDefinition(typeof(HeaderedContentControl), HeaderedContentControl.HeaderProperty);
+            LabelPropertySelector.SetDefinition(typeof(TextBlock), TextBlock.TextProperty);
+            LabelPropertySelector.SetDefinition(typeof(Label), Label.ContentProperty);
         }
+
 
         static void TaskSetVoteAutoHide(FrameworkElement fe, string route, PropertyRoute context)
         {
@@ -502,11 +508,11 @@ namespace Signum.Windows
             }
         }
 
-
+        public static Polymorphic<DependencyProperty> ValuePropertySelector = new Polymorphic<DependencyProperty>(minimumType: typeof(FrameworkElement));
 
         public static void TaskSetValueProperty(FrameworkElement fe, string route, PropertyRoute context)
         {
-            DependencyProperty valueProperty = ValueProperty(fe);
+            DependencyProperty valueProperty = ValuePropertySelector.GetValue(fe.GetType());
 
             bool isReadOnly = context.PropertyRouteType == PropertyRouteType.FieldOrProperty && context.PropertyInfo.IsReadOnly();
 
@@ -523,19 +529,11 @@ namespace Signum.Windows
             }
         }
 
-        private static DependencyProperty ValueProperty(FrameworkElement fe)
-        {
-            return fe is LineBase ? ((LineBase)fe).CommonRouteValue() :
-                            fe is ItemsControl ? ItemsControl.ItemsSourceProperty :
-                            FrameworkElement.DataContextProperty;
-        }
-
+        public static Polymorphic<DependencyProperty> TypePropertySelector = new Polymorphic<DependencyProperty>(minimumType: typeof(FrameworkElement));
 
         public static void TaskSetTypeProperty(FrameworkElement fe, string route, PropertyRoute context)
         {
-            DependencyProperty typeProperty =
-                fe is LineBase ? ((LineBase)fe).CommonRouteType() :
-                null;
+            DependencyProperty typeProperty = TypePropertySelector.TryGetValue(fe.GetType());
 
             if (typeProperty != null && fe.NotSet(typeProperty))
             {
@@ -543,14 +541,11 @@ namespace Signum.Windows
             }
         }
 
+        public static Polymorphic<DependencyProperty> LabelPropertySelector = new Polymorphic<DependencyProperty>(minimumType: typeof(FrameworkElement));
+
         public static void TaskSetLabelText(FrameworkElement fe, string route, PropertyRoute context)
         {
-            DependencyProperty labelText =
-               fe is LineBase ? ((LineBase)fe).CommonRouteLabelText() :
-               fe is HeaderedContentControl ? HeaderedContentControl.HeaderProperty :
-               fe is TextBlock ? TextBlock.TextProperty:
-               fe is Label ? Label.ContentProperty :
-               null;
+            DependencyProperty labelText = LabelPropertySelector.TryGetValue(fe.GetType());
 
             if (labelText != null && fe.NotSet(labelText))
             {

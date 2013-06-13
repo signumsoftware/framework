@@ -97,10 +97,10 @@ namespace Signum.Windows
                 this.label.Target = this.ValueControl;
             }
         }
-
-        protected internal override DependencyProperty CommonRouteValue()
+        
+        static ValueLine()
         {
-            return ValueProperty;
+            Common.ValuePropertySelector.SetDefinition(typeof(ValueLine), ValueProperty);
         }
 
         public static ValueLineConfigurator Configurator = new ValueLineConfigurator();
