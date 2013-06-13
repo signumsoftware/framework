@@ -8,6 +8,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq.Expressions;
 using Signum.Entities;
 using Signum.Engine.Basics;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Web.Selenium
 {
@@ -50,6 +51,18 @@ namespace Signum.Web.Selenium
         {
             var combo = "{0}sfElems".Formato(prefix);
             selenium.Select(combo, "value=" + elementsPerPage);
+            selenium.FireEvent(combo, "change");
+        }
+
+        public static void SetPaginationMode(this ISelenium selenium, PaginationMode mode)
+        {
+            SetPaginationMode(selenium, mode, "");
+        }
+
+        public static void SetPaginationMode(this ISelenium selenium, PaginationMode mode, string prefix)
+        {
+            var combo = "{0}sfPaginationMode".Formato(prefix);
+            selenium.Select(combo, "value=" + mode.ToString());
             selenium.FireEvent(combo, "change");
         }
 
