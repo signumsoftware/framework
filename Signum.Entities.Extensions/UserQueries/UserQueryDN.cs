@@ -160,7 +160,7 @@ namespace Signum.Entities.UserQueries
             if (pi.Is(() => ElementsPerPage))
             {
                 if (ElementsPerPage != null && !ShouldHaveElements)
-                    return UserQueryMessage._0ShouldBeNullIf1Is2.NiceToString().Formato(pi.NiceName(), NicePropertyName(() => PaginationMode), PaginationMode.NiceToString());
+                    return UserQueryMessage._0ShouldBeNullIf1Is2.NiceToString().Formato(pi.NiceName(), NicePropertyName(() => PaginationMode), PaginationMode.TrySC(pm=>pm.NiceToString()) ?? "" );
 
                 if (ElementsPerPage == null && ShouldHaveElements)
                     return UserQueryMessage._0ShouldBeSetIf1Is2.NiceToString().Formato(pi.NiceName(), NicePropertyName(() => PaginationMode), PaginationMode.NiceToString());
