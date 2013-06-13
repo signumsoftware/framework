@@ -79,8 +79,6 @@ namespace Signum.Windows.Chart
                     return null;
                 }); 
 
-                ChartUtils.RemoveNotNullValidators();
-
                 LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, ctrl) =>
                     Server.Return((IChartServer us) => us.GetUserChartsEntity(entity.EntityType))
                     .Select(cp => new UserChartQuickLink (cp, entity)).ToArray());

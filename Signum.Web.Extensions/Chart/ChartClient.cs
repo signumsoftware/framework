@@ -67,23 +67,12 @@ namespace Signum.Web.Chart
         }
 
         public static EntityMapping<ChartColumnDN> MappingChartColumn = new EntityMapping<ChartColumnDN>(true)
-            .SetProperty(ct => ct.TryToken, ctx =>
+            .SetProperty(ct => ct.Token, ctx =>
             {
-                var tokenName = "";
-
-                var chartTokenInputs = ctx.Parent.Inputs;
-                bool stop = false;
-                for (var i = 0; !stop; i++)
-                {
-                    var subtokenName = chartTokenInputs.TryGetC("ddlTokens_" + i);
-                    if (string.IsNullOrEmpty(subtokenName))
-                        stop = true;
-                    else
-                        tokenName = tokenName.HasText() ? (tokenName + "." + subtokenName) : subtokenName;
-                }
+                var tokenName = UserQueriesHelper.GetTokenString(ctx);
 
                 if (string.IsNullOrEmpty(tokenName))
-                    return ctx.None();
+                    return null;
 
                 var qd = DynamicQueryManager.Current.QueryDescription(
                     Navigator.ResolveQueryName(ctx.ControllerContext.HttpContext.Request.Params["webQueryName"]));
@@ -95,7 +84,7 @@ namespace Signum.Web.Chart
                 if (token is AggregateToken && !chartToken.ParentChart.GroupResults)
                     token = token.Parent;
 
-                return token;
+                return new QueryTokenDN(token);
             })
             .SetProperty(ct => ct.DisplayName, ctx =>
             {
@@ -193,18 +182,11 @@ namespace Signum.Web.Chart
                 };
         }
 
-        public static MvcHtmlString ChartTokenBuilder(this HtmlHelper helper, QueryTokenDN chartToken, IChartBase chart, QueryDescription qd, Context context)
-        {
-            bool canAggregate = (chartToken as ChartColumnDN).TryCS(ct => ct.IsGroupKey == false) ?? true;
-
-            return helper.QueryTokenDNBuilder(chartToken, context, qd, canAggregate: chart.GroupResults && canAggregate);
-        }
-
         public static string ChartTypeImgClass(IChartBase chartBase, ChartScriptDN current, ChartScriptDN script)
         {
             string css = "sf-chart-img";
 
-            if (!chartBase.Columns.Any(a=>a.ParseException != null) && script.IsCompatibleWith(chartBase))
+            if (!chartBase.Columns.Any(a => a.Token != null && a.Token.ParseException != null) && script.IsCompatibleWith(chartBase))
                 css += " sf-chart-img-equiv";
 
             if (script.Is(current))
@@ -238,7 +220,7 @@ namespace Signum.Web.Chart
 
         public static string ToJS(this QueryOrderDN order)
         {
-            return (order.OrderType == OrderType.Descending ? "-" : "") + order.Token.FullKey();
+            return (order.OrderType == OrderType.Descending ? "-" : "") + order.Token.Token.FullKey();
         }
 
         public static void SetupParameter(ValueLine vl, ChartColumnDN column, ChartScriptParameterDN scriptParameter)
@@ -259,7 +241,7 @@ namespace Signum.Web.Chart
             {
                 vl.ValueLineType = ValueLineType.Combo;
 
-                var compatible = scriptParameter.GetEnumValues().Where(a => a.CompatibleWith(column.Token)).ToList();
+                var compatible = scriptParameter.GetEnumValues().Where(a => a.CompatibleWith(column.Token.Token)).ToList();
                 vl.ReadOnly = compatible.Count <= 1;
                 vl.EnumComboItems = compatible.Select(ev => new SelectListItem
                 {

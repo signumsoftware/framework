@@ -1,9 +1,0 @@
-﻿@using Signum.Engine
-@using Signum.Entities.UserQueries
-@using Signum.Web.UserQueries
-@using Signum.Entities.DynamicQuery
-
-@using (var e = Html.TypeContext<QueryTokenDN>())
-{
-    @Html.QueryTokenDNBuilder(e.Value, e, (QueryDescription)ViewData[ViewDataKeys.QueryDescription])
-}

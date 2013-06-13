@@ -137,17 +137,17 @@ namespace Signum.Entities.Chart
 
                 GroupResults = request.GroupResults,
                 ChartScript = request.ChartScript,
-                
+
                 Filters = request.Filters.Select(f => new QueryFilterDN
                 {
-                    Token = f.Token,
+                    Token = new QueryTokenDN(f.Token),
                     Operation = f.Operation,
                     ValueString = FilterValueConverter.ToString(f.Value, f.Token.Type),
                 }).ToMList(),
 
                 Orders = request.Orders.Select(o => new QueryOrderDN
                 {
-                    Token = o.Token,
+                    Token = new QueryTokenDN(o.Token),
                     OrderType = o.OrderType
                 }).ToMList()
             };
@@ -170,8 +170,8 @@ namespace Signum.Entities.Chart
             {
                 GroupResults = uq.GroupResults,
                 ChartScript = uq.ChartScript,
-                Filters = uq.Filters.Select(qf => new Filter(qf.Token, qf.Operation, qf.Value)).ToList(),
-                Orders = uq.Orders.Select(o => new Order(o.Token, o.OrderType)).ToList(),
+                Filters = uq.Filters.Select(qf => new Filter(qf.Token.Token, qf.Operation, qf.Value)).ToList(),
+                Orders = uq.Orders.Select(o => new Order(o.Token.Token, o.OrderType)).ToList(),
             };
 
             result.Columns.ZipForeach(uq.Columns, (r, u) =>
@@ -198,8 +198,8 @@ namespace Signum.Entities.Chart
                 name = "c" + i,
                 displayName = request.Columns[i].ScriptColumn.DisplayName,
                 title = c.GetTitle(),
-                token = c.Token == null? null: c.Token.FullKey(),
-                type =  c.Token == null? null: c.Token.GetChartColumnType().ToString(),               
+                token = c.Token == null ? null : c.Token.Token.FullKey(),
+                type = c.Token == null ? null : c.Token.Token.GetChartColumnType().ToString(),               
                 parameter1 = c.Parameter1,
                 parameter2 = c.Parameter2,
                 parameter3 = c.Parameter3,
@@ -246,7 +246,7 @@ namespace Signum.Entities.Chart
             if (ct == null || ct.Token == null)
                 return null;
 
-            var type = ct.Token.Type.UnNullify();
+            var type = ct.Token.Token.Type.UnNullify();
 
             if (type.IsLite())
             {
@@ -287,7 +287,7 @@ namespace Signum.Entities.Chart
                     {
                         key = e,
                         keyForFilter = e.TryToString("s"),
-                        toStr = ct.Token.Format.HasText() ? e.TryToString(ct.Token.Format) : r[columnIndex].TryToString()
+                        toStr = ct.Token.Token.Format.HasText() ? e.TryToString(ct.Token.Token.Format) : r[columnIndex].TryToString()
                     };
                 };
             }
@@ -344,12 +344,6 @@ namespace Signum.Entities.Chart
             }
 
             return result;
-        }
-
-        public static void RemoveNotNullValidators()
-        {
-            Validator.OverridePropertyValidator((ChartColumnDN c) => c.TokenString)
-                .Validators.OfType<StringLengthValidatorAttribute>().SingleEx().AllowNulls = true;
         }
     }
 

@@ -138,13 +138,13 @@ namespace Signum.Windows.Chart
                 var filters = Request.Filters.Select(f => new FilterOption { Path = f.Token.FullKey(), Value = f.Value, Operation = f.Operation }).ToList();
                 var keyColunns = Request.Columns
                     .Zip(ResultTable.Columns, (t, c) => new { t.Token, Column = c })
-                    .Where(a => !(a.Token is AggregateToken)).ToArray();
+                    .Where(a => !(a.Token.Token is AggregateToken)).ToArray();
 
                 lastRequest = new LastRequest
                 {
                     KeyColumns = Request.Columns.Iterate()
                     .Where(a => a.Value.ScriptColumn.IsGroupKey)
-                    .Select(a => new KeyColumn { Position = a.Position, Token = a.Value.Token })
+                    .Select(a => new KeyColumn { Position = a.Position, Token = a.Value.Token.Token })
                     .ToList(),
                     Filters = Request.Filters.Where(a => !(a.Token is AggregateToken)).Select(f => new FilterOption
                     {
@@ -153,7 +153,7 @@ namespace Signum.Windows.Chart
                         Operation = f.Operation
                     }).ToList(),
                     GroupResults = Request.GroupResults,
-                    GetFilter = rr => keyColunns.Select(t => GetTokenFilters(t.Token, rr[t.Column])).ToList()
+                    GetFilter = rr => keyColunns.Select(t => GetTokenFilters(t.Token.Token, rr[t.Column])).ToList()
                 };
             }
             else lastRequest = new LastRequest { GroupResults = false };
@@ -228,7 +228,7 @@ namespace Signum.Windows.Chart
 
             lastRequest = null;
             
-            var keys = Request.Columns.Select(a => a.Token).Where(a => a != null && !(a is AggregateToken)).Select(a => a.FullKey()).ToHashSet();
+            var keys = Request.Columns.Select(a => a.Token.Token).Where(a => a != null && !(a is AggregateToken)).Select(a => a.FullKey()).ToHashSet();
             OrderOptions.RemoveAll(a => !(a.Token is AggregateToken) && !keys.Contains(a.Token.FullKey()));
         }
 
