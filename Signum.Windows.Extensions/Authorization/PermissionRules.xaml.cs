@@ -13,6 +13,7 @@ using System.Windows.Shapes;
 using Signum.Entities.Authorization;
 using Signum.Entities;
 using Signum.Services;
+using Signum.Utilities;
 
 namespace Signum.Windows.Authorization
 {
@@ -43,6 +44,7 @@ namespace Signum.Windows.Authorization
 
         private void Load()
         {
+            this.Title = AuthMessage._0RulesFor1.NiceToString().Formato(typeof(PermissionDN).NiceName(), Role);
             DataContext = Server.Return((IPermissionAuthServer s) => s.GetPermissionRules(Role));
         }
 

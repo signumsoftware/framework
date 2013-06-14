@@ -47,8 +47,8 @@ namespace Signum.Windows.Authorization
 
         void Test_Loaded(object sender, RoutedEventArgs e)
         {
+            this.Title = AuthMessage._0RulesFor1.NiceToString().Formato(typeof(PropertyRouteDN).NiceName(), Role);
             Load();
-            this.Title = "Property Rules for {0}".Formato(Type.CleanName);
         }
 
         private void Load()

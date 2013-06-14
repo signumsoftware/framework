@@ -114,17 +114,12 @@ namespace Signum.Web.Chart
             }
         }
 
-        public static List<ToolBarButton> GetChartMenu(ControllerContext controllerContext, object queryName, Type entityType, string prefix)
+        public static List<ToolBarButton> GetChartMenu(ControllerContext controllerContext, object queryName, Type entityType, string prefix, Lite<UserChartDN> currentUserChart)
         {
             if (!Navigator.IsNavigable(typeof(UserChartDN), isSearchEntity: true))
                 return new List<ToolBarButton>();
 
             var items = new List<ToolBarButton>();
-
-            Lite<UserChartDN> currentUserChart = null;
-            string url = (controllerContext.RouteData.Route as Route).TryCC(r => r.Url);
-            if (url.HasText() && url.Contains("UC"))
-                currentUserChart = Lite.Create<UserChartDN>(int.Parse(controllerContext.RouteData.Values["lite"].ToString()));
 
             foreach (var uc in UserChartLogic.GetUserCharts(queryName))
             {

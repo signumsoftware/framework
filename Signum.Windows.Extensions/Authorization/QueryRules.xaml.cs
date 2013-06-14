@@ -14,6 +14,7 @@ using Signum.Entities.Authorization;
 using Signum.Entities;
 using Signum.Services;
 using Signum.Entities.Basics;
+using Signum.Utilities;
 
 namespace Signum.Windows.Authorization
 {
@@ -50,7 +51,9 @@ namespace Signum.Windows.Authorization
         }
 
         private void Load()
-        {
+        {   
+            this.Title = AuthMessage._0RulesFor1.NiceToString().Formato(typeof(QueryDN).NiceName(), Role);
+
             DataContext = Server.Return((IQueryAuthServer s)=>s.GetQueryRules(Role, Type)); 
         }
 

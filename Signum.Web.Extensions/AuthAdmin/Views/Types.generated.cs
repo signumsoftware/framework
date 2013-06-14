@@ -51,7 +51,7 @@ namespace Signum.Web.Extensions.AuthAdmin.Views
     #line default
     #line hidden
     
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.5.4.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/AuthAdmin/Views/Types.cshtml")]
     public partial class Types : System.Web.Mvc.WebViewPage<dynamic>
     {
@@ -168,7 +168,7 @@ WriteLiteral("    <table class=\"sf-auth-rules\">\r\n        <thead>\r\n        
 
             
             #line 31 "..\..\AuthAdmin\Views\Types.cshtml"
-               Write(AuthMessage.TypesAscx_Type.NiceToString());
+               Write(typeof(TypeDN).NiceName());
 
             
             #line default
@@ -178,7 +178,7 @@ WriteLiteral("\r\n                </th>\r\n                <th>");
 
             
             #line 33 "..\..\AuthAdmin\Views\Types.cshtml"
-               Write(AuthMessage.TypesAscx_Create.NiceToString());
+               Write(TypeAllowed.Create.NiceToString());
 
             
             #line default
@@ -188,7 +188,7 @@ WriteLiteral("\r\n                </th>\r\n                <th>");
 
             
             #line 35 "..\..\AuthAdmin\Views\Types.cshtml"
-               Write(AuthMessage.TypesAscx_Modify.NiceToString());
+               Write(TypeAllowed.Modify.NiceToString());
 
             
             #line default
@@ -198,7 +198,7 @@ WriteLiteral("\r\n                </th>\r\n                <th>");
 
             
             #line 37 "..\..\AuthAdmin\Views\Types.cshtml"
-               Write(AuthMessage.TypesAscx_Read.NiceToString());
+               Write(TypeAllowed.Read.NiceToString());
 
             
             #line default
@@ -208,7 +208,7 @@ WriteLiteral("\r\n                </th>\r\n                <th>");
 
             
             #line 39 "..\..\AuthAdmin\Views\Types.cshtml"
-               Write(AuthMessage.TypesAscx_None.NiceToString());
+               Write(TypeAllowed.None.NiceToString());
 
             
             #line default
@@ -218,7 +218,7 @@ WriteLiteral("\r\n                </th>\r\n                <th>");
 
             
             #line 41 "..\..\AuthAdmin\Views\Types.cshtml"
-               Write(AuthMessage.TypesAscx_Overriden.NiceToString());
+               Write(AuthAdminMessage.Overriden.NiceToString());
 
             
             #line default
@@ -239,7 +239,7 @@ WriteLiteral("                    <th>");
 
             
             #line 45 "..\..\AuthAdmin\Views\Types.cshtml"
-                   Write(AuthMessage.TypesAscx_Properties.NiceToString());
+                   Write(typeof(PropertyRouteDN).NiceName());
 
             
             #line default
@@ -268,7 +268,7 @@ WriteLiteral("                    <th>");
 
             
             #line 50 "..\..\AuthAdmin\Views\Types.cshtml"
-                   Write(AuthMessage.TypesAscx_Operations.NiceToString());
+                   Write(typeof(OperationDN).NiceName());
 
             
             #line default
@@ -297,7 +297,7 @@ WriteLiteral("                    <th>");
 
             
             #line 55 "..\..\AuthAdmin\Views\Types.cshtml"
-                   Write(AuthMessage.TypesAscx_Queries.NiceToString());
+                   Write(typeof(QueryDN).NiceName());
 
             
             #line default

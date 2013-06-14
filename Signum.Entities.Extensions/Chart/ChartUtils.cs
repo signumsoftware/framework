@@ -384,6 +384,22 @@ namespace Signum.Entities.Chart
         ViewPalette,
         [Description("Chart for")]
         ChartFor,
+
+
+        [Description("{0} is key, but {1} is an aggregate")]
+        _0IsKeyBut1IsAnAggregate,
+        [Description("{0} should be an aggregate")]
+        _0ShouldBeAnAggregate,
+        [Description("{0} should be set")]
+        _0ShouldBeSet,
+        [Description("{0} should be null")]
+        _0ShouldBeNull,
+        [Description("{0} is not {1}")]
+        _0IsNot1,
+        [Description("{0} is an aggregate, but the chart is not grouping")]
+        _0IsAnAggregateButTheChartIsNotGrouping,
+        [Description("{0} is not optional")]
+        _0IsNotOptional,
     }
 
 }

@@ -3,15 +3,16 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:m2="clr-namespace:Signum.Windows.Extensions"
+    xmlns:seb="clr-namespace:Signum.Entities.Basics;assembly=Signum.Entities"
+    xmlns:seb2="clr-namespace:Signum.Entities.Basics;assembly=Signum.Entities.Extensions"
     xmlns:auth="clr-namespace:Signum.Windows.Authorization"
     xmlns:d="clr-namespace:Signum.Entities.Authorization;assembly=Signum.Entities.Extensions"
     xmlns:sef="clr-namespace:Signum.Entities.Files;assembly=Signum.Entities.Extensions"
-
     m:Monitors.AdjustToMonitor="true"
     WindowStartupLocation="CenterOwner"    
     TextOptions.TextFormattingMode="Display"
     UseLayoutRounding="True" 
-    Title="Type Rules" x:Name="me" MinWidth="300" MinHeight="300" m:Common.TypeContext="{x:Type d:TypeRulePack}">
+    x:Name="me" MinWidth="300" MinHeight="300" m:Common.TypeContext="{x:Type d:TypeRulePack}">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -36,32 +37,32 @@
                             VerticalScrollBarVisibility="Disabled"
                       Margin="1,1,18,1">
             <Grid x:Name="grid" >
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
 
-                <ColumnDefinition Width="38" />
-                <ColumnDefinition Width="38" />
-                <ColumnDefinition Width="38" />
-                <ColumnDefinition Width="38" />
+                    <ColumnDefinition Width="38" />
+                    <ColumnDefinition Width="38" />
+                    <ColumnDefinition Width="38" />
+                    <ColumnDefinition Width="38" />
 
-                <ColumnDefinition Width="58" />
-                <ColumnDefinition Width="58" />
-                <ColumnDefinition Width="58" />
-                <ColumnDefinition Width="58" />
-            </Grid.ColumnDefinitions>
-            <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="0" Content="Type"/>
+                    <ColumnDefinition Width="58" />
+                    <ColumnDefinition Width="58" />
+                    <ColumnDefinition Width="58" />
+                    <ColumnDefinition Width="58" />
+                </Grid.ColumnDefinitions>
+                <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="0" Content="{m:LocType {x:Type seb:TypeDN}}"/>
 
-            <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="1" Content="Create" />
-            <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="2" Content="Modify" />
-            <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="3" Content="Read" />
-            <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="4" Content="None" />
+                <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="1" Content="{m:Loc {x:Static d:TypeAllowedBasic.Create}}" />
+                <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="2" Content="{m:Loc {x:Static d:TypeAllowedBasic.Modify}}" />
+                <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="3" Content="{m:Loc {x:Static d:TypeAllowedBasic.Read}}" />
+                <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="4" Content="{m:Loc {x:Static d:TypeAllowedBasic.None}}" />
 
-            <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="5" Content="Overriden" />
-            <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="6" Content="Properties" />
-            <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="7" Content="Operations" />
-            <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="8" Content="Queries" />
-        </Grid>
-            </ScrollViewer>
+                <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="5" Content="Overriden" />
+                <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="6" Content="{m:LocTypePlural {x:Type seb2:PropertyRouteDN}}" />
+                <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="7" Content="{m:LocTypePlural {x:Type seb:OperationDN}}" />
+                <GridViewColumnHeader Style="{DynamicResource GridViewColumnHeaderStyle1}" Grid.Column="8" Content="{m:LocTypePlural {x:Type seb2:QueryDN}}" />
+            </Grid>
+        </ScrollViewer>
 
         <TreeView 
             ScrollViewer.VerticalScrollBarVisibility="Visible"
@@ -109,7 +110,7 @@
                             <ToggleButton HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=Allowed.Read}" Style="{StaticResource SphereRadioButton}" Background="Yellow" Grid.Column="3"  />
                             <ToggleButton HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Path=Allowed.None}" Style="{StaticResource SphereRadioButton}" Background="Red" Grid.Column="4"  />
                             <CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" IsEnabled="False" IsChecked="{Binding Path=Overriden,Mode=OneWay}" Grid.Column="5"  />
-                            
+
                             <Button Click="properties_Click" x:Name="properties" Style="{StaticResource ThinButtonStyle}" ToolTip="{m:Loc {x:Static d:AuthMessage.View}}" Grid.Column="6" RenderOptions.BitmapScalingMode="NearestNeighbor" 
                                     Visibility="{Binding Properties, Converter={x:Static m:Converters.NullToVisibility}}" HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <Grid>
@@ -169,7 +170,7 @@
                 </m:TypeDataTemplateSelector>
             </TreeView.ItemTemplateSelector>
 
-         
+
         </TreeView>
     </DockPanel>
 </Window>

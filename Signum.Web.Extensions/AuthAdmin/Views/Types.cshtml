@@ -28,31 +28,31 @@
     <table class="sf-auth-rules">
         <thead>
             <tr>
-                <th>@AuthMessage.TypesAscx_Type.NiceToString()
+                <th>@typeof(TypeDN).NiceName()
                 </th>
-                <th>@AuthMessage.TypesAscx_Create.NiceToString()
+                <th>@TypeAllowed.Create.NiceToString()
                 </th>
-                <th>@AuthMessage.TypesAscx_Modify.NiceToString()
+                <th>@TypeAllowed.Modify.NiceToString()
                 </th>
-                <th>@AuthMessage.TypesAscx_Read.NiceToString()
+                <th>@TypeAllowed.Read.NiceToString()
                 </th>
-                <th>@AuthMessage.TypesAscx_None.NiceToString()
+                <th>@TypeAllowed.None.NiceToString()
                 </th>
-                <th>@AuthMessage.TypesAscx_Overriden.NiceToString()
+                <th>@AuthAdminMessage.Overriden.NiceToString()
                 </th>
                 @if (propertyRules)
                 {
-                    <th>@AuthMessage.TypesAscx_Properties.NiceToString()
+                    <th>@typeof(PropertyRouteDN).NiceName()
                     </th>
                 }
                 @if (operationRules)
                 {
-                    <th>@AuthMessage.TypesAscx_Operations.NiceToString()
+                    <th>@typeof(OperationDN).NiceName()
                     </th>
                 }
                 @if (queryRules)
                 {
-                    <th>@AuthMessage.TypesAscx_Queries.NiceToString()
+                    <th>@typeof(QueryDN).NiceName()
                     </th>
                 }
             </tr>

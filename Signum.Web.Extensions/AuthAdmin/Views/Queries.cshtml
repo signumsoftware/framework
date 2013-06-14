@@ -10,16 +10,16 @@
         <thead>
             <tr>
                 <th>
-                    @AuthMessage.QueriesAscx_Query.NiceToString()
+                    @typeof(Signum.Entities.Basics.QueryDN).NiceName()
                 </th>
                 <th>
-                    @AuthMessage.QueriesAscx_Allow.NiceToString()
+                    @AuthAdminMessage.Allow.NiceToString()
                 </th>
                 <th>
-                    @AuthMessage.QueriesAscx_Deny.NiceToString()
+                    @AuthAdminMessage.Deny.NiceToString()
                 </th>
                 <th>
-                    @AuthMessage.QueriesAscx_Overriden.NiceToString()
+                    @AuthAdminMessage.Overriden.NiceToString()
                 </th>
             </tr>
         </thead>
