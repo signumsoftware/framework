@@ -13,41 +13,67 @@ using System.Text.RegularExpressions;
 
 namespace Signum.Windows
 {
-    /// <summary>
-    /// Represents a localization makrup extension.
-    /// </summary>
     [MarkupExtensionReturnType(typeof(object))]
-    //[ContentProperty("Key")]
     public class LocExtension : MarkupExtension
     {
-        /// <summary>
-        /// Gets or sets the resource key.
-        /// </summary>
         [ConstructorArgument("key")]
         public Enum Key { get; set; }
 
-
         public LocExtension() { }
-        /// <summary>
-        /// Initializes new instance of the class.
-        /// </summary>
-        /// <param name="key">The resource key.</param>
+   
         public LocExtension(Enum key)
         {
             Key = key;
         }
 
-        /// <summary>
-        /// Returns the object that corresponds to the specified resource key.
-        /// </summary>
-        /// <param name="serviceProvider">An object that can provide services for the markup extension.</param>
-        /// <returns>The object that corresponds to the specified resource key.</returns>
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
             if (Key == null)
                 return "[null]";
 
             return Key.NiceToString();
+        }
+    }
+
+    [MarkupExtensionReturnType(typeof(object))]
+    public class LocTypeExtension : MarkupExtension
+    {
+        [ConstructorArgument("key")]
+        public Type Type { get; set; }
+
+        public LocTypeExtension() { }
+        public LocTypeExtension(Type type)
+        {
+            Type = type;
+        }
+
+        public override object ProvideValue(IServiceProvider serviceProvider)
+        {
+            if (Type == null)
+                return "[null]";
+
+            return Type.NiceName();
+        }
+    }
+
+    [MarkupExtensionReturnType(typeof(object))]
+    public class LocTypePluralExtension : MarkupExtension
+    {
+        [ConstructorArgument("key")]
+        public Type Type { get; set; }
+
+        public LocTypePluralExtension() { }
+        public LocTypePluralExtension(Type type)
+        {
+            Type = type;
+        }
+
+        public override object ProvideValue(IServiceProvider serviceProvider)
+        {
+            if (Type == null)
+                return "[null]";
+
+            return Type.NicePluralName();
         }
     }
 }
