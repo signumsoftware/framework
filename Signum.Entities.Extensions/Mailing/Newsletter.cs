@@ -10,6 +10,7 @@ using Signum.Entities.Basics;
 using System.Linq.Expressions;
 using System.Reflection;
 using Signum.Entities.DynamicQuery;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Entities.Mailing
 {
@@ -109,8 +110,8 @@ namespace Signum.Entities.Mailing
             set { Set(ref query, value, () => Query); }
         }
 
-        MList<TemplateQueryTokenDN> tokens = new MList<TemplateQueryTokenDN>();
-        public MList<TemplateQueryTokenDN> Tokens
+        MList<QueryTokenDN> tokens = new MList<QueryTokenDN>();
+        public MList<QueryTokenDN> Tokens
         {
             get { return tokens; }
             set { Set(ref tokens, value, () => Tokens); }

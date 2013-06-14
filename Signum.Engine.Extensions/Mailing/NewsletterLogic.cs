@@ -17,6 +17,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using System.Net.Mail;
 using Signum.Engine.Exceptions;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Engine.Mailing
 {
@@ -145,7 +146,7 @@ namespace Signum.Engine.Mailing
 
             if (!newsletter.Tokens.Select(a => a.Token).ToList().SequenceEqual(tokens))
             {
-                newsletter.Tokens.ResetRange(tokens.Select(t => new TemplateQueryTokenDN { Token = t }));
+                newsletter.Tokens.ResetRange(tokens.Select(t => new QueryTokenDN(t)));
                 graphModified = true;
             }
         }
@@ -293,7 +294,7 @@ namespace Signum.Engine.Mailing
 
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
             
-            var columns = EmailLogic.GetTemplateColumns(newsletter.Tokens.ToList(), qd);
+            var columns = EmailLogic.GetTemplateColumns(newsletter, newsletter.Tokens, qd);
 
             //var columns = new List<QueryToken>();
             //columns.Add(QueryUtils.Parse("Entity.NewsletterDeliveries.Element", qd, canAggregate: false));

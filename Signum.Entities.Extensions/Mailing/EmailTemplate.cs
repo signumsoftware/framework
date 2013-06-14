@@ -84,8 +84,8 @@ namespace Signum.Entities.Mailing
             set { Set(ref isBodyHtml, value, () => IsBodyHtml); }
         }
 
-        MList<TemplateQueryTokenDN> tokens = new MList<TemplateQueryTokenDN>();
-        public MList<TemplateQueryTokenDN> Tokens
+        MList<QueryTokenDN> tokens = new MList<QueryTokenDN>();
+        public MList<QueryTokenDN> Tokens
         {
             get { return tokens; }
             set { Set(ref tokens, value, () => Tokens); }
@@ -236,17 +236,24 @@ namespace Signum.Entities.Mailing
                     t.ParseData(this, queryDescription, false);
 
             if (Recipients != null)
-                foreach (var r in Recipients)
-                    r.ParseData(this, queryDescription, false);
+                foreach (var r in Recipients.Where(r => r.Token != null))
+                    r.Token.ParseData(this, queryDescription, false);
 
-            if (From != null)
-                From.ParseData(this, queryDescription, false);
+            if (From != null && From.Token != null)
+                From.Token.ParseData(this, queryDescription, false);
         }
     }
 
     [Serializable]
-    public class EmailTemplateContactDN : TemplateQueryTokenDN
+    public class EmailTemplateContactDN : EmbeddedEntity
     {
+        QueryTokenDN token;
+        public QueryTokenDN Token
+        {
+            get { return token; }
+            set { Set(ref token, value, () => Token); }
+        }
+
         string emailAddress;
         public string EmailAddress
         {
@@ -268,7 +275,7 @@ namespace Signum.Entities.Mailing
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => TokenString) && TokenString == null && emailAddress.IsNullOrEmpty())
+            if (pi.Is(() => Token) && Token == null && emailAddress.IsNullOrEmpty())
                 return "Token or Email Address must be set";
             
             return null;
@@ -360,22 +367,6 @@ namespace Signum.Entities.Mailing
 
         [Ignore]
         internal object SubjectParsedNode;
-    }
-
-    [Serializable]
-    public class TemplateQueryTokenDN : QueryTokenDN
-    {
-        public override void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)
-        {
-            try
-            {
-                token = QueryUtils.Parse(tokenString, description, canAggregate);
-            }
-            catch (Exception e)
-            {
-                parseException = new FormatException("{0} {1}: {2}\r\n{3}".Formato(context.GetType().Name, context.IdOrNull, context, e.Message));
-            }
-        }
     }
 
     public enum EmailMasterTemplateOperation

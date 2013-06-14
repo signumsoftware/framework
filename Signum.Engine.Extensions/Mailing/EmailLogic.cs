@@ -30,6 +30,7 @@ using System.Globalization;
 using Signum.Engine.Translation;
 using System.Net.Configuration;
 using System.Configuration;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Engine.Mailing
 {
@@ -169,8 +170,6 @@ namespace Signum.Engine.Mailing
                 Validator.OverridePropertyValidator((EmailTemplateMessageDN m) => m.Subject).StaticPropertyValidation +=
                     EmailTemplateMessageSubject_StaticPropertyValidation;
                 
-                RemoveNotNullValidators();
-
                 EmailTemplateGraph.Register();
                 EmailMasterTemplateGraph.Register();
             }
@@ -182,21 +181,6 @@ namespace Signum.Engine.Mailing
             QueryDescription description = DynamicQueryManager.Current.QueryDescription(queryName);
 
             emailTemplate.ParseData(description);
-        }
-        
-        static void RemoveNotNullValidators()
-        {
-            Validator.OverridePropertyValidator((EmailTemplateContactDN c) => c.TokenString)
-                .Validators.OfType<StringLengthValidatorAttribute>().SingleEx().AllowNulls = true;
-
-            Validator.OverridePropertyValidator((EmailTemplateRecipientDN c) => c.TokenString)
-                .Validators.OfType<StringLengthValidatorAttribute>().SingleEx().AllowNulls = true;
-
-            //Validator.OverridePropertyValidator((EmailTemplateDN et) => et.Recipients.First().TokenString)
-            //    .Validators.OfType<StringLengthValidatorAttribute>().SingleEx().AllowNulls = true;
-
-            //Validator.OverridePropertyValidator((TemplateQueryTokenDN c) => c.TokenString)
-            //    .Validators.OfType<StringLengthValidatorAttribute>().SingleEx().AllowNulls = true;
         }
 
         static string EmailTemplateMessageText_StaticPropertyValidation(EmailTemplateMessageDN message, PropertyInfo pi)
@@ -271,9 +255,9 @@ namespace Signum.Engine.Mailing
 
             List<QueryToken> list = new List<QueryToken>();
 
-            foreach (var tr in template.Recipients.Where(r => r.TokenString.HasText()))
+            foreach (var tr in template.Recipients.Where(r => r.Token != null))
             {
-                list.Add(QueryUtils.Parse(".".Combine("Entity", tr.TokenString, "EmailOwnerData"), qd, false));
+                list.Add(QueryUtils.Parse(".".Combine("Entity", tr.Token.TokenString, "EmailOwnerData"), qd, false));
             }
             
             foreach (var message in template.Messages)
@@ -286,7 +270,7 @@ namespace Signum.Engine.Mailing
 
             if (!template.Tokens.Select(a => a.Token).ToList().SequenceEqual(tokens))
             {
-                template.Tokens.ResetRange(tokens.Select(t => new TemplateQueryTokenDN { Token = t }));
+                template.Tokens.ResetRange(tokens.Select(t => new QueryTokenDN(t)));
                 graphModified = true;
             }
         }
@@ -486,7 +470,7 @@ namespace Signum.Engine.Mailing
 
             var smtpConfig = template.SMTPConfiguration ?? EmailLogic.SenderManager.DefaultSMTPConfiguration;
             
-            var columns = GetTemplateColumns(template.Tokens.ToList(), qd);
+            var columns = GetTemplateColumns(template, template.Tokens, qd);
 
             var table = DynamicQueryManager.Current.ExecuteQuery(new QueryRequest
             {
@@ -506,9 +490,9 @@ namespace Signum.Engine.Mailing
 
             recipients.AddRange(template.Recipients.SelectMany(tr => 
             {
-                if (tr.TokenString.HasText())
+                if (tr.Token != null)
                 {
-                    var owner = dicTokenColumn.GetOrThrow(QueryUtils.Parse("Entity." + tr.TokenString + ".EmailOwnerData", qd, false));
+                    var owner = dicTokenColumn.GetOrThrow(QueryUtils.Parse("Entity." + tr.Token.TokenString + ".EmailOwnerData", qd, false));
 
                     var groups = table.Rows.Select(r => (EmailOwnerData)r[owner]).Distinct(a => a.Owner).ToList();
                     if (groups.Count == 1 && groups[0] == null)
@@ -537,9 +521,9 @@ namespace Signum.Engine.Mailing
             EmailAddressDN from = null;
             if (template.From != null)
             {
-                if (template.From.TokenString.HasText())
+                if (template.From.Token != null)
                 {
-                    var owner = dicTokenColumn.GetOrThrow(QueryUtils.Parse("Entity." + template.From.TokenString + ".EmailOwnerData", qd, false));
+                    var owner = dicTokenColumn.GetOrThrow(QueryUtils.Parse("Entity." + template.From.Token.TokenString + ".EmailOwnerData", qd, false));
 
                     var eod = table.Rows.Select(r => (EmailOwnerData)r[owner]).Distinct(a => a.Owner).SingleOrDefaultEx(() => "More than one distinct From value");
 
@@ -621,12 +605,11 @@ namespace Signum.Engine.Mailing
             return email;
         }
 
-        public static List<Column> GetTemplateColumns(List<TemplateQueryTokenDN> tokens, QueryDescription queryDescription)
+        public static List<Column> GetTemplateColumns(IdentifiableEntity context, MList<QueryTokenDN> tokens, QueryDescription queryDescription)
         {
             foreach (var t in tokens)
             {
-                if (t.Token == null)
-                    t.Token = QueryUtils.Parse(t.TokenString, queryDescription, false);
+                t.ParseData(context, queryDescription, canAggregate: false);
             }
 
             return tokens.Select(qt => new Column(qt.Token, null)).ToList();
