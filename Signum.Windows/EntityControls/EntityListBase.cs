@@ -42,16 +42,13 @@ namespace Signum.Windows
         }
 
         public new event Func<object> Finding;
-        
-        protected internal override DependencyProperty CommonRouteValue()
+
+        static EntityListBase()
         {
-            return EntitiesProperty;
+            Common.ValuePropertySelector.SetDefinition(typeof(EntityListBase), EntitiesProperty);
+            Common.TypePropertySelector.SetDefinition(typeof(EntityListBase), EntitiesTypeProperty);
         }
 
-        protected internal override DependencyProperty CommonRouteType()
-        {
-            return EntitiesTypeProperty;
-        }
 
         protected override bool CanFind()
         {

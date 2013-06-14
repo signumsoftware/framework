@@ -52,19 +52,11 @@ namespace Signum.Windows
             btDown.Visibility = Move ? (CanMoveDown() ? Visibility.Visible : Visibility.Hidden) : Visibility.Collapsed;
         }
 
-        protected internal override DependencyProperty CommonRouteLabelText()
+        static EntityList()
         {
-            return null;
-        }
-
-        protected internal override DependencyProperty CommonRouteValue()
-        {
-            return EntitiesProperty;
-        }
-
-        protected internal override DependencyProperty CommonRouteType()
-        {
-            return EntitiesTypeProperty;
+            Common.LabelPropertySelector.SetDefinition(typeof(EntityList), null);
+            Common.ValuePropertySelector.SetDefinition(typeof(EntityList), EntitiesProperty);
+            Common.TypePropertySelector.SetDefinition(typeof(EntityList), EntitiesTypeProperty);
         }
 
         private bool CanMoveUp()

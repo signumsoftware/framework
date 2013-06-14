@@ -41,9 +41,9 @@ namespace Signum.Windows
             set { SetValue(TextProperty, value); }
         }
 
-        protected internal override DependencyProperty CommonRouteValue()
+        static TextArea()
         {
-            return TextProperty;
+            Common.LabelPropertySelector.SetDefinition(typeof(TextArea), TextProperty);
         }
 
         public TextArea()

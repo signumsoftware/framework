@@ -123,6 +123,8 @@ namespace Signum.Windows
         {
             LineBase.TypeProperty.OverrideMetadata(typeof(EntityBase), 
                 new UIPropertyMetadata((d, e) => ((EntityBase)d).SetType((Type)e.NewValue)));
+
+            Common.ValuePropertySelector.SetDefinition(typeof(EntityBase), EntityProperty);
         }
 
         public EntityBase()
@@ -131,8 +133,6 @@ namespace Signum.Windows
             this.CommandBindings.Add(new CommandBinding(FindCommand, btFind_Click));
             this.CommandBindings.Add(new CommandBinding(RemoveCommand, btRemove_Click));
             this.CommandBindings.Add(new CommandBinding(ViewCommand, btView_Click));
-
-          
         }
 
         public bool dynamicReadOnly;
@@ -158,11 +158,6 @@ namespace Signum.Windows
         void IsReadOnlyChanged(object sender, EventArgs e)
         {
             UpdateVisibility();
-        }
-
-        protected internal override DependencyProperty CommonRouteValue()
-        {
-            return EntityProperty;
         }
 
         private void SetType(Type type)
