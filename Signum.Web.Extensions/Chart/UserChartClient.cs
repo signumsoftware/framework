@@ -34,13 +34,9 @@ namespace Signum.Web.Chart
                 UserAssetsClient.Start();
                 UserAssetsClient.RegisterExportAssertLink<UserChartDN>();
 
-                Mapping<QueryToken> qtMapping = ctx =>
+                Mapping<QueryTokenDN> qtMapping = ctx =>
                 {
-                    string tokenStr = "";
-                    foreach (string key in ctx.Parent.Inputs.Keys.Where(k => k.Contains("ddlTokens")).OrderBy())
-                        tokenStr += ctx.Parent.Inputs[key] + ".";
-                    while (tokenStr.EndsWith("."))
-                        tokenStr = tokenStr.Substring(0, tokenStr.Length - 1);
+                    string tokenStr = UserQueries.UserQueriesHelper.GetTokenString(ctx);
 
                     string queryKey = ctx.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", "Key")];
                     object queryName = QueryLogic.ToQueryName(queryKey);
@@ -48,7 +44,7 @@ namespace Signum.Web.Chart
                     var chart = ((UserChartDN)ctx.Parent.Parent.Parent.UntypedValue);
 
                     QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                    return QueryUtils.Parse(tokenStr, qd, canAggregate: chart.GroupResults);
+                    return new QueryTokenDN(QueryUtils.Parse(tokenStr, qd, canAggregate: chart.GroupResults));
                 };
 
                 Navigator.AddSettings(new List<EntitySettings>
@@ -64,13 +60,13 @@ namespace Signum.Web.Chart
                                 ElementMapping = new EntityMapping<QueryFilterDN>(false)
                                     .CreateProperty(a=>a.Operation)
                                     .CreateProperty(a=>a.ValueString)
-                                    .SetProperty(a=>a.TryToken, qtMapping)
+                                    .SetProperty(a=>a.Token, qtMapping)
                             })
                             .SetProperty(cr => cr.Orders, new MListMapping<QueryOrderDN>
                             {
                                 ElementMapping = new EntityMapping<QueryOrderDN>(false)
                                     .CreateProperty(a=>a.OrderType)
-                                    .SetProperty(a=>a.TryToken, qtMapping)
+                                    .SetProperty(a=>a.Token, qtMapping)
                             })
                     }
                 });

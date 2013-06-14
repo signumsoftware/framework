@@ -31,18 +31,14 @@ namespace Signum.Web.UserQueries
 
         public static string ViewPrefix = "~/UserQueries/Views/{0}.cshtml";
 
-        public static Mapping<QueryToken> QueryTokenMapping = ctx =>
+        public static Mapping<QueryTokenDN> QueryTokenMapping = ctx =>
         {
-            string tokenStr = "";
-            foreach (string key in ctx.Parent.Inputs.Keys.Where(k => k.Contains("ddlTokens")).OrderBy())
-                tokenStr += ctx.Parent.Inputs[key] + ".";
-            while (tokenStr.EndsWith("."))
-                tokenStr = tokenStr.Substring(0, tokenStr.Length - 1);
+			string tokenStr = UserQueriesHelper.GetTokenString(ctx);
 
             string queryKey = ctx.Parent.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", "Key")];
             object queryName = QueryLogic.ToQueryName(queryKey);
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-            return QueryUtils.Parse(tokenStr, qd, canAggregate: false);
+            return new QueryTokenDN(QueryUtils.Parse(tokenStr, qd, canAggregate: false));
         };
 
         public static void Start()
@@ -73,7 +69,7 @@ namespace Signum.Web.UserQueries
                         MappingDefault = new EntityMapping<QueryFilterDN>(false)
                             .CreateProperty(a=>a.Operation)
                             .CreateProperty(a=>a.ValueString)
-                            .SetProperty(a=>a.TryToken, QueryTokenMapping)
+                            .SetProperty(a=>a.Token, QueryTokenMapping)
                     },
 
                     new EmbeddedEntitySettings<QueryColumnDN>
@@ -81,7 +77,7 @@ namespace Signum.Web.UserQueries
                         PartialViewName = e => ViewPrefix.Formato("QueryColumn"), 
                         MappingDefault = new EntityMapping<QueryColumnDN>(false)
                             .CreateProperty(a=>a.DisplayName)
-                            .SetProperty(a=>a.TryToken, QueryTokenMapping)
+                            .SetProperty(a=>a.Token, QueryTokenMapping)
                     },
 
                     new EmbeddedEntitySettings<QueryOrderDN>
@@ -89,7 +85,7 @@ namespace Signum.Web.UserQueries
                         PartialViewName = e => ViewPrefix.Formato("QueryOrder"), 
                         MappingDefault = new EntityMapping<QueryOrderDN>(false)
                             .CreateProperty(a=>a.OrderType)
-                            .SetProperty(a=>a.TryToken, QueryTokenMapping)
+                            .SetProperty(a=>a.Token, QueryTokenMapping)
                     },
                 });
 
@@ -216,8 +212,8 @@ namespace Signum.Web.UserQueries
 
                 findOptions.FilterOptions.AddRange(userQuery.Filters.Select(qf => new FilterOption
                 {
-                    Token = qf.Token,
-                    ColumnName = qf.TokenString,
+                    Token = qf.Token.Token,
+                    ColumnName = qf.Token.TokenString,
                     Operation = qf.Operation,
                     Value = qf.Value
                 }));
@@ -228,16 +224,16 @@ namespace Signum.Web.UserQueries
             findOptions.ColumnOptions.Clear();
             findOptions.ColumnOptions.AddRange(userQuery.Columns.Select(qc => new ColumnOption
             {
-                Token = qc.Token,
-                ColumnName = qc.TokenString,                
+                Token = qc.Token.Token,
+                ColumnName = qc.Token.TokenString,                
                 DisplayName = qc.DisplayName,
             }));
 
             findOptions.OrderOptions.Clear();
             findOptions.OrderOptions.AddRange(userQuery.Orders.Select(qo => new OrderOption
             {
-                Token = qo.Token,
-                ColumnName = qo.TokenString,
+                Token = qo.Token.Token,
+                ColumnName = qo.Token.TokenString,
                 OrderType = qo.OrderType
             }));
 

@@ -867,11 +867,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>QueryOrder.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="UserQueries\Views\QueryToken.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>QueryToken.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="Reports\ReportsClient.cs" />
     <Compile Include="Reports\Controllers\ReportController.cs" />
     <Compile Include="Scheduler\SchedulerClient.cs" />
@@ -1518,10 +1513,6 @@
     <None Include="UserQueries\Views\QueryOrder.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>QueryOrder.generated.cs</LastGenOutput>
-    </None>
-    <None Include="UserQueries\Views\QueryToken.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>QueryToken.generated.cs</LastGenOutput>
     </None>
     <None Include="UserQueries\Views\UserQuery.cshtml">
       <Generator>RazorGenerator</Generator>

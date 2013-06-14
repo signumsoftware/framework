@@ -135,7 +135,7 @@ namespace Signum.Entities.Chart
 
         public List<QueryToken> AllTokens()
         {
-            var allTokens = Columns.Select(a => a.Token).ToList();
+            var allTokens = Columns.Select(a => a.Token.TryCC(t => t.Token)).ToList();
 
             if (Filters != null)
                 allTokens.AddRange(Filters.Select(a => a.Token));
@@ -155,7 +155,7 @@ namespace Signum.Entities.Chart
         {
             if (GroupResults)
             {
-                var keys = this.Columns.Where(a => a.IsGroupKey.Value).Select(a => a.Token);
+                var keys = this.Columns.Where(a => a.IsGroupKey.Value).Select(a => a.Token.Token);
 
                 Orders.RemoveAll(o => !(o.Token is AggregateToken) && !keys.Contains(o.Token));
             }

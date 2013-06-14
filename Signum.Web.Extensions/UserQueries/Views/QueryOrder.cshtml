@@ -9,8 +9,8 @@
     {
         style.OnlyValue = true;
     <div style="float: left">
-        @Html.QueryTokenDNBuilder(e.Value, e, (QueryDescription)ViewData[ViewDataKeys.QueryDescription])
+        @Html.QueryTokenDNBuilder(e.SubContext(a => a.Token), (QueryDescription)ViewData[ViewDataKeys.QueryDescription])
     </div>
-        @Html.ValueLine(style, f => f.OrderType)
+    @Html.ValueLine(style, f => f.OrderType)
     }
 }

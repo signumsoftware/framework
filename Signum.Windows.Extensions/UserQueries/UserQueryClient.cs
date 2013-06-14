@@ -140,20 +140,20 @@ namespace Signum.Windows.UserQueries
             var filters = uq.WithoutFilters ? searchControl.FilterOptions.ToList() :
                 searchControl.FilterOptions.Where(f => f.Frozen).Concat(uq.Filters.Select(qf => new FilterOption
             {
-                Path = qf.Token.FullKey(),
+                Path = qf.Token.Token.FullKey(),
                 Operation = qf.Operation,
                 Value = qf.Value
             })).ToList();
 
             var columns = uq.Columns.Select(qc => new ColumnOption
             {
-                Path = qc.Token.FullKey(),
+                Path = qc.Token.Token.FullKey(),
                 DisplayName = qc.DisplayName
             }).ToList();
 
             var orders = uq.Orders.Select(of => new OrderOption
             {
-                Path = of.Token.FullKey(),
+                Path = of.Token.Token.FullKey(),
                 OrderType = of.OrderType,
             }).ToList();
 
@@ -167,21 +167,21 @@ namespace Signum.Windows.UserQueries
             var filters = uq.WithoutFilters ? countSearchControl.FilterOptions.ToList() :
                 countSearchControl.FilterOptions.Where(f => f.Frozen).Concat(uq.Filters.Select(qf => new FilterOption
                 {
-                    Path = qf.Token.FullKey(),
+                    Path = qf.Token.Token.FullKey(),
                     Operation = qf.Operation,
                     Value = qf.Value
                 })).ToList();
 
             var columns = uq.Columns.Select(qc => new ColumnOption
             {
-            
-                Path = qc.Token.FullKey(),
+
+                Path = qc.Token.Token.FullKey(),
                 DisplayName = qc.DisplayName
             }).ToList();
 
             var orders = uq.Orders.Select(of => new OrderOption
             {
-                Path = of.Token.FullKey(),
+                Path = of.Token.Token.FullKey(),
                 OrderType = of.OrderType,
             }).ToList();
 

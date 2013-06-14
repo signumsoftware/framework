@@ -160,7 +160,7 @@ namespace Signum.Entities.UserQueries
             if (pi.Is(() => ElementsPerPage))
             {
                 if (ElementsPerPage != null && !ShouldHaveElements)
-                    return UserQueryMessage._0ShouldBeNullIf1Is2.NiceToString().Formato(pi.NiceName(), NicePropertyName(() => PaginationMode), PaginationMode.NiceToString());
+                    return UserQueryMessage._0ShouldBeNullIf1Is2.NiceToString().Formato(pi.NiceName(), NicePropertyName(() => PaginationMode), PaginationMode.TrySC(pm=>pm.NiceToString()) ?? "" );
 
                 if (ElementsPerPage == null && ShouldHaveElements)
                     return UserQueryMessage._0ShouldBeSetIf1Is2.NiceToString().Formato(pi.NiceName(), NicePropertyName(() => PaginationMode), PaginationMode.NiceToString());
@@ -259,19 +259,38 @@ namespace Signum.Entities.UserQueries
     }
 
     [Serializable]
-    public abstract class QueryTokenDN : EmbeddedEntity
+    public sealed class QueryTokenDN : EmbeddedEntity
     {
+        private QueryTokenDN() 
+        { 
+        }
+
+        public QueryTokenDN(QueryToken token) 
+        {
+            if (token == null)
+                throw new ArgumentNullException("token");
+
+            this.token = token;
+        }
+
+        public QueryTokenDN(string tokenString)
+        {
+            if (string.IsNullOrEmpty(tokenString))
+                throw new ArgumentNullException("tokenString");
+
+            this.tokenString = tokenString;
+        }
+
         [NotNullable]
-        protected string tokenString;
+        string tokenString;
         [StringLengthValidator(AllowNulls = false, Min = 1)]
         public string TokenString
         {
             get { return tokenString; }
-            set { SetToStr(ref tokenString, value, () => TokenString); }
         }
 
         [Ignore]
-        protected QueryToken token;
+        QueryToken token;
         [HiddenProperty]
         public QueryToken Token
         {
@@ -282,44 +301,38 @@ namespace Signum.Entities.UserQueries
 
                 return token;
             }
-            set { if (Set(ref token, value, () => Token)) TokenChanged(); }
-        }
-
-        int index;
-        public int Index
-        {
-            get { return index; }
-            set { Set(ref index, value, () => Index); }
         }
 
         [HiddenProperty]
         public QueryToken TryToken
         {
             get { return token; }
-            set { if (Set(ref token, value, () => Token)) TokenChanged(); }
         }
 
         [Ignore]
-        protected Exception parseException;
+        Exception parseException;
         [HiddenProperty]
         public Exception ParseException
         {
             get { return parseException; }
         }
 
-        public virtual void TokenChanged()
-        {
-            parseException = null;
-            Notify(() => Token);
-            Notify(() => TryToken);
-        }
-
         protected override void PreSaving(ref bool graphModified)
         {
-            tokenString = token.TryCC(t => t.FullKey());
+            tokenString = token.FullKey();
         }
 
-        public abstract void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate);
+        public void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)
+        {
+            try
+            {
+                token = QueryUtils.Parse(tokenString, description, canAggregate);
+            }
+            catch (Exception e)
+            {
+                parseException = new FormatException("{0} {1}: {2}\r\n{3}".Formato(context.GetType().Name, context.IdOrNull, context, e.Message));
+            }
+        }
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
@@ -333,15 +346,17 @@ namespace Signum.Entities.UserQueries
     }
 
     [Serializable]
-    public class QueryOrderDN : QueryTokenDN
+    public class QueryOrderDN : EmbeddedEntity
     {
-        public QueryOrderDN() {}
-
-        public QueryOrderDN(string columnName, OrderType type)
+        [NotNullable]
+        QueryTokenDN token;
+        [NotNullValidator]
+        public QueryTokenDN Token
         {
-            this.TokenString = columnName;
-            orderType = type;
+            get { return token; }
+            set { Set(ref token, value, () => Token); }
         }
+
 
         OrderType orderType;
         public OrderType OrderType
@@ -350,101 +365,100 @@ namespace Signum.Entities.UserQueries
             set { Set(ref orderType, value, () => OrderType); }
         }
 
-        public override void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)
+        int index;
+        public int Index
         {
-            try
-            {
-                token = QueryUtils.Parse(tokenString, description, canAggregate);
-            }
-            catch (Exception e)
-            {
-                parseException = new FormatException("{0} {1}: {2}\r\n{3}".Formato(context.GetType().Name, context.IdOrNull, context, e.Message));
-            }
+            get { return index; }
+            set { Set(ref index, value, () => Index); }
         }
 
         public XElement ToXml(IToXmlContext ctx)
         {
             return new XElement("Orden",
-                new XAttribute("Token", Token.FullKey()),
+                new XAttribute("Token", Token.Token.FullKey()),
                 new XAttribute("OrderType", OrderType));
         }
 
         internal void FromXml(XElement element, IFromXmlContext ctx)
         {
-            TokenString = element.Attribute("Token").Value;
+            Token = new QueryTokenDN(element.Attribute("Token").Value);
             OrderType = element.Attribute("OrderType").Value.ToEnum<OrderType>();
+        }
+
+        public void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)
+        {
+            token.ParseData(context, description, canAggregate);
         }
     }
 
     [Serializable]
-    public class QueryColumnDN : QueryTokenDN
+    public class QueryColumnDN : EmbeddedEntity
     {
-        public QueryColumnDN(){}
-
-        public QueryColumnDN(string columnName)
+        [NotNullable]
+        QueryTokenDN token;
+        [NotNullValidator]
+        public QueryTokenDN Token
         {
-            this.TokenString = columnName;
-        }
-
-        public QueryColumnDN(Column col)
-        {
-            Token = col.Token;
-            DisplayName = col.DisplayName;
+            get { return token; }
+            set { Set(ref token, value, () => Token); }
         }
 
         string displayName;
         public string DisplayName
         {
-            get { return displayName ?? Token.TryCC(t => t.NiceName()); }
+            get { return displayName ?? Token.TryCC(t => t.Token.NiceName()); }
             set
             {
-                var name = value == Token.TryCC(t => t.NiceName()) ? null : value;
+                var name = value == Token.TryCC(t => t.Token.NiceName()) ? null : value;
                 Set(ref displayName, name, () => DisplayName);
             }
         }
 
-        public override void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)
+        int index;
+        public int Index
         {
-            try
-            {
-                token = QueryUtils.Parse(tokenString, description, canAggregate);
-            }
-            catch (Exception e)
-            {
-                parseException = new FormatException("{0} {1}: {2}\r\n{3}".Formato(context.GetType().Name, context.IdOrNull, context, e.Message));
-            }
+            get { return index; }
+            set { Set(ref index, value, () => Index); }
         }
 
         public XElement ToXml(IToXmlContext ctx)
         {
             return new XElement("Column",
-                new XAttribute("Token", Token.FullKey()),
+                new XAttribute("Token", Token.Token.FullKey()),
                 DisplayName != null ? new XAttribute("DisplayName", DisplayName) : null);
         }
 
         internal void FromXml(XElement element, IFromXmlContext ctx)
         {
-            TokenString = element.Attribute("Token").Value;
+            Token = new QueryTokenDN(element.Attribute("Token").Value);
             DisplayName = element.Attribute("DisplayName").TryCC(a => a.Value);
         }
-        
+
+        public void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)
+        {
+            token.ParseData(context, description, canAggregate);
+        }
     }
 
     [Serializable]
-    public class QueryFilterDN : QueryTokenDN
+    public class QueryFilterDN : EmbeddedEntity
     {
         public QueryFilterDN() { }
 
-        public QueryFilterDN(string columnName)
+        [NotNullable]
+        QueryTokenDN token;
+        [NotNullValidator]
+        public QueryTokenDN Token
         {
-            this.TokenString = columnName;
-        }
-
-        public QueryFilterDN(string columnName, object value)
-        {
-            this.TokenString = columnName;
-            this.value = value;
-            this.operation = FilterOperation.EqualTo;
+            get { return token; }
+            set
+            {
+                if (Set(ref token, value, () => Token))
+                {
+                    Notify(() => Operation);
+                    Notify(() => ValueString);
+                }
+            }
         }
 
         FilterOperation operation;
@@ -471,25 +485,25 @@ namespace Signum.Entities.UserQueries
             set { this.value = value; }
         }
 
-        public override void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)
+        int index;
+        public int Index
         {
-            try
-            {
-                token = QueryUtils.Parse(tokenString, description, canAggregate);
-            }
-            catch (Exception e)
-            {
-                parseException = new FormatException("{0} {1}: {2}\r\n{3}".Formato(context.GetType().Name, context.IdOrNull, context, e.Message));
-            }
+            get { return index; }
+            set { Set(ref index, value, () => Index); }
+        }
 
-            if (token != null)
+        public void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)
+        {
+            token.ParseData(context, description, canAggregate);
+
+            if (token.Token != null)
             {
                 if (value != null)
                 {
                     if (valueString.HasText())
                         throw new InvalidOperationException("Value and ValueString defined at the same time");
 
-                    ValueString = FilterValueConverter.ToString(value, Token.Type);
+                    ValueString = FilterValueConverter.ToString(value, Token.Token.Type);
                 }
                 else
                 {
@@ -501,17 +515,9 @@ namespace Signum.Entities.UserQueries
         public void SetValue()
         {
             object val;
-            string error = FilterValueConverter.TryParse(ValueString, Token.Type, out val);
+            string error = FilterValueConverter.TryParse(ValueString, Token.Token.Type, out val);
             if (string.IsNullOrEmpty(error))
                 Value = val; //Executed on server only
-        }
-
-        public override void TokenChanged()
-        {
-            Notify(() => Operation);
-            Notify(() => ValueString);
-
-            base.TokenChanged();
         }
 
         protected override string PropertyValidation(PropertyInfo pi)
@@ -520,7 +526,7 @@ namespace Signum.Entities.UserQueries
             {
                 if (pi.Is(() => Operation))
                 {
-                    FilterType? filterType = QueryUtils.TryGetFilterType(Token.Type);
+                    FilterType? filterType = QueryUtils.TryGetFilterType(Token.Token.Type);
 
                     if (filterType == null)
                         return UserQueryMessage._0IsNotFilterable.NiceToString().Formato(token);
@@ -532,7 +538,7 @@ namespace Signum.Entities.UserQueries
                 if (pi.Is(() => ValueString))
                 {
                     object val;
-                    return FilterValueConverter.TryParse(ValueString, Token.Type, out val);
+                    return FilterValueConverter.TryParse(ValueString, Token.Token.Type, out val);
                 }
             }
 
@@ -542,14 +548,14 @@ namespace Signum.Entities.UserQueries
         public XElement ToXml(IToXmlContext ctx)
         {
             return new XElement("Filter",
-                new XAttribute("Token", Token.FullKey()),
+                new XAttribute("Token", Token.Token.FullKey()),
                 new XAttribute("Operation", Operation),
                 new XAttribute("Value", ValueString));
         }
 
         public void FromXml(XElement element, IFromXmlContext ctx)
         {
-            TokenString = element.Attribute("Token").Value;
+            Token = new QueryTokenDN(element.Attribute("Token").Value);
             Operation = element.Attribute("Operation").Value.ToEnum<FilterOperation>();
             ValueString = element.Attribute("Value").Value;
         }
@@ -578,7 +584,7 @@ namespace Signum.Entities.UserQueries
                 Related = DefaultRelated(),
                 Filters = withoutFilters ? new MList<QueryFilterDN>() : request.Filters.Select(f => new QueryFilterDN
                 {
-                    Token = f.Token,
+                    Token = new QueryTokenDN(f.Token),
                     Operation = f.Operation,
                     ValueString = FilterValueConverter.ToString(f.Value, f.Token.Type)
                 }).ToMList(),
@@ -586,7 +592,7 @@ namespace Signum.Entities.UserQueries
                 Columns = tuple.Item2,
                 Orders = request.Orders.Select(oo => new QueryOrderDN
                 {
-                    Token = oo.Token,
+                    Token = new QueryTokenDN(oo.Token),
                     OrderType = oo.OrderType
                 }).ToMList(),
                 PaginationMode = isDefaultPaginate ? (PaginationMode?)null : mode,
@@ -613,16 +619,24 @@ namespace Signum.Entities.UserQueries
                 }
 
                 if (toRemove.Count + current.Count == ideal.Count)
-                    return Tuple.Create(ColumnOptionsMode.Remove, toRemove.Select(c => new QueryColumnDN { Token = c.Token }).ToMList());
+                    return Tuple.Create(ColumnOptionsMode.Remove, toRemove.Select(c => new QueryColumnDN { Token = new QueryTokenDN(c.Token) }).ToMList());
             }
             else
             {
                 if (current.Zip(ideal).All(t => t.Item1.Equals(t.Item2)))
-                    return Tuple.Create(ColumnOptionsMode.Add, current.Skip(ideal.Count).Select(c => new QueryColumnDN(c)).ToMList());
+                    return Tuple.Create(ColumnOptionsMode.Add, current.Skip(ideal.Count).Select(c => new QueryColumnDN
+                    {
+                        Token = new QueryTokenDN(c.Token),
+                        DisplayName = c.DisplayName
+                    }).ToMList());
 
             }
 
-            return Tuple.Create(ColumnOptionsMode.Replace, current.Select(c => new QueryColumnDN(c)).ToMList());
+            return Tuple.Create(ColumnOptionsMode.Replace, current.Select(c => new QueryColumnDN
+            {
+                Token = new QueryTokenDN(c.Token),
+                DisplayName = c.DisplayName
+            }).ToMList());
         }
     }
 
