@@ -48,6 +48,8 @@ namespace Signum.Windows
 
     public class NavigateOptions: ViewOptionsBase
     {
+        public bool AvoidSpawnThread { get; set; }
+
         public EventHandler Closed { get; set; }
 
         public override ViewMode ViewButtons

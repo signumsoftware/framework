@@ -20,6 +20,7 @@ using System.Windows.Threading;
 using System.Collections.ObjectModel;
 using Signum.Windows.Operations;
 using System.Collections.Concurrent;
+using System.Threading;
 
 namespace Signum.Windows
 {
@@ -344,7 +345,8 @@ namespace Signum.Windows
 
         void TaskSetIconNormalWindow(NormalWindow nw, ModifiableEntity entity)
         {
-            nw.Icon = GetEntityIcon(entity.GetType(), true);
+            var icon = GetEntityIcon(entity.GetType(), true);
+            nw.Icon = icon;
         }
 
         void TaskSetLabelNormalWindow(NormalWindow nw, ModifiableEntity entity)
@@ -434,7 +436,7 @@ namespace Signum.Windows
 
         public virtual void Explore(ExploreOptions options)
         {
-            AssertFindable(options.QueryName); 
+            AssertFindable(options.QueryName);
 
             if (options.NavigateIfOne)
             {
@@ -446,17 +448,53 @@ namespace Signum.Windows
 
                 if (lite != null)
                 {
-                    Navigate(lite, new NavigateOptions());
+                    Navigate(lite, new NavigateOptions { AvoidSpawnThread = options.AvoidSpawnThread, Closed = options.Closed });
                     return;
                 }
             }
 
-            SearchWindow sw = CreateSearchWindow(options);
 
-            if (options.Closed != null)
-                sw.Closed += options.Closed;
+            if (options.AvoidSpawnThread)
+                ExploreInternal(options);
+            else
+            {
+                Thread t = new Thread(() =>
+                {
+                     SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher));
+                     ExploreInternal(options);
+                     Dispatcher.Run();
+                });
+                t.SetApartmentState(ApartmentState.STA);
+                t.Start();
+            }
+        }
+
+        private void ExploreInternal(ExploreOptions options)
+        {
+            Window sw = CreateSearchWindow(options);
+
+            AttachOnClosing(sw, options.AvoidSpawnThread, options.Closed);
 
             sw.Show();
+        }
+
+        private static void AttachOnClosing(Window win, bool avoidSpawnThread, EventHandler closed)
+        {
+            if (avoidSpawnThread)
+            {
+                if (closed != null)
+                    win.Closed += closed;
+            }
+            else
+            {
+                Dispatcher d = Dispatcher.CurrentDispatcher;
+                win.Closed += (e, args) =>
+                {
+                    ((Window)e).Dispatcher.InvokeShutdown();
+                    if (closed != null)
+                        d.Invoke(() => closed(e, args));
+                };
+            }
         }
 
         protected virtual SearchWindow CreateSearchWindow(FindOptionsBase options)
@@ -490,12 +528,29 @@ namespace Signum.Windows
             if (entityOrLite == null)
                 throw new ArgumentNullException("entity");
 
+            if (options.AvoidSpawnThread)
+                NavigateInternal(entityOrLite, options);
+            else
+            {
+                Thread t = new Thread(() =>
+                {
+                    SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher));
+                    NavigateInternal(entityOrLite, options);
+                    Dispatcher.Run();
+                });
+                t.SetApartmentState(ApartmentState.STA);
+                t.Start();
+            }
+        }
+
+        public virtual void NavigateInternal(object entityOrLite, NavigateOptions options)
+        {
             Type type = entityOrLite is Lite<IdentifiableEntity> ? ((Lite<IdentifiableEntity>)entityOrLite).EntityType : entityOrLite.GetType();
 
             NormalWindow win = CreateNormalWindow();
             win.SetTitleText(NormalWindowMessage.Loading0.NiceToString().Formato(type.NiceName()));
             win.Show();
-            
+
             try
             {
                 ModifiableEntity entity = entityOrLite as ModifiableEntity;
@@ -516,8 +571,7 @@ namespace Signum.Windows
 
                 SetNormalWindowEntity(win, (ModifiableEntity)entity, options, es, ctrl);
 
-                if (options.Closed != null)
-                    win.Closed += options.Closed;
+                AttachOnClosing(win, options.AvoidSpawnThread, options.Closed);
             }
             catch
             {

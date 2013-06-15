@@ -178,6 +178,8 @@ namespace Signum.Windows
         {
             return SearchMode.Explore;
         }
+
+        public bool AvoidSpawnThread { get; set; }
     }
 
     public class ExploreExtension : MarkupExtension

@@ -43,7 +43,7 @@ namespace Signum.Windows
 
         static TextArea()
         {
-            Common.LabelPropertySelector.SetDefinition(typeof(TextArea), TextProperty);
+            Common.ValuePropertySelector.SetDefinition(typeof(TextArea), TextProperty);
         }
 
         public TextArea()

@@ -14,14 +14,18 @@ namespace Signum.Windows
 {
     public static class ImageLoader
     {
-        public static BitmapFrame GetImageSortName(string name)
+        public static BitmapSource GetImageSortName(string name)
         {
             return LoadIcon(PackUriHelper.Reference("Images/" + name, typeof(Navigator)));
         }
 
-        public static BitmapFrame LoadIcon(Uri uri)
+        public static BitmapSource LoadIcon(Uri uri)
         {
-            return BitmapFrame.Create(Application.GetResourceStream(uri).Stream);
+            var result = BitmapFrame.Create(Application.GetResourceStream(uri).Stream, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
+            result.Freeze();
+            var writable = new WriteableBitmap(result);
+            writable.Freeze();
+            return writable;
         }
 
         public static Image ToSmallImage(this ImageSource source)
@@ -35,6 +39,9 @@ namespace Signum.Windows
             };
 
             RenderOptions.SetBitmapScalingMode(result, BitmapScalingMode.NearestNeighbor);
+
+            source.Freeze();
+
             return result;
         }
 
