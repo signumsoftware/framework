@@ -28,9 +28,7 @@ namespace Signum.Entities.Chart
         
         public ChartColumnDN()
         {
-
         }
-
 
         public void TokenChanged()
         {
@@ -159,29 +157,29 @@ namespace Signum.Entities.Chart
             if (pi.Is(() => Token))
             {
                 if (Token == null)
-                    return !scriptColumn.IsOptional ? "{0} is not optional".Formato(scriptColumn.DisplayName) : null;
+                    return !scriptColumn.IsOptional ? ChartMessage._0IsNotOptional.NiceToString().Formato(scriptColumn.DisplayName) : null;
 
                 if (parentChart.GroupResults)
                 {
                     if (scriptColumn.IsGroupKey)
                     {
                         if (Token.Token is AggregateToken)
-                            return "{0} is key, but {1} is an aggregate".Formato(scriptColumn.DisplayName, DisplayName);
+                            return ChartMessage._0IsKeyBut1IsAnAggregate.NiceToString().Formato(scriptColumn.DisplayName, DisplayName);
                     }
                     else
                     {
                         if (!(Token.Token is AggregateToken))
-                            return "{0} should be an aggregate".Formato(scriptColumn.DisplayName, DisplayName);
+                            return ChartMessage._0ShouldBeAnAggregate.NiceToString().Formato(scriptColumn.DisplayName, DisplayName);
                     }
                 }
                 else
                 {
                     if (Token.Token is AggregateToken)
-                        return "{1} is an aggregate, but the chart is not grouping".Formato(scriptColumn.DisplayName, DisplayName);
+                        return ChartMessage._0IsAnAggregateButTheChartIsNotGrouping.NiceToString().Formato(DisplayName);
                 }
 
                 if (!ChartUtils.IsChartColumnType(token.Token, ScriptColumn.ColumnType))
-                    return "{0} is not {1}".Formato(DisplayName, ScriptColumn.ColumnType);
+                    return ChartMessage._0IsNot1.NiceToString().Formato(DisplayName, ScriptColumn.ColumnType);
             }
 
             if (pi.Is(() => Parameter1) && token != null)
@@ -201,17 +199,16 @@ namespace Signum.Entities.Chart
             if (description != null)
             {
                 if (parameter == null)
-                    return "{0} should be set".Formato(description.Name);
+                    return ChartMessage._0ShouldBeSet.NiceToString().Formato(description.Name);
 
                 return description.Valdidate(parameter, token.Token);
             }
 
             if (parameter.HasText())
-                return "{0} should be null".Formato(pi.NiceName());
+                return ChartMessage._0ShouldBeNull.NiceToString().Formato(pi.NiceName());
 
             return null;
         }
-
 
         public string GetTitle()
         {

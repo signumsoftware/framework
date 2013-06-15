@@ -33,7 +33,7 @@ namespace Signum.Web.Extensions.AuthAdmin.Views
     using Signum.Web;
     using Signum.Web.Auth;
     
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.5.4.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/AuthAdmin/Views/Permissions.cshtml")]
     public partial class Permissions : System.Web.Mvc.WebViewPage<dynamic>
     {
@@ -107,7 +107,7 @@ WriteLiteral("    <table class=\"sf-auth-rules\">\r\n        <thead>\r\n        
 
             
             #line 17 "..\..\AuthAdmin\Views\Permissions.cshtml"
-               Write(AuthMessage.PermissionsAscx_Permission.NiceToString());
+               Write(typeof(PermissionDN).NiceName());
 
             
             #line default
@@ -117,7 +117,7 @@ WriteLiteral("\r\n                </th>\r\n                <th>\r\n             
 
             
             #line 20 "..\..\AuthAdmin\Views\Permissions.cshtml"
-               Write(AuthMessage.PermissionsAscx_Allow.NiceToString());
+               Write(AuthAdminMessage.Allow.NiceToString());
 
             
             #line default
@@ -127,7 +127,7 @@ WriteLiteral("\r\n                </th>\r\n                <th>\r\n             
 
             
             #line 23 "..\..\AuthAdmin\Views\Permissions.cshtml"
-               Write(AuthMessage.PermissionsAscx_Deny.NiceToString());
+               Write(AuthAdminMessage.Deny.NiceToString());
 
             
             #line default
@@ -137,7 +137,7 @@ WriteLiteral("\r\n                </th>\r\n                <th>\r\n             
 
             
             #line 26 "..\..\AuthAdmin\Views\Permissions.cshtml"
-               Write(AuthMessage.PermissionsAscx_Overriden.NiceToString());
+               Write(AuthAdminMessage.Overriden.NiceToString());
 
             
             #line default

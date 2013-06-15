@@ -45,7 +45,8 @@ namespace Signum.Web.Chart
 
             return OpenChartRequest(request,
                 findOptions.FilterOptions,
-                findOptions.Navigate && IsNavigableEntity(request.QueryName));
+                findOptions.Navigate && IsNavigableEntity(request.QueryName),
+                null);
         }
 
         public ViewResult FullScreen(string prefix)
@@ -54,7 +55,8 @@ namespace Signum.Web.Chart
 
             return OpenChartRequest(request,
                 request.Filters.Select(f => new FilterOption { Token = f.Token, Operation = f.Operation, Value = f.Value }).ToList(),
-                IsNavigableEntity(request.QueryName));
+                IsNavigableEntity(request.QueryName),
+                null);
         }
 
         public bool IsNavigableEntity(object queryName)
@@ -254,14 +256,15 @@ namespace Signum.Web.Chart
             return ctx;
         }
 
-        ViewResult OpenChartRequest(ChartRequest request, List<FilterOption> filterOptions, bool navigate)
+        ViewResult OpenChartRequest(ChartRequest request, List<FilterOption> filterOptions, bool navigate, Lite<UserChartDN> currentUserChart)
         {
             ViewData[ViewDataKeys.PartialViewName] = ChartClient.ChartRequestView;
             ViewData[ViewDataKeys.Title] = Navigator.Manager.SearchTitle(request.QueryName);
             ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName); ;
             ViewData[ViewDataKeys.FilterOptions] = filterOptions;
             ViewData[ViewDataKeys.Navigate] = navigate;
-
+            ViewData["UserChart"] = currentUserChart;
+            
             return View(Navigator.Manager.SearchPageView, new TypeContext<ChartRequest>(request, ""));
         }
 
@@ -293,7 +296,8 @@ namespace Signum.Web.Chart
 
             return OpenChartRequest(request,
                 request.Filters.Select(f => new FilterOption { Token = f.Token, Operation = f.Operation, Value = f.Value }).ToList(),
-                IsNavigableEntity(request.QueryName));
+                IsNavigableEntity(request.QueryName),
+                uc.ToLite());
         }
 
         [HttpPost]

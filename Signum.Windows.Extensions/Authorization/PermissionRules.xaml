@@ -3,13 +3,15 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:auth="clr-namespace:Signum.Windows.Authorization"
-    xmlns:authdn="clr-namespace:Signum.Entities.Authorization;assembly=Signum.Entities.Extensions"
+    xmlns:d="clr-namespace:Signum.Entities.Authorization;assembly=Signum.Entities.Extensions"
+    xmlns:seb="clr-namespace:Signum.Entities.Basics;assembly=Signum.Entities"
+    xmlns:seb2="clr-namespace:Signum.Entities.Basics;assembly=Signum.Entities.Extensions"
     SizeToContent="WidthAndHeight"
     m:Monitors.AdjustToMonitor="true"
     TextOptions.TextFormattingMode="Display"
     UseLayoutRounding="True" 
     WindowStartupLocation="CenterOwner"
-    Title="Permission Rules" x:Name="me" MinWidth="500" MinHeight="300" m:Common.TypeContext="{x:Type authdn:PermissionRulePack}">
+    x:Name="me" MinWidth="500" MinHeight="300" m:Common.TypeContext="{x:Type d:PermissionRulePack}">
 	<Window.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
@@ -29,22 +31,22 @@
             </ListView.ItemContainerStyle>
             <ListView.View>
                 <GridView AllowsColumnReorder="False">
-                    <GridViewColumn Header="Permission" DisplayMemberBinding="{Binding Resource}" />
-                    <GridViewColumn Header="Allow" Width="40">
+                    <GridViewColumn Header="{m:LocType {x:Type d:PermissionDN}}" DisplayMemberBinding="{Binding Resource}" />
+                    <GridViewColumn Header="{m:Loc {x:Static d:AuthAdminMessage.Allow}}" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <RadioButton IsChecked="{Binding Path=Allowed}" Style="{StaticResource SphereRadioButton}" Background="Lime"  />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="Deny" Width="40">
+                    <GridViewColumn Header="{m:Loc {x:Static d:AuthAdminMessage.Deny}}" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <RadioButton  IsChecked="{Binding Path=Allowed, Converter={x:Static m:Converters.Not}}" Style="{StaticResource SphereRadioButton}" Background="Red" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="Overriden" Width="60">
+                    <GridViewColumn Header="{m:Loc {x:Static d:AuthAdminMessage.Overriden}}" Width="60">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <CheckBox  IsEnabled="False" IsChecked="{Binding Path=Overriden,Mode=OneWay}" />

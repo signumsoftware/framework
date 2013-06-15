@@ -350,7 +350,7 @@ WriteLiteral("</button>\r\n        ");
 
             
             #line 69 "..\..\Chart\Views\ChartRequestView.cshtml"
-   Write(UserChartClient.GetChartMenu(this.ViewContext, queryDescription.QueryName, entitiesType, Model.ControlID).ToString(Html));
+   Write(UserChartClient.GetChartMenu(this.ViewContext, queryDescription.QueryName, entitiesType, Model.ControlID, (Lite<UserChartDN>)ViewData["UserChart"]).ToString(Html));
 
             
             #line default

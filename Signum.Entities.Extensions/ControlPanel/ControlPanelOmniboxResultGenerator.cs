@@ -46,7 +46,7 @@ namespace Signum.Entities.ControlPanel
         public override List<HelpOmniboxResult> GetHelp()
         {
             var resultType = typeof(ControlPanelOmniboxResult);
-            var userQuery = OmniboxMessage.Omnibox_UserQuery.NiceToString();
+            var userQuery = OmniboxMessage.Omnibox_ControlPanel.NiceToString();
             return new List<HelpOmniboxResult>
             {
                 new HelpOmniboxResult { Text = "'{0}'".Formato(userQuery), OmniboxResultType = resultType }

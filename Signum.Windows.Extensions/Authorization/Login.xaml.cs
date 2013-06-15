@@ -131,13 +131,10 @@ namespace Signum.Windows.Authorization
             tbNewPassword1.Focus();
         }
 
-        private BitmapFrame _minimizarFocus;
-
-        private BitmapFrame _minimizarNoFocus;
-
-        private BitmapFrame _cerrarFocus;
-
-        private BitmapFrame _cerrarNoFocus;
+        private BitmapSource _minimizarFocus;
+        private BitmapSource _minimizarNoFocus;
+        private BitmapSource _cerrarFocus;
+        private BitmapSource _cerrarNoFocus;
 
         public  event EventHandler LoginClicked;
 

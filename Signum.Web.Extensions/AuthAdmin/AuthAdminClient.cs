@@ -70,8 +70,8 @@ namespace Signum.Web.AuthAdmin
                      !BasicPermission.AdminRules.IsAuthorized() ? null :
                      new[]
                      {
-                         types ? new QuickLinkAction(AuthMessage._0Rules.NiceToString().Formato(typeof(TypeDN).NiceName()), RouteHelper.New().Action((AuthAdminController c)=>c.Types(role))): null,
-                         permissions ? new QuickLinkAction(AuthMessage._0Rules.NiceToString().Formato(typeof(PermissionDN).NiceName()), RouteHelper.New().Action((AuthAdminController c)=>c.Permissions(role))): null,
+                         types ? new QuickLinkAction(AuthAdminMessage.TypeRules.NiceToString(), RouteHelper.New().Action((AuthAdminController c)=>c.Types(role))): null,
+                         permissions ? new QuickLinkAction(AuthAdminMessage.PermissionRules.NiceToString().Formato(typeof(PermissionDN).NiceName()), RouteHelper.New().Action((AuthAdminController c)=>c.Permissions(role))): null,
                      });
 
                 SpecialOmniboxProvider.Register(new SpecialOmniboxAction("DownloadAuthRules",

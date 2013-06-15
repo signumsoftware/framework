@@ -30,7 +30,9 @@ namespace Signum.Windows.Authorization
         public static Type RuleType = typeof(TypeRuleBuilder);
         public static Type GroupType = typeof(NamespaceNode);
         public static Type ConditionType = typeof(TypeConditionRuleBuilder);
-        
+
+        public static readonly DependencyProperty RoleProperty =
+           DependencyProperty.Register("Role", typeof(Lite<RoleDN>), typeof(TypeRules), new UIPropertyMetadata(null));
         public Lite<RoleDN> Role
         {
             get { return (Lite<RoleDN>)GetValue(RoleProperty); }
@@ -41,12 +43,12 @@ namespace Signum.Windows.Authorization
         public bool Operations { get; set; }
         public bool Queries { get; set; }
 
-        public static readonly DependencyProperty RoleProperty =
-            DependencyProperty.Register("Role", typeof(Lite<RoleDN>), typeof(TypeRules  ), new UIPropertyMetadata(null));
+       
         public TypeRules()
         {
             InitializeComponent();
             this.Loaded += new RoutedEventHandler(Test_Loaded);
+
         }
 
         ScrollViewer swTree; 
@@ -61,6 +63,8 @@ namespace Signum.Windows.Authorization
 
         private void Load()
         {
+            this.Title = AuthMessage._0RulesFor1.NiceToString().Formato(typeof(TypeDN).NiceName(), Role);
+
             TypeRulePack trp = Server.Return((ITypeAuthServer s) => s.GetTypesRules(Role));
 
             DataContext = trp;

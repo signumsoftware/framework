@@ -10,8 +10,6 @@ namespace Signum.Entities.Authorization
     {
         [Description(@"{0} cycles have been found in the graph of Roles due to the relationships:")]
         _0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships,
-        [Description("{0} rules")]
-        _0Rules,
         [Description("{0} rules for {1}")]
         _0RulesFor1,
         [Description("Access to Facade Method '{0}' is not allowed")]
@@ -47,15 +45,7 @@ namespace Signum.Entities.Authorization
         ExpectedUserLogged,
         ExpiredPassword,
         [Description("Your password has expired. You should change it")]
-        ExpiredPasswordMessage,
-        [Description("Allow")]
-        FacadeMethodsAscx_Allow,
-        [Description("Deny")]
-        FacadeMethodsAscx_Deny,
-        [Description("Facade Method")]
-        FacadeMethodsAscx_FacadeMethod,
-        [Description("Overriden")]
-        FacadeMethodsAscx_Overriden,
+        ExpiredPasswordMessage,     
         [Description("Forgot your password? Enter your login email below. We will send you an email with a link to reset your password.")]
         ForgotYourPassword,
         IHaveForgottenMyPassword,
@@ -84,17 +74,7 @@ namespace Signum.Entities.Authorization
         NotAuthorizedToRetrieve0,
         [Description("Not authorized to Save '{0}'")]
         NotAuthorizedToSave0,
-        NotUserLogged,
-        [Description("Allow")]
-        OperationsAscx_Allow,
-        [Description("DB Only")]
-        OperationsAscx_DBOnly,
-        [Description("None")]
-        OperationsAscx_None,
-        [Description("Operation")]
-        OperationsAscx_Operation,
-        [Description("Overriden")]
-        OperationsAscx_Overriden,
+        NotUserLogged,     
         Password,
         PasswordChanged,
         [Description("The given password doesn't match the current one")]
@@ -107,36 +87,12 @@ namespace Signum.Entities.Authorization
         PasswordNearExpired,
         PasswordsAreDifferent,
         PasswordsDoNotMatch,
-        [Description("Allow")]
-        PermissionsAscx_Allow,
-        [Description("Deny")]
-        PermissionsAscx_Deny,
-        [Description("Overriden")]
-        PermissionsAscx_Overriden,
-        [Description("Permission")]
-        PermissionsAscx_Permission,
+
         [Description("Please, {0} into your account")]
         Please0IntoYourAccount,
         [Description("Please, enter your chosen new password")]
         PleaseEnterYourChosenNewPassword,
-        [Description("Modify")]
-        PropertiesAscx_Modify,
-        [Description("None")]
-        PropertiesAscx_None,
-        [Description("Overriden")]
-        PropertiesAscx_Overriden,
-        [Description("Property")]
-        PropertiesAscx_Property,
-        [Description("Read")]
-        PropertiesAscx_Read,
-        [Description("Allow")]
-        QueriesAscx_Allow,
-        [Description("Deny")]
-        QueriesAscx_Deny,
-        [Description("Overriden")]
-        QueriesAscx_Overriden,
-        [Description("Query")]
-        QueriesAscx_Query,
+
         Remember,
         RememberMe,
         [Description("Reset Password")]
@@ -157,24 +113,7 @@ namespace Signum.Entities.Authorization
         [Description("The specified passwords don't match")]
         TheSpecifiedPasswordsDontMatch,
         TheUserStateMustBeDisabled,
-        [Description("Create")]
-        TypesAscx_Create,
-        [Description("Modify")]
-        TypesAscx_Modify,
-        [Description("None")]
-        TypesAscx_None,
-        [Description("Operations")]
-        TypesAscx_Operations,
-        [Description("Overriden")]
-        TypesAscx_Overriden,
-        [Description("Properties")]
-        TypesAscx_Properties,
-        [Description("Queries")]
-        TypesAscx_Queries,
-        [Description("Read")]
-        TypesAscx_Read,
-        [Description("Type")]
-        TypesAscx_Type,
+     
         User,
         [Description("Username {0} is not valid")]
         Username0IsNotValid,
@@ -205,6 +144,11 @@ namespace Signum.Entities.Authorization
         Everything,
         TypeRules,
         PermissionRules,
+
+        Allow,
+        Deny,
+
+        Overriden
     }
 
 }

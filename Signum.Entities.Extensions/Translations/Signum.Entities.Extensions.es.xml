@@ -62,15 +62,17 @@
   </Type>
   <Type Name="AuthAdminMessage">
     <Member Name="_0of1" Description="{0} de {1}" />
+    <Member Name="Allow" Description="Permitir" />
+    <Member Name="Deny" Description="Denegar" />
     <Member Name="Everything" Description="Todo" />
     <Member Name="Nothing" Description="Nada" />
-    <Member Name="PermissionRules" Description="Reglas de autorización" />
+    <Member Name="Overriden" Description="Sobrescrito" />
+    <Member Name="PermissionRules" Description="Reglas de permiso" />
     <Member Name="TypeRules" Description="Reglas de tipo" />
   </Type>
   <Type Name="AuthMessage">
     <Member Name="_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships" Description="{0} ciclos han sido encontrados en el grafo de funciones debido a las relaciones:&#xD;&#xA;" />
-    <Member Name="_0Rules" Description="{0} reglas" />
-    <Member Name="_0RulesFor1" Description="{0} reglas para {1}" />
+    <Member Name="_0RulesFor1" Description="Reglas de {0} para {1}" />
     <Member Name="AccessToFacadeMethod0IsNotAllowed" Description="El acceso a el Método de Fachada '{0}' no está permitido" />
     <Member Name="AuthAdmin_AddCondition" Description="Añadir condición" />
     <Member Name="AuthAdmin_ChooseACondition" Description="Elija una condición" />
@@ -91,10 +93,6 @@
     <Member Name="ExpectedUserLogged" Description="Se esperaba que un usuario hubiera iniciado sesión" />
     <Member Name="ExpiredPassword" Description="Contraseña caducada" />
     <Member Name="ExpiredPasswordMessage" Description="Su contraseña ha caducado. Debe cambiarla" />
-    <Member Name="FacadeMethodsAscx_Allow" Description="Permitir" />
-    <Member Name="FacadeMethodsAscx_Deny" Description="Denegar" />
-    <Member Name="FacadeMethodsAscx_FacadeMethod" Description="Método de fachada" />
-    <Member Name="FacadeMethodsAscx_Overriden" Description="Sobreescrito" />
     <Member Name="ForgotYourPassword" Description="Olvidó su contraseña, Introduzca su correo electrónico a continuación. Le enviaremos un email con un enlace para restablecer su contraseña." />
     <Member Name="IHaveForgottenMyPassword" Description="He olvidado mi contraseña" />
     <Member Name="IncorrectPassword" Description="Contraseña incorrecta" />
@@ -112,11 +110,6 @@
     <Member Name="NotAuthorizedToRetrieve0" Description="No autorizado para recuperar '{0}'" />
     <Member Name="NotAuthorizedToSave0" Description="Not autorizado para guardar '{0}'" />
     <Member Name="NotUserLogged" Description="Ningún usuario logado" />
-    <Member Name="OperationsAscx_Allow" Description="Permitir" />
-    <Member Name="OperationsAscx_DBOnly" Description="Sólo BBDD" />
-    <Member Name="OperationsAscx_None" Description="Ninguno" />
-    <Member Name="OperationsAscx_Operation" Description="Operación" />
-    <Member Name="OperationsAscx_Overriden" Description="Sobreescrito" />
     <Member Name="Password" Description="Contraseña:" />
     <Member Name="PasswordChanged" Description="Contraseña cambiada" />
     <Member Name="PasswordDoesNotMatchCurrent" Description="La contraseña indicada no coincide con la actual" />
@@ -125,21 +118,8 @@
     <Member Name="PasswordNearExpired" Description="Tu contraseña está a punto de caducar" />
     <Member Name="PasswordsAreDifferent" Description="Las contraseñas son diferentes" />
     <Member Name="PasswordsDoNotMatch" Description="Las contraseñas no coinciden" />
-    <Member Name="PermissionsAscx_Allow" Description="Permitir" />
-    <Member Name="PermissionsAscx_Deny" Description="Denegar" />
-    <Member Name="PermissionsAscx_Overriden" Description="Sobreescrito" />
-    <Member Name="PermissionsAscx_Permission" Description="Permiso" />
     <Member Name="Please0IntoYourAccount" Description="Por favor, vaya al {0} para acceder a la aplicación" />
     <Member Name="PleaseEnterYourChosenNewPassword" Description="Por favor, introduzca su nueva contraseña" />
-    <Member Name="PropertiesAscx_Modify" Description="Modificar" />
-    <Member Name="PropertiesAscx_None" Description="Ninguno" />
-    <Member Name="PropertiesAscx_Overriden" Description="Sobreescrito" />
-    <Member Name="PropertiesAscx_Property" Description="Propiedad" />
-    <Member Name="PropertiesAscx_Read" Description="Lectura" />
-    <Member Name="QueriesAscx_Allow" Description="Permitir" />
-    <Member Name="QueriesAscx_Deny" Description="Denegar" />
-    <Member Name="QueriesAscx_Overriden" Description="Sobreescrito" />
-    <Member Name="QueriesAscx_Query" Description="Consulta" />
     <Member Name="Remember" Description="Recordar" />
     <Member Name="RememberMe" Description="Recordarme" />
     <Member Name="ResetPassword" Description="Restablecer contraseña" />
@@ -153,15 +133,6 @@
     <Member Name="ThereSNotARegisteredUserWithThatEmailAddress" Description="No hay ningún usuario registrado con esa dirección de correo electrónico" />
     <Member Name="TheSpecifiedPasswordsDontMatch" Description="Las contraseñas especificadas no coinciden" />
     <Member Name="TheUserStateMustBeDisabled" Description="El estado del usuario debe ser deshabilitado" />
-    <Member Name="TypesAscx_Create" Description="Creación" />
-    <Member Name="TypesAscx_Modify" Description="Modificación" />
-    <Member Name="TypesAscx_None" Description="Ninguno" />
-    <Member Name="TypesAscx_Operations" Description="Operaciones" />
-    <Member Name="TypesAscx_Overriden" Description="Sobreescrito" />
-    <Member Name="TypesAscx_Properties" Description="Propiedades" />
-    <Member Name="TypesAscx_Queries" Description="Consultas" />
-    <Member Name="TypesAscx_Read" Description="Leer" />
-    <Member Name="TypesAscx_Type" Description="Tipo" />
     <Member Name="User" Description="Usuario" />
     <Member Name="User0IsDisabled" Description="El usuario {0} está desactivado" />
     <Member Name="Username0IsNotValid" Description="El nombre de usuario {0} no es válido" />
@@ -196,10 +167,12 @@
   </Type>
   <Type Name="ChartColumnDN" Description="Columna de gráfico">
     <Member Name="DisplayName" Description="Nombre para Mostrar" />
+    <Member Name="Index" Description="Índice" />
     <Member Name="Parameter1" Description="Parámetro1" />
     <Member Name="Parameter2" Description="Parámetro2" />
     <Member Name="Parameter3" Description="Parámetro3" />
     <Member Name="ScriptColumn" Description="Columna de script" />
+    <Member Name="Token" Description="Token" />
   </Type>
   <Type Name="ChartColumnType" Description="Tipo de columna del gráfico">
     <Member Name="Date" Description="Fecha" />
@@ -216,6 +189,13 @@
   <Type Name="ChartMessage">
     <Member Name="_0CanOnlyBeCreatedFromTheChartWindow" Description="{0} sólo se puede crear desde la ventana del gráfico" />
     <Member Name="_0CanOnlyBeCreatedFromTheSearchWindow" Description="{0} sólo se puede crear desde el buscador" />
+    <Member Name="_0IsAnAggregateButTheChartIsNotGrouping" Description="{0} es un agregado, pero el gráfico no es una agrupación" />
+    <Member Name="_0IsKeyBut1IsAnAggregate" Description="{0} es clave, pero {1} es un agregado" />
+    <Member Name="_0IsNot1" Description="{0} no es {1}" />
+    <Member Name="_0IsNotOptional" Description="{0} no es opcional" />
+    <Member Name="_0ShouldBeAnAggregate" Description="{0} debe ser un agregado" />
+    <Member Name="_0ShouldBeNull" Description="{0} debe ser nulo" />
+    <Member Name="_0ShouldBeSet" Description="{0} debe establecerse" />
     <Member Name="Chart" Description="Gráfico" />
     <Member Name="Chart_ChartSettings" Description="Configuración del gráfico" />
     <Member Name="Chart_Dimension" Description="Dimensión" />
@@ -785,30 +765,35 @@
     <Member Name="None" Description="Ninguno" />
     <Member Name="Read" Description="Lectura" />
   </Type>
-  <Type Name="PropertyRouteDN" Description="Ruta de la propiedad">
+  <Type Name="PropertyRouteDN" Description="Ruta propiedad">
     <Member Name="Path" Description="Camino" />
     <Member Name="Route" Description="Ruta" />
     <Member Name="Type" Description="Tipo" />
   </Type>
-  <Type Name="PropertyRulePack" Description="Pack de reglas de propiedades" />
+  <Type Name="PropertyRulePack" Description="Paquete de reglas de propiedades" />
   <Type Name="QueryColumnDN" Description="Columna de consulta">
     <Member Name="DisplayName" Description="Nombre" />
+    <Member Name="Index" Description="Índice" />
+    <Member Name="Token" Description="Token" />
   </Type>
   <Type Name="QueryDN" Description="Query">
     <Member Name="Key" Description="Clave" />
     <Member Name="Name" Description="Nombre" />
   </Type>
   <Type Name="QueryFilterDN" Description="Filtro de consulta">
+    <Member Name="Index" Description="Índice" />
     <Member Name="Operation" Description="Operación" />
+    <Member Name="Token" Description="Token" />
     <Member Name="Value" Description="Valor" />
     <Member Name="ValueString" Description="Valor cadena" />
   </Type>
   <Type Name="QueryOrderDN" Description="Orden de consulta">
-    <Member Name="OrderType" Description="Tipo de orden" />
-  </Type>
-  <Type Name="QueryRulePack" Description="Pack de reglas de consultas" />
-  <Type Name="QueryTokenDN" Description="Token de consulta">
     <Member Name="Index" Description="Índice" />
+    <Member Name="OrderType" Description="Tipo de orden" />
+    <Member Name="Token" Description="Token" />
+  </Type>
+  <Type Name="QueryRulePack" Description="Paquete de reglas de consultas" />
+  <Type Name="QueryTokenDN" Description="Token de consulta">
     <Member Name="TokenString" Description="Cadena del token" />
   </Type>
   <Type Name="ResetPasswordRequestDN" Description="Solicitud nueva contraseña">
@@ -1042,7 +1027,7 @@
     <Member Name="Read" Description="Lectura" />
   </Type>
   <Type Name="TypeConditionNameDN" Description="Nombre condición de tipo" />
-  <Type Name="TypeRulePack" Description="Pack de reglas de tipo" />
+  <Type Name="TypeRulePack" Description="Paquete de reglas de tipo" />
   <Type Name="UserAssetMessage">
     <Member Name="ExportToXml" Description="Exportar a xml" />
     <Member Name="ImportPreview" Description="Previsualizar importación" />
@@ -1057,7 +1042,9 @@
     <Member Name="Text" Description="Texto" />
     <Member Name="Type" Description="Tipo" />
   </Type>
-  <Type Name="UserAssetPreviewModel" Description="Previsualización de recursos de usuario" />
+  <Type Name="UserAssetPreviewModel" Description="Previsualización de recursos de usuario">
+    <Member Name="Lines" Description="Líneas" />
+  </Type>
   <Type Name="UserChartDN" Description="Gráfico de usuario">
     <Member Name="ChartScript" Description="Script de gráfico" />
     <Member Name="Columns" Description="Columnas" />
