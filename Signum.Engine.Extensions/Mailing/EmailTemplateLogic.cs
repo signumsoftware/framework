@@ -172,7 +172,7 @@ namespace Signum.Engine.Mailing
             var queryName = QueryLogic.ToQueryName(template.Query.Key);
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
 
-            var smtpConfig = template.SMTPConfiguration ?? EmailLogic.SenderManager.DefaultSMTPConfiguration;
+            var smtpConfig = template.SmtpConfiguration ?? EmailLogic.SenderManager.DefaultSmtpConfiguration;
 
             var columns = GetTemplateColumns(template, template.Tokens, qd);
 
@@ -335,7 +335,7 @@ namespace Signum.Engine.Mailing
                     Construct = _ => new EmailTemplateDN 
                     { 
                         State = EmailTemplateState.Created,
-                        SMTPConfiguration = EmailLogic.SenderManager.TryCC(m => m.DefaultSMTPConfiguration)
+                        SmtpConfiguration = EmailLogic.SenderManager.TryCC(m => m.DefaultSmtpConfiguration)
                     }
                 }.Register();
 

@@ -132,11 +132,11 @@ namespace Signum.Entities.Mailing
             set { Set(ref masterTemplate, value, () => MasterTemplate); }
         }
 
-        Lite<SMTPConfigurationDN> smtpConfiguration;
-        public Lite<SMTPConfigurationDN> SMTPConfiguration
+        Lite<SmtpConfigurationDN> smtpConfiguration;
+        public Lite<SmtpConfigurationDN> SmtpConfiguration
         {
             get { return smtpConfiguration; }
-            set { Set(ref smtpConfiguration, value, () => SMTPConfiguration); }
+            set { Set(ref smtpConfiguration, value, () => SmtpConfiguration); }
         }
 
         SystemEmailDN systemEmail;

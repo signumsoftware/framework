@@ -9,11 +9,11 @@ using System.Windows;
 
 namespace Signum.Windows.Mailing
 {
-    public class SMTPConfigurationClient
+    public class SmtpConfigurationClient
     {
         public static void AsserIsStarted()
         {
-            Navigator.Manager.AssertDefined(ReflectionTools.GetMethodInfo(() => SMTPConfigurationClient.Start()));
+            Navigator.Manager.AssertDefined(ReflectionTools.GetMethodInfo(() => SmtpConfigurationClient.Start()));
         }
 
         public static void Start()
@@ -22,9 +22,8 @@ namespace Signum.Windows.Mailing
             {
                 Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<SMTPConfigurationDN> { View = e => new SMTPConfiguration() },
+                    new EntitySettings<SmtpConfigurationDN> { View = e => new SmtpConfiguration() },
                     new EntitySettings<ClientCertificationFileDN> { View = e => new ClientCertificationFile() },
-
                 });
             }
         }

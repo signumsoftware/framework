@@ -93,7 +93,7 @@ namespace Signum.Web.Mailing
                 if (smtpConfig)
                     Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<SMTPConfigurationDN> { PartialViewName = e => ViewPrefix.Formato("SMTPConfiguration") },
+                    new EntitySettings<SmtpConfigurationDN> { PartialViewName = e => ViewPrefix.Formato("SmtpConfiguration") },
                 });
 
                 if (newsletter)

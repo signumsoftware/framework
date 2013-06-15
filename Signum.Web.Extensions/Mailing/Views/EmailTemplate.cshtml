@@ -7,7 +7,7 @@
         <legend>Properties</legend>
         @Html.EntityLine(ec, e => e.Query)
         @Html.EntityList(ec, e => e.Recipients)
-        @Html.EntityLine(ec, e => e.Model)
+        @Html.EntityLine(ec, e => e.SystemEmail)
     </fieldset>
     <fieldset>
         <legend>Active</legend>
@@ -20,7 +20,7 @@
         @Html.EntityLine(ec, e => e.From)
         @Html.EntityList(ec, e => e.Recipients)
     </fieldset>
-    @Html.EntityLine(ec, e => e.SMTPConfiguration)
+    @Html.EntityLine(ec, e => e.SmtpConfiguration)
     <fieldset>
         <legend>Text</legend>
         @Html.EntityLine(ec, e => e.MasterTemplate)

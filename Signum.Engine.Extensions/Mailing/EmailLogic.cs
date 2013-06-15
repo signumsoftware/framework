@@ -288,19 +288,19 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        public Lite<SMTPConfigurationDN> DefaultSMTPConfiguration;
+        public Lite<SmtpConfigurationDN> DefaultSmtpConfiguration;
 
         SmtpClient CreateSmtpClient(EmailMessageDN email)
         {
             if (email.Template != null)
             {
-                var smtp = email.Template.InDB(t => t.SMTPConfiguration);
+                var smtp = email.Template.InDB(t => t.SmtpConfiguration);
                 if (smtp != null)
                     return smtp.GenerateSmtpClient();
             }
 
-            if (DefaultSMTPConfiguration != null)
-                return DefaultSMTPConfiguration.GenerateSmtpClient();
+            if (DefaultSmtpConfiguration != null)
+                return DefaultSmtpConfiguration.GenerateSmtpClient();
 
             return EmailLogic.SafeSmtpClient();
         }

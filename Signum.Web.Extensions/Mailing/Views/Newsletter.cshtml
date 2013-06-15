@@ -14,13 +14,13 @@
             @Html.ValueLine(nc, n => n.Subject)
             @if (nc.Value.State == NewsletterState.Sent)
             {
-                @Html.Hidden("htmlBodyContent", nc.Value.HtmlBody)
+                @Html.Hidden("htmlBodyContent", nc.Value.Text)
                 <fieldset>
                     <legend>Message</legend>
                     @*<iframe id="newsBodyContent" name="frameNewImage" src="about:blank" class="sf-email-htmlbody" frameborder="0">
                     </iframe>*@
                     <div class="sf-email-htmlbody">
-                        @Html.Raw(nc.Value.HtmlBody)
+                        @Html.Raw(nc.Value.Text)
                     </div>
                     
                 </fieldset>
@@ -28,7 +28,7 @@
             else
             {
                 <div id="newsEditContent">
-                    @Html.ValueLine(nc, n => n.HtmlBody, vl =>
+                    @Html.ValueLine(nc, n => n.Text, vl =>
                     {
                         vl.ValueLineType = ValueLineType.TextArea;
                         vl.ValueHtmlProps["cols"] = "30";
@@ -49,7 +49,7 @@
                     </fieldset>
                 </div>
             }
-            @Html.EntityCombo(nc, n => n.SMTPConfig)
+            @Html.EntityCombo(nc, n => n.SmtpConfig)
             @Html.ValueLine(nc, n => n.From)
             @Html.ValueLine(nc, n => n.DisplayFrom)
         </fieldset>

@@ -9,7 +9,7 @@ using Signum.Utilities;
 namespace Signum.Entities.Mailing
 {
     [Serializable, EntityKind(EntityKind.Main)]
-    public class SMTPConfigurationDN : Entity
+    public class SmtpConfigurationDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         string name;
@@ -89,7 +89,7 @@ namespace Signum.Entities.Mailing
             set { Set(ref clientCertificationFiles, value, () => ClientCertificationFiles); }
         }
 
-        static readonly Expression<Func<SMTPConfigurationDN, string>> ToStringExpression = e => e.name;
+        static readonly Expression<Func<SmtpConfigurationDN, string>> ToStringExpression = e => e.name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -97,7 +97,7 @@ namespace Signum.Entities.Mailing
     }
 
 
-    public enum SMTPConfigurationOperation
+    public enum SmtpConfigurationOperation
     {
         Save
     }

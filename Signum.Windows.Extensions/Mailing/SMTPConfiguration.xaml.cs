@@ -18,11 +18,11 @@ using Signum.Entities.Mailing;
 namespace Signum.Windows.Mailing
 {
     /// <summary>
-    /// Interaction logic for SMTPConfiguration.xaml
+    /// Interaction logic for SmtpConfiguration.xaml
     /// </summary>
-    public partial class SMTPConfiguration : UserControl
+    public partial class SmtpConfiguration : UserControl
     {
-        public SMTPConfiguration()
+        public SmtpConfiguration()
         {
             InitializeComponent();
         }

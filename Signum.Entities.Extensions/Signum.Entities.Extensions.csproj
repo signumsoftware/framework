@@ -136,7 +136,7 @@
     <Compile Include="Mailing\EmailMessage.cs" />
     <Compile Include="Mailing\EmailTemplate.cs" />
     <Compile Include="Mailing\Newsletter.cs" />
-    <Compile Include="Mailing\SMTPConfiguration.cs" />
+    <Compile Include="Mailing\SmtpConfiguration.cs" />
     <Compile Include="Chart\UserChartOmniboxResultGenerator.cs" />
     <Compile Include="Notes\Note.cs" />
     <Compile Include="Omnibox\SpecialOmniboxResultGenerator.cs" />

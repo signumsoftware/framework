@@ -16,23 +16,23 @@ using Signum.Engine.Operations;
 
 namespace Signum.Engine.Mailing
 {
-    public static class SMTPConfigurationLogic
+    public static class SmtpConfigurationLogic
     {
-        public static ResetLazy<Dictionary<Lite<SMTPConfigurationDN>, SMTPConfigurationDN>> SmtpConfigCache; 
+        public static ResetLazy<Dictionary<Lite<SmtpConfigurationDN>, SmtpConfigurationDN>> SmtpConfigCache; 
 
         internal static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => SMTPConfigurationLogic.Start(null, null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => SmtpConfigurationLogic.Start(null, null)));
         }
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<SMTPConfigurationDN>();
+                sb.Include<SmtpConfigurationDN>();
 
-                dqm.RegisterQuery(typeof(SMTPConfigurationDN), () =>
-                    from s in Database.Query<SMTPConfigurationDN>()
+                dqm.RegisterQuery(typeof(SmtpConfigurationDN), () =>
+                    from s in Database.Query<SmtpConfigurationDN>()
                     select new
                     {
                         Entity = s,
@@ -57,10 +57,10 @@ namespace Signum.Engine.Mailing
                         c.FullFilePath
                     });
 
-                SmtpConfigCache = sb.GlobalLazy(() => Database.Query<SMTPConfigurationDN>().ToDictionary(a => a.ToLite()),
-                    new InvalidateWith(typeof(SMTPConfigurationDN)));
+                SmtpConfigCache = sb.GlobalLazy(() => Database.Query<SmtpConfigurationDN>().ToDictionary(a => a.ToLite()),
+                    new InvalidateWith(typeof(SmtpConfigurationDN)));
 
-                new Graph<SMTPConfigurationDN>.Execute(SMTPConfigurationOperation.Save)
+                new Graph<SmtpConfigurationDN>.Execute(SmtpConfigurationOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
@@ -70,17 +70,17 @@ namespace Signum.Engine.Mailing
         }
 
 
-        public static SmtpClient GenerateSmtpClient(this Lite<SMTPConfigurationDN> config)
+        public static SmtpClient GenerateSmtpClient(this Lite<SmtpConfigurationDN> config)
         {
             return config.RetrieveFromCache().GenerateSmtpClient();
         }
 
-        public static SMTPConfigurationDN RetrieveFromCache(this Lite<SMTPConfigurationDN> config)
+        public static SmtpConfigurationDN RetrieveFromCache(this Lite<SmtpConfigurationDN> config)
         {
             return SmtpConfigCache.Value.GetOrThrow(config);
         }
 
-        public static SmtpClient GenerateSmtpClient(this SMTPConfigurationDN config)
+        public static SmtpClient GenerateSmtpClient(this SmtpConfigurationDN config)
         {
             SmtpClient client = EmailLogic.SafeSmtpClient(config.Host, config.Port);
 

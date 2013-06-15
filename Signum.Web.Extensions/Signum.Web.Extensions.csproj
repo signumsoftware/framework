@@ -580,10 +580,10 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>NewsletterDelivery.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Mailing\Views\SMTPConfiguration.generated.cs">
+    <Compile Include="Mailing\Views\SmtpConfiguration1.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>SMTPConfiguration.cshtml</DependentUpon>
+      <DependentUpon>SmtpConfiguration.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Mailing\Views\_ViewStart.generated.cs">
       <AutoGen>True</AutoGen>
@@ -1087,9 +1087,9 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>StatisticsTable.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Mailing\Views\SMTPConfiguration.cshtml">
+    <Content Include="Mailing\Views\SmtpConfiguration.cshtml">
       <Generator>RazorGenerator</Generator>
-      <LastGenOutput>SMTPConfiguration.generated.cs</LastGenOutput>
+      <LastGenOutput>SmtpConfiguration1.generated.cs</LastGenOutput>
     </Content>
     <Content Include="Mailing\Views\Newsletter.cshtml">
       <Generator>RazorGenerator</Generator>

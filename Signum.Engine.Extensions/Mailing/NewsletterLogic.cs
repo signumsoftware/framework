@@ -190,7 +190,7 @@ namespace Signum.Engine.Mailing
                 Construct = (n, _) => new NewsletterDN
                 {
                     Name = n.Name,
-                    SMTPConfig = n.SMTPConfig,
+                    SmtpConfig = n.SmtpConfig,
                     From = n.From,
                     Query = n.Query,
                     Subject = n.Subject,
@@ -353,13 +353,13 @@ namespace Signum.Engine.Mailing
                     {
                         try
                         {
-                            var client = newsletter.SMTPConfig.GenerateSmtpClient();
+                            var client = newsletter.SmtpConfig.GenerateSmtpClient();
                             var message = new MailMessage();
                             
                             if (newsletter.From.HasText())
                                 message.From = new MailAddress(newsletter.From, newsletter.DisplayFrom);
                             else
-                                message.From = newsletter.SMTPConfig.InDB(smtp => smtp.DefaultFrom).ToMailAddress();
+                                message.From = newsletter.SmtpConfig.InDB(smtp => smtp.DefaultFrom).ToMailAddress();
                             
                             message.To.Add(overrideEmail ?? s.Email.Email);
 
