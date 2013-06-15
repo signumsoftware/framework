@@ -91,7 +91,7 @@ namespace Signum.Entities
 
         public virtual string IdentifiableIntegrityCheck()
         {
-            using (AllMixin.OfType<CorruptMixin>().Any(c => c.Corrupt) ? Corruption.AllowScope() : null)
+            using (Mixins.OfType<CorruptMixin>().Any(c => c.Corrupt) ? Corruption.AllowScope() : null)
             {
                 return IdentifiableIntegrityCheckBase();
             }
@@ -150,7 +150,7 @@ namespace Signum.Entities
         }
 
         [HiddenProperty]
-        public IEnumerable<MixinEntity> AllMixin
+        public IEnumerable<MixinEntity> Mixins
         {
             get
             {

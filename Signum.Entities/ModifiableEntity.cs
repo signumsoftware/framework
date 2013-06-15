@@ -416,7 +416,7 @@ namespace Signum.Entities
 
             if (ident != null)
             {
-                foreach (var m in ident.AllMixin)
+                foreach (var m in ident.Mixins)
                 {
                     list.Add(new Member(m.GetType().Name, m, m.GetType()));
                 }

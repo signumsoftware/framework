@@ -579,7 +579,7 @@ namespace Signum.Engine.Maps
 
         internal MixinEntity Getter(IdentifiableEntity ident)
         {
-            return ((IdentifiableEntity)ident).AllMixin.Single(mo => mo.GetType() == FieldType);
+            return ((IdentifiableEntity)ident).Mixins.Single(mo => mo.GetType() == FieldType);
         }
     }
 

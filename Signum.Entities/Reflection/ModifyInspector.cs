@@ -64,7 +64,7 @@ namespace Signum.Entities.Reflection
                 IdentifiableEntity ident = obj as IdentifiableEntity;
                 if (ident != null)
                 {
-                    foreach (var mixin in ident.AllMixin)
+                    foreach (var mixin in ident.Mixins)
                     {
                         yield return mixin;
                     }
@@ -104,7 +104,7 @@ namespace Signum.Entities.Reflection
                 IdentifiableEntity ident = obj as IdentifiableEntity;
                 if (ident != null)
                 {
-                    foreach (var mixin in ident.AllMixin)
+                    foreach (var mixin in ident.Mixins)
                     {
                         yield return mixin;
                     }
