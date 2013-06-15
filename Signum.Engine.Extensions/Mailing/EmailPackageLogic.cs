@@ -32,7 +32,7 @@ namespace Signum.Engine.Mailing
         }
 
         static Expression<Func<EmailPackageDN, IQueryable<EmailMessageDN>>> ExceptionMessagesExpression =
-            p => p.Messages().Where(a => a.State == EmailMessageState.Exception);
+            p => p.Messages().Where(a => a.State == EmailMessageState.SentException);
         public static IQueryable<EmailMessageDN> ExceptionMessages(this EmailPackageDN p)
         {
             return ExceptionMessagesExpression.Evaluate(p);
@@ -67,7 +67,7 @@ namespace Signum.Engine.Mailing
                             {
                                 Package = emailPackage.ToLite(),
                                 Recipients = m.Recipients,
-                                Text = m.Text,
+                                Body = m.Body,
                                 Subject = m.Subject,
                                 Template = m.Template,
                                 State = EmailMessageState.Created

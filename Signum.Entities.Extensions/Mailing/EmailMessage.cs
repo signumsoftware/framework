@@ -17,7 +17,7 @@ namespace Signum.Entities.Mailing
 {
     [Serializable, EntityKind(EntityKind.System)]
     public class EmailMessageDN : Entity
-    {
+    {   
         public EmailMessageDN()
         {
             this.UniqueIdentifier = Guid.NewGuid();
@@ -69,6 +69,13 @@ namespace Signum.Entities.Mailing
             set { SetToStr(ref sent, value, () => Sent); }
         }
 
+        DateTime? receptionNotified;
+        public DateTime? ReceptionNotified
+        {
+            get { return receptionNotified; }
+            set { Set(ref receptionNotified, value, () => ReceptionNotified); }
+        }
+
         DateTime? received;
         public DateTime? Received
         {
@@ -86,12 +93,12 @@ namespace Signum.Entities.Mailing
         }
 
         [SqlDbType(Size = int.MaxValue)]
-        string text;
+        string body;
         [StringLengthValidator(AllowNulls = false, Min = 3)]
-        public string Text
+        public string Body
         {
-            get { return text; }
-            set { Set(ref text, value, () => Text); }
+            get { return body; }
+            set { Set(ref body, value, () => Body); }
         }
 
         bool isBodyHtml = false;
@@ -115,8 +122,8 @@ namespace Signum.Entities.Mailing
             set { Set(ref state, value, () => State); }
         }
 
-        Guid uniqueIdentifier;
-        public Guid UniqueIdentifier
+        Guid? uniqueIdentifier;
+        public Guid? UniqueIdentifier
         {
             get { return uniqueIdentifier; }
             set { Set(ref uniqueIdentifier, value, () => UniqueIdentifier); }
@@ -136,13 +143,21 @@ namespace Signum.Entities.Mailing
             set { Set(ref package, value, () => Package); }
         }
 
+        Lite<Pop3ReceptionDN> reception;
+        public Lite<Pop3ReceptionDN> Reception
+        {
+            get { return reception; }
+            set { Set(ref reception, value, () => Reception); }
+        }
+
         static StateValidator<EmailMessageDN, EmailMessageState> validator = new StateValidator<EmailMessageDN, EmailMessageState>(
-            m => m.State, m => m.Exception, m => m.Sent, m => m.Received, m => m.Package)
+            m => m.State, m => m.Exception, m => m.Sent, m => m.Received, m => m.ReceptionNotified, m => m.Package)
             {
-{EmailMessageState.Created,      false,             false,      false,         null },
-{EmailMessageState.Sent,         false,             true,       false,         null },
-{EmailMessageState.Exception,    true,              true,       false,         null },
-{EmailMessageState.Received,     false,             true,       true,          null },
+{EmailMessageState.Created,      false,         false,        false,           false,                    null },
+{EmailMessageState.Sent,         false,         true,         false,           false,                    null },
+{EmailMessageState.SentException,true,          true,         false,           false,                    null },
+{EmailMessageState.ReceptionNotified,true,      true,         false,           true,                     null },
+{EmailMessageState.Received,     false,         false,        true,            false,                    false },
             };
     }
 
@@ -155,6 +170,11 @@ namespace Signum.Entities.Mailing
             : base(data)
         {
             kind = EmailRecipientKind.To;
+        }
+
+        public EmailRecipientDN(MailAddress ma, EmailRecipientKind kind) : base(ma)
+        {
+            this.kind = kind;
         }
 
         EmailRecipientKind kind;
@@ -200,6 +220,12 @@ namespace Signum.Entities.Mailing
             displayName = data.DisplayName;
         }
 
+        public EmailAddressDN(MailAddress mailAddress)
+        {
+            displayName = mailAddress.DisplayName;
+            emailAddress = mailAddress.Address;
+        }
+
         Lite<IEmailOwnerDN> emailOwner;
         public Lite<IEmailOwnerDN> EmailOwner
         {
@@ -217,6 +243,7 @@ namespace Signum.Entities.Mailing
         }
 
         string displayName;
+        private MailAddress mailAddress;
         public string DisplayName
         {
             get { return displayName; }
@@ -261,7 +288,8 @@ namespace Signum.Entities.Mailing
     {
         Created,
         Sent,
-        Exception,
+        SentException,
+        ReceptionNotified,
         Received
     }
 

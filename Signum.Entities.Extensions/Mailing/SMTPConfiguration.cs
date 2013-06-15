@@ -73,7 +73,6 @@ namespace Signum.Entities.Mailing
             set { Set(ref aditionalRecipients, value, () => AditionalRecipients); }
         }
 
-
         bool enableSSL;
         public bool EnableSSL
         {

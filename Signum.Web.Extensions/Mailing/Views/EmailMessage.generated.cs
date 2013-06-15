@@ -201,7 +201,7 @@ WriteLiteral("    <div>\r\n");
             #line hidden
             
             #line 17 "..\..\Mailing\Views\EmailMessage.cshtml"
-       Write(Html.Raw(e.Value.Text));
+       Write(Html.Raw(e.Value.Body));
 
             
             #line default
@@ -218,7 +218,7 @@ WriteLiteral("    <div>\r\n");
             #line hidden
             
             #line 21 "..\..\Mailing\Views\EmailMessage.cshtml"
-     Write(Html.Raw(HttpUtility.HtmlEncode(e.Value.Text)));
+     Write(Html.Raw(HttpUtility.HtmlEncode(e.Value.Body)));
 
             
             #line default

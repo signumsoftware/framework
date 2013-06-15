@@ -65,7 +65,7 @@ namespace Signum.Engine.Mailing
                         e.Id,
                         e.State,
                         e.Subject,
-                        e.Text,
+                        Text = e.Body,
                         e.Template,
                         e.Sent,
                         e.Received,
@@ -203,7 +203,7 @@ namespace Signum.Engine.Mailing
                         From = m.From.Clone(),
                         Recipients = m.Recipients.Select(r => r.Clone()).ToMList(),
                         Subject = m.Subject,
-                        Text = m.Text,
+                        Body = m.Body,
                         IsBodyHtml = m.IsBodyHtml,
                         Template = m.Template,
                         EditableMessage = m.EditableMessage,
@@ -228,7 +228,7 @@ namespace Signum.Engine.Mailing
             {
                 From = email.From.ToMailAddress(),
                 Subject = email.Subject,
-                Body = email.Text,
+                Body = email.Body,
                 IsBodyHtml = email.IsBodyHtml,
             };
 
@@ -279,7 +279,7 @@ namespace Signum.Engine.Mailing
                 using (Transaction tr = Transaction.ForceNew())
                 {
                     email.Exception = exLog;
-                    email.State = EmailMessageState.Exception;
+                    email.State = EmailMessageState.SentException;
                     email.Save();
                     tr.Commit();
                 }
@@ -337,7 +337,7 @@ namespace Signum.Engine.Mailing
                             updater = em => new EmailMessageDN
                             {
                                 Exception = exLog,
-                                State = EmailMessageState.Exception
+                                State = EmailMessageState.SentException
                             };
                         }
                         else
@@ -368,7 +368,7 @@ namespace Signum.Engine.Mailing
                 using (Transaction tr = Transaction.ForceNew())
                 {
                     email.Exception = exLog;
-                    email.State = EmailMessageState.Exception;
+                    email.State = EmailMessageState.SentException;
                     email.Save();
                     tr.Commit();
                 }

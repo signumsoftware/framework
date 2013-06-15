@@ -304,7 +304,7 @@ namespace Signum.Engine.Mailing
             if (template.MasterTemplate != null)
                 body = EmailMasterTemplateDN.MasterTemplateContentRegex.Replace(template.MasterTemplate.Retrieve().Text, m => body);
 
-            email.Text = body;
+            email.Body = body;
 
             return email;
         }

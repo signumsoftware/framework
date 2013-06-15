@@ -134,6 +134,11 @@
     <Compile Include="Help\HelpTools.cs" />
     <Compile Include="Help\HelpUtilities.cs" />
     <Compile Include="Help\NamespaceHelp.cs" />
+    <Compile Include="Mailing\Pop3ConfigurationLogic.cs" />
+    <Compile Include="Mailing\Pop3\Pop3MailClient.cs" />
+    <Compile Include="Mailing\Pop3\Pop3MimeClient.cs" />
+    <Compile Include="Mailing\Pop3\QuotedPrintable.cs" />
+    <Compile Include="Mailing\Pop3\RxMailMessage.cs" />
     <Compile Include="Mailing\SystemEmailLogic.cs" />
     <Compile Include="Translation\CultureInfoLogic.cs" />
     <Compile Include="Translation\LocalizedInstanceLogic.cs" />
