@@ -294,7 +294,7 @@ namespace Signum.Engine.Mailing
 
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
             
-            var columns = EmailLogic.GetTemplateColumns(newsletter, newsletter.Tokens, qd);
+            var columns = EmailTemplateLogic.GetTemplateColumns(newsletter, newsletter.Tokens, qd);
 
             //var columns = new List<QueryToken>();
             //columns.Add(QueryUtils.Parse("Entity.NewsletterDeliveries.Element", qd, canAggregate: false));

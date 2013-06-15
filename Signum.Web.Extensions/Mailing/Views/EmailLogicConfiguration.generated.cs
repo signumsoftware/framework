@@ -51,7 +51,7 @@ WriteLiteral("\r\n");
 
             
             #line 3 "..\..\Mailing\Views\EmailLogicConfiguration.cshtml"
- using (var sc = Html.TypeContext<EmailLogicConfigurationDN>()) 
+ using (var sc = Html.TypeContext<EmailTemplateConfigurationDN>()) 
 {
 	
             
