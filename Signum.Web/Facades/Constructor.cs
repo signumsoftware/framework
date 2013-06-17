@@ -83,7 +83,7 @@ namespace Signum.Web
 
         public static ModifiableEntity DefaultContructor(Type type)
         {
-            return (ModifiableEntity)Activator.CreateInstance(type);
+            return (ModifiableEntity)Activator.CreateInstance(type, true);
         }
 
         public virtual ActionResult VisualConstruct(ControllerBase controller, Type type, string prefix, VisualConstructStyle preferredStyle)
