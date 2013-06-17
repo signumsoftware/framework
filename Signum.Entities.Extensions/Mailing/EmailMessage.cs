@@ -243,7 +243,6 @@ namespace Signum.Entities.Mailing
         }
 
         string displayName;
-        private MailAddress mailAddress;
         public string DisplayName
         {
             get { return displayName; }
