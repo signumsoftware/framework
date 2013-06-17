@@ -261,10 +261,19 @@
     <Compile Include="Mailing\ClientCertificationFile.xaml.cs">
       <DependentUpon>ClientCertificationFile.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Mailing\EmailRecipient.xaml.cs">
+      <DependentUpon>EmailRecipient.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Mailing\EmailAddress.xaml.cs">
+      <DependentUpon>EmailAddress.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Mailing\Pop3Configuration.xaml.cs">
+      <DependentUpon>Pop3Configuration.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Mailing\SmtpConfiguration.xaml.cs">
       <DependentUpon>SmtpConfiguration.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Mailing\SmtpConfigurationClient.cs" />
+    <Compile Include="Mailing\MailingClient.cs" />
     <Compile Include="Notes\NoteType.xaml.cs">
       <DependentUpon>NoteType.xaml</DependentUpon>
     </Compile>
@@ -633,6 +642,18 @@
     <Page Include="Mailing\ClientCertificationFile.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Mailing\EmailRecipient.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Mailing\EmailAddress.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Mailing\Pop3Configuration.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Mailing\SmtpConfiguration.xaml">
       <SubType>Designer</SubType>

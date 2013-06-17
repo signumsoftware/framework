@@ -95,7 +95,7 @@ namespace Signum.Web.Mailing
                     new EmbeddedEntitySettings<EmailRecipientDN>{ PartialViewName = e => ViewPrefix.Formato("EmailRecipient")},
                     new EmbeddedEntitySettings<EmailTemplateConfigurationDN> { PartialViewName = e => ViewPrefix.Formato("EmailLogicConfiguration")},
 
-                    new EntitySettings<ClientCertificationFileDN> { PartialViewName = e => ViewPrefix.Formato("ClientCertificationFile")},
+                    new EmbeddedEntitySettings<ClientCertificationFileDN> { PartialViewName = e => ViewPrefix.Formato("ClientCertificationFile")},
                 });
 
                 if (smtpConfig)

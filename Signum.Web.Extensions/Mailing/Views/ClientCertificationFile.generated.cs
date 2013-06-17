@@ -59,41 +59,27 @@ WriteLiteral("\r\n");
             #line hidden
             
             #line 5 "..\..\Mailing\Views\ClientCertificationFile.cshtml"
-Write(Html.ValueLine(sc, s => s.Name));
-
-            
-            #line default
-            #line hidden
-            
-            #line 5 "..\..\Mailing\Views\ClientCertificationFile.cshtml"
-                                 
-	
-            
-            #line default
-            #line hidden
-            
-            #line 6 "..\..\Mailing\Views\ClientCertificationFile.cshtml"
 Write(Html.ValueLine(sc, s => s.CertFileType));
 
             
             #line default
             #line hidden
             
-            #line 6 "..\..\Mailing\Views\ClientCertificationFile.cshtml"
+            #line 5 "..\..\Mailing\Views\ClientCertificationFile.cshtml"
                                          
 	
             
             #line default
             #line hidden
             
-            #line 7 "..\..\Mailing\Views\ClientCertificationFile.cshtml"
+            #line 6 "..\..\Mailing\Views\ClientCertificationFile.cshtml"
 Write(Html.ValueLine(sc, s => s.FullFilePath));
 
             
             #line default
             #line hidden
             
-            #line 7 "..\..\Mailing\Views\ClientCertificationFile.cshtml"
+            #line 6 "..\..\Mailing\Views\ClientCertificationFile.cshtml"
                                          
 }
 

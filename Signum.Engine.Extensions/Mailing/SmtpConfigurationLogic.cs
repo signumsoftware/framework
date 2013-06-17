@@ -46,17 +46,6 @@ namespace Signum.Engine.Mailing
                         s.EnableSSL
                     });
 
-                dqm.RegisterQuery(typeof(ClientCertificationFileDN), () =>
-                    from c in Database.Query<ClientCertificationFileDN>()
-                    select new
-                    {
-                        Entity = c,
-                        c.Id,
-                        c.Name,
-                        CertFileType = c.CertFileType.NiceToString(),
-                        c.FullFilePath
-                    });
-
                 SmtpConfigCache = sb.GlobalLazy(() => Database.Query<SmtpConfigurationDN>().ToDictionary(a => a.ToLite()),
                     new InvalidateWith(typeof(SmtpConfigurationDN)));
 

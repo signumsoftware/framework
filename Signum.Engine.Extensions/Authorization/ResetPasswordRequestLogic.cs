@@ -42,7 +42,7 @@ namespace Signum.Engine.Authorization
                 {
                     Name = "Reset Password Request",
                     IsBodyHtml = true,
-                    Messages = CultureInfoLogic.ForEachCulture((culture) => new EmailTemplateMessageDN
+                    Messages = CultureInfoLogic.ForEachCulture(culture => new EmailTemplateMessageDN(culture)
                     {
                         Text = AuthEmailMessage.ResetPasswordRequestBody.NiceToString(),
                         Subject = AuthEmailMessage.ResetPasswordRequestSubject.NiceToString()

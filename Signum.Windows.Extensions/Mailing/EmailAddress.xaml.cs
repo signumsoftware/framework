@@ -20,15 +20,15 @@ namespace Signum.Windows.Mailing
     /// <summary>
     /// Interaction logic for ClientCertificationFile.xaml
     /// </summary>
-    public partial class ClientCertificationFile : UserControl
+    public partial class EmailAddress : UserControl
     {
-       public ClientCertificationFile(PropertyRoute tc)
+       public EmailAddress(PropertyRoute tc)
         {
             Common.SetPropertyRoute(this, tc); 
             InitializeComponent();
         }
 
-       public ClientCertificationFile()
+       public EmailAddress()
         {
             Common.SetDelayedRoutes(this, true);
             InitializeComponent();

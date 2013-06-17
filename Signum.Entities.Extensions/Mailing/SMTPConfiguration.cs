@@ -5,6 +5,7 @@ using System.Text;
 using Signum.Entities;
 using System.Linq.Expressions;
 using Signum.Utilities;
+using Signum.Entities.Files;
 
 namespace Signum.Entities.Mailing
 {
@@ -101,19 +102,12 @@ namespace Signum.Entities.Mailing
         Save
     }
 
-    [Serializable, EntityKind(EntityKind.System)]
-    public class ClientCertificationFileDN : Entity
+    [Serializable]
+    public class ClientCertificationFileDN : EmbeddedEntity
     {
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
-        string name;
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            set { SetToStr(ref name, value, () => Name); }
-        }
-
+        [NotNullable, SqlDbType(Size = 300)]
         string fullFilePath;
+        [StringLengthValidator(AllowNulls = false, Min = 2, Max = 300), ]
         public string FullFilePath
         {
             get { return fullFilePath; }
@@ -127,7 +121,7 @@ namespace Signum.Entities.Mailing
             set { Set(ref certFileType, value, () => CertFileType); }
         }
 
-        static readonly Expression<Func<ClientCertificationFileDN, string>> ToStringExpression = e => e.name;
+        static readonly Expression<Func<ClientCertificationFileDN, string>> ToStringExpression = e => e.fullFilePath;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
