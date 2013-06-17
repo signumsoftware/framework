@@ -117,8 +117,8 @@ namespace Signum.Engine.Basics
             return Synchronizer.SynchronizeScriptReplacing(
                 replacements,
                 QueriesKey,
-                should.ToDictionary(a => a.Key),
-                current.ToDictionary(a => a.Key),
+                should.ToDictionary(a => a.Key, "query in memory"),
+                current.ToDictionary(a => a.Key, "query in database"),
                 (n, s)=>table.InsertSqlSync(s),
                 (n, c) => table.DeleteSqlSync(c),
                 (fn, s, c) =>
