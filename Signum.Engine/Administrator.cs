@@ -416,5 +416,14 @@ namespace Signum.Engine
                                select i.name).ToList();
             }
         }
+
+        public static void DropUniqueIndexes<T>() where T : IdentifiableEntity
+        {
+            var table = Schema.Current.Table<T>();
+            var indexesNames = Administrator.GetIndixesNames(table, unique: true);
+
+            if (indexesNames.HasItems())
+                indexesNames.Select(n => SqlBuilder.DropIndex(table.Name, n)).Combine(Spacing.Simple).ExecuteLeaves();
+        }
     }
 }
