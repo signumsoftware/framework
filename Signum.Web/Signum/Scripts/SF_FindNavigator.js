@@ -936,8 +936,11 @@ SF.registerModule("FindNavigator", function () {
             this.clearChildSubtokenCombos($selectedCombo, prefix, index);
 
             var $container = $selectedCombo.closest(".sf-search-control");
-            if ($container != null) {
+            if ($container.length > 0) {
                 $container.trigger("sf-new-subtokens-combo", $selectedCombo.attr("id"));
+            }
+            else {
+                $selectedCombo.trigger("sf-new-subtokens-combo", $selectedCombo.attr("id"));
             }
 
             var $selectedOption = $selectedCombo.children("option:selected");
