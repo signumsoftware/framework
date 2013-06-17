@@ -49,6 +49,12 @@ namespace Signum.Engine.Mailing
                     Execute = (e, _) => { }
                 }.Register();
 
+                new Graph<Pop3ConfigurationDN>.Execute(Pop3ConfigurationOperation.ReceiveEmails)
+                {
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (e, _) => e.ReceiveEmails()
+                }.Register();
 
                 SchedulerLogic.ExecuteTask.Register((Pop3ConfigurationDN smtp) =>smtp.ReceiveEmails());
 

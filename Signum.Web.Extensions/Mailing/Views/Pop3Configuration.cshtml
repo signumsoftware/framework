@@ -1,0 +1,14 @@
+﻿@using Signum.Entities.Mailing
+
+@using (var sc = Html.TypeContext<Pop3ConfigurationDN>()) 
+{
+	@Html.ValueLine(sc, s => s.Name)
+	@Html.ValueLine(sc, s => s.Port)
+	@Html.ValueLine(sc, s => s.Host)
+	@Html.ValueLine(sc, s => s.Username)
+	@Html.ValueLine(sc, s => s.Password)
+	@Html.ValueLine(sc, s => s.EnableSSL)
+	@Html.ValueLine(sc, s => s.ReadTimeout)
+	@Html.ValueLine(sc, s => s.MaxDownloadEmails)
+    @Html.EntityList(sc, s => s.ClientCertificationFiles)
+}

@@ -95,7 +95,8 @@ namespace Signum.Entities.Mailing
 
     public enum Pop3ConfigurationOperation
     {
-        Save
+        Save,
+        ReceiveEmails
     }
 
     public enum Pop3ConfigurationAction

@@ -165,6 +165,11 @@
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
     <Compile Include="ControlPanel\ControlPanelOmniboxProvider.cs" />
+    <Compile Include="Mailing\Views\ClientCertificationFile.generated.cs">
+      <DependentUpon>ClientCertificationFile.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Mailing\Views\EmailAddress.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -194,6 +199,11 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>EmailTemplateMessage.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Mailing\Views\Pop3Configuration.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Pop3Configuration.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Translation\Controllers\TranslationController.cs" />
     <Compile Include="Translation\TranslationClient.cs" />
@@ -1217,6 +1227,14 @@
     <Content Include="Mailing\Views\EmailAddress.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>EmailAddress.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Mailing\Views\Pop3Configuration.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>Pop3Configuration.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Mailing\Views\ClientCertificationFile.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>ClientCertificationFile.generated.cs</LastGenOutput>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>RazorGenerator</Generator>
