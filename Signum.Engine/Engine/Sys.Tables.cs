@@ -190,6 +190,8 @@ namespace Signum.Engine.SchemaInfoTables
         public string name;
         public int parent_object_id;
         public int referenced_object_id;
+        public bool is_disabled;
+        public bool is_not_trusted; 
 
         static Expression<Func<SysForeignKeys, IQueryable<SysForeignKeyColumns>>> ForeignKeyColumnsExpression =
             fk => Database.View<SysForeignKeyColumns>().Where(fkc => fkc.constraint_object_id == fk.object_id);

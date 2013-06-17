@@ -144,7 +144,9 @@ namespace Signum.Engine
                          SqlBuilder.AlterTableAddConstraintForeignKey(tab, colModel.Name, colModel.ReferenceTable) : null,
                      null,
                      (cn, colModel, coldb) => colModel.ReferenceTable != null && (coldb.ForeingKey == null || !coldb.ForeingKey.EqualForeignKey(tab.Name.Name, colModel)) ?
-                         SqlBuilder.AlterTableAddConstraintForeignKey(tab, colModel.Name, colModel.ReferenceTable) : null,
+                         SqlBuilder.AlterTableAddConstraintForeignKey(tab, colModel.Name, colModel.ReferenceTable) :
+                         colModel.ReferenceTable != null && coldb.ForeingKey != null && (coldb.ForeingKey.IsDisabled || coldb.ForeingKey.IsNotTrusted) ? SqlBuilder.EnableForeignKey(tab.Name,  coldb.ForeingKey.Name) :                         
+                         null,
                      Spacing.Simple),
                  Spacing.Double);
 
@@ -247,6 +249,7 @@ namespace Signum.Engine
                                                          select fk.name == null ? null : new DiffForeignKey
                                                          {
                                                              Name = fk.name,
+                                                             IsDisabled = fk.is_disabled,
                                                              TargetTable = new ObjectName(new SchemaName(db, rs.name), rt.name),
                                                          }).FirstOrDefault(),
                                        }).ToDictionary(a => a.Name, "columns"),
@@ -420,6 +423,8 @@ namespace Signum.Engine
     {
         public string Name;
         public ObjectName TargetTable;
+        public bool IsDisabled; 
+        public bool IsNotTrusted;
 
         internal bool EqualForeignKey(string tableName, IColumn colModel)
         {
