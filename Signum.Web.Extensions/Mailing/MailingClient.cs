@@ -20,6 +20,7 @@ using Signum.Engine;
 using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.DynamicQuery;
+using Signum.Entities.UserQueries;
 #endregion
 
 namespace Signum.Web.Mailing
@@ -46,21 +47,7 @@ namespace Signum.Web.Mailing
             return QueryUtils.Parse(tokenString, qd, canAggregate: false);
         }
 
-        public static Mapping<QueryToken> EmailTemplateFromQueryTokenMapping = ctx =>
-        {
-            string tokenStr = "";
-            foreach (string key in ctx.Parent.Inputs.Keys.Where(k => k.Contains("ddlTokens")).OrderBy())
-                tokenStr += ctx.Parent.Inputs[key] + ".";
-            while (tokenStr.EndsWith("."))
-                tokenStr = tokenStr.Substring(0, tokenStr.Length - 1);
-
-            if (tokenStr.IsNullOrEmpty())
-                return null;
-
-            return ParseQueryToken(tokenStr, ctx.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", EntityBaseKeys.RuntimeInfo)]);
-        };
-
-        public static Mapping<QueryToken> EmailTemplateRecipientsQueryTokenMapping = ctx =>
+        static Mapping<QueryToken> EmailTemplateFromQueryTokenMapping = ctx =>
         {
             string tokenStr = "";
             foreach (string key in ctx.Parent.Inputs.Keys.Where(k => k.Contains("ddlTokens")).OrderBy())
@@ -73,6 +60,26 @@ namespace Signum.Web.Mailing
 
             return ParseQueryToken(tokenStr, ctx.Parent.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", EntityBaseKeys.RuntimeInfo)]);
         };
+
+        public static EntityMapping<QueryTokenDN> EmailTemplateFromQueryTokenDNMapping = new EntityMapping<QueryTokenDN>(false)
+            .SetProperty(qt => qt.TryToken, MailingClient.EmailTemplateFromQueryTokenMapping);
+
+        static Mapping<QueryToken> EmailTemplateRecipientsQueryTokenMapping = ctx =>
+        {
+            string tokenStr = "";
+            foreach (string key in ctx.Parent.Inputs.Keys.Where(k => k.Contains("ddlTokens")).OrderBy())
+                tokenStr += ctx.Parent.Inputs[key] + ".";
+            while (tokenStr.EndsWith("."))
+                tokenStr = tokenStr.Substring(0, tokenStr.Length - 1);
+
+            if (tokenStr.IsNullOrEmpty())
+                return null;
+
+            return ParseQueryToken(tokenStr, ctx.Parent.Parent.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", EntityBaseKeys.RuntimeInfo)]);
+        };
+
+        public static EntityMapping<QueryTokenDN> EmailTemplateRecipientsQueryTokenDNMapping = new EntityMapping<QueryTokenDN>(false)
+            .SetProperty(qt => qt.TryToken, MailingClient.EmailTemplateRecipientsQueryTokenMapping);
 
         public static void Start(bool smtpConfig, bool newsletter)
         {
