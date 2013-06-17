@@ -18,19 +18,12 @@ using Signum.Entities.Mailing;
 namespace Signum.Windows.Mailing
 {
     /// <summary>
-    /// Interaction logic for ClientCertificationFile.xaml
+    /// Interaction logic for Pop3Configuration.xaml
     /// </summary>
-    public partial class ClientCertificationFile : UserControl
+    public partial class Pop3Configuration : UserControl
     {
-       public ClientCertificationFile(PropertyRoute tc)
+        public Pop3Configuration()
         {
-            Common.SetPropertyRoute(this, tc); 
-            InitializeComponent();
-        }
-
-       public ClientCertificationFile()
-        {
-            Common.SetDelayedRoutes(this, true);
             InitializeComponent();
         }
     }

@@ -118,7 +118,7 @@ namespace Signum.Web.Mailing
                         MappingDefault = EmailTemplateRecipientMapping
                     },
 
-                    new EntitySettings<ClientCertificationFileDN> { PartialViewName = e => ViewPrefix.Formato("ClientCertificationFile")},
+                    new EmbeddedEntitySettings<ClientCertificationFileDN> { PartialViewName = e => ViewPrefix.Formato("ClientCertificationFile")},
                 });
 
                 if (smtpConfig)

@@ -319,6 +319,13 @@ namespace Signum.Entities.Mailing
     [Serializable]
     public class EmailTemplateMessageDN : EmbeddedEntity
     {
+        private EmailTemplateMessageDN() { }
+
+        public EmailTemplateMessageDN(CultureInfoDN culture)
+        {
+            this.CultureInfo = culture;
+        }
+
         [Ignore]
         EmailTemplateDN template;
         public EmailTemplateDN Template

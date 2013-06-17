@@ -14,11 +14,11 @@
     <div>
         @if (e.Value.IsBodyHtml)
         {
-            @Html.Raw(e.Value.Text)
+            @Html.Raw(e.Value.Body)
         } 
         else
         {
-          @Html.Raw(HttpUtility.HtmlEncode(e.Value.Text))
+          @Html.Raw(HttpUtility.HtmlEncode(e.Value.Body))
         }
     </div>
 }

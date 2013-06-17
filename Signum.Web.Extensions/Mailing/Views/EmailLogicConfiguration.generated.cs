@@ -36,7 +36,7 @@ namespace Signum.Web.Extensions.Mailing.Views
     using Signum.Utilities;
     using Signum.Web;
     
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.5.4.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Mailing/Views/EmailLogicConfiguration.cshtml")]
     public partial class EmailLogicConfiguration : System.Web.Mvc.WebViewPage<dynamic>
     {

@@ -151,19 +151,47 @@ Write(Html.ValueLine(sc, s => s.EnableSSL));
             
             #line 11 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
                                       
-    
+	
             
             #line default
             #line hidden
             
             #line 12 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-Write(Html.EntityList(sc, s => s.ClientCertificationFiles));
+Write(Html.EntityLineDetail(sc, s => s.DefaultFrom));
 
             
             #line default
             #line hidden
             
             #line 12 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
+                                               
+	
+            
+            #line default
+            #line hidden
+            
+            #line 13 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
+Write(Html.EntityRepeater(sc, s => s.AditionalRecipients));
+
+            
+            #line default
+            #line hidden
+            
+            #line 13 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
+                                                     
+    
+            
+            #line default
+            #line hidden
+            
+            #line 14 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
+Write(Html.EntityList(sc, s => s.ClientCertificationFiles));
+
+            
+            #line default
+            #line hidden
+            
+            #line 14 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
                                                          
 }
 
