@@ -81,7 +81,7 @@ namespace Signum.Web.Mailing
         public static EntityMapping<QueryTokenDN> EmailTemplateRecipientsQueryTokenDNMapping = new EntityMapping<QueryTokenDN>(false)
             .SetProperty(qt => qt.TryToken, MailingClient.EmailTemplateRecipientsQueryTokenMapping);
 
-        public static void Start(bool smtpConfig, bool newsletter)
+        public static void Start(bool smtpConfig, bool newsletter, bool pop3Config)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -93,8 +93,9 @@ namespace Signum.Web.Mailing
                     new EntitySettings<EmailMessageDN>{ PartialViewName = e => ViewPrefix.Formato("EmailMessage")},
                     new EmbeddedEntitySettings<EmailAddressDN>{ PartialViewName = e => ViewPrefix.Formato("EmailAddress")},
                     new EmbeddedEntitySettings<EmailRecipientDN>{ PartialViewName = e => ViewPrefix.Formato("EmailRecipient")},
-
                     new EmbeddedEntitySettings<EmailTemplateConfigurationDN> { PartialViewName = e => ViewPrefix.Formato("EmailLogicConfiguration")},
+
+                    new EntitySettings<ClientCertificationFileDN> { PartialViewName = e => ViewPrefix.Formato("ClientCertificationFile")},
                 });
 
                 if (smtpConfig)
@@ -108,6 +109,12 @@ namespace Signum.Web.Mailing
                 {
                     //new EntitySettings<NewsletterDN> { PartialViewName = e => ViewPrefix.Formato("Newsletter") },
                     new EntitySettings<NewsletterDeliveryDN> { PartialViewName = e => ViewPrefix.Formato("NewsletterDelivery") },
+                });
+
+                if (pop3Config)
+                    Navigator.AddSettings(new List<EntitySettings>
+                {
+                    new EntitySettings<Pop3ConfigurationDN> { PartialViewName = e => ViewPrefix.Formato("Pop3Configuration") },
                 });
             }
         }
