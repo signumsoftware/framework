@@ -370,12 +370,13 @@ namespace Signum.Engine
                 if (multiIndexes.Any())
                 {
                     SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " DISABLE Multiple Indexes");
+                    multiIndexes.Select(i => SqlBuilder.DisableIndex(table.Name, i)).Combine(Spacing.Simple).ExecuteLeaves();
                     Executor.ExecuteNonQuery(multiIndexes.ToString(i => "ALTER INDEX [{0}] ON {1} DISABLE".Formato(i, table.Name), "\r\n"));
 
                     onDispose += () =>
                     {
                         SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " REBUILD Multiple Indexes");
-                        Executor.ExecuteNonQuery(multiIndexes.ToString(i => "ALTER INDEX [{0}] ON {1} REBUILD".Formato(i, table.Name), "\r\n"));
+                        multiIndexes.Select(i => SqlBuilder.EnableIndex(table.Name, i)).Combine(Spacing.Simple).ExecuteLeaves();
                     };
                 }
             }
@@ -387,12 +388,11 @@ namespace Signum.Engine
                 if (uniqueIndexes.Any())
                 {
                     SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " DISABLE Unique Indexes");
-                    Executor.ExecuteNonQuery(uniqueIndexes.ToString(i => "ALTER INDEX [{0}] ON {1} DISABLE".Formato(i, table.Name), "\r\n"));
-
+                    uniqueIndexes.Select(i => SqlBuilder.DisableIndex(table.Name, i)).Combine(Spacing.Simple).ExecuteLeaves();
                     onDispose += () =>
                     {
                         SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " REBUILD Unique Indexes");
-                        Executor.ExecuteNonQuery(uniqueIndexes.ToString(i => "ALTER INDEX [{0}] ON {1} REBUILD".Formato(i, table.Name), "\r\n"));
+                        uniqueIndexes.Select(i => SqlBuilder.EnableIndex(table.Name, i)).Combine(Spacing.Simple).ExecuteLeaves();
                     };
                 }
             }
@@ -403,7 +403,7 @@ namespace Signum.Engine
             return new Disposable(onDispose);
         }
 
-        private static List<string> GetIndixesNames(this ITable table, bool unique)
+        public static List<string> GetIndixesNames(this ITable table, bool unique)
         {
             using (OverrideDatabaseInViews(table.Name.Schema.Database))
             {
@@ -412,7 +412,7 @@ namespace Signum.Engine
                                from t in s.Tables()
                                where t.name == table.Name.Name
                                from i in t.Indices()
-                               where i.is_unique == unique
+                               where i.is_unique == unique && !i.is_primary_key 
                                select i.name).ToList();
             }
         }

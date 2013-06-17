@@ -318,5 +318,25 @@ FROM {1} as [table]".Formato(
         {
             return new SqlPreCommandSimple("DROP SCHEMA {0}".Formato(schemaName));
         }
+
+        public static SqlPreCommandSimple DisableForeignKey(ObjectName tableName, string foreignKey)
+        {
+            return new SqlPreCommandSimple("ALTER TABLE {0} NOCHECK CONSTRAINT {1}".Formato(tableName, foreignKey));
+        }
+
+        public static SqlPreCommandSimple EnableForeignKey(ObjectName tableName, string foreignKey)
+        {
+            return new SqlPreCommandSimple("ALTER TABLE {0} WITH CHECK CHECK CONSTRAINT {1}".Formato(tableName, foreignKey));
+        }
+
+        public static SqlPreCommandSimple DisableIndex(ObjectName tableName, string indexName)
+        {
+            return new SqlPreCommandSimple("ALTER INDEX [{0}] ON {1} DISABLE".Formato(indexName, tableName));
+        }
+
+        public static SqlPreCommandSimple EnableIndex(ObjectName tableName, string indexName)
+        {
+            return new SqlPreCommandSimple("ALTER INDEX [{0}] ON {1} REBUILD".Formato(indexName, tableName));
+        }
     }
 }
