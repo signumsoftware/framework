@@ -124,15 +124,15 @@ namespace Signum.Windows.Chart
 
             miResult.Click += delegate
             {
-                ChartRequestWindow window = new ChartRequestWindow()
+                var cr = new ChartRequest(sc.QueryName)
                 {
-                    DataContext = new ChartRequest(sc.QueryName)
-                    {
-                        Filters = sc.FilterOptions.Select(fo => fo.ToFilter()).ToList(),
-                    }
+                    Filters = sc.FilterOptions.Select(fo => fo.ToFilter()).ToList(),
                 };
 
-                window.Show();
+                Navigator.OpenIndependentWindow(() => new ChartRequestWindow()
+                {
+                    DataContext = cr
+                });
             };
 
             return miResult;
@@ -157,14 +157,10 @@ namespace Signum.Windows.Chart
                 CurrentEntityConverter.SetFilterValues(uc.Filters, currentEntity);
             }
 
-            ChartRequestWindow cw = new ChartRequestWindow()
+            Navigator.OpenIndependentWindow(() => new ChartRequestWindow()
             {
                 DataContext = new ChartRequest(query)
-            };
-
-            ChartClient.SetUserChart(cw, uc);
-
-            cw.Show();
+            }.Set(ChartClient.UserChartProperty, uc));
         }
     }
 }

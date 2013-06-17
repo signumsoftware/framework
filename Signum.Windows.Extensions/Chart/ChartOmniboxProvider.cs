@@ -44,12 +44,10 @@ namespace Signum.Windows.Chart
             if (result.QueryName == null)
                 return;
 
-            ChartRequestWindow cw = new ChartRequestWindow()
+            Navigator.OpenIndependentWindow(() => new ChartRequestWindow()
             {
                 DataContext = new ChartRequest(result.QueryName)
-            };
-
-            cw.Show();
+            });
         }
 
         public override string GetName(ChartOmniboxResult result)

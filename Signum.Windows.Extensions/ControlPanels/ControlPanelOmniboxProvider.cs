@@ -34,7 +34,7 @@ namespace Signum.Windows.ControlPanels
 
         public override void OnSelected(ControlPanelOmniboxResult result, Window window)
         {
-            ControlPanelClient.View(result.ControlPanel, null);
+            ControlPanelClient.Navigate(result.ControlPanel, null);
         }
 
         public override string GetName(ControlPanelOmniboxResult result)
