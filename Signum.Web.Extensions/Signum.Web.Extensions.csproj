@@ -195,10 +195,20 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>EmailTemplate.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Mailing\Views\EmailTemplateContact.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>EmailTemplateContact.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Mailing\Views\EmailTemplateMessage.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>EmailTemplateMessage.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Mailing\Views\EmailTemplateRecipient.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>EmailTemplateRecipient.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Mailing\Views\Pop3Configuration.generated.cs">
       <AutoGen>True</AutoGen>
@@ -1014,8 +1024,9 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Mailing\Content\Mail.css" />
-    <Content Include="Mailing\Scripts\SF_Mail.js" />
+    <Content Include="Mailing\Content\SF_Mailing.css" />
+    <Content Include="Mailing\Scripts\SF_Mailing.js" />
+    <Content Include="Mailing\Scripts\SF_TabsRepeater.js" />
     <Content Include="Mailing\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
@@ -1235,6 +1246,14 @@
     <Content Include="Mailing\Views\ClientCertificationFile.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ClientCertificationFile.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Mailing\Views\EmailTemplateContact.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>EmailTemplateContact.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Mailing\Views\EmailTemplateRecipient.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>EmailTemplateRecipient.generated.cs</LastGenOutput>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>RazorGenerator</Generator>

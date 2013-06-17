@@ -1,0 +1,16 @@
+﻿@using Signum.Entities.Mailing
+@using Signum.Entities.DynamicQuery
+@using Signum.Web.UserQueries
+@using (var tc = Html.TypeContext<EmailTemplateRecipientDN>())
+{
+    using (var qtTc = tc.SubContext(etTc => etTc.Token))
+    {
+        @Html.Field("Email Owner", Html.QueryTokenDNBuilder(qtTc, (QueryDescription)ViewData[ViewDataKeys.QueryDescription]))
+    }
+    @Html.ValueLine(tc, c => c.EmailAddress)
+    @Html.ValueLine(tc, c => c.DisplayName)
+    @Html.ValueLine(tc, c => c.Kind)
+}
+@Html.ScriptsJs("~/Mailing/Scripts/SF_Mailing.js")
+
+

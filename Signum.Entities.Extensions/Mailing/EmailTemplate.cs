@@ -447,8 +447,12 @@ namespace Signum.Entities.Mailing
     { 
         [Description("Insert message content")]
         InsertMessageContent,
-        [Description("Insert token")]
-        InsertToken,
+        [Description("Insert")]
+        Insert,
+        [Description("If")]
+        If,
+        [Description("Foreach")]
+        Foreach,
         [Description("Language")]
         Language
     }

@@ -35,7 +35,7 @@ namespace Signum.Web.Mailing
             return (EmailTemplateDN)runtimeInfo.ToLite().Retrieve();
         };
 
-        private static QueryToken ParseQueryToken(string tokenString, string queryRuntimeInfoInput)
+        private static QueryTokenDN ParseQueryToken(string tokenString, string queryRuntimeInfoInput)
         {
             if (tokenString.IsNullOrEmpty())
                 return null;
@@ -44,10 +44,27 @@ namespace Signum.Web.Mailing
             var queryName = QueryLogic.ToQueryName(((Lite<QueryDN>)queryRuntimeInfo.ToLite()).InDB(q => q.Key));
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
 
-            return QueryUtils.Parse(tokenString, qd, canAggregate: false);
+            return new QueryTokenDN(QueryUtils.Parse(tokenString, qd, canAggregate: false));
         }
 
-        static Mapping<QueryToken> EmailTemplateFromQueryTokenMapping = ctx =>
+        public static Mapping<QueryTokenDN> EmailTemplateFromQueryTokenMapping = ctx =>
+        {
+            string tokenStr = "";
+            foreach (string key in ctx.Parent.Inputs.Keys.Where(k => k.Contains("ddlTokens")).OrderBy())
+                tokenStr += ctx.Parent.Inputs[key] + ".";
+            while (tokenStr.EndsWith("."))
+                tokenStr = tokenStr.Substring(0, tokenStr.Length - 1);
+
+            if (tokenStr.IsNullOrEmpty())
+                return null;
+
+            return ParseQueryToken(tokenStr, ctx.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", EntityBaseKeys.RuntimeInfo)]);
+        };
+
+        static EntityMapping<EmailTemplateContactDN> EmailTemplateContactMapping = new EntityMapping<EmailTemplateContactDN>(true)
+            .SetProperty(ec => ec.Token, MailingClient.EmailTemplateFromQueryTokenMapping);
+
+        public static Mapping<QueryTokenDN> EmailTemplateRecipientsQueryTokenMapping = ctx =>
         {
             string tokenStr = "";
             foreach (string key in ctx.Parent.Inputs.Keys.Where(k => k.Contains("ddlTokens")).OrderBy())
@@ -61,26 +78,9 @@ namespace Signum.Web.Mailing
             return ParseQueryToken(tokenStr, ctx.Parent.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", EntityBaseKeys.RuntimeInfo)]);
         };
 
-        public static EntityMapping<QueryTokenDN> EmailTemplateFromQueryTokenDNMapping = new EntityMapping<QueryTokenDN>(false)
-            .SetProperty(qt => qt.TryToken, MailingClient.EmailTemplateFromQueryTokenMapping);
-
-        static Mapping<QueryToken> EmailTemplateRecipientsQueryTokenMapping = ctx =>
-        {
-            string tokenStr = "";
-            foreach (string key in ctx.Parent.Inputs.Keys.Where(k => k.Contains("ddlTokens")).OrderBy())
-                tokenStr += ctx.Parent.Inputs[key] + ".";
-            while (tokenStr.EndsWith("."))
-                tokenStr = tokenStr.Substring(0, tokenStr.Length - 1);
-
-            if (tokenStr.IsNullOrEmpty())
-                return null;
-
-            return ParseQueryToken(tokenStr, ctx.Parent.Parent.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", EntityBaseKeys.RuntimeInfo)]);
-        };
-
-        public static EntityMapping<QueryTokenDN> EmailTemplateRecipientsQueryTokenDNMapping = new EntityMapping<QueryTokenDN>(false)
-            .SetProperty(qt => qt.TryToken, MailingClient.EmailTemplateRecipientsQueryTokenMapping);
-
+        static EntityMapping<EmailTemplateRecipientDN> EmailTemplateRecipientMapping = new EntityMapping<EmailTemplateRecipientDN>(true)
+            .SetProperty(ec => ec.Token, MailingClient.EmailTemplateRecipientsQueryTokenMapping);
+        
         public static void Start(bool smtpConfig, bool newsletter, bool pop3Config)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -91,9 +91,32 @@ namespace Signum.Web.Mailing
                     new EntitySettings<EmailPackageDN>{ PartialViewName = e => ViewPrefix.Formato("EmailPackage")},
                     
                     new EntitySettings<EmailMessageDN>{ PartialViewName = e => ViewPrefix.Formato("EmailMessage")},
+                    
                     new EmbeddedEntitySettings<EmailAddressDN>{ PartialViewName = e => ViewPrefix.Formato("EmailAddress")},
                     new EmbeddedEntitySettings<EmailRecipientDN>{ PartialViewName = e => ViewPrefix.Formato("EmailRecipient")},
+                    
                     new EmbeddedEntitySettings<EmailTemplateConfigurationDN> { PartialViewName = e => ViewPrefix.Formato("EmailLogicConfiguration")},
+                    new EntitySettings<EmailTemplateDN>() { PartialViewName = e => ViewPrefix.Formato("EmailTemplate") },
+                    new EntitySettings<EmailMasterTemplateDN>{ PartialViewName =  e => ViewPrefix.Formato("EmailMasterTemplate") },
+                    
+                    new EmbeddedEntitySettings<EmailTemplateMessageDN>() 
+                    { 
+                        PartialViewName = e => ViewPrefix.Formato("EmailTemplateMessage"),
+                        MappingDefault = new EntityMapping<EmailTemplateMessageDN>(true)
+                            .SetProperty(etm => etm.Template, MailingClient.EmailTemplateMessageTemplateMapping)
+                    },
+
+                    new EmbeddedEntitySettings<EmailTemplateContactDN>() 
+                    { 
+                        PartialViewName = e => ViewPrefix.Formato("EmailTemplateContact"),
+                        MappingDefault = EmailTemplateContactMapping,
+                    },
+
+                    new EmbeddedEntitySettings<EmailTemplateRecipientDN>() 
+                    { 
+                        PartialViewName = e => ViewPrefix.Formato("EmailTemplateRecipient"),
+                        MappingDefault = EmailTemplateRecipientMapping
+                    },
 
                     new EntitySettings<ClientCertificationFileDN> { PartialViewName = e => ViewPrefix.Formato("ClientCertificationFile")},
                 });
@@ -107,7 +130,7 @@ namespace Signum.Web.Mailing
                 if (newsletter)
                     Navigator.AddSettings(new List<EntitySettings>
                 {
-                    //new EntitySettings<NewsletterDN> { PartialViewName = e => ViewPrefix.Formato("Newsletter") },
+                    new EntitySettings<NewsletterDN> { PartialViewName = e => ViewPrefix.Formato("Newsletter") },
                     new EntitySettings<NewsletterDeliveryDN> { PartialViewName = e => ViewPrefix.Formato("NewsletterDelivery") },
                 });
 

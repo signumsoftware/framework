@@ -27,22 +27,50 @@ namespace Signum.Web.Extensions.Mailing.Views
     using System.Web.UI;
     using System.Web.WebPages;
     
-    #line 2 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+    #line 5 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+    using Signum.Engine;
+    
+    #line default
+    #line hidden
+    
+    #line 3 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
     using Signum.Engine.Translation;
     
     #line default
     #line hidden
+    
+    #line 4 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
     using Signum.Entities;
+    
+    #line default
+    #line hidden
+    
+    #line 7 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+    using Signum.Entities.DynamicQuery;
+    
+    #line default
+    #line hidden
     
     #line 1 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
     using Signum.Entities.Mailing;
     
     #line default
     #line hidden
+    
+    #line 2 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+    using Signum.Entities.Translation;
+    
+    #line default
+    #line hidden
     using Signum.Utilities;
+    
+    #line 6 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
     using Signum.Web;
     
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.5.4.0")]
+    #line default
+    #line hidden
+    
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Mailing/Views/EmailTemplateMessage.cshtml")]
     public partial class EmailTemplateMessage : System.Web.Mvc.WebViewPage<dynamic>
     {
@@ -54,21 +82,26 @@ namespace Signum.Web.Extensions.Mailing.Views
 
 
 
+
+
+
+
+
             
-            #line 3 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+            #line 8 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
  using (var ec = Html.TypeContext<EmailTemplateMessageDN>())
 {
 
             
             #line default
             #line hidden
-WriteLiteral("    <div class=\"sf-email-messageContainer\">\r\n        <input type=\"hidden\" class=\"" +
+WriteLiteral("    <div class=\"sf-email-template-message\">\r\n        <input type=\"hidden\" class=\"" +
 "sf-email-culture\" value=\"");
 
 
             
-            #line 6 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
-                                                         Write(ec.Value.CultureInfo.CultureInfo.DisplayName);
+            #line 11 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+                                                         Write(ec.Value.CultureInfo.TryToString());
 
             
             #line default
@@ -77,83 +110,138 @@ WriteLiteral("\" />\r\n        ");
 
 
             
-            #line 7 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
-   Write(Html.ValueLine(ec, e => e.CultureInfo, vl =>
+            #line 12 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+   Write(Html.EntityCombo(ec, e => e.CultureInfo, vl =>
         {
-            vl.ValueLineType = ValueLineType.Combo;
-            vl.EnumComboItems = CultureInfoLogic.ApplicationCultures.OrderBy(
-                ci => ci.Name).ThenBy(ci => ci.IsNeutralCulture).Select(ci =>
-                    new SelectListItem 
-                    { 
-                        Text = ci.DisplayName, 
-                        Value = ci.Name, 
-                        Selected = ci.Name == ec.Value.CultureInfo.CultureInfo.Name 
-                    }).ToList();           
+            vl.LabelText = EmailTemplateViewMessage.Language.NiceToString();
         }));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n        <fieldset>\r\n            <legend>Replacement</legend>\r\n            <text" +
-"area cols=\"30\" rows=\"6\"></textarea>\r\n\r\n        </fieldset>\r\n        ");
+WriteLiteral(@"
+        <div class=""sf-email-replacements-token-container"">
+            <input type=""button"" class=""sf-button sf-email-togglereplacementspanel"" value=""Toggle replacements panel"" />
+            <fieldset class=""sf-email-replacements-panel"" style=""display: none;"">
+                <legend>Replacements</legend>
+                ");
 
 
             
-            #line 24 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
-   Write(Html.ValueLine(ec, e => e.Subject));
+            #line 20 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+           Write(Html.QueryTokenBuilder(null, ec, (QueryDescription)ViewData[ViewDataKeys.QueryDescription]));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n        <div class=\"sf-email-messageEditContent\">\r\n            ");
+WriteLiteral("\r\n                <input type=\"button\" class=\"sf-button sf-email-inserttoken\" dat" +
+"a-prefix=\"");
+
+
+            
+            #line 21 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+                                                                                    Write(ec.ControlID);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\" value=\"");
+
+
+            
+            #line 21 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+                                                                                                           Write(EmailTemplateViewMessage.Insert.NiceToString());
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\" />\r\n                <input type=\"button\" class=\"sf-button sf-email-inserttoken " +
+"sf-email-inserttoken-if\" data-prefix=\"");
+
+
+            
+            #line 22 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+                                                                                                            Write(ec.ControlID);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\" data-block=\"if\" value=\"");
+
+
+            
+            #line 22 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+                                                                                                                                                   Write(EmailTemplateViewMessage.If.NiceToString());
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\" />\r\n                <input type=\"button\" class=\"sf-button sf-email-inserttoken " +
+"sf-email-inserttoken-foreach\" data-prefix=\"");
+
+
+            
+            #line 23 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+                                                                                                                 Write(ec.ControlID);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\" data-block=\"foreach\" value=\"");
+
+
+            
+            #line 23 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+                                                                                                                                                             Write(EmailTemplateViewMessage.Foreach.NiceToString());
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\" />\r\n            </fieldset>\r\n        </div>\r\n        ");
 
 
             
             #line 26 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
-       Write(Html.ValueLine(ec, e => e.Text, vl =>
-            {
-                vl.ValueLineType = ValueLineType.TextArea;
-                vl.ValueHtmlProps["cols"] = "30";
-                vl.ValueHtmlProps["rows"] = "6";
-                vl.ValueHtmlProps["class"] = "sf-email-htmlwrite";
-            }));
+   Write(Html.ValueLine(ec, e => e.Subject, vl => vl.ValueHtmlProps["class"] = "sf-email-inserttoken-target sf-email-template-message-subject"));
 
             
             #line default
             #line hidden
-WriteLiteral(@"
-            <br />
-            <input type=""button"" class=""sf-button sf-email-messagePreviewContentButton"" value=""Preview"" />
-        </div>
-        <div class=""sf-email-messagePreviewContent"" style=""display: none;"">
-            <fieldset>
-                <legend>Message</legend>
-                <iframe name=""frameNewImage"" src=""about:blank"" class=""sf-email-htmlBody"" frameborder=""0""></iframe>
-                <br />
-                <input type=""button"" class=""sf-button sf-email-messageEditContentButton"" value=""Edit"" />
-            </fieldset>
-        </div>
-    </div>
-");
+WriteLiteral("\r\n        ");
 
 
             
-            #line 45 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+            #line 27 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+   Write(Html.ValueLine(ec, e => e.Text, vl =>
+        {
+            vl.ValueLineType = ValueLineType.TextArea;
+            vl.ValueHtmlProps["style"] = "width:100%; height:180px;";
+            vl.ValueHtmlProps["class"] = "sf-rich-text-editor sf-email-template-message-text";
+        }));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n        \r\n        <script>\r\n            $(function () {\r\n                SF.Mai" +
+"ling.initHtmlEditorWithTokens(\"");
+
+
+            
+            #line 36 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+                                                Write(ec.SubContext(e => e.Text).ControlID);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\");\r\n            });\r\n        </script>\r\n    </div>\r\n");
+
+
+            
+            #line 40 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
 }
-
             
             #line default
             #line hidden
-
-            
-            #line 46 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
-Write(Html.ScriptsJs("~/Mailing/Scripts/SF_Mail.js"));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n");
-
 
         }
     }

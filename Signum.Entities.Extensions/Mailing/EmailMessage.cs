@@ -297,12 +297,27 @@ namespace Signum.Entities.Mailing
         EmailOwnerData EmailOwnerData { get; }
     }
 
-    public class EmailOwnerData : IQueryTokenBag
+    public class EmailOwnerData : IQueryTokenBag, IEquatable<EmailOwnerData>
     {
         public Lite<IEmailOwnerDN> Owner { get; set; }
         public string Email { get; set; }
         public string DisplayName { get; set; }
         public CultureInfo CultureInfo { get; set; }
+
+        public bool Equals(EmailOwnerData other)
+        {
+            return Owner != null && other != null && other.Owner != null && Owner.Equals(other.Owner);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is EmailOwnerData && Equals((EmailOwnerData)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return Owner == null ? base.GetHashCode() : Owner.GetHashCode();
+        }
     }
 
     public enum EmailMessageProcesses

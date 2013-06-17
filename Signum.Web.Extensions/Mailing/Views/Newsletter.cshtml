@@ -1,57 +1,64 @@
 ﻿@using Signum.Entities.Mailing
 @using Signum.Entities.Reflection
-@Html.ScriptCss("~/Mailing/Content/Mail.css")
+@using Signum.Engine.DynamicQuery
+@using Signum.Engine.Basics
+@Html.ScriptCss("~/Mailing/Content/SF_Mailing.css")
+@Html.ScriptsJs("~/Scripts/ckeditor/ckeditor.js")
+@Html.ScriptsJs("~/Mailing/Scripts/SF_Mailing.js")
 @using (var nc = Html.TypeContext<NewsletterDN>())
 {  
     <div class="@(nc.Value.IsNew ? "" : "sf-tabs")">
         <fieldset id="emTabMain">
             <legend>Newsletter</legend>
             @Html.ValueLine(nc, n => n.Name)
-           
-            @Html.HiddenRuntimeInfo(nc, n => n.Query)
-        
-            @Html.ValueLine(nc, n => n.State, vl => vl.ReadOnly = true)
-            @Html.ValueLine(nc, n => n.Subject)
-            @if (nc.Value.State == NewsletterState.Sent)
-            {
-                @Html.Hidden("htmlBodyContent", nc.Value.Text)
-                <fieldset>
-                    <legend>Message</legend>
-                    @*<iframe id="newsBodyContent" name="frameNewImage" src="about:blank" class="sf-email-htmlbody" frameborder="0">
-                    </iframe>*@
-                    <div class="sf-email-htmlbody">
-                        @Html.Raw(nc.Value.Text)
-                    </div>
-                    
-                </fieldset>
-            }
-            else
-            {
-                <div id="newsEditContent">
-                    @Html.ValueLine(nc, n => n.Text, vl =>
-                    {
-                        vl.ValueLineType = ValueLineType.TextArea;
-                        vl.ValueHtmlProps["cols"] = "30";
-                        vl.ValueHtmlProps["rows"] = "6";
-                        vl.ValueHtmlProps["class"] = "sf-email-htmlwrite";
-                        vl.ReadOnly = nc.Value.State == NewsletterState.Sent;
-                    })
-                    <br />
-                    <input type="button" class="sf-button" id="newsPreviewContentButton" value="Preview content" />
-                </div>
-                <div id="newsPreviewContent">
-                    <fieldset>
-                        <legend>Message</legend>
-                        <iframe id="newsBodyContentPreview" name="frameNewImage" src="about:blank" class="sf-email-htmlbody"
-                            frameborder="0"></iframe>
-                        <br />
-                        <input type="button" class="sf-button" id="newsEditContentButton" value="Edit content" />
-                    </fieldset>
-                </div>
-            }
+            @Html.ValueLine(nc, n => n.State, vl => vl.ReadOnly = true)     
+            
             @Html.EntityCombo(nc, n => n.SmtpConfig)
             @Html.ValueLine(nc, n => n.From)
             @Html.ValueLine(nc, n => n.DisplayFrom)
+
+            @Html.EntityLine(nc, e => e.Query)
+
+            @if (nc.Value.State == NewsletterState.Sent)
+            {
+                @Html.ValueLine(nc, n => n.Subject, vl => vl.ReadOnly = true)
+                <fieldset>
+                    <legend>Message</legend>
+                    <div class="sf-email-htmlbody">
+                        @Html.Raw(nc.Value.Text)
+                    </div>
+                </fieldset>
+            }
+            else if (!nc.Value.IsNew)
+            {   
+                object queryName = QueryLogic.ToQueryName(nc.Value.Query.Key);
+                var queryDescription = DynamicQueryManager.Current.QueryDescription(queryName); //To be use inside query token controls
+                    
+                <div class="sf-email-replacements-container">
+                    <div class="sf-email-replacements-token-container">
+                        <input type="button" class="sf-button sf-email-togglereplacementspanel" value="Toggle replacements panel" />
+                        <fieldset class="sf-email-replacements-panel" style="display: none;">
+                            <legend>Replacements</legend>
+                            @Html.QueryTokenBuilder(null, nc, queryDescription)
+                            <input type="button" class="sf-button sf-email-inserttoken" data-prefix="@nc.ControlID" value="@(EmailTemplateViewMessage.Insert.NiceToString())" />
+                            <input type="button" class="sf-button sf-email-inserttoken" data-prefix="@nc.ControlID" data-block="if" value="@(EmailTemplateViewMessage.If.NiceToString())" />
+                            <input type="button" class="sf-button sf-email-inserttoken" data-prefix="@nc.ControlID" data-block="foreach" value="@(EmailTemplateViewMessage.Foreach.NiceToString())" />
+                        </fieldset>
+                    </div>
+                    @Html.ValueLine(nc, e => e.Subject, vl => vl.ValueHtmlProps["class"] = "sf-email-inserttoken-target")
+                    @Html.ValueLine(nc, e => e.Text, vl =>
+                    {
+                        vl.ValueLineType = ValueLineType.TextArea;
+                        vl.ValueHtmlProps["style"] = "width:100%; height:180px;";
+                        vl.ValueHtmlProps["class"] = "sf-rich-text-editor";
+                    })
+                    <script>
+                        $(function () {
+                            SF.Mailing.initHtmlEditorWithTokens("@nc.SubContext(e => e.Text).ControlID");
+                        });
+                    </script>
+                </div>
+            }
         </fieldset>
         @if (!nc.Value.IsNew)
         {
@@ -69,4 +76,8 @@
         }
     </div>    
 }
-@Html.ScriptsJs("~/Mailing/Scripts/SF_Mail.js")
+<script>
+    $(function () {
+        SF.Mailing.initReplacements();
+    });
+</script>

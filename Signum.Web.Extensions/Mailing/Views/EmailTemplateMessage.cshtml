@@ -1,46 +1,40 @@
 ﻿@using Signum.Entities.Mailing
+@using Signum.Entities.Translation
 @using Signum.Engine.Translation
+@using Signum.Entities
+@using Signum.Engine
+@using Signum.Web
+@using Signum.Entities.DynamicQuery
 @using (var ec = Html.TypeContext<EmailTemplateMessageDN>())
 {
-    <div class="sf-email-messageContainer">
-        <input type="hidden" class="sf-email-culture" value="@(ec.Value.CultureInfo.CultureInfo.DisplayName)" />
-        @Html.ValueLine(ec, e => e.CultureInfo, vl =>
+    <div class="sf-email-template-message">
+        <input type="hidden" class="sf-email-culture" value="@(ec.Value.CultureInfo.TryToString())" />
+        @Html.EntityCombo(ec, e => e.CultureInfo, vl =>
         {
-            vl.ValueLineType = ValueLineType.Combo;
-            vl.EnumComboItems = CultureInfoLogic.ApplicationCultures.OrderBy(
-                ci => ci.Name).ThenBy(ci => ci.IsNeutralCulture).Select(ci =>
-                    new SelectListItem 
-                    { 
-                        Text = ci.DisplayName, 
-                        Value = ci.Name, 
-                        Selected = ci.Name == ec.Value.CultureInfo.CultureInfo.Name 
-                    }).ToList();           
+            vl.LabelText = EmailTemplateViewMessage.Language.NiceToString();
         })
-        <fieldset>
-            <legend>Replacement</legend>
-            <textarea cols="30" rows="6"></textarea>
-
-        </fieldset>
-        @Html.ValueLine(ec, e => e.Subject)
-        <div class="sf-email-messageEditContent">
-            @Html.ValueLine(ec, e => e.Text, vl =>
-            {
-                vl.ValueLineType = ValueLineType.TextArea;
-                vl.ValueHtmlProps["cols"] = "30";
-                vl.ValueHtmlProps["rows"] = "6";
-                vl.ValueHtmlProps["class"] = "sf-email-htmlwrite";
-            })
-            <br />
-            <input type="button" class="sf-button sf-email-messagePreviewContentButton" value="Preview" />
-        </div>
-        <div class="sf-email-messagePreviewContent" style="display: none;">
-            <fieldset>
-                <legend>Message</legend>
-                <iframe name="frameNewImage" src="about:blank" class="sf-email-htmlBody" frameborder="0"></iframe>
-                <br />
-                <input type="button" class="sf-button sf-email-messageEditContentButton" value="Edit" />
+        <div class="sf-email-replacements-token-container">
+            <input type="button" class="sf-button sf-email-togglereplacementspanel" value="Toggle replacements panel" />
+            <fieldset class="sf-email-replacements-panel" style="display: none;">
+                <legend>Replacements</legend>
+                @Html.QueryTokenBuilder(null, ec, (QueryDescription)ViewData[ViewDataKeys.QueryDescription])
+                <input type="button" class="sf-button sf-email-inserttoken" data-prefix="@ec.ControlID" value="@(EmailTemplateViewMessage.Insert.NiceToString())" />
+                <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-if" data-prefix="@ec.ControlID" data-block="if" value="@(EmailTemplateViewMessage.If.NiceToString())" />
+                <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-foreach" data-prefix="@ec.ControlID" data-block="foreach" value="@(EmailTemplateViewMessage.Foreach.NiceToString())" />
             </fieldset>
         </div>
+        @Html.ValueLine(ec, e => e.Subject, vl => vl.ValueHtmlProps["class"] = "sf-email-inserttoken-target sf-email-template-message-subject")
+        @Html.ValueLine(ec, e => e.Text, vl =>
+        {
+            vl.ValueLineType = ValueLineType.TextArea;
+            vl.ValueHtmlProps["style"] = "width:100%; height:180px;";
+            vl.ValueHtmlProps["class"] = "sf-rich-text-editor sf-email-template-message-text";
+        })
+        
+        <script>
+            $(function () {
+                SF.Mailing.initHtmlEditorWithTokens("@ec.SubContext(e => e.Text).ControlID");
+            });
+        </script>
     </div>
 }
-@Html.ScriptsJs("~/Mailing/Scripts/SF_Mail.js")

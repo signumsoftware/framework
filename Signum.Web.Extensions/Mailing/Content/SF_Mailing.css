@@ -1,0 +1,28 @@
+﻿.sf-email-htmlbody
+{
+    width: 623px;
+    border: 0;
+    min-height: 200px;
+}
+
+.sf-email-template-message-text
+{
+    width: 623px;
+    height: 228px;
+}
+
+.sf-email-replacements-token-container
+{
+    margin-left: 110px;
+}
+
+.sf-email-togglereplacementspanel
+{
+    margin-bottom: 10px;
+    margin-top: 10px;        
+}
+
+.sf-email-inserttoken-targetactive
+{
+   border: 2px solid #58ACFA !important;
+}

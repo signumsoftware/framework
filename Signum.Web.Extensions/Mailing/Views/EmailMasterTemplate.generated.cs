@@ -36,7 +36,7 @@ namespace Signum.Web.Extensions.Mailing.Views
     using Signum.Utilities;
     using Signum.Web;
     
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.5.4.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Mailing/Views/EmailMasterTemplate.cshtml")]
     public partial class EmailMasterTemplate : System.Web.Mvc.WebViewPage<dynamic>
     {
@@ -49,6 +49,26 @@ namespace Signum.Web.Extensions.Mailing.Views
 
             
             #line 2 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
+Write(Html.ScriptsJs("~/Scripts/ckeditor/ckeditor.js"));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n");
+
+
+            
+            #line 3 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
+Write(Html.ScriptsJs("~/Mailing/Scripts/SF_Mailing.js"));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n");
+
+
+            
+            #line 4 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
  using (var ec = Html.TypeContext<EmailMasterTemplateDN>())
 {
     
@@ -56,29 +76,29 @@ namespace Signum.Web.Extensions.Mailing.Views
             #line default
             #line hidden
             
-            #line 4 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
+            #line 6 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
 Write(Html.ValueLine(ec, e => e.Name));
 
             
             #line default
             #line hidden
             
-            #line 4 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
+            #line 6 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
                                     
     
             
             #line default
             #line hidden
             
-            #line 5 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
-Write(Html.ValueLine(ec, e => e.State));
+            #line 7 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
+Write(Html.ValueLine(ec, e => e.State, vl => vl.ReadOnly = true));
 
             
             #line default
             #line hidden
             
-            #line 5 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
-                                     
+            #line 7 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
+                                                               
 
 
             
@@ -88,14 +108,13 @@ WriteLiteral("    <div id=\"messageEditContent\">\r\n        ");
 
 
             
-            #line 8 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
+            #line 10 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
    Write(Html.ValueLine(ec, e => e.Text, vl =>
-               {
-                   vl.ValueLineType = ValueLineType.TextArea;
-                   vl.ValueHtmlProps["cols"] = "30";
-                   vl.ValueHtmlProps["rows"] = "6";
-                   vl.ValueHtmlProps["class"] = "sf-email-htmlwrite";
-               }));
+        {
+            vl.ValueLineType = ValueLineType.TextArea;
+            vl.ValueHtmlProps["style"] = "width:100%; min-height:180px;";
+            vl.ValueHtmlProps["class"] = "sf-email-htmlwrite";
+        }));
 
             
             #line default
@@ -105,7 +124,7 @@ WriteLiteral("\r\n        <br />\r\n        <input type=\"button\" class=\"sf-bu
 
 
             
-            #line 16 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
+            #line 17 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
                                                                                        Write(EmailTemplateViewMessage.InsertMessageContent.NiceToString());
 
             
@@ -114,23 +133,28 @@ WriteLiteral("\r\n        <br />\r\n        <input type=\"button\" class=\"sf-bu
 WriteLiteral("\" />\r\n    </div>\r\n");
 
 
+
+WriteLiteral("    <script>\r\n        $(function () {\r\n            SF.Mailing.initHtmlEditorMaste" +
+"rTemplate(\"");
+
+
             
-            #line 18 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
+            #line 21 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
+                                                Write(ec.SubContext(e => e.Text).ControlID);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\");\r\n        });\r\n    </script>\r\n");
+
+
+            
+            #line 24 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
 }
 
             
             #line default
             #line hidden
-
-            
-            #line 19 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
-Write(Html.ScriptsJs("~/Mailing/Scripts/SF_Mail.js"));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n");
-
 
         }
     }
