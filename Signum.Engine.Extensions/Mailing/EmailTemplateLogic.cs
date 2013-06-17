@@ -31,6 +31,8 @@ namespace Signum.Engine.Mailing
 
                 EmailLogicConfiguration = emailLogicConfiguration;
 
+                SystemEmailLogic.Start(sb, dqm);
+
                 dqm.RegisterQuery(typeof(EmailMasterTemplateDN), () =>
                  from t in Database.Query<EmailMasterTemplateDN>()
                  select new

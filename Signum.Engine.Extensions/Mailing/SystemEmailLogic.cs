@@ -121,13 +121,13 @@ namespace Signum.Engine.Mailing
                 Spacing.Double);
         }
 
-        public static void RegisterSystemModel<T>(Func<EmailTemplateDN> defaultTemplateConstructor = null)
+        public static void RegisterSystemEmailModel<T>(Func<EmailTemplateDN> defaultTemplateConstructor = null)
           where T : ISystemEmail
         {
-            RegisterEmailModel(typeof(T), defaultTemplateConstructor);
+            RegisterSystemEmailModel(typeof(T), defaultTemplateConstructor);
         }
 
-        public static void RegisterEmailModel(Type model, Func<EmailTemplateDN> defaultTemplateConstructor = null)
+        public static void RegisterSystemEmailModel(Type model, Func<EmailTemplateDN> defaultTemplateConstructor = null)
         {
             systemEmails[model] = defaultTemplateConstructor;
         }
