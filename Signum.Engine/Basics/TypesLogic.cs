@@ -92,10 +92,10 @@ namespace Signum.Engine.Basics
         {
             Table table = Schema.Current.Table<TypeDN>();
 
-            Dictionary<string, TypeDN> should = GenerateSchemaTypes().ToDictionary(s => s.TableName);
+            Dictionary<string, TypeDN> should = GenerateSchemaTypes().ToDictionary(s => s.TableName, "tableName in memory");
 
             Dictionary<string, TypeDN> current = replacements.ApplyReplacementsToOldCleaning(
-                Administrator.TryRetrieveAll<TypeDN>(replacements).ToDictionary(c => c.TableName), Replacements.KeyTables);
+                Administrator.TryRetrieveAll<TypeDN>(replacements).ToDictionary(c => c.TableName, "tableName in database"), Replacements.KeyTables);
 
             return Synchronizer.SynchronizeScript(
                 should, 

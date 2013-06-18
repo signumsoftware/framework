@@ -453,9 +453,9 @@ namespace Signum.Utilities
             return value;
         }
 
-        public static V Extract<K, V>(this IDictionary<K, V> dictionary, K key, string message)
+        public static V Extract<K, V>(this IDictionary<K, V> dictionary, K key, string messageWithFormat)
         {
-            V value = dictionary.GetOrThrow(key, message);
+            V value = dictionary.GetOrThrow(key, messageWithFormat);
             dictionary.Remove(key);
             return value;
         }

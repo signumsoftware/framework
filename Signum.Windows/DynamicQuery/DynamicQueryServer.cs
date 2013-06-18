@@ -273,13 +273,13 @@ namespace Signum.Windows
             }
         }
 
-        static List<RequestTuple> tuples = new List<RequestTuple>();
+        static Dictionary<Dispatcher, List<RequestTuple>> tuples = new Dictionary<Dispatcher, List<RequestTuple>>();
 
         public static void Enqueue(BaseQueryRequest request, Action<object> onResult, Action @finally)
         {
             lock (tuples)
             {
-                tuples.Add(new RequestTuple
+                tuples.GetOrCreate(Dispatcher.CurrentDispatcher).Add(new RequestTuple
                 {
                     Request = request,
                     OnResult = onResult,
@@ -295,12 +295,8 @@ namespace Signum.Windows
         {
             lock (tuples)
             {
-                if (tuples.IsEmpty())
-                    throw new InvalidOperationException("Calling Hooks_DispatcherInactive with no tuples");
-
-                var tup = tuples.ToList();
-
-                tuples.Clear();
+                var tup = tuples.Extract(Dispatcher.CurrentDispatcher, "Calling Hooks_DispatcherInactive with no tuples for {0}").ToList();
+                Dispatcher.CurrentDispatcher.Hooks.DispatcherInactive -= new EventHandler(Hooks_DispatcherInactive);
 
                 object[] results = null;
                 Async.Do(() =>
@@ -322,8 +318,6 @@ namespace Signum.Windows
                         }
 
                     });
-
-                Dispatcher.CurrentDispatcher.Hooks.DispatcherInactive -= new EventHandler(Hooks_DispatcherInactive);
             }
         }
         #endregion
