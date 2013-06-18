@@ -135,7 +135,8 @@ namespace Signum.Windows.UIAutomation
             if (actionDescription == null)
                 actionDescription = () => "Get Windows after";
 
-            var previous = WaitExtensions.GetAllProcessWindows(element).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
+            var pid = element.Current.ProcessId;
+            var previous = WaitExtensions.GetAllProcessWindows(pid).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
 
             action();
 
@@ -143,7 +144,7 @@ namespace Signum.Windows.UIAutomation
 
             element.Wait(() =>
             {
-                newWindow = WaitExtensions.GetAllProcessWindows(element).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
+                newWindow = WaitExtensions.GetAllProcessWindows(pid).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
 
                 if (newWindow != null)
                     MessageBoxProxy.AssertNoErrorWindow(newWindow);

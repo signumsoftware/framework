@@ -12,7 +12,7 @@ namespace Signum.Windows.UIAutomation
         public LoginWindowProxy(AutomationElement element)
             : base(element)
         {
-            element.AssertClassName("Login");
+            element.AssertClassName("Login", allowHwndWrapper: true);
         }
 
         AutomationElement LoginCapture(string userName, string password, int? timeOut = null)
@@ -20,7 +20,8 @@ namespace Signum.Windows.UIAutomation
             Element.ChildById("tbUserName").Value(userName);
             Element.ChildById("tbPassword").Value(password);
 
-            var previous = WaitExtensions.GetAllProcessWindows(Element).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
+            var pid = Element.Current.ProcessId;
+            var previous = WaitExtensions.GetAllProcessWindows(pid).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
 
             Element.ChildById("btLogin").ButtonInvoke();
 
@@ -30,7 +31,7 @@ namespace Signum.Windows.UIAutomation
 
             Element.Wait(() =>
             {
-                newWindow = WaitExtensions.GetAllProcessWindows(Element).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
+                newWindow = WaitExtensions.GetAllProcessWindows(pid).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
 
                 MessageBoxProxy.AssertNoErrorWindow(newWindow);
 

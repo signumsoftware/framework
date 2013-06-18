@@ -106,7 +106,7 @@ namespace Signum.Windows.Notes
         {
             Navigator.NavigateUntyped(note, new NavigateOptions()
             {
-                Closed = (_, __) => ReloadNotes(),
+                Closed = (_, __) => Dispatcher.Invoke(() => ReloadNotes()),
             });
         }
 

@@ -79,7 +79,7 @@ namespace Signum.Windows.Alerts
         {
             Navigator.Navigate(alert, new NavigateOptions()
             {
-                Closed = (o, e) => ReloadAlerts(),
+                Closed = (o, e) => Dispatcher.Invoke(() => ReloadAlerts()),
             });
         }
 
