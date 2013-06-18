@@ -108,12 +108,13 @@ namespace Signum.Engine.DynamicQuery
             if (IsEntity && !Type.CleanType().IsIIdentifiable())
                 throw new InvalidOperationException("Entity must be a Lite or an IIdentifiable");
 
-            if (meta is CleanMeta)
+            if (meta != null)
             {
-                PropertyRoutes = ((CleanMeta)meta).PropertyRoutes;
+                Implementations = meta.Implementations;
+                if (meta is CleanMeta)
+                    PropertyRoutes = ((CleanMeta)meta).PropertyRoutes;
             }
 
-            Implementations = meta.Implementations;
         }
 
         public string DisplayName()

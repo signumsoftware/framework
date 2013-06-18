@@ -389,7 +389,9 @@ namespace Signum.Engine.Linq
 
                     PropertyRoute element = parent.Add(fieldInfo).Add("Item");
 
-                    return new MetaProjectorExpression(c.Type, new MetaMListExpression(type, new CleanMeta(Implementations.By(type), parent), new CleanMeta(element.TryGetImplementations(), element)));
+                    return new MetaProjectorExpression(c.Type, new MetaMListExpression(type, 
+                        new CleanMeta(Implementations.By(parentType), parent), 
+                        new CleanMeta(element.TryGetImplementations(), element)));
                 }
             }
 
@@ -452,9 +454,16 @@ namespace Signum.Engine.Linq
 
                 MetaExpression meta = (MetaExpression)source;
 
+                if (meta.Meta.Implementations != null)
+                {
+                    var routes = meta.Meta.Implementations.Value.Types.Select(t=> PropertyRoute.Root(t).Add(pi)).ToArray();
+
+                    return new MetaExpression(memberType, new CleanMeta(GetImplementations(routes, memberType), routes)); 
+                }
+
                 if (meta.Meta is CleanMeta)
                 {
-                    PropertyRoute[] routes = ((CleanMeta)meta.Meta).PropertyRoutes.SelectMany(r => GetRoutes(r, source.Type, pi.Name)).ToArray();
+                    PropertyRoute[] routes = ((CleanMeta)meta.Meta).PropertyRoutes.Select(r => r.Add(pi.Name)).ToArray();
 
                     return new MetaExpression(memberType, new CleanMeta(GetImplementations(routes, memberType), routes));
                 }
@@ -484,7 +493,7 @@ namespace Signum.Engine.Linq
 
         internal static Entities.Implementations? GetImplementations(PropertyRoute[] propertyRoutes, Type cleanType)
         {
-            if (!cleanType.IsIIdentifiable())
+            if (!cleanType.IsIIdentifiable() && !cleanType.IsLite())
                 return (Implementations?)null;
 
             var only = propertyRoutes.Only();
@@ -515,21 +524,6 @@ namespace Signum.Engine.Linq
             return Signum.Entities.Implementations.By(types);
         }
 
-        private static PropertyRoute[] GetRoutes(PropertyRoute route, Type type, string piName)
-        {
-            if (route.PropertyRouteType == PropertyRouteType.Root)
-                return new[] { PropertyRoute.Root(type).Add(piName) };
-
-            Implementations? imp = route.TryGetImplementations();
-
-            if (imp == null) //Embedded
-                return new[] { route.Add(piName) };
-
-            var fimp = CastImplementations(imp.Value, type);
-
-            return fimp.Types.Select(t => PropertyRoute.Root(t).Add(piName)).ToArray();
-        }
-
         protected override Expression VisitTypeIs(TypeBinaryExpression b)
         {
             return MakeDirtyMeta(b.Type, null, Visit(b.Expression));
@@ -541,7 +535,7 @@ namespace Signum.Engine.Linq
 
             if (u.NodeType == ExpressionType.Convert || u.NodeType == ExpressionType.TypeAs)
             {
-                var imps = exp.Meta.Implementations.TrySS(s => CastImplementations(s, u.Type));
+                var imps = exp.Meta.Implementations.TrySS(s => CastImplementations(s, u.Type.CleanType()));
 
                 return new MetaExpression(u.Type, exp.Meta is DirtyMeta ?
                     (Meta)new DirtyMeta(imps, ((DirtyMeta)exp.Meta).CleanMetas.Cast<Meta>().ToArray()) :
