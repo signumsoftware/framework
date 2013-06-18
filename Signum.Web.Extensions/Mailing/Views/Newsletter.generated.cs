@@ -77,7 +77,7 @@ namespace Signum.Web.Extensions.Mailing.Views
 
             
             #line 6 "..\..\Mailing\Views\Newsletter.cshtml"
-Write(Html.ScriptCss("~/Content/SF_Mailing.css"));
+Write(Html.ScriptCss("~/Mailing/Content/SF_Mailing.css"));
 
             
             #line default
@@ -97,7 +97,7 @@ WriteLiteral("\r\n");
 
             
             #line 8 "..\..\Mailing\Views\Newsletter.cshtml"
-Write(Html.ScriptsJs("~/Scripts/SF_Mailing.js"));
+Write(Html.ScriptsJs("~/Mailing/Scripts/SF_Mailing.js"));
 
             
             #line default
@@ -409,7 +409,7 @@ WriteLiteral("    </div>    \r\n");
             #line default
             #line hidden
 WriteLiteral("<script>\r\n    $(function () {\r\n        SF.Mailing.initReplacements();\r\n    });\r\n<" +
-"/script>\r\n");
+"/script>");
 
 
         }

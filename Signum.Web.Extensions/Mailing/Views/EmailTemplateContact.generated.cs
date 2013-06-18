@@ -63,16 +63,6 @@ namespace Signum.Web.Extensions.Mailing.Views
 
             
             #line 4 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
-Write(Html.ScriptCss("~/Mailing/Content/SF_Mailing.css"));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n");
-
-
-            
-            #line 5 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
  using (var tc = Html.TypeContext<EmailTemplateContactDN>())
 {
     using (var qtTc = tc.SubContext(etTc => etTc.Token))
@@ -82,14 +72,14 @@ WriteLiteral("\r\n");
             #line default
             #line hidden
             
-            #line 9 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
+            #line 8 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
    Write(Html.Field("Email Owner", Html.QueryTokenDNBuilder(qtTc, (QueryDescription)ViewData[ViewDataKeys.QueryDescription])));
 
             
             #line default
             #line hidden
             
-            #line 9 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
+            #line 8 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
                                                                                                                              
     }
     
@@ -97,44 +87,33 @@ WriteLiteral("\r\n");
             #line default
             #line hidden
             
-            #line 11 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
+            #line 10 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
 Write(Html.ValueLine(tc, c => c.EmailAddress));
 
             
             #line default
             #line hidden
             
-            #line 11 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
+            #line 10 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
                                             
     
             
             #line default
             #line hidden
             
-            #line 12 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
+            #line 11 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
 Write(Html.ValueLine(tc, c => c.DisplayName));
 
             
             #line default
             #line hidden
             
-            #line 12 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
+            #line 11 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
                                            
 }
-
             
             #line default
             #line hidden
-
-            
-            #line 14 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
-Write(Html.ScriptsJs("~/Mailing/Scripts/SF_Mailing.js"));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n\r\n\r\n");
-
 
         }
     }

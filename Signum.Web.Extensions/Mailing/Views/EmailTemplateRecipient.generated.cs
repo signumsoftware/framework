@@ -125,20 +125,9 @@ Write(Html.ValueLine(tc, c => c.Kind));
             #line 12 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
                                     
 }
-
             
             #line default
             #line hidden
-
-            
-            #line 14 "..\..\Mailing\Views\EmailTemplateRecipient.cshtml"
-Write(Html.ScriptsJs("~/Mailing/Scripts/SF_Mailing.js"));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n\r\n\r\n");
-
 
         }
     }

@@ -104,14 +104,16 @@ Write(Html.ValueLine(ec, e => e.State, vl => vl.ReadOnly = true));
             
             #line default
             #line hidden
-WriteLiteral("    <div id=\"messageEditContent\">\r\n        ");
+WriteLiteral("    <div id=\"messageEditContent\">\r\n        <span class=\"sf-label-line\">Text</span" +
+"><div class=\"clearall\"></div>\r\n        ");
 
 
             
-            #line 10 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
+            #line 11 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
    Write(Html.ValueLine(ec, e => e.Text, vl =>
         {
             vl.ValueLineType = ValueLineType.TextArea;
+            vl.LabelVisible = false;
             vl.ValueHtmlProps["style"] = "width:100%; min-height:180px;";
             vl.ValueHtmlProps["class"] = "sf-email-htmlwrite";
         }));
@@ -124,7 +126,7 @@ WriteLiteral("\r\n        <br />\r\n        <input type=\"button\" class=\"sf-bu
 
 
             
-            #line 17 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
+            #line 19 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
                                                                                        Write(EmailTemplateViewMessage.InsertMessageContent.NiceToString());
 
             
@@ -139,7 +141,7 @@ WriteLiteral("    <script>\r\n        $(function () {\r\n            SF.Mailing.
 
 
             
-            #line 21 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
+            #line 23 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
                                                 Write(ec.SubContext(e => e.Text).ControlID);
 
             
@@ -149,7 +151,7 @@ WriteLiteral("\");\r\n        });\r\n    </script>\r\n");
 
 
             
-            #line 24 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
+            #line 26 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
 }
 
             

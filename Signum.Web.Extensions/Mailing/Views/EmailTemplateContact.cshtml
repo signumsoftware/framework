@@ -1,7 +1,6 @@
 ﻿@using Signum.Entities.Mailing
 @using Signum.Entities.DynamicQuery
 @using Signum.Web.UserQueries
-@Html.ScriptCss("~/Mailing/Content/SF_Mailing.css")
 @using (var tc = Html.TypeContext<EmailTemplateContactDN>())
 {
     using (var qtTc = tc.SubContext(etTc => etTc.Token))
@@ -11,6 +10,3 @@
     @Html.ValueLine(tc, c => c.EmailAddress)
     @Html.ValueLine(tc, c => c.DisplayName)
 }
-@Html.ScriptsJs("~/Mailing/Scripts/SF_Mailing.js")
-
-

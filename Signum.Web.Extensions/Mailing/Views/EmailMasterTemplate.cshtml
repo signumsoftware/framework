@@ -7,9 +7,11 @@
     @Html.ValueLine(ec, e => e.State, vl => vl.ReadOnly = true)
 
     <div id="messageEditContent">
+        <span class="sf-label-line">Text</span><div class="clearall"></div>
         @Html.ValueLine(ec, e => e.Text, vl =>
         {
             vl.ValueLineType = ValueLineType.TextArea;
+            vl.LabelVisible = false;
             vl.ValueHtmlProps["style"] = "width:100%; min-height:180px;";
             vl.ValueHtmlProps["class"] = "sf-email-htmlwrite";
         })
