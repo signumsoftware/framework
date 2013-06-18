@@ -384,7 +384,8 @@ namespace Signum.Entities.Chart
         ViewPalette,
         [Description("Chart for")]
         ChartFor,
-
+        [Description("Chart of {0}")]
+        ChartOf0,
 
         [Description("{0} is key, but {1} is an aggregate")]
         _0IsKeyBut1IsAnAggregate,

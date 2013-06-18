@@ -69,11 +69,16 @@ namespace Signum.Windows.Chart
         {
             var cs = sender as ChartScriptDN;
 
-            if (RequestWindow != null && !RequestWindow.IsLoaded)
-                RequestWindow = null;
-
-            if (e.PropertyName == "Script" && RequestWindow != null)
-                RequestWindow.SetResults(cs.Script); //If saved, different clone
+            if (RequestWindow != null && e.PropertyName == "Script")
+            {
+                RequestWindow.Dispatcher.Invoke(() =>
+                {
+                    if (!RequestWindow.IsLoaded)
+                        RequestWindow = null;
+                    else
+                        RequestWindow.SetResults(cs.Script); //If saved, different clone
+                });
+            }
         }
 
         public ChartRequestWindow RequestWindow { get; set; }

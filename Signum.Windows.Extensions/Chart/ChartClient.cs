@@ -129,10 +129,7 @@ namespace Signum.Windows.Chart
                     Filters = sc.FilterOptions.Select(fo => fo.ToFilter()).ToList(),
                 };
 
-                Navigator.OpenIndependentWindow(() => new ChartRequestWindow()
-                {
-                    DataContext = cr
-                });
+                ChartClient.OpenChartRequest(cr, null);
             };
 
             return miResult;
@@ -156,11 +153,26 @@ namespace Signum.Windows.Chart
 
                 CurrentEntityConverter.SetFilterValues(uc.Filters, currentEntity);
             }
+            
+            OpenChartRequest(new ChartRequest(query), uc);
+        }
 
-            Navigator.OpenIndependentWindow(() => new ChartRequestWindow()
+        internal static void OpenChartRequest(ChartRequest chartRequest, UserChartDN uc)
+        {
+            Navigator.OpenIndependentWindow(() => 
             {
-                DataContext = new ChartRequest(query)
-            }.Set(ChartClient.UserChartProperty, uc));
+                var crw = new ChartRequestWindow()
+                {
+                    DataContext = chartRequest,
+                    Title = ChartMessage.ChartOf0.NiceToString().Formato(QueryUtils.GetNiceName(chartRequest.QueryName)),
+                    Icon = Navigator.Manager.GetFindIcon(chartRequest.QueryName, false) ?? ExtensionsImageLoader.GetImageSortName("chartIcon.png")
+                };
+
+                if (uc != null)
+                    SetUserChart(crw, uc);
+
+                return crw; 
+            });
         }
     }
 }

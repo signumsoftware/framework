@@ -188,10 +188,11 @@ namespace Signum.Windows.Chart
         {
             e.Handled = true;
 
+            var d = Dispatcher;
             Navigator.Navigate(CurrentUserChart, new NavigateOptions()
             {
-                View = new UserChart { QueryDescription = Description },
-                Closed = (s, args) => Initialize()
+                View = () => new UserChart { QueryDescription = Description },
+                Closed = (s, args) => d.Invoke(() => Initialize())
             });
         }
 
