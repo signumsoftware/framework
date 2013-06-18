@@ -740,13 +740,12 @@ namespace Signum.Windows
                 return;
 
             var oldPaginate = oldValue as Pagination.Paginate;
-            var newPaginate = newValue as  Pagination.Paginate;
+            var newPaginate = newValue as Pagination.Paginate;
 
             if (oldPaginate != null && newPaginate != null &&
                 oldPaginate.ElementsPerPage == newPaginate.ElementsPerPage &&
                 oldPaginate.CurrentPage != newPaginate.CurrentPage)
             {
-
                 if (FixSize != null)
                     FixSize(this, new EventArgs());
             }
@@ -756,7 +755,10 @@ namespace Signum.Windows
                     ClearSize(this, new EventArgs());
             }
 
-            Search();
+            if (newValue is Pagination.All)
+                ClearResults();
+            else
+                Search();
         }
 
         void OnQueryResultChanged(bool cleaning)
