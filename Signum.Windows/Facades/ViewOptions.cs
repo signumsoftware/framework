@@ -22,8 +22,6 @@ namespace Signum.Windows
 
         public bool ShowOperations { get; set; }
 
-        public Control View { get; set; }
-
         public abstract ViewMode ViewButtons { get; }
     }
 
@@ -33,6 +31,8 @@ namespace Signum.Windows
         {
             Clone = true;
         }
+
+        public Control View { get; set; }
 
         public PropertyRoute PropertyRoute { get; set; }
 
@@ -48,7 +48,7 @@ namespace Signum.Windows
 
     public class NavigateOptions: ViewOptionsBase
     {
-        public bool AvoidSpawnThread { get; set; }
+        public Func<Control> View { get; set; }
 
         public EventHandler Closed { get; set; }
 

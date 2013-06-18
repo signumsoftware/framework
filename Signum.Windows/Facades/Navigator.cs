@@ -38,8 +38,6 @@ namespace Signum.Windows
             Manager.Explore(options);
         }
 
-      
-
         public static Lite<T> Find<T>()
             where T : IdentifiableEntity
         {
@@ -261,6 +259,12 @@ namespace Signum.Windows
         {
             return Manager.FindImplementations(pr);
         }
+
+        public static void OpenIndependentWindow<W>(Func<W> windowConstructor,
+            Action<W> afterShown = null, EventHandler closed = null) where W : Window
+        {
+            Manager.OpenIndependentWindow(windowConstructor, afterShown, closed);
+        }
     }
 
     public class NavigationManager
@@ -271,8 +275,11 @@ namespace Signum.Windows
         public event Action<NormalWindow, ModifiableEntity> TaskNormalWindow;
         public event Action<SearchWindow, object> TaskSearchWindow;
 
-        public NavigationManager()
+        bool multithreaded; 
+
+        public NavigationManager(bool multithreaded)
         {
+            this.multithreaded = multithreaded;
             EntitySettings = new Dictionary<Type, EntitySettings>();
             QuerySettings = new Dictionary<object, QuerySettings>();
 
@@ -335,7 +342,6 @@ namespace Signum.Windows
         }
 
         public ImageSource DefaultFindIcon = ImageLoader.GetImageSortName("find.png");
-        public ImageSource DefaultAdminIcon = ImageLoader.GetImageSortName("admin.png");
         public ImageSource DefaultEntityIcon = ImageLoader.GetImageSortName("entity.png");
 
         void TaskSetIconSearchWindow(SearchWindow sw, object qn)
@@ -377,15 +383,6 @@ namespace Signum.Windows
             }
 
             return useDefault ? DefaultFindIcon : null;
-        }
-
-        public ImageSource GetAdminIcon(Type entityType, bool useDefault)
-        {
-            EntitySettings es = EntitySettings.TryGetC(entityType);
-            if (es != null && es.Icon != null)
-                return es.Icon;
-
-            return useDefault ? DefaultAdminIcon : null;
         }
 
         public virtual string SearchTitle(object queryName)
@@ -448,63 +445,25 @@ namespace Signum.Windows
 
                 if (lite != null)
                 {
-                    Navigate(lite, new NavigateOptions { AvoidSpawnThread = options.AvoidSpawnThread, Closed = options.Closed });
+                    Navigate(lite, new NavigateOptions { Closed = options.Closed });
                     return;
                 }
             }
 
-
-            if (options.AvoidSpawnThread)
-                ExploreInternal(options);
-            else
-            {
-                Thread t = new Thread(() =>
-                {
-                     SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher));
-                     ExploreInternal(options);
-                     Dispatcher.Run();
-                });
-                t.SetApartmentState(ApartmentState.STA);
-                t.Start();
-            }
+            OpenIndependentWindow(() => CreateSearchWindow(options),
+                afterShown : null,
+                closed: options.Closed); 
         }
 
-        private void ExploreInternal(ExploreOptions options)
-        {
-            Window sw = CreateSearchWindow(options);
-
-            AttachOnClosing(sw, options.AvoidSpawnThread, options.Closed);
-
-            sw.Show();
-        }
-
-        private static void AttachOnClosing(Window win, bool avoidSpawnThread, EventHandler closed)
-        {
-            if (avoidSpawnThread)
-            {
-                if (closed != null)
-                    win.Closed += closed;
-            }
-            else
-            {
-                Dispatcher d = Dispatcher.CurrentDispatcher;
-                win.Closed += (e, args) =>
-                {
-                    ((Window)e).Dispatcher.InvokeShutdown();
-                    if (closed != null)
-                        d.Invoke(() => closed(e, args));
-                };
-            }
-        }
 
         protected virtual SearchWindow CreateSearchWindow(FindOptionsBase options)
         {
             SearchWindow sw = new SearchWindow(options.GetSearchMode(), options.SearchOnLoad)
             {
                 QueryName = options.QueryName,
-                FilterOptions = new FreezableCollection<FilterOption>(options.FilterOptions),
-                OrderOptions = new ObservableCollection<OrderOption>(options.OrderOptions),
-                ColumnOptions = new ObservableCollection<ColumnOption>(options.ColumnOptions),
+                FilterOptions = new FreezableCollection<FilterOption>(options.FilterOptions.Select(c => c.CloneIfNecessary())),
+                OrderOptions = new ObservableCollection<OrderOption>(options.OrderOptions.Select(c => c.CloneIfNecessary())),
+                ColumnOptions = new ObservableCollection<ColumnOption>(options.ColumnOptions.Select(c => c.CloneIfNecessary())),
                 ColumnOptionsMode = options.ColumnOptionsMode,
                 Pagination = options.Pagination ?? GetQuerySettings(options.QueryName).Pagination ?? FindOptions.DefaultPagination,
                 ShowFilters = options.ShowFilters,
@@ -528,56 +487,43 @@ namespace Signum.Windows
             if (entityOrLite == null)
                 throw new ArgumentNullException("entity");
 
-            if (options.AvoidSpawnThread)
-                NavigateInternal(entityOrLite, options);
-            else
-            {
-                Thread t = new Thread(() =>
-                {
-                    SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher));
-                    NavigateInternal(entityOrLite, options);
-                    Dispatcher.Run();
-                });
-                t.SetApartmentState(ApartmentState.STA);
-                t.Start();
-            }
-        }
-
-        public virtual void NavigateInternal(object entityOrLite, NavigateOptions options)
-        {
             Type type = entityOrLite is Lite<IdentifiableEntity> ? ((Lite<IdentifiableEntity>)entityOrLite).EntityType : entityOrLite.GetType();
 
-            NormalWindow win = CreateNormalWindow();
-            win.SetTitleText(NormalWindowMessage.Loading0.NiceToString().Formato(type.NiceName()));
-            win.Show();
-
-            try
+            OpenIndependentWindow(() =>
             {
-                ModifiableEntity entity = entityOrLite as ModifiableEntity;
-                if (entity == null)
+                NormalWindow win = CreateNormalWindow();
+                win.SetTitleText(NormalWindowMessage.Loading0.NiceToString().Formato(type.NiceName()));
+                return win;
+            },
+            afterShown: win =>
+            {
+                try
                 {
-                    Lite<IdentifiableEntity> lite = (Lite<IdentifiableEntity>)entityOrLite;
-                    entity = lite.UntypedEntityOrNull ?? Server.RetrieveAndForget(lite);
+                    ModifiableEntity entity = entityOrLite as ModifiableEntity;
+                    if (entity == null)
+                    {
+                        Lite<IdentifiableEntity> lite = (Lite<IdentifiableEntity>)entityOrLite;
+                        entity = lite.UntypedEntityOrNull ?? Server.RetrieveAndForget(lite);
+                    }
+
+                    EntitySettings es = AssertViewableEntitySettings(entity);
+                    if (!es.OnIsNavigable(true))
+                        throw new Exception("{0} is not navigable".Formato(entity));
+
+                    if (entity is EmbeddedEntity)
+                        throw new InvalidOperationException("ViewSave is not allowed for EmbeddedEntities");
+
+                    Control ctrl = options.View != null ? options.View() : es.CreateView(entity, null);
+
+                    SetNormalWindowEntity(win, (ModifiableEntity)entity, options, es, ctrl);
                 }
-
-                EntitySettings es = AssertViewableEntitySettings(entity);
-                if (!es.OnIsNavigable(true))
-                    throw new Exception("{0} is not navigable".Formato(entity));
-
-                if (entity is EmbeddedEntity)
-                    throw new InvalidOperationException("ViewSave is not allowed for EmbeddedEntities");
-
-                Control ctrl = options.View ?? es.CreateView(entity, null);
-
-                SetNormalWindowEntity(win, (ModifiableEntity)entity, options, es, ctrl);
-
-                AttachOnClosing(win, options.AvoidSpawnThread, options.Closed);
-            }
-            catch
-            {
-                win.Close();
-                throw;
-            }
+                catch
+                {
+                    win.Close();
+                    throw;
+                }
+            }, 
+            closed: options.Closed);
         }
 
         public virtual object View(object entityOrLite, ViewOptions options)
@@ -596,7 +542,7 @@ namespace Signum.Windows
             EntitySettings es = AssertViewableEntitySettings(entity);
             if (!es.OnIsViewable())
                 throw new Exception("{0} is not viewable".Formato(entity));
-            
+
             Control ctrl = options.View ?? es.CreateView(entity, options.PropertyRoute);
 
             NormalWindow win = CreateNormalWindow();
@@ -892,6 +838,25 @@ namespace Signum.Windows
             }
 
             return elements;
+        }
+
+        protected internal virtual void OpenIndependentWindow<W>(Func<W> windowConstructor, Action<W> afterShown, EventHandler closed) where W : Window
+        {
+            if (multithreaded)
+            {
+                Async.ShowInAnotherThread(windowConstructor, afterShown, closed);
+            }
+            else
+            {
+                W win = windowConstructor();
+
+                win.Closed += closed;
+
+                win.Show();
+
+                if (afterShown != null)
+                    afterShown(win);
+            }
         }
     }
 }

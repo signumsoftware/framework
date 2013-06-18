@@ -178,8 +178,6 @@ namespace Signum.Windows
         {
             return SearchMode.Explore;
         }
-
-        public bool AvoidSpawnThread { get; set; }
     }
 
     public class ExploreExtension : MarkupExtension
@@ -316,6 +314,20 @@ namespace Signum.Windows
         {
             return "{0} {1} {2}".Formato(Path, Operation, Value);
         }
+
+        public FilterOption CloneIfNecessary()
+        {
+            if (CheckAccess())
+                return this;
+
+            return new FilterOption
+            {
+                 Operation = Operation,
+                 Token = Token,
+                 Path = Path,
+                 Value = Dispatcher.Return(()=>Value)
+            };
+        }
     }
 
     public class OrderOption : Freezable
@@ -350,6 +362,19 @@ namespace Signum.Windows
         {
             return new Order(Token, OrderType);
         }
+
+        public OrderOption CloneIfNecessary()
+        {
+            if (CheckAccess())
+                return this;
+
+            return new OrderOption
+            {
+                Token = Token,
+                Path = Path,
+                OrderType = OrderType
+            };
+        }
     }
 
     public class ColumnOption : Freezable
@@ -376,6 +401,19 @@ namespace Signum.Windows
         internal Column ToColumn()
         {
             return new Column(Token, DisplayName.DefaultText(Token.NiceName()));
+        }
+
+        public ColumnOption CloneIfNecessary()
+        {
+            if (CheckAccess())
+                return this;
+
+            return new ColumnOption
+            {
+                DisplayName = DisplayName,
+                Token = Token,
+                Path = Path,
+            };
         }
     }
 }

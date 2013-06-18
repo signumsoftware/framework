@@ -104,8 +104,8 @@ namespace Signum.Windows
             var task = Task.Factory.StartNew<IEnumerable>(()=>AutoCompleting(text, source.Token), source.Token);
             task.ContinueWith(res =>
             {
-                if (res.IsFaulted)
-                    Async.ExceptionHandler(res.Exception.InnerExceptions.FirstEx());
+                if (res.IsFaulted && Async.AsyncUnhandledException != null)
+                    Async.AsyncUnhandledException(res.Exception.InnerExceptions.FirstEx(), Window.GetWindow(this));
                 else
                 {
                     lstBox.ItemsSource = res.Result;

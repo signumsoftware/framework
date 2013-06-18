@@ -7,7 +7,7 @@ using System.Windows;
 
 namespace Signum.Windows
 {
-    public class ShyBorder : Decorator
+    public class ShyBorder : Border
     {
         public static readonly DependencyProperty HorizontalProperty =
             DependencyProperty.Register("Horizontal", typeof(bool), typeof(ShyBorder), new UIPropertyMetadata(false));

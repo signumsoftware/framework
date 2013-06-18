@@ -5,17 +5,22 @@ using System.Text;
 using System.Windows.Threading;
 using System.Windows;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace Signum.Windows
 {
     public static class Async
     {
-        public static Action<Exception> ExceptionHandler;
+        public static Action<Exception, Window> AsyncUnhandledException;
+        public static Action<Exception, Window> DispatcherUnhandledException;
+
+        [ThreadStatic]
+        static Window mainWindow; 
 
         public static IAsyncResult Do(Action backgroundThread, Action endAction, Action finallyAction)
         {
             var disp = Dispatcher.CurrentDispatcher;
-
+           
             Action action = () =>
             {
                 try
@@ -26,7 +31,7 @@ namespace Signum.Windows
                 }
                 catch (Exception e)
                 {
-                    disp.BeginInvoke(DispatcherPriority.Normal, (Action)(() => ExceptionHandler(e)));
+                    disp.BeginInvoke(DispatcherPriority.Normal, (Action)(() => AsyncUnhandledException(e, mainWindow)));
                 }
                 finally
                 {
@@ -51,6 +56,65 @@ namespace Signum.Windows
         public static DispatcherOperation BeginInvoke(this Dispatcher dispatcher, Action action)
         {
             return dispatcher.BeginInvoke(action);
+        }
+
+        public static void ShowInAnotherThread<W>(Func<W> windowConstructor,
+            Action<W> afterShown = null, EventHandler closed = null, bool avoidSpawnThread = false) where W : Window
+        {
+            if (avoidSpawnThread)
+            {
+                W win = windowConstructor();
+
+                if (closed != null)
+                    win.Closed += (sender, args) => closed(sender, args);
+
+                win.Show();
+
+                if (afterShown != null)
+                    afterShown(win);
+            }
+            else
+            {
+                Dispatcher prevDispatcher = Dispatcher.CurrentDispatcher;
+
+                Thread t = new Thread(() =>
+                {
+                    SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher));
+                    try
+                    {
+                        Dispatcher.CurrentDispatcher.UnhandledException += (sender, args) =>
+                        {
+                            if (DispatcherUnhandledException != null)
+                                DispatcherUnhandledException(args.Exception, mainWindow);
+                        };
+
+                        W win = windowConstructor();
+
+                        mainWindow = win;
+
+                        win.Closed += (sender, args) =>
+                        {
+                            ((Window)sender).Dispatcher.InvokeShutdown();
+                            mainWindow = null;
+                            if (closed != null)
+                                closed(sender, args);
+                        };
+
+                        win.Show();
+
+                        if (afterShown != null)
+                            afterShown(win);
+
+                        Dispatcher.Run();
+                    }
+                    catch (Exception e)
+                    {
+                        Async.DispatcherUnhandledException(e, mainWindow); 
+                    }
+                });
+                t.SetApartmentState(ApartmentState.STA);
+                t.Start();
+            }
         }
     }
 }
