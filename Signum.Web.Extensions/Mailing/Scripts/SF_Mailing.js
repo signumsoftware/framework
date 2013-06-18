@@ -136,6 +136,9 @@ SF.registerModule("Mailing", function () {
             CKEDITOR.instances[idTargetTextArea].on('key', changed);
             CKEDITOR.instances[idTargetTextArea].on('paste', changed);
             CKEDITOR.instances[idTargetTextArea].on('afterCommandExec', changed);
+            CKEDITOR.instances[idTargetTextArea].on('saveSnapshot', changed);
+            CKEDITOR.instances[idTargetTextArea].on('afterUndo', changed);
+            CKEDITOR.instances[idTargetTextArea].on('afterRedo', changed);
         };
 
         var initHtmlEditorMasterTemplate = function (idTargetTextArea) {
