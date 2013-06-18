@@ -131,7 +131,7 @@ SF.registerModule("FindNavigator", function () {
                 });
 
                 $tblResults.on("change", ".sf-pagination-size", function () {
-                    if ($(this).find("option:selected").val() == -1) {
+                    if ($(this).find("option:selected").val() == "All") {
                         self.clearResults();
                     }
                     else {
