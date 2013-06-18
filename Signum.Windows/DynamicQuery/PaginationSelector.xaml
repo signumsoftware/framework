@@ -15,7 +15,7 @@
     <Grid MinWidth="300">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <m:ElementsInPageLabel x:Name="elementsInPageLabel" Grid.Column="0" HorizontalAlignment="Left" Visibility="Hidden"  VerticalAlignment="Center"/>
