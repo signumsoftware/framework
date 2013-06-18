@@ -60,7 +60,7 @@ namespace Signum.Engine.Linq
             });
         }
 
-       
+
 
         //internal static Expression JustVisit(LambdaExpression expression, PropertyRoute route)
         //{
@@ -81,27 +81,27 @@ namespace Signum.Engine.Linq
 
         static MetaExpression MakeCleanMeta(Type type, Expression expression)
         {
-            MetaExpression meta = expression as MetaExpression;
+            MetaExpression meta = (MetaExpression)expression;
 
             return new MetaExpression(type, meta.Meta);
         }
 
-        static MetaExpression MakeDirtyMeta(Type type, params Expression[] expression)
+        static MetaExpression MakeDirtyMeta(Type type, Implementations? implementations, params Expression[] expression)
         {
             var metas = expression.OfType<MetaExpression>().Select(a => a.Meta).NotNull().ToArray();
 
-            return new MetaExpression(type, new DirtyMeta(metas));
+            return new MetaExpression(type, new DirtyMeta(implementations, metas));
         }
 
         static internal Expression MakeVoidMeta(Type type)
         {
-            return new MetaExpression(type, new DirtyMeta(new Meta[0]));
+            return new MetaExpression(type, new DirtyMeta(null, new Meta[0]));
         }
 
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
             if (m.Method.DeclaringType == typeof(Queryable) ||
-                m.Method.DeclaringType == typeof(Enumerable) || 
+                m.Method.DeclaringType == typeof(Enumerable) ||
                 m.Method.DeclaringType == typeof(EnumerableUniqueExtensions))
             {
                 switch (m.Method.Name)
@@ -136,7 +136,7 @@ namespace Signum.Engine.Linq
                     case "Count":
                         return this.BindCount(m.Type, m.GetArgument("source"));
                     case "DefaultIfEmpty":
-                       return Visit(m.GetArgument("source"));
+                        return Visit(m.GetArgument("source"));
                     case "Any":
                         return this.BindAny(m.Type, m.GetArgument("source"));
                     case "All":
@@ -190,12 +190,12 @@ namespace Signum.Engine.Linq
             {
                 var a = this.Visit(m.Object);
                 var list = this.VisitExpressionList(m.Arguments);
-                return MakeDirtyMeta(m.Type, list.PreAnd(a).ToArray());
+                return MakeDirtyMeta(m.Type, null, list.PreAnd(a).ToArray());
             }
             else
             {
                 var list = this.VisitExpressionList(m.Arguments);
-                return MakeDirtyMeta(m.Type, list.ToArray());
+                return MakeDirtyMeta(m.Type, null, list.ToArray());
             }
         }
 
@@ -205,7 +205,7 @@ namespace Signum.Engine.Linq
         private Expression MapAndVisit(LambdaExpression lambda, params MetaProjectorExpression[] projs)
         {
             map.SetRange(lambda.Parameters, projs.Select(a => a.Projector));
-            var result =  Visit(lambda.Body);
+            var result = Visit(lambda.Body);
             map.RemoveRange(lambda.Parameters);
             return result;
         }
@@ -220,7 +220,7 @@ namespace Signum.Engine.Linq
             {
                 NewExpression nex = (NewExpression)expression;
                 if (nex.Type.IsInstantiationOf(typeof(Grouping<,>)))
-                    return (MetaProjectorExpression)nex.Arguments[1]; 
+                    return (MetaProjectorExpression)nex.Arguments[1];
             }
 
             Type elementType = expression.Type.ElementType();
@@ -229,18 +229,18 @@ namespace Signum.Engine.Linq
                 MetaExpression meta = expression as MetaExpression;
                 if (meta != null && meta.Meta is CleanMeta)
                 {
-                    PropertyRoute route = ((CleanMeta)meta.Meta).PropertyRoutes.SingleEx(()=>"Metas don't work over polymorphic MLists").Add("Item");
+                    PropertyRoute route = ((CleanMeta)meta.Meta).PropertyRoutes.SingleEx(() => "Metas don't work over polymorphic MLists").Add("Item");
 
                     return new MetaProjectorExpression(expression.Type,
                         new MetaExpression(elementType,
-                            new CleanMeta(route)));
+                            new CleanMeta(route.TryGetImplementations(), route)));
                 }
 
                 return new MetaProjectorExpression(expression.Type,
-                     MakeVoidMeta(elementType)); 
+                     MakeVoidMeta(elementType));
             }
 
-            throw new InvalidOperationException(); 
+            throw new InvalidOperationException();
         }
 
         private Expression BindTake(Type resultType, Expression source, Expression count)
@@ -290,19 +290,19 @@ namespace Signum.Engine.Linq
                 return mp.Projector;
 
             Expression projector = MapAndVisit(selector, mp);
-            return projector; 
+            return projector;
         }
 
         private Expression BindWhere(Type resultType, Expression source, LambdaExpression predicate)
         {
-            return AsProjection(Visit(source)); 
+            return AsProjection(Visit(source));
         }
 
         private Expression BindSelect(Type resultType, Expression source, LambdaExpression selector)
         {
             MetaProjectorExpression mp = AsProjection(Visit(source));
             Expression projector = MapAndVisit(selector, mp);
-            return new MetaProjectorExpression(resultType, projector); 
+            return new MetaProjectorExpression(resultType, projector);
         }
 
         protected virtual Expression BindSelectMany(Type resultType, Expression source, LambdaExpression collectionSelector, LambdaExpression resultSelector)
@@ -311,10 +311,10 @@ namespace Signum.Engine.Linq
             MetaProjectorExpression collectionProjector = AsProjection(MapAndVisit(collectionSelector, mp));
 
             if (resultSelector == null)
-                return collectionProjector; 
+                return collectionProjector;
 
             Expression resultProjection = MapAndVisit(resultSelector, mp, collectionProjector);
-            return new MetaProjectorExpression(resultType, resultProjection); 
+            return new MetaProjectorExpression(resultType, resultProjection);
         }
 
         protected virtual Expression BindJoin(Type resultType, Expression outerSource, Expression innerSource, LambdaExpression outerKey, LambdaExpression innerKey, LambdaExpression resultSelector)
@@ -322,7 +322,7 @@ namespace Signum.Engine.Linq
             MetaProjectorExpression mpOuter = AsProjection(Visit(outerSource));
             MetaProjectorExpression mpInner = AsProjection(Visit(innerSource));
             Expression projector = MapAndVisit(resultSelector, mpOuter, mpInner);
-            return new MetaProjectorExpression(resultType, projector); 
+            return new MetaProjectorExpression(resultType, projector);
         }
 
         private Expression BindGroupBy(Type resultType, Expression source, LambdaExpression keySelector, LambdaExpression elementSelector)
@@ -338,15 +338,15 @@ namespace Signum.Engine.Linq
                 Expression.New(groupType.GetConstructor(new Type[] { key.Type, colType }),
                 key, new MetaProjectorExpression(colType, element)));
         }
-   
+
         protected virtual Expression BindOrderBy(Type resultType, Expression source, LambdaExpression orderSelector, OrderType orderType)
         {
-            return AsProjection(Visit(source)); 
+            return AsProjection(Visit(source));
         }
 
         protected virtual Expression BindThenBy(Expression source, LambdaExpression orderSelector, OrderType orderType)
         {
-            return AsProjection(Visit(source)); 
+            return AsProjection(Visit(source));
         }
 
         public Type TableType(object value)
@@ -363,7 +363,7 @@ namespace Signum.Engine.Linq
         protected override Expression Visit(Expression exp)
         {
             if (exp is MetaExpression)
-                return exp; 
+                return exp;
 
             return base.Visit(exp);
         }
@@ -374,22 +374,22 @@ namespace Signum.Engine.Linq
             if (type != null)
             {
                 if (typeof(IRootEntity).IsAssignableFrom(type))
-                    return new MetaProjectorExpression(c.Type, new MetaExpression(type, new CleanMeta(PropertyRoute.Root(type))));
+                    return new MetaProjectorExpression(c.Type, new MetaExpression(type, new CleanMeta(Implementations.By(type), PropertyRoute.Root(type))));
 
-                if(type.IsInstantiationOf(typeof(MListElement<,>)))
+                if (type.IsInstantiationOf(typeof(MListElement<,>)))
                 {
                     var parentType = type.GetGenericArguments()[0];
                     PropertyRoute parent = PropertyRoute.Root(parentType);
 
-                    ISignumTable st =  (ISignumTable)c.Value;
+                    ISignumTable st = (ISignumTable)c.Value;
                     var rt = (RelationalTable)st.Table;
 
                     Table table = rt.BackReference.ReferenceTable;
-                    FieldInfo fieldInfo = table.Fields.Values.Single(f=>f.Field is FieldMList && ((FieldMList)f.Field).RelationalTable == rt).FieldInfo; 
+                    FieldInfo fieldInfo = table.Fields.Values.Single(f => f.Field is FieldMList && ((FieldMList)f.Field).RelationalTable == rt).FieldInfo;
 
                     PropertyRoute element = parent.Add(fieldInfo).Add("Item");
 
-                    return new MetaProjectorExpression(c.Type, new MetaMListExpression(type, new CleanMeta(parent), new CleanMeta(element))); 
+                    return new MetaProjectorExpression(c.Type, new MetaMListExpression(type, new CleanMeta(Implementations.By(type), parent), new CleanMeta(element.TryGetImplementations(), element)));
                 }
             }
 
@@ -456,11 +456,15 @@ namespace Signum.Engine.Linq
                 {
                     PropertyRoute[] routes = ((CleanMeta)meta.Meta).PropertyRoutes.SelectMany(r => GetRoutes(r, source.Type, pi.Name)).ToArray();
 
-                    return new MetaExpression(memberType, new CleanMeta(routes));
+                    return new MetaExpression(memberType, new CleanMeta(GetImplementations(routes, memberType), routes));
                 }
 
                 if (typeof(IdentifiableEntity).IsAssignableFrom(source.Type) && !source.Type.IsAbstract) //Works for simple entities and also for interface casting
-                    return new MetaExpression(memberType, new CleanMeta(PropertyRoute.Root(source.Type).Add(pi)));
+                {
+                    var pr = PropertyRoute.Root(source.Type).Add(pi);
+
+                    return new MetaExpression(memberType, new CleanMeta(pr.TryGetImplementations(), pr));
+                }
             }
 
             if (source.Type.IsLite() && member.Name == "Entity")
@@ -469,13 +473,46 @@ namespace Signum.Engine.Linq
 
                 if (meta.Meta is CleanMeta)
                 {
-                    PropertyRoute[] routes = ((CleanMeta)meta.Meta).PropertyRoutes.Select(pr=>pr.Add("Entity")).ToArray();
+                    PropertyRoute[] routes = ((CleanMeta)meta.Meta).PropertyRoutes.Select(pr => pr.Add("Entity")).ToArray();
 
-                    return new MetaExpression(memberType, new CleanMeta(routes));
+                    return new MetaExpression(memberType, new CleanMeta(meta.Meta.Implementations, routes));
                 }
             }
 
-            return MakeDirtyMeta(memberType, source);
+            return MakeDirtyMeta(memberType, null, source);
+        }
+
+        internal static Entities.Implementations? GetImplementations(PropertyRoute[] propertyRoutes, Type cleanType)
+        {
+            if (!cleanType.IsIIdentifiable())
+                return (Implementations?)null;
+
+            var only = propertyRoutes.Only();
+            if (only != null && only.PropertyRouteType == PropertyRouteType.Root)
+                return Signum.Entities.Implementations.By(cleanType);
+
+            var aggregate = AggregateImplementations(propertyRoutes.Select(pr => pr.GetImplementations()));
+
+            return aggregate;
+        }
+
+        public static Implementations AggregateImplementations(IEnumerable<Implementations> implementations)
+        {
+            if (implementations.IsEmpty())
+                throw new InvalidOperationException("implementations is Empty");
+
+            if (implementations.Count() == 1)
+                return implementations.First();
+
+            if (implementations.Any(a => a.IsByAll))
+                return Signum.Entities.Implementations.ByAll;
+
+            var types = implementations
+                .SelectMany(ib => ib.Types)
+                .Distinct()
+                .ToArray();
+
+            return Signum.Entities.Implementations.By(types);
         }
 
         private static PropertyRoute[] GetRoutes(PropertyRoute route, Type type, string piName)
@@ -488,19 +525,46 @@ namespace Signum.Engine.Linq
             if (imp == null) //Embedded
                 return new[] { route.Add(piName) };
 
-            var fimp = ColumnDescriptionFactory.CastImplementations(imp.Value, type);
+            var fimp = CastImplementations(imp.Value, type);
 
             return fimp.Types.Select(t => PropertyRoute.Root(t).Add(piName)).ToArray();
         }
 
         protected override Expression VisitTypeIs(TypeBinaryExpression b)
         {
-            return MakeDirtyMeta(b.Type, Visit(b.Expression)); 
+            return MakeDirtyMeta(b.Type, null, Visit(b.Expression));
         }
 
         protected override Expression VisitUnary(UnaryExpression u)
         {
-            return MakeCleanMeta(u.Type, Visit(u.Operand));
+            var exp = (MetaExpression)Visit(u.Operand);
+
+            if (u.NodeType == ExpressionType.Convert || u.NodeType == ExpressionType.TypeAs)
+            {
+                var imps = exp.Meta.Implementations.TrySS(s => CastImplementations(s, u.Type));
+
+                return new MetaExpression(u.Type, exp.Meta is DirtyMeta ?
+                    (Meta)new DirtyMeta(imps, ((DirtyMeta)exp.Meta).CleanMetas.Cast<Meta>().ToArray()) :
+                    (Meta)new CleanMeta(imps, ((CleanMeta)exp.Meta).PropertyRoutes));
+            }
+
+            return new MetaExpression(u.Type, exp.Meta);
+        }
+
+        internal static Implementations CastImplementations(Implementations implementations, Type cleanType)
+        {
+            if (implementations.IsByAll)
+            {
+                if (!Schema.Current.Tables.ContainsKey(cleanType))
+                    throw new InvalidOperationException("Tye type {0} is not registered in the schema as a concrete table".Formato(cleanType));
+
+                return Signum.Entities.Implementations.By(cleanType);
+            }
+
+            if (implementations.Types.All(cleanType.IsAssignableFrom))
+                return implementations;
+
+            return Signum.Entities.Implementations.By(implementations.Types.Where(cleanType.IsAssignableFrom).ToArray());
         }
 
         protected override Expression VisitBinary(BinaryExpression b)
@@ -511,13 +575,11 @@ namespace Signum.Engine.Linq
             var mRight = right as MetaExpression;
             var mLeft = left as MetaExpression;
 
-            if(b.NodeType == ExpressionType.Coalesce &&  mRight.Meta is CleanMeta && mLeft.Meta is CleanMeta)
-            {
-                if(((CleanMeta)mRight.Meta).PropertyRoutes.SequenceEqual(((CleanMeta)mLeft.Meta).PropertyRoutes))
-                    return new MetaExpression(b.Type, mRight.Meta); 
-            } 
+            Implementations? imps = mRight != null && mLeft != null && mRight.Meta.Implementations != null && mLeft.Meta.Implementations != null ?
+                AggregateImplementations(new[] { mRight.Meta.Implementations.Value, mLeft.Meta.Implementations.Value }) :
+                (Implementations?)null;
 
-            return MakeDirtyMeta(b.Type,  left,  right); 
+            return MakeDirtyMeta(b.Type, imps, left, right);
         }
 
         protected override Expression VisitConditional(ConditionalExpression c)
@@ -528,13 +590,11 @@ namespace Signum.Engine.Linq
             var mIfTrue = ifTrue as MetaExpression;
             var mIfFalse = ifFalse as MetaExpression;
 
-            if (mIfTrue != null && mIfTrue != null && mIfTrue.Meta is CleanMeta && mIfFalse.Meta is CleanMeta)
-            {
-                if (((CleanMeta)mIfTrue.Meta).PropertyRoutes.SequenceEqual(((CleanMeta)mIfFalse.Meta).PropertyRoutes))
-                    return new MetaExpression(c.Type, mIfTrue.Meta);
-            }
+            Implementations? imps = mIfFalse != null && mIfFalse != null && mIfFalse.Meta.Implementations != null && mIfFalse.Meta.Implementations != null ?
+                AggregateImplementations(new[] { mIfTrue.Meta.Implementations.Value, mIfFalse.Meta.Implementations.Value }) :
+                (Implementations?)null;
 
-            return MakeDirtyMeta(c.Type, Visit(c.Test), ifTrue, ifFalse);
+            return MakeDirtyMeta(c.Type, imps, Visit(c.Test), ifTrue, ifFalse);
         }
     }
 }

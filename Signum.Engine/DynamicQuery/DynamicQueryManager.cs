@@ -304,9 +304,9 @@ namespace Signum.Engine.DynamicQuery
 
         protected internal virtual ExtensionToken CreateToken(QueryToken parent)
         {
-            var info = metas.GetOrAdd(parent, p =>
+            var info = metas.GetOrAdd(parent, qt =>
             {
-                Expression e = MetadataVisitor.JustVisit(Lambda, MetaExpression.FromRoute(p.Type, p.GetPropertyRoute()));
+                Expression e = MetadataVisitor.JustVisit(Lambda, MetaExpression.FromRoute(qt.Type, qt.GetImplementations(), qt.GetPropertyRoute()));
 
                 MetaExpression me = e as MetaExpression;
 
@@ -325,7 +325,7 @@ namespace Signum.Engine.DynamicQuery
                     var cleanType = me.Type.CleanType();
 
                     result.PropertyRoute = cm.PropertyRoutes.Only();
-                    result.Implementations = AllImplementations ?? ColumnDescriptionFactory.GetImplementations(cm.PropertyRoutes, cleanType);
+                    result.Implementations = me.Meta.Implementations;
                     result.Format = ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes);
                     result.Unit = ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes);
                 }

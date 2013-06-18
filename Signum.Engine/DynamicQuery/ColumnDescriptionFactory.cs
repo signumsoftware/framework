@@ -55,29 +55,13 @@ namespace Signum.Engine.DynamicQuery
                 {
                     var cleanType = Type.CleanType();
 
-                    Implementations = GetImplementations(propertyRoutes, cleanType);
                     Format = GetFormat(propertyRoutes);
                     Unit = GetUnit(propertyRoutes);
                 }
             }
         }
 
-        internal static Entities.Implementations? GetImplementations(PropertyRoute[] propertyRoutes, Type cleanType)
-        {
-            if (!cleanType.IsIIdentifiable())
-                return (Implementations?)null;
 
-            var only = propertyRoutes.Only();
-            if (only != null && only.PropertyRouteType == PropertyRouteType.Root)
-                return Signum.Entities.Implementations.By(cleanType);
-
-            var aggregate = AggregateImplementations(propertyRoutes.Select(pr => pr.GetImplementations()));
-
-            if (!cleanType.IsAssignableFrom(propertyRoutes.First().Type.CleanType()))
-                return CastImplementations(aggregate, cleanType);
-
-            return aggregate;
-        }
 
         internal static string GetUnit(PropertyRoute[] routes)
         {
@@ -128,43 +112,8 @@ namespace Signum.Engine.DynamicQuery
             {
                 PropertyRoutes = ((CleanMeta)meta).PropertyRoutes;
             }
-        }
 
-        public static Implementations AggregateImplementations(IEnumerable<Implementations> implementations)
-        {
-            if (implementations.IsEmpty())
-                throw new InvalidOperationException("implementations is Empty");
-
-            if (implementations.Count() == 1)
-                return implementations.First();
-
-            if (implementations.Any(a => a.IsByAll))
-                return Signum.Entities.Implementations.ByAll;
-
-            var types = implementations
-                .SelectMany(ib => ib.Types)
-                .Distinct()
-                .ToArray();
-
-            return Signum.Entities.Implementations.By(types);
-        }
-
-        internal static Implementations CastImplementations(Implementations implementations, Type cleanType)
-        {
-            if (implementations.IsByAll)
-            {
-                
-
-                if (!Schema.Current.Tables.ContainsKey(cleanType))
-                    throw new InvalidOperationException("Tye type {0} is not registered in the schema as a concrete table".Formato(cleanType));
-
-                return Signum.Entities.Implementations.By(cleanType);
-            }
-
-            if (implementations.Types.All(cleanType.IsAssignableFrom))
-                return implementations;
-
-            return Signum.Entities.Implementations.By(implementations.Types.Where(cleanType.IsAssignableFrom).ToArray());
+            Implementations = meta.Implementations;
         }
 
         public string DisplayName()

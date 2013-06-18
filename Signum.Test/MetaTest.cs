@@ -27,20 +27,20 @@ namespace Signum.Test
 
 
         [TestMethod]
-        public void NoMetadata()
+        public void MetaNoMetadata()
         {
             Assert.IsNull(DynamicQuery.QueryMetadata(Database.Query<NoteWithDateDN>().Select(a => a.Target)));
         }
 
         [TestMethod]
-        public void RawEntity()
+        public void MetaRawEntity()
         {
             var dic = DynamicQuery.QueryMetadata(Database.Query<NoteWithDateDN>());
             Assert.IsNotNull(dic);
         }
 
         [TestMethod]
-        public void AnonymousType()
+        public void MetaAnonymousType()
         {
             var dic = DynamicQuery.QueryMetadata(Database.Query<NoteWithDateDN>().Select(a => new { a.Target, a.Text, a.ToString().Length, Sum = a.ToString() + a.ToString() }));
             Assert.IsInstanceOfType(dic["Target"], typeof(CleanMeta));
@@ -56,7 +56,7 @@ namespace Signum.Test
         }
 
         [TestMethod]
-        public void NamedType()
+        public void MetaNamedType()
         {
             var dic = DynamicQuery.QueryMetadata(Database.Query<NoteWithDateDN>().Select(a => new Bla { ToStr = a.ToString(), Length = a.ToString().Length }));
             Assert.IsInstanceOfType(dic["ToStr"], typeof(CleanMeta));
@@ -64,7 +64,7 @@ namespace Signum.Test
         }
 
         [TestMethod]
-        public void ComplexJoin()
+        public void MetaComplexJoin()
         {
             var dic = DynamicQuery.QueryMetadata(
                     from l in Database.Query<LabelDN>()
@@ -75,11 +75,11 @@ namespace Signum.Test
             Assert.IsInstanceOfType(dic["Name"], typeof(CleanMeta));
             Assert.IsInstanceOfType(dic["Sum"], typeof(DirtyMeta));
 
-            Assert.AreEqual(((DirtyMeta)dic["Sum"]).Properties.Select(cm => cm.PropertyRoutes[0].ToString()).OrderBy().ToString(","), "(AlbumDN).Name,(LabelDN).Name");
+            Assert.AreEqual(((DirtyMeta)dic["Sum"]).CleanMetas.Select(cm => cm.PropertyRoutes[0].ToString()).OrderBy().ToString(","), "(AlbumDN).Name,(LabelDN).Name");
         }
 
         [TestMethod]
-        public void ComplexJoinGroup()
+        public void MetaComplexJoinGroup()
         {
             var dic = DynamicQuery.QueryMetadata(
                       from l in Database.Query<LabelDN>()
@@ -89,11 +89,11 @@ namespace Signum.Test
             Assert.IsInstanceOfType(dic["Name"], typeof(CleanMeta));
             Assert.IsInstanceOfType(dic["Num"], typeof(DirtyMeta));
 
-            Assert.IsTrue(((DirtyMeta)dic["Num"]).Properties.Count == 0);
+            Assert.IsTrue(((DirtyMeta)dic["Num"]).CleanMetas.Count == 0);
         }
 
         [TestMethod]
-        public void ComplexGroup()
+        public void MetaComplexGroup()
         {
             var dic = DynamicQuery.QueryMetadata(
                     from a in Database.Query<AlbumDN>()
@@ -103,11 +103,11 @@ namespace Signum.Test
             Assert.IsInstanceOfType(dic["Key"], typeof(CleanMeta));
             Assert.IsInstanceOfType(dic["Num"], typeof(DirtyMeta));
 
-            Assert.IsTrue(((DirtyMeta)dic["Num"]).Properties.Count == 0);
+            Assert.IsTrue(((DirtyMeta)dic["Num"]).CleanMetas.Count == 0);
         }
 
         [TestMethod]
-        public void SelectMany()
+        public void MetaSelectMany()
         {
             var dic = DynamicQuery.QueryMetadata(
                     from a in Database.Query<AlbumDN>()
@@ -119,6 +119,32 @@ namespace Signum.Test
             Assert.IsInstanceOfType(dic["Song"], typeof(CleanMeta));
 
             Assert.IsNotNull(((CleanMeta)dic["Song"]).PropertyRoutes[0].ToString(), "(AlbumDN).Songs/Name");
+        }
+
+        [TestMethod]
+        public void MetaCoallesce()
+        {
+            var dic = DynamicQuery.QueryMetadata(
+                    from a in Database.Query<AlbumDN>()
+                    select new { Author = (ArtistDN)a.Author ?? (IAuthorDN)(BandDN)a.Author }
+                    );
+
+            DirtyMeta meta = (DirtyMeta)dic["Author"];
+
+            Assert.AreEqual(meta.Implementations, Implementations.By(typeof(ArtistDN), typeof(BandDN)));
+        }
+
+        [TestMethod]
+        public void MetaConditional()
+        {
+            var dic = DynamicQuery.QueryMetadata(
+                    from a in Database.Query<AlbumDN>()
+                    select new { Author = a.Id > 1 ? (ArtistDN)a.Author : (IAuthorDN)(BandDN)a.Author }
+                    );
+
+            DirtyMeta meta = (DirtyMeta)dic["Author"];
+
+            Assert.AreEqual(meta.Implementations, Implementations.By(typeof(ArtistDN), typeof(BandDN)));
         }
     }
 }

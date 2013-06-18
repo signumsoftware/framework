@@ -522,21 +522,13 @@ namespace Signum.Engine.Maps
             if (lambda == null)
                 return null;
 
-            Expression e = MetadataVisitor.JustVisit(lambda, new MetaExpression(route.Parent.Type, new CleanMeta(new[] { route.Parent })));
+            Expression e = MetadataVisitor.JustVisit(lambda, new MetaExpression(route.Parent.Type, new CleanMeta(route.TryGetImplementations(), new[] { route.Parent })));
 
             MetaExpression me = e as MetaExpression;
             if (me == null)
                 return null;
 
-            CleanMeta cm = me.Meta as CleanMeta;
-            if (cm == null)
-                return null;
-
-            var imp = ColumnDescriptionFactory.GetImplementations(cm.PropertyRoutes, me.Type.CleanType());
-            if (imp == null)
-                return null;
-
-            return imp.Value;
+            return me.Meta.Implementations;
         }
 
         /// <summary>

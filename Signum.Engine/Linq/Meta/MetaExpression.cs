@@ -74,12 +74,12 @@ namespace Signum.Engine.Linq
             return "Exp({0})".Formato(Meta);
         }
 
-        internal static MetaExpression FromRoute(Type type, PropertyRoute pr)
+        internal static MetaExpression FromRoute(Type type, Implementations? implementations, PropertyRoute pr)
         {
             if (pr == null)
-                return new MetaExpression(type.UnNullify().CleanType(), new DirtyMeta(new Meta[0]));
+                return new MetaExpression(type.UnNullify().CleanType(), new DirtyMeta(implementations, new Meta[0]));
 
-            return new MetaExpression(type.UnNullify().CleanType(), new CleanMeta(new[] { pr }));
+            return new MetaExpression(type.UnNullify().CleanType(), new CleanMeta(implementations, new[] { pr }));
         }
     }
 
