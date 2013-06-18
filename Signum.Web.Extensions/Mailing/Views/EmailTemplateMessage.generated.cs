@@ -70,6 +70,12 @@ namespace Signum.Web.Extensions.Mailing.Views
     #line default
     #line hidden
     
+    #line 8 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+    using Signum.Web.Mailing;
+    
+    #line default
+    #line hidden
+    
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Mailing/Views/EmailTemplateMessage.cshtml")]
     public partial class EmailTemplateMessage : System.Web.Mvc.WebViewPage<dynamic>
@@ -87,8 +93,9 @@ namespace Signum.Web.Extensions.Mailing.Views
 
 
 
+
             
-            #line 8 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+            #line 9 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
  using (var ec = Html.TypeContext<EmailTemplateMessageDN>())
 {
 
@@ -100,7 +107,7 @@ WriteLiteral("    <div class=\"sf-email-template-message\">\r\n        <input ty
 
 
             
-            #line 11 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+            #line 12 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
                                                          Write(ec.Value.CultureInfo.TryToString());
 
             
@@ -110,7 +117,7 @@ WriteLiteral("\" />\r\n        ");
 
 
             
-            #line 12 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+            #line 13 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
    Write(Html.EntityCombo(ec, e => e.CultureInfo, vl =>
         {
             vl.LabelText = EmailTemplateViewMessage.Language.NiceToString();
@@ -128,19 +135,19 @@ WriteLiteral(@"
 
 
             
-            #line 20 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
-           Write(Html.QueryTokenBuilder(null, ec, (QueryDescription)ViewData[ViewDataKeys.QueryDescription]));
+            #line 21 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+           Write(Html.MailingInsertQueryTokenBuilder(null, ec, (QueryDescription)ViewData[ViewDataKeys.QueryDescription]));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                <input type=\"button\" class=\"sf-button sf-email-inserttoken\" dat" +
-"a-prefix=\"");
+WriteLiteral("\r\n                <input type=\"button\" class=\"sf-button sf-email-inserttoken sf-e" +
+"mail-inserttoken-basic sf-disabled\" data-prefix=\"");
 
 
             
-            #line 21 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
-                                                                                    Write(ec.ControlID);
+            #line 22 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+                                                                                                                           Write(ec.ControlID);
 
             
             #line default
@@ -149,19 +156,19 @@ WriteLiteral("\" value=\"");
 
 
             
-            #line 21 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
-                                                                                                           Write(EmailTemplateViewMessage.Insert.NiceToString());
+            #line 22 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+                                                                                                                                                  Write(EmailTemplateViewMessage.Insert.NiceToString());
 
             
             #line default
             #line hidden
 WriteLiteral("\" />\r\n                <input type=\"button\" class=\"sf-button sf-email-inserttoken " +
-"sf-email-inserttoken-if\" data-prefix=\"");
+"sf-email-inserttoken-if sf-disabled\" data-prefix=\"");
 
 
             
-            #line 22 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
-                                                                                                            Write(ec.ControlID);
+            #line 23 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+                                                                                                                        Write(ec.ControlID);
 
             
             #line default
@@ -170,19 +177,19 @@ WriteLiteral("\" data-block=\"if\" value=\"");
 
 
             
-            #line 22 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
-                                                                                                                                                   Write(EmailTemplateViewMessage.If.NiceToString());
+            #line 23 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+                                                                                                                                                               Write(EmailTemplateViewMessage.If.NiceToString());
 
             
             #line default
             #line hidden
 WriteLiteral("\" />\r\n                <input type=\"button\" class=\"sf-button sf-email-inserttoken " +
-"sf-email-inserttoken-foreach\" data-prefix=\"");
+"sf-email-inserttoken-foreach sf-disabled\" data-prefix=\"");
 
 
             
-            #line 23 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
-                                                                                                                 Write(ec.ControlID);
+            #line 24 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+                                                                                                                             Write(ec.ControlID);
 
             
             #line default
@@ -191,8 +198,8 @@ WriteLiteral("\" data-block=\"foreach\" value=\"");
 
 
             
-            #line 23 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
-                                                                                                                                                             Write(EmailTemplateViewMessage.Foreach.NiceToString());
+            #line 24 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+                                                                                                                                                                         Write(EmailTemplateViewMessage.Foreach.NiceToString());
 
             
             #line default
@@ -201,7 +208,7 @@ WriteLiteral("\" />\r\n            </fieldset>\r\n        </div>\r\n        ");
 
 
             
-            #line 26 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+            #line 27 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
    Write(Html.ValueLine(ec, e => e.Subject, vl => vl.ValueHtmlProps["class"] = "sf-email-inserttoken-target sf-email-template-message-subject"));
 
             
@@ -211,7 +218,7 @@ WriteLiteral("\r\n        ");
 
 
             
-            #line 27 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+            #line 28 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
    Write(Html.ValueLine(ec, e => e.Text, vl =>
         {
             vl.ValueLineType = ValueLineType.TextArea;
@@ -227,7 +234,7 @@ WriteLiteral("\r\n        \r\n        <script>\r\n            $(function () {\r\
 
 
             
-            #line 36 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+            #line 37 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
                                                 Write(ec.SubContext(e => e.Text).ControlID);
 
             
@@ -237,7 +244,7 @@ WriteLiteral("\");\r\n            });\r\n        </script>\r\n    </div>\r\n");
 
 
             
-            #line 40 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
+            #line 41 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
 }
             
             #line default

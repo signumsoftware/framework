@@ -54,6 +54,12 @@ namespace Signum.Web.Extensions.Mailing.Views
     using Signum.Utilities;
     using Signum.Web;
     
+    #line 5 "..\..\Mailing\Views\Newsletter.cshtml"
+    using Signum.Web.Mailing;
+    
+    #line default
+    #line hidden
+    
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Mailing/Views/Newsletter.cshtml")]
     public partial class Newsletter : System.Web.Mvc.WebViewPage<dynamic>
@@ -68,19 +74,10 @@ namespace Signum.Web.Extensions.Mailing.Views
 
 
 
-            
-            #line 5 "..\..\Mailing\Views\Newsletter.cshtml"
-Write(Html.ScriptCss("~/Mailing/Content/SF_Mailing.css"));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n");
-
 
             
             #line 6 "..\..\Mailing\Views\Newsletter.cshtml"
-Write(Html.ScriptsJs("~/Scripts/ckeditor/ckeditor.js"));
+Write(Html.ScriptCss("~/Content/SF_Mailing.css"));
 
             
             #line default
@@ -90,7 +87,7 @@ WriteLiteral("\r\n");
 
             
             #line 7 "..\..\Mailing\Views\Newsletter.cshtml"
-Write(Html.ScriptsJs("~/Mailing/Scripts/SF_Mailing.js"));
+Write(Html.ScriptsJs("~/Scripts/ckeditor/ckeditor.js"));
 
             
             #line default
@@ -100,6 +97,16 @@ WriteLiteral("\r\n");
 
             
             #line 8 "..\..\Mailing\Views\Newsletter.cshtml"
+Write(Html.ScriptsJs("~/Scripts/SF_Mailing.js"));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n");
+
+
+            
+            #line 9 "..\..\Mailing\Views\Newsletter.cshtml"
  using (var nc = Html.TypeContext<NewsletterDN>())
 {  
 
@@ -110,7 +117,7 @@ WriteLiteral("    <div class=\"");
 
 
             
-            #line 10 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 11 "..\..\Mailing\Views\Newsletter.cshtml"
             Write(nc.Value.IsNew ? "" : "sf-tabs");
 
             
@@ -121,7 +128,7 @@ WriteLiteral("\">\r\n        <fieldset id=\"emTabMain\">\r\n            <legend>
 
 
             
-            #line 13 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 14 "..\..\Mailing\Views\Newsletter.cshtml"
        Write(Html.ValueLine(nc, n => n.Name));
 
             
@@ -131,7 +138,7 @@ WriteLiteral("\r\n            ");
 
 
             
-            #line 14 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 15 "..\..\Mailing\Views\Newsletter.cshtml"
        Write(Html.ValueLine(nc, n => n.State, vl => vl.ReadOnly = true));
 
             
@@ -141,7 +148,7 @@ WriteLiteral("     \r\n            \r\n            ");
 
 
             
-            #line 16 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 17 "..\..\Mailing\Views\Newsletter.cshtml"
        Write(Html.EntityCombo(nc, n => n.SmtpConfig));
 
             
@@ -151,7 +158,7 @@ WriteLiteral("\r\n            ");
 
 
             
-            #line 17 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 18 "..\..\Mailing\Views\Newsletter.cshtml"
        Write(Html.ValueLine(nc, n => n.From));
 
             
@@ -161,7 +168,7 @@ WriteLiteral("\r\n            ");
 
 
             
-            #line 18 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 19 "..\..\Mailing\Views\Newsletter.cshtml"
        Write(Html.ValueLine(nc, n => n.DisplayFrom));
 
             
@@ -171,7 +178,7 @@ WriteLiteral("\r\n\r\n            ");
 
 
             
-            #line 20 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 21 "..\..\Mailing\Views\Newsletter.cshtml"
        Write(Html.EntityLine(nc, e => e.Query));
 
             
@@ -181,7 +188,7 @@ WriteLiteral("\r\n\r\n");
 
 
             
-            #line 22 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 23 "..\..\Mailing\Views\Newsletter.cshtml"
              if (nc.Value.State == NewsletterState.Sent)
             {
                 
@@ -189,14 +196,14 @@ WriteLiteral("\r\n\r\n");
             #line default
             #line hidden
             
-            #line 24 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 25 "..\..\Mailing\Views\Newsletter.cshtml"
            Write(Html.ValueLine(nc, n => n.Subject, vl => vl.ReadOnly = true));
 
             
             #line default
             #line hidden
             
-            #line 24 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 25 "..\..\Mailing\Views\Newsletter.cshtml"
                                                                              
 
             
@@ -207,7 +214,7 @@ WriteLiteral("                <fieldset>\r\n                    <legend>Message<
 
 
             
-            #line 28 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 29 "..\..\Mailing\Views\Newsletter.cshtml"
                    Write(Html.Raw(nc.Value.Text));
 
             
@@ -217,10 +224,10 @@ WriteLiteral("\r\n                    </div>\r\n                </fieldset>\r\n"
 
 
             
-            #line 31 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 32 "..\..\Mailing\Views\Newsletter.cshtml"
             }
             else if (!nc.Value.IsNew)
-            {   
+            {
                 object queryName = QueryLogic.ToQueryName(nc.Value.Query.Key);
                 var queryDescription = DynamicQueryManager.Current.QueryDescription(queryName); //To be use inside query token controls
                     
@@ -237,19 +244,19 @@ WriteLiteral(@"                <div class=""sf-email-replacements-container"">
 
 
             
-            #line 42 "..\..\Mailing\Views\Newsletter.cshtml"
-                       Write(Html.QueryTokenBuilder(null, nc, queryDescription));
+            #line 43 "..\..\Mailing\Views\Newsletter.cshtml"
+                       Write(Html.MailingInsertQueryTokenBuilder(null, nc, queryDescription));
 
             
             #line default
             #line hidden
 WriteLiteral("\r\n                            <input type=\"button\" class=\"sf-button sf-email-inse" +
-"rttoken\" data-prefix=\"");
+"rttoken sf-email-inserttoken-basic sf-disabled\" data-prefix=\"");
 
 
             
-            #line 43 "..\..\Mailing\Views\Newsletter.cshtml"
-                                                                                                Write(nc.ControlID);
+            #line 44 "..\..\Mailing\Views\Newsletter.cshtml"
+                                                                                                                                       Write(nc.ControlID);
 
             
             #line default
@@ -258,19 +265,19 @@ WriteLiteral("\" value=\"");
 
 
             
-            #line 43 "..\..\Mailing\Views\Newsletter.cshtml"
-                                                                                                                       Write(EmailTemplateViewMessage.Insert.NiceToString());
+            #line 44 "..\..\Mailing\Views\Newsletter.cshtml"
+                                                                                                                                                              Write(EmailTemplateViewMessage.Insert.NiceToString());
 
             
             #line default
             #line hidden
 WriteLiteral("\" />\r\n                            <input type=\"button\" class=\"sf-button sf-email-" +
-"inserttoken\" data-prefix=\"");
+"inserttoken sf-email-inserttoken-if sf-disabled\" data-prefix=\"");
 
 
             
-            #line 44 "..\..\Mailing\Views\Newsletter.cshtml"
-                                                                                                Write(nc.ControlID);
+            #line 45 "..\..\Mailing\Views\Newsletter.cshtml"
+                                                                                                                                    Write(nc.ControlID);
 
             
             #line default
@@ -279,19 +286,19 @@ WriteLiteral("\" data-block=\"if\" value=\"");
 
 
             
-            #line 44 "..\..\Mailing\Views\Newsletter.cshtml"
-                                                                                                                                       Write(EmailTemplateViewMessage.If.NiceToString());
+            #line 45 "..\..\Mailing\Views\Newsletter.cshtml"
+                                                                                                                                                                           Write(EmailTemplateViewMessage.If.NiceToString());
 
             
             #line default
             #line hidden
 WriteLiteral("\" />\r\n                            <input type=\"button\" class=\"sf-button sf-email-" +
-"inserttoken\" data-prefix=\"");
+"inserttoken sf-email-inserttoken-foreach sf-disabled\" data-prefix=\"");
 
 
             
-            #line 45 "..\..\Mailing\Views\Newsletter.cshtml"
-                                                                                                Write(nc.ControlID);
+            #line 46 "..\..\Mailing\Views\Newsletter.cshtml"
+                                                                                                                                         Write(nc.ControlID);
 
             
             #line default
@@ -300,8 +307,8 @@ WriteLiteral("\" data-block=\"foreach\" value=\"");
 
 
             
-            #line 45 "..\..\Mailing\Views\Newsletter.cshtml"
-                                                                                                                                            Write(EmailTemplateViewMessage.Foreach.NiceToString());
+            #line 46 "..\..\Mailing\Views\Newsletter.cshtml"
+                                                                                                                                                                                     Write(EmailTemplateViewMessage.Foreach.NiceToString());
 
             
             #line default
@@ -311,7 +318,7 @@ WriteLiteral("\" />\r\n                        </fieldset>\r\n                  
 
 
             
-            #line 48 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 49 "..\..\Mailing\Views\Newsletter.cshtml"
                Write(Html.ValueLine(nc, e => e.Subject, vl => vl.ValueHtmlProps["class"] = "sf-email-inserttoken-target"));
 
             
@@ -321,13 +328,13 @@ WriteLiteral("\r\n                    ");
 
 
             
-            #line 49 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 50 "..\..\Mailing\Views\Newsletter.cshtml"
                Write(Html.ValueLine(nc, e => e.Text, vl =>
-                    {
-                        vl.ValueLineType = ValueLineType.TextArea;
-                        vl.ValueHtmlProps["style"] = "width:100%; height:180px;";
-                        vl.ValueHtmlProps["class"] = "sf-rich-text-editor";
-                    }));
+               {
+                   vl.ValueLineType = ValueLineType.TextArea;
+                   vl.ValueHtmlProps["style"] = "width:100%; height:180px;";
+                   vl.ValueHtmlProps["class"] = "sf-rich-text-editor";
+               }));
 
             
             #line default
@@ -337,7 +344,7 @@ WriteLiteral("\r\n                    <script>\r\n                        $(func
 
 
             
-            #line 57 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 58 "..\..\Mailing\Views\Newsletter.cshtml"
                                                             Write(nc.SubContext(e => e.Text).ControlID);
 
             
@@ -348,7 +355,7 @@ WriteLiteral("\");\r\n                        });\r\n                    </scrip
 
 
             
-            #line 61 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 62 "..\..\Mailing\Views\Newsletter.cshtml"
             }
 
             
@@ -358,7 +365,7 @@ WriteLiteral("        </fieldset>\r\n");
 
 
             
-            #line 63 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 64 "..\..\Mailing\Views\Newsletter.cshtml"
          if (!nc.Value.IsNew)
         {
 
@@ -371,12 +378,12 @@ WriteLiteral("            <fieldset id=\"emTabSend\">\r\n                <legend
 
 
             
-            #line 69 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 70 "..\..\Mailing\Views\Newsletter.cshtml"
                Write(Html.SearchControl(new FindOptions(typeof(NewsletterDeliveryDN))
-                    {
-                        FilterOptions = { new FilterOption("Newsletter", nc.Value) { Frozen = true } },
-                        SearchOnLoad = true,
-                    }, new Context(nc, "ncSent")));
+               {
+                   FilterOptions = { new FilterOption("Newsletter", nc.Value) { Frozen = true } },
+                   SearchOnLoad = true,
+               }, new Context(nc, "ncSent")));
 
             
             #line default
@@ -385,7 +392,7 @@ WriteLiteral("\r\n                </fieldset>\r\n            </fieldset>\r\n");
 
 
             
-            #line 76 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 77 "..\..\Mailing\Views\Newsletter.cshtml"
         }
 
             
@@ -395,7 +402,7 @@ WriteLiteral("    </div>    \r\n");
 
 
             
-            #line 78 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 79 "..\..\Mailing\Views\Newsletter.cshtml"
 }
 
             

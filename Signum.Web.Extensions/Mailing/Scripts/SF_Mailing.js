@@ -9,6 +9,8 @@ SF.registerModule("Mailing", function () {
         var onInsertToken;
 
         var initReplacements = function () {
+            var self = this;
+
             $(".sf-email-replacements-container").on("click", ".sf-email-togglereplacementspanel", function () {
                 $(this).siblings(".sf-email-replacements-panel").toggle();
             });
@@ -42,6 +44,10 @@ SF.registerModule("Mailing", function () {
                     $lastTokenTarget.val(newValue);
                 }
             });
+
+            $(".sf-email-replacements-container").on("sf-new-subtokens-combo", "select", function (event, idSelectedCombo) {
+                SF.Mailing.newSubTokensComboAdded.call(self, $("#" + idSelectedCombo));
+            });
         };
 
         var setTokenTargetFocus = function ($element) {
@@ -69,31 +75,48 @@ SF.registerModule("Mailing", function () {
             }
         };
 
-        //var newSubTokensComboAdded = function ($selectedCombo) {
-        //    var $btnAddFilter = $(".sf-email-inserttoken-if");
-        //    var $btnAddColumn = $(this.pf("btnAddColumn"));
+        var newSubTokensComboAdded = function ($selectedCombo) {
+            var $btnInsertBasic = $(".sf-email-inserttoken-basic");
+            var $btnInsertIf = $(".sf-email-inserttoken-if");
+            var $btnInsertForeach = $(".sf-email-inserttoken-foreach");
 
-        //    var self = this;
-        //    var $selectedOption = $selectedCombo.children("option:selected");
-        //    $selectedCombo.attr("title", $selectedOption.attr("title"));
-        //    $selectedCombo.attr("style", $selectedOption.attr("style"));
-        //    if ($selectedOption.val() == "") {
-        //        var $prevSelect = $selectedCombo.prev("select");
-        //        if ($prevSelect.length == 0) {
-        //            this.changeButtonState($btnAddFilter, lang.signum.selectToken);
-        //            this.changeButtonState($btnAddColumn, lang.signum.selectToken);
-        //        }
-        //        else {
-        //            var $prevSelectedOption = $prevSelect.find("option:selected");
-        //            this.changeButtonState($btnAddFilter, $prevSelectedOption.attr("data-filter"), function () { self.addFilter(); });
-        //            this.changeButtonState($btnAddColumn, $prevSelectedOption.attr("data-column"), function () { self.addColumn(); });
-        //        }
-        //        return;
-        //    }
+            var self = this;
+            var $selectedOption = $selectedCombo.children("option:selected");
+            $selectedCombo.attr("title", $selectedOption.attr("title"));
+            $selectedCombo.attr("style", $selectedOption.attr("style"));
+            if ($selectedOption.val() == "") {
+                var $prevSelect = $selectedCombo.prev("select");
+                if ($prevSelect.length == 0) {
+                    changeButtonState($btnInsertBasic, lang.signum.selectToken);
+                    changeButtonState($btnInsertIf, lang.signum.selectToken);
+                    changeButtonState($btnInsertForeach, lang.signum.selectToken);
+                }
+                else {
+                    changeButtonState($btnInsertBasic);
+                    var $prevSelectedOption = $prevSelect.find("option:selected");
+                    changeButtonState($btnInsertIf, $prevSelectedOption.attr("data-if"));
+                    changeButtonState($btnInsertForeach, $prevSelectedOption.attr("data-foreach"));
+                }
+                return;
+            }
 
-        //    this.changeButtonState($btnAddFilter, $selectedOption.attr("data-filter"), function () { self.addFilter(); });
-        //    this.changeButtonState($btnAddColumn, $selectedOption.attr("data-column"), function () { self.addColumn(); });
-        //};
+            changeButtonState($btnInsertBasic);
+            changeButtonState($btnInsertIf, $selectedOption.attr("data-if"));
+            changeButtonState($btnInsertForeach, $selectedOption.attr("data-foreach"));
+        };
+
+        var changeButtonState = function ($button, disablingMessage) {
+            var hiddenId = $button.attr("id") + "temp";
+            if (typeof disablingMessage != "undefined") {
+                $button.addClass("ui-button-disabled").addClass("ui-state-disabled").addClass("sf-disabled").attr("disabled", "disabled").attr("title", disablingMessage);
+                $button.unbind('click').bind('click', function (e) { e.preventDefault(); return false; });
+            }
+            else {
+                var self = this;
+                $button.removeClass("ui-button-disabled").removeClass("ui-state-disabled").removeClass("sf-disabled").prop("disabled", null).attr("title", "");
+                $button.unbind('click');
+            }
+        };
 
         var updateHtmlEditorTextArea = function (idTargetTextArea) {
             CKEDITOR.instances[idTargetTextArea].updateElement();
@@ -153,7 +176,8 @@ SF.registerModule("Mailing", function () {
             initHtmlEditorMasterTemplate: initHtmlEditorMasterTemplate,
             initHtmlEditorWithTokens: initHtmlEditorWithTokens,
             setTokenTargetFocus: setTokenTargetFocus,
-            removeTokenTargetFocus: removeTokenTargetFocus
+            removeTokenTargetFocus: removeTokenTargetFocus,
+            newSubTokensComboAdded: newSubTokensComboAdded
         };
     })();
 });

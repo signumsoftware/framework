@@ -192,6 +192,7 @@ namespace Signum.Engine.Mailing
                     Name = n.Name,
                     SmtpConfig = n.SmtpConfig,
                     From = n.From,
+                    DisplayFrom = n.DisplayFrom,
                     Query = n.Query,
                     Subject = n.Subject,
                     Text = n.Text,

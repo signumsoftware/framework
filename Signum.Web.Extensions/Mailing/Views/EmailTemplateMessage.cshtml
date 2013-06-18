@@ -5,6 +5,7 @@
 @using Signum.Engine
 @using Signum.Web
 @using Signum.Entities.DynamicQuery
+@using Signum.Web.Mailing
 @using (var ec = Html.TypeContext<EmailTemplateMessageDN>())
 {
     <div class="sf-email-template-message">
@@ -17,10 +18,10 @@
             <input type="button" class="sf-button sf-email-togglereplacementspanel" value="Toggle replacements panel" />
             <fieldset class="sf-email-replacements-panel" style="display: none;">
                 <legend>Replacements</legend>
-                @Html.QueryTokenBuilder(null, ec, (QueryDescription)ViewData[ViewDataKeys.QueryDescription])
-                <input type="button" class="sf-button sf-email-inserttoken" data-prefix="@ec.ControlID" value="@(EmailTemplateViewMessage.Insert.NiceToString())" />
-                <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-if" data-prefix="@ec.ControlID" data-block="if" value="@(EmailTemplateViewMessage.If.NiceToString())" />
-                <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-foreach" data-prefix="@ec.ControlID" data-block="foreach" value="@(EmailTemplateViewMessage.Foreach.NiceToString())" />
+                @Html.MailingInsertQueryTokenBuilder(null, ec, (QueryDescription)ViewData[ViewDataKeys.QueryDescription])
+                <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-basic sf-disabled" data-prefix="@ec.ControlID" value="@(EmailTemplateViewMessage.Insert.NiceToString())" />
+                <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-if sf-disabled" data-prefix="@ec.ControlID" data-block="if" value="@(EmailTemplateViewMessage.If.NiceToString())" />
+                <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-foreach sf-disabled" data-prefix="@ec.ControlID" data-block="foreach" value="@(EmailTemplateViewMessage.Foreach.NiceToString())" />
             </fieldset>
         </div>
         @Html.ValueLine(ec, e => e.Subject, vl => vl.ValueHtmlProps["class"] = "sf-email-inserttoken-target sf-email-template-message-subject")

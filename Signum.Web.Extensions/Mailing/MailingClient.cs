@@ -141,5 +141,101 @@ namespace Signum.Web.Mailing
                 });
             }
         }
+
+        public static MvcHtmlString MailingInsertQueryTokenBuilder(this HtmlHelper helper, QueryToken queryToken, Context context, QueryDescription qd, bool canAggregate = false)
+        {
+            var tokenPath = queryToken.FollowC(qt => qt.Parent).Reverse().NotNull().ToList();
+
+            HtmlStringBuilder sb = new HtmlStringBuilder();
+
+            for (int i = 0; i < tokenPath.Count; i++)
+            {
+                sb.AddLine(helper.MailingInsertQueryTokenCombo(i == 0 ? null : tokenPath[i - 1], tokenPath[i], context, i, qd, canAggregate));
+            }
+
+            sb.AddLine(helper.MailingInsertQueryTokenCombo(queryToken, null, context, tokenPath.Count, qd, canAggregate));
+
+            return sb.ToHtml();
+        }
+
+        public static MvcHtmlString MailingInsertQueryTokenCombo(this HtmlHelper helper, QueryToken previous, QueryToken selected, Context context, int index, QueryDescription qd, bool canAggregate)
+        {
+            if (previous != null && SearchControlHelper.AllowSubTokens != null && !SearchControlHelper.AllowSubTokens(previous))
+                return MvcHtmlString.Create("");
+
+            var queryTokens = previous.SubTokens(qd, canAggregate);
+
+            if (queryTokens.IsEmpty())
+                return MvcHtmlString.Create("");
+
+            var options = new HtmlStringBuilder();
+            options.AddLine(new HtmlTag("option").Attr("value", "").SetInnerText("-").ToHtml());
+            foreach (var qt in queryTokens)
+            {
+                var option = new HtmlTag("option")
+                            .Attr("value", qt.Key)
+                            .SetInnerText(qt.SubordinatedToString);
+
+                if (selected != null && qt.Key == selected.Key)
+                    option.Attr("selected", "selected");
+
+                option.Attr("title", qt.NiceTypeName);
+                option.Attr("style", "color:" + qt.TypeColor);
+
+                string canIf = CanIf(qt);
+                if (canIf.HasText())
+                    option.Attr("data-if", canIf);
+
+                string canForeach = CanForeach(qt);
+                if (canForeach.HasText())
+                    option.Attr("data-foreach", canForeach);
+
+                options.AddLine(option.ToHtml());
+            }
+
+            string onChange = "SF.FindNavigator.newSubTokensCombo('{0}','{1}',{2},'{3}')".Formato(
+                Navigator.ResolveWebQueryName(qd.QueryName), 
+                context.ControlID, 
+                index,
+                RouteHelper.New().Action("NewSubTokensCombo", "Mailing"));
+            
+            HtmlTag dropdown = new HtmlTag("select")
+                .IdName(context.Compose("ddlTokens_" + index))
+                .InnerHtml(options.ToHtml())
+                .Attr("onchange", onChange);
+
+            if (selected != null)
+            {
+                dropdown.Attr("title", selected.NiceTypeName);
+                dropdown.Attr("style", "color:" + selected.TypeColor);
+            }
+
+            return dropdown.ToHtml();
+        }
+
+        static string CanIf(QueryToken token)
+        {
+            if (token == null)
+                return EmailTemplateCanAddTokenMessage.NoColumnSelected.NiceToString();
+
+            if (token.Type.UnNullify() != typeof(bool))
+                return EmailTemplateCanAddTokenMessage.YouCanOnlyAddIfBlocksWithBooleanFields.NiceToString();
+
+            return null;
+        }
+
+        static string CanForeach(QueryToken token)
+        {
+            if (token == null)
+                return EmailTemplateCanAddTokenMessage.NoColumnSelected.NiceToString();
+
+            if (token.Type != typeof(string) && token.Type != typeof(byte[]) && token.Type.ElementType() != null)
+                return EmailTemplateCanAddTokenMessage.YouHaveToAddTheElementTokenToUseForeachOnCollectionFields.NiceToString();
+
+            if (token.Key != "Element" || token.Parent == null || token.Parent.Type.ElementType() == null)
+                return EmailTemplateCanAddTokenMessage.YouCanOnlyAddForeachBlocksWithCollectionFields.NiceToString();
+
+            return null; 
+        }
     }
 }

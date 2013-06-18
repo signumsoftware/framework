@@ -2,9 +2,10 @@
 @using Signum.Entities.Reflection
 @using Signum.Engine.DynamicQuery
 @using Signum.Engine.Basics
-@Html.ScriptCss("~/Mailing/Content/SF_Mailing.css")
+@using Signum.Web.Mailing
+@Html.ScriptCss("~/Content/SF_Mailing.css")
 @Html.ScriptsJs("~/Scripts/ckeditor/ckeditor.js")
-@Html.ScriptsJs("~/Mailing/Scripts/SF_Mailing.js")
+@Html.ScriptsJs("~/Scripts/SF_Mailing.js")
 @using (var nc = Html.TypeContext<NewsletterDN>())
 {  
     <div class="@(nc.Value.IsNew ? "" : "sf-tabs")">
@@ -30,7 +31,7 @@
                 </fieldset>
             }
             else if (!nc.Value.IsNew)
-            {   
+            {
                 object queryName = QueryLogic.ToQueryName(nc.Value.Query.Key);
                 var queryDescription = DynamicQueryManager.Current.QueryDescription(queryName); //To be use inside query token controls
                     
@@ -39,19 +40,19 @@
                         <input type="button" class="sf-button sf-email-togglereplacementspanel" value="Toggle replacements panel" />
                         <fieldset class="sf-email-replacements-panel" style="display: none;">
                             <legend>Replacements</legend>
-                            @Html.QueryTokenBuilder(null, nc, queryDescription)
-                            <input type="button" class="sf-button sf-email-inserttoken" data-prefix="@nc.ControlID" value="@(EmailTemplateViewMessage.Insert.NiceToString())" />
-                            <input type="button" class="sf-button sf-email-inserttoken" data-prefix="@nc.ControlID" data-block="if" value="@(EmailTemplateViewMessage.If.NiceToString())" />
-                            <input type="button" class="sf-button sf-email-inserttoken" data-prefix="@nc.ControlID" data-block="foreach" value="@(EmailTemplateViewMessage.Foreach.NiceToString())" />
+                            @Html.MailingInsertQueryTokenBuilder(null, nc, queryDescription)
+                            <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-basic sf-disabled" data-prefix="@nc.ControlID" value="@(EmailTemplateViewMessage.Insert.NiceToString())" />
+                            <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-if sf-disabled" data-prefix="@nc.ControlID" data-block="if" value="@(EmailTemplateViewMessage.If.NiceToString())" />
+                            <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-foreach sf-disabled" data-prefix="@nc.ControlID" data-block="foreach" value="@(EmailTemplateViewMessage.Foreach.NiceToString())" />
                         </fieldset>
                     </div>
                     @Html.ValueLine(nc, e => e.Subject, vl => vl.ValueHtmlProps["class"] = "sf-email-inserttoken-target")
                     @Html.ValueLine(nc, e => e.Text, vl =>
-                    {
-                        vl.ValueLineType = ValueLineType.TextArea;
-                        vl.ValueHtmlProps["style"] = "width:100%; height:180px;";
-                        vl.ValueHtmlProps["class"] = "sf-rich-text-editor";
-                    })
+               {
+                   vl.ValueLineType = ValueLineType.TextArea;
+                   vl.ValueHtmlProps["style"] = "width:100%; height:180px;";
+                   vl.ValueHtmlProps["class"] = "sf-rich-text-editor";
+               })
                     <script>
                         $(function () {
                             SF.Mailing.initHtmlEditorWithTokens("@nc.SubContext(e => e.Text).ControlID");
@@ -67,10 +68,10 @@
                 <fieldset>
                     <legend>Email recipients</legend>
                     @Html.SearchControl(new FindOptions(typeof(NewsletterDeliveryDN))
-                    {
-                        FilterOptions = { new FilterOption("Newsletter", nc.Value) { Frozen = true } },
-                        SearchOnLoad = true,
-                    }, new Context(nc, "ncSent"))
+               {
+                   FilterOptions = { new FilterOption("Newsletter", nc.Value) { Frozen = true } },
+                   SearchOnLoad = true,
+               }, new Context(nc, "ncSent"))
                 </fieldset>
             </fieldset>
         }

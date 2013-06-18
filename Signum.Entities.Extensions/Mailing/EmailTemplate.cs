@@ -447,7 +447,19 @@ namespace Signum.Entities.Mailing
         [Description("The template is already inactive")]
         TheTemplateIsAlreadyInactive,
         [Description("The model {0} does not have any field with the token {1}")]
-        TheModel0DoesNotHaveAnyFieldWithTheToken1
+        TheModel0DoesNotHaveAnyFieldWithTheToken1,
+    }
+
+    public enum EmailTemplateCanAddTokenMessage
+    { 
+        [Description("No column selected")]
+        NoColumnSelected,
+        [Description("You can only add If blocks with boolean fields")]
+        YouCanOnlyAddIfBlocksWithBooleanFields,
+        [Description("You have to add the Element token to use Foreach on collection fields")]
+        YouHaveToAddTheElementTokenToUseForeachOnCollectionFields,
+        [Description("You can only add Foreach blocks with collection fields")]
+        YouCanOnlyAddForeachBlocksWithCollectionFields
     }
 
     public enum EmailTemplateViewMessage
