@@ -30,6 +30,9 @@ namespace Signum.Windows
 
         public static Image ToSmallImage(this ImageSource source)
         {
+            if (source == null)
+                return null;
+
             var result = new Image
             {
                 Width = 16,

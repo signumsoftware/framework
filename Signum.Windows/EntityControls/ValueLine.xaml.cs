@@ -194,6 +194,8 @@ namespace Signum.Windows
                         .Do(f => f.SetValue(TextBlock.TextAlignmentProperty, TextAlignment.Right))
                         .Do(f => f.SetBinding(TextBlock.TextProperty, new Binding() { Mode = BindingMode.OneTime, Converter =  Converters.EnumDescription }))
             };
+
+            ComboEnumDescriptionTemplate.Seal();
         }
 
 
