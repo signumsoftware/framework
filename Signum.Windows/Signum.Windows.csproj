@@ -555,7 +555,6 @@
     <Resource Include="Images\entity.png" />
     <Resource Include="Images\find.png" />
     <Resource Include="Images\reload.png" />
-    <Resource Include="Images\admin.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\star.png" />

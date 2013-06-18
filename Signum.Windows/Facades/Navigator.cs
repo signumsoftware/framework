@@ -342,7 +342,6 @@ namespace Signum.Windows
         }
 
         public ImageSource DefaultFindIcon = ImageLoader.GetImageSortName("find.png");
-        public ImageSource DefaultAdminIcon = ImageLoader.GetImageSortName("admin.png");
         public ImageSource DefaultEntityIcon = ImageLoader.GetImageSortName("entity.png");
 
         void TaskSetIconSearchWindow(SearchWindow sw, object qn)
@@ -384,15 +383,6 @@ namespace Signum.Windows
             }
 
             return useDefault ? DefaultFindIcon : null;
-        }
-
-        public ImageSource GetAdminIcon(Type entityType, bool useDefault)
-        {
-            EntitySettings es = EntitySettings.TryGetC(entityType);
-            if (es != null && es.Icon != null)
-                return es.Icon;
-
-            return useDefault ? DefaultAdminIcon : null;
         }
 
         public virtual string SearchTitle(object queryName)
@@ -455,7 +445,7 @@ namespace Signum.Windows
 
                 if (lite != null)
                 {
-                    Navigate(lite, new NavigateOptions { AvoidSpawnThread = options.AvoidSpawnThread, Closed = options.Closed });
+                    Navigate(lite, new NavigateOptions { Closed = options.Closed });
                     return;
                 }
             }
@@ -471,9 +461,9 @@ namespace Signum.Windows
             SearchWindow sw = new SearchWindow(options.GetSearchMode(), options.SearchOnLoad)
             {
                 QueryName = options.QueryName,
-                FilterOptions = new FreezableCollection<FilterOption>(options.FilterOptions),
-                OrderOptions = new ObservableCollection<OrderOption>(options.OrderOptions),
-                ColumnOptions = new ObservableCollection<ColumnOption>(options.ColumnOptions),
+                FilterOptions = new FreezableCollection<FilterOption>(options.FilterOptions.Select(c => c.CloneIfNecessary())),
+                OrderOptions = new ObservableCollection<OrderOption>(options.OrderOptions.Select(c => c.CloneIfNecessary())),
+                ColumnOptions = new ObservableCollection<ColumnOption>(options.ColumnOptions.Select(c => c.CloneIfNecessary())),
                 ColumnOptionsMode = options.ColumnOptionsMode,
                 Pagination = options.Pagination ?? GetQuerySettings(options.QueryName).Pagination ?? FindOptions.DefaultPagination,
                 ShowFilters = options.ShowFilters,
@@ -523,7 +513,7 @@ namespace Signum.Windows
                     if (entity is EmbeddedEntity)
                         throw new InvalidOperationException("ViewSave is not allowed for EmbeddedEntities");
 
-                    Control ctrl = options.View ?? es.CreateView(entity, null);
+                    Control ctrl = options.View != null ? options.View() : es.CreateView(entity, null);
 
                     SetNormalWindowEntity(win, (ModifiableEntity)entity, options, es, ctrl);
                 }
@@ -552,7 +542,7 @@ namespace Signum.Windows
             EntitySettings es = AssertViewableEntitySettings(entity);
             if (!es.OnIsViewable())
                 throw new Exception("{0} is not viewable".Formato(entity));
-            
+
             Control ctrl = options.View ?? es.CreateView(entity, options.PropertyRoute);
 
             NormalWindow win = CreateNormalWindow();
