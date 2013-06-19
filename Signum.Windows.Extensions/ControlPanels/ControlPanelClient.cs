@@ -76,7 +76,7 @@ namespace Signum.Windows.ControlPanels
 
                 LinksClient.RegisterEntityLinks<ControlPanelDN>((cp, ctrl) => new[]{  
                     !ControlPanelPermission.ViewControlPanel.IsAuthorized() ? null:  
-                    new QuickLinkAction(ControlPanelMessage.Preview, () => View(cp, null))
+                    new QuickLinkAction(ControlPanelMessage.Preview, () => Navigate(cp, null))
                 });
 
                 LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, ctrl) =>
@@ -107,7 +107,7 @@ namespace Signum.Windows.ControlPanels
 
             public override void Execute()
             {
-                ControlPanelClient.View(controlPanel, entity.Retrieve());
+                ControlPanelClient.Navigate(controlPanel, entity.Retrieve());
             }
 
             public override string Name
@@ -116,25 +116,27 @@ namespace Signum.Windows.ControlPanels
             }
         }
 
-        public static void View(Lite<ControlPanelDN> controlPanel, IdentifiableEntity currentEntity)
+        public static void Navigate(Lite<ControlPanelDN> controlPanel, IdentifiableEntity currentEntity)
         {
-            ControlPanelWindow win = new ControlPanelWindow();
-
-            win.tbControlPanel.Text = NormalWindowMessage.Loading0.NiceToString().Formato(controlPanel.EntityType.NiceName());
-            win.Show();
-
-            var cp = controlPanel.Retrieve();
-
-            if (cp.EntityType != null)
+            Navigator.OpenIndependentWindow(() => new ControlPanelWindow
             {
-                var filters = GraphExplorer.FromRoot(cp).OfType<QueryFilterDN>();
+                tbControlPanel = { Text = NormalWindowMessage.Loading0.NiceToString().Formato(controlPanel.EntityType.NiceName()) }
+            },
+            afterShown: win =>
+            {
+                var cp = controlPanel.Retrieve();
 
-                CurrentEntityConverter.SetFilterValues(filters, currentEntity);
+                if (cp.EntityType != null)
+                {
+                    var filters = GraphExplorer.FromRoot(cp).OfType<QueryFilterDN>();
 
-                win.CurrentEntity = currentEntity;
-            }
+                    CurrentEntityConverter.SetFilterValues(filters, currentEntity);
 
-            win.DataContext = controlPanel.Retrieve();
+                    win.CurrentEntity = currentEntity;
+                }
+
+                win.DataContext = controlPanel.Retrieve();
+            });
         }
     }
 

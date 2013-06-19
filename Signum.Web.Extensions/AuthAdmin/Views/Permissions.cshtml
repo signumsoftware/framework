@@ -14,16 +14,16 @@
         <thead>
             <tr>
                 <th>
-                    @AuthMessage.PermissionsAscx_Permission.NiceToString()
+                    @typeof(PermissionDN).NiceName()
                 </th>
                 <th>
-                    @AuthMessage.PermissionsAscx_Allow.NiceToString()
+                    @AuthAdminMessage.Allow.NiceToString()
                 </th>
                 <th>
-                    @AuthMessage.PermissionsAscx_Deny.NiceToString()
+                    @AuthAdminMessage.Deny.NiceToString()
                 </th>
                 <th>
-                    @AuthMessage.PermissionsAscx_Overriden.NiceToString()
+                    @AuthAdminMessage.Overriden.NiceToString()
                 </th>
             </tr>
         </thead>

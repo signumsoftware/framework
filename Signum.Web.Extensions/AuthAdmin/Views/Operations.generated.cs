@@ -39,7 +39,7 @@ namespace Signum.Web.Extensions.AuthAdmin.Views
     using Signum.Web;
     using Signum.Web.Auth;
     
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.5.4.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/AuthAdmin/Views/Operations.cshtml")]
     public partial class Operations : System.Web.Mvc.WebViewPage<dynamic>
     {
@@ -117,7 +117,7 @@ WriteLiteral("    <table class=\"sf-auth-rules\" id=\"operations\">\r\n        <
 
             
             #line 13 "..\..\AuthAdmin\Views\Operations.cshtml"
-               Write(AuthMessage.OperationsAscx_Operation.NiceToString());
+               Write(typeof(Signum.Entities.Basics.OperationDN).NiceName());
 
             
             #line default
@@ -127,7 +127,7 @@ WriteLiteral("\r\n                </th>\r\n                <th>\r\n             
 
             
             #line 16 "..\..\AuthAdmin\Views\Operations.cshtml"
-               Write(AuthMessage.OperationsAscx_Allow.NiceToString());
+               Write(OperationAllowed.Allow.NiceToString());
 
             
             #line default
@@ -137,7 +137,7 @@ WriteLiteral("\r\n                </th>\r\n                <th>\r\n             
 
             
             #line 19 "..\..\AuthAdmin\Views\Operations.cshtml"
-               Write(AuthMessage.OperationsAscx_DBOnly.NiceToString());
+               Write(OperationAllowed.DBOnly.NiceToString());
 
             
             #line default
@@ -147,7 +147,7 @@ WriteLiteral("\r\n                </th>\r\n                <th>\r\n             
 
             
             #line 22 "..\..\AuthAdmin\Views\Operations.cshtml"
-               Write(AuthMessage.OperationsAscx_None.NiceToString());
+               Write(OperationAllowed.None.NiceToString());
 
             
             #line default
@@ -157,7 +157,7 @@ WriteLiteral("\r\n                </th>\r\n                <th>\r\n             
 
             
             #line 25 "..\..\AuthAdmin\Views\Operations.cshtml"
-               Write(AuthMessage.OperationsAscx_Overriden.NiceToString());
+               Write(AuthAdminMessage.Overriden.NiceToString());
 
             
             #line default

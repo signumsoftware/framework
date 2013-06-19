@@ -20,8 +20,8 @@
                     <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" FontSize="20">Generate Chart</TextBlock>
                 </Border>
                 <TextBlock Foreground="Red" x:Name="errorLine"/>
-                <m:ShyBorder Horizontal="True" Vertical="True" MinWidth="400" MinHeight="250">
-                    <WebBrowser x:Name="webBrowser"  Visibility="{Binding NeedNewQuery, Converter={x:Static m:Converters.NotBoolToVisibility}}" HorizontalAlignment="Stretch" />
+                <m:ShyBorder Horizontal="True" Vertical="True" MinWidth="400" MinHeight="250" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <WebBrowser x:Name="webBrowser"  Visibility="{Binding NeedNewQuery, Converter={x:Static m:Converters.NotBoolToVisibility}}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
                 </m:ShyBorder>
             </Grid>
         </TabItem>

@@ -45,7 +45,8 @@ namespace Signum.Web.Chart
 
             return OpenChartRequest(request,
                 findOptions.FilterOptions,
-                findOptions.Navigate && IsNavigableEntity(request.QueryName));
+                findOptions.Navigate && IsNavigableEntity(request.QueryName),
+                null);
         }
 
         public ViewResult FullScreen(string prefix)
@@ -54,7 +55,8 @@ namespace Signum.Web.Chart
 
             return OpenChartRequest(request,
                 request.Filters.Select(f => new FilterOption { Token = f.Token, Operation = f.Operation, Value = f.Value }).ToList(),
-                IsNavigableEntity(request.QueryName));
+                IsNavigableEntity(request.QueryName),
+                null);
         }
 
         public bool IsNavigableEntity(object queryName)
@@ -166,7 +168,7 @@ namespace Signum.Web.Chart
                 foreach (var column in chartRequest.Columns.Iterate())
                 {
                     if (column.Value.ScriptColumn.IsGroupKey && column.Value.Token != null)
-                        filters.AddRange(GetFilter(column.Value, "c" + column.Position));
+                        filters.AddRange(GetSubgroupFilter(column.Value, "c" + column.Position));
                 }
 
                 var findOptions = new FindOptions(chartRequest.QueryName)
@@ -194,9 +196,9 @@ namespace Signum.Web.Chart
             }
         }
 
-        private FilterOption GetFilter(ChartColumnDN chartToken, string key)
+        private FilterOption GetSubgroupFilter(ChartColumnDN chartToken, string key)
         {
-            if (chartToken == null ||  chartToken.Token is AggregateToken)
+            if (chartToken == null || chartToken.Token.Token is AggregateToken)
                 return null;
 
             var token = chartToken.Token;
@@ -204,12 +206,12 @@ namespace Signum.Web.Chart
             string str = Request.Params.AllKeys.Contains(key)  ? Request.Params[key] : null;
 
             var value = str == null || str == "null" ? null :
-                FindOptionsModelBinder.Convert(FindOptionsModelBinder.DecodeValue(str), token.Type);
+                FindOptionsModelBinder.Convert(FindOptionsModelBinder.DecodeValue(str), token.Token.Type);
             
             return new FilterOption
             {
-                ColumnName = token.FullKey(),
-                Token = token,
+                ColumnName = token.Token.FullKey(),
+                Token = token.Token,
                 Operation = FilterOperation.EqualTo,
                 Value = value,
             };
@@ -254,14 +256,15 @@ namespace Signum.Web.Chart
             return ctx;
         }
 
-        ViewResult OpenChartRequest(ChartRequest request, List<FilterOption> filterOptions, bool navigate)
+        ViewResult OpenChartRequest(ChartRequest request, List<FilterOption> filterOptions, bool navigate, Lite<UserChartDN> currentUserChart)
         {
             ViewData[ViewDataKeys.PartialViewName] = ChartClient.ChartRequestView;
             ViewData[ViewDataKeys.Title] = Navigator.Manager.SearchTitle(request.QueryName);
             ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName); ;
             ViewData[ViewDataKeys.FilterOptions] = filterOptions;
             ViewData[ViewDataKeys.Navigate] = navigate;
-
+            ViewData["UserChart"] = currentUserChart;
+            
             return View(Navigator.Manager.SearchPageView, new TypeContext<ChartRequest>(request, ""));
         }
 
@@ -293,7 +296,8 @@ namespace Signum.Web.Chart
 
             return OpenChartRequest(request,
                 request.Filters.Select(f => new FilterOption { Token = f.Token, Operation = f.Operation, Value = f.Value }).ToList(),
-                IsNavigableEntity(request.QueryName));
+                IsNavigableEntity(request.QueryName),
+                uc.ToLite());
         }
 
         [HttpPost]

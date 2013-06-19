@@ -40,7 +40,8 @@ namespace Signum.Windows.UIAutomation
             if (string.IsNullOrEmpty(oldValue))
                 throw new InvalidOperationException("Element does not has ItemStatus set. Consider setting m:Common.AutomationItemStatusFromDataContext on the WPF control");
 
-            var previous = GetAllProcessWindows(element).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
+            var pid = element.Current.ProcessId;
+            var previous = GetAllProcessWindows(pid).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
 
             action();
 
@@ -53,7 +54,7 @@ namespace Signum.Windows.UIAutomation
                 if (newValue != null && newValue != oldValue)
                     return true;
 
-                var newWindow = GetAllProcessWindows(element).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
+                var newWindow = GetAllProcessWindows(pid).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
 
                 MessageBoxProxy.AssertNoErrorWindow(newWindow);
 
@@ -85,7 +86,8 @@ namespace Signum.Windows.UIAutomation
             if (actionDescription == null)
                 actionDescription = () => "Get Windows after";
 
-            var previous = GetAllProcessWindows(element).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
+            var pid = element.Current.ProcessId;
+            var previous = GetAllProcessWindows(pid).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
 
             action();
 
@@ -93,7 +95,7 @@ namespace Signum.Windows.UIAutomation
 
             element.Wait(() =>
             {
-                newWindow = GetAllProcessWindows(element).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
+                newWindow = GetAllProcessWindows(pid).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
 
                 MessageBoxProxy.AssertNoErrorWindow(newWindow);
 
@@ -106,9 +108,9 @@ namespace Signum.Windows.UIAutomation
             return newWindow;
         }
 
-        public static List<AutomationElement> GetAllProcessWindows(AutomationElement element)
+        public static List<AutomationElement> GetAllProcessWindows(int processId)
         {
-            return GetRecursiveProcessWindows(AutomationElement.RootElement, element.Current.ProcessId);
+            return GetRecursiveProcessWindows(AutomationElement.RootElement, processId);
         }
 
         static List<AutomationElement> GetRecursiveProcessWindows(AutomationElement parentWindow, int processId)

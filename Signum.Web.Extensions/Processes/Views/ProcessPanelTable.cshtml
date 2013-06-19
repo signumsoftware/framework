@@ -1,6 +1,7 @@
 ﻿@using Signum.Utilities.ExpressionTrees
 @using Signum.Engine.Processes
 @using Signum.Web.Processes
+@using Signum.Entities.DynamicQuery
 @model ProcessLogicState
 <div id="processMainDiv">
         <br />
@@ -87,7 +88,7 @@
     OrderOptions = { new OrderOption("CreationDate", Signum.Entities.DynamicQuery.OrderType.Descending) },
     FilterMode = Signum.Web.FilterMode.Hidden,
     SearchOnLoad = true,
-    ElementsPerPage = 10,
+    Pagination =  new Pagination.Top(10),
 },new Context(null, "sc"))
     <br />
 </div>

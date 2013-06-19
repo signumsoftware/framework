@@ -91,9 +91,9 @@ namespace Signum.Windows.Files
             set { SetValue(DropFileProperty, value); }
         }
 
-        protected override DependencyProperty CommonRouteValue()
+        static FileLine()
         {
-            return EntityProperty;
+            Common.ValuePropertySelector.SetDefinition(typeof(FileLine), EntityProperty);
         }
 
         public delegate void SaveFileDelegate(object entity);

@@ -1,5 +1,4 @@
 @using Signum.Web
-@using Signum.Web.Extensions.Properties
 @using Signum.Entities.DynamicQuery
 @using Signum.Engine.DynamicQuery
 @using System.Configuration
@@ -9,6 +8,7 @@
 @using Signum.Web.Chart
 @using Signum.Engine.Authorization;
 @using Signum.Entities.Authorization;
+@using Signum.Web.UserQueries;
 @helper ColorLink(Type type)
     {
         var identType = type.IsEnum ? EnumEntity.Generate(type) : type;
@@ -52,7 +52,7 @@
         </td>
         <td>
             <div class="sf-query-token">
-                @Html.ChartTokenBuilder(tc.Value, tc.Value.ParentChart, (QueryDescription)ViewData[ViewDataKeys.QueryDescription], tc)
+                @Html.QueryTokenDNBuilder(tc.SubContext(a=>a.Token), (QueryDescription)ViewData[ViewDataKeys.QueryDescription], canAggregate: tc.Value.ParentChart.GroupResults && tc.Value.IsGroupKey == false)
             </div>
             <a class="sf-chart-token-config-trigger">@ChartMessage.Chart_ToggleInfo.NiceToString()</a>
         </td>
@@ -70,9 +70,9 @@
                 @Html.ValueLine(tc, ct => ct.Parameter1, vl => ChartClient.SetupParameter(vl, tc.Value, tc.Value.ScriptColumn.Parameter1))
                 @Html.ValueLine(tc, ct => ct.Parameter2, vl => ChartClient.SetupParameter(vl, tc.Value, tc.Value.ScriptColumn.Parameter2))
                 @Html.ValueLine(tc, ct => ct.Parameter3, vl => ChartClient.SetupParameter(vl, tc.Value, tc.Value.ScriptColumn.Parameter3))
-                if (tc.Value.TryToken!= null && !Navigator.IsReadOnly(typeof(ChartColorDN)))
+                if (tc.Value.Token != null && !Navigator.IsReadOnly(typeof(ChartColorDN)))
                 {
-                    var type = tc.Value.Token.Type.CleanType();
+                    var type = tc.Value.Token.Token.Type.CleanType();
 
                     if (type.IsEnum)
                     {
@@ -80,7 +80,7 @@
                     }
                     else
                     {
-                        var imp = tc.Value.Token.GetImplementations();
+                        var imp = tc.Value.Token.Token.GetImplementations();
 
                         if (imp != null && !imp.Value.IsByAll)
                         {

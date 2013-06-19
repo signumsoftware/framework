@@ -42,14 +42,13 @@ namespace Signum.Windows.Authorization
                 return new QuickLink[]
                 {
                     new QuickLinkAction(AuthAdminMessage.TypeRules, () => 
-                        new TypeRules 
+                        Navigator.OpenIndependentWindow(()=> new TypeRules 
                         { 
-                            Owner = Window.GetWindow(c),
                             Role = r, 
                             Properties = PropertyAuthClient.Started, 
                             Operations = OperationAuthClient.Started,
                             Queries = QueryAuthClient.Started
-                        }.Show())
+                        }))
                     { 
                         IsVisible = authorized
                     },

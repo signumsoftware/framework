@@ -27,7 +27,7 @@ namespace Signum.Engine.Help
         public Dictionary<Enum, OperationHelp> Operations;
         public Dictionary<object, QueryHelp> Queries
         {
-            get { return HelpLogic.state.Value.GetQueryHelps(this.Type).ToDictionary(qh => qh.Key); }
+            get { return HelpLogic.State.Value.GetQueryHelps(this.Type).ToDictionary(qh => qh.Key); }
         }
         public string FileName;
         public string Language;

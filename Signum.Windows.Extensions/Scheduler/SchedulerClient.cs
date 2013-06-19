@@ -32,7 +32,7 @@ namespace Signum.Windows.Scheduler
             }
         }
 
-        static BitmapFrame Image(string name)
+        static BitmapSource Image(string name)
         {
             return ImageLoader.LoadIcon(PackUriHelper.Reference("Images/" + name, typeof(SchedulerClient)));
         }

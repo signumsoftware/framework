@@ -265,7 +265,7 @@ namespace Signum.Engine.Mailing
                 },
                 Orders = new List<Order>(),
                 Columns = columns.Select(t => new Column(t, t.NiceName())).ToList(),
-                ElementsPerPage = QueryRequest.AllElements,
+                Pagination = new Pagination.All(),
             });
 
             var lines = resultTable.Rows.Select(r => new SendLine

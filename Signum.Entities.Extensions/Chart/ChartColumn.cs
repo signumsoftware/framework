@@ -16,7 +16,7 @@ using System.Xml.Linq;
 namespace Signum.Entities.Chart
 {
     [Serializable]
-    public class ChartColumnDN : QueryTokenDN
+    public class ChartColumnDN : EmbeddedEntity
     {
         [Ignore]
         ChartScriptColumnDN scriptColumn;
@@ -28,10 +28,9 @@ namespace Signum.Entities.Chart
         
         public ChartColumnDN()
         {
-
         }
 
-        public override void TokenChanged()
+        public void TokenChanged()
         {
             NotifyChange(true);
 
@@ -41,24 +40,34 @@ namespace Signum.Entities.Chart
             {
                 DisplayName = null;
             }
-
-            base.TokenChanged();
         }
 
         public void SetDefaultParameters()
         {
-            Parameter1 = scriptColumn.Parameter1.TryCC(a => a.DefaultValue(token));
-            Parameter2 = scriptColumn.Parameter2.TryCC(a => a.DefaultValue(token));
-            Parameter3 = scriptColumn.Parameter3.TryCC(a => a.DefaultValue(token));
+            var t = token.TryCC(tk => tk.Token);
+            Parameter1 = scriptColumn.Parameter1.TryCC(a => a.DefaultValue(t));
+            Parameter2 = scriptColumn.Parameter2.TryCC(a => a.DefaultValue(t));
+            Parameter3 = scriptColumn.Parameter3.TryCC(a => a.DefaultValue(t));
+        }
+
+        QueryTokenDN token;
+        public QueryTokenDN Token
+        {
+            get { return token; }
+            set
+            {
+                if (Set(ref token, value, () => Token))
+                    TokenChanged();
+            }
         }
 
         string displayName;
         public string DisplayName
         {
-            get { return displayName ?? Token.TryCC(t => t.NiceName()); }
+            get { return displayName ?? Token.TryCC(t => t.Token.TryCC(tt => tt.NiceName())); }
             set
             {
-                var name = value == Token.TryCC(t => t.NiceName()) ? null : value;
+                var name = value == Token.TryCC(t => t.Token.TryCC(tt => tt.NiceName())) ? null : value;
                 Set(ref displayName, name, () => DisplayName);
             }
         }
@@ -90,6 +99,12 @@ namespace Signum.Entities.Chart
             set { if (Set(ref parameter3, value, () => Parameter3))NotifyChange(false); }
         }
 
+        int index;
+        public int Index
+        {
+            get { return index; }
+            set { Set(ref index, value, () => Index); }
+        }
       
         [Ignore]
         internal IChartBase parentChart;
@@ -139,43 +154,32 @@ namespace Signum.Entities.Chart
 
         protected override string PropertyValidation(PropertyInfo pi)
         {
-            if (pi.Is(() => TokenString))
+            if (pi.Is(() => Token))
             {
-                if (TokenString != null && Token == null)
-                    return null;
-
                 if (Token == null)
-                    return !scriptColumn.IsOptional ? "{0} is not optional".Formato(scriptColumn.DisplayName) : null;
-
-                if (Token is IDataErrorInfo)
-                {
-                    var err = ((IDataErrorInfo)Token).Error;
-                    if (err != null)
-                        return err;
-                }
+                    return !scriptColumn.IsOptional ? ChartMessage._0IsNotOptional.NiceToString().Formato(scriptColumn.DisplayName) : null;
 
                 if (parentChart.GroupResults)
                 {
                     if (scriptColumn.IsGroupKey)
                     {
-                        if (Token is AggregateToken)
-                            return "{0} is key, but {1} is an aggregate".Formato(scriptColumn.DisplayName, DisplayName);
+                        if (Token.Token is AggregateToken)
+                            return ChartMessage._0IsKeyBut1IsAnAggregate.NiceToString().Formato(scriptColumn.DisplayName, DisplayName);
                     }
                     else
                     {
-                        if (!(Token is AggregateToken))
-                            return "{0} should be an aggregate".Formato(scriptColumn.DisplayName, DisplayName);
+                        if (!(Token.Token is AggregateToken))
+                            return ChartMessage._0ShouldBeAnAggregate.NiceToString().Formato(scriptColumn.DisplayName, DisplayName);
                     }
                 }
                 else
                 {
-                    if (Token is AggregateToken)
-                        return "{1} is an aggregate, but the chart is not grouping".Formato(scriptColumn.DisplayName, DisplayName);
+                    if (Token.Token is AggregateToken)
+                        return ChartMessage._0IsAnAggregateButTheChartIsNotGrouping.NiceToString().Formato(DisplayName);
                 }
 
-
-                if (!ChartUtils.IsChartColumnType(token, ScriptColumn.ColumnType))
-                    return "{0} is not {1}".Formato(DisplayName, ScriptColumn.ColumnType);
+                if (!ChartUtils.IsChartColumnType(token.Token, ScriptColumn.ColumnType))
+                    return ChartMessage._0IsNot1.NiceToString().Formato(DisplayName, ScriptColumn.ColumnType);
             }
 
             if (pi.Is(() => Parameter1) && token != null)
@@ -190,58 +194,49 @@ namespace Signum.Entities.Chart
             return base.PropertyValidation(pi);
         }
 
-        private string ValidateParameter(PropertyInfo pi, string parameter, ChartScriptParameterDN description)
+        string ValidateParameter(PropertyInfo pi, string parameter, ChartScriptParameterDN description)
         {
             if (description != null)
             {
                 if (parameter == null)
-                    return "{0} should be set".Formato(description.Name);
+                    return ChartMessage._0ShouldBeSet.NiceToString().Formato(description.Name);
 
-                return description.Valdidate(parameter, token);
+                return description.Valdidate(parameter, token.Token);
             }
 
             if (parameter.HasText())
-                return "{0} should be null".Formato(pi.NiceName());
+                return ChartMessage._0ShouldBeNull.NiceToString().Formato(pi.NiceName());
 
             return null;
         }
 
-
         public string GetTitle()
         {
-            var unit = Token.TryCC(a=>a.Unit);
+            var unit = Token.TryCC(a=>a.Token.Unit);
 
             return DisplayName + (unit.HasText() ? " ({0})".Formato(unit) : null);
         }
 
         protected override void PreSaving(ref bool graphModified)
         {
-            tokenString = token == null ? null : token.FullKey();
-
             DisplayName = displayName;
         }
 
-        public override void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)
+        public void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)
         {
-            try
-            {
-                token = string.IsNullOrEmpty(tokenString) ? null : QueryUtils.Parse(tokenString, description, canAggregate);
-            }
-            catch (Exception e)
-            {
-                parseException = new FormatException("{0} {1}: {2}\r\n{3}".Formato(context.GetType().Name, context.IdOrNull, context, e.Message));
-            }
+            if (token != null)
+                token.ParseData(context, description, canAggregate);
         }
 
         internal Column CreateColumn()
         {
-            return new Column(Token, DisplayName); 
+            return new Column(Token.Token, DisplayName); 
         }
 
         internal XElement ToXml(IToXmlContext ctx)
         {
             return new XElement("Column",
-              Token ==  null ? null : new XAttribute("Token", this.Token.FullKey()),
+              Token ==  null ? null : new XAttribute("Token", this.Token.Token.FullKey()),
               DisplayName == null ? null : new XAttribute("DisplayName", this.DisplayName),
               Parameter1 == null ? null : new XAttribute("Parameter1", this.Parameter1),
               Parameter2 == null ? null : new XAttribute("Parameter2", this.Parameter2),
@@ -250,11 +245,12 @@ namespace Signum.Entities.Chart
 
         internal void FromXml(XElement element, IFromXmlContext ctx)
         {
-            TokenString = element.Attribute("Token").TryCC(a => a.Value);
+            Token = element.Attribute("Token").TryCC(a => new QueryTokenDN(a.Value));
             DisplayName = element.Attribute("DisplayName").TryCC(a => a.Value);
             Parameter1 = element.Attribute("Parameter1").TryCC(a => a.Value);
             Parameter2 = element.Attribute("Parameter2").TryCC(a => a.Value);
             Parameter3 = element.Attribute("Parameter3").TryCC(a => a.Value);
         }
+
     }
 }

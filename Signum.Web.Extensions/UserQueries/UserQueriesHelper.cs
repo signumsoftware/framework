@@ -40,20 +40,29 @@ namespace Signum.Web.UserQueries
         }
 
 
-        public static MvcHtmlString QueryTokenDNBuilder(this HtmlHelper helper, QueryTokenDN queryToken, Context context, QueryDescription qd, bool canAggregate = false)
+        public static MvcHtmlString QueryTokenDNBuilder(this HtmlHelper helper, TypeContext<QueryTokenDN> ctx, QueryDescription qd, bool canAggregate = false)
         {
-            if (queryToken.TryCC(qt => qt.ParseException) != null)
+            if (ctx.Value.TryCC(qt => qt.ParseException) != null)
             {
                 HtmlStringBuilder sb = new HtmlStringBuilder();
-                sb.Add(new HtmlTag("div").Class("ui-state-error").SetInnerText(queryToken.ParseException.Message).ToHtml());
-                sb.Add(new HtmlTag("pre").SetInnerText(queryToken.TokenString).ToHtml());
-                sb.Add(helper.QueryTokenBuilder(null, context, qd, canAggregate));
+                sb.Add(new HtmlTag("div").Class("ui-state-error").SetInnerText(ctx.Value.ParseException.Message).ToHtml());
+                sb.Add(new HtmlTag("pre").SetInnerText(ctx.Value.TokenString).ToHtml());
+                sb.Add(helper.QueryTokenBuilder(null, ctx, qd, canAggregate));
                 return sb.ToHtml();
             }
             else
             {
-                return helper.QueryTokenBuilder(queryToken.TryCC(ct => ct.Token), context, qd, canAggregate);
+                return helper.QueryTokenBuilder(ctx.Value.TryCC(ct => ct.Token), ctx, qd, canAggregate);
             }
+        }
+
+        public static string GetTokenString(MappingContext<QueryTokenDN> ctx)
+        {
+            return ctx.Inputs.Keys
+                .OrderBy(k => int.Parse(k.After("ddlTokens_")))
+                .Select(k => ctx.Inputs[k])
+                .TakeWhile(k => k.HasText())
+                .ToString(".");
         }
     }
 }

@@ -35,8 +35,6 @@ namespace Signum.Engine.Chart
                 ChartColorLogic.Start(sb, dqm);
                 ChartScriptLogic.Start(sb, dqm);
                 UserChartLogic.Start(sb, dqm);
-
-                ChartUtils.RemoveNotNullValidators();
             }
         }
 
@@ -69,7 +67,7 @@ namespace Signum.Engine.Chart
                     Columns = columns,
                     Filters = request.Filters,
                     Orders = request.Orders,
-                    ElementsPerPage = QueryRequest.AllElements,
+                    Pagination = new Pagination.All(),
                 });
             }
             else

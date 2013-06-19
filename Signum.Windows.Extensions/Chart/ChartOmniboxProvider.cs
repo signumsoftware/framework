@@ -41,12 +41,10 @@ namespace Signum.Windows.Chart
 
         public override void OnSelected(ChartOmniboxResult result, Window window)
         {
-            ChartRequestWindow cw = new ChartRequestWindow()
-            {
-                DataContext = new ChartRequest(result.QueryName)
-            };
+            if (result.QueryName == null)
+                return;
 
-            cw.Show();
+            ChartClient.OpenChartRequest(new ChartRequest(result.QueryName), null);
         }
 
         public override string GetName(ChartOmniboxResult result)

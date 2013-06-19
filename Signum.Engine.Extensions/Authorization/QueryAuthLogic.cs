@@ -54,7 +54,12 @@ namespace Signum.Engine.Authorization
 
                     return cache.ImportXml(x, "Queries", "Query", roles, s =>
                     {
-                        return QueryLogic.GetQuery(QueryLogic.ToQueryName(replacements.Apply(replacementKey, s)));
+                        var qn = QueryLogic.TryToQueryName(replacements.Apply(replacementKey, s));
+
+                        if (qn == null)
+                            return null;
+
+                        return QueryLogic.GetQuery(qn);
                     }, bool.Parse);
                 };
             }

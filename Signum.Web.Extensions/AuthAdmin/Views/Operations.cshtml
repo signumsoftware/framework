@@ -10,19 +10,19 @@
         <thead>
             <tr>
                 <th>
-                    @AuthMessage.OperationsAscx_Operation.NiceToString()
+                    @typeof(Signum.Entities.Basics.OperationDN).NiceName()
                 </th>
                 <th>
-                    @AuthMessage.OperationsAscx_Allow.NiceToString()
+                    @OperationAllowed.Allow.NiceToString()
                 </th>
                 <th>
-                    @AuthMessage.OperationsAscx_DBOnly.NiceToString()
+                    @OperationAllowed.DBOnly.NiceToString()
                 </th>
                 <th>
-                    @AuthMessage.OperationsAscx_None.NiceToString()
+                    @OperationAllowed.None.NiceToString()
                 </th>
                 <th>
-                    @AuthMessage.OperationsAscx_Overriden.NiceToString()
+                    @AuthAdminMessage.Overriden.NiceToString()
                 </th>
             </tr>
         </thead>

@@ -57,32 +57,32 @@ namespace Signum.Engine.Help
             }
         }
 
-        internal static Lazy<HelpState> state = new Lazy<HelpState>(Schema_Initialize, System.Threading.LazyThreadSafetyMode.PublicationOnly);
+        public static Lazy<HelpState> State = new Lazy<HelpState>(Schema_Initialize, System.Threading.LazyThreadSafetyMode.PublicationOnly);
 
       
         public static NamespaceHelp GetNamespace(string @namespace)
         {
-            return state.Value.Namespaces.TryGetC(@namespace);
+            return State.Value.Namespaces.TryGetC(@namespace);
         }
 
         public static List<NamespaceHelp> GetNamespaces()
         {
-            return state.Value.Namespaces.Select(kvp => kvp.Value).ToList();
+            return State.Value.Namespaces.Select(kvp => kvp.Value).ToList();
         }
 
         public static List<AppendixHelp> GetAppendices()
         {
-            return state.Value.Appendices.Select(kvp => kvp.Value).ToList();
+            return State.Value.Appendices.Select(kvp => kvp.Value).ToList();
         }
 
         public static AppendixHelp GetAppendix(string appendix)
         {
-            return state.Value.Appendices.TryGetC(appendix);
+            return State.Value.Appendices.TryGetC(appendix);
         }
 
         public static Type[] AllTypes()
         {
-            return state.Value.TypeToHelpFiles.Keys.ToArray();
+            return State.Value.TypeToHelpFiles.Keys.ToArray();
         }
 
         public static string EntityUrl(Type entityType)
@@ -113,17 +113,17 @@ namespace Signum.Engine.Help
 
         public static EntityHelp GetEntityHelp(Type entityType)
         {
-            return state.Value.TypeToHelpFiles[entityType];
+            return State.Value.TypeToHelpFiles[entityType];
         }
 
         public static List<KeyValuePair<Type, EntityHelp>> GetEntitiesHelp()
         {
-            return state.Value.TypeToHelpFiles.ToList();
+            return State.Value.TypeToHelpFiles.ToList();
         }
 
         public static QueryHelp GetQueryHelp(string query)
         {
-            return state.Value.QueryColumns[QueryLogic.TryToQueryName(query)];
+            return State.Value.QueryColumns[QueryLogic.TryToQueryName(query)];
         }
 
     
@@ -137,22 +137,22 @@ namespace Signum.Engine.Help
 
         public static void ReloadDocumentEntity(EntityHelp entityHelp)
         {
-            state.Value.TypeToHelpFiles[entityHelp.Type] = EntityHelp.Load(entityHelp.Type, XDocument.Load(entityHelp.FileName), entityHelp.FileName);
+            State.Value.TypeToHelpFiles[entityHelp.Type] = EntityHelp.Load(entityHelp.Type, XDocument.Load(entityHelp.FileName), entityHelp.FileName);
         }
 
         public static void ReloadDocumentQuery(QueryHelp queryHelp)
         {
-            state.Value.QueryColumns[queryHelp.Key] = QueryHelp.Load(XDocument.Load(queryHelp.FileName), queryHelp.FileName);
+            State.Value.QueryColumns[queryHelp.Key] = QueryHelp.Load(XDocument.Load(queryHelp.FileName), queryHelp.FileName);
         }
 
         public static void ReloadDocumentNamespace(NamespaceHelp namespaceHelp)
         {
-            state.Value.Namespaces[namespaceHelp.Name] = NamespaceHelp.Load(XDocument.Load(namespaceHelp.FileName), namespaceHelp.FileName);
+            State.Value.Namespaces[namespaceHelp.Name] = NamespaceHelp.Load(XDocument.Load(namespaceHelp.FileName), namespaceHelp.FileName);
         }
 
         public static void ReloadDocumentAppendix(AppendixHelp appendixHelp)
         {
-            state.Value.Appendices[appendixHelp.Name] = AppendixHelp.Load(XDocument.Load(appendixHelp.FileName), appendixHelp.FileName);
+            State.Value.Appendices[appendixHelp.Name] = AppendixHelp.Load(XDocument.Load(appendixHelp.FileName), appendixHelp.FileName);
         }
 
         static HelpState Schema_Initialize()

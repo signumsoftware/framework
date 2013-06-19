@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Signum.Entities.DynamicQuery;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Windows.UserQueries
 {
@@ -21,9 +22,22 @@ namespace Signum.Windows.UserQueries
     {
         public event Func<QueryToken, List<QueryToken>> SubTokensEvent;
 
+        public static readonly DependencyProperty TokenProperty = 
+            DependencyProperty.Register("Token", typeof(QueryTokenDN), typeof(QueryTokenDNBuilder), new PropertyMetadata(null));
+        public QueryTokenDN Token
+        {
+            get { return (QueryTokenDN)GetValue(TokenProperty); }
+            set { SetValue(TokenProperty, value); }
+        }
+
         public QueryTokenDNBuilder()
         {
             InitializeComponent();
+        }
+
+        static QueryTokenDNBuilder()
+        {
+            Common.ValuePropertySelector.SetDefinition(typeof(QueryTokenDNBuilder), TokenProperty);
         }
 
         private List<QueryToken> QueryTokenBuilder_SubTokensEvent(QueryToken arg)

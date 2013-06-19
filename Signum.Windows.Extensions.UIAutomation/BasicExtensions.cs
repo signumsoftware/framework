@@ -7,6 +7,7 @@ using Signum.Utilities;
 using System.Windows.Automation;
 using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Entities;
 
 namespace Signum.Windows.UIAutomation
 {
@@ -161,10 +162,12 @@ namespace Signum.Windows.UIAutomation
             element.Wait(() => element.IsVisible(), actionDescription, timeOut);
         }
 
-        public static void AssertClassName(this AutomationElement element, string expectedType)
+        public static void AssertClassName(this AutomationElement element, string expectedType, bool allowHwndWrapper = false)
         {
-            if (element.Current.ClassName != expectedType)
-                throw new InvalidCastException("The AutomationElement is not a {0}, but a {1}".Formato(expectedType, element.Current.ClassName));
+            if (element.Current.ClassName == expectedType)
+                return;
+
+            throw new InvalidCastException("The AutomationElement is not a {0}, but a {1}".Formato(expectedType, element.Current.ClassName));
         }
     }
 }

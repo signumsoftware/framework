@@ -29,7 +29,7 @@ namespace Signum.Windows.Authorization
                 return new QuickLink[]
                 {
                     new QuickLinkAction(AuthAdminMessage.PermissionRules, () => 
-                        new PermissionRules { Role = r, Owner = Window.GetWindow(c) }.Show())
+                        Navigator.OpenIndependentWindow(()=>new PermissionRules { Role = r }))
                     {
                         IsVisible = authorized
                     },

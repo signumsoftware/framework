@@ -280,10 +280,10 @@ namespace Signum.Entities.Chart
                 if (c == null || c.Token == null)
                     return s.IsOptional;
 
-                if (!ChartUtils.IsChartColumnType(c.Token, s.ColumnType))
+                if (!ChartUtils.IsChartColumnType(c.Token.Token, s.ColumnType))
                     return false;
 
-                if (c.Token is AggregateToken)
+                if (c.Token.Token is AggregateToken)
                     return !s.IsGroupKey;
                 else
                     return s.IsGroupKey || !chartBase.GroupResults; 

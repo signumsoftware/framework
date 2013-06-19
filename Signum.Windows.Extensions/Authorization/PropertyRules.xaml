@@ -4,14 +4,15 @@
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:auth="clr-namespace:Signum.Windows.Authorization"
-    xmlns:authdn="clr-namespace:Signum.Entities.Authorization;assembly=Signum.Entities.Extensions"
-    xmlns:dn="clr-namespace:Signum.Entities;assembly=Signum.Entities"
+    xmlns:d="clr-namespace:Signum.Entities.Authorization;assembly=Signum.Entities.Extensions"
+    xmlns:seb="clr-namespace:Signum.Entities.Basics;assembly=Signum.Entities"
+    xmlns:seb2="clr-namespace:Signum.Entities.Basics;assembly=Signum.Entities.Extensions"
     SizeToContent="WidthAndHeight"
     m:Monitors.AdjustToMonitor="true"
     TextOptions.TextFormattingMode="Display"
     UseLayoutRounding="True" 
     WindowStartupLocation="CenterOwner"
-    Title="Property Rules" x:Name="me" MinWidth="300" MinHeight="300" m:Common.TypeContext="{x:Type authdn:PropertyRulePack}">
+    x:Name="me" MinWidth="300" MinHeight="300" m:Common.TypeContext="{x:Type d:PropertyRulePack}">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -32,38 +33,38 @@
             </ListView.ItemContainerStyle>
             <ListView.View>
                 <GridView AllowsColumnReorder="False">
-                    <GridViewColumn Header="Property" DisplayMemberBinding="{Binding Resource}" />
-                    <GridViewColumn Header="Modify" Width="40">
+                    <GridViewColumn Header="{m:LocType {x:Type seb2:PropertyRouteDN}}" DisplayMemberBinding="{Binding Resource}" />
+                    <GridViewColumn Header="{m:Loc {x:Static d:PropertyAllowed.Modify}}" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <RadioButton 
-                                    Visibility="{Binding CoercedValues, Converter={auth:VisibleIfNotContains {x:Static authdn:PropertyAllowed.Modify}}}"
-                                    IsChecked="{Binding Allowed, Converter={m:Equals {x:Static authdn:PropertyAllowed.Modify}}}" 
+                                    Visibility="{Binding CoercedValues, Converter={auth:VisibleIfNotContains {x:Static d:PropertyAllowed.Modify}}}"
+                                    IsChecked="{Binding Allowed, Converter={m:Equals {x:Static d:PropertyAllowed.Modify}}}" 
                                     Style="{StaticResource SphereRadioButton}" Background="Lime"  />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="Read" Width="40">
+                    <GridViewColumn Header="{m:Loc {x:Static d:PropertyAllowed.Read}}" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <RadioButton 
-                                    Visibility="{Binding CoercedValues, Converter={auth:VisibleIfNotContains {x:Static authdn:PropertyAllowed.Read}}}"
-                                    IsChecked="{Binding Path=Allowed, Converter={m:Equals {x:Static authdn:PropertyAllowed.Read}}}" 
+                                    Visibility="{Binding CoercedValues, Converter={auth:VisibleIfNotContains {x:Static d:PropertyAllowed.Read}}}"
+                                    IsChecked="{Binding Path=Allowed, Converter={m:Equals {x:Static d:PropertyAllowed.Read}}}" 
                                     Style="{StaticResource SphereRadioButton}" Background="Yellow" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="None" Width="40">
+                    <GridViewColumn Header="{m:Loc {x:Static d:PropertyAllowed.None}}" Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <RadioButton 
-                                    Visibility="{Binding CoercedValues, Converter={auth:VisibleIfNotContains {x:Static authdn:PropertyAllowed.None}}}"
-                                    IsChecked="{Binding Path=Allowed, Converter={m:Equals {x:Static authdn:PropertyAllowed.None}}}" 
+                                    Visibility="{Binding CoercedValues, Converter={auth:VisibleIfNotContains {x:Static d:PropertyAllowed.None}}}"
+                                    IsChecked="{Binding Path=Allowed, Converter={m:Equals {x:Static d:PropertyAllowed.None}}}" 
                                     Style="{StaticResource SphereRadioButton}" Background="Red" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="Overriden" Width="60">
+                    <GridViewColumn Header="{m:Loc {x:Static d:AuthAdminMessage.Overriden}}" Width="60">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <CheckBox IsEnabled="False" IsChecked="{Binding Path=Overriden,Mode=OneWay}" />

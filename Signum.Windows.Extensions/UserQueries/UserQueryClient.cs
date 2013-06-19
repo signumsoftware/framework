@@ -122,7 +122,7 @@ namespace Signum.Windows.UserQueries
             if (!Navigator.IsViewable(typeof(UserQueryDN)))
                 return null;
 
-            return UserQueryMenuItemConsturctor.Construct(seachControl);
+            return UserQueryMenuItemConstructor.Construct(seachControl);
         }
 
         internal static UserQueryDN FromSearchControl(SearchControl searchControl)
@@ -131,35 +131,35 @@ namespace Signum.Windows.UserQueries
 
             return searchControl.GetQueryRequest(true).ToUserQuery(description, 
                 QueryClient.GetQuery(searchControl.QueryName), 
-                FindOptions.DefaultElementsPerPage, 
+                FindOptions.DefaultPagination, 
                 searchControl.SimpleFilterBuilder != null);
         }
 
         internal static void ToSearchControl(UserQueryDN uq, SearchControl searchControl)
         {
-            var filters = uq.WithoutFilters ? searchControl.FilterOptions.ToList() : 
-                searchControl.FilterOptions.Where(f => f.Frozen).Concat(uq.Filters.Select(qf => new FilterOption
-            {
-                Path = qf.Token.FullKey(),
-                Operation = qf.Operation,
-                Value = qf.Value
-            })).ToList();
+            var filters = uq.WithoutFilters ? searchControl.FilterOptions.ToList() :
+                 searchControl.FilterOptions.Where(f => f.Frozen).Concat(uq.Filters.Select(qf => new FilterOption
+             {
+                 Path = qf.Token.Token.FullKey(),
+                 Operation = qf.Operation,
+                 Value = qf.Value
+             })).ToList();
 
             var columns = uq.Columns.Select(qc => new ColumnOption
             {
-                Path = qc.Token.FullKey(),
+                Path = qc.Token.Token.FullKey(),
                 DisplayName = qc.DisplayName
             }).ToList();
 
             var orders = uq.Orders.Select(of => new OrderOption
             {
-                Path = of.Token.FullKey(),
+                Path = of.Token.Token.FullKey(),
                 OrderType = of.OrderType,
             }).ToList();
-         
-            searchControl.Reinitialize(filters, columns, uq.ColumnsMode, orders);
 
-            searchControl.ElementsPerPage = uq.ElementsPerPage ?? FindOptions.DefaultElementsPerPage;
+            var pagination = uq.GetPagination() ?? Navigator.GetQuerySettings(searchControl.QueryName).Pagination ?? FindOptions.DefaultPagination;
+
+            searchControl.Reinitialize(filters, columns, uq.ColumnsMode, orders, pagination);
         }
 
         internal static void ToCountSearchControl(UserQueryDN uq, CountSearchControl countSearchControl)
@@ -167,21 +167,21 @@ namespace Signum.Windows.UserQueries
             var filters = uq.WithoutFilters ? countSearchControl.FilterOptions.ToList() :
                 countSearchControl.FilterOptions.Where(f => f.Frozen).Concat(uq.Filters.Select(qf => new FilterOption
                 {
-                    Path = qf.Token.FullKey(),
+                    Path = qf.Token.Token.FullKey(),
                     Operation = qf.Operation,
                     Value = qf.Value
                 })).ToList();
 
             var columns = uq.Columns.Select(qc => new ColumnOption
             {
-            
-                Path = qc.Token.FullKey(),
+
+                Path = qc.Token.Token.FullKey(),
                 DisplayName = qc.DisplayName
             }).ToList();
 
             var orders = uq.Orders.Select(of => new OrderOption
             {
-                Path = of.Token.FullKey(),
+                Path = of.Token.Token.FullKey(),
                 OrderType = of.OrderType,
             }).ToList();
 

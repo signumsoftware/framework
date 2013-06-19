@@ -14,6 +14,7 @@ using System.Windows.Shapes;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Chart;
 using Signum.Utilities;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Windows.Chart
 {
@@ -69,13 +70,15 @@ namespace Signum.Windows.Chart
             vl.Bind(ValueLine.LabelTextProperty, "ScriptColumn." + property + ".Name");
         }
 
-        public static IMultiValueConverter EnumValues = ConverterFactory.New((ChartScriptParameterDN csp, QueryToken token) =>
+        public static IMultiValueConverter EnumValues = ConverterFactory.New((ChartScriptParameterDN csp, QueryTokenDN token) =>
         {
             if (csp == null || csp.Type != ChartParameterType.Enum)
                 return null;
 
+            var t = token.TryCC(tk => tk.Token);
+
             return csp.GetEnumValues()
-                .Where(a => a.CompatibleWith(token))
+                .Where(a => a.CompatibleWith(t))
                 .Select(a => a.Name)
                 .ToList();
         });

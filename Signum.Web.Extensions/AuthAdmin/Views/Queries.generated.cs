@@ -39,7 +39,7 @@ namespace Signum.Web.Extensions.AuthAdmin.Views
     using Signum.Web;
     using Signum.Web.Auth;
     
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.5.4.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/AuthAdmin/Views/Queries.cshtml")]
     public partial class Queries : System.Web.Mvc.WebViewPage<dynamic>
     {
@@ -117,7 +117,7 @@ WriteLiteral("    <table class=\"sf-auth-rules\" id=\"queries\">\r\n        <the
 
             
             #line 13 "..\..\AuthAdmin\Views\Queries.cshtml"
-               Write(AuthMessage.QueriesAscx_Query.NiceToString());
+               Write(typeof(Signum.Entities.Basics.QueryDN).NiceName());
 
             
             #line default
@@ -127,7 +127,7 @@ WriteLiteral("\r\n                </th>\r\n                <th>\r\n             
 
             
             #line 16 "..\..\AuthAdmin\Views\Queries.cshtml"
-               Write(AuthMessage.QueriesAscx_Allow.NiceToString());
+               Write(AuthAdminMessage.Allow.NiceToString());
 
             
             #line default
@@ -137,7 +137,7 @@ WriteLiteral("\r\n                </th>\r\n                <th>\r\n             
 
             
             #line 19 "..\..\AuthAdmin\Views\Queries.cshtml"
-               Write(AuthMessage.QueriesAscx_Deny.NiceToString());
+               Write(AuthAdminMessage.Deny.NiceToString());
 
             
             #line default
@@ -147,7 +147,7 @@ WriteLiteral("\r\n                </th>\r\n                <th>\r\n             
 
             
             #line 22 "..\..\AuthAdmin\Views\Queries.cshtml"
-               Write(AuthMessage.QueriesAscx_Overriden.NiceToString());
+               Write(AuthAdminMessage.Overriden.NiceToString());
 
             
             #line default

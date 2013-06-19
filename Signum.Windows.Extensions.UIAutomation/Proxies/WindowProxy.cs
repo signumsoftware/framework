@@ -80,10 +80,11 @@ namespace Signum.Windows.UIAutomation
             }
         }
 
-       
-
         public static AutomationElement Normalize(AutomationElement element)
         {
+            if (element.Current.ControlType == ControlType.Window)
+                return element;
+
             TreeWalker walker = new TreeWalker(ConditionBuilder.ToCondition(a => a.Current.ControlType == ControlType.Window));
 
             return walker.Normalize(element);

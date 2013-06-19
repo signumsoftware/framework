@@ -16,29 +16,29 @@
 
     <Expander>
         <Expander.Header>
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" SharedSizeGroup="A"/>
-                <ColumnDefinition Width="Auto" SharedSizeGroup="B"/>
-                <ColumnDefinition Width="*" SharedSizeGroup="C"/>
-            </Grid.ColumnDefinitions>
-            <Label Content="{Binding PropertyLabel}" />
-            <ToggleButton ToolTip="Group results" 
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="A"/>
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="B"/>
+                    <ColumnDefinition Width="*" SharedSizeGroup="C"/>
+                </Grid.ColumnDefinitions>
+                <Label Content="{Binding PropertyLabel}" />
+                <ToggleButton ToolTip="Group results" 
                       Visibility="{Binding GroupByVisible, Converter={x:Static m:Converters.BoolToVisibility}}" 
                       IsEnabled="{Binding GroupByEnabled}"    
                       IsChecked="{Binding GroupByChecked}" 
                       HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="1">
-                <Image Source="/Signum.Windows.Extensions;Component/Images/groupby.png" Stretch="None" SnapsToDevicePixels="True" />
-            </ToggleButton>
-                <uq:QueryTokenDNBuilder Grid.Column="2" SubTokensEvent="token_SubTokensEvent" x:Name="token"/>
+                    <Image Source="/Signum.Windows.Extensions;Component/Images/groupby.png" Stretch="None" SnapsToDevicePixels="True" />
+                </ToggleButton>
+                <uq:QueryTokenDNBuilder m:Common.Route="Token" Grid.Column="2" SubTokensEvent="token_SubTokensEvent" x:Name="token"/>
             </Grid>
         </Expander.Header>
         <StackPanel Orientation="Horizontal" m:Common.MinLabelWidth="70" x:Name="sp" Background="{StaticResource LightBlue}">
-                    <m:ValueLine m:Common.Route="DisplayName" MinWidth="200"/>
-                    
-                    <m:ValueLine m:Common.Route="Parameter1" x:Name="param1" />
-                    <m:ValueLine m:Common.Route="Parameter2" x:Name="param2" />
-                    <m:ValueLine m:Common.Route="Parameter3" x:Name="param3" />
-                </StackPanel>
-            </Expander>
+            <m:ValueLine m:Common.Route="DisplayName" MinWidth="200"/>
+
+            <m:ValueLine m:Common.Route="Parameter1" x:Name="param1" />
+            <m:ValueLine m:Common.Route="Parameter2" x:Name="param2" />
+            <m:ValueLine m:Common.Route="Parameter3" x:Name="param3" />
+        </StackPanel>
+    </Expander>
 </UserControl>

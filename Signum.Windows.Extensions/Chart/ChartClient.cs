@@ -79,8 +79,6 @@ namespace Signum.Windows.Chart
                     return null;
                 }); 
 
-                ChartUtils.RemoveNotNullValidators();
-
                 LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, ctrl) =>
                     Server.Return((IChartServer us) => us.GetUserChartsEntity(entity.EntityType))
                     .Select(cp => new UserChartQuickLink (cp, entity)).ToArray());
@@ -126,15 +124,12 @@ namespace Signum.Windows.Chart
 
             miResult.Click += delegate
             {
-                ChartRequestWindow window = new ChartRequestWindow()
+                var cr = new ChartRequest(sc.QueryName)
                 {
-                    DataContext = new ChartRequest(sc.QueryName)
-                    {
-                        Filters = sc.FilterOptions.Select(fo => fo.ToFilter()).ToList(),
-                    }
+                    Filters = sc.FilterOptions.Select(fo => fo.ToFilter()).ToList(),
                 };
 
-                window.Show();
+                ChartClient.OpenChartRequest(cr, null);
             };
 
             return miResult;
@@ -158,15 +153,26 @@ namespace Signum.Windows.Chart
 
                 CurrentEntityConverter.SetFilterValues(uc.Filters, currentEntity);
             }
+            
+            OpenChartRequest(new ChartRequest(query), uc);
+        }
 
-            ChartRequestWindow cw = new ChartRequestWindow()
+        internal static void OpenChartRequest(ChartRequest chartRequest, UserChartDN uc)
+        {
+            Navigator.OpenIndependentWindow(() => 
             {
-                DataContext = new ChartRequest(query)
-            };
+                var crw = new ChartRequestWindow()
+                {
+                    DataContext = chartRequest,
+                    Title = ChartMessage.ChartOf0.NiceToString().Formato(QueryUtils.GetNiceName(chartRequest.QueryName)),
+                    Icon = Navigator.Manager.GetFindIcon(chartRequest.QueryName, false) ?? ExtensionsImageLoader.GetImageSortName("chartIcon.png")
+                };
 
-            ChartClient.SetUserChart(cw, uc);
+                if (uc != null)
+                    SetUserChart(crw, uc);
 
-            cw.Show();
+                return crw; 
+            });
         }
     }
 }
