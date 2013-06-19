@@ -90,7 +90,7 @@ namespace Signum.Windows.Notes
                     func != null ?  func((IdentifiableEntity)DataContext) : new FilterOption("Target", DataContext) { Frozen = true },
                 },
                 OrderOptions = { new OrderOption("CreationDate", OrderType.Ascending) },
-                Closed = (_, __) => ReloadNotes()
+                Closed = (_, __) => Dispatcher.Invoke(() => ReloadNotes())
             };
 
             if (func == null)
