@@ -966,31 +966,41 @@ namespace Signum.Windows
             return (SortGridViewColumnHeader)((ContextMenu)(((MenuItem)sender).Parent)).PlacementTarget;
         }
 
-        public void Reinitialize(List<FilterOption> filters, List<ColumnOption> columns, ColumnOptionsMode columnOptionsMode, List<OrderOption> orders)
+        public void Reinitialize(List<FilterOption> filters, List<ColumnOption> columns, ColumnOptionsMode columnOptionsMode, List<OrderOption> orders, Pagination pagination)
         {
-            ColumnOptions.Clear();
-            ColumnOptions.AddRange(columns);
-            DynamicQueryServer.SetColumnTokens(ColumnOptions, Description);
-            ColumnOptionsMode = columnOptionsMode; 
-            GenerateListViewColumns();
-
-            if (!filters.SequenceEqual(FilterOptions))
+            try
             {
-                if (SimpleFilterBuilder != null)
-                    SimpleFilterBuilder = null;
+                settingResults = true;
 
-                FilterOptions.Clear();
-                DynamicQueryServer.SetFilterTokens(filters, Description);
-                FilterOptions.AddRange(filters);
+                ColumnOptions.Clear();
+                ColumnOptions.AddRange(columns);
+                DynamicQueryServer.SetColumnTokens(ColumnOptions, Description);
+                ColumnOptionsMode = columnOptionsMode;
+                GenerateListViewColumns();
+
+                if (!filters.SequenceEqual(FilterOptions))
+                {
+                    if (SimpleFilterBuilder != null)
+                        SimpleFilterBuilder = null;
+
+                    FilterOptions.Clear();
+                    DynamicQueryServer.SetFilterTokens(filters, Description);
+                    FilterOptions.AddRange(filters);
+                }
+
+                OrderOptions.Clear();
+                OrderOptions.AddRange(orders);
+                DynamicQueryServer.SetOrderTokens(OrderOptions, Description);
+                SortGridViewColumnHeader.SetColumnAdorners(gvResults, OrderOptions);
+
+                UpdateMultiplyMessage(true);
+
+                Pagination = pagination;
             }
-
-            OrderOptions.Clear();
-            OrderOptions.AddRange(orders);
-            DynamicQueryServer.SetOrderTokens(OrderOptions, Description);
-            SortGridViewColumnHeader.SetColumnAdorners(gvResults, OrderOptions);
-
-
-            UpdateMultiplyMessage(true); 
+            finally
+            {
+                settingResults = false;
+            }
         }
 
         private void btFilters_Unchecked(object sender, RoutedEventArgs e)
