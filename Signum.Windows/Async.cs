@@ -6,6 +6,8 @@ using System.Windows.Threading;
 using System.Windows;
 using System.Threading.Tasks;
 using System.Threading;
+using Signum.Utilities;
+using System.Collections.Concurrent;
 
 namespace Signum.Windows
 {
@@ -14,8 +16,7 @@ namespace Signum.Windows
         public static event Action<Exception, Window> AsyncUnhandledException;
         public static event Action<Exception, Window> DispatcherUnhandledException;
 
-        [ThreadStatic]
-        static Window mainWindow; 
+        static ConcurrentDictionary<Thread, Window> threadWindows = new ConcurrentDictionary<Thread, Window>();
 
         public static IAsyncResult Do(Action backgroundThread, Action endAction, Action finallyAction)
         {
@@ -31,7 +32,7 @@ namespace Signum.Windows
                 }
                 catch (Exception e)
                 {
-                    disp.BeginInvoke(DispatcherPriority.Normal, (Action)(() => AsyncUnhandledException(e, mainWindow)));
+                    disp.BeginInvoke(DispatcherPriority.Normal, (Action)(() => AsyncUnhandledException(e, threadWindows.TryGetC(Thread.CurrentThread))));
                 }
                 finally
                 {
@@ -84,19 +85,20 @@ namespace Signum.Windows
                     {
                         Dispatcher.CurrentDispatcher.UnhandledException += (sender, args) =>
                         {
-                            OnDispatcherUnhandledException(args.Exception, mainWindow);
+                            OnDispatcherUnhandledException(args.Exception, threadWindows.TryGetC(Thread.CurrentThread));
 
                             args.Handled = true;
                         };
 
                         W win = windowConstructor();
 
-                        mainWindow = win;
+                        threadWindows.TryAdd(Thread.CurrentThread, win);
 
                         win.Closed += (sender, args) =>
                         {
                             ((Window)sender).Dispatcher.InvokeShutdown();
-                            mainWindow = null;
+                            Window rubish;
+                            threadWindows.TryRemove(Thread.CurrentThread, out rubish);
                             if (closed != null)
                                 closed(sender, args);
                         };
@@ -110,7 +112,7 @@ namespace Signum.Windows
                     }
                     catch (Exception e)
                     {
-                        OnDispatcherUnhandledException(e, mainWindow); 
+                        OnDispatcherUnhandledException(e, threadWindows.TryGetC(Thread.CurrentThread)); 
                     }
                 });
                 t.SetApartmentState(ApartmentState.STA);
@@ -132,6 +134,16 @@ namespace Signum.Windows
                 throw new InvalidOperationException("There has been an exception but Async.AsyncUnhandledException is not set");
 
             AsyncUnhandledException(ex, win);
+        }
+
+        public static bool CloseAllThreadWindows()
+        {
+            foreach (var win in threadWindows.Values.ToList())
+            {
+                win.Dispatcher.Invoke(() => win.Close());
+            }
+
+            return threadWindows.Any();
         }
     }
 }
