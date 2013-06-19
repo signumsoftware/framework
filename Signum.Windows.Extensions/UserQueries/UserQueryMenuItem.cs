@@ -17,10 +17,11 @@ using Signum.Entities.Authorization;
 using System.Windows.Data;
 using Signum.Windows.Authorization;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace Signum.Windows.UserQueries
 {
-    public static class UserQueryMenuItemConsturctor
+    public static class UserQueryMenuItemConstructor
     {
         static IValueConverter notNullAndEditable = ConverterFactory.New((UserQueryDN uq) => uq != null && uq.IsAllowedFor(TypeAllowedBasic.Modify));
 
@@ -73,19 +74,23 @@ namespace Signum.Windows.UserQueries
 
                 UserQueryDN userQuery = UserQueryClient.FromSearchControl(sc);
 
+                var disp = Dispatcher.CurrentDispatcher;
                 Navigator.Navigate(userQuery, new NavigateOptions
                 {
-                    View = new UserQuery { QueryDescription = sc.Description },
+                    View = () => new UserQuery { QueryDescription = sc.Description },
                     Closed = (s, args) =>
                     {
-                        initialize();
-
-                        if (userQuery.IdOrNull != null)
+                        disp.Invoke(() =>
                         {
-                            current = userQuery;
-                        }
+                            initialize();
 
-                        updatecurrent();
+                            if (userQuery.IdOrNull != null)
+                            {
+                                current = userQuery;
+                            }
+
+                            updatecurrent();
+                        });
                     }
                 });
             };
@@ -94,13 +99,17 @@ namespace Signum.Windows.UserQueries
             {
                 e.Handled = true;
 
-                Navigator.Navigate(current, new NavigateOptions()
+                var d = Dispatcher.CurrentDispatcher;
+                Navigator.Navigate(current, new NavigateOptions
                 {
-                    View = new UserQuery { QueryDescription = sc.Description },
+                    View = () => new UserQuery { QueryDescription = sc.Description },
                     Closed = (s, args) =>
                     {
-                        initialize();
-                        updatecurrent();
+                        d.Invoke(() =>
+                        {
+                            initialize();
+                            updatecurrent();
+                        });
                     }
                 });
             };

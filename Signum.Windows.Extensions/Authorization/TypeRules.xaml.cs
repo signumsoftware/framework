@@ -101,36 +101,36 @@ namespace Signum.Windows.Authorization
         {
             TypeRuleBuilder rules = (TypeRuleBuilder)((Button)sender).DataContext;
 
-            new PropertyRules
+            Navigator.OpenIndependentWindow(() => new PropertyRules
             {
                 Owner = this,
                 Type = rules.Resource,
                 Role = Role
-            }.Show(); 
+            }); 
         }
 
         private void operations_Click(object sender, RoutedEventArgs e)
         {
             TypeRuleBuilder rules = (TypeRuleBuilder)((Button)sender).DataContext;
 
-            new OperationRules
+            Navigator.OpenIndependentWindow(() => new OperationRules
             {
                 Owner = this,
                 Type = rules.Resource,
                 Role = Role
-            }.Show(); 
+            }); 
         }
 
         private void queries_Click(object sender, RoutedEventArgs e)
         {
             TypeRuleBuilder rules = (TypeRuleBuilder)((Button)sender).DataContext;
 
-            new QueryRules
+            Navigator.OpenIndependentWindow(() => new QueryRules
             {
                 Owner = this,
                 Type = rules.Resource,
                 Role = Role
-            }.Show(); 
+            });
         }
 
         private void treeView_ScrollChanged(object sender, ScrollChangedEventArgs e)

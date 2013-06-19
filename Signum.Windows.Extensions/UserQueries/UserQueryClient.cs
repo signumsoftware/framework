@@ -122,7 +122,7 @@ namespace Signum.Windows.UserQueries
             if (!Navigator.IsViewable(typeof(UserQueryDN)))
                 return null;
 
-            return UserQueryMenuItemConsturctor.Construct(seachControl);
+            return UserQueryMenuItemConstructor.Construct(seachControl);
         }
 
         internal static UserQueryDN FromSearchControl(SearchControl searchControl)

@@ -185,14 +185,11 @@ namespace Signum.Windows.Chart
 
         private void edit_Click(object sender, RoutedEventArgs e)
         {
-            chartScriptControl = new ChartScript();
-            chartScriptControl.RequestWindow = this;
-
             Navigator.Navigate(Request.ChartScript, new NavigateOptions()
             {
-                View = chartScriptControl,
+                View = () => new ChartScript { RequestWindow = this },
                 Clone = false,
-            }); 
+            });
         }
 
         internal void SetResults(string script)

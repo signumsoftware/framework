@@ -187,15 +187,22 @@ namespace Signum.Windows.UIAutomation
 
                 Element.Wait(() =>
                 {
-                    if (IsClosed)
+                    try
+                    {
+                        if (IsClosed)
+                            return true;
+
+                        confirmation = Element.TryMessageBoxChild();
+
+                        if (confirmation != null)
+                            return true;
+
+                        return false;
+                    }
+                    catch (ElementNotAvailableException)
+                    {
                         return true;
-
-                    confirmation = Element.TryMessageBoxChild();
-
-                    if (confirmation != null)
-                        return true;
-
-                    return false;
+                    }
                 }, () => "Waiting for normal window to close or show confirmation dialog");
 
 
