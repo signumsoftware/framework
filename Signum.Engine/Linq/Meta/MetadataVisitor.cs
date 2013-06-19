@@ -569,8 +569,12 @@ namespace Signum.Engine.Linq
             var mRight = right as MetaExpression;
             var mLeft = left as MetaExpression;
 
-            Implementations? imps = mRight != null && mLeft != null && mRight.Meta.Implementations != null && mLeft.Meta.Implementations != null ?
-                AggregateImplementations(new[] { mRight.Meta.Implementations.Value, mLeft.Meta.Implementations.Value }) :
+            Implementations? imps =
+                mRight != null && mRight.Meta.Implementations != null &&
+                mLeft != null && mLeft.Meta.Implementations != null ?
+                AggregateImplementations(new[] { 
+                    mRight.Meta.Implementations.Value, 
+                    mLeft.Meta.Implementations.Value }) :
                 (Implementations?)null;
 
             return MakeDirtyMeta(b.Type, imps, left, right);
@@ -584,8 +588,12 @@ namespace Signum.Engine.Linq
             var mIfTrue = ifTrue as MetaExpression;
             var mIfFalse = ifFalse as MetaExpression;
 
-            Implementations? imps = mIfFalse != null && mIfFalse != null && mIfFalse.Meta.Implementations != null && mIfFalse.Meta.Implementations != null ?
-                AggregateImplementations(new[] { mIfTrue.Meta.Implementations.Value, mIfFalse.Meta.Implementations.Value }) :
+            Implementations? imps =
+                mIfTrue != null && mIfTrue.Meta.Implementations != null && 
+                mIfFalse != null && mIfFalse.Meta.Implementations != null ?
+                AggregateImplementations(new[] { 
+                    mIfTrue.Meta.Implementations.Value, 
+                    mIfFalse.Meta.Implementations.Value }) :
                 (Implementations?)null;
 
             return MakeDirtyMeta(c.Type, imps, Visit(c.Test), ifTrue, ifFalse);
