@@ -289,10 +289,15 @@ namespace Signum.Engine.Mailing
                 },
                 table.Rows);
 
-            if (message.TextParsedNode == null)
-                message.TextParsedNode = EmailTemplateParser.Parse(message.Text, parseToken, template.SystemEmail.ToType());
+            string body = message.Text;
 
-            var body = ((EmailTemplateParser.BlockNode)message.TextParsedNode).Print(
+            if (template.MasterTemplate != null)
+                body = EmailMasterTemplateDN.MasterTemplateContentRegex.Replace(template.MasterTemplate.Retrieve().Text, m => body);
+
+            if (message.TextParsedNode == null)
+                message.TextParsedNode = EmailTemplateParser.Parse(body, parseToken, template.SystemEmail.ToType());
+
+            body = ((EmailTemplateParser.BlockNode)message.TextParsedNode).Print(
                 new EmailTemplateParameters
                 {
                     Columns = dicTokenColumn,
@@ -302,10 +307,7 @@ namespace Signum.Engine.Mailing
                     SystemEmail = systemEmail
                 },
                 table.Rows);
-
-            if (template.MasterTemplate != null)
-                body = EmailMasterTemplateDN.MasterTemplateContentRegex.Replace(template.MasterTemplate.Retrieve().Text, m => body);
-
+            
             email.Body = body;
 
             return email;
