@@ -292,17 +292,22 @@ namespace Signum.Engine
 
         public static void UpdateToStrings<T>() where T : IdentifiableEntity, new()
         {
+            UpdateToStrings(Database.Query<T>()); 
+        }
+        
+        public static void UpdateToStrings<T>(IQueryable<T> query) where T : IdentifiableEntity, new()
+        {
             SafeConsole.WriteLineColor(ConsoleColor.Cyan, "Saving toStr for {0}".Formato(typeof(T).TypeName()));
 
-            if (!Database.Query<T>().Any())
+            if (!query.Any())
                 return;
 
-            int min = Database.Query<T>().Min(a => a.Id);
-            int max = Database.Query<T>().Max(a => a.Id);
+            int min = query.Min(a => a.Id);
+            int max = query.Max(a => a.Id);
 
             min.To(max + 1, 100).ProgressForeach(id => id.ToString(), null, (i, writer) =>
             {
-                var list = Database.Query<T>().Where(a => i <= a.Id && a.Id < i + 100).ToList();
+                var list = query.Where(a => i <= a.Id && a.Id < i + 100).ToList();
 
                 foreach (var item in list)
                 {
