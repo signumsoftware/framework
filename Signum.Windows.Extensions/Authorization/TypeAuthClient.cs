@@ -44,7 +44,6 @@ namespace Signum.Windows.Authorization
                     new QuickLinkAction(AuthAdminMessage.TypeRules, () => 
                         Navigator.OpenIndependentWindow(()=> new TypeRules 
                         { 
-                            Owner = Window.GetWindow(c),
                             Role = r, 
                             Properties = PropertyAuthClient.Started, 
                             Operations = OperationAuthClient.Started,
