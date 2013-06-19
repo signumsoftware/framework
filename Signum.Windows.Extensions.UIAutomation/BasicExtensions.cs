@@ -7,6 +7,7 @@ using Signum.Utilities;
 using System.Windows.Automation;
 using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Entities;
 
 namespace Signum.Windows.UIAutomation
 {
@@ -164,9 +165,6 @@ namespace Signum.Windows.UIAutomation
         public static void AssertClassName(this AutomationElement element, string expectedType, bool allowHwndWrapper = false)
         {
             if (element.Current.ClassName == expectedType)
-                return;
-
-            if (allowHwndWrapper && element.Current.ClassName.Contains("HwndWrapper"))
                 return;
 
             throw new InvalidCastException("The AutomationElement is not a {0}, but a {1}".Formato(expectedType, element.Current.ClassName));

@@ -138,12 +138,12 @@ namespace Signum.Windows.UserQueries
         internal static void ToSearchControl(UserQueryDN uq, SearchControl searchControl)
         {
             var filters = uq.WithoutFilters ? searchControl.FilterOptions.ToList() :
-                searchControl.FilterOptions.Where(f => f.Frozen).Concat(uq.Filters.Select(qf => new FilterOption
-            {
-                Path = qf.Token.Token.FullKey(),
-                Operation = qf.Operation,
-                Value = qf.Value
-            })).ToList();
+                 searchControl.FilterOptions.Where(f => f.Frozen).Concat(uq.Filters.Select(qf => new FilterOption
+             {
+                 Path = qf.Token.Token.FullKey(),
+                 Operation = qf.Operation,
+                 Value = qf.Value
+             })).ToList();
 
             var columns = uq.Columns.Select(qc => new ColumnOption
             {
@@ -157,9 +157,9 @@ namespace Signum.Windows.UserQueries
                 OrderType = of.OrderType,
             }).ToList();
 
-            searchControl.Reinitialize(filters, columns, uq.ColumnsMode, orders);
+            var pagination = uq.GetPagination() ?? Navigator.GetQuerySettings(searchControl.QueryName).Pagination ?? FindOptions.DefaultPagination;
 
-            searchControl.Pagination = uq.GetPagination() ?? Navigator.GetQuerySettings(searchControl.QueryName).Pagination ?? FindOptions.DefaultPagination;
+            searchControl.Reinitialize(filters, columns, uq.ColumnsMode, orders, pagination);
         }
 
         internal static void ToCountSearchControl(UserQueryDN uq, CountSearchControl countSearchControl)

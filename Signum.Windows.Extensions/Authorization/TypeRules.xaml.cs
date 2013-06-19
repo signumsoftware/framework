@@ -100,36 +100,33 @@ namespace Signum.Windows.Authorization
         private void properties_Click(object sender, RoutedEventArgs e)
         {
             TypeRuleBuilder rules = (TypeRuleBuilder)((Button)sender).DataContext;
-
+            var role = Role;
             Navigator.OpenIndependentWindow(() => new PropertyRules
             {
-                Owner = this,
                 Type = rules.Resource,
-                Role = Role
+                Role = role
             }); 
         }
 
         private void operations_Click(object sender, RoutedEventArgs e)
         {
             TypeRuleBuilder rules = (TypeRuleBuilder)((Button)sender).DataContext;
-
+            var role = Role;
             Navigator.OpenIndependentWindow(() => new OperationRules
             {
-                Owner = this,
                 Type = rules.Resource,
-                Role = Role
+                Role = role
             }); 
         }
 
         private void queries_Click(object sender, RoutedEventArgs e)
         {
             TypeRuleBuilder rules = (TypeRuleBuilder)((Button)sender).DataContext;
-
+            var role = Role;
             Navigator.OpenIndependentWindow(() => new QueryRules
             {
-                Owner = this,
                 Type = rules.Resource,
-                Role = Role
+                Role = role
             });
         }
 
@@ -232,8 +229,7 @@ namespace Signum.Windows.Authorization
                             foreach (var si in i.SubNodes)
                             {
                                 si.Selected = true;
-                            }
-                        
+                            }           
                         }
                         else
                         i.Selected = false;

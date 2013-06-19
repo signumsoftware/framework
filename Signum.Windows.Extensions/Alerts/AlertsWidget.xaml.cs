@@ -159,7 +159,7 @@ namespace Signum.Windows.Alerts
                     func != null ? func(entity) : new FilterOption("Target", DataContext) { Frozen = true },
                     new FilterOption("Entity.CurrentState", state)
                 },
-                Closed = (o, ea) => ReloadAlerts(),
+                Closed = (o, ea) => Dispatcher.Invoke(() => ReloadAlerts()),
             };
 
             if (func == null)
