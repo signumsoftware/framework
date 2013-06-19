@@ -194,5 +194,36 @@ namespace Signum.Engine.Mailing
             return EmailTemplateLogic.CreateEmailMessage(template, systemEmail.UntypedEntity, systemEmail);
         }
 
+        public static void GenerateAllTemplates()
+        {
+            foreach (var systemEmail in systemEmails.Keys)
+            {
+                var systemEmailDN = ToSystemEmailDN(systemEmail);
+
+                var template = Database.Query<EmailTemplateDN>().SingleOrDefaultEx(t =>
+                    t.IsActiveNow() == true &&
+                    t.SystemEmail == systemEmailDN);
+
+                if (template == null)
+                {
+                    template = systemEmails.GetOrThrow(systemEmail)();
+                    template.SystemEmail = systemEmailDN;
+                    template.Active = true;
+
+                    if (template.Query == null)
+                    {
+                        var emailModelType = ((ISystemEmail)Activator.CreateInstance(systemEmail)).DefaultQueryName;
+                        if (emailModelType == null)
+                            throw new Exception("Query not specified for {0}".Formato(systemEmail));
+
+                        template.Query = QueryLogic.GetQuery(emailModelType);
+                    }
+
+                    using (ExecutionMode.Global())
+                    using (OperationLogic.AllowSave<EmailTemplateDN>())
+                        template.Save();
+                }
+            }
+        }
     }
 }
