@@ -130,8 +130,12 @@ namespace Signum.Entities.Authorization
 
     public enum AuthEmailMessage
     {
-        [Description(@"<p>You recently requested a new password</p><p>Your username is: {0}</p><p>You can reset your password by following the link below</p><a href=""{1}"">{1}</a>")]
-        ResetPasswordRequestBody,
+        [Description("You recently requested a new password")]
+        YouRecentlyRequestedANewPassword,
+        [Description("Your username is:")]
+        YourUsernameIs,
+        [Description("You can reset your password by following the link below")]
+        YouCanResetYourPasswordByFollowingTheLinkBelow,
         [Description("Reset password request")]
         ResetPasswordRequestSubject
     }

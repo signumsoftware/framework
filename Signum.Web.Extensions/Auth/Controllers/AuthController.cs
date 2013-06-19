@@ -214,8 +214,6 @@ namespace Signum.Web.Auth
             return View(AuthClient.ResetPasswordView);
         }
 
-
-
         [HttpPost]
         public ActionResult ResetPassword(string email)
         {
@@ -228,15 +226,13 @@ namespace Signum.Web.Auth
             using (AuthLogic.Disable())
             {
                 var user = ResetPasswordRequestLogic.GetUserByEmail(email);
-                ResetPasswordRequestLogic.ResetPasswordRequestAndSendEmail(user);
+                Func<ResetPasswordRequestDN, string> url = (ResetPasswordRequestDN rpr) => HttpContext.Request.Url.GetLeftPart(UriPartial.Authority) + Url.Action<AuthController>(ac => ac.ResetPasswordCode(email, rpr.Code));
+                ResetPasswordRequestLogic.ResetPasswordRequestAndSendEmail(user, url);
             }
 
             ViewData["email"] = email;
             return RedirectToAction("ResetPasswordSend");
         }
-
-      
-      
 
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult ResetPasswordSend()

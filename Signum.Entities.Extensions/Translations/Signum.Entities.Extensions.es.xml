@@ -70,6 +70,12 @@
     <Member Name="PermissionRules" Description="Reglas de permiso" />
     <Member Name="TypeRules" Description="Reglas de tipo" />
   </Type>
+  <Type Name="AuthEmailMessage">
+    <Member Name="YouRecentlyRequestedANewPassword" Description="Has solicitado una nueva contraseña" />
+    <Member Name="YourUsernameIs" Description="Tu nombre de usuario es:" />
+    <Member Name="YouCanResetYourPasswordByFollowingTheLinkBelow" Description="Puedes establecer una nueva contraseña mediante el siguiente enlace" />
+    <Member Name="ResetPasswordRequestSubject" Description="Solicitud de nueva contraseña" />
+  </Type>
   <Type Name="AuthMessage">
     <Member Name="_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships" Description="{0} ciclos han sido encontrados en el grafo de funciones debido a las relaciones:&#xD;&#xA;" />
     <Member Name="_0RulesFor1" Description="Reglas de {0} para {1}" />

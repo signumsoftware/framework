@@ -5,6 +5,12 @@
     <Member Name="Alerts" Description="Alerts" />
     <Member Name="NewAlert" Description="New Alert" />
   </Type>
+  <Type Name="AuthEmailMessage">
+    <Member Name="YouRecentlyRequestedANewPassword" Description="You recently requested a new password" />
+    <Member Name="YourUsernameIs" Description="Your username is:" />
+    <Member Name="YouCanResetYourPasswordByFollowingTheLinkBelow" Description="You can reset your password by following the link below" />
+    <Member Name="ResetPasswordRequestSubject" Description="Reset password request" />
+  </Type>
   <Type Name="AuthMessage">
     <Member Name="0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships" Description="{0} cycles have been found in the graph of Roles due to the relationships:&#xD;&#xA;" />
     <Member Name="0Rules" Description="{0} rules" />
