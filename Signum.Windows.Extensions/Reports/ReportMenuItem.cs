@@ -81,7 +81,7 @@ namespace Signum.Windows.Reports
                             Frozen = true
                         }
                     },
-                    Closed = (_, __) => initialize() //Refrescar lista de informes tras salir del administrador
+                    Closed = (_, __) => miAdmin.Dispatcher.Invoke(() => initialize()) //Refrescar lista de informes tras salir del administrador
                 });
 
                 e.Handled = true;
