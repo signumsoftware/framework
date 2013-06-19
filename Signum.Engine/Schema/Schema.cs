@@ -522,7 +522,7 @@ namespace Signum.Engine.Maps
             if (lambda == null)
                 return null;
 
-            Expression e = MetadataVisitor.JustVisit(lambda, new MetaExpression(route.Parent.Type, new CleanMeta(route.TryGetImplementations(), new[] { route.Parent })));
+            Expression e = MetadataVisitor.JustVisit(lambda, new MetaExpression(route.Parent.Type, new CleanMeta(route.Parent.TryGetImplementations(), new[] { route.Parent })));
 
             MetaExpression me = e as MetaExpression;
             if (me == null)

@@ -81,7 +81,7 @@ namespace Signum.Entities
 
                 Sb.Append("new ");
 
-                Sb.Append(CSharpRenderer.TypeName(t));
+                Sb.Append(CSharpRenderer.CleanIdentifiers(CSharpRenderer.TypeName(t)));
 
                 if (IgnoreTypes.Contains(t))
                 {
