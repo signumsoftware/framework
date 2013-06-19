@@ -11,8 +11,8 @@ namespace Signum.Windows
 {
     public static class Async
     {
-        public static Action<Exception, Window> AsyncUnhandledException;
-        public static Action<Exception, Window> DispatcherUnhandledException;
+        public static event Action<Exception, Window> AsyncUnhandledException;
+        public static event Action<Exception, Window> DispatcherUnhandledException;
 
         [ThreadStatic]
         static Window mainWindow; 
@@ -84,8 +84,9 @@ namespace Signum.Windows
                     {
                         Dispatcher.CurrentDispatcher.UnhandledException += (sender, args) =>
                         {
-                            if (DispatcherUnhandledException != null)
-                                DispatcherUnhandledException(args.Exception, mainWindow);
+                            OnDispatcherUnhandledException(args.Exception, mainWindow);
+
+                            args.Handled = true;
                         };
 
                         W win = windowConstructor();
@@ -109,12 +110,28 @@ namespace Signum.Windows
                     }
                     catch (Exception e)
                     {
-                        Async.DispatcherUnhandledException(e, mainWindow); 
+                        OnDispatcherUnhandledException(e, mainWindow); 
                     }
                 });
                 t.SetApartmentState(ApartmentState.STA);
                 t.Start();
             }
+        }
+
+        public static void OnDispatcherUnhandledException(Exception ex, Window win)
+        {
+            if (DispatcherUnhandledException == null)
+                throw new InvalidOperationException("There has been an exception but Async.DispatcherUnhandledException is not set");
+
+            DispatcherUnhandledException(ex, win);
+        }
+
+        public static void OnAsyncUnhandledException(Exception ex, Window win)
+        {
+            if (AsyncUnhandledException == null)
+                throw new InvalidOperationException("There has been an exception but Async.AsyncUnhandledException is not set");
+
+            AsyncUnhandledException(ex, win);
         }
     }
 }
