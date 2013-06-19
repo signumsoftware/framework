@@ -216,7 +216,7 @@ namespace Signum.Engine.DynamicQuery
                 .Where(request.Filters)
                 .OrderBy(request.Orders)
                 .Select(request.Columns)
-                .TryPaginatePartial(request.Pagination.MaxElementIndex);
+                .TryPaginate(request.Pagination);
         }
 
         #endregion 
@@ -533,33 +533,6 @@ namespace Signum.Engine.DynamicQuery
         }
         #endregion
 
-        #region TryPaginatePartial
-        public static DEnumerableCount<T> TryPaginatePartial<T>(this DQueryable<T> query, int? maxElementIndex)
-        {
-            if (maxElementIndex.HasValue)
-            {
-                List<object> list = query.Query.Take(maxElementIndex.Value).ToList();
-                int count = list.Count < maxElementIndex.Value ? list.Count : query.Query.Count();
-
-                return new DEnumerableCount<T>(list, query.Context, count);
-            }
-            else
-            {
-                List<object> list = query.Query.ToList();
-                return new DEnumerableCount<T>(list, query.Context, list.Count);
-            }
-        }
-
-        public static DEnumerableCount<T> TryPaginatePartial<T>(this DEnumerable<T> collection, int? maxElementIndex)
-        {
-            int count = collection.Collection.Count(); 
-
-            if (maxElementIndex.HasValue)
-                return new DEnumerableCount<T>(collection.Collection.Take(maxElementIndex.Value), collection.Context, count);
-
-            return new DEnumerableCount<T>(collection.Collection, collection.Context, count);
-        }
-        #endregion
 
         #region TryPaginate
 
