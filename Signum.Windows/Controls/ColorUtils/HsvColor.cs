@@ -19,7 +19,7 @@ using System.Windows.Controls.Primitives;
 namespace Signum.Windows.ColorUtils
 {
  
-    internal struct HsvColor
+    public struct HsvColor
     {
         public double H;
         public double S;

@@ -58,13 +58,13 @@
                                     <ControlTemplate.Triggers>
                                         <Trigger Property="IsKeyboardFocused" Value="True"/>
                                         <Trigger Property="ToggleButton.IsChecked" Value="True">
-                                            <Setter Property="Background" TargetName="border" Value="#FFC9E4FF"/>
+                                            <Setter Property="Background" TargetName="border" Value="{StaticResource LightBlue}"/>
                                         </Trigger>
                                         <Trigger Property="IsEnabled" Value="False">
                                             <Setter Property="Foreground" Value="#FFADADAD"/>
                                         </Trigger>
                                         <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" TargetName="border" Value="#FFA6D3FF"/>
+                                            <Setter Property="Background" TargetName="border" Value="{StaticResource LightBlueDarker}"/>
                                         </Trigger>
                                     </ControlTemplate.Triggers>
                                 </ControlTemplate>
@@ -87,7 +87,7 @@
         <ContentControl Content="{Binding Path=SimpleFilterBuilder, ElementName=me}" Focusable="False"
                         x:Name="simpleFilterBuilderContentControl" 
                         HorizontalContentAlignment="Stretch"/>
-        <Grid Background="#FFC9E4FF" Grid.Row="1">
+        <Grid Background="{StaticResource LightBlue}" Grid.Row="1">
             <Grid.Visibility>
                 <MultiBinding Converter="{x:Static m:Converters.AndToVisibility}">
                     <Binding Path="ShowHeader" ElementName="me"/>
@@ -168,7 +168,7 @@
                 </Style>
             </ListView.ItemContainerStyle>
         </ListView>
-        <StackPanel Grid.Row="5" Background="#FFC9E4FF"  Visibility="{Binding ShowFooter, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}">
+        <StackPanel Grid.Row="5" Background="{StaticResource LightBlue}"  Visibility="{Binding ShowFooter, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}">
             <m:PaginationSelector x:Name="paginationSelector" Pagination="{Binding Pagination, ElementName=me}"  Height="24"   Margin="3,3,16,3" HorizontalAlignment="Stretch"/>
         </StackPanel>
     </Grid>

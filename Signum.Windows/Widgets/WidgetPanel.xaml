@@ -3,7 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:m="clr-namespace:Signum.Windows"
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" >
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" Background="{StaticResource WidgetBackground}" >
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -11,22 +11,9 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
-    <UserControl.Background>
-        <LinearGradientBrush>
-            <GradientStop Color="#dae9ff" Offset="0"/>
-            <GradientStop Color="#d2e1f6" Offset="1"/>
-        </LinearGradientBrush>
-    </UserControl.Background>
     <Expander x:Name="expander" ExpandDirection="Right" Expanded="expander_Expanded" Collapsed="expander_Collapsed">
         <Grid>
-        	<Rectangle HorizontalAlignment="Right" Width="50">
-        		<Rectangle.Fill>
-        			<LinearGradientBrush>
-		                <GradientStop Color="#dae9ff" Offset="0"/>
-		                <GradientStop Color="#d2e1f6" Offset="1"/>
-        			</LinearGradientBrush>
-        		</Rectangle.Fill>
-        	</Rectangle>
+        	<Rectangle HorizontalAlignment="Right" Width="50"/>
         	<StackPanel x:Name="stackPanel" Margin="-22,25,0,0"/>
     	</Grid>
     </Expander>
