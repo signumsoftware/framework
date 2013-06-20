@@ -9,6 +9,7 @@ using Signum.Entities;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Reflection;
 using Signum.Engine;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Windows.UIAutomation
 {
@@ -174,6 +175,8 @@ namespace Signum.Windows.UIAutomation
             }
             set
             {
+                AssertCompatibleLite(value);
+
                 if (!FastSelect(value))
                 {
                     FindLite(value);
@@ -183,6 +186,8 @@ namespace Signum.Windows.UIAutomation
 
         public void FindLite(Lite<IIdentifiable> value)
         {
+            AssertCompatibleLite(value);
+
             if (Element.TryChildById("btFind") == null)
                 throw new InvalidOperationException("The {0} {1} has no find button to complete the search for {2}".Formato(GetType().Name, this, value.KeyLong())); 
 
@@ -203,6 +208,19 @@ namespace Signum.Windows.UIAutomation
                 sw.SelectElementAt(0);
                 sw.Ok();
             }
+        }
+
+        private void AssertCompatibleLite(Lite<IIdentifiable> value)
+        {
+            var imps = GetImplementations();
+            
+            if (!imps.IsByAll && !imps.Types.Contains(value.EntityType))
+                throw new InvalidOperationException("Lite of type {0} can not be set on {1} {2} {3}".Formato(value.EntityType.TypeName(), GetType().TypeName(), PropertyRoute, imps));
+        }
+
+        public virtual Implementations GetImplementations()
+        {
+            return PropertyRoute.GetImplementations();
         }
 
         protected virtual bool FastSelect(Lite<IIdentifiable> value)
@@ -507,6 +525,11 @@ namespace Signum.Windows.UIAutomation
 
             return result;
         }
+
+        public override Implementations GetImplementations()
+        {
+            return PropertyRoute.Add("Item").GetImplementations();
+        }
     }
 
     public class EntityRepeaterProxy : EntityBaseProxy
@@ -545,6 +568,11 @@ namespace Signum.Windows.UIAutomation
                 return null;
 
             return result;
+        }
+
+        public override Implementations GetImplementations()
+        {
+            return PropertyRoute.Add("Item").GetImplementations();
         }
     }
 
