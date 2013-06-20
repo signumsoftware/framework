@@ -69,7 +69,7 @@
 
         </GroupBox>
 
-        <GroupBox Grid.Column="1" Header="Chart Settings" Style="{DynamicResource EntityGroupBox}" Margin="0,0,2,2" Background="{DynamicResource BlueBackground}">
+        <GroupBox Grid.Column="1" Header="Chart Settings" Style="{StaticResource EntityGroupBox}" Margin="0,0,2,2" Background="{StaticResource LightBlueLighter}">
             <ItemsControl Grid.IsSharedSizeScope="True" HorizontalAlignment="Stretch" ItemsSource="{Binding Columns}" x:Name="columnsControl">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="{x:Type sce:ChartColumnDN}">
