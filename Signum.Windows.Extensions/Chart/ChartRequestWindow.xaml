@@ -26,14 +26,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <Border BorderThickness="0,0,0,1" Padding="2" Grid.Row="0">
-            <Border.Background>
-                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                    <GradientStop Color="#FFD9ECFF" Offset="0.015"/>
-                    <GradientStop Color="#FFEAF3F6" Offset="0.205"/>
-                    <GradientStop Color="White" Offset="1"/>
-                </LinearGradientBrush>
-            </Border.Background>
+        <Border BorderThickness="0,0,0,1" Padding="2" Grid.Row="0" Background="{StaticResource EntityTitleBackgroundGradient}">
             <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Margin="5">
                 <TextBox IsReadOnly="True" Foreground="#ff333333" BorderThickness="0" FontSize="18" Background="{x:Null}" Text="{m:Loc {x:Static d:ChartMessage.ChartFor}}" />
                 <TextBox x:Name="tbEntityType" IsReadOnly="True" Foreground="#ff333333" BorderThickness="0" FontSize="18" Background="{x:Null}" TextBlock.FontWeight="SemiBold" />
@@ -41,7 +34,7 @@
             </StackPanel>
         </Border>
         <GroupBox Grid.Row="1" Header="Filters" Style="{DynamicResource EntityGroupBox}" Margin="2">
-            <Grid Background="{DynamicResource BlueBackground}">
+            <Grid Background="{DynamicResource LightBlueLighter}">
                 <Grid.RowDefinitions>
                     <RowDefinition/>
                     <RowDefinition/>

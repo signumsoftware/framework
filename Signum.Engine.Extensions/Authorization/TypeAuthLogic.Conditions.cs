@@ -124,11 +124,11 @@ namespace Signum.Engine.Authorization
         {
             using (DisableQueryFilter())
             {
-                var found = Database.Query<T>().Where(a => requested.Contains(a.Id)).Select(a => new
+                var found = requested.GroupsOf(1000).SelectMany(gr => Database.Query<T>().Where(a => gr.Contains(a.Id)).Select(a => new
                 {
                     a.Id,
                     Allowed = a.IsAllowedFor(typeAllowed, ExecutionMode.InUserInterface),
-                }).ToArray();
+                })).ToArray();
 
                 if (found.Length != requested.Length)
                     throw new EntityNotFoundException(typeof(T), requested.Except(found.Select(a => a.Id)).ToArray());

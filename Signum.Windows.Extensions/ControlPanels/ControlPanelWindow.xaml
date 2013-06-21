@@ -11,22 +11,8 @@
         Title="ControlPanelWindow" Height="300" Width="300" x:Name="me">
     <Grid>
         <DockPanel LastChildFill="True" >
-            <Border  DockPanel.Dock="Top">
-                <Border.Background>
-                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                        <GradientStop Color="#FFEAF3F6" Offset="0.150"/>
-                        <GradientStop Color="#FFD9ECFF" Offset="0.805"/>
-                    </LinearGradientBrush>
-                </Border.Background>
-                <Border BorderThickness="0,0,0,3" Padding="2" >
-                    <Border.BorderBrush>
-                        <RadialGradientBrush GradientOrigin="0.5,0.3" RadiusX="1.5">
-                            <GradientStop Color="#00569AFF" Offset="1"/>
-                            <GradientStop Color="#00569AFF" Offset="0.53"/>
-                            <GradientStop Color="#FF65A3FE" Offset="0.82"/>
-                            <GradientStop Color="#7309316A" Offset="0.797"/>
-                        </RadialGradientBrush>
-                    </Border.BorderBrush>
+            <Border  DockPanel.Dock="Top" Background="{StaticResource EntityTitleUpperBackgroundGradient}">
+                <Border BorderThickness="0,0,0,3" Padding="2" BorderBrush="{StaticResource EntityTitleLightShadowGradient}">                  
                     <StackPanel  TextBlock.Foreground="{DynamicResource BlueBorder}" HorizontalAlignment="Left" Orientation="Vertical" Margin="3">
                         <StackPanel Orientation="Horizontal">
                             <TextBox x:Name="tbControlPanel" Text="{Binding ToStringProperty, Mode=OneWay}" TextBlock.FontWeight="SemiBold"  IsReadOnly="True" Foreground="#ff333333" BorderThickness="0" FontSize="14" Background="{x:Null}"/>
