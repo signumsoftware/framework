@@ -33,9 +33,9 @@ namespace Signum.Utilities
                         num[i][j] = num[i - 1][j - 1];
                     else
                         num[i][j] = Math.Min(Math.Min(
-                                        num[i - 1][j] + deleteWeight(cs),     //deletion
-                                        num[i][j - 1] + insertWeight(cs)),  //insertion
-                                        num[i - 1][j - 1] + replaceWeight(cs));//replace
+                            num[i - 1][j] + (deleteWeight != null ? deleteWeight(cs) : 1),        //deletion
+                            num[i][j - 1] + (insertWeight != null ? insertWeight(cs) : 1)),       //insertion
+                            num[i - 1][j - 1] + (replaceWeight != null ? replaceWeight(cs) : 1)); //replace
                 }
             }
 
