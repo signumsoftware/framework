@@ -241,7 +241,7 @@ namespace Signum.Engine
 
         static float Distance(StringDistance sd, string o, string n)
         {
-            return sd.LevenshteinDistance(o, n, replaceWeight: 2);
+            return sd.LevenshteinDistance(o, n, replaceWeight: c => 2);
         }
 
         const int MaxElements = 70;
