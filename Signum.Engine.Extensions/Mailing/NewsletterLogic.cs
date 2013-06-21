@@ -137,10 +137,10 @@ namespace Signum.Engine.Mailing
             list.Add(QueryUtils.Parse(".".Combine("Entity", "EmailOwnerData"), qd, false));
 
             if (newsletter.Subject != null)
-                EmailTemplateParser.Parse(newsletter.Subject, s => QueryUtils.Parse("Entity." + s, qd, false), null).FillQueryTokens(list);
+                EmailTemplateParser.Parse(newsletter.Subject, qd, null).FillQueryTokens(list);
 
             if (newsletter.Text != null)
-                EmailTemplateParser.Parse(newsletter.Text, s => QueryUtils.Parse("Entity." + s, qd, false), null).FillQueryTokens(list);
+                EmailTemplateParser.Parse(newsletter.Text, qd, null).FillQueryTokens(list);
 
             var tokens = list.Distinct();
 
@@ -330,14 +330,12 @@ namespace Signum.Engine.Mailing
                     Email = (EmailOwnerData)g.DistinctSingle(emailOwnerColumn),
                     Rows = g,
                 }).ToList();
-
-            Func<string, QueryToken> parseToken = str => QueryUtils.Parse("Entity." + str, qd, false);
-
+            
             if (newsletter.SubjectParsedNode == null)
-                newsletter.SubjectParsedNode = EmailTemplateParser.Parse(newsletter.Subject, parseToken, null);
+                newsletter.SubjectParsedNode = EmailTemplateParser.Parse(newsletter.Subject, qd, null);
 
             if (newsletter.TextParsedNode == null)
-                newsletter.TextParsedNode = EmailTemplateParser.Parse(newsletter.Text, parseToken, null);
+                newsletter.TextParsedNode = EmailTemplateParser.Parse(newsletter.Text, qd, null);
 
             string overrideEmail = EmailLogic.OverrideEmailAddress();
 

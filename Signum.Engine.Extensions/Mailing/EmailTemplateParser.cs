@@ -31,7 +31,7 @@ namespace Signum.Engine.Mailing
                 "Multiple values for column {0}".Formato(column.Column.Token.FullKey()));
         }
 
-        public static readonly Regex TokenRegex = new Regex(@"\@(((?<special>(foreach|if|global|model|))\[(?<token>[^\]]*)\])|(?<special>endforeach|else|endif))");
+        public static readonly Regex TokenRegex = new Regex(@"\@(((?<special>(foreach|if|global|model|))\[(?<token>[^\]\:]*)(\:(?<format>.*))?\])|(?<special>endforeach|else|endif))");
 
         public abstract class TextNode
         {
@@ -60,19 +60,20 @@ namespace Signum.Engine.Mailing
         }
 
         public class TokenNode : TextNode
-        {
-            public TokenNode(QueryToken token)
+        {   
+            public readonly QueryToken Token;
+            public readonly string Format;
+            public TokenNode(QueryToken token, string format)
             {
                 this.Token = token;
+                this.Format = format;
             }
-
-            public readonly QueryToken Token;
 
             public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
             {
                 ResultColumn column = p.Columns[Token];
                 object obj = rows.DistinctSingle(column);
-                var text = obj is IFormattable ? ((IFormattable)obj).ToString(Token.Format, p.CultureInfo) : obj.TryToString();
+                var text = obj is IFormattable ? ((IFormattable)obj).ToString(Format ?? Token.Format, p.CultureInfo) : obj.TryToString();
                 p.StringBuilder.Append(p.IsHtml ? HttpUtility.HtmlEncode(text) : text);
             }
 
@@ -248,8 +249,9 @@ namespace Signum.Engine.Mailing
 
             public ConditionNode(QueryToken token, List<string> errors)
             {
-                if (token.Type.UnNullify() != typeof(bool))
-                    errors.Add("Token {0} is not a boolean".Formato(token));
+                //Commented: Now conditions can be added to objects (null => false, true otherwise)
+                //if (token.Type.UnNullify() != typeof(bool))
+                //    errors.Add("Token {0} is not a boolean".Formato(token));
 
                 this.Token = token;
             }
@@ -258,6 +260,14 @@ namespace Signum.Engine.Mailing
             {
                 list.Add(Token);
                 base.FillQueryTokens(list);
+            }
+
+            protected static bool ToBool(object obj)
+            {
+                if (obj == null || obj is bool && ((bool)obj) == false)
+                    return false;
+
+                return true;
             }
         }
 
@@ -271,9 +281,7 @@ namespace Signum.Engine.Mailing
 
             public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
             {
-                var value = (bool?)rows.DistinctSingle(p.Columns[Token]);
-
-                if (value == true)
+                if (ToBool(rows.DistinctSingle(p.Columns[Token])))
                 {
                     base.PrintList(p, rows);
                 }
@@ -299,9 +307,7 @@ namespace Signum.Engine.Mailing
 
             public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
             {
-                var value = (bool?)rows.DistinctSingle(p.Columns[Token]);
-
-                if (value != true)
+                if (!ToBool(rows.DistinctSingle(p.Columns[Token])))
                 {
                     base.PrintList(p, rows);
                 }
@@ -318,17 +324,17 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        public static BlockNode Parse(string text, Func<string, QueryToken> parseToken, Type modelType)
+        public static BlockNode Parse(string text, QueryDescription qd, Type modelType)
         {
             BlockNode node;
-            var errors = TryParseTemplate(text, parseToken, modelType, out node);
+            var errors = TryParseTemplate(text, qd, modelType, out node);
             if (errors.Any())
                 throw new FormatException(errors.ToString("\r\n"));
             return node;
         }
 
 
-        static List<string> TryParseTemplate(string text, Func<string, QueryToken> parseToken, Type modelType, out BlockNode mainBlock)
+        static List<string> TryParseTemplate(string text, QueryDescription qd, Type modelType, out BlockNode mainBlock)
         {
             List<string> errors = new List<string>();
 
@@ -350,7 +356,7 @@ namespace Signum.Engine.Mailing
                 QueryToken result = null;
                 try
                 {
-                    result = parseToken(token);
+                    result = QueryUtils.Parse(token, qd, false);
                 }
                 catch (Exception ex)
                 {
@@ -368,11 +374,12 @@ namespace Signum.Engine.Mailing
                     stack.Peek().Nodes.Add(new LiteralNode { Text = text.Substring(index, match.Index - index) });
                 }
                 var token = match.Groups["token"].Value;
-                var special = match.Groups["special"].Value; 
+                var special = match.Groups["special"].Value;
+                var format = match.Groups["format"].Value; 
                 switch (special)
                 {
                     case "":
-                        stack.Peek().Nodes.Add(new TokenNode(tryParseToken(token)));
+                        stack.Peek().Nodes.Add(new TokenNode(tryParseToken(token), format));
                         break;
                     case "global":
                         stack.Peek().Nodes.Add(new GlobalNode(token, errors));
@@ -401,7 +408,7 @@ namespace Signum.Engine.Mailing
                         }
                         break;
                     case "if":
-                        stack.Push(new IfNode(parseToken(token), errors));
+                        stack.Push(new IfNode(tryParseToken(token), errors));
                         break;
                     case "else":
                     case "endif":
