@@ -68,6 +68,7 @@ namespace Signum.Engine.Mailing
 
     public static class SystemEmailLogic
     {
+        static ResetLazy<Dictionary<Lite<SystemEmailDN>, List<EmailTemplateDN>>> SystemEmailsToEmailTemplates;
         static Dictionary<Type, Func<EmailTemplateDN>> systemEmails = new Dictionary<Type, Func<EmailTemplateDN>>();
         static Dictionary<Type, SystemEmailDN> systemEmailToDN;
         static Dictionary<SystemEmailDN, Type> systemEmailToType;
@@ -79,6 +80,15 @@ namespace Signum.Engine.Mailing
                 sb.Schema.Initializing[InitLevel.Level2NormalEntities] += Schema_Initializing;
                 sb.Schema.Generating += Schema_Generating;
                 sb.Schema.Synchronizing += Schema_Synchronizing;
+
+                SystemEmailsToEmailTemplates = sb.GlobalLazy(() => (
+                    from se in Database.Query<SystemEmailDN>()
+                    from et in Database.Query<EmailTemplateDN>()
+                    where et.SystemEmail != null && se.Is(et.SystemEmail)
+                        && (et.Active && (et.EndDate == null || et.EndDate > TimeZoneManager.Now))
+                    select new { se, et })
+                    .GroupToDictionary(pair => pair.se.ToLite(), pair => pair.et),
+                    new InvalidateWith(typeof(EmailTemplateDN)));
             }
         }
 
@@ -92,7 +102,6 @@ namespace Signum.Engine.Mailing
 
             systemEmailToType = systemEmailToDN.Inverse();
         }
-
 
         static readonly string systemTemplatesReplacementKey = "EmailTemplates";
 
@@ -167,9 +176,9 @@ namespace Signum.Engine.Mailing
         {
             var systemEmailDN = ToSystemEmailDN(systemEmail.GetType());
 
-            var template = Database.Query<EmailTemplateDN>().SingleOrDefaultEx(t =>
-                t.IsActiveNow() == true &&
-                t.SystemEmail == systemEmailDN);
+            var template = SystemEmailsToEmailTemplates.Value
+                .GetOrThrow(systemEmailDN.ToLite(), "System Email {0} not cached".Formato(systemEmailDN.ToString()))
+                .SingleOrDefaultEx(t => t.IsActiveNow());
 
             if (template == null)
             {
@@ -191,7 +200,7 @@ namespace Signum.Engine.Mailing
                     template.Save();
             }
 
-            return EmailTemplateLogic.CreateEmailMessage(template, systemEmail.UntypedEntity, systemEmail);
+            return EmailTemplateLogic.CreateEmailMessage(template.ToLite(), systemEmail.UntypedEntity, systemEmail);
         }
 
         public static void GenerateAllTemplates()
