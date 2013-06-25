@@ -8,7 +8,10 @@
     MinWidth="300">
     <StackPanel m:Common.IsReadOnly="True" m:Common.MinLabelWidth="105">
         <m:ValueLine m:Common.Route="State" />
-        
+        <m:EntityLine m:Common.Route="Algorithm" />
+        <m:EntityLine m:Common.Route="Session"/>
+        <m:EntityLine m:Common.Route="Data"/>
+        <m:ValueLine m:Common.Route="MachineName" />
         <m:ValueLine m:Common.Route="CreationDate" />
         <m:ValueLine m:Common.CollapseIfNull="True" m:Common.Route="PlannedDate" />
         <m:ValueLine m:Common.CollapseIfNull="True" m:Common.Route="CancelationDate" />
@@ -21,9 +24,7 @@
         <ProgressBar Minimum="0" Maximum="100" Height="15"
                      Value="{Binding Progress, Converter={x:Static m2:Converters.DecimalOrZero}}"
                      Visibility="{Binding Progress, Converter={x:Static m:Converters.NullToVisibility}}"/>
-        <m:EntityLine m:Common.Route="Algorithm" />
-        <m:EntityLine m:Common.Route="Session"/>
-        <m:EntityLine m:Common.Route="Data"/>
+     
         <m:CountSearchControl QueryName="{x:Type d:ProcessExceptionLineDN}" FilterColumn="Process" />
     </StackPanel>
 </UserControl>
