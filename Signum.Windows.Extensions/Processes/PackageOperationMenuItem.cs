@@ -42,6 +42,8 @@ namespace Signum.Windows.Processes
 
             miResult.Click += (object sender, RoutedEventArgs e) =>
             {
+                coc.SearchControl.SetDirtySelectedItems();
+
                 if (coc.OperationSettings != null && coc.OperationSettings.Click != null)
                     coc.OperationSettings.Click(new ContextualOperationContext
                      {
