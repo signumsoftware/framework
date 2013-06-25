@@ -35,8 +35,20 @@ namespace Signum.Test
             Assert.AreEqual(1, d.LevenshteinDistance("hi", "ho"));
             Assert.AreEqual(1, d.LevenshteinDistance("hi", "hil"));
             Assert.AreEqual(1, d.LevenshteinDistance("hi", "h"));
-
         }
+
+        [TestMethod]
+        public void LevenshteinDistanceWeight()
+        {
+            CharWeighter w = (c1, c2) => c1.HasValue && char.IsNumber(c1.Value) || c2.HasValue && char.IsNumber(c2.Value) ? 10 : 1;
+
+            Assert.AreEqual(10, d.LevenshteinDistance("hola", "ho5la", w));
+            Assert.AreEqual(10, d.LevenshteinDistance("ho5la", "hola", w));
+            Assert.AreEqual(10, d.LevenshteinDistance("ho5la", "hojla", w));
+            Assert.AreEqual(10, d.LevenshteinDistance("hojla", "ho5la", w));
+            Assert.AreEqual(10, d.LevenshteinDistance("ho5la", "ho6la", w));
+        }
+
 
         [TestMethod]
         public void LongestCommonSubsequence()
