@@ -8,7 +8,7 @@ namespace Signum.Utilities
     {
         int[][] num;
 
-        public int LevenshteinDistance(string str1, string str2, Func<char, int> deleteWeight = null, Func<char, int> insertWeight = null, Func<char, int> replaceWeight = null)
+        public int LevenshteinDistance(string str1, string str2, Func<char, int> deleteWeight = null, Func<char, int> insertWeight = null, Func<char, char, int> replaceWeight = null)
         {
             if (string.IsNullOrEmpty(str1) || string.IsNullOrEmpty(str2))
                 return 0;
@@ -35,7 +35,7 @@ namespace Signum.Utilities
                         num[i][j] = Math.Min(Math.Min(
                             num[i - 1][j] + (deleteWeight != null ? deleteWeight(cs) : 1),        //deletion
                             num[i][j - 1] + (insertWeight != null ? insertWeight(cs) : 1)),       //insertion
-                            num[i - 1][j - 1] + (replaceWeight != null ? replaceWeight(cs) : 1)); //replace
+                            num[i - 1][j - 1] + (replaceWeight != null ? replaceWeight(cs, str2[j - 1]) : 1)); //replace
                 }
             }
 
