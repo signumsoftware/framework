@@ -720,6 +720,14 @@ namespace Signum.Windows
 
                 lvResult.ItemsSource = rt.Rows;
 
+                foreach (GridViewColumn column in gvResults.Columns)
+                {
+                    if (double.IsNaN(column.Width))
+                        column.Width = column.ActualWidth;
+
+                    column.Width = double.NaN;
+                }
+
                 if (rt.Rows.Length > 0)
                 {
                     lvResult.SelectedIndex = 0;
