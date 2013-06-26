@@ -232,12 +232,10 @@ namespace Signum.Engine.Mailing
                 ToState = NewsletterState.Saved,
                 Execute = (n, args) =>
                 {
-                    var p = args.GetArg<List<Lite<IEmailOwnerDN>>>();
-                    foreach (var eo in p.GroupsOf(20))
+                    var p = args.GetArg<List<Lite<NewsletterDeliveryDN>>>();
+                    foreach (var nd in p.GroupsOf(20))
                     {
-                        var col = Database.Query<NewsletterDeliveryDN>().Where(d =>
-                            d.Newsletter.RefersTo(n) && eo.Any(i => i.Is(d.Recipient))).Select(d => d.ToLite()).ToList();
-                        Database.DeleteList(col);
+                        Database.DeleteList(nd);
                     }
 
                     n.State = NewsletterState.Saved;

@@ -21,6 +21,7 @@ using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserQueries;
+using Signum.Web.Operations;
 #endregion
 
 namespace Signum.Web.Mailing
@@ -128,11 +129,22 @@ namespace Signum.Web.Mailing
                 });
 
                 if (newsletter)
-                    Navigator.AddSettings(new List<EntitySettings>
                 {
-                    new EntitySettings<NewsletterDN> { PartialViewName = e => ViewPrefix.Formato("Newsletter") },
-                    new EntitySettings<NewsletterDeliveryDN> { PartialViewName = e => ViewPrefix.Formato("NewsletterDelivery") },
-                });
+                    Navigator.AddSettings(new List<EntitySettings>
+                    {
+                        new EntitySettings<NewsletterDN> { PartialViewName = e => ViewPrefix.Formato("Newsletter") },
+                        new EntitySettings<NewsletterDeliveryDN> { PartialViewName = e => ViewPrefix.Formato("NewsletterDelivery") },
+                    });
+
+                    OperationsClient.AddSettings(new List<OperationSettings>
+                    {
+                        new EntityOperationSettings(NewsletterOperation.RemoveRecipients)
+                        {
+                            OnClick = ctx => new JsOperationExecutor(ctx.Options("RemoveRecipients", "Mailing"))
+                                .ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk)
+                        }
+                    });
+                }
 
                 if (pop3Config)
                     Navigator.AddSettings(new List<EntitySettings>
