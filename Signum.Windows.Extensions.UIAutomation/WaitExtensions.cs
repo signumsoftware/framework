@@ -42,7 +42,8 @@ namespace Signum.Windows.UIAutomation
                 throw new InvalidOperationException("Element does not has ItemStatus set. Consider setting m:Common.AutomationItemStatusFromDataContext on the WPF control");
 
             var pid = element.Current.ProcessId;
-            var previous = GetAllProcessWindows(pid).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
+            int c = 0;
+            var previous = GetAllProcessWindows(pid, c++).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
 
             action();
 
@@ -55,7 +56,7 @@ namespace Signum.Windows.UIAutomation
                 if (newValue != null && newValue != oldValue)
                     return true;
 
-                var newWindow = GetAllProcessWindows(pid).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
+                var newWindow = GetAllProcessWindows(pid, c++).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
 
                 MessageBoxProxy.ThrowIfError(newWindow);
 
@@ -98,7 +99,7 @@ namespace Signum.Windows.UIAutomation
 
             element.Wait(() =>
             {
-                newWindow = GetAllProcessWindows(pid).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
+                newWindow = GetAllProcessWindows(pid, c++).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
 
                 MessageBoxProxy.ThrowIfError(newWindow);
 
@@ -115,19 +116,27 @@ namespace Signum.Windows.UIAutomation
         {
             var result = GetRecursiveProcessWindows(AutomationElement.RootElement, processId);
 
-            result.Select(r => new
-            {
-                retry,
-                r.Current.ClassName,
-                r.Current.Name,
-                RuntimeId = r.GetRuntimeId().ToString("."),
-                r.Current.ItemStatus,
-            }).ToCsvFile(@"c:\debugWindows.txt");
+            result.Select(r =>
+            { 
+                try
+                {
+                    return new
+                    {
+                        retry,
+                        r.Current.ClassName,
+                        r.Current.Name,
+                        RuntimeId = r.GetRuntimeId().ToString("."),
+                        r.Current.ItemStatus,
+                    };
+                }
+                catch(ElementNotAvailableException)
+                {
+                    return new {retry, ClassName = "error", Name = "error", RuntimeId= "error", ItemStatus = "error"};
+                }
+            }).ToCsvFile(@"c:\debugWindows.csv", append: true);
 
             return result;
         }
-
-        
 
         static List<AutomationElement> GetRecursiveProcessWindows(AutomationElement parentWindow, int processId)
         {
