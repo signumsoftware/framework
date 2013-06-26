@@ -33,7 +33,7 @@ namespace Signum.Windows.UIAutomation
             {
                 newWindow = WaitExtensions.GetAllProcessWindows(pid).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
 
-                MessageBoxProxy.AssertNoErrorWindow(newWindow);
+                MessageBoxProxy.ThrowIfError(newWindow);
 
                 if (newWindow != null)
                     return true;

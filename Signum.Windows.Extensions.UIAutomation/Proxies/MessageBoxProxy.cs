@@ -75,22 +75,35 @@ namespace Signum.Windows.UIAutomation
             return windowElement.Current.ControlType == ControlType.Window && windowElement.Current.ClassName == "#32770";
         }
 
-        public static void AssertNoErrorWindow(AutomationElement windowElement)
+        public static void ThrowIfError(AutomationElement windowElement)
         {
             if (windowElement != null && IsMessageBox(windowElement))
             {
                 var mb = new MessageBoxProxy(windowElement);
 
-                mb.AssertNoError();
+                mb.ThrowIfError();
             }
         }
 
-        public void AssertNoError()
+        public void ThrowIfError()
         {
             try
             {
                 if (IsError)
                     throw new MessageBoxErrorException("Error MessageBox shown: {0}\r\nMessage: {1}".Formato(Title, Message));
+            }
+            finally
+            {
+                this.Close();
+            }
+        }
+
+        public void AssertErrorAndClose()
+        {
+            try
+            {
+                if (!IsError)
+                    throw new AssertFailedException("Error was expected instead of MessageBox: {0}\r\nMessage: {1}".Formato(Title, Message));
             }
             finally
             {
@@ -106,7 +119,7 @@ namespace Signum.Windows.UIAutomation
             var mb = element.TryMessageBoxChild();
 
             if (mb != null)
-                mb.AssertNoError();
+                mb.ThrowIfError();
         }
 
         public static MessageBoxProxy TryMessageBoxChild(this AutomationElement element)
@@ -133,7 +146,7 @@ namespace Signum.Windows.UIAutomation
         public static MessageBoxProxy WaitMessageBox(this AutomationElement element, Action action, Func<string> actionDescription = null, int? timeOut = null)
         {
             if (actionDescription == null)
-                actionDescription = () => "Get Windows after";
+                actionDescription = () => "Get MessageBox after";
 
             var pid = element.Current.ProcessId;
             var previous = WaitExtensions.GetAllProcessWindows(pid).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
@@ -146,10 +159,7 @@ namespace Signum.Windows.UIAutomation
             {
                 newWindow = WaitExtensions.GetAllProcessWindows(pid).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
 
-                if (newWindow != null)
-                    MessageBoxProxy.AssertNoErrorWindow(newWindow);
-
-                return false;
+                return newWindow != null;
             }, actionDescription, timeOut);
 
             return new MessageBoxProxy(newWindow);
