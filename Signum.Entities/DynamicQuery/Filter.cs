@@ -31,11 +31,7 @@ namespace Signum.Entities.DynamicQuery
         }
 
         static MethodInfo miContainsEnumerable = ReflectionTools.GetMethodInfo((IEnumerable<int> s) => s.Contains(2)).GetGenericMethodDefinition();
-        static MethodInfo miContains = ReflectionTools.GetMethodInfo((string s) => s.Contains(s));
-        static MethodInfo miStartsWith = ReflectionTools.GetMethodInfo((string s) => s.StartsWith(s));
-        static MethodInfo miEndsWith = ReflectionTools.GetMethodInfo((string s) => s.EndsWith(s));
-        static MethodInfo miLike = ReflectionTools.GetMethodInfo((string s) => s.Like(s));
-
+     
         public void GenerateCondition(FilterBuildExpressionContext filterContext)
         {
             List<CollectionElementToken> allAny = Token.FollowC(a => a.Parent)
@@ -96,27 +92,10 @@ namespace Signum.Entities.DynamicQuery
             {
                 Expression right = Expression.Constant(Value, Token.Type);
 
-                switch (Operation)
-                {
-                    case FilterOperation.EqualTo: return Expression.Equal(left, right);
-                    case FilterOperation.DistinctTo: return Expression.NotEqual(left, right);
-                    case FilterOperation.GreaterThan: return Expression.GreaterThan(left, right);
-                    case FilterOperation.GreaterThanOrEqual: return Expression.GreaterThanOrEqual(left, right);
-                    case FilterOperation.LessThan: return Expression.LessThan(left, right);
-                    case FilterOperation.LessThanOrEqual: return Expression.LessThanOrEqual(left, right);
-                    case FilterOperation.Contains: return Expression.Call(left, miContains, right);
-                    case FilterOperation.StartsWith: return Expression.Call(left, miStartsWith, right);
-                    case FilterOperation.EndsWith: return Expression.Call(left, miEndsWith, right);
-                    case FilterOperation.Like: return Expression.Call(miLike, left, right);
-                    case FilterOperation.NotContains: return Expression.Not(Expression.Call(left, miContains, right));
-                    case FilterOperation.NotStartsWith: return Expression.Not(Expression.Call(left, miStartsWith, right));
-                    case FilterOperation.NotEndsWith: return Expression.Not(Expression.Call(left, miEndsWith, right));
-                    case FilterOperation.NotLike: return Expression.Not(Expression.Call(miLike, left, right));
-                    default:
-                        throw new InvalidOperationException("Unknown operation {0}".Formato(Operation));
-                }
+                return QueryUtils.GetCompareExpression(Operation, left, right);
             }
         }
+
 
         public override string ToString()
         {

@@ -372,5 +372,42 @@ namespace Signum.Entities.DynamicQuery
 
             return type;
         }
+
+
+        static MethodInfo miContains = ReflectionTools.GetMethodInfo((string s) => s.Contains(s));
+        static MethodInfo miStartsWith = ReflectionTools.GetMethodInfo((string s) => s.StartsWith(s));
+        static MethodInfo miEndsWith = ReflectionTools.GetMethodInfo((string s) => s.EndsWith(s));
+        static MethodInfo miLike = ReflectionTools.GetMethodInfo((string s) => s.Like(s));
+
+        public static Expression GetCompareExpression(FilterOperation operation, Expression left, Expression right, bool inMemory = false)
+        {
+            switch (operation)
+            {
+                case FilterOperation.EqualTo: return Expression.Equal(left, right);
+                case FilterOperation.DistinctTo: return Expression.NotEqual(left, right);
+                case FilterOperation.GreaterThan: return Expression.GreaterThan(left, right);
+                case FilterOperation.GreaterThanOrEqual: return Expression.GreaterThanOrEqual(left, right);
+                case FilterOperation.LessThan: return Expression.LessThan(left, right);
+                case FilterOperation.LessThanOrEqual: return Expression.LessThanOrEqual(left, right);
+                case FilterOperation.Contains: return Expression.Call(Fix(left, inMemory), miContains, right);
+                case FilterOperation.StartsWith: return Expression.Call(Fix(left, inMemory), miStartsWith, right);
+                case FilterOperation.EndsWith: return Expression.Call(Fix(left, inMemory), miEndsWith, right);
+                case FilterOperation.Like: return Expression.Call(miLike, Fix(left, inMemory), right);
+                case FilterOperation.NotContains: return Expression.Not(Expression.Call(Fix(left, inMemory), miContains, right));
+                case FilterOperation.NotStartsWith: return Expression.Not(Expression.Call(Fix(left, inMemory), miStartsWith, right));
+                case FilterOperation.NotEndsWith: return Expression.Not(Expression.Call(Fix(left, inMemory), miEndsWith, right));
+                case FilterOperation.NotLike: return Expression.Not(Expression.Call(miLike, Fix(left, inMemory), right));
+                default:
+                    throw new InvalidOperationException("Unknown operation {0}".Formato(operation));
+            }
+        }
+
+        private static Expression Fix(Expression left, bool inMemory)
+        {
+            if (inMemory)
+                return Expression.Coalesce(left, Expression.Constant(""));
+
+            return left;
+        }
     }
 }
