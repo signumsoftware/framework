@@ -7,6 +7,7 @@ using Signum.Utilities;
 using System.Windows.Automation;
 using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Entities;
 
 namespace Signum.Windows.UIAutomation
 {
@@ -41,7 +42,8 @@ namespace Signum.Windows.UIAutomation
                 throw new InvalidOperationException("Element does not has ItemStatus set. Consider setting m:Common.AutomationItemStatusFromDataContext on the WPF control");
 
             var pid = element.Current.ProcessId;
-            var previous = GetAllProcessWindows(pid).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
+            int c = 0;
+            var previous = GetAllProcessWindows(pid, c++).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
 
             action();
 
@@ -54,9 +56,9 @@ namespace Signum.Windows.UIAutomation
                 if (newValue != null && newValue != oldValue)
                     return true;
 
-                var newWindow = GetAllProcessWindows(pid).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
+                var newWindow = GetAllProcessWindows(pid, c++).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
 
-                MessageBoxProxy.AssertNoErrorWindow(newWindow);
+                MessageBoxProxy.ThrowIfError(newWindow);
 
                 return false;
             }, actionDescription, timeOut);
@@ -81,13 +83,15 @@ namespace Signum.Windows.UIAutomation
 
         public static int CapturaWindowTimeout = 5 * 1000;
 
+
         public static AutomationElement CaptureWindow(this AutomationElement element, Action action, Func<string> actionDescription = null, int? timeOut = null)
         {
             if (actionDescription == null)
                 actionDescription = () => "Get Windows after";
 
             var pid = element.Current.ProcessId;
-            var previous = GetAllProcessWindows(pid).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
+            int c = 0;
+            var previous = GetAllProcessWindows(pid, c++).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
 
             action();
 
@@ -95,9 +99,9 @@ namespace Signum.Windows.UIAutomation
 
             element.Wait(() =>
             {
-                newWindow = GetAllProcessWindows(pid).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
+                newWindow = GetAllProcessWindows(pid, c++).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
 
-                MessageBoxProxy.AssertNoErrorWindow(newWindow);
+                MessageBoxProxy.ThrowIfError(newWindow);
 
                 if (newWindow != null)
                     return true;
@@ -108,9 +112,30 @@ namespace Signum.Windows.UIAutomation
             return newWindow;
         }
 
-        public static List<AutomationElement> GetAllProcessWindows(int processId)
+        public static List<AutomationElement> GetAllProcessWindows(int processId, int retry = -1)
         {
-            return GetRecursiveProcessWindows(AutomationElement.RootElement, processId);
+            var result = GetRecursiveProcessWindows(AutomationElement.RootElement, processId);
+
+            result.Select(r =>
+            { 
+                try
+                {
+                    return new
+                    {
+                        retry,
+                        r.Current.ClassName,
+                        r.Current.Name,
+                        RuntimeId = r.GetRuntimeId().ToString("."),
+                        r.Current.ItemStatus,
+                    };
+                }
+                catch(ElementNotAvailableException)
+                {
+                    return new {retry, ClassName = "error", Name = "error", RuntimeId= "error", ItemStatus = "error"};
+                }
+            }).ToCsvFile(@"c:\debugWindows.csv", append: true);
+
+            return result;
         }
 
         static List<AutomationElement> GetRecursiveProcessWindows(AutomationElement parentWindow, int processId)
@@ -145,7 +170,7 @@ namespace Signum.Windows.UIAutomation
                 var currentWindows = parentWindow.Children(a => a.Current.ControlType == ControlType.Window);
                 newWindow = currentWindows.FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
 
-                MessageBoxProxy.AssertNoErrorWindow(newWindow);
+                MessageBoxProxy.ThrowIfError(newWindow);
 
                 if (newWindow != null )
                     return true;
