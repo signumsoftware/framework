@@ -11,6 +11,9 @@ using System.Text.RegularExpressions;
 using System.Globalization;
 using Signum.Entities;
 using Signum.Entities.Mailing;
+using Signum.Entities.UserQueries;
+using System.Linq.Expressions;
+
 
 namespace Signum.Engine.Mailing
 {
@@ -31,7 +34,10 @@ namespace Signum.Engine.Mailing
                 "Multiple values for column {0}".Formato(column.Column.Token.FullKey()));
         }
 
-        public static readonly Regex TokenRegex = new Regex(@"\@(((?<special>(foreach|if|global|model|))\[(?<token>[^\]\:]*)(\:(?<format>.*))?\])|(?<special>endforeach|else|endif))");
+        public static readonly Regex KeywordsRegex = new Regex(@"\@(((?<keyword>(foreach|if|global|model|where|))\[(?<token>[^\]]+)\])|(?<keyword>endforeach|else|endif|endwhere))");
+
+        public static readonly Regex TokenFormatRegex = new Regex(@"(?<token>[^\]\:]+)(\:(?<format>.*))?");
+        public static readonly Regex TokenOperationValueRegex = new Regex(@"(?<token>[^\]]+)(?<comparer>(" + FilterValueConverter.OperationRegex + @"))(?<value>[^\]\:]+)");
 
         public abstract class TextNode
         {
@@ -243,6 +249,60 @@ namespace Signum.Engine.Mailing
             }
         }
 
+        public class WhereNode : BlockNode
+        {
+            public readonly QueryToken Token;
+            public readonly FilterOperation Operation;
+            public readonly string Value;
+
+            public WhereNode(QueryToken token, string operation, string value, List<string> errors)
+            {
+                if (token.HasAllOrAny())
+                    errors.Add("Where {0} can not contains Any or All");
+
+                this.Token = token;
+                this.Operation = FilterValueConverter.ParseOperation(operation);
+                this.Value = value;
+                object rubish;
+                string error = FilterValueConverter.TryParse(Value, Token.Type, out rubish);
+
+                if (error.HasText())
+                    errors.Add(error);
+            }
+
+            public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
+            {
+                object val = FilterValueConverter.Parse(Value, Token.Type);
+
+                Expression value = Expression.Constant(val, Token.Type); 
+
+                var col = p.Columns[Token];
+
+                var example = Signum.Utilities.ExpressionTrees.Linq.Expr((ResultRow rr)=>rr[col]);
+
+                var newBody = QueryUtils.GetCompareExpression(Operation, Expression.Convert(example.Body, Token.Type), value, inMemory: true);
+                var lambda = Expression.Lambda<Func<ResultRow, bool>>(newBody, example.Parameters).Compile();
+
+                base.PrintList(p, rows.Where(lambda));
+            }
+
+            public override void FillQueryTokens(List<QueryToken> list)
+            {
+                list.Add(Token);
+                base.FillQueryTokens(list);
+            }
+
+            public override string ToString()
+            {
+                return "where {0} {1} {2} ({3} nodes)".Formato(Token.FullKey(), FilterValueConverter.ToStringOperation(Operation), Value, Nodes.Count);
+            }
+
+            public override string UserString()
+            {
+                return "where";
+            }
+        }
+
         public abstract class ConditionNode : BlockNode
         {
             public readonly QueryToken Token;
@@ -338,7 +398,7 @@ namespace Signum.Engine.Mailing
         {
             List<string> errors = new List<string>();
 
-            var matches = TokenRegex.Matches(text);
+            var matches = KeywordsRegex.Matches(text);
 
             Stack<BlockNode> stack = new Stack<BlockNode>();
             mainBlock = new BlockNode();
@@ -374,18 +434,54 @@ namespace Signum.Engine.Mailing
                     stack.Peek().Nodes.Add(new LiteralNode { Text = text.Substring(index, match.Index - index) });
                 }
                 var token = match.Groups["token"].Value;
-                var special = match.Groups["special"].Value;
-                var format = match.Groups["format"].Value; 
-                switch (special)
+                var keyword = match.Groups["keyword"].Value;
+                switch (keyword)
                 {
                     case "":
-                        stack.Peek().Nodes.Add(new TokenNode(tryParseToken(token), format));
+                        var tok = TokenFormatRegex.Match(token);
+                        if (!tok.Success)
+                            errors.Add("{0} has invalid format".Formato(token)); 
+                        else
+                            stack.Peek().Nodes.Add(new TokenNode(tryParseToken(tok.Groups["token"].Value), tok.Groups["format"].Value));
                         break;
                     case "global":
                         stack.Peek().Nodes.Add(new GlobalNode(token, errors));
                         break;
                     case "model":
                         stack.Peek().Nodes.Add(new ModelNode(token, modelType, errors));
+                        break;
+                    case "where":
+                        {
+                            var filter = TokenOperationValueRegex.Match(token);
+                            if (!filter.Success)
+                            {
+                                errors.Add("{0} has invalid format".Formato(token));
+                            }
+                            else
+                            {
+                                var t = tryParseToken(filter.Groups["token"].Value);
+                                var comparer = filter.Groups["comparer"].Value;
+                                var value = filter.Groups["value"].Value;
+                                stack.Push(new WhereNode(t, comparer, value, errors));
+                            }
+                            break;
+                        }
+                    case "endwhere":
+                        {
+                            if (stack.Count() <= 1)
+                            {
+                                errors.Add("No 'where' has been opened for {0}".Formato(token));
+                                break;
+                            }
+                            var n = stack.Pop();
+                            if (n.GetType() != typeof(WhereNode))
+                            {
+                                errors.Add("Unexpected '{0}'".Formato(n.UserString()));
+                                break;
+                            }
+
+                            stack.Peek().Nodes.Add(n);
+                        }
                         break;
                     case "foreach":
                         stack.Push(new ForeachNode(tryParseToken(token)));
@@ -427,7 +523,7 @@ namespace Signum.Engine.Mailing
 
                             stack.Peek().Nodes.Add(n);
 
-                            if(special == "else")
+                            if(keyword == "else")
                                 stack.Push(new ElseNode(((ConditionNode)n).Token, errors));
                         }
                         break;

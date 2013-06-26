@@ -7,6 +7,7 @@ using Signum.Utilities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Reflection;
 using System.Threading;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Entities.Omnibox
 {
@@ -34,7 +35,7 @@ namespace Signum.Entities.Omnibox
 (?<ident>[a-zA-Z_][a-zA-Z0-9_]*)|
 (?<number>[+-]?\d+(\.\d+)?)|
 (?<string>("".*?(""|$)|\'.*?(\'|$)))|
-(?<comparer>(==?|<=|>=|<|>|\^=|\$=|%=|\*=|\!=|\!\^=|\!\$=|\!%=|\!\*=))|
+(?<comparer>(" + FilterValueConverter.OperationRegex + @"))|
 (?<symbol>[\.\,;!?@#$%&/\\\(\)\^\*\[\]\{\}\-+])", 
   RegexOptions.ExplicitCapture | RegexOptions.IgnorePatternWhitespace);
 

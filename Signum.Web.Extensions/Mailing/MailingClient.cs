@@ -190,6 +190,10 @@ namespace Signum.Web.Mailing
                 if (canForeach.HasText())
                     option.Attr("data-foreach", canForeach);
 
+                string canWhere = CanWhere(qt);
+                if (canWhere.HasText())
+                    option.Attr("data-where", canWhere);
+
                 options.AddLine(option.ToHtml());
             }
 
@@ -218,8 +222,11 @@ namespace Signum.Web.Mailing
             if (token == null)
                 return EmailTemplateCanAddTokenMessage.NoColumnSelected.NiceToString();
 
-            if (token.Type.UnNullify() != typeof(bool))
-                return EmailTemplateCanAddTokenMessage.YouCanOnlyAddIfBlocksWithBooleanFields.NiceToString();
+            if (token.Type != typeof(string) && token.Type != typeof(byte[]) && token.Type.ElementType() != null)
+                return EmailTemplateCanAddTokenMessage.YouCannotAddIfBlocksOnCollectionFields.NiceToString();
+
+            if (token.HasAllOrAny())
+                return EmailTemplateCanAddTokenMessage.YouCannotAddBlocksWithAllOrAny.NiceToString();
 
             return null;
         }
@@ -235,7 +242,21 @@ namespace Signum.Web.Mailing
             if (token.Key != "Element" || token.Parent == null || token.Parent.Type.ElementType() == null)
                 return EmailTemplateCanAddTokenMessage.YouCanOnlyAddForeachBlocksWithCollectionFields.NiceToString();
 
+            if (token.HasAllOrAny())
+                return EmailTemplateCanAddTokenMessage.YouCannotAddBlocksWithAllOrAny.NiceToString();
+
             return null; 
+        }
+
+        static string CanWhere(QueryToken token)
+        {
+            if (token == null)
+                return EmailTemplateCanAddTokenMessage.NoColumnSelected.NiceToString();
+
+            if (token.HasAllOrAny())
+                return EmailTemplateCanAddTokenMessage.YouCannotAddBlocksWithAllOrAny.NiceToString();
+
+            return null;
         }
     }
 }

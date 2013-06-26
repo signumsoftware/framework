@@ -282,18 +282,9 @@ WriteLiteral("\" />\r\n                            <input type=\"button\" class=
             
             #line default
             #line hidden
-WriteLiteral("\" data-block=\"if\" value=\"");
-
-
-            
-            #line 45 "..\..\Mailing\Views\Newsletter.cshtml"
-                                                                                                                                                                           Write(EmailTemplateViewMessage.If.NiceToString());
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\" />\r\n                            <input type=\"button\" class=\"sf-button sf-email-" +
-"inserttoken sf-email-inserttoken-foreach sf-disabled\" data-prefix=\"");
+WriteLiteral("\" data-block=\"if\" value=\"if\" />\r\n                            <input type=\"button\"" +
+" class=\"sf-button sf-email-inserttoken sf-email-inserttoken-foreach sf-disabled\"" +
+" data-prefix=\"");
 
 
             
@@ -303,22 +294,24 @@ WriteLiteral("\" />\r\n                            <input type=\"button\" class=
             
             #line default
             #line hidden
-WriteLiteral("\" data-block=\"foreach\" value=\"");
+WriteLiteral("\" data-block=\"foreach\" value=\"foreach\" />\r\n                            <input typ" +
+"e=\"button\" class=\"sf-button sf-email-inserttoken sf-email-inserttoken-where sf-d" +
+"isabled\" data-prefix=\"");
 
 
             
-            #line 46 "..\..\Mailing\Views\Newsletter.cshtml"
-                                                                                                                                                                                     Write(EmailTemplateViewMessage.Foreach.NiceToString());
+            #line 47 "..\..\Mailing\Views\Newsletter.cshtml"
+                                                                                                                                       Write(nc.ControlID);
 
             
             #line default
             #line hidden
-WriteLiteral("\" />\r\n                        </fieldset>\r\n                    </div>\r\n          " +
-"          ");
+WriteLiteral("\" data-block=\"where\" value=\"where\" />\r\n                        </fieldset>\r\n     " +
+"               </div>\r\n                    ");
 
 
             
-            #line 49 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 50 "..\..\Mailing\Views\Newsletter.cshtml"
                Write(Html.ValueLine(nc, e => e.Subject, vl => vl.ValueHtmlProps["class"] = "sf-email-inserttoken-target"));
 
             
@@ -328,7 +321,7 @@ WriteLiteral("\r\n                    ");
 
 
             
-            #line 50 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 51 "..\..\Mailing\Views\Newsletter.cshtml"
                Write(Html.ValueLine(nc, e => e.Text, vl =>
                {
                    vl.ValueLineType = ValueLineType.TextArea;
@@ -344,7 +337,7 @@ WriteLiteral("\r\n                    <script>\r\n                        $(func
 
 
             
-            #line 58 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 59 "..\..\Mailing\Views\Newsletter.cshtml"
                                                             Write(nc.SubContext(e => e.Text).ControlID);
 
             
@@ -355,7 +348,7 @@ WriteLiteral("\");\r\n                        });\r\n                    </scrip
 
 
             
-            #line 62 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 63 "..\..\Mailing\Views\Newsletter.cshtml"
             }
 
             
@@ -365,7 +358,7 @@ WriteLiteral("        </fieldset>\r\n");
 
 
             
-            #line 64 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 65 "..\..\Mailing\Views\Newsletter.cshtml"
          if (!nc.Value.IsNew)
         {
 
@@ -378,7 +371,7 @@ WriteLiteral("            <fieldset id=\"emTabSend\">\r\n                <legend
 
 
             
-            #line 70 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 71 "..\..\Mailing\Views\Newsletter.cshtml"
                Write(Html.SearchControl(new FindOptions(typeof(NewsletterDeliveryDN))
                {
                    FilterOptions = { new FilterOption("Newsletter", nc.Value) { Frozen = true } },
@@ -392,7 +385,7 @@ WriteLiteral("\r\n                </fieldset>\r\n            </fieldset>\r\n");
 
 
             
-            #line 77 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 78 "..\..\Mailing\Views\Newsletter.cshtml"
         }
 
             
@@ -402,7 +395,7 @@ WriteLiteral("    </div>    \r\n");
 
 
             
-            #line 79 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 80 "..\..\Mailing\Views\Newsletter.cshtml"
 }
 
             

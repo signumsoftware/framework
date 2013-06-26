@@ -9,6 +9,7 @@ using Signum.Utilities.Reflection;
 using Signum.Entities.Reflection;
 using Signum.Utilities.DataStructures;
 using Signum.Entities.Basics;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Entities.Omnibox
 {
@@ -147,8 +148,7 @@ namespace Signum.Entities.Omnibox
                     }
                     else
                     {
-
-                        FilterOperation operation = ParseOperation(tokens[operatorIndex]);
+                        FilterOperation operation = FilterValueConverter.ParseOperation(tokens[operatorIndex].Value);
 
                         if (syntax.Completion == FilterSyntaxCompletion.Operation)
                         {
@@ -336,54 +336,6 @@ namespace Signum.Entities.Omnibox
             return null;
         }
 
-        public static FilterOperation ParseOperation(OmniboxToken omniboxToken)
-        {
-            switch (omniboxToken.Value)
-            {
-                case "=":
-                case "==": return FilterOperation.EqualTo;
-                case "<=": return FilterOperation.LessThanOrEqual;
-                case ">=": return FilterOperation.GreaterThanOrEqual;
-                case "<": return FilterOperation.LessThan;
-                case ">": return FilterOperation.GreaterThan;
-                case "^=": return FilterOperation.StartsWith;
-                case "$=": return FilterOperation.EndsWith;
-                case "*=": return FilterOperation.Contains;
-                case "%=": return FilterOperation.Like;
-
-                case "!=": return FilterOperation.DistinctTo;
-                case "!^=": return FilterOperation.NotStartsWith;
-                case "!$=": return FilterOperation.NotEndsWith;
-                case "!*=": return FilterOperation.NotContains;
-                case "!%=": return FilterOperation.NotLike;
-            }
-
-            throw new InvalidOperationException("Unexpected Filter {0}".Formato(omniboxToken.Value));
-        }
-
-        public static string ToStringOperation(FilterOperation operation)
-        {
-            switch (operation)
-            {
-                case FilterOperation.EqualTo: return "=";
-                case FilterOperation.DistinctTo: return "!=";
-                case FilterOperation.GreaterThan: return ">";
-                case FilterOperation.GreaterThanOrEqual: return ">=";
-                case FilterOperation.LessThan: return "<";
-                case FilterOperation.LessThanOrEqual: return "<=";
-                case FilterOperation.Contains: return "*=";
-                case FilterOperation.StartsWith: return "^=";
-                case FilterOperation.EndsWith: return "$=";
-                case FilterOperation.Like: return "%=";
-                case FilterOperation.NotContains: return "!*=";
-                case FilterOperation.NotStartsWith: return "!^=";
-                case FilterOperation.NotEndsWith: return "!$=";
-                case FilterOperation.NotLike: return "!%=";
-            }
-
-            throw new InvalidOperationException("Unexpected Filter {0}".Formato(operation));
-        }
-
         protected virtual IEnumerable<Tuple<QueryToken, ImmutableStack<OmniboxMatch>>> GetAmbiguousTokens(QueryToken queryToken, ImmutableStack<OmniboxMatch> distancePack,
             QueryDescription queryDescription, List<OmniboxToken> omniboxTokens, int index, int operatorIndex)
         {
@@ -496,7 +448,7 @@ namespace Signum.Entities.Omnibox
             if (Syntax == null || Syntax.Completion == FilterSyntaxCompletion.Token || CanFilter.HasText())
                 return token;
 
-            string oper = DynamicQueryOmniboxResultGenerator.ToStringOperation(Operation.Value);
+            string oper = FilterValueConverter.ToStringOperation(Operation.Value);
 
             if ((Syntax.Completion == FilterSyntaxCompletion.Operation && Value == null) ||
                 Value == DynamicQueryOmniboxResultGenerator.UnknownValue)

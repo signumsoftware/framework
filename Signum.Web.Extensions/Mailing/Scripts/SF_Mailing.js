@@ -65,10 +65,10 @@ SF.registerModule("Mailing", function () {
                 return "@[" + tokenName + "]";
             }
             else if (block === "if") {
-                return "@if[" + tokenName + "] @else @endif";
+                return "<!--@if[" + tokenName + "]--> <!--@else--> <!--@endif-->";
             }
             else if (block === "foreach") {
-                return "@foreach[" + tokenName + "] @endforeach";
+                return "<!--@foreach[" + tokenName + "]--> <!--@endforeach-->";
             }
             else {
                 throw "invalid block name";
@@ -155,6 +155,8 @@ SF.registerModule("Mailing", function () {
 
             initHtmlEditor(idTargetTextArea);
 
+            var lastCursorPosition;
+
             CKEDITOR.instances[idTargetTextArea].on('focus', function () {
                 $("#cke_" + idTargetTextArea).addClass(cssClassActive);
                 $lastTokenTarget = null;
@@ -163,9 +165,31 @@ SF.registerModule("Mailing", function () {
                         window.alert("Select the target first");
                     }
                     else {
-                        CKEDITOR.instances[idTargetTextArea].insertText(tokenTag);
-                        updateHtmlEditorTextArea(idTargetTextArea);
+                        if (CKEDITOR.instances[idTargetTextArea].mode == "source") {
+                            var codeMirrorInstance = CodeMirror.fromTextArea($(".cke_source")[0]);
+                            codeMirrorInstance.replaceRange(tokenTag, lastCursorPosition);
+
+                            //var oldValue = codeMirrorInstance.getValue();
+                            //var currentPosition = lastCursorPosition || 0;
+                            //var newValue = oldValue.substr(0, currentPosition) + tokenTag + oldValue.substring(currentPosition);
+                            //codeMirrorInstance.setValue(newValue);
+                        }
+                        else {
+                            CKEDITOR.instances[idTargetTextArea].insertHtml(tokenTag);
+                            updateHtmlEditorTextArea(idTargetTextArea);
+                            if (tokenTag.indexOf("<!--") == 0) {
+                                CKEDITOR.instances[idTargetTextArea].setMode("source");
+                            }
+                        }
                     }
+                }
+            });
+
+            CKEDITOR.instances[idTargetTextArea].on('mode', function () {
+                if (CKEDITOR.instances[idTargetTextArea].mode == "source") {
+                    CodeMirror.fromTextArea($(".cke_source")[0]).on("cursorActivity", function () {
+                        lastCursorPosition = CodeMirror.fromTextArea($(".cke_source")[0]).getCursor();
+                    });
                 }
             });
 

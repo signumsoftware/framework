@@ -88,7 +88,7 @@ namespace Signum.Engine.Mailing
                         && (et.Active && (et.EndDate == null || et.EndDate > TimeZoneManager.Now))
                     select new { se, et })
                     .GroupToDictionary(pair => pair.se.ToLite(), pair => pair.et),
-                    new InvalidateWith(typeof(EmailTemplateDN)));
+                    new InvalidateWith(typeof(SystemEmailDN), typeof(EmailTemplateDN)));
             }
         }
 
@@ -177,8 +177,8 @@ namespace Signum.Engine.Mailing
             var systemEmailDN = ToSystemEmailDN(systemEmail.GetType());
 
             var template = SystemEmailsToEmailTemplates.Value
-                .GetOrThrow(systemEmailDN.ToLite(), "System Email {0} not cached".Formato(systemEmailDN.ToString()))
-                .SingleOrDefaultEx(t => t.IsActiveNow());
+                .TryGetC(systemEmailDN.ToLite())
+                .TryCC(ets => ets.SingleOrDefaultEx(t => t.IsActiveNow()));
 
             if (template == null)
             {
