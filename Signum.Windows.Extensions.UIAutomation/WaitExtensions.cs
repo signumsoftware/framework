@@ -57,7 +57,7 @@ namespace Signum.Windows.UIAutomation
 
                 var newWindow = GetAllProcessWindows(pid).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
 
-                MessageBoxProxy.AssertNoErrorWindow(newWindow);
+                MessageBoxProxy.ThrowIfError(newWindow);
 
                 return false;
             }, actionDescription, timeOut);
@@ -98,9 +98,9 @@ namespace Signum.Windows.UIAutomation
 
             element.Wait(() =>
             {
-                var newWindows = GetAllProcessWindows(pid, c++).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
+                newWindow = GetAllProcessWindows(pid).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
 
-                MessageBoxProxy.AssertNoErrorWindow(newWindow);
+                MessageBoxProxy.ThrowIfError(newWindow);
 
                 if (newWindow != null)
                     return true;
@@ -161,7 +161,7 @@ namespace Signum.Windows.UIAutomation
                 var currentWindows = parentWindow.Children(a => a.Current.ControlType == ControlType.Window);
                 newWindow = currentWindows.FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
 
-                MessageBoxProxy.AssertNoErrorWindow(newWindow);
+                MessageBoxProxy.ThrowIfError(newWindow);
 
                 if (newWindow != null )
                     return true;
