@@ -82,13 +82,15 @@ namespace Signum.Windows.UIAutomation
 
         public static int CapturaWindowTimeout = 5 * 1000;
 
+
         public static AutomationElement CaptureWindow(this AutomationElement element, Action action, Func<string> actionDescription = null, int? timeOut = null)
         {
             if (actionDescription == null)
                 actionDescription = () => "Get Windows after";
 
             var pid = element.Current.ProcessId;
-            var previous = GetAllProcessWindows(pid).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
+            int c = 0;
+            var previous = GetAllProcessWindows(pid, c++).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
 
             action();
 
@@ -96,17 +98,8 @@ namespace Signum.Windows.UIAutomation
 
             element.Wait(() =>
             {
-                var newWindows = GetAllProcessWindows(pid).Where(a => !previous.Contains(a.GetRuntimeId().ToString("."))).ToList();
+                var newWindows = GetAllProcessWindows(pid, c++).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
 
-                newWindow = newWindows.SingleOrDefaultEx(() => "More than one new windows found.\r\n Previous {0}\r\nNew Windows\r\n{0}".Formato(
-                    previous.ToString(" "),
-                    newWindows.Select(w => new
-                    {
-                        w.Current.ClassName,
-                        w.Current.Name,
-                        RuntimeId = w.GetRuntimeId().ToString(".")
-                    }).ToString(a => a.Dump(), "\r\n")));
-                
                 MessageBoxProxy.AssertNoErrorWindow(newWindow);
 
                 if (newWindow != null)
@@ -118,10 +111,23 @@ namespace Signum.Windows.UIAutomation
             return newWindow;
         }
 
-        public static List<AutomationElement> GetAllProcessWindows(int processId)
+        public static List<AutomationElement> GetAllProcessWindows(int processId, int retry = -1)
         {
-            return GetRecursiveProcessWindows(AutomationElement.RootElement, processId);
+            var result = GetRecursiveProcessWindows(AutomationElement.RootElement, processId);
+
+            result.Select(r => new
+            {
+                retry,
+                r.Current.ClassName,
+                r.Current.Name,
+                RuntimeId = r.GetRuntimeId().ToString("."),
+                r.Current.ItemStatus,
+            }).ToCsvFile(@"c:\debugWindows.txt");
+
+            return result;
         }
+
+        
 
         static List<AutomationElement> GetRecursiveProcessWindows(AutomationElement parentWindow, int processId)
         {
