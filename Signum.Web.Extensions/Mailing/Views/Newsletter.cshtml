@@ -37,14 +37,13 @@
                     
                 <div class="sf-email-replacements-container">
                     <div class="sf-email-replacements-token-container">
-                        <input type="button" class="sf-button sf-email-togglereplacementspanel" value="Toggle replacements panel" />
-                        <fieldset class="sf-email-replacements-panel" style="display: none;">
+                        <fieldset class="sf-email-replacements-panel">
                             <legend>Replacements</legend>
                             @Html.MailingInsertQueryTokenBuilder(null, nc, queryDescription)
                             <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-basic sf-disabled" data-prefix="@nc.ControlID" value="@(EmailTemplateViewMessage.Insert.NiceToString())" />
                             <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-if sf-disabled" data-prefix="@nc.ControlID" data-block="if" value="if" />
                             <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-foreach sf-disabled" data-prefix="@nc.ControlID" data-block="foreach" value="foreach" />
-                            <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-where sf-disabled" data-prefix="@nc.ControlID" data-block="where" value="where" />
+                            <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-any sf-disabled" data-prefix="@nc.ControlID" data-block="any" value="any" />
                         </fieldset>
                     </div>
                     @Html.ValueLine(nc, e => e.Subject, vl => vl.ValueHtmlProps["class"] = "sf-email-inserttoken-target")

@@ -11,16 +11,8 @@ SF.registerModule("Mailing", function () {
         var initReplacements = function () {
             var self = this;
 
-            $(".sf-email-replacements-container").on("click", ".sf-email-togglereplacementspanel", function () {
-                $(this).siblings(".sf-email-replacements-panel").toggle();
-            });
-
             $(".sf-email-replacements-container").on("focus", ".sf-email-inserttoken-target", function () {
                 setTokenTargetFocus($(this));
-            });
-
-            $(".sf-email-replacements-container").on("blur", ".sf-email-inserttoken-targetactive", function () {
-                removeTokenTargetFocus($(this));
             });
 
             $(".sf-email-replacements-container").on("click", ".sf-email-inserttoken", function () {
@@ -51,9 +43,11 @@ SF.registerModule("Mailing", function () {
         };
 
         var setTokenTargetFocus = function ($element) {
+            $("." + cssClassActive).removeClass(cssClassActive);
+            onInsertToken = null;
+
             $element.addClass(cssClassActive);
             $lastTokenTarget = $element;
-            onInsertToken = null;
         };
 
         var removeTokenTargetFocus = function ($element) {
@@ -70,6 +64,9 @@ SF.registerModule("Mailing", function () {
             else if (block === "foreach") {
                 return "<!--@foreach[" + tokenName + "]--> <!--@endforeach-->";
             }
+            else if (block === "any") {
+                return "<!--@any[" + tokenName + "]--> <!--@notany--> <!--@endany-->";
+            }
             else {
                 throw "invalid block name";
             }
@@ -79,6 +76,7 @@ SF.registerModule("Mailing", function () {
             var $btnInsertBasic = $(".sf-email-inserttoken-basic");
             var $btnInsertIf = $(".sf-email-inserttoken-if");
             var $btnInsertForeach = $(".sf-email-inserttoken-foreach");
+            var $btnInsertAny = $(".sf-email-inserttoken-any");
 
             var self = this;
             var $selectedOption = $selectedCombo.children("option:selected");
@@ -90,12 +88,14 @@ SF.registerModule("Mailing", function () {
                     changeButtonState($btnInsertBasic, lang.signum.selectToken);
                     changeButtonState($btnInsertIf, lang.signum.selectToken);
                     changeButtonState($btnInsertForeach, lang.signum.selectToken);
+                    changeButtonState($btnInsertAny, lang.signum.selectToken);
                 }
                 else {
                     changeButtonState($btnInsertBasic);
                     var $prevSelectedOption = $prevSelect.find("option:selected");
                     changeButtonState($btnInsertIf, $prevSelectedOption.attr("data-if"));
                     changeButtonState($btnInsertForeach, $prevSelectedOption.attr("data-foreach"));
+                    changeButtonState($btnInsertAny, $prevSelectedOption.attr("data-any"));
                 }
                 return;
             }
@@ -103,6 +103,7 @@ SF.registerModule("Mailing", function () {
             changeButtonState($btnInsertBasic);
             changeButtonState($btnInsertIf, $selectedOption.attr("data-if"));
             changeButtonState($btnInsertForeach, $selectedOption.attr("data-foreach"));
+            changeButtonState($btnInsertAny, $selectedOption.attr("data-any"));
         };
 
         var changeButtonState = function ($button, disablingMessage) {
@@ -157,38 +158,60 @@ SF.registerModule("Mailing", function () {
 
             var lastCursorPosition;
 
-            CKEDITOR.instances[idTargetTextArea].on('focus', function () {
-                $("#cke_" + idTargetTextArea).addClass(cssClassActive);
-                $lastTokenTarget = null;
-                onInsertToken = function (tokenTag) {
-                    if ($("#cke_" + idTargetTextArea + ":visible").length == 0) {
-                        window.alert("Select the target first");
+            var codeMirrorInstance;
+
+            var ckEditorOnInsertToken = function (tokenTag) {
+                if ($("#cke_" + idTargetTextArea + ":visible").length == 0) {
+                    window.alert("Select the target first");
+                }
+                else {
+                    if (CKEDITOR.instances[idTargetTextArea].mode == "source") {
+                        codeMirrorInstance.replaceRange(tokenTag, lastCursorPosition || { line: 0, ch: 0 });
                     }
                     else {
-                        if (CKEDITOR.instances[idTargetTextArea].mode == "source") {
-                            var codeMirrorInstance = CodeMirror.fromTextArea($(".cke_source")[0]);
-                            codeMirrorInstance.replaceRange(tokenTag, lastCursorPosition);
-
-                            //var oldValue = codeMirrorInstance.getValue();
-                            //var currentPosition = lastCursorPosition || 0;
-                            //var newValue = oldValue.substr(0, currentPosition) + tokenTag + oldValue.substring(currentPosition);
-                            //codeMirrorInstance.setValue(newValue);
-                        }
-                        else {
-                            CKEDITOR.instances[idTargetTextArea].insertHtml(tokenTag);
-                            updateHtmlEditorTextArea(idTargetTextArea);
-                            if (tokenTag.indexOf("<!--") == 0) {
-                                CKEDITOR.instances[idTargetTextArea].setMode("source");
-                            }
+                        CKEDITOR.instances[idTargetTextArea].insertHtml(tokenTag);
+                        updateHtmlEditorTextArea(idTargetTextArea);
+                        if (tokenTag.indexOf("<!--") == 0) {
+                            CKEDITOR.instances[idTargetTextArea].setMode("source");
                         }
                     }
                 }
+            };
+
+            CKEDITOR.instances[idTargetTextArea].on('focus', function () {
+                $("." + cssClassActive).removeClass(cssClassActive);
+                $lastTokenTarget = null;
+
+                $("#cke_" + idTargetTextArea).addClass(cssClassActive);
+                onInsertToken = ckEditorOnInsertToken;
             });
 
             CKEDITOR.instances[idTargetTextArea].on('mode', function () {
-                if (CKEDITOR.instances[idTargetTextArea].mode == "source") {
-                    CodeMirror.fromTextArea($(".cke_source")[0]).on("cursorActivity", function () {
-                        lastCursorPosition = CodeMirror.fromTextArea($(".cke_source")[0]).getCursor();
+                var ckEditorInstance = CKEDITOR.instances[idTargetTextArea];
+                if (ckEditorInstance.mode == "source") {
+                    codeMirrorInstance = window["codemirror_" + ckEditorInstance.id];
+
+                    codeMirrorInstance.on("cursorActivity", function (instance) {
+                        lastCursorPosition = instance.getCursor();
+                    });
+
+                    codeMirrorInstance.on("change", function (instance, change) {
+                        var cmValue = instance.getValue();
+                        ckEditorInstance.element.setValue(cmValue);
+                        ckEditorInstance.setData(cmValue);
+                        ckEditorInstance.fire('dataReady');
+                    });
+
+                    codeMirrorInstance.on("focus", function () {
+                        $("." + cssClassActive).removeClass(cssClassActive);
+                        $lastTokenTarget = null;
+
+                        $("#cke_" + idTargetTextArea).addClass(cssClassActive);
+                        onInsertToken = ckEditorOnInsertToken;
+                    });
+
+                    codeMirrorInstance.on("blur", function () {
+                        SF.Mailing.removeTokenTargetFocus($("#cke_" + idTargetTextArea));
                     });
                 }
             });

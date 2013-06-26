@@ -30,11 +30,12 @@ namespace Signum.Engine.Mailing
 
         public static object DistinctSingle(this IEnumerable<ResultRow> rows, ResultColumn column)
         {
-            return rows.Select(r => r[column]).Distinct().SingleEx(() =>
-                "Multiple values for column {0}".Formato(column.Column.Token.FullKey()));
+            return rows.Select(r => r[column]).Distinct().SingleEx(
+                () =>"No values for column {0}".Formato(column.Column.Token.FullKey()),
+                () =>"Multiple values for column {0}".Formato(column.Column.Token.FullKey()));
         }
 
-        public static readonly Regex KeywordsRegex = new Regex(@"\@(((?<keyword>(foreach|if|global|model|where|))\[(?<token>[^\]]+)\])|(?<keyword>endforeach|else|endif|endwhere))");
+        public static readonly Regex KeywordsRegex = new Regex(@"\@(((?<keyword>(foreach|if|global|model|any|))\[(?<token>[^\]]+)\])|(?<keyword>endforeach|else|endif|notany|endany))");
 
         public static readonly Regex TokenFormatRegex = new Regex(@"(?<token>[^\]\:]+)(\:(?<format>.*))?");
         public static readonly Regex TokenOperationValueRegex = new Regex(@"(?<token>[^\]]+)(?<comparer>(" + FilterValueConverter.OperationRegex + @"))(?<value>[^\]\:]+)");
@@ -171,12 +172,15 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        public class BlockNode : TextNode
+        public sealed class BlockNode : TextNode
         {
-            public List<TextNode> Nodes = new List<TextNode>();
+            public readonly List<TextNode> Nodes = new List<TextNode>();
 
-            public BlockNode()
+            public readonly TextNode Parent; 
+
+            public BlockNode(TextNode parent)
             {
+                this.Parent = parent;
             }
 
             public string Print(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
@@ -206,19 +210,31 @@ namespace Signum.Engine.Mailing
                 return "block ({0} nodes)".Formato(Nodes.Count);
             }
 
-            public virtual string UserString()
+            public static string UserString(Type type)
             {
+                if (type == typeof(ForeachNode))
+                    return "foreach";
+                
+                if (type == typeof(IfNode))
+                    return "if";
+
+                if (type == typeof(AnyNode))
+                    return "any";
+
                 return "block";
             }
         }
 
-        public class ForeachNode : BlockNode
+        public class ForeachNode : TextNode
         {
             public readonly QueryToken Token;
+
+            public readonly BlockNode Block;
 
             public ForeachNode(QueryToken token)
             {
                 this.Token = token;
+                this.Block = new BlockNode(this);
             }
 
             public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
@@ -228,34 +244,33 @@ namespace Signum.Engine.Mailing
                     return;
                 foreach (var group in groups)
                 {
-                    base.PrintList(p, group);
+                    Block.PrintList(p, group);
                 }
             }
 
             public override void FillQueryTokens(List<QueryToken> list)
             {
                 list.Add(Token);
-                base.FillQueryTokens(list);
+                Block.FillQueryTokens(list);
             }
 
             public override string ToString()
             {
-                return "foreach {0} ({1} nodes)".Formato(Token.FullKey(), Nodes.Count);
-            }
-
-            public override string UserString()
-            {
-                return "foreach";
+                return "foreach {0} ({1} nodes)".Formato(Token.FullKey(), Block.Nodes.Count);
             }
         }
 
-        public class WhereNode : BlockNode
+        public class AnyNode : TextNode
         {
             public readonly QueryToken Token;
             public readonly FilterOperation Operation;
             public readonly string Value;
 
-            public WhereNode(QueryToken token, string operation, string value, List<string> errors)
+            public readonly BlockNode AnyBlock;
+            public BlockNode NotAnyBlock;
+
+
+            public AnyNode(QueryToken token, string operation, string value, List<string> errors)
             {
                 if (token.HasAllOrAny())
                     errors.Add("Where {0} can not contains Any or All");
@@ -268,6 +283,14 @@ namespace Signum.Engine.Mailing
 
                 if (error.HasText())
                     errors.Add(error);
+
+                AnyBlock = new BlockNode(this);
+            }
+
+            public BlockNode CreateNotAny()
+            {
+                NotAnyBlock = new BlockNode(this);
+                return NotAnyBlock;
             }
 
             public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
@@ -283,104 +306,88 @@ namespace Signum.Engine.Mailing
                 var newBody = QueryUtils.GetCompareExpression(Operation, Expression.Convert(example.Body, Token.Type), value, inMemory: true);
                 var lambda = Expression.Lambda<Func<ResultRow, bool>>(newBody, example.Parameters).Compile();
 
-                base.PrintList(p, rows.Where(lambda));
+                var filtered = rows.Where(lambda).ToList();
+                if (filtered.Any())
+                {
+                    AnyBlock.PrintList(p, filtered);
+                }
+                else if (NotAnyBlock != null)
+                {
+                    NotAnyBlock.PrintList(p, filtered);
+                }
             }
 
             public override void FillQueryTokens(List<QueryToken> list)
             {
                 list.Add(Token);
-                base.FillQueryTokens(list);
+                AnyBlock.FillQueryTokens(list);
+                if (NotAnyBlock != null)
+                    NotAnyBlock.FillQueryTokens(list);
             }
 
             public override string ToString()
             {
-                return "where {0} {1} {2} ({3} nodes)".Formato(Token.FullKey(), FilterValueConverter.ToStringOperation(Operation), Value, Nodes.Count);
-            }
-
-            public override string UserString()
-            {
-                return "where";
+                return " ".CombineIfNotEmpty(
+                    "any {0} {1} {2} ({3} nodes)".Formato(Token.FullKey(), FilterValueConverter.ToStringOperation(Operation), Value, AnyBlock.Nodes.Count),
+                    NotAnyBlock == null ? null : "notany ({0} nodes)".Formato(NotAnyBlock.Nodes.Count));
             }
         }
 
-        public abstract class ConditionNode : BlockNode
+        public class IfNode : TextNode
         {
-            public readonly QueryToken Token;
+             public readonly QueryToken Token;
+             public readonly BlockNode IfBlock;
+             public BlockNode ElseBlock;
 
-            public ConditionNode(QueryToken token, List<string> errors)
-            {
-                //Commented: Now conditions can be added to objects (null => false, true otherwise)
-                //if (token.Type.UnNullify() != typeof(bool))
-                //    errors.Add("Token {0} is not a boolean".Formato(token));
+             public IfNode(QueryToken token, List<string> errors)
+             {
+                 this.Token = token;
+                 this.IfBlock = new BlockNode(this);
+             }
 
-                this.Token = token;
-            }
+             public BlockNode CreateElse()
+             {
+                 ElseBlock = new BlockNode(this);
+                 return ElseBlock;
+             }
 
             public override void FillQueryTokens(List<QueryToken> list)
             {
                 list.Add(Token);
-                base.FillQueryTokens(list);
+                IfBlock.FillQueryTokens(list);
+                if (ElseBlock != null)
+                    ElseBlock.FillQueryTokens(list);
             }
 
-            protected static bool ToBool(object obj)
+            protected static bool ToBool(IEnumerable<ResultRow> rows, ResultColumn column)
             {
+                if (rows.IsEmpty())
+                    return false;
+
+                object obj = rows.DistinctSingle(column);
+
                 if (obj == null || obj is bool && ((bool)obj) == false)
                     return false;
 
                 return true;
-            }
-        }
-
-        public class IfNode : ConditionNode
-        {
-            public IfNode(QueryToken token, List<string> errors)
-                : base(token, errors)
-            {
-            }
-           
+            } 
 
             public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
             {
-                if (ToBool(rows.DistinctSingle(p.Columns[Token])))
+                if (ToBool(rows, p.Columns[Token]))
                 {
-                    base.PrintList(p, rows);
+                    IfBlock.PrintList(p, rows);
+                }
+                else if(ElseBlock != null)
+                {
+                    ElseBlock.PrintList(p, rows);
                 }
             }
 
             public override string ToString()
             {
-                return "if {0} ({1} nodes)".Formato(Token.FullKey(), Nodes.Count);
-            }
-
-            public override string UserString()
-            {
-                return "if";
-            }
-        }
-
-        public class ElseNode : ConditionNode
-        {
-            public ElseNode(QueryToken token, List<string> errors)
-                : base(token, errors)
-            {
-            }
-
-            public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
-            {
-                if (!ToBool(rows.DistinctSingle(p.Columns[Token])))
-                {
-                    base.PrintList(p, rows);
-                }
-            }
-
-            public override string ToString()
-            {
-                return "else {0} ({1} nodes)".Formato(Token.FullKey(), Nodes.Count);
-            }
-
-            public override string UserString()
-            {
-                return "else";
+                return " ".CombineIfNotEmpty("if {0} ({1} nodes)".Formato(Token.FullKey(), IfBlock.Nodes.Count),
+                    ElseBlock != null ? "else ({0} nodes)".Formato(ElseBlock.Nodes.Count) : "");
             }
         }
 
@@ -401,7 +408,7 @@ namespace Signum.Engine.Mailing
             var matches = KeywordsRegex.Matches(text);
 
             Stack<BlockNode> stack = new Stack<BlockNode>();
-            mainBlock = new BlockNode();
+            mainBlock = new BlockNode(null);
             stack.Push(mainBlock);
 
             if (matches.Count == 0)
@@ -424,6 +431,22 @@ namespace Signum.Engine.Mailing
                     return null;
                 }
                 return result;
+            };
+
+            Func<Type, BlockNode> popNode = type =>
+            {
+                if (stack.Count() <= 1)
+                {
+                    errors.Add("No {0} has been opened".Formato(BlockNode.UserString(type)));
+                    return null;
+                }
+                var n = stack.Pop();
+                if (n.Parent == null || n.Parent.GetType() != type)
+                {
+                    errors.Add("Unexpected '{0}'".Formato(BlockNode.UserString(n.Parent.TryCC(p => p.GetType()))));
+                    return null;
+                }
+                return n;
             };
 
             int index = 0;
@@ -450,7 +473,7 @@ namespace Signum.Engine.Mailing
                     case "model":
                         stack.Peek().Nodes.Add(new ModelNode(token, modelType, errors));
                         break;
-                    case "where":
+                    case "any":
                         {
                             var filter = TokenOperationValueRegex.Match(token);
                             if (!filter.Success)
@@ -462,71 +485,53 @@ namespace Signum.Engine.Mailing
                                 var t = tryParseToken(filter.Groups["token"].Value);
                                 var comparer = filter.Groups["comparer"].Value;
                                 var value = filter.Groups["value"].Value;
-                                stack.Push(new WhereNode(t, comparer, value, errors));
+                                var any = new AnyNode(t, comparer, value, errors);
+                                stack.Peek().Nodes.Add(any);
+                                stack.Push(any.AnyBlock);
                             }
                             break;
                         }
-                    case "endwhere":
+                    case "notany":
                         {
-                            if (stack.Count() <= 1)
-                            {
-                                errors.Add("No 'where' has been opened for {0}".Formato(token));
-                                break;
-                            }
-                            var n = stack.Pop();
-                            if (n.GetType() != typeof(WhereNode))
-                            {
-                                errors.Add("Unexpected '{0}'".Formato(n.UserString()));
-                                break;
-                            }
-
-                            stack.Peek().Nodes.Add(n);
+                            var an = (AnyNode)popNode(typeof(AnyNode)).Parent;
+                            stack.Push(an.CreateNotAny());
+                            break;
                         }
-                        break;
+                    case "endany":
+                        {
+                            popNode(typeof(AnyNode));
+                            break;
+                        }
                     case "foreach":
-                        stack.Push(new ForeachNode(tryParseToken(token)));
-                        break;
+                        {
+                            var fn = new ForeachNode(tryParseToken(token));
+                            stack.Peek().Nodes.Add(fn);
+                            stack.Push(fn.Block);
+                            break;
+                        }
                     case "endforeach":
                         {
-                            if (stack.Count() <= 1)
-                            {
-                                errors.Add("No 'foreach' has been opened for {0}".Formato(token));
-                                break;
-                            }
-                            var n = stack.Pop();
-                            if (n.GetType() != typeof(ForeachNode))
-                            {
-                                errors.Add("Unexpected '{0}'".Formato(n.UserString()));
-                                break;
-                            }
-
-                            stack.Peek().Nodes.Add(n);
+                            popNode(typeof(ForeachNode));
                         }
                         break;
                     case "if":
-                        stack.Push(new IfNode(tryParseToken(token), errors));
-                        break;
+                        {
+                            var ifn = new IfNode(tryParseToken(token), errors);
+                            stack.Peek().Nodes.Add(ifn);
+                            stack.Push(ifn.IfBlock);
+                            break;
+                        }
                     case "else":
+                        {
+                            var ifn = (IfNode)popNode(typeof(IfNode)).Parent;
+                            stack.Push(ifn.CreateElse());
+                            break;
+                        }
                     case "endif":
                         {
-                            if (stack.Count() <= 1)
-                            {
-                                errors.Add("No 'if' has been opened for {0}".Formato(token));
-                                break;
-                            }
-                            var n = stack.Pop();
-                            if (!(n is ConditionNode))
-                            {
-                                errors.Add("Unexpected {0}".Formato(n.UserString()));
-                                break;
-                            }
-
-                            stack.Peek().Nodes.Add(n);
-
-                            if(keyword == "else")
-                                stack.Push(new ElseNode(((ConditionNode)n).Token, errors));
+                            popNode(typeof(IfNode));
+                            break;
                         }
-                        break;
                     default:
                         break;
                 }

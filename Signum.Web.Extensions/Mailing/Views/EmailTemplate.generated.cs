@@ -279,13 +279,9 @@ WriteLiteral("\r\n            </div> \r\n        </fieldset>\r\n");
             #line default
             #line hidden
 
-
-WriteLiteral("\r\n");
-
-
             
-            #line 52 "..\..\Mailing\Views\EmailTemplate.cshtml"
-Write(Html.ScriptsJs("~/Scripts/SF_Mailing.js"));
+            #line 51 "..\..\Mailing\Views\EmailTemplate.cshtml"
+Write(Html.ScriptsJs("~/Mailing/Scripts/SF_Mailing.js"));
 
             
             #line default
@@ -294,7 +290,7 @@ WriteLiteral("\r\n");
 
 
             
-            #line 53 "..\..\Mailing\Views\EmailTemplate.cshtml"
+            #line 52 "..\..\Mailing\Views\EmailTemplate.cshtml"
 Write(Html.ScriptsJs("~/Mailing/Scripts/SF_TabsRepeater.js"));
 
             
