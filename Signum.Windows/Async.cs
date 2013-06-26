@@ -96,11 +96,12 @@ namespace Signum.Windows
 
                         win.Closed += (sender, args) =>
                         {
+                            if (closed != null)
+                                closed(sender, args);
+
                             ((Window)sender).Dispatcher.InvokeShutdown();
                             Window rubish;
                             threadWindows.TryRemove(Thread.CurrentThread, out rubish);
-                            if (closed != null)
-                                closed(sender, args);
                         };
 
                         win.Show();
