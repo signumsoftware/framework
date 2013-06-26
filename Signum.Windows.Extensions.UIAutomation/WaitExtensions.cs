@@ -96,7 +96,7 @@ namespace Signum.Windows.UIAutomation
 
             element.Wait(() =>
             {
-                var newWindows = GetAllProcessWindows(pid).Where(a => !previous.Contains(a.GetRuntimeId().ToString("."))).ToList();
+                newWindow = GetAllProcessWindows(pid).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
 
                 MessageBoxProxy.ThrowIfError(newWindow);
 
