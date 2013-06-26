@@ -7,6 +7,7 @@ using Signum.Utilities;
 using System.Windows.Automation;
 using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Entities;
 
 namespace Signum.Windows.UIAutomation
 {
@@ -95,8 +96,17 @@ namespace Signum.Windows.UIAutomation
 
             element.Wait(() =>
             {
-                newWindow = GetAllProcessWindows(pid).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
+                var newWindows = GetAllProcessWindows(pid).Where(a => !previous.Contains(a.GetRuntimeId().ToString("."))).ToList();
 
+                newWindow = newWindows.SingleOrDefaultEx(() => "More than one new windows found.\r\n Previous {0}\r\nNew Windows\r\n{0}".Formato(
+                    previous.ToString(" "),
+                    newWindows.Select(w => new
+                    {
+                        w.Current.ClassName,
+                        w.Current.Name,
+                        RuntimeId = w.GetRuntimeId().ToString(".")
+                    }).ToString(a => a.Dump(), "\r\n")));
+                
                 MessageBoxProxy.AssertNoErrorWindow(newWindow);
 
                 if (newWindow != null)
