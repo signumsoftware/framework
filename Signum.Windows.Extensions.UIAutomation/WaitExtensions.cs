@@ -113,9 +113,12 @@ namespace Signum.Windows.UIAutomation
             return newWindow;
         }
 
-        public static List<AutomationElement> GetAllProcessWindows(int processId, int retry = -10)
+        public static List<AutomationElement> GetAllProcessWindows(int processId, int count = -10)
         {
+            int retryCount = 0;
+            retry: 
             var result = GetRecursiveProcessWindows(AutomationElement.RootElement, processId);
+
             lock (Entries)
             {
                 Entries.AddRange(result.Select(r =>
@@ -124,7 +127,8 @@ namespace Signum.Windows.UIAutomation
                     {
                         return new LogEntry
                         {
-                            retry = retry,
+                            Count = count,
+                            retryCount = retryCount,
                             ClassName = r.Current.ClassName,
                             Name = r.Current.Name,
                             RuntimeId = r.GetRuntimeId().ToString("."),
@@ -136,7 +140,8 @@ namespace Signum.Windows.UIAutomation
                     {
                         return new LogEntry
                         {
-                            retry = retry,
+                            Count = count,
+                            retryCount = retryCount,
                             ClassName = "error",
                             Name = "error",
                             RuntimeId = r.GetRuntimeId().ToString("."),
@@ -147,12 +152,22 @@ namespace Signum.Windows.UIAutomation
                 }));
             }
 
+            if (result.IsEmpty())
+            {
+                if (retryCount > 4)
+                    throw new InvalidOperationException("No windows found after {0} retries".Formato(retryCount));
+
+                retryCount++;
+                goto retry;
+            }
+
             return result;
         }
 
         class LogEntry
         {
-            public int retry;
+            public int Count;
+            public int retryCount;
             public string ClassName;
             public string Name;
             public string RuntimeId;
@@ -164,7 +179,7 @@ namespace Signum.Windows.UIAutomation
         {
             lock (Entries)
             {
-                Entries.Add(new LogEntry { retry = 987, ClassName = should, Name = current, ItemStatus = e.Message,  StackTrace = Environment.StackTrace });
+                Entries.Add(new LogEntry { Count = 987, ClassName = should, Name = current, ItemStatus = e.Message,  StackTrace = Environment.StackTrace });
                 Entries.ToCsvFile(@"c:\debugWindows.csv", append: true);
                 Entries.Clear();
             }
