@@ -8,6 +8,7 @@ using System.Windows.Automation;
 using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Entities;
+using System.Reflection;
 
 namespace Signum.Windows.UIAutomation
 {
@@ -43,8 +44,8 @@ namespace Signum.Windows.UIAutomation
 
             var pid = element.Current.ProcessId;
             int c = 0;
-            var previous = GetAllProcessWindows(pid, c++).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
-
+            var previous = GetAllProcessWindows(pid, c).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
+            c++;
             action();
 
             if (actionDescription == null)
@@ -56,8 +57,8 @@ namespace Signum.Windows.UIAutomation
                 if (newValue != null && newValue != oldValue)
                     return true;
 
-                var newWindow = GetAllProcessWindows(pid, c++).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
-
+                var newWindow = GetAllProcessWindows(pid, c).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
+                c++;
                 MessageBoxProxy.ThrowIfError(newWindow);
 
                 return false;
@@ -91,16 +92,16 @@ namespace Signum.Windows.UIAutomation
 
             var pid = element.Current.ProcessId;
             int c = 0;
-            var previous = GetAllProcessWindows(pid, c++).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
-
+            var previous = GetAllProcessWindows(pid, c).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
+            c++;
             action();
 
             AutomationElement newWindow = null;
 
             element.Wait(() =>
             {
-                newWindow = GetAllProcessWindows(pid, c++).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
-
+                newWindow = GetAllProcessWindows(pid, c).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
+                c++;
                 MessageBoxProxy.ThrowIfError(newWindow);
 
                 if (newWindow != null)
@@ -112,31 +113,78 @@ namespace Signum.Windows.UIAutomation
             return newWindow;
         }
 
-        public static List<AutomationElement> GetAllProcessWindows(int processId, int retry = -1)
+        public static List<AutomationElement> GetAllProcessWindows(int processId, int count = -10)
         {
+            Entries.Add(new LogEntry
+            {
+                Count = count,
+                retryCount = -1,
+                StackTrace = Environment.StackTrace
+            });
+
+            int retryCount = 0;
+        retry:
             var result = GetRecursiveProcessWindows(AutomationElement.RootElement, processId);
 
-            result.Select(r =>
-            { 
+            Entries.AddRange(result.Select(r =>
+            {
                 try
                 {
-                    return new
+                    return new LogEntry
                     {
-                        retry,
-                        r.Current.ClassName,
-                        r.Current.Name,
+                        Count = count,
+                        retryCount = retryCount,
+                        ClassName = r.Current.ClassName,
+                        Name = r.Current.Name,
                         RuntimeId = r.GetRuntimeId().ToString("."),
-                        r.Current.ItemStatus,
+                        ItemStatus = r.Current.ItemStatus,
                     };
                 }
-                catch(ElementNotAvailableException)
+                catch (ElementNotAvailableException)
                 {
-                    return new {retry, ClassName = "error", Name = "error", RuntimeId= "error", ItemStatus = "error"};
+                    return new LogEntry
+                    {
+                        Count = count,
+                        retryCount = retryCount,
+                        ClassName = "error",
+                        Name = "error",
+                        RuntimeId = r.GetRuntimeId().ToString("."),
+                        ItemStatus = "error",
+                        StackTrace = Environment.StackTrace,
+                    };
                 }
-            }).ToCsvFile(@"c:\debugWindows.csv", append: true);
+            }));
+            if (result.IsEmpty())
+            {
+                if (retryCount > 4)
+                    throw new InvalidOperationException("No windows found after {0} retries".Formato(retryCount));
+
+                retryCount++;
+                goto retry;
+            }
 
             return result;
         }
+
+        class LogEntry
+        {
+            public int Count;
+            public int retryCount;
+            public string ClassName;
+            public string Name;
+            public string RuntimeId;
+            public string ItemStatus;
+            public string StackTrace;
+        }
+
+        public static void PrintEntries(Exception e, string should, string current)
+        {
+            Entries.Add(new LogEntry { Count = 987, ClassName = should, Name = current, ItemStatus = e.Message, StackTrace = Environment.StackTrace });
+            Entries.ToCsvFile(@"c:\debugWindows.csv", append: true);
+            Entries.Clear();
+        }
+
+        static List<LogEntry> Entries = new List<LogEntry>();
 
         static List<AutomationElement> GetRecursiveProcessWindows(AutomationElement parentWindow, int processId)
         {

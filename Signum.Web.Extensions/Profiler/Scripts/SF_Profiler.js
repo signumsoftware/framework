@@ -105,11 +105,11 @@ SF.Profiler = (function () {
             .attr('dy', function (v) { return y(v.Depth); })
             .attr('y', (2 * fontPadding) + (2 * fontSize))
             .attr('fill', function (v) { return v.Depth == currentDepth ? '#000' : '#fff'; })
-            .text(function (v) { return v.Role + " - " + v.AditionalData; });
+            .text(function (v) { return v.Role + " - " + v.AdditionalData; });
 
-        rectangles.append('svg:title').text(function (v) { return v.Elapsed + " - " + v.AditionalData; });
-        labelsTop.append('svg:title').text(function (v) { return v.Elapsed + " - " + v.AditionalData; });
-        labelsBottom.append('svg:title').text(function (v) { return v.Elapsed + " - " + v.AditionalData; });
+        rectangles.append('svg:title').text(function (v) { return v.Elapsed + " - " + v.AdditionalData; });
+        labelsTop.append('svg:title').text(function (v) { return v.Elapsed + " - " + v.AdditionalData; });
+        labelsBottom.append('svg:title').text(function (v) { return v.Elapsed + " - " + v.AdditionalData; });
 
         $('g.entry').on('click', function (evt) {
             var $this = $(this);
@@ -168,7 +168,7 @@ SF.Profiler = (function () {
             .attr('dy', function (v, i) { return y(i); })
             .attr('y', fontPadding + fontSize)
             .attr('fill', '#000')
-            .text(function (v) { return v.AditionalData; });
+            .text(function (v) { return v.AdditionalData; });
 
         groups.append('svg:rect').attr('class', 'right-background')
             .attr('x', labelWidth)
@@ -192,9 +192,9 @@ SF.Profiler = (function () {
             .attr('fill', '#000')
             .text(function (v) { return v.Elapsed; });
 
-        rectangles.append('svg:title').text(function (v) { return v.Elapsed + " - " + v.AditionalData; });
-        labelsLeft.append('svg:title').text(function (v) { return v.Elapsed + " - " + v.AditionalData; });
-        labelsRight.append('svg:title').text(function (v) { return v.Elapsed + " - " + v.AditionalData; });
+        rectangles.append('svg:title').text(function (v) { return v.Elapsed + " - " + v.AdditionalData; });
+        labelsLeft.append('svg:title').text(function (v) { return v.Elapsed + " - " + v.AdditionalData; });
+        labelsRight.append('svg:title').text(function (v) { return v.Elapsed + " - " + v.AdditionalData; });
 
         $('g.entry').on('click', function (evt) {
             var $this = $(this);

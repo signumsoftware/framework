@@ -131,11 +131,11 @@ namespace Signum.Entities.Alerts
         }
 
         [ImplementedBy()]
-        Lite<IIdentifiable> aditionalData;
-        public Lite<IIdentifiable> AditionalData
+        Lite<IIdentifiable> additionalData;
+        public Lite<IIdentifiable> AdditionalData
         {
-            get { return aditionalData; }
-            set { Set(ref aditionalData, value, () => AditionalData); }
+            get { return additionalData; }
+            set { Set(ref additionalData, value, () => AdditionalData); }
         }
     }
 
