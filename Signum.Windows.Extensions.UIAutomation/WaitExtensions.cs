@@ -8,6 +8,7 @@ using System.Windows.Automation;
 using System.Linq.Expressions;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Entities;
+using System.Reflection;
 
 namespace Signum.Windows.UIAutomation
 {
@@ -43,8 +44,8 @@ namespace Signum.Windows.UIAutomation
 
             var pid = element.Current.ProcessId;
             int c = 0;
-            var previous = GetAllProcessWindows(pid, c++).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
-
+            var previous = GetAllProcessWindows(pid, c).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
+            c++;
             action();
 
             if (actionDescription == null)
@@ -56,8 +57,8 @@ namespace Signum.Windows.UIAutomation
                 if (newValue != null && newValue != oldValue)
                     return true;
 
-                var newWindow = GetAllProcessWindows(pid, c++).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
-
+                var newWindow = GetAllProcessWindows(pid, c).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
+                c++;
                 MessageBoxProxy.ThrowIfError(newWindow);
 
                 return false;
@@ -91,16 +92,16 @@ namespace Signum.Windows.UIAutomation
 
             var pid = element.Current.ProcessId;
             int c = 0;
-            var previous = GetAllProcessWindows(pid, c++).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
-
+            var previous = GetAllProcessWindows(pid, c).Select(a => a.GetRuntimeId().ToString(".")).ToHashSet();
+            c++;
             action();
 
             AutomationElement newWindow = null;
 
             element.Wait(() =>
             {
-                newWindow = GetAllProcessWindows(pid, c++).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
-
+                newWindow = GetAllProcessWindows(pid, c).FirstOrDefault(a => !previous.Contains(a.GetRuntimeId().ToString(".")));
+                c++;
                 MessageBoxProxy.ThrowIfError(newWindow);
 
                 if (newWindow != null)
@@ -112,7 +113,7 @@ namespace Signum.Windows.UIAutomation
             return newWindow;
         }
 
-        public static List<AutomationElement> GetAllProcessWindows(int processId, int retry = -1)
+        public static List<AutomationElement> GetAllProcessWindows(int processId, int retry = -10)
         {
             var result = GetRecursiveProcessWindows(AutomationElement.RootElement, processId);
             lock (Entries)
@@ -128,7 +129,7 @@ namespace Signum.Windows.UIAutomation
                             Name = r.Current.Name,
                             RuntimeId = r.GetRuntimeId().ToString("."),
                             ItemStatus = r.Current.ItemStatus,
-                            ThreadId = Thread.CurrentThread.ManagedThreadId,
+                            StackTrace = Environment.StackTrace,
                         };
                     }
                     catch (ElementNotAvailableException)
@@ -140,7 +141,7 @@ namespace Signum.Windows.UIAutomation
                             Name = "error",
                             RuntimeId = r.GetRuntimeId().ToString("."),
                             ItemStatus = "error",
-                            ThreadId = Thread.CurrentThread.ManagedThreadId,
+                            StackTrace = Environment.StackTrace,
                         };
                     }
                 }));
@@ -156,14 +157,14 @@ namespace Signum.Windows.UIAutomation
             public string Name;
             public string RuntimeId;
             public string ItemStatus;
-            public int ThreadId;
+            public string StackTrace;
         }
 
         public static void PrintEntries(Exception e, string should, string current)
         {
             lock (Entries)
             {
-                Entries.Add(new LogEntry { retry = 987, ClassName = should, Name = current, ItemStatus = e.Message, RuntimeId = e.StackTrace, ThreadId = Thread.CurrentThread.ManagedThreadId });
+                Entries.Add(new LogEntry { retry = 987, ClassName = should, Name = current, ItemStatus = e.Message,  StackTrace = Environment.StackTrace });
                 Entries.ToCsvFile(@"c:\debugWindows.csv", append: true);
                 Entries.Clear();
             }
