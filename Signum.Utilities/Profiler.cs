@@ -451,7 +451,7 @@ namespace Signum.Utilities
                 new XAttribute("Start", this.Start),
                 new XAttribute("End", this.End),
                 this.AdditionalData == null ? null :
-                new XAttribute("AditionalData", this.AdditionalData),
+                new XAttribute("AdditionalData", this.AdditionalData),
                 Entries == null ? null :
                 Entries.Select(e => e.ExportXml()).ToList());
         }
@@ -474,7 +474,7 @@ namespace Signum.Utilities
                 BeforeStart = long.Parse(xLog.Attribute("BeforeStart").Value),
                 Start = long.Parse(xLog.Attribute("Start").Value),
                 End = long.Parse(xLog.Attribute("End").Value),
-                AdditionalData = xLog.Attribute("AditionalData").TryCC(ad => ad.Value),
+                AdditionalData = xLog.Attribute("AdditionalData").TryCC(ad => ad.Value),
             };
 
             if (xLog.Element("Log") != null)
