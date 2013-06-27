@@ -10,6 +10,7 @@ using Signum.Entities;
 using System.Windows.Documents;
 using System.Windows.Media;
 using Signum.Entities.Basics;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Windows.Omnibox
 {
@@ -95,7 +96,7 @@ namespace Signum.Windows.Omnibox
                 }
                 else if (item.Operation != null)
                 {
-                    lines.Add(new Bold(new Run(DynamicQueryOmniboxResultGenerator.ToStringOperation(item.Operation.Value))));
+                    lines.Add(new Bold(new Run(FilterValueConverter.ToStringOperation(item.Operation.Value))));
 
                     if (item.Value == DynamicQueryOmniboxResultGenerator.UnknownValue)
                         lines.Add(new Run(OmniboxMessage.Unknown.NiceToString()) { Foreground = Brushes.Red });
