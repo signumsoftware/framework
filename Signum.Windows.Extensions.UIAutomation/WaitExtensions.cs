@@ -128,6 +128,7 @@ namespace Signum.Windows.UIAutomation
                             Name = r.Current.Name,
                             RuntimeId = r.GetRuntimeId().ToString("."),
                             ItemStatus = r.Current.ItemStatus,
+                            ThreadId = Thread.CurrentThread.ManagedThreadId,
                         };
                     }
                     catch (ElementNotAvailableException)
@@ -138,7 +139,8 @@ namespace Signum.Windows.UIAutomation
                             ClassName = "error",
                             Name = "error",
                             RuntimeId = r.GetRuntimeId().ToString("."),
-                            ItemStatus = "error"
+                            ItemStatus = "error",
+                            ThreadId = Thread.CurrentThread.ManagedThreadId,
                         };
                     }
                 }));
