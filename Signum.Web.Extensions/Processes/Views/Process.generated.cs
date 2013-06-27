@@ -36,7 +36,7 @@ namespace Signum.Web.Extensions.Processes.Views
     using Signum.Utilities;
     using Signum.Web;
     
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.5.4.0")]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Processes/Views/Process.cshtml")]
     public partial class Process : System.Web.Mvc.WebViewPage<dynamic>
     {
@@ -97,139 +97,167 @@ Write(Html.EntityLine(e, f => f.Algorithm));
             #line hidden
             
             #line 9 "..\..\Processes\Views\Process.cshtml"
-Write(Html.EntityLine(e, f => f.Data, f => f.ReadOnly = true));
+Write(Html.EntityLine(e, f => f.Session, f => f.ReadOnly = true));
 
             
             #line default
             #line hidden
             
             #line 9 "..\..\Processes\Views\Process.cshtml"
+                                                               
+    
+            
+            #line default
+            #line hidden
+            
+            #line 10 "..\..\Processes\Views\Process.cshtml"
+Write(Html.EntityLine(e, f => f.Data, f => f.ReadOnly = true));
+
+            
+            #line default
+            #line hidden
+            
+            #line 10 "..\..\Processes\Views\Process.cshtml"
                                                             
     
             
             #line default
             #line hidden
             
-            #line 10 "..\..\Processes\Views\Process.cshtml"
+            #line 11 "..\..\Processes\Views\Process.cshtml"
+Write(Html.ValueLine(e, f => f.MachineName));
+
+            
+            #line default
+            #line hidden
+            
+            #line 11 "..\..\Processes\Views\Process.cshtml"
+                                          
+    
+            
+            #line default
+            #line hidden
+            
+            #line 12 "..\..\Processes\Views\Process.cshtml"
 Write(Html.ValueLine(e, f => f.CreationDate));
 
             
             #line default
             #line hidden
             
-            #line 10 "..\..\Processes\Views\Process.cshtml"
+            #line 12 "..\..\Processes\Views\Process.cshtml"
                                            
     
             
             #line default
             #line hidden
             
-            #line 11 "..\..\Processes\Views\Process.cshtml"
+            #line 13 "..\..\Processes\Views\Process.cshtml"
 Write(Html.ValueLine(e, f => f.PlannedDate, f => { f.HideIfNull = true; f.ReadOnly = true; }));
 
             
             #line default
             #line hidden
             
-            #line 11 "..\..\Processes\Views\Process.cshtml"
+            #line 13 "..\..\Processes\Views\Process.cshtml"
                                                                                             
     
             
             #line default
             #line hidden
             
-            #line 12 "..\..\Processes\Views\Process.cshtml"
+            #line 14 "..\..\Processes\Views\Process.cshtml"
 Write(Html.ValueLine(e, f => f.CancelationDate, f => { f.HideIfNull = true; f.ReadOnly = true; }));
 
             
             #line default
             #line hidden
             
-            #line 12 "..\..\Processes\Views\Process.cshtml"
+            #line 14 "..\..\Processes\Views\Process.cshtml"
                                                                                                 
     
             
             #line default
             #line hidden
             
-            #line 13 "..\..\Processes\Views\Process.cshtml"
+            #line 15 "..\..\Processes\Views\Process.cshtml"
 Write(Html.ValueLine(e, f => f.QueuedDate, f => { f.HideIfNull = true; f.ReadOnly = true; }));
 
             
             #line default
             #line hidden
             
-            #line 13 "..\..\Processes\Views\Process.cshtml"
+            #line 15 "..\..\Processes\Views\Process.cshtml"
                                                                                            
     
             
             #line default
             #line hidden
             
-            #line 14 "..\..\Processes\Views\Process.cshtml"
+            #line 16 "..\..\Processes\Views\Process.cshtml"
 Write(Html.ValueLine(e, f => f.ExecutionStart, f => { f.HideIfNull = true; f.ReadOnly = true; }));
 
             
             #line default
             #line hidden
             
-            #line 14 "..\..\Processes\Views\Process.cshtml"
+            #line 16 "..\..\Processes\Views\Process.cshtml"
                                                                                                
     
             
             #line default
             #line hidden
             
-            #line 15 "..\..\Processes\Views\Process.cshtml"
+            #line 17 "..\..\Processes\Views\Process.cshtml"
 Write(Html.ValueLine(e, f => f.ExecutionEnd, f => { f.HideIfNull = true; f.ReadOnly = true; }));
 
             
             #line default
             #line hidden
             
-            #line 15 "..\..\Processes\Views\Process.cshtml"
+            #line 17 "..\..\Processes\Views\Process.cshtml"
                                                                                              
     
             
             #line default
             #line hidden
             
-            #line 16 "..\..\Processes\Views\Process.cshtml"
+            #line 18 "..\..\Processes\Views\Process.cshtml"
 Write(Html.ValueLine(e, f => f.SuspendDate, f => { f.HideIfNull = true; f.ReadOnly = true; }));
 
             
             #line default
             #line hidden
             
-            #line 16 "..\..\Processes\Views\Process.cshtml"
+            #line 18 "..\..\Processes\Views\Process.cshtml"
                                                                                             
     
             
             #line default
             #line hidden
             
-            #line 17 "..\..\Processes\Views\Process.cshtml"
+            #line 19 "..\..\Processes\Views\Process.cshtml"
 Write(Html.ValueLine(e, f => f.ExceptionDate, f => { f.HideIfNull = true; f.ReadOnly = true; }));
 
             
             #line default
             #line hidden
             
-            #line 17 "..\..\Processes\Views\Process.cshtml"
+            #line 19 "..\..\Processes\Views\Process.cshtml"
                                                                                               
     
             
             #line default
             #line hidden
             
-            #line 18 "..\..\Processes\Views\Process.cshtml"
+            #line 20 "..\..\Processes\Views\Process.cshtml"
 Write(Html.EntityLine(e, f => f.Exception, f => { f.HideIfNull = true; f.ReadOnly = true; }));
 
             
             #line default
             #line hidden
             
-            #line 18 "..\..\Processes\Views\Process.cshtml"
+            #line 20 "..\..\Processes\Views\Process.cshtml"
                                                                                            
     
     if (e.Value.State == ProcessState.Executing || e.Value.State == ProcessState.Queued)
@@ -257,7 +285,7 @@ WriteLiteral("    <div class=\"progressContainer\">\r\n        <div class=\"prog
 
 
             
-            #line 26 "..\..\Processes\Views\Process.cshtml"
+            #line 28 "..\..\Processes\Views\Process.cshtml"
                                                                          Write(Math.Round((double?)e.Value.Progress ?? 0, 0));
 
             
@@ -267,7 +295,7 @@ WriteLiteral("%;\">\r\n        </div>\r\n    </div>\r\n");
 
 
             
-            #line 29 "..\..\Processes\Views\Process.cshtml"
+            #line 31 "..\..\Processes\Views\Process.cshtml"
 
 
             
@@ -278,7 +306,7 @@ WriteLiteral("    <script type=\"text/javascript\">\r\n    $(function() {\r\n   
 
 
             
-            #line 32 "..\..\Processes\Views\Process.cshtml"
+            #line 34 "..\..\Processes\Views\Process.cshtml"
                     Write(e.Value.Id);
 
             
@@ -288,7 +316,7 @@ WriteLiteral("\';\r\n        var prefix = \'");
 
 
             
-            #line 33 "..\..\Processes\Views\Process.cshtml"
+            #line 35 "..\..\Processes\Views\Process.cshtml"
                  Write(e.ControlID);
 
             
@@ -300,7 +328,7 @@ WriteLiteral("\';\r\n\r\n        refreshUpdate(idProcess, prefix);\r\n    })\r\n
 
 
             
-            #line 40 "..\..\Processes\Views\Process.cshtml"
+            #line 42 "..\..\Processes\Views\Process.cshtml"
                Write(Url.Action("GetProgressExecution", "Process"));
 
             
@@ -317,7 +345,7 @@ WriteLiteral(@""", { id: idProcess }, function(data) {
 
 
             
-            #line 47 "..\..\Processes\Views\Process.cshtml"
+            #line 49 "..\..\Processes\Views\Process.cshtml"
                                       Write(Url.Action("FinishProcessNormalPage", "Process"));
 
             
@@ -347,7 +375,7 @@ WriteLiteral(@""", idPrefix);*/
 
 
             
-            #line 67 "..\..\Processes\Views\Process.cshtml"
+            #line 69 "..\..\Processes\Views\Process.cshtml"
 
     }
 } 

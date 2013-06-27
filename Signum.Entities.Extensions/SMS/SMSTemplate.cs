@@ -126,11 +126,11 @@ namespace Signum.Entities.SMS
         }
 
         [ImplementedBy()]
-        IIdentifiable aditionalData;
-        public IIdentifiable AditionalData
+        IIdentifiable additionalData;
+        public IIdentifiable AdditionalData
         {
-            get { return aditionalData; }
-            set { Set(ref aditionalData, value, () => AditionalData); }
+            get { return additionalData; }
+            set { Set(ref additionalData, value, () => AdditionalData); }
         }
 
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)

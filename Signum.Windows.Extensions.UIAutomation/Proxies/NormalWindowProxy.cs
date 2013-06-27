@@ -68,7 +68,7 @@ namespace Signum.Windows.UIAutomation
 
                     if (childWindows != null)
                     {
-                        MessageBoxProxy.AssertNoErrorWindow(childWindows);
+                        MessageBoxProxy.ThrowIfError(childWindows);
                         throw new InvalidOperationException("A window was open after pressing Ok on {0}. Consider using OkCapture".Formato(entityId));
                     }
 

@@ -240,6 +240,8 @@ namespace Signum.Engine.Processes
 
         static bool running = false;
 
+        public static bool ExecuteProcessesFromOtherMachines = false;
+
         static int initialDelayMiliseconds;
 
         public static void StartBackgroundProcess(int delayMilliseconds)
@@ -269,6 +271,7 @@ namespace Signum.Engine.Processes
                                  p.State == ProcessState.Queued ||
                                  p.State == ProcessState.Suspending ||
                                  p.State == ProcessState.Suspended
+                           where ExecuteProcessesFromOtherMachines || p.MachineName == null || p.MachineName == Environment.MachineName
                            select p).AsEnumerable().OrderByDescending(p => p.State).ToArray();
 
                 foreach (var p in pes)
@@ -421,7 +424,6 @@ namespace Signum.Engine.Processes
                     }
                 }.Register();
 
-
                 new Execute(ProcessOperation.Plan)
                 {
                     FromStates = { ProcessState.Created, ProcessState.Canceled, ProcessState.Planned, ProcessState.Suspended },
@@ -469,8 +471,7 @@ namespace Signum.Engine.Processes
                 {
                     CanConstruct = p => p.State.InState(ProcessState.Error, ProcessState.Canceled, ProcessState.Finished, ProcessState.Suspended),
                     ToState = ProcessState.Created,
-                    Construct = (p, _) =>
-                        p.Algorithm.Create(p.Data, p.Session)
+                    Construct = (p, _) => p.Algorithm.Create(p.Data, p.Session)
                 }.Register();
             }
         }
@@ -494,6 +495,7 @@ namespace Signum.Engine.Processes
                     State = ProcessState.Created,
                     Data = processData,
                     Session = session,
+                    MachineName = Environment.MachineName,
                 }.Save();
         }
 

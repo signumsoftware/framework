@@ -53,6 +53,15 @@ namespace Signum.Entities.Processes
             set { Set(ref session, value, () => Session); }
         }
 
+        [SqlDbType(Size = 100)]
+        string machineName;
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100)]
+        public string MachineName
+        {
+            get { return machineName; }
+            set { Set(ref machineName, value, () => MachineName); }
+        }
+
         ProcessState state;
         public ProcessState State
         {
