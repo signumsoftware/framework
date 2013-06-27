@@ -541,6 +541,29 @@ namespace Signum.Windows
                 SelectedItems = null;
         }
 
+        public void SetDirtySelectedItems()
+        {
+            foreach (var rr in lvResult.SelectedItems.Cast<ResultRow>())
+            {
+                SetDirty(rr);
+            }
+        }
+
+        public void SetDirtySelectedItem()
+        {
+            var rr = (ResultRow)lvResult.SelectedItem;
+            if (rr == null)
+                return;
+
+            SetDirty(rr);
+        }
+
+        private void SetDirty(ResultRow rr)
+        {
+            var lvi = (ListViewItem)lvResult.ItemContainerGenerator.ContainerFromItem(rr);
+            lvi.Child<GridViewRowPresenter>(WhereFlags.VisualTree).Opacity = .5;
+        }
+
         public void GenerateListViewColumns()
         {
             if (IsSearching)
@@ -697,6 +720,14 @@ namespace Signum.Windows
 
                 lvResult.ItemsSource = rt.Rows;
 
+                foreach (GridViewColumn column in gvResults.Columns)
+                {
+                    if (double.IsNaN(column.Width))
+                        column.Width = column.ActualWidth;
+
+                    column.Width = double.NaN;
+                }
+
                 if (rt.Rows.Length > 0)
                 {
                     lvResult.SelectedIndex = 0;
@@ -780,6 +811,8 @@ namespace Signum.Windows
 
             if (row == null)
                 return;
+
+            SetDirtySelectedItem();
 
             IdentifiableEntity entity = (IdentifiableEntity)Server.Convert(row.Entity, EntityType);
 
@@ -875,8 +908,6 @@ namespace Signum.Windows
 
             Search();
         }
-
-
 
         FilterOption CreateFilter(SortGridViewColumnHeader header)
         {
