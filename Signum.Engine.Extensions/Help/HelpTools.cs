@@ -18,52 +18,46 @@ namespace Signum.Engine.Help
             return dic;
         }
 
-        internal static void Syncronize(XElement created, XElement loaded,
-            XName collectionElementName, XName elementName, XName elementKeyAttribute, string replacementsKey,
-            Func<string, XElement, XElement, bool> update, Action<SyncAction, string> notify)
+        internal static void SynchronizeElements<V>(XElement loaded, XName collectionElementName, XName elementName, XName elementKeyAttribute, Dictionary<string, V> should, string replacementsKey, Action<SyncAction, string> notify)
         {
-            Dictionary<string, XElement> loadedDictionary = (loaded.Element(collectionElementName) ?? new XElement(collectionElementName))
-                .Elements(elementName).ToDictionary(a => a.Attribute(elementKeyAttribute).Value);
-            Dictionary<string, XElement> createdDictionary = (created.Element(collectionElementName) ?? new XElement(collectionElementName))
-                .Elements(elementName).ToDictionary(a => a.Attribute(elementKeyAttribute).Value);
-
             Replacements replacements = new Replacements();
 
+            var collection = loaded.Element(collectionElementName);
+
+            if (collection == null)
+                return;
+
+            Dictionary<string, XElement> loadedDictionary = collection.Elements(elementName).ToDictionary(a => a.Attribute(elementKeyAttribute).Value);
+
+            if (loadedDictionary.IsEmpty())
+                return;
+
             replacements.AskForReplacements(
-                loadedDictionary.Keys.ToHashSet(), 
-                createdDictionary.Keys.ToHashSet(), replacementsKey);
+                 loadedDictionary.Keys.ToHashSet(),
+                 should.Keys.ToHashSet(), replacementsKey);
 
-            var repLoadedDictionary = replacements.ApplyReplacementsToOld(loadedDictionary, replacementsKey);
+            var reps = replacements.TryGetC(replacementsKey);
 
-            foreach (var k in loadedDictionary.Keys.Except(createdDictionary.Keys))
-                notify(SyncAction.Removed, k);
-
-            foreach (var elem in createdDictionary.Values)
+            foreach (var kvp in loadedDictionary)
             {
-                string key = elem.Attribute(elementKeyAttribute).Value;
-                XElement load;
-                if (repLoadedDictionary.TryGetValue(key, out load))
+                var key = kvp.Value.Attribute(elementKeyAttribute).Value;
+
+                var newKey = reps.TryGetC(key);
+
+                if (newKey != null)
                 {
-                    if (update(key, elem, load))
-                    {
-                        notify(SyncAction.Updated, key);
-                    }
+                    notify(SyncAction.Renamed, newKey);
+                    kvp.Value.Attribute(elementKeyAttribute).Value = newKey;
                 }
-                else
+                else if (!should.ContainsKey(key))
                 {
-                    notify(SyncAction.Added, key);
+                    notify(SyncAction.Removed, newKey);
+                    kvp.Value.Remove();
                 }
             }
 
-            if (!loadedDictionary.Keys.Zip(createdDictionary.Keys, (x, y) => x == y).All(b => b) &&
-                 loadedDictionary.Keys.ToHashSet().SetEquals(createdDictionary.Keys))
-            {
-                notify(SyncAction.OrderChanged, null);
-            }
-
-            var col = created.Element(collectionElementName);
-            if (col != null && col.Elements().Count() == 0)
-                col.Remove();
+            if (!collection.Elements().Any())
+                collection.Remove();
         }
 
         public static void SynchronizeReplacing<O, N>(
@@ -103,9 +97,7 @@ namespace Signum.Engine.Help
 
     internal enum SyncAction
     {
-        Added,
         Removed,
-        Updated,
-        OrderChanged,
+        Renamed,
     }
 }

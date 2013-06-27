@@ -142,7 +142,7 @@ namespace Signum.Engine.Help
 
         public static void ReloadDocumentQuery(QueryHelp queryHelp)
         {
-            State.Value.QueryColumns[queryHelp.Key] = QueryHelp.Load(XDocument.Load(queryHelp.FileName), queryHelp.FileName);
+            State.Value.QueryColumns[queryHelp.Key] = QueryHelp Load(XDocument.Load(queryHelp.FileName), queryHelp.FileName);
         }
 
         public static void ReloadDocumentNamespace(NamespaceHelp namespaceHelp)
@@ -162,17 +162,13 @@ namespace Signum.Engine.Help
 
             HelpState result = new HelpState();
 
-            Type[] types = Schema.Current.Tables.Select(t => t.Key).ToArray();
-
-            var typesDic = types.ToDictionary(a => a.FullName);
-
-            var entitiesDocuments = LoadDocuments(EntitiesDirectory);
-            var namespacesDocuments = LoadDocuments(NamespacesDirectory);
-            var queriesDocuments = LoadDocuments(QueriesDirectory);
-            var appendicesDocuments = LoadDocuments(AppendicesDirectory);
-
+         
             //Scope
             {
+                Type[] types = Schema.Current.Tables.Select(t => t.Key).ToArray();
+                var typesDic = types.ToDictionary(a => a.FullName);
+
+                var entitiesDocuments = LoadDocuments(EntitiesDirectory);
                 var typeHelpInfo = from doc in entitiesDocuments
                                    let typeName = EntityHelp.GetEntityFullName(doc.Document)
                                    where typeName != null
@@ -185,6 +181,7 @@ namespace Signum.Engine.Help
 
             //Scope
             {
+                var namespacesDocuments = LoadDocuments(NamespacesDirectory);
                 var nameSpaceInfo = from doc in namespacesDocuments
                                     let namespaceName = NamespaceHelp.GetNamespaceName(doc.Document)
                                     where namespaceName != null
@@ -195,6 +192,7 @@ namespace Signum.Engine.Help
 
             //Scope
             {
+                var appendicesDocuments = LoadDocuments(AppendicesDirectory);
                 var appendixInfo = from doc in appendicesDocuments
                                    let namespaceName = AppendixHelp.GetAppendixName(doc.Document)
                                    where namespaceName != null
@@ -205,6 +203,7 @@ namespace Signum.Engine.Help
 
             //Scope
             {
+                var queriesDocuments = LoadDocuments(QueriesDirectory);
                 var queriesInfo = from doc in queriesDocuments
                                   let queryName = QueryHelp.GetQueryFullName(doc.Document)
                                   where queryName != null
@@ -254,61 +253,6 @@ namespace Signum.Engine.Help
             public string File;
         }
 
-
-        public static void GenerateAll()
-        {
-            if (!Directory.Exists(HelpDirectory))
-            {
-                Directory.CreateDirectory(HelpDirectory);
-
-                if (!Directory.Exists(Path.Combine(HelpDirectory, AppendicesDirectory)))
-                    Directory.CreateDirectory(Path.Combine(HelpDirectory, AppendicesDirectory));
-
-                if (!Directory.Exists(Path.Combine(HelpDirectory, EntitiesDirectory)))
-                    Directory.CreateDirectory(Path.Combine(HelpDirectory, EntitiesDirectory));
-
-                if (!Directory.Exists(Path.Combine(HelpDirectory, QueriesDirectory)))
-                    Directory.CreateDirectory(Path.Combine(HelpDirectory, QueriesDirectory));
-
-                if (!Directory.Exists(Path.Combine(HelpDirectory, NamespacesDirectory)))
-                    Directory.CreateDirectory(Path.Combine(HelpDirectory, NamespacesDirectory));
-            }
-            else
-            {
-                string[] files = Directory.GetFiles(HelpDirectory, "*.help");
-
-                if (files.Length != 0)
-                {
-                    Console.WriteLine("There are files in {0}, remove? (y/n)", HelpDirectory);
-                    if (Console.ReadLine().ToLower() != "y")
-                        return;
-
-                    foreach (var f in files)
-                    {
-                        File.Delete(f);
-                    }
-                }
-            }
-
-            Type[] types = Schema.Current.Tables.Keys.Where(t => !t.IsEnumEntity()).ToArray();
-
-            foreach (Type type in types)
-            {
-                EntityHelp.Create(type).Save();
-            }
-
-            foreach (var ns in types.Select(a => a.Namespace).Distinct())
-            {
-                NamespaceHelp.Create(ns).Save();
-            }
-
-            foreach (Type type in types)
-            {
-                foreach (var v in DynamicQueryManager.Current.GetTypeQueries(type))
-                    QueryHelp.Create(v.Key).Save();
-            }
-        }
-
         public static void SyncronizeAll()
         {
             if (!Directory.Exists(HelpDirectory))
@@ -317,14 +261,11 @@ namespace Signum.Engine.Help
             }
 
             Type[] types = Schema.Current.Tables.Keys.Where(t => !t.IsEnumEntity()).ToArray();
-            var entitiesDocuments = LoadDocuments(EntitiesDirectory);
-            var namespacesDocuments = LoadDocuments(NamespacesDirectory);
-            var queriesDocuments = LoadDocuments(QueriesDirectory);
-            //var appendicesDocuments = LoadDocuments(AppendicesFolder);
-
+           
             Replacements replacements = new Replacements();
             //Namespaces
             {
+                var namespacesDocuments = LoadDocuments(NamespacesDirectory);
                 var should = types.Select(type => type.Namespace).Distinct().ToDictionary(a => a);
 
                 var current = (from doc in namespacesDocuments
@@ -354,9 +295,10 @@ namespace Signum.Engine.Help
             }
 
             //Types
-            {
+            {   
                 var should = types.ToDictionary(type => type.FullName);
 
+                var entitiesDocuments = LoadDocuments(EntitiesDirectory);
                 var current = (from doc in entitiesDocuments 
                                let name = EntityHelp.GetEntityFullName(doc.Document)
                                where name != null
@@ -375,8 +317,6 @@ namespace Signum.Engine.Help
                     },
                     (fullName, type) =>
                     {
-                        string fileName = EntityHelp.Create(type).Save();
-                        Console.WriteLine("Created {0}".Formato(fileName));
                     },
                     (fullName, oldFile, type) =>
                     {
@@ -387,10 +327,10 @@ namespace Signum.Engine.Help
             //Queries
             {
                 var should = (from type in types
-                              let keys = DynamicQueryManager.Current.GetTypeQueries(type).Keys
-                              from key in keys
+                              from key in DynamicQueryManager.Current.GetTypeQueries(type).Keys
                               select key).Distinct().ToDictionary(q => QueryUtils.GetQueryUniqueKey(q), "Queries in HelpFiles");
 
+                var queriesDocuments = LoadDocuments(QueriesDirectory);
                 var current = (from doc in queriesDocuments 
                                let name = QueryHelp.GetQueryFullName(doc.Document)
                                where name != null
@@ -406,11 +346,7 @@ namespace Signum.Engine.Help
                         File.Delete(oldFile);
                         Console.WriteLine("Deleted {0}".Formato(oldFile));
                     },
-                    (fullName, query) =>
-                    {
-                        string fileName = QueryHelp.Create(query).Save();
-                        Console.WriteLine("Created {0}".Formato(fileName));
-                    },
+                    (fullName, query) =>{},
                     (fullName, oldFile, query) =>
                     {
                         QueryHelp.Synchronize(oldFile, QueryUtils.GetQueryUniqueKey(query));

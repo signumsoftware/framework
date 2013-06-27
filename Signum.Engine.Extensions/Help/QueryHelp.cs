@@ -29,64 +29,52 @@ namespace Signum.Engine.Help
         public string UserDescription = string.Empty;
         public string Info = string.Empty;
 
-        public QueryHelp() { }
-
-        public QueryHelp(object queryKey, string info)
-        {
-            this.Key = queryKey;
-            this.Info = info;
-        }
-
-        public QueryHelp(object queryKey, string info, string userDescription)
-        {
-            this.Key = queryKey;
-            this.Info = info;
-            this.UserDescription = userDescription;
-        }
-
         public XDocument ToXDocument()
         {
+            if (string.IsNullOrEmpty(UserDescription) && Columns.All(c => string.IsNullOrEmpty(UserDescription)))
+                return null;
+
             return new XDocument(
                 new XDeclaration("1.0", "utf-8", "yes"),
                    new XElement(_Query,
                        new XAttribute(_Key, QueryUtils.GetQueryUniqueKey(Key)),
-                       new XAttribute(_Info, Info),
                        new XAttribute(_Language, Language),
-                       new XElement(_Description, UserDescription),
-                        Columns.Let(ps => ps == null || ps.Count == 0 ? null :
+                       UserDescription.HasText() ? new XElement(_Description, UserDescription) : null,
+                        Columns.Values.Any(c => c.UserDescription.HasText()) ?
                            new XElement(_Columns,
-                               ps.Select(p => new XElement(_Column,
-                                   new XAttribute(_Name, p.Value.Name),
-                                   new XAttribute(_Info, p.Value.Info),
-                                   p.Value.UserDescription))
-                           )
+                               Columns.Values.Where(c => c.UserDescription.HasText())
+                               .Select(c => new XElement(_Column,
+                                   new XAttribute(_Name, c.Name),
+                                   c.UserDescription))
+                           ) : null
                        )
-                   )
-                );
+                   );
         }
 
-        public static QueryHelp Load(XDocument document, string sourceFile)
+        public QueryHelp Load(XDocument document, string sourceFile)
         {
+            if (document == null)
+                return this;
+
             XElement element = document.Element(_Query);
-            string queryName = element.Attribute(_Key).Value;
-            object queryKey = QueryLogic.ToQueryName(queryName);
-            return new QueryHelp
+            object queryName = QueryLogic.ToQueryName(element.Attribute(_Key).Value);
+
+            if (!queryName.Equals(this.Key))
+                throw new InvalidOperationException("QueryName should be {0} instead of {1}".Formato(QueryUtils.GetQueryUniqueKey(this.Key), QueryUtils.GetQueryUniqueKey(queryName))); 
+
+            this.UserDescription = element.Element(_Description).TryCC(d => d.Value); 
+            
+            var cs = element.Element(_Columns);
+            if(cs != null)
             {
-                Key = queryKey,
-                UserDescription = element.Element(_Description).TryCC(d => d.Value),
-                Language = element.Attribute(_Language).Value,
-                Info = element.Attribute(_Info).Value,
-                FileName = sourceFile,
-                Columns = EnumerableExtensions.JoinStrict(
-                    element.Element(_Columns).TryCC(ps => ps.Elements(_Column)) ?? new XElement[0],
-                    GenerateColumns(queryKey),
-                    x => x.Attribute(_Name).Value,
-                    pp => pp.Name,
-                    (x, pp) => new KeyValuePair<string, QueryColumnHelp>(
-                         pp.Name,
-                         new QueryColumnHelp{Name = x.Attribute(_Name).Value, Info = x.Attribute(_Info).Value, UserDescription = x.Value}),
-                    "loading Columns for {0} Query file ({1})".Formato(queryName, sourceFile)).CollapseDictionary(),
-            }; 
+                string errorMessage = "loading column {0} on Query file (" + sourceFile + ")"; 
+                foreach (var item in cs.Elements(_Column))
+	            {
+                    this.Columns.GetOrThrow(item.Attribute(_Name).Value, errorMessage ).UserDescription = item.Value;
+	            }
+            }
+
+            return this;
         }
 
         internal static string GetQueryFullName(XDocument document)
@@ -140,41 +128,23 @@ namespace Signum.Engine.Help
         static readonly XName _Query = "Query";
         static readonly XName _Columns = "Columns";
         static readonly XName _Column = "Column";
-        static readonly XName _Info = "Info";
 
 
         public static void Synchronize(string fileName, string key)
         {
             XElement loaded = XDocument.Load(fileName).Element(_Query);
-            XDocument createdDoc = QueryHelp.Create(QueryLogic.TryToQueryName(key)).ToXDocument();
-            XElement created = createdDoc.Element(_Query);
-
-
-            created.Element(_Description).Value = loaded.Element(_Description).Value;
+            var created = QueryHelp.Create(QueryLogic.TryToQueryName(key));
 
             bool changed = false;
-            Action change = () =>
-            {
-                if (!changed)
-                {
-                    Console.WriteLine("Synchronized {0} ".Formato(fileName));
-                    changed = true;
-                }
-            };
-
-            HelpTools.Syncronize(created, loaded, _Columns, _Columns, _Name, "Columns of {0}".Formato(key),
-              (k, c, l) =>
-              {
-                  c.Value = l.Value;
-                  return EntityHelp.Distinct(l.Attribute(_Info), c.Attribute(_Info));
-              },
+            HelpTools.SynchronizeElements(loaded, _Columns, _Columns, _Name, created.Columns, "Columns of {0}".Formato(key),
               (action, column) =>
               {
-                  change();
-                  if (action == SyncAction.OrderChanged)
-                      Console.WriteLine("  Columns {0}".Formato(action));
-                  else
-                      Console.WriteLine("  Column {0}: {1}".Formato(action, column));
+                  if (!changed)
+                  {
+                      Console.WriteLine("Synchronized {0} ".Formato(fileName));
+                      changed = true;
+                  }
+                  Console.WriteLine("  Column {0}: {1}".Formato(action, column));
               });
 
             string goodFileName = DefaultFileName(key);
@@ -182,11 +152,11 @@ namespace Signum.Engine.Help
             {
                 Console.WriteLine("FileNameChanged {0} -> {1}".Formato(fileName, goodFileName));
                 File.Delete(fileName);
-                createdDoc.Save(goodFileName);
+                loaded.Save(goodFileName);
             }
             else
             {
-                createdDoc.Save(fileName);
+                loaded.Save(fileName);
             }
 
             if (changed)

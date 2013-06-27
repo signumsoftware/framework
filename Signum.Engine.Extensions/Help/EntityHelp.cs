@@ -137,12 +137,8 @@ namespace Signum.Engine.Help
 
         public static void Synchronize(string fileName, Type type)
         {
-            
             XElement loaded = XDocument.Load(fileName).Element(_Entity);
-            XDocument createdDoc = EntityHelp.Create(type).ToXDocument();
-            XElement created = createdDoc.Element(_Entity);
-
-            created.Element(_Description).Value = loaded.Element(_Description).Value;
+            var created = EntityHelp.Create(type);
 
             bool changed = false; 
             Action change = ()=>
@@ -154,49 +150,18 @@ namespace Signum.Engine.Help
                 }
             };
 
-            HelpTools.Syncronize(created, loaded, _Properties, _Property, _Name, "Properties of {0}".Formato(type.Name),
-                (k, c, l) =>
-                {
-                    c.Value = l.Value;
-                    return Distinct(l.Attribute(_Info), c.Attribute(_Info));
-                },
+            HelpTools.SynchronizeElements(loaded, _Properties, _Property, _Name, created.Properties, "Properties of {0}".Formato(type.Name),
                 (action, prop) =>
                 {
                     change();
-                    if (action == SyncAction.OrderChanged)
-                        Console.WriteLine("  Properties {0}".Formato(action));
-                    else
-                        Console.WriteLine("  Property {0}: {1}".Formato(action, prop));
+                    Console.WriteLine("  Property {0}: {1}".Formato(action, prop));
                 });
 
-           /* HelpTools.Syncronize(created, loaded, _Queries, _Query, _Key, "Queries of {0}".Formato(type.Name),
-                (k, c, l) =>
-                {
-                    c.Value = l.Value;
-                    return Distinct(l.Attribute(_Info), c.Attribute(_Info));
-                },
-                (action, qn) =>
-                {
-                    change();
-                    if (action == SyncAction.OrderChanged)
-                        Console.WriteLine("  Queries {0}".Formato(action));
-                    else
-                        Console.WriteLine("  Query {0}: {1}".Formato(action, qn));
-                });*/
-
-            HelpTools.Syncronize(created, loaded, _Operations, _Operation, _Key, "Operations of {0}".Formato(type.Name),
-                (k, c, l) =>
-                {
-                    c.Value = l.Value;
-                    return Distinct(l.Attribute(_Info), c.Attribute(_Info));
-                },
+            HelpTools.SynchronizeElements(loaded, _Operations, _Operation, _Key, created.Operations.SelectDictionary(OperationDN.UniqueKey, v => v), "Operations of {0}".Formato(type.Name),
                 (action, op) =>
                 {
                     change();
-                    if (action == SyncAction.OrderChanged)
-                        Console.WriteLine("  Operations {0}".Formato(action));
-                    else
-                        Console.WriteLine("  Operation {0}: {1}".Formato(action, op));
+                    Console.WriteLine("  Operation {0}: {1}".Formato(action, op));
                 });
 
             string goodFileName = DefaultFileName(type);
@@ -204,11 +169,11 @@ namespace Signum.Engine.Help
             {
                 Console.WriteLine("FileNameChanged {0} -> {1}".Formato(fileName, goodFileName));
                 File.Delete(fileName);
-                createdDoc.Save(goodFileName);
+                loaded.Save(goodFileName);
             }
             else
             {
-                createdDoc.Save(fileName);
+                loaded.Save(fileName);
             }
 
             if (changed)
