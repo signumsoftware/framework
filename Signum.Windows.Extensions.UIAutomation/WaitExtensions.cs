@@ -116,27 +116,52 @@ namespace Signum.Windows.UIAutomation
         {
             var result = GetRecursiveProcessWindows(AutomationElement.RootElement, processId);
 
-            result.Select(r =>
+            Entries.AddRange(result.Select(r =>
             { 
                 try
                 {
-                    return new
+                    return new LogEntry
                     {
-                        retry,
-                        r.Current.ClassName,
-                        r.Current.Name,
+                        retry = retry,
+                        ClassName = r.Current.ClassName,
+                        Name =r.Current.Name,
                         RuntimeId = r.GetRuntimeId().ToString("."),
-                        r.Current.ItemStatus,
+                        ItemStatus= r.Current.ItemStatus,
                     };
                 }
                 catch(ElementNotAvailableException)
                 {
-                    return new {retry, ClassName = "error", Name = "error", RuntimeId= "error", ItemStatus = "error"};
+                    return new LogEntry
+                    { 
+                        retry = retry, 
+                        ClassName = "error", 
+                        Name = "error", 
+                        RuntimeId = r.GetRuntimeId().ToString("."),
+                        ItemStatus = "error"
+                    };
                 }
-            }).ToCsvFile(@"c:\debugWindows.csv", append: true);
+            }));
 
             return result;
         }
+
+        class LogEntry
+        {
+            public int retry;
+            public string ClassName;
+            public string Name;
+            public string RuntimeId;
+            public string ItemStatus;
+        }
+
+        public static void PrintEntries(Exception e, string should, string current)
+        {
+            Entries.Add(new LogEntry { retry = 987, ClassName = should, Name = current, ItemStatus = e.Message, RuntimeId = e.StackTrace });
+            Entries.ToCsvFile(@"c:\debugWindows.csv", append: true);
+            Entries.Clear();
+        }
+
+        static List<LogEntry> Entries = new List<LogEntry>();
 
         static List<AutomationElement> GetRecursiveProcessWindows(AutomationElement parentWindow, int processId)
         {
