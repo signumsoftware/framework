@@ -115,32 +115,34 @@ namespace Signum.Windows.UIAutomation
         public static List<AutomationElement> GetAllProcessWindows(int processId, int retry = -1)
         {
             var result = GetRecursiveProcessWindows(AutomationElement.RootElement, processId);
-
-            Entries.AddRange(result.Select(r =>
-            { 
-                try
+            lock (Entries)
+            {
+                Entries.AddRange(result.Select(r =>
                 {
-                    return new LogEntry
+                    try
                     {
-                        retry = retry,
-                        ClassName = r.Current.ClassName,
-                        Name =r.Current.Name,
-                        RuntimeId = r.GetRuntimeId().ToString("."),
-                        ItemStatus= r.Current.ItemStatus,
-                    };
-                }
-                catch(ElementNotAvailableException)
-                {
-                    return new LogEntry
-                    { 
-                        retry = retry, 
-                        ClassName = "error", 
-                        Name = "error", 
-                        RuntimeId = r.GetRuntimeId().ToString("."),
-                        ItemStatus = "error"
-                    };
-                }
-            }));
+                        return new LogEntry
+                        {
+                            retry = retry,
+                            ClassName = r.Current.ClassName,
+                            Name = r.Current.Name,
+                            RuntimeId = r.GetRuntimeId().ToString("."),
+                            ItemStatus = r.Current.ItemStatus,
+                        };
+                    }
+                    catch (ElementNotAvailableException)
+                    {
+                        return new LogEntry
+                        {
+                            retry = retry,
+                            ClassName = "error",
+                            Name = "error",
+                            RuntimeId = r.GetRuntimeId().ToString("."),
+                            ItemStatus = "error"
+                        };
+                    }
+                }));
+            }
 
             return result;
         }
@@ -152,13 +154,17 @@ namespace Signum.Windows.UIAutomation
             public string Name;
             public string RuntimeId;
             public string ItemStatus;
+            public int ThreadId;
         }
 
         public static void PrintEntries(Exception e, string should, string current)
         {
-            Entries.Add(new LogEntry { retry = 987, ClassName = should, Name = current, ItemStatus = e.Message, RuntimeId = e.StackTrace });
-            Entries.ToCsvFile(@"c:\debugWindows.csv", append: true);
-            Entries.Clear();
+            lock (Entries)
+            {
+                Entries.Add(new LogEntry { retry = 987, ClassName = should, Name = current, ItemStatus = e.Message, RuntimeId = e.StackTrace, ThreadId = Thread.CurrentThread.ManagedThreadId });
+                Entries.ToCsvFile(@"c:\debugWindows.csv", append: true);
+                Entries.Clear();
+            }
         }
 
         static List<LogEntry> Entries = new List<LogEntry>();
