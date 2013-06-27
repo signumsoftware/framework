@@ -50,19 +50,18 @@ namespace Signum.Engine.Help
                     notify(SyncAction.Renamed, newKey);
                     key = newKey;
                 }
- 
-                    T val = should.TryGetC(key);
 
-                    if (val == null)
-                    {
-                        notify(SyncAction.Updated, newKey);
-                    }
-                    else
-                    {
+                T val = should.TryGetC(key);
 
-                        if(update(val, kvp.Value))
-                            notify(SyncAction.Updated
-                    }
+                if (val == null)
+                {
+                    notify(SyncAction.Removed, key);
+                }
+                else
+                {
+                    if (update(val, kvp.Value))
+                        notify(SyncAction.Updated, key);
+                }
             }
         }
 
@@ -103,7 +102,8 @@ namespace Signum.Engine.Help
 
     internal enum SyncAction
     {
-        Updated,
+        Removed,
         Renamed,
+        Updated,
     }
 }

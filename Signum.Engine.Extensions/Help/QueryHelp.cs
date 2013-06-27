@@ -134,6 +134,11 @@ namespace Signum.Engine.Help
 
             bool changed = false;
             HelpTools.SynchronizeElements(loadedQuery, _Columns, _Columns, _Name, created.Columns, "Columns of {0}".Formato(key),
+              (qc, element)=>
+              {
+                  qc.
+
+              }
               (action, column) =>
               {
                   if (!changed)
