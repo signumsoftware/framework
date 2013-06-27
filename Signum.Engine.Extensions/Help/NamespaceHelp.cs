@@ -19,6 +19,9 @@ namespace Signum.Engine.Help
 
         public XDocument ToXDocument()
         {
+            if (string.IsNullOrEmpty(Description))
+                return null;
+
             return new XDocument(
                 new XDeclaration("1.0", "utf-8", "yes"),
                    new XElement(_Namespace,
@@ -54,23 +57,19 @@ namespace Signum.Engine.Help
             {
                 Name = nameSpace,
                 Language = CultureInfo.CurrentCulture.Name,
-                Description = "",
+                FileName = Path.Combine(Path.Combine(HelpLogic.HelpDirectory, HelpLogic.NamespacesDirectory), "{0}.help".Formato(nameSpace))
             };
         }
 
-        public string Save()
+        public void Save()
         {
             XDocument document = this.ToXDocument();
-            string path = DefaultFileName(Name);
-            document.Save(path);
-            return path;
+            if (document == null)
+                File.Delete(FileName);
+            else
+                document.Save(FileName);
         }
 
-        static string DefaultFileName(string nameSpace)
-        {
-            return Path.Combine(
-                Path.Combine(HelpLogic.HelpDirectory, HelpLogic.NamespacesDirectory), "{0}.help".Formato(nameSpace));
-        }
 
         static readonly XName _Namespace = "Namespace";
         static readonly XName _Name = "Name";
@@ -82,31 +81,25 @@ namespace Signum.Engine.Help
             XDocument loadedDoc = XDocument.Load(fileName);
             XElement loadedNs = loadedDoc.Element(_Namespace);
 
-            XDocument createdDoc = NamespaceHelp.Create(nameSpace).ToXDocument();
-            XElement createdNs = createdDoc.Element(_Namespace); 
-            XElement createdDesc = createdDoc.Element(_Description);
+            var created = NamespaceHelp.Create(nameSpace);
+            loadedNs.Attribute(_Name).Value = created.Name;
 
-            string loadedNameSpace = loadedNs.Attribute(_Name).Value;
-            if (nameSpace != loadedNameSpace)
+            if(loadedNs.Element(_Description) == null)
             {
-                string goodFileName = DefaultFileName(nameSpace);
-
-                if (loadedNs != null)
-                {
-                    XElement loadedDesc = loadedDoc.Element(_Description);
-                    if (loadedDesc != null)
-                        createdDesc.Value = loadedDesc.Value;
-                }
-
-                Console.WriteLine("FileNameChanged {0} -> {1}".Formato(fileName, goodFileName));
                 File.Delete(fileName);
-                createdDoc.Save(goodFileName);
+            }
+            else if (fileName != created.FileName)
+            {
+                Console.WriteLine("FileNameChanged {0} -> {1}".Formato(fileName, created.FileName));
+                File.Delete(fileName);
+                loadedDoc.Save(created.FileName);
                 Console.WriteLine();
             }
-            else if (loadedNs == null || loadedNs.Element(_Description) == null)
+            else if ()
             {
+
                 Console.WriteLine("FilModified {0}".Formato(fileName));
-                createdNs.Save(fileName);
+                loadedDoc.Save(fileName);
                 Console.WriteLine();
             }
         }

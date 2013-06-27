@@ -51,12 +51,12 @@ namespace Signum.Engine.Help
                    );
         }
 
-        public QueryHelp Load(XDocument document, string sourceFile)
+        public QueryHelp Load()
         {
-            if (document == null)
+            if (!File.Exists(FileName))
                 return this;
 
-            XElement element = document.Element(_Query);
+            XElement element = XDocument.Load(FileName).Element(_Query);
             object queryName = QueryLogic.ToQueryName(element.Attribute(_Key).Value);
 
             if (!queryName.Equals(this.Key))
@@ -67,7 +67,7 @@ namespace Signum.Engine.Help
             var cs = element.Element(_Columns);
             if(cs != null)
             {
-                string errorMessage = "loading column {0} on Query file (" + sourceFile + ")"; 
+                string errorMessage = "loading column {0} on Query file (" + FileName + ")"; 
                 foreach (var item in cs.Elements(_Column))
 	            {
                     this.Columns.GetOrThrow(item.Attribute(_Name).Value, errorMessage ).UserDescription = item.Value;
@@ -103,22 +103,18 @@ namespace Signum.Engine.Help
                 Info = HelpGenerator.GetQueryHelp(DynamicQueryManager.Current.GetQuery(key).Core.Value),
                 Columns = GenerateColumns(key).ToDictionary(
                                 kvp => kvp.Name,
-                                kvp => new QueryColumnHelp() { Name = kvp.Name, Info = HelpGenerator.GetQueryColumnHelp(kvp) })
+                                kvp => new QueryColumnHelp() { Name = kvp.Name, Info = HelpGenerator.GetQueryColumnHelp(kvp) }),
+                FileName = Path.Combine(Path.Combine(HelpLogic.HelpDirectory, HelpLogic.QueriesDirectory), "{0}.help".Formato(key))
             };
         }
 
-        public string Save()
+        public void Save()
         {
             XDocument document = this.ToXDocument();
-            string path = DefaultFileName(QueryUtils.GetQueryUniqueKey(Key));
-            document.Save(path);
-            return path;
-        }
-
-        static string DefaultFileName(string key)
-        {
-            return Path.Combine(
-                Path.Combine(HelpLogic.HelpDirectory,HelpLogic.QueriesDirectory), "{0}.help".Formato(key));
+            if (document == null)
+                File.Delete(FileName);
+            else
+                document.Save(FileName);
         }
 
         static readonly XName _Name = "Name";
@@ -132,11 +128,12 @@ namespace Signum.Engine.Help
 
         public static void Synchronize(string fileName, string key)
         {
-            XElement loaded = XDocument.Load(fileName).Element(_Query);
+            XDocument loaded = XDocument.Load(fileName);
+            XElement loadedQuery = loaded.Element(_Query);
             var created = QueryHelp.Create(QueryLogic.TryToQueryName(key));
 
             bool changed = false;
-            HelpTools.SynchronizeElements(loaded, _Columns, _Columns, _Name, created.Columns, "Columns of {0}".Formato(key),
+            HelpTools.SynchronizeElements(loadedQuery, _Columns, _Columns, _Name, created.Columns, "Columns of {0}".Formato(key),
               (action, column) =>
               {
                   if (!changed)
@@ -147,16 +144,21 @@ namespace Signum.Engine.Help
                   Console.WriteLine("  Column {0}: {1}".Formato(action, column));
               });
 
-            string goodFileName = DefaultFileName(key);
-            if (fileName != goodFileName)
+            if (loadedQuery.Element(_Columns) == null && loadedQuery.Element(_Description) == null)
             {
-                Console.WriteLine("FileNameChanged {0} -> {1}".Formato(fileName, goodFileName));
                 File.Delete(fileName);
-                loaded.Save(goodFileName);
+
+                Console.WriteLine("Deleted {0} -> {1}".Formato(fileName, created.FileName));
+            }
+            else if (fileName != created.FileName)
+            {
+                Console.WriteLine("FileNameChanged {0} -> {1}".Formato(fileName, created.FileName));
+                File.Delete(fileName);
+                loadedQuery.Save(created.FileName);
             }
             else
             {
-                loaded.Save(fileName);
+                loadedQuery.Save(fileName);
             }
 
             if (changed)

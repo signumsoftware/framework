@@ -142,7 +142,7 @@ namespace Signum.Engine.Help
 
         public static void ReloadDocumentQuery(QueryHelp queryHelp)
         {
-            State.Value.QueryColumns[queryHelp.Key] = QueryHelp Load(XDocument.Load(queryHelp.FileName), queryHelp.FileName);
+            State.Value.QueryColumns[queryHelp.Key] = QueryHelp.Create(queryHelp.Key).Load();
         }
 
         public static void ReloadDocumentNamespace(NamespaceHelp namespaceHelp)
@@ -285,8 +285,6 @@ namespace Signum.Engine.Help
                  },
                  (nameSpace, _) =>
                  {
-                     string fileName = NamespaceHelp.Create(nameSpace).Save();
-                     Console.WriteLine("Created {0}".Formato(fileName));
                  },
                  (nameSpace, oldFile, type) =>
                  {

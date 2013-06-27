@@ -18,7 +18,8 @@ namespace Signum.Engine.Help
             return dic;
         }
 
-        internal static void SynchronizeElements<V>(XElement loaded, XName collectionElementName, XName elementName, XName elementKeyAttribute, Dictionary<string, V> should, string replacementsKey, Action<SyncAction, string> notify)
+        internal static void SynchronizeElements<T>(XElement loaded, XName collectionElementName, XName elementName, XName elementKeyAttribute, 
+            Dictionary<string, T> should, string replacementsKey, Func<T, XElement, bool> update, Action<SyncAction, string> notify) where T:class
         {
             Replacements replacements = new Replacements();
 
@@ -47,17 +48,22 @@ namespace Signum.Engine.Help
                 if (newKey != null)
                 {
                     notify(SyncAction.Renamed, newKey);
-                    kvp.Value.Attribute(elementKeyAttribute).Value = newKey;
+                    key = newKey;
                 }
-                else if (!should.ContainsKey(key))
-                {
-                    notify(SyncAction.Removed, newKey);
-                    kvp.Value.Remove();
-                }
-            }
+ 
+                    T val = should.TryGetC(key);
 
-            if (!collection.Elements().Any())
-                collection.Remove();
+                    if (val == null)
+                    {
+                        notify(SyncAction.Updated, newKey);
+                    }
+                    else
+                    {
+
+                        if(update(val, kvp.Value))
+                            notify(SyncAction.Updated
+                    }
+            }
         }
 
         public static void SynchronizeReplacing<O, N>(
@@ -97,7 +103,7 @@ namespace Signum.Engine.Help
 
     internal enum SyncAction
     {
-        Removed,
+        Updated,
         Renamed,
     }
 }
