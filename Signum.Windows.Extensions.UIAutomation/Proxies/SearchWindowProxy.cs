@@ -19,10 +19,8 @@ namespace Signum.Windows.UIAutomation
         public SearchControlProxy SearchControl { get; private set; }
 
         public SearchWindowProxy(AutomationElement element)
-            : base(element)
+            : base(element.AssertClassName("SearchWindow"))
         {
-            element.AssertClassName("SearchWindow");
-
             SearchControl = new SearchControlProxy(element.ChildById("searchControl"));
         }
 

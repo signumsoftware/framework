@@ -13,9 +13,8 @@ namespace Signum.Windows.UIAutomation
     public class SelectorWindowProxy : WindowProxy
     {
         public SelectorWindowProxy(AutomationElement element)
-            : base(element)
+            : base(element.AssertClassName("SelectorWindow"))
         {
-            element.AssertClassName("SelectorWindow");
         }
 
         public void Select(string value)

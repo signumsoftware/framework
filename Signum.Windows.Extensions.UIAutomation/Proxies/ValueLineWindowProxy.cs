@@ -13,10 +13,8 @@ namespace Signum.Windows.UIAutomation
         ValueLineProxy ValueLine { get; set; }
 
         public ValueLineBoxProxy(AutomationElement element)
-            : base(element)
+            : base(element.AssertClassName("ValueLineBox"))
         {
-            element.AssertClassName("ValueLineBox");
-
             ValueLine = new ValueLineProxy(element.Child(e => e.Current.ClassName == "ValueLine"), null);
         }
 
