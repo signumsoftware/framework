@@ -66,10 +66,14 @@ namespace Signum.Engine.Mailing
                             new EmailMessageDN()
                             {
                                 Package = emailPackage.ToLite(),
+                                From = m.From,
                                 Recipients = m.Recipients,
+                                Target = m.Target,
                                 Body = m.Body,
+                                IsBodyHtml = m.IsBodyHtml,
                                 Subject = m.Subject,
                                 Template = m.Template,
+                                EditableMessage = m.EditableMessage,
                                 State = EmailMessageState.Created
                             }.Save();
                         }

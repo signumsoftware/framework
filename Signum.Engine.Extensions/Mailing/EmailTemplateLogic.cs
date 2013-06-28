@@ -271,6 +271,7 @@ namespace Signum.Engine.Mailing
 
                 var email = new EmailMessageDN
                 {
+                    Target = (Lite<IdentifiableEntity>)entity.ToLite(),
                     Recipients = recipients.Select(r => new EmailRecipientDN(r.OwnerData) { Kind = r.Kind }).ToMList(),
                     From = from,
                     IsBodyHtml = template.IsBodyHtml,

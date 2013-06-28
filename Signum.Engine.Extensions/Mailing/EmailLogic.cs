@@ -203,6 +203,7 @@ namespace Signum.Engine.Mailing
                     {
                         From = m.From.Clone(),
                         Recipients = m.Recipients.Select(r => r.Clone()).ToMList(),
+                        Target = m.Target,
                         Subject = m.Subject,
                         Body = m.Body,
                         IsBodyHtml = m.IsBodyHtml,
