@@ -63,13 +63,13 @@ namespace Signum.Engine.Translation
             }
         }
 
-        public static IEnumerable<T> ForEachCulture<T>(Func<T> func)
+        public static IEnumerable<T> ForEachCulture<T>(Func<CultureInfoDN, T> func)
         {
-            foreach (var c in CultureInfoDictionary.Value.Keys)
+            foreach (var c in CultureInfoDictionary.Value)
             {
-                using (Sync.ChangeBothCultures(c))
+                using (Sync.ChangeBothCultures(c.Key))
                 {
-                    yield return func();
+                    yield return func(c.Value);
                 }
             }
         }

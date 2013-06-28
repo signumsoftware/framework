@@ -70,6 +70,12 @@
     <Member Name="PermissionRules" Description="Reglas de permiso" />
     <Member Name="TypeRules" Description="Reglas de tipo" />
   </Type>
+  <Type Name="AuthEmailMessage">
+    <Member Name="YouRecentlyRequestedANewPassword" Description="Has solicitado una nueva contraseña" />
+    <Member Name="YourUsernameIs" Description="Tu nombre de usuario es:" />
+    <Member Name="YouCanResetYourPasswordByFollowingTheLinkBelow" Description="Puedes establecer una nueva contraseña mediante el siguiente enlace" />
+    <Member Name="ResetPasswordRequestSubject" Description="Solicitud de nueva contraseña" />
+  </Type>
   <Type Name="AuthMessage">
     <Member Name="_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships" Description="{0} ciclos han sido encontrados en el grafo de funciones debido a las relaciones:&#xD;&#xA;" />
     <Member Name="_0RulesFor1" Description="Reglas de {0} para {1}" />
@@ -618,7 +624,7 @@
     <Member Name="HtmlBody" Description="Cuerpo HTML" />
     <Member Name="Name" Description="Nombre" />
     <Member Name="Query" Description="Consulta" />
-    <Member Name="SMTPConfig" Description="SMTPConfig" />
+    <Member Name="SmtpConfig" Description="SmtpConfig" />
     <Member Name="State" Description="Estado" />
     <Member Name="Subject" Description="Asunto" />
   </Type>
@@ -979,7 +985,7 @@
     <Member Name="Modified" Description="Modificado" />
   </Type>
   <Type Name="SMSUpdatePackageDN" Description="Paquete de actualización de SMS" />
-  <Type Name="SMTPConfigurationDN" Description="Configuración SMTP">
+  <Type Name="SmtpConfigurationDN" Description="Configuración Smtp">
     <Member Name="ClientCertificationFiles" Description="Archivos de certificado de cliente" />
     <Member Name="EnableSSL" Description="Habilitar SSL" />
     <Member Name="Host" Description="Host" />
@@ -989,7 +995,7 @@
     <Member Name="UseDefaultCredentials" Description="Utilizar credenciales predeterminadas" />
     <Member Name="Username" Description="Nombre de usuario" />
   </Type>
-  <Type Name="SMTPConfigurationOperation">
+  <Type Name="SmtpConfigurationOperation">
     <Member Name="Save" Description="Guardar" />
   </Type>
   <Type Name="TranslatedCultureAction" Description="Acción de cultura traducida">

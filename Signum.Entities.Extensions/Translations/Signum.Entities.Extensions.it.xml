@@ -613,7 +613,7 @@
     <Member Name="Created" Description="Creato" />
     <Member Name="Modified" Description="Modificato" />
   </Type>
-  <Type Name="SMTPConfigurationDN" Description="Configurazione SMTP">
+  <Type Name="SSmtpConfigurationDN" Description="Configurazione Smtp">
     <Member Name="ClientCertificationFiles" Description="File di certificazione del cliente" />
     <Member Name="EnableSSL" Description="Attivare SSL" />
     <Member Name="Host" Description="Host" />
@@ -623,7 +623,7 @@
     <Member Name="UseDefaultCredentials" Description="Utilizzare credenziali predefinite" />
     <Member Name="Username" Description="Nome utente" />
   </Type>
-  <Type Name="SMTPConfigurationQueries">
+  <Type Name="SmtpConfigurationQueries">
     <Member Name="NoCredentialsData" Description="Nessun dato di credenziali" />
   </Type>
   <Type Name="Source" Description="Origine" />

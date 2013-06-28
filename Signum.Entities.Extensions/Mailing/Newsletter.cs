@@ -8,6 +8,9 @@ using Signum.Entities.Mailing;
 using Signum.Utilities;
 using Signum.Entities.Basics;
 using System.Linq.Expressions;
+using System.Reflection;
+using Signum.Entities.DynamicQuery;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Entities.Mailing
 {
@@ -30,33 +33,15 @@ namespace Signum.Entities.Mailing
             set { Set(ref state, value, () => State); }
         }
 
-        [NotNullable, SqlDbType(Size = int.MaxValue)]
-        string htmlBody;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = int.MaxValue)]
-        public string HtmlBody
-        {
-            get { return htmlBody; }
-            set { Set(ref htmlBody, value, () => HtmlBody); }
-        }
-
-        [NotNullable, SqlDbType(Size = 50)]
-        string subject;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 50)]
-        public string Subject
-        {
-            get { return subject; }
-            set { Set(ref subject, value, () => Subject); }
-        }
-
-        Lite<SMTPConfigurationDN> smtpConfig = DefaultSMTPConfig;
-        public Lite<SMTPConfigurationDN> SMTPConfig
+        Lite<SmtpConfigurationDN> smtpConfig = DefaultSmtpConfig;
+        public Lite<SmtpConfigurationDN> SmtpConfig
         {
             get { return smtpConfig; }
-            set { Set(ref smtpConfig, value, () => SMTPConfig); }
+            set { Set(ref smtpConfig, value, () => SmtpConfig); }
         }
 
         [NotNullable, SqlDbType(Size = 50)]
-        string from = DefaultFrom;
+        string from;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 50)]
         public string From
         {
@@ -65,12 +50,49 @@ namespace Signum.Entities.Mailing
         }
 
         [NotNullable, SqlDbType(Size = 50)]
-        string displayFrom = DefaultDisplayFrom;
+        string displayFrom;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 50)]
         public string DisplayFrom
         {
             get { return displayFrom; }
             set { Set(ref displayFrom, value, () => DisplayFrom); }
+        }
+
+        [SqlDbType(Size = 50)]
+        string subject;
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 50)]
+        public string Subject
+        {
+            get { return subject; }
+            set { Set(ref subject, value, () => Subject); }
+        }
+
+        [Ignore]
+        internal object SubjectParsedNode;
+
+        [SqlDbType(Size = int.MaxValue)]
+        string text;
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = int.MaxValue)]
+        public string Text
+        {
+            get { return text; }
+            set { Set(ref text, value, () => Text); }
+        }
+
+        [Ignore]
+        internal object TextParsedNode;
+
+        static StateValidator<NewsletterDN, NewsletterState> stateValidator = new StateValidator<NewsletterDN, NewsletterState>
+            (     n => n.State,            n => n.Subject, n => n.Text)
+            {
+                { NewsletterState.Created, null,           null },
+                { NewsletterState.Saved,   null,           null },
+                { NewsletterState.Sent,    true,           true },
+            };
+
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            return stateValidator.Validate(this, pi) ?? base.PropertyValidation(pi);
         }
 
         static readonly Expression<Func<NewsletterDN, string>> ToStringExpression = e => e.name;
@@ -79,15 +101,27 @@ namespace Signum.Entities.Mailing
             return ToStringExpression.Evaluate(this);
         }
 
-        public static Lite<SMTPConfigurationDN> DefaultSMTPConfig;
-        public static string DefaultFrom;
-        public static string DefaultDisplayFrom;
+        public static Lite<SmtpConfigurationDN> DefaultSmtpConfig;
 
         QueryDN query;
         public QueryDN Query
         {
             get { return query; }
             set { Set(ref query, value, () => Query); }
+        }
+
+        MList<QueryTokenDN> tokens = new MList<QueryTokenDN>();
+        public MList<QueryTokenDN> Tokens
+        {
+            get { return tokens; }
+            set { Set(ref tokens, value, () => Tokens); }
+        }
+
+        internal void ParseData(QueryDescription queryDescription)
+        {
+            if (Tokens != null)
+                foreach (var t in Tokens)
+                    t.ParseData(this, queryDescription, false);
         }
     }
 

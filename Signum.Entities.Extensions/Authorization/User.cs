@@ -12,6 +12,7 @@ using Signum.Entities.Mailing;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using Signum.Entities.Basics;
+using System.Globalization;
 
 namespace Signum.Entities.Authorization
 {
@@ -106,13 +107,6 @@ namespace Signum.Entities.Authorization
             set { Set(ref state, value, () => State); }
         }
 
-        public static Expression<Func<UserDN, string>> CultureInfoExpression =
-            u => null;
-        public string CultureInfo
-        {
-            get { return CultureInfoExpression.Evaluate(this); }
-        }
-
         protected override string PropertyValidation(PropertyInfo pi)
         {
             if (pi.Is(() => State))
@@ -134,6 +128,19 @@ namespace Signum.Entities.Authorization
         {
             get { return (UserDN)UserHolder.Current; }
             set { UserHolder.Current = value; }
+        }
+
+        public static Expression<Func<UserDN, EmailOwnerData>> EmailOwnerDataExpression =
+            entity => new EmailOwnerData
+            {
+                 Owner = entity.ToLite(), 
+                 CultureInfo = null,
+                 DisplayName = entity.UserName,
+                 Email = entity.Email,
+            };
+        public EmailOwnerData EmailOwnerData
+        {
+            get{ return EmailOwnerDataExpression.Evaluate(this); }
         }
     }
 

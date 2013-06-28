@@ -147,7 +147,11 @@ else {
                 return;
             }
             var $message = $control();
-            $message.val($message.val() + selected);
+            $message.val(
+                $message.val().substring(0, $message[0].selectionStart) +
+                selected +
+                $message.val().substring($message[0].selectionEnd)
+                );
         };
 
         return {

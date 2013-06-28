@@ -1,0 +1,26 @@
+﻿@using Signum.Entities.Mailing
+@Html.ScriptsJs("~/Scripts/ckeditor/ckeditor.js")
+@Html.ScriptsJs("~/Mailing/Scripts/SF_Mailing.js")
+@using (var ec = Html.TypeContext<EmailMasterTemplateDN>())
+{
+    @Html.ValueLine(ec, e => e.Name)
+    @Html.ValueLine(ec, e => e.State, vl => vl.ReadOnly = true)
+
+    <div id="messageEditContent">
+        <span class="sf-label-line">Text</span><div class="clearall"></div>
+        @Html.ValueLine(ec, e => e.Text, vl =>
+        {
+            vl.ValueLineType = ValueLineType.TextArea;
+            vl.LabelVisible = false;
+            vl.ValueHtmlProps["style"] = "width:100%; min-height:180px;";
+            vl.ValueHtmlProps["class"] = "sf-email-htmlwrite";
+        })
+        <br />
+        <input type="button" class="sf-button" id="insertMasterTemplateTokenButton" value="@(EmailTemplateViewMessage.InsertMessageContent.NiceToString())" />
+    </div>
+    <script>
+        $(function () {
+            SF.Mailing.initHtmlEditorMasterTemplate("@ec.SubContext(e => e.Text).ControlID");
+        });
+    </script>
+}

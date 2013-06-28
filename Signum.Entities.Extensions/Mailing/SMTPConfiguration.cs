@@ -5,11 +5,12 @@ using System.Text;
 using Signum.Entities;
 using System.Linq.Expressions;
 using Signum.Utilities;
+using Signum.Entities.Files;
 
 namespace Signum.Entities.Mailing
 {
     [Serializable, EntityKind(EntityKind.Main)]
-    public class SMTPConfigurationDN : Entity
+    public class SmtpConfigurationDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         string name;
@@ -55,6 +56,24 @@ namespace Signum.Entities.Mailing
             set { Set(ref password, value, () => Password); }
         }
 
+        [NotNullable]
+        EmailAddressDN defaultFrom;
+        [NotNullValidator]
+        public EmailAddressDN DefaultFrom
+        {
+            get { return defaultFrom; }
+            set { Set(ref defaultFrom, value, () => DefaultFrom); }
+        }
+
+        [NotNullable]
+        MList<EmailRecipientDN> aditionalRecipients = new MList<EmailRecipientDN>();
+        [NotNullValidator, NoRepeatValidator]
+        public MList<EmailRecipientDN> AditionalRecipients
+        {
+            get { return aditionalRecipients; }
+            set { Set(ref aditionalRecipients, value, () => AditionalRecipients); }
+        }
+
         bool enableSSL;
         public bool EnableSSL
         {
@@ -70,7 +89,7 @@ namespace Signum.Entities.Mailing
             set { Set(ref clientCertificationFiles, value, () => ClientCertificationFiles); }
         }
 
-        static readonly Expression<Func<SMTPConfigurationDN, string>> ToStringExpression = e => e.name;
+        static readonly Expression<Func<SmtpConfigurationDN, string>> ToStringExpression = e => e.name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
@@ -78,24 +97,17 @@ namespace Signum.Entities.Mailing
     }
 
 
-    public enum SMTPConfigurationOperation
+    public enum SmtpConfigurationOperation
     {
         Save
     }
 
-    [Serializable, EntityKind(EntityKind.System)]
-    public class ClientCertificationFileDN : Entity
+    [Serializable]
+    public class ClientCertificationFileDN : EmbeddedEntity
     {
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
-        string name;
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            set { SetToStr(ref name, value, () => Name); }
-        }
-
+        [NotNullable, SqlDbType(Size = 300)]
         string fullFilePath;
+        [StringLengthValidator(AllowNulls = false, Min = 2, Max = 300), ]
         public string FullFilePath
         {
             get { return fullFilePath; }
@@ -109,7 +121,7 @@ namespace Signum.Entities.Mailing
             set { Set(ref certFileType, value, () => CertFileType); }
         }
 
-        static readonly Expression<Func<ClientCertificationFileDN, string>> ToStringExpression = e => e.name;
+        static readonly Expression<Func<ClientCertificationFileDN, string>> ToStringExpression = e => e.fullFilePath;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

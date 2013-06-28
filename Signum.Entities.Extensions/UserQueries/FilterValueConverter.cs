@@ -126,6 +126,56 @@ namespace Signum.Entities.UserQueries
                 return "Invalid format";
             }
         }
+
+        public static FilterOperation ParseOperation(string operationString)
+        {
+            switch (operationString)
+            {
+                case "=":
+                case "==": return FilterOperation.EqualTo;
+                case "<=": return FilterOperation.LessThanOrEqual;
+                case ">=": return FilterOperation.GreaterThanOrEqual;
+                case "<": return FilterOperation.LessThan;
+                case ">": return FilterOperation.GreaterThan;
+                case "^=": return FilterOperation.StartsWith;
+                case "$=": return FilterOperation.EndsWith;
+                case "*=": return FilterOperation.Contains;
+                case "%=": return FilterOperation.Like;
+
+                case "!=": return FilterOperation.DistinctTo;
+                case "!^=": return FilterOperation.NotStartsWith;
+                case "!$=": return FilterOperation.NotEndsWith;
+                case "!*=": return FilterOperation.NotContains;
+                case "!%=": return FilterOperation.NotLike;
+            }
+
+            throw new InvalidOperationException("Unexpected Filter {0}".Formato(operationString));
+        }
+
+        public const string OperationRegex = @"==?|<=|>=|<|>|\^=|\$=|%=|\*=|\!=|\!\^=|\!\$=|\!%=|\!\*=";
+
+        public static string ToStringOperation(FilterOperation operation)
+        {
+            switch (operation)
+            {
+                case FilterOperation.EqualTo: return "=";
+                case FilterOperation.DistinctTo: return "!=";
+                case FilterOperation.GreaterThan: return ">";
+                case FilterOperation.GreaterThanOrEqual: return ">=";
+                case FilterOperation.LessThan: return "<";
+                case FilterOperation.LessThanOrEqual: return "<=";
+                case FilterOperation.Contains: return "*=";
+                case FilterOperation.StartsWith: return "^=";
+                case FilterOperation.EndsWith: return "$=";
+                case FilterOperation.Like: return "%=";
+                case FilterOperation.NotContains: return "!*=";
+                case FilterOperation.NotStartsWith: return "!^=";
+                case FilterOperation.NotEndsWith: return "!$=";
+                case FilterOperation.NotLike: return "!%=";
+            }
+
+            throw new InvalidOperationException("Unexpected Filter {0}".Formato(operation));
+        }
     }
 
     public interface IFilterValueConverter

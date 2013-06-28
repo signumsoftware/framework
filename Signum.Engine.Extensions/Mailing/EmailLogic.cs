@@ -23,68 +23,40 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Linq.Expressions;
 using Signum.Engine.Exceptions;
+using Signum.Entities.Basics;
+using Signum.Entities.DynamicQuery;
+using System.Text.RegularExpressions;
+using System.Globalization;
+using Signum.Engine.Translation;
+using System.Net.Configuration;
+using System.Configuration;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Engine.Mailing
 {
-    public class EmailContent
-    {
-        public string Subject { get; set; }
-        public string Body { get; set; }
-        bool IsPlainText { get; set; }
-    }
-
-    public interface IEmailModel
-    {
-        IEmailOwnerDN To { get; set; }
-        string Cc { get; set; }
-        string Bcc { get; set; }
-    }
-
-    public class EmailModel<T> : IEmailModel
-        where T : IEmailOwnerDN
-    {
-        public T To;
-
-        IEmailOwnerDN IEmailModel.To
-        {
-            get { return To; }
-            set { To = (T)value; }
-        }
-
-        public string Cc { get; set; }
-        public string Bcc { get; set; }
-    }
-
     public static class EmailLogic
     {
+        public static EmailSenderManager SenderManager;
+
         public static string DoNotSend = "null@null.com";
 
         public static Func<string> OverrideEmailAddress = () => null;
 
         public static Func<EmailMessageDN, SmtpClient> SmtpClientBuilder;
 
-        static Dictionary<Type, Func<IEmailModel, EmailContent>> templates = new Dictionary<Type, Func<IEmailModel, EmailContent>>();
-        static Dictionary<Type, Lite<EmailTemplateDN>> templateToDN;
-
         internal static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null, null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null, null, null)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<EmailTemplateConfigurationDN> configuration)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<EmailMessageDN>();
+                CultureInfoLogic.AssertStarted(sb);
+                EmailTemplateLogic.Start(sb, dqm, configuration);
 
-                dqm.RegisterQuery(typeof(EmailTemplateDN), () =>
-                    from e in Database.Query<EmailTemplateDN>()
-                    select new
-                    {
-                        Entity = e,
-                        e.Id,
-                        e.FullClassName,
-                    });
+                sb.Include<EmailMessageDN>();
 
                 dqm.RegisterQuery(typeof(EmailMessageDN), () =>
                     from e in Database.Query<EmailMessageDN>()
@@ -92,174 +64,73 @@ namespace Signum.Engine.Mailing
                     {
                         Entity = e,
                         e.Id,
-                        e.Recipient,
                         e.State,
                         e.Subject,
-                        e.Body,
-                        Template = e.Template,
+                        Text = e.Body,
+                        e.Template,
                         e.Sent,
                         e.Received,
                         e.Package,
                         e.Exception,
                     });
 
-                sb.Schema.Initializing[InitLevel.Level2NormalEntities] += Schema_Initializing;
-                sb.Schema.Generating += Schema_Generating;
-                sb.Schema.Synchronizing += Schema_Synchronizing;
-
-                new Graph<EmailTemplateDN>.Execute(EmailTemplateOperation.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (et, _) => { },
-                }.Register();
+                SenderManager = new EmailSenderManager();
             }
         }
-
-        #region database management
-        static void Schema_Initializing()
+        
+        public static void SendMail(this ISystemEmail systemEmail)
         {
-            List<EmailTemplateDN> dbTemplates = Database.RetrieveAll<EmailTemplateDN>();
-
-            templateToDN = EnumerableExtensions.JoinStrict(
-                dbTemplates, templates.Keys, t => t.FullClassName, t => t.FullName,
-                (typeDN, type) => new { typeDN, type }, "caching EmailTemplates").ToDictionary(a => a.type, a => a.typeDN.ToLite());
+            var email = systemEmail.CreateEmailMessage();
+            SenderManager.Send(email);
         }
 
-        static readonly string EmailTemplates = "EmailTemplates";
-
-
-        static SqlPreCommand Schema_Synchronizing(Replacements replacements)
+        public static void SendMail(this Lite<EmailTemplateDN> template, IIdentifiable entity)
         {
-            Table table = Schema.Current.Table<EmailTemplateDN>();
-
-            Dictionary<string, EmailTemplateDN> should = GenerateTemplates().ToDictionary(s => s.FullClassName);
-            Dictionary<string, EmailTemplateDN> old = Administrator.TryRetrieveAll<EmailTemplateDN>(replacements).ToDictionary(c => c.FullClassName);
-
-            replacements.AskForReplacements(
-                old.Keys.ToHashSet(),
-                should.Keys.ToHashSet(), EmailTemplates);
-
-            Dictionary<string, EmailTemplateDN> current = replacements.ApplyReplacementsToOld(old, EmailTemplates);
-
-            return Synchronizer.SynchronizeScript(should, current,
-                (tn, s) => table.InsertSqlSync(s),
-                (tn, c) => table.DeleteSqlSync(c),
-                (tn, s, c) =>
-                {
-                    c.FullClassName = s.FullClassName;
-                    return table.UpdateSqlSync(c);
-                },
-                Spacing.Double);
+            var email = template.CreateEmailMessage(entity);
+            SenderManager.Send(email);
         }
 
-        static SqlPreCommand Schema_Generating()
+        public static void SendMail(this EmailMessageDN email)
         {
-            Table table = Schema.Current.Table<EmailTemplateDN>();
-
-            return (from ei in GenerateTemplates()
-                    select table.InsertSqlSync(ei)).Combine(Spacing.Simple);
+            SenderManager.Send(email);
         }
 
-        internal static List<EmailTemplateDN> GenerateTemplates()
+        public static void SendMailAsync(this ISystemEmail systemEmail)
         {
-            var lista = (from type in templates.Keys
-                         select new EmailTemplateDN
-                         {
-                             FullClassName = type.FullName,
-                         }).ToList();
-            return lista;
-        }
-        #endregion
-
-        public static void RegisterTemplate<T>(Func<T, EmailContent> template)
-            where T : IEmailModel
-        {
-            templates[typeof(T)] = et => template((T)et);
+            var email = systemEmail.CreateEmailMessage();
+            SenderManager.SendAsync(email);
         }
 
-        public static Lite<EmailTemplateDN> GetTemplateDN(Type type)
+        public static void SendMailAsync(this IIdentifiable entity, Lite<EmailTemplateDN> template)
         {
-            return templateToDN.GetOrThrow(type, "{0} not registered in EmailLogic");
+            var email = template.CreateEmailMessage(entity);
+            SenderManager.SendAsync(email);
         }
 
-        public static Func<IEmailModel, EmailContent> GetTemplate(Type type)
+        public static void SendMailAsync(this EmailMessageDN email)
         {
-            return templates.GetOrThrow(type, "{0} not registered in EmailLogic");
+            SenderManager.SendAsync(email);
         }
 
-        public static EmailMessageDN CreateEmailMessage(IEmailModel model, Lite<EmailPackageDN> package)
+        public static void SafeSendMailAsync(this SmtpClient client, MailMessage message, Action<AsyncCompletedEventArgs> onComplete)
         {
-
-            if (model == null)
-                throw new ArgumentNullException("model");
-
-            if (model.To == null)
-                throw new ArgumentNullException("model.To");
-
-
-            using (Sync.ChangeBothCultures(model.To.CultureInfo))
+            client.SendCompleted += (object sender, AsyncCompletedEventArgs e) =>
             {
-                EmailContent content = GetTemplate(model.GetType())(model);
-
-                var result = new EmailMessageDN
+                //client.Dispose(); -> the client can be used later by other messages
+                message.Dispose();
+                using (AuthLogic.Disable())
                 {
-                    State = EmailMessageState.Created,
-                    Recipient = model.To.ToLite(),
-                    Bcc = model.Bcc,
-                    Cc = model.Cc,
-                    Template = GetTemplateDN(model.GetType()),
-                    Subject = content.Subject,
-                    Body = content.Body,
-                    Package = package
-                };
-                return result;
-            }
-        }
-
-        public static EmailMessageDN Send(this IEmailModel model)
-        {
-            EmailMessageDN result = CreateEmailMessage(model, null);
-
-            SendMail(result);
-
-            return result;
-        }
-
-        public static void SendMail(EmailMessageDN emailMessage)
-        {
-            try
-            {
-                MailMessage message = CreateMailMessage(emailMessage);
-
-                if (message != null)
-                {
-                    SmtpClient client = SmtpClientBuilder == null ? SafeSmtpClient() : SmtpClientBuilder(emailMessage);
-                    client.Send(message);
+                    try
+                    {
+                        onComplete(e);
+                    }
+                    catch (Exception ex)
+                    {
+                        ex.LogException();
+                    }
                 }
-
-                emailMessage.State = EmailMessageState.Sent;
-                emailMessage.Sent = TimeZoneManager.Now;
-                emailMessage.Received = null;
-                emailMessage.Save();
-            }
-            catch (Exception e)
-            {
-                if (Transaction.InTestTransaction)
-                    throw;
-
-                var exLog = e.LogException().ToLite();
-
-                using (Transaction tr = Transaction.ForceNew())
-                {
-                    emailMessage.Exception = exLog;
-                    emailMessage.State = EmailMessageState.Exception;
-                    emailMessage.Save();
-                    tr.Commit();
-                }
-
-                throw;
-            }
+            };
+            client.SendAsync(message, null);
         }
 
         public static SmtpClient SafeSmtpClient()
@@ -280,31 +151,183 @@ namespace Signum.Engine.Mailing
             };
         }
 
-        public static void SendAsync(this IEmailModel model)
+        public static MList<EmailTemplateMessageDN> CreateMessages(Func<EmailTemplateMessageDN> func)
         {
-            EmailMessageDN message = CreateEmailMessage(model, null);
-
-            SendMailAsync(message);
+            var list = new MList<EmailTemplateMessageDN>();
+            foreach (var ci in CultureInfoLogic.ApplicationCultures)
+            {
+                using (Sync.ChangeBothCultures(ci))
+                {
+                    list.Add(func());
+                }
+            }
+            return list;
         }
 
-        class EmailUser
+        class EmailGraph : Graph<EmailMessageDN, EmailMessageState>
         {
-            public EmailMessageDN EmailMessage;
-            public UserDN User;
+            public static void Register()
+            {
+                GetState = m => m.State;
+
+                new Construct(EmailMessageOperation.CreateMail)
+                {
+                    Construct = _ => new EmailMessageDN
+                    {
+                        State = EmailMessageState.Created,
+                    }
+                }.Register();
+
+                new ConstructFrom<IIdentifiable>(EmailMessageOperation.CreateMailFromTemplate)
+                {
+                    AllowsNew = false,
+                    Construct = (e, args) =>
+                    {
+                        var template = args.GetArg<Lite<EmailTemplateDN>>();
+                        return EmailTemplateLogic.CreateEmailMessage(template, e);
+                    }
+                }.Register();
+
+                new Execute(EmailMessageOperation.Send)
+                {
+                    CanExecute = m => m.State == EmailMessageState.Created ? null : EmailMessageMessage.TheEmailMessageCannotBeSentFromState0.NiceToString().Formato(m.State.NiceToString()),
+                    AllowsNew = true,
+                    Lite = false,
+                    Execute = (m, _) => EmailLogic.SenderManager.Send(m)
+                }.Register();
+
+                new ConstructFrom<EmailMessageDN>(EmailMessageOperation.ReSend)
+                {
+                    AllowsNew = false,
+                    Construct = (m, _) => new EmailMessageDN
+                    {
+                        From = m.From.Clone(),
+                        Recipients = m.Recipients.Select(r => r.Clone()).ToMList(),
+                        Subject = m.Subject,
+                        Body = m.Body,
+                        IsBodyHtml = m.IsBodyHtml,
+                        Template = m.Template,
+                        EditableMessage = m.EditableMessage,
+                        State = EmailMessageState.Created
+                    }
+                }.Register();
+            }
+        }
+    }
+
+
+    public class EmailSenderManager
+    {
+        public EmailSenderManager()
+        {
+
         }
 
-        public static void SendMailAsync(EmailMessageDN emailMessage)
+        protected MailMessage CreateMailMessage(EmailMessageDN email, string overrideEmailAddress)
+        {
+            MailMessage message = new MailMessage()
+            {
+                From = email.From.ToMailAddress(),
+                Subject = email.Subject,
+                Body = email.Body,
+                IsBodyHtml = email.IsBodyHtml,
+            };
+
+            message.To.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.To).Select(r => ToMailAddress(r, overrideEmailAddress)).ToList());
+            message.CC.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.CC).Select(r => ToMailAddress(r, overrideEmailAddress)).ToList());
+            message.Bcc.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.Bcc).Select(r => ToMailAddress(r, overrideEmailAddress)).ToList());
+
+            return message;
+        }
+
+        MailAddress ToMailAddress(EmailRecipientDN recipient, string overrideEmailAddress)
+        {
+            var address = overrideEmailAddress ?? recipient.EmailAddress;
+
+            if (recipient.DisplayName != null)
+                return new MailAddress(address, recipient.DisplayName);
+
+            return new MailAddress(address);
+        }
+
+        public virtual void Send(EmailMessageDN email)
         {
             try
             {
-                MailMessage message = CreateMailMessage(emailMessage);
-                if (message != null)
-                {
-                    SmtpClient client = SmtpClientBuilder == null ? SafeSmtpClient() : SmtpClientBuilder(emailMessage);
+                var overrideEmailAddress = EmailLogic.OverrideEmailAddress();
 
-                    emailMessage.Sent = null;
-                    emailMessage.Received = null;
-                    emailMessage.Save();
+                if (overrideEmailAddress != EmailLogic.DoNotSend)
+                {
+                    SmtpClient client = CreateSmtpClient(email);
+
+                    MailMessage message = CreateMailMessage(email, overrideEmailAddress);
+
+                    client.Send(message);
+                }
+
+                email.State = EmailMessageState.Sent;
+                email.Sent = TimeZoneManager.Now;
+                email.Received = null;
+                email.Save();
+            }
+            catch (Exception ex)
+            {
+                if (Transaction.InTestTransaction) //Transaction.IsTestTransaction
+                    throw;
+
+                var exLog = ex.LogException().ToLite();
+
+                using (Transaction tr = Transaction.ForceNew())
+                {
+                    email.Exception = exLog;
+                    email.State = EmailMessageState.SentException;
+                    email.Save();
+                    tr.Commit();
+                }
+
+                throw;
+            }
+        }
+
+        public Lite<SmtpConfigurationDN> DefaultSmtpConfiguration;
+
+        SmtpClient CreateSmtpClient(EmailMessageDN email)
+        {
+            if (email.Template != null)
+            {
+                var smtp = email.Template.InDB(t => t.SmtpConfiguration);
+                if (smtp != null)
+                    return smtp.GenerateSmtpClient();
+            }
+
+            if (DefaultSmtpConfiguration != null)
+                return DefaultSmtpConfiguration.GenerateSmtpClient();
+
+            return EmailLogic.SafeSmtpClient();
+        }
+
+        public virtual void SendAsync(EmailMessageDN email)
+        {
+            try
+            {
+                var overrideEmailAddress = EmailLogic.OverrideEmailAddress();
+
+                if (overrideEmailAddress == EmailLogic.DoNotSend)
+                {
+                    email.State = EmailMessageState.Sent;
+                    email.Sent = TimeZoneManager.Now;
+                    email.Received = null;
+                    email.Save();
+                }
+                else
+                {
+                    SmtpClient client = CreateSmtpClient(email);
+
+                    MailMessage message = CreateMailMessage(email, overrideEmailAddress);
+
+                    email.Sent = null;
+                    email.Received = null;
+                    email.Save();
 
                     client.SafeSendMailAsync(message, args =>
                     {
@@ -315,7 +338,7 @@ namespace Signum.Engine.Mailing
                             updater = em => new EmailMessageDN
                             {
                                 Exception = exLog,
-                                State = EmailMessageState.Exception
+                                State = EmailMessageState.SentException
                             };
                         }
                         else
@@ -325,9 +348,9 @@ namespace Signum.Engine.Mailing
                                 Sent = TimeZoneManager.Now
                             };
 
-                        for (int i = 0; i < 4; i++)
+                        for (int i = 0; i < 4; i++) //to allow main thread to save email asynchronously
                         {
-                            if (emailMessage.InDB().UnsafeUpdate(updater) > 0)
+                            if (email.InDB().UnsafeUpdate(updater) > 0)
                                 return;
 
                             if (i != 3)
@@ -335,162 +358,26 @@ namespace Signum.Engine.Mailing
                         }
                     });
                 }
-                else
-                {
-                    emailMessage.Received = null;
-                    emailMessage.State = EmailMessageState.Sent;
-                    emailMessage.Sent = TimeZoneManager.Now;
-                    emailMessage.Save();
-                }
             }
             catch (Exception ex)
             {
-                if (Transaction.InTestTransaction)
+                if (Transaction.InTestTransaction) //Transaction.InTestTransaction
                     throw;
 
                 var exLog = ex.LogException().ToLite();
 
-                using (var tr = Transaction.ForceNew())
+                using (Transaction tr = Transaction.ForceNew())
                 {
-                    emailMessage.Sent = TimeZoneManager.Now;
-                    emailMessage.State = EmailMessageState.Exception;
-                    emailMessage.Exception = exLog;
-                    emailMessage.Save();
+                    email.Exception = exLog;
+                    email.State = EmailMessageState.SentException;
+                    email.Save();
                     tr.Commit();
                 }
+
+                throw;
             }
         }
 
-        public static void SafeSendMailAsync(this SmtpClient client, MailMessage message, Action<AsyncCompletedEventArgs> onComplete)
-        {
-            client.SendCompleted += (object sender, AsyncCompletedEventArgs e) =>
-            {
-                client.Dispose();
-                message.Dispose();
-                using (AuthLogic.Disable())
-                {
-                    try
-                    {
-                        onComplete(e);
-                    }
-                    catch (Exception ex)
-                    {
-                        ex.LogException();
-                    }
-                }
-            };
-            client.SendAsync(message, null);
-        }
-
-        static MailMessage CreateMailMessage(EmailMessageDN emailMessage)
-        {
-            var address = OverrideEmailAddress();
-
-            if (address == DoNotSend)
-                return null;
-
-            MailMessage message = new MailMessage()
-            {
-                To = { address ?? emailMessage.Recipient.Retrieve().Email },
-                Subject = emailMessage.Subject,
-                Body = emailMessage.Body,
-                IsBodyHtml = true,
-            };
-
-            if (emailMessage.Bcc.HasText())
-                message.Bcc.AddRange(emailMessage.Bcc.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(a => new MailAddress(a)).ToList());
-            if (emailMessage.Cc.HasText())
-                message.CC.AddRange(emailMessage.Cc.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(a => new MailAddress(a)).ToList());
-            return message;
-        }
-
-        public static ProcessDN SendAll<T>(List<T> emails)
-            where T : IEmailModel
-        {
-            EmailPackageDN emailPackage = new EmailPackageDN
-            {
-            }.Save();
-
-            var packLite = emailPackage.ToLite();
-
-            emails.Select(e => CreateEmailMessage(e, packLite)).SaveList();
-
-            var process = ProcessLogic.Create(EmailMessageProcesses.SendEmails, emailPackage);
-
-            process.Execute(ProcessOperation.Execute);
-
-            return process;
-        }
-
-        public static ProcessDN SendToMany<T>(EmailModel<T> model, List<T> recipientList)
-            where T : class, IEmailOwnerDN
-        {
-            if (model.To != null)
-                throw new InvalidOperationException("model should have no To");
-
-            EmailContent content = GetTemplate(model.GetType())(model);
-            var template = GetTemplateDN(model.GetType());
-
-            EmailPackageDN package = new EmailPackageDN
-            {
-            }.Save();
-
-            var lite = package.ToLite();
-
-            recipientList.Select(to => new EmailMessageDN
-            {
-                State = EmailMessageState.Created,
-                Recipient = to.ToLite(),
-                Template = template,
-                Subject = content.Subject,
-                Body = content.Body,
-                Package = lite
-            }).SaveList();
-
-            var process = ProcessLogic.Create(EmailMessageProcesses.SendEmails, package);
-
-            process.Execute(ProcessOperation.Execute);
-
-            return process;
-        }
-
-        public static Dictionary<Type, Exception> GetAllErrors()
-        {
-            Dictionary<Type, Exception> exceptions = new Dictionary<Type, Exception>();
-
-            foreach (var item in templates)
-            {
-                try
-                {
-                    item.Value((IEmailModel)Activator.CreateInstance(item.Key));
-                }
-                catch (Exception e)
-                {
-                    exceptions.Add(item.Key, e);
-                }
-            }
-
-            return exceptions;
-        }
-
-
-    }
-
-    public struct Link
-    {
-        public readonly string Url;
-        public readonly string Content;
-
-        public Link(string url, string content)
-        {
-            this.Url = url;
-            this.Content = content;
-        }
-
-        public override string ToString()
-        {
-            return @"<a href='{0}'>{1}</a>".Formato(Url, HttpUtility.HtmlEncode(Content));
-        }
     }
 
 

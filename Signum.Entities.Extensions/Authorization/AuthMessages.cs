@@ -8,8 +8,7 @@ namespace Signum.Entities.Authorization
 {
     public enum AuthMessage
     {
-        [Description(@"{0} cycles have been found in the graph of Roles due to the relationships:
-")]
+        [Description(@"{0} cycles have been found in the graph of Roles due to the relationships:")]
         _0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships,
         [Description("{0} rules for {1}")]
         _0RulesFor1,
@@ -123,16 +122,22 @@ namespace Signum.Entities.Authorization
         View,
         [Description("We received a request to create an account. You can create it following the link below:")]
         WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow,
-        [Description("You can reset your password by following the link below:")]
-        YouCanResetYourPasswordByFollowingTheLinkBelow,
         [Description("You must repeat the new password")]
         YouMustRepeatTheNewPassword,
-        [Description("You recently requested a new password")]
-        YouRecentlyRequestedANewPassword,
-        [Description("Your username is: {0}")]
-        YourUsernameIs0,
         [Description("User {0} is disabled")]
         User0IsDisabled,
+    }
+
+    public enum AuthEmailMessage
+    {
+        [Description("You recently requested a new password")]
+        YouRecentlyRequestedANewPassword,
+        [Description("Your username is:")]
+        YourUsernameIs,
+        [Description("You can reset your password by following the link below")]
+        YouCanResetYourPasswordByFollowingTheLinkBelow,
+        [Description("Reset password request")]
+        ResetPasswordRequestSubject
     }
 
     public enum AuthAdminMessage

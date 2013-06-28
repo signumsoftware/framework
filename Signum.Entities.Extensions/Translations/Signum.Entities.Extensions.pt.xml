@@ -411,7 +411,7 @@
     <Member Name="Name" Description="Nome" />
     <Member Name="NumLines" Description="Número de linhas" />
     <Member Name="OverrideEmail" Description="Substituir E-mail" />
-    <Member Name="SMTPConfig" Description="SMTPConfig" />
+    <Member Name="SmtpConfig" Description="SmtpConfig" />
     <Member Name="State" Description="Estado" />
     <Member Name="Subject" Description="Assunto" />
   </Type>
@@ -662,7 +662,7 @@
     <Member Name="Created" Description="Criado" />
     <Member Name="Modified" Description="Modificado" />
   </Type>
-  <Type Name="SMTPConfigurationDN" Description="Configuração de SMTP">
+  <Type Name="SmtpConfigurationDN" Description="Configuração de Smtp">
     <Member Name="ClientCertificationFiles" Description="Arquivos de certificação de cliente" />
     <Member Name="EnableSSL" Description="Activar o SSL" />
     <Member Name="Host" Description="Host" />
@@ -672,7 +672,7 @@
     <Member Name="UseDefaultCredentials" Description="Usar as credenciais padrão" />
     <Member Name="Username" Description="Nome de utilizador" />
   </Type>
-  <Type Name="SMTPConfigurationQueries">
+  <Type Name="SmtpConfigurationQueries">
     <Member Name="NoCredentialsData" Description="Não há dados de credenciais" />
   </Type>
   <Type Name="Source" Description="Fonte" />

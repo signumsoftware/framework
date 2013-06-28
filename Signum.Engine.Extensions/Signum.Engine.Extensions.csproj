@@ -69,6 +69,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -133,11 +134,18 @@
     <Compile Include="Help\HelpTools.cs" />
     <Compile Include="Help\HelpUtilities.cs" />
     <Compile Include="Help\NamespaceHelp.cs" />
+    <Compile Include="Mailing\Pop3ConfigurationLogic.cs" />
+    <Compile Include="Mailing\Pop3\Pop3MailClient.cs" />
+    <Compile Include="Mailing\Pop3\Pop3MimeClient.cs" />
+    <Compile Include="Mailing\Pop3\QuotedPrintable.cs" />
+    <Compile Include="Mailing\Pop3\RxMailMessage.cs" />
+    <Compile Include="Mailing\SystemEmailLogic.cs" />
     <Compile Include="Translation\CultureInfoLogic.cs" />
     <Compile Include="Translation\LocalizedInstanceLogic.cs" />
     <Compile Include="Mailing\EmailLogic.cs" />
+    <Compile Include="Mailing\EmailTemplateParser.cs" />
     <Compile Include="Mailing\EmailPackageLogic.cs" />
-    <Compile Include="Mailing\EmailRenderer.cs" />
+    <Compile Include="Mailing\EmailTemplateLogic.cs" />
     <Compile Include="Mailing\NewsletterLogic.cs" />
     <Compile Include="Mailing\SmtpConfigurationLogic.cs" />
     <Compile Include="Notes\NoteLogic.cs" />
@@ -188,7 +196,6 @@
     <None Include="Help\Sample.xml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Authorization\ResetPasswordRequestMail.htm" />
     <EmbeddedResource Include="Mailing\DefaultEmailTemplate.htm" />
     <Content Include="Chart\ChartScripts\Bars.xml" />
     <Content Include="Chart\ChartScripts\BoxPack.xml" />

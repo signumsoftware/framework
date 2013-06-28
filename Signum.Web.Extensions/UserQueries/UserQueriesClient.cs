@@ -31,6 +31,16 @@ namespace Signum.Web.UserQueries
 
         public static string ViewPrefix = "~/UserQueries/Views/{0}.cshtml";
 
+        public static Mapping<QueryTokenDN> QueryTokenMapping = ctx =>
+        {
+			string tokenStr = UserQueriesHelper.GetTokenString(ctx);
+
+            string queryKey = ctx.Parent.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", "Key")];
+            object queryName = QueryLogic.ToQueryName(queryKey);
+            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
+            return new QueryTokenDN(QueryUtils.Parse(tokenStr, qd, canAggregate: false));
+        };
+
         public static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -49,16 +59,6 @@ namespace Signum.Web.UserQueries
                 RouteTable.Routes.MapRoute(null, "UQ/{webQueryName}/{lite}",
                     new { controller = "UserQueries", action = "View" });
 
-                Mapping<QueryTokenDN> qtMapping = ctx =>
-                {
-                    string tokenStr = UserQueriesHelper.GetTokenString(ctx);
-
-                    string queryKey = ctx.Parent.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", "Key")];
-                    object queryName = QueryLogic.ToQueryName(queryKey);
-                    QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                    return new QueryTokenDN(QueryUtils.Parse(tokenStr, qd, canAggregate: false));
-                };
-
                 Navigator.AddSettings(new List<EntitySettings>
                 {
                     new EntitySettings<UserQueryDN> { PartialViewName = e => ViewPrefix.Formato("UserQuery") },
@@ -69,7 +69,7 @@ namespace Signum.Web.UserQueries
                         MappingDefault = new EntityMapping<QueryFilterDN>(false)
                             .CreateProperty(a=>a.Operation)
                             .CreateProperty(a=>a.ValueString)
-                            .SetProperty(a=>a.Token, qtMapping)
+                            .SetProperty(a=>a.Token, QueryTokenMapping)
                     },
 
                     new EmbeddedEntitySettings<QueryColumnDN>
@@ -77,7 +77,7 @@ namespace Signum.Web.UserQueries
                         PartialViewName = e => ViewPrefix.Formato("QueryColumn"), 
                         MappingDefault = new EntityMapping<QueryColumnDN>(false)
                             .CreateProperty(a=>a.DisplayName)
-                            .SetProperty(a=>a.Token, qtMapping)
+                            .SetProperty(a=>a.Token, QueryTokenMapping)
                     },
 
                     new EmbeddedEntitySettings<QueryOrderDN>
@@ -85,7 +85,7 @@ namespace Signum.Web.UserQueries
                         PartialViewName = e => ViewPrefix.Formato("QueryOrder"), 
                         MappingDefault = new EntityMapping<QueryOrderDN>(false)
                             .CreateProperty(a=>a.OrderType)
-                            .SetProperty(a=>a.Token, qtMapping)
+                            .SetProperty(a=>a.Token, QueryTokenMapping)
                     },
                 });
 

@@ -10,6 +10,7 @@ using Signum.Entities;
 using Signum.Entities.Basics;
 using Signum.Engine.DynamicQuery;
 using System.Web.Mvc;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Web.Omnibox
 {
@@ -57,7 +58,7 @@ namespace Signum.Web.Omnibox
                 else if (item.Operation != null)
                 {
                     html = html.Concat(new HtmlTag("b").InnerHtml(
-                        new MvcHtmlString(DynamicQueryOmniboxResultGenerator.ToStringOperation(item.Operation.Value))).ToHtml());
+                        new MvcHtmlString(FilterValueConverter.ToStringOperation(item.Operation.Value))).ToHtml());
 
                     if (item.Value == DynamicQueryOmniboxResultGenerator.UnknownValue)
                         html = html.Concat(ColoredSpan(OmniboxMessage.Unknown.NiceToString(), "red"));

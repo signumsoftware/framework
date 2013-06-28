@@ -9,30 +9,13 @@ using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Engine.Mailing;
 using Signum.Utilities;
+using Signum.Entities.Mailing;
+using Signum.Engine.Basics;
 using System.Globalization;
+using Signum.Engine.Translation;
 
 namespace Signum.Engine.Authorization
 {
-    public class ResetPasswordRequestMail : EmailModel<UserDN>
-    {
-        public string Link;
-
-        public string YouRecentlyRequestedANewPassword
-        {
-            get { return AuthMessage.YouRecentlyRequestedANewPassword.NiceToString(); }
-        }
-
-        public string YourUsernameIs0
-        {
-            get { return AuthMessage.YourUsernameIs0.NiceToString().Formato(To.UserName); }
-        }
-
-        public string YouCanResetYourPasswordByFollowingTheLinkBelow
-        {
-            get { return AuthMessage.YouCanResetYourPasswordByFollowingTheLinkBelow.NiceToString(); }
-        }
-    }
-
     public static class ResetPasswordRequestLogic
     {
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
@@ -55,15 +38,29 @@ namespace Signum.Engine.Authorization
 
                 EmailLogic.AssertStarted(sb);
 
-                EmailLogic.RegisterTemplate<ResetPasswordRequestMail>(model =>
+                SystemEmailLogic.RegisterSystemEmail<ResetPasswordRequestMail>(() => new EmailTemplateDN
                 {
-                    return new EmailContent
+                    Name = "Reset Password Request",
+                    IsBodyHtml = true,
+                    Messages = CultureInfoLogic.ForEachCulture(culture => new EmailTemplateMessageDN(culture)
                     {
-                        Subject = AuthMessage.ResetPasswordCode.NiceToString(),
-                        Body = EmailRenderer.Replace(typeof(AuthLogic).Assembly.ReadResourceStream("Signum.Engine.Extensions.Authorization.ResetPasswordRequestMail.htm"),
-                               model, null, DescriptionManager.GetLocalizedAssembly(typeof(AuthMessage).Assembly, CultureInfo.CurrentUICulture))
-                    };
+                        Text = "<p>{0}</p>".Formato(AuthEmailMessage.YouRecentlyRequestedANewPassword.NiceToString()) + 
+                            "<p>{0} @[User.UserName]</p>".Formato(AuthEmailMessage.YourUsernameIs.NiceToString()) +
+                            "<p>{0}</p>".Formato(AuthEmailMessage.YouCanResetYourPasswordByFollowingTheLinkBelow.NiceToString()) +
+                            "<p><a href=\"@model[Url]\">@model[Url]</a></p>",
+                        Subject = AuthEmailMessage.ResetPasswordRequestSubject.NiceToString()
+                    }).ToMList()
                 });
+            }
+        }
+
+        public class ResetPasswordRequestMail : SystemEmail<ResetPasswordRequestDN>
+        {
+            public string Url;
+
+            public override List<EmailOwnerRecipientData> GetRecipients()
+            {
+                return To(Entity.User.EmailOwnerData); 
             }
         }
 
@@ -82,15 +79,11 @@ namespace Signum.Engine.Authorization
             }.Save();
         }
 
-        public static void ResetPasswordRequestAndSendEmail(UserDN user, Func<ResetPasswordRequestDN, string> urlGenerator)
+        public static void ResetPasswordRequestAndSendEmail(UserDN user, Func<ResetPasswordRequestDN, string> urlResetPassword)
         {
             var rpr = ResetPasswordRequest(user);
-
-            new ResetPasswordRequestMail
-            {
-                To = user,
-                Link = urlGenerator(rpr),
-            }.Send();
+            var url = urlResetPassword(rpr);
+            new ResetPasswordRequestMail { Entity = rpr, Url = url }.SendMailAsync();
         }
 
         public static Func<string, UserDN> GetUserByEmail = (email) =>
