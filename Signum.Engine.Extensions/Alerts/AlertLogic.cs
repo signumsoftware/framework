@@ -51,7 +51,7 @@ namespace Signum.Engine.Alerts
                                a.Id,
                                a.AlertType,
                                a.AlertDate,
-                               Texto = a.Text.Etc(100),
+                               Text = a.Text.Etc(100),
                                CreacionDate = a.CreationDate,
                                a.CreatedBy,
                                a.AttendedDate,
