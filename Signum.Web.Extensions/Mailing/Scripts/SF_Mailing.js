@@ -65,7 +65,7 @@ SF.registerModule("Mailing", function () {
                 return "<!--@foreach[" + tokenName + "]--> <!--@endforeach-->";
             }
             else if (block === "any") {
-                return "<!--@any[" + tokenName + "]--> <!--@notany--> <!--@endany-->";
+                return "<!--@any[" + tokenName + "=value]--> <!--@notany--> <!--@endany-->";
             }
             else {
                 throw "invalid block name";
