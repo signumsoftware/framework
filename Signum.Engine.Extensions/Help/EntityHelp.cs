@@ -87,7 +87,7 @@ namespace Signum.Engine.Help
             if (!File.Exists(FileName))
                 return this;
 
-            XElement element = XDocument.Load(FileName).ValidateHelpSchema(FileName).Element(_Entity);
+            XElement element = HelpLogic.LoadAndValidate(FileName).Element(_Entity);
 
             Description = element.Element(_Description).TryCC(d => d.Value);
 
@@ -115,9 +115,9 @@ namespace Signum.Engine.Help
             return this;
         }
 
-        public static void Synchronize(string fileName, Type type)
+        public static void Synchronize(string fileName, XDocument loaded, Type type)
         {
-            XElement loaded = XDocument.Load(fileName).Element(_Entity);
+            XElement loadedEntity = loaded.Element(_Entity);
             EntityHelp created = EntityHelp.Create(type);
 
             bool changed = false; 
@@ -130,9 +130,9 @@ namespace Signum.Engine.Help
                 }
             };
 
-            created.Description = loaded.Element(_Description).TryCC(a => a.Value);
+            created.Description = loadedEntity.Element(_Description).TryCC(a => a.Value);
 
-            HelpTools.SynchronizeElements(loaded, _Properties, _Property, _Name, created.Properties, "Properties of {0}".Formato(type.Name),
+            HelpTools.SynchronizeElements(loadedEntity, _Properties, _Property, _Name, created.Properties, "Properties of {0}".Formato(type.Name),
                 (ph, elem)=>HelpTools.Set(ref ph.UserDescription, elem.Value),
                 (action, prop) =>
                 {
@@ -140,7 +140,7 @@ namespace Signum.Engine.Help
                     Console.WriteLine("  Property {0}: {1}".Formato(action, prop));
                 });
 
-            HelpTools.SynchronizeElements(loaded, _Operations, _Operation, _Key, created.Operations.SelectDictionary(OperationDN.UniqueKey, v => v), "Operations of {0}".Formato(type.Name),
+            HelpTools.SynchronizeElements(loadedEntity, _Operations, _Operation, _Key, created.Operations.SelectDictionary(OperationDN.UniqueKey, v => v), "Operations of {0}".Formato(type.Name),
                 (oh, op)=> HelpTools.Set(ref oh.UserDescription, op.Value),
                 (action, op) =>
                 {

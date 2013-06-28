@@ -38,22 +38,22 @@ namespace Signum.Engine.Help
 
         public class HelpState
         {
-            public Dictionary<Type, EntityHelp> TypeToHelpFiles;
+            public Dictionary<Type, EntityHelp> Types;
 
             public Dictionary<string, NamespaceHelp> Namespaces;
             public Dictionary<string, AppendixHelp> Appendices;
 
-            public Dictionary<Type, List<object>> TypeToQueryFiles;
-            public Dictionary<object, QueryHelp> QueryColumns;
+            public Dictionary<Type, List<object>> TypeToQuery;
+            public Dictionary<object, QueryHelp> Queries;
 
             public List<QueryHelp> GetQueryHelps(Type type)
             {
-                var list = TypeToQueryFiles.TryGetC(type);
+                var list = TypeToQuery.TryGetC(type);
 
                 if(list == null)
                     return new List<QueryHelp>();
 
-                return list.Select(o => QueryColumns[o]).ToList();
+                return list.Select(o => Queries[o]).ToList();
             }
         }
 
@@ -82,7 +82,7 @@ namespace Signum.Engine.Help
 
         public static Type[] AllTypes()
         {
-            return State.Value.TypeToHelpFiles.Keys.ToArray();
+            return State.Value.Types.Keys.ToArray();
         }
 
         public static string EntityUrl(Type entityType)
@@ -113,17 +113,17 @@ namespace Signum.Engine.Help
 
         public static EntityHelp GetEntityHelp(Type entityType)
         {
-            return State.Value.TypeToHelpFiles[entityType];
+            return State.Value.Types[entityType];
         }
 
         public static List<KeyValuePair<Type, EntityHelp>> GetEntitiesHelp()
         {
-            return State.Value.TypeToHelpFiles.ToList();
+            return State.Value.Types.ToList();
         }
 
         public static QueryHelp GetQueryHelp(string query)
         {
-            return State.Value.QueryColumns[QueryLogic.TryToQueryName(query)];
+            return State.Value.Queries[QueryLogic.TryToQueryName(query)];
         }
 
         public static void Start(SchemaBuilder sb)
@@ -135,12 +135,12 @@ namespace Signum.Engine.Help
 
         public static void ReloadDocumentEntity(EntityHelp entityHelp)
         {
-            State.Value.TypeToHelpFiles[entityHelp.Type] = EntityHelp.Create(entityHelp.Type).Load();
+            State.Value.Types[entityHelp.Type] = EntityHelp.Create(entityHelp.Type).Load();
         }
 
         public static void ReloadDocumentQuery(QueryHelp queryHelp)
         {
-            State.Value.QueryColumns[queryHelp.Key] = QueryHelp.Create(queryHelp.Key).Load();
+            State.Value.Queries[queryHelp.Key] = QueryHelp.Create(queryHelp.Key).Load();
         }
 
         public static void ReloadDocumentNamespace(NamespaceHelp namespaceHelp)
@@ -161,52 +161,17 @@ namespace Signum.Engine.Help
             HelpState result = new HelpState();
 
             Type[] types = Schema.Current.Tables.Keys.Where(t => !t.IsEnumEntity()).ToArray();
-            result.TypeToHelpFiles = types.Select(t => EntityHelp.Create(t).Load()).ToDictionary(a => a.Type);
+
+            result.Types = types.Select(t => EntityHelp.Create(t).Load()).ToDictionary(a => a.Type);
+
+            var dqm = DynamicQueryManager.Current;
+            result.TypeToQuery = types.ToDictionary(t => t, t => dqm.GetTypeQueries(t).Keys.ToList());
+            result.Queries = result.TypeToQuery.SelectMany(kvp => kvp.Value).Distinct().Select(qn => QueryHelp.Create(qn).Load()).ToDictionary(a => a.Key);
+
             result.Namespaces = types.Select(t => t.Namespace).Distinct().Select(ns => NamespaceHelp.Create(ns).Load()).ToDictionary(a => a.Name);
+
+            result.Appendices = FileNames(AppendicesDirectory).Select(fn => AppendixHelp.Load(LoadAndValidate(fn), fn)).ToDictionary(a => a.Name);
          
-            //Scope
-            {   
-
-                //tipo a entityHelp
-              
-            }
-
-            //Scope
-            {
-                var namespacesDocuments = LoadDocuments(NamespacesDirectory);
-                var nameSpaceInfo = from doc in namespacesDocuments
-                                    let namespaceName = NamespaceHelp.GetNamespaceName(doc.Document)
-                                    where namespaceName != null
-                                    select NamespaceHelp.Load(doc.Document, doc.File);
-
-                result.Namespaces = nameSpaceInfo.ToDictionary(a => a.Name);
-            }
-
-            //Scope
-            {
-                var appendicesDocuments = LoadDocuments(AppendicesDirectory);
-                var appendixInfo = from doc in appendicesDocuments
-                                   let namespaceName = AppendixHelp.GetAppendixName(doc.Document)
-                                   where namespaceName != null
-                                   select AppendixHelp.Load(doc.Document, doc.File);
-
-                result.Appendices = appendixInfo.ToDictionary(a => a.Name);
-            }
-
-            //Scope
-            {
-                var queriesDocuments = LoadDocuments(QueriesDirectory);
-                var queriesInfo = from doc in queriesDocuments
-                                  let queryName = QueryHelp.GetQueryFullName(doc.Document)
-                                  where queryName != null
-                                  select QueryHelp.Load(doc.Document, doc.File);
-
-
-                result.TypeToQueryFiles = queriesInfo.GroupToDictionary(qh => GetQueryType(qh.Key), qh => qh.Key);
-
-                result.QueryColumns = queriesInfo.ToDictionary(a => a.Key);
-            }
-
             return result;
         }
 
@@ -223,7 +188,7 @@ namespace Signum.Engine.Help
             return schemas;
         });
 
-        static List<string> LoadDocuments(string subdirectory)
+        static List<string> FileNames(string subdirectory)
         {
             return Directory.GetFiles(Path.Combine(HelpDirectory, subdirectory), "*.help").ToList();
         }
@@ -243,12 +208,6 @@ namespace Signum.Engine.Help
             return document;
         }
 
-        class FileXDocument
-        {
-            public XDocument Document;
-            public string File;
-        }
-
         public static void SyncronizeAll()
         {
             if (!Directory.Exists(HelpDirectory))
@@ -257,64 +216,52 @@ namespace Signum.Engine.Help
             }
 
             Type[] types = Schema.Current.Tables.Keys.Where(t => !t.IsEnumEntity()).ToArray();
-           
+
             Replacements replacements = new Replacements();
             //Namespaces
             {
-                var namespacesDocuments = LoadDocuments(NamespacesDirectory);
+                var namespacesDocuments = FileNames(NamespacesDirectory)
+                    .Select(fn => new { FileName = fn, XDocument = LoadAndValidate(fn) })
+                    .ToDictionary(p => NamespaceHelp.GetNamespaceName(p.XDocument), "Namespaces in HelpFiles");
+
                 var should = types.Select(type => type.Namespace).Distinct().ToDictionary(a => a);
 
-                var current = (from doc in namespacesDocuments
-                               let name = NamespaceHelp.GetNamespaceName(doc.Document)
-                               where name != null
-                               select new
-                               {
-                                   Namespace = name,
-                                   File = doc.File,
-                               }).ToDictionary(a => a.Namespace, a => a.File);
-
-                HelpTools.SynchronizeReplacing(replacements, "Namespace", current, should,
-                 (nameSpace, oldFile) =>
+                HelpTools.SynchronizeReplacing(replacements, "Namespace", namespacesDocuments, should,
+                 (nameSpace, pair) =>
                  {
-                     File.Delete(oldFile);
-                     Console.WriteLine("Deleted {0}".Formato(oldFile));
+                     File.Delete(pair.FileName);
+                     Console.WriteLine("Deleted {0}".Formato(pair.FileName));
                  },
                  (nameSpace, _) =>
                  {
                  },
-                 (nameSpace, oldFile, type) =>
+                 (nameSpace, pair, _) =>
                  {
-                     NamespaceHelp.Synchronize(oldFile, type);
+                     NamespaceHelp.Synchronize(pair.FileName, pair.XDocument, nameSpace);
                  });
             }
 
             //Types
-            {   
+            {
                 var should = types.ToDictionary(type => type.FullName);
 
-                var entitiesDocuments = LoadDocuments(EntitiesDirectory);
-                var current = (from doc in entitiesDocuments 
-                               let name = EntityHelp.GetEntityFullName(doc.Document)
-                               where name != null
-                               select new
-                               {
-                                   TypeName = name,
-                                   File = doc.File,
-                               }).ToDictionary(a => a.TypeName, a => a.File,"Types in HelpFiles");
+                var current = FileNames(EntitiesDirectory)
+                    .Select(fn => new { FileName = fn, XDocument = LoadAndValidate(fn) })
+                    .ToDictionary(a => EntityHelp.GetEntityFullName(a.XDocument), "Types in HelpFiles");
 
-             
+
                 HelpTools.SynchronizeReplacing(replacements, "Type", current, should,
-                    (fullName, oldFile) =>
+                    (fullName, pair) =>
                     {
-                        File.Delete(oldFile);
-                        Console.WriteLine("Deleted {0}".Formato(oldFile));
+                        File.Delete(pair.FileName);
+                        Console.WriteLine("Deleted {0}".Formato(pair.FileName));
                     },
                     (fullName, type) =>
                     {
                     },
-                    (fullName, oldFile, type) =>
+                    (fullName, pair, type) =>
                     {
-                        EntityHelp.Synchronize(oldFile, type);
+                        EntityHelp.Synchronize(pair.FileName, pair.XDocument, type);
                     });
             }
 
@@ -322,30 +269,23 @@ namespace Signum.Engine.Help
             {
                 var should = (from type in types
                               from key in DynamicQueryManager.Current.GetTypeQueries(type).Keys
-                              select key).Distinct().ToDictionary(q => QueryUtils.GetQueryUniqueKey(q), "Queries in HelpFiles");
+                              select key).Distinct().ToDictionary(q => QueryUtils.GetQueryUniqueKey(q));
 
-                var queriesDocuments = LoadDocuments(QueriesDirectory);
-                var current = (from doc in queriesDocuments 
-                               let name = QueryHelp.GetQueryFullName(doc.Document)
-                               where name != null
-                               select new
-                               {
-                                   QueryName = name,
-                                   File = doc.File,
-                               }).ToDictionary(a => a.QueryName, a => a.File);
+                var current = FileNames(QueriesDirectory)
+                    .Select(fn => new { FileName = fn, XDocument = LoadAndValidate(fn) })
+                    .ToDictionary(p => QueryHelp.GetQueryFullName(p.XDocument), "Queries in HelpFiles");
 
                 HelpTools.SynchronizeReplacing(replacements, "Query", current, should,
-                    (fullName, oldFile) =>
+                    (fullName, pair) =>
                     {
-                        File.Delete(oldFile);
-                        Console.WriteLine("Deleted {0}".Formato(oldFile));
+                        File.Delete(pair.FileName);
+                        Console.WriteLine("Deleted {0}".Formato(pair.FileName));
                     },
-                    (fullName, query) =>{},
+                    (fullName, query) => { },
                     (fullName, oldFile, query) =>
                     {
-                        QueryHelp.Synchronize(oldFile, QueryUtils.GetQueryUniqueKey(query));
+                        QueryHelp.Synchronize(oldFile.FileName, oldFile.XDocument, QueryUtils.GetQueryUniqueKey(query));
                     });
-
             }
         }
 

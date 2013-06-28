@@ -81,9 +81,8 @@ namespace Signum.Engine.Help
         static readonly XName _Description = "Description";
         static readonly XName _Language = "Language";
 
-        public static void Synchronize(string fileName, string nameSpace)
+        public static void Synchronize(string fileName, XDocument loadedDoc, string nameSpace)
         {
-            XDocument loadedDoc = XDocument.Load(fileName).ValidateHelpSchema(fileName);
             XElement loadedNs = loadedDoc.Element(_Namespace);
 
             var created = NamespaceHelp.Create(nameSpace);
