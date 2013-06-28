@@ -162,10 +162,10 @@ namespace Signum.Windows.UIAutomation
             element.Wait(() => element.IsVisible(), actionDescription, timeOut);
         }
 
-        public static void AssertClassName(this AutomationElement element, string expectedType, bool allowHwndWrapper = false)
+        public static AutomationElement AssertClassName(this AutomationElement element, string expectedType)
         {
             if (element.Current.ClassName == expectedType)
-                return;
+                return element;
 
             try
             {

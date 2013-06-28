@@ -126,35 +126,17 @@ namespace Signum.Windows.UIAutomation
         retry:
             var result = GetRecursiveProcessWindows(AutomationElement.RootElement, processId);
 
-            Entries.AddRange(result.Select(r =>
+            Entries.AddRange(result.Select(r => new LogEntry
             {
-                try
-                {
-                    return new LogEntry
-                    {
-                        Count = count,
-                        retryCount = retryCount,
-                        ClassName = r.Current.ClassName,
-                        Name = r.Current.Name,
-                        RuntimeId = r.GetRuntimeId().ToString("."),
-                        ItemStatus = r.Current.ItemStatus,
-                    };
-                }
-                catch (ElementNotAvailableException)
-                {
-                    return new LogEntry
-                    {
-                        Count = count,
-                        retryCount = retryCount,
-                        ClassName = "error",
-                        Name = "error",
-                        RuntimeId = r.GetRuntimeId().ToString("."),
-                        ItemStatus = "error",
-                        StackTrace = Environment.StackTrace,
-                    };
-                }
+                Count = count,
+                retryCount = retryCount,
+                ClassName = r.SafeGet(p => p.ClassName, "error"),
+                Name = r.SafeGet(p => p.Name, "error"),
+                RuntimeId = r.GetRuntimeId().ToString("."),
+                ItemStatus = r.SafeGet(p => p.ItemStatus, "error"),
             }));
-            if (result.IsEmpty())
+
+            if (result.IsEmpty() || result.Any(a => a.SafeGet(p => p.ClassName.StartsWith("HwndWrapper"), false)))
             {
                 if (retryCount > 4)
                     throw new InvalidOperationException("No windows found after {0} retries".Formato(retryCount));
@@ -182,6 +164,18 @@ namespace Signum.Windows.UIAutomation
             Entries.Add(new LogEntry { Count = 987, ClassName = should, Name = current, ItemStatus = e.Message, StackTrace = Environment.StackTrace });
             Entries.ToCsvFile(@"c:\debugWindows.csv", append: true);
             Entries.Clear();
+        }
+
+        public static T SafeGet<T>(this AutomationElement element, Func<AutomationElement.AutomationElementInformation, T> getter, T error)
+        {
+            try
+            {
+                return getter(element.Current);
+            }
+            catch (ElementNotAvailableException)
+            {
+                return error;
+            }
         }
 
         static List<LogEntry> Entries = new List<LogEntry>();
