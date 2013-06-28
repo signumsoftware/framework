@@ -108,13 +108,19 @@ namespace Signum.Engine.Help
             };
         }
 
-        public void Save()
+        public bool Save()
         {
             XDocument document = this.ToXDocument();
             if (document == null)
+            {
                 File.Delete(FileName);
+                return false;
+            }
             else
+            {   
                 document.Save(FileName);
+                return true;
+            }
         }
 
         static readonly XName _Name = "Name";
@@ -134,11 +140,7 @@ namespace Signum.Engine.Help
 
             bool changed = false;
             HelpTools.SynchronizeElements(loadedQuery, _Columns, _Columns, _Name, created.Columns, "Columns of {0}".Formato(key),
-              (qc, element)=>
-              {
-                  qc.
-
-              }
+              (qc, element) => HelpTools.Set(ref qc.UserDescription, element.Element(_Description).TryCC(a => a.Value)),
               (action, column) =>
               {
                   if (!changed)
@@ -149,26 +151,16 @@ namespace Signum.Engine.Help
                   Console.WriteLine("  Column {0}: {1}".Formato(action, column));
               });
 
-            if (loadedQuery.Element(_Columns) == null && loadedQuery.Element(_Description) == null)
-            {
-                File.Delete(fileName);
+            created.UserDescription = loadedQuery.Element(_Description).TryCC(a => a.Value);
 
-                Console.WriteLine("Deleted {0} -> {1}".Formato(fileName, created.FileName));
-            }
-            else if (fileName != created.FileName)
+            if (fileName != created.FileName)
             {
-                Console.WriteLine("FileNameChanged {0} -> {1}".Formato(fileName, created.FileName));
-                File.Delete(fileName);
-                loadedQuery.Save(created.FileName);
-            }
-            else
-            {
-                loadedQuery.Save(fileName);
+                Console.WriteLine("FileName changed {0} -> {1}".Formato(fileName, created.FileName));
+                File.Move(fileName, created.FileName);
             }
 
-            if (changed)
-                Console.WriteLine();
-
+            if (!created.Save())
+                Console.WriteLine("File deleted {1}".Formato(fileName, created.FileName));
         }
     }
 }

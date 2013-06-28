@@ -51,28 +51,10 @@ namespace Signum.Engine.Help
             return null;
         }
 
-        public static AppendixHelp Create(string name, string title, string description)
-        {
-            return new AppendixHelp
-            {
-                Name = name,
-                Title = title,
-                Language = CultureInfo.CurrentCulture.Name,
-                Description = description,
-            };
-        }
-
-        static string DefaultFileName(string name)
-        {
-            return Path.Combine(Path.Combine(HelpLogic.HelpDirectory,HelpLogic.AppendicesDirectory), "{0}.help".Formato(name));
-        }
-
-        public string Save()
+        public void Save()
         {
             XDocument document = this.ToXDocument();
-            string path = DefaultFileName(Name);
-            document.Save(path);
-            return path;
+            document.Save(FileName);
         }
 
         static readonly XName _Appendix = "Appendix";

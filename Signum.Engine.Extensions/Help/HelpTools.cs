@@ -98,6 +98,16 @@ namespace Signum.Engine.Help
                     merge(key, oldVal, newVal);
             }
         }
+
+        internal static bool Set(ref string variable, string value)
+        {
+            if (variable == value)
+                return false;
+
+            variable = value;
+
+            return true;
+        }
     }
 
     internal enum SyncAction

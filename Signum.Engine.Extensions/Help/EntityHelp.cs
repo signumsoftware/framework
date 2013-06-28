@@ -32,113 +32,93 @@ namespace Signum.Engine.Help
         public string FileName;
         public string Language;
 
-        public static EntityHelp Create(Type t)
+        public static EntityHelp Create(Type type)
         {
             return new EntityHelp
             {
-                Type = t,
+                Type = type,
                 Language = CultureInfo.CurrentCulture.Name,
-                Description = "",
-                Properties = PropertyRoute.GenerateRoutes(t)
+                Description = null,
+                FileName = Path.Combine(Path.Combine(HelpLogic.HelpDirectory,HelpLogic.EntitiesDirectory), "{0}.help".Formato(type.FullName)),
+                Properties = PropertyRoute.GenerateRoutes(type)
                             .ToDictionary(
                                 pp => pp.PropertyString(),
                                 pp => new PropertyHelp(pp, HelpGenerator.GetPropertyHelp(pp))),
 
-                Operations = OperationLogic.GetAllOperationInfos(t)
+                Operations = OperationLogic.GetAllOperationInfos(type)
                             .ToDictionary(
                                 oi => oi.Key,
-                                oi => new OperationHelp(oi.Key, HelpGenerator.GetOperationHelp(t, oi))),
+                                oi => new OperationHelp(oi.Key, HelpGenerator.GetOperationHelp(type, oi))),
 
-             /*   Queries = DynamicQueryManager.Current.GetQueryNames(t)
-                           .ToDictionary(
-                                kvp => kvp.Key,
-                                kvp => new QueryHelp(kvp.Key, HelpGenerator.GetQueryHelp(t, kvp.Value)))*/
+           
             };
         }
 
         public XDocument ToXDocument()
         {
+            if (string.IsNullOrEmpty(Description) &&
+                Properties.Values.All(a => string.IsNullOrEmpty(a.UserDescription)) &&
+                Operations.Values.All(a => string.IsNullOrEmpty(a.UserDescription)))
+                return null;
+
             return new XDocument(
                 new XDeclaration("1.0", "utf-8", "yes"),
                 new XElement(_Entity, 
                        new XAttribute(_FullName, Type.FullName),
                        new XAttribute(_Language, Language),
                        new XElement(_Description, Description),
-                       Properties.Let(ps => ps == null || ps.Count == 0 ? null : 
-                           new XElement(_Properties,
-                               ps.Select(p => new XElement(_Property, 
-                                   new XAttribute(_Name, p.Key), 
-                                   new XAttribute(_Info, p.Value.Info), 
-                                   p.Value.UserDescription))
-                           )
+                       new XElement(_Properties,
+                           Properties.Select(p => new XElement(_Property, 
+                               new XAttribute(_Name, p.Key), 
+                               p.Value.UserDescription))
                        ),
-                       Operations.Let(os => os == null || os.Count == 0 ? null : 
-                           new XElement(_Operations,
-                               os.Select(o => new XElement(_Operation, 
-                                   new XAttribute(_Key, OperationDN.UniqueKey(o.Key)),
-                                   new XAttribute(_Info, o.Value.Info),
-                                   o.Value.UserDescription))
-                           )
-                       )/*,
-                       Queries.Map(qs => qs == null || qs.Count == 0 ? null : 
-                           new XElement(_Queries,
-                               qs.Select(q => new XElement(_Query, 
-                                   new XAttribute(_Key, QueryUtils.GetQueryName(q.Key)),
-                                   new XAttribute(_Info, q.Value.Info),
-                                   q.Value.UserDescription))
-                           )
-                       )*/
+                       new XElement(_Operations,
+                           Operations.Select(o => new XElement(_Operation, 
+                               new XAttribute(_Key, OperationDN.UniqueKey(o.Key)),
+                               o.Value.UserDescription))
+                       )
                    )
                );
         }
 
 
-        public static EntityHelp Load(Type type, XDocument document, string sourceFile)
+        public EntityHelp Load()
         {
-            XElement element = document.Element(_Entity);
+            if (!File.Exists(FileName))
+                return this;
 
-            return new EntityHelp
+            XElement element = XDocument.Load(FileName).ValidateHelpSchema(FileName).Element(_Entity);
+
+            Description = element.Element(_Description).TryCC(d => d.Value);
+
+            var ps = element.Element(_Properties);
+            if (ps != null)
             {
-                Type = type,
-                FileName = sourceFile,
-                Description = element.Element(_Description).TryCC(d => d.Value),
-                Language = element.Attribute(_Language).Value,
-                Properties = EnumerableExtensions.JoinStrict(
-                    element.Element(_Properties).TryCC(ps => ps.Elements(_Property)) ?? new XElement[0],
-                    PropertyRoute.GenerateRoutes(type),
-                    x => x.Attribute(_Name).Value,
-                    pp => pp.PropertyString(),
-                    (x, pp) => new KeyValuePair<string, PropertyHelp>(
-                         pp.PropertyString(),
-                         new PropertyHelp(pp, x.Attribute(_Info).Value, x.Value)),
-                    "loading Properties for {0} Help file ({1})".Formato(type.Name, sourceFile)).CollapseDictionary(),
+                string errorMessage = "loading property {0} on Entity file (" + FileName + ")";
+                foreach (var item in ps.Elements(_Property))
+                {
+                    this.Properties.GetOrThrow(item.Attribute(_Name).Value, errorMessage).UserDescription = item.Value;
+                }
+            }
 
-                Operations = EnumerableExtensions.JoinStrict(
-                    element.Element(_Operations).TryCC(os => os.Elements(_Operation)) ?? new XElement[0],
-                    OperationLogic.GetAllOperationInfos(type),
-                    x => x.Attribute(_Key).Value,
-                    oi => OperationDN.UniqueKey(oi.Key),
-                    (x, oi) => new KeyValuePair<Enum, OperationHelp>(
-                        oi.Key, 
-                        new OperationHelp(oi.Key,x.Attribute(_Info).Value, x.Value)),
-                    "loading Operations for {0} Help file ({1})".Formato(type.Name, sourceFile)).CollapseDictionary(),
+            var os = element.Element(_Operations);
+            if (os != null)
+            {
+                string errorMessage = "loading property {0} on Entity file (" + FileName + ")";
+                var ops = Operations.SelectDictionary(OperationDN.UniqueKey, v => v);
+                foreach (var item in os.Elements(_Operation))
+                {
+                    ops.GetOrThrow(item.Attribute(_Key).Value, errorMessage).UserDescription = item.Value;
+                }
+            }
 
-                /*Queries = EnumerableExtensions.JoinStrict(
-                    element.Element(_Queries).TryCC(qs => qs.Elements(_Query)) ?? new XElement[0],
-                    DynamicQueryManager.Current.GetQueryNames(type),
-                    x => x.Attribute(_Key).Value,
-                    qn => QueryUtils.GetQueryName(qn.Key),
-                    (x, qn) => new KeyValuePair<object, QueryHelp>(
-                        qn.Key, 
-                        new QueryHelp(qn.Key, x.Attribute(_Info).Value, x.Value)),
-                    "Loading Queries for {0} Help file ({1})".Formato(type.Name, sourceFile)).CollapseDictionary()*/
-            };
+            return this;
         }
 
         public static void Synchronize(string fileName, Type type)
         {
             XElement loaded = XDocument.Load(fileName).Element(_Entity);
-            var created = EntityHelp.Create(type);
+            EntityHelp created = EntityHelp.Create(type);
 
             bool changed = false; 
             Action change = ()=>
@@ -150,7 +130,10 @@ namespace Signum.Engine.Help
                 }
             };
 
+            created.Description = loaded.Element(_Description).TryCC(a => a.Value);
+
             HelpTools.SynchronizeElements(loaded, _Properties, _Property, _Name, created.Properties, "Properties of {0}".Formato(type.Name),
+                (ph, elem)=>HelpTools.Set(ref ph.UserDescription, elem.Value),
                 (action, prop) =>
                 {
                     change();
@@ -158,26 +141,22 @@ namespace Signum.Engine.Help
                 });
 
             HelpTools.SynchronizeElements(loaded, _Operations, _Operation, _Key, created.Operations.SelectDictionary(OperationDN.UniqueKey, v => v), "Operations of {0}".Formato(type.Name),
+                (oh, op)=> HelpTools.Set(ref oh.UserDescription, op.Value),
                 (action, op) =>
                 {
                     change();
                     Console.WriteLine("  Operation {0}: {1}".Formato(action, op));
                 });
 
-            string goodFileName = DefaultFileName(type);
-            if (fileName != goodFileName)
+
+            if (fileName != created.FileName)
             {
-                Console.WriteLine("FileNameChanged {0} -> {1}".Formato(fileName, goodFileName));
-                File.Delete(fileName);
-                loaded.Save(goodFileName);
-            }
-            else
-            {
-                loaded.Save(fileName);
+                Console.WriteLine("FileName changed {0} -> {1}".Formato(fileName, created.FileName));
+                File.Move(fileName, created.FileName);
             }
 
-            if (changed)
-                Console.WriteLine();
+            if (!created.Save())
+                Console.WriteLine("File deleted {1}".Formato(fileName, created.FileName));
         }
 
         internal static bool Distinct(XAttribute a1, XAttribute a2)
@@ -202,7 +181,6 @@ namespace Signum.Engine.Help
         static readonly XName _Operation = "Operation";
         static readonly XName _Queries = "Queries";
         static readonly XName _Query = "Query";
-        static readonly XName _Info = "Info";
         static readonly XName _Language = "Language";
 
         public string Extract(string s, Match m)
@@ -323,17 +301,19 @@ namespace Signum.Engine.Help
             return kvp.Key.NiceName() + " | " + kvp.Value.Description;
         }
 
-        public string Save()
+        public bool Save()
         {
             XDocument document = this.ToXDocument();
-            string path = DefaultFileName(this.Type);
-            document.Save(path);
-            return path;
-        }
-
-        static string DefaultFileName(Type type)
-        {
-            return Path.Combine(Path.Combine(HelpLogic.HelpDirectory,HelpLogic.EntitiesDirectory), "{0}.help".Formato(type.FullName));
+            if (document == null)
+            {
+                File.Delete(FileName);
+                return false;
+            }
+            else
+            {
+                document.Save(FileName);
+                return true;
+            }
         }
 
         internal static string GetEntityFullName(XDocument document)
@@ -355,14 +335,9 @@ namespace Signum.Engine.Help
             this.Info = info;
         }
 
-        public PropertyHelp(PropertyRoute propertyRoute, string info, string userDescription)
-            : this(propertyRoute, info)
-        {
-            this.UserDescription = userDescription;
-        }
 
         public string Info { get; private set; }
-        public string UserDescription { get; set; }
+        public string UserDescription;
         public PropertyInfo PropertyInfo { get { return PropertyRoute.PropertyInfo; } }
         public PropertyRoute PropertyRoute { get; private set; }
 
@@ -380,16 +355,9 @@ namespace Signum.Engine.Help
             this.Info = info;
         }
 
-        public OperationHelp(Enum operationKey, string info, string userDescription)
-        {
-            this.OperationKey = operationKey;
-            this.Info = info;
-            this.UserDescription = userDescription;
-        }
-
         public Enum OperationKey { get; set; }
         public string Info { get; private set; }
-        public string UserDescription { get; set; }
+        public string UserDescription;
 
         public override string ToString()
         {

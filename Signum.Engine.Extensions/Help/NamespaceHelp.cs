@@ -32,16 +32,15 @@ namespace Signum.Engine.Help
                 );
         }
 
-        public static NamespaceHelp Load(XDocument document, string sourceFile)
+        public NamespaceHelp Load()
         {
-            XElement ns = document.Element(_Namespace);
-            return new NamespaceHelp
-            {
-                Name = ns.Attribute(_Name).Value,
-                Language = ns.Attribute(_Language).Value,
-                Description = ns.Element(_Description).Value,
-                FileName = sourceFile,
-            }; 
+            if (!File.Exists(FileName))
+                return this;
+
+            XElement ns = XDocument.Load(FileName).Element(_Namespace);
+            Description = ns.Element(_Description).TryCC(a => a.Value);
+
+            return this;
         }
 
         internal static string GetNamespaceName(XDocument document)
@@ -61,13 +60,19 @@ namespace Signum.Engine.Help
             };
         }
 
-        public void Save()
+        public bool Save()
         {
             XDocument document = this.ToXDocument();
             if (document == null)
+            {
                 File.Delete(FileName);
+                return false;
+            }
             else
+            {
                 document.Save(FileName);
+                return true;
+            }
         }
 
 
@@ -78,30 +83,20 @@ namespace Signum.Engine.Help
 
         public static void Synchronize(string fileName, string nameSpace)
         {
-            XDocument loadedDoc = XDocument.Load(fileName);
+            XDocument loadedDoc = XDocument.Load(fileName).ValidateHelpSchema(fileName);
             XElement loadedNs = loadedDoc.Element(_Namespace);
 
             var created = NamespaceHelp.Create(nameSpace);
-            loadedNs.Attribute(_Name).Value = created.Name;
+            created.Description = loadedNs.Element(_Description).TryCC(a => a.Value);
 
-            if(loadedNs.Element(_Description) == null)
+            if (fileName != created.FileName)
             {
-                File.Delete(fileName);
+                Console.WriteLine("FileName changed {0} -> {1}".Formato(fileName, created.FileName));
+                File.Move(fileName, created.FileName);
             }
-            else if (fileName != created.FileName)
-            {
-                Console.WriteLine("FileNameChanged {0} -> {1}".Formato(fileName, created.FileName));
-                File.Delete(fileName);
-                loadedDoc.Save(created.FileName);
-                Console.WriteLine();
-            }
-            else if ()
-            {
 
-                Console.WriteLine("FilModified {0}".Formato(fileName));
-                loadedDoc.Save(fileName);
-                Console.WriteLine();
-            }
+            if (!created.Save())
+                Console.WriteLine("File deleted {1}".Formato(fileName, created.FileName));
         }
 
         public IEnumerable<SearchResult> Search(Regex regex)

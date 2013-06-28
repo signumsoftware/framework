@@ -126,8 +126,6 @@ namespace Signum.Engine.Help
             return State.Value.QueryColumns[QueryLogic.TryToQueryName(query)];
         }
 
-    
-
         public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -137,7 +135,7 @@ namespace Signum.Engine.Help
 
         public static void ReloadDocumentEntity(EntityHelp entityHelp)
         {
-            State.Value.TypeToHelpFiles[entityHelp.Type] = EntityHelp.Load(entityHelp.Type, XDocument.Load(entityHelp.FileName), entityHelp.FileName);
+            State.Value.TypeToHelpFiles[entityHelp.Type] = EntityHelp.Create(entityHelp.Type).Load();
         }
 
         public static void ReloadDocumentQuery(QueryHelp queryHelp)
@@ -147,7 +145,7 @@ namespace Signum.Engine.Help
 
         public static void ReloadDocumentNamespace(NamespaceHelp namespaceHelp)
         {
-            State.Value.Namespaces[namespaceHelp.Name] = NamespaceHelp.Load(XDocument.Load(namespaceHelp.FileName), namespaceHelp.FileName);
+            State.Value.Namespaces[namespaceHelp.Name] = NamespaceHelp.Create(namespaceHelp.Name).Load();
         }
 
         public static void ReloadDocumentAppendix(AppendixHelp appendixHelp)
@@ -162,21 +160,15 @@ namespace Signum.Engine.Help
 
             HelpState result = new HelpState();
 
+            Type[] types = Schema.Current.Tables.Keys.Where(t => !t.IsEnumEntity()).ToArray();
+            result.TypeToHelpFiles = types.Select(t => EntityHelp.Create(t).Load()).ToDictionary(a => a.Type);
+            result.Namespaces = types.Select(t => t.Namespace).Distinct().Select(ns => NamespaceHelp.Create(ns).Load()).ToDictionary(a => a.Name);
          
             //Scope
-            {
-                Type[] types = Schema.Current.Tables.Select(t => t.Key).ToArray();
-                var typesDic = types.ToDictionary(a => a.FullName);
-
-                var entitiesDocuments = LoadDocuments(EntitiesDirectory);
-                var typeHelpInfo = from doc in entitiesDocuments
-                                   let typeName = EntityHelp.GetEntityFullName(doc.Document)
-                                   where typeName != null
-                                   select EntityHelp.Load(typesDic.GetOrThrow(typeName, "Not type with FullName {0} found in the schema"), doc.Document, doc.File);
-
+            {   
 
                 //tipo a entityHelp
-                result.TypeToHelpFiles = typeHelpInfo.ToDictionary(p => p.Type);
+              
             }
 
             //Scope
@@ -223,28 +215,32 @@ namespace Signum.Engine.Help
             return DynamicQueryManager.Current.GetQuery(query).Core.Value.EntityColumn().Implementations.Value.Types.FirstEx();
         }
 
-        private static List<FileXDocument> LoadDocuments(string subdirectory)
+        static Lazy<XmlSchemaSet> Schemas = new Lazy<XmlSchemaSet>(() =>
         {
             XmlSchemaSet schemas = new XmlSchemaSet();
             Stream str = typeof(HelpLogic).Assembly.GetManifestResourceStream("Signum.Engine.Extensions.Help.SignumFrameworkHelp.xsd");
             schemas.Add("", XmlReader.Create(str));
+            return schemas;
+        });
 
-            var documents = Directory.GetFiles(Path.Combine(HelpDirectory,subdirectory), "*.help").Select(f => new FileXDocument { File = f, Document = XDocument.Load(f) }).ToList();
+        static List<string> LoadDocuments(string subdirectory)
+        {
+            return Directory.GetFiles(Path.Combine(HelpDirectory, subdirectory), "*.help").ToList();
+        }
+
+        internal static XDocument LoadAndValidate(string fileName)
+        {
+            var document = XDocument.Load(fileName); 
 
             List<Tuple<XmlSchemaException, string>> exceptions = new List<Tuple<XmlSchemaException, string>>();
-            foreach (var doc in documents)
-            {
-                doc.Document.Validate(schemas, (s, e) => exceptions.Add(Tuple.Create(e.Exception, doc.File)));
-            }
 
-            if (exceptions.Count != 0)
-            {
-                string errorText = "Error Parsing XML Help Files: " + exceptions.ToString(e => "{0} ({1}:{2}): {3}".Formato(
-                    e.Item2, e.Item1.LineNumber, e.Item1.LinePosition, e.Item1.Message), "\r\n").Indent(3);
+            document.Document.Validate(Schemas.Value, (s, e) => exceptions.Add(Tuple.Create(e.Exception, fileName)));
 
-                throw new InvalidOperationException(errorText);
-            }
-            return documents;
+            if (exceptions.Any())
+                throw new InvalidOperationException("Error Parsing XML Help Files: " + exceptions.ToString(e => "{0} ({1}:{2}): {3}".Formato(
+                 e.Item2, e.Item1.LineNumber, e.Item1.LinePosition, e.Item1.Message), "\r\n").Indent(3));
+
+            return document;
         }
 
         class FileXDocument
