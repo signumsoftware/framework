@@ -398,7 +398,8 @@ namespace Signum.Windows
             GridViewColumnLabelOnlyRouteTask += TaskGridViewColumnSetLabelText;
 
             ValuePropertySelector.SetDefinition(typeof(FrameworkElement), FrameworkElement.DataContextProperty);
-            ValuePropertySelector.SetDefinition(typeof(ItemsControl), ItemsControl.ItemsSourceProperty);
+            ValuePropertySelector.SetDefinition(typeof(ListView), ItemsControl.ItemsSourceProperty);
+            ValuePropertySelector.SetDefinition(typeof(DataGrid), ItemsControl.ItemsSourceProperty);
 
             TypePropertySelector.SetDefinition(typeof(FrameworkElement), null);
 
