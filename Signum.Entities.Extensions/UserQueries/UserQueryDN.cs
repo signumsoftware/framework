@@ -232,7 +232,8 @@ namespace Signum.Entities.UserQueries
             ColumnsMode = element.Attribute("ColumnsMode").Value.ToEnum<ColumnOptionsMode>();
             Filters.Syncronize(element.Element("Filters").TryCC(fs => fs.Elements()).EmptyIfNull().ToList(), (f, x)=>f.FromXml(x, ctx));
             Columns.Syncronize(element.Element("Columns").TryCC(fs => fs.Elements()).EmptyIfNull().ToList(), (c, x)=>c.FromXml(x, ctx));
-            Orders.Syncronize(element.Element("Orders").TryCC(fs => fs.Elements()).EmptyIfNull().ToList(), (o, x)=>o.FromXml(x, ctx));   
+            Orders.Syncronize(element.Element("Orders").TryCC(fs => fs.Elements()).EmptyIfNull().ToList(), (o, x)=>o.FromXml(x, ctx));
+            ParseData(ctx.GetQueryDescription(Query));
         }
 
         public Pagination GetPagination()

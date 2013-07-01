@@ -105,6 +105,8 @@ namespace Signum.Entities.UserQueries
         IUserAssetEntity GetEntity(Guid guid);
 
         IPartDN GetPart(IPartDN old, XElement element);
+
+        DynamicQuery.QueryDescription GetQueryDescription(QueryDN Query);
     }
 
     public interface IUserAssetEntity : IIdentifiable
