@@ -341,8 +341,6 @@ namespace Signum.Windows
                 throw new InvalidOperationException("Entity Column not found on {0}".Formato(QueryUtils.GetQueryUniqueKey(QueryName)));
         }
 
-
-      
         ColumnDescription entityColumn;
 
         ResultTable resultTable;
@@ -358,7 +356,6 @@ namespace Signum.Windows
             remove { RemoveHandler(ResultChangedEvent, value); }
         }
 
-      
 
         void SearchControl_Loaded(object sender, RoutedEventArgs e)
         {
@@ -605,26 +602,41 @@ namespace Signum.Windows
 
         void btSearch_Click(object sender, RoutedEventArgs e)
         {
-            Search();
+            Search(resetPage: true);
         }
 
 
         bool hasBeenLoaded = false;
 
-        bool searchQueued;
+
+        bool? searchQueuedResetPage;
         bool generateListViewColumnsQueued; 
 
-        public void Search()
+        public void Search(bool resetPage = true)
         {
             if (IsSearching)
             {
-                searchQueued = true;
+                searchQueuedResetPage = resetPage;
                 return;
             }
 
             ClearResults();
 
             IsSearching = true;
+
+            var pag = Pagination as Pagination.Paginate;
+            if (resetPage && pag != null && pag.CurrentPage != 1)
+            {
+                try
+                {
+                    avoidPaginationChange = true;
+                    Pagination = new Pagination.Paginate(pag.ElementsPerPage, 1);
+                }
+                finally
+                {
+                    avoidPaginationChange = false;
+                }
+            }
 
             QueryRequest request = UpdateMultiplyMessage(true);
 
@@ -647,10 +659,11 @@ namespace Signum.Windows
                     generateListViewColumnsQueued = false;
                     GenerateListViewColumns();
                 }
-                if (searchQueued)
+                if (searchQueuedResetPage != null)
                 {
-                    searchQueued = false;
-                    Search(); 
+                    var c = searchQueuedResetPage.Value;
+                    searchQueuedResetPage = null;
+                    Search(c); 
                 }
             });
         }
@@ -697,12 +710,12 @@ namespace Signum.Windows
         }
 
 
-        bool settingResults = false;
+        bool avoidPaginationChange = false;
         private void SetResults(ResultTable rt)
         {
             try
             {
-                settingResults = true;
+                avoidPaginationChange = true;
 
                 gvResults.Columns.ZipForeach(rt.Columns, (gvc, rc) =>
                 {
@@ -747,7 +760,7 @@ namespace Signum.Windows
             }
             finally
             {
-                settingResults = false;
+                avoidPaginationChange = false;
             }
         }
 
@@ -767,7 +780,7 @@ namespace Signum.Windows
 
         private void Pagination_Changed(Pagination oldValue, Pagination newValue)
         {
-            if (!IsLoaded || settingResults)
+            if (!IsLoaded || avoidPaginationChange)
                 return;
 
             var oldPaginate = oldValue as Pagination.Paginate;
@@ -789,7 +802,7 @@ namespace Signum.Windows
             if (newValue is Pagination.All)
                 ClearResults();
             else
-                Search();
+                Search(resetPage: false);
         }
 
         void OnQueryResultChanged(bool cleaning)
@@ -906,7 +919,7 @@ namespace Signum.Windows
 
             header.ChangeOrders(OrderOptions);
 
-            Search();
+            Search(resetPage: true);
         }
 
         FilterOption CreateFilter(SortGridViewColumnHeader header)
@@ -1001,7 +1014,7 @@ namespace Signum.Windows
         {
             try
             {
-                settingResults = true;
+                avoidPaginationChange = true;
 
                 ColumnOptions.Clear();
                 ColumnOptions.AddRange(columns);
@@ -1030,7 +1043,7 @@ namespace Signum.Windows
             }
             finally
             {
-                settingResults = false;
+                avoidPaginationChange = false;
             }
         }
 
