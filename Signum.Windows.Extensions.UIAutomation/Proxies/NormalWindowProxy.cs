@@ -24,10 +24,8 @@ namespace Signum.Windows.UIAutomation
         }
 
         public NormalWindowProxy(AutomationElement element)
-            : base(element)
+            : base(element.AssertClassName("NormalWindow"))
         {
-            element.AssertClassName("NormalWindow");
-
             Element.WaitDataContextSet(() => "DataContextSet for {0}".Formato(typeof(T).Name));
         }
 

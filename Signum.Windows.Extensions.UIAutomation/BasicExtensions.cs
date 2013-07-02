@@ -162,12 +162,20 @@ namespace Signum.Windows.UIAutomation
             element.Wait(() => element.IsVisible(), actionDescription, timeOut);
         }
 
-        public static void AssertClassName(this AutomationElement element, string expectedType, bool allowHwndWrapper = false)
+        public static AutomationElement AssertClassName(this AutomationElement element, string expectedType)
         {
             if (element.Current.ClassName == expectedType)
-                return;
+                return element;
 
-            throw new InvalidCastException("The AutomationElement is not a {0}, but a {1}".Formato(expectedType, element.Current.ClassName));
+            try
+            {
+                throw new InvalidCastException("The AutomationElement is not a {0}, but a {1}".Formato(expectedType, element.Current.ClassName));
+            }
+            catch (Exception e)
+            {
+                WaitExtensions.PrintEntries(e, expectedType, element.Current.ClassName);
+                throw; 
+            }
         }
     }
 }

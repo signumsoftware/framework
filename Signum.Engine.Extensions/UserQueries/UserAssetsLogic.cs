@@ -17,6 +17,8 @@ using Signum.Entities.UserQueries;
 using Signum.Services;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
+using Signum.Engine.DynamicQuery;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Engine.UserQueries
 {
@@ -133,6 +135,11 @@ namespace Signum.Engine.UserQueries
             {
                 return ChartScriptLogic.GetChartScript(chartScriptName);
             }
+
+            public QueryDescription GetQueryDescription(QueryDN Query)
+            {
+                return DynamicQueryManager.Current.QueryDescription(QueryLogic.QueryNames.GetOrThrow(Query.Key));
+            }
         }
 
         public static UserAssetPreviewModel Preview(byte[] doc)
@@ -205,7 +212,6 @@ namespace Signum.Engine.UserQueries
                 return part;
             }
 
-
             public Lite<TypeDN> GetType(string cleanName)
             {
                 return TypeLogic.GetType(cleanName).ToTypeDN().ToLite();
@@ -214,6 +220,11 @@ namespace Signum.Engine.UserQueries
             public ChartScriptDN ChartScript(string chartScriptName)
             {
                 return ChartScriptLogic.GetChartScript(chartScriptName); 
+            }
+
+            public QueryDescription GetQueryDescription(QueryDN Query)
+            {
+                return DynamicQueryManager.Current.QueryDescription(QueryLogic.QueryNames.GetOrThrow(Query.Key));
             }
         }
 

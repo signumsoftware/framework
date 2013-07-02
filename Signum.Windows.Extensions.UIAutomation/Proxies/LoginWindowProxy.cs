@@ -10,9 +10,8 @@ namespace Signum.Windows.UIAutomation
     public class LoginWindowProxy : WindowProxy
     {
         public LoginWindowProxy(AutomationElement element)
-            : base(element)
+            : base(element.AssertClassName("Login"))
         {
-            element.AssertClassName("Login", allowHwndWrapper: true);
         }
 
         AutomationElement LoginCapture(string userName, string password, int? timeOut = null)
