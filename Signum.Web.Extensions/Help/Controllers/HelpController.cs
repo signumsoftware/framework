@@ -24,7 +24,7 @@ namespace Signum.Web.Help
     {
         public static MvcHtmlString WikiParse(this HtmlHelper helper, string text, WikiSettings settings)
         {
-            return MvcHtmlString.Create(settings.WikiParse(text).Replace("\n", "<p>")); 
+            return MvcHtmlString.Create(settings.WikiParse(text ?? "").Replace("\n", "<p>")); 
         }
 
         

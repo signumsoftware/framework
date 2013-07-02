@@ -29,7 +29,7 @@ namespace Signum.Engine.Help
 {
     public static class HelpLogic
     {
-        public static string EntitiesDirectory = "";
+        public static string EntitiesDirectory = "Entity";
         public static string QueriesDirectory = "Query";
         public static string NamespacesDirectory = "Namespace";
         public static string AppendicesDirectory = "Appendix";
@@ -222,7 +222,7 @@ namespace Signum.Engine.Help
             {
                 var namespacesDocuments = FileNames(NamespacesDirectory)
                     .Select(fn => new { FileName = fn, XDocument = LoadAndValidate(fn) })
-                    .ToDictionary(p => NamespaceHelp.GetNamespaceName(p.XDocument), "Namespaces in HelpFiles");
+                    .ToDictionary(p => NamespaceHelp.GetNamespaceName(p.XDocument, p.FileName), "Namespaces in HelpFiles");
 
                 var should = types.Select(type => type.Namespace).Distinct().ToDictionary(a => a);
 
@@ -247,7 +247,7 @@ namespace Signum.Engine.Help
 
                 var current = FileNames(EntitiesDirectory)
                     .Select(fn => new { FileName = fn, XDocument = LoadAndValidate(fn) })
-                    .ToDictionary(a => EntityHelp.GetEntityFullName(a.XDocument), "Types in HelpFiles");
+                    .ToDictionary(a => EntityHelp.GetEntityFullName(a.XDocument, a.FileName), "Types in HelpFiles");
 
 
                 HelpTools.SynchronizeReplacing(replacements, "Type", current, should,
@@ -273,7 +273,7 @@ namespace Signum.Engine.Help
 
                 var current = FileNames(QueriesDirectory)
                     .Select(fn => new { FileName = fn, XDocument = LoadAndValidate(fn) })
-                    .ToDictionary(p => QueryHelp.GetQueryFullName(p.XDocument), "Queries in HelpFiles");
+                    .ToDictionary(p => QueryHelp.GetQueryFullName(p.XDocument, p.FileName), "Queries in HelpFiles");
 
                 HelpTools.SynchronizeReplacing(replacements, "Query", current, should,
                     (fullName, pair) =>
@@ -284,7 +284,7 @@ namespace Signum.Engine.Help
                     (fullName, query) => { },
                     (fullName, oldFile, query) =>
                     {
-                        QueryHelp.Synchronize(oldFile.FileName, oldFile.XDocument, QueryUtils.GetQueryUniqueKey(query));
+                        QueryHelp.Synchronize(oldFile.FileName, oldFile.XDocument, query);
                     });
             }
         }

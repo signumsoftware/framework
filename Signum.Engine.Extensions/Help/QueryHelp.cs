@@ -31,7 +31,9 @@ namespace Signum.Engine.Help
 
         public XDocument ToXDocument()
         {
-            if (string.IsNullOrEmpty(UserDescription) && Columns.All(c => string.IsNullOrEmpty(UserDescription)))
+            var cols = Columns.Values.Where(c => c.UserDescription.HasText());
+
+            if (string.IsNullOrEmpty(UserDescription) && !cols.Any())
                 return null;
 
             return new XDocument(
@@ -40,10 +42,9 @@ namespace Signum.Engine.Help
                        new XAttribute(_Key, QueryUtils.GetQueryUniqueKey(Key)),
                        new XAttribute(_Language, Language),
                        UserDescription.HasText() ? new XElement(_Description, UserDescription) : null,
-                        Columns.Values.Any(c => c.UserDescription.HasText()) ?
+                        cols.Any() ?
                            new XElement(_Columns,
-                               Columns.Values.Where(c => c.UserDescription.HasText())
-                               .Select(c => new XElement(_Column,
+                               cols.Select(c => new XElement(_Column,
                                    new XAttribute(_Name, c.Name),
                                    c.UserDescription))
                            ) : null
@@ -77,11 +78,17 @@ namespace Signum.Engine.Help
             return this;
         }
 
-        internal static string GetQueryFullName(XDocument document)
+        internal static string GetQueryFullName(XDocument document, string fileName)
         {
-            if (document.Root.Name == _Query)
-                return document.Root.Attribute(_Key).Value;
-            return null;
+            if (document.Root.Name != _Query)
+                throw new InvalidOperationException("{0} does not have a {1} root".Formato(fileName, _Query));
+
+            var result = document.Root.Attribute(_Key).TryCC(a => a.Value);
+
+            if (string.IsNullOrEmpty(result))
+                throw new InvalidOperationException("{0} does not have a {1} attribute".Formato(fileName, _Key));
+
+            return result;
         }
 
         public static IEnumerable<ColumnDescriptionFactory> GenerateColumns(object key)
@@ -104,7 +111,7 @@ namespace Signum.Engine.Help
                 Columns = GenerateColumns(key).ToDictionary(
                                 kvp => kvp.Name,
                                 kvp => new QueryColumnHelp() { Name = kvp.Name, Info = HelpGenerator.GetQueryColumnHelp(kvp) }),
-                FileName = Path.Combine(Path.Combine(HelpLogic.HelpDirectory, HelpLogic.QueriesDirectory), "{0}.help".Formato(key))
+                FileName = Path.Combine(Path.Combine(HelpLogic.HelpDirectory, HelpLogic.QueriesDirectory), "{0}.help".Formato(QueryUtils.GetQueryUniqueKey(key)))
             };
         }
 
@@ -139,7 +146,7 @@ namespace Signum.Engine.Help
 
             bool changed = false;
             HelpTools.SynchronizeElements(loadedQuery, _Columns, _Columns, _Name, created.Columns, "Columns of {0}".Formato(QueryUtils.GetQueryUniqueKey(queryName)),
-              (qc, element) => HelpTools.Set(ref qc.UserDescription, element.Element(_Description).TryCC(a => a.Value)),
+              (qc, element) => qc.UserDescription = element.Element(_Description).TryCC(a => a.Value),
               (action, column) =>
               {
                   if (!changed)

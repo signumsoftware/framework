@@ -15,12 +15,12 @@
         <xs:element minOccurs="0" name="Properties">
           <xs:complexType>
             <xs:sequence>
-              <xs:element maxOccurs="unbounded" name="Property">
+              <xs:element minOccurs="0" maxOccurs="unbounded"  name="Property">
                 <xs:complexType>
                   <xs:simpleContent>
                     <xs:extension base="xs:string">
                       <xs:attribute name="Name" type="xs:string" use="required" />
-                      <xs:attribute name="Info" type="xs:string" use="required" />
+                      <xs:attribute name="Info" type="xs:string" use="optional" />
                     </xs:extension>
                   </xs:simpleContent>
                 </xs:complexType>
@@ -31,12 +31,12 @@
         <xs:element minOccurs="0" name="Operations">
           <xs:complexType>
             <xs:sequence>
-              <xs:element maxOccurs="unbounded" name="Operation">
+              <xs:element minOccurs="0" maxOccurs="unbounded" name="Operation">
                 <xs:complexType>
                   <xs:simpleContent>
                     <xs:extension base="xs:string">
                       <xs:attribute name="Key" type="xs:string" use="required" />
-                      <xs:attribute name="Info" type="xs:string" use="required" />
+                      <xs:attribute name="Info" type="xs:string" use="optional" />
                     </xs:extension>
                   </xs:simpleContent>
                 </xs:complexType>
@@ -44,22 +44,6 @@
             </xs:sequence>
           </xs:complexType>
         </xs:element>
-       <!-- <xs:element minOccurs="0" name="Queries">
-          <xs:complexType>
-            <xs:sequence>
-              <xs:element maxOccurs="unbounded" name="Query">
-                <xs:complexType>
-                  <xs:simpleContent>
-                    <xs:extension base="xs:string">
-                      <xs:attribute name="Key" type="xs:string" use="required" />
-                      <xs:attribute name="Info" type="xs:string" use="required" />
-                    </xs:extension>
-                  </xs:simpleContent>
-                </xs:complexType>
-              </xs:element>
-            </xs:sequence>
-          </xs:complexType>
-        </xs:element>-->
       </xs:sequence>
       <xs:attribute name="FullName" type="xs:string" use="required" />
       <xs:attribute name="Language" type="xs:language" use="required" />
@@ -112,12 +96,12 @@
         <xs:element minOccurs="0" name="Columns">
           <xs:complexType>
             <xs:sequence>
-              <xs:element maxOccurs="unbounded" name="Column">
+              <xs:element minOccurs="0" maxOccurs="unbounded" name="Column">
                 <xs:complexType>
                   <xs:simpleContent>
                     <xs:extension base="xs:string">
                       <xs:attribute name="Name" type="xs:string" use="required" />
-                      <xs:attribute name="Info" type="xs:string" use="required" />
+                      <xs:attribute name="Info" type="xs:string" use="optional" />
                     </xs:extension>
                   </xs:simpleContent>
                 </xs:complexType>
@@ -127,7 +111,7 @@
         </xs:element>
       </xs:sequence>
       <xs:attribute name="Key" type="xs:string" use="required" />
-      <xs:attribute name="Info" type="xs:string" use="required" />
+      <xs:attribute name="Info" type="xs:string" use="optional" />
       <xs:attribute name="Language" type="xs:language" use="required" />
     </xs:complexType>
   </xs:element>

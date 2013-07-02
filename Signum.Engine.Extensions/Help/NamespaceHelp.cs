@@ -43,11 +43,17 @@ namespace Signum.Engine.Help
             return this;
         }
 
-        internal static string GetNamespaceName(XDocument document)
+        internal static string GetNamespaceName(XDocument document, string fileName)
         {
-            if (document.Root.Name == _Namespace)
-                return document.Root.Attribute(_Name).Value;
-            return null;
+            if (document.Root.Name != _Namespace)
+                throw new InvalidOperationException("{0} does not have a {1} root".Formato(fileName, _Namespace));
+
+            var result = document.Root.Attribute(_Name).TryCC(a => a.Value);
+
+            if (string.IsNullOrEmpty(result))
+                throw new InvalidOperationException("{0} does not have a {1} attribute".Formato(fileName, _Name));
+
+            return result;
         }
 
         public static NamespaceHelp Create(string nameSpace)

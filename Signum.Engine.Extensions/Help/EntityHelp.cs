@@ -56,9 +56,10 @@ namespace Signum.Engine.Help
 
         public XDocument ToXDocument()
         {
-            if (string.IsNullOrEmpty(Description) &&
-                Properties.Values.All(a => string.IsNullOrEmpty(a.UserDescription)) &&
-                Operations.Values.All(a => string.IsNullOrEmpty(a.UserDescription)))
+            var props =  Properties.Where(a => a.Value.UserDescription.HasText());
+            var opers =  Operations.Where(a => a.Value.UserDescription.HasText());
+
+            if (string.IsNullOrEmpty(Description) && !props.Any() && !opers.Any())
                 return null;
 
             return new XDocument(
@@ -66,17 +67,17 @@ namespace Signum.Engine.Help
                 new XElement(_Entity, 
                        new XAttribute(_FullName, Type.FullName),
                        new XAttribute(_Language, Language),
-                       new XElement(_Description, Description),
-                       new XElement(_Properties,
-                           Properties.Select(p => new XElement(_Property, 
+                       Description.HasText()? new XElement(_Description, Description) : null,
+                       props.Any() ? new XElement(_Properties,
+                           props.Select(p => new XElement(_Property, 
                                new XAttribute(_Name, p.Key), 
                                p.Value.UserDescription))
-                       ),
-                       new XElement(_Operations,
+                       ) : null,
+                       opers.Any() ? new XElement(_Operations,
                            Operations.Select(o => new XElement(_Operation, 
                                new XAttribute(_Key, OperationDN.UniqueKey(o.Key)),
                                o.Value.UserDescription))
-                       )
+                       ) : null
                    )
                );
         }
@@ -133,7 +134,7 @@ namespace Signum.Engine.Help
             created.Description = loadedEntity.Element(_Description).TryCC(a => a.Value);
 
             HelpTools.SynchronizeElements(loadedEntity, _Properties, _Property, _Name, created.Properties, "Properties of {0}".Formato(type.Name),
-                (ph, elem)=>HelpTools.Set(ref ph.UserDescription, elem.Value),
+                (ph, elem)=>ph.UserDescription = elem.Value,
                 (action, prop) =>
                 {
                     change();
@@ -141,7 +142,7 @@ namespace Signum.Engine.Help
                 });
 
             HelpTools.SynchronizeElements(loadedEntity, _Operations, _Operation, _Key, created.Operations.SelectDictionary(OperationDN.UniqueKey, v => v), "Operations of {0}".Formato(type.Name),
-                (oh, op)=> HelpTools.Set(ref oh.UserDescription, op.Value),
+                (oh, op) => oh.UserDescription = op.Value,
                 (action, op) =>
                 {
                     change();
@@ -316,11 +317,17 @@ namespace Signum.Engine.Help
             }
         }
 
-        internal static string GetEntityFullName(XDocument document)
+        internal static string GetEntityFullName(XDocument document, string fileName)
         {
-            if (document.Root.Name == _Entity)
-                return document.Root.Attribute(_FullName).Value;
-            return null;
+            if (document.Root.Name != _Entity)
+                throw new InvalidOperationException("{0} does not have a {1} root".Formato(fileName, _Entity));
+
+            var result = document.Root.Attribute(_FullName).TryCC(a => a.Value);
+
+            if (string.IsNullOrEmpty(result))
+                throw new InvalidOperationException("{0} does not have a {1} attribute".Formato(fileName, _FullName));
+
+            return result;
         }
     }
 

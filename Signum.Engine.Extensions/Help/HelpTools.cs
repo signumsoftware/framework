@@ -19,7 +19,7 @@ namespace Signum.Engine.Help
         }
 
         internal static void SynchronizeElements<T>(XElement loaded, XName collectionElementName, XName elementName, XName elementKeyAttribute, 
-            Dictionary<string, T> should, string replacementsKey, Func<T, XElement, bool> update, Action<SyncAction, string> notify) where T:class
+            Dictionary<string, T> should, string replacementsKey, Action<T, XElement> update, Action<SyncAction, string> notify) where T:class
         {
             Replacements replacements = new Replacements();
 
@@ -59,8 +59,7 @@ namespace Signum.Engine.Help
                 }
                 else
                 {
-                    if (update(val, kvp.Value))
-                        notify(SyncAction.Updated, key);
+                    update(val, kvp.Value);
                 }
             }
         }
@@ -98,22 +97,11 @@ namespace Signum.Engine.Help
                     merge(key, oldVal, newVal);
             }
         }
-
-        internal static bool Set(ref string variable, string value)
-        {
-            if (variable == value)
-                return false;
-
-            variable = value;
-
-            return true;
-        }
     }
 
     internal enum SyncAction
     {
         Removed,
         Renamed,
-        Updated,
     }
 }
