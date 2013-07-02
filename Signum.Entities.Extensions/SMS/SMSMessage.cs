@@ -19,8 +19,6 @@ namespace Signum.Entities.SMS
     [Serializable, EntityKind(EntityKind.Main)]
     public class SMSMessageDN : Entity, IProcessLineDataDN
     {
-        public static string DefaultFrom;
-
         Lite<SMSTemplateDN> template;
         public Lite<SMSTemplateDN> Template
         {
@@ -44,7 +42,7 @@ namespace Signum.Entities.SMS
             set { Set(ref editableMessage, value, () => EditableMessage); }
         }
 
-        string from = DefaultFrom;
+        string from;
         [StringLengthValidator(AllowNulls = false)]
         public string From
         {

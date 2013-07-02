@@ -8,7 +8,7 @@ using Signum.Entities.Translation;
 namespace Signum.Entities.Mailing
 {
     [Serializable]
-    public class EmailTemplateConfigurationDN : EmbeddedEntity
+    public class EmailConfigurationDN : EmbeddedEntity
     {
         CultureInfoDN defaultCulture;
         [NotNullValidator]
@@ -23,6 +23,22 @@ namespace Signum.Entities.Mailing
         {
             get { return urlLeft; }
             set { Set(ref urlLeft, value, () => UrlLeft); }
+        }
+
+        bool doNotSendEmails;
+        public bool DoNotSendEmails
+        {
+            get { return doNotSendEmails; }
+            set { Set(ref doNotSendEmails, value, () => DoNotSendEmails); }
+        }
+
+        [NotNullable, SqlDbType(Size = 100)]
+        string overrideEmailAddress;
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100), EMailValidator]
+        public string OverrideEmailAddress
+        {
+            get { return overrideEmailAddress; }
+            set { Set(ref overrideEmailAddress, value, () => OverrideEmailAddress); }
         }
     }
 }

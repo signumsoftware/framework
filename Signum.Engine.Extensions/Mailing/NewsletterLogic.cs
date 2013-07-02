@@ -335,7 +335,7 @@ namespace Signum.Engine.Mailing
             if (newsletter.TextParsedNode == null)
                 newsletter.TextParsedNode = EmailTemplateParser.Parse(newsletter.Text, qd, null);
 
-            string overrideEmail = EmailLogic.OverrideEmailAddress();
+            var conf = EmailLogic.Configuration;
 
             int processed = 0;
             foreach (var group in lines.GroupsOf(20))
@@ -344,13 +344,13 @@ namespace Signum.Engine.Mailing
 
                 executingProcess.CancellationToken.ThrowIfCancellationRequested();
 
-                if (overrideEmail != EmailLogic.DoNotSend)
+                if (!conf.DoNotSendEmails)
                 {
                     Parallel.ForEach(group, s =>
                     {
                         try
                         {
-                            var client = newsletter.SmtpConfig.GenerateSmtpClient();
+                            var client = newsletter.SmtpConfig.RetrieveFromCache().GenerateSmtpClient();
                             var message = new MailMessage();
                             
                             if (newsletter.From.HasText())
@@ -358,7 +358,7 @@ namespace Signum.Engine.Mailing
                             else
                                 message.From = newsletter.SmtpConfig.InDB(smtp => smtp.DefaultFrom).ToMailAddress();
                             
-                            message.To.Add(overrideEmail ?? s.Email.Email);
+                            message.To.Add(conf.OverrideEmailAddress.DefaultText(s.Email.Email));
 
                             message.Subject = ((EmailTemplateParser.BlockNode)newsletter.SubjectParsedNode).Print(
                                 new EmailTemplateParameters

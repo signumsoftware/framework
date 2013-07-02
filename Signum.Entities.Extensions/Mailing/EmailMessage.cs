@@ -254,14 +254,6 @@ namespace Signum.Entities.Mailing
             return "{0} <{1}>".Formato(displayName, emailAddress);
         }
 
-        public MailAddress ToMailAddress()
-        {
-            if (DisplayName != null)
-                return new MailAddress(EmailAddress, DisplayName);
-
-            return new MailAddress(EmailAddress);
-        }
-
         public EmailAddressDN Clone()
         {
             return new EmailAddressDN

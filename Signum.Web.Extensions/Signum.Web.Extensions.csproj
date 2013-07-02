@@ -176,10 +176,10 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>EmailAddress.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Mailing\Views\EmailLogicConfiguration.generated.cs">
+    <Compile Include="Mailing\Views\EmailConfiguration.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>EmailLogicConfiguration.cshtml</DependentUpon>
+      <DependentUpon>EmailConfiguration.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Mailing\Views\EmailMasterTemplate.generated.cs">
       <AutoGen>True</AutoGen>
@@ -1228,9 +1228,9 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Mailing\Views\EmailLogicConfiguration.cshtml">
+    <Content Include="Mailing\Views\EmailConfiguration.cshtml">
       <Generator>RazorGenerator</Generator>
-      <LastGenOutput>EmailLogicConfiguration.generated.cs</LastGenOutput>
+      <LastGenOutput>EmailConfiguration.generated.cs</LastGenOutput>
     </Content>
     <Content Include="Mailing\Views\EmailRecipient.cshtml">
       <Generator>RazorGenerator</Generator>

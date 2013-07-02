@@ -20,11 +20,11 @@ namespace Signum.Engine.Mailing
 {
     public static class EmailTemplateLogic
     {
-        private static Func<EmailTemplateConfigurationDN> EmailLogicConfiguration;
+     
 
         public static ResetLazy<Dictionary<Lite<EmailTemplateDN>, EmailTemplateDN>> EmailTemplates; 
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<EmailTemplateConfigurationDN> emailLogicConfiguration)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -34,8 +34,6 @@ namespace Signum.Engine.Mailing
                 EmailTemplates = sb.GlobalLazy(() => Database.Query<EmailTemplateDN>()
                     .Where(et => et.Active && (et.EndDate == null || et.EndDate > TimeZoneManager.Now))
                     .ToDictionary(et => et.ToLite()), new InvalidateWith(typeof(EmailTemplateDN)));
-
-                EmailLogicConfiguration = emailLogicConfiguration;
 
                 SystemEmailLogic.Start(sb, dqm);
 
@@ -73,16 +71,17 @@ namespace Signum.Engine.Mailing
                 EmailTemplateGraph.Register();
                 EmailMasterTemplateGraph.Register();
 
+                EmailTemplateParser.GlobalVariables.Add("UrlLeft", _ => EmailLogic.Configuration.UrlLeft);
 
-                sb.Schema.Initializing[InitLevel.Level2NormalEntities] += Schema_Initializing;
+
+                Validator.PropertyValidator<EmailTemplateDN>(et => et.Messages).StaticPropertyValidation += (et, pi) =>
+                {
+                    if (!et.Messages.Any(m => m.CultureInfo.Is(EmailLogic.Configuration.DefaultCulture)))
+                        return EmailTemplateMessage.ThereMustBeAMessageFor0.NiceToString().Formato(EmailLogic.Configuration.DefaultCulture.DisplayName);
+
+                    return null;
+                }; 
             }
-        }
-
-        static void Schema_Initializing()
-        {
-            var emailLogicConfiguration = EmailLogicConfiguration();
-            EmailTemplateDN.DefaultCulture = emailLogicConfiguration.DefaultCulture;
-            EmailTemplateParser.GlobalVariables.Add("UrlLeft", _ => emailLogicConfiguration.UrlLeft);
         }
 
         static void EmailTemplateLogic_Retrieved(EmailTemplateDN emailTemplate)
@@ -281,7 +280,10 @@ namespace Signum.Engine.Mailing
 
                 CultureInfo ci = recipients.Where(a => a.Kind == EmailRecipientKind.To).Select(a => a.OwnerData.CultureInfo).FirstOrDefault();
 
-                var message = template.GetCultureMessage(ci);
+                var message = template.GetCultureMessage(ci) ?? template.GetCultureMessage(EmailLogic.Configuration.DefaultCulture.CultureInfo);
+
+                if (message == null)
+                    throw new InvalidOperationException("Message {0} does not have a message for CultureInfo {0} (or Default)".Formato(template, ci));
 
                 if (message.SubjectParsedNode == null)
                     message.SubjectParsedNode = EmailTemplateParser.Parse(message.Subject, qd, template.SystemEmail.ToType());
