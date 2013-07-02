@@ -58,7 +58,6 @@ namespace Signum.Engine.Mailing
             }
         }
 
-
         public static SmtpClient GenerateSmtpClient(this Lite<SmtpConfigurationDN> config)
         {
             return config.RetrieveFromCache().GenerateSmtpClient();

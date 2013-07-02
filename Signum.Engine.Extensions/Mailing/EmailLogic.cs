@@ -36,25 +36,26 @@ namespace Signum.Engine.Mailing
 {
     public static class EmailLogic
     {
+        static Func<EmailConfigurationDN> getConfiguration;
+        public static EmailConfigurationDN Configuration
+        {
+            get { return getConfiguration(); }
+        }
+
         public static EmailSenderManager SenderManager;
-
-        public static string DoNotSend = "null@null.com";
-
-        public static Func<string> OverrideEmailAddress = () => null;
-
-        public static Func<EmailMessageDN, SmtpClient> SmtpClientBuilder;
 
         internal static void AssertStarted(SchemaBuilder sb)
         {
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null, null, null)));
         }
 
-        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<EmailTemplateConfigurationDN> configuration)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, Func<EmailConfigurationDN> getConfiguration)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 CultureInfoLogic.AssertStarted(sb);
-                EmailTemplateLogic.Start(sb, dqm, configuration);
+                EmailLogic.getConfiguration = getConfiguration;
+                EmailTemplateLogic.Start(sb, dqm);
 
                 sb.Include<EmailMessageDN>();
 
@@ -87,11 +88,6 @@ namespace Signum.Engine.Mailing
         public static void SendMail(this Lite<EmailTemplateDN> template, IIdentifiable entity)
         {
             var email = template.CreateEmailMessage(entity);
-            SenderManager.Send(email);
-        }
-
-        public static void SendMail(this EmailMessageDN email)
-        {
             SenderManager.Send(email);
         }
 
@@ -164,6 +160,25 @@ namespace Signum.Engine.Mailing
             return list;
         }
 
+        public static MailAddress ToMailAddress(this EmailAddressDN address)
+        {
+            if (address.DisplayName != null)
+                return new MailAddress(address.EmailAddress, address.DisplayName);
+
+            return new MailAddress(address.EmailAddress);
+        }
+
+        public static MailAddress ToMailAddress(this EmailRecipientDN recipient)
+        {
+            if(Configuration.DoNotSendEmails)
+                throw new InvalidOperationException("EmailConfigurationDN.DoNotSendEmails is set");
+
+            if (recipient.DisplayName != null)
+                return new MailAddress(Configuration.OverrideEmailAddress.DefaultText(recipient.EmailAddress), recipient.DisplayName);
+
+            return new MailAddress(Configuration.OverrideEmailAddress.DefaultText(recipient.EmailAddress));
+        }
+
         class EmailGraph : Graph<EmailMessageDN, EmailMessageState>
         {
             public static void Register()
@@ -203,6 +218,7 @@ namespace Signum.Engine.Mailing
                     {
                         From = m.From.Clone(),
                         Recipients = m.Recipients.Select(r => r.Clone()).ToMList(),
+                        Target = m.Target,
                         Subject = m.Subject,
                         Body = m.Body,
                         IsBodyHtml = m.IsBodyHtml,
@@ -223,7 +239,7 @@ namespace Signum.Engine.Mailing
 
         }
 
-        protected MailMessage CreateMailMessage(EmailMessageDN email, string overrideEmailAddress)
+        protected MailMessage CreateMailMessage(EmailMessageDN email)
         {
             MailMessage message = new MailMessage()
             {
@@ -233,37 +249,23 @@ namespace Signum.Engine.Mailing
                 IsBodyHtml = email.IsBodyHtml,
             };
 
-            message.To.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.To).Select(r => ToMailAddress(r, overrideEmailAddress)).ToList());
-            message.CC.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.CC).Select(r => ToMailAddress(r, overrideEmailAddress)).ToList());
-            message.Bcc.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.Bcc).Select(r => ToMailAddress(r, overrideEmailAddress)).ToList());
+            message.To.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.To).Select(r => r.ToMailAddress()).ToList());
+            message.CC.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.CC).Select(r => r.ToMailAddress()).ToList());
+            message.Bcc.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.Bcc).Select(r => r.ToMailAddress()).ToList());
 
             return message;
         }
 
-        MailAddress ToMailAddress(EmailRecipientDN recipient, string overrideEmailAddress)
-        {
-            var address = overrideEmailAddress ?? recipient.EmailAddress;
-
-            if (recipient.DisplayName != null)
-                return new MailAddress(address, recipient.DisplayName);
-
-            return new MailAddress(address);
-        }
-
         public virtual void Send(EmailMessageDN email)
         {
+            if (EmailLogic.Configuration.DoNotSendEmails)
+                return;
+
             try
             {
-                var overrideEmailAddress = EmailLogic.OverrideEmailAddress();
+                MailMessage message = CreateMailMessage(email);
 
-                if (overrideEmailAddress != EmailLogic.DoNotSend)
-                {
-                    SmtpClient client = CreateSmtpClient(email);
-
-                    MailMessage message = CreateMailMessage(email, overrideEmailAddress);
-
-                    client.Send(message);
-                }
+                CreateSmtpClient(email).Send(message);
 
                 email.State = EmailMessageState.Sent;
                 email.Sent = TimeZoneManager.Now;
@@ -310,9 +312,7 @@ namespace Signum.Engine.Mailing
         {
             try
             {
-                var overrideEmailAddress = EmailLogic.OverrideEmailAddress();
-
-                if (overrideEmailAddress == EmailLogic.DoNotSend)
+                if (EmailLogic.Configuration.DoNotSendEmails)
                 {
                     email.State = EmailMessageState.Sent;
                     email.Sent = TimeZoneManager.Now;
@@ -323,7 +323,7 @@ namespace Signum.Engine.Mailing
                 {
                     SmtpClient client = CreateSmtpClient(email);
 
-                    MailMessage message = CreateMailMessage(email, overrideEmailAddress);
+                    MailMessage message = CreateMailMessage(email);
 
                     email.Sent = null;
                     email.Received = null;

@@ -183,8 +183,6 @@ namespace Signum.Entities.Mailing
             return IsActiveNowExpression.Evaluate(this);
         }
 
-        public static CultureInfoDN DefaultCulture;
-
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
         {
             if (pi.Is(() => StartDate) || pi.Is(() => EndDate))
@@ -197,8 +195,7 @@ namespace Signum.Entities.Mailing
             {
                 if (Messages == null || !Messages.Any())
                     return EmailTemplateMessage.ThereAreNoMessagesForTheTemplate.NiceToString();
-                if (!Messages.Any(m => m.CultureInfo.Is(DefaultCulture)))
-                    return EmailTemplateMessage.ThereMustBeAMessageFor0.NiceToString().Formato(DefaultCulture.DisplayName);
+
                 if (Messages.GroupCount(m => m.CultureInfo).Any(c => c.Value > 1))
                     return EmailTemplateMessage.TheresMoreThanOneMessageForTheSameLanguage.NiceToString();
             }
@@ -214,19 +211,7 @@ namespace Signum.Entities.Mailing
 
         internal EmailTemplateMessageDN GetCultureMessage(CultureInfo ci)
         {
-            EmailTemplateMessageDN result;
-            if (ci != DefaultCulture.CultureInfo)
-            {
-                result = Messages.SingleOrDefault(tm => tm.CultureInfo.CultureInfo == ci);
-                if (result != null)
-                    return result;
-
-                result = Messages.SingleOrDefault(tm => ci != null && tm.CultureInfo.CultureInfo == ci.Parent);
-                if (result != null)
-                    return result;
-            }
-
-            return Messages.SingleOrDefault(tm => tm.CultureInfo.CultureInfo == DefaultCulture.CultureInfo);
+            return Messages.SingleOrDefault(tm=>tm.CultureInfo.CultureInfo == ci);
         }
 
         internal void ParseData(QueryDescription queryDescription)

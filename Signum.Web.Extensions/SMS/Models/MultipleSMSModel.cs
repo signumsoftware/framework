@@ -17,7 +17,7 @@ namespace Signum.Web.Extensions.SMS.Models
             set { Set(ref message, value, () => Message); }
         }
 
-        string from = SMSMessageDN.DefaultFrom;
+        string from;
         [StringLengthValidator(AllowNulls = false)]
         public string From
         {
