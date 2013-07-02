@@ -38,7 +38,7 @@ namespace Signum.Web
             string viewName = ec.ViewName;
             if (viewName == null)
             {
-                var es = Navigator.Manager.EntitySettings.GetOrThrow(context.Type.CleanType());
+                var es = Navigator.EntitySettings(context.Type.CleanType());
 
                 viewName = es.OnPartialViewName((ModifiableEntity)context.UntypedValue);
 
