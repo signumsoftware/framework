@@ -385,6 +385,8 @@ namespace Signum.Windows
             RouteTask += TaskSetNotNullItemsSource;
             RouteTask += TaskSetAutomationName;
             RouteTask += TaskSetVoteAutoHide;
+            RouteTask += TaskSetMaxLenth;
+
             LabelOnlyRouteTask += TaskSetLabelText;
             LabelOnlyRouteTask += TaskSetVoteAutoHide;
 
@@ -423,6 +425,7 @@ namespace Signum.Windows
                 }
             }
         }
+
 
         
         static void TaskDataGridColumnSetReadOnly(DataGridColumn column, string route, PropertyRoute context)
@@ -623,6 +626,17 @@ namespace Signum.Windows
                 {
                     vl.ItemSource = EnumExtensions.UntypedGetValues(vl.Type.UnNullify()).ToObservableCollection();
                 }
+            }
+        }
+
+        static void TaskSetMaxLenth(FrameworkElement fe, string route, PropertyRoute context)
+        {
+            ValueLine vl = fe as ValueLine;
+            if (vl != null && context.PropertyRouteType == PropertyRouteType.FieldOrProperty && context.Type == typeof(string))
+            {
+                var slv = Validator.TryGetPropertyValidator(context).Validators.OfType<StringLengthValidatorAttribute>().FirstOrDefault();
+                if (slv != null && slv.Max != -1)
+                    vl.MaxTextLength = slv.Max;
             }
         }
 

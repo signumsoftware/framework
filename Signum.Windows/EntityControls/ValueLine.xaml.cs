@@ -69,6 +69,14 @@ namespace Signum.Windows
             set { SetValue(ItemSourceProperty, value); }
         }
 
+        public static readonly DependencyProperty MaxTextLengthProperty =
+            DependencyProperty.Register("MaxTextLength", typeof(int?), typeof(ValueLine), new PropertyMetadata(null));
+        public int? MaxTextLength
+        {
+            get { return (int?)GetValue(MaxTextLengthProperty); }
+            set { SetValue(MaxTextLengthProperty, value); }
+        }
+
         public ValueLine()
         {
             InitializeComponent();
@@ -297,6 +305,10 @@ namespace Signum.Windows
                         tb.CharacterCasing = CharacterCasing.Upper;
                     else if(vl.Format == "L")
                         tb.CharacterCasing = CharacterCasing.Lower;
+
+                    if (vl.MaxTextLength.HasValue)
+                        tb.MaxLength = vl.MaxTextLength.Value;
+
                     return tb;
                 }
             },
