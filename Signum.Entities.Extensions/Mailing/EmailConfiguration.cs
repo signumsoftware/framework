@@ -32,9 +32,9 @@ namespace Signum.Entities.Mailing
             set { Set(ref sendEmails, value, () => SendEmails); }
         }
 
-        [NotNullable, SqlDbType(Size = 100)]
+        [SqlDbType(Size = 100)]
         string overrideEmailAddress;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100), EMailValidator]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 100), EMailValidator]
         public string OverrideEmailAddress
         {
             get { return overrideEmailAddress; }
