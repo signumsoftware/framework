@@ -17,6 +17,7 @@ using Signum.Entities.Reflection;
 using Signum.Utilities.ExpressionTrees;
 using System.Windows.Automation;
 using Signum.Entities.Basics;
+using System.Collections.Concurrent;
 
 namespace Signum.Windows.Operations
 {
@@ -116,10 +117,10 @@ namespace Signum.Windows.Operations
             return null;
         }
 
-        Dictionary<Type, List<OperationInfo>> operationInfoCache = new Dictionary<Type, List<OperationInfo>>();
+        ConcurrentDictionary<Type, List<OperationInfo>> operationInfoCache = new ConcurrentDictionary<Type, List<OperationInfo>>();
         public List<OperationInfo> OperationInfos(Type entityType)
         {
-            return operationInfoCache.GetOrCreate(entityType, () => Server.Return((IOperationServer o) => o.GetOperationInfos(entityType)));
+            return operationInfoCache.GetOrAdd(entityType, t => Server.Return((IOperationServer o) => o.GetOperationInfos(t)));
         }
 
         protected internal virtual List<FrameworkElement> ButtonBar_GetButtonBarElement(object entity, ButtonBarEventArgs ctx)
