@@ -28,16 +28,16 @@ namespace Signum.Windows
                 {
                     backgroundThread();
                     if (endAction != null)
-                        disp.BeginInvoke(DispatcherPriority.Normal, endAction);
+                        disp.Invoke(DispatcherPriority.Normal, endAction);
                 }
                 catch (Exception e)
                 {
-                    disp.BeginInvoke(DispatcherPriority.Normal, (Action)(() => AsyncUnhandledException(e, threadWindows.TryGetC(Thread.CurrentThread))));
+                    disp.Invoke(DispatcherPriority.Normal, (Action)(() => AsyncUnhandledException(e, threadWindows.TryGetC(Thread.CurrentThread))));
                 }
                 finally
                 {
                     if (finallyAction != null)
-                        disp.BeginInvoke(DispatcherPriority.Normal, finallyAction);
+                        disp.Invoke(DispatcherPriority.Normal, finallyAction);
                 }
             };
 
