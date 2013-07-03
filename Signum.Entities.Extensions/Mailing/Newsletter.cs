@@ -58,9 +58,9 @@ namespace Signum.Entities.Mailing
             set { Set(ref displayFrom, value, () => DisplayFrom); }
         }
 
-        [SqlDbType(Size = 50)]
+        [SqlDbType(Size = 300)]
         string subject;
-        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 50)]
+        [StringLengthValidator(AllowNulls = true, Min = 3, Max = 300)]
         public string Subject
         {
             get { return subject; }
