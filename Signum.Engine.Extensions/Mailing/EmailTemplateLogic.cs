@@ -187,12 +187,15 @@ namespace Signum.Engine.Mailing
 
                 var columns = GetTemplateColumns(template, template.Tokens, qd);
 
+                var filters = systemEmail != null ? systemEmail.GetFilters(qd) :
+                    new List<Filter> { new Filter(QueryUtils.Parse("Entity", qd, false), FilterOperation.EqualTo, entity.ToLite()) };
+
                 var table = DynamicQueryManager.Current.ExecuteQuery(new QueryRequest
                 {
                     QueryName = queryName,
                     Columns = columns,
                     Pagination = new Pagination.All(),
-                    Filters = systemEmail.GetFilters(qd),
+                    Filters = filters,
                     Orders = new List<Order>(),
                 });
 

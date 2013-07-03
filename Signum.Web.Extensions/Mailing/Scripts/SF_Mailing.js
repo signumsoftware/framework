@@ -223,6 +223,7 @@ SF.registerModule("Mailing", function () {
 
         return {
             initReplacements: initReplacements,
+            initHtmlEditor: initHtmlEditor,
             initHtmlEditorMasterTemplate: initHtmlEditorMasterTemplate,
             initHtmlEditorWithTokens: initHtmlEditorWithTokens,
             setTokenTargetFocus: setTokenTargetFocus,

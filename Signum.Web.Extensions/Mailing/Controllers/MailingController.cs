@@ -1,4 +1,7 @@
-﻿using Signum.Engine.DynamicQuery;
+﻿using Signum.Engine;
+using Signum.Engine.Basics;
+using Signum.Engine.DynamicQuery;
+using Signum.Engine.Mailing;
 using Signum.Engine.Operations;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
@@ -56,6 +59,32 @@ namespace Signum.Web.Mailing
             newsletter.ExecuteLite(NewsletterOperation.RemoveRecipients, deliveries);
 
             return JsonAction.Redirect(Navigator.NavigateRoute(newsletter));
+        }
+
+        [HttpPost]
+        public PartialViewResult CreateMailFromTemplate(string prefix, string oldPrefix)
+        {
+            var et = this.ExtractLite<EmailTemplateDN>(oldPrefix);
+
+            var queryName = QueryLogic.ToQueryName(et.InDB(t => t.Query.Key));
+           
+            ViewData[ViewDataKeys.OnOk] = JsFindNavigator.GetFor(prefix).hasSelectedItems(new JsFunction("items") 
+            {
+                Js.Submit<MailingController>(mc => mc.CreateMailFromTemplateAndEntity(et, prefix), 
+                    "{ keys: items.map(function(i) { return i.key; }).join(',') }")
+            }).ToJS();
+
+            return Navigator.PartialFind(this, new FindOptions(queryName), prefix);
+        }
+
+        [HttpPost]
+        public ViewResult CreateMailFromTemplateAndEntity(Lite<EmailTemplateDN> emailTemplate, string prefix)
+        {
+            var entity = Lite.Parse(Request["keys"]).Retrieve();
+
+            var emailMessage = emailTemplate.ConstructFromLite<EmailMessageDN>(EmailMessageOperation.CreateMailFromTemplate, entity);
+
+            return Navigator.NormalPage(this, emailMessage);
         }
     }
 }

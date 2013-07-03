@@ -15,7 +15,7 @@ using System.Net.Mail;
 
 namespace Signum.Entities.Mailing
 {
-    [Serializable, EntityKind(EntityKind.System)]
+    [Serializable, EntityKind(EntityKind.Main)]
     public class EmailMessageDN : Entity
     {   
         public EmailMessageDN()
@@ -322,8 +322,8 @@ namespace Signum.Entities.Mailing
         Send,
         ReSend,
         ReSendEmails,
-        CreateMailFromTemplate,
-        CreateMail
+        CreateMail,
+        CreateMailFromTemplate
     }
 
     public enum EmailMessageMessage

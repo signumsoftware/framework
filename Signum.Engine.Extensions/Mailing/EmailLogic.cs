@@ -76,9 +76,11 @@ namespace Signum.Engine.Mailing
                     });
 
                 SenderManager = new EmailSenderManager();
+
+                EmailGraph.Register();
             }
         }
-        
+
         public static void SendMail(this ISystemEmail systemEmail)
         {
             var email = systemEmail.CreateEmailMessage();
@@ -182,24 +184,37 @@ namespace Signum.Engine.Mailing
         class EmailGraph : Graph<EmailMessageDN, EmailMessageState>
         {
             public static void Register()
-            {
+            {            
                 GetState = m => m.State;
 
                 new Construct(EmailMessageOperation.CreateMail)
                 {
+                    ToState = EmailMessageState.Created,
                     Construct = _ => new EmailMessageDN
                     {
                         State = EmailMessageState.Created,
                     }
                 }.Register();
 
-                new ConstructFrom<IIdentifiable>(EmailMessageOperation.CreateMailFromTemplate)
+                new ConstructFrom<EmailTemplateDN>(EmailMessageOperation.CreateMailFromTemplate)
                 {
                     AllowsNew = false,
-                    Construct = (e, args) =>
+                    ToState = EmailMessageState.Created,
+                    CanConstruct = et => 
                     {
-                        var template = args.GetArg<Lite<EmailTemplateDN>>();
-                        return EmailTemplateLogic.CreateEmailMessage(template, e);
+                        if (et.SystemEmail == null)
+                            return null;
+
+                        var systemEmailType = et.SystemEmail.ToType();
+                        if (systemEmailType.GetFields().Any())
+                            return "Cannot send sample email because {0} has custom model fields".Formato(systemEmailType.NiceName());
+                        
+                        return null;
+                    },
+                    Construct = (et, args) =>
+                    {
+                        var entity = args.GetArg<IdentifiableEntity>();
+                        return et.ToLite().CreateEmailMessage(entity);
                     }
                 }.Register();
 
@@ -208,12 +223,15 @@ namespace Signum.Engine.Mailing
                     CanExecute = m => m.State == EmailMessageState.Created ? null : EmailMessageMessage.TheEmailMessageCannotBeSentFromState0.NiceToString().Formato(m.State.NiceToString()),
                     AllowsNew = true,
                     Lite = false,
+                    FromStates = { EmailMessageState.Created },
+                    ToState = EmailMessageState.Sent,
                     Execute = (m, _) => EmailLogic.SenderManager.Send(m)
                 }.Register();
 
                 new ConstructFrom<EmailMessageDN>(EmailMessageOperation.ReSend)
                 {
                     AllowsNew = false,
+                    ToState = EmailMessageState.Sent,
                     Construct = (m, _) => new EmailMessageDN
                     {
                         From = m.From.Clone(),
@@ -261,33 +279,36 @@ namespace Signum.Engine.Mailing
             if (!EmailLogic.Configuration.SendEmails)
                 return;
 
-            try
+            using (OperationLogic.AllowSave<EmailMessageDN>())
             {
-                MailMessage message = CreateMailMessage(email);
-
-                CreateSmtpClient(email).Send(message);
-
-                email.State = EmailMessageState.Sent;
-                email.Sent = TimeZoneManager.Now;
-                email.Received = null;
-                email.Save();
-            }
-            catch (Exception ex)
-            {
-                if (Transaction.InTestTransaction) //Transaction.IsTestTransaction
-                    throw;
-
-                var exLog = ex.LogException().ToLite();
-
-                using (Transaction tr = Transaction.ForceNew())
+                try
                 {
-                    email.Exception = exLog;
-                    email.State = EmailMessageState.SentException;
-                    email.Save();
-                    tr.Commit();
-                }
+                    MailMessage message = CreateMailMessage(email);
 
-                throw;
+                    CreateSmtpClient(email).Send(message);
+
+                    email.State = EmailMessageState.Sent;
+                    email.Sent = TimeZoneManager.Now;
+                    email.Received = null;
+                    email.Save();
+                }
+                catch (Exception ex)
+                {
+                    if (Transaction.InTestTransaction) //Transaction.IsTestTransaction
+                        throw;
+
+                    var exLog = ex.LogException().ToLite();
+
+                    using (Transaction tr = Transaction.ForceNew())
+                    {
+                        email.Exception = exLog;
+                        email.State = EmailMessageState.SentException;
+                        email.Save();
+                        tr.Commit();
+                    }
+
+                    throw;
+                }
             }
         }
 
@@ -310,75 +331,75 @@ namespace Signum.Engine.Mailing
 
         public virtual void SendAsync(EmailMessageDN email)
         {
-            try
+            using (OperationLogic.AllowSave<EmailMessageDN>())
             {
-                if (!EmailLogic.Configuration.SendEmails)
+                try
                 {
-                    email.State = EmailMessageState.Sent;
-                    email.Sent = TimeZoneManager.Now;
-                    email.Received = null;
-                    email.Save();
-                }
-                else
-                {
-                    SmtpClient client = CreateSmtpClient(email);
-
-                    MailMessage message = CreateMailMessage(email);
-
-                    email.Sent = null;
-                    email.Received = null;
-                    email.Save();
-
-                    client.SafeSendMailAsync(message, args =>
+                    if (!EmailLogic.Configuration.SendEmails)
                     {
-                        Expression<Func<EmailMessageDN, EmailMessageDN>> updater;
-                        if (args.Error != null)
-                        {
-                            var exLog = args.Error.LogException().ToLite();
-                            updater = em => new EmailMessageDN
-                            {
-                                Exception = exLog,
-                                State = EmailMessageState.SentException
-                            };
-                        }
-                        else
-                            updater = em => new EmailMessageDN
-                            {
-                                State = EmailMessageState.Sent,
-                                Sent = TimeZoneManager.Now
-                            };
+                        email.State = EmailMessageState.Sent;
+                        email.Sent = TimeZoneManager.Now;
+                        email.Received = null;
+                        email.Save();
+                    }
+                    else
+                    {
+                        SmtpClient client = CreateSmtpClient(email);
 
-                        for (int i = 0; i < 4; i++) //to allow main thread to save email asynchronously
-                        {
-                            if (email.InDB().UnsafeUpdate(updater) > 0)
-                                return;
+                        MailMessage message = CreateMailMessage(email);
 
-                            if (i != 3)
-                                Thread.Sleep(3000);
-                        }
-                    });
+                        email.Sent = null;
+                        email.Received = null;
+                        email.Save();
+
+                        client.SafeSendMailAsync(message, args =>
+                        {
+                            Expression<Func<EmailMessageDN, EmailMessageDN>> updater;
+                            if (args.Error != null)
+                            {
+                                var exLog = args.Error.LogException().ToLite();
+                                updater = em => new EmailMessageDN
+                                {
+                                    Exception = exLog,
+                                    State = EmailMessageState.SentException
+                                };
+                            }
+                            else
+                                updater = em => new EmailMessageDN
+                                {
+                                    State = EmailMessageState.Sent,
+                                    Sent = TimeZoneManager.Now
+                                };
+
+                            for (int i = 0; i < 4; i++) //to allow main thread to save email asynchronously
+                            {
+                                if (email.InDB().UnsafeUpdate(updater) > 0)
+                                    return;
+
+                                if (i != 3)
+                                    Thread.Sleep(3000);
+                            }
+                        });
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                if (Transaction.InTestTransaction) //Transaction.InTestTransaction
-                    throw;
-
-                var exLog = ex.LogException().ToLite();
-
-                using (Transaction tr = Transaction.ForceNew())
+                catch (Exception ex)
                 {
-                    email.Exception = exLog;
-                    email.State = EmailMessageState.SentException;
-                    email.Save();
-                    tr.Commit();
-                }
+                    if (Transaction.InTestTransaction) //Transaction.InTestTransaction
+                        throw;
 
-                throw;
+                    var exLog = ex.LogException().ToLite();
+
+                    using (Transaction tr = Transaction.ForceNew())
+                    {
+                        email.Exception = exLog;
+                        email.State = EmailMessageState.SentException;
+                        email.Save();
+                        tr.Commit();
+                    }
+
+                    throw;
+                }
             }
         }
-
     }
-
-
 }

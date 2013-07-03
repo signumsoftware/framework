@@ -122,6 +122,16 @@ namespace Signum.Web.Mailing
                     new EmbeddedEntitySettings<ClientCertificationFileDN> { PartialViewName = e => ViewPrefix.Formato("ClientCertificationFile")},
                 });
 
+                OperationsClient.AddSettings(new List<OperationSettings>
+                {
+                    new EntityOperationSettings(EmailMessageOperation.CreateMailFromTemplate)
+                    {
+                        Group = EntityOperationGroup.None,
+                        OnClick = ctx => new JsOperationConstructorFrom(ctx.Options("CreateMailFromTemplate", "Mailing"))
+                            .ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk)
+                    }
+                });
+
                 if (smtpConfig)
                     Navigator.AddSettings(new List<EntitySettings>
                 {
