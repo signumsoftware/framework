@@ -344,7 +344,7 @@ namespace Signum.Engine.Mailing
 
                 executingProcess.CancellationToken.ThrowIfCancellationRequested();
 
-                if (!conf.DoNotSendEmails)
+                if (conf.SendEmails)
                 {
                     Parallel.ForEach(group, s =>
                     {

@@ -170,8 +170,8 @@ namespace Signum.Engine.Mailing
 
         public static MailAddress ToMailAddress(this EmailRecipientDN recipient)
         {
-            if(Configuration.DoNotSendEmails)
-                throw new InvalidOperationException("EmailConfigurationDN.DoNotSendEmails is set");
+            if(!Configuration.SendEmails)
+                throw new InvalidOperationException("EmailConfigurationDN.SendEmails is set to false");
 
             if (recipient.DisplayName != null)
                 return new MailAddress(Configuration.OverrideEmailAddress.DefaultText(recipient.EmailAddress), recipient.DisplayName);
@@ -258,7 +258,7 @@ namespace Signum.Engine.Mailing
 
         public virtual void Send(EmailMessageDN email)
         {
-            if (EmailLogic.Configuration.DoNotSendEmails)
+            if (!EmailLogic.Configuration.SendEmails)
                 return;
 
             try
@@ -312,7 +312,7 @@ namespace Signum.Engine.Mailing
         {
             try
             {
-                if (EmailLogic.Configuration.DoNotSendEmails)
+                if (!EmailLogic.Configuration.SendEmails)
                 {
                     email.State = EmailMessageState.Sent;
                     email.Sent = TimeZoneManager.Now;

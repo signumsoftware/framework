@@ -25,11 +25,11 @@ namespace Signum.Entities.Mailing
             set { Set(ref urlLeft, value, () => UrlLeft); }
         }
 
-        bool doNotSendEmails;
-        public bool DoNotSendEmails
+        bool sendEmails;
+        public bool SendEmails
         {
-            get { return doNotSendEmails; }
-            set { Set(ref doNotSendEmails, value, () => DoNotSendEmails); }
+            get { return sendEmails; }
+            set { Set(ref sendEmails, value, () => SendEmails); }
         }
 
         [NotNullable, SqlDbType(Size = 100)]

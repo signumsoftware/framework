@@ -2,8 +2,8 @@
 
 @using (var sc = Html.TypeContext<EmailConfigurationDN>()) 
 {
-	@Html.EntityCombo(sc, ca => ca.DefaultCulture)
-    @Html.ValueLine(sc, ca => ca.UrlLeft)
-    @Html.ValueLine(sc, ca => ca.DoNotSendEmails)
+	@Html.ValueLine(sc, ca => ca.SendEmails)
     @Html.ValueLine(sc, ca => ca.OverrideEmailAddress)
+    @Html.EntityCombo(sc, ca => ca.DefaultCulture)
+    @Html.ValueLine(sc, ca => ca.UrlLeft)
 }
