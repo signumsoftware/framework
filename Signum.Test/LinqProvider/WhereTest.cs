@@ -329,5 +329,11 @@ namespace Signum.Test.LinqProvider
                 a.Friends.Contains(Database.Query<ArtistDN>().Single(a2 => a2.Sex == Sex.Female).ToLite())
                 ).Select(a => a.ToLite()).ToList();
         }
+
+        [TestMethod]
+        public void NullableBoolFix()
+        {
+            var artist = Database.Query<ArtistDN>().Where(a => ((bool?)(a.Dead ? a.Friends.Any() : false)) == true).ToList();
+        }
     }
 }
