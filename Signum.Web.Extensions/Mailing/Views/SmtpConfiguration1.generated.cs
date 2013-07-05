@@ -59,139 +59,153 @@ WriteLiteral("\r\n");
             #line hidden
             
             #line 5 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-Write(Html.ValueLine(sc, s => s.Name));
+Write(Html.ValueLine(sc, s => s.IsDefault));
 
             
             #line default
             #line hidden
             
             #line 5 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-                                 
-	
-            
-            #line default
-            #line hidden
-            
-            #line 6 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-Write(Html.ValueLine(sc, s => s.Port));
-
-            
-            #line default
-            #line hidden
-            
-            #line 6 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-                                 
-	
-            
-            #line default
-            #line hidden
-            
-            #line 7 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-Write(Html.ValueLine(sc, s => s.Host));
-
-            
-            #line default
-            #line hidden
-            
-            #line 7 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-                                 
-	
-            
-            #line default
-            #line hidden
-            
-            #line 8 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-Write(Html.ValueLine(sc, s => s.UseDefaultCredentials));
-
-            
-            #line default
-            #line hidden
-            
-            #line 8 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-                                                  
-	
-            
-            #line default
-            #line hidden
-            
-            #line 9 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-Write(Html.ValueLine(sc, s => s.Username));
-
-            
-            #line default
-            #line hidden
-            
-            #line 9 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-                                     
-	
-            
-            #line default
-            #line hidden
-            
-            #line 10 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-Write(Html.ValueLine(sc, s => s.Password));
-
-            
-            #line default
-            #line hidden
-            
-            #line 10 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-                                     
-	
-            
-            #line default
-            #line hidden
-            
-            #line 11 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-Write(Html.ValueLine(sc, s => s.EnableSSL));
-
-            
-            #line default
-            #line hidden
-            
-            #line 11 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
                                       
 	
             
             #line default
             #line hidden
             
+            #line 6 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
+Write(Html.ValueLine(sc, s => s.Name));
+
+            
+            #line default
+            #line hidden
+            
+            #line 6 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
+                                 
+	
+            
+            #line default
+            #line hidden
+            
+            #line 7 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
+Write(Html.ValueLine(sc, s => s.Port));
+
+            
+            #line default
+            #line hidden
+            
+            #line 7 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
+                                 
+	
+            
+            #line default
+            #line hidden
+            
+            #line 8 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
+Write(Html.ValueLine(sc, s => s.Host));
+
+            
+            #line default
+            #line hidden
+            
+            #line 8 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
+                                 
+	
+            
+            #line default
+            #line hidden
+            
+            #line 9 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
+Write(Html.ValueLine(sc, s => s.UseDefaultCredentials));
+
+            
+            #line default
+            #line hidden
+            
+            #line 9 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
+                                                  
+	
+            
+            #line default
+            #line hidden
+            
+            #line 10 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
+Write(Html.ValueLine(sc, s => s.Username));
+
+            
+            #line default
+            #line hidden
+            
+            #line 10 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
+                                     
+	
+            
+            #line default
+            #line hidden
+            
+            #line 11 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
+Write(Html.ValueLine(sc, s => s.Password));
+
+            
+            #line default
+            #line hidden
+            
+            #line 11 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
+                                     
+	
+            
+            #line default
+            #line hidden
+            
             #line 12 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-Write(Html.EntityLineDetail(sc, s => s.DefaultFrom));
+Write(Html.ValueLine(sc, s => s.EnableSSL));
 
             
             #line default
             #line hidden
             
             #line 12 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-                                               
+                                      
 	
             
             #line default
             #line hidden
             
             #line 13 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-Write(Html.EntityRepeater(sc, s => s.AditionalRecipients));
+Write(Html.EntityLineDetail(sc, s => s.DefaultFrom));
 
             
             #line default
             #line hidden
             
             #line 13 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-                                                     
-    
+                                               
+	
             
             #line default
             #line hidden
             
             #line 14 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
-Write(Html.EntityList(sc, s => s.ClientCertificationFiles));
+Write(Html.EntityRepeater(sc, s => s.AditionalRecipients));
 
             
             #line default
             #line hidden
             
             #line 14 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
+                                                     
+    
+            
+            #line default
+            #line hidden
+            
+            #line 15 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
+Write(Html.EntityList(sc, s => s.ClientCertificationFiles));
+
+            
+            #line default
+            #line hidden
+            
+            #line 15 "..\..\Mailing\Views\SmtpConfiguration.cshtml"
                                                          
 }
 

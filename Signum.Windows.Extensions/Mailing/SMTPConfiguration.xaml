@@ -6,6 +6,7 @@
     m:Common.TypeContext="{x:Type d:SmtpConfigurationDN}"
     MinWidth="300">
     <StackPanel>
+        <m:ValueLine m:Common.Route="IsDefault" />
         <m:ValueLine m:Common.Route="Name" />
         <m:ValueLine m:Common.Route="Port" />
         <m:ValueLine m:Common.Route="Host" />

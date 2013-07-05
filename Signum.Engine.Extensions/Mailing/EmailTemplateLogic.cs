@@ -183,7 +183,8 @@ namespace Signum.Engine.Mailing
                 var queryName = QueryLogic.ToQueryName(template.Query.Key);
                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
 
-                var smtpConfig = template.SmtpConfiguration ?? EmailLogic.SenderManager.DefaultSmtpConfiguration;
+             
+            var smtpConfig = template.SmtpConfiguration.TryCC(SmtpConfigurationLogic.RetrieveFromCache) ?? SmtpConfigurationLogic.DefaultSmtpConfiguration.Value;
 
                 var columns = GetTemplateColumns(template, template.Tokens, qd);
 
@@ -231,9 +232,9 @@ namespace Signum.Engine.Mailing
                     }
                 }));
 
-                if (smtpConfig != null)
-                    recipients.AddRange(smtpConfig.RetrieveFromCache().AditionalRecipients.Select(r =>
-                        new EmailOwnerRecipientData(r.EmailOwner.Retrieve().EmailOwnerData) { Kind = r.Kind }));
+            if (smtpConfig != null)
+                recipients.AddRange(smtpConfig.AditionalRecipients.Select(r =>
+                    new EmailOwnerRecipientData(r.EmailOwner.Retrieve().EmailOwnerData) { Kind = r.Kind }));
 
                 EmailAddressDN from = null;
                 if (template.From != null)
@@ -270,6 +271,8 @@ namespace Signum.Engine.Mailing
                         EmailAddress = smtpSection.From
                     };
                 }
+                from = smtpConfig.DefaultFrom;
+            }
 
                 var email = new EmailMessageDN
                 {
@@ -356,7 +359,7 @@ namespace Signum.Engine.Mailing
                     Construct = _ => new EmailTemplateDN 
                     { 
                         State = EmailTemplateState.Created,
-                        SmtpConfiguration = EmailLogic.SenderManager.TryCC(m => m.DefaultSmtpConfiguration)
+                        SmtpConfiguration = SmtpConfigurationLogic.DefaultSmtpConfiguration.Value.ToLite()
                     }
                 }.Register();
 
