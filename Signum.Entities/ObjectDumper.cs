@@ -16,14 +16,7 @@ namespace Signum.Entities
     {
         public static HashSet<Type> IgnoreTypes = new HashSet<Type> { typeof(ExceptionDN) };
 
-        public static bool ShowByteArrays = false;
-
-        public static string Dump(this object o)
-        {
-            return o.Dump(false, ShowByteArrays);
-        }
-
-        public static string Dump(this object o, bool showIgnoredFields, bool showByteArrays)
+        public static string Dump(this object o, bool showIgnoredFields = false, bool showByteArrays = false)
         {
             var od = new DumpVisitor(showIgnoredFields, showByteArrays);
             od.DumpObject(o);
