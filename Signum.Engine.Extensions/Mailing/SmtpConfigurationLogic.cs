@@ -18,18 +18,16 @@ namespace Signum.Engine.Mailing
 {
     public static class SmtpConfigurationLogic
     {
-        public static ResetLazy<Dictionary<Lite<SmtpConfigurationDN>, SmtpConfigurationDN>> SmtpConfigCache; 
-
-        internal static void AssertStarted(SchemaBuilder sb)
-        {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => SmtpConfigurationLogic.Start(null, null)));
-        }
+        public static ResetLazy<Dictionary<Lite<SmtpConfigurationDN>, SmtpConfigurationDN>> SmtpConfigCache;
+        public static ResetLazy<SmtpConfigurationDN> DefaultSmtpConfiguration;  
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<SmtpConfigurationDN>();
+
+                sb.AddUniqueIndex<SmtpConfigurationDN>(c => new { c.IsDefault }, c => c.IsDefault);
 
                 dqm.RegisterQuery(typeof(SmtpConfigurationDN), () =>
                     from s in Database.Query<SmtpConfigurationDN>()
@@ -47,6 +45,9 @@ namespace Signum.Engine.Mailing
                     });
 
                 SmtpConfigCache = sb.GlobalLazy(() => Database.Query<SmtpConfigurationDN>().ToDictionary(a => a.ToLite()),
+                    new InvalidateWith(typeof(SmtpConfigurationDN)));
+
+                DefaultSmtpConfiguration = sb.GlobalLazy(() => SmtpConfigCache.Value.Values.SingleOrDefaultEx(a => a.IsDefault),
                     new InvalidateWith(typeof(SmtpConfigurationDN)));
 
                 new Graph<SmtpConfigurationDN>.Execute(SmtpConfigurationOperation.Save)

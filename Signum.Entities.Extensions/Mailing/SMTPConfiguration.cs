@@ -12,6 +12,13 @@ namespace Signum.Entities.Mailing
     [Serializable, EntityKind(EntityKind.Main)]
     public class SmtpConfigurationDN : Entity
     {
+        bool isDefault;
+        public bool IsDefault
+        {
+            get { return isDefault; }
+            set { Set(ref isDefault, value, () => IsDefault); }
+        }
+
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         string name;
         [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
