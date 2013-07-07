@@ -25,6 +25,7 @@
         <m:ValueLine m:Common.Route="CreationDate" m:Common.IsReadOnly="True"/>
         <m:EntityLine  m:Common.Route="Target" m:Common.IsReadOnly="True"/>
         <m:ValueLine m:Common.Route="AlertDate" />
+        <m:ValueLine m:Common.Route="Title" />
         <Label Content="Text"/>
         <m:TextArea Margin="8,0,8,8" Background="#7FFFFFFF" m:Common.Route="Text" Height="55" m:Common.IsReadOnly="{Binding Attended}"/>
         <m:ValueLine m:Common.CollapseIfNull="True" m:Common.Route="AttendedDate" m:Common.IsReadOnly="True"/>
