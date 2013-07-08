@@ -75,7 +75,7 @@ namespace Signum.Engine.Linq
             if (dataReader.Read())
             {
                 this.Row++;
-                this.current = this.projector(this);
+                this.current = this.projector(this); //InvalidOperationException? Press F5
                 return true;
             }
             return false;
