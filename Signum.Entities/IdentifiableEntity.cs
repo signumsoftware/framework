@@ -69,7 +69,7 @@ namespace Signum.Entities
             return BaseToString();
         }
 
-        internal string BaseToString()
+        public string BaseToString()
         {
             return "{0} ({1})".Formato(GetType().Name, id.HasValue ? id.ToString() : LiteMessage.New.NiceToString());
         }
