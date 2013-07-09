@@ -65,4 +65,14 @@ namespace Signum.Entities.Scheduler
     { 
         Save
     }
+
+    public enum TaskOperation
+    {
+        ExecuteSync,
+        ExecuteAsync,
+    }
+
+    public interface ITaskDN : IIdentifiable
+    {
+    }
 }

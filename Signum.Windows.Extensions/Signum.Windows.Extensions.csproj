@@ -351,8 +351,8 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="Reports\ReportClient.cs" />
-    <Compile Include="Scheduler\Calendar.xaml.cs">
-      <DependentUpon>Calendar.xaml</DependentUpon>
+    <Compile Include="Scheduler\HolidayCalendar.xaml.cs">
+      <DependentUpon>HolidayCalendar.xaml</DependentUpon>
     </Compile>
     <Compile Include="Scheduler\ActionTask.xaml.cs">
       <DependentUpon>ActionTask.xaml</DependentUpon>
@@ -726,7 +726,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Scheduler\Calendar.xaml">
+    <Page Include="Scheduler\HolidayCalendar.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>

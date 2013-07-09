@@ -97,6 +97,7 @@
     <Compile Include="Authorization\User.cs" />
     <Compile Include="ControlPanel\ControlPanelOmniboxResultGenerator.cs" />
     <Compile Include="Help\HelpMessage.cs" />
+    <Compile Include="Scheduler\ScheduledTaskLogDN.cs" />
     <Compile Include="Translation\CultureInfoDN.cs" />
     <Compile Include="Basics\HourMinuteDN.cs" />
     <Compile Include="Basics\DateSpanDN.cs" />
@@ -158,10 +159,10 @@
     <Compile Include="UserQueries\FilterValueConverter.cs" />
     <Compile Include="Reports\IExcelReportServer.cs" />
     <Compile Include="UserQueries\UserQueryDN.cs" />
-    <Compile Include="Scheduler\CalendarDN.cs" />
+    <Compile Include="Scheduler\HolidayCalendarDN.cs" />
     <Compile Include="Scheduler\ScheduledTaskDN.cs" />
     <Compile Include="Scheduler\ScheduleRule.cs" />
-    <Compile Include="Scheduler\Task.cs" />
+    <Compile Include="Scheduler\ActionTask.cs" />
     <Compile Include="SMS\ISmsServer.cs" />
     <Compile Include="SMS\SMSMessage.cs" />
     <Compile Include="SMS\SMSTemplate.cs" />
@@ -176,9 +177,6 @@
       <Project>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</Project>
       <Name>Signum.Utilities</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Scheduler\Scheduler.cd" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
