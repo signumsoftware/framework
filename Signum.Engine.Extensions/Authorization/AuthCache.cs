@@ -404,4 +404,6 @@ namespace Signum.Entities.Authorization
             return "{0} {1} for {2} ({3} -> {4})".Formato(typeof(R).NiceName(), resource.ToString(), role, from, to);
         }
     }
+
+
 }

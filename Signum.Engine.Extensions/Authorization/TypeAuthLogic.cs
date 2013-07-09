@@ -300,7 +300,8 @@ namespace Signum.Engine.Authorization
 
         public override Func<Type, TypeAllowedAndConditions> MergeDefault(Lite<RoleDN> role, IEnumerable<Func<Type, TypeAllowedAndConditions>> baseDefaultValues)
         {
-            return type => new TypeAllowedAndConditions(AuthLogic.GetDefaultAllowed(role) ? TypeAllowed.Create : TypeAllowed.None);
+            var taac = new TypeAllowedAndConditions(AuthLogic.GetDefaultAllowed(role) ? TypeAllowed.Create : TypeAllowed.None);
+            return new ConstantFunction<Type, TypeAllowedAndConditions>(taac).GetValue;
         }
 
         public static TypeAllowedAndConditions MergeBase(IEnumerable<TypeAllowedAndConditions> baseRules, Func<IEnumerable<TypeAllowed>, TypeAllowed> maxMerge, TypeAllowed max, TypeAllowed min)

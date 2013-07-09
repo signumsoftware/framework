@@ -158,7 +158,7 @@ namespace Signum.Engine.Authorization
 
         public override Func<Enum, bool> MergeDefault(Lite<RoleDN> role, IEnumerable<Func<Enum, bool>> baseDefaultValues)
         {
-            return key => AuthLogic.GetDefaultAllowed(role);
+            return new ConstantFunction<Enum, bool>(AuthLogic.GetDefaultAllowed(role)).GetValue;
         }
     }
 }
