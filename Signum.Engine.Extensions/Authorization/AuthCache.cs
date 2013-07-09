@@ -30,6 +30,7 @@ namespace Signum.Entities.Authorization
         protected abstract A Intersection(K key, Lite<RoleDN> role, IEnumerable<A> baseValues);
         protected abstract A Union(K key, Lite<RoleDN> role, IEnumerable<A> baseValues);
 
+        //This function should have the property that every key not following this rule is because is overriden by some inherited role
         public abstract Func<K, A> MergeDefault(Lite<RoleDN> role, IEnumerable<Func<K, A>> baseDefaultValues);
     }
 

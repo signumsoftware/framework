@@ -316,8 +316,12 @@ namespace Signum.Engine.Authorization
         public override Func<Enum, OperationAllowed> MergeDefault(Lite<RoleDN> role, IEnumerable<Func<Enum, OperationAllowed>> baseDefaultValues)
         {
             return key => 
-                OperationAuthLogic.AvoidAutomaticUpgrade.Contains(key) ? OperationAllowed.None : 
-                OperationAuthLogic.MaxTypePermission(key, TypeAllowedBasic.Modify, t => TypeAuthLogic.GetAllowed(role, t));
+            {
+                if(!OperationAuthLogic.AvoidAutomaticUpgrade.Contains(key))
+                    return Merge(key, role, baseDefaultValues.Select(f => f(key))); //deep search!
+
+                return OperationAuthLogic.MaxTypePermission(key, TypeAllowedBasic.Modify, t => TypeAuthLogic.GetAllowed(role, t));
+            };
         }
     }
 
