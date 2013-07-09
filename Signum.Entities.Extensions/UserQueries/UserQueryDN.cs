@@ -410,7 +410,7 @@ namespace Signum.Entities.UserQueries
             get { return displayName ?? Token.TryCC(t => t.Token.NiceName()); }
             set
             {
-                var name = value == Token.TryCC(t => t.Token.NiceName()) ? null : value;
+                var name = value == Token.TryCC(t => t.Token).TryCC(tt => tt.NiceName()) ? null : value;
                 Set(ref displayName, name, () => DisplayName);
             }
         }
@@ -438,6 +438,7 @@ namespace Signum.Entities.UserQueries
         public void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)
         {
             token.ParseData(context, description, canAggregate);
+            DisplayName = DisplayName;
         }
     }
 
