@@ -48,8 +48,18 @@ namespace Signum.Engine.Authorization
             get { return anonymousUserLazy.Value; }
         }
 
+
+        
+
         static ResetLazy<DirectedGraph<Lite<RoleDN>>> roles;
-        static ResetLazy<Dictionary<Lite<RoleDN>, MergeStrategy>> mergeStrategies;
+
+        class RoleData
+        {
+            public bool DefaultAllowed;
+            public MergeStrategy MergeStrategy;
+        }
+
+        static ResetLazy<Dictionary<Lite<RoleDN>, RoleData>> mergeStrategies;
 
         public static void AssertStarted(SchemaBuilder sb)
         {
@@ -69,8 +79,27 @@ namespace Signum.Engine.Authorization
 
                 roles = sb.GlobalLazy(CacheRoles, new InvalidateWith(typeof(RoleDN)));
                 mergeStrategies = sb.GlobalLazy(() =>
-                    Database.Query<RoleDN>().Select(r => KVP.Create(r.ToLite(), r.MergeStrategy)).ToDictionary(),
-                    new InvalidateWith(typeof(RoleDN)));
+                {
+                    var strategies = Database.Query<RoleDN>().Select(r => KVP.Create(r.ToLite(), r.MergeStrategy)).ToDictionary();
+
+                    var graph = roles.Value;
+
+                    Dictionary<Lite<RoleDN>, RoleData> result = new Dictionary<Lite<RoleDN>, RoleData>();
+                    foreach (var r in graph.CompilationOrder())
+                    {
+                        var strat = strategies.GetOrThrow(r);
+
+                        var baseValues = graph.RelatedTo(r).Select(r2=>result[r2].DefaultAllowed);
+
+                        result.Add(r, new RoleData
+                        {
+                            MergeStrategy = strat,
+                            DefaultAllowed = strat == MergeStrategy.Union ? baseValues.Any(a => a) : baseValues.All(a => a)
+                        }); 
+                    }
+
+                    return result;
+                },new InvalidateWith(typeof(RoleDN)));
 
                 sb.Schema.EntityEvents<RoleDN>().Saving += Schema_Saving;
 
@@ -223,7 +252,12 @@ namespace Signum.Engine.Authorization
 
         public static MergeStrategy GetMergeStrategy(Lite<RoleDN> role)
         {
-            return mergeStrategies.Value.GetOrThrow(role);
+            return mergeStrategies.Value.GetOrThrow(role).MergeStrategy;
+        }
+
+        public static bool GetDefaultAllowed(Lite<RoleDN> role)
+        {
+            return mergeStrategies.Value.GetOrThrow(role).DefaultAllowed;
         }
 
         static bool gloaballyEnabled = true;
