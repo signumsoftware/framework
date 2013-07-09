@@ -317,7 +317,7 @@ namespace Signum.Engine.Authorization
         {
             return key => 
             {
-                if (!OperationAuthLogic.AvoidAutomaticUpgrade.Contains(key))
+                if (OperationAuthLogic.AvoidAutomaticUpgrade.Contains(key))
                     return AuthLogic.GetDefaultAllowed(role) ? OperationAllowed.Allow : OperationAllowed.None;
 
                 return OperationAuthLogic.MaxTypePermission(key, TypeAllowedBasic.Modify, t => TypeAuthLogic.GetAllowed(role, t));
