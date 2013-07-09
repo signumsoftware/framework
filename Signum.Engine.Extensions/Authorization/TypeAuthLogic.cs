@@ -300,12 +300,7 @@ namespace Signum.Engine.Authorization
 
         public override Func<Type, TypeAllowedAndConditions> MergeDefault(Lite<RoleDN> role, IEnumerable<Func<Type, TypeAllowedAndConditions>> baseDefaultValues)
         {
-            var baseValues = baseDefaultValues.Select(f => ConstantFunction.GetConstantValue(f).Fallback).ToList();
-
-            if (AuthLogic.GetMergeStrategy(role) == MergeStrategy.Intersection)
-                return new ConstantFunction<Type, TypeAllowedAndConditions>(new TypeAllowedAndConditions(MinTypeAllowed(baseValues))).GetValue;
-            else
-                return new ConstantFunction<Type, TypeAllowedAndConditions>(new TypeAllowedAndConditions(MaxTypeAllowed(baseValues))).GetValue;
+            return type => new TypeAllowedAndConditions(AuthLogic.GetDefaultAllowed(role) ? TypeAllowed.Create : TypeAllowed.None);
         }
 
         public static TypeAllowedAndConditions MergeBase(IEnumerable<TypeAllowedAndConditions> baseRules, Func<IEnumerable<TypeAllowed>, TypeAllowed> maxMerge, TypeAllowed max, TypeAllowed min)

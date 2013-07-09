@@ -42,35 +42,6 @@ namespace Signum.Entities.Authorization
     }
 
     [Serializable]
-    public class ConstantFunction<K, A>
-    {
-        internal A Allowed;
-        public ConstantFunction(A allowed)
-        {
-            this.Allowed = allowed;
-        }
-
-        public A GetValue(K key)
-        {
-            return this.Allowed;
-        }
-
-        public override string ToString()
-        {
-            return "Constant {0}".Formato(Allowed);
-        }
-    }
-
-    public static class ConstantFunction
-    {
-        public static A GetConstantValue<K, A>(Func<K, A> defaultConstant)
-        {
-            return ((ConstantFunction<K, A>)defaultConstant.Target).Allowed;
-        }
-    }
-
-
-    [Serializable]
     public abstract class BaseRulePack<T> : ModelEntity
     {
         Lite<RoleDN> role;
