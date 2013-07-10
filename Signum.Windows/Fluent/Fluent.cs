@@ -156,7 +156,7 @@ namespace Signum.Windows
                 if (oldDC != null)
                     oldDC.PropertyChanged -= propertyChanged;
 
-                INotifyPropertyChanged newDC = e.OldValue as INotifyPropertyChanged;
+                INotifyPropertyChanged newDC = e.NewValue as INotifyPropertyChanged;
                 if (newDC != null)
                     newDC.PropertyChanged += propertyChanged;
             };
