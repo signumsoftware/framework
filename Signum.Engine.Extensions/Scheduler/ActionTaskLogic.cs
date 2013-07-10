@@ -20,20 +20,6 @@ namespace Signum.Engine.Scheduler
 {
     public static class ActionTaskLogic
     {
-        static Expression<Func<ActionTaskDN, IQueryable<ActionTaskLogDN>>> ExecutionsExpression =
-            ct => Database.Query<ActionTaskLogDN>().Where(a => a.ActionTask == ct);
-        public static IQueryable<ActionTaskLogDN> Executions(this ActionTaskDN e)
-        {
-            return ExecutionsExpression.Evaluate(e);
-        }
-
-        static Expression<Func<ActionTaskDN, IQueryable<ActionTaskLogDN>>> LastExecutionExpression =
-            e => e.Executions().OrderByDescending(a => a.StartTime).Take(1);
-        public static IQueryable<ActionTaskLogDN> LastExecution(this ActionTaskDN e)
-        {
-            return LastExecutionExpression.Evaluate(e);
-        }
-
         static Dictionary<Enum, Action> tasks = new Dictionary<Enum, Action>();
 
         internal static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
@@ -42,15 +28,15 @@ namespace Signum.Engine.Scheduler
             {
                 MultiEnumLogic<ActionTaskDN>.Start(sb, () => tasks.Keys.ToHashSet());
 
-                sb.Include<ActionTaskLogDN>();
-
-                new Graph<ActionTaskDN>.Execute(ActionTaskOperation.Execute)
-                {
-                    Execute = (ct, _) => Execute(MultiEnumLogic<ActionTaskDN>.ToEnum(ct.Key))
-                }.Register();
+                sb.Include<ScheduledTaskLogDN>();
 
                 SchedulerLogic.ExecuteTask.Register((ActionTaskDN ct) =>
-                    Execute(MultiEnumLogic<ActionTaskDN>.ToEnum(ct.Key)));
+                {
+                    Enum enumValue = MultiEnumLogic<ActionTaskDN>.ToEnum(ct.Key);
+                    Action action = tasks.GetOrThrow(enumValue);
+                    action();
+                });
+
 
                 dqm.RegisterQuery(typeof(ActionTaskDN), ()=>
                       from ct in Database.Query<ActionTaskDN>()
@@ -61,13 +47,13 @@ namespace Signum.Engine.Scheduler
                            ct.Key,
                        });
 
-                dqm.RegisterQuery(typeof(ActionTaskLogDN), ()=>
-                     from cte in Database.Query<ActionTaskLogDN>()
+                dqm.RegisterQuery(typeof(ScheduledTaskLogDN), ()=>
+                     from cte in Database.Query<ScheduledTaskLogDN>()
                       select new
                       {
                           Entity = cte,
                           cte.Id,
-                          cte.ActionTask,
+                          ActionTask = cte.Task,
                           cte.StartTime,
                           cte.EndTime,
                           cte.Exception,
@@ -75,52 +61,6 @@ namespace Signum.Engine.Scheduler
 
                 dqm.RegisterExpression((ActionTaskDN ct) => ct.Executions());
                 dqm.RegisterExpression((ActionTaskDN ct) => ct.LastExecution());
-            }
-        }
-
-        public static void Execute(Enum key)
-        {
-            ActionTaskLogDN cte = new ActionTaskLogDN
-            {
-                ActionTask = MultiEnumLogic<ActionTaskDN>.ToEntity(key),
-                StartTime = TimeZoneManager.Now,
-            };
-
-            try
-            {
-                using (Transaction tr = new Transaction())
-                {
-                    cte.Save();
-
-                    tasks[key]();
-
-                    cte.EndTime = TimeZoneManager.Now;
-                    cte.Save();
-
-                    tr.Commit();
-                }
-            }
-            catch (Exception ex)
-            {
-                if (Transaction.InTestTransaction)
-                    throw; 
-
-                var exLog = ex.LogException().ToLite();
-
-                using (Transaction tr2 = Transaction.ForceNew())
-                {
-                    ActionTaskLogDN cte2 = new ActionTaskLogDN
-                    {
-                        ActionTask = cte.ActionTask,
-                        StartTime = cte.StartTime,
-                        EndTime = TimeZoneManager.Now,
-                        Exception = exLog,
-                    }.Save();
-
-                    tr2.Commit();
-                }
-
-                throw;
             }
         }
 

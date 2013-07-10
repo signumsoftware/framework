@@ -687,21 +687,20 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Scheduler\ActionTaskClient.cs" />
-    <Compile Include="Scheduler\Views\Calendar.generated.cs">
+    <Compile Include="Scheduler\Views\HolidayCalendar.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>Calendar.cshtml</DependentUpon>
+      <DependentUpon>HolidayCalendar.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Scheduler\Views\ActionTask.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>ActionTask.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Scheduler\Views\ActionTaskLog.generated.cs">
+    <Compile Include="Scheduler\Views\ScheduledTaskLog.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>ActionTaskLog.cshtml</DependentUpon>
+      <DependentUpon>ScheduledTaskLog.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Scheduler\Views\Holiday.generated.cs">
       <AutoGen>True</AutoGen>
@@ -1188,9 +1187,9 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </None>
-    <None Include="Scheduler\Views\Calendar.cshtml">
+    <None Include="Scheduler\Views\HolidayCalendar.cshtml">
       <Generator>RazorGenerator</Generator>
-      <LastGenOutput>Calendar.generated.cs</LastGenOutput>
+      <LastGenOutput>HolidayCalendar.generated.cs</LastGenOutput>
     </None>
     <Content Include="Scheduler\Views\ScheduleRuleMinutely.cshtml">
       <Generator>RazorGenerator</Generator>
@@ -1220,9 +1219,9 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ScheduledTask.generated.cs</LastGenOutput>
     </None>
-    <None Include="Scheduler\Views\ActionTaskLog.cshtml">
+    <None Include="Scheduler\Views\ScheduledTaskLog.cshtml">
       <Generator>RazorGenerator</Generator>
-      <LastGenOutput>ActionTaskLog.generated.cs</LastGenOutput>
+      <LastGenOutput>ScheduledTaskLog.generated.cs</LastGenOutput>
     </None>
     <None Include="Scheduler\Views\Holiday.cshtml">
       <Generator>RazorGenerator</Generator>

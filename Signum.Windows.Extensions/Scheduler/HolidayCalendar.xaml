@@ -1,9 +1,9 @@
-﻿<UserControl x:Class="Signum.Windows.Scheduler.Calendar"
+﻿<UserControl x:Class="Signum.Windows.Scheduler.HolidayCalendar"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:m="clr-namespace:Signum.Windows;assembly=Signum.Windows"
     xmlns:d="clr-namespace:Signum.Entities.Scheduler;assembly=Signum.Entities.Extensions"
-    m:Common.TypeContext="{x:Type d:CalendarDN}">
+    m:Common.TypeContext="{x:Type d:HolidayCalendarDN}">
     <StackPanel>
         <m:ValueLine m:Common.Route="Name" />
         <GroupBox m:Common.LabelOnlyRoute="Holidays">

@@ -3,36 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Entities.Basics;
-using Signum.Entities;
-using Signum.Entities.Processes;
 using Signum.Utilities;
-using Signum.Entities.Authorization;
 
 namespace Signum.Entities.Scheduler
 {
-    public enum ActionTaskOperation
-    {
-        Execute,
-    }
-
-    public interface ITaskDN : IIdentifiable
-    {
-    }
-
-    [Serializable, EntityKind(EntityKind.SystemString)]
-    public class ActionTaskDN : MultiEnumDN, ITaskDN
-    {
-        
-    }
-
     [Serializable, EntityKind(EntityKind.System)]
-    public class ActionTaskLogDN : IdentifiableEntity
+    public class ScheduledTaskLogDN : IdentifiableEntity
     {
-        ActionTaskDN actionTask;
-        public ActionTaskDN ActionTask
+        [ImplementedBy(typeof(ActionTaskDN))]
+        ITaskDN task;
+        [NotNullValidator]
+        public ITaskDN Task
         {
-            get { return actionTask; }
-            set { Set(ref actionTask, value, () => ActionTask); }
+            get { return task; }
+            set { Set(ref task, value, () => Task); }
         }
 
         DateTime startTime;
@@ -62,7 +46,7 @@ namespace Signum.Entities.Scheduler
                 return "{0}-{1}".Formato(startTime, endTime);
             else if (exception != null)
                 return "{0} Error: {1}".Formato(startTime, exception);
-            return startTime.ToString(); 
+            return startTime.ToString();
         }
     }
 }

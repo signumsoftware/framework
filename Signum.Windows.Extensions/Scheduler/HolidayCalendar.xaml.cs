@@ -20,16 +20,16 @@ namespace Signum.Windows.Scheduler
     /// <summary>
     /// Interaction logic for Calendar.xaml
     /// </summary>
-    public partial class Calendar : UserControl
+    public partial class HolidayCalendar : UserControl
     {
-        public Calendar()
+        public HolidayCalendar()
         {
             InitializeComponent();
         }
 
         private object EntityList_Creating()
         {
-            CalendarDN cal = ((CalendarDN)DataContext);
+            HolidayCalendarDN cal = ((HolidayCalendarDN)DataContext);
             if (cal == null || cal.Holidays == null || cal.Holidays.Count == 0)
                 return new HolidayDN { Date = DateTime.Today };
             else

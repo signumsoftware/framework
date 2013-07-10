@@ -21,14 +21,15 @@ namespace Signum.Windows.Scheduler
                 Navigator.AddSetting(new EntitySettings<ScheduledTaskDN> { View = e => new ScheduledTask(), Icon = Image("clock.png") });
 
                 Navigator.AddSetting(new EntitySettings<ActionTaskDN> { View = e => new ActionTask(), Icon = Image("actionTask.png") });
-                Navigator.AddSetting(new EntitySettings<ActionTaskLogDN> { View = e => new ActionTaskLog(), Icon = Image("actionTaskLog.png") });
+                Navigator.AddSetting(new EntitySettings<ScheduledTaskLogDN> { View = e => new ActionTaskLog(), Icon = Image("actionTaskLog.png") });
 
-                OperationClient.AddSetting(new EntityOperationSettings(ActionTaskOperation.Execute){ Icon = Image("execute.png") });
+                OperationClient.AddSetting(new EntityOperationSettings(TaskOperation.ExecuteSync) { Icon = Image("execute.png") });
+                OperationClient.AddSetting(new EntityOperationSettings(TaskOperation.ExecuteAsync) { Icon = Image("execute.png") });
 
                 Navigator.AddSetting(new EntitySettings<ScheduleRuleDailyDN> { View = e => new ScheduleRuleDaily() });
                 Navigator.AddSetting(new EntitySettings<ScheduleRuleWeeklyDN> { View = e => new ScheduleRuleWeekly() });
                 Navigator.AddSetting(new EntitySettings<ScheduleRuleWeekDaysDN> { View = e => new ScheduleRuleWeekDays() });
-                Navigator.AddSetting(new EntitySettings<CalendarDN> { View = e => new Calendar() });
+                Navigator.AddSetting(new EntitySettings<HolidayCalendarDN> { View = e => new HolidayCalendar() });
             }
         }
 

@@ -23,7 +23,7 @@ namespace Signum.Web.Extensions.Scheduler
     {
         public static string ViewPrefix = "~/scheduler/Views/{0}.cshtml";
 
-        public static void Start()
+        public static void Start(bool actionTask)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -31,6 +31,7 @@ namespace Signum.Web.Extensions.Scheduler
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {
+                    new EntitySettings<ScheduledTaskLogDN>{ PartialViewName = _ => ViewPrefix.Formato("ScheduledTaskLog") },
                     new EntitySettings<ScheduledTaskDN>{ PartialViewName = _ => ViewPrefix.Formato("ScheduledTask") },
                     
                     new EntitySettings<ScheduleRuleDailyDN> { PartialViewName = _ => ViewPrefix.Formato("ScheduleRuleDaily") },
@@ -39,7 +40,7 @@ namespace Signum.Web.Extensions.Scheduler
                     new EntitySettings<ScheduleRuleMinutelyDN> { PartialViewName = _ => ViewPrefix.Formato("ScheduleRuleMinutely") },
                     new EntitySettings<ScheduleRuleHourlyDN> { PartialViewName = _ => ViewPrefix.Formato("ScheduleRuleHourly") },
 
-                    new EntitySettings<CalendarDN> { PartialViewName = _ => ViewPrefix.Formato("Calendar") },
+                    new EntitySettings<HolidayCalendarDN> { PartialViewName = _ => ViewPrefix.Formato("HolidayCalendar") },
                     new EmbeddedEntitySettings<HolidayDN> { PartialViewName = _ => ViewPrefix.Formato("Holiday") },
                 });
 
@@ -47,6 +48,14 @@ namespace Signum.Web.Extensions.Scheduler
                 Navigator.EntitySettings<ScheduleRuleWeeklyDN>().MappingMain.AsEntityMapping().SetProperty(srw => srw.StartingOn, Mapping.DateHourMinute);
                 Navigator.EntitySettings<ScheduleRuleMinutelyDN>().MappingMain.AsEntityMapping().SetProperty(srw => srw.StartingOn, Mapping.DateHourMinute);
                 Navigator.EntitySettings<ScheduleRuleHourlyDN>().MappingMain.AsEntityMapping().SetProperty(srw => srw.StartingOn, Mapping.DateHourMinute);
+
+                if (actionTask)
+                {
+                    Navigator.AddSettings(new List<EntitySettings>
+                    {
+                        new EntitySettings<ActionTaskDN>{ PartialViewName = _ => ViewPrefix.Formato("ActionTask") },
+                    });
+                }
             }
         }
     }

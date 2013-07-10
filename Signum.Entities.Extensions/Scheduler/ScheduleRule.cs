@@ -242,8 +242,8 @@ namespace Signum.Entities.Scheduler
             set { SetToStr(ref sunday, value, () => Sunday); }
         }
 
-        CalendarDN calendar;
-        public CalendarDN Calendar
+        HolidayCalendarDN calendar;
+        public HolidayCalendarDN Calendar
         {
             get { return calendar; }
             set
