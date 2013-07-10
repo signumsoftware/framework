@@ -255,7 +255,7 @@ namespace Signum.Engine.Operations
 
                                 OnEndOperation(result);
 
-                                if (!result.IsNew)
+                                if (result != null && !result.IsNew)
                                     log.Target = result.ToLite();
 
                                 log.End = TimeZoneManager.Now;
