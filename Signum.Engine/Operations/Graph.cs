@@ -57,12 +57,11 @@ namespace Signum.Engine.Operations
                                 OnEndOperation(entity);
 
                                 if (!entity.IsNew)
-                                {
                                     log.Target = entity.ToLite();
-                                    log.End = TimeZoneManager.Now;
-                                    using (ExecutionMode.Global())
-                                        log.Save();
-                                }
+
+                                log.End = TimeZoneManager.Now;
+                                using (ExecutionMode.Global())
+                                    log.Save();
 
                                 return tr.Commit(entity);
                             }
@@ -169,8 +168,8 @@ namespace Signum.Engine.Operations
 
                                 OnEndOperation(result);
 
-                                if (result != null && !result.IsNew)
-                                    log.Target = result.ToLite();
+                                if (!entity.IsNew)
+                                    log.Target = entity.ToLite();
 
                                 log.End = TimeZoneManager.Now;
                                 using (ExecutionMode.Global())
