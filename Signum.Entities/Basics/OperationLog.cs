@@ -12,7 +12,6 @@ namespace Signum.Entities.Basics
     {
         [ImplementedByAll]
         Lite<IIdentifiable> target;
-        [NotNullValidator]
         public Lite<IIdentifiable> Target
         {
             get { return target; }
