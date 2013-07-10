@@ -17,10 +17,15 @@ namespace Signum.Entities
         InUserInterface,
         [Description("Operation {0} ({1}) is not Authorized")]
         Operation01IsNotAuthorized,
+        [Description("Delete?")]
+        Delete,
         [Description("Please confirm you'd like to delete the entity from the system")]
         PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem,
         [Description("Please confirm you'd like to delete the selected entities from the system")]
-        PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem
+        PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem,
+
+        [Description("{0} didn't return an entity")]
+        TheOperation0DidNotReturnAnEntity
     }
 
     public enum SynchronizerMessage
