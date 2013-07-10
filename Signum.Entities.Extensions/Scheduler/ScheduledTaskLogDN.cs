@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Signum.Entities.Basics;
 using Signum.Utilities;
+using System.Linq.Expressions;
 
 namespace Signum.Entities.Scheduler
 {
@@ -31,6 +32,13 @@ namespace Signum.Entities.Scheduler
         {
             get { return endTime; }
             set { Set(ref endTime, value, () => EndTime); }
+        }
+
+        static Expression<Func<ScheduledTaskLogDN, double?>> DurationExpression =
+            log => (double?)(log.EndTime - log.StartTime).Value.TotalMilliseconds;
+        public double? Duration
+        {
+            get { return EndTime == null ? null : DurationExpression.Evaluate(this); }
         }
 
         [ImplementedByAll]

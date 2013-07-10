@@ -18,7 +18,7 @@ namespace Signum.Entities.Processes
     [Serializable, EntityKind(EntityKind.SystemString)]
     public class ProcessAlgorithmDN : MultiEnumDN
     {
-       
+
     }
 
     [Serializable, EntityKind(EntityKind.Main)]
@@ -109,6 +109,13 @@ namespace Signum.Entities.Processes
         {
             get { return executionEnd; }
             set { if (Set(ref executionEnd, value, () => ExecutionEnd))Notify(() => ExecutionStart); }
+        }
+
+        static Expression<Func<ProcessDN, double?>> DurationExpression =
+         log => (double?)(log.ExecutionEnd - log.ExecutionStart).Value.TotalMilliseconds;
+        public double? Duration
+        {
+            get { return ExecutionEnd == null ? null : DurationExpression.Evaluate(this); }
         }
 
         DateTime? suspendDate;
