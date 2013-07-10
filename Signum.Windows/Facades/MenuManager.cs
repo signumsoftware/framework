@@ -90,7 +90,7 @@ namespace Signum.Windows
                 ImageSource source = 
                     o is FindOptionsBase ? Navigator.Manager.GetFindIcon(((FindOptionsBase)o).QueryName, false) : null;
 
-                menuItem.Icon = new Image { Source = source, Stretch = Stretch.None }; 
+                menuItem.Icon = source.ToSmallImage(); 
             }
         }
 

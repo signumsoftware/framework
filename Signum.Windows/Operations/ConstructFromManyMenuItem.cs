@@ -26,7 +26,7 @@ namespace Signum.Windows.Operations
             MenuItem miResult = new MenuItem
             {
                 Header = OperationClient.GetText(coc.OperationInfo.Key),
-                Icon = OperationClient.GetImage(coc.OperationInfo.Key),
+                Icon = OperationClient.GetImage(coc.OperationInfo.Key).ToSmallImage(),
             };
 
             if (coc.CanExecute != null)

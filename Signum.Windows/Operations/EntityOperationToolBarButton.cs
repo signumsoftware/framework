@@ -86,7 +86,7 @@ namespace Signum.Windows.Operations
                 Header = eoc.OperationSettings.TryCC(os => os.Text) ?? 
                 (group == null || group.SimplifyName == null ? eoc.OperationInfo.Key.NiceToString() : 
                  group.SimplifyName(eoc.OperationInfo.Key.NiceToString())),
-                Icon = man.GetImage(eoc.OperationInfo.Key, eoc.OperationSettings),
+                Icon = man.GetImage(eoc.OperationInfo.Key, eoc.OperationSettings).ToSmallImage(),
                 Tag = eoc.OperationInfo,
                 Background = man.GetBackground(eoc.OperationInfo, eoc.OperationSettings)
             };
