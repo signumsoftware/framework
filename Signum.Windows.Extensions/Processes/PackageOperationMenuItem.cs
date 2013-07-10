@@ -29,7 +29,7 @@ namespace Signum.Windows.Processes
             MenuItem miResult = new MenuItem
             {
                 Header = coc.OperationSettings.TryCC(s => s.Text) ?? coc.OperationInfo.Key.NiceToString(),
-                Icon = coc.OperationSettings.TryCC(s => s.Icon),
+                Icon = coc.OperationSettings.TryCC(s => s.Icon.ToSmallImage()),
             };
 
             if (coc.CanExecute != null)

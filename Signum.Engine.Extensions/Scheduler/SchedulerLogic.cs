@@ -76,6 +76,7 @@ namespace Signum.Engine.Scheduler
 
                 SimpleTaskLogic.Start(sb, dqm);
                 sb.Include<ScheduledTaskDN>();
+                sb.Include<ScheduledTaskLogDN>();
                 sb.Schema.Initializing[InitLevel.Level4BackgroundProcesses] += Schema_InitializingApplicaton;
                 sb.Schema.EntityEvents<ScheduledTaskDN>().Saving += Schema_Saving;
                 
@@ -101,6 +102,21 @@ namespace Signum.Engine.Scheduler
                          st.Suspended,
                          st.Rule,
                      });
+
+                dqm.RegisterQuery(typeof(ScheduledTaskLogDN), () =>
+                    from cte in Database.Query<ScheduledTaskLogDN>()
+                    select new
+                    {
+                        Entity = cte,
+                        cte.Id,
+                        ActionTask = cte.Task,
+                        cte.StartTime,
+                        cte.EndTime,
+                        cte.Exception,
+                    });
+
+                dqm.RegisterExpression((ITaskDN ct) => ct.Executions());
+                dqm.RegisterExpression((ITaskDN ct) => ct.LastExecution());
 
                 new Graph<HolidayCalendarDN>.Execute(CalendarOperation.Save)
                 {

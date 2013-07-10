@@ -30,7 +30,7 @@ namespace Signum.Windows.Scheduler
                 {
                     Background = Brushes.Gold,
                     AutomationName = "execute",
-                    Description = () => TaskMessage.Execute.NiceToString(),
+                    Description = () => TaskMessage.Execute.NiceToString() + "...",
                 };
 
                 OperationClient.AddSetting(new EntityOperationSettings(TaskOperation.ExecuteSync) { Icon = Image("execute.png"), Group = executeGroup });
