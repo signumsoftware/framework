@@ -21,7 +21,7 @@ namespace Signum.Entities.Scheduler
             set { SetToStr(ref rule, value, () => Rule); }
         }
 
-        [ImplementedBy(typeof(ActionTaskDN))]
+        [ImplementedBy(typeof(SimpleTaskDN))]
         ITaskDN task;
         [NotNullValidator]
         public ITaskDN Task
@@ -64,6 +64,11 @@ namespace Signum.Entities.Scheduler
     public enum ScheduledTaskOperation
     { 
         Save
+    }
+
+    public enum TaskMessage
+    {
+        Execute
     }
 
     public enum TaskOperation

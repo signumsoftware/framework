@@ -38,7 +38,7 @@ namespace Signum.Engine.Scheduler
         }
 
 
-        public static Polymorphic<Action<ITaskDN>> ExecuteTask = new Polymorphic<Action<ITaskDN>>();
+        public static Polymorphic<Func<ITaskDN, Lite<IIdentifiable>>> ExecuteTask = new Polymorphic<Func<ITaskDN, Lite<IIdentifiable>>>();
 
         public static event Action<string, Exception> Error;
 
@@ -74,7 +74,7 @@ namespace Signum.Engine.Scheduler
 
                 ExecuteTask.Register((ITaskDN t) => { throw new NotImplementedException("SchedulerLogic.ExecuteTask not registered for {0}".Formato(t.GetType().Name)); });
 
-                ActionTaskLogic.Start(sb, dqm);
+                SimpleTaskLogic.Start(sb, dqm);
                 sb.Include<ScheduledTaskDN>();
                 sb.Schema.Initializing[InitLevel.Level4BackgroundProcesses] += Schema_InitializingApplicaton;
                 sb.Schema.EntityEvents<ScheduledTaskDN>().Saving += Schema_Saving;
@@ -116,9 +116,9 @@ namespace Signum.Engine.Scheduler
                     Execute = (st, _) => { },
                 }.Register();
 
-                new Graph<ITaskDN>.Execute(TaskOperation.ExecuteSync)
+                new Graph<IIdentifiable>.ConstructFrom<ITaskDN>(TaskOperation.ExecuteSync)
                 {
-                    Execute = (task, _) => ExecuteSync(task)
+                    Construct = (task, _) => ExecuteSync(task).TryCC(l => l.Retrieve())
                 }.Register();
 
                 new Graph<ITaskDN>.Execute(TaskOperation.ExecuteAsync)
@@ -259,11 +259,11 @@ namespace Signum.Engine.Scheduler
         }
 
 
-        public static void ExecuteSync(ITaskDN task)
+        public static Lite<IIdentifiable> ExecuteSync(ITaskDN task)
         {
             using (AuthLogic.UserSession(AuthLogic.SystemUser))
             {
-                ScheduledTaskLogDN cte = new ScheduledTaskLogDN
+                ScheduledTaskLogDN stl = new ScheduledTaskLogDN
                 {
                     Task = task,
                     StartTime = TimeZoneManager.Now,
@@ -273,14 +273,14 @@ namespace Signum.Engine.Scheduler
                 {
                     using (Transaction tr = new Transaction())
                     {
-                        cte.Save();
+                        stl.Save();
 
-                        ExecuteTask.Invoke(task);
+                        stl.Entity = ExecuteTask.Invoke(task);
 
-                        cte.EndTime = TimeZoneManager.Now;
-                        cte.Save();
+                        stl.EndTime = TimeZoneManager.Now;
+                        stl.Save();
 
-                        tr.Commit();
+                        return tr.Commit(stl.Entity);
                     }
                 }
                 catch (Exception ex)
@@ -294,8 +294,8 @@ namespace Signum.Engine.Scheduler
                     {
                         ScheduledTaskLogDN cte2 = new ScheduledTaskLogDN
                         {
-                            Task = cte.Task,
-                            StartTime = cte.StartTime,
+                            Task = stl.Task,
+                            StartTime = stl.StartTime,
                             EndTime = TimeZoneManager.Now,
                             Exception = exLog,
                         }.Save();

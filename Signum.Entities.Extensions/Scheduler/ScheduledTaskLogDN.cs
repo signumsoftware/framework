@@ -10,7 +10,7 @@ namespace Signum.Entities.Scheduler
     [Serializable, EntityKind(EntityKind.System)]
     public class ScheduledTaskLogDN : IdentifiableEntity
     {
-        [ImplementedBy(typeof(ActionTaskDN))]
+        [ImplementedBy(typeof(SimpleTaskDN))]
         ITaskDN task;
         [NotNullValidator]
         public ITaskDN Task
@@ -31,6 +31,14 @@ namespace Signum.Entities.Scheduler
         {
             get { return endTime; }
             set { Set(ref endTime, value, () => EndTime); }
+        }
+
+        [ImplementedByAll]
+        Lite<IIdentifiable> entity;
+        public Lite<IIdentifiable> Entity
+        {
+            get { return entity; }
+            set { Set(ref entity, value, () => Entity); }
         }
 
         Lite<ExceptionDN> exception;

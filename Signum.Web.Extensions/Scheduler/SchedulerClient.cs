@@ -23,7 +23,7 @@ namespace Signum.Web.Extensions.Scheduler
     {
         public static string ViewPrefix = "~/scheduler/Views/{0}.cshtml";
 
-        public static void Start(bool actionTask)
+        public static void Start(bool simpleTask)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -49,11 +49,11 @@ namespace Signum.Web.Extensions.Scheduler
                 Navigator.EntitySettings<ScheduleRuleMinutelyDN>().MappingMain.AsEntityMapping().SetProperty(srw => srw.StartingOn, Mapping.DateHourMinute);
                 Navigator.EntitySettings<ScheduleRuleHourlyDN>().MappingMain.AsEntityMapping().SetProperty(srw => srw.StartingOn, Mapping.DateHourMinute);
 
-                if (actionTask)
+                if (simpleTask)
                 {
                     Navigator.AddSettings(new List<EntitySettings>
                     {
-                        new EntitySettings<ActionTaskDN>{ PartialViewName = _ => ViewPrefix.Formato("ActionTask") },
+                        new EntitySettings<SimpleTaskDN>{ PartialViewName = _ => ViewPrefix.Formato("SimpleTask") },
                     });
                 }
             }

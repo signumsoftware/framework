@@ -153,7 +153,7 @@
     <Compile Include="Translation\TranslationLogic.cs" />
     <Compile Include="UserQueries\UserQueryLogic.cs" />
     <Compile Include="Scheduler\SchedulerLogic.cs" />
-    <Compile Include="Scheduler\ActionTaskLogic.cs" />
+    <Compile Include="Scheduler\SimpleTaskLogic.cs" />
     <Compile Include="ServerExtensions.cs" />
     <Compile Include="SMS\SMSLogic.cs" />
     <Compile Include="SMS\SMSProcessAlgortihms.cs" />

@@ -162,7 +162,7 @@
     <Compile Include="Scheduler\HolidayCalendarDN.cs" />
     <Compile Include="Scheduler\ScheduledTaskDN.cs" />
     <Compile Include="Scheduler\ScheduleRule.cs" />
-    <Compile Include="Scheduler\ActionTask.cs" />
+    <Compile Include="Scheduler\SimpleTask.cs" />
     <Compile Include="SMS\ISmsServer.cs" />
     <Compile Include="SMS\SMSMessage.cs" />
     <Compile Include="SMS\SMSTemplate.cs" />

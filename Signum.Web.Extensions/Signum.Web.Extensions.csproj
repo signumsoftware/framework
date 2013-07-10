@@ -692,10 +692,10 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>HolidayCalendar.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Scheduler\Views\ActionTask.generated.cs">
+    <Compile Include="Scheduler\Views\SimpleTask.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>ActionTask.cshtml</DependentUpon>
+      <DependentUpon>SimpleTask.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Scheduler\Views\ScheduledTaskLog.generated.cs">
       <AutoGen>True</AutoGen>
@@ -1199,9 +1199,9 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ScheduleRuleHourly.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Scheduler\Views\ActionTask.cshtml">
+    <Content Include="Scheduler\Views\SimpleTask.cshtml">
       <Generator>RazorGenerator</Generator>
-      <LastGenOutput>ActionTask.generated.cs</LastGenOutput>
+      <LastGenOutput>SimpleTask.generated.cs</LastGenOutput>
     </Content>
     <None Include="Scheduler\Views\ScheduleRuleDaily.cshtml">
       <Generator>RazorGenerator</Generator>

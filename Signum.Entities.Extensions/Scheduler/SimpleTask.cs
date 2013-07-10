@@ -11,7 +11,7 @@ using Signum.Entities.Authorization;
 namespace Signum.Entities.Scheduler
 {
     [Serializable, EntityKind(EntityKind.SystemString)]
-    public class ActionTaskDN : MultiEnumDN, ITaskDN
+    public class SimpleTaskDN : MultiEnumDN, ITaskDN
     {
         
     }

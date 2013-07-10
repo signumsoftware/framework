@@ -354,11 +354,11 @@
     <Compile Include="Scheduler\HolidayCalendar.xaml.cs">
       <DependentUpon>HolidayCalendar.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Scheduler\ActionTask.xaml.cs">
-      <DependentUpon>ActionTask.xaml</DependentUpon>
+    <Compile Include="Scheduler\SimpleTask.xaml.cs">
+      <DependentUpon>SimpleTask.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Scheduler\ActionTaskLog.xaml.cs">
-      <DependentUpon>ActionTaskLog.xaml</DependentUpon>
+    <Compile Include="Scheduler\ScheduledTaskLog.xaml.cs">
+      <DependentUpon>ScheduledTaskLog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Scheduler\ScheduledTask.xaml.cs">
       <DependentUpon>ScheduledTask.xaml</DependentUpon>
@@ -732,13 +732,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Scheduler\ActionTask.xaml">
+    <Page Include="Scheduler\SimpleTask.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Scheduler\ActionTaskLog.xaml">
+    <Page Include="Scheduler\ScheduledTaskLog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
       <Generator>MSBuild:Compile</Generator>
@@ -837,8 +837,8 @@
     <Resource Include="Images\stop.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\actionTask.png" />
-    <Resource Include="Images\actionTaskLog.png" />
+    <Resource Include="Images\simpleTask.png" />
+    <Resource Include="Images\scheduledTaskLog.png" />
     <Resource Include="Images\package.png" />
     <Resource Include="Images\packageLine.png" />
     <Resource Include="Images\processAlgorithm.png" />
