@@ -7,7 +7,7 @@ using Signum.Utilities;
 
 namespace Signum.Entities.Scheduler
 {
-    [Serializable, EntityKind(EntityKind.System)]
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class ScheduledTaskLogDN : IdentifiableEntity
     {
         [ImplementedBy(typeof(SimpleTaskDN))]

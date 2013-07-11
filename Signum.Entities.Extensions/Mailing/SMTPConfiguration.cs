@@ -8,7 +8,7 @@ using Signum.Utilities;
 
 namespace Signum.Entities.Mailing
 {
-    [Serializable, EntityKind(EntityKind.Main)]
+    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class SMTPConfigurationDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
@@ -83,7 +83,7 @@ namespace Signum.Entities.Mailing
         Save
     }
 
-    [Serializable, EntityKind(EntityKind.System)]
+    [Serializable, EntityKind(EntityKind.System, EntityData.Master)]
     public class ClientCertificationFileDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]

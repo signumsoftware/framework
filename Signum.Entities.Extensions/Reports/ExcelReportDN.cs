@@ -11,7 +11,7 @@ using System.ComponentModel;
 
 namespace Signum.Entities.Reports
 {
-    [Serializable, EntityKind(EntityKind.Main)]
+    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class ExcelReportDN : IdentifiableEntity
     {
         QueryDN query;

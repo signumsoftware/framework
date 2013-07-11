@@ -1,0 +1,601 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{CAFD6D4D-E5FB-4A6E-84FC-3185854CCD9D}</ProjectGuid>
+    <OutputType>library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Signum.Windows.Extensions</RootNamespace>
+    <AssemblyName>Signum.Windows.Extensions</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <ExpressionBlendVersion>3.0.1927.0</ExpressionBlendVersion>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>4.0</OldToolsVersion>
+    <UpgradeBackupLocation />
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Partial|AnyCPU' ">
+    <OutputPath>bin\Partial\</OutputPath>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Alerts\Alert.xaml.cs">
+      <DependentUpon>Alert.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Alerts\AlertClient.cs" />
+    <Compile Include="Alerts\AlertsWidget.xaml.cs">
+      <DependentUpon>AlertsWidget.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Alerts\AlertType.xaml.cs">
+      <DependentUpon>AlertType.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Authorization\AuthClient.cs" />
+    <Compile Include="Authorization\NewPassword.xaml.cs">
+      <DependentUpon>NewPassword.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Authorization\PasswordExpiresInterval.xaml.cs">
+      <DependentUpon>PasswordExpiresInterval.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Authorization\QueryAuthClient.cs" />
+    <Compile Include="Authorization\TypeAuthClient.cs" />
+    <Compile Include="Authorization\PropertyAuthClient.cs" />
+    <Compile Include="Authorization\PermissionAuthClient.cs" />
+    <Compile Include="Authorization\OperationAuthClient.cs" />
+    <Compile Include="Authorization\OperationRules.xaml.cs">
+      <DependentUpon>OperationRules.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Authorization\PermissionRules.xaml.cs">
+      <DependentUpon>PermissionRules.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Authorization\PropertyRules.xaml.cs">
+      <DependentUpon>PropertyRules.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Authorization\TypeRules.xaml.cs">
+      <DependentUpon>TypeRules.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Authorization\Role.xaml.cs">
+      <DependentUpon>Role.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Authorization\DoublePassword.xaml.cs">
+      <DependentUpon>DoublePassword.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Authorization\Login.xaml.cs">
+      <SubType>Code</SubType>
+      <DependentUpon>Login.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Authorization\QueryRules.xaml.cs">
+      <DependentUpon>QueryRules.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Authorization\User.xaml.cs">
+      <DependentUpon>User.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Basic\DateSpan.xaml.cs">
+      <DependentUpon>DateSpan.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Basic\DateSpanClient.cs" />
+    <Compile Include="Basic\QueryClient.cs" />
+    <Compile Include="Calendars\CalendarStrip.cs" />
+    <Compile Include="Calendars\CalendarStripHeader.xaml.cs">
+      <DependentUpon>CalendarStripHeader.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Calendars\CalendarStripList.xaml.cs">
+      <DependentUpon>CalendarStripList.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Calendars\CalendarStripTreeView.xaml.cs">
+      <DependentUpon>CalendarStripTreeView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Calendars\CalendarStripWallpaper.xaml.cs">
+      <DependentUpon>CalendarStripWallpaper.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Calendars\CalendarStripWithTitles.xaml.cs">
+      <DependentUpon>CalendarStripWithTitles.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Calendars\DatePanel.cs" />
+    <Compile Include="Chart\ChartBuilder.xaml.cs">
+      <DependentUpon>ChartBuilder.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Chart\ChartClient.cs" />
+    <Compile Include="Chart\ChartOmniboxProvider.cs" />
+    <Compile Include="Chart\ChartRenderer.xaml.cs">
+      <DependentUpon>ChartRenderer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Chart\ChartScript.xaml.cs">
+      <DependentUpon>ChartScript.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Chart\ChartScriptParameter.xaml.cs">
+      <DependentUpon>ChartScriptParameter.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Chart\UserChart.xaml.cs">
+      <DependentUpon>UserChart.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Chart\ChartColumn.xaml.cs">
+      <DependentUpon>ChartColumn.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Chart\ChartRequestWindow.xaml.cs">
+      <DependentUpon>ChartRequestWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Chart\UserChartMenuItem.cs" />
+    <Compile Include="Chart\UserChartOmniboxProvider.cs" />
+    <Compile Include="ControlPanels\ControlPanelSelector.xaml.cs">
+      <DependentUpon>ControlPanelSelector.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\ControlPanelWindow.xaml.cs">
+      <DependentUpon>ControlPanelWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\PartView\UserChartPartView.xaml.cs">
+      <DependentUpon>UserChartPartView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\PartView\LinkListPartView.xaml.cs">
+      <DependentUpon>LinkListPartView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\PartView\CountSearchControlPartView.xaml.cs">
+      <DependentUpon>CountSearchControlPartView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\ControlPanelOmniboxProvider.cs" />
+    <Compile Include="ControlPanels\PartView\UserQueryPartView.xaml.cs">
+      <DependentUpon>UserQueryPartView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\Admin\CountSearchControlPartEdit.xaml.cs">
+      <DependentUpon>CountSearchControlPartEdit.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\Admin\LinkListPartEdit.xaml.cs">
+      <DependentUpon>LinkListPartEdit.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\Admin\UserChartPartEdit.xaml.cs">
+      <DependentUpon>UserChartPartEdit.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\Admin\UserQueryPartEdit.xaml.cs">
+      <DependentUpon>UserQueryPartEdit.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\ControlPanelClient.cs" />
+    <Compile Include="ControlPanels\ControlPanelView.xaml.cs">
+      <DependentUpon>ControlPanelView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ControlPanels\StackColumnPanel.cs" />
+    <Compile Include="Converters.cs" />
+    <Compile Include="ControlPanels\Admin\ControlPanelEdit.xaml.cs">
+      <DependentUpon>ControlPanelEdit.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Disconnected\UploadProgress.xaml.cs">
+      <DependentUpon>UploadProgress.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Disconnected\DisconnectedImport.xaml.cs">
+      <DependentUpon>DisconnectedImport.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Disconnected\DisconnectedClient.cs" />
+    <Compile Include="Disconnected\DisconnectedMachine.xaml.cs">
+      <DependentUpon>DisconnectedMachine.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Disconnected\DownloadProgress.xaml.cs">
+      <DependentUpon>DownloadProgress.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Disconnected\DisconnectedExport.xaml.cs">
+      <DependentUpon>DisconnectedExport.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Files\DropFileExtensions.cs" />
+    <Compile Include="Files\FileLine.xaml.cs">
+      <DependentUpon>FileLine.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Files\FilePath.xaml.cs">
+      <DependentUpon>FilePath.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Files\FilePathClient.cs" />
+    <Compile Include="Files\FileRepository.xaml.cs">
+      <DependentUpon>FileRepository.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ExtensionsImageLoader.cs" />
+    <Compile Include="Files\ImageFileExtension.cs" />
+    <Compile Include="Mailing\ClientCertificationFile.xaml.cs">
+      <DependentUpon>ClientCertificationFile.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Mailing\SMTPConfiguration.xaml.cs">
+      <DependentUpon>SMTPConfiguration.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Mailing\SMTPConfigurationClient.cs" />
+    <Compile Include="Notes\NoteType.xaml.cs">
+      <DependentUpon>NoteType.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Notes\Note.xaml.cs">
+      <DependentUpon>Note.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Notes\NoteClient.cs" />
+    <Compile Include="Notes\NotesWidget.xaml.cs">
+      <DependentUpon>NotesWidget.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Omnibox\DynamicQueryOmniboxProvider.cs" />
+    <Compile Include="Omnibox\EntityOmniboxProvider.cs" />
+    <Compile Include="Omnibox\OmniboxAutocomplete.xaml.cs">
+      <DependentUpon>OmniboxAutocomplete.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Omnibox\OmniboxTemplate.xaml.cs">
+      <DependentUpon>OmniboxTemplate.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Omnibox\OmniboxClient.cs" />
+    <Compile Include="Omnibox\SpecialOmniboxProvider.cs" />
+    <Compile Include="Processes\PackageData.cs" />
+    <Compile Include="Processes\PackageOperationMenuItem.cs" />
+    <Compile Include="Processes\PackageOperation.xaml.cs">
+      <DependentUpon>PackageOperation.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Processes\Package.xaml.cs">
+      <DependentUpon>Package.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Processes\PackageLine.xaml.cs">
+      <DependentUpon>PackageLine.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Processes\ProcessAlgorithm.xaml.cs">
+      <DependentUpon>ProcessAlgorithm.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Processes\ProcessClient.cs" />
+    <Compile Include="Processes\ProcessUI.xaml.cs">
+      <DependentUpon>ProcessUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Profiler\ProfilerClient.cs" />
+    <Compile Include="Profiler\ProfilerUploader.xaml.cs">
+      <DependentUpon>ProfilerUploader.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SMS\SMSMessage.xaml.cs">
+      <DependentUpon>SMSMessage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SMS\SMSSendPackage.xaml.cs">
+      <DependentUpon>SMSSendPackage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SMS\SMSUpdatePackage.xaml.cs">
+      <DependentUpon>SMSUpdatePackage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SynthaxHighlight\DrawingControl.cs" />
+    <Compile Include="SynthaxHighlight\Highlighter.cs" />
+    <Compile Include="SynthaxHighlight\HighlighterLibrary.cs" />
+    <Compile Include="SynthaxHighlight\SyntaxHighlightBox.xaml.cs">
+      <DependentUpon>SyntaxHighlightBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SynthaxHighlight\TextUtilities.cs" />
+    <Compile Include="UserQueries\ImportUserAssetsConfirmation.xaml.cs">
+      <DependentUpon>ImportUserAssetsConfirmation.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserQueries\QueryTokenDNBuilder.xaml.cs">
+      <DependentUpon>QueryTokenDNBuilder.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserQueries\UserAssetsClient.cs" />
+    <Compile Include="UserQueries\UserQueryOmniboxProvider.cs" />
+    <Compile Include="UserQueries\UserQueryClient.cs" />
+    <Compile Include="UserQueries\UserQueryMenuItem.cs" />
+    <Compile Include="UserQueries\UserQuery.xaml.cs">
+      <DependentUpon>UserQuery.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Reports\ExcelReport.xaml.cs">
+      <DependentUpon>ExcelReport.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Reports\PlainExcelMenuItem.cs" />
+    <Compile Include="Reports\ReportMenuItem.cs" />
+    <Compile Include="Panels\TreeMapPanel.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="Reports\ReportClient.cs" />
+    <Compile Include="Scheduler\HolidayCalendar.xaml.cs">
+      <DependentUpon>HolidayCalendar.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Scheduler\SimpleTask.xaml.cs">
+      <DependentUpon>SimpleTask.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Scheduler\ScheduledTaskLog.xaml.cs">
+      <DependentUpon>ScheduledTaskLog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Scheduler\ScheduledTask.xaml.cs">
+      <DependentUpon>ScheduledTask.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Scheduler\SchedulerClient.cs" />
+    <Compile Include="Scheduler\ScheduleRuleDaily.xaml.cs">
+      <DependentUpon>ScheduleRuleDaily.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Scheduler\ScheduleRuleWeekDays.xaml.cs">
+      <DependentUpon>ScheduleRuleWeekDays.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Scheduler\ScheduleRuleWeekly.xaml.cs">
+      <DependentUpon>ScheduleRuleWeekly.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Shapes\Arrow.cs" />
+    <Compile Include="SMS\SMSClient.cs" />
+    <Compile Include="SMS\SMSTemplate.xaml.cs">
+      <DependentUpon>SMSTemplate.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ZoomViewer.cs" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <AppDesigner Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Framework\Signum.Windows\Signum.Windows.csproj">
+      <Project>{76278145-7CCD-4411-9B8A-078708128571}</Project>
+      <Name>Signum.Windows</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj">
+      <Project>{7D851227-5294-4BEB-990E-56B4FBB7A148}</Project>
+      <Name>Signum.Entities.Extensions</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Framework\Signum.Entities\Signum.Entities.csproj">
+      <Project>{F2B51D08-498D-4C9F-8112-9521A7762B02}</Project>
+      <Name>Signum.Entities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Framework\Signum.Utilities\Signum.Utilities.csproj">
+      <Project>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</Project>
+      <Name>Signum.Utilities</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\Signum.Web.Extensions\Chart\Scripts\SF_Chart_Utils.js">
+      <Link>Chart\Html\SF_Chart_Utils.js</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Chart\Html\ChartContainer.htm" />
+    <EmbeddedResource Include="Chart\Html\jquery-1.7.2.min.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\Framework\Signum.Web\Signum\Content\reset.css">
+      <Link>Chart\Html\reset.css</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Chart\Html\colorbrewer.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Chart\Html\d3.v2.min.js" />
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>if exist "$(TargetPath).locked" del "$(TargetPath).locked"
+if not exist "$(TargetPath).locked" if exist "$(TargetPath)" move "$(TargetPath)" "$(TargetPath).locked"</PreBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <ItemGroup>
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\mscorlib.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\PresentationCore.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\PresentationFramework.Aero.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\PresentationFramework.dll" />
+    <ReferencePath Include="D:\Signum\Seguros\Framework\Signum.Entities\bin\Debug\Signum.Entities.dll" />
+    <ReferencePath Include="D:\Signum\Seguros\Extensions\Signum.Entities.Extensions\bin\Debug\Signum.Entities.Extensions.dll" />
+    <ReferencePath Include="D:\Signum\Seguros\Framework\Signum.Utilities\bin\Debug\Signum.Utilities.dll" />
+    <ReferencePath Include="D:\Signum\Seguros\Framework\Signum.Windows\bin\Debug\Signum.Windows.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Core.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Data.DataSetExtensions.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Data.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Drawing.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Web.Extensions.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Windows.Forms.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Xaml.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Xml.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\System.Xml.Linq.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\UIAutomationProvider.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0\WindowsBase.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Alerts\Alert.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Alerts\AlertsWidget.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Alerts\AlertType.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Authorization\NewPassword.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Authorization\PasswordExpiresInterval.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Authorization\OperationRules.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Authorization\PermissionRules.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Authorization\PropertyRules.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Authorization\TypeRules.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Authorization\Role.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Authorization\DoublePassword.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Authorization\Login.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Authorization\QueryRules.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Authorization\User.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Basic\DateSpan.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Calendars\CalendarStripHeader.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Calendars\CalendarStripList.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Calendars\CalendarStripTreeView.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Calendars\CalendarStripWallpaper.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Calendars\CalendarStripWithTitles.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Chart\ChartBuilder.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Chart\ChartRenderer.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Chart\ChartScript.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Chart\ChartScriptParameter.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Chart\UserChart.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Chart\ChartColumn.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Chart\ChartRequestWindow.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\ControlPanels\Admin\ControlPanelEdit.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\ControlPanels\ControlPanelSelector.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\ControlPanels\ControlPanelWindow.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\ControlPanels\PartView\UserChartPartView.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\ControlPanels\PartView\LinkListPartView.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\ControlPanels\PartView\CountSearchControlPartView.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\ControlPanels\PartView\UserQueryPartView.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\ControlPanels\Admin\CountSearchControlPartEdit.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\ControlPanels\Admin\LinkListPartEdit.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\ControlPanels\Admin\UserChartPartEdit.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\ControlPanels\Admin\UserQueryPartEdit.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\ControlPanels\ControlPanelView.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Disconnected\UploadProgress.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Disconnected\DisconnectedImport.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Disconnected\DisconnectedMachine.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Disconnected\DownloadProgress.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Disconnected\DisconnectedExport.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Files\FileLine.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Files\FilePath.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Files\FileRepository.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Mailing\ClientCertificationFile.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Mailing\SMTPConfiguration.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Notes\NoteType.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Notes\Note.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Notes\NotesWidget.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Omnibox\OmniboxAutocomplete.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Omnibox\OmniboxTemplate.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Processes\PackageOperation.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Processes\Package.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Processes\PackageLine.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Processes\ProcessAlgorithm.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Processes\ProcessUI.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Profiler\ProfilerUploader.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\SMS\SMSMessage.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\SMS\SMSSendPackage.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\SMS\SMSUpdatePackage.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\SynthaxHighlight\SyntaxHighlightBox.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\UserQueries\ImportUserAssetsConfirmation.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\UserQueries\QueryTokenDNBuilder.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\UserQueries\UserQuery.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Reports\ExcelReport.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Scheduler\HolidayCalendar.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Scheduler\SimpleTask.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Scheduler\ScheduledTaskLog.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Scheduler\ScheduledTask.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Scheduler\ScheduleRuleDaily.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Scheduler\ScheduleRuleWeekDays.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\Scheduler\ScheduleRuleWeekly.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\SMS\SMSTemplate.g.cs" />
+    <Compile Include="D:\Signum\Seguros\Extensions\Signum.Windows.Extensions\obj\Debug\GeneratedInternalTypeHelper.g.cs" />
+  </ItemGroup>
+</Project>

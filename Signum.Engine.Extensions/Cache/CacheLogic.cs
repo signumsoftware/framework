@@ -23,6 +23,7 @@ using System.Diagnostics;
 using System.Data.SqlTypes;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.SchemaInfoTables;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.Cache
 {
@@ -332,8 +333,13 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
         }
 
         static GenericInvoker<Action<SchemaBuilder>> giCacheTable = new GenericInvoker<Action<SchemaBuilder>>(sb => CacheTable<IdentifiableEntity>(sb));
-        public static void CacheTable<T>(SchemaBuilder sb) where T : IdentifiableEntity
+        public static void CacheTable<T>(SchemaBuilder sb, bool ignoreEntityData = false) where T : IdentifiableEntity
         {
+            if (EntityKindCache.IsLowPopulation(typeof(T)))
+            {
+                throw new InvalidOperationException(""); 
+            }
+
             var cc = new CacheController<T>(sb.Schema);
             controllers.AddOrThrow(typeof(T), cc, "{0} already registered");
 

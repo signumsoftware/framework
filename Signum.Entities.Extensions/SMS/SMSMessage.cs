@@ -16,7 +16,7 @@ namespace Signum.Entities.SMS
         SendSMSMessagesFromTemplate
     }
 
-    [Serializable, EntityKind(EntityKind.Main)]
+    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class SMSMessageDN : Entity, IProcessLineDataDN
     {
         public static string DefaultFrom;

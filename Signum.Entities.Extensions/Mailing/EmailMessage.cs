@@ -11,7 +11,7 @@ using Signum.Entities.Basics;
 
 namespace Signum.Entities.Mailing
 {
-    [Serializable, EntityKind(EntityKind.System)]
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class EmailMessageDN : Entity
     {
         [ImplementedBy(typeof(UserDN))]
@@ -139,7 +139,7 @@ namespace Signum.Entities.Mailing
         ReSendEmails
     }
 
-    [Serializable, EntityKind(EntityKind.System)]
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class EmailPackageDN : IdentifiableEntity, IProcessDataDN
     {
         [SqlDbType(Size = 200)]

@@ -7,7 +7,7 @@ using Signum.Entities.Basics;
 
 namespace Signum.Entities.Authorization
 {
-    [Serializable, EntityKind(EntityKind.SystemString)]
+    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
     public class PermissionDN : MultiEnumDN
     {
 

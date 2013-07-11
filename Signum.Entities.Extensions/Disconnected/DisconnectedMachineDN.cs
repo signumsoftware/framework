@@ -9,7 +9,7 @@ using System.ComponentModel;
 
 namespace Signum.Entities.Disconnected
 {
-    [Serializable, EntityKind(EntityKind.Main)]
+    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class DisconnectedMachineDN : Entity
     {
         DateTime creationDate = TimeZoneManager.Now;

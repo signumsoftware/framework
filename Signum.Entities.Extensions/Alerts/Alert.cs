@@ -14,7 +14,7 @@ using Signum.Services;
 
 namespace Signum.Entities.Alerts
 {
-    [Serializable, EntityKind(EntityKind.Main)]
+    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class AlertDN : IdentifiableEntity
     {
         [ImplementedByAll]
@@ -169,7 +169,7 @@ namespace Signum.Entities.Alerts
         Unattend
     }
 
-    [Serializable, EntityKind(EntityKind.String)]
+    [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
     public class AlertTypeDN : MultiOptionalEnumDN
     {
       static AlertTypeDN()

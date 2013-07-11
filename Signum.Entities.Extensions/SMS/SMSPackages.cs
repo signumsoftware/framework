@@ -9,13 +9,13 @@ using System.Linq.Expressions;
 
 namespace Signum.Entities.SMS
 {
-    [Serializable, EntityKind(EntityKind.System)]
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class SMSSendPackageDN : SMSPackageDN
     {
 
     }
 
-    [Serializable, EntityKind(EntityKind.System)]
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class SMSUpdatePackageDN : SMSPackageDN
     {
 

@@ -10,7 +10,7 @@ using System.Linq.Expressions;
 
 namespace Signum.Entities.Basics
 {
-    [Serializable, EntityKind(EntityKind.SystemString)]
+    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
     public class QueryDN : IdentifiableEntity
     {
         [NotNullable, SqlDbType(Size = 100)]

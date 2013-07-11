@@ -9,7 +9,7 @@ using System.Collections.Specialized;
 
 namespace Signum.Entities.Authorization
 {
-    [Serializable, EntityKind(EntityKind.Shared)]
+    [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
     public class RoleDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
@@ -93,7 +93,7 @@ namespace Signum.Entities.Authorization
         Delete
     }
 
-    [Serializable, EntityKind(EntityKind.System)]
+    [Serializable, EntityKind(EntityKind.System, EntityData.Master)]
     public class LastAuthRulesImportDN : IdentifiableEntity
     {
         [UniqueIndex, FieldWithoutProperty]

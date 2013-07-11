@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Signum.Entities.Translation
 {
-    [Serializable, EntityKind(EntityKind.Main)]
+    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class LocalizedInstanceDN : Entity
     {
         [NotNullable]

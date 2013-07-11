@@ -18,7 +18,7 @@ using Signum.Entities.Chart;
 
 namespace Signum.Entities.UserQueries
 {
-    [Serializable, EntityKind(EntityKind.Main)]
+    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class UserQueryDN : Entity, IUserAssetEntity
     {
         public UserQueryDN() { }

@@ -8,7 +8,7 @@ using Signum.Entities.Basics;
 
 namespace Signum.Entities.Disconnected
 {
-    [Serializable, EntityKind(EntityKind.System)]
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class DisconnectedImportDN : IdentifiableEntity
     {
         DateTime creationDate = TimeZoneManager.Now;
