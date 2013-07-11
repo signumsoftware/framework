@@ -332,13 +332,11 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
                 giCacheTable.GetInvoker(type)(sb);
         }
 
-        static GenericInvoker<Action<SchemaBuilder>> giCacheTable = new GenericInvoker<Action<SchemaBuilder>>(sb => CacheTable<IdentifiableEntity>(sb));
-        public static void CacheTable<T>(SchemaBuilder sb, bool ignoreEntityData = false) where T : IdentifiableEntity
+        static GenericInvoker<Action<SchemaBuilder>> giCacheTable = new GenericInvoker<Action<SchemaBuilder>>(sb => CacheTable<IdentifiableEntity>(sb, false));
+        public static void CacheTable<T>(SchemaBuilder sb, bool ignoreIsTransactionalData = false) where T : IdentifiableEntity
         {
-            if (EntityKindCache.IsLowPopulation(typeof(T)))
-            {
-                throw new InvalidOperationException(""); 
-            }
+            if (EntityKindCache.GetEntityData(typeof(T)) == EntityData.Transactional && !ignoreIsTransactionalData)
+                throw new InvalidOperationException("{0} is Transactional. Reconsider caching this table or set ignoreIsTransactionalData = true".Formato(typeof(T).TypeName())); 
 
             var cc = new CacheController<T>(sb.Schema);
             controllers.AddOrThrow(typeof(T), cc, "{0} already registered");
@@ -348,6 +346,7 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
             cc.BuildCachedTable();
         }
 
+        static GenericInvoker<Action<SchemaBuilder>> giSemiCacheTable = new GenericInvoker<Action<SchemaBuilder>>(sb => SemiCacheTable<IdentifiableEntity>(sb));
         public static void SemiCacheTable<T>(SchemaBuilder sb) where T : IdentifiableEntity
         {
             controllers.AddOrThrow(typeof(T), null, "{0} already registered");
@@ -364,7 +363,12 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
             foreach (var rType in relatedTypes)
             {
                 if (!controllers.ContainsKey(rType))
-                    giCacheTable.GetInvoker(rType)(sb);
+                {
+                    if (EntityKindCache.GetEntityData(rType) == EntityData.Master)
+                        giCacheTable.GetInvoker(rType)(sb);
+                    else
+                        giSemiCacheTable.GetInvoker(rType)(sb);
+                }
 
                 inverseDependencies.Add(rType, type);
             }
