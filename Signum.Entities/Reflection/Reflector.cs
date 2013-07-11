@@ -323,18 +323,6 @@ namespace Signum.Entities.Reflection
             return false;
         }
 
-        public static bool IsLowPopulation(Type type)
-        {
-            if (!typeof(IIdentifiable).IsAssignableFrom(type))
-                throw new ArgumentException("{0} does not inherit from IdentifiableEntity".Formato(type));
-
-            LowPopulationAttribute lpa = type.SingleAttribute<LowPopulationAttribute>();
-            if (lpa != null)
-                return true;
-
-            return false;
-        }
-
         public static Func<IFormattable, string> GetPropertyFormatter(string format, string unitName)
         {
             if (format != null)

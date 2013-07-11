@@ -323,16 +323,6 @@ namespace Signum.Windows
 
            return lite;
         }
-
-        internal static EntityKind GetEntityKind(Type type)
-        {
-            var eta = type.SingleAttributeInherit<EntityKindAttribute>();
-
-            if (eta == null)
-                throw new InvalidOperationException("Type {0} does not have an EntityTypeAttribute".Formato(type.Name));
-
-            return eta.EntityType;
-        }
     }
 
     [Serializable]

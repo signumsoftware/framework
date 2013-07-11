@@ -87,7 +87,7 @@ namespace Signum.Windows
             Type lt = t.CleanType();
             if (Reflector.IsIIdentifiable(lt))
             {
-                if (Reflector.IsLowPopulation(lt))
+                if (EntityKindCache.IsLowPopulation(lt))
                     return new XElement(m + "EntityCombo", new XAttribute(m + "Common.Route", pi.Name));
                 else
                     return new XElement(m + "EntityLine", new XAttribute(m + "Common.Route", pi.Name));

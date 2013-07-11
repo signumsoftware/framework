@@ -297,7 +297,7 @@ namespace Signum.Web
                     Database.FillToString(lite);
 
                 Type cleanType = Lite.Extract(filterOption.Token.Type);
-                if (Reflector.IsLowPopulation(cleanType) && !cleanType.IsInterface && !implementations.Value.IsByAll)
+                if (EntityKindCache.IsLowPopulation(cleanType) && !cleanType.IsInterface && !implementations.Value.IsByAll)
                 {
                     EntityCombo ec = new EntityCombo(filterOption.Token.Type, lite, parent, "", filterOption.Token.GetPropertyRoute())
                     {

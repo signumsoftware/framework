@@ -154,7 +154,7 @@ namespace Signum.Windows
 
                 Type cleanType = Lite.Extract(type);
 
-                if (Reflector.IsLowPopulation(cleanType) && !implementations.IsByAll)
+                if (EntityKindCache.IsLowPopulation(cleanType) && !implementations.IsByAll)
                 {
                     EntityCombo ec = new EntityCombo
                     {
