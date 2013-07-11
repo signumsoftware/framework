@@ -25,12 +25,12 @@ namespace Signum.Entities
 
         public static EntityKind GetEntityKind(Type type)
         {
-            return GetAttribute(type).EntityType;
+            return GetAttribute(type).EntityKind;
         }
 
-        public static EntityKind GetEntity(Type type)
+        public static EntityData GetEntityData(Type type)
         {
-            return GetAttribute(type).EntityType;
+            return GetAttribute(type).EntityData;
         }
 
         public static bool IsLowPopulation(Type type)
@@ -38,19 +38,24 @@ namespace Signum.Entities
             return GetAttribute(type).IsLowPopulation;
         }
 
-        private static EntityKindAttribute GetAttribute(Type type)
+        public static EntityKindAttribute GetAttribute(Type type)
+        {
+            var attr = TryGetAttribute(type);
+
+            if (attr == null)
+                throw new InvalidOperationException("{0} does not define an EntityKindAttribute".Formato(type.TypeName()));
+
+            return attr;
+        }
+
+        public static EntityKindAttribute TryGetAttribute(Type type)
         {
             return dictionary.GetOrAdd(type, t =>
             {
                 if (t.IsAbstract || !t.IsIdentifiableEntity())
                     throw new InvalidOperationException("{0} should be a non-abstrat IdentifiableEntity");
                 
-                var attr = t.SingleAttribute<EntityKindAttribute>();
-
-                if (attr == null)
-                    throw new InvalidOperationException("{0} does not define an EntityKindAttribute".Formato(type.TypeName())); 
-
-                 return attr;
+                return t.SingleAttributeInherit<EntityKindAttribute>();
             });
         }
 
@@ -70,14 +75,14 @@ namespace Signum.Entities
     [AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
     public sealed class EntityKindAttribute : Attribute
     {
-        public EntityKind EntityType { get; private set; }
+        public EntityKind EntityKind { get; private set; }
         public EntityData EntityData { get; private set; }
 
         public bool IsLowPopulation { get; set; }
 
-        public EntityKindAttribute(EntityKind entityType, EntityData entityData)
+        public EntityKindAttribute(EntityKind entityKind, EntityData entityData)
         {
-            this.EntityType = entityType;
+            this.EntityKind = entityKind;
             this.EntityData = entityData;
         }
     }

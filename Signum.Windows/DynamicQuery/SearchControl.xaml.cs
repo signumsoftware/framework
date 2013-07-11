@@ -218,6 +218,14 @@ namespace Signum.Windows
             set { SetValue(IsSearchingProperty, value); }
         }
 
+        public static readonly DependencyProperty AddDefaultOrdersProperty =
+         DependencyProperty.Register("AddDefaultOrders", typeof(bool), typeof(SearchControl), new PropertyMetadata(false));
+        public bool AddDefaultOrders
+        {
+            get { return (bool)GetValue(AddDefaultOrdersProperty); }
+            set { SetValue(AddDefaultOrdersProperty, value); }
+        }
+
         public static readonly DependencyProperty FilterColumnProperty =
         DependencyProperty.Register("FilterColumn", typeof(string), typeof(SearchControl), new UIPropertyMetadata(null, 
             (d, e) => ((SearchControl)d).AssetNotLoaded(e)));
@@ -289,6 +297,7 @@ namespace Signum.Windows
         public event Action<IdentifiableEntity> Navigating;
         public event Action<List<Lite<IdentifiableEntity>>> Removing;
         public event Action DoubleClick;
+        public event Func<Column, bool> OrderClick;
 
         public SearchControl()
         {
@@ -397,6 +406,21 @@ namespace Signum.Windows
                 ColumnOptionsMode = ColumnOptionsMode.Remove;
                 if (ControlExtensions.NotSet(this, SearchOnLoadProperty))
                     SearchOnLoad = true;
+            }
+
+            if (AddDefaultOrders && !entityColumn.Implementations.Value.IsByAll)
+            {
+                var column = Description.Columns.SingleOrDefaultEx(c=>c.Name == "Id"); 
+
+                var pr = column.PropertyRoutes.Only();
+                var type = entityColumn.Implementations.Value.IsByAll ? null : entityColumn.Implementations.Value.Types.Only();
+
+                if (pr != null && type != null && pr.RootType == type && pr.PropertyRouteType == PropertyRouteType.FieldOrProperty && pr.PropertyInfo.Name == "Id")
+                {
+                    var orderType = EntityKindCache.GetEntityData(type) == EntityData.Master ? OrderType.Ascending : OrderType.Descending;
+
+                    OrderOptions.Add(new OrderOption(column.Name, orderType)); 
+                }
             }
 
             if (this.NotSet(SearchControl.NavigateProperty) && Navigate)
@@ -860,6 +884,9 @@ namespace Signum.Windows
             SortGridViewColumnHeader header = sender as SortGridViewColumnHeader;
 
             if (header == null)
+                return;
+
+            if (OrderClick != null && !OrderClick(header.RequestColumn))
                 return;
 
             string canOrder = QueryUtils.CanOrder(header.RequestColumn.Token);

@@ -50,7 +50,9 @@
                          ShowFilters="{Binding ShowFilters, ElementName=me}"
                          ShowFilterButton="{Binding ShowFilterButton, ElementName=me}"
                          ShowFooter="{Binding ShowFooter, ElementName=me}"
-                         ShowHeader="{Binding ShowHeader, ElementName=me}" />
+                         ShowHeader="{Binding ShowHeader, ElementName=me}" 
+                         AddDefaultOrders="{Binding AddDefaultOrders, ElementName=me}"
+                         />
         <m:OkCancelBar x:Name="spOkCancel" OkClicked="Ok_Click" CancelClicked="Cancel_Click" Grid.Row="2" />
     </Grid>
 </Window>
