@@ -786,7 +786,7 @@ namespace Signum.Web
 
                 if (column != null)
                 {
-                    findOptions.OrderOptions.Add(new OrderOption(column.Name, orderType));
+                    findOptions.OrderOptions.Add(new OrderOption{ Token = new ColumnToken(column, description.QueryName), ColumnName = column.Name, OrderType = orderType });
                 }
             }
         }
