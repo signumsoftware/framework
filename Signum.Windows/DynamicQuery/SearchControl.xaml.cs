@@ -218,14 +218,6 @@ namespace Signum.Windows
             set { SetValue(IsSearchingProperty, value); }
         }
 
-        public static readonly DependencyProperty AddDefaultOrdersProperty =
-         DependencyProperty.Register("AddDefaultOrders", typeof(bool), typeof(SearchControl), new PropertyMetadata(false));
-        public bool AddDefaultOrders
-        {
-            get { return (bool)GetValue(AddDefaultOrdersProperty); }
-            set { SetValue(AddDefaultOrdersProperty, value); }
-        }
-
         public static readonly DependencyProperty FilterColumnProperty =
         DependencyProperty.Register("FilterColumn", typeof(string), typeof(SearchControl), new UIPropertyMetadata(null, 
             (d, e) => ((SearchControl)d).AssetNotLoaded(e)));
@@ -408,7 +400,7 @@ namespace Signum.Windows
                     SearchOnLoad = true;
             }
 
-            if (AddDefaultOrders && !entityColumn.Implementations.Value.IsByAll)
+            if (OrderOptions.IsNullOrEmpty() && !entityColumn.Implementations.Value.IsByAll)
             {
                 var column = Description.Columns.SingleOrDefaultEx(c=>c.Name == "Id"); 
 

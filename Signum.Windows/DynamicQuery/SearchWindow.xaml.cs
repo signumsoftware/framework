@@ -146,14 +146,6 @@ namespace Signum.Windows
             set { SetValue(ShowFooterProperty, value); }
         }
 
-        public static readonly DependencyProperty AddDefaultOrdersProperty =
-          DependencyProperty.Register("AddDefaultOrders", typeof(bool), typeof(SearchWindow), new PropertyMetadata(true));
-        public bool AddDefaultOrders
-        {
-            get { return (bool)GetValue(AddDefaultOrdersProperty); }
-            set { SetValue(AddDefaultOrdersProperty, value); }
-        }
-
         public SearchMode Mode { get; private set; }
         public bool SearchOnLoad { get; private set; }
 
