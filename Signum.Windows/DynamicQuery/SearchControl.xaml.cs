@@ -402,16 +402,13 @@ namespace Signum.Windows
 
             if (OrderOptions.IsNullOrEmpty() && !entityColumn.Implementations.Value.IsByAll)
             {
-                var column = Description.Columns.SingleOrDefaultEx(c=>c.Name == "Id"); 
+                var orderType = entityColumn.Implementations.Value.Types.All(t => EntityKindCache.GetEntityData(t) == EntityData.Master) ? OrderType.Ascending : OrderType.Descending;
 
-                var pr = column.PropertyRoutes.Only();
-                var type = entityColumn.Implementations.Value.IsByAll ? null : entityColumn.Implementations.Value.Types.Only();
+                var column = Description.Columns.SingleOrDefaultEx(c => c.Name == "Id");
 
-                if (pr != null && type != null && pr.RootType == type && pr.PropertyRouteType == PropertyRouteType.FieldOrProperty && pr.PropertyInfo.Name == "Id")
+                if (column != null)
                 {
-                    var orderType = EntityKindCache.GetEntityData(type) == EntityData.Master ? OrderType.Ascending : OrderType.Descending;
-
-                    OrderOptions.Add(new OrderOption(column.Name, orderType)); 
+                    OrderOptions.Add(new OrderOption(column.Name, orderType));
                 }
             }
 
@@ -456,6 +453,7 @@ namespace Signum.Windows
             }
         }
 
+       
         void FilterOptions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             UpdateMultiplyMessage(false);                       

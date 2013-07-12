@@ -780,16 +780,13 @@ namespace Signum.Web
 
             if (findOptions.OrderOptions.IsNullOrEmpty() && !entityColumn.Implementations.Value.IsByAll)
             {
+                var orderType = entityColumn.Implementations.Value.Types.All(t => EntityKindCache.GetEntityData(t) == EntityData.Master) ? OrderType.Ascending : OrderType.Descending;
+
                 var column = description.Columns.SingleOrDefaultEx(c => c.Name == "Id");
 
-                var pr = column.PropertyRoutes.Only();
-                var type = entityColumn.Implementations.Value.IsByAll ? null : entityColumn.Implementations.Value.Types.Only();
-
-                if (pr != null && type != null && pr.RootType == type && pr.PropertyRouteType == PropertyRouteType.FieldOrProperty && pr.PropertyInfo.Name == "Id")
+                if (column != null)
                 {
-                    var orderType = EntityKindCache.GetEntityData(type) == EntityData.Master ? OrderType.Ascending : OrderType.Descending;
-
-                    findOptions.OrderOptions.Add(new OrderOption { Token = new ColumnToken(column, description.QueryName), OrderType = orderType });
+                    findOptions.OrderOptions.Add(new OrderOption(column.Name, orderType));
                 }
             }
         }
