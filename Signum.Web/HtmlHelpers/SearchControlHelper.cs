@@ -52,13 +52,13 @@ namespace Signum.Web
             if (settingsModifier != null)
                 settingsModifier(options);
 
+            QueryDescription description = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
-            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
-
-            Navigator.SetTokens(findOptions.FilterOptions, queryDescription, false);
-            Navigator.SetTokens(findOptions.OrderOptions, queryDescription, false);
-            Navigator.SetTokens(findOptions.ColumnOptions, queryDescription, false);
-            Navigator.SetSearchViewableAndCreable(findOptions);
+            Navigator.SetTokens(findOptions.FilterOptions, description, false);
+            Navigator.SetTokens(findOptions.OrderOptions, description, false);
+            Navigator.SetTokens(findOptions.ColumnOptions, description, false);
+            Navigator.Manager.SetSearchViewableAndCreable(findOptions, description);
+            Navigator.Manager.SetDefaultOrder(findOptions, description);
 
             var viewData = new ViewDataDictionary(context);
             viewData[ViewDataKeys.FindOptions] = findOptions;
