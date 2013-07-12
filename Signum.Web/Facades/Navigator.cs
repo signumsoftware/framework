@@ -789,7 +789,7 @@ namespace Signum.Web
                 {
                     var orderType = EntityKindCache.GetEntityData(type) == EntityData.Master ? OrderType.Ascending : OrderType.Descending;
 
-                    findOptions.OrderOptions.Add(new OrderOption { Token = new ColumnToken(column, description.QueryName), OrderType = orderType });
+                    findOptions.OrderOptions.Add(new OrderOption { Token = new ColumnToken(column, description.QueryName), ColumnName = column.Name, OrderType = orderType });
                 }
             }
         }
