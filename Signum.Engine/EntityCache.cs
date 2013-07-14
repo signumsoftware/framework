@@ -63,7 +63,7 @@ namespace Signum.Engine
                 IsSealed = isSealed;
             }
 
-            internal IRetriever NewRetriever()
+            public IRetriever NewRetriever()
             {
                 if (retriever == null)
                     retriever = new RealRetriever(this);
@@ -180,7 +180,7 @@ namespace Signum.Engine
             return Current.Get(type, id);
         }
 
-        internal static IRetriever NewRetriever()
+        public static IRetriever NewRetriever()
         {
             return Current.NewRetriever();
         }

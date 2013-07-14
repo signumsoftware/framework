@@ -246,7 +246,7 @@ namespace Signum.Engine
         {
             var prov = ((DbQueryProvider)query.Provider);
 
-            return prov.Translate(query.Expression, tr => tr.MainPreCommand());
+            return prov.Translate(query.Expression, tr => tr.GetMainPreCommand());
         }
 
         public static SqlPreCommandSimple UnsafeDeletePreCommand<T>(IQueryable<T> query) 
