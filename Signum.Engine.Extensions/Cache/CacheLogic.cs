@@ -24,12 +24,19 @@ using System.Data.SqlTypes;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.SchemaInfoTables;
 using Signum.Engine.Basics;
+using Signum.Engine.Linq;
+using System.Linq.Expressions;
 
 namespace Signum.Engine.Cache
 {
     public static class CacheLogic
     {
         public static bool AssertOnStart = true;
+
+        public static void AssertStarted(SchemaBuilder sb)
+        {
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(()=>Start(null)));
+        }
 
         /// <summary>
         /// If you have invalidation problems look at exceptions in: select * from sys.transmission_queue 
@@ -47,6 +54,80 @@ namespace Signum.Engine.Cache
                 sb.SwitchGlobalLazyManager(new CacheGlobalLazyManager());
 
                 sb.Schema.Initializing[InitLevel.Level_0BeforeAnyQuery] += OnStart;
+            }
+        }
+
+        public static List<T> ToListWithInvalidation<T>(this IQueryable<T> simpleQuery, string exceptionContext, Action<SqlNotificationEventArgs> invalidation)
+        {
+            ITranslateResult tr;
+            using (ObjectName.OverrideOptions(new ObjectNameOptions { IncludeDboSchema = true }))
+                tr = ((DbQueryProvider)simpleQuery.Provider).GetRawTranslateResult(simpleQuery.Expression);
+
+            OnChangeEventHandler onChange = (object sender, SqlNotificationEventArgs args) =>
+            {
+                try
+                {
+                    if (args.Type != SqlNotificationType.Change)
+                        throw new InvalidOperationException(
+                            "Problems with SqlDependency (Type : {0} Source : {1} Info : {2}) on query: \r\n{3}"
+                            .Formato(args.Type, args.Source, args.Info, tr.GetMainPreCommand().PlainSql()));
+
+                    invalidation(args);
+                }
+                catch (Exception e)
+                {
+                    e.LogException(c => c.ControllerName = exceptionContext);
+                }
+            };
+
+            SimpleReader reader = null;
+
+            Expression<Func<IProjectionRow, T>> projectorExpression = (Expression<Func<IProjectionRow, T>>)tr.GetMainProjector();
+            Func<IProjectionRow, T> projector = projectorExpression.Compile();
+
+            List<T> list = new List<T>();
+
+            using (new EntityCache())
+                ((SqlConnector)Connector.Current).ExecuteDataReaderDependency(tr.GetMainPreCommand(), onChange, CacheLogic.OnStart, fr =>
+                {
+                    if (reader == null)
+                        reader = new SimpleReader(fr, EntityCache.NewRetriever());
+
+                    list.Add(projector(reader));
+                });
+
+            return list;
+        }
+
+        class SimpleReader : IProjectionRow
+        {
+            FieldReader reader;
+            IRetriever retriever;
+
+            public SimpleReader(FieldReader reader, IRetriever retriever)
+            {
+                this.reader = reader;
+                this.retriever = retriever;
+            }
+
+            public FieldReader Reader
+            {
+                get { return reader; }
+            }
+
+            public IRetriever Retriever
+            {
+                get { return retriever; }
+            }
+
+            public IEnumerable<S> Lookup<K, S>(LookupToken token, K key)
+            {
+                throw new InvalidOperationException("Subqueries can not be used on simple queries");
+            }
+
+            public MList<S> LookupRequest<K, S>(LookupToken token, K key, MList<S> field)
+            {
+                throw new InvalidOperationException("Subqueries can not be used on simple queries");
             }
         }
 
