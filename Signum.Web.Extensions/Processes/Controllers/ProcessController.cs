@@ -45,24 +45,20 @@ namespace Signum.Web.Processes
         [HttpGet]
         public new ActionResult View()
         {
-            ProcessLogicState state = ProcessLogic.ExecutionState();
+            ProcessLogicState state = ProcessRunnerLogic.ExecutionState();
 
             if (Request.IsAjaxRequest())
-            {
                 return PartialView(ProcessesClient.ViewPrefix.Formato("ProcessPanelTable"), state);
-            }
             else
-            {
                 return View(ProcessesClient.ViewPrefix.Formato("ProcessPanel"), state);
-            }
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult Start()
         {
-            ProcessPermission.ViewProcessControlPanel.Authorize();
+            ProcessPermission.ViewProcessPanel.Authorize();
 
-            ProcessLogic.StartBackgroundProcess();
+            ProcessRunnerLogic.StartRunningProcesses();
 
             Thread.Sleep(1000);
 
@@ -72,9 +68,9 @@ namespace Signum.Web.Processes
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult Stop()
         {
-            ProcessPermission.ViewProcessControlPanel.Authorize();
+            ProcessPermission.ViewProcessPanel.Authorize();
 
-            ProcessLogic.Stop();
+            ProcessRunnerLogic.Stop();
 
             Thread.Sleep(1000);
 
