@@ -819,20 +819,11 @@ namespace Signum.Engine.Maps
 
         static bool AvoidDatabaseNameGlobally;
 
-        static ThreadVariable<bool> avoidDatabaseName = new ThreadVariable<bool>("avoidDatabaseName");
-
-        public static IDisposable AvoidDatabaseName()
-        {
-            var old = avoidDatabaseName.Value;
-            avoidDatabaseName.Value = true;
-            return new Disposable(() => avoidDatabaseName.Value = old);
-        }
-
         public DatabaseName Database
         {
             get
             {
-                if (database == null || AvoidDatabaseNameGlobally || avoidDatabaseName.Value)
+                if (database == null || ObjectName.CurrentOptions.AvoidDatabaseName)
                     return null;
 
                 return database;
@@ -960,5 +951,25 @@ namespace Signum.Engine.Maps
         {
             return new ObjectName(schemaName, Name);
         }
+
+        static readonly ThreadVariable<ObjectNameOptions> optionsVariable = Statics.ThreadVariable<ObjectNameOptions>("objectNameOptions");
+        public static IDisposable OverrideOptions(ObjectNameOptions options)
+        {
+            var old = optionsVariable.Value;
+            optionsVariable.Value = options;
+            return new Disposable(() => optionsVariable.Value = old);
+        }
+
+        public static ObjectNameOptions CurrentOptions
+        {
+            get { return optionsVariable.Value; }
+        }
+    }
+
+    public struct ObjectNameOptions
+    {
+        public bool IncludeDboSchema;
+        public DatabaseName OverrideDatabaseNameOnSystemQueries;
+        public bool AvoidDatabaseName; 
     }
 }
