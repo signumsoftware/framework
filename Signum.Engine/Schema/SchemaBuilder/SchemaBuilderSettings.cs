@@ -127,9 +127,17 @@ namespace Signum.Engine.Maps
                 throw new InvalidOperationException("The following attributes ar not compatible with targets {0}: {1}".Formato(attributeTargets, incorrects.ToString(a => a.GetType().Name, ", ")));
         }
 
-        public Attribute[] FieldAttributes<T>(Expression<Func<T, object>> route)
+        public void AssertNotIgnored<T>(Expression<Func<T, object>> route, string errorContext) where T : IdentifiableEntity
         {
-            return FieldAttributes(route);
+            var pr = PropertyRoute.Construct<T>(route);
+
+            if (FieldAttributes(pr).OfType<IgnoreAttribute>().Any())
+                throw new InvalidOperationException("In order to {0} you need to OverrideAttributes for {1} to remove IgnoreAttribute".Formato(errorContext, pr));
+        }
+
+        public Attribute[] FieldAttributes<T>(Expression<Func<T, object>> route) where T : IdentifiableEntity
+        {
+            return FieldAttributes(PropertyRoute.Construct<T>(route));
         }
 
         public Attribute[] FieldAttributes(PropertyRoute route)

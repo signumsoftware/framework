@@ -154,6 +154,15 @@ namespace Signum.Engine.Maps
             }
         }
 
+        protected override Expression VisitMemberAccess(MemberExpression m)
+        {
+            var field = GetField(m);
+
+            sb.Append(Equals(field, true, true));
+
+            return m;
+        }
+
         protected override Expression VisitUnary(UnaryExpression u)
         {
             switch (u.NodeType)
