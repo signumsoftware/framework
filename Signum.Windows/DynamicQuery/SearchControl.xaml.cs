@@ -289,6 +289,7 @@ namespace Signum.Windows
         public event Action<IdentifiableEntity> Navigating;
         public event Action<List<Lite<IdentifiableEntity>>> Removing;
         public event Action DoubleClick;
+        public event Func<Column, bool> OrderClick;
 
         public SearchControl()
         {
@@ -396,6 +397,18 @@ namespace Signum.Windows
                     SearchOnLoad = true;
             }
 
+            if (OrderOptions.IsNullOrEmpty() && !entityColumn.Implementations.Value.IsByAll)
+            {
+                var orderType = entityColumn.Implementations.Value.Types.All(t => EntityKindCache.GetEntityData(t) == EntityData.Master) ? OrderType.Ascending : OrderType.Descending;
+
+                var column = Description.Columns.SingleOrDefaultEx(c => c.Name == "Id");
+
+                if (column != null)
+                {
+                    OrderOptions.Add(new OrderOption(column.Name, orderType));
+                }
+            }
+
             if (this.NotSet(SearchControl.NavigateProperty) && Navigate)
                 Navigate = Implementations.IsByAll ? true :
                            Implementations.Types.Any(t => Navigator.IsNavigable(t, isSearchEntity: true));
@@ -437,6 +450,7 @@ namespace Signum.Windows
             }
         }
 
+       
         void FilterOptions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             UpdateMultiplyMessage(false);                       
@@ -906,6 +920,9 @@ namespace Signum.Windows
             SortGridViewColumnHeader header = sender as SortGridViewColumnHeader;
 
             if (header == null)
+                return;
+
+            if (OrderClick != null && !OrderClick(header.RequestColumn))
                 return;
 
             string canOrder = QueryUtils.CanOrder(header.RequestColumn.Token);

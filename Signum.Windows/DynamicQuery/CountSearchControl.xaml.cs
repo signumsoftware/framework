@@ -150,15 +150,14 @@ namespace Signum.Windows
             ColumnOptions = new ObservableCollection<ColumnOption>();
             OrderOptions = new ObservableCollection<OrderOption>();
             this.Loaded += new RoutedEventHandler(SearchControl_Loaded);
-            this.DataContextChanged += new DependencyPropertyChangedEventHandler(CountSearchControl_DataContextChanged);
-
+           
             this.Bind(AutomationProperties.ItemStatusProperty, this, "ItemsCount"); 
         }
 
 
-        void CountSearchControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        void item_BindingValueChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (IsLoaded && e.NewValue != null)
+            if (this.IsLoaded && e.NewValue != null)
             {
                 Search();
             }
@@ -193,6 +192,11 @@ namespace Signum.Windows
             AutomationProperties.SetName(this, QueryUtils.GetQueryUniqueKey(QueryName));
 
             Search();
+
+            foreach (var item in FilterOptions)
+            {
+                item.BindingValueChanged += new DependencyPropertyChangedEventHandler(item_BindingValueChanged);
+            }
         }   
         
         

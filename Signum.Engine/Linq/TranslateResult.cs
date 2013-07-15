@@ -13,13 +13,15 @@ using System.Data.Common;
 
 namespace Signum.Engine.Linq
 {
-    interface ITranslateResult
+    public interface ITranslateResult
     {
         string CleanCommandText();
 
-        SqlPreCommandSimple MainPreCommand();
+        SqlPreCommandSimple GetMainPreCommand();
 
         object Execute();
+
+        LambdaExpression GetMainProjector(); 
     }
 
     interface IChildProjection
@@ -106,13 +108,14 @@ namespace Signum.Engine.Linq
 
                 try
                 {
+                    var ms = retriever.ModifiedState;
                     var lookUp = enumerabe.ToLookup(a => a.Key, a => a.Value);
                     foreach (var kvp in requests)
                     {
                         var results = lookUp[kvp.Key];
 
                         kvp.Value.AddRange(results);
-                        kvp.Value.Modified = retriever.ModifiedState;
+                        kvp.Value.Modified = ms;
                     }
                 }
                 catch (SqlTypeException ex)
@@ -218,7 +221,7 @@ namespace Signum.Engine.Linq
             {
                 SqlPreCommand eager = EagerProjections == null ? null : EagerProjections.Select(cp => cp.PreCommand()).Combine(Spacing.Double);
 
-                SqlPreCommand main = MainPreCommand();
+                SqlPreCommand main = GetMainPreCommand();
 
                 SqlPreCommand lazy = LazyChildProjections  == null ? null : LazyChildProjections.Select(cp => cp.PreCommand()).Combine(Spacing.Double);
 
@@ -237,9 +240,15 @@ namespace Signum.Engine.Linq
             }
         }
 
-        public SqlPreCommandSimple MainPreCommand()
+        public SqlPreCommandSimple GetMainPreCommand()
         {
             return new SqlPreCommandSimple(CommandText, Parameters);
+        }
+
+
+        public LambdaExpression GetMainProjector()
+        {
+            return this.ProjectorExpression;
         }
     }
 

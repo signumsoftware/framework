@@ -26,7 +26,7 @@ namespace Signum.Windows.Operations
             MenuItem miResult = new MenuItem()
             {
                 Header = coc.OperationSettings.TryCC(f => f.Text) ?? coc.OperationInfo.Key.NiceToString(),
-                Icon = coc.OperationSettings.TryCC(f => f.Icon),
+                Icon = coc.OperationSettings.TryCC(f => f.Icon.ToSmallImage()),
             };
 
             if (coc.CanExecute != null)

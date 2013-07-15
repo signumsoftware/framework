@@ -135,9 +135,10 @@ namespace Signum.Utilities
             }
         }
 
-        public static void Wait(string startingText, Func<int> updateOrDelete)
+        public static void WaitRows(string startingText, Func<int> updateOrDelete)
         {
-            Wait(startingText, () =>
+            SafeConsole.WriteColor(ConsoleColor.Gray, startingText); 
+            WaitExecute(() =>
             {
                 int result = updateOrDelete();
 
@@ -149,9 +150,22 @@ namespace Signum.Utilities
             }); 
         }
 
-        public static void Wait(string startingText, Action action)
+        public static T WaitQuery<T>(string startingText, Func<T> query)
+        {
+            T result = default(T);
+            SafeConsole.WriteColor(ConsoleColor.Yellow, startingText);
+            WaitExecute(() => { result = query(); Console.WriteLine(); });
+            return result;
+        }
+
+        public static void WaitExecute(string startingText, Action action)
         {
             Console.Write(startingText);
+            WaitExecute(() => { action(); Console.WriteLine(); }); 
+        }
+
+        public static void WaitExecute(Action action)
+        {
             int? result = null;
             try
             {

@@ -35,8 +35,6 @@ namespace Signum.Engine.Basics
             get { return Schema.Current.TypeToName; }
         }
 
-        public static Dictionary<Type, EntityKind> EntityKinds { get; private set; }
-
         public static Type ToType(this TypeDN type)
         {
             return DnToType.GetOrThrow(type);
@@ -57,8 +55,6 @@ namespace Signum.Engine.Basics
 
             if (errors.HasText())
                 throw new InvalidOperationException(errors);
-
-            EntityKinds = attributes.Select(kvp => KVP.Create(kvp.Key, kvp.Value.EntityType)).ToDictionary();
 
             List<TypeDN> types = Database.RetrieveAll<TypeDN>();
 
@@ -164,16 +160,6 @@ namespace Signum.Engine.Basics
         public static string TryGetCleanName(Type type)
         {
             return Schema.Current.TypeToName.TryGetC(type);
-        }
-
-        public static EntityKind GetEntityKind(Type type)
-        {
-            return EntityKinds.GetOrThrow(type, "EntityKind not found for {0}");
-        }
-
-        public static EntityKind? TryGetEntityKind(Type type)
-        {
-            return EntityKinds.TryGetS(type);
         }
     }
 }

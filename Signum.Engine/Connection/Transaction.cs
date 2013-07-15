@@ -227,6 +227,9 @@ namespace Signum.Engine
 
             public NamedTransaction(ICoreTransaction parent, string savePointName)
             {
+                if (parent == null)
+                    throw new InvalidOperationException("Named transactions should be nested inside another transaction"); 
+
                 if (parent != null && parent.IsRolledback)
                     throw new InvalidOperationException("The transaction can not be created because a parent transaction is rolled back");
 

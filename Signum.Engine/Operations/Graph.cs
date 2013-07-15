@@ -57,12 +57,11 @@ namespace Signum.Engine.Operations
                                 OnEndOperation(entity);
 
                                 if (!entity.IsNew)
-                                {
                                     log.Target = entity.ToLite();
-                                    log.End = TimeZoneManager.Now;
-                                    using (ExecutionMode.Global())
-                                        log.Save();
-                                }
+
+                                log.End = TimeZoneManager.Now;
+                                using (ExecutionMode.Global())
+                                    log.Save();
 
                                 return tr.Commit(entity);
                             }
@@ -169,13 +168,12 @@ namespace Signum.Engine.Operations
 
                                 OnEndOperation(result);
 
-                                if (!result.IsNew)
-                                {
-                                    log.Target = result.ToLite();
-                                    log.End = TimeZoneManager.Now;
-                                    using (ExecutionMode.Global())
-                                        log.Save();
-                                }
+                                if (!entity.IsNew)
+                                    log.Target = entity.ToLite();
+
+                                log.End = TimeZoneManager.Now;
+                                using (ExecutionMode.Global())
+                                    log.Save();
 
                                 return tr.Commit(result);
                             }
@@ -257,13 +255,12 @@ namespace Signum.Engine.Operations
 
                                 OnEndOperation(result);
 
-                                if (!result.IsNew)
-                                {
+                                if (result != null && !result.IsNew)
                                     log.Target = result.ToLite();
-                                    log.End = TimeZoneManager.Now;
-                                    using (ExecutionMode.Global())
-                                        log.Save();
-                                }
+
+                                log.End = TimeZoneManager.Now;
+                                using (ExecutionMode.Global())
+                                    log.Save();
 
                                 return tr.Commit(result);
                             }

@@ -12,7 +12,7 @@ using Signum.Engine.Maps;
 
 namespace Signum.Test.Environment
 {
-    [Serializable, EntityKind(EntityKind.Shared), Mixin(typeof(CorruptMixin)), Mixin(typeof(ColaboratorsMixin))]
+    [Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional), Mixin(typeof(CorruptMixin)), Mixin(typeof(ColaboratorsMixin))]
     public class NoteWithDateDN : Entity
     {
         [SqlDbType(Size = int.MaxValue)]
@@ -77,7 +77,7 @@ namespace Signum.Test.Environment
         bool Lonely();
     }
 
-    [Serializable, EntityKind(EntityKind.Shared)]
+    [Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional)]
     public class ArtistDN : Entity, IAuthorDN
     {
         [NotNullable, SqlDbType(Size = 100)]
@@ -180,7 +180,7 @@ namespace Signum.Test.Environment
         Married, 
     }
 
-    [Serializable, EntityKind(EntityKind.Main)]
+    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class BandDN : Entity, IAuthorDN
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
@@ -242,7 +242,7 @@ namespace Signum.Test.Environment
         Save
     }
 
-    [Serializable, EntityKind(EntityKind.Shared)]
+    [Serializable, EntityKind(EntityKind.Shared, EntityData.Transactional)]
     public abstract class AwardDN : Entity
     {
         int year;
@@ -296,7 +296,7 @@ namespace Signum.Test.Environment
     }
 
 
-    [Serializable, EntityKind(EntityKind.Main)]
+    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class LabelDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
@@ -342,7 +342,7 @@ namespace Signum.Test.Environment
         Save
     }
 
-    [Serializable, EntityKind(EntityKind.SystemString)]
+    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
     public class CountryDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
@@ -360,7 +360,7 @@ namespace Signum.Test.Environment
         }
     }
 
-    [Serializable, EntityKind(EntityKind.Main)]
+    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class AlbumDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
@@ -481,7 +481,7 @@ namespace Signum.Test.Environment
         }
     }
 
-    [Serializable, EntityKind(EntityKind.System)]
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class AwardNominationDN : Entity
     {
         [ImplementedBy(typeof(ArtistDN), typeof(BandDN))]

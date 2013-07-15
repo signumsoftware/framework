@@ -201,11 +201,6 @@ namespace Signum.Web
             Manager.SetTokens(columns, queryDescription, canAggregate);
         }
 
-        public static void SetSearchViewableAndCreable(FindOptions findOptions)
-        {
-            Manager.SetSearchViewableAndCreable(findOptions);
-        }
-
         public static SortedList<string, string> ToSortedList(this NameValueCollection form, string prefix)
         {
             SortedList<string, string> formValues = new SortedList<string, string>(form.Count);
@@ -686,10 +681,11 @@ namespace Signum.Web
             if (!Navigator.IsFindable(findOptions.QueryName))
                 throw new UnauthorizedAccessException(SearchMessage.Query0IsNotAllowed.NiceToString().Formato(findOptions.QueryName));
 
-            QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
+            QueryDescription description = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
 
-            Navigator.SetTokens(findOptions.FilterOptions, queryDescription, canAggregate: false);
-            SetSearchViewableAndCreable(findOptions);
+            //Navigator.SetTokens(findOptions.FilterOptions, description, canAggregate: false);
+            SetSearchViewableAndCreable(findOptions, description);
+            SetDefaultOrder(findOptions, description);
 
             controller.ViewData.Model = new Context(null, "");
             controller.ViewData[ViewDataKeys.PartialViewName] = SearchControlView;
@@ -760,10 +756,9 @@ namespace Signum.Web
                 o.Token = QueryUtils.Parse(o.ColumnName, queryDescription, canAggregate);
         }
 
-        protected internal virtual void SetSearchViewableAndCreable(FindOptions findOptions)
+        public virtual void SetSearchViewableAndCreable(FindOptions findOptions, QueryDescription description)
         {
-            var queryDescription = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
-            var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
+            var entityColumn = description.Columns.SingleEx(a => a.IsEntity);
             Type entitiesType = Lite.Extract(entityColumn.Type);
             Implementations? implementations = entityColumn.Implementations;
 
@@ -778,19 +773,39 @@ namespace Signum.Web
                     (implementations.Value.IsByAll ? true : implementations.Value.Types.Any(t => Navigator.IsCreable(t, true)));
             }
         }
+
+        public virtual void SetDefaultOrder(FindOptions findOptions, QueryDescription description)
+        {
+            var entityColumn = description.Columns.SingleOrDefaultEx(cd => cd.IsEntity);
+
+            if (findOptions.OrderOptions.IsNullOrEmpty() && !entityColumn.Implementations.Value.IsByAll)
+            {
+                var orderType = entityColumn.Implementations.Value.Types.All(t => EntityKindCache.GetEntityData(t) == EntityData.Master) ? OrderType.Ascending : OrderType.Descending;
+
+                var column = description.Columns.SingleOrDefaultEx(c => c.Name == "Id");
+
+                if (column != null)
+                {
+                    findOptions.OrderOptions.Add(new OrderOption{ Token = new ColumnToken(column, description.QueryName), ColumnName = column.Name, OrderType = orderType });
+                }
+            }
+        }
         
         protected internal virtual PartialViewResult PartialFind(ControllerBase controller, FindOptions findOptions, Context context)
         {
             if (!Navigator.IsFindable(findOptions.QueryName))
                 throw new UnauthorizedAccessException(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().Formato(findOptions.QueryName));
 
-            SetSearchViewableAndCreable(findOptions);
+            var desc =  DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
+
+            SetSearchViewableAndCreable(findOptions, desc);
+            SetDefaultOrder(findOptions, desc);
 
             controller.ViewData.Model = context;
             controller.ViewData[ViewDataKeys.PartialViewName] = SearchControlView;
             
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
-            controller.ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(findOptions.QueryName);
+            controller.ViewData[ViewDataKeys.QueryDescription] = desc;
             
             if (!controller.ViewData.ContainsKey(ViewDataKeys.Title))
                 controller.ViewData[ViewDataKeys.Title] = SearchTitle(findOptions.QueryName);

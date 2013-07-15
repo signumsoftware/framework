@@ -86,7 +86,7 @@ namespace Signum.Windows.Operations
                 Header = eoc.OperationSettings.TryCC(os => os.Text) ?? 
                 (group == null || group.SimplifyName == null ? eoc.OperationInfo.Key.NiceToString() : 
                  group.SimplifyName(eoc.OperationInfo.Key.NiceToString())),
-                Icon = man.GetImage(eoc.OperationInfo.Key, eoc.OperationSettings),
+                Icon = man.GetImage(eoc.OperationInfo.Key, eoc.OperationSettings).ToSmallImage(),
                 Tag = eoc.OperationInfo,
                 Background = man.GetBackground(eoc.OperationInfo, eoc.OperationSettings)
             };
@@ -144,26 +144,29 @@ namespace Signum.Windows.Operations
                 }
                 else if (eoc.OperationInfo.OperationType == OperationType.ConstructorFrom)
                 {
+                    IIdentifiable result = null;
                     if (eoc.OperationInfo.Lite.Value)
                     {
-                        if (eoc.EntityControl.LooseChangesIfAny())
-                        {
-                            Lite<IdentifiableEntity> lite = ident.ToLite();
-                            IIdentifiable newIdent = Server.Return((IOperationServer s) => s.ConstructFromLite(lite, eoc.OperationInfo.Key, null));
-                            if (eoc.OperationInfo.Returns)
-                                Navigator.Navigate(newIdent);
-                        }
+                        if (!eoc.EntityControl.LooseChangesIfAny())
+                            return;
+
+                        Lite<IdentifiableEntity> lite = ident.ToLite();
+                        result = Server.Return((IOperationServer s) => s.ConstructFromLite(lite, eoc.OperationInfo.Key, null));
                     }
                     else
                     {
-                        IIdentifiable newIdent = Server.Return((IOperationServer s) => s.ConstructFrom(ident, eoc.OperationInfo.Key, null));
-                        if (eoc.OperationInfo.Returns)
-                            Navigator.Navigate(newIdent);
+                        result = Server.Return((IOperationServer s) => s.ConstructFrom(ident, eoc.OperationInfo.Key, null));
                     }
+
+                    if (result != null)
+                        Navigator.Navigate(result);
+                    else
+                        MessageBox.Show(Window.GetWindow(eoc.EntityControl), OperationMessage.TheOperation0DidNotReturnAnEntity.NiceToString().Formato(eoc.OperationInfo.Key.NiceToString()));
+
                 }
                 else if (eoc.OperationInfo.OperationType == OperationType.Delete)
                 {
-                    if (MessageBox.Show(Window.GetWindow(eoc.EntityControl), "Are you sure of deleting the entity?", "Delete?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                    if (MessageBox.Show(Window.GetWindow(eoc.EntityControl), OperationMessage.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem.NiceToString(),  OperationMessage.Delete.NiceToString(), MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                     {
                         Lite<IdentifiableEntity> lite = ident.ToLite();
                         Server.Execute((IOperationServer s) => s.Delete(lite, eoc.OperationInfo.Key, null));

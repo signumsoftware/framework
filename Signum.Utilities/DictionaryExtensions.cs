@@ -410,6 +410,11 @@ namespace Signum.Utilities
             }
         }
 
+        public static void RemoveAll<K, V>(this IDictionary<K, V> dictionary, Func<KeyValuePair<K, V>, bool> condition)
+        {
+            dictionary.RemoveRange(dictionary.Where(condition).Select(a => a.Key).ToList());
+        }
+
         public static void RemoveRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<K> keys)
         {
             foreach (var k in keys)

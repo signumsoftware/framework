@@ -139,5 +139,10 @@ namespace Signum.Engine.Linq
             }
             return continuation(cr);
         }
+
+        public ITranslateResult GetRawTranslateResult(Expression expression)
+        {
+            return Translate(expression, tr => tr);
+        }
     }
 }
