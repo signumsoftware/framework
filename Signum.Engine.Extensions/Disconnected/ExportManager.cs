@@ -104,14 +104,14 @@ namespace Signum.Engine.Disconnected
 
                         using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { CreateSchema = l })))
                         using (Connector.Override(newDatabase))
-                        using (SchemaName.AvoidDatabaseName())
+                        using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
                         {
                             Administrator.TotalGeneration();
                         }
 
                         using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { DisableForeignKeys = l })))
                         using (Connector.Override(newDatabase))
-                        using (SchemaName.AvoidDatabaseName())
+                        using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
                         {
                             foreach (var tuple in downloadTables.Where(t => !t.Type.IsEnumEntity()))
                             {
@@ -161,7 +161,7 @@ namespace Signum.Engine.Disconnected
                                 t => DisconnectedTools.MaxIdInRange(t, machine.SeedMin, machine.SeedMax));
 
                             using (Connector.Override(newDatabase))
-                            using (SchemaName.AvoidDatabaseName())
+                            using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
                             {
                                 foreach (var table in tablesToUpload)
                                 {
@@ -178,7 +178,7 @@ namespace Signum.Engine.Disconnected
 
                         machine.InDB().UnsafeUpdate(m => new DisconnectedMachineDN { State = DisconnectedMachineState.Disconnected });
                         using (SqlConnector.Override(newDatabase))
-                        using (SchemaName.AvoidDatabaseName())
+                        using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
                             machine.InDB().UnsafeUpdate(m => new DisconnectedMachineDN { State = DisconnectedMachineState.Disconnected });
 
                         using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { BackupDatabase = l })))
@@ -220,7 +220,7 @@ namespace Signum.Engine.Disconnected
             var clone = export.Retrieve().Clone();
 
             using (Connector.Override(newDatabase))
-            using (SchemaName.AvoidDatabaseName())
+            using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
             {
                 clone.Save();
             }

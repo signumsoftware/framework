@@ -61,7 +61,7 @@ namespace Signum.Engine.Authorization
             var graph = Schema.Current.ToDirectedGraph();
             graph.RemoveEdges(graph.FeedbackEdgeSet().Edges);
             var compilationOrder = graph.CompilationOrder().ToList();
-            var entityTypes = graph.ToDictionary(t => t.Type, t => TypeLogic.GetEntityKind(t.Type));
+            var entityTypes = graph.ToDictionary(t => t.Type, t => EntityKindCache.GetEntityKind(t.Type));
 
             return role =>
             {
@@ -300,12 +300,8 @@ namespace Signum.Engine.Authorization
 
         public override Func<Type, TypeAllowedAndConditions> MergeDefault(Lite<RoleDN> role, IEnumerable<Func<Type, TypeAllowedAndConditions>> baseDefaultValues)
         {
-            var baseValues = baseDefaultValues.Select(f => ConstantFunction.GetConstantValue(f).Fallback).ToList();
-
-            if (AuthLogic.GetMergeStrategy(role) == MergeStrategy.Intersection)
-                return new ConstantFunction<Type, TypeAllowedAndConditions>(new TypeAllowedAndConditions(MinTypeAllowed(baseValues))).GetValue;
-            else
-                return new ConstantFunction<Type, TypeAllowedAndConditions>(new TypeAllowedAndConditions(MaxTypeAllowed(baseValues))).GetValue;
+            var taac = new TypeAllowedAndConditions(AuthLogic.GetDefaultAllowed(role) ? TypeAllowed.Create : TypeAllowed.None);
+            return new ConstantFunction<Type, TypeAllowedAndConditions>(taac).GetValue;
         }
 
         public static TypeAllowedAndConditions MergeBase(IEnumerable<TypeAllowedAndConditions> baseRules, Func<IEnumerable<TypeAllowed>, TypeAllowed> maxMerge, TypeAllowed max, TypeAllowed min)

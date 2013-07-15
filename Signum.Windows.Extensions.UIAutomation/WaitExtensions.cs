@@ -131,7 +131,7 @@ namespace Signum.Windows.UIAutomation
                 Count = count,
                 retryCount = retryCount,
                 ClassName = r.SafeGet(p => p.ClassName, "error"),
-                Name = r.SafeGet(p => p.Name, "error"),
+                Name = r.SafeGet(p =>p.Name, "error"),
                 RuntimeId = r.GetRuntimeId().ToString("."),
                 ItemStatus = r.SafeGet(p => p.ItemStatus, "error"),
             }));

@@ -30,7 +30,7 @@ namespace Signum.Entities.Mailing
         Disable
     }
 
-    [Serializable, EntityKind(EntityKind.Main)]
+    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class EmailTemplateDN : Entity
     {
         public EmailTemplateDN() { }

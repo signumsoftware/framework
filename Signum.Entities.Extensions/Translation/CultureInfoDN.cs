@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace Signum.Entities.Translation
 {
-    [Serializable, EntityKind(EntityKind.String)]
+    [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
     public class CultureInfoDN : Entity
     {
         public CultureInfoDN() { }

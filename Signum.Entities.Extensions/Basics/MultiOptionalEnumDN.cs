@@ -7,7 +7,7 @@ using Signum.Utilities;
 
 namespace Signum.Entities.Basics
 {
-    [Serializable, EntityKind(EntityKind.String)]
+    [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
     public class MultiOptionalEnumDN : IdentifiableEntity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]

@@ -9,7 +9,7 @@ using System.Linq.Expressions;
 
 namespace Signum.Entities.Processes
 {
-    [Serializable, EntityKind(EntityKind.Part)]
+    [Serializable, EntityKind(EntityKind.Part, EntityData.Transactional)]
     public class PackageDN : IdentifiableEntity, IProcessDataDN
     {
         [SqlDbType(Size = 200)]
@@ -27,7 +27,7 @@ namespace Signum.Entities.Processes
         }
     }
 
-    [Serializable, EntityKind(EntityKind.System)]
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class PackageOperationDN : PackageDN
     {
         OperationDN operation;
@@ -49,7 +49,7 @@ namespace Signum.Entities.Processes
     }
 
 
-    [Serializable, EntityKind(EntityKind.System)]
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class PackageLineDN : IdentifiableEntity, IProcessLineDataDN
     {
         [NotNullable]

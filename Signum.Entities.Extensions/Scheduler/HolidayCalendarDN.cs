@@ -9,8 +9,8 @@ using System.Linq.Expressions;
 
 namespace Signum.Entities.Scheduler
 {
-    [Serializable, EntityKind(EntityKind.Shared)]
-    public class CalendarDN : Entity
+    [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
+    public class HolidayCalendarDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
         string name;
@@ -56,7 +56,7 @@ namespace Signum.Entities.Scheduler
             return base.PropertyValidation(pi);
         }
 
-        static readonly Expression<Func<CalendarDN, string>> ToStringExpression = e => e.name;
+        static readonly Expression<Func<HolidayCalendarDN, string>> ToStringExpression = e => e.name;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);

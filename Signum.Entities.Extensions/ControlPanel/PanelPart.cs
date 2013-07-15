@@ -106,7 +106,7 @@ namespace Signum.Entities.ControlPanel
         void FromXml(XElement element, IFromXmlContext ctx);
     }
 
-    [Serializable, EntityKind(EntityKind.Part)]
+    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class UserQueryPartDN : Entity, IPartDN
     {
         [NotNullable]
@@ -148,7 +148,7 @@ namespace Signum.Entities.ControlPanel
         }
     }
 
-    [Serializable, EntityKind(EntityKind.Part)]
+    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class UserChartPartDN : Entity, IPartDN
     {
         [NotNullable]
@@ -199,7 +199,7 @@ namespace Signum.Entities.ControlPanel
         }
     }
 
-    [Serializable, EntityKind(EntityKind.Part)]
+    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class CountSearchControlPartDN : Entity, IPartDN
     {
         [NotNullable]
@@ -290,7 +290,7 @@ namespace Signum.Entities.ControlPanel
         }
     }
 
-    [Serializable, EntityKind(EntityKind.Part)]
+    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
     public class LinkListPartDN : Entity, IPartDN
     {
         [NotNullable]

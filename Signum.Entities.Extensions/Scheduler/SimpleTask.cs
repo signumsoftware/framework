@@ -2,19 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Signum.Utilities;
 using Signum.Entities.Basics;
+using Signum.Entities;
+using Signum.Entities.Processes;
+using Signum.Utilities;
+using Signum.Entities.Authorization;
 
-namespace Signum.Entities.Authorization
+namespace Signum.Entities.Scheduler
 {
     [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
-    public class PermissionDN : MultiEnumDN
+    public class SimpleTaskDN : MultiEnumDN, ITaskDN
     {
-
-    }
-
-    public enum BasicPermission
-    {
-        AdminRules,
+        
     }
 }

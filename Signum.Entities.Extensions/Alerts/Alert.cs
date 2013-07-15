@@ -14,7 +14,7 @@ using Signum.Services;
 
 namespace Signum.Entities.Alerts
 {
-    [Serializable, EntityKind(EntityKind.Main)]
+    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class AlertDN : IdentifiableEntity
     {
         [ImplementedByAll]
@@ -101,22 +101,29 @@ namespace Signum.Entities.Alerts
             return text.EtcLines(100);
         }
 
-        static Expression<Func<AlertDN, bool>> AlertedExpression = 
-            a => (a.AlertDate.HasValue && a.AlertDate <= TimeZoneManager.Now) && !a.AttendedDate.HasValue;
+        static Expression<Func<AlertDN, bool>> AttendedExpression =
+           a => a.AttendedDate.HasValue;
+        public bool Attended
+        {
+            get { return AttendedExpression.Evaluate(this); }
+        }
+
+        static Expression<Func<AlertDN, bool>> NotAttendedExpression =
+           a => a.AttendedDate == null;
+        public bool NotAttended
+        {
+            get { return NotAttendedExpression.Evaluate(this); }
+        }
+
+        static Expression<Func<AlertDN, bool>> AlertedExpression =
+            a => !a.AttendedDate.HasValue && a.AlertDate <= TimeZoneManager.Now;
         public bool Alerted
         {
             get{ return AlertedExpression.Evaluate(this); }
         }
 
-        static Expression<Func<AlertDN, bool>> AttendedExpression = 
-            a => a.AttendedDate.HasValue; 
-        public bool Attended
-        {
-            get{ return AttendedExpression.Evaluate(this); }
-        }
-
-        static Expression<Func<AlertDN, bool>> FutureExpression = 
-            a => !a.AttendedDate.HasValue && (a.AlertDate == null || a.AlertDate > TimeZoneManager.Now); 
+        static Expression<Func<AlertDN, bool>> FutureExpression =
+            a => !a.AttendedDate.HasValue && a.AlertDate > TimeZoneManager.Now; 
         public bool Future
         {
             get{ return FutureExpression.Evaluate(this); }
@@ -162,7 +169,7 @@ namespace Signum.Entities.Alerts
         Unattend
     }
 
-    [Serializable, EntityKind(EntityKind.String)]
+    [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
     public class AlertTypeDN : MultiOptionalEnumDN
     {
       static AlertTypeDN()

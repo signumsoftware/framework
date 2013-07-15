@@ -15,7 +15,7 @@ using System.Net.Mail;
 
 namespace Signum.Entities.Mailing
 {
-    [Serializable, EntityKind(EntityKind.Main)]
+    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class EmailMessageDN : Entity
     {   
         public EmailMessageDN()
@@ -326,6 +326,7 @@ namespace Signum.Entities.Mailing
         CreateMailFromTemplate
     }
 
+    [Serializable, EntityKind(EntityKind.System)]
     public enum EmailMessageMessage
     {
         [Description("The email message cannot be sent from state {0}")]
@@ -335,6 +336,7 @@ namespace Signum.Entities.Mailing
     }
 
     [Serializable, EntityKind(EntityKind.System)]
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class EmailPackageDN : IdentifiableEntity, IProcessDataDN
     {
         [SqlDbType(Size = 200)]

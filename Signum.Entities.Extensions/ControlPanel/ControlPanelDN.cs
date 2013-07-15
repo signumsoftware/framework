@@ -16,7 +16,7 @@ using System.Xml.Linq;
 
 namespace Signum.Entities.ControlPanel
 {
-    [Serializable, EntityKind(EntityKind.Main)]
+    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class ControlPanelDN : Entity, IUserAssetEntity
     {
         public ControlPanelDN()

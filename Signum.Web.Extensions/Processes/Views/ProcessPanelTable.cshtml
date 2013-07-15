@@ -4,9 +4,9 @@
 @using Signum.Entities.DynamicQuery
 @model ProcessLogicState
 <div id="processMainDiv">
-        <br />
+    <br />
     <h2>ProcessLogic state</h2>
-   
+
     State: <strong>
         @if (Model.Running)
         {
@@ -26,24 +26,23 @@
     <table class="sf-search-results sf-stats-table">
         <thead>
             <tr>
-                <th>
-                    Process
+                <th>Process
                 </th>
-                <th>
-                    State
+                <th>State
                 </th>
-                <th>
-                    Progress
+                <th>Progress
                 </th>
-                <th>
-                    IsCancellationRequested
+                <th>MachineName
                 </th>
+                <th>IsCancellationRequested
+                </th>
+
             </tr>
         </thead>
         <tbody>
             <tr>
                 <td colspan="4">
-                    <b>Executing (@Model.Executing.Count)</b>
+                    <b>@Model.Executing.Count processes executing in @Environment.MachineName ()</b>
                 </td>
             </tr>
             @foreach (var item in Model.Executing)
@@ -55,26 +54,11 @@
                     </td>
                     <td>@item.Progress.TryToString("p")
                     </td>
-                    <td>@item.IsCancellationRequested
-                    </td>
-                </tr>
-            }
-            <tr>
-                <td colspan="4">
-                    <b>Queued (@Model.Queue.Count)</b>
-                </td>
-            </tr>
-            @foreach (var item in Model.Queue)
-            {
-                <tr>
-                    <td>@Html.LightEntityLine(item.Process, true)
-                    </td>
-                    <td>@item.State
-                    </td>
-                    <td>@item.Progress
+                    <td>@item.MachineName
                     </td>
                     <td>@item.IsCancellationRequested
                     </td>
+
                 </tr>
             }
         </tbody>
@@ -88,7 +72,7 @@
     OrderOptions = { new OrderOption("CreationDate", Signum.Entities.DynamicQuery.OrderType.Descending) },
     FilterMode = Signum.Web.FilterMode.Hidden,
     SearchOnLoad = true,
-    Pagination =  new Pagination.Top(10),
-},new Context(null, "sc"))
+    Pagination = new Pagination.Firsts(10),
+}, new Context(null, "sc"))
     <br />
 </div>
