@@ -183,8 +183,7 @@ namespace Signum.Engine.Mailing
                 var queryName = QueryLogic.ToQueryName(template.Query.Key);
                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
 
-             
-            var smtpConfig = template.SmtpConfiguration.TryCC(SmtpConfigurationLogic.RetrieveFromCache) ?? SmtpConfigurationLogic.DefaultSmtpConfiguration.Value;
+                var smtpConfig = template.SmtpConfiguration.TryCC(SmtpConfigurationLogic.RetrieveFromCache) ?? SmtpConfigurationLogic.DefaultSmtpConfiguration.Value;
 
                 var columns = GetTemplateColumns(template, template.Tokens, qd);
 
@@ -259,7 +258,7 @@ namespace Signum.Engine.Mailing
                 }
                 else if (smtpConfig != null)
                 {
-                    from = smtpConfig.RetrieveFromCache().DefaultFrom;
+                    from = smtpConfig.DefaultFrom;
                 }
 
                 if (from == null)
@@ -272,7 +271,7 @@ namespace Signum.Engine.Mailing
                     };
                 }
                 from = smtpConfig.DefaultFrom;
-            }
+            
 
                 var email = new EmailMessageDN
                 {

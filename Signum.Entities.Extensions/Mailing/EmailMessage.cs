@@ -85,7 +85,7 @@ namespace Signum.Entities.Mailing
 
         [SqlDbType(Size = int.MaxValue)]
         string subject;
-        [StringLengthValidator(AllowNulls = false, Min = 3)]
+        [StringLengthValidator(AllowNulls = true, Min = 3)]
         public string Subject
         {
             get { return subject; }
@@ -94,7 +94,7 @@ namespace Signum.Entities.Mailing
 
         [SqlDbType(Size = int.MaxValue)]
         string body;
-        [StringLengthValidator(AllowNulls = false, Min = 3)]
+        [StringLengthValidator(AllowNulls = true, Min = 3)]
         public string Body
         {
             get { return body; }
@@ -143,6 +143,7 @@ namespace Signum.Entities.Mailing
             set { Set(ref package, value, () => Package); }
         }
 
+        [Ignore]
         Lite<Pop3ReceptionDN> reception;
         public Lite<Pop3ReceptionDN> Reception
         {

@@ -13,10 +13,16 @@
 
 .sf-email-replacements-token-container
 {
-    margin-left: 110px;
+    margin-left: 100px;
 }
 
 .sf-email-inserttoken-targetactive
 {
    border: 2px solid #58ACFA !important;
 }
+
+.sf-email-replacements-container
+{
+    margin-top: 5px;
+}
+

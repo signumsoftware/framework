@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using Signum.Entities.Basics;
 using Signum.Entities.Mailing;
 using Signum.Entities.Scheduler;
+using Signum.Utilities;
 
 namespace Signum.Entities.Mailing
 {
@@ -76,11 +78,18 @@ namespace Signum.Entities.Mailing
             set { Set(ref readTimeout, value, () => ReadTimeout); }
         }
 
-        int maxDownloadEmails;
+        int maxDownloadEmails = 100;
         public int MaxDownloadEmails
         {
             get { return maxDownloadEmails; }
             set { Set(ref maxDownloadEmails, value, () => MaxDownloadEmails); }
+        }
+
+        bool deleteAfterReception =  true;
+        public bool DeleteAfterReception
+        {
+            get { return deleteAfterReception; }
+            set { Set(ref deleteAfterReception, value, () => DeleteAfterReception); }
         }
 
         [NotNullable]
@@ -89,6 +98,12 @@ namespace Signum.Entities.Mailing
         {
             get { return clientCertificationFiles; }
             set { Set(ref clientCertificationFiles, value, () => ClientCertificationFiles); }
+        }
+
+        static Expression<Func<Pop3ConfigurationDN, string>> ToStringExpression = e => e.Name;
+        public override string ToString()
+        {
+            return ToStringExpression.Evaluate(this);
         }
 
     }
@@ -107,6 +122,15 @@ namespace Signum.Entities.Mailing
     [Serializable, EntityKind(EntityKind.System)]
     public class Pop3ReceptionDN : Entity
     {
+        [NotNullable]
+        Lite<Pop3ConfigurationDN> pop3Configuration;
+        [NotNullValidator]
+        public Lite<Pop3ConfigurationDN> Pop3Configuration
+        {
+            get { return pop3Configuration; }
+            set { Set(ref pop3Configuration, value, () => Pop3Configuration); }
+        }
+
         DateTime startDate;
         public DateTime StartDate
         {

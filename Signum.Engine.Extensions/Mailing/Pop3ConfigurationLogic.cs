@@ -26,7 +26,24 @@ namespace Signum.Engine.Mailing
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                sb.Settings.AssertNotIgnored((EmailMessageDN em) => em.Reception, "start Pop3ConfigurationLogic");
+               
                 sb.Include<Pop3ConfigurationDN>();
+                sb.Include<Pop3ReceptionDN>();
+
+                dqm.RegisterQuery(typeof(Pop3ReceptionDN), () =>
+                    from s in Database.Query<Pop3ReceptionDN>()
+                    select new
+                    {
+                        Entity = s,
+                        s.Id,
+                        s.Pop3Configuration,
+                        s.StartDate,
+                        s.EndDate,
+                        s.NumberOfMails,
+                        s.MailboxSize,
+                        s.Exception
+                    });
 
                 dqm.RegisterQuery(typeof(Pop3ConfigurationDN), () =>
                     from s in Database.Query<Pop3ConfigurationDN>()
@@ -70,7 +87,8 @@ namespace Signum.Engine.Mailing
 
         public static void ReceiveEmails(this Pop3ConfigurationDN config)
         {
-            Pop3ReceptionDN reception = new Pop3ReceptionDN { StartDate = TimeZoneManager.Now };
+            Pop3ReceptionDN reception = new Pop3ReceptionDN { Pop3Configuration = config.ToLite(), StartDate = TimeZoneManager.Now };
+            reception.Save();
 
             try
             {
@@ -82,35 +100,63 @@ namespace Signum.Engine.Mailing
                 if (Trace != null)
                     client.Trace += Trace;
 
-                int numberOfMails;
-                int mailboxSize;
-                if (!client.GetMailboxStats(out numberOfMails, out mailboxSize))
-                    throw new Pop3Exception("Error retrieving mailbox stats");
-
-                reception.NumberOfMails = numberOfMails;
-                reception.MailboxSize = mailboxSize; 
-
-                int maxids = Math.Min(numberOfMails, config.MaxDownloadEmails);
-
-                for (int i = 1; i <= maxids; i++)
+                try
                 {
-                    RxMailMessage mm;
-                    if (client.GetEmail(i, out mm))
+                    client.Connect();
+
+                    int numberOfMails;
+                    int mailboxSize;
+                    if (!client.GetMailboxStats(out numberOfMails, out mailboxSize))
+                        throw new Pop3Exception("Error retrieving mailbox stats");
+
+                    reception.NumberOfMails = numberOfMails;
+                    reception.MailboxSize = mailboxSize;
+
+                    int maxids = Math.Min(numberOfMails, config.MaxDownloadEmails);
+
+                    for (int i = 1; i <= maxids; i++)
                     {
-                        var email = ToEmailMessage(mm);
+                        using (Transaction tr = Transaction.ForceNew())
+                        {
+                            try
+                            {
+                                RxMailMessage mm;
+                                if (client.GetEmail(i, out mm))
+                                {
+                                    var email = ToEmailMessage(mm);
+                                    email.Reception = reception.ToLite();
 
-                        if (AssociateWithEntities != null)
-                            AssociateWithEntities(email);
+                                    if (AssociateWithEntities != null)
+                                        AssociateWithEntities(email);
 
-                        email.Save();
+
+                                    using (OperationLogic.AllowSave<EmailMessageDN>())
+                                        email.Save();
+
+                                    if (config.DeleteAfterReception)
+                                        client.DeleteEmail(i);
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                e.LogException();
+                            }
+
+                            tr.Commit();
+                        }
                     }
-                }
 
-                reception.EndDate = TimeZoneManager.Now;
-                reception.Save(); 
+                    reception.EndDate = TimeZoneManager.Now;
+                    reception.Save();
+                }
+                finally
+                {
+                    client.Disconnect();
+                }
             }
             catch (Exception e)
             {
+
                 var ex = e.LogException();
 
                 try
@@ -127,6 +173,8 @@ namespace Signum.Engine.Mailing
 
         private static EmailMessageDN ToEmailMessage(RxMailMessage mm)
         {
+            mm.MailStructure();
+
             return new EmailMessageDN
             {
                 EditableMessage = false,
