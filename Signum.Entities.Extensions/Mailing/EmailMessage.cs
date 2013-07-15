@@ -326,7 +326,6 @@ namespace Signum.Entities.Mailing
         CreateMailFromTemplate
     }
 
-    [Serializable, EntityKind(EntityKind.System)]
     public enum EmailMessageMessage
     {
         [Description("The email message cannot be sent from state {0}")]
@@ -335,7 +334,6 @@ namespace Signum.Entities.Mailing
         Message,
     }
 
-    [Serializable, EntityKind(EntityKind.System)]
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class EmailPackageDN : IdentifiableEntity, IProcessDataDN
     {

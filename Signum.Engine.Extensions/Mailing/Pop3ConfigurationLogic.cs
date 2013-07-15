@@ -56,19 +56,21 @@ namespace Signum.Engine.Mailing
                     Execute = (e, _) => e.ReceiveEmails()
                 }.Register();
 
-                SchedulerLogic.ExecuteTask.Register((Pop3ConfigurationDN smtp) =>smtp.ReceiveEmails());
+                SchedulerLogic.ExecuteTask.Register((Pop3ConfigurationDN smtp) => smtp.ReceiveEmails().ToLite());
 
-                ActionTaskLogic.Register(Pop3ConfigurationAction.ReceiveAllActivePop3Configurations, () =>
+                SimpleTaskLogic.Register(Pop3ConfigurationAction.ReceiveAllActivePop3Configurations, () =>
                 {
                     foreach (var item in Database.Query<Pop3ConfigurationDN>().Where(a=>a.Active).ToList())
                     {
                         item.ReceiveEmails();
                     }
+
+                    return null;
                 }); 
             }
         }
 
-        public static void ReceiveEmails(this Pop3ConfigurationDN config)
+        public static Pop3ReceptionDN ReceiveEmails(this Pop3ConfigurationDN config)
         {
             Pop3ReceptionDN reception = new Pop3ReceptionDN { StartDate = TimeZoneManager.Now };
 
@@ -121,6 +123,8 @@ namespace Signum.Engine.Mailing
                 }
                 catch { }
             }
+
+            return reception;
         }
 
         public static Action<EmailMessageDN> AssociateWithEntities;

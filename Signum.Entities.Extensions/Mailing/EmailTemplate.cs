@@ -283,7 +283,7 @@ namespace Signum.Entities.Mailing
         }
     }
 
-    [Serializable, EntityKind(EntityKind.SystemString)]
+    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
     public class SystemEmailDN : IdentifiableEntity
     {
         [NotNullable, UniqueIndex]
@@ -367,7 +367,7 @@ namespace Signum.Entities.Mailing
         Save
 	}
 
-    [Serializable, EntityKind(EntityKind.Main)]
+    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class EmailMasterTemplateDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]
