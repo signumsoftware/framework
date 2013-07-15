@@ -84,7 +84,7 @@ namespace Signum.Engine.Processes
                 Progress = null,
                 Exception = null,
                 ExceptionDate = null,
-                MachineName = ProcessLogic.ExecuteInMyMachine ? Environment.MachineName : ProcessDN.None
+                MachineName = ProcessLogic.JustMyProcesses ? Environment.MachineName : ProcessDN.None
             });
         }
 
@@ -98,7 +98,7 @@ namespace Signum.Engine.Processes
             process.Progress = null;
             process.Exception = null;
             process.ExceptionDate = null;
-            process.MachineName = ProcessLogic.ExecuteInMyMachine ? Environment.MachineName : ProcessDN.None;
+            process.MachineName = ProcessLogic.JustMyProcesses ? Environment.MachineName : ProcessDN.None;
         }
 
         public static void StartRunningProcesses()
@@ -118,7 +118,7 @@ namespace Signum.Engine.Processes
                          where
                          p.State == ProcessState.Executing && p.MachineName == Environment.MachineName ||
                          p.State == ProcessState.Suspending && p.MachineName == Environment.MachineName ||
-                         p.State == ProcessState.Suspended && (p.MachineName == Environment.MachineName || !ProcessLogic.ExecuteInMyMachine && p.MachineName == ProcessDN.None)
+                         p.State == ProcessState.Suspended && (p.MachineName == Environment.MachineName || !ProcessLogic.JustMyProcesses && p.MachineName == ProcessDN.None)
                          select p).SetAsQueued();
 
                         CancelNewProcesses = new CancellationTokenSource();
@@ -134,7 +134,7 @@ namespace Signum.Engine.Processes
                              select p).SetAsQueued();
 
                             var list = Database.Query<ProcessDN>()
-                                    .Where(a => ProcessLogic.ExecuteInMyMachine ? a.MachineName == Environment.MachineName : a.MachineName == ProcessDN.None)
+                                    .Where(a => ProcessLogic.JustMyProcesses ? a.MachineName == Environment.MachineName : a.MachineName == ProcessDN.None)
                                     .Where(a => a.State == ProcessState.Planned)
                                     .Select(a => a.PlannedDate)
                                     .ToListWithInvalidation("Process", args => autoResetEvent.Set());
@@ -151,7 +151,7 @@ namespace Signum.Engine.Processes
                                     {
                                         var queued = Database.Query<ProcessDN>()
                                             .Where(p => p.State == ProcessState.Queued)
-                                            .Where(p => p.MachineName == Environment.MachineName || !ProcessLogic.ExecuteInMyMachine && p.MachineName == ProcessDN.None)
+                                            .Where(p => p.MachineName == Environment.MachineName || !ProcessLogic.JustMyProcesses && p.MachineName == ProcessDN.None)
                                             .Select(a => new { Process = a.ToLite(), a.QueuedDate })
                                             .ToListWithInvalidation("", args => autoResetEvent.Set());
 

@@ -31,7 +31,7 @@ namespace Signum.Engine.Processes
 {
     public static class ProcessLogic
     {
-        public static bool ExecuteInMyMachine = true; 
+        public static bool JustMyProcesses = true; 
 
         public static Polymorphic<Action<IProcessSessionDN>> ApplySession = new Polymorphic<Action<IProcessSessionDN>>();
 
@@ -218,7 +218,7 @@ namespace Signum.Engine.Processes
                     ToState = ProcessState.Planned,
                     Execute = (p, args) =>
                     {
-                        if (ExecuteInMyMachine)
+                        if (JustMyProcesses)
                             p.MachineName = Environment.MachineName;
                         else
                             p.MachineName = ProcessDN.None;
@@ -246,7 +246,7 @@ namespace Signum.Engine.Processes
                     ToState = ProcessState.Queued,
                     Execute = (p, _) =>
                     {
-                        if (ExecuteInMyMachine)
+                        if (JustMyProcesses)
                             p.MachineName = Environment.MachineName;
                         else
                             p.MachineName = ProcessDN.None;
