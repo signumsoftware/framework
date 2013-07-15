@@ -140,6 +140,7 @@
     <Compile Include="Mailing\Pop3\QuotedPrintable.cs" />
     <Compile Include="Mailing\Pop3\RxMailMessage.cs" />
     <Compile Include="Mailing\SystemEmailLogic.cs" />
+    <Compile Include="Processes\ProcessRunnerLogic.cs" />
     <Compile Include="Translation\CultureInfoLogic.cs" />
     <Compile Include="Translation\LocalizedInstanceLogic.cs" />
     <Compile Include="Mailing\EmailLogic.cs" />
@@ -161,7 +162,7 @@
     <Compile Include="Translation\TranslationLogic.cs" />
     <Compile Include="UserQueries\UserQueryLogic.cs" />
     <Compile Include="Scheduler\SchedulerLogic.cs" />
-    <Compile Include="Scheduler\ActionTaskLogic.cs" />
+    <Compile Include="Scheduler\SimpleTaskLogic.cs" />
     <Compile Include="ServerExtensions.cs" />
     <Compile Include="SMS\SMSLogic.cs" />
     <Compile Include="SMS\SMSProcessAlgortihms.cs" />

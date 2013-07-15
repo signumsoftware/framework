@@ -63,8 +63,8 @@ namespace Signum.Web.Processes
                     ContextualItemsHelper.GetContextualItemsForLites += CreateGroupContextualItem;
                 }
 
-                SpecialOmniboxProvider.Register(new SpecialOmniboxAction("ProcessControlPanel", 
-                    () => ProcessPermission.ViewProcessControlPanel.IsAuthorized(),
+                SpecialOmniboxProvider.Register(new SpecialOmniboxAction("ProcessPanel", 
+                    () => ProcessPermission.ViewProcessPanel.IsAuthorized(),
                     uh => uh.Action((ProcessController pc) => pc.View())));
             }
         }

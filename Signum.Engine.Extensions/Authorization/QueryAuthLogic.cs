@@ -68,7 +68,7 @@ namespace Signum.Engine.Authorization
         static Action<Lite<RoleDN>> SuggestQueryRules()
         {
             var queries = (from type in Schema.Current.Tables.Keys
-                           where TypeLogic.GetEntityKind(type) != EntityKind.Part
+                           where EntityKindCache.GetEntityKind(type) != EntityKind.Part
                            let qs = DynamicQueryManager.Current.GetTypeQueries(type).Keys
                            where qs.Any()
                            select KVP.Create(type, qs.ToList())).ToDictionary();

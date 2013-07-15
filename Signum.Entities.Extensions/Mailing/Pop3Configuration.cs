@@ -10,7 +10,7 @@ using Signum.Utilities;
 
 namespace Signum.Entities.Mailing
 {
-    [Serializable, EntityKind(EntityKind.Main)]
+    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class Pop3ConfigurationDN : Entity, ITaskDN
     {
         bool active;
@@ -119,7 +119,7 @@ namespace Signum.Entities.Mailing
         ReceiveAllActivePop3Configurations
     }
 
-    [Serializable, EntityKind(EntityKind.System)]
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class Pop3ReceptionDN : Entity
     {
         [NotNullable]

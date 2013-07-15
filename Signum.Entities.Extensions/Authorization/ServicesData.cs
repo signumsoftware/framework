@@ -61,14 +61,6 @@ namespace Signum.Entities.Authorization
         }
     }
 
-    public static class ConstantFunction
-    {
-        public static A GetConstantValue<K, A>(Func<K, A> defaultConstant)
-        {
-            return ((ConstantFunction<K, A>)defaultConstant.Target).Allowed;
-        }
-    }
-
 
     [Serializable]
     public abstract class BaseRulePack<T> : ModelEntity

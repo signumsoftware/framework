@@ -25,6 +25,8 @@ namespace Signum.Engine.Authorization
 
         public static bool IsStarted { get { return cache != null; } }
 
+        public static readonly HashSet<Enum> AvoidAutomaticUpgrade = new HashSet<Enum>();
+
         public static void Start(SchemaBuilder sb)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -257,7 +259,10 @@ namespace Signum.Engine.Authorization
         {
             var result = Max(baseValues);
 
-            if (key != null && result == OperationAuthLogic.MaxTypePermission(key, TypeAllowedBasic.Modify, t => TypeAuthLogic.GetAllowedBase(role, t)))
+            if(key != null && OperationAuthLogic.AvoidAutomaticUpgrade.Contains(key))
+                return result;
+            
+            if (key != null && result == OperationAuthLogic.MaxTypePermission(key, TypeAllowedBasic.Modify, t => TypeAuthLogic.GetAllowedBase(role, t)) )
                 return OperationAuthLogic.MaxTypePermission(key, TypeAllowedBasic.Modify, t => TypeAuthLogic.GetAllowed(role, t));
 
             return result;
@@ -283,6 +288,9 @@ namespace Signum.Engine.Authorization
         {
             var result = Min(baseValues);
 
+            if (key != null && OperationAuthLogic.AvoidAutomaticUpgrade.Contains(key))
+                return result;
+
             if (key != null && result == OperationAuthLogic.MaxTypePermission(key, TypeAllowedBasic.Modify, t => TypeAuthLogic.GetAllowedBase(role, t)))
                 return OperationAuthLogic.MaxTypePermission(key, TypeAllowedBasic.Modify, t => TypeAuthLogic.GetAllowed(role, t));
 
@@ -307,7 +315,13 @@ namespace Signum.Engine.Authorization
 
         public override Func<Enum, OperationAllowed> MergeDefault(Lite<RoleDN> role, IEnumerable<Func<Enum, OperationAllowed>> baseDefaultValues)
         {
-            return key => OperationAuthLogic.MaxTypePermission(key, TypeAllowedBasic.Modify, t => TypeAuthLogic.GetAllowed(role, t));
+            return key => 
+            {
+                if (OperationAuthLogic.AvoidAutomaticUpgrade.Contains(key))
+                    return AuthLogic.GetDefaultAllowed(role) ? OperationAllowed.Allow : OperationAllowed.None;
+
+                return OperationAuthLogic.MaxTypePermission(key, TypeAllowedBasic.Modify, t => TypeAuthLogic.GetAllowed(role, t));
+            };
         }
     }
 

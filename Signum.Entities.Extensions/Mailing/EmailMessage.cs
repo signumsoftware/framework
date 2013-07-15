@@ -15,7 +15,7 @@ using System.Net.Mail;
 
 namespace Signum.Entities.Mailing
 {
-    [Serializable, EntityKind(EntityKind.Main)]
+    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class EmailMessageDN : Entity
     {   
         public EmailMessageDN()
@@ -335,7 +335,7 @@ namespace Signum.Entities.Mailing
         Message,
     }
 
-    [Serializable, EntityKind(EntityKind.System)]
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class EmailPackageDN : IdentifiableEntity, IProcessDataDN
     {
         [SqlDbType(Size = 200)]

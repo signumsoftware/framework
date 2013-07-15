@@ -10,7 +10,7 @@ using Signum.Services;
 
 namespace Signum.Entities.Files
 {
-    [Serializable, EntityKind(EntityKind.SharedPart)]
+    [Serializable, EntityKind(EntityKind.SharedPart, EntityData.Master)]
     public class FileDN : ImmutableEntity, IFile
     {
         public FileDN() { }

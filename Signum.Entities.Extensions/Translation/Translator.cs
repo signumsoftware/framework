@@ -11,7 +11,7 @@ using Signum.Utilities;
 
 namespace Signum.Entities.Translation
 {
-    [Serializable, EntityKind(EntityKind.String)]
+    [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
     public class TranslatorDN : Entity
     {
         [NotNullable, UniqueIndex, ImplementedBy(typeof(UserDN))]

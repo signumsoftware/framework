@@ -9,6 +9,9 @@ using Signum.Windows.Processes;
 using Signum.Windows.Operations;
 using System.Windows.Media.Imaging;
 using System.Reflection;
+using System.Windows.Media;
+using Signum.Utilities;
+using Signum.Services;
 
 namespace Signum.Windows.Scheduler
 {
@@ -20,15 +23,23 @@ namespace Signum.Windows.Scheduler
             {
                 Navigator.AddSetting(new EntitySettings<ScheduledTaskDN> { View = e => new ScheduledTask(), Icon = Image("clock.png") });
 
-                Navigator.AddSetting(new EntitySettings<ActionTaskDN> { View = e => new ActionTask(), Icon = Image("actionTask.png") });
-                Navigator.AddSetting(new EntitySettings<ActionTaskLogDN> { View = e => new ActionTaskLog(), Icon = Image("actionTaskLog.png") });
+                Navigator.AddSetting(new EntitySettings<SimpleTaskDN> { View = e => new SimpleTask(), Icon = Image("simpleTask.png") });
+                Navigator.AddSetting(new EntitySettings<ScheduledTaskLogDN> { View = e => new ScheduledTaskLog(), Icon = Image("scheduledTaskLog.png") });
 
-                OperationClient.AddSetting(new EntityOperationSettings(ActionTaskOperation.Execute){ Icon = Image("execute.png") });
+                var executeGroup = new EntityOperationGroup
+                {
+                    Background = Brushes.Gold,
+                    AutomationName = "execute",
+                    Description = () => TaskMessage.Execute.NiceToString() + "...",
+                };
+
+                OperationClient.AddSetting(new EntityOperationSettings(TaskOperation.ExecuteSync) { Icon = Image("execute.png"), Group = executeGroup });
+                OperationClient.AddSetting(new EntityOperationSettings(TaskOperation.ExecuteAsync) { Icon = Image("execute.png"), Group = executeGroup });
 
                 Navigator.AddSetting(new EntitySettings<ScheduleRuleDailyDN> { View = e => new ScheduleRuleDaily() });
                 Navigator.AddSetting(new EntitySettings<ScheduleRuleWeeklyDN> { View = e => new ScheduleRuleWeekly() });
                 Navigator.AddSetting(new EntitySettings<ScheduleRuleWeekDaysDN> { View = e => new ScheduleRuleWeekDays() });
-                Navigator.AddSetting(new EntitySettings<CalendarDN> { View = e => new Calendar() });
+                Navigator.AddSetting(new EntitySettings<HolidayCalendarDN> { View = e => new HolidayCalendar() });
             }
         }
 

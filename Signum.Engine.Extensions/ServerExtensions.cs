@@ -32,6 +32,7 @@ using Signum.Engine.Processes;
 using Signum.Engine.Operations;
 using Signum.Entities.ControlPanel;
 using Signum.Engine.ControlPanel;
+using Signum.Entities.Scheduler;
 
 namespace Signum.Services
 {

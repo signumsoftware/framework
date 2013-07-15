@@ -11,7 +11,7 @@ using System.Reflection;
 
 namespace Signum.Entities.Notes
 {
-    [Serializable, EntityKind(EntityKind.Main)]
+    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
     public class NoteDN : IdentifiableEntity
     {
         [SqlDbType(Size = 100)]
@@ -98,7 +98,7 @@ namespace Signum.Entities.Notes
         ViewNotes
     }
 
-    [Serializable, EntityKind(EntityKind.String)]
+    [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
     public class NoteTypeDN : MultiOptionalEnumDN
     {
 

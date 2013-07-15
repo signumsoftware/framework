@@ -23,12 +23,20 @@ using System.Diagnostics;
 using System.Data.SqlTypes;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.SchemaInfoTables;
+using Signum.Engine.Basics;
+using Signum.Engine.Linq;
+using System.Linq.Expressions;
 
 namespace Signum.Engine.Cache
 {
     public static class CacheLogic
     {
         public static bool AssertOnStart = true;
+
+        public static void AssertStarted(SchemaBuilder sb)
+        {
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(()=>Start(null)));
+        }
 
         /// <summary>
         /// If you have invalidation problems look at exceptions in: select * from sys.transmission_queue 
@@ -46,6 +54,80 @@ namespace Signum.Engine.Cache
                 sb.SwitchGlobalLazyManager(new CacheGlobalLazyManager());
 
                 sb.Schema.Initializing[InitLevel.Level_0BeforeAnyQuery] += OnStart;
+            }
+        }
+
+        public static List<T> ToListWithInvalidation<T>(this IQueryable<T> simpleQuery, string exceptionContext, Action<SqlNotificationEventArgs> invalidation)
+        {
+            ITranslateResult tr;
+            using (ObjectName.OverrideOptions(new ObjectNameOptions { IncludeDboSchema = true }))
+                tr = ((DbQueryProvider)simpleQuery.Provider).GetRawTranslateResult(simpleQuery.Expression);
+
+            OnChangeEventHandler onChange = (object sender, SqlNotificationEventArgs args) =>
+            {
+                try
+                {
+                    if (args.Type != SqlNotificationType.Change)
+                        throw new InvalidOperationException(
+                            "Problems with SqlDependency (Type : {0} Source : {1} Info : {2}) on query: \r\n{3}"
+                            .Formato(args.Type, args.Source, args.Info, tr.GetMainPreCommand().PlainSql()));
+
+                    invalidation(args);
+                }
+                catch (Exception e)
+                {
+                    e.LogException(c => c.ControllerName = exceptionContext);
+                }
+            };
+
+            SimpleReader reader = null;
+
+            Expression<Func<IProjectionRow, T>> projectorExpression = (Expression<Func<IProjectionRow, T>>)tr.GetMainProjector();
+            Func<IProjectionRow, T> projector = projectorExpression.Compile();
+
+            List<T> list = new List<T>();
+
+            using (new EntityCache())
+                ((SqlConnector)Connector.Current).ExecuteDataReaderDependency(tr.GetMainPreCommand(), onChange, CacheLogic.OnStart, fr =>
+                {
+                    if (reader == null)
+                        reader = new SimpleReader(fr, EntityCache.NewRetriever());
+
+                    list.Add(projector(reader));
+                });
+
+            return list;
+        }
+
+        class SimpleReader : IProjectionRow
+        {
+            FieldReader reader;
+            IRetriever retriever;
+
+            public SimpleReader(FieldReader reader, IRetriever retriever)
+            {
+                this.reader = reader;
+                this.retriever = retriever;
+            }
+
+            public FieldReader Reader
+            {
+                get { return reader; }
+            }
+
+            public IRetriever Retriever
+            {
+                get { return retriever; }
+            }
+
+            public IEnumerable<S> Lookup<K, S>(LookupToken token, K key)
+            {
+                throw new InvalidOperationException("Subqueries can not be used on simple queries");
+            }
+
+            public MList<S> LookupRequest<K, S>(LookupToken token, K key, MList<S> field)
+            {
+                throw new InvalidOperationException("Subqueries can not be used on simple queries");
             }
         }
 
@@ -331,9 +413,12 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
                 giCacheTable.GetInvoker(type)(sb);
         }
 
-        static GenericInvoker<Action<SchemaBuilder>> giCacheTable = new GenericInvoker<Action<SchemaBuilder>>(sb => CacheTable<IdentifiableEntity>(sb));
-        public static void CacheTable<T>(SchemaBuilder sb) where T : IdentifiableEntity
+        static GenericInvoker<Action<SchemaBuilder>> giCacheTable = new GenericInvoker<Action<SchemaBuilder>>(sb => CacheTable<IdentifiableEntity>(sb, false));
+        public static void CacheTable<T>(SchemaBuilder sb, bool ignoreIsTransactionalData = false) where T : IdentifiableEntity
         {
+            if (EntityKindCache.GetEntityData(typeof(T)) == EntityData.Transactional && !ignoreIsTransactionalData)
+                throw new InvalidOperationException("{0} is Transactional. Reconsider caching this table or set ignoreIsTransactionalData = true".Formato(typeof(T).TypeName())); 
+
             var cc = new CacheController<T>(sb.Schema);
             controllers.AddOrThrow(typeof(T), cc, "{0} already registered");
 
@@ -342,6 +427,7 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
             cc.BuildCachedTable();
         }
 
+        static GenericInvoker<Action<SchemaBuilder>> giSemiCacheTable = new GenericInvoker<Action<SchemaBuilder>>(sb => SemiCacheTable<IdentifiableEntity>(sb));
         public static void SemiCacheTable<T>(SchemaBuilder sb) where T : IdentifiableEntity
         {
             controllers.AddOrThrow(typeof(T), null, "{0} already registered");
@@ -358,7 +444,12 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
             foreach (var rType in relatedTypes)
             {
                 if (!controllers.ContainsKey(rType))
-                    giCacheTable.GetInvoker(rType)(sb);
+                {
+                    if (EntityKindCache.GetEntityData(rType) == EntityData.Master)
+                        giCacheTable.GetInvoker(rType)(sb);
+                    else
+                        giSemiCacheTable.GetInvoker(rType)(sb);
+                }
 
                 inverseDependencies.Add(rType, type);
             }

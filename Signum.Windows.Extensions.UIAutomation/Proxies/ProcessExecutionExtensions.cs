@@ -13,21 +13,28 @@ namespace Signum.Windows.UIAutomation
     {
         static int DefaultTimeout = 20 * 1000;
 
-        public static void PlayAndWait(this NormalWindowProxy<ProcessDN> pe, Func<string> actionDescription  = null, int? timeout = null)
+        private static void WaitFinished(this NormalWindowProxy<ProcessDN> pe, Func<string> actionDescription, int? timeout = null)
         {
-            using (pe)
+            pe.Element.Wait(() => pe.ValueLineValue(pe2 => pe2.State) == ProcessState.Finished,
+                            () => "{0}, result state is {1}".Formato((actionDescription != null ? actionDescription() : "Waiting for process to finish"), pe.ValueLineValue(pe2 => pe2.State)),
+                            timeout ?? DefaultTimeout);
+        }
+
+        public static void ConstructProcessPlayAndWait<T>(this NormalWindowProxy<T> normalWnindow, Enum processOperation, int? timeout = null) where T : ModifiableEntity
+        {
+            using (var pe = normalWnindow.ConstructFrom<ProcessDN>(processOperation))
             {
                 pe.Execute(ProcessOperation.Execute);
-                pe.Element.Wait(() => pe.ValueLineValue(pe2 => pe2.State) == ProcessState.Finished,
-                                () => "{0}, result state is {1}".Formato((actionDescription != null ? actionDescription() : "Waiting for process to finish"), pe.ValueLineValue(pe2 => pe2.State)),
-                                timeout ?? DefaultTimeout);
+                pe.WaitFinished(() => "Waiting for process after {0} to finish".Formato(OperationDN.UniqueKey(processOperation)));
             }
         }
 
-        public static void ConstructProcessAndPlay<T>(this NormalWindowProxy<T> normalWnindow, Enum processOperation, int? timeout = null) where T : ModifiableEntity
+        public static void ConstructProcessWait<T>(this NormalWindowProxy<T> normalWnindow, Enum processOperation, int? timeout = null) where T : ModifiableEntity
         {
-            var pe = normalWnindow.ConstructFrom<ProcessDN>(processOperation);
-            pe.PlayAndWait(() => "Waiting for process after {0} to finish".Formato(OperationDN.UniqueKey(processOperation)));
+            using (var pe = normalWnindow.ConstructFrom<ProcessDN>(processOperation))
+            {
+                pe.WaitFinished(() => "Waiting for process after {0} to finish".Formato(OperationDN.UniqueKey(processOperation)));
+            }
         }
     }
 }

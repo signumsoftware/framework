@@ -9,12 +9,12 @@ using System.IO;
 
 namespace Signum.Entities.Files
 {
-    [Serializable, EntityKind(EntityKind.SystemString)]
+    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
     public class FileTypeDN : MultiEnumDN
     {
     }
 
-    [Serializable, EntityKind(EntityKind.Main)]
+    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class FileRepositoryDN : Entity
     {
         [NotNullable, SqlDbType(Size = 100), UniqueIndex]

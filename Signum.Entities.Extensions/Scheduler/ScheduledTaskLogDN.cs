@@ -3,36 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Signum.Entities.Basics;
-using Signum.Entities;
-using Signum.Entities.Processes;
 using Signum.Utilities;
-using Signum.Entities.Authorization;
+using System.Linq.Expressions;
 
 namespace Signum.Entities.Scheduler
 {
-    public enum ActionTaskOperation
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    public class ScheduledTaskLogDN : IdentifiableEntity
     {
-        Execute,
-    }
-
-    public interface ITaskDN : IIdentifiable
-    {
-    }
-
-    [Serializable, EntityKind(EntityKind.SystemString)]
-    public class ActionTaskDN : MultiEnumDN, ITaskDN
-    {
-        
-    }
-
-    [Serializable, EntityKind(EntityKind.System)]
-    public class ActionTaskLogDN : IdentifiableEntity
-    {
-        ActionTaskDN actionTask;
-        public ActionTaskDN ActionTask
+        [ImplementedBy(typeof(SimpleTaskDN))]
+        ITaskDN task;
+        [NotNullValidator]
+        public ITaskDN Task
         {
-            get { return actionTask; }
-            set { Set(ref actionTask, value, () => ActionTask); }
+            get { return task; }
+            set { Set(ref task, value, () => Task); }
         }
 
         DateTime startTime;
@@ -49,6 +34,21 @@ namespace Signum.Entities.Scheduler
             set { Set(ref endTime, value, () => EndTime); }
         }
 
+        static Expression<Func<ScheduledTaskLogDN, double?>> DurationExpression =
+            log => (double?)(log.EndTime - log.StartTime).Value.TotalMilliseconds;
+        public double? Duration
+        {
+            get { return EndTime == null ? null : DurationExpression.Evaluate(this); }
+        }
+
+        [ImplementedByAll]
+        Lite<IIdentifiable> entity;
+        public Lite<IIdentifiable> Entity
+        {
+            get { return entity; }
+            set { Set(ref entity, value, () => Entity); }
+        }
+
         Lite<ExceptionDN> exception;
         public Lite<ExceptionDN> Exception
         {
@@ -62,7 +62,7 @@ namespace Signum.Entities.Scheduler
                 return "{0}-{1}".Formato(startTime, endTime);
             else if (exception != null)
                 return "{0} Error: {1}".Formato(startTime, exception);
-            return startTime.ToString(); 
+            return startTime.ToString();
         }
     }
 }
