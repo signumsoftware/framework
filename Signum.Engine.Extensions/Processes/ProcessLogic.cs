@@ -306,6 +306,7 @@ namespace Signum.Engine.Processes
                 p
             );
 
+            ep.TakeForThisMachine();
             ep.Execute();
         }
 
