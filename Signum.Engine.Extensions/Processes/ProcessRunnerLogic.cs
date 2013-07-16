@@ -23,10 +23,7 @@ namespace Signum.Engine.Processes
     {
         static Dictionary<Lite<ProcessDN>, ExecutingProcess> executing = new Dictionary<Lite<ProcessDN>, ExecutingProcess>();
 
-        static Timer timer = new Timer(ob => WakeUp("Timer", null), // main timer
-                   null,
-                   Timeout.Infinite,
-                   Timeout.Infinite);
+        static Timer timer;
 
         internal static DateTime? nextPlannedExecution;
 
@@ -108,6 +105,7 @@ namespace Signum.Engine.Processes
             if (running)
                 throw new InvalidOperationException("ProcessLogic is running");
 
+
             Task.Factory.StartNew(() =>
             {
                 using (AuthLogic.Disable())
@@ -125,6 +123,11 @@ namespace Signum.Engine.Processes
 
                         CancelNewProcesses = new CancellationTokenSource();
                         autoResetEvent.Set();
+                        timer = new Timer(ob => WakeUp("Timer", null), // main timer
+                             null,
+                             Timeout.Infinite,
+                             Timeout.Infinite);
+
                         while (autoResetEvent.WaitOne())
                         {
                             if (CancelNewProcesses.IsCancellationRequested)
