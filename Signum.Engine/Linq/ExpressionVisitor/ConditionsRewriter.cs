@@ -268,26 +268,12 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitCase(CaseExpression cex)
         {
-            if (IsBooleanExpression(cex))
-            {
-                var result = cex.Whens.IsNullOrEmpty() ? False : cex.Whens
-                    .Select(a => SmartAnd(Visit(a.Condition), Visit(a.Value), true))
-                    .Aggregate((a, b) => SmartOr(a, b, true));
+            var newWhens = cex.Whens.NewIfChange(w => VisitWhen(w));
+            var newDefault = MakeSqlValue(Visit(cex.DefaultValue));
 
-                if (cex.DefaultValue == null)
-                    return result;
-
-                return SmartOr(result, MakeSqlCondition(Visit(cex.DefaultValue)), true);
-            }
-            else
-            {
-                var newWhens = cex.Whens.NewIfChange(w => VisitWhen(w));
-                var newDefault = MakeSqlValue(Visit(cex.DefaultValue));
-
-                if (newWhens != cex.Whens || newDefault != cex.DefaultValue)
-                    return new CaseExpression(newWhens, newDefault);
-                return cex;
-            }
+            if (newWhens != cex.Whens || newDefault != cex.DefaultValue)
+                return new CaseExpression(newWhens, newDefault);
+            return cex;
         }
 
         protected override When VisitWhen(When when)
