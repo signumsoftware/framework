@@ -18,10 +18,6 @@ namespace Signum.Entities.Basics
 
         public ExceptionDN(Exception ex)
         {
-            this.ExceptionType = ex.GetType().Name;
-            this.ExceptionMessage = ex.Message;
-            this.StackTrace = ex.StackTrace;
-            this.ThreadId = Thread.CurrentThread.ManagedThreadId;
             ex.Data[ExceptionDataKey] = this;
         }
 
@@ -38,7 +34,7 @@ namespace Signum.Entities.Basics
         public string ExceptionType
         {
             get { return exceptionType; }
-            private set { Set(ref exceptionType, value, () => ExceptionType); }
+            set { Set(ref exceptionType, value, () => ExceptionType); }
         }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
@@ -46,7 +42,7 @@ namespace Signum.Entities.Basics
         public string ExceptionMessage
         {
             get { return exceptionMessage; }
-            private set
+            set
             {
                 if (Set(ref exceptionMessage, value, () => ExceptionMessage))
                 {
@@ -68,7 +64,7 @@ namespace Signum.Entities.Basics
         public string StackTrace
         {
             get { return stackTrace; }
-            private set
+            set
             {
                 if (Set(ref stackTrace, value, () => StackTrace))
                 {
@@ -88,7 +84,7 @@ namespace Signum.Entities.Basics
         public int ThreadId
         {
             get { return threadId; }
-            private set { Set(ref threadId, value, () => ThreadId); }
+            set { Set(ref threadId, value, () => ThreadId); }
         }
 
         Lite<IUserDN> user;

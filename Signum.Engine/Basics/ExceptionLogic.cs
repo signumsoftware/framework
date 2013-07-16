@@ -8,6 +8,7 @@ using Signum.Engine.DynamicQuery;
 using Signum.Entities;
 using Signum.Utilities;
 using Signum.Entities.Basics;
+using System.Threading;
 
 namespace Signum.Engine.Basics
 {
@@ -51,32 +52,21 @@ namespace Signum.Engine.Basics
 
         public static ExceptionDN LogException(this Exception ex, Action<ExceptionDN> completeContext)
         {
-            var prev = PreviousExceptionDN(ex);
+            var entity = GetEntity(ex);
+            
+            completeContext(entity);
 
-            if (prev != null)
-            {
-                completeContext(prev);
-
-                using (ExecutionMode.Global())
-                using (Transaction tr = Transaction.ForceNew())
-                {
-                    prev.Save();
-
-                    return tr.Commit(prev);
-                }
-            }
-
-            var newException = new ExceptionDN(ex);
-            completeContext(newException);
-            return CompleteAndSave(newException);
+            return entity.SaveForceNew();
         }
 
         public static ExceptionDN LogException(this Exception ex)
         {
-           return PreviousExceptionDN(ex) ?? CompleteAndSave(new ExceptionDN(ex));
+            var entity = GetEntity(ex);
+
+            return entity.SaveForceNew();
         }
 
-        public static ExceptionDN PreviousExceptionDN(this Exception ex)
+        static ExceptionDN PreviousExceptionDN(this Exception ex)
         {
             var exEntity = ex.Data[ExceptionDN.ExceptionDataKey] as ExceptionDN;
 
@@ -86,23 +76,39 @@ namespace Signum.Engine.Basics
             return null;
         }
 
-        public static ExceptionDN CompleteAndSave(ExceptionDN ex)
+        static ExceptionDN GetEntity(Exception entity)
         {
-            ex.Environment = CurrentEnvironment;
+            ExceptionDN e = entity.PreviousExceptionDN() ?? new ExceptionDN(entity);
+
+            e.ExceptionType = entity.GetType().Name;
+            e.ExceptionMessage = entity.Message;
+            e.StackTrace = entity.StackTrace;
+            e.ThreadId = Thread.CurrentThread.ManagedThreadId;
+
+            e.Environment = CurrentEnvironment;
             try
             {
-                ex.User = UserHolder.Current.ToLite(); //Session special situations
+                e.User = UserHolder.Current.ToLite(); //Session special situations
             }
             catch { }
 
-            ex.Version = Schema.Current.Version.ToString();
+            e.Data = entity.Data.Dump();
+            e.Version = Schema.Current.Version.ToString();
+
+            return e;
+        }
+
+        static ExceptionDN SaveForceNew(this ExceptionDN entity)
+        {
+            if (entity.Modified == ModifiedState.Clean)
+                return entity;
 
             using (ExecutionMode.Global())
             using (Transaction tr = Transaction.ForceNew())
             {
-                ex.Save();
+                entity.Save();
 
-                return tr.Commit(ex);
+                return tr.Commit(entity);
             }
         }
 
