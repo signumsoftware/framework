@@ -173,21 +173,27 @@ namespace Signum.Engine.Authorization
         {
             return PropertyRoute.GenerateRoutes(entityType).Select(pr => cache.GetAllowed(role, pr)).Collapse();
         }
-
     }
 
-    class PropertyMerger : Merger<PropertyRoute, PropertyAllowed>
+    class PropertyMerger : IMerger<PropertyRoute, PropertyAllowed>
     {
-        protected override PropertyAllowed Union(PropertyRoute key, Lite<RoleDN> role, IEnumerable<PropertyAllowed> baseValues)
+        public PropertyAllowed Merge(PropertyRoute key, Lite<RoleDN> role, IEnumerable<KeyValuePair<Lite<RoleDN>, PropertyAllowed>> baseValues)
         {
-            var result = Max(baseValues);
+            var nonDefaults = baseValues.Where(kvp => !kvp.Value.Equals(GetDefault(key, kvp.Key))).ToList();
 
-            if (result == TypeAllowedBase(key, role))
-                return TypeAllowed(key, role);
+            if (nonDefaults.IsEmpty())
+                return GetDefault(key, role);
 
-            return result;
+            if (AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union)
+                return Max(nonDefaults.Select(a => a.Value));
+            else
+                return Min(nonDefaults.Select(a => a.Value));
         }
 
+        PropertyAllowed GetDefault(PropertyRoute key, Lite<RoleDN> role)
+        {
+            return TypeAuthLogic.GetAllowed(role, key.RootType).MaxUI().ToPropertyAllowed();
+        }
 
         static PropertyAllowed Max(IEnumerable<PropertyAllowed> baseValues)
         {
@@ -201,16 +207,6 @@ namespace Signum.Engine.Authorization
                 if (result == PropertyAllowed.Modify)
                     return result;
             }
-            return result;
-        }
-
-        protected override PropertyAllowed Intersection(PropertyRoute key, Lite<RoleDN> role, IEnumerable<PropertyAllowed> baseValues)
-        {
-            var result = Min(baseValues);
-
-            if (result == TypeAllowedBase(key, role))
-                return TypeAllowed(key, role);
-
             return result;
         }
 
@@ -229,19 +225,9 @@ namespace Signum.Engine.Authorization
             return result;
         }
 
-        static PropertyAllowed TypeAllowedBase(PropertyRoute key, Lite<RoleDN> role)
+        public Func<PropertyRoute, PropertyAllowed> MergeDefault(Lite<RoleDN> role)
         {
-            return TypeAuthLogic.GetAllowedBase(role, key.RootType).MaxUI().ToPropertyAllowed();
-        }
-
-        static PropertyAllowed TypeAllowed(PropertyRoute key, Lite<RoleDN> role)
-        {
-            return TypeAuthLogic.GetAllowed(role, key.RootType).MaxUI().ToPropertyAllowed();
-        }
-
-        public override Func<PropertyRoute, PropertyAllowed> MergeDefault(Lite<RoleDN> role, IEnumerable<Func<PropertyRoute, PropertyAllowed>> baseDefaultValues)
-        {
-            return pr => TypeAllowed(pr, role); 
+            return pr => GetDefault(pr, role);
         }
     }
 

@@ -253,19 +253,34 @@ namespace Signum.Engine.Authorization
         }
     }
 
-    class OperationMerger : Merger<Enum, OperationAllowed>
+    class OperationMerger : IMerger<Enum, OperationAllowed>
     {
-        protected override OperationAllowed Union(Enum key, Lite<RoleDN> role, IEnumerable<OperationAllowed> baseValues)
+        public OperationAllowed Merge(Enum key, Lite<RoleDN> role, IEnumerable<KeyValuePair<Lite<RoleDN>, OperationAllowed>> baseValues)
         {
-            var result = Max(baseValues);
+            if (OperationAuthLogic.AvoidAutomaticUpgrade.Contains(key))
+            {
+                if (AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union)
+                    return Max(baseValues.Select(a => a.Value));
+                else
+                    return Min(baseValues.Select(a => a.Value));
+            }
+            else
+            {
+                var nonDefaults = baseValues.Where(kvp=> !kvp.Value.Equals(GetDefault(key, kvp.Key))).ToList();
 
-            if(key != null && OperationAuthLogic.AvoidAutomaticUpgrade.Contains(key))
-                return result;
-            
-            if (key != null && result == OperationAuthLogic.MaxTypePermission(key, TypeAllowedBasic.Modify, t => TypeAuthLogic.GetAllowedBase(role, t)) )
-                return OperationAuthLogic.MaxTypePermission(key, TypeAllowedBasic.Modify, t => TypeAuthLogic.GetAllowed(role, t));
+                if(nonDefaults.IsEmpty())
+                    return GetDefault(key, role);
 
-            return result;
+                if (AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union)
+                    return Max(nonDefaults.Select(a => a.Value));
+                else
+                    return Min(nonDefaults.Select(a => a.Value));
+            }
+        }
+
+        static OperationAllowed GetDefault(Enum key, Lite<RoleDN> role)
+        {
+            return OperationAuthLogic.MaxTypePermission(key, TypeAllowedBasic.Modify, t => TypeAuthLogic.GetAllowed(role, t));
         }
 
         static OperationAllowed Max(IEnumerable<OperationAllowed> baseValues)
@@ -283,21 +298,8 @@ namespace Signum.Engine.Authorization
             }
             return result;
         }
-
-        protected override OperationAllowed Intersection(Enum key, Lite<RoleDN> role, IEnumerable<OperationAllowed> baseValues)
-        {
-            var result = Min(baseValues);
-
-            if (key != null && OperationAuthLogic.AvoidAutomaticUpgrade.Contains(key))
-                return result;
-
-            if (key != null && result == OperationAuthLogic.MaxTypePermission(key, TypeAllowedBasic.Modify, t => TypeAuthLogic.GetAllowedBase(role, t)))
-                return OperationAuthLogic.MaxTypePermission(key, TypeAllowedBasic.Modify, t => TypeAuthLogic.GetAllowed(role, t));
-
-            return result;
-        }
-
-        private static OperationAllowed Min(IEnumerable<OperationAllowed> baseValues)
+   
+        static OperationAllowed Min(IEnumerable<OperationAllowed> baseValues)
         {
             OperationAllowed result = OperationAllowed.Allow;
 
@@ -313,7 +315,7 @@ namespace Signum.Engine.Authorization
             return result;
         }
 
-        public override Func<Enum, OperationAllowed> MergeDefault(Lite<RoleDN> role, IEnumerable<Func<Enum, OperationAllowed>> baseDefaultValues)
+        public Func<Enum, OperationAllowed> MergeDefault(Lite<RoleDN> role)
         {
             return key => 
             {
@@ -323,6 +325,7 @@ namespace Signum.Engine.Authorization
                 return OperationAuthLogic.MaxTypePermission(key, TypeAllowedBasic.Modify, t => TypeAuthLogic.GetAllowed(role, t));
             };
         }
+
     }
 
     class OperationCoercer : Coercer<OperationAllowed, Enum>
