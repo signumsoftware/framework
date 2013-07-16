@@ -218,10 +218,7 @@ namespace Signum.Engine.Processes
                     ToState = ProcessState.Planned,
                     Execute = (p, args) =>
                     {
-                        if (JustMyProcesses)
-                            p.MachineName = Environment.MachineName;
-                        else
-                            p.MachineName = ProcessDN.None;
+                        p.MachineName = JustMyProcesses ? Environment.MachineName : ProcessDN.None;
 
                         p.State = ProcessState.Planned;
                         p.PlannedDate = (DateTime)args[0];
@@ -246,10 +243,7 @@ namespace Signum.Engine.Processes
                     ToState = ProcessState.Queued,
                     Execute = (p, _) =>
                     {
-                        if (JustMyProcesses)
-                            p.MachineName = Environment.MachineName;
-                        else
-                            p.MachineName = ProcessDN.None;
+                        p.MachineName = JustMyProcesses ?  Environment.MachineName:  ProcessDN.None;
 
                         p.SetAsQueued();
                     }
@@ -294,7 +288,7 @@ namespace Signum.Engine.Processes
                     State = ProcessState.Created,
                     Data = processData,
                     Session = session,
-                    MachineName = Environment.MachineName,
+                    MachineName = JustMyProcesses ? Environment.MachineName : ProcessDN.None
                 }.Save();
         }
 
