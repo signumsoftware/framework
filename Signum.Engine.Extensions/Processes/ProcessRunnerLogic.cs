@@ -23,10 +23,7 @@ namespace Signum.Engine.Processes
     {
         static Dictionary<Lite<ProcessDN>, ExecutingProcess> executing = new Dictionary<Lite<ProcessDN>, ExecutingProcess>();
 
-        static Timer timer = new Timer(ob => WakeUp("Timer", null), // main timer
-                   null,
-                   Timeout.Infinite,
-                   Timeout.Infinite);
+        static Timer timer;
 
         internal static DateTime? nextPlannedExecution;
 
@@ -108,6 +105,7 @@ namespace Signum.Engine.Processes
             if (running)
                 throw new InvalidOperationException("ProcessLogic is running");
 
+
             Task.Factory.StartNew(() =>
             {
                 using (AuthLogic.Disable())
@@ -125,6 +123,11 @@ namespace Signum.Engine.Processes
 
                         CancelNewProcesses = new CancellationTokenSource();
                         autoResetEvent.Set();
+                        timer = new Timer(ob => WakeUp("Timer", null), // main timer
+                             null,
+                             Timeout.Infinite,
+                             Timeout.Infinite);
+
                         while (autoResetEvent.WaitOne())
                         {
                             if (CancelNewProcesses.IsCancellationRequested)
@@ -321,6 +324,9 @@ namespace Signum.Engine.Processes
 
         public void ProgressChanged(int position, int count)
         {
+            if (position > count)
+                throw new InvalidOperationException("Position ({0}) should not be greater thant count ({1}). Maybe the process is not making progress.".Formato(position, count));
+
             decimal progress = ((decimal)position) / count;
 
             ProgressChanged(progress);
