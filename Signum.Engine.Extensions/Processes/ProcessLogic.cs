@@ -31,7 +31,7 @@ namespace Signum.Engine.Processes
 {
     public static class ProcessLogic
     {
-        public static bool ExecuteInMyMachine = true; 
+        public static bool JustMyProcesses = true; 
 
         public static Polymorphic<Action<IProcessSessionDN>> ApplySession = new Polymorphic<Action<IProcessSessionDN>>();
 
@@ -218,7 +218,7 @@ namespace Signum.Engine.Processes
                     ToState = ProcessState.Planned,
                     Execute = (p, args) =>
                     {
-                        if (ExecuteInMyMachine)
+                        if (JustMyProcesses)
                             p.MachineName = Environment.MachineName;
                         else
                             p.MachineName = ProcessDN.None;
@@ -246,7 +246,7 @@ namespace Signum.Engine.Processes
                     ToState = ProcessState.Queued,
                     Execute = (p, _) =>
                     {
-                        if (ExecuteInMyMachine)
+                        if (JustMyProcesses)
                             p.MachineName = Environment.MachineName;
                         else
                             p.MachineName = ProcessDN.None;
@@ -329,40 +329,43 @@ namespace Signum.Engine.Processes
                     return;
 
                 for (int i = 0; i < lines.Count; i++)
-                {
+                {   
                     executingProcess.CancellationToken.ThrowIfCancellationRequested();
 
                     T pl = lines[i];
 
-                    try
+                    using (HeavyProfiler.Log("ProcessLine", () => pl.ToString()))
                     {
-                        using (Transaction tr = Transaction.ForceNew())
+                        try
                         {
-                            action(pl);
-                            tr.Commit();
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        if (Transaction.InTestTransaction)
-                            throw;
-
-                        var exLog = e.LogException();
-
-                        using (Transaction tr = Transaction.ForceNew())
-                        {
-                            new ProcessExceptionLineDN
+                            using (Transaction tr = Transaction.ForceNew())
                             {
-                                Exception = exLog.ToLite(),
-                                Line = pl.ToLite(),
-                                Process = executingProcess.CurrentExecution.ToLite()
-                            }.Save();
-
-                            tr.Commit();
+                                action(pl);
+                                tr.Commit();
+                            }
                         }
-                    }
+                        catch (Exception e)
+                        {
+                            if (Transaction.InTestTransaction)
+                                throw;
 
-                    executingProcess.ProgressChanged(j++, totalCount);
+                            var exLog = e.LogException();
+
+                            using (Transaction tr = Transaction.ForceNew())
+                            {
+                                new ProcessExceptionLineDN
+                                {
+                                    Exception = exLog.ToLite(),
+                                    Line = pl.ToLite(),
+                                    Process = executingProcess.CurrentExecution.ToLite()
+                                }.Save();
+
+                                tr.Commit();
+                            }
+                        }
+
+                        executingProcess.ProgressChanged(j++, totalCount);
+                    }
                 }
             }
         }
