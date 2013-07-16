@@ -15,6 +15,7 @@ using Signum.Entities.Authorization;
 using Signum.Entities.Processes;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
+using System.Data.SqlClient;
 
 namespace Signum.Engine.Processes
 {
@@ -22,10 +23,7 @@ namespace Signum.Engine.Processes
     {
         static Dictionary<Lite<ProcessDN>, ExecutingProcess> executing = new Dictionary<Lite<ProcessDN>, ExecutingProcess>();
 
-        static Timer timer = new Timer(ob => autoResetEvent.Set(), // main timer
-                   null,
-                   Timeout.Infinite,
-                   Timeout.Infinite);
+        static Timer timer;
 
         internal static DateTime? nextPlannedExecution;
 
@@ -47,6 +45,7 @@ namespace Signum.Engine.Processes
                 InitialDelayMiliseconds = initialDelayMiliseconds,
                 MaxDegreeOfParallelism = MaxDegreeOfParallelism,
                 NextPlannedExecution = nextPlannedExecution,
+                JustMyProcesses = ProcessLogic.JustMyProcesses,
                 Executing = executing.Values.Select(p => new ExecutionState
                 {
                     IsCancellationRequested = p.CancelationSource.IsCancellationRequested,
@@ -84,7 +83,7 @@ namespace Signum.Engine.Processes
                 Progress = null,
                 Exception = null,
                 ExceptionDate = null,
-                MachineName = ProcessLogic.ExecuteInMyMachine ? Environment.MachineName : ProcessDN.None
+                MachineName = ProcessLogic.JustMyProcesses ? Environment.MachineName : ProcessDN.None
             });
         }
 
@@ -98,13 +97,14 @@ namespace Signum.Engine.Processes
             process.Progress = null;
             process.Exception = null;
             process.ExceptionDate = null;
-            process.MachineName = ProcessLogic.ExecuteInMyMachine ? Environment.MachineName : ProcessDN.None;
+            process.MachineName = ProcessLogic.JustMyProcesses ? Environment.MachineName : ProcessDN.None;
         }
 
         public static void StartRunningProcesses()
         {
             if (running)
                 throw new InvalidOperationException("ProcessLogic is running");
+
 
             Task.Factory.StartNew(() =>
             {
@@ -118,44 +118,63 @@ namespace Signum.Engine.Processes
                          where
                          p.State == ProcessState.Executing && p.MachineName == Environment.MachineName ||
                          p.State == ProcessState.Suspending && p.MachineName == Environment.MachineName ||
-                         p.State == ProcessState.Suspended && (p.MachineName == Environment.MachineName || !ProcessLogic.ExecuteInMyMachine && p.MachineName == ProcessDN.None)
+                         p.State == ProcessState.Suspended && (p.MachineName == Environment.MachineName || !ProcessLogic.JustMyProcesses && p.MachineName == ProcessDN.None)
                          select p).SetAsQueued();
 
                         CancelNewProcesses = new CancellationTokenSource();
                         autoResetEvent.Set();
+                        timer = new Timer(ob => WakeUp("Timer", null), // main timer
+                             null,
+                             Timeout.Infinite,
+                             Timeout.Infinite);
+
                         while (autoResetEvent.WaitOne())
                         {
                             if (CancelNewProcesses.IsCancellationRequested)
                                 return;
 
-                            (from p in Database.Query<ProcessDN>()
-                             where p.State == ProcessState.Planned && p.PlannedDate <= TimeZoneManager.Now
-                             orderby p.PlannedDate
-                             select p).SetAsQueued();
-
-                            var list = Database.Query<ProcessDN>()
-                                    .Where(a => ProcessLogic.ExecuteInMyMachine ? a.MachineName == Environment.MachineName : a.MachineName == ProcessDN.None)
-                                    .Where(a => a.State == ProcessState.Planned)
-                                    .Select(a => a.PlannedDate)
-                                    .ToListWithInvalidation("Process", args => autoResetEvent.Set());
-
-                            SetNextPannedExecution(list.Min());
-
-                            lock (executing)
+                            using (HeavyProfiler.Log("PWL", ()=> "Process Runner"))
                             {
-                                int remaining = MaxDegreeOfParallelism - executing.Count;
+                                (from p in Database.Query<ProcessDN>()
+                                 where p.State == ProcessState.Planned && p.PlannedDate <= TimeZoneManager.Now
+                                 orderby p.PlannedDate
+                                 select p).SetAsQueued();
 
-                                if (remaining > 0)
+                                var list = Database.Query<ProcessDN>()
+                                        .Where(a => ProcessLogic.JustMyProcesses ? a.MachineName == Environment.MachineName : a.MachineName == ProcessDN.None)
+                                        .Where(a => a.State == ProcessState.Planned)
+                                        .Select(a => a.PlannedDate)
+                                        .ToListWithInvalidation("Process", args => WakeUp("Planned dependency", args));
+
+                                SetNextPannedExecution(list.Min());
+
+                                lock (executing)
                                 {
-                                    using (Transaction tr = Transaction.ForceNew(IsolationLevel.Serializable))
-                                    {
-                                        var queued = Database.Query<ProcessDN>()
-                                            .Where(p => p.State == ProcessState.Queued)
-                                            .Where(p => p.MachineName == Environment.MachineName || !ProcessLogic.ExecuteInMyMachine && p.MachineName == ProcessDN.None)
-                                            .Select(a => new { Process = a.ToLite(), a.QueuedDate })
-                                            .ToListWithInvalidation("", args => autoResetEvent.Set());
+                                    int remaining = MaxDegreeOfParallelism - executing.Count;
 
-                                        var afordable = queued.OrderBy(a => a.QueuedDate).Take(remaining).ToList();
+                                    if (remaining > 0)
+                                    {
+                                        var afordable = new Transaction().Using(tr =>
+                                        {
+                                            var queued = Database.Query<ProcessDN>()
+                                                .Where(p => p.State == ProcessState.Queued)
+                                                .Where(p => p.MachineName == Environment.MachineName || (!ProcessLogic.JustMyProcesses && p.MachineName == ProcessDN.None))
+                                                .Select(a => new { Process = a.ToLite(), a.QueuedDate, a.MachineName })
+                                                .ToListWithInvalidation("", args => WakeUp("Queued dependency", args));
+
+                                            var result = queued
+                                                .OrderByDescending(p => p.MachineName == Environment.MachineName)
+                                                .OrderBy(a => a.QueuedDate)
+                                                .Take(remaining).ToList();
+
+                                            var taken = result.Where(p => p.MachineName == ProcessDN.None).Select(a => a.Process).ToList();
+                                            if (taken.Any())
+                                                Database.Query<ProcessDN>()
+                                                    .Where(p => taken.Contains(p.ToLite()))
+                                                    .UnsafeUpdate(p => new ProcessDN { MachineName = Environment.MachineName });
+
+                                            return tr.Commit(result);
+                                        });
 
                                         foreach (var pair in afordable)
                                         {
@@ -180,29 +199,27 @@ namespace Signum.Engine.Processes
                                                     lock (executing)
                                                     {
                                                         executing.Remove(pro.ToLite());
-                                                        autoResetEvent.Set();
+                                                        WakeUp("Process ended", null);
                                                     }
                                                 }
                                             });
                                         }
 
-                                        tr.Commit();
-                                    }
+                                        var suspending = Database.Query<ProcessDN>()
+                                                .Where(p => p.State == ProcessState.Suspending)
+                                                .Where(p => p.MachineName == Environment.MachineName)
+                                                .Select(a => a.ToLite())
+                                                .ToListWithInvalidation("", args => WakeUp("Suspending dependency", args));
 
-                                    var suspending = Database.Query<ProcessDN>()
-                                            .Where(p => p.State == ProcessState.Suspending)
-                                            .Where(p => p.MachineName == Environment.MachineName)
-                                            .Select(a => a.ToLite())
-                                            .ToListWithInvalidation("", args => autoResetEvent.Set());
-
-                                    foreach (var s in suspending)
-                                    {
-                                        ExecutingProcess execProc = executing.GetOrThrow(s);
-
-                                        if (execProc.CurrentExecution.State != ProcessState.Finished)
+                                        foreach (var s in suspending)
                                         {
-                                            execProc.CurrentExecution = s.Retrieve();
-                                            execProc.CancelationSource.Cancel();
+                                            ExecutingProcess execProc = executing.GetOrThrow(s);
+
+                                            if (execProc.CurrentExecution.State != ProcessState.Finished)
+                                            {
+                                                execProc.CurrentExecution = s.Retrieve();
+                                                execProc.CancelationSource.Cancel();
+                                            }
                                         }
                                     }
                                 }
@@ -211,7 +228,11 @@ namespace Signum.Engine.Processes
                     }
                     catch (Exception e)
                     {
-                        e.LogException(edn => { edn.ControllerName = "ProcessWorker"; edn.ControllerName = "MainLoop"; });
+                        e.LogException(edn =>
+                        {
+                            edn.ControllerName = "ProcessWorker";
+                            edn.ActionName = "MainLoop";
+                        });
                     }
                     finally
                     {
@@ -219,6 +240,22 @@ namespace Signum.Engine.Processes
                     }
                 }
             }, TaskCreationOptions.LongRunning);
+        }
+
+        private static bool WakeUp(string reason, SqlNotificationEventArgs args)
+        {
+            using (HeavyProfiler.Log("WakeUp", () => "WakeUp! "+ reason + ToString(args)))
+            {
+                return autoResetEvent.Set();
+            }
+        }
+
+        private static string ToString(SqlNotificationEventArgs args)
+        {
+            if (args == null)
+                return null;
+
+            return " ({0} {1} {2})".Formato(args.Type, args.Source, args.Info); 
         }
 
         private static void SetNextPannedExecution(DateTime? next)
@@ -247,6 +284,8 @@ namespace Signum.Engine.Processes
 
             timer.Dispose();
             CancelNewProcesses.Cancel();
+
+            WakeUp("Stop", null);
 
             foreach (var p in executing.Values)
             {
@@ -366,6 +405,7 @@ namespace Signum.Engine.Processes
         public int MaxDegreeOfParallelism;
         public int InitialDelayMiliseconds;
         public bool Running;
+        public bool JustMyProcesses;
         public DateTime? NextPlannedExecution;
         public List<ExecutionState> Executing;
     }
