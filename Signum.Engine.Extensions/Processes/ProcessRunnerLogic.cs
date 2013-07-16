@@ -153,24 +153,28 @@ namespace Signum.Engine.Processes
                                     {
                                         var afordable = new Transaction().Using(tr =>
                                         {
-                                            var queued = Database.Query<ProcessDN>()
-                                                .Where(p => p.State == ProcessState.Queued)
-                                                .Where(p => p.MachineName == Environment.MachineName || (!ProcessLogic.JustMyProcesses && p.MachineName == ProcessDN.None))
-                                                .Select(a => new { Process = a.ToLite(), a.QueuedDate, a.MachineName })
-                                                .ToListWithInvalidation("", args => WakeUp("Queued dependency", args));
+                                            while (true)
+                                            {
+                                                var queued = Database.Query<ProcessDN>()
+                                                    .Where(p => p.State == ProcessState.Queued)
+                                                    .Where(p => p.MachineName == Environment.MachineName || (!ProcessLogic.JustMyProcesses && p.MachineName == ProcessDN.None))
+                                                    .Select(a => new { Process = a.ToLite(), a.QueuedDate, a.MachineName })
+                                                    .ToListWithInvalidation("", args => WakeUp("Queued dependency", args));
 
-                                            var result = queued
-                                                .OrderByDescending(p => p.MachineName == Environment.MachineName)
-                                                .OrderBy(a => a.QueuedDate)
-                                                .Take(remaining).ToList();
+                                                var result = queued
+                                                    .OrderByDescending(p => p.MachineName == Environment.MachineName)
+                                                    .OrderBy(a => a.QueuedDate)
+                                                    .Take(remaining).ToList();
 
-                                            var taken = result.Where(p => p.MachineName == ProcessDN.None).Select(a => a.Process).ToList();
-                                            if (taken.Any())
+                                                var taken = result.Where(p => p.MachineName == ProcessDN.None).Select(a => a.Process).ToList();
+
+                                                if (taken.IsNullOrEmpty())
+                                                    return tr.Commit(result);
+
                                                 Database.Query<ProcessDN>()
-                                                    .Where(p => taken.Contains(p.ToLite()))
+                                                    .Where(p => taken.Contains(p.ToLite()) && p.MachineName == ProcessDN.None)
                                                     .UnsafeUpdate(p => new ProcessDN { MachineName = Environment.MachineName });
-
-                                            return tr.Commit(result);
+                                            }
                                         });
 
                                         foreach (var pair in afordable)
