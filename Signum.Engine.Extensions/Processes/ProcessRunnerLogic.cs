@@ -281,6 +281,9 @@ namespace Signum.Engine.Processes
 
         public void ProgressChanged(int position, int count)
         {
+            if (position > count)
+                throw new InvalidOperationException("Position ({0}) should not be greater thant count ({1}). Maybe the process is not making progress.".Formato(position, count));
+
             decimal progress = ((decimal)position) / count;
 
             ProgressChanged(progress);
