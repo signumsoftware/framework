@@ -18,6 +18,10 @@ namespace Signum.Entities.Basics
 
         public ExceptionDN(Exception ex)
         {
+            this.ExceptionType = ex.GetType().Name;
+            this.ExceptionMessage = ex.Message;
+            this.StackTrace = ex.StackTrace;
+            this.ThreadId = Thread.CurrentThread.ManagedThreadId;
             ex.Data[ExceptionDataKey] = this;
         }
 

@@ -76,26 +76,26 @@ namespace Signum.Engine.Basics
             return null;
         }
 
-        static ExceptionDN GetEntity(Exception entity)
+        static ExceptionDN GetEntity(Exception ex)
         {
-            ExceptionDN e = entity.PreviousExceptionDN() ?? new ExceptionDN(entity);
+            ExceptionDN entity = ex.PreviousExceptionDN() ?? new ExceptionDN(ex);
 
-            e.ExceptionType = entity.GetType().Name;
-            e.ExceptionMessage = entity.Message;
-            e.StackTrace = entity.StackTrace;
-            e.ThreadId = Thread.CurrentThread.ManagedThreadId;
+            entity.ExceptionType = ex.GetType().Name;
+            entity.ExceptionMessage = ex.Message;
+            entity.StackTrace = ex.StackTrace;
+            entity.ThreadId = Thread.CurrentThread.ManagedThreadId;
 
-            e.Environment = CurrentEnvironment;
+            entity.Environment = CurrentEnvironment;
             try
             {
-                e.User = UserHolder.Current.ToLite(); //Session special situations
+                entity.User = UserHolder.Current.ToLite(); //Session special situations
             }
             catch { }
 
-            e.Data = entity.Data.Dump();
-            e.Version = Schema.Current.Version.ToString();
+            entity.Data = ex.Data.Dump();
+            entity.Version = Schema.Current.Version.ToString();
 
-            return e;
+            return entity;
         }
 
         static ExceptionDN SaveForceNew(this ExceptionDN entity)
