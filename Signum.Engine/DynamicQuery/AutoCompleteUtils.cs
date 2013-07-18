@@ -56,21 +56,26 @@ namespace Signum.Engine.DynamicQuery
                     }
                 }
             }
-
-            foreach (var t in types)
+            else
             {
-                results.AddRange(miLiteStarting.GetInvoker(t)(subString, count - results.Count));
+                if (subString.Trim('\'', '"').ToInt().HasValue)
+                    subString = subString.Trim('\'', '"');
 
-                if (results.Count >= count)
-                    return results;
-            }
+                foreach (var t in types)
+                {
+                    results.AddRange(miLiteStarting.GetInvoker(t)(subString, count - results.Count));
 
-            foreach (var t in types)
-            {
-                results.AddRange(miLiteContaining.GetInvoker(t)(subString, count - results.Count));
+                    if (results.Count >= count)
+                        return results;
+                }
 
-                if (results.Count >= count)
-                    return results;
+                foreach (var t in types)
+                {
+                    results.AddRange(miLiteContaining.GetInvoker(t)(subString, count - results.Count));
+
+                    if (results.Count >= count)
+                        return results;
+                }
             }
 
             return results;
