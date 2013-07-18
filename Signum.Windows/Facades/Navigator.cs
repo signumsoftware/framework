@@ -559,10 +559,21 @@ namespace Signum.Windows
             object result = win.DataContext;
             if (liteType != null)
             {
-                return ((IdentifiableEntity)result).ToLite();
+                IdentifiableEntity ident = (IdentifiableEntity)result;
+
+                bool saveProtected = ((ViewOptions)options).SaveProtected ?? OperationClient.SaveProtected(ident.GetType());
+
+                if (GraphExplorer.HasChanges(ident))
+                {
+                    if (saveProtected)
+                        throw new InvalidOperationException("The lite '{0}' of type '{1}' is SaveProtected but has changes. Consider setting SaveProtected = false in ViewOptions".Formato(entityOrLite, liteType.TypeName()));
+
+                    return ident.ToLiteFat();
+                }
+
+                return ident.ToLite();
             }
             return result;
-
         }
 
         protected virtual NormalWindow CreateNormalWindow()
