@@ -256,26 +256,18 @@ namespace Signum.Engine.Authorization
     class OperationMerger : IMerger<Enum, OperationAllowed>
     {
         public OperationAllowed Merge(Enum key, Lite<RoleDN> role, IEnumerable<KeyValuePair<Lite<RoleDN>, OperationAllowed>> baseValues)
-        {
+        {   
+            OperationAllowed best = AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union ? 
+                Max(baseValues.Select(a => a.Value)):
+                Min(baseValues.Select(a => a.Value));
+
             if (OperationAuthLogic.AvoidAutomaticUpgrade.Contains(key))
-            {
-                if (AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union)
-                    return Max(baseValues.Select(a => a.Value));
-                else
-                    return Min(baseValues.Select(a => a.Value));
-            }
-            else
-            {
-                var nonDefaults = baseValues.Where(kvp=> !kvp.Value.Equals(GetDefault(key, kvp.Key))).ToList();
+               return best;
+            
+            if(baseValues.Any(a=>a.Value.Equals(best) && GetDefault(key, a.Key).Equals(a.Value)))
+                return GetDefault(key, role);
 
-                if(nonDefaults.IsEmpty())
-                    return GetDefault(key, role);
-
-                if (AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union)
-                    return Max(nonDefaults.Select(a => a.Value));
-                else
-                    return Min(nonDefaults.Select(a => a.Value));
-            }
+            return best; 
         }
 
         static OperationAllowed GetDefault(Enum key, Lite<RoleDN> role)
@@ -322,7 +314,7 @@ namespace Signum.Engine.Authorization
                 if (OperationAuthLogic.AvoidAutomaticUpgrade.Contains(key))
                     return AuthLogic.GetDefaultAllowed(role) ? OperationAllowed.Allow : OperationAllowed.None;
 
-                return OperationAuthLogic.MaxTypePermission(key, TypeAllowedBasic.Modify, t => TypeAuthLogic.GetAllowed(role, t));
+                return GetDefault(key, role);
             };
         }
 

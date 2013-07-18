@@ -193,20 +193,19 @@ namespace Signum.Engine.Authorization
     {
         public bool Merge(object key, Lite<RoleDN> role, IEnumerable<KeyValuePair<Lite<RoleDN>, bool>> baseValues)
         {
-            var nonDefaults = baseValues.Where(kvp => !kvp.Value.Equals(GetDefault(key, kvp.Key))).ToList();
+            bool best = AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union ?
+                baseValues.Max(a => a.Value):
+                baseValues.Min(a => a.Value);
 
-            if (nonDefaults.IsEmpty())
+            if (baseValues.Any(a => a.Value.Equals(best) && GetDefault(key, a.Key).Equals(a.Value)))
                 return GetDefault(key, role);
 
-            if (AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union)
-                return nonDefaults.Max(a => a.Value);
-            else
-                return nonDefaults.Min(a => a.Value);
+            return best; 
         }
 
         public Func<object, bool> MergeDefault(Lite<RoleDN> role)
         {
-            return key => DynamicQueryManager.Current.GetEntityImplementations(key).AllCanRead(t => TypeAuthLogic.GetAllowed(role, t));
+            return key => GetDefault(key, role);
         }
 
         bool GetDefault(object key, Lite<RoleDN> role)

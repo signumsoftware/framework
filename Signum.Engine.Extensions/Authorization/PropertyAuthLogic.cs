@@ -179,15 +179,14 @@ namespace Signum.Engine.Authorization
     {
         public PropertyAllowed Merge(PropertyRoute key, Lite<RoleDN> role, IEnumerable<KeyValuePair<Lite<RoleDN>, PropertyAllowed>> baseValues)
         {
-            var nonDefaults = baseValues.Where(kvp => !kvp.Value.Equals(GetDefault(key, kvp.Key))).ToList();
+            PropertyAllowed best = AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union ?
+                Max(baseValues.Select(a => a.Value)) :
+                Min(baseValues.Select(a => a.Value));
 
-            if (nonDefaults.IsEmpty())
+            if (baseValues.Any(a => a.Value.Equals(best) && GetDefault(key, a.Key).Equals(a.Value)))
                 return GetDefault(key, role);
 
-            if (AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union)
-                return Max(nonDefaults.Select(a => a.Value));
-            else
-                return Min(nonDefaults.Select(a => a.Value));
+            return best; 
         }
 
         PropertyAllowed GetDefault(PropertyRoute key, Lite<RoleDN> role)
