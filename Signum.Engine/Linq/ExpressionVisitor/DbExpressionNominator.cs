@@ -1007,14 +1007,9 @@ namespace Signum.Engine.Linq
             if (this.IsFullNominateOrAggresive)
                 return newStr;
 
-            var subString = Add(new SqlFunctionExpression(typeof(string), null, SqlFunction.SUBSTRING.ToString(), new Expression[]
-            {
-                newStr,
-                new SqlConstantExpression(1, typeof(int)),
-                Expression.Add(max, new SqlConstantExpression(1, typeof(int))),
-            }));
-
-            return etcString == null ? Expression.Call(miEtc2, subString, max) : Expression.Call(miEtc3, subString, max, etcString); 
+            return etcString == null ?
+                Expression.Call(miEtc2, newStr, max) :
+                Expression.Call(miEtc3, newStr, max, etcString);
         }
 
         static MethodInfo miEtc2 = ReflectionTools.GetMethodInfo(() => "".Etc(2));
