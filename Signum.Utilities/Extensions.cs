@@ -14,55 +14,55 @@ namespace Signum.Utilities
     public static class Extensions
     {
         #region Parse Number
-        public static int? ToInt(this string str)
+        public static int? ToInt(this string str, NumberStyles ns = NumberStyles.Integer)
         {
             int result;
-            if (int.TryParse(str, out result))
+            if (int.TryParse(str, ns, CultureInfo.CurrentCulture, out result))
                 return result;
             else
                 return null;
         }
 
-        public static long? ToLong(this string str)
+        public static long? ToLong(this string str, NumberStyles ns = NumberStyles.Integer)
         {
             long result;
-            if (long.TryParse(str, out result))
+            if (long.TryParse(str, ns, CultureInfo.CurrentCulture, out result))
                 return result;
             else
                 return null;
         }
 
-        public static short? ToShort(this string str)
+        public static short? ToShort(this string str, NumberStyles ns = NumberStyles.Integer)
         {
             short result;
-            if (short.TryParse(str, out result))
+            if (short.TryParse(str, ns, CultureInfo.CurrentCulture, out result))
                 return result;
             else
                 return null;
         }
 
-        public static float? ToFloat(this string str)
+        public static float? ToFloat(this string str, NumberStyles ns = NumberStyles.Float | NumberStyles.AllowThousands)
         {
             float result;
-            if (float.TryParse(str, out result))
+            if (float.TryParse(str, ns, CultureInfo.CurrentCulture, out result))
                 return result;
             else
                 return null;
         }
 
-        public static double? ToDouble(this string str)
+        public static double? ToDouble(this string str, NumberStyles ns = NumberStyles.Float | NumberStyles.AllowThousands)
         {
             double result;
-            if (double.TryParse(str, out result))
+            if (double.TryParse(str, ns, CultureInfo.CurrentCulture, out result))
                 return result;
             else
                 return null;
         }
 
-        public static decimal? ToDecimal(this string str)
+        public static decimal? ToDecimal(this string str, NumberStyles ns = NumberStyles.Number)
         {
             decimal result;
-            if (decimal.TryParse(str, out result))
+            if (decimal.TryParse(str, ns, CultureInfo.CurrentCulture, out result))
                 return result;
             else
                 return null;

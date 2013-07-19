@@ -285,5 +285,10 @@ namespace Signum.Entities.Reflection
                new XAttribute("Background", ColorExtensions.ToHtmlColor(list.GetType().ElementType().FullName.GetHashCode())),
             };
         }
+
+        public static bool HasChanges(Modifiable mod)
+        {
+            return GraphExplorer.FromRoot(mod).Any(a => a.Modified == ModifiedState.SelfModified);
+        }
     }
 }
