@@ -149,8 +149,8 @@ namespace Signum.Windows.Chart
                     Filters = Request.Filters.Where(a => !(a.Token is AggregateToken)).Select(f => new FilterOption
                     {
                         Token = f.Token,
+                        Operation = f.Operation,
                         Value = f.Value,
-                        Operation = f.Operation
                     }).ToList(),
                     GroupResults = Request.GroupResults,
                     GetFilter = rr => keyColunns.Select(t => GetTokenFilters(t.Token.Token, rr[t.Column])).ToList()
