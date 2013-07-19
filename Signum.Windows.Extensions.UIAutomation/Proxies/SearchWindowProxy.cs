@@ -429,37 +429,6 @@ namespace Signum.Windows.UIAutomation
         {
             return Element.TryChild(a => a.Current.ControlType == ControlType.Button && a.Current.Name == OperationDN.UniqueKey(operationKey));
         }
-
-        public void ValidateHeadersItems()
-        {
-            StringBuilder sb = new StringBuilder();
-
-            foreach (var columnHeader in HeaderItems)
-            {
-                try
-                {
-                    columnHeader.ButtonInvoke();
-
-                    var mb = Element.TryMessageBoxChild();
-                    if (mb != null && !mb.IsError) //Not order
-                    {
-                        mb.OkButton.ButtonInvoke();
-
-                        continue;
-                    }
-
-                    WaitSearch();
-                }
-                catch (MessageBoxErrorException e)
-                {
-                    sb.AppendFormat("Query '{0}' Column '{1}':\r\n{2}", Element.Current.Name, columnHeader.Current.Name, e.Message);
-                }
-            }
-
-            if (sb.Length > 0)
-                throw new MessageBoxErrorException(sb.ToString());
-
-        }
     }
 
     public class PaginationSelectorProxy
