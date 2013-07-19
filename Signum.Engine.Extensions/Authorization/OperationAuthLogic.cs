@@ -263,8 +263,8 @@ namespace Signum.Engine.Authorization
 
             if (OperationAuthLogic.AvoidAutomaticUpgrade.Contains(key))
                return best;
-            
-            if(baseValues.Any(a=>a.Value.Equals(best) && GetDefault(key, a.Key).Equals(a.Value)))
+
+            if (baseValues.Where(a => a.Value.Equals(best)).All(a => GetDefault(key, a.Key).Equals(a.Value)))
                 return GetDefault(key, role);
 
             return best; 
