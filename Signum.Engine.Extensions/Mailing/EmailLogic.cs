@@ -133,8 +133,8 @@ namespace Signum.Engine.Mailing
 
         public static SmtpClient SafeSmtpClient()
         {
-            if (!SendEmails)
-                throw new InvalidOperationException("EmailLogic.EmailConfigurationDN.SendEmails is set to false");
+            if (!EmailLogic.Configuration.SendEmails)
+                throw new InvalidOperationException("EmailLogic.Configuration.SendEmails is set to false");
 
             //http://weblogs.asp.net/stanleygu/archive/2010/03/31/tip-14-solve-smtpclient-issues-of-delayed-email-and-high-cpu-usage.aspx
             return new SmtpClient()
@@ -145,8 +145,8 @@ namespace Signum.Engine.Mailing
 
         internal static SmtpClient SafeSmtpClient(string host, int port)
         {
-            if (!SendEmails)
-                throw new InvalidOperationException("EmailLogic.SendEmails is set to false");
+            if (!EmailLogic.Configuration.SendEmails)
+                throw new InvalidOperationException("EmailLogic.Configuration.SendEmails is set to false");
 
             //http://weblogs.asp.net/stanleygu/archive/2010/03/31/tip-14-solve-smtpclient-issues-of-delayed-email-and-high-cpu-usage.aspx
             return new SmtpClient(host, port)
