@@ -177,9 +177,12 @@ namespace Signum.Engine.Files
 
         private static bool SaveFile(FilePathDN fp)
         {
+
+            string fullPhysicalPath = null;
             try
             {
                 string path = Path.GetDirectoryName(fp.FullPhysicalPath);
+                fullPhysicalPath = path;
                 if (!Directory.Exists(path))
                     Directory.CreateDirectory(path);
                 File.WriteAllBytes(fp.FullPhysicalPath, fp.BinaryFile);
@@ -187,6 +190,9 @@ namespace Signum.Engine.Files
             }
             catch (IOException ex)
             {
+                ex.Data.Add("FullPhysicalPath" , fullPhysicalPath);
+                ex.Data.Add("CurrentPrincipal",System.Threading.Thread.CurrentPrincipal.Identity.Name);
+
                 int hresult = (int)ex.GetType().GetField("_HResult",
                     System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(ex); // The error code is stored in just the lower 16 bits
                 if ((hresult & 0xFFFF) == ERROR_DISK_FULL)

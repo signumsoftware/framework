@@ -218,10 +218,7 @@ namespace Signum.Engine.Processes
                     ToState = ProcessState.Planned,
                     Execute = (p, args) =>
                     {
-                        if (JustMyProcesses)
-                            p.MachineName = Environment.MachineName;
-                        else
-                            p.MachineName = ProcessDN.None;
+                        p.MachineName = JustMyProcesses ? Environment.MachineName : ProcessDN.None;
 
                         p.State = ProcessState.Planned;
                         p.PlannedDate = (DateTime)args[0];
@@ -246,10 +243,7 @@ namespace Signum.Engine.Processes
                     ToState = ProcessState.Queued,
                     Execute = (p, _) =>
                     {
-                        if (JustMyProcesses)
-                            p.MachineName = Environment.MachineName;
-                        else
-                            p.MachineName = ProcessDN.None;
+                        p.MachineName = JustMyProcesses ?  Environment.MachineName:  ProcessDN.None;
 
                         p.SetAsQueued();
                     }
@@ -294,7 +288,7 @@ namespace Signum.Engine.Processes
                     State = ProcessState.Created,
                     Data = processData,
                     Session = session,
-                    MachineName = Environment.MachineName,
+                    MachineName = JustMyProcesses ? Environment.MachineName : ProcessDN.None
                 }.Save();
         }
 
@@ -329,40 +323,43 @@ namespace Signum.Engine.Processes
                     return;
 
                 for (int i = 0; i < lines.Count; i++)
-                {
+                {   
                     executingProcess.CancellationToken.ThrowIfCancellationRequested();
 
                     T pl = lines[i];
 
-                    try
+                    using (HeavyProfiler.Log("ProcessLine", () => pl.ToString()))
                     {
-                        using (Transaction tr = Transaction.ForceNew())
+                        try
                         {
-                            action(pl);
-                            tr.Commit();
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        if (Transaction.InTestTransaction)
-                            throw;
-
-                        var exLog = e.LogException();
-
-                        using (Transaction tr = Transaction.ForceNew())
-                        {
-                            new ProcessExceptionLineDN
+                            using (Transaction tr = Transaction.ForceNew())
                             {
-                                Exception = exLog.ToLite(),
-                                Line = pl.ToLite(),
-                                Process = executingProcess.CurrentExecution.ToLite()
-                            }.Save();
-
-                            tr.Commit();
+                                action(pl);
+                                tr.Commit();
+                            }
                         }
-                    }
+                        catch (Exception e)
+                        {
+                            if (Transaction.InTestTransaction)
+                                throw;
 
-                    executingProcess.ProgressChanged(j++, totalCount);
+                            var exLog = e.LogException();
+
+                            using (Transaction tr = Transaction.ForceNew())
+                            {
+                                new ProcessExceptionLineDN
+                                {
+                                    Exception = exLog.ToLite(),
+                                    Line = pl.ToLite(),
+                                    Process = executingProcess.CurrentExecution.ToLite()
+                                }.Save();
+
+                                tr.Commit();
+                            }
+                        }
+
+                        executingProcess.ProgressChanged(j++, totalCount);
+                    }
                 }
             }
         }

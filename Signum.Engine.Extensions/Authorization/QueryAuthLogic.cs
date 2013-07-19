@@ -148,7 +148,7 @@ namespace Signum.Engine.Authorization
             cache.GetRules(result, QueryLogic.GetTypeQueries(typeDN));
 
             var coercer = QueryCoercer.Instance.GetCoerceValue(role);
-            result.Rules.ForEach(r => r.CoercedValues = new []{ false, true }
+            result.Rules.ForEach(r => r.CoercedValues = new[] { false, true }
                 .Where(a => !coercer(QueryLogic.ToQueryName(r.Resource.Key), a).Equals(a))
                 .ToArray());
 
@@ -189,35 +189,28 @@ namespace Signum.Engine.Authorization
         }
     }
 
-    class QueryMerger : Merger<object, bool>
+    class QueryMerger : IMerger<object, bool>
     {
-        protected override bool Union(object key, Lite<RoleDN> role, IEnumerable<bool> baseValues)
+        public bool Merge(object key, Lite<RoleDN> role, IEnumerable<KeyValuePair<Lite<RoleDN>, bool>> baseValues)
         {
-            var result = baseValues.Any(a => a);
+            bool best = AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union ?
+                baseValues.Max(a => a.Value) :
+                baseValues.Min(a => a.Value);
 
-            var implementations = DynamicQueryManager.Current.GetEntityImplementations(key);
+            if (baseValues.Where(a => a.Value.Equals(best)).All(a => GetDefault(key, a.Key).Equals(a.Value)))
+                return GetDefault(key, role);
 
-            if (result == implementations.AllCanRead(t => TypeAuthLogic.GetAllowedBase(role, t)))
-                return implementations.AllCanRead(t => TypeAuthLogic.GetAllowed(role, t));
-
-            return result;
+            return best;
         }
 
-        protected override bool Intersection(object key, Lite<RoleDN> role, IEnumerable<bool> baseValues)
+        public Func<object, bool> MergeDefault(Lite<RoleDN> role)
         {
-            var result = baseValues.All(a => a);
-
-            var implementations = DynamicQueryManager.Current.GetEntityImplementations(key);
-
-            if (result == implementations.AllCanRead(t => TypeAuthLogic.GetAllowedBase(role, t)))
-                return implementations.AllCanRead(t => TypeAuthLogic.GetAllowed(role, t));
-            
-            return result;
+            return key => GetDefault(key, role);
         }
 
-        public override Func<object, bool> MergeDefault(Lite<RoleDN> role, IEnumerable<Func<object, bool>> baseDefaultValues)
+        bool GetDefault(object key, Lite<RoleDN> role)
         {
-            return key => DynamicQueryManager.Current.GetEntityImplementations(key).AllCanRead(t => TypeAuthLogic.GetAllowed(role, t));
+            return DynamicQueryManager.Current.GetEntityImplementations(key).AllCanRead(t => TypeAuthLogic.GetAllowed(role, t));
         }
     }
 
