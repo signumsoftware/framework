@@ -183,10 +183,10 @@ namespace Signum.Engine.Authorization
                 Max(baseValues.Select(a => a.Value)) :
                 Min(baseValues.Select(a => a.Value));
 
-            if (baseValues.Any(a => a.Value.Equals(best) && GetDefault(key, a.Key).Equals(a.Value)))
+            if (baseValues.Where(a => a.Value.Equals(best)).All(a => GetDefault(key, a.Key).Equals(a.Value)))
                 return GetDefault(key, role);
 
-            return best; 
+            return best;
         }
 
         PropertyAllowed GetDefault(PropertyRoute key, Lite<RoleDN> role)
