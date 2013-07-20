@@ -93,6 +93,7 @@
   <ItemGroup>
     <Compile Include="Alerts\AlertLogic.cs" />
     <Compile Include="Authorization\AuthCache.cs" />
+    <Compile Include="Authorization\Impersonator.cs" />
     <Compile Include="Authorization\SessionLogLogic.cs" />
     <Compile Include="Authorization\TypeAuthCache.cs" />
     <Compile Include="Authorization\PasswordExpiresLogic.cs" />
