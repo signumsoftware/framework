@@ -57,7 +57,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            var constructor = "new {0}({1})".Formato(Type.TypeName(),
+            var constructor = "new {0}{1}({2})".Formato(Type.TypeName(), AvoidExpandOnRetrieving ? "?": "",
                 ExternalId.NiceToString());
 
             return constructor +
@@ -189,7 +189,7 @@ namespace Signum.Engine.Linq
 
         public override string ToString()
         {
-            return "ImplementedBy({0}){{\r\n{}\r\n}}".Formato(Strategy,
+            return "ImplementedBy({0}){{\r\n{1}\r\n}}".Formato(Strategy,
                 Implementations.ToString(kvp => "{0} ->  {1}".Formato(kvp.Key.NiceName(), kvp.Value.NiceToString()), "\r\n").Indent(4)
                 );
         }
