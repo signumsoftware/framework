@@ -1,51 +1,82 @@
 ﻿@using Signum.Engine
 @using Signum.Entities.Mailing
 
-@Html.ScriptsJs("~/Scripts/ckeditor/ckeditor.js")
+
 @Html.ScriptCss("~/Mailing/Content/SF_Mailing.css")
+
 
 @using (var e = Html.TypeContext<EmailMessageDN>())
 {
-    @Html.EntityLine(e, f => f.From)
-    @Html.EntityList(e, f => f.Recipients)
-    @Html.EntityLine(e, f => f.Target, f => f.ReadOnly = true)
-    @Html.EntityLine(e, f => f.Template, f => f.ReadOnly = true)
-    @Html.ValueLine(e, f => f.Sent, f => f.ReadOnly = true)
-    @Html.ValueLine(e, f => f.Received, f => f.ReadOnly = true)
-    @Html.EntityLine(e, f => f.Exception, f => f.ReadOnly = true)
-    @Html.ValueLine(e, f => f.State, f => f.ReadOnly = true)
-    @Html.EntityLine(e, f => f.Package, f => f.ReadOnly = true)
-    @Html.ValueLine(e, f => f.IsBodyHtml)
-    @Html.ValueLine(e, f => f.Subject)
+    if (e.Value.State != EmailMessageState.Created)
+    {
+        e.ReadOnly = true;
+    }
+    
+    <div style="float: left; margin: 10px">
+        @Html.EntityLine(e, f => f.Target)
+        @Html.EntityLineDetail(e, f => f.From)
+        @Html.EntityRepeater(e, f => f.Recipients)
+    </div>
+    
+    <fieldset style="float: left">
+        <legend>Properties</legend>
+        @Html.ValueLine(e, f => f.State)
+        @Html.ValueLine(e, f => f.Sent)
+        @Html.ValueLine(e, f => f.Received)
+        @Html.EntityLine(e, f => f.Exception)
+        @Html.EntityLine(e, f => f.Template)
+        @Html.EntityLine(e, f => f.Package)
+        @Html.ValueLine(e, f => f.IsBodyHtml)
+    </fieldset>
+     
+    <div class="clearall" />
+    
+    @Html.ValueLine(e, f => f.Subject) 
     if (e.Value.State == EmailMessageState.Created)
     {
-        @Html.ValueLine(e, f => f.Body, vl => 
+    @Html.ValueLine(e, f => f.Body, vl =>
         {
             vl.ValueLineType = ValueLineType.TextArea;
             vl.ValueHtmlProps["style"] = "width:100%; height:180px;";
         })
-    }
-    else
-    {
-        <h3>@EmailMessageMessage.Message.NiceToString():</h3>
-        <div>
-            @if (e.Value.IsBodyHtml)
-            {
-                @Html.Raw(e.Value.Body)
-            } 
-            else
-            {
-              @Html.Raw(HttpUtility.HtmlEncode(e.Value.Body))
-            }
-        </div>
-    }
 
+    @Html.ScriptsJs("~/Scripts/ckeditor/ckeditor.js")
     @Html.ScriptsJs("~/Mailing/Scripts/SF_Mailing.js")
+   
 
     <script>
         $(function () {
             SF.Mailing.initHtmlEditor('@e.Compose("Body")');
         });
     </script>
+    }
+    else
+    {
+    <h3>@EmailMessageMessage.Message.NiceToString():</h3>
+    <div>
+        @if (e.Value.IsBodyHtml)
+        {
+            @Html.ScriptsJs("~/Mailing/Scripts/SF_Mailing.js")
+            
+            <iframe id="@e.Compose("iframe")" style="width:90%">
+                @Html.Raw(e.Value.Body)
+            </iframe>
+            <script>
+                $(function () {
+                    var iframe = $("@e.Compose("iframe")");
+                    SF.Mailing.activateIFrame(iframe);
+                });
+            </script>
+        }
+        else
+        {
+            <pre>
+            @Html.Raw(HttpUtility.HtmlEncode(e.Value.Body))
+            </pre>
+        }
+    </div>
+    }
+
+
 }
 

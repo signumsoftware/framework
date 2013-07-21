@@ -138,8 +138,8 @@ namespace Signum.Entities.Mailing
             set { Set(ref startDate, value, () => StartDate); }
         }
 
-        DateTime endDate;
-        public DateTime EndDate
+        DateTime? endDate;
+        public DateTime? EndDate
         {
             get { return endDate; }
             set { Set(ref endDate, value, () => EndDate); }

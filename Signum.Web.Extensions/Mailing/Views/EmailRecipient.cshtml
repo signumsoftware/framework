@@ -1,9 +1,13 @@
 ﻿@using Signum.Entities.Mailing
 
-@using (var sc = Html.TypeContext<EmailRecipientDN>()) 
+@using (var sc = Html.TypeContext<EmailRecipientDN>())
 {
-	@Html.EntityLine(sc, er => er.EmailOwner)
-	@Html.ValueLine(sc, er => er.EmailAddress)
-    @Html.ValueLine(sc, er => er.DisplayName)
-    @Html.ValueLine(sc, er => er.Kind)
+    using (Html.FieldInline())
+    {
+    @Html.ValueLine(sc, c => c.Kind)
+    @Html.ValueLine(sc, c => c.EmailAddress)
+    @Html.ValueLine(sc, c => c.DisplayName)
+    }
+    
+    @Html.EntityLine(sc, er => er.EmailOwner)
 }
