@@ -250,36 +250,18 @@ namespace Signum.Engine.Authorization
         }
     }
 
-    class TypeAllowedMerger : Merger<Type, TypeAllowedAndConditions>
+    class TypeAllowedMerger : IMerger<Type, TypeAllowedAndConditions>
     {
         public static readonly TypeAllowedMerger Instance = new TypeAllowedMerger();
 
         TypeAllowedMerger() { }
 
-        protected override TypeAllowedAndConditions Union(Type key, Lite<RoleDN> role, IEnumerable<TypeAllowedAndConditions> baseValues)
+        public TypeAllowedAndConditions Merge(Type key, Lite<RoleDN> role, IEnumerable<KeyValuePair<Lite<RoleDN>, TypeAllowedAndConditions>> baseValues)
         {
-            return MergeBase(baseValues, MaxTypeAllowed, TypeAllowed.Create, TypeAllowed.None);
-        }
-
-        static TypeAllowed MaxTypeAllowed(IEnumerable<TypeAllowed> collection)
-        {
-            TypeAllowed result = TypeAllowed.None;
-
-            foreach (var item in collection)
-            {
-                if (item > result)
-                    result = item;
-
-                if (result == TypeAllowed.Create)
-                    return result;
-
-            }
-            return result;
-        }
-
-        protected override TypeAllowedAndConditions Intersection(Type key, Lite<RoleDN> role, IEnumerable<TypeAllowedAndConditions> baseValues)
-        {
-            return MergeBase(baseValues, MinTypeAllowed, TypeAllowed.None, TypeAllowed.Create);
+            if (AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union)
+                return MergeBase(baseValues.Select(a=>a.Value), MaxTypeAllowed, TypeAllowed.Create, TypeAllowed.None);
+            else
+                return MergeBase(baseValues.Select(a => a.Value), MinTypeAllowed, TypeAllowed.None, TypeAllowed.Create);
         }
 
         static TypeAllowed MinTypeAllowed(IEnumerable<TypeAllowed> collection)
@@ -298,12 +280,28 @@ namespace Signum.Engine.Authorization
             return result;
         }
 
-        public override Func<Type, TypeAllowedAndConditions> MergeDefault(Lite<RoleDN> role, IEnumerable<Func<Type, TypeAllowedAndConditions>> baseDefaultValues)
+        static TypeAllowed MaxTypeAllowed(IEnumerable<TypeAllowed> collection)
+        {
+            TypeAllowed result = TypeAllowed.None;
+
+            foreach (var item in collection)
+            {
+                if (item > result)
+                    result = item;
+
+                if (result == TypeAllowed.Create)
+                    return result;
+
+            }
+            return result;
+        }
+
+        public Func<Type, TypeAllowedAndConditions> MergeDefault(Lite<RoleDN> role)
         {
             var taac = new TypeAllowedAndConditions(AuthLogic.GetDefaultAllowed(role) ? TypeAllowed.Create : TypeAllowed.None);
             return new ConstantFunction<Type, TypeAllowedAndConditions>(taac).GetValue;
         }
-
+      
         public static TypeAllowedAndConditions MergeBase(IEnumerable<TypeAllowedAndConditions> baseRules, Func<IEnumerable<TypeAllowed>, TypeAllowed> maxMerge, TypeAllowed max, TypeAllowed min)
         {
             TypeAllowedAndConditions only = baseRules.Only();
@@ -330,6 +328,8 @@ namespace Signum.Engine.Authorization
             return new TypeAllowedAndConditions(maxMerge(baseRules.Select(a => a.Fallback)),
                 conditions.Select((c, i) => new TypeConditionRule(c, maxMerge(baseRules.Where(br => !br.Conditions.IsNullOrEmpty()).Select(br => br.Conditions[i].Allowed)))).ToArray());
         }
+
+     
     }
 
     public static class AuthThumbnailExtensions

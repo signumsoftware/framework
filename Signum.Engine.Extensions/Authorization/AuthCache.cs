@@ -17,21 +17,10 @@ using Signum.Engine.Cache;
 
 namespace Signum.Entities.Authorization
 {
-    abstract class Merger<K , A>
+    public interface IMerger<K, A>
     {
-        public A Merge(K key, Lite<RoleDN> role, IEnumerable<A> baseValues)
-        {
-            if (AuthLogic.GetMergeStrategy(role) == MergeStrategy.Intersection)
-                return Intersection(key, role, baseValues);
-            else
-                return Union(key, role, baseValues); 
-        }
-
-        protected abstract A Intersection(K key, Lite<RoleDN> role, IEnumerable<A> baseValues);
-        protected abstract A Union(K key, Lite<RoleDN> role, IEnumerable<A> baseValues);
-
-        //This function should have the property that every key not following this rule is because is overriden by some inherited role
-        public abstract Func<K, A> MergeDefault(Lite<RoleDN> role, IEnumerable<Func<K, A>> baseDefaultValues);
+        A Merge(K key, Lite<RoleDN> role, IEnumerable<KeyValuePair<Lite<RoleDN>, A>> baseValues);
+        Func<K, A> MergeDefault(Lite<RoleDN> role);
     }
 
     public interface IManualAuth<K, A>
@@ -42,7 +31,7 @@ namespace Signum.Entities.Authorization
 
     class Coercer<A, K>
     {
-        public static readonly Coercer<A, K> Default = new Coercer<A, K>();
+        public static readonly Coercer<A, K> None = new Coercer<A, K>();
 
         public virtual Func<Lite<RoleDN>, A, A> GetCoerceValueManual(K key) { return (role, allowed) => allowed; }
         public virtual Func<K, A, A> GetCoerceValue(Lite<RoleDN> role) { return (key, allowed) => allowed; } 
@@ -57,15 +46,15 @@ namespace Signum.Entities.Authorization
 
         Func<R, K> ToKey;
         Func<K, R> ToEntity;
-        Merger<K, A> merger;
+        IMerger<K, A> merger;
         Coercer<A, K> coercer;
 
-        public AuthCache(SchemaBuilder sb, Func<R, K> toKey, Func<K, R> toEntity, Merger<K, A> merger, bool invalidateWithTypes, Coercer<A, K> coercer = null)
+        public AuthCache(SchemaBuilder sb, Func<R, K> toKey, Func<K, R> toEntity, IMerger<K, A> merger, bool invalidateWithTypes, Coercer<A, K> coercer = null)
         {
             this.ToKey = toKey;
             this.ToEntity = toEntity;
             this.merger = merger;
-            this.coercer = coercer ?? Coercer<A, K>.Default; 
+            this.coercer = coercer ?? Coercer<A, K>.None; 
 
             sb.Include<RT>();
 
@@ -133,13 +122,13 @@ namespace Signum.Entities.Authorization
         {
             readonly Dictionary<Lite<RoleDN>, A> specificRules;
 
-            readonly Merger<K, A> merger;
+            readonly IMerger<K, A> merger;
 
             readonly Func<Lite<RoleDN>, A, A> coercer;
 
-            readonly K key; 
+            readonly K key;
 
-            public ManualResourceCache(K key, R resource, Merger<K, A> merger, Func<Lite<RoleDN>, A, A> coercer)
+            public ManualResourceCache(K key, R resource, IMerger<K, A> merger, Func<Lite<RoleDN>, A, A> coercer)
             {
                 this.key = key;
 
@@ -164,7 +153,7 @@ namespace Signum.Entities.Authorization
 
             public A GetAllowedBase(Lite<RoleDN> role)
             {
-                var result = merger.Merge(key, role, AuthLogic.RelatedTo(role).Select(GetAllowed));
+                var result = merger.Merge(key, role, AuthLogic.RelatedTo(role).Select(r => KVP.Create(r, GetAllowed(r))));
 
                 return coercer(role, result);
             }
@@ -244,14 +233,14 @@ namespace Signum.Entities.Authorization
         public class RoleAllowedCache
         {
             readonly Lite<RoleDN> role;
-            readonly Merger<K, A> merger;
+            readonly IMerger<K, A> merger;
             readonly Func<K, A, A> coercer;
 
             readonly DefaultDictionary<K, A> rules; 
             readonly List<RoleAllowedCache> baseCaches;
 
 
-            public RoleAllowedCache(Lite<RoleDN> role, Merger<K, A> merger, List<RoleAllowedCache> baseCaches, Dictionary<K, A> newValues, Func<K, A, A> coercer)
+            public RoleAllowedCache(Lite<RoleDN> role, IMerger<K, A> merger, List<RoleAllowedCache> baseCaches, Dictionary<K, A> newValues, Func<K, A, A> coercer)
             {
                 this.role = role;
 
@@ -260,9 +249,9 @@ namespace Signum.Entities.Authorization
 
                 this.baseCaches = baseCaches;
 
-                Func<K, A> defaultAllowed = merger.MergeDefault(role, baseCaches.Select(a => a.rules.DefaultAllowed));
+                Func<K, A> defaultAllowed = merger.MergeDefault(role);
 
-                Func<K, A> baseAllowed =  k => merger.Merge(k, role, baseCaches.Select(b => b.GetAllowed(k)));
+                Func<K, A> baseAllowed = k => merger.Merge(k, role, baseCaches.Select(b => KVP.Create(b.role, b.GetAllowed(k))));
 
                 var keys = baseCaches
                     .Where(b => b.rules.OverrideDictionary != null)
@@ -302,7 +291,7 @@ namespace Signum.Entities.Authorization
 
             public A GetAllowedBase(K key)
             {
-                var raw = merger.Merge(key, role, baseCaches.Select(b => b.GetAllowed(key)));
+                var raw = merger.Merge(key, role, baseCaches.Select(b => KVP.Create(b.role, b.GetAllowed(key))));
 
                 return coercer(key, raw);
             }
