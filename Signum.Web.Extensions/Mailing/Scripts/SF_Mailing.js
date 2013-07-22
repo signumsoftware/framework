@@ -221,6 +221,22 @@ SF.registerModule("Mailing", function () {
             });
         };
 
+
+        var activateIFrame = function ($iframe) {
+            var doc = $iframe[0].document;
+            if ($iframe[0].contentDocument)
+                doc = $iframe[0].contentDocument; // For NS6
+            else if ($iframe[0].contentWindow)
+                doc = $iframe[0].contentWindow.document; // For IE5.5 and IE6
+
+            doc.open();
+            doc.writeln($iframe.text());
+            doc.close();
+
+            $iframe.height($iframe.contents().find("html").height() + 10);
+        };
+
+
         return {
             initReplacements: initReplacements,
             initHtmlEditor: initHtmlEditor,
@@ -228,7 +244,8 @@ SF.registerModule("Mailing", function () {
             initHtmlEditorWithTokens: initHtmlEditorWithTokens,
             setTokenTargetFocus: setTokenTargetFocus,
             removeTokenTargetFocus: removeTokenTargetFocus,
-            newSubTokensComboAdded: newSubTokensComboAdded
+            newSubTokensComboAdded: newSubTokensComboAdded,
+            activateIFrame: activateIFrame
         };
     })();
 });

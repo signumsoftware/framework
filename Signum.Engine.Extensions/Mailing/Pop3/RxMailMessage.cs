@@ -301,8 +301,8 @@ namespace Signum.Engine.Mailing.Pop3
             AppendLine(sb, "M-ID  : {0}", entity.MessageId);
             AppendLine(sb, "Mime  : Version {0}", entity.MimeVersion);
 
-            if (entity.ContentStream != null)
-                AppendLine(sb, "Stream: Length {0}", entity.ContentStream.Length);
+            //if (entity.ContentStream != null)
+            //    AppendLine(sb, "Stream: Length {0}", entity.ContentStream.Length);
 
             //decode all shild MIME entities
             foreach (RxMailMessage child in entity.Entities)

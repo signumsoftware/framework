@@ -56,6 +56,7 @@ namespace Signum.Engine.Mailing
                 CultureInfoLogic.AssertStarted(sb);
                 EmailLogic.getConfiguration = getConfiguration;
                 EmailTemplateLogic.Start(sb, dqm);
+				SmtpConfigurationLogic.Start(sb, dqm); 
 
                 sb.Include<EmailMessageDN>();
 
@@ -318,8 +319,6 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        public Lite<SmtpConfigurationDN> DefaultSmtpConfiguration;
-
         SmtpClient CreateSmtpClient(EmailMessageDN email)
         {
             if (email.Template != null)
@@ -329,8 +328,12 @@ namespace Signum.Engine.Mailing
                     return smtp.GenerateSmtpClient();
             }
 
-            if (DefaultSmtpConfiguration != null)
-                return DefaultSmtpConfiguration.GenerateSmtpClient();
+            if (SmtpConfigurationLogic.DefaultSmtpConfiguration != null)
+            {
+                var val = SmtpConfigurationLogic.DefaultSmtpConfiguration.Value;
+                if (val != null)
+                    return val.GenerateSmtpClient();
+            }
 
             return EmailLogic.SafeSmtpClient();
         }
