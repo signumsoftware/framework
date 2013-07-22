@@ -22,9 +22,6 @@ namespace Signum.Services
         [OperationContract, NetDataContract]
         void ChagePassword(Lite<UserDN> user, string passwordHash, string newPasswordHash);
 
-        [OperationContract(IsTerminating = true), NetDataContract]
-        void Logout();
-
         [OperationContract, NetDataContract]
         UserDN GetCurrentUser();
 
