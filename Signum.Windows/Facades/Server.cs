@@ -54,6 +54,8 @@ namespace Signum.Windows
 
         public static bool Connect()
         {
+            Disconnect();
+
             current = getServer();
 
             if (current == null)
@@ -77,6 +79,19 @@ namespace Signum.Windows
 
                 return ((ICommunicationObject)current).State != CommunicationState.Faulted;
             }
+        }
+
+        public static void Disconnect()
+        {
+            ICommunicationObject co = current as ICommunicationObject;
+
+            if (co == null)
+                return;
+
+            if (co.State == CommunicationState.Faulted)
+                co.Abort();
+
+            ((IDisposable)co).Dispose();
         }
        
         public static void Execute<S>(Action<S> action)
@@ -323,6 +338,8 @@ namespace Signum.Windows
 
            return lite;
         }
+
+      
     }
 
     [Serializable]
