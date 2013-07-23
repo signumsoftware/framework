@@ -274,14 +274,11 @@ namespace Signum.Web.Auth
         public ActionResult ResetPasswordSetNew(Lite<ResetPasswordRequestDN> rpr)
         {
             ResetPasswordRequestDN request = null;
-            UserDN user = null;
             using (AuthLogic.Disable())
             {
                 request = rpr.Retrieve();
-                user = Database.Query<UserDN>()
-                    .Where(u => u.Email == request.User.Email)
-                    .SingleEx();
             }
+            var user = request.User;
 
             var context = user.ApplyChanges(this.ControllerContext, "", UserMapping.ChangePassword).ValidateGlobal();
 
