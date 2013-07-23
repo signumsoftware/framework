@@ -60,7 +60,7 @@ namespace Signum.Engine.Authorization
 
             public override List<EmailOwnerRecipientData> GetRecipients()
             {
-                return To(Entity.User.EmailOwnerData); 
+                return SendTo(Entity.User.EmailOwnerData); 
             }
         }
 

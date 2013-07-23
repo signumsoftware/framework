@@ -51,7 +51,7 @@ WriteLiteral("\r\n");
 
             
             #line 3 "..\..\Mailing\Views\EmailAddress.cshtml"
- using (var sc = Html.TypeContext<EmailAddressDN>()) 
+ using (var sc = Html.TypeContext<EmailAddressDN>())
 {
     using (Html.FieldInline())
     {
@@ -61,43 +61,45 @@ WriteLiteral("\r\n");
             #line hidden
             
             #line 7 "..\..\Mailing\Views\EmailAddress.cshtml"
-Write(Html.ValueLine(sc, c => c.EmailAddress));
-
-            
-            #line default
-            #line hidden
-            
-            #line 7 "..\..\Mailing\Views\EmailAddress.cshtml"
-                                            
-    
-            
-            #line default
-            #line hidden
-            
-            #line 8 "..\..\Mailing\Views\EmailAddress.cshtml"
-Write(Html.ValueLine(sc, c => c.DisplayName));
-
-            
-            #line default
-            #line hidden
-            
-            #line 8 "..\..\Mailing\Views\EmailAddress.cshtml"
-                                           
-    }
-	
-            
-            #line default
-            #line hidden
-            
-            #line 10 "..\..\Mailing\Views\EmailAddress.cshtml"
 Write(Html.EntityLine(sc, ea => ea.EmailOwner));
 
             
             #line default
             #line hidden
             
+            #line 7 "..\..\Mailing\Views\EmailAddress.cshtml"
+                                             
+
+    
+            
+            #line default
+            #line hidden
+            
+            #line 9 "..\..\Mailing\Views\EmailAddress.cshtml"
+Write(Html.ValueLine(sc, c => c.EmailAddress, vl => vl.ValueHtmlProps.Add("style", "width:250px")));
+
+            
+            #line default
+            #line hidden
+            
+            #line 9 "..\..\Mailing\Views\EmailAddress.cshtml"
+                                                                                                 
+    
+            
+            #line default
+            #line hidden
+            
             #line 10 "..\..\Mailing\Views\EmailAddress.cshtml"
-                                          
+Write(Html.ValueLine(sc, c => c.DisplayName, vl => vl.ValueHtmlProps.Add("style", "width:250px")));
+
+            
+            #line default
+            #line hidden
+            
+            #line 10 "..\..\Mailing\Views\EmailAddress.cshtml"
+                                                                                                
+    }
+
 }
 
             

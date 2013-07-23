@@ -9,7 +9,6 @@
 {
     <div style="float: left">
         @Html.ValueLine(ec, e => e.Name)
-        @Html.ValueLine(ec, e => e.State, vl => vl.ReadOnly = true)
         @Html.EntityLine(ec, e => e.Query)
         @Html.EntityLine(ec, e => e.SmtpConfiguration)
         @Html.ValueLine(ec, e => e.EditableMessage)

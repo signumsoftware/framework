@@ -20,8 +20,8 @@ namespace Signum.Engine.Mailing
 {
     public static class EmailTemplateLogic
     {
+        public static Func<EmailMasterTemplateDN> CreateDefaultMasterTemplate;
      
-
         public static ResetLazy<Dictionary<Lite<EmailTemplateDN>, EmailTemplateDN>> EmailTemplates; 
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
@@ -44,7 +44,6 @@ namespace Signum.Engine.Mailing
                      Entity = t,
                      t.Id,
                      t.Name,
-                     t.State
                  });
 
                 dqm.RegisterQuery(typeof(EmailTemplateDN), () =>
@@ -343,46 +342,37 @@ namespace Signum.Engine.Mailing
         }
 
 
-        class EmailTemplateGraph : Graph<EmailTemplateDN, EmailTemplateState>
+        class EmailTemplateGraph : Graph<EmailTemplateDN>
         {
             static bool registered;
             public static bool Registered { get { return registered; } }
 
             public static void Register()
             {
-                GetState = t => t.State;
-
                 new Construct(EmailTemplateOperation.Create)
                 {
-                    ToState = EmailTemplateState.Created,
                     Construct = _ => new EmailTemplateDN 
                     { 
-                        State = EmailTemplateState.Created,
-                        SmtpConfiguration = SmtpConfigurationLogic.DefaultSmtpConfiguration.Value.ToLite()
+                        SmtpConfiguration = SmtpConfigurationLogic.DefaultSmtpConfiguration.Value.ToLite(),
+                        MasterTemplate = EmailTemplateLogic.GetDefaultMasterTemplate(),
                     }
                 }.Register();
 
                 new Execute(EmailTemplateOperation.Save)
                 {
-                    ToState = EmailTemplateState.Modified,
                     AllowsNew = true,
                     Lite = false,
-                    FromStates = { EmailTemplateState.Created, EmailTemplateState.Modified },
-                    Execute = (t, _) => t.State = EmailTemplateState.Modified
+                    Execute = (t, _) => { }
                 }.Register();
 
                 new Execute(EmailTemplateOperation.Enable) 
                 {
-                    ToState = EmailTemplateState.Modified,
-                    FromStates = { EmailTemplateState.Modified },
                     CanExecute = t => t.Active ? EmailTemplateMessage.TheTemplateIsAlreadyActive.NiceToString() : null,
                     Execute = (t, _) => t.Active = true
                 }.Register();
 
                 new Execute(EmailTemplateOperation.Disable) 
                 {
-                    ToState = EmailTemplateState.Modified,
-                    FromStates = { EmailTemplateState.Modified },
                     CanExecute = t => !t.Active ? EmailTemplateMessage.TheTemplateIsAlreadyInactive.NiceToString() : null,
                     Execute = (t, _) => t.Active = false
                 }.Register();
@@ -391,27 +381,39 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        class EmailMasterTemplateGraph : Graph<EmailMasterTemplateDN, EmailTemplateState>
+        class EmailMasterTemplateGraph : Graph<EmailMasterTemplateDN>
         {
             public static void Register()
             {
-                GetState = t => t.State;
-
                 new Construct(EmailMasterTemplateOperation.Create)
                 {
-                    ToState = EmailTemplateState.Created,
-                    Construct = _ => new EmailMasterTemplateDN { State = EmailTemplateState.Created }
+                    Construct = _ => CreateDefaultMasterTemplate == null ? 
+                        new EmailMasterTemplateDN { }:
+                        CreateDefaultMasterTemplate()
                 }.Register();
 
                 new Execute(EmailMasterTemplateOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
-                    FromStates = { EmailTemplateState.Created, EmailTemplateState.Modified },
-                    ToState = EmailTemplateState.Modified,
-                    Execute = (t, _) => t.State = EmailTemplateState.Modified
+                    Execute = (t, _) => { }
                 }.Register();
             }
+        }
+
+        public static Lite<EmailMasterTemplateDN> GetDefaultMasterTemplate()
+        {
+            var result = Database.Query<EmailMasterTemplateDN>().Select(emt => emt.ToLite()).SingleEx();
+
+            if (result != null)
+                return result;
+
+            if (CreateDefaultMasterTemplate == null)
+                return null;
+
+            var newTemplate = CreateDefaultMasterTemplate();
+
+            return newTemplate.Save().ToLite();
         }
     }
 }

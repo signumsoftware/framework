@@ -47,7 +47,7 @@ namespace Signum.Engine.Mailing
 
         public abstract List<EmailOwnerRecipientData> GetRecipients();
 
-        protected static List<EmailOwnerRecipientData> To(EmailOwnerData ownerData)
+        protected static List<EmailOwnerRecipientData> SendTo(EmailOwnerData ownerData)
         {
             return new List<EmailOwnerRecipientData> { new EmailOwnerRecipientData(ownerData) };
         }
@@ -130,14 +130,17 @@ namespace Signum.Engine.Mailing
                 Spacing.Double);
         }
 
-        public static void RegisterSystemEmail<T>(Func<EmailTemplateDN> defaultTemplateConstructor = null)
+        public static void RegisterSystemEmail<T>(Func<EmailTemplateDN> defaultTemplateConstructor)
           where T : ISystemEmail
         {
             RegisterSystemEmail(typeof(T), defaultTemplateConstructor);
         }
 
-        public static void RegisterSystemEmail(Type model, Func<EmailTemplateDN> defaultTemplateConstructor = null)
+        public static void RegisterSystemEmail(Type model, Func<EmailTemplateDN> defaultTemplateConstructor)
         {
+            if (defaultTemplateConstructor == null)
+                throw new ArgumentNullException("defaultTemplateConstructor"); 
+
             systemEmails[model] = defaultTemplateConstructor;
         }
 
@@ -183,6 +186,7 @@ namespace Signum.Engine.Mailing
             if (template == null)
             {
                 template = systemEmails.GetOrThrow(systemEmail.GetType())();
+                template.MasterTemplate = EmailTemplateLogic.GetDefaultMasterTemplate();
                 template.SystemEmail = systemEmailDN;
                 template.Active = true;
 

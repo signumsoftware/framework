@@ -5,9 +5,8 @@
     using (Html.FieldInline())
     {
     @Html.ValueLine(sc, c => c.Kind)
-    @Html.ValueLine(sc, c => c.EmailAddress)
-    @Html.ValueLine(sc, c => c.DisplayName)
+    @Html.EntityLine(sc, c => c.EmailOwner)
+    @Html.ValueLine(sc, c => c.EmailAddress, vl => vl.ValueHtmlProps.Add("style", "width:250px"))
+    @Html.ValueLine(sc, c => c.DisplayName, vl => vl.ValueHtmlProps.Add("style", "width:250px"))
     }
-    
-    @Html.EntityLine(sc, er => er.EmailOwner)
 }

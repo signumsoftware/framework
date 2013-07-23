@@ -16,12 +16,6 @@ using System.Reflection;
 
 namespace Signum.Entities.Mailing
 {
-    public enum EmailTemplateState
-    {
-        Created,
-        Modified
-    }
-
     public enum EmailTemplateOperation
     {
         Create,
@@ -144,13 +138,6 @@ namespace Signum.Entities.Mailing
         {
             get { return systemEmail; }
             set { Set(ref systemEmail, value, () => SystemEmail); }
-        }
-
-        EmailTemplateState state = EmailTemplateState.Created;
-        public EmailTemplateState State
-        {
-            get { return state; }
-            set { Set(ref state, value, () => State); }
         }
 
         bool active;
@@ -386,13 +373,6 @@ namespace Signum.Entities.Mailing
         {
             get { return text; }
             set { Set(ref text, value, () => Text); }
-        }
-
-        EmailTemplateState state = EmailTemplateState.Created;
-        public EmailTemplateState State
-        {
-            get { return state; }
-            set { Set(ref state, value, () => State); }
         }
 
         static Expression<Func<EmailMasterTemplateDN, string>> ToStringExpression = e => e.name;
