@@ -82,7 +82,7 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty AllowChangeColumnsProperty =
-            DependencyProperty.Register("AllowChangeColumns", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(false));
+            DependencyProperty.Register("AllowChangeColumns", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(true));
         public bool AllowChangeColumns
         {
             get { return (bool)GetValue(AllowChangeColumnsProperty); }
