@@ -44,8 +44,11 @@ namespace Signum.Web.Operations
             Constructor.ConstructorManager.GeneralConstructor += Manager.ConstructorManager_GeneralConstructor;
             Constructor.ConstructorManager.VisualGeneralConstructor += Manager.ConstructorManager_VisualGeneralConstructor;
 
-            ContextualItemsHelper.GetContextualItemsForLites += Manager.ContextualItemsHelper_GetConstructorFromManyMenuItems;
-            ContextualItemsHelper.GetContextualItemsForLites += Manager.ContextualItemsHelper_GetEntityOperationMenuItem;
+            if (contextualMenuInSearchWindow)
+            {
+                ContextualItemsHelper.GetContextualItemsForLites += Manager.ContextualItemsHelper_GetConstructorFromManyMenuItems;
+                ContextualItemsHelper.GetContextualItemsForLites += Manager.ContextualItemsHelper_GetEntityOperationMenuItem;
+            }
         }
 
         public static void AddSetting(OperationSettings setting)

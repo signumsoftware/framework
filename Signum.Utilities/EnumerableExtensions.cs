@@ -1123,16 +1123,16 @@ namespace Signum.Utilities
             var shouldDictionary = shouldCollection.ToDictionary(shouldKeySelector);
 
             var extra = currentDictionary.Keys.Where(k => !shouldDictionary.ContainsKey(k)).ToList();
-            var lacking = shouldDictionary.Keys.Where(k => !currentDictionary.ContainsKey(k)).ToList();
+            var missing = shouldDictionary.Keys.Where(k => !currentDictionary.ContainsKey(k)).ToList();
 
             if (extra.Count != 0)
-                if (lacking.Count != 0)
-                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}\r\n Lacking: {2}".Formato(action, extra.ToString(", "), lacking.ToString(", ")));
+                if (missing.Count != 0)
+                    throw new InvalidOperationException("Error {0}\r\n Extra: {1}\r\n Missing: {2}".Formato(action, extra.ToString(", "), missing.ToString(", ")));
                 else
                     throw new InvalidOperationException("Error {0}\r\n Extra: {1}".Formato(action, extra.ToString(", ")));
             else
-                if (lacking.Count != 0)
-                    throw new InvalidOperationException("Error {0}\r\n Lacking: {1}".Formato(action, lacking.ToString(", ")));
+                if (missing.Count != 0)
+                    throw new InvalidOperationException("Error {0}\r\n Missing: {1}".Formato(action, missing.ToString(", ")));
 
            return currentDictionary.Select(p => resultSelector(p.Value, shouldDictionary[p.Key]));
         }
@@ -1154,7 +1154,7 @@ namespace Signum.Utilities
             return new JoinStrictResult<C, S, R>
             {
                 Extra = currentDictionary.Where(e => !newDictionary.ContainsKey(e.Key)).Select(e => e.Value).ToList(),
-                Lacking = newDictionary.Where(e => !currentDictionary.ContainsKey(e.Key)).Select(e => e.Value).ToList(),
+                Missing = newDictionary.Where(e => !currentDictionary.ContainsKey(e.Key)).Select(e => e.Value).ToList(),
 
                 Result = commonKeys.Select(k => resultSelector(currentDictionary[k], newDictionary[k])).ToList()
             };
@@ -1193,7 +1193,7 @@ namespace Signum.Utilities
     public class JoinStrictResult<O, N, R>
     {
         public List<O> Extra;
-        public List<N> Lacking;
+        public List<N> Missing;
         public List<R> Result;
     }
 
