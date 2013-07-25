@@ -97,9 +97,11 @@ namespace Signum.Utilities
             throw new InvalidOperationException("Sequence contains more than one {0}".Formato(typeof(T).TypeName()));
         }
 
-        public static T SingleEx<T>(this IEnumerable<T> collection, Func<string> error)
+        public static T SingleEx<T>(this IEnumerable<T> collection, Func<string> elementName)
         {
-            return collection.SingleEx(error, error);
+            return collection.SingleEx(
+                () => "Sequence contains no {0}".Formato(elementName()),
+                () => "Sequence contains more than one {0}".Formato(elementName()));
         }
 
         public static T SingleEx<T>(this IEnumerable<T> collection, Func<string> errorZero, Func<string> errorMoreThanOne)

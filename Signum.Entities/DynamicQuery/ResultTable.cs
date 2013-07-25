@@ -250,7 +250,7 @@ namespace Signum.Entities.DynamicQuery
 
         void CreateIndices(ResultColumn[] columns)
         {
-            int rows = columns.Select(a => a.Values.Count).Distinct().SingleEx(() => "Unsyncronized number of rows in the results");
+            int rows = columns.Select(a => a.Values.Count).Distinct().SingleEx(() => "Count");
 
             for (int i = 0; i < Columns.Length; i++)
                 Columns[i].Index = i;
@@ -330,7 +330,7 @@ namespace Signum.Entities.DynamicQuery
 
         public T GetValue<T>(string columnName)
         {
-            return (T)this[Table.Columns.Where(c => c.Column.Name == columnName).SingleEx(() => "column not found")];
+            return (T)this[Table.Columns.Where(c => c.Column.Name == columnName).SingleEx(() => columnName)];
         }
 
         public T GetValue<T>(int columnIndex)
