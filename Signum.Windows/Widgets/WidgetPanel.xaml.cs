@@ -49,18 +49,17 @@ namespace Signum.Windows
 
         void LeftNavigationPanel_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            List<IWidget> widgets = GetWidgets == null ?  new List<IWidget>(): 
-                
-                GetWidgets.GetInvocationList().Cast<GetWidgetDelegate>().Select(d => d((ModifiableEntity)DataContext, MainControl)).NotNull().ToList() ;
+            List<IWidget> widgets = GetWidgets == null || e.NewValue == null ? new List<IWidget>() :
+                GetWidgets.GetInvocationList().Cast<GetWidgetDelegate>().Select(d => d((ModifiableEntity)DataContext, MainControl)).NotNull().ToList();
 
             this.Visibility = widgets.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
 
-            stackPanel.Children.Clear(); 
-            
+            stackPanel.Children.Clear();
+
             foreach (var item in widgets)
             {
                 stackPanel.Children.Add((UIElement)item);
-                item.ForceShow += () => expander.IsExpanded = true; 
+                item.ForceShow += () => expander.IsExpanded = true;
             }
         }
 
