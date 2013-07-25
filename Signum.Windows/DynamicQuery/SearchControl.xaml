@@ -19,6 +19,8 @@
                 <MenuItem Header="{m:Loc {x:Static d:SearchMessage.Rename}}" Click="renameMenu_Click"/>
                 <MenuItem Header="{m:Loc {x:Static d:EntityControlMessage.Remove}}" Click="removeMenu_Click"/>
             </ContextMenu>
+            <Geometry x:Key="RightArrow">M 0,0 L 4,3.5 L 0,7 Z</Geometry>
+            <Geometry x:Key="UpArrow">M 0,4 L 3.5,0 L 7,4 Z</Geometry>
             <Style x:Key="FilterButtonStyle" TargetType="{x:Type ToggleButton}">
                 <Style.BasedOn>
                     <Style TargetType="{x:Type ButtonBase}">
@@ -45,26 +47,31 @@
                             <Setter.Value>
                                 <ControlTemplate TargetType="{x:Type ButtonBase}">
                                     <Border x:Name="border" CornerRadius="0,0,5,0">
-                                        <ContentPresenter x:Name="contentPresenter" 
-                                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
-                                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}" 
+                                        <StackPanel Orientation="Horizontal"   
+                                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}" >
+                                            <Path x:Name="path" Stroke="Gray" Data="{DynamicResource RightArrow}" Margin="5,5,0,5" HorizontalAlignment="Center"/>
+                                            <ContentPresenter x:Name="contentPresenter" 
+                                                        
                                                           SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
                                                           Margin="{TemplateBinding Padding}" 
                                                           Content="{TemplateBinding Content}" 
                                                           ContentStringFormat="{TemplateBinding ContentStringFormat}" 
                                                           ContentTemplate="{TemplateBinding ContentTemplate}" 
                                                           RecognizesAccessKey="True"/>
+                                        </StackPanel>
                                     </Border>
                                     <ControlTemplate.Triggers>
                                         <Trigger Property="IsKeyboardFocused" Value="True"/>
                                         <Trigger Property="ToggleButton.IsChecked" Value="True">
-                                            <Setter Property="Background" TargetName="border" Value="#FFC9E4FF"/>
+                                            <Setter Property="Background" TargetName="border" Value="{StaticResource LightBlue}"/>
+                                            <Setter Property="Data" TargetName="path" Value="{DynamicResource UpArrow}"/>
                                         </Trigger>
                                         <Trigger Property="IsEnabled" Value="False">
                                             <Setter Property="Foreground" Value="#FFADADAD"/>
                                         </Trigger>
                                         <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" TargetName="border" Value="#FFA6D3FF"/>
+                                            <Setter Property="Background" TargetName="border" Value="{StaticResource LightBlueDarker}"/>
                                         </Trigger>
                                     </ControlTemplate.Triggers>
                                 </ControlTemplate>
@@ -87,7 +94,7 @@
         <ContentControl Content="{Binding Path=SimpleFilterBuilder, ElementName=me}" Focusable="False"
                         x:Name="simpleFilterBuilderContentControl" 
                         HorizontalContentAlignment="Stretch"/>
-        <Grid Background="#FFC9E4FF" Grid.Row="1">
+        <Grid Background="{StaticResource LightBlue}" Grid.Row="1">
             <Grid.Visibility>
                 <MultiBinding Converter="{x:Static m:Converters.AndToVisibility}">
                     <Binding Path="ShowHeader" ElementName="me"/>
@@ -168,7 +175,7 @@
                 </Style>
             </ListView.ItemContainerStyle>
         </ListView>
-        <StackPanel Grid.Row="5" Background="#FFC9E4FF"  Visibility="{Binding ShowFooter, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}">
+        <StackPanel Grid.Row="5" Background="{StaticResource LightBlue}"  Visibility="{Binding ShowFooter, Converter={x:Static m:Converters.BoolToVisibility}, ElementName=me}">
             <m:PaginationSelector x:Name="paginationSelector" Pagination="{Binding Pagination, ElementName=me}"  Height="24"   Margin="3,3,16,3" HorizontalAlignment="Stretch"/>
         </StackPanel>
     </Grid>

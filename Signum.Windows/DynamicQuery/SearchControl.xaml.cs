@@ -82,7 +82,7 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty AllowChangeColumnsProperty =
-            DependencyProperty.Register("AllowChangeColumns", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(false));
+            DependencyProperty.Register("AllowChangeColumns", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(true));
         public bool AllowChangeColumns
         {
             get { return (bool)GetValue(AllowChangeColumnsProperty); }
@@ -289,6 +289,7 @@ namespace Signum.Windows
         public event Action<IdentifiableEntity> Navigating;
         public event Action<List<Lite<IdentifiableEntity>>> Removing;
         public event Action DoubleClick;
+        public event Func<Column, bool> OrderClick;
 
         public SearchControl()
         {
@@ -341,8 +342,6 @@ namespace Signum.Windows
                 throw new InvalidOperationException("Entity Column not found on {0}".Formato(QueryUtils.GetQueryUniqueKey(QueryName)));
         }
 
-
-      
         ColumnDescription entityColumn;
 
         ResultTable resultTable;
@@ -358,7 +357,6 @@ namespace Signum.Windows
             remove { RemoveHandler(ResultChangedEvent, value); }
         }
 
-      
 
         void SearchControl_Loaded(object sender, RoutedEventArgs e)
         {
@@ -397,6 +395,18 @@ namespace Signum.Windows
                 ColumnOptionsMode = ColumnOptionsMode.Remove;
                 if (ControlExtensions.NotSet(this, SearchOnLoadProperty))
                     SearchOnLoad = true;
+            }
+
+            if (OrderOptions.IsNullOrEmpty() && !entityColumn.Implementations.Value.IsByAll)
+            {
+                var orderType = entityColumn.Implementations.Value.Types.All(t => EntityKindCache.GetEntityData(t) == EntityData.Master) ? OrderType.Ascending : OrderType.Descending;
+
+                var column = Description.Columns.SingleOrDefaultEx(c => c.Name == "Id");
+
+                if (column != null)
+                {
+                    OrderOptions.Add(new OrderOption(column.Name, orderType));
+                }
             }
 
             if (this.NotSet(SearchControl.NavigateProperty) && Navigate)
@@ -440,6 +450,7 @@ namespace Signum.Windows
             }
         }
 
+       
         void FilterOptions_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             UpdateMultiplyMessage(false);                       
@@ -541,6 +552,29 @@ namespace Signum.Windows
                 SelectedItems = null;
         }
 
+        public void SetDirtySelectedItems()
+        {
+            foreach (var rr in lvResult.SelectedItems.Cast<ResultRow>())
+            {
+                SetDirty(rr);
+            }
+        }
+
+        public void SetDirtySelectedItem()
+        {
+            var rr = (ResultRow)lvResult.SelectedItem;
+            if (rr == null)
+                return;
+
+            SetDirty(rr);
+        }
+
+        private void SetDirty(ResultRow rr)
+        {
+            var lvi = (ListViewItem)lvResult.ItemContainerGenerator.ContainerFromItem(rr);
+            lvi.Child<GridViewRowPresenter>(WhereFlags.VisualTree).Opacity = .5;
+        }
+
         public void GenerateListViewColumns()
         {
             if (IsSearching)
@@ -582,26 +616,41 @@ namespace Signum.Windows
 
         void btSearch_Click(object sender, RoutedEventArgs e)
         {
-            Search();
+            Search(resetPage: true);
         }
 
 
         bool hasBeenLoaded = false;
 
-        bool searchQueued;
+
+        bool? searchQueuedResetPage;
         bool generateListViewColumnsQueued; 
 
-        public void Search()
+        public void Search(bool resetPage = true)
         {
             if (IsSearching)
             {
-                searchQueued = true;
+                searchQueuedResetPage = resetPage;
                 return;
             }
 
             ClearResults();
 
             IsSearching = true;
+
+            var pag = Pagination as Pagination.Paginate;
+            if (resetPage && pag != null && pag.CurrentPage != 1)
+            {
+                try
+                {
+                    avoidPaginationChange = true;
+                    Pagination = new Pagination.Paginate(pag.ElementsPerPage, 1);
+                }
+                finally
+                {
+                    avoidPaginationChange = false;
+                }
+            }
 
             QueryRequest request = UpdateMultiplyMessage(true);
 
@@ -624,10 +673,11 @@ namespace Signum.Windows
                     generateListViewColumnsQueued = false;
                     GenerateListViewColumns();
                 }
-                if (searchQueued)
+                if (searchQueuedResetPage != null)
                 {
-                    searchQueued = false;
-                    Search(); 
+                    var c = searchQueuedResetPage.Value;
+                    searchQueuedResetPage = null;
+                    Search(c); 
                 }
             });
         }
@@ -674,12 +724,12 @@ namespace Signum.Windows
         }
 
 
-        bool settingResults = false;
+        bool avoidPaginationChange = false;
         private void SetResults(ResultTable rt)
         {
             try
             {
-                settingResults = true;
+                avoidPaginationChange = true;
 
                 gvResults.Columns.ZipForeach(rt.Columns, (gvc, rc) =>
                 {
@@ -696,6 +746,14 @@ namespace Signum.Windows
                 });
 
                 lvResult.ItemsSource = rt.Rows;
+
+                foreach (GridViewColumn column in gvResults.Columns)
+                {
+                    if (double.IsNaN(column.Width))
+                        column.Width = column.ActualWidth;
+
+                    column.Width = double.NaN;
+                }
 
                 if (rt.Rows.Length > 0)
                 {
@@ -716,7 +774,7 @@ namespace Signum.Windows
             }
             finally
             {
-                settingResults = false;
+                avoidPaginationChange = false;
             }
         }
 
@@ -736,7 +794,7 @@ namespace Signum.Windows
 
         private void Pagination_Changed(Pagination oldValue, Pagination newValue)
         {
-            if (!IsLoaded || settingResults)
+            if (!IsLoaded || avoidPaginationChange)
                 return;
 
             var oldPaginate = oldValue as Pagination.Paginate;
@@ -758,7 +816,7 @@ namespace Signum.Windows
             if (newValue is Pagination.All)
                 ClearResults();
             else
-                Search();
+                Search(resetPage: false);
         }
 
         void OnQueryResultChanged(bool cleaning)
@@ -780,6 +838,8 @@ namespace Signum.Windows
 
             if (row == null)
                 return;
+
+            SetDirtySelectedItem();
 
             IdentifiableEntity entity = (IdentifiableEntity)Server.Convert(row.Entity, EntityType);
 
@@ -862,6 +922,9 @@ namespace Signum.Windows
             if (header == null)
                 return;
 
+            if (OrderClick != null && !OrderClick(header.RequestColumn))
+                return;
+
             string canOrder = QueryUtils.CanOrder(header.RequestColumn.Token);
             if (canOrder.HasText())
             {
@@ -873,10 +936,8 @@ namespace Signum.Windows
 
             header.ChangeOrders(OrderOptions);
 
-            Search();
+            Search(resetPage: true);
         }
-
-
 
         FilterOption CreateFilter(SortGridViewColumnHeader header)
         {
@@ -970,7 +1031,7 @@ namespace Signum.Windows
         {
             try
             {
-                settingResults = true;
+                avoidPaginationChange = true;
 
                 ColumnOptions.Clear();
                 ColumnOptions.AddRange(columns);
@@ -999,7 +1060,7 @@ namespace Signum.Windows
             }
             finally
             {
-                settingResults = false;
+                avoidPaginationChange = false;
             }
         }
 

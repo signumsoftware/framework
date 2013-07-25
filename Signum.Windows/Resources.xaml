@@ -12,13 +12,40 @@
     <SolidColorBrush x:Key="BlueBorder" Color="#FF0046AD"/>
     <SolidColorBrush x:Key="BlackBorder" Color="Black"/>
 
-    <LinearGradientBrush x:Key="ToolBarStyle" EndPoint="0.5,1" StartPoint="0.5,0">
+    <SolidColorBrush x:Key="LightBlueLighter" Color="#FFF0F6FC"/>
+    <SolidColorBrush x:Key="LightBlue" Color="#FFC9E4FF"/>
+    <SolidColorBrush x:Key="LightBlueDarker" Color="#FFA6D3FF"/>
+
+    <LinearGradientBrush x:Key="EntityTitleUpperBackgroundGradient" EndPoint="0.5,1" StartPoint="0.5,0">
+        <GradientStop Color="#FFEAF0F6" Offset="0.150"/>
+        <GradientStop Color="#FFD9ECFF" Offset="0.805"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="EntityTitleBackgroundGradient" EndPoint="0.5,1" StartPoint="0.5,0">
+        <GradientStop Color="#FFD9ECFF" Offset="0.015"/>
+        <GradientStop Color="#FFEDF6FF" Offset="0.205"/>
+        <GradientStop Color="White" Offset="1"/>
+    </LinearGradientBrush>
+
+    <RadialGradientBrush x:Key="EntityTitleLightShadowGradient" GradientOrigin="0.5,0.3" RadiusX="1.5">
+        <GradientStop Color="#00569AFF" Offset="1"/>
+        <GradientStop Color="#00569AFF" Offset="0.53"/>
+        <GradientStop Color="#FF65A3FE" Offset="0.82"/>
+        <GradientStop Color="#7309316A" Offset="0.797"/>
+    </RadialGradientBrush>
+
+    <LinearGradientBrush x:Key="EntityTitleDarkShadowGradient" EndPoint="1,0.5" StartPoint="0,0.5">
+        <GradientStop Color="#000046AD" Offset="1"/>
+        <GradientStop Color="#000046AD"/>
+        <GradientStop Color="#FF0046AD" Offset="0.51"/>
+    </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="ToolBarBackground" EndPoint="0.5,1" StartPoint="0.5,0">
         <GradientStop Color="#FFF0F8FF" Offset="0"/>
         <GradientStop Color="#FFD8EBFF" Offset="0.927"/>
         <GradientStop Color="#FF6E8194" Offset="0.935"/>
         <GradientStop Color="#336E8194" Offset="0.987"/>
     </LinearGradientBrush>
-
 
     <LinearGradientBrush x:Key="BlueBackground" EndPoint="0.5,1" StartPoint="0.5,0">
         <GradientStop Color="#FFFFFFFF" Offset="0"/>
@@ -34,6 +61,12 @@
         <GradientStop Color="#FFF7FBFF" Offset="0"/>
         <GradientStop Color="#FFD4E9FF" Offset="1"/>
     </LinearGradientBrush>
+
+    <LinearGradientBrush x:Key="WidgetBackground">
+        <GradientStop Color="#dae9ff" Offset="0"/>
+        <GradientStop Color="#d2e1f6" Offset="1"/>
+    </LinearGradientBrush>
+
 
     <Path x:Key="Create" Stretch="Fill" Stroke="#FF117333" x:Shared="False">
         <Path.Data>
@@ -536,7 +569,6 @@
             </Setter.Value>
         </Setter>
     </Style>
-    <SolidColorBrush x:Key="LightBlue" Color="#FFC9E4FF"/>
 
     <Style x:Key="EntityGroupBox" TargetType="{x:Type GroupBox}">
         <Setter Property="BorderBrush" Value="#D5DFE5"/>
@@ -545,7 +577,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type GroupBox}">
                     <Border BorderBrush="#FF8CACCC" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4" Grid.RowSpan="2" Grid.Row="0" >
-                        <Border BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="3" BorderBrush="#FFC9E4FF" Background="{TemplateBinding Background}">
+                        <Border BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="3" BorderBrush="{DynamicResource LightBlue}" Background="{TemplateBinding Background}">
                             <Grid SnapsToDevicePixels="true">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>

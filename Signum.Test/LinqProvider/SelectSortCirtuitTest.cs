@@ -55,6 +55,13 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void NonSortCircuitCondicional()
+        {
+            var list = Database.Query<BandDN>().Where(b => b.Name == "Olmo" ? b.Members.Any(a => a.Name == "A") : true).Select(b => b.ToLite()).ToList();
+
+        }
+
+        [TestMethod]
         public void SortCircuitOr()
         {
             var list = Database.Query<AlbumDN>().Where(a => true | Throw<bool>()).Select(a => a.Year).ToList();

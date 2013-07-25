@@ -52,7 +52,7 @@ namespace Signum.Windows
 
         public EntitySettings()
         {
-            EntityKind entityKind = Server.GetEntityKind(typeof(T));
+            EntityKind entityKind = EntityKindCache.GetEntityKind(typeof(T));
 
             switch (entityKind)
             {

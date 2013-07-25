@@ -66,7 +66,12 @@ namespace Signum.Engine.Linq
             }; 
         }
 
-        private QueryFormatter() { }
+        ObjectNameOptions objectNameOptions;
+
+        private QueryFormatter() 
+        {
+            objectNameOptions = ObjectName.CurrentOptions;
+        }
 
 
         static internal string Format(Expression expression, out List<DbParameter> getParameters)
@@ -553,7 +558,10 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitTable(TableExpression table)
         {
-            sb.Append(table.Name.ToString());
+            if (objectNameOptions.IncludeDboSchema)
+                sb.Append(table.Name.ToStringDbo());
+            else
+                sb.Append(table.Name.ToString());
 
             return table;
         }

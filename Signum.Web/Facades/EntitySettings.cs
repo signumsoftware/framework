@@ -68,7 +68,7 @@ namespace Signum.Web
         
         public EntitySettings()
         {
-            switch (TypeLogic.GetEntityKind(typeof(T)))
+            switch (EntityKindCache.GetEntityKind(typeof(T)))
             {
                 case EntityKind.SystemString:
                     IsCreable = EntityWhen.Never;

@@ -14,7 +14,7 @@ using System.Data.Common;
 
 namespace Signum.Engine.Linq
 {
-    class LookupToken
+    public class LookupToken
     {
         public override string ToString()
         {
@@ -22,7 +22,7 @@ namespace Signum.Engine.Linq
         }
     }
 
-    internal interface IProjectionRow
+    public interface IProjectionRow
     {
         FieldReader Reader { get; }
 
@@ -75,7 +75,7 @@ namespace Signum.Engine.Linq
             if (dataReader.Read())
             {
                 this.Row++;
-                this.current = this.projector(this);
+                this.current = this.projector(this); //InvalidOperationException? Press F5
                 return true;
             }
             return false;

@@ -9,6 +9,7 @@ using Signum.Utilities.ExpressionTrees;
 using System.Reflection;
 using Signum.Entities.Reflection;
 using Signum.Entities.Basics;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Entities
 {
@@ -16,14 +17,7 @@ namespace Signum.Entities
     {
         public static HashSet<Type> IgnoreTypes = new HashSet<Type> { typeof(ExceptionDN) };
 
-        public static bool ShowByteArrays = false;
-
-        public static string Dump(this object o)
-        {
-            return o.Dump(false, ShowByteArrays);
-        }
-
-        public static string Dump(this object o, bool showIgnoredFields, bool showByteArrays)
+        public static string Dump(this object o, bool showIgnoredFields = false, bool showByteArrays = false)
         {
             var od = new DumpVisitor(showIgnoredFields, showByteArrays);
             od.DumpObject(o);
@@ -169,15 +163,23 @@ namespace Signum.Entities
                         DumpPropertyOrField(prop.PropertyType, prop.Name, prop.GetValue(o, null));
                     }
                 else
-                    foreach (var field in Reflector.InstanceFieldsInOrder(t))
+                    foreach (var field in Reflector.InstanceFieldsInOrder(t).OrderBy(IsMixinField))
                     {
-                        if (showIgnoredFields || !field.IsDefined(typeof(IgnoreAttribute), false))
-                            DumpPropertyOrField(field.FieldType, field.Name, field.GetValue(o));
+                        if (!showIgnoredFields && field.IsDefined(typeof(IgnoreAttribute), false) && !IsMixinField(field))
+                            continue;
+
+                        DumpPropertyOrField(field.FieldType, field.Name, field.GetValue(o));
                     }
 
                 level -= 1;
                 Sb.Append("}".Indent(level));
                 return;
+            }
+
+            private bool IsMixinField(FieldInfo field)
+            {
+                return field.Name == "mixin" && field.DeclaringType == typeof(IdentifiableEntity) ||
+                    field.Name == "next" && field.DeclaringType == typeof(MixinEntity);
             }
 
             private bool Any(IEnumerable ie)

@@ -16,9 +16,9 @@ namespace Signum.Utilities
     {
         public static Encoding DefaultEncoding = Encoding.GetEncoding(1252);
 
-        public static string ToCsvFile<T>(this IEnumerable<T> collection, string fileName, Encoding encoding = null, CultureInfo culture = null, bool writeHeaders = true, bool autoFlush = false)
+        public static string ToCsvFile<T>(this IEnumerable<T> collection, string fileName, Encoding encoding = null, CultureInfo culture = null, bool writeHeaders = true, bool autoFlush = false, bool append = false)
         {
-            using (FileStream fs = File.Create(fileName))
+            using (FileStream fs = append ? new FileStream(fileName, FileMode.Append, FileAccess.Write) : File.Create(fileName))
                 ToCsv<T>(collection, fs, encoding, culture, writeHeaders, autoFlush);
 
             return fileName;

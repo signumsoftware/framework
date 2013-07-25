@@ -13,6 +13,7 @@ using System.Windows;
 using System.ServiceModel.Security;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Entities.Basics;
+using System.Collections.Concurrent;
 
 namespace Signum.Windows
 {
@@ -53,6 +54,8 @@ namespace Signum.Windows
 
         public static bool Connect()
         {
+            Disconnect();
+
             current = getServer();
 
             if (current == null)
@@ -76,6 +79,21 @@ namespace Signum.Windows
 
                 return ((ICommunicationObject)current).State != CommunicationState.Faulted;
             }
+        }
+
+        public static void Disconnect()
+        {
+            ICommunicationObject co = current as ICommunicationObject;
+
+            if (co == null)
+                return;
+
+            if (co.State == CommunicationState.Faulted)
+                co.Abort();
+            else if(co.State != CommunicationState.Closed)
+                co.Close();
+
+            ((IDisposable)co).Dispose();
         }
        
         public static void Execute<S>(Action<S> action)
@@ -225,16 +243,16 @@ namespace Signum.Windows
             return Return((IBaseServer s) => s.SaveList(list.Cast<IdentifiableEntity>().ToList()).Cast<T>().ToList()); 
         }
 
-        static Dictionary<Type, Dictionary<PropertyRoute, Implementations>> implementations = new Dictionary<Type, Dictionary<PropertyRoute, Implementations>>();
+        static ConcurrentDictionary<Type, Dictionary<PropertyRoute, Implementations>> implementations = new ConcurrentDictionary<Type, Dictionary<PropertyRoute, Implementations>>();
 
         public static Implementations FindImplementations(PropertyRoute propertyRoute)
         {
-            var dic = implementations.GetOrCreate(propertyRoute.RootType, () =>
+            var dic = implementations.GetOrAdd(propertyRoute.RootType, type =>
             {
-                if (!Server.ServerTypes.ContainsKey(propertyRoute.RootType))
+                if (!Server.ServerTypes.ContainsKey(type))
                     return null;
 
-                return Server.Return((IBaseServer s) => s.FindAllImplementations(propertyRoute.RootType));
+                return Server.Return((IBaseServer s) => s.FindAllImplementations(type));
             });
 
             return dic.GetOrThrow(propertyRoute, "{0} implementations not found");
@@ -323,15 +341,7 @@ namespace Signum.Windows
            return lite;
         }
 
-        internal static EntityKind GetEntityKind(Type type)
-        {
-            var eta = type.SingleAttributeInherit<EntityKindAttribute>();
-
-            if (eta == null)
-                throw new InvalidOperationException("Type {0} does not have an EntityTypeAttribute".Formato(type.Name));
-
-            return eta.EntityType;
-        }
+      
     }
 
     [Serializable]

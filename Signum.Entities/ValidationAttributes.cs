@@ -253,7 +253,7 @@ namespace Signum.Entities
 
     public class FileNameValidatorAttribute : RegexValidatorAttribute
     {
-        public static readonly Regex FileNameRegex = new Regex(@"^(?!^(PRN|AUX|CLOCK\$|NUL|CON|COM\d|LPT\d|\..*)(\..+)?$)[^\x00-\x1f\\?*:\"";|/]+$");
+        public static readonly Regex FileNameRegex = new Regex(@"^(?!^(PRN|AUX|CLOCK\$|NUL|CON|COM\d|LPT\d|\..*)(\..+)?$)[^\x00-\x1f\"";|/]+$");
         public FileNameValidatorAttribute()
             : base(FileNameRegex)
         {

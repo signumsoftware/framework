@@ -246,7 +246,7 @@ namespace Signum.Engine
         {
             var prov = ((DbQueryProvider)query.Provider);
 
-            return prov.Translate(query.Expression, tr => tr.MainPreCommand());
+            return prov.Translate(query.Expression, tr => tr.GetMainPreCommand());
         }
 
         public static SqlPreCommandSimple UnsafeDeletePreCommand<T>(IQueryable<T> query) 
@@ -319,13 +319,13 @@ namespace Signum.Engine
 
         public static void UpdateToStrings<T>(Expression<Func<T, string>> expression) where T : IdentifiableEntity, new()
         {
-            SafeConsole.Wait("UnsafeUpdate toStr for {0}".Formato(typeof(T).TypeName()), () =>
+            SafeConsole.WaitRows("UnsafeUpdate toStr for {0}".Formato(typeof(T).TypeName()), () =>
                 Database.Query<T>().UnsafeUpdate(a => new T { toStr = expression.Evaluate(a) }));
         }
 
         public static void UpdateToStrings<T>(IQueryable<T> query, Expression<Func<T, string>> expression) where T : IdentifiableEntity, new()
         {
-            SafeConsole.Wait("UnsafeUpdate toStr for {0}".Formato(typeof(T).TypeName()), () =>
+            SafeConsole.WaitRows("UnsafeUpdate toStr for {0}".Formato(typeof(T).TypeName()), () =>
                 query.UnsafeUpdate(a => new T { toStr = expression.Evaluate(a) }));
         }
 

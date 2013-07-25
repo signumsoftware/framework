@@ -385,6 +385,8 @@ namespace Signum.Windows
             RouteTask += TaskSetNotNullItemsSource;
             RouteTask += TaskSetAutomationName;
             RouteTask += TaskSetVoteAutoHide;
+            RouteTask += TaskSetMaxLenth;
+
             LabelOnlyRouteTask += TaskSetLabelText;
             LabelOnlyRouteTask += TaskSetVoteAutoHide;
 
@@ -398,7 +400,8 @@ namespace Signum.Windows
             GridViewColumnLabelOnlyRouteTask += TaskGridViewColumnSetLabelText;
 
             ValuePropertySelector.SetDefinition(typeof(FrameworkElement), FrameworkElement.DataContextProperty);
-            ValuePropertySelector.SetDefinition(typeof(ItemsControl), ItemsControl.ItemsSourceProperty);
+            ValuePropertySelector.SetDefinition(typeof(ListView), ItemsControl.ItemsSourceProperty);
+            ValuePropertySelector.SetDefinition(typeof(DataGrid), ItemsControl.ItemsSourceProperty);
 
             TypePropertySelector.SetDefinition(typeof(FrameworkElement), null);
 
@@ -423,6 +426,7 @@ namespace Signum.Windows
                 }
             }
         }
+
 
         
         static void TaskDataGridColumnSetReadOnly(DataGridColumn column, string route, PropertyRoute context)
@@ -618,11 +622,22 @@ namespace Signum.Windows
             ValueLine vl = fe as ValueLine;
             if (vl != null && vl.NotSet(ValueLine.ItemSourceProperty) && context.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
-                if(context.Type.IsNullable() && context.Type.UnNullify().IsEnum &&
-                   Validator.TryGetPropertyValidator(context).Validators.OfType<NotNullableAttribute>().Any())
+                if (context.Type.IsNullable() && context.Type.UnNullify().IsEnum &&
+                   Validator.TryGetPropertyValidator(context).Let(pv => pv != null && pv.Validators.OfType<NotNullableAttribute>().Any()))
                 {
                     vl.ItemSource = EnumExtensions.UntypedGetValues(vl.Type.UnNullify()).ToObservableCollection();
                 }
+            }
+        }
+
+        static void TaskSetMaxLenth(FrameworkElement fe, string route, PropertyRoute context)
+        {
+            ValueLine vl = fe as ValueLine;
+            if (vl != null && context.PropertyRouteType == PropertyRouteType.FieldOrProperty && context.Type == typeof(string))
+            {
+                var slv = Validator.TryGetPropertyValidator(context).TryCC(pv => pv.Validators.OfType<StringLengthValidatorAttribute>().FirstOrDefault());
+                if (slv != null && slv.Max != -1)
+                    vl.MaxTextLength = slv.Max;
             }
         }
 

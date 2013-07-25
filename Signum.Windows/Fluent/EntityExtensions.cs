@@ -24,8 +24,7 @@ namespace Signum.Windows
             if (hch != null)
                 return hch.HasChanges();
 
-            var graph = GraphExplorer.FromRoot((Modifiable)element.DataContext);
-            return graph.Any(a => a.Modified == ModifiedState.SelfModified);
+            return GraphExplorer.HasChanges((Modifiable)element.DataContext);
         }
 
         public static bool AssertErrors(this FrameworkElement element)

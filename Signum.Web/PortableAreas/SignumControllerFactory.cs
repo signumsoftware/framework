@@ -8,6 +8,7 @@ using System.Reflection;
 using Signum.Utilities;
 using System.Linq.Expressions;
 using System.Diagnostics;
+using Signum.Web.Controllers;
 
 namespace Signum.Web.PortableAreas
 {
@@ -99,6 +100,56 @@ namespace Signum.Web.PortableAreas
         public static ControllerFilterConfig<Controller> EveryController()
         {
             return (ControllerFilterConfig<Controller>)Config.GetOrCreate(typeof(Controller), () => new ControllerFilterConfig<Controller>());
+        }
+
+        public static void AvoidValidate(Type[] doNotValidateInput)
+        {
+
+            ValidateInputAttribute doNotValidateInputAttribute = new ValidateInputAttribute(false);
+            Controller<SignumController>()
+                .Action(c => c.Validate())
+                .AddFilters(ctx =>
+                {
+                    RuntimeInfo ri = RuntimeInfo.FromFormValue(ctx.ControllerContext.HttpContext.Request.Form[EntityBaseKeys.RuntimeInfo]);
+                    if (doNotValidateInput.Contains(ri.EntityType))
+                        return doNotValidateInputAttribute;
+                    return null;
+                });
+
+            Controller<SignumController>()
+                .Action(c => c.ValidatePartial(null, null))
+                .AddFilters(ctx =>
+                {
+                    var form = ctx.ControllerContext.HttpContext.Request.Form;
+                    var prefix = form["prefix"];
+
+                    RuntimeInfo ri = RuntimeInfo.FromFormValue(form[TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo)]);
+
+                    if (doNotValidateInput.Contains(ri.EntityType))
+                        return doNotValidateInputAttribute;
+
+                    if (form.AllKeys.Contains(EntityBaseKeys.RuntimeInfo))
+                    {
+                        RuntimeInfo riBase = RuntimeInfo.FromFormValue(form[EntityBaseKeys.RuntimeInfo]);
+                        if (doNotValidateInput.Contains(riBase.EntityType))
+                            return doNotValidateInputAttribute;
+                    }
+
+                    return null;
+                });
+
+            Controller<OperationController>()
+                 .Action(c => c.Execute(null, true, null, null))
+                 .AddFilters(ctx =>
+                 {
+                     var form = ctx.ControllerContext.HttpContext.Request.Form;
+                     var prefix = form["prefix"];
+
+                     RuntimeInfo ri = RuntimeInfo.FromFormValue(form[TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo)]);
+                     if (doNotValidateInput.Contains(ri.EntityType))
+                         return doNotValidateInputAttribute;
+                     return null;
+                 });
         }
     }
 

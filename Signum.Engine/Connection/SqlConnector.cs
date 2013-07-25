@@ -156,6 +156,7 @@ namespace Signum.Engine
             {
                 using (SqlConnection con = EnsureConnection())
                 using (SqlCommand cmd = NewCommand(preCommand, con))
+                using (HeavyProfiler.Log("SQL-Dependency"))
                 using (HeavyProfiler.Log("SQL", () => preCommand.PlainSql()))
                 {
                     try

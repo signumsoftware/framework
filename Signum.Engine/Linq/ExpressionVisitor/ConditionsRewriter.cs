@@ -47,7 +47,7 @@ namespace Signum.Engine.Linq
             if (IsSqlCondition(exp))
                 return exp;
 
-            var result = Expression.Equal(exp, new SqlConstantExpression(true));
+            var result = Expression.Equal(exp, exp.Type.IsNullable() ? new SqlConstantExpression(true).Nullify() : new SqlConstantExpression(true));
 
             return exp.Type.IsNullable() ? result.Nullify() : result;
         }
@@ -183,9 +183,9 @@ namespace Signum.Engine.Linq
                 return left;
 
             if (sortCircuit)
-                return Expression.AndAlso(MakeSqlCondition(left), MakeSqlCondition(right));
+                return CombineConditions(left, right, Expression.AndAlso);
             else
-                return Expression.And(MakeSqlCondition(left), MakeSqlCondition(right));
+                return CombineConditions(left, right, Expression.And);
         }
 
         Expression SmartOr(Expression left, Expression right, bool sortCircuit)
@@ -200,9 +200,23 @@ namespace Signum.Engine.Linq
                 return left;
 
             if(sortCircuit)
-                return Expression.OrElse(MakeSqlCondition(left), MakeSqlCondition(right));
+                return CombineConditions(left, right, Expression.OrElse);
             else
-                return Expression.Or(MakeSqlCondition(left), MakeSqlCondition(right));
+                return CombineConditions(left, right, Expression.Or);
+        }
+
+        BinaryExpression CombineConditions(Expression left, Expression right, Func<Expression, Expression, BinaryExpression> combinator)
+        {
+            var nLeft = MakeSqlCondition(left);
+            var nRight = MakeSqlCondition(right);
+
+            if (nLeft.Type.IsNullable() || nRight.Type.IsNullable())
+            {
+                nLeft = nLeft.Nullify();
+                nRight = nRight.Nullify(); 
+            }
+
+            return combinator(nLeft, nRight); 
         }
 
         protected override Expression VisitBinary(BinaryExpression b)
@@ -268,26 +282,12 @@ namespace Signum.Engine.Linq
 
         protected override Expression VisitCase(CaseExpression cex)
         {
-            if (IsBooleanExpression(cex))
-            {
-                var result = cex.Whens.IsNullOrEmpty() ? False : cex.Whens
-                    .Select(a => SmartAnd(Visit(a.Condition), Visit(a.Value), true))
-                    .Aggregate((a, b) => SmartOr(a, b, true));
+            var newWhens = cex.Whens.NewIfChange(w => VisitWhen(w));
+            var newDefault = MakeSqlValue(Visit(cex.DefaultValue));
 
-                if (cex.DefaultValue == null)
-                    return result;
-
-                return SmartOr(result, MakeSqlCondition(Visit(cex.DefaultValue)), true);
-            }
-            else
-            {
-                var newWhens = cex.Whens.NewIfChange(w => VisitWhen(w));
-                var newDefault = MakeSqlValue(Visit(cex.DefaultValue));
-
-                if (newWhens != cex.Whens || newDefault != cex.DefaultValue)
-                    return new CaseExpression(newWhens, newDefault);
-                return cex;
-            }
+            if (newWhens != cex.Whens || newDefault != cex.DefaultValue)
+                return new CaseExpression(newWhens, newDefault);
+            return cex;
         }
 
         protected override When VisitWhen(When when)
