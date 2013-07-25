@@ -30,7 +30,7 @@ namespace Signum.Engine.DynamicQuery
 
         Dictionary<object, DynamicQueryBucket> queries = new Dictionary<object, DynamicQueryBucket>();
 
-        Polymorphic<Dictionary<string, ExtensionInfo>> registeredExtensions =
+        public Polymorphic<Dictionary<string, ExtensionInfo>> RegisteredExtensions =
             new Polymorphic<Dictionary<string, ExtensionInfo>>(PolymorphicMerger.InheritDictionaryInterfaces, null);
 
 
@@ -167,7 +167,7 @@ namespace Signum.Engine.DynamicQuery
 
         private Expression BuildExtension(Type parentType, string key, Expression parentExpression)
         {
-            LambdaExpression lambda = registeredExtensions.GetValue(parentType)[key].Lambda;
+            LambdaExpression lambda = RegisteredExtensions.GetValue(parentType)[key].Lambda;
 
             return ExpressionReplacer.Replace(Expression.Invoke(lambda, parentExpression));
         }
@@ -176,7 +176,7 @@ namespace Signum.Engine.DynamicQuery
         {
             var parentType = parent.Type.CleanType().UnNullify();
 
-            var dic = registeredExtensions.TryGetValue(parentType);
+            var dic = RegisteredExtensions.TryGetValue(parentType);
             
             if (dic == null)
                 return Enumerable.Empty<QueryToken>();
@@ -239,11 +239,16 @@ namespace Signum.Engine.DynamicQuery
 
         public ExtensionInfo RegisterExpression(ExtensionInfo extension)
         {
-            registeredExtensions.GetOrAddDefinition(extension.SourceType)[extension.Key] = extension;
+            RegisteredExtensions.GetOrAddDefinition(extension.SourceType)[extension.Key] = extension;
 
-            registeredExtensions.ClearCache();
+            RegisteredExtensions.ClearCache();
 
             return extension;
+        }
+
+        public void Unregister(Type type, string text)
+        {
+            RegisteredExtensions.GetDefinition(type);
         }
 
         internal object[] BatchExecute(BaseQueryRequest[] requests)
