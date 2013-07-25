@@ -207,11 +207,13 @@
   <Type Name="OperationMessage">
     <Member Name="Create" Description="Crear..." />
     <Member Name="CreateFromRegex" Description="^ Crear (. *) de. *$" />
+    <Member Name="Delete" Description="¿Borrar?" />
     <Member Name="InUserInterface" Description="(en interfaz de usuario)" />
     <Member Name="Operation01IsNotAuthorized" Description="La operación {0} ({1}) no está autorizada" />
     <Member Name="PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem" Description="Confirme que desea eliminar esta entidad del sistema" />
     <Member Name="PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem" Description="Confirme que desea eliminar las entidades seleccionadas del sistema" />
     <Member Name="StateShouldBe0InsteadOf1" Description="Estado debe ser {0} (en lugar de {1})" />
+    <Member Name="TheOperation0DidNotReturnAnEntity" Description="{0} no devolvió ninguna entidad" />
   </Type>
   <Type Name="OrderType" Description="Tipo de órden">
     <Member Name="Ascending" Description="Ascendente" />
