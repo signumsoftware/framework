@@ -66,7 +66,7 @@ namespace Signum.Entities.DynamicQuery
                 return Implementations.FromAttributes(cleanType, fi.GetCustomAttributes(true).Cast<Attribute>().ToArray(), null);
 
             if (cleanType.IsAbstract)
-                throw new InvalidOperationException("Impossible to determine implementations for {0}".Formato(fi.FieldName()));
+                throw new InvalidOperationException("Impossible to determine implementations for {0}".Formato(PropertyInfo.PropertyName()));
 
             return Implementations.By(cleanType);
         }
