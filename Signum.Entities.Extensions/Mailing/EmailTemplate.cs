@@ -424,8 +424,8 @@ namespace Signum.Entities.Mailing
         TheTemplateIsAlreadyInactive,
         [Description("Type {0} does not have a property with name {1}")]
         Type0DoesNotHaveAPropertyWithName1,
-        [Description("SystemTemplate should be set to access model {0}")]
-        SystemTemplateShouldBeSetToAccessModel0,
+        [Description("SystemEmail should be set to access model {0}")]
+        SystemEmailShouldBeSetToAccessModel0,
     }
 
     public enum EmailTemplateCanAddTokenMessage

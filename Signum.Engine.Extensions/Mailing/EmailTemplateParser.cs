@@ -137,7 +137,7 @@ namespace Signum.Engine.Mailing
             {
                 if (modelType == null)
                 {
-                    errors.Add(EmailTemplateMessage.SystemTemplateShouldBeSetToAccessModel0.NiceToString().Formato(fieldOrPropertyChain));
+                    errors.Add(EmailTemplateMessage.SystemEmailShouldBeSetToAccessModel0.NiceToString().Formato(fieldOrPropertyChain));
                     return;
                 }
 
