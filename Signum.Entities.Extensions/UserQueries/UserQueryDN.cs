@@ -344,6 +344,14 @@ namespace Signum.Entities.UserQueries
 
             return base.PropertyValidation(pi);
         }
+
+        public override string ToString()
+        {
+            if (token != null)
+                return token.FullKey();
+
+            return tokenString;
+        }
     }
 
     [Serializable]

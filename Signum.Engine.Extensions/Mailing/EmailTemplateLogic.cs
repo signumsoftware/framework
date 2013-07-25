@@ -177,34 +177,12 @@ namespace Signum.Engine.Mailing
             return false;
         }
 
-      
-
-        public static EmailMessageDN CreateEmailMessage(this Lite<EmailTemplateDN> liteTemplate, IIdentifiable entity, ISystemEmail systemEmail = null)
+        public static IEnumerable<EmailMessageDN> CreateEmailMessage(this Lite<EmailTemplateDN> liteTemplate, IIdentifiable entity, ISystemEmail systemEmail = null)
         {
-            EmailTemplateDN template = GetTemplate(liteTemplate);
-
-            if (template.SendDifferentMessages)
-                throw new InvalidOperationException("{0} has SendDifferentMessages set to true. Call CreateMultipleEmailMessages instead".Formato(template));
-
-            return new EmailMessageBuilder(template, entity, systemEmail).CreateEmailMessageInternal().Single();
-        }
-
-        public static IEnumerable<EmailMessageDN> CreateMultipleEmailMessages(this Lite<EmailTemplateDN> liteTemplate, IIdentifiable entity, ISystemEmail systemEmail = null)
-        {
-            EmailTemplateDN template = GetTemplate(liteTemplate);
-
-            if (!template.SendDifferentMessages)
-                throw new InvalidOperationException("{0} has SendDifferentMessages set to false. Call CreateEmailMessage instead".Formato(template));
+            EmailTemplateDN template = EmailTemplates.Value.GetOrThrow(liteTemplate, "Email template {0} not in cache".Formato(liteTemplate));
 
             return new EmailMessageBuilder(template, entity, systemEmail).CreateEmailMessageInternal().ToList();
         }
-
-        static EmailTemplateDN GetTemplate(Lite<EmailTemplateDN> liteTemplate)
-        {
-            return EmailTemplates.Value.GetOrThrow(liteTemplate, "Email template {0} not in cache".Formato(liteTemplate));
-        }
-
-    
 
         class EmailTemplateGraph : Graph<EmailTemplateDN>
         {

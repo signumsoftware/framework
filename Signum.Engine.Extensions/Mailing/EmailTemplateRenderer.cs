@@ -202,19 +202,19 @@ namespace Signum.Engine.Mailing
             if (!template.SendDifferentMessages)
             {
                 return new[]
-                    { 
-                        tokenRecipients.SelectMany(tr =>
-                        {
-                            ResultColumn owner = dicTokenColumn.GetOrThrow(tr.Token.Token);
+                { 
+                    tokenRecipients.SelectMany(tr =>
+                    {
+                        ResultColumn owner = dicTokenColumn.GetOrThrow(tr.Token.Token);
 
-                            List<EmailOwnerData> groups = currentRows.Select(r => (EmailOwnerData)r[owner]).Distinct().ToList();
+                        List<EmailOwnerData> groups = currentRows.Select(r => (EmailOwnerData)r[owner]).Distinct().ToList();
 
-                            if (groups.Count == 1 && groups[0] == null)
-                                return new List<EmailOwnerRecipientData>();
+                        if (groups.Count == 1 && groups[0].TryCC(a => a.Owner) == null)
+                            return new List<EmailOwnerRecipientData>();
 
-                            return groups.Select(g => new EmailOwnerRecipientData(g) { Kind = tr.Kind }).ToList();
-                        }).ToList()
-                    };
+                        return groups.Where(g => g.Email.HasText()).Select(g => new EmailOwnerRecipientData(g) { Kind = tr.Kind }).ToList();
+                    }).ToList()
+                };
             }
             else
             {

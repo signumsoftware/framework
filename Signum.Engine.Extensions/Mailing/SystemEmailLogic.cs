@@ -212,24 +212,30 @@ namespace Signum.Engine.Mailing
             return systemEmailToType.GetOrThrow(systemEmail, "The system email {0} was not registered");
         }
 
-        public static EmailMessageDN CreateEmailMessage(this ISystemEmail systemEmail)
+        public static IEnumerable<EmailMessageDN> CreateEmailMessage(this ISystemEmail systemEmail)
         {
             var systemEmailDN = ToSystemEmailDN(systemEmail.GetType());
+            var template = GetDefaultTemplate(systemEmailDN);
 
-            var template = SystemEmailsToEmailTemplates.Value
-                .TryGetC(systemEmailDN.ToLite())
-                .TryCC(ets => ets.SingleOrDefaultEx(t => t.IsActiveNow()));
+            return EmailTemplateLogic.CreateEmailMessage(template.ToLite(), systemEmail.UntypedEntity, systemEmail);
+        }
 
-            if (template == null)
+        private static EmailTemplateDN GetDefaultTemplate(SystemEmailDN systemEmailDN)
+        {
+            var list = SystemEmailsToEmailTemplates.Value.TryGetC(systemEmailDN.ToLite()); 
+
+            if(list.IsNullOrEmpty())
             {
-                template = CreateDefaultTemplate(systemEmailDN);
+                var template = CreateDefaultTemplate(systemEmailDN);
 
                 using (ExecutionMode.Global())
                 using (OperationLogic.AllowSave<EmailTemplateDN>())
                     template.Save();
+
+                return template;
             }
 
-            return EmailTemplateLogic.CreateEmailMessage(template.ToLite(), systemEmail.UntypedEntity, systemEmail);
+            return list.Where(t => t.IsActiveNow()).SingleEx(() => "Active EmailTemplates for SystemEmail {0}".Formato(systemEmailDN));
         }
 
         private static EmailTemplateDN CreateDefaultTemplate(SystemEmailDN systemEmailDN)
