@@ -320,7 +320,7 @@ namespace Signum.Entities.UserQueries
 
         protected override void PreSaving(ref bool graphModified)
         {
-            tokenString = token.FullKey();
+            tokenString = token == null ? null : token.FullKey();
         }
 
         public void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)

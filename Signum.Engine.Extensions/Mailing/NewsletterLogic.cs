@@ -292,8 +292,16 @@ namespace Signum.Engine.Mailing
             var queryName = QueryLogic.ToQueryName(newsletter.Query.Key);
 
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-            
-            var columns = EmailTemplateLogic.GetTemplateColumns(newsletter, newsletter.Tokens, qd);
+
+            using (ExecutionMode.Global())
+            {
+                foreach (var t in newsletter.Tokens)
+                {
+                    t.ParseData(newsletter, qd, canAggregate: false);
+                }
+            }
+
+            var columns = newsletter.Tokens.Select(qt => new Column(qt.Token, null)).ToList();
 
             //var columns = new List<QueryToken>();
             //columns.Add(QueryUtils.Parse("Entity.NewsletterDeliveries.Element", qd, canAggregate: false));

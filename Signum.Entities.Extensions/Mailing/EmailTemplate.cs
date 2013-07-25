@@ -18,6 +18,7 @@ namespace Signum.Entities.Mailing
 {
     public enum EmailTemplateOperation
     {
+        CreateEmailTemplateFromSystemEmail,
         Create,
         Save,
         Enable,
@@ -62,54 +63,18 @@ namespace Signum.Entities.Mailing
             set { Set(ref query, value, () => Query); }
         }
 
-        [NotNullable]
-        MList<EmailTemplateRecipientDN> recipients = new MList<EmailTemplateRecipientDN>();
-        [NotNullValidator, NoRepeatValidator]
-        public MList<EmailTemplateRecipientDN> Recipients
+        SystemEmailDN systemEmail;
+        public SystemEmailDN SystemEmail
         {
-            get { return recipients; }
-            set { Set(ref recipients, value, () => Recipients); }
+            get { return systemEmail; }
+            set { Set(ref systemEmail, value, () => SystemEmail); }
         }
 
-        bool isBodyHtml = true;
-        public bool IsBodyHtml
+        bool sendDifferentMessages;
+        public bool SendDifferentMessages
         {
-            get { return isBodyHtml; }
-            set { Set(ref isBodyHtml, value, () => IsBodyHtml); }
-        }
-
-        MList<QueryTokenDN> tokens = new MList<QueryTokenDN>();
-        public MList<QueryTokenDN> Tokens
-        {
-            get { return tokens; }
-            set { Set(ref tokens, value, () => Tokens); }
-        }
-
-        [NotifyCollectionChanged]
-        MList<EmailTemplateMessageDN> messages =new MList<EmailTemplateMessageDN>();
-        public MList<EmailTemplateMessageDN> Messages
-        {
-            get { return messages; }
-            set { Set(ref messages, value, () => Messages); }
-        }
-
-        protected override void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
-        {
-            if (sender == messages)
-            {
-                foreach (var item in args.OldItems.Cast<EmailTemplateMessageDN>())
-                    item.Template = null;
-
-                foreach (var item in args.NewItems.Cast<EmailTemplateMessageDN>())
-                    item.Template = this;
-            }
-        }
-
-        protected override void PreSaving(ref bool graphModified)
-        {
-            base.PreSaving(ref graphModified);
-
-            messages.ForEach(e => e.Template = this);
+            get { return sendDifferentMessages; }
+            set { Set(ref sendDifferentMessages, value, () => SendDifferentMessages); }
         }
 
         EmailTemplateContactDN from;
@@ -119,6 +84,16 @@ namespace Signum.Entities.Mailing
             set { Set(ref from, value, () => From); }
         }
 
+        [NotNullable]
+        MList<EmailTemplateRecipientDN> recipients = new MList<EmailTemplateRecipientDN>();
+        [NotNullValidator, NoRepeatValidator]
+        public MList<EmailTemplateRecipientDN> Recipients
+        {
+            get { return recipients; }
+            set { Set(ref recipients, value, () => Recipients); }
+        }
+
+       
         Lite<EmailMasterTemplateDN> masterTemplate;
         public Lite<EmailMasterTemplateDN> MasterTemplate
         {
@@ -133,11 +108,26 @@ namespace Signum.Entities.Mailing
             set { Set(ref smtpConfiguration, value, () => SmtpConfiguration); }
         }
 
-        SystemEmailDN systemEmail;
-        public SystemEmailDN SystemEmail
+        bool isBodyHtml = true;
+        public bool IsBodyHtml
         {
-            get { return systemEmail; }
-            set { Set(ref systemEmail, value, () => SystemEmail); }
+            get { return isBodyHtml; }
+            set { Set(ref isBodyHtml, value, () => IsBodyHtml); }
+        }
+
+        [NotifyCollectionChanged]
+        MList<EmailTemplateMessageDN> messages = new MList<EmailTemplateMessageDN>();
+        public MList<EmailTemplateMessageDN> Messages
+        {
+            get { return messages; }
+            set { Set(ref messages, value, () => Messages); }
+        }
+
+        MList<QueryTokenDN> tokens = new MList<QueryTokenDN>();
+        public MList<QueryTokenDN> Tokens
+        {
+            get { return tokens; }
+            set { Set(ref tokens, value, () => Tokens); }
         }
 
         bool active;
@@ -170,6 +160,27 @@ namespace Signum.Entities.Mailing
             return IsActiveNowExpression.Evaluate(this);
         }
 
+
+        protected override void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
+        {
+            if (sender == messages)
+            {
+                foreach (var item in args.OldItems.Cast<EmailTemplateMessageDN>())
+                    item.Template = null;
+
+                foreach (var item in args.NewItems.Cast<EmailTemplateMessageDN>())
+                    item.Template = this;
+            }
+        }
+
+        protected override void PreSaving(ref bool graphModified)
+        {
+            base.PreSaving(ref graphModified);
+
+            messages.ForEach(e => e.Template = this);
+        }
+     
+     
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
         {
             if (pi.Is(() => StartDate) || pi.Is(() => EndDate))
@@ -299,11 +310,11 @@ namespace Signum.Entities.Mailing
         }
 
         [Ignore]
-        EmailTemplateDN template;
+        internal EmailTemplateDN template;
         public EmailTemplateDN Template
         {
             get { return template; }
-            set { Set(ref template, value, () => Template); }
+            set { template = value; }
         }
 
         [NotNullable]
@@ -411,8 +422,10 @@ namespace Signum.Entities.Mailing
         TheTemplateIsAlreadyActive,
         [Description("The template is already inactive")]
         TheTemplateIsAlreadyInactive,
-        [Description("The model {0} does not have any field with the token {1}")]
-        TheModel0DoesNotHaveAnyFieldWithTheToken1,
+        [Description("Type {0} does not have a property with name {1}")]
+        Type0DoesNotHaveAPropertyWithName1,
+        [Description("SystemTemplate should be set to access model {0}")]
+        SystemTemplateShouldBeSetToAccessModel0,
     }
 
     public enum EmailTemplateCanAddTokenMessage

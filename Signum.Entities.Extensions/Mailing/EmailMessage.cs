@@ -290,7 +290,8 @@ namespace Signum.Entities.Mailing
         EmailOwnerData EmailOwnerData { get; }
     }
 
-    public class EmailOwnerData : IQueryTokenBag, IEquatable<EmailOwnerData>
+    [DescriptionOptions(DescriptionOptions.Description | DescriptionOptions.Members)]
+    public class EmailOwnerData : IEquatable<EmailOwnerData>
     {
         public Lite<IEmailOwnerDN> Owner { get; set; }
         public string Email { get; set; }
