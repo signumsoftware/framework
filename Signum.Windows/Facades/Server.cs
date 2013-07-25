@@ -90,6 +90,8 @@ namespace Signum.Windows
 
             if (co.State == CommunicationState.Faulted)
                 co.Abort();
+            else if(co.State != CommunicationState.Closed)
+                co.Close();
 
             ((IDisposable)co).Dispose();
         }
