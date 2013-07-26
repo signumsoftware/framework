@@ -141,6 +141,10 @@ namespace Signum.Windows
 
         public static readonly IValueConverter LabelCount = ConverterFactory.New(
             (ResultRow r) => "{0} ({1})".Formato(r[0] is Enum ? ((Enum)r[0]).NiceToString() : r[0], r[1]));
+
+
+        public static readonly IValueConverter DirtyOpacity = ConverterFactory.New(
+            (bool isDirty) => isDirty ? .5 : 1);
     }
 
     public static class ColorExtensions
