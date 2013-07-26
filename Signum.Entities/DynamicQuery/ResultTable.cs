@@ -9,6 +9,7 @@ using System.Reflection;
 using Signum.Utilities;
 using System.Runtime.Serialization;
 using System.Globalization;
+using System.ComponentModel;
 
 namespace Signum.Entities.DynamicQuery
 {
@@ -302,10 +303,23 @@ namespace Signum.Entities.DynamicQuery
 
 
     [Serializable]
-    public class ResultRow
+    public class ResultRow : INotifyPropertyChanged
     {
         public readonly int Index;
         public readonly ResultTable Table;
+
+        bool isDirty; 
+        public bool IsDirty
+        {
+            get { return isDirty; }
+            set
+            {
+                isDirty = value;
+
+                if (PropertyChanged != null)
+                    PropertyChanged(this, new PropertyChangedEventArgs("IsDirty"));
+            }
+        }
 
         public object this[int columnIndex]
         {
@@ -342,5 +356,7 @@ namespace Signum.Entities.DynamicQuery
         {
             return (T)this[column];
         }
+
+        public event PropertyChangedEventHandler PropertyChanged;
     }
 }
