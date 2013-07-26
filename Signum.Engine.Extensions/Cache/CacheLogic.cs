@@ -460,7 +460,7 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
             var controller = controllers.GetOrThrow(type, "{0} is not registered in CacheLogic");
 
             if (controller == null)
-                throw new InvalidOperationException("{0} is just semi cached");
+                throw new InvalidOperationException("{0} is just semi cached".Formato(type.TypeName()));
 
             return controller;
         }
