@@ -162,7 +162,7 @@ namespace Signum.Engine.Operations
                           let et = EntityKindCache.TryGetAttribute(t)
                           let sp = IsSaveProtected(t)
                           select et == null ? "{0} has no EntityTypeAttribute set".Formato(t.FullName) :
-                          sp != RequiresSaveProtected(et.EntityKind) ? "\t{0} is {1} but is {2}'save protected'".Formato(t.FullName, et, sp ? "" : "NOT ") :
+                          sp != RequiresSaveProtected(et.EntityKind) ? "\t{0} is {1} but is {2}'save protected'".Formato(t.TypeName(), et.EntityKind, sp ? "" : "NOT ") :
                           null).NotNull().OrderBy().ToString("\r\n");
 
             if (errors.HasText())
