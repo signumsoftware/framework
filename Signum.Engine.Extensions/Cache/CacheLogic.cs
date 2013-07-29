@@ -35,7 +35,7 @@ namespace Signum.Engine.Cache
 
         public static void AssertStarted(SchemaBuilder sb)
         {
-            sb.AssertDefined(ReflectionTools.GetMethodInfo(()=>Start(null)));
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null)));
         }
 
         /// <summary>
@@ -52,8 +52,6 @@ namespace Signum.Engine.Cache
                 PermissionAuthLogic.RegisterTypes(typeof(CachePermission));
 
                 sb.SwitchGlobalLazyManager(new CacheGlobalLazyManager());
-
-                sb.Schema.Initializing[InitLevel.Level_0BeforeAnyQuery] += OnStart;
             }
         }
 
@@ -86,6 +84,8 @@ namespace Signum.Engine.Cache
             Func<IProjectionRow, T> projector = projectorExpression.Compile();
 
             List<T> list = new List<T>();
+
+            CacheLogic.OnStart();
 
             using (new EntityCache())
                 ((SqlConnector)Connector.Current).ExecuteDataReaderDependency(tr.GetMainPreCommand(), onChange, CacheLogic.OnStart, fr =>
@@ -131,84 +131,97 @@ namespace Signum.Engine.Cache
             }
         }
 
+
+        static bool isStarted = false;
+        readonly static object startKeyLock = new object();
         internal static void OnStart()
         {
             if (GloballyDisabled)
                 return;
 
-            SqlConnector connector = (SqlConnector)Connector.Current;
+            if (isStarted)
+                return;
 
-            if (AssertOnStart)
+            lock (startKeyLock)
             {
-                string currentUser = (string)Executor.ExecuteScalar("select SYSTEM_USER");
+                if (isStarted)
+                    return;
+                SqlConnector connector = (SqlConnector)Connector.Current;
 
-                var type = Database.View<SysServerPrincipals>().Where(a => a.name == currentUser).Select(a => a.type_desc).Single();
+                if (AssertOnStart)
+                {
+                    string currentUser = (string)Executor.ExecuteScalar("select SYSTEM_USER");
 
-                if (type != "SQL_LOGIN")
-                    throw new InvalidOperationException("The current login '{0}' is a {1} instead of a SQL_LOGIN. Avoid using Integrated Security with Cache Logic".Formato(currentUser, type));
+                    var type = Database.View<SysServerPrincipals>().Where(a => a.name == currentUser).Select(a => a.type_desc).Single();
 
-                var serverPrincipalName = (from db in Database.View<SysDatabases>()
-                                           where db.name == connector.DatabaseName()
-                                           join spl in Database.View<SysServerPrincipals>().DefaultIfEmpty() on db.owner_sid equals spl.sid
-                                           select spl.name).Single();
+                    if (type != "SQL_LOGIN")
+                        throw new InvalidOperationException("The current login '{0}' is a {1} instead of a SQL_LOGIN. Avoid using Integrated Security with Cache Logic".Formato(currentUser, type));
+
+                    var serverPrincipalName = (from db in Database.View<SysDatabases>()
+                                               where db.name == connector.DatabaseName()
+                                               join spl in Database.View<SysServerPrincipals>().DefaultIfEmpty() on db.owner_sid equals spl.sid
+                                               select spl.name).Single();
 
 
-                if (currentUser != serverPrincipalName)
-                    throw new InvalidOperationException(@"The current owner of {0} is '{1}', but the current user is '{2}'. Change the login or call:
+                    if (currentUser != serverPrincipalName)
+                        throw new InvalidOperationException(@"The current owner of {0} is '{1}', but the current user is '{2}'. Change the login or call:
 ALTER AUTHORIZATION ON DATABASE::{0} TO {2}".Formato(connector.DatabaseName(), serverPrincipalName, currentUser));
 
-                var databasePrincipalName = (from db in Database.View<SysDatabases>()
-                                             where db.name == connector.DatabaseName()
-                                             join dpl in Database.View<SysDatabasePrincipals>().DefaultIfEmpty() on db.owner_sid equals dpl.sid
-                                             select dpl.name).Single();
+                    var databasePrincipalName = (from db in Database.View<SysDatabases>()
+                                                 where db.name == connector.DatabaseName()
+                                                 join dpl in Database.View<SysDatabasePrincipals>().DefaultIfEmpty() on db.owner_sid equals dpl.sid
+                                                 select dpl.name).Single();
 
-                if (!databasePrincipalName.HasText() || databasePrincipalName != "dbo")
-                    throw new InvalidOperationException(@"The database principal of {0} is '{1}', not associated with the current user '{2}'. Call:
+                    if (!databasePrincipalName.HasText() || databasePrincipalName != "dbo")
+                        throw new InvalidOperationException(@"The database principal of {0} is '{1}', not associated with the current user '{2}'. Call:
 ALTER AUTHORIZATION ON DATABASE::{0} TO {2}".Formato(connector.DatabaseName(), databasePrincipalName.DefaultText("Unknown"), currentUser));
-            }
+                }
 
-            var enabled = Database.View<SysDatabases>().Where(db => db.name == Connector.Current.DatabaseName()).Select(a => a.is_broker_enabled).Single();
-            if (!enabled)
-            {
-                try
+                var enabled = Database.View<SysDatabases>().Where(db => db.name == Connector.Current.DatabaseName()).Select(a => a.is_broker_enabled).Single();
+                if (!enabled)
                 {
                     try
                     {
-                        Executor.ExecuteNonQuery("ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()));
+                        try
+                        {
+                            Executor.ExecuteNonQuery("ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()));
+                        }
+                        catch (SqlException e)
+                        {
+                            if (e.Number == 9772)
+                                Executor.ExecuteNonQuery("ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
+                            else
+                                throw;
+                        }
                     }
-                    catch (SqlException e)
+                    catch (TimeoutException)
                     {
-                        if (e.Number == 9772)
-                            Executor.ExecuteNonQuery("ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
-                        else 
-                            throw;
+                        throw EnableBlocker();
                     }
                 }
-                catch (TimeoutException)
+
+                try
                 {
-                    throw EnableBlocker();
+                    SqlDependency.Start(connector.ConnectionString);
                 }
+                catch (InvalidOperationException ex)
+                {
+                    if (ex.Message.Contains("SQL Server Service Broker"))
+                        throw EnableBlocker();
+
+                    throw;
+                }
+
+                SafeConsole.SetConsoleCtrlHandler(ct =>
+                {
+                    Shutdown();
+                    return true;
+                }, true);
+
+                AppDomain.CurrentDomain.ProcessExit += (o, a) => Shutdown();
+
+                isStarted = true;
             }
-
-            try
-            {
-                SqlDependency.Start(connector.ConnectionString);
-            }
-            catch (InvalidOperationException ex)
-            {
-                if (ex.Message.Contains("SQL Server Service Broker"))
-                    throw EnableBlocker();
-
-                throw;
-            }
-
-            SafeConsole.SetConsoleCtrlHandler(ct =>
-            {
-                Shutdown();
-                return true;
-            }, true);
-
-            AppDomain.CurrentDomain.ProcessExit += (o, a) => Shutdown();
         }
 
         private static InvalidOperationException EnableBlocker()
@@ -417,7 +430,7 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
         public static void CacheTable<T>(SchemaBuilder sb, bool ignoreIsTransactionalData = false) where T : IdentifiableEntity
         {
             if (EntityKindCache.GetEntityData(typeof(T)) == EntityData.Transactional && !ignoreIsTransactionalData)
-                throw new InvalidOperationException("{0} is Transactional. Reconsider caching this table or set ignoreIsTransactionalData = true".Formato(typeof(T).TypeName())); 
+                throw new InvalidOperationException("{0} is Transactional. Reconsider caching this table or set ignoreIsTransactionalData = true".Formato(typeof(T).TypeName()));
 
             var cc = new CacheController<T>(sb.Schema);
             controllers.AddOrThrow(typeof(T), cc, "{0} already registered");
