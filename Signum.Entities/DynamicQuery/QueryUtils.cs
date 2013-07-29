@@ -209,7 +209,7 @@ namespace Signum.Entities.DynamicQuery
 
         public static Func<bool> MergeEntityColumns = null;
 
-        static QueryToken SubToken(QueryToken token, QueryDescription qd, bool canAggregate, string key)
+        public static QueryToken SubToken(QueryToken token, QueryDescription qd, bool canAggregate, string key)
         {
             var result = SubTokenBasic(token, qd, key);
 
@@ -263,6 +263,9 @@ namespace Signum.Entities.DynamicQuery
             if (token == null)
             {
                 var column = qd.Columns.SingleOrDefaultEx(a=>a.Name == key);
+
+                if (column == null)
+                    return null;
 
                 return new ColumnToken(column, qd.QueryName);
             }
