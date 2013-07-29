@@ -22,7 +22,7 @@ namespace Signum.Entities.DynamicQuery
 
         public static QueryToken IdProperty(QueryToken parent)
         {
-            return new EntityPropertyToken(parent, piId, PropertyRoute.Root(parent.Type.CleanType()).Add(piId));
+            return new EntityPropertyToken(parent, piId, PropertyRoute.Root(parent.Type.CleanType()).Add(piId)) { Priority = 10 };
         }
 
         internal EntityPropertyToken(QueryToken parent, PropertyInfo pi, PropertyRoute pr)
