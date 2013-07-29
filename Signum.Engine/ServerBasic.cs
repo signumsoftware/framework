@@ -127,7 +127,7 @@ namespace Signum.Services
         public virtual Dictionary<Type, TypeDN> ServerTypes()
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => Schema.Current.TypeToDN);
+                () => TypeLogic.TypeToDN);
         }
 
         public virtual DateTime ServerNow()

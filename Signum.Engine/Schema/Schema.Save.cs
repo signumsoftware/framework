@@ -17,6 +17,7 @@ using System.Text;
 using Signum.Utilities.DataStructures;
 using System.Data.Common;
 using System.Collections.Concurrent;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine.Maps
 {
@@ -612,8 +613,7 @@ namespace Signum.Engine.Maps
 
         public SqlPreCommand InsertSqlSync(IdentifiableEntity ident, bool includeCollections = true, string comment = null)
         {
-            bool dirty = false;
-            ident.PreSaving(ref dirty);
+            PrepareEntitySync(ident);
             SetToStrField(ident);
 
             SqlPreCommandSimple insert = Identity ?
@@ -641,12 +641,10 @@ namespace Signum.Engine.Maps
             return SqlPreCommand.Combine(Spacing.Simple, insert, setParent, collections);
         }
 
-
-
         public SqlPreCommand UpdateSqlSync(IdentifiableEntity ident, bool includeCollections = true, string comment = null)
         {
-            bool dirty = false;
-            ident.PreSaving(ref dirty);
+            PrepareEntitySync(ident);
+            
             if (SetToStrField(ident))
                 ident.SetSelfModified();
 
@@ -667,6 +665,25 @@ namespace Signum.Engine.Maps
             SqlPreCommand collections = cc.InsertCollectionsSync(ident);
 
             return SqlPreCommand.Combine(Spacing.Simple, update, collections);
+        }
+
+        void PrepareEntitySync(IdentifiableEntity entity)
+        {
+            DirectedGraph<Modifiable> modifiables = GraphExplorer.PreSaving(() => GraphExplorer.FromRoot(entity), (Modifiable m, ref bool graphModified) =>
+            {
+                m.PreSaving(ref graphModified);
+
+                IdentifiableEntity ident = m as IdentifiableEntity;
+
+                if (ident != null)
+                    Schema.Current.OnPreSaving(ident, ref graphModified);
+            });
+
+            string error = GraphExplorer.FullIntegrityCheck(modifiables, withIndependentEmbeddedEntities: false);
+            if (error.HasText())
+                throw new ApplicationException(error);
+
+            GraphExplorer.PropagateModifications(modifiables.Inverse());
         }
 
         public class Trio
@@ -1180,7 +1197,7 @@ namespace Signum.Engine.Maps
             if (type == null)
                 return null;
 
-            return Schema.Current.TypeToId.GetOrThrow(type, "{0} not registered in the schema");
+            return TypeLogic.TypeToId.GetOrThrow(type, "{0} not registered in the schema");
         }
     }
 

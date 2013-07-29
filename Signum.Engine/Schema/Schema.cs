@@ -53,52 +53,6 @@ namespace Signum.Engine.Maps
 
         const string errorType = "TypeDN table not cached. Remember to call Schema.Current.Initialize";
 
-        Dictionary<Type, int> typeToId;
-        internal Dictionary<Type, int> TypeToId
-        {
-            get { return typeToId.ThrowIfNullC(errorType); }
-            set { typeToId = value; }
-        }
-
-        Dictionary<int, Type> idToType;
-        internal Dictionary<int, Type> IdToType
-        {
-            get { return idToType.ThrowIfNullC(errorType); }
-            set { idToType = value; }
-        }
-
-        Dictionary<Type, TypeDN> typeToDN;
-        internal Dictionary<Type, TypeDN> TypeToDN
-        {
-            get { return typeToDN.ThrowIfNullC(errorType); }
-            set { typeToDN = value; }
-        }
-
-        Dictionary<TypeDN, Type> dnToType;
-        internal Dictionary<TypeDN, Type> DnToType
-        {
-            get { return dnToType.ThrowIfNullC(errorType); }
-            set { dnToType = value; }
-        }
-
-        Dictionary<string, Type> nameToType = new Dictionary<string, Type>();
-        internal Dictionary<string, Type> NameToType
-        {
-            get { return nameToType; }
-            //set { nameToType = value; }
-        }
-
-        Dictionary<Type, string> typeToName = new Dictionary<Type, string>();
-        internal Dictionary<Type, string> TypeToName
-        {
-            get { return typeToName; }
-            //set { typeToName = value; }
-        }
-
-        public Type GetType(int id)
-        {
-            return this.idToType[id];
-        }
 
         #region Events
 
@@ -117,6 +71,11 @@ namespace Signum.Engine.Maps
 
             return null;
         }
+
+        internal Dictionary<string, Type> NameToType = new Dictionary<string, Type>();
+        internal Dictionary<Type, string> TypeToName = new Dictionary<Type, string>();
+
+        internal ResetLazy<TypeCaches> typeCachesLazy;
 
         public void AssertAllowed(Type type)
         {
@@ -316,7 +275,7 @@ namespace Signum.Engine.Maps
 
             public void InitializeUntil(InitLevel topLevel)
             {
-                for (InitLevel current = initLevel + 1 ?? InitLevel.Level_0BeforeAnyQuery; current <= topLevel; current++)
+                for (InitLevel current = initLevel + 1 ?? InitLevel.Level0SyncEntities; current <= topLevel; current++)
                 {
                     InitializeJust(current);
                     initLevel = current;
@@ -393,8 +352,6 @@ namespace Signum.Engine.Maps
             Synchronizing += SchemaSynchronizer.SynchronizeTablesScript;
             Synchronizing += TypeLogic.Schema_Synchronizing;
             Synchronizing += Assets.Schema_Synchronizing;
-
-            Initializing[InitLevel.Level0SyncEntities] += TypeLogic.Schema_Initializing;
         }
 
         public static Schema Current
@@ -565,6 +522,11 @@ namespace Signum.Engine.Maps
         public DirectedEdgedGraph<Table, RelationInfo> ToDirectedGraph()
         {
             return DirectedEdgedGraph<Table, RelationInfo>.Generate(Tables.Values, t => t.DependentTables());
+        }
+
+        public Type GetType(int id)
+        {
+            return typeCachesLazy.Value.IdToType[id];
         }
     }
 
