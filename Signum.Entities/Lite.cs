@@ -302,7 +302,7 @@ namespace Signum.Entities
             return null;
         }
 
-        static Regex regex = new Regex(@"(?<type>.+);(?<id>.+)(;(?<toStr>.+))?");
+        public static readonly Regex ParseRegex = new Regex(@"(?<type>.+);(?<id>.+)(;(?<toStr>.+))?");
 
         public static Lite<IdentifiableEntity> Parse(string liteKey)
         {
@@ -325,13 +325,13 @@ namespace Signum.Entities
             if (string.IsNullOrEmpty(liteKey))
                 return null;
 
-            Match match = regex.Match(liteKey);
+            Match match = ParseRegex.Match(liteKey);
             if (!match.Success)
                 return ValidationMessage.InvalidFormat.NiceToString();
 
             Type type = TryGetType(match.Groups["type"].Value);
             if (type == null)
-                return LiteMessage.TypeNotFound.NiceToString();
+                return LiteMessage.Type0NotFound.NiceToString().Formato(match.Groups["type"].Value);
 
             int id;
             if (!int.TryParse(match.Groups["id"].Value, out id))
@@ -562,7 +562,8 @@ namespace Signum.Entities
         [Description("Invalid Format")]
         InvalidFormat,
         New,
-        TypeNotFound,
+        [Description("Type {0} not found")]
+        Type0NotFound,
         [Description("Text")]
         ToStr
     }
