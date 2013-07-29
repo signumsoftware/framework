@@ -244,7 +244,7 @@ namespace Signum.Engine
             return sd.LevenshteinDistance(o, n, weighter: (oc, nc) => oc.HasValue && nc.HasValue ? 2 : 1);
         }
 
-        const int MaxElements = 70;
+        public const int MaxElements = 70;
 
         public static Func<string, List<string>, Selection?> AutoRepacement; 
 
@@ -278,7 +278,7 @@ namespace Signum.Engine
 
             int remaining = newValues.Count - startingIndex - MaxElements;
             if (remaining > 0)
-                SafeConsole.WriteLineColor(ConsoleColor.White, "- s: Show more values ({0} remaining)", remaining);
+                SafeConsole.WriteLineColor(ConsoleColor.White, "- +: Show more values ({0} remaining)", remaining);
 
             while (true)
             {
@@ -289,7 +289,7 @@ namespace Signum.Engine
                 
                  answer= answer.ToLower();
 
-                if (answer == "s" && remaining > 0)
+                if (answer == "+" && remaining > 0)
                 {
                     startingIndex += MaxElements;
                     goto retry;
