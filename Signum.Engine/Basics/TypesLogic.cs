@@ -71,7 +71,7 @@ namespace Signum.Engine.Basics
             current.DnToType = dict.Inverse();
 
 
-            Lite.SetTypeNameAndResolveType(TypeLogic.GetCleanName, TypeLogic.GetType);
+            Lite.SetTypeNameAndResolveType(TypeLogic.GetCleanName, TypeLogic.TryGetType);
 
             //current.TypeToName = current.Tables.SelectDictionary(k => k, v => v.CleanTypeName);
             //current.NameToType = current.TypeToName.Inverse("CleanTypeNames");

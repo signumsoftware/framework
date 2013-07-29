@@ -210,12 +210,12 @@ namespace Signum.Entities
 
         public string Key()
         {
-            return "{0};{1}".Formato(Lite.UniqueTypeName(this.EntityType), this.Id);
+            return "{0};{1}".Formato(Lite.GetCleanName(this.EntityType), this.Id);
         }
 
         public string KeyLong()
         {
-            return "{0};{1};{2}".Formato(Lite.UniqueTypeName(this.EntityType), this.Id, this.ToString());
+            return "{0};{1};{2}".Formato(Lite.GetCleanName(this.EntityType), this.Id, this.ToString());
         }
 
         public int CompareTo(Lite<IdentifiableEntity> other)
@@ -329,7 +329,7 @@ namespace Signum.Entities
             if (!match.Success)
                 return ValidationMessage.InvalidFormat.NiceToString();
 
-            Type type = ResolveType(match.Groups["type"].Value);
+            Type type = TryGetType(match.Groups["type"].Value);
             if (type == null)
                 return LiteMessage.TypeNotFound.NiceToString();
 
@@ -351,13 +351,13 @@ namespace Signum.Entities
             return result;
         }
 
-        public static Func<Type, string> UniqueTypeName { get; private set; }
-        public static Func<string, Type> ResolveType { get; private set; }
+        public static Func<Type, string> GetCleanName { get; private set; }
+        public static Func<string, Type> TryGetType { get; private set; }
 
-        public static void SetTypeNameAndResolveType(Func<Type, string> uniqueTypeName, Func<string, Type> resolveType)
+        public static void SetTypeNameAndResolveType(Func<Type, string> getCleanName, Func<string, Type> tryResolveType)
         {
-            Lite.UniqueTypeName = uniqueTypeName;
-            Lite.ResolveType = resolveType;
+            Lite.GetCleanName = getCleanName;
+            Lite.TryGetType = tryResolveType;
         }
 
         public static Lite<IdentifiableEntity> Create(Type type, int id)
