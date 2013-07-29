@@ -14,6 +14,7 @@ using Signum.Engine.Authorization;
 using Signum.Engine.Operations;
 using Signum.Utilities;
 using Signum.Engine.UserQueries;
+using Signum.Entities.UserQueries;
 
 namespace Signum.Engine.Chart
 {
@@ -27,6 +28,8 @@ namespace Signum.Engine.Chart
                     throw new InvalidOperationException("UserChart has already been registered");
 
                 UserAssetsImporter.UserAssetNames.Add("UserChart", typeof(UserChartDN));
+
+                sb.Schema.Synchronizing += Schema_Synchronizing;
 
                 sb.Include<UserChartDN>();
 
@@ -123,6 +126,119 @@ namespace Signum.Engine.Chart
             sb.Schema.Settings.AssertImplementedBy((UserChartDN uq) => uq.Related, typeof(RoleDN));
 
             TypeConditionLogic.Register<UserChartDN>(newEntityGroupKey, uq => AuthLogic.CurrentRoles().Contains(uq.Related));
+        }
+
+        static SqlPreCommand Schema_Synchronizing(Replacements replacements)
+        {
+            var list = Database.Query<UserChartDN>().ToList();
+
+            var table = Schema.Current.Table(typeof(UserChartDN));
+
+            SqlPreCommand cmd = list.Select(uq => ProcessUserChart(replacements, table, uq)).Combine(Spacing.Double);
+
+            return cmd;
+        }
+
+        static SqlPreCommand ProcessUserChart(Replacements replacements, Table table, UserChartDN uc)
+        {
+            try
+            {
+                Console.Clear();
+
+                SafeConsole.WriteLineColor(ConsoleColor.White, "UserChart: " + uc.DisplayName);
+                Console.WriteLine(" ChartScript: " + uc.ChartScript.ToString());
+                Console.WriteLine(" Query: " + uc.Query.Key);
+
+                if (uc.Filters.Any(a => a.Token.ParseException != null) ||
+                   uc.Columns.Any(a => a.Token != null && a.Token.ParseException != null) ||
+                   uc.Orders.Any(a => a.Token.ParseException != null))
+                {
+                    QueryDescription qd = DynamicQueryManager.Current.QueryDescription(uc.Query.ToQueryName());
+
+                    bool canAggregate = uc.GroupResults;
+
+                    if (uc.Filters.Any())
+                    {
+                        Console.WriteLine(" Filters:");
+                        foreach (var item in uc.Filters.ToList())
+                        {
+                            QueryTokenDN token = item.Token;
+                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, canAggregate, "{0} {1}".Formato(item.Operation, item.ValueString)))
+                            {
+                                case FixTokenResult.Nothing: break;
+                                case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc);
+                                case FixTokenResult.RemoveToken: uc.Filters.Remove(item); break;
+                                case FixTokenResult.SkipEntity: return null;
+                                case FixTokenResult.Fix: item.Token = token; break;
+                                default: break;
+                            }
+                        }
+                    }
+
+                    if (uc.Columns.Any())
+                    {
+                        Console.WriteLine(" Columns:");
+                        foreach (var item in uc.Columns.ToList())
+                        {
+                            QueryTokenDN token = item.Token;
+                            if (item.Token == null)
+                                break;
+
+                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, canAggregate, item.ScriptColumn.DisplayName, allowRemoveToken: item.ScriptColumn.IsOptional))
+                            {
+                                case FixTokenResult.Nothing: break;
+                                case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc);
+                                case FixTokenResult.RemoveToken: item.Token = null; break;
+                                case FixTokenResult.SkipEntity: return null;
+                                case FixTokenResult.Fix: item.Token = token; break;
+                                default: break;
+                            }
+                        }
+                    }
+
+                    if (uc.Orders.Any())
+                    {
+                        Console.WriteLine(" Orders:");
+                        foreach (var item in uc.Orders.ToList())
+                        {
+                            QueryTokenDN token = item.Token;
+                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, canAggregate, item.OrderType.ToString()))
+                            {
+                                case FixTokenResult.Nothing: break;
+                                case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc);
+                                case FixTokenResult.RemoveToken: uc.Orders.Remove(item); break;
+                                case FixTokenResult.SkipEntity: return null;
+                                case FixTokenResult.Fix: item.Token = token; break;
+                                default: break;
+                            }
+                        }
+                    }
+                }
+
+                foreach (var item in uc.Filters.ToList())
+                {
+                    string val = item.ValueString;
+                    switch (QueryTokenSynchronizer.FixValue(replacements, item.Token.Token.Type, ref val))
+                    {
+                        case FixTokenResult.Nothing: break;
+                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc);
+                        case FixTokenResult.RemoveToken: uc.Filters.Remove(item); break;
+                        case FixTokenResult.SkipEntity: return null;
+                        case FixTokenResult.Fix: item.ValueString = val; break;
+                    }
+                }
+
+                foreach (var item in uc.Columns)
+                {
+                    item.FixParameters();
+                }
+
+                return table.UpdateSqlSync(uc, includeCollections: true);
+            }
+            catch (Exception e)
+            {
+                return new SqlPreCommandSimple("-- Exception in {0}: {1}".Formato(uc.BaseToString(), e.Message));
+            }
         }
     }
 }

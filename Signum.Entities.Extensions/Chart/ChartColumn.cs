@@ -194,6 +194,8 @@ namespace Signum.Entities.Chart
             return base.PropertyValidation(pi);
         }
 
+        
+
         string ValidateParameter(PropertyInfo pi, string parameter, ChartScriptParameterDN description)
         {
             if (description != null)
@@ -208,6 +210,24 @@ namespace Signum.Entities.Chart
                 return ChartMessage._0ShouldBeNull.NiceToString().Formato(pi.NiceName());
 
             return null;
+        }
+
+        internal void FixParameters()
+        {
+            Parameter1 = FixParameter(Parameter1, scriptColumn.Parameter1);
+            Parameter2 = FixParameter(Parameter2, scriptColumn.Parameter2);
+            Parameter3 = FixParameter(Parameter3, scriptColumn.Parameter3);
+        }
+
+        private string FixParameter(string parameter, ChartScriptParameterDN description)
+        {
+            if (parameter != null && description == null)
+                return null;
+
+            if (parameter == null && description != null)
+                return description.DefaultValue(Token.TryCC(t => t.Token));
+
+            return parameter;
         }
 
         public string GetTitle()
@@ -252,5 +272,9 @@ namespace Signum.Entities.Chart
             Parameter3 = element.Attribute("Parameter3").TryCC(a => a.Value);
         }
 
+        public override string ToString()
+        {
+            return token.TryToString();
+        }
     }
 }
