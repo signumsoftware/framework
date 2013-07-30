@@ -21,9 +21,9 @@ namespace Signum.Utilities
 
         public static string DefaultText(this string str, string defaultText)
         {
-            if (str.HasText()) 
+            if (str.HasText())
                 return str;
-            else 
+            else
                 return defaultText;
         }
 
@@ -231,7 +231,7 @@ namespace Signum.Utilities
 
             int start = str.IndexOf(firstSeparator);
             if (start == -1)
-               throw NotFound(str, firstSeparator);
+                throw NotFound(str, firstSeparator);
 
             start = start + 1;
 
@@ -306,6 +306,9 @@ namespace Signum.Utilities
 
         public static string TryStart(this string str, int numChars)
         {
+            if (str == null)
+                return null;
+
             if (numChars > str.Length)
                 return str;
 
@@ -322,6 +325,9 @@ namespace Signum.Utilities
 
         public static string TryEnd(this string str, int numChars)
         {
+            if (str == null)
+                return null;
+
             if (numChars > str.Length)
                 return str;
 
@@ -501,7 +507,7 @@ namespace Signum.Utilities
             if (index >= pascalStr.Length)
                 return false;
 
-            return !char.IsUpper(pascalStr[index]); 
+            return !char.IsUpper(pascalStr[index]);
         }
 
         public static string FirstUpper(this string str)
@@ -555,7 +561,7 @@ namespace Signum.Utilities
         public static string RemoveDiacritics(this string s)
         {
             if (string.IsNullOrEmpty(s))
-                return s; 
+                return s;
 
             string normalizedString = s.Normalize(NormalizationForm.FormD);
             StringBuilder stringBuilder = new StringBuilder();
@@ -631,7 +637,7 @@ namespace Signum.Utilities
         {
             foreach (var item in strings)
             {
-                sb.AppendLine(item); 
+                sb.AppendLine(item);
             }
 
             return sb;
