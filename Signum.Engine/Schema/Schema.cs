@@ -348,6 +348,7 @@ namespace Signum.Engine.Maps
             Generating += TypeLogic.Schema_Generating;
             Generating += Assets.Schema_Generating;
 
+            Synchronizing += SchemaSynchronizer.SnapshotIsolation;
             Synchronizing += SchemaSynchronizer.SynchronizeSchemasScript;
             Synchronizing += SchemaSynchronizer.SynchronizeTablesScript;
             Synchronizing += TypeLogic.Schema_Synchronizing;

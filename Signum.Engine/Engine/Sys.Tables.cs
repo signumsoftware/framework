@@ -40,6 +40,9 @@ namespace Signum.Engine.SchemaInfoTables
         public byte[] owner_sid;
 
         public bool is_broker_enabled;
+
+        public bool snapshot_isolation_state;
+        public bool is_read_committed_snapshot_on;
     }
 
 

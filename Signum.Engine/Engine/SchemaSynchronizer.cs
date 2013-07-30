@@ -347,6 +347,25 @@ namespace Signum.Engine
 
             return SqlPreCommand.Combine(Spacing.Double, commands.ToArray());
         }
+
+        public static SqlPreCommand SnapshotIsolation(Replacements replacements)
+        {
+            var list = Schema.Current.DatabaseNames().Select(a => a.TryToString()).ToList();
+
+            if (list.Contains(null))
+            {
+                list.Remove(null);
+                list.Add(Connector.Current.DatabaseName());
+            }
+
+            var results = Database.View<SysDatabases>()
+                .Where(d => list.Contains(d.name))
+                .Select(d => new { d.name, d.snapshot_isolation_state, d.is_read_committed_snapshot_on }).ToList();
+
+            return results.Select(a => SqlPreCommand.Combine(Spacing.Simple,
+                !a.snapshot_isolation_state ? SqlBuilder.SetSnapshotIsolation(a.name, true) : null,
+                !a.is_read_committed_snapshot_on ? SqlBuilder.MakeSnapshotIsolationDefault(a.name, true) : null)).Combine(Spacing.Double);
+        }
     }
 
     public class DiffTable
