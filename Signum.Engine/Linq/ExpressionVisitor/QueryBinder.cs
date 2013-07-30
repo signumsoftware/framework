@@ -1626,7 +1626,7 @@ namespace Signum.Engine.Linq
 
         internal static int TypeId(Type type)
         {
-            return Schema.Current.TypeToId.GetOrThrow(type, "The type {0} is not registered in the database as a concrete table");
+            return TypeLogic.TypeToId.GetOrThrow(type, "The type {0} is not registered in the database as a concrete table");
         }
 
         //On Sql, nullability has no sense

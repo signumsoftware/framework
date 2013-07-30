@@ -10,12 +10,15 @@ using Signum.Entities.Reflection;
 using Signum.Utilities.ExpressionTrees; 
 using System.Text.RegularExpressions;
 using System.ComponentModel;
+using System.Collections.Concurrent;
 
 namespace Signum.Entities.DynamicQuery
 {
     [Serializable]
     public abstract class QueryToken : IEquatable<QueryToken>
     {
+        public int Priority = 0;
+
         bool subordianted;
         public bool Subordinated
         {
@@ -90,44 +93,35 @@ namespace Signum.Entities.DynamicQuery
             this.parent = parent;
         }
 
-        public List<QueryToken> SubTokensInternal()
+        static ConcurrentDictionary<QueryToken, Dictionary<string, QueryToken>> subTokensOverrideCache = new ConcurrentDictionary<QueryToken, Dictionary<string, QueryToken>>();
+
+
+        public QueryToken SubTokenInternal(string key)
         {
-            var result = this.SubTokensOverride();
+            var result = CachedSubTokensOverride().TryGetC(key) ?? OnEntityExtension(this).SingleOrDefaultEx(a => a.Key == key);
 
-            result.AddRange(OnEntityExtension(this));
+            if (result == null)
+                return null;
 
-            if (result.IsEmpty())
-                return new List<QueryToken>();
-
-            result.RemoveAll(t => t.IsAllowed() != null);
-
-            if (!IsCollecction(Type))
-                result.Sort((a, b) =>
-                {
-                    return
-                        PriorityCompare(a.Key, b.Key, s => s == "Id") ??
-                        PriorityCompare(a.Key, b.Key, s => s == "ToString") ??
-                        PriorityCompare(a.Key, b.Key, s => s.StartsWith("(")) ??
-                        string.Compare(a.ToString(), b.ToString());
-                });
+            if (result.IsAllowed() != null)
+                return null;
 
             return result;
         }
 
-
-        public int? PriorityCompare(string a, string b, Func<string, bool> isPriority)
+        public List<QueryToken> SubTokensInternal()
         {
-            if (isPriority(a))
-            {
-                if (isPriority(b))
-                    return string.Compare(a, b);
-                return -1;
-            }
+            return CachedSubTokensOverride().Values
+                .Concat(OnEntityExtension(this))
+                .Where(t => t.IsAllowed() == null)
+                .OrderByDescending(a=>a.Priority)
+                .ThenBy(a=>a.ToString())
+                .ToList();
+        }
 
-            if (isPriority(b))
-                return 1;
-
-            return null;
+        Dictionary<string, QueryToken> CachedSubTokensOverride()
+        {
+            return subTokensOverrideCache.GetOrCreate(this, () => this.SubTokensOverride().ToDictionary(a => a.Key));
         }
 
         protected List<QueryToken> SubTokensBase(Type type, Implementations? implementations)
