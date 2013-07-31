@@ -12,6 +12,7 @@ using System.Globalization;
 using System.ComponentModel;
 using Signum.Entities.DynamicQuery;
 using System.Net.Mail;
+using System.Linq.Expressions;
 
 namespace Signum.Entities.Mailing
 {
@@ -160,6 +161,12 @@ namespace Signum.Entities.Mailing
 {EmailMessageState.ReceptionNotified,true,      true,         false,           true,                     null },
 {EmailMessageState.Received,     false,         false,        true,            false,                    false },
             };
+
+        static Expression<Func<EmailMessageDN, string>> ToStringExpression = e => e.Subject;
+        public override string ToString()
+        {
+            return ToStringExpression.Evaluate(this);
+        }
     }
 
     [Serializable]
@@ -290,7 +297,8 @@ namespace Signum.Entities.Mailing
         EmailOwnerData EmailOwnerData { get; }
     }
 
-    public class EmailOwnerData : IQueryTokenBag, IEquatable<EmailOwnerData>
+    [DescriptionOptions(DescriptionOptions.Description | DescriptionOptions.Members)]
+    public class EmailOwnerData : IEquatable<EmailOwnerData>
     {
         public Lite<IEmailOwnerDN> Owner { get; set; }
         public string Email { get; set; }
@@ -310,6 +318,11 @@ namespace Signum.Entities.Mailing
         public override int GetHashCode()
         {
             return Owner == null ? base.GetHashCode() : Owner.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return "{0} <{1}> ({2})".Formato(DisplayName, Email, Owner);
         }
     }
 

@@ -19,6 +19,7 @@ using Signum.Utilities;
 using Signum.Utilities.Reflection;
 using Signum.Engine.DynamicQuery;
 using Signum.Entities.DynamicQuery;
+using Signum.Engine.Maps;
 
 namespace Signum.Engine.UserQueries
 {
@@ -67,7 +68,7 @@ namespace Signum.Engine.UserQueries
         public static Dictionary<string, Type> UserAssetNames = new Dictionary<string, Type>();
         public static Dictionary<string, Type> PartNames = new Dictionary<string, Type>();
 
-        class PreviewContext :IFromXmlContext
+        class PreviewContext : IFromXmlContext
         {
             public Dictionary<Guid, IUserAssetEntity> entities = new Dictionary<Guid, IUserAssetEntity>();
             public Dictionary<Guid, XElement> elements;
@@ -219,7 +220,7 @@ namespace Signum.Engine.UserQueries
 
             public ChartScriptDN ChartScript(string chartScriptName)
             {
-                return ChartScriptLogic.GetChartScript(chartScriptName); 
+                return ChartScriptLogic.GetChartScript(chartScriptName);
             }
 
             public QueryDescription GetQueryDescription(QueryDN Query)
@@ -261,4 +262,6 @@ namespace Signum.Engine.UserQueries
             return new T { Guid = guid };
         }
     }
+
+ 
 }

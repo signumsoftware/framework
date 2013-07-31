@@ -20,8 +20,8 @@ namespace Signum.Engine.Mailing
 {
     public static class EmailTemplateLogic
     {
+        public static Func<EmailMasterTemplateDN> CreateDefaultMasterTemplate;
      
-
         public static ResetLazy<Dictionary<Lite<EmailTemplateDN>, EmailTemplateDN>> EmailTemplates; 
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
@@ -44,7 +44,6 @@ namespace Signum.Engine.Mailing
                      Entity = t,
                      t.Id,
                      t.Name,
-                     t.State
                  });
 
                 dqm.RegisterQuery(typeof(EmailTemplateDN), () =>
@@ -144,14 +143,22 @@ namespace Signum.Engine.Mailing
 
         static void EmailTemplate_PreSaving(EmailTemplateDN template, ref bool graphModified)
         {
+            graphModified |= UpdateTokens(template);
+        }
+
+        public static bool UpdateTokens(EmailTemplateDN template)
+        {
             var queryname = QueryLogic.ToQueryName(template.Query.Key);
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryname);
 
             List<QueryToken> list = new List<QueryToken>();
 
+            if (template.From != null)
+                list.Add(template.From.Token.Token);
+
             foreach (var tr in template.Recipients.Where(r => r.Token != null))
             {
-                list.Add(QueryUtils.Parse(".".Combine("Entity", tr.Token.TokenString, "EmailOwnerData"), qd, false));
+                list.Add(tr.Token.Token);
             }
 
             foreach (var message in template.Messages)
@@ -162,227 +169,52 @@ namespace Signum.Engine.Mailing
 
             var tokens = list.Distinct();
 
-            if (!template.Tokens.Select(a => a.Token).ToList().SequenceEqual(tokens))
+            if (template.Tokens.Any(t=>t.ParseException != null) || !template.Tokens.Select(a => a.Token).ToList().SequenceEqual(tokens))
             {
                 template.Tokens.ResetRange(tokens.Select(t => new QueryTokenDN(t)));
-                graphModified = true;
+                return true;
             }
+            return false;
         }
 
-        public static EmailMessageDN CreateEmailMessage(this Lite<EmailTemplateDN> template, IIdentifiable entity)
+        public static IEnumerable<EmailMessageDN> CreateEmailMessage(this Lite<EmailTemplateDN> liteTemplate, IIdentifiable entity, ISystemEmail systemEmail = null)
         {
-            return CreateEmailMessage(template, entity, null);
+            EmailTemplateDN template = EmailTemplates.Value.GetOrThrow(liteTemplate, "Email template {0} not in cache".Formato(liteTemplate));
+
+            return new EmailMessageBuilder(template, entity, systemEmail).CreateEmailMessageInternal().ToList();
         }
 
-        public static EmailMessageDN CreateEmailMessage(this Lite<EmailTemplateDN> liteTemplate, IIdentifiable entity, ISystemEmail systemEmail)
-        {
-            using (ExecutionMode.Global())
-            {
-                var template = EmailTemplates.Value.GetOrThrow(liteTemplate, "Email template {0} not in cache".Formato(liteTemplate));
-
-                var queryName = QueryLogic.ToQueryName(template.Query.Key);
-                QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-
-                var smtpConfig = template.SmtpConfiguration.TryCC(SmtpConfigurationLogic.RetrieveFromCache) ?? SmtpConfigurationLogic.DefaultSmtpConfiguration.Value;
-
-                var columns = GetTemplateColumns(template, template.Tokens, qd);
-
-                var filters = systemEmail != null ? systemEmail.GetFilters(qd) :
-                    new List<Filter> { new Filter(QueryUtils.Parse("Entity", qd, false), FilterOperation.EqualTo, entity.ToLite()) };
-
-                var table = DynamicQueryManager.Current.ExecuteQuery(new QueryRequest
-                {
-                    QueryName = queryName,
-                    Columns = columns,
-                    Pagination = new Pagination.All(),
-                    Filters = filters,
-                    Orders = new List<Order>(),
-                });
-
-                var dicTokenColumn = table.Columns.ToDictionary(rc => rc.Column.Token);
-
-                MList<EmailOwnerRecipientData> recipients = new MList<EmailOwnerRecipientData>();
-                if (systemEmail != null)
-                    recipients.AddRange(systemEmail.GetRecipients());
-
-                recipients.AddRange(template.Recipients.SelectMany(tr =>
-                {
-                    if (tr.Token != null)
-                    {
-                        var owner = dicTokenColumn.GetOrThrow(QueryUtils.Parse("Entity." + tr.Token.TokenString + ".EmailOwnerData", qd, false));
-
-                        var groups = table.Rows.Select(r => (EmailOwnerData)r[owner]).Distinct(a => a.Owner).ToList();
-                        if (groups.Count == 1 && groups[0] == null)
-                            return new List<EmailOwnerRecipientData>();
-
-                        return groups.Select(g => new EmailOwnerRecipientData(g) { Kind = tr.Kind }).ToList();
-                    }
-                    else
-                    {
-                        return new List<EmailOwnerRecipientData>
-                    { 
-                        new EmailOwnerRecipientData(new EmailOwnerData
-                        {
-                             CultureInfo = null, 
-                             Email = tr.EmailAddress,
-                             DisplayName = tr.DisplayName
-                        }){ Kind = tr.Kind },
-                    };
-                    }
-                }));
-
-            if (smtpConfig != null)
-                recipients.AddRange(smtpConfig.AditionalRecipients.Select(r =>
-                    new EmailOwnerRecipientData(r.EmailOwner.Retrieve().EmailOwnerData) { Kind = r.Kind }));
-
-                EmailAddressDN from = null;
-                if (template.From != null)
-                {
-                    if (template.From.Token != null)
-                    {
-                        var owner = dicTokenColumn.GetOrThrow(QueryUtils.Parse("Entity." + template.From.Token.TokenString + ".EmailOwnerData", qd, false));
-
-                        var eod = table.Rows.Select(r => (EmailOwnerData)r[owner]).Distinct(a => a.Owner).SingleOrDefaultEx(() => "More than one distinct From value");
-
-                        from = new EmailAddressDN(eod);
-                    }
-                    else
-                    {
-                        from = new EmailAddressDN(new EmailOwnerData
-                        {
-                            CultureInfo = null,
-                            Email = template.From.EmailAddress,
-                            DisplayName = template.From.DisplayName,
-                        });
-                    }
-                }
-                else if (smtpConfig != null)
-                {
-                    from = smtpConfig.DefaultFrom;
-                }
-
-                if (from == null)
-                {
-                    SmtpSection smtpSection = ConfigurationManager.GetSection("system.net/mailSettings/smtp") as SmtpSection;
-
-                    from = new EmailAddressDN
-                    {
-                        EmailAddress = smtpSection.From
-                    };
-                }
-                from = smtpConfig.DefaultFrom;
-            
-
-                var email = new EmailMessageDN
-                {
-                    Target = (Lite<IdentifiableEntity>)entity.ToLite(),
-                    Recipients = recipients.Select(r => new EmailRecipientDN(r.OwnerData) { Kind = r.Kind }).ToMList(),
-                    From = from,
-                    IsBodyHtml = template.IsBodyHtml,
-                    EditableMessage = template.EditableMessage,
-                    Template = template.ToLite(),
-                };
-
-                CultureInfo ci = recipients.Where(a => a.Kind == EmailRecipientKind.To).Select(a => a.OwnerData.CultureInfo).FirstOrDefault();
-
-                var message = template.GetCultureMessage(ci) ?? template.GetCultureMessage(EmailLogic.Configuration.DefaultCulture.CultureInfo);
-
-                if (message == null)
-                    throw new InvalidOperationException("Message {0} does not have a message for CultureInfo {0} (or Default)".Formato(template, ci));
-
-                if (message.SubjectParsedNode == null)
-                    message.SubjectParsedNode = EmailTemplateParser.Parse(message.Subject, qd, template.SystemEmail.ToType());
-
-                email.Subject = ((EmailTemplateParser.BlockNode)message.SubjectParsedNode).Print(
-                    new EmailTemplateParameters
-                    {
-                        Columns = dicTokenColumn,
-                        IsHtml = false,
-                        CultureInfo = ci,
-                        Entity = entity,
-                        SystemEmail = systemEmail
-                    },
-                    table.Rows);
-
-                if (message.TextParsedNode == null)
-                {
-                    string body = message.Text;
-
-                    if (template.MasterTemplate != null)
-                        body = EmailMasterTemplateDN.MasterTemplateContentRegex.Replace(template.MasterTemplate.Retrieve().Text, m => body);
-
-                    message.TextParsedNode = EmailTemplateParser.Parse(body, qd, template.SystemEmail.ToType());
-                }
-
-                email.Body = ((EmailTemplateParser.BlockNode)message.TextParsedNode).Print(
-                    new EmailTemplateParameters
-                    {
-                        Columns = dicTokenColumn,
-                        IsHtml = template.IsBodyHtml,
-                        CultureInfo = ci,
-                        Entity = entity,
-                        SystemEmail = systemEmail
-                    },
-                    table.Rows); ;
-
-                return email;
-            }
-        }
-
-        public static List<Column> GetTemplateColumns(IdentifiableEntity context, MList<QueryTokenDN> tokens, QueryDescription queryDescription)
-        {
-            using (ExecutionMode.Global())
-            {
-                foreach (var t in tokens)
-                {
-                    t.ParseData(context, queryDescription, canAggregate: false);
-                }
-            }
-
-            return tokens.Select(qt => new Column(qt.Token, null)).ToList();
-        }
-
-
-        class EmailTemplateGraph : Graph<EmailTemplateDN, EmailTemplateState>
+        class EmailTemplateGraph : Graph<EmailTemplateDN>
         {
             static bool registered;
             public static bool Registered { get { return registered; } }
 
             public static void Register()
             {
-                GetState = t => t.State;
-
                 new Construct(EmailTemplateOperation.Create)
                 {
-                    ToState = EmailTemplateState.Created,
                     Construct = _ => new EmailTemplateDN 
                     { 
-                        State = EmailTemplateState.Created,
-                        SmtpConfiguration = SmtpConfigurationLogic.DefaultSmtpConfiguration.Value.ToLite()
+                        SmtpConfiguration = SmtpConfigurationLogic.DefaultSmtpConfiguration.Value.ToLite(),
+                        MasterTemplate = EmailTemplateLogic.GetDefaultMasterTemplate(),
                     }
                 }.Register();
 
                 new Execute(EmailTemplateOperation.Save)
                 {
-                    ToState = EmailTemplateState.Modified,
                     AllowsNew = true,
                     Lite = false,
-                    FromStates = { EmailTemplateState.Created, EmailTemplateState.Modified },
-                    Execute = (t, _) => t.State = EmailTemplateState.Modified
+                    Execute = (t, _) => { }
                 }.Register();
 
                 new Execute(EmailTemplateOperation.Enable) 
                 {
-                    ToState = EmailTemplateState.Modified,
-                    FromStates = { EmailTemplateState.Modified },
                     CanExecute = t => t.Active ? EmailTemplateMessage.TheTemplateIsAlreadyActive.NiceToString() : null,
                     Execute = (t, _) => t.Active = true
                 }.Register();
 
                 new Execute(EmailTemplateOperation.Disable) 
                 {
-                    ToState = EmailTemplateState.Modified,
-                    FromStates = { EmailTemplateState.Modified },
                     CanExecute = t => !t.Active ? EmailTemplateMessage.TheTemplateIsAlreadyInactive.NiceToString() : null,
                     Execute = (t, _) => t.Active = false
                 }.Register();
@@ -391,27 +223,39 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        class EmailMasterTemplateGraph : Graph<EmailMasterTemplateDN, EmailTemplateState>
+        class EmailMasterTemplateGraph : Graph<EmailMasterTemplateDN>
         {
             public static void Register()
             {
-                GetState = t => t.State;
-
                 new Construct(EmailMasterTemplateOperation.Create)
                 {
-                    ToState = EmailTemplateState.Created,
-                    Construct = _ => new EmailMasterTemplateDN { State = EmailTemplateState.Created }
+                    Construct = _ => CreateDefaultMasterTemplate == null ? 
+                        new EmailMasterTemplateDN { }:
+                        CreateDefaultMasterTemplate()
                 }.Register();
 
                 new Execute(EmailMasterTemplateOperation.Save)
                 {
                     AllowsNew = true,
                     Lite = false,
-                    FromStates = { EmailTemplateState.Created, EmailTemplateState.Modified },
-                    ToState = EmailTemplateState.Modified,
-                    Execute = (t, _) => t.State = EmailTemplateState.Modified
+                    Execute = (t, _) => { }
                 }.Register();
             }
+        }
+
+        public static Lite<EmailMasterTemplateDN> GetDefaultMasterTemplate()
+        {
+            var result = Database.Query<EmailMasterTemplateDN>().Select(emt => emt.ToLite()).SingleEx();
+
+            if (result != null)
+                return result;
+
+            if (CreateDefaultMasterTemplate == null)
+                return null;
+
+            var newTemplate = CreateDefaultMasterTemplate();
+
+            return newTemplate.Save().ToLite();
         }
     }
 }

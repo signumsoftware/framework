@@ -75,44 +75,43 @@ Write(Html.ValueLine(sc, c => c.Kind));
             #line hidden
             
             #line 8 "..\..\Mailing\Views\EmailRecipient.cshtml"
-Write(Html.ValueLine(sc, c => c.EmailAddress));
+Write(Html.EntityLine(sc, c => c.EmailOwner));
 
             
             #line default
             #line hidden
             
             #line 8 "..\..\Mailing\Views\EmailRecipient.cshtml"
-                                            
-    
-            
-            #line default
-            #line hidden
-            
-            #line 9 "..\..\Mailing\Views\EmailRecipient.cshtml"
-Write(Html.ValueLine(sc, c => c.DisplayName));
-
-            
-            #line default
-            #line hidden
-            
-            #line 9 "..\..\Mailing\Views\EmailRecipient.cshtml"
                                            
-    }
-    
     
             
             #line default
             #line hidden
             
-            #line 12 "..\..\Mailing\Views\EmailRecipient.cshtml"
-Write(Html.EntityLine(sc, er => er.EmailOwner));
+            #line 9 "..\..\Mailing\Views\EmailRecipient.cshtml"
+Write(Html.ValueLine(sc, c => c.EmailAddress, vl => vl.ValueHtmlProps.Add("style", "width:250px")));
 
             
             #line default
             #line hidden
             
-            #line 12 "..\..\Mailing\Views\EmailRecipient.cshtml"
-                                             
+            #line 9 "..\..\Mailing\Views\EmailRecipient.cshtml"
+                                                                                                 
+    
+            
+            #line default
+            #line hidden
+            
+            #line 10 "..\..\Mailing\Views\EmailRecipient.cshtml"
+Write(Html.ValueLine(sc, c => c.DisplayName, vl => vl.ValueHtmlProps.Add("style", "width:250px")));
+
+            
+            #line default
+            #line hidden
+            
+            #line 10 "..\..\Mailing\Views\EmailRecipient.cshtml"
+                                                                                                
+    }
 }
 
             

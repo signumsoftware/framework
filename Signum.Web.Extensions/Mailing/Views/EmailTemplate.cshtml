@@ -2,25 +2,31 @@
 @using Signum.Engine.DynamicQuery
 @using Signum.Engine.Basics
 
-@Html.ScriptsJs("~/Scripts/ckeditor/ckeditor.js")
+
 @Html.ScriptCss("~/Mailing/Content/SF_Mailing.css")
+@Html.ScriptsJs("~/Scripts/ckeditor/ckeditor.js")
+@Html.ScriptsJs("~/Mailing/Scripts/SF_Mailing.js")
+@Html.ScriptsJs("~/Mailing/Scripts/SF_TabsRepeater.js")
 
 @using (var ec = Html.TypeContext<EmailTemplateDN>())
 {
     <div style="float: left">
         @Html.ValueLine(ec, e => e.Name)
-        @Html.ValueLine(ec, e => e.State, vl => vl.ReadOnly = true)
+        @Html.EntityCombo(ec, e => e.SystemEmail)
         @Html.EntityLine(ec, e => e.Query)
         @Html.EntityLine(ec, e => e.SmtpConfiguration)
         @Html.ValueLine(ec, e => e.EditableMessage)
     </div>
     
+    if(!ec.Value.IsNew)
+    {
     <fieldset style="float: left">
         <legend>Active</legend>
         @Html.ValueLine(ec, e => e.Active)
         @Html.ValueLine(ec, e => e.StartDate)
         @Html.ValueLine(ec, e => e.EndDate)
     </fieldset>
+    }
     
     <div class="clearall" />
         
@@ -28,7 +34,8 @@
     {
         object queryName = QueryLogic.ToQueryName(ec.Value.Query.Key);
         ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(queryName); //To be use inside query token controls
-    
+        
+    @Html.ValueLine(ec, e => e.SendDifferentMessages)
     @Html.EntityLineDetail(ec, e => e.From, el => el.PreserveViewData = true)
     @Html.EntityRepeater(ec, e => e.Recipients, el => el.PreserveViewData = true)
 
@@ -46,8 +53,8 @@
     </div>
     }
 }
-@Html.ScriptsJs("~/Mailing/Scripts/SF_Mailing.js")
-@Html.ScriptsJs("~/Mailing/Scripts/SF_TabsRepeater.js")
+
+
 
 <script>
     $(function () {

@@ -96,6 +96,7 @@ namespace Signum.Engine.Mailing
             {
                 Pop3MimeClient client = new Pop3MimeClient(config.Host, config.Port, config.EnableSSL, config.Username, config.Password) { ReadTimeout = config.ReadTimeout };
 
+                
                 if (Warning != null)
                     client.Warning += Warning;
 

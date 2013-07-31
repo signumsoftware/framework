@@ -174,7 +174,7 @@ namespace Signum.Engine.Disconnected
 
             var extra = result.Extra.OrderBy(a => a.Namespace).ThenBy(a => a.Name).ToString(t => "  DisconnectedLogic.Register<{0}>(Download.None, Upload.None);".Formato(t.Name), "\r\n");
 
-            var lacking = result.Lacking.GroupBy(a => a.Namespace).OrderBy(gr => gr.Key).ToString(gr => "  //{0}\r\n".Formato(gr.Key) +
+            var lacking = result.Missing.GroupBy(a => a.Namespace).OrderBy(gr => gr.Key).ToString(gr => "  //{0}\r\n".Formato(gr.Key) +
                 gr.ToString(t => "  DisconnectedLogic.Register<{0}>(Download.None, Upload.None);".Formato(t.Name), "\r\n"), "\r\n\r\n");
 
             if (extra.HasText() || lacking.HasText())

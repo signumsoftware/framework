@@ -84,26 +84,32 @@ namespace Signum.Engine.Mailing
 
         public static void SendMail(this ISystemEmail systemEmail)
         {
-            var email = systemEmail.CreateEmailMessage();
-            SenderManager.Send(email);
+            foreach (var email in systemEmail.CreateEmailMessage())
+                SenderManager.Send(email);
         }
 
         public static void SendMail(this Lite<EmailTemplateDN> template, IIdentifiable entity)
         {
-            var email = template.CreateEmailMessage(entity);
+            foreach (var email in template.CreateEmailMessage(entity))
+                SenderManager.Send(email);
+        }
+
+        public static void SendMail(this EmailMessageDN email)
+        {
             SenderManager.Send(email);
         }
 
+
         public static void SendMailAsync(this ISystemEmail systemEmail)
         {
-            var email = systemEmail.CreateEmailMessage();
-            SenderManager.SendAsync(email);
+            foreach (var email in systemEmail.CreateEmailMessage())
+                SenderManager.SendAsync(email);
         }
 
-        public static void SendMailAsync(this IIdentifiable entity, Lite<EmailTemplateDN> template)
+        public static void SendMailAsync(this Lite<EmailTemplateDN> template, IIdentifiable entity)
         {
-            var email = template.CreateEmailMessage(entity);
-            SenderManager.SendAsync(email);
+            foreach (var email in template.CreateEmailMessage(entity))
+                SenderManager.SendAsync(email);
         }
 
         public static void SendMailAsync(this EmailMessageDN email)
@@ -209,19 +215,18 @@ namespace Signum.Engine.Mailing
                     ToState = EmailMessageState.Created,
                     CanConstruct = et => 
                     {
-                        if (et.SystemEmail == null)
-                            return null;
+                        if (et.SystemEmail != null)
+                            return "Cannot send email because {0} is a SystemEmail ({1})".Formato(et, et.SystemEmail);
 
-                        var systemEmailType = et.SystemEmail.ToType();
-                        if (systemEmailType.GetFields().Any())
-                            return "Cannot send sample email because {0} has custom model fields".Formato(systemEmailType.NiceName());
-                        
+                        if (et.SendDifferentMessages)
+                            return "Cannot create email becaue {0} has SendDifferentMessages set";
+
                         return null;
                     },
                     Construct = (et, args) =>
                     {
                         var entity = args.GetArg<IdentifiableEntity>();
-                        return et.ToLite().CreateEmailMessage(entity);
+                        return et.ToLite().CreateEmailMessage(entity).Single();
                     }
                 }.Register();
 
@@ -306,12 +311,19 @@ namespace Signum.Engine.Mailing
 
                     var exLog = ex.LogException().ToLite();
 
-                    using (Transaction tr = Transaction.ForceNew())
+                    try
                     {
-                        email.Exception = exLog;
-                        email.State = EmailMessageState.SentException;
-                        email.Save();
-                        tr.Commit();
+                        using (Transaction tr = Transaction.ForceNew())
+                        {
+                            email.Exception = exLog;
+                            email.State = EmailMessageState.SentException;
+                            email.Save();
+                            tr.Commit();
+                        }
+                    }
+                    catch (Exception)
+                    {
+
                     }
 
                     throw;

@@ -22,6 +22,7 @@ using Signum.Engine.DynamicQuery;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserQueries;
 using Signum.Web.Operations;
+using Signum.Web.UserQueries;
 #endregion
 
 namespace Signum.Web.Mailing
@@ -29,12 +30,6 @@ namespace Signum.Web.Mailing
     public static class MailingClient
     {
         public static string ViewPrefix = "~/Mailing/Views/{0}.cshtml";
-
-        public static Mapping<EmailTemplateDN> EmailTemplateMessageTemplateMapping = ctx =>
-        {
-            var runtimeInfo = RuntimeInfo.FromFormValue(ctx.Parent.Parent.Parent.Parent.Inputs[EntityBaseKeys.RuntimeInfo]);
-            return (EmailTemplateDN)runtimeInfo.ToLite().Retrieve();
-        };
 
         private static QueryTokenDN ParseQueryToken(string tokenString, string queryRuntimeInfoInput)
         {
@@ -48,40 +43,7 @@ namespace Signum.Web.Mailing
             return new QueryTokenDN(QueryUtils.Parse(tokenString, qd, canAggregate: false));
         }
 
-        public static Mapping<QueryTokenDN> EmailTemplateFromQueryTokenMapping = ctx =>
-        {
-            string tokenStr = "";
-            foreach (string key in ctx.Parent.Inputs.Keys.Where(k => k.Contains("ddlTokens")).OrderBy())
-                tokenStr += ctx.Parent.Inputs[key] + ".";
-            while (tokenStr.EndsWith("."))
-                tokenStr = tokenStr.Substring(0, tokenStr.Length - 1);
 
-            if (tokenStr.IsNullOrEmpty())
-                return null;
-
-            return ParseQueryToken(tokenStr, ctx.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", EntityBaseKeys.RuntimeInfo)]);
-        };
-
-        static EntityMapping<EmailTemplateContactDN> EmailTemplateContactMapping = new EntityMapping<EmailTemplateContactDN>(true)
-            .SetProperty(ec => ec.Token, MailingClient.EmailTemplateFromQueryTokenMapping);
-
-        public static Mapping<QueryTokenDN> EmailTemplateRecipientsQueryTokenMapping = ctx =>
-        {
-            string tokenStr = "";
-            foreach (string key in ctx.Parent.Inputs.Keys.Where(k => k.Contains("ddlTokens")).OrderBy())
-                tokenStr += ctx.Parent.Inputs[key] + ".";
-            while (tokenStr.EndsWith("."))
-                tokenStr = tokenStr.Substring(0, tokenStr.Length - 1);
-
-            if (tokenStr.IsNullOrEmpty())
-                return null;
-
-            return ParseQueryToken(tokenStr, ctx.Parent.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", EntityBaseKeys.RuntimeInfo)]);
-        };
-
-        static EntityMapping<EmailTemplateRecipientDN> EmailTemplateRecipientMapping = new EntityMapping<EmailTemplateRecipientDN>(true)
-            .SetProperty(ec => ec.Token, MailingClient.EmailTemplateRecipientsQueryTokenMapping);
-        
         public static void Start(bool smtpConfig, bool newsletter, bool pop3Config)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -97,26 +59,51 @@ namespace Signum.Web.Mailing
                     new EmbeddedEntitySettings<EmailRecipientDN>{ PartialViewName = e => ViewPrefix.Formato("EmailRecipient")},
                     
                     new EmbeddedEntitySettings<EmailConfigurationDN> { PartialViewName = e => ViewPrefix.Formato("EmailConfiguration")},
-                    new EntitySettings<EmailTemplateDN>() { PartialViewName = e => ViewPrefix.Formato("EmailTemplate") },
                     new EntitySettings<EmailMasterTemplateDN>{ PartialViewName =  e => ViewPrefix.Formato("EmailMasterTemplate") },
+                    new EntitySettings<SystemEmailDN>{ },
+
+                    new EntitySettings<EmailTemplateDN>
+                    { 
+                        PartialViewName = e => ViewPrefix.Formato("EmailTemplate"),
+                        MappingMain = new EntityMapping<EmailTemplateDN>(true)
+                            .ReplaceProperty(a=>a.Tokens, m=>ctx=>
+                            {
+                                EmailTemplateLogic.UpdateTokens((EmailTemplateDN)ctx.Parent.UntypedValue);
+                                return m(ctx);
+                            })
+                    },
                     
                     new EmbeddedEntitySettings<EmailTemplateMessageDN>() 
                     { 
                         PartialViewName = e => ViewPrefix.Formato("EmailTemplateMessage"),
                         MappingDefault = new EntityMapping<EmailTemplateMessageDN>(true)
-                            .SetProperty(etm => etm.Template, MailingClient.EmailTemplateMessageTemplateMapping)
+                            .SetProperty(etm => etm.Template, ctx =>
+                            {
+                                return (EmailTemplateDN)ctx.Parent.Parent.Parent.Parent.UntypedValue;
+                            })
                     },
 
                     new EmbeddedEntitySettings<EmailTemplateContactDN>() 
                     { 
                         PartialViewName = e => ViewPrefix.Formato("EmailTemplateContact"),
-                        MappingDefault = EmailTemplateContactMapping,
+                        MappingDefault = new EntityMapping<EmailTemplateContactDN>(true)
+                            .SetProperty(ec => ec.Token, ctx =>
+                            {
+                                string tokenStr = UserQueriesHelper.GetTokenString(ctx);
+                                return ParseQueryToken(tokenStr, ctx.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", EntityBaseKeys.RuntimeInfo)]);
+                            }),
                     },
 
                     new EmbeddedEntitySettings<EmailTemplateRecipientDN>() 
                     { 
                         PartialViewName = e => ViewPrefix.Formato("EmailTemplateRecipient"),
-                        MappingDefault = EmailTemplateRecipientMapping
+                        MappingDefault = new EntityMapping<EmailTemplateRecipientDN>(true)
+                            .SetProperty(ec => ec.Token, ctx =>
+                            {
+                                string tokenStr = UserQueriesHelper.GetTokenString(ctx);
+
+                                return ParseQueryToken(tokenStr, ctx.Parent.Parent.Parent.Parent.Inputs[TypeContextUtilities.Compose("Query", EntityBaseKeys.RuntimeInfo)]);
+                            })
                     },
 
                     new EmbeddedEntitySettings<ClientCertificationFileDN> { PartialViewName = e => ViewPrefix.Formato("ClientCertificationFile")},

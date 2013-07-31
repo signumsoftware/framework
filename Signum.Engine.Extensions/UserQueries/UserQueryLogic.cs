@@ -30,6 +30,8 @@ namespace Signum.Engine.UserQueries
 
                 UserAssetsImporter.UserAssetNames.Add("UserQuery", typeof(UserQueryDN));
 
+                sb.Schema.Synchronizing += Schema_Synchronizing;
+
                 sb.Include<UserQueryDN>();
 
                 dqm.RegisterQuery(typeof(UserQueryDN), () =>
@@ -60,6 +62,9 @@ namespace Signum.Engine.UserQueries
             }
         }
 
+
+      
+   
         public static UserQueryDN ParseAndSave(this UserQueryDN userQuery)
         {
             if (!userQuery.IsNew || userQuery.queryName == null)
@@ -116,6 +121,121 @@ namespace Signum.Engine.UserQueries
         public static List<Lite<UserQueryDN>> Autocomplete(string subString, int limit)
         {
             return Database.Query<UserQueryDN>().Where(uq => uq.EntityType == null).Autocomplete(subString, limit);
+        }
+
+
+        static SqlPreCommand Schema_Synchronizing(Replacements replacements)
+        {
+            var list = Database.Query<UserQueryDN>().ToList();
+
+            var table = Schema.Current.Table(typeof(UserQueryDN));
+
+            SqlPreCommand cmd = list.Select(uq => ProcessUserQuery(replacements, table, uq)).Combine(Spacing.Double);
+
+            return cmd;
+        }
+
+        static SqlPreCommand ProcessUserQuery(Replacements replacements, Table table, UserQueryDN uq)
+        {
+            try
+            {
+                Console.Clear();
+
+                SafeConsole.WriteLineColor(ConsoleColor.White, "UserQuery: " + uq.DisplayName);
+                Console.WriteLine(" Query: " + uq.Query.Key);
+
+                if (uq.Filters.Any(a => a.Token.ParseException != null) ||
+                   uq.Columns.Any(a => a.Token != null && a.Token.ParseException != null) ||
+                   uq.Orders.Any(a => a.Token.ParseException != null))
+                {
+
+
+
+                    QueryDescription qd = DynamicQueryManager.Current.QueryDescription(uq.Query.ToQueryName());
+
+                    if (uq.Filters.Any())
+                    {
+                        Console.WriteLine(" Filters:");
+                        foreach (var item in uq.Filters.ToList())
+                        {
+                            QueryTokenDN token = item.Token;
+                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, false, "{0} {1}".Formato(item.Operation, item.ValueString)))
+                            {
+                                case FixTokenResult.Nothing: break;
+                                case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq);
+                                case FixTokenResult.RemoveToken: uq.Filters.Remove(item); break;
+                                case FixTokenResult.SkipEntity: return null;
+                                case FixTokenResult.Fix: item.Token = token; break;
+                                default: break;
+                            }
+                        }
+                    }
+
+                    if (uq.Columns.Any())
+                    {
+                        Console.WriteLine(" Columns:");
+                        foreach (var item in uq.Columns.ToList())
+                        {
+                            QueryTokenDN token = item.Token;
+                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, false, item.DisplayName.HasText() ? "'{0}'".Formato(item.DisplayName) : null))
+                            {
+                                case FixTokenResult.Nothing: break;
+                                case FixTokenResult.DeleteEntity: ; return table.DeleteSqlSync(uq);
+                                case FixTokenResult.RemoveToken: uq.Columns.Remove(item); break;
+                                case FixTokenResult.SkipEntity: return null;
+                                case FixTokenResult.Fix: item.Token = token; break;
+                                default: break;
+                            }
+                        }
+                    }
+
+                    if (uq.Orders.Any())
+                    {
+                        Console.WriteLine(" Orders:");
+                        foreach (var item in uq.Orders.ToList())
+                        {
+                            QueryTokenDN token = item.Token;
+                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, false, item.OrderType.ToString()))
+                            {
+                                case FixTokenResult.Nothing: break;
+                                case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq);
+                                case FixTokenResult.RemoveToken: uq.Orders.Remove(item); break;
+                                case FixTokenResult.SkipEntity: return null;
+                                case FixTokenResult.Fix: item.Token = token; break;
+                                default: break;
+                            }
+                        }
+                    }
+                }
+
+                foreach (var item in uq.Filters.ToList())
+                {
+                    string val = item.ValueString;
+                    switch (QueryTokenSynchronizer.FixValue(replacements, item.Token.Token.Type, ref val))
+                    {
+                        case FixTokenResult.Nothing: break;
+                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq);
+                        case FixTokenResult.RemoveToken: uq.Filters.Remove(item); break;
+                        case FixTokenResult.SkipEntity: return null;
+                        case FixTokenResult.Fix: item.ValueString = val; break;
+                    }
+                }
+
+                if (uq.WithoutFilters)
+                    uq.Filters.Clear();
+
+                if (!uq.ShouldHaveElements && uq.ElementsPerPage.HasValue)
+                    uq.ElementsPerPage = null;
+
+                if (uq.ShouldHaveElements && !uq.ElementsPerPage.HasValue)
+                    uq.ElementsPerPage = 20;
+
+                return table.UpdateSqlSync(uq, includeCollections: true);
+            }
+            catch (Exception e)
+            {
+                return new SqlPreCommandSimple("-- Exception in {0}: {1}".Formato(uq.BaseToString(), e.Message));
+            }
         }
     }
 }

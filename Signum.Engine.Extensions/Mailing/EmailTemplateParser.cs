@@ -35,7 +35,7 @@ namespace Signum.Engine.Mailing
                 () =>"Multiple values for column {0}".Formato(column.Column.Token.FullKey()));
         }
 
-        public static readonly Regex KeywordsRegex = new Regex(@"\@(((?<keyword>(foreach|if|global|model|any|))\[(?<token>[^\]]+)\])|(?<keyword>endforeach|else|endif|notany|endany))");
+        public static readonly Regex KeywordsRegex = new Regex(@"\@(((?<keyword>(foreach|if|raw|global|model|modelraw|any|))\[(?<token>[^\]]+)\])|(?<keyword>endforeach|else|endif|notany|endany))");
 
         public static readonly Regex TokenFormatRegex = new Regex(@"(?<token>[^\]\:]+)(\:(?<format>.*))?");
         public static readonly Regex TokenOperationValueRegex = new Regex(@"(?<token>[^\]]+)(?<comparer>(" + FilterValueConverter.OperationRegex + @"))(?<value>[^\]\:]+)");
@@ -67,7 +67,9 @@ namespace Signum.Engine.Mailing
         }
 
         public class TokenNode : TextNode
-        {   
+        {
+            public bool IsRaw { get; set; }
+
             public readonly QueryToken Token;
             public readonly string Format;
             public TokenNode(QueryToken token, string format)
@@ -81,7 +83,7 @@ namespace Signum.Engine.Mailing
                 ResultColumn column = p.Columns[Token];
                 object obj = rows.DistinctSingle(column);
                 var text = obj is IFormattable ? ((IFormattable)obj).ToString(Format ?? Token.Format, p.CultureInfo) : obj.TryToString();
-                p.StringBuilder.Append(p.IsHtml ? HttpUtility.HtmlEncode(text) : text);
+                p.StringBuilder.Append(p.IsHtml && !IsRaw ? HttpUtility.HtmlEncode(text) : text);
             }
 
             public override void FillQueryTokens(List<QueryToken> list)
@@ -93,6 +95,8 @@ namespace Signum.Engine.Mailing
             {
                 return "token {0}".Formato(Token.FullKey());
             }
+
+       
         }
 
         public class GlobalNode : TextNode
@@ -126,32 +130,58 @@ namespace Signum.Engine.Mailing
 
         public class ModelNode : TextNode
         {
-            public ModelNode(string fieldOrProperty, Type modelType, List<string> errors)
+            public bool IsRaw { get; set; }
+
+            List<MemberInfo> member;
+            public ModelNode(string fieldOrPropertyChain, Type modelType, List<string> errors)
             {
-                this.member = (MemberInfo)modelType.GetField(fieldOrProperty, flags) ??
-                       (MemberInfo)modelType.GetProperty(fieldOrProperty, flags);
+                if (modelType == null)
+                {
+                    errors.Add(EmailTemplateMessage.SystemEmailShouldBeSetToAccessModel0.NiceToString().Formato(fieldOrPropertyChain));
+                    return;
+                }
 
-                if (member == null)
-                    errors.Add(EmailTemplateMessage.TheModel0DoesNotHaveAnyFieldWithTheToken1.NiceToString().Formato(modelType.Name, fieldOrProperty));
+                member = new List<MemberInfo>();
+                var type = modelType;
+                foreach (var field in fieldOrPropertyChain.Split('.'))
+                {
+                    var info = (MemberInfo)type.GetField(field, flags) ??
+                               (MemberInfo)type.GetProperty(field, flags);
+
+                    if (info == null)
+                    {
+                        errors.Add(EmailTemplateMessage.Type0DoesNotHaveAPropertyWithName1.NiceToString().Formato(type.Name, field));
+                        break;
+                    }
+
+                    member.Add(info);
+
+                    type = info.ReturningType();
+                }
             }
-
-            MemberInfo member;
-
+          
             const BindingFlags flags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
 
             public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
             {
                 if (p.SystemEmail == null)
-                    throw new ArgumentException("There is not any model for the message composition");
+                    throw new ArgumentException("There is no system email for the message composition");
 
-                var value = Getter(p.SystemEmail);
-                if (p.IsHtml && !(value is System.Web.HtmlString))
+                object value = p.SystemEmail;
+                foreach (var m in member)
+                {
+                    value = Getter(m, value);
+                    if (value == null)
+                        break;
+                }
+                
+                if (p.IsHtml && !(value is System.Web.HtmlString) && !IsRaw)
                     p.StringBuilder.Append(HttpUtility.HtmlEncode(value.ToString()));
                 else
                     p.StringBuilder.Append(value.ToString());
             }
 
-            object Getter(ISystemEmail systemEmail)
+            static object Getter(MemberInfo member, object systemEmail)
             {
                 var pi = member as PropertyInfo;
 
@@ -393,6 +423,15 @@ namespace Signum.Engine.Mailing
 
         public static BlockNode Parse(string text, QueryDescription qd, Type modelType)
         {
+            if (text == null)
+                throw new ArgumentNullException("text");
+
+            if (qd == null)
+                throw new ArgumentNullException("qd");
+
+            if (modelType == null)
+                throw new ArgumentNullException("modelType");
+
             BlockNode node;
             var errors = TryParseTemplate(text, qd, modelType, out node);
             if (errors.Any())
@@ -461,17 +500,19 @@ namespace Signum.Engine.Mailing
                 switch (keyword)
                 {
                     case "":
+                    case "raw":
                         var tok = TokenFormatRegex.Match(token);
                         if (!tok.Success)
                             errors.Add("{0} has invalid format".Formato(token)); 
                         else
-                            stack.Peek().Nodes.Add(new TokenNode(tryParseToken(tok.Groups["token"].Value), tok.Groups["format"].Value));
+                            stack.Peek().Nodes.Add(new TokenNode(tryParseToken(tok.Groups["token"].Value), tok.Groups["format"].Value){ IsRaw = keyword == "raw"});
                         break;
                     case "global":
                         stack.Peek().Nodes.Add(new GlobalNode(token, errors));
                         break;
                     case "model":
-                        stack.Peek().Nodes.Add(new ModelNode(token, modelType, errors));
+                    case "modelraw":
+                        stack.Peek().Nodes.Add(new ModelNode(token, modelType, errors) { IsRaw = keyword == "modelraw" });
                         break;
                     case "any":
                         {
@@ -545,6 +586,8 @@ namespace Signum.Engine.Mailing
             stack.Pop();
             return errors;
         }
+
+       
     }
 
     public class EmailTemplateParameters

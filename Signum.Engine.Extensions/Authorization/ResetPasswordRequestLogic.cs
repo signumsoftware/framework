@@ -44,23 +44,13 @@ namespace Signum.Engine.Authorization
                     IsBodyHtml = true,
                     Messages = CultureInfoLogic.ForEachCulture(culture => new EmailTemplateMessageDN(culture)
                     {
-                        Text = "<p>{0}</p>".Formato(AuthEmailMessage.YouRecentlyRequestedANewPassword.NiceToString()) + 
+                        Text = "<p>{0}</p>".Formato(AuthEmailMessage.YouRecentlyRequestedANewPassword.NiceToString()) +
                             "<p>{0} @[User.UserName]</p>".Formato(AuthEmailMessage.YourUsernameIs.NiceToString()) +
                             "<p>{0}</p>".Formato(AuthEmailMessage.YouCanResetYourPasswordByFollowingTheLinkBelow.NiceToString()) +
                             "<p><a href=\"@model[Url]\">@model[Url]</a></p>",
                         Subject = AuthEmailMessage.ResetPasswordRequestSubject.NiceToString()
                     }).ToMList()
                 });
-            }
-        }
-
-        public class ResetPasswordRequestMail : SystemEmail<ResetPasswordRequestDN>
-        {
-            public string Url;
-
-            public override List<EmailOwnerRecipientData> GetRecipients()
-            {
-                return To(Entity.User.EmailOwnerData); 
             }
         }
 
@@ -95,6 +85,15 @@ namespace Signum.Engine.Authorization
 
             return user;
         };
+    }
 
+    public class ResetPasswordRequestMail : SystemEmail<ResetPasswordRequestDN>
+    {
+        public string Url;
+
+        public override List<EmailOwnerRecipientData> GetRecipients()
+        {
+            return SendTo(Entity.User.EmailOwnerData);
+        }
     }
 }

@@ -45,8 +45,8 @@ namespace Signum.Engine.Extensions.Basics
                      k => MultiEnumDN.UniqueKey(k),
                      (a, k) => new { a, k });
 
-                if (joinResult.Lacking.Count != 0)
-                    throw new InvalidOperationException("Error loading {0}\r\n Lacking: {1}".Formato(typeof(T).Name, joinResult.Lacking.ToString(", ")));
+                if (joinResult.Missing.Count != 0)
+                    throw new InvalidOperationException("Error loading {0}\r\n Lacking: {1}".Formato(typeof(T).Name, joinResult.Missing.ToString(", ")));
 
                 toEntity = joinResult.Result.ToDictionary(p => p.k, p => p.a);
 
