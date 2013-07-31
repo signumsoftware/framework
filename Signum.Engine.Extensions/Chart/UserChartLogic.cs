@@ -233,6 +233,8 @@ namespace Signum.Engine.Chart
                     item.FixParameters();
                 }
 
+                Console.Clear();
+
                 return table.UpdateSqlSync(uc, includeCollections: true);
             }
             catch (Exception e)

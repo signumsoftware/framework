@@ -230,6 +230,8 @@ namespace Signum.Engine.UserQueries
                 if (uq.ShouldHaveElements && !uq.ElementsPerPage.HasValue)
                     uq.ElementsPerPage = 20;
 
+                Console.Clear();
+
                 return table.UpdateSqlSync(uq, includeCollections: true);
             }
             catch (Exception e)
