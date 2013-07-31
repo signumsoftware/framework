@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net.Mail;
@@ -7,11 +8,13 @@ using System.Reflection;
 using System.Text;
 using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
+using Signum.Engine.Files;
 using Signum.Engine.Mailing.Pop3;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Engine.Scheduler;
 using Signum.Entities;
+using Signum.Entities.Files;
 using Signum.Entities.Mailing;
 using Signum.Utilities;
 
@@ -19,13 +22,12 @@ namespace Signum.Engine.Mailing
 {
     public static class Pop3ConfigurationLogic
     {
-        public static WarningHandler Warning;
-        public static TraceHandler Trace;
-
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                FilePathLogic.Register(EmailFileType.Attachment, new FileTypeAlgorithm { CalculateSufix = FileTypeAlgorithm.MonthlyGuidSufix });
+
                 sb.Settings.AssertNotIgnored((EmailMessageDN em) => em.Reception, "start Pop3ConfigurationLogic");
                
                 sb.Include<Pop3ConfigurationDN>();
@@ -41,7 +43,6 @@ namespace Signum.Engine.Mailing
                         s.StartDate,
                         s.EndDate,
                         s.NumberOfMails,
-                        s.MailboxSize,
                         s.Exception
                     });
 
@@ -70,7 +71,14 @@ namespace Signum.Engine.Mailing
                 {
                     AllowsNew = true,
                     Lite = false,
-                    Execute = (e, _) => e.ReceiveEmails()
+                    Execute = (e, _) =>
+                    {
+                        using(Transaction tr = Transaction.None())
+                        {
+                            e.ReceiveEmails();
+                            tr.Commit();
+                        }
+                    }
                 }.Register();
 
                 SchedulerLogic.ExecuteTask.Register((Pop3ConfigurationDN smtp) => smtp.ReceiveEmails().ToLite());
@@ -90,32 +98,27 @@ namespace Signum.Engine.Mailing
         public static Pop3ReceptionDN ReceiveEmails(this Pop3ConfigurationDN config)
         {
             Pop3ReceptionDN reception = new Pop3ReceptionDN { Pop3Configuration = config.ToLite(), StartDate = TimeZoneManager.Now };
-            reception.Save();
 
             try
             {
-                Pop3MimeClient client = new Pop3MimeClient(config.Host, config.Port, config.EnableSSL, config.Username, config.Password) { ReadTimeout = config.ReadTimeout };
-
-                
-                if (Warning != null)
-                    client.Warning += Warning;
-
-                if (Trace != null)
-                    client.Trace += Trace;
-
-                try
+                using (Pop3Client client = new Pop3Client(config.Username, config.Password, config.Host, config.Port, config.EnableSSL))
                 {
                     client.Connect();
 
-                    int numberOfMails;
-                    int mailboxSize;
-                    if (!client.GetMailboxStats(out numberOfMails, out mailboxSize))
-                        throw new Pop3Exception("Error retrieving mailbox stats");
+                    var dic = client.GetMessages();
 
-                    reception.NumberOfMails = numberOfMails;
-                    reception.MailboxSize = mailboxSize;
+                    reception.NumberOfMails = dic.Count;
 
-                    int maxids = Math.Min(numberOfMails, config.MaxDownloadEmails);
+                    if (reception.NumberOfMails == 0)
+                        return null;
+
+                    using (Transaction tr = Transaction.ForceNew())
+                    {
+                        reception.Save();
+                        tr.Commit();
+                    }
+
+                    int maxids = Math.Min(dic.Count, config.MaxDownloadEmails);
 
                     for (int i = 1; i <= maxids; i++)
                     {
@@ -123,22 +126,21 @@ namespace Signum.Engine.Mailing
                         {
                             try
                             {
-                                RxMailMessage mm;
-                                if (client.GetEmail(i, out mm))
-                                {
-                                    var email = ToEmailMessage(mm);
-                                    email.Reception = reception.ToLite();
+                                string rawContent = client.GetMessage(i);
 
-                                    if (AssociateWithEntities != null)
-                                        AssociateWithEntities(email);
+                                MailMessage mm = new StringReader(rawContent).Using(MailMimeParser.Parse);
 
+                                var email = ToEmailMessage(mm, rawContent);
+                                email.Reception = reception.ToLite();
 
-                                    using (OperationLogic.AllowSave<EmailMessageDN>())
-                                        email.Save();
+                                if (AssociateWithEntities != null)
+                                    AssociateWithEntities(email);
 
-                                    if (config.DeleteAfterReception)
-                                        client.DeleteEmail(i);
-                                }
+                                using (OperationLogic.AllowSave<EmailMessageDN>())
+                                    email.Save();
+
+                                if (config.DeleteAfterReception)
+                                    client.DeleteMessage(i);
                             }
                             catch (Exception e)
                             {
@@ -149,17 +151,20 @@ namespace Signum.Engine.Mailing
                         }
                     }
 
+                    using (Transaction tr = Transaction.ForceNew())
+                    {
+                        reception.Save();
+                        tr.Commit();
+                    }
+
                     reception.EndDate = TimeZoneManager.Now;
                     reception.Save();
-                }
-                finally
-                {
-                    client.Disconnect();
+
+                    client.Disconnect(); //Delete messages now
                 }
             }
             catch (Exception e)
             {
-
                 var ex = e.LogException();
 
                 try
@@ -176,11 +181,9 @@ namespace Signum.Engine.Mailing
 
         public static Action<EmailMessageDN> AssociateWithEntities;
 
-        private static EmailMessageDN ToEmailMessage(RxMailMessage mm)
+        private static EmailMessageDN ToEmailMessage(MailMessage mm, string rawContent)
         {
-            mm.MailStructure();
-
-            return new EmailMessageDN
+            var dn = new EmailMessageDN
             {
                 EditableMessage = false,
                 From = new EmailAddressDN(mm.From),
@@ -189,11 +192,32 @@ namespace Signum.Engine.Mailing
                    mm.CC.Select(ma => new EmailRecipientDN(ma, EmailRecipientKind.CC))).Concat(
                    mm.Bcc.Select(ma => new EmailRecipientDN(ma, EmailRecipientKind.Bcc))).ToMList(),
                 State = EmailMessageState.Received,
-                IsBodyHtml = mm.IsBodyHtml,
                 Subject = mm.Subject,
-                Body = mm.Body,
                 Received = TimeZoneManager.Now,
-            }; 
+                RawContent = rawContent,
+            };
+
+            if (mm.Body.HasText())
+            {
+                dn.IsBodyHtml = mm.IsBodyHtml;
+                dn.Body = mm.Body;
+            }
+            else
+            {
+                var bestView = mm.AlternateViews.OrderByDescending(a => a.ContentType.MediaType.Contains("htm")).ThenByDescending(a => a.ContentStream.Length).FirstOrDefault();
+                if (bestView != null)
+                {
+                    dn.IsBodyHtml = bestView.ContentType.MediaType.Contains("htm");
+                    dn.Body = MailMimeParser.GetStringFromStream(bestView.ContentStream, bestView.ContentType);
+                }
+            }
+
+            foreach (var item in mm.Attachments)
+            {
+                dn.Attachments.Add(new FilePathDN(EmailFileType.Attachment, item.Name, item.ContentStream.ReadAllBytes()));
+            }
+
+            return dn;
         }
     }
 }

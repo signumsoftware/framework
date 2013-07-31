@@ -10,7 +10,7 @@ using Signum.Utilities;
 
 namespace Signum.Entities.Mailing
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
     public class Pop3ConfigurationDN : Entity, ITaskDN
     {
         bool active;
@@ -150,13 +150,6 @@ namespace Signum.Entities.Mailing
         {
             get { return numberOfMails; }
             set { Set(ref numberOfMails, value, () => NumberOfMails); }
-        }
-
-        int mailboxSize;
-        public int MailboxSize
-        {
-            get { return mailboxSize; }
-            set { Set(ref mailboxSize, value, () => MailboxSize); }
         }
 
         Lite<ExceptionDN> exception;

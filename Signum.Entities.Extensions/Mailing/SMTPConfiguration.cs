@@ -9,7 +9,7 @@ using Signum.Entities.Files;
 
 namespace Signum.Entities.Mailing
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    [Serializable, EntityKind(EntityKind.Shared, EntityData.Master)]
     public class SmtpConfigurationDN : Entity
     {
         bool isDefault;

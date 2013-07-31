@@ -1,5 +1,6 @@
 ﻿@using Signum.Engine
 @using Signum.Entities.Mailing
+@using Signum.Web.Files
 
 
 @Html.ScriptCss("~/Mailing/Content/SF_Mailing.css")
@@ -13,13 +14,14 @@
     }
     
     <div style="float: left; margin: 10px">
-        @Html.EntityLine(e, f => f.Target)
         @Html.EntityLineDetail(e, f => f.From)
         @Html.EntityRepeater(e, f => f.Recipients)
+        @Html.FileRepeater(e, f => f.Attachments, fr => fr.FileType = EmailFileType.Attachment)
     </div>
     
     <fieldset style="float: left">
         <legend>Properties</legend>
+        @Html.EntityLine(e, f => f.Target)
         @Html.ValueLine(e, f => f.State)
         @Html.ValueLine(e, f => f.Sent)
         @Html.ValueLine(e, f => f.Received)
@@ -28,6 +30,8 @@
         @Html.EntityLine(e, f => f.Package)
         @Html.ValueLine(e, f => f.IsBodyHtml)
     </fieldset>
+    
+  
      
     <div class="clearall" />
     
@@ -42,7 +46,6 @@
 
     @Html.ScriptsJs("~/Scripts/ckeditor/ckeditor.js")
     @Html.ScriptsJs("~/Mailing/Scripts/SF_Mailing.js")
-   
 
     <script>
         $(function () {

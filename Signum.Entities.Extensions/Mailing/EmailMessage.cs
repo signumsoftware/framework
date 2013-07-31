@@ -13,6 +13,8 @@ using System.ComponentModel;
 using Signum.Entities.DynamicQuery;
 using System.Net.Mail;
 using System.Linq.Expressions;
+using Signum.Entities.Files;
+using System.Security.Cryptography;
 
 namespace Signum.Entities.Mailing
 {
@@ -99,7 +101,20 @@ namespace Signum.Entities.Mailing
         public string Body
         {
             get { return body; }
-            set { Set(ref body, value, () => Body); }
+            set
+            {
+                if (Set(ref body, value, () => Body))
+                {
+                    BodyHash = value == null ? null : Convert.ToBase64String(SHA1.Create().ComputeHash(Encoding.ASCII.GetBytes(value)));
+                }
+            }
+        }
+
+        string bodyHash;
+        public string BodyHash
+        {
+            get { return bodyHash; }
+            private set { Set(ref bodyHash, value, () => BodyHash); }
         }
 
         bool isBodyHtml = false;
@@ -150,6 +165,23 @@ namespace Signum.Entities.Mailing
         {
             get { return reception; }
             set { Set(ref reception, value, () => Reception); }
+        }
+
+        [SqlDbType(Size = int.MaxValue)]
+        string rawContent;
+        public string RawContent
+        {
+            get { return rawContent; }
+            set { Set(ref rawContent, value, () => RawContent); }
+        }
+
+        [NotNullable]
+        MList<FilePathDN> attachments = new MList<FilePathDN>();
+        [NotNullValidator, NoRepeatValidator]
+        public MList<FilePathDN> Attachments
+        {
+            get { return attachments; }
+            set { Set(ref attachments, value, () => Attachments); }
         }
 
         static StateValidator<EmailMessageDN, EmailMessageState> validator = new StateValidator<EmailMessageDN, EmailMessageState>(
@@ -364,6 +396,11 @@ namespace Signum.Entities.Mailing
         {
             return "EmailPackage {0}".Formato(Name);
         }
+    }
+
+    public enum EmailFileType
+    {
+        Attachment
     }
 }
 

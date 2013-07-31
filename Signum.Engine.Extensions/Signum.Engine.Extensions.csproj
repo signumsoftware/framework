@@ -137,10 +137,8 @@
     <Compile Include="Help\NamespaceHelp.cs" />
     <Compile Include="Mailing\EmailTemplateRenderer.cs" />
     <Compile Include="Mailing\Pop3ConfigurationLogic.cs" />
-    <Compile Include="Mailing\Pop3\Pop3MailClient.cs" />
-    <Compile Include="Mailing\Pop3\Pop3MimeClient.cs" />
-    <Compile Include="Mailing\Pop3\QuotedPrintable.cs" />
-    <Compile Include="Mailing\Pop3\RxMailMessage.cs" />
+    <Compile Include="Mailing\Pop3\MailMimeParser.cs" />
+    <Compile Include="Mailing\Pop3\Pop3Client.cs" />
     <Compile Include="Mailing\SystemEmailLogic.cs" />
     <Compile Include="Processes\ProcessRunnerLogic.cs" />
     <Compile Include="Translation\CultureInfoLogic.cs" />
@@ -200,7 +198,6 @@
     <None Include="Help\Sample.xml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Mailing\DefaultEmailTemplate.htm" />
     <Content Include="Chart\ChartScripts\Bars.xml" />
     <Content Include="Chart\ChartScripts\BoxPack.xml" />
     <Content Include="Chart\ChartScripts\BubblePack.xml" />
