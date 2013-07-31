@@ -512,6 +512,8 @@ namespace Signum.Engine.Cache
 
             rows = new ResetLazy<Dictionary<int, object>>(() =>
             {
+                CacheLogic.OnStart();
+
                 Dictionary<int, object> result = new Dictionary<int, object>();
                 using (MeasureLoad())
                 using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
@@ -632,6 +634,8 @@ namespace Signum.Engine.Cache
 
             relationalRows = new ResetLazy<Dictionary<int, Dictionary<int, object>>>(() =>
             {
+                CacheLogic.OnStart();
+
                 Dictionary<int, Dictionary<int, object>> result = new Dictionary<int, Dictionary<int, object>>();
 
                 using (MeasureLoad())
@@ -745,6 +749,8 @@ namespace Signum.Engine.Cache
 
             toStrings = new ResetLazy<Dictionary<int, string>>(() =>
             {
+                CacheLogic.OnStart();
+
                 Dictionary<int, string> result = new Dictionary<int, string>();
 
                 using (MeasureLoad())

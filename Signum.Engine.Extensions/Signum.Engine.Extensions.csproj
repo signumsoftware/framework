@@ -162,6 +162,7 @@
     <Compile Include="Reports\PlainExcelGenerator.cs" />
     <Compile Include="Reports\ReportsLogic.cs" />
     <Compile Include="Translation\TranslationLogic.cs" />
+    <Compile Include="UserQueries\QueryTokenSynchronizer.cs" />
     <Compile Include="UserQueries\UserQueryLogic.cs" />
     <Compile Include="Scheduler\SchedulerLogic.cs" />
     <Compile Include="Scheduler\SimpleTaskLogic.cs" />
