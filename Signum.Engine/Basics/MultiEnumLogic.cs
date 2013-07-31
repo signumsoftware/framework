@@ -56,7 +56,7 @@ namespace Signum.Engine.Basics
                      Keys,
                      a => a.Key,
                      k => MultiEnumDN.UniqueKey(k),
-                     (a, k) => new { a, k }, "loading {0}".Formato(typeof(T).Name)).ToDictionary(p => p.k, p => p.a);
+                     (a, k) => new { a, k }, "loading {0}. Consider synchronize".Formato(typeof(T).Name)).ToDictionary(p => p.k, p => p.a);
 
                 toEnum = toEntity.Keys.ToDictionary(k => MultiEnumDN.UniqueKey(k));
             }
