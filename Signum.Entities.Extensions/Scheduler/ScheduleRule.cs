@@ -30,7 +30,7 @@ namespace Signum.Entities.Scheduler
         {
             DateTime result = DateTimeExtensions.Max(TimeZoneManager.Now.Date, startingOn.Date).Add(startingOn.TimeOfDay); 
 
-            if (result < TimeZoneManager.Now)
+            if (result < TimeZoneManager.Now.Add(ScheduledTaskDN.MinimumSpan).Add(ScheduledTaskDN.MinimumSpan))
                 result = result.AddDays(1);
 
             return result;

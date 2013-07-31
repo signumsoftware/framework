@@ -12,6 +12,9 @@ namespace Signum.Entities.Scheduler
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class ScheduledTaskDN : IdentifiableEntity
     {
+        public static readonly TimeSpan MinimumSpan = TimeSpan.FromMinutes(2);
+
+
         [ImplementedBy(typeof(ScheduleRuleDailyDN), typeof(ScheduleRuleWeeklyDN), typeof(ScheduleRuleWeekDaysDN), typeof(ScheduleRuleMinutelyDN), typeof(ScheduleRuleHourlyDN))]
         IScheduleRuleDN rule;
         [NotNullValidator]
@@ -42,6 +45,15 @@ namespace Signum.Entities.Scheduler
         {
             get { return suspended; }
             set { Set(ref suspended, value, () => Suspended); }
+        }
+
+        [NotNullable, SqlDbType(Size = 100)]
+        string machineName;
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        public string MachineName
+        {
+            get { return machineName; }
+            set { Set(ref machineName, value, () => MachineName); }
         }
 
         protected override void PreSaving(ref bool graphModified)

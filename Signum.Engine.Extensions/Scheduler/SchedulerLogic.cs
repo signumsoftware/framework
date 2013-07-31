@@ -18,6 +18,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Signum.Entities.Authorization;
 using System.Linq.Expressions;
+using Signum.Engine.Cache;
 
 namespace Signum.Engine.Scheduler
 {
@@ -224,8 +225,6 @@ namespace Signum.Engine.Scheduler
                 Error(message, ex);
         }
 
-        static readonly TimeSpan MinimumSpan = TimeSpan.FromSeconds(10);
-
         static void DispatchEvents(object obj) // obj ignored
         {
             using (new EntityCache(EntityCacheType.ForceNew))
@@ -239,7 +238,7 @@ namespace Signum.Engine.Scheduler
                     }
 
                     ScheduledTaskDN st = priorityQueue.Pop(); //Exceed timer change
-                    if (st.NextDate.HasValue && (st.NextDate - TimeZoneManager.Now) > MinimumSpan)
+                    if (st.NextDate.HasValue && Math.Abs((st.NextDate.Value - TimeZoneManager.Now).Ticks) > MinimumSpan.Ticks)
                     {
                         priorityQueue.Push(st);
                         SetTimer();
@@ -251,7 +250,6 @@ namespace Signum.Engine.Scheduler
                         st.Save();
 
                     priorityQueue.Push(st);
-
 
                     ExecuteAsync(st.Task);
 
