@@ -118,7 +118,7 @@ namespace Signum.Engine.Mailing
 
             systemEmailToDN = EnumerableExtensions.JoinStrict(
                 dbTemplates, systemEmails.Keys, typeDN => typeDN.FullClassName, type => type.FullName,
-                (typeDN, type) => KVP.Create(type, typeDN), "caching EmailTemplates").ToDictionary();
+                (typeDN, type) => KVP.Create(type, typeDN), "caching EmailTemplates. Consider synchronize").ToDictionary();
 
             systemEmailToType = systemEmailToDN.Inverse();
         }

@@ -67,7 +67,7 @@ namespace Signum.Engine.Basics
                 q => q.Key,
                 kvp => kvp.Key,
                 (q, kvp) => KVP.Create(kvp.Value, q),
-                "Query").ToDictionary();
+                "caching QueryDN. Consider synchronize").ToDictionary();
 
             EntityToQueryName = QueryNameToEntity.Inverse(); 
         }
