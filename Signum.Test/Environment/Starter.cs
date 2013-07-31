@@ -56,6 +56,8 @@ namespace Signum.Test.Environment
             sb.Schema.Settings.OverrideAttributes((ExceptionDN e) => e.User, new ImplementedByAttribute());
 
             Validator.PropertyValidator((OperationLogDN e) => e.User).Validators.Clear();
+            
+            TypeLogic.Start(sb, dqm);
 
             OperationLogic.Start(sb, dqm);
             ExceptionLogic.Start(sb, dqm);
