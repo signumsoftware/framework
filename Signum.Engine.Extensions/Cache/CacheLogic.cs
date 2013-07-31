@@ -52,6 +52,8 @@ namespace Signum.Engine.Cache
                 PermissionAuthLogic.RegisterTypes(typeof(CachePermission));
 
                 sb.SwitchGlobalLazyManager(new CacheGlobalLazyManager());
+
+                sb.Schema.Synchronizing += Synchronize;
             }
         }
 
@@ -132,6 +134,59 @@ namespace Signum.Engine.Cache
         }
 
 
+        public static SqlPreCommand Synchronize(Replacements replacements)
+        {
+            SqlConnector connector = (SqlConnector)Connector.Current;
+
+            List<SqlPreCommand> commands = new List<SqlPreCommand>();
+
+            string currentUser = (string)Executor.ExecuteScalar("select SYSTEM_USER");
+
+            AssertNonIntegratedSecurity(currentUser);
+
+            string databaseName = connector.DatabaseName();
+
+            var serverPrincipalName = (from db in Database.View<SysDatabases>()
+                                       where db.name == databaseName
+                                       join spl in Database.View<SysServerPrincipals>().DefaultIfEmpty() on db.owner_sid equals spl.sid
+                                       select spl.name).Single();
+
+
+            if (currentUser != serverPrincipalName)
+                commands.Add(new SqlPreCommandSimple("ALTER AUTHORIZATION ON DATABASE::{0} TO {2}".Formato(databaseName, serverPrincipalName, currentUser)));
+
+
+            var databasePrincipalName = (from db in Database.View<SysDatabases>()
+                                         where db.name == databaseName
+                                         join dpl in Database.View<SysDatabasePrincipals>().DefaultIfEmpty() on db.owner_sid equals dpl.sid
+                                         select dpl.name).Single();
+
+            if (!databasePrincipalName.HasText() || databasePrincipalName != "dbo")
+                commands.Add(new SqlPreCommandSimple("ALTER AUTHORIZATION ON DATABASE::{0} TO {2}".Formato(databaseName, databasePrincipalName.DefaultText("Unknown"), currentUser)));
+
+            var enabled = Database.View<SysDatabases>().Where(db => db.name == databaseName).Select(a => a.is_broker_enabled).Single();
+
+            if (!enabled)
+            {
+                commands.Add(new SqlPreCommandSimple(
+@"DECLARE @DatabaseName VARCHAR(100)
+SELECT @DatabaseName = '{0}'
+
+DECLARE @SPId VARCHAR(7000)
+SELECT @SPId = COALESCE(@SPId,'')+'KILL '+CAST(SPID AS VARCHAR)+'; '
+FROM master..SysProcesses
+WHERE DB_NAME(DBId) = @DatabaseName
+
+PRINT @SPId
+EXEC(@SPId)"));
+
+                commands.Add(new SqlPreCommandSimple("ALTER DATABASE {0} SET ENABLE_BROKER".Formato(databaseName)));
+                commands.Add(new SqlPreCommandSimple("--ALTER DATABASE {0} SET NEW_BROKER".Formato(databaseName)));
+            }
+
+            return commands.Combine(Spacing.Simple);
+        }
+
         static bool isStarted = false;
         readonly static object startKeyLock = new object();
         internal static void OnStart()
@@ -152,52 +207,7 @@ namespace Signum.Engine.Cache
                 {
                     string currentUser = (string)Executor.ExecuteScalar("select SYSTEM_USER");
 
-                    var type = Database.View<SysServerPrincipals>().Where(a => a.name == currentUser).Select(a => a.type_desc).Single();
-
-                    if (type != "SQL_LOGIN")
-                        throw new InvalidOperationException("The current login '{0}' is a {1} instead of a SQL_LOGIN. Avoid using Integrated Security with Cache Logic".Formato(currentUser, type));
-
-                    var serverPrincipalName = (from db in Database.View<SysDatabases>()
-                                               where db.name == connector.DatabaseName()
-                                               join spl in Database.View<SysServerPrincipals>().DefaultIfEmpty() on db.owner_sid equals spl.sid
-                                               select spl.name).Single();
-
-
-                    if (currentUser != serverPrincipalName)
-                        throw new InvalidOperationException(@"The current owner of {0} is '{1}', but the current user is '{2}'. Change the login or call:
-ALTER AUTHORIZATION ON DATABASE::{0} TO {2}".Formato(connector.DatabaseName(), serverPrincipalName, currentUser));
-
-                    var databasePrincipalName = (from db in Database.View<SysDatabases>()
-                                                 where db.name == connector.DatabaseName()
-                                                 join dpl in Database.View<SysDatabasePrincipals>().DefaultIfEmpty() on db.owner_sid equals dpl.sid
-                                                 select dpl.name).Single();
-
-                    if (!databasePrincipalName.HasText() || databasePrincipalName != "dbo")
-                        throw new InvalidOperationException(@"The database principal of {0} is '{1}', not associated with the current user '{2}'. Call:
-ALTER AUTHORIZATION ON DATABASE::{0} TO {2}".Formato(connector.DatabaseName(), databasePrincipalName.DefaultText("Unknown"), currentUser));
-                }
-
-                var enabled = Database.View<SysDatabases>().Where(db => db.name == Connector.Current.DatabaseName()).Select(a => a.is_broker_enabled).Single();
-                if (!enabled)
-                {
-                    try
-                    {
-                        try
-                        {
-                            Executor.ExecuteNonQuery("ALTER DATABASE {0} SET ENABLE_BROKER".Formato(Connector.Current.DatabaseName()));
-                        }
-                        catch (SqlException e)
-                        {
-                            if (e.Number == 9772)
-                                Executor.ExecuteNonQuery("ALTER DATABASE {0} SET NEW_BROKER".Formato(Connector.Current.DatabaseName()));
-                            else
-                                throw;
-                        }
-                    }
-                    catch (TimeoutException)
-                    {
-                        throw EnableBlocker();
-                    }
+                    AssertNonIntegratedSecurity(currentUser);
                 }
 
                 try
@@ -222,6 +232,14 @@ ALTER AUTHORIZATION ON DATABASE::{0} TO {2}".Formato(connector.DatabaseName(), d
 
                 isStarted = true;
             }
+        }
+
+        private static void AssertNonIntegratedSecurity(string currentUser)
+        {
+            var type = Database.View<SysServerPrincipals>().Where(a => a.name == currentUser).Select(a => a.type_desc).Single();
+
+            if (type != "SQL_LOGIN")
+                throw new InvalidOperationException("The current login '{0}' is a {1} instead of a SQL_LOGIN. Avoid using Integrated Security with Cache Logic".Formato(currentUser, type));
         }
 
         private static InvalidOperationException EnableBlocker()
