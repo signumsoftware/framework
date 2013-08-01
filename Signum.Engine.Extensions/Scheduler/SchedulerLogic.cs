@@ -238,7 +238,7 @@ namespace Signum.Engine.Scheduler
                     }
 
                     ScheduledTaskDN st = priorityQueue.Pop(); //Exceed timer change
-                    if (st.NextDate.HasValue && Math.Abs((st.NextDate.Value - TimeZoneManager.Now).Ticks) > MinimumSpan.Ticks)
+                    if (st.NextDate.HasValue && Math.Abs((st.NextDate.Value - TimeZoneManager.Now).Ticks) > ScheduledTaskDN.MinimumSpan.Ticks)
                     {
                         priorityQueue.Push(st);
                         SetTimer();
