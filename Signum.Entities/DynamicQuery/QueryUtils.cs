@@ -264,10 +264,20 @@ namespace Signum.Entities.DynamicQuery
             {
                 var column = qd.Columns.SingleOrDefaultEx(a=>a.Name == key);
 
-                if (column == null)
+                if (column != null)
+                    return new ColumnToken(column, qd.QueryName);
+
+                if (MergeEntityColumns != null && !MergeEntityColumns())
                     return null;
 
-                return new ColumnToken(column, qd.QueryName);
+                var entity = new ColumnToken(qd.Columns.SingleEx(a => a.IsEntity), qd.QueryName);
+
+                var result = SubTokenBasic(entity, qd, key);
+
+                if (result != null)
+                    result.Subordinated = true;
+
+                return result;
             }
             else
             {
