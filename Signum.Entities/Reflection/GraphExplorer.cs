@@ -30,7 +30,9 @@ namespace Signum.Entities.Reflection
             if (item.Modified == ModifiedState.Modified)
                 return;
 
-            item.Modified = ModifiedState.Modified;
+            if (item.Modified != ModifiedState.SelfModified)
+                item.Modified = ModifiedState.Modified;
+
             foreach (var other in inverseGraph.RelatedTo(item))
                 Propagate(other, inverseGraph);
         }
