@@ -308,7 +308,7 @@ namespace Signum.Web.Selenium
         
         public static void TableHasColumn(this ISelenium selenium, string tokenName, string prefix)
         {
-            Assert.IsTrue(selenium.IsElementPresent("{0} > :hidden[value={1}]".Formato(TableHeaderSelector(prefix), tokenName)));
+            Assert.IsTrue(selenium.IsElementPresent("{0} > :hidden[value='{1}']".Formato(TableHeaderSelector(prefix), tokenName)));
         }
 
         public static void AssertMultiplyMessage(this ISelenium selenium, bool isPresent)
