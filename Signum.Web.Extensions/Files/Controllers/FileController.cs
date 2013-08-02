@@ -49,9 +49,9 @@ namespace Signum.Web.Files
             ViewData["IdValueField"] = prefix;
             ViewData["FileType"] = fileType;
 
-            string url = Navigator.Manager.EntitySettings[type].OnPartialViewName(entity);
+            string partialViewName = Navigator.Manager.EntitySettings[type].OnPartialViewName(entity);
 
-            return Navigator.PartialView(this, entity, prefix, url);
+            return Navigator.PartialView(this, entity, prefix, partialViewName);
         }
 
         public ActionResult Upload()

@@ -140,7 +140,7 @@ namespace Signum.Web.UserQueries
             if (ctx.Prefix.HasText())
                 return null;
 
-            if (!Navigator.IsNavigable(typeof(UserQueryDN), isSearchEntity: true))
+            if (!Navigator.IsNavigable(typeof(UserQueryDN), null, isSearchEntity: true))
                 return null;
 
             var items = new List<ToolBarButton>();
