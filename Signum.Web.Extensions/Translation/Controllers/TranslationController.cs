@@ -52,7 +52,7 @@ namespace Signum.Web.Translation.Controllers
 
         public new ActionResult View(string assembly, string culture)
         {
-            Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0} not found".Formato(assembly));
+            Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".Formato(assembly));
 
             CultureInfo defaultCulture = CultureInfo.GetCultureInfo(ass.SingleAttribute<DefaultAssemblyCultureAttribute>().DefaultCulture);
 
@@ -172,7 +172,7 @@ namespace Signum.Web.Translation.Controllers
 
         public ActionResult Sync(string assembly, string culture)
         {
-            Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0} not found".Formato(assembly));
+            Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".Formato(assembly));
             var targetCI = CultureInfo.GetCultureInfo(culture);
 
             CultureInfo defaultCulture = CultureInfo.GetCultureInfo(ass.SingleAttribute<DefaultAssemblyCultureAttribute>().DefaultCulture);
@@ -194,7 +194,7 @@ namespace Signum.Web.Translation.Controllers
         [HttpPost]
         public ActionResult Sync(string assembly, string culture, string bla)
         {
-            Assembly currentAssembly = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0} not found".Formato(assembly));
+            Assembly currentAssembly = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".Formato(assembly));
             
             LocalizedAssembly locAssembly = LocalizedAssembly.ImportXml(currentAssembly, CultureInfo.GetCultureInfo(culture));
 

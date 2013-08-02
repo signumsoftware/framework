@@ -68,20 +68,11 @@ namespace Signum.Services
             }, checkLogin: false);
         }
 
-        public virtual void Logout()
-        {
-            using (ScopeSessionFactory.OverrideSession(session))
-            {
-                UserDN.Current = null;
-            }
-        }
-
         public UserDN GetCurrentUser()
         {
             return Return(MethodInfo.GetCurrentMethod(),
               () => UserDN.Current);
         }
-
 
         public string PasswordNearExpired()
         {

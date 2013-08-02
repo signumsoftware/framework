@@ -93,6 +93,7 @@
   <ItemGroup>
     <Compile Include="Alerts\AlertLogic.cs" />
     <Compile Include="Authorization\AuthCache.cs" />
+    <Compile Include="Authorization\Impersonator.cs" />
     <Compile Include="Authorization\SessionLogLogic.cs" />
     <Compile Include="Authorization\TypeAuthCache.cs" />
     <Compile Include="Authorization\PasswordExpiresLogic.cs" />
@@ -134,6 +135,7 @@
     <Compile Include="Help\HelpTools.cs" />
     <Compile Include="Help\HelpUtilities.cs" />
     <Compile Include="Help\NamespaceHelp.cs" />
+    <Compile Include="Mailing\EmailTemplateRenderer.cs" />
     <Compile Include="Mailing\Pop3ConfigurationLogic.cs" />
     <Compile Include="Mailing\Pop3\Pop3MailClient.cs" />
     <Compile Include="Mailing\Pop3\Pop3MimeClient.cs" />
@@ -160,6 +162,7 @@
     <Compile Include="Reports\PlainExcelGenerator.cs" />
     <Compile Include="Reports\ReportsLogic.cs" />
     <Compile Include="Translation\TranslationLogic.cs" />
+    <Compile Include="UserQueries\QueryTokenSynchronizer.cs" />
     <Compile Include="UserQueries\UserQueryLogic.cs" />
     <Compile Include="Scheduler\SchedulerLogic.cs" />
     <Compile Include="Scheduler\SimpleTaskLogic.cs" />

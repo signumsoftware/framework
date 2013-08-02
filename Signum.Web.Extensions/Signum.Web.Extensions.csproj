@@ -171,6 +171,11 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="Mailing\Views\Pop3Reception.generated.cs">
+      <DependentUpon>Pop3Reception.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Mailing\Views\EmailAddress.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -1254,6 +1259,10 @@
     <Content Include="Mailing\Views\EmailTemplateRecipient.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>EmailTemplateRecipient.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Mailing\Views\Pop3Reception.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>Pop3Reception.generated.cs</LastGenOutput>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>RazorGenerator</Generator>

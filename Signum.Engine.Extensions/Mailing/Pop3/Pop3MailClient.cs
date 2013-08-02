@@ -405,6 +405,7 @@ namespace Signum.Engine.Mailing.Pop3
                     {
                         CallTrace("   Get SSL connection");
                         pop3Stream = new SslStream(serverTcpConnection.GetStream(), false);
+                        
                         pop3Stream.ReadTimeout = readTimeout;
                     }
                     catch (Exception ex)

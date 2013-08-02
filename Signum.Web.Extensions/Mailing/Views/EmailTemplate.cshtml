@@ -2,54 +2,59 @@
 @using Signum.Engine.DynamicQuery
 @using Signum.Engine.Basics
 
-@Html.ScriptsJs("~/Scripts/ckeditor/ckeditor.js")
+
 @Html.ScriptCss("~/Mailing/Content/SF_Mailing.css")
+@Html.ScriptsJs("~/Scripts/ckeditor/ckeditor.js")
+@Html.ScriptsJs("~/Mailing/Scripts/SF_Mailing.js")
+@Html.ScriptsJs("~/Mailing/Scripts/SF_TabsRepeater.js")
 
 @using (var ec = Html.TypeContext<EmailTemplateDN>())
 {
-    @Html.ValueLine(ec, e => e.Name)
-    @Html.ValueLine(ec, e => e.State, vl => vl.ReadOnly = true)
-    
-    <fieldset>
-        <legend>Properties</legend>
+    <div style="float: left">
+        @Html.ValueLine(ec, e => e.Name)
+        @Html.EntityCombo(ec, e => e.SystemEmail)
         @Html.EntityLine(ec, e => e.Query)
-    </fieldset>
+        @Html.EntityLine(ec, e => e.SmtpConfiguration)
+        @Html.ValueLine(ec, e => e.EditableMessage)
+    </div>
     
-    if (ec.Value.Query != null) {
+    if(!ec.Value.IsNew)
+    {
+    <fieldset style="float: left">
+        <legend>Active</legend>
+        @Html.ValueLine(ec, e => e.Active)
+        @Html.ValueLine(ec, e => e.StartDate)
+        @Html.ValueLine(ec, e => e.EndDate)
+    </fieldset>
+    }
+    
+    <div class="clearall" />
+        
+    if (ec.Value.Query != null)
+    {
         object queryName = QueryLogic.ToQueryName(ec.Value.Query.Key);
         ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(queryName); //To be use inside query token controls
-    
-        <fieldset>
-            <legend>Active</legend>
-            @Html.ValueLine(ec, e => e.Active)
-            @Html.ValueLine(ec, e => e.StartDate)
-            @Html.ValueLine(ec, e => e.EndDate)
-        </fieldset>
-        <fieldset>
-            <legend>From/Recipients</legend>
-            @Html.EntityLineDetail(ec, e => e.From, el => el.PreserveViewData = true)
-            @Html.EntityRepeater(ec, e => e.Recipients, el => el.PreserveViewData = true)
-        </fieldset>
-        @Html.EntityLine(ec, e => e.SmtpConfiguration)
-        <fieldset>
-            <legend>Text</legend>
-            @Html.EntityLine(ec, e => e.MasterTemplate)
-            @Html.ValueLine(ec, e => e.IsBodyHtml)
-            @Html.ValueLine(ec, e => e.EditableMessage)
         
-            <div class="sf-email-replacements-container sf-tabs-repeater">      
-                @Html.EntityRepeater(ec, e => e.Messages, er =>
+    @Html.ValueLine(ec, e => e.SendDifferentMessages)
+    @Html.EntityLineDetail(ec, e => e.From, el => el.PreserveViewData = true)
+    @Html.EntityRepeater(ec, e => e.Recipients, el => el.PreserveViewData = true)
+
+
+    @Html.EntityLine(ec, e => e.MasterTemplate)
+    @Html.ValueLine(ec, e => e.IsBodyHtml)
+
+    <div class="sf-email-replacements-container sf-tabs-repeater">
+        @Html.EntityRepeater(ec, e => e.Messages, er =>
                 {
                     er.Removing = "";
                     er.Creating = "SF.TabsRepeater.addItem();";
                     er.PreserveViewData = true;
                 })
-            </div> 
-        </fieldset>
+    </div>
     }
 }
-@Html.ScriptsJs("~/Mailing/Scripts/SF_Mailing.js")
-@Html.ScriptsJs("~/Mailing/Scripts/SF_TabsRepeater.js")
+
+
 
 <script>
     $(function () {

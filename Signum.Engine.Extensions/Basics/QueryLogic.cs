@@ -17,10 +17,17 @@ namespace Signum.Engine.Basics
 {
     public static class QueryLogic
     {
-        public static Dictionary<string, object> QueryNames {get; set;}
+        static ResetLazy<Dictionary<string, object>> queryNamesLazy;
+        public static Dictionary<string, object> QueryNames 
+        { 
+            get { return queryNamesLazy.Value; } 
+        }
 
-        public static Dictionary<object, QueryDN> QueryNameToEntity { get; set; }
-        public static Dictionary<QueryDN, object> EntityToQueryName { get; set; }
+        static ResetLazy<Dictionary<object, QueryDN>> queryNameToEntityLazy;
+        public static Dictionary<object, QueryDN> QueryNameToEntity 
+        {
+            get { return queryNameToEntityLazy.Value; }
+        }
 
         public static void AssertStarted(SchemaBuilder sb)
         {
@@ -32,19 +39,36 @@ namespace Signum.Engine.Basics
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 // QueryManagers = queryManagers;
-                sb.Schema.Initializing[InitLevel.Level0SyncEntities] += Schema_Initializing;
+                sb.Schema.Initializing[InitLevel.Level0SyncEntities] += () =>
+                {
+                    queryNamesLazy.Load();
+
+                    queryNameToEntityLazy.Load();
+                };
 
                 sb.Include<QueryDN>();
 
                 sb.Schema.Synchronizing += SynchronizeQueries;
                 sb.Schema.Generating += Schema_Generating;
+
+                queryNamesLazy = sb.GlobalLazy(()=>CreateQueryNames(), new InvalidateWith(typeof(QueryDN)));
+
+                queryNameToEntityLazy = sb.GlobalLazy(() => 
+                    EnumerableExtensions.JoinStrict(
+                        Database.Query<QueryDN>().ToList(),
+                        QueryNames,
+                        q => q.Key,
+                        kvp => kvp.Key,
+                        (q, kvp) => KVP.Create(kvp.Value, q),
+                        "caching QueryDN. Consider synchronize").ToDictionary(),
+                    new InvalidateWith(typeof(QueryDN)));
             }
         }
 
 
         public static object ToQueryName(this QueryDN query)
         {
-            return QueryNameToEntity.GetOrThrow(query, "QueryName with unique name {0} not found");
+            return QueryNames.GetOrThrow(query.Key, "QueryName with unique name {0} not found");
         }
 
         public static object ToQueryName(string uniqueQueryName)
@@ -57,24 +81,9 @@ namespace Signum.Engine.Basics
             return QueryNames.TryGetC(uniqueQueryName);
         }
 
-        static void Schema_Initializing()
-        {
-            QueryNames = CreateQueryNames();
-
-            QueryNameToEntity = EnumerableExtensions.JoinStrict(
-                Database.Query<QueryDN>().ToList(),
-                QueryNames,
-                q => q.Key,
-                kvp => kvp.Key,
-                (q, kvp) => KVP.Create(kvp.Value, q),
-                "Query").ToDictionary();
-
-            EntityToQueryName = QueryNameToEntity.Inverse(); 
-        }
-
         private static Dictionary<string, object> CreateQueryNames()
         {
-            return DynamicQueryManager.Current.GetQueryNames().ToDictionary(qn => QueryUtils.GetQueryUniqueKey(qn));
+            return DynamicQueryManager.Current.GetQueryNames().ToDictionary(qn => QueryUtils.GetQueryUniqueKey(qn), "queryName");
         }
 
         static IEnumerable<QueryDN> GenerateQueries()

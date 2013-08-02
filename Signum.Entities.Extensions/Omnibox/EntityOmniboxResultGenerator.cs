@@ -14,7 +14,7 @@ namespace Signum.Entities.Omnibox
 
         public EntityOmniboxResultGenenerator(IEnumerable<Type> schemaTypes)
         {
-            types = schemaTypes.Where(t => !t.IsEnumEntity()).ToDictionary(Lite.UniqueTypeName);
+            types = schemaTypes.Where(t => !t.IsEnumEntity()).ToDictionary(Lite.GetCleanName);
         }
 
         public int AutoCompleteLimit = 5;

@@ -28,13 +28,7 @@ namespace Signum.Web.Extensions.Mailing.Views
     using System.Web.WebPages;
     using Signum.Entities;
     
-    #line 2 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
-    using Signum.Entities.DynamicQuery;
-    
-    #line default
-    #line hidden
-    
-    #line 1 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
+    #line 1 "..\..\Mailing\Views\Pop3Reception.cshtml"
     using Signum.Entities.Mailing;
     
     #line default
@@ -42,79 +36,95 @@ namespace Signum.Web.Extensions.Mailing.Views
     using Signum.Utilities;
     using Signum.Web;
     
-    #line 3 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
-    using Signum.Web.UserQueries;
-    
-    #line default
-    #line hidden
-    
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/Mailing/Views/EmailTemplateContact.cshtml")]
-    public partial class EmailTemplateContact : System.Web.Mvc.WebViewPage<dynamic>
+    [System.Web.WebPages.PageVirtualPathAttribute("~/Mailing/Views/Pop3Reception.cshtml")]
+    public partial class Pop3Reception : System.Web.Mvc.WebViewPage<dynamic>
     {
-        public EmailTemplateContact()
+        public Pop3Reception()
         {
         }
         public override void Execute()
         {
 
-
+WriteLiteral("\r\n");
 
 
             
-            #line 4 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
- using (var tc = Html.TypeContext<EmailTemplateContactDN>())
+            #line 3 "..\..\Mailing\Views\Pop3Reception.cshtml"
+ using (var sc = Html.TypeContext<Pop3ReceptionDN>()) 
 {
-    using (Html.FieldInline())
-    {
+	
+            
+            #line default
+            #line hidden
+            
+            #line 5 "..\..\Mailing\Views\Pop3Reception.cshtml"
+Write(Html.ValueLine(sc, s => s.StartDate));
+
+            
+            #line default
+            #line hidden
+            
+            #line 5 "..\..\Mailing\Views\Pop3Reception.cshtml"
+                                      
+	
+            
+            #line default
+            #line hidden
+            
+            #line 6 "..\..\Mailing\Views\Pop3Reception.cshtml"
+Write(Html.ValueLine(sc, s => s.EndDate));
+
+            
+            #line default
+            #line hidden
+            
+            #line 6 "..\..\Mailing\Views\Pop3Reception.cshtml"
+                                    
+	
+            
+            #line default
+            #line hidden
+            
+            #line 7 "..\..\Mailing\Views\Pop3Reception.cshtml"
+Write(Html.ValueLine(sc, s => s.NumberOfMails));
+
+            
+            #line default
+            #line hidden
+            
+            #line 7 "..\..\Mailing\Views\Pop3Reception.cshtml"
+                                          
+	
+            
+            #line default
+            #line hidden
+            
+            #line 8 "..\..\Mailing\Views\Pop3Reception.cshtml"
+Write(Html.ValueLine(sc, s => s.MailboxSize));
+
+            
+            #line default
+            #line hidden
+            
+            #line 8 "..\..\Mailing\Views\Pop3Reception.cshtml"
+                                        
     
             
             #line default
             #line hidden
             
-            #line 8 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
-Write(Html.ValueLine(tc, c => c.EmailAddress));
+            #line 9 "..\..\Mailing\Views\Pop3Reception.cshtml"
+Write(Html.EntityLine(sc, s => s.Exception));
 
             
             #line default
             #line hidden
             
-            #line 8 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
-                                            
-    
-            
-            #line default
-            #line hidden
-            
-            #line 9 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
-Write(Html.ValueLine(tc, c => c.DisplayName));
-
-            
-            #line default
-            #line hidden
-            
-            #line 9 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
-                                           
-    }
-    using (var qtTc = tc.SubContext(etTc => etTc.Token))
-    {
-    
-            
-            #line default
-            #line hidden
-            
-            #line 13 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
-Write(Html.Field("Email Owner", Html.QueryTokenDNBuilder(qtTc, (QueryDescription)ViewData[ViewDataKeys.QueryDescription])));
-
-            
-            #line default
-            #line hidden
-            
-            #line 13 "..\..\Mailing\Views\EmailTemplateContact.cshtml"
-                                                                                                                         
-    }
-
+            #line 9 "..\..\Mailing\Views\Pop3Reception.cshtml"
+                                          
 }
+
             
             #line default
             #line hidden

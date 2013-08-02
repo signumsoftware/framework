@@ -303,7 +303,7 @@ namespace Signum.Engine.SMS
 
         static string CombineText(string text, List<Combination> combinations, MessageLengthExceeded onExceeded)
         {
-            string result = literalFinder.Replace(text, m => combinations.SingleEx(c => c.Name == m.Groups["name"].Value).Value);
+            string result = literalFinder.Replace(text, m => combinations.FirstEx(c => c.Name == m.Groups["name"].Value).Value);
             int remainingLength = SMSCharacters.RemainingLength(result);
             if (remainingLength < 0)
             {

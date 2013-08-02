@@ -33,7 +33,7 @@ namespace Signum.Engine.Authorization
         public static string SystemUserName { get; private set; }
         static ResetLazy<UserDN> systemUserLazy = GlobalLazy.WithoutInvalidations(() => SystemUserName == null ? null :
             Database.Query<UserDN>().Where(u => u.UserName == SystemUserName)
-            .SingleEx(() => "SystemUser with name '{0}' not found".Formato(SystemUserName)));
+            .SingleEx(() => "SystemUser with name '{0}'".Formato(SystemUserName)));
         public static UserDN SystemUser
         {
             get { return systemUserLazy.Value; }
@@ -42,7 +42,7 @@ namespace Signum.Engine.Authorization
         public static string AnonymousUserName { get; private set; }
         static ResetLazy<UserDN> anonymousUserLazy = GlobalLazy.WithoutInvalidations(() => AnonymousUserName == null ? null :
             Database.Query<UserDN>().Where(u => u.UserName == AnonymousUserName)
-            .SingleEx(() => "AnonymousUser with name '{0}' not found".Formato(AnonymousUserName)));
+            .SingleEx(() => "AnonymousUser with name '{0}'".Formato(AnonymousUserName)));
         public static UserDN AnonymousUser
         {
             get { return anonymousUserLazy.Value; }

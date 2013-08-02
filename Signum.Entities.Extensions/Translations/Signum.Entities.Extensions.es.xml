@@ -1,22 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
-  <Type Name="ActionTaskDN" Description="Tarea de acción" />
-  <Type Name="ActionTaskLogDN" Description="Registro de tareas de acción">
-    <Member Name="ActionTask" Description="Tarea de acción" />
-    <Member Name="EndTime" Description="Hora de finalización" />
-    <Member Name="Exception" Description="Excepción" />
-    <Member Name="StartTime" Description="Hora de inicio" />
-  </Type>
-  <Type Name="ActionTaskOperation">
-    <Member Name="Execute" Description="Ejecutar" />
-  </Type>
   <Type Name="AlertCurrentState" Description="Estado actual de la alerta">
     <Member Name="Alerted" Description="Alertada" />
     <Member Name="Attended" Description="Atendida" />
     <Member Name="Future" Description="Futura" />
   </Type>
   <Type Name="AlertDN" Description="Alerta">
-    <Member Name="AditionalData" Description="Datos adicionales" />
+    <Member Name="AdditionalData" Description="Datos adicionales" />
     <Member Name="AlertDate" Description="Fecha alerta" />
     <Member Name="Alerted" Description="Alertada" />
     <Member Name="AlertType" Description="Tipo de alerta" />
@@ -27,6 +17,7 @@
     <Member Name="CreationDate" Description="Fecha de creación" />
     <Member Name="CurrentState" Description="Estado actual" />
     <Member Name="Future" Description="Futura" />
+    <Member Name="NotAttended" Description="No atendida" />
     <Member Name="State" Description="Estado" />
     <Member Name="Target" Description="Destino" />
     <Member Name="Text" Description="Texto" />
@@ -71,10 +62,10 @@
     <Member Name="TypeRules" Description="Reglas de tipo" />
   </Type>
   <Type Name="AuthEmailMessage">
+    <Member Name="ResetPasswordRequestSubject" Description="Solicitud de nueva contraseña" />
+    <Member Name="YouCanResetYourPasswordByFollowingTheLinkBelow" Description="Puedes establecer una nueva contraseña mediante el siguiente enlace" />
     <Member Name="YouRecentlyRequestedANewPassword" Description="Has solicitado una nueva contraseña" />
     <Member Name="YourUsernameIs" Description="Tu nombre de usuario es:" />
-    <Member Name="YouCanResetYourPasswordByFollowingTheLinkBelow" Description="Puedes establecer una nueva contraseña mediante el siguiente enlace" />
-    <Member Name="ResetPasswordRequestSubject" Description="Solicitud de nueva contraseña" />
   </Type>
   <Type Name="AuthMessage">
     <Member Name="_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships" Description="{0} ciclos han sido encontrados en el grafo de funciones debido a las relaciones:&#xD;&#xA;" />
@@ -145,20 +136,13 @@
     <Member Name="UserNameMustHaveAValue" Description="Se debe introducir el nombre de usuario" />
     <Member Name="View" Description="Ver" />
     <Member Name="WeReceivedARequestToCreateAnAccountYouCanCreateItFollowingTheLinkBelow" Description="Ha solicitado crear una cuenta. Para confirmarlo haga click en el siguiente enlace:" />
-    <Member Name="YouCanResetYourPasswordByFollowingTheLinkBelow" Description="Puedes crear una nueva contraseña haciendo click en el siguiente enlace:" />
     <Member Name="YouMustRepeatTheNewPassword" Description="Debes repetir la nueva contraseña" />
-    <Member Name="YouRecentlyRequestedANewPassword" Description="Recientemente solicitó una nueva contraseña" />
-    <Member Name="YourUsernameIs0" Description="Su nombre de usuario es: {0}" />
   </Type>
   <Type Name="BaseRulePack`1">
     <Member Name="Role" Description="Role" />
     <Member Name="Rules" Description="Reglas" />
     <Member Name="Strategy" Description="Estrategia" />
     <Member Name="Type" Description="Tipo" />
-  </Type>
-  <Type Name="CalendarDN" Description="Calendario">
-    <Member Name="Holidays" Description="Festivos" />
-    <Member Name="Name" Description="Nombre" />
   </Type>
   <Type Name="CalendarOperation">
     <Member Name="Save" Description="Guardar" />
@@ -210,6 +194,7 @@
     <Member Name="Chart_Query0IsNotAllowed" Description="La consulta {0} no está permitida" />
     <Member Name="Chart_ToggleInfo" Description="Mostrar/Ocultar información" />
     <Member Name="ChartFor" Description="Gráfico para" />
+    <Member Name="ChartOf0" Description="Gráfico de {0}" />
     <Member Name="ChartScript_Edit" Description="Editar Script" />
     <Member Name="ColorsFor0" Description="Colores para {0}" />
     <Member Name="CreatePalette" Description="Crear paleta" />
@@ -269,7 +254,6 @@
   <Type Name="ClientCertificationFileDN" Description="Archivo de certificado de cliente">
     <Member Name="CertFileType" Description="Tipo de archivo de certificado" />
     <Member Name="FullFilePath" Description="Ruta completa del archivo" />
-    <Member Name="Name" Description="Nombre" />
   </Type>
   <Type Name="ControlPanelDN" Description="Panel de control">
     <Member Name="DisplayName" Description="Nombre" />
@@ -402,37 +386,144 @@
     <Member Name="DisconnectedMachine" Description="Máquina desconectada" />
     <Member Name="LastOnlineTicks" Description="Últimos ticks online" />
   </Type>
+  <Type Name="EmailAddressDN" Description="Dirección email">
+    <Member Name="DisplayName" Description="Nombre" />
+    <Member Name="EmailAddress" Description="Dirección email" />
+    <Member Name="EmailOwner" Description="Propietario email" />
+  </Type>
+  <Type Name="EmailConfigurationDN" Description="Configuración de email">
+    <Member Name="DefaultCulture" Description="Cultura predeterminada" />
+    <Member Name="OverrideEmailAddress" Description="Reemplazar dirección email" />
+    <Member Name="SendEmails" Description="Enviar emails" />
+    <Member Name="UrlLeft" Description="Parte Izquierda URL" />
+  </Type>
+  <Type Name="EmailMasterTemplateDN" Description="Plantilla maestra de email">
+    <Member Name="Name" Description="Nombre" />
+    <Member Name="Text" Description="Texto" />
+  </Type>
+  <Type Name="EmailMasterTemplateOperation">
+    <Member Name="Create" Description="Crear" />
+    <Member Name="Save" Description="Guardar" />
+  </Type>
   <Type Name="EmailMessageDN" Description="Mensaje de e-mail">
-    <Member Name="Bcc" Description="CCO" />
     <Member Name="Body" Description="Cuerpo" />
-    <Member Name="Cc" Description="CC" />
     <Member Name="CreationTime" Description="Fecha de creación" />
+    <Member Name="EditableMessage" Description="Mensaje editable" />
     <Member Name="Exception" Description="Error" />
+    <Member Name="From" Description="De" />
+    <Member Name="IsBodyHtml" Description="Cuerpo html" />
     <Member Name="Package" Description="Paquete" />
     <Member Name="Received" Description="Recibido" />
-    <Member Name="Recipient" Description="Destinatario" />
+    <Member Name="Reception" Description="Recepción" />
+    <Member Name="ReceptionNotified" Description="Recepción notificada" />
+    <Member Name="Recipients" Description="Destinatarios" />
     <Member Name="Sent" Description="Enviado" />
     <Member Name="State" Description="Estado" />
     <Member Name="Subject" Description="Asunto" />
+    <Member Name="Target" Description="Destino" />
     <Member Name="Template" Description="Plantilla" />
+    <Member Name="UniqueIdentifier" Description="Identificador único" />
+  </Type>
+  <Type Name="EmailMessageMessage">
+    <Member Name="Message" Description="Mensaje" />
+    <Member Name="TheEmailMessageCannotBeSentFromState0" Description="El email no se pueden enviar desde el estado {0}" />
   </Type>
   <Type Name="EmailMessageOperation">
+    <Member Name="CreateMail" Description="Crear email" />
+    <Member Name="CreateMailFromTemplate" Description="Crear email desde plantilla" />
+    <Member Name="ReSend" Description="Re enviar" />
     <Member Name="ReSendEmails" Description="Re enviar correos electrónicos" />
+    <Member Name="Send" Description="Enviar" />
   </Type>
   <Type Name="EmailMessageState" Description="Estado del email">
     <Member Name="Created" Description="Creado" />
-    <Member Name="Exception" Description="Excepción" />
     <Member Name="Received" Description="Recibido" />
+    <Member Name="ReceptionNotified" Description="Recepción notificada" />
     <Member Name="Sent" Description="Enviado" />
+    <Member Name="SentException" Description="Excepción envío" />
+  </Type>
+  <Type Name="EmailOwnerData" Description="Datos propietario email">
+    <Member Name="CultureInfo" Description="Cultura" />
+    <Member Name="DisplayName" Description="Nombre" />
+    <Member Name="Email" Description="Email" />
+    <Member Name="Owner" Description="Propietario" />
   </Type>
   <Type Name="EmailPackageDN" Description="Paquete de e-mail">
     <Member Name="Name" Description="Nombre" />
   </Type>
+  <Type Name="EmailRecipientDN" Description="Destinatario email">
+    <Member Name="Kind" Description="Tipo" />
+  </Type>
+  <Type Name="EmailRecipientKind" Description="Tipo destinatario email">
+    <Member Name="Bcc" Description="CCO" />
+    <Member Name="CC" Description="CC" />
+    <Member Name="To" Description="Para" />
+  </Type>
+  <Type Name="EmailRecipientOperation">
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="EmailSenderOperation">
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="EmailTemplateCanAddTokenMessage">
+    <Member Name="NoColumnSelected" Description="Ninguna columna seleccionada" />
+    <Member Name="YouCannotAddBlocksWithAllOrAny" Description="No puede agregar bloques con 'Todos' o 'Alguno'" />
+    <Member Name="YouCannotAddIfBlocksOnCollectionFields" Description="No se puede agregar bloques 'If' en campos de colección" />
+    <Member Name="YouCanOnlyAddForeachBlocksWithCollectionFields" Description="Sólo puede agregar bloques 'Foreach' con campos de colección" />
+    <Member Name="YouHaveToAddTheElementTokenToUseForeachOnCollectionFields" Description="Tienes que añadir el token 'Elemento' para usar Foreach en campos de colección" />
+  </Type>
+  <Type Name="EmailTemplateContactDN" Description="Plantilla email">
+    <Member Name="DisplayName" Description="Nombre" />
+    <Member Name="EmailAddress" Description="Dirección email" />
+    <Member Name="Token" Description="Token" />
+  </Type>
   <Type Name="EmailTemplateDN" Description="Plantillas de email">
-    <Member Name="FullClassName" Description="Full Class Name" />
+    <Member Name="Active" Description="Activo" />
+    <Member Name="EditableMessage" Description="Mensaje editable" />
+    <Member Name="EndDate" Description="Fecha de fin" />
+    <Member Name="From" Description="De" />
+    <Member Name="IsBodyHtml" Description="Es cuerpo html" />
+    <Member Name="MasterTemplate" Description="Plantilla principal" />
+    <Member Name="Messages" Description="Mensajes" />
+    <Member Name="Name" Description="Nombre" />
+    <Member Name="Query" Description="Consulta" />
+    <Member Name="Recipients" Description="Destinatarios" />
+    <Member Name="SendDifferentMessages" Description="Enviar mensajes diferentes" />
+    <Member Name="SmtpConfiguration" Description="Configuración de SMTP" />
+    <Member Name="StartDate" Description="Fecha de inicio" />
+    <Member Name="SystemEmail" Description="Email del sistema" />
+    <Member Name="Tokens" Description="Tokens" />
+  </Type>
+  <Type Name="EmailTemplateMessage">
+    <Member Name="EndDateMustBeHigherThanStartDate" Description="Fecha de fin debe ser superior a la fecha de inicio" />
+    <Member Name="ThereAreNoMessagesForTheTemplate" Description="No hay mensajes para la plantilla" />
+    <Member Name="ThereMustBeAMessageFor0" Description="Debe haber un mensaje para {0}" />
+    <Member Name="TheresMoreThanOneMessageForTheSameLanguage" Description="Hay más de un mensaje para el mismo idioma" />
+    <Member Name="TheTemplateIsAlreadyActive" Description="La plantilla ya está activa" />
+    <Member Name="TheTemplateIsAlreadyInactive" Description="La plantilla ya está inactiva" />
+    <Member Name="TheTextMustContain0IndicatingReplacementPoint" Description="El texto debe contener {0} indicando punto de reemplazamiento" />
+    <Member Name="Type0DoesNotHaveAPropertyWithName1" Description="Tipo {0} no tiene una propiedad con nombre {1}" />
+  </Type>
+  <Type Name="EmailTemplateMessageDN" Description="Mensaje plantilla email">
+    <Member Name="CultureInfo" Description="Cultura" />
+    <Member Name="Subject" Description="Asunto" />
+    <Member Name="Template" Description="Plantilla" />
+    <Member Name="Text" Description="Texto" />
   </Type>
   <Type Name="EmailTemplateOperation">
+    <Member Name="Create" Description="Crear" />
+    <Member Name="CreateEmailTemplateFromSystemEmail" Description="Crear plantilla email desde email del sistema" />
+    <Member Name="Disable" Description="Desactivar" />
+    <Member Name="Enable" Description="Activar" />
     <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="EmailTemplateRecipientDN" Description="Destinatario plantilla email">
+    <Member Name="Kind" Description="Tipo" />
+  </Type>
+  <Type Name="EmailTemplateViewMessage">
+    <Member Name="Insert" Description="Insertar" />
+    <Member Name="InsertMessageContent" Description="Insertar contenido del mensaje" />
+    <Member Name="Language" Description="Idioma" />
   </Type>
   <Type Name="EmbeddedFileDN" Description="Archivo incrustado">
     <Member Name="BinaryFile" Description="Archivo binario" />
@@ -552,6 +643,10 @@
     <Member Name="ValueLike0" Description="valor entre {0}" />
     <Member Name="YourVersion" Description="tu versión" />
   </Type>
+  <Type Name="HolidayCalendarDN" Description="Calendario de fiestas">
+    <Member Name="Holidays" Description="Vacaciones" />
+    <Member Name="Name" Description="Nombre" />
+  </Type>
   <Type Name="HolidayDN" Description="Festivo">
     <Member Name="Date" Description="Fecha" />
     <Member Name="Name" Description="Nombre" />
@@ -561,8 +656,7 @@
     <Member Name="Minute" Description="Minuto" />
   </Type>
   <Type Name="IEmailOwnerDN">
-    <Member Name="CultureInfo" Description="Información de la cultura" />
-    <Member Name="Email" Description="Email" />
+    <Member Name="EmailOwnerData" Description="Datos propietario email" />
   </Type>
   <Type Name="IPartDN">
     <Member Name="RequiresTitle" Description="Requiere título" />
@@ -621,12 +715,13 @@
   <Type Name="NewsletterDN" Description="Newsletter">
     <Member Name="DisplayFrom" Description="Visualizarlo desde" />
     <Member Name="From" Description="De" />
-    <Member Name="HtmlBody" Description="Cuerpo HTML" />
     <Member Name="Name" Description="Nombre" />
     <Member Name="Query" Description="Consulta" />
     <Member Name="SmtpConfig" Description="SmtpConfig" />
     <Member Name="State" Description="Estado" />
     <Member Name="Subject" Description="Asunto" />
+    <Member Name="Text" Description="Texto" />
+    <Member Name="Tokens" Description="Tokens" />
   </Type>
   <Type Name="NewsletterOperation">
     <Member Name="AddRecipients" Description="Agregar destinatarios" />
@@ -641,7 +736,7 @@
     <Member Name="Sent" Description="Enviado" />
   </Type>
   <Type Name="NoteDN" Description="Nota">
-    <Member Name="AditionalData" Description="Datos adicionales" />
+    <Member Name="AdditionalData" Description="Datos adicionales" />
     <Member Name="CreatedBy" Description="Creado por" />
     <Member Name="CreationDate" Description="Fecha de creación" />
     <Member Name="NoteType" Description="Tipo de nota" />
@@ -717,16 +812,43 @@
   </Type>
   <Type Name="PermissionDN" Description="Permiso" />
   <Type Name="PermissionRulePack" Description="Paquete de la regla de permiso" />
+  <Type Name="Pop3ConfigurationDN" Description="Configuración POP3">
+    <Member Name="Active" Description="Activo" />
+    <Member Name="ClientCertificationFiles" Description="Certificación de cliente" />
+    <Member Name="DeleteAfterReception" Description="Eliminar después de la recepción" />
+    <Member Name="EnableSSL" Description="Activar SSL" />
+    <Member Name="Host" Description="Host" />
+    <Member Name="MaxDownloadEmails" Description="Max Descarga Emails" />
+    <Member Name="Name" Description="Nombre" />
+    <Member Name="Password" Description="Contraseña" />
+    <Member Name="Port" Description="Puerto" />
+    <Member Name="ReadTimeout" Description="Read timeout" />
+    <Member Name="Username" Description="Nombre de usuario" />
+  </Type>
+  <Type Name="Pop3ConfigurationOperation">
+    <Member Name="ReceiveEmails" Description="Recibir e-mails" />
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="Pop3ReceptionDN" Description="Recepción POP3">
+    <Member Name="EndDate" Description="Fecha de fin" />
+    <Member Name="Exception" Description="Excepción" />
+    <Member Name="MailboxSize" Description="Tamaño de buzón" />
+    <Member Name="NumberOfMails" Description="Número de emails" />
+    <Member Name="Pop3Configuration" Description="Configuración POP3" />
+    <Member Name="StartDate" Description="Fecha de inicio" />
+  </Type>
   <Type Name="ProcessAlgorithmDN" Description="Algoritmo de proceso" />
   <Type Name="ProcessDN" Description="Proceso">
     <Member Name="Algorithm" Description="Algoritmo" />
     <Member Name="CancelationDate" Description="Fecha de cancelación" />
     <Member Name="CreationDate" Description="Fecha de creación" />
     <Member Name="Data" Description="Datos" />
+    <Member Name="Duration" Description="Duración" />
     <Member Name="Exception" Description="Excepción" />
     <Member Name="ExceptionDate" Description="Fecha de excepción" />
     <Member Name="ExecutionEnd" Description="Final de ejecución" />
     <Member Name="ExecutionStart" Description="Inicio de ejecución" />
+    <Member Name="MachineName" Description="Nombre máquina" />
     <Member Name="PlannedDate" Description="Fecha prevista" />
     <Member Name="Progress" Description="Progreso" />
     <Member Name="QueuedDate" Description="Fecha encolado" />
@@ -842,6 +964,14 @@
     <Member Name="Suspended" Description="Suspendido" />
     <Member Name="Task" Description="Tarea programada" />
   </Type>
+  <Type Name="ScheduledTaskLogDN" Description="Registro de tareas programadas">
+    <Member Name="Duration" Description="Duración" />
+    <Member Name="EndTime" Description="Hora de finalización" />
+    <Member Name="Entity" Description="Entidad" />
+    <Member Name="Exception" Description="Excepción" />
+    <Member Name="StartTime" Description="Hora de inicio" />
+    <Member Name="Task" Description="Tarea" />
+  </Type>
   <Type Name="ScheduledTaskOperation">
     <Member Name="Save" Description="Guardar" />
   </Type>
@@ -914,6 +1044,7 @@
     <Member Name="UserAgent" Description="User Agent" />
     <Member Name="UserHostAddress" Description="User Host Address" />
   </Type>
+  <Type Name="SimpleTaskDN" Description="Tarea sencilla" />
   <Type Name="SmsMessage">
     <Member Name="Insert" Description="Insertar" />
     <Member Name="Message" Description="Mensaje" />
@@ -961,7 +1092,7 @@
   <Type Name="SMSSendPackageDN" Description="Paquete de envios SMS" />
   <Type Name="SMSTemplateDN" Description="Plantilla SMS">
     <Member Name="Active" Description="Activo" />
-    <Member Name="AditionalData" Description="Datos adicionales" />
+    <Member Name="AdditionalData" Description="Datos adicionales" />
     <Member Name="AssociatedType" Description="Tipo asociado" />
     <Member Name="Certified" Description="Certificado" />
     <Member Name="EditableMessage" Description="Mensaje editable" />
@@ -986,9 +1117,12 @@
   </Type>
   <Type Name="SMSUpdatePackageDN" Description="Paquete de actualización de SMS" />
   <Type Name="SmtpConfigurationDN" Description="Configuración Smtp">
+    <Member Name="AditionalRecipients" Description="Receptores adicionales" />
     <Member Name="ClientCertificationFiles" Description="Archivos de certificado de cliente" />
+    <Member Name="DefaultFrom" Description="Desde por defecto" />
     <Member Name="EnableSSL" Description="Habilitar SSL" />
     <Member Name="Host" Description="Host" />
+    <Member Name="IsDefault" Description="Por defecto" />
     <Member Name="Name" Description="Nombre" />
     <Member Name="Password" Description="Contraseña" />
     <Member Name="Port" Description="Puerto" />
@@ -997,6 +1131,16 @@
   </Type>
   <Type Name="SmtpConfigurationOperation">
     <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="SystemEmailDN" Description="Correo electrónico del sistema">
+    <Member Name="FullClassName" Description="Nombre completo de clase " />
+  </Type>
+  <Type Name="TaskMessage">
+    <Member Name="Execute" Description="Ejecutar" />
+  </Type>
+  <Type Name="TaskOperation">
+    <Member Name="ExecuteAsync" Description="Ejecutar async" />
+    <Member Name="ExecuteSync" Description="Ejecutar sync" />
   </Type>
   <Type Name="TranslatedCultureAction" Description="Acción de cultura traducida">
     <Member Name="Read" Description="Leer" />
@@ -1074,8 +1218,8 @@
   </Type>
   <Type Name="UserDN" Description="Usuario">
     <Member Name="AnulationDate" Description="Fecha de Anulation" />
-    <Member Name="CultureInfo" Description="Info de la cultura" />
     <Member Name="Email" Description="e-Mail" />
+    <Member Name="EmailOwnerData" Description="Datos propietario email" />
     <Member Name="PasswordHash" Description="Hash de la contraseña" />
     <Member Name="PasswordNeverExpires" Description="La contraseña nunca caduca" />
     <Member Name="PasswordSetDate" Description="Establecer fecha de contraseña" />

@@ -133,30 +133,17 @@ namespace Signum.Engine.Authorization
     }
 
 
-
-    class PermissionMerger : Merger<Enum, bool>
+    class PermissionMerger : IMerger<Enum, bool>
     {
-        protected override bool Union(Enum key, Lite<RoleDN> role, IEnumerable<bool> baseValues)
+        public bool Merge(Enum key, Lite<RoleDN> role, IEnumerable<KeyValuePair<Lite<RoleDN>, bool>> baseValues)
         {
-            return Max(baseValues);
+            if (AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union)
+                return baseValues.Any(a => a.Value);
+            else
+                return baseValues.All(a => a.Value);
         }
 
-        static bool Max(IEnumerable<bool> baseValues)
-        {
-            return baseValues.Any(a => a);
-        }
-
-        protected override bool Intersection(Enum key, Lite<RoleDN> role, IEnumerable<bool> baseValues)
-        {
-            return Min(baseValues);
-        }
-
-        static bool Min(IEnumerable<bool> baseValues)
-        {
-            return baseValues.All(a => a);
-        }
-
-        public override Func<Enum, bool> MergeDefault(Lite<RoleDN> role, IEnumerable<Func<Enum, bool>> baseDefaultValues)
+        public Func<Enum, bool> MergeDefault(Lite<RoleDN> role)
         {
             return new ConstantFunction<Enum, bool>(AuthLogic.GetDefaultAllowed(role)).GetValue;
         }

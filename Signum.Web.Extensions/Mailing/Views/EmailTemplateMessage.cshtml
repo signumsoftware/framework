@@ -15,18 +15,20 @@
             vl.LabelText = EmailTemplateViewMessage.Language.NiceToString();
         })
         <div class="sf-email-replacements-token-container">
-            <fieldset class="sf-email-replacements-panel">
-                <legend>Replacements</legend>
                 @Html.MailingInsertQueryTokenBuilder(null, ec, (QueryDescription)ViewData[ViewDataKeys.QueryDescription])
                 <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-basic sf-disabled" data-prefix="@ec.ControlID" value="@(EmailTemplateViewMessage.Insert.NiceToString())" />
                 <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-if sf-disabled" data-prefix="@ec.ControlID" data-block="if" value="if" />
                 <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-foreach sf-disabled" data-prefix="@ec.ControlID" data-block="foreach" value="foreach" />
                 <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-any sf-disabled" data-prefix="@ec.ControlID" data-block="any" value="any" />
-            </fieldset>
         </div>
-        @Html.ValueLine(ec, e => e.Subject, vl => vl.ValueHtmlProps["class"] = "sf-email-inserttoken-target sf-email-template-message-subject")
+        @Html.ValueLine(ec, e => e.Subject, vl => 
+        {
+            vl.LabelHtmlProps["style"] = "width:100px";
+            vl.ValueHtmlProps["class"] = "sf-email-inserttoken-target sf-email-template-message-subject";
+        })
         @Html.ValueLine(ec, e => e.Text, vl =>
         {
+            vl.LabelVisible = false;
             vl.ValueLineType = ValueLineType.TextArea;
             vl.ValueHtmlProps["style"] = "width:100%; height:180px;";
             vl.ValueHtmlProps["class"] = "sf-rich-text-editor sf-email-template-message-text";

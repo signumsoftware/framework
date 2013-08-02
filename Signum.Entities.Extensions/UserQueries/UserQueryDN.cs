@@ -320,7 +320,7 @@ namespace Signum.Entities.UserQueries
 
         protected override void PreSaving(ref bool graphModified)
         {
-            tokenString = token.FullKey();
+            tokenString = token == null ? null : token.FullKey();
         }
 
         public void ParseData(IdentifiableEntity context, QueryDescription description, bool canAggregate)
@@ -331,7 +331,7 @@ namespace Signum.Entities.UserQueries
             }
             catch (Exception e)
             {
-                parseException = new FormatException("{0} {1}: {2}\r\n{3}".Formato(context.GetType().Name, context.IdOrNull, context, e.Message));
+                parseException = new FormatException("{0} {1}: {2}\r\n{3}".Formato(context.GetType().Name, context.IdOrNull, context, e.Message), e);
             }
         }
 
@@ -343,6 +343,14 @@ namespace Signum.Entities.UserQueries
             }
 
             return base.PropertyValidation(pi);
+        }
+
+        public override string ToString()
+        {
+            if (token != null)
+                return token.FullKey();
+
+            return tokenString;
         }
     }
 
@@ -390,6 +398,11 @@ namespace Signum.Entities.UserQueries
         {
             token.ParseData(context, description, canAggregate);
         }
+
+        public override string ToString()
+        {
+            return "{0} {1}".Formato(token, orderType);
+        }
     }
 
     [Serializable]
@@ -407,10 +420,10 @@ namespace Signum.Entities.UserQueries
         string displayName;
         public string DisplayName
         {
-            get { return displayName ?? Token.TryCC(t => t.Token.NiceName()); }
+            get { return displayName ?? token.TryCC(t => t.TryToken).TryCC(tt => tt.NiceName()); }
             set
             {
-                var name = value == Token.TryCC(t => t.Token).TryCC(tt => tt.NiceName()) ? null : value;
+                var name = value == Token.TryCC(t => t.TryToken).TryCC(tt => tt.NiceName()) ? null : value;
                 Set(ref displayName, name, () => DisplayName);
             }
         }
@@ -439,6 +452,11 @@ namespace Signum.Entities.UserQueries
         {
             token.ParseData(context, description, canAggregate);
             DisplayName = DisplayName;
+        }
+
+        public override string ToString()
+        {
+            return "{0} {1}".Formato(token, displayName);
         }
     }
 
@@ -498,7 +516,7 @@ namespace Signum.Entities.UserQueries
         {
             token.ParseData(context, description, canAggregate);
 
-            if (token.Token != null)
+            if (token.TryToken != null)
             {
                 if (value != null)
                 {
@@ -560,6 +578,11 @@ namespace Signum.Entities.UserQueries
             Token = new QueryTokenDN(element.Attribute("Token").Value);
             Operation = element.Attribute("Operation").Value.ToEnum<FilterOperation>();
             ValueString = element.Attribute("Value").Value;
+        }
+
+        public override string ToString()
+        {
+            return "{0} {1} {2}".Formato(token, operation, ValueString);
         }
     }
 

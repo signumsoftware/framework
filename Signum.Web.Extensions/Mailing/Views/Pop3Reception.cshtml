@@ -1,0 +1,10 @@
+﻿@using Signum.Entities.Mailing
+
+@using (var sc = Html.TypeContext<Pop3ReceptionDN>()) 
+{
+	@Html.ValueLine(sc, s => s.StartDate)
+	@Html.ValueLine(sc, s => s.EndDate)
+	@Html.ValueLine(sc, s => s.NumberOfMails)
+	@Html.ValueLine(sc, s => s.MailboxSize)
+    @Html.EntityLine(sc, s => s.Exception)
+}

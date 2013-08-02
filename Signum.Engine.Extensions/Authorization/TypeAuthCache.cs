@@ -24,9 +24,9 @@ namespace Signum.Entities.Authorization
     {
         readonly ResetLazy<Dictionary<Lite<RoleDN>, RoleAllowedCache>> runtimeRules;
 
-        Merger<Type, TypeAllowedAndConditions> merger;
+        IMerger<Type, TypeAllowedAndConditions> merger;
 
-        public TypeAuthCache(SchemaBuilder sb, Merger<Type, TypeAllowedAndConditions> merger)
+        public TypeAuthCache(SchemaBuilder sb, IMerger<Type, TypeAllowedAndConditions> merger)
         {
             this.merger = merger;
 
@@ -107,11 +107,11 @@ namespace Signum.Entities.Authorization
         {
             readonly Dictionary<Lite<RoleDN>, TypeAllowedAndConditions> rules;
 
-            readonly Merger<Type, TypeAllowedAndConditions> merger;
+            readonly IMerger<Type, TypeAllowedAndConditions> merger;
 
             readonly TypeDN resource;
 
-            public ManualResourceCache(TypeDN resource, Merger<Type, TypeAllowedAndConditions> merger)
+            public ManualResourceCache(TypeDN resource, IMerger<Type, TypeAllowedAndConditions> merger)
             {
                 this.resource = resource;
 
@@ -135,7 +135,7 @@ namespace Signum.Entities.Authorization
             {
                 IEnumerable<Lite<RoleDN>> related = AuthLogic.RelatedTo(role);
 
-                return merger.Merge(resource.ToType(), role, related.Select(GetAllowed));
+                return merger.Merge(resource.ToType(), role, related.Select(r => KVP.Create(r, GetAllowed(r))));
             }    
             
         }
@@ -232,12 +232,12 @@ namespace Signum.Entities.Authorization
 
         public class RoleAllowedCache
         {
-            readonly Merger<Type, TypeAllowedAndConditions> merger;
+            readonly IMerger<Type, TypeAllowedAndConditions> merger;
             readonly DefaultDictionary<Type, TypeAllowedAndConditions> rules; 
             readonly List<RoleAllowedCache> baseCaches;
             readonly Lite<RoleDN> role;
 
-            public RoleAllowedCache(Lite<RoleDN> role, Merger<Type, TypeAllowedAndConditions> merger, List<RoleAllowedCache> baseCaches, Dictionary<Type, TypeAllowedAndConditions> newValues)
+            public RoleAllowedCache(Lite<RoleDN> role, IMerger<Type, TypeAllowedAndConditions> merger, List<RoleAllowedCache> baseCaches, Dictionary<Type, TypeAllowedAndConditions> newValues)
             {
                 this.role = role;
 
@@ -245,9 +245,9 @@ namespace Signum.Entities.Authorization
 
                 this.baseCaches = baseCaches;
 
-                Func<Type, TypeAllowedAndConditions> defaultAllowed = merger.MergeDefault(role, baseCaches.Select(a => a.rules.DefaultAllowed));
+                Func<Type, TypeAllowedAndConditions> defaultAllowed = merger.MergeDefault(role);
 
-                Func<Type, TypeAllowedAndConditions> baseAllowed = k => merger.Merge(k, role, baseCaches.Select(b => b.GetAllowed(k)));
+                Func<Type, TypeAllowedAndConditions> baseAllowed = k => merger.Merge(k, role, baseCaches.Select(b => KVP.Create(b.role, b.GetAllowed(k))));
 
 
                 var keys = baseCaches
@@ -288,7 +288,7 @@ namespace Signum.Entities.Authorization
 
             public TypeAllowedAndConditions GetAllowedBase(Type k)
             {
-                return merger.Merge(k, role, baseCaches.Select(b => b.GetAllowed(k)));
+                return merger.Merge(k, role, baseCaches.Select(b => KVP.Create(b.role, b.GetAllowed(k))));
             }
 
             internal DefaultDictionary<Type, TypeAllowedAndConditions> DefaultDictionary()
