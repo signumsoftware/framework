@@ -26,8 +26,8 @@ namespace Signum.Web
         public abstract Delegate UntypedMappingMain { get; }
 
         internal abstract bool OnIsCreable(bool isSearchEntity);
-        internal abstract bool OnIsViewable();
-        internal abstract bool OnIsNavigable(bool isSearchEntity);
+        internal abstract bool OnIsViewable(string partialViewName);
+        internal abstract bool OnIsNavigable(string partialViewName, bool isSearchEntity);
         internal abstract bool OnIsReadonly();
 
         public ViewOverrides ViewOverrides { get; set; }
@@ -132,14 +132,20 @@ namespace Signum.Web
             return IsCreable.HasFlag(isSearchEntity ? EntityWhen.IsSearchEntity : EntityWhen.IsLine);
         }
 
-        internal override bool OnIsViewable()
+        internal override bool OnIsViewable(string partialViewName)
         {
-            return PartialViewName != null && IsViewable;
+            if (partialViewName == null && PartialViewName == null)
+                return false;
+
+            return IsViewable;
         }
 
-        internal override bool OnIsNavigable(bool isSearchEntity)
+        internal override bool OnIsNavigable(string partialViewName, bool isSearchEntity)
         {
-            return this.PartialViewName != null && IsNavigable.HasFlag(isSearchEntity ? EntityWhen.IsSearchEntity : EntityWhen.IsLine);
+            if (partialViewName == null && PartialViewName == null)
+                return false;
+
+            return IsNavigable.HasFlag(isSearchEntity ? EntityWhen.IsSearchEntity : EntityWhen.IsLine);
         }
 
         internal override bool OnIsReadonly()
@@ -189,12 +195,15 @@ namespace Signum.Web
             return IsCreable;
         }
 
-        internal override bool OnIsViewable()
+        internal override bool OnIsViewable(string partialViewName)
         {
-            return PartialViewName != null && IsViewable;
+            if (partialViewName == null && PartialViewName == null)
+                return false;
+
+            return IsViewable;
         }
 
-        internal override bool OnIsNavigable(bool isSearchEntity)
+        internal override bool OnIsNavigable(string partialViewName, bool isSearchEntity)
         {
             return false;
         }

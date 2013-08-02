@@ -34,9 +34,9 @@ namespace Signum.Web
             return (T)ConstructorManager.Construct(typeof(T));
         }
 
-        public static ActionResult VisualConstruct(ControllerBase controller, Type type, string prefix, VisualConstructStyle preferredStyle)
+        public static ActionResult VisualConstruct(ControllerBase controller, Type type, string prefix, VisualConstructStyle preferredStyle, string partialViewName)
         {
-            return ConstructorManager.VisualConstruct(controller, type, prefix, preferredStyle);
+            return ConstructorManager.VisualConstruct(controller, type, prefix, preferredStyle, partialViewName);
         }
 
         public static void AddConstructor<T>(Func<T> constructor) where T:ModifiableEntity
@@ -86,7 +86,7 @@ namespace Signum.Web
             return (ModifiableEntity)Activator.CreateInstance(type, true);
         }
 
-        public virtual ActionResult VisualConstruct(ControllerBase controller, Type type, string prefix, VisualConstructStyle preferredStyle)
+        public virtual ActionResult VisualConstruct(ControllerBase controller, Type type, string prefix, VisualConstructStyle preferredStyle, string partialViewName)
         {
             ConstructContext ctx = new ConstructContext { Controller = controller, Type = type, Prefix = prefix, PreferredViewStyle = preferredStyle };
             Func<ConstructContext, ActionResult> c = VisualConstructors.TryGetC(type);
@@ -108,10 +108,10 @@ namespace Signum.Web
                 return JsonAction.Redirect(Navigator.NavigateRoute(type, null));
 
             ModifiableEntity entity = Constructor.Construct(type);
-            return EncapsulateView(controller, entity, prefix, preferredStyle); 
+            return EncapsulateView(controller, entity, prefix, preferredStyle, partialViewName); 
         }
 
-        private ViewResultBase EncapsulateView(ControllerBase controller, ModifiableEntity entity, string prefix, VisualConstructStyle preferredStyle)
+        private ViewResultBase EncapsulateView(ControllerBase controller, ModifiableEntity entity, string prefix, VisualConstructStyle preferredStyle, string partialViewName)
         {
             IdentifiableEntity ident = entity as IdentifiableEntity;
 
@@ -123,13 +123,13 @@ namespace Signum.Web
             switch (preferredStyle)
             {
                 case VisualConstructStyle.PopupView:
-                    return Navigator.PopupOpen(controller, new PopupViewOptions(TypeContextUtilities.UntypedNew(ident, prefix)));
+                    return Navigator.PopupOpen(controller, new PopupViewOptions(TypeContextUtilities.UntypedNew(ident, prefix)) { PartialViewName = partialViewName });
                 case VisualConstructStyle.PopupNavigate:
-                    return Navigator.PopupOpen(controller, new PopupNavigateOptions(TypeContextUtilities.UntypedNew(ident, prefix)));
+                    return Navigator.PopupOpen(controller, new PopupNavigateOptions(TypeContextUtilities.UntypedNew(ident, prefix)) { PartialViewName = partialViewName });
                 case VisualConstructStyle.PartialView:
-                    return Navigator.PartialView(controller, ident, prefix);
+                    return Navigator.PartialView(controller, ident, prefix, partialViewName);
                 case VisualConstructStyle.View:
-                    return Navigator.NormalPage(controller, ident);
+                    return Navigator.NormalPage(controller, new NavigateOptions(ident) { PartialViewName = partialViewName });
                 default:
                     throw new InvalidOperationException();
             }
