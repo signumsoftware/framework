@@ -202,6 +202,7 @@ namespace Signum.Engine.Maps
                 return null;
 
             using (Sync.ChangeBothCultures(ForceCultureInfo))
+            using (ExecutionMode.Global())
             {
                 Replacements replacements = new Replacements() { Interactive = interactive };
                 SqlPreCommand command = Synchronizing
@@ -243,6 +244,7 @@ namespace Signum.Engine.Maps
                 return null;
 
             using (Sync.ChangeBothCultures(ForceCultureInfo))
+            using (ExecutionMode.Global())
             {
                 return Generating
                     .GetInvocationList()
