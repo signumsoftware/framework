@@ -207,7 +207,7 @@ SF.registerModule("Lines", function () {
                     type: info.entityType(),
                     id: info.id(),
                     prefix: this.options.prefix,
-                    partialViewName: this.options.prefix,
+                    partialViewName: this.options.partialViewName,
                     requestExtraJsonData: this.extraJsonParams()
                 }, _viewOptions);
             },
@@ -225,7 +225,7 @@ SF.registerModule("Lines", function () {
                     onOk: function (clonedElements) { return self.onCreatingOk(clonedElements, _viewOptions.validationOptions, _viewOptions.type); },
                     onOkClosed: function () { self.fireOnEntityChanged(true); },
                     prefix: this.options.prefix,
-                    partialViewName: _viewOptions.partialViewName,
+                    partialViewName: this.options.partialViewName,
                     requestExtraJsonData: this.extraJsonParams()
                 }, _viewOptions);
             },
@@ -425,7 +425,7 @@ SF.registerModule("Lines", function () {
                 return $.extend({
                     containerDiv: this.options.detailDiv,
                     prefix: this.options.prefix,
-                    partialViewName: _viewOptions.partialViewName,
+                    partialViewName: this.options.partialViewName,
                     requestExtraJsonData: this.extraJsonParams()
                 }, _viewOptions);
             },
@@ -624,7 +624,7 @@ SF.registerModule("Lines", function () {
                     onCancelled: null,
                     controllerUrl: null,
                     prefix: itemPrefix,
-                    partialViewName:_viewOptions.partialViewName,
+                    partialViewName: this.options.partialViewName,
                     requestExtraJsonData: this.extraJsonParams(itemPrefix)
                 }, _viewOptions);
             },
@@ -703,7 +703,7 @@ SF.registerModule("Lines", function () {
                     type: info.entityType(),
                     id: info.id(),
                     prefix: itemPrefix,
-                    partialViewName: _viewOptions.par,
+                    partialViewName: this.options.partialViewName,
                     requestExtraJsonData: this.extraJsonParams(itemPrefix)
                 }, _viewOptions);
             },
@@ -845,7 +845,7 @@ SF.registerModule("Lines", function () {
                 return $.extend({
                     containerDiv: this.options.detailDiv,
                     prefix: itemPrefix,
-                    partialViewName: _viewOptions.partialViewName,
+                    partialViewName: this.options.partialViewName,
                     requestExtraJsonData: this.extraJsonParams(itemPrefix)
                 }, _viewOptions);
             },
@@ -907,7 +907,7 @@ SF.registerModule("Lines", function () {
                     type: info.entityType(),
                     id: info.id(),
                     prefix: itemPrefix,
-                    partialViewName: _viewOptions.partialViewName,
+                    partialViewName: this.options.partialViewName,
                     requestExtraJsonData: this.extraJsonParams(itemPrefix)
                 }, _viewOptions);
             },
@@ -1038,7 +1038,7 @@ SF.registerModule("Lines", function () {
                 return $.extend({
                     containerDiv: "",
                     prefix: itemPrefix,
-                    partialViewName: _viewOptions.partialViewName,
+                    partialViewName: this.options.partialViewName,
                     requestExtraJsonData: this.extraJsonParams(itemPrefix)
                 }, _viewOptions);
             },
@@ -1094,7 +1094,7 @@ SF.registerModule("Lines", function () {
                 return $.extend({
                     containerDiv: SF.compose(itemPrefix, this.keys.entity),
                     prefix: itemPrefix,
-                    partialViewName: _viewOptions.partialViewName,
+                    partialViewName: this.options.partialViewName,
                     requestExtraJsonData: this.extraJsonParams(itemPrefix)
                 }, _viewOptions);
             },
