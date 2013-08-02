@@ -71,7 +71,7 @@ namespace Signum.Web.Processes
 
         public static ContextualItem CreateGroupContextualItem(SelectedItemsMenuContext ctx)
         {
-            if (!Navigator.IsViewable(typeof(PackageOperationDN)))
+            if (!Navigator.IsViewable(typeof(PackageOperationDN), null))
                 return null;
 
             if (ctx.Lites.IsNullOrEmpty() || ctx.Lites.Count <= 1)
