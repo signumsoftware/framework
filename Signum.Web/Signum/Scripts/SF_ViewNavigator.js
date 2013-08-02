@@ -220,7 +220,7 @@ SF.registerModule("ViewNavigator", function () {
                                 });
 
             if (!SF.isEmpty(options.partialViewName)) { //Send specific partialview if given
-                serializer.add("url", options.partialViewName);
+                serializer.add("partialViewName", options.partialViewName);
             }
 
             serializer.add(options.requestExtraJsonData);

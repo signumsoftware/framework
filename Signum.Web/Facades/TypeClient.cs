@@ -32,7 +32,7 @@ namespace Signum.Web
         {
             return from t in Navigator.Manager.EntitySettings.Keys
                    let tdn = TypeLogic.TypeToDN.TryGetC(t)
-                   where tdn != null && Navigator.IsViewable(t)
+                   where tdn != null && Navigator.IsViewable(t, null)
                    select tdn;
         }
     }

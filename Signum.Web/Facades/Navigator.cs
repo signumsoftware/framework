@@ -124,20 +124,9 @@ namespace Signum.Web
             return Manager.PopupOpen(controller, viewOptions);
         }
 
-        public static PartialViewResult PartialView(this ControllerBase controller, TypeContext tc)
-        {
-            return Manager.PartialView(controller, tc, null);
-        }
-
         public static PartialViewResult PartialView(this ControllerBase controller, TypeContext tc, string partialViewName)
         {
             return Manager.PartialView(controller, tc, partialViewName);
-        }
-
-        public static PartialViewResult PartialView(this ControllerBase controller, IRootEntity entity, string prefix)
-        {
-            TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);
-            return Manager.PartialView(controller, tc, null);
         }
 
         public static PartialViewResult PartialView(this ControllerBase controller, IRootEntity entity, string prefix, string partialViewName)
@@ -362,24 +351,24 @@ namespace Signum.Web
             return Manager.OnIsReadOnly(entity.GetType(), entity);
         }
 
-        public static bool IsViewable(Type type)
+        public static bool IsViewable(Type type, string partialViewName)
         {
-            return Manager.OnIsViewable(type, null);
+            return Manager.OnIsViewable(type, null, partialViewName);
         }
 
-        public static bool IsViewable(ModifiableEntity entity)
+        public static bool IsViewable(ModifiableEntity entity, string partialViewName)
         {
-            return Manager.OnIsViewable(entity.GetType(), entity);
+            return Manager.OnIsViewable(entity.GetType(), entity, partialViewName);
         }
 
-        public static bool IsNavigable(Type type, bool isSearchEntity = false)
+        public static bool IsNavigable(Type type, string partialViewName, bool isSearchEntity = false)
         {
-            return Manager.OnIsNavigable(type, null, isSearchEntity);
+            return Manager.OnIsNavigable(type, null, partialViewName, isSearchEntity);
         }
 
-        public static bool IsNavigable(ModifiableEntity entity, bool isSearchEntity = false)
+        public static bool IsNavigable(ModifiableEntity entity, string partialViewName, bool isSearchEntity = false)
         {
-            return Manager.OnIsNavigable(entity.GetType(), entity, isSearchEntity);
+            return Manager.OnIsNavigable(entity.GetType(), entity, partialViewName, isSearchEntity);
         }
 
         public static string OnPartialViewName(ModifiableEntity entity)
@@ -658,7 +647,7 @@ namespace Signum.Web
             TypeContext cleanTC = TypeContextUtilities.CleanTypeContext(tc);
             Type cleanType = cleanTC.UntypedValue.GetType();
 
-            if (!Navigator.IsViewable(cleanType))
+            if (!Navigator.IsViewable(cleanType, partialViewName))
                 throw new Exception(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().Formato(cleanType.Name));
 
             controller.ViewData.Model = cleanTC;
@@ -765,7 +754,7 @@ namespace Signum.Web
             if (findOptions.Navigate)
             {
                 findOptions.Navigate = implementations.Value.IsByAll ? true : 
-                    implementations.Value.Types.Any(t => Navigator.IsNavigable(t, true));
+                    implementations.Value.Types.Any(t => Navigator.IsNavigable(t, null, true));
             }
             if (findOptions.Create)
             {
@@ -1015,22 +1004,22 @@ namespace Signum.Web
             return es;
         }
 
-        internal protected virtual bool OnIsNavigable(Type type, ModifiableEntity entity, bool isSearchEntity)
+        internal protected virtual bool OnIsNavigable(Type type, ModifiableEntity entity, string partialViewName, bool isSearchEntity)
         {
             EntitySettings es = EntitySettings.TryGetC(type);
 
             return es != null &&
                 IsViewableBase(type, entity) &&
-                es.OnIsNavigable(isSearchEntity);
+                es.OnIsNavigable(partialViewName, isSearchEntity);
         }
 
-        internal protected virtual bool OnIsViewable(Type type, ModifiableEntity entity)
+        internal protected virtual bool OnIsViewable(Type type, ModifiableEntity entity, string partialViewName)
         {
             EntitySettings es = EntitySettings.TryGetC(type);
 
             return es != null &&
                 IsViewableBase(type, entity) &&
-                es.OnIsViewable();
+                es.OnIsViewable(partialViewName);
         }
 
         public event Func<object, bool> IsFindable;

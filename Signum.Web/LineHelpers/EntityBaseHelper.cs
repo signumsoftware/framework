@@ -235,14 +235,14 @@ namespace Signum.Web
                 eb.Implementations.Value.Types.Any(t => Navigator.IsCreable(t, isSearchEntity: false));
                 
             eb.View &=
-                cleanType.IsEmbeddedEntity() ? Navigator.IsViewable(cleanType) :
+                cleanType.IsEmbeddedEntity() ? Navigator.IsViewable(cleanType, eb.PartialViewName) :
                 eb.Implementations.Value.IsByAll ? true :
-                eb.Implementations.Value.Types.Any(t => Navigator.IsViewable(t));
+                eb.Implementations.Value.Types.Any(t => Navigator.IsViewable(t, eb.PartialViewName));
 
             eb.Navigate &=
-              cleanType.IsEmbeddedEntity() ? Navigator.IsNavigable(cleanType, isSearchEntity: false) :
+              cleanType.IsEmbeddedEntity() ? Navigator.IsNavigable(cleanType, eb.PartialViewName, isSearchEntity: false) :
               eb.Implementations.Value.IsByAll ? true :
-              eb.Implementations.Value.Types.Any(t => Navigator.IsNavigable(t, isSearchEntity: false));
+              eb.Implementations.Value.Types.Any(t => Navigator.IsNavigable(t, eb.PartialViewName, isSearchEntity: false));
 
             eb.Find &=
                 cleanType.IsEmbeddedEntity() ? false :

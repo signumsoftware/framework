@@ -46,10 +46,10 @@ namespace Signum.Web.Controllers
         {
             Type type = Navigator.ResolveType(entityType);
 
-            return Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.Navigate);
+            return Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.Navigate, null);
         }
 
-        public PartialViewResult PopupNavigate(string entityType, int? id, string prefix, string url)
+        public PartialViewResult PopupNavigate(string entityType, int? id, string prefix, string partialViewName)
         {
             Type type = Navigator.ResolveType(entityType);
 
@@ -58,7 +58,7 @@ namespace Signum.Web.Controllers
                 entity = Database.Retrieve(type, id.Value);
             else
             {
-                object result = Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.PopupNavigate);
+                object result = Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.PopupNavigate, partialViewName);
                 if (result.GetType() == typeof(PartialViewResult))
                     return (PartialViewResult)result;
 
@@ -72,10 +72,10 @@ namespace Signum.Web.Controllers
             }
 
             TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);
-            return this.PopupOpen(new PopupNavigateOptions(tc) { PartialViewName = url });
+            return this.PopupOpen(new PopupNavigateOptions(tc) { PartialViewName = partialViewName });
         }
 
-        public PartialViewResult PopupView(string entityType, int? id, string prefix, bool? readOnly, string url)
+        public PartialViewResult PopupView(string entityType, int? id, string prefix, bool? readOnly, string partialViewName)
         {
             Type type = Navigator.ResolveType(entityType);
             
@@ -84,7 +84,7 @@ namespace Signum.Web.Controllers
                 entity = Database.Retrieve(type, id.Value);
             else
             {
-                ActionResult result = Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.PopupView);
+                ActionResult result = Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.PopupView, partialViewName);
                 if (result is PartialViewResult)
                     return (PartialViewResult)result;
                 else
@@ -92,11 +92,11 @@ namespace Signum.Web.Controllers
             }
             
             TypeContext tc = TypeContextUtilities.UntypedNew((IdentifiableEntity)entity, prefix);
-            return this.PopupOpen(new PopupViewOptions(tc) { PartialViewName = url, ReadOnly = readOnly.HasValue });
+            return this.PopupOpen(new PopupViewOptions(tc) { PartialViewName = partialViewName, ReadOnly = readOnly.HasValue });
         }
 
         [HttpPost]
-        public PartialViewResult PartialView(string entityType, int? id, string prefix, bool? readOnly, string url)
+        public PartialViewResult PartialView(string entityType, int? id, string prefix, bool? readOnly, string partialViewName)
         {
             Type type = Navigator.ResolveType(entityType);
             
@@ -105,7 +105,7 @@ namespace Signum.Web.Controllers
                 entity = Database.Retrieve(type, id.Value);
             else
             {
-                object result = Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.PartialView);
+                object result = Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.PartialView, partialViewName);
                 if (result is PartialViewResult)
                     return (PartialViewResult)result;
                 else
@@ -117,7 +117,7 @@ namespace Signum.Web.Controllers
             if (readOnly.HasValue)
                 tc.ReadOnly = true;
 
-            return Navigator.PartialView(this, tc, url);
+            return Navigator.PartialView(this, tc, partialViewName);
         }
 
         [HttpPost]
