@@ -5,7 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.WebPages;
 
-namespace Signum.Web.HtmlHelpers
+namespace Signum.Web
 {
     public static class TabHelpers
     {
