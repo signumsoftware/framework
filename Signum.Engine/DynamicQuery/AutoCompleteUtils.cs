@@ -14,6 +14,7 @@ using Signum.Engine.Linq;
 using System.Collections;
 using Signum.Engine.Maps;
 using Signum.Entities.Basics;
+using System.Globalization;
 
 namespace Signum.Engine.DynamicQuery
 {
@@ -36,12 +37,15 @@ namespace Signum.Engine.DynamicQuery
             }
         }
 
+
+        static NumberStyles numberStyles = NumberStyles.Integer | NumberStyles.AllowThousands;
+
         static List<Lite<IdentifiableEntity>> FindLiteLike(IEnumerable<Type> types, string subString, int count)
         {
             types = types.Where(t => Schema.Current.IsAllowed(t) == null);
 
             List<Lite<IdentifiableEntity>> results = new List<Lite<IdentifiableEntity>>();
-            int? id = subString.ToInt();
+            int? id = subString.ToInt(numberStyles);
             if (id.HasValue)
             {
                 foreach (var t in types)
@@ -56,21 +60,26 @@ namespace Signum.Engine.DynamicQuery
                     }
                 }
             }
-
-            foreach (var t in types)
+            else
             {
-                results.AddRange(miLiteStarting.GetInvoker(t)(subString, count - results.Count));
+                if (subString.Trim('\'', '"').ToInt(numberStyles).HasValue)
+                    subString = subString.Trim('\'', '"');
 
-                if (results.Count >= count)
-                    return results;
-            }
+                foreach (var t in types)
+                {
+                    results.AddRange(miLiteStarting.GetInvoker(t)(subString, count - results.Count));
 
-            foreach (var t in types)
-            {
-                results.AddRange(miLiteContaining.GetInvoker(t)(subString, count - results.Count));
+                    if (results.Count >= count)
+                        return results;
+                }
 
-                if (results.Count >= count)
-                    return results;
+                foreach (var t in types)
+                {
+                    results.AddRange(miLiteContaining.GetInvoker(t)(subString, count - results.Count));
+
+                    if (results.Count >= count)
+                        return results;
+                }
             }
 
             return results;

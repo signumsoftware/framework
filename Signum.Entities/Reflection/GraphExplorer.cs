@@ -27,10 +27,12 @@ namespace Signum.Entities.Reflection
 
         static void Propagate(Modifiable item, DirectedGraph<Modifiable> inverseGraph)
         {
-            if (item.Modified == ModifiedState.Modified)
+            if (item.Modified == ModifiedState.Modified || item.Modified == ModifiedState.SelfModified)
                 return;
 
-            item.Modified = ModifiedState.Modified;
+            if (item.Modified != ModifiedState.SelfModified)
+                item.Modified = ModifiedState.Modified;
+
             foreach (var other in inverseGraph.RelatedTo(item))
                 Propagate(other, inverseGraph);
         }
@@ -284,6 +286,11 @@ namespace Signum.Entities.Reflection
                new XAttribute("NodeRadius", 2),
                new XAttribute("Background", ColorExtensions.ToHtmlColor(list.GetType().ElementType().FullName.GetHashCode())),
             };
+        }
+
+        public static bool HasChanges(Modifiable mod)
+        {
+            return GraphExplorer.FromRoot(mod).Any(a => a.Modified == ModifiedState.SelfModified);
         }
     }
 }

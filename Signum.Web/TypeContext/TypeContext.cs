@@ -356,10 +356,10 @@ namespace Signum.Web
 
 
         Dictionary<PropertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString>> beforeLine;
-        public ViewOverrides BeforeLine<T>(Expression<Func<T, object>> expression, Func<HtmlHelper, TypeContext, MvcHtmlString> constructor)
+        public ViewOverrides BeforeLine<T>(Expression<Func<T, object>> expression, Func<HtmlHelper, TypeContext<T>, MvcHtmlString> constructor)
             where T : IRootEntity
         {
-            return BeforeLine(PropertyRoute.Construct<T>(expression), constructor);
+            return BeforeLine(PropertyRoute.Construct<T>(expression), (helper, tc) => constructor(helper, (TypeContext<T>)tc));
         }
 
         public ViewOverrides BeforeLine(PropertyRoute route, Func<HtmlHelper, TypeContext, MvcHtmlString> constructor)

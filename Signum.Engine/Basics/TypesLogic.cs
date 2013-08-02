@@ -10,29 +10,31 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Basics;
+using Signum.Engine.DynamicQuery;
 
 namespace Signum.Engine.Basics
 {
+   
     public static class TypeLogic
     {
+        public static Dictionary<int, Type> IdToType
+        {
+            get { return Schema.Current.typeCachesLazy.Value.IdToType; }
+        }
+
+        public static Dictionary<Type, int> TypeToId
+        {
+            get { return Schema.Current.typeCachesLazy.Value.TypeToId; }
+        }
+
         public static Dictionary<Type, TypeDN> TypeToDN
         {
-            get { return Schema.Current.TypeToDN; }
+            get { return Schema.Current.typeCachesLazy.Value.TypeToDN; }
         }
 
         public static Dictionary<TypeDN, Type> DnToType
         {
-            get { return Schema.Current.DnToType; }
-        }
-
-        public static Dictionary<string, Type> NameToType
-        {
-            get { return Schema.Current.NameToType; }
-        }
-
-        public static Dictionary<Type, string> TypeToName
-        {
-            get { return Schema.Current.TypeToName; }
+            get { return Schema.Current.typeCachesLazy.Value.DnToType; }
         }
 
         public static Type ToType(this TypeDN type)
@@ -45,38 +47,39 @@ namespace Signum.Engine.Basics
             return TypeToDN.GetOrThrow(type);
         }
 
-        internal static void Schema_Initializing()
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
-            Schema current = Schema.Current;
+            if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+            {
+                Schema current = Schema.Current;
 
-            var attributes = current.Tables.Keys.Select(t => KVP.Create(t, t.SingleAttributeInherit<EntityKindAttribute>())).ToList();
+                current.Initializing[InitLevel.Level0SyncEntities] += () =>
+                {
+                    var attributes = current.Tables.Keys.Select(t => KVP.Create(t, t.SingleAttributeInherit<EntityKindAttribute>())).ToList();
 
-            var errors = attributes.Where(a => a.Value == null).ToString(a => "Type {0} does not have an EntityTypeAttribute".Formato(a.Key.Name), "\r\n");
+                    var errors = attributes.Where(a => a.Value == null).ToString(a => "Type {0} does not have an EntityTypeAttribute".Formato(a.Key.Name), "\r\n");
 
-            if (errors.HasText())
-                throw new InvalidOperationException(errors);
+                    current.typeCachesLazy.Load();
+                };
 
-            List<TypeDN> types = Database.RetrieveAll<TypeDN>();
+                current.typeCachesLazy = sb.GlobalLazy(() => new TypeCaches(current), 
+                    new InvalidateWith(typeof(TypeDN)));
 
-            var dict = EnumerableExtensions.JoinStrict(
-                types, current.Tables.Keys, t => t.FullClassName, t => (EnumEntity.Extract(t) ?? t).FullName,
-                (typeDN, type) => new { typeDN, type },
-                "caching types table from {0}".Formato(current.Table(typeof(TypeDN)).Name)
-                ).ToDictionary(a => a.type, a => a.typeDN);
+                dqm.RegisterQuery(typeof(TypeDN), () =>
+                    from t in Database.Query<TypeDN>()
+                    select new
+                    {
+                        Entity = t,
+                        t.Id,
+                        t.TableName,
+                        t.CleanName,
+                        t.FullClassName,
+                    });
 
-            current.TypeToId = dict.SelectDictionary(k => k, v => v.Id);
-            current.IdToType = current.TypeToId.ToDictionary(p => p.Value, p => current.Table(p.Key).Type);
-
-            current.TypeToDN = dict;
-            current.DnToType = dict.Inverse();
-
-
-            Lite.SetTypeNameAndResolveType(TypeLogic.GetCleanName, TypeLogic.GetType);
-
-            //current.TypeToName = current.Tables.SelectDictionary(k => k, v => v.CleanTypeName);
-            //current.NameToType = current.TypeToName.Inverse("CleanTypeNames");
+                Lite.SetTypeNameAndResolveType(TypeLogic.GetCleanName, TypeLogic.TryGetType);
+            }
         }
-        
+
         public static Dictionary<TypeDN, Type> TryDNToType(Replacements replacements)
         {
             return (from dn in Administrator.TryRetrieveAll<TypeDN>(replacements)
@@ -142,24 +145,60 @@ namespace Signum.Engine.Basics
             return lista;
         }
 
+        public static Dictionary<string, Type> NameToType
+        {
+            get { return Schema.Current.NameToType; }
+        }
+
+        public static Dictionary<Type, string> TypeToName
+        {
+            get { return Schema.Current.TypeToName; }
+        }
+
         public static Type GetType(string cleanName)
         {
-            return Schema.Current.NameToType.GetOrThrow(cleanName, "Type {0} not found in the schema");
+            return NameToType.GetOrThrow(cleanName, "Type {0} not found in the schema");
         }
 
         public static Type TryGetType(string cleanName)
         {
-            return Schema.Current.NameToType.TryGetC(cleanName);
+            return NameToType.TryGetC(cleanName);
         }
 
         public static string GetCleanName(Type type)
         {
-            return Schema.Current.TypeToName.GetOrThrow(type, "Type {0} not found in the schema");
+            return TypeToName.GetOrThrow(type, "Type {0} not found in the schema");
         }
 
         public static string TryGetCleanName(Type type)
         {
-            return Schema.Current.TypeToName.TryGetC(type);
+            return TypeToName.TryGetC(type);
+        }
+    }
+
+    internal class TypeCaches
+    {
+        public readonly Dictionary<Type, TypeDN> TypeToDN;
+        public readonly Dictionary<TypeDN, Type> DnToType;
+        public readonly Dictionary<int, Type> IdToType;
+        public readonly Dictionary<Type, int> TypeToId;
+
+        public TypeCaches(Schema current)
+        {
+            TypeToDN = EnumerableExtensions.JoinStrict(
+                    Database.RetrieveAll<TypeDN>(),
+                    current.Tables.Keys,
+                    t => t.FullClassName,
+                    t => (EnumEntity.Extract(t) ?? t).FullName,
+                    (typeDN, type) => new { typeDN, type },
+                     "caching {0}. Consider synchronize".Formato(current.Table(typeof(TypeDN)).Name)
+                    ).ToDictionary(a => a.type, a => a.typeDN);
+
+            DnToType = TypeToDN.Inverse();
+
+            TypeToId = TypeToDN.SelectDictionary(k => k, v => v.Id);
+            IdToType = TypeToId.Inverse();
+
         }
     }
 }

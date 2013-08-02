@@ -22,6 +22,8 @@ namespace Signum.Entities.DynamicQuery
                 throw new ArgumentNullException("type");
 
             this.entityType = type;
+
+            this.Priority = 8;
         }
 
         public override Type Type
@@ -36,7 +38,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string Key
         {
-            get { return "({0})".Formato(Lite.UniqueTypeName(entityType)); }
+            get { return "({0})".Formato(Lite.GetCleanName(entityType)); }
         }
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)

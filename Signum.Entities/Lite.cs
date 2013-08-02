@@ -210,12 +210,12 @@ namespace Signum.Entities
 
         public string Key()
         {
-            return "{0};{1}".Formato(Lite.UniqueTypeName(this.EntityType), this.Id);
+            return "{0};{1}".Formato(Lite.GetCleanName(this.EntityType), this.Id);
         }
 
         public string KeyLong()
         {
-            return "{0};{1};{2}".Formato(Lite.UniqueTypeName(this.EntityType), this.Id, this.ToString());
+            return "{0};{1};{2}".Formato(Lite.GetCleanName(this.EntityType), this.Id, this.ToString());
         }
 
         public int CompareTo(Lite<IdentifiableEntity> other)
@@ -302,7 +302,7 @@ namespace Signum.Entities
             return null;
         }
 
-        static Regex regex = new Regex(@"(?<type>.+);(?<id>.+)(;(?<toStr>.+))?");
+        public static readonly Regex ParseRegex = new Regex(@"(?<type>.+);(?<id>.+)(;(?<toStr>.+))?");
 
         public static Lite<IdentifiableEntity> Parse(string liteKey)
         {
@@ -325,13 +325,13 @@ namespace Signum.Entities
             if (string.IsNullOrEmpty(liteKey))
                 return null;
 
-            Match match = regex.Match(liteKey);
+            Match match = ParseRegex.Match(liteKey);
             if (!match.Success)
                 return ValidationMessage.InvalidFormat.NiceToString();
 
-            Type type = ResolveType(match.Groups["type"].Value);
+            Type type = TryGetType(match.Groups["type"].Value);
             if (type == null)
-                return LiteMessage.TypeNotFound.NiceToString();
+                return LiteMessage.Type0NotFound.NiceToString().Formato(match.Groups["type"].Value);
 
             int id;
             if (!int.TryParse(match.Groups["id"].Value, out id))
@@ -351,13 +351,13 @@ namespace Signum.Entities
             return result;
         }
 
-        public static Func<Type, string> UniqueTypeName { get; private set; }
-        public static Func<string, Type> ResolveType { get; private set; }
+        public static Func<Type, string> GetCleanName { get; private set; }
+        public static Func<string, Type> TryGetType { get; private set; }
 
-        public static void SetTypeNameAndResolveType(Func<Type, string> uniqueTypeName, Func<string, Type> resolveType)
+        public static void SetTypeNameAndResolveType(Func<Type, string> getCleanName, Func<string, Type> tryResolveType)
         {
-            Lite.UniqueTypeName = uniqueTypeName;
-            Lite.ResolveType = resolveType;
+            Lite.GetCleanName = getCleanName;
+            Lite.TryGetType = tryResolveType;
         }
 
         public static Lite<IdentifiableEntity> Create(Type type, int id)
@@ -562,7 +562,8 @@ namespace Signum.Entities
         [Description("Invalid Format")]
         InvalidFormat,
         New,
-        TypeNotFound,
+        [Description("Type {0} not found")]
+        Type0NotFound,
         [Description("Text")]
         ToStr
     }

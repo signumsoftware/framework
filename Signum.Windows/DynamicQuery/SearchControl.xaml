@@ -171,6 +171,7 @@
                 <Style TargetType="{x:Type ListViewItem}">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                     <Setter Property="AutomationProperties.ItemStatus" Value="{Binding Converter={x:Static m:Converters.EntityKey}}"/>
+                    <Setter Property="Opacity" Value="{Binding IsDirty, Converter={x:Static m:Converters.DirtyOpacity}}"/>
                     <EventSetter Event="Control.MouseDoubleClick" Handler="lvResult_MouseDoubleClick"/>
                 </Style>
             </ListView.ItemContainerStyle>

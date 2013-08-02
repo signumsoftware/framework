@@ -7,6 +7,7 @@ using Signum.Engine.Maps;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
+using Signum.Engine.Basics;
 
 namespace Signum.Engine
 {
@@ -115,7 +116,7 @@ namespace Signum.Engine
             if (id == null)
                 return null;
 
-            Type type = Schema.Current.IdToType[typeId.Value];
+            Type type = TypeLogic.IdToType[typeId.Value];
 
             return (T)(IIdentifiable)giRequest.GetInvoker(type)(this, id); 
         }

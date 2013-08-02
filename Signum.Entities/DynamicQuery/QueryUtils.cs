@@ -209,37 +209,80 @@ namespace Signum.Entities.DynamicQuery
 
         public static Func<bool> MergeEntityColumns = null;
 
+        public static QueryToken SubToken(QueryToken token, QueryDescription qd, bool canAggregate, string key)
+        {
+            var result = SubTokenBasic(token, qd, key);
+
+            if (result != null)
+                return result;
+
+            if (canAggregate)
+                return AggregateTokens(token, qd).SingleOrDefaultEx(a => a.Key == key);
+
+            return null;
+        }
+
         public static List<QueryToken> SubTokens(this QueryToken token, QueryDescription qd, bool canAggregate)
         {
             var result = SubTokensBasic(token, qd);
 
             if (canAggregate)
-            {
-                if (token == null)
-                {
-                    result.Add(new AggregateToken(AggregateFunction.Count, qd.QueryName));
-                }
-                else if (!(token is AggregateToken))
-                {
-                    FilterType? ft = QueryUtils.TryGetFilterType(token.Type);
-
-                    if (ft == FilterType.Integer || ft == FilterType.Decimal || ft == FilterType.Boolean)
-                    {
-                        result.Add(new AggregateToken(AggregateFunction.Average, token));
-                        result.Add(new AggregateToken(AggregateFunction.Sum, token));
-
-                        result.Add(new AggregateToken(AggregateFunction.Min, token));
-                        result.Add(new AggregateToken(AggregateFunction.Max, token));
-                    }
-                    else if (ft == FilterType.DateTime) /*ft == FilterType.String || */
-                    {
-                        result.Add(new AggregateToken(AggregateFunction.Min, token));
-                        result.Add(new AggregateToken(AggregateFunction.Max, token));
-                    }
-                }
-            }
+                result.AddRange(AggregateTokens(token, qd));
 
             return result;
+        }
+
+        private static IEnumerable<QueryToken> AggregateTokens(QueryToken token, QueryDescription qd)
+        {
+            if (token == null)
+            {
+                yield return new AggregateToken(AggregateFunction.Count, qd.QueryName);
+            }
+            else if (!(token is AggregateToken))
+            {
+                FilterType? ft = QueryUtils.TryGetFilterType(token.Type);
+
+                if (ft == FilterType.Integer || ft == FilterType.Decimal || ft == FilterType.Boolean)
+                {
+                    yield return new AggregateToken(AggregateFunction.Average, token);
+                    yield return new AggregateToken(AggregateFunction.Sum, token);
+
+                    yield return new AggregateToken(AggregateFunction.Min, token);
+                    yield return new AggregateToken(AggregateFunction.Max, token);
+                }
+                else if (ft == FilterType.DateTime) /*ft == FilterType.String || */
+                {
+                    yield return new AggregateToken(AggregateFunction.Min, token);
+                    yield return new AggregateToken(AggregateFunction.Max, token);
+                }
+            }
+        }
+
+        static QueryToken SubTokenBasic(QueryToken token, QueryDescription qd, string key)
+        {
+            if (token == null)
+            {
+                var column = qd.Columns.SingleOrDefaultEx(a=>a.Name == key);
+
+                if (column != null)
+                    return new ColumnToken(column, qd.QueryName);
+
+                if (MergeEntityColumns != null && !MergeEntityColumns())
+                    return null;
+
+                var entity = new ColumnToken(qd.Columns.SingleEx(a => a.IsEntity), qd.QueryName);
+
+                var result = SubTokenBasic(entity, qd, key);
+
+                if (result != null)
+                    result.Subordinated = true;
+
+                return result;
+            }
+            else
+            {
+                return token.SubTokenInternal(key);
+            }
         }
 
         static List<QueryToken> SubTokensBasic(QueryToken token, QueryDescription qd)
@@ -272,34 +315,29 @@ namespace Signum.Entities.DynamicQuery
 
         public static QueryToken Parse(string tokenString, QueryDescription qd, bool canAggregate)
         {
-            try
+            if (string.IsNullOrEmpty(tokenString))
+                throw new ArgumentNullException("tokenString");
+
+            string[] parts = tokenString.Split('.');
+
+            string firstPart = parts.FirstEx();
+
+            QueryToken result = SubToken(null, qd, canAggregate, firstPart);
+
+            if (result == null)
+                throw new FormatException("Column {0} not found".Formato(firstPart));
+
+            foreach (var part in parts.Skip(1))
             {
-                if (string.IsNullOrEmpty(tokenString))
-                    throw new ArgumentNullException("tokenString"); 
+                var newResult = SubToken(result, qd, canAggregate, part);
 
-                string[] parts = tokenString.Split('.');
+                if (newResult == null)
+                    throw new FormatException("Token with key '{0}' not found on {1}".Formato(part, result.FullKey()));
 
-                string firstPart = parts.FirstEx();
-
-                QueryToken result = SubTokens(null, qd, canAggregate).Where(t => t.Key == firstPart).SingleEx(
-                    () => "Column {0} not found".Formato(firstPart),
-                    () => "More than one column named {0}".Formato(firstPart));
-
-                foreach (var part in parts.Skip(1))
-                {
-                    var list = SubTokens(result, qd, canAggregate);
-
-                    result = list.Where(t => t.Key == part).SingleEx(
-                          () => "Token with key '{0}' not found on {1}".Formato(part, result),
-                          () => "More than one token with key '{0}' found on {1}".Formato(part, result));
-                }
-
-                return result;
+                result = newResult;
             }
-            catch (Exception e)
-            {
-                throw new FormatException(e.Message, e);
-            }
+
+            return result;
         }
 
         public static string CanFilter(QueryToken token)

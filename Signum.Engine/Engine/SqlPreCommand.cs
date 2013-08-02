@@ -174,6 +174,9 @@ namespace Signum.Engine
             if (value is string)
                 return "\'" + ((string)value).Replace("'", "''") + "'";
 
+            if (value is Guid)
+                return "\'" + ((Guid)value).ToString() + "'";
+
             if (value is DateTime)
                 return "convert(datetime, '{0:s}', 126)".Formato(value);
 

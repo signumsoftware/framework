@@ -82,7 +82,7 @@ namespace Signum.Windows
         }
 
         public static readonly DependencyProperty AllowChangeColumnsProperty =
-            DependencyProperty.Register("AllowChangeColumns", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(false));
+            DependencyProperty.Register("AllowChangeColumns", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(true));
         public bool AllowChangeColumns
         {
             get { return (bool)GetValue(AllowChangeColumnsProperty); }
@@ -556,7 +556,7 @@ namespace Signum.Windows
         {
             foreach (var rr in lvResult.SelectedItems.Cast<ResultRow>())
             {
-                SetDirty(rr);
+                rr.IsDirty = true;
             }
         }
 
@@ -566,13 +566,7 @@ namespace Signum.Windows
             if (rr == null)
                 return;
 
-            SetDirty(rr);
-        }
-
-        private void SetDirty(ResultRow rr)
-        {
-            var lvi = (ListViewItem)lvResult.ItemContainerGenerator.ContainerFromItem(rr);
-            lvi.Child<GridViewRowPresenter>(WhereFlags.VisualTree).Opacity = .5;
+            rr.IsDirty = true;
         }
 
         public void GenerateListViewColumns()

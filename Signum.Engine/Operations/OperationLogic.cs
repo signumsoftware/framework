@@ -162,7 +162,7 @@ namespace Signum.Engine.Operations
                           let et = EntityKindCache.TryGetAttribute(t)
                           let sp = IsSaveProtected(t)
                           select et == null ? "{0} has no EntityTypeAttribute set".Formato(t.FullName) :
-                          sp != RequiresSaveProtected(et.EntityKind) ? "\t{0} is {1} but is {2}'save protected'".Formato(t.FullName, et, sp ? "" : "NOT ") :
+                          sp != RequiresSaveProtected(et.EntityKind) ? "\t{0} is {1} but is {2}'save protected'".Formato(t.TypeName(), et.EntityKind, sp ? "" : "NOT ") :
                           null).NotNull().OrderBy().ToString("\r\n");
 
             if (errors.HasText())
@@ -521,15 +521,13 @@ namespace Signum.Engine.Operations
 
         public static T GetArg<T>(this object[] args)
         {
-            return args.OfTypeOrEmpty<T>().SingleEx(
-                () => "The operation needs a {0} in the arguments".Formato(typeof(T)),
-                () => "There are more than one {0} in the arguments in the argument list".Formato(typeof(T)));
+            return args.OfTypeOrEmpty<T>().SingleEx(() => "{0} in the argument list".Formato(typeof(T))); ;
         }
 
         public static T TryGetArgC<T>(this object[] args) where T : class
         {
             return args.OfTypeOrEmpty<T>().SingleOrDefaultEx(
-                () => "There are more than one {0} in the arguments in the argument list".Formato(typeof(T)));
+                () => "There are more than one {0} in the argument list".Formato(typeof(T)));
         }
 
         public static T? TryGetArgS<T>(this object[] args) where T : struct
@@ -539,7 +537,7 @@ namespace Signum.Engine.Operations
             if (casted.IsEmpty())
                 return null;
 
-            return casted.SingleEx(() => "There are more than one {0} in the arguments in the argument list".Formato(typeof(T)));
+            return casted.SingleEx(() => "{0} in the argument list".Formato(typeof(T)));
         }
 
         static IEnumerable<T> OfTypeOrEmpty<T>(this object[] args)

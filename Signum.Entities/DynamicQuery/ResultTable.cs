@@ -9,6 +9,7 @@ using System.Reflection;
 using Signum.Utilities;
 using System.Runtime.Serialization;
 using System.Globalization;
+using System.ComponentModel;
 
 namespace Signum.Entities.DynamicQuery
 {
@@ -193,7 +194,7 @@ namespace Signum.Entities.DynamicQuery
         {
             var lite = ((Lite<IdentifiableEntity>)obj);
 
-            return lite.Id + ";" + (lite.EntityType == defaultEntityType ? null : Lite.UniqueTypeName(lite.EntityType)) + ";" + lite.ToString();
+            return lite.Id + ";" + (lite.EntityType == defaultEntityType ? null : Lite.GetCleanName(lite.EntityType)) + ";" + lite.ToString();
         }
 
         static object DeserializeLite(string str, Type defaultEntityType)
@@ -206,7 +207,7 @@ namespace Signum.Entities.DynamicQuery
 
             string toStr = after.After(';');
 
-            return Lite.Create(string.IsNullOrEmpty(type) ? defaultEntityType : Lite.ResolveType(type), id, toStr);
+            return Lite.Create(string.IsNullOrEmpty(type) ? defaultEntityType : Lite.TryGetType(type), id, toStr);
         }
     }
 
@@ -250,7 +251,7 @@ namespace Signum.Entities.DynamicQuery
 
         void CreateIndices(ResultColumn[] columns)
         {
-            int rows = columns.Select(a => a.Values.Count).Distinct().SingleEx(() => "Unsyncronized number of rows in the results");
+            int rows = columns.Select(a => a.Values.Count).Distinct().SingleEx(() => "Count");
 
             for (int i = 0; i < Columns.Length; i++)
                 Columns[i].Index = i;
@@ -302,10 +303,23 @@ namespace Signum.Entities.DynamicQuery
 
 
     [Serializable]
-    public class ResultRow
+    public class ResultRow : INotifyPropertyChanged
     {
         public readonly int Index;
         public readonly ResultTable Table;
+
+        bool isDirty; 
+        public bool IsDirty
+        {
+            get { return isDirty; }
+            set
+            {
+                isDirty = value;
+
+                if (PropertyChanged != null)
+                    PropertyChanged(this, new PropertyChangedEventArgs("IsDirty"));
+            }
+        }
 
         public object this[int columnIndex]
         {
@@ -330,7 +344,7 @@ namespace Signum.Entities.DynamicQuery
 
         public T GetValue<T>(string columnName)
         {
-            return (T)this[Table.Columns.Where(c => c.Column.Name == columnName).SingleEx(() => "column not found")];
+            return (T)this[Table.Columns.Where(c => c.Column.Name == columnName).SingleEx(() => columnName)];
         }
 
         public T GetValue<T>(int columnIndex)
@@ -342,5 +356,7 @@ namespace Signum.Entities.DynamicQuery
         {
             return (T)this[column];
         }
+
+        public event PropertyChangedEventHandler PropertyChanged;
     }
 }

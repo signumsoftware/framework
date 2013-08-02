@@ -17,6 +17,7 @@ namespace Signum.Entities.DynamicQuery
         internal EntityToStringToken(QueryToken parent)
             : base(parent)
         {
+            Priority = 9;
          
         }
 

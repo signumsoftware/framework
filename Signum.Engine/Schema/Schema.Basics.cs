@@ -952,7 +952,6 @@ namespace Signum.Engine.Maps
 
     public enum InitLevel
     {
-        Level_0BeforeAnyQuery,
         Level0SyncEntities,
         Level1SimpleEntities,
         Level2NormalEntities,

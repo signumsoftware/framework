@@ -622,8 +622,8 @@ namespace Signum.Windows
             ValueLine vl = fe as ValueLine;
             if (vl != null && vl.NotSet(ValueLine.ItemSourceProperty) && context.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
-                if(context.Type.IsNullable() && context.Type.UnNullify().IsEnum &&
-                   Validator.TryGetPropertyValidator(context).Validators.OfType<NotNullableAttribute>().Any())
+                if (context.Type.IsNullable() && context.Type.UnNullify().IsEnum &&
+                   Validator.TryGetPropertyValidator(context).Let(pv => pv != null && pv.Validators.OfType<NotNullableAttribute>().Any()))
                 {
                     vl.ItemSource = EnumExtensions.UntypedGetValues(vl.Type.UnNullify()).ToObservableCollection();
                 }
@@ -635,7 +635,7 @@ namespace Signum.Windows
             ValueLine vl = fe as ValueLine;
             if (vl != null && context.PropertyRouteType == PropertyRouteType.FieldOrProperty && context.Type == typeof(string))
             {
-                var slv = Validator.TryGetPropertyValidator(context).Validators.OfType<StringLengthValidatorAttribute>().FirstOrDefault();
+                var slv = Validator.TryGetPropertyValidator(context).TryCC(pv => pv.Validators.OfType<StringLengthValidatorAttribute>().FirstOrDefault());
                 if (slv != null && slv.Max != -1)
                     vl.MaxTextLength = slv.Max;
             }

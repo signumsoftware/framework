@@ -45,7 +45,7 @@ namespace Signum.Engine.DynamicQuery
 
                 core.QueryName = QueryName;
 
-                core.StaticColumns.Where(sc => sc.IsEntity).SingleEx(() => "Entity column not found {0}".Formato(QueryUtils.GetQueryUniqueKey(QueryName)));
+                core.StaticColumns.Where(sc => sc.IsEntity).SingleEx(() => "Entity column on {0}".Formato(QueryUtils.GetQueryUniqueKey(QueryName)));
 
                 core.EntityColumn().Implementations = entityImplementations;
 
@@ -111,7 +111,7 @@ namespace Signum.Engine.DynamicQuery
 
         public ColumnDescriptionFactory EntityColumn()
         {
-            return StaticColumns.Where(c => c.IsEntity).SingleEx(() => "There's no Entity column on {0}".Formato(QueryUtils.GetQueryUniqueKey(QueryName)));
+            return StaticColumns.Where(c => c.IsEntity).SingleEx(() => "Entity column on {0}".Formato(QueryUtils.GetQueryUniqueKey(QueryName)));
         }
 
         public virtual Expression Expression
@@ -714,7 +714,7 @@ namespace Signum.Engine.DynamicQuery
 
         static Expression BuildAggregateExpression(Expression collection, AggregateToken at, BuildExpressionContext context)
         {
-            Type groupType = collection.Type.GetGenericInterfaces(typeof(IEnumerable<>)).SingleEx(() => "expression should be a IEnumerable").GetGenericArguments()[0];
+            Type groupType = collection.Type.GetGenericInterfaces(typeof(IEnumerable<>)).SingleEx(() => "IEnumerable<T> implementations on {0}".Formato(collection.Type)).GetGenericArguments()[0];
 
             if (at.AggregateFunction == Signum.Entities.DynamicQuery.AggregateFunction.Count)
                 return Expression.Call(typeof(Enumerable), "Count", new[] { groupType }, new[] { collection });

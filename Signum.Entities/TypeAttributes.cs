@@ -35,7 +35,7 @@ namespace Signum.Entities
 
         public static bool IsLowPopulation(Type type)
         {
-            return GetAttribute(type).IsLowPopulation;
+            return TryGetAttribute(type).TryCS(a => a.IsLowPopulation) ?? false;
         }
 
         public static EntityKindAttribute GetAttribute(Type type)
@@ -52,9 +52,9 @@ namespace Signum.Entities
         {
             return dictionary.GetOrAdd(type, t =>
             {
-                if (t.IsAbstract || !t.IsIdentifiableEntity())
+                if (!t.IsIIdentifiable())
                     throw new InvalidOperationException("{0} should be a non-abstrat IdentifiableEntity");
-                
+
                 return t.SingleAttributeInherit<EntityKindAttribute>();
             });
         }
