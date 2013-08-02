@@ -357,7 +357,7 @@ namespace Signum.Web.Selenium
         public static void AddColumn(this ISelenium selenium, string columnTokenName, string prefix)
         {
             selenium.Click("{0}btnAddColumn".Formato(prefix));
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("{0} > :hidden[value={1}]".Formato(TableHeaderSelector(prefix), columnTokenName)));
+            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("{0} > :hidden[value='{1}']".Formato(TableHeaderSelector(prefix), columnTokenName)));
         }
 
         public static void Sort(this ISelenium selenium, int columnIndexBase1, bool ascending)
@@ -395,7 +395,7 @@ namespace Signum.Web.Selenium
         {
             bool isMarked = selenium.IsElementPresent("{0}.{1}".Formato(
                 TableHeaderSelector(columnIndexBase1, prefix),
-                ascending ? ".sf-header-sort-down" : ".sf-header-sort-up"));
+                ascending ? "sf-header-sort-down" : "sf-header-sort-up"));
 
             if (marked)
                 Assert.IsTrue(isMarked);
