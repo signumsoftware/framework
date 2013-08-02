@@ -97,7 +97,7 @@ namespace Signum.Web.Omnibox
         {
             public override bool AllowedType(Type type)
             {
-                return Navigator.IsNavigable(type, isSearchEntity: true);
+                return Navigator.IsNavigable(type, null, isSearchEntity: true);
             }
 
             public override bool AllowedPermission(Enum permission)
