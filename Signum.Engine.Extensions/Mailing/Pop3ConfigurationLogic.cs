@@ -17,6 +17,7 @@ using Signum.Entities;
 using Signum.Entities.Files;
 using Signum.Entities.Mailing;
 using Signum.Utilities;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Engine.Mailing
 {
@@ -130,14 +131,29 @@ namespace Signum.Engine.Mailing
 
                                 MailMessage mm = new StringReader(rawContent).Using(MailMimeParser.Parse);
 
-                                var email = ToEmailMessage(mm, rawContent);
-                                email.Reception = reception.ToLite();
+                                EmailMessageDN email = ToEmailMessage(mm, rawContent);
 
-                                if (AssociateWithEntities != null)
-                                    AssociateWithEntities(email);
+                                Lite<EmailMessageDN> duplicate = Database.Query<EmailMessageDN>()
+                                    .Where(a => a.BodyHash == email.BodyHash)
+                                    .Select(a => a.ToLite())
+                                    .SingleOrDefaultEx();
 
-                                using (OperationLogic.AllowSave<EmailMessageDN>())
-                                    email.Save();
+                                if (duplicate != null && AreDuplicates(email, duplicate.Retrieve()))
+                                {
+                                    var dup = duplicate.Retrieve();
+                                    dup.Duplicates++;
+                                    dup.Save();
+                                }
+                                else
+                                {
+                                    email.Reception = reception.ToLite();
+
+                                    if (AssociateWithEntities != null)
+                                        AssociateWithEntities(email);
+
+                                    using (OperationLogic.AllowSave<EmailMessageDN>())
+                                        email.Save();
+                                }
 
                                 if (config.DeleteAfterReception)
                                     client.DeleteMessage(i);
@@ -179,6 +195,22 @@ namespace Signum.Engine.Mailing
             return reception;
         }
 
+        static LambdaComparer<EmailAttachmentDN, string> fileComparer = new LambdaComparer<EmailAttachmentDN, string>(fp => fp.File.FileName);
+
+        private static bool AreDuplicates(EmailMessageDN email, EmailMessageDN dup)
+        {
+            if (!dup.Recipients.SequenceEqual(email.Recipients))
+                return false;
+
+            if (!dup.From.Equals(email.From))
+                return false;
+
+            if (!dup.Attachments.SequenceEqual(email.Attachments, fileComparer))
+                return false;
+
+            return true;
+        }
+
         public static Action<EmailMessageDN> AssociateWithEntities;
 
         private static EmailMessageDN ToEmailMessage(MailMessage mm, string rawContent)
@@ -195,7 +227,19 @@ namespace Signum.Engine.Mailing
                 Subject = mm.Subject,
                 Received = TimeZoneManager.Now,
                 RawContent = rawContent,
+                Attachments = mm.Attachments.Select(a => 
+                    new EmailAttachmentDN 
+                    {
+                        File = new FilePathDN(EmailFileType.Attachment, a.ContentId, a.ContentStream.ReadAllBytes()), 
+                        Type = EmailAttachmentType.Attachment 
+                    }).ToMList()
             };
+
+            DateTime parse;
+            if (DateTime.TryParse(mm.Headers["Date"], out parse))
+            {
+                dn.Sent = parse;
+            }
 
             if (mm.Body.HasText())
             {
@@ -209,12 +253,13 @@ namespace Signum.Engine.Mailing
                 {
                     dn.IsBodyHtml = bestView.ContentType.MediaType.Contains("htm");
                     dn.Body = MailMimeParser.GetStringFromStream(bestView.ContentStream, bestView.ContentType);
+                    dn.Attachments.AddRange(bestView.LinkedResources.Select(a => 
+                        new EmailAttachmentDN
+                        {
+                            File = new FilePathDN(EmailFileType.Attachment, a.ContentId, a.ContentStream.ReadAllBytes()),
+                            Type = EmailAttachmentType.LinkedResource
+                        }));
                 }
-            }
-
-            foreach (var item in mm.Attachments)
-            {
-                dn.Attachments.Add(new FilePathDN(EmailFileType.Attachment, item.Name, item.ContentStream.ReadAllBytes()));
             }
 
             return dn;

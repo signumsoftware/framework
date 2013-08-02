@@ -158,16 +158,13 @@ namespace Signum.Engine.Mailing.Pop3
             if (string.IsNullOrEmpty(message.Subject))
                 message.Subject = GetHeaderValue(message.Headers, "subject");
 
-            if (message.From == null)
+            try
             {
-                try
-                {
-                    message.From = new MailAddress(message.Headers["from"].DefaultText("missing@missing.com"));
-                }
-                catch
-                {
-                    message.From = new MailAddress("error@error.com");
-                }
+                message.From = new MailAddress(message.Headers["from"].DefaultText("missing@missing.com"));
+            }
+            catch
+            {
+                message.From = new MailAddress("error@error.com");
             }
 
             FillAddressesCollection(message.CC, message.Headers["cc"]);

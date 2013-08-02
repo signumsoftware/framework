@@ -253,6 +253,7 @@ namespace Signum.Engine.Mailing
                         Body = m.Body,
                         IsBodyHtml = m.IsBodyHtml,
                         Template = m.Template,
+                        SmtpConfiguration = m.SmtpConfiguration,
                         EditableMessage = m.EditableMessage,
                         State = EmailMessageState.Created
                     }

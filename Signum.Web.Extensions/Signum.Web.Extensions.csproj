@@ -171,6 +171,11 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="Mailing\Views\EmailAttachment.generated.cs">
+      <DependentUpon>EmailAttachment.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Mailing\Views\Pop3Reception.generated.cs">
       <DependentUpon>Pop3Reception.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -678,8 +683,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>LinkListPart.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Files\FileRepeaterHelper.cs" />
-    <Compile Include="Files\FileRepeater.cs" />
     <Compile Include="Files\FileLineHelper.cs" />
     <Compile Include="Files\FileLine.cs" />
     <Compile Include="Files\Controllers\FileController.cs" />
@@ -1263,6 +1266,10 @@
     <Content Include="Mailing\Views\Pop3Reception.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Pop3Reception.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Mailing\Views\EmailAttachment.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>EmailAttachment.generated.cs</LastGenOutput>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>RazorGenerator</Generator>

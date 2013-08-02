@@ -26,6 +26,7 @@ namespace Signum.Entities.Mailing
             this.UniqueIdentifier = Guid.NewGuid();
         }
 
+        [NotNullable]
         MList<EmailRecipientDN> recipients = new MList<EmailRecipientDN>();
         [CountIsValidator(ComparisonType.GreaterThan, 0)]
         public MList<EmailRecipientDN> Recipients
@@ -49,6 +50,13 @@ namespace Signum.Entities.Mailing
         {
             get { return from; }
             set { Set(ref from, value, () => From); }
+        }
+
+        Lite<SmtpConfigurationDN> smtpConfiguration;
+        public Lite<SmtpConfigurationDN> SmtpConfiguration
+        {
+            get { return smtpConfiguration; }
+            set { Set(ref smtpConfiguration, value, () => SmtpConfiguration); }
         }
 
         Lite<EmailTemplateDN> template;
@@ -92,7 +100,7 @@ namespace Signum.Entities.Mailing
         public string Subject
         {
             get { return subject; }
-            set { Set(ref subject, value, () => Subject); }
+            set { if (Set(ref subject, value, () => Subject))CalculateHash(); }
         }
 
         [SqlDbType(Size = int.MaxValue)]
@@ -101,20 +109,30 @@ namespace Signum.Entities.Mailing
         public string Body
         {
             get { return body; }
-            set
-            {
-                if (Set(ref body, value, () => Body))
-                {
-                    BodyHash = value == null ? null : Convert.ToBase64String(SHA1.Create().ComputeHash(Encoding.ASCII.GetBytes(value)));
-                }
-            }
+            set { if (Set(ref body, value, () => Subject))CalculateHash(); }
         }
 
+        void CalculateHash()
+        {
+            var str = subject + body;
+
+            BodyHash = Convert.ToBase64String(SHA1.Create().ComputeHash(Encoding.ASCII.GetBytes(str)));
+        }
+
+        [NotNullable, SqlDbType(Size = 150), UniqueIndex]
         string bodyHash;
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 150)]
         public string BodyHash
         {
             get { return bodyHash; }
-            private set { Set(ref bodyHash, value, () => BodyHash); }
+            set { Set(ref bodyHash, value, () => BodyHash); }
+        }
+
+        int duplicates;
+        public int Duplicates
+        {
+            get { return duplicates; }
+            set { Set(ref duplicates, value, () => Duplicates); }
         }
 
         bool isBodyHtml = false;
@@ -176,9 +194,9 @@ namespace Signum.Entities.Mailing
         }
 
         [NotNullable]
-        MList<FilePathDN> attachments = new MList<FilePathDN>();
+        MList<EmailAttachmentDN> attachments = new MList<EmailAttachmentDN>();
         [NotNullValidator, NoRepeatValidator]
-        public MList<FilePathDN> Attachments
+        public MList<EmailAttachmentDN> Attachments
         {
             get { return attachments; }
             set { Set(ref attachments, value, () => Attachments); }
@@ -191,7 +209,7 @@ namespace Signum.Entities.Mailing
 {EmailMessageState.Sent,         false,         true,         false,           false,                    null },
 {EmailMessageState.SentException,true,          true,         false,           false,                    null },
 {EmailMessageState.ReceptionNotified,true,      true,         false,           true,                     null },
-{EmailMessageState.Received,     false,         false,        true,            false,                    false },
+{EmailMessageState.Received,     false,         null,         true,            false,                    false },
             };
 
         static Expression<Func<EmailMessageDN, string>> ToStringExpression = e => e.Subject;
@@ -202,7 +220,33 @@ namespace Signum.Entities.Mailing
     }
 
     [Serializable]
-    public class EmailRecipientDN : EmailAddressDN
+    public class EmailAttachmentDN : EmbeddedEntity
+    {
+        EmailAttachmentType type;
+        public EmailAttachmentType Type
+        {
+            get { return type; }
+            set { Set(ref type, value, () => Type); }
+        }
+
+        [NotNullable]
+        FilePathDN file;
+        [NotNullValidator]
+        public FilePathDN File
+        {
+            get { return file; }
+            set { Set(ref file, value, () => File); }
+        }
+    }
+
+    public enum EmailAttachmentType
+    {
+        Attachment,
+        LinkedResource
+    }
+
+    [Serializable]
+    public class EmailRecipientDN : EmailAddressDN, IEquatable<EmailRecipientDN>
     {
         public EmailRecipientDN() { }
 
@@ -224,11 +268,6 @@ namespace Signum.Entities.Mailing
             set { Set(ref kind, value, () => Kind); }
         }
 
-        public override string ToString()
-        {
-            return "{0}: {1}".Formato(kind.NiceToString(), base.ToString());
-        }
-
         internal EmailRecipientDN Clone()
         {
             return new EmailRecipientDN
@@ -238,6 +277,31 @@ namespace Signum.Entities.Mailing
                  EmailOwner = EmailOwner,
                  Kind = Kind,
             };
+        }
+
+        public bool Equals(EmailRecipientDN other)
+        {
+            return base.Equals((EmailAddressDN)other) && kind == other.kind;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is EmailAddressDN && Equals((EmailAddressDN)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode() ^ kind.GetHashCode();
+        }
+
+        public string BaseToString()
+        {
+            return base.ToString();
+        }
+
+        public override string ToString()
+        {
+            return "{0}: {1}".Formato(kind.NiceToString(), base.ToString());
         }
     }
 
@@ -249,7 +313,7 @@ namespace Signum.Entities.Mailing
     }
 
     [Serializable]
-    public class EmailAddressDN : EmbeddedEntity
+    public class EmailAddressDN : EmbeddedEntity, IEquatable<EmailAddressDN>
     {
         public EmailAddressDN() { }
 
@@ -302,6 +366,21 @@ namespace Signum.Entities.Mailing
                 EmailAddress = EmailAddress,
                 EmailOwner = EmailOwner
             }; 
+        }
+
+        public bool Equals(EmailAddressDN other)
+        {
+            return other.emailAddress == emailAddress && other.displayName == displayName;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is EmailAddressDN && Equals((EmailAddressDN)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return (emailAddress ?? "").GetHashCode() ^ (displayName ?? "").GetHashCode();
         }
     }
 
