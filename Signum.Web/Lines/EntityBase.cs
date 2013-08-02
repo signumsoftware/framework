@@ -80,7 +80,10 @@ namespace Signum.Web
 
             if (OnEntityChanged.HasText())
                 options.Add("onEntityChanged", "function(){ " + OnEntityChanged + " }");
-            
+
+            if (PartialViewName.HasText() && !Type.IsEmbeddedEntity())
+                options.Add("partialViewName", PartialViewName.SingleQuote());
+
             return options;
         }
 

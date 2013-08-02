@@ -10,7 +10,7 @@
       @{
             var ident = Model.UntypedValue as IdentifiableEntity;
 
-            if (ident != null && !ident.IsNew && Navigator.IsNavigable(ident))
+            if (ident != null && !ident.IsNew && Navigator.IsNavigable(ident, null))
             {
                 <a href="@Navigator.NavigateRoute(ident)" class="sf-popup-fullscreen">
                 <span class="ui-icon ui-icon-extlink">fullscreen</span>
