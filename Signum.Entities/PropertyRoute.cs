@@ -44,11 +44,15 @@ namespace Signum.Entities
 
             foreach (var mi in Reflector.GetMemberList(expression))
             {
-                result = result.Add(mi); 
+                if (mi is MethodInfo && ((MethodInfo)mi).IsInstantiationOf(MixinDeclarations.miMixin))
+                    result = result.Add(((MethodInfo)mi).GetGenericArguments()[0]);
+                else
+                    result = result.Add(mi);
             }
             return result;
         }
 
+     
         public PropertyRoute Add(string fieldOrProperty)
         {
             return Add(GetMember(fieldOrProperty));
