@@ -22,17 +22,15 @@ namespace Signum.Entities.Reflection
 
             foreach (Modifiable item in inverseGraph)
                 if (item.Modified == ModifiedState.SelfModified)
-                    Propagate(item, inverseGraph); 
+                    Propagate(item, inverseGraph);
         }
 
         static void Propagate(Modifiable item, DirectedGraph<Modifiable> inverseGraph)
         {
-            if (item.Modified == ModifiedState.Modified || item.Modified == ModifiedState.SelfModified)
+            if (item.Modified == ModifiedState.Modified)
                 return;
 
-            if (item.Modified != ModifiedState.SelfModified)
-                item.Modified = ModifiedState.Modified;
-
+            item.Modified = ModifiedState.Modified;
             foreach (var other in inverseGraph.RelatedTo(item))
                 Propagate(other, inverseGraph);
         }
@@ -139,15 +137,15 @@ namespace Signum.Entities.Reflection
 
         public static DirectedGraph<Modifiable> PreSaving(Func<DirectedGraph<Modifiable>> recreate, ModifyEntityEventHandler modifier)
         {
-            DirectedGraph<Modifiable> graph = recreate(); 
+            DirectedGraph<Modifiable> graph = recreate();
 
-            bool graphModified = false; 
+            bool graphModified = false;
             foreach (var m in graph)
             {
                 modifier(m, ref graphModified);
             }
 
-            if(!graphModified)
+            if (!graphModified)
                 return graph; //common case
 
             do
@@ -162,7 +160,7 @@ namespace Signum.Entities.Reflection
                 graph = newGraph;
             } while (graphModified);
 
-            return graph; 
+            return graph;
         }
 
 
@@ -187,7 +185,7 @@ namespace Signum.Entities.Reflection
                 Fillcolor = n is Lite<IdentifiableEntity> ? "white" : color(n.GetType()),
                 Color =
                     n is Lite<IdentifiableEntity> ? color(((Lite<IdentifiableEntity>)n).GetType()) :
-                    (n.Modified == ModifiedState.SelfModified ? "red" : 
+                    (n.Modified == ModifiedState.SelfModified ? "red" :
                      n.Modified == ModifiedState.Modified ? "red4" :
                      n.Modified == ModifiedState.Sealed ? "gray" : "black"),
 
@@ -225,11 +223,11 @@ namespace Signum.Entities.Reflection
         public static XDocument EntityDGML(this DirectedGraph<Modifiable> graph)
         {
             return graph.ToDGML(n =>
-                n is IdentifiableEntity ? GetAttributes((IdentifiableEntity)n):
+                n is IdentifiableEntity ? GetAttributes((IdentifiableEntity)n) :
                 n is Lite<IdentifiableEntity> ? GetAttributes((Lite<IdentifiableEntity>)n) :
-                n is EmbeddedEntity ? GetAttributes((EmbeddedEntity)n):
-                n.GetType().IsMList() ? GetAttributes((IList)n) : 
-                new []
+                n is EmbeddedEntity ? GetAttributes((EmbeddedEntity)n) :
+                n.GetType().IsMList() ? GetAttributes((IList)n) :
+                new[]
                 {
                     new XAttribute("Label", n.ToString() ?? "[null]"),
                     new XAttribute("TypeName", n.GetType().TypeName()), 
