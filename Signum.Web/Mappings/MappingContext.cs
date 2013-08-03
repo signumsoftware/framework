@@ -358,8 +358,8 @@ namespace Signum.Web
             this.globalInputs = globalInputs;
             if (prefix.HasText())
             {
-                this.inputs = new ContextualSortedList<string>(globalInputs, prefix);
-                this.errors = new ContextualDictionary<List<string>>(globalErrors, prefix);
+                this.inputs = new ContextualSortedList<string>(globalInputs, prefix + TypeContext.Separator);
+                this.errors = new ContextualDictionary<List<string>>(globalErrors, prefix+ TypeContext.Separator);
             }
             else
             {
@@ -417,8 +417,37 @@ namespace Signum.Web
         {
             this.parent = parent;
             this.root = parent.Root;
-            this.inputs = new ContextualSortedList<string>(parent.Inputs, controlID);
+            this.inputs = new ContextualSortedList<string>(parent.Inputs, controlID + TypeContext.Separator);
             this.errors = new ContextualDictionary<List<string>>(root.GlobalErrors, controlID);
+        }
+    }
+
+    public class MixinContext<T> : MappingContext<T> where T : MixinEntity
+    {
+        MappingContext parent;
+        public override MappingContext Parent { get { return parent; } }
+
+        MappingContext root;
+        public override MappingContext Root { get { return root; } }
+
+        MappingContext next;
+        internal override MappingContext Next
+        {
+            get { return next; }
+            set { next = value; }
+        }
+
+        public override ControllerContext ControllerContext{   get { return root.ControllerContext; }}
+        public override SortedList<string, string> GlobalInputs{   get { return root.GlobalInputs; }}
+        public override Dictionary<string, List<string>> GlobalErrors{ get { return root.GlobalErrors; }}
+        public override IDictionary<string, string> Inputs { get { return parent.Inputs; } }
+        public override IDictionary<string, List<string>> Errors { get { return parent.Errors; } }
+
+        public MixinContext(PropertyRoute route, MappingContext parent) :
+            base(parent.ControlID, null, route)
+        {
+            this.parent = parent;
+            this.root = parent.Root;
         }
     }
 
@@ -430,7 +459,7 @@ namespace Signum.Web
         public ContextualDictionary(Dictionary<string, V> global, string controlID)
         {
             this.global = global;
-            this.ControlID = controlID + TypeContext.Separator;
+            this.ControlID = controlID;
         }
 
         public void Add(string key, V value)
@@ -534,7 +563,7 @@ namespace Signum.Web
             ContextualSortedList<V> csl = sortedList as ContextualSortedList<V>;
             
             Debug.Assert(controlID.HasText());
-            this.ControlID = controlID + TypeContext.Separator;
+            this.ControlID = controlID ;
 
             Debug.Assert(csl == null || ControlID.StartsWith(csl.ControlID));
 
