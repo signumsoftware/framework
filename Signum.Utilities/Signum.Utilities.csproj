@@ -78,6 +78,7 @@
     <Compile Include="ColorExtensions.cs" />
     <Compile Include="ConsoleSwitch.cs" />
     <Compile Include="DataStructures\ReadOnlyDictionary.cs" />
+    <Compile Include="MimeTypes.cs" />
     <Compile Include="Statics.cs" />
     <Compile Include="DataStructures\HashsetComparer.cs" />
     <Compile Include="DataStructures\MinMax.cs" />

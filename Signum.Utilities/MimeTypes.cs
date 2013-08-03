@@ -7,7 +7,7 @@ using Microsoft.Win32;
 using Signum.Utilities;
 using System.Collections.Concurrent;
 
-namespace Signum.Web
+namespace Signum.Utilities
 {
     public static class MimeType
     {
