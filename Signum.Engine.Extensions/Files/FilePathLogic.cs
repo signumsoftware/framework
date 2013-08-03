@@ -241,7 +241,7 @@ namespace Signum.Engine.Files
         {
             RenameAlgorithm = DefaultRenameAlgorithm;
             GetRepository = DefaultGetRepository;
-            CalculateSufix = SimpleSufix;
+            CalculateSufix = FileName_Sufix;
         }
 
         public static readonly Func<string, int, string> DefaultRenameAlgorithm = (sufix, num) =>
@@ -251,12 +251,14 @@ namespace Signum.Engine.Files
         public static readonly Func<FilePathDN, FileRepositoryDN> DefaultGetRepository = (FilePathDN fp) =>
             Database.Query<FileRepositoryDN>().FirstOrDefault(r => r.Active && r.FileTypes.Contains(fp.FileType));
 
-        public static readonly Func<FilePathDN, string> SimpleSufix = (FilePathDN fp) => fp.FileName;
+        public static readonly Func<FilePathDN, string> FileName_Sufix = (FilePathDN fp) => fp.FileName;
 
-        public static readonly Func<FilePathDN, string> YearlySufix = (FilePathDN fp) => Path.Combine(TimeZoneManager.Now.Year.ToString(), fp.FileName);
-        public static readonly Func<FilePathDN, string> MonthlySufix = (FilePathDN fp) => Path.Combine(TimeZoneManager.Now.Year.ToString(), Path.Combine(TimeZoneManager.Now.Month.ToString(), fp.FileName));
+        public static readonly Func<FilePathDN, string> Year_FileName_Sufix = (FilePathDN fp) => Path.Combine(TimeZoneManager.Now.Year.ToString(), fp.FileName);
+        public static readonly Func<FilePathDN, string> Year_Month_FileName_Sufix = (FilePathDN fp) => Path.Combine(TimeZoneManager.Now.Year.ToString(), Path.Combine(TimeZoneManager.Now.Month.ToString(), fp.FileName));
 
-        public static readonly Func<FilePathDN, string> YearlyGuidSufix = (FilePathDN fp) => Path.Combine(TimeZoneManager.Now.Year.ToString(), Guid.NewGuid().ToString() + Path.GetExtension(fp.FileName));
-        public static readonly Func<FilePathDN, string> MonthlyGuidSufix = (FilePathDN fp) => Path.Combine(TimeZoneManager.Now.Year.ToString(), Path.Combine(TimeZoneManager.Now.Month.ToString(), Guid.NewGuid() + Path.GetExtension(fp.FileName)));
+        public static readonly Func<FilePathDN, string> Year_GuidExtension_Sufix = (FilePathDN fp) => Path.Combine(TimeZoneManager.Now.Year.ToString(), Guid.NewGuid().ToString() + Path.GetExtension(fp.FileName));
+        public static readonly Func<FilePathDN, string> Year_Month_GuidExtension_Sufix = (FilePathDN fp) => Path.Combine(TimeZoneManager.Now.Year.ToString(), Path.Combine(TimeZoneManager.Now.Month.ToString(), Guid.NewGuid() + Path.GetExtension(fp.FileName)));
+
+        public static readonly Func<FilePathDN, string> YearMonth_Guid_Filename_Sufix = (FilePathDN fp) => Path.Combine(TimeZoneManager.Now.Year.ToString("yyyy-MM"), Path.Combine(Guid.NewGuid().ToString(), fp.FileName));
     }
 }

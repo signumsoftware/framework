@@ -28,7 +28,7 @@ namespace Signum.Engine.Mailing
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                FilePathLogic.Register(EmailFileType.Attachment, new FileTypeAlgorithm { CalculateSufix = FileTypeAlgorithm.MonthlyGuidSufix });
+                FilePathLogic.Register(EmailFileType.Attachment, new FileTypeAlgorithm { CalculateSufix = FileTypeAlgorithm.YearMonth_Guid_Filename_Sufix });
 
                 sb.Settings.AssertNotIgnored((EmailMessageDN em) => em.Reception, "start Pop3ConfigurationLogic");
                
