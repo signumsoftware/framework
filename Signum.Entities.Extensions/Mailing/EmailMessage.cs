@@ -222,6 +222,15 @@ namespace Signum.Entities.Mailing
     [Serializable]
     public class EmailAttachmentDN : EmbeddedEntity
     {
+        [NotNullable, SqlDbType(Size = 100)]
+        string contentId;
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        public string ContentId
+        {
+            get { return contentId; }
+            set { Set(ref contentId, value, () => ContentId); }
+        }
+
         EmailAttachmentType type;
         public EmailAttachmentType Type
         {
@@ -236,6 +245,22 @@ namespace Signum.Entities.Mailing
         {
             get { return file; }
             set { Set(ref file, value, () => File); }
+        }
+
+        protected override void PreSaving(ref bool graphModified)
+        {
+            if (ContentId == null && File != null)
+                ContentId = File.Sufix;
+        }
+
+        public EmailAttachmentDN Clone()
+        {
+            return new EmailAttachmentDN
+            {
+                ContentId = contentId,
+                File = file,
+                Type = type,
+            }; 
         }
     }
 

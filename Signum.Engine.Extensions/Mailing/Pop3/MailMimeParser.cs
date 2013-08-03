@@ -92,69 +92,70 @@ namespace Signum.Engine.Mailing.Pop3
 
         static void FixStandardFields(MailMessage message)
         {
-            if (message.Headers["content-type"] != null)
-            {
+            //if (message.Headers["content-type"] != null)
+            //{
 
-                //extract the value of the content-type
-                string type = Regex.Match(message.Headers["content-type"], @"^([^;]*)", RegexOptions.IgnoreCase).Groups[1].Value;
-                if (type.ToLower() == "multipart/related" || type.ToLower() == "multipart/alternative")
-                {
-                    List<string> toBeRemoved = new List<string>();
-                    List<AlternateView> viewsToBeRemoved = new List<AlternateView>();
-                    List<AlternateView> viewsToBeAdded = new List<AlternateView>();
+            //    //extract the value of the content-type
+            //    string type = Regex.Match(message.Headers["content-type"], @"^([^;]*)", RegexOptions.IgnoreCase).Groups[1].Value;
+            //    if (type.ToLower() == "multipart/related" || type.ToLower() == "multipart/alternative")
+            //    {
+            //        List<string> toBeRemoved = new List<string>();
+            //        List<AlternateView> viewsToBeRemoved = new List<AlternateView>();
+            //        List<AlternateView> viewsToBeAdded = new List<AlternateView>();
 
-                    foreach (AlternateView view in message.AlternateViews)
-                    {
-                        if (view.ContentType.MediaType == "text/html")
-                        {
-                            foreach (Attachment att in message.Attachments)
-                            {
-                                if (!string.IsNullOrEmpty(att.ContentId))
-                                {
-                                    LinkedResource res = new LinkedResource(att.ContentStream, att.ContentType);
-                                    res.ContentId = att.ContentId;
-                                    if (att.ContentId.StartsWith("tmpContentId123_"))
-                                    {
-                                        string tmpLocation = Regex.Match(att.ContentId, "tmpContentId123_(.*)").Groups[1].Value;
-                                        string tmpid = Guid.NewGuid().ToString();
-                                        res.ContentId = tmpid;
-                                        string oldHtml = GetStringFromStream(view.ContentStream, view.ContentType);
-                                        ContentType ct = new ContentType("text/html; charset=utf-7");
-                                        AlternateView tmpView = AlternateView.CreateAlternateViewFromString(Regex.Replace(oldHtml, "src=\"" + tmpLocation + "\"", "src=\"cid:" + tmpid + "\"", RegexOptions.IgnoreCase), ct);
-                                        tmpView.LinkedResources.Add(res);
-                                        viewsToBeAdded.Add(tmpView);
-                                        viewsToBeRemoved.Add(view);
-                                    }
-                                    else
-                                        view.LinkedResources.Add(res);
+            //        foreach (AlternateView view in message.AlternateViews)
+            //        {
+            //            if (view.ContentType.MediaType == "text/html")
+            //            {
+            //                foreach (Attachment att in message.Attachments)
+            //                {
+            //                    if (!string.IsNullOrEmpty(att.ContentId))
+            //                    {
+            //                        LinkedResource res = new LinkedResource(att.ContentStream, att.ContentType);
+            //                        res.ContentId = att.ContentId;
+            //                        if (att.ContentId.StartsWith("tmpContentId123_"))
+            //                        {
+            //                            string tmpLocation = Regex.Match(att.ContentId, "tmpContentId123_(.*)").Groups[1].Value;
+            //                            string tmpid = Guid.NewGuid().ToString();
+            //                            res.ContentId = tmpid;
+            //                            string oldHtml = GetStringFromStream(view.ContentStream, view.ContentType);
+            //                            ContentType ct = new ContentType("text/html; charset=utf-7");
+            //                            AlternateView tmpView = AlternateView.CreateAlternateViewFromString(Regex.Replace(oldHtml, "src=\"" + tmpLocation + "\"", "src=\"cid:" + tmpid + "\"", RegexOptions.IgnoreCase), ct);
+            //                            tmpView.LinkedResources.Add(res);
+            //                            viewsToBeAdded.Add(tmpView);
+            //                            viewsToBeRemoved.Add(view);
+            //                        }
+            //                        else
+            //                            view.LinkedResources.Add(res);
 
-                                    toBeRemoved.Add(att.ContentId);
-                                }
-                            }
-                        }
-                    }
-                    foreach (AlternateView view in viewsToBeRemoved)
-                    {
-                        message.AlternateViews.Remove(view);
-                    }
-                    foreach (AlternateView view in viewsToBeAdded)
-                    {
-                        message.AlternateViews.Add(view);
-                    }
-                    foreach (string s in toBeRemoved)
-                    {
-                        foreach (Attachment att in message.Attachments)
-                        {
-                            if (att.ContentId == s)
-                            {
-                                message.Attachments.Remove(att);
-                                break;
-                            }
-                        }
-                    }
-                }
+            //                        toBeRemoved.Add(att.ContentId);
+            //                    }
+            //                }
+            //            }
+            //        }
+            //        foreach (AlternateView view in viewsToBeRemoved)
+            //        {
+            //            message.AlternateViews.Remove(view);
+            //        }
+            //        foreach (AlternateView view in viewsToBeAdded)
+            //        {
+            //            message.AlternateViews.Add(view);
+            //        }
+            //        foreach (string s in toBeRemoved)
+            //        {
+            //            foreach (Attachment att in message.Attachments)
+            //            {
+            //                if (att.ContentId == s)
+            //                {
+            //                    message.Attachments.Remove(att);
+            //                    break;
+            //                }
+            //            }
+            //        }
+            //    }
 
-            }
+            //}
+
             if (string.IsNullOrEmpty(message.Subject))
                 message.Subject = GetHeaderValue(message.Headers, "subject");
 

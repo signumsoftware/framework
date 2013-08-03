@@ -31,6 +31,7 @@ using Signum.Engine.Translation;
 using System.Net.Configuration;
 using System.Configuration;
 using Signum.Entities.UserQueries;
+using System.IO;
 
 namespace Signum.Engine.Mailing
 {
@@ -279,6 +280,39 @@ namespace Signum.Engine.Mailing
                 Body = email.Body,
                 IsBodyHtml = email.IsBodyHtml,
             };
+
+            if (email.Attachments.Any())
+            {
+                string body = Regex.Replace(email.Body, "src=\"(?<link>[^\"]*)\"", m =>
+                {
+                    var value = m.Groups["link"].Value;
+
+                    var link = email.Attachments.Where(a => a.File.FullWebPath == value).Select(a => a.ContentId).FirstOrDefault() ?? "missingContent";
+
+                    return "src=\"cid:{0}\"".Formato(link);
+                });
+
+                AlternateView view = AlternateView.CreateAlternateViewFromString(email.Body, null, "text/html");
+                view.LinkedResources.AddRange(email.Attachments
+                   .Where(a => a.Type == EmailAttachmentType.LinkedResource)
+                   .Select(a => new LinkedResource(a.File.FullPhysicalPath, MimeType.FromFileName(a.File.FileName))
+                   {
+                       ContentId = a.ContentId
+                   }));
+
+                message.Attachments.AddRange(email.Attachments
+                    .Where(a => a.Type == EmailAttachmentType.Attachment)
+                    .Select(a => new Attachment(a.File.FullPhysicalPath, MimeType.FromFileName(a.File.FileName))
+                    {
+                        ContentId = a.ContentId
+                    }));
+
+                message.AlternateViews.Add(view);
+            }
+            else
+            {
+                message.Body = email.Body;
+            }
 
             message.To.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.To).Select(r => r.ToMailAddress()).ToList());
             message.CC.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.CC).Select(r => r.ToMailAddress()).ToList());

@@ -99,7 +99,6 @@ Write(Html.ValueLine(sc, c => c.DisplayName, vl => vl.ValueHtmlProps.Add("style"
             #line 10 "..\..\Mailing\Views\EmailAddress.cshtml"
                                                                                                 
     }
-
 }
 
             

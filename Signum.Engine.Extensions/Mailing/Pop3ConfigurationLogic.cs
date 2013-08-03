@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.Net.Mail;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Files;
@@ -230,10 +231,12 @@ namespace Signum.Engine.Mailing
                 Attachments = mm.Attachments.Select(a => 
                     new EmailAttachmentDN 
                     {
-                        File = new FilePathDN(EmailFileType.Attachment, a.ContentId, a.ContentStream.ReadAllBytes()), 
+                        ContentId = a.ContentId,
+                        File = new FilePathDN(EmailFileType.Attachment, a.ContentType.Name, a.ContentStream.ReadAllBytes()).Save(), 
                         Type = EmailAttachmentType.Attachment 
                     }).ToMList()
             };
+
 
             DateTime parse;
             if (DateTime.TryParse(mm.Headers["Date"], out parse))
@@ -248,18 +251,42 @@ namespace Signum.Engine.Mailing
             }
             else
             {
-                var bestView = mm.AlternateViews.OrderByDescending(a => a.ContentType.MediaType.Contains("htm")).ThenByDescending(a => a.ContentStream.Length).FirstOrDefault();
+                var bestView = mm.AlternateViews
+                    .OrderByDescending(a => a.ContentType.MediaType.Contains("htm"))
+                    .ThenByDescending(a => a.ContentStream.Length)
+                    .FirstOrDefault();
+
                 if (bestView != null)
                 {
                     dn.IsBodyHtml = bestView.ContentType.MediaType.Contains("htm");
+                    string body = 
+
                     dn.Body = MailMimeParser.GetStringFromStream(bestView.ContentStream, bestView.ContentType);
                     dn.Attachments.AddRange(bestView.LinkedResources.Select(a => 
                         new EmailAttachmentDN
                         {
-                            File = new FilePathDN(EmailFileType.Attachment, a.ContentId, a.ContentStream.ReadAllBytes()),
+                            ContentId = a.ContentId,
+                            File = new FilePathDN(EmailFileType.Attachment, a.ContentType.Name, a.ContentStream.ReadAllBytes()).Save(),
                             Type = EmailAttachmentType.LinkedResource
                         }));
                 }
+            }
+
+            if (dn.Attachments.Any())
+            {
+                dn.Body = Regex.Replace(dn.Body, "src=\"(?<link>[^\"]*)\"", m =>
+                {
+                    var value = m.Groups["link"].Value;
+
+                    if (!value.StartsWith("cid:"))
+                        return m.Value;
+
+                    value = value.After("cid:");
+
+                    var link = dn.Attachments.Where(a => a.ContentId == value).Select(a => a.File.FullWebPath).FirstOrDefault() ?? "http://missing/missing.jpg";
+
+                    return "src=\"{0}\"".Formato(link);
+                });
             }
 
             return dn;
