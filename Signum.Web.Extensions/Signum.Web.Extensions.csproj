@@ -441,7 +441,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="ControllerFilters\GZipFilter.cs" />
     <Compile Include="ControlPanel\Views\Admin\PanelParts.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
