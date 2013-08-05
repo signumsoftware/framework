@@ -178,7 +178,7 @@ FROM master..SysProcesses
 WHERE DB_NAME(DBId) = @DatabaseName
 
 PRINT @SPId
-EXEC(@SPId)"));
+EXEC(@SPId)".Formato(databaseName)));
 
                 commands.Add(new SqlPreCommandSimple("ALTER DATABASE {0} SET ENABLE_BROKER".Formato(databaseName)));
                 commands.Add(new SqlPreCommandSimple("--ALTER DATABASE {0} SET NEW_BROKER".Formato(databaseName)));
