@@ -121,5 +121,5 @@ namespace Signum.Utilities
         }
     }
 
-    public delegate string LocString(string lang);
+    public delegate string LocString(CultureInfo lang);
 }
