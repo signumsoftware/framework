@@ -429,9 +429,6 @@ namespace Signum.Engine.Mailing
             if (qd == null)
                 throw new ArgumentNullException("qd");
 
-            if (modelType == null)
-                throw new ArgumentNullException("modelType");
-
             BlockNode node;
             var errors = TryParseTemplate(text, qd, modelType, out node);
             if (errors.Any())
