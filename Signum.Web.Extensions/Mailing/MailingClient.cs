@@ -44,7 +44,7 @@ namespace Signum.Web.Mailing
         }
 
 
-        public static void Start(bool smtpConfig, bool newsletter, bool pop3Config)
+        public static void Start(bool newsletter, bool pop3Config)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -62,6 +62,8 @@ namespace Signum.Web.Mailing
                     new EmbeddedEntitySettings<EmailConfigurationDN> { PartialViewName = e => ViewPrefix.Formato("EmailConfiguration")},
                     new EntitySettings<EmailMasterTemplateDN>{ PartialViewName =  e => ViewPrefix.Formato("EmailMasterTemplate") },
                     new EntitySettings<SystemEmailDN>{ },
+
+                    new EntitySettings<SmtpConfigurationDN> { PartialViewName = e => ViewPrefix.Formato("SmtpConfiguration") },
 
                     new EntitySettings<EmailTemplateDN>
                     { 
@@ -118,12 +120,6 @@ namespace Signum.Web.Mailing
                         OnClick = ctx => new JsOperationConstructorFrom(ctx.Options("CreateMailFromTemplate", "Mailing"))
                             .ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk)
                     }
-                });
-
-                if (smtpConfig)
-                    Navigator.AddSettings(new List<EntitySettings>
-                {
-                    new EntitySettings<SmtpConfigurationDN> { PartialViewName = e => ViewPrefix.Formato("SmtpConfiguration") },
                 });
 
                 if (newsletter)

@@ -17,16 +17,17 @@ using System.Linq.Expressions;
 
 namespace Signum.Engine.Mailing
 {
-    public class GlobalVarDispatcher
+    public class GlobalVarContext
     {
         public IIdentifiable Entity;
         public CultureInfo Culture;
         public bool IsHtml;
+        public ISystemEmail SystemEmail;
     }
 
     public static class EmailTemplateParser
     {
-        public static Dictionary<string, Func<GlobalVarDispatcher, string>> GlobalVariables = new Dictionary<string, Func<GlobalVarDispatcher, string>>();
+        public static Dictionary<string, Func<GlobalVarContext, object>> GlobalVariables = new Dictionary<string, Func<GlobalVarContext, object>>();
 
         public static object DistinctSingle(this IEnumerable<ResultRow> rows, ResultColumn column)
         {
@@ -101,7 +102,7 @@ namespace Signum.Engine.Mailing
 
         public class GlobalNode : TextNode
         {
-            Func<GlobalVarDispatcher, string> globalFunc;
+            Func<GlobalVarContext, object> globalFunc;
             string globalKey;
             public GlobalNode(string globalKey, List<string> errors)
             {
@@ -113,8 +114,11 @@ namespace Signum.Engine.Mailing
 
             public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
             {
-                var text = globalFunc(new GlobalVarDispatcher { Entity = p.Entity, Culture = p.CultureInfo, IsHtml = p.IsHtml });
-                p.StringBuilder.Append(text);
+                var text = globalFunc(new GlobalVarContext { Entity = p.Entity, Culture = p.CultureInfo, IsHtml = p.IsHtml, SystemEmail = p.SystemEmail, });
+                if (text is IHtmlString)
+                    p.StringBuilder.Append(((IHtmlString)text).ToHtmlString());
+
+                p.StringBuilder.Append(p.IsHtml ? HttpUtility.HtmlEncode(text) : text);
             }
 
             public override void FillQueryTokens(List<QueryToken> list)

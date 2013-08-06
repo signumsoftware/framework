@@ -39,7 +39,7 @@ namespace Signum.Engine.Mailing
         }
 
 
-        public static void StarProcesses(SchemaBuilder sb, DynamicQueryManager dqm)
+        public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {

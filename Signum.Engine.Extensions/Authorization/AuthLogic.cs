@@ -690,7 +690,16 @@ namespace Signum.Engine.Authorization
             return UserDN.Current != null && !UserDN.Current.Is(AnonymousUser);
         }
 
-       
+        public static int Compare(Lite<RoleDN> role1, Lite<RoleDN> role2)
+        {
+            if (roles.Value.IndirectlyRelatedTo(role1).Contains(role2))
+                return 1;
+
+            if (roles.Value.IndirectlyRelatedTo(role2).Contains(role1))
+                return -1;
+
+            return 0;
+        }
     }
 
     [Serializable]

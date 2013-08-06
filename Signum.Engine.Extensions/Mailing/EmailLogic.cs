@@ -32,6 +32,7 @@ using System.Net.Configuration;
 using System.Configuration;
 using Signum.Entities.UserQueries;
 using System.IO;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Mailing
 {
@@ -193,6 +194,29 @@ namespace Signum.Engine.Mailing
                 return new MailAddress(Configuration.OverrideEmailAddress.DefaultText(recipient.EmailAddress), recipient.DisplayName);
 
             return new MailAddress(Configuration.OverrideEmailAddress.DefaultText(recipient.EmailAddress));
+        }
+
+        public static ProcessDN SendAll<T>(List<T> emails, string packageName = null)
+                   where T : ISystemEmail
+        {
+            EmailPackageDN package = new EmailPackageDN
+            {
+                Name = packageName ?? "Package of {0} created on {0}".Formato(typeof(T).TypeName(), TimeZoneManager.Now)
+            }.Save();
+
+            var packLite = package.ToLite();
+
+            var list = emails.SelectMany(e => e.CreateEmailMessage()).ToList();
+
+            list.ForEach(l => l.Package = packLite);
+
+            list.SaveList();
+
+            var process = ProcessLogic.Create(EmailMessageProcesses.SendEmails, package);
+
+            process.Execute(ProcessOperation.Execute);
+
+            return process;
         }
 
         class EmailGraph : Graph<EmailMessageDN, EmailMessageState>

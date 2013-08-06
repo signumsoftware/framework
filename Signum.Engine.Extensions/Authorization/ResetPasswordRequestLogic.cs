@@ -40,8 +40,6 @@ namespace Signum.Engine.Authorization
 
                 SystemEmailLogic.RegisterSystemEmail<ResetPasswordRequestMail>(() => new EmailTemplateDN
                 {
-                    Name = "Reset Password Request",
-                    IsBodyHtml = true,
                     Messages = CultureInfoLogic.ForEachCulture(culture => new EmailTemplateMessageDN(culture)
                     {
                         Text = "<p>{0}</p>".Formato(AuthEmailMessage.YouRecentlyRequestedANewPassword.NiceToString()) +

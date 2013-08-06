@@ -245,6 +245,10 @@ namespace Signum.Engine.Mailing
             EmailTemplateDN template = info.DefaultTemplateConstructor();
             if (template.MasterTemplate != null)
                 template.MasterTemplate = EmailTemplateLogic.GetDefaultMasterTemplate();
+
+            if (template.Name == null)
+                template.Name = systemEmailDN.FullClassName;
+
             template.SystemEmail = systemEmailDN;
             template.Active = true;
             template.Query = QueryLogic.GetQuery(info.QueryName);
