@@ -357,6 +357,11 @@ namespace Signum.Entities.Mailing
 
         [Ignore]
         internal object SubjectParsedNode;
+
+        public override string ToString()
+        {
+            return cultureInfo.TryToString();
+        }
     }
 
     public enum EmailMasterTemplateOperation

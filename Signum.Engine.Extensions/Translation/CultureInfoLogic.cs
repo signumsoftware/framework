@@ -55,8 +55,19 @@ namespace Signum.Engine.Translation
                     Execute = (ci, _) => { },
                 }.Register();
 
+                sb.Schema.Synchronizing += Schema_Synchronizing;
+
                 PermissionAuthLogic.RegisterTypes(typeof(TranslationPermission));
             }
+        }
+
+        static SqlPreCommand Schema_Synchronizing(Replacements arg)
+        {
+            var cis = Database.Query<CultureInfoDN>().ToList();
+
+            var table = Schema.Current.Table(typeof(CultureInfoDN));
+
+            return cis.Select(c => table.UpdateSqlSync(c)).Combine(Spacing.Double);
         }
 
         public static CultureInfo ToCultureInfo(this CultureInfoDN culture)

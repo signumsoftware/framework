@@ -15,14 +15,24 @@ using Signum.Entities.UserQueries;
 using System.Net.Configuration;
 using System.Globalization;
 using System.Configuration;
+using Signum.Engine.UserQueries;
+using System.Linq.Expressions;
+using Signum.Entities.Translation;
 
 namespace Signum.Engine.Mailing
 {
     public static class EmailTemplateLogic
     {
+        static Expression<Func<SystemEmailDN, IQueryable<EmailTemplateDN>>> EmailTemplatesExpression =
+            se => Database.Query<EmailTemplateDN>().Where(et => et.SystemEmail == se);
+        public static IQueryable<EmailTemplateDN> EmailTemplates(this SystemEmailDN se)
+        {
+            return EmailTemplatesExpression.Evaluate(se);
+        }
+
         public static Func<EmailMasterTemplateDN> CreateDefaultMasterTemplate;
      
-        public static ResetLazy<Dictionary<Lite<EmailTemplateDN>, EmailTemplateDN>> EmailTemplates; 
+        public static ResetLazy<Dictionary<Lite<EmailTemplateDN>, EmailTemplateDN>> EmailTemplatesLazy; 
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -31,7 +41,7 @@ namespace Signum.Engine.Mailing
                 sb.Include<EmailTemplateDN>();                
                 sb.Include<EmailMasterTemplateDN>();
 
-                EmailTemplates = sb.GlobalLazy(() => Database.Query<EmailTemplateDN>()
+                EmailTemplatesLazy = sb.GlobalLazy(() => Database.Query<EmailTemplateDN>()
                     .Where(et => et.Active && (et.EndDate == null || et.EndDate > TimeZoneManager.Now))
                     .ToDictionary(et => et.ToLite()), new InvalidateWith(typeof(EmailTemplateDN)));
 
@@ -72,6 +82,8 @@ namespace Signum.Engine.Mailing
 
                 EmailTemplateParser.GlobalVariables.Add("UrlLeft", _ => EmailLogic.Configuration.UrlLeft);
 
+                sb.Schema.Synchronizing += Schema_Synchronize_Tokens;
+                sb.Schema.Synchronizing += Schema_Syncronize_DefaultTemplates;
 
                 Validator.PropertyValidator<EmailTemplateDN>(et => et.Messages).StaticPropertyValidation += (et, pi) =>
                 {
@@ -179,7 +191,7 @@ namespace Signum.Engine.Mailing
 
         public static IEnumerable<EmailMessageDN> CreateEmailMessage(this Lite<EmailTemplateDN> liteTemplate, IIdentifiable entity, ISystemEmail systemEmail = null)
         {
-            EmailTemplateDN template = EmailTemplates.Value.GetOrThrow(liteTemplate, "Email template {0} not in cache".Formato(liteTemplate));
+            EmailTemplateDN template = EmailTemplatesLazy.Value.GetOrThrow(liteTemplate, "Email template {0} not in cache".Formato(liteTemplate));
 
             return new EmailMessageBuilder(template, entity, systemEmail).CreateEmailMessageInternal().ToList();
         }
@@ -256,6 +268,80 @@ namespace Signum.Engine.Mailing
             var newTemplate = CreateDefaultMasterTemplate();
 
             return newTemplate.Save().ToLite();
+        }
+
+        static SqlPreCommand Schema_Synchronize_Tokens(Replacements replacements)
+        {
+            var emailTemplates = Database.Query<EmailTemplateDN>().ToList();
+
+            var table = Schema.Current.Table(typeof(EmailTemplateDN));
+
+            SqlPreCommand cmd = emailTemplates.Select(uq => ProcessUserQuery(replacements, table, uq)).Combine(Spacing.Double);
+
+            return cmd;
+        }
+
+        static SqlPreCommand Schema_Syncronize_DefaultTemplates(Replacements replacements)
+        {
+            var table = Schema.Current.Table(typeof(EmailTemplateDN));
+
+            var systemEmails = Database.Query<SystemEmailDN>().Where(se => !se.EmailTemplates().Any(a => a.Active)).ToList();
+
+            string cis = Database.Query<CultureInfoDN>().Select(a => a.Name).ToString(", ").Etc(60);
+
+            if (!systemEmails.Any() || !SafeConsole.Ask("Create default EmailTemplates ({0})?".Formato(cis.DefaultText("No CultureInfos registered!"))))
+                return null;
+
+            var cmd = systemEmails
+                    .Select(se => table.InsertSqlSync(SystemEmailLogic.CreateDefaultTemplate(se), includeCollections: true))
+                    .Combine(Spacing.Double);
+
+            if (cmd != null)
+                return SqlPreCommand.Combine(Spacing.Double, new SqlPreCommandSimple("DECLARE @idParent INT"), cmd);
+
+            return cmd;
+        }
+
+        static SqlPreCommand ProcessUserQuery(Replacements replacements, Table table, EmailTemplateDN et)
+        {
+            try
+            {
+                Console.Clear();
+
+                SafeConsole.WriteLineColor(ConsoleColor.White, "EmailTemplate: " + et.Name);
+                Console.WriteLine(" Query: " + et.Query.Key);
+
+                if (et.Tokens.Any(a => a.ParseException != null))
+                {
+                    QueryDescription qd = DynamicQueryManager.Current.QueryDescription(et.Query.ToQueryName());
+
+                    if (et.Tokens.Any())
+                    {
+                        Console.WriteLine(" Tokens:");
+                        foreach (var item in et.Tokens.ToList())
+                        {
+                            QueryTokenDN token = item;
+                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, false, "", allowRemoveToken: false))
+                            {
+                                case FixTokenResult.Nothing: break;
+                                case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(et);
+                                case FixTokenResult.RemoveToken: throw new InvalidOperationException("Unexpected RemoveToken");
+                                case FixTokenResult.SkipEntity: return null;
+                                case FixTokenResult.Fix: EmailTemplateParser.ReplaceToken(et, item, token);break;
+                                default: break;
+                            }
+                        }
+                    }
+                }
+
+                Console.Clear();
+
+                return table.UpdateSqlSync(et, includeCollections: true);
+            }
+            catch (Exception e)
+            {
+                return new SqlPreCommandSimple("-- Exception in {0}: {1}".Formato(et.BaseToString(), e.Message));
+            }
         }
     }
 }
