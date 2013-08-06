@@ -6,7 +6,6 @@
 @Html.ScriptCss("~/Mailing/Content/SF_Mailing.css")
 @Html.ScriptsJs("~/Scripts/ckeditor/ckeditor.js")
 @Html.ScriptsJs("~/Mailing/Scripts/SF_Mailing.js")
-@Html.ScriptsJs("~/Mailing/Scripts/SF_TabsRepeater.js")
 
 @using (var ec = Html.TypeContext<EmailTemplateDN>())
 {
@@ -54,7 +53,7 @@
     }
 }
 
-
+@Html.ScriptsJs("~/Mailing/Scripts/SF_TabsRepeater.js")
 
 <script>
     $(function () {

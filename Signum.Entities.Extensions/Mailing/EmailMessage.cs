@@ -119,7 +119,7 @@ namespace Signum.Entities.Mailing
             BodyHash = Convert.ToBase64String(SHA1.Create().ComputeHash(Encoding.ASCII.GetBytes(str)));
         }
 
-        [NotNullable, SqlDbType(Size = 150), UniqueIndex]
+        [NotNullable, SqlDbType(Size = 150)]
         string bodyHash;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 150)]
         public string BodyHash
