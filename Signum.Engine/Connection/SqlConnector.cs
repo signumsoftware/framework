@@ -51,8 +51,7 @@ namespace Signum.Engine
             if (Transaction.HasTransaction)
                 return null;
 
-            SqlConnector current = ((SqlConnector)Connector.Current);
-            SqlConnection result = new SqlConnection(current.ConnectionString);
+            SqlConnection result = new SqlConnection(this.ConnectionString);
             result.Open();
             return result;
         }
@@ -381,6 +380,21 @@ namespace Signum.Engine
         public override bool AllowsMultipleQueries
         {
             get { return true; }
+        }
+
+        public SqlConnector ForDatabase(Maps.DatabaseName database)
+        {
+            if (database == null)
+                return this;
+
+            return new SqlConnector(Replace(connectionString, database), this.Schema, this.DynamicQueryManager);
+        }
+
+        private static string Replace(string connectionString, DatabaseName item)
+        {
+            var csb = new SqlConnectionStringBuilder(connectionString);
+            csb.InitialCatalog = item.ToString();
+            return csb.ToString();
         }
     }
 
