@@ -362,9 +362,21 @@ namespace Signum.Engine
                 .Where(d => list.Contains(d.name))
                 .Select(d => new { d.name, d.snapshot_isolation_state, d.is_read_committed_snapshot_on }).ToList();
 
-            return results.Select(a => SqlPreCommand.Combine(Spacing.Simple,
+            var cmd = results.Select(a =>  
+                SqlPreCommand.Combine(Spacing.Simple,
+                !a.snapshot_isolation_state || !a.is_read_committed_snapshot_on ? new SqlPreCommandSimple(@"DECLARE @SPId VARCHAR(7000)
+SELECT @SPId = COALESCE(@SPId,'')+'KILL '+CAST(SPID AS VARCHAR)+'; 'FROM master..SysProcesses WHERE DB_NAME(DBId) = 'Southwind_Log'
+EXEC(@SPId)") : null,
                 !a.snapshot_isolation_state ? SqlBuilder.SetSnapshotIsolation(a.name, true) : null,
                 !a.is_read_committed_snapshot_on ? SqlBuilder.MakeSnapshotIsolationDefault(a.name, true) : null)).Combine(Spacing.Double);
+
+            if (cmd == null)
+                return null;
+
+            return SqlPreCommand.Combine(Spacing.Double,
+                new SqlPreCommandSimple("use master -- Start Snapshot"),
+                cmd,
+                new SqlPreCommandSimple("use {0} -- Stop Snapshot".Formato(Connector.Current.DatabaseName())));
         }
     }
 
