@@ -289,7 +289,7 @@ namespace Signum.Engine.Mailing
 
             string cis = Database.Query<CultureInfoDN>().Select(a => a.Name).ToString(", ").Etc(60);
 
-            if (!systemEmails.Any() || !SafeConsole.Ask("Create default EmailTemplates ({0})?".Formato(cis.DefaultText("No CultureInfos registered!"))))
+            if (!systemEmails.Any() || !SafeConsole.Ask("{0}\r\n have no EmailTemplates. Create in {1}?".Formato(systemEmails.ToString("\r\n"), cis.DefaultText("No CultureInfos registered!"))))
                 return null;
 
             var cmd = systemEmails
