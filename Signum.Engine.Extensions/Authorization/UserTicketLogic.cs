@@ -37,6 +37,8 @@ namespace Signum.Engine.Authorization
                         ut.ConnectionDate,
                         ut.Device,
                     });
+
+                dqm.RegisterExpression((UserDN u) => u.Tickets());
             }
         }
 
