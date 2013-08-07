@@ -781,9 +781,7 @@ namespace Signum.Engine.Maps
         public string Name { get; private set; }
 
         readonly DatabaseName database;
-
-        static bool AvoidDatabaseNameGlobally;
-
+        
         public DatabaseName Database
         {
             get

@@ -79,7 +79,9 @@ namespace Signum.Web
             filterContext.HttpContext.Response.TrySkipIisCustomErrors = true;
         };
 
-        public static void HandlerApplication_Error(HttpContext context, bool isWebRequest)
+
+        /// <param name="request">The request from the GlobalAsax is behaves differently!</param>
+        public static void HandlerApplication_Error(HttpRequest request, HttpContext context, bool isWebRequest)
         {
             if (Navigator.Manager == null || !Navigator.Manager.Initialized)
                 return;

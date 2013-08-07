@@ -26,7 +26,7 @@ namespace Signum.Services
             return Return(mi, null, function);
         }
 
-        protected virtual T Return<T>(MethodBase mi, string description, Func<T> function, bool checkLogin = true)
+        protected virtual T Return<T>(MethodBase mi, string description, Func<T> function)
         {
             try
             {
@@ -57,9 +57,9 @@ namespace Signum.Services
             Return(mi, null, () => { action(); return true; });
         }
 
-        protected void Execute(MethodBase mi, string description, Action action, bool checkLogin = true)
+        protected void Execute(MethodBase mi, string description, Action action)
         {
-            Return(mi, description, () => { action(); return true; }, checkLogin);
+            Return(mi, description, () => { action(); return true; });
         }
 
         #region IBaseServer
@@ -195,8 +195,8 @@ namespace Signum.Services
 
         public virtual object[] BatchExecute(BaseQueryRequest[] requests)
         {
-            return Return(MethodInfo.GetCurrentMethod(),
-             () => DynamicQueryManager.Current.BatchExecute(requests));
+            return Return(MethodInfo.GetCurrentMethod(), requests.ToString("; "),
+                () => DynamicQueryManager.Current.BatchExecute(requests));
         }
         #endregion
 
