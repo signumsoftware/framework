@@ -33,6 +33,7 @@ namespace Signum.Engine.Authorization
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                TypeLogic.AssertStarted(sb);
                 AuthLogic.AssertStarted(sb);
                 TypeConditionLogic.Start(sb);
 
