@@ -14,14 +14,14 @@ namespace Signum.Web.Translation
         {
             var types = master.Types.Select(kvp =>
             {
-                var type = kvp.Key;
+                Type type = kvp.Key;
 
                 LocalizedType targetType = target.Types.TryGetC(type);
 
                 LocalizedType masterType = master.Types[type];
                 List<LocalizedType> supportTypes = support.Select(la => la.Types.TryGetC(type)).NotNull().ToList();
 
-                var typeConflicts = TypeConflicts(targetType, masterType, supportTypes);
+                Dictionary<CultureInfo, TypeConflict> typeConflicts = TypeConflicts(targetType, masterType, supportTypes);
 
                 var memberConflicts = (from m in masterType.Members.Keys
                                        let con = MemberConflicts(m, targetType, masterType, supportTypes)
@@ -34,25 +34,25 @@ namespace Signum.Web.Translation
                 return new TypeChanges { Type = targetType, TypeConflict = typeConflicts, MemberConflicts = memberConflicts };
             }).NotNull().ToList();
 
-            var typeGroups = (from t in types
-                              where t.TypeConflict != null
-                              from tc in t.TypeConflict
-                              select tc).GroupBy(a => a.Key, a => a.Value).ToList();
+            List<IGrouping<CultureInfo, TypeConflict>> typeGroups = (from t in types
+                                                                     where t.TypeConflict != null
+                                                                     from tc in t.TypeConflict
+                                                                     select tc).GroupBy(a => a.Key, a => a.Value).ToList();
 
-            foreach (var gr in typeGroups)
+            foreach (IGrouping<CultureInfo, TypeConflict> gr in typeGroups)
             {
-                var result = translator.TranslateBatch(gr.Select(a => a.Original.Description).ToList(), gr.Key.Name, target.Culture.Name);
+                List<string> result = translator.TranslateBatch(gr.Select(a => a.Original.Description).ToList(), gr.Key.Name, target.Culture.Name);
 
                 gr.ZipForeach(result, (sp, translated) => sp.Translated = translated);
             }
 
-            var memberGroups = (from t in types
-                                where t.MemberConflicts != null
-                                from mcKVP in t.MemberConflicts
-                                from mc in mcKVP.Value
-                                select mc).GroupBy(a => a.Key, a => a.Value).ToList();
+            List<IGrouping<CultureInfo, MemberConflict>> memberGroups = (from t in types
+                                                                         where t.MemberConflicts != null
+                                                                         from mcKVP in t.MemberConflicts
+                                                                         from mc in mcKVP.Value
+                                                                         select mc).GroupBy(a => a.Key, a => a.Value).ToList();
 
-            foreach (var gr in memberGroups)
+            foreach (IGrouping<CultureInfo, MemberConflict> gr in memberGroups)
             {
                 var result = translator.TranslateBatch(gr.Select(a => a.Original).ToList(), gr.Key.Name, target.Culture.Name);
 
@@ -98,7 +98,7 @@ namespace Signum.Web.Translation
             sentences.Add(master.Assembly.Culture, new MemberConflict { Original = master.Members.TryGetC(member) });
 
             sentences.AddRange(from lt in support
-                               where lt.Description != null
+                               where lt.Members.TryGetC(member).HasText()
                                select KVP.Create(lt.Assembly.Culture, new MemberConflict { Original = lt.Members.TryGetC(member) }));
 
             return sentences;
@@ -146,7 +146,6 @@ namespace Signum.Web.Translation
     {
         public string Original;
         public string Translated;
-
 
         public override string ToString()
         {
