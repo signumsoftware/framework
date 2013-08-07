@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Basics;
 using Signum.Engine.DynamicQuery;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Basics
 {
@@ -45,6 +46,11 @@ namespace Signum.Engine.Basics
         public static TypeDN ToTypeDN(this Type type)
         {
             return TypeToDN.GetOrThrow(type);
+        }
+
+        public static void AssertStarted(SchemaBuilder sb)
+        {
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null)));
         }
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
