@@ -48,7 +48,7 @@ namespace Signum.Services
             Execute(MethodInfo.GetCurrentMethod(), null, () =>
             {
                 UserDN.Current = AuthLogic.Login(username, passwordHash);
-            }, checkLogin: false);
+            });
         }
 
         public virtual void ChagePassword(Lite<UserDN> user, string passwordHash, string newPasswordHash)
@@ -65,7 +65,7 @@ namespace Signum.Services
             Execute(MethodInfo.GetCurrentMethod(), null, () =>
             {
                 UserDN.Current = AuthLogic.ChangePasswordLogin(username, passwordHash, newPasswordHash);
-            }, checkLogin: false);
+            });
         }
 
         public UserDN GetCurrentUser()

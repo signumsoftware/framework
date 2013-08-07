@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.Web;
 using System.Linq.Expressions;
 using Signum.Engine.Operations;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Files
 {
@@ -34,6 +35,11 @@ namespace Signum.Engine.Files
         }
 
         static Dictionary<Enum, FileTypeAlgorithm> fileTypes = new Dictionary<Enum, FileTypeAlgorithm>();
+
+        public static void AssertStarted(SchemaBuilder sb)
+        {
+            sb.AssertDefined(ReflectionTools.GetMethodInfo(() => FilePathLogic.Start(null, null)));
+        }
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -221,6 +227,8 @@ namespace Signum.Engine.Files
         {
             return File.ReadAllBytes(fp.InDB(f => f.FullPhysicalPath));
         }
+
+     
     }
 
     public sealed class FileTypeAlgorithm

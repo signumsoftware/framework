@@ -477,6 +477,7 @@ namespace Signum.Engine.Cache
             CachedTableConstructor ctr = new CachedTableConstructor(this, aliasGenerator);
 
             //Query
+            using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
             {
                 string select = "SELECT\r\n{0}\r\nFROM {1} {2}\r\n".Formato(
                     Table.Columns.Values.ToString(c => ctr.currentAlias.Name.SqlScape() + "." + c.Name.SqlScape(), ",\r\n"),
@@ -490,6 +491,7 @@ namespace Signum.Engine.Cache
 
                 query = new SqlPreCommandSimple(select);
             }
+            
 
             //Reader
             {
@@ -514,8 +516,14 @@ namespace Signum.Engine.Cache
             {
                 CacheLogic.OnStart();
 
+                var connector = (SqlConnector)Connector.Current;
+                Table table = connector.Schema.Table(typeof(T));
+
+                var subConnector = connector.ForDatabase(table.Name.Schema.TryCC(s => s.Database));
+
                 Dictionary<int, object> result = new Dictionary<int, object>();
                 using (MeasureLoad())
+                using (Connector.Override(subConnector))
                 using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
                 {
                     ((SqlConnector)Connector.Current).ExecuteDataReaderDependency(query, OnChange, CacheLogic.OnStart, fr =>
@@ -599,6 +607,7 @@ namespace Signum.Engine.Cache
             CachedTableConstructor ctr = new CachedTableConstructor(this, aliasGenerator);
 
             //Query
+            using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
             {
                 string select = "SELECT\r\n{0}\r\nFROM {1} {2}\r\n".Formato(
                     ctr.table.Columns.Values.ToString(c => ctr.currentAlias.Name.SqlScape() + "." + c.Name.SqlScape(), ",\r\n"),
@@ -636,9 +645,14 @@ namespace Signum.Engine.Cache
             {
                 CacheLogic.OnStart();
 
+                var connector = (SqlConnector)Connector.Current;
+
+                var subConnector = connector.ForDatabase(table.Name.Schema.TryCC(s => s.Database));
+
                 Dictionary<int, Dictionary<int, object>> result = new Dictionary<int, Dictionary<int, object>>();
 
                 using (MeasureLoad())
+                using (Connector.Override(subConnector))
                 using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
                 {
                     ((SqlConnector)Connector.Current).ExecuteDataReaderDependency(query, OnChange, CacheLogic.OnStart, fr =>
@@ -724,6 +738,7 @@ namespace Signum.Engine.Cache
             IColumn colToStr = (IColumn)table.Fields[SchemaBuilder.GetToStringFieldInfo(typeof(T)).Name].Field;
 
             //Query
+            using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
             {
                 string select = "SELECT {0}, {1}\r\nFROM {2} {3}\r\n".Formato(
                     currentAlias.Name.SqlScape() + "." + colId.Name.SqlScape(),
@@ -751,9 +766,14 @@ namespace Signum.Engine.Cache
             {
                 CacheLogic.OnStart();
 
+                var connector = (SqlConnector)Connector.Current;
+
+                var subConnector = connector.ForDatabase(table.Name.Schema.TryCC(s => s.Database));
+
                 Dictionary<int, string> result = new Dictionary<int, string>();
 
                 using (MeasureLoad())
+                using (Connector.Override(subConnector))
                 using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
                 {
                     ((SqlConnector)Connector.Current).ExecuteDataReaderDependency(query, OnChange, CacheLogic.OnStart, fr =>

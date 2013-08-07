@@ -247,5 +247,26 @@ namespace Signum.Engine.Mailing
 
             return template;
         }
+
+        public static void GenerateAllTemplates()
+        {
+            foreach (var systemEmail in systemEmails.Keys)
+            {
+                var systemEmailDN = ToSystemEmailDN(systemEmail);
+
+                var template = Database.Query<EmailTemplateDN>().SingleOrDefaultEx(t =>
+                    t.IsActiveNow() == true &&
+                    t.SystemEmail == systemEmailDN);
+
+                if (template == null)
+                {
+                    template = CreateDefaultTemplate(systemEmailDN);
+
+                    using (ExecutionMode.Global())
+                    using (OperationLogic.AllowSave<EmailTemplateDN>())
+                        template.Save();
+                }
+            }
+        }
     }
 }

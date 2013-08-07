@@ -16,6 +16,7 @@ using Signum.Entities.Processes;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using System.Data.SqlClient;
+using Signum.Engine.Maps;
 
 namespace Signum.Engine.Processes
 {
@@ -108,6 +109,8 @@ namespace Signum.Engine.Processes
 
             Task.Factory.StartNew(() =>
             {
+                var database = Schema.Current.Table(typeof(ProcessDN)).Name.Schema.TryCC(s => s.Database); 
+
                 using (AuthLogic.Disable())
                 {
                     try
@@ -144,7 +147,7 @@ namespace Signum.Engine.Processes
                                         .Where(a => ProcessLogic.JustMyProcesses ? a.MachineName == Environment.MachineName : a.MachineName == ProcessDN.None)
                                         .Where(a => a.State == ProcessState.Planned)
                                         .Select(a => a.PlannedDate)
-                                        .ToListWithInvalidation("Process", args => WakeUp("Planned dependency", args));
+                                        .ToListWithInvalidation(typeof(ProcessDN), "Planned dependency", args => WakeUp("Planned dependency", args));
 
                                 SetNextPannedExecution(list.Min());
 
@@ -160,7 +163,7 @@ namespace Signum.Engine.Processes
                                             .Where(p => p.State == ProcessState.Queued)
                                             .Where(p => p.MachineName == Environment.MachineName || (!ProcessLogic.JustMyProcesses && p.MachineName == ProcessDN.None))
                                             .Select(a => new { Process = a.ToLite(), a.QueuedDate, a.MachineName })
-                                            .ToListWithInvalidation("", args => WakeUp("Queued dependency", args));
+                                            .ToListWithInvalidation(typeof(ProcessDN), "Queued depencency", args => WakeUp("Queued dependency", args));
 
                                         var afordable = queued
                                             .OrderByDescending(p => p.MachineName == Environment.MachineName)
@@ -211,7 +214,7 @@ namespace Signum.Engine.Processes
                                                 .Where(p => p.State == ProcessState.Suspending)
                                                 .Where(p => p.MachineName == Environment.MachineName)
                                                 .Select(a => a.ToLite())
-                                                .ToListWithInvalidation("", args => WakeUp("Suspending dependency", args));
+                                                .ToListWithInvalidation(typeof(ProcessDN), "Suspending dependency", args => WakeUp("Suspending dependency", args));
 
                                         foreach (var s in suspending)
                                         {
