@@ -33,6 +33,7 @@ using System.Configuration;
 using Signum.Entities.UserQueries;
 using System.IO;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Engine.Files;
 
 namespace Signum.Engine.Mailing
 {
@@ -55,6 +56,7 @@ namespace Signum.Engine.Mailing
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                FilePathLogic.AssertStarted(sb);
                 CultureInfoLogic.AssertStarted(sb);
                 EmailLogic.getConfiguration = getConfiguration;
                 EmailTemplateLogic.Start(sb, dqm);
