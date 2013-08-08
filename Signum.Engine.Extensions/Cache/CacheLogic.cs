@@ -95,7 +95,7 @@ namespace Signum.Engine.Cache
             SqlConnector subConnector = ((SqlConnector)Connector.Current).ForDatabase(db);
 
             using (new EntityCache())
-                subConnector.ExecuteDataReaderDependency(tr.GetMainPreCommand(), onChange, CacheLogic.OnStart, fr =>
+                subConnector.ExecuteDataReaderDependency(tr.GetMainPreCommand(), onChange, CacheLogic.ForceOnStart, fr =>
                     {
                         if (reader == null)
                             reader = new SimpleReader(fr, EntityCache.NewRetriever());
@@ -201,21 +201,30 @@ EXEC(@SPId)".Formato(databaseName)));
                 new SqlPreCommandSimple("use {0} -- Finish SqlDepencency sync".Formato(connector.DatabaseName())));
         }
 
-        static bool isStarted = false;
+
+        static bool started = false;
         readonly static object startKeyLock = new object();
         internal static void OnStart()
         {
             if (GloballyDisabled)
                 return;
 
-            if (isStarted)
+            if (started)
                 return;
 
             lock (startKeyLock)
             {
-                if (isStarted)
+                if (started)
                     return;
 
+                ForceOnStart();
+            }
+        }
+
+        internal static void ForceOnStart()
+        {
+            lock (startKeyLock)
+            {
                 SqlConnector connector = (SqlConnector)Connector.Current;
 
                 if (AssertOnStart)
@@ -224,7 +233,6 @@ EXEC(@SPId)".Formato(databaseName)));
 
                     AssertNonIntegratedSecurity(currentUser);
                 }
-
 
                 foreach (var database in Schema.Current.DatabaseNames())
                 {
@@ -243,16 +251,27 @@ EXEC(@SPId)".Formato(databaseName)));
                     }
                 }
 
-                SafeConsole.SetConsoleCtrlHandler(ct =>
-                {
-                    Shutdown();
-                    return true;
-                }, true);
+                RegisterOnShutdown();
 
-                AppDomain.CurrentDomain.ProcessExit += (o, a) => Shutdown();
-
-                isStarted = true;
+                started = true;
             }
+        }
+
+        static bool registered = false;
+        static void RegisterOnShutdown()
+        {
+            if (registered)
+                return;
+
+            SafeConsole.SetConsoleCtrlHandler(ct =>
+            {
+                Shutdown();
+                return true;
+            }, true);
+
+            AppDomain.CurrentDomain.ProcessExit += (o, a) => Shutdown();
+
+            registered = true;
         }
 
         private static void AssertNonIntegratedSecurity(string currentUser)

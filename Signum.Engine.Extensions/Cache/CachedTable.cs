@@ -526,7 +526,7 @@ namespace Signum.Engine.Cache
                 using (Connector.Override(subConnector))
                 using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
                 {
-                    ((SqlConnector)Connector.Current).ExecuteDataReaderDependency(query, OnChange, CacheLogic.OnStart, fr =>
+                    ((SqlConnector)Connector.Current).ExecuteDataReaderDependency(query, OnChange, CacheLogic.ForceOnStart, fr =>
                     {
                         object obj = rowReader(fr);
                         result[idGetter(obj)] = obj; //Could be repeated joins
@@ -655,7 +655,7 @@ namespace Signum.Engine.Cache
                 using (Connector.Override(subConnector))
                 using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
                 {
-                    ((SqlConnector)Connector.Current).ExecuteDataReaderDependency(query, OnChange, CacheLogic.OnStart, fr =>
+                    ((SqlConnector)Connector.Current).ExecuteDataReaderDependency(query, OnChange, CacheLogic.ForceOnStart, fr =>
                     {
                         object obj = rowReader(fr);
                         int parentId = parentIdGetter(obj);
@@ -776,7 +776,7 @@ namespace Signum.Engine.Cache
                 using (Connector.Override(subConnector))
                 using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
                 {
-                    ((SqlConnector)Connector.Current).ExecuteDataReaderDependency(query, OnChange, CacheLogic.OnStart, fr =>
+                    ((SqlConnector)Connector.Current).ExecuteDataReaderDependency(query, OnChange, CacheLogic.ForceOnStart, fr =>
                     {
                         var kvp = rowReader(fr);
                         result[kvp.Key] = kvp.Value;
