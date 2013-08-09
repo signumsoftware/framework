@@ -189,10 +189,11 @@ namespace Signum.Utilities
 
         static object ConvertTo(string s, Type type, CultureInfo culture)
         {
+            s = s.Trim();
             Type baseType = Nullable.GetUnderlyingType(type);
             if (baseType != null)
             {
-                if (!s.Trim().HasText()) return null;
+                if (!s.HasText()) return null;
                 else return ConvertTo(s, baseType, culture);
             }
 
