@@ -80,17 +80,40 @@ namespace Signum.Entities.DynamicQuery
                     hasNull = true;
                 }
 
+                if (token.Type == typeof(string))
+                {
+                    while (clone.Contains(""))
+                    {
+                        clone.Remove("");
+                        hasNull = true;
+                    }
+
+                    if (hasNull)
+                    {
+                        clone.Add("");
+                        left = Expression.Coalesce(left, Expression.Constant(""));
+                    }
+                }
+
+
                 Expression right = Expression.Constant(clone, typeof(IEnumerable<>).MakeGenericType(Token.Type.Nullify()));
                 var contains =  Expression.Call(miContainsEnumerable.MakeGenericMethod(Token.Type.Nullify()), right, left.Nullify());
 
-                if (!hasNull)
+                if (!hasNull || token.Type == typeof(string))
                     return contains;
 
                 return Expression.Or(Expression.Equal(left, Expression.Constant(null, Token.Type.Nullify())), contains);
             }
             else
             {
-                Expression right = Expression.Constant(Value, Token.Type);
+                var val = Value;
+                if (token.Type == typeof(string) && (val == null || val is string && string.IsNullOrEmpty((string)val)))
+                {
+                    val = val ?? "";
+                    left = Expression.Coalesce(left, Expression.Constant(""));
+                }
+
+                Expression right = Expression.Constant(val, Token.Type);
 
                 return QueryUtils.GetCompareExpression(Operation, left, right);
             }
