@@ -102,18 +102,12 @@ namespace Signum.Engine
 
                     return result;
                 }
-                catch (SqlTypeException ex)
+                catch (Exception ex)
                 {
-                    var nex = HandleSqlTypeException(ex, preCommand);
+                    var nex = HandleException(ex, preCommand);
                     if (nex == ex)
                         throw;
-                    throw nex;
-                }
-                catch (SqlException ex)
-                {
-                    var nex = HandleSqlException(ex, preCommand);
-                    if (nex == ex)
-                        throw;
+
                     throw nex;
                 }
             }
@@ -130,18 +124,12 @@ namespace Signum.Engine
                     int result = cmd.ExecuteNonQuery();
                     return result;
                 }
-                catch (SqlTypeException ex)
+                catch (Exception ex)
                 {
-                    var nex = HandleSqlTypeException(ex, preCommand);
+                    var nex = HandleException(ex, preCommand);
                     if (nex == ex)
                         throw;
-                    throw nex;
-                }
-                catch (SqlException ex)
-                {
-                    var nex = HandleSqlException(ex, preCommand);
-                    if (nex == ex)
-                        throw;
+
                     throw nex;
                 }
             }
@@ -187,18 +175,12 @@ namespace Signum.Engine
                             }
                         }
                     }
-                    catch (SqlTypeException ex)
+                    catch (Exception ex)
                     {
-                        var nex = HandleSqlTypeException(ex, preCommand);
+                        var nex = HandleException(ex, preCommand);
                         if (nex == ex)
                             throw;
-                        throw nex;
-                    }
-                    catch (SqlException ex)
-                    {
-                        var nex = HandleSqlException(ex, preCommand);
-                        if (nex == ex)
-                            throw;
+
                         throw nex;
                     }
                 }
@@ -226,18 +208,12 @@ namespace Signum.Engine
 
                 return cmd.ExecuteReader();
             }
-            catch (SqlTypeException ex)
+            catch (Exception ex)
             {
-                var nex = HandleSqlTypeException(ex, preCommand);
+                var nex = HandleException(ex, preCommand);
                 if (nex == ex)
                     throw;
-                throw nex;
-            }
-            catch (SqlException ex)
-            {
-                var nex = HandleSqlException(ex, preCommand);
-                if (nex == ex)
-                    throw;
+
                 throw nex;
             }
         }
@@ -256,18 +232,12 @@ namespace Signum.Engine
                     da.Fill(result);
                     return result;
                 }
-                catch (SqlTypeException ex)
+                catch (Exception ex)
                 {
-                    var nex = HandleSqlTypeException(ex, preCommand);
+                    var nex = HandleException(ex, preCommand);
                     if (nex == ex)
                         throw;
-                    throw nex;
-                }
-                catch (SqlException ex)
-                {
-                    var nex = HandleSqlException(ex, preCommand);
-                    if (nex == ex)
-                        throw;
+
                     throw nex;
                 }
             }
@@ -286,26 +256,40 @@ namespace Signum.Engine
                     da.Fill(result);
                     return result;
                 }
-                catch (SqlTypeException ex)
+                catch (Exception ex)
                 {
-                    var nex = HandleSqlTypeException(ex, preCommand);
+                    var nex = HandleException(ex, preCommand);
                     if (nex == ex)
                         throw;
-                    throw nex;
-                }
-                catch (SqlException ex)
-                {
-                    var nex = HandleSqlException(ex, preCommand);
-                    if (nex == ex)
-                        throw;
+
                     throw nex;
                 }
             }
         }
 
-        public Exception HandleSqlTypeException(SqlTypeException ex, SqlPreCommandSimple command)
+        public Exception HandleException(Exception ex, SqlPreCommandSimple command)
         {
-            if (ex.Message.Contains("DateTime"))
+            var nex = ReplaceException(ex, command);
+            nex.Data["Sql"] = command.PlainSql();
+            return nex;
+        }
+
+        Exception ReplaceException(Exception ex, SqlPreCommandSimple command)
+        {
+            var se = ex as SqlException;
+            if (se != null)
+            {
+                switch (se.Number)
+                {
+                    case -2: return new TimeoutException(ex.Message, ex);
+                    case 2601: return new UniqueKeyException(ex);
+                    case 547: return new ForeignKeyException(ex);
+                    default: return ex;
+                }
+            }
+
+            var ste = ex as SqlTypeException;
+            if (ste != null && ex.Message.Contains("DateTime"))
             {
                 var mins = command.Parameters.Where(a => DateTime.MinValue.Equals(a.Value));
 
@@ -318,19 +302,7 @@ namespace Signum.Engine
             }
 
             return ex;
-        }
 
-        public Exception HandleSqlException(SqlException ex, SqlPreCommand command)
-        {
-            switch (ex.Number)
-            {
-                case -2: var timeout = new TimeoutException(ex.Message, ex);
-                    timeout.Data["Sql"] = command.PlainSql();
-                    return timeout;
-                case 2601: return new UniqueKeyException(ex);
-                case 547: return new ForeignKeyException(ex);
-                default: return ex;
-            }
         }
 
         public override string DatabaseName()

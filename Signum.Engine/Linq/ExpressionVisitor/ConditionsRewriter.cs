@@ -322,6 +322,22 @@ namespace Signum.Engine.Linq
             return select;
         }
 
+        protected override Expression VisitIsNull(IsNullExpression isNull)
+        {
+            var newExpr = MakeSqlValue(Visit(isNull.Expression));
+            if (newExpr != isNull.Expression)
+                return new IsNullExpression(newExpr);
+            return isNull;
+        }
+
+        protected override Expression VisitIsNotNull(IsNotNullExpression isNotNull)
+        {
+            var newExpr = MakeSqlValue(Visit(isNotNull.Expression));
+            if (newExpr != isNotNull.Expression)
+                return new IsNotNullExpression(newExpr);
+            return isNotNull;
+        }
+
         protected override ColumnDeclaration VisitColumnDeclaration(ColumnDeclaration c)
         {
             var e = MakeSqlValue(Visit(c.Expression));
