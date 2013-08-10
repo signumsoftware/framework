@@ -293,7 +293,17 @@ namespace Signum.Engine.Mailing
                 return null;
 
             var cmd = systemEmails
-                    .Select(se => table.InsertSqlSync(SystemEmailLogic.CreateDefaultTemplate(se), includeCollections: true))
+                    .Select(se =>
+                    {
+                        try
+                        {
+                            return table.InsertSqlSync(SystemEmailLogic.CreateDefaultTemplate(se), includeCollections: true);
+                        }
+                        catch (Exception e)
+                        {
+                            return new SqlPreCommandSimple("Exception on SystemEmail {0}: {1}".Formato(se, e.Message));
+                        }
+                    })
                     .Combine(Spacing.Double);
 
             if (cmd != null)
