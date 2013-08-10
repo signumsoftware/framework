@@ -17,7 +17,8 @@ namespace Signum.Entities.Translation
         public CultureInfoDN(CultureInfo ci)
         {
             Name = ci.Name;
-            DisplayName = ci.DisplayName;
+            NativeName = ci.NativeName;
+            EnglishName = ci.EnglishName;
         }
 
         [NotNullable, SqlDbType(Size = 10), UniqueIndex]
@@ -29,11 +30,18 @@ namespace Signum.Entities.Translation
             set { SetToStr(ref name, value, () => Name); }
         }
 
-        string displayName;
-        public string DisplayName
+        string nativeName;
+        public string NativeName
         {
-            get { return displayName; }
-            private set { Set(ref displayName, value, () => DisplayName); }
+            get { return nativeName; }
+            private set { Set(ref nativeName, value, () => NativeName); }
+        }
+
+        string englishName;
+        public string EnglishName
+        {
+            get { return englishName; }
+            private set { Set(ref englishName, value, () => EnglishName); }
         }
 
         public CultureInfo CultureInfo
@@ -65,7 +73,8 @@ namespace Signum.Entities.Translation
         {
             try
             {
-                DisplayName = CultureInfo.DisplayName;
+                EnglishName = CultureInfo.EnglishName;
+                NativeName = CultureInfo.NativeName;
             }
             catch (CultureNotFoundException)
             {
@@ -74,7 +83,7 @@ namespace Signum.Entities.Translation
             base.PreSaving(ref graphModified);
         }
 
-        static Expression<Func<CultureInfoDN, string>> ToStringExpression = e => e.DisplayName;
+        static Expression<Func<CultureInfoDN, string>> ToStringExpression = e => e.EnglishName;
         public override string ToString()
         {
             return ToStringExpression.Evaluate(this);
