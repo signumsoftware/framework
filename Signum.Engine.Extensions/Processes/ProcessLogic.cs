@@ -272,7 +272,7 @@ namespace Signum.Engine.Processes
 
         public static ProcessDN Create(Enum processKey, IProcessDataDN processData, IProcessSessionDN session = null)
         {
-            return MultiEnumLogic<ProcessAlgorithmDN>.ToEntity(processKey).Create(processData, session);
+            return processKey.ToEntity<ProcessAlgorithmDN>().Create(processData, session);
         }
 
         public static ProcessDN Create(this ProcessAlgorithmDN process, IProcessDataDN processData, IProcessSessionDN session = null)

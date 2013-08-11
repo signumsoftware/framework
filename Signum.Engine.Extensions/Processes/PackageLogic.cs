@@ -136,7 +136,7 @@ namespace Signum.Engine.Processes
 
         public static ProcessDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> entities, Enum operationKey)
         {
-            return CreatePackageOperation(entities, MultiEnumLogic<OperationDN>.ToEntity((Enum)operationKey));
+            return CreatePackageOperation(entities, operationKey.ToEntity<OperationDN>());
         }
 
         public static ProcessDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> entities, OperationDN operation)
@@ -169,7 +169,7 @@ namespace Signum.Engine.Processes
         {
             PackageOperationDN package = (PackageOperationDN)executingProcess.Data;
 
-            Enum operationKey = MultiEnumLogic<OperationDN>.ToEnum(package.Operation);
+            Enum operationKey = package.Operation.ToEnum();
 
             executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
             {

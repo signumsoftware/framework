@@ -64,8 +64,8 @@ namespace Signum.Engine.Authorization
                 MultiEnumLogic<PermissionDN>.Start(sb, () => RegisteredPermission.ToHashSet());
 
                 cache = new AuthCache<RulePermissionDN, PermissionAllowedRule, PermissionDN, Enum, bool>(sb,
-                    MultiEnumLogic<PermissionDN>.ToEnum,
-                    MultiEnumLogic<PermissionDN>.ToEntity,
+                    MultiEnumExtensions.ToEnum<PermissionDN>,
+                    MultiEnumExtensions.ToEntity<PermissionDN>,
                     merger: new PermissionMerger(),
                     invalidateWithTypes: false);
 

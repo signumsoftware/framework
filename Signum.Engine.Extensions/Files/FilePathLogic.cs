@@ -144,11 +144,11 @@ namespace Signum.Engine.Files
                 {
                     //set typedn from enum
                     if (fp.FileType == null)
-                        fp.FileType = MultiEnumLogic<FileTypeDN>.ToEntity(fp.FileTypeEnum);
+                        fp.FileType = fp.FileTypeEnum.ToEntity<FileTypeDN>();
 
                     //set enum from typedn
                     if (fp.FileTypeEnum == null)
-                        fp.SetFileTypeEnum(MultiEnumLogic<FileTypeDN>.ToEnum(fp.FileType));
+                        fp.SetFileTypeEnum(fp.FileType.ToEnum());
 
                     FileTypeAlgorithm alg = fileTypes[fp.FileTypeEnum];
                     string sufix = alg.CalculateSufix(fp);

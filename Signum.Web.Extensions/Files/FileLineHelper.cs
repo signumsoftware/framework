@@ -133,7 +133,7 @@ namespace Signum.Web.Files
                         if (filePath != null)
                         {
                             sb.AddLine(helper.Hidden(fileLine.Compose(FileLineKeys.FileType),
-                                MultiEnumDN.UniqueKey(filePath.FileTypeEnum ?? MultiEnumLogic<FileTypeDN>.ToEnum(filePath.FileType))));
+                                MultiEnumDN.UniqueKey(filePath.FileTypeEnum ?? filePath.FileType.ToEnum())));
                         }
                         else
                         {
@@ -191,7 +191,7 @@ namespace Signum.Web.Files
             if (fp.FileTypeEnum != null)
                 return fp.FileTypeEnum;
             else if (fp.FileType != null)
-                return MultiEnumLogic<FileTypeDN>.ToEnum(fp.FileType);
+                return fp.FileType.ToEnum<FileTypeDN>();
 
             return null;
         }
