@@ -37,8 +37,8 @@ namespace Signum.Engine.Authorization
                 OperationLogic.AllowOperation += new AllowOperationHandler(OperationLogic_AllowOperation);
 
                 cache = new AuthCache<RuleOperationDN, OperationAllowedRule, OperationDN, Enum, OperationAllowed>(sb,
-                     MultiEnumLogic<OperationDN>.ToEnum,
-                     MultiEnumLogic<OperationDN>.ToEntity,
+                     MultiEnumExtensions.ToEnum<OperationDN>,
+                     MultiEnumExtensions.ToEntity<OperationDN>,
                      merger: new OperationMerger(),
                      invalidateWithTypes: true,
                      coercer:  OperationCoercer.Instance);
@@ -142,13 +142,13 @@ namespace Signum.Engine.Authorization
 
         public static OperationRulePack GetOperationRules(Lite<RoleDN> role, TypeDN typeDN)
         {
-            var resources = OperationLogic.GetAllOperationInfos(TypeLogic.DnToType[typeDN]).Select(a => MultiEnumLogic<OperationDN>.ToEntity(a.Key));
+            var resources = OperationLogic.GetAllOperationInfos(TypeLogic.DnToType[typeDN]).Select(a => a.Key.ToEntity<OperationDN>());
             var result = new OperationRulePack { Role = role, Type = typeDN, };
 
             cache.GetRules(result, resources);
 
             var coercer = OperationCoercer.Instance.GetCoerceValue(role);
-            result.Rules.ForEach(r => r.CoercedValues = EnumExtensions.GetValues<OperationAllowed>().Where(a => !coercer(MultiEnumLogic<OperationDN>.ToEnum(r.Resource), a).Equals(a)).ToArray());
+            result.Rules.ForEach(r => r.CoercedValues = EnumExtensions.GetValues<OperationAllowed>().Where(a => !coercer(r.Resource.ToEnum(), a).Equals(a)).ToArray());
             
             return result;
         }

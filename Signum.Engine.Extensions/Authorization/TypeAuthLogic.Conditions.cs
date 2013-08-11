@@ -536,7 +536,7 @@ namespace Signum.Engine.Authorization
                 Conditions = allowed.Conditions.Select(a => new RuleTypeConditionDN
                 {
                     Allowed = a.Allowed,
-                    Condition = MultiEnumLogic<TypeConditionNameDN>.ToEntity(a.ConditionName)
+                    Condition = a.ConditionName.ToEntity<TypeConditionNameDN>()
                 }).ToMList()
             };
         }
@@ -544,7 +544,7 @@ namespace Signum.Engine.Authorization
         public static TypeAllowedAndConditions ToTypeAllowedAndConditions(this RuleTypeDN rule)
         {
             return new TypeAllowedAndConditions(rule.Allowed,
-                rule.Conditions.Select(c => new TypeConditionRule(MultiEnumLogic<TypeConditionNameDN>.ToEnum(c.Condition), c.Allowed)).ToReadOnly());
+                rule.Conditions.Select(c => new TypeConditionRule(c.Condition.ToEnum(), c.Allowed)).ToReadOnly());
         }
     }
 }

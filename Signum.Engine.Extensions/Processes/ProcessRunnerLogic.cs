@@ -185,7 +185,7 @@ namespace Signum.Engine.Processes
                                         {
                                             ProcessDN pro = pair.Process.Retrieve();
 
-                                            IProcessAlgorithm algorithm = ProcessLogic.GetProcessAlgorithm(MultiEnumLogic<ProcessAlgorithmDN>.ToEnum(pro.Algorithm));
+                                            IProcessAlgorithm algorithm = ProcessLogic.GetProcessAlgorithm(pro.Algorithm.ToEnum());
 
                                             ExecutingProcess executingProcess = new ExecutingProcess(algorithm, pro);
 
