@@ -8,7 +8,7 @@ using Signum.Utilities;
 using System.Reflection;
 using Signum.Utilities.ExpressionTrees;
 
-namespace Signum.Engine.Basics
+namespace Signum.Engine
 {
     public static class MultiEnumExtensions
     {
@@ -100,7 +100,7 @@ namespace Signum.Engine.Basics
             }).ToList();
         }
 
-        public static T ToEntity(Enum key)
+        internal static T ToEntity(Enum key)
         {
             AssertInitialized();
 
@@ -135,7 +135,7 @@ namespace Signum.Engine.Basics
             return TryToEntity(en); 
         }
 
-        public static Enum ToEnum(T entity)
+        internal static Enum ToEnum(T entity)
         {
             return ToEnum(entity.Key);
         }
