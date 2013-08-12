@@ -122,7 +122,7 @@ namespace Signum.Utilities.NaturalLanguage
             DecimalUnitPlural = "céntimos",
             DecimalUnitGender = null,
 
-            NumeroDecimales = 2,
+            NumberOfDecimals = 2,
             OmitirDecimalZeros = true
         }; 
 
@@ -149,12 +149,12 @@ namespace Signum.Utilities.NaturalLanguage
             parteEntera = ConvertirNumeros(entero, femenino, settings.Unit, settings.UnitPlural);
 
             decimal decimAux = (number - entero);
-            for (int i = 0; i < settings.NumeroDecimales; i++)
+            for (int i = 0; i < settings.NumberOfDecimals; i++)
                 decimAux *=10m;
 
             long decim = (long)decimAux;
             if (decim != decimAux)
-                throw new ApplicationException(string.Format("numero tiene mas de {0} valores decimales", settings.NumeroDecimales));
+                throw new ApplicationException(string.Format("numero tiene mas de {0} valores decimales", settings.NumberOfDecimals));
 
 
             if (decim != 0 || !settings.OmitirDecimalZeros)

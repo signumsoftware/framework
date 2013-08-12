@@ -41,7 +41,6 @@ namespace Signum.Utilities
 
             return detector.GetGender(name);
         }
-
         
         public static bool HasGenders(CultureInfo cultureInfo)
         {
@@ -267,8 +266,7 @@ namespace Signum.Utilities
         public string DecimalUnitPlural; 
         public char? DecimalUnitGender;
 
-        public int NumeroDecimales;
+        public int NumberOfDecimals;
         public bool OmitirDecimalZeros; 
     }
-
 }
