@@ -14,11 +14,17 @@ namespace Signum.Engine
     {
         public static T ToEntity<T>(this Enum key) where T:MultiEnumDN, new()
         {
+            if (key == null)
+                return null;
+
             return MultiEnumLogic<T>.ToEntity(key);
         }
 
         public static Enum ToEnum<T>(this T entity) where T : MultiEnumDN, new()
         {
+            if (entity == null)
+                return null;
+
             return MultiEnumLogic<T>.ToEnum(entity);
         }
     }
