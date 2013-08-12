@@ -15,6 +15,7 @@ using Signum.Engine.Basics;
 using Signum.Engine.UserQueries;
 using Signum.Engine.Operations;
 using Signum.Entities.UserQueries;
+using Signum.Entities.Chart;
 
 namespace Signum.Engine.ControlPanel
 {
@@ -68,6 +69,50 @@ namespace Signum.Engine.ControlPanel
                         ToStr = cp.ToString(),
                         Links = cp.UserQueries.Count
                     });
+
+                if (sb.Settings.ImplementedBy((ControlPanelDN cp) => cp.Parts.First().Content, typeof(UserQueryPartDN)))
+                {
+                    sb.Schema.EntityEvents<UserQueryDN>().PreUnsafeDelete += query =>
+                    {
+                        Database.MListQuery((ControlPanelDN cp) => cp.Parts).Where(mle => query.Contains(((UserQueryPartDN)mle.Element.Content).UserQuery)).UnsafeDelete();
+                        Database.Query<UserQueryPartDN>().Where(uqp => query.Contains(uqp.UserQuery)).UnsafeDelete();
+                    };
+
+                    sb.Schema.Table<UserQueryDN>().PreDeleteSqlSync += arg =>
+                    {
+                        var uq = (UserQueryDN)arg;
+
+                        var parts = Administrator.UnsafeDeletePreCommand(Database.MListQuery((ControlPanelDN cp) => cp.Parts)
+                            .Where(mle => ((UserQueryPartDN)mle.Element.Content).UserQuery == uq));
+
+                        var parts2 = Administrator.UnsafeDeletePreCommand(Database.Query<UserQueryPartDN>()
+                          .Where(mle => mle.UserQuery == uq));
+
+                        return SqlPreCommand.Combine(Spacing.Simple, parts, parts2);
+                    };
+                }
+
+                if (sb.Settings.ImplementedBy((ControlPanelDN cp) => cp.Parts.First().Content, typeof(UserChartPartDN)))
+                {
+                    sb.Schema.EntityEvents<UserChartDN>().PreUnsafeDelete += query =>
+                    {
+                        Database.MListQuery((ControlPanelDN cp) => cp.Parts).Where(mle => query.Contains(((UserChartPartDN)mle.Element.Content).UserChart)).UnsafeDelete();
+                        Database.Query<UserChartPartDN>().Where(uqp => query.Contains(uqp.UserChart)).UnsafeDelete();
+                    };
+
+                    sb.Schema.Table<UserChartDN>().PreDeleteSqlSync += arg =>
+                    {
+                        var uc = (UserChartDN)arg;
+
+                        var parts = Administrator.UnsafeDeletePreCommand(Database.MListQuery((ControlPanelDN cp) => cp.Parts)
+                            .Where(mle => ((UserChartPartDN)mle.Element.Content).UserChart == uc));
+
+                        var parts2 = Administrator.UnsafeDeletePreCommand(Database.Query<UserChartPartDN>()
+                            .Where(mle => mle.UserChart == uc));
+
+                        return SqlPreCommand.Combine(Spacing.Simple, parts, parts2);
+                    };
+                }
 
                 ControlPanelGraph.Register();
             }
