@@ -23,7 +23,7 @@ namespace Signum.Engine.Translation
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => CultureInfoLogic.Start(null, null)));
         }
 
-        public static ResetLazy<Dictionary<CultureInfoDN, CultureInfo>> EntityToCultureInfo;
+        public static ResetLazy<Dictionary<CultureInfo, CultureInfoDN>> CultureInfoToEntity;
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -42,7 +42,7 @@ namespace Signum.Engine.Translation
                         c.NativeName,
                     });
 
-                EntityToCultureInfo = sb.GlobalLazy(() => Database.Query<CultureInfoDN>().ToDictionary(ci=>ci, ci => CultureInfo.GetCultureInfo(ci.Name)),
+                CultureInfoToEntity = sb.GlobalLazy(() => Database.Query<CultureInfoDN>().ToDictionary(ci => CultureInfo.GetCultureInfo(ci.Name), ci=>ci),
                     invalidateWith: new InvalidateWith(typeof(CultureInfoDN)));
 
                 new Graph<CultureInfoDN>.Execute(CultureInfoOperation.Save)
@@ -67,26 +67,26 @@ namespace Signum.Engine.Translation
             return cis.Select(c => table.UpdateSqlSync(c)).Combine(Spacing.Double);
         }
 
-        public static CultureInfo ToCultureInfo(this CultureInfoDN culture)
+        public static CultureInfoDN ToCultureInfoDN(this CultureInfo ci)
         {
-            return EntityToCultureInfo.Value.GetOrThrow(culture);
+            return CultureInfoToEntity.Value.GetOrThrow(ci);
         }
 
         public static IEnumerable<CultureInfo> ApplicationCultures
         {
             get
             {
-                return EntityToCultureInfo.Value.Values;
+                return CultureInfoToEntity.Value.Keys;
             }
         }
 
         public static IEnumerable<T> ForEachCulture<T>(Func<CultureInfoDN, T> func)
         {
-            foreach (var c in EntityToCultureInfo.Value)
+            foreach (var c in CultureInfoToEntity.Value)
             {
-                using (Sync.ChangeBothCultures(c.Value))
+                using (Sync.ChangeBothCultures(c.Key))
                 {
-                    yield return func(c.Key);
+                    yield return func(c.Value);
                 }
             }
         }
