@@ -245,6 +245,8 @@ namespace Signum.Engine.Mailing
             template.Active = true;
             template.Query = QueryLogic.GetQuery(info.QueryName);
 
+            template.ParseData(DynamicQueryManager.Current.QueryDescription(info.QueryName));
+
             return template;
         }
 
