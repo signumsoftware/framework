@@ -63,6 +63,11 @@ namespace Signum.Utilities
             return new string(0.To(length).Select(i => r.NextChar()).ToArray());
         }
 
+        public static string NextString(this Random r, int length, string chars)
+        {
+            return new string(0.To(length).Select(i => chars[r.Next(chars.Length)]).ToArray());
+        }
+
         public static string NextSubstring(this Random r, string text, int minLength, int maxLength)
         {
             int length = r.Next(minLength, maxLength); 

@@ -8,17 +8,23 @@ using Signum.Utilities;
 using System.Reflection;
 using Signum.Utilities.ExpressionTrees;
 
-namespace Signum.Engine.Basics
+namespace Signum.Engine
 {
     public static class MultiEnumExtensions
     {
         public static T ToEntity<T>(this Enum key) where T:MultiEnumDN, new()
         {
+            if (key == null)
+                return null;
+
             return MultiEnumLogic<T>.ToEntity(key);
         }
 
         public static Enum ToEnum<T>(this T entity) where T : MultiEnumDN, new()
         {
+            if (entity == null)
+                return null;
+
             return MultiEnumLogic<T>.ToEnum(entity);
         }
     }
@@ -100,7 +106,7 @@ namespace Signum.Engine.Basics
             }).ToList();
         }
 
-        public static T ToEntity(Enum key)
+        internal static T ToEntity(Enum key)
         {
             AssertInitialized();
 
@@ -135,7 +141,7 @@ namespace Signum.Engine.Basics
             return TryToEntity(en); 
         }
 
-        public static Enum ToEnum(T entity)
+        internal static Enum ToEnum(T entity)
         {
             return ToEnum(entity.Key);
         }

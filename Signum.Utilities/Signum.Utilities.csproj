@@ -79,6 +79,8 @@
     <Compile Include="ConsoleSwitch.cs" />
     <Compile Include="DataStructures\ReadOnlyDictionary.cs" />
     <Compile Include="MimeTypes.cs" />
+    <Compile Include="NaturalLanguage\English.cs" />
+    <Compile Include="NaturalLanguage\Spanish.cs" />
     <Compile Include="Statics.cs" />
     <Compile Include="DataStructures\HashsetComparer.cs" />
     <Compile Include="DataStructures\MinMax.cs" />
@@ -88,7 +90,7 @@
     <Compile Include="ExpressionTrees\ExpressionReplacer.cs" />
     <Compile Include="ExpressionTrees\Linq.cs" />
     <Compile Include="FileExtensions.cs" />
-    <Compile Include="NaturalLanguageTools.cs" />
+    <Compile Include="NaturalLanguage\NaturalLanguageTools.cs" />
     <Compile Include="Pagination.cs" />
     <Compile Include="Polymorphic.cs" />
     <Compile Include="Reflection\GenericInvoker.cs" />
