@@ -199,6 +199,18 @@ namespace Signum.Engine.Processes
                                                 {
                                                     executingProcess.Execute();
                                                 }
+                                                catch (Exception ex)
+                                                {
+                                                    try
+                                                    {
+                                                        ex.LogException(edn =>
+                                                        {
+                                                            edn.ControllerName = "ProcessWorker";
+                                                            edn.ActionName = executingProcess.CurrentExecution.ToLite().Key();
+                                                        });
+                                                    }
+                                                    catch { }
+                                                }
                                                 finally
                                                 {
                                                     lock (executing)
@@ -233,11 +245,15 @@ namespace Signum.Engine.Processes
                     }
                     catch (Exception e)
                     {
-                        e.LogException(edn =>
+                        try
                         {
-                            edn.ControllerName = "ProcessWorker";
-                            edn.ActionName = "MainLoop";
-                        });
+                            e.LogException(edn =>
+                            {
+                                edn.ControllerName = "ProcessWorker";
+                                edn.ActionName = "MainLoop";
+                            });
+                        }
+                        catch { }
                     }
                     finally
                     {
