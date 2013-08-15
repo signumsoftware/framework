@@ -121,7 +121,13 @@ namespace Signum.Utilities
             else
             {
                 this.box = null;
+
             }
+
+            if (OnReset != null)
+                OnReset(this, null);
         }
+
+        public event EventHandler OnReset; 
     }
 }
