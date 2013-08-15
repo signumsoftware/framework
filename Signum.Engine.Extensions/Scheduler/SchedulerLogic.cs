@@ -38,26 +38,25 @@ namespace Signum.Engine.Scheduler
             return LastExecutionExpression.Evaluate(e);
         }
 
-
         public static Polymorphic<Func<ITaskDN, Lite<IIdentifiable>>> ExecuteTask = new Polymorphic<Func<ITaskDN, Lite<IIdentifiable>>>();
 
         public static event Action<string, Exception> Error;
 
-        static PriorityQueue<ScheduledTaskDN> priorityQueue = new PriorityQueue<ScheduledTaskDN>(new LambdaComparer<ScheduledTaskDN, DateTime>(st => st.NextDate.Value));
+        public class ScheduledTaskPair
+        {
+            public ScheduledTaskDN ScheduledTask;
+            public DateTime NextDate; 
+        }
 
-        static Timer timer = new Timer(new TimerCallback(DispatchEvents), // main timer
+        static ResetLazy<List<ScheduledTaskDN>> ScheduledTasksLazy;
+
+        static PriorityQueue<ScheduledTaskPair> priorityQueue = new PriorityQueue<ScheduledTaskPair>((a, b) => a.NextDate.CompareTo(b.NextDate));
+
+        static Timer timer = new Timer(new TimerCallback(TimerCallback), // main timer
                                 null,
                                 Timeout.Infinite,
                                 Timeout.Infinite);
 
-        static readonly Variable<bool> avoidReloadPlan = Statics.ThreadVariable<bool>("avoidReloadSchedulerPlan");
-
-        static IDisposable AvoidReloadPlanOnSave()
-        {
-            if (avoidReloadPlan.Value) return null;
-            avoidReloadPlan.Value = true;
-            return new Disposable(() => avoidReloadPlan.Value = false);
-        }
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -70,7 +69,7 @@ namespace Signum.Engine.Scheduler
                 Implementations imp2 = sb.Settings.GetImplementations((ScheduledTaskLogDN st) => st.Task);
 
                 if (!imp2.Equals(imp2))
-                    throw new InvalidOperationException("Implementations of ScheduledTaskDN.Task should be the same as in ScheduledTaskLogDN.Task"); 
+                    throw new InvalidOperationException("Implementations of ScheduledTaskDN.Task should be the same as in ScheduledTaskLogDN.Task");
 
 
                 ExecuteTask.Register((ITaskDN t) => { throw new NotImplementedException("SchedulerLogic.ExecuteTask not registered for {0}".Formato(t.GetType().Name)); });
@@ -79,30 +78,28 @@ namespace Signum.Engine.Scheduler
                 sb.Include<ScheduledTaskDN>();
                 sb.Include<ScheduledTaskLogDN>();
                 sb.Schema.Initializing[InitLevel.Level4BackgroundProcesses] += Schema_InitializingApplicaton;
-                sb.Schema.EntityEvents<ScheduledTaskDN>().Saving += Schema_Saving;
-                
-                dqm.RegisterQuery(typeof(HolidayCalendarDN), ()=>
+
+                dqm.RegisterQuery(typeof(HolidayCalendarDN), () =>
                      from st in Database.Query<HolidayCalendarDN>()
-                      select new
-                      {
-                          Entity = st,
-                          st.Id,
-                          st.Name,
-                          Holidays = st.Holidays.Count,
-                      });
-
-
-                dqm.RegisterQuery(typeof(ScheduledTaskDN), ()=>
-                    from st in Database.Query<ScheduledTaskDN>()
                      select new
                      {
                          Entity = st,
                          st.Id,
-                         st.Task,
-                         st.NextDate,
-                         st.Suspended,
-                         st.Rule,
+                         st.Name,
+                         Holidays = st.Holidays.Count,
                      });
+
+
+                dqm.RegisterQuery(typeof(ScheduledTaskDN), () =>
+                    from st in Database.Query<ScheduledTaskDN>()
+                    select new
+                    {
+                        Entity = st,
+                        st.Id,
+                        st.Task,
+                        st.Suspended,
+                        st.Rule,
+                    });
 
                 dqm.RegisterQuery(typeof(ScheduledTaskLogDN), () =>
                     from cte in Database.Query<ScheduledTaskLogDN>()
@@ -142,7 +139,18 @@ namespace Signum.Engine.Scheduler
                 {
                     Execute = (task, _) => ExecuteAsync(task)
                 }.Register();
+
+                ScheduledTasksLazy = sb.GlobalLazy(() =>
+                    Database.Query<ScheduledTaskDN>().Where(a => !a.Suspended && (a.MachineName == null || a.MachineName == Environment.MachineName)).ToList(),
+                    new InvalidateWith(typeof(ScheduledTaskDN)));
+
+                ScheduledTasksLazy.OnReset += ScheduledTasksLazy_OnReset;
             }
+        }
+
+        static void ScheduledTasksLazy_OnReset(object sender, EventArgs e)
+        {
+            ReloadPlan();
         }
 
         static void Schema_InitializingApplicaton()
@@ -150,51 +158,54 @@ namespace Signum.Engine.Scheduler
             ReloadPlan();
         }
 
-        static void Schema_Saving(ScheduledTaskDN task)
+        static bool running = false;
+        public static bool Running
         {
-            if (!avoidReloadPlan.Value && task.IsGraphModified)
-            {
-                Transaction.PostRealCommit -= Transaction_RealCommit;
-                Transaction.PostRealCommit += Transaction_RealCommit;
-            }
+            get { return running; }
         }
 
-        static void Transaction_RealCommit(Dictionary<string, object> userData)
+        public static void StartScheduledTasks()
         {
+            if (running)
+                throw new InvalidOperationException("SchedulerLogic is already Running in {0}".Formato(Environment.MachineName));
+
+            running = true;
+
             ReloadPlan();
         }
 
-        static bool enabled = false;
-        public static bool Enabled
+        public static void StopScheduledTasks()
         {
-            get { return enabled; }
-            set
+            if (!running)
+                throw new InvalidOperationException("SchedulerLogic is already Stopped in {0}".Formato(Environment.MachineName));
+
+            lock (priorityQueue)
             {
-                enabled = value; 
-                if (enabled) 
-                    ReloadPlan();
+                if (!running)
+                    return;
+
+                running = false;
+
+                priorityQueue.Clear();
+                timer.Change(Timeout.Infinite, Timeout.Infinite);
             }
         }
 
-        public static void ReloadPlan()
+        static void ReloadPlan()
         {
-            if (!enabled)
+            if (!running)
                 return;
 
             using (new EntityCache(EntityCacheType.ForceNew))
             using (AuthLogic.Disable())
                 lock (priorityQueue)
                 {
-                    List<ScheduledTaskDN> schTasks = Database.Query<ScheduledTaskDN>().Where(st => !st.Suspended).ToList();
-
-                    using (AvoidReloadPlanOnSave())
-                    using (OperationLogic.AllowSave<ScheduledTaskDN>())
-                    {
-                        schTasks.SaveList(); //Force replanification
-                    }
-
                     priorityQueue.Clear();
-                    priorityQueue.PushAll(schTasks);
+                    priorityQueue.PushAll(ScheduledTasksLazy.Value.Select(st => new ScheduledTaskPair
+                    {
+                        ScheduledTask = st,
+                        NextDate = st.Rule.Next(),
+                    }));
 
                     SetTimer();
                 }
@@ -202,14 +213,20 @@ namespace Signum.Engine.Scheduler
 
         static TimeSpan SchedulerMargin = TimeSpan.FromSeconds(0.5); //stabilize sub-day schedulers
 
+        static DateTime? NextExecution;
+
         //Lock priorityQueue
-        private static void SetTimer()
+        static void SetTimer()
         {
-            if (priorityQueue.Empty)
+            lock (priorityQueue)
+                NextExecution = priorityQueue.Empty ? (DateTime?)null : priorityQueue.Peek().NextDate;
+
+            if (NextExecution == null)
                 timer.Change(Timeout.Infinite, Timeout.Infinite);
             else
             {
-                TimeSpan ts = priorityQueue.Peek().NextDate.Value - TimeZoneManager.Now;
+                TimeSpan ts = NextExecution.Value - TimeZoneManager.Now;
+
                 if (ts < TimeSpan.Zero)
                     ts = TimeSpan.Zero; // cannot be negative !
                 if (ts.TotalMilliseconds > int.MaxValue)
@@ -225,7 +242,7 @@ namespace Signum.Engine.Scheduler
                 Error(message, ex);
         }
 
-        static void DispatchEvents(object obj) // obj ignored
+        static void TimerCallback(object obj) // obj ignored
         {
             using (new EntityCache(EntityCacheType.ForceNew))
             using (AuthLogic.Disable())
@@ -237,23 +254,16 @@ namespace Signum.Engine.Scheduler
                         return;
                     }
 
-                    ScheduledTaskDN st = priorityQueue.Pop(); //Exceed timer change
-                    if (st.NextDate.HasValue && Math.Abs((st.NextDate.Value - TimeZoneManager.Now).Ticks) > ScheduledTaskDN.MinimumSpan.Ticks)
+                    var pair = priorityQueue.Pop(); //Exceed timer change
+                    if (Math.Abs((pair.NextDate - TimeZoneManager.Now).Ticks) < ScheduledTaskDN.MinimumSpan.Ticks)
                     {
-                        priorityQueue.Push(st);
-                        SetTimer();
-                        return;
+                        ExecuteAsync(pair.ScheduledTask.Task);
                     }
 
-                    using (AvoidReloadPlanOnSave())
-                    using (OperationLogic.AllowSave<ScheduledTaskDN>())
-                        st.Save();
-
-                    priorityQueue.Push(st);
-
-                    ExecuteAsync(st.Task);
-
+                    pair.NextDate = pair.ScheduledTask.Rule.Next();
+                    priorityQueue.Push(pair);
                     SetTimer();
+                    return;
                 }
         }
 
@@ -272,7 +282,6 @@ namespace Signum.Engine.Scheduler
             }); 
         }
 
-
         public static Lite<IIdentifiable> ExecuteSync(ITaskDN task)
         {
             using (AuthLogic.UserSession(AuthLogic.SystemUser))
@@ -281,6 +290,7 @@ namespace Signum.Engine.Scheduler
                 {
                     Task = task,
                     StartTime = TimeZoneManager.Now,
+                    MachineName = Environment.MachineName
                 };
 
                 try
@@ -321,5 +331,36 @@ namespace Signum.Engine.Scheduler
                 }
             }
         }
+
+        public static SchedulerState GetSchedulerState()
+        {
+            return new SchedulerState
+            {
+                Running = Running,
+                SchedulerMargin = SchedulerMargin,
+                NextExecution = NextExecution,
+                Queue = priorityQueue.GetOrderedList().Select(p => new SchedulerItemState
+                {
+                    ScheduledTask = p.ScheduledTask.ToLite(),
+                    Rule = p.ScheduledTask.Rule.ToString(),
+                    NextExecution = p.NextDate,
+                }).ToList()
+            };
+        }
+    }
+
+    public class SchedulerState
+    {
+        public bool Running;
+        public TimeSpan SchedulerMargin;
+        public DateTime? NextExecution;
+        public List<SchedulerItemState> Queue; 
+    }
+
+    public class SchedulerItemState
+    {
+        public Lite<ScheduledTaskDN> ScheduledTask;
+        public string Rule; 
+        public DateTime NextExecution; 
     }
 }

@@ -33,13 +33,6 @@ namespace Signum.Entities.Scheduler
             set { SetToStr(ref task, value, () => Task); }
         }
 
-        DateTime? nextDate = TimeZoneManager.Now;
-        public DateTime? NextDate
-        {
-            get { return nextDate; }
-            private set { Set(ref nextDate, value, () => NextDate); }
-        }
-
         bool suspended;
         public bool Suspended
         {
@@ -54,17 +47,6 @@ namespace Signum.Entities.Scheduler
         {
             get { return machineName; }
             set { Set(ref machineName, value, () => MachineName); }
-        }
-
-        protected override void PreSaving(ref bool graphModified)
-        {
-            base.PreSaving(ref graphModified);
-            NewPlan();
-        }
-
-        public void NewPlan()
-        {
-            NextDate = suspended ? (DateTime?)null : rule.Next(); 
         }
 
         public override string ToString()
@@ -87,6 +69,12 @@ namespace Signum.Entities.Scheduler
     {
         ExecuteSync,
         ExecuteAsync,
+    }
+
+
+    public enum SchedulerPermission
+    {
+        ViewSchedulerPanel,
     }
 
     public interface ITaskDN : IIdentifiable

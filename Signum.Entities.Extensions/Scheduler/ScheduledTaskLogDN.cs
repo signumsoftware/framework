@@ -41,6 +41,15 @@ namespace Signum.Entities.Scheduler
             get { return EndTime == null ? null : DurationExpression.Evaluate(this); }
         }
 
+        [NotNullable, SqlDbType(Size = 200)]
+        string machineName;
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
+        public string MachineName
+        {
+            get { return machineName; }
+            set { Set(ref machineName, value, () => MachineName); }
+        }
+
         [ImplementedByAll]
         Lite<IIdentifiable> entity;
         public Lite<IIdentifiable> Entity

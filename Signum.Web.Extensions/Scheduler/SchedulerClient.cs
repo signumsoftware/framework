@@ -15,9 +15,11 @@ using System.Web.Routing;
 
 using Signum.Entities.Scheduler;
 using Signum.Entities.Files;
+using Signum.Web.Omnibox;
+using Signum.Engine.Authorization;
 #endregion
 
-namespace Signum.Web.Extensions.Scheduler
+namespace Signum.Web.Scheduler
 {
     public static class SchedulerClient
     {
@@ -56,6 +58,10 @@ namespace Signum.Web.Extensions.Scheduler
                         new EntitySettings<SimpleTaskDN>{ PartialViewName = _ => ViewPrefix.Formato("SimpleTask") },
                     });
                 }
+                
+                SpecialOmniboxProvider.Register(new SpecialOmniboxAction("SchedulerPanel",
+                    () => SchedulerPermission.ViewSchedulerPanel.IsAuthorized(),
+                    uh => uh.Action((SchedulerController sc) => sc.View())));
             }
         }
     }
