@@ -9,6 +9,7 @@ using Signum.Utilities;
 using Signum.Entities;
 using Signum.Engine.SchemaInfoTables;
 using System.Text.RegularExpressions;
+using Signum.Engine.Linq;
 
 namespace Signum.Engine
 {
@@ -120,11 +121,12 @@ namespace Signum.Engine
                         (cn, difCol) => SqlPreCommand.Combine(Spacing.Simple,
                                     difCol.DefaultConstraintName.HasText() ? SqlBuilder.AlterTableDropConstraint(tab.Name, difCol.DefaultConstraintName) : null,
                                     SqlBuilder.AlterTableDropColumn(tab, cn)),
-                        (cn, tabCol, difCol) => SqlPreCommand.Combine(Spacing.Simple,
+                        (cn, tabCol, difCol) =>SqlPreCommand.Combine(Spacing.Simple,
                             difCol.Name == tabCol.Name ? null : SqlBuilder.RenameColumn(tab, difCol.Name, tabCol.Name),
-                            difCol.Equals(tabCol) ? null : SqlBuilder.AlterTableAlterColumn(tab, tabCol)),
-                            Spacing.Simple)),
-                    Spacing.Double);
+                            difCol.Equals(tabCol) ? null : SqlBuilder.AlterTableAlterColumn(tab, tabCol),
+                            UpdateByFkChange(tn, difCol, tabCol, replacements)),
+                        Spacing.Simple)),
+                 Spacing.Double);
 
             var tableReplacements = replacements.TryGetC(Replacements.KeyTables);
             if (tableReplacements != null)
@@ -180,6 +182,28 @@ namespace Signum.Engine
                 }, Spacing.Double);
 
             return SqlPreCommand.Combine(Spacing.Triple, dropIndices, dropForeignKeys, tables, syncEnums, addForeingKeys, addIndices);
+        }
+
+        private static SqlPreCommandSimple UpdateByFkChange(string tn, DiffColumn difCol, IColumn tabCol, Replacements replacements)
+        {
+            if (difCol.ForeingKey == null || tabCol.ReferenceTable == null)
+                return null;
+
+            var oldFK = replacements.Apply(Replacements.KeyTables, difCol.ForeingKey.TargetTable.Name);
+
+            if (oldFK == tabCol.ReferenceTable.Name.Name)
+                return null;
+
+            AliasGenerator ag = new AliasGenerator();
+
+            return new SqlPreCommandSimple(
+@"UPDATE {2}
+SET {0} = GetId{5}({4}.Id)
+FROM {1} {2}
+JOIN {3} {4} ON {2}.{0} = {4}.Id".Formato(tabCol.Name,
+                tn, ag.NextTableAlias(tn),
+                oldFK, ag.NextTableAlias(oldFK),
+                tabCol.ReferenceTable.Name.Name));
         }
 
 
