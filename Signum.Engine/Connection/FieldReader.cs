@@ -561,7 +561,7 @@ namespace Signum.Engine
             return Expression.Call(reader, miIsNull, Expression.Constant(ordinal));
         }
 
-        internal FieldReaderException CreateFieldReaderException(SqlTypeException ex)
+        internal FieldReaderException CreateFieldReaderException(Exception ex)
         {
             return new FieldReaderException(ex)
             {
@@ -575,7 +575,7 @@ namespace Signum.Engine
     [Serializable]
     public class FieldReaderException : SqlTypeException
     {
-        public FieldReaderException(SqlTypeException inner) : base(null, inner) { }
+        public FieldReaderException(Exception inner) : base(null, inner) { }
         protected FieldReaderException(
           System.Runtime.Serialization.SerializationInfo info,
           System.Runtime.Serialization.StreamingContext context)

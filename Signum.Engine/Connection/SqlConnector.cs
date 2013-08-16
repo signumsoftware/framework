@@ -166,12 +166,17 @@ namespace Signum.Engine
                                     forEach(fr);
                                 }
                             }
-                            catch (SqlTypeException ex)
+                            catch (Exception ex)
                             {
-                                FieldReaderException fieldEx = fr.CreateFieldReaderException(ex);
-                                fieldEx.Command = preCommand;
-                                fieldEx.Row = row;
-                                throw fieldEx;
+                                if (ex is SqlTypeException || ex is InvalidOperationException)
+                                {
+                                    FieldReaderException fieldEx = fr.CreateFieldReaderException(ex);
+                                    fieldEx.Command = preCommand;
+                                    fieldEx.Row = row;
+                                    throw fieldEx;
+                                }
+
+                                throw;
                             }
                         }
                     }

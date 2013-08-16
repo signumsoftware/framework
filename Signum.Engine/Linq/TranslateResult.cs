@@ -60,13 +60,18 @@ namespace Signum.Engine.Linq
 
                     lookups.Add(Token, lookUp);
                 }
-                catch (SqlTypeException ex)
+                catch (Exception ex)
                 {
-                    FieldReaderException fieldEx = enumerator.Reader.CreateFieldReaderException(ex);
-                    fieldEx.Command = command;
-                    fieldEx.Row = enumerator.Row;
-                    fieldEx.Projector = ProjectorExpression;
-                    throw fieldEx;
+                    if (ex is SqlTypeException || ex is InvalidOperationException)
+                    {
+                        FieldReaderException fieldEx = enumerator.Reader.CreateFieldReaderException(ex);
+                        fieldEx.Command = command;
+                        fieldEx.Row = enumerator.Row;
+                        fieldEx.Projector = ProjectorExpression;
+                        throw fieldEx;
+                    }
+
+                    throw;
                 }
             }
         }
@@ -118,13 +123,18 @@ namespace Signum.Engine.Linq
                         kvp.Value.Modified = ms;
                     }
                 }
-                catch (SqlTypeException ex)
+                catch (Exception ex)
                 {
-                    FieldReaderException fieldEx = enumerator.Reader.CreateFieldReaderException(ex);
-                    fieldEx.Command = command;
-                    fieldEx.Row = enumerator.Row;
-                    fieldEx.Projector = ProjectorExpression;
-                    throw fieldEx;
+                    if (ex is SqlTypeException || ex is InvalidOperationException)
+                    {
+                        FieldReaderException fieldEx = enumerator.Reader.CreateFieldReaderException(ex);
+                        fieldEx.Command = command;
+                        fieldEx.Row = enumerator.Row;
+                        fieldEx.Projector = ProjectorExpression;
+                        throw fieldEx;
+                    }
+
+                    throw;
                 }
             }
         }
@@ -183,13 +193,18 @@ namespace Signum.Engine.Linq
                             else
                                 result = UniqueMethod(enumerable, Unique.Value);
                         }
-                        catch (SqlTypeException ex)
+                        catch (Exception ex)
                         {
-                            FieldReaderException fieldEx = enumerator.Reader.CreateFieldReaderException(ex);
-                            fieldEx.Command = command;
-                            fieldEx.Row = enumerator.Row;
-                            fieldEx.Projector = ProjectorExpression;
-                            throw fieldEx;
+                            if (ex is SqlTypeException || ex is InvalidOperationException)
+                            {
+                                FieldReaderException fieldEx = enumerator.Reader.CreateFieldReaderException(ex);
+                                fieldEx.Command = command;
+                                fieldEx.Row = enumerator.Row;
+                                fieldEx.Projector = ProjectorExpression;
+                                throw fieldEx;
+                            }
+
+                            throw;
                         }
                     }
 
