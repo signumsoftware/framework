@@ -233,12 +233,15 @@ namespace Signum.Engine.Chart
                     item.FixParameters();
                 }
 
-                string errors = uc.IdentifiableIntegrityCheck();
 
-                if (errors.HasText())
+                try
+                {
+                    return table.UpdateSqlSync(uc, includeCollections: true);
+                }
+                catch(Exception e)
                 {
                     Console.WriteLine("Integrity Error:");
-                    SafeConsole.WriteLineColor(ConsoleColor.DarkRed, errors);
+                    SafeConsole.WriteLineColor(ConsoleColor.DarkRed, e.Message);
                     while (true)
                     {
                         SafeConsole.WriteLineColor(ConsoleColor.Yellow, "- s: Skip entity");
@@ -259,7 +262,7 @@ namespace Signum.Engine.Chart
                     }
                 }
 
-                return table.UpdateSqlSync(uc, includeCollections: true);
+               
             }
             catch (Exception e)
             {
