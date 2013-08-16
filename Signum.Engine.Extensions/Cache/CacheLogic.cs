@@ -485,30 +485,40 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(database.TryToString() ?? Connector.C
             }
         }
 
+      
+        public static Dictionary<Type, EntityData> EntityDataOverrides = new Dictionary<Type, EntityData>();
+
+        public static void OverrideEntityData<T>(EntityData data)
+        {
+            EntityDataOverrides.AddOrThrow(typeof(T), data, "{0} is already overriden");
+        }
+
         static void TryCacheTable(SchemaBuilder sb, Type type)
         {
             if (!controllers.ContainsKey(type))
                 giCacheTable.GetInvoker(type)(sb);
         }
 
-        static GenericInvoker<Action<SchemaBuilder>> giCacheTable = new GenericInvoker<Action<SchemaBuilder>>(sb => CacheTable<IdentifiableEntity>(sb, false));
-        public static void CacheTable<T>(SchemaBuilder sb, bool ignoreIsTransactionalData = false) where T : IdentifiableEntity
+        static GenericInvoker<Action<SchemaBuilder>> giCacheTable = new GenericInvoker<Action<SchemaBuilder>>(sb => CacheTable<IdentifiableEntity>(sb));
+        public static void CacheTable<T>(SchemaBuilder sb) where T : IdentifiableEntity
         {
-            if (EntityKindCache.GetEntityData(typeof(T)) == EntityData.Transactional && !ignoreIsTransactionalData)
-                throw new InvalidOperationException("{0} is Transactional. Reconsider caching this table or set ignoreIsTransactionalData = true".Formato(typeof(T).TypeName()));
+            EntityData data = EntityDataOverrides.TryGetS(typeof(T)) ?? EntityKindCache.GetEntityData(typeof(T));
 
-            var cc = new CacheController<T>(sb.Schema);
-            controllers.AddOrThrow(typeof(T), cc, "{0} already registered");
+            if (data == EntityData.Master)
+            {
+                var cc = new CacheController<T>(sb.Schema);
+                controllers.AddOrThrow(typeof(T), cc, "{0} already registered");
 
-            TryCacheSubTables(typeof(T), sb);
+                TryCacheSubTables(typeof(T), sb);
 
-            cc.BuildCachedTable();
-        }
+                cc.BuildCachedTable();
+            }
+            else //data == EntityData.Transactional
+            {
+                controllers.AddOrThrow(typeof(T), null, "{0} already registered");
 
-        static GenericInvoker<Action<SchemaBuilder>> giSemiCacheTable = new GenericInvoker<Action<SchemaBuilder>>(sb => SemiCacheTable<IdentifiableEntity>(sb));
-        public static void SemiCacheTable<T>(SchemaBuilder sb) where T : IdentifiableEntity
-        {
-            controllers.AddOrThrow(typeof(T), null, "{0} already registered");
+                TryCacheSubTables(typeof(T), sb);
+            }
         }
 
         static void TryCacheSubTables(Type type, SchemaBuilder sb)
@@ -521,13 +531,7 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(database.TryToString() ?? Connector.C
 
             foreach (var rType in relatedTypes)
             {
-                if (!controllers.ContainsKey(rType))
-                {
-                    if (EntityKindCache.GetEntityData(rType) == EntityData.Master)
-                        giCacheTable.GetInvoker(rType)(sb);
-                    else
-                        giSemiCacheTable.GetInvoker(rType)(sb);
-                }
+                TryCacheTable(sb, rType);
 
                 inverseDependencies.Add(rType, type);
             }

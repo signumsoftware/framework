@@ -314,23 +314,31 @@ namespace Signum.Engine.Cache
                 if (isLite)
                 {
                     Expression lite;
-                    if (CacheLogic.GetCacheType(type) == CacheType.Cached)
+                    switch (CacheLogic.GetCacheType(type))
                     {
-                        lite = Expression.Call(retriever, miRequestLite.MakeGenericMethod(type),
-                            Lite.NewExpression(type, id.UnNullify(), Expression.Constant(null, typeof(string)), peModified));
-                    }
-                    else
-                    {
-                        string lastPartialJoin = CreatePartialInnerJoin(column);
+                        case CacheType.Cached:
+                            {
+                                lite = Expression.Call(retriever, miRequestLite.MakeGenericMethod(type),
+                                    Lite.NewExpression(type, id.UnNullify(), Expression.Constant(null, typeof(string)), peModified));
 
-                        CachedTableBase ctb = ciCachedSemiTable.GetInvoker(type)(cachedTable.controller, aliasGenerator, lastPartialJoin, remainingJoins);
+                                break;
+                            }
+                        case CacheType.Semi:
+                            {
+                                string lastPartialJoin = CreatePartialInnerJoin(column);
 
-                        if (cachedTable.subTables == null)
-                            cachedTable.subTables = new List<CachedTableBase>();
+                                CachedTableBase ctb = ciCachedSemiTable.GetInvoker(type)(cachedTable.controller, aliasGenerator, lastPartialJoin, remainingJoins);
 
-                        cachedTable.subTables.Add(ctb);
+                                if (cachedTable.subTables == null)
+                                    cachedTable.subTables = new List<CachedTableBase>();
 
-                        lite = Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod("GetLite"), id.UnNullify(), retriever);
+                                cachedTable.subTables.Add(ctb);
+
+                                lite = Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod("GetLite"), id.UnNullify(), retriever);
+
+                                break;
+                            }
+                        default: throw new InvalidOperationException("{0} should be cached at this stage".Formato(type));
                     }
 
                     if (!id.Type.IsNullable())
@@ -340,24 +348,29 @@ namespace Signum.Engine.Cache
                 }
                 else
                 {
-                    if (CacheLogic.GetCacheType(type) == CacheType.Cached)
-                        return Expression.Call(retriever, miRequest.MakeGenericMethod(type), id.Nullify());
+                    switch (CacheLogic.GetCacheType(type))
+                    {
+                        case CacheType.Cached: return Expression.Call(retriever, miRequest.MakeGenericMethod(type), id.Nullify());
+                        case CacheType.Semi:
+                            {
+                                string lastPartialJoin = CreatePartialInnerJoin(column);
 
-                    string lastPartialJoin = CreatePartialInnerJoin(column);
+                                CachedTableBase ctb = ciCachedTable.GetInvoker(type)(cachedTable.controller, aliasGenerator, lastPartialJoin, remainingJoins);
 
-                    CachedTableBase ctb = ciCachedTable.GetInvoker(type)(cachedTable.controller, aliasGenerator, lastPartialJoin, remainingJoins);
+                                if (cachedTable.subTables == null)
+                                    cachedTable.subTables = new List<CachedTableBase>();
 
-                    if (cachedTable.subTables == null)
-                        cachedTable.subTables = new List<CachedTableBase>();
+                                cachedTable.subTables.Add(ctb);
 
-                    cachedTable.subTables.Add(ctb);
+                                var entity = Expression.Parameter(type);
+                                LambdaExpression lambda = Expression.Lambda(typeof(Action<>).MakeGenericType(type),
+                                    Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod("Complete"), entity, retriever),
+                                    entity);
 
-                    var entity = Expression.Parameter(type);
-                    LambdaExpression lambda = Expression.Lambda(typeof(Action<>).MakeGenericType(type),
-                        Expression.Call(Expression.Constant(ctb), ctb.GetType().GetMethod("Complete"), entity, retriever),
-                        entity);
-
-                    return Expression.Call(retriever, miComplete.MakeGenericMethod(type), id.Nullify(), lambda);
+                                return Expression.Call(retriever, miComplete.MakeGenericMethod(type), id.Nullify(), lambda);
+                            }
+                        default: throw new InvalidOperationException("{0} should be cached at this stage".Formato(type));
+                    }
                 }
             }
 

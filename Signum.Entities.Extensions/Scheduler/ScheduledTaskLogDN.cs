@@ -21,6 +21,7 @@ namespace Signum.Entities.Scheduler
         }
 
         DateTime startTime;
+        [Format("G")]
         public DateTime StartTime
         {
             get { return startTime; }
@@ -28,6 +29,7 @@ namespace Signum.Entities.Scheduler
         }
 
         DateTime? endTime;
+        [Format("G")]
         public DateTime? EndTime
         {
             get { return endTime; }
@@ -39,6 +41,15 @@ namespace Signum.Entities.Scheduler
         public double? Duration
         {
             get { return EndTime == null ? null : DurationExpression.Evaluate(this); }
+        }
+
+        [NotNullable, SqlDbType(Size = 200)]
+        string machineName;
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
+        public string MachineName
+        {
+            get { return machineName; }
+            set { Set(ref machineName, value, () => MachineName); }
         }
 
         [ImplementedByAll]

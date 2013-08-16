@@ -3,8 +3,8 @@
 
 @using (var e = Html.TypeContext<ScheduledTaskDN>())
 {
-    @Html.ValueLine(e, f => f.NextDate)
     @Html.ValueLine(e, f => f.Suspended)
-    @Html.EntityLine(e, f => f.Task, vl => vl.Create = false)
-    @Html.EntityLine(e, f => f.Rule, vl => vl.Find = false)
+    @Html.EntityLine(e, f => f.Task, vl=>vl.Create = false)
+    @Html.EntityLine(e, f => f.Rule)
+    @Html.ValueLine(e, f => f.MachineName)
 }

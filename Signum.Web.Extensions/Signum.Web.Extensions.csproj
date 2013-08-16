@@ -226,6 +226,12 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Pop3Configuration.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Scheduler\Controllers\SchedulerController.cs" />
+    <Compile Include="Scheduler\Views\SchedulerPanel.generated.cs">
+      <DependentUpon>SchedulerPanel.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Translation\Controllers\TranslationController.cs" />
     <Compile Include="Translation\TranslationClient.cs" />
     <Compile Include="Translation\ITranslator.cs" />
@@ -1309,6 +1315,10 @@
     <Content Include="Scheduler\Views\SimpleTask.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>SimpleTask.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Scheduler\Views\SchedulerPanel.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>SchedulerPanel.generated.cs</LastGenOutput>
     </Content>
     <None Include="Scheduler\Views\ScheduleRuleDaily.cshtml">
       <Generator>RazorGenerator</Generator>
