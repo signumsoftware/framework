@@ -171,7 +171,12 @@ namespace Signum.Engine.Maps
 
         public IEnumerable<KeyValuePair<Table, RelationInfo>> DependentTables()
         {
-            return Fields.Values.SelectMany(f => f.Field.GetTables());
+            var result = Fields.Values.SelectMany(f => f.Field.GetTables()).ToList();
+
+            if (Mixins != null)
+                result.AddRange(Mixins.Values.SelectMany(fm => fm.GetTables()));
+
+            return result;
         }
 
         public IEnumerable<RelationalTable> RelationalTables()
