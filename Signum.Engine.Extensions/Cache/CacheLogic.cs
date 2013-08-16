@@ -481,7 +481,7 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(database.TryToString() ?? Connector.C
             foreach (var stype in connected)
             {
                 hs.Add(stype);
-                controllers[stype].NotifyDisabled();
+                controllers[stype].TryDoC(t => t.NotifyDisabled());
             }
         }
 

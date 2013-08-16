@@ -49,6 +49,8 @@ namespace Signum.Engine.Authorization
                     }
                 };
 
+                sb.Schema.Synchronizing += Schema_Synchronizing;
+
                 cache = new TypeAuthCache(sb, merger: TypeAllowedMerger.Instance);
 
                 AuthLogic.ExportToXml += () => cache.ExportXml();

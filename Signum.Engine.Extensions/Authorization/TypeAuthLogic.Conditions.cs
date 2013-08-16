@@ -546,5 +546,21 @@ namespace Signum.Engine.Authorization
             return new TypeAllowedAndConditions(rule.Allowed,
                 rule.Conditions.Select(c => new TypeConditionRule(c.Condition.ToEnum(), c.Allowed)).ToReadOnly());
         }
+
+        static SqlPreCommand Schema_Synchronizing(Replacements arg)
+        {
+            var conds = (from rt in Database.Query<RuleTypeDN>()
+                         from c in rt.Conditions
+                         select new { rt.Resource, c.Condition, rt.Role }).ToList();
+
+            var errors = conds.GroupBy(a => new { a.Resource, a.Condition }, a => a.Role)
+                .Where(c => !TypeConditionLogic.IsDefined(c.Key.Resource.ToType(), c.Key.Condition.ToEnum()))
+                .ToList();
+
+            return errors.Select(a => Administrator.UnsafeDeletePreCommand(Database.MListQuery((RuleTypeDN rt) => rt.Conditions)
+                .Where(mle => mle.Element.Condition.Is(a.Key.Condition) && mle.Parent.Resource.Is(a.Key.Resource)))
+                .AddComment("TypeCondition {0} not defined for {1} (roles {2})".Formato(a.Key.Condition, a.Key.Resource, a.ToString(", "))))
+                .Combine(Spacing.Double);
+        }
     }
 }
