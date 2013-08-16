@@ -80,28 +80,42 @@ Write(Html.ValueLine(e, f => f.Suspended));
             #line hidden
             
             #line 7 "..\..\Scheduler\Views\ScheduledTask.cshtml"
-Write(Html.EntityLine(e, f => f.Task, vl => vl.Create = false));
+Write(Html.EntityLine(e, f => f.Task, vl=>vl.Create = false));
 
             
             #line default
             #line hidden
             
             #line 7 "..\..\Scheduler\Views\ScheduledTask.cshtml"
-                                                             
+                                                           
     
             
             #line default
             #line hidden
             
             #line 8 "..\..\Scheduler\Views\ScheduledTask.cshtml"
-Write(Html.EntityLine(e, f => f.Rule, vl => vl.Find = false));
+Write(Html.EntityLine(e, f => f.Rule));
 
             
             #line default
             #line hidden
             
             #line 8 "..\..\Scheduler\Views\ScheduledTask.cshtml"
-                                                           
+                                    
+    
+            
+            #line default
+            #line hidden
+            
+            #line 9 "..\..\Scheduler\Views\ScheduledTask.cshtml"
+Write(Html.ValueLine(e, f => f.MachineName));
+
+            
+            #line default
+            #line hidden
+            
+            #line 9 "..\..\Scheduler\Views\ScheduledTask.cshtml"
+                                          
 }
             
             #line default

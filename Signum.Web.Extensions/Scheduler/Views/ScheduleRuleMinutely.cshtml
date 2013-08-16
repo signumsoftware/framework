@@ -1,9 +1,7 @@
 ﻿@using Signum.Engine
 @using Signum.Entities.Scheduler
 
-@using (var e = Html.TypeContext<ScheduleRuleMinutelyDN>())
+@using (var sr = Html.TypeContext<ScheduleRuleMinutelyDN>())
 {
-    DateTime d = e.Value.StartingOn.ToUserInterface();
-    @Html.Field("Start Date", Html.TextBox(e.Compose("Date"), d.Date.ToShortDateString(), new { @class = "sf-value-line sf-datepicker" }))
-    @Html.Field("Minutes", Html.TextBox(e.Compose("EachMinute"), d.Minute.ToString("00")))
+    @Html.ValueLine(sr, s => s.EachMinutes)
 }

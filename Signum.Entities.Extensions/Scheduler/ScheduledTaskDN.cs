@@ -41,7 +41,7 @@ namespace Signum.Entities.Scheduler
         }
 
         [NotNullable, SqlDbType(Size = 100)]
-        string machineName;
+        string machineName = None;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string MachineName
         {
@@ -53,6 +53,8 @@ namespace Signum.Entities.Scheduler
         {
             return "{0} {1}".Formato(task, rule) + (suspended ? " [{0}]".Formato(ReflectionTools.GetPropertyInfo(() => Suspended).NiceName()) : "");
         }
+
+        public const string None = "none";
     }
 
     public enum ScheduledTaskOperation

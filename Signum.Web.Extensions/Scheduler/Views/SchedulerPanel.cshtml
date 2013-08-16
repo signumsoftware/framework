@@ -34,7 +34,7 @@
     <br />
     NextExecution: @Model.NextExecution  (@(Model.NextExecution == null? "-None-" : Model.NextExecution.Value.ToAgoString()))
     <br />
-        <h3>Queue</h3>
+        <h3>In Memory Queue</h3>
     <table class="sf-search-results sf-stats-table">
         <thead>
             <tr>
@@ -60,9 +60,19 @@
             }
         </tbody>
     </table>
-
+        
     <br />
-    <h2>Latest Scheduled Taks</h2>
+    <h2>@typeof(ScheduledTaskDN).NicePluralName()</h2>
+
+    @Html.SearchControl(new FindOptions(typeof(ScheduledTaskDN))
+{
+    FilterMode = Signum.Web.FilterMode.Hidden,
+    SearchOnLoad = true,
+    Pagination = new Pagination.Firsts(10),
+}, new Context(null, "st"))
+    <br />
+    <br />
+    <h2>@typeof(ScheduledTaskLogDN).NicePluralName()</h2>
 
     @Html.SearchControl(new FindOptions(typeof(ScheduledTaskLogDN))
 {
@@ -70,7 +80,7 @@
     FilterMode = Signum.Web.FilterMode.Hidden,
     SearchOnLoad = true,
     Pagination = new Pagination.Firsts(10),
-}, new Context(null, "sc"))
+}, new Context(null, "stl"))
     <br />
 </div>
 </div>

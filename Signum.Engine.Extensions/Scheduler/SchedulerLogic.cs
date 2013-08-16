@@ -97,8 +97,9 @@ namespace Signum.Engine.Scheduler
                         Entity = st,
                         st.Id,
                         st.Task,
-                        st.Suspended,
                         st.Rule,
+                        st.Suspended,
+                        st.MachineName,
                     });
 
                 dqm.RegisterQuery(typeof(ScheduledTaskLogDN), () =>
@@ -107,9 +108,10 @@ namespace Signum.Engine.Scheduler
                     {
                         Entity = cte,
                         cte.Id,
-                        ActionTask = cte.Task,
+                        cte.Task,
                         cte.StartTime,
                         cte.EndTime,
+                        cte.MachineName,
                         cte.Exception,
                     });
 
@@ -141,7 +143,7 @@ namespace Signum.Engine.Scheduler
                 }.Register();
 
                 ScheduledTasksLazy = sb.GlobalLazy(() =>
-                    Database.Query<ScheduledTaskDN>().Where(a => !a.Suspended && (a.MachineName == null || a.MachineName == Environment.MachineName)).ToList(),
+                    Database.Query<ScheduledTaskDN>().Where(a => !a.Suspended && (a.MachineName == ScheduledTaskDN.None || a.MachineName == Environment.MachineName)).ToList(),
                     new InvalidateWith(typeof(ScheduledTaskDN)));
 
                 ScheduledTasksLazy.OnReset += ScheduledTasksLazy_OnReset;
@@ -236,35 +238,39 @@ namespace Signum.Engine.Scheduler
             }
         }
 
-        static void OnError(string message, Exception ex)
-        {
-            if (Error != null)
-                Error(message, ex);
-        }
-
         static void TimerCallback(object obj) // obj ignored
         {
-            using (new EntityCache(EntityCacheType.ForceNew))
-            using (AuthLogic.Disable())
-                lock (priorityQueue)
-                {
-                    if (priorityQueue.Empty)
+            try
+            {
+                using (new EntityCache(EntityCacheType.ForceNew))
+                using (AuthLogic.Disable())
+                    lock (priorityQueue)
                     {
-                        OnError("Inconstency in SchedulerLogic PriorityQueue", null);
+                        if (priorityQueue.Empty)
+                        {
+                            throw new InvalidOperationException("Inconstency in SchedulerLogic PriorityQueue");
+                        }
+
+                        var pair = priorityQueue.Pop(); //Exceed timer change
+                        if (Math.Abs((pair.NextDate - TimeZoneManager.Now).Ticks) < ScheduledTaskDN.MinimumSpan.Ticks)
+                        {
+                            ExecuteAsync(pair.ScheduledTask.Task);
+                        }
+
+                        pair.NextDate = pair.ScheduledTask.Rule.Next();
+                        priorityQueue.Push(pair);
+                        SetTimer();
                         return;
                     }
-
-                    var pair = priorityQueue.Pop(); //Exceed timer change
-                    if (Math.Abs((pair.NextDate - TimeZoneManager.Now).Ticks) < ScheduledTaskDN.MinimumSpan.Ticks)
-                    {
-                        ExecuteAsync(pair.ScheduledTask.Task);
-                    }
-
-                    pair.NextDate = pair.ScheduledTask.Rule.Next();
-                    priorityQueue.Push(pair);
-                    SetTimer();
-                    return;
-                }
+            }
+            catch (Exception e)
+            {
+                e.LogException(ex =>
+                {
+                    ex.ControllerName = "SchedulerLogic";
+                    ex.ActionName = "TimerCallback";
+                });
+            }
         }
 
         public static void ExecuteAsync(ITaskDN task)
@@ -277,7 +283,11 @@ namespace Signum.Engine.Scheduler
                 }
                 catch (Exception e)
                 {
-                    OnError("Error executing task '{0}'".Formato(task), e);
+                    e.LogException(ex =>
+                    {
+                        ex.ControllerName = "SchedulerLogic";
+                        ex.ActionName = "ExecuteAsync";
+                    });
                 }
             }); 
         }
@@ -320,6 +330,7 @@ namespace Signum.Engine.Scheduler
                         {
                             Task = stl.Task,
                             StartTime = stl.StartTime,
+                            MachineName = stl.MachineName,
                             EndTime = TimeZoneManager.Now,
                             Exception = exLog,
                         }.Save();

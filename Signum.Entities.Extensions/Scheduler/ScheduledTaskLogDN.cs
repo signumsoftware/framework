@@ -21,6 +21,7 @@ namespace Signum.Entities.Scheduler
         }
 
         DateTime startTime;
+        [Format("G")]
         public DateTime StartTime
         {
             get { return startTime; }
@@ -28,6 +29,7 @@ namespace Signum.Entities.Scheduler
         }
 
         DateTime? endTime;
+        [Format("G")]
         public DateTime? EndTime
         {
             get { return endTime; }

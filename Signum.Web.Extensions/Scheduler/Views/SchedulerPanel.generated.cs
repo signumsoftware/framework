@@ -220,7 +220,7 @@ WriteLiteral("  (");
             #line hidden
 WriteLiteral(@")
     <br />
-        <h3>Queue</h3>
+        <h3>In Memory Queue</h3>
     <table class=""sf-search-results sf-stats-table"">
         <thead>
             <tr>
@@ -294,19 +294,53 @@ WriteLiteral(")\r\n                    </td>\r\n                </tr>\r\n");
             
             #line default
             #line hidden
-WriteLiteral("        </tbody>\r\n    </table>\r\n\r\n    <br />\r\n    <h2>Latest Scheduled Taks</h2>\r" +
-"\n\r\n    ");
+WriteLiteral("        </tbody>\r\n    </table>\r\n        \r\n    <br />\r\n    <h2>");
+
+
+            
+            #line 65 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
+   Write(typeof(ScheduledTaskDN).NicePluralName());
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</h2>\r\n\r\n    ");
 
 
             
             #line 67 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
+Write(Html.SearchControl(new FindOptions(typeof(ScheduledTaskDN))
+{
+    FilterMode = Signum.Web.FilterMode.Hidden,
+    SearchOnLoad = true,
+    Pagination = new Pagination.Firsts(10),
+}, new Context(null, "st")));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n    <br />\r\n    <br />\r\n    <h2>");
+
+
+            
+            #line 75 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
+   Write(typeof(ScheduledTaskLogDN).NicePluralName());
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</h2>\r\n\r\n    ");
+
+
+            
+            #line 77 "..\..\Scheduler\Views\SchedulerPanel.cshtml"
 Write(Html.SearchControl(new FindOptions(typeof(ScheduledTaskLogDN))
 {
     OrderOptions = { new OrderOption("StartTime", Signum.Entities.DynamicQuery.OrderType.Descending) },
     FilterMode = Signum.Web.FilterMode.Hidden,
     SearchOnLoad = true,
     Pagination = new Pagination.Firsts(10),
-}, new Context(null, "sc")));
+}, new Context(null, "stl")));
 
             
             #line default
