@@ -681,7 +681,8 @@ namespace Signum.Engine.Maps
             {
                 IsLite = IsLite,
                 IsCollection = false,
-                IsNullable = Nullable
+                IsNullable = Nullable,
+                IsEnum = true,
             });
         }
 
