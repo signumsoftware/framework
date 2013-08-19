@@ -524,7 +524,7 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(database.TryToString() ?? Connector.C
         static void TryCacheSubTables(Type type, SchemaBuilder sb)
         {
             List<Type> relatedTypes = sb.Schema.Table(type).DependentTables()
-                .Where(kvp => !kvp.Key.Type.IsEnumEntity())
+                .Where(a => !a.Value.IsEnum)
                 .Select(t => t.Key.Type).ToList();
 
             inverseDependencies.Add(type);
