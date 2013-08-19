@@ -162,11 +162,8 @@ SF.registerModule("Operations", function () {
                 new SF.Validator().showErrors(modelState);
             }
             else {
-                var info = this.runtimeInfo();
                 new SF.PartialValidator({
-                    prefix: this.options.prefix,
-                    type: info.entityType(),
-                    id: info.id()
+                    prefix: this.options.prefix
                 }).showErrors(modelState);
             }
             return false;
