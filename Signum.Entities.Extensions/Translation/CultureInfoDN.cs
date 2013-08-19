@@ -44,7 +44,7 @@ namespace Signum.Entities.Translation
             private set { Set(ref englishName, value, () => EnglishName); }
         }
 
-        Expression<Func<CultureInfoDN, CultureInfo>> CultureInfoExpression = ci => CultureInfo.GetCultureInfo(ci.Name);
+        static Expression<Func<CultureInfoDN, CultureInfo>> CultureInfoExpression = ci => CultureInfo.GetCultureInfo(ci.Name);
         public CultureInfo CultureInfo
         {
             get
