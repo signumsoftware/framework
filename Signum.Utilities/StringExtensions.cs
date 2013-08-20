@@ -476,6 +476,27 @@ namespace Signum.Utilities
             return replacements.Aggregate(str, (s, kvp) => s.Replace(kvp.Key, kvp.Value));
         }
 
+        public static string Replace(this string str, Dictionary<char, char> replacements)
+        {
+            StringBuilder sb = null;
+            for (int i = 0; i < str.Length; i++)
+            {
+                char c = str[i];
+                char rep;
+                if (replacements.TryGetValue(c, out rep))
+                {
+                    if (sb == null)
+                        sb = new StringBuilder(str, 0, i, str.Length);
+
+                    sb.Append(rep);
+                }
+                else if (sb != null)
+                    sb.Append(c);
+            }
+
+            return sb == null ? str : sb.ToString();
+        }
+
         public static string Indent(this string str, int numChars)
         {
             return Indent(str, numChars, ' ');
