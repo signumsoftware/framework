@@ -342,6 +342,8 @@ namespace Signum.Web
             return this;
         }
 
+        public bool DisambiguateRuntimeInfo { get; set; }
+
         public override T GetValue(MappingContext<T> ctx)
         {
             using (HeavyProfiler.LogNoStackTrace("GetValue", () => "AutoEntityMapping<{0}>".Formato(typeof(T).TypeName())))
@@ -349,10 +351,9 @@ namespace Signum.Web
                 if (ctx.Empty())
                     return ctx.None();
 
-                string strRuntimeInfo;
-                Type entityType = ctx.Inputs.TryGetValue(EntityBaseKeys.RuntimeInfo, out strRuntimeInfo) ?
-                    RuntimeInfo.FromFormValue(strRuntimeInfo).EntityType :
-                    ctx.Value.TryCC(t => t.GetType());
+                 Type entityType;
+                 entityType = GetRuntimeType(ctx);
+          
 
                 if (entityType == null)
                     return (T)(object)null;
@@ -362,6 +363,27 @@ namespace Signum.Web
 
                 return miGetRuntimeValue.GetInvoker(entityType)(this, ctx, PropertyRoute.Root(entityType));
             }
+        }
+
+        private Type GetRuntimeType(MappingContext<T> ctx)
+        {
+            string strRuntimeInfo;
+            if (ctx.Inputs.TryGetValue(EntityBaseKeys.RuntimeInfo, out strRuntimeInfo))
+            {
+                if (!DisambiguateRuntimeInfo)
+                    return RuntimeInfo.FromFormValue(strRuntimeInfo).EntityType;
+                else
+                {
+                    RuntimeInfo ri = strRuntimeInfo.Split(',')
+                        .Select(r => RuntimeInfo.FromFormValue(r))
+                        .OrderBy(a => !a.ToLite().RefersTo((IdentifiableEntity)(object)ctx.Value))
+                        .FirstEx();
+
+                    return ri.EntityType;
+                }
+            }
+            else
+                return ctx.Value.TryCC(t => t.GetType());
         }
 
         static GenericInvoker<Func<AutoEntityMapping<T>, MappingContext<T>, PropertyRoute, T>> miGetRuntimeValue = 
@@ -609,13 +631,24 @@ namespace Signum.Web
             }
         }
 
+        public bool DesambiguateRuntimeInfo { get; set; }
+
         public virtual T GetEntity(MappingContext<T> ctx)
         {
             string strRuntimeInfo;
             if (!ctx.Inputs.TryGetValue(EntityBaseKeys.RuntimeInfo, out strRuntimeInfo))
                 return ctx.Value; //I only have some ValueLines of an Entity (so no Runtime, Id or anything)
 
-            RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(strRuntimeInfo);
+            RuntimeInfo runtimeInfo; 
+            if (!DesambiguateRuntimeInfo)
+                runtimeInfo = RuntimeInfo.FromFormValue(strRuntimeInfo);
+            else
+            {
+                runtimeInfo = strRuntimeInfo.Split(',')
+                    .Select(r => RuntimeInfo.FromFormValue(r))
+                    .OrderBy(a => !a.ToLite().RefersTo((IdentifiableEntity)(object)ctx.Value))
+                    .FirstEx();
+            }
 
             if (runtimeInfo.EntityType == null)
                 return null;

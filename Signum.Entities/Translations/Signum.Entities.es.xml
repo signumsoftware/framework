@@ -160,7 +160,7 @@
     <Member Name="InvalidFormat" Description="Formato inválido" />
     <Member Name="New" Description="Nuevo" />
     <Member Name="ToStr" Description="Texto" />
-    <Member Name="TypeNotFound" Description="Tipo no encontrado" />
+    <Member Name="Type0NotFound" Description="Tipo {0} no encontrado" />
   </Type>
   <Type Name="LockableEntity" Description="Entidad bloqueable">
     <Member Name="Locked" Description="Bloqueado" />

@@ -177,8 +177,11 @@ namespace Signum.Web
 
         public Lite<IdentifiableEntity> ToLite()
         {
-            if(IsNew)
+            if (IsNew)
                 throw new InvalidOperationException("The RuntimeInfo represents a new entity");
+
+            if (this.EntityType == null)
+                return null;
 
             return Lite.Create(this.EntityType, this.IdOrNull.Value);
         }
