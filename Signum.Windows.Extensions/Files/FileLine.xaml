@@ -21,7 +21,7 @@
             <ColumnDefinition/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <Label Content="{Binding Path=LabelText, ElementName=me, Mode=Default}" VerticalContentAlignment="Center" HorizontalAlignment="Left" 
+        <Label Content="{Binding Path=LabelText, ElementName=me, Mode=Default}" VerticalContentAlignment="Center" 
 		Target="{Binding ElementName=cc, Mode=OneWay}" MinWidth="{Binding Path=(m:Common.MinLabelWidth), ElementName=me, Mode=OneWay}"
 		 Visibility="{Binding ElementName=me, Path=(m:Common.LabelVisible), Converter={x:Static m:Converters.BoolToVisibility}}"/>
         <Border Grid.ColumnSpan="1" Grid.Column="1" Margin="1,1,1,1" Padding="3,0,3,0"  SnapsToDevicePixels="True" BorderBrush="{DynamicResource BlueBorder}" BorderThickness="1,1,1,1" CornerRadius="3,3,3,3" Background="{DynamicResource BlueBackground}" Focusable="True" x:Name="border" Grid.IsSharedSizeScope="False">
