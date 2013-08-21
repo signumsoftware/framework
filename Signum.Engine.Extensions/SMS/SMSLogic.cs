@@ -529,8 +529,8 @@ namespace Signum.Engine.SMS
                     else
                         SMSLogic.UpdateMessageStatus(sms);
 
-                    if (sms.State == SMSMessageState.Sent)
-                        throw new InvalidOperationException("SMS Message {0} has not updated state".Formato(sms.Id));
+                    //if (sms.State == SMSMessageState.Sent)
+                    //    throw new InvalidOperationException("SMS Message {0} has not updated state".Formato(sms.Id));
                 }
             }.Register();
 
