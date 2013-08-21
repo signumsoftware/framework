@@ -54,17 +54,20 @@ namespace Signum.Engine.Authorization
 
         public static ResetPasswordRequestDN ResetPasswordRequest(UserDN user)
         {
-            //Remove old previous requests
-            Database.Query<ResetPasswordRequestDN>()
-                .Where(r => r.User.Is(user) && r.RequestDate < TimeZoneManager.Now.AddMonths(1))
-                .UnsafeDelete();
-
-            return new ResetPasswordRequestDN()
+            using (AuthLogic.Disable())
             {
-                Code = MyRandom.Current.NextString(5),
-                User = user,
-                RequestDate = TimeZoneManager.Now,
-            }.Save();
+                //Remove old previous requests
+                Database.Query<ResetPasswordRequestDN>()
+                    .Where(r => r.User.Is(user) && r.RequestDate < TimeZoneManager.Now.AddMonths(1))
+                    .UnsafeDelete();
+
+                return new ResetPasswordRequestDN()
+                {
+                    Code = MyRandom.Current.NextString(5),
+                    User = user,
+                    RequestDate = TimeZoneManager.Now,
+                }.Save();
+            }
         }
 
         public static void ResetPasswordRequestAndSendEmail(UserDN user, Func<ResetPasswordRequestDN, string> urlResetPassword)

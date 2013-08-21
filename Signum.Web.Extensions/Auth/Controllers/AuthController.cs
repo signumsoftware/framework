@@ -52,7 +52,7 @@ namespace Signum.Web.Auth
             var context = this.ExtractEntity<UserDN>(prefix).ApplyChanges(this.ControllerContext, prefix, UserMapping.NewUser).ValidateGlobal();
 
             if (context.GlobalErrors.Any())
-            { 
+            {
                 this.ModelState.FromContext(context);
                 return JsonAction.ModelState(ModelState);
             }
@@ -75,7 +75,7 @@ namespace Signum.Web.Auth
             var context = this.ExtractEntity<UserDN>(prefix).ApplyChanges(this.ControllerContext, prefix, true).ValidateGlobal();
 
             if (context.GlobalErrors.Any())
-            { 
+            {
                 this.ModelState.FromContext(context);
                 return JsonAction.ModelState(ModelState);
             }
@@ -111,7 +111,7 @@ namespace Signum.Web.Auth
 
             return JsonAction.Redirect(Navigator.NavigateRoute(typeof(UserDN), g.Id));
         }
-                
+
         #region "Change password"
         public ActionResult ChangePassword()
         {
@@ -181,9 +181,10 @@ namespace Signum.Web.Auth
                 user = context.Value;
             }
 
-            AuthLogic.ChangePassword(user.ToLite(),
-                Security.EncodePassword(form[UserMapping.OldPasswordKey]), 
-                Security.EncodePassword(form[UserMapping.NewPasswordKey]));
+            using (AuthLogic.Disable())
+                AuthLogic.ChangePassword(user.ToLite(),
+                    Security.EncodePassword(form[UserMapping.OldPasswordKey]),
+                    Security.EncodePassword(form[UserMapping.NewPasswordKey]));
             Login(user.UserName, form[UserMapping.NewPasswordKey], false, null);
 
             return RedirectToAction("ChangePasswordSuccess");
@@ -193,7 +194,8 @@ namespace Signum.Web.Auth
 
         private void RefreshSessionUserChanges()
         {
-            UserDN.Current = UserDN.Current.ToLite().Retrieve(); 
+            using (AuthLogic.Disable())
+                UserDN.Current = UserDN.Current.ToLite().Retrieve();
         }
 
         public ActionResult ChangePasswordSuccess()
@@ -250,7 +252,7 @@ namespace Signum.Web.Auth
             {
                 rpr = Database.Query<ResetPasswordRequestDN>()
                     .Where(r => r.User.Email == email && r.Code == code)
-                    .SingleOrDefaultEx(()=>AuthMessage.TheConfirmationCodeThatYouHaveJustSentIsInvalid.NiceToString());
+                    .SingleOrDefaultEx(() => AuthMessage.TheConfirmationCodeThatYouHaveJustSentIsInvalid.NiceToString());
             }
             TempData["ResetPasswordRequest"] = rpr;
 
@@ -319,7 +321,7 @@ namespace Signum.Web.Auth
             return View(AuthClient.ResetPasswordSuccessView);
         }
         #endregion
-          
+
         #region Login
 
         [AcceptVerbs(HttpVerbs.Get)]
@@ -332,7 +334,7 @@ namespace Signum.Web.Auth
                 if (TempData.ContainsKey("referrer") && TempData["referrer"] != null)
                     ViewData["referrer"] = TempData["referrer"].ToString();
             }
-            
+
             return View(AuthClient.LoginView);
         }
 
@@ -485,10 +487,10 @@ namespace Signum.Web.Auth
         {
             var newUser = UserDN.Current.ToLite().Retrieve();
 
-            UserDN.Current = newUser; 
+            UserDN.Current = newUser;
 
             if (OnUpdatedSessionUser != null)
-                OnUpdatedSessionUser(newUser); 
+                OnUpdatedSessionUser(newUser);
         }
 
         public static void AddUserSession(UserDN user)

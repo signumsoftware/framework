@@ -33,6 +33,7 @@ using System.Configuration;
 using Signum.Entities.UserQueries;
 using System.IO;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Engine.Files;
 
 namespace Signum.Engine.Mailing
 {
@@ -55,6 +56,7 @@ namespace Signum.Engine.Mailing
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                FilePathLogic.AssertStarted(sb);
                 CultureInfoLogic.AssertStarted(sb);
                 EmailLogic.getConfiguration = getConfiguration;
                 EmailTemplateLogic.Start(sb, dqm);
@@ -311,12 +313,15 @@ namespace Signum.Engine.Mailing
                 {
                     var value = m.Groups["link"].Value;
 
-                    var link = email.Attachments.Where(a => a.File.FullWebPath == value).Select(a => a.ContentId).FirstOrDefault() ?? "missingContent";
+                    var link = email.Attachments.Where(a => a.File.FullWebPath == value).Select(a => a.ContentId).FirstOrDefault();
 
-                    return "src=\"cid:{0}\"".Formato(link);
+                    if (link != null)
+                        return "src=\"cid:{0}\"".Formato(link);
+                    
+                    return m.Value;
                 });
 
-                AlternateView view = AlternateView.CreateAlternateViewFromString(email.Body, null, "text/html");
+                AlternateView view = AlternateView.CreateAlternateViewFromString(body, null, "text/html");
                 view.LinkedResources.AddRange(email.Attachments
                    .Where(a => a.Type == EmailAttachmentType.LinkedResource)
                    .Select(a => new LinkedResource(a.File.FullPhysicalPath, MimeType.FromFileName(a.File.FileName))

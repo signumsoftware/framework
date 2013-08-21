@@ -433,9 +433,6 @@ namespace Signum.Engine.Mailing
             if (qd == null)
                 throw new ArgumentNullException("qd");
 
-            if (modelType == null)
-                throw new ArgumentNullException("modelType");
-
             BlockNode node;
             var errors = TryParseTemplate(text, qd, modelType, out node);
             if (errors.Any())
@@ -591,7 +588,41 @@ namespace Signum.Engine.Mailing
             return errors;
         }
 
-       
+
+
+        internal static void ReplaceToken(EmailTemplateDN et, QueryTokenDN item, QueryTokenDN token)
+        {
+            foreach (var tok in et.Recipients.Where(r => r.Token == item).ToList())
+            {
+                tok.Token = token;
+            }
+
+            foreach (var m in et.Messages)
+            {
+                m.Subject = ReplaceTokenText(m.Subject, item, token);
+                m.Text = ReplaceTokenText(m.Text, item, token);
+            }
+        }
+
+        private static string ReplaceTokenText(string text, QueryTokenDN item, QueryTokenDN token)
+        {
+            var result = KeywordsRegex.Replace(text, m =>
+            {
+                var gr = m.Groups["token"];
+
+                if (!gr.Success)
+                    return m.Value;
+
+                if(gr.Value != item.TokenString)
+                    return m.Value;
+
+                var newKeyword = m.Value.Substring(0, gr.Index) + token.Token.FullKey() + m.Value.Substring(gr.Index + gr.Length);
+
+                return newKeyword;
+            });
+
+            return result;
+        }
     }
 
     public class EmailTemplateParameters

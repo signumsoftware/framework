@@ -37,6 +37,8 @@ namespace Signum.Engine.Authorization
                         ut.ConnectionDate,
                         ut.Device,
                     });
+
+                dqm.RegisterExpression((UserDN u) => u.Tickets());
             }
         }
 
@@ -49,6 +51,7 @@ namespace Signum.Engine.Authorization
 
         public static string NewTicket(string device)
         {
+            using (AuthLogic.Disable())
             using (Transaction tr = new Transaction())
             {
                 CleanExpiredTickets(UserDN.Current);
@@ -70,6 +73,7 @@ namespace Signum.Engine.Authorization
 
         public static UserDN UpdateTicket(string device, ref string ticket)
         {
+            using (AuthLogic.Disable())
             using (Transaction tr = new Transaction())
             {
                 Tuple<int, string> pair = UserTicketDN.ParseTicket(ticket);
@@ -98,12 +102,8 @@ namespace Signum.Engine.Authorization
             }
         }
 
-        public static int RemoveTickets(UserDN user)
-        {
-            return user.Tickets().UnsafeDelete();
-        }
 
-        public static int CleanExpiredTickets(UserDN user)
+        static int CleanExpiredTickets(UserDN user)
         {
             DateTime min = TimeZoneManager.Now.Subtract(ExpirationInterval);
 
@@ -112,12 +112,6 @@ namespace Signum.Engine.Authorization
             int tooMuch = user.Tickets().OrderByDescending(t => t.ConnectionDate).Skip(MaxTicketsPerUser).UnsafeDelete();
 
             return expired + tooMuch;
-        }
-
-        public static int CleanAllExpiredTickets()
-        {
-            DateTime min = TimeZoneManager.Now.Subtract(ExpirationInterval);
-            return Database.Query<UserTicketDN>().Where(a => a.ConnectionDate < min).UnsafeDelete();
         }
     }
 }

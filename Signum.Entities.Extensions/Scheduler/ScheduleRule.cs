@@ -14,6 +14,94 @@ namespace Signum.Entities.Scheduler
         DateTime Next();
     }
 
+
+    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
+    public class ScheduleRuleMinutelyDN : Entity, IScheduleRuleDN
+    {
+        public DateTime Next()
+        {
+            DateTime now = TimeZoneManager.Now;
+
+            DateTime candidate = now.TrimToMinutes();
+
+            candidate = candidate.AddMinutes(-(candidate.Minute % eachMinutes));
+
+            if (candidate < now)
+                candidate = candidate.AddMinutes(eachMinutes);
+
+            return candidate; 
+        }
+
+        int eachMinutes;
+        [NumberBetweenValidator(1, 60)]
+        public int EachMinutes
+        {
+            get { return eachMinutes; }
+            set { Set(ref eachMinutes, value, () => EachMinutes); }
+        }
+
+        public override string ToString()
+        {
+            return SchedulerMessage.Each0Minutes.NiceToString().Formato(eachMinutes.ToString());
+        }
+
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Is(() => EachMinutes))
+            {
+                if ((60 % EachMinutes) != 0)
+                    return SchedulerMessage._0IsNotMultiple1.NiceToString().Formato(pi.NiceName(), 60);
+            }
+
+            return base.PropertyValidation(pi);
+        }
+    }
+
+    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
+    public class ScheduleRuleHourlyDN : Entity, IScheduleRuleDN
+    {
+        public DateTime Next()
+        {
+            DateTime now = TimeZoneManager.Now;
+
+            DateTime candidate = now.TrimToHours();
+
+            candidate = candidate.AddHours(-(candidate.Hour % eachHours));
+
+            if (candidate < now)
+                candidate = candidate.AddHours(eachHours);
+
+            return candidate;
+        }
+
+        int eachHours;
+        [NumberBetweenValidator(1, 24)]
+        public int EachHours
+        {
+            get { return eachHours; }
+            set { Set(ref eachHours, value, () => EachHours); }
+        }
+
+        public override string ToString()
+        {
+            return SchedulerMessage.Each0Hours.NiceToString().Formato(eachHours.ToString());
+        }
+
+        protected override string PropertyValidation(PropertyInfo pi)
+        {
+            if (pi.Is(() => EachHours))
+            {
+                if ((24 % EachHours) != 0)
+                    return SchedulerMessage._0IsNotMultiple1.NiceToString().Formato(pi.NiceName(), 24);
+            }
+
+            return base.PropertyValidation(pi);
+        }
+    }
+
+
+
+
     [Serializable]
     public abstract class ScheduleRuleDayDN : Entity, IScheduleRuleDN
     {
@@ -28,7 +116,7 @@ namespace Signum.Entities.Scheduler
 
         protected DateTime BaseNext()
         {
-            DateTime result = DateTimeExtensions.Max(TimeZoneManager.Now.Date, startingOn.Date).Add(startingOn.TimeOfDay); 
+            DateTime result = DateTimeExtensions.Max(TimeZoneManager.Now.Date, startingOn.Date).Add(startingOn.TimeOfDay);
 
             if (result < TimeZoneManager.Now.Add(ScheduledTaskDN.MinimumSpan).Add(ScheduledTaskDN.MinimumSpan))
                 result = result.AddDays(1);
@@ -39,109 +127,6 @@ namespace Signum.Entities.Scheduler
         public override string ToString()
         {
             return startingOn.ToUserInterface().ToShortTimeString();
-        }
-    }
-
-    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
-    public class ScheduleRuleMinutelyDN : Entity, IScheduleRuleDN
-    {
-        DateTime startingOn = TimeZoneManager.Now.Date;
-        public DateTime StartingOn
-        {
-            get { return startingOn; }
-            set { Set(ref startingOn, value, () => StartingOn); }
-        }
-
-        public DateTime Next()
-        {
-            DateTime next = DateTimeExtensions.Max(TimeZoneManager.Now, startingOn);
-
-            DateTime candidate = next.TrimToMinutes();
-
-            candidate = candidate.AddMinutes(-(candidate.Minute % eachMinute));
-
-            if (candidate < next)
-                candidate = candidate.AddMinutes(eachMinute);
-
-            return candidate; 
-        }
-
-        int eachMinute;
-        [NumberBetweenValidator(1, 60)]
-        public int EachMinute
-        {
-            get { return eachMinute; }
-            set { Set(ref eachMinute, value, () => EachMinute); }
-        }
-
-        public override string ToString()
-        {
-            return SchedulerMessage.Each0MinutesFrom1.NiceToString().Formato(eachMinute.ToString(), startingOn.ToUserInterface().ToShortDateString());
-        }
-
-        protected override string PropertyValidation(PropertyInfo pi)
-        {
-            if (pi.Is(() => EachMinute))
-            {
-                if ((60 % EachMinute) != 0)
-                    return SchedulerMessage._0IsNotMultiple1.NiceToString().Formato(pi.NiceName(), 60);
-            }
-
-            return base.PropertyValidation(pi);
-        }
-    }
-
-    [Serializable, EntityKind(EntityKind.Part, EntityData.Master)]
-    public class ScheduleRuleHourlyDN : Entity, IScheduleRuleDN
-    {
-        DateTime startingOn = TimeZoneManager.Now.Date;
-        public DateTime StartingOn
-        {
-            get { return startingOn; }
-            set { Set(ref startingOn, value, () => StartingOn); }
-        }
-
-        public DateTime Next()
-        {
-            DateTime next = DateTimeExtensions.Max(TimeZoneManager.Now, startingOn);
-
-            DateTime candidate = next.TrimToHours();
-
-            candidate = candidate.AddHours(-(candidate.Hour % eachHour));
-
-            if (candidate < next)
-                candidate = candidate.AddHours(eachHour);
-
-            return candidate;
-        }
-
-        public static bool isValid(int time)
-        {
-            return (24 % time) == 0;
-        }
-
-        int eachHour;
-        [NumberBetweenValidator(1, 24)]
-        public int EachHour
-        {
-            get { return eachHour; }
-            set { Set(ref eachHour, value, () => EachHour); }
-        }
-
-        public override string ToString()
-        {
-            return SchedulerMessage.Each0HoursFrom1.NiceToString().Formato(eachHour.ToString(), startingOn.ToUserInterface().ToShortDateString());
-        }
-
-        protected override string PropertyValidation(PropertyInfo pi)
-        {
-            if (pi.Is(() => EachHour))
-            {
-                if ((24 % EachHour) != 0)
-                    return SchedulerMessage._0IsNotMultiple1.NiceToString().Formato(pi.NiceName(), 24);
-            }
-
-            return base.PropertyValidation(pi);
         }
     }
 
@@ -323,10 +308,10 @@ namespace Signum.Entities.Scheduler
     {
         [Description("{0} is not multiple of {1}")]
         _0IsNotMultiple1,
-        [Description("Each {0} hours from {1}")]
-        Each0HoursFrom1,
-        [Description("Each {0} minutes from {1}")]
-        Each0MinutesFrom1,
+        [Description("Each {0} hours")]
+        Each0Hours,
+        [Description("Each {0} minutes")]
+        Each0Minutes,
         [Description("Holiday have to be null when no calendar is set")]
         Holidayhavetobenullwhennocalendarisset,
         [Description("Holiday have to be true or false when a calendar is set")]

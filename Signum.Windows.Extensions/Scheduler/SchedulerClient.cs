@@ -21,10 +21,20 @@ namespace Signum.Windows.Scheduler
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                Navigator.AddSetting(new EntitySettings<ScheduledTaskDN> { View = e => new ScheduledTask(), Icon = Image("clock.png") });
+                Navigator.AddSettings(new List<EntitySettings>()
+                {              
+                    new EntitySettings<ScheduledTaskDN> { View = e => new ScheduledTask(), Icon = Image("clock.png") },
 
-                Navigator.AddSetting(new EntitySettings<SimpleTaskDN> { View = e => new SimpleTask(), Icon = Image("simpleTask.png") });
-                Navigator.AddSetting(new EntitySettings<ScheduledTaskLogDN> { View = e => new ScheduledTaskLog(), Icon = Image("scheduledTaskLog.png") });
+                    new EntitySettings<SimpleTaskDN> { View = e => new SimpleTask(), Icon = Image("simpleTask.png") },
+                    new EntitySettings<ScheduledTaskLogDN> { View = e => new ScheduledTaskLog(), Icon = Image("scheduledTaskLog.png") },
+
+                    new EntitySettings<ScheduleRuleDailyDN> { View = e => new ScheduleRuleDaily() },
+                    new EntitySettings<ScheduleRuleWeeklyDN> { View = e => new ScheduleRuleWeekly() },
+                    new EntitySettings<ScheduleRuleWeekDaysDN> { View = e => new ScheduleRuleWeekDays() },
+                    new EntitySettings<ScheduleRuleMinutelyDN> { View = e => new ScheduleRuleMinutely() },
+                    new EntitySettings<ScheduleRuleHourlyDN> { View = e => new ScheduleRuleHourly() },
+                    new EntitySettings<HolidayCalendarDN> { View = e => new HolidayCalendar() },
+                });
 
                 var executeGroup = new EntityOperationGroup
                 {
@@ -35,11 +45,6 @@ namespace Signum.Windows.Scheduler
 
                 OperationClient.AddSetting(new EntityOperationSettings(TaskOperation.ExecuteSync) { Icon = Image("execute.png"), Group = executeGroup });
                 OperationClient.AddSetting(new EntityOperationSettings(TaskOperation.ExecuteAsync) { Icon = Image("execute.png"), Group = executeGroup });
-
-                Navigator.AddSetting(new EntitySettings<ScheduleRuleDailyDN> { View = e => new ScheduleRuleDaily() });
-                Navigator.AddSetting(new EntitySettings<ScheduleRuleWeeklyDN> { View = e => new ScheduleRuleWeekly() });
-                Navigator.AddSetting(new EntitySettings<ScheduleRuleWeekDaysDN> { View = e => new ScheduleRuleWeekDays() });
-                Navigator.AddSetting(new EntitySettings<HolidayCalendarDN> { View = e => new HolidayCalendar() });
             }
         }
 

@@ -21,8 +21,6 @@ namespace Signum.Engine.Mailing
         List<EmailOwnerRecipientData> GetRecipients();
 
         List<Filter> GetFilters(QueryDescription qd);
-
-        object DefaultQueryName { get; }
     }
 
     public class EmailOwnerRecipientData
@@ -60,11 +58,6 @@ namespace Signum.Engine.Mailing
                 new Filter(QueryUtils.Parse("Entity", qd, false), FilterOperation.EqualTo, Entity.ToLite())
             };
         }
-
-        public object DefaultQueryName
-        {
-            get { return typeof(T); }
-        }
     }
 
     public static class SystemEmailLogic
@@ -77,14 +70,13 @@ namespace Signum.Engine.Mailing
 
         static ResetLazy<Dictionary<Lite<SystemEmailDN>, List<EmailTemplateDN>>> SystemEmailsToEmailTemplates;
         static Dictionary<Type, SystemEmailInfo> systemEmails = new Dictionary<Type, SystemEmailInfo>();
-        static Dictionary<Type, SystemEmailDN> systemEmailToDN;
-        static Dictionary<SystemEmailDN, Type> systemEmailToType;
+        static ResetLazy<Dictionary<Type, SystemEmailDN>> systemEmailToDN;
+        static ResetLazy<Dictionary<SystemEmailDN, Type>> systemEmailToType;
      
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Schema.Initializing[InitLevel.Level2NormalEntities] += Schema_Initializing;
                 sb.Schema.Generating += Schema_Generating;
                 sb.Schema.Synchronizing += Schema_Synchronizing;
 
@@ -109,18 +101,18 @@ namespace Signum.Engine.Mailing
                     select new { se = et.SystemEmail, et })
                     .GroupToDictionary(pair => pair.se.ToLite(), pair => pair.et),
                     new InvalidateWith(typeof(SystemEmailDN), typeof(EmailTemplateDN)));
+
+                systemEmailToDN = sb.GlobalLazy(() =>
+                {
+                    var dbTemplates = Database.RetrieveAll<SystemEmailDN>();
+                    return EnumerableExtensions.JoinStrict(
+                        dbTemplates, systemEmails.Keys, typeDN => typeDN.FullClassName, type => type.FullName,
+                        (typeDN, type) => KVP.Create(type, typeDN), "caching EmailTemplates. Consider synchronize").ToDictionary();
+                }, new InvalidateWith(typeof(SystemEmailDN)));
+
+                systemEmailToType = sb.GlobalLazy(() => systemEmailToDN.Value.Inverse(),
+                    new InvalidateWith(typeof(SystemEmailDN)));
             }
-        }
-
-        static void Schema_Initializing()
-        {
-            var dbTemplates = Database.RetrieveAll<SystemEmailDN>();
-
-            systemEmailToDN = EnumerableExtensions.JoinStrict(
-                dbTemplates, systemEmails.Keys, typeDN => typeDN.FullClassName, type => type.FullName,
-                (typeDN, type) => KVP.Create(type, typeDN), "caching EmailTemplates. Consider synchronize").ToDictionary();
-
-            systemEmailToType = systemEmailToDN.Inverse();
         }
 
         static readonly string systemTemplatesReplacementKey = "EmailTemplates";
@@ -154,7 +146,7 @@ namespace Signum.Engine.Mailing
         public static void RegisterSystemEmail<T>(Func<EmailTemplateDN> defaultTemplateConstructor, object queryName = null)
           where T : ISystemEmail
         {
-            RegisterSystemEmail(typeof(T), defaultTemplateConstructor);
+            RegisterSystemEmail(typeof(T), defaultTemplateConstructor, queryName);
         }
 
         public static void RegisterSystemEmail(Type model, Func<EmailTemplateDN> defaultTemplateConstructor, object queryName = null)
@@ -201,7 +193,7 @@ namespace Signum.Engine.Mailing
 
         public static SystemEmailDN ToSystemEmailDN(Type type)
         {
-            return systemEmailToDN.GetOrThrow(type, "The system email {0} was not registered");
+            return systemEmailToDN.Value.GetOrThrow(type, "The system email {0} was not registered");
         }
 
         public static Type ToType(this SystemEmailDN systemEmail)
@@ -209,7 +201,7 @@ namespace Signum.Engine.Mailing
             if (systemEmail == null)
                 return null;
 
-            return systemEmailToType.GetOrThrow(systemEmail, "The system email {0} was not registered");
+            return systemEmailToType.Value.GetOrThrow(systemEmail, "The system email {0} was not registered");
         }
 
         public static IEnumerable<EmailMessageDN> CreateEmailMessage(this ISystemEmail systemEmail)
@@ -238,9 +230,9 @@ namespace Signum.Engine.Mailing
             return list.Where(t => t.IsActiveNow()).SingleEx(() => "Active EmailTemplates for SystemEmail {0}".Formato(systemEmailDN));
         }
 
-        private static EmailTemplateDN CreateDefaultTemplate(SystemEmailDN systemEmailDN)
+        internal static EmailTemplateDN CreateDefaultTemplate(SystemEmailDN systemEmailDN)
         {
-            SystemEmailInfo info = systemEmails.GetOrThrow(systemEmailToType.GetOrThrow(systemEmailDN));
+            SystemEmailInfo info = systemEmails.GetOrThrow(systemEmailToType.Value.GetOrThrow(systemEmailDN));
 
             EmailTemplateDN template = info.DefaultTemplateConstructor();
             if (template.MasterTemplate != null)
@@ -252,6 +244,8 @@ namespace Signum.Engine.Mailing
             template.SystemEmail = systemEmailDN;
             template.Active = true;
             template.Query = QueryLogic.GetQuery(info.QueryName);
+
+            template.ParseData(DynamicQueryManager.Current.QueryDescription(info.QueryName));
 
             return template;
         }
@@ -268,7 +262,7 @@ namespace Signum.Engine.Mailing
 
                 if (template == null)
                 {
-                    template = CreateDefaultTemplate(systemEmailDN); 
+                    template = CreateDefaultTemplate(systemEmailDN);
 
                     using (ExecutionMode.Global())
                     using (OperationLogic.AllowSave<EmailTemplateDN>())

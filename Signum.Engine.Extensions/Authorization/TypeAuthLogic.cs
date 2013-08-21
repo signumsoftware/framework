@@ -33,6 +33,7 @@ namespace Signum.Engine.Authorization
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+                TypeLogic.AssertStarted(sb);
                 AuthLogic.AssertStarted(sb);
                 TypeConditionLogic.Start(sb);
 
@@ -47,6 +48,8 @@ namespace Signum.Engine.Authorization
                         miRegister.GetInvoker(type)(Schema.Current);
                     }
                 };
+
+                sb.Schema.Synchronizing += Schema_Synchronizing;
 
                 cache = new TypeAuthCache(sb, merger: TypeAllowedMerger.Instance);
 

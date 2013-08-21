@@ -120,12 +120,42 @@ namespace Signum.Windows.UIAutomation
             return container.EntityLine(route, scope);
         }
 
+        public static V EntityLineValue<T, V>(this ILineContainer<T> container, Expression<Func<T, V>> property, TreeScope scope = TreeScope.Descendants) where T : ModifiableEntity
+        {
+            PropertyRoute route = container.GetRoute(property);
+
+            return (V)container.EntityLine(route, scope).LiteValue;
+        }
+
+        public static void EntityLineValue<T, V>(this ILineContainer<T> container, Expression<Func<T, V>> property, V value, TreeScope scope = TreeScope.Descendants) where T : ModifiableEntity
+        {
+            PropertyRoute route = container.GetRoute(property);
+
+            container.EntityLine(route, scope).LiteValue = value as Lite<IIdentifiable> ?? ((IIdentifiable)value).ToLite();
+        }
+
+
         public static EntityComboProxy EntityCombo<T>(this ILineContainer<T> container, Expression<Func<T, object>> property, TreeScope scope = TreeScope.Descendants) where T : ModifiableEntity
         {
             PropertyRoute route = container.GetRoute(property);
 
             return container.EntityCombo(route, scope);
         }
+
+        public static V EntityComboValue<T, V>(this ILineContainer<T> container, Expression<Func<T, V>> property, TreeScope scope = TreeScope.Descendants) where T : ModifiableEntity
+        {
+            PropertyRoute route = container.GetRoute(property);
+
+            return (V)container.EntityCombo(route, scope).LiteValue;
+        }
+
+        public static void EntityComboValue<T, V>(this ILineContainer<T> container, Expression<Func<T, V>> property, V value, TreeScope scope = TreeScope.Descendants) where T : ModifiableEntity
+        {
+            PropertyRoute route = container.GetRoute(property);
+
+            container.EntityCombo(route, scope).LiteValue = value as Lite<IIdentifiable> ?? ((IIdentifiable)value).ToLite();
+        }
+
 
         public static EntityDetailProxy EntityDetail<T>(this ILineContainer<T> container, Expression<Func<T, object>> property, TreeScope scope = TreeScope.Descendants) where T : ModifiableEntity
         {

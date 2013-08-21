@@ -194,7 +194,8 @@ namespace Signum.Engine.Mailing
                     recipients.AddRange(smtpConfig.AditionalRecipients.Select(r =>
                         new EmailOwnerRecipientData(r.EmailOwner.Retrieve().EmailOwnerData) { Kind = r.Kind }));
 
-                yield return recipients;
+                if (recipients.Any())
+                    yield return recipients;
             }
         }
 
@@ -236,22 +237,26 @@ namespace Signum.Engine.Mailing
                 var groups = currentRows.GroupBy(r => (EmailOwnerData)r[owner]).ToList();
 
                 if (groups.Count == 1 && groups[0].Key.TryCC(e => e.Owner) == null)
-                    yield return new List<EmailOwnerRecipientData>();
-
-                foreach (var gr in groups)
                 {
-                    var rec = new EmailOwnerRecipientData(gr.Key) { Kind = tr.Kind };
-
-                    var old = currentRows;
-                    currentRows = gr;
-
-                    foreach (var list in CrossProduct(tokenRecipients, pos + 1))
+                    yield return new List<EmailOwnerRecipientData>();
+                }
+                else
+                {
+                    foreach (var gr in groups)
                     {
-                        var result = list.ToList();
-                        result.Insert(0, rec);
-                        yield return result;
+                        var rec = new EmailOwnerRecipientData(gr.Key) { Kind = tr.Kind };
+
+                        var old = currentRows;
+                        currentRows = gr;
+
+                        foreach (var list in CrossProduct(tokenRecipients, pos + 1))
+                        {
+                            var result = list.ToList();
+                            result.Insert(0, rec);
+                            yield return result;
+                        }
+                        currentRows = old;
                     }
-                    currentRows = old;
                 }
             }
         }

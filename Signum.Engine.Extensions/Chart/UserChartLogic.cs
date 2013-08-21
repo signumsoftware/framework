@@ -233,13 +233,44 @@ namespace Signum.Engine.Chart
                     item.FixParameters();
                 }
 
-                Console.Clear();
 
-                return table.UpdateSqlSync(uc, includeCollections: true);
+                try
+                {
+                    return table.UpdateSqlSync(uc, includeCollections: true);
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine("Integrity Error:");
+                    SafeConsole.WriteLineColor(ConsoleColor.DarkRed, e.Message);
+                    while (true)
+                    {
+                        SafeConsole.WriteLineColor(ConsoleColor.Yellow, "- s: Skip entity");
+                        SafeConsole.WriteLineColor(ConsoleColor.Red, "- d: Delete entity");
+
+                        string answer = Console.ReadLine();
+
+                        if (answer == null)
+                            throw new InvalidOperationException("Impossible to Syncrhonize interactively without Console");
+
+                        answer = answer.ToLower();
+
+                        if (answer == "s")
+                            return null;
+
+                        if (answer == "d")
+                            return table.DeleteSqlSync(uc);
+                    }
+                }
+
+               
             }
             catch (Exception e)
             {
                 return new SqlPreCommandSimple("-- Exception in {0}: {1}".Formato(uc.BaseToString(), e.Message));
+            }
+            finally
+            {
+                Console.Clear();
             }
         }
     }

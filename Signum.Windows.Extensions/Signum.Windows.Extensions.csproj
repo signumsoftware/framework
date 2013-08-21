@@ -316,6 +316,12 @@
     <Compile Include="Profiler\ProfilerUploader.xaml.cs">
       <DependentUpon>ProfilerUploader.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Scheduler\ScheduleRuleMinutely.xaml.cs">
+      <DependentUpon>ScheduleRuleMinutely.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Scheduler\ScheduleRuleHourly.xaml.cs">
+      <DependentUpon>ScheduleRuleHourly.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SMS\SMSMessage.xaml.cs">
       <DependentUpon>SMSMessage.xaml</DependentUpon>
     </Compile>
@@ -710,6 +716,14 @@
     <Page Include="Profiler\ProfilerUploader.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Scheduler\ScheduleRuleMinutely.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Scheduler\ScheduleRuleHourly.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="SMS\SMSMessage.xaml">
       <SubType>Designer</SubType>

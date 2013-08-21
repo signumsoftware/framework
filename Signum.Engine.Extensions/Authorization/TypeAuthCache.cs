@@ -54,7 +54,7 @@ namespace Signum.Entities.Authorization
             }
             
             Type type = TypeLogic.DnToType[rt.Resource];
-            var conditions = rt.Conditions.Where(a => !TypeConditionLogic.IsDefined(type, MultiEnumLogic<TypeConditionNameDN>.ToEnum(a.Condition)));
+            var conditions = rt.Conditions.Where(a => !TypeConditionLogic.IsDefined(type, a.Condition.ToEnum()));
 
             if (conditions.IsEmpty())
                 return null;
@@ -203,7 +203,7 @@ namespace Signum.Entities.Authorization
                         var shouldConditions = ar.Allowed.Conditions.Select(a => new RuleTypeConditionDN
                         {
                             Allowed = a.Allowed,
-                            Condition = MultiEnumLogic<TypeConditionNameDN>.ToEntity(a.ConditionName),
+                            Condition = a.ConditionName.ToEntity<TypeConditionNameDN>(),
                         }).ToMList();
 
                         if (!pr.Conditions.SequenceEqual(shouldConditions))

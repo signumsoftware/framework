@@ -185,7 +185,7 @@ namespace Signum.Entities.Mailing
         {
             if (pi.Is(() => StartDate) || pi.Is(() => EndDate))
             {
-                if (EndDate != null && EndDate >= StartDate)
+                if (EndDate != null && EndDate < StartDate)
                     return EmailTemplateMessage.EndDateMustBeHigherThanStartDate.NiceToString();
             }
 
@@ -357,6 +357,11 @@ namespace Signum.Entities.Mailing
 
         [Ignore]
         internal object SubjectParsedNode;
+
+        public override string ToString()
+        {
+            return cultureInfo.TryToString();
+        }
     }
 
     public enum EmailMasterTemplateOperation

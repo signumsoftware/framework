@@ -119,7 +119,7 @@ namespace Signum.Entities.Mailing
             BodyHash = Convert.ToBase64String(SHA1.Create().ComputeHash(Encoding.ASCII.GetBytes(str)));
         }
 
-        [NotNullable, SqlDbType(Size = 150), UniqueIndex]
+        [NotNullable, SqlDbType(Size = 150)]
         string bodyHash;
         [StringLengthValidator(AllowNulls = false, Min = 3, Max = 150)]
         public string BodyHash
@@ -222,14 +222,7 @@ namespace Signum.Entities.Mailing
     [Serializable]
     public class EmailAttachmentDN : EmbeddedEntity
     {
-        [NotNullable, SqlDbType(Size = 100)]
-        string contentId;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string ContentId
-        {
-            get { return contentId; }
-            set { Set(ref contentId, value, () => ContentId); }
-        }
+        
 
         EmailAttachmentType type;
         public EmailAttachmentType Type
@@ -244,13 +237,23 @@ namespace Signum.Entities.Mailing
         public FilePathDN File
         {
             get { return file; }
-            set { Set(ref file, value, () => File); }
+            set
+            {
+                if (Set(ref file, value, () => File))
+                {
+                    if (ContentId == null && File != null)
+                        ContentId = Guid.NewGuid() + File.FileName;
+                }
+            }
         }
 
-        protected override void PreSaving(ref bool graphModified)
+        [NotNullable, SqlDbType(Size = 100)]
+        string contentId;
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        public string ContentId
         {
-            if (ContentId == null && File != null)
-                ContentId = File.Sufix;
+            get { return contentId; }
+            set { Set(ref contentId, value, () => ContentId); }
         }
 
         public EmailAttachmentDN Clone()

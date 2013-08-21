@@ -391,6 +391,15 @@
     <Member Name="EmailAddress" Description="Dirección email" />
     <Member Name="EmailOwner" Description="Propietario email" />
   </Type>
+  <Type Name="EmailAttachmentDN" Description="Archivo adjunto de email">
+    <Member Name="ContentId" Description="Content id" />
+    <Member Name="File" Description="Archivo" />
+    <Member Name="Type" Description="Tipo" />
+  </Type>
+  <Type Name="EmailAttachmentType" Description="Tipo archivo adjunto de email">
+    <Member Name="Attachment" Description="Archivo adjunto" />
+    <Member Name="LinkedResource" Description="Recursos vinculados" />
+  </Type>
   <Type Name="EmailConfigurationDN" Description="Configuración de email">
     <Member Name="DefaultCulture" Description="Cultura predeterminada" />
     <Member Name="OverrideEmailAddress" Description="Reemplazar dirección email" />
@@ -406,18 +415,23 @@
     <Member Name="Save" Description="Guardar" />
   </Type>
   <Type Name="EmailMessageDN" Description="Mensaje de e-mail">
+    <Member Name="Attachments" Description="Archivos adjuntos" />
     <Member Name="Body" Description="Cuerpo" />
+    <Member Name="BodyHash" Description="Hash Cuerpo" />
     <Member Name="CreationTime" Description="Fecha de creación" />
+    <Member Name="Duplicates" Description="Duplicados" />
     <Member Name="EditableMessage" Description="Mensaje editable" />
     <Member Name="Exception" Description="Error" />
     <Member Name="From" Description="De" />
     <Member Name="IsBodyHtml" Description="Cuerpo html" />
     <Member Name="Package" Description="Paquete" />
+    <Member Name="RawContent" Description="Contenido original" />
     <Member Name="Received" Description="Recibido" />
     <Member Name="Reception" Description="Recepción" />
     <Member Name="ReceptionNotified" Description="Recepción notificada" />
     <Member Name="Recipients" Description="Destinatarios" />
     <Member Name="Sent" Description="Enviado" />
+    <Member Name="SmtpConfiguration" Description="Configuración SMTP" />
     <Member Name="State" Description="Estado" />
     <Member Name="Subject" Description="Asunto" />
     <Member Name="Target" Description="Destino" />
@@ -496,6 +510,7 @@
   </Type>
   <Type Name="EmailTemplateMessage">
     <Member Name="EndDateMustBeHigherThanStartDate" Description="Fecha de fin debe ser superior a la fecha de inicio" />
+    <Member Name="SystemEmailShouldBeSetToAccessModel0" Description="SystemEmail debe establecerse en acceso modelo {0}" />
     <Member Name="ThereAreNoMessagesForTheTemplate" Description="No hay mensajes para la plantilla" />
     <Member Name="ThereMustBeAMessageFor0" Description="Debe haber un mensaje para {0}" />
     <Member Name="TheresMoreThanOneMessageForTheSameLanguage" Description="Hay más de un mensaje para el mismo idioma" />
@@ -832,7 +847,6 @@
   <Type Name="Pop3ReceptionDN" Description="Recepción POP3">
     <Member Name="EndDate" Description="Fecha de fin" />
     <Member Name="Exception" Description="Excepción" />
-    <Member Name="MailboxSize" Description="Tamaño de buzón" />
     <Member Name="NumberOfMails" Description="Número de emails" />
     <Member Name="Pop3Configuration" Description="Configuración POP3" />
     <Member Name="StartDate" Description="Fecha de inicio" />
@@ -959,6 +973,7 @@
     <Member Name="Conditions" Description="Condiciones" />
   </Type>
   <Type Name="ScheduledTaskDN" Description="Tarea programada">
+    <Member Name="MachineName" Description="Nombre de la máquina" />
     <Member Name="NextDate" Description="Proxima fecha" />
     <Member Name="Rule" Description="Regla" />
     <Member Name="Suspended" Description="Suspendido" />

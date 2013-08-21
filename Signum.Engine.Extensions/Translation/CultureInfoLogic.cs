@@ -24,7 +24,6 @@ namespace Signum.Engine.Translation
         }
 
         public static ResetLazy<Dictionary<CultureInfo, CultureInfoDN>> CultureInfoToEntity;
-        public static ResetLazy<Dictionary<CultureInfoDN, CultureInfo>> EntityToCultureInfo;
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -38,14 +37,12 @@ namespace Signum.Engine.Translation
                     {
                         Entity = c,
                         c.Id,
-                        CI = c.Name,
-                        Description = c.DisplayName
+                        c.Name,
+                        c.EnglishName,
+                        c.NativeName,
                     });
 
-                CultureInfoToEntity = sb.GlobalLazy(() => Database.Query<CultureInfoDN>().ToDictionary(ci => CultureInfo.GetCultureInfo(ci.Name)),
-                    invalidateWith: new InvalidateWith(typeof(CultureInfoDN)));
-
-                EntityToCultureInfo = sb.GlobalLazy(() => CultureInfoToEntity.Value.ToDictionary(a=>a.Value, a=>a.Key),
+                CultureInfoToEntity = sb.GlobalLazy(() => Database.Query<CultureInfoDN>().ToDictionary(ci => CultureInfo.GetCultureInfo(ci.Name), ci=>ci),
                     invalidateWith: new InvalidateWith(typeof(CultureInfoDN)));
 
                 new Graph<CultureInfoDN>.Execute(CultureInfoOperation.Save)
@@ -55,20 +52,26 @@ namespace Signum.Engine.Translation
                     Execute = (ci, _) => { },
                 }.Register();
 
+                sb.Schema.Synchronizing += Schema_Synchronizing;
+
                 PermissionAuthLogic.RegisterTypes(typeof(TranslationPermission));
             }
         }
 
-        public static CultureInfo ToCultureInfo(this CultureInfoDN culture)
+        static SqlPreCommand Schema_Synchronizing(Replacements arg)
         {
-            return EntityToCultureInfo.Value.GetOrThrow(culture);
+            var cis = Database.Query<CultureInfoDN>().ToList();
+
+            var table = Schema.Current.Table(typeof(CultureInfoDN));
+
+            return cis.Select(c => table.UpdateSqlSync(c)).Combine(Spacing.Double);
         }
 
-        public static CultureInfoDN ToCultureInfoDN(this CultureInfo culture)
+        public static CultureInfoDN ToCultureInfoDN(this CultureInfo ci)
         {
-            return CultureInfoToEntity.Value.GetOrThrow(culture);
+            return CultureInfoToEntity.Value.GetOrThrow(ci);
         }
-        
+
         public static IEnumerable<CultureInfo> ApplicationCultures
         {
             get
