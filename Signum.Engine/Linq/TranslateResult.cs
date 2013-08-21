@@ -62,16 +62,11 @@ namespace Signum.Engine.Linq
                 }
                 catch (Exception ex)
                 {
-                    if (ex is SqlTypeException || ex is InvalidOperationException)
-                    {
-                        FieldReaderException fieldEx = enumerator.Reader.CreateFieldReaderException(ex);
-                        fieldEx.Command = command;
-                        fieldEx.Row = enumerator.Row;
-                        fieldEx.Projector = ProjectorExpression;
-                        throw fieldEx;
-                    }
-
-                    throw;
+                    FieldReaderException fieldEx = enumerator.Reader.CreateFieldReaderException(ex);
+                    fieldEx.Command = command;
+                    fieldEx.Row = enumerator.Row;
+                    fieldEx.Projector = ProjectorExpression;
+                    throw fieldEx;
                 }
             }
         }
@@ -125,16 +120,12 @@ namespace Signum.Engine.Linq
                 }
                 catch (Exception ex)
                 {
-                    if (ex is SqlTypeException || ex is InvalidOperationException)
-                    {
-                        FieldReaderException fieldEx = enumerator.Reader.CreateFieldReaderException(ex);
-                        fieldEx.Command = command;
-                        fieldEx.Row = enumerator.Row;
-                        fieldEx.Projector = ProjectorExpression;
-                        throw fieldEx;
-                    }
+                    FieldReaderException fieldEx = enumerator.Reader.CreateFieldReaderException(ex);
+                    fieldEx.Command = command;
+                    fieldEx.Row = enumerator.Row;
+                    fieldEx.Projector = ProjectorExpression;
+                    throw fieldEx;
 
-                    throw;
                 }
             }
         }
@@ -195,16 +186,11 @@ namespace Signum.Engine.Linq
                         }
                         catch (Exception ex)
                         {
-                            if (ex is SqlTypeException || ex is InvalidOperationException)
-                            {
-                                FieldReaderException fieldEx = enumerator.Reader.CreateFieldReaderException(ex);
-                                fieldEx.Command = command;
-                                fieldEx.Row = enumerator.Row;
-                                fieldEx.Projector = ProjectorExpression;
-                                throw fieldEx;
-                            }
-
-                            throw;
+                            FieldReaderException fieldEx = enumerator.Reader.CreateFieldReaderException(ex);
+                            fieldEx.Command = command;
+                            fieldEx.Row = enumerator.Row;
+                            fieldEx.Projector = ProjectorExpression;
+                            throw fieldEx;
                         }
                     }
 

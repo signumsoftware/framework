@@ -168,15 +168,10 @@ namespace Signum.Engine
                             }
                             catch (Exception ex)
                             {
-                                if (ex is SqlTypeException || ex is InvalidOperationException)
-                                {
-                                    FieldReaderException fieldEx = fr.CreateFieldReaderException(ex);
-                                    fieldEx.Command = preCommand;
-                                    fieldEx.Row = row;
-                                    throw fieldEx;
-                                }
-
-                                throw;
+                                FieldReaderException fieldEx = fr.CreateFieldReaderException(ex);
+                                fieldEx.Command = preCommand;
+                                fieldEx.Row = row;
+                                throw fieldEx;
                             }
                         }
                     }
