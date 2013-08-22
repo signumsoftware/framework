@@ -35,6 +35,11 @@ namespace Signum.Entities
         {
             get { return mainEntity; }
         }
+
+        protected internal virtual void CopyFrom(MixinEntity mixin, object[] args)
+        {
+
+        }
     }
 
     public static class MixinDeclarations
