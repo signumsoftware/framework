@@ -175,12 +175,14 @@ namespace Signum.Engine.UserQueries
                 StringDistance sd = new StringDistance();
                 var list = TypeLogic.NameToType.Keys.OrderBy(t => sd.LevenshteinDistance(t, type)).ToList();
             retry:
-                list.Skip(startingIndex).Take(Replacements.MaxElements)
+                int maxElements = Console.LargestWindowHeight - 11;
+
+                list.Skip(startingIndex).Take(maxElements)
                            .Select((s, i) => "- {1,2}: {2} ".Formato(i + startingIndex == 0 ? ">" : " ", i + startingIndex, s)).ToConsole();
                 Console.WriteLine();
                 SafeConsole.WriteLineColor(ConsoleColor.White, "- n: None");
 
-                int remaining = list.Count - startingIndex - Replacements.MaxElements;
+                int remaining = list.Count - startingIndex - maxElements;
                 if (remaining > 0)
                     SafeConsole.WriteLineColor(ConsoleColor.White, "- +: Show more values ({0} remaining)", remaining);
 
@@ -195,7 +197,7 @@ namespace Signum.Engine.UserQueries
 
                     if (answer == "+" && remaining > 0)
                     {
-                        startingIndex += Replacements.MaxElements;
+                        startingIndex += maxElements;
                         goto retry;
                     }
 
@@ -277,11 +279,13 @@ namespace Signum.Engine.UserQueries
                 bool isRoot = token == null;
 
             retry:
-                subTokens.Skip(startingIndex).Take(Replacements.MaxElements)
+                int maxElements = Console.LargestWindowHeight - 11;
+
+                subTokens.Skip(startingIndex).Take(maxElements)
                     .Select((s, i) => "- {1,2}: {2} ".Formato(i + " ", i + startingIndex, ((isRoot && !(s is ColumnToken)) ? "-" : "") + s.Key)).ToConsole();
                 Console.WriteLine();
 
-                int remaining = subTokens.Count - startingIndex - Replacements.MaxElements;
+                int remaining = subTokens.Count - startingIndex - maxElements;
                 if (remaining > 0)
                     SafeConsole.WriteLineColor(ConsoleColor.White, "- +: Show more values ({0} remaining)", remaining);
 
@@ -309,7 +313,7 @@ namespace Signum.Engine.UserQueries
 
                     if (answer == "+" && remaining > 0)
                     {
-                        startingIndex += Replacements.MaxElements;
+                        startingIndex += maxElements;
                         goto retry;
                     }
 
