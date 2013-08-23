@@ -244,7 +244,6 @@ namespace Signum.Engine
             return sd.LevenshteinDistance(o, n, weighter: (oc, nc) => oc.HasValue && nc.HasValue ? 2 : 1);
         }
 
-        public const int MaxElements = 70;
 
         public static Func<string, List<string>, Selection?> AutoRepacement; 
 
@@ -269,14 +268,16 @@ namespace Signum.Engine
             int startingIndex = 0;
 
             Console.WriteLine(SynchronizerMessage._0HasBeenRenamedIn1.NiceToString().Formato(oldValue, replacementsKey));
-          retry:
-            newValues.Skip(startingIndex).Take(MaxElements)
+        retry:
+            int maxElement = Console.LargestWindowHeight - 7;
+
+        newValues.Skip(startingIndex).Take(maxElement)
                 .Select((s, i) => "-{0}{1,2}: {2} ".Formato(i + startingIndex == 0 ? ">" : " ", i + startingIndex, s)).ToConsole();
             Console.WriteLine();
 
             Console.WriteLine(SynchronizerMessage.NNone.NiceToString());
 
-            int remaining = newValues.Count - startingIndex - MaxElements;
+            int remaining = newValues.Count - startingIndex - maxElement;
             if (remaining > 0)
                 SafeConsole.WriteLineColor(ConsoleColor.White, "- +: Show more values ({0} remaining)", remaining);
 
@@ -291,7 +292,7 @@ namespace Signum.Engine
 
                 if (answer == "+" && remaining > 0)
                 {
-                    startingIndex += MaxElements;
+                    startingIndex += maxElement;
                     goto retry;
                 }
                 if (answer == "n")
