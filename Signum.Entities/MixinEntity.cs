@@ -35,6 +35,11 @@ namespace Signum.Entities
         {
             get { return mainEntity; }
         }
+
+        protected internal virtual void CopyFrom(MixinEntity mixin, object[] args)
+        {
+
+        }
     }
 
     public static class MixinDeclarations
@@ -57,6 +62,9 @@ namespace Signum.Entities
         {
             if (!typeof(IdentifiableEntity).IsAssignableFrom(mainEntity))
                 throw new InvalidOperationException("{0} is not a {1}".Formato(mainEntity.Name, typeof(IdentifiableEntity).Name));
+
+            if (mainEntity.IsAbstract)
+                throw new InvalidOperationException("{0} is abstract".Formato(mainEntity.Name));
 
             if (!typeof(MixinEntity).IsAssignableFrom(mixinEntity))
                 throw new InvalidOperationException("{0} is not a {1}".Formato(mixinEntity.Name, typeof(MixinEntity).Name));

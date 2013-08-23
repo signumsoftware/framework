@@ -1053,13 +1053,13 @@ namespace Signum.Engine.Linq
             {
                 EntityExpression ee = (EntityExpression)source;
               
-                var type = m.Method.GetGenericArguments().SingleEx();
+                var mixinType = m.Method.GetGenericArguments().SingleEx();
 
                 Expression result = Completed(ee)
                     .Mixins
                     .EmptyIfNull()
-                    .Where(mx => mx.Type == type)
-                    .SingleOrDefaultEx(() => "{0} not found in mixins of {1}".Formato(type.Name, source.Type.Name));
+                    .Where(mx => mx.Type == mixinType)
+                    .SingleEx(() => "{0} on {1}".Formato(mixinType.Name, source.Type.Name));
 
                 return result;
             }
