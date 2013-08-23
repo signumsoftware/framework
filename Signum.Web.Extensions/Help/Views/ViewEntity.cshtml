@@ -33,10 +33,13 @@
                 @{ 
         var a = TreeHelper.ToTreeS(eh.Properties, kvp =>
         {
-            int index = kvp.Key.LastIndexOfAny(new[] { '.', '/' });
-            if (index == -1)
+            string s = kvp.Key.TryBeforeLast('.') ?? kvp.Key.TryBeforeLast('/');
+            if(s == null)
                 return null;
-            string s = kvp.Key.Substring(0, index);
+
+            if (s.StartsWith("[")) // Mixin
+                return null;
+            
             return new KeyValuePair<string, PropertyHelp>(s, eh.Properties[s]);
         });
         ViewDataDictionary vdd = new ViewDataDictionary();
