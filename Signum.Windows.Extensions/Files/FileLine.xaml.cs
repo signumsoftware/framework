@@ -148,15 +148,35 @@ namespace Signum.Windows.Files
 
         protected void UpdateVisibility()
         {
-            btSave.Visibility = Save && Entity != null ? Visibility.Visible : Visibility.Collapsed;
-            btOpen.Visibility = Open && Entity == null ? Visibility.Visible : Visibility.Collapsed;
-            btView.Visibility = View && Entity != null ? Visibility.Visible : Visibility.Collapsed;
-            btRemove.Visibility = Remove && Entity != null ? Visibility.Visible : Visibility.Collapsed;
+            btSave.Visibility = CanSave() ? Visibility.Visible : Visibility.Collapsed;
+            btOpen.Visibility = CanOpen() ? Visibility.Visible : Visibility.Collapsed;
+            btView.Visibility = CanView() ? Visibility.Visible : Visibility.Collapsed;
+            btRemove.Visibility = CanRemove() ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private bool CanRemove()
+        {
+            return Remove && Entity != null && !Common.GetIsReadOnly(this);
+        }
+
+        private bool CanView()
+        {
+            return View && Entity != null;
+        }
+
+        private bool CanOpen()
+        {
+            return Open && Entity == null && !Common.GetIsReadOnly(this);
+        }
+
+        private bool CanSave()
+        {
+            return Save && Entity != null;
         }
 
         private void OnViewing(object entity)
         {
-            if (Entity == null || !View)
+            if (Entity == null || CanView())
                 return;
 
             if (Viewing != null)
@@ -185,6 +205,9 @@ namespace Signum.Windows.Files
 
         private void OnSaving(object entity)
         {
+            if (!CanSave())
+                return;
+
             if (Saving != null)
             {
                 Saving(entity);
@@ -218,6 +241,9 @@ namespace Signum.Windows.Files
 
         private object OnOpening()
         {
+            if (!CanOpen())
+                return null;
+
             if (Opening != null)
                 return Opening();
 
@@ -250,6 +276,9 @@ namespace Signum.Windows.Files
 
         protected bool OnRemoving(object entity)
         {
+            if (!CanRemove())
+                return false;
+
             if (Removing != null)
                 return Removing(entity);
 
@@ -257,35 +286,23 @@ namespace Signum.Windows.Files
         }
 
         private void btRemove_Click(object sender, RoutedEventArgs e)
-        {
-            if (Entity == null || !Remove)
-                return;
-
+        {   
             if (OnRemoving(Entity))
                 Entity = null;
         }
 
         private void btView_Click(object sender, RoutedEventArgs e)
         {
-            if (Entity == null || !View)
-                return;
-
             OnViewing(Entity);
         }
 
         private void btSave_Click(object sender, RoutedEventArgs e)
         {
-            if (Entity == null || !Save)
-                return;
-
             OnSaving(Entity);
         }
 
         private void btOpen_Click(object sender, RoutedEventArgs e)
         {
-            if (Entity != null || !Open)
-                return;
-
             object entity = OnOpening();
 
             if (entity != null)
