@@ -190,7 +190,7 @@ namespace Signum.Engine.Files
                 string path = Path.GetDirectoryName(fp.FullPhysicalPath);
                 fullPhysicalPath = path;
                 if (!Directory.Exists(path))
-                    Directory.CreateDirectory(path);
+                   Directory.CreateDirectory(path);
                 File.WriteAllBytes(fp.FullPhysicalPath, fp.BinaryFile);
                 fp.BinaryFile = null;
             }
