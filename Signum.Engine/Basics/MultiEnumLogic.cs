@@ -45,12 +45,15 @@ namespace Signum.Engine
                      k => MultiEnumDN.UniqueKey(k),
                      (a, k) => new { a, k }, "loading {0}. Consider synchronize".Formato(typeof(T).Name)).ToDictionary(p => p.k, p => p.a);
 
-                ToEnum = ToEntity.Keys.ToDictionary(k => MultiEnumDN.UniqueKey(k));
+                ToEnum = ToEntity.Inverse();
+
+                ToEnumUniqueKey = ToEntity.Keys.ToDictionary(k => MultiEnumDN.UniqueKey(k));
             }
 
             public HashSet<Enum> Keys;
             public Dictionary<Enum, T> ToEntity;
-            public Dictionary<string, Enum> ToEnum;
+            public Dictionary<string, Enum> ToEnumUniqueKey;
+            public Dictionary<T, Enum> ToEnum;
         }
 
         static ResetLazy<LazyState> lazy;
@@ -152,17 +155,17 @@ namespace Signum.Engine
 
         internal static Enum ToEnum(T entity)
         {
-            return ToEnum(entity.Key);
+            return AssertStarted().ToEnum.GetOrThrow(entity);
         }
 
         public static Enum ToEnum(string keyName)
         {
-            return AssertStarted().ToEnum.GetOrThrow(keyName);
+            return AssertStarted().ToEnumUniqueKey.GetOrThrow(keyName);
         }
 
         public static Enum TryToEnum(string keyName)
         {
-            return AssertStarted().ToEnum.TryGetC(keyName);
+            return AssertStarted().ToEnumUniqueKey.TryGetC(keyName);
         }
 
         public static IEnumerable<T> AllEntities()
@@ -172,7 +175,7 @@ namespace Signum.Engine
 
         public static IEnumerable<string> AllUniqueKeys()
         {
-            return AssertStarted().ToEnum.Keys;
+            return AssertStarted().ToEnumUniqueKey.Keys;
         }
     }
 }
