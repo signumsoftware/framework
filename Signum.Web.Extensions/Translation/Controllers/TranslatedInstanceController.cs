@@ -7,8 +7,12 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Mvc;
+using Signum.Engine;
+using Signum.Engine.Basics;
 using Signum.Engine.Translation;
+using Signum.Entities;
 using Signum.Entities.Authorization;
+using Signum.Entities.Basics;
 using Signum.Entities.Translation;
 using Signum.Utilities;
 
@@ -16,10 +20,9 @@ namespace Signum.Web.Translation.Controllers
 {
     public class TranslatedInstanceController : Controller
     {
-
         public ActionResult Index()
         {
-            var cultures = CultureInfoLogic.CultureInfos("en");
+            var cultures = TranslationLogic.CurrentCultureInfos("en");
 
             var list = TranslatedInstanceLogic.TranslationInstancesStatus();
 
@@ -28,168 +31,162 @@ namespace Signum.Web.Translation.Controllers
 
         public new ActionResult View(string type, string culture)
         {
-            //Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".Formato(assembly));
+            Type t = TypeLogic.GetType(type);
 
-            //CultureInfo defaultCulture = CultureInfo.GetCultureInfo(ass.SingleAttribute<DefaultAssemblyCultureAttribute>().DefaultCulture);
+            Dictionary<LocalizedInstanceKey, string> master = TranslatedInstanceLogic.FromEntities(t);
 
-            //Dictionary<CultureInfo, LocalizedAssembly> reference = (from ci in CultureInfoLogic.CultureInfos(defaultCulture.Name)
-            //                                                        let la = DescriptionManager.GetLocalizedAssembly(ass, ci)
-            //                                                        where la != null || ci == defaultCulture
-            //                                                        select KVP.Create(ci, la ?? LocalizedAssembly.ImportXml(ass, ci))).ToDictionary();
+            Dictionary<CultureInfo, Dictionary<LocalizedInstanceKey, TranslatedInstanceDN>> support = TranslatedInstanceLogic.TranslationsForType(t, culture: null);
 
-            //ViewBag.Assembly = ass;
-            //ViewBag.DefaultCulture = defaultCulture;
-            //ViewBag.Culture = culture == null ? null : CultureInfo.GetCultureInfo(culture);
+            var c =  culture == null ? null : CultureInfo.GetCultureInfo(culture);
 
-            return base.View(TranslationClient.ViewPrefix.Formato("ViewInstance"));//, reference);
+            ViewBag.Type = t;
+            ViewBag.Master = master;
+            ViewBag.Culture = c;
+
+            return base.View(TranslationClient.ViewPrefix.Formato("ViewInstance"), support);
         }
 
-        //[HttpPost]
-        //public ActionResult View(string assembly, string culture, string bla)
-        //{   
-        //    var currentAssembly = AssembliesToLocalize().Single(a => a.GetName().Name == assembly);
-
-        //    List<TranslationRecord> list = GetTranslationRecords();
-
-        //    if (culture.HasText())
-        //    {
-        //        LocalizedAssembly locAssembly = LocalizedAssembly.ImportXml(currentAssembly, CultureInfo.GetCultureInfo(culture));
-
-        //        list.GroupToDictionary(a => a.Type).JoinDictionaryForeach(locAssembly.Types.Values.ToDictionary(a => a.Type.Name), (tn, tuples, lt) =>
-        //        {
-        //            foreach (var t in tuples)
-        //                t.Apply(lt);
-        //        });
-
-        //        locAssembly.ExportXml();
-        //    }
-        //    else
-        //    {
-        //        Dictionary<string, LocalizedAssembly> locAssemblies = CultureInfoLogic.CultureInfos("en").ToDictionary(ci => ci.Name, ci => LocalizedAssembly.ImportXml(currentAssembly, ci));
-
-        //        Dictionary<string, List<TranslationRecord>> groups = list.GroupToDictionary(a => a.Lang);
-
-        //        list.GroupToDictionary(a => a.Lang).JoinDictionaryForeach(locAssemblies, (cn, recs, la) =>
-        //        {
-        //            recs.GroupToDictionary(a => a.Type).JoinDictionaryForeach(la.Types.Values.ToDictionary(a => a.Type.Name), (tn, tuples, lt) =>
-        //            {
-        //                foreach (var t in tuples)
-        //                    t.Apply(lt);
-        //            });
-
-        //            la.ExportXml();
-        //        });
-        //    }
-        //    return RedirectToAction("View", new { assembly = assembly, culture = culture });
-        //}
-
-        //static Regex regex = new Regex(@"^(?<type>[_\w][_\w\d]*(`\d)?)\.(?<lang>[\w_\-]+)\.(?<kind>\w+)(\.(?<member>[_\w][_\w\d]*))?$");
-
-        //private List<TranslationRecord> GetTranslationRecords()
-        //{
-        //    var list = (from k in Request.Form.AllKeys
-        //                let m = regex.Match(k)
-        //                where m.Success
-        //                select new TranslationRecord
-        //                {
-        //                    Type = m.Groups["type"].Value,
-        //                    Lang = m.Groups["lang"].Value,
-        //                    Kind = m.Groups["kind"].Value.ToEnum<TranslationRecordKind>(),
-        //                    Member = m.Groups["member"].Value,
-        //                    Value = Request.Form[k].DefaultText(null),
-        //                }).ToList();
-        //    return list;
-        //}
-
-        //public JsonResult PluralAndGender()
-        //{
-        //    string name = Request.Form["name"];
-
-        //    CultureInfo ci = CultureInfo.GetCultureInfo(regex.Match(name).Groups["lang"].Value);
-
-        //    string text = Request.Form["text"];
-
-        //    return Json(new
-        //    {
-        //        gender = NaturalLanguageTools.GetGender(text, ci),
-        //        plural = NaturalLanguageTools.Pluralize(text, ci)
-        //    });
-        //}
-
-
-        //class TranslationRecord
-        //{
-        //    public string Type;
-        //    public string Lang;
-        //    public TranslationRecordKind Kind;
-        //    public string Member;
-        //    public string Value;
-
-        //    internal void Apply(LocalizedType lt)
-        //    {
-        //        switch (Kind)
-        //        {
-        //            case TranslationRecordKind.Description: lt.Description = Value; break;
-        //            case TranslationRecordKind.PluralDescription: lt.PluralDescription = Value; break;
-        //            case TranslationRecordKind.Gender: lt.Gender = Value != null ? (char?)Value[0] : null; break;
-        //            case TranslationRecordKind.Member: lt.Members[Member] = Value; break;
-        //            default: throw new InvalidOperationException("Unexpected kind {0}".Formato(Kind));
-        //        }
-        //    }
-        //}
-
-        //public enum TranslationRecordKind
-        //{
-        //    Description,
-        //    PluralDescription,
-        //    Gender,
-        //    Member,
-        //}
-
-        public ActionResult Sync(string assembly, string culture)
+        [HttpPost]
+        public ActionResult View(string type, string culture, string bla)
         {
-            //Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".Formato(assembly));
-            //var targetCI = CultureInfo.GetCultureInfo(culture);
+            Type t = TypeLogic.GetType(type);
 
-            //CultureInfo defaultCulture = CultureInfo.GetCultureInfo(ass.SingleAttribute<DefaultAssemblyCultureAttribute>().DefaultCulture);
+            Dictionary<LocalizedInstanceKey, string> master = TranslatedInstanceLogic.FromEntities(t);
 
-            //Dictionary<CultureInfo, LocalizedAssembly> reference = (from ci in CultureInfoLogic.CultureInfos(defaultCulture.Name)
-            //                                                        let la = DescriptionManager.GetLocalizedAssembly(ass, ci)
-            //                                                        where la != null || ci == defaultCulture
-            //                                                        select KVP.Create(ci, la ?? LocalizedAssembly.ImportXml(ass, ci))).ToDictionary();
-            //var master = reference.Extract(defaultCulture);
+            Dictionary<Tuple<CultureInfo, LocalizedInstanceKey>, TranslationRecord> should = GetTranslationRecords(t).Where(a => a.Value.HasText())
+                .ToDictionary(a => Tuple.Create(a.Culture, new LocalizedInstanceKey(a.Route, a.Instance)));
 
-            //var target = reference.Extract(targetCI);
-            //DictionaryByTypeName(target); //To avoid finding duplicated types on save
-            //var changes = TranslationSynchronizer.GetAssemblyChanges(TranslationClient.Translator, target, master, reference.Values.ToList());
+            var c = culture == null ? null : CultureInfo.GetCultureInfo(culture);
 
-            //ViewBag.Culture = targetCI;
-            return base.View(TranslationClient.ViewPrefix.Formato("Sync"));//, changes);
+            Dictionary<Tuple<CultureInfo, LocalizedInstanceKey>, TranslatedInstanceDN> current = 
+                (from ci in TranslatedInstanceLogic.TranslationsForType(t, c)
+                from key in ci.Value
+                select KVP.Create(Tuple.Create(ci.Key, key.Key), key.Value)).ToDictionary();
+
+            using (Transaction tr = new Transaction())
+            {
+                Dictionary<PropertyRoute, PropertyRouteDN> routes = should.Keys.Select(a => a.Item2.Route).Distinct().ToDictionary(a => a, a => a.ToPropertyRouteDN());
+
+                Synchronizer.Synchronize(
+                    should,
+                    current,
+                    (k, n) =>new TranslatedInstanceDN
+                    {
+                        Culture = n.Culture.ToCultureInfoDN(),
+                        PropertyRoute = routes.GetOrThrow(n.Route),
+                        Instance = n.Instance,
+                        OriginalText = master[k.Item2],
+                        TranslatedText = n.Value,
+                    }.Save(),
+                    (k, o) => o.Delete(),
+                    (k, n, o) =>
+                    {
+                        if (o.TranslatedText != n.Value || o.OriginalText != master[k.Item2])
+                        {
+                            var r = o.ToLite().Retrieve();
+                            r.OriginalText = master[k.Item2];
+                            r.TranslatedText = n.Value;
+                            r.Save();
+                        }
+                    });
+                tr.Commit();
+            }
+
+
+            return RedirectToAction("View", new { type = type, culture = culture });
         }
 
-        //[HttpPost]
-        //public ActionResult Sync(string assembly, string culture, string bla)
-        //{
-        //    Assembly currentAssembly = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".Formato(assembly));
-            
-        //    LocalizedAssembly locAssembly = LocalizedAssembly.ImportXml(currentAssembly, CultureInfo.GetCultureInfo(culture));
+        static Regex regex = new Regex(@"^(?<lang>.+)#(?<instance>.+)#(?<route>.+)$");
 
-        //    List<TranslationRecord> list = GetTranslationRecords();
+        private List<TranslationRecord> GetTranslationRecords(Type type)
+        {
+            var list = (from k in Request.Form.AllKeys
+                        let m = regex.Match(k)
+                        where m.Success
+                        select new TranslationRecord
+                        {
+                            Culture = CultureInfo.GetCultureInfo(m.Groups["lang"].Value),
+                            Instance = Lite.Parse(m.Groups["instance"].Value),
+                            Route = PropertyRoute.Parse(type, m.Groups["route"].Value),
+                            Value = Request.Form[k].DefaultText(null),
+                        }).ToList();
+            return list;
+        }
 
-        //    list.GroupToDictionary(a => a.Type).JoinDictionaryForeach(DictionaryByTypeName(locAssembly), (tn, tuples, lt) =>
-        //    {
-        //        foreach (var t in tuples)
-        //            t.Apply(lt);
-        //    });
+        class TranslationRecord
+        {
+            public CultureInfo Culture;
+            public Lite<IdentifiableEntity> Instance;
+            public PropertyRoute Route;
+            public string Value;
 
-        //    locAssembly.ExportXml();
+            public override string ToString()
+            {
+                return "{0} {1} {2} -> {3}".Formato(Culture, Instance, Route, Value);
+            }
+        }
 
-        //    return RedirectToAction("Index");
-        //}
+        public ActionResult Sync(string type, string culture)
+        {
+            Type t = TypeLogic.GetType(type);
 
-        //private static Dictionary<string, LocalizedType> DictionaryByTypeName(LocalizedAssembly locAssembly)
-        //{
-        //    return locAssembly.Types.Values.ToDictionary(a => a.Type.Name, "LocalizedTypes");
-        //}
+            var c = CultureInfo.GetCultureInfo(culture);
+
+            var changes = TranslatedInstanceSynchronizer.GetTypeInstanceChanges(TranslationClient.Translator, t, c);
+
+            ViewBag.Culture = c;
+            return base.View(TranslationClient.ViewPrefix.Formato("SyncInstance"), changes);
+        }
+
+        [HttpPost]
+        public ActionResult Sync(string type, string culture, string bla)
+        {
+            Type t = TypeLogic.GetType(type);
+
+            var c = CultureInfo.GetCultureInfo(culture);
+
+            var list = GetTranslationRecords(t);
+
+            Dictionary<LocalizedInstanceKey, string> master = TranslatedInstanceLogic.FromEntities(t);
+
+            var current = TranslatedInstanceLogic.TranslationsForType(t, c).Single().Value; 
+
+            Dictionary<PropertyRoute, PropertyRouteDN> routes = list.Select(a => a.Route).Distinct().ToDictionary(a => a, a => a.ToPropertyRouteDN());
+            using (Transaction tr = new Transaction())
+            {
+                list.Where(r => r.Value.HasText()).Select(r =>
+                {
+                    var key = new LocalizedInstanceKey(r.Route, r.Instance);
+
+                    TranslatedInstanceDN entity = current.TryGetC(key);
+
+                    if (entity != null)
+                    {
+                        entity = entity.ToLite().Retrieve();
+                        entity.OriginalText = master[key];
+                        entity.TranslatedText = r.Value;
+                        return entity;
+                    }
+                    else
+                    {
+                        return new TranslatedInstanceDN
+                        {
+                            Culture = r.Culture.ToCultureInfoDN(),
+                            PropertyRoute = routes.GetOrThrow(r.Route),
+                            Instance = r.Instance,
+                            OriginalText = master[key],
+                            TranslatedText = r.Value,
+                        };
+                    }
+
+                }).SaveList();
+
+                TranslatedInstanceLogic.CleanTranslations(t);
+
+                tr.Commit();
+            }
+
+            return RedirectToAction("Index");
+        }
     }
 }

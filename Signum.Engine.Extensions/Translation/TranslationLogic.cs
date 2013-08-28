@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -8,6 +9,7 @@ using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
 using Signum.Entities;
+using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Entities.Translation;
 using Signum.Utilities;
@@ -55,6 +57,18 @@ namespace Signum.Engine.Translation
                     Delete = (e, _) => { e.Delete(); }
                 }.Register();
             }
+        }
+
+        public static List<CultureInfo> CurrentCultureInfos(string defaultCulture)
+        {
+            var cultures = CultureInfoLogic.ApplicationCultures;
+
+            TranslatorDN tr = UserDN.Current.Translator();
+
+            if (tr != null)
+                cultures = cultures.Where(ci => ci.Name == defaultCulture || tr.Cultures.Any(tc => tc.Culture.CultureInfo == ci));
+
+            return cultures.OrderByDescending(a => a.Name == defaultCulture).ThenBy(a => a.Name).ToList();
         }
     }
 }

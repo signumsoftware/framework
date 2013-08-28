@@ -14,6 +14,7 @@ using System.Globalization;
 using Signum.Engine.Basics;
 using System.Linq.Expressions;
 using Signum.Utilities.Reflection;
+using Signum.Entities.Basics;
 
 namespace Signum.Engine.Translation
 {
@@ -29,6 +30,7 @@ namespace Signum.Engine.Translation
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 sb.Include<TranslatedInstanceDN>();
+                sb.AddUniqueIndex<TranslatedInstanceDN>(ti => new { ti.Culture, ti.PropertyRoute, ti.Instance });
 
                 DefaultCulture = defaultCulture;
 
@@ -39,37 +41,25 @@ namespace Signum.Engine.Translation
                         Entity = e,
                         e.Id,
                         e.Culture,
-                        Instance = e.Instance,
+                        e.Instance,
+                        e.PropertyRoute,
+                        e.TranslatedText,
+                        e.OriginalText,
                     });
 
-                new Graph<TranslatedInstanceDN>.Execute(TranslatedInstanceOperation.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (e, _) => { }
-                }.Register();
-
-                new Graph<TranslatedInstanceDN>.Delete(TranslatedInstanceOperation.Delete)
-                {
-                    Lite = false,
-                    Delete = (e, _) => e.Delete()
-                }.Register();
-
                 LocalizationCache = sb.GlobalLazy(() => Database.Query<TranslatedInstanceDN>()
-                    .Select(li => new
-                    {
-                        CultureInfo = li.Culture.CultureInfo,
-                        Key = new LocalizedInstanceKey(li.PropertyRoute.ToPropertyRoute(), li.Instance),
-                        li,
-                    })
-                    .AgGroupToDictionary(a => a.CultureInfo,
-                    gr => gr.ToDictionary(a => a.Key, a => a.li)),
+                    .AgGroupToDictionary(a => a.Culture.CultureInfo,
+                    gr => gr.ToDictionary(a => new LocalizedInstanceKey(a.PropertyRoute.ToPropertyRoute(), a.Instance))),
                     new InvalidateWith(typeof(TranslatedInstanceDN)));
             }
         }
 
-        
-        public static void AddTraducibleRoute(PropertyRoute route)
+        public static void AddRoute<T>(Expression<Func<T, object>> expression) where T : IdentifiableEntity
+        {
+            AddRoute(PropertyRoute.Construct<T>(expression));
+        }
+
+        public static void AddRoute(PropertyRoute route)
         {
             if (route.PropertyRouteType != PropertyRouteType.FieldOrProperty)
                 throw new InvalidOperationException("Routes of type {0} can not be traducibles".Formato(route.PropertyRouteType));
@@ -83,13 +73,13 @@ namespace Signum.Engine.Translation
             TraducibleRoutes.GetOrCreate(route.RootType).Add(route); 
         }
 
-      
-
         public static List<TranslatedTypeSummary> TranslationInstancesStatus()
         {
+            var cultures = TranslationLogic.CurrentCultureInfos(DefaultCulture); 
+
             return (from kvp in TraducibleRoutes
                     let original = FromEntities(kvp.Key)
-                    from ci in CultureInfoLogic.CultureInfos(DefaultCulture)
+                    from ci in cultures
                     select new TranslatedTypeSummary
                     {
                         Type = kvp.Key,
@@ -126,9 +116,9 @@ namespace Signum.Engine.Translation
             return result;
         }
 
-        public static Dictionary<CultureInfo, Dictionary<LocalizedInstanceKey, TranslatedInstanceDN>> TranslationsForType(Type type)
+        public static Dictionary<CultureInfo, Dictionary<LocalizedInstanceKey, TranslatedInstanceDN>> TranslationsForType(Type type, CultureInfo culture)
         {
-            return LocalizationCache.Value.ToDictionary(
+            return LocalizationCache.Value.Where(c => culture == null || c.Key.Equals(culture)).ToDictionary(
                 kvp => kvp.Key,
                 kvp => kvp.Value.Where(a => a.Key.Route.RootType == type).ToDictionary());
         }
@@ -138,6 +128,7 @@ namespace Signum.Engine.Translation
             TranslatedSummaryState? result = null;
 
             foreach (var item in (from kvp in original
+                                  where kvp.Value.HasText() 
                                   let t = translations.TryGetC(kvp.Key)
                                   select t != null && t.OriginalText == kvp.Value))
             {
@@ -161,6 +152,44 @@ namespace Signum.Engine.Translation
             }
 
             return result;
+        }
+
+        public static void CleanTranslations(Type t)
+        {
+            var routes = TraducibleRoutes.GetOrThrow(t).Select(pr => pr.ToPropertyRouteDN()).Where(a => !a.IsNew).ToList();
+
+            Database.Query<TranslatedInstanceDN>().Where(a => a.PropertyRoute.Type == t.ToTypeDN() && !routes.Contains(a.PropertyRoute)).UnsafeDelete();
+
+            giRemoveTranslationsForMissingEntities.GetInvoker(t).Invoke();
+        }
+
+        static GenericInvoker<Action> giRemoveTranslationsForMissingEntities = new GenericInvoker<Action>(() => RemoveTranslationsForMissingEntities<IdentifiableEntity>());
+        static void RemoveTranslationsForMissingEntities<T>() where T : IdentifiableEntity
+        {
+            (from ti in Database.Query<TranslatedInstanceDN>()
+             join e in Database.Query<T>().DefaultIfEmpty() on ti.Instance.Entity equals e
+             where e == null
+             select ti).UnsafeDelete();
+        }
+
+        public static string GetTranslation(Lite<IdentifiableEntity> lite, PropertyRoute route)
+        {
+            var key = new LocalizedInstanceKey(route, lite);
+
+            var result = LocalizationCache.Value.TryGetC(CultureInfo.CurrentUICulture).TryGetC(key);
+
+            if (result != null)
+                return result.TranslatedText;
+
+            if (CultureInfo.CurrentUICulture.IsNeutralCulture)
+                return null;
+
+            result = LocalizationCache.Value.TryGetC(CultureInfo.CurrentUICulture.Parent).TryGetC(key);
+
+            if (result != null)
+                return result.TranslatedText;
+
+            return null;
         }
     }
 
@@ -188,6 +217,11 @@ namespace Signum.Engine.Translation
         public override int GetHashCode()
         {
             return Route.GetHashCode() ^ Instance.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return "{0} {1}".Formato(Route, Instance);
         }
     }
 

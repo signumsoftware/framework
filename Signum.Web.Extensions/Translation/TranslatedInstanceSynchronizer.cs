@@ -10,21 +10,19 @@ using Signum.Engine.Translation;
 using Signum.Web.Translation;
 using Signum.Entities.Translation;
 
-namespace Signum.Web.Translation2
+namespace Signum.Web.Translation
 {
-    public static class TranslationInstanceSynchronizer
+    public static class TranslatedInstanceSynchronizer
     {
-        public static TypeInstancesChanges GetAssemblyChanges(ITranslator translator, Type type, CultureInfo targetCulture)
+        public static TypeInstancesChanges GetTypeInstanceChanges(ITranslator translator, Type type, CultureInfo targetCulture)
         {
+            CultureInfo masterCulture = CultureInfo.GetCultureInfo(TranslatedInstanceLogic.DefaultCulture);
 
-            CultureInfo masterCulture = new CultureInfo(TranslatedInstanceLogic.DefaultCulture);
-
-            Dictionary<CultureInfo, Dictionary<LocalizedInstanceKey, TranslatedInstanceDN>> support = TranslatedInstanceLogic.TranslationsForType(type);
+            Dictionary<CultureInfo, Dictionary<LocalizedInstanceKey, TranslatedInstanceDN>> support = TranslatedInstanceLogic.TranslationsForType(type, culture: null);
 
             Dictionary<LocalizedInstanceKey, TranslatedInstanceDN> target = support.TryGetC(targetCulture);
 
-            if (target != null)
-                support.Remove(targetCulture);
+            var cultures = TranslationLogic.CurrentCultureInfos(TranslatedInstanceLogic.DefaultCulture);
 
             var instances = TranslatedInstanceLogic.FromEntities(type).GroupBy(a=>a.Key.Instance).Select(gr =>
             {
@@ -33,21 +31,19 @@ namespace Signum.Web.Translation2
                                       where kvp.Value.HasText() && (t == null || t.OriginalText != kvp.Value)
                                       select KVP.Create(kvp.Key, kvp.Value)).ToDictionary();
 
+                if (routeConflicts.IsEmpty())
+                    return null;
+
                 var result = (from rc in routeConflicts
-                              from dic in support
-                              let trans = dic.Value.TryGetC(rc.Key)
-                              where trans != null
+                              from c in cultures
+                              let str = c.Equals(masterCulture) ? rc.Value : support.TryGetC(c).TryGetC(rc.Key).TryCC(a=>a.TranslatedText)
+                              where str.HasItems()
                               select new
                               {
                                   rc.Key.Route,
-                                  Culture = dic.Key,
-                                  Conflict = new PropertyRouteConflict { Original = trans.TranslatedText, AutomaticTranslation = null }
-                              }).Concat(gr.Select(rc => new
-                              {
-                                  rc.Key.Route,
-                                  Culture = masterCulture,
-                                  Conflict = new PropertyRouteConflict { Original = rc.Value, AutomaticTranslation = null }
-                              })).AgGroupToDictionary(a => a.Route, g => g.ToDictionary(a => a.Culture, a => a.Conflict));
+                                  Culture = c,
+                                  Conflict = new PropertyRouteConflict { Original = str, AutomaticTranslation = null }
+                              }).AgGroupToDictionary(a => a.Route, g => g.ToDictionary(a => a.Culture, a => a.Conflict));
                 
                 return new InstanceChanges
                 {

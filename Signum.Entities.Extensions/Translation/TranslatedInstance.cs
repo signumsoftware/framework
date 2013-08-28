@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Signum.Entities.Translation
 {
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
+    [Serializable, EntityKind(EntityKind.System, EntityData.Master)]
     public class TranslatedInstanceDN : Entity
     {
         [NotNullable]
@@ -38,12 +38,12 @@ namespace Signum.Entities.Translation
         }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
-        string localizedText;
+        string translatedText;
         [StringLengthValidator(AllowNulls = false)]
         public string TranslatedText
         {
-            get { return localizedText; }
-            set { Set(ref localizedText, value, () => TranslatedText); }
+            get { return translatedText; }
+            set { Set(ref translatedText, value, () => TranslatedText); }
         }
 
         [NotNullable, SqlDbType(Size = int.MaxValue)]
@@ -57,13 +57,7 @@ namespace Signum.Entities.Translation
 
         public override string ToString()
         {
-            return "{0} - ({1} {2})".Formato(culture, instance.TryCC(e => e.EntityType.Name));
+            return "{0} {1} {2}".Formato(culture, instance, propertyRoute);
         }
-    }
-
-    public enum TranslatedInstanceOperation
-    {
-        Save,
-        Delete,
     }
 }

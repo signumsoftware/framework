@@ -3,24 +3,28 @@
 @using Signum.Web.Translation.Controllers
 @using System.Globalization;
 @using Signum.Engine.Basics;
+@using Signum.Entities.Translation
 @model Dictionary<Type, Dictionary<CultureInfo, TranslatedTypeSummary>>
 @{
-    ViewBag.Title = "Translated instances";        
+    ViewBag.Title = TranslationMessage.InstanceTranslations.NiceToString();        
 }
 
 @Html.ScriptCss("~/Translation/Content/Translation.css")
 
 @if (Model.IsEmpty())
 {
-    <pre>No instance properties to translate</pre>   
+    <h2>@TranslationMessage.NothingToTranslate.NiceToString()</h2>   
 }
 else
 {
+    <h2>@ViewBag.Title</h2>
+    
     var langs = Model.First().Value.Keys;
 
     <table class="st">
         <tr>
             <th></th>
+            <th>@TranslationMessage.All.NiceToString()</th>
             @foreach (var ci in langs)
             {
                 <th>@ci.Name</th>
@@ -30,12 +34,26 @@ else
         {
             <tr>
                 <th>@type.Key.NiceName()</th>
+
+                <td>
+                    @Html.ActionLink(TranslationMessage.View.NiceToString(), (TranslatedInstanceController tc) => tc.View(TypeLogic.GetCleanName(type.Key), null))
+                </td>
                 @foreach (var tf in type.Value.Values)
                 {
                     <td>
-                        @Html.ActionLink("view", (TranslatedInstanceController tc) => tc.View(TypeLogic.GetCleanName(tf.Type), tf.CultureInfo.Name))
-                        <br />
-                        @Html.ActionLink("sync", (TranslatedInstanceController tc) => tc.Sync(TypeLogic.GetCleanName(tf.Type), tf.CultureInfo.Name), new { @class = "status-" + tf.State.ToString() })
+                        @if (tf.CultureInfo.Name == TranslatedInstanceLogic.DefaultCulture)
+                        {
+                            <text>@TranslationMessage.None.NiceToString()</text>
+                        }
+                        else
+                        {
+                            @Html.ActionLink(TranslationMessage.View.NiceToString(), (TranslatedInstanceController tc) => tc.View(TypeLogic.GetCleanName(tf.Type), tf.CultureInfo.Name))
+                            <br />
+                            if (tf.CultureInfo.IsNeutralCulture)
+                            {
+                                @Html.ActionLink(TranslationMessage.Sync.NiceToString(), (TranslatedInstanceController tc) => tc.Sync(TypeLogic.GetCleanName(tf.Type), tf.CultureInfo.Name), new { @class = "status-" + tf.State.ToString() })
+                            }
+                        }
                     </td>
                 }
             </tr>

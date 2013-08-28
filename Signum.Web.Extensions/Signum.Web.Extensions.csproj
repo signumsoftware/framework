@@ -836,6 +836,16 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>SMSUpdatePackage.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Translation\Views\SyncInstance.generated.cs">
+      <DependentUpon>SyncInstance.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Translation\Views\ViewInstance.generated.cs">
+      <DependentUpon>ViewInstance.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Translation\Views\IndexInstance.generated.cs">
       <DependentUpon>IndexInstance.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -1574,6 +1584,14 @@
     <Content Include="Translation\Views\IndexInstance.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>IndexInstance.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Translation\Views\ViewInstance.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>ViewInstance.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Translation\Views\SyncInstance.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>SyncInstance.generated.cs</LastGenOutput>
     </Content>
     <None Include="UserQueries\Views\QueryColumn.cshtml">
       <Generator>RazorGenerator</Generator>

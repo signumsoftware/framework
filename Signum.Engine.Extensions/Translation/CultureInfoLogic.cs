@@ -91,17 +91,5 @@ namespace Signum.Engine.Translation
                 }
             }
         }
-
-        public static List<CultureInfo> CultureInfos(string defaultCulture)
-        {
-            var cultures = CultureInfoLogic.ApplicationCultures;
-
-            TranslatorDN tr = UserDN.Current.Translator();
-
-            if (tr != null)
-                cultures = cultures.Where(ci => ci.Name == defaultCulture || tr.Cultures.Any(tc => tc.Culture.CultureInfo == ci));
-
-            return cultures.OrderByDescending(a => a.Name == defaultCulture).ThenBy(a => a.Name).ToList();
-        }
     }
 }

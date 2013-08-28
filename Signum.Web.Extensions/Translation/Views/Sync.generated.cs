@@ -40,6 +40,12 @@ namespace Signum.Web.Extensions.Translation.Views
     using System.Web.WebPages;
     using Signum.Entities;
     
+    #line 7 "..\..\Translation\Views\Sync.cshtml"
+    using Signum.Entities.Translation;
+    
+    #line default
+    #line hidden
+    
     #line 4 "..\..\Translation\Views\Sync.cshtml"
     using Signum.Utilities;
     
@@ -75,12 +81,13 @@ namespace Signum.Web.Extensions.Translation.Views
 
 
 
+
             
-            #line 7 "..\..\Translation\Views\Sync.cshtml"
+            #line 8 "..\..\Translation\Views\Sync.cshtml"
   
     CultureInfo culture = ViewBag.Culture;
 
-    ViewBag.Title = "Synchronize {0} in {1}".Formato(Model.LocalizedAssembly.Assembly.GetName().Name, Model.LocalizedAssembly.Culture.DisplayName);
+    ViewBag.Title = TranslationMessage.Synchronize0In1.NiceToString().Formato(Model.LocalizedAssembly.Assembly.GetName().Name, Model.LocalizedAssembly.Culture.DisplayName);
 
     Func<IEnumerable<string>, List<SelectListItem>> selectListItems = values =>
     {
@@ -109,7 +116,7 @@ WriteLiteral("\r\n");
 
 
             
-            #line 32 "..\..\Translation\Views\Sync.cshtml"
+            #line 33 "..\..\Translation\Views\Sync.cshtml"
 Write(Html.ScriptCss("~/Translation/Content/Translation.css"));
 
             
@@ -119,7 +126,7 @@ WriteLiteral("\r\n");
 
 
             
-            #line 33 "..\..\Translation\Views\Sync.cshtml"
+            #line 34 "..\..\Translation\Views\Sync.cshtml"
 Write(Html.ScriptsJs("~/Translation/Content/Translation.js"));
 
             
@@ -129,20 +136,64 @@ WriteLiteral("\r\n\r\n");
 
 
             
-            #line 35 "..\..\Translation\Views\Sync.cshtml"
- using (Html.BeginForm())
+            #line 36 "..\..\Translation\Views\Sync.cshtml"
+ if (Model.Types.IsEmpty())
 {
 
             
             #line default
             #line hidden
-WriteLiteral("    <table id=\"results\" style=\"width: 100%; margin: 0px\" class=\"st\" pluralAndGend" +
-"er=\"");
+WriteLiteral("    <h2>");
 
 
             
-            #line 37 "..\..\Translation\Views\Sync.cshtml"
-                                                                                Write(Url.Action((TranslationController tc) => tc.PluralAndGender()));
+            #line 38 "..\..\Translation\Views\Sync.cshtml"
+   Write(TranslationMessage._0AlreadySynchronized.NiceToString().Formato(Model.LocalizedAssembly.Assembly.GetName().Name));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</h2>   \r\n");
+
+
+            
+            #line 39 "..\..\Translation\Views\Sync.cshtml"
+}
+else
+{
+
+            
+            #line default
+            #line hidden
+WriteLiteral("   <h2>");
+
+
+            
+            #line 42 "..\..\Translation\Views\Sync.cshtml"
+  Write(ViewBag.Title);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</h2>\r\n");
+
+
+            
+            #line 43 "..\..\Translation\Views\Sync.cshtml"
+    
+    using (Html.BeginForm())
+    {
+
+            
+            #line default
+            #line hidden
+WriteLiteral("        <table id=\"results\" style=\"width: 100%; margin: 0px\" class=\"st\" pluralAnd" +
+"Gender=\"");
+
+
+            
+            #line 46 "..\..\Translation\Views\Sync.cshtml"
+                                                                                    Write(Url.Action((TranslationController tc) => tc.PluralAndGender()));
 
             
             #line default
@@ -151,417 +202,466 @@ WriteLiteral("\">\r\n");
 
 
             
-            #line 38 "..\..\Translation\Views\Sync.cshtml"
-         foreach (var typeChanges in Model.Types)
-        {
-
-            
-            #line default
-            #line hidden
-WriteLiteral("            <thead>\r\n                <tr>\r\n                    <th class=\"leftCel" +
-"l\">Type</th>\r\n                    <th colspan=\"4\" class=\"titleCell\">");
-
-
-            
-            #line 43 "..\..\Translation\Views\Sync.cshtml"
-                                                 Write(typeChanges.Type.Type.Name);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("</th>\r\n                </tr>\r\n            </thead>\r\n");
-
-
-            
-            #line 46 "..\..\Translation\Views\Sync.cshtml"
-            
-            if (typeChanges.TypeConflict != null)
+            #line 47 "..\..\Translation\Views\Sync.cshtml"
+             foreach (var typeChanges in Model.Types)
             {
 
-                bool hasGenderOption = typeChanges.Type.Options.IsSet(DescriptionOptions.Gender);
-                bool hasPlural = typeChanges.Type.Options.IsSet(DescriptionOptions.PluralDescription);
+            
+            #line default
+            #line hidden
+WriteLiteral("                <thead>\r\n                    <tr>\r\n                        <th cl" +
+"ass=\"leftCell\">");
 
-                foreach (var tc in typeChanges.TypeConflict)
+
+            
+            #line 51 "..\..\Translation\Views\Sync.cshtml"
+                                        Write(TranslationMessage.Type.NiceToString());
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</th>\r\n                        <th colspan=\"4\" class=\"titleCell\">");
+
+
+            
+            #line 52 "..\..\Translation\Views\Sync.cshtml"
+                                                     Write(typeChanges.Type.Type.Name);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</th>\r\n                    </tr>\r\n                </thead>\r\n");
+
+
+            
+            #line 55 "..\..\Translation\Views\Sync.cshtml"
+            
+                if (typeChanges.TypeConflict != null)
                 {
-                    var locType = tc.Value.Original;
 
-                    var hasGender = hasGenderOption && NaturalLanguageTools.HasGenders(tc.Key);
+                    bool hasGenderOption = typeChanges.Type.Options.IsSet(DescriptionOptions.Gender);
+                    bool hasPlural = typeChanges.Type.Options.IsSet(DescriptionOptions.PluralDescription);
 
-            
-            #line default
-            #line hidden
-WriteLiteral("            <tr>\r\n                <th class=\"leftCell\">");
-
-
-            
-            #line 59 "..\..\Translation\Views\Sync.cshtml"
-                                Write(tc.Key.Name);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("</th>\r\n                <th class=\"smallCell monospaceCell\">\r\n");
-
-
-            
-            #line 61 "..\..\Translation\Views\Sync.cshtml"
-                     if (hasGender)
+                    foreach (var tc in typeChanges.TypeConflict)
                     {
-                        
-            
-            #line default
-            #line hidden
-            
-            #line 63 "..\..\Translation\Views\Sync.cshtml"
-                    Write(locType.Gender != null ? NaturalLanguageTools.GetPronom(locType.Gender.Value, plural: false, culture: locType.Assembly.Culture) : "-");
+                        var locType = tc.Value.Original;
+
+                        var hasGender = hasGenderOption && NaturalLanguageTools.HasGenders(tc.Key);
 
             
             #line default
             #line hidden
+WriteLiteral("                <tr>\r\n                    <th class=\"leftCell\">");
+
+
             
-            #line 63 "..\..\Translation\Views\Sync.cshtml"
-                                                                                                                                                                
-                    }
+            #line 68 "..\..\Translation\Views\Sync.cshtml"
+                                    Write(tc.Key.Name);
 
             
             #line default
             #line hidden
-WriteLiteral("                </th>\r\n                <th class=\"monospaceCell\">\r\n              " +
-"      ");
-
-
-            
-            #line 67 "..\..\Translation\Views\Sync.cshtml"
-               Write(locType.Description);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n                </th>\r\n                <th class=\"smallCell monospaceCell\">\r\n");
+WriteLiteral("</th>\r\n                    <th class=\"smallCell monospaceCell\">\r\n");
 
 
             
             #line 70 "..\..\Translation\Views\Sync.cshtml"
-                     if (hasGender && hasPlural)
-                    {
-                        
+                         if (hasGender)
+                        {
+                            
             
             #line default
             #line hidden
             
             #line 72 "..\..\Translation\Views\Sync.cshtml"
-                    Write(locType.Gender != null ? NaturalLanguageTools.GetPronom(locType.Gender.Value, plural: true, culture: locType.Assembly.Culture) : "-");
+                        Write(locType.Gender != null ? NaturalLanguageTools.GetPronom(locType.Gender.Value, plural: false, culture: locType.Assembly.Culture) : "-");
 
             
             #line default
             #line hidden
             
             #line 72 "..\..\Translation\Views\Sync.cshtml"
-                                                                                                                                                               
-                    }
+                                                                                                                                                                    
+                        }
 
             
             #line default
             #line hidden
-WriteLiteral("                </th>\r\n                <th class=\"monospaceCell\">\r\n");
+WriteLiteral("                    </th>\r\n                    <th class=\"monospaceCell\">\r\n      " +
+"                  ");
 
 
             
             #line 76 "..\..\Translation\Views\Sync.cshtml"
-                     if (hasPlural)
-                    {
-                        
+                   Write(locType.Description);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n                    </th>\r\n                    <th class=\"smallCell monospaceCe" +
+"ll\">\r\n");
+
+
+            
+            #line 79 "..\..\Translation\Views\Sync.cshtml"
+                         if (hasGender && hasPlural)
+                        {
+                            
             
             #line default
             #line hidden
             
-            #line 78 "..\..\Translation\Views\Sync.cshtml"
-                    Write(locType.PluralDescription ?? "-");
+            #line 81 "..\..\Translation\Views\Sync.cshtml"
+                        Write(locType.Gender != null ? NaturalLanguageTools.GetPronom(locType.Gender.Value, plural: true, culture: locType.Assembly.Culture) : "-");
 
             
             #line default
             #line hidden
             
-            #line 78 "..\..\Translation\Views\Sync.cshtml"
-                                                           
+            #line 81 "..\..\Translation\Views\Sync.cshtml"
+                                                                                                                                                                   
+                        }
+
+            
+            #line default
+            #line hidden
+WriteLiteral("                    </th>\r\n                    <th class=\"monospaceCell\">\r\n");
+
+
+            
+            #line 85 "..\..\Translation\Views\Sync.cshtml"
+                         if (hasPlural)
+                        {
+                            
+            
+            #line default
+            #line hidden
+            
+            #line 87 "..\..\Translation\Views\Sync.cshtml"
+                        Write(locType.PluralDescription ?? "-");
+
+            
+            #line default
+            #line hidden
+            
+            #line 87 "..\..\Translation\Views\Sync.cshtml"
+                                                               
+                        }
+
+            
+            #line default
+            #line hidden
+WriteLiteral("                    </th>\r\n                </tr>\t \r\n");
+
+
+            
+            #line 91 "..\..\Translation\Views\Sync.cshtml"
                     }
 
-            
-            #line default
-            #line hidden
-WriteLiteral("                </th>\r\n            </tr>\t \r\n");
+                    {
+                        var locType = typeChanges.Type;
 
-
-            
-            #line 82 "..\..\Translation\Views\Sync.cshtml"
-                }
-
-                {
-                    var locType = typeChanges.Type;
-
-                    var hasGender = hasGenderOption && NaturalLanguageTools.HasGenders(culture);
+                        var hasGender = hasGenderOption && NaturalLanguageTools.HasGenders(culture);
                     
 
             
             #line default
             #line hidden
-WriteLiteral("            <tr>\r\n                <th class=\"leftCell\">");
+WriteLiteral("                <tr>\r\n                    <th class=\"leftCell\">");
 
 
             
-            #line 90 "..\..\Translation\Views\Sync.cshtml"
-                                Write(culture.Name);
+            #line 99 "..\..\Translation\Views\Sync.cshtml"
+                                    Write(culture.Name);
 
             
             #line default
             #line hidden
-WriteLiteral("</th>\r\n                <th class=\"smallCell monospaceCell\">\r\n");
+WriteLiteral("</th>\r\n                    <th class=\"smallCell monospaceCell\">\r\n");
 
 
             
-            #line 92 "..\..\Translation\Views\Sync.cshtml"
-                     if (hasGender)
-                    {
-                        var gd = NaturalLanguageTools.GenderDetectors.TryGetC(locType.Assembly.Culture.TwoLetterISOLanguageName);
-
-                        var list = gd.TryCC(a => a.Pronoms).EmptyIfNull()
-                                .Select(pi => new SelectListItem { Value = pi.Gender.ToString(), Text = pi.Singular, Selected = pi.Gender == locType.Gender }).ToList();
-
-                        if (typeChanges.Type.Gender == null)
+            #line 101 "..\..\Translation\Views\Sync.cshtml"
+                         if (hasGender)
                         {
-                            list.Insert(0, new SelectListItem { Value = "", Text = "-", Selected = true });
+                            var gd = NaturalLanguageTools.GenderDetectors.TryGetC(locType.Assembly.Culture.TwoLetterISOLanguageName);
+
+                            var list = gd.TryCC(a => a.Pronoms).EmptyIfNull()
+                                    .Select(pi => new SelectListItem { Value = pi.Gender.ToString(), Text = pi.Singular, Selected = pi.Gender == locType.Gender }).ToList();
+
+                            if (typeChanges.Type.Gender == null)
+                            {
+                                list.Insert(0, new SelectListItem { Value = "", Text = "-", Selected = true });
+                            }
+                            
+            
+            #line default
+            #line hidden
+            
+            #line 112 "..\..\Translation\Views\Sync.cshtml"
+                       Write(Html.DropDownList(locKey(typeChanges.Type) + ".Gender", list));
+
+            
+            #line default
+            #line hidden
+            
+            #line 112 "..\..\Translation\Views\Sync.cshtml"
+                                                                                          ;
                         }
-                        
-            
-            #line default
-            #line hidden
-            
-            #line 103 "..\..\Translation\Views\Sync.cshtml"
-                   Write(Html.DropDownList(locKey(typeChanges.Type) + ".Gender", list));
 
             
             #line default
             #line hidden
-            
-            #line 103 "..\..\Translation\Views\Sync.cshtml"
-                                                                                      ;
-                    }
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n                </th>\r\n                <th class=\"monospaceCell\">\r\n");
+WriteLiteral("\r\n                    </th>\r\n                    <th class=\"monospaceCell\">\r\n");
 
 
             
-            #line 108 "..\..\Translation\Views\Sync.cshtml"
-                        
+            #line 117 "..\..\Translation\Views\Sync.cshtml"
+                            
                         var items = selectListItems(typeChanges.TypeConflict.Values.Select(a => a.Translated));
 
+                            
+            
+            #line default
+            #line hidden
+            
+            #line 120 "..\..\Translation\Views\Sync.cshtml"
+                       Write(Html.DropDownList(locKey(typeChanges.Type) + ".Description", items, new { style = "width:90%" }));
+
+            
+            #line default
+            #line hidden
+            
+            #line 120 "..\..\Translation\Views\Sync.cshtml"
+                                                                                                                             ;
                         
-            
-            #line default
-            #line hidden
-            
-            #line 111 "..\..\Translation\Views\Sync.cshtml"
-                   Write(Html.DropDownList(locKey(typeChanges.Type) + ".Description", items, new { style = "width:90%" }));
 
             
             #line default
             #line hidden
-            
-            #line 111 "..\..\Translation\Views\Sync.cshtml"
-                                                                                                                         ;
-                    
-
-            
-            #line default
-            #line hidden
-WriteLiteral("                    <a href=\"#\" class=\"edit\">edit</a>\r\n                </th>\r\n   " +
-"             <th class=\"smallCell monospaceCell\">\r\n");
-
-
-            
-            #line 116 "..\..\Translation\Views\Sync.cshtml"
-                     if (hasGender && hasPlural)
-                    {
-                        
-            
-            #line default
-            #line hidden
-            
-            #line 118 "..\..\Translation\Views\Sync.cshtml"
-                    Write(locType.Gender != null ? NaturalLanguageTools.GetPronom(locType.Gender.Value, plural: true, culture: locType.Assembly.Culture) : "-");
-
-            
-            #line default
-            #line hidden
-            
-            #line 118 "..\..\Translation\Views\Sync.cshtml"
-                                                                                                                                                                  
-                    }
-
-            
-            #line default
-            #line hidden
-WriteLiteral("                </th>\r\n                <th class=\"monospaceCell\">\r\n");
+WriteLiteral("                        <a href=\"#\" class=\"edit\">");
 
 
             
             #line 122 "..\..\Translation\Views\Sync.cshtml"
-                     if (hasPlural)
-                    {
-                        
-            
-            #line default
-            #line hidden
-            
-            #line 124 "..\..\Translation\Views\Sync.cshtml"
-                   Write(Html.TextArea(locKey(locType) + ".PluralDescription", locType.PluralDescription, new { style = "width:90%;height:16px" }));
+                                            Write(TranslationMessage.Edit.NiceToString());
 
             
             #line default
             #line hidden
+WriteLiteral("</a>\r\n                    </th>\r\n                    <th class=\"smallCell monospa" +
+"ceCell\">\r\n");
+
+
             
-            #line 124 "..\..\Translation\Views\Sync.cshtml"
-                                                                                                                                                     
-                    }
+            #line 125 "..\..\Translation\Views\Sync.cshtml"
+                         if (hasGender && hasPlural)
+                        {
+                            
+            
+            #line default
+            #line hidden
+            
+            #line 127 "..\..\Translation\Views\Sync.cshtml"
+                        Write(locType.Gender != null ? NaturalLanguageTools.GetPronom(locType.Gender.Value, plural: true, culture: locType.Assembly.Culture) : "-");
 
             
             #line default
             #line hidden
-WriteLiteral("                </th>\r\n            </tr>\r\n");
+            
+            #line 127 "..\..\Translation\Views\Sync.cshtml"
+                                                                                                                                                                      
+                        }
+
+            
+            #line default
+            #line hidden
+WriteLiteral("                    </th>\r\n                    <th class=\"monospaceCell\">\r\n");
 
 
             
-            #line 128 "..\..\Translation\Views\Sync.cshtml"
+            #line 131 "..\..\Translation\Views\Sync.cshtml"
+                         if (hasPlural)
+                        {
+                            
+            
+            #line default
+            #line hidden
+            
+            #line 133 "..\..\Translation\Views\Sync.cshtml"
+                       Write(Html.TextArea(locKey(locType) + ".PluralDescription", locType.PluralDescription, new { style = "width:90%;height:16px" }));
+
+            
+            #line default
+            #line hidden
+            
+            #line 133 "..\..\Translation\Views\Sync.cshtml"
+                                                                                                                                                         
+                        }
+
+            
+            #line default
+            #line hidden
+WriteLiteral("                    </th>\r\n                </tr>\r\n");
+
+
+            
+            #line 137 "..\..\Translation\Views\Sync.cshtml"
                 
+                    }
                 }
-            }
 
-            {
-
-                var locType = typeChanges.Type;
-                foreach (var conflict in typeChanges.MemberConflicts)
                 {
 
-
-            
-            #line default
-            #line hidden
-WriteLiteral("            <tr>\r\n                <th class=\"leftCell\">Member\r\n                </" +
-"th>\r\n                <th colspan=\"4\">");
-
-
-            
-            #line 141 "..\..\Translation\Views\Sync.cshtml"
-                           Write(conflict.Key);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n                </th>\r\n            </tr>\r\n");
-
-
-            
-            #line 144 "..\..\Translation\Views\Sync.cshtml"
-            
-                    foreach (var mc in conflict.Value)
+                    var locType = typeChanges.Type;
+                    foreach (var conflict in typeChanges.MemberConflicts)
                     {
 
+
             
             #line default
             #line hidden
-WriteLiteral("            <tr>\r\n                <td class=\"leftCell\">");
+WriteLiteral("                <tr>\r\n                    <th class=\"leftCell\">");
 
 
             
             #line 148 "..\..\Translation\Views\Sync.cshtml"
-                                Write(mc.Key.Name);
+                                    Write(TranslationMessage.Member.NiceToString());
 
             
             #line default
             #line hidden
-WriteLiteral("</td>\r\n                <td colspan=\"4\" class=\"monospaceCell\">\r\n                  " +
-"  ");
+WriteLiteral("\r\n                    </th>\r\n                    <th colspan=\"4\">");
 
 
             
             #line 150 "..\..\Translation\Views\Sync.cshtml"
-               Write(mc.Value.Original);
+                               Write(conflict.Key);
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n\r\n                </td>\r\n            </tr>\r\n");
+WriteLiteral("\r\n                    </th>\r\n                </tr>\r\n");
 
 
             
-            #line 154 "..\..\Translation\Views\Sync.cshtml"
-                    }
+            #line 153 "..\..\Translation\Views\Sync.cshtml"
+                        foreach (var mc in conflict.Value)
+                        {
 
             
             #line default
             #line hidden
-WriteLiteral("            <tr>\r\n                <td class=\"leftCell\">");
+WriteLiteral("                <tr>\r\n                    <td class=\"leftCell\">");
 
 
             
             #line 156 "..\..\Translation\Views\Sync.cshtml"
-                                Write(culture.Name);
+                                    Write(mc.Key.Name);
 
             
             #line default
             #line hidden
-WriteLiteral("</td>\r\n                <td colspan=\"4\" class=\"monospaceCell\">\r\n");
+WriteLiteral("</td>\r\n                    <td colspan=\"4\" class=\"monospaceCell\">\r\n              " +
+"          ");
 
 
             
             #line 158 "..\..\Translation\Views\Sync.cshtml"
-                        
+                   Write(mc.Value.Original);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n\r\n                    </td>\r\n                </tr>\r\n");
+
+
+            
+            #line 162 "..\..\Translation\Views\Sync.cshtml"
+                        }
+
+            
+            #line default
+            #line hidden
+WriteLiteral("                <tr>\r\n                    <td class=\"leftCell\">");
+
+
+            
+            #line 164 "..\..\Translation\Views\Sync.cshtml"
+                                    Write(culture.Name);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</td>\r\n                    <td colspan=\"4\" class=\"monospaceCell\">\r\n");
+
+
+            
+            #line 166 "..\..\Translation\Views\Sync.cshtml"
+                            
                         var items = selectListItems(conflict.Value.Values.Select(a => a.Translated));
+                            
+            
+            #line default
+            #line hidden
+            
+            #line 168 "..\..\Translation\Views\Sync.cshtml"
+                       Write(Html.DropDownList(locKey(typeChanges.Type) + ".Member." + conflict.Key, items));
+
+            
+            #line default
+            #line hidden
+            
+            #line 168 "..\..\Translation\Views\Sync.cshtml"
+                                                                                                           ;
                         
-            
-            #line default
-            #line hidden
-            
-            #line 160 "..\..\Translation\Views\Sync.cshtml"
-                   Write(Html.DropDownList(locKey(typeChanges.Type) + ".Member." + conflict.Key, items));
 
             
             #line default
             #line hidden
+WriteLiteral("                        <a href=\"#\" class=\"edit\">");
+
+
             
-            #line 160 "..\..\Translation\Views\Sync.cshtml"
-                                                                                                       ;
-                    
+            #line 170 "..\..\Translation\Views\Sync.cshtml"
+                                            Write(TranslationMessage.Edit.NiceToString());
 
             
             #line default
             #line hidden
-WriteLiteral("                    <a href=\"#\" class=\"edit\">edit</a>\r\n                </td>\r\n   " +
-"         </tr>\r\n");
+WriteLiteral("</a>\r\n                    </td>\r\n                </tr>\r\n");
 
 
             
-            #line 165 "..\..\Translation\Views\Sync.cshtml"
+            #line 173 "..\..\Translation\Views\Sync.cshtml"
+                    }
                 }
+
             }
 
-        }
+            
+            #line default
+            #line hidden
+WriteLiteral("        </table>\r\n");
+
+
+
+WriteLiteral("    <input type=\"submit\" value=\"");
+
+
+            
+            #line 178 "..\..\Translation\Views\Sync.cshtml"
+                           Write(TranslationMessage.Save.NiceToString());
 
             
             #line default
             #line hidden
-WriteLiteral("    </table>\r\n");
-
-
-
-WriteLiteral("    <input type=\"submit\" value=\"Save\" />\r\n");
+WriteLiteral("\" />\r\n");
 
 
             
-            #line 171 "..\..\Translation\Views\Sync.cshtml"
+            #line 179 "..\..\Translation\Views\Sync.cshtml"
+    }
 }
 
             
