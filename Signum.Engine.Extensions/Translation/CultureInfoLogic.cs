@@ -13,6 +13,7 @@ using Signum.Entities.Translation;
 using System.Reflection;
 using Signum.Engine.Operations;
 using Signum.Engine.Authorization;
+using Signum.Entities.Authorization;
 
 namespace Signum.Engine.Translation
 {
@@ -89,6 +90,18 @@ namespace Signum.Engine.Translation
                     yield return func(c.Value);
                 }
             }
+        }
+
+        public static List<CultureInfo> CultureInfos(string defaultCulture)
+        {
+            var cultures = CultureInfoLogic.ApplicationCultures;
+
+            TranslatorDN tr = UserDN.Current.Translator();
+
+            if (tr != null)
+                cultures = cultures.Where(ci => ci.Name == defaultCulture || tr.Cultures.Any(tc => tc.Culture.CultureInfo == ci));
+
+            return cultures.OrderByDescending(a => a.Name == defaultCulture).ThenBy(a => a.Name).ToList();
         }
     }
 }

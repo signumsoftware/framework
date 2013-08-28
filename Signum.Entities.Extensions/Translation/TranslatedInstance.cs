@@ -8,12 +8,12 @@ using System.Text;
 namespace Signum.Entities.Translation
 {
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class LocalizedInstanceDN : Entity
+    public class TranslatedInstanceDN : Entity
     {
         [NotNullable]
-        Lite<CultureInfoDN> culture;
+        CultureInfoDN culture;
         [NotNullValidator]
-        public Lite<CultureInfoDN> Culture
+        public CultureInfoDN Culture
         {
             get { return culture; }
             set { Set(ref culture, value, () => Culture); }
@@ -29,12 +29,30 @@ namespace Signum.Entities.Translation
         }
 
         [NotNullable]
-        MList<LocalizedInstancePropertyDN> properties = new MList<LocalizedInstancePropertyDN>();
-        [NotNullValidator, NoRepeatValidator]
-        public MList<LocalizedInstancePropertyDN> Properties
+        PropertyRouteDN propertyRoute;
+        [NotNullValidator]
+        public PropertyRouteDN PropertyRoute
         {
-            get { return properties; }
-            set { Set(ref properties, value, () => Properties); }
+            get { return propertyRoute; }
+            set { Set(ref propertyRoute, value, () => PropertyRoute); }
+        }
+
+        [NotNullable, SqlDbType(Size = int.MaxValue)]
+        string localizedText;
+        [StringLengthValidator(AllowNulls = false)]
+        public string TranslatedText
+        {
+            get { return localizedText; }
+            set { Set(ref localizedText, value, () => TranslatedText); }
+        }
+
+        [NotNullable, SqlDbType(Size = int.MaxValue)]
+        string originalText;
+        [StringLengthValidator(AllowNulls = false)]
+        public string OriginalText
+        {
+            get { return originalText; }
+            set { Set(ref originalText, value, () => OriginalText); }
         }
 
         public override string ToString()
@@ -43,29 +61,7 @@ namespace Signum.Entities.Translation
         }
     }
 
-    [Serializable]
-    public class LocalizedInstancePropertyDN : Entity
-    {
-        [NotNullable]
-        Lite<PropertyRouteDN> propertyRoute;
-        [NotNullValidator]
-        public Lite<PropertyRouteDN> PropertyRoute
-        {
-            get { return propertyRoute; }
-            set { Set(ref propertyRoute, value, () => PropertyRoute); }
-        }
-
-        [NotNullable, SqlDbType(Size = int.MaxValue)]
-        string localizedText;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string LocalizedText
-        {
-            get { return localizedText; }
-            set { Set(ref localizedText, value, () => LocalizedText); }
-        }
-    }
-
-    public enum LocalizedInstanceOperation
+    public enum TranslatedInstanceOperation
     {
         Save,
         Delete,

@@ -20,7 +20,7 @@ namespace Signum.Web.Translation
 
 
         /// <param name="copyTranslationsToRootFolder">avoids Web Application restart when translations change</param>
-        public static void Start(ITranslator translator, bool copyNewTranslationsToRootFolder = true)
+        public static void Start(ITranslator translator, bool instanceTranslator, bool copyNewTranslationsToRootFolder = true)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -34,9 +34,16 @@ namespace Signum.Web.Translation
 
                 Translator = translator;
 
-                SpecialOmniboxProvider.Register(new SpecialOmniboxAction("Translation",
+                SpecialOmniboxProvider.Register(new SpecialOmniboxAction("TranslateCode",
                     () => TranslationPermission.TranslateCode.IsAuthorized(),
                     uh => uh.Action((TranslationController tc) => tc.Index())));
+
+                if (instanceTranslator)
+                {
+                    SpecialOmniboxProvider.Register(new SpecialOmniboxAction("TranslateInstances",
+                        () => TranslationPermission.TranslateInstances.IsAuthorized(),
+                        uh => uh.Action((TranslatedInstanceController tic) => tic.Index())));
+                }
 
                 if (copyNewTranslationsToRootFolder)
                 {

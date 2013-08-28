@@ -14,7 +14,7 @@ namespace Signum.Web.Extensions.Translation.Views
     using System;
     using System.Collections.Generic;
     
-    #line 4 "..\..\Translation\Views\Index.cshtml"
+    #line 4 "..\..\Translation\Views\IndexInstance.cshtml"
     using System.Globalization;
     
     #line default
@@ -23,7 +23,7 @@ namespace Signum.Web.Extensions.Translation.Views
     using System.Linq;
     using System.Net;
     
-    #line 2 "..\..\Translation\Views\Index.cshtml"
+    #line 1 "..\..\Translation\Views\IndexInstance.cshtml"
     using System.Reflection;
     
     #line default
@@ -38,21 +38,33 @@ namespace Signum.Web.Extensions.Translation.Views
     using System.Web.Security;
     using System.Web.UI;
     using System.Web.WebPages;
+    
+    #line 5 "..\..\Translation\Views\IndexInstance.cshtml"
+    using Signum.Engine.Basics;
+    
+    #line default
+    #line hidden
+    
+    #line 2 "..\..\Translation\Views\IndexInstance.cshtml"
+    using Signum.Engine.Translation;
+    
+    #line default
+    #line hidden
     using Signum.Entities;
     using Signum.Utilities;
     using Signum.Web;
     
-    #line 3 "..\..\Translation\Views\Index.cshtml"
+    #line 3 "..\..\Translation\Views\IndexInstance.cshtml"
     using Signum.Web.Translation.Controllers;
     
     #line default
     #line hidden
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
-    [System.Web.WebPages.PageVirtualPathAttribute("~/Translation/Views/Index.cshtml")]
-    public partial class Index : System.Web.Mvc.WebViewPage<Dictionary<Assembly, Dictionary<CultureInfo, TranslationFile>>>
+    [System.Web.WebPages.PageVirtualPathAttribute("~/Translation/Views/IndexInstance.cshtml")]
+    public partial class IndexInstance : System.Web.Mvc.WebViewPage<Dictionary<Type, Dictionary<CultureInfo, TranslatedTypeSummary>>>
     {
-        public Index()
+        public IndexInstance()
         {
         }
         public override void Execute()
@@ -62,10 +74,12 @@ namespace Signum.Web.Extensions.Translation.Views
 
 
 
+
+
             
-            #line 5 "..\..\Translation\Views\Index.cshtml"
+            #line 7 "..\..\Translation\Views\IndexInstance.cshtml"
   
-    ViewBag.Title = "Translation files";        
+    ViewBag.Title = "Translated instances";        
 
 
             
@@ -75,7 +89,7 @@ WriteLiteral("\r\n");
 
 
             
-            #line 9 "..\..\Translation\Views\Index.cshtml"
+            #line 11 "..\..\Translation\Views\IndexInstance.cshtml"
 Write(Html.ScriptCss("~/Translation/Content/Translation.css"));
 
             
@@ -85,18 +99,18 @@ WriteLiteral("\r\n\r\n");
 
 
             
-            #line 11 "..\..\Translation\Views\Index.cshtml"
+            #line 13 "..\..\Translation\Views\IndexInstance.cshtml"
  if (Model.IsEmpty())
 {
 
             
             #line default
             #line hidden
-WriteLiteral("    <pre>No assembly to translate</pre>   \r\n");
+WriteLiteral("    <pre>No instance properties to translate</pre>   \r\n");
 
 
             
-            #line 14 "..\..\Translation\Views\Index.cshtml"
+            #line 16 "..\..\Translation\Views\IndexInstance.cshtml"
 }
 else
 {
@@ -106,12 +120,11 @@ else
             
             #line default
             #line hidden
-WriteLiteral("    <table class=\"st\">\r\n        <tr>\r\n            <th></th>\r\n            <th>All<" +
-"/th>\r\n");
+WriteLiteral("    <table class=\"st\">\r\n        <tr>\r\n            <th></th>\r\n");
 
 
             
-            #line 23 "..\..\Translation\Views\Index.cshtml"
+            #line 24 "..\..\Translation\Views\IndexInstance.cshtml"
              foreach (var ci in langs)
             {
 
@@ -122,7 +135,7 @@ WriteLiteral("                <th>");
 
 
             
-            #line 25 "..\..\Translation\Views\Index.cshtml"
+            #line 26 "..\..\Translation\Views\IndexInstance.cshtml"
                Write(ci.Name);
 
             
@@ -132,7 +145,7 @@ WriteLiteral("</th>\r\n");
 
 
             
-            #line 26 "..\..\Translation\Views\Index.cshtml"
+            #line 27 "..\..\Translation\Views\IndexInstance.cshtml"
             }
 
             
@@ -142,8 +155,8 @@ WriteLiteral("        </tr>\r\n");
 
 
             
-            #line 28 "..\..\Translation\Views\Index.cshtml"
-         foreach (var assembly in Model)
+            #line 29 "..\..\Translation\Views\IndexInstance.cshtml"
+         foreach (var type in Model)
         {
 
             
@@ -153,28 +166,18 @@ WriteLiteral("            <tr>\r\n                <th>");
 
 
             
-            #line 31 "..\..\Translation\Views\Index.cshtml"
-               Write(assembly.Key.GetName().Name);
+            #line 32 "..\..\Translation\Views\IndexInstance.cshtml"
+               Write(type.Key.NiceName());
 
             
             #line default
             #line hidden
-WriteLiteral("</th>\r\n                <td>\r\n                    ");
+WriteLiteral("</th>\r\n");
 
 
             
-            #line 33 "..\..\Translation\Views\Index.cshtml"
-               Write(Html.ActionLink("view", (TranslationController tc) => tc.View(assembly.Key.GetName().Name, null)));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n                </td>\r\n");
-
-
-            
-            #line 35 "..\..\Translation\Views\Index.cshtml"
-                 foreach (var tf in assembly.Value.Values)
+            #line 33 "..\..\Translation\Views\IndexInstance.cshtml"
+                 foreach (var tf in type.Value.Values)
                 {
 
             
@@ -184,55 +187,27 @@ WriteLiteral("                    <td>\r\n                        ");
 
 
             
-            #line 38 "..\..\Translation\Views\Index.cshtml"
-                   Write(Html.ActionLink("view", (TranslationController tc) => tc.View(tf.Assembly.GetName().Name, tf.CultureInfo.Name)));
+            #line 36 "..\..\Translation\Views\IndexInstance.cshtml"
+                   Write(Html.ActionLink("view", (TranslatedInstanceController tc) => tc.View(TypeLogic.GetCleanName(tf.Type), tf.CultureInfo.Name)));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                        <br />\r\n");
+WriteLiteral("\r\n                        <br />\r\n                        ");
 
 
             
-            #line 40 "..\..\Translation\Views\Index.cshtml"
-                         if(tf.IsDefault)
-                        {
-
-            
-            #line default
-            #line hidden
-WriteLiteral("                            <p>sync</p>\r\n");
-
-
-            
-            #line 43 "..\..\Translation\Views\Index.cshtml"
-                        }
-                        else
-                        {
-                        
-            
-            #line default
-            #line hidden
-            
-            #line 46 "..\..\Translation\Views\Index.cshtml"
-                   Write(Html.ActionLink("sync", (TranslationController tc) => tc.Sync(tf.Assembly.GetName().Name, tf.CultureInfo.Name), new { @class = "status-" + tf.Status().ToString() }));
+            #line 38 "..\..\Translation\Views\IndexInstance.cshtml"
+                   Write(Html.ActionLink("sync", (TranslatedInstanceController tc) => tc.Sync(TypeLogic.GetCleanName(tf.Type), tf.CultureInfo.Name), new { @class = "status-" + tf.State.ToString() }));
 
             
             #line default
             #line hidden
-            
-            #line 46 "..\..\Translation\Views\Index.cshtml"
-                                                                                                                                                                                                 
-                        }
-
-            
-            #line default
-            #line hidden
-WriteLiteral("                    </td>\r\n");
+WriteLiteral("\r\n                    </td>\r\n");
 
 
             
-            #line 49 "..\..\Translation\Views\Index.cshtml"
+            #line 40 "..\..\Translation\Views\IndexInstance.cshtml"
                 }
 
             
@@ -242,7 +217,7 @@ WriteLiteral("            </tr>\r\n");
 
 
             
-            #line 51 "..\..\Translation\Views\Index.cshtml"
+            #line 42 "..\..\Translation\Views\IndexInstance.cshtml"
         }
 
             
@@ -252,7 +227,7 @@ WriteLiteral("    </table>\r\n");
 
 
             
-            #line 53 "..\..\Translation\Views\Index.cshtml"
+            #line 44 "..\..\Translation\Views\IndexInstance.cshtml"
 }
             
             #line default
