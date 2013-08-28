@@ -276,7 +276,7 @@ namespace Signum.Engine.Mailing
 
             var table = Schema.Current.Table(typeof(EmailTemplateDN));
 
-            SqlPreCommand cmd = emailTemplates.Select(uq => ProcessUserQuery(replacements, table, uq)).Combine(Spacing.Double);
+            SqlPreCommand cmd = emailTemplates.Select(uq => ProcessEmailTemplate(replacements, table, uq)).Combine(Spacing.Double);
 
             return cmd;
         }
@@ -312,7 +312,7 @@ namespace Signum.Engine.Mailing
             return cmd;
         }
 
-        static SqlPreCommand ProcessUserQuery(Replacements replacements, Table table, EmailTemplateDN et)
+        static SqlPreCommand ProcessEmailTemplate(Replacements replacements, Table table, EmailTemplateDN et)
         {
             try
             {
