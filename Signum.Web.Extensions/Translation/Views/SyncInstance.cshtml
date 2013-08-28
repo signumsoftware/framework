@@ -1,0 +1,115 @@
+﻿@model TypeInstancesChanges
+@using System.Globalization
+@using System.Reflection
+@using Signum.Utilities
+@using Signum.Web.Translation
+@using Signum.Web.Translation.Controllers
+@using Signum.Engine.Translation
+@using Signum.Entities.Translation
+@{
+    CultureInfo culture = ViewBag.Culture;
+    CultureInfo defaultCulture = CultureInfo.GetCultureInfo(TranslatedInstanceLogic.DefaultCulture);
+
+    ViewBag.Title = TranslationMessage.Synchronize0In1.NiceToString().Formato(Model.Type.NiceName(), culture.DisplayName);
+
+    Func<IEnumerable<string>, List<SelectListItem>> selectListItems = values =>
+    {
+        var items = values.Select(s => new SelectListItem { Value = s, Text = s }).ToList();
+
+        if (values.Count() > 1 && values.Distinct().Count() == 1)
+        {
+            items.First().Selected = true;
+            items.Insert(0, new SelectListItem { Value = "", Text = "-" });
+        }
+        else
+        {
+            items.Insert(0, new SelectListItem { Value = "", Text = "-", Selected = true });
+        }
+
+        return items;
+    };
+
+    Func<LocalizedType, string> locKey = lt => lt.Type.Name + "." + lt.Assembly.Culture.Name;
+}
+
+@Html.ScriptCss("~/Translation/Content/Translation.css")
+
+
+
+@if (Model.Instances.IsEmpty())
+{
+    <h2>@TranslationMessage._0AlreadySynchronized.NiceToString().Formato(@Model.Type.NiceName())</h2>   
+}
+else
+{
+    <h2>@ViewBag.Title</h2>
+
+    using (Html.BeginForm())
+    {
+    <table id="results" style="width: 100%; margin: 0px" class="st" pluralAndGender="@Url.Action((TranslationController tc) => tc.PluralAndGender())">
+        @foreach (InstanceChanges instance in Model.Instances)
+        {
+            <thead>
+                <tr>
+                    <th class="leftCell">@TranslationMessage.Instance.NiceToString()</th>
+                    <th class="titleCell">@Html.Href(Navigator.NavigateRoute(instance.Instance), instance.Instance.ToString())</th>
+                </tr>
+            </thead>
+           
+            foreach (var route in instance.RouteConflicts)
+            {
+
+            <tr>
+                <th class="leftCell">@TranslationMessage.Property.NiceToString()
+                </th>
+                <th>@route.Key.PropertyString()</th>
+            </tr>
+                foreach (var mc in route.Value)
+                {
+            <tr>
+                <td class="leftCell">@mc.Key.Name</td>
+                <td colspan="4" class="monospaceCell">
+                    @if (mc.Key.Equals(defaultCulture))
+                    {
+                        <em>@mc.Value.Original</em>
+                    }
+                    else
+                    {
+                        @mc.Value.Original  
+                    }
+                </td>
+            </tr>
+                }
+            <tr>
+                <td class="leftCell">@culture.Name</td>
+                <td colspan="4" class="monospaceCell">
+                    @{  
+                var items = selectListItems(route.Value.Values.Select(a => a.AutomaticTranslation));
+                        @Html.DropDownList(culture.Name + "#" + instance.Instance.Key() + "#" + route.Key.PropertyString(), items);
+                    }
+                    <a href="#" class="edit">@TranslationMessage.Edit.NiceToString()</a>
+                </td>
+            </tr>
+            }
+        }
+    </table>
+    <input type="submit" value="@TranslationMessage.Save.NiceToString()" />
+    }
+}
+
+<script>
+    $(function () {
+        $("a.edit").bind("click", function () {
+            var select = $(this).parent().find("select");
+            var input = $("<textarea/>").attr("type", "text")
+                .attr("name", select.attr("name"))
+                .val(select.val())
+                .attr("style", "width:90%; height:16px");
+            select.after(input);
+            select.remove();
+            $(this).remove();
+
+            return false;
+        });
+    });
+</script>

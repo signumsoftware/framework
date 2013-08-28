@@ -1,13 +1,14 @@
-﻿@model AssemblyChanges
+﻿@model LocalizedAssemblyChanges
 @using System.Globalization
 @using System.Reflection
 @using Signum.Utilities
 @using Signum.Web.Translation
 @using Signum.Web.Translation.Controllers
+@using Signum.Entities.Translation
 @{
     CultureInfo culture = ViewBag.Culture;
 
-    ViewBag.Title = "Synchronize {0} in {1}".Formato(Model.LocalizedAssembly.Assembly.GetName().Name, Model.LocalizedAssembly.Culture.DisplayName);
+    ViewBag.Title = TranslationMessage.Synchronize0In1.NiceToString().Formato(Model.LocalizedAssembly.Assembly.GetName().Name, Model.LocalizedAssembly.Culture.DisplayName);
 
     Func<IEnumerable<string>, List<SelectListItem>> selectListItems = values =>
     {
@@ -32,142 +33,150 @@
 @Html.ScriptCss("~/Translation/Content/Translation.css")
 @Html.ScriptsJs("~/Translation/Content/Translation.js")
 
-@using (Html.BeginForm())
+@if (Model.Types.IsEmpty())
 {
-    <table id="results" style="width: 100%; margin: 0px" class="st" pluralAndGender="@Url.Action((TranslationController tc) => tc.PluralAndGender())">
-        @foreach (var typeChanges in Model.Types)
-        {
-            <thead>
-                <tr>
-                    <th class="leftCell">Type</th>
-                    <th colspan="4" class="titleCell">@typeChanges.Type.Type.Name</th>
-                </tr>
-            </thead>
-            
-            if (typeChanges.TypeConflict != null)
+    <h2>@TranslationMessage._0AlreadySynchronized.NiceToString().Formato(Model.LocalizedAssembly.Assembly.GetName().Name)</h2>   
+}
+else
+{
+   <h2>@ViewBag.Title</h2>
+    
+    using (Html.BeginForm())
+    {
+        <table id="results" style="width: 100%; margin: 0px" class="st" pluralAndGender="@Url.Action((TranslationController tc) => tc.PluralAndGender())">
+            @foreach (var typeChanges in Model.Types)
             {
-
-                bool hasGenderOption = typeChanges.Type.Options.IsSet(DescriptionOptions.Gender);
-                bool hasPlural = typeChanges.Type.Options.IsSet(DescriptionOptions.PluralDescription);
-
-                foreach (var tc in typeChanges.TypeConflict)
+                <thead>
+                    <tr>
+                        <th class="leftCell">@TranslationMessage.Type.NiceToString()</th>
+                        <th colspan="4" class="titleCell">@typeChanges.Type.Type.Name</th>
+                    </tr>
+                </thead>
+            
+                if (typeChanges.TypeConflict != null)
                 {
-                    var locType = tc.Value.Original;
 
-                    var hasGender = hasGenderOption && NaturalLanguageTools.HasGenders(tc.Key);
-            <tr>
-                <th class="leftCell">@tc.Key.Name</th>
-                <th class="smallCell monospaceCell">
-                    @if (hasGender)
+                    bool hasGenderOption = typeChanges.Type.Options.IsSet(DescriptionOptions.Gender);
+                    bool hasPlural = typeChanges.Type.Options.IsSet(DescriptionOptions.PluralDescription);
+
+                    foreach (var tc in typeChanges.TypeConflict)
                     {
-                        @(locType.Gender != null ? NaturalLanguageTools.GetPronom(locType.Gender.Value, plural: false, culture: locType.Assembly.Culture) : "-")
-                    }
-                </th>
-                <th class="monospaceCell">
-                    @locType.Description
-                </th>
-                <th class="smallCell monospaceCell">
-                    @if (hasGender && hasPlural)
-                    {
-                        @(locType.Gender != null ? NaturalLanguageTools.GetPronom(locType.Gender.Value, plural: true, culture: locType.Assembly.Culture) : "-")
-                    }
-                </th>
-                <th class="monospaceCell">
-                    @if (hasPlural)
-                    {
-                        @(locType.PluralDescription ?? "-")
-                    }
-                </th>
-            </tr>	 
-                }
+                        var locType = tc.Value.Original;
 
-                {
-                    var locType = typeChanges.Type;
-
-                    var hasGender = hasGenderOption && NaturalLanguageTools.HasGenders(culture);
-                    
-            <tr>
-                <th class="leftCell">@culture.Name</th>
-                <th class="smallCell monospaceCell">
-                    @if (hasGender)
-                    {
-                        var gd = NaturalLanguageTools.GenderDetectors.TryGetC(locType.Assembly.Culture.TwoLetterISOLanguageName);
-
-                        var list = gd.TryCC(a => a.Pronoms).EmptyIfNull()
-                                .Select(pi => new SelectListItem { Value = pi.Gender.ToString(), Text = pi.Singular, Selected = pi.Gender == locType.Gender }).ToList();
-
-                        if (typeChanges.Type.Gender == null)
+                        var hasGender = hasGenderOption && NaturalLanguageTools.HasGenders(tc.Key);
+                <tr>
+                    <th class="leftCell">@tc.Key.Name</th>
+                    <th class="smallCell monospaceCell">
+                        @if (hasGender)
                         {
-                            list.Insert(0, new SelectListItem { Value = "", Text = "-", Selected = true });
+                            @(locType.Gender != null ? NaturalLanguageTools.GetPronom(locType.Gender.Value, plural: false, culture: locType.Assembly.Culture) : "-")
                         }
-                        @Html.DropDownList(locKey(typeChanges.Type) + ".Gender", list);
+                    </th>
+                    <th class="monospaceCell">
+                        @locType.Description
+                    </th>
+                    <th class="smallCell monospaceCell">
+                        @if (hasGender && hasPlural)
+                        {
+                            @(locType.Gender != null ? NaturalLanguageTools.GetPronom(locType.Gender.Value, plural: true, culture: locType.Assembly.Culture) : "-")
+                        }
+                    </th>
+                    <th class="monospaceCell">
+                        @if (hasPlural)
+                        {
+                            @(locType.PluralDescription ?? "-")
+                        }
+                    </th>
+                </tr>	 
                     }
 
-                </th>
-                <th class="monospaceCell">
-                    @{  
+                    {
+                        var locType = typeChanges.Type;
+
+                        var hasGender = hasGenderOption && NaturalLanguageTools.HasGenders(culture);
+                    
+                <tr>
+                    <th class="leftCell">@culture.Name</th>
+                    <th class="smallCell monospaceCell">
+                        @if (hasGender)
+                        {
+                            var gd = NaturalLanguageTools.GenderDetectors.TryGetC(locType.Assembly.Culture.TwoLetterISOLanguageName);
+
+                            var list = gd.TryCC(a => a.Pronoms).EmptyIfNull()
+                                    .Select(pi => new SelectListItem { Value = pi.Gender.ToString(), Text = pi.Singular, Selected = pi.Gender == locType.Gender }).ToList();
+
+                            if (typeChanges.Type.Gender == null)
+                            {
+                                list.Insert(0, new SelectListItem { Value = "", Text = "-", Selected = true });
+                            }
+                            @Html.DropDownList(locKey(typeChanges.Type) + ".Gender", list);
+                        }
+
+                    </th>
+                    <th class="monospaceCell">
+                        @{  
                         var items = selectListItems(typeChanges.TypeConflict.Values.Select(a => a.Translated));
 
-                        @Html.DropDownList(locKey(typeChanges.Type) + ".Description", items, new { style = "width:90%" });
-                    }
-                    <a href="#" class="edit">edit</a>
-                </th>
-                <th class="smallCell monospaceCell">
-                    @if (hasGender && hasPlural)
-                    {
-                        @(locType.Gender != null ? NaturalLanguageTools.GetPronom(locType.Gender.Value, plural: true, culture: locType.Assembly.Culture) : "-")   
-                    }
-                </th>
-                <th class="monospaceCell">
-                    @if (hasPlural)
-                    {
-                        @Html.TextArea(locKey(locType) + ".PluralDescription", locType.PluralDescription, new { style = "width:90%;height:16px" })   
-                    }
-                </th>
-            </tr>
+                            @Html.DropDownList(locKey(typeChanges.Type) + ".Description", items, new { style = "width:90%" });
+                        }
+                        <a href="#" class="edit">@TranslationMessage.Edit.NiceToString()</a>
+                    </th>
+                    <th class="smallCell monospaceCell">
+                        @if (hasGender && hasPlural)
+                        {
+                            @(locType.Gender != null ? NaturalLanguageTools.GetPronom(locType.Gender.Value, plural: true, culture: locType.Assembly.Culture) : "-")   
+                        }
+                    </th>
+                    <th class="monospaceCell">
+                        @if (hasPlural)
+                        {
+                            @Html.TextArea(locKey(locType) + ".PluralDescription", locType.PluralDescription, new { style = "width:90%;height:16px" })   
+                        }
+                    </th>
+                </tr>
                 
+                    }
                 }
-            }
 
-            {
-
-                var locType = typeChanges.Type;
-                foreach (var conflict in typeChanges.MemberConflicts)
                 {
 
-            <tr>
-                <th class="leftCell">Member
-                </th>
-                <th colspan="4">@conflict.Key
-                </th>
-            </tr>
-            
-                    foreach (var mc in conflict.Value)
+                    var locType = typeChanges.Type;
+                    foreach (var conflict in typeChanges.MemberConflicts)
                     {
-            <tr>
-                <td class="leftCell">@mc.Key.Name</td>
-                <td colspan="4" class="monospaceCell">
-                    @mc.Value.Original
 
-                </td>
-            </tr>
-                    }
-            <tr>
-                <td class="leftCell">@culture.Name</td>
-                <td colspan="4" class="monospaceCell">
-                    @{  
+                <tr>
+                    <th class="leftCell">@TranslationMessage.Member.NiceToString()
+                    </th>
+                    <th colspan="4">@conflict.Key
+                    </th>
+                </tr>
+                        foreach (var mc in conflict.Value)
+                        {
+                <tr>
+                    <td class="leftCell">@mc.Key.Name</td>
+                    <td colspan="4" class="monospaceCell">
+                        @mc.Value.Original
+
+                    </td>
+                </tr>
+                        }
+                <tr>
+                    <td class="leftCell">@culture.Name</td>
+                    <td colspan="4" class="monospaceCell">
+                        @{  
                         var items = selectListItems(conflict.Value.Values.Select(a => a.Translated));
-                        @Html.DropDownList(locKey(typeChanges.Type) + ".Member." + conflict.Key, items);
+                            @Html.DropDownList(locKey(typeChanges.Type) + ".Member." + conflict.Key, items);
+                        }
+                        <a href="#" class="edit">@TranslationMessage.Edit.NiceToString()</a>
+                    </td>
+                </tr>
                     }
-                    <a href="#" class="edit">edit</a>
-                </td>
-            </tr>
                 }
-            }
 
-        }
-    </table>
-    <input type="submit" value="Save" />
+            }
+        </table>
+    <input type="submit" value="@TranslationMessage.Save.NiceToString()" />
+    }
 }
 
 <script>

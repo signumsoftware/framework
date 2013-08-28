@@ -232,7 +232,9 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="Translation\Controllers\TranslatedInstanceController.cs" />
     <Compile Include="Translation\Controllers\TranslationController.cs" />
+    <Compile Include="Translation\TranslatedInstanceSynchronizer.cs" />
     <Compile Include="Translation\TranslationClient.cs" />
     <Compile Include="Translation\ITranslator.cs" />
     <Compile Include="Translation\TranslationSynchronizer.cs" />
@@ -833,6 +835,21 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>SMSUpdatePackage.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Translation\Views\SyncInstance.generated.cs">
+      <DependentUpon>SyncInstance.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Translation\Views\ViewInstance.generated.cs">
+      <DependentUpon>ViewInstance.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Translation\Views\IndexInstance.generated.cs">
+      <DependentUpon>IndexInstance.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="Translation\Views\Sync.generated.cs">
       <DependentUpon>Sync.cshtml</DependentUpon>
@@ -1563,6 +1580,18 @@
     <Content Include="UserQueries\Views\ImportUserAsset.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ImportUserAsset.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Translation\Views\IndexInstance.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>IndexInstance.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Translation\Views\ViewInstance.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>ViewInstance.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Translation\Views\SyncInstance.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>SyncInstance.generated.cs</LastGenOutput>
     </Content>
     <None Include="UserQueries\Views\QueryColumn.cshtml">
       <Generator>RazorGenerator</Generator>

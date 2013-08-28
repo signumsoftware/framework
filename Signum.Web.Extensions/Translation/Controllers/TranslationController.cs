@@ -23,7 +23,7 @@ namespace Signum.Web.Translation.Controllers
 
         public ActionResult Index()
         {
-            var cultures = CultureInfos("en");
+            var cultures = TranslationLogic.CurrentCultureInfos("en");
 
             var dic = AssembliesToLocalize().ToDictionary(a => a,
                 a => cultures.Select(ci => new TranslationFile
@@ -37,26 +37,13 @@ namespace Signum.Web.Translation.Controllers
             return base.View(TranslationClient.ViewPrefix.Formato("Index"), dic);
         }
 
-        private static List<CultureInfo> CultureInfos(string defaultCulture)
-        {
-            var cultures = CultureInfoLogic.ApplicationCultures;
-
-            TranslatorDN tr = UserDN.Current.Translator();
-
-            if (tr != null)
-                cultures = cultures.Where(ci => ci.Name == defaultCulture || tr.Cultures.Any(tc => tc.Culture.CultureInfo == ci));
-
-            return cultures.OrderByDescending(a => a.Name == defaultCulture)
-                    .ThenBy(a => a.Name).ToList();
-        }
-
         public new ActionResult View(string assembly, string culture)
         {
             Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".Formato(assembly));
 
             CultureInfo defaultCulture = CultureInfo.GetCultureInfo(ass.SingleAttribute<DefaultAssemblyCultureAttribute>().DefaultCulture);
 
-            Dictionary<CultureInfo, LocalizedAssembly> reference = (from ci in CultureInfos(defaultCulture.Name)
+            Dictionary<CultureInfo, LocalizedAssembly> reference = (from ci in TranslationLogic.CurrentCultureInfos(defaultCulture.Name)
                                                                     let la = DescriptionManager.GetLocalizedAssembly(ass, ci)
                                                                     where la != null || ci == defaultCulture
                                                                     select KVP.Create(ci, la ?? LocalizedAssembly.ImportXml(ass, ci))).ToDictionary();
@@ -89,7 +76,7 @@ namespace Signum.Web.Translation.Controllers
             }
             else
             {
-                Dictionary<string, LocalizedAssembly> locAssemblies = CultureInfos("en").ToDictionary(ci => ci.Name, ci => LocalizedAssembly.ImportXml(currentAssembly, ci));
+                Dictionary<string, LocalizedAssembly> locAssemblies = TranslationLogic.CurrentCultureInfos("en").ToDictionary(ci => ci.Name, ci => LocalizedAssembly.ImportXml(currentAssembly, ci));
 
                 Dictionary<string, List<TranslationRecord>> groups = list.GroupToDictionary(a => a.Lang);
 
@@ -177,7 +164,7 @@ namespace Signum.Web.Translation.Controllers
 
             CultureInfo defaultCulture = CultureInfo.GetCultureInfo(ass.SingleAttribute<DefaultAssemblyCultureAttribute>().DefaultCulture);
 
-            Dictionary<CultureInfo, LocalizedAssembly> reference = (from ci in CultureInfos(defaultCulture.Name)
+            Dictionary<CultureInfo, LocalizedAssembly> reference = (from ci in TranslationLogic.CurrentCultureInfos(defaultCulture.Name)
                                                                     let la = DescriptionManager.GetLocalizedAssembly(ass, ci)
                                                                     where la != null || ci == defaultCulture
                                                                     select KVP.Create(ci, la ?? LocalizedAssembly.ImportXml(ass, ci))).ToDictionary();
@@ -224,15 +211,15 @@ namespace Signum.Web.Translation.Controllers
         public string FileName;
         public bool IsDefault; 
 
-        public TranslationFileStatus Status()
+        public TranslatedSummaryState Status()
         {
             if (!System.IO.File.Exists(FileName))
-                return TranslationFileStatus.NotCreated;
+                return TranslatedSummaryState.None;
 
             if (System.IO.File.GetLastWriteTime(Assembly.Location) > System.IO.File.GetLastWriteTime(FileName))
-                return TranslationFileStatus.Outdated;
+                return TranslatedSummaryState.Pending;
 
-            return TranslationFileStatus.InSync;
+            return TranslatedSummaryState.Completed;
         }
     }
 

@@ -71,12 +71,12 @@ namespace Signum.Engine.Basics
                 }).ToList();
         }
 
-        public static PropertyRoute GetPropertyRoute(PropertyRouteDN route)
+        public static PropertyRoute ToPropertyRoute(this PropertyRouteDN route)
         {
             return PropertyRoute.Parse(TypeLogic.DnToType[route.Type], route.Path);
         }
 
-        public static PropertyRouteDN GetEntity(PropertyRoute route)
+        public static PropertyRouteDN ToPropertyRouteDN(this PropertyRoute route)
         {
             TypeDN type = TypeLogic.TypeToDN[route.RootType];
             string path = route.PropertyString();

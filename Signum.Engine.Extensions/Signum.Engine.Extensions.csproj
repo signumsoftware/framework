@@ -142,7 +142,7 @@
     <Compile Include="Mailing\SystemEmailLogic.cs" />
     <Compile Include="Processes\ProcessRunnerLogic.cs" />
     <Compile Include="Translation\CultureInfoLogic.cs" />
-    <Compile Include="Translation\LocalizedInstanceLogic.cs" />
+    <Compile Include="Translation\InstanceTranslationLogic.cs" />
     <Compile Include="Mailing\EmailLogic.cs" />
     <Compile Include="Mailing\EmailTemplateParser.cs" />
     <Compile Include="Mailing\EmailPackageLogic.cs" />

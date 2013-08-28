@@ -133,7 +133,7 @@
     <Compile Include="Files\FileRepository.cs" />
     <Compile Include="Files\IFileServer.cs" />
     <Compile Include="Mailing\EmailConfiguration.cs" />
-    <Compile Include="Translation\LocalizedInstance.cs" />
+    <Compile Include="Translation\TranslatedInstance.cs" />
     <Compile Include="Translation\Translator.cs" />
     <Compile Include="Mailing\EmailMessage.cs" />
     <Compile Include="Mailing\EmailTemplate.cs" />

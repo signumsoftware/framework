@@ -13,6 +13,7 @@ using Signum.Entities.Translation;
 using System.Reflection;
 using Signum.Engine.Operations;
 using Signum.Engine.Authorization;
+using Signum.Entities.Authorization;
 
 namespace Signum.Engine.Translation
 {

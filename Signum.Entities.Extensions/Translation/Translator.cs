@@ -39,7 +39,7 @@ namespace Signum.Entities.Translation
                 var error = Cultures.GroupBy(a => a.Culture).Where(a => a.Count() > 1).ToString(a => a.Key.ToString(), ", ");
 
                 if (error.HasText())
-                    return TranslationMessages.RepeatedCultures0.NiceToString().Formato(error); 
+                    return TranslationMessage.RepeatedCultures0.NiceToString().Formato(error); 
             }
 
             return base.PropertyValidation(pi);
@@ -84,9 +84,50 @@ namespace Signum.Entities.Translation
         Delete,
     }
 
-    public enum TranslationMessages
+    public enum TranslationMessage
     {
         [Description("Repeated cultures {0}")]
-        RepeatedCultures0
+        RepeatedCultures0,
+
+        CodeTranslations,
+        InstanceTranslations,
+
+        [Description("Synchronize {0} in {1}")]
+        Synchronize0In1,
+
+        [Description("View {0} in {1}")]
+        View0In1,
+
+        [Description("all languages")]
+        AllLanguages,
+
+        [Description("{0} already synchronized")]
+        _0AlreadySynchronized,
+
+        NothingToTranslate,         
+        All,
+
+        [Description("Nothing to translate in {0}")]
+        NothingToTranslateIn0,
+        
+        [Description("sync")]
+        Sync,
+
+        [Description("view")]
+        View,
+
+        [Description("none")]
+        None,
+
+        [Description("edit")]
+        Edit,
+
+        Member,
+        Type,
+
+        Instance,
+        Property,
+        Save,
     }
+
 }

@@ -10,7 +10,7 @@ namespace Signum.Web.Translation
 {
     public static class TranslationSynchronizer
     {
-        public static AssemblyChanges GetAssemblyChanges(ITranslator translator, LocalizedAssembly target, LocalizedAssembly master, List<LocalizedAssembly> support)
+        public static LocalizedAssemblyChanges GetAssemblyChanges(ITranslator translator, LocalizedAssembly target, LocalizedAssembly master, List<LocalizedAssembly> support)
         {
             var types = master.Types.Select(kvp =>
             {
@@ -21,7 +21,7 @@ namespace Signum.Web.Translation
                 LocalizedType masterType = master.Types[type];
                 List<LocalizedType> supportTypes = support.Select(la => la.Types.TryGetC(type)).NotNull().ToList();
 
-                Dictionary<CultureInfo, TypeConflict> typeConflicts = TypeConflicts(targetType, masterType, supportTypes);
+                Dictionary<CultureInfo, TypeNameConflict> typeConflicts = TypeConflicts(targetType, masterType, supportTypes);
 
                 var memberConflicts = (from m in masterType.Members.Keys
                                        let con = MemberConflicts(m, targetType, masterType, supportTypes)
@@ -31,42 +31,43 @@ namespace Signum.Web.Translation
                 if (memberConflicts.IsEmpty() && typeConflicts == null)
                     return null;
 
-                return new TypeChanges { Type = targetType, TypeConflict = typeConflicts, MemberConflicts = memberConflicts };
+                return new LocalizedTypeChanges { Type = targetType, TypeConflict = typeConflicts, MemberConflicts = memberConflicts };
             }).NotNull().ToList();
 
-            List<IGrouping<CultureInfo, TypeConflict>> typeGroups = (from t in types
+            List<IGrouping<CultureInfo, TypeNameConflict>> typeGroups = (from t in types
                                                                      where t.TypeConflict != null
                                                                      from tc in t.TypeConflict
                                                                      select tc).GroupBy(a => a.Key, a => a.Value).ToList();
 
-            foreach (IGrouping<CultureInfo, TypeConflict> gr in typeGroups)
+            foreach (IGrouping<CultureInfo, TypeNameConflict> gr in typeGroups)
             {
                 List<string> result = translator.TranslateBatch(gr.Select(a => a.Original.Description).ToList(), gr.Key.Name, target.Culture.Name);
 
                 gr.ZipForeach(result, (sp, translated) => sp.Translated = translated);
             }
 
-            List<IGrouping<CultureInfo, MemberConflict>> memberGroups = (from t in types
-                                                                         where t.MemberConflicts != null
-                                                                         from mcKVP in t.MemberConflicts
-                                                                         from mc in mcKVP.Value
-                                                                         select mc).GroupBy(a => a.Key, a => a.Value).ToList();
+            List<IGrouping<CultureInfo, MemberNameConflict>> memberGroups =
+                (from t in types
+                 where t.MemberConflicts != null
+                 from mcKVP in t.MemberConflicts
+                 from mc in mcKVP.Value
+                 select mc).GroupBy(a => a.Key, a => a.Value).ToList();
 
-            foreach (IGrouping<CultureInfo, MemberConflict> gr in memberGroups)
+            foreach (IGrouping<CultureInfo, MemberNameConflict> gr in memberGroups)
             {
                 var result = translator.TranslateBatch(gr.Select(a => a.Original).ToList(), gr.Key.Name, target.Culture.Name);
 
                 gr.ZipForeach(result, (sp, translated) => sp.Translated = translated);
             }
 
-            return new AssemblyChanges
+            return new LocalizedAssemblyChanges
             {
                 LocalizedAssembly = target,
                 Types = types,
             };
         }
 
-        static Dictionary<CultureInfo, TypeConflict> TypeConflicts(LocalizedType target, LocalizedType master, List<LocalizedType> support)
+        static Dictionary<CultureInfo, TypeNameConflict> TypeConflicts(LocalizedType target, LocalizedType master, List<LocalizedType> support)
         {
             if(master.Description == null)
                 return null;
@@ -74,18 +75,18 @@ namespace Signum.Web.Translation
             if (target != null && target.Description != null)
                 return null;
 
-            var sentences = new Dictionary<CultureInfo, TypeConflict>();
+            var sentences = new Dictionary<CultureInfo, TypeNameConflict>();
 
-            sentences.Add(master.Assembly.Culture, new TypeConflict { Original = master });
+            sentences.Add(master.Assembly.Culture, new TypeNameConflict { Original = master });
 
             sentences.AddRange(from lt in support
                                where lt.Description != null
-                               select KVP.Create(lt.Assembly.Culture, new TypeConflict { Original = lt }));
+                               select KVP.Create(lt.Assembly.Culture, new TypeNameConflict { Original = lt }));
 
             return sentences;
         }
 
-        static Dictionary<CultureInfo, MemberConflict> MemberConflicts(string member, LocalizedType target, LocalizedType master, List<LocalizedType> support)
+        static Dictionary<CultureInfo, MemberNameConflict> MemberConflicts(string member, LocalizedType target, LocalizedType master, List<LocalizedType> support)
         {
             if (master.Members.TryGetC(member) == null)
                 return null;
@@ -93,23 +94,23 @@ namespace Signum.Web.Translation
             if (target != null && target.Members.TryGetC(member) != null)
                 return null;
 
-            var sentences = new Dictionary<CultureInfo, MemberConflict>();
+            var sentences = new Dictionary<CultureInfo, MemberNameConflict>();
 
-            sentences.Add(master.Assembly.Culture, new MemberConflict { Original = master.Members.TryGetC(member) });
+            sentences.Add(master.Assembly.Culture, new MemberNameConflict { Original = master.Members.TryGetC(member) });
 
             sentences.AddRange(from lt in support
                                where lt.Members.TryGetC(member).HasText()
-                               select KVP.Create(lt.Assembly.Culture, new MemberConflict { Original = lt.Members.TryGetC(member) }));
+                               select KVP.Create(lt.Assembly.Culture, new MemberNameConflict { Original = lt.Members.TryGetC(member) }));
 
             return sentences;
         }
     }
 
-    public class AssemblyChanges
+    public class LocalizedAssemblyChanges
     {
         public LocalizedAssembly LocalizedAssembly { get; set; }
 
-        public List<TypeChanges> Types { get; set; }
+        public List<LocalizedTypeChanges> Types { get; set; }
 
         public override string ToString()
         {
@@ -117,13 +118,13 @@ namespace Signum.Web.Translation
         }
     }
 
-    public class TypeChanges
+    public class LocalizedTypeChanges
     {
         public LocalizedType Type { get; set; }
 
-        public Dictionary<CultureInfo, TypeConflict> TypeConflict;
+        public Dictionary<CultureInfo, TypeNameConflict> TypeConflict;
 
-        public Dictionary<string, Dictionary<CultureInfo, MemberConflict>> MemberConflicts { get; set; }
+        public Dictionary<string, Dictionary<CultureInfo, MemberNameConflict>> MemberConflicts { get; set; }
 
         public override string ToString()
         {
@@ -131,7 +132,7 @@ namespace Signum.Web.Translation
         }
     }
 
-    public class TypeConflict
+    public class TypeNameConflict
     {
         public LocalizedType Original;
         public string Translated;
@@ -142,7 +143,7 @@ namespace Signum.Web.Translation
         }
     }
 
-    public class MemberConflict
+    public class MemberNameConflict
     {
         public string Original;
         public string Translated;
