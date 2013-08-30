@@ -389,7 +389,7 @@ namespace Signum.Engine.Authorization
                 new XDeclaration("1.0", "utf-8", "yes"),
                 new XElement("Auth",
                     imported == null ? null : new XElement("Imported", new XAttribute("On", imported.Date.ToString("s"))),
-                    new XElement("Exported", new XAttribute("On", DateTime.Now.ToString("s"))),
+                    new XElement("Exported", new XAttribute("On", TimeZoneManager.Now.ToString("s"))),
                     new XElement("Roles",
                         RolesInOrder().Select(r => new XElement("Role",
                             new XAttribute("Name", r.ToString()),
@@ -481,7 +481,7 @@ namespace Signum.Engine.Authorization
                 return table.DeleteSqlSync(last);
             }
 
-            DateTime dt = DateTime.ParseExact(exported.Attribute("On").Value, "s", null);
+            DateTime dt =  DateTime.ParseExact(exported.Attribute("On").Value, "s", null).FromUserInterface();
 
             if (last == null)
                 return table.InsertSqlSync(new LastAuthRulesImportDN { Date = dt });
