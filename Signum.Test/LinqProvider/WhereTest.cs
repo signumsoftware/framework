@@ -335,5 +335,18 @@ namespace Signum.Test.LinqProvider
         {
             var artist = Database.Query<ArtistDN>().Where(a => ((bool?)(a.Dead ? a.Friends.Any() : false)) == true).ToList();
         }
+
+        [TestMethod]
+        public void ExceptionTest()
+        {
+            Assert2.Throws<FieldReaderException>(() =>
+                Database.Query<ArtistDN>().Select(a => Throw(a.Id)).ToList());
+        }
+
+
+        public static bool Throw(int a)
+        {
+            throw new ArgumentException("a");
+        }
     }
 }

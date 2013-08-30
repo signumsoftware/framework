@@ -16,7 +16,7 @@ namespace Signum.Utilities
             if (string.IsNullOrEmpty(cultureName))
                 return null;
 
-            return ChangeBothCultures(new CultureInfo(cultureName));
+            return ChangeBothCultures(CultureInfo.GetCultureInfo(cultureName));
         }
 
         public static IDisposable ChangeBothCultures(CultureInfo ci)
@@ -41,7 +41,7 @@ namespace Signum.Utilities
             if (string.IsNullOrEmpty(cultureName))
                 return null;
 
-            return ChangeCulture(new CultureInfo(cultureName));
+            return ChangeCulture(CultureInfo.GetCultureInfo(cultureName));
         }
 
         public static IDisposable ChangeCulture(CultureInfo ci)
@@ -60,7 +60,7 @@ namespace Signum.Utilities
             if (string.IsNullOrEmpty(cultureName))
                 return null;
 
-            return ChangeCultureUI(new CultureInfo(cultureName));
+            return ChangeCultureUI(CultureInfo.GetCultureInfo(cultureName));
         }
 
         public static IDisposable ChangeCultureUI(CultureInfo ci)

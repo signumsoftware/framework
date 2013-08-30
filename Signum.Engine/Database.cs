@@ -207,7 +207,7 @@ namespace Signum.Engine
                 {
                     var cc = CanUseCache<T>();
                     if (cc != null)
-                        return cc.GetToString(id).ToString();
+                        return cc.GetToString(id);
 
                     return Database.Query<T>().Where(a => a.Id == id).Select(a => a.ToString()).FirstEx();
                 }

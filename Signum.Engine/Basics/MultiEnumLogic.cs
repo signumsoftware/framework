@@ -8,17 +8,23 @@ using Signum.Utilities;
 using System.Reflection;
 using Signum.Utilities.ExpressionTrees;
 
-namespace Signum.Engine.Basics
+namespace Signum.Engine
 {
     public static class MultiEnumExtensions
     {
         public static T ToEntity<T>(this Enum key) where T:MultiEnumDN, new()
         {
+            if (key == null)
+                return null;
+
             return MultiEnumLogic<T>.ToEntity(key);
         }
 
         public static Enum ToEnum<T>(this T entity) where T : MultiEnumDN, new()
         {
+            if (entity == null)
+                return null;
+
             return MultiEnumLogic<T>.ToEnum(entity);
         }
     }
@@ -26,42 +32,49 @@ namespace Signum.Engine.Basics
     public static class MultiEnumLogic<T>
         where T:MultiEnumDN, new()
     {
-        public static HashSet<Enum> Keys { get; set; }
-        static Dictionary<Enum, T> toEntity;
-        static Dictionary<string, Enum> toEnum;
-        static Func<HashSet<Enum>> getKeys;
-
-        public static void Start(SchemaBuilder sb, Func<HashSet<Enum>> getKeys)
+        class LazyState
         {
-            if (sb.NotDefined(typeof(MultiEnumLogic<T>).GetMethod("Start")))
-            {
-                sb.Include<T>(); 
-
-                MultiEnumLogic<T>.getKeys = getKeys;
-
-                sb.Schema.Initializing[InitLevel.Level0SyncEntities] += Schema_Initializing;
-                sb.Schema.Synchronizing += Schema_Synchronizing;
-                sb.Schema.Generating += Schema_Generating;
-            }
-        }
-
-        static void Schema_Initializing()
-        {
-            using (new EntityCache(EntityCacheType.ForceNewSealed))
+            public LazyState(Func<HashSet<Enum>> getKeys)
             {
                 Keys = getKeys();
 
-                toEntity = EnumerableExtensions.JoinStrict(
+                ToEntity = EnumerableExtensions.JoinStrict(
                      Database.RetrieveAll<T>(),
                      Keys,
                      a => a.Key,
                      k => MultiEnumDN.UniqueKey(k),
                      (a, k) => new { a, k }, "loading {0}. Consider synchronize".Formato(typeof(T).Name)).ToDictionary(p => p.k, p => p.a);
 
-                toEnum = toEntity.Keys.ToDictionary(k => MultiEnumDN.UniqueKey(k));
+                ToEnum = ToEntity.Inverse();
+
+                ToEnumUniqueKey = ToEntity.Keys.ToDictionary(k => MultiEnumDN.UniqueKey(k));
             }
+
+            public HashSet<Enum> Keys;
+            public Dictionary<Enum, T> ToEntity;
+            public Dictionary<string, Enum> ToEnumUniqueKey;
+            public Dictionary<T, Enum> ToEnum;
         }
 
+        static ResetLazy<LazyState> lazy;
+        static Func<HashSet<Enum>> getKeys;
+
+        public static void Start(SchemaBuilder sb, Func<HashSet<Enum>> getKeys)
+        {
+            if (sb.NotDefined(typeof(MultiEnumLogic<T>).GetMethod("Start")))
+            {
+                sb.Include<T>();
+
+                sb.Schema.Initializing[InitLevel.Level0SyncEntities] += () => lazy.Load();
+                sb.Schema.Synchronizing += Schema_Synchronizing;
+                sb.Schema.Generating += Schema_Generating;
+
+                MultiEnumLogic<T>.getKeys = getKeys;
+                lazy = sb.GlobalLazy(() => new LazyState(MultiEnumLogic<T>.getKeys),
+                    new InvalidateWith(typeof(T)));
+            }
+        }
+      
         static SqlPreCommand Schema_Generating()
         {
             Table table = Schema.Current.Table<T>();
@@ -94,23 +107,30 @@ namespace Signum.Engine.Basics
 
         static List<T> GenerateEntities()
         {
-            return getKeys().Select(k => new T
+            return  getKeys().Select(k => new T
             {
                 Key = MultiEnumDN.UniqueKey(k),
             }).ToList();
         }
 
-        public static T ToEntity(Enum key)
+        internal static T ToEntity(Enum key)
         {
-            AssertInitialized();
+            AssertStarted();
 
-            return toEntity.GetOrThrow(key);
+            return lazy.Value.ToEntity.GetOrThrow(key);
         }
 
-        private static void AssertInitialized()
+        static LazyState AssertStarted()
         {
-            if (Keys == null)
-                throw new InvalidOperationException("{0} is not initialized. Consider calling Schema.InitializeUntil(InitLevel.Level0SyncEntities)".Formato(typeof(MultiEnumLogic<T>).TypeName()));
+            if (lazy == null)
+                throw new InvalidOperationException("{0} has not been started. Someone should have called {0}.Start before".Formato(typeof(MultiEnumLogic<T>).TypeName()));
+
+            return lazy.Value;
+        }
+
+        public static HashSet<Enum> Keys
+        {
+            get { return AssertStarted().Keys; }
         }
 
         public static T ToEntity(string keyName)
@@ -120,9 +140,7 @@ namespace Signum.Engine.Basics
 
         public static T TryToEntity(Enum key)
         {
-            AssertInitialized();
-
-            return toEntity.TryGetC(key);
+            return AssertStarted().ToEntity.TryGetC(key);
         }
 
         public static T TryToEntity(string keyName)
@@ -135,37 +153,29 @@ namespace Signum.Engine.Basics
             return TryToEntity(en); 
         }
 
-        public static Enum ToEnum(T entity)
+        internal static Enum ToEnum(T entity)
         {
-            return ToEnum(entity.Key);
+            return AssertStarted().ToEnum.GetOrThrow(entity);
         }
 
         public static Enum ToEnum(string keyName)
         {
-            AssertInitialized();
-
-            return toEnum.GetOrThrow(keyName);
+            return AssertStarted().ToEnumUniqueKey.GetOrThrow(keyName);
         }
 
         public static Enum TryToEnum(string keyName)
         {
-            AssertInitialized();
-
-            return toEnum.TryGetC(keyName);
+            return AssertStarted().ToEnumUniqueKey.TryGetC(keyName);
         }
 
         public static IEnumerable<T> AllEntities()
         {
-            AssertInitialized();
-
-            return toEntity.Values; 
+            return AssertStarted().ToEntity.Values; 
         }
 
         public static IEnumerable<string> AllUniqueKeys()
         {
-            AssertInitialized();
-
-            return toEnum.Keys;
+            return AssertStarted().ToEnumUniqueKey.Keys;
         }
     }
 }

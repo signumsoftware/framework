@@ -538,6 +538,7 @@ namespace Signum.Engine.Maps
         public bool IsLite { get; set; }
         public bool IsNullable { get; set; }
         public bool IsCollection { get; set; }
+        public bool IsEnum { get; set; }
     }
 
     internal interface IEntityEvents

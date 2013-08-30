@@ -166,7 +166,7 @@ namespace Signum.Engine
                                     forEach(fr);
                                 }
                             }
-                            catch (SqlTypeException ex)
+                            catch (Exception ex)
                             {
                                 FieldReaderException fieldEx = fr.CreateFieldReaderException(ex);
                                 fieldEx.Command = preCommand;

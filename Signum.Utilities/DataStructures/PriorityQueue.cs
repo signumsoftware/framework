@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Signum.Utilities.DataStructures
@@ -8,10 +9,11 @@ namespace Signum.Utilities.DataStructures
     public class PriorityQueue<T>
     {
         List<T> list = new List<T>();
-        Comparison<T> comparer; 
+        Comparison<T> comparer;
 
-        public PriorityQueue():this(Comparer<T>.Default.Compare)
-        {           
+        public PriorityQueue()
+            : this(Comparer<T>.Default.Compare)
+        {
         }
 
         public PriorityQueue(IComparer<T> comparer)
@@ -37,18 +39,18 @@ namespace Signum.Utilities.DataStructures
         {
             get { return list.Count == 0; }
         }
-   
+
 
         public int Push(T element)
         {
             int p = list.Count;
-            list.Add(element); 
+            list.Add(element);
             do
             {
                 if (p == 0)
                     break;
                 int p2 = (p - 1) / 2;
-                if (Compare(p,p2) < 0)
+                if (Compare(p, p2) < 0)
                 {
                     SwitchElements(p, p2);
                     p = p2;
@@ -79,9 +81,9 @@ namespace Signum.Utilities.DataStructures
                 int pn = p;
                 int p1 = 2 * p + 1;
                 int p2 = 2 * p + 2;
-                if (list.Count > p1 && Compare(p,p1) > 0)
+                if (list.Count > p1 && Compare(p, p1) > 0)
                     p = p1;
-                if (list.Count > p2 && Compare(p,p2) > 0)
+                if (list.Count > p2 && Compare(p, p2) > 0)
                     p = p2;
 
                 if (p == pn)
@@ -90,7 +92,7 @@ namespace Signum.Utilities.DataStructures
                 SwitchElements(p, pn);
             } while (true);
 
-            return result; 
+            return result;
         }
 
         public T Peek()
@@ -164,6 +166,15 @@ namespace Signum.Utilities.DataStructures
                     break;
                 SwitchElements(p, pn);
             } while (true);
+        }
+
+        public List<T> GetOrderedList()
+        {
+            var result = new List<T>(list);
+
+            result.Sort(comparer);
+
+            return result;
         }
     }
 }

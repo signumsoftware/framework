@@ -339,6 +339,7 @@ namespace Signum.Utilities
 
     public static class EnumerableExtensions
     {
+        [MethodExpander(typeof(IsEmptyExpander))]
         public static IEnumerable<T> EmptyIfNull<T>(this IEnumerable<T> collection)
         {
             if (collection == null)
@@ -347,12 +348,23 @@ namespace Signum.Utilities
             return collection;
         }
 
+        [MethodExpander(typeof(IsEmptyExpander))]
         public static bool IsEmpty<T>(this IEnumerable<T> collection)
         {
             foreach (var item in collection)
                 return false;
 
             return true;
+        }
+
+        class IsEmptyExpander : IMethodExpander
+        {
+            static readonly MethodInfo miAny = ReflectionTools.GetMethodInfo((int[] a) => a.Any()).GetGenericMethodDefinition();
+
+            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            {
+                return Expression.Not(Expression.Call(miAny.MakeGenericMethod(mi.GetGenericArguments()), arguments));
+            }
         }
 
         public static bool IsNullOrEmpty<T>(this IEnumerable<T> collection)

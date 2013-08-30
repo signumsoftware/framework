@@ -332,6 +332,12 @@ namespace Signum.Test.LinqProvider
         }
 
         [TestMethod]
+        public void SelectMixinWhere()
+        {
+            Database.Query<NoteWithDateDN>().Where(a => a.Mixin<CorruptMixin>().Corrupt == true).ToArray();
+        }
+
+        [TestMethod]
         public void SelectMixinCollection()
         {
             var result = (from n in Database.Query<NoteWithDateDN>()
