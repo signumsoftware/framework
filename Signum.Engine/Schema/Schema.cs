@@ -310,8 +310,8 @@ namespace Signum.Engine.Maps
                     .ToString(a => "{0} -> \r\n{1}".Formato(
                         a.Key,
                         a.Value.GetInvocationList().Select(h => h.Method).ToString(mi => "\t{0}.{1}".Formato(
-                            mi.DeclaringType.TypeName(), 
-                            mi.MethodName()), 
+                            mi.DeclaringType.TypeName(),
+                            mi.MethodName()),
                         "\r\n")
                     ), "\r\n\r\n");
             }
@@ -441,6 +441,8 @@ namespace Signum.Engine.Maps
                 return Implementations.By(route.Type.CleanType());
 
             Field field = TryFindField(Table(type), route.Members);
+            if (field == null)
+                return Implementations.ByAll;
 
             FieldReference refField = field as FieldReference;
             if (refField != null)
@@ -564,8 +566,8 @@ namespace Signum.Engine.Maps
         string GetToString(int id);
     }
 
-    public class InvalidateEventArgs : EventArgs{}
-    public class InvaludateEventArgs : EventArgs{}
+    public class InvalidateEventArgs : EventArgs { }
+    public class InvaludateEventArgs : EventArgs { }
 
     public abstract class CacheControllerBase<T> : ICacheController
         where T : IdentifiableEntity
@@ -782,7 +784,7 @@ namespace Signum.Engine.Maps
         public string Name { get; private set; }
 
         readonly DatabaseName database;
-        
+
         public DatabaseName Database
         {
             get
@@ -934,6 +936,6 @@ namespace Signum.Engine.Maps
     {
         public bool IncludeDboSchema;
         public DatabaseName OverrideDatabaseNameOnSystemQueries;
-        public bool AvoidDatabaseName; 
+        public bool AvoidDatabaseName;
     }
 }
