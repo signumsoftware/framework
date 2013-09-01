@@ -114,6 +114,9 @@ namespace Signum.Utilities
 
         public static string TryBefore(this string str, char separator)
         {
+            if (str == null)
+                return null;
+
             int index = str.IndexOf(separator);
             if (index == -1)
                 return null;
@@ -123,6 +126,9 @@ namespace Signum.Utilities
 
         public static string TryBefore(this string str, string separator)
         {
+            if (str == null)
+                return null;
+
             int index = str.IndexOf(separator);
             if (index == -1)
                 return null;
@@ -132,6 +138,9 @@ namespace Signum.Utilities
 
         public static string TryAfter(this string str, char separator)
         {
+            if (str == null)
+                return null;
+
             int index = str.IndexOf(separator);
             if (index == -1)
                 return null;
@@ -141,6 +150,9 @@ namespace Signum.Utilities
 
         public static string TryAfter(this string str, string separator)
         {
+            if (str == null)
+                return null;
+
             int index = str.IndexOf(separator);
             if (index == -1)
                 return null;
@@ -187,6 +199,9 @@ namespace Signum.Utilities
 
         public static string TryBeforeLast(this string str, char separator)
         {
+            if (str == null)
+                return null;
+
             int index = str.LastIndexOf(separator);
             if (index == -1)
                 return null;
@@ -196,6 +211,9 @@ namespace Signum.Utilities
 
         public static string TryBeforeLast(this string str, string separator)
         {
+            if (str == null)
+                return null;
+
             int index = str.LastIndexOf(separator);
             if (index == -1)
                 return null;
@@ -205,6 +223,9 @@ namespace Signum.Utilities
 
         public static string TryAfterLast(this string str, char separator)
         {
+            if (str == null)
+                return null;
+
             int index = str.LastIndexOf(separator);
             if (index == -1)
                 return null;
@@ -214,6 +235,9 @@ namespace Signum.Utilities
 
         public static string TryAfterLast(this string str, string separator)
         {
+            if (str == null)
+                return null;
+
             int index = str.LastIndexOf(separator);
             if (index == -1)
                 return null;
@@ -520,21 +544,18 @@ namespace Signum.Utilities
             return result;
         }
 
-        private static bool IsUpper(string pascalStr, int index)
-        {
-            if (index < 0)
-                return false;
-
-            if (index >= pascalStr.Length)
-                return false;
-
-            return !char.IsUpper(pascalStr[index]);
-        }
 
         public static string FirstUpper(this string str)
         {
-            if (str.HasText())
+            if (str.HasText() && char.IsLower(str[0]))
                 return char.ToUpper(str[0]) + str.Substring(1);
+            return str;
+        }
+
+        public static string FirstLower(this string str)
+        {
+            if (str.HasText() && char.IsUpper(str[0]))
+                return char.ToLower(str[0]) + str.Substring(1);
             return str;
         }
 

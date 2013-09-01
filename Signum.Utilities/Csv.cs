@@ -61,7 +61,7 @@ namespace Signum.Utilities
 
             string separator = culture.TextInfo.ListSeparator;
 
-            if (p.Contains(separator) || p.Contains("\""))
+            if (p.Contains(separator) || p.Contains("\"") || p.Contains("\r") || p.Contains("\n"))
             {
                 return "\"" + p.Replace("\"", "\"\"") + "\"";
             }
