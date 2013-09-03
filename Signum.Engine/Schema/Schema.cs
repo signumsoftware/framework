@@ -441,8 +441,8 @@ namespace Signum.Engine.Maps
                 return Implementations.By(route.Type.CleanType());
 
             Field field = TryFindField(Table(type), route.Members);
-            if (field == null)
-                return Implementations.ByAll;
+            //if (field == null)
+            //    return Implementations.ByAll;
 
             FieldReference refField = field as FieldReference;
             if (refField != null)
