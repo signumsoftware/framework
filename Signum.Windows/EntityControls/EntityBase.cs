@@ -111,6 +111,14 @@ namespace Signum.Windows
             set { SetValue(ViewOnCreateProperty, value); }
         }
 
+        public static readonly DependencyProperty ReadonlyEntityProperty =
+            DependencyProperty.Register("ReadonlyEntity", typeof(bool?), typeof(EntityBase), new PropertyMetadata(null));
+        public bool? ReadonlyEntity
+        {
+            get { return (bool?)GetValue(ReadonlyEntityProperty); }
+            set { SetValue(ReadonlyEntityProperty, value); }
+        }
+
         public event Func<object> Creating;
         public event Func<object> Finding;
         public event Func<object, object> Viewing;
@@ -434,7 +442,7 @@ namespace Signum.Windows
                 PropertyRoute = CleanType.IsEmbeddedEntity() ? GetEntityPropertyRoute() : null,
             };
 
-            bool isReadOnly = Common.GetIsReadOnly(this) && !creating;
+            bool isReadOnly = (ReadonlyEntity ?? Common.GetIsReadOnly(this)) && !creating;
             if (isReadOnly)
                 options.ReadOnly = isReadOnly;
 
@@ -452,7 +460,7 @@ namespace Signum.Windows
             {
                 var options = new NavigateOptions();
 
-                bool isReadOnly = Common.GetIsReadOnly(this);
+                bool isReadOnly = (ReadonlyEntity ?? Common.GetIsReadOnly(this));
                 if (isReadOnly)
                     options.ReadOnly = isReadOnly;
 
