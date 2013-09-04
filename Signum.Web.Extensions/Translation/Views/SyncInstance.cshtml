@@ -33,8 +33,8 @@
 }
 
 @Html.ScriptCss("~/Translation/Content/Translation.css")
-
-
+@Html.ScriptsJs("~/Translation/Content/Translation.js")
+@Html.ScriptsJs("~/Translation/resources/" + CultureInfo.CurrentCulture.Name + ".js")
 
 @if (Model.Instances.IsEmpty())
 {
@@ -46,7 +46,9 @@ else
 
     using (Html.BeginForm())
     {
-    <table id="results" style="width: 100%; margin: 0px" class="st" pluralAndGender="@Url.Action((TranslationController tc) => tc.PluralAndGender())">
+    <table id="results" style="width: 100%; margin: 0px" class="st"        
+        data-feedback="@Url.Action("Feedback", "Translation")" 
+        data-culture="@culture.Name">
         @foreach (InstanceChanges instance in Model.Instances)
         {
             <thead>
@@ -99,17 +101,6 @@ else
 
 <script>
     $(function () {
-        $("a.edit").bind("click", function () {
-            var select = $(this).parent().find("select");
-            var input = $("<textarea/>").attr("type", "text")
-                .attr("name", select.attr("name"))
-                .val(select.val())
-                .attr("style", "width:90%; height:16px");
-            select.after(input);
-            select.remove();
-            $(this).remove();
-
-            return false;
-        });
+        SF.Translation.editAndRemember(@((TranslationClient.Translator is ITranslatorWithFeedback).ToString().ToLower()));
     });
 </script>

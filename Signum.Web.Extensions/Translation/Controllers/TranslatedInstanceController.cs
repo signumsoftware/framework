@@ -89,14 +89,14 @@ namespace Signum.Web.Translation.Controllers
                             r.Save();
                         }
                     });
+
                 tr.Commit();
             }
-
 
             return RedirectToAction("View", new { type = type, culture = culture });
         }
 
-        static Regex regex = new Regex(@"^(?<lang>.+)#(?<instance>.+)#(?<route>.+)$");
+        static Regex regex = new Regex(@"^(?<lang>[^#]+)#(?<instance>[^#]+)#(?<route>[^#]+)$");
 
         private List<TranslationRecord> GetTranslationRecords(Type type)
         {
@@ -145,16 +145,16 @@ namespace Signum.Web.Translation.Controllers
 
             var c = CultureInfo.GetCultureInfo(culture);
 
-            var list = GetTranslationRecords(t);
+            List<TranslationRecord> records = GetTranslationRecords(t);
 
             Dictionary<LocalizedInstanceKey, string> master = TranslatedInstanceLogic.FromEntities(t);
 
-            var current = TranslatedInstanceLogic.TranslationsForType(t, c).Single().Value; 
+            var current = TranslatedInstanceLogic.TranslationsForType(t, c).SingleOrDefault().Value; 
 
-            Dictionary<PropertyRoute, PropertyRouteDN> routes = list.Select(a => a.Route).Distinct().ToDictionary(a => a, a => a.ToPropertyRouteDN());
+            Dictionary<PropertyRoute, PropertyRouteDN> routes = records.Select(a => a.Route).Distinct().ToDictionary(a => a, a => a.ToPropertyRouteDN());
             using (Transaction tr = new Transaction())
             {
-                list.Where(r => r.Value.HasText()).Select(r =>
+                records.Where(r => r.Value.HasText()).Select(r =>
                 {
                     var key = new LocalizedInstanceKey(r.Route, r.Instance);
 

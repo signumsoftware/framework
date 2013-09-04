@@ -13,7 +13,9 @@ using Signum.Entities;
 using Signum.Entities.Translation;
 using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Web.Extensions.Translation.Views;
 using Signum.Web.Omnibox;
+using Signum.Web.PortableAreas;
 using Signum.Web.Translation.Controllers;
 
 namespace Signum.Web.Translation
@@ -26,19 +28,37 @@ namespace Signum.Web.Translation
 
 
         /// <param name="copyTranslationsToRootFolder">avoids Web Application restart when translations change</param>
-        public static void Start(ITranslator translator, bool instanceTranslator, bool copyNewTranslationsToRootFolder = true)
+        public static void Start(ITranslator translator, bool translatorUser, bool translationReplacement, bool instanceTranslator, bool copyNewTranslationsToRootFolder = true)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+
+                Translator = translator;
+
                 Navigator.RegisterArea(typeof(TranslationClient));
                 Navigator.AddSettings(new List<EntitySettings>
                 {   
                     new EntitySettings<CultureInfoDN>{ PartialViewName = t=>ViewPrefix.Formato("CultureInfoView")},
-                     new EntitySettings<TranslatorDN>{ PartialViewName = t=>ViewPrefix.Formato("Translator")},
-                    new EmbeddedEntitySettings<TranslatedCultureDN>{ PartialViewName = t=>ViewPrefix.Formato("Translator")},
                 });
 
-                Translator = translator;
+                if (translatorUser)
+                {
+                    Navigator.AddSettings(new List<EntitySettings>
+                    {
+                        new EntitySettings<TranslatorUserDN>{ PartialViewName = t=>ViewPrefix.Formato("TranslatorUser")},
+                        new EmbeddedEntitySettings<TranslatorUserCultureDN>{ PartialViewName = t=>ViewPrefix.Formato("TranslatorUserCulture")},
+                    });
+                }
+
+                if (translationReplacement)
+                {
+                    FileRepositoryManager.Register(new LocalizedJavaScriptRepository(typeof(TranslationJavascriptMessage), "translation"));
+
+                    Navigator.AddSettings(new List<EntitySettings>
+                    {
+                        new EntitySettings<TranslationReplacementDN>{ PartialViewName = t=>ViewPrefix.Formato("TranslationReplacement")},
+                    });
+                }
 
                 SpecialOmniboxProvider.Register(new SpecialOmniboxAction("TranslateCode",
                     () => TranslationPermission.TranslateCode.IsAuthorized(),

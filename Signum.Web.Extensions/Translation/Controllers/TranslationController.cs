@@ -185,9 +185,9 @@ namespace Signum.Web.Translation.Controllers
             
             LocalizedAssembly locAssembly = LocalizedAssembly.ImportXml(currentAssembly, CultureInfo.GetCultureInfo(culture));
 
-            List<TranslationRecord> list = GetTranslationRecords();
+            List<TranslationRecord> records = GetTranslationRecords();
 
-            list.GroupToDictionary(a => a.Type).JoinDictionaryForeach(DictionaryByTypeName(locAssembly), (tn, tuples, lt) =>
+            records.GroupToDictionary(a => a.Type).JoinDictionaryForeach(DictionaryByTypeName(locAssembly), (tn, tuples, lt) =>
             {
                 foreach (var t in tuples)
                     t.Apply(lt);
@@ -198,7 +198,13 @@ namespace Signum.Web.Translation.Controllers
             return RedirectToAction("Index");
         }
 
-        private static Dictionary<string, LocalizedType> DictionaryByTypeName(LocalizedAssembly locAssembly)
+        [HttpPost]
+        public void Feedback(string culture, string wrong, string right)
+        {
+            ((ITranslatorWithFeedback)TranslationClient.Translator).Feedback(culture, wrong, right);
+        }
+
+        static Dictionary<string, LocalizedType> DictionaryByTypeName(LocalizedAssembly locAssembly)
         {
             return locAssembly.Types.Values.ToDictionary(a => a.Type.Name, "LocalizedTypes");
         }

@@ -134,7 +134,8 @@
     <Compile Include="Files\IFileServer.cs" />
     <Compile Include="Mailing\EmailConfiguration.cs" />
     <Compile Include="Translation\TranslatedInstance.cs" />
-    <Compile Include="Translation\Translator.cs" />
+    <Compile Include="Translation\TranslationReplacement.cs" />
+    <Compile Include="Translation\TranslatorUser.cs" />
     <Compile Include="Mailing\EmailMessage.cs" />
     <Compile Include="Mailing\EmailTemplate.cs" />
     <Compile Include="Mailing\Newsletter.cs" />

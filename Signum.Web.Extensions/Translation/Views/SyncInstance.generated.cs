@@ -130,7 +130,27 @@ Write(Html.ScriptCss("~/Translation/Content/Translation.css"));
             
             #line default
             #line hidden
-WriteLiteral("\r\n\r\n\r\n\r\n");
+WriteLiteral("\r\n");
+
+
+            
+            #line 36 "..\..\Translation\Views\SyncInstance.cshtml"
+Write(Html.ScriptsJs("~/Translation/Content/Translation.js"));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n");
+
+
+            
+            #line 37 "..\..\Translation\Views\SyncInstance.cshtml"
+Write(Html.ScriptsJs("~/Translation/resources/" + CultureInfo.CurrentCulture.Name + ".js"));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n\r\n");
 
 
             
@@ -185,13 +205,23 @@ WriteLiteral("</h2>\r\n");
             
             #line default
             #line hidden
-WriteLiteral("    <table id=\"results\" style=\"width: 100%; margin: 0px\" class=\"st\" pluralAndGend" +
-"er=\"");
+WriteLiteral("    <table id=\"results\" style=\"width: 100%; margin: 0px\" class=\"st\"        \r\n    " +
+"    data-feedback=\"");
 
 
             
-            #line 49 "..\..\Translation\Views\SyncInstance.cshtml"
-                                                                                Write(Url.Action((TranslationController tc) => tc.PluralAndGender()));
+            #line 50 "..\..\Translation\Views\SyncInstance.cshtml"
+                  Write(Url.Action("Feedback", "Translation"));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\" \r\n        data-culture=\"");
+
+
+            
+            #line 51 "..\..\Translation\Views\SyncInstance.cshtml"
+                 Write(culture.Name);
 
             
             #line default
@@ -200,7 +230,7 @@ WriteLiteral("\">\r\n");
 
 
             
-            #line 50 "..\..\Translation\Views\SyncInstance.cshtml"
+            #line 52 "..\..\Translation\Views\SyncInstance.cshtml"
          foreach (InstanceChanges instance in Model.Instances)
         {
 
@@ -212,7 +242,7 @@ WriteLiteral("            <thead>\r\n                <tr>\r\n                   
 
 
             
-            #line 54 "..\..\Translation\Views\SyncInstance.cshtml"
+            #line 56 "..\..\Translation\Views\SyncInstance.cshtml"
                                     Write(TranslationMessage.Instance.NiceToString());
 
             
@@ -222,7 +252,7 @@ WriteLiteral("</th>\r\n                    <th class=\"titleCell\">");
 
 
             
-            #line 55 "..\..\Translation\Views\SyncInstance.cshtml"
+            #line 57 "..\..\Translation\Views\SyncInstance.cshtml"
                                      Write(Html.Href(Navigator.NavigateRoute(instance.Instance), instance.Instance.ToString()));
 
             
@@ -232,7 +262,7 @@ WriteLiteral("</th>\r\n                </tr>\r\n            </thead>\r\n");
 
 
             
-            #line 58 "..\..\Translation\Views\SyncInstance.cshtml"
+            #line 60 "..\..\Translation\Views\SyncInstance.cshtml"
            
             foreach (var route in instance.RouteConflicts)
             {
@@ -245,7 +275,7 @@ WriteLiteral("            <tr>\r\n                <th class=\"leftCell\">");
 
 
             
-            #line 63 "..\..\Translation\Views\SyncInstance.cshtml"
+            #line 65 "..\..\Translation\Views\SyncInstance.cshtml"
                                 Write(TranslationMessage.Property.NiceToString());
 
             
@@ -255,7 +285,7 @@ WriteLiteral("\r\n                </th>\r\n                <th>");
 
 
             
-            #line 65 "..\..\Translation\Views\SyncInstance.cshtml"
+            #line 67 "..\..\Translation\Views\SyncInstance.cshtml"
                Write(route.Key.PropertyString());
 
             
@@ -265,7 +295,7 @@ WriteLiteral("</th>\r\n            </tr>\r\n");
 
 
             
-            #line 67 "..\..\Translation\Views\SyncInstance.cshtml"
+            #line 69 "..\..\Translation\Views\SyncInstance.cshtml"
                 foreach (var mc in route.Value)
                 {
 
@@ -276,7 +306,7 @@ WriteLiteral("            <tr>\r\n                <td class=\"leftCell\">");
 
 
             
-            #line 70 "..\..\Translation\Views\SyncInstance.cshtml"
+            #line 72 "..\..\Translation\Views\SyncInstance.cshtml"
                                 Write(mc.Key.Name);
 
             
@@ -286,7 +316,7 @@ WriteLiteral("</td>\r\n                <td colspan=\"4\" class=\"monospaceCell\"
 
 
             
-            #line 72 "..\..\Translation\Views\SyncInstance.cshtml"
+            #line 74 "..\..\Translation\Views\SyncInstance.cshtml"
                      if (mc.Key.Equals(defaultCulture))
                     {
 
@@ -297,7 +327,7 @@ WriteLiteral("                        <em>");
 
 
             
-            #line 74 "..\..\Translation\Views\SyncInstance.cshtml"
+            #line 76 "..\..\Translation\Views\SyncInstance.cshtml"
                        Write(mc.Value.Original);
 
             
@@ -307,7 +337,7 @@ WriteLiteral("</em>\r\n");
 
 
             
-            #line 75 "..\..\Translation\Views\SyncInstance.cshtml"
+            #line 77 "..\..\Translation\Views\SyncInstance.cshtml"
                     }
                     else
                     {
@@ -316,14 +346,14 @@ WriteLiteral("</em>\r\n");
             #line default
             #line hidden
             
-            #line 78 "..\..\Translation\Views\SyncInstance.cshtml"
+            #line 80 "..\..\Translation\Views\SyncInstance.cshtml"
                    Write(mc.Value.Original);
 
             
             #line default
             #line hidden
             
-            #line 78 "..\..\Translation\Views\SyncInstance.cshtml"
+            #line 80 "..\..\Translation\Views\SyncInstance.cshtml"
                                             
                     }
 
@@ -334,7 +364,7 @@ WriteLiteral("                </td>\r\n            </tr>\r\n");
 
 
             
-            #line 82 "..\..\Translation\Views\SyncInstance.cshtml"
+            #line 84 "..\..\Translation\Views\SyncInstance.cshtml"
                 }
 
             
@@ -344,7 +374,7 @@ WriteLiteral("            <tr>\r\n                <td class=\"leftCell\">");
 
 
             
-            #line 84 "..\..\Translation\Views\SyncInstance.cshtml"
+            #line 86 "..\..\Translation\Views\SyncInstance.cshtml"
                                 Write(culture.Name);
 
             
@@ -354,7 +384,7 @@ WriteLiteral("</td>\r\n                <td colspan=\"4\" class=\"monospaceCell\"
 
 
             
-            #line 86 "..\..\Translation\Views\SyncInstance.cshtml"
+            #line 88 "..\..\Translation\Views\SyncInstance.cshtml"
                         
                 var items = selectListItems(route.Value.Values.Select(a => a.AutomaticTranslation));
                         
@@ -362,14 +392,14 @@ WriteLiteral("</td>\r\n                <td colspan=\"4\" class=\"monospaceCell\"
             #line default
             #line hidden
             
-            #line 88 "..\..\Translation\Views\SyncInstance.cshtml"
+            #line 90 "..\..\Translation\Views\SyncInstance.cshtml"
                    Write(Html.DropDownList(culture.Name + "#" + instance.Instance.Key() + "#" + route.Key.PropertyString(), items));
 
             
             #line default
             #line hidden
             
-            #line 88 "..\..\Translation\Views\SyncInstance.cshtml"
+            #line 90 "..\..\Translation\Views\SyncInstance.cshtml"
                                                                                                                                   ;
                     
 
@@ -380,7 +410,7 @@ WriteLiteral("                    <a href=\"#\" class=\"edit\">");
 
 
             
-            #line 90 "..\..\Translation\Views\SyncInstance.cshtml"
+            #line 92 "..\..\Translation\Views\SyncInstance.cshtml"
                                         Write(TranslationMessage.Edit.NiceToString());
 
             
@@ -390,7 +420,7 @@ WriteLiteral("</a>\r\n                </td>\r\n            </tr>\r\n");
 
 
             
-            #line 93 "..\..\Translation\Views\SyncInstance.cshtml"
+            #line 95 "..\..\Translation\Views\SyncInstance.cshtml"
             }
         }
 
@@ -405,7 +435,7 @@ WriteLiteral("    <input type=\"submit\" value=\"");
 
 
             
-            #line 96 "..\..\Translation\Views\SyncInstance.cshtml"
+            #line 98 "..\..\Translation\Views\SyncInstance.cshtml"
                            Write(TranslationMessage.Save.NiceToString());
 
             
@@ -415,31 +445,24 @@ WriteLiteral("\" />\r\n");
 
 
             
-            #line 97 "..\..\Translation\Views\SyncInstance.cshtml"
+            #line 99 "..\..\Translation\Views\SyncInstance.cshtml"
     }
 }
 
             
             #line default
             #line hidden
-WriteLiteral(@"
-<script>
-    $(function () {
-        $(""a.edit"").bind(""click"", function () {
-            var select = $(this).parent().find(""select"");
-            var input = $(""<textarea/>"").attr(""type"", ""text"")
-                .attr(""name"", select.attr(""name""))
-                .val(select.val())
-                .attr(""style"", ""width:90%; height:16px"");
-            select.after(input);
-            select.remove();
-            $(this).remove();
+WriteLiteral("\r\n<script>\r\n    $(function () {\r\n        SF.Translation.editAndRemember(");
 
-            return false;
-        });
-    });
-</script>
-");
+
+            
+            #line 104 "..\..\Translation\Views\SyncInstance.cshtml"
+                                   Write((TranslationClient.Translator is ITranslatorWithFeedback).ToString().ToLower());
+
+            
+            #line default
+            #line hidden
+WriteLiteral(");\r\n    });\r\n</script>\r\n");
 
 
         }

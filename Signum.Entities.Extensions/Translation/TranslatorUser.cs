@@ -12,7 +12,7 @@ using Signum.Utilities;
 namespace Signum.Entities.Translation
 {
     [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
-    public class TranslatorDN : Entity
+    public class TranslatorUserDN : Entity
     {
         [NotNullable, UniqueIndex, ImplementedBy(typeof(UserDN))]
         Lite<IUserDN> user;
@@ -24,9 +24,9 @@ namespace Signum.Entities.Translation
         }
 
         [NotNullable]
-        MList<TranslatedCultureDN> cultures = new MList<TranslatedCultureDN>();
+        MList<TranslatorUserCultureDN> cultures = new MList<TranslatorUserCultureDN>();
         [NotNullValidator, NoRepeatValidator]
-        public MList<TranslatedCultureDN> Cultures
+        public MList<TranslatorUserCultureDN> Cultures
         {
             get { return cultures; }
             set { Set(ref cultures, value, () => Cultures); }
@@ -52,7 +52,7 @@ namespace Signum.Entities.Translation
     }
 
     [Serializable]
-    public class TranslatedCultureDN : EmbeddedEntity
+    public class TranslatorUserCultureDN : EmbeddedEntity
     {
         [NotNullable]
         CultureInfoDN culture;
@@ -128,6 +128,13 @@ namespace Signum.Entities.Translation
         Instance,
         Property,
         Save,
+    }
+
+    public enum TranslationJavascriptMessage
+    {
+        WrongTranslationToSubstitute,
+        RightTranslation,
+        RememberChange,
     }
 
 }
