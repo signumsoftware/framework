@@ -49,7 +49,7 @@ namespace Signum.Engine
                 return dic.TryGetC(new IdentityTuple(type, id));
             }
 
-            public void AddFullGraph(IdentifiableEntity ie)
+            public void AddFullGraph(ModifiableEntity ie)
             {
                 DirectedGraph<Modifiable> modifiables = GraphExplorer.FromRoot(ie);
 
@@ -149,7 +149,7 @@ namespace Signum.Engine
                 Add(item);
         }
 
-        public static void AddFullGraph(IdentifiableEntity ie)
+        public static void AddFullGraph(ModifiableEntity ie)
         {
             Current.AddFullGraph(ie);
         }
