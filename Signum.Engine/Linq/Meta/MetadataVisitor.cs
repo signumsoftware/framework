@@ -210,7 +210,7 @@ namespace Signum.Engine.Linq
             return result;
         }
 
-        private MetaProjectorExpression AsProjection(Expression expression)
+        public static MetaProjectorExpression AsProjection(Expression expression)
         {
             MetaProjectorExpression mpe = expression as MetaProjectorExpression;
             if (mpe != null)
