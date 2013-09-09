@@ -227,36 +227,36 @@ namespace Signum.Utilities
             return value == -1 ? defaultValue : value;
         }
 
-        public static T ThrowIfNullS<T>(this T? t, string mensaje)
+        public static T ThrowIfNullS<T>(this T? t, string message)
          where T : struct
         {
             if (t == null)
-                throw new NullReferenceException(mensaje);
+                throw new NullReferenceException(message);
             return t.Value;
         }
 
-        public static T ThrowIfNullC<T>(this T t, string mensaje)
+        public static T ThrowIfNullC<T>(this T t, string message)
             where T : class
         {
             if (t == null)
-                throw new NullReferenceException(mensaje);
+                throw new NullReferenceException(message);
             return t;
         }
 
 
-        public static T ThrowIfNullS<T>(this T? t, Func<string> mensaje)
+        public static T ThrowIfNullS<T>(this T? t, Func<string> message)
          where T : struct
         {
             if (t == null)
-                throw new NullReferenceException(mensaje());
+                throw new NullReferenceException(message());
             return t.Value;
         }
 
-        public static T ThrowIfNullC<T>(this T t, Func<string> mensaje)
+        public static T ThrowIfNullC<T>(this T t, Func<string> message)
             where T : class
         {
             if (t == null)
-                throw new NullReferenceException(mensaje());
+                throw new NullReferenceException(message());
             return t;
         }
 
