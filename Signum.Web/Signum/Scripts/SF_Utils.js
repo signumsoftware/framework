@@ -98,7 +98,9 @@ SF.registerModule = (function () {
         if (options.sfNotify) {
             pendingRequests++;
             if (pendingRequests == 1) {
-                SF.Notify.info(lang.signum.loading);
+                if (typeof (lang) != "undefined") {
+                    SF.Notify.info(lang.signum.loading);
+                }
             }
         }
         if (options.sfCheckRedirection) {
