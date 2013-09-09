@@ -900,7 +900,10 @@ namespace Signum.Web
         protected internal virtual MappingContext<T> ApplyChanges<T>(ControllerContext controllerContext, T entity, string prefix, Mapping<T> mapping, SortedList<string, string> inputs) where T : IRootEntity
         {
             using (HeavyProfiler.Log("ApplyChanges", () => typeof(T).TypeName()))
+            using (new EntityCache(EntityCacheType.Normal))
             {
+                EntityCache.AddFullGraph((ModifiableEntity)(IRootEntity)entity);
+
                 RootContext<T> ctx = new RootContext<T>(prefix, inputs, controllerContext) { Value = entity };
                 mapping(ctx);
                 return ctx;
