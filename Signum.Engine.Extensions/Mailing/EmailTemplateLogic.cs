@@ -97,11 +97,14 @@ namespace Signum.Engine.Mailing
 
         static void EmailTemplateLogic_Retrieved(EmailTemplateDN emailTemplate)
         {
-            object queryName = QueryLogic.ToQueryName(emailTemplate.Query.Key);
-            QueryDescription description = DynamicQueryManager.Current.QueryDescription(queryName);
+            using (emailTemplate.DisableAuthorization ? ExecutionMode.Global() : null)
+            {
+                object queryName = QueryLogic.ToQueryName(emailTemplate.Query.Key);
+                QueryDescription description = DynamicQueryManager.Current.QueryDescription(queryName);
 
-            using (ExecutionMode.Global())
-                emailTemplate.ParseData(description);
+                using (emailTemplate.DisableAuthorization ? ExecutionMode.Global() : null)
+                    emailTemplate.ParseData(description);
+            }
         }
 
         static string EmailTemplateMessageText_StaticPropertyValidation(EmailTemplateMessageDN message, PropertyInfo pi)
@@ -146,11 +149,14 @@ namespace Signum.Engine.Mailing
 
         private static EmailTemplateParser.BlockNode ParseTemplate(EmailTemplateMessageDN message, string text)
         {
-            object queryName = QueryLogic.ToQueryName(message.Template.Query.Key);
-            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
+            using (message.Template.DisableAuthorization ? ExecutionMode.Global() : null)
+            {
+                object queryName = QueryLogic.ToQueryName(message.Template.Query.Key);
+                QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
 
-            List<QueryToken> list = new List<QueryToken>();
-            return EmailTemplateParser.Parse(text, qd, message.Template.SystemEmail.ToType());
+                List<QueryToken> list = new List<QueryToken>();
+                return EmailTemplateParser.Parse(text, qd, message.Template.SystemEmail.ToType());
+            }
         }
 
         static void EmailTemplate_PreSaving(EmailTemplateDN template, ref bool graphModified)
@@ -160,40 +166,44 @@ namespace Signum.Engine.Mailing
 
         public static bool UpdateTokens(EmailTemplateDN template)
         {
-            var queryname = QueryLogic.ToQueryName(template.Query.Key);
-            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryname);
-
-            List<QueryToken> list = new List<QueryToken>();
-
-            if (template.From != null)
-                list.Add(template.From.Token.Token);
-
-            foreach (var tr in template.Recipients.Where(r => r.Token != null))
+            using (template.DisableAuthorization ? ExecutionMode.Global() : null)
             {
-                list.Add(tr.Token.Token);
-            }
+                var queryName = QueryLogic.ToQueryName(template.Query.Key);
+                QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
 
-            foreach (var message in template.Messages)
-            {
-                EmailTemplateParser.Parse(message.Text, qd, template.SystemEmail.ToType()).FillQueryTokens(list);
-                EmailTemplateParser.Parse(message.Subject, qd, template.SystemEmail.ToType()).FillQueryTokens(list);
-            }
+                List<QueryToken> list = new List<QueryToken>();
 
-            var tokens = list.Distinct();
+                if (template.From != null)
+                    list.Add(template.From.Token.Token);
 
-            if (template.Tokens.Any(t=>t.ParseException != null) || !template.Tokens.Select(a => a.Token).ToList().SequenceEqual(tokens))
-            {
-                template.Tokens.ResetRange(tokens.Select(t => new QueryTokenDN(t)));
-                return true;
+                foreach (var tr in template.Recipients.Where(r => r.Token != null))
+                {
+                    list.Add(tr.Token.Token);
+                }
+
+                foreach (var message in template.Messages)
+                {
+                    EmailTemplateParser.Parse(message.Text, qd, template.SystemEmail.ToType()).FillQueryTokens(list);
+                    EmailTemplateParser.Parse(message.Subject, qd, template.SystemEmail.ToType()).FillQueryTokens(list);
+                }
+
+                var tokens = list.Distinct();
+
+                if (template.Tokens.Any(t => t.ParseException != null) || !template.Tokens.Select(a => a.Token).ToList().SequenceEqual(tokens))
+                {
+                    template.Tokens.ResetRange(tokens.Select(t => new QueryTokenDN(t)));
+                    return true;
+                }
+                return false;
             }
-            return false;
         }
 
         public static IEnumerable<EmailMessageDN> CreateEmailMessage(this Lite<EmailTemplateDN> liteTemplate, IIdentifiable entity, ISystemEmail systemEmail = null)
         {
             EmailTemplateDN template = EmailTemplatesLazy.Value.GetOrThrow(liteTemplate, "Email template {0} not in cache".Formato(liteTemplate));
 
-            return new EmailMessageBuilder(template, entity, systemEmail).CreateEmailMessageInternal().ToList();
+            using (template.DisableAuthorization ? ExecutionMode.Global() : null)
+                return new EmailMessageBuilder(template, entity, systemEmail).CreateEmailMessageInternal().ToList();
         }
 
         class EmailTemplateGraph : Graph<EmailTemplateDN>
@@ -322,27 +332,28 @@ namespace Signum.Engine.Mailing
                 Console.WriteLine(" Query: " + et.Query.Key);
 
                 if (et.Tokens.Any(a => a.ParseException != null))
-                {
-                    QueryDescription qd = DynamicQueryManager.Current.QueryDescription(et.Query.ToQueryName());
-
-                    if (et.Tokens.Any())
+                    using (et.DisableAuthorization ? ExecutionMode.Global() : null)
                     {
-                        Console.WriteLine(" Tokens:");
-                        foreach (var item in et.Tokens.ToList())
+                        QueryDescription qd = DynamicQueryManager.Current.QueryDescription(et.Query.ToQueryName());
+
+                        if (et.Tokens.Any())
                         {
-                            QueryTokenDN token = item;
-                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, false, "", allowRemoveToken: false))
+                            Console.WriteLine(" Tokens:");
+                            foreach (var item in et.Tokens.ToList())
                             {
-                                case FixTokenResult.Nothing: break;
-                                case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(et);
-                                case FixTokenResult.RemoveToken: throw new InvalidOperationException("Unexpected RemoveToken");
-                                case FixTokenResult.SkipEntity: return null;
-                                case FixTokenResult.Fix: EmailTemplateParser.ReplaceToken(et, item, token);break;
-                                default: break;
+                                QueryTokenDN token = item;
+                                switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, false, "", allowRemoveToken: false))
+                                {
+                                    case FixTokenResult.Nothing: break;
+                                    case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(et);
+                                    case FixTokenResult.RemoveToken: throw new InvalidOperationException("Unexpected RemoveToken");
+                                    case FixTokenResult.SkipEntity: return null;
+                                    case FixTokenResult.Fix: EmailTemplateParser.ReplaceToken(et, item, token); break;
+                                    default: break;
+                                }
                             }
                         }
                     }
-                }
 
                 Console.Clear();
 
