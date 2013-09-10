@@ -141,6 +141,7 @@
     <Compile Include="Mailing\Pop3\Pop3Client.cs" />
     <Compile Include="Mailing\SystemEmailLogic.cs" />
     <Compile Include="Processes\ProcessRunnerLogic.cs" />
+    <Compile Include="Scheduler\ApplicationEventLogLogic.cs" />
     <Compile Include="Translation\CultureInfoLogic.cs" />
     <Compile Include="Translation\LocalizedInstanceLogic.cs" />
     <Compile Include="Mailing\EmailLogic.cs" />
