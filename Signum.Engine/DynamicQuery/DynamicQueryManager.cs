@@ -79,7 +79,7 @@ namespace Signum.Engine.DynamicQuery
             {
                 try
                 {
-                    var qb = queries.GetOrThrow(queryName);
+                    var qb = GetQuery(queryName);
 
                     return executor(qb); 
                 }
