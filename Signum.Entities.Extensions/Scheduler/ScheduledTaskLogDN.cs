@@ -11,6 +11,20 @@ namespace Signum.Entities.Scheduler
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
     public class ScheduledTaskLogDN : IdentifiableEntity
     {
+        ScheduledTaskDN scheduledTask;
+        public ScheduledTaskDN ScheduledTask
+        {
+            get { return scheduledTask; }
+            set { Set(ref scheduledTask, value, () => ScheduledTask); }
+        }
+
+        Lite<IUserDN> user;
+        public Lite<IUserDN> User
+        {
+            get { return user; }
+            set { Set(ref user, value, () => User); }
+        }
+
         [ImplementedBy(typeof(SimpleTaskDN))]
         ITaskDN task;
         [NotNullValidator]
@@ -53,11 +67,11 @@ namespace Signum.Entities.Scheduler
         }
 
         [ImplementedByAll]
-        Lite<IIdentifiable> entity;
-        public Lite<IIdentifiable> Entity
+        Lite<IIdentifiable> productEntity;
+        public Lite<IIdentifiable> ProductEntity
         {
-            get { return entity; }
-            set { Set(ref entity, value, () => Entity); }
+            get { return productEntity; }
+            set { Set(ref productEntity, value, () => ProductEntity); }
         }
 
         Lite<ExceptionDN> exception;
