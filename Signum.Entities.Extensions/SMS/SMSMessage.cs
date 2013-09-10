@@ -112,6 +112,13 @@ namespace Signum.Entities.SMS
             set { Set(ref referred, value, () => Referred); }
         }
 
+        Lite<ExceptionDN> exception;
+        public Lite<ExceptionDN> Exception
+        {
+            get { return exception; }
+            set { Set(ref exception, value, () => Exception); }
+        }
+
         public override string ToString()
         {
             return "SMS " + MessageID;
@@ -129,11 +136,12 @@ namespace Signum.Entities.SMS
     public enum SMSMessageOperation
     {
         Send,
+        SendAsync,
         UpdateStatus,
         CreateUpdateStatusPackage,
         CreateSMSFromSMSTemplate,
         CreateSMSWithTemplateFromEntity,
-        CreateSMSFromEntity,
+        CreateSMSFromEntity
     }
 
     public enum SMSMessageProcess

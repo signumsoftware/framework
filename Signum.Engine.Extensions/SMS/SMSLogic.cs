@@ -17,6 +17,7 @@ using Signum.Entities.Basics;
 using System.Text.RegularExpressions;
 using Signum.Engine.Basics;
 using Signum.Utilities.ExpressionTrees;
+using System.Threading.Tasks;
 
 namespace Signum.Engine.SMS
 {
@@ -359,7 +360,7 @@ namespace Signum.Engine.SMS
 
                 dqm.RegisterQuery(typeof(SMSSendPackageDN), () =>
                     from e in Database.Query<SMSSendPackageDN>()
-                    let p  = e.LastProcess()
+                    let p = e.LastProcess()
                     select new
                     {
                         Entity = e,
@@ -428,13 +429,7 @@ namespace Signum.Engine.SMS
             if (SMSSendAndGetTicketAction == null)
                 throw new InvalidOperationException("SMSSendAction was not established");
 
-            SendSMS(message, SMSSendAndGetTicketAction);
-        }
-
-        //Allows concurrent custom sendProviders for one application
-        public static void SendSMS(SMSMessageDN message, Func<SMSMessageDN, string> sendAndGetTicket)
-        {
-            message.MessageID = sendAndGetTicket(message);
+            message.MessageID = SMSSendAndGetTicketAction(message);
             message.SendDate = TimeZoneManager.Now.TrimToSeconds();
             message.State = SMSMessageState.Sent;
             message.Save();
@@ -442,15 +437,8 @@ namespace Signum.Engine.SMS
 
         public static List<SMSMessageDN> CreateAndSendMultipleSMSMessages(CreateMessageParams template, List<string> phones)
         {
-            return CreateAndSendMultipleSMSMessages(template, phones, SMSMultipleSendAction);
-        }
-
-        //Allows concurrent custom sendProviders for one application
-        public static List<SMSMessageDN> CreateAndSendMultipleSMSMessages(CreateMessageParams template,
-            List<string> phones, Func<CreateMessageParams, List<string>, List<string>> send)
-        {
             var messages = new List<SMSMessageDN>();
-            var IDs = send(template, phones);
+            var IDs = SMSMultipleSendAction(template, phones);
             var sendDate = TimeZoneManager.Now.TrimToSeconds();
             for (int i = 0; i < phones.Count; i++)
             {
@@ -508,13 +496,44 @@ namespace Signum.Engine.SMS
                 Lite = false,
                 FromStates = { SMSMessageState.Created },
                 ToState = SMSMessageState.Sent,
-                Execute = (t, args) =>
+                Execute = (m, _) =>
                 {
-                    var func = args.TryGetArgC<Func<SMSMessageDN, string>>();
-                    if (func != null)
-                        SMSLogic.SendSMS(t, func);
-                    else
-                        SMSLogic.SendSMS(t);
+                    try
+                    {
+                        SMSLogic.SendSMS(m);
+                    }
+                    catch (Exception e)
+                    {
+                        var ex = e.LogException();
+                        m.Exception = ex.ToLite();
+                        m.Save();
+                        throw;
+                    }
+                }
+            }.Register();
+
+            new Execute(SMSMessageOperation.SendAsync)
+            {
+                AllowsNew = true,
+                Lite = false,
+                FromStates = { SMSMessageState.Created },
+                ToState = SMSMessageState.Sent,
+                Execute = (m, _) =>
+                {
+                    Task.Factory.StartNew(() =>
+                    {
+                        try
+                        {
+                            SMSLogic.SendSMS(m);
+                        }
+                        catch (Exception e)
+                        {
+                            var ex = e.LogException();
+                            m.Exception = ex.ToLite();
+                            m.Save();
+                            throw;
+                        }
+                    });
                 }
             }.Register();
 
