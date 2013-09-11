@@ -312,13 +312,13 @@ namespace Signum.Engine.Processes
         public static void ForEachLine<T>(this ExecutingProcess executingProcess, IQueryable<T> remainingLines, Action<T> action, int groupsOf = 100)
             where T : IdentifiableEntity, IProcessLineDataDN, new()
         {
-            var ramainingNotExceptionsLines = remainingLines.Where(li => li.Exception(executingProcess.CurrentExecution) == null);
+            var remainingNotExceptionsLines = remainingLines.Where(li => li.Exception(executingProcess.CurrentExecution) == null);
 
-            var totalCount = ramainingNotExceptionsLines.Count();
+            var totalCount = remainingNotExceptionsLines.Count();
             int j = 0; 
             while (true)
             {
-                List<T> lines = ramainingNotExceptionsLines.Take(groupsOf).ToList();
+                List<T> lines = remainingNotExceptionsLines.Take(groupsOf).ToList();
                 if (lines.IsEmpty())
                     return;
 
