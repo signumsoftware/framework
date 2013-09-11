@@ -15,6 +15,7 @@ SF.registerModule("FindNavigator", function () {
                 selectedItemsContextMenu: true,
                 filterMode: "Visible",
                 filters: null, //List of filter names "token1,operation1,value1;token2,operation2,value2"
+                navigate: true,
                 openFinderUrl: null,
                 onCancelled: null,
                 onOk: null,
@@ -22,7 +23,6 @@ SF.registerModule("FindNavigator", function () {
                 orders: [], //A Json array like ["Id","-Name"] => Id asc, then Name desc
                 prefix: "",
                 searchOnLoad: false,
-                view: true,
                 webQueryName: null
             },
 
@@ -320,7 +320,7 @@ SF.registerModule("FindNavigator", function () {
                 requestData["elems"] = $(this.pf(this.keys.elems)).val();
                 requestData["page"] = $(this.pf(this.keys.page)).val();
                 requestData["allowMultiple"] = this.options.allowMultiple;
-                requestData["view"] = this.options.view;
+                requestData["navigate"] = this.options.navigate;
                 requestData["filters"] = this.serializeFilters();
                 requestData["filterMode"] = this.options.filterMode;
                 requestData["orders"] = this.serializeOrders();
@@ -340,7 +340,7 @@ SF.registerModule("FindNavigator", function () {
                     "&orders=" + this.serializeOrders() +
                     "&columns=" + this.serializeColumns() +
                     "&columnMode=Replace" +
-                    "&view=" + this.options.view;
+                    "&navigate=" + this.options.navigate;
 
                 if (!this.options.allowMultiple) {
                     url += "&allowMultiple=" + this.options.allowMultiple;
@@ -888,8 +888,8 @@ SF.registerModule("FindNavigator", function () {
                 prefix: findOptions.prefix
             };
 
-            if (findOptions.view == false) {
-                requestData["view"] = findOptions.view;
+            if (findOptions.navigate == false) {
+                requestData["navigate"] = findOptions.navigate;
             }
             if (findOptions.searchOnLoad == true) {
                 requestData["searchOnLoad"] = findOptions.searchOnLoad;

@@ -73,8 +73,8 @@ namespace Signum.Web
             if (parameters.AllKeys.Contains("create"))
                 fo.Create = bool.Parse(parameters["create"]);
 
-            if (parameters.AllKeys.Contains("view"))
-                fo.Navigate = bool.Parse(parameters["view"]);
+            if (parameters.AllKeys.Contains("navigate"))
+                fo.Navigate = bool.Parse(parameters["navigate"]);
 
             if (parameters.AllKeys.Contains("pagination"))
             {
