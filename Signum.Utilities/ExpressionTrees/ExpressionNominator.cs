@@ -41,7 +41,7 @@ namespace Signum.Utilities.ExpressionTrees
             {
                 if (expression.NodeType == ExpressionType.Call &&
                     ((MethodCallExpression)expression).Method.DeclaringType == typeof(LinqHints) &&
-                    ((MethodCallExpression)expression).Method.Name == "InSql")
+                    ((MethodCallExpression)expression).Method.Name == "KeepConstantSubexpressions")
                 {
                     this.hasDependencies = true;
                     return expression;
@@ -69,6 +69,11 @@ namespace Signum.Utilities
     public static class LinqHints
     {
         public static T InSql<T>(this T value)
+        {
+            return value;
+        }
+
+        public static T KeepConstantSubexpressions<T>(this T value)
         {
             return value;
         }
