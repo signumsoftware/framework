@@ -257,7 +257,7 @@ namespace Signum.Engine.Mailing
 
         public static Lite<EmailMasterTemplateDN> GetDefaultMasterTemplate()
         {
-            var result = Database.Query<EmailMasterTemplateDN>().Select(emt => emt.ToLite()).SingleEx();
+            var result = Database.Query<EmailMasterTemplateDN>().Select(emt => emt.ToLite()).FirstOrDefault();
 
             if (result != null)
                 return result;
