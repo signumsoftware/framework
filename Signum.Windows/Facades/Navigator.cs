@@ -608,11 +608,19 @@ namespace Signum.Windows
         internal protected virtual bool OnIsCreable(Type type, bool isSearchEntity)
         {
             EntitySettings es = EntitySettings.TryGetC(type);
-            if (es == null)
-                return false;
 
-            if (!es.OnIsCreable(isSearchEntity))
-                return false;
+            if (es != null)
+            {
+                if (!es.OnIsCreable(isSearchEntity))
+                    return false;
+            }
+            else
+            {
+                if (type.IsIdentifiableEntity())//HACK
+                    return false;
+                else
+                    return true; 
+            }
 
             if (IsCreable != null)
                 foreach (Func<Type, bool> isCreable in IsCreable.GetInvocationList())
