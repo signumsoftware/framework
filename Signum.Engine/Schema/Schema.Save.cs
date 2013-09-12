@@ -352,7 +352,10 @@ namespace Signum.Engine.Maps
             var toStrColumn = ToStrColumn;
             if (toStrColumn != null)
             {
-                var newStr = entity.ToString();
+                string newStr;
+                using (Sync.ChangeCultureUI(Schema.Current.ForceCultureInfo))
+                    newStr = entity.ToString();
+
                 if (newStr.HasText() && toStrColumn.Size.HasValue && newStr.Length > toStrColumn.Size)
                     newStr = newStr.Substring(0, toStrColumn.Size.Value);
 
@@ -361,6 +364,7 @@ namespace Signum.Engine.Maps
                     entity.toStr = newStr;
                     return true;
                 }
+
             }
 
             return false;
