@@ -54,6 +54,13 @@ namespace Signum.Entities.Mailing
             set { Set(ref editableMessage, value, () => EditableMessage); }
         }
 
+        bool disableAuthorization;
+        public bool DisableAuthorization
+        {
+            get { return disableAuthorization; }
+            set { Set(ref disableAuthorization, value, () => DisableAuthorization); }
+        }
+
         [NotNullable]
         QueryDN query;
         [NotNullValidator]

@@ -15,6 +15,7 @@
         @Html.EntityLine(ec, e => e.Query)
         @Html.EntityLine(ec, e => e.SmtpConfiguration)
         @Html.ValueLine(ec, e => e.EditableMessage)
+        @Html.ValueLine(ec, e => e.DisableAuthorization)
     </div>
     
     if(!ec.Value.IsNew)

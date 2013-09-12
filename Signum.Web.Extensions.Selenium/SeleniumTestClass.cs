@@ -66,15 +66,15 @@ namespace Signum.Web.Selenium
             }
         }
 
-        protected virtual string FindRoute(Type tipo)
+        protected virtual string FindRoute(Type type)
         {
-            return "Find/" + (TypeLogic.TypeToName.TryGetC(tipo) ?? Reflector.CleanTypeName(tipo));
+            return "Find/" + (TypeLogic.TypeToName.TryGetC(type) ?? Reflector.CleanTypeName(type));
         }
 
-        protected virtual string ViewRoute(Type tipo, int? id)
+        protected virtual string ViewRoute(Type type, int? id)
         {
             return "View/{0}/{1}".Formato(
-                TypeLogic.TypeToName.TryGetC(tipo) ?? Reflector.CleanTypeName(tipo),
+                TypeLogic.TypeToName.TryGetC(type) ?? Reflector.CleanTypeName(type),
                 id.HasValue ? id.ToString() : "");
         }
 

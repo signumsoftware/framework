@@ -99,6 +99,7 @@
     <Compile Include="Help\HelpMessage.cs" />
     <Compile Include="Mailing\Pop3Configuration.cs" />
     <Compile Include="Scheduler\ScheduledTaskLogDN.cs" />
+    <Compile Include="Scheduler\ApplicationEventLog.cs" />
     <Compile Include="Translation\CultureInfoDN.cs" />
     <Compile Include="Basics\HourMinuteDN.cs" />
     <Compile Include="Basics\DateSpanDN.cs" />

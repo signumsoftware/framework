@@ -67,7 +67,7 @@ namespace Signum.Engine.Alerts
                     {
                         Entity = t,
                         t.Id,
-                        Nombre = t.Name,
+                        t.Name,
                         t.Key,
                     });
 

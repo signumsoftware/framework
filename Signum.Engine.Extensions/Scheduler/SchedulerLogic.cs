@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 using Signum.Entities.Authorization;
 using System.Linq.Expressions;
 using Signum.Engine.Cache;
+using Signum.Entities.Basics;
 
 namespace Signum.Engine.Scheduler
 {
@@ -109,10 +110,14 @@ namespace Signum.Engine.Scheduler
                         Entity = cte,
                         cte.Id,
                         cte.Task,
+                        cte.ScheduledTask,
                         cte.StartTime,
                         cte.EndTime,
+                        cte.ProductEntity,
                         cte.MachineName,
+                        cte.User,
                         cte.Exception,
+                        
                     });
 
                 dqm.RegisterExpression((ITaskDN ct) => ct.Executions());
@@ -134,12 +139,12 @@ namespace Signum.Engine.Scheduler
 
                 new Graph<IIdentifiable>.ConstructFrom<ITaskDN>(TaskOperation.ExecuteSync)
                 {
-                    Construct = (task, _) => ExecuteSync(task).TryCC(l => l.Retrieve())
+                    Construct = (task, _) => ExecuteSync(task, null, UserHolder.Current).TryCC(l => l.Retrieve())
                 }.Register();
 
                 new Graph<ITaskDN>.Execute(TaskOperation.ExecuteAsync)
                 {
-                    Execute = (task, _) => ExecuteAsync(task)
+                    Execute = (task, _) => ExecuteAsync(task, null, UserHolder.Current)
                 }.Register();
 
                 ScheduledTasksLazy = sb.GlobalLazy(() =>
@@ -254,7 +259,7 @@ namespace Signum.Engine.Scheduler
                         var pair = priorityQueue.Pop(); //Exceed timer change
                         if (Math.Abs((pair.NextDate - TimeZoneManager.Now).Ticks) < ScheduledTaskDN.MinimumSpan.Ticks)
                         {
-                            ExecuteAsync(pair.ScheduledTask.Task);
+                            ExecuteAsync(pair.ScheduledTask.Task, pair.ScheduledTask, null);
                         }
 
                         pair.NextDate = pair.ScheduledTask.Rule.Next();
@@ -273,13 +278,13 @@ namespace Signum.Engine.Scheduler
             }
         }
 
-        public static void ExecuteAsync(ITaskDN task)
+        public static void ExecuteAsync(ITaskDN task, ScheduledTaskDN scheduledTask, IUserDN user)
         {
             Task.Factory.StartNew(() =>
             {
                 try
                 {
-                    ExecuteSync(task);
+                    ExecuteSync(task, scheduledTask, user);
                 }
                 catch (Exception e)
                 {
@@ -292,13 +297,15 @@ namespace Signum.Engine.Scheduler
             }); 
         }
 
-        public static Lite<IIdentifiable> ExecuteSync(ITaskDN task)
+        public static Lite<IIdentifiable> ExecuteSync(ITaskDN task, ScheduledTaskDN scheduledTask, IUserDN user)
         {
             using (AuthLogic.UserSession(AuthLogic.SystemUser))
             {
                 ScheduledTaskLogDN stl = new ScheduledTaskLogDN
                 {
                     Task = task,
+                    ScheduledTask = scheduledTask, 
+                    User = user.ToLite(),
                     StartTime = TimeZoneManager.Now,
                     MachineName = Environment.MachineName
                 };
@@ -309,12 +316,12 @@ namespace Signum.Engine.Scheduler
                     {
                         stl.Save();
 
-                        stl.Entity = ExecuteTask.Invoke(task);
+                        stl.ProductEntity = ExecuteTask.Invoke(task);
 
                         stl.EndTime = TimeZoneManager.Now;
                         stl.Save();
 
-                        return tr.Commit(stl.Entity);
+                        return tr.Commit(stl.ProductEntity);
                     }
                 }
                 catch (Exception ex)
