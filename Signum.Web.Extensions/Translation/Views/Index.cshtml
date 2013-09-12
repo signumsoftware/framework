@@ -2,24 +2,27 @@
 @using System.Reflection
 @using Signum.Web.Translation.Controllers
 @using System.Globalization;
+@using Signum.Entities.Translation
 @{
-    ViewBag.Title = "Translation files";        
+    ViewBag.Title = TranslationMessage.CodeTranslations.NiceToString();        
 }
 
 @Html.ScriptCss("~/Translation/Content/Translation.css")
 
 @if (Model.IsEmpty())
 {
-    <pre>No assembly to translate</pre>   
+    <h2>@TranslationMessage.NothingToTranslate.NiceToString()</h2>   
 }
 else
 {
+    <h2>@ViewBag.Title</h2>
+    
     var langs = Model.First().Value.Keys;
 
     <table class="st">
         <tr>
             <th></th>
-            <th>All</th>
+            <th>@TranslationMessage.All.NiceToString()</th>
             @foreach (var ci in langs)
             {
                 <th>@ci.Name</th>
@@ -30,20 +33,16 @@ else
             <tr>
                 <th>@assembly.Key.GetName().Name</th>
                 <td>
-                    @Html.ActionLink("view", (TranslationController tc) => tc.View(assembly.Key.GetName().Name, null))
+                    @Html.ActionLink(TranslationMessage.View.NiceToString(), (TranslationController tc) => tc.View(assembly.Key.GetName().Name, null))
                 </td>
                 @foreach (var tf in assembly.Value.Values)
                 {
                     <td>
-                        @Html.ActionLink("view", (TranslationController tc) => tc.View(tf.Assembly.GetName().Name, tf.CultureInfo.Name))
+                        @Html.ActionLink(TranslationMessage.View.NiceToString(), (TranslationController tc) => tc.View(tf.Assembly.GetName().Name, tf.CultureInfo.Name))
                         <br />
-                        @if(tf.IsDefault)
+                        @if(!tf.IsDefault && tf.CultureInfo.IsNeutralCulture)
                         {
-                            <p>sync</p>
-                        }
-                        else
-                        {
-                        @Html.ActionLink("sync", (TranslationController tc) => tc.Sync(tf.Assembly.GetName().Name, tf.CultureInfo.Name), new { @class = "status-" + tf.Status().ToString() })    
+                        @Html.ActionLink(TranslationMessage.Sync.NiceToString(), (TranslationController tc) => tc.Sync(tf.Assembly.GetName().Name, tf.CultureInfo.Name), new { @class = "status-" + tf.Status().ToString() })    
                         }
                     </td>
                 }

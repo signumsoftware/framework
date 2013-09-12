@@ -1,0 +1,90 @@
+﻿@model Dictionary<CultureInfo, Dictionary<LocalizedInstanceKey, TranslatedInstanceDN>>
+@using System.Globalization
+@using Signum.Engine.Translation
+@using Signum.Entities.Translation
+@using System.Reflection
+@using Signum.Utilities
+@using Signum.Web.Translation.Controllers
+@{
+    CultureInfo culture = ViewBag.Culture;
+    Type type = ViewBag.Type;
+
+    ViewBag.Title = TranslationMessage.View0In1.NiceToString().Formato(type.NiceName(), culture == null ? TranslationMessage.AllLanguages.NiceToString() : culture.DisplayName);
+
+    Dictionary<LocalizedInstanceKey, string> master = ViewBag.Master;
+
+    var cultures = TranslationLogic.CurrentCultureInfos(TranslatedInstanceLogic.DefaultCulture);
+
+    Func<CultureInfo, bool> editCulture = c => culture == null || culture.Name == c.Name;
+}
+@Html.ScriptCss("~/Translation/Content/Translation.css")
+@Html.ScriptsJs("~/Translation/Content/Translation.js")
+
+@if (master.Keys.IsEmpty())
+{
+   <h2>@TranslationMessage.NothingToTranslateIn0.NiceToString().Formato(type.NiceName())</h2>
+}
+else
+{
+   <h2>@ViewBag.Title</h2>
+
+    using (Html.BeginForm())
+    {
+        <table id="results" style="width: 100%; margin: 0px" class="st">
+            @foreach (var instance in master.Keys.GroupBy(a => a.Instance).OrderBy(a => a.Key.Id))
+            { 
+                <thead>
+                    <tr>
+                        <th class="leftCell">@TranslationMessage.Instance.NiceToString()</th>
+                        <th class="titleCell">@Html.Href(Navigator.NavigateRoute(instance.Key), instance.Key.ToString())</th>
+                    </tr>
+                </thead>
+
+                foreach (LocalizedInstanceKey key in instance.OrderBy(a => a.Route.ToString()))
+                {     
+                <tr>
+                    <th class="leftCell">@TranslationMessage.Property.NiceToString()
+                    </th>
+                    <th>@key.Route.PropertyString()</th>
+                </tr>
+            
+                    foreach (var ci in cultures)
+                    {
+                        if (ci.Name == TranslatedInstanceLogic.DefaultCulture)
+                        {
+                <tr>
+                    <td class="leftCell">@TranslatedInstanceLogic.DefaultCulture</td>
+                    <td class="monospaceCell">
+                        <em>@master[key]</em>
+                    </td>
+                </tr>
+                        }
+                        else
+                        {
+                            TranslatedInstanceDN trans = Model.TryGetC(ci).TryGetC(key);
+
+                            if (trans != null || editCulture(ci))
+                            {
+                <tr>
+                    <td class="leftCell">@ci.Name</td>
+                    <td class="monospaceCell">
+                        @if (editCulture(ci))
+                        {
+                            @Html.TextArea(ci.Name + "#" + key.Instance.Key() + "#" + key.Route.PropertyString(), trans.TryCC(t => t.TranslatedText), new { style = "width:90%;height:16px" })
+                        }
+                        else
+                        {
+                            @trans.TranslatedText
+                        }
+                    </td>
+                </tr>
+                            }
+                        }
+
+                    }
+                }
+            }
+        </table>
+    <input type="submit" value="@TranslationMessage.Save.NiceToString()" />
+    }
+}

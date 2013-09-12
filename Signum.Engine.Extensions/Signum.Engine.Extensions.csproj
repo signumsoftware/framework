@@ -141,8 +141,9 @@
     <Compile Include="Mailing\Pop3\Pop3Client.cs" />
     <Compile Include="Mailing\SystemEmailLogic.cs" />
     <Compile Include="Processes\ProcessRunnerLogic.cs" />
+    <Compile Include="Scheduler\ApplicationEventLogLogic.cs" />
     <Compile Include="Translation\CultureInfoLogic.cs" />
-    <Compile Include="Translation\LocalizedInstanceLogic.cs" />
+    <Compile Include="Translation\InstanceTranslationLogic.cs" />
     <Compile Include="Mailing\EmailLogic.cs" />
     <Compile Include="Mailing\EmailTemplateParser.cs" />
     <Compile Include="Mailing\EmailPackageLogic.cs" />
@@ -160,6 +161,7 @@
     <Compile Include="Reports\PlainExcelGenerator.cs" />
     <Compile Include="Reports\ReportsLogic.cs" />
     <Compile Include="Translation\TranslationLogic.cs" />
+    <Compile Include="Translation\TranslationReplacementLogic.cs" />
     <Compile Include="UserQueries\QueryTokenSynchronizer.cs" />
     <Compile Include="UserQueries\UserQueryLogic.cs" />
     <Compile Include="Scheduler\SchedulerLogic.cs" />

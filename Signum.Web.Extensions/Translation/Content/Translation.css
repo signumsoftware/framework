@@ -1,14 +1,14 @@
-﻿.status-NotCreated
+﻿.status-None
 {
     color: red;
 }
 
-.status-Outdated
+.status-Pending
 {
     color: #ffc300;
 }
 
-.status-InSync
+.status-Completed
 {
     color: green;
 }

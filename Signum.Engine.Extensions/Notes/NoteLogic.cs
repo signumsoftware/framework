@@ -63,7 +63,7 @@ namespace Signum.Engine.Notes
                     {
                         Entity = t,
                         t.Id,
-                        Nombre = t.Name,
+                        t.Name,
                         t.Key,
                     });
 

@@ -99,6 +99,7 @@
     <Compile Include="Help\HelpMessage.cs" />
     <Compile Include="Mailing\Pop3Configuration.cs" />
     <Compile Include="Scheduler\ScheduledTaskLogDN.cs" />
+    <Compile Include="Scheduler\ApplicationEventLog.cs" />
     <Compile Include="Translation\CultureInfoDN.cs" />
     <Compile Include="Basics\HourMinuteDN.cs" />
     <Compile Include="Basics\DateSpanDN.cs" />
@@ -133,8 +134,9 @@
     <Compile Include="Files\FileRepository.cs" />
     <Compile Include="Files\IFileServer.cs" />
     <Compile Include="Mailing\EmailConfiguration.cs" />
-    <Compile Include="Translation\LocalizedInstance.cs" />
-    <Compile Include="Translation\Translator.cs" />
+    <Compile Include="Translation\TranslatedInstance.cs" />
+    <Compile Include="Translation\TranslationReplacement.cs" />
+    <Compile Include="Translation\TranslatorUser.cs" />
     <Compile Include="Mailing\EmailMessage.cs" />
     <Compile Include="Mailing\EmailTemplate.cs" />
     <Compile Include="Mailing\Newsletter.cs" />

@@ -176,7 +176,7 @@ namespace Signum.Windows.Files
 
         private void OnViewing(object entity)
         {
-            if (Entity == null || CanView())
+            if (!CanView())
                 return;
 
             if (Viewing != null)

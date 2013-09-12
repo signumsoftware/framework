@@ -1,13 +1,14 @@
-﻿@model AssemblyChanges
+﻿@model LocalizedAssemblyChanges
 @using System.Globalization
 @using System.Reflection
 @using Signum.Utilities
 @using Signum.Web.Translation
 @using Signum.Web.Translation.Controllers
+@using Signum.Entities.Translation
 @{
     CultureInfo culture = ViewBag.Culture;
 
-    ViewBag.Title = "Synchronize {0} in {1}".Formato(Model.LocalizedAssembly.Assembly.GetName().Name, Model.LocalizedAssembly.Culture.DisplayName);
+    ViewBag.Title = TranslationMessage.Synchronize0In1.NiceToString().Formato(Model.LocalizedAssembly.Assembly.GetName().Name, Model.LocalizedAssembly.Culture.DisplayName);
 
     Func<IEnumerable<string>, List<SelectListItem>> selectListItems = values =>
     {
@@ -29,17 +30,30 @@
     Func<LocalizedType, string> locKey = lt => lt.Type.Name + "." + lt.Assembly.Culture.Name;
 }
 
+
 @Html.ScriptCss("~/Translation/Content/Translation.css")
 @Html.ScriptsJs("~/Translation/Content/Translation.js")
+@Html.ScriptsJs("~/Translation/resources/" + CultureInfo.CurrentCulture.Name + ".js")
 
-@using (Html.BeginForm())
+@if (Model.Types.IsEmpty())
 {
-    <table id="results" style="width: 100%; margin: 0px" class="st" pluralAndGender="@Url.Action((TranslationController tc) => tc.PluralAndGender())">
+    <h2>@TranslationMessage._0AlreadySynchronized.NiceToString().Formato(Model.LocalizedAssembly.Assembly.GetName().Name)</h2>   
+}
+else
+{
+    <h2>@ViewBag.Title</h2>
+    
+    using (Html.BeginForm())
+    {
+    <table id="results" style="width: 100%; margin: 0px" class="st" 
+        data-pluralAndGender="@Url.Action((TranslationController tc) => tc.PluralAndGender())" 
+        data-feedback="@Url.Action("Feedback", "Translation")" 
+        data-culture="@culture.Name">
         @foreach (var typeChanges in Model.Types)
         {
             <thead>
                 <tr>
-                    <th class="leftCell">Type</th>
+                    <th class="leftCell">@TranslationMessage.Type.NiceToString()</th>
                     <th colspan="4" class="titleCell">@typeChanges.Type.Type.Name</th>
                 </tr>
             </thead>
@@ -106,11 +120,11 @@
                 </th>
                 <th class="monospaceCell">
                     @{  
-                        var items = selectListItems(typeChanges.TypeConflict.Values.Select(a => a.Translated));
+                    var items = selectListItems(typeChanges.TypeConflict.Values.Select(a => a.Translated));
 
                         @Html.DropDownList(locKey(typeChanges.Type) + ".Description", items, new { style = "width:90%" });
                     }
-                    <a href="#" class="edit">edit</a>
+                    <a href="#" class="edit">@TranslationMessage.Edit.NiceToString()</a>
                 </th>
                 <th class="smallCell monospaceCell">
                     @if (hasGender && hasPlural)
@@ -136,12 +150,11 @@
                 {
 
             <tr>
-                <th class="leftCell">Member
+                <th class="leftCell">@TranslationMessage.Member.NiceToString()
                 </th>
                 <th colspan="4">@conflict.Key
                 </th>
             </tr>
-            
                     foreach (var mc in conflict.Value)
                     {
             <tr>
@@ -156,10 +169,10 @@
                 <td class="leftCell">@culture.Name</td>
                 <td colspan="4" class="monospaceCell">
                     @{  
-                        var items = selectListItems(conflict.Value.Values.Select(a => a.Translated));
+                    var items = selectListItems(conflict.Value.Values.Select(a => a.Translated));
                         @Html.DropDownList(locKey(typeChanges.Type) + ".Member." + conflict.Key, items);
                     }
-                    <a href="#" class="edit">edit</a>
+                    <a href="#" class="edit">@TranslationMessage.Edit.NiceToString()</a>
                 </td>
             </tr>
                 }
@@ -167,22 +180,13 @@
 
         }
     </table>
-    <input type="submit" value="Save" />
+    <input type="submit" value="@TranslationMessage.Save.NiceToString()" />
+    }
 }
 
 <script>
     $(function () {
-        $("a.edit").bind("click", function () {
-            var select = $(this).parent().find("select");
-            var input = $("<textarea/>").attr("type", "text")
-                .attr("name", select.attr("name"))
-                .val(select.val())
-                .attr("style", "width:90%; height:16px");
-            select.after(input);
-            select.remove();
-            $(this).remove();
-
-            return false;
-        });
+        SF.Translation.pluralAndGender();
+        SF.Translation.editAndRemember(@((TranslationClient.Translator is ITranslatorWithFeedback).ToString().ToLower()));
     });
 </script>

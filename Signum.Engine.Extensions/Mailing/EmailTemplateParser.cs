@@ -613,15 +613,28 @@ namespace Signum.Engine.Mailing
                 if (!gr.Success)
                     return m.Value;
 
-                if(gr.Value != item.TokenString)
+                if(!AreSimilar(gr.Value,item.TokenString))
                     return m.Value;
 
-                var newKeyword = m.Value.Substring(0, gr.Index) + token.Token.FullKey() + m.Value.Substring(gr.Index + gr.Length);
+                var newKeyword = m.Value.Substring(0, gr.Index - m.Index)
+                    + token.Token.FullKey()
+                    + m.Value.Substring(gr.Index + gr.Length - m.Index);
 
                 return newKeyword;
             });
 
             return result;
+        }
+
+        private static bool AreSimilar(string p1, string p2)
+        {
+            if (p1.StartsWith("Entity."))
+                p1 = p1.After("Entity.");
+
+            if (p2.StartsWith("Entity."))
+                p2 = p2.After("Entity.");
+
+            return p1 == p2;
         }
     }
 

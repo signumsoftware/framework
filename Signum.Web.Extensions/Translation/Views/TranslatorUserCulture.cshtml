@@ -1,6 +1,9 @@
 ﻿@using Signum.Entities.Translation
-@using (var tcc = Html.TypeContext<TranslatedCultureDN>())
+@using (var tcc = Html.TypeContext<TranslatorUserCultureDN>())
 {
+    using (Html.FieldInline())
+    {
     @Html.EntityCombo(tcc, d => d.Culture)
     @Html.ValueLine(tcc, d => d.Action)
+    }
 }

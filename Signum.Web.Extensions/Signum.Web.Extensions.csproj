@@ -232,7 +232,9 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="Translation\Controllers\TranslatedInstanceController.cs" />
     <Compile Include="Translation\Controllers\TranslationController.cs" />
+    <Compile Include="Translation\TranslatedInstanceSynchronizer.cs" />
     <Compile Include="Translation\TranslationClient.cs" />
     <Compile Include="Translation\ITranslator.cs" />
     <Compile Include="Translation\TranslationSynchronizer.cs" />
@@ -834,6 +836,26 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>SMSUpdatePackage.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Translation\Views\TranslationReplacement.generated.cs">
+      <DependentUpon>TranslationReplacement.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Translation\Views\SyncInstance.generated.cs">
+      <DependentUpon>SyncInstance.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Translation\Views\ViewInstance.generated.cs">
+      <DependentUpon>ViewInstance.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Translation\Views\IndexInstance.generated.cs">
+      <DependentUpon>IndexInstance.cshtml</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Translation\Views\Sync.generated.cs">
       <DependentUpon>Sync.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -849,15 +871,15 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Index.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Translation\Views\TranslatedCulture.generated.cs">
+    <Compile Include="Translation\Views\TranslatorUserCulture.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>TranslatedCulture.cshtml</DependentUpon>
+      <DependentUpon>TranslatorUserCulture.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Translation\Views\Translator.generated.cs">
+    <Compile Include="Translation\Views\TranslatorUser.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>Translator.cshtml</DependentUpon>
+      <DependentUpon>TranslatorUser.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Translation\Views\View.generated.cs">
       <AutoGen>True</AutoGen>
@@ -1544,13 +1566,13 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>CultureInfoView.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Translation\Views\TranslatedCulture.cshtml">
+    <Content Include="Translation\Views\TranslatorUserCulture.cshtml">
       <Generator>RazorGenerator</Generator>
-      <LastGenOutput>TranslatedCulture.generated.cs</LastGenOutput>
+      <LastGenOutput>TranslatorUserCulture.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Translation\Views\Translator.cshtml">
+    <Content Include="Translation\Views\TranslatorUser.cshtml">
       <Generator>RazorGenerator</Generator>
-      <LastGenOutput>Translator.generated.cs</LastGenOutput>
+      <LastGenOutput>TranslatorUser.generated.cs</LastGenOutput>
     </Content>
     <Content Include="Translation\Views\View.cshtml">
       <Generator>RazorGenerator</Generator>
@@ -1563,6 +1585,22 @@
     <Content Include="UserQueries\Views\ImportUserAsset.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ImportUserAsset.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Translation\Views\IndexInstance.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>IndexInstance.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Translation\Views\ViewInstance.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>ViewInstance.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Translation\Views\SyncInstance.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>SyncInstance.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Translation\Views\TranslationReplacement.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>TranslationReplacement.generated.cs</LastGenOutput>
     </Content>
     <None Include="UserQueries\Views\QueryColumn.cshtml">
       <Generator>RazorGenerator</Generator>

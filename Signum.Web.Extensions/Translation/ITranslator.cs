@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -9,6 +10,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Script.Serialization;
+using Signum.Engine.Translation;
+using Signum.Entities.Translation;
 using Signum.Utilities;
 
 namespace Signum.Web.Translation
@@ -18,11 +21,65 @@ namespace Signum.Web.Translation
         List<string> TranslateBatch(List<string> list, string from, string to);
     }
 
+    public interface ITranslatorWithFeedback: ITranslator
+    {
+        void Feedback(string to, string wrongTranslation, string fixedTranslation);
+    }
+
     public class MockTranslator : ITranslator
     {
         public List<string> TranslateBatch(List<string> list, string from, string to)
         {
             return list.Select(text => "In{0}({1})".Formato(to, text)).ToList();
+        }
+    }
+
+    public class ReplacerTranslator : ITranslatorWithFeedback
+    {
+        ITranslator Inner;
+
+        public ReplacerTranslator(ITranslator inner)
+        {
+            if (inner == null)
+                throw new ArgumentNullException("inner");
+
+            this.Inner = inner;
+        }
+
+        public List<string> TranslateBatch(List<string> list, string from, string to)
+        {
+            var result = Inner.TranslateBatch(list, from, to);
+
+            TranslationReplacementPack pack = TranslationReplacementLogic.ReplacementsLazy.Value.TryGetC(CultureInfo.GetCultureInfo(to));
+
+            if (pack == null)
+                return result;
+
+            return result.Select(s => pack.Regex.Replace(s, m =>
+            {
+                string replacement = pack.Dictionary.GetOrThrow(m.Value);
+
+                return IsUpper(m.Value) ? replacement.ToUpper() :
+                    IsLower(m.Value) ? replacement.ToLower() :
+                    char.IsUpper(m.Value[0]) ? replacement.FirstUpper() :
+                    replacement.FirstLower();
+            })).ToList();
+        }
+
+
+        bool IsUpper(string p)
+        {
+            return p.ToUpper() == p && p.ToLower() != p;
+        }
+
+        bool IsLower(string p)
+        {
+            return p.ToLower() == p && p.ToUpper() != p;
+        }
+
+        public void Feedback(string culture, string wrongTranslation, string fixedTranslation)
+        {
+            TranslationReplacementLogic.ReplacementFeedback(CultureInfo.GetCultureInfo(culture), wrongTranslation, fixedTranslation);
         }
     }
 
