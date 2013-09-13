@@ -32,7 +32,7 @@ namespace Signum.Windows.UIAutomation
                     return;
 
                 if (((PerfCounter.Ticks - start) / PerfCounter.FrequencyMilliseconds) > (timeOut ?? DefaultTimeout))
-                    throw new TimeoutException("Wait condition failed after {0} ms: ".Formato(timeOut ?? DefaultTimeout) + actionDescription == null ? null : actionDescription());
+                    throw new TimeoutException("Wait condition failed after {0} ms: ".Formato(timeOut ?? DefaultTimeout) + (actionDescription == null ? null : actionDescription()));
             }
         }
 

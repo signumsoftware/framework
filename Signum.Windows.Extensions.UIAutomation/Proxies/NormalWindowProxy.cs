@@ -195,6 +195,8 @@ namespace Signum.Windows.UIAutomation
                         if (confirmation != null)
                             return true;
 
+                        base.Close();
+
                         return false;
                     }
                     catch (ElementNotAvailableException)
