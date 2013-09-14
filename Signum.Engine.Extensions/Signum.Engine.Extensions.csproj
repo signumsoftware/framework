@@ -159,7 +159,7 @@
     <Compile Include="Reports\CellBuilder.cs" />
     <Compile Include="Reports\ExcelExtensions.cs" />
     <Compile Include="Reports\PlainExcelGenerator.cs" />
-    <Compile Include="Reports\ReportsLogic.cs" />
+    <Compile Include="Reports\ReportSpreedsheetsLogic.cs" />
     <Compile Include="Translation\TranslationLogic.cs" />
     <Compile Include="Translation\TranslationReplacementLogic.cs" />
     <Compile Include="UserQueries\QueryTokenSynchronizer.cs" />

@@ -18,7 +18,7 @@ using Signum.Engine.Operations;
 
 namespace Signum.Engine.Reports
 {
-    public static class ReportsLogic
+    public static class ReportSpreadsheetsLogic
     {
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm, bool excelReport)
         {

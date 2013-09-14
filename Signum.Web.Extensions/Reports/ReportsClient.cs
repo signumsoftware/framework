@@ -123,7 +123,7 @@ namespace Signum.Web.Reports
                 if (ToExcelPlain)
                     items.Add(plain);
 
-                List<Lite<ExcelReportDN>> reports = ReportsLogic.GetExcelReports(ctx.QueryName);
+                List<Lite<ExcelReportDN>> reports = ReportSpreadsheetsLogic.GetExcelReports(ctx.QueryName);
 
                 if (reports.Count > 0)
                 {
