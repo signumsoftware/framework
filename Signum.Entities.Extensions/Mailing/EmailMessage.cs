@@ -296,7 +296,7 @@ namespace Signum.Entities.Mailing
             set { Set(ref kind, value, () => Kind); }
         }
 
-        internal EmailRecipientDN Clone()
+        public new EmailRecipientDN Clone()
         {
             return new EmailRecipientDN
             {

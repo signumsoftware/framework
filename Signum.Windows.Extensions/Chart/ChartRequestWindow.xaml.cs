@@ -181,7 +181,6 @@ namespace Signum.Windows.Chart
         }
 
 
-        ChartScript chartScriptControl;
 
         private void edit_Click(object sender, RoutedEventArgs e)
         {

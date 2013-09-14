@@ -40,9 +40,7 @@ namespace Signum.Engine.Scheduler
         }
 
         public static Polymorphic<Func<ITaskDN, Lite<IIdentifiable>>> ExecuteTask = new Polymorphic<Func<ITaskDN, Lite<IIdentifiable>>>();
-
-        public static event Action<string, Exception> Error;
-
+        
         public class ScheduledTaskPair
         {
             public ScheduledTaskDN ScheduledTask;

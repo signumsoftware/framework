@@ -19,9 +19,9 @@ namespace Signum.Windows.Reports
                 if (excelReport)
                 {
                     if (toExcel)
-                        SearchControl.GetMenuItems += sc => sc.QueryName == typeof(ExcelReportDN) ? null : ReportMenuItemConstructor.Construct(sc, PlainExcelMenuItemConstructor.Construct(sc));
+                        SearchControl.GetMenuItems += sc => (sc.QueryName as Type) == typeof(ExcelReportDN) ? null : ReportMenuItemConstructor.Construct(sc, PlainExcelMenuItemConstructor.Construct(sc));
                     else
-                        SearchControl.GetMenuItems += sc => sc.QueryName == typeof(ExcelReportDN) ? null : ReportMenuItemConstructor.Construct(sc, null);
+                        SearchControl.GetMenuItems += sc => (sc.QueryName as Type) == typeof(ExcelReportDN) ? null : ReportMenuItemConstructor.Construct(sc, null);
 
                     QueryClient.Start();
 
