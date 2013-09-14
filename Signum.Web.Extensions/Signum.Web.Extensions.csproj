@@ -931,7 +931,6 @@
     <Compile Include="Combine\CssCombiner.cs" />
     <Compile Include="Combine\GoogleClosure.cs" />
     <Compile Include="Combine\JavascriptCombiner.cs" />
-    <Compile Include="Combine\JavaScriptMinifier.cs" />
     <Compile Include="Combine\Logger.cs" />
     <Compile Include="UserQueries\Views\UserQuery.generated.cs">
       <AutoGen>True</AutoGen>

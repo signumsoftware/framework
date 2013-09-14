@@ -13,11 +13,10 @@ namespace Signum.Web.Combine
 
         static string Minify(string content)
         {
-            string minified = new JavaScriptMinifier().Minify(content);
+            if (UseGoogleClosure)
+                return GoogleClosure.CompressSourceCode(content);
 
-            if (UseGoogleClosure) return GoogleClosure.CompressSourceCode(minified);
-
-            return minified;
+            return content;
         }
 
         internal static StaticContentResult Combine(string[] virtualFiles)
