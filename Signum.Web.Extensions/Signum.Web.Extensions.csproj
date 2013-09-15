@@ -922,7 +922,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>QueryOrder.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Reports\ReportsClient.cs" />
+    <Compile Include="Reports\ReportSpreadsheetsClient.cs" />
     <Compile Include="Reports\Controllers\ReportController.cs" />
     <Compile Include="Scheduler\SchedulerClient.cs" />
     <Compile Include="Combine\CombineController.cs" />
