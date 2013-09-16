@@ -58,15 +58,13 @@ namespace Signum.Engine.Maps
 
         public UniqueIndex AddUniqueIndex<T>(Expression<Func<T, object>> fields, Expression<Func<T, bool>> where) where T : IdentifiableEntity
         {
-            Schema schema = Schema.Current;
-
-            Expression<Func<T, object>>[] fieldLambdas = Split(fields);
-
-            Field[] colFields = fieldLambdas.Select(fun => schema.Field<T>(fun)).ToArray();
-
+            Schema schema = Schema.Current;          
+       
             var table = schema.Table<T>();
 
-            var index = AddUniqueIndex(table, colFields);
+            IColumn[] columns = Split(table, fields);
+
+            var index = AddUniqueIndex(table, columns);
 
             if (where != null)
                 index.Where = IndexWhereExpressionVisitor.GetIndexWhere(where, table);
@@ -85,13 +83,11 @@ namespace Signum.Engine.Maps
         {
             Schema schema = Schema.Current;
 
-            Expression<Func<MListElement<T, V>, object>>[] fieldLambdas = Split(fields);
-
             RelationalTable table = ((FieldMList)Schema.FindField(schema.Table(typeof(T)), Reflector.GetMemberList(toMList))).RelationalTable;
 
-            Field[] colFields = fieldLambdas.Select(fun => Schema.FindField(table, Reflector.GetMemberList(fun))).ToArray();
+            IColumn[] columns = Split(table, fields);
 
-            var index = AddUniqueIndex(table, colFields);
+            var index = AddUniqueIndex(table, columns);
 
             if (where != null)
                 index.Where = IndexWhereExpressionVisitor.GetIndexWhere(where, table);
@@ -99,24 +95,63 @@ namespace Signum.Engine.Maps
             return index;
         }
 
-        Expression<Func<T, object>>[] Split<T>(Expression<Func<T, object>> columns)
+        IColumn[] Split<T>(IFieldFinder finder, Expression<Func<T, object>> columns)
         {
             if (columns == null)
-                return new Expression<Func<T, object>>[0];
+                throw new ArgumentNullException("columns");
 
             if (columns.Body.NodeType == ExpressionType.New)
             {
-                return ((NewExpression)columns.Body).Arguments
-                    .Select(a => Expression.Lambda<Func<T, object>>(Expression.Convert(a, typeof(object)), columns.Parameters))
-                    .ToArray();
+                return (from a in ((NewExpression)columns.Body).Arguments
+                        from c in GetColumns<T>(finder, Expression.Lambda<Func<T, object>>(Expression.Convert(a, typeof(object)), columns.Parameters))
+                        select c).ToArray();
             }
 
-            return new[] { columns };
+            return GetColumns<T>(finder, columns);
+        }
+
+        static IColumn[] GetColumns<T>(IFieldFinder finder, Expression<Func<T, object>> field)
+        {
+            Type type = RemoveCasting(ref field);
+
+            Field f = Schema.FindField(finder, Reflector.GetMemberList(field));
+
+            if (type != null)
+            {
+                var ib = f as FieldImplementedBy;
+                if (ib == null)
+                    throw new InvalidOperationException("Casting only supported for {0}".Formato(typeof(FieldImplementedBy).Name));
+
+                return (from ic in ib.ImplementationColumns
+                        where type.IsAssignableFrom(ic.Key)
+                        select (IColumn)ic.Value).ToArray();
+            }
+
+            return Index.GetColumnsFromFields(f);
+        }
+
+        static Type RemoveCasting<T>(ref Expression<Func<T, object>> field)
+        {
+            var body = field.Body;
+
+            if (body.NodeType == ExpressionType.Convert && body.Type == typeof(object))
+                body = ((UnaryExpression)body).Operand;
+
+            Type type = null;
+            if ((body.NodeType == ExpressionType.Convert || body.NodeType == ExpressionType.TypeAs) &&
+                body.Type != typeof(object))
+            {
+                type = body.Type;
+                body = ((UnaryExpression)body).Operand;
+            }
+
+            field = Expression.Lambda<Func<T, object>>(Expression.Convert(body, typeof(object)), field.Parameters);
+            return type;
         }
 
         public UniqueIndex AddUniqueIndex(ITable table, Field[] fields)
         {
-            var index = new UniqueIndex(table, fields);
+            var index = new UniqueIndex(table, Index.GetColumnsFromFields(fields));
             AddIndex(index);
             return index;
         }
