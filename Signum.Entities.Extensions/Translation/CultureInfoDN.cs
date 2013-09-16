@@ -44,22 +44,13 @@ namespace Signum.Entities.Translation
             private set { Set(ref englishName, value, () => EnglishName); }
         }
 
-        static Expression<Func<CultureInfoDN, CultureInfo>> CultureInfoExpression = ci => ci == null ? null : CultureInfo.GetCultureInfo(ci.Name);
-        public CultureInfo CultureInfo
-        {
-            get
-            {
-                return CultureInfo.GetCultureInfo(Name);
-            }
-        }
-
         protected override string PropertyValidation(PropertyInfo pi)
         {
             if (pi.Is(() => Name) && Name.HasText())
             {
                 try
                 {
-                    CultureInfo culture = CultureInfo;
+                    this.ToCultureInfo();
                 }
                 catch (CultureNotFoundException)
                 {
@@ -74,8 +65,9 @@ namespace Signum.Entities.Translation
         {
             try
             {
-                EnglishName = CultureInfo.EnglishName;
-                NativeName = CultureInfo.NativeName;
+                var ci = this.ToCultureInfo();
+                EnglishName = ci.EnglishName;
+                NativeName = ci.NativeName;
             }
             catch (CultureNotFoundException)
             {
@@ -94,6 +86,17 @@ namespace Signum.Entities.Translation
     public enum CultureInfoOperation
     {
         Save
+    }
+
+    public static class CultureInfoExtensions
+    {
+        public static CultureInfo ToCultureInfo(this CultureInfoDN ci)
+        {
+            if (ci == null)
+                return null;
+
+            return CultureInfo.GetCultureInfo(ci.Name);
+        }
     }
 
     public enum TranslationPermission

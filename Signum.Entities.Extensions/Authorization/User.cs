@@ -142,7 +142,7 @@ namespace Signum.Entities.Authorization
             entity => new EmailOwnerData
             {
                  Owner = entity.ToLite(), 
-                 CultureInfo = entity.CultureInfo.CultureInfo,
+                 CultureInfo = entity.CultureInfo.ToCultureInfo(),
                  DisplayName = entity.UserName,
                  Email = entity.Email,
             };

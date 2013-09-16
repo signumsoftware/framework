@@ -49,7 +49,7 @@ namespace Signum.Engine.Translation
                 }.Register();
 
                 ReplacementsLazy = sb.GlobalLazy(() => Database.Query<TranslationReplacementDN>()
-                    .AgGroupToDictionary(a => a.CultureInfo.CultureInfo,
+                    .AgGroupToDictionary(a => a.CultureInfo.ToCultureInfo(),
                     gr =>
                     {
                         var dic = gr.ToDictionary(a => a.WrongTranslation, a => a.RightTranslation, StringComparer.InvariantCultureIgnoreCase, "wrong translations");

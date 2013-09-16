@@ -216,7 +216,7 @@ namespace Signum.Entities.Mailing
 
         internal EmailTemplateMessageDN GetCultureMessage(CultureInfo ci)
         {
-            return Messages.SingleOrDefault(tm=>tm.CultureInfo.CultureInfo == ci);
+            return Messages.SingleOrDefault(tm => tm.CultureInfo.ToCultureInfo() == ci);
         }
 
         internal void ParseData(QueryDescription queryDescription)

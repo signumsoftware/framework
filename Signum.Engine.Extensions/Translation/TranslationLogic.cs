@@ -71,7 +71,7 @@ namespace Signum.Engine.Translation
                 TranslatorUserDN tr = UserDN.Current.Translator();
 
                 if (tr != null)
-                    cultures = cultures.Where(ci => ci.Name == defaultCulture || tr.Cultures.Any(tc => tc.Culture.CultureInfo == ci));
+                    cultures = cultures.Where(ci => ci.Name == defaultCulture || tr.Cultures.Any(tc => tc.Culture.ToCultureInfo() == ci));
             }
 
             return cultures.OrderByDescending(a => a.Name == defaultCulture).ThenBy(a => a.Name).ToList();
