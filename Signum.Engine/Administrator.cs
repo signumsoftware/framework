@@ -15,6 +15,7 @@ using Signum.Utilities.ExpressionTrees;
 using System.Reflection;
 using System.Collections.Concurrent;
 using Signum.Engine.Linq;
+using System.Data.Common;
 
 namespace Signum.Engine
 {
@@ -148,19 +149,19 @@ namespace Signum.Engine
             return ident;
         }
 
-        public static T SetNotModifiedGraph<T>(this T ident, int id) 
-            where T: IdentifiableEntity
+        public static T SetNotModifiedGraph<T>(this T ident, int id)
+            where T : IdentifiableEntity
         {
             foreach (var item in GraphExplorer.FromRoot(ident).Where(a => a.Modified != ModifiedState.Sealed))
             {
-                 item.SetNotModified();
+                item.SetNotModified();
                 if (item is IdentifiableEntity)
                     ((IdentifiableEntity)item).SetId(-1);
             }
 
             ident.SetId(id);
 
-            return ident; 
+            return ident;
         }
 
         /// <summary>
@@ -249,7 +250,7 @@ namespace Signum.Engine
             return prov.Translate(query.Expression, tr => tr.GetMainPreCommand());
         }
 
-        public static SqlPreCommandSimple UnsafeDeletePreCommand<T>(IQueryable<T> query) 
+        public static SqlPreCommandSimple UnsafeDeletePreCommand<T>(IQueryable<T> query)
             where T : IdentifiableEntity
         {
             var prov = ((DbQueryProvider)query.Provider);
@@ -257,7 +258,7 @@ namespace Signum.Engine
             return prov.Delete<SqlPreCommandSimple>(query, cm => cm.ToPreCommand(), removeSelectRowCount: true);
         }
 
-        public static SqlPreCommandSimple UnsafeDeletePreCommand<E, V>(this IQueryable<MListElement<E, V>> query) 
+        public static SqlPreCommandSimple UnsafeDeletePreCommand<E, V>(this IQueryable<MListElement<E, V>> query)
             where E : IdentifiableEntity
         {
             var prov = ((DbQueryProvider)query.Provider);
@@ -292,9 +293,9 @@ namespace Signum.Engine
 
         public static void UpdateToStrings<T>() where T : IdentifiableEntity, new()
         {
-            UpdateToStrings(Database.Query<T>()); 
+            UpdateToStrings(Database.Query<T>());
         }
-        
+
         public static void UpdateToStrings<T>(IQueryable<T> query) where T : IdentifiableEntity, new()
         {
             SafeConsole.WriteLineColor(ConsoleColor.Cyan, "Saving toStr for {0}".Formato(typeof(T).TypeName()));
@@ -361,11 +362,11 @@ namespace Signum.Engine
                 SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " NOCHECK  Foreign Keys");
                 Executor.ExecuteNonQuery("ALTER TABLE {0} NOCHECK CONSTRAINT ALL".Formato(table.Name));
 
-                onDispose += ()=>
+                onDispose += () =>
                 {
                     SafeConsole.WriteColor(ConsoleColor.DarkMagenta, " RE-CHECK Foreign Keys");
                     Executor.ExecuteNonQuery("ALTER TABLE {0}  WITH CHECK CHECK CONSTRAINT ALL".Formato(table.Name));
-                }; 
+                };
             }
 
             if (disableMultipleIndexes)
@@ -413,12 +414,12 @@ namespace Signum.Engine
             using (OverrideDatabaseInViews(table.Name.Schema.Database))
             {
                 return (from s in Database.View<SysSchemas>()
-                               where s.name == table.Name.Schema.Name
-                               from t in s.Tables()
-                               where t.name == table.Name.Name
-                               from i in t.Indices()
-                               where i.is_unique == unique && !i.is_primary_key 
-                               select i.name).ToList();
+                        where s.name == table.Name.Schema.Name
+                        from t in s.Tables()
+                        where t.name == table.Name.Name
+                        from i in t.Indices()
+                        where i.is_unique == unique && !i.is_primary_key
+                        select i.name).ToList();
             }
         }
 
@@ -429,6 +430,79 @@ namespace Signum.Engine
 
             if (indexesNames.HasItems())
                 indexesNames.Select(n => SqlBuilder.DropIndex(table.Name, n)).Combine(Spacing.Simple).ExecuteLeaves();
+        }
+
+
+
+        public static SqlPreCommand MoveAllForeignKeysScript<T>(Lite<T> oldEntity, Lite<T> newEntity)
+        where T : IdentifiableEntity
+        {
+            return MoveAllForeignKeysPrivate<T>(oldEntity, newEntity).Select(a => a.UpdateScript).Combine(Spacing.Double);
+        }
+
+        public static void MoveAllForeignKeysConsole<T>(Lite<T> oldEntity, Lite<T> newEntity)
+            where T : IdentifiableEntity
+        {
+            var tuples = MoveAllForeignKeysPrivate<T>(oldEntity, newEntity);
+
+            foreach (var t in tuples)
+            {
+                SafeConsole.WaitRows("{0}.{1}".Formato(t.ColumnTable.Table.Name.Name, t.ColumnTable.Column.Name), () => t.UpdateScript.ExecuteNonQuery());
+            }
+        }
+
+        class ColumnTableScript
+        {
+            public ColumnTable ColumnTable;
+            public SqlPreCommandSimple UpdateScript;
+        }
+
+        static List<ColumnTableScript> MoveAllForeignKeysPrivate<T>(Lite<T> oldEntity, Lite<T> newEntity)
+        where T : IdentifiableEntity
+        {
+            if (oldEntity.GetType() != newEntity.GetType())
+                throw new ArgumentException("oldEntity and newEntity should have the same type");
+
+            Schema s = Schema.Current;
+
+            Table refTable = s.Table(typeof(T));
+
+            List<ColumnTable> columns = GetColumnTables(s, refTable);
+
+            var pb = Connector.Current.ParameterBuilder;
+
+            return columns.Select(ct => new ColumnTableScript
+            {
+                ColumnTable = ct,
+                UpdateScript = new SqlPreCommandSimple("UPDATE {0}\r\nSET {1} = @newEntity\r\nWHERE {1} = @oldEntity".Formato(ct.Table.Name, ct.Column.Name.SqlScape()), new List<DbParameter>
+                {
+                    pb.CreateParameter("@oldEntity", SqlBuilder.PrimaryKeyType, null, false, oldEntity.Id),
+                    pb.CreateParameter("@newEntity", SqlBuilder.PrimaryKeyType, null, false, newEntity.Id),
+                })
+            }).ToList();
+        }
+
+        class ColumnTable
+        {
+            public ITable Table;
+            public IColumn Column;
+        }
+
+        static ConcurrentDictionary<Table, List<ColumnTable>> columns = new ConcurrentDictionary<Table, List<ColumnTable>>();
+
+        static List<ColumnTable> GetColumnTables(Schema schema, Table refTable)
+        {
+            return columns.GetOrAdd(refTable, rt =>
+            {
+                return (from t in schema.GetDatabaseTables()
+                        from c in t.Columns.Values
+                        where c.ReferenceTable == rt
+                        select new ColumnTable
+                        {
+                            Table = t,
+                            Column = c,
+                        }).ToList();
+            });
         }
     }
 }
