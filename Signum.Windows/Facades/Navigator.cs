@@ -608,12 +608,19 @@ namespace Signum.Windows
         internal protected virtual bool OnIsCreable(Type type, bool isSearchEntity)
         {
             EntitySettings es = EntitySettings.TryGetC(type);
-            if (es == null)
-                return true;
 
-            if (!es.OnIsCreable(isSearchEntity))
-                return false;
-
+            if (es != null)
+            {
+                if (!es.OnIsCreable(isSearchEntity))
+                    return false;
+            }
+            else
+            {
+                if (type.IsIdentifiableEntity())//HACK
+                    return false;
+                else
+                    return true; 
+            }
 
             if (IsCreable != null)
                 foreach (Func<Type, bool> isCreable in IsCreable.GetInvocationList())
@@ -702,8 +709,8 @@ namespace Signum.Windows
 
         internal protected virtual bool OnIsFindable(object queryName)
         {
-            QuerySettings es = QuerySettings.TryGetC(queryName);
-            if (es == null || !es.IsFindable)
+            QuerySettings qs = QuerySettings.TryGetC(queryName);
+            if (qs == null || !qs.IsFindable)
                 return false;
 
             if (IsFindable != null)
@@ -718,8 +725,8 @@ namespace Signum.Windows
 
         internal protected virtual void AssertFindable(object queryName)
         {      
-            QuerySettings es = QuerySettings.TryGetC(queryName);
-            if (es == null)
+            QuerySettings qs = QuerySettings.TryGetC(queryName);
+            if (qs == null)
                 throw new InvalidOperationException(SearchMessage.Query0NotRegistered.NiceToString().Formato(queryName));
 
             if (!OnIsFindable(queryName))

@@ -344,6 +344,24 @@ namespace Signum.Engine.Linq
 
             return Add(result); 
         }
+
+        private Expression TryDatePartTo(SqlEnumExpression datePart, Expression start, Expression end)
+        {
+            Expression exprStart = Visit(start);
+            Expression exprEnd = Visit(end);
+            if (innerProjection || !Has(exprStart) || !Has(exprEnd))
+                return null;
+
+            var diff = new SqlFunctionExpression(typeof(int), null, SqlFunction.DATEDIFF.ToString(), 
+                new[] { datePart, exprStart, exprEnd });
+
+            var add = new SqlFunctionExpression(typeof(DateTime), null, SqlFunction.DATEADD.ToString(), 
+                new[] { datePart, diff, exprStart });
+
+            return Add(new CaseExpression(new[]{
+                new When(Expression.GreaterThan(add, end), Expression.Subtract(diff, Expression.Constant(1)))},
+                    diff));
+        }
         
 
         private Expression TrySqlTrim(Expression expression)
@@ -965,8 +983,8 @@ namespace Signum.Engine.Linq
                 
                     //dateadd(month, datediff(month, 0, SomeDate),0);
                 case "DateTimeExtensions.MonthStart": return TrySqlMonthStart(m.GetArgument("dateTime"));
-                case "DateTimeExtensions.YearsTo": return TrySqlFunction(null, SqlFunction.DATEDIFF, m.Type, new SqlEnumExpression(SqlEnums.year), m.GetArgument("min"), m.GetArgument("max"));
-                case "DateTimeExtensions.MonthsTo": return TrySqlFunction(null, SqlFunction.DATEDIFF, m.Type, new SqlEnumExpression(SqlEnums.month), m.GetArgument("min"), m.GetArgument("max"));
+                case "DateTimeExtensions.YearsTo": return TryDatePartTo(new SqlEnumExpression(SqlEnums.year), m.GetArgument("start"), m.GetArgument("end"));
+                case "DateTimeExtensions.MonthsTo": return TryDatePartTo(new SqlEnumExpression(SqlEnums.month), m.GetArgument("start"), m.GetArgument("end"));
 
                 case "Math.Sign": return TrySqlFunction(null, SqlFunction.SIGN, m.Type, m.GetArgument("value"));
                 case "Math.Abs": return TrySqlFunction(null, SqlFunction.ABS, m.Type, m.GetArgument("value"));

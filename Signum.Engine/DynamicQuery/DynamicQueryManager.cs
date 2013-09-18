@@ -79,7 +79,7 @@ namespace Signum.Engine.DynamicQuery
             {
                 try
                 {
-                    var qb = queries.GetOrThrow(queryName);
+                    var qb = GetQuery(queryName);
 
                     return executor(qb); 
                 }
@@ -313,14 +313,22 @@ namespace Signum.Engine.DynamicQuery
             {
                 Expression e = MetadataVisitor.JustVisit(Lambda, MetaExpression.FromRoute(qt.Type, qt.GetImplementations(), qt.GetPropertyRoute()));
 
-                MetaExpression me = e as MetaExpression;
+                MetaExpression me;
 
-                if (e is MetaProjectorExpression)
+                if (this.IsProjection)
                 {
-                    this.IsProjection = true;
-                    me = ((MetaProjectorExpression)e).Projector as MetaExpression;
-                }
+                    var mpe = e as MetaProjectorExpression; 
 
+                    if(mpe == null)
+                        mpe = MetadataVisitor.AsProjection(e);
+
+                    me = mpe == null ? null : mpe.Projector as MetaExpression;
+
+                }else 
+                {
+                    me = e as MetaExpression;
+                }
+     
                 CleanMeta cm = me == null ? null : me.Meta as CleanMeta;
 
                 var result = new ExtensionRouteInfo();

@@ -2375,11 +2375,10 @@ namespace Signum.Engine.Linq
         ColumnGenerator columnGenerator = new ColumnGenerator();
 
         Dictionary<string, Dictionary<Type, Expression>> declarations = new Dictionary<string, Dictionary<Type, Expression>>();
-        private ImplementedByExpression ib;
 
         public UnionAllRequest(ImplementedByExpression ib)
         {
-          this.OriginalImplementedBy  = ib;
+            this.OriginalImplementedBy = ib;
         }
 
         public override string ToString()

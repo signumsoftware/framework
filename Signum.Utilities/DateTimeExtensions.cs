@@ -120,19 +120,19 @@ namespace Signum.Utilities
             }
         }
 
-        public static int YearsTo(this DateTime min, DateTime max)
+        public static int YearsTo(this DateTime start, DateTime end)
         {
-            int result = max.Year - min.Year;
-            if (max.Month < min.Month || (max.Month == min.Month & max.Day < min.Day))
+            int result = end.Year - start.Year;
+            if (end.Month < start.Month || (end.Month == start.Month & end.Day < start.Day))
                 result--;
 
             return result;
         }
 
-        public static int MonthsTo(this DateTime min, DateTime max)
+        public static int MonthsTo(this DateTime start, DateTime end)
         {
-            int result = max.Month - min.Month + (max.Year - min.Year) * 12;
-            if (max.Day < min.Day)
+            int result = end.Month - start.Month + (end.Year - start.Year) * 12;
+            if (end.Day < start.Day)
                 result--;
 
             return result;
