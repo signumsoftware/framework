@@ -101,7 +101,14 @@ namespace Signum.Engine.Mailing
                 string body = message.Text;
 
                 if (template.MasterTemplate != null)
-                    body = EmailMasterTemplateDN.MasterTemplateContentRegex.Replace(template.MasterTemplate.Retrieve().Text, m => body);
+                {
+                    var emt = template.MasterTemplate.Retrieve();
+                    var emtm = emt.GetCultureMessage(message.CultureInfo.ToCultureInfo()) ??
+                        emt.GetCultureMessage(EmailLogic.Configuration.DefaultCulture.ToCultureInfo());
+
+                    if (emtm != null)
+                        body = EmailMasterTemplateDN.MasterTemplateContentRegex.Replace(emtm.Text, m => body);
+                }
 
                 message.TextParsedNode = EmailTemplateParser.Parse(body, qd, template.SystemEmail.ToType());
             }

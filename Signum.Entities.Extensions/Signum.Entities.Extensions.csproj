@@ -97,7 +97,9 @@
     <Compile Include="Authorization\User.cs" />
     <Compile Include="ControlPanel\ControlPanelOmniboxResultGenerator.cs" />
     <Compile Include="Help\HelpMessage.cs" />
+    <Compile Include="Mailing\EmailMasterTemplate.cs" />
     <Compile Include="Mailing\Pop3Configuration.cs" />
+    <Compile Include="Mailing\SystemEmail.cs" />
     <Compile Include="Scheduler\ScheduledTaskLogDN.cs" />
     <Compile Include="Scheduler\ApplicationEventLog.cs" />
     <Compile Include="Translation\CultureInfoDN.cs" />

@@ -46,20 +46,12 @@ namespace Signum.Web.Extensions.Mailing.Views
         public override void Execute()
         {
 
-
-            
-            #line 2 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
-Write(Html.ScriptsJs("~/Scripts/ckeditor/ckeditor.js"));
-
-            
-            #line default
-            #line hidden
 WriteLiteral("\r\n");
 
 
             
             #line 3 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
-Write(Html.ScriptsJs("~/Mailing/Scripts/SF_Mailing.js"));
+Write(Html.ScriptCss("~/Mailing/Content/SF_Mailing.css"));
 
             
             #line default
@@ -69,6 +61,26 @@ WriteLiteral("\r\n");
 
             
             #line 4 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
+Write(Html.ScriptsJs("~/Scripts/ckeditor/ckeditor.js"));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n");
+
+
+            
+            #line 5 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
+Write(Html.ScriptsJs("~/Mailing/Scripts/SF_Mailing.js"));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n\r\n");
+
+
+            
+            #line 7 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
  using (var ec = Html.TypeContext<EmailMasterTemplateDN>())
 {
     
@@ -76,69 +88,54 @@ WriteLiteral("\r\n");
             #line default
             #line hidden
             
-            #line 6 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
+            #line 9 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
 Write(Html.ValueLine(ec, e => e.Name));
 
             
             #line default
             #line hidden
             
-            #line 6 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
+            #line 9 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
                                     
-
 
             
             #line default
             #line hidden
-WriteLiteral("    <div id=\"messageEditContent\">\r\n        <span class=\"sf-label-line\">Text</span" +
-"><div class=\"clearall\"></div>\r\n        ");
+WriteLiteral("    <div class=\"clearall\" />\r\n");
+
+
+
+WriteLiteral("    <div class=\"sf-email-replacements-container sf-tabs-repeater\">\r\n        ");
 
 
             
-            #line 10 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
-   Write(Html.ValueLine(ec, e => e.Text, vl =>
+            #line 12 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
+   Write(Html.EntityRepeater(ec, e => e.Messages, er =>
         {
-            vl.ValueLineType = ValueLineType.TextArea;
-            vl.LabelVisible = false;
-            vl.ValueHtmlProps["style"] = "width:100%; min-height:180px;";
-            vl.ValueHtmlProps["class"] = "sf-email-htmlwrite";
+            er.Removing = "";
+            er.Creating = "SF.TabsRepeater.addItem();";
+            er.PreserveViewData = true;
         }));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n        <br />\r\n        <input type=\"button\" class=\"sf-button\" id=\"insertMaster" +
-"TemplateTokenButton\" value=\"");
+WriteLiteral("\r\n    </div>\r\n");
 
 
             
-            #line 18 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
-                                                                                       Write(EmailTemplateViewMessage.InsertMessageContent.NiceToString());
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\" />\r\n    </div>\r\n");
-
-
-
-WriteLiteral("    <script>\r\n        $(function () {\r\n            SF.Mailing.initHtmlEditorMaste" +
-"rTemplate(\"");
-
-
-            
-            #line 22 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
-                                                Write(ec.SubContext(e => e.Text).ControlID);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\");\r\n        });\r\n    </script>\r\n");
-
-
-            
-            #line 25 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
+            #line 19 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
 }
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n");
+
+
+            
+            #line 21 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
+Write(Html.ScriptsJs("~/Mailing/Scripts/SF_TabsRepeater.js"));
 
             
             #line default

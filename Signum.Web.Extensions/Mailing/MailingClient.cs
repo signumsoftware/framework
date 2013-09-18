@@ -43,7 +43,6 @@ namespace Signum.Web.Mailing
             return new QueryTokenDN(QueryUtils.Parse(tokenString, qd, canAggregate: false));
         }
 
-
         public static void Start(bool newsletter, bool pop3Config)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -60,11 +59,19 @@ namespace Signum.Web.Mailing
                     new EmbeddedEntitySettings<EmailRecipientDN>{ PartialViewName = e => ViewPrefix.Formato("EmailRecipient")},
                     
                     new EmbeddedEntitySettings<EmailConfigurationDN> { PartialViewName = e => ViewPrefix.Formato("EmailConfiguration")},
-                    new EntitySettings<EmailMasterTemplateDN>{ PartialViewName =  e => ViewPrefix.Formato("EmailMasterTemplate") },
                     new EntitySettings<SystemEmailDN>{ },
-
-                    new EntitySettings<SmtpConfigurationDN> { PartialViewName = e => ViewPrefix.Formato("SmtpConfiguration") },
-
+                    
+                    new EntitySettings<EmailMasterTemplateDN> { PartialViewName = e => ViewPrefix.Formato("EmailMasterTemplate") },
+                    new EmbeddedEntitySettings<EmailMasterTemplateMessageDN>
+                    {
+                        PartialViewName = e => ViewPrefix.Formato("EmailMasterTemplateMessage"),
+                        MappingDefault = new EntityMapping<EmailMasterTemplateMessageDN>(true)
+                            .SetProperty(emtm => emtm.MasterTemplate, ctx => 
+                            {
+                                return (EmailMasterTemplateDN)ctx.Parent.Parent.Parent.Parent.UntypedValue;
+                            })
+                    },
+                    
                     new EntitySettings<EmailTemplateDN>
                     { 
                         PartialViewName = e => ViewPrefix.Formato("EmailTemplate"),
@@ -75,7 +82,6 @@ namespace Signum.Web.Mailing
                                 return m(ctx);
                             })
                     },
-                    
                     new EmbeddedEntitySettings<EmailTemplateMessageDN>() 
                     { 
                         PartialViewName = e => ViewPrefix.Formato("EmailTemplateMessage"),
@@ -109,6 +115,7 @@ namespace Signum.Web.Mailing
                             })
                     },
 
+                    new EntitySettings<SmtpConfigurationDN> { PartialViewName = e => ViewPrefix.Formato("SmtpConfiguration") },
                     new EmbeddedEntitySettings<ClientCertificationFileDN> { PartialViewName = e => ViewPrefix.Formato("ClientCertificationFile")},
                 });
 

@@ -29,32 +29,21 @@ namespace Signum.Engine.Mailing
         {
             return EmailTemplatesExpression.Evaluate(se);
         }
-
-        public static Func<EmailMasterTemplateDN> CreateDefaultMasterTemplate;
-     
+        
         public static ResetLazy<Dictionary<Lite<EmailTemplateDN>, EmailTemplateDN>> EmailTemplatesLazy; 
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
-                sb.Include<EmailTemplateDN>();                
-                sb.Include<EmailMasterTemplateDN>();
+                sb.Include<EmailTemplateDN>();       
 
                 EmailTemplatesLazy = sb.GlobalLazy(() => Database.Query<EmailTemplateDN>()
                     .Where(et => et.Active && (et.EndDate == null || et.EndDate > TimeZoneManager.Now))
                     .ToDictionary(et => et.ToLite()), new InvalidateWith(typeof(EmailTemplateDN)));
 
                 SystemEmailLogic.Start(sb, dqm);
-
-                dqm.RegisterQuery(typeof(EmailMasterTemplateDN), () =>
-                 from t in Database.Query<EmailMasterTemplateDN>()
-                 select new
-                 {
-                     Entity = t,
-                     t.Id,
-                     t.Name,
-                 });
+                EmailMasterTemplateLogic.Start(sb, dqm);
 
                 dqm.RegisterQuery(typeof(EmailTemplateDN), () =>
                     from t in Database.Query<EmailTemplateDN>()
@@ -76,9 +65,7 @@ namespace Signum.Engine.Mailing
                 Validator.OverridePropertyValidator((EmailTemplateMessageDN m) => m.Subject).StaticPropertyValidation +=
                     EmailTemplateMessageSubject_StaticPropertyValidation;
 
-
                 EmailTemplateGraph.Register();
-                EmailMasterTemplateGraph.Register();
 
                 EmailTemplateParser.GlobalVariables.Add("UrlLeft", _ => EmailLogic.Configuration.UrlLeft);
 
@@ -218,7 +205,7 @@ namespace Signum.Engine.Mailing
                     Construct = _ => new EmailTemplateDN 
                     { 
                         SmtpConfiguration = SmtpConfigurationLogic.DefaultSmtpConfiguration.Value.ToLite(),
-                        MasterTemplate = EmailTemplateLogic.GetDefaultMasterTemplate(),
+                        MasterTemplate = EmailMasterTemplateLogic.GetDefaultMasterTemplate(),
                     }
                 }.Register();
 
@@ -243,41 +230,6 @@ namespace Signum.Engine.Mailing
 
                 registered = true;
             }
-        }
-
-        class EmailMasterTemplateGraph : Graph<EmailMasterTemplateDN>
-        {
-            public static void Register()
-            {
-                new Construct(EmailMasterTemplateOperation.Create)
-                {
-                    Construct = _ => CreateDefaultMasterTemplate == null ? 
-                        new EmailMasterTemplateDN { }:
-                        CreateDefaultMasterTemplate()
-                }.Register();
-
-                new Execute(EmailMasterTemplateOperation.Save)
-                {
-                    AllowsNew = true,
-                    Lite = false,
-                    Execute = (t, _) => { }
-                }.Register();
-            }
-        }
-
-        public static Lite<EmailMasterTemplateDN> GetDefaultMasterTemplate()
-        {
-            var result = Database.Query<EmailMasterTemplateDN>().Select(emt => emt.ToLite()).FirstOrDefault();
-
-            if (result != null)
-                return result;
-
-            if (CreateDefaultMasterTemplate == null)
-                return null;
-
-            var newTemplate = CreateDefaultMasterTemplate();
-
-            return newTemplate.Save().ToLite();
         }
 
         static SqlPreCommand Schema_Synchronize_Tokens(Replacements replacements)

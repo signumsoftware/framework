@@ -146,7 +146,10 @@ SF.registerModule("Mailing", function () {
 
             initHtmlEditor(idTargetTextArea);
 
-            $("body").off("click").on("click", "#insertMasterTemplateTokenButton", function () {
+            var $insertContent = $("#" + idTargetTextArea).closest(".sf-email-template-message")
+                .find(".sf-master-template-insert-content");
+
+            $insertContent.on("click", "", function () {
                 CKEDITOR.instances[idTargetTextArea].insertText(constructTokenTag("content"));
                 updateHtmlEditorTextArea(idTargetTextArea);
             });

@@ -167,7 +167,6 @@ namespace Signum.Entities.Mailing
             return IsActiveNowExpression.Evaluate(this);
         }
 
-
         protected override void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
         {
             if (sender == messages)
@@ -186,8 +185,7 @@ namespace Signum.Entities.Mailing
 
             messages.ForEach(e => e.Template = this);
         }
-     
-     
+
         protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
         {
             if (pi.Is(() => StartDate) || pi.Is(() => EndDate))
@@ -288,24 +286,6 @@ namespace Signum.Entities.Mailing
         }
     }
 
-    [Serializable, EntityKind(EntityKind.SystemString, EntityData.Master)]
-    public class SystemEmailDN : IdentifiableEntity
-    {
-        [NotNullable, UniqueIndex]
-        string fullClassName;
-        public string FullClassName
-        {
-            get { return fullClassName; }
-            set { Set(ref fullClassName, value, () => FullClassName); }
-        }
-
-        static readonly Expression<Func<SystemEmailDN, string>> ToStringExpression = e => e.fullClassName;
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
-    }
-
     [Serializable]
     public class EmailTemplateMessageDN : EmbeddedEntity
     {
@@ -368,53 +348,6 @@ namespace Signum.Entities.Mailing
         public override string ToString()
         {
             return cultureInfo.TryToString();
-        }
-    }
-
-    public enum EmailMasterTemplateOperation
-    {
-        Create,
-        Save
-	}
-
-    [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
-    public class EmailMasterTemplateDN : Entity
-    {
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
-        string name;
-        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            set { SetToStr(ref name, value, () => Name); }
-        }
-
-        [NotNullable, SqlDbType(Size = int.MaxValue)]
-        string text;
-        [StringLengthValidator(AllowNulls = false, Max = int.MaxValue)]
-        public string Text
-        {
-            get { return text; }
-            set { Set(ref text, value, () => Text); }
-        }
-
-        static Expression<Func<EmailMasterTemplateDN, string>> ToStringExpression = e => e.name;
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
-        }
-
-        [Ignore]
-        public static readonly Regex MasterTemplateContentRegex = new Regex(@"\@\[content\]");
-
-        protected override string PropertyValidation(System.Reflection.PropertyInfo pi)
-        {
-            if (pi.Is(() => Text) && !MasterTemplateContentRegex.IsMatch(Text))
-            {
-                throw new ApplicationException(EmailTemplateMessage.TheTextMustContain0IndicatingReplacementPoint.NiceToString().Formato("@[content]"));
-            }
-
-            return base.PropertyValidation(pi);
         }
     }
 
