@@ -23,6 +23,7 @@ namespace Signum.Entities.Basics
             this.StackTrace = ex.StackTrace;
             this.ThreadId = Thread.CurrentThread.ManagedThreadId;
             ex.Data[ExceptionDataKey] = this;
+            this.MachineName = System.Environment.MachineName;
         }
 
         DateTime creationDate = TimeZoneManager.Now;
@@ -157,6 +158,15 @@ namespace Signum.Entities.Basics
         {
             get { return urlReferer; }
             set { Set(ref urlReferer, value, () => UrlReferer); }
+        }
+
+        [SqlDbType(Size = 100)]
+        string machineName;
+        [StringLengthValidator(AllowNulls = true, Max = 100)]
+        public string MachineName
+        {
+            get { return machineName; }
+            set { Set(ref machineName, value, () => MachineName); }
         }
 
         [SqlDbType(Size = 100)]
