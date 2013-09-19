@@ -174,9 +174,14 @@ namespace Signum.Engine.Processes
 
                                         if (taken.Any())
                                         {
-                                            Database.Query<ProcessDN>()
-                                            .Where(p => taken.Contains(p.ToLite()) && p.MachineName == ProcessDN.None)
-                                            .UnsafeUpdate(p => new ProcessDN { MachineName = Environment.MachineName });
+                                            using (Transaction tr = Transaction.ForceNew())
+                                            {
+                                                Database.Query<ProcessDN>()
+                                                    .Where(p => taken.Contains(p.ToLite()) && p.MachineName == ProcessDN.None)
+                                                    .UnsafeUpdate(p => new ProcessDN { MachineName = Environment.MachineName });
+                                                tr.Commit();
+                                            }
+
 
                                             goto retry;
                                         }
@@ -365,8 +370,17 @@ namespace Signum.Engine.Processes
             CurrentExecution.ExecutionStart = TimeZoneManager.Now;
             CurrentExecution.Progress = 0;
             CurrentExecution.MachineName = Environment.MachineName;
-            using (OperationLogic.AllowSave<ProcessDN>())
-                CurrentExecution.Save();
+
+            using (Transaction tr = new Transaction())
+            {
+                if (!CurrentExecution.InDB().Any(a => a.State == ProcessState.Queued))
+                    throw new InvalidOperationException("The process should be in state Queued at this stage");
+                         
+                using (OperationLogic.AllowSave<ProcessDN>())
+                    CurrentExecution.Save();
+
+                tr.Commit();
+            }
         }
 
         public void Execute()
