@@ -24,6 +24,7 @@ namespace Signum.Entities.Basics
             this.ThreadId = Thread.CurrentThread.ManagedThreadId;
             ex.Data[ExceptionDataKey] = this;
             this.MachineName = System.Environment.MachineName;
+            this.ApplicationName = AppDomain.CurrentDomain.FriendlyName;
         }
 
         DateTime creationDate = TimeZoneManager.Now;
@@ -167,6 +168,15 @@ namespace Signum.Entities.Basics
         {
             get { return machineName; }
             set { Set(ref machineName, value, () => MachineName); }
+        }
+
+        [SqlDbType(Size = 100)]
+        string applicationName;
+        [StringLengthValidator(AllowNulls = true, Max = 100)]
+        public string ApplicationName
+        {
+            get { return applicationName; }
+            set { Set(ref applicationName, value, () => ApplicationName); }
         }
 
         [SqlDbType(Size = 100)]

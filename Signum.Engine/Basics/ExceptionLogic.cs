@@ -84,6 +84,7 @@ namespace Signum.Engine.Basics
             entity.ExceptionMessage = ex.Message;
             entity.StackTrace = ex.StackTrace;
             entity.ThreadId = Thread.CurrentThread.ManagedThreadId;
+            entity.ApplicationName = Schema.Current.ApplicationName;
 
             entity.Environment = CurrentEnvironment;
             try
