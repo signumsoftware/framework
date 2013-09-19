@@ -9,6 +9,8 @@
         <m:EntityCombo m:Common.Route="Task" />
         <m:ValueLine m:Common.Route="StartTime" />
         <m:ValueLine m:Common.Route="EndTime" />
+        <m:ValueLine m:Common.Route="MachineName" />
+        <m:ValueLine m:Common.Route="ApplicationName" />
         <m:EntityLine m:Common.Route="Exception" />
     </StackPanel>
 </UserControl>

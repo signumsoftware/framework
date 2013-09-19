@@ -66,6 +66,15 @@ namespace Signum.Entities.Scheduler
             set { Set(ref machineName, value, () => MachineName); }
         }
 
+        [NotNullable, SqlDbType(Size = 200)]
+        string applicationName;
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 200)]
+        public string ApplicationName
+        {
+            get { return applicationName; }
+            set { Set(ref applicationName, value, () => ApplicationName); }
+        }
+
         [ImplementedByAll]
         Lite<IIdentifiable> productEntity;
         public Lite<IIdentifiable> ProductEntity
