@@ -247,9 +247,9 @@ namespace Signum.Engine.Maps
             switch (IndexType)
             {
                 case IndexType.None: return Enumerable.Empty<Index>();
-                case IndexType.Unique: return new[] { new UniqueIndex(table, this) };
+                case IndexType.Unique: return new[] { new UniqueIndex(table, Index.GetColumnsFromFields(this)) };
                 case IndexType.UniqueMultipleNulls:
-                    var index = new UniqueIndex(table, this);
+                    var index = new UniqueIndex(table, Index.GetColumnsFromFields(this));
                     index.Where = IndexWhereExpressionVisitor.IsNull(this, false);
                     return new[] { index };
             }
@@ -633,7 +633,7 @@ namespace Signum.Engine.Maps
         public override IEnumerable<Index> GeneratIndexes(ITable table)
         {
             if (IndexType == Maps.IndexType.None)
-                return new[] { new Index(table, (Field)this) };
+                return new[] { new Index(table, (IColumn)this) };
 
             return base.GeneratIndexes(table);
         }
@@ -787,7 +787,7 @@ namespace Signum.Engine.Maps
         public override IEnumerable<Index> GeneratIndexes(ITable table)
         {
             if (IndexType == Maps.IndexType.None)
-                return new[] { new Index(table, (Field)this) };
+                return new[] { new Index(table, (IColumn)this.Column, (IColumn)this.ColumnTypes) };
 
             return base.GeneratIndexes(table);
         }

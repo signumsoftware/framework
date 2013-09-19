@@ -16,19 +16,15 @@ namespace Signum.Engine.Maps
         public ITable Table { get; private set; }
         public IColumn[] Columns { get; private set; }
 
-        public Index(ITable table, params Field[] fields)
+        public static IColumn[] GetColumnsFromFields(params Field[] fields)
         {
-            if (table == null)
-                throw new ArgumentNullException("table");
-
             if (fields == null || fields.IsEmpty())
                 throw new InvalidOperationException("No fields");
 
             if (fields.Any(f => f is FieldEmbedded || f is FieldMixin))
                 throw new InvalidOperationException("Embedded fields not supported for indexes");
 
-            this.Table = table;
-            this.Columns = fields.SelectMany(f => f.Columns()).ToArray();
+            return fields.SelectMany(f => f.Columns()).ToArray();
         }
 
         public Index(ITable table, params IColumn[] columns)
@@ -56,8 +52,6 @@ namespace Signum.Engine.Maps
 
     public class UniqueIndex : Index
     {
-        public UniqueIndex(ITable table, params Field[] fields) : base(table, fields) { }
-
         public UniqueIndex(ITable table, params IColumn[] columns) : base(table, columns) { }
 
         public string Where { get; set; }
@@ -136,7 +130,6 @@ namespace Signum.Engine.Maps
         {
             switch (exp.NodeType)
             {
-                case ExpressionType.TypeIs:
                 case ExpressionType.Conditional:
                 case ExpressionType.Constant:
                 case ExpressionType.Parameter:
@@ -152,6 +145,39 @@ namespace Signum.Engine.Maps
                 default:
                     return base.Visit(exp);
             }
+        }
+
+        protected override Expression VisitTypeIs(TypeBinaryExpression b)
+        {
+            var f = GetField(b.Expression);
+
+            FieldReference fr = f as FieldReference;
+            if (fr != null)
+            {
+                if (b.TypeOperand.IsAssignableFrom(fr.FieldType))
+                {
+                    sb.Append(fr.Name.SqlScape() + " IS NOT NULL");
+                }
+                else
+                    throw new InvalidOperationException("A {0} will never be {1}".Formato(fr.FieldType.TypeName(), b.TypeOperand.TypeName()));
+
+                return b;
+            }
+
+            FieldImplementedBy fib = f as FieldImplementedBy;
+            if (fib != null)
+            {
+                var imp = fib.ImplementationColumns.Where(kvp => b.TypeOperand.IsAssignableFrom(kvp.Key));
+
+                if (imp.Any())
+                    sb.Append(imp.ToString(kvp => kvp.Value.Name.SqlScape() + " IS NOT NULL", " OR "));
+                else
+                    throw new InvalidOperationException("No implementation ({0}) will never be {1}".Formato(fib.ImplementationColumns.Keys.ToString(t=>t.TypeName(), ", "), b.TypeOperand.TypeName()));
+
+                return b;
+            }
+
+            throw new NotSupportedException("'is' only works with ImplementedBy or Reference fields");
         }
 
         protected override Expression VisitMemberAccess(MemberExpression m)
