@@ -13,6 +13,7 @@ using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using Signum.Entities.Basics;
 using System.Globalization;
+using Signum.Entities.Translation;
 
 namespace Signum.Entities.Authorization
 {
@@ -93,6 +94,13 @@ namespace Signum.Entities.Authorization
             set { Set(ref email, value, () => Email); }
         }
 
+        CultureInfoDN cultureInfo;
+        public CultureInfoDN CultureInfo
+        {
+            get { return cultureInfo; }
+            set { Set(ref cultureInfo, value, () => CultureInfo); }
+        }
+
         DateTime? anulationDate;
         public DateTime? AnulationDate
         {
@@ -134,7 +142,7 @@ namespace Signum.Entities.Authorization
             entity => new EmailOwnerData
             {
                  Owner = entity.ToLite(), 
-                 CultureInfo = null,
+                 CultureInfo = entity.CultureInfo.ToCultureInfo(),
                  DisplayName = entity.UserName,
                  Email = entity.Email,
             };

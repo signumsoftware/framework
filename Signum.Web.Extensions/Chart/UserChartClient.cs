@@ -174,7 +174,7 @@ namespace Signum.Web.Chart
                 }
             };
 
-            if (ReportsClient.ToExcelPlain)
+            if (ReportSpreadsheetClient.ToExcelPlain)
             {
                 string ucExportDataText = ChartMessage.UserChart_ExportData.NiceToString();
                 buttons.Add(new ToolBarButton

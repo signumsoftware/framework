@@ -36,7 +36,7 @@
                 var queryDescription = DynamicQueryManager.Current.QueryDescription(queryName); //To be use inside query token controls
                     
                 <div class="sf-email-replacements-container">
-                    <div class="sf-email-replacements-token-container">
+                    <div class="sf-template-message-insert-container">
                         <fieldset class="sf-email-replacements-panel">
                             <legend>Replacements</legend>
                             @Html.MailingInsertQueryTokenBuilder(null, nc, queryDescription)
@@ -48,11 +48,11 @@
                     </div>
                     @Html.ValueLine(nc, e => e.Subject, vl => vl.ValueHtmlProps["class"] = "sf-email-inserttoken-target")
                     @Html.ValueLine(nc, e => e.Text, vl =>
-               {
-                   vl.ValueLineType = ValueLineType.TextArea;
-                   vl.ValueHtmlProps["style"] = "width:100%; height:180px;";
-                   vl.ValueHtmlProps["class"] = "sf-rich-text-editor";
-               })
+                    {
+                        vl.ValueLineType = ValueLineType.TextArea;
+                        vl.ValueHtmlProps["style"] = "width:100%; height:180px;";
+                        vl.ValueHtmlProps["class"] = "sf-rich-text-editor";
+                    })
                     <script>
                         $(function () {
                             SF.Mailing.initHtmlEditorWithTokens("@nc.SubContext(e => e.Text).ControlID");

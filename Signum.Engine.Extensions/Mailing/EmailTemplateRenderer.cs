@@ -11,6 +11,7 @@ using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Mailing;
 using Signum.Utilities;
+using Signum.Entities.Translation;
 
 namespace Signum.Engine.Mailing
 {
@@ -59,8 +60,8 @@ namespace Signum.Engine.Mailing
                     };
 
                     CultureInfo ci = recipients.Where(a => a.Kind == EmailRecipientKind.To).Select(a => a.OwnerData.CultureInfo).FirstOrDefault();
-
-                    EmailTemplateMessageDN message = template.GetCultureMessage(ci) ?? template.GetCultureMessage(EmailLogic.Configuration.DefaultCulture.CultureInfo);
+                    
+                    EmailTemplateMessageDN message = template.GetCultureMessage(ci) ?? template.GetCultureMessage(EmailLogic.Configuration.DefaultCulture.ToCultureInfo());
 
                     if (message == null)
                         throw new InvalidOperationException("Message {0} does not have a message for CultureInfo {0} (or Default)".Formato(template, ci));
@@ -100,7 +101,14 @@ namespace Signum.Engine.Mailing
                 string body = message.Text;
 
                 if (template.MasterTemplate != null)
-                    body = EmailMasterTemplateDN.MasterTemplateContentRegex.Replace(template.MasterTemplate.Retrieve().Text, m => body);
+                {
+                    var emt = template.MasterTemplate.Retrieve();
+                    var emtm = emt.GetCultureMessage(message.CultureInfo.ToCultureInfo()) ??
+                        emt.GetCultureMessage(EmailLogic.Configuration.DefaultCulture.ToCultureInfo());
+
+                    if (emtm != null)
+                        body = EmailMasterTemplateDN.MasterTemplateContentRegex.Replace(emtm.Text, m => body);
+                }
 
                 message.TextParsedNode = EmailTemplateParser.Parse(body, qd, template.SystemEmail.ToType());
             }

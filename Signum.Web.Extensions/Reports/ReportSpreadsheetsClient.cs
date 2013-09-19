@@ -22,7 +22,7 @@ using Signum.Entities.UserQueries;
 
 namespace Signum.Web.Reports
 {
-    public class ReportsClient
+    public class ReportSpreadsheetClient
     {
         public static bool ToExcelPlain { get; private set; }
         static bool ExcelReport;
@@ -34,7 +34,7 @@ namespace Signum.Web.Reports
                 ToExcelPlain = toExcelPlain;
                 ExcelReport = excelReport;
 
-                Navigator.RegisterArea(typeof(ReportsClient));
+                Navigator.RegisterArea(typeof(ReportSpreadsheetClient));
 
                 if (excelReport)
                 {
@@ -123,7 +123,7 @@ namespace Signum.Web.Reports
                 if (ToExcelPlain)
                     items.Add(plain);
 
-                List<Lite<ExcelReportDN>> reports = ReportsLogic.GetExcelReports(ctx.QueryName);
+                List<Lite<ExcelReportDN>> reports = ReportSpreadsheetsLogic.GetExcelReports(ctx.QueryName);
 
                 if (reports.Count > 0)
                 {

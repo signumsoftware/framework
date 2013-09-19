@@ -14,12 +14,12 @@
         {
             vl.LabelText = EmailTemplateViewMessage.Language.NiceToString();
         })
-        <div class="sf-email-replacements-token-container">
-                @Html.MailingInsertQueryTokenBuilder(null, ec, (QueryDescription)ViewData[ViewDataKeys.QueryDescription])
-                <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-basic sf-disabled" data-prefix="@ec.ControlID" value="@(EmailTemplateViewMessage.Insert.NiceToString())" />
-                <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-if sf-disabled" data-prefix="@ec.ControlID" data-block="if" value="if" />
-                <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-foreach sf-disabled" data-prefix="@ec.ControlID" data-block="foreach" value="foreach" />
-                <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-any sf-disabled" data-prefix="@ec.ControlID" data-block="any" value="any" />
+        <div class="sf-template-message-insert-container">
+            @Html.MailingInsertQueryTokenBuilder(null, ec, (QueryDescription)ViewData[ViewDataKeys.QueryDescription])
+            <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-basic sf-disabled" data-prefix="@ec.ControlID" value="@(EmailTemplateViewMessage.Insert.NiceToString())" />
+            <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-if sf-disabled" data-prefix="@ec.ControlID" data-block="if" value="if" />
+            <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-foreach sf-disabled" data-prefix="@ec.ControlID" data-block="foreach" value="foreach" />
+            <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-any sf-disabled" data-prefix="@ec.ControlID" data-block="any" value="any" />
         </div>
         @Html.ValueLine(ec, e => e.Subject, vl => 
         {

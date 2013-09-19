@@ -52,6 +52,9 @@ namespace Signum.Web.Combine
             {
                 string route = m.Groups["route"].Value;
 
+                if (route.StartsWith("data"))
+                    return m.Value;
+
                 string absolute = VirtualPathUtility.Combine(virtualFile, route); 
 
                 return "url(\"{0}\")".Formato(absolute);

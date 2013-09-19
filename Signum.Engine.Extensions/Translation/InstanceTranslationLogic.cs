@@ -48,7 +48,7 @@ namespace Signum.Engine.Translation
                     });
 
                 LocalizationCache = sb.GlobalLazy(() => Database.Query<TranslatedInstanceDN>()
-                    .AgGroupToDictionary(a => a.Culture.CultureInfo,
+                    .AgGroupToDictionary(a => a.Culture.ToCultureInfo(),
                     gr => gr.ToDictionary(a => new LocalizedInstanceKey(a.PropertyRoute.ToPropertyRoute(), a.Instance))),
                     new InvalidateWith(typeof(TranslatedInstanceDN)));
             }

@@ -236,7 +236,7 @@ namespace Signum.Engine.Mailing
 
             EmailTemplateDN template = info.DefaultTemplateConstructor();
             if (template.MasterTemplate != null)
-                template.MasterTemplate = EmailTemplateLogic.GetDefaultMasterTemplate();
+                template.MasterTemplate = EmailMasterTemplateLogic.GetDefaultMasterTemplate();
 
             if (template.Name == null)
                 template.Name = systemEmailDN.FullClassName;

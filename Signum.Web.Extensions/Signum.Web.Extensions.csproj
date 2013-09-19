@@ -176,6 +176,11 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="Mailing\Views\EmailMasterTemplateMessage.generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>EmailMasterTemplateMessage.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Mailing\Views\Pop3Reception.generated.cs">
       <DependentUpon>Pop3Reception.cshtml</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -922,7 +927,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>QueryOrder.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Reports\ReportsClient.cs" />
+    <Compile Include="Reports\ReportSpreadsheetsClient.cs" />
     <Compile Include="Reports\Controllers\ReportController.cs" />
     <Compile Include="Scheduler\SchedulerClient.cs" />
     <Compile Include="Combine\CombineController.cs" />
@@ -931,7 +936,6 @@
     <Compile Include="Combine\CssCombiner.cs" />
     <Compile Include="Combine\GoogleClosure.cs" />
     <Compile Include="Combine\JavascriptCombiner.cs" />
-    <Compile Include="Combine\JavaScriptMinifier.cs" />
     <Compile Include="Combine\Logger.cs" />
     <Compile Include="UserQueries\Views\UserQuery.generated.cs">
       <AutoGen>True</AutoGen>
@@ -1297,6 +1301,10 @@
     <Content Include="Mailing\Views\EmailAttachment.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>EmailAttachment.generated.cs</LastGenOutput>
+    </Content>
+    <Content Include="Mailing\Views\EmailMasterTemplateMessage.cshtml">
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>EmailMasterTemplateMessage.generated.cs</LastGenOutput>
     </Content>
     <None Include="Profiler\Views\Times.cshtml">
       <Generator>RazorGenerator</Generator>

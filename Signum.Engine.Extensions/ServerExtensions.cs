@@ -259,19 +259,19 @@ namespace Signum.Services
         public List<Lite<ExcelReportDN>> GetExcelReports(object queryName)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => ReportsLogic.GetExcelReports(queryName));
+                () => ReportSpreadsheetsLogic.GetExcelReports(queryName));
         }
 
         public byte[] ExecuteExcelReport(Lite<ExcelReportDN> excelReport, QueryRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => ReportsLogic.ExecuteExcelReport(excelReport, request));
+                () => ReportSpreadsheetsLogic.ExecuteExcelReport(excelReport, request));
         }
 
         public byte[] ExecutePlainExcel(QueryRequest request)
         {
             return Return(MethodInfo.GetCurrentMethod(),
-                () => ReportsLogic.ExecutePlainExcel(request));
+                () => ReportSpreadsheetsLogic.ExecutePlainExcel(request));
         }
 
         #endregion

@@ -16,6 +16,7 @@
     @Html.ValueLine(e, f => f.PasswordSetDate)
 
     @Html.ValueLine(e, f => f.Email, vl => vl.ValueHtmlProps["size"] = 30)
+    @Html.EntityCombo(e, f => f.CultureInfo)
     @Html.EntityLine(e, f => f.Role)
     @Html.EntityLine(e, f => f.Related)
 }
