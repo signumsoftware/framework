@@ -388,8 +388,8 @@ namespace Signum.Engine.Processes
 
             using (Transaction tr = new Transaction())
             {
-                if (!CurrentExecution.InDB().Any(a => a.State == ProcessState.Queued))
-                    throw new InvalidOperationException("The process should be in state Queued at this stage");
+                if (CurrentExecution.InDB().Any(a => a.State == ProcessState.Executing))
+                    throw new InvalidOperationException("The process {0} is allready Executing!".Formato(CurrentExecution.Id));
                          
                 using (OperationLogic.AllowSave<ProcessDN>())
                     CurrentExecution.Save();
