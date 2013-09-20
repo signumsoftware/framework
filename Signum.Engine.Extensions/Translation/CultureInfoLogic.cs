@@ -19,12 +19,21 @@ namespace Signum.Engine.Translation
 {
     public static class CultureInfoLogic
     {
+        public static CultureInfo ToCultureInfo(this CultureInfoDN ci)
+        {
+            if (ci == null)
+                return null;
+           
+            return CultureInfoDNToCultureInfo.Value.TryGetC(ci);
+        }
+
         internal static void AssertStarted(SchemaBuilder sb)
         {
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => CultureInfoLogic.Start(null, null)));
         }
 
         public static ResetLazy<Dictionary<CultureInfo, CultureInfoDN>> CultureInfoToEntity;
+        public static ResetLazy<Dictionary<CultureInfoDN, CultureInfo>> CultureInfoDNToCultureInfo;
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
@@ -44,6 +53,9 @@ namespace Signum.Engine.Translation
                     });
 
                 CultureInfoToEntity = sb.GlobalLazy(() => Database.Query<CultureInfoDN>().ToDictionary(ci => CultureInfo.GetCultureInfo(ci.Name), ci=>ci),
+                    invalidateWith: new InvalidateWith(typeof(CultureInfoDN)));
+                
+                CultureInfoDNToCultureInfo = sb.GlobalLazy(() => Database.Query<CultureInfoDN>().ToDictionary(ci => ci, ci => CultureInfo.GetCultureInfo(ci.Name)),
                     invalidateWith: new InvalidateWith(typeof(CultureInfoDN)));
 
                 new Graph<CultureInfoDN>.Execute(CultureInfoOperation.Save)

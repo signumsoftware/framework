@@ -73,11 +73,6 @@ namespace Signum.Entities.Mailing
 
             messages.ForEach(e => e.MasterTemplate = this);
         }
-
-        internal EmailMasterTemplateMessageDN GetCultureMessage(CultureInfo ci)
-        {
-            return Messages.SingleOrDefault(tm => tm.CultureInfo.ToCultureInfo() == ci);
-        }
     }
 
     public enum EmailMasterTemplateOperation

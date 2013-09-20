@@ -1,11 +1,13 @@
 ﻿using Signum.Engine.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Operations;
+using Signum.Engine.Translation;
 using Signum.Entities;
 using Signum.Entities.Mailing;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -14,6 +16,11 @@ namespace Signum.Engine.Mailing
 {
     public static class EmailMasterTemplateLogic
     {
+        public static EmailMasterTemplateMessageDN GetCultureMessage(this EmailMasterTemplateDN template, CultureInfo ci)
+        {
+            return template.Messages.SingleOrDefault(tm => tm.CultureInfo.ToCultureInfo() == ci);
+        }
+
         public static Func<EmailMasterTemplateDN> CreateDefaultMasterTemplate;
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)

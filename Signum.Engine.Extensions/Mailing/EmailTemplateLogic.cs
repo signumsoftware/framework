@@ -18,11 +18,17 @@ using System.Configuration;
 using Signum.Engine.UserQueries;
 using System.Linq.Expressions;
 using Signum.Entities.Translation;
+using Signum.Engine.Translation;
 
 namespace Signum.Engine.Mailing
 {
     public static class EmailTemplateLogic
-    {
+    {   
+        public static EmailTemplateMessageDN GetCultureMessage(this EmailTemplateDN template, CultureInfo ci)
+        {
+            return template.Messages.SingleOrDefault(tm => tm.CultureInfo.ToCultureInfo() == ci);
+        }
+     
         static Expression<Func<SystemEmailDN, IQueryable<EmailTemplateDN>>> EmailTemplatesExpression =
             se => Database.Query<EmailTemplateDN>().Where(et => et.SystemEmail == se);
         public static IQueryable<EmailTemplateDN> EmailTemplates(this SystemEmailDN se)
