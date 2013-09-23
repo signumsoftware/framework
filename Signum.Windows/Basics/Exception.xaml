@@ -26,6 +26,8 @@
             <m:ValueLine m:Common.Route="ControllerName" />
             <m:ValueLine m:Common.Route="Version" />
             <m:ValueLine m:Common.Route="ThreadId" />
+            <m:ValueLine m:Common.Route="MachineName" />
+            <m:ValueLine m:Common.Route="ApplicationName" />
         </StackPanel>
         
         <StackPanel  Grid.Column="1">
