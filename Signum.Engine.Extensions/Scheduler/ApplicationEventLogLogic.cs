@@ -43,7 +43,8 @@ namespace Signum.Engine.Extensions.Scheduler
 
         public static void ApplicationStart()
         {
-            new ApplicationEventLogDN { Date = TimeZoneManager.Now, MachineName = Environment.MachineName, GlobalEvent = TypeEvent.Start }.Save();
+            using (AuthLogic.Disable())
+                new ApplicationEventLogDN { Date = TimeZoneManager.Now, MachineName = Environment.MachineName, GlobalEvent = TypeEvent.Start }.Save();
         }
 
         public static void ApplicationEnd()

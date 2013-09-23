@@ -49,6 +49,15 @@ namespace Signum.Entities.Scheduler
             set { Set(ref machineName, value, () => MachineName); }
         }
 
+        [NotNullable, SqlDbType(Size = 100)]
+        string applicationName = None;
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        public string ApplicationName
+        {
+            get { return applicationName; }
+            set { Set(ref applicationName, value, () => ApplicationName); }
+        }
+
         public override string ToString()
         {
             return "{0} {1}".Formato(task, rule) + (suspended ? " [{0}]".Formato(ReflectionTools.GetPropertyInfo(() => Suspended).NiceName()) : "");

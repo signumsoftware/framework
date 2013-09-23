@@ -17,6 +17,7 @@ using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using System.Data.SqlClient;
 using Signum.Engine.Maps;
+using System.Linq.Expressions;
 
 namespace Signum.Engine.Processes
 {
@@ -84,7 +85,8 @@ namespace Signum.Engine.Processes
                 Progress = null,
                 Exception = null,
                 ExceptionDate = null,
-                MachineName = ProcessLogic.JustMyProcesses ? Environment.MachineName : ProcessDN.None
+                MachineName = ProcessLogic.JustMyProcesses ? Environment.MachineName : ProcessDN.None,
+                ApplicationName = ProcessLogic.JustMyProcesses ? Schema.Current.ApplicationName : ProcessDN.None
             });
         }
 
@@ -99,6 +101,21 @@ namespace Signum.Engine.Processes
             process.Exception = null;
             process.ExceptionDate = null;
             process.MachineName = ProcessLogic.JustMyProcesses ? Environment.MachineName : ProcessDN.None;
+            process.ApplicationName = ProcessLogic.JustMyProcesses ? Schema.Current.ApplicationName : ProcessDN.None;
+        }
+
+        static Expression<Func<ProcessDN, bool>> IsMineExpression =
+            p => p.MachineName == Environment.MachineName && p.ApplicationName == Schema.Current.ApplicationName; 
+        public static bool IsMine(this ProcessDN p)
+        {
+            return IsMineExpression.Evaluate(p);
+        }
+
+        static Expression<Func<ProcessDN, bool>> IsSharedExpression =
+            p => !ProcessLogic.JustMyProcesses && p.MachineName == ProcessDN.None;
+        public static bool IsShared(this ProcessDN p)
+        {
+            return IsSharedExpression.Evaluate(p);
         }
 
         public static void StartRunningProcesses()
@@ -118,10 +135,8 @@ namespace Signum.Engine.Processes
                         running = true;
 
                         (from p in Database.Query<ProcessDN>()
-                         where
-                         p.State == ProcessState.Executing && p.MachineName == Environment.MachineName ||
-                         p.State == ProcessState.Suspending && p.MachineName == Environment.MachineName ||
-                         p.State == ProcessState.Suspended && (p.MachineName == Environment.MachineName || !ProcessLogic.JustMyProcesses && p.MachineName == ProcessDN.None)
+                         where p.IsMine() && (p.State == ProcessState.Executing || p.State == ProcessState.Suspending || p.State == ProcessState.Suspended) ||
+                         p.IsShared() && p.State == ProcessState.Suspended
                          select p).SetAsQueued();
 
                         CancelNewProcesses = new CancellationTokenSource();
@@ -144,9 +159,9 @@ namespace Signum.Engine.Processes
                                  select p).SetAsQueued();
 
                                 var list = Database.Query<ProcessDN>()
-                                        .Where(a => ProcessLogic.JustMyProcesses ? a.MachineName == Environment.MachineName : a.MachineName == ProcessDN.None)
-                                        .Where(a => a.State == ProcessState.Planned)
-                                        .Select(a => a.PlannedDate)
+                                        .Where(p => p.IsMine() || p.IsShared())
+                                        .Where(p => p.State == ProcessState.Planned)
+                                        .Select(p => p.PlannedDate)
                                         .ToListWithInvalidation(typeof(ProcessDN), "Planned dependency", args => WakeUp("Planned dependency", args));
 
                                 SetNextPannedExecution(list.Min());
@@ -161,7 +176,7 @@ namespace Signum.Engine.Processes
                                     retry:
                                         var queued = Database.Query<ProcessDN>()
                                             .Where(p => p.State == ProcessState.Queued)
-                                            .Where(p => p.MachineName == Environment.MachineName || (!ProcessLogic.JustMyProcesses && p.MachineName == ProcessDN.None))
+                                            .Where(p => p.IsMine() || p.IsShared())
                                             .Select(a => new { Process = a.ToLite(), a.QueuedDate, a.MachineName })
                                             .ToListWithInvalidation(typeof(ProcessDN), "Queued depencency", args => WakeUp("Queued dependency", args));
 
@@ -174,9 +189,14 @@ namespace Signum.Engine.Processes
 
                                         if (taken.Any())
                                         {
-                                            Database.Query<ProcessDN>()
-                                            .Where(p => taken.Contains(p.ToLite()) && p.MachineName == ProcessDN.None)
-                                            .UnsafeUpdate(p => new ProcessDN { MachineName = Environment.MachineName });
+                                            using (Transaction tr = Transaction.ForceNew())
+                                            {
+                                                Database.Query<ProcessDN>()
+                                                    .Where(p => taken.Contains(p.ToLite()) && p.MachineName == ProcessDN.None)
+                                                    .UnsafeUpdate(p => new ProcessDN { MachineName = Environment.MachineName });
+                                                tr.Commit();
+                                            }
+
 
                                             goto retry;
                                         }
@@ -365,8 +385,17 @@ namespace Signum.Engine.Processes
             CurrentExecution.ExecutionStart = TimeZoneManager.Now;
             CurrentExecution.Progress = 0;
             CurrentExecution.MachineName = Environment.MachineName;
-            using (OperationLogic.AllowSave<ProcessDN>())
-                CurrentExecution.Save();
+
+            using (Transaction tr = new Transaction())
+            {
+                if (CurrentExecution.InDB().Any(a => a.State == ProcessState.Executing))
+                    throw new InvalidOperationException("The process {0} is allready Executing!".Formato(CurrentExecution.Id));
+                         
+                using (OperationLogic.AllowSave<ProcessDN>())
+                    CurrentExecution.Save();
+
+                tr.Commit();
+            }
         }
 
         public void Execute()

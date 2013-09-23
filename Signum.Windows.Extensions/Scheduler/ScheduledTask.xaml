@@ -22,5 +22,6 @@
             <m:DataBorder m:Common.Route="Rule" AutoChild="True"/>
         </GroupBox>
         <m:ValueLine m:Common.Route="MachineName" />
+        <m:ValueLine m:Common.Route="ApplicationName" />
     </StackPanel>
 </UserControl>

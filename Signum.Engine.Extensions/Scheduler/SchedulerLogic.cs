@@ -99,6 +99,7 @@ namespace Signum.Engine.Scheduler
                         st.Rule,
                         st.Suspended,
                         st.MachineName,
+                        st.ApplicationName
                     });
 
                 dqm.RegisterQuery(typeof(ScheduledTaskLogDN), () =>
@@ -146,7 +147,8 @@ namespace Signum.Engine.Scheduler
                 }.Register();
 
                 ScheduledTasksLazy = sb.GlobalLazy(() =>
-                    Database.Query<ScheduledTaskDN>().Where(a => !a.Suspended && (a.MachineName == ScheduledTaskDN.None || a.MachineName == Environment.MachineName)).ToList(),
+                    Database.Query<ScheduledTaskDN>().Where(a => !a.Suspended && 
+                        (a.MachineName == ScheduledTaskDN.None || a.MachineName == Environment.MachineName && a.ApplicationName == Schema.Current.ApplicationName)).ToList(),
                     new InvalidateWith(typeof(ScheduledTaskDN)));
 
                 ScheduledTasksLazy.OnReset += ScheduledTasksLazy_OnReset;
@@ -305,7 +307,8 @@ namespace Signum.Engine.Scheduler
                     ScheduledTask = scheduledTask, 
                     User = user.ToLite(),
                     StartTime = TimeZoneManager.Now,
-                    MachineName = Environment.MachineName
+                    MachineName = Environment.MachineName,
+                    ApplicationName = Schema.Current.ApplicationName
                 };
 
                 try
@@ -336,6 +339,7 @@ namespace Signum.Engine.Scheduler
                             Task = stl.Task,
                             StartTime = stl.StartTime,
                             MachineName = stl.MachineName,
+                            ApplicationName = stl.ApplicationName,
                             EndTime = TimeZoneManager.Now,
                             Exception = exLog,
                         }.Save();

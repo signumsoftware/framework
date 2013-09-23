@@ -150,13 +150,41 @@ Write(Html.EntityLine(e, f => f.ProductEntity));
             #line hidden
             
             #line 12 "..\..\Scheduler\Views\ScheduledTaskLog.cshtml"
-Write(Html.EntityLine(e, f => f.Exception));
+Write(Html.EntityLine(e, f => f.MachineName));
 
             
             #line default
             #line hidden
             
             #line 12 "..\..\Scheduler\Views\ScheduledTaskLog.cshtml"
+                                           
+    
+            
+            #line default
+            #line hidden
+            
+            #line 13 "..\..\Scheduler\Views\ScheduledTaskLog.cshtml"
+Write(Html.EntityLine(e, f => f.ApplicationName));
+
+            
+            #line default
+            #line hidden
+            
+            #line 13 "..\..\Scheduler\Views\ScheduledTaskLog.cshtml"
+                                               
+    
+            
+            #line default
+            #line hidden
+            
+            #line 14 "..\..\Scheduler\Views\ScheduledTaskLog.cshtml"
+Write(Html.EntityLine(e, f => f.Exception));
+
+            
+            #line default
+            #line hidden
+            
+            #line 14 "..\..\Scheduler\Views\ScheduledTaskLog.cshtml"
                                          
 }
             

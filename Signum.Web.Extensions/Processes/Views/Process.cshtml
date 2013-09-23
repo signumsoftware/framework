@@ -9,6 +9,7 @@
     @Html.EntityLine(e, f => f.Session, f => f.ReadOnly = true)
     @Html.EntityLine(e, f => f.Data, f => f.ReadOnly = true)
     @Html.ValueLine(e, f => f.MachineName)
+    @Html.ValueLine(e, f => f.ApplicationName)
     @Html.ValueLine(e, f => f.CreationDate)
     @Html.ValueLine(e, f => f.PlannedDate, f => { f.HideIfNull = true; f.ReadOnly = true; })
     @Html.ValueLine(e, f => f.CancelationDate, f => { f.HideIfNull = true; f.ReadOnly = true; })

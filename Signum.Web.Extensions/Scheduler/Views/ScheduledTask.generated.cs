@@ -116,6 +116,20 @@ Write(Html.ValueLine(e, f => f.MachineName));
             
             #line 9 "..\..\Scheduler\Views\ScheduledTask.cshtml"
                                           
+    
+            
+            #line default
+            #line hidden
+            
+            #line 10 "..\..\Scheduler\Views\ScheduledTask.cshtml"
+Write(Html.ValueLine(e, f => f.ApplicationName));
+
+            
+            #line default
+            #line hidden
+            
+            #line 10 "..\..\Scheduler\Views\ScheduledTask.cshtml"
+                                              
 }
             
             #line default
