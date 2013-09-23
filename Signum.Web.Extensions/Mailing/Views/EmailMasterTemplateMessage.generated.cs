@@ -103,12 +103,12 @@ namespace Signum.Web.Extensions.Mailing.Views
             #line default
             #line hidden
 WriteLiteral("    <div class=\"sf-email-template-message\">\r\n        <input type=\"hidden\" class=\"" +
-"sf-email-culture\" value=\"");
+"sf-tab-title\" value=\"");
 
 
             
             #line 12 "..\..\Mailing\Views\EmailMasterTemplateMessage.cshtml"
-                                                         Write(ec.Value.CultureInfo.TryToString());
+                                                     Write(ec.Value.CultureInfo.TryToString());
 
             
             #line default

@@ -214,7 +214,7 @@ WriteLiteral("\r\n    </fieldset>\r\n");
             
             #line default
             #line hidden
-WriteLiteral("    <div class=\"clearall\" />\r\n");
+WriteLiteral("    <div class=\"clearall\"></div>\r\n");
 
 
             
