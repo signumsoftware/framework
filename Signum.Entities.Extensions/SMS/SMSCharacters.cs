@@ -111,7 +111,6 @@ namespace Signum.Entities.SMS
         }
     }
 
-
     public enum SmsMessage
     {
         Insert,
@@ -121,7 +120,7 @@ namespace Signum.Entities.SMS
         StatusCanNotBeUpdatedForNonSentMessages,
         [Description("The template must be Active to construct SMS messages")]
         TheTemplateMustBeActiveToConstructSMSMessages,
-        TheTextForTheSMSMessageExceedsTheLengthLimit
+        TheTextForTheSMSMessageExceedsTheLengthLimit,
+        Language
     }
-
 }

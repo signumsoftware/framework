@@ -1,0 +1,7 @@
+@using Signum.Entities.SMS;
+@using Signum.Web;
+
+@using (var tc = Html.TypeContext<SMSConfigurationDN>())
+{   
+    @Html.EntityCombo(tc, s => s.DefaultCulture)
+}

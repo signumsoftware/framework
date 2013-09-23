@@ -1,0 +1,33 @@
+﻿@using Signum.Entities.SMS
+@using Signum.Web.SMS
+@using Signum.Web
+@using Signum.Utilities
+
+@using (var tc = Html.TypeContext<SMSTemplateMessageDN>())
+{
+    <div class="sf-sms-template-message">
+        <input type="hidden" class="sf-tab-title" value="@(tc.Value.CultureInfo.TryToString())" />
+        @Html.EntityCombo(tc, e => e.CultureInfo, vl =>
+        {
+            vl.LabelText = SmsMessage.Language.NiceToString();
+        })
+
+        <div class="sf-sms-edit-container">
+            @Html.ValueLine(tc, s => s.Message, vl =>
+            {
+                vl.ValueLineType = ValueLineType.TextArea;
+                vl.ValueHtmlProps["cols"] = "30";
+                vl.ValueHtmlProps["rows"] = "6";
+                vl.ValueHtmlProps["class"] = "sf-sms-msg-text";
+            })
+            <div class="sf-sms-characters-left">
+                <p>
+                    <span>@SmsMessage.RemainingCharacters.NiceToString()</span>: <span class="sf-sms-chars-left"></span>
+                </p>
+            </div>
+            <div>
+                <input type="button" class="sf-button sf-sms-remove-chars" value="@SmsMessage.RemoveNonValidCharacters.NiceToString()" />
+            </div>
+        </div>
+    </div>
+}

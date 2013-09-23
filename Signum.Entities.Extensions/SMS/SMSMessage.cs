@@ -149,9 +149,4 @@ namespace Signum.Entities.SMS
         Send,
         UpdateStatus
     }
-
-    public enum SmsMessages
-    {
-        EndDateMustBeHigherThanStartDate
-    }
 }
