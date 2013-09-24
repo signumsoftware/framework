@@ -82,23 +82,22 @@ namespace Signum.Utilities
             return p.Replace("__", "^").Replace("_", " ").Replace("^", "_");
         }
 
-        public static List<T> ReadFile<T>(string fileName, Encoding encoding = null, CultureInfo culture = null, int skipLines = 1) where T : new()
+        public static List<T> ReadFile<T>(string fileName, Encoding encoding = null, CultureInfo culture = null, int skipLines = 1, bool trim = false) where T : new()
         {
             encoding = encoding ?? DefaultEncoding;
             culture = culture ?? CultureInfo.CurrentCulture;
 
             using (FileStream fs = File.OpenRead(fileName))
-                return ReadStream<T>(fs, encoding, culture, skipLines).ToList();
+                return ReadStream<T>(fs, encoding, culture, skipLines, trim).ToList();
         }
 
-        public static List<T> ReadBytes<T>(byte[] data, Encoding encoding = null, CultureInfo culture = null, int skipLines = 1) where T : new()
+        public static List<T> ReadBytes<T>(byte[] data, Encoding encoding = null, CultureInfo culture = null, int skipLines = 1, bool trim = true) where T : new()
         {
-
             using (MemoryStream ms = new MemoryStream(data))
-                return ReadStream<T>(ms, encoding, culture, skipLines).ToList();
+                return ReadStream<T>(ms, encoding, culture, skipLines, trim).ToList();
         }
 
-        public static IEnumerable<T> ReadStream<T>(this Stream stream, Encoding encoding = null, CultureInfo culture = null, int skipLines = 1)
+        public static IEnumerable<T> ReadStream<T>(this Stream stream, Encoding encoding = null, CultureInfo culture = null, int skipLines = 1, bool trim = true)
             where T : new()
         {
             encoding = encoding ?? DefaultEncoding;
@@ -108,7 +107,8 @@ namespace Signum.Utilities
 
             using (StreamReader sr = new StreamReader(stream, encoding))
             {
-                string str = sr.ReadToEnd().Trim();
+                string str = sr.ReadToEnd();
+
                 var matches = regex.Matches(str).Cast<Match>();
 
                 if (skipLines > 0)
@@ -116,14 +116,17 @@ namespace Signum.Utilities
 
                 foreach (var m in matches)
                 {
-                    T t = ReadObject<T>(culture, m);
+                    if (m.Length > 0)
+                    {
+                        T t = ReadObject<T>(culture, m, trim);
 
-                    yield return t;
+                        yield return t;
+                    }
                 }
             }
         }
 
-        public static T ReadLine<T>(string csvLine, CultureInfo culture = null)
+        public static T ReadLine<T>(string csvLine, CultureInfo culture = null, bool trim = true)
             where T : new()
         {
             culture = culture ?? CultureInfo.CurrentCulture;
@@ -135,7 +138,7 @@ namespace Signum.Utilities
             return ReadObject<T>(culture, m);
         }
 
-        static T ReadObject<T>(CultureInfo culture, Match m) where T : new()
+        static T ReadObject<T>(CultureInfo culture, Match m, bool trim = true) where T : new()
         {
             var members = MemberEntryCache<T>.Members;
 
@@ -147,7 +150,12 @@ namespace Signum.Utilities
             T t = new T();
             for (int i = 0; i < members.Count; i++)
             {
-                object value = ConvertTo(DecodeCsv(vals[i].Value), members[i].MemberInfo.ReturningType(), culture);
+                string str = DecodeCsv(vals[i].Value);
+
+                if(trim)
+                    str = str.Trim();
+
+                object value = ConvertTo(str, members[i].MemberInfo.ReturningType(), culture);
 
                 members[i].UntypedSetter(t, value);
             }
@@ -189,7 +197,6 @@ namespace Signum.Utilities
 
         static object ConvertTo(string s, Type type, CultureInfo culture)
         {
-            s = s.Trim();
             Type baseType = Nullable.GetUnderlyingType(type);
             if (baseType != null)
             {
