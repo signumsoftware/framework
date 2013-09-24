@@ -42,7 +42,10 @@ namespace Signum.Engine.Cache
                 if (args.Info == SqlNotificationInfo.Invalid &&
                     args.Source == SqlNotificationSource.Statement &&
                     args.Type == SqlNotificationType.Subscribe)
-                    throw new InvalidOperationException("Invalid query for SqlDependency") { Data = { { "query", query } } };
+                    throw new InvalidOperationException("Invalid query for SqlDependency") { Data = { { "query", query.PlainSql() } } };
+
+                if (args.Info == SqlNotificationInfo.PreviousFire)
+                    throw new InvalidOperationException("The same transaction that loaded the data is invalidating it!") { Data = { { "query", query.PlainSql() } } };
 
                 Reset();
 
