@@ -518,7 +518,7 @@ namespace Signum.Web
                 FileRepositoryManager.Register(new LocalizedJavaScriptRepository(typeof(JavascriptMessage), "signum"));
                 FileRepositoryManager.Register(new CalendarLocalizedJavaScriptRepository("~/signum/calendarResources/"));
 
-                Schema.Current.ApplicationName = System.Web.Hosting.HostingEnvironment.ApplicationHost.GetSiteName();
+                Schema.Current.ApplicationName = System.Web.Hosting.HostingEnvironment.ApplicationHost.GetPhysicalPath();
 
                 if (Initializing != null)
                     Initializing();
