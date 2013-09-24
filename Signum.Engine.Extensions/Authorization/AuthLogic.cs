@@ -22,6 +22,8 @@ using System.Text.RegularExpressions;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.Cache;
 using System.IO;
+using Signum.Entities.Mailing;
+using Signum.Engine.Translation;
 
 namespace Signum.Engine.Authorization
 {
@@ -72,8 +74,16 @@ namespace Signum.Engine.Authorization
             {
                 SystemUserName = systemUserName;
                 AnonymousUserName = anonymousUserName;
-
+                
                 sb.Include<UserDN>();
+                UserDN.EmailOwnerDataExpression = entity => new EmailOwnerData
+                {
+                    Owner = entity.ToLite(),
+                    CultureInfo = entity.CultureInfo.ToCultureInfo(),
+                    DisplayName = entity.UserName,
+                    Email = entity.Email,
+                };
+                
                 sb.Include<RoleDN>();
                 sb.Include<LastAuthRulesImportDN>(); 
 

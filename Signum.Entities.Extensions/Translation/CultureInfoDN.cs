@@ -50,7 +50,7 @@ namespace Signum.Entities.Translation
             {
                 try
                 {
-                    this.ToCultureInfo();
+                    CultureInfo.GetCultureInfo(this.Name);
                 }
                 catch (CultureNotFoundException)
                 {
@@ -65,7 +65,7 @@ namespace Signum.Entities.Translation
         {
             try
             {
-                var ci = this.ToCultureInfo();
+                var ci = CultureInfo.GetCultureInfo(Name);
                 EnglishName = ci.EnglishName;
                 NativeName = ci.NativeName;
             }
@@ -86,17 +86,6 @@ namespace Signum.Entities.Translation
     public enum CultureInfoOperation
     {
         Save
-    }
-
-    public static class CultureInfoExtensions
-    {
-        public static CultureInfo ToCultureInfo(this CultureInfoDN ci)
-        {
-            if (ci == null)
-                return null;
-
-            return CultureInfo.GetCultureInfo(ci.Name);
-        }
     }
 
     public enum TranslationPermission

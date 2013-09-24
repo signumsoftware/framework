@@ -64,7 +64,7 @@ SF.TabsRepeater = (function () {
 
         $container.find(".sf-repeater-element").each(function () {
             var $legend = $(this).children("legend");
-            var title = $(this).find(".sf-email-culture").val();
+            var title = $(this).find(".sf-tab-title").val();
 
             $("<li><a class='sf-tab-header' href='#" + this.id + "'>" + title + "</a>" + $legend.html() + "</li>")
                     .appendTo($container.find(".ui-tabs-nav"));

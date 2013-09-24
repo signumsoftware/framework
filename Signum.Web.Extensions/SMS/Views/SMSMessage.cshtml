@@ -4,39 +4,48 @@
 @using Signum.Utilities;
 @using Signum.Web.SMS;
 
-@Html.ScriptCss("~/SMS/Content/SMS.css")
+@Html.RegisterUrls(new Dictionary<string, string> 
+{ 
+    { "getDictionaries", Url.Action<SMSController>(s => s.GetDictionaries()) },
+    { "removeCharacters", Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")) }
+})
+@Html.ScriptCss("~/SMS/Content/SF_SMS.css")
 
 @using (var e = Html.TypeContext<SMSMessageDN>())
 {   
     @Html.ValueLine(e, s => s.MessageID, vl =>
-{
-    vl.Visible = !e.Value.IsNew;
-    vl.ReadOnly = true;
-})
+    {
+        vl.Visible = !e.Value.IsNew;
+        vl.ReadOnly = true;
+    })
     @Html.EntityLine(e, s => s.Template, vl =>
-{
-    vl.Create = false;
-    vl.Remove = false;
-    vl.HideIfNull = true;
-})
+    {
+        vl.Create = false;
+        vl.Remove = false;
+        vl.HideIfNull = true;
+    })
     @Html.ValueLine(e, s => s.Certified, vl => vl.ReadOnly = (e.Value.State != SMSMessageState.Created))
     @Html.ValueLine(e, s => s.DestinationNumber, vl => vl.ReadOnly = !e.Value.IsNew)
-    @Html.ValueLine(e, s => s.Message, vl =>
-{
-    vl.ValueLineType = ValueLineType.TextArea;
-    vl.ValueHtmlProps["cols"] = "30";
-    vl.ValueHtmlProps["rows"] = "6";
-    vl.ReadOnly = (!e.Value.EditableMessage || e.Value.State != SMSMessageState.Created);
-})
-    if (e.Value.State == SMSMessageState.Created && e.Value.EditableMessage)
-    {
-        <div id="sfCharactersLeft" data-url="@(Url.Action<SMSController>(s => s.GetDictionaries()))">
-            <p><span>@SmsMessage.RemainingCharacters.NiceToString()</span>: <span id="sfCharsLeft"></span></p>
-        </div>
-        <div>
-            <input type="button" class="sf-button" id="sfRemoveNoSMSChars" value="@SmsMessage.RemoveNonValidCharacters.NiceToString()" data-url="@(Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")))"/>
-        </div>
-    }
+
+    <div class="sf-sms-edit-container">
+        @Html.ValueLine(e, s => s.Message, vl =>
+        {
+            vl.ValueLineType = ValueLineType.TextArea;
+            vl.ValueHtmlProps["cols"] = "30";
+            vl.ValueHtmlProps["rows"] = "6";
+            vl.ValueHtmlProps["class"] = "sf-sms-msg-text";
+            vl.ReadOnly = (!e.Value.EditableMessage || e.Value.State != SMSMessageState.Created);
+        })
+        @if (e.Value.State == SMSMessageState.Created && e.Value.EditableMessage)
+        {
+            <div class="sf-sms-characters-left">
+                <p><span>@SmsMessage.RemainingCharacters.NiceToString()</span>: <span class="sf-sms-chars-left"></span></p>
+            </div>
+            <div>
+                <input type="button" class="sf-button sf-sms-remove-chars" value="@SmsMessage.RemoveNonValidCharacters.NiceToString()" />
+            </div>
+        }
+    </div>
     <br />
     @Html.ValueLine(e, s => s.From, vl => vl.ReadOnly = (e.Value.State != SMSMessageState.Created))
 

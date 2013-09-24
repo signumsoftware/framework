@@ -55,6 +55,7 @@ namespace Signum.Engine.Processes
                     State = p.CurrentExecution.State,
                     Progress = p.CurrentExecution.Progress,
                     MachineName = p.CurrentExecution.MachineName,
+                    ApplicationName = p.CurrentExecution.ApplicationName,
                 }).ToList()
             };
         }
@@ -193,7 +194,11 @@ namespace Signum.Engine.Processes
                                             {
                                                 Database.Query<ProcessDN>()
                                                     .Where(p => taken.Contains(p.ToLite()) && p.MachineName == ProcessDN.None)
-                                                    .UnsafeUpdate(p => new ProcessDN { MachineName = Environment.MachineName });
+                                                    .UnsafeUpdate(p => new ProcessDN
+                                                    {
+                                                        MachineName = Environment.MachineName,
+                                                        ApplicationName = Schema.Current.ApplicationName,
+                                                    });
                                                 tr.Commit();
                                             }
 
@@ -244,7 +249,7 @@ namespace Signum.Engine.Processes
 
                                         var suspending = Database.Query<ProcessDN>()
                                                 .Where(p => p.State == ProcessState.Suspending)
-                                                .Where(p => p.MachineName == Environment.MachineName)
+                                                .Where(p => p.IsMine())
                                                 .Select(a => a.ToLite())
                                                 .ToListWithInvalidation(typeof(ProcessDN), "Suspending dependency", args => WakeUp("Suspending dependency", args));
 
@@ -385,6 +390,7 @@ namespace Signum.Engine.Processes
             CurrentExecution.ExecutionStart = TimeZoneManager.Now;
             CurrentExecution.Progress = 0;
             CurrentExecution.MachineName = Environment.MachineName;
+            CurrentExecution.ApplicationName = Schema.Current.ApplicationName;
 
             using (Transaction tr = new Transaction())
             {
@@ -467,5 +473,6 @@ namespace Signum.Engine.Processes
         public bool IsCancellationRequested;
         public decimal? Progress;
         public string MachineName;
+        public string ApplicationName; 
     }
 }

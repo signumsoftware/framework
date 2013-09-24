@@ -122,7 +122,7 @@ namespace Signum.Web.SMS
         public ActionResult SendMultipleMessagesFromTemplate(Lite<SMSTemplateDN> smsTemplate, string webTypeName)
         {
             Type entitiesType = Navigator.ResolveType(webTypeName);
-            var providers = Request["providerKeys"].Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries)
+            var providers = Request["providerKeys"].Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(key => Lite.Parse(key)).ToList();
 
             var process = OperationLogic.ServiceConstructFromMany(providers, entitiesType,

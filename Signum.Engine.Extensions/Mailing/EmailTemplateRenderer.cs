@@ -12,6 +12,7 @@ using Signum.Entities.DynamicQuery;
 using Signum.Entities.Mailing;
 using Signum.Utilities;
 using Signum.Entities.Translation;
+using Signum.Engine.Translation;
 
 namespace Signum.Engine.Mailing
 {

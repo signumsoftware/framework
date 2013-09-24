@@ -7,7 +7,7 @@
 @using (var ec = Html.TypeContext<EmailMasterTemplateDN>())
 {
     @Html.ValueLine(ec, e => e.Name)
-    <div class="clearall" />
+    <div class="clearall"></div>
     <div class="sf-email-replacements-container sf-tabs-repeater">
         @Html.EntityRepeater(ec, e => e.Messages, er =>
         {

@@ -3,22 +3,33 @@
 @using Signum.Web;
 @using Signum.Web.SMS;
 @using Signum.Web.Extensions.SMS.Models
-@Html.ScriptCss("~/SMS/Content/SMS.css")
+@using Signum.Utilities
+
+@Html.RegisterUrls(new Dictionary<string, string> 
+{ 
+    { "getDictionaries", Url.Action<SMSController>(s => s.GetDictionaries()) },
+    { "removeCharacters", Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")) }
+})
+@Html.ScriptCss("~/SMS/Content/SF_SMS.css")
+
 @using (var e = Html.TypeContext<MultipleSMSModel>())
 {
-    @Html.ValueLine(e, s => s.Message, vl =>
-   {
-       vl.ValueLineType = ValueLineType.TextArea;
-       vl.ValueHtmlProps["cols"] = "30";
-       vl.ValueHtmlProps["rows"] = "6";
-   })
-    <div id="sfCharactersLeft" data-url="@(Url.Action<SMSController>(s => s.GetDictionaries()))">
-        <p>
-            Remaining characters: <span id="sfCharsLeft"></span>
-        </p>
-    </div>
-    <div>
-        <input type="button" class="sf-button" id="sfRemoveNoSMSChars" value="Remove non valid characters" data-url="@(Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")))"/>
+    <div class="sf-sms-edit-container">
+        @Html.ValueLine(e, s => s.Message, vl =>
+        {
+            vl.ValueLineType = ValueLineType.TextArea;
+            vl.ValueHtmlProps["cols"] = "30";
+            vl.ValueHtmlProps["rows"] = "6";
+            vl.ValueHtmlProps["class"] = "sf-sms-msg-text";
+        })
+        <div class="sf-sms-characters-left">
+            <p>
+                <span>@SmsMessage.RemainingCharacters.NiceToString()</span>: <span class="sf-sms-chars-left"></span>
+            </p>
+        </div>
+        <div>
+            <input type="button" class="sf-button sf-sms-remove-chars" value="Remove non valid characters" />
+        </div>
     </div>
     <br />
     @Html.ValueLine(e, s => s.From)

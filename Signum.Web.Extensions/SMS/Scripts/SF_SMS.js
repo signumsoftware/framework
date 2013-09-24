@@ -15,19 +15,25 @@ else {
             if (!editable()) {
                 return;
             }
-            loadLists($('#sfCharactersLeft').attr("data-url"));
-            remainingCharacters();
+
+            loadLists();
+
+            var $textAreasPresent = $(".sf-sms-msg-text");
+            for (var i = 0; i < $textAreasPresent.length; i++) {
+                remainingCharacters($($textAreasPresent[i]));
+            }
+
             fillLiterals();
 
-            $('textarea#Message').keyup(function () {
+            $(document).on('keyup', 'textarea.sf-sms-msg-text', function () {
                 remainingCharacters();
             });
 
-            $('#sfRemoveNoSMSChars').click(function () {
+            $(document).on('click', '.sf-sms-remove-chars', function () {
                 var $textarea = $control();
                 $.ajax({
                     dataType: "text",
-                    url: $(this).attr("data-url"),
+                    url: SF.Urls.removeCharacters,
                     data: { text: $textarea.val() },
                     success: function (result) {
                         $textarea.val(result);
@@ -46,11 +52,11 @@ else {
         };
 
         var $control = function () {
-            return $('#Message');
+            return $('.sf-sms-msg-text:visible');
         };
 
         var editable = function () {
-            return $control().length > 0;
+            return $control().length > 0 || $(".sf-sms-template-messages").length > 0;
         };
 
         var charactersToEnd = function ($textarea) {
@@ -76,9 +82,9 @@ else {
             return maxLength - count;
         };
 
-        var loadLists = function (url) {
+        var loadLists = function () {
             $.ajax({
-                url: url,
+                url: SF.Urls.getDictionaries,
                 data: {},
                 async: false,
                 success: function (data) {
@@ -86,15 +92,15 @@ else {
                     SMSWarningTextLength = data.smsWarningLength;
                     normalCharacters = data.normalChar;
                     doubleCharacters = data.doubleChar;
-                    $('#sfCharsLeft').html(SMSMaxTextLength);
+                    $('.sf-sms-chars-left:visible').html(SMSMaxTextLength);
                 }
             });
         };
 
-        var remainingCharacters = function () {
-            var $textarea = $control();
-            var $remainingChars = $('#sfCharsLeft');
-            var $remainingCharacters = $('#sfCharactersLeft > p');
+        var remainingCharacters = function ($textarea) {
+            $textarea = $textarea || $control();
+            var $remainingChars = $textarea.closest(".sf-sms-edit-container").find('.sf-sms-chars-left');
+            var $remainingCharacters = $textarea.closest(".sf-sms-edit-container").find('.sf-sms-characters-left > p');
 
             var numberCharsLeft = charactersToEnd($textarea);
             $remainingChars.html(numberCharsLeft);
@@ -160,5 +166,5 @@ else {
         };
     })();
 
-    $(function () { SF.SMS.init(); });
+    SF.SMS.init();
 }

@@ -5,33 +5,33 @@
 @using Signum.Web.SMS
 @using Signum.Engine.SMS
 @using Signum.Utilities
-@Html.ScriptCss("~/SMS/Content/SMS.css")
-@using (var e = Html.TypeContext<SMSTemplateDN>())
-{   
-    @Html.ValueLine(e, s => s.Name)
-    @Html.ValueLine(e, s => s.Active, vl => vl.ReadOnly = true)
 
-    <div id="sfTemplateText">
-        @Html.ValueLine(e, s => s.Message, vl =>
-        {
-            vl.ValueLineType = ValueLineType.TextArea;
-            vl.ValueHtmlProps["cols"] = "30";
-            vl.ValueHtmlProps["rows"] = "6";
-        })
-        <div id="sfCharactersLeft" data-url="@(Url.Action<SMSController>(s => s.GetDictionaries()))">
-            <p>
-                <span>@SmsMessage.RemainingCharacters.NiceToString()</span>: <span id="sfCharsLeft"></span>
-            </p>
-        </div>
-        <div>
-            <input type="button" class="sf-button" id="sfRemoveNoSMSChars" value="@SmsMessage.RemoveNonValidCharacters.NiceToString()" data-url="@(Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")))"/>
-        </div>
-    </div>
+@Html.RegisterUrls(new Dictionary<string, string> 
+{ 
+    { "getDictionaries", Url.Action<SMSController>(s => s.GetDictionaries()) },
+    { "removeCharacters", Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")) }
+})
+@Html.ScriptCss("~/SMS/Content/SF_SMS.css")
+
+@using (var tc = Html.TypeContext<SMSTemplateDN>())
+{   
+    @Html.ValueLine(tc, s => s.Name)
+    @Html.ValueLine(tc, s => s.Active, vl => vl.ReadOnly = true)
+    @Html.ValueLine(tc, s => s.StartDate)
+    @Html.ValueLine(tc, s => s.EndDate) 
     
+    @Html.ValueLine(tc, s => s.From) 
+    @Html.ValueLine(tc, s => s.Certified)
+    @Html.ValueLine(tc, s => s.EditableMessage)
+    
+    @Html.ValueLine(tc, s => s.RemoveNoSMSCharacters)
+    @Html.ValueLine(tc, s => s.MessageLengthExceeded)
+    
+    <div class="clearall"></div>
     <div id="sfTemplateLiterals">
         @using (Html.FieldInline())
         {
-            @Html.EntityCombo(e, s => s.AssociatedType, ec =>
+            @Html.EntityCombo(tc, s => s.AssociatedType, ec =>
             {
                 ec.Data = SMSLogic.RegisteredDataObjectProviders();
                 ec.OnEntityChanged = "SF.SMS.fillLiterals()";
@@ -45,15 +45,14 @@
         <input type="button" class="sf-button" id="sfInsertLiteral" value="@SmsMessage.Insert.NiceToString()" />
     </div>
     
-    <div class="clearall"></div>
-    
-    @Html.ValueLine(e, s => s.RemoveNoSMSCharacters)
-    @Html.ValueLine(e, s => s.MessageLengthExceeded)
-    @Html.ValueLine(e, s => s.EditableMessage)
-    @Html.ValueLine(e, s => s.Certified)
-    @Html.ValueLine(e, s => s.From)
-    @Html.ValueLine(e, s => s.StartDate)
-    @Html.ValueLine(e, s => s.EndDate)
-   
+    <div class="sf-tabs-repeater sf-sms-template-messages">
+        @Html.EntityRepeater(tc, e => e.Messages, er =>
+        {
+            er.Removing = "";
+            er.Creating = "SF.TabsRepeater.addItem();";
+            er.PreserveViewData = true;
+        })
+    </div>
 }
 @Html.ScriptsJs("~/SMS/Scripts/SF_SMS.js")
+@Html.ScriptsJs("~/Mailing/Scripts/SF_TabsRepeater.js")

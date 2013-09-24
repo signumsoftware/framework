@@ -6,24 +6,14 @@ using Signum.Entities;
 using System.Linq.Expressions;
 using Signum.Utilities;
 using Signum.Entities.Basics;
+using Signum.Entities.Translation;
+using System.Reflection;
+using System.ComponentModel;
+using System.Collections.Specialized;
+using System.Globalization;
 
 namespace Signum.Entities.SMS
 {
-
-    public enum SMSTemplateState
-    {
-        Created,
-        Modified
-    }
-
-    public enum SMSTemplateOperation
-    { 
-        Create,
-        Save,
-        Disable,
-        Enable
-    }
-
     [Serializable, EntityKind(EntityKind.Main, EntityData.Master)]
     public class SMSTemplateDN : Entity
     {
@@ -57,13 +47,12 @@ namespace Signum.Entities.SMS
             set { Set(ref associatedType, value, () => AssociatedType); }
         }
 
-        [NotNullable, SqlDbType(Size = int.MaxValue)]
-        string message;
-        [StringLengthValidator(AllowNulls = false, Max = int.MaxValue)] // Max = SMSCharacters.TripleSMSMaxTextLength)]
-        public string Message
+        [NotifyCollectionChanged]
+        MList<SMSTemplateMessageDN> messages = new MList<SMSTemplateMessageDN>();
+        public MList<SMSTemplateMessageDN> Messages
         {
-            get { return message; }
-            set { Set(ref message, value, () => Message); }
+            get { return messages; }
+            set { Set(ref messages, value, () => Messages); }
         }
 
         string from;
@@ -138,7 +127,16 @@ namespace Signum.Entities.SMS
             if (pi.Is(() => StartDate) || pi.Is(() => EndDate))
             {
                 if (EndDate != null && StartDate >= EndDate)
-                    return SmsMessages.EndDateMustBeHigherThanStartDate.NiceToString();
+                    return SMSTemplateMessage.EndDateMustBeHigherThanStartDate.NiceToString();
+            }
+
+            if (pi.Is(() => Messages))
+            {
+                if (Messages == null || !Messages.Any())
+                    return SMSTemplateMessage.ThereAreNoMessagesForTheTemplate.NiceToString();
+
+                if (Messages.GroupCount(m => m.CultureInfo).Any(c => c.Value > 1))
+                    return SMSTemplateMessage.TheresMoreThanOneMessageForTheSameLanguage.NiceToString();
             }
 
             return base.PropertyValidation(pi);
@@ -150,26 +148,40 @@ namespace Signum.Entities.SMS
             return ToStringExpression.Evaluate(this);
         }
 
-        public SMSMessageDN CreateStaticSMSMessage()
+        protected override void ChildCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
         {
-            return CreateStaticSMSMessage(null);
+            if (sender == messages)
+            {
+                foreach (var item in args.OldItems.Cast<SMSTemplateMessageDN>())
+                    item.Template = null;
+
+                foreach (var item in args.NewItems.Cast<SMSTemplateMessageDN>())
+                    item.Template = this;
+            }
         }
 
-        public SMSMessageDN CreateStaticSMSMessage(string destinationNumber) 
+        protected override void PreSaving(ref bool graphModified)
         {
-            return new SMSMessageDN 
-            { 
-                Template = this.ToLite(),
-                Message = this.message,
-                From = this.from,
-                EditableMessage = this.editableMessage,
-                State = SMSMessageState.Created,
-                DestinationNumber = destinationNumber,
-                Certified = this.Certified
-            };            
+            base.PreSaving(ref graphModified);
+
+            messages.ForEach(e => e.Template = this);
         }
 
         public static bool AllowEditMessages = true;
+    }
+
+    public enum SMSTemplateState
+    {
+        Created,
+        Modified
+    }
+
+    public enum SMSTemplateOperation
+    {
+        Create,
+        Save,
+        Disable,
+        Enable
     }
 
     public enum MessageLengthExceeded
@@ -179,4 +191,57 @@ namespace Signum.Entities.SMS
         TextPruning,
     }
 
+    [Serializable]
+    public class SMSTemplateMessageDN : EmbeddedEntity
+    {
+        private SMSTemplateMessageDN() { }
+
+        public SMSTemplateMessageDN(CultureInfoDN culture)
+        {
+            this.CultureInfo = culture;
+        }
+
+        [Ignore]
+        internal SMSTemplateDN template;
+        public SMSTemplateDN Template
+        {
+            get { return template; }
+            set { template = value; }
+        }
+
+        [NotNullable]
+        CultureInfoDN cultureInfo;
+        [NotNullValidator]
+        public CultureInfoDN CultureInfo
+        {
+            get { return cultureInfo; }
+            set { Set(ref cultureInfo, value, () => CultureInfo); }
+        }
+
+        [NotNullable, SqlDbType(Size = int.MaxValue)]
+        string message;
+        [StringLengthValidator(AllowNulls = false, Max = int.MaxValue)]
+        public string Message
+        {
+            get { return message; }
+            set { Set(ref message, value, () => Message); }
+        }
+
+        public override string ToString()
+        {
+            return cultureInfo.TryToString();
+        }
+    }
+
+    public enum SMSTemplateMessage
+    {
+        [Description("End date must be higher than start date")]
+        EndDateMustBeHigherThanStartDate,
+        [Description("There are no messages for the template")]
+        ThereAreNoMessagesForTheTemplate,
+        [Description("There must be a message for {0}")]
+        ThereMustBeAMessageFor0,
+        [Description("There's more than one message for the same language")]
+        TheresMoreThanOneMessageForTheSameLanguage
+    }
 }

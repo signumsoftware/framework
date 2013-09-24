@@ -2,52 +2,49 @@
 {
     color: #FE642E;
 }
-
 .sf-sms-no-more-chars
 {
     color: red;
     font-weight:bold;
 }
-
 .sf-sms-red
 {
     background-color: #F5A9A9;
 }
-
 .sf-sms-highlight
 {
     font-weight:bold;    
 }
-
-#sfCharactersLeft
+.sf-sms-characters-left
 {
     margin-left: 150px;
 }
-
-#sfTemplateText
+.sf-sms-template-messages {
+    margin-top: 10px;
+}
+.sf-sms-template-message
 {
     float: left;
     margin-top: 8px;
 }
-
 #sfTemplateLiterals
 {
     float: left;
-    margin-left: 10px;    
+    margin: 5px 20px 0 10px;    
 }
-
+#sfTemplateLiterals .sf-field {
+    min-width: inherit;    
+}
 #sfLiterals
 {
     min-width: 105px;
 }
-
 #sfInsertLiteral
 {
     margin-top: 10px;
     margin-bottom: 15px;
 }
-
-#sfRemoveNoSMSChars
+.sf-sms-remove-chars
 {
     margin-top: 7px;
     margin-bottom: 15px;
