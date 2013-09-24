@@ -45,7 +45,7 @@ namespace Signum.Engine.Maps
         public string ApplicationName
         {
             get { return applicationName ?? (applicationName = AppDomain.CurrentDomain.FriendlyName); }
-            set { applicationName = AppDomain.CurrentDomain.FriendlyName; }
+            set { applicationName = value; }
         }
 
         public SchemaSettings Settings { get; private set; }
