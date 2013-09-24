@@ -110,7 +110,7 @@ namespace Signum.Entities.SMS
         static Expression<Func<SMSTemplateDN, bool>> IsActiveNowExpression =
             (mt) => mt.active && TimeZoneManager.Now.IsInInterval(mt.StartDate, mt.EndDate);
         public bool IsActiveNow()
-        { 
+        {
             return IsActiveNowExpression.Evaluate(this);
         }
 
@@ -152,11 +152,13 @@ namespace Signum.Entities.SMS
         {
             if (sender == messages)
             {
-                foreach (var item in args.OldItems.Cast<SMSTemplateMessageDN>())
-                    item.Template = null;
+                if (args.OldItems != null)
+                    foreach (var item in args.OldItems.Cast<SMSTemplateMessageDN>())
+                        item.Template = null;
 
-                foreach (var item in args.NewItems.Cast<SMSTemplateMessageDN>())
-                    item.Template = this;
+                if (args.NewItems != null)
+                    foreach (var item in args.NewItems.Cast<SMSTemplateMessageDN>())
+                        item.Template = this;
             }
         }
 
@@ -185,7 +187,7 @@ namespace Signum.Entities.SMS
     }
 
     public enum MessageLengthExceeded
-    { 
+    {
         NotAllowed,
         Allowed,
         TextPruning,
@@ -194,7 +196,7 @@ namespace Signum.Entities.SMS
     [Serializable]
     public class SMSTemplateMessageDN : EmbeddedEntity
     {
-        private SMSTemplateMessageDN() { }
+        public SMSTemplateMessageDN() { }
 
         public SMSTemplateMessageDN(CultureInfoDN culture)
         {

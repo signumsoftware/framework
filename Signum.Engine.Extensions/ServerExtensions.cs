@@ -315,6 +315,11 @@ namespace Signum.Services
                 () => SMSLogic.RegisteredDataObjectProviders());
         }
 
+        public Entities.Translation.CultureInfoDN GetDefaultCulture()
+        {
+            return Return(MethodInfo.GetCurrentMethod(),
+                () => SMSLogic.Configuration.DefaultCulture);
+        }
         #endregion
 
         #region Profiler
@@ -364,5 +369,8 @@ namespace Signum.Services
               () => UserAssetsImporter.Import(document, previews));
         }
         #endregion
+
+
+
     }
 }

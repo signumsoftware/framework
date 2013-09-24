@@ -5,6 +5,7 @@ using System.Text;
 using System.ServiceModel;
 using Signum.Services;
 using Signum.Entities.Basics;
+using Signum.Entities.Translation;
 
 namespace Signum.Entities.SMS
 {
@@ -19,5 +20,8 @@ namespace Signum.Entities.SMS
 
         [OperationContract, NetDataContract]
         List<Lite<TypeDN>> GetAssociatedTypesForTemplates();
+
+        [OperationContract, NetDataContract]
+        CultureInfoDN GetDefaultCulture();
     }
 }

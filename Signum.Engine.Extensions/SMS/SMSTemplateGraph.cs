@@ -19,7 +19,17 @@ namespace Signum.Engine.SMS
             new Construct(SMSTemplateOperation.Create)
             {
                 ToState = SMSTemplateState.Created,
-                Construct = _ => new SMSTemplateDN { State = SMSTemplateState.Created },
+                Construct = _ => new SMSTemplateDN
+                {
+                    State = SMSTemplateState.Created,
+                    Messages = new Entities.MList<SMSTemplateMessageDN> 
+                    {
+                        new SMSTemplateMessageDN
+                        {
+                            CultureInfo = SMSLogic.Configuration.DefaultCulture
+                        }
+                    }
+                },
             }.Register();
 
             new Execute(SMSTemplateOperation.Save)

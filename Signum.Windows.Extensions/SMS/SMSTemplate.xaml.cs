@@ -15,6 +15,7 @@ using Signum.Windows;
 using Signum.Entities;
 using Signum.Entities.SMS;
 using Signum.Entities.Basics;
+using Signum.Entities.Translation;
 
 namespace Signum.Windows.SMS
 {
@@ -26,58 +27,6 @@ namespace Signum.Windows.SMS
         public SMSTemplate()
         {
             InitializeComponent();
-            text = textMessage.Child<TextBox>();
-            text.TextChanged += new TextChangedEventHandler(SMSMessage_TextChanged);
-            BrushConverter bc = new BrushConverter();
-            greenBrush = (Brush)bc.ConvertFromString("Green");
-            redBrush = (Brush)bc.ConvertFromString("Red");
-            pinkBackground = new LinearGradientBrush(new GradientStopCollection 
-            { 
-                new GradientStop(Color.FromRgb(255, 237, 237), 0),
-                new GradientStop(Color.FromRgb(255, 231, 231), 0.527),
-                new GradientStop(Color.FromRgb(255, 204, 204), 1)
-            }, new Point(0.5, 1), new Point(0.5, 0));
-            normalBackGround = text.Background;
-            VisualCharactersToEnd();
-        }
-
-        public SMSTemplateDN TemplateDC
-        {
-            get { return (SMSTemplateDN)DataContext; }
-            set { RaiseEvent(new ChangeDataContextEventArgs(value)); }
-        }
-
-        private void SMSMessage_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            VisualCharactersToEnd();
-        }
-
-        LinearGradientBrush pinkBackground = null;
-        TextBox text = null;
-        Brush greenBrush = null;
-        Brush redBrush = null;
-        Brush normalBackGround = null;
-
-        private void VisualCharactersToEnd()
-        {
-            int chLeft = SMSCharacters.RemainingLength(text.Text);
-            charactersLeft.Text = chLeft.ToString();
-            if (chLeft < 0)
-            {
-                charactersLeft.Foreground = redBrush;
-                charactersLeft.Background = pinkBackground;
-            }
-            else
-            {
-                charactersLeft.Foreground = greenBrush;
-                charactersLeft.Background = normalBackGround;
-            }
-        }
-
-        private void removeNonSMSChars_Click(object sender, RoutedEventArgs e)
-        {
-            TemplateDC.Message = SMSCharacters.RemoveNoSMSCharacters(TemplateDC.Message);
-            TemplateDC = TemplateDC;
         }
 
         private void EntityCombo_EntityChanged(object sender, bool userInteraction, object oldValue, object newValue)
@@ -110,15 +59,43 @@ namespace Signum.Windows.SMS
             else
             {
                 string literal = (string)sfLiterals.SelectedItem;
-                text.SelectedText = literal;
-                text.SelectionStart = text.SelectionStart + literal.Length;
-                text.SelectionLength = 0;
+
+                var msgCtrl = tabCulture.Child<SMSTemplateMessage>(WhereFlags.VisualTree);
+
+                msgCtrl.ReplaceText(literal);
             }
         }
 
         private IEnumerable<Lite<IIdentifiable>> EntityCombo_LoadData()
         {
             return Server.Return((ISmsServer s) => s.GetAssociatedTypesForTemplates());
+        }
+
+        private void deleteMessage_Click(object sender, RoutedEventArgs e)
+        {
+            var b = (Button)sender;
+            SMSTemplateMessageDN message = (SMSTemplateMessageDN)b.DataContext;
+            ((SMSTemplateDN)DataContext).Messages.Remove(message);
+        }
+
+        static CultureInfoDN defaultCulture;
+        static CultureInfoDN DefaultCulture
+        {
+            get 
+            {
+                if (defaultCulture == null)
+                {
+                    defaultCulture = Server.Return((ISmsServer s) => s.GetDefaultCulture());
+                }
+                return defaultCulture;
+            }
+        }
+
+        private void createMessage_Click(object sender, RoutedEventArgs e)
+        {
+            ((SMSTemplateDN)DataContext).Messages.Add(new SMSTemplateMessageDN(DefaultCulture));
+            tabCulture.SelectedIndex = ((SMSTemplateDN)DataContext).Messages.Count - 1;
+
         }
     }
 }

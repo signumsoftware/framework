@@ -328,6 +328,9 @@
     <Compile Include="SMS\SMSSendPackage.xaml.cs">
       <DependentUpon>SMSSendPackage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SMS\SMSTemplateMessage.xaml.cs">
+      <DependentUpon>SMSTemplateMessage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SMS\SMSUpdatePackage.xaml.cs">
       <DependentUpon>SMSUpdatePackage.xaml</DependentUpon>
     </Compile>
@@ -730,6 +733,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="SMS\SMSSendPackage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SMS\SMSTemplateMessage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
