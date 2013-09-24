@@ -72,6 +72,9 @@ namespace Signum.Engine.Cache
                             "Problems with SqlDependency (Type : {0} Source : {1} Info : {2}) on query: \r\n{3}"
                             .Formato(args.Type, args.Source, args.Info, tr.GetMainPreCommand().PlainSql()));
 
+                    if (args.Info == SqlNotificationInfo.PreviousFire)
+                        throw new InvalidOperationException("The same transaction that loaded the data is invalidating it!") { Data = { { "query", tr.GetMainPreCommand().PlainSql() } } };
+
                     invalidation(args);
                 }
                 catch (Exception e)

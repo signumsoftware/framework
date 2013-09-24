@@ -154,6 +154,8 @@ WriteLiteral(@"
                 </th>
                 <th>MachineName
                 </th>
+                <th>ApplicationName
+                </th>
                 <th>IsCancellationRequested
                 </th>
 
@@ -166,7 +168,7 @@ WriteLiteral(@"
 
 
             
-            #line 47 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+            #line 49 "..\..\Processes\Views\ProcessPanelTable.cshtml"
                   Write(Model.Executing.Count);
 
             
@@ -176,7 +178,7 @@ WriteLiteral(" processes executing in ");
 
 
             
-            #line 47 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+            #line 49 "..\..\Processes\Views\ProcessPanelTable.cshtml"
                                                                 Write(Environment.MachineName);
 
             
@@ -186,7 +188,7 @@ WriteLiteral(" ()</b>\r\n                </td>\r\n            </tr>\r\n");
 
 
             
-            #line 50 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+            #line 52 "..\..\Processes\Views\ProcessPanelTable.cshtml"
              foreach (var item in Model.Executing)
             {
 
@@ -197,7 +199,7 @@ WriteLiteral("                <tr>\r\n                    <td>");
 
 
             
-            #line 53 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+            #line 55 "..\..\Processes\Views\ProcessPanelTable.cshtml"
                    Write(Html.LightEntityLine(item.Process, true));
 
             
@@ -207,7 +209,7 @@ WriteLiteral("\r\n                    </td>\r\n                    <td>");
 
 
             
-            #line 55 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+            #line 57 "..\..\Processes\Views\ProcessPanelTable.cshtml"
                    Write(item.State);
 
             
@@ -217,7 +219,7 @@ WriteLiteral("\r\n                    </td>\r\n                    <td>");
 
 
             
-            #line 57 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+            #line 59 "..\..\Processes\Views\ProcessPanelTable.cshtml"
                    Write(item.Progress.TryToString("p"));
 
             
@@ -227,7 +229,7 @@ WriteLiteral("\r\n                    </td>\r\n                    <td>");
 
 
             
-            #line 59 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+            #line 61 "..\..\Processes\Views\ProcessPanelTable.cshtml"
                    Write(item.MachineName);
 
             
@@ -237,7 +239,17 @@ WriteLiteral("\r\n                    </td>\r\n                    <td>");
 
 
             
-            #line 61 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+            #line 63 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+                   Write(item.ApplicationName);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n                    </td>\r\n                    <td>");
+
+
+            
+            #line 65 "..\..\Processes\Views\ProcessPanelTable.cshtml"
                    Write(item.IsCancellationRequested);
 
             
@@ -247,7 +259,7 @@ WriteLiteral("\r\n                    </td>\r\n\r\n                </tr>\r\n");
 
 
             
-            #line 65 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+            #line 69 "..\..\Processes\Views\ProcessPanelTable.cshtml"
             }
 
             
@@ -258,7 +270,7 @@ WriteLiteral("        </tbody>\r\n    </table>\r\n\r\n    <br />\r\n    <h2>Late
 
 
             
-            #line 72 "..\..\Processes\Views\ProcessPanelTable.cshtml"
+            #line 76 "..\..\Processes\Views\ProcessPanelTable.cshtml"
 Write(Html.SearchControl(new FindOptions(typeof(Signum.Entities.Processes.ProcessDN))
 {
     OrderOptions = { new OrderOption("CreationDate", Signum.Entities.DynamicQuery.OrderType.Descending) },

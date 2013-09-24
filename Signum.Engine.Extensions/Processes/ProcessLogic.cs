@@ -222,10 +222,8 @@ namespace Signum.Engine.Processes
                         p.MachineName = JustMyProcesses ? Environment.MachineName : ProcessDN.None;
                         p.ApplicationName = JustMyProcesses ? Schema.Current.ApplicationName : ProcessDN.None;
                       
-
                         p.State = ProcessState.Planned;
-                        p.PlannedDate = (DateTime)args[0];
-                        
+                        p.PlannedDate = args.GetArg<DateTime>();
                     }
                 }.Register();
 
