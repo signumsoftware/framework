@@ -218,13 +218,16 @@ namespace Signum.Engine.Mailing
 
             if(list.IsNullOrEmpty())
             {
-                var template = CreateDefaultTemplate(systemEmailDN);
+                using (Transaction tr = Transaction.ForceNew())
+                {
+                    var template = CreateDefaultTemplate(systemEmailDN);
 
-                using (ExecutionMode.Global())
-                using (OperationLogic.AllowSave<EmailTemplateDN>())
-                    template.Save();
+                    using (ExecutionMode.Global())
+                    using (OperationLogic.AllowSave<EmailTemplateDN>())
+                        template.Save();
 
-                return template;
+                    return tr.Commit(template);
+                }
             }
 
             return list.Where(t => t.IsActiveNow()).SingleEx(() => "Active EmailTemplates for SystemEmail {0}".Formato(systemEmailDN));
