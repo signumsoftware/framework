@@ -331,7 +331,12 @@ namespace Signum.Windows
 
         public static string GetCleanName(Type type)
         {
-            return ServerTypes[type].CleanName;
+            return ServerTypes.GetOrThrow(type).CleanName;
+        }
+
+        public static TypeDN ToTypeDN(this Type type)
+        {
+            return ServerTypes.GetOrThrow(type);
         }
 
         public static Lite<T> FillToStr<T>(this Lite<T> lite) where T : class, IIdentifiable
