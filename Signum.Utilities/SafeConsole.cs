@@ -15,8 +15,11 @@ namespace Signum.Utilities
 
         public static void WriteSameLine(string format, params object[] parameters)
         {
-            string str = string.Format(format, parameters);
+            WriteSameLine(string.Format(format, parameters));
+        }
 
+        public static void WriteSameLine(string str)
+        {
             if (needToClear)
                 str = str.PadChopRight(Console.BufferWidth - 1);
             else
@@ -39,10 +42,13 @@ namespace Signum.Utilities
             needToClear = false;
         }
 
-
         public static void WriteColor(ConsoleColor color, string format, params object[] parameters)
         {
-            string str = string.Format(format, parameters);
+            WriteColor(color, string.Format(format, parameters));
+        }
+
+        public static void WriteColor(ConsoleColor color, string str)
+        {
             ConsoleColor old = Console.ForegroundColor;
             Console.ForegroundColor = color;
             Console.Write(str);
@@ -51,7 +57,11 @@ namespace Signum.Utilities
 
         public static void WriteLineColor(ConsoleColor color, string format, params object[] parameters)
         {
-            string str = string.Format(format, parameters);
+            WriteLineColor(color, string.Format(format, parameters));
+        }
+
+        public static void WriteLineColor(ConsoleColor color, string str)
+        {
             ConsoleColor old = Console.ForegroundColor;
             Console.ForegroundColor = color;
             Console.WriteLine(str);
