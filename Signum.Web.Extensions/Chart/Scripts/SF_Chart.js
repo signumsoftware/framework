@@ -109,6 +109,11 @@ SF.Chart = (function () {
                 var win = window.open($textArea.data("url"));
             });
 
+            $(document).on("mousedown", this.pf("sfFullScreen"), function (e) {
+                e.preventDefault();
+                self.fullScreen(e);
+            });
+
             this.$chartControl.on("sf-new-subtokens-combo", function (event, idSelectedCombo, index) {
                 self.newSubTokensComboAdded($("#" + idSelectedCombo), index);
             });
@@ -293,8 +298,12 @@ SF.Chart = (function () {
 
         fullScreen: function (evt) {
             evt.preventDefault();
-            var url = this.$chartControl.find(".sf-chart-container").attr("data-fullscreen-url")
-                    + "&" + this.requestData();
+
+            var url = this.$chartControl.find(".sf-chart-container").attr("data-fullscreen-url") ||
+                this.$chartControl.attr("data-fullscreen-url");
+
+            url += (url.indexOf("?") < 0 ? "?" : "&") + this.requestData();
+
             if (evt.ctrlKey || evt.which == 2) {
                 window.open(url);
             }
