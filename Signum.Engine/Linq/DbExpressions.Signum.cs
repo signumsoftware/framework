@@ -70,7 +70,7 @@ namespace Signum.Engine.Linq
             if (Bindings == null)
                 throw new InvalidOperationException("EntityInitiExpression not completed");
 
-            FieldBinding binding = Bindings.SingleEx(fb => ReflectionTools.FieldEquals(fi, fb.FieldInfo));
+            FieldBinding binding = Bindings.Where(fb => ReflectionTools.FieldEquals(fi, fb.FieldInfo)).SingleEx(() => "field '{0}' in {1} (field Ignored?)".Formato(fi.Name, this.Type.TypeName()));
             
             return binding.Binding;
         }
