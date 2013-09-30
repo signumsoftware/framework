@@ -234,6 +234,21 @@ namespace Signum.Engine
             return "FK_{0}_{1}".Formato(table, fieldName).SqlScape();
         }
 
+        public static SqlPreCommand RenameForeignKey(SchemaName schema, string oldName, string newName)
+        {
+            return SP_RENAME(schema, oldName, newName, "OBJECT");
+        }
+
+        internal static SqlPreCommandSimple SP_RENAME(SchemaName schema, string oldName, string newName, string objectType)
+        {
+            return new SqlPreCommandSimple("EXEC {0}SP_RENAME '{1}' , '{2}'{3}".Formato(
+                schema.IsDefault() ? null : schema.ToString() + ".",
+                oldName,
+                newName,
+                objectType == null ? null : ", '{0}'".Formato(objectType)
+                ));
+        }
+
         public static SqlPreCommand RenameOrMove(DiffTable oldTable, ITable newTable)
         {
             if (object.Equals(oldTable.Name.Schema, newTable.Name.Schema))
@@ -269,7 +284,7 @@ FROM {1} as [table]".Formato(
 
         public static SqlPreCommand RenameTable(ObjectName oldName, string newName)
         {
-            return new SqlPreCommandSimple("EXEC SP_RENAME '{0}' , '{1}'".Formato(oldName, newName.SqlScape()));
+            return SP_RENAME(oldName.Schema, oldName.Name, newName.SqlScape(), null);
         }
 
         public static SqlPreCommandSimple AlterSchema(ObjectName oldName, SchemaName schemaName)
@@ -279,12 +294,12 @@ FROM {1} as [table]".Formato(
 
         public static SqlPreCommand RenameColumn(ITable table, string oldName, string newName)
         {
-            return new SqlPreCommandSimple("EXEC SP_RENAME '{0}.{1}' , '{2}', 'COLUMN' ".Formato(table.Name, oldName, newName));
+            return SP_RENAME(table.Name.Schema, table.Name.Name + "." + oldName, newName, "COLUMN");
         }
 
         public static SqlPreCommand RenameIndex(ITable table, string oldName, string newName)
         {
-            return new SqlPreCommandSimple("EXEC SP_RENAME '{0}.{1}' , '{2}', 'INDEX' ".Formato(table.Name, oldName, newName));
+            return SP_RENAME(table.Name.Schema, table.Name.Name + "." + oldName, newName, "INDEX");
         }
         #endregion
 
