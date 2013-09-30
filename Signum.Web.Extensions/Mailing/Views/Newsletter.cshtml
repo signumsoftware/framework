@@ -30,7 +30,14 @@
                     </div>
                 </fieldset>
             }
-            else if (!nc.Value.IsNew)
+            else if (nc.Value.IsNew)
+            {
+                <div style="display:none">
+                    @Html.ValueLine(nc, e => e.Subject)
+                    @Html.ValueLine(nc, e => e.Text, vl => vl.ValueLineType = ValueLineType.TextArea)
+                </div>
+            }
+            else
             {
                 object queryName = QueryLogic.ToQueryName(nc.Value.Query.Key);
                 var queryDescription = DynamicQueryManager.Current.QueryDescription(queryName); //To be use inside query token controls
