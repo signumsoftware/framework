@@ -179,6 +179,27 @@ namespace Signum.Utilities
             Abbreviation,
         }
 
+        public static string ToPascal(this string str, bool firstUpper)
+        {
+            StringBuilder sb = new StringBuilder(str.Length);
+
+            bool upper = true;
+            for (int i = 0; i < str.Length; i++)
+            {
+                char c = str[i];
+                if (!char.IsLetter(c) && !char.IsNumber(c))
+                    upper = true;
+                else
+                {
+                    sb.Append(upper ? char.ToUpper(c) : char.ToLower(c));
+
+                    if (char.IsLetter(c))
+                        upper = false;
+                }
+            }
+
+            return sb.ToString();
+        }
 
         /// <param name="genderAwareText">Se ha[n] encontrado [1m:un|1f:una|m:unos|f:unas] {0} eliminad[1m:o|1f:a|m:os|f:as]</param>
         /// <param name="gender">Masculine, Femenine, Neutrum, Inanimate, Animate</param>
