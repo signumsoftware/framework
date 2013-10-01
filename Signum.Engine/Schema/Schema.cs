@@ -920,7 +920,7 @@ namespace Signum.Engine.Maps
             return new ObjectName(new SchemaName(databaseName, Schema.Name), Name);
         }
 
-        internal ObjectName OnSchema(SchemaName schemaName)
+        public ObjectName OnSchema(SchemaName schemaName)
         {
             return new ObjectName(schemaName, Name);
         }

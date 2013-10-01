@@ -131,16 +131,7 @@ namespace Signum.Engine
 
             var repOldDictionary = replacements.ApplyReplacementsToOld(oldDictionary, replacementsKey);
 
-            return newDictionary.OuterJoinDictionaryCC(repOldDictionary, (key, newVal, oldVal) =>
-            {
-                if (oldVal == null)
-                    return createNew == null ? null : createNew(key, newVal);
-
-                if (newVal == null)
-                    return removeOld == null ? null : removeOld(key, oldVal);
-
-                return merge == null ? null : merge(key, newVal, oldVal);
-            }).Values.Combine(spacing);
+            return SynchronizeScript(newDictionary, repOldDictionary, createNew, removeOld, merge, spacing);
         }
 
         public static IDisposable RenameTable(Table table, Replacements replacements)

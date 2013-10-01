@@ -166,13 +166,15 @@ String.prototype.startsWith = function (str) {
     return (this.indexOf(str) === 0);
 }
 
-String.prototype.format = function (values) {
+String.prototype.format = function () {
     var regex = /\{([\w-]+)(?:\:([\w\.]*)(?:\((.*?)?\))?)?\}/g;
 
-    var getValue = function (key) {
-            if (values == null || typeof values === 'undefined') return null;
+    var args = arguments;
 
-        var value = values[key];
+    var getValue = function (key) {
+        if (args == null || typeof args === 'undefined') return null;
+
+        var value = args[key];
         var type = typeof value;
 
         return type === 'string' || type === 'number' ? value : null;
@@ -189,9 +191,9 @@ String.prototype.format = function (values) {
     });
 };
 
-    String.prototype.replaceAll = function (s1, s2) {
-        return this.split(s1).join(s2)
-    };
+String.prototype.replaceAll = function (s1, s2) {
+    return this.split(s1).join(s2)
+};
 
 if (typeof String.prototype.trim !== 'function') {
     String.prototype.trim = function () {
