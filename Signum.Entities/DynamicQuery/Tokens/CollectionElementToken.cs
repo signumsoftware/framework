@@ -86,7 +86,10 @@ namespace Signum.Entities.DynamicQuery
 
         public override bool HasAllOrAny()
         {
-            return CollectionElementType == CollectionElementType.All || CollectionElementType == CollectionElementType.Any;
+            return
+                CollectionElementType != CollectionElementType.Element &&
+                CollectionElementType != CollectionElementType.Element2 &&
+                CollectionElementType != CollectionElementType.Element3;
         }
 
         public override PropertyRoute GetPropertyRoute()
@@ -97,9 +100,9 @@ namespace Signum.Entities.DynamicQuery
 
             PropertyRoute parent = Parent.GetPropertyRoute();
             if (parent != null && parent.Type.ElementType() != null)
-               return parent.Add("Item");
+                return parent.Add("Item");
 
-            return parent; 
+            return parent;
         }
 
         public override string NiceName()
@@ -111,7 +114,7 @@ namespace Signum.Entities.DynamicQuery
 
             if (parentElement.IsModifiableEntity())
                 return parentElement.NiceName();
-            
+
             return "Element of " + Parent.NiceName();
         }
 
@@ -165,7 +168,7 @@ namespace Signum.Entities.DynamicQuery
     public class FilterBuildExpressionContext : BuildExpressionContext
     {
         public FilterBuildExpressionContext(BuildExpressionContext context)
-            :base(context.TupleType, context.Parameter, context.Replacemens.ToDictionary())
+            : base(context.TupleType, context.Parameter, context.Replacemens.ToDictionary())
         {
         }
 
@@ -201,9 +204,8 @@ namespace Signum.Entities.DynamicQuery
                 throw new ArgumentException("ce should be non-Free Any or All");
 
             this.Token = ce;
-            this.Parameter = ce.CreateParameter(); 
+            this.Parameter = ce.CreateParameter();
         }
-
 
         public readonly ParameterExpression Parameter;
         public readonly CollectionElementToken Token;
@@ -220,13 +222,23 @@ namespace Signum.Entities.DynamicQuery
 
             var and = Filters.Select(f => f.ToExpression(ctx)).AggregateAnd();
 
+            string type = Token.CollectionElementType.ToString();
+
+            if (type.StartsWith("AnyNo"))
+                and = Expression.Not(and);
+
             var lambda = Expression.Lambda(and, Parameter);
 
             MethodInfo mi = typeof(IQueryable).IsAssignableFrom(Token.Parent.Type) ?
-                 (Token.CollectionElementType.ToString().StartsWith("All") ? miAllQ : miAnyQ) :
-                 (Token.CollectionElementType.ToString().StartsWith("All") ? miAllE : miAnyE);
+                 (type.StartsWith("All") ? miAllQ : miAnyQ) :
+                 (type.StartsWith("All") ? miAllE : miAnyE);
 
-            return Expression.Call(mi.MakeGenericMethod(Parameter.Type), collection, lambda);
+            var result = Expression.Call(mi.MakeGenericMethod(Parameter.Type), collection, lambda);
+
+            if (type.StartsWith("NoOne"))
+                return Expression.Not(result);
+
+            return result;
         }
     }
 
@@ -236,6 +248,8 @@ namespace Signum.Entities.DynamicQuery
         Element,
         Any,
         All,
+        NoOne,
+        AnyNo,
 
         [Description("Element (2)")]
         Element2,
@@ -243,6 +257,10 @@ namespace Signum.Entities.DynamicQuery
         Any2,
         [Description("All (2)")]
         All2,
+        [Description("No one (2)")]
+        NoOne2,
+        [Description("Any no (2)")]
+        AnyNo2,
 
         [Description("Element (3)")]
         Element3,
@@ -250,6 +268,10 @@ namespace Signum.Entities.DynamicQuery
         Any3,
         [Description("All (3)")]
         All3,
+        [Description("No one (3)")]
+        NoOne3,
+        [Description("Any no (3)")]
+        AnyNo3,
     }
 
     public static class CollectionElementTypeExtensions

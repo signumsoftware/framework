@@ -360,7 +360,11 @@ namespace Signum.Entities.DynamicQuery
                 return "You can not add collections as columns";
 
             if (token.HasAllOrAny())
-                return "Columns can not contain '{0}' or '{1}'".Formato(CollectionElementType.All.NiceToString(), CollectionElementType.Any.NiceToString());
+                return "Columns can not contain '{0}', '{1}', {2} or {3}".Formato(
+                    CollectionElementType.All.NiceToString(), 
+                    CollectionElementType.Any.NiceToString(),
+                    CollectionElementType.NoOne.NiceToString(),
+                    CollectionElementType.AnyNo.NiceToString());
 
             return null; 
         }
@@ -374,7 +378,11 @@ namespace Signum.Entities.DynamicQuery
                 return "{0} can not be ordered".Formato(token.Type.NicePluralName());
 
             if (token.HasAllOrAny())
-                return "Orders can not contains {0} or {1}".Formato(CollectionElementType.All.NiceToString(), CollectionElementType.Any.NiceToString());
+                return "Columns can not contain '{0}', '{1}', {2} or {3}".Formato(
+                    CollectionElementType.All.NiceToString(),
+                    CollectionElementType.Any.NiceToString(),
+                    CollectionElementType.NoOne.NiceToString(),
+                    CollectionElementType.AnyNo.NiceToString());
 
             return null;
         }
