@@ -882,6 +882,10 @@
 						                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
 						                HorizontalAlignment="Stretch"  />
                             <StackPanel Grid.Column="1" Orientation="{Binding ButtonsOrientation, RelativeSource={RelativeSource AncestorType={x:Type m:EntityRepeater}}}" MinWidth="24">
+                                <Button x:Name="PART_View" Style="{DynamicResource RoundButton}"                                      
+                                        Content="{DynamicResource View}"
+                                        ToolTip="{m:Loc {x:Static d:EntityControlMessage.View}}"
+                                        Visibility="{Binding ViewVisibility, RelativeSource={RelativeSource AncestorType={x:Type m:EntityRepeater}}}"/>
                                 <Button x:Name="PART_RemoveButton"
                                         Style="{StaticResource RoundButton}" 
                                         Content="{StaticResource Remove}" 
