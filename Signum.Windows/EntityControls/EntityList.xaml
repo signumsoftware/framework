@@ -61,6 +61,7 @@
 			SelectedItem="{Binding Path=Entity, ElementName=me, Mode=Default}" 
             ItemsSource="{Binding Path=Entities, ElementName=me, Mode=Default}" 
 			ItemTemplate="{Binding Path=EntityTemplate, ElementName=me, Mode=Default}" 
+			ItemTemplateSelector="{Binding Path=EntityTemplateSelector, ElementName=me, Mode=Default}" 
             ItemContainerStyle="{StaticResource AllBlueListBoxItem}"
 			HorizontalContentAlignment="Stretch"
             MouseDoubleClick="listBox_MouseDoubleClick"/>

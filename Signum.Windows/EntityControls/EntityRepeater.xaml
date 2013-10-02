@@ -37,6 +37,7 @@
             <m:EntityRepeaterItemsControl x:Name="itemsControl"
 			ItemsSource="{Binding Entities, ElementName=me, Mode=Default}" 
 			ItemTemplate="{Binding EntityTemplate, ElementName=me, Mode=Default}" 
+            ItemTemplateSelector="{Binding EntityTemplateSelector, ElementName=me, Mode=Default}" 
             ItemsPanel="{Binding ItemsPanel, ElementName=me, Mode=Default}"
             ItemContainerStyle="{Binding ItemContainerStyle, ElementName=me, Mode=Default}"
             HorizontalContentAlignment="Stretch"

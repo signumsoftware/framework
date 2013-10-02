@@ -55,6 +55,14 @@ namespace Signum.Windows
             set { SetValue(EntityTemplateProperty, value); }
         }
 
+        public static readonly DependencyProperty EntityTemplateSelectorProperty =
+            DependencyProperty.Register("EntityTemplateSelector", typeof(DataTemplateSelector), typeof(EntityBase), new UIPropertyMetadata(null));
+        public DataTemplateSelector EntityTemplateSelector
+        {
+            get { return (DataTemplateSelector)GetValue(EntityTemplateSelectorProperty); }
+            set { SetValue(EntityTemplateSelectorProperty, value); }
+        }
+
         public static readonly DependencyProperty CreateProperty =
             DependencyProperty.Register("Create", typeof(bool), typeof(EntityBase), new FrameworkPropertyMetadata(true, (d, e) => ((EntityBase)d).UpdateVisibility()));
         public bool Create
@@ -208,7 +216,7 @@ namespace Signum.Windows
             if (DesignerProperties.GetIsInDesignMode(this))
                 return;
 
-            if (this.NotSet(EntityBase.EntityTemplateProperty))
+            if (this.NotSet(EntityBase.EntityTemplateProperty) && this.NotSet(EntityBase.EntityTemplateSelectorProperty))
             {
                 var type = Type;
 

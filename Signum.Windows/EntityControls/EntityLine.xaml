@@ -50,6 +50,7 @@
                     MouseDown="cc_MouseDown"
                     GotFocus="cc_GotFocus"
                     ContentTemplate="{Binding Path=EntityTemplate, ElementName=me, Mode=Default}" 
+                    ContentTemplateSelector="{Binding Path=EntityTemplateSelector, ElementName=me, Mode=Default}" 
                     Content="{Binding Path=Entity, ElementName=me, Mode=OneWay}" 
                     HorizontalContentAlignment="Left" 
                     VerticalContentAlignment="Center"

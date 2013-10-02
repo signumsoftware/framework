@@ -28,6 +28,7 @@
         <ComboBox Grid.ColumnSpan="1" Grid.Column="1" Margin="1,1,1,1" x:Name="combo" 
                   Background="{DynamicResource BlueBackground}"
                   ItemTemplate="{Binding Path=EntityTemplate, ElementName=me, Mode=Default}" 
+                  ItemTemplateSelector="{Binding Path=EntityTemplateSelector, ElementName=me, Mode=Default}" 
                   SelectionChanged="combo_SelectionChanged"
                   IsEnabled="{Binding Path=(m:Common.IsReadOnly), ElementName=me, Converter={x:Static m:Converters.Not}}" 
                   PreviewKeyDown="combo_PreviewKeyDown">
