@@ -127,11 +127,11 @@ namespace Signum.Engine.Maps
 
     public static partial class ColumnExtensions
     {
-        public static Type ReferenceType(this IColumn columna)
+        public static Type ReferenceType(this IColumn column)
         {
-            Debug.Assert(columna.SqlDbType == SqlBuilder.PrimaryKeyType);
+            Debug.Assert(column.SqlDbType == SqlBuilder.PrimaryKeyType);
 
-            return columna.Nullable ? typeof(int?) : typeof(int);
+            return column.Nullable ? typeof(int?) : typeof(int);
         }
     }
 

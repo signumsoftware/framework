@@ -123,19 +123,19 @@ namespace Signum.Utilities.NaturalLanguage
             DecimalUnitGender = null,
 
             NumberOfDecimals = 2,
-            OmitirDecimalZeros = true
+            OmitDecimalZeros = true
         }; 
 
       
         public string ToNumber(decimal number, NumberWriterSettings settings)
         {
-            bool? femenino = 
+            bool? femenin = 
                 settings.UnitGender == 'f' ? (bool?)true :
                 settings.UnitGender == 'm' ? (bool?)false : null;
 
  	        string signo = null;
-            string parteEntera = null;
-            string parteDecimal = null;
+            string integerPart = null;
+            string decimalPart = null;
 
             if (number < 0)
             {
@@ -144,32 +144,32 @@ namespace Signum.Utilities.NaturalLanguage
             }
 
             //convertimos en text0
-            long entero = (long)number;
-            long enteroMod1Mill = entero % 1000000;
-            parteEntera = ConvertirNumeros(entero, femenino, settings.Unit, settings.UnitPlural);
+            long integer = (long)number;
+            long integerMod1Mill = integer % 1000000;
+            integerPart = ConvertNumber(integer, femenin, settings.Unit, settings.UnitPlural);
 
-            decimal decimAux = (number - entero);
+            decimal decimAux = (number - integer);
             for (int i = 0; i < settings.NumberOfDecimals; i++)
                 decimAux *=10m;
 
             long decim = (long)decimAux;
             if (decim != decimAux)
-                throw new ApplicationException(string.Format("numero tiene mas de {0} valores decimales", settings.NumberOfDecimals));
+                throw new ApplicationException(string.Format("number has more than {0} decimal values", settings.NumberOfDecimals));
 
 
-            if (decim != 0 || !settings.OmitirDecimalZeros)
+            if (decim != 0 || !settings.OmitDecimalZeros)
             {
-                parteDecimal = ConvertirNumeros(decim, femenino, settings.DecimalUnit, settings.DecimalUnitPlural);
+                decimalPart = ConvertNumber(decim, femenin, settings.DecimalUnit, settings.DecimalUnitPlural);
             }
 
-            return " ".Combine(signo, " con ".Combine(parteEntera, parteDecimal));
+            return " ".Combine(signo, " con ".Combine(integerPart, decimalPart));
         }
-        private static string ConvertirNumeros(long num, bool? femenino, string singular, string plural)
+        private static string ConvertNumber(long num, bool? femenine, string singular, string plural)
         {
             string result = null;
             long numAux = num;
             for (int i = 0; numAux > 0; i++, numAux /= 1000)
-                result = " ".Combine(ConvertirTrio((int)(numAux % 1000), i, femenino), " ", result);
+                result = " ".Combine(ConvertTrio((int)(numAux % 1000), i, femenine), " ", result);
 
             long numMod1M = num % 1000000;
 
@@ -178,29 +178,29 @@ namespace Signum.Utilities.NaturalLanguage
             return separator.Combine(result ?? "cero", numMod1M == 1 ? singular : plural);
         }
 
-        static string ConvertirTrio(int val, int grupo, bool? femenino)
+        static string ConvertTrio(int val, int group, bool? femenine)
         {
             string trio = val.ToString("000");
 
-            int centena = CharUtil.ToInt(trio[0]);
-            int decena = CharUtil.ToInt(trio[1]);
-            int unidad = CharUtil.ToInt(trio[2]);
+            int cent = CharUtil.ToInt(trio[0]);
+            int dec = CharUtil.ToInt(trio[1]);
+            int unit = CharUtil.ToInt(trio[2]);
 
-            if (centena == 0 && decena == 0 && unidad == 0 && grupo % 2 == 1)
+            if (cent == 0 && dec == 0 && unit == 0 && group % 2 == 1)
                 return null;
 
-            string nombreGrupo = GrupoUnidades(grupo, unidad != 1 || decena > 0 || centena > 0);
+            string groupName = UnitsGroup(group, unit != 1 || dec > 0 || cent > 0);
 
-            string num = GestorCentenasDecenasUnidades(centena, decena, unidad, grupo >= 2 ? null : femenino);
+            string num = CentsDecsUnits(cent, dec, unit, group >= 2 ? null : femenine);
 
-            return " ".Combine(val == 1 && nombreGrupo == "mil" ? null : num, nombreGrupo);
+            return " ".Combine(val == 1 && groupName == "mil" ? null : num, groupName);
         }
 
-        static string GrupoUnidades(int numGrupo, bool plural)
+        static string UnitsGroup(int numGroup, bool plural)
         {
             //en función de la cantidad de elementos que haya en enteros tendremos los
             //billones, millones, unidades...
-            switch (numGrupo)
+            switch (numGroup)
             {
                 case 0: return null;
                 case 1:
@@ -217,19 +217,19 @@ namespace Signum.Utilities.NaturalLanguage
             }
         }
 
-        static string GestorCentenasDecenasUnidades(int centena, int decena, int unidad, bool? femenino)
+        static string CentsDecsUnits(int centena, int decena, int unidad, bool? femenine)
         {
-            return " ".Combine((centena == 1 && decena == 0 && unidad == 0) ? "cien" : Centenas(centena, femenino ?? false), " ",
-                GestorDecenasUnidades(decena, unidad, femenino));
+            return " ".Combine((centena == 1 && decena == 0 && unidad == 0) ? "cien" : Cents(centena, femenine ?? false), " ",
+                DecsUnits(decena, unidad, femenine));
         }
 
-        static string GestorDecenasUnidades(int decena, int unidad, bool? femenino)
+        static string DecsUnits(int decena, int unit, bool? femenine)
         {
             switch (decena)
             {
                 case 1:
                     //se trata de once, doce...
-                    switch (unidad)
+                    switch (unit)
                     {
                         case 0: return "diez";
                         case 1: return "once";
@@ -244,27 +244,27 @@ namespace Signum.Utilities.NaturalLanguage
                         default: throw new InvalidOperationException();
                     }
                 case 2:
-                    switch (unidad)
+                    switch (unit)
                     {
                         case 0: return "veinte";
                         case 1: return
-                            femenino == true ? "veintiuna" :
-                            femenino == false ? "veitiuno" : "veintiún";
-                        default: return "veinti" + Unidades(unidad, femenino);
+                            femenine == true ? "veintiuna" :
+                            femenine == false ? "veitiuno" : "veintiún";
+                        default: return "veinti" + Units(unit, femenine);
                     }
                 default:
-                    return " y ".Combine(Decenas(decena), Unidades(unidad, femenino));
+                    return " y ".Combine(Decs(decena), Units(unit, femenine));
             }
         }
 
-        static string Unidades(int num, bool? femenino)
+        static string Units(int num, bool? femenine)
         {
             switch (num)
             {
                 case 0: return null;
                 case 1: return
-                    femenino == true ? "una" :
-                    femenino == false ? "uno" : "un";
+                    femenine == true ? "una" :
+                    femenine == false ? "uno" : "un";
                 case 2: return "dos";
                 case 3: return "tres";
                 case 4: return "cuatro";
@@ -277,7 +277,7 @@ namespace Signum.Utilities.NaturalLanguage
             }
         }
 
-        static string Decenas(int num)
+        static string Decs(int num)
         {
             switch (num)
             {
@@ -295,20 +295,20 @@ namespace Signum.Utilities.NaturalLanguage
             }
         }
 
-        static string Centenas(int num, bool femenino)
+        static string Cents(int num, bool femenine)
         {
             switch (num)
             {
                 case 0: return null;
                 case 1: return "ciento";
-                case 2: return femenino ? "doscientas" : "doscientos";
-                case 3: return femenino ? "trescientas" : "trescientos";
-                case 4: return femenino ? "cuentrocientas" : "cuatrocientos";
-                case 5: return femenino ? "quinientas" : "quinientos";
-                case 6: return femenino ? "seiscientas" : "seiscientos";
-                case 7: return femenino ? "setecientas" : "setecientos";
-                case 8: return femenino ? "ochocientas" : "ochocientos";
-                case 9: return femenino ? "novecientas" : "novecientos";
+                case 2: return femenine ? "doscientas" : "doscientos";
+                case 3: return femenine ? "trescientas" : "trescientos";
+                case 4: return femenine ? "cuentrocientas" : "cuatrocientos";
+                case 5: return femenine ? "quinientas" : "quinientos";
+                case 6: return femenine ? "seiscientas" : "seiscientos";
+                case 7: return femenine ? "setecientas" : "setecientos";
+                case 8: return femenine ? "ochocientas" : "ochocientos";
+                case 9: return femenine ? "novecientas" : "novecientos";
                 default: throw new InvalidOperationException();
             }
         }

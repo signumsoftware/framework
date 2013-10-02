@@ -140,7 +140,7 @@ namespace Signum.Engine.Basics
 
         internal static List<TypeDN> GenerateSchemaTypes()
         {
-            var lista = (from tab in Schema.Current.Tables.Values
+            var list = (from tab in Schema.Current.Tables.Values
                          let type = EnumEntity.Extract(tab.Type) ?? tab.Type
                          select new TypeDN
                          {
@@ -148,7 +148,7 @@ namespace Signum.Engine.Basics
                              TableName = tab.Name.Name,
                              CleanName = Reflector.CleanTypeName(type)
                          }).ToList();
-            return lista;
+            return list;
         }
 
         public static Dictionary<string, Type> NameToType

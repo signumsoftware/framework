@@ -288,6 +288,6 @@ namespace Signum.Utilities
         public char? DecimalUnitGender;
 
         public int NumberOfDecimals;
-        public bool OmitirDecimalZeros; 
+        public bool OmitDecimalZeros; 
     }
 }
