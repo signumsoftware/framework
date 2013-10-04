@@ -95,30 +95,27 @@ namespace Signum.Web.Translation
             }
         }
 
-        static ConcurrentDictionary<LambdaExpression, Delegate> compiledExpressions = 
-            new ConcurrentDictionary<LambdaExpression, Delegate>(ExpressionComparer.GetComparer<LambdaExpression>());
+
 
         public static string TranslatedField<T>(this HtmlHelper helper, T entity, Expression<Func<T, string>> property) where T: IdentifiableEntity
         {
-            PropertyRoute route = PropertyRoute.Construct<T>(Expression.Lambda<Func<T, object>>(property.Body, property.Parameters));
+            PropertyRoute route = PropertyRoute.Construct(property);
 
             var result = TranslatedInstanceLogic.GetTranslation(entity.ToLite(), route);
 
-            if (route != null)
+            if (result != null)
                 return result;
 
-            Func<T, string> func = (Func<T, string>)compiledExpressions.GetOrAdd(property, ld => ld.Compile());
-
-            return func(entity);
+            return TranslatedInstanceLogic.GetPropertyRouteAccesor(property)(entity);
         }
 
         public static string TranslatedField<T>(this HtmlHelper helper, Lite<T> lite, Expression<Func<T, string>> property, string fallbackString) where T : IdentifiableEntity
         {
-            PropertyRoute route = PropertyRoute.Construct<T>(Expression.Lambda<Func<T, object>>(property.Body, property.Parameters));
+            PropertyRoute route = PropertyRoute.Construct(Expression.Lambda<Func<T, object>>(property.Body, property.Parameters));
 
             var result = TranslatedInstanceLogic.GetTranslation(lite, route);
 
-            if (route != null)
+            if (result != null)
                 return result;
 
             return fallbackString;

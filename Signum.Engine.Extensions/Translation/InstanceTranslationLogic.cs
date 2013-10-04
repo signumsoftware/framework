@@ -194,23 +194,28 @@ namespace Signum.Engine.Translation
             return null;
         }
 
-        static ConcurrentDictionary<LambdaExpression, Delegate> compiledExpressions = new ConcurrentDictionary<LambdaExpression, Delegate>(ExpressionComparer.GetComparer<LambdaExpression>());
-
-        public T SaveTranslation<T>(this T entity, CultureInfo ci, Expression<Func<T, string>> propertyRoute, string translatedText)
+     
+        public static T SaveTranslation<T>(this T entity, CultureInfo ci, Expression<Func<T, string>> propertyRoute, string translatedText)
             where T : IdentifiableEntity
         {
-            Func<T, string> func = (Func<T, string>)compiledExpressions.GetOrAdd(propertyRoute, ld => ld.Compile());
-
             new TranslatedInstanceDN
             {
                 PropertyRoute = PropertyRoute.Construct(propertyRoute).ToPropertyRouteDN(),
                 Culture = ci.ToCultureInfoDN(),
                 TranslatedText = translatedText,
-                OriginalText = func(entity),
+                OriginalText = GetPropertyRouteAccesor(propertyRoute)(entity),
                 Instance = entity.ToLite(),
             }.Save();
 
             return entity;
+        }
+
+
+        static ConcurrentDictionary<LambdaExpression, Delegate> compiledExpressions = new ConcurrentDictionary<LambdaExpression, Delegate>(ExpressionComparer.GetComparer<LambdaExpression>());
+
+        public static Func<T, string> GetPropertyRouteAccesor<T>(Expression<Func<T, string>> propertyRoute) where T:IdentifiableEntity
+        {
+            return (Func<T, string>)compiledExpressions.GetOrAdd(propertyRoute, ld => ld.Compile());
         }
     }
 
