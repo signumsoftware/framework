@@ -25,9 +25,15 @@
     <Member Name="Any" Description="Alguno" />
     <Member Name="Any2" Description="Alguno (2)" />
     <Member Name="Any3" Description="Alguno (3)" />
+    <Member Name="AnyNo" Description="Alguno no" />
+    <Member Name="AnyNo2" Description="Alguno no (2)" />
+    <Member Name="AnyNo3" Description="Alguno no (3)" />
     <Member Name="Element" Description="Elemento" />
     <Member Name="Element2" Description="Elemento (2)" />
     <Member Name="Element3" Description="Elemento (3)" />
+    <Member Name="NoOne" Description="Nadie" />
+    <Member Name="NoOne2" Description="Nadie (2)" />
+    <Member Name="NoOne3" Description="Nadie (3)" />
   </Type>
   <Type Name="ColorDN" Description="Color">
     <Member Name="Argb" Description="Argb" />
@@ -84,6 +90,7 @@
   <Type Name="EnumEntity`1" />
   <Type Name="ExceptionDN" Description="Excepción">
     <Member Name="ActionName" Description="Nombre de la acción" />
+    <Member Name="ApplicationName" Description="Nombre de la aplicación" />
     <Member Name="ControllerName" Description="Nombre del controlador" />
     <Member Name="CreationDate" Description="Fecha de creación" />
     <Member Name="Data" Description="Datos" />
@@ -92,6 +99,7 @@
     <Member Name="ExceptionMessageHash" Description="Hash del mensaje de excepción" />
     <Member Name="ExceptionType" Description="Tipo de excepción" />
     <Member Name="Form" Description="Formulario" />
+    <Member Name="MachineName" Description="Nombre de la máquina" />
     <Member Name="QueryString" Description="Cadena de consulta" />
     <Member Name="RequestUrl" Description="Url solicitada" />
     <Member Name="Session" Description="Sesión" />
