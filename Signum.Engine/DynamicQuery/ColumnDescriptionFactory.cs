@@ -137,10 +137,10 @@ namespace Signum.Engine.DynamicQuery
             return Name.NiceName();
         }
 
-        public void SetPropertyRoutes<T>(params Expression<Func<T, object>>[] expression)
+        public void SetPropertyRoutes<T>(params Expression<Func<T, object>>[] propertyRoutes)
             where T : IdentifiableEntity
         {
-            PropertyRoutes = expression.Select(exp => PropertyRoute.Construct(exp)).ToArray();
+            PropertyRoutes = propertyRoutes.Select(exp => PropertyRoute.Construct(exp)).ToArray();
         }
 
         public bool IsEntity

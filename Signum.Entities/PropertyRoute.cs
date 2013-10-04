@@ -37,12 +37,12 @@ namespace Signum.Entities
             get { return this.FollowC(a => a.Parent).Select(a => a.PropertyInfo).Reverse().Skip(1).ToArray(); }
         }
 
-        public static PropertyRoute Construct<T>(Expression<Func<T, object>> expression)
+        public static PropertyRoute Construct<T, S>(Expression<Func<T, S>> propertyRoute)
             where T : IRootEntity
         {
             PropertyRoute result = Root(typeof(T));
 
-            foreach (var mi in Reflector.GetMemberList(expression))
+            foreach (var mi in Reflector.GetMemberList(propertyRoute))
             {
                 if (mi is MethodInfo && ((MethodInfo)mi).IsInstantiationOf(MixinDeclarations.miMixin))
                     result = result.Add(((MethodInfo)mi).GetGenericArguments()[0]);

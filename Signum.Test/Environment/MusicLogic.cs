@@ -21,8 +21,8 @@ namespace Signum.Test.Environment
             {
                 if (sb.Schema.Settings.DBMS == DBMS.SqlCompact || sb.Schema.Settings.DBMS == DBMS.SqlServer2005)
                 {
-                    sb.Settings.OverrideAttributes<AlbumDN>(a => a.Songs[0].Duration, new Signum.Entities.IgnoreAttribute());
-                    sb.Settings.OverrideAttributes<AlbumDN>(a => a.BonusTrack.Duration, new Signum.Entities.IgnoreAttribute());
+                    sb.Settings.OverrideAttributes((AlbumDN a) => a.Songs[0].Duration, new Signum.Entities.IgnoreAttribute());
+                    sb.Settings.OverrideAttributes((AlbumDN a) => a.BonusTrack.Duration, new Signum.Entities.IgnoreAttribute());
                 }
 
                 sb.Include<AlbumDN>();
