@@ -15,6 +15,8 @@ using Signum.Engine.Basics;
 using System.Linq.Expressions;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Basics;
+using System.Collections.Concurrent;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Translation
 {
@@ -54,9 +56,9 @@ namespace Signum.Engine.Translation
             }
         }
 
-        public static void AddRoute<T>(Expression<Func<T, object>> expression) where T : IdentifiableEntity
+        public static void AddRoute<T, S>(Expression<Func<T, S>> propertyRoute) where T : IdentifiableEntity
         {
-            AddRoute(PropertyRoute.Construct<T>(expression));
+            AddRoute(PropertyRoute.Construct<T, S>(propertyRoute));
         }
 
         public static void AddRoute(PropertyRoute route)
@@ -190,6 +192,25 @@ namespace Signum.Engine.Translation
                 return result.TranslatedText;
 
             return null;
+        }
+
+        static ConcurrentDictionary<LambdaExpression, Delegate> compiledExpressions = new ConcurrentDictionary<LambdaExpression, Delegate>(ExpressionComparer.GetComparer<LambdaExpression>());
+
+        public T SaveTranslation<T>(this T entity, CultureInfo ci, Expression<Func<T, string>> propertyRoute, string translatedText)
+            where T : IdentifiableEntity
+        {
+            Func<T, string> func = (Func<T, string>)compiledExpressions.GetOrAdd(propertyRoute, ld => ld.Compile());
+
+            new TranslatedInstanceDN
+            {
+                PropertyRoute = PropertyRoute.Construct(propertyRoute).ToPropertyRouteDN(),
+                Culture = ci.ToCultureInfoDN(),
+                TranslatedText = translatedText,
+                OriginalText = func(entity),
+                Instance = entity.ToLite(),
+            }.Save();
+
+            return entity;
         }
     }
 
