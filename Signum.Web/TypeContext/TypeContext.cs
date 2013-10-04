@@ -182,10 +182,10 @@ namespace Signum.Web
 
         public PropertyRoute PropertyRoute { get; private set; }
 
-        protected TypeContext(Context parent, string controlID, PropertyRoute route)
+        protected TypeContext(Context parent, string controlID, PropertyRoute propertyRoute)
             :base(parent, controlID)
         {
-            this.PropertyRoute = route;
+            this.PropertyRoute = propertyRoute;
         }
 
         public RuntimeInfo RuntimeInfo()
@@ -226,8 +226,8 @@ namespace Signum.Web
             Value = value;
         }
 
-        public TypeContext(T value, TypeContext parent, string controlID, PropertyRoute route)
-            : base(parent, controlID, route)
+        public TypeContext(T value, TypeContext parent, string controlID, PropertyRoute propertyRoute)
+            : base(parent, controlID, propertyRoute)
         {
             Value = value;
         }
@@ -265,8 +265,8 @@ namespace Signum.Web
     {
         PropertyInfo[] properties;
 
-        public TypeSubContext(T value, TypeContext parent, PropertyInfo[] properties, PropertyRoute route)
-            : base(value, parent.ThrowIfNullC(""), properties.ToString(a => a.Name, Separator), route)
+        public TypeSubContext(T value, TypeContext parent, PropertyInfo[] properties, PropertyRoute propertyRoute)
+            : base(value, parent.ThrowIfNullC(""), properties.ToString(a => a.Name, Separator), propertyRoute)
         {
             this.properties = properties;
         }
@@ -304,7 +304,7 @@ namespace Signum.Web
     public interface IViewOverrides
     {
         HelperResult OnSurrondFieldset(string id, HtmlHelper helper, TypeContext tc, HelperResult result);
-        MvcHtmlString OnSurroundLine(PropertyRoute route, HtmlHelper helper, TypeContext tc, MvcHtmlString result);
+        MvcHtmlString OnSurroundLine(PropertyRoute propertyRoute, HtmlHelper helper, TypeContext tc, MvcHtmlString result);
     }
 
     public class ViewOverrides : IViewOverrides
@@ -356,48 +356,48 @@ namespace Signum.Web
 
 
         Dictionary<PropertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString>> beforeLine;
-        public ViewOverrides BeforeLine<T>(Expression<Func<T, object>> expression, Func<HtmlHelper, TypeContext<T>, MvcHtmlString> constructor)
+        public ViewOverrides BeforeLine<T, S>(Expression<Func<T, S>> propertyRoute, Func<HtmlHelper, TypeContext<T>, MvcHtmlString> constructor)
             where T : IRootEntity
         {
-            return BeforeLine(PropertyRoute.Construct<T>(expression), (helper, tc) => constructor(helper, (TypeContext<T>)tc));
+            return BeforeLine(PropertyRoute.Construct(propertyRoute), (helper, tc) => constructor(helper, (TypeContext<T>)tc));
         }
 
-        public ViewOverrides BeforeLine(PropertyRoute route, Func<HtmlHelper, TypeContext, MvcHtmlString> constructor)
+        public ViewOverrides BeforeLine(PropertyRoute propertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString> constructor)
         {
             if (beforeLine == null)
                 beforeLine = new Dictionary<PropertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString>>();
 
-            beforeLine.Add(route, constructor);
+            beforeLine.Add(propertyRoute, constructor);
 
             return this; 
         }
 
 
         Dictionary<PropertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString>> afterLine;
-        public ViewOverrides AfterLine<T>(Expression<Func<T, object>> expression, Func<HtmlHelper, TypeContext<T>, MvcHtmlString> constructor)
+        public ViewOverrides AfterLine<T, S>(Expression<Func<T, S>> propertyRoute, Func<HtmlHelper, TypeContext<T>, MvcHtmlString> constructor)
             where T : IRootEntity
         {
-            return AfterLine(PropertyRoute.Construct<T>(expression), (helper, tc) => constructor(helper, (TypeContext<T>)tc));
+            return AfterLine(PropertyRoute.Construct(propertyRoute), (helper, tc) => constructor(helper, (TypeContext<T>)tc));
         }
 
-        public ViewOverrides AfterLine(PropertyRoute route, Func<HtmlHelper, TypeContext, MvcHtmlString> constructor)
+        public ViewOverrides AfterLine(PropertyRoute propertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString> constructor)
         {
             if (afterLine == null)
                 afterLine = new Dictionary<PropertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString>>();
 
-            afterLine.Add(route, constructor);
+            afterLine.Add(propertyRoute, constructor);
 
             return this;
         }
 
 
-        MvcHtmlString IViewOverrides.OnSurroundLine(PropertyRoute route, HtmlHelper helper, TypeContext tc, MvcHtmlString result)
+        MvcHtmlString IViewOverrides.OnSurroundLine(PropertyRoute propertyRoute, HtmlHelper helper, TypeContext tc, MvcHtmlString result)
         {
-            var before = beforeLine.TryGetC(route);
+            var before = beforeLine.TryGetC(propertyRoute);
             if (before != null)
                 result = before(helper, tc).Concat(result);
 
-            var after = afterLine.TryGetC(route);
+            var after = afterLine.TryGetC(propertyRoute);
             if (after != null)
                 result = result.Concat(after(helper, tc));
 
