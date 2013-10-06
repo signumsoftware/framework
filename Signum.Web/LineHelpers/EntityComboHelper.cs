@@ -149,9 +149,9 @@ namespace Signum.Web
             return builder.ToHtml();
         }
 
-        public static SelectListItem ToSelectListItem(this Lite<IIdentifiable> lite, bool selected)
+        public static SelectListItem ToSelectListItem<T>(this Lite<T> lite, Lite<T> selected) where T : class, IIdentifiable
         {
-            return new SelectListItem { Text = lite.ToString(), Value = lite.Id.ToString(), Selected = selected };
+            return new SelectListItem { Text = lite.ToString(), Value = lite.Id.ToString(), Selected = selected.Is(lite) };
         }
 
         public static MvcHtmlString ToOptions<T>(this IEnumerable<Lite<T>> lites, Lite<T> selectedElement) where T : class, IIdentifiable
@@ -161,7 +161,7 @@ namespace Signum.Web
             if (selectedElement == null || !lites.Contains(selectedElement))
                 list.Add(new SelectListItem { Text = "-", Value = "" });
 
-            list.AddRange(lites.Select(l => l.ToSelectListItem(l.Is(selectedElement))));
+            list.AddRange(lites.Select(l => l.ToSelectListItem(selectedElement)));
 
             return new HtmlStringBuilder( list.Select(RenderOption)).ToHtml();
         }
