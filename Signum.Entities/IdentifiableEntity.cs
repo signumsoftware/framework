@@ -16,7 +16,7 @@ using Signum.Services;
 
 namespace Signum.Entities
 {
-    [Serializable]
+    [Serializable, DescriptionOptions(DescriptionOptions.All)]
     public abstract class IdentifiableEntity : ModifiableEntity, IIdentifiable
     {
         internal int? id = null; //primary key

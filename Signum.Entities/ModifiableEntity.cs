@@ -21,7 +21,7 @@ using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities
 {
-    [Serializable, DebuggerTypeProxy(typeof(FlattenHierarchyProxy)), DescriptionOptions(DescriptionOptions.All)]
+    [Serializable, DebuggerTypeProxy(typeof(FlattenHierarchyProxy)), DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description)]
     public abstract class ModifiableEntity : Modifiable, INotifyPropertyChanged, IDataErrorInfo, ICloneable
     {
         protected virtual bool Set<T>(ref T field, T value, Expression<Func<T>> property)
