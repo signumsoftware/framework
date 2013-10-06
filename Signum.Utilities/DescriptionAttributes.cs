@@ -259,7 +259,7 @@ namespace Signum.Utilities
         {
             return localizations
                 .GetOrAdd(cultureInfo, ci => new ConcurrentDictionary<Assembly, LocalizedAssembly>())
-                .GetOrAdd(assembly, (Assembly a) => LocalizedAssembly.ImportXml(assembly, cultureInfo));
+                .GetOrAdd(assembly, (Assembly a) => LocalizedAssembly.ImportXml(assembly, cultureInfo, forceCreate : false));
         }
 
         internal static DescriptionOptions? OnDefaultDescriptionOptions(Type type)
@@ -365,8 +365,8 @@ namespace Signum.Utilities
 
             DescriptionManager.Invalidate();
         }
-
-        public static LocalizedAssembly ImportXml(Assembly assembly, CultureInfo cultureInfo)
+     
+        public static LocalizedAssembly ImportXml(Assembly assembly, CultureInfo cultureInfo, bool forceCreate)
         {
             var defaultCulture = GetDefaultAssemblyCulture(assembly);
 
@@ -383,7 +383,7 @@ namespace Signum.Utilities
                 .Distinct(x => x.Key)
                 .ToDictionary();
 
-            if (!isDefault && file == null)
+            if (!isDefault && !forceCreate && file == null)
                 return null;
 
             var result = new LocalizedAssembly
