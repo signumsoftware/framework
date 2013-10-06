@@ -1,5 +1,5 @@
 @{  
-    ViewBag.Title = AuthMessage.LoginEnter.NiceToString();
+    ViewBag.Title = AuthMessage.Login.NiceToString();
 }
 <script type="text/javascript">
     $(function () { $("#username").focus(); });
@@ -47,7 +47,7 @@
                 <td>
                 </td>
                 <td>
-                    <input class="sf-button login" type="submit" value="@AuthMessage.LoginEnter.NiceToString()" />
+                    <input class="sf-button login" type="submit" value="@AuthMessage.Login.NiceToString()" />
                 </td>
             </tr>
             @if (AuthClient.ResetPasswordStarted)
