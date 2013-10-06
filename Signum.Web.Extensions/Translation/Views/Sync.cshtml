@@ -7,14 +7,20 @@
 @using Signum.Entities.Translation
 @{
     CultureInfo culture = ViewBag.Culture;
+    int totalTypes = ViewBag.TotalTypes;
 
     ViewBag.Title = TranslationMessage.Synchronize0In1.NiceToString().Formato(Model.LocalizedAssembly.Assembly.GetName().Name, Model.LocalizedAssembly.Culture.DisplayName);
 
+    if(Model.Types.Count < totalTypes)
+    {
+        ViewBag.Title = ViewBag.Title + " [{0}/{1}]".Formato(Model.Types.Count, totalTypes); 
+    }
+    
     Func<IEnumerable<string>, List<SelectListItem>> selectListItems = values =>
     {
         var items = values.Select(s => new SelectListItem { Value = s, Text = s }).ToList();
 
-        if (values.Count() > 1 && values.Distinct().Count() == 1)
+        if (values.Count() > 1 && values.Distinct().Count() == 1 || TranslationClient.Translator.AutoSelect())
         {
             items.First().Selected = true;
             items.Insert(0, new SelectListItem { Value = "", Text = "-" });

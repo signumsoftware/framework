@@ -194,18 +194,21 @@ namespace Signum.Engine.Translation
             return null;
         }
 
-     
-        public static T SaveTranslation<T>(this T entity, CultureInfo ci, Expression<Func<T, string>> propertyRoute, string translatedText)
+
+        public static T SaveTranslation<T>(this T entity, CultureInfoDN ci, Expression<Func<T, string>> propertyRoute, string translatedText)
             where T : IdentifiableEntity
         {
-            new TranslatedInstanceDN
-            {
-                PropertyRoute = PropertyRoute.Construct(propertyRoute).ToPropertyRouteDN(),
-                Culture = ci.ToCultureInfoDN(),
-                TranslatedText = translatedText,
-                OriginalText = GetPropertyRouteAccesor(propertyRoute)(entity),
-                Instance = entity.ToLite(),
-            }.Save();
+            entity.Save();
+
+            if (translatedText.HasText())
+                new TranslatedInstanceDN
+                {
+                    PropertyRoute = PropertyRoute.Construct(propertyRoute).ToPropertyRouteDN(),
+                    Culture = ci,
+                    TranslatedText = translatedText,
+                    OriginalText = GetPropertyRouteAccesor(propertyRoute)(entity),
+                    Instance = entity.ToLite(),
+                }.Save();
 
             return entity;
         }

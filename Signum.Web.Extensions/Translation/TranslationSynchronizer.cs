@@ -10,7 +10,9 @@ namespace Signum.Web.Translation
 {
     public static class TranslationSynchronizer
     {
-        public static LocalizedAssemblyChanges GetAssemblyChanges(ITranslator translator, LocalizedAssembly target, LocalizedAssembly master, List<LocalizedAssembly> support)
+        public static int MaxTypeChanges = 50; 
+
+        public static LocalizedAssemblyChanges GetAssemblyChanges(ITranslator translator, LocalizedAssembly target, LocalizedAssembly master, List<LocalizedAssembly> support, out int totalTypes)
         {
             var types = master.Types.Select(kvp =>
             {
@@ -34,10 +36,16 @@ namespace Signum.Web.Translation
                 return new LocalizedTypeChanges { Type = targetType, TypeConflict = typeConflicts, MemberConflicts = memberConflicts };
             }).NotNull().ToList();
 
-            List<IGrouping<CultureInfo, TypeNameConflict>> typeGroups = (from t in types
-                                                                     where t.TypeConflict != null
-                                                                     from tc in t.TypeConflict
-                                                                     select tc).GroupBy(a => a.Key, a => a.Value).ToList();
+            totalTypes = types.Count;
+
+            if (totalTypes > MaxTypeChanges)
+                types = types.Take(MaxTypeChanges).ToList();
+
+            List<IGrouping<CultureInfo, TypeNameConflict>> typeGroups = 
+                (from t in types
+                 where t.TypeConflict != null
+                 from tc in t.TypeConflict
+                 select tc).GroupBy(a => a.Key, a => a.Value).ToList();
 
             foreach (IGrouping<CultureInfo, TypeNameConflict> gr in typeGroups)
             {
