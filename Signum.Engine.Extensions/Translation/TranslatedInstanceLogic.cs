@@ -174,14 +174,34 @@ namespace Signum.Engine.Translation
              select ti).UnsafeDelete();
         }
 
-        public static string GetTranslation(Lite<IdentifiableEntity> lite, PropertyRoute route)
+
+        public static string TranslatedField<T>(this T entity, Expression<Func<T, string>> property) where T : IdentifiableEntity
+        {
+            string fallbackString = TranslatedInstanceLogic.GetPropertyRouteAccesor(property)(entity);
+
+            return entity.ToLite().TranslatedField(property, fallbackString);
+        }
+
+        public static string TranslatedField<T>(this Lite<T> lite, Expression<Func<T, string>> property, string fallbackString) where T : IdentifiableEntity
+        {
+            PropertyRoute route = PropertyRoute.Construct(Expression.Lambda<Func<T, object>>(property.Body, property.Parameters));
+
+            var result = TranslatedInstanceLogic.GetTranslatedInstance(lite, route);
+
+            if (result != null && result.OriginalText == fallbackString)
+                return result.TranslatedText;
+
+            return fallbackString;
+        }
+
+        public static TranslatedInstanceDN GetTranslatedInstance(Lite<IdentifiableEntity> lite, PropertyRoute route)
         {
             var key = new LocalizedInstanceKey(route, lite);
 
             var result = LocalizationCache.Value.TryGetC(CultureInfo.CurrentUICulture).TryGetC(key);
 
             if (result != null)
-                return result.TranslatedText;
+                return result;
 
             if (CultureInfo.CurrentUICulture.IsNeutralCulture)
                 return null;
@@ -189,7 +209,7 @@ namespace Signum.Engine.Translation
             result = LocalizationCache.Value.TryGetC(CultureInfo.CurrentUICulture.Parent).TryGetC(key);
 
             if (result != null)
-                return result.TranslatedText;
+                return result;
 
             return null;
         }

@@ -96,29 +96,9 @@ namespace Signum.Web.Translation
         }
 
 
-
-        public static string TranslatedField<T>(this HtmlHelper helper, T entity, Expression<Func<T, string>> property) where T: IdentifiableEntity
+        public static SelectListItem ToTranslatedSelectListItem<T>(this Lite<T> lite, Lite<T> selected, Expression<Func<T, string>> toStringField) where T : IdentifiableEntity
         {
-            PropertyRoute route = PropertyRoute.Construct(property);
-
-            var result = TranslatedInstanceLogic.GetTranslation(entity.ToLite(), route);
-
-            if (result != null)
-                return result;
-
-            return TranslatedInstanceLogic.GetPropertyRouteAccesor(property)(entity);
-        }
-
-        public static string TranslatedField<T>(this HtmlHelper helper, Lite<T> lite, Expression<Func<T, string>> property, string fallbackString) where T : IdentifiableEntity
-        {
-            PropertyRoute route = PropertyRoute.Construct(Expression.Lambda<Func<T, object>>(property.Body, property.Parameters));
-
-            var result = TranslatedInstanceLogic.GetTranslation(lite, route);
-
-            if (result != null)
-                return result;
-
-            return fallbackString;
+            return new SelectListItem { Text = lite.TranslatedField(toStringField, lite.ToString()), Value = lite.Id.ToString(), Selected = lite.Equals(selected) };
         }
     }
 }
