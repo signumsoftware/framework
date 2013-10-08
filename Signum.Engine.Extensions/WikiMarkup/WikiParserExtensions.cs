@@ -96,9 +96,11 @@ namespace Signum.Engine.WikiMarkup
             return result;
         }
 
+        public static readonly Regex TokenRegex = new Regex(@"\[(?<content>([^\[\]]|\[\[|\]\])*)\]");
+
         static string ProcessTokens(string content, WikiSettings settings)
         {
-            return Regex.Replace(content, @"\[(?<content>([^\[\]]|\[\[|\]\])*)\]", m =>
+            return TokenRegex.Replace(content, m =>
             {
                 string text = m.Groups["content"].Value.Replace("[[", "[").Replace("]]", "]");
 

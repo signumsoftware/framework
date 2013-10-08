@@ -8,17 +8,16 @@ namespace Signum.Engine.Help
 {
     public static class HelpUtilities
     {
-
         public static string Extract(this string s, Match m)
         {
             return Extract(s, m.Index, m.Index + m.Length);
         }
 
-        public static string Extract(this string s, int low, int high)
+        public static string Extract(this string s, int start, int end)
         {
             if (s.Length <= etcLength) return s;
 
-            int m = (low + high) / 2;
+            int m = (start + end) / 2;
             int limMin = m - lp2;
             int limMax = m + lp2;
             if (limMin < 0)
@@ -34,7 +33,7 @@ namespace Signum.Engine.Help
 
             return (limMin != 0 ? "..." : "")
             + s.Substring(limMin, limMax - limMin)
-            + (limMax != high ? "..." : "");
+            + (limMax != end ? "..." : "");
         }
 
         const int etcLength = 300;

@@ -23,6 +23,7 @@ using System.Diagnostics;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine.Basics;
 using Signum.Entities.Basics;
+using System.Text.RegularExpressions;
 
 
 namespace Signum.Engine.Help
@@ -217,16 +218,20 @@ namespace Signum.Engine.Help
 
             Type[] types = Schema.Current.Tables.Keys.Where(t => !t.IsEnumEntity()).ToArray();
 
-            Replacements replacements = new Replacements();
+            Replacements r = new Replacements();
+
+            StringDistance sd = new StringDistance();
+
+            var namespaces = types.Select(type => type.Namespace).ToHashSet();
+
             //Namespaces
             {
                 var namespacesDocuments = FileNames(NamespacesDirectory)
                     .Select(fn => new { FileName = fn, XDocument = LoadAndValidate(fn) })
                     .ToDictionary(p => NamespaceHelp.GetNamespaceName(p.XDocument, p.FileName), "Namespaces in HelpFiles");
 
-                var should = types.Select(type => type.Namespace).Distinct().ToDictionary(a => a);
 
-                HelpTools.SynchronizeReplacing(replacements, "Namespace", namespacesDocuments, should,
+                HelpTools.SynchronizeReplacing(r, "Namespace", namespacesDocuments, namespaces.ToDictionary(a => a),
                  (nameSpace, pair) =>
                  {
                      File.Delete(pair.FileName);
@@ -237,7 +242,7 @@ namespace Signum.Engine.Help
                  },
                  (nameSpace, pair, _) =>
                  {
-                     NamespaceHelp.Synchronize(pair.FileName, pair.XDocument, nameSpace);
+                     NamespaceHelp.Synchronize(pair.FileName, pair.XDocument, nameSpace, s => SyncronizeContent(s, r, sd, namespaces));
                  });
             }
 
@@ -250,7 +255,7 @@ namespace Signum.Engine.Help
                     .ToDictionary(a => EntityHelp.GetEntityFullName(a.XDocument, a.FileName), "Types in HelpFiles");
 
 
-                HelpTools.SynchronizeReplacing(replacements, "Type", current, should,
+                HelpTools.SynchronizeReplacing(r, "Type", current, should,
                     (fullName, pair) =>
                     {
                         File.Delete(pair.FileName);
@@ -261,7 +266,7 @@ namespace Signum.Engine.Help
                     },
                     (fullName, pair, type) =>
                     {
-                        EntityHelp.Synchronize(pair.FileName, pair.XDocument, type);
+                        EntityHelp.Synchronize(pair.FileName, pair.XDocument, type, s => SyncronizeContent(s, r, sd, namespaces));
                     });
             }
 
@@ -275,7 +280,7 @@ namespace Signum.Engine.Help
                     .Select(fn => new { FileName = fn, XDocument = LoadAndValidate(fn) })
                     .ToDictionary(p => QueryHelp.GetQueryFullName(p.XDocument, p.FileName), "Queries in HelpFiles");
 
-                HelpTools.SynchronizeReplacing(replacements, "Query", current, should,
+                HelpTools.SynchronizeReplacing(r, "Query", current, should,
                     (fullName, pair) =>
                     {
                         File.Delete(pair.FileName);
@@ -284,10 +289,188 @@ namespace Signum.Engine.Help
                     (fullName, query) => { },
                     (fullName, oldFile, query) =>
                     {
-                        QueryHelp.Synchronize(oldFile.FileName, oldFile.XDocument, query);
+                        QueryHelp.Synchronize(oldFile.FileName, oldFile.XDocument, query, s => SyncronizeContent(s, r, sd, namespaces));
                     });
             }
         }
 
+        public static readonly Regex HelpLinkRegex = new Regex(@"^(?<letter>[^:]+):(?<link>[^\|]*)(\|(?<text>.*))?$");
+
+        static string SyncronizeContent(string content, Replacements r, StringDistance sd, HashSet<string> namespaces)
+        {
+            return WikiMarkup.WikiParserExtensions.TokenRegex.Replace(content, m =>
+            {
+                var m2 = HelpLinkRegex.Match(m.Groups["content"].Value);
+
+                if (!m2.Success)
+                    return m.Value;
+
+                string letter = m2.Groups["letter"].Value;
+                string link = m2.Groups["link"].Value;
+                string text = m2.Groups["text"].Value;
+
+                switch (letter)
+                {
+                    case WikiFormat.EntityLink:
+                        {
+                            string type = ParseReplaceType(r, sd, link);
+
+                            if (type == null)
+                                return m.Value;
+
+                            return Link(letter, type, text);
+                        }
+                    case WikiFormat.PropertyLink:
+                        {
+                            string type = ParseReplaceType(r, sd, link.Before("."));
+
+                            if (type == null)
+                                return m.Value;
+
+                            string pr = ParseReplacePropertyRoute(r, sd, TypeLogic.GetType(type), link.After('.'));
+
+                            if (pr == null)
+                                return m.Value;
+
+                            return Link(letter, type + "." + pr, text);
+                        }
+                    case WikiFormat.QueryLink:
+                        {
+                            string query = ParseReplaceQuery(r, sd, link);
+
+                            if (query == null)
+                                return m.Value;
+
+                            return Link(letter, query, text);
+                        }
+                    case WikiFormat.OperationLink:
+                        {
+                            string operation = ParseReplaceOperation(r, sd, link);
+
+                            if (operation == null)
+                                return m.Value;
+
+                            return Link(letter, operation, text);
+                        }
+                    case WikiFormat.Hyperlink: return m.Value;
+                    case WikiFormat.NamespaceLink:
+                        {
+                            string @namespace = ParseReplaceNamespace(r, sd, namespaces, link);
+
+                            if (@namespace == null)
+                                return m.Value;
+
+                            return Link(letter, @namespace, text);
+                        }
+                    default:
+                        break;
+                }
+
+                return m.Value;
+            });
+        }
+
+        static string ParseReplaceNamespace(Replacements r, StringDistance sd, HashSet<string> namespaces, string @namespace)
+        {
+            if (namespaces.Contains(@namespace) != null)
+                return @namespace;
+
+            @namespace = r.Apply("Namespace", @namespace);
+
+            if (namespaces.Contains(@namespace) != null)
+                return @namespace;
+
+            @namespace = r.SelectInteractive(@namespace, namespaces, "Namespace", sd);
+
+            return @namespace;
+        }
+
+        static string ParseReplaceOperation(Replacements r, StringDistance sd, string operation)
+        {
+            if (MultiEnumLogic<OperationDN>.TryToEntity(operation) != null)
+                return operation;
+
+            operation = r.Apply("Operation", operation);
+
+            if (MultiEnumLogic<OperationDN>.TryToEntity(operation) != null)
+                return operation;
+
+            operation = r.SelectInteractive(operation, MultiEnumLogic<OperationDN>.AllUniqueKeys(), "Operation", sd);
+
+            return operation;
+        }
+
+        static string ParseReplaceQuery(Replacements r, StringDistance sd, string query)
+        {
+            if (QueryLogic.QueryNames.ContainsKey(query))
+                return query;
+
+            query = r.Apply("Query", query);
+
+            if (QueryLogic.QueryNames.ContainsKey(query))
+                return query;
+
+            query = r.SelectInteractive(query, QueryLogic.QueryNames.Keys, "Query", sd);
+
+            return query;
+        }
+
+        private static string ParseReplaceType(Replacements r, StringDistance sd, string type)
+        {
+            if(TypeLogic.TryGetType(type) != null)
+                return type;
+
+            type = r.Apply("Type", type); 
+
+            if(TypeLogic.TryGetType(type) != null)
+                return type;
+
+            type = r.SelectInteractive(type, TypeLogic.NameToType.Keys, "Type", sd);
+
+            return type;
+        }
+
+        static string ParseReplacePropertyRoute(Replacements r, StringDistance sd, Type type, string propertyRoute)
+        {
+            var key = "Properties-" + TypeLogic.GetCleanName(type);
+
+            PropertyRoute pr;
+            try
+            {
+                pr = PropertyRoute.Parse(type, r.Apply(key, propertyRoute)); //Try parse needed
+
+                return pr.PropertyString();
+            }
+            catch
+            {
+                var routes = PropertyRouteLogic.GenerateProperties(type, type.ToTypeDN()).Select(a => a.ToString()).ToList();
+
+                string str = r.SelectInteractive(propertyRoute, routes, key, sd);
+
+                return str;
+            }
+        }
+
+
+        static string Link(string letter, string link, string text)
+        {
+            if (text.HasText())
+                return "[{0}:{1}|{2}]".Formato(letter, link, text);
+            else
+                return "[{0}:{1}]".Formato(letter, link); 
+        }
+    }
+
+    public static class WikiFormat
+    {
+        public const string EntityLink = "e";
+        public const string PropertyLink = "p";
+        public const string QueryLink = "q";
+        public const string OperationLink = "o";
+        public const string Hyperlink = "h";
+        public const string WikiLink = "w";
+        public const string NamespaceLink = "n";
+
+        public const string Separator = ":";
     }
 }

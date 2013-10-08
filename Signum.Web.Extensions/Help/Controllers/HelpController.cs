@@ -94,24 +94,23 @@ namespace Signum.Web.Help
             Stopwatch sp = new Stopwatch();
             sp.Start();
             Regex regex = new Regex(Regex.Escape(q.RemoveDiacritics()), RegexOptions.IgnoreCase);
-            List<List<SearchResult>> results = (from eh in HelpLogic.GetEntitiesHelp()
-                                               let result = eh.Value.Search(regex)
-                                               where result.Any()
-                                               select result.ToList()).ToList();
+            List<SearchResult> results = (from eh in HelpLogic.GetEntitiesHelp()
+                                          from s in eh.Value.Search(regex)
+                                          select s).ToList();
 
             //We add the appendices
             results.AddRange(from a in HelpLogic.GetAppendices()
                              let result = a.Search(regex)
-                             where result.Any()
-                             select result.ToList());
+                             where result != null
+                             select result);
 
             //We add the appendices
             results.AddRange(from a in HelpLogic.GetNamespaces()
                              let result = a.Search(regex)
-                             where result.Any()
-                             select result.ToList());
+                             where result != null
+                             select result);
 
-            results.Sort(a => a.FirstEx());
+            results.Sort();
 
             sp.Stop();
             ViewData["time"] = sp.ElapsedMilliseconds;
