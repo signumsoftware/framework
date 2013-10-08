@@ -153,27 +153,13 @@ namespace Signum.Web.Help
             }
         }
 
-        public static class WikiFormat
-        {
-            public const string EntityLink = "e";
-            public const string PropertyLink = "p";
-            public const string QueryLink = "q";
-            public const string OperationLink = "o";
-            public const string HyperLink = "h";
-            public const string WikiLink = "w";
-            public const string NameSpaceLink = "n";
-
-            public const string Separator = ":";
-        }
-
         public static WikiSettings DefaultWikiSettings;
         public static WikiSettings NoLinkWikiSettings;
         public static Func<string, string> TokenParser;
 
         public static WikiLink LinkParser(string content)
         {
-            Match m = Regex.Match(content,
-                        @"^(?<letter>[^:]+):(?<link>[^\|]*)(\|(?<text>.*))?$");
+            Match m = HelpLogic.HelpLinkRegex.Match(content);
 
             if (m.Success)
             {
@@ -189,7 +175,7 @@ namespace Signum.Web.Help
                             HelpLogic.EntityUrl(t),
                             text.HasText() ? text : t.NiceName());
 
-                    case WikiFormat.HyperLink:
+                    case WikiFormat.Hyperlink:
                         return new WikiLink(link, text);
 
                     case WikiFormat.OperationLink:
@@ -214,10 +200,9 @@ namespace Signum.Web.Help
                         }
 
                     case WikiFormat.PropertyLink:
-                        int index= link.IndexOf("."); 
-                        string type = link.Substring(0, index); 
-                        string rest = link.Substring(index +1);
-                        PropertyRoute route = PropertyRoute.Parse(TypeLogic.TryGetType(type), rest);
+                        PropertyRoute route = PropertyRoute.Parse
+                            (TypeLogic.TryGetType(link.Before('.')),
+                            link.After('.'));
                         //TODO: NiceToString de la propiedad
                         return new WikiLink(
                             HelpLogic.PropertyUrl(route),
@@ -243,7 +228,7 @@ namespace Signum.Web.Help
                     case WikiFormat.WikiLink:
                         return new WikiLink(WikiUrl + link, text.HasText() ? text : link);
 
-                    case WikiFormat.NameSpaceLink:
+                    case WikiFormat.NamespaceLink:
                         NamespaceHelp nameSpace = HelpLogic.GetNamespace(link);
                         return new WikiLink(
                             HelpLogic.BaseUrl + "/Namespace/" + link,

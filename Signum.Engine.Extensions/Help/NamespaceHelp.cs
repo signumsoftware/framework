@@ -87,12 +87,12 @@ namespace Signum.Engine.Help
         static readonly XName _Description = "Description";
         static readonly XName _Language = "Language";
 
-        public static void Synchronize(string fileName, XDocument loadedDoc, string nameSpace)
+        public static void Synchronize(string fileName, XDocument loadedDoc, string nameSpace, Func<string, string> syncContent)
         {
             XElement loadedNs = loadedDoc.Element(_Namespace);
 
             var created = NamespaceHelp.Create(nameSpace);
-            created.Description = loadedNs.Element(_Description).TryCC(a => a.Value);
+            created.Description = syncContent(loadedNs.Element(_Description).TryCC(a => a.Value));
 
             if (fileName != created.FileName)
             {
@@ -104,20 +104,18 @@ namespace Signum.Engine.Help
                 Console.WriteLine("File deleted {1}".Formato(fileName, created.FileName));
         }
 
-        public IEnumerable<SearchResult> Search(Regex regex)
+        public SearchResult Search(Regex regex)
         {
-            Match m = null;
-
-            //Types description
             if (Description.HasText())
             {
-                m = regex.Match(Description.RemoveDiacritics());
+                Match m = regex.Match(Description.RemoveDiacritics());
                 if (m.Success)
                 {
-                    yield return new SearchResult(TypeSearchResult.NamespaceDescription, Name, Description.Extract(m), null, m, HelpLogic.BaseUrl + "/Namespace/" + Name);
-                    yield break;
+                    return new SearchResult(TypeSearchResult.NamespaceDescription, Name, Description.Extract(m), null, m, HelpLogic.BaseUrl + "/Namespace/" + Name);
                 }
             }
+
+            return null;
         }
     }
 }

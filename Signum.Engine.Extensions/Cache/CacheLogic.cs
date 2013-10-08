@@ -63,6 +63,8 @@ namespace Signum.Engine.Cache
             using (ObjectName.OverrideOptions(new ObjectNameOptions { IncludeDboSchema = true, AvoidDatabaseName = true }))
                 tr = ((DbQueryProvider)simpleQuery.Provider).GetRawTranslateResult(simpleQuery.Expression);
 
+            bool inTest = Transaction.InTestTransaction;
+
             OnChangeEventHandler onChange = (object sender, SqlNotificationEventArgs args) =>
             {
                 try
@@ -73,7 +75,12 @@ namespace Signum.Engine.Cache
                             .Formato(args.Type, args.Source, args.Info, tr.GetMainPreCommand().PlainSql()));
 
                     if (args.Info == SqlNotificationInfo.PreviousFire)
-                        throw new InvalidOperationException("The same transaction that loaded the data is invalidating it!") { Data = { { "query", tr.GetMainPreCommand().PlainSql() } } };
+                    {
+                        if (inTest)
+                            Debug.WriteLine("The same transaction that loaded the data is invalidating it! " + tr.GetMainPreCommand().PlainSql());
+                        else
+                            throw new InvalidOperationException("The same transaction that loaded the data is invalidating it!") { Data = { { "query", tr.GetMainPreCommand().PlainSql() } } };
+                    }
 
                     invalidation(args);
                 }
