@@ -160,18 +160,19 @@ namespace Signum.Engine.Translation
         {
             var routes = TraducibleRoutes.GetOrThrow(t).Select(pr => pr.ToPropertyRouteDN()).Where(a => !a.IsNew).ToList();
 
-            Database.Query<TranslatedInstanceDN>().Where(a => a.PropertyRoute.Type == t.ToTypeDN() && !routes.Contains(a.PropertyRoute)).UnsafeDelete();
+            int deletedPr = Database.Query<TranslatedInstanceDN>().Where(a => a.PropertyRoute.Type == t.ToTypeDN() && !routes.Contains(a.PropertyRoute)).UnsafeDelete();
 
-            giRemoveTranslationsForMissingEntities.GetInvoker(t).Invoke();
+            int deletedInstance = giRemoveTranslationsForMissingEntities.GetInvoker(t)();
         }
 
-        static GenericInvoker<Action> giRemoveTranslationsForMissingEntities = new GenericInvoker<Action>(() => RemoveTranslationsForMissingEntities<IdentifiableEntity>());
-        static void RemoveTranslationsForMissingEntities<T>() where T : IdentifiableEntity
+        static GenericInvoker<Func<int>> giRemoveTranslationsForMissingEntities = new GenericInvoker<Func<int>>(() => RemoveTranslationsForMissingEntities<IdentifiableEntity>());
+        static int RemoveTranslationsForMissingEntities<T>() where T : IdentifiableEntity
         {
-            (from ti in Database.Query<TranslatedInstanceDN>()
-             join e in Database.Query<T>().DefaultIfEmpty() on ti.Instance.Entity equals e
-             where e == null
-             select ti).UnsafeDelete();
+            return (from ti in Database.Query<TranslatedInstanceDN>()
+                    where ti.PropertyRoute.Type == typeof(T).ToTypeDN()
+                    join e in Database.Query<T>().DefaultIfEmpty() on ti.Instance.Entity equals e
+                    where e == null
+                    select ti).UnsafeDelete();
         }
 
 
