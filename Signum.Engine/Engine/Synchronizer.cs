@@ -227,7 +227,7 @@ namespace Signum.Engine
             }
 
             if (replacements.Count != 0)
-                this.Add(replacementsKey, replacements);
+                this.GetOrCreate(replacementsKey).SetRange(replacements);
         }
 
         static float Distance(StringDistance sd, string o, string n)
@@ -235,6 +235,19 @@ namespace Signum.Engine
             return sd.LevenshteinDistance(o, n, weighter: (oc, nc) => oc.HasValue && nc.HasValue ? 2 : 1);
         }
 
+        public string SelectInteractive(string oldValue, IEnumerable<string> newValues, string replacementsKey, StringDistance sd)
+        {
+            var dic = newValues.ToDictionary(a => a, a => Distance(sd, oldValue, a));
+
+            Selection sel = SelectInteractive(oldValue, dic.OrderBy(a => a.Value).Select(a => a.Key).ToList(), replacementsKey, Interactive);
+
+            if (sel.NewValue != null)
+            {
+                this.GetOrCreate(replacementsKey).Add(sel.OldValue, sel.NewValue);
+            }
+
+            return sel.NewValue;
+        }
 
         public static Func<string, List<string>, Selection?> AutoRepacement; 
 
