@@ -51,6 +51,11 @@
   <Type Name="AlertTypeOperation">
     <Member Name="Save" Description="Guardar" />
   </Type>
+  <Type Name="ApplicationEventLogDN" Description="Registro eventos aplicación">
+    <Member Name="Date" Description="Fecha" />
+    <Member Name="GlobalEvent" Description="Evento mundial" />
+    <Member Name="MachineName" Description="Nombre de la máquina" />
+  </Type>
   <Type Name="AuthAdminMessage">
     <Member Name="_0of1" Description="{0} de {1}" />
     <Member Name="Allow" Description="Permitir" />
@@ -292,7 +297,6 @@
     <Member Name="UserQuery" Description="Consulta de usuario" />
   </Type>
   <Type Name="CultureInfoDN" Description="Información de la cultura">
-    <Member Name="CultureInfo" Description="Información de la cultura" />
     <Member Name="EnglishName" Description="Nombre en inglés" />
     <Member Name="Name" Description="Nombre" />
     <Member Name="NativeName" Description="Nombre nativo" />
@@ -408,7 +412,12 @@
     <Member Name="UrlLeft" Description="Parte Izquierda URL" />
   </Type>
   <Type Name="EmailMasterTemplateDN" Description="Plantilla maestra de email">
+    <Member Name="Messages" Description="Mensajes" />
     <Member Name="Name" Description="Nombre" />
+  </Type>
+  <Type Name="EmailMasterTemplateMessageDN" Description="Mensaje email plantilla maestra">
+    <Member Name="CultureInfo" Description="Información cultura" />
+    <Member Name="MasterTemplate" Description="Plantilla maestra" />
     <Member Name="Text" Description="Texto" />
   </Type>
   <Type Name="EmailMasterTemplateOperation">
@@ -494,6 +503,7 @@
   </Type>
   <Type Name="EmailTemplateDN" Description="Plantillas de email">
     <Member Name="Active" Description="Activo" />
+    <Member Name="DisableAuthorization" Description="Desactivar autorización" />
     <Member Name="EditableMessage" Description="Mensaje editable" />
     <Member Name="EndDate" Description="Fecha de fin" />
     <Member Name="From" Description="De" />
@@ -842,6 +852,7 @@
   <Type Name="ProcessAlgorithmDN" Description="Algoritmo de proceso" />
   <Type Name="ProcessDN" Description="Proceso">
     <Member Name="Algorithm" Description="Algoritmo" />
+    <Member Name="ApplicationName" Description="Nombre de la aplicación" />
     <Member Name="CancelationDate" Description="Fecha de cancelación" />
     <Member Name="CreationDate" Description="Fecha de creación" />
     <Member Name="Data" Description="Datos" />
@@ -961,19 +972,23 @@
     <Member Name="Conditions" Description="Condiciones" />
   </Type>
   <Type Name="ScheduledTaskDN" Description="Tarea programada">
+    <Member Name="ApplicationName" Description="Nombre de la aplicación" />
     <Member Name="MachineName" Description="Nombre de la máquina" />
     <Member Name="Rule" Description="Regla" />
     <Member Name="Suspended" Description="Suspendido" />
     <Member Name="Task" Description="Tarea programada" />
   </Type>
   <Type Name="ScheduledTaskLogDN" Description="Registro de tareas programadas">
+    <Member Name="ApplicationName" Description="Nombre de la aplicación" />
     <Member Name="Duration" Description="Duración" />
     <Member Name="EndTime" Description="Hora de finalización" />
-    <Member Name="Entity" Description="Entidad" />
     <Member Name="Exception" Description="Excepción" />
     <Member Name="MachineName" Description="Nombre de la máquina" />
+    <Member Name="ProductEntity" Description="Entidad producto" />
+    <Member Name="ScheduledTask" Description="Tarea programada" />
     <Member Name="StartTime" Description="Hora de inicio" />
     <Member Name="Task" Description="Tarea" />
+    <Member Name="User" Description="Usuario" />
   </Type>
   <Type Name="ScheduledTaskOperation">
     <Member Name="Save" Description="Guardar" />
@@ -1046,8 +1061,12 @@
     <Member Name="UserHostAddress" Description="User Host Address" />
   </Type>
   <Type Name="SimpleTaskDN" Description="Tarea sencilla" />
+  <Type Name="SMSConfigurationDN" Description="Configuración de SMS">
+    <Member Name="DefaultCulture" Description="Cultura predeterminada" />
+  </Type>
   <Type Name="SmsMessage">
     <Member Name="Insert" Description="Insertar" />
+    <Member Name="Language" Description="Idioma" />
     <Member Name="Message" Description="Mensaje" />
     <Member Name="RemainingCharacters" Description="Caracteres restantes" />
     <Member Name="RemoveNonValidCharacters" Description="Quitar caracteres no válidos" />
@@ -1059,6 +1078,7 @@
     <Member Name="Certified" Description="Certificado" />
     <Member Name="DestinationNumber" Description="Número de destino" />
     <Member Name="EditableMessage" Description="Mensaje editable" />
+    <Member Name="Exception" Description="Excepción" />
     <Member Name="From" Description="De" />
     <Member Name="Message" Description="Mensaje" />
     <Member Name="MessageID" Description="ID de mensaje" />
@@ -1075,6 +1095,7 @@
     <Member Name="CreateSMSWithTemplateFromEntity" Description="Crear SMS con plantilla desde entidad" />
     <Member Name="CreateUpdateStatusPackage" Description="Crear paquete de actualización de estado" />
     <Member Name="Send" Description="Enviar" />
+    <Member Name="SendAsync" Description="Enviar async" />
     <Member Name="UpdateStatus" Description="Actualización de estado" />
   </Type>
   <Type Name="SMSMessageState" Description="Estado del SMS">
@@ -1099,12 +1120,23 @@
     <Member Name="EditableMessage" Description="Mensaje editable" />
     <Member Name="EndDate" Description="Fecha de finalización" />
     <Member Name="From" Description="De" />
-    <Member Name="Message" Description="Mensaje" />
     <Member Name="MessageLengthExceeded" Description="Longitud del mensaje superada" />
+    <Member Name="Messages" Description="Mensajes" />
     <Member Name="Name" Description="Nombre" />
     <Member Name="RemoveNoSMSCharacters" Description="Quitar No SMSCharacters" />
     <Member Name="StartDate" Description="Fecha de inicio" />
     <Member Name="State" Description="Estado" />
+  </Type>
+  <Type Name="SMSTemplateMessage">
+    <Member Name="EndDateMustBeHigherThanStartDate" Description="Fecha de finalización debe ser superior a la fecha de inicio" />
+    <Member Name="ThereAreNoMessagesForTheTemplate" Description="No hay mensajes para la plantilla" />
+    <Member Name="ThereMustBeAMessageFor0" Description="Debe haber un mensaje para {0}" />
+    <Member Name="TheresMoreThanOneMessageForTheSameLanguage" Description="Hay más de un mensaje para el mismo idioma" />
+  </Type>
+  <Type Name="SMSTemplateMessageDN" Description="Mensaje de plantilla SMS">
+    <Member Name="CultureInfo" Description="Información cultura" />
+    <Member Name="Message" Description="Mensaje" />
+    <Member Name="Template" Description="Plantilla" />
   </Type>
   <Type Name="SMSTemplateOperation">
     <Member Name="Create" Description="Crear" />
@@ -1147,16 +1179,17 @@
     <Member Name="Read" Description="Leer" />
     <Member Name="Translate" Description="Traducir" />
   </Type>
-  <Type Name="TranslatedCultureDN" Description="Cultura traducida" PluralDescription="Culturas traducidas">
-    <Member Name="Action" Description="Acción" />
-    <Member Name="Culture" Description="Cultura" />
-  </Type>
   <Type Name="TranslatedInstanceDN" Description="Instancia traducida" PluralDescription="Instancias traducidas">
     <Member Name="Culture" Description="Cultura" />
     <Member Name="Instance" Description="Instancia" />
     <Member Name="OriginalText" Description="Texto original" />
     <Member Name="PropertyRoute" Description="Ruta de propiedad" />
     <Member Name="TranslatedText" Description="Texto traducido" />
+  </Type>
+  <Type Name="TranslationJavascriptMessage">
+    <Member Name="RememberChange" Description="Recordar cambio" />
+    <Member Name="RightTranslation" Description="Traducción correcta" />
+    <Member Name="WrongTranslationToSubstitute" Description="Traducción incorrecta para sustituir" />
   </Type>
   <Type Name="TranslationMessage">
     <Member Name="_0AlreadySynchronized" Description="{0} ya sincronizado" />
@@ -1173,19 +1206,32 @@
     <Member Name="Property" Description="Propiedad" />
     <Member Name="RepeatedCultures0" Description="Culturas repetidas {0}" />
     <Member Name="Save" Description="Guardar" />
-    <Member Name="Sync" Description="Sinc" />
+    <Member Name="Sync" Description="sinc" />
     <Member Name="Synchronize0In1" Description="Sincronizar {0} en {1}" />
     <Member Name="Type" Description="Tipo" />
-    <Member Name="View" Description="Ver" />
+    <Member Name="View" Description="ver" />
     <Member Name="View0In1" Description="Ver {0} en {1}" />
   </Type>
-  <Type Name="TranslatorDN" Description="Traductor">
-    <Member Name="Cultures" Description="Culturas" />
-    <Member Name="User" Description="Usuario" />
+  <Type Name="TranslationReplacementDN" Description="Reemplazo de traducción">
+    <Member Name="CultureInfo" Description="Información de la cultura" />
+    <Member Name="RightTranslation" Description="Traducción correcta" />
+    <Member Name="WrongTranslation" Description="Traducción incorrecta" />
+  </Type>
+  <Type Name="TranslationReplacementOperation">
+    <Member Name="Delete" Description="Eliminar" />
+    <Member Name="Save" Description="Guardar" />
   </Type>
   <Type Name="TranslatorOperation">
     <Member Name="Delete" Description="Eliminar" />
     <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="TranslatorUserCultureDN" Description="Cultura usuario traductor">
+    <Member Name="Action" Description="Acción" />
+    <Member Name="Culture" Description="Cultura" />
+  </Type>
+  <Type Name="TranslatorUserDN" Description="Usuario traductor">
+    <Member Name="Cultures" Description="Culturas" />
+    <Member Name="User" Description="Usuario" />
   </Type>
   <Type Name="TypeAllowed">
     <Member Name="Create" Description="Creación" />
@@ -1206,6 +1252,10 @@
     <Member Name="Read" Description="Lectura" />
   </Type>
   <Type Name="TypeConditionNameDN" Description="Nombre condición de tipo" />
+  <Type Name="TypeEvent" Description="Tipo evento">
+    <Member Name="Start" Description="Inicio" />
+    <Member Name="Stop" Description="Parada" />
+  </Type>
   <Type Name="TypeRulePack" Description="Paquete de reglas de tipo" />
   <Type Name="UserAssetMessage">
     <Member Name="ExportToXml" Description="Exportar a xml" />
@@ -1247,6 +1297,7 @@
   </Type>
   <Type Name="UserDN" Description="Usuario">
     <Member Name="AnulationDate" Description="Fecha de Anulation" />
+    <Member Name="CultureInfo" Description="Información cultura" />
     <Member Name="Email" Description="e-Mail" />
     <Member Name="EmailOwnerData" Description="Datos propietario email" />
     <Member Name="PasswordHash" Description="Hash de la contraseña" />

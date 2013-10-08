@@ -19,6 +19,8 @@ namespace Signum.Web.Translation
     public interface ITranslator
     {
         List<string> TranslateBatch(List<string> list, string from, string to);
+
+        bool AutoSelect();
     }
 
     public interface ITranslatorWithFeedback: ITranslator
@@ -31,6 +33,12 @@ namespace Signum.Web.Translation
         public List<string> TranslateBatch(List<string> list, string from, string to)
         {
             return list.Select(text => "In{0}({1})".Formato(to, text)).ToList();
+        }
+
+
+        public bool AutoSelect()
+        {
+            return false;
         }
     }
 
@@ -55,7 +63,7 @@ namespace Signum.Web.Translation
             if (pack == null)
                 return result;
 
-            return result.Select(s => pack.Regex.Replace(s, m =>
+            return result.Select(s => s == null ? s : pack.Regex.Replace(s, m =>
             {
                 string replacement = pack.Dictionary.GetOrThrow(m.Value);
 
@@ -80,6 +88,11 @@ namespace Signum.Web.Translation
         public void Feedback(string culture, string wrongTranslation, string fixedTranslation)
         {
             TranslationReplacementLogic.ReplacementFeedback(CultureInfo.GetCultureInfo(culture), wrongTranslation, fixedTranslation);
+        }
+
+        public bool AutoSelect()
+        {
+            return Inner.AutoSelect();
         }
     }
 

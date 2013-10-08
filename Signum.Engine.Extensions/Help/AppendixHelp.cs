@@ -65,27 +65,18 @@ namespace Signum.Engine.Help
 
         const int etcLength = 300;
 
-        public IEnumerable<SearchResult> Search(Regex regex)
+        public SearchResult Search(Regex regex)
         {
-            //Types
-            Match m=null;
-            /*m = regex.Match(Title);
-            if (m.Success)
-            {
-                yield return new SearchResult(TypeSearchResult.Appendix, Title, " | ".Combine(Title, Description.Etc(etcLength)), null, m, HelpLogic.BaseUrl + "/Appendix/" + Name);
-                yield break;
-            }*/
-
-            //Types description
             if (Description.HasText())
             {
-                m = regex.Match(Description.RemoveDiacritics());
+                Match m = regex.Match(Description.RemoveDiacritics());
                 if (m.Success)
                 {
-                    yield return new SearchResult(TypeSearchResult.AppendixDescription, Name, Description.Extract(m), null, m, HelpLogic.BaseUrl + "/Appendix/" + Name);
-                    yield break;
+                    return new SearchResult(TypeSearchResult.AppendixDescription, Name, Description.Extract(m), null, m, HelpLogic.BaseUrl + "/Appendix/" + Name);
                 }
             }
+
+            return null;
         }
     }
 }
