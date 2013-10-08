@@ -679,6 +679,14 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(database.TryToString() ?? Connector.C
                 }
             }
         }
+
+        public static void LoadAllControllers()
+        {
+            foreach (var c in controllers.Values.NotNull())
+            {
+                c.Load();
+            }
+        }
     }
 
     internal interface ICacheLogicController : ICacheController
