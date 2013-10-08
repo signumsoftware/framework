@@ -175,7 +175,7 @@
   </Type>
   <Type Name="MixinEntity" />
   <Type Name="ModelEntity" Description="Entidad modelo" />
-  <Type Name="ModifiableEntity" Description="Entidad modificable" PluralDescription="Entidades modificables" />
+  <Type Name="ModifiableEntity" Description="Entidad modificable" />
   <Type Name="MultiEnumDN" Description="Multi enum" PluralDescription="Multi enums">
     <Member Name="Key" Description="Clave" />
   </Type>
