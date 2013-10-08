@@ -105,7 +105,6 @@
     <Member Name="Login_Repeat" Description="Repetir:" />
     <Member Name="Login_UserName" Description="Nombre de usuario:" />
     <Member Name="Login_UserName_Watermark" Description="usuario" />
-    <Member Name="LoginEnter" Description="Entrar" />
     <Member Name="NewPassword" Description="Nueva contraseña" />
     <Member Name="NotAllowedToSaveThis0WhileOffline" Description="No se puede guardar este {0} en modo desconectado" />
     <Member Name="NotAuthorizedTo0The1WithId2" Description="No autorizado para {0} la entidad {1} con Id {2}" />
@@ -291,7 +290,7 @@
     <Member Name="RequiresTitle" Description="Requiere título" />
     <Member Name="UserQueries" Description="Consultas de usuario" />
   </Type>
-  <Type Name="CountUserQueryElement" Description="Contador de consulta de usuario" PluralDescription="Contadores de consultas de usuario">
+  <Type Name="CountUserQueryElement" Description="Contador de consulta de usuario">
     <Member Name="Href" Description="Href" />
     <Member Name="Label" Description="Etiqueta" />
     <Member Name="UserQuery" Description="Consulta de usuario" />
