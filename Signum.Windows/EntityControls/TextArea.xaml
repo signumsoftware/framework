@@ -17,5 +17,5 @@
         <TextBox Text="{Binding Path=Text, ElementName=me, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" AcceptsTab="True" 
                  Background="{Binding Background, ElementName=me}"
                  IsReadOnly="{Binding Path=(m:Common.IsReadOnly), ElementName=me}" 
-                 TextWrapping="Wrap"/>
+                 TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
 </m:LineBase>
