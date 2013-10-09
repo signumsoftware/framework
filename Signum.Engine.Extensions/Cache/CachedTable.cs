@@ -47,6 +47,9 @@ namespace Signum.Engine.Cache
                 if (args.Info == SqlNotificationInfo.PreviousFire)
                     throw new InvalidOperationException("The same transaction that loaded the data is invalidating it!") { Data = { { "query", query.PlainSql() } } };
 
+                if (CacheLogic.LogWriter != null)
+                    CacheLogic.LogWriter.WriteLine("Change {0}".Formato(GetType().TypeName())); 
+
                 Reset();
 
                 Interlocked.Increment(ref invalidations);
@@ -61,6 +64,9 @@ namespace Signum.Engine.Cache
 
         public void ResetAll(bool forceReset)
         {
+            if (CacheLogic.LogWriter != null)
+                CacheLogic.LogWriter.WriteLine("ResetAll {0}".Formato(GetType().TypeName()));
+
             Reset();
 
             if (forceReset)
@@ -542,6 +548,9 @@ namespace Signum.Engine.Cache
                 using (Connector.Override(subConnector))
                 using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
                 {
+                    if (CacheLogic.LogWriter != null)
+                        CacheLogic.LogWriter.WriteLine("Load {0}".Formato(GetType().TypeName()));
+
                     ((SqlConnector)Connector.Current).ExecuteDataReaderDependency(query, OnChange, CacheLogic.ForceOnStart, fr =>
                     {
                         object obj = rowReader(fr);
@@ -557,6 +566,9 @@ namespace Signum.Engine.Cache
 
         protected override void Reset()
         {
+            if (CacheLogic.LogWriter != null)
+                CacheLogic.LogWriter.WriteLine((rows.IsValueCreated ? "RESET {0}" : "Reset {0}").Formato(GetType().TypeName()));
+
             rows.Reset();
         }
 
@@ -671,6 +683,9 @@ namespace Signum.Engine.Cache
                 using (Connector.Override(subConnector))
                 using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
                 {
+                    if (CacheLogic.LogWriter != null)
+                        CacheLogic.LogWriter.WriteLine("Load {0}".Formato(GetType().TypeName()));
+
                     ((SqlConnector)Connector.Current).ExecuteDataReaderDependency(query, OnChange, CacheLogic.ForceOnStart, fr =>
                     {
                         object obj = rowReader(fr);
@@ -690,6 +705,10 @@ namespace Signum.Engine.Cache
 
         protected override void Reset()
         {
+            if (CacheLogic.LogWriter != null)
+                CacheLogic.LogWriter.WriteLine((relationalRows.IsValueCreated ? "RESET {0}" : "Reset {0}").Formato(GetType().TypeName()));
+
+
             relationalRows.Reset();
         }
 
@@ -792,6 +811,9 @@ namespace Signum.Engine.Cache
                 using (Connector.Override(subConnector))
                 using (Transaction tr = Transaction.ForceNew(IsolationLevel.ReadCommitted))
                 {
+                    if (CacheLogic.LogWriter != null)
+                        CacheLogic.LogWriter.WriteLine("Load {0}".Formato(GetType().TypeName()));
+
                     ((SqlConnector)Connector.Current).ExecuteDataReaderDependency(query, OnChange, CacheLogic.ForceOnStart, fr =>
                     {
                         var kvp = rowReader(fr);
@@ -806,6 +828,9 @@ namespace Signum.Engine.Cache
 
         protected override void Reset()
         {
+            if (CacheLogic.LogWriter != null)
+                CacheLogic.LogWriter.WriteLine((toStrings.IsValueCreated ? "RESET {0}" : "Reset {0}").Formato(GetType().TypeName()));
+
             toStrings.Reset();
         }
 
