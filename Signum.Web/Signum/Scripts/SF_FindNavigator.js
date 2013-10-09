@@ -318,7 +318,7 @@ SF.registerModule("FindNavigator", function () {
                 requestData["webQueryName"] = this.options.webQueryName;
                 requestData["pagination"] = $(this.pf(this.keys.pagination)).val();
                 requestData["elems"] = $(this.pf(this.keys.elems)).val();
-                requestData["page"] = $(this.pf(this.keys.page)).val();
+                requestData["page"] = ($(this.pf(this.keys.page)).val() || "1");
                 requestData["allowMultiple"] = this.options.allowMultiple;
                 requestData["navigate"] = this.options.navigate;
                 requestData["filters"] = this.serializeFilters();
