@@ -78,7 +78,7 @@ namespace Signum.Engine.UserQueries
                     if (old == null)
                         return null;
 
-                    var subParts = dic[old].Split('.');
+                    var subParts = dic[old].Let(s => s.HasText() ? s.Split('.') : new string[0]);
 
                     for (int j = 0; j < subParts.Length; j++)
                     {
