@@ -26,7 +26,7 @@ namespace Signum.Entities.SMS
             set { Set(ref template, value, () => Template); }
         }
 
-        [SqlDbType(Size=int.MaxValue)]
+        [SqlDbType(Size = int.MaxValue)]
         string message;
         [NotNullValidator]
         public string Message
@@ -101,7 +101,18 @@ namespace Signum.Entities.SMS
         public Lite<SMSUpdatePackageDN> UpdatePackage
         {
             get { return updatePackage; }
-            set { Set(ref updatePackage, value, () => UpdatePackage); }
+            set
+            {
+                if(Set(ref updatePackage, value, () => UpdatePackage))
+                    UpdatePackageProcessed = false;
+            }
+        }
+
+        bool updatePackageProcessed;
+        public bool UpdatePackageProcessed
+        {
+            get { return updatePackageProcessed; }
+            set { Set(ref updatePackageProcessed, value, () => UpdatePackageProcessed); }
         }
 
         [ImplementedBy()]

@@ -36,7 +36,7 @@ namespace Signum.Windows.ControlPanels.Admin
 
         private object EntityRepeater_Creating()
         {
-            var imp = (Implementations)PropertyRoute.Construct<ControlPanelDN>(cp => cp.Parts.First().Content).GetImplementations();
+            var imp = (Implementations)PropertyRoute.Construct((ControlPanelDN cp) => cp.Parts.First().Content).GetImplementations();
 
             var type = Navigator.SelectType(Window.GetWindow(this), imp.Types, t => Navigator.IsCreable(t, isSearchEntity: false));
 
