@@ -169,6 +169,21 @@ namespace Signum.Engine.Linq
                 }
             }
 
+            if (m.Method.Name == "Mixin" && m.Method.GetParameters().Length == 0)
+            {
+                var obj = Visit(m.Object);
+
+                var me = obj as MetaExpression;
+                if (me != null && me.Meta is CleanMeta)
+                {
+                    CleanMeta cm = (CleanMeta)me.Meta;
+
+                    var mixinType = m.Method.GetGenericArguments().Single();
+
+                    return new MetaExpression(mixinType, new CleanMeta(null, cm.PropertyRoutes.Select(a => a.Add(mixinType)).ToArray()));
+                }
+            }
+
             if (m.Method.DeclaringType == typeof(LinqHints) || m.Method.DeclaringType == typeof(LinqHintEntities))
                 return Visit(m.Arguments[0]);
 
