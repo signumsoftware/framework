@@ -202,7 +202,9 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="SMS\SMSCharactersMap.xlsx" />
+  </ItemGroup>
   <ItemGroup>
     <Content Include="Translations\Signum.Entities.Extensions.de.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
