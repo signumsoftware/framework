@@ -127,6 +127,8 @@ namespace Signum.Entities.Disconnected
         [Description("Not allowed to save {0} while offline")]
         NotAllowedToSave0WhileOffline,
         [Description("The {0} with Id {1} ({2}) is locked by {3}")]
-        The0WithId12IsLockedBy3
+        The0WithId12IsLockedBy3,
+        Imports,
+        Exports
     }
 }

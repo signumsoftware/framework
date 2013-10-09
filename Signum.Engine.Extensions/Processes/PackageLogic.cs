@@ -58,7 +58,7 @@ namespace Signum.Engine.Processes
                     });
 
 
-                dqm.RegisterExpression((PackageDN p) => p.Lines());
+                dqm.RegisterExpression((PackageDN p) => p.Lines(), () => ProcessMessage.Lines.NiceToString());
 
                 if (packages)
                 {

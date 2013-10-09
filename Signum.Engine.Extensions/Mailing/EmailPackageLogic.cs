@@ -45,9 +45,9 @@ namespace Signum.Engine.Mailing
             {
                 sb.Include<EmailPackageDN>();
 
-                dqm.RegisterExpression((EmailPackageDN ep) => ep.Messages());
-                dqm.RegisterExpression((EmailPackageDN ep) => ep.RemainingMessages());
-                dqm.RegisterExpression((EmailPackageDN ep) => ep.ExceptionMessages());
+                dqm.RegisterExpression((EmailPackageDN ep) => ep.Messages(), ()=>EmailMessageMessage.Messages.NiceToString());
+                dqm.RegisterExpression((EmailPackageDN ep) => ep.RemainingMessages(), () => EmailMessageMessage.RemainingMessages.NiceToString());
+                dqm.RegisterExpression((EmailPackageDN ep) => ep.ExceptionMessages(), () => EmailMessageMessage.ExceptionMessages.NiceToString());
 
                 ProcessLogic.AssertStarted(sb);
                 ProcessLogic.Register(EmailMessageProcesses.SendEmails, new SendEmailProcessAlgorithm());
