@@ -179,8 +179,15 @@ namespace Signum.Utilities
             Abbreviation,
         }
 
+        public static string ToPascal(this string str)
+        {
+            return str.ToPascal(true);
+        }
+
         public static string ToPascal(this string str, bool firstUpper)
         {
+            str = str.RemoveDiacritics();
+
             StringBuilder sb = new StringBuilder(str.Length);
 
             bool upper = true;
