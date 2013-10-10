@@ -18,7 +18,7 @@ namespace Signum.Web.Omnibox
     {
         public override OmniboxResultGenerator<DynamicQueryOmniboxResult> CreateGenerator()
         {
-            return new DynamicQueryOmniboxResultGenerator(DynamicQueryManager.Current.GetQueryNames());
+            return new DynamicQueryOmniboxResultGenerator();
         }
 
         public override MvcHtmlString RenderHtml(DynamicQueryOmniboxResult result)
@@ -48,7 +48,7 @@ namespace Signum.Web.Omnibox
                 {
                     html = html.Concat("{0}{1}".FormatHtml(
                         last != null ? "." : "",
-                        ColoredSpan(item.QueryToken.Key, "gray")));
+                        ColoredSpan(item.QueryToken.ToString().ToPascal(), "gray")));
                 }
 
                 if (item.CanFilter.HasText())

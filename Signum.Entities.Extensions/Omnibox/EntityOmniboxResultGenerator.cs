@@ -10,13 +10,6 @@ namespace Signum.Entities.Omnibox
 {
     public class EntityOmniboxResultGenenerator : OmniboxResultGenerator<EntityOmniboxResult>
     {
-        Dictionary<string, Type> types; 
-
-        public EntityOmniboxResultGenenerator(IEnumerable<Type> schemaTypes)
-        {
-            types = schemaTypes.Where(t => !t.IsEnumEntity()).ToDictionary(Lite.GetCleanName);
-        }
-
         public int AutoCompleteLimit = 5;
 
         Regex regex = new Regex(@"^I((?<id>N)|(?<toStr>S))?$", RegexOptions.ExplicitCapture);
@@ -33,7 +26,7 @@ namespace Signum.Entities.Omnibox
             bool isPascalCase = OmniboxUtils.IsPascalCasePattern(ident);
 
 
-            var matches = OmniboxUtils.Matches(types, OmniboxParser.Manager.AllowedType, t => t.NiceName(), ident, isPascalCase);
+            var matches = OmniboxUtils.Matches(OmniboxParser.Manager.Types(), OmniboxParser.Manager.AllowedType, ident, isPascalCase);
 
             if (tokens.Count == 1)
             {
@@ -128,12 +121,12 @@ namespace Signum.Entities.Omnibox
         public override string ToString()
         {
             if (Id.HasValue)
-                return "{0} {1}".Formato(Reflector.CleanTypeName(Type), Id, Lite.TryToString() ?? OmniboxMessage.NotFound.NiceToString());
+                return "{0} {1}".Formato(Type.NiceName().ToPascal(), Id, Lite.TryToString() ?? OmniboxMessage.NotFound.NiceToString());
 
             if (ToStr != null)
-                return "{0} \"{1}\"".Formato(Reflector.CleanTypeName(Type), ToStr, Lite.TryToString() ?? OmniboxMessage.NotFound.NiceToString());
+                return "{0} \"{1}\"".Formato(Type.NiceName().ToPascal(), ToStr, Lite.TryToString() ?? OmniboxMessage.NotFound.NiceToString());
 
-            return Reflector.CleanTypeName(Type);
+            return Type.NiceName().ToPascal();
         }
     }
 }
