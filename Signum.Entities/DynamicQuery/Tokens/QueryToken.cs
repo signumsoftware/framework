@@ -153,7 +153,7 @@ namespace Signum.Entities.DynamicQuery
                 return EntityProperties(type).OrderBy(a => a.ToString()).ToList();
             }
 
-            if(IsCollecction(type))
+            if(IsCollection(type))
             {
                 return CollectionProperties(this);
             }
@@ -275,7 +275,7 @@ namespace Signum.Entities.DynamicQuery
         {
             get
             {
-                if (IsCollecction(Type))
+                if (IsCollection(Type))
                     return "#CE6700";
 
                 switch (QueryUtils.TryGetFilterType(Type))
@@ -300,7 +300,7 @@ namespace Signum.Entities.DynamicQuery
             {
                 Type type = Type.CleanType();
 
-                if (IsCollecction(type))
+                if (IsCollection(type))
                 {
                     return QueryTokenMessage.ListOf0.NiceToString().Formato(GetNiceTypeName(Type.ElementType(), GetElementImplementations()));
                 }
@@ -318,7 +318,7 @@ namespace Signum.Entities.DynamicQuery
             return null;
         }
 
-        public bool IsCollecction(Type type)
+        public bool IsCollection(Type type)
         {
             return type != typeof(string) && type != typeof(byte[]) && type.ElementType() != null;
         }
