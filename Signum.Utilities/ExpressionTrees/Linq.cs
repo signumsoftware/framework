@@ -58,6 +58,17 @@ namespace Signum.Utilities.ExpressionTrees
 			return f;
 		}
 
+
+        /// <summary>
+        /// Utility function for building delegates for lambda functions
+        /// that return C# anonymous type as a result (because you can't declare 
+        /// it using delegates&lt;Func&lt;...&gt;&gt; syntax)
+        /// </summary>
+        public static Func<R> Func<R>(Func<R> f)
+        {
+            return f;
+        }
+
 		/// <summary>
 		/// Utility function for building delegates for lambda functions
 		/// that return C# anonymous type as a result (because you can't declare 
