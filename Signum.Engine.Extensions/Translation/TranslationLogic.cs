@@ -19,11 +19,11 @@ namespace Signum.Engine.Translation
 {
     public static class TranslationLogic
     {
-        static Expression<Func<IUserDN, TranslatorUserDN>> TranslatorExpression =
+        static Expression<Func<IUserDN, TranslatorUserDN>> TranslatorUserExpression =
              user => Database.Query<TranslatorUserDN>().SingleOrDefault(a => a.User.RefersTo(user));
         public static TranslatorUserDN TranslatorUser(this IUserDN entity)
         {
-            return TranslatorExpression.Evaluate(entity);
+            return TranslatorUserExpression.Evaluate(entity);
         }
 
         
