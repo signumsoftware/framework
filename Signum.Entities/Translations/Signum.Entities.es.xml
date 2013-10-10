@@ -217,6 +217,7 @@
     <Member Name="CreateFromRegex" Description="^ Crear (. *) de. *$" />
     <Member Name="Delete" Description="¿Borrar?" />
     <Member Name="InUserInterface" Description="(en interfaz de usuario)" />
+    <Member Name="Logs" Description="Registros" />
     <Member Name="Operation01IsNotAuthorized" Description="La operación {0} ({1}) no está autorizada" />
     <Member Name="PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem" Description="Confirme que desea eliminar esta entidad del sistema" />
     <Member Name="PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem" Description="Confirme que desea eliminar las entidades seleccionadas del sistema" />
@@ -367,7 +368,9 @@
     <Member Name="TheNumberOfElementsOf0HasToBe01" Description="El número de elementos en {{0}} ha de ser {0} {1}" />
     <Member Name="Type0NotAllowed" Description="El tipo {0} no está permitido" />
   </Type>
-  <Type Name="ValueLineBoxModel" />
+  <Type Name="ValueLineBoxModel">
+    <Member Name="Related" Description="Relacionados" />
+  </Type>
   <Type Name="ValueLineBoxType" />
   <Type Name="VoidEnumMessage">
     <Member Name="Instance" Description="-" />

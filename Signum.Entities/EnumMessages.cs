@@ -25,7 +25,8 @@ namespace Signum.Entities
         PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem,
 
         [Description("{0} didn't return an entity")]
-        TheOperation0DidNotReturnAnEntity
+        TheOperation0DidNotReturnAnEntity,
+        Logs
     }
 
     public enum SynchronizerMessage

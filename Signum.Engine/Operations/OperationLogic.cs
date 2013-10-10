@@ -31,11 +31,11 @@ namespace Signum.Engine.Operations
             return OperationLogsEntityExpression.Evaluate(e);
         }
 
-        static Expression<Func<OperationDN, IQueryable<OperationLogDN>>> OperationLogsExpression =
+        static Expression<Func<OperationDN, IQueryable<OperationLogDN>>> LogsExpression =
             o => Database.Query<OperationLogDN>().Where(a => a.Operation == o);
-        public static IQueryable<OperationLogDN> OperationLogs(this OperationDN o)
+        public static IQueryable<OperationLogDN> Logs(this OperationDN o)
         {
-            return OperationLogsExpression.Evaluate(o);
+            return LogsExpression.Evaluate(o);
         }
 
         static Polymorphic<Dictionary<Enum, IOperation>> operations = new Polymorphic<Dictionary<Enum, IOperation>>(PolymorphicMerger.InheritDictionaryInterfaces, typeof(IIdentifiable));
@@ -144,8 +144,8 @@ namespace Signum.Engine.Operations
                         lo.Key,
                     });
 
-                dqm.RegisterExpression((OperationDN o) => o.OperationLogs());
-                dqm.RegisterExpression((IdentifiableEntity o) => o.OperationLogs());
+                dqm.RegisterExpression((OperationDN o) => o.Logs(), () => OperationMessage.Logs.NiceToString());
+                dqm.RegisterExpression((IdentifiableEntity o) => o.OperationLogs(), () => typeof(OperationLogDN).NicePluralName());
 
                 sb.Schema.EntityEventsGlobal.Saving += EntityEventsGlobal_Saving;
 
