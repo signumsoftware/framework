@@ -21,7 +21,7 @@ namespace Signum.Entities.DynamicQuery
             var shouldHaveImplementations = typeof(IIdentifiable).IsAssignableFrom((isProjection ? type.ElementType() : type).CleanType());
 
             if (shouldHaveImplementations && implementations == null)
-                throw new ArgumentException("Extension {0} ({1}) registered on type {2} has no implementations".Formato(key, type.TypeName(), parent.Type.CleanType()));
+                throw new ArgumentException("Extension token '{0}' (of type {1}) registered on type {2} has no implementations".Formato(key, type.TypeName(), parent.Type.CleanType().TypeName()));
 
             this.key= key;
             this.type = type;
