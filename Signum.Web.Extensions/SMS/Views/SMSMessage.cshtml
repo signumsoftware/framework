@@ -35,6 +35,7 @@
             vl.ValueHtmlProps["rows"] = "6";
             vl.ValueHtmlProps["class"] = "sf-sms-msg-text";
             vl.ReadOnly = (!e.Value.EditableMessage || e.Value.State != SMSMessageState.Created);
+            vl.WriteHiddenOnReadonly = true;
         })
         @if (e.Value.State == SMSMessageState.Created && e.Value.EditableMessage)
         {

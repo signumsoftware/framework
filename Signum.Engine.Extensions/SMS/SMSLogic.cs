@@ -483,6 +483,14 @@ namespace Signum.Engine.SMS
             message.Save();
         }
 
+        public static void SendAsyncSMS(SMSMessageDN message)
+        {
+            Task.Factory.StartNew(() => 
+            {
+                SendSMS(message);
+            });
+        }
+
         public static List<SMSMessageDN> CreateAndSendMultipleSMSMessages(CreateMessageParams template, List<string> phones)
         {
             var messages = new List<SMSMessageDN>();
@@ -567,31 +575,6 @@ namespace Signum.Engine.SMS
                         m.Save();
                         throw;
                     }
-                }
-            }.Register();
-
-            new Execute(SMSMessageOperation.SendAsync)
-            {
-                AllowsNew = true,
-                Lite = false,
-                FromStates = { SMSMessageState.Created },
-                ToState = SMSMessageState.Sent,
-                Execute = (m, _) =>
-                {
-                    Task.Factory.StartNew(() =>
-                    {
-                        try
-                        {
-                            SMSLogic.SendSMS(m);
-                        }
-                        catch (Exception e)
-                        {
-                            var ex = e.LogException();
-                            m.Exception = ex.ToLite();
-                            m.Save();
-                            throw;
-                        }
-                    });
                 }
             }.Register();
 
