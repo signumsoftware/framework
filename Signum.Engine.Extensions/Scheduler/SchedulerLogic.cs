@@ -338,6 +338,7 @@ namespace Signum.Engine.Scheduler
                         {
                             Task = stl.Task,
                             StartTime = stl.StartTime,
+                            User = stl.User,
                             MachineName = stl.MachineName,
                             ApplicationName = stl.ApplicationName,
                             EndTime = TimeZoneManager.Now,
