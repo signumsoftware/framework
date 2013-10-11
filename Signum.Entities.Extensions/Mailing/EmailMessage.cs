@@ -485,6 +485,9 @@ namespace Signum.Entities.Mailing
         TheEmailMessageCannotBeSentFromState0,
         [Description("Message")]
         Message,
+        Messages,
+        RemainingMessages,
+        ExceptionMessages,
     }
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]

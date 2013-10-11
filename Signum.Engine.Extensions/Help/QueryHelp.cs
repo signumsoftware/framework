@@ -139,14 +139,14 @@ namespace Signum.Engine.Help
         static readonly XName _Column = "Column";
 
 
-        public static void Synchronize(string fileName, XDocument loaded, object queryName)
+        public static void Synchronize(string fileName, XDocument loaded, object queryName, Func<string, string> syncContent)
         {
             XElement loadedQuery = loaded.Element(_Query);
             var created = QueryHelp.Create(queryName);
 
             bool changed = false;
             HelpTools.SynchronizeElements(loadedQuery, _Columns, _Columns, _Name, created.Columns, "Columns of {0}".Formato(QueryUtils.GetQueryUniqueKey(queryName)),
-              (qc, element) => qc.UserDescription = element.Element(_Description).TryCC(a => a.Value),
+              (qc, element) => qc.UserDescription = syncContent(element.Element(_Description).TryCC(a => a.Value)),
               (action, column) =>
               {
                   if (!changed)
@@ -157,7 +157,7 @@ namespace Signum.Engine.Help
                   Console.WriteLine("  Column {0}: {1}".Formato(action, column));
               });
 
-            created.UserDescription = loadedQuery.Element(_Description).TryCC(a => a.Value);
+            created.UserDescription = syncContent(loadedQuery.Element(_Description).TryCC(a => a.Value));
 
             if (fileName != created.FileName)
             {

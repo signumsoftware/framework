@@ -15,6 +15,8 @@ using Signum.Engine.Basics;
 using System.Linq.Expressions;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Basics;
+using System.Collections.Concurrent;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Translation
 {
@@ -54,9 +56,9 @@ namespace Signum.Engine.Translation
             }
         }
 
-        public static void AddRoute<T>(Expression<Func<T, object>> expression) where T : IdentifiableEntity
+        public static void AddRoute<T, S>(Expression<Func<T, S>> propertyRoute) where T : IdentifiableEntity
         {
-            AddRoute(PropertyRoute.Construct<T>(expression));
+            AddRoute(PropertyRoute.Construct<T, S>(propertyRoute));
         }
 
         public static void AddRoute(PropertyRoute route)
@@ -158,28 +160,49 @@ namespace Signum.Engine.Translation
         {
             var routes = TraducibleRoutes.GetOrThrow(t).Select(pr => pr.ToPropertyRouteDN()).Where(a => !a.IsNew).ToList();
 
-            Database.Query<TranslatedInstanceDN>().Where(a => a.PropertyRoute.Type == t.ToTypeDN() && !routes.Contains(a.PropertyRoute)).UnsafeDelete();
+            int deletedPr = Database.Query<TranslatedInstanceDN>().Where(a => a.PropertyRoute.Type == t.ToTypeDN() && !routes.Contains(a.PropertyRoute)).UnsafeDelete();
 
-            giRemoveTranslationsForMissingEntities.GetInvoker(t).Invoke();
+            int deletedInstance = giRemoveTranslationsForMissingEntities.GetInvoker(t)();
         }
 
-        static GenericInvoker<Action> giRemoveTranslationsForMissingEntities = new GenericInvoker<Action>(() => RemoveTranslationsForMissingEntities<IdentifiableEntity>());
-        static void RemoveTranslationsForMissingEntities<T>() where T : IdentifiableEntity
+        static GenericInvoker<Func<int>> giRemoveTranslationsForMissingEntities = new GenericInvoker<Func<int>>(() => RemoveTranslationsForMissingEntities<IdentifiableEntity>());
+        static int RemoveTranslationsForMissingEntities<T>() where T : IdentifiableEntity
         {
-            (from ti in Database.Query<TranslatedInstanceDN>()
-             join e in Database.Query<T>().DefaultIfEmpty() on ti.Instance.Entity equals e
-             where e == null
-             select ti).UnsafeDelete();
+            return (from ti in Database.Query<TranslatedInstanceDN>()
+                    where ti.PropertyRoute.Type == typeof(T).ToTypeDN()
+                    join e in Database.Query<T>().DefaultIfEmpty() on ti.Instance.Entity equals e
+                    where e == null
+                    select ti).UnsafeDelete();
         }
 
-        public static string GetTranslation(Lite<IdentifiableEntity> lite, PropertyRoute route)
+
+        public static string TranslatedField<T>(this T entity, Expression<Func<T, string>> property) where T : IdentifiableEntity
+        {
+            string fallbackString = TranslatedInstanceLogic.GetPropertyRouteAccesor(property)(entity);
+
+            return entity.ToLite().TranslatedField(property, fallbackString);
+        }
+
+        public static string TranslatedField<T>(this Lite<T> lite, Expression<Func<T, string>> property, string fallbackString) where T : IdentifiableEntity
+        {
+            PropertyRoute route = PropertyRoute.Construct(Expression.Lambda<Func<T, object>>(property.Body, property.Parameters));
+
+            var result = TranslatedInstanceLogic.GetTranslatedInstance(lite, route);
+
+            if (result != null && result.OriginalText == fallbackString)
+                return result.TranslatedText;
+
+            return fallbackString;
+        }
+
+        public static TranslatedInstanceDN GetTranslatedInstance(Lite<IdentifiableEntity> lite, PropertyRoute route)
         {
             var key = new LocalizedInstanceKey(route, lite);
 
             var result = LocalizationCache.Value.TryGetC(CultureInfo.CurrentUICulture).TryGetC(key);
 
             if (result != null)
-                return result.TranslatedText;
+                return result;
 
             if (CultureInfo.CurrentUICulture.IsNeutralCulture)
                 return null;
@@ -187,9 +210,36 @@ namespace Signum.Engine.Translation
             result = LocalizationCache.Value.TryGetC(CultureInfo.CurrentUICulture.Parent).TryGetC(key);
 
             if (result != null)
-                return result.TranslatedText;
+                return result;
 
             return null;
+        }
+
+
+        public static T SaveTranslation<T>(this T entity, CultureInfoDN ci, Expression<Func<T, string>> propertyRoute, string translatedText)
+            where T : IdentifiableEntity
+        {
+            entity.Save();
+
+            if (translatedText.HasText())
+                new TranslatedInstanceDN
+                {
+                    PropertyRoute = PropertyRoute.Construct(propertyRoute).ToPropertyRouteDN(),
+                    Culture = ci,
+                    TranslatedText = translatedText,
+                    OriginalText = GetPropertyRouteAccesor(propertyRoute)(entity),
+                    Instance = entity.ToLite(),
+                }.Save();
+
+            return entity;
+        }
+
+
+        static ConcurrentDictionary<LambdaExpression, Delegate> compiledExpressions = new ConcurrentDictionary<LambdaExpression, Delegate>(ExpressionComparer.GetComparer<LambdaExpression>());
+
+        public static Func<T, string> GetPropertyRouteAccesor<T>(Expression<Func<T, string>> propertyRoute) where T:IdentifiableEntity
+        {
+            return (Func<T, string>)compiledExpressions.GetOrAdd(propertyRoute, ld => ld.Compile());
         }
     }
 

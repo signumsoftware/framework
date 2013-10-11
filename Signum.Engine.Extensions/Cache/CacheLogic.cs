@@ -26,11 +26,14 @@ using Signum.Engine.SchemaInfoTables;
 using Signum.Engine.Basics;
 using Signum.Engine.Linq;
 using System.Linq.Expressions;
+using System.IO;
 
 namespace Signum.Engine.Cache
 {
     public static class CacheLogic
     {
+        public static TextWriter LogWriter;
+
         public static bool AssertOnStart = true;
 
         public static void AssertStarted(SchemaBuilder sb)
@@ -75,6 +78,9 @@ namespace Signum.Engine.Cache
                     if (args.Info == SqlNotificationInfo.PreviousFire)
                         throw new InvalidOperationException("The same transaction that loaded the data is invalidating it!") { Data = { { "query", tr.GetMainPreCommand().PlainSql() } } };
 
+                    if (CacheLogic.LogWriter != null)
+                        CacheLogic.LogWriter.WriteLine("Change ToListWithInvalidations {0} {1}".Formato(typeof(T).TypeName()), exceptionContext);
+
                     invalidation(args);
                 }
                 catch (Exception e)
@@ -96,6 +102,9 @@ namespace Signum.Engine.Cache
             DatabaseName db = table.Name.Schema.TryCC(s => s.Database);
 
             SqlConnector subConnector = ((SqlConnector)Connector.Current).ForDatabase(db);
+
+            if (CacheLogic.LogWriter != null)
+                CacheLogic.LogWriter.WriteLine("Load ToListWithInvalidations {0} {1}".Formato(typeof(T).TypeName()), exceptionContext);
 
             using (new EntityCache())
                 subConnector.ExecuteDataReaderDependency(tr.GetMainPreCommand(), onChange, CacheLogic.ForceOnStart, fr =>
@@ -670,6 +679,14 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(database.TryToString() ?? Connector.C
                     foreach (var t in invalidateWith.Types)
                         sb.Schema.CacheController(t).Load();
                 }
+            }
+        }
+
+        public static void LoadAllControllers()
+        {
+            foreach (var c in controllers.Values.NotNull())
+            {
+                c.Load();
             }
         }
     }

@@ -13,12 +13,6 @@ namespace Signum.Entities.Chart
 {
     public class ChartOmniboxResultGenerator : OmniboxResultGenerator<ChartOmniboxResult>
     {
-        static Dictionary<string, object> queries;
-        public ChartOmniboxResultGenerator(IEnumerable<object> queryNames)
-        {
-            queries = queryNames.ToDictionary(QueryUtils.GetCleanName);
-        }
-
         public string Keyword = "Chart";
         public Func<string> NiceName = () => ChartMessage.Chart.NiceToString();
 
@@ -46,7 +40,7 @@ namespace Signum.Entities.Chart
 
                 bool isPascalCase = OmniboxUtils.IsPascalCasePattern(pattern);
 
-                foreach (var match in OmniboxUtils.Matches(queries, OmniboxParser.Manager.AllowedQuery,  QueryUtils.GetNiceName, pattern, isPascalCase).OrderBy(ma => ma.Distance))
+                foreach (var match in OmniboxUtils.Matches(OmniboxParser.Manager.GetQueries(), OmniboxParser.Manager.AllowedQuery, pattern, isPascalCase).OrderBy(ma => ma.Distance))
                 {
                     var queryName = match.Value;
                     if (OmniboxParser.Manager.AllowedQuery(queryName))
@@ -83,7 +77,7 @@ namespace Signum.Entities.Chart
             if (QueryName == null)
                 return KeywordMatch.Value.ToString();
 
-            return "{0} {1}".Formato(KeywordMatch.Value, QueryUtils.GetCleanName(QueryName));
+            return "{0} {1}".Formato(KeywordMatch.Value, QueryUtils.GetNiceName(QueryName).ToPascal());
         }
     }
 }

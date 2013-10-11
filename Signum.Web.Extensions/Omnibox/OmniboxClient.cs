@@ -129,6 +129,16 @@ namespace Signum.Web.Omnibox
 
                 return AutocompleteUtils.FindLiteLike(implementations, subString, 5);
             }
+
+            protected override IEnumerable<object> GetAllQueryNames()
+            {
+                return DynamicQueryManager.Current.GetQueryNames();
+            }
+
+            protected override IEnumerable<Type> GetAllTypes()
+            {
+                return Schema.Current.Tables.Keys;
+            }
         }
     }
 }

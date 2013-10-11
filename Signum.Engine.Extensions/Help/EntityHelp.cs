@@ -116,25 +116,25 @@ namespace Signum.Engine.Help
             return this;
         }
 
-        public static void Synchronize(string fileName, XDocument loaded, Type type)
+        public static void Synchronize(string fileName, XDocument loaded, Type type, Func<string, string> syncContent)
         {
             XElement loadedEntity = loaded.Element(_Entity);
             EntityHelp created = EntityHelp.Create(type);
 
-            bool changed = false; 
-            Action change = ()=>
+            bool changed = false;
+            Action change = () =>
             {
-                if(!changed)
+                if (!changed)
                 {
                     Console.WriteLine("Synchronized {0} ".Formato(fileName));
-                    changed= true;
+                    changed = true;
                 }
             };
 
-            created.Description = loadedEntity.Element(_Description).TryCC(a => a.Value);
+            created.Description = syncContent(loadedEntity.Element(_Description).TryCC(a => a.Value));
 
             HelpTools.SynchronizeElements(loadedEntity, _Properties, _Property, _Name, created.Properties, "Properties of {0}".Formato(type.Name),
-                (ph, elem)=>ph.UserDescription = elem.Value,
+                (ph, elem) => ph.UserDescription = syncContent(elem.Value),
                 (action, prop) =>
                 {
                     change();
@@ -142,7 +142,7 @@ namespace Signum.Engine.Help
                 });
 
             HelpTools.SynchronizeElements(loadedEntity, _Operations, _Operation, _Key, created.Operations.SelectDictionary(OperationDN.UniqueKey, v => v), "Operations of {0}".Formato(type.Name),
-                (oh, op) => oh.UserDescription = op.Value,
+                (oh, op) => oh.UserDescription = syncContent(op.Value),
                 (action, op) =>
                 {
                     change();

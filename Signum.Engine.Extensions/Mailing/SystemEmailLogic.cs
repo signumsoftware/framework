@@ -175,12 +175,12 @@ namespace Signum.Engine.Mailing
 
         internal static List<SystemEmailDN> GenerateTemplates()
         {
-            var lista = (from type in systemEmails.Keys
+            var list = (from type in systemEmails.Keys
                          select new SystemEmailDN
                          {
                              FullClassName = type.FullName
                          }).ToList();
-            return lista;
+            return list;
         }
 
         static SqlPreCommand Schema_Generating()

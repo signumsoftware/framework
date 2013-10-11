@@ -64,7 +64,9 @@ namespace Signum.Entities.Authorization
         [Description("user")]
         Login_UserName_Watermark,
         [Description("Login")]
-        LoginEnter,
+        Login,
+        [Description("Logout")]
+        Logout,
         NewPassword,
         [Description("Not allowed to save this {0} while offline")]
         NotAllowedToSaveThis0WhileOffline,

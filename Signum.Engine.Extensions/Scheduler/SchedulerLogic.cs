@@ -32,9 +32,9 @@ namespace Signum.Engine.Scheduler
             return ExecutionsExpression.Evaluate(e);
         }
 
-        static Expression<Func<ITaskDN, IQueryable<ScheduledTaskLogDN>>> LastExecutionExpression =
-            e => e.Executions().OrderByDescending(a => a.StartTime).Take(1);
-        public static IQueryable<ScheduledTaskLogDN> LastExecution(this ITaskDN e)
+        static Expression<Func<ITaskDN, ScheduledTaskLogDN>> LastExecutionExpression =
+            e => e.Executions().OrderByDescending(a => a.StartTime).FirstOrDefault();
+        public static ScheduledTaskLogDN LastExecution(this ITaskDN e)
         {
             return LastExecutionExpression.Evaluate(e);
         }
@@ -119,8 +119,8 @@ namespace Signum.Engine.Scheduler
                         
                     });
 
-                dqm.RegisterExpression((ITaskDN ct) => ct.Executions());
-                dqm.RegisterExpression((ITaskDN ct) => ct.LastExecution());
+                dqm.RegisterExpression((ITaskDN ct) => ct.Executions(), () => TaskMessage.Executions.NiceToString());
+                dqm.RegisterExpression((ITaskDN ct) => ct.LastExecution(), () => TaskMessage.LastExecution.NiceToString());
 
                 new Graph<HolidayCalendarDN>.Execute(CalendarOperation.Save)
                 {

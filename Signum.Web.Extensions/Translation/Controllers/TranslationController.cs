@@ -11,6 +11,7 @@ using Signum.Engine.Translation;
 using Signum.Entities.Authorization;
 using Signum.Entities.Translation;
 using Signum.Utilities;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Web.Translation.Controllers
 {
@@ -25,7 +26,11 @@ namespace Signum.Web.Translation.Controllers
         {
             var cultures = TranslationLogic.CurrentCultureInfos("en");
 
-            var dic = AssembliesToLocalize().ToDictionary(a => a,
+            var assemblies = AssembliesToLocalize().ToDictionary(a=>a.FullName);
+
+            var dg = DirectedGraph<Assembly>.Generate(assemblies.Values, a => a.GetReferencedAssemblies().Select(an => assemblies.TryGetC(an.FullName)).NotNull());
+
+            var dic = dg.CompilationOrderGroups().SelectMany(gr => gr.OrderBy(a => a.FullName)).ToDictionary(a => a,
                 a => cultures.Select(ci => new TranslationFile
                 {
                     Assembly = a,
@@ -42,15 +47,16 @@ namespace Signum.Web.Translation.Controllers
             Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".Formato(assembly));
 
             CultureInfo defaultCulture = CultureInfo.GetCultureInfo(ass.SingleAttribute<DefaultAssemblyCultureAttribute>().DefaultCulture);
+            CultureInfo targetCulture = culture == null ? null : CultureInfo.GetCultureInfo(culture);
 
             Dictionary<CultureInfo, LocalizedAssembly> reference = (from ci in TranslationLogic.CurrentCultureInfos(defaultCulture.Name)
                                                                     let la = DescriptionManager.GetLocalizedAssembly(ass, ci)
-                                                                    where la != null || ci == defaultCulture
-                                                                    select KVP.Create(ci, la ?? LocalizedAssembly.ImportXml(ass, ci))).ToDictionary();
+                                                                    where la != null || ci == defaultCulture || ci == targetCulture
+                                                                    select KVP.Create(ci, la ?? LocalizedAssembly.ImportXml(ass, ci, forceCreate: true))).ToDictionary();
 
             ViewBag.Assembly = ass;
             ViewBag.DefaultCulture = defaultCulture;
-            ViewBag.Culture = culture == null ? null : CultureInfo.GetCultureInfo(culture);
+            ViewBag.Culture = targetCulture;
 
             return base.View(TranslationClient.ViewPrefix.Formato("View"), reference);
         }
@@ -64,7 +70,7 @@ namespace Signum.Web.Translation.Controllers
 
             if (culture.HasText())
             {
-                LocalizedAssembly locAssembly = LocalizedAssembly.ImportXml(currentAssembly, CultureInfo.GetCultureInfo(culture));
+                LocalizedAssembly locAssembly = LocalizedAssembly.ImportXml(currentAssembly, CultureInfo.GetCultureInfo(culture), forceCreate: true);
 
                 list.GroupToDictionary(a => a.Type).JoinDictionaryForeach(locAssembly.Types.Values.ToDictionary(a => a.Type.Name), (tn, tuples, lt) =>
                 {
@@ -76,7 +82,8 @@ namespace Signum.Web.Translation.Controllers
             }
             else
             {
-                Dictionary<string, LocalizedAssembly> locAssemblies = TranslationLogic.CurrentCultureInfos("en").ToDictionary(ci => ci.Name, ci => LocalizedAssembly.ImportXml(currentAssembly, ci));
+                Dictionary<string, LocalizedAssembly> locAssemblies = TranslationLogic.CurrentCultureInfos("en").ToDictionary(ci => ci.Name, 
+                    ci => LocalizedAssembly.ImportXml(currentAssembly, ci, forceCreate: true));
 
                 Dictionary<string, List<TranslationRecord>> groups = list.GroupToDictionary(a => a.Lang);
 
@@ -160,21 +167,23 @@ namespace Signum.Web.Translation.Controllers
         public ActionResult Sync(string assembly, string culture)
         {
             Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".Formato(assembly));
-            var targetCI = CultureInfo.GetCultureInfo(culture);
+            CultureInfo targetCulture = CultureInfo.GetCultureInfo(culture);
 
             CultureInfo defaultCulture = CultureInfo.GetCultureInfo(ass.SingleAttribute<DefaultAssemblyCultureAttribute>().DefaultCulture);
 
             Dictionary<CultureInfo, LocalizedAssembly> reference = (from ci in TranslationLogic.CurrentCultureInfos(defaultCulture.Name)
                                                                     let la = DescriptionManager.GetLocalizedAssembly(ass, ci)
-                                                                    where la != null || ci == defaultCulture
-                                                                    select KVP.Create(ci, la ?? LocalizedAssembly.ImportXml(ass, ci))).ToDictionary();
+                                                                    where la != null || ci == defaultCulture || ci == targetCulture
+                                                                    select KVP.Create(ci, la ?? LocalizedAssembly.ImportXml(ass, ci, forceCreate: true))).ToDictionary();
             var master = reference.Extract(defaultCulture);
-            
-            var target = reference.Extract(targetCI);
-            DictionaryByTypeName(target); //To avoid finding duplicated types on save
-            var changes = TranslationSynchronizer.GetAssemblyChanges(TranslationClient.Translator, target, master, reference.Values.ToList());
 
-            ViewBag.Culture = targetCI;
+            var target = reference.Extract(targetCulture); 
+            DictionaryByTypeName(target); //To avoid finding duplicated types on save
+            int totalTypes;
+            var changes = TranslationSynchronizer.GetAssemblyChanges(TranslationClient.Translator, target, master, reference.Values.ToList(), out totalTypes);
+
+            ViewBag.TotalTypes = totalTypes;
+            ViewBag.Culture = targetCulture;
             return base.View(TranslationClient.ViewPrefix.Formato("Sync"), changes);
         }
 
@@ -182,8 +191,8 @@ namespace Signum.Web.Translation.Controllers
         public ActionResult Sync(string assembly, string culture, string bla)
         {
             Assembly currentAssembly = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".Formato(assembly));
-            
-            LocalizedAssembly locAssembly = LocalizedAssembly.ImportXml(currentAssembly, CultureInfo.GetCultureInfo(culture));
+
+            LocalizedAssembly locAssembly = LocalizedAssembly.ImportXml(currentAssembly, CultureInfo.GetCultureInfo(culture), forceCreate: true);
 
             List<TranslationRecord> records = GetTranslationRecords();
 
