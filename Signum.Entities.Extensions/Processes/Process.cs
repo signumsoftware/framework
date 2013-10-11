@@ -273,7 +273,10 @@ namespace Signum.Entities.Processes
         [Description("Process Start is greater than Process End")]
         ProcessStartIsGreaterThanProcessEnd,
         [Description("Process Start is null but Process End is not")]
-        ProcessStartIsNullButProcessEndIsNot
+        ProcessStartIsNullButProcessEndIsNot,
+        Lines,
+        LastProcess,
+        ExceptionLines
     }
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]

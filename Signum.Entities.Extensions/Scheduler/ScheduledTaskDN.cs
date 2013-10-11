@@ -73,7 +73,9 @@ namespace Signum.Entities.Scheduler
 
     public enum TaskMessage
     {
-        Execute
+        Execute,
+        Executions,
+        LastExecution
     }
 
     public enum TaskOperation

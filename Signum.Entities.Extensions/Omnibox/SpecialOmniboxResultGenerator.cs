@@ -38,7 +38,7 @@ namespace Signum.Entities.Omnibox
 
             bool isPascalCase = OmniboxUtils.IsPascalCasePattern(ident);
 
-            return OmniboxUtils.Matches(Actions, a => a.Allowed(), null, ident, isPascalCase)
+            return OmniboxUtils.Matches(Actions, a => a.Allowed(), ident, isPascalCase)
                 .Select(m => new SpecialOmniboxResult { Match = m, Distance = m.Distance });
         }
 

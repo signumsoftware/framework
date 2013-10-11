@@ -60,7 +60,7 @@ namespace Signum.Entities.Omnibox
                 boldIndices: indices);
         }
 
-        public static IEnumerable<OmniboxMatch> Matches<T>(Dictionary<string, T> values, Func<T, bool> filter, Func<T, string> niceName, string pattern, bool isPascalCase)
+        public static IEnumerable<OmniboxMatch> Matches<T>(Dictionary<string, T> values, Func<T, bool> filter, string pattern, bool isPascalCase)
         {
             T val;
             if (values.TryGetValue(pattern, out val) && filter(val))
@@ -88,16 +88,6 @@ namespace Signum.Entities.Omnibox
                     {
                         yield return result;
                         continue;
-                    }
-
-                    if (niceName != null)
-                    {
-                        result = Contains(kvp.Value, niceName(kvp.Value), pattern);
-                        if (result != null)
-                        {
-                            yield return result;
-                            continue;
-                        }
                     }
                 }
             }

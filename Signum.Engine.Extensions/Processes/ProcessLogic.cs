@@ -159,13 +159,13 @@ namespace Signum.Engine.Processes
                                  p.Exception,
                              });
 
-                dqm.RegisterExpression((ProcessAlgorithmDN p) => p.Processes());
-                dqm.RegisterExpression((ProcessAlgorithmDN p) => p.LastProcess());
+                dqm.RegisterExpression((ProcessAlgorithmDN p) => p.Processes(), () => typeof(ProcessDN).NicePluralName());
+                dqm.RegisterExpression((ProcessAlgorithmDN p) => p.LastProcess(), () => ProcessMessage.LastProcess.NiceToString());
 
-                dqm.RegisterExpression((IProcessDataDN p) => p.Processes());
-                dqm.RegisterExpression((IProcessDataDN p) => p.LastProcess());
+                dqm.RegisterExpression((IProcessDataDN p) => p.Processes(), () => typeof(ProcessDN).NicePluralName());
+                dqm.RegisterExpression((IProcessDataDN p) => p.LastProcess(), () => ProcessMessage.LastProcess.NiceToString());
 
-                dqm.RegisterExpression((IProcessLineDataDN p) => p.ExceptionLines());
+                dqm.RegisterExpression((IProcessLineDataDN p) => p.ExceptionLines(), () => ProcessMessage.ExceptionLines.NiceToString());
 
                 if (userProcessSession)
                 {

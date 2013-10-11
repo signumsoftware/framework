@@ -147,7 +147,6 @@ namespace Signum.Entities.SMS
     public enum SMSMessageOperation
     {
         Send,
-        SendAsync,
         UpdateStatus,
         CreateUpdateStatusPackage,
         CreateSMSFromSMSTemplate,

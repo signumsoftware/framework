@@ -15,7 +15,7 @@ namespace Signum.Web.Omnibox
     {
         public override OmniboxResultGenerator<EntityOmniboxResult> CreateGenerator()
         {
-            return new EntityOmniboxResultGenenerator(Schema.Current.Tables.Keys);
+            return new EntityOmniboxResultGenenerator();
         }
 
         public override MvcHtmlString RenderHtml(EntityOmniboxResult result)

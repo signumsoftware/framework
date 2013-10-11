@@ -15,7 +15,7 @@ namespace Signum.Web.Chart
     {
         public override OmniboxResultGenerator<ChartOmniboxResult> CreateGenerator()
         {
-            return new ChartOmniboxResultGenerator(DynamicQueryManager.Current.GetQueryNames());
+            return new ChartOmniboxResultGenerator();
         }
 
         public override MvcHtmlString RenderHtml(ChartOmniboxResult result)

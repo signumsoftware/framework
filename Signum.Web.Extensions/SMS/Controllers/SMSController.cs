@@ -63,7 +63,7 @@ namespace Signum.Web.SMS
             var jsFindNavigator = JsFindNavigator.GetFor(prefix);
             ViewData[ViewDataKeys.OnOk] = jsFindNavigator.hasSelectedItem(new JsFunction("item") 
             {
-                Js.Submit(Url.Action<SMSController>(sc => sc.CreateMessageFromTemplate()), "{ template: item.key }")
+                Js.Submit(Url.Action<SMSController>(sc => sc.CreateSMSMessageFromTemplateDo()), "{ template: item.key }")
             }).ToJS();
 
             var ie = this.ExtractEntity<IdentifiableEntity>(null);
@@ -81,7 +81,7 @@ namespace Signum.Web.SMS
         }
 
         [HttpPost]
-        public ActionResult CreateMessageFromTemplate()
+        public ActionResult CreateSMSMessageFromTemplateDo()
         {
             var ie = this.ExtractLite<IdentifiableEntity>(null);
             var template = Lite.Parse<SMSTemplateDN>(Request["template"]);

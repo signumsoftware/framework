@@ -19,11 +19,11 @@ namespace Signum.Engine.Translation
 {
     public static class TranslationLogic
     {
-        static Expression<Func<IUserDN, TranslatorUserDN>> TranslatorExpression =
+        static Expression<Func<IUserDN, TranslatorUserDN>> TranslatorUserExpression =
              user => Database.Query<TranslatorUserDN>().SingleOrDefault(a => a.User.RefersTo(user));
-        public static TranslatorUserDN Translator(this IUserDN entity)
+        public static TranslatorUserDN TranslatorUser(this IUserDN entity)
         {
-            return TranslatorExpression.Evaluate(entity);
+            return TranslatorUserExpression.Evaluate(entity);
         }
 
         
@@ -46,7 +46,7 @@ namespace Signum.Engine.Translation
                         Cultures = e.Cultures.Count,
                     });
 
-                dqm.RegisterExpression((IUserDN e) => e.Translator());
+                dqm.RegisterExpression((IUserDN e) => e.TranslatorUser(), () => typeof(TranslatorUserDN).NiceName());
 
                 new Graph<TranslatorUserDN>.Execute(TranslatorOperation.Save)
                 {
@@ -68,7 +68,7 @@ namespace Signum.Engine.Translation
 
             if (Schema.Current.Tables.ContainsKey(typeof(TranslatorUserDN)))
             {
-                TranslatorUserDN tr = UserDN.Current.Translator();
+                TranslatorUserDN tr = UserDN.Current.TranslatorUser();
 
                 if (tr != null)
                     cultures = cultures.Where(ci => ci.Name == defaultCulture || tr.Cultures.Any(tc => tc.Culture.ToCultureInfo() == ci));

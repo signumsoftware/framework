@@ -8,6 +8,8 @@ using Signum.Entities.DynamicQuery;
 using Signum.Entities.Reflection;
 using System.Threading;
 using Signum.Entities.UserQueries;
+using System.Collections.Concurrent;
+using System.Globalization;
 
 namespace Signum.Entities.Omnibox
 {
@@ -135,6 +137,26 @@ namespace Signum.Entities.Omnibox
 
         public abstract List<Lite<IdentifiableEntity>> Autocomplete(Implementations implementations, string subString, int count);
 
+
+        protected abstract IEnumerable<object> GetAllQueryNames();
+ 
+        static ConcurrentDictionary<CultureInfo, Dictionary<string, object>> queries = new ConcurrentDictionary<CultureInfo, Dictionary<string, object>>();
+
+        public Dictionary<string, object> GetQueries()
+        {
+            return queries.GetOrAdd(CultureInfo.CurrentCulture, ci =>
+                 GetAllQueryNames().ToDictionary(qn => QueryUtils.GetNiceName(qn).ToPascal(), "Translated QueryNames"));
+        }
+
+        protected abstract IEnumerable<Type> GetAllTypes();
+
+        static ConcurrentDictionary<CultureInfo, Dictionary<string, Type>> types = new ConcurrentDictionary<CultureInfo, Dictionary<string, Type>>();
+
+        internal Dictionary<string, Type> Types()
+        {
+            return types.GetOrAdd(CultureInfo.CurrentCulture, ci =>
+               GetAllTypes().Where(t => !t.IsEnumEntity()).ToDictionary(t => t.NiceName().ToPascal(), "Translated Types"));
+        }
     }
 
     public abstract class OmniboxResult
@@ -224,5 +246,10 @@ namespace Signum.Entities.Omnibox
         Number,
         String,
         Entity,
+    }
+
+    public enum OmniboxPermission
+    {
+        OmniboxInAssemblyLanguage,
     }
 }

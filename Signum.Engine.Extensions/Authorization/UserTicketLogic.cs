@@ -38,15 +38,15 @@ namespace Signum.Engine.Authorization
                         ut.Device,
                     });
 
-                dqm.RegisterExpression((UserDN u) => u.Tickets());
+                dqm.RegisterExpression((UserDN u) => u.UserTickets(), () => typeof(UserTicketDN).NicePluralName());
             }
         }
 
-        static Expression<Func<UserDN, IQueryable<UserTicketDN>>> TicketsExpression =
+        static Expression<Func<UserDN, IQueryable<UserTicketDN>>> UserTicketsExpression =
             u => Database.Query<UserTicketDN>().Where(ut => ut.User == u.ToLite());
-        public static IQueryable<UserTicketDN> Tickets(this UserDN u)
+        public static IQueryable<UserTicketDN> UserTickets(this UserDN u)
         {
-            return TicketsExpression.Evaluate(u);
+            return UserTicketsExpression.Evaluate(u);
         }
 
         public static string NewTicket(string device)
@@ -82,7 +82,7 @@ namespace Signum.Engine.Authorization
                 CleanExpiredTickets(user);
 
 
-                UserTicketDN userTicket = user.Tickets().SingleOrDefaultEx(t => t.Ticket == pair.Item2);
+                UserTicketDN userTicket = user.UserTickets().SingleOrDefaultEx(t => t.Ticket == pair.Item2);
                 if (userTicket == null)
                 {
                     throw new UnauthorizedAccessException("User attempted to log in with an invalid ticket");
@@ -107,9 +107,9 @@ namespace Signum.Engine.Authorization
         {
             DateTime min = TimeZoneManager.Now.Subtract(ExpirationInterval);
 
-            int expired = user.Tickets().Where(d => d.ConnectionDate < min).UnsafeDelete();
+            int expired = user.UserTickets().Where(d => d.ConnectionDate < min).UnsafeDelete();
 
-            int tooMuch = user.Tickets().OrderByDescending(t => t.ConnectionDate).Skip(MaxTicketsPerUser).UnsafeDelete();
+            int tooMuch = user.UserTickets().OrderByDescending(t => t.ConnectionDate).Skip(MaxTicketsPerUser).UnsafeDelete();
 
             return expired + tooMuch;
         }

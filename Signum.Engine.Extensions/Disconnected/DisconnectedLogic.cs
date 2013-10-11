@@ -91,8 +91,8 @@ namespace Signum.Engine.Disconnected
                         dm.Exception,
                     });
 
-                dqm.RegisterExpression((DisconnectedMachineDN dm) => dm.Imports());
-                dqm.RegisterExpression((DisconnectedMachineDN dm) => dm.Exports());
+                dqm.RegisterExpression((DisconnectedMachineDN dm) => dm.Imports(), ()=>DisconnectedMessage.Imports.NiceToString());
+                dqm.RegisterExpression((DisconnectedMachineDN dm) => dm.Exports(), ()=>DisconnectedMessage.Exports.NiceToString());
 
 
                 MachineGraph.Register();
