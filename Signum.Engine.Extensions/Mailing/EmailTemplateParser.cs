@@ -164,7 +164,7 @@ namespace Signum.Engine.Mailing
                 }
             }
           
-            const BindingFlags flags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+            public const BindingFlags flags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
 
             public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
             {
@@ -590,21 +590,16 @@ namespace Signum.Engine.Mailing
 
 
 
-        internal static void ReplaceToken(EmailTemplateDN et, QueryTokenDN item, QueryTokenDN token)
+        internal static void ReplaceToken(EmailTemplateDN et, Func<string, string, string> replacer)
         {
-            foreach (var tok in et.Recipients.Where(r => r.Token == item).ToList())
-            {
-                tok.Token = token;
-            }
-
             foreach (var m in et.Messages)
             {
-                m.Subject = ReplaceTokenText(m.Subject, item, token);
-                m.Text = ReplaceTokenText(m.Text, item, token);
+                m.Subject = ReplaceTokenText(m.Subject, replacer);
+                m.Text = ReplaceTokenText(m.Text, replacer);
             }
         }
 
-        private static string ReplaceTokenText(string text, QueryTokenDN item, QueryTokenDN token)
+        static string ReplaceTokenText(string text, Func<string, string, string> replacer)
         {
             var result = KeywordsRegex.Replace(text, m =>
             {
@@ -613,11 +608,13 @@ namespace Signum.Engine.Mailing
                 if (!gr.Success)
                     return m.Value;
 
-                if(!AreSimilar(gr.Value,item.TokenString))
+                var rep = replacer(m.Groups["keyword"].Value, m.Groups["token"].Value);
+
+                if (rep == null)
                     return m.Value;
 
                 var newKeyword = m.Value.Substring(0, gr.Index - m.Index)
-                    + token.Token.FullKey()
+                    + rep
                     + m.Value.Substring(gr.Index + gr.Length - m.Index);
 
                 return newKeyword;
@@ -626,16 +623,8 @@ namespace Signum.Engine.Mailing
             return result;
         }
 
-        private static bool AreSimilar(string p1, string p2)
-        {
-            if (p1.StartsWith("Entity."))
-                p1 = p1.After("Entity.");
 
-            if (p2.StartsWith("Entity."))
-                p2 = p2.After("Entity.");
-
-            return p1 == p2;
-        }
+        
     }
 
     public class EmailTemplateParameters

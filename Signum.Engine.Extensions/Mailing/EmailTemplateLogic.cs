@@ -19,6 +19,7 @@ using Signum.Engine.UserQueries;
 using System.Linq.Expressions;
 using Signum.Entities.Translation;
 using Signum.Engine.Translation;
+using System.Text.RegularExpressions;
 
 namespace Signum.Engine.Mailing
 {
@@ -108,7 +109,7 @@ namespace Signum.Engine.Mailing
             {
                 try
                 {
-                    parsedNode = ParseTemplate(message, message.Text);
+                    parsedNode = ParseTemplate(message.Template, message.Text);
                     message.TextParsedNode = parsedNode;
                 }
                 catch (Exception ex)
@@ -128,7 +129,7 @@ namespace Signum.Engine.Mailing
             {
                 try
                 {
-                    parsedNode = ParseTemplate(message, message.Subject);
+                    parsedNode = ParseTemplate(message.template, message.Subject);
                     message.SubjectParsedNode = parsedNode;
                 }
                 catch (Exception ex)
@@ -140,15 +141,15 @@ namespace Signum.Engine.Mailing
             return null;
         }
 
-        private static EmailTemplateParser.BlockNode ParseTemplate(EmailTemplateMessageDN message, string text)
+        private static EmailTemplateParser.BlockNode ParseTemplate(EmailTemplateDN template, string text)
         {
-            using (message.Template.DisableAuthorization ? ExecutionMode.Global() : null)
+            using (template.DisableAuthorization ? ExecutionMode.Global() : null)
             {
-                object queryName = QueryLogic.ToQueryName(message.Template.Query.Key);
+                object queryName = QueryLogic.ToQueryName(template.Query.Key);
                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
 
                 List<QueryToken> list = new List<QueryToken>();
-                return EmailTemplateParser.Parse(text, qd, message.Template.SystemEmail.ToType());
+                return EmailTemplateParser.Parse(text, qd, template.SystemEmail.ToType());
             }
         }
 
@@ -238,13 +239,15 @@ namespace Signum.Engine.Mailing
             }
         }
 
-        static SqlPreCommand Schema_Synchronize_Tokens(Replacements replacements)
+        public static SqlPreCommand Schema_Synchronize_Tokens(Replacements replacements)
         {
+            StringDistance sd = new StringDistance();
+
             var emailTemplates = Database.Query<EmailTemplateDN>().ToList();
 
             var table = Schema.Current.Table(typeof(EmailTemplateDN));
 
-            SqlPreCommand cmd = emailTemplates.Select(uq => ProcessEmailTemplate(replacements, table, uq)).Combine(Spacing.Double);
+            SqlPreCommand cmd = emailTemplates.Select(uq => ProcessEmailTemplate(replacements, table, uq, sd)).Combine(Spacing.Double);
 
             return cmd;
         }
@@ -280,7 +283,7 @@ namespace Signum.Engine.Mailing
             return cmd;
         }
 
-        static SqlPreCommand ProcessEmailTemplate(Replacements replacements, Table table, EmailTemplateDN et)
+        static SqlPreCommand ProcessEmailTemplate(Replacements replacements, Table table, EmailTemplateDN et, StringDistance sd)
         {
             try
             {
@@ -288,6 +291,60 @@ namespace Signum.Engine.Mailing
 
                 SafeConsole.WriteLineColor(ConsoleColor.White, "EmailTemplate: " + et.Name);
                 Console.WriteLine(" Query: " + et.Query.Key);
+
+
+                var result = (from msg in et.Messages
+                              from s in new[] { msg.Subject, msg.Text }
+                              from m in EmailTemplateParser.KeywordsRegex.Matches(s).Cast<Match>()
+                              where m.Groups["token"].Success && !IsToken(m.Groups["keyword"].Value)
+                              select new
+                              {
+                                  isGlobal = IsGlobal(m.Groups["keyword"].Value),
+                                  token = m.Groups["token"].Value
+                              }).Distinct().ToList();
+
+                foreach (var g in result.Where(a => a.isGlobal).Select(a => a.token).ToHashSet())
+                {
+                    if(!EmailTemplateParser.GlobalVariables.ContainsKey(g))
+                    {
+                        string s = replacements.SelectInteractive(g, EmailTemplateParser.GlobalVariables.Keys, "EmailTemplate Globals", sd);
+
+                        if (s != null)
+                        {
+                            EmailTemplateParser.ReplaceToken(et, (keyword, oldToken) =>
+                            {
+                                if (!IsGlobal(keyword))
+                                    return null;
+
+                                if (oldToken == g)
+                                    return s;
+
+                                return null;
+                            });
+                        }
+                    }
+                }
+
+                foreach (var m in result.Where(a => !a.isGlobal).Select(a => a.token).ToHashSet())
+                {
+                    var type = et.SystemEmail.ToType();
+
+                    string newM = GetNewModel(type, m, replacements, sd);
+
+                    if (newM != m)
+                    {
+                        EmailTemplateParser.ReplaceToken(et, (keyword, oldToken) =>
+                        {
+                            if (!IsModel(keyword))
+                                return null;
+
+                            if (oldToken == m)
+                                return newM;
+
+                            return null;
+                        });
+                    }
+                }
 
                 if (et.Tokens.Any(a => a.ParseException != null))
                     using (et.DisableAuthorization ? ExecutionMode.Global() : null)
@@ -306,7 +363,21 @@ namespace Signum.Engine.Mailing
                                     case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(et);
                                     case FixTokenResult.RemoveToken: throw new InvalidOperationException("Unexpected RemoveToken");
                                     case FixTokenResult.SkipEntity: return null;
-                                    case FixTokenResult.Fix: EmailTemplateParser.ReplaceToken(et, item, token); break;
+                                    case FixTokenResult.Fix:
+                                        foreach (var tok in et.Recipients.Where(r => r.Token.Equals(item)).ToList())
+                                            tok.Token = token;
+                                        
+                                        EmailTemplateParser.ReplaceToken(et, (keyword, oldToken)=>
+                                        {
+                                            if(!IsToken(keyword))
+                                                return null;
+
+                                            if(AreSimilar(oldToken, item.TokenString))
+                                                return token.TokenString;
+
+                                            return null;
+                                        });
+                                        break;
                                     default: break;
                                 }
                             }
@@ -321,6 +392,92 @@ namespace Signum.Engine.Mailing
             {
                 return new SqlPreCommandSimple("-- Exception in {0}: {1}".Formato(et.BaseToString(), e.Message));
             }
+        }
+
+        static string GetNewModel(Type type, string model, Replacements replacements, StringDistance sd)
+        {
+            List<string> fields = new List<string>();
+
+            foreach (var field in model.Split('.'))
+            {
+                var info = (MemberInfo)type.GetField(field, EmailTemplateParser.ModelNode.flags) ??
+                         (MemberInfo)type.GetProperty(field, EmailTemplateParser.ModelNode.flags);
+
+                if (info != null)
+                {
+                    type = info.ReturningType();
+                    fields.Add(info.Name);
+                }
+                else
+                {
+                    var allMembers = type.GetFields(EmailTemplateParser.ModelNode.flags).Select(a => a.Name)
+                        .Concat(type.GetProperties(EmailTemplateParser.ModelNode.flags).Select(a => a.Name));
+
+                    string s = replacements.SelectInteractive(field, allMembers, "Members {0}".Formato(type.FullName), sd);
+
+                    if (s == null)
+                        return null;
+
+                    fields.Add(s);
+                }
+            }
+
+            return fields.ToString(".");
+        }
+
+        private static bool AreSimilar(string p1, string p2)
+        {
+            if (p1.StartsWith("Entity."))
+                p1 = p1.After("Entity.");
+
+            if (p2.StartsWith("Entity."))
+                p2 = p2.After("Entity.");
+
+            return p1 == p2;
+        }
+
+        public static bool IsModel(string keyword)
+        {
+            return keyword == "model" || keyword == "modelraw";
+        }
+
+        public static bool IsGlobal(string keyword)
+        {
+            return keyword == "global";
+        }
+
+        public static bool IsToken(string keyword)
+        {
+            return
+                keyword == "" ||
+                keyword == "foreach" ||
+                keyword == "if" ||
+                keyword == "raw" ||
+                keyword == "any";
+        }
+
+        static KeywordType GetTokenType(string keyword)
+        {
+            switch (keyword)
+            {
+                case "foreach":
+                case "if":
+                case "raw":
+                case "any": return KeywordType.Token;
+                case "model":
+                case "modelraw": return KeywordType.Model;
+
+                case "global": return KeywordType.Global;
+            }
+
+            throw new InvalidOperationException("Unexpected keyword '{0}'".Formato(keyword));
+        }
+
+        enum KeywordType
+        {
+            Token,
+            Model,
+            Global,
         }
     }
 }
