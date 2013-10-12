@@ -26,9 +26,23 @@ namespace Signum.Engine.UserQueries
             List<string> oldPartsList = oldParts.ToList();
             List<string> newPartsList = newParts.ToList();
 
+            Func<string, string> rep = str =>
+            {
+                if (Replacements.AutoRepacement == null)
+                    return null;
+
+                Replacements.Selection? sel = Replacements.AutoRepacement(str, null);
+
+                if (sel == null || sel.Value.NewValue == null)
+                    return null;
+
+                return sel.Value.NewValue;
+            };
+
             int pos = -1;
             while (oldPartsList.Count > 0 && newPartsList.Count > 0 &&
-                oldPartsList[0] == newPartsList[0])
+                (oldPartsList[0] == newPartsList[0] ||
+                 rep(oldPartsList[0]) == newPartsList[0]))
             {
                 pos++;
                 oldPartsList.RemoveAt(0);
@@ -36,7 +50,8 @@ namespace Signum.Engine.UserQueries
             }
 
             while (oldPartsList.Count > 0 && newPartsList.Count > 0 &&
-                oldPartsList[oldPartsList.Count - 1] == newPartsList[newPartsList.Count - 1])
+                (oldPartsList[oldPartsList.Count - 1] == newPartsList[newPartsList.Count - 1] ||
+                 rep(oldPartsList[oldPartsList.Count - 1]) == newPartsList[newPartsList.Count - 1]))
             {
                 oldPartsList.RemoveAt(oldPartsList.Count - 1);
                 newPartsList.RemoveAt(newPartsList.Count - 1);
@@ -47,11 +62,11 @@ namespace Signum.Engine.UserQueries
             replacements.GetOrCreate(key)[oldPartsList.ToString(".")] = newPartsList.ToString(".");
         }
 
-        static QueryToken TryParseRemember(Replacements replacements, string tokenString, QueryDescription qd, bool canAggregate)
+        static bool TryParseRemember(Replacements replacements, string tokenString, QueryDescription qd, bool canAggregate, out QueryToken result)
         {
             string[] parts = tokenString.Split('.');
 
-            QueryToken result = null;
+            result = null;
             for (int i = 0; i < parts.Length; i++)
             {
                 string part = parts[i];
@@ -64,19 +79,35 @@ namespace Signum.Engine.UserQueries
                 }
                 else
                 {
+                    if (Replacements.AutoRepacement != null)
+                    {
+                        Replacements.Selection? sel = Replacements.AutoRepacement(part, result.SubTokens(qd, canAggregate).Select(a => a.Key).ToList());
+
+                        if (sel != null && sel.Value.NewValue != null)
+                        {
+                            newResult = QueryUtils.SubToken(result, qd, canAggregate, sel.Value.NewValue);
+
+                            if (newResult != null)
+                            {
+                                result = newResult;
+                                continue;
+                            }
+                        }
+                    }
+
                     string key = result == null ? QueryKey(qd.QueryName) : TypeKey(result.Type);
 
                     Dictionary<string, string> dic = replacements.TryGetC(key);
 
                     if (dic == null)
-                        return result;
+                        return false;
 
                     string remainging = parts.Skip(i).ToString(".");
 
                     string old = dic.Keys.OrderByDescending(a => a.Length).FirstOrDefault(s => remainging.StartsWith(s));
 
                     if (old == null)
-                        return null;
+                        return false;
 
                     var subParts = dic[old].Let(s => s.HasText() ? s.Split('.') : new string[0]);
 
@@ -87,7 +118,7 @@ namespace Signum.Engine.UserQueries
                         QueryToken subNewResult = QueryUtils.SubToken(result, qd, canAggregate, subPart);
 
                         if (subNewResult == null)
-                            return result;
+                            return false;
 
                         result = subNewResult;
                     }
@@ -96,8 +127,7 @@ namespace Signum.Engine.UserQueries
                 }
             }
 
-            return result;
-         
+            return true;
         }
 
         static string QueryKey(object tokenList)
@@ -138,6 +168,17 @@ namespace Signum.Engine.UserQueries
                 }
             }
 
+            if (Replacements.AutoRepacement != null)
+            {
+                Replacements.Selection? sel = Replacements.AutoRepacement(valueString, null);
+
+                if (sel != null && sel.Value.NewValue != null)
+                {
+                    valueString = sel.Value.NewValue;
+                    return FixTokenResult.Fix;
+                }
+            }
+
             SafeConsole.WriteLineColor(ConsoleColor.White, "Value '{0}' not convertible to {1}.".Formato(valueString, type.TypeName()));
             SafeConsole.WriteLineColor(ConsoleColor.Yellow, "- s: Skip entity");
             SafeConsole.WriteLineColor(ConsoleColor.DarkRed, "- r: Remove token");
@@ -169,6 +210,14 @@ namespace Signum.Engine.UserQueries
         {
             return replacements.GetOrCreate("cleanNames").GetOrCreate(type, () =>
             {
+                if (Replacements.AutoRepacement != null)
+                {
+                    Replacements.Selection? sel = Replacements.AutoRepacement(type, null);
+
+                    if (sel != null && sel.Value.NewValue != null)
+                        return sel.Value.NewValue;
+                }
+
                 Console.WriteLine("Type {0} has been renamed?".Formato(type));
 
                 int startingIndex = 0;
@@ -227,7 +276,17 @@ namespace Signum.Engine.UserQueries
 
             string[] parts = token.TokenString.Split('.');
 
-            QueryToken current = TryParseRemember(replacements, original, qd, canAggregate);
+            QueryToken current;
+            if (TryParseRemember(replacements, original, qd, canAggregate, out current))
+            {
+                SafeConsole.WriteColor(ConsoleColor.DarkRed, "  " + original);
+                Console.Write(" -> ");
+                SafeConsole.WriteColor(ConsoleColor.DarkGreen, current.FullKey());
+                Console.WriteLine(remainingText);
+                token = new QueryTokenDN(current);
+                return FixTokenResult.Fix;
+            }
+
             while (true)
             {
                 var result = SelectInteractive(ref current, qd, canAggregate, allowRemoveToken);
