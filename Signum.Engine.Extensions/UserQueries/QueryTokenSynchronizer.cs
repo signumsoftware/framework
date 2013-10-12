@@ -140,7 +140,7 @@ namespace Signum.Engine.UserQueries
             return "tokens-Type-" + type.CleanType().FullName;
         }
 
-        public static FixTokenResult FixValue(Replacements replacements, Type type, ref string valueString)
+        public static FixTokenResult FixValue(Replacements replacements, Type type, ref string valueString, bool allowRemoveToken)
         {
             object val;
             string error = FilterValueConverter.TryParse(valueString, type, out val);
@@ -181,7 +181,8 @@ namespace Signum.Engine.UserQueries
 
             SafeConsole.WriteLineColor(ConsoleColor.White, "Value '{0}' not convertible to {1}.".Formato(valueString, type.TypeName()));
             SafeConsole.WriteLineColor(ConsoleColor.Yellow, "- s: Skip entity");
-            SafeConsole.WriteLineColor(ConsoleColor.DarkRed, "- r: Remove token");
+            if (allowRemoveToken)
+                SafeConsole.WriteLineColor(ConsoleColor.DarkRed, "- r: Remove token");
             SafeConsole.WriteLineColor(ConsoleColor.Red, "- d: Delete entity");
             SafeConsole.WriteLineColor(ConsoleColor.Green, "- freeText: New value");
 
@@ -195,7 +196,7 @@ namespace Signum.Engine.UserQueries
             if (a == "s")
                 return FixTokenResult.SkipEntity;
 
-            if (a == "r")
+            if (allowRemoveToken && a == "r")
                 return FixTokenResult.RemoveToken;
 
             if (a == "d")
