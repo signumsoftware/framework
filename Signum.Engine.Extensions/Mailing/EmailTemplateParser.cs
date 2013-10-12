@@ -13,6 +13,10 @@ using Signum.Entities;
 using Signum.Entities.Mailing;
 using Signum.Entities.UserQueries;
 using System.Linq.Expressions;
+using Signum.Engine.UserQueries;
+using Signum.Engine.DynamicQuery;
+using Signum.Engine.Basics;
+using Signum.Engine.Maps;
 
 
 namespace Signum.Engine.Mailing
@@ -25,7 +29,7 @@ namespace Signum.Engine.Mailing
         public ISystemEmail SystemEmail;
     }
 
-    public static class EmailTemplateParser
+    public static partial class EmailTemplateParser
     {
         public static Dictionary<string, Func<GlobalVarContext, object>> GlobalVariables = new Dictionary<string, Func<GlobalVarContext, object>>();
 
@@ -41,389 +45,7 @@ namespace Signum.Engine.Mailing
         public static readonly Regex TokenFormatRegex = new Regex(@"(?<token>[^\]\:]+)(\:(?<format>.*))?");
         public static readonly Regex TokenOperationValueRegex = new Regex(@"(?<token>[^\]]+)(?<comparer>(" + FilterValueConverter.OperationRegex + @"))(?<value>[^\]\:]+)");
 
-        public abstract class TextNode
-        {
-            public abstract void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows);
-            public abstract void FillQueryTokens(List<QueryToken> list);
-        }
 
-        public class LiteralNode : TextNode
-        {
-            public string Text;
-
-            public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
-            {
-                p.StringBuilder.Append(Text);
-            }
-
-            public override void FillQueryTokens(List<QueryToken> list)
-            {
-                return;
-            }
-
-            public override string ToString()
-            {
-                return "literal {0}".Formato(Text.Etc(20));
-            }
-        }
-
-        public class TokenNode : TextNode
-        {
-            public bool IsRaw { get; set; }
-
-            public readonly QueryToken Token;
-            public readonly string Format;
-            public TokenNode(QueryToken token, string format)
-            {
-                this.Token = token;
-                this.Format = format;
-            }
-
-            public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
-            {
-                ResultColumn column = p.Columns[Token];
-                object obj = rows.DistinctSingle(column);
-                var text = obj is IFormattable ? ((IFormattable)obj).ToString(Format ?? Token.Format, p.CultureInfo) : obj.TryToString();
-                p.StringBuilder.Append(p.IsHtml && !IsRaw ? HttpUtility.HtmlEncode(text) : text);
-            }
-
-            public override void FillQueryTokens(List<QueryToken> list)
-            {
-                list.Add(Token);
-            }
-
-            public override string ToString()
-            {
-                return "token {0}".Formato(Token.FullKey());
-            }
-
-       
-        }
-
-        public class GlobalNode : TextNode
-        {
-            Func<GlobalVarContext, object> globalFunc;
-            string globalKey;
-            public GlobalNode(string globalKey, List<string> errors)
-            {
-                this.globalKey = globalKey;
-                this.globalFunc = GlobalVariables.TryGet(globalKey, null);
-                if (globalFunc == null)
-                    errors.Add("The global key {0} was not found".Formato(globalKey));
-            }
-
-            public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
-            {
-                var text = globalFunc(new GlobalVarContext { Entity = p.Entity, Culture = p.CultureInfo, IsHtml = p.IsHtml, SystemEmail = p.SystemEmail, });
-                if (text is IHtmlString)
-                    p.StringBuilder.Append(((IHtmlString)text).ToHtmlString());
-
-                p.StringBuilder.Append(p.IsHtml ? HttpUtility.HtmlEncode(text) : text);
-            }
-
-            public override void FillQueryTokens(List<QueryToken> list)
-            {
-                return;
-            }
-
-            public override string ToString()
-            {
-                return "global {0}".Formato(globalKey);
-            }
-        }
-
-        public class ModelNode : TextNode
-        {
-            public bool IsRaw { get; set; }
-
-            List<MemberInfo> member;
-            public ModelNode(string fieldOrPropertyChain, Type modelType, List<string> errors)
-            {
-                if (modelType == null)
-                {
-                    errors.Add(EmailTemplateMessage.SystemEmailShouldBeSetToAccessModel0.NiceToString().Formato(fieldOrPropertyChain));
-                    return;
-                }
-
-                member = new List<MemberInfo>();
-                var type = modelType;
-                foreach (var field in fieldOrPropertyChain.Split('.'))
-                {
-                    var info = (MemberInfo)type.GetField(field, flags) ??
-                               (MemberInfo)type.GetProperty(field, flags);
-
-                    if (info == null)
-                    {
-                        errors.Add(EmailTemplateMessage.Type0DoesNotHaveAPropertyWithName1.NiceToString().Formato(type.Name, field));
-                        break;
-                    }
-
-                    member.Add(info);
-
-                    type = info.ReturningType();
-                }
-            }
-          
-            public const BindingFlags flags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
-
-            public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
-            {
-                if (p.SystemEmail == null)
-                    throw new ArgumentException("There is no system email for the message composition");
-
-                object value = p.SystemEmail;
-                foreach (var m in member)
-                {
-                    value = Getter(m, value);
-                    if (value == null)
-                        break;
-                }
-                
-                if (p.IsHtml && !(value is System.Web.HtmlString) && !IsRaw)
-                    p.StringBuilder.Append(HttpUtility.HtmlEncode(value.ToString()));
-                else
-                    p.StringBuilder.Append(value.ToString());
-            }
-
-            static object Getter(MemberInfo member, object systemEmail)
-            {
-                var pi = member as PropertyInfo;
-
-                if (pi != null)
-                    return pi.GetValue(systemEmail, null);
-
-                return ((FieldInfo)member).GetValue(systemEmail);
-            }
-
-            public override void FillQueryTokens(List<QueryToken> list)
-            {
-                return;
-            }
-
-            public override string ToString()
-            {
-                return "model {0}".Formato(member);
-            }
-        }
-
-        public sealed class BlockNode : TextNode
-        {
-            public readonly List<TextNode> Nodes = new List<TextNode>();
-
-            public readonly TextNode Parent; 
-
-            public BlockNode(TextNode parent)
-            {
-                this.Parent = parent;
-            }
-
-            public string Print(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
-            {
-                this.PrintList(p, rows);
-                return p.StringBuilder.ToString();
-            }
-
-            public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
-            {
-                foreach (var node in Nodes)
-                {
-                    node.PrintList(p, rows);
-                }
-            }
-
-            public override void FillQueryTokens(List<QueryToken> list)
-            {
-                foreach (var node in Nodes)
-                {
-                    node.FillQueryTokens(list);
-                }
-            }
-
-            public override string ToString()
-            {
-                return "block ({0} nodes)".Formato(Nodes.Count);
-            }
-
-            public static string UserString(Type type)
-            {
-                if (type == typeof(ForeachNode))
-                    return "foreach";
-                
-                if (type == typeof(IfNode))
-                    return "if";
-
-                if (type == typeof(AnyNode))
-                    return "any";
-
-                return "block";
-            }
-        }
-
-        public class ForeachNode : TextNode
-        {
-            public readonly QueryToken Token;
-
-            public readonly BlockNode Block;
-
-            public ForeachNode(QueryToken token)
-            {
-                this.Token = token;
-                this.Block = new BlockNode(this);
-            }
-
-            public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
-            {
-                var groups = rows.GroupBy(r => r[p.Columns[Token]]).ToList();
-                if (groups.Count == 1 && groups[0].Key == null)
-                    return;
-                foreach (var group in groups)
-                {
-                    Block.PrintList(p, group);
-                }
-            }
-
-            public override void FillQueryTokens(List<QueryToken> list)
-            {
-                list.Add(Token);
-                Block.FillQueryTokens(list);
-            }
-
-            public override string ToString()
-            {
-                return "foreach {0} ({1} nodes)".Formato(Token.FullKey(), Block.Nodes.Count);
-            }
-        }
-
-        public class AnyNode : TextNode
-        {
-            public readonly QueryToken Token;
-            public readonly FilterOperation Operation;
-            public readonly string Value;
-
-            public readonly BlockNode AnyBlock;
-            public BlockNode NotAnyBlock;
-
-
-            public AnyNode(QueryToken token, string operation, string value, List<string> errors)
-            {
-                if (token.HasAllOrAny())
-                    errors.Add("Where {0} can not contains Any or All");
-
-                this.Token = token;
-                this.Operation = FilterValueConverter.ParseOperation(operation);
-                this.Value = value;
-                object rubish;
-                string error = FilterValueConverter.TryParse(Value, Token.Type, out rubish);
-
-                if (error.HasText())
-                    errors.Add(error);
-
-                AnyBlock = new BlockNode(this);
-            }
-
-            public BlockNode CreateNotAny()
-            {
-                NotAnyBlock = new BlockNode(this);
-                return NotAnyBlock;
-            }
-
-            public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
-            {
-                object val = FilterValueConverter.Parse(Value, Token.Type);
-
-                Expression value = Expression.Constant(val, Token.Type); 
-
-                var col = p.Columns[Token];
-
-                var example = Signum.Utilities.ExpressionTrees.Linq.Expr((ResultRow rr)=>rr[col]);
-
-                var newBody = QueryUtils.GetCompareExpression(Operation, Expression.Convert(example.Body, Token.Type), value, inMemory: true);
-                var lambda = Expression.Lambda<Func<ResultRow, bool>>(newBody, example.Parameters).Compile();
-
-                var filtered = rows.Where(lambda).ToList();
-                if (filtered.Any())
-                {
-                    AnyBlock.PrintList(p, filtered);
-                }
-                else if (NotAnyBlock != null)
-                {
-                    NotAnyBlock.PrintList(p, filtered);
-                }
-            }
-
-            public override void FillQueryTokens(List<QueryToken> list)
-            {
-                list.Add(Token);
-                AnyBlock.FillQueryTokens(list);
-                if (NotAnyBlock != null)
-                    NotAnyBlock.FillQueryTokens(list);
-            }
-
-            public override string ToString()
-            {
-                return " ".CombineIfNotEmpty(
-                    "any {0} {1} {2} ({3} nodes)".Formato(Token.FullKey(), FilterValueConverter.ToStringOperation(Operation), Value, AnyBlock.Nodes.Count),
-                    NotAnyBlock == null ? null : "notany ({0} nodes)".Formato(NotAnyBlock.Nodes.Count));
-            }
-        }
-
-        public class IfNode : TextNode
-        {
-             public readonly QueryToken Token;
-             public readonly BlockNode IfBlock;
-             public BlockNode ElseBlock;
-
-             public IfNode(QueryToken token, List<string> errors)
-             {
-                 this.Token = token;
-                 this.IfBlock = new BlockNode(this);
-             }
-
-             public BlockNode CreateElse()
-             {
-                 ElseBlock = new BlockNode(this);
-                 return ElseBlock;
-             }
-
-            public override void FillQueryTokens(List<QueryToken> list)
-            {
-                list.Add(Token);
-                IfBlock.FillQueryTokens(list);
-                if (ElseBlock != null)
-                    ElseBlock.FillQueryTokens(list);
-            }
-
-            protected static bool ToBool(IEnumerable<ResultRow> rows, ResultColumn column)
-            {
-                if (rows.IsEmpty())
-                    return false;
-
-                object obj = rows.DistinctSingle(column);
-
-                if (obj == null || obj is bool && ((bool)obj) == false)
-                    return false;
-
-                return true;
-            } 
-
-            public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
-            {
-                if (ToBool(rows, p.Columns[Token]))
-                {
-                    IfBlock.PrintList(p, rows);
-                }
-                else if(ElseBlock != null)
-                {
-                    ElseBlock.PrintList(p, rows);
-                }
-            }
-
-            public override string ToString()
-            {
-                return " ".CombineIfNotEmpty("if {0} ({1} nodes)".Formato(Token.FullKey(), IfBlock.Nodes.Count),
-                    ElseBlock != null ? "else ({0} nodes)".Formato(ElseBlock.Nodes.Count) : "");
-            }
-        }
 
         public static BlockNode Parse(string text, QueryDescription qd, Type modelType)
         {
@@ -588,9 +210,161 @@ namespace Signum.Engine.Mailing
             return errors;
         }
 
+        internal static SqlPreCommand ProcessEmailTemplate(Replacements replacements, Table table, EmailTemplateDN et, StringDistance sd)
+        {
+            try
+            {
+                Console.Clear();
+
+                SafeConsole.WriteLineColor(ConsoleColor.White, "EmailTemplate: " + et.Name);
+                Console.WriteLine(" Query: " + et.Query.Key);
 
 
-        internal static void ReplaceToken(EmailTemplateDN et, Func<string, string, string> replacer)
+                var result = (from msg in et.Messages
+                              from s in new[] { msg.Subject, msg.Text }
+                              from m in KeywordsRegex.Matches(s).Cast<Match>()
+                              where m.Groups["token"].Success && !IsToken(m.Groups["keyword"].Value)
+                              select new
+                              {
+                                  isGlobal = IsGlobal(m.Groups["keyword"].Value),
+                                  token = m.Groups["token"].Value
+                              }).Distinct().ToList();
+
+                foreach (var g in result.Where(a => a.isGlobal).Select(a => a.token).ToHashSet())
+                {
+                    string s = replacements.SelectInteractive(g, GlobalVariables.Keys, "EmailTemplate Globals", sd);
+
+                    if (s != null && s != g)
+                    {
+                        ReplaceToken(et, (keyword, oldToken) =>
+                        {
+                            if (!IsGlobal(keyword))
+                                return null;
+
+                            if (oldToken == g)
+                                return s;
+
+                            return null;
+                        });
+                    }
+                }
+
+                foreach (var m in result.Where(a => !a.isGlobal).Select(a => a.token).ToHashSet())
+                {
+                    var type = et.SystemEmail.ToType();
+
+                    string newM = ModelNode.GetNewModel(type, m, replacements, sd);
+
+                    if (newM != m)
+                    {
+                        ReplaceToken(et, (keyword, oldToken) =>
+                        {
+                            if (!IsModel(keyword))
+                                return null;
+
+                            if (oldToken == m)
+                                return newM;
+
+                            return null;
+                        });
+                    }
+                }
+
+                if (et.Tokens.Any(a => a.ParseException != null))
+                    using (et.DisableAuthorization ? ExecutionMode.Global() : null)
+                    {
+                        QueryDescription qd = DynamicQueryManager.Current.QueryDescription(et.Query.ToQueryName());
+
+                        if (et.Tokens.Any())
+                        {
+                            Console.WriteLine(" Tokens:");
+                            foreach (var item in et.Tokens.ToList())
+                            {
+                                QueryTokenDN token = item;
+                                switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, false, "", allowRemoveToken: false))
+                                {
+                                    case FixTokenResult.Nothing: break;
+                                    case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(et);
+                                    case FixTokenResult.RemoveToken: throw new InvalidOperationException("Unexpected RemoveToken");
+                                    case FixTokenResult.SkipEntity: return null;
+                                    case FixTokenResult.Fix:
+                                        foreach (var tok in et.Recipients.Where(r => r.Token.Equals(item)).ToList())
+                                            tok.Token = token;
+
+                                        FixTokenResult? currentResult = null;
+
+                                        ReplaceToken(et, (keyword, oldToken) =>
+                                        {
+                                            if (!IsToken(keyword) || currentResult.HasValue)
+                                                return null;
+
+                                            if (keyword == "" || keyword == "raw")
+                                            {
+                                                var match = TokenFormatRegex.Match(oldToken);
+                                                string tokenPart = match.Groups["token"].Value;
+                                                string formatPart = oldToken.RemoveStart(match.Groups["token"].Length);
+
+                                                if (AreSimilar(tokenPart, item.TokenString))
+                                                    return token.Token.FullKey() + formatPart;
+
+                                                return null;
+                                            }
+                                            else if (keyword == "any")
+                                            {
+                                                var match = TokenOperationValueRegex.Match(oldToken);
+                                                string tokenPart = match.Groups["token"].Value;
+                                                string operationPart = match.Groups["comparer"].Value;
+                                                string valuePart = match.Groups["value"].Value;
+
+                                                if (AreSimilar(tokenPart, item.TokenString))
+                                                {
+                                                    tokenPart = token.Token.FullKey();
+
+                                                    switch (QueryTokenSynchronizer.FixValue(replacements, token.Token.Type, ref valuePart, allowRemoveToken: false))
+                                                    {
+                                                        case FixTokenResult.Fix:
+                                                        case FixTokenResult.Nothing: break;
+                                                        case FixTokenResult.DeleteEntity: currentResult = FixTokenResult.DeleteEntity; break;
+                                                        case FixTokenResult.SkipEntity: currentResult = FixTokenResult.SkipEntity; break;
+                                                    }
+
+                                                    return tokenPart + operationPart + valuePart;
+                                                }
+
+                                                return null;
+                                            }
+                                            else
+                                            {
+                                                if (AreSimilar(oldToken, item.TokenString))
+                                                    return token.Token.FullKey();
+
+                                                return null;
+                                            }
+                                        });
+
+                                        if (currentResult == FixTokenResult.DeleteEntity)
+                                            goto case FixTokenResult.DeleteEntity;
+                                        if (currentResult == FixTokenResult.SkipEntity)
+                                            goto case FixTokenResult.SkipEntity;
+
+                                        break;
+                                    default: break;
+                                }
+                            }
+                        }
+                    }
+
+                Console.Clear();
+
+                return table.UpdateSqlSync(et, includeCollections: true);
+            }
+            catch (Exception e)
+            {
+                return new SqlPreCommandSimple("-- Exception in {0}: {1}".Formato(et.BaseToString(), e.Message));
+            }
+        }
+
+        static void ReplaceToken(EmailTemplateDN et, Func<string, string, string> replacer)
         {
             foreach (var m in et.Messages)
             {
@@ -623,8 +397,36 @@ namespace Signum.Engine.Mailing
             return result;
         }
 
+        static bool AreSimilar(string p1, string p2)
+        {
+            if (p1.StartsWith("Entity."))
+                p1 = p1.After("Entity.");
 
-        
+            if (p2.StartsWith("Entity."))
+                p2 = p2.After("Entity.");
+
+            return p1 == p2;
+        }
+
+        static bool IsModel(string keyword)
+        {
+            return keyword == "model" || keyword == "modelraw";
+        }
+
+        static bool IsGlobal(string keyword)
+        {
+            return keyword == "global";
+        }
+
+        static bool IsToken(string keyword)
+        {
+            return
+                keyword == "" ||
+                keyword == "foreach" ||
+                keyword == "if" ||
+                keyword == "raw" ||
+                keyword == "any";
+        }
     }
 
     public class EmailTemplateParameters
