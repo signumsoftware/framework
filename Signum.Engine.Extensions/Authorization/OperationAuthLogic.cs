@@ -51,7 +51,7 @@ namespace Signum.Engine.Authorization
 
                     replacements.AskForReplacements(
                         x.Element("Operations").Elements("Role").SelectMany(r => r.Elements("Operation")).Select(p => p.Attribute("Resource").Value).ToHashSet(),
-                        MultiEnumLogic<OperationDN>.AllUniqueKeys().ToHashSet(),
+                        MultiEnumLogic<OperationDN>.AllUniqueKeys.ToHashSet(),
                         replacementKey);
 
                     return cache.ImportXml(x, "Operations", "Operation", roles,

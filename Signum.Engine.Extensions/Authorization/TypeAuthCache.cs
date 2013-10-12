@@ -340,7 +340,7 @@ namespace Signum.Entities.Authorization
 
             replacements.AskForReplacements(
                 element.Element("Types").Elements("Role").SelectMany(x => x.Elements("Type")).SelectMany(t => t.Elements("Condition")).Select(x => x.Attribute("Name").Value).ToHashSet(),
-                MultiEnumLogic<TypeConditionNameDN>.AllUniqueKeys().ToHashSet(),
+                MultiEnumLogic<TypeConditionNameDN>.AllUniqueKeys.ToHashSet(),
                 typeof(TypeConditionNameDN).Name);
 
             Func<string, TypeDN> getResource = s =>

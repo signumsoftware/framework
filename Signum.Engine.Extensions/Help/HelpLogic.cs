@@ -313,7 +313,7 @@ namespace Signum.Engine.Help
                 {
                     case WikiFormat.EntityLink:
                         {
-                            string type = ParseReplaceType(r, sd, link);
+                            string type = r.SelectInteractive(link, TypeLogic.NameToType.Keys, "Type", sd);
 
                             if (type == null)
                                 return m.Value;
@@ -322,12 +322,14 @@ namespace Signum.Engine.Help
                         }
                     case WikiFormat.PropertyLink:
                         {
-                            string type = ParseReplaceType(r, sd, link.Before("."));
+                            string type = r.SelectInteractive(link.Before("."), TypeLogic.NameToType.Keys, "Type", sd);
 
                             if (type == null)
                                 return m.Value;
 
-                            string pr = ParseReplacePropertyRoute(r, sd, TypeLogic.GetType(type), link.After('.'));
+                            var routes = PropertyRoute.GenerateRoutes(TypeLogic.GetType(type)).Select(a => a.PropertyString()).ToList();
+
+                            string pr = r.SelectInteractive(link.After('.'), routes, "PropertyRoutes-" + type, sd);
 
                             if (pr == null)
                                 return m.Value;
@@ -336,7 +338,7 @@ namespace Signum.Engine.Help
                         }
                     case WikiFormat.QueryLink:
                         {
-                            string query = ParseReplaceQuery(r, sd, link);
+                            string query = r.SelectInteractive(link, QueryLogic.QueryNames.Keys, "Query", sd);
 
                             if (query == null)
                                 return m.Value;
@@ -345,7 +347,7 @@ namespace Signum.Engine.Help
                         }
                     case WikiFormat.OperationLink:
                         {
-                            string operation = ParseReplaceOperation(r, sd, link);
+                            string operation = r.SelectInteractive(link, MultiEnumLogic<OperationDN>.AllUniqueKeys, "Operation", sd);
 
                             if (operation == null)
                                 return m.Value;
@@ -355,7 +357,7 @@ namespace Signum.Engine.Help
                     case WikiFormat.Hyperlink: return m.Value;
                     case WikiFormat.NamespaceLink:
                         {
-                            string @namespace = ParseReplaceNamespace(r, sd, namespaces, link);
+                            string @namespace = r.SelectInteractive(link, namespaces, "Namespace", sd);
 
                             if (@namespace == null)
                                 return m.Value;
@@ -369,88 +371,6 @@ namespace Signum.Engine.Help
                 return m.Value;
             });
         }
-
-        static string ParseReplaceNamespace(Replacements r, StringDistance sd, HashSet<string> namespaces, string @namespace)
-        {
-            if (namespaces.Contains(@namespace) != null)
-                return @namespace;
-
-            @namespace = r.Apply("Namespace", @namespace);
-
-            if (namespaces.Contains(@namespace) != null)
-                return @namespace;
-
-            @namespace = r.SelectInteractive(@namespace, namespaces, "Namespace", sd);
-
-            return @namespace;
-        }
-
-        static string ParseReplaceOperation(Replacements r, StringDistance sd, string operation)
-        {
-            if (MultiEnumLogic<OperationDN>.TryToEntity(operation) != null)
-                return operation;
-
-            operation = r.Apply("Operation", operation);
-
-            if (MultiEnumLogic<OperationDN>.TryToEntity(operation) != null)
-                return operation;
-
-            operation = r.SelectInteractive(operation, MultiEnumLogic<OperationDN>.AllUniqueKeys(), "Operation", sd);
-
-            return operation;
-        }
-
-        static string ParseReplaceQuery(Replacements r, StringDistance sd, string query)
-        {
-            if (QueryLogic.QueryNames.ContainsKey(query))
-                return query;
-
-            query = r.Apply("Query", query);
-
-            if (QueryLogic.QueryNames.ContainsKey(query))
-                return query;
-
-            query = r.SelectInteractive(query, QueryLogic.QueryNames.Keys, "Query", sd);
-
-            return query;
-        }
-
-        private static string ParseReplaceType(Replacements r, StringDistance sd, string type)
-        {
-            if(TypeLogic.TryGetType(type) != null)
-                return type;
-
-            type = r.Apply("Type", type); 
-
-            if(TypeLogic.TryGetType(type) != null)
-                return type;
-
-            type = r.SelectInteractive(type, TypeLogic.NameToType.Keys, "Type", sd);
-
-            return type;
-        }
-
-        static string ParseReplacePropertyRoute(Replacements r, StringDistance sd, Type type, string propertyRoute)
-        {
-            var key = "Properties-" + TypeLogic.GetCleanName(type);
-
-            PropertyRoute pr;
-            try
-            {
-                pr = PropertyRoute.Parse(type, r.Apply(key, propertyRoute)); //Try parse needed
-
-                return pr.PropertyString();
-            }
-            catch
-            {
-                var routes = PropertyRouteLogic.GenerateProperties(type, type.ToTypeDN()).Select(a => a.ToString()).ToList();
-
-                string str = r.SelectInteractive(propertyRoute, routes, key, sd);
-
-                return str;
-            }
-        }
-
 
         static string Link(string letter, string link, string text)
         {
