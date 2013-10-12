@@ -284,7 +284,7 @@ FROM {1} as [table]".Formato(
 
         public static SqlPreCommand RenameTable(ObjectName oldName, string newName)
         {
-            return SP_RENAME(oldName.Schema, oldName.Name, newName.SqlScape(), null);
+            return SP_RENAME(oldName.Schema, oldName.Name, newName, null);
         }
 
         public static SqlPreCommandSimple AlterSchema(ObjectName oldName, SchemaName schemaName)
