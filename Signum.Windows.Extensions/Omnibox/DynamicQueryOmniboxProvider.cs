@@ -18,7 +18,7 @@ namespace Signum.Windows.Omnibox
     {
         public override OmniboxResultGenerator<DynamicQueryOmniboxResult> CreateGenerator()
         {
-            return new DynamicQueryOmniboxResultGenerator(QueryClient.queryNames.Values);
+            return new DynamicQueryOmniboxResultGenerator();
         }
 
         public override void OnSelected(DynamicQueryOmniboxResult r, Window window)

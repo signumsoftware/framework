@@ -15,7 +15,7 @@ namespace Signum.Windows.Omnibox
     {
         public override OmniboxResultGenerator<EntityOmniboxResult> CreateGenerator()
         {
-            return new EntityOmniboxResultGenenerator(Server.ServerTypes.Keys);
+            return new EntityOmniboxResultGenenerator();
         }
 
         public override void RenderLines(EntityOmniboxResult result, InlineCollection lines)

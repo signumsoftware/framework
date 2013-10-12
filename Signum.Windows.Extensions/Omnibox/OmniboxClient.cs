@@ -120,5 +120,14 @@ namespace Signum.Windows.Omnibox
             return Server.Return((IBaseServer bs) => bs.FindLiteLike(implementations, subString, 5));
         }
 
+        protected override IEnumerable<object> GetAllQueryNames()
+        {
+            return QueryClient.queryNames.Values;
+        }
+
+        protected override IEnumerable<Type> GetAllTypes()
+        {
+            return Server.ServerTypes.Keys;
+        }
     }
 }

@@ -19,7 +19,7 @@ namespace Signum.Windows.Chart
     {
         public override OmniboxResultGenerator<ChartOmniboxResult> CreateGenerator()
         {
-            return new ChartOmniboxResultGenerator(QueryClient.queryNames.Values);
+            return new ChartOmniboxResultGenerator();
         }
 
         public override void RenderLines(ChartOmniboxResult result, InlineCollection lines)
