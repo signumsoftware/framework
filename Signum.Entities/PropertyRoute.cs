@@ -197,6 +197,9 @@ namespace Signum.Entities
             if (!typeof(IRootEntity).IsAssignableFrom(type))
                 throw new ArgumentException("Type must implement IPropertyRouteRoot");
 
+            if (type.IsAbstract)
+                throw new ArgumentException("Type must be non-abstract"); 
+
             this.type = type;
             this.PropertyRouteType = PropertyRouteType.Root;
         }
