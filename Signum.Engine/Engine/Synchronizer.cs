@@ -235,8 +235,16 @@ namespace Signum.Engine
             return sd.LevenshteinDistance(o, n, weighter: (oc, nc) => oc.HasValue && nc.HasValue ? 2 : 1);
         }
 
-        public string SelectInteractive(string oldValue, IEnumerable<string> newValues, string replacementsKey, StringDistance sd)
+        public string SelectInteractive(string oldValue, ICollection<string> newValues, string replacementsKey, StringDistance sd)
         {
+            if (newValues.Contains(oldValue))
+                return oldValue;
+
+            var rep = this.TryGetC(replacementsKey).TryGetC(oldValue);
+
+            if (rep != null && newValues.Contains(rep))
+                return rep;
+
             var dic = newValues.ToDictionary(a => a, a => Distance(sd, oldValue, a));
 
             Selection sel = SelectInteractive(oldValue, dic.OrderBy(a => a.Value).Select(a => a.Key).ToList(), replacementsKey, Interactive);
