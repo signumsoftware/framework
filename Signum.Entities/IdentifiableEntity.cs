@@ -131,6 +131,20 @@ namespace Signum.Entities
                 .Formato(typeof(M).TypeName(), GetType().TypeName()));
         }
 
+        public MixinEntity GetMixin(Type mixinType)
+        {
+            var current = mixin;
+            while (current != null)
+            {
+                if (current.GetType() == mixinType)
+                    return current;
+                current = current.Next;
+            }
+
+            throw new InvalidOperationException("Mixin {0} not declared for {1} in MixinDeclarations"
+                .Formato(mixinType.TypeName(), GetType().TypeName()));
+        }
+
         [HiddenProperty]
         public MixinEntity this[string mixinName]
         {
