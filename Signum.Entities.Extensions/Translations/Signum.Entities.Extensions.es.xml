@@ -1174,7 +1174,7 @@
   <Type Name="SmtpConfigurationOperation">
     <Member Name="Save" Description="Guardar" />
   </Type>
-  <Type Name="SystemEmailDN" Description="Correo electrónico del sistema">
+  <Type Name="SystemEmailDN" Description="Email del sistema">
     <Member Name="FullClassName" Description="Nombre completo de clase " />
   </Type>
   <Type Name="TaskMessage">
