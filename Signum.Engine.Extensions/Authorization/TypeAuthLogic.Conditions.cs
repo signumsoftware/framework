@@ -80,9 +80,9 @@ namespace Signum.Engine.Authorization
             Transaction.PreRealCommit += Transaction_PreRealCommit;
         }
 
-        static void Transaction_PreRealCommit()
+        static void Transaction_PreRealCommit(Dictionary<string, object> dic)
         {
-            var modified = (List<IdentifiableEntity>)Transaction.UserData.TryGetC(ModifiedKey);
+            var modified = (List<IdentifiableEntity>)dic.TryGetC(ModifiedKey);
 
             if (modified != null)
             {
