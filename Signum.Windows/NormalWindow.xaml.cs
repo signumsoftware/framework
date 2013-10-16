@@ -61,6 +61,14 @@ namespace Signum.Windows
             set { SetValue(ViewModeProperty, value); }
         }
 
+        public static readonly DependencyProperty AvoidShowCloseDialogProperty =
+            DependencyProperty.Register("AvoidShowCloseDialog", typeof(bool), typeof(NormalWindow), new PropertyMetadata(false));
+        public bool AvoidShowCloseDialog
+        {
+            get { return (bool)GetValue(AvoidShowCloseDialogProperty); }
+            set { SetValue(AvoidShowCloseDialogProperty, value); }
+        }
+
         public ButtonBar ButtonBar
         {
             get { return this.buttonBar; }
@@ -189,7 +197,7 @@ namespace Signum.Windows
 
             MoveFocus();
 
-            if (this.DataContext != null && this.HasChanges())
+            if (this.DataContext != null && this.HasChanges() && !AvoidShowCloseDialog)
             {
                 if (buttonBar.ViewMode == ViewMode.Navigate)
                 {
@@ -268,6 +276,7 @@ namespace Signum.Windows
         {
             return new NormalWindowAutomationPeer(this);
         }
+
     }
 
     public enum AllowErrors
