@@ -716,7 +716,7 @@ namespace Signum.Engine.Maps
                 if (Transaction.InTestTransaction)
                 {
                     invalidate(this, null);
-                    Transaction.Rolledback += () => invalidate(this, null);
+                    Transaction.Rolledback += dic => invalidate(this, null);
                 }
 
                 Transaction.PostRealCommit += dic => invalidate(this, null);
