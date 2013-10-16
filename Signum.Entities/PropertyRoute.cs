@@ -68,7 +68,7 @@ namespace Signum.Entities
             {
                 string name = ExtractMixin(fieldOrProperty);
 
-                mi = MixinDeclarations.GetMixinDeclarations(type).FirstOrDefault(t => t.Name == name);
+                mi = MixinDeclarations.GetMixinDeclarations(Type).FirstOrDefault(t => t.Name == name);
             }
 
             if (mi == null)
