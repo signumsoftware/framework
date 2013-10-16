@@ -69,6 +69,10 @@ namespace Signum.Engine.Linq
             if (result != null)
                 return result;
 
+            result = MListElementEquals(exp1, exp2);
+            if (result != null)
+                return result;
+
             return EqualNullable(exp1, exp2);
         }
 
@@ -392,6 +396,22 @@ namespace Signum.Engine.Linq
             if (e1.Type.IsLite() || e2.Type.IsLite())
             {
                 return PolymorphicEqual(GetEntity(e1), GetEntity(e2)); //Conditional and Coalesce could be inside
+            }
+
+            return null;
+        }
+
+        public static Expression MListElementEquals(Expression e1, Expression e2)
+        {
+            if (e1 is MListElementExpression || e2 is MListElementExpression)
+            {
+                if (e1.IsNull())
+                    return EqualsToNull(((MListElementExpression)e2).RowId);
+
+                if (e2.IsNull())
+                    return EqualsToNull(((MListElementExpression)e1).RowId);
+
+                return EqualNullable(((MListElementExpression)e1).RowId, ((MListElementExpression)e2).RowId);
             }
 
             return null;
