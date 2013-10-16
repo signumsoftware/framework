@@ -33,7 +33,7 @@ namespace Signum.Windows.Mailing
                     });
                 }
 
-                if (smtp)
+                if (pop3)
                     Navigator.AddSetting(new EntitySettings<Pop3ConfigurationDN> { View = e => new Pop3Configuration() });
             }
         }
