@@ -1097,6 +1097,7 @@
     <Member Name="State" Description="Estado" />
     <Member Name="Template" Description="Plantilla" />
     <Member Name="UpdatePackage" Description="Paquete de actualización" />
+    <Member Name="UpdatePackageProcessed" Description="Paquete de actualización procesado" />
   </Type>
   <Type Name="SMSMessageOperation">
     <Member Name="CreateSMSFromEntity" Description="Crear SMS desde entidad" />
@@ -1104,7 +1105,6 @@
     <Member Name="CreateSMSWithTemplateFromEntity" Description="Crear SMS con plantilla desde entidad" />
     <Member Name="CreateUpdateStatusPackage" Description="Crear paquete de actualización de estado" />
     <Member Name="Send" Description="Enviar" />
-    <Member Name="SendAsync" Description="Enviar async" />
     <Member Name="UpdateStatus" Description="Actualización de estado" />
   </Type>
   <Type Name="SMSMessageState" Description="Estado del SMS">
