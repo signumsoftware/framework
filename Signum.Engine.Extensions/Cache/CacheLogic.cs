@@ -458,10 +458,12 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(database.TryToString() ?? Connector.C
 
         static HashSet<Type> DisabledTypesDuringTransaction()
         {
-            var hs = Transaction.UserData.TryGetC(DisabledCachesKey) as HashSet<Type>;
+            var topUserData = Transaction.TopParentUserData();
+
+            var hs = topUserData.TryGetC(DisabledCachesKey) as HashSet<Type>;
             if (hs == null)
             {
-                Transaction.UserData[DisabledCachesKey] = hs = new HashSet<Type>();
+                topUserData[DisabledCachesKey] = hs = new HashSet<Type>();
             }
 
             return hs;
@@ -472,7 +474,7 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(database.TryToString() ?? Connector.C
             if (!Transaction.HasTransaction)
                 return false;
 
-            HashSet<Type> disabledTypes = Transaction.UserData.TryGetC(DisabledCachesKey) as HashSet<Type>;
+            HashSet<Type> disabledTypes = Transaction.TopParentUserData().TryGetC(DisabledCachesKey) as HashSet<Type>;
 
             return disabledTypes != null && disabledTypes.Contains(type);
         }
@@ -652,7 +654,7 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(database.TryToString() ?? Connector.C
                             if (Transaction.InTestTransaction)
                             {
                                 invalidate(sender, args);
-                                Transaction.Rolledback += () => invalidate(sender, args);
+                                Transaction.Rolledback += dic => invalidate(sender, args);
                             }
 
                             Transaction.PostRealCommit += dic => invalidate(sender, args);
