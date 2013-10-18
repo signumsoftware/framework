@@ -15,5 +15,6 @@
         <m:ValueLine m:Common.Route="Password" />
         <m:ValueLine m:Common.Route="EnableSSL" />
         <m:EntityRepeater m:Common.Route="ClientCertificationFiles" />
+        <m:EntityLine m:Common.Route="DefaultFrom" />
     </StackPanel>
 </UserControl>
