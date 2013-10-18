@@ -401,6 +401,8 @@ namespace Signum.Entities.Chart
         _0IsAnAggregateButTheChartIsNotGrouping,
         [Description("{0} is not optional")]
         _0IsNotOptional,
+        SavePalette,
+        NewPalette,
     }
 
 }
