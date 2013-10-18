@@ -205,6 +205,8 @@
     <Member Name="ColorsFor0" Description="Colores para {0}" />
     <Member Name="CreatePalette" Description="Crear paleta" />
     <Member Name="MyCharts" Description="Mis Gráficos" />
+    <Member Name="NewPalette" Description="Nueva paleta" />
+    <Member Name="SavePalette" Description="Guardar paleta" />
     <Member Name="UserChart_CreateNew" Description="Crear" />
     <Member Name="UserChart_Edit" Description="Editar" />
     <Member Name="UserChart_ExportData" Description="Exportar datos" />
