@@ -370,12 +370,15 @@
   </Type>
   <Type Name="ValueLineBoxModel" Description="Valor línea Box">
     <Member Name="BoolValue" Description="Valor bool" />
+    <Member Name="BoxType" Description="Tipo caja" />
     <Member Name="DateValue" Description="Valor de fecha" />
     <Member Name="DecimalValue" Description="Valor decimal" />
+    <Member Name="FieldName" Description="Nombre del campo" />
     <Member Name="IntValue" Description="Valor int" />
     <Member Name="IsNullable" Description="Es anulable" />
     <Member Name="Related" Description="Relacionados" />
     <Member Name="StringValue" Description="Valor de cadena" />
+    <Member Name="TopText" Description="Texto superior" />
   </Type>
   <Type Name="ValueLineBoxType">
     <Member Name="Boolean" Description="Boolean" />
