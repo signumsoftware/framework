@@ -368,10 +368,22 @@
     <Member Name="TheNumberOfElementsOf0HasToBe01" Description="El número de elementos en {{0}} ha de ser {0} {1}" />
     <Member Name="Type0NotAllowed" Description="El tipo {0} no está permitido" />
   </Type>
-  <Type Name="ValueLineBoxModel">
+  <Type Name="ValueLineBoxModel" Description="Valor línea Box">
+    <Member Name="BoolValue" Description="Valor bool" />
+    <Member Name="DateValue" Description="Valor de fecha" />
+    <Member Name="DecimalValue" Description="Valor decimal" />
+    <Member Name="IntValue" Description="Valor int" />
+    <Member Name="IsNullable" Description="Es anulable" />
     <Member Name="Related" Description="Relacionados" />
+    <Member Name="StringValue" Description="Valor de cadena" />
   </Type>
-  <Type Name="ValueLineBoxType" />
+  <Type Name="ValueLineBoxType">
+    <Member Name="Boolean" Description="Boolean" />
+    <Member Name="DateTime" Description="Fecha hora" />
+    <Member Name="Decimal" Description="Decimal" />
+    <Member Name="Integer" Description="Número entero" />
+    <Member Name="String" Description="Cadena" />
+  </Type>
   <Type Name="VoidEnumMessage">
     <Member Name="Instance" Description="-" />
   </Type>
