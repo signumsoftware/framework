@@ -32,7 +32,9 @@ namespace Signum.Engine.Translation
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => CultureInfoLogic.Start(null, null)));
         }
 
-        public static ResetLazy<Dictionary<CultureInfo, CultureInfoDN>> CultureInfoToEntity;
+        public static Func<CultureInfo, CultureInfo> CultureInfoModifier = ci => ci;
+
+        public static ResetLazy<Dictionary<string, CultureInfoDN>> CultureInfoToEntity;
         public static ResetLazy<Dictionary<CultureInfoDN, CultureInfo>> CultureInfoDNToCultureInfo;
 
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
@@ -52,10 +54,12 @@ namespace Signum.Engine.Translation
                         c.NativeName,
                     });
 
-                CultureInfoToEntity = sb.GlobalLazy(() => Database.Query<CultureInfoDN>().ToDictionary(ci => CultureInfo.GetCultureInfo(ci.Name), ci=>ci),
+                CultureInfoToEntity = sb.GlobalLazy(() => Database.Query<CultureInfoDN>().ToDictionary(ci => ci.Name,
+                    ci => ci),
                     invalidateWith: new InvalidateWith(typeof(CultureInfoDN)));
-                
-                CultureInfoDNToCultureInfo = sb.GlobalLazy(() => Database.Query<CultureInfoDN>().ToDictionary(ci => ci, ci => CultureInfo.GetCultureInfo(ci.Name)),
+
+                CultureInfoDNToCultureInfo = sb.GlobalLazy(() => Database.Query<CultureInfoDN>().ToDictionary(ci => ci, 
+                    ci => CultureInfoModifier(CultureInfo.GetCultureInfo(ci.Name))),
                     invalidateWith: new InvalidateWith(typeof(CultureInfoDN)));
 
                 new Graph<CultureInfoDN>.Execute(CultureInfoOperation.Save)
@@ -82,26 +86,31 @@ namespace Signum.Engine.Translation
 
         public static CultureInfoDN ToCultureInfoDN(this CultureInfo ci)
         {
-            return CultureInfoToEntity.Value.GetOrThrow(ci);
+            return CultureInfoToEntity.Value.GetOrThrow(ci.Name);
         }
 
         public static IEnumerable<CultureInfo> ApplicationCultures
         {
             get
             {
-                return CultureInfoToEntity.Value.Keys;
+                return CultureInfoDNToCultureInfo.Value.Values;
             }
         }
 
         public static IEnumerable<T> ForEachCulture<T>(Func<CultureInfoDN, T> func)
         {
-            foreach (var c in CultureInfoToEntity.Value)
+            foreach (var c in CultureInfoDNToCultureInfo.Value)
             {
-                using (Sync.ChangeBothCultures(c.Key))
+                using (Sync.ChangeBothCultures(c.Value))
                 {
-                    yield return func(c.Value);
+                    yield return func(c.Key);
                 }
             }
+        }
+
+        public static CultureInfoDN GetCultureInfoDN(string cultureName)
+        {
+            return CultureInfoToEntity.Value.GetOrThrow(cultureName);
         }
     }
 }
