@@ -108,9 +108,9 @@ namespace Signum.Entities.DynamicQuery
                 {
                     var imp = implementations.Value.Types.Only();
                     if (imp == null)
-                        return null; 
+                        return null;
 
-                    return PropertyRoute.Root(type);
+                    return PropertyRoute.Root(imp);
                 }
             }
                 

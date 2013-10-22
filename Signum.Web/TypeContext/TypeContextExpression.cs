@@ -86,7 +86,11 @@ namespace Signum.Web
 
             TypeContextExpression result = Cast(mag.Visit(lambda.Body));
 
-            return new TypeSubContext<S>((S)result.Value, tc, result.Properties, result.Route);
+            var value = result.Value == NonValue ?
+                (S)(object)null :
+                (S)result.Value;
+
+            return new TypeSubContext<S>(value, tc, result.Properties, result.Route);
         }
 
         protected override Expression VisitParameter(ParameterExpression p)
