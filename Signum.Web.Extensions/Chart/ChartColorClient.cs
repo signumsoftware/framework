@@ -61,13 +61,13 @@ namespace Signum.Web.Chart
                         new ToolBarButton
                         {
                             Id = TypeContextUtilities.Compose(ctx.Prefix, "ebChartColorSave"),
-                            Text = "Save palette",
+                            Text = ChartMessage.SavePalette.NiceToString(),
                             OnClick = "SF.ChartColors.savePalette('{0}')".Formato(RouteHelper.New().Action<ColorChartController>(pc => pc.SavePalette(typeName)))
                         },
                         new ToolBarButton
                         {
                             Id = TypeContextUtilities.Compose(ctx.Prefix, "ebChartColorCreate"),
-                            Text = "New palette",
+                            Text =ChartMessage.NewPalette.NiceToString(),
                             Href = RouteHelper.New().Action<ColorChartController>(cc => cc.CreateNewPalette(typeName))
                         }
                     };

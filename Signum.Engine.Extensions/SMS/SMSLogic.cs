@@ -30,6 +30,13 @@ namespace Signum.Engine.SMS
         {
             return template.Messages.SingleOrDefault(tm => tm.CultureInfo.ToCultureInfo() == ci);
         }
+        
+        public static Expression<Func<IdentifiableEntity, IQueryable<SMSMessageDN>>> SMSMessagesExpression = 
+            e => Database.Query<SMSMessageDN>().Where(m=>m.Referred.RefersTo(e)); 
+        public static IQueryable<SMSMessageDN> SMSMessages(this IdentifiableEntity e)
+        {
+            return SMSMessagesExpression.Evaluate(e);
+        }
 
         static Expression<Func<SMSSendPackageDN, IQueryable<SMSMessageDN>>> SMSMessagesSendExpression =
             e => Database.Query<SMSMessageDN>().Where(a => a.SendPackage.RefersTo(e));
