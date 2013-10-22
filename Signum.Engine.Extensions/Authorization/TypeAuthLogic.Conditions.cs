@@ -80,6 +80,17 @@ namespace Signum.Engine.Authorization
             Transaction.PreRealCommit += Transaction_PreRealCommit;
         }
 
+        public static void RemovePreRealCommitChecking(IdentifiableEntity entity)
+        {
+            var created = (List<IdentifiableEntity>)Transaction.UserData.TryGetC(CreatedKey);
+            if (created != null && created.Contains(entity))
+                created.Remove(entity);
+
+            var modified = (List<IdentifiableEntity>)Transaction.UserData.TryGetC(ModifiedKey);
+            if (modified != null && modified.Contains(entity))
+                modified.Remove(entity); 
+        }
+
         static void Transaction_PreRealCommit(Dictionary<string, object> dic)
         {
             var modified = (List<IdentifiableEntity>)dic.TryGetC(ModifiedKey);
