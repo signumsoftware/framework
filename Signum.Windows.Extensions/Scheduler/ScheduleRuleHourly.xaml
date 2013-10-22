@@ -7,6 +7,6 @@
     m:Common.TypeContext="{x:Type d:ScheduleRuleHourlyDN}"
     Padding="2">
     <StackPanel>
-        <m:ValueLine m:Common.Route="EachHour"/>
+        <m:ValueLine m:Common.Route="EachHours"/>
     </StackPanel>
 </UserControl>
