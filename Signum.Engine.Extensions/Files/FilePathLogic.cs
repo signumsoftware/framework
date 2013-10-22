@@ -190,21 +190,22 @@ namespace Signum.Engine.Files
                 string path = Path.GetDirectoryName(fp.FullPhysicalPath);
                 fullPhysicalPath = path;
                 if (!Directory.Exists(path))
-                   Directory.CreateDirectory(path);
+                    Directory.CreateDirectory(path);
                 File.WriteAllBytes(fp.FullPhysicalPath, fp.BinaryFile);
                 fp.BinaryFile = null;
             }
             catch (IOException ex)
             {
-                ex.Data.Add("FullPhysicalPath" , fullPhysicalPath);
-                ex.Data.Add("CurrentPrincipal",System.Threading.Thread.CurrentPrincipal.Identity.Name);
+                ex.Data.Add("FullPhysicalPath", fullPhysicalPath);
+                ex.Data.Add("CurrentPrincipal", System.Threading.Thread.CurrentPrincipal.Identity.Name);
 
                 int hresult = (int)ex.GetType().GetField("_HResult",
                     System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(ex); // The error code is stored in just the lower 16 bits
                 if ((hresult & 0xFFFF) == ERROR_DISK_FULL)
                 {
                     fp.Repository.Active = false;
-                    Database.Save(fp.Repository);
+                    using (OperationLogic.AllowSave<FileRepositoryDN>())
+                        Database.Save(fp.Repository);
                     return false;
                 }
                 else
@@ -228,7 +229,7 @@ namespace Signum.Engine.Files
             return File.ReadAllBytes(fp.InDB(f => f.FullPhysicalPath));
         }
 
-     
+
     }
 
     public sealed class FileTypeAlgorithm
