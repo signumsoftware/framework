@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using Signum.Entities;
 using System.Data.Common;
+using System.Linq;
 
 namespace Signum.Engine
 {
@@ -30,7 +31,7 @@ namespace Signum.Engine
         {
             event Action<Dictionary<string, object>> PostRealCommit;
             void CallPostRealCommit();
-            event Action PreRealCommit;
+            event Action<Dictionary<string, object>> PreRealCommit;
             DbConnection Connection { get; }
             DbTransaction Transaction { get; }
            
@@ -38,7 +39,7 @@ namespace Signum.Engine
 
             bool IsRolledback { get; }
             void Rollback();
-            event Action Rolledback;
+            event Action<Dictionary<string, object>> Rolledback;
 
             void Commit();
             void Finish();
@@ -67,7 +68,7 @@ namespace Signum.Engine
                 remove { parent.PostRealCommit -= value; }
             }
 
-            public event Action PreRealCommit
+            public event Action<Dictionary<string, object>> PreRealCommit
             {
                 add { parent.PreRealCommit += value; }
                 remove { parent.PreRealCommit -= value; }
@@ -104,7 +105,7 @@ namespace Signum.Engine
                 get { return parent; }
             }
 
-            public event Action Rolledback
+            public event Action<Dictionary<string, object>> Rolledback
             {
                 add { parent.Rolledback += value; }
                 remove { parent.Rolledback -= value; }
@@ -120,8 +121,8 @@ namespace Signum.Engine
             public bool IsRolledback { get; private set; }
             public bool Started { get; private set; }
             public event Action<Dictionary<string, object>> PostRealCommit;
-            public event Action PreRealCommit;
-            public event Action Rolledback;
+            public event Action<Dictionary<string, object>> PreRealCommit;
+            public event Action<Dictionary<string, object>> Rolledback;
 
             IsolationLevel? IsolationLevel;
 
@@ -157,9 +158,9 @@ namespace Signum.Engine
             {
                 while (PreRealCommit != null)
                 {
-                    foreach (Action item in PreRealCommit.GetInvocationList())
+                    foreach (Action<Dictionary<string, object>> item in PreRealCommit.GetInvocationList())
                     {
-                        item();
+                        item(this.UserData);
                         PreRealCommit -= item;
                     }
                 }
@@ -183,7 +184,7 @@ namespace Signum.Engine
                     Transaction.Rollback();
                     IsRolledback = true;
                     if (Rolledback != null)
-                        Rolledback();
+                        Rolledback(this.userData);
                 }
             }
 
@@ -222,8 +223,9 @@ namespace Signum.Engine
             public bool IsRolledback { get; private set; }
             public bool Started { get; private set; }
             public event Action<Dictionary<string, object>> PostRealCommit;
-            public event Action PreRealCommit;
-            public event Action Rolledback;
+
+            public event Action<Dictionary<string, object>> PreRealCommit;
+            public event Action<Dictionary<string, object>> Rolledback;
 
             public NamedTransaction(ICoreTransaction parent, string savePointName)
             {
@@ -258,38 +260,31 @@ namespace Signum.Engine
                     Connector.Current.RollbackTransactionPoint(Transaction, savePointName);
                     IsRolledback = true;
                     if (Rolledback != null)
-                        Rolledback();
+                        Rolledback(this.UserData);
                 }
             }
 
             public void Commit() 
-            {
-                while (PreRealCommit != null)
-                {
-                    foreach (Action item in PreRealCommit.GetInvocationList())
-                    {
-                        item();
-                        PreRealCommit -= item;
-                    }
-                }
+            {   
             }
 
             public void CallPostRealCommit()
             {
+                if (PreRealCommit != null)
+                    foreach (Action<Dictionary<string, object>> item in PreRealCommit.GetInvocationList())
+                        parent.PreRealCommit += parentUserData => item(this.UserData);
+
                 if (PostRealCommit != null)
-                {
                     foreach (Action<Dictionary<string, object>> item in PostRealCommit.GetInvocationList())
-                    {
-                        item(this.UserData);
-                    }
-                }
+                        parent.PostRealCommit += parentUserData => item(this.UserData);
             }
 
             public void Finish() { }
 
+            Dictionary<string, object> userData;
             public Dictionary<string, object> UserData
             {
-                get { return parent.UserData; }
+                get { return userData ?? (userData = new Dictionary<string, object>()); }
             }
 
             public ICoreTransaction Parent
@@ -307,8 +302,8 @@ namespace Signum.Engine
             public bool IsRolledback { get; private set; }
             public bool Started { get; private set; }
             public event Action<Dictionary<string, object>> PostRealCommit;
-            public event Action PreRealCommit;
-            public event Action Rolledback;
+            public event Action<Dictionary<string, object>> PreRealCommit;
+            public event Action<Dictionary<string, object>> Rolledback;
 
             public NoneTransaction(ICoreTransaction parent)
             {
@@ -333,9 +328,9 @@ namespace Signum.Engine
                 {
                     while (PreRealCommit != null)
                     {
-                        foreach (Action item in PreRealCommit.GetInvocationList())
+                        foreach (Action<Dictionary<string, object>> item in PreRealCommit.GetInvocationList())
                         {
-                            item();
+                            item(this.UserData);
                             PreRealCommit -= item;
                         }
                     }
@@ -362,7 +357,7 @@ namespace Signum.Engine
                     //Transaction.Rollback();
                     IsRolledback = true;
                     if (Rolledback != null)
-                        Rolledback();
+                        Rolledback(this.UserData);
                 }
             }
 
@@ -486,13 +481,13 @@ namespace Signum.Engine
             remove { GetCurrent().PostRealCommit -= value; }
         }
 
-        public static event Action PreRealCommit
+        public static event Action<Dictionary<string, object>> PreRealCommit
         {
             add { GetCurrent().PreRealCommit += value; }
             remove { GetCurrent().PreRealCommit -= value; }
         }
 
-        public static event Action Rolledback
+        public static event Action<Dictionary<string, object>> Rolledback
         {
             add { GetCurrent().Rolledback += value; }
             remove { GetCurrent().Rolledback -= value; }
@@ -501,6 +496,11 @@ namespace Signum.Engine
         public static Dictionary<string, object> UserData
         {
             get { return GetCurrent().UserData; }
+        }
+
+        public static Dictionary<string, object> TopParentUserData()
+        {
+            return GetCurrent().FollowC(a => a.Parent).Last().UserData;
         }
 
         public static bool HasTransaction

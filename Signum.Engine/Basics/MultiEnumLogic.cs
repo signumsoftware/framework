@@ -173,9 +173,12 @@ namespace Signum.Engine
             return AssertStarted().ToEntity.Values; 
         }
 
-        public static IEnumerable<string> AllUniqueKeys()
+        public static ICollection<string> AllUniqueKeys
         {
-            return AssertStarted().ToEnumUniqueKey.Keys;
+            get
+            {
+                return AssertStarted().ToEnumUniqueKey.Keys;
+            }
         }
     }
 }

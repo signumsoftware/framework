@@ -320,7 +320,7 @@
     <Member Name="_0HasBeenRenamedIn1" Description="    ¿'{0}' ha sido renombrada en {1}?" />
     <Member Name="EndOfSyncScript" Description="--- FIN DEL SCRIPT DE SINCRONIZACION" />
     <Member Name="NNone" Description="- n: Ninguno" />
-    <Member Name="StartOfSyncScriptGeneratedOn0" Description="--- INICIO DEL SCRIPT DE SINCRONIZACION GENERADO EL {0}" />
+    <Member Name="StartOfSyncScriptGeneratedOn0" Description="--- INICIO DEL SCRIPT DE SINCRONIZACIÓN GENERADO EL {0}" />
   </Type>
   <Type Name="TypeDN" Description="Tipo">
     <Member Name="ClassName" Description="Class Name" />
@@ -368,10 +368,25 @@
     <Member Name="TheNumberOfElementsOf0HasToBe01" Description="El número de elementos en {{0}} ha de ser {0} {1}" />
     <Member Name="Type0NotAllowed" Description="El tipo {0} no está permitido" />
   </Type>
-  <Type Name="ValueLineBoxModel">
+  <Type Name="ValueLineBoxModel" Description="Valor línea Box">
+    <Member Name="BoolValue" Description="Valor bool" />
+    <Member Name="BoxType" Description="Tipo caja" />
+    <Member Name="DateValue" Description="Valor de fecha" />
+    <Member Name="DecimalValue" Description="Valor decimal" />
+    <Member Name="FieldName" Description="Nombre del campo" />
+    <Member Name="IntValue" Description="Valor int" />
+    <Member Name="IsNullable" Description="Es anulable" />
     <Member Name="Related" Description="Relacionados" />
+    <Member Name="StringValue" Description="Valor de cadena" />
+    <Member Name="TopText" Description="Texto superior" />
   </Type>
-  <Type Name="ValueLineBoxType" />
+  <Type Name="ValueLineBoxType">
+    <Member Name="Boolean" Description="Boolean" />
+    <Member Name="DateTime" Description="Fecha hora" />
+    <Member Name="Decimal" Description="Decimal" />
+    <Member Name="Integer" Description="Número entero" />
+    <Member Name="String" Description="Cadena" />
+  </Type>
   <Type Name="VoidEnumMessage">
     <Member Name="Instance" Description="-" />
   </Type>

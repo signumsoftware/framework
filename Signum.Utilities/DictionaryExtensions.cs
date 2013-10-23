@@ -348,18 +348,21 @@ namespace Signum.Utilities
 
         public static void AddRange<K, V, A>(this IDictionary<K, V> dictionary, IEnumerable<A> collection, Func<A, K> keySelector, Func<A, V> valueSelector, string errorContext)
         {
-            HashSet<K> repetitions = new HashSet<K>();
+            Dictionary<K, List<V>> repetitions = new Dictionary<K, List<V>>();
             foreach (var item in collection)
             {
                 var key = keySelector(item);
                 if (dictionary.ContainsKey(key))
-                    repetitions.Add(key);
+                {
+                    repetitions.GetOrCreate(key, () => new List<V> { dictionary[key] }).Add(valueSelector(item));
+                }
                 else
                     dictionary.Add(key, valueSelector(item));
             }
 
             if (repetitions.Count > 0)
-                throw new ArgumentException("There are some repeated {0}: {1}".Formato(errorContext, repetitions.ToString(", ")));
+                throw new ArgumentException("There are some repeated {0}: {1}".Formato(errorContext, repetitions
+                    .ToString(kvp => "{0} ({1})".Formato(kvp.Key, kvp.Value.ToString(", ")), "\r\n")));
         }
 
         public static void SetRange<K, V>(this IDictionary<K, V> dictionary, IEnumerable<KeyValuePair<K, V>> collection)

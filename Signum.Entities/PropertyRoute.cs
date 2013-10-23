@@ -68,7 +68,7 @@ namespace Signum.Entities
             {
                 string name = ExtractMixin(fieldOrProperty);
 
-                mi = MixinDeclarations.GetMixinDeclarations(type).FirstOrDefault(t => t.Name == name);
+                mi = MixinDeclarations.GetMixinDeclarations(Type).FirstOrDefault(t => t.Name == name);
             }
 
             if (mi == null)
@@ -196,6 +196,9 @@ namespace Signum.Entities
 
             if (!typeof(IRootEntity).IsAssignableFrom(type))
                 throw new ArgumentException("Type must implement IPropertyRouteRoot");
+
+            if (type.IsAbstract)
+                throw new ArgumentException("Type must be non-abstract"); 
 
             this.type = type;
             this.PropertyRouteType = PropertyRouteType.Root;

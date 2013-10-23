@@ -100,10 +100,20 @@ namespace Signum.Entities.DynamicQuery
             if (Column.PropertyRoutes != null)
                 return Column.PropertyRoutes[0]; //HACK: compatibility with IU entitiy elements
 
-            Type type = Lite.Extract(Type);
-            if (type != null && typeof(IdentifiableEntity).IsAssignableFrom(type))
-                return PropertyRoute.Root(type);
+            Type type = Lite.Extract(Type); // Useful? 
+            if (type != null && type.IsIIdentifiable())
+            {
+                var implementations = Column.Implementations;
+                if (implementations != null && !implementations.Value.IsByAll)
+                {
+                    var imp = implementations.Value.Types.Only();
+                    if (imp == null)
+                        return null;
 
+                    return PropertyRoute.Root(imp);
+                }
+            }
+                
             return null;
         }
 

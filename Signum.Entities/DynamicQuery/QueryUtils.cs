@@ -325,14 +325,14 @@ namespace Signum.Entities.DynamicQuery
             QueryToken result = SubToken(null, qd, canAggregate, firstPart);
 
             if (result == null)
-                throw new FormatException("Column {0} not found".Formato(firstPart));
+                throw new FormatException("Column {0} not found on query {1}".Formato(firstPart, QueryUtils.GetCleanName(qd.QueryName)));
 
             foreach (var part in parts.Skip(1))
             {
                 var newResult = SubToken(result, qd, canAggregate, part);
 
                 if (newResult == null)
-                    throw new FormatException("Token with key '{0}' not found on {1}".Formato(part, result.FullKey()));
+                    throw new FormatException("Token with key '{0}' not found on {1} of query {2}".Formato(part, result.FullKey(), QueryUtils.GetCleanName(qd.QueryName)));
 
                 result = newResult;
             }

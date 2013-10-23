@@ -61,7 +61,14 @@ namespace Signum.Engine
                 diff.Colums = replacements.ApplyReplacementsToOld(diff.Colums,  key);
 
                 diff.Indices = ApplyIndexAutoReplacements(diff, tab, modelIndices[tab]);
-            }); 
+            });
+
+            Func<ObjectName, ObjectName> ChangeName = (ObjectName objectName) =>
+            {
+                string name = replacements.Apply(Replacements.KeyTables, objectName.ToString());
+
+                return model.GetOrThrow(name).Name;
+            };
 
             //use database without replacements to just remove indexes
             SqlPreCommand dropIndices =
@@ -95,7 +102,7 @@ namespace Signum.Engine
                      null,
                      (cn, colDb) => colDb.ForeingKey != null ? SqlBuilder.AlterTableDropConstraint(dif.Name, colDb.ForeingKey.Name) : null,
                      (cn, colModel, colDb) => colDb.ForeingKey == null ? null :
-                         colModel.ReferenceTable == null || !colModel.ReferenceTable.Name.Equals(ChangeName(colDb.ForeingKey.TargetTable, replacements)) ? 
+                         colModel.ReferenceTable == null || !colModel.ReferenceTable.Name.Equals(ChangeName(colDb.ForeingKey.TargetTable)) ? 
                          SqlBuilder.AlterTableDropConstraint(dif.Name, colDb.ForeingKey.Name) :
                          null, Spacing.Simple),
                         Spacing.Double);
@@ -119,7 +126,7 @@ namespace Signum.Engine
                         (cn, tabCol, difCol) =>SqlPreCommand.Combine(Spacing.Simple,
                             difCol.Name == tabCol.Name ? null : SqlBuilder.RenameColumn(tab, difCol.Name, tabCol.Name),
                             difCol.ColumnEquals(tabCol) ? null : SqlBuilder.AlterTableAlterColumn(tab, tabCol),
-                            UpdateByFkChange(tn, difCol, tabCol, replacements)),
+                            UpdateByFkChange(tn, difCol, tabCol, ChangeName)),
                         Spacing.Simple)),
                  Spacing.Double);
 
@@ -145,7 +152,7 @@ namespace Signum.Engine
                          if(colModel.ReferenceTable == null)
                             return null;
 
-                         if(coldb.ForeingKey == null || !colModel.ReferenceTable.Name.Equals(ChangeName(coldb.ForeingKey.TargetTable, replacements)))
+                         if(coldb.ForeingKey == null || !colModel.ReferenceTable.Name.Equals(ChangeName(coldb.ForeingKey.TargetTable)))
                             return SqlBuilder.AlterTableAddConstraintForeignKey(tab, colModel.Name, colModel.ReferenceTable);
                                                           
                          var name = SqlBuilder.ForeignKeyName(tab.Name.Name, colModel.Name);
@@ -181,15 +188,7 @@ namespace Signum.Engine
             return SqlPreCommand.Combine(Spacing.Triple, dropIndices, dropForeignKeys, tables, syncEnums, addForeingKeys, addIndices);
         }
 
-        private static ObjectName ChangeName(ObjectName objectName, Replacements replacements)
-        {
-            string name = replacements.Apply(Replacements.KeyTables, objectName.Name);
 
-            if (name != objectName.Name)
-                return new ObjectName(objectName.Schema, name);
-
-            return objectName;
-        }
 
         private static Dictionary<string, DiffIndex> ApplyIndexAutoReplacements(DiffTable diff, ITable tab, Dictionary<string, Index> dictionary)
         {
@@ -239,14 +238,14 @@ namespace Signum.Engine
             return diff.Indices.SelectDictionary(on => replacements.TryGetC(on) ?? on, dif => dif);
         }
 
-        private static SqlPreCommandSimple UpdateByFkChange(string tn, DiffColumn difCol, IColumn tabCol, Replacements replacements)
+        private static SqlPreCommandSimple UpdateByFkChange(string tn, DiffColumn difCol, IColumn tabCol, Func<ObjectName, ObjectName> changeName)
         {
             if (difCol.ForeingKey == null || tabCol.ReferenceTable == null)
                 return null;
 
-            var oldFK = replacements.Apply(Replacements.KeyTables, difCol.ForeingKey.TargetTable.Name);
+            ObjectName oldFk = changeName(difCol.ForeingKey.TargetTable);
 
-            if (oldFK == tabCol.ReferenceTable.Name.Name)
+            if (oldFk.Equals(tabCol.ReferenceTable.Name))
                 return null;
 
             AliasGenerator ag = new AliasGenerator();
@@ -257,7 +256,7 @@ SET {0} = GetId{5}({4}.Id)
 FROM {1} {2}
 JOIN {3} {4} ON {2}.{0} = {4}.Id".Formato(tabCol.Name,
                 tn, ag.NextTableAlias(tn),
-                oldFK, ag.NextTableAlias(oldFK),
+                oldFk, ag.NextTableAlias(oldFk.Name),
                 tabCol.ReferenceTable.Name.Name));
         }
 

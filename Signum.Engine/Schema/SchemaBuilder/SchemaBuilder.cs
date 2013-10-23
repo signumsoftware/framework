@@ -242,6 +242,17 @@ namespace Signum.Engine.Maps
         HashSet<string> loadedModules = new HashSet<string>();
         public bool NotDefined(MethodBase methodBase)
         {
+            var should = methodBase.DeclaringType.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+             .Where(m => !m.HasAttribute<MethodExpanderAttribute>())
+             .Select(m => m.SingleAttribute<ExpressionFieldAttribute>().TryCC(a => a.Name) ?? m.Name + "Expression").ToList();
+
+            var fields = methodBase.DeclaringType.GetFields(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+                .Where(f => f.Name.EndsWith("Expression") && f.FieldType.IsInstantiationOf(typeof(Expression<>)));
+
+            foreach (var f in fields)
+                should.Where(a => a == f.Name).SingleEx(() => "Methods for {0}".Formato(f.Name));
+
+
             return loadedModules.Add(methodBase.DeclaringType.FullName + "." + methodBase.Name);
         }
 
@@ -705,7 +716,7 @@ namespace Signum.Engine.Maps
                 if (Transaction.InTestTransaction)
                 {
                     invalidate(this, null);
-                    Transaction.Rolledback += () => invalidate(this, null);
+                    Transaction.Rolledback += dic => invalidate(this, null);
                 }
 
                 Transaction.PostRealCommit += dic => invalidate(this, null);

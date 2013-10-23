@@ -24,6 +24,12 @@ namespace Signum.Web
 
     class TypeContextExpression : Expression
     {
+        readonly object value;
+        public object Value
+        {
+            get { return value; }
+        }
+
         readonly PropertyRoute route;
         public PropertyRoute Route
         {
@@ -43,11 +49,20 @@ namespace Signum.Web
 
         public readonly PropertyInfo[] Properties;
 
-        internal TypeContextExpression(PropertyInfo[] properties, Type type, PropertyRoute route)
+        internal TypeContextExpression(PropertyInfo[] properties, Type type, PropertyRoute route, object value)
         {
             this.type = type;
             this.Properties = properties;
             this.route = route;
+            this.value = value; 
+        }
+
+        public PropertyRoute AddDynamic(MemberInfo mi)
+        {
+            if (Value is IdentifiableEntity)
+                return PropertyRoute.Root(value.GetType()).Add(mi);
+            else
+                return Route.Add(mi); 
         }
 
         public override string ToString()
@@ -58,7 +73,7 @@ namespace Signum.Web
 
     internal class MemberAccessGatherer : SimpleExpressionVisitor
     {
-        static ConcurrentDictionary<LambdaExpression, Delegate> compiledExpressions = new ConcurrentDictionary<LambdaExpression, Delegate>(ExpressionComparer.GetComparer<LambdaExpression>());
+        static object NonValue = new object(); 
 
         public Dictionary<ParameterExpression, TypeContextExpression> replacements = new Dictionary<ParameterExpression, TypeContextExpression>();
 
@@ -66,14 +81,14 @@ namespace Signum.Web
         {
             var mag = new MemberAccessGatherer()
             {
-                replacements = { { lambda.Parameters[0], new TypeContextExpression(new PropertyInfo[0], typeof(T), tc.PropertyRoute) } }
+                replacements = { { lambda.Parameters[0], new TypeContextExpression(new PropertyInfo[0], typeof(T), tc.PropertyRoute, tc.Value) } }
             };
 
             TypeContextExpression result = Cast(mag.Visit(lambda.Body));
 
-            Func<T, S> func = (Func<T, S>)compiledExpressions.GetOrAdd(lambda, ld => ld.Compile());
-
-            S value = func(tc.Value);
+            var value = result.Value == NonValue ?
+                (S)(object)null :
+                (S)result.Value;
 
             return new TypeSubContext<S>(value, tc, result.Properties, result.Route);
         }
@@ -94,14 +109,29 @@ namespace Signum.Web
         protected override Expression VisitMemberAccess(MemberExpression me)
         {
             var tce = Cast(Visit(me.Expression));
-            
-            if (tce.Type.IsLite() && (me.Member.Name == "EntityOrNull" || me.Member.Name == "Entity"))
-                return new TypeContextExpression(tce.Properties, me.Type, tce.Route.Add((PropertyInfo)me.Member));
 
-            return new TypeContextExpression(
-                tce.Properties.And((PropertyInfo)me.Member).ToArray(),
-                me.Type,
-                tce.Route.Add((PropertyInfo)me.Member));
+            if (tce.Type.IsLite() && (me.Member.Name == "EntityOrNull" || me.Member.Name == "Entity"))
+            {
+                var lite = tce.Value as Lite<IIdentifiable>;
+
+                return new TypeContextExpression(tce.Properties, me.Type,
+                    tce.AddDynamic(me.Member),
+                    tce.Value == NonValue ? NonValue :
+                    me.Member.Name == "EntityOrNull" ? lite.EntityOrNull : lite.Entity);
+            }
+            else
+            {
+                var field = tce.Value == NonValue ? NonValue :
+                    me.Member is PropertyInfo ?
+                    ((PropertyInfo)me.Member).GetValue(tce.Value, null) :
+                    ((FieldInfo)me.Member).GetValue(tce.Value);
+
+                return new TypeContextExpression(
+                    tce.Properties.And((PropertyInfo)me.Member).ToArray(),
+                    me.Type,
+                    tce.AddDynamic(me.Member),
+                    field);
+            }
         }
 
         protected override Expression VisitUnary(UnaryExpression u)
@@ -109,28 +139,43 @@ namespace Signum.Web
             if (u.NodeType == ExpressionType.TypeAs || u.NodeType == ExpressionType.Convert)
             {
                 var tce = Cast(Visit(u.Operand));
-                return new TypeContextExpression(tce.Properties, u.Type, PropertyRoute.Root(u.Type));
+                return new TypeContextExpression(tce.Properties, u.Type,
+                    PropertyRoute.Root(tce.Value == NonValue ? u.Type : tce.Value.GetType()),
+                    tce.Value == NonValue ? NonValue :
+                    tce.Value);
             }
 
             return base.VisitUnary(u);
         }
 
         static string[] tryies = new string[] { "TryCC", "TryCS", "TrySS", "TrySC" };
+
+        static readonly PropertyInfo piEntity = ReflectionTools.GetPropertyInfo((Lite<IIdentifiable> lite) => lite.Entity);
         
-        MethodInfo miRetrieve = ReflectionTools.GetMethodInfo((Lite<TypeDN> l) => l.Retrieve()).GetGenericMethodDefinition();
+        static readonly MethodInfo miRetrieve = ReflectionTools.GetMethodInfo((Lite<TypeDN> l) => l.Retrieve()).GetGenericMethodDefinition();
 
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
             if (m.Method.IsInstantiationOf(miRetrieve))
             {
                 var tce = Cast(Visit(m.Arguments[0]));
-                return new TypeContextExpression(tce.Properties, m.Type, tce.Route.Add("Entity"));
+
+                Lite<IIdentifiable> lite = tce.Value as Lite<IIdentifiable>;
+
+                var obj =  tce.Value == NonValue ? NonValue:
+                    lite.Retrieve();
+
+                return new TypeContextExpression(tce.Properties, m.Type, 
+                    tce.Route.Add(piEntity), obj);
             }
 
             if (m.Method.DeclaringType == typeof(Extensions) && tryies.Contains(m.Method.Name))
             {
                 var tce = Cast(Visit(m.Arguments[0]));
                 var lambda = (LambdaExpression)m.Arguments[1];
+
+                if (tce.Value == null)
+                    tce = new TypeContextExpression(tce.Properties, tce.Type, tce.Route, NonValue); 
 
                 replacements.Add(lambda.Parameters[0], tce);
 
@@ -141,7 +186,12 @@ namespace Signum.Web
             {
                 var tce = Cast(Visit(m.Object));
                 var mixinType = m.Method.GetGenericArguments().SingleEx();
-                return new TypeContextExpression(tce.Properties, mixinType, tce.Route.Add(mixinType));
+
+                var ident = tce.Value as IdentifiableEntity;
+
+                return new TypeContextExpression(tce.Properties, mixinType, tce.Route.Add(mixinType),
+                    tce.Value == NonValue ? NonValue :
+                    ident.GetMixin(mixinType));
             }
 
             return base.VisitMethodCall(m);

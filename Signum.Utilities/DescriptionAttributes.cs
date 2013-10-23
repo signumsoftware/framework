@@ -172,6 +172,9 @@ namespace Signum.Utilities
 
         public static string NiceToString(this Enum a)
         {
+            if (a == null)
+                return null;
+
             var fi = EnumFieldCache.Get(a.GetType()).TryGetC(a);
             if (fi != null)
                 return GetMemberNiceName(fi) ?? DefaultMemberDescription(fi);
