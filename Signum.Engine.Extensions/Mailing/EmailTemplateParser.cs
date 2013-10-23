@@ -288,7 +288,7 @@ namespace Signum.Engine.Mailing
                                     case FixTokenResult.RemoveToken: throw new InvalidOperationException("Unexpected RemoveToken");
                                     case FixTokenResult.SkipEntity: return null;
                                     case FixTokenResult.Fix:
-                                        foreach (var tok in et.Recipients.Where(r => r.Token.Equals(item)).ToList())
+                                        foreach (var tok in et.Recipients.Where(r => r.Token.TokenString == item.TokenString).ToList())
                                             tok.Token = token;
 
                                         FixTokenResult? currentResult = null;
