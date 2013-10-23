@@ -193,7 +193,7 @@ namespace Signum.Engine.Cache
                     {
                         commands.Add(new SqlPreCommandSimple(
         @"DECLARE @SPId VARCHAR(7000)
-SELECT @SPId = COALESCE(@SPId,'')+'KILL '+CAST(SPID AS VARCHAR)+'; ' FROM master..SysProcesses WHERE DB_NAME(DBId) = {0}
+SELECT @SPId = COALESCE(@SPId,'')+'KILL '+CAST(SPID AS VARCHAR)+'; ' FROM master..SysProcesses WHERE DB_NAME(DBId) = '{0}'
 EXEC(@SPId)".Formato(databaseName)));
 
                         commands.Add(new SqlPreCommandSimple("ALTER DATABASE {0} SET ENABLE_BROKER".Formato(databaseName)));
