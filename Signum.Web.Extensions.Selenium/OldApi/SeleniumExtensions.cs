@@ -252,6 +252,7 @@ namespace Signum.Web.Selenium
             selenium.EntityButtonClick(operationKey.GetType().Name + "_" + operationKey.ToString());
         }
 
+
         public static void EntityButtonClick(this ISelenium selenium, string idButton)
         {
             selenium.Click("{0}:not(.sf-disabled)".Formato(EntityButtonLocator(idButton)));

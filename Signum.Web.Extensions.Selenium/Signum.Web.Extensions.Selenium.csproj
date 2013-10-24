@@ -79,12 +79,20 @@
     <Reference Include="ThoughtWorks.Selenium.UnitTests, Version=0.0.0.0, Culture=neutral" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="WidgetsTestExtensions.cs" />
-    <Compile Include="LinesTestExtensions.cs" />
+    <Compile Include="EntityButtonContainer.cs" />
+    <Compile Include="LineContainer.cs" />
+    <Compile Include="LineProxies.cs" />
+    <Compile Include="OldApi\WidgetsTestExtensions.cs" />
+    <Compile Include="OldApi\LinesTestExtensions.cs" />
+    <Compile Include="Popup.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SearchTestExtensions.cs" />
-    <Compile Include="SeleniumExtensions.cs" />
-    <Compile Include="SeleniumTestClass.cs" />
+    <Compile Include="OldApi\SearchTestExtensions.cs" />
+    <Compile Include="OldApi\SeleniumExtensions.cs" />
+    <Compile Include="OldApi\SeleniumTestClass.cs" />
+    <Compile Include="SearchDialogProxy.cs" />
+    <Compile Include="SeleniumExtensionsNew.cs" />
+    <Compile Include="ValidationSummaryContainer.cs" />
+    <Compile Include="WidgetContainer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Selenium\ThoughtWorks.Selenium.Core.dll">
@@ -126,6 +134,14 @@
     <ProjectReference Include="..\..\Framework\Signum.Utilities\Signum.Utilities.csproj">
       <Project>{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}</Project>
       <Name>Signum.Utilities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Signum.Engine.Extensions\Signum.Engine.Extensions.csproj">
+      <Project>{ba7fa363-61a1-41b1-945b-9b9c7bbcd357}</Project>
+      <Name>Signum.Engine.Extensions</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Signum.Entities.Extensions\Signum.Entities.Extensions.csproj">
+      <Project>{7d851227-5294-4beb-990e-56b4fbb7a148}</Project>
+      <Name>Signum.Entities.Extensions</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

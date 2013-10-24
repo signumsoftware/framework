@@ -118,6 +118,13 @@ namespace Signum.Entities.Omnibox
                 tokens.Add(new OmniboxToken(type, group.Index, group.Value));
             }
         }
+
+        public static string ToOmniboxPascal(this string text)
+        {
+            var simple = Regex.Replace(text, OmniboxMessage.ComplementWordsRegex.NiceToString(), m => "", RegexOptions.IgnoreCase);
+
+            return simple.ToPascal();
+        }
     }
 
     public abstract class OmniboxManager
@@ -145,7 +152,7 @@ namespace Signum.Entities.Omnibox
         public Dictionary<string, object> GetQueries()
         {
             return queries.GetOrAdd(CultureInfo.CurrentCulture, ci =>
-                 GetAllQueryNames().ToDictionary(qn => QueryUtils.GetNiceName(qn).ToPascal(), "Translated QueryNames"));
+                 GetAllQueryNames().ToDictionary(qn => QueryUtils.GetNiceName(qn).ToOmniboxPascal(), "Translated QueryNames"));
         }
 
         protected abstract IEnumerable<Type> GetAllTypes();
@@ -155,7 +162,7 @@ namespace Signum.Entities.Omnibox
         internal Dictionary<string, Type> Types()
         {
             return types.GetOrAdd(CultureInfo.CurrentCulture, ci =>
-               GetAllTypes().Where(t => !t.IsEnumEntity()).ToDictionary(t => t.NiceName().ToPascal(), "Translated Types"));
+               GetAllTypes().Where(t => !t.IsEnumEntity()).ToDictionary(t => t.NiceName().ToOmniboxPascal(), "Translated Types"));
         }
     }
 

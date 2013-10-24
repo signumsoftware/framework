@@ -187,6 +187,8 @@ namespace Signum.Entities.Omnibox
         Omnibox_Value,
         Unknown,
         [Description("yes")]
-        Yes
+        Yes,
+        [Description(@"\b(the|of) ")]
+        ComplementWordsRegex
     }
 }

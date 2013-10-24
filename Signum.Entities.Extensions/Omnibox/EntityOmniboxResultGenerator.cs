@@ -121,12 +121,12 @@ namespace Signum.Entities.Omnibox
         public override string ToString()
         {
             if (Id.HasValue)
-                return "{0} {1}".Formato(Type.NiceName().ToPascal(), Id, Lite.TryToString() ?? OmniboxMessage.NotFound.NiceToString());
+                return "{0} {1}".Formato(Type.NiceName().ToOmniboxPascal(), Id, Lite.TryToString() ?? OmniboxMessage.NotFound.NiceToString());
 
             if (ToStr != null)
-                return "{0} \"{1}\"".Formato(Type.NiceName().ToPascal(), ToStr, Lite.TryToString() ?? OmniboxMessage.NotFound.NiceToString());
+                return "{0} \"{1}\"".Formato(Type.NiceName().ToOmniboxPascal(), ToStr, Lite.TryToString() ?? OmniboxMessage.NotFound.NiceToString());
 
-            return Type.NiceName().ToPascal();
+            return Type.NiceName().ToOmniboxPascal();
         }
     }
 }

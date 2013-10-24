@@ -77,7 +77,7 @@ namespace Signum.Entities.Chart
             if (QueryName == null)
                 return KeywordMatch.Value.ToString();
 
-            return "{0} {1}".Formato(KeywordMatch.Value, QueryUtils.GetNiceName(QueryName).ToPascal());
+            return "{0} {1}".Formato(KeywordMatch.Value, QueryUtils.GetNiceName(QueryName).ToOmniboxPascal());
         }
     }
 }

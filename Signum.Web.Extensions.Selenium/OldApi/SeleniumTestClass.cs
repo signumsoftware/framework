@@ -11,6 +11,7 @@ using Signum.Utilities;
 using Signum.Entities.Reflection;
 using Signum.Entities;
 using Signum.Engine.Basics;
+using Signum.Entities.DynamicQuery;
 
 namespace Signum.Web.Selenium
 {
@@ -66,11 +67,36 @@ namespace Signum.Web.Selenium
             }
         }
 
-        protected virtual string FindRoute(Type type)
+        protected virtual string Url(string url)
         {
-            return "Find/" + (TypeLogic.TypeToName.TryGetC(type) ?? Reflector.CleanTypeName(type));
+            throw new InvalidOperationException("Implement this method returing something like: http://localhost/MyApp/ + url");
         }
 
+        protected virtual string FindRoute(object queryName)
+        {
+            return "Find/" + GetWebQueryName(queryName);
+        }
+
+        protected string GetWebQueryName(object queryName)
+        {
+            if (queryName is Type)
+            {
+                return TypeLogic.TryGetCleanName((Type)queryName) ?? ((Type)queryName).Name;
+            }
+
+            return queryName.ToString();
+        }
+
+        public SearchPageProxy SearchPage(object queryName)
+        {
+            var url = Url(FindRoute(queryName));
+
+            selenium.Open(url);
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+
+            return new SearchPageProxy(selenium);
+        }
+        
         protected virtual string ViewRoute(Type type, int? id)
         {
             return "View/{0}/{1}".Formato(
@@ -81,6 +107,16 @@ namespace Signum.Web.Selenium
         protected virtual string ViewRoute(Lite<IIdentifiable> lite)
         {
             return ViewRoute(lite.EntityType, lite.IdOrNull);
+        }
+
+        public NormalPage<T> NormalPage<T>(int? id = null) where T: IdentifiableEntity
+        {
+            var url = Url(ViewRoute(typeof(T), id));
+
+            selenium.Open(url);
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+
+            return new NormalPage<T>(selenium, null); 
         }
     }
 }
