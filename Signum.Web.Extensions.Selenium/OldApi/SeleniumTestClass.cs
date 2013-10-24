@@ -77,7 +77,7 @@ namespace Signum.Web.Selenium
             return "Find/" + GetWebQueryName(queryName);
         }
 
-        string GetWebQueryName(object queryName)
+        protected string GetWebQueryName(object queryName)
         {
             if (queryName is Type)
             {

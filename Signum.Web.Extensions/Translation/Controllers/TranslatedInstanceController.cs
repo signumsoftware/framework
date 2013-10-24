@@ -132,8 +132,10 @@ namespace Signum.Web.Translation.Controllers
 
             var c = CultureInfo.GetCultureInfo(culture);
 
-            var changes = TranslatedInstanceSynchronizer.GetTypeInstanceChanges(TranslationClient.Translator, t, c);
+            int totalInstances; 
+            var changes = TranslatedInstanceSynchronizer.GetTypeInstanceChanges(TranslationClient.Translator, t, c, out totalInstances);
 
+            ViewBag.TotalInstances = totalInstances; 
             ViewBag.Culture = c;
             return base.View(TranslationClient.ViewPrefix.Formato("SyncInstance"), changes);
         }

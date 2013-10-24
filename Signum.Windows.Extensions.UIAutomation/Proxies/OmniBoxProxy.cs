@@ -10,6 +10,7 @@ using Signum.Engine.Basics;
 using Signum.Entities.Reflection;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine;
+using Signum.Entities.Omnibox;
 
 namespace Signum.Windows.UIAutomation
 {
@@ -26,23 +27,23 @@ namespace Signum.Windows.UIAutomation
 
         public SearchWindowProxy SelectQuery(object queryName)
         {
-            var cleanName = queryName is Type ? Reflector.CleanTypeName((Type)queryName) : queryName.ToString();
+            var omniboxName = QueryUtils.GetNiceName(queryName).ToOmniboxPascal();
 
-            return new SearchWindowProxy(SelectCapture(cleanName, "Q:" + QueryUtils.GetQueryUniqueKey(queryName))); 
+            return new SearchWindowProxy(SelectCapture(omniboxName, "Q:" + QueryUtils.GetQueryUniqueKey(queryName))); 
         }
 
         public NormalWindowProxy<T> SelectEntity<T>(Lite<T> lite) where T : IdentifiableEntity
         {
-            var cleanName = TypeLogic.GetCleanName(lite.EntityType) + " " + lite.Id;
+            var omniboxName = lite.EntityType.NiceName().ToOmniboxPascal() + " " + lite.Id;
 
-            return new NormalWindowProxy<T>(SelectCapture(cleanName, "E:" + lite.Key())); 
+            return new NormalWindowProxy<T>(SelectCapture(omniboxName, "E:" + lite.Key())); 
         }
 
         public SearchWindowProxy SelectUserQuery(Lite<UserQueryDN> userQuery)
         {
-            var cleanName = "'" + userQuery.ToString() + "'";
+            var omniboxName = "'" + userQuery.ToString() + "'";
 
-            return new SearchWindowProxy(SelectCapture(cleanName, "UQ:" + userQuery.Key())); 
+            return new SearchWindowProxy(SelectCapture(omniboxName, "UQ:" + userQuery.Key())); 
         }
 
         public AutomationElement SelectCapture(string autoCompleteText, string name, int? timeOut = null)

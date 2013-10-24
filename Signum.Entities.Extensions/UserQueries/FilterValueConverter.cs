@@ -84,7 +84,7 @@ namespace Signum.Entities.UserQueries
         {
             if (stringValue != null && stringValue.Contains('|'))
             {
-                IList list = (IList)Activator.CreateInstance(typeof(MList<>).MakeGenericType(type.UnNullify()));
+                IList list = (IList)Activator.CreateInstance(typeof(MList<>).MakeGenericType(type));
                 result = list;
                 foreach (var item in stringValue.Split('|'))
                 {
