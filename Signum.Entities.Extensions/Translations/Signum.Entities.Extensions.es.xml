@@ -783,6 +783,7 @@
     <Member Name="Save" Description="Guardar" />
   </Type>
   <Type Name="OmniboxMessage">
+    <Member Name="ComplementWordsRegex" Description="\b(el|la|los|las|de|del) " />
     <Member Name="No" Description="No" />
     <Member Name="NotFound" Description="[No encontrada]" />
     <Member Name="Omnibox_ControlPanel" Description="Panel de control" />

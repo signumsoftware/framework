@@ -117,7 +117,7 @@ namespace Signum.Entities.Omnibox
 
                 if (syntax.Completion == FilterSyntaxCompletion.Token)
                 {
-                    if (tokens[operatorIndex - 1].Next(rawQuery) == '.' && pair.Item2.All(a => ((QueryToken)a.Value).ToString().ToPascal() == a.Text))
+                    if (tokens[operatorIndex - 1].Next(rawQuery) == '.' && pair.Item2.All(a => ((QueryToken)a.Value).ToString().ToOmniboxPascal() == a.Text))
                     {
                         foreach (var qt in QueryUtils.SubTokens(pair.Item1, queryDescription, canAggregate: false))
                         {
@@ -289,7 +289,7 @@ namespace Signum.Entities.Omnibox
                         string value = omniboxToken.Type == OmniboxTokenType.Identifier ? omniboxToken.Value : OmniboxUtils.CleanCommas(omniboxToken.Value);
                         bool isPascalValue = OmniboxUtils.IsPascalCasePattern(value);
                         Type enumType = queryToken.Type.UnNullify();
-                        var dic = EnumEntity.GetValues(enumType).ToDictionary(a => a.NiceToString().ToPascal(), a => (object)a, "Translations Enum " + enumType.Name);
+                        var dic = EnumEntity.GetValues(enumType).ToDictionary(a => a.NiceToString().ToOmniboxPascal(), a => (object)a, "Translations Enum " + enumType.Name);
 
                         var result = OmniboxUtils.Matches(dic, e => true, value, isPascalValue)
                             .Select(m => new ValueTuple { Value = m.Value, Match = m })
@@ -338,7 +338,7 @@ namespace Signum.Entities.Omnibox
 
             bool isPascal = OmniboxUtils.IsPascalCasePattern(omniboxToken.Value);
 
-            var dic = QueryUtils.SubTokens(queryToken, queryDescription, canAggregate: false).ToDictionary(qt => qt.ToString().ToPascal());
+            var dic = QueryUtils.SubTokens(queryToken, queryDescription, canAggregate: false).ToDictionary(qt => qt.ToString().ToOmniboxPascal());
 
             var matches = OmniboxUtils.Matches(dic, qt => qt.IsAllowed() == null, omniboxToken.Value, isPascal);
 
@@ -403,7 +403,7 @@ namespace Signum.Entities.Omnibox
 
         public override string ToString()
         {
-            string queryName = QueryUtils.GetNiceName(QueryName).ToPascal();
+            string queryName = QueryUtils.GetNiceName(QueryName).ToOmniboxPascal();
 
             string filters = Filters.ToString(" ");
 
@@ -438,7 +438,7 @@ namespace Signum.Entities.Omnibox
 
         public override string ToString()
         {
-            string token = QueryToken.FollowC(q => q.Subordinated ? null : q.Parent).Reverse().Select(a => a.ToString().ToPascal()).ToString(".");
+            string token = QueryToken.FollowC(q => q.Subordinated ? null : q.Parent).Reverse().Select(a => a.ToString().ToOmniboxPascal()).ToString(".");
 
             if (Syntax == null || Syntax.Completion == FilterSyntaxCompletion.Token || CanFilter.HasText())
                 return token;

@@ -48,7 +48,7 @@ namespace Signum.Web.Omnibox
                 {
                     html = html.Concat("{0}{1}".FormatHtml(
                         last != null ? "." : "",
-                        ColoredSpan(item.QueryToken.ToString().ToPascal(), "gray")));
+                        ColoredSpan(item.QueryToken.ToString().ToOmniboxPascal(), "gray")));
                 }
 
                 if (item.CanFilter.HasText())
