@@ -432,34 +432,37 @@ SF.NewContentProcessor = {
     },
 
     defaultTabs: function ($newContent) {
-        var $tabContainer = $newContent.find(".sf-tabs:not(.ui-tabs)").prepend($("<ul></ul>"));
+        var $tabContainers = $newContent.find(".sf-tabs:not(.ui-tabs)").prepend($("<ul></ul>"));
 
-        $tabContainer.tabs();
+        $tabContainers.tabs();
+        $tabContainers.each(function () {
+            var $tabContainer = $(this);
 
-        var $tabs = $tabContainer.children("fieldset");
-        $tabs.each(function () {
-            var $this = $(this);
-            var $legend = $this.children("legend");
-            if ($legend.length == 0) {
-                $this.prepend("<strong>¡¡¡NO LEGEND SPECIFIED!!!</strong>");
-                throw "No legend specified for tab";
-            }
-            var legend = $legend.html();
+            var $tabs = $tabContainer.children("fieldset");
+            $tabs.each(function () {
+                var $this = $(this);
+                var $legend = $this.children("legend");
+                if ($legend.length == 0) {
+                    $this.prepend("<strong>¡¡¡NO LEGEND SPECIFIED!!!</strong>");
+                    throw "No legend specified for tab";
+                }
+                var legend = $legend.html();
 
-            var id = $this.attr("id");
-            if (SF.isEmpty(id)) {
-                $legend.html(legend + " <strong>¡¡¡NO TAB ID SET!!!</strong>");
-                throw "No id set for tab with legend: " + legend;
-            }
-            else {
-                $("<li><a href='#" + id + "'>" + legend + "</a></li>")
-                    .appendTo($tabContainer.find(".ui-tabs-nav"));
-                $legend.remove();
-            }
+                var id = $this.attr("id");
+                if (SF.isEmpty(id)) {
+                    $legend.html(legend + " <strong>¡¡¡NO TAB ID SET!!!</strong>");
+                    throw "No id set for tab with legend: " + legend;
+                }
+                else {
+                    $("<li><a href='#" + id + "'>" + legend + "</a></li>")
+                        .appendTo($($tabContainer.find(".ui-tabs-nav").first()));
+                    $legend.remove();
+                }
+            });
+
+            $tabContainer.tabs("refresh");
+            $tabContainer.tabs("option", "active", 0);
         });
-
-        $tabContainer.tabs("refresh");
-        $tabContainer.tabs("option", "active", 0);
     },
 
     defaultSlider: function ($newContent) {
