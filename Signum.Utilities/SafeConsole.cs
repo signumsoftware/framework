@@ -145,6 +145,16 @@ namespace Signum.Utilities
             }
         }
 
+        public static string AskSwitch(string question, List<string> options)
+        {
+            var cs = new ConsoleSwitch<int, string>();
+
+            for (int i = 0; i < options.Count; i++)
+                cs.Add(i, options[i]);
+
+            return cs.Choose(question);
+        }
+
         public static void WaitRows(string startingText, Func<int> updateOrDelete)
         {
             SafeConsole.WriteColor(ConsoleColor.Gray, startingText); 
@@ -217,5 +227,7 @@ namespace Signum.Utilities
             CTRL_LOGOFF_EVENT = 5,
             CTRL_SHUTDOWN_EVENT = 6
         }
+
+     
     }
 }

@@ -380,7 +380,7 @@
     <Member Name="StringValue" Description="Valor de cadena" />
     <Member Name="TopText" Description="Texto superior" />
   </Type>
-  <Type Name="ValueLineBoxType">
+  <Type Name="ValueLineBoxType" Description="Valor línea tipo caja">
     <Member Name="Boolean" Description="Boolean" />
     <Member Name="DateTime" Description="Fecha hora" />
     <Member Name="Decimal" Description="Decimal" />
