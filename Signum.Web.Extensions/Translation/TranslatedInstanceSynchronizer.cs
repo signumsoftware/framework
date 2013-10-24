@@ -14,7 +14,9 @@ namespace Signum.Web.Translation
 {
     public static class TranslatedInstanceSynchronizer
     {
-        public static TypeInstancesChanges GetTypeInstanceChanges(ITranslator translator, Type type, CultureInfo targetCulture)
+        public static int MaxInstancesChanges = 50;
+
+        public static TypeInstancesChanges GetTypeInstanceChanges(ITranslator translator, Type type, CultureInfo targetCulture, out int totalInstances)
         {
             CultureInfo masterCulture = CultureInfo.GetCultureInfo(TranslatedInstanceLogic.DefaultCulture);
 
@@ -53,6 +55,9 @@ namespace Signum.Web.Translation
 
             }).NotNull().ToList();
 
+            totalInstances = instances.Count;
+            if (totalInstances > MaxInstancesChanges)
+                instances = instances.Take(MaxInstancesChanges).ToList(); 
 
             List<IGrouping<CultureInfo, PropertyRouteConflict>> memberGroups = (from t in instances
                                                                                 from rcKVP in t.RouteConflicts

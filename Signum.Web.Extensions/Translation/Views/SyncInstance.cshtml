@@ -12,6 +12,13 @@
 
     ViewBag.Title = TranslationMessage.Synchronize0In1.NiceToString().Formato(Model.Type.NiceName(), culture.DisplayName);
 
+    int totalInstances= ViewBag.TotalInstances;
+
+    if (Model.Instances.Count < totalInstances)
+    {
+        ViewBag.Title = ViewBag.Title + " [{0}/{1}]".Formato(Model.Instances.Count, totalInstances);
+    }
+    
     Func<IEnumerable<string>, List<SelectListItem>> selectListItems = values =>
     {
         var items = values.Select(s => new SelectListItem { Value = s, Text = s }).ToList();
