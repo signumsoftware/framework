@@ -113,7 +113,7 @@ namespace Signum.Engine.UserQueries
 
                     for (int j = 0; j < subParts.Length; j++)
                     {
-                        string subPart = subParts[0];
+                        string subPart = subParts[j];
 
                         QueryToken subNewResult = QueryUtils.SubToken(result, qd, canAggregate, subPart);
 
