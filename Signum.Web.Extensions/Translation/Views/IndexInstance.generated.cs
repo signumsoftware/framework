@@ -97,7 +97,7 @@ WriteLiteral("\r\n");
 
             
             #line 12 "..\..\Translation\Views\IndexInstance.cshtml"
-Write(Html.ScriptCss("~/Translation/Content/Translation.css"));
+Write(Html.ScriptCss("~/Translation/Content/SF_Translation.css"));
 
             
             #line default

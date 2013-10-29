@@ -98,7 +98,7 @@ namespace Signum.Web.Extensions.Translation.Views
 
             
             #line 21 "..\..\Translation\Views\View.cshtml"
-Write(Html.ScriptCss("~/Translation/Content/Translation.css"));
+Write(Html.ScriptCss("~/Translation/Content/SF_Translation.css"));
 
             
             #line default
@@ -108,7 +108,7 @@ WriteLiteral("\r\n");
 
             
             #line 22 "..\..\Translation\Views\View.cshtml"
-Write(Html.ScriptsJs("~/Translation/Content/Translation.js"));
+Write(Html.ScriptsJs("~/Translation/Scripts/SF_Translation.js"));
 
             
             #line default

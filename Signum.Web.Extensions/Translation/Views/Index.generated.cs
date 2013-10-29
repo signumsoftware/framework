@@ -83,7 +83,7 @@ WriteLiteral("\r\n");
 
             
             #line 10 "..\..\Translation\Views\Index.cshtml"
-Write(Html.ScriptCss("~/Translation/Content/Translation.css"));
+Write(Html.ScriptCss("~/Translation/Content/SF_Translation.css"));
 
             
             #line default

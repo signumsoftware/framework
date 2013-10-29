@@ -1386,8 +1386,8 @@
     </None>
     <Content Include="SMS\Content\SF_SMS.css" />
     <Content Include="SMS\Scripts\SF_SMS.js" />
-    <Content Include="Translation\Content\Translation.css" />
-    <Content Include="Translation\Content\Translation.js" />
+    <Content Include="Translation\Content\SF_Translation.css" />
+    <Content Include="Translation\Scripts\SF_Translation.js" />
     <Content Include="UserQueries\Scripts\SF_UserQuery.js" />
     <Content Include="Web.config" />
     <Content Include="Basic\Views\Web.config" />
