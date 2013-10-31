@@ -184,7 +184,19 @@ namespace Signum.Engine.Mailing
                         break;
                     case "if":
                         {
-                            var ifn = new IfNode(tryParseToken(token), errors);
+                            IfNode ifn;
+                            var filter = TokenOperationValueRegex.Match(token);
+                            if (!filter.Success)
+                            {
+                                ifn = new IfNode(tryParseToken(token), errors);
+                            }
+                            else
+                            {
+                                var t = tryParseToken(filter.Groups["token"].Value);
+                                var comparer = filter.Groups["comparer"].Value;
+                                var value = filter.Groups["value"].Value;
+                                ifn = new IfNode(t, comparer, value, errors);
+                            }
                             stack.Peek().Nodes.Add(ifn);
                             stack.Push(ifn.IfBlock);
                             break;
@@ -313,9 +325,18 @@ namespace Signum.Engine.Mailing
 
                                                 return null;
                                             }
-                                            else if (keyword == "any")
+                                            else if (keyword == "any" || keyword == "if")
                                             {
                                                 var match = TokenOperationValueRegex.Match(oldToken);
+
+                                                if (keyword == "if" && !match.Success)
+                                                {
+                                                    if (AreSimilar(oldToken, item.TokenString))
+                                                        return token.Token.FullKey();
+
+                                                    return null;
+                                                }
+
                                                 string tokenPart = match.Groups["token"].Value;
                                                 string operationPart = match.Groups["comparer"].Value;
                                                 string valuePart = match.Groups["value"].Value;

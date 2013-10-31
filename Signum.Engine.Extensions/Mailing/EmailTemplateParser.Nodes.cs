@@ -377,12 +377,12 @@ namespace Signum.Engine.Mailing
 
                 Expression value = Expression.Constant(val, Token.Type);
 
-                var col = p.Columns[Token];
+                ResultColumn col = p.Columns[Token];
 
-                var example = Signum.Utilities.ExpressionTrees.Linq.Expr((ResultRow rr) => rr[col]);
+                var expression = Signum.Utilities.ExpressionTrees.Linq.Expr((ResultRow rr) => rr[col]);
 
-                var newBody = QueryUtils.GetCompareExpression(Operation, Expression.Convert(example.Body, Token.Type), value, inMemory: true);
-                var lambda = Expression.Lambda<Func<ResultRow, bool>>(newBody, example.Parameters).Compile();
+                Expression newBody = QueryUtils.GetCompareExpression(Operation, Expression.Convert(expression.Body, Token.Type), value, inMemory: true);
+                var lambda = Expression.Lambda<Func<ResultRow, bool>>(newBody, expression.Parameters).Compile();
 
                 var filtered = rows.Where(lambda).ToList();
                 if (filtered.Any())
@@ -416,11 +416,20 @@ namespace Signum.Engine.Mailing
             public readonly QueryToken Token;
             public readonly BlockNode IfBlock;
             public BlockNode ElseBlock;
+            private FilterOperation? Operation;
+            private string Value;
 
             public IfNode(QueryToken token, List<string> errors)
             {
                 this.Token = token;
                 this.IfBlock = new BlockNode(this);
+            }
+
+            public IfNode(QueryToken token, string operation, string value, List<string> errors)
+            {
+                this.Token = token;
+                this.Operation = FilterValueConverter.ParseOperation(operation);
+                this.Value = value;
             }
 
             public BlockNode CreateElse()
@@ -452,13 +461,38 @@ namespace Signum.Engine.Mailing
 
             public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
             {
-                if (ToBool(rows, p.Columns[Token]))
+                if (Operation == null)
                 {
-                    IfBlock.PrintList(p, rows);
+                    if (ToBool(rows, p.Columns[Token]))
+                    {
+                        IfBlock.PrintList(p, rows);
+                    }
+                    else if (ElseBlock != null)
+                    {
+                        ElseBlock.PrintList(p, rows);
+                    }
                 }
-                else if (ElseBlock != null)
+                else
                 {
-                    ElseBlock.PrintList(p, rows);
+                    object val = FilterValueConverter.Parse(Value, Token.Type);
+
+                    Expression value = Expression.Constant(val, Token.Type);
+
+                    ResultColumn col = p.Columns[Token];
+
+                    var expression = Signum.Utilities.ExpressionTrees.Linq.Expr((ResultRow rr) => rr[col]);
+
+                    Expression newBody = QueryUtils.GetCompareExpression(Operation.Value, Expression.Convert(expression.Body, Token.Type), value, inMemory: true);
+                    var lambda = Expression.Lambda<Func<ResultRow, bool>>(newBody, expression.Parameters).Compile();
+
+                    if (rows.Any(lambda))
+                    {
+                        IfBlock.PrintList(p, rows);
+                    }
+                    else if (ElseBlock != null)
+                    {
+                        ElseBlock.PrintList(p, rows);
+                    }
                 }
             }
 
