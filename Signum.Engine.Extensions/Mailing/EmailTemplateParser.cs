@@ -40,7 +40,7 @@ namespace Signum.Engine.Mailing
                 () =>"Multiple values for column {0}".Formato(column.Column.Token.FullKey()));
         }
 
-        public static readonly Regex KeywordsRegex = new Regex(@"\@(((?<keyword>(foreach|if|raw|global|model|modelraw|any|))\[(?<token>[^\]]+)\])|(?<keyword>endforeach|else|endif|notany|endany))");
+        public static readonly Regex KeywordsRegex = new Regex(@"\@(((?<keyword>(foreach|if|raw|translated|rawtranslated|global|model|modelraw|any|))\[(?<token>[^\]]+)\])|(?<keyword>endforeach|else|endif|notany|endany))");
 
         public static readonly Regex TokenFormatRegex = new Regex(@"(?<token>[^\]\:]+)(\:(?<format>.*))?");
         public static readonly Regex TokenOperationValueRegex = new Regex(@"(?<token>[^\]]+)(?<comparer>(" + FilterValueConverter.OperationRegex + @"))(?<value>[^\]\:]+)");
@@ -124,11 +124,15 @@ namespace Signum.Engine.Mailing
                 {
                     case "":
                     case "raw":
+                    case "translated":
+                    case "rawtranslated":
                         var tok = TokenFormatRegex.Match(token);
                         if (!tok.Success)
                             errors.Add("{0} has invalid format".Formato(token)); 
                         else
-                            stack.Peek().Nodes.Add(new TokenNode(tryParseToken(tok.Groups["token"].Value), tok.Groups["format"].Value){ IsRaw = keyword == "raw"});
+                            stack.Peek().Nodes.Add(new TokenNode(tryParseToken(tok.Groups["token"].Value), tok.Groups["format"].Value, 
+                                isRaw: keyword.Contains("raw"),
+                                isTranslated: keyword.Contains("translated"), errors : errors));
                         break;
                     case "global":
                         stack.Peek().Nodes.Add(new GlobalNode(token, errors));
@@ -298,7 +302,7 @@ namespace Signum.Engine.Mailing
                                             if (!IsToken(keyword) || currentResult.HasValue)
                                                 return null;
 
-                                            if (keyword == "" || keyword == "raw")
+                                            if (keyword == "" || keyword == "raw" || keyword == "translated" || keyword == "translatedraw")
                                             {
                                                 var match = TokenFormatRegex.Match(oldToken);
                                                 string tokenPart = match.Groups["token"].Value;
@@ -425,6 +429,8 @@ namespace Signum.Engine.Mailing
                 keyword == "foreach" ||
                 keyword == "if" ||
                 keyword == "raw" ||
+                keyword == "translated" ||
+                keyword == "translatedraw" ||
                 keyword == "any";
         }
     }
