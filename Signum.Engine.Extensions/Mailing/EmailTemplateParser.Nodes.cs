@@ -65,6 +65,8 @@ namespace Signum.Engine.Mailing
                     string error = DeterminEntityToken(token, out EntityToken);
                     if (error != null)
                         errors.Add(error);
+                    
+                    Route = token.GetPropertyRoute();
                 }
             }
             
