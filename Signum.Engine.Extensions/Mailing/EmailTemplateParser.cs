@@ -143,20 +143,23 @@ namespace Signum.Engine.Mailing
                         break;
                     case "any":
                         {
+                            AnyNode any;
                             var filter = TokenOperationValueRegex.Match(token);
                             if (!filter.Success)
                             {
-                                errors.Add("{0} has invalid format".Formato(token));
+                                var t = tryParseToken(token);
+                                any = new AnyNode(t, errors);
                             }
                             else
                             {
                                 var t = tryParseToken(filter.Groups["token"].Value);
                                 var comparer = filter.Groups["comparer"].Value;
                                 var value = filter.Groups["value"].Value;
-                                var any = new AnyNode(t, comparer, value, errors);
-                                stack.Peek().Nodes.Add(any);
-                                stack.Push(any.AnyBlock);
+                                any = new AnyNode(t, comparer, value, errors);
+                               
                             }
+                            stack.Peek().Nodes.Add(any);
+                            stack.Push(any.AnyBlock);
                             break;
                         }
                     case "notany":
@@ -329,7 +332,7 @@ namespace Signum.Engine.Mailing
                                             {
                                                 var match = TokenOperationValueRegex.Match(oldToken);
 
-                                                if (keyword == "if" && !match.Success)
+                                                if (!match.Success)
                                                 {
                                                     if (AreSimilar(oldToken, item.TokenString))
                                                         return token.Token.FullKey();
