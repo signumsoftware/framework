@@ -187,6 +187,11 @@ namespace Signum.Engine.Translation
         {
             PropertyRoute route = PropertyRoute.Construct(Expression.Lambda<Func<T, object>>(property.Body, property.Parameters));
 
+            return TranslatedField(lite, route, fallbackString);
+        }
+
+        public static string TranslatedField(Lite<IdentifiableEntity> lite, PropertyRoute route, string fallbackString)
+        {
             var result = TranslatedInstanceLogic.GetTranslatedInstance(lite, route);
 
             if (result != null && result.OriginalText == fallbackString)
