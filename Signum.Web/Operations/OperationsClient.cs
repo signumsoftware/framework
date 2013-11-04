@@ -329,6 +329,7 @@ namespace Signum.Web.Operations
                  let os = GetSettings<ContextualOperationSettings>(g.Key)
                  let coc = new ContextualOperationContext
                  {
+                     Prefix = ctx.Prefix,
                      Entities = ctx.Lites,
                      OperationSettings = os,
                      OperationInfo = g.First().oi,
