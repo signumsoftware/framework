@@ -74,7 +74,9 @@ namespace Signum.Engine.Authorization
             {
                 SystemUserName = systemUserName;
                 AnonymousUserName = anonymousUserName;
-                
+
+                CultureInfoLogic.AssertStarted(sb); 
+
                 sb.Include<UserDN>();
                 UserDN.EmailOwnerDataExpression = entity => new EmailOwnerData
                 {

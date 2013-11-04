@@ -39,8 +39,8 @@
     Func<LocalizedType, string> locKey = lt => lt.Type.Name + "." + lt.Assembly.Culture.Name;
 }
 
-@Html.ScriptCss("~/Translation/Content/Translation.css")
-@Html.ScriptsJs("~/Translation/Content/Translation.js")
+@Html.ScriptCss("~/Translation/Content/SF_Translation.css")
+@Html.ScriptsJs("~/Translation/Scripts/SF_Translation.js")
 @Html.ScriptsJs("~/Translation/resources/" + CultureInfo.CurrentCulture.Name + ".js")
 
 @if (Model.Instances.IsEmpty())
@@ -77,10 +77,10 @@ else
                 {
             <tr>
                 <td class="leftCell">@mc.Key.Name</td>
-                <td colspan="4" class="monospaceCell">
+                <td class="monospaceCell">
                     @if (mc.Key.Equals(defaultCulture))
                     {
-                        <em>@mc.Value.Original</em>
+                        <span>@mc.Value.Original</span>
                     }
                     else
                     {
@@ -91,12 +91,23 @@ else
                 }
             <tr>
                 <td class="leftCell">@culture.Name</td>
-                <td colspan="4" class="monospaceCell">
+                <td class="monospaceCell">
                     @{  
-                var items = selectListItems(route.Value.Values.Select(a => a.AutomaticTranslation));
-                        @Html.DropDownList(culture.Name + "#" + instance.Instance.Key() + "#" + route.Key.PropertyString(), items);
+                        var translations = route.Value.Values.Select(a => a.AutomaticTranslation);
+                        string elementName = culture.Name + "#" + instance.Instance.Key() + "#" + route.Key.PropertyString();
+                        
+                        if (translations.Count() == 1 && translations.First().Length > 200)
+                        {
+                            <textarea name="@elementName" style="width:90%">@translations.First()</textarea>
+                            <button onclick="SF.Translation.onFeedbackClick()">@TranslationJavascriptMessage.RememberChange.NiceToString()</button>
+                        }
+                        else 
+                        {
+                            var items = selectListItems(translations);
+                            @Html.DropDownList(elementName, items);
+                            <a href="#" class="edit">@TranslationMessage.Edit.NiceToString()</a>
+                        }
                     }
-                    <a href="#" class="edit">@TranslationMessage.Edit.NiceToString()</a>
                 </td>
             </tr>
             }

@@ -5,9 +5,13 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Web;
+using Signum.Engine.DynamicQuery;
 using Signum.Engine.Mailing;
+using Signum.Engine.Translation;
+using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Entities.Mailing;
+using Signum.Entities.Reflection;
 using Signum.Entities.UserQueries;
 using Signum.Utilities;
 
@@ -43,34 +47,82 @@ namespace Signum.Engine.Mailing
 
         public class TokenNode : TextNode
         {
-            public bool IsRaw { get; set; }
+            public readonly bool IsRaw;
+            public readonly bool IsTranslated;
 
             public readonly QueryToken Token;
+            public readonly QueryToken EntityToken; 
             public readonly string Format;
-            public TokenNode(QueryToken token, string format)
+            public readonly PropertyRoute Route;
+            public TokenNode(QueryToken token, string format, bool isRaw, bool isTranslated, List<string> errors)
             {
                 this.Token = token;
                 this.Format = format;
+                this.IsRaw = isRaw;
+                this.IsTranslated = isTranslated;
+                if (IsTranslated)
+                {
+                    string error = DeterminEntityToken(token, out EntityToken);
+                    if (error != null)
+                        errors.Add(error);
+                    
+                    Route = token.GetPropertyRoute();
+                }
+            }
+            
+            static string DeterminEntityToken(QueryToken token, out QueryToken entityToken)
+            {
+                entityToken = null;
+
+                if (token.Type != typeof(string))
+                    return "{0} can not be translated because is not an string".Formato(token.FullKey());
+                
+                var pr = token.GetPropertyRoute();
+                if (pr == null)
+                    return "{0} has no property route".Formato(token.FullKey());
+
+                entityToken = token.FollowC(a => a.Parent).FirstOrDefault(a => a.Type.IsLite() || a.Type.IsIIdentifiable());
+
+                if (entityToken == null)
+                    entityToken = QueryUtils.Parse("Entity", DynamicQueryManager.Current.QueryDescription(token.QueryName), canAggregate: false);
+
+                if (entityToken.Type.IsAssignableFrom(pr.RootType))
+                    return "The entity of {0} ({1}) is not compatible with the property route {2}".Formato(token.FullKey(), entityToken.FullKey(), pr.RootType.NiceName());
+
+                return null;
             }
 
             public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
             {
-                ResultColumn column = p.Columns[Token];
-                object obj = rows.DistinctSingle(column);
-                var text = obj is IFormattable ? ((IFormattable)obj).ToString(Format ?? Token.Format, p.CultureInfo) : obj.TryToString();
+                string text;
+                if (IsTranslated)
+                {
+                    var entity = (Lite<IdentifiableEntity>)rows.DistinctSingle(p.Columns[EntityToken]);
+                    var fallback = (string)rows.DistinctSingle(p.Columns[Token]);
+
+                    text = entity == null ? null : TranslatedInstanceLogic.TranslatedField(entity, Route, fallback);
+                }
+                else
+                {
+                    object obj = rows.DistinctSingle(p.Columns[Token]);
+                    text = obj is IFormattable ?
+                        ((IFormattable)obj).ToString(Format ?? Token.Format, p.CultureInfo) :
+                        obj.TryToString();
+                }
                 p.StringBuilder.Append(p.IsHtml && !IsRaw ? HttpUtility.HtmlEncode(text) : text);
             }
 
             public override void FillQueryTokens(List<QueryToken> list)
             {
                 list.Add(Token);
-            }
+                if (EntityToken != null)
+                    list.Add(EntityToken);
+            } 
 
             public override string ToString()
             {
                 return "token {0}".Formato(Token.FullKey());
             }
-
 
         }
 
@@ -291,12 +343,19 @@ namespace Signum.Engine.Mailing
         public class AnyNode : TextNode
         {
             public readonly QueryToken Token;
-            public readonly FilterOperation Operation;
+            public readonly FilterOperation? Operation;
             public readonly string Value;
 
             public readonly BlockNode AnyBlock;
             public BlockNode NotAnyBlock;
 
+            public AnyNode(QueryToken token, List<string> errors)
+            {
+                if (token.HasAllOrAny())
+                    errors.Add("Where {0} can not contains Any or All");
+
+                AnyBlock = new BlockNode(this);
+            }
 
             public AnyNode(QueryToken token, string operation, string value, List<string> errors)
             {
@@ -321,27 +380,53 @@ namespace Signum.Engine.Mailing
                 return NotAnyBlock;
             }
 
+            protected static bool ToBool(object obj)
+            {
+                if (obj == null || obj is bool && ((bool)obj) == false)
+                    return false;
+
+                return true;
+            }
+
             public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
             {
-                object val = FilterValueConverter.Parse(Value, Token.Type);
-
-                Expression value = Expression.Constant(val, Token.Type);
-
-                var col = p.Columns[Token];
-
-                var example = Signum.Utilities.ExpressionTrees.Linq.Expr((ResultRow rr) => rr[col]);
-
-                var newBody = QueryUtils.GetCompareExpression(Operation, Expression.Convert(example.Body, Token.Type), value, inMemory: true);
-                var lambda = Expression.Lambda<Func<ResultRow, bool>>(newBody, example.Parameters).Compile();
-
-                var filtered = rows.Where(lambda).ToList();
-                if (filtered.Any())
+                if (Operation == null)
                 {
-                    AnyBlock.PrintList(p, filtered);
+                    var column = p.Columns[Token];
+
+                    var filtered = rows.Where(r => ToBool(r[column])).ToList();
+                    if (filtered.Any())
+                    {
+                        AnyBlock.PrintList(p, filtered);
+                    }
+                    else if (NotAnyBlock != null)
+                    {
+                        NotAnyBlock.PrintList(p, filtered);
+                    }
                 }
-                else if (NotAnyBlock != null)
+                else
                 {
-                    NotAnyBlock.PrintList(p, filtered);
+
+                    object val = FilterValueConverter.Parse(Value, Token.Type);
+
+                    Expression value = Expression.Constant(val, Token.Type);
+
+                    ResultColumn col = p.Columns[Token];
+
+                    var expression = Signum.Utilities.ExpressionTrees.Linq.Expr((ResultRow rr) => rr[col]);
+
+                    Expression newBody = QueryUtils.GetCompareExpression(Operation.Value, Expression.Convert(expression.Body, Token.Type), value, inMemory: true);
+                    var lambda = Expression.Lambda<Func<ResultRow, bool>>(newBody, expression.Parameters).Compile();
+
+                    var filtered = rows.Where(lambda).ToList();
+                    if (filtered.Any())
+                    {
+                        AnyBlock.PrintList(p, filtered);
+                    }
+                    else if (NotAnyBlock != null)
+                    {
+                        NotAnyBlock.PrintList(p, filtered);
+                    }
                 }
             }
 
@@ -356,7 +441,7 @@ namespace Signum.Engine.Mailing
             public override string ToString()
             {
                 return " ".CombineIfNotEmpty(
-                    "any {0} {1} {2} ({3} nodes)".Formato(Token.FullKey(), FilterValueConverter.ToStringOperation(Operation), Value, AnyBlock.Nodes.Count),
+                    "any {0} ({1} nodes)".Formato(Token.FullKey(), AnyBlock.Nodes.Count),
                     NotAnyBlock == null ? null : "notany ({0} nodes)".Formato(NotAnyBlock.Nodes.Count));
             }
         }
@@ -366,10 +451,20 @@ namespace Signum.Engine.Mailing
             public readonly QueryToken Token;
             public readonly BlockNode IfBlock;
             public BlockNode ElseBlock;
+            private FilterOperation? Operation;
+            private string Value;
 
             public IfNode(QueryToken token, List<string> errors)
             {
                 this.Token = token;
+                this.IfBlock = new BlockNode(this);
+            }
+
+            public IfNode(QueryToken token, string operation, string value, List<string> errors)
+            {
+                this.Token = token;
+                this.Operation = FilterValueConverter.ParseOperation(operation);
+                this.Value = value;
                 this.IfBlock = new BlockNode(this);
             }
 
@@ -387,13 +482,8 @@ namespace Signum.Engine.Mailing
                     ElseBlock.FillQueryTokens(list);
             }
 
-            protected static bool ToBool(IEnumerable<ResultRow> rows, ResultColumn column)
+            protected static bool ToBool(object obj)
             {
-                if (rows.IsEmpty())
-                    return false;
-
-                object obj = rows.DistinctSingle(column);
-
                 if (obj == null || obj is bool && ((bool)obj) == false)
                     return false;
 
@@ -402,13 +492,34 @@ namespace Signum.Engine.Mailing
 
             public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
             {
-                if (ToBool(rows, p.Columns[Token]))
+                if (Operation == null)
                 {
-                    IfBlock.PrintList(p, rows);
+                    if (!rows.IsEmpty() &&  ToBool(rows.DistinctSingle(p.Columns[Token])))
+                    {
+                        IfBlock.PrintList(p, rows);
+                    }
+                    else if (ElseBlock != null)
+                    {
+                        ElseBlock.PrintList(p, rows);
+                    }
                 }
-                else if (ElseBlock != null)
+                else
                 {
-                    ElseBlock.PrintList(p, rows);
+                    Expression token = Expression.Constant(rows.DistinctSingle(p.Columns[Token]), Token.Type);
+
+                    Expression value = Expression.Constant(FilterValueConverter.Parse(Value, Token.Type), Token.Type);
+
+                    Expression newBody = QueryUtils.GetCompareExpression(Operation.Value,  token, value, inMemory: true);
+                    var lambda = Expression.Lambda<Func<bool>>(newBody).Compile();
+
+                    if (lambda())
+                    {
+                        IfBlock.PrintList(p, rows);
+                    }
+                    else if (ElseBlock != null)
+                    {
+                        ElseBlock.PrintList(p, rows);
+                    }
                 }
             }
 

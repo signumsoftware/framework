@@ -21,7 +21,7 @@ SF.Translation = (function () {
             var input = $("<textarea/>").attr("type", "text")
                 .attr("name", select.attr("name"))
                 .val(select.val())
-                .attr("style", "width:90%; height:16px");
+                .attr("style", "width:90%");
             select.after(input);
 
             $(this).remove();
@@ -95,5 +95,6 @@ SF.Translation = (function () {
     return {
         pluralAndGender: pluralAndGender,
         editAndRemember: editAndRemember,
+        onFeedbackClick: onFeedbackClick
     };
 })();
