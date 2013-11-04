@@ -172,7 +172,7 @@ namespace Signum.Entities.Alerts
     [Serializable, EntityKind(EntityKind.String, EntityData.Master)]
     public class AlertTypeDN : MultiOptionalEnumDN
     {
-      static AlertTypeDN()
+        static AlertTypeDN()
         {
             DescriptionManager.DefaultDescriptionOptions += DescriptionManager_DefaultDescriptionOptions;
             DescriptionManager.Invalidate();
