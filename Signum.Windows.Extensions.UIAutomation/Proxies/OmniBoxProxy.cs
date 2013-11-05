@@ -34,7 +34,7 @@ namespace Signum.Windows.UIAutomation
 
         public NormalWindowProxy<T> SelectEntity<T>(Lite<T> lite) where T : IdentifiableEntity
         {
-            var omniboxName = lite.EntityType.NiceName().ToOmniboxPascal() + " " + lite.Id;
+            var omniboxName = lite.EntityType.NicePluralName().ToOmniboxPascal() + " " + lite.Id;
 
             return new NormalWindowProxy<T>(SelectCapture(omniboxName, "E:" + lite.Key())); 
         }
