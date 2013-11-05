@@ -179,7 +179,7 @@ namespace Signum.Utilities
     {
         public static Dictionary<string, object> singletonSession = new Dictionary<string, object>();
 
-        public static Dictionary<string, object> SinglestonSession
+        public static Dictionary<string, object> SingletonSession
         {
             get { return singletonSession; }
             set { singletonSession = value; }
