@@ -554,6 +554,19 @@ namespace Signum.Engine
             commited = true;
         }
 
+        public void PreRealCommitOnly()
+        {
+            if (coreTransaction.IsRolledback)
+                throw new InvalidOperationException("The transation is rolled back and can not be commited.");
+
+            var rt = coreTransaction as RealTransaction;
+
+            if (rt != null)
+                throw new InvalidOperationException("This method is meant for testing purposes, and only Real and Test transactions can execute it"); 
+
+            rt.OnPreRealCommit();
+        }
+
         public void Dispose()
         {
             try
