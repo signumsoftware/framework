@@ -61,7 +61,7 @@ namespace Signum.Engine.Mailing
                 this.Format = format;
                 this.IsRaw = isRaw;
                 this.IsTranslated = isTranslated;
-                if (IsTranslated)
+                if (IsTranslated && token != null && token.Type == typeof(string))
                 {
                     string error = DeterminEntityToken(token, out EntityToken);
                     if (error != null)
@@ -98,10 +98,19 @@ namespace Signum.Engine.Mailing
                 string text;
                 if (IsTranslated)
                 {
-                    var entity = (Lite<IdentifiableEntity>)rows.DistinctSingle(p.Columns[EntityToken]);
-                    var fallback = (string)rows.DistinctSingle(p.Columns[Token]);
+                    if (EntityToken != null)
+                    {
+                        var entity = (Lite<IdentifiableEntity>)rows.DistinctSingle(p.Columns[EntityToken]);
+                        var fallback = (string)rows.DistinctSingle(p.Columns[Token]);
 
-                    text = entity == null ? null : TranslatedInstanceLogic.TranslatedField(entity, Route, fallback);
+                        text = entity == null ? null : TranslatedInstanceLogic.TranslatedField(entity, Route, fallback);
+                    }
+                    else
+                    {
+                        var obj = rows.DistinctSingle(p.Columns[EntityToken]);
+
+                        text = obj is Enum ? ((Enum)obj).NiceToString() : obj.TryToString();
+                    }
                 }
                 else
                 {
