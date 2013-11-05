@@ -14,6 +14,7 @@ using Signum.Entities.Mailing;
 using Signum.Entities.Reflection;
 using Signum.Entities.UserQueries;
 using Signum.Utilities;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Engine.Mailing
 {
@@ -254,13 +255,15 @@ namespace Signum.Engine.Mailing
 
         public sealed class BlockNode : TextNode
         {
+            public Dictionary<string, QueryToken> Variables = new Dictionary<string, QueryToken>(); 
+
             public readonly List<TextNode> Nodes = new List<TextNode>();
 
-            public readonly TextNode Parent;
+            public readonly TextNode owner;
 
-            public BlockNode(TextNode parent)
+            public BlockNode(TextNode owner)
             {
-                this.Parent = parent;
+                this.owner = owner;
             }
 
             public string Print(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
