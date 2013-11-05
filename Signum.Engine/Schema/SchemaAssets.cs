@@ -140,7 +140,7 @@ namespace Signum.Engine.Maps
                 {
                     return (from p in Database.View<SysObjects>()
                             join s in Database.View<SysSchemas>() on p.schema_id equals s.schema_id
-                            where p.type == "P" || p.type == "IF"
+                            where p.type == "P" || p.type == "IF" || p.type == "FN"
                             join m in Database.View<SysSqlModules>() on p.object_id equals m.object_id
                             select KVP.Create(new ObjectName(new SchemaName(db, s.name), p.name), m.definition)).ToList();
                 }
