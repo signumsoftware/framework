@@ -65,19 +65,30 @@ namespace Signum.Engine.Authorization
             }
             else
             {
-                var modified = (List<IdentifiableEntity>)Transaction.UserData.GetOrCreate(ModifiedKey, () => new List<IdentifiableEntity>());
-                if (modified.Contains(ident))
+                if (IsCreatedOrModified(Transaction.TopParentUserData(), ident) ||
+                   IsCreatedOrModified(Transaction.UserData, ident))
                     return;
 
-                var created = (List<IdentifiableEntity>)Transaction.UserData.TryGetC(CreatedKey);
-                if (created != null && created.Contains(ident))
-                    return;
+                var modified = (List<IdentifiableEntity>)Transaction.UserData.GetOrCreate(ModifiedKey, () => new List<IdentifiableEntity>());
 
                 modified.Add(ident);
             }
 
             Transaction.PreRealCommit -= Transaction_PreRealCommit;
             Transaction.PreRealCommit += Transaction_PreRealCommit;
+        }
+
+        private static bool IsCreatedOrModified(Dictionary<string, object> dictionary, IdentifiableEntity ident)
+        {
+            var modified = (List<IdentifiableEntity>)dictionary.TryGetC(ModifiedKey);
+            if (modified != null && modified.Contains(ident))
+                return true;
+
+            var created = (List<IdentifiableEntity>)dictionary.TryGetC(CreatedKey);
+            if (created != null && created.Contains(ident))
+                return true;
+
+            return false;
         }
 
         public static void RemovePreRealCommitChecking(IdentifiableEntity entity)
@@ -95,7 +106,7 @@ namespace Signum.Engine.Authorization
         {
             var modified = (List<IdentifiableEntity>)dic.TryGetC(ModifiedKey);
 
-            if (modified != null)
+            if (modified.HasItems())
             {
                 var groups = modified.GroupBy(e => e.GetType(), e => e.Id);
 
@@ -117,7 +128,7 @@ namespace Signum.Engine.Authorization
 
             var created = (List<IdentifiableEntity>)Transaction.UserData.TryGetC(CreatedKey);
 
-            if (created != null)
+            if (created.HasItems())
             {
                 var groups = created.GroupBy(e => e.GetType(), e => e.Id);
 
