@@ -65,6 +65,8 @@ namespace Signum.Engine.Mailing
                     string error = DeterminEntityToken(token, out EntityToken);
                     if (error != null)
                         errors.Add(error);
+                    
+                    Route = token.GetPropertyRoute();
                 }
             }
             
@@ -463,6 +465,7 @@ namespace Signum.Engine.Mailing
                 this.Token = token;
                 this.Operation = FilterValueConverter.ParseOperation(operation);
                 this.Value = value;
+                this.IfBlock = new BlockNode(this);
             }
 
             public BlockNode CreateElse()
