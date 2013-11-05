@@ -17,6 +17,7 @@ using Signum.Engine.UserQueries;
 using Signum.Engine.DynamicQuery;
 using Signum.Engine.Basics;
 using Signum.Engine.Maps;
+using Signum.Utilities.DataStructures;
 
 
 namespace Signum.Engine.Mailing
@@ -40,7 +41,7 @@ namespace Signum.Engine.Mailing
                 () =>"Multiple values for column {0}".Formato(column.Column.Token.FullKey()));
         }
 
-        public static readonly Regex KeywordsRegex = new Regex(@"\@(((?<keyword>(foreach|if|raw|translated|rawtranslated|global|model|modelraw|any|))\[(?<token>[^\]]+)\])|(?<keyword>endforeach|else|endif|notany|endany))");
+        public static readonly Regex KeywordsRegex = new Regex(@"\@(((?<keyword>(foreach|if|raw|global|model|modelraw|any|declare|))\[(?<token>[^\]]+)\](\s+as\s+(?<dec>\$\w*))?)|(?<keyword>endforeach|else|endif|notany|endany))");
 
         public static readonly Regex TokenFormatRegex = new Regex(@"(?<token>[^\]\:]+)(\:(?<format>.*))?");
         public static readonly Regex TokenOperationValueRegex = new Regex(@"(?<token>[^\]]+)(?<comparer>(" + FilterValueConverter.OperationRegex + @"))(?<value>[^\]\:]+)");
@@ -80,12 +81,49 @@ namespace Signum.Engine.Mailing
                 return errors;
             }
 
-            Func<string, QueryToken> tryParseToken = token =>
+            Func<string, QueryToken> getVariable = variable =>
             {
+                foreach (var item in stack)
+                {
+                    var result = item.Variables.TryGetC(variable);
+                    if (result != null)
+                        return result;
+                }
+
+                return null;
+            };
+
+            Action<string, QueryToken> declareVariable = (variable, queryToken)=>
+            {
+                if(getVariable(variable) != null)
+                    errors.Add("There's already a variable '{0}' defined in this scope".Formato(variable));
+
+                stack.Peek().Variables.Add(variable, queryToken);
+            }; 
+
+            Func<string, QueryToken> tryParseToken = tokenString =>
+            {
+                if (tokenString.StartsWith("$"))
+                {
+                    string v = tokenString.TryBefore('.') ?? tokenString;
+
+                    QueryToken token = getVariable(v);
+
+                    if (token == null)
+                    {
+                        errors.Add("Variable '{0}' is not defined at this scope".Formato(v));
+                        return null;
+                    }
+
+                    var after =  tokenString.TryAfter('.');
+
+                    tokenString = token.FullKey() + (after == null ? null : ("." + after));
+                }
+
                 QueryToken result = null;
                 try
                 {
-                    result = QueryUtils.Parse(token, qd, false);
+                    result = QueryUtils.Parse(tokenString, qd, false);
                 }
                 catch (Exception ex)
                 {
@@ -103,9 +141,9 @@ namespace Signum.Engine.Mailing
                     return null;
                 }
                 var n = stack.Pop();
-                if (n.Parent == null || n.Parent.GetType() != type)
+                if (n.owner == null || n.owner.GetType() != type)
                 {
-                    errors.Add("Unexpected '{0}'".Formato(BlockNode.UserString(n.Parent.TryCC(p => p.GetType()))));
+                    errors.Add("Unexpected '{0}'".Formato(BlockNode.UserString(n.owner.TryCC(p => p.GetType()))));
                     return null;
                 }
                 return n;
@@ -120,19 +158,34 @@ namespace Signum.Engine.Mailing
                 }
                 var token = match.Groups["token"].Value;
                 var keyword = match.Groups["keyword"].Value;
+                var dec = match.Groups["dec"].Value;
                 switch (keyword)
                 {
                     case "":
                     case "raw":
-                    case "translated":
-                    case "rawtranslated":
                         var tok = TokenFormatRegex.Match(token);
                         if (!tok.Success)
-                            errors.Add("{0} has invalid format".Formato(token)); 
+                            errors.Add("{0} has invalid format".Formato(token));
                         else
-                            stack.Peek().Nodes.Add(new TokenNode(tryParseToken(tok.Groups["token"].Value), tok.Groups["format"].Value, 
+                        {
+                            var t = tryParseToken(tok.Groups["token"].Value);
+
+                            stack.Peek().Nodes.Add(new TokenNode(t, tok.Groups["format"].Value,
                                 isRaw: keyword.Contains("raw"),
-                                isTranslated: keyword.Contains("translated"), errors : errors));
+                                errors: errors));
+
+                            if (dec.HasText())
+                                declareVariable(dec, t); 
+                        }
+                        break;
+                    case "declare":
+                        {
+                            var t = tryParseToken(token);
+                            if (!dec.HasText())
+                                errors.Add("declare[{0}] should end with 'as $someVariable'".Formato(token));
+                            else
+                                declareVariable(dec, t); 
+                        }
                         break;
                     case "global":
                         stack.Peek().Nodes.Add(new GlobalNode(token, errors));
@@ -144,15 +197,16 @@ namespace Signum.Engine.Mailing
                     case "any":
                         {
                             AnyNode any;
+                            QueryToken t;
                             var filter = TokenOperationValueRegex.Match(token);
                             if (!filter.Success)
                             {
-                                var t = tryParseToken(token);
+                                t = tryParseToken(token);
                                 any = new AnyNode(t, errors);
                             }
                             else
                             {
-                                var t = tryParseToken(filter.Groups["token"].Value);
+                                t = tryParseToken(filter.Groups["token"].Value);
                                 var comparer = filter.Groups["comparer"].Value;
                                 var value = filter.Groups["value"].Value;
                                 any = new AnyNode(t, comparer, value, errors);
@@ -160,11 +214,14 @@ namespace Signum.Engine.Mailing
                             }
                             stack.Peek().Nodes.Add(any);
                             stack.Push(any.AnyBlock);
+
+                            if (dec.HasText())
+                                declareVariable(dec, t); 
                             break;
                         }
                     case "notany":
                         {
-                            var an = (AnyNode)popNode(typeof(AnyNode)).Parent;
+                            var an = (AnyNode)popNode(typeof(AnyNode)).owner;
                             stack.Push(an.CreateNotAny());
                             break;
                         }
@@ -175,9 +232,13 @@ namespace Signum.Engine.Mailing
                         }
                     case "foreach":
                         {
-                            var fn = new ForeachNode(tryParseToken(token));
+                            var t = tryParseToken(token);
+                            var fn = new ForeachNode(t);
                             stack.Peek().Nodes.Add(fn);
                             stack.Push(fn.Block);
+
+                            if (dec.HasText())
+                                declareVariable(dec, t); 
                             break;
                         }
                     case "endforeach":
@@ -188,25 +249,29 @@ namespace Signum.Engine.Mailing
                     case "if":
                         {
                             IfNode ifn;
+                            QueryToken t; 
                             var filter = TokenOperationValueRegex.Match(token);
                             if (!filter.Success)
                             {
-                                ifn = new IfNode(tryParseToken(token), errors);
+                                t = tryParseToken(token);
+                                ifn = new IfNode(t, errors);
                             }
                             else
                             {
-                                var t = tryParseToken(filter.Groups["token"].Value);
+                                t = tryParseToken(filter.Groups["token"].Value);
                                 var comparer = filter.Groups["comparer"].Value;
                                 var value = filter.Groups["value"].Value;
                                 ifn = new IfNode(t, comparer, value, errors);
                             }
                             stack.Peek().Nodes.Add(ifn);
                             stack.Push(ifn.IfBlock);
+                            if (dec.HasText())
+                                declareVariable(dec, t); 
                             break;
                         }
                     case "else":
                         {
-                            var ifn = (IfNode)popNode(typeof(IfNode)).Parent;
+                            var ifn = (IfNode)popNode(typeof(IfNode)).owner;
                             stack.Push(ifn.CreateElse());
                             break;
                         }
