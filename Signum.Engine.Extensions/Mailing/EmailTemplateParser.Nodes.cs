@@ -49,46 +49,50 @@ namespace Signum.Engine.Mailing
         public class TokenNode : TextNode
         {
             public readonly bool IsRaw;
-            public readonly bool IsTranslated;
 
             public readonly QueryToken Token;
             public readonly QueryToken EntityToken; 
             public readonly string Format;
             public readonly PropertyRoute Route;
-            public TokenNode(QueryToken token, string format, bool isRaw, bool isTranslated, List<string> errors)
+            public TokenNode(QueryToken token, string format, bool isRaw, List<string> errors)
             {
                 this.Token = token;
                 this.Format = format;
                 this.IsRaw = isRaw;
-                this.IsTranslated = isTranslated;
-                if (IsTranslated && token != null && token.Type == typeof(string))
+
+                if (IsTranslateInstanceCanditate(token))
                 {
+                    Route = token.GetPropertyRoute();
                     string error = DeterminEntityToken(token, out EntityToken);
                     if (error != null)
                         errors.Add(error);
-                    
-                    Route = token.GetPropertyRoute();
                 }
             }
-            
-            static string DeterminEntityToken(QueryToken token, out QueryToken entityToken)
-            {
-                entityToken = null;
 
+            static bool IsTranslateInstanceCanditate(QueryToken token)
+            {
                 if (token.Type != typeof(string))
-                    return "{0} can not be translated because is not an string".Formato(token.FullKey());
-                
+                    return false;
+
                 var pr = token.GetPropertyRoute();
                 if (pr == null)
-                    return "{0} has no property route".Formato(token.FullKey());
+                    return false;
 
+                if (!TranslatedInstanceLogic.ContainsRoute(pr))
+                    return false;
+
+                return true;
+            }
+
+            string DeterminEntityToken(QueryToken token, out QueryToken entityToken)
+            {
                 entityToken = token.FollowC(a => a.Parent).FirstOrDefault(a => a.Type.IsLite() || a.Type.IsIIdentifiable());
 
                 if (entityToken == null)
                     entityToken = QueryUtils.Parse("Entity", DynamicQueryManager.Current.QueryDescription(token.QueryName), canAggregate: false);
 
-                if (entityToken.Type.IsAssignableFrom(pr.RootType))
-                    return "The entity of {0} ({1}) is not compatible with the property route {2}".Formato(token.FullKey(), entityToken.FullKey(), pr.RootType.NiceName());
+                if (entityToken.Type.IsAssignableFrom(Route.RootType))
+                    return "The entity of {0} ({1}) is not compatible with the property route {2}".Formato(token.FullKey(), entityToken.FullKey(), Route.RootType.NiceName());
 
                 return null;
             }
@@ -96,27 +100,19 @@ namespace Signum.Engine.Mailing
             public override void PrintList(EmailTemplateParameters p, IEnumerable<ResultRow> rows)
             {
                 string text;
-                if (IsTranslated)
+                if (EntityToken != null)
                 {
-                    if (EntityToken != null)
-                    {
-                        var entity = (Lite<IdentifiableEntity>)rows.DistinctSingle(p.Columns[EntityToken]);
-                        var fallback = (string)rows.DistinctSingle(p.Columns[Token]);
+                    var entity = (Lite<IdentifiableEntity>)rows.DistinctSingle(p.Columns[EntityToken]);
+                    var fallback = (string)rows.DistinctSingle(p.Columns[Token]);
 
-                        text = entity == null ? null : TranslatedInstanceLogic.TranslatedField(entity, Route, fallback);
-                    }
-                    else
-                    {
-                        var obj = rows.DistinctSingle(p.Columns[EntityToken]);
-
-                        text = obj is Enum ? ((Enum)obj).NiceToString() : obj.TryToString();
-                    }
+                    text = entity == null ? null : TranslatedInstanceLogic.TranslatedField(entity, Route, fallback);
                 }
                 else
                 {
                     object obj = rows.DistinctSingle(p.Columns[Token]);
                     text = obj is IFormattable ?
                         ((IFormattable)obj).ToString(Format ?? Token.Format, p.CultureInfo) :
+                        obj is Enum ? ((Enum)obj).NiceToString() :
                         obj.TryToString();
                 }
                 p.StringBuilder.Append(p.IsHtml && !IsRaw ? HttpUtility.HtmlEncode(text) : text);

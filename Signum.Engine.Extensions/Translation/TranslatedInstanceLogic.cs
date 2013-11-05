@@ -75,6 +75,13 @@ namespace Signum.Engine.Translation
             TraducibleRoutes.GetOrCreate(route.RootType).Add(route); 
         }
 
+        public static bool ContainsRoute(PropertyRoute route)
+        {
+            var list = TraducibleRoutes.TryGetC(route.RootType);
+
+            return list != null && list.Contains(route); 
+        }
+
         public static List<TranslatedTypeSummary> TranslationInstancesStatus()
         {
             var cultures = TranslationLogic.CurrentCultureInfos(DefaultCulture); 

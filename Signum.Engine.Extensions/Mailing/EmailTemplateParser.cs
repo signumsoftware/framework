@@ -41,7 +41,7 @@ namespace Signum.Engine.Mailing
                 () =>"Multiple values for column {0}".Formato(column.Column.Token.FullKey()));
         }
 
-        public static readonly Regex KeywordsRegex = new Regex(@"\@(((?<keyword>(foreach|if|raw|translated|rawtranslated|global|model|modelraw|any|declare|))\[(?<token>[^\]]+)\](\s+as\s+(?<dec>\$\w*))?)|(?<keyword>endforeach|else|endif|notany|endany))");
+        public static readonly Regex KeywordsRegex = new Regex(@"\@(((?<keyword>(foreach|if|raw|global|model|modelraw|any|declare|))\[(?<token>[^\]]+)\](\s+as\s+(?<dec>\$\w*))?)|(?<keyword>endforeach|else|endif|notany|endany))");
 
         public static readonly Regex TokenFormatRegex = new Regex(@"(?<token>[^\]\:]+)(\:(?<format>.*))?");
         public static readonly Regex TokenOperationValueRegex = new Regex(@"(?<token>[^\]]+)(?<comparer>(" + FilterValueConverter.OperationRegex + @"))(?<value>[^\]\:]+)");
@@ -163,8 +163,6 @@ namespace Signum.Engine.Mailing
                 {
                     case "":
                     case "raw":
-                    case "translated":
-                    case "rawtranslated":
                         var tok = TokenFormatRegex.Match(token);
                         if (!tok.Success)
                             errors.Add("{0} has invalid format".Formato(token));
@@ -174,7 +172,7 @@ namespace Signum.Engine.Mailing
 
                             stack.Peek().Nodes.Add(new TokenNode(t, tok.Groups["format"].Value,
                                 isRaw: keyword.Contains("raw"),
-                                isTranslated: keyword.Contains("translated"), errors: errors));
+                                errors: errors));
 
                             if (dec.HasText())
                                 declareVariable(dec, t); 
