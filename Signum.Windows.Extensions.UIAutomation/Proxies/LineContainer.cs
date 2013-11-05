@@ -6,6 +6,7 @@ using Signum.Entities;
 using System.Windows.Automation;
 using System.Linq.Expressions;
 using Signum.Entities.Reflection;
+using Signum.Engine;
 
 namespace Signum.Windows.UIAutomation
 {
@@ -124,7 +125,9 @@ namespace Signum.Windows.UIAutomation
         {
             PropertyRoute route = container.GetRoute(property);
 
-            return (V)container.EntityLine(route, scope).LiteValue;
+            var lite = container.EntityLine(route, scope).LiteValue;
+
+            return lite is V ? (V)lite : (V)lite.Retrieve();
         }
 
         public static void EntityLineValue<T, V>(this ILineContainer<T> container, Expression<Func<T, V>> property, V value, TreeScope scope = TreeScope.Descendants) where T : ModifiableEntity
@@ -146,7 +149,9 @@ namespace Signum.Windows.UIAutomation
         {
             PropertyRoute route = container.GetRoute(property);
 
-            return (V)container.EntityCombo(route, scope).LiteValue;
+            var lite = container.EntityCombo(route, scope).LiteValue;
+
+            return lite is V ? (V)lite : (V)lite.Retrieve();
         }
 
         public static void EntityComboValue<T, V>(this ILineContainer<T> container, Expression<Func<T, V>> property, V value, TreeScope scope = TreeScope.Descendants) where T : ModifiableEntity
