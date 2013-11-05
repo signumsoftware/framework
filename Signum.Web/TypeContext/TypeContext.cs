@@ -331,7 +331,6 @@ namespace Signum.Web
             return this;
         }
 
-
         HelperResult IViewOverrides.OnSurrondFieldset(string id, HtmlHelper helper, TypeContext tc, HelperResult result)
         {
             var before = beforeFieldset.TryGetC(id);
@@ -342,18 +341,23 @@ namespace Signum.Web
 
             return new HelperResult(writer =>
             {
-                var b = before(helper, tc);
-                if (!MvcHtmlString.IsNullOrEmpty(b))
-                    writer.WriteLine(b);
+                if (before != null)
+                {
+                    var b = before(helper, tc);
+                    if (!MvcHtmlString.IsNullOrEmpty(b))
+                        writer.WriteLine(b);
+                }
 
                 result.WriteTo(writer);
 
-                var a = after(helper, tc);
-                if (!MvcHtmlString.IsNullOrEmpty(a))
-                    writer.WriteLine(a);
+                if (after != null)
+                {
+                    var a = after(helper, tc);
+                    if (!MvcHtmlString.IsNullOrEmpty(a))
+                        writer.WriteLine(a);
+                }
             }); 
         }
-
 
         Dictionary<PropertyRoute, Func<HtmlHelper, TypeContext, MvcHtmlString>> beforeLine;
         public ViewOverrides BeforeLine<T, S>(Expression<Func<T, S>> propertyRoute, Func<HtmlHelper, TypeContext<T>, MvcHtmlString> constructor)
