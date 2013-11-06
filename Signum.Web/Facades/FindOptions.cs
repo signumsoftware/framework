@@ -104,6 +104,13 @@ namespace Signum.Web
             set { allowMultiple = value; }
         }
 
+        bool allowOrder = true;
+        public bool AllowOrder
+        {
+            get { return allowOrder; }
+            set { allowOrder = value; }
+        }
+
         FilterMode filterMode = FilterMode.Visible;
         public FilterMode FilterMode
         {
@@ -162,6 +169,7 @@ namespace Signum.Web
                 !Navigate ? "navigate=false": null, 
                 !AllowMultiple ? "allowMultiple=false" : null,
                 !AllowChangeColumns ? "allowChangeColumns=false" : null,
+                !AllowOrder ? "allowOrder=false" : null,
                 FilterMode != FilterMode.Visible ? "filterMode=" + FilterMode.ToString() : null,
                 (FilterOptions != null && FilterOptions.Count > 0) ? ("filters=" + FilterOptions.ToString(";") + ";") : null,
                 (OrderOptions != null && OrderOptions.Count > 0) ? ("orders=" + OrderOptions.ToString(";") + ";") : null,
@@ -193,6 +201,8 @@ namespace Signum.Web
             op.Add("allowMultiple", !AllowMultiple ? "false" : null);
             op.Add("selectedItemsContextMenu", !SelectedItemsContextMenu ? "false" : null);
             op.Add("allowChangeColumns", !AllowChangeColumns ? "false" : null);
+            op.Add("allowOrder", !AllowOrder ? "false" : null);
+            op.Add("filterMode", FilterMode != FilterMode.Visible ? FilterMode.ToString().SingleQuote() : null);
             op.Add("filters", filterOptions.IsEmpty() ? null : (filterOptions.ToString(";") + ";").SingleQuote());
             op.Add("orders", OrderOptions.IsEmpty() ? null : ("[" + OrderOptions.ToString(oo => oo.ToString().SingleQuote(), ",") + "]"));
             op.Add("columns", ColumnOptions.IsEmpty() ? null : (ColumnOptions.ToString(";") + ";").SingleQuote());
