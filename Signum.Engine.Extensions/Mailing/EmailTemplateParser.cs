@@ -18,6 +18,7 @@ using Signum.Engine.DynamicQuery;
 using Signum.Engine.Basics;
 using Signum.Engine.Maps;
 using Signum.Utilities.DataStructures;
+using System.Collections.Concurrent;
 
 
 namespace Signum.Engine.Mailing
@@ -32,11 +33,74 @@ namespace Signum.Engine.Mailing
 
     public static partial class EmailTemplateParser
     {
+        class SemiStructuralEqualityComparer : IEqualityComparer<object>
+        {
+            public static readonly SemiStructuralEqualityComparer Comparer = new SemiStructuralEqualityComparer();
+
+            ConcurrentDictionary<Type, List<Func<object, object>>> Cache = new ConcurrentDictionary<Type, List<Func<object, object>>>();
+
+            public List<Func<object, object>> GetFieldGetters(Type type)
+            {
+                return Cache.GetOrAdd(type, t =>
+                    t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                    .Where(f => !f.HasAttribute<IgnoreAttribute>())
+                    .Select(fi => Signum.Utilities.Reflection.ReflectionTools.CreateGetterUntyped(t, fi)).ToList());
+            }
+
+            public bool Equals(object x, object y)
+            {
+                if (x == null || y == null)
+                    return x == null && y == null;
+
+                Type t = x.GetType();
+
+                if (IsSimple(t))
+                    return x.Equals(y);
+
+                var fields = GetFieldGetters(t);
+                for (int i = 0; i < fields.Count; i++)
+                {
+                    var f = fields[i];
+                    if (!Equals(x, y))
+                        return false;
+                }
+
+
+                return true;
+            }
+
+            public int GetHashCode(object obj)
+            {
+                if (obj == null)
+                    return 0;
+
+                Type t = obj.GetType();
+
+                if (IsSimple(t))
+                    return obj.GetHashCode();
+
+                int result = 1;
+
+                var fields = GetFieldGetters(t);
+                for (int i = 0; i < fields.Count; i++)
+                    result += GetHashCode(fields[i](obj)) >> (i % 8);
+
+                return result;
+            }
+
+            static bool IsSimple(Type t)
+            {
+                return t == typeof(string) || Type.GetTypeCode(t) >= TypeCode.Boolean ||
+                    typeof(IIdentifiable).IsAssignableFrom(t) || typeof(Lite<IIdentifiable>).IsAssignableFrom(t) ||
+                    typeof(IEquatable<>).MakeGenericType(t).IsAssignableFrom(t);
+            }
+        }
+
         public static Dictionary<string, Func<GlobalVarContext, object>> GlobalVariables = new Dictionary<string, Func<GlobalVarContext, object>>();
 
         public static object DistinctSingle(this IEnumerable<ResultRow> rows, ResultColumn column)
         {
-            return rows.Select(r => r[column]).Distinct().SingleEx(
+            return rows.Select(r => r[column]).Distinct(SemiStructuralEqualityComparer.Comparer).SingleEx(
                 () =>"No values for column {0}".Formato(column.Column.Token.FullKey()),
                 () =>"Multiple values for column {0}".Formato(column.Column.Token.FullKey()));
         }
