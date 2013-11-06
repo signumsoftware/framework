@@ -76,9 +76,9 @@ namespace Signum.Engine
                 entity = EntityCache.Construct<T>(id.Value);
             }
 
-            complete(entity);
             retrieved.Add(tuple, entity);
-
+            complete(entity);
+        
             return entity;
         }
 
