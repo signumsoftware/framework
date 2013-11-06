@@ -110,9 +110,8 @@ namespace Signum.Engine.Mailing
                 else
                 {
                     object obj = rows.DistinctSingle(p.Columns[Token]);
-                    text = obj is IFormattable ?
-                        ((IFormattable)obj).ToString(Format ?? Token.Format, p.CultureInfo) :
-                        obj is Enum ? ((Enum)obj).NiceToString() :
+                    text = obj is Enum ? ((Enum)obj).NiceToString() : 
+                        obj is IFormattable ? ((IFormattable)obj).ToString(Format ?? Token.Format, p.CultureInfo) :
                         obj.TryToString();
                 }
                 p.StringBuilder.Append(p.IsHtml && !IsRaw ? HttpUtility.HtmlEncode(text) : text);
