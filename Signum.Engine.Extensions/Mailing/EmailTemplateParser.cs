@@ -61,7 +61,7 @@ namespace Signum.Engine.Mailing
                 for (int i = 0; i < fields.Count; i++)
                 {
                     var f = fields[i];
-                    if (!Equals(x, y))
+                    if (!Equals(f(x), f(y)))
                         return false;
                 }
 
@@ -83,7 +83,7 @@ namespace Signum.Engine.Mailing
 
                 var fields = GetFieldGetters(t);
                 for (int i = 0; i < fields.Count; i++)
-                    result += GetHashCode(fields[i](obj)) >> (i % 8);
+                    result ^= GetHashCode(fields[i](obj)) << (i % 8);
 
                 return result;
             }
