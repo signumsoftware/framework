@@ -5,11 +5,13 @@ using System.Text;
 
 namespace Signum.Utilities.DataStructures
 {
-    public class ScopedDictionary<TKey, TValue>
+    public class ScopedDictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>
     {
         ScopedDictionary<TKey, TValue> previous;
         Dictionary<TKey, TValue> map;
-        public IEqualityComparer<TKey> Comparer { get { return map.Comparer; } } 
+
+        public IEqualityComparer<TKey> Comparer { get { return map.Comparer; } }
+        public ScopedDictionary<TKey, TValue> Previous { get { return previous; } }
 
         public ScopedDictionary(ScopedDictionary<TKey, TValue> previous)
             :this(previous, EqualityComparer<TKey>.Default)
@@ -79,6 +81,23 @@ namespace Signum.Utilities.DataStructures
                 Add(key, result);
             }
             return result;
+        }
+
+
+        public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
+        {
+            for (var sd = this; sd != null; sd = sd.previous)
+            {
+                foreach (var item in sd.map)
+                {
+                    yield return item;
+                }
+            }
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
         }
     }
 }
