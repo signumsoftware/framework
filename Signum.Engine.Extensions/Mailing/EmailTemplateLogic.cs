@@ -103,14 +103,13 @@ namespace Signum.Engine.Mailing
 
         static string EmailTemplateMessageText_StaticPropertyValidation(EmailTemplateMessageDN message, PropertyInfo pi)
         {
-            EmailTemplateParser.BlockNode parsedNode = message.TextParsedNode as EmailTemplateParser.BlockNode;
-
-            if (parsedNode == null)
+            if (message.TextParsedNode as EmailTemplateParser.BlockNode == null)
             {
                 try
                 {
-                    parsedNode = ParseTemplate(message.Template, message.Text);
-                    message.TextParsedNode = parsedNode;
+                    string errorMessage;
+                    message.TextParsedNode = ParseTemplate(message.Template, message.Text, out errorMessage);
+                    return errorMessage.DefaultText(null);
                 }
                 catch (Exception ex)
                 {
@@ -123,14 +122,13 @@ namespace Signum.Engine.Mailing
 
         static string EmailTemplateMessageSubject_StaticPropertyValidation(EmailTemplateMessageDN message, PropertyInfo pi)
         {
-            EmailTemplateParser.BlockNode parsedNode = message.SubjectParsedNode as EmailTemplateParser.BlockNode;
-
-            if (parsedNode == null)
+            if (message.SubjectParsedNode as EmailTemplateParser.BlockNode == null)
             {
                 try
                 {
-                    parsedNode = ParseTemplate(message.template, message.Subject);
-                    message.SubjectParsedNode = parsedNode;
+                    string errorMessage;
+                    message.SubjectParsedNode = ParseTemplate(message.template, message.Subject, out errorMessage);
+                    return errorMessage.DefaultText(null);
                 }
                 catch (Exception ex)
                 {
@@ -141,7 +139,7 @@ namespace Signum.Engine.Mailing
             return null;
         }
 
-        private static EmailTemplateParser.BlockNode ParseTemplate(EmailTemplateDN template, string text)
+        private static EmailTemplateParser.BlockNode ParseTemplate(EmailTemplateDN template, string text, out string errorMessage)
         {
             using (template.DisableAuthorization ? ExecutionMode.Global() : null)
             {
@@ -149,16 +147,11 @@ namespace Signum.Engine.Mailing
                 QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
 
                 List<QueryToken> list = new List<QueryToken>();
-                return EmailTemplateParser.Parse(text, qd, template.SystemEmail.ToType());
+                return EmailTemplateParser.TryParse(text, qd, template.SystemEmail.ToType(), out errorMessage);
             }
         }
 
         static void EmailTemplate_PreSaving(EmailTemplateDN template, ref bool graphModified)
-        {
-            graphModified |= UpdateTokens(template);
-        }
-
-        public static bool UpdateTokens(EmailTemplateDN template)
         {
             using (template.DisableAuthorization ? ExecutionMode.Global() : null)
             {
@@ -167,28 +160,11 @@ namespace Signum.Engine.Mailing
 
                 List<QueryToken> list = new List<QueryToken>();
 
-                if (template.From != null)
-                    list.Add(template.From.Token.Token);
-
-                foreach (var tr in template.Recipients.Where(r => r.Token != null))
-                {
-                    list.Add(tr.Token.Token);
-                }
-
                 foreach (var message in template.Messages)
                 {
-                    EmailTemplateParser.Parse(message.Text, qd, template.SystemEmail.ToType()).FillQueryTokens(list);
-                    EmailTemplateParser.Parse(message.Subject, qd, template.SystemEmail.ToType()).FillQueryTokens(list);
+                    message.Text = EmailTemplateParser.Parse(message.Text, qd, template.SystemEmail.ToType()).ToString();
+                    message.Subject = EmailTemplateParser.Parse(message.Subject, qd, template.SystemEmail.ToType()).ToString();
                 }
-
-                var tokens = list.Distinct();
-
-                if (template.Tokens.Any(t => t.ParseException != null) || !template.Tokens.Select(a => a.Token).ToList().SequenceEqual(tokens))
-                {
-                    template.Tokens.ResetRange(tokens.Select(t => new QueryTokenDN(t)));
-                    return true;
-                }
-                return false;
             }
         }
 

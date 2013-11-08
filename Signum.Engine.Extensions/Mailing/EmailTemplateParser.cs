@@ -105,487 +105,503 @@ namespace Signum.Engine.Mailing
                 () =>"Multiple values for column {0}".Formato(column.Column.Token.FullKey()));
         }
 
-        public static readonly Regex KeywordsRegex = new Regex(@"\@(((?<keyword>(foreach|if|raw|global|model|modelraw|any|declare|))\[(?<token>[^\]]+)\](\s+as\s+(?<dec>\$\w*))?)|(?<keyword>endforeach|else|endif|notany|endany))");
-
-        public static readonly Regex TokenFormatRegex = new Regex(@"(?<token>[^\]\:]+)(\:(?<format>.*))?");
-        public static readonly Regex TokenOperationValueRegex = new Regex(@"(?<token>[^\]]+)(?<comparer>(" + FilterValueConverter.OperationRegex + @"))(?<value>[^\]\:]+)");
-
-
-
         public static BlockNode Parse(string text, QueryDescription qd, Type modelType)
         {
-            if (text == null)
-                throw new ArgumentNullException("text");
-
-            if (qd == null)
-                throw new ArgumentNullException("qd");
-
-            BlockNode node;
-            var errors = TryParseTemplate(text, qd, modelType, out node);
-            if (errors.Any())
-                throw new FormatException(errors.ToString("\r\n"));
-            return node;
+            return new TemplateWalker(text, qd, modelType).Parse();      
         }
 
-
-        static List<string> TryParseTemplate(string text, QueryDescription qd, Type modelType, out BlockNode mainBlock)
+        public static BlockNode TryParse(string text, QueryDescription qd, Type modelType, out string errorMessage)
         {
-            List<string> errors = new List<string>();
+            return new TemplateWalker(text, qd, modelType).TryParse(out errorMessage);
+        }
 
-            var matches = KeywordsRegex.Matches(text);
+        struct Error
+        {
+            public string Message; 
+            public bool IsFatal; 
+        }
 
-            Stack<BlockNode> stack = new Stack<BlockNode>();
-            mainBlock = new BlockNode(null);
-            stack.Push(mainBlock);
+        internal class TemplateWalker
+        {
+            public static readonly Regex KeywordsRegex = new Regex(@"\@(((?<keyword>(foreach|if|raw|global|model|modelraw|any|declare|))\[(?<token>[^\]]+)\](\s+as\s+(?<dec>\$\w*))?)|(?<keyword>endforeach|else|endif|notany|endany))");
 
-            if (matches.Count == 0)
+            public static readonly Regex TokenFormatRegex = new Regex(@"(?<token>[^\]\:]+)(\:(?<format>.*))?");
+            public static readonly Regex TokenOperationValueRegex = new Regex(@"(?<token>[^\]]+)(?<comparer>(" + FilterValueConverter.OperationRegex + @"))(?<value>[^\]\:]+)");
+
+
+            QueryDescription qd;
+            Type modelType;
+            string text;
+
+
+            BlockNode mainBlock;
+            Stack<BlockNode> stack;
+            ScopedDictionary<string, ParsedToken> variables;
+            List<Error> errors;
+
+            public TemplateWalker(string text, QueryDescription qd, Type modelType)
             {
-                stack.Peek().Nodes.Add(new LiteralNode { Text = text });
-                stack.Pop();
-                return errors;
+                if (qd == null)
+                    throw new ArgumentNullException("qd");
+
+                this.text = text ?? "";
+                this.qd = qd;
+                this.modelType = modelType; 
             }
 
-            Func<string, QueryToken> getVariable = variable =>
+            public BlockNode Parse()
             {
-                foreach (var item in stack)
+                ParseInternal();
+                if (errors.Any())
+                    throw new FormatException(errors.ToString("\r\n"));
+                return mainBlock;
+            }
+
+            public BlockNode ParseSync()
+            {
+                ParseInternal();
+
+                string fatalErrors = errors.Where(a => a.IsFatal).ToString("\r\n");
+
+                if (fatalErrors.HasText())
+                    throw new FormatException(fatalErrors);
+
+                return mainBlock;
+            }
+
+            public BlockNode TryParse(out string errorMessages)
+            {
+                ParseInternal();
+                errorMessages = this.errors.ToString(a => a.Message, ", ");
+                return mainBlock;
+            }
+
+            internal void AddError(bool fatal, string message)
+            {
+                errors.Add(new Error{ IsFatal = fatal, Message = message}); 
+            }
+
+            void DeclareVariable(ParsedToken token)
+            {
+                if (token.Variable.HasText())
                 {
-                    var result = item.Variables.TryGetC(variable);
-                    if (result != null)
-                        return result;
+                    if (variables.ContainsKey(token.Variable))
+                        AddError(true, "There's already a variable '{0}' defined in this scope".Formato(token.Variable));
+
+                    variables.Add(token.Variable, token);
                 }
+            }
 
-                return null;
-            };
-
-            Action<string, QueryToken> declareVariable = (variable, queryToken)=>
+            ParsedToken TryParseToken(string tokenString, string variable)
             {
-                if(getVariable(variable) != null)
-                    errors.Add("There's already a variable '{0}' defined in this scope".Formato(variable));
+                ParsedToken result = new ParsedToken { String = tokenString, Variable = variable };
 
-                stack.Peek().Variables.Add(variable, queryToken);
-            }; 
-
-            Func<string, QueryToken> tryParseToken = tokenString =>
-            {
                 if (tokenString.StartsWith("$"))
                 {
                     string v = tokenString.TryBefore('.') ?? tokenString;
 
-                    QueryToken token = getVariable(v);
+                    ParsedToken token;
 
-                    if (token == null)
+                    if (!variables.TryGetValue(v, out token))
                     {
-                        errors.Add("Variable '{0}' is not defined at this scope".Formato(v));
-                        return null;
+                        AddError(false, "Variable '{0}' is not defined at this scope".Formato(v));
+                        return result;
                     }
 
-                    var after =  tokenString.TryAfter('.');
+                    var after = tokenString.TryAfter('.');
 
-                    tokenString = token.FullKey() + (after == null ? null : ("." + after));
+                    tokenString = token.QueryToken.FullKey() + (after == null ? null : ("." + after));
                 }
 
-                QueryToken result = null;
                 try
                 {
-                    result = QueryUtils.Parse(tokenString, qd, false);
+                    result.QueryToken = QueryUtils.Parse(tokenString, qd, false);
                 }
                 catch (Exception ex)
                 {
-                    errors.Add(ex.Message);
-                    return null;
+                    AddError(false, ex.Message);
                 }
                 return result;
-            };
+            }
 
-            Func<Type, BlockNode> popNode = type =>
+            public BlockNode PopBlock(Type type)
             {
                 if (stack.Count() <= 1)
                 {
-                    errors.Add("No {0} has been opened".Formato(BlockNode.UserString(type)));
+                    AddError(true, "No {0} has been opened".Formato(BlockNode.UserString(type)));
                     return null;
                 }
                 var n = stack.Pop();
+                variables = variables.Previous;
                 if (n.owner == null || n.owner.GetType() != type)
                 {
-                    errors.Add("Unexpected '{0}'".Formato(BlockNode.UserString(n.owner.TryCC(p => p.GetType()))));
+                    AddError(true, "Unexpected '{0}'".Formato(BlockNode.UserString(n.owner.TryCC(p => p.GetType()))));
                     return null;
                 }
                 return n;
-            };
-
-            int index = 0;
-            foreach (Match match in matches)
-            {
-                if (index < match.Index)
-                {
-                    stack.Peek().Nodes.Add(new LiteralNode { Text = text.Substring(index, match.Index - index) });
-                }
-                var token = match.Groups["token"].Value;
-                var keyword = match.Groups["keyword"].Value;
-                var dec = match.Groups["dec"].Value;
-                switch (keyword)
-                {
-                    case "":
-                    case "raw":
-                        var tok = TokenFormatRegex.Match(token);
-                        if (!tok.Success)
-                            errors.Add("{0} has invalid format".Formato(token));
-                        else
-                        {
-                            var t = tryParseToken(tok.Groups["token"].Value);
-
-                            stack.Peek().Nodes.Add(new TokenNode(t, tok.Groups["format"].Value,
-                                isRaw: keyword.Contains("raw"),
-                                errors: errors));
-
-                            if (dec.HasText())
-                                declareVariable(dec, t); 
-                        }
-                        break;
-                    case "declare":
-                        {
-                            var t = tryParseToken(token);
-                            if (!dec.HasText())
-                                errors.Add("declare[{0}] should end with 'as $someVariable'".Formato(token));
-                            else
-                                declareVariable(dec, t); 
-                        }
-                        break;
-                    case "global":
-                        stack.Peek().Nodes.Add(new GlobalNode(token, errors));
-                        break;
-                    case "model":
-                    case "modelraw":
-                        stack.Peek().Nodes.Add(new ModelNode(token, modelType, errors) { IsRaw = keyword == "modelraw" });
-                        break;
-                    case "any":
-                        {
-                            AnyNode any;
-                            QueryToken t;
-                            var filter = TokenOperationValueRegex.Match(token);
-                            if (!filter.Success)
-                            {
-                                t = tryParseToken(token);
-                                any = new AnyNode(t, errors);
-                            }
-                            else
-                            {
-                                t = tryParseToken(filter.Groups["token"].Value);
-                                var comparer = filter.Groups["comparer"].Value;
-                                var value = filter.Groups["value"].Value;
-                                any = new AnyNode(t, comparer, value, errors);
-                               
-                            }
-                            stack.Peek().Nodes.Add(any);
-                            stack.Push(any.AnyBlock);
-
-                            if (dec.HasText())
-                                declareVariable(dec, t); 
-                            break;
-                        }
-                    case "notany":
-                        {
-                            var an = (AnyNode)popNode(typeof(AnyNode)).owner;
-                            stack.Push(an.CreateNotAny());
-                            break;
-                        }
-                    case "endany":
-                        {
-                            popNode(typeof(AnyNode));
-                            break;
-                        }
-                    case "foreach":
-                        {
-                            var t = tryParseToken(token);
-                            var fn = new ForeachNode(t);
-                            stack.Peek().Nodes.Add(fn);
-                            stack.Push(fn.Block);
-
-                            if (dec.HasText())
-                                declareVariable(dec, t); 
-                            break;
-                        }
-                    case "endforeach":
-                        {
-                            popNode(typeof(ForeachNode));
-                        }
-                        break;
-                    case "if":
-                        {
-                            IfNode ifn;
-                            QueryToken t; 
-                            var filter = TokenOperationValueRegex.Match(token);
-                            if (!filter.Success)
-                            {
-                                t = tryParseToken(token);
-                                ifn = new IfNode(t, errors);
-                            }
-                            else
-                            {
-                                t = tryParseToken(filter.Groups["token"].Value);
-                                var comparer = filter.Groups["comparer"].Value;
-                                var value = filter.Groups["value"].Value;
-                                ifn = new IfNode(t, comparer, value, errors);
-                            }
-                            stack.Peek().Nodes.Add(ifn);
-                            stack.Push(ifn.IfBlock);
-                            if (dec.HasText())
-                                declareVariable(dec, t); 
-                            break;
-                        }
-                    case "else":
-                        {
-                            var ifn = (IfNode)popNode(typeof(IfNode)).owner;
-                            stack.Push(ifn.CreateElse());
-                            break;
-                        }
-                    case "endif":
-                        {
-                            popNode(typeof(IfNode));
-                            break;
-                        }
-                    default:
-                        break;
-                }
-                index = match.Index + match.Length;
             }
-            if (stack.Count != 1)
-                errors.Add("Last block is not closed: {0}".Formato(stack.Peek()));
-            var lastM = matches.Cast<Match>().LastOrDefault();
-            if (lastM != null && lastM.Index + lastM.Length < text.Length)
-                stack.Peek().Nodes.Add(new LiteralNode { Text = text.Substring(lastM.Index + lastM.Length) });
-            stack.Pop();
-            return errors;
+
+            public void PushBlock(BlockNode block)
+            {
+                stack.Push(block);
+                variables = new ScopedDictionary<string, ParsedToken>(variables); 
+            }
+
+            void ParseInternal()
+            {
+                this.mainBlock = new BlockNode(null);
+                this.stack = new Stack<BlockNode>();
+                this.errors = new List<Error>(); 
+                PushBlock(mainBlock);
+
+                var matches = KeywordsRegex.Matches(text);
+
+                if (matches.Count == 0)
+                {
+                    stack.Peek().Nodes.Add(new LiteralNode { Text = text });
+                    stack.Pop();
+                    return;
+                }
+
+                int index = 0;
+                foreach (Match match in matches)
+                {
+                    if (index < match.Index)
+                    {
+                        stack.Peek().Nodes.Add(new LiteralNode { Text = text.Substring(index, match.Index - index) });
+                    }
+                    var token = match.Groups["token"].Value;
+                    var keyword = match.Groups["keyword"].Value;
+                    var dec = match.Groups["dec"].Value;
+                    switch (keyword)
+                    {
+                        case "":
+                        case "raw":
+                            var tok = TokenFormatRegex.Match(token);
+                            if (!tok.Success)
+                                AddError(true, "{0} has invalid format".Formato(token));
+                            else
+                            {
+                                var t = TryParseToken(tok.Groups["token"].Value, dec);
+
+                                stack.Peek().Nodes.Add(new TokenNode(t, tok.Groups["format"].Value,
+                                    isRaw: keyword.Contains("raw"),
+                                    walker: this));
+
+                                DeclareVariable(t);
+                            }
+                            break;
+                        case "declare":
+                            {
+                                var t = TryParseToken(token, dec);
+
+                                stack.Peek().Nodes.Add(new DeclareNode(t, this));
+
+                                DeclareVariable(t);
+                            }
+                            break;
+                        case "global":
+                            stack.Peek().Nodes.Add(new GlobalNode(token, walker: this));
+                            break;
+                        case "model":
+                        case "modelraw":
+                            stack.Peek().Nodes.Add(new ModelNode(token, modelType, walker: this) { IsRaw = keyword == "modelraw" });
+                            break;
+                        case "any":
+                            {
+                                AnyNode any;
+                                ParsedToken t;
+                                var filter = TokenOperationValueRegex.Match(token);
+                                if (!filter.Success)
+                                {
+                                    t = TryParseToken(token, dec);
+                                    any = new AnyNode(t, this);
+                                }
+                                else
+                                {
+                                    t = TryParseToken(filter.Groups["token"].Value, dec);
+                                    var comparer = filter.Groups["comparer"].Value;
+                                    var value = filter.Groups["value"].Value;
+                                    any = new AnyNode(t, comparer, value, this);
+
+                                }
+                                stack.Peek().Nodes.Add(any);
+                                PushBlock(any.AnyBlock);
+
+                                DeclareVariable(t);
+                                break;
+                            }
+                        case "notany":
+                            {
+                                var an = (AnyNode)PopBlock(typeof(AnyNode)).owner;
+                                PushBlock(an.CreateNotAny());
+                                break;
+                            }
+                        case "endany":
+                            {
+                                PopBlock(typeof(AnyNode));
+                                break;
+                            }
+                        case "foreach":
+                            {
+                                var t = TryParseToken(token, dec);
+                                var fn = new ForeachNode(t);
+                                stack.Peek().Nodes.Add(fn);
+                                PushBlock(fn.Block);
+
+                                DeclareVariable(t);
+                                break;
+                            }
+                        case "endforeach":
+                            {
+                                PopBlock(typeof(ForeachNode));
+                            }
+                            break;
+                        case "if":
+                            {
+                                IfNode ifn;
+                                ParsedToken t;
+                                var filter = TokenOperationValueRegex.Match(token);
+                                if (!filter.Success)
+                                {
+                                    t = TryParseToken(token, dec);
+                                    ifn = new IfNode(t, this);
+                                }
+                                else
+                                {
+                                    t = TryParseToken(filter.Groups["token"].Value, dec);
+                                    var comparer = filter.Groups["comparer"].Value;
+                                    var value = filter.Groups["value"].Value;
+                                    ifn = new IfNode(t, comparer, value, this);
+                                }
+                                stack.Peek().Nodes.Add(ifn);
+                                PushBlock(ifn.IfBlock);
+                                DeclareVariable(t);
+                                break;
+                            }
+                        case "else":
+                            {
+                                var ifn = (IfNode)PopBlock(typeof(IfNode)).owner;
+                                PushBlock(ifn.CreateElse());
+                                break;
+                            }
+                        case "endif":
+                            {
+                                PopBlock(typeof(IfNode));
+                                break;
+                            }
+                        default:
+                            break;
+                    }
+                    index = match.Index + match.Length;
+                }
+
+                if (stack.Count != 1)
+                    AddError(true, "Last block is not closed: {0}".Formato(stack.Peek()));
+
+                var lastM = matches.Cast<Match>().LastOrDefault();
+                if (lastM != null && lastM.Index + lastM.Length < text.Length)
+                    stack.Peek().Nodes.Add(new LiteralNode { Text = text.Substring(lastM.Index + lastM.Length) });
+
+                stack.Pop();
+            }
         }
 
-        internal static SqlPreCommand ProcessEmailTemplate(Replacements replacements, Table table, EmailTemplateDN et, StringDistance sd)
+        private static string Synchronize(string text, SyncronizationContext sc)
+        {
+            BlockNode node = new TemplateWalker(text, sc.QueryDescription, sc.ModelType).ParseSync();
+
+            node.Synchronize(sc);
+
+            return node.ToString(); 
+        }
+
+        public class SyncronizationContext
+        {
+            public ScopedDictionary<string, ParsedToken> Variables;
+            public Type ModelType;
+            public Replacements Replacements;
+            public StringDistance StringDistance;
+            public QueryDescription QueryDescription;
+
+            internal void SynchronizeToken(ParsedToken parsedToken, string remainingText)
+            {
+                if (parsedToken.QueryToken != null)
+                {
+                    SafeConsole.WriteColor(parsedToken.QueryToken != null ? ConsoleColor.Gray : ConsoleColor.Red, "  " + parsedToken.QueryToken.FullKey());
+                    Console.WriteLine(" " + remainingText);
+                }
+                else
+                {
+                    string tokenString = parsedToken.String;
+
+                    if (tokenString.StartsWith("$"))
+                    {
+                        string v = tokenString.TryBefore('.') ?? tokenString;
+
+                        ParsedToken part;
+                        if (!Variables.TryGetValue(v, out part))
+                            SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Variable '{0}' not found!".Formato(v));
+
+                        if (part != null && part.QueryToken == null)
+                            SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Variable '{0}' is not fixed yet! currently: '{1}'".Formato(v, part.String));
+
+                        var after = tokenString.TryAfter('.');
+
+                        tokenString =
+                            (part == null ? "Unknown" :
+                            part.QueryToken == null ? part.String :
+                            part.QueryToken.FullKey()) + (after == null ? null : ("." + after));
+                    }
+
+                    SafeConsole.WriteColor(ConsoleColor.Red, "  " + tokenString);
+                    Console.WriteLine(" " + remainingText);
+
+                    QueryToken token;
+                    FixTokenResult result = QueryTokenSynchronizer.FixToken(Replacements, tokenString, out token, QueryDescription, false, remainingText, allowRemoveToken: false);
+                    switch (result)
+                    {
+                        case FixTokenResult.Nothing:
+                        case FixTokenResult.Fix:
+                            parsedToken.QueryToken = token;
+                            parsedToken.String = token.FullKey();
+                            break;
+                        case FixTokenResult.SkipEntity:
+                        case FixTokenResult.RemoveToken:
+                            throw new TemplateSyncException(result);
+                    }
+                }
+            }
+
+            public void SynchronizeValue(ParsedToken Token, ref string value)
+            {
+                string val = value;
+                FixTokenResult result = QueryTokenSynchronizer.FixValue(Replacements, Token.QueryToken.Type, ref val, allowRemoveToken: false);
+                switch (result)
+                {
+                    case FixTokenResult.Fix:
+                    case FixTokenResult.Nothing:
+                        value = val;
+                        break;
+                    case FixTokenResult.SkipEntity:
+                    case FixTokenResult.RemoveToken:
+                        throw new TemplateSyncException(result);
+                }
+            }
+
+            public IDisposable NewScope()
+            {
+                Variables = new ScopedDictionary<string, ParsedToken>(Variables);
+
+                return new Disposable(() => Variables = Variables.Previous);
+            }
+        }
+
+        public class TemplateSyncException : Exception
+        {
+            public FixTokenResult Result;
+
+            public TemplateSyncException(FixTokenResult result)
+            {
+                this.Result = result;
+            }
+        }
+
+
+        internal static SqlPreCommand ProcessEmailTemplate( Replacements replacements, Table table, EmailTemplateDN et, StringDistance sd)
         {
             try
             {
+                var queryName = QueryLogic.ToQueryName(et.Query.Key);
+
+                QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
+
                 Console.Clear();
 
                 SafeConsole.WriteLineColor(ConsoleColor.White, "EmailTemplate: " + et.Name);
                 Console.WriteLine(" Query: " + et.Query.Key);
 
-
-                var result = (from msg in et.Messages
-                              from s in new[] { msg.Subject, msg.Text }
-                              from m in KeywordsRegex.Matches(s).Cast<Match>()
-                              where m.Groups["token"].Success && !IsToken(m.Groups["keyword"].Value)
-                              select new
-                              {
-                                  isGlobal = IsGlobal(m.Groups["keyword"].Value),
-                                  token = m.Groups["token"].Value
-                              }).Distinct().ToList();
-
-                foreach (var g in result.Where(a => a.isGlobal).Select(a => a.token).ToHashSet())
+                if (et.From != null && et.From.Token != null)
                 {
-                    string s = replacements.SelectInteractive(g, GlobalVariables.Keys, "EmailTemplate Globals", sd);
-
-                    if (s != null && s != g)
+                    QueryTokenDN token = et.From.Token;
+                    switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, false, " From", allowRemoveToken: false))
                     {
-                        ReplaceToken(et, (keyword, oldToken) =>
-                        {
-                            if (!IsGlobal(keyword))
-                                return null;
-
-                            if (oldToken == g)
-                                return s;
-
-                            return null;
-                        });
+                        case FixTokenResult.Nothing: break;
+                        case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(et);
+                        case FixTokenResult.SkipEntity: return null;
+                        case FixTokenResult.Fix: et.From.Token = token; break;
+                        default: break;
                     }
                 }
 
-                foreach (var m in result.Where(a => !a.isGlobal).Select(a => a.token).ToHashSet())
+                if (et.Recipients.Any(a=>a.Token != null))
                 {
-                    var type = et.SystemEmail.ToType();
-
-                    string newM = ModelNode.GetNewModel(type, m, replacements, sd);
-
-                    if (newM != m)
+                    Console.WriteLine(" Recipients:");
+                    foreach (var item in et.Recipients.Where(a => a.Token != null).ToList())
                     {
-                        ReplaceToken(et, (keyword, oldToken) =>
+                        QueryTokenDN token = item.Token;
+                        switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, false, " Recipient"))
                         {
-                            if (!IsModel(keyword))
-                                return null;
-
-                            if (oldToken == m)
-                                return newM;
-
-                            return null;
-                        });
-                    }
-                }
-
-                if (et.Tokens.Any(a => a.ParseException != null))
-                    using (et.DisableAuthorization ? ExecutionMode.Global() : null)
-                    {
-                        QueryDescription qd = DynamicQueryManager.Current.QueryDescription(et.Query.ToQueryName());
-
-                        if (et.Tokens.Any())
-                        {
-                            Console.WriteLine(" Tokens:");
-                            foreach (var item in et.Tokens.ToList())
-                            {
-                                QueryTokenDN token = item;
-                                switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, false, "", allowRemoveToken: false))
-                                {
-                                    case FixTokenResult.Nothing: break;
-                                    case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(et);
-                                    case FixTokenResult.RemoveToken: throw new InvalidOperationException("Unexpected RemoveToken");
-                                    case FixTokenResult.SkipEntity: return null;
-                                    case FixTokenResult.Fix:
-                                        foreach (var tok in et.Recipients.Where(r => r.Token.TokenString == item.TokenString).ToList())
-                                            tok.Token = token;
-
-                                        FixTokenResult? currentResult = null;
-
-                                        ReplaceToken(et, (keyword, oldToken) =>
-                                        {
-                                            if (!IsToken(keyword) || currentResult.HasValue)
-                                                return null;
-
-                                            if (keyword == "" || keyword == "raw" || keyword == "translated" || keyword == "translatedraw")
-                                            {
-                                                var match = TokenFormatRegex.Match(oldToken);
-                                                string tokenPart = match.Groups["token"].Value;
-                                                string formatPart = oldToken.RemoveStart(match.Groups["token"].Length);
-
-                                                if (AreSimilar(tokenPart, item.TokenString))
-                                                    return token.Token.FullKey() + formatPart;
-
-                                                return null;
-                                            }
-                                            else if (keyword == "any" || keyword == "if")
-                                            {
-                                                var match = TokenOperationValueRegex.Match(oldToken);
-
-                                                if (!match.Success)
-                                                {
-                                                    if (AreSimilar(oldToken, item.TokenString))
-                                                        return token.Token.FullKey();
-
-                                                    return null;
-                                                }
-
-                                                string tokenPart = match.Groups["token"].Value;
-                                                string operationPart = match.Groups["comparer"].Value;
-                                                string valuePart = match.Groups["value"].Value;
-
-                                                if (AreSimilar(tokenPart, item.TokenString))
-                                                {
-                                                    tokenPart = token.Token.FullKey();
-
-                                                    switch (QueryTokenSynchronizer.FixValue(replacements, token.Token.Type, ref valuePart, allowRemoveToken: false))
-                                                    {
-                                                        case FixTokenResult.Fix:
-                                                        case FixTokenResult.Nothing: break;
-                                                        case FixTokenResult.DeleteEntity: currentResult = FixTokenResult.DeleteEntity; break;
-                                                        case FixTokenResult.SkipEntity: currentResult = FixTokenResult.SkipEntity; break;
-                                                    }
-
-                                                    return tokenPart + operationPart + valuePart;
-                                                }
-
-                                                return null;
-                                            }
-                                            else
-                                            {
-                                                if (AreSimilar(oldToken, item.TokenString))
-                                                    return token.Token.FullKey();
-
-                                                return null;
-                                            }
-                                        });
-
-                                        if (currentResult == FixTokenResult.DeleteEntity)
-                                            goto case FixTokenResult.DeleteEntity;
-                                        if (currentResult == FixTokenResult.SkipEntity)
-                                            goto case FixTokenResult.SkipEntity;
-
-                                        break;
-                                    default: break;
-                                }
-                            }
+                            case FixTokenResult.Nothing: break;
+                            case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(et);
+                            case FixTokenResult.RemoveToken: et.Recipients.Remove(item); break;
+                            case FixTokenResult.SkipEntity: return null;
+                            case FixTokenResult.Fix: item.Token = token; break;
+                            default: break;
                         }
                     }
+                }
 
-                Console.Clear();
+                SyncronizationContext sc = new SyncronizationContext
+                {
+                     ModelType = et.SystemEmail.ToType(),
+                     QueryDescription = qd,
+                     Replacements = replacements, 
+                     StringDistance = sd
+                };
 
-                return table.UpdateSqlSync(et, includeCollections: true);
+                try
+                {
+
+                    foreach (var item in et.Messages)
+                    {
+                        item.Subject = Synchronize(item.Subject, sc);
+                        item.Text = Synchronize(item.Text, sc);
+                    }
+
+                    return table.UpdateSqlSync(et, includeCollections: true);
+                }
+                catch (TemplateSyncException ex)
+                {
+                    if (ex.Result == FixTokenResult.SkipEntity)
+                        return null;
+
+                    if (ex.Result == FixTokenResult.DeleteEntity)
+                        return table.DeleteSqlSync(et);
+
+                    throw new InvalidOperationException("Unexcpected {0}".Formato(ex.Result));
+                }
+                finally
+                {
+                    Console.Clear();
+                }
             }
             catch (Exception e)
             {
                 return new SqlPreCommandSimple("-- Exception in {0}: {1}".Formato(et.BaseToString(), e.Message));
             }
         }
+    
+        //static bool AreSimilar(string p1, string p2)
+        //{
+        //    if (p1.StartsWith("Entity."))
+        //        p1 = p1.After("Entity.");
 
-        static void ReplaceToken(EmailTemplateDN et, Func<string, string, string> replacer)
-        {
-            foreach (var m in et.Messages)
-            {
-                m.Subject = ReplaceTokenText(m.Subject, replacer);
-                m.Text = ReplaceTokenText(m.Text, replacer);
-            }
-        }
+        //    if (p2.StartsWith("Entity."))
+        //        p2 = p2.After("Entity.");
 
-        static string ReplaceTokenText(string text, Func<string, string, string> replacer)
-        {
-            var result = KeywordsRegex.Replace(text, m =>
-            {
-                var gr = m.Groups["token"];
-
-                if (!gr.Success)
-                    return m.Value;
-
-                var rep = replacer(m.Groups["keyword"].Value, m.Groups["token"].Value);
-
-                if (rep == null)
-                    return m.Value;
-
-                var newKeyword = m.Value.Substring(0, gr.Index - m.Index)
-                    + rep
-                    + m.Value.Substring(gr.Index + gr.Length - m.Index);
-
-                return newKeyword;
-            });
-
-            return result;
-        }
-
-        static bool AreSimilar(string p1, string p2)
-        {
-            if (p1.StartsWith("Entity."))
-                p1 = p1.After("Entity.");
-
-            if (p2.StartsWith("Entity."))
-                p2 = p2.After("Entity.");
-
-            return p1 == p2;
-        }
-
-        static bool IsModel(string keyword)
-        {
-            return keyword == "model" || keyword == "modelraw";
-        }
-
-        static bool IsGlobal(string keyword)
-        {
-            return keyword == "global";
-        }
-
-        static bool IsToken(string keyword)
-        {
-            return
-                keyword == "" ||
-                keyword == "foreach" ||
-                keyword == "if" ||
-                keyword == "raw" ||
-                keyword == "translated" ||
-                keyword == "translatedraw" ||
-                keyword == "any";
-        }
+        //    return p1 == p2;
+        //}
     }
 
     public class EmailTemplateParameters

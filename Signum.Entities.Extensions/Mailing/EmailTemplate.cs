@@ -130,13 +130,6 @@ namespace Signum.Entities.Mailing
             set { Set(ref messages, value, () => Messages); }
         }
 
-        MList<QueryTokenDN> tokens = new MList<QueryTokenDN>();
-        public MList<QueryTokenDN> Tokens
-        {
-            get { return tokens; }
-            set { Set(ref tokens, value, () => Tokens); }
-        }
-
         bool active;
         public bool Active
         {
@@ -214,10 +207,6 @@ namespace Signum.Entities.Mailing
 
         internal void ParseData(QueryDescription queryDescription)
         {
-            if (Tokens != null)
-                foreach (var t in Tokens)
-                    t.ParseData(this, queryDescription, false);
-
             if (Recipients != null)
                 foreach (var r in Recipients.Where(r => r.Token != null))
                     r.Token.ParseData(this, queryDescription, false);
