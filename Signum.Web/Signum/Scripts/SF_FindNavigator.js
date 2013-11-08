@@ -7,6 +7,7 @@ SF.registerModule("FindNavigator", function () {
 
             options: {
                 allowChangeColumns: true,
+                allowOrder: true,
                 allowMultiple: true,
                 columnMode: "Add",
                 columns: null, //List of column names "token1,displayName1;token2,displayName2"
@@ -52,118 +53,129 @@ SF.registerModule("FindNavigator", function () {
                 };
 
                 var $tblResults = self.element.find(".sf-search-results-container");
-                $tblResults.on("click", "th:not(.sf-th-entity):not(.sf-th-selection),th:not(.sf-th-entity):not(.sf-th-selection) span,th:not(.sf-th-entity):not(.sf-th-selection) .sf-header-droppable", function (e) {
-                    if (e.target != this || $(this).closest(".sf-search-ctxmenu").length > 0) {
-                        return;
-                    } 
-                    self.newSortOrder($(e.target).closest("th"), e.shiftKey);
-                    self.search();
-                    return false;
-                });
 
-                $tblResults.on("contextmenu", "th:not(.sf-th-entity):not(.sf-th-selection)", function (e) {
-                    if (!closeMyOpenedCtxMenu()) {
-                        return false;
-                    }
-                    self.headerContextMenu(e);
-                    return false;
-                });
-
-                $tblResults.on("contextmenu", "td:not(.sf-td-no-results):not(.sf-td-multiply,.sf-search-footer-pagination)", function (e) {
-                    if (!closeMyOpenedCtxMenu()) {
-                        return false;
-                    }
-
-                    var $td = $(this).closest("td");
-
-                    var $tr = $td.closest("tr");
-                    var $currentRowSelector = $tr.find(".sf-td-selection");
-                    if ($currentRowSelector.filter(":checked").length == 0) {
-                        self.changeRowSelection($(self.pf("sfSearchControl .sf-td-selection:checked")), false);
-                        self.changeRowSelection($currentRowSelector, true);
-                    }
-
-                    var index = $td.index();
-                    var $th = $td.closest("table").find("th").eq(index);
-                    if ($th.hasClass('sf-th-selection') || $th.hasClass('sf-th-entity')) {
-                        if (self.options.selectedItemsContextMenu == true) {
-                            self.entityContextMenu(e);
+                if (this.options.allowOrder) {
+                    $tblResults.on("click", "th:not(.sf-th-entity):not(.sf-th-selection),th:not(.sf-th-entity):not(.sf-th-selection) span,th:not(.sf-th-entity):not(.sf-th-selection) .sf-header-droppable", function (e) {
+                        if (e.target != this || $(this).closest(".sf-search-ctxmenu").length > 0) {
+                            return;
                         }
-                    }
-                    else {
-                        self.cellContextMenu(e);
-                    }
-                    return false;
-                });
-
-                $tblResults.on("click", ".sf-search-ctxitem.sf-quickfilter > span", function () {
-                    var $elem = $(this).closest("td");
-                    $('.sf-search-ctxmenu-overlay').remove();
-                    self.quickFilterCell($elem);
-                });
-
-                $tblResults.on("click", ".sf-search-ctxitem.sf-quickfilter-header > span", function () {
-                    var $elem = $(this).closest("th");
-                    $('.sf-search-ctxmenu-overlay').remove();
-                    self.quickFilterHeader($elem);
-                    return false;
-                });
-
-                $tblResults.on("click", ".sf-search-ctxitem.sf-remove-column > span", function () {
-                    var $elem = $(this).closest("th");
-                    $('.sf-search-ctxmenu-overlay').remove();
-
-                    self.removeColumn($elem);
-                    return false;
-                });
-
-                $tblResults.on("click", ".sf-search-ctxitem.sf-edit-column > span", function () {
-                    var $elem = $(this).closest("th");
-                    $('.sf-search-ctxmenu-overlay').remove();
-
-                    self.editColumn($elem);
-                    return false;
-                });
-
-                $tblResults.on("click", ".sf-pagination-button", function () {
-                    $(self.pf(self.keys.page)).val($(this).attr("data-page"));
-                    self.search();
-                });
-
-                $tblResults.on("change", ".sf-pagination-size", function () {
-                    if ($(this).find("option:selected").val() == "All") {
-                        self.clearResults();
-                    }
-                    else {
+                        self.newSortOrder($(e.target).closest("th"), e.shiftKey);
                         self.search();
-                    }
-                });
+                        return false;
+                    });
+                }
 
-                $tblResults.on("change", ".sf-td-selection", function () {
-                    self.changeRowSelection($(this), $(this).filter(":checked").length > 0);
-                });
+                if (this.options.allowChangeColumns || (this.options.filterMode != "AlwaysHidden" && this.options.filterMode != "OnlyResults")) {
+                    $tblResults.on("contextmenu", "th:not(.sf-th-entity):not(.sf-th-selection)", function (e) {
+                        if (!closeMyOpenedCtxMenu()) {
+                            return false;
+                        }
+                        self.headerContextMenu(e);
+                        return false;
+                    });
+                }
 
-                $(this.pf("sfFullScreen")).on("mousedown", function (e) {
-                    e.preventDefault();
-                    self.fullScreen(e);
-                });
+                 if (this.options.allowChangeColumns) {
+                    $tblResults.on("click", ".sf-search-ctxitem.sf-remove-column > span", function () {
+                        var $elem = $(this).closest("th");
+                        $('.sf-search-ctxmenu-overlay').remove();
 
-                this.createMoveColumnDragDrop();
+                        self.removeColumn($elem);
+                        return false;
+                    });
+
+                    $tblResults.on("click", ".sf-search-ctxitem.sf-edit-column > span", function () {
+                        var $elem = $(this).closest("th");
+                        $('.sf-search-ctxmenu-overlay').remove();
+
+                        self.editColumn($elem);
+                        return false;
+                    });
+
+                    this.createMoveColumnDragDrop();
+                }
+
+                if (this.options.filterMode != "AlwaysHidden" && this.options.filterMode != "OnlyResults") {
+                    $tblResults.on("contextmenu", "td:not(.sf-td-no-results):not(.sf-td-multiply,.sf-search-footer-pagination)", function (e) {
+                        if (!closeMyOpenedCtxMenu()) {
+                            return false;
+                        }
+
+                        var $td = $(this).closest("td");
+
+                        var $tr = $td.closest("tr");
+                        var $currentRowSelector = $tr.find(".sf-td-selection");
+                        if ($currentRowSelector.filter(":checked").length == 0) {
+                            self.changeRowSelection($(self.pf("sfSearchControl .sf-td-selection:checked")), false);
+                            self.changeRowSelection($currentRowSelector, true);
+                        }
+
+                        var index = $td.index();
+                        var $th = $td.closest("table").find("th").eq(index);
+                        if ($th.hasClass('sf-th-selection') || $th.hasClass('sf-th-entity')) {
+                            if (self.options.selectedItemsContextMenu == true) {
+                                self.entityContextMenu(e);
+                            }
+                        }
+                        else {
+                            self.cellContextMenu(e);
+                        }
+                        return false;
+                    });
+
+                    $tblResults.on("click", ".sf-search-ctxitem.sf-quickfilter > span", function () {
+                        var $elem = $(this).closest("td");
+                        $('.sf-search-ctxmenu-overlay').remove();
+                        self.quickFilterCell($elem);
+                    });
+
+                    $tblResults.on("click", ".sf-search-ctxitem.sf-quickfilter-header > span", function () {
+                        var $elem = $(this).closest("th");
+                        $('.sf-search-ctxmenu-overlay').remove();
+                        self.quickFilterHeader($elem);
+                        return false;
+                    });
+                }
+
+                if (this.options.filterMode != "OnlyResults") {
+                    $tblResults.on("click", ".sf-pagination-button", function () {
+                        $(self.pf(self.keys.page)).val($(this).attr("data-page"));
+                        self.search();
+                    });
+
+                    $tblResults.on("change", ".sf-pagination-size", function () {
+                        if ($(this).find("option:selected").val() == "All") {
+                            self.clearResults();
+                        }
+                        else {
+                            self.search();
+                        }
+                    });
+
+                    $tblResults.on("change", ".sf-td-selection", function () {
+                        self.changeRowSelection($(this), $(this).filter(":checked").length > 0);
+                    });
+
+                    $(this.pf("sfFullScreen")).on("mousedown", function (e) {
+                        e.preventDefault();
+                        self.fullScreen(e);
+                    });
+
+                    this.element.on("sf-new-subtokens-combo", function (event, idSelectedCombo) {
+                        self.newSubTokensComboAdded($("#" + idSelectedCombo));
+                    });
+
+                    this.element.find(".sf-tm-selected").click(function () {
+                        if (!closeMyOpenedCtxMenu()) {
+                            return false;
+                        }
+
+                        self.ctxMenuInDropdown($(this).closest(".sf-dropdown"));
+                    });
+                }
 
                 $tblResults.on("selectstart", "th:not(.sf-th-entity):not(.sf-th-selection)", function (e) {
                     return false;
-                });
-
-                this.element.on("sf-new-subtokens-combo", function (event, idSelectedCombo) {
-                    self.newSubTokensComboAdded($("#" + idSelectedCombo));
-                });
-
-                this.element.find(".sf-tm-selected").click(function () {
-                    if (!closeMyOpenedCtxMenu()) {
-                        return false;
-                    }
-
-                    self.ctxMenuInDropdown($(this).closest(".sf-dropdown"));
                 });
 
                 if (this.options.searchOnLoad) {
@@ -208,7 +220,9 @@ SF.registerModule("FindNavigator", function () {
                 var $menu = this.createCtxMenu($th);
 
                 var $itemContainer = $menu.find(".sf-search-ctxmenu");
-                $itemContainer.append("<div class='sf-search-ctxitem sf-quickfilter-header'><span>" + lang.signum.addFilter + "</span></div>");
+                if (this.options.filterMode != "AlwaysHidden" && this.options.filterMode != "OnlyResults") {
+                    $itemContainer.append("<div class='sf-search-ctxitem sf-quickfilter-header'><span>" + lang.signum.addFilter + "</span></div>");
+                }
 
                 if (this.options.allowChangeColumns) {
                     $itemContainer.append("<div class='sf-search-ctxitem sf-edit-column'><span>" + lang.signum.editColumnName + "</span></div>")

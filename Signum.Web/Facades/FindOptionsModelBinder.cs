@@ -56,16 +56,11 @@ namespace Signum.Web
             if (parameters.AllKeys.Contains("allowChangeColumns"))
                 fo.AllowChangeColumns = bool.Parse(parameters["allowChangeColumns"]);
 
+            if (parameters.AllKeys.Contains("allowOrder"))
+                fo.AllowOrder = bool.Parse(parameters["allowOrder"]);
+
             if (parameters.AllKeys.Contains("filterMode"))
-            {
-                FilterMode mode = parameters["filterMode"].ToEnum<FilterMode>();
-                if (mode == FilterMode.AlwaysHidden || mode == FilterMode.OnlyResults)
-                {
-                    if (controllerContext.HttpContext.Request.QueryString.AllKeys.Contains("filterMode"))
-                        throw new InvalidOperationException("QueryString cannot contain FilterMode set to Always Hidden or Only Results");
-                }
-                fo.FilterMode = mode;
-            }
+                fo.FilterMode = parameters["filterMode"].ToEnum<FilterMode>();
 
             if (parameters.AllKeys.Contains("columnMode"))
                 fo.ColumnOptionsMode = parameters["columnMode"].ToEnum<ColumnOptionsMode>();
