@@ -38,7 +38,7 @@ namespace Signum.Web.Reports
 
                 if (excelReport)
                 {
-                    string viewPrefix = "~/Reports/Views/{0}.cshtml";
+                    string viewPrefix = "~/ReportSpreadsheet/Views/{0}.cshtml";
                     Navigator.AddSettings(new List<EntitySettings>{
                         new EntitySettings<ExcelReportDN> 
                         { 
