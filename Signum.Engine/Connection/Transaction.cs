@@ -25,7 +25,7 @@ namespace Signum.Engine
         static readonly Variable<Dictionary<Connector, ICoreTransaction>> currents = Statics.ThreadVariable<Dictionary<Connector, ICoreTransaction>>("transactions");
 
         bool commited;
-        ICoreTransaction coreTransaction; 
+        ICoreTransaction coreTransaction;
 
         interface ICoreTransaction
         {
@@ -34,7 +34,7 @@ namespace Signum.Engine
             event Action<Dictionary<string, object>> PreRealCommit;
             DbConnection Connection { get; }
             DbTransaction Transaction { get; }
-           
+
             bool Started { get; }
 
             bool IsRolledback { get; }
@@ -45,11 +45,11 @@ namespace Signum.Engine
             void Finish();
             void Start();
 
-            ICoreTransaction Parent { get; } 
+            ICoreTransaction Parent { get; }
 
             Dictionary<string, object> UserData { get; }
         }
-     
+
         class FakedTransaction : ICoreTransaction
         {
             ICoreTransaction parent;
@@ -74,19 +74,19 @@ namespace Signum.Engine
                 remove { parent.PreRealCommit -= value; }
             }
 
-            public DbConnection Connection{ get { return parent.Connection; } }
-            public DbTransaction Transaction{ get { return parent.Transaction; } }
-            public bool IsRolledback { get{ return parent.IsRolledback;} }
+            public DbConnection Connection { get { return parent.Connection; } }
+            public DbTransaction Transaction { get { return parent.Transaction; } }
+            public bool IsRolledback { get { return parent.IsRolledback; } }
             public bool Started { get { return parent.Started; } }
 
             public void Start() { parent.Start(); }
 
             public void Rollback()
             {
-                parent.Rollback(); 
+                parent.Rollback();
             }
 
-            public void Commit(){ }
+            public void Commit() { }
 
             public void Finish() { }
 
@@ -114,7 +114,7 @@ namespace Signum.Engine
 
         class RealTransaction : ICoreTransaction
         {
-            ICoreTransaction parent; 
+            ICoreTransaction parent;
 
             public DbConnection Connection { get; private set; }
             public DbTransaction Transaction { get; private set; }
@@ -137,7 +137,7 @@ namespace Signum.Engine
                 if (!Started)
                 {
                     Connection = Connector.Current.CreateConnection();
-                    
+
                     Connection.Open();
                     Transaction = Connection.BeginTransaction(IsolationLevel ?? Connector.Current.IsolationLevel);
                     Started = true;
@@ -206,7 +206,7 @@ namespace Signum.Engine
             Dictionary<string, object> userData;
             public Dictionary<string, object> UserData
             {
-                get { return userData ?? (userData = new Dictionary<string, object>());  }
+                get { return userData ?? (userData = new Dictionary<string, object>()); }
             }
 
             public ICoreTransaction Parent
@@ -230,7 +230,7 @@ namespace Signum.Engine
             public NamedTransaction(ICoreTransaction parent, string savePointName)
             {
                 if (parent == null)
-                    throw new InvalidOperationException("Named transactions should be nested inside another transaction"); 
+                    throw new InvalidOperationException("Named transactions should be nested inside another transaction");
 
                 if (parent != null && parent.IsRolledback)
                     throw new InvalidOperationException("The transaction can not be created because a parent transaction is rolled back");
@@ -239,10 +239,10 @@ namespace Signum.Engine
                 this.savePointName = savePointName;
             }
 
-        
+
             public DbConnection Connection { get { return parent.Connection; } }
             public DbTransaction Transaction { get { return parent.Transaction; } }
-            
+
             public void Start()
             {
                 if (!Started)
@@ -264,8 +264,8 @@ namespace Signum.Engine
                 }
             }
 
-            public void Commit() 
-            {   
+            public void Commit()
+            {
             }
 
             public void CallPostRealCommit()
@@ -290,7 +290,7 @@ namespace Signum.Engine
             public ICoreTransaction Parent
             {
                 get { return parent; }
-        }
+            }
         }
 
         class NoneTransaction : ICoreTransaction
@@ -298,7 +298,7 @@ namespace Signum.Engine
             ICoreTransaction parent;
 
             public DbConnection Connection { get; private set; }
-            public DbTransaction Transaction { get{return null;}}
+            public DbTransaction Transaction { get { return null; } }
             public bool IsRolledback { get; private set; }
             public bool Started { get; private set; }
             public event Action<Dictionary<string, object>> PostRealCommit;
@@ -395,7 +395,7 @@ namespace Signum.Engine
 
         static readonly Variable<bool> inTestTransaction = Statics.ThreadVariable<bool>("inTestTransaction");
 
-        class TestTransaction : RealTransaction 
+        class TestTransaction : RealTransaction
         {
             bool oldTestTransaction;
             public TestTransaction(ICoreTransaction parent, IsolationLevel? isolation)
@@ -405,7 +405,7 @@ namespace Signum.Engine
                 inTestTransaction.Value = true;
             }
 
-    
+
             public override void Finish()
             {
                 inTestTransaction.Value = oldTestTransaction;
@@ -448,15 +448,15 @@ namespace Signum.Engine
 
         public static Transaction ForceNew()
         {
-            return new Transaction(parent => inTestTransaction.Value ? 
-                (ICoreTransaction)new FakedTransaction(parent) : 
+            return new Transaction(parent => inTestTransaction.Value ?
+                (ICoreTransaction)new FakedTransaction(parent) :
                 (ICoreTransaction)new RealTransaction(parent, null));
         }
 
         public static Transaction ForceNew(IsolationLevel? isolationLevel)
         {
-            return new Transaction(parent => inTestTransaction.Value ? 
-                (ICoreTransaction)new FakedTransaction(parent) : 
+            return new Transaction(parent => inTestTransaction.Value ?
+                (ICoreTransaction)new FakedTransaction(parent) :
                 (ICoreTransaction)new RealTransaction(parent, isolationLevel));
         }
 
@@ -469,7 +469,7 @@ namespace Signum.Engine
         {
             return new Transaction(parent => new TestTransaction(parent, isolationLevel));
         }
-    
+
         static ICoreTransaction GetCurrent()
         {
             return currents.Value.GetOrThrow(Connector.Current, "No Transaction created yet");
@@ -561,8 +561,8 @@ namespace Signum.Engine
 
             var rt = coreTransaction as RealTransaction;
 
-            if (rt != null)
-                throw new InvalidOperationException("This method is meant for testing purposes, and only Real and Test transactions can execute it"); 
+            if (rt == null)
+                throw new InvalidOperationException("This method is meant for testing purposes, and only Real and Test transactions can execute it");
 
             rt.OnPreRealCommit();
         }
@@ -571,7 +571,7 @@ namespace Signum.Engine
         {
             try
             {
-            if (!commited)
+                if (!commited)
                     coreTransaction.Rollback(); //... sqlTransacion.Rollback()
 
                 coreTransaction.Finish(); //... sqlTransaction.Dispose() sqlConnection.Dispose()
@@ -579,8 +579,8 @@ namespace Signum.Engine
             finally
             {
                 if (coreTransaction.Parent == null)
-                currents.Value.Remove(Connector.Current);
-            else
+                    currents.Value.Remove(Connector.Current);
+                else
                     currents.Value[Connector.Current] = coreTransaction.Parent;
             }
 
