@@ -5,6 +5,7 @@ using System.Text;
 using System.IO;
 using System.Resources;
 using System.Reflection;
+using System.Diagnostics;
 
 namespace Signum.Utilities
 {
@@ -72,6 +73,7 @@ namespace Signum.Utilities
             }
         }
 
+        [DebuggerStepThrough]
         public static R Using<T, R>(this T disposable, Func<T, R> function)
             where T : IDisposable
         {
@@ -79,6 +81,7 @@ namespace Signum.Utilities
                 return function(disposable);
         }
 
+        [DebuggerStepThrough]
         public static void EndUsing<T>(this T disposable, Action<T> action)
             where T : IDisposable
         {
