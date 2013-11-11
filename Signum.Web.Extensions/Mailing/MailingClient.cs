@@ -75,12 +75,6 @@ namespace Signum.Web.Mailing
                     new EntitySettings<EmailTemplateDN>
                     { 
                         PartialViewName = e => ViewPrefix.Formato("EmailTemplate"),
-                        MappingMain = new EntityMapping<EmailTemplateDN>(true)
-                            .ReplaceProperty(a=>a.Tokens, m=>ctx=>
-                            {
-                                EmailTemplateLogic.UpdateTokens((EmailTemplateDN)ctx.Parent.UntypedValue);
-                                return m(ctx);
-                            })
                     },
                     new EmbeddedEntitySettings<EmailTemplateMessageDN>() 
                     { 

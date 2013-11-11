@@ -82,23 +82,30 @@ namespace Signum.Engine.Mailing
 
                 sb.AddUniqueIndex<NewsletterDeliveryDN>(nd => new { nd.Newsletter, nd.Recipient });
 
-                Validator.PropertyValidator((NewsletterDN news) => news.Text).StaticPropertyValidation += (sender, pi) => ValidateTokens((NewsletterDN)sender, pi);
-                Validator.PropertyValidator((NewsletterDN news) => news.Subject).StaticPropertyValidation += (sender, pi) => ValidateTokens((NewsletterDN)sender, pi);
+                Validator.PropertyValidator((NewsletterDN news) => news.Text).StaticPropertyValidation += (sender, pi) => ValidateTokens(sender, sender.Text);
+                Validator.PropertyValidator((NewsletterDN news) => news.Subject).StaticPropertyValidation += (sender, pi) => ValidateTokens(sender, sender.Subject);
 
-                sb.Schema.EntityEvents<NewsletterDN>().PreSaving += new PreSavingEventHandler<NewsletterDN>(Newsletter_PreSaving);
-                sb.Schema.EntityEvents<NewsletterDN>().Retrieved += Newsletter_Retrieved;
+                sb.Schema.EntityEvents<NewsletterDN>().PreSaving += Newsletter_PreSaving;
             }
         }
 
-        static string ValidateTokens(NewsletterDN newsletter, PropertyInfo pi)
+        static string ValidateTokens(NewsletterDN newsletter, string text)
         {
-            if (pi.Is(() => newsletter.Subject) && newsletter.Subject.HasText())
-                return AssertTokens(QueryLogic.ToQueryName(newsletter.Query.Key), newsletter.Subject);
+            var queryName = QueryLogic.ToQueryName(newsletter.Query.Key);
 
-            if (pi.Is(() => newsletter.Text) && newsletter.Text.HasText())
-                return AssertTokens(QueryLogic.ToQueryName(newsletter.Query.Key), newsletter.Text);
-            
-            return null;
+            QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
+
+            try
+            {
+                string error;
+                EmailTemplateParser.TryParse(text, qd, null, out error);
+
+                return error.DefaultText(null);
+            }
+            catch (Exception e)
+            {
+                return e.Message;
+            }
         }
 
         static string AssertTokens(object queryName, string content)
@@ -131,32 +138,8 @@ namespace Signum.Engine.Mailing
             var queryname = QueryLogic.ToQueryName(newsletter.Query.Key);
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryname);
 
-            List<QueryToken> list = new List<QueryToken>();
-            list.Add(QueryUtils.Parse("Entity", qd, false));
-            list.Add(QueryUtils.Parse(".".Combine("Entity", "NewsletterDeliveries", "Element"), qd, false));
-            list.Add(QueryUtils.Parse(".".Combine("Entity", "EmailOwnerData"), qd, false));
-
-            if (newsletter.Subject != null)
-                EmailTemplateParser.Parse(newsletter.Subject, qd, null).FillQueryTokens(list);
-
-            if (newsletter.Text != null)
-                EmailTemplateParser.Parse(newsletter.Text, qd, null).FillQueryTokens(list);
-
-            var tokens = list.Distinct();
-
-            if (!newsletter.Tokens.Select(a => a.Token).ToList().SequenceEqual(tokens))
-            {
-                newsletter.Tokens.ResetRange(tokens.Select(t => new QueryTokenDN(t)));
-                graphModified = true;
-            }
-        }
-
-        static void Newsletter_Retrieved(NewsletterDN newsletter)
-        {
-            object queryName = QueryLogic.ToQueryName(newsletter.Query.Key);
-            QueryDescription description = DynamicQueryManager.Current.QueryDescription(queryName);
-
-            newsletter.ParseData(description);
+            newsletter.Subject = EmailTemplateParser.Parse(newsletter.Subject, qd, null).ToString();
+            newsletter.Text = EmailTemplateParser.Parse(newsletter.Text, qd, null).ToString();
         }
 
         public static List<QueryToken> GetTokens(object queryName, string content)
@@ -293,15 +276,21 @@ namespace Signum.Engine.Mailing
 
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
 
+            List<QueryToken> list = new List<QueryToken>();
+
             using (ExecutionMode.Global())
             {
-                foreach (var t in newsletter.Tokens)
-                {
-                    t.ParseData(newsletter, qd, canAggregate: false);
-                }
+                list.Add(QueryUtils.Parse("Entity", qd, false));
+                list.Add(QueryUtils.Parse(".".Combine("Entity", "NewsletterDeliveries", "Element"), qd, false));
+                list.Add(QueryUtils.Parse(".".Combine("Entity", "EmailOwnerData"), qd, false));
+
+                EmailTemplateParser.Parse(newsletter.Subject, qd, null).FillQueryTokens(list);
+                EmailTemplateParser.Parse(newsletter.Text, qd, null).FillQueryTokens(list);
+
+                list = list.Distinct().ToList();
             }
 
-            var columns = newsletter.Tokens.Select(qt => new Column(qt.Token, null)).ToList();
+            var columns = list.Select(qt => new Column(qt, null)).ToList();
 
             //var columns = new List<QueryToken>();
             //columns.Add(QueryUtils.Parse("Entity.NewsletterDeliveries.Element", qd, canAggregate: false));

@@ -149,8 +149,6 @@ namespace Signum.Engine.UserQueries
                    uq.Orders.Any(a => a.Token.ParseException != null))
                 {
 
-
-
                     QueryDescription qd = DynamicQueryManager.Current.QueryDescription(uq.Query.ToQueryName());
 
                     if (uq.Filters.Any())

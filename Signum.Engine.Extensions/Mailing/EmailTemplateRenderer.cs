@@ -274,12 +274,20 @@ namespace Signum.Engine.Mailing
         {
             using (ExecutionMode.Global())
             {
-                foreach (var t in template.Tokens)
+                List<QueryToken> tokens = new List<QueryToken>();
+                if (template.From != null)
+                    tokens.Add(template.From.Token.Token);
+
+                foreach (var tr in template.Recipients.Where(r => r.Token != null))
+                    tokens.Add(tr.Token.Token);
+
+                foreach (var t in template.Messages)
                 {
-                    t.ParseData(template, qd, canAggregate: false);
+                    TextNode(t).FillQueryTokens(tokens);
+                    SubjectNode(t).FillQueryTokens(tokens);
                 }
 
-                var columns = template.Tokens.Select(qt => new Column(qt.Token, null)).ToList();
+                var columns = tokens.Distinct().Select(qt => new Column(qt, null)).ToList();
 
                 var filters = systemEmail != null ? systemEmail.GetFilters(qd) :
                     new List<Filter> { new Filter(QueryUtils.Parse("Entity", qd, false), FilterOperation.EqualTo, entity.ToLite()) };

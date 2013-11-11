@@ -18,7 +18,7 @@ namespace Signum.Engine.UserQueries
     {
         static void Remember(Replacements replacements, string tokenString, QueryToken token)
         {
-            List<QueryToken> tokenList = token.FollowC(a => a.Parent).Reverse().ToList();
+            List<QueryToken> tokenList = token.FollowC(a => a.Subordinated ? null : a.Parent).Reverse().ToList();
 
             string[] oldParts = tokenString.Split('.');
             string[] newParts = token.FullKey().Split('.');
@@ -44,9 +44,9 @@ namespace Signum.Engine.UserQueries
                 (oldPartsList[0] == newPartsList[0] ||
                  rep(oldPartsList[0]) == newPartsList[0]))
             {
-                pos++;
                 oldPartsList.RemoveAt(0);
                 newPartsList.RemoveAt(0);
+                pos++;
             }
 
             while (oldPartsList.Count > 0 && newPartsList.Count > 0 &&
@@ -267,24 +267,36 @@ namespace Signum.Engine.UserQueries
 
         public static FixTokenResult FixToken(Replacements replacements, ref QueryTokenDN token, QueryDescription qd, bool canAggregate, string remainingText, bool allowRemoveToken = true)
         {
-            var original = token.TokenString;
-
-            SafeConsole.WriteColor(token.ParseException == null ? ConsoleColor.Gray : ConsoleColor.Red, "  " + original);
+            SafeConsole.WriteColor(token.ParseException == null ? ConsoleColor.Gray : ConsoleColor.Red, "  " + token.TokenString);
             Console.WriteLine(" " + remainingText);
 
             if (token.ParseException == null)
                 return FixTokenResult.Nothing;
 
-            string[] parts = token.TokenString.Split('.');
+            QueryToken resultToken;
+            FixTokenResult result = FixToken(replacements, token.TokenString, out resultToken, qd, canAggregate, remainingText, allowRemoveToken);
+
+            if (result == FixTokenResult.Fix)
+                token = new QueryTokenDN(resultToken);
+
+            return result;
+        }
+
+        public static FixTokenResult FixToken(Replacements replacements, string original, out QueryToken token, QueryDescription qd, bool canAggregate, string remainingText, bool allowRemoveToken = true)
+        {
+            string[] parts = original.Split('.');
 
             QueryToken current;
             if (TryParseRemember(replacements, original, qd, canAggregate, out current))
             {
-                SafeConsole.WriteColor(ConsoleColor.DarkRed, "  " + original);
-                Console.Write(" -> ");
-                SafeConsole.WriteColor(ConsoleColor.DarkGreen, current.FullKey());
+                if (current.FullKey() != original)
+                {
+                    SafeConsole.WriteColor(ConsoleColor.DarkRed, "  " + original);
+                    Console.Write(" -> ");
+                    SafeConsole.WriteColor(ConsoleColor.DarkGreen, current.FullKey());
+                }
                 Console.WriteLine(remainingText);
-                token = new QueryTokenDN(current);
+                token = current;
                 return FixTokenResult.Fix;
             }
 
@@ -295,6 +307,7 @@ namespace Signum.Engine.UserQueries
                 {
                     case UserAssetTokenAction.DeleteEntity:
                         SafeConsole.WriteLineColor(ConsoleColor.Red, "Entity deleted");
+                        token = null;
                         return FixTokenResult.DeleteEntity;
                     case UserAssetTokenAction.RemoveToken:
                         if (!allowRemoveToken)
@@ -304,9 +317,11 @@ namespace Signum.Engine.UserQueries
                         SafeConsole.WriteColor(ConsoleColor.DarkRed, "  " + original);
                         SafeConsole.WriteColor(ConsoleColor.DarkRed, " (token removed)");
                         Console.WriteLine(remainingText);
+                        token = null;
                         return FixTokenResult.RemoveToken;
                     case UserAssetTokenAction.SkipEntity:
                         SafeConsole.WriteLineColor(ConsoleColor.DarkYellow, "Entity skipped");
+                        token = null;
                         return FixTokenResult.SkipEntity;
                     case UserAssetTokenAction.Confirm:
                         Remember(replacements, original, current);
@@ -315,7 +330,7 @@ namespace Signum.Engine.UserQueries
                         Console.Write(" -> ");
                         SafeConsole.WriteColor(ConsoleColor.DarkGreen, current.FullKey());
                         Console.WriteLine(remainingText);
-                        token = new QueryTokenDN(current);
+                        token = current;
                         return FixTokenResult.Fix;
                 }
             }

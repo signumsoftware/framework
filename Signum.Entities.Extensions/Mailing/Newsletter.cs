@@ -109,20 +109,6 @@ namespace Signum.Entities.Mailing
             get { return query; }
             set { Set(ref query, value, () => Query); }
         }
-
-        MList<QueryTokenDN> tokens = new MList<QueryTokenDN>();
-        public MList<QueryTokenDN> Tokens
-        {
-            get { return tokens; }
-            set { Set(ref tokens, value, () => Tokens); }
-        }
-
-        internal void ParseData(QueryDescription queryDescription)
-        {
-            if (Tokens != null)
-                foreach (var t in Tokens)
-                    t.ParseData(this, queryDescription, false);
-        }
     }
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
