@@ -758,12 +758,12 @@
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Reports\Views\ExcelReport.generated.cs">
+    <Compile Include="ReportSpreadsheet\Views\ExcelReport.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>ExcelReport.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Reports\Views\_ViewStart.generated.cs">
+    <Compile Include="ReportSpreadsheet\Views\_ViewStart.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>_ViewStart.cshtml</DependentUpon>
@@ -937,8 +937,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>QueryOrder.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Reports\ReportSpreadsheetsClient.cs" />
-    <Compile Include="Reports\Controllers\ReportController.cs" />
+    <Compile Include="ReportSpreadsheet\ReportSpreadsheetsClient.cs" />
+    <Compile Include="ReportSpreadsheet\Controllers\ReportController.cs" />
     <Compile Include="Scheduler\SchedulerClient.cs" />
     <Compile Include="Combine\CombineController.cs" />
     <Compile Include="Combine\CombineClient.cs" />
@@ -1336,7 +1336,7 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
-    <None Include="Reports\Views\_ViewStart.cshtml">
+    <None Include="ReportSpreadsheet\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </None>
@@ -1398,7 +1398,7 @@
     <Content Include="Processes\Views\Web.config" />
     <Content Include="Profiler\Views\Web.config" />
     <Content Include="UserQueries\Views\Web.config" />
-    <Content Include="Reports\Views\Web.config" />
+    <Content Include="ReportSpreadsheet\Views\Web.config" />
     <Content Include="Scheduler\Views\Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -1644,7 +1644,7 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>UserQuery.generated.cs</LastGenOutput>
     </None>
-    <None Include="Reports\Views\ExcelReport.cshtml">
+    <None Include="ReportSpreadsheet\Views\ExcelReport.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ExcelReport.generated.cs</LastGenOutput>
     </None>

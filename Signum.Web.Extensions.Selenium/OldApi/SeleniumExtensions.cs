@@ -107,20 +107,13 @@ namespace Signum.Web.Selenium
         public const string DefaultPageLoadTimeout = "20000";
         public const string PageLoadLongTimeout = "40000";
 
-        //public const int DefaultAjaxTimeout = 10000;
-        public static int DefaultAjaxTimeout = 30000;
+        public const int DefaultAjaxTimeout = 10000;
         public static int DefaultAjaxWait = 200;
 
 
-        public static void WaitAjaxFinished(this ISelenium selenium, Expression<Func<bool>> condition)
+        public static void Wait(this ISelenium selenium, Func<bool> condition, Func<string> actionDescription = null, int? timeout = null)
         {
-            WaitAjaxFinished(selenium, condition, DefaultAjaxTimeout);
-        }
-
-        public static void WaitAjaxFinished(this ISelenium selenium, Expression<Func<bool>> condition, int? timeout = null)
-        {
-            var func = condition.Compile();
-            if (func())
+            if (condition())
                 return;
 
             DateTime limit = DateTime.Now.AddMilliseconds(timeout ?? DefaultAjaxTimeout);
@@ -128,13 +121,25 @@ namespace Signum.Web.Selenium
             {
                 Thread.Sleep(DefaultAjaxWait);
 
-                if (func())
+                if (condition())
                     return;
 
             } while (DateTime.Now < limit);
 
 
-            throw new TimeoutException("The expression took more than {0} ms:\r\n{1}".Formato(timeout ?? DefaultAjaxTimeout, condition.NiceToString()));
+            throw new TimeoutException("Timeout after {0} ms waiting for {1}".Formato(
+                timeout ?? DefaultAjaxTimeout,
+                actionDescription == null ? "visual condition" : actionDescription()));
+        }
+
+        public static void WaitElementPresent(this ISelenium selenium, string locator, Func<string> actionDescription = null, int? timeout = null)
+        {
+            selenium.Wait(() => selenium.IsElementPresent(locator), actionDescription ?? (Func<string>)(() => "{0} to be present".Formato(locator)), timeout);
+        }
+
+        public static void WaitElementDisapear(this ISelenium selenium, string locator, Func<string> actionDescription = null, int? timeout = null)
+        {
+            selenium.Wait(() => !selenium.IsElementPresent(locator), actionDescription ?? (Func<string>)(() => "{0} to disapear".Formato(locator)), timeout);
         }
 
         public static string PopupSelector(string prefix)
@@ -145,17 +150,17 @@ namespace Signum.Web.Selenium
         public static void PopupCancel(this ISelenium selenium, string prefix)
         {
             selenium.Click("jq=.ui-dialog-titlebar-close:visible");
-            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("{0}:visible".Formato(PopupSelector(prefix))));
+            selenium.Wait(() => !selenium.IsElementPresent("{0}:visible".Formato(PopupSelector(prefix))));
         }
 
         public static void PopupCancelDiscardChanges(this ISelenium selenium, string prefix)
         {
             selenium.Click("jq=.ui-dialog-titlebar-close:visible");
             
-            selenium.WaitAjaxFinished(() => selenium.IsConfirmationPresent());
+            selenium.Wait(() => selenium.IsConfirmationPresent());
             Assert.IsTrue(Regex.IsMatch(selenium.GetConfirmation(), ".*"));
             
-            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("{0}:visible".Formato(PopupSelector(prefix))));
+            selenium.Wait(() => !selenium.IsElementPresent("{0}:visible".Formato(PopupSelector(prefix))));
         }
 
         public static void PopupOk(this ISelenium selenium, string prefix)
@@ -169,7 +174,7 @@ namespace Signum.Web.Selenium
             if (submit)
                 selenium.WaitForPageToLoad(DefaultPageLoadTimeout);
             else
-                selenium.WaitAjaxFinished(() => !selenium.IsElementPresent(PopupSelector(prefix)));
+                selenium.Wait(() => !selenium.IsElementPresent(PopupSelector(prefix)));
         }
 
         public static void PopupSave(this ISelenium selenium, string prefix)

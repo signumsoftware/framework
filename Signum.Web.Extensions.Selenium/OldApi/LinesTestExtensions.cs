@@ -102,7 +102,7 @@ namespace Signum.Web.Selenium
 
         public static void RepeaterWaitUntilItemLoaded(this ISelenium selenium, string repeaterPrefix, int itemIndexBase0)
         {
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(RepeaterItemSelector(repeaterPrefix, itemIndexBase0)));
+            selenium.Wait(() => selenium.IsElementPresent(RepeaterItemSelector(repeaterPrefix, itemIndexBase0)));
         }
 
         public static void RepeaterItemMove(this ISelenium selenium, bool up, string prefix, int elementIndexBase0)
@@ -136,7 +136,7 @@ namespace Signum.Web.Selenium
             {
                 if (elementIndexBase0 != -1)
                     prefix += elementIndexBase0 + "_";
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(prefix)));
+                selenium.Wait(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(prefix)));
             }
         }
 
@@ -156,16 +156,16 @@ namespace Signum.Web.Selenium
             selenium.Click(LineCreateSelector(prefix));
 
             //implementation popup opens
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(prefix)));
+            selenium.Wait(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(prefix)));
             selenium.Click(typeToChoose);
-            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("{0} .sf-chooser-button".Formato(SeleniumExtensions.PopupSelector(prefix))));
+            selenium.Wait(() => !selenium.IsElementPresent("{0} .sf-chooser-button".Formato(SeleniumExtensions.PopupSelector(prefix))));
 
             if (opensEntity)
             {
                 //entity popup opens
                 if (elementIndexBase0 != -1)
                     prefix += elementIndexBase0 + "_";
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(prefix)));
+                selenium.Wait(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(prefix)));
             }
         }
 
@@ -177,7 +177,7 @@ namespace Signum.Web.Selenium
         public static void LineView(this ISelenium selenium, string prefix)
         {
             selenium.Click(LineViewSelector(prefix));
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("{0}:visible".Formato(SeleniumExtensions.PopupSelector(prefix))));
+            selenium.Wait(() => selenium.IsElementPresent("{0}:visible".Formato(SeleniumExtensions.PopupSelector(prefix))));
         }
 
         public static string ListLineSelector(string prefix)
@@ -205,7 +205,7 @@ namespace Signum.Web.Selenium
             {
                 selenium.Click(ListLineOptionId(prefix, itemIndexBase0));
                 selenium.Click(LineViewSelector(prefix));
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("{0}:visible".Formato(SeleniumExtensions.PopupSelector(prefix + itemIndexBase0 + "_"))));
+                selenium.Wait(() => selenium.IsElementPresent("{0}:visible".Formato(SeleniumExtensions.PopupSelector(prefix + itemIndexBase0 + "_"))));
             }
             else
             {
@@ -235,7 +235,7 @@ namespace Signum.Web.Selenium
 
             if (elementIndexBase0 != -1)
                 prefix += elementIndexBase0 + "_";
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(prefix)));
+            selenium.Wait(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(prefix)));
         }
 
         public static void LineFindWithImpl(this ISelenium selenium, string prefix, string typeToChoose)
@@ -254,14 +254,14 @@ namespace Signum.Web.Selenium
             selenium.Click(LineFindSelector(prefix));
 
             //implementation popup opens
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(prefix)));
+            selenium.Wait(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(prefix)));
             selenium.Click(typeToChoose);
-            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("{0} .sf-chooser-button".Formato(SeleniumExtensions.PopupSelector(prefix))));
+            selenium.Wait(() => !selenium.IsElementPresent("{0} .sf-chooser-button".Formato(SeleniumExtensions.PopupSelector(prefix))));
 
             //search popup opens
             if (elementIndexBase0 != -1)
                 prefix += elementIndexBase0 + "_";
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(prefix)));
+            selenium.Wait(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(prefix)));
         }
 
         public static void LineFindAndSelectElements(this ISelenium selenium, string prefix, int[] rowIndexesBase0)

@@ -38,7 +38,7 @@ namespace Signum.Web.Selenium
         public static void WaitSearchCompleted(this ISelenium selenium, string prefix)
         {
             string searchButton = SearchSelector(prefix);
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(searchButton) &&
+            selenium.Wait(() => selenium.IsElementPresent(searchButton) &&
                 !selenium.IsElementPresent("{0}.sf-searching".Formato(searchButton)));
         }
 
@@ -74,7 +74,7 @@ namespace Signum.Web.Selenium
         public static void ToggleFilters(this ISelenium selenium, bool show, string prefix)
         {
             selenium.Click("jq=#{0}sfSearchControl .sf-filters-header".Formato(prefix));
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#{0}sfSearchControl .sf-filters:{1}".Formato(prefix, show ? "visible" : "hidden")));
+            selenium.Wait(() => selenium.IsElementPresent("jq=#{0}sfSearchControl .sf-filters:{1}".Formato(prefix, show ? "visible" : "hidden")));
         }
 
         public static void FilterSelectToken(this ISelenium selenium, int tokenSelectorIndexBase0, string itemSelector, bool willExpand)
@@ -86,7 +86,7 @@ namespace Signum.Web.Selenium
         {
             selenium.Select("{0}ddlTokens_{1}".Formato(prefix, tokenSelectorIndexBase0), itemSelector);
             if (willExpand)
-                selenium.WaitAjaxFinished(() => selenium.IsElementPresent("{0}ddlTokens_{1}".Formato(prefix, tokenSelectorIndexBase0 + 1)));
+                selenium.Wait(() => selenium.IsElementPresent("{0}ddlTokens_{1}".Formato(prefix, tokenSelectorIndexBase0 + 1)));
         }
 
         public static string FilterOperationSelector(int filterIndexBase0)
@@ -121,7 +121,7 @@ namespace Signum.Web.Selenium
         public static void AddFilter(this ISelenium selenium, int filterIndexBase0, string prefix)
         {
             selenium.Click("{0}btnAddFilter".Formato(prefix));
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(FilterOperationSelector(filterIndexBase0, prefix)));
+            selenium.Wait(() => selenium.IsElementPresent(FilterOperationSelector(filterIndexBase0, prefix)));
         }        
 
         public static void FilterSelectOperation(this ISelenium selenium, int filterIndexBase0, string optionSelector)
@@ -155,9 +155,9 @@ namespace Signum.Web.Selenium
             selenium.ContextMenu(cellSelector);
             
             string quickFilterSelector = "{0} .sf-quickfilter > span".Formato(cellSelector);
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(quickFilterSelector));
+            selenium.Wait(() => selenium.IsElementPresent(quickFilterSelector));
             selenium.Click(quickFilterSelector);
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#{0}tblFilters #{0}trFilter_{1}".Formato(prefix, filterIndexBase0)));
+            selenium.Wait(() => selenium.IsElementPresent("jq=#{0}tblFilters #{0}trFilter_{1}".Formato(prefix, filterIndexBase0)));
         }
 
         public static void QuickFilterFromHeader(this ISelenium selenium, int columnIndexBase1, int filterIndexBase0)
@@ -170,7 +170,7 @@ namespace Signum.Web.Selenium
             string headerSelector = SearchTestExtensions.TableHeaderSelector(columnIndexBase1, prefix);
             selenium.ContextMenu(headerSelector);
             selenium.Click("{0} .sf-quickfilter-header > span".Formato(headerSelector));
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("jq=#{0}tblFilters #{0}trFilter_{1}".Formato(prefix, filterIndexBase0)));
+            selenium.Wait(() => selenium.IsElementPresent("jq=#{0}tblFilters #{0}trFilter_{1}".Formato(prefix, filterIndexBase0)));
         }
 
         public static void RemoveColumn(this ISelenium selenium, int columnIndexBase1, int numberOfColumnsBeforeDeleting)
@@ -185,7 +185,7 @@ namespace Signum.Web.Selenium
             string headerSelector = SearchTestExtensions.TableHeaderSelector(columnIndexBase1, prefix);
             selenium.ContextMenu(headerSelector);
             selenium.Click("{0} .sf-remove-column > span".Formato(headerSelector));
-            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent(lastHeaderSelector));
+            selenium.Wait(() => !selenium.IsElementPresent(lastHeaderSelector));
         }
 
         public static void EditColumnName(this ISelenium selenium, int columnIndexBase1, string newName)
@@ -201,11 +201,11 @@ namespace Signum.Web.Selenium
 
             string popupPrefix = prefix + "newName_";
             string popupSelector = SeleniumExtensions.PopupSelector(popupPrefix);
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(popupSelector));
+            selenium.Wait(() => selenium.IsElementPresent(popupSelector));
             selenium.Type("{0} input:text".Formato(popupSelector), newName);
 
             selenium.PopupOk(popupPrefix);
-            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent(SeleniumExtensions.PopupSelector(popupPrefix)));
+            selenium.Wait(() => !selenium.IsElementPresent(SeleniumExtensions.PopupSelector(popupPrefix)));
             Assert.IsTrue(selenium.IsElementPresent("{0}:contains('{1}')".Formato(headerSelector, newName)));
         }
 
@@ -223,7 +223,7 @@ namespace Signum.Web.Selenium
             
             selenium.DragAndDropToObject(headerSelector, targetSelector);
 
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("{0}:contains('{1}')".Formato(
+            selenium.Wait(() => selenium.IsElementPresent("{0}:contains('{1}')".Formato(
                 SearchTestExtensions.TableHeaderSelector((left ? (columnIndexBase1 - 1) : (columnIndexBase1 + 1)), prefix),
                 columnName)));
         }
@@ -357,7 +357,7 @@ namespace Signum.Web.Selenium
         public static void AddColumn(this ISelenium selenium, string columnTokenName, string prefix)
         {
             selenium.Click("{0}btnAddColumn".Formato(prefix));
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("{0} > :hidden[value='{1}']".Formato(TableHeaderSelector(prefix), columnTokenName)));
+            selenium.Wait(() => selenium.IsElementPresent("{0} > :hidden[value='{1}']".Formato(TableHeaderSelector(prefix), columnTokenName)));
         }
 
         public static void Sort(this ISelenium selenium, int columnIndexBase1, bool ascending)
@@ -484,7 +484,7 @@ namespace Signum.Web.Selenium
         public static void EntityContextMenu(this ISelenium selenium, int rowIndexBase1, string prefix)
         {
             selenium.ContextMenu(CellSelector(selenium, rowIndexBase1, 1, prefix));
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(EntityContextMenuSelector(selenium, rowIndexBase1, prefix)));
+            selenium.Wait(() => selenium.IsElementPresent(EntityContextMenuSelector(selenium, rowIndexBase1, prefix)));
         }
 
         public static void EntityContextMenuClick(this ISelenium selenium, int rowIndexBase1, string itemId)
@@ -509,7 +509,7 @@ namespace Signum.Web.Selenium
                 quickLinkIndexBase1));
         }
 
-        public static Expression<Func<bool>> ThereAreNRows(this ISelenium selenium, int n, string prefix)
+        public static Func<bool> ThereAreNRows(this ISelenium selenium, int n, string prefix)
         {
             if (n == 0)
                 n = 1; //there will be a row with the "no results" message
@@ -521,7 +521,7 @@ namespace Signum.Web.Selenium
                 !selenium.IsElementPresent(noRow);
         }
 
-        public static Expression<Func<bool>> ThereAreNRows(this ISelenium selenium, int n)
+        public static Func<bool> ThereAreNRows(this ISelenium selenium, int n)
         {
             return ThereAreNRows(selenium, n, "");
         }
@@ -556,9 +556,9 @@ namespace Signum.Web.Selenium
             selenium.Click(SearchCreateLocator(prefix));
 
             //implementation popup opens
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(prefix)));
+            selenium.Wait(() => selenium.IsElementPresent(SeleniumExtensions.PopupSelector(prefix)));
             selenium.Click(typeToChoose);
-            selenium.WaitAjaxFinished(() => !selenium.IsElementPresent("{0} .sf-chooser-button".Formato(SeleniumExtensions.PopupSelector(prefix))));
+            selenium.Wait(() => !selenium.IsElementPresent("{0} .sf-chooser-button".Formato(SeleniumExtensions.PopupSelector(prefix))));
         }
 
         public static string QueryButtonLocator(string id) {

@@ -18,7 +18,7 @@ namespace Signum.Web.Selenium
     {
         public static string ValidationSummaryLocator(this IValidationSummaryContainer container)
         {
-            return "jq=#{0}sfGlobalValidationSummary".Formato(container.Prefix);
+            return "jq=#{0}_sfGlobalValidationSummary".Formato(container.Prefix);
         }
 
         public static bool FormHasNErrors(this IValidationSummaryContainer container, int? numberOfErrors)

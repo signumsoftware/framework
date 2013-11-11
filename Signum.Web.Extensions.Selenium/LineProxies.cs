@@ -5,7 +5,9 @@ using System.Text;
 using Selenium;
 using Signum.Engine.Basics;
 using Signum.Entities;
+using Signum.Entities.Reflection;
 using Signum.Utilities;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Web.Selenium
 {
@@ -31,6 +33,52 @@ namespace Signum.Web.Selenium
         }
     }
 
+    public class ValueLineProxy : BaseLineProxy
+    {
+        public ValueLineProxy(ISelenium selenium, string prefix, PropertyRoute route)
+            : base(selenium, prefix, route)
+        {
+        }
+
+        public string StringValue
+        {
+            get
+            {
+                if (Selenium.IsElementPresent("jq=input[type=checkbox]{0}".Formato(Prefix)))
+                    return Selenium.IsChecked(Prefix).ToString();
+
+                return Selenium.GetValue(Prefix);
+            }
+
+            set
+            {
+                if (Selenium.IsElementPresent("jq=input[type=checkbox]{0}".Formato(Prefix)))
+                    Selenium.SetChecked(Prefix, bool.Parse(value));
+                else
+                    Selenium.Type(Prefix, value);
+            }
+        }
+
+
+        public object Value
+        {
+            get { return GetValue(Route.Type); }
+            set { SetValue(value, Reflector.FormatString(Route)); }
+        }
+
+        public object GetValue(Type type)
+        {
+            return ReflectionTools.Parse(StringValue, type);
+        }
+
+        public void SetValue(object value, string format)
+        {
+            StringValue = value == null ? null :
+                    value is IFormattable ? ((IFormattable)value).ToString(format, null) :
+                    value.ToString();
+        }
+    }
+
     public abstract class EntityBaseProxy : BaseLineProxy
     {
         public EntityBaseProxy(ISelenium selenium, string prefix, PropertyRoute route)
@@ -40,7 +88,7 @@ namespace Signum.Web.Selenium
 
         public string CreateLocator
         {
-            get { return "jq=#{0}btnCreate".Formato(Prefix); }
+            get { return "jq=#{0}_btnCreate".Formato(Prefix); }
         }
 
         public void Create()
@@ -48,89 +96,107 @@ namespace Signum.Web.Selenium
             Selenium.Click(CreateLocator);
         }
 
-        public void CreateImplementations(Type selectType, int? index = null)
+        public void CreateImplementations(Type selectType)
         {
             Create();
 
-            string newPrefix = Prefix + (index == null ? "" : ("_" + index));
-
-            Selenium.WaitAjaxFinished(() => Popup.IsPopupVisible(Selenium, newPrefix));
-
-            if (!Popup.IsChooser(Selenium, newPrefix))
-                throw new InvalidOperationException("No chooser found");
-
-            Selenium.Click(TypeLogic.GetCleanName(selectType));
+            string newPrefix = ChooseType(selectType, NewIndex());
         }
 
-        public PopupControl<T> CreateWaitPopup<T>(int? index = null) where T : ModifiableEntity
+        public virtual int? NewIndex()
         {
+            return null;
+        }
+
+        public PopupControl<T> CreatePopup<T>() where T : ModifiableEntity
+        {
+            var index = NewIndex();
+
             Create();
 
-            string newPrefix = Prefix + (index == null ? "" : ("_" + index));
+            string newPrefix = ChooseType(typeof(T), index);
 
-            Selenium.WaitAjaxFinished(() => Popup.IsPopupVisible(Selenium, newPrefix));
-
-            if (Popup.IsChooser(Selenium, newPrefix))
-            {
-                Selenium.Click(TypeLogic.GetCleanName(typeof(T)));
-
-                Selenium.WaitAjaxFinished(() => !Popup.IsChooser(Selenium, newPrefix));
-            }
-
-            PropertyRoute route = index == 0 ? this.Route : this.Route.Add("Item");
+            PropertyRoute route = index == null ? this.Route : this.Route.Add("Item");
 
             return new PopupControl<T>(this.Selenium, newPrefix, route);
         }
 
         public string ViewLocator
         {
-            get { return "jq=#{0}btnView".Formato(Prefix); }
+            get { return "jq=#{0}_btnView".Formato(Prefix); }
         }
 
-        public PopupControl<T> View<T>(int? index = null) where T : ModifiableEntity
+        protected PopupControl<T> ViewInternal<T>(int? index) where T : ModifiableEntity
         {
             Selenium.Click(ViewLocator);
 
             string newPrefix = Prefix + (index == null ? "" : ("_" + index));
 
-            Selenium.WaitAjaxFinished(() => Popup.IsPopupVisible(Selenium, newPrefix));
+            Selenium.Wait(() => Popup.IsPopupVisible(Selenium, newPrefix), () => "Popup {0} to be visible".Formato(newPrefix));
 
-            PropertyRoute route = index == 0 ? this.Route : this.Route.Add("Item");
+            PropertyRoute route = index == null ? this.Route : this.Route.Add("Item");
 
             return new PopupControl<T>(this.Selenium, newPrefix, route);
         }
 
         public string FindLocator
         {
-            get { return "jq=#{0}btnFind".Formato(Prefix); }
+            get { return "jq=#{0}_btnFind".Formato(Prefix); }
         }
 
-        public SearchPopupProxy Find(Type selectType = null, int? index = null)
+        public string RemoveLocator
         {
-            Find();
+            get { return "jq=#{0}_btnRemove".Formato(Prefix); }
+        }
 
+        public void Remove()
+        {
+            Selenium.Click(RemoveLocator);
+        }
+
+        public SearchPopupProxy Find(Type selectType = null)
+        {
+            int? index = NewIndex();
+
+            Selenium.Click(FindLocator);
+
+            string newPrefix = ChooseType(selectType, index);
+
+            return new SearchPopupProxy(Selenium, newPrefix);
+        }
+
+        private string ChooseType(Type selectType, int? index)
+        {
             string newPrefix = Prefix + (index == null ? "" : ("_" + index));
 
-            Selenium.WaitAjaxFinished(() => Popup.IsPopupVisible(Selenium, newPrefix));
+            Selenium.Wait(() => Popup.IsPopupVisible(Selenium, newPrefix) || Popup.IsPopupVisible(Selenium, Prefix), () => "Popup {0} or {1} to be visible".Formato(newPrefix, Prefix));
 
             if (selectType == null)
             {
-                if (Popup.IsChooser(Selenium, newPrefix))
-                    throw new InvalidOperationException("TypeChooser found but argment selectType is not specified");
+                if (Popup.IsChooser(Selenium, Prefix))
+                    throw new InvalidOperationException("TypeChooser found but arugment selectType is not specified");
             }
             else
             {
-                if (Popup.IsChooser(Selenium, newPrefix))
-                    throw new InvalidOperationException("No TypeChooser found but argment selectType is set to {0}".Formato(selectType.Name));
+                if (Popup.IsChooser(Selenium, Prefix))
+                {
+                    Selenium.Click(TypeLogic.GetCleanName(selectType));
 
-                Selenium.Click(TypeLogic.GetCleanName(selectType));
-
-                Selenium.WaitAjaxFinished(() => !Popup.IsChooser(Selenium, newPrefix));
+                    Selenium.Wait(() => !Popup.IsChooser(Selenium, Prefix));
+                }
             }
 
-            Selenium.Click(TypeLogic.GetCleanName(selectType));
+            return newPrefix;
+        }
 
-            return new SearchPopupProxy(Selenium, newPrefix);
+        protected string RuntimeInfoLocatorInternal(int? index = null)
+        {
+            return Prefix + (index == null ? "" : ("_" + index)) + "_sfRuntimeInfo";
+        }
+
+        protected RuntimeInfoProxy RuntimeInfoInternal(int? index = null)
+        {
+            return RuntimeInfoProxy.FromFormValue(Selenium.GetValue(RuntimeInfoLocatorInternal(index)));
         }
     }
 
@@ -143,40 +209,29 @@ namespace Signum.Web.Selenium
 
         public string OptionIdLocator(int index)
         {
-            return "jq=#{0}{1}_sfToStr".Formato(Prefix, index);
-        }
-
-        public string RuntimeInfoLocator(int index)
-        {
-            return "jq=#{0}{1}_sfRuntimeInfo".Formato(Prefix, index);
+            return "jq=#{0}_{1}_sfToStr".Formato(Prefix, index);
         }
 
         public string ListLocator
         {
-            get { return "jq=#{0}sfList".Formato(Prefix); }
+            get { return "jq=#{0}_sfList".Formato(Prefix); }
         }
 
         public void Select(int index)
         {
-            Selenium.Select(ListLocator, "id=" + OptionIdLocator(index));
+            Selenium.Select(ListLocator, "id={0}_{1}_sfToStr".Formato(Prefix, index));
         }
 
         public void AddSelection(int index)
         {
-            Selenium.AddSelection(ListLocator, "id=" + OptionIdLocator(index));
+            Selenium.AddSelection(ListLocator, "id={0}_{1}_sfToStr".Formato(Prefix, index));
         }
 
-        public PopupControl<T> SelectView<T>(int index) where T : ModifiableEntity
+        public PopupControl<T> View<T>(int index) where T : ModifiableEntity
         {
             Select(index);
 
-            Selenium.DoubleClick(OptionIdLocator(index));
-
-            string newPrefix = Prefix + index;
-
-            Selenium.WaitAjaxFinished(() => Popup.IsPopupVisible(Selenium, newPrefix));
-
-            return new PopupControl<T>(this.Selenium, newPrefix, this.Route.Add("Item"));
+            return base.ViewInternal<T>(index);
         }
 
         public bool HasEntity(int index)
@@ -188,6 +243,61 @@ namespace Signum.Web.Selenium
                 throw new InvalidOperationException("{0}{1}_sfToStr is {2} but {0}{1}_sfRuntimeInfo is {3}".Formato(Prefix, index, ToVisible(optionVisible), ToVisible(runtimeInfoVisible)));
 
             return optionVisible;
+        }
+
+
+        public int ItemsCount()
+        {
+            string result = Selenium.GetEval("window.$('#{0}_sfList option').length".Formato(Prefix));
+
+            return int.Parse(result);
+        }
+
+        public override int? NewIndex()
+        {
+            string result = Selenium.GetEval("window.$('#{0}_sfList option').get().map(function(a){{return parseInt(a.id.substr('{0}'.length + 1));}}).join()".Formato(Prefix));
+
+            return string.IsNullOrEmpty(result) ? 0 : result.Split(',').Select(int.Parse).Max() + 1;
+        }
+
+        public string DetailsDivSelector
+        {
+            get { return "jq=#{0}_sfDetail".Formato(Prefix); }
+        }
+
+        public string RuntimeInfoLocator(int index)
+        {
+            return RuntimeInfoLocatorInternal(index);
+        }
+
+        public RuntimeInfoProxy RuntimeInfo(int index)
+        {
+            return RuntimeInfoInternal(index);
+        }
+
+        public bool HasDetailEntity()
+        {
+            bool parentVisible = Selenium.IsElementPresent(DetailsDivSelector + ":parent");
+            bool emptyVisible = Selenium.IsElementPresent(DetailsDivSelector + ":empty");
+
+            if (parentVisible != !emptyVisible)
+                throw new InvalidOperationException("{0}_sfDetail is {1} but has {1}".Formato(Prefix,
+                    parentVisible ? "has parent" : "has no parent",
+                    emptyVisible ? "empty" : "not empty"));
+
+
+            return parentVisible;
+        }
+
+        public LineContainer<T> Details<T>(int index) where T : ModifiableEntity
+        {
+            return new LineContainer<T>(Selenium, Prefix + "_" + index, Route.Add("Item"));
+        }
+
+        public void DoubleClick(int index)
+        {
+            Select(index);
+            Selenium.DoubleClick(OptionIdLocator(index));
         }
     }
 
@@ -201,22 +311,17 @@ namespace Signum.Web.Selenium
 
         public string ItemsContainerLocator
         {
-            get { return "jq=#{0}sfItemsContainer".Formato(Prefix); }
+            get { return "jq=#{0}_sfItemsContainer".Formato(Prefix); }
         }
 
         public string RepeaterItemSelector(int index)
         {
-            return "{0} > #{1}{2}_sfRepeaterItem".Formato(ItemsContainerLocator, Prefix, index);
-        }
-
-        public string RuntimeInfoLocator(int index)
-        {
-            return "jq=#{0}{1}_sfRuntimeInfo".Formato(Prefix, index);
+            return "{0} > #{1}_{2}_sfRepeaterItem".Formato(ItemsContainerLocator, Prefix, index);
         }
 
         public void WaitItemLoaded(int index)
         {
-            Selenium.WaitAjaxFinished(() => Selenium.IsElementPresent(RepeaterItemSelector(index)));
+            Selenium.WaitElementPresent(RepeaterItemSelector(index));
         }
 
         public void ItemMove(int index, bool up)
@@ -230,9 +335,50 @@ namespace Signum.Web.Selenium
             bool runtimeInfoPresent = Selenium.IsElementPresent(RuntimeInfoLocator(index));
 
             if (divPresent != runtimeInfoPresent)
-                throw new InvalidOperationException("{0}{1}_sfToStr is {2} but {0}{1}_sfRuntimeInfo is {3}".Formato(Prefix, index, ToVisible(divPresent), ToVisible(runtimeInfoPresent)));
+                throw new InvalidOperationException("{0} is {2} but {1} is {3}".Formato(
+                    RepeaterItemSelector(index), RuntimeInfoLocator(index),
+                    ToVisible(divPresent), ToVisible(runtimeInfoPresent)));
 
             return divPresent;
+        }
+
+        public int ItemsCount()
+        {
+            string result = Selenium.GetEval("window.$('#{0}_sfItemsContainer fieldset').length".Formato(ItemsContainerLocator));
+
+            return int.Parse(result);
+        }
+
+        public override int? NewIndex()
+        {
+            string result = Selenium.GetEval("window.$('#{0}_sfItemsContainer fieldset').get().map(function(a){{return parseInt(a.id.substr('{0}'.length + 1));}}).join()".Formato(Prefix));
+
+            return string.IsNullOrEmpty(result) ? 0 : result.Split(',').Select(int.Parse).Max() + 1;
+        }
+
+        public LineContainer<T> Details<T>(int index) where T : ModifiableEntity
+        {
+            return new LineContainer<T>(Selenium, Prefix + "_" + index, Route.Add("Item"));
+        }
+
+        public string RemoveLocatorIndex(int index)
+        {
+            return "jq=#{0}_{1}_btnRemove".Formato(Prefix, index);
+        }
+
+        public void Remove(int index)
+        {
+            Selenium.Click(RemoveLocatorIndex(index));
+        }
+
+        public string RuntimeInfoLocator(int index)
+        {
+            return RuntimeInfoLocatorInternal(index);
+        }
+
+        public RuntimeInfoProxy RuntimeInfo(int index)
+        {
+            return RuntimeInfoInternal(index);
         }
     }
 
@@ -245,12 +391,12 @@ namespace Signum.Web.Selenium
 
         public string ToStrLocator
         {
-            get { return "jq=#{0}sfToStr".Formato(Prefix); }
+            get { return "jq=#{0}_sfToStr".Formato(Prefix); }
         }
 
         public string LinkLocator
         {
-            get { return "jq=#{0}sfLink".Formato(Prefix); }
+            get { return "jq=#{0}_sfLink".Formato(Prefix); }
         }
 
         public bool HasEntity()
@@ -259,11 +405,108 @@ namespace Signum.Web.Selenium
             bool linkVisible = Selenium.IsElementPresent(LinkLocator + ":visible");
 
             if (toStrVisible != !linkVisible)
-                throw new InvalidOperationException("{0}sfToStr is {1} but {0}sfLink is {2}".Formato(Prefix,
+                throw new InvalidOperationException("{0}_sfToStr is {1} but {0}_sfLink is {2}".Formato(Prefix,
                     toStrVisible ? "visible" : "not visible",
                     linkVisible ? "visible" : "not visible"));
 
             return linkVisible;
+        }
+
+        public Lite<IIdentifiable> LiteValue
+        {
+            get { return RuntimeInfo().ToLite(); }
+            set
+            {
+                if (HasEntity())
+                    this.Remove();
+
+                if (value != null)
+                {
+                    if (Selenium.IsElementPresent(AutoCompleteLocator))
+                        AutoComplete(value);
+                    else if (Selenium.IsElementPresent(FindLocator))
+                        this.Find().SelectLite(value);
+                    else
+                        throw new NotImplementedException("AutoComplete");
+                }
+            }
+        }
+
+        public string AutoCompleteLocator
+        {
+            get { return "jq=#{0}_sfToStr".Formato(Prefix); }
+        }
+
+        public void AutoComplete(Lite<IIdentifiable> lite)
+        {
+            Selenium.Type(AutoCompleteLocator, lite.Id.ToString());
+            Selenium.FireEvent(AutoCompleteLocator, "keydown");
+
+            Selenium.WaitElementPresent("jq=.ui-autocomplete:visible");
+            Selenium.FireEvent("jq=.ui-autocomplete:visible > li:first > a", "focus");
+            Selenium.Click("jq=.ui-autocomplete:visible > li:first > a");
+        }
+
+        public PopupControl<T> View<T>() where T : ModifiableEntity
+        {
+            return base.ViewInternal<T>(null);
+        }
+
+        public string RuntimeInfoLocator()
+        {
+            return RuntimeInfoLocatorInternal(null);
+        }
+
+        public RuntimeInfoProxy RuntimeInfo()
+        {
+            return RuntimeInfoInternal(null);
+        }
+    }
+
+    public class EntityComboProxy : EntityBaseProxy
+    {
+        public EntityComboProxy(ISelenium selenium, string prefix, PropertyRoute route)
+            : base(selenium, prefix, route)
+        {
+        }
+
+        public string ComboLocator
+        {
+            get { return "jq=#{0}_sfCombo".Formato(Prefix); }
+        }
+
+        public Lite<IIdentifiable> LiteValue
+        {
+            get { return RuntimeInfo().ToLite(); }
+            set
+            {
+                Selenium.Select(ComboLocator, "value=" + (value == null ? null : value.Key()));
+            }
+        }
+
+        public PopupControl<T> View<T>() where T : ModifiableEntity
+        {
+            return base.ViewInternal<T>(null);
+        }
+
+        public void SelectLabel(string label)
+        {
+            Selenium.Select(ComboLocator, "label=" + label);
+        }
+
+        public void SelectIndex(int index)
+        {
+            Selenium.Select(ComboLocator, "index=" + (index + 1));
+        }
+
+        public string RuntimeInfoLocator()
+        {
+            return RuntimeInfoLocatorInternal(null);
+        }
+
+        public RuntimeInfoProxy RuntimeInfo()
+        {
+            return RuntimeInfoInternal(null);
         }
     }
 
@@ -276,7 +519,7 @@ namespace Signum.Web.Selenium
 
         public string DivSelector
         {
-            get { return "jq=#{0}sfDetail".Formato(Prefix); }
+            get { return "jq=#{0}_sfDetail".Formato(Prefix); }
         }
 
         public bool HasEntity()
@@ -292,6 +535,50 @@ namespace Signum.Web.Selenium
 
             return parentVisible;
         }
+
+        public Lite<IIdentifiable> Lite
+        {
+            get { return RuntimeInfo().ToLite(); }
+            set
+            {
+                if (HasEntity())
+                    this.Remove();
+
+                if (Selenium.IsElementPresent(FindLocator))
+                    this.Find().SelectLite(value);
+
+                throw new NotImplementedException("AutoComplete");
+            }
+        }
+
+        public LineContainer<T> Details<T>() where T : ModifiableEntity
+        {
+            return new LineContainer<T>(Selenium, Prefix, Route);
+        }
+
+        public string RuntimeInfoLocator()
+        {
+            return RuntimeInfoLocatorInternal(null);
+        }
+
+        public RuntimeInfoProxy RuntimeInfo()
+        {
+            return RuntimeInfoInternal(null);
+        }
     }
 
+    public class FileLineProxy : BaseLineProxy
+    {
+        public FileLineProxy(ISelenium selenium, string prefix, PropertyRoute route)
+            : base(selenium, prefix, route)
+        {
+        }
+
+        public void SetPath(string path)
+        {
+            Selenium.Type("{0}_sfFile".Formato(Prefix), path);
+            Selenium.FireEvent("{0}_sfFile".Formato(Prefix), "change");
+            Selenium.WaitElementDisapear("jq=#{0}_sfFile:visible".Formato(Prefix));
+        }
+    }
 }

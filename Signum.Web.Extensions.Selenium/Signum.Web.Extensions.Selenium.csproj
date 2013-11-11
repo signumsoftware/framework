@@ -79,6 +79,7 @@
     <Reference Include="ThoughtWorks.Selenium.UnitTests, Version=0.0.0.0, Culture=neutral" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChartPageProxy.cs" />
     <Compile Include="EntityButtonContainer.cs" />
     <Compile Include="LineContainer.cs" />
     <Compile Include="LineProxies.cs" />
@@ -89,8 +90,10 @@
     <Compile Include="OldApi\SearchTestExtensions.cs" />
     <Compile Include="OldApi\SeleniumExtensions.cs" />
     <Compile Include="OldApi\SeleniumTestClass.cs" />
+    <Compile Include="RuntimeInfoProxy.cs" />
     <Compile Include="SearchDialogProxy.cs" />
     <Compile Include="SeleniumExtensionsNew.cs" />
+    <Compile Include="SearchControlExtensions.cs" />
     <Compile Include="ValidationSummaryContainer.cs" />
     <Compile Include="WidgetContainer.cs" />
   </ItemGroup>

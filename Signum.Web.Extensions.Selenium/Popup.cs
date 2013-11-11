@@ -2,13 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Selenium;
+using Signum.Engine.Basics;
 using Signum.Entities;
 using Signum.Utilities;
 
 namespace Signum.Web.Selenium
 {
-    public abstract class Popup : IDisposable
+    public class Popup : IDisposable
     {
         public ISelenium Selenium { get; private set; }
 
@@ -18,41 +20,95 @@ namespace Signum.Web.Selenium
         {
             this.Selenium = selenium;
             this.Prefix = prefix;
-       
         }
 
         public string PopupVisibleLocator
         {
-            get { return "jq=#{0}Temp:visible".Formato(Prefix); }
+            get { return "jq=#{0}_Temp:visible".Formato(Prefix); }
         }
 
         public string CloseButtonLocator
         {
-            get { return "jq=.ui-dialog-titlebar-close:visible"; }
+            get { return "jq=[aria-describedby='{0}_Temp'] .ui-dialog-titlebar-close:visible".Formato(Prefix); }
         }
 
         public void Close()
         {
             Selenium.Click(CloseButtonLocator);
-
-            Selenium.WaitAjaxFinished(() => Selenium.IsConfirmationPresent());
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
-            if (Selenium.IsElementPresent(PopupVisibleLocator))
-                throw new InvalidOperationException("Close popup {0} before dispossing".Formato(Prefix));
+            if (Selenium.IsElementPresent(CloseButtonLocator))
+                Selenium.Click(CloseButtonLocator);
+
+            Selenium.WaitElementDisapear(PopupVisibleLocator);
         }
 
+        public string OkButtonLocator
+        {
+            get { return "jq=#{0}_btnOk".Formato(Prefix); }
+        }
+
+        public void OkWaitSubmit()
+        {
+            Selenium.Click(OkButtonLocator);
+            Selenium.WaitForPageToLoad(SeleniumExtensions.DefaultPageLoadTimeout);
+        }
+
+        public NormalPage<T> OkWaitNormalPage<T>() where T : IdentifiableEntity
+        {
+            Selenium.Click(OkButtonLocator);
+            Selenium.WaitForPageToLoad(SeleniumExtensions.DefaultPageLoadTimeout);
+            return new NormalPage<T>(Selenium);
+        }
+
+        public void OkWaitClosed()
+        {
+            Selenium.Click(OkButtonLocator);
+            Selenium.WaitElementDisapear(PopupVisibleLocator);
+        }
 
         public static bool IsPopupVisible(ISelenium selenium, string prefix)
         {
-            return selenium.IsElementPresent("jq=#{0}Temp:visible".Formato(prefix));
+            return selenium.IsElementPresent("jq=#{0}:visible".Formato("_".CombineIfNotEmpty(prefix, "Temp")));
         }
 
         public static bool IsChooser(ISelenium selenium, string prefix)
         {
-            return selenium.IsElementPresent("jq=#{0}Temp:visible".Formato(prefix) + " .sf-chooser-button");
+            return selenium.IsElementPresent("jq=#{0}:visible".Formato("_".CombineIfNotEmpty(prefix, "Temp")) + " .sf-chooser-button");
+        }
+    }
+
+    public class SelectorPopup : Popup
+    {
+        public SelectorPopup(ISelenium selenium, string prefix = "New") : base(selenium, prefix) { }
+
+        public void Select(string locator)
+        {
+            Selenium.Click(locator);
+        }
+
+        public void Select(Enum enumValue)
+        {
+            Selenium.Click(enumValue.ToString());
+        }
+
+        public void Select<T>()
+        {
+            Selenium.Click(TypeLogic.GetCleanName(typeof(T)));
+        }
+    }
+
+    public class ValueLinePopup : Popup
+    {
+        public ValueLinePopup(ISelenium selenium, string prefix = "New") : base(selenium, prefix)
+        {
+        }
+
+        public ValueLineProxy StringValueLine
+        {
+            get { return new ValueLineProxy(Selenium, Prefix + "_StringValue", null); }
         }
     }
 
@@ -64,26 +120,49 @@ namespace Signum.Web.Selenium
         public PopupControl(ISelenium selenium, string prefix, PropertyRoute route = null)
             : base(selenium, prefix)
         {
-            this.Route = route ?? PropertyRoute.Root(typeof(T));
+            this.Route = route == null || route.IsImplementation(typeof(T)) ? PropertyRoute.Root(typeof(T)) : route;
         }
 
-        public string OkButtonLocator
+
+        public string ButtonLocator(string buttonId)
         {
-            get { return "jq=#{0}btnOk".Formato(Prefix); }
+            return "jq=#{0}_panelPopup #{1}.sf-entity-button".Formato(Prefix, buttonId);
         }
 
-        public void OkWaitSubmit()
+        public bool HasChanges()
         {
-            Selenium.Click(OkButtonLocator);
-            Selenium.WaitForPageToLoad(SeleniumExtensions.DefaultPageLoadTimeout);
+            return Selenium.IsElementPresent("jq=#{0}_divMainControl.sf-changed".Formato(Prefix));
         }
 
-        public void OkWaitClosed()
+        public void CloseDiscardChanges()
         {
-            Selenium.Click(OkButtonLocator);
-            Selenium.WaitAjaxFinished(() => !Selenium.IsElementPresent(PopupVisibleLocator));
+            Selenium.Click(CloseButtonLocator);
+
+            Selenium.ConsumeConfirmation();
+
+            Selenium.WaitElementDisapear(PopupVisibleLocator + ":visible");
         }
 
-       
+        public override void Dispose()
+        {
+            if (Selenium.IsElementPresent(CloseButtonLocator))
+            {
+                Selenium.Click(CloseButtonLocator);
+
+                string confirmation;
+                Selenium.Wait(() =>
+                {
+                    if (!Selenium.IsElementPresent(PopupVisibleLocator))
+                        return true;
+
+                    if (Selenium.IsConfirmationPresent())
+                        confirmation = Selenium.GetConfirmation();
+
+                    return false;
+                }, ()=>"popup {0} to disapear with or without confirmation");
+            }
+        }
+
+        
     }
 }

@@ -30,7 +30,7 @@ namespace Signum.Web.Selenium
             selenium.Click("{0} .sf-quicklink-toggler".Formato(WidgetContainerSelector(prefix)));
 
             string quickLinkSelector = "{0} .sf-quicklinks > .sf-quicklink:nth-child({1}) > a".Formato(WidgetContainerSelector(prefix), quickLinkIndexBase1);
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("{0}:visible".Formato(quickLinkSelector)));
+            selenium.Wait(() => selenium.IsElementPresent("{0}:visible".Formato(quickLinkSelector)));
             selenium.Click(quickLinkSelector);
         }
 
@@ -47,7 +47,7 @@ namespace Signum.Web.Selenium
             selenium.Click("{0} .{1}".Formato(WidgetContainerSelector(prefix), notesTogglerClass));
 
             string createSelector = "{0} .{1} .sf-note-create".Formato(WidgetContainerSelector(prefix), notesDropDownClass);
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("{0}:visible".Formato(createSelector)));
+            selenium.Wait(() => selenium.IsElementPresent("{0}:visible".Formato(createSelector)));
             selenium.Click(createSelector);
         }
 
@@ -61,7 +61,7 @@ namespace Signum.Web.Selenium
             selenium.Click("{0} .{1}".Formato(WidgetContainerSelector(prefix), notesTogglerClass));
 
             string viewSelector = "{0} .{1} .sf-note-view".Formato(WidgetContainerSelector(prefix), notesDropDownClass);
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("{0}:visible".Formato(viewSelector)));
+            selenium.Wait(() => selenium.IsElementPresent("{0}:visible".Formato(viewSelector)));
             selenium.Click(viewSelector);
         }
 
@@ -95,7 +95,7 @@ namespace Signum.Web.Selenium
             selenium.Click("{0} .{1}".Formato(WidgetContainerSelector(prefix), alertsTogglerClass));
 
             string createSelector = "{0} .{1} .sf-alert-create".Formato(WidgetContainerSelector(prefix), alertsDropDownClass);
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("{0}:visible".Formato(createSelector)));
+            selenium.Wait(() => selenium.IsElementPresent("{0}:visible".Formato(createSelector)));
             selenium.Click(createSelector);
         }
 
@@ -113,7 +113,7 @@ namespace Signum.Web.Selenium
                 alertsDropDownClass,
                 alertTypeClass);
 
-            selenium.WaitAjaxFinished(() => selenium.IsElementPresent("{0}:visible".Formato(viewSelector)));
+            selenium.Wait(() => selenium.IsElementPresent("{0}:visible".Formato(viewSelector)));
             selenium.Click(viewSelector);
         }
 

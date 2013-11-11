@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Selenium;
+using Signum.Entities;
 using Signum.Utilities;
 
 namespace Signum.Web.Selenium
@@ -12,16 +13,15 @@ namespace Signum.Web.Selenium
         ISelenium Selenium { get; }
 
         string Prefix { get; }
+
+        bool HasChanges();
+
+        string ButtonLocator(string buttonId);
     }
 
     public static class EntityButtonContainerExtensions
     {
-        public static string ButtonLocator(this IEntityButtonContainer container, string buttonId)
-        {
-            return "jq={0} #{1}.sf-entity-button".Formato(container.Prefix, buttonId);
-        }
-
-        public static bool ExecuteEnabled(this IEntityButtonContainer container, Enum operationKey)
+        public static bool OperationEnabled(this IEntityButtonContainer container, Enum operationKey)
         {
             return container.ButtonEnabled(operationKey.GetType().Name + "_" + operationKey.ToString());
         }
@@ -36,9 +36,26 @@ namespace Signum.Web.Selenium
             return container.Selenium.IsElementPresent(locator + ":not(.sf-disabled)");
         }
 
-        public static void ExecuteClick(this IEntityButtonContainer container, Enum operationKey)
+        public static void ExecuteAjax(this IEntityButtonContainer container, Enum operationKey)
         {
             container.ButtonClick(operationKey.GetType().Name + "_" + operationKey.ToString());
+            container.Selenium.Wait(() => !container.HasChanges());
+        }
+
+        public static void ExecuteSubmit(this IEntityButtonContainer container, Enum operationKey)
+        {
+            container.ButtonClick(operationKey.GetType().Name + "_" + operationKey.ToString());
+            container.Selenium.WaitForPageToLoad(SeleniumExtensions.DefaultPageLoadTimeout);
+        }
+
+        public static SearchPageProxy DeleteSubmit(this IEntityButtonContainer container, Enum operationKey)
+        {
+            container.ExecuteSubmit(operationKey);
+            container.Selenium.ConsumeConfirmation();
+
+            container.Selenium.WaitForPageToLoad(SeleniumExtensions.DefaultPageLoadTimeout); 
+
+            return new SearchPageProxy(container.Selenium);
         }
 
         public static void ButtonClick(this IEntityButtonContainer container, string idButton)
@@ -51,12 +68,29 @@ namespace Signum.Web.Selenium
             return "jq={0} #{1}.sf-dropdown ul.sf-menu-button li.ui-menu-item a.sf-entity-button#{2}".Formato(container.Prefix, menuId, optionId);
         }
 
-        public static void ConstructFromClick(this IEntityButtonContainer container, Enum constructFromKey)
+        public static void ConstructFrom(this IEntityButtonContainer container, Enum operationKey)
         {
-            container.MenuOptionClick("tmConstructors", constructFromKey.GetType().Name + "_" + constructFromKey.ToString());
+            container.MenuOption("tmConstructors", operationKey.GetType().Name + "_" + operationKey.ToString());
         }
 
-        public static void MenuOptionClick(this IEntityButtonContainer container, string menuId, string optionId)
+        public static NormalPage<T> ConstructFromNormalWindow<T>(this IEntityButtonContainer container, Enum operationKey) where T: IdentifiableEntity
+        {
+            container.ConstructFrom(operationKey);
+            return new NormalPage<T>(container.Selenium, null);
+        }
+
+        public static PopupControl<T> ConstructFromPopup<T>(this IEntityButtonContainer container, Enum operationKey) where T : ModifiableEntity
+        {
+            container.ConstructFrom(operationKey); 
+
+            var popup = new PopupControl<T>(container.Selenium, "New");
+
+            container.Selenium.WaitElementPresent(popup.PopupVisibleLocator);
+
+            return popup;
+        }
+
+        public static void MenuOption(this IEntityButtonContainer container, string menuId, string optionId)
         {
             container.Selenium.Click(container.MenuOptionLocator(menuId, optionId));
         }
