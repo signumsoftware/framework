@@ -250,7 +250,7 @@ namespace Signum.Entities.DynamicQuery
 
         public string FullKey()
         {
-            if (Parent == null)
+            if (Parent == null || Subordinated)
                 return Key;
 
             return Parent.FullKey() + "." + Key;

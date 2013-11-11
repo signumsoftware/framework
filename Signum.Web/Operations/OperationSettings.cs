@@ -46,7 +46,7 @@ namespace Signum.Web.Operations
         public static EntityOperationGroup Create = new EntityOperationGroup
         {
             Description = () => OperationMessage.Create.NiceToString(),
-            SimplifyName = cs => Regex.Replace(cs, OperationMessage.CreateFromRegex.NiceToString(), m => m.Groups["t"].Value.FirstUpper(), RegexOptions.IgnoreCase),
+            SimplifyName = cs => Regex.Replace(cs, OperationMessage.CreateFromRegex.NiceToString(), m => m.Groups[1].Value.FirstUpper(), RegexOptions.IgnoreCase),
             CssClass = "sf-operation"
         };
 
