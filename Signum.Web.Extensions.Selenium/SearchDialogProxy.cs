@@ -66,7 +66,7 @@ namespace Signum.Web.Selenium
         {
             Selenium.Click(SearchControl.CreateButtonLocator);
 
-            Selenium.WaitForPageToLoad(SeleniumExtensions.DefaultPageLoadTimeout);
+            Selenium.WaitForPageToLoad();
 
             return new PopupControl<T>(Selenium, Prefix);
         }
@@ -83,7 +83,7 @@ namespace Signum.Web.Selenium
 
             Selenium.Click(TypeLogic.GetCleanName(typeof(T)));
 
-            Selenium.WaitForPageToLoad(SeleniumExtensions.DefaultPageLoadTimeout);
+            Selenium.WaitForPageToLoad();
 
             return new PopupControl<T>(Selenium, Prefix);
         }
@@ -112,7 +112,7 @@ namespace Signum.Web.Selenium
         {
             Selenium.Click(SearchControl.CreateButtonLocator);
 
-            Selenium.WaitForPageToLoad(SeleniumExtensions.DefaultPageLoadTimeout);
+            Selenium.WaitForPageToLoad();
 
             return new NormalPage<T>(Selenium);
         }
@@ -129,7 +129,7 @@ namespace Signum.Web.Selenium
 
             Selenium.Click(TypeLogic.GetCleanName(typeof(T)));
 
-            Selenium.WaitForPageToLoad(SeleniumExtensions.DefaultPageLoadTimeout);
+            Selenium.WaitForPageToLoad();
 
             return new NormalPage<T>(Selenium);
         }
@@ -602,14 +602,14 @@ namespace Signum.Web.Selenium
         public NormalPage<T> EntityClick<T>(Lite<T> lite, bool allowMultiple = true) where T : IdentifiableEntity
         {
             Selenium.Click(EntityLinkLocator(lite, allowMultiple));
-            Selenium.WaitForPageToLoad(SeleniumExtensions.DefaultPageLoadTimeout);
+            Selenium.WaitForPageToLoad();
             return new NormalPage<T>(Selenium);
         }
 
         public NormalPage<T> EntityClick<T>(int rowIndex, bool allowMultiple = true) where T : IdentifiableEntity
         {
             Selenium.Click(EntityLinkLocator(rowIndex, allowMultiple));
-            Selenium.WaitForPageToLoad(SeleniumExtensions.DefaultPageLoadTimeout);
+            Selenium.WaitForPageToLoad();
             return new NormalPage<T>(Selenium);
         }
 
@@ -808,7 +808,7 @@ namespace Signum.Web.Selenium
         public NormalPage<T> ConstructFromNormalPage<T>(Enum operationKey) where T : IdentifiableEntity
         {
             MenuClick(operationKey.GetType().Name + "_" + operationKey.ToString());
-            resultTable.Selenium.WaitForPageToLoad(SeleniumExtensions.PageLoadLongTimeout);
+            resultTable.Selenium.WaitForPageToLoad();
             var result = new NormalPage<T>(this.resultTable.Selenium);
             return result;
         }

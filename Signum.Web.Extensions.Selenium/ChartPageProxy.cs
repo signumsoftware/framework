@@ -82,20 +82,20 @@ namespace Signum.Web.Selenium
         public NormalPage<UserChartDN> NewUserChart()
         {
             Selenium.Click(MenuOptionLocator("tmUserCharts", "qbUserChartNew"));
-            Selenium.WaitForPageToLoad(SeleniumExtensions.DefaultPageLoadTimeout);
+            Selenium.WaitForPageToLoad();
             return new NormalPage<UserChartDN>(Selenium); 
         }
 
         public void SelectUserChart(string userChartName)
         {
             Selenium.Click(MenuOptionLocatorByAttr("tmUserCharts", "title=" + userChartName));
-            Selenium.WaitForPageToLoad(SeleniumExtensions.DefaultPageLoadTimeout);
+            Selenium.WaitForPageToLoad();
         }
 
         public NormalPage<UserChartDN> EditUserChart()
         {
             Selenium.Click(MenuOptionLocator("tmUserCharts", "qbUserChartEdit"));
-            Selenium.WaitForPageToLoad(SeleniumExtensions.DefaultPageLoadTimeout);
+            Selenium.WaitForPageToLoad();
             return new NormalPage<UserChartDN>(Selenium); 
         }
 
@@ -110,7 +110,7 @@ namespace Signum.Web.Selenium
         public static ChartPageProxy OpenChart(this SearchControlProxy searchControl)
         {
             searchControl.Selenium.Click("jq=#qbChartNew");
-            searchControl.Selenium.WaitForPageToLoad(SeleniumExtensions.DefaultPageLoadTimeout);
+            searchControl.Selenium.WaitForPageToLoad();
             return new ChartPageProxy(searchControl.Selenium);
         }
 
@@ -121,7 +121,7 @@ namespace Signum.Web.Selenium
             SelectorPopup sp = new SelectorPopup(controlPanel.Selenium);
             controlPanel.Selenium.WaitElementPresent(sp.PopupVisibleLocator);
             sp.Select<T>();
-            controlPanel.Selenium.WaitForPageToLoad(SeleniumExtensions.DefaultPageLoadTimeout);
+            controlPanel.Selenium.WaitForPageToLoad();
             return controlPanel.EntityRepeater(a => a.Parts).Details<PanelPartDN>(index);
         }
     }

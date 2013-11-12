@@ -13,7 +13,7 @@ namespace Signum.Web.Selenium
         public static SearchPageProxy AdministerExcelReports(this SearchControlProxy sc)
         {
             sc.Selenium.Click(sc.MenuOptionLocator("tmExcel", "qbReportAdminister"));
-            sc.Selenium.WaitForPageToLoad(SeleniumExtensions.DefaultPageLoadTimeout);
+            sc.Selenium.WaitForPageToLoad();
             return new SearchPageProxy(sc.Selenium);
         }
 
@@ -25,7 +25,7 @@ namespace Signum.Web.Selenium
         public static NormalPage<UserQueryDN> NewUserQuery(this SearchControlProxy sc)
         {
             sc.Selenium.Click(sc.MenuOptionLocator("tmUserQueries", "qbUserQueryNew"));
-            sc.Selenium.WaitForPageToLoad(SeleniumExtensions.DefaultPageLoadTimeout);
+            sc.Selenium.WaitForPageToLoad();
 
             return new NormalPage<UserQueryDN>(sc.Selenium); 
         }
@@ -33,7 +33,7 @@ namespace Signum.Web.Selenium
         public static NormalPage<UserQueryDN> EditUserQuery(this SearchControlProxy sc)
         {
             sc.Selenium.Click(sc.MenuOptionLocator("tmUserQueries", "qbUserQueryEdit"));
-            sc.Selenium.WaitForPageToLoad(SeleniumExtensions.DefaultPageLoadTimeout);
+            sc.Selenium.WaitForPageToLoad();
 
             return new NormalPage<UserQueryDN>(sc.Selenium);
         }

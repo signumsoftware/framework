@@ -23,8 +23,6 @@ namespace Signum.Web.Selenium
         protected static Process seleniumServerProcess;
         private static bool Cleaned = false;
 
-        public string PageLoadTimeout = SeleniumExtensions.DefaultPageLoadTimeout;
-
         public SeleniumTestClass()
         {
 
@@ -93,7 +91,7 @@ namespace Signum.Web.Selenium
             var url = Url(FindRoute(queryName));
 
             selenium.Open(url);
-            selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.WaitForPageToLoad();
 
             if (checkLogin != null)
                 checkLogin(url);
@@ -138,7 +136,7 @@ namespace Signum.Web.Selenium
         public NormalPage<T> NormalPageUrl<T>(string url, Action<string> checkLogin) where T : IdentifiableEntity
         {
             selenium.Open(url);
-            selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.WaitForPageToLoad();
 
             if (checkLogin != null)
                 checkLogin(url);

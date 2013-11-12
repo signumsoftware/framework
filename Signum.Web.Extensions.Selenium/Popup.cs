@@ -53,13 +53,13 @@ namespace Signum.Web.Selenium
         public void OkWaitSubmit()
         {
             Selenium.Click(OkButtonLocator);
-            Selenium.WaitForPageToLoad(SeleniumExtensions.DefaultPageLoadTimeout);
+            Selenium.WaitForPageToLoad();
         }
 
         public NormalPage<T> OkWaitNormalPage<T>() where T : IdentifiableEntity
         {
             Selenium.Click(OkButtonLocator);
-            Selenium.WaitForPageToLoad(SeleniumExtensions.DefaultPageLoadTimeout);
+            Selenium.WaitForPageToLoad();
             return new NormalPage<T>(Selenium);
         }
 
