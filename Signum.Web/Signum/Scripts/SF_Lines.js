@@ -646,18 +646,14 @@ SF.registerModule("Lines", function () {
             },
 
             newListItem: function (clonedElements, itemPrefix, item) {
-                var listInfo = this.staticInfo();
-                var $listInfo = listInfo.find();
-                if (typeof item.runtimeInfo != "undefined") {
-                    $listInfo.after(SF.hiddenInput(SF.compose(itemPrefix, SF.Keys.runtimeInfo), item.runtimeInfo));
-                }
-                else {
-                    var itemInfoValue = this.itemRuntimeInfo(itemPrefix).createValue(item.type, item.id || '', typeof item.id == "undefined" ? 'n' : 'o');
-                    $listInfo.after(SF.hiddenInput(SF.compose(itemPrefix, SF.Keys.runtimeInfo), itemInfoValue));
-                }
+                var $table = $("#" + this.options.prefix + "> .sf-field-list-table");
 
-                $listInfo.after(SF.hiddenInput(SF.compose(itemPrefix, this.keys.indexes), ";" + (this.getLastNewIndex() + 1).toString()))
-                    .after(SF.hiddenDiv(SF.compose(itemPrefix, this.keys.entity), ""));
+                $table.before(SF.hiddenInput(SF.compose(itemPrefix, this.keys.indexes), ";" + (this.getLastNewIndex() + 1).toString()));
+
+                var itemInfoValue = item.runtimeInfo || this.itemRuntimeInfo(itemPrefix).createValue(item.type, item.id || '', typeof item.id == "undefined" ? 'n' : 'o');
+                $table.before(SF.hiddenInput(SF.compose(itemPrefix, SF.Keys.runtimeInfo), itemInfoValue));
+
+                $table.before(SF.hiddenDiv(SF.compose(itemPrefix, this.keys.entity), ""));
 
                 $('#' + SF.compose(itemPrefix, this.keys.entity)).append(clonedElements);
 

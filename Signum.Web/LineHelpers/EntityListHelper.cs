@@ -27,17 +27,17 @@ namespace Signum.Web
             {
                 sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityList));
 
-                sb.AddLine(helper.HiddenStaticInfo(entityList));
-
-                //If it's an embeddedEntity write an empty template with index 0 to be used when creating a new item
-                if (entityList.ElementType.IsEmbeddedEntity())
-                {
-                    TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)entityList.Parent, 0);
-                    sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityList, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Popup, entityList)));
-                }
-
                 using (sb.Surround(new HtmlTag("div").Class("sf-field-list")))
                 {
+                    sb.AddLine(helper.HiddenStaticInfo(entityList));
+
+                    //If it's an embeddedEntity write an empty template with index 0 to be used when creating a new item
+                    if (entityList.ElementType.IsEmbeddedEntity())
+                    {
+                        TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)entityList.Parent, 0);
+                        sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityList, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Popup, entityList)));
+                    }
+
                     HtmlStringBuilder sbSelect = new HtmlStringBuilder();
                     
                     var sbSelectContainer = new HtmlTag("select").Attr("multiple", "multiple")
