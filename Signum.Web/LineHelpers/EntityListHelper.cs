@@ -28,7 +28,6 @@ namespace Signum.Web
                 sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityList));
 
                 sb.AddLine(helper.HiddenStaticInfo(entityList));
-                sb.AddLine(helper.Hidden(entityList.Compose(EntityListBaseKeys.ListPresent), ""));
 
                 //If it's an embeddedEntity write an empty template with index 0 to be used when creating a new item
                 if (entityList.ElementType.IsEmbeddedEntity())
