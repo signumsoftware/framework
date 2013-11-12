@@ -260,10 +260,7 @@ namespace Signum.Web.Selenium
             return string.IsNullOrEmpty(result) ? 0 : result.Split(',').Select(int.Parse).Max() + 1;
         }
 
-        public string DetailsDivSelector
-        {
-            get { return "jq=#{0}_sfDetail".Formato(Prefix); }
-        }
+  
 
         public string RuntimeInfoLocator(int index)
         {
@@ -275,6 +272,26 @@ namespace Signum.Web.Selenium
             return RuntimeInfoInternal(index);
         }
 
+
+        public void DoubleClick(int index)
+        {
+            Select(index);
+            Selenium.DoubleClick(OptionIdLocator(index));
+        }
+    }
+
+    public class EntityListDetailProxy : EntityListProxy
+    {
+         public EntityListDetailProxy(ISelenium selenium, string prefix, PropertyRoute route)
+            : base(selenium, prefix, route)
+         {
+         }
+
+        public string DetailsDivSelector
+        {
+            get { return "jq=#{0}_sfDetail".Formato(Prefix); }
+        }
+        
         public bool HasDetailEntity()
         {
             bool parentVisible = Selenium.IsElementPresent(DetailsDivSelector + ":parent");
@@ -292,12 +309,6 @@ namespace Signum.Web.Selenium
         public LineContainer<T> Details<T>(int index) where T : ModifiableEntity
         {
             return new LineContainer<T>(Selenium, Prefix + "_" + index, Route.Add("Item"));
-        }
-
-        public void DoubleClick(int index)
-        {
-            Select(index);
-            Selenium.DoubleClick(OptionIdLocator(index));
         }
     }
 
