@@ -2,15 +2,15 @@
 
 SF.registerModule("Files", function () {
 
-    if (typeof $.SF == "undefined" || typeof $.SF.baseLine == "undefined") {
+    if (typeof $.SF == "undefined" || typeof $.SF.entityBase == "undefined") {
         throw "SF_Lines must be loaded before SF_Files";
     }
 
     (function ($) {
 
-        $.widget("SF.fileLine", $.SF.baseLine, {
+        $.widget("SF.fileLine", $.SF.entityBase, {
 
-            options: {}, //baseLine options + asyncUpload + uploadUrl + uploadDroppedUrl + downloadUrl
+            options: {}, //entityBase options + asyncUpload + uploadUrl + uploadDroppedUrl + downloadUrl
 
             _create: function () {
                 $("#" + this.options.prefix).data("SF-fileLine").initDragDrop($(this.pf("DivNew")));

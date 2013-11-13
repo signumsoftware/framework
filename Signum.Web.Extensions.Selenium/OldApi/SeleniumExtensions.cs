@@ -104,22 +104,24 @@ namespace Signum.Web.Selenium
                 seleniumProcess.Kill();
         }
 
-        public const string DefaultPageLoadTimeout = "20000";
-        public const string PageLoadLongTimeout = "40000";
+        public static string PageLoadTimeout = "20000";
+        public static int AjaxTimeout = 10000;
+        public static int AjaxWait = 200;
 
-        public const int DefaultAjaxTimeout = 10000;
-        public static int DefaultAjaxWait = 200;
-
+        public static void WaitForPageToLoad(this ISelenium selenium)
+        {
+            selenium.WaitForPageToLoad(PageLoadTimeout);
+        }
 
         public static void Wait(this ISelenium selenium, Func<bool> condition, Func<string> actionDescription = null, int? timeout = null)
         {
             if (condition())
                 return;
 
-            DateTime limit = DateTime.Now.AddMilliseconds(timeout ?? DefaultAjaxTimeout);
+            DateTime limit = DateTime.Now.AddMilliseconds(timeout ?? AjaxTimeout);
             do
             {
-                Thread.Sleep(DefaultAjaxWait);
+                Thread.Sleep(AjaxWait);
 
                 if (condition())
                     return;
@@ -128,7 +130,7 @@ namespace Signum.Web.Selenium
 
 
             throw new TimeoutException("Timeout after {0} ms waiting for {1}".Formato(
-                timeout ?? DefaultAjaxTimeout,
+                timeout ?? AjaxTimeout,
                 actionDescription == null ? "visual condition" : actionDescription()));
         }
 
@@ -172,7 +174,7 @@ namespace Signum.Web.Selenium
         {
             selenium.Click("jq=#{0}btnOk".Formato(prefix));
             if (submit)
-                selenium.WaitForPageToLoad(DefaultPageLoadTimeout);
+                selenium.WaitForPageToLoad(PageLoadTimeout);
             else
                 selenium.Wait(() => !selenium.IsElementPresent(PopupSelector(prefix)));
         }

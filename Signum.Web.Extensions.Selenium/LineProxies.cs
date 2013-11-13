@@ -535,7 +535,7 @@ namespace Signum.Web.Selenium
             Selenium.Click("{0} > legend .sf-move-up".Formato(RepeaterItemSelector(index)));
         }
 
-        public void ModeDown(int index)
+        public void MoveDown(int index)
         {
             Selenium.Click("{0} > legend .sf-move-down".Formato(RepeaterItemSelector(index)));
         }

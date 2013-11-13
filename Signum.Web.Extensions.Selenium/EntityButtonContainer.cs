@@ -45,7 +45,7 @@ namespace Signum.Web.Selenium
         public static void ExecuteSubmit(this IEntityButtonContainer container, Enum operationKey)
         {
             container.ButtonClick(operationKey.GetType().Name + "_" + operationKey.ToString());
-            container.Selenium.WaitForPageToLoad(SeleniumExtensions.DefaultPageLoadTimeout);
+            container.Selenium.WaitForPageToLoad();
         }
 
         public static SearchPageProxy DeleteSubmit(this IEntityButtonContainer container, Enum operationKey)
@@ -53,7 +53,7 @@ namespace Signum.Web.Selenium
             container.ExecuteSubmit(operationKey);
             container.Selenium.ConsumeConfirmation();
 
-            container.Selenium.WaitForPageToLoad(SeleniumExtensions.DefaultPageLoadTimeout); 
+            container.Selenium.WaitForPageToLoad(); 
 
             return new SearchPageProxy(container.Selenium);
         }
