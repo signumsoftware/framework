@@ -158,6 +158,15 @@ namespace Signum.Web.Selenium
             return new EntityRepeaterProxy(lineContainer.Selenium, newPrefix, newRoute);
         }
 
+        public static EntityStripProxy EntityStrip<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
+            where T : ModifiableEntity
+        {
+            string newPrefix;
+            PropertyRoute newRoute = lineContainer.GetRoute(property, out newPrefix);
+
+            return new EntityStripProxy(lineContainer.Selenium, newPrefix, newRoute);
+        }
+
         public static EntityListProxy EntityList<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
           where T : ModifiableEntity
         {
