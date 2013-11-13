@@ -73,7 +73,7 @@ namespace Signum.Web
                         using (sb.Surround(new HtmlTag("td")))
                         using (sb.Surround(new HtmlTag("ul")))
                         {
-                            sb.AddLine(ListBaseHelper.CreateButton(helper, listDetail, null).Surround("li"));
+                            sb.AddLine(ListBaseHelper.CreateButton(helper, listDetail).Surround("li"));
                             sb.AddLine(ListBaseHelper.FindButton(helper, listDetail).Surround("li"));
                             sb.AddLine(ListBaseHelper.RemoveButton(helper, listDetail).Surround("li"));
                             sb.AddLine(ListBaseHelper.MoveUpButton(helper, listDetail).Surround("li"));
@@ -115,10 +115,7 @@ namespace Signum.Web
             sb.AddLine(ListBaseHelper.WriteIndex(helper, listDetail, itemTC, itemTC.Index));
             sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
-            //TODO: Anto - RequestLoadAll con ItemTC
-            if (typeof(T).IsEmbeddedEntity() || 
-                EntityBaseHelper.RequiresLoadAll(helper, listDetail) ||
-                (itemTC.Value.GetType().IsIIdentifiable() && (itemTC.Value as IIdentifiable).IsNew))
+            if (EntityBaseHelper.EmbeddedOrNew((Modifiable)(object)itemTC.Value))
                 sb.AddLine(EntityBaseHelper.RenderTypeContext(helper, itemTC, RenderMode.ContentInInvisibleDiv, listDetail));
             else if (itemTC.Value != null)
                 sb.Add(helper.Div(itemTC.Compose(EntityBaseKeys.Entity), null, "", new Dictionary<string, object> { { "style", "display:none" } }));

@@ -28,16 +28,23 @@ namespace Signum.Web
                    MvcHtmlString.Empty;
         }
 
-        public static bool RequiresLoadAll(HtmlHelper helper, EntityBase eb)
+        public static bool EmbeddedOrNew(Modifiable entity)
         {
-            return eb.IsNew == true;
+            if (entity is EmbeddedEntity)
+                return true;
+
+            if (entity is IIdentifiable)
+                return ((IIdentifiable)entity).IsNew;
+
+            if(entity is Lite<IIdentifiable>)
+                return ((Lite<IIdentifiable>)entity).IsNew;
+
+            return false;
         }
 
         public static MvcHtmlString RenderTypeContext(HtmlHelper helper, TypeContext typeContext, RenderMode mode, EntityBase line)
         {
             Type cleanEntityType = (typeContext.UntypedValue as Lite<IIdentifiable>).TryCC(l => l.EntityType) ?? typeContext.UntypedValue.GetType();
-
-    
 
             TypeContext tc = TypeContextUtilities.CleanTypeContext((TypeContext)typeContext);
 

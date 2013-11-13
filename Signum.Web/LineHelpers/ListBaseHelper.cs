@@ -20,7 +20,7 @@ namespace Signum.Web
 {
     public static class ListBaseHelper
     {
-        public static MvcHtmlString CreateButton(HtmlHelper helper, EntityListBase listBase, Dictionary<string, object> htmlProperties)
+        public static MvcHtmlString CreateButton(HtmlHelper helper, EntityListBase listBase)
         {
             if (!listBase.Create)
                 return MvcHtmlString.Empty;
@@ -33,9 +33,6 @@ namespace Signum.Web
                 { "data-icon", "ui-icon-circle-plus" },
                 { "data-text", false}
             };
-
-            if (htmlProperties != null)
-                htmlAttr.AddRange(htmlProperties);
 
             return helper.Href(listBase.Compose("btnCreate"),
                   EntityControlMessage.Create.NiceToString(),
@@ -148,9 +145,9 @@ namespace Signum.Web
                 htmlAttr.Add("style", "display:none");
 
             return helper.Href(listBase.Compose("btnUp"),
-                  JavascriptMessage.entityRepeater_moveUp.NiceToString(),
+                  JavascriptMessage.moveUp.NiceToString(),
                   "",
-                  JavascriptMessage.entityRepeater_moveUp.NiceToString(),
+                  JavascriptMessage.moveUp.NiceToString(),
                   "sf-line-button move-up",
                   htmlAttr);
         }
@@ -173,9 +170,9 @@ namespace Signum.Web
                 htmlAttr.Add("style", "display:none");
 
             return helper.Href(listBase.Compose("btnDown"),
-                  JavascriptMessage.entityRepeater_moveDown.NiceToString(),
+                  JavascriptMessage.moveDown.NiceToString(),
                   "",
-                  JavascriptMessage.entityRepeater_moveDown.NiceToString(),
+                  JavascriptMessage.moveDown.NiceToString(),
                   "sf-line-button move-down",
                   htmlAttr);
         }

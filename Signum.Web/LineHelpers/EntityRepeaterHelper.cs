@@ -31,7 +31,7 @@ namespace Signum.Web
                 {
                     sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityRepeater));
                     
-                    sb.AddLine(ListBaseHelper.CreateButton(helper, entityRepeater, new Dictionary<string, object> { { "title", entityRepeater.AddElementLinkText } }));
+                    sb.AddLine(ListBaseHelper.CreateButton(helper, entityRepeater));
                     sb.AddLine(ListBaseHelper.FindButton(helper, entityRepeater));
                 }
 
@@ -72,9 +72,9 @@ namespace Signum.Web
                     if (entityRepeater.Remove)
                         sb.AddLine(
                             helper.Href(itemTC.Compose("btnRemove"),
-                                    entityRepeater.RemoveElementLinkText,
+                                    EntityControlMessage.Remove.NiceToString(),
                                     "",
-                                    entityRepeater.RemoveElementLinkText,
+                                    EntityControlMessage.Remove.NiceToString(),
                                     "sf-line-button sf-remove",
                                     new Dictionary<string, object> 
                                     {
@@ -87,26 +87,26 @@ namespace Signum.Web
                     {
                         sb.AddLine(
                             helper.Span(itemTC.Compose("btnUp"),
-                                JavascriptMessage.entityRepeater_moveUp.NiceToString(),
+                                JavascriptMessage.moveUp.NiceToString(),
                                 "sf-line-button sf-move-up",
                                 new Dictionary<string, object> 
                                 {  
                                    { "onclick", "{0}.moveUp('{1}');".Formato(entityRepeater.ToJS(), itemTC.ControlID) },
                                    { "data-icon", "ui-icon-triangle-1-n" },
                                    { "data-text", false },
-                                   { "title", JavascriptMessage.entityRepeater_moveUp.NiceToString() }
+                                   { "title", JavascriptMessage.moveUp.NiceToString() }
                                 }));
 
                         sb.AddLine(
                             helper.Span(itemTC.Compose("btnDown"),
-                                JavascriptMessage.entityRepeater_moveDown.NiceToString(),
+                                JavascriptMessage.moveDown.NiceToString(),
                                 "sf-line-button sf-move-down",
                                 new Dictionary<string, object> 
                                 {   
                                    { "onclick", "{0}.moveDown('{1}');".Formato(entityRepeater.ToJS(), itemTC.ControlID) },
                                    { "data-icon", "ui-icon-triangle-1-s" },
                                    { "data-text", false },
-                                   { "title", JavascriptMessage.entityRepeater_moveDown.NiceToString() }
+                                   { "title", JavascriptMessage.moveDown.NiceToString() }
                                 }));
                     }
                 }

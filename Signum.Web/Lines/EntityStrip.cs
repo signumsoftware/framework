@@ -16,27 +16,44 @@ using Signum.Engine;
 
 namespace Signum.Web
 {
-    public static class EntityRepeaterKeys
+    public static class EntityStripKeys
     {
         public const string ItemsContainer = "sfItemsContainer";
-        public const string RepeaterElement = "sfRepeaterItem";
+        public const string StripElement = "sfStripItem";
     }
 
-    public class EntityRepeater : EntityListBase
+    public class EntityStrip : EntityListBase
     {
         public int? MaxElements { get; set; }
 
-        public EntityRepeater(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
+        public bool Autocomplete { get; set; }
+        public string AutocompleteUrl { get; set; }
+
+        public bool Vertical { get; set; }
+
+        public EntityStrip(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
             : base(type, untypedValue, parent, controlID, propertyRoute)
         {
+            bool isEmbedded = type.ElementType().IsEmbeddedEntity();
+
             Find = false;
-            LabelClass = "sf-label-repeater-line";
             Reorder = false;
+            Create = isEmbedded;
+            Navigate = !isEmbedded;
+            View = isEmbedded;
+            Autocomplete = !isEmbedded;
+            Remove = true;
+        }
+
+        protected override void SetReadOnly()
+        {
+            base.SetReadOnly();
+            Autocomplete = false;
         }
 
         public override string ToJS()
         {
-            return "$('#{0}').data('SF-entityRepeater')".Formato(ControlID);
+            return "$('#{0}').data('SF-entityStrip')".Formato(ControlID);
         }
 
         protected override JsOptionsBuilder OptionsJSInternal()
@@ -91,5 +108,6 @@ namespace Signum.Web
         {
             return null;
         }
+
     }
 }

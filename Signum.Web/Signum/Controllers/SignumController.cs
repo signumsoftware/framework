@@ -184,7 +184,8 @@ namespace Signum.Web.Controllers
             {
                 id = o.Id,
                 text = o.ToString(),
-                type = Navigator.ResolveWebTypeName(o.EntityType)
+                type = Navigator.ResolveWebTypeName(o.EntityType),
+                link = Navigator.NavigateRoute(o.EntityType, o.Id)
             }).ToList();
 
             return Json(result);

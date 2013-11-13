@@ -234,10 +234,6 @@ Lose changes?")]
         editColumnName,
         [Description("Enter the new column name")]
         enterTheNewColumnName,
-        [Description("Move down")]
-        entityRepeater_moveDown,
-        [Description("Move up")]
-        entityRepeater_moveUp,
         [Description("Error")]
         error,
         [Description("Executed")]
@@ -274,7 +270,21 @@ Lose changes?")]
         [Description("Select a token")]
         selectToken,
         [Description("Show filters")]
-        showFilters
+        showFilters,
+        [Description("Find")]
+        find,
+        [Description("Remove")]
+        remove,
+        [Description("View")]
+        view,
+        [Description("View")]
+        create,
+        [Description("Move down")]
+        moveDown,
+        [Description("Move up")]
+        moveUp,
+        [Description("Navigate")]
+        navigate,
     }
 
     public enum QuickLinkMessage

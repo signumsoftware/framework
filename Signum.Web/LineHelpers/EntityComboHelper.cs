@@ -40,7 +40,7 @@ namespace Signum.Web
                 {
                     sb.AddLine(helper.HiddenEntityInfo(entityCombo));
 
-                    if (EntityBaseHelper.RequiresLoadAll(helper, entityCombo))
+                    if (EntityBaseHelper.EmbeddedOrNew((Modifiable)entityCombo.UntypedValue))
                         sb.AddLine(EntityBaseHelper.RenderTypeContext(helper, (TypeContext)entityCombo.Parent, RenderMode.PopupInDiv, entityCombo));
                     else if (entityCombo.UntypedValue != null)
                         sb.AddLine(helper.Div(entityCombo.Compose(EntityBaseKeys.Entity), null, "", new Dictionary<string, object> { { "style", "display:none" } }));

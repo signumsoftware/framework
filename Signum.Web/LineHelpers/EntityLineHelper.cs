@@ -38,7 +38,7 @@ namespace Signum.Web
                     
                     if (entityLine.Type.IsIIdentifiable() || entityLine.Type.IsLite())
                     {
-                        if (EntityBaseHelper.RequiresLoadAll(helper, entityLine))
+                        if (EntityBaseHelper.EmbeddedOrNew((Modifiable)entityLine.UntypedValue))
                             sb.AddLine(EntityBaseHelper.RenderTypeContext(helper, (TypeContext)entityLine.Parent, RenderMode.PopupInDiv, entityLine));
                         else if (entityLine.UntypedValue != null)
                             sb.AddLine(helper.Div(entityLine.Compose(EntityBaseKeys.Entity), null, "", new Dictionary<string, object> { { "style", "display:none" } }));
@@ -55,7 +55,7 @@ namespace Signum.Web
 
                         if (entityLine.Autocomplete)
                         {
-                            htmlAttr.Add("data-types", new StaticInfo(entityLine.Type, entityLine.Implementations).Types.ToString(t => Navigator.ResolveWebTypeName(t), ","));
+                            htmlAttr.Add("data-types", new StaticInfo(entityLine.Type, entityLine.Implementations).Types.ToString(Navigator.ResolveWebTypeName, ","));
 
                             if (entityLine.AutocompleteUrl.HasText())
                                 htmlAttr.Add("data-url", entityLine.AutocompleteUrl); 
@@ -71,7 +71,7 @@ namespace Signum.Web
                         {
                             sb.AddLine(
                                 helper.Href(entityLine.Compose(EntityBaseKeys.ToStrLink),
-                                    entityLine.UntypedValue.ToString(), Navigator.NavigateRoute(entityLine.CleanRuntimeType, id), EntityControlMessage.View.NiceToString(), "sf-value-line",
+                                    entityLine.UntypedValue.ToString(), Navigator.NavigateRoute(entityLine.CleanRuntimeType, id), JavascriptMessage.navigate.NiceToString(), "sf-value-line",
                                     new Dictionary<string, object> { { "style", "display:" + ((entityLine.UntypedValue == null) ? "none" : "block") } }));
                         }
                         else

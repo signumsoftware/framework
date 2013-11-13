@@ -419,14 +419,6 @@ SF.NewContentProcessor = {
             .addClass("ui-corner-all");
     },
 
-    defaultAutocomplete: function ($newContent) {
-        $newContent.find(".sf-entity-autocomplete").each(function (i, val) {
-            var $txt = $(val);
-            var data = $txt.data();
-            $.SF.entityLine.prototype.entityAutocomplete($txt, { delay: 200, types: data.types, url: data.url || SF.Urls.autocomplete, count: 5 });
-        });
-    },
-
     defaultPlaceholder: function ($newContent) {
         $newContent.find('input[placeholder], textarea[placeholder]').placeholder();
     },
