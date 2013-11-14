@@ -473,10 +473,10 @@ namespace Signum.Engine.Mailing
                 }
             }
 
-            public void SynchronizeValue(ParsedToken Token, ref string value)
+            public void SynchronizeValue(ParsedToken Token, ref string value, bool isList)
             {
                 string val = value;
-                FixTokenResult result = QueryTokenSynchronizer.FixValue(Replacements, Token.QueryToken.Type, ref val, allowRemoveToken: false);
+                FixTokenResult result = QueryTokenSynchronizer.FixValue(Replacements, Token.QueryToken.Type, ref val, allowRemoveToken: false, isList: isList);
                 switch (result)
                 {
                     case FixTokenResult.Fix:

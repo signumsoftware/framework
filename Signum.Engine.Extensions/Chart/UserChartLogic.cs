@@ -218,7 +218,7 @@ namespace Signum.Engine.Chart
                 foreach (var item in uc.Filters.ToList())
                 {
                     string val = item.ValueString;
-                    switch (QueryTokenSynchronizer.FixValue(replacements, item.Token.Token.Type, ref val, allowRemoveToken: true))
+                    switch (QueryTokenSynchronizer.FixValue(replacements, item.Token.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation == FilterOperation.IsIn))
                     {
                         case FixTokenResult.Nothing: break;
                         case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc);

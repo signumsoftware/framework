@@ -208,14 +208,15 @@ namespace Signum.Engine.UserQueries
 
                 foreach (var item in uq.Filters.ToList())
                 {
+                retry:
                     string val = item.ValueString;
-                    switch (QueryTokenSynchronizer.FixValue(replacements, item.Token.Token.Type, ref val, allowRemoveToken: true))
+                    switch (QueryTokenSynchronizer.FixValue(replacements, item.Token.Token.Type, ref val, allowRemoveToken: true, isList: item.Operation == FilterOperation.IsIn))
                     {
                         case FixTokenResult.Nothing: break;
                         case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq);
                         case FixTokenResult.RemoveToken: uq.Filters.Remove(item); break;
                         case FixTokenResult.SkipEntity: return null;
-                        case FixTokenResult.Fix: item.ValueString = val; break;
+                        case FixTokenResult.Fix: item.ValueString = val; goto retry; break;
                     }
                 }
 
