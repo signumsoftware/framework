@@ -55,7 +55,7 @@ namespace Signum.Web
 
                         if (entityLine.Autocomplete)
                         {
-                            htmlAttr.Add("data-types", new StaticInfo(entityLine.Type, entityLine.Implementations).Types.ToString(Navigator.ResolveWebTypeName, ","));
+                            htmlAttr.Add("data-types", new StaticInfo(entityLine.Type, entityLine.Implementations, entityLine.PropertyRoute, entityLine.ReadOnly).Types.ToString(Navigator.ResolveWebTypeName, ","));
 
                             if (entityLine.AutocompleteUrl.HasText())
                                 htmlAttr.Add("data-url", entityLine.AutocompleteUrl); 

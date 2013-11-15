@@ -290,37 +290,15 @@ SF.registerModule("Validator", function () {
 
             //Send main form (or parent popup) to be able to construct a typecontext if EmbeddedEntity
             var staticInfo = SF.StaticInfo(this.valOptions.prefix);
-            var isEmbedded = false;
             if (staticInfo.find().length == 0 && !SF.isEmpty(this.valOptions.prefix)) { //If List => use parent
                 var lastPrefix = this.valOptions.prefix.substr(0, this.valOptions.prefix.lastIndexOf(SF.Keys.separator));
                 staticInfo = SF.StaticInfo(lastPrefix);
             }
-            if (staticInfo.find().length > 0 && staticInfo.isEmbedded()) {
-                isEmbedded = true;
-            }
 
             var formChildren = null;
             var parentPrefix;
-            if (isEmbedded) {
-                var myRuntimeInfoKey = SF.compose(this.valOptions.prefix, SF.Keys.runtimeInfo);
-                var pathPrefixes = SF.getPathPrefixes(this.valOptions.prefix);
-                for (var i = pathPrefixes.length - 1; 0 < i; i--) {
-                    var parentPopup = $(".sf-main-control[data-prefix='" + pathPrefixes[i] + "']");
-                    if (parentPopup.length > 0) {
-                        parentPrefix = pathPrefixes[i];
-                        formChildren = parentPopup.find(":input").add($("#" + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "]"));
-                    }
-                }
-                if (typeof (parentPrefix) == "undefined") {
-                    formChildren = $("form :input:not('#" + myRuntimeInfoKey + "')")
-                        .add("#" + SF.Keys.tabId)
-                        .add("input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
-                }
-                if (!SF.isEmpty(this.valOptions.parentDiv) && $("form").find("#" + this.valOptions.parentDiv).length == 0) {
-                    formChildren = formChildren.add($("#" + this.valOptions.parentDiv + " :input:not('#" + myRuntimeInfoKey + "')"));
-                }
-            }
-            else if (!SF.isEmpty(this.valOptions.parentDiv)) {
+           
+            if (!SF.isEmpty(this.valOptions.parentDiv)) {
                 if (formChildren == null) {
                     formChildren = $("#" + this.valOptions.parentDiv + " :input")
                         .add("#" + SF.Keys.tabId)
@@ -335,6 +313,11 @@ SF.registerModule("Validator", function () {
             var serializer = new SF.Serializer().add(formChildren.serialize());
 
             this.checkOrAddRuntimeInfo(formChildren, serializer);
+
+            if (staticInfo.find().length > 0 && staticInfo.isEmbedded()) {
+                serializer.add("rootType", staticInfo.rootType());
+                serializer.add("propertyRoute", staticInfo.propertyRoute());
+            }
 
             serializer.add("prefix", this.valOptions.prefix);
             serializer.add(this.valOptions.requestExtraJsonData);

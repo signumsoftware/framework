@@ -57,7 +57,7 @@ namespace Signum.Web
                             {
                                 { "class", "sf-value-line sf-entity-autocomplete"},
                                 { "autocomplete", "off" }, 
-                                { "data-types", new StaticInfo(entityStrip.Type, entityStrip.Implementations).Types.ToString(Navigator.ResolveWebTypeName, ",") }
+                                { "data-types", new StaticInfo(entityStrip.Type, entityStrip.Implementations, entityStrip.PropertyRoute, entityStrip.ReadOnly).Types.ToString(Navigator.ResolveWebTypeName, ",") }
                             };
 
                             if (entityStrip.AutocompleteUrl.HasText())

@@ -117,7 +117,7 @@ namespace Signum.Web.PortableAreas
                 });
 
             Controller<SignumController>()
-                .Action(c => c.ValidatePartial(null, null))
+                .Action(c => c.ValidatePartial(null, null, null))
                 .AddFilters(ctx =>
                 {
                     var form = ctx.ControllerContext.HttpContext.Request.Form;

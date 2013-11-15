@@ -247,38 +247,34 @@ namespace Signum.Web
             return Manager.QuerySettings.GetOrThrow(queryName, "no QuerySettings for queryName {0} found");
         }
 
-        public static MappingContext UntypedApplyChanges(this ModifiableEntity entity, ControllerContext controllerContext, string prefix, bool admin)
+        public static MappingContext UntypedApplyChanges(this ModifiableEntity entity, ControllerContext controllerContext, string prefix, bool admin, PropertyRoute route = null, SortedList<string, string> inputs = null)
         {
-            return miApplyChanges.GetInvoker(entity.GetType()).Invoke(entity, controllerContext, prefix, admin);
+            return miApplyChanges.GetInvoker(entity.GetType()).Invoke(entity, controllerContext, prefix, admin, route, inputs);
         }
 
-        static GenericInvoker<Func<ModifiableEntity, ControllerContext, string, bool, MappingContext>> miApplyChanges =
-            new GenericInvoker<Func<ModifiableEntity, ControllerContext, string, bool, MappingContext>>((me, cc, pr, ad) => ApplyChanges<TypeDN>((TypeDN)me, cc, pr, ad));
-        public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerContext controllerContext, string prefix, bool admin) where T : IRootEntity
-        {
-            SortedList<string, string> inputs = controllerContext.HttpContext.Request.Form.ToSortedList(prefix);
-            Mapping<T> mapping = (Mapping<T>)Navigator.EntitySettings(typeof(T)).Let(s => admin ? s.UntypedMappingMain : s.UntypedMappingLine);
-
-            return Manager.ApplyChanges<T>(controllerContext, entity, prefix, mapping, inputs);
-        }
-
-        public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerContext controllerContext, string prefix, bool admin, SortedList<string, string> inputs) where T : IRootEntity
+        static GenericInvoker<Func<ModifiableEntity, ControllerContext, string, bool, PropertyRoute, SortedList<string, string>, MappingContext>> miApplyChanges =
+            new GenericInvoker<Func<ModifiableEntity, ControllerContext, string, bool, PropertyRoute, SortedList<string, string>, MappingContext>>((me, cc, prefix, ad, route, dic) => ApplyChanges<TypeDN>((TypeDN)me, cc, prefix, ad, route, dic));
+        public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerContext controllerContext, string prefix, bool admin, PropertyRoute route = null, SortedList<string, string> inputs = null) where T : ModifiableEntity
         {
             Mapping<T> mapping = (Mapping<T>)Navigator.EntitySettings(typeof(T)).Let(s => admin ? s.UntypedMappingMain : s.UntypedMappingLine);
 
-            return Manager.ApplyChanges<T>(controllerContext, entity, prefix, mapping, inputs);
+            return ApplyChanges<T>(entity, controllerContext, prefix, mapping, route, inputs);
         }
 
-        public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerContext controllerContext, string prefix, Mapping<T> mapping) where T : IRootEntity
+        public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerContext controllerContext, string prefix, Mapping<T> mapping, PropertyRoute route = null, SortedList<string, string> inputs = null) where T : ModifiableEntity
         {
-            SortedList<string, string> inputs = controllerContext.HttpContext.Request.Form.ToSortedList(prefix);
+            if (inputs == null)
+                inputs = controllerContext.HttpContext.Request.Form.ToSortedList(prefix);
 
-            return Manager.ApplyChanges<T>(controllerContext, entity, prefix, mapping, inputs);
-        }
+            if (route == null)
+            {
+                if (!typeof(IRootEntity).IsAssignableFrom(typeof(T)))
+                    throw new InvalidOperationException("In order to use ApplyChanges with EmbeddedEntities set 'route' argument");
 
-        public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerContext controllerContext, string prefix, Mapping<T> mapping, SortedList<string, string> inputs) where T : IRootEntity
-        {
-            return Manager.ApplyChanges<T>(controllerContext, entity, prefix, mapping, inputs);
+                route = PropertyRoute.Root(typeof(T));
+            }
+
+            return Manager.ApplyChanges<T>(controllerContext, entity, prefix, mapping, route, inputs);
         }
 
         public static ModifiableEntity UntypedExtractEntity(this ControllerBase controller)
@@ -899,14 +895,14 @@ namespace Signum.Web
                 (type.IsIdentifiableEntity() ? " or the Schema" : null));
         }
 
-        protected internal virtual MappingContext<T> ApplyChanges<T>(ControllerContext controllerContext, T entity, string prefix, Mapping<T> mapping, SortedList<string, string> inputs) where T : IRootEntity
+        protected internal virtual MappingContext<T> ApplyChanges<T>(ControllerContext controllerContext, T entity, string prefix, Mapping<T> mapping, PropertyRoute route, SortedList<string, string> inputs) where T: ModifiableEntity
         {
             using (HeavyProfiler.Log("ApplyChanges", () => typeof(T).TypeName()))
             using (new EntityCache(EntityCacheType.Normal))
             {
-                EntityCache.AddFullGraph((ModifiableEntity)(IRootEntity)entity);
+                EntityCache.AddFullGraph((ModifiableEntity)entity);
 
-                RootContext<T> ctx = new RootContext<T>(prefix, inputs, controllerContext) { Value = entity };
+                RootContext<T> ctx = new RootContext<T>(prefix, inputs, route, controllerContext) { Value = entity };
                 mapping(ctx);
                 return ctx;
             }

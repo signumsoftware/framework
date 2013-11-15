@@ -147,97 +147,6 @@ namespace Signum.Web
             }
             return true;
         }
-
-
-        public static ModifiableEntity FindSubEntity(ModifiableEntity entity, string prefix)
-        {
-            if (!prefix.HasText())
-                return entity;
-
-            string[] properties = prefix.Split(new string[] { TypeContext.Separator }, StringSplitOptions.RemoveEmptyEntries);
-            if (properties == null || properties.Length == 0)
-                throw new ArgumentException("Invalid property prefix");
-
-            Modifiable currentEntity = entity;
-            try
-            {
-                foreach (string property in properties)
-                {    
-                    int index;
-                    if (int.TryParse(property, out index))
-                    {
-                        IList list = (IList)currentEntity;
-                        if (list.Count <= index)
-                            return null;
-                        currentEntity = (Modifiable)list[index];
-                    }
-                    else
-                    {
-                        Type cleanType = (currentEntity as Lite<IIdentifiable>).TryCC(t => t.EntityType) ?? currentEntity.GetType();
-                        PropertyInfo pi = cleanType.GetProperty(property);
-                        currentEntity = (Modifiable)pi.GetValue(currentEntity, null);
-                    }
-
-                    if (currentEntity is Lite<IIdentifiable>)
-                        currentEntity = Database.Retrieve((Lite<IdentifiableEntity>)currentEntity);
-
-                    if (currentEntity == null)
-                        return null;
-                }
-            }
-            catch (Exception)
-            {
-                throw new InvalidOperationException("Invalid property prefix or wrong entity in Session");
-            }
-
-            return (ModifiableEntity)currentEntity;
-        }
-
-        public static Type FindSubentityType(IdentifiableEntity entity, string prefix)
-        {
-            if (!prefix.HasText())
-                throw new ApplicationException("Route cannot be null to find subentity");
-
-            string[] properties = prefix.Split(new string[] { TypeContext.Separator }, StringSplitOptions.RemoveEmptyEntries);
-            if (properties == null || properties.Length == 0)
-                throw new ArgumentException("Invalid property prefix");
-
-            Modifiable currentEntity = entity;
-            PropertyInfo pi = null;
-            try
-            {
-                foreach (string property in properties)
-                {    
-                    int index;
-                    if (int.TryParse(property, out index))
-                    {
-                        IList list = (IList)currentEntity;
-                        if (list.Count <= index)
-                            currentEntity = (Modifiable)Constructor.Construct(list.GetType().ElementType());
-                        else
-                            currentEntity = (Modifiable)list[index];
-                    }
-                    else
-                    {
-                        Type cleanType = (currentEntity as Lite<IIdentifiable>).TryCC(t => t.EntityType) ?? currentEntity.GetType();
-                        pi = cleanType.GetProperty(property);
-                        currentEntity = (Modifiable)pi.GetValue(currentEntity, null);
-                    }
-
-                    if (currentEntity is Lite<IIdentifiable>)
-                        currentEntity = Database.Retrieve((Lite<IdentifiableEntity>)currentEntity);
-
-                    if (currentEntity == null)
-                        currentEntity = (Modifiable)Constructor.Construct(pi.PropertyType);
-                }
-            }
-            catch (Exception)
-            {
-                throw new InvalidOperationException("Invalid property prefix or wrong entity in Session");
-            }
-
-            return currentEntity.GetType();
-        }
     }
 
     public abstract class MappingContext<T> : MappingContext
@@ -326,7 +235,7 @@ namespace Signum.Web
         }
     }
 
-    internal class RootContext<T> : MappingContext<T> where T : IRootEntity
+    internal class RootContext<T> : MappingContext<T>
     {
         public override MappingContext Parent { get { throw new InvalidOperationException(); } }
         public override MappingContext Root { get { return this; } }
@@ -352,8 +261,8 @@ namespace Signum.Web
         IDictionary<string, List<string>> errors;
         public override IDictionary<string, List<string>> Errors { get { return errors; } }
 
-        public RootContext(string prefix, SortedList<string, string> globalInputs, ControllerContext controllerContext) :
-            base(prefix, null, PropertyRoute.Root(typeof(T)))
+        public RootContext(string prefix, SortedList<string, string> globalInputs, PropertyRoute route, ControllerContext controllerContext) :
+            base(prefix, null, route)
         {
             this.globalInputs = globalInputs;
             if (prefix.HasText())

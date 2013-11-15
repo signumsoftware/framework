@@ -33,7 +33,13 @@ namespace Signum.Web
         public static MvcHtmlString HiddenStaticInfo(this HtmlHelper helper, EntityBase tc)
         {
             Type type = tc is EntityListBase ? ((EntityListBase)tc).ElementType : tc.Type;
-            StaticInfo si = new StaticInfo(type, tc.Implementations) { IsReadOnly = tc.ReadOnly };
+
+            PropertyRoute pr =
+                !type.IsEmbeddedEntity() ? null :
+                tc is EntityListBase ? tc.PropertyRoute.Add("Item") :
+                tc.PropertyRoute;
+
+            StaticInfo si = new StaticInfo(type, tc.Implementations, pr, tc.ReadOnly);
             return helper.Hidden(tc.Compose(EntityBaseKeys.StaticInfo), si.ToString(), new { disabled = "disabled" });
         }
 
@@ -48,8 +54,9 @@ namespace Signum.Web
     {
         public static readonly Type[] ImplementedByAll = new Type[0];
         public static readonly string ImplementedByAllKey = "[All]";
+       
 
-        public StaticInfo(Type staticType, Implementations? implementations)
+        public StaticInfo(Type staticType, Implementations? implementations , PropertyRoute embeddedRoute, bool readOnly)
         {
             if (staticType.IsEmbeddedEntity())
             {
@@ -57,33 +64,43 @@ namespace Signum.Web
                     throw new ArgumentException("implementations should be null for EmbeddedEntities");
 
                 Types = new[] { staticType };
+
+                if (embeddedRoute == null)
+                    throw new ArgumentNullException("embeddedRoute"); 
+
+                EmbeddedRoute = embeddedRoute;
             }
             else
             {
                 Types = implementations.Value.IsByAll ? ImplementedByAll :
                         implementations.Value.Types.ToArray();
             }
+
+            this.IsReadOnly = readOnly;
         }
 
-        public Type[] Types { get; set; }
-
+        public Type[] Types { get; private set; }
+        public PropertyRoute EmbeddedRoute { get; private set;}
+ 
         public bool IsEmbedded
         {
             get { return Types != null && Types.Length == 1 && typeof(EmbeddedEntity).IsAssignableFrom(Types[0]); }
         }
 
-        public bool IsReadOnly { get; set; }
+        public bool IsReadOnly { get; private set; }
 
         public override string ToString()
         {
             if (Types == null)
                 throw new ArgumentException("StaticInfo.Types must be set");
 
-            return "{0};{1};{2}".Formato(
-                    Types == ImplementedByAll ? ImplementedByAllKey : 
+            return "{0};{1};{2};{3};{4}".Formato(
+                    Types == ImplementedByAll ? ImplementedByAllKey :
                     Types.ToString(t => Navigator.ResolveWebTypeName(t), ","),
                     IsEmbedded ? "e" : "i",
-                    IsReadOnly ? "r" : ""
+                    IsReadOnly ? "r" : "",
+                    EmbeddedRoute != null ? Navigator.ResolveWebTypeName(EmbeddedRoute.RootType) : "",
+                    EmbeddedRoute != null ? EmbeddedRoute.PropertyString() : ""
                 );
         }
 

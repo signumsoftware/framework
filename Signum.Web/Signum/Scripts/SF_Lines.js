@@ -139,13 +139,10 @@ SF.registerModule("Lines", function () {
 
                 var staticInfo = this.staticInfo();
 
-                //If Embedded Entity => send path of runtimes and ids to be able to construct a typecontext
+                //If Embedded Entity => send propertyInfo
                 if (staticInfo.isEmbedded()) {
-                    var pathInfo = SF.fullPathNodesSelector(this.options.prefix);
-                    for (var i = 0, l = pathInfo.length; i < l; i++) {
-                        var node = pathInfo[i];
-                        extraParams[node.id] = node.value;
-                    }
+                    extraParams.rootType = staticInfo.rootType();
+                    extraParams.propertyRoute = staticInfo.propertyRoute();
                 }
 
                 if (staticInfo.isReadOnly()) {
@@ -526,14 +523,12 @@ SF.registerModule("Lines", function () {
             extraJsonParams: function (itemPrefix) {
                 var extraParams = new Object();
 
-                //If Embedded Entity => send path of runtimes and ids to be able to construct a typecontext
                 var staticInfo = this.staticInfo();
+
+                //If Embedded Entity => send propertyRoute
                 if (staticInfo.isEmbedded()) {
-                    var pathInfo = SF.fullPathNodesSelector(itemPrefix);
-                    for (var i = 0, l = pathInfo.length; i < l; i++) {
-                        var node = pathInfo[i];
-                        extraParams[node.id] = node.value;
-                    }
+                    extraParams.rootType = staticInfo.rootType();
+                    extraParams.propertyRoute = staticInfo.propertyRoute();
                 }
 
                 if (staticInfo.isReadOnly()) {
@@ -667,7 +662,7 @@ SF.registerModule("Lines", function () {
             },
 
             newListItem: function (clonedElements, itemPrefix, item) {
-                var $table = $("#" + this.options.prefix + "> .sf-field-list-table");
+                var $table = $("#" + this.options.prefix + "> .sf-field-list > .sf-field-list-table");
 
                 $table.before(SF.hiddenInput(SF.compose(itemPrefix, this.keys.indexes), ";" + (this.getLastNewIndex() + 1).toString()));
 

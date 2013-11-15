@@ -23,6 +23,8 @@ SF.registerModule("Globals", function () {
 			_types = 0,
             _isEmbedded = 1,
 			_isReadOnly = 2,
+            _rootType = 3,
+            _propertyRoute = 4,
 			$elem; 			//cache for the element
 
         var find = function () {
@@ -68,11 +70,21 @@ SF.registerModule("Globals", function () {
             return getValue(_isReadOnly) == "r";
         };
 
-        var createValue = function (types, isEmbedded, isReadOnly) {
+        var rootType = function () {
+            return getValue(_rootType);
+        };
+
+        var propertyRoute = function () {
+            return getValue(_propertyRoute);
+        };
+
+        var createValue = function (types, isEmbedded, isReadOnly, rootType, propertyRoute) {
             var array = [];
             array[_types] = types;
             array[_isEmbedded] = isEmbedded ? "e" : "i";
             array[_isReadOnly] = isReadOnly ? "r" : "";
+            array[_rootType] = rootType;
+            array[_propertyRoute] = propertyRoute;
             return toValue(array);
         };
 
@@ -81,6 +93,8 @@ SF.registerModule("Globals", function () {
             singleType: singleType,
             isEmbedded: isEmbedded,
             isReadOnly: isReadOnly,
+            rootType: rootType,
+            propertyRoute: propertyRoute,
             createValue: createValue,
             find: find
         };

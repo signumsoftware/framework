@@ -18,6 +18,7 @@ using System.Collections.Specialized;
 using System.Web.Script.Serialization;
 using System.Text;
 using System.IO;
+using Signum.Engine.Basics;
 #endregion
 
 namespace Signum.Web.Controllers
@@ -130,43 +131,19 @@ namespace Signum.Web.Controllers
         }
 
         [HttpPost]
-        public JsonResult ValidatePartial(string prefix, string parentPrefix = "")
+        public JsonResult ValidatePartial(string prefix, string rootType = null, string propertyRoute = null)
         {
             ModifiableEntity mod = this.UntypedExtractEntity(prefix);
-            MappingContext context = null;
-            bool isEmbedded = mod as EmbeddedEntity != null && !(mod is ModelEntity);
-            if (isEmbedded)
-            {
-                mod = this.UntypedExtractEntity(parentPrefix); //apply changes to the parent entity
-                context = mod.UntypedApplyChanges(ControllerContext, parentPrefix, true).UntypedValidateGlobal();
-            }
-            else
-            {
-                context = mod.UntypedApplyChanges(ControllerContext, prefix, !prefix.HasText()).UntypedValidateGlobal();
-            }
 
+            PropertyRoute route = (rootType.HasText() || propertyRoute.HasText()) ? PropertyRoute.Parse(TypeLogic.GetType(rootType), propertyRoute) : PropertyRoute.Root(mod.GetType());
+          
+            MappingContext context = mod.UntypedApplyChanges(ControllerContext, prefix, admin: true, route: route).UntypedValidateGlobal();
+            
             this.ModelState.FromContext(context);
-
-            string newLink = "";
-            string newToStr = "";
+            
             IIdentifiable ident = context.UntypedValue as IIdentifiable;
-            if (isEmbedded)
-            {
-                newToStr = MappingContext.FindSubEntity(
-                    (ModifiableEntity)context.UntypedValue, 
-                    prefix.Substring(parentPrefix.Length)).ToString();
-            }
-            else if (context.UntypedValue == null)
-            {
-                RuntimeInfo ei = RuntimeInfo.FromFormValue(Request.Form[TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo)]);
-                newLink = Navigator.NavigateRoute(ei.EntityType, ident.TryCS(e => e.IdOrNull));
-                newToStr = context.UntypedValue.ToString();
-            }
-            else
-            {
-                newLink = Navigator.NavigateRoute(context.UntypedValue.GetType(), ident.TryCS(e => e.IdOrNull));
-                newToStr = context.UntypedValue.ToString();
-            }
+            string newLink = ident != null && ident.IdOrNull != null ? Navigator.NavigateRoute(ident) : null;
+            string newToStr = context.UntypedValue.ToString();
             
             return JsonAction.ModelState(ModelState, newToStr, newLink);
         }
