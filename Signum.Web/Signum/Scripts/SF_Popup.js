@@ -61,7 +61,7 @@ SF.registerModule("Popup", function () {
                     };
 
                     if (typeof options.onOk != "undefined") {
-                        $this.find(".sf-ok-button").click(function () {
+                        $this.find(".sf-ok-button").off('click').click(function () {
                             var $this = $(this);
                             if ($this.hasClass("sf-save-protected")) {
                                 var $popupDialog = $this.closest(".sf-popup-dialog");
@@ -87,7 +87,7 @@ SF.registerModule("Popup", function () {
                     }
 
                     if (typeof options.onSave != "undefined") {
-                        $this.find(".sf-save").click(options.onSave);
+                        $this.find(".sf-save").off('click').click(options.onSave);
                     }
 
                     var dialog = $this.dialog(o);
@@ -99,7 +99,7 @@ SF.registerModule("Popup", function () {
 
                         dialog.dialog('option', 'title', $htmlTitle.html());
 
-                        $htmlTitle.remove();
+                        //$htmlTitle.remove();
                     }
                 }
             });
