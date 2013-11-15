@@ -362,14 +362,14 @@ namespace Signum.Windows.Chart
 
             if (!lastRequest.GroupResults)
             {
-                Lite<IdentifiableEntity> lite = (Lite<IdentifiableEntity>)FilterValueConverter.Parse(dic["entity"], this.Description.Columns.Single(a => a.IsEntity).Type);
+                Lite<IdentifiableEntity> lite = (Lite<IdentifiableEntity>)FilterValueConverter.Parse(dic["entity"], this.Description.Columns.Single(a => a.IsEntity).Type, isList: false);
 
                 if (Navigator.IsNavigable(lite.EntityType, isSearchEntity: true))
                     Navigator.NavigateUntyped(lite, new NavigateOptions());
             }
             else
             {
-                var subFilters = lastRequest.KeyColumns.Select(t => new FilterOption(t.Token.FullKey(), FilterValueConverter.Parse(dic["c" + t.Position], t.Token.Type)));
+                var subFilters = lastRequest.KeyColumns.Select(t => new FilterOption(t.Token.FullKey(), FilterValueConverter.Parse(dic["c" + t.Position], t.Token.Type, isList: false)));
 
                 Navigator.Explore(new ExploreOptions(Request.QueryName)
                 {

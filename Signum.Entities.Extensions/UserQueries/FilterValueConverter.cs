@@ -70,19 +70,19 @@ namespace Signum.Entities.UserQueries
             return null;
         }
 
-        public static object Parse(string stringValue, Type type)
+        public static object Parse(string stringValue, Type type, bool isList)
         {
             object result;
-            string error = TryParse(stringValue, type, out result);
+            string error = TryParse(stringValue, type, out result, isList);
             if (error.HasText())
                 throw new FormatException(error);
 
             return result;
         }
 
-        public static string TryParse(string stringValue, Type type, out object result)
+        public static string TryParse(string stringValue, Type type, out object result, bool isList)
         {
-            if (stringValue != null && stringValue.Contains('|'))
+            if (isList && stringValue != null && stringValue.Contains('|'))
             {
                 IList list = (IList)Activator.CreateInstance(typeof(MList<>).MakeGenericType(type));
                 result = list;

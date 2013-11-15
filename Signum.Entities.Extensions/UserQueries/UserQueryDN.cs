@@ -535,7 +535,7 @@ namespace Signum.Entities.UserQueries
         public void SetValue()
         {
             object val;
-            string error = FilterValueConverter.TryParse(ValueString, Token.Token.Type, out val);
+            string error = FilterValueConverter.TryParse(ValueString, Token.Token.Type, out val, this.operation == FilterOperation.IsIn);
             if (string.IsNullOrEmpty(error))
                 Value = val; //Executed on server only
         }
@@ -558,7 +558,7 @@ namespace Signum.Entities.UserQueries
                 if (pi.Is(() => ValueString))
                 {
                     object val;
-                    return FilterValueConverter.TryParse(ValueString, Token.Token.Type, out val);
+                    return FilterValueConverter.TryParse(ValueString, Token.Token.Type, out val, operation == FilterOperation.IsIn);
                 }
             }
 

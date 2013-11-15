@@ -140,13 +140,31 @@ namespace Signum.Engine.UserQueries
             return "tokens-Type-" + type.CleanType().FullName;
         }
 
-        public static FixTokenResult FixValue(Replacements replacements, Type type, ref string valueString, bool allowRemoveToken)
+        public static FixTokenResult FixValue(Replacements replacements, Type type, ref string valueString, bool allowRemoveToken, bool isList)
         {
             object val;
-            string error = FilterValueConverter.TryParse(valueString, type, out val);
+            string error = FilterValueConverter.TryParse(valueString, type, out val, isList);
 
             if (error == null)
                 return FixTokenResult.Nothing;
+
+            if (isList && valueString.Contains('|'))
+            {
+                List<string> changes = new List<string>();
+                foreach (var str in valueString.Split('|'))
+                {
+                    string s = str;
+                    var result = FixValue(replacements, type, ref s, allowRemoveToken, false);
+
+                    if (result == FixTokenResult.DeleteEntity || result == FixTokenResult.SkipEntity || result == FixTokenResult.RemoveToken)
+                        return result;
+
+                    changes.Add(s);
+                }
+
+                valueString = changes.ToString("|");
+                return FixTokenResult.Fix;
+            }
 
             if (type.IsLite())
             {

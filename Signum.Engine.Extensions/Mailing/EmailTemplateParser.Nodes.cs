@@ -532,7 +532,7 @@ namespace Signum.Engine.Mailing
                 if (Token.QueryToken != null)
                 {
                     object rubish;
-                    string error = FilterValueConverter.TryParse(Value, Token.QueryToken.Type, out rubish);
+                    string error = FilterValueConverter.TryParse(Value, Token.QueryToken.Type, out rubish, Operation == FilterOperation.IsIn);
 
                     if (error.HasText())
                         walker.AddError(false, error);
@@ -573,7 +573,7 @@ namespace Signum.Engine.Mailing
                 }
                 else
                 {
-                    object val = FilterValueConverter.Parse(Value, Token.QueryToken.Type);
+                    object val = FilterValueConverter.Parse(Value, Token.QueryToken.Type, Operation == FilterOperation.IsIn);
 
                     Expression value = Expression.Constant(val, Token.QueryToken.Type);
 
@@ -631,7 +631,7 @@ namespace Signum.Engine.Mailing
                 sc.SynchronizeToken(Token, "@any[]");
 
                 if (Operation != null)
-                    sc.SynchronizeValue(Token, ref Value);
+                    sc.SynchronizeValue(Token, ref Value, Operation == FilterOperation.IsIn);
 
                 using (sc.NewScope())
                 {
@@ -675,7 +675,7 @@ namespace Signum.Engine.Mailing
                 if (Token.QueryToken != null)
                 {
                     object rubish;
-                    string error = FilterValueConverter.TryParse(Value, Token.QueryToken.Type, out rubish);
+                    string error = FilterValueConverter.TryParse(Value, Token.QueryToken.Type, out rubish, Operation == FilterOperation.IsIn);
 
                     if (error.HasText())
                         walker.AddError(false, error);
@@ -724,7 +724,7 @@ namespace Signum.Engine.Mailing
                 {
                     Expression token = Expression.Constant(rows.DistinctSingle(p.Columns[Token.QueryToken]), Token.QueryToken.Type);
 
-                    Expression value = Expression.Constant(FilterValueConverter.Parse(Value, Token.QueryToken.Type), Token.QueryToken.Type);
+                    Expression value = Expression.Constant(FilterValueConverter.Parse(Value, Token.QueryToken.Type, Operation == FilterOperation.IsIn), Token.QueryToken.Type);
 
                     Expression newBody = QueryUtils.GetCompareExpression(Operation.Value,  token, value, inMemory: true);
                     var lambda = Expression.Lambda<Func<bool>>(newBody).Compile();
@@ -767,7 +767,7 @@ namespace Signum.Engine.Mailing
                 sc.SynchronizeToken(Token, "@if[]");
 
                 if (Operation != null)
-                    sc.SynchronizeValue(Token, ref Value);
+                    sc.SynchronizeValue(Token, ref Value, Operation == FilterOperation.IsIn);
 
                 using (sc.NewScope())
                 {
