@@ -28,6 +28,19 @@ namespace Signum.Web
 
     public static class Mapping
     {
+        public static Func<PropertyRoute, string> CanChange;
+
+        public static void AssertCanChange(PropertyRoute route)
+        {
+            if (CanChange == null)
+                return;
+
+            string error = CanChange(route);
+
+            if (error.HasText())
+                throw new UnauthorizedAccessException(error); 
+        }
+
         static Mapping()
         {
             MappingRepository<bool>.Mapping = GetValue(ctx => ParseHtmlBool(ctx.Input));
@@ -453,14 +466,22 @@ namespace Signum.Web
 
             try
             {
+                var old = ctx.Value;
                 ctx.Value = Mapping(ctx);
 
                 if (!ctx.SupressChange)
+                {
+                    if (!object.Equals(old, ctx.Value) && !typeof(P).IsMList())
+                        Signum.Web.Mapping.AssertCanChange(ctx.PropertyRoute);
+                    
                     SetValue(parent.Value, ctx.Value);
+                }
             }
             catch (Exception e)
             {
-                string error = e is FormatException ? ValidationMessage._0HasAnInvalidFormat.NiceToString() : ValidationMessage.NotPossibleToaAssign0.NiceToString();
+                string error = e is FormatException ? ValidationMessage._0HasAnInvalidFormat.NiceToString() :
+                    e is UnauthorizedAccessException ? e.Message :
+                    ValidationMessage.NotPossibleToaAssign0.NiceToString();
 
                 ctx.Error.Add(error.Formato(PropertyValidator.PropertyInfo.NiceName()));
             }
@@ -961,6 +982,10 @@ namespace Signum.Web
                     if (itemCtx.Value != null)
                         newList.Add(itemCtx.Value);
                 }
+
+                if(!newList.SequenceEqual(oldList))
+                    Signum.Web.Mapping.AssertCanChange(ctx.PropertyRoute);
+
                 return newList;
             }
         }
@@ -994,6 +1019,10 @@ namespace Signum.Web
                     itemCtx.Value = ElementMapping(itemCtx);
 
                     ctx.AddChild(itemCtx);
+
+                    if (!itemCtx.SupressChange && !object.Equals(list[i], itemCtx.Value))
+                        Signum.Web.Mapping.AssertCanChange(ctx.PropertyRoute);
+
                     list[i] = itemCtx.Value;
 
                     i++;
@@ -1046,31 +1075,20 @@ namespace Signum.Web
 
                 PropertyRoute route = ctx.PropertyRoute.Add("Item");
 
-                using(var log = HeavyProfiler.LogNoStackTrace("Log"))
                 foreach (MappingContext<S> itemCtx in GenerateItemContexts(ctx))
                 {
-                    log.Switch("SubContext");
-
                     SubContext<K> subContext = new SubContext<K>(TypeContextUtilities.Compose(itemCtx.ControlID, Route), null, route, itemCtx);
-
-                    log.Switch("KeyPropertyMapping");
 
                     subContext.Value = KeyPropertyMapping(subContext);
 
-                    log.Switch("Dic");
-
                     itemCtx.Value = dic[subContext.Value];
-
-                    log.Switch("ElementMapping");
 
                     itemCtx.Value = ElementMapping(itemCtx);
 
-                    log.Switch("AddChild");
-
                     ctx.AddChild(itemCtx);
-
-                    log.Switch("Log");
                 }
+
+                //No need to AssertCanChange because the collection itself is never modified
 
                 return list;
             }
