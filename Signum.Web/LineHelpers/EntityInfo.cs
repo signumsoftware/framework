@@ -121,6 +121,7 @@ namespace Signum.Web
         public Type EntityType { get; set; }
         public int? IdOrNull { get; set; }
         public bool IsNew { get; set; }
+        public long? Ticks { get; set; }
 
         public RuntimeInfo() { }
 
@@ -159,6 +160,10 @@ namespace Signum.Web
             EntityType = entity.GetType();
             IdOrNull = entity.IdOrNull;
             IsNew = entity.IsNew;
+            if (entity is Entity)
+            {
+                Ticks = ((Entity)entity).Ticks;
+            }
         }
 
         public override string ToString()
@@ -169,17 +174,18 @@ namespace Signum.Web
             if (EntityType != null && EntityType.IsLite())
                 throw new ArgumentException("RuntimeInfo's RuntimeType cannot be of type Lite. Use ExtractLite or construct a RuntimeInfo<T> instead");
 
-            return "{0};{1};{2}".Formato(
+            return "{0};{1};{2};{3}".Formato(
                 (EntityType == null) ? "" : Navigator.ResolveWebTypeName(EntityType),
                 IdOrNull.TryToString(),
-                IsNew ? "n" : "o"
+                IsNew ? "n" : "o",
+                Ticks
                 );
         }
 
         public static RuntimeInfo FromFormValue(string formValue)
         {
             string[] parts = formValue.Split(new[] { ";" }, StringSplitOptions.None);
-            if (parts.Length != 3)
+            if (parts.Length != 4)
                 throw new ArgumentException("Incorrect sfRuntimeInfo format: {0}".Formato(formValue));
 
             string entityTypeString = parts[0];
@@ -188,7 +194,8 @@ namespace Signum.Web
             {
                 EntityType = string.IsNullOrEmpty(entityTypeString) ? null : Navigator.ResolveType(entityTypeString),
                 IdOrNull = (parts[1].HasText()) ? int.Parse(parts[1]) : (int?)null,
-                IsNew = parts[2]=="n" ? true : false
+                IsNew = parts[2]=="n",
+                Ticks = parts.Length == 4 && parts[3].HasText() ? long.Parse(parts[3]) : (long?)null
             };
         }
 

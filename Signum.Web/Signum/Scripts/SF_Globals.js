@@ -105,6 +105,7 @@ SF.registerModule("Globals", function () {
         var _entityType = 0;
         var _id = 1;
         var _isNew = 2;
+        var _ticks = 3;
         var $elem; 			//cache for the element
 
         var find = function () {
@@ -139,6 +140,9 @@ SF.registerModule("Globals", function () {
         var isNew = function () {
             return getSet(_isNew);
         };
+        var ticks = function () {
+            return getSet(_ticks);
+        };
         var setEntity = function (entityType, id) {
             getSet(_entityType, entityType);
             if (SF.isEmpty(id)) {
@@ -155,7 +159,7 @@ SF.registerModule("Globals", function () {
             getSet(_id, '');
             getSet(_isNew, 'o');
         };
-        var createValue = function (entityType, id, isNew) {
+        var createValue = function (entityType, id, isNew, ticks) {
             var array = [];
             array[_entityType] = entityType;
             array[_id] = id;
@@ -165,6 +169,7 @@ SF.registerModule("Globals", function () {
             else {
                 array[_isNew] = isNew;
             }
+            array[_ticks] = ticks;
             return toValue(array);
         };
 

@@ -471,7 +471,7 @@ namespace Signum.Web
 
                 if (!ctx.SupressChange)
                 {
-                    if (!object.Equals(old, ctx.Value) && !typeof(P).IsMList())
+                    if (!object.Equals(old, ctx.Value))
                         Signum.Web.Mapping.AssertCanChange(ctx.PropertyRoute);
                     
                     SetValue(parent.Value, ctx.Value);
@@ -685,19 +685,29 @@ namespace Signum.Web
             {
                 IdentifiableEntity identifiable = (IdentifiableEntity)(ModifiableEntity)ctx.Value;
 
-                 if (runtimeInfo.IsNew)
-                 {
-                     if(identifiable != null && identifiable.IsNew)
-                         return (T)(ModifiableEntity)identifiable;
-                     else
-                         return Constructor.Construct<T>();
-                 }
+                var result = GetIdentifiableEntity(runtimeInfo, identifiable);
 
-                 if (identifiable != null && runtimeInfo.IdOrNull == identifiable.IdOrNull && runtimeInfo.EntityType == identifiable.GetType())
-                     return (T)(ModifiableEntity)identifiable;
-                 else
-                     return (T)(ModifiableEntity)Database.Retrieve(runtimeInfo.EntityType, runtimeInfo.IdOrNull.Value);
+                if (result is Entity && runtimeInfo.Ticks != null)
+                    ((Entity)(ModifiableEntity)result).ticks = runtimeInfo.Ticks.Value;
+
+                return result;
             }
+        }
+
+        private static T GetIdentifiableEntity(RuntimeInfo runtimeInfo, IdentifiableEntity identifiable)
+        {
+            if (runtimeInfo.IsNew)
+            {
+                if (identifiable != null && identifiable.IsNew)
+                    return (T)(ModifiableEntity)identifiable;
+                else
+                    return Constructor.Construct<T>();
+            }
+
+            if (identifiable != null && runtimeInfo.IdOrNull == identifiable.IdOrNull && runtimeInfo.EntityType == identifiable.GetType())
+                return (T)(ModifiableEntity)identifiable;
+            else
+                return (T)(ModifiableEntity)Database.Retrieve(runtimeInfo.EntityType, runtimeInfo.IdOrNull.Value);
         }
  
 
@@ -983,8 +993,8 @@ namespace Signum.Web
                         newList.Add(itemCtx.Value);
                 }
 
-                if(!newList.SequenceEqual(oldList))
-                    Signum.Web.Mapping.AssertCanChange(ctx.PropertyRoute);
+                if (newList.SequenceEqual(oldList))
+                    return oldList;
 
                 return newList;
             }
@@ -1087,8 +1097,6 @@ namespace Signum.Web
 
                     ctx.AddChild(itemCtx);
                 }
-
-                //No need to AssertCanChange because the collection itself is never modified
 
                 return list;
             }

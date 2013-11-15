@@ -179,7 +179,7 @@ namespace Signum.Web.Operations
             {
                 if (Entities.Count == 1) 
                     requestData = "{{{0}:'{1}'}}".Formato(TypeContextUtilities.Compose(Prefix, EntityBaseKeys.RuntimeInfo), 
-                        "{0};{1};{2}".Formato(Navigator.ResolveWebTypeName(Entities[0].EntityType), Entities[0].Id, "o"));
+                        new RuntimeInfo(Entities[0]).ToString());
                 else 
                     requestData = "{{lites:'{0}'}}".Formato(Entities.Select(e => e.Key()).ToString(",")); 
             }
