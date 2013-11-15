@@ -263,5 +263,10 @@ namespace Signum.Web.Selenium
         {
             return Selenium.GetEval("window.$('#divNormalControl > div > .sf-entity-title').html()");
         }
+
+        public RuntimeInfoProxy RuntimeInfo()
+        {
+            return RuntimeInfoProxy.FromFormValue(Selenium.GetEval("window.$('#sfRuntimeInfo').val()"));
+        }
     }
 }

@@ -161,8 +161,16 @@ namespace Signum.Web.Selenium
                     return false;
                 }, ()=>"popup {0} to disapear with or without confirmation");
             }
+
+            if (Selenium.IsConfirmationPresent())
+                Selenium.ConsumeConfirmation();
         }
 
-        
+
+
+        public RuntimeInfoProxy RuntimeInfo()
+        {
+            return RuntimeInfoProxy.FromFormValue(Selenium.GetEval("window.$('#{0}_divMainControl').data('runtimeinfo')".Formato(Prefix)));
+        }
     }
 }
