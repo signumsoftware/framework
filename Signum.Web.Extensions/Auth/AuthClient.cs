@@ -79,7 +79,10 @@ namespace Signum.Web.Auth
                 });
 
                 if (property)
+                {
                     Common.CommonTask += new CommonTask(TaskAuthorizeProperties);
+                    Mapping.CanChange += Mapping_CanChange;
+                }
 
 
                 var manager = Navigator.Manager;
@@ -216,6 +219,16 @@ namespace Signum.Web.Auth
 
         }
 
+        static string Mapping_CanChange(PropertyRoute route)
+        {
+            switch (PropertyAuthLogic.GetPropertyAllowed(route))
+            {
+                case PropertyAllowed.Modify: return null;
+                case PropertyAllowed.None:
+                case PropertyAllowed.Read:
+                default: return AuthMessage.NotAuthorizedToChangeProperty0on1.NiceToString().Formato(route.PropertyString(), route.RootType.NiceName());
+            }
+        }
 
         static void TaskAuthorizeProperties(BaseLine bl)
         {

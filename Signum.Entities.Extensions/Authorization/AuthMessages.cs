@@ -12,8 +12,6 @@ namespace Signum.Entities.Authorization
         _0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships,
         [Description("{0} rules for {1}")]
         _0RulesFor1,
-        [Description("Access to Facade Method '{0}' is not allowed")]
-        AccessToFacadeMethod0IsNotAllowed,
         [Description("Add condition")]
         AuthAdmin_AddCondition,
         [Description("Choose a condition")]
@@ -76,6 +74,8 @@ namespace Signum.Entities.Authorization
         NotAuthorizedToRetrieve0,
         [Description("Not authorized to Save '{0}'")]
         NotAuthorizedToSave0,
+        [Description("Not authorized to change property '{0}' on {1}")]
+        NotAuthorizedToChangeProperty0on1,
         NotUserLogged,     
         Password,
         PasswordChanged,
