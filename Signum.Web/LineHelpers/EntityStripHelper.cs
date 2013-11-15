@@ -104,7 +104,7 @@ namespace Signum.Web
 
                 int? id = itemTC.UntypedValue is IdentifiableEntity ? ((IdentifiableEntity)itemTC.UntypedValue).IdOrNull :
                     itemTC.UntypedValue is IdentifiableEntity ? ((Lite<IdentifiableEntity>)itemTC.UntypedValue).IdOrNull : null;
-                if (id != null && entityStrip.Navigate && Navigator.IsNavigable(itemTC.Type.CleanType(), entityStrip.PartialViewName, isSearchEntity: false))
+                if (id != null && entityStrip.Navigate)
                 {
                     sb.AddLine(
                         helper.Href(itemTC.Compose(EntityBaseKeys.ToStrLink),
