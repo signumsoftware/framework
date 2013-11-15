@@ -245,7 +245,7 @@ namespace Signum.Web.Chart
         public MappingContext<ChartRequest> ExtractChartRequestCtx(string prefix, int? lastTokenChanged)
         {
             var ctx = new ChartRequest(Navigator.ResolveQueryName(Request.Params["webQueryName"]))
-                    .ApplyChanges(ControllerContext, prefix, ChartClient.MappingChartRequest, Request.Params.ToSortedList(prefix));
+                .ApplyChanges(ControllerContext, prefix, ChartClient.MappingChartRequest, inputs: Request.Params.ToSortedList(prefix));
 
             ctx.Value.CleanOrderColumns();
 
