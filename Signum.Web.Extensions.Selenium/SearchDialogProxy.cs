@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Selenium;
 using Signum.Engine.Basics;
 using Signum.Entities;
@@ -644,9 +645,11 @@ namespace Signum.Web.Selenium
             return num; 
         }
 
-        public bool IsEntityInRow<T>(int id, int index) where T : IdentifiableEntity
+        public Lite<IdentifiableEntity> EntityInIndex(int index)
         {
-            return Selenium.IsElementPresent("{0}[data-entity='{1}']".Formato(RowLocator(index), TypeLogic.GetCleanName(typeof(T)) + ";" + id));
+            var result = Selenium.GetEval("window.$('{0}').data('entity')".Formato(RowLocator(index).RemoveStart(3)));
+
+            return Lite.Parse(result);
         }
 
         public bool IsHeaderMarkedSorted(int columnIndex)
