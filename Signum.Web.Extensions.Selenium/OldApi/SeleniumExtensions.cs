@@ -110,7 +110,7 @@ namespace Signum.Web.Selenium
 
         public static void WaitForPageToLoad(this ISelenium selenium)
         {
-            selenium.WaitForPageToLoad(PageLoadTimeout);
+            selenium.WaitForPageToLoad();
         }
 
         public static void Wait(this ISelenium selenium, Func<bool> condition, Func<string> actionDescription = null, int? timeout = null)
@@ -174,7 +174,7 @@ namespace Signum.Web.Selenium
         {
             selenium.Click("jq=#{0}btnOk".Formato(prefix));
             if (submit)
-                selenium.WaitForPageToLoad(PageLoadTimeout);
+                selenium.WaitForPageToLoad();
             else
                 selenium.Wait(() => !selenium.IsElementPresent(PopupSelector(prefix)));
         }
