@@ -276,11 +276,11 @@ namespace Signum.Entities
         }
 
 
-        public static PropertyRoute Parse(Type type, string route)
+        public static PropertyRoute Parse(Type type, string propertyString)
         {
             PropertyRoute result = PropertyRoute.Root(type);
 
-            foreach (var part in route.Replace("/", ".Item.").TrimEnd('.').Split('.'))
+            foreach (var part in propertyString.Replace("/", ".Item.").TrimEnd('.').Split('.'))
             {
                 result = result.Add(part);
             }
