@@ -1,6 +1,8 @@
-﻿var SF = SF || {};
+﻿/// <reference path="SF_Utils.ts"/>
+/// <reference path="SF_Globals.ts"/>
 
-SF.Widgets = (function () {
+module SF.Widgets
+{   
     var highlightClass = "sf-alert-active";
 
     $(document).on("click", ".sf-widget-toggler", function (evt) {
@@ -8,7 +10,7 @@ SF.Widgets = (function () {
         return false;
     });
 
-    var onNoteCreated = function (url, prefix, successMessage) {
+    export function onNoteCreated(url, prefix, successMessage) {
         $.ajax({
             url: url,
             data: { sfRuntimeInfo: new SF.RuntimeInfo(prefix).find().val() },
@@ -18,9 +20,9 @@ SF.Widgets = (function () {
                 window.alert(successMessage);
             }
         });
-    };
+    }
 
-    var onAlertCreated = function (url, prefix, successMessage) {
+    export function onAlertCreated(url, prefix, successMessage) {
         $.ajax({
             url: url,
             data: { sfRuntimeInfo: new SF.RuntimeInfo(prefix).find().val() },
@@ -32,18 +34,13 @@ SF.Widgets = (function () {
                 window.alert(successMessage);
             }
         });
-    };
+    }
 
-    var updateCountAndHighlight = function ($alertsWidget, key, count) {
+    function updateCountAndHighlight($alertsWidget, key, count) {
         var $current = $alertsWidget.find(".sf-alert-" + key);
         $current.not(".sf-alert-count-label").html(count);
         if (count > 0) {
             $current.addClass(highlightClass);
         }
-    };
-
-    return {
-        onNoteCreated: onNoteCreated,
-        onAlertCreated: onAlertCreated
-    };
-})();
+    }
+}

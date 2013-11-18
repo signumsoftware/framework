@@ -264,6 +264,9 @@
     <Compile Include="ViewDataKeys.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Signum\Headers\d3.d.ts" />
+    <Content Include="Signum\Headers\jquery.d.ts" />
+    <Content Include="Signum\Headers\jqueryui.d.ts" />
     <Content Include="Signum\Scripts\SF_Operations.js" />
     <Content Include="Signum\Views\Exception.cshtml">
       <Generator>RazorGenerator</Generator>
@@ -296,7 +299,7 @@
       <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
     <Content Include="Signum\Content\SF_Widgets.css" />
-    <Content Include="Signum\Scripts\SF_Widgets.js" />
+    <Content Include="Signum\Scripts\SF_Widgets.ts" />
     <None Include="Signum\Views\SearchControl.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>SearchControl.generated.cs</LastGenOutput>
@@ -327,21 +330,21 @@
     <Content Include="Signum\Content\SF_NormalPage.css" />
     <Content Include="Signum\Content\SF_Notify.css" />
     <Content Include="Signum\Content\SF_Search.css" />
-    <Content Include="Signum\Scripts\SF_Slider.js" />
+    <Content Include="Signum\Scripts\SF_Slider.ts" />
     <None Include="Signum\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
       <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
     <Content Include="Signum\Images\calendar.png" />
-    <Content Include="Signum\Scripts\SF_Utils.js" />
+    <TypeScriptCompile Include="Signum\Scripts\SF_Utils.ts" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Web.config" />
     <Content Include="Signum\Views\Web.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Signum\Scripts\SF_Globals.js" />
+    <Content Include="Signum\Scripts\SF_Globals.ts" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Signum\Images\asc.gif" />
@@ -361,7 +364,7 @@
     </None>
     <Content Include="Signum\Scripts\SF_FindNavigator.js" />
     <Content Include="Signum\Scripts\SF_Lines.js" />
-    <Content Include="Signum\Scripts\SF_Popup.js" />
+    <Content Include="Signum\Scripts\SF_Popup.ts" />
     <Content Include="Signum\Scripts\SF_Validator.js" />
     <Content Include="Signum\Scripts\SF_ViewNavigator.js" />
     <None Include="Signum\Views\Error.cshtml">

@@ -1,238 +1,217 @@
-﻿"use strict";
+﻿var SF;
+(function (SF) {
+    /// <reference path="SF_Utils.ts"/>
+    (function (Globals) {
+        var StaticInfo = (function () {
+            function StaticInfo(prefix) {
+                this.prefix = prefix;
+            }
+            StaticInfo.prototype.find = function () {
+                if (!this.$elem) {
+                    this.$elem = $('#' + SF.compose(this.prefix, SF.Keys.staticInfo));
+                }
+                return this.$elem;
+            };
 
-if (!SF)
-    throw "SF.Utils not initialized";
+            StaticInfo.prototype.value = function () {
+                return this.find().val();
+            };
 
-SF.registerModule("Globals", function () {
+            StaticInfo.prototype.toArray = function () {
+                return this.value().split(";");
+            };
 
+            StaticInfo.prototype.toValue = function (array) {
+                return array.join(";");
+            };
+
+            StaticInfo.prototype.getValue = function (key) {
+                var array = this.toArray();
+                return array[key];
+            };
+
+            StaticInfo.prototype.singleType = function () {
+                var typeArray = this.types().split(',');
+                if (typeArray.length !== 1) {
+                    throw "types should have only one element for element {0}".format(this.prefix);
+                }
+                return typeArray[0];
+            };
+
+            StaticInfo.prototype.types = function () {
+                return this.getValue(StaticInfo._types);
+            };
+
+            StaticInfo.prototype.isEmbedded = function () {
+                return this.getValue(StaticInfo._isEmbedded) == "e";
+            };
+
+            StaticInfo.prototype.isReadOnly = function () {
+                return this.getValue(StaticInfo._isReadOnly) == "r";
+            };
+
+            StaticInfo.prototype.rootType = function () {
+                return this.getValue(StaticInfo._rootType);
+            };
+
+            StaticInfo.prototype.propertyRoute = function () {
+                return this.getValue(StaticInfo._propertyRoute);
+            };
+
+            StaticInfo.prototype.createValue = function (types, isEmbedded, isReadOnly, rootType, propertyRoute) {
+                var array = [];
+                array[StaticInfo._types] = types;
+                array[StaticInfo._isEmbedded] = isEmbedded ? "e" : "i";
+                array[StaticInfo._isReadOnly] = isReadOnly ? "r" : "";
+                array[StaticInfo._rootType] = rootType;
+                array[StaticInfo._propertyRoute] = propertyRoute;
+                return this.toValue(array);
+            };
+            StaticInfo._types = 0;
+            StaticInfo._isEmbedded = 1;
+            StaticInfo._isReadOnly = 2;
+            StaticInfo._rootType = 3;
+            StaticInfo._propertyRoute = 4;
+            return StaticInfo;
+        })();
+        Globals.StaticInfo = StaticInfo;
+
+        var RuntimeInfo = (function () {
+            function RuntimeInfo(prefix) {
+                this.prefix = prefix;
+            }
+            RuntimeInfo.prototype.find = function () {
+                if (!this.$elem) {
+                    this.$elem = $('#' + SF.compose(this.prefix, SF.Keys.runtimeInfo));
+                }
+                return this.$elem;
+            };
+            RuntimeInfo.prototype.value = function () {
+                return this.find().val();
+            };
+            RuntimeInfo.prototype.toArray = function () {
+                return this.value().split(";");
+            };
+            RuntimeInfo.prototype.toValue = function (array) {
+                return array.join(";");
+            };
+            RuntimeInfo.prototype.getSet = function (key, val) {
+                var array = this.toArray();
+                if (val === undefined) {
+                    return array[key];
+                }
+                array[key] = val;
+                this.find().val(this.toValue(array));
+            };
+            RuntimeInfo.prototype.entityType = function () {
+                return this.getSet(RuntimeInfo._entityType);
+            };
+            RuntimeInfo.prototype.id = function () {
+                return this.getSet(RuntimeInfo._id);
+            };
+            RuntimeInfo.prototype.isNew = function () {
+                return this.getSet(RuntimeInfo._isNew);
+            };
+            RuntimeInfo.prototype.ticks = function () {
+                return this.getSet(RuntimeInfo._ticks);
+            };
+            RuntimeInfo.prototype.setEntity = function (entityType, id) {
+                this.getSet(RuntimeInfo._entityType, entityType);
+                if (SF.isEmpty(id)) {
+                    this.getSet(RuntimeInfo._id, '');
+                    this.getSet(RuntimeInfo._isNew, 'n');
+                } else {
+                    this.getSet(RuntimeInfo._id, id);
+                    this.getSet(RuntimeInfo._isNew, 'o');
+                }
+            };
+            RuntimeInfo.prototype.removeEntity = function () {
+                this.getSet(RuntimeInfo._entityType, '');
+                this.getSet(RuntimeInfo._id, '');
+                this.getSet(RuntimeInfo._isNew, 'o');
+            };
+            RuntimeInfo.prototype.createValue = function (entityType, id, isNew, ticks) {
+                var array = [];
+                array[RuntimeInfo._entityType] = entityType;
+                array[RuntimeInfo._id] = id;
+                if (SF.isEmpty(isNew)) {
+                    array[RuntimeInfo._isNew] = SF.isEmpty(id) ? "n" : "o";
+                } else {
+                    array[RuntimeInfo._isNew] = isNew;
+                }
+                array[RuntimeInfo._ticks] = ticks;
+                return this.toValue(array);
+            };
+            RuntimeInfo._entityType = 0;
+            RuntimeInfo._id = 1;
+            RuntimeInfo._isNew = 2;
+            RuntimeInfo._ticks = 3;
+            return RuntimeInfo;
+        })();
+        Globals.RuntimeInfo = RuntimeInfo;
+
+        var Serializer = (function () {
+            function Serializer() {
+            }
+            Serializer.prototype.concat = function (value) {
+                if (this.result === "") {
+                    this.result = value;
+                } else {
+                    this.result += "&" + value;
+                }
+            };
+
+            Serializer.prototype.add = function (param, value) {
+                if (typeof param === "string") {
+                    if (value === undefined) {
+                        this.concat(param);
+                    } else {
+                        this.concat(param + "=" + value);
+                    }
+                } else if ($.isFunction(param)) {
+                    var data = param();
+
+                    for (var key in data) {
+                        if (data.hasOwnProperty(key)) {
+                            var value = data[key];
+                            this.concat(key + "=" + value);
+                        }
+                    }
+                } else {
+                    for (var key in param) {
+                        if (param.hasOwnProperty(key)) {
+                            var value = param[key];
+                            this.concat(key + "=" + value);
+                        }
+                    }
+                }
+                return this;
+            };
+
+            Serializer.prototype.serialize = function () {
+                return this.result;
+            };
+            return Serializer;
+        })();
+        Globals.Serializer = Serializer;
+    })(SF.Globals || (SF.Globals = {}));
+    var Globals = SF.Globals;
+})(SF || (SF = {}));
+
+var SF;
+(function (SF) {
     SF.Keys = {
         separator: "_",
         tabId: "sfTabId",
         antiForgeryToken: "__RequestVerificationToken",
-
         entityTypeNames: "sfEntityTypeNames",
-
         runtimeInfo: "sfRuntimeInfo",
         staticInfo: "sfStaticInfo",
         toStr: "sfToStr",
         link: "sfLink"
     };
 
-    SF.StaticInfo = function (_prefix) {
-        var prefix = _prefix,
-			_types = 0,
-            _isEmbedded = 1,
-			_isReadOnly = 2,
-            _rootType = 3,
-            _propertyRoute = 4,
-			$elem; 			//cache for the element
-
-        var find = function () {
-            if (!$elem) {
-                $elem = $('#' + SF.compose(prefix, SF.Keys.staticInfo));
-            }
-            return $elem;
-        };
-
-        var value = function () {
-            return find().val();
-        };
-
-        var toArray = function () {
-            return value().split(";")
-        };
-        var toValue = function (array) {
-            return array.join(";");
-        };
-
-        var getValue = function (key) {
-            var array = toArray();
-            return array[key];
-        };
-
-        var singleType = function () {
-            var typeArray = types().split(',');
-            if (typeArray.length !== 1) {
-                throw "types should have only one element for element {0}".format(prefix);
-            }
-            return typeArray[0];
-        };
-
-        var types = function () {
-            return getValue(_types);
-        };
-
-        var isEmbedded = function () {
-            return getValue(_isEmbedded) == "e";
-        };
-
-        var isReadOnly = function () {
-            return getValue(_isReadOnly) == "r";
-        };
-
-        var rootType = function () {
-            return getValue(_rootType);
-        };
-
-        var propertyRoute = function () {
-            return getValue(_propertyRoute);
-        };
-
-        var createValue = function (types, isEmbedded, isReadOnly, rootType, propertyRoute) {
-            var array = [];
-            array[_types] = types;
-            array[_isEmbedded] = isEmbedded ? "e" : "i";
-            array[_isReadOnly] = isReadOnly ? "r" : "";
-            array[_rootType] = rootType;
-            array[_propertyRoute] = propertyRoute;
-            return toValue(array);
-        };
-
-        return {
-            types: types,
-            singleType: singleType,
-            isEmbedded: isEmbedded,
-            isReadOnly: isReadOnly,
-            rootType: rootType,
-            propertyRoute: propertyRoute,
-            createValue: createValue,
-            find: find
-        };
-    };
-
-    SF.RuntimeInfo = function (_prefix) {
-        var prefix = _prefix;
-        var _entityType = 0;
-        var _id = 1;
-        var _isNew = 2;
-        var _ticks = 3;
-        var $elem; 			//cache for the element
-
-        var find = function () {
-            if (!$elem) {
-                $elem = $('#' + SF.compose(prefix, SF.Keys.runtimeInfo));
-            }
-            return $elem;
-        };
-        var value = function () {
-            return find().val();
-        };
-        var toArray = function () {
-            return value().split(";");
-        };
-        var toValue = function (array) {
-            return array.join(";");
-        };
-        var getSet = function (key, val) {
-            var array = toArray();
-            if (val === undefined) {
-                return array[key];
-            }
-            array[key] = val;
-            find().val(toValue(array));
-        };
-        var entityType = function () {
-            return getSet(_entityType);
-        };
-        var id = function () {
-            return getSet(_id);
-        };
-        var isNew = function () {
-            return getSet(_isNew);
-        };
-        var ticks = function () {
-            return getSet(_ticks);
-        };
-        var setEntity = function (entityType, id) {
-            getSet(_entityType, entityType);
-            if (SF.isEmpty(id)) {
-                getSet(_id, '');
-                getSet(_isNew, 'n');
-            }
-            else {
-                getSet(_id, id);
-                getSet(_isNew, 'o');
-            }
-        };
-        var removeEntity = function () {
-            getSet(_entityType, '');
-            getSet(_id, '');
-            getSet(_isNew, 'o');
-        };
-        var createValue = function (entityType, id, isNew, ticks) {
-            var array = [];
-            array[_entityType] = entityType;
-            array[_id] = id;
-            if (SF.isEmpty(isNew)) {
-                array[_isNew] = SF.isEmpty(id) ? "n" : "o";
-            }
-            else {
-                array[_isNew] = isNew;
-            }
-            array[_ticks] = ticks;
-            return toValue(array);
-        };
-
-        return {
-            entityType: entityType,
-            id: id,
-            isNew: isNew,
-            setEntity: setEntity,
-            removeEntity: removeEntity,
-            createValue: createValue,
-            find: find,
-            getSet: getSet,
-            value: value
-        };
-    };
-
-    SF.Serializer = function () {
-        var result = "";
-
-        var concat = function (value) {
-            if (result === "") {
-                result = value;
-            } else {
-                result += "&" + value;
-            }
-        };
-
-        this.add = function (param, value) {
-            if (typeof param === "string") {
-                if (value === undefined) {
-                    concat(param);
-                } else {
-                    concat(param + "=" + value);
-                }
-            }
-            else if ($.isFunction(param)) {
-                var data = param();
-                //json
-                for (var key in data) {
-                    if (data.hasOwnProperty(key)) {
-                        var value = data[key];
-                        concat(key + "=" + value);
-                    }
-                }
-            }
-            else {
-                //json
-                for (var key in param) {
-                    if (param.hasOwnProperty(key)) {
-                        var value = param[key];
-                        concat(key + "=" + value);
-                    }
-                }
-            }
-            return this;
-        };
-
-        this.serialize = function () {
-            return result;
-        };
-    };
-
-    SF.compose = function (str1, str2, separator) {
+    function compose(str1, str2, separator) {
         if (typeof (str1) !== "string" && str1 !== null && str1 != undefined) {
             throw "str1 " + str1 + " is not a string";
         }
@@ -254,9 +233,10 @@ SF.registerModule("Globals", function () {
         }
 
         return str1 + separator + str2;
-    };
+    }
+    SF.compose = compose;
 
-    SF.cloneContents = function (sourceContainerId) {
+    function cloneContents(sourceContainerId) {
         var $source = $('#' + sourceContainerId);
         var $clone = $source.children().clone(true);
 
@@ -268,19 +248,20 @@ SF.registerModule("Globals", function () {
         }
 
         return $clone;
-    };
+    }
+    SF.cloneContents = cloneContents;
 
-    SF.getPathPrefixes = function (prefix) {
-        var path = [],
-            pathSplit = prefix.split("_");
+    function getPathPrefixes(prefix) {
+        var path = [], pathSplit = prefix.split("_");
 
         for (var i = 0, l = pathSplit.length; i < l; i++)
             path[i] = pathSplit.slice(0, i).join("_");
 
         return path;
-    };
+    }
+    SF.getPathPrefixes = getPathPrefixes;
 
-    SF.submit = function (urlController, requestExtraJsonData, $form) {
+    function submit(urlController, requestExtraJsonData, $form) {
         $form = $form || $("form");
         if (!SF.isEmpty(requestExtraJsonData)) {
             if ($.isFunction(requestExtraJsonData)) {
@@ -295,14 +276,16 @@ SF.registerModule("Globals", function () {
 
         $form.attr("action", urlController)[0].submit();
         return false;
-    };
+    }
+    SF.submit = submit;
+    ;
 
-    SF.submitOnly = function (urlController, requestExtraJsonData) {
+    function submitOnly(urlController, requestExtraJsonData) {
         if (requestExtraJsonData == null)
             throw "SubmitOnly needs requestExtraJsonData. Use Submit instead";
 
-        var $form = $("<form />",
-        { method: 'post',
+        var $form = $("<form />", {
+            method: 'post',
             action: urlController
         });
 
@@ -325,38 +308,38 @@ SF.registerModule("Globals", function () {
 
         return false;
     }
+    SF.submitOnly = submitOnly;
 
-    SF.hiddenInput = function (id, value) {
+    function hiddenInput(id, value) {
         return "<input type='hidden' id='" + id + "' name='" + id + "' value='" + value + "' />\n";
-    };
+    }
+    SF.hiddenInput = hiddenInput;
 
-    SF.hiddenDiv = function (id, innerHtml) {
+    function hiddenDiv(id, innerHtml) {
         return "<div id='" + id + "' name='" + id + "' style='display:none'>" + innerHtml + "</div>";
-    };
+    }
+    SF.hiddenDiv = hiddenDiv;
 
-    SF.Dropdowns =
-    {
-        toggle: function (event, elem, topFix) {
-            var $elem = $(elem),
-                clss = "sf-open";
+    var Dropdowns;
+    (function (Dropdowns) {
+        function toggle(event, elem, topFix) {
+            var $elem = $(elem), clss = "sf-open";
 
             if (!$elem.hasClass("sf-dropdown")) {
                 $elem = $elem.closest(".sf-dropdown");
             }
 
             var opened = $elem.hasClass(clss);
-            if (opened) {      
+            if (opened) {
                 $elem.removeClass(clss);
-            }
-            else {
-                //topFix is used to correct top when the toggler element is inside another panel with borders or anything
+            } else {
                 if (typeof topFix == "undefined") {
                     topFix = 0;
                 }
 
                 $(".sf-dropdown").removeClass(clss);
                 var $content = $elem.find(".sf-menu-button");
-                var left = $elem.width() - $content.width(); 
+                var left = $elem.width() - $content.width();
                 $content.css({
                     top: $elem.outerHeight() + topFix,
                     left: ($elem.position().left - $elem.parents("div").first().position().left) < Math.abs(left) ? 0 : left
@@ -366,40 +349,35 @@ SF.registerModule("Globals", function () {
 
             SF.stopPropagation(event);
         }
-    };
+        Dropdowns.toggle = toggle;
+    })(Dropdowns || (Dropdowns = {}));
 
-    SF.Blocker = (function () {
-
-        var blocked = false,
-            $elem;
+    var Blocker;
+    (function (Blocker) {
+        var blocked = false;
+        var $elem;
 
         function isEnabled() {
             return blocked;
         }
+        Blocker.isEnabled = isEnabled;
 
         function enable() {
             blocked = true;
-            $elem =
-                $("<div/>", {
-                    "class": "sf-ui-blocker",
-                    "width": "300%",
-                    "height": "300%"
-                }).appendTo($("body"));
+            $elem = $("<div/>", {
+                "class": "sf-ui-blocker",
+                "width": "300%",
+                "height": "300%"
+            }).appendTo($("body"));
         }
+        Blocker.enable = enable;
 
         function disable() {
             blocked = false;
             $elem.remove();
         }
-
-        return {
-            isEnabled: isEnabled,
-            enable: enable,
-            disable: disable
-        };
-
-    })();
-
+        Blocker.disable = disable;
+    })(Blocker || (Blocker = {}));
 
     $(function () {
         $(document).on("click", function (e) {
@@ -407,11 +385,14 @@ SF.registerModule("Globals", function () {
         });
     });
 
-    $(function () { $('#form input[type=text]').keypress(function (e) { return e.which != 13 }) });
+    $(function () {
+        $('#form input[type=text]').keypress(function (e) {
+            return e.which != 13;
+        });
+    });
 
     $(function () {
         $("body").bind("sf-ajax-error", function (event, XMLHttpRequest, textStatus, thrownError) {
-
             var error = XMLHttpRequest.responseText;
             if (!error) {
                 error = textStatus;
@@ -425,9 +406,9 @@ SF.registerModule("Globals", function () {
             SF.log(thrownError);
 
             alert(lang.signum.error + ": " + error);
-            if (SF.Blocker.isEnabled()) {
-                SF.Blocker.disable();
+            if (Blocker.isEnabled()) {
+                Blocker.disable();
             }
         });
-    })
-});
+    });
+})(SF || (SF = {}));
