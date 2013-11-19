@@ -37,7 +37,7 @@ namespace Signum.Engine.ControlPanel
                     {"UserQueryPart", typeof(UserQueryPartDN)},
                     {"LinkListPart", typeof(LinkListPartDN)},
                     {"CountSearchControlPart", typeof(CountSearchControlPartDN)},
-                }); 
+                });
 
                 sb.Include<ControlPanelDN>();
 
@@ -180,6 +180,9 @@ namespace Signum.Engine.ControlPanel
 
             TypeConditionLogic.Register<LinkListPartDN>(newEntityGroupKey,
                  llp => Database.Query<ControlPanelDN>().WhereCondition(newEntityGroupKey).Any(cp => cp.ContainsContent(llp)));
+
+            TypeConditionLogic.Register<UserChartPartDN>(newEntityGroupKey,
+                 llp => Database.Query<ControlPanelDN>().WhereCondition(newEntityGroupKey).Any(cp => cp.ContainsContent(llp)));
         }
 
         public static void RegisterRoleTypeCondition(SchemaBuilder sb, Enum newEntityGroupKey)
@@ -193,6 +196,9 @@ namespace Signum.Engine.ControlPanel
                  uq => Database.Query<ControlPanelDN>().WhereCondition(newEntityGroupKey).Any(cp => cp.ContainsContent(uq)));
 
             TypeConditionLogic.Register<LinkListPartDN>(newEntityGroupKey,
+                 uq => Database.Query<ControlPanelDN>().WhereCondition(newEntityGroupKey).Any(cp => cp.ContainsContent(uq)));
+
+            TypeConditionLogic.Register<UserChartPartDN>(newEntityGroupKey,
                  uq => Database.Query<ControlPanelDN>().WhereCondition(newEntityGroupKey).Any(cp => cp.ContainsContent(uq)));
         }
 
