@@ -105,6 +105,14 @@ namespace Signum.Entities
         System,
 
         /// <summary>
+        /// An entity that connects to entity to implement a N to N relationship in a symetric way (no MLists)
+        /// Not SaveProtected, not vieable, not creable (override on SearchControl) 
+        /// ie: DiscountProductDN
+        /// </summary>
+        Relational,
+
+
+        /// <summary>
         /// Doesn't make sense to view it from other entity, since there's not to much to see. 
         /// SaveProtected
         /// ie: CountryDN
