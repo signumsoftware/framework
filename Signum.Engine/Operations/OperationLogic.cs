@@ -175,6 +175,7 @@ namespace Signum.Engine.Operations
             {
                 case EntityKind.SystemString:
                 case EntityKind.System:
+                case EntityKind.Relational:
                     return false;
 
                 case EntityKind.String:
