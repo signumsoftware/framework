@@ -1,201 +1,153 @@
-﻿var SF;
+/// <reference path="SF_Utils.ts"/>
+var SF;
 (function (SF) {
-    /// <reference path="SF_Utils.ts"/>
-    (function (Globals) {
-        var StaticInfo = (function () {
-            function StaticInfo(prefix) {
-                this.prefix = prefix;
+    var StaticInfo = (function () {
+        function StaticInfo(prefix) {
+            this.prefix = prefix;
+        }
+        StaticInfo.prototype.find = function () {
+            if (!this.$elem) {
+                this.$elem = $('#' + SF.compose(this.prefix, SF.Keys.staticInfo));
             }
-            StaticInfo.prototype.find = function () {
-                if (!this.$elem) {
-                    this.$elem = $('#' + SF.compose(this.prefix, SF.Keys.staticInfo));
-                }
-                return this.$elem;
-            };
+            return this.$elem;
+        };
 
-            StaticInfo.prototype.value = function () {
-                return this.find().val();
-            };
+        StaticInfo.prototype.value = function () {
+            return this.find().val();
+        };
 
-            StaticInfo.prototype.toArray = function () {
-                return this.value().split(";");
-            };
+        StaticInfo.prototype.toArray = function () {
+            return this.value().split(";");
+        };
 
-            StaticInfo.prototype.toValue = function (array) {
-                return array.join(";");
-            };
+        StaticInfo.prototype.toValue = function (array) {
+            return array.join(";");
+        };
 
-            StaticInfo.prototype.getValue = function (key) {
-                var array = this.toArray();
+        StaticInfo.prototype.getValue = function (key) {
+            var array = this.toArray();
+            return array[key];
+        };
+
+        StaticInfo.prototype.singleType = function () {
+            var typeArray = this.types().split(',');
+            if (typeArray.length !== 1) {
+                throw "types should have only one element for element {0}".format(this.prefix);
+            }
+            return typeArray[0];
+        };
+
+        StaticInfo.prototype.types = function () {
+            return this.getValue(StaticInfo._types);
+        };
+
+        StaticInfo.prototype.isEmbedded = function () {
+            return this.getValue(StaticInfo._isEmbedded) == "e";
+        };
+
+        StaticInfo.prototype.isReadOnly = function () {
+            return this.getValue(StaticInfo._isReadOnly) == "r";
+        };
+
+        StaticInfo.prototype.rootType = function () {
+            return this.getValue(StaticInfo._rootType);
+        };
+
+        StaticInfo.prototype.propertyRoute = function () {
+            return this.getValue(StaticInfo._propertyRoute);
+        };
+
+        StaticInfo.prototype.createValue = function (types, isEmbedded, isReadOnly, rootType, propertyRoute) {
+            var array = [];
+            array[StaticInfo._types] = types;
+            array[StaticInfo._isEmbedded] = isEmbedded ? "e" : "i";
+            array[StaticInfo._isReadOnly] = isReadOnly ? "r" : "";
+            array[StaticInfo._rootType] = rootType;
+            array[StaticInfo._propertyRoute] = propertyRoute;
+            return this.toValue(array);
+        };
+        StaticInfo._types = 0;
+        StaticInfo._isEmbedded = 1;
+        StaticInfo._isReadOnly = 2;
+        StaticInfo._rootType = 3;
+        StaticInfo._propertyRoute = 4;
+        return StaticInfo;
+    })();
+    SF.StaticInfo = StaticInfo;
+
+    var RuntimeInfo = (function () {
+        function RuntimeInfo(prefix) {
+            this.prefix = prefix;
+        }
+        RuntimeInfo.prototype.find = function () {
+            if (!this.$elem) {
+                this.$elem = $('#' + SF.compose(this.prefix, SF.Keys.runtimeInfo));
+            }
+            return this.$elem;
+        };
+        RuntimeInfo.prototype.value = function () {
+            return this.find().val();
+        };
+        RuntimeInfo.prototype.toArray = function () {
+            return this.value().split(";");
+        };
+        RuntimeInfo.prototype.toValue = function (array) {
+            return array.join(";");
+        };
+        RuntimeInfo.prototype.getSet = function (key, val) {
+            var array = this.toArray();
+            if (val === undefined) {
                 return array[key];
-            };
-
-            StaticInfo.prototype.singleType = function () {
-                var typeArray = this.types().split(',');
-                if (typeArray.length !== 1) {
-                    throw "types should have only one element for element {0}".format(this.prefix);
-                }
-                return typeArray[0];
-            };
-
-            StaticInfo.prototype.types = function () {
-                return this.getValue(StaticInfo._types);
-            };
-
-            StaticInfo.prototype.isEmbedded = function () {
-                return this.getValue(StaticInfo._isEmbedded) == "e";
-            };
-
-            StaticInfo.prototype.isReadOnly = function () {
-                return this.getValue(StaticInfo._isReadOnly) == "r";
-            };
-
-            StaticInfo.prototype.rootType = function () {
-                return this.getValue(StaticInfo._rootType);
-            };
-
-            StaticInfo.prototype.propertyRoute = function () {
-                return this.getValue(StaticInfo._propertyRoute);
-            };
-
-            StaticInfo.prototype.createValue = function (types, isEmbedded, isReadOnly, rootType, propertyRoute) {
-                var array = [];
-                array[StaticInfo._types] = types;
-                array[StaticInfo._isEmbedded] = isEmbedded ? "e" : "i";
-                array[StaticInfo._isReadOnly] = isReadOnly ? "r" : "";
-                array[StaticInfo._rootType] = rootType;
-                array[StaticInfo._propertyRoute] = propertyRoute;
-                return this.toValue(array);
-            };
-            StaticInfo._types = 0;
-            StaticInfo._isEmbedded = 1;
-            StaticInfo._isReadOnly = 2;
-            StaticInfo._rootType = 3;
-            StaticInfo._propertyRoute = 4;
-            return StaticInfo;
-        })();
-        Globals.StaticInfo = StaticInfo;
-
-        var RuntimeInfo = (function () {
-            function RuntimeInfo(prefix) {
-                this.prefix = prefix;
             }
-            RuntimeInfo.prototype.find = function () {
-                if (!this.$elem) {
-                    this.$elem = $('#' + SF.compose(this.prefix, SF.Keys.runtimeInfo));
-                }
-                return this.$elem;
-            };
-            RuntimeInfo.prototype.value = function () {
-                return this.find().val();
-            };
-            RuntimeInfo.prototype.toArray = function () {
-                return this.value().split(";");
-            };
-            RuntimeInfo.prototype.toValue = function (array) {
-                return array.join(";");
-            };
-            RuntimeInfo.prototype.getSet = function (key, val) {
-                var array = this.toArray();
-                if (val === undefined) {
-                    return array[key];
-                }
-                array[key] = val;
-                this.find().val(this.toValue(array));
-            };
-            RuntimeInfo.prototype.entityType = function () {
-                return this.getSet(RuntimeInfo._entityType);
-            };
-            RuntimeInfo.prototype.id = function () {
-                return this.getSet(RuntimeInfo._id);
-            };
-            RuntimeInfo.prototype.isNew = function () {
-                return this.getSet(RuntimeInfo._isNew);
-            };
-            RuntimeInfo.prototype.ticks = function () {
-                return this.getSet(RuntimeInfo._ticks);
-            };
-            RuntimeInfo.prototype.setEntity = function (entityType, id) {
-                this.getSet(RuntimeInfo._entityType, entityType);
-                if (SF.isEmpty(id)) {
-                    this.getSet(RuntimeInfo._id, '');
-                    this.getSet(RuntimeInfo._isNew, 'n');
-                } else {
-                    this.getSet(RuntimeInfo._id, id);
-                    this.getSet(RuntimeInfo._isNew, 'o');
-                }
-            };
-            RuntimeInfo.prototype.removeEntity = function () {
-                this.getSet(RuntimeInfo._entityType, '');
+            array[key] = val;
+            this.find().val(this.toValue(array));
+        };
+        RuntimeInfo.prototype.entityType = function () {
+            return this.getSet(RuntimeInfo._entityType);
+        };
+        RuntimeInfo.prototype.id = function () {
+            return this.getSet(RuntimeInfo._id);
+        };
+        RuntimeInfo.prototype.isNew = function () {
+            return this.getSet(RuntimeInfo._isNew);
+        };
+        RuntimeInfo.prototype.ticks = function () {
+            return this.getSet(RuntimeInfo._ticks);
+        };
+        RuntimeInfo.prototype.setEntity = function (entityType, id) {
+            this.getSet(RuntimeInfo._entityType, entityType);
+            if (SF.isEmpty(id)) {
                 this.getSet(RuntimeInfo._id, '');
+                this.getSet(RuntimeInfo._isNew, 'n');
+            } else {
+                this.getSet(RuntimeInfo._id, id);
                 this.getSet(RuntimeInfo._isNew, 'o');
-            };
-            RuntimeInfo.prototype.createValue = function (entityType, id, isNew, ticks) {
-                var array = [];
-                array[RuntimeInfo._entityType] = entityType;
-                array[RuntimeInfo._id] = id;
-                if (SF.isEmpty(isNew)) {
-                    array[RuntimeInfo._isNew] = SF.isEmpty(id) ? "n" : "o";
-                } else {
-                    array[RuntimeInfo._isNew] = isNew;
-                }
-                array[RuntimeInfo._ticks] = ticks;
-                return this.toValue(array);
-            };
-            RuntimeInfo._entityType = 0;
-            RuntimeInfo._id = 1;
-            RuntimeInfo._isNew = 2;
-            RuntimeInfo._ticks = 3;
-            return RuntimeInfo;
-        })();
-        Globals.RuntimeInfo = RuntimeInfo;
-
-        var Serializer = (function () {
-            function Serializer() {
             }
-            Serializer.prototype.concat = function (value) {
-                if (this.result === "") {
-                    this.result = value;
-                } else {
-                    this.result += "&" + value;
-                }
-            };
-
-            Serializer.prototype.add = function (param, value) {
-                if (typeof param === "string") {
-                    if (value === undefined) {
-                        this.concat(param);
-                    } else {
-                        this.concat(param + "=" + value);
-                    }
-                } else if ($.isFunction(param)) {
-                    var data = param();
-
-                    for (var key in data) {
-                        if (data.hasOwnProperty(key)) {
-                            var value = data[key];
-                            this.concat(key + "=" + value);
-                        }
-                    }
-                } else {
-                    for (var key in param) {
-                        if (param.hasOwnProperty(key)) {
-                            var value = param[key];
-                            this.concat(key + "=" + value);
-                        }
-                    }
-                }
-                return this;
-            };
-
-            Serializer.prototype.serialize = function () {
-                return this.result;
-            };
-            return Serializer;
-        })();
-        Globals.Serializer = Serializer;
-    })(SF.Globals || (SF.Globals = {}));
-    var Globals = SF.Globals;
+        };
+        RuntimeInfo.prototype.removeEntity = function () {
+            this.getSet(RuntimeInfo._entityType, '');
+            this.getSet(RuntimeInfo._id, '');
+            this.getSet(RuntimeInfo._isNew, 'o');
+        };
+        RuntimeInfo.prototype.createValue = function (entityType, id, isNew, ticks) {
+            var array = [];
+            array[RuntimeInfo._entityType] = entityType;
+            array[RuntimeInfo._id] = id;
+            if (SF.isEmpty(isNew)) {
+                array[RuntimeInfo._isNew] = SF.isEmpty(id) ? "n" : "o";
+            } else {
+                array[RuntimeInfo._isNew] = isNew;
+            }
+            array[RuntimeInfo._ticks] = ticks;
+            return this.toValue(array);
+        };
+        RuntimeInfo._entityType = 0;
+        RuntimeInfo._id = 1;
+        RuntimeInfo._isNew = 2;
+        RuntimeInfo._ticks = 3;
+        return RuntimeInfo;
+    })();
+    SF.RuntimeInfo = RuntimeInfo;
 })(SF || (SF = {}));
 
 var SF;
@@ -210,6 +162,51 @@ var SF;
         toStr: "sfToStr",
         link: "sfLink"
     };
+
+    var Serializer = (function () {
+        function Serializer() {
+        }
+        Serializer.prototype.concat = function (value) {
+            if (this.result === "") {
+                this.result = value;
+            } else {
+                this.result += "&" + value;
+            }
+        };
+
+        Serializer.prototype.add = function (param, value) {
+            if (typeof param === "string") {
+                if (value === undefined) {
+                    this.concat(param);
+                } else {
+                    this.concat(param + "=" + value);
+                }
+            } else if ($.isFunction(param)) {
+                var data = param();
+
+                for (var key in data) {
+                    if (data.hasOwnProperty(key)) {
+                        var value = data[key];
+                        this.concat(key + "=" + value);
+                    }
+                }
+            } else {
+                for (var key in param) {
+                    if (param.hasOwnProperty(key)) {
+                        var value = param[key];
+                        this.concat(key + "=" + value);
+                    }
+                }
+            }
+            return this;
+        };
+
+        Serializer.prototype.serialize = function () {
+            return this.result;
+        };
+        return Serializer;
+    })();
+    SF.Serializer = Serializer;
 
     function compose(str1, str2, separator) {
         if (typeof (str1) !== "string" && str1 !== null && str1 != undefined) {

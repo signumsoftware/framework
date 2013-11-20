@@ -264,9 +264,9 @@
     <Compile Include="ViewDataKeys.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Signum\Headers\d3.d.ts" />
-    <Content Include="Signum\Headers\jquery.d.ts" />
-    <Content Include="Signum\Headers\jqueryui.d.ts" />
+    <Content Include="Signum\Headers\d3\d3.d.ts" />
+    <Content Include="Signum\Headers\jquery\jquery.d.ts" />
+    <Content Include="Signum\Headers\jqueryui\jqueryui.d.ts" />
     <Content Include="Signum\Scripts\SF_Operations.js" />
     <Content Include="Signum\Views\Exception.cshtml">
       <Generator>RazorGenerator</Generator>
@@ -365,7 +365,7 @@
     <Content Include="Signum\Scripts\SF_FindNavigator.js" />
     <Content Include="Signum\Scripts\SF_Lines.js" />
     <Content Include="Signum\Scripts\SF_Popup.ts" />
-    <Content Include="Signum\Scripts\SF_Validator.js" />
+    <Content Include="Signum\Scripts\SF_Validator.ts" />
     <Content Include="Signum\Scripts\SF_ViewNavigator.js" />
     <None Include="Signum\Views\Error.cshtml">
       <Generator>RazorGenerator</Generator>
@@ -392,6 +392,7 @@
       <Name>Signum.Utilities</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

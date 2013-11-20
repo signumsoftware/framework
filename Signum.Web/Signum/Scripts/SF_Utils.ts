@@ -1,12 +1,14 @@
-﻿/// <reference path="../Headers/jquery.d.ts"/>
-/// <reference path="../Headers/jqueryui.d.ts"/>
+﻿/// <reference path="../Headers/jquery/jquery.d.ts"/>
+/// <reference path="../Headers/jqueryui/jqueryui.d.ts"/>
 
 declare var lang: any;
 
-module SF {
-    declare var debug: boolean;
 
-    debug = true;
+module SF {
+
+    export var Urls : any;
+
+    export var debug = true;
 
     export function log(s : string) {
         if (debug) {

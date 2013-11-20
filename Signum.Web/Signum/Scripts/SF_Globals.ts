@@ -1,8 +1,8 @@
 ﻿/// <reference path="SF_Utils.ts"/>
 
+module SF
+{
 
-
-module SF.Globals {
     export class StaticInfo {
         static _types = 0;
         static _isEmbedded = 1;
@@ -159,6 +159,22 @@ module SF.Globals {
             return this.toValue(array);
         }
     }
+}
+
+module SF
+{
+    export var Keys = {
+        separator: "_",
+        tabId: "sfTabId",
+        antiForgeryToken: "__RequestVerificationToken",
+
+        entityTypeNames: "sfEntityTypeNames",
+
+        runtimeInfo: "sfRuntimeInfo",
+        staticInfo: "sfStaticInfo",
+        toStr: "sfToStr",
+        link: "sfLink"
+    };
 
     export class Serializer {
         result: string;
@@ -171,7 +187,7 @@ module SF.Globals {
             }
         }
 
-        public add(param, value) {
+        public add(param, value?) {
             if (typeof param === "string") {
                 if (value === undefined) {
                     this.concat(param);
@@ -205,23 +221,6 @@ module SF.Globals {
             return this.result;
         }
     }
-
-}
-
-module SF
-{
-    export var Keys = {
-        separator: "_",
-        tabId: "sfTabId",
-        antiForgeryToken: "__RequestVerificationToken",
-
-        entityTypeNames: "sfEntityTypeNames",
-
-        runtimeInfo: "sfRuntimeInfo",
-        staticInfo: "sfStaticInfo",
-        toStr: "sfToStr",
-        link: "sfLink"
-    };
 
 
     export function compose (str1: string, str2: string, separator?: string) {
