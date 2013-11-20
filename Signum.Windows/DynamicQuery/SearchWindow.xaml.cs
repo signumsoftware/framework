@@ -74,12 +74,12 @@ namespace Signum.Windows
             set { SetValue(ColumnOptionsProperty, value); }
         }
 
-        public static readonly DependencyProperty ElementsPerPageProperty =
+        public static readonly DependencyProperty PaginationProperty =
           DependencyProperty.Register("Pagination", typeof(Pagination), typeof(SearchWindow), new UIPropertyMetadata(null));
         public Pagination Pagination
         {
-            get { return (Pagination)GetValue(ElementsPerPageProperty); }
-            set { SetValue(ElementsPerPageProperty, value); }
+            get { return (Pagination)GetValue(PaginationProperty); }
+            set { SetValue(PaginationProperty, value); }
         }
 
         public static readonly DependencyProperty AllowChangeColumnsProperty =
@@ -205,8 +205,6 @@ namespace Signum.Windows
             bool ok = Mode == SearchMode.Find;
             spOkCancel.Visibility =  ok ? Visibility.Visible : Visibility.Collapsed;
             
-            searchControl.IsAdmin = !ok;
-
             if (ok)
             {
                 searchControl.DoubleClick += new Action(searchControl_DoubleClick);

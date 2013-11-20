@@ -170,14 +170,6 @@ namespace Signum.Windows
             set { SetValue(SearchOnLoadProperty, value); }
         }
 
-        public static readonly DependencyProperty IsAdminProperty =
-            DependencyProperty.Register("IsAdmin", typeof(bool), typeof(SearchControl), new UIPropertyMetadata(true));
-        public bool IsAdmin
-        {
-            get { return (bool)GetValue(IsAdminProperty); }
-            set { SetValue(IsAdminProperty, value); }
-        }
-
         public static readonly DependencyProperty NavigateProperty =
            DependencyProperty.Register("Navigate", typeof(bool), typeof(SearchControl), new FrameworkPropertyMetadata(true, (d, e) => ((SearchControl)d).UpdateVisibility()));
         public bool Navigate
