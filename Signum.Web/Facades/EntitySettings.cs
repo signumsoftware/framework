@@ -86,6 +86,14 @@ namespace Signum.Web
                     MappingMain = MappingLine = new EntityMapping<T>(false).GetValue;
                     break;
 
+                case EntityKind.Relational:
+                    IsCreable = EntityWhen.Never;
+                    IsViewable = false;
+                    IsNavigable = EntityWhen.Never;
+                    IsReadonly = true;
+                    MappingMain = MappingLine = new EntityMapping<T>(false).GetValue;
+                    break;
+
                 case EntityKind.String:
                     IsCreable = EntityWhen.IsSearchEntity;
                     IsViewable = false;
