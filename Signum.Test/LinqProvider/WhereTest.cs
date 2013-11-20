@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using Signum.Utilities;
 using Signum.Test.Environment;
+using System.Linq.Expressions;
 
 namespace Signum.Test.LinqProvider
 {
@@ -343,10 +344,19 @@ namespace Signum.Test.LinqProvider
                 Database.Query<ArtistDN>().Select(a => Throw(a.Id)).ToList());
         }
 
-
         public static bool Throw(int a)
         {
             throw new ArgumentException("a");
+        }
+
+        [TestMethod]
+        public void DistinctWithNulls()
+        {
+            var nullRight = Database.Query<AlbumDN>().Where(alb =>LinqHints.DistinctNull(alb.Id, (int?)null)).Count();
+            var notNullRight = Database.Query<AlbumDN>().Where(alb => LinqHints.DistinctNull(alb.Id, (int?)1)).Count();
+
+            var nullLeft = Database.Query<AlbumDN>().Where(alb => LinqHints.DistinctNull((int?)null, alb.Id)).Count();
+            var notNullLeft = Database.Query<AlbumDN>().Where(alb => LinqHints.DistinctNull((int?)1, alb.Id)).Count();
         }
     }
 }
