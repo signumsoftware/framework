@@ -98,7 +98,9 @@ namespace Signum.Engine
                 if (dix.Columns.Count != mix.Columns.Length)
                     return true;
 
-                return !dix.Columns.All(a => dif.Colums[a].ColumnEquals(mix.Columns.SingleEx(c => c.Name == a)));
+                var dixColumns =dif.Colums.Where(kvp=>dix.Columns.Contains(kvp.Value.Name));
+
+                return !dixColumns.All(kvp => dif.Colums.GetOrThrow(kvp.Key).ColumnEquals(mix.Columns.SingleEx(c => c.Name == kvp.Key)));
             };
 
             //use database without replacements to just remove indexes
