@@ -93,6 +93,14 @@ namespace Signum.Engine
                 return model.GetOrThrow(name).Name;
             };
 
+            Func<DiffTable, DiffIndex, Index, bool> columnsChanged = (dif, dix, mix) =>
+            {
+                if (dix.Columns.Count != mix.Columns.Length)
+                    return true;
+
+                return !dix.Columns.All(a => dif.Colums[a].ColumnEquals(mix.Columns.SingleEx(c => c.Name == a)));
+            };
+
             //use database without replacements to just remove indexes
             SqlPreCommand dropIndices =
                 Synchronizer.SynchronizeScript(model, database,
@@ -106,8 +114,8 @@ namespace Signum.Engine
 
                     var changes = Synchronizer.SynchronizeScript(modelIxs, dif.Indices,
                         null,
-                        (i, dix) => dix.IsControlledIndex || dix.Columns.Any(removedColums.Contains) ? SqlBuilder.DropIndex(dif.Name, dix) : null,
-                        (i, mix, dix) => (mix as UniqueIndex).TryCC(u => u.ViewName) != dix.ViewName ? SqlBuilder.DropIndex(dif.Name, dix) : null,
+                        (i, dix) => dix.IsControlledIndex || dix.Columns.Any(removedColums.Contains)  ? SqlBuilder.DropIndex(dif.Name, dix) : null,
+                        (i, mix, dix) => (mix as UniqueIndex).TryCC(u => u.ViewName) != dix.ViewName || columnsChanged(dif, dix, mix) ? SqlBuilder.DropIndex(dif.Name, dix) : null,
                         Spacing.Simple);
 
                     return changes;
@@ -201,7 +209,7 @@ namespace Signum.Engine
                     var controlledIndexes = Synchronizer.SynchronizeScript(modelIxs, dif.Indices,
                         (i, mix) => mix is UniqueIndex || SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index too?") ? SqlBuilder.CreateIndex(mix) : null,
                         null,
-                        (i, mix, dix) => (mix as UniqueIndex).TryCC(u => u.ViewName) != dix.ViewName ? SqlBuilder.CreateIndex(mix) :
+                        (i, mix, dix) => (mix as UniqueIndex).TryCC(u => u.ViewName) != dix.ViewName || columnsChanged(dif, dix, mix) ? SqlBuilder.CreateIndex(mix) :
                             mix.IndexName != dix.IndexName ? SqlBuilder.RenameIndex(tab, dix.IndexName, mix.IndexName) : null,
                         Spacing.Simple);
 
