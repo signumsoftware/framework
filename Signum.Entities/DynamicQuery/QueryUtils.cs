@@ -424,13 +424,14 @@ namespace Signum.Entities.DynamicQuery
         static MethodInfo miStartsWith = ReflectionTools.GetMethodInfo((string s) => s.StartsWith(s));
         static MethodInfo miEndsWith = ReflectionTools.GetMethodInfo((string s) => s.EndsWith(s));
         static MethodInfo miLike = ReflectionTools.GetMethodInfo((string s) => s.Like(s));
+        static MethodInfo miDistinctNull = ReflectionTools.GetMethodInfo((string s) => LinqHints.DistinctNull<string>(null, null)).GetGenericMethodDefinition();
 
         public static Expression GetCompareExpression(FilterOperation operation, Expression left, Expression right, bool inMemory = false)
         {
             switch (operation)
             {
                 case FilterOperation.EqualTo: return Expression.Equal(left, right);
-                case FilterOperation.DistinctTo: return Expression.NotEqual(left, right);
+                case FilterOperation.DistinctTo: return Expression.Call(miDistinctNull.MakeGenericMethod(left.GetType()), left, right);
                 case FilterOperation.GreaterThan: return Expression.GreaterThan(left, right);
                 case FilterOperation.GreaterThanOrEqual: return Expression.GreaterThanOrEqual(left, right);
                 case FilterOperation.LessThan: return Expression.LessThan(left, right);
