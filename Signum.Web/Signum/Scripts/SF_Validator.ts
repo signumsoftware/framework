@@ -97,7 +97,7 @@ module SF {
         }
 
 
-        public validate() {
+        public validate(): any {
             SF.log("Validator validate");
             var returnValue = false;
             var self = this;
@@ -363,7 +363,7 @@ module SF {
             return serializer.serialize();
         }
 
-        public validate() {
+        public validate() : any {
             SF.log("PartialValidator validate");
             var validatorResult = null;
             var self = this;

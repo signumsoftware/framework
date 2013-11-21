@@ -366,7 +366,7 @@
     <Content Include="Signum\Scripts\SF_Lines.js" />
     <Content Include="Signum\Scripts\SF_Popup.ts" />
     <Content Include="Signum\Scripts\SF_Validator.ts" />
-    <Content Include="Signum\Scripts\SF_ViewNavigator.js" />
+    <Content Include="Signum\Scripts\SF_ViewNavigator.ts" />
     <None Include="Signum\Views\Error.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Error.generated.cs</LastGenOutput>

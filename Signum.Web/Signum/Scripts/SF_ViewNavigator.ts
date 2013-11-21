@@ -1,4 +1,36 @@
-﻿"use strict";
+﻿/// <reference path="SF_Utils.ts"/>
+/// <reference path="SF_Globals.ts"/>
+
+
+module SF
+{
+    export interface  ViewOptions
+    {
+          containerDiv: string;
+            onOk: ()=>void;
+            onSave: ()=>void;
+            onOkClosed: ()=>void;
+            onCancelled: ()=>void;
+            onLoaded: ()=>void;
+            controllerUrl: string,
+            type: string;
+            id: string;
+            prefix: string;
+            partialViewName: string;
+            navigate: string;
+            requestExtraJsonData: any
+    }
+
+
+
+    export class ViewNavigator
+    {
+
+        }
+
+}
+
+"use strict";
 
 SF.registerModule("ViewNavigator", function () {
 
@@ -15,7 +47,7 @@ SF.registerModule("ViewNavigator", function () {
             id: null,
             prefix: "",
             partialViewName: null,
-            navigate: null,
+            navigate: string,
             requestExtraJsonData: null
         }, _viewOptions);
 
