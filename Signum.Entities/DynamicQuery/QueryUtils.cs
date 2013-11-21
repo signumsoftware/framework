@@ -435,7 +435,7 @@ namespace Signum.Entities.DynamicQuery
                 case FilterOperation.EqualTo: return Expression.Equal(left, right);
                 case FilterOperation.DistinctTo: 
                     {
-                        var t = left.GetType().UnNullify();
+                        var t = left.Type.UnNullify();
                         var mi = t.IsClass ? miDistinct : miDistinctNullable;
                         return Expression.Call(mi.MakeGenericMethod(t), left.Nullify(), right.Nullify());
                     }
