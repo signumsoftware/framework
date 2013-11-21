@@ -89,10 +89,11 @@ namespace Signum.Utilities
             if (source == null)
                 throw new ArgumentNullException("source");
 
-            return source.Provider.CreateQuery<T>(Expression.Call(null, 
-                ((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new Type[] { typeof(T) }), 
+            return source.Provider.CreateQuery<T>(Expression.Call(null,
+                ((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new Type[] { typeof(T) }),
                 new Expression[] { source.Expression }));
         }
+
 
         [MethodExpander(typeof(DistinctNullExpander))]
         public static bool DistinctNull<T>(T a, T b) where T : class

@@ -41,6 +41,29 @@ namespace Signum.Engine
 
         public static SqlPreCommand SynchronizeTablesScript(Replacements replacements)
         {
+            //Temproal HACK
+            if (Database.View<SysIndexes>().Any(a => a.name.StartsWith("FIX")) && SafeConsole.Ask("Old index naming convention...rename first?"))
+            {
+                return Schema.Current.DatabaseNames().Select(db =>
+                {
+                    using (Administrator.OverrideDatabaseInViews(db))
+                    {
+                        var indexes =
+                            (from s in Database.View<SysSchemas>()
+                             from t in s.Tables()
+                             from ix in t.Indices()
+                             where !ix.is_primary_key
+                             select new { schemaName = s.name, tableName = t.name, ix.is_unique, indexName = ix.name }).ToList();
+
+                        return (from ix in indexes
+                                let newName = ix.is_unique ? Regex.Replace(ix.indexName, @"^IX_\w+?_", "UIX_") : Regex.Replace(ix.indexName, @"^F?IX_\w+?_", "IX_")
+                                where ix.indexName != newName
+                                select new SqlPreCommandSimple("EXEC SP_RENAME '{0}.{1}' , '{2}', 'INDEX' ".Formato(
+                                    new ObjectName(new SchemaName(db, ix.schemaName), ix.tableName), ix.indexName, newName))).Combine(Spacing.Simple);
+                    }
+                }).Combine(Spacing.Double);
+            }
+
             Dictionary<string, ITable> model = Schema.Current.GetDatabaseTables().ToDictionary(a => a.Name.ToString(), "schema tables");
 
             Dictionary<string, DiffTable> database = DefaultGetDatabaseDescription(Schema.Current.DatabaseNames());
@@ -70,6 +93,16 @@ namespace Signum.Engine
                 return model.GetOrThrow(name).Name;
             };
 
+            Func<DiffTable, DiffIndex, Index, bool> columnsChanged = (dif, dix, mix) =>
+            {
+                if (dix.Columns.Count != mix.Columns.Length)
+                    return true;
+
+                var dixColumns =dif.Colums.Where(kvp=>dix.Columns.Contains(kvp.Value.Name));
+
+                return !dixColumns.All(kvp => dif.Colums.GetOrThrow(kvp.Key).ColumnEquals(mix.Columns.SingleEx(c => c.Name == kvp.Key)));
+            };
+
             //use database without replacements to just remove indexes
             SqlPreCommand dropIndices =
                 Synchronizer.SynchronizeScript(model, database,
@@ -83,8 +116,8 @@ namespace Signum.Engine
 
                     var changes = Synchronizer.SynchronizeScript(modelIxs, dif.Indices,
                         null,
-                        (i, dix) => dix.IsControlledIndex || dix.Columns.Any(removedColums.Contains) ? SqlBuilder.DropIndex(dif.Name, dix) : null,
-                        (i, mix, dix) => (mix as UniqueIndex).TryCC(u => u.ViewName) != dix.ViewName ? SqlBuilder.DropIndex(dif.Name, dix) : null,
+                        (i, dix) => dix.IsControlledIndex || dix.Columns.Any(removedColums.Contains)  ? SqlBuilder.DropIndex(dif.Name, dix) : null,
+                        (i, mix, dix) => (mix as UniqueIndex).TryCC(u => u.ViewName) != dix.ViewName || columnsChanged(dif, dix, mix) ? SqlBuilder.DropIndex(dif.Name, dix) : null,
                         Spacing.Simple);
 
                     return changes;
@@ -178,7 +211,7 @@ namespace Signum.Engine
                     var controlledIndexes = Synchronizer.SynchronizeScript(modelIxs, dif.Indices,
                         (i, mix) => mix is UniqueIndex || SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index too?") ? SqlBuilder.CreateIndex(mix) : null,
                         null,
-                        (i, mix, dix) => (mix as UniqueIndex).TryCC(u => u.ViewName) != dix.ViewName ? SqlBuilder.CreateIndex(mix) :
+                        (i, mix, dix) => (mix as UniqueIndex).TryCC(u => u.ViewName) != dix.ViewName || columnsChanged(dif, dix, mix) ? SqlBuilder.CreateIndex(mix) :
                             mix.IndexName != dix.IndexName ? SqlBuilder.RenameIndex(tab, dix.IndexName, mix.IndexName) : null,
                         Spacing.Simple);
 
@@ -415,8 +448,8 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".Formato(tabCol.Name,
             var cmd = results.Select(a =>  
                 SqlPreCommand.Combine(Spacing.Simple,
                 !a.snapshot_isolation_state || !a.is_read_committed_snapshot_on ? new SqlPreCommandSimple(@"DECLARE @SPId VARCHAR(7000)
-SELECT @SPId = COALESCE(@SPId,'')+'KILL '+CAST(SPID AS VARCHAR)+'; 'FROM master..SysProcesses WHERE DB_NAME(DBId) = 'Southwind_Log'
-EXEC(@SPId)") : null,
+SELECT @SPId = COALESCE(@SPId,'')+'KILL '+CAST(SPID AS VARCHAR)+'; 'FROM master..SysProcesses WHERE DB_NAME(DBId) = '{0}'
+EXEC(@SPId)".Formato(a.name)) : null,
                 !a.snapshot_isolation_state ? SqlBuilder.SetSnapshotIsolation(a.name, true) : null,
                 !a.is_read_committed_snapshot_on ? SqlBuilder.MakeSnapshotIsolationDefault(a.name, true) : null)).Combine(Spacing.Double);
 
