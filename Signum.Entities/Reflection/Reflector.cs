@@ -278,7 +278,7 @@ namespace Signum.Entities.Reflection
 
             var propertyName = PropertyName(fi.Name);
 
-            var result = fi.DeclaringType.GetProperty(propertyName, flags);
+            var result = fi.DeclaringType.GetProperty(propertyName, flags, null, null, new Type[0], null);
 
             if (result != null)
                 return result;
