@@ -104,7 +104,7 @@ namespace Signum.Windows
 
             S server = current as S;
             if (server == null)
-                throw new InvalidOperationException("Server {0} does not implement {1}".Formato(server.GetType(), typeof(S)));
+                throw new InvalidOperationException("Server does not implement {0}".Formato(typeof(S)));
             
             try
             {
