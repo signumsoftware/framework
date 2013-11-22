@@ -138,7 +138,7 @@ namespace Signum.Entities.DynamicQuery
         {
             public static int DefaultElementsPerPage = 50;
 
-            public Paginate(int elementsPerPage, int currentPage)
+            public Paginate(int elementsPerPage, int currentPage = 0)
             {
                 if (elementsPerPage <= 0)
                     throw new InvalidOperationException("elementsPerPage should be greater than zero");
