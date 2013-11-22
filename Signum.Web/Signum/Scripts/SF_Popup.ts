@@ -1,7 +1,7 @@
 ﻿/// <reference path="SF_Utils.ts"/>
 /// <reference path="SF_Globals.ts"/>
 
-module SF.Popup
+export module SF.Popup
 {
     export function serialize(prefix)
     {

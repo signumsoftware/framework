@@ -267,6 +267,7 @@
     <Content Include="Signum\Headers\d3\d3.d.ts" />
     <Content Include="Signum\Headers\jquery\jquery.d.ts" />
     <Content Include="Signum\Headers\jqueryui\jqueryui.d.ts" />
+    <Content Include="Signum\Scripts\SF_Lines_Old.js" />
     <Content Include="Signum\Scripts\SF_Operations.ts" />
     <Content Include="Signum\Views\Exception.cshtml">
       <Generator>RazorGenerator</Generator>
@@ -362,8 +363,8 @@
       <LastGenOutput>ValueLineBox.generated.cs</LastGenOutput>
       <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
-    <Content Include="Signum\Scripts\SF_FindNavigator.js" />
-    <Content Include="Signum\Scripts\SF_Lines.js" />
+    <Content Include="Signum\Scripts\SF_FindNavigator.ts" />
+    <Content Include="Signum\Scripts\SF_Lines.ts" />
     <Content Include="Signum\Scripts\SF_Popup.ts" />
     <Content Include="Signum\Scripts\SF_Validator.ts" />
     <Content Include="Signum\Scripts\SF_ViewNavigator.ts" />

@@ -1,6 +1,6 @@
 ﻿/// <reference path="SF_Utils.ts"/>
 
-module SF
+export module SF
 {
 
     export class StaticInfo {
@@ -161,7 +161,7 @@ module SF
     }
 }
 
-module SF
+export module SF
 {
     export var Keys = {
         separator: "_",
@@ -326,7 +326,7 @@ module SF
         return "<div id='" + id + "' name='" + id + "' style='display:none'>" + innerHtml + "</div>";
     }
 
-    module Dropdowns
+    export module Dropdowns
     {
         export function toggle(event, elem, topFix) {
             var $elem = $(elem),
@@ -360,7 +360,7 @@ module SF
         }
     }
 
-    module Blocker
+    export module Blocker
     {
         var blocked = false;
         var $elem: JQuery;

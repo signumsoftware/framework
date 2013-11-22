@@ -2,10 +2,10 @@
 /// <reference path="../Headers/jqueryui/jqueryui.d.ts"/>
 /// <reference path="SF_Slider.ts"/>
 
-declare var lang: any;
+export declare var lang: any;
 
 
-module SF {
+export module SF {
 
     export var Urls: any;
     export var Locale: any;

@@ -1,6 +1,7 @@
-﻿/// <reference path="SF_Utils.ts"/>
+﻿/// <reference path="../Headers/jquery/jquery.d.ts"/>
+/// <reference path="SF_Utils.ts"/>
 
-module SF {
+export module SF {
 
     export function slider($container: JQuery) {
         var w = $container.width(),

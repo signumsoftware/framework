@@ -1,7 +1,7 @@
 ﻿/// <reference path="SF_Utils.ts"/>
 /// <reference path="SF_Globals.ts"/>
 
-module SF {
+export module SF {
     export interface ValidationOptions {
         prefix: string;
         controllerUrl?: string;

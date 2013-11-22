@@ -4,7 +4,7 @@
 /// <reference path="SF_Validator.ts"/>
 
 
-module SF
+export module SF
 {
     export interface  ViewOptions
     {
