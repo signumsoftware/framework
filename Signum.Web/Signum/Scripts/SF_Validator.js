@@ -1,4 +1,4 @@
-﻿/// <reference path="SF_Utils.ts"/>
+/// <reference path="SF_Utils.ts"/>
 /// <reference path="SF_Globals.ts"/>
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -274,7 +274,7 @@ var SF;
             var staticInfo = new SF.StaticInfo(this.valOptions.prefix);
             if (staticInfo.find().length == 0 && !SF.isEmpty(this.valOptions.prefix)) {
                 var lastPrefix = this.valOptions.prefix.substr(0, this.valOptions.prefix.lastIndexOf(SF.Keys.separator));
-                staticInfo = SF.StaticInfo(lastPrefix);
+                staticInfo = new SF.StaticInfo(lastPrefix);
             }
 
             var formChildren = null;

@@ -1,12 +1,14 @@
 ﻿/// <reference path="../Headers/jquery/jquery.d.ts"/>
 /// <reference path="../Headers/jqueryui/jqueryui.d.ts"/>
+/// <reference path="SF_Slider.ts"/>
 
 declare var lang: any;
 
 
 module SF {
 
-    export var Urls : any;
+    export var Urls: any;
+    export var Locale: any;
 
     export var debug = true;
 

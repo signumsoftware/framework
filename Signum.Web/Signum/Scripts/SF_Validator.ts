@@ -4,7 +4,7 @@
 module SF {
     export interface ValidationOptions {
         prefix: string;
-        controllerUrl: string;
+        controllerUrl?: string;
         showInlineErrors: string;
         fixedInlineErrorText: string; //Set to "" for it to be populated from ModelState error messages
         parentDiv: string;
@@ -235,7 +235,7 @@ module SF {
 
     export interface PartialValidationOptions extends ValidationOptions {
         type: string;
-        id: number;
+        id?: number;
     }
 
     export class PartialValidator extends Validator {

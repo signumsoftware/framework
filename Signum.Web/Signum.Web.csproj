@@ -267,7 +267,7 @@
     <Content Include="Signum\Headers\d3\d3.d.ts" />
     <Content Include="Signum\Headers\jquery\jquery.d.ts" />
     <Content Include="Signum\Headers\jqueryui\jqueryui.d.ts" />
-    <Content Include="Signum\Scripts\SF_Operations.js" />
+    <Content Include="Signum\Scripts\SF_Operations.ts" />
     <Content Include="Signum\Views\Exception.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Exception.generated.cs</LastGenOutput>

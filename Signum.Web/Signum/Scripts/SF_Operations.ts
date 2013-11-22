@@ -1,4 +1,21 @@
-﻿"use strict";
+﻿/// <reference path="SF_Utils.ts"/>
+/// <reference path="SF_Globals.ts"/>
+
+module SF
+{
+    export class OperationOptions
+    {
+
+    }
+
+    export class OperationManager
+    {
+
+    }
+
+}
+
+
 
 SF.registerModule("Operations", function () {
 

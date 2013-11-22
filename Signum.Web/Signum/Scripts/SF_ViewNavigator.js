@@ -2,34 +2,10 @@
 /// <reference path="SF_Globals.ts"/>
 /// <reference path="SF_Popup.ts"/>
 /// <reference path="SF_Validator.ts"/>
-
-
-module SF
-{
-    export interface  ViewOptions
-    {
-        containerDiv: string;
-        onOk: (element?: JQuery)=>boolean;
-        onSave: (element?: string)=>boolean;
-        onOkClosed: ()=>void;
-        onCancelled: ()=>void;
-        onLoaded: (tempDiv: string)=>void;
-        controllerUrl: string;
-        type: string;
-        id: string;
-        prefix: string;
-        partialViewName: string;
-        navigate: string;
-        requestExtraJsonData: any
-    }
-
-
-
-    export class ViewNavigator {
-        viewOptions: ViewOptions;
-        backup: JQuery;
-
-        constructor(_viewOptions: ViewOptions) {
+var SF;
+(function (SF) {
+    var ViewNavigator = (function () {
+        function ViewNavigator(_viewOptions) {
             this.viewOptions = $.extend({
                 containerDiv: null,
                 onOk: null,
@@ -46,15 +22,13 @@ module SF
                 requestExtraJsonData: null
             }, _viewOptions);
 
-            this.backup = null; //jquery object with the cloned original elements
+            this.backup = null;
         }
-
-
-        public tempDivId() {
+        ViewNavigator.prototype.tempDivId = function () {
             return SF.compose(this.viewOptions.prefix, "Temp");
-        }
+        };
 
-        public viewOk() {
+        ViewNavigator.prototype.viewOk = function () {
             if (SF.isEmpty(this.viewOptions.containerDiv)) {
                 throw "No containerDiv was specified to Navigator on viewOk mode";
             }
@@ -65,10 +39,12 @@ module SF
                 this.viewOptions.controllerUrl = SF.Urls.popupView;
             }
             var self = this;
-            this.callServer(function (controlHtml) { self.showViewOk(controlHtml); });
-        }
+            this.callServer(function (controlHtml) {
+                self.showViewOk(controlHtml);
+            });
+        };
 
-        public createOk() {
+        ViewNavigator.prototype.createOk = function () {
             if (!SF.isEmpty(this.viewOptions.containerDiv)) {
                 throw "ContainerDiv cannot be specified to Navigator on createOk mode";
             }
@@ -76,10 +52,12 @@ module SF
                 this.viewOptions.controllerUrl = SF.Urls.popupView;
             }
             var self = this;
-            this.callServer(function (controlHtml) { self.showCreateOk(controlHtml); });
-        }
+            this.callServer(function (controlHtml) {
+                self.showCreateOk(controlHtml);
+            });
+        };
 
-        public viewEmbedded() {
+        ViewNavigator.prototype.viewEmbedded = function () {
             if (SF.isEmpty(this.viewOptions.containerDiv)) {
                 throw "No containerDiv was specified to Navigator on viewEmbedded mode";
             }
@@ -87,20 +65,24 @@ module SF
                 this.viewOptions.controllerUrl = SF.Urls.partialView;
             }
             var self = this;
-            this.callServer(function (controlHtml) { $('#' + self.viewOptions.containerDiv).html(controlHtml); });
-        }
+            this.callServer(function (controlHtml) {
+                $('#' + self.viewOptions.containerDiv).html(controlHtml);
+            });
+        };
 
-        public createEmbedded(onHtmlReceived) {
+        ViewNavigator.prototype.createEmbedded = function (onHtmlReceived) {
             if (!SF.isEmpty(this.viewOptions.containerDiv)) {
                 throw "ContainerDiv cannot be specified to Navigator on createEmbedded mode";
             }
             if (SF.isEmpty(this.viewOptions.controllerUrl)) {
                 this.viewOptions.controllerUrl = SF.Urls.partialView;
             }
-            this.callServer(function (controlHtml) { onHtmlReceived(controlHtml) });
-        }
+            this.callServer(function (controlHtml) {
+                onHtmlReceived(controlHtml);
+            });
+        };
 
-        public viewSave(html) {
+        ViewNavigator.prototype.viewSave = function (html) {
             if (SF.isEmpty(this.viewOptions.containerDiv)) {
                 throw "No ContainerDiv was specified to Navigator on viewSave mode";
             }
@@ -112,8 +94,7 @@ module SF
             }
             if (this.isLoaded()) {
                 return this.showViewSave();
-            }
-            else {
+            } else {
                 if (SF.isEmpty(this.viewOptions.type) && new SF.RuntimeInfo(this.viewOptions.prefix).find().length == 0) {
                     throw "Type must be specified to Navigator on viewSave mode";
                 }
@@ -121,11 +102,13 @@ module SF
                     this.viewOptions.controllerUrl = SF.Urls.popupNavigate;
                 }
                 var self = this;
-                this.callServer(function (controlHtml) { self.showViewSave(controlHtml); });
+                this.callServer(function (controlHtml) {
+                    self.showViewSave(controlHtml);
+                });
             }
-        }
+        };
 
-        public createSave() {
+        ViewNavigator.prototype.createSave = function () {
             if (!SF.isEmpty(this.viewOptions.containerDiv)) {
                 throw "ContainerDiv cannot be specified to Navigator on createSave mode";
             }
@@ -137,10 +120,12 @@ module SF
                 this.viewOptions.controllerUrl = SF.Urls.popupNavigate;
             }
             var self = this;
-            this.callServer(function (controlHtml) { self.showCreateSave(controlHtml); });
-        }
+            this.callServer(function (controlHtml) {
+                self.showCreateSave(controlHtml);
+            });
+        };
 
-        public navigate() {
+        ViewNavigator.prototype.navigate = function () {
             if (!SF.isEmpty(this.viewOptions.containerDiv)) {
                 throw "ContainerDiv cannot be specified to Navigator on Navigate mode";
             }
@@ -148,27 +133,27 @@ module SF
                 throw "Type must be specified to Navigator on Navigate mode";
             }
             var self = this;
-            this.callServer(function (url) { /*$.ajaxPrefilter will handle the redirect*/ });
-        }
+            this.callServer(function (url) {
+            });
+        };
 
-        public isLoaded() {
+        ViewNavigator.prototype.isLoaded = function () {
             return !SF.isEmpty($('#' + this.viewOptions.containerDiv).html());
-        }
+        };
 
-        public showViewOk(newHtml) {
+        ViewNavigator.prototype.showViewOk = function (newHtml) {
             if (SF.isEmpty(newHtml)) {
-                newHtml = $('#' + this.viewOptions.containerDiv).children().clone(true); //preloaded
+                newHtml = $('#' + this.viewOptions.containerDiv).children().clone(true);
 
                 //Backup current Html (for cancel scenarios)
                 this.backup = SF.cloneContents(this.viewOptions.containerDiv);
-                $('#' + this.viewOptions.containerDiv).html(''); //avoid id-collision
+                $('#' + this.viewOptions.containerDiv).html('');
 
                 $("body").append($("<div></div>").attr("id", this.tempDivId()).css("display", "none").html(newHtml));
-            }
-            else {
+            } else {
                 //Backup current Html (for cancel scenarios)
                 this.backup = SF.cloneContents(this.viewOptions.containerDiv);
-                $('#' + this.viewOptions.containerDiv).html(''); //avoid id-collision
+                $('#' + this.viewOptions.containerDiv).html('');
 
                 $("body").append(SF.hiddenDiv(this.tempDivId(), newHtml));
             }
@@ -177,12 +162,16 @@ module SF
 
             var self = this;
             $("#" + this.tempDivId()).data("viewOptions", this.viewOptions).popup({
-                onOk: function () { self.onViewOk() },
-                onCancel: function () { self.onViewCancel() }
+                onOk: function () {
+                    self.onViewOk();
+                },
+                onCancel: function () {
+                    self.onViewCancel();
+                }
             });
-        }
+        };
 
-        public showViewSave(newHtml?) {
+        ViewNavigator.prototype.showViewSave = function (newHtml) {
             if (!SF.isEmpty(newHtml)) {
                 $('#' + this.viewOptions.containerDiv).html(newHtml);
             }
@@ -191,13 +180,16 @@ module SF
 
             var self = this;
             $("#" + this.viewOptions.containerDiv).data("viewOptions", this.viewOptions).popup({
-                onSave: function () { self.onCreateSave() },
-                onCancel: function () { self.onCreateCancel() }
+                onSave: function () {
+                    self.onCreateSave();
+                },
+                onCancel: function () {
+                    self.onCreateCancel();
+                }
             });
-        }
+        };
 
-
-        public showCreateOk(newHtml) {
+        ViewNavigator.prototype.showCreateOk = function (newHtml) {
             var tempDivId = this.tempDivId();
 
             if (!SF.isEmpty(newHtml)) {
@@ -208,16 +200,20 @@ module SF
 
             var self = this;
             $("#" + tempDivId).data("viewOptions", this.viewOptions).popup({
-                onOk: function () { self.onCreateOk() },
-                onCancel: function () { self.onCreateCancel() }
+                onOk: function () {
+                    self.onCreateOk();
+                },
+                onCancel: function () {
+                    self.onCreateCancel();
+                }
             });
 
             if (this.viewOptions.onLoaded != null) {
                 this.viewOptions.onLoaded(this.tempDivId());
             }
-        }
+        };
 
-        public showCreateSave(newHtml) {
+        ViewNavigator.prototype.showCreateSave = function (newHtml) {
             var tempDivId = this.tempDivId();
 
             if (!SF.isEmpty(newHtml)) {
@@ -228,33 +224,35 @@ module SF
 
             var self = this;
             $("#" + tempDivId).data("viewOptions", this.viewOptions).popup({
-                onSave: function () { self.onCreateSave() },
-                onCancel: function () { self.onCreateCancel() }
+                onSave: function () {
+                    self.onCreateSave();
+                },
+                onCancel: function () {
+                    self.onCreateCancel();
+                }
             });
 
             if (this.viewOptions.onLoaded != null) {
                 this.viewOptions.onLoaded(this.tempDivId());
             }
-        }
+        };
 
-        public constructRequestData() {
-            var options = this.viewOptions,
-                serializer = new SF.Serializer()
-                    .add({
-                        entityType: options.type,
-                        id: options.id,
-                        prefix: options.prefix
-                    });
+        ViewNavigator.prototype.constructRequestData = function () {
+            var options = this.viewOptions, serializer = new SF.Serializer().add({
+                entityType: options.type,
+                id: options.id,
+                prefix: options.prefix
+            });
 
-            if (!SF.isEmpty(options.partialViewName)) { //Send specific partialview if given
+            if (!SF.isEmpty(options.partialViewName)) {
                 serializer.add("partialViewName", options.partialViewName);
             }
 
             serializer.add(options.requestExtraJsonData);
             return serializer.serialize();
-        }
+        };
 
-        public callServer(onSuccess) {
+        ViewNavigator.prototype.callServer = function (onSuccess) {
             $.ajax({
                 url: this.viewOptions.controllerUrl || SF.Urls.popupView,
                 data: this.constructRequestData(),
@@ -263,9 +261,9 @@ module SF
                     onSuccess(newHtml);
                 }
             });
-        }
+        };
 
-        public onViewOk() {
+        ViewNavigator.prototype.onViewOk = function () {
             var doDefault = (this.viewOptions.onOk != null) ? this.viewOptions.onOk() : true;
             if (doDefault != false) {
                 $('#' + this.tempDivId()).popup('destroy');
@@ -277,9 +275,9 @@ module SF
                     this.viewOptions.onOkClosed();
                 }
             }
-        }
+        };
 
-        public onViewCancel() {
+        ViewNavigator.prototype.onViewCancel = function () {
             $('#' + this.tempDivId()).remove();
             var $popupPanel = $('#' + this.viewOptions.containerDiv);
             $popupPanel.html(this.backup);
@@ -288,9 +286,9 @@ module SF
             if (this.viewOptions.onCancelled != null) {
                 this.viewOptions.onCancelled();
             }
-        }
+        };
 
-        public onCreateOk() {
+        ViewNavigator.prototype.onCreateOk = function () {
             var doDefault = (this.viewOptions.onOk != null) ? this.viewOptions.onOk(SF.cloneContents(this.tempDivId())) : true;
             if (doDefault != false) {
                 $('#' + this.tempDivId()).remove();
@@ -298,9 +296,9 @@ module SF
                     this.viewOptions.onOkClosed();
                 }
             }
-        }
+        };
 
-        public onCreateSave() {
+        ViewNavigator.prototype.onCreateSave = function () {
             var doDefault = (this.viewOptions.onSave != null) ? this.viewOptions.onSave(this.tempDivId()) : true;
             if (doDefault != false) {
                 var validatorResult = new SF.PartialValidator({ prefix: this.viewOptions.prefix, type: this.viewOptions.type }).trySave();
@@ -310,34 +308,35 @@ module SF
                 }
                 if (SF.isEmpty(this.viewOptions.containerDiv)) {
                     $('#' + this.tempDivId()).remove();
-                }
-                else {
+                } else {
                     $('#' + this.viewOptions.containerDiv).remove();
                 }
                 if (this.viewOptions.onOkClosed != null) {
                     this.viewOptions.onOkClosed();
                 }
             }
-        }
+        };
 
-        public onCreateCancel() {
+        ViewNavigator.prototype.onCreateCancel = function () {
             if (SF.isEmpty(this.viewOptions.containerDiv)) {
                 $('#' + this.tempDivId()).remove();
-            }
-            else {
+            } else {
                 $('#' + this.viewOptions.containerDiv).remove();
             }
             if (this.viewOptions.onCancelled != null) {
                 this.viewOptions.onCancelled();
             }
-        }
-    }
+        };
+        return ViewNavigator;
+    })();
+    SF.ViewNavigator = ViewNavigator;
 
-    export function closePopup(prefix) {
+    function closePopup(prefix) {
         $('#' + SF.compose(prefix, "panelPopup")).closest(".ui-dialog-content,.ui-dialog").remove();
     }
+    SF.closePopup = closePopup;
 
-    export function openTypeChooser(prefix, onTypeChosen, chooserOptions) {
+    function openTypeChooser(prefix, onTypeChosen, chooserOptions) {
         chooserOptions = chooserOptions || {};
         var tempDivId = SF.compose(prefix, "Temp");
         $.ajax({
@@ -347,6 +346,7 @@ module SF
             success: function (chooserHTML) {
                 $("body").append(SF.hiddenDiv(tempDivId, chooserHTML));
                 SF.triggerNewContent($("#" + tempDivId));
+
                 //Set continuation for each type button
                 $('#' + tempDivId + " :button").each(function () {
                     $('#' + this.id).unbind('click').click(function () {
@@ -366,16 +366,17 @@ module SF
             }
         });
     }
+    SF.openTypeChooser = openTypeChooser;
 
-    export function openChooser(_prefix, onOptionClicked, jsonOptionsListFormat, onCancelled, chooserOptions) {
+    function openChooser(_prefix, onOptionClicked, jsonOptionsListFormat, onCancelled, chooserOptions) {
         //Construct popup
         var tempDivId = SF.compose(_prefix, "Temp");
         var requestData = "prefix=" + tempDivId;
         if (!SF.isEmpty(jsonOptionsListFormat)) {
             for (var i = 0; i < jsonOptionsListFormat.length; i++) {
-                requestData += "&buttons=" + jsonOptionsListFormat[i];  //This will Bind to the List<string> "buttons"
+                requestData += "&buttons=" + jsonOptionsListFormat[i];
                 if (chooserOptions && chooserOptions.ids != null) {
-                    requestData += "&ids=" + chooserOptions.ids[i];  //This will Bind to the List<string> "ids"            
+                    requestData += "&ids=" + chooserOptions.ids[i];
                 }
             }
         }
@@ -389,6 +390,7 @@ module SF
             success: function (chooserHTML) {
                 $("body").append(SF.hiddenDiv(tempDivId, chooserHTML));
                 SF.triggerNewContent($("#" + tempDivId));
+
                 //Set continuation for each type button
                 $('#' + tempDivId + " :button").each(function () {
                     $('#' + this.id).unbind('click').click(function () {
@@ -409,4 +411,5 @@ module SF
             }
         });
     }
-}
+    SF.openChooser = openChooser;
+})(SF || (SF = {}));
