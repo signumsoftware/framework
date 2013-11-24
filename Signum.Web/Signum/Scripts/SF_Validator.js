@@ -1,5 +1,6 @@
-/// <reference path="SF_Utils.ts"/>
+﻿/// <reference path="SF_Utils.ts"/>
 /// <reference path="SF_Globals.ts"/>
+/// <reference path="SF_Lines.ts"/>
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -239,10 +240,10 @@ var SF;
 
         PartialValidator.prototype.createValidatorResult = function (r) {
             var validatorResult = {
-                "modelState": r["ModelState"],
-                "isValid": this.isValid(r["ModelState"]),
-                "newToStr": r[SF.Keys.toStr],
-                "newLink": r[SF.Keys.link]
+                modelState: r["ModelState"],
+                isValid: this.isValid(r["ModelState"]),
+                newToStr: r[SF.Keys.toStr],
+                newLink: r[SF.Keys.link]
             };
             return validatorResult;
         };

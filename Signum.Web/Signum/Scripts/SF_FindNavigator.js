@@ -1,14 +1,14 @@
 ﻿/// <reference path="SF_Utils.ts"/>
 /// <reference path="SF_Globals.ts"/>
-
-module SF {
-    export module FindNavigator {
-
-        export function getFor(prefix) {
+var SF;
+(function (SF) {
+    (function (FindNavigator) {
+        function getFor(prefix) {
             return $("#" + SF.compose(prefix, "sfSearchControl")).data("SF-findNavigator");
         }
+        FindNavigator.getFor = getFor;
 
-        export function openFinder(findOptions) {
+        function openFinder(findOptions) {
             var self = this;
             $.ajax({
                 url: findOptions.openFinderUrl || (SF.isEmpty(findOptions.prefix) ? SF.Urls.find : SF.Urls.partialFind),
@@ -18,16 +18,21 @@ module SF {
                     var divId = SF.compose(findOptions.prefix, "Temp");
                     $("body").append(SF.hiddenDiv(divId, popupHtml));
                     SF.triggerNewContent($("#" + divId));
-                    $.extend(self.getFor(findOptions.prefix).options, findOptions); //Copy all properties (i.e. onOk was not transmitted)
+                    $.extend(self.getFor(findOptions.prefix).options, findOptions);
                     $("#" + divId).popup({
-                        onOk: function () { self.getFor(findOptions.prefix).onSearchOk(); },
-                        onCancel: function () { self.getFor(findOptions.prefix).onSearchCancel(); }
+                        onOk: function () {
+                            self.getFor(findOptions.prefix).onSearchOk();
+                        },
+                        onCancel: function () {
+                            self.getFor(findOptions.prefix).onSearchCancel();
+                        }
                     });
                 }
             });
         }
+        FindNavigator.openFinder = openFinder;
 
-        export function requestDataForOpenFinder(findOptions) {
+        function requestDataForOpenFinder(findOptions) {
             var requestData = {
                 webQueryName: findOptions.webQueryName,
                 elems: findOptions.elems,
@@ -65,16 +70,18 @@ module SF {
 
             return requestData;
         }
+        FindNavigator.requestDataForOpenFinder = requestDataForOpenFinder;
 
-        export function serializeOrders(orderArray) {
+        function serializeOrders(orderArray) {
             var currOrders = orderArray.join(";");
             if (!SF.isEmpty(currOrders)) {
                 currOrders += ";";
             }
-            return currOrders; //.replace(/"/g, "");
+            return currOrders;
         }
+        FindNavigator.serializeOrders = serializeOrders;
 
-        export function newSubTokensCombo(webQueryName, prefix, index, controllerUrl, requestExtraJsonData) {
+        function newSubTokensCombo(webQueryName, prefix, index, controllerUrl, requestExtraJsonData) {
             var $selectedCombo = $("#" + SF.compose(prefix, "ddlTokens_" + index));
             if ($selectedCombo.length == 0) {
                 return;
@@ -85,8 +92,7 @@ module SF {
             var $container = $selectedCombo.closest(".sf-search-control");
             if ($container.length > 0) {
                 $container.trigger("sf-new-subtokens-combo", $selectedCombo.attr("id"));
-            }
-            else {
+            } else {
                 $selectedCombo.trigger("sf-new-subtokens-combo", $selectedCombo.attr("id"));
             }
 
@@ -116,39 +122,40 @@ module SF {
                     }
                 }
             });
-        };
-
-        export function clearChildSubtokenCombos($selectedCombo, prefix, index) {
-            $selectedCombo.siblings("select,span")
-                .filter(function () {
-                    var elementId = $(this).attr("id");
-                    if (typeof elementId == "undefined") {
-                        return false;
-                    }
-                    if ((elementId.indexOf(SF.compose(prefix, "ddlTokens_")) != 0)
-                        && (elementId.indexOf(SF.compose(prefix, "lblddlTokens_")) != 0)) {
-                        return false;
-                    }
-                    var currentIndex = elementId.substring(elementId.lastIndexOf("_") + 1, elementId.length);
-                    return parseInt(currentIndex) > index;
-                })
-                .remove();
         }
+        FindNavigator.newSubTokensCombo = newSubTokensCombo;
+        ;
 
-        export function constructTokenName(prefix) {
+        function clearChildSubtokenCombos($selectedCombo, prefix, index) {
+            $selectedCombo.siblings("select,span").filter(function () {
+                var elementId = $(this).attr("id");
+                if (typeof elementId == "undefined") {
+                    return false;
+                }
+                if ((elementId.indexOf(SF.compose(prefix, "ddlTokens_")) != 0) && (elementId.indexOf(SF.compose(prefix, "lblddlTokens_")) != 0)) {
+                    return false;
+                }
+                var currentIndex = elementId.substring(elementId.lastIndexOf("_") + 1, elementId.length);
+                return parseInt(currentIndex) > index;
+            }).remove();
+        }
+        FindNavigator.clearChildSubtokenCombos = clearChildSubtokenCombos;
+
+        function constructTokenName(prefix) {
             var tokenName = "";
             var stop = false;
             for (var i = 0; !stop; i++) {
                 var currSubtoken = $("#" + SF.compose(prefix, "ddlTokens_" + i));
                 if (currSubtoken.length > 0)
                     tokenName = SF.compose(tokenName, currSubtoken.val(), ".");
-                else
+else
                     stop = true;
             }
             return tokenName;
         }
+        FindNavigator.constructTokenName = constructTokenName;
 
-        export function deleteFilter(elem) {
+        function deleteFilter(elem) {
             var $tr = $(elem).closest("tr");
             if ($tr.find("select[disabled]").length > 0) {
                 return;
@@ -162,56 +169,43 @@ module SF {
 
             $tr.remove();
         }
-    }
+        FindNavigator.deleteFilter = deleteFilter;
+    })(SF.FindNavigator || (SF.FindNavigator = {}));
+    var FindNavigator = SF.FindNavigator;
 
-    export enum ColumnOptionsMode {
-        Add,
-        Remove,
-        Replace,
-    }
+    (function (ColumnOptionsMode) {
+        ColumnOptionsMode[ColumnOptionsMode["Add"] = 0] = "Add";
+        ColumnOptionsMode[ColumnOptionsMode["Remove"] = 1] = "Remove";
+        ColumnOptionsMode[ColumnOptionsMode["Replace"] = 2] = "Replace";
+    })(SF.ColumnOptionsMode || (SF.ColumnOptionsMode = {}));
+    var ColumnOptionsMode = SF.ColumnOptionsMode;
 
-    export class FilterMode {
-        static Visible = "Visible";
-        static Hidden = "Hidden";
-        static AlwaysHidden = "AlwaysHidden";
-        static OnlyResults = "OnlyResults";
-    }
+    var FilterMode = (function () {
+        function FilterMode() {
+        }
+        FilterMode.Visible = "Visible";
+        FilterMode.Hidden = "Hidden";
+        FilterMode.AlwaysHidden = "AlwaysHidden";
+        FilterMode.OnlyResults = "OnlyResults";
+        return FilterMode;
+    })();
+    SF.FilterMode = FilterMode;
 
-    export class FindOptions {
-        allowChangeColumns: boolean;
-        allowOrder: boolean;
-        allowMultiple: boolean;
-        columnMode: ColumnOptionsMode;
-        columns: string; //List of column names "token1,displayName1;token2,displayName2"
-        create: boolean;
-        elems: number;
-        selectedItemsContextMenu: boolean;
-        filterMode: FilterMode;
-        filters: string; //List of filter names "token1,operation1,value1;token2,operation2,value2"
-        navigate: boolean;
-        openFinderUrl: boolean;
-        onCancelled: () => void;
-        onOk: () => void;
-        onOkClosed: () => void;
-        orders: string[]; //A Json array like ["Id","-Name"] => Id asc, then Name desc
-        prefix: string;
-        searchOnLoad: boolean;
-        webQueryName: string;
-    }
+    var FindOptions = (function () {
+        function FindOptions() {
+        }
+        return FindOptions;
+    })();
+    SF.FindOptions = FindOptions;
 
-    export class SearchControl {
-
-        element: JQuery;
-
-        keys = {
-            elems: "sfElems",
-            page: "sfPage",
-            pagination: "sfPaginationMode"
-        };
-
-        options: FindOptions;
-
-        constructor(_options: FindOptions) {
+    var SearchControl = (function () {
+        function SearchControl(_options) {
+            this.keys = {
+                elems: "sfElems",
+                page: "sfPage",
+                pagination: "sfPaginationMode"
+            };
+            this.searchOnLoadFinished = false;
             this.options = $.extend({
                 allowChangeColumns: true,
                 allowOrder: true,
@@ -228,7 +222,7 @@ module SF {
                 onCancelled: null,
                 onOk: null,
                 onOkClosed: null,
-                orders: [], //A Json array like ["Id","-Name"] => Id asc, then Name desc
+                orders: [],
                 prefix: "",
                 searchOnLoad: false,
                 webQueryName: null
@@ -236,27 +230,25 @@ module SF {
 
             this._create();
         }
-
-        public pf(s) {
+        SearchControl.prototype.pf = function (s) {
             return "#" + SF.compose(this.options.prefix, s);
-        }
+        };
 
-        public tempDivId() {
+        SearchControl.prototype.tempDivId = function () {
             return SF.compose(this.options.prefix, "Temp");
-        }
+        };
 
-        public closeMyOpenedCtxMenu() {
+        SearchControl.prototype.closeMyOpenedCtxMenu = function () {
             if (this.element.find(".sf-search-ctxmenu-overlay").length > 0) {
                 $('.sf-search-ctxmenu-overlay').remove();
                 return false;
             }
 
             return true;
-        }
+        };
 
-        _create() {
+        SearchControl.prototype._create = function () {
             var self = this;
-
 
             var $tblResults = self.element.find(".sf-search-results-container");
 
@@ -271,7 +263,7 @@ module SF {
                 });
             }
 
-            if (this.options.allowChangeColumns || (this.options.filterMode !=  SF.FilterMode[SF.FilterMode.AlwaysHidden] && this.options.filterMode != "OnlyResults")) {
+            if (this.options.allowChangeColumns || (this.options.filterMode != SF.FilterMode[SF.FilterMode.AlwaysHidden] && this.options.filterMode != "OnlyResults")) {
                 $tblResults.on("contextmenu", "th:not(.sf-th-entity):not(.sf-th-selection)", function (e) {
                     if (!this.closeMyOpenedCtxMenu()) {
                         return false;
@@ -322,8 +314,7 @@ module SF {
                         if (self.options.selectedItemsContextMenu == true) {
                             self.entityContextMenu(e);
                         }
-                    }
-                    else {
+                    } else {
                         self.cellContextMenu(e);
                     }
                     return false;
@@ -352,8 +343,7 @@ module SF {
                 $tblResults.on("change", ".sf-pagination-size", function () {
                     if ($(this).find("option:selected").val() == "All") {
                         self.clearResults();
-                    }
-                    else {
+                    } else {
                         self.search();
                     }
                 });
@@ -387,11 +377,9 @@ module SF {
             if (this.options.searchOnLoad) {
                 this.searchOnLoad();
             }
-        }
+        };
 
-
-
-        changeRowSelection($rowSelectors, select) {
+        SearchControl.prototype.changeRowSelection = function ($rowSelectors, select) {
             $rowSelectors.prop("checked", select);
             $rowSelectors.closest("tr").toggleClass("ui-state-active", select);
 
@@ -399,9 +387,9 @@ module SF {
 
             var selected = $control.find(".sf-td-selection:checked").length;
             $control.find(".sf-tm-selected > .ui-button-text").html(lang.signum.searchControlMenuSelected + " (" + selected + ")");
-        }
+        };
 
-        createCtxMenu($rightClickTarget) {
+        SearchControl.prototype.createCtxMenu = function ($rightClickTarget) {
             var left = $rightClickTarget.position().left + ($rightClickTarget.outerWidth() / 2);
             var top = $rightClickTarget.position().top + ($rightClickTarget.outerHeight() / 2);
 
@@ -416,14 +404,14 @@ module SF {
                 var $clickTarget = $(e.target);
                 if ($clickTarget.hasClass("sf-search-ctxitem") || $clickTarget.parent().hasClass("sf-search-ctxitem"))
                     $cmenu.hide();
-                else
+else
                     $('.sf-search-ctxmenu-overlay').remove();
             }).append($cmenu);
 
             return $ctxMenuOverlay;
-        }
+        };
 
-        headerContextMenu(e) {
+        SearchControl.prototype.headerContextMenu = function (e) {
             var $th = $(e.target).closest("th");
             var $menu = this.createCtxMenu($th);
 
@@ -433,35 +421,35 @@ module SF {
             }
 
             if (this.options.allowChangeColumns) {
-                $itemContainer.append("<div class='sf-search-ctxitem sf-edit-column'><span>" + lang.signum.editColumnName + "</span></div>")
-                    .append("<div class='sf-search-ctxitem sf-remove-column'><span>" + lang.signum.removeColumn + "</span></div>");
+                $itemContainer.append("<div class='sf-search-ctxitem sf-edit-column'><span>" + lang.signum.editColumnName + "</span></div>").append("<div class='sf-search-ctxitem sf-remove-column'><span>" + lang.signum.removeColumn + "</span></div>");
             }
 
             $th.append($menu);
             return false;
-        }
+        };
 
-        cellContextMenu(e) {
+        SearchControl.prototype.cellContextMenu = function (e) {
             var $td = $(e.target);
             var $menu = this.createCtxMenu($td);
 
-            $menu.find(".sf-search-ctxmenu")
-                .html("<div class='sf-search-ctxitem sf-quickfilter'><span>" + lang.signum.addFilter + "</span></div>");
+            $menu.find(".sf-search-ctxmenu").html("<div class='sf-search-ctxitem sf-quickfilter'><span>" + lang.signum.addFilter + "</span></div>");
 
             $td.append($menu);
             return false;
-        }
+        };
 
-        requestDataForContextMenu() {
+        SearchControl.prototype.requestDataForContextMenu = function () {
             return {
-                liteKeys: this.element.find(".sf-td-selection:checked").closest("tr").map(function () { return $(this).data("entity"); }).toArray().join(","),
+                liteKeys: this.element.find(".sf-td-selection:checked").closest("tr").map(function () {
+                    return $(this).data("entity");
+                }).toArray().join(","),
                 webQueryName: this.options.webQueryName,
                 prefix: this.options.prefix,
                 implementationsKey: $(this.pf("sfEntityTypeNames")).val()
             };
-        }
+        };
 
-        entityContextMenu(e) {
+        SearchControl.prototype.entityContextMenu = function (e) {
             var $td = $(e.target).closest("td");
             $td.addClass("sf-ctxmenu-active");
 
@@ -479,9 +467,9 @@ module SF {
             });
 
             return false;
-        }
+        };
 
-        ctxMenuInDropdown($dropdown) {
+        SearchControl.prototype.ctxMenuInDropdown = function ($dropdown) {
             if ($dropdown.hasClass("sf-open")) {
                 var requestData = this.requestDataForContextMenu();
                 if (SF.isEmpty(requestData.implementationsKey)) {
@@ -502,19 +490,18 @@ module SF {
                     }
                 });
             }
-        }
+        };
 
-        fullScreen(evt) {
+        SearchControl.prototype.fullScreen = function (evt) {
             var url = this.element.attr("data-find-url") + this.requestDataForSearchInUrl();
             if (evt.ctrlKey || evt.which == 2) {
                 window.open(url);
-            }
-            else if (evt.which == 1) {
+            } else if (evt.which == 1) {
                 window.location.href = url;
             }
-        }
+        };
 
-        search() {
+        SearchControl.prototype.search = function () {
             var $searchButton = $(this.pf("qbSearch"));
             $searchButton.addClass("sf-searching");
             var self = this;
@@ -526,16 +513,15 @@ module SF {
                     if (!SF.isEmpty(r)) {
                         $tbody.html(r);
                         SF.triggerNewContent(self.element.find(".sf-search-results-container tbody"));
-                    }
-                    else {
+                    } else {
                         $tbody.html("");
                     }
                     $searchButton.removeClass("sf-searching");
                 }
             });
-        }
+        };
 
-        requestDataForSearch() {
+        SearchControl.prototype.requestDataForSearch = function () {
             var requestData = new Object();
             requestData["webQueryName"] = this.options.webQueryName;
             requestData["pagination"] = $(this.pf(this.keys.pagination)).val();
@@ -551,49 +537,39 @@ module SF {
 
             requestData["prefix"] = this.options.prefix;
             return requestData;
-        }
+        };
 
-        requestDataForSearchInUrl() {
-            var url = "?pagination=" + $(this.pf(this.keys.pagination)).val() +
-                "&elems=" + $(this.pf(this.keys.elems)).val() +
-                "&page=" + $(this.pf(this.keys.page)).val() +
-                "&filters=" + this.serializeFilters() +
-                "&filterMode=Visible" +
-                "&orders=" + this.serializeOrders() +
-                "&columns=" + this.serializeColumns() +
-                "&columnMode=Replace" +
-                "&navigate=" + this.options.navigate;
+        SearchControl.prototype.requestDataForSearchInUrl = function () {
+            var url = "?pagination=" + $(this.pf(this.keys.pagination)).val() + "&elems=" + $(this.pf(this.keys.elems)).val() + "&page=" + $(this.pf(this.keys.page)).val() + "&filters=" + this.serializeFilters() + "&filterMode=Visible" + "&orders=" + this.serializeOrders() + "&columns=" + this.serializeColumns() + "&columnMode=Replace" + "&navigate=" + this.options.navigate;
 
             if (!this.options.allowMultiple) {
                 url += "&allowMultiple=" + this.options.allowMultiple;
             }
 
             return url;
-        }
+        };
 
-        serializeFilters() {
+        SearchControl.prototype.serializeFilters = function () {
             var result = "", self = this;
             $(this.pf("tblFilters > tbody > tr")).each(function () {
                 result += self.serializeFilter($(this)) + ";";
             });
             return result;
-        }
+        };
 
-
-        serializeFilter($filter) {
+        SearchControl.prototype.serializeFilter = function ($filter) {
             var id = $filter[0].id;
             var index = id.substring(id.lastIndexOf("_") + 1, id.length);
 
             var selector = $(SF.compose(this.pf("ddlSelector"), index) + " option:selected", $filter);
             var value = $(SF.compose(this.pf("value"), index), $filter).val();
 
-            var valBool = $("input:checkbox[id=" + SF.compose(SF.compose(this.options.prefix, "value"), index) + "]", $filter); //it's a checkbox
+            var valBool = $("input:checkbox[id=" + SF.compose(SF.compose(this.options.prefix, "value"), index) + "]", $filter);
             if (valBool.length > 0) {
-                value = (<HTMLInputElement> valBool[0]).checked;
-            }
-            else {
+                value = (valBool[0]).checked;
+            } else {
                 var info = new SF.RuntimeInfo(SF.compose(SF.compose(this.options.prefix, "value"), index));
-                if (info.find().length > 0) { //If it's a Lite, the value is the Id
+                if (info.find().length > 0) {
                     value = info.entityType() + ";" + info.id();
                     if (value == ";") {
                         value = "";
@@ -611,13 +587,13 @@ module SF {
             }
 
             return $filter.find("td:nth-child(2) > :hidden").val() + "," + selector.val() + "," + value;
-        }
+        };
 
-        serializeOrders() {
+        SearchControl.prototype.serializeOrders = function () {
             return SF.FindNavigator.serializeOrders(this.options.orders);
-        }
+        };
 
-        serializeColumns() {
+        SearchControl.prototype.serializeColumns = function () {
             var result = "";
             var self = this;
             $(this.pf("tblResults thead tr th:not(.sf-th-entity):not(.sf-th-selection)")).each(function () {
@@ -626,16 +602,15 @@ module SF {
                 var displayName = $this.text().trim();
                 if (token == displayName) {
                     result += token;
-                }
-                else {
+                } else {
                     result += token + "," + displayName;
                 }
                 result += ";";
             });
             return result;
-        }
+        };
 
-        onSearchOk() {
+        SearchControl.prototype.onSearchOk = function () {
             var self = this;
             this.hasSelectedItems(function (items) {
                 var doDefault = (self.options.onOk != null) ? self.options.onOk(items) : true;
@@ -646,38 +621,37 @@ module SF {
                     }
                 }
             });
-        }
+        };
 
-        onSearchCancel() {
+        SearchControl.prototype.onSearchCancel = function () {
             $('#' + this.tempDivId()).remove();
             if (this.options.onCancelled != null) {
                 this.options.onCancelled();
             }
-        }
+        };
 
-        hasSelectedItems(onSuccess) {
+        SearchControl.prototype.hasSelectedItems = function (onSuccess) {
             var items = this.selectedItems();
             if (items.length == 0) {
                 SF.Notify.info(lang.signum.noElementsSelected);
                 return;
             }
             onSuccess(items);
-        }
+        };
 
-        hasSelectedItem(onSuccess) {
+        SearchControl.prototype.hasSelectedItem = function (onSuccess) {
             var items = this.selectedItems();
             if (items.length == 0) {
                 SF.Notify.info(lang.signum.noElementsSelected);
                 return;
-            }
-            else if (items.length > 1) {
+            } else if (items.length > 1) {
                 SF.Notify.info(lang.signum.onlyOneElement);
                 return;
             }
             onSuccess(items[0]);
-        }
+        };
 
-        selectedItems() {
+        SearchControl.prototype.selectedItems = function () {
             var items = [];
             var selected = $("input:checkbox[name^=" + SF.compose(this.options.prefix, "rowSelection") + "]:checked");
             if (selected.length == 0)
@@ -697,19 +671,20 @@ module SF {
             });
 
             return items;
-        }
+        };
 
-        splitSelectedKeys() {
+        SearchControl.prototype.splitSelectedKeys = function () {
             var selected = this.selectedItems();
             if (selected.length < 1) {
                 return '';
+            } else {
+                return selected.map(function (item) {
+                    return item.key;
+                }).join(',');
             }
-            else {
-                return selected.map(function (item) { return item.key; }).join(',');
-            }
-        }
+        };
 
-        newSortOrder($th, multiCol) {
+        SearchControl.prototype.newSortOrder = function ($th, multiCol) {
             var columnName = $th.find("input:hidden").val();
             var currentOrders = this.options.orders;
 
@@ -717,31 +692,28 @@ module SF {
             var newOrder = "";
             if (indexCurrOrder === -1) {
                 indexCurrOrder = $.inArray("-" + columnName, currentOrders);
-            }
-            else {
+            } else {
                 newOrder = "-";
             }
 
             if (!multiCol) {
                 this.element.find(".sf-search-results-container th").removeClass("sf-header-sort-up sf-header-sort-down");
                 this.options.orders = [newOrder + columnName];
-            }
-            else {
+            } else {
                 if (indexCurrOrder !== -1) {
                     this.options.orders[indexCurrOrder] = newOrder + columnName;
-                }
-                else {
+                } else {
                     this.options.orders.push(newOrder + columnName);
                 }
             }
 
             if (newOrder == "-")
                 $th.removeClass("sf-header-sort-down").addClass("sf-header-sort-up");
-            else
+else
                 $th.removeClass("sf-header-sort-up").addClass("sf-header-sort-down");
-        }
+        };
 
-        addColumn() {
+        SearchControl.prototype.addColumn = function () {
             if (!this.options.allowChangeColumns || $(this.pf("tblFilters tbody")).length == 0) {
                 throw "Adding columns is not allowed";
             }
@@ -764,53 +736,45 @@ module SF {
                 data: { "webQueryName": this.options.webQueryName, "tokenName": tokenName },
                 async: false,
                 success: function (columnNiceName) {
-                    $tblHeaders.append("<th class='ui-state-default'>" +
-                        "<div class='sf-header-droppable sf-header-droppable-right'></div>" +
-                        "<div class='sf-header-droppable sf-header-droppable-left'></div>" +
-                        "<input type=\"hidden\" value=\"" + tokenName + "\" />" +
-                        "<span>" + columnNiceName + "</span></th>");
+                    $tblHeaders.append("<th class='ui-state-default'>" + "<div class='sf-header-droppable sf-header-droppable-right'></div>" + "<div class='sf-header-droppable sf-header-droppable-left'></div>" + "<input type=\"hidden\" value=\"" + tokenName + "\" />" + "<span>" + columnNiceName + "</span></th>");
                     var $newTh = $tblHeaders.find("th:last");
                     self.createMoveColumnDragDrop($newTh, $newTh.find(".sf-header-droppable"));
                 }
             });
-        }
+        };
 
-        editColumn($th) {
+        SearchControl.prototype.editColumn = function ($th) {
             var colName = $th.text().trim();
 
             var popupPrefix = SF.compose(this.options.prefix, "newName");
 
             var divId = "columnNewName";
             var $div = $("<div id='" + divId + "'></div>");
-            $div.html("<p>" + lang.signum.enterTheNewColumnName + "</p>")
-                .append("<br />")
-                .append("<input type='text' value='" + colName + "' />")
-                .append("<br />").append("<br />")
-                .append("<input type='button' id='" + SF.compose(popupPrefix, "btnOk") + "' class='sf-button sf-ok-button' value='OK' />");
+            $div.html("<p>" + lang.signum.enterTheNewColumnName + "</p>").append("<br />").append("<input type='text' value='" + colName + "' />").append("<br />").append("<br />").append("<input type='button' id='" + SF.compose(popupPrefix, "btnOk") + "' class='sf-button sf-ok-button' value='OK' />");
 
             var $tempContainer = $("<div></div>").append($div);
 
             new SF.ViewNavigator({
-                onOk: function () { $th.find("span").html($("#columnNewName > input:text").val()); },
+                onOk: function () {
+                    $th.find("span").html($("#columnNewName > input:text").val());
+                },
                 prefix: popupPrefix
             }).showViewOk($tempContainer.html());
-        }
+        };
 
-
-        moveColumn($source, $target, before) {
+        SearchControl.prototype.moveColumn = function ($source, $target, before) {
             if (before) {
                 $target.before($source);
-            }
-            else {
+            } else {
                 $target.after($source);
             }
 
-            $source.removeAttr("style"); //remove absolute positioning
+            $source.removeAttr("style");
             this.clearResults();
             this.createMoveColumnDragDrop();
-        }
+        };
 
-        createMoveColumnDragDrop($draggables?, $droppables?) {
+        SearchControl.prototype.createMoveColumnDragDrop = function ($draggables, $droppables) {
             $draggables = $draggables || $(this.pf("tblResults") + " th:not(.sf-th-entity):not(.sf-th-selection)");
             $droppables = $droppables || $(this.pf("tblResults") + " .sf-header-droppable");
 
@@ -821,7 +785,7 @@ module SF {
                 distance: 8,
                 cursor: "move"
             });
-            $draggables.removeAttr("style"); //remove relative positioning
+            $draggables.removeAttr("style");
 
             var self = this;
             $droppables.droppable({
@@ -830,41 +794,40 @@ module SF {
                 drop: function (event, ui) {
                     var $dragged = ui.draggable;
 
-                    var $targetPlaceholder = $(this); //droppable
+                    var $targetPlaceholder = $(this);
                     var $targetCol = $targetPlaceholder.closest("th");
 
                     self.moveColumn($dragged, $targetCol, $targetPlaceholder.hasClass("sf-header-droppable-left"));
                 }
             });
-        }
+        };
 
-        removeColumn($th) {
+        SearchControl.prototype.removeColumn = function ($th) {
             $th.remove();
             this.clearResults();
-        }
+        };
 
-        clearResults() {
+        SearchControl.prototype.clearResults = function () {
             var $tbody = $(this.pf("tblResults tbody"));
             $tbody.find("tr:not('.sf-search-footer')").remove();
             $tbody.prepend($("<tr></tr>").append($("<td></td>").attr("colspan", $tbody.find(".sf-search-footer td").attr("colspan"))));
-        }
+        };
 
-        toggleFilters() {
+        SearchControl.prototype.toggleFilters = function () {
             var $toggler = this.element.find(".sf-filters-header");
             this.element.find(".sf-filters").toggle();
             $toggler.toggleClass('close');
             if ($toggler.hasClass('close')) {
                 $toggler.find(".ui-button-icon-primary").removeClass("ui-icon-triangle-1-n").addClass("ui-icon-triangle-1-e");
                 $toggler.find(".ui-button-text").html(lang.signum.showFilters);
-            }
-            else {
+            } else {
                 $toggler.find(".ui-button-icon-primary").removeClass("ui-icon-triangle-1-e").addClass("ui-icon-triangle-1-n");
                 $toggler.find(".ui-button-text").html(lang.signum.hideFilters);
             }
             return false;
-        }
+        };
 
-        addFilter(url, requestExtraJsonData?) {
+        SearchControl.prototype.addFilter = function (url, requestExtraJsonData) {
             var tableFilters = $(this.pf("tblFilters tbody"));
             if (tableFilters.length == 0) {
                 throw "Adding filters is not allowed";
@@ -899,18 +862,18 @@ module SF {
                     SF.triggerNewContent($(self.pf("tblFilters tbody tr:last")));
                 }
             });
-        }
+        };
 
-        newFilterRowIndex() {
+        SearchControl.prototype.newFilterRowIndex = function () {
             var lastRow = $(this.pf("tblFilters tbody tr:last"));
             var lastRowIndex = -1;
             if (lastRow.length == 1) {
                 lastRowIndex = lastRow[0].id.substr(lastRow[0].id.lastIndexOf("_") + 1, lastRow[0].id.length);
             }
             return parseInt(lastRowIndex) + 1;
-        }
+        };
 
-        newSubTokensComboAdded($selectedCombo) {
+        SearchControl.prototype.newSubTokensComboAdded = function ($selectedCombo) {
             var $btnAddFilter = $(this.pf("btnAddFilter"));
             var $btnAddColumn = $(this.pf("btnAddColumn"));
 
@@ -923,36 +886,42 @@ module SF {
                 if ($prevSelect.length == 0) {
                     this.changeButtonState($btnAddFilter, lang.signum.selectToken);
                     this.changeButtonState($btnAddColumn, lang.signum.selectToken);
-                }
-                else {
+                } else {
                     var $prevSelectedOption = $prevSelect.find("option:selected");
-                    this.changeButtonState($btnAddFilter, $prevSelectedOption.attr("data-filter"), function () { self.addFilter(); });
-                    this.changeButtonState($btnAddColumn, $prevSelectedOption.attr("data-column"), function () { self.addColumn(); });
+                    this.changeButtonState($btnAddFilter, $prevSelectedOption.attr("data-filter"), function () {
+                        self.addFilter();
+                    });
+                    this.changeButtonState($btnAddColumn, $prevSelectedOption.attr("data-column"), function () {
+                        self.addColumn();
+                    });
                 }
                 return;
             }
 
-            this.changeButtonState($btnAddFilter, $selectedOption.attr("data-filter"), function () { self.addFilter(); });
-            this.changeButtonState($btnAddColumn, $selectedOption.attr("data-column"), function () { self.addColumn(); });
-        }
+            this.changeButtonState($btnAddFilter, $selectedOption.attr("data-filter"), function () {
+                self.addFilter();
+            });
+            this.changeButtonState($btnAddColumn, $selectedOption.attr("data-column"), function () {
+                self.addColumn();
+            });
+        };
 
-        changeButtonState($button, disablingMessage, enableCallback) {
+        SearchControl.prototype.changeButtonState = function ($button, disablingMessage, enableCallback) {
             var hiddenId = $button.attr("id") + "temp";
             if (typeof disablingMessage != "undefined") {
                 $button.addClass("ui-button-disabled").addClass("ui-state-disabled").addClass("sf-disabled").attr("disabled", "disabled").attr("title", disablingMessage);
-                $button.unbind('click').bind('click', function (e) { e.preventDefault(); return false; });
-            }
-            else {
+                $button.unbind('click').bind('click', function (e) {
+                    e.preventDefault();
+                    return false;
+                });
+            } else {
                 var self = this;
                 $button.removeClass("ui-button-disabled").removeClass("ui-state-disabled").removeClass("sf-disabled").prop("disabled", null).attr("title", "");
                 $button.unbind('click').bind('click', enableCallback);
             }
-        }
+        };
 
-
-
-
-        quickFilter(value, tokenName) {
+        SearchControl.prototype.quickFilter = function (value, tokenName) {
             var tableFilters = $(this.pf("tblFilters tbody"));
             if (tableFilters.length === 0) {
                 return;
@@ -980,82 +949,79 @@ module SF {
                     SF.triggerNewContent($(self.pf("tblFilters tbody tr:last")));
                 }
             });
-        }
+        };
 
-        quickFilterCell($elem) {
+        SearchControl.prototype.quickFilterCell = function ($elem) {
             var value = $elem.data("value");
             if (typeof value == "undefined") {
-                value = $elem.html().trim()
-                }
+                value = $elem.html().trim();
+            }
 
             var cellIndex = $elem[0].cellIndex;
             var tokenName = $($($elem.closest(".sf-search-results")).find("th")[cellIndex]).children("input:hidden").val();
 
             this.quickFilter(value, tokenName);
-        }
+        };
 
-        quickFilterHeader($elem) {
+        SearchControl.prototype.quickFilterHeader = function ($elem) {
             this.quickFilter("", $elem.find("input:hidden").val());
-        }
+        };
 
-        create(viewOptions) {
+        SearchControl.prototype.create = function (viewOptions) {
             var self = this;
             var type = this.getEntityType(function (type) {
                 self.typedCreate($.extend({
                     type: type
                 }, viewOptions || {}));
             });
-        }
+        };
 
-        getEntityType(_onTypeFound) {
+        SearchControl.prototype.getEntityType = function (_onTypeFound) {
             var typeStr = $(this.pf(SF.Keys.entityTypeNames)).val();
             var types = typeStr.split(",");
             if (types.length == 1) {
                 return _onTypeFound(types[0]);
             }
             SF.openTypeChooser(this.options.prefix, _onTypeFound, { types: typeStr });
-        }
+        };
 
-        typedCreate(viewOptions) {
+        SearchControl.prototype.typedCreate = function (viewOptions) {
             viewOptions.prefix = viewOptions.prefix || this.options.prefix;
             if (SF.isEmpty(viewOptions.prefix)) {
                 var fullViewOptions = this.viewOptionsForSearchCreate(viewOptions);
                 new SF.ViewNavigator(fullViewOptions).navigate();
-            }
-            else {
+            } else {
                 var fullViewOptions = this.viewOptionsForSearchPopupCreate(viewOptions);
                 new SF.ViewNavigator(fullViewOptions).createSave();
             }
-        }
+        };
 
-        viewOptionsForSearchCreate(viewOptions) {
+        SearchControl.prototype.viewOptionsForSearchCreate = function (viewOptions) {
             return $.extend({
                 controllerUrl: SF.Urls.create
             }, viewOptions);
-        }
+        };
 
-        viewOptionsForSearchPopupCreate(viewOptions) {
+        SearchControl.prototype.viewOptionsForSearchPopupCreate = function (viewOptions) {
             return $.extend({
                 controllerUrl: SF.Urls.popupNavigate,
                 requestExtraJsonData: this.requestDataForSearchPopupCreate()
             }, viewOptions);
-        }
+        };
 
-        requestDataForSearchPopupCreate() {
+        SearchControl.prototype.requestDataForSearchPopupCreate = function () {
             return {
                 filters: this.serializeFilters(),
                 webQueryName: this.options.webQueryName
             };
-        }
+        };
 
-        toggleSelectAll() {
+        SearchControl.prototype.toggleSelectAll = function () {
             var select = $(this.pf("cbSelectAll:checked"));
             $(this.pf("sfSearchControl .sf-td-selection")).prop('checked', (select.length > 0) ? true : false);
-        }
+        };
 
-        searchOnLoadFinished = false;
-
-        searchOnLoad() {
+        SearchControl.prototype.searchOnLoad = function () {
             var btnSearchId = SF.compose(this.options.prefix, "qbSearch");
             var $button = $("#" + btnSearchId);
             var self = this;
@@ -1069,8 +1035,7 @@ module SF {
             var $tabContainer = $button.closest(".sf-tabs");
             if ($tabContainer.length == 0) {
                 makeSearch();
-            }
-            else {
+            } else {
                 var self = this;
                 $tabContainer.bind("tabsactivate", function (evt, ui) {
                     if ($(ui.newPanel).find(self.element).length > 0) {
@@ -1078,7 +1043,8 @@ module SF {
                     }
                 });
             }
-        }
-
-    }
-}
+        };
+        return SearchControl;
+    })();
+    SF.SearchControl = SearchControl;
+})(SF || (SF = {}));

@@ -1,8 +1,7 @@
 ﻿/// <reference path="SF_Utils.ts"/>
 
-export module SF
+module SF
 {
-
     export class StaticInfo {
         static _types = 0;
         static _isEmbedded = 1;
@@ -24,7 +23,7 @@ export module SF
             return this.$elem;
         }
 
-        public value() {
+        public value() :string {
             return this.find().val();
         }
 
@@ -161,7 +160,7 @@ export module SF
     }
 }
 
-export module SF
+module SF
 {
     export var Keys = {
         separator: "_",
@@ -247,7 +246,7 @@ export module SF
         return str1 + separator + str2;
     }
 
-    export function cloneContents(sourceContainerId) {
+    export function cloneContents(sourceContainerId) : JQuery {
         var $source = $('#' + sourceContainerId);
         var $clone = $source.children().clone(true);
 
@@ -312,7 +311,7 @@ export module SF
         var currentForm = $("form");
         currentForm.after($form);
 
-        $form[0].submit();
+        (<HTMLFormElement>$form[0]).submit();
         $form.remove();
 
         return false;

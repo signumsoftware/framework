@@ -2,11 +2,9 @@
 /// <reference path="../Headers/jqueryui/jqueryui.d.ts"/>
 /// <reference path="SF_Slider.ts"/>
 
-export declare var lang: any;
+declare var lang: any;
 
-
-export module SF {
-
+module SF {
     export var Urls: any;
     export var Locale: any;
 
@@ -242,91 +240,90 @@ export module SF {
     export function triggerNewContent($source: JQuery) {
         $source.trigger("sf-new-content");
     }
+}
 
-
-    export module NewContentProcessor {
-        export function defaultButtons($newContent: JQuery) {
-            $newContent.find(".sf-entity-button, .sf-query-button, .sf-line-button, .sf-chooser-button, .sf-button").each(function (i, val) {
-                var $txt = $(val);
-                if (!$txt.hasClass("ui-button") && !($txt.closest(".sf-menu-button").length > 0)) {
-                    var data = $txt.data();
-                    $txt.button({
-                        text: (!("text" in data) || SF.isTrue(data.text)),
-                        icons: { primary: data.icon, secondary: data.iconSecondary },
-                        disabled: $txt.hasClass("sf-disabled")
-                    });
-                }
-            });
-        }
-
-        export function defaultDatepicker($newContent) {
-            $newContent.find(".sf-datepicker").each(function (i, val) {
-                var $txt = $(val);
-                $txt.datepicker(jQuery.extend({}, SF.Locale.defaultDatepickerOptions, { dateFormat: $txt.attr("data-format") }));
-            });
-        }
-
-        export function defaultDropdown($newContent) {
-            $newContent.find(".sf-dropdown .sf-menu-button")
-                .addClass("ui-autocomplete ui-menu ui-widget ui-widget-content ui-corner-all")
-                .find("li")
-                .addClass("ui-menu-item")
-                .find("a")
-                .addClass("ui-corner-all");
-        }
-
-        export function defaultPlaceholder($newContent) {
-            $newContent.find('input[placeholder], textarea[placeholder]').placeholder();
-        }
-
-        export function defaultTabs($newContent) {
-            var $tabContainers = $newContent.find(".sf-tabs:not(.ui-tabs)").prepend($("<ul></ul>"));
-
-            $tabContainers.tabs();
-            $tabContainers.each(function () {
-                var $tabContainer = $(this);
-
-                var $tabs = $tabContainer.children("fieldset");
-                $tabs.each(function () {
-                    var $this = $(this);
-                    var $legend = $this.children("legend");
-                    if ($legend.length == 0) {
-                        $this.prepend("<strong>¡¡¡NO LEGEND SPECIFIED!!!</strong>");
-                        throw "No legend specified for tab";
-                    }
-                    var legend = $legend.html();
-
-                    var id = $this.attr("id");
-                    if (SF.isEmpty(id)) {
-                        $legend.html(legend + " <strong>¡¡¡NO TAB ID SET!!!</strong>");
-                        throw "No id set for tab with legend: " + legend;
-                    }
-                    else {
-                        $("<li><a href='#" + id + "'>" + legend + "</a></li>")
-                            .appendTo($($tabContainer.find(".ui-tabs-nav").first()));
-                        $legend.remove();
-                    }
+module SF.NewContentProcessor {
+    export function defaultButtons($newContent: JQuery) {
+        $newContent.find(".sf-entity-button, .sf-query-button, .sf-line-button, .sf-chooser-button, .sf-button").each(function (i, val) {
+            var $txt = $(val);
+            if (!$txt.hasClass("ui-button") && !($txt.closest(".sf-menu-button").length > 0)) {
+                var data = $txt.data();
+                $txt.button({
+                    text: (!("text" in data) || SF.isTrue(data.text)),
+                    icons: { primary: data.icon, secondary: data.iconSecondary },
+                    disabled: $txt.hasClass("sf-disabled")
                 });
+            }
+        });
+    }
 
-                $tabContainer.tabs("refresh");
-                $tabContainer.tabs("option", "active", 0);
-            });
-        }
+    export function defaultDatepicker($newContent) {
+        $newContent.find(".sf-datepicker").each(function (i, val) {
+            var $txt = $(val);
+            $txt.datepicker(jQuery.extend({}, SF.Locale.defaultDatepickerOptions, { dateFormat: $txt.attr("data-format") }));
+        });
+    }
 
-        export function defaultSlider($newContent) {
-            $newContent.find(".sf-search-results-container").each(function (i, val) {
-                new SF.slider(jQuery(val));
-            });
-        }
+    export function defaultDropdown($newContent) {
+        $newContent.find(".sf-dropdown .sf-menu-button")
+            .addClass("ui-autocomplete ui-menu ui-widget ui-widget-content ui-corner-all")
+            .find("li")
+            .addClass("ui-menu-item")
+            .find("a")
+            .addClass("ui-corner-all");
+    }
 
-        export function defaultModifiedChecker($newContent) {
-            $newContent.find(":input").on("change", function () {
-                var $mainControl = $(this).closest(".sf-main-control");
-                if ($mainControl.length > 0) {
-                    $mainControl.addClass("sf-changed");
+    export function defaultPlaceholder($newContent) {
+        $newContent.find('input[placeholder], textarea[placeholder]').placeholder();
+    }
+
+    export function defaultTabs($newContent) {
+        var $tabContainers = $newContent.find(".sf-tabs:not(.ui-tabs)").prepend($("<ul></ul>"));
+
+        $tabContainers.tabs();
+        $tabContainers.each(function () {
+            var $tabContainer = $(this);
+
+            var $tabs = $tabContainer.children("fieldset");
+            $tabs.each(function () {
+                var $this = $(this);
+                var $legend = $this.children("legend");
+                if ($legend.length == 0) {
+                    $this.prepend("<strong>¡¡¡NO LEGEND SPECIFIED!!!</strong>");
+                    throw "No legend specified for tab";
+                }
+                var legend = $legend.html();
+
+                var id = $this.attr("id");
+                if (SF.isEmpty(id)) {
+                    $legend.html(legend + " <strong>¡¡¡NO TAB ID SET!!!</strong>");
+                    throw "No id set for tab with legend: " + legend;
+                }
+                else {
+                    $("<li><a href='#" + id + "'>" + legend + "</a></li>")
+                        .appendTo($($tabContainer.find(".ui-tabs-nav").first()));
+                    $legend.remove();
                 }
             });
-        }
+
+            $tabContainer.tabs("refresh");
+            $tabContainer.tabs("option", "active", 0);
+        });
+    }
+
+    export function defaultSlider($newContent) {
+        $newContent.find(".sf-search-results-container").each(function (i, val) {
+            new SF.slider(jQuery(val));
+        });
+    }
+
+    export function defaultModifiedChecker($newContent) {
+        $newContent.find(":input").on("change", function () {
+            var $mainControl = $(this).closest(".sf-main-control");
+            if ($mainControl.length > 0) {
+                $mainControl.addClass("sf-changed");
+            }
+        });
     }
 }
 
@@ -377,8 +374,6 @@ export module SF {
     };
 })(jQuery);
 
-
-
 interface String {
     hasText(): boolean;
     startsWith(str: string): boolean;
@@ -428,4 +423,7 @@ if (typeof String.prototype.trim !== 'function') {
         return this.replace(/^\s+|\s+$/, '');
     }
 }
+
+
+
 

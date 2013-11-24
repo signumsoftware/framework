@@ -1,7 +1,7 @@
 ﻿/// <reference path="SF_Utils.ts"/>
 /// <reference path="SF_Globals.ts"/>
 
-export module SF.Widgets
+module SF.Widgets
 {   
     var highlightClass = "sf-alert-active";
 

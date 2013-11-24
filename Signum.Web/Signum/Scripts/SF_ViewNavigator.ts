@@ -4,23 +4,24 @@
 /// <reference path="SF_Validator.ts"/>
 
 
-export module SF
+module SF
 {
     export interface  ViewOptions
     {
         containerDiv: string;
-        onOk: (element?: JQuery)=>boolean;
-        onSave: (element?: string)=>boolean;
-        onOkClosed: ()=>void;
-        onCancelled: ()=>void;
-        onLoaded: (tempDiv: string)=>void;
+        onOk: (element?: JQuery) => boolean;
+        onSave: (element?: string) => boolean;
+        onOkClosed: () => void;
+        onCancelled: () => void;
+        onLoaded: (tempDiv: string) => void;
         controllerUrl: string;
         type: string;
         id: string;
         prefix: string;
         partialViewName: string;
         navigate: string;
-        requestExtraJsonData: any
+        requestExtraJsonData: any;
+        validationOptions: PartialValidationOptions
     }
 
 
@@ -337,7 +338,7 @@ export module SF
         $('#' + SF.compose(prefix, "panelPopup")).closest(".ui-dialog-content,.ui-dialog").remove();
     }
 
-    export function openTypeChooser(prefix, onTypeChosen, chooserOptions) {
+    export function openTypeChooser(prefix, onTypeChosen, chooserOptions?) {
         chooserOptions = chooserOptions || {};
         var tempDivId = SF.compose(prefix, "Temp");
         $.ajax({
@@ -409,4 +410,6 @@ export module SF
             }
         });
     }
+
+   
 }

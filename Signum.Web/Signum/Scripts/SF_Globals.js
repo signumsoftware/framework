@@ -1,4 +1,4 @@
-/// <reference path="SF_Utils.ts"/>
+﻿/// <reference path="SF_Utils.ts"/>
 var SF;
 (function (SF) {
     var StaticInfo = (function () {
@@ -300,7 +300,7 @@ var SF;
         var currentForm = $("form");
         currentForm.after($form);
 
-        $form[0].submit();
+        ($form[0]).submit();
         $form.remove();
 
         return false;
@@ -317,7 +317,6 @@ var SF;
     }
     SF.hiddenDiv = hiddenDiv;
 
-    var Dropdowns;
     (function (Dropdowns) {
         function toggle(event, elem, topFix) {
             var $elem = $(elem), clss = "sf-open";
@@ -347,9 +346,9 @@ var SF;
             SF.stopPropagation(event);
         }
         Dropdowns.toggle = toggle;
-    })(Dropdowns || (Dropdowns = {}));
+    })(SF.Dropdowns || (SF.Dropdowns = {}));
+    var Dropdowns = SF.Dropdowns;
 
-    var Blocker;
     (function (Blocker) {
         var blocked = false;
         var $elem;
@@ -374,7 +373,8 @@ var SF;
             $elem.remove();
         }
         Blocker.disable = disable;
-    })(Blocker || (Blocker = {}));
+    })(SF.Blocker || (SF.Blocker = {}));
+    var Blocker = SF.Blocker;
 
     $(function () {
         $(document).on("click", function (e) {

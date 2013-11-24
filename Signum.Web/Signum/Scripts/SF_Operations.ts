@@ -2,7 +2,7 @@
 /// <reference path="SF_Globals.ts"/>
 /// <reference path="SF_Validator.ts"/>
 
-export module SF
+module SF
 {
     export class OperationOptions
     {

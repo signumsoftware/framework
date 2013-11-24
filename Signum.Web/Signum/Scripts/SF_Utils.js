@@ -1,9 +1,21 @@
-﻿/// <reference path="../Headers/jquery.d.ts"/>
-var SF;
+﻿var SF;
 (function (SF) {
-    debug = true;
+    SF.Urls;
+    SF.Locale;
 
-    function SetupAjaxPrefilters() {
+    SF.debug = true;
+
+    function log(s) {
+        if (SF.debug) {
+            if (typeof console != "undefined" && typeof console.debug != "undefined")
+                console.log(s);
+        }
+    }
+    SF.log = log;
+
+    setupAjaxPrefilters();
+
+    function setupAjaxPrefilters() {
         var pendingRequests = 0;
 
         $.ajaxSetup({
@@ -36,7 +48,7 @@ var SF;
                 pendingRequests++;
                 if (pendingRequests == 1) {
                     if (typeof (lang) != "undefined") {
-                        SF.Notify.info(lang.signum.loading);
+                        Notify.info(lang.signum.loading);
                     }
                 }
             }
@@ -47,7 +59,7 @@ var SF;
                     pendingRequests--;
                     if (pendingRequests <= 0) {
                         pendingRequests = 0;
-                        SF.Notify.clear();
+                        Notify.clear();
                     }
                     if (typeof result === "string") {
                         result = result ? result.trim() : "";
@@ -71,115 +83,66 @@ var SF;
             }
         });
     }
-})(SF || (SF = {}));
 
-var SF = SF || {};
-
-if (!SF.Utils) {
-    SF.Utils = true;
-    SF.debug = true;
-
-    (function () {
-    })();
-
-    SF.stopPropagation = function (event) {
+    function stopPropagation(event) {
         if (event.stopPropagation)
             event.stopPropagation();
 else
             event.cancelBubble = true;
-    };
-
-    SF.isFalse = function (value) {
-        return value == false || value == "false" || value == "False";
-    };
-
-    SF.isTrue = function (value) {
-        return value == true || value == "true" || value == "True";
-    };
-
-    SF.isEmpty = function (value) {
-        return (value == undefined || value == null || value === "" || value.toString() == "");
-    };
-
-    String.prototype.hasText = function () {
-        return (this == null || this == undefined || this == '') ? false : true;
-    };
-
-    String.prototype.startsWith = function (str) {
-        return (this.indexOf(str) === 0);
-    };
-
-    String.prototype.format = function () {
-        var regex = /\{([\w-]+)(?:\:([\w\.]*)(?:\((.*?)?\))?)?\}/g;
-
-        var args = arguments;
-
-        var getValue = function (key) {
-            if (args == null || typeof args === 'undefined')
-                return null;
-
-            var value = args[key];
-            var type = typeof value;
-
-            return type === 'string' || type === 'number' ? value : null;
-        };
-
-        return this.replace(regex, function (match) {
-            //match will look like {sample-match}
-            //key will be 'sample-match';
-            var key = match.substr(1, match.length - 2);
-
-            var value = getValue(key);
-
-            return value != null ? value : match;
-        });
-    };
-
-    String.prototype.replaceAll = function (s1, s2) {
-        return this.split(s1).join(s2);
-    };
-
-    if (typeof String.prototype.trim !== 'function') {
-        String.prototype.trim = function () {
-            return this.replace(/^\s+|\s+$/, '');
-        };
     }
+    SF.stopPropagation = stopPropagation;
 
-    SF.log = function (s) {
-        if (SF.debug) {
-            if (typeof console != "undefined" && typeof console.debug != "undefined")
-                console.log(s);
+    function isFalse(value) {
+        return value == false || value == "false" || value == "False";
+    }
+    SF.isFalse = isFalse;
+    ;
+
+    function isTrue(value) {
+        return value == true || value == "true" || value == "True";
+    }
+    SF.isTrue = isTrue;
+    ;
+    0;
+
+    function isEmpty(value) {
+        return (value == undefined || value == null || value === "" || value.toString() == "");
+    }
+    SF.isEmpty = isEmpty;
+    ;
+
+    (function (Notify) {
+        var $messageArea;
+        var timer;
+        var css;
+
+        function error(message, timeout) {
+            info(message, timeout, 'sf-error');
         }
-    };
+        Notify.error = error;
+        ;
 
-    /* show messages on top (info, error...) */
-    SF.Notify = (function () {
-        var $messageArea, timer, css;
-
-        var error = function (s, t) {
-            info(s, t, 'sf-error');
-        };
-
-        var info = function (s, t, cssClass) {
-            SF.Notify.clear();
+        function info(message, timeout, cssClass) {
+            clear();
             css = (cssClass != undefined ? cssClass : "sf-info");
             $messageArea = $("#sfMessageArea");
             if ($messageArea.length == 0) {
                 $messageArea = $("<div id=\"sfMessageArea\"><div id=\"sfMessageAreaTextContainer\"><span></span></div></div>").hide().prependTo($("body"));
             }
 
-            $messageArea.find("span").html(s);
+            $messageArea.find("span").html(message);
             $messageArea.children().first().addClass(css);
             $messageArea.css({
-                marginLeft: -parseInt($messageArea.outerWidth() / 2)
+                marginLeft: -$messageArea.outerWidth() / 2
             }).show();
 
-            if (t != undefined) {
-                timer = setTimeout(clear, t);
+            if (timeout != undefined) {
+                timer = setTimeout(clear, timeout);
             }
-        };
+        }
+        Notify.info = info;
 
-        var clear = function () {
+        function clear() {
             if ($messageArea) {
                 $messageArea.hide().children().first().removeClass(css);
                 if (timer != null) {
@@ -187,70 +150,28 @@ else
                     timer = null;
                 }
             }
-        };
+        }
+        Notify.clear = clear;
+    })(SF.Notify || (SF.Notify = {}));
+    var Notify = SF.Notify;
 
-        return {
-            error: error,
-            info: info,
-            clear: clear
-        };
-    })();
-
-    SF.InputValidator = {
-        isNumber: function (e) {
+    (function (InputValidator) {
+        function isNumber(e) {
             var c = e.keyCode;
             return ((c >= 48 && c <= 57) || (c >= 96 && c <= 105) || (c == 8) || (c == 9) || (c == 12) || (c == 27) || (c == 37) || (c == 39) || (c == 46) || (c == 36) || (c == 35) || (c == 109) || (c == 189) || (e.ctrlKey && c == 86) || (e.ctrlKey && c == 67));
-        },
-        isDecimal: function (e) {
+        }
+        InputValidator.isNumber = isNumber;
+
+        function isDecimal(e) {
             var c = e.keyCode;
             return (this.isNumber(e) || (c == 110) || (c == 190) || (c == 188));
         }
-    };
+        InputValidator.isDecimal = isDecimal;
+    })(SF.InputValidator || (SF.InputValidator = {}));
+    var InputValidator = SF.InputValidator;
 
-    (function ($) {
-        $.fn.placeholder = function () {
-            if ($.fn.placeholder.supported()) {
-                return $(this);
-            } else {
-                $(this).parent('form').submit(function (e) {
-                    $('input[placeholder].sf-placeholder, textarea[placeholder].sf-placeholder', this).val('');
-                });
-
-                $(this).each(function () {
-                    $.fn.placeholder.on(this);
-                });
-
-                return $(this).focus(function () {
-                    if ($(this).hasClass('sf-placeholder')) {
-                        $.fn.placeholder.off(this);
-                    }
-                }).blur(function () {
-                    if ($(this).val() == '') {
-                        $.fn.placeholder.on(this);
-                    }
-                });
-            }
-        };
-
-        // Extracted from: http://diveintohtml5.org/detect.html#input-placeholder
-        $.fn.placeholder.supported = function () {
-            var input = document.createElement('input');
-            return !!('placeholder' in input);
-        };
-
-        $.fn.placeholder.on = function (el) {
-            var $el = $(el);
-            if ($el.val() == '')
-                $el.val($el.attr('placeholder')).addClass('sf-placeholder');
-        };
-
-        $.fn.placeholder.off = function (el) {
-            $(el).val('').removeClass('sf-placeholder');
-        };
-    })(jQuery);
-
-    SF.Cookies = {
-        read: function (name) {
+    (function (Cookies) {
+        function read(name) {
             var nameEQ = name + "=";
             var ca = document.cookie.split(';');
             for (var i = 0; i < ca.length; i++) {
@@ -261,8 +182,10 @@ else
                     return c.substring(nameEQ.length, c.length);
             }
             return null;
-        },
-        create: function (name, value, days, domain) {
+        }
+        Cookies.read = read;
+
+        function create(name, value, days, domain) {
             var expires = null, path = "/";
 
             if (days) {
@@ -271,113 +194,224 @@ else
                 expires = date;
             }
 
-            document.cookie = name + "=" + escape(value) + ((expires) ? ";expires=" + expires.toGMTString() : "") + ((path) ? ";path=" + path : "") + ((domain) ? ";domain=" + domain : "");
+            document.cookie = name + "=" + encodeURI(value) + ((expires) ? ";expires=" + expires.toGMTString() : "") + ((path) ? ";path=" + path : "") + ((domain) ? ";domain=" + domain : "");
         }
-    };
+        Cookies.create = create;
+    })(SF.Cookies || (SF.Cookies = {}));
+    var Cookies = SF.Cookies;
 
-    SF.LocalStorage = (function () {
+    (function (LocalStorage) {
         var isSupported = typeof (localStorage) != 'undefined';
 
-        var getItem = function (key) {
+        function getItem(key) {
             if (isSupported) {
                 try  {
                     return localStorage.getItem(key);
                 } catch (e) {
                 }
             }
-            return SF.Cookies.read(key);
-        };
+            return Cookies.read(key);
+        }
+        LocalStorage.getItem = getItem;
+        ;
 
-        var setItem = function (key, value, days) {
+        function setItem(key, value, days) {
             if (isSupported) {
                 try  {
                     localStorage.setItem(key, value);
                     return true;
                 } catch (e) {
                 }
-            }
-            SF.Cookies.create(key, value, days ? days : 30);
-        };
+            } else
+                Cookies.create(key, value, days ? days : 30);
+        }
+        LocalStorage.setItem = setItem;
+        ;
 
         return {
             getItem: getItem,
             setItem: setItem
         };
-    })();
+    })(SF.LocalStorage || (SF.LocalStorage = {}));
+    var LocalStorage = SF.LocalStorage;
 
-    SF.triggerNewContent = function ($source) {
+    function triggerNewContent($source) {
         $source.trigger("sf-new-content");
-    };
-}
+    }
+    SF.triggerNewContent = triggerNewContent;
+})(SF || (SF = {}));
 
-SF.NewContentProcessor = {
-    defaultButtons: function ($newContent) {
-        $newContent.find(".sf-entity-button, .sf-query-button, .sf-line-button, .sf-chooser-button, .sf-button").each(function (i, val) {
-            var $txt = $(val);
-            if (!$txt.hasClass("ui-button") && !$txt.closest(".sf-menu-button").length > 0) {
-                var data = $txt.data();
-                $txt.button({
-                    text: (!("text" in data) || SF.isTrue(data.text)),
-                    icons: { primary: data.icon, secondary: data.iconSecondary },
-                    disabled: $txt.hasClass("sf-disabled")
-                });
-            }
-        });
-    },
-    defaultDatepicker: function ($newContent) {
-        $newContent.find(".sf-datepicker").each(function (i, val) {
-            var $txt = $(val);
-            $txt.datepicker(jQuery.extend({}, SF.Locale.defaultDatepickerOptions, { dateFormat: $txt.attr("data-format") }));
-        });
-    },
-    defaultDropdown: function ($newContent) {
-        $newContent.find(".sf-dropdown .sf-menu-button").addClass("ui-autocomplete ui-menu ui-widget ui-widget-content ui-corner-all").find("li").addClass("ui-menu-item").find("a").addClass("ui-corner-all");
-    },
-    defaultPlaceholder: function ($newContent) {
-        $newContent.find('input[placeholder], textarea[placeholder]').placeholder();
-    },
-    defaultTabs: function ($newContent) {
-        var $tabContainers = $newContent.find(".sf-tabs:not(.ui-tabs)").prepend($("<ul></ul>"));
-
-        $tabContainers.tabs();
-        $tabContainers.each(function () {
-            var $tabContainer = $(this);
-
-            var $tabs = $tabContainer.children("fieldset");
-            $tabs.each(function () {
-                var $this = $(this);
-                var $legend = $this.children("legend");
-                if ($legend.length == 0) {
-                    $this.prepend("<strong>¡¡¡NO LEGEND SPECIFIED!!!</strong>");
-                    throw "No legend specified for tab";
-                }
-                var legend = $legend.html();
-
-                var id = $this.attr("id");
-                if (SF.isEmpty(id)) {
-                    $legend.html(legend + " <strong>¡¡¡NO TAB ID SET!!!</strong>");
-                    throw "No id set for tab with legend: " + legend;
-                } else {
-                    $("<li><a href='#" + id + "'>" + legend + "</a></li>").appendTo($($tabContainer.find(".ui-tabs-nav").first()));
-                    $legend.remove();
+var SF;
+(function (SF) {
+    (function (NewContentProcessor) {
+        function defaultButtons($newContent) {
+            $newContent.find(".sf-entity-button, .sf-query-button, .sf-line-button, .sf-chooser-button, .sf-button").each(function (i, val) {
+                var $txt = $(val);
+                if (!$txt.hasClass("ui-button") && !($txt.closest(".sf-menu-button").length > 0)) {
+                    var data = $txt.data();
+                    $txt.button({
+                        text: (!("text" in data) || SF.isTrue(data.text)),
+                        icons: { primary: data.icon, secondary: data.iconSecondary },
+                        disabled: $txt.hasClass("sf-disabled")
+                    });
                 }
             });
+        }
+        NewContentProcessor.defaultButtons = defaultButtons;
 
-            $tabContainer.tabs("refresh");
-            $tabContainer.tabs("option", "active", 0);
-        });
-    },
-    defaultSlider: function ($newContent) {
-        $newContent.find(".sf-search-results-container").each(function (i, val) {
-            new SF.slider(jQuery(val));
-        });
-    },
-    defaultModifiedChecker: function ($newContent) {
-        $newContent.find(":input").on("change", function () {
-            var $mainControl = $(this).closest(".sf-main-control");
-            if ($mainControl.length > 0) {
-                $mainControl.addClass("sf-changed");
-            }
-        });
-    }
+        function defaultDatepicker($newContent) {
+            $newContent.find(".sf-datepicker").each(function (i, val) {
+                var $txt = $(val);
+                $txt.datepicker(jQuery.extend({}, SF.Locale.defaultDatepickerOptions, { dateFormat: $txt.attr("data-format") }));
+            });
+        }
+        NewContentProcessor.defaultDatepicker = defaultDatepicker;
+
+        function defaultDropdown($newContent) {
+            $newContent.find(".sf-dropdown .sf-menu-button").addClass("ui-autocomplete ui-menu ui-widget ui-widget-content ui-corner-all").find("li").addClass("ui-menu-item").find("a").addClass("ui-corner-all");
+        }
+        NewContentProcessor.defaultDropdown = defaultDropdown;
+
+        function defaultPlaceholder($newContent) {
+            $newContent.find('input[placeholder], textarea[placeholder]').placeholder();
+        }
+        NewContentProcessor.defaultPlaceholder = defaultPlaceholder;
+
+        function defaultTabs($newContent) {
+            var $tabContainers = $newContent.find(".sf-tabs:not(.ui-tabs)").prepend($("<ul></ul>"));
+
+            $tabContainers.tabs();
+            $tabContainers.each(function () {
+                var $tabContainer = $(this);
+
+                var $tabs = $tabContainer.children("fieldset");
+                $tabs.each(function () {
+                    var $this = $(this);
+                    var $legend = $this.children("legend");
+                    if ($legend.length == 0) {
+                        $this.prepend("<strong>¡¡¡NO LEGEND SPECIFIED!!!</strong>");
+                        throw "No legend specified for tab";
+                    }
+                    var legend = $legend.html();
+
+                    var id = $this.attr("id");
+                    if (SF.isEmpty(id)) {
+                        $legend.html(legend + " <strong>¡¡¡NO TAB ID SET!!!</strong>");
+                        throw "No id set for tab with legend: " + legend;
+                    } else {
+                        $("<li><a href='#" + id + "'>" + legend + "</a></li>").appendTo($($tabContainer.find(".ui-tabs-nav").first()));
+                        $legend.remove();
+                    }
+                });
+
+                $tabContainer.tabs("refresh");
+                $tabContainer.tabs("option", "active", 0);
+            });
+        }
+        NewContentProcessor.defaultTabs = defaultTabs;
+
+        function defaultSlider($newContent) {
+            $newContent.find(".sf-search-results-container").each(function (i, val) {
+                new SF.slider(jQuery(val));
+            });
+        }
+        NewContentProcessor.defaultSlider = defaultSlider;
+
+        function defaultModifiedChecker($newContent) {
+            $newContent.find(":input").on("change", function () {
+                var $mainControl = $(this).closest(".sf-main-control");
+                if ($mainControl.length > 0) {
+                    $mainControl.addClass("sf-changed");
+                }
+            });
+        }
+        NewContentProcessor.defaultModifiedChecker = defaultModifiedChecker;
+    })(SF.NewContentProcessor || (SF.NewContentProcessor = {}));
+    var NewContentProcessor = SF.NewContentProcessor;
+})(SF || (SF = {}));
+
+(function ($) {
+    $.fn.placeholder = function () {
+        if ($.fn.placeholder.supported()) {
+            return $(this);
+        } else {
+            $(this).parent('form').submit(function (e) {
+                $('input[placeholder].sf-placeholder, textarea[placeholder].sf-placeholder', this).val('');
+            });
+
+            $(this).each(function () {
+                $.fn.placeholder.on(this);
+            });
+
+            return $(this).focus(function () {
+                if ($(this).hasClass('sf-placeholder')) {
+                    $.fn.placeholder.off(this);
+                }
+            }).blur(function () {
+                if ($(this).val() == '') {
+                    $.fn.placeholder.on(this);
+                }
+            });
+        }
+    };
+
+    // Extracted from: http://diveintohtml5.org/detect.html#input-placeholder
+    $.fn.placeholder.supported = function () {
+        var input = document.createElement('input');
+        return !!('placeholder' in input);
+    };
+
+    $.fn.placeholder.on = function (el) {
+        var $el = $(el);
+        if ($el.val() == '')
+            $el.val($el.attr('placeholder')).addClass('sf-placeholder');
+    };
+
+    $.fn.placeholder.off = function (el) {
+        $(el).val('').removeClass('sf-placeholder');
+    };
+})(jQuery);
+
+String.prototype.hasText = function () {
+    return (this == null || this == undefined || this == '') ? false : true;
 };
+
+String.prototype.startsWith = function (str) {
+    return (this.indexOf(str) === 0);
+};
+
+String.prototype.format = function () {
+    var regex = /\{([\w-]+)(?:\:([\w\.]*)(?:\((.*?)?\))?)?\}/g;
+
+    var args = arguments;
+
+    var getValue = function (key) {
+        if (args == null || typeof args === 'undefined')
+            return null;
+
+        var value = args[key];
+        var type = typeof value;
+
+        return type === 'string' || type === 'number' ? value : null;
+    };
+
+    return this.replace(regex, function (match) {
+        //match will look like {sample-match}
+        //key will be 'sample-match';
+        var key = match.substr(1, match.length - 2);
+
+        var value = getValue(key);
+
+        return value != null ? value : match;
+    });
+};
+
+String.prototype.replaceAll = function (from, to) {
+    return this.split(from).join(to);
+};
+
+if (typeof String.prototype.trim !== 'function') {
+    String.prototype.trim = function () {
+        return this.replace(/^\s+|\s+$/, '');
+    };
+}

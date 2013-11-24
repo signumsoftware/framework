@@ -1,7 +1,8 @@
 ﻿/// <reference path="SF_Utils.ts"/>
 /// <reference path="SF_Globals.ts"/>
+/// <reference path="SF_Lines.ts"/>
 
-export module SF {
+module SF {
     export interface ValidationOptions {
         prefix: string;
         controllerUrl?: string;
@@ -62,7 +63,7 @@ export module SF {
         }
 
 
-        public trySave() : any {
+        public trySave(): any {
             SF.log("Validator trySave");
             var returnValue = false;
             var self = this;
@@ -238,6 +239,14 @@ export module SF {
         id?: number;
     }
 
+    export interface ValidationResult {
+        modelState: string;
+        isValid: boolean;
+        newToStr: string;
+        newLink: string;
+        acceptChanges?: boolean;
+    }
+
     export class PartialValidator extends Validator {
 
         constructor(_pvalOptions: PartialValidationOptions) {
@@ -283,12 +292,12 @@ export module SF {
         }
 
 
-        public createValidatorResult(r) {
+        public createValidatorResult(r): ValidationResult {
             var validatorResult = {
-                "modelState": r["ModelState"],
-                "isValid": this.isValid(r["ModelState"]),
-                "newToStr": r[SF.Keys.toStr],
-                "newLink": r[SF.Keys.link]
+                modelState: r["ModelState"],
+                isValid: this.isValid(r["ModelState"]),
+                newToStr: r[SF.Keys.toStr],
+                newLink: r[SF.Keys.link]
             };
             return validatorResult;
         }
@@ -363,7 +372,7 @@ export module SF {
             return serializer.serialize();
         }
 
-        public validate() : any {
+        public validate(): ValidationResult {
             SF.log("PartialValidator validate");
             var validatorResult = null;
             var self = this;

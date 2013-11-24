@@ -1,7 +1,7 @@
 ﻿/// <reference path="../Headers/jquery/jquery.d.ts"/>
 /// <reference path="SF_Utils.ts"/>
 
-export module SF {
+module SF {
 
     export function slider($container: JQuery) {
         var w = $container.width(),
@@ -117,8 +117,8 @@ export module SF {
             posx = window.event.clientX + document.documentElement.scrollLeft + document.body.scrollLeft;
             posy = window.event.clientY + document.documentElement.scrollTop + document.body.scrollTop;
         } else {
-            posx = e.clientX + window.scrollX;
-            posy = e.clientY + window.scrollY;
+            //posx = e.clientX + window.scrollX;
+            //posy = e.clientY + window.scrollY;
         }
 
         return {
