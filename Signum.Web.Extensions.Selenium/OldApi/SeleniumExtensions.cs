@@ -174,7 +174,7 @@ namespace Signum.Web.Selenium
         {
             selenium.Click("jq=#{0}btnOk".Formato(prefix));
             if (submit)
-                selenium.WaitForPageToLoad(PageLoadTimeout);
+                selenium.WaitForPageToLoad();
             else
                 selenium.Wait(() => !selenium.IsElementPresent(PopupSelector(prefix)));
         }

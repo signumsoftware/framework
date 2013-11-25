@@ -270,7 +270,7 @@ namespace Signum.Entities.Chart
                     Enum e = (Enum)r[columnIndex];
                     return new
                     {
-                        key = Convert.ToInt32(e),
+                        key = e == null ? (int?)null : Convert.ToInt32(e),
                         toStr = e.TryCC(en => en.NiceToString()),
                         color = e == null ? "#555" : GetChartColor(enumEntity, Convert.ToInt32(e)).TryToHtml(),
                     };

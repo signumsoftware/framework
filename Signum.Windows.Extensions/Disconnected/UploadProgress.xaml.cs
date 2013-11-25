@@ -123,7 +123,7 @@ namespace Signum.Windows.Disconnected
                     expander.IsExpanded = true;
                     pbImporting.IsIndeterminate = false;
 
-                    if (MessageBox.Show(Window.GetWindow(this), "There have been an error. View Details?", "Error importing database", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                    if (MessageBox.Show(Window.GetWindow(this), "There has been an error. View Details?", "Error importing database", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                         Navigator.View(current.Exception);
 
                     Completed = true;

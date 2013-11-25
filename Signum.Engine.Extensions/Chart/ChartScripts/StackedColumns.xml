@@ -193,7 +193,7 @@
     .each(function(s){
       d3.select(this).enterData(s.points, 'rect', 'shape')
         .filter(function(r){return r.value != undefined; })
-        .attr('stroke', '#fff')
+        .attr('stroke', x.rangeBand() > 4 ? '#fff' : null)
         .attr('fill', function (r) { return s.color || color(s.key); })
         .attr('x', function (r) { return x(r.dim0); })
         .attr('width', x.rangeBand())
