@@ -88,7 +88,7 @@
     .attr('width', x.rangeBand)
     .attr('x', function (v) { return x(v.c0); })
     .attr('fill', function (v) { return v.c0.color || color(v.c0); })
-    .attr('stroke', '#fff')
+    .attr('stroke', x.rangeBand() > 4 ? '#fff' : null)
     .attr('data-click', function (v) { return getClickKeys(v, data.columns); })
     .append('svg:title')
     .text(function (d) { return d.c0.niceToString() + ': ' + d.c1.niceToString(); });
