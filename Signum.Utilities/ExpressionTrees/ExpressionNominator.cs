@@ -5,6 +5,7 @@ using System.Text;
 using System.Linq.Expressions;
 using System.Reflection;
 using Signum.Utilities.Reflection;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Utilities.ExpressionTrees
 {
@@ -88,9 +89,43 @@ namespace Signum.Utilities
             if (source == null)
                 throw new ArgumentNullException("source");
 
-            return source.Provider.CreateQuery<T>(Expression.Call(null, 
-                ((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new Type[] { typeof(T) }), 
+            return source.Provider.CreateQuery<T>(Expression.Call(null,
+                ((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new Type[] { typeof(T) }),
                 new Expression[] { source.Expression }));
+        }
+
+
+        [MethodExpander(typeof(DistinctNullExpander))]
+        public static bool DistinctNull<T>(T a, T b) where T : class
+        {
+            return (a == null && b != null) ||
+                  (a != null && b == null) ||
+                  (a != null && b != null && !a.Equals(b));
+        }
+
+        [MethodExpander(typeof(DistinctNullExpander))]
+        public static bool DistinctNull<T>(T? a, T? b) where T : struct
+        {
+            return (a == null && b != null) ||
+                  (a != null && b == null) ||
+                  (a != null && b != null && !a.Value.Equals(b.Value));
+        }
+
+        class DistinctNullExpander : IMethodExpander
+        {
+            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            {
+                var a = arguments[0];
+                var b = arguments[1];
+
+                var n = Expression.Constant(null, mi.GetGenericArguments().Single().Nullify());
+
+                var c1 = Expression.And(Expression.Equal(a, n), Expression.NotEqual(b, n));
+                var c2 = Expression.And(Expression.NotEqual(a, n), Expression.Equal(b, n));
+                var c3 = Expression.And(Expression.And(Expression.NotEqual(a, n), Expression.NotEqual(b, n)), Expression.NotEqual(a, b));
+
+                return Expression.Or(Expression.Or(c1, c2), c3);
+            }
         }
     }
 }

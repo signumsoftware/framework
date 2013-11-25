@@ -13,6 +13,7 @@ using Signum.Engine.Linq;
 using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Test.Environment;
+using System.Linq.Expressions;
 
 namespace Signum.Test
 {
@@ -146,5 +147,6 @@ namespace Signum.Test
 
             Assert.AreEqual(meta.Implementations, Implementations.By(typeof(ArtistDN), typeof(BandDN)));
         }
+
     }
 }

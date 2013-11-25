@@ -8,6 +8,7 @@ using System.Reflection;
 using Signum.Utilities.Reflection;
 using System.Linq.Expressions;
 using System.Globalization;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities.DynamicQuery
 {
@@ -424,13 +425,20 @@ namespace Signum.Entities.DynamicQuery
         static MethodInfo miStartsWith = ReflectionTools.GetMethodInfo((string s) => s.StartsWith(s));
         static MethodInfo miEndsWith = ReflectionTools.GetMethodInfo((string s) => s.EndsWith(s));
         static MethodInfo miLike = ReflectionTools.GetMethodInfo((string s) => s.Like(s));
+        static MethodInfo miDistinctNullable = ReflectionTools.GetMethodInfo((string s) => LinqHints.DistinctNull<int>(null, null)).GetGenericMethodDefinition();
+        static MethodInfo miDistinct = ReflectionTools.GetMethodInfo((string s) => LinqHints.DistinctNull<string>(null, null)).GetGenericMethodDefinition();
 
         public static Expression GetCompareExpression(FilterOperation operation, Expression left, Expression right, bool inMemory = false)
         {
             switch (operation)
             {
                 case FilterOperation.EqualTo: return Expression.Equal(left, right);
-                case FilterOperation.DistinctTo: return Expression.NotEqual(left, right);
+                case FilterOperation.DistinctTo: 
+                    {
+                        var t = left.GetType().UnNullify();
+                        var mi = t.IsClass ? miDistinct : miDistinctNullable;
+                        return Expression.Call(mi.MakeGenericMethod(t), left.Nullify(), right.Nullify());
+                    }
                 case FilterOperation.GreaterThan: return Expression.GreaterThan(left, right);
                 case FilterOperation.GreaterThanOrEqual: return Expression.GreaterThanOrEqual(left, right);
                 case FilterOperation.LessThan: return Expression.LessThan(left, right);

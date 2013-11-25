@@ -68,6 +68,12 @@ namespace Signum.Windows
                     IsNavigable = EntityWhen.Always;
                     IsReadOnly = true;
                     break;
+                case EntityKind.Relational:
+                    IsCreable = EntityWhen.Never;
+                    IsViewable = false;
+                    IsNavigable = EntityWhen.Never;
+                    IsReadOnly = true;
+                    break;
 
                 case EntityKind.String:
                     IsCreable = EntityWhen.IsSearchEntity;
