@@ -216,9 +216,6 @@ namespace Signum.Engine.Disconnected
             if (typeof(T).IsEnumEntity())
                 throw new InvalidOperationException("EnumProxies can not be registered on DisconnectedLogic");
 
-            if (!Schema.Current.Tables.ContainsKey(typeof(T)))
-                throw new InvalidOperationException("{0} is not registered in the Schema".Formato(typeof(T).Name));
-
             strategies.AddOrThrow(typeof(T), stragety, "{0} has already been registered");
 
             return stragety;
@@ -332,7 +329,7 @@ namespace Signum.Engine.Disconnected
                 if (download == Download.None)
                     throw new InvalidOperationException("Upload.Subset is not compatible with Download.None, choose Upload.New instead");
 
-                MixinDeclarations.AssertDefined(typeof(T), typeof(DisconnectedMixin));
+                MixinDeclarations.Register(typeof(T), typeof(DisconnectedMixin));
             }
 
             this.Upload = upload;
