@@ -1,5 +1,5 @@
-﻿/// <reference path="SF_Utils.ts"/>
-/// <reference path="SF_Globals.ts"/>
+﻿/// <reference path="references.ts"/>
+
 
 module SF.Widgets
 {   

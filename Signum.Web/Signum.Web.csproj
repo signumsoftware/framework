@@ -267,6 +267,7 @@
     <Content Include="Signum\Headers\d3\d3.d.ts" />
     <Content Include="Signum\Headers\jquery\jquery.d.ts" />
     <Content Include="Signum\Headers\jqueryui\jqueryui.d.ts" />
+    <TypeScriptCompile Include="Signum\Scripts\references.ts" />
     <Content Include="Signum\Scripts\SF_FindNavigator.ts" />
     <Content Include="Signum\Scripts\SF_Operations.ts" />
     <Content Include="Signum\Views\Exception.cshtml">
@@ -352,7 +353,7 @@
     <Content Include="Signum\Images\desc.gif" />
     <Content Include="Signum\Images\lineButtons.gif" />
     <Content Include="Signum\Images\sign_error.gif" />
-    <Content Include="Signum\Scripts\SF_jquery-ui-datepicker-extension.js" />
+    <Content Include="Signum\Scripts\SF_jquery-ui-datepicker-extension.ts" />
     <None Include="Signum\Views\NormalControl.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>NormalControl.generated.cs</LastGenOutput>

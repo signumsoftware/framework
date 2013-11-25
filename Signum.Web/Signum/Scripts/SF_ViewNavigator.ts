@@ -1,30 +1,24 @@
-﻿/// <reference path="SF_Utils.ts"/>
-/// <reference path="SF_Globals.ts"/>
-/// <reference path="SF_Popup.ts"/>
-/// <reference path="SF_Validator.ts"/>
-
+﻿/// <reference path="references.ts"/>
 
 module SF
 {
     export interface  ViewOptions
     {
-        containerDiv: string;
-        onOk: (element?: JQuery) => boolean;
-        onSave: (element?: string) => boolean;
-        onOkClosed: () => void;
-        onCancelled: () => void;
-        onLoaded: (tempDiv: string) => void;
-        controllerUrl: string;
-        type: string;
-        id: string;
-        prefix: string;
-        partialViewName: string;
-        navigate: string;
-        requestExtraJsonData: any;
-        validationOptions: PartialValidationOptions
+        containerDiv?: string;
+        onOk?: (element?: JQuery) => any;
+        onSave?: (element?: string) => boolean;
+        onOkClosed?: () => void;
+        onCancelled?: () => void;
+        onLoaded?: (tempDiv: string) => void;
+        controllerUrl?: string;
+        type?: string;
+        id?: string;
+        prefix?: string;
+        partialViewName?: string;
+        navigate?: string;
+        requestExtraJsonData?: any;
+        validationOptions?: PartialValidationOptions
     }
-
-
 
     export class ViewNavigator {
         viewOptions: ViewOptions;

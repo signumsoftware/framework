@@ -1,6 +1,5 @@
-﻿/// <reference path="../Headers/jquery/jquery.d.ts"/>
-/// <reference path="../Headers/jqueryui/jqueryui.d.ts"/>
-/// <reference path="SF_Slider.ts"/>
+﻿/// <reference path="references.ts"/>
+
 
 declare var lang: any;
 

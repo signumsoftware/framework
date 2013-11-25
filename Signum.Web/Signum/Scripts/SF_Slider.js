@@ -1,5 +1,4 @@
-﻿/// <reference path="../Headers/jquery/jquery.d.ts"/>
-/// <reference path="SF_Utils.ts"/>
+﻿/// <reference path="references.ts"/>
 var SF;
 (function (SF) {
     function slider($container) {

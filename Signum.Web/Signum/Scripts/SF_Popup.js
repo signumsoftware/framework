@@ -1,7 +1,6 @@
 ﻿var SF;
 (function (SF) {
-    /// <reference path="SF_Utils.ts"/>
-    /// <reference path="SF_Globals.ts"/>
+    /// <reference path="references.ts"/>
     (function (Popup) {
         function serialize(prefix) {
             var id = SF.compose(prefix, "panelPopup");

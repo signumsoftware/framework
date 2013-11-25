@@ -1,10 +1,6 @@
-﻿/// <reference path="SF_Utils.ts"/>
-/// <reference path="SF_Globals.ts"/>
-/// <reference path="SF_Validator.ts"/>
-/// <reference path="SF_ViewNavigator.ts"/>
-/// <reference path="SF_FindNavigator.ts"/>
+﻿/// <reference path="references.ts"/>
 
-module SF.Lines {
+module SF {
     export interface EntityBaseOptions {
         prefix: string;
         partialViewName: string;
@@ -17,6 +13,7 @@ module SF.Lines {
         type: string;
         toStr: string;
         link?: string;
+        key?: string;
     }
 
     export class EntityBase {
@@ -102,7 +99,7 @@ module SF.Lines {
             this.fireOnEntityChanged(false);
         }
 
-        removeSpecific() { 
+        removeSpecific() {
             throw new Error("removeSpecific is abstract");
         }
 
@@ -141,7 +138,7 @@ module SF.Lines {
         }
 
 
-        viewOptionsForCreating(viewOptions : ViewOptions) : ViewOptions {
+        viewOptionsForCreating(viewOptions: ViewOptions): ViewOptions {
             throw new Error("viewOptionsForCreating is abstract");
         }
 
@@ -157,7 +154,7 @@ module SF.Lines {
             return window[SF.compose(this.options.prefix, "sfTemplate")];
         }
 
-        find(_findOptions : FindOptions, _viewOptions?: ViewOptions ) {
+        find(_findOptions: FindOptions, _viewOptions?: ViewOptions) {
             var _self = this;
             var type = this.getEntityType(function (type) {
                 _self.typedFind($.extend({ webQueryName: type }, _findOptions));
@@ -172,12 +169,12 @@ module SF.Lines {
             SF.FindNavigator.openFinder(findOptions);
         }
 
-        createFindOptions(findOptions: FindOptions, _viewOptions?: ViewOptions) : FindOptions {
+        createFindOptions(findOptions: FindOptions, _viewOptions?: ViewOptions): FindOptions {
             throw new Error("removeSpecific is abstract");
         }
 
         extraJsonParams(itemPrefix?: string) {
-            var extraParams : any = {};
+            var extraParams: any = {};
 
             var staticInfo = this.staticInfo();
 
@@ -271,7 +268,7 @@ module SF.Lines {
             };
         }
 
-        onAutocompleteSelected(controlId: string, data: string) {
+        onAutocompleteSelected(controlId: string, data: any) {
             throw new Error("onAutocompleteSelected is abstract");
         }
     }
@@ -287,7 +284,7 @@ module SF.Lines {
             $(this.pf(SF.Keys.toStr)).val('');
         }
 
-        view(_viewOptions: ViewOptions) {
+        view(_viewOptions?: ViewOptions) {
             var viewOptions = this.viewOptionsForViewing(_viewOptions);
             new SF.ViewNavigator(viewOptions).viewOk();
         }
@@ -314,7 +311,7 @@ module SF.Lines {
             return this.checkValidation(valOptions).acceptChanges;
         }
 
-        viewOptionsForCreating(_viewOptions: ViewOptions) : ViewOptions {
+        viewOptionsForCreating(_viewOptions: ViewOptions): ViewOptions {
             var self = this;
             return $.extend({
                 onOk: function (clonedElements) { return self.onCreatingOk(clonedElements, _viewOptions.validationOptions, _viewOptions.type); },
@@ -325,7 +322,7 @@ module SF.Lines {
             }, _viewOptions);
         }
 
-        newEntity(clonedElements : JQuery, item : EntityData) {
+        newEntity(clonedElements: JQuery, item: EntityData) {
             var info = this.runtimeInfo();
             if (typeof item.runtimeInfo != "undefined") {
                 info.find().val(item.runtimeInfo);
@@ -366,7 +363,7 @@ module SF.Lines {
             return validatorResult.acceptChanges;
         }
 
-        createFindOptions(_findOptions: FindOptions, _viewOptions?: ViewOptions) : FindOptions {
+        createFindOptions(_findOptions: FindOptions, _viewOptions?: ViewOptions): FindOptions {
             var self = this;
             return $.extend({
                 prefix: this.options.prefix,
@@ -384,7 +381,7 @@ module SF.Lines {
             return true;
         }
 
-        onAutocompleteSelected(controlId, data) {
+        onAutocompleteSelected(controlId: string, data: any) {
             var selectedItems = [{
                 id: data.id,
                 type: data.type,
@@ -446,7 +443,7 @@ module SF.Lines {
             this.fireOnEntityChanged(newEntity);
         }
 
-        view(_viewOptions : ViewOptions) {
+        view(_viewOptions?: ViewOptions) {
             var viewOptions = this.viewOptionsForViewing(_viewOptions);
             if (viewOptions.navigate) {
                 var runtimeInfo = this.runtimeInfo();
@@ -458,7 +455,7 @@ module SF.Lines {
                 new SF.ViewNavigator(viewOptions).viewOk();
             }
         }
-    } 
+    }
 
     export interface EntityBaseDetailOptions extends EntityBaseOptions {
         detailDiv: string;
@@ -466,7 +463,7 @@ module SF.Lines {
 
     export class EntityLineDetail extends EntityBase {
 
-        options: EntityBaseDetailOptions ;
+        options: EntityBaseDetailOptions;
 
         constructor(options: EntityBaseDetailOptions) {
             super(options);
@@ -489,7 +486,7 @@ module SF.Lines {
             this.onCreated(viewOptions.type);
         }
 
-        viewOptionsForCreating(_viewOptions : ViewOptions) : ViewOptions {
+        viewOptionsForCreating(_viewOptions: ViewOptions): ViewOptions {
             return $.extend({
                 containerDiv: this.options.detailDiv,
                 prefix: this.options.prefix,
@@ -507,14 +504,14 @@ module SF.Lines {
             this.fireOnEntityChanged(true);
         }
 
-        find(_findOptions : FindOptions, _viewOptions?: ViewOptions) {
+        find(_findOptions: FindOptions, _viewOptions?: ViewOptions) {
             var _self = this;
             var type = this.getEntityType(function (type) {
                 _self.typedFind($.extend({ webQueryName: type }, _findOptions), _viewOptions);
             });
         }
 
-        typedFind(_findOptions : FindOptions, _viewOptions?: ViewOptions) {
+        typedFind(_findOptions: FindOptions, _viewOptions?: ViewOptions) {
             if (SF.isEmpty(_findOptions.webQueryName)) {
                 throw "FindOptions webQueryName parameter must not be null in entityLineDetail typedFind. Call find instead";
             }
@@ -562,7 +559,7 @@ module SF.Lines {
             return SF.Keys.toStr;
         }
 
-        updateLinks(newToStr: string, newLink:  string, itemPrefix?: string) {
+        updateLinks(newToStr: string, newLink: string, itemPrefix?: string) {
             $('#' + SF.compose(itemPrefix, SF.Keys.toStr)).html(newToStr);
         }
 
@@ -589,7 +586,7 @@ module SF.Lines {
         }
 
 
-        selectedItemPrefix() : string {
+        selectedItemPrefix(): string {
             var $items = this.getItems();
             if ($items.length == 0) {
                 return null;
@@ -620,7 +617,7 @@ module SF.Lines {
             return lastPrefixIndex;
         }
 
-        getNewIndex(itemPrefix : string) {
+        getNewIndex(itemPrefix: string) {
             return parseInt($("#" + SF.compose(itemPrefix, EntityList.key_indexes)).val().split(";")[1]);
         }
 
@@ -678,7 +675,7 @@ module SF.Lines {
             return template;
         }
 
-        viewOptionsForCreating(_viewOptions: ViewOptions) : ViewOptions {
+        viewOptionsForCreating(_viewOptions: ViewOptions): ViewOptions {
             var self = this;
             var newPrefixIndex = this.getLastPrefixIndex() + 1;
             var itemPrefix = SF.compose(this.options.prefix, newPrefixIndex.toString());
@@ -692,7 +689,7 @@ module SF.Lines {
             }, _viewOptions);
         }
 
-        onCreatingOk(clonedElements : JQuery, validatorOptions : PartialValidationOptions, entityType: string, itemPrefix? : string) {
+        onCreatingOk(clonedElements: JQuery, validatorOptions: PartialValidationOptions, entityType: string, itemPrefix?: string) {
             var valOptions = $.extend(validatorOptions || {}, {
                 type: entityType
             });
@@ -730,7 +727,7 @@ module SF.Lines {
             this.fireOnEntityChanged(false);
         }
 
-        view(_viewOptions : ViewOptions) {
+        view(_viewOptions: ViewOptions) {
             var selectedItemPrefix = this.selectedItemPrefix();
             if (SF.isEmpty(selectedItemPrefix)) {
                 return;
@@ -738,7 +735,7 @@ module SF.Lines {
             this.viewInIndex(_viewOptions, selectedItemPrefix);
         }
 
-        viewInIndex(_viewOptions: ViewOptions, selectedItemPrefix: string){
+        viewInIndex(_viewOptions: ViewOptions, selectedItemPrefix: string) {
             var viewOptions = this.viewOptionsForViewing(_viewOptions, selectedItemPrefix);
             if (viewOptions.navigate) {
                 var itemInfo = this.itemRuntimeInfo(selectedItemPrefix);
@@ -750,7 +747,7 @@ module SF.Lines {
             new SF.ViewNavigator(viewOptions).viewOk();
         }
 
-        viewOptionsForViewing(_viewOptions : ViewOptions, itemPrefix?: string) : ViewOptions {
+        viewOptionsForViewing(_viewOptions: ViewOptions, itemPrefix?: string): ViewOptions {
             var self = this;
             var info = this.itemRuntimeInfo(itemPrefix);
             return $.extend({
@@ -767,7 +764,7 @@ module SF.Lines {
             }, _viewOptions);
         }
 
-        onViewingOk(validatorOptions : ValidationOptions, itemPrefix) {
+        onViewingOk(validatorOptions: ValidationOptions, itemPrefix) {
             var valOptions = $.extend(validatorOptions || {}, {
                 type: this.itemRuntimeInfo(itemPrefix).entityType()
             });
@@ -775,7 +772,7 @@ module SF.Lines {
             return validatorResult.acceptChanges;
         }
 
-        createFindOptions(_findOptions: FindOptions, _viewOptions?: ViewOptions): FindOptions{
+        createFindOptions(_findOptions: FindOptions, _viewOptions?: ViewOptions): FindOptions {
             var newPrefixIndex = this.getLastPrefixIndex() + 1;
             var itemPrefix = SF.compose(this.options.prefix, newPrefixIndex.toString());
             var self = this;
@@ -796,7 +793,7 @@ module SF.Lines {
             return true;
         }
 
-        foreachNewItem(selectedItems: Array<EntityData>, itemAction : (item: EntityData, itemPrefix :string) => void) {
+        foreachNewItem(selectedItems: Array<EntityData>, itemAction: (item: EntityData, itemPrefix: string) => void) {
             var lastPrefixIndex = this.getLastPrefixIndex();
             for (var i = 0, l = selectedItems.length; i < l; i++) {
                 var item = selectedItems[i];
@@ -814,7 +811,7 @@ module SF.Lines {
             this.removeInIndex(selectedItemPrefix);
         }
 
-        removeInIndex(selectedItemPrefix : string) {
+        removeInIndex(selectedItemPrefix: string) {
             $.each([SF.Keys.runtimeInfo, SF.Keys.toStr, EntityList.key_entity, EntityList.key_indexes], function (i, key) {
                 $("#" + SF.compose(selectedItemPrefix, key)).remove();
             });
@@ -904,7 +901,7 @@ module SF.Lines {
             this.onItemCreated(viewOptions);
         }
 
-        viewOptionsForCreating(_viewOptions: ViewOptions) : ViewOptions {
+        viewOptionsForCreating(_viewOptions: ViewOptions): ViewOptions {
             var newPrefixIndex = this.getLastPrefixIndex() + 1;
             var itemPrefix = SF.compose(this.options.prefix, newPrefixIndex.toString());
             return $.extend({
@@ -941,7 +938,7 @@ module SF.Lines {
             }
 
             var itemPrefix = viewOptions.prefix;
-            this.newListItem(null, itemPrefix, { type: viewOptions.type, toStr : null });
+            this.newListItem(null, itemPrefix, { type: viewOptions.type, toStr: null });
         }
 
         view(_viewOptions: ViewOptions) {
@@ -964,7 +961,7 @@ module SF.Lines {
             }
         }
 
-        viewOptionsForViewing(_viewOptions: ViewOptions, itemPrefix?: string) : ViewOptions {
+        viewOptionsForViewing(_viewOptions: ViewOptions, itemPrefix?: string): ViewOptions {
             var self = this;
             var info = this.itemRuntimeInfo(itemPrefix);
             return $.extend({
@@ -977,7 +974,7 @@ module SF.Lines {
             }, _viewOptions);
         }
 
-        isLoaded(selectedItemPrefix : string) {
+        isLoaded(selectedItemPrefix: string) {
             return !SF.isEmpty($('#' + SF.compose(selectedItemPrefix, EntityBase.key_entity)).html());
         }
 
@@ -990,14 +987,14 @@ module SF.Lines {
                 .html('');
         }
 
-        find(_findOptions : FindOptions, _viewOptions? : ViewOptions) {
+        find(_findOptions: FindOptions, _viewOptions?: ViewOptions) {
             var _self = this;
             var type = this.getEntityType(function (type) {
                 _self.typedFind($.extend({ webQueryName: type }, _findOptions), _viewOptions);
             });
         }
 
-        typedFind(_findOptions : FindOptions, _viewOptions? : ViewOptions) {
+        typedFind(_findOptions: FindOptions, _viewOptions?: ViewOptions) {
             if (SF.isEmpty(_findOptions.webQueryName)) {
                 throw "FindOptions webQueryName parameter must not be null in entityListDetail typedFind. Call find instead";
             }
@@ -1063,10 +1060,10 @@ module SF.Lines {
         options: EntityRepeaterOptions;
 
         constructor(options: EntityRepeaterOptions) {
-            super(options); 
+            super(options);
         }
 
-        itemSuffix () {
+        itemSuffix() {
             return EntityRepeater.key_repeaterItem;
         }
 
@@ -1117,7 +1114,7 @@ module SF.Lines {
             }, _viewOptions);
         }
 
-        onItemCreated(newHtml, viewOptions : ViewOptions) {
+        onItemCreated(newHtml, viewOptions: ViewOptions) {
             if (SF.isEmpty(viewOptions.type)) {
                 throw "ViewOptions type parameter must not be null in entityRepeater onItemCreated";
             }
@@ -1163,7 +1160,7 @@ module SF.Lines {
             return this._getRepeaterCall() + ".moveDown('" + itemPrefix + "');";
         }
 
-        viewOptionsForViewing(_viewOptions : ViewOptions, itemPrefix?: string) : ViewOptions{ //Used in onFindingOk
+        viewOptionsForViewing(_viewOptions: ViewOptions, itemPrefix?: string): ViewOptions { //Used in onFindingOk
             return $.extend({
                 containerDiv: SF.compose(itemPrefix, EntityBase.key_entity),
                 prefix: itemPrefix,
@@ -1179,7 +1176,7 @@ module SF.Lines {
             });
         }
 
-        typedFind(_findOptions : FindOptions, _viewOptions? : ViewOptions) {
+        typedFind(_findOptions: FindOptions, _viewOptions?: ViewOptions) {
             if (SF.isEmpty(_findOptions.webQueryName)) {
                 throw "FindOptions webQueryName parameter must not be null in ERep typedFind. Call find instead";
             }
@@ -1191,7 +1188,7 @@ module SF.Lines {
             SF.FindNavigator.openFinder(findOptions);
         }
 
-        createFindOptions(_findOptions : FindOptions, _viewOptions?: ViewOptions) : FindOptions {
+        createFindOptions(_findOptions: FindOptions, _viewOptions?: ViewOptions): FindOptions {
             var newPrefixIndex = this.getLastPrefixIndex() + 1;
             var itemPrefix = SF.compose(this.options.prefix, newPrefixIndex.toString());
             var self = this;
@@ -1221,7 +1218,7 @@ module SF.Lines {
             return true;
         }
 
-        remove(itemPrefix? : string) {
+        remove(itemPrefix?: string) {
             $('#' + SF.compose(itemPrefix, EntityRepeater.key_repeaterItem)).remove();
             this.fireOnEntityChanged(false);
         }
@@ -1237,16 +1234,26 @@ module SF.Lines {
         }
     }
 
+    export interface EntityStripOptions extends EntityBaseOptions {
+        maxElements?: number;
+        remove?: boolean;
+        vertical?: boolean;
+        reorder?: boolean;
+        view?: boolean;
+        navigate?: boolean;
+    }
+
+
     export class EntityStrip extends EntityList {
-        static key_itemsContainer= "sfItemsContainer";
+        static key_itemsContainer = "sfItemsContainer";
         static key_stripItem = "sfStripItem";
         static key_stripItemClass = "sf-strip-element";
         static key_link = "sfLink";
         static key_input = "sf-strip-input";
 
-        options: EntityListOptions;
+        options: EntityStripOptions;
 
-        constructor(options: EntityListOptions) {
+        constructor(options: EntityStripOptions) {
             super(options);
         }
 
@@ -1281,7 +1288,7 @@ module SF.Lines {
             }, _viewOptions);
         }
 
-        onCreatingOk(clonedElements, validatorOptions, entityType, itemPrefix) {
+        onCreatingOk(clonedElements: JQuery, validatorOptions: PartialValidationOptions, entityType: string, itemPrefix?: string) {
             var valOptions = $.extend(validatorOptions || {}, {
                 type: entityType
             });
@@ -1297,21 +1304,21 @@ module SF.Lines {
             return validatorResult.acceptChanges;
         }
 
-        newStripItem(newHtml, itemPrefix, item) {
+        newStripItem(newHtml: JQuery, itemPrefix: string, item: EntityData) {
             var itemInfoValue = item.runtimeInfo || this.itemRuntimeInfo(itemPrefix).createValue(item.type, item.id || '', typeof item.id == "undefined" ? 'n' : 'o', null);
-            var $li = $("<li id='" + SF.compose(itemPrefix, EntityStrip.key_stripItem) + "' name='" + SF.compose(itemPrefix, EntityStrip.key_stripItem) + "' class='" + this.keys.stripItemClass + "'>" +
+            var $li = $("<li id='" + SF.compose(itemPrefix, EntityStrip.key_stripItem) + "' name='" + SF.compose(itemPrefix, EntityStrip.key_stripItem) + "' class='" + EntityStrip.key_stripItemClass + "'>" +
                 SF.hiddenInput(SF.compose(itemPrefix, EntityStrip.key_indexes), ";" + (this.getLastNewIndex() + 1).toString()) +
                 SF.hiddenInput(SF.compose(itemPrefix, SF.Keys.runtimeInfo), itemInfoValue) +
                 (this.options.navigate ?
                 ("<a class='sf-value-line' id='" + SF.compose(itemPrefix, EntityStrip.key_link) + "' href='" + item.link + "' title='" + lang.signum.navigate + "'>" + item.toStr + "</a>") :
                 ("<span class='sf-value-line' id='" + SF.compose(itemPrefix, EntityStrip.key_link) + "'>" + item.toStr + "</span>")) +
                 "<span class='sf-button-container'>" + (
-                (this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this._getMovingUp(itemPrefix) + "\" class='sf-line-button sf-move-up' data-icon='ui-icon-triangle-1-" + (this.options.vertial ? "w" : "n") + "' data-text='false'>" + lang.signum.moveUp + "</span>") : "") +
-                (this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this._getMovingDown(itemPrefix) + "\" class='sf-line-button sf-move-down' data-icon='ui-icon-triangle-1-" + (this.options.vertial ? "e" : "s") + "' data-text='false'>" + lang.signum.moveDown + "</span>") : "") +
+                (this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this._getMovingUp(itemPrefix) + "\" class='sf-line-button sf-move-up' data-icon='ui-icon-triangle-1-" + (this.options.vertical ? "w" : "n") + "' data-text='false'>" + lang.signum.moveUp + "</span>") : "") +
+                (this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this._getMovingDown(itemPrefix) + "\" class='sf-line-button sf-move-down' data-icon='ui-icon-triangle-1-" + (this.options.vertical ? "e" : "s") + "' data-text='false'>" + lang.signum.moveDown + "</span>") : "") +
                 (this.options.view ? ("<a id='" + SF.compose(itemPrefix, "btnView") + "' title='" + lang.signum.view + "' onclick=\"" + this._getView(itemPrefix) + "\" class='sf-line-button sf-view' data-icon='ui-icon-circle-arrow-e' data-text='false'>" + lang.signum.view + "</a>") : "") +
                 (this.options.remove ? ("<a id='" + SF.compose(itemPrefix, "btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this._getRemoving(itemPrefix) + "\" class='sf-line-button sf-remove' data-icon='ui-icon-circle-close' data-text='false'>" + lang.signum.remove + "</a>") : "")) +
                 "</span>" +
-                (!SF.isEmpty(newHtml) ? "<div id='" + SF.compose(itemPrefix, EntityStrip.key_entity) + "' name='" + SF.compose(itemPrefix, this.keys.entity) + "' style='display:none'></div>" : "") +
+                (!SF.isEmpty(newHtml) ? "<div id='" + SF.compose(itemPrefix, EntityStrip.key_entity) + "' name='" + SF.compose(itemPrefix, EntityStrip.key_entity) + "' style='display:none'></div>" : "") +
                 "</li>"
                 );
 
@@ -1319,38 +1326,38 @@ module SF.Lines {
             if (!SF.isEmpty(newHtml))
                 $("#" + SF.compose(itemPrefix, EntityStrip.key_entity)).html(newHtml);
             SF.triggerNewContent($("#" + SF.compose(itemPrefix, EntityStrip.key_stripItem)));
-            this.fireOnEntityChanged();
+            this.fireOnEntityChanged(false);
         }
 
         _getRepeaterCall() {
             return "$('#" + this.options.prefix + "').data('SF-entityStrip')";
         }
 
-        _getRemoving(itemPrefix) {
+        _getRemoving(itemPrefix: string) {
             return this._getRepeaterCall() + ".remove('" + itemPrefix + "');";
         }
 
-        _getView(itemPrefix) {
+        _getView(itemPrefix: string) {
             return this._getRepeaterCall() + ".view('" + itemPrefix + "');";
         }
 
-        _getMovingUp(itemPrefix) {
+        _getMovingUp(itemPrefix: string) {
             return this._getRepeaterCall() + ".moveUp('" + itemPrefix + "');";
         }
 
-        _getMovingDown(itemPrefix) {
+        _getMovingDown(itemPrefix: string) {
             return this._getRepeaterCall() + ".moveDown('" + itemPrefix + "');";
         }
 
 
-        find(_findOptions, _viewOptions) {
+        find(_findOptions: FindOptions, _viewOptions?: ViewOptions) {
             var _self = this;
             var type = this.getEntityType(function (type) {
                 _self.typedFind($.extend({ webQueryName: type }, _findOptions), _viewOptions);
             });
         }
 
-        typedFind(_findOptions, _viewOptions) {
+        typedFind(_findOptions: FindOptions, _viewOptions?: ViewOptions) {
             if (SF.isEmpty(_findOptions.webQueryName)) {
                 throw "FindOptions webQueryName parameter must not be null in ERep typedFind. Call find instead";
             }
@@ -1362,7 +1369,7 @@ module SF.Lines {
             SF.FindNavigator.openFinder(findOptions);
         }
 
-        createFindOptions(_findOptions, _viewOptions) {
+        createFindOptions(_findOptions: FindOptions, _viewOptions?: ViewOptions): FindOptions {
             var newPrefixIndex = this.getLastPrefixIndex() + 1;
             var itemPrefix = SF.compose(this.options.prefix, newPrefixIndex.toString());
             var self = this;
@@ -1372,7 +1379,7 @@ module SF.Lines {
             }, _findOptions);
         }
 
-        onFindingOk(selectedItems, _viewOptions) {
+        onFindingOk(selectedItems: Array<EntityData>, _viewOptions?: ViewOptions) {
             if (selectedItems == null || selectedItems.length == 0) {
                 throw "No item was returned from Find Window";
             }
@@ -1382,23 +1389,23 @@ module SF.Lines {
                     return;
                 }
 
-                self.newStripItem('', itemPrefix, item);
+                self.newStripItem(null, itemPrefix, item);
             });
             return true;
         }
 
-        remove(itemPrefix) {
-            $('#' + SF.compose(itemPrefix, this.keys.stripItem)).remove();
-            this.fireOnEntityChanged();
+        remove(itemPrefix?: string) {
+            $('#' + SF.compose(itemPrefix, EntityStrip.key_stripItem)).remove();
+            this.fireOnEntityChanged(false);
         }
 
-        view(itemPrefix, _viewOptions) {
+        view(_viewOptions: ViewOptions, itemPrefix?: string) {
             this.viewInIndex(_viewOptions || {}, itemPrefix);
         }
 
 
         updateButtonsDisplay() {
-            var $buttons = $(this.pf("btnFind"), this.pf("btnCreate"), this.pf("sfToStr"));
+            var $buttons = $(this.pf("btnFind") + ", " + this.pf("btnCreate") + ", " + this.pf("sfToStr"));
             if (this.canAddItems()) {
                 $buttons.show();
             }
@@ -1407,11 +1414,11 @@ module SF.Lines {
             }
         }
 
-        updateLinks(newToStr, newLink, itemPrefix) {
+        updateLinks(newToStr: string, newLink: string, itemPrefix?: string) {
             $('#' + SF.compose(itemPrefix, SF.Keys.link)).html(newToStr);
         }
 
-        onAutocompleteSelected(controlId, data) {
+        onAutocompleteSelected(controlId: string, data: any) {
             var selectedItems = [{
                 id: data.id,
                 type: data.type,
@@ -1425,7 +1432,7 @@ module SF.Lines {
     }
 
     export function getInfoParams(prefix) {
-        return $("#" + SF.compose(prefix, SF.Keys.runtimeInfo) + ", #" + SF.compose(prefix,  EntityList.key_indexes));
+        return $("#" + SF.compose(prefix, SF.Keys.runtimeInfo) + ", #" + SF.compose(prefix, EntityList.key_indexes));
     };
 }
 

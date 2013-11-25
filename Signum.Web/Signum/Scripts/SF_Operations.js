@@ -1,6 +1,10 @@
-﻿/// <reference path="SF_Utils.ts"/>
-/// <reference path="SF_Globals.ts"/>
-/// <reference path="SF_Validator.ts"/>
+﻿/// <reference path="references.ts"/>
+var __extends = this.__extends || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+};
 var SF;
 (function (SF) {
     var OperationOptions = (function () {
@@ -39,7 +43,7 @@ var SF;
         };
 
         OperationManager.prototype.requestData = function (newPrefix) {
-            var formChildren = "";
+            var formChildren = null;
             if (SF.isFalse(this.options.isLite)) {
                 if (SF.isEmpty(this.options.prefix)) {
                     formChildren = SF.isEmpty(this.options.parentDiv) ? $(this.options.sender).closest("form").find(":input") : $("#" + this.options.parentDiv + " :input");
@@ -80,14 +84,8 @@ var SF;
 
             return serializer.serialize();
         };
-        return OperationManager;
-    })();
-    SF.OperationManager = OperationManager;
-})(SF || (SF = {}));
 
-SF.registerModule("Operations", function () {
-    SF.OperationManager.prototype = {
-        contextualRequestData: function (newPrefix) {
+        OperationManager.prototype.contextualRequestData = function (newPrefix) {
             var serializer = new SF.Serializer();
             serializer.add($("input:hidden[name=" + SF.Keys.antiForgeryToken + "]").serialize());
             serializer.add({
@@ -102,8 +100,9 @@ SF.registerModule("Operations", function () {
             serializer.add(this.options.requestExtraJsonData);
 
             return serializer.serialize();
-        },
-        ajax: function (newPrefix, onSuccess) {
+        };
+
+        OperationManager.prototype.ajax = function (newPrefix, onSuccess) {
             if (SF.Blocker.isEnabled()) {
                 return false;
             } else {
@@ -135,8 +134,9 @@ SF.registerModule("Operations", function () {
             });
 
             return false;
-        },
-        submit: function () {
+        };
+
+        OperationManager.prototype.submit = function () {
             if (SF.Blocker.isEnabled()) {
                 return false;
             }
@@ -156,8 +156,9 @@ SF.registerModule("Operations", function () {
             SF.submit(this.options.controllerUrl, this.options.requestExtraJsonData, $form);
 
             return false;
-        },
-        executedSuccessfully: function (operationResult) {
+        };
+
+        OperationManager.prototype.executedSuccessfully = function (operationResult) {
             if ((typeof (operationResult) !== "object") || (operationResult.result != "ModelState")) {
                 return true;
             }
@@ -171,8 +172,9 @@ SF.registerModule("Operations", function () {
                 }).showErrors(modelState);
             }
             return false;
-        },
-        validateAndSubmit: function () {
+        };
+
+        OperationManager.prototype.validateAndSubmit = function () {
             if (SF.Blocker.isEnabled()) {
                 return false;
             }
@@ -196,15 +198,19 @@ SF.registerModule("Operations", function () {
             }
 
             return false;
+        };
+        return OperationManager;
+    })();
+    SF.OperationManager = OperationManager;
+
+    var OperationExecutor = (function (_super) {
+        __extends(OperationExecutor, _super);
+        function OperationExecutor(_options) {
+            _super.call(this, $.extend({
+                controllerUrl: SF.Urls.operationExecute
+            }, _options));
         }
-    };
-
-    SF.OperationExecutor = function (_options) {
-        SF.OperationManager.call(this, $.extend({
-            controllerUrl: SF.Urls.operationExecute
-        }, _options));
-
-        this.validateAndAjax = function (newPrefix, onAjaxSuccess) {
+        OperationExecutor.prototype.validateAndAjax = function (newPrefix, onAjaxSuccess) {
             if (SF.Blocker.isEnabled()) {
                 return false;
             }
@@ -234,7 +240,7 @@ SF.registerModule("Operations", function () {
             }
         };
 
-        this.contextualExecute = function (entityType, id) {
+        OperationExecutor.prototype.contextualExecute = function (entityType, id) {
             if (SF.Blocker.isEnabled()) {
                 return false;
             }
@@ -255,18 +261,19 @@ SF.registerModule("Operations", function () {
                 this.ajax(null, SF.opMarkCellOnSuccess);
             }
         };
-    };
+        return OperationExecutor;
+    })(OperationManager);
+    SF.OperationExecutor = OperationExecutor;
 
-    SF.OperationExecutor.prototype = new SF.OperationManager();
-
-    //ConstructorFrom options = OperationManager options + returnType
-    SF.ConstructorFrom = function (_options) {
-        SF.OperationManager.call(this, $.extend({
-            controllerUrl: SF.Urls.operationConstructFrom,
-            returnType: null
-        }, _options));
-
-        this.validateAndAjax = function (newPrefix, onAjaxSuccess) {
+    var ConstructorFrom = (function (_super) {
+        __extends(ConstructorFrom, _super);
+        function ConstructorFrom(_options) {
+            _super.call(this, $.extend({
+                controllerUrl: SF.Urls.operationConstructFrom,
+                returnType: null
+            }, _options));
+        }
+        ConstructorFrom.prototype.validateAndAjax = function (newPrefix, onAjaxSuccess) {
             if (SF.Blocker.isEnabled()) {
                 return false;
             }
@@ -296,7 +303,7 @@ SF.registerModule("Operations", function () {
             }
         };
 
-        this.contextualConstruct = function (entityType, id) {
+        ConstructorFrom.prototype.contextualConstruct = function (entityType, id) {
             if (SF.Blocker.isEnabled()) {
                 return false;
             }
@@ -311,16 +318,18 @@ SF.registerModule("Operations", function () {
                 this.ajax(this.newPrefix(), SF.opContextualOnSuccess);
             }
         };
-    };
+        return ConstructorFrom;
+    })(OperationManager);
+    SF.ConstructorFrom = ConstructorFrom;
 
-    SF.ConstructorFrom.prototype = new SF.OperationManager();
-
-    SF.DeleteExecutor = function (_options) {
-        SF.OperationManager.call(this, $.extend({
-            controllerUrl: SF.Urls.operationDelete
-        }, _options));
-
-        this.contextualDelete = function (entityType, id) {
+    var DeleteExecutor = (function (_super) {
+        __extends(DeleteExecutor, _super);
+        function DeleteExecutor(_options) {
+            _super.call(this, $.extend({
+                controllerUrl: SF.Urls.operationDelete
+            }, _options));
+        }
+        DeleteExecutor.prototype.contextualDelete = function (entityType, id) {
             if (SF.Blocker.isEnabled()) {
                 return false;
             }
@@ -336,22 +345,19 @@ SF.registerModule("Operations", function () {
                 });
             }
         };
-    };
+        return DeleteExecutor;
+    })(OperationExecutor);
+    SF.DeleteExecutor = DeleteExecutor;
 
-    SF.DeleteExecutor.prototype = new SF.OperationManager();
-
-    SF.OperationDelete = function (deleteExecutor) {
-        deleteExecutor.execute();
-    };
-
-    //ConstructorFromMany options = OperationManager options + returnType
-    SF.ConstructorFromMany = function (_options) {
-        SF.OperationManager.call(this, $.extend({
-            controllerUrl: SF.Urls.operationConstructFromMany,
-            returnType: null
-        }, _options));
-
-        this.requestData = function (newPrefix, items) {
+    var ConstructorFromMany = (function (_super) {
+        __extends(ConstructorFromMany, _super);
+        function ConstructorFromMany(_options) {
+            _super.call(this, $.extend({
+                controllerUrl: SF.Urls.operationConstructFromMany,
+                returnType: null
+            }));
+        }
+        ConstructorFromMany.prototype.requestData = function (newPrefix, items) {
             var serializer = new SF.Serializer().add($('#' + SF.Keys.tabId).serialize()).add($("input:hidden[name=" + SF.Keys.antiForgeryToken + "]").serialize()).add({
                 entityType: $(this.pf(SF.Keys.entityTypeNames)).val(),
                 operationFullKey: this.options.operationKey,
@@ -367,7 +373,7 @@ SF.registerModule("Operations", function () {
             return serializer.serialize();
         };
 
-        this.ajax = function (newPrefix, items, onSuccess) {
+        ConstructorFromMany.prototype.ajax = function (newPrefix, items, onSuccess) {
             if (SF.Blocker.isEnabled()) {
                 return false;
             } else {
@@ -397,7 +403,7 @@ SF.registerModule("Operations", function () {
             });
         };
 
-        this.ajaxSelected = function (newPrefix, onAjaxSuccess) {
+        ConstructorFromMany.prototype.ajaxSelected = function (newPrefix, onAjaxSuccess) {
             if (SF.Blocker.isEnabled()) {
                 return false;
             }
@@ -412,7 +418,7 @@ SF.registerModule("Operations", function () {
             });
         };
 
-        this.submitSelected = function () {
+        ConstructorFromMany.prototype.submitSelected = function () {
             if (SF.Blocker.isEnabled()) {
                 return false;
             }
@@ -429,16 +435,17 @@ SF.registerModule("Operations", function () {
                 onSuccess.call(self, items);
             });
         };
-    };
+        return ConstructorFromMany;
+    })(OperationManager);
+    SF.ConstructorFromMany = ConstructorFromMany;
 
-    SF.ConstructorFromMany.prototype = new SF.OperationManager();
-
-    SF.opDisableCtxmenu = function () {
+    function opDisableCtxmenu() {
         var clss = "sf-ctxmenu-active";
         $("." + clss).removeClass(clss);
-    };
+    }
+    SF.opDisableCtxmenu = opDisableCtxmenu;
 
-    SF.opOnSuccessDispatcher = function (prefix, operationResult, parentDiv) {
+    function opOnSuccessDispatcher(prefix, operationResult, parentDiv) {
         SF.opDisableCtxmenu();
 
         if (SF.isEmpty(operationResult)) {
@@ -454,9 +461,10 @@ SF.registerModule("Operations", function () {
         } else {
             SF.opOpenPopup(prefix, operationResult);
         }
-    };
+    }
+    SF.opOnSuccessDispatcher = opOnSuccessDispatcher;
 
-    SF.opReloadContent = function (prefix, operationResult, parentDiv) {
+    function opReloadContent(prefix, operationResult, parentDiv) {
         SF.opDisableCtxmenu();
         if (SF.isEmpty(prefix)) {
             var $elem = SF.isEmpty(parentDiv) ? $("#divNormalControl") : $("#" + parentDiv);
@@ -481,15 +489,17 @@ SF.registerModule("Operations", function () {
             }
         }
         SF.Notify.info(lang.signum.executed, 2000);
-    };
+    }
+    SF.opReloadContent = opReloadContent;
 
-    SF.opOpenPopup = function (prefix, operationResult) {
+    function opOpenPopup(prefix, operationResult) {
         SF.opDisableCtxmenu();
         new SF.ViewNavigator({ prefix: prefix }).showCreateSave(operationResult);
         SF.Notify.info(lang.signum.executed, 2000);
-    };
+    }
+    SF.opOpenPopup = opOpenPopup;
 
-    SF.opOpenPopupNoDefaultOk = function (prefix, operationResult) {
+    function opOpenPopupNoDefaultOk(prefix, operationResult) {
         SF.opDisableCtxmenu();
         new SF.ViewNavigator({ prefix: prefix, onOk: function () {
                 return false;
@@ -497,19 +507,22 @@ SF.registerModule("Operations", function () {
                 return false;
             } }).showCreateSave(operationResult);
         SF.Notify.info(lang.signum.executed, 2000);
-    };
+    }
+    SF.opOpenPopupNoDefaultOk = opOpenPopupNoDefaultOk;
 
-    SF.opNavigate = function (prefix, operationResult) {
+    function opNavigate(prefix, operationResult) {
         SF.submit(operationResult);
-    };
+    }
+    SF.opNavigate = opNavigate;
 
-    SF.opMarkCellOnSuccess = function (prefix, operationResult) {
+    function opMarkCellOnSuccess(prefix, operationResult) {
         $(".sf-ctxmenu-active").addClass("sf-entity-ctxmenu-" + (SF.isEmpty(operationResult) ? "success" : "error")).removeClass("sf-ctxmenu-active");
 
         SF.Notify.info(lang.signum.executed, 2000);
-    };
+    }
+    SF.opMarkCellOnSuccess = opMarkCellOnSuccess;
 
-    SF.opContextualOnSuccess = function (prefix, operationResult) {
+    function opContextualOnSuccess(prefix, operationResult) {
         SF.opDisableCtxmenu();
         if (SF.isEmpty(operationResult)) {
             return null;
@@ -527,5 +540,6 @@ SF.registerModule("Operations", function () {
             SF.triggerNewContent($form);
             SF.Notify.info(lang.signum.executed, 2000);
         }
-    };
-});
+    }
+    SF.opContextualOnSuccess = opContextualOnSuccess;
+})(SF || (SF = {}));

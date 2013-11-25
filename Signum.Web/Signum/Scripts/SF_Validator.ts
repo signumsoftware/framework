@@ -1,17 +1,16 @@
-﻿/// <reference path="SF_Utils.ts"/>
-/// <reference path="SF_Globals.ts"/>
-/// <reference path="SF_Lines.ts"/>
+﻿/// <reference path="references.ts"/>
+
 
 module SF {
     export interface ValidationOptions {
         prefix: string;
         controllerUrl?: string;
-        showInlineErrors: string;
-        fixedInlineErrorText: string; //Set to "" for it to be populated from ModelState error messages
-        parentDiv: string;
-        requestExtraJsonData: string;
-        ajaxError: (jqXHR: JQueryXHR, textStatus: string, errorThrow: string) => any;
-        errorSummaryId: string;
+        showInlineErrors?: string;
+        fixedInlineErrorText?: string; //Set to "" for it to be populated from ModelState error messages
+        parentDiv?: string;
+        requestExtraJsonData?: string;
+        ajaxError?: (jqXHR: JQueryXHR, textStatus: string, errorThrow: string) => any;
+        errorSummaryId?: string;
     }
 
     export class Validator {

@@ -1,4 +1,4 @@
-﻿/// <reference path="SF_Utils.ts"/>
+﻿/// <reference path="references.ts"/>
 var SF;
 (function (SF) {
     var StaticInfo = (function () {

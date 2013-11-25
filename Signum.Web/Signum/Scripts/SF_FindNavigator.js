@@ -1,5 +1,4 @@
-﻿/// <reference path="SF_Utils.ts"/>
-/// <reference path="SF_Globals.ts"/>
+﻿/// <reference path="references.ts"/>
 var SF;
 (function (SF) {
     (function (FindNavigator) {
@@ -659,7 +658,7 @@ else
 
             var self = this;
             selected.each(function (i, v) {
-                var parts = v.value.split("__");
+                var parts = (v).value.split("__");
                 var item = {
                     id: parts[0],
                     type: parts[1],
@@ -866,11 +865,10 @@ else
 
         SearchControl.prototype.newFilterRowIndex = function () {
             var lastRow = $(this.pf("tblFilters tbody tr:last"));
-            var lastRowIndex = -1;
             if (lastRow.length == 1) {
-                lastRowIndex = lastRow[0].id.substr(lastRow[0].id.lastIndexOf("_") + 1, lastRow[0].id.length);
+                return parseInt(lastRow[0].id.substr(lastRow[0].id.lastIndexOf("_") + 1, lastRow[0].id.length)) + 1;
             }
-            return parseInt(lastRowIndex) + 1;
+            return 0;
         };
 
         SearchControl.prototype.newSubTokensComboAdded = function ($selectedCombo) {

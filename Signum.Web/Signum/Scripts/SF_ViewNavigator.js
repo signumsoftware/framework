@@ -1,7 +1,4 @@
-﻿/// <reference path="SF_Utils.ts"/>
-/// <reference path="SF_Globals.ts"/>
-/// <reference path="SF_Popup.ts"/>
-/// <reference path="SF_Validator.ts"/>
+﻿/// <reference path="references.ts"/>
 var SF;
 (function (SF) {
     var ViewNavigator = (function () {

@@ -1,5 +1,4 @@
-﻿/// <reference path="SF_Utils.ts"/>
-/// <reference path="SF_Globals.ts"/>
+﻿/// <reference path="references.ts"/>
 
 module SF {
     export module FindNavigator {
@@ -191,7 +190,7 @@ module SF {
         navigate: boolean;
         openFinderUrl: boolean;
         onCancelled: () => void;
-        onOk: () => void;
+        onOk: (item: Array<SF.EntityData>) => boolean;
         onOkClosed: () => void;
         orders: string[]; //A Json array like ["Id","-Name"] => Id asc, then Name desc
         prefix: string;
@@ -655,7 +654,7 @@ module SF {
             }
         }
 
-        hasSelectedItems(onSuccess) {
+        hasSelectedItems(onSuccess : (item : Array<SF.EntityData>)=>void) {
             var items = this.selectedItems();
             if (items.length == 0) {
                 SF.Notify.info(lang.signum.noElementsSelected);
@@ -664,7 +663,7 @@ module SF {
             onSuccess(items);
         }
 
-        hasSelectedItem(onSuccess) {
+        hasSelectedItem(onSuccess: (item: SF.EntityData) => void) {
             var items = this.selectedItems();
             if (items.length == 0) {
                 SF.Notify.info(lang.signum.noElementsSelected);
@@ -677,7 +676,7 @@ module SF {
             onSuccess(items[0]);
         }
 
-        selectedItems() {
+        selectedItems() : Array<SF.EntityData> {
             var items = [];
             var selected = $("input:checkbox[name^=" + SF.compose(this.options.prefix, "rowSelection") + "]:checked");
             if (selected.length == 0)
@@ -685,7 +684,7 @@ module SF {
 
             var self = this;
             selected.each(function (i, v) {
-                var parts = v.value.split("__");
+                var parts = (<HTMLInputElement>v).value.split("__");
                 var item = {
                     id: parts[0],
                     type: parts[1],
@@ -864,7 +863,7 @@ module SF {
             return false;
         }
 
-        addFilter(url, requestExtraJsonData?) {
+        addFilter(url?, requestExtraJsonData?) {
             var tableFilters = $(this.pf("tblFilters tbody"));
             if (tableFilters.length == 0) {
                 throw "Adding filters is not allowed";
@@ -901,13 +900,12 @@ module SF {
             });
         }
 
-        newFilterRowIndex() {
+        newFilterRowIndex()  : number{
             var lastRow = $(this.pf("tblFilters tbody tr:last"));
-            var lastRowIndex = -1;
             if (lastRow.length == 1) {
-                lastRowIndex = lastRow[0].id.substr(lastRow[0].id.lastIndexOf("_") + 1, lastRow[0].id.length);
+                return parseInt(lastRow[0].id.substr(lastRow[0].id.lastIndexOf("_") + 1, lastRow[0].id.length)) + 1;
             }
-            return parseInt(lastRowIndex) + 1;
+            return 0;
         }
 
         newSubTokensComboAdded($selectedCombo) {
@@ -936,7 +934,7 @@ module SF {
             this.changeButtonState($btnAddColumn, $selectedOption.attr("data-column"), function () { self.addColumn(); });
         }
 
-        changeButtonState($button, disablingMessage, enableCallback) {
+        changeButtonState($button: JQuery, disablingMessage : string, enableCallback?: (eventObject: JQueryEventObject) => any) {
             var hiddenId = $button.attr("id") + "temp";
             if (typeof disablingMessage != "undefined") {
                 $button.addClass("ui-button-disabled").addClass("ui-state-disabled").addClass("sf-disabled").attr("disabled", "disabled").attr("title", disablingMessage);
