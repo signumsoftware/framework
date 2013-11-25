@@ -74,9 +74,9 @@
                 {
                     var type = tc.Value.Token.Token.Type.CleanType();
 
-                    if (type.IsEnum)
+                    if (type.UnNullify().IsEnum)
                     {
-                @ColorLink(type);
+                @ColorLink(type.UnNullify());
                     }
                     else
                     {
