@@ -113,5 +113,11 @@ namespace Signum.Test.LinqProvider
                                                select al2.ToLite()).FirstOrDefault()
                           }).ToList();
         }
+
+        [TestMethod]
+        public void SelectEmbeddedWithMList()
+        {
+            var config = Database.Query<ConfigDN>().SingleEx();
+        }
     }
 }
