@@ -29,6 +29,7 @@ namespace Signum.Test.Environment
                 sb.Include<NoteWithDateDN>();
                 sb.Include<PersonalAwardDN>();
                 sb.Include<AwardNominationDN>();
+                sb.Include<ConfigDN>();
 
                 MinimumExtensions.IncludeFunction(sb.Schema.Assets);
 
@@ -223,6 +224,13 @@ namespace Signum.Test.Environment
                 AllowsNew = true,
                 Lite = false,
                 Execute = (l, _) => { }
+            }.Register();
+
+            new Graph<ConfigDN>.Execute(ConfigOperation.Save)
+            {
+                AllowsNew = true,
+                Lite = false,
+                Execute = (e, _) => { },
             }.Register();
         }
     }
