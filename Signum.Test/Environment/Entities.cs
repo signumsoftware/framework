@@ -508,6 +508,36 @@ namespace Signum.Test.Environment
         }
     }
 
+    [Serializable, EntityKind(EntityKind.Main, EntityData.Transactional)]
+    public class ConfigDN : Entity
+    {
+        EmbeddedConfigDN embeddedConfig;
+        public EmbeddedConfigDN EmbeddedConfig
+        {
+            get { return embeddedConfig; }
+            set { Set(ref embeddedConfig, value, () => EmbeddedConfig); }
+        }
+    }
+
+    public enum ConfigOperation
+    {
+        Save
+    }
+
+    public class EmbeddedConfigDN : EmbeddedEntity
+    {
+        [NotNullable]
+        MList<Lite<GrammyAwardDN>> awards = new MList<Lite<GrammyAwardDN>>();
+        [NotNullValidator, NoRepeatValidator]
+        public MList<Lite<GrammyAwardDN>> Awards
+        {
+            get { return awards; }
+            set { Set(ref awards, value, () => Awards); }
+        }
+    }
+
+    
+
     public static class MinimumExtensions
     {
         [SqlMethod(Name = "dbo.MinimumTableValued")]
