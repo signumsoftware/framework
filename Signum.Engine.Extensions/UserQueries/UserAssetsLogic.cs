@@ -119,7 +119,7 @@ namespace Signum.Engine.UserQueries
             {
                 Type type = PartNames.GetOrThrow(element.Name.ToString());
 
-                var part = old.GetType() == type ? old : (IPartDN)Activator.CreateInstance(type);
+                var part = old != null && old.GetType() == type ? old : (IPartDN)Activator.CreateInstance(type);
 
                 part.FromXml(element, this);
 
@@ -203,11 +203,11 @@ namespace Signum.Engine.UserQueries
             {
                 Type type = PartNames.GetOrThrow(element.Name.ToString());
 
-                var part = old.GetType() == type ? old : (IPartDN)Activator.CreateInstance(type);
+                var part = old != null && old.GetType() == type ? old : (IPartDN)Activator.CreateInstance(type);
 
                 part.FromXml(element, this);
 
-                if (part != old)
+                if (old != null && part != old)
                     toRemove.Add(old);
 
                 return part;
