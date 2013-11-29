@@ -97,6 +97,9 @@ namespace Signum.Web.Operations
 
         public static ActionResult DefaultConstructResult(ControllerBase controller, IdentifiableEntity entity, string prefix)
         {
+            if (entity.Modified == ModifiedState.SelfModified)
+                controller.ViewData[ViewDataKeys.WriteEntityState] = true;
+
             if (prefix.HasText())
             {
                 TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);

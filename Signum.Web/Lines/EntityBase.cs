@@ -11,7 +11,8 @@ using Signum.Entities.Reflection;
 namespace Signum.Web
 {
     public static class EntityBaseKeys
-    { 
+    {
+        public const string EntityState = "sfEntityState";
         public const string RuntimeInfo = "sfRuntimeInfo";
         public const string StaticInfo = "sfStaticInfo";
         public const string Entity = "sfEntity";

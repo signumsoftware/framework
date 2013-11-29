@@ -286,6 +286,10 @@ namespace Signum.Test.Environment
                     {
                         Author = g.Author,
                         Label = g.Label,
+                        BonusTrack = new SongDN
+                        {
+                            Name = "Clone bonus track"
+                        }
                     };
                 }
             }.Register();
