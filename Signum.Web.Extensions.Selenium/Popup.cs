@@ -166,11 +166,17 @@ namespace Signum.Web.Selenium
                 Selenium.ConsumeConfirmation();
         }
 
-
-
         public RuntimeInfoProxy RuntimeInfo()
         {
             return RuntimeInfoProxy.FromFormValue(Selenium.GetEval("window.$('#{0}_divMainControl').data('runtimeinfo')".Formato(Prefix)));
+        }
+
+        public string EntityState()
+        {
+            if (int.Parse(Selenium.GetEval("window.$('#{0}_sfEntityState').length".Formato(Prefix))) == 0)
+                return null;
+
+            return Selenium.GetEval("window.$('#{0}_sfEntityState')[0].value".Formato(Prefix));
         }
     }
 }
