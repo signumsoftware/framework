@@ -993,11 +993,22 @@ namespace Signum.Web
                         newList.Add(itemCtx.Value);
                 }
 
-                if (newList.SequenceEqual(oldList))
+                if (AreEqual(newList, oldList))
                     return oldList;
 
                 return newList;
             }
+        }
+
+        private bool AreEqual(MList<S> newList, MList<S> oldList)
+        {
+            if (newList.IsNullOrEmpty() && oldList.IsNullOrEmpty())
+                return true;
+
+            if (newList == null || oldList == null)
+                return false;
+
+            return newList.SequenceEqual(oldList);
         }
 
     }
