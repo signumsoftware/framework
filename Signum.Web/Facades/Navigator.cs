@@ -33,6 +33,7 @@ using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
 using System.Runtime.Serialization;
+using Microsoft.SqlServer.Types;
 #endregion
 
 namespace Signum.Web
@@ -492,6 +493,29 @@ namespace Signum.Web
             EntitySettings = new Dictionary<Type, EntitySettings>();
             QuerySettings = new Dictionary<object, QuerySettings>();
             EntityStateKey = entityStateKey;
+
+            formatter = new NetDataContractSerializer();
+
+            var ss = new SurrogateSelector();
+            ss.AddSurrogate(typeof(SqlHierarchyId),
+                new StreamingContext(StreamingContextStates.All),
+                new SqlHierarchySurrogate());
+
+            formatter.SurrogateSelector = ss;
+        }
+
+        class SqlHierarchySurrogate : ISerializationSurrogate 
+        {
+            public void GetObjectData(object obj, SerializationInfo info, StreamingContext context)
+            {
+                SqlHierarchyId shi = (SqlHierarchyId)obj;
+                info.AddValue("route", shi.ToString());
+            }
+
+            public object SetObjectData(object obj, SerializationInfo info, StreamingContext context, ISurrogateSelector selector)
+            {
+                return SqlHierarchyId.Parse(info.GetString("route"));
+            }
         }
         
         public event Action Initializing;
@@ -1069,7 +1093,7 @@ namespace Signum.Web
                 var array = new MemoryStream().Using(ms =>
                 {
                     using (DeflateStream ds = new DeflateStream(ms, CompressionMode.Compress))
-                        new NetDataContractSerializer().Serialize(ds, entity);
+                        formatter.Serialize(ds, entity);
                     return ms.ToArray();
                 });
 
@@ -1079,6 +1103,10 @@ namespace Signum.Web
                 return Convert.ToBase64String(array); 
             }
         }
+
+        public IFormatter Formatter { get { return formatter; } }
+
+        IFormatter formatter;
 
         public ModifiableEntity DeserializeEntity(string viewState)
         {
@@ -1091,7 +1119,7 @@ namespace Signum.Web
 
                 using (var ms = new MemoryStream(array))
                 using (DeflateStream ds = new DeflateStream(ms, CompressionMode.Decompress))
-                    return (ModifiableEntity)new NetDataContractSerializer().Deserialize(ds);
+                    return (ModifiableEntity)formatter.Deserialize(ds);
             }
         }
 
