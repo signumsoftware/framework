@@ -61,7 +61,7 @@ namespace Signum.Entities
 
         MemberInfo GetMember(string fieldOrProperty)
         {
-            MemberInfo mi = (MemberInfo)Type.GetProperty(fieldOrProperty, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, null, new Type[0], null) ??
+            MemberInfo mi = (MemberInfo)Type.GetProperty(fieldOrProperty, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, null, this.Type.IsMList() ? new[] { typeof(int) } : new Type[0], null) ??
                             (MemberInfo)Type.GetField(fieldOrProperty, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
             if (mi == null && Type.IsIdentifiableEntity())
