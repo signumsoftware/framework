@@ -73,7 +73,7 @@ namespace Signum.Web.Selenium
             container.MenuOption("tmConstructors", operationKey.GetType().Name + "_" + operationKey.ToString());
         }
 
-        public static NormalPage<T> ConstructFromNormalWindow<T>(this IEntityButtonContainer container, Enum operationKey) where T: IdentifiableEntity
+        public static NormalPage<T> ConstructFromNormalPage<T>(this IEntityButtonContainer container, Enum operationKey) where T: IdentifiableEntity
         {
             container.ConstructFrom(operationKey);
             return new NormalPage<T>(container.Selenium, null);
