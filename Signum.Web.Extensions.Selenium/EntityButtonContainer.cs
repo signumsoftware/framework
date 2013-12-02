@@ -21,6 +21,11 @@ namespace Signum.Web.Selenium
 
     public static class EntityButtonContainerExtensions
     {
+        public static string OperationLocator(this IEntityButtonContainer container, Enum operationKey)
+        {
+            return container.ButtonLocator(operationKey.GetType().Name + "_" + operationKey.ToString());
+        }
+
         public static bool OperationEnabled(this IEntityButtonContainer container, Enum operationKey)
         {
             return container.ButtonEnabled(operationKey.GetType().Name + "_" + operationKey.ToString());
@@ -68,20 +73,24 @@ namespace Signum.Web.Selenium
             return "jq={0} #{1}.sf-dropdown ul.sf-menu-button li.ui-menu-item a.sf-entity-button#{2}".Formato(container.Prefix, menuId, optionId);
         }
 
-        public static void ConstructFrom(this IEntityButtonContainer container, Enum operationKey)
+        public static void ConstructFrom(this IEntityButtonContainer container, Enum operationKey, string group = "tmConstructors")
         {
-            container.MenuOption("tmConstructors", operationKey.GetType().Name + "_" + operationKey.ToString());
+            if (group.HasText())
+                container.MenuOption(group, operationKey.GetType().Name + "_" + operationKey.ToString());
+            else
+                container.ButtonClick(operationKey.GetType().Name + "_" + operationKey.ToString());
         }
 
-        public static NormalPage<T> ConstructFromNormalPage<T>(this IEntityButtonContainer container, Enum operationKey) where T: IdentifiableEntity
+        public static NormalPage<T> ConstructFromNormalPage<T>(this IEntityButtonContainer container, Enum operationKey, string group = "tmConstructors") where T: IdentifiableEntity
         {
-            container.ConstructFrom(operationKey);
+            container.ConstructFrom(operationKey, group);
+
             return new NormalPage<T>(container.Selenium, null);
         }
 
-        public static PopupControl<T> ConstructFromPopup<T>(this IEntityButtonContainer container, Enum operationKey) where T : ModifiableEntity
+        public static PopupControl<T> ConstructFromPopup<T>(this IEntityButtonContainer container, Enum operationKey, string group = "tmConstructors") where T : ModifiableEntity
         {
-            container.ConstructFrom(operationKey); 
+            container.ConstructFrom(operationKey, group); 
 
             var popup = new PopupControl<T>(container.Selenium, "New");
 

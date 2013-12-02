@@ -130,8 +130,6 @@ namespace Signum.Web.Selenium
         {
             string newPrefix = Prefix + (index == null ? "" : ("_" + index));
 
-            Selenium.Wait(() => Popup.IsPopupVisible(Selenium, newPrefix), () => "Popup {0} to be visible".Formato(newPrefix));
-
             PropertyRoute route = index == null ? this.Route : this.Route.Add("Item");
 
             return new PopupControl<T>(this.Selenium, newPrefix, route);
@@ -304,7 +302,7 @@ namespace Signum.Web.Selenium
             get { return RuntimeInfo().ToLite(); }
             set
             {
-                Selenium.Select(ComboLocator, "value=" + (value == null ? null : value.Key()));
+                Selenium.Select(ComboLocator, "value=" + (value == null ? null : value.Id.ToString()));
             }
         }
 

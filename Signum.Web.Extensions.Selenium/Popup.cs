@@ -179,4 +179,14 @@ namespace Signum.Web.Selenium
             return Selenium.GetEval("window.$('#{0}_sfEntityState')[0].value".Formato(Prefix));
         }
     }
+
+    public static class PopupExtensions
+    {
+        public static P WaitVisible<P>(this P popup) where P : Popup
+        {
+            popup.Selenium.Wait(() => Popup.IsPopupVisible(popup.Selenium, popup.Prefix), () => "Popup {0} to be visible".Formato(popup.Prefix));
+
+            return popup;
+        }
+    }
 }
