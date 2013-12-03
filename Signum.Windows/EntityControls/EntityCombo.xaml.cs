@@ -25,6 +25,16 @@ namespace Signum.Windows
 {
     public partial class EntityCombo : EntityBase
     {
+        static readonly string NullValueString = " - ";
+
+        public static readonly DependencyProperty NullValueProperty =
+            DependencyProperty.Register("NullValue", typeof(bool), typeof(EntityCombo), new PropertyMetadata(true));
+        public bool NullValue
+        {
+            get { return (bool)GetValue(NullValueProperty); }
+            set { SetValue(NullValueProperty, value); }
+        }
+
         public static readonly DependencyProperty LoadDataTriggerProperty =
             DependencyProperty.Register("LoadDataTrigger", typeof(LoadDataTrigger), typeof(EntityCombo), new UIPropertyMetadata(LoadDataTrigger.OnExpand));
         public LoadDataTrigger LoadDataTrigger
@@ -74,7 +84,7 @@ namespace Signum.Windows
                 if (!isLoaded || newEntity != null && !combo.Items.Contains(newEntity))
                     combo.Items.Add(newEntity);
 
-                combo.SelectedItem = newEntity;
+                combo.SelectedItem = NullValue && newEntity == null ? NullValueString : newEntity;
             }
             finally
             {
@@ -89,7 +99,9 @@ namespace Signum.Windows
             {
                 changing = true;
 
-                SetEntityUserInteraction(Server.Convert(combo.SelectedItem, Type));
+                var selItem = NullValue && combo.SelectedItem == NullValueString ? null : combo.SelectedItem;
+
+                SetEntityUserInteraction(Server.Convert(selItem, Type));
             }
             finally
             {
@@ -121,7 +133,15 @@ namespace Signum.Windows
             if (LoadDataTrigger == LoadDataTrigger.OnLoad)
                 OnLoadData(sender, e);
             else
+            {
+                if (NullValue && Entity == null) //Beasue entity changed won't be fired
+                {
+                    combo.Items.Add(NullValueString);
+                    combo.SelectedItem = NullValueString;
+                }
+
                 combo.DropDownOpened += new EventHandler(OnLoadData);
+            }
         }
 
         bool isLoaded = false;
@@ -155,6 +175,8 @@ namespace Signum.Windows
             {
                 changing = true;
                 combo.Items.Clear();
+                if(NullValue)
+                    combo.Items.Add(NullValueString); 
                 foreach (Lite<IIdentifiable> lite in data)
                 {
                     combo.Items.Add(lite);
@@ -165,9 +187,9 @@ namespace Signum.Windows
                 if (selectedItem != null && !combo.Items.Contains(selectedItem))
                     combo.Items.Add(selectedItem);
 
-                combo.SelectedItem = selectedItem;
+                combo.SelectedItem = NullValue && selectedItem == null ? NullValueString : selectedItem;
 
-                if (selectedItem == null)
+                if (!NullValue && selectedItem == null)
                 {
                     combo.SelectedIndex = -1;
                     combo.SelectedValue = -1;
