@@ -41,15 +41,20 @@ namespace Signum.Web.Selenium
             return container.Selenium.IsElementPresent(locator + ":not(.sf-disabled)");
         }
 
-        public static void ExecuteAjax(this IEntityButtonContainer container, Enum operationKey)
+        public static void OperationClick(this IEntityButtonContainer container, Enum operationKey)
         {
             container.ButtonClick(operationKey.GetType().Name + "_" + operationKey.ToString());
+        }
+
+        public static void ExecuteAjax(this IEntityButtonContainer container, Enum operationKey)
+        {
+            container.OperationClick(operationKey);
             container.Selenium.Wait(() => !container.HasChanges());
         }
 
         public static void ExecuteSubmit(this IEntityButtonContainer container, Enum operationKey)
         {
-            container.ButtonClick(operationKey.GetType().Name + "_" + operationKey.ToString());
+            container.OperationClick(operationKey);
             container.Selenium.WaitForPageToLoad();
         }
 
