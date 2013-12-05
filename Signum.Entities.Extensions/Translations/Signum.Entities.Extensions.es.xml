@@ -75,7 +75,6 @@
   <Type Name="AuthMessage">
     <Member Name="_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships" Description="{0} ciclos han sido encontrados en el grafo de funciones debido a las relaciones:&#xD;&#xA;" />
     <Member Name="_0RulesFor1" Description="Reglas de {0} para {1}" />
-    <Member Name="AccessToFacadeMethod0IsNotAllowed" Description="El acceso a el Método de Fachada '{0}' no está permitido" />
     <Member Name="AuthAdmin_AddCondition" Description="Añadir condición" />
     <Member Name="AuthAdmin_ChooseACondition" Description="Elija una condición" />
     <Member Name="AuthAdmin_RemoveCondition" Description="Eliminar condición" />
@@ -110,6 +109,7 @@
     <Member Name="NewPassword" Description="Nueva contraseña" />
     <Member Name="NotAllowedToSaveThis0WhileOffline" Description="No se puede guardar este {0} en modo desconectado" />
     <Member Name="NotAuthorizedTo0The1WithId2" Description="No autorizado para {0} la entidad {1} con Id {2}" />
+    <Member Name="NotAuthorizedToChangeProperty0on1" Description="No autorizado para cambiar propiedad '{0}' en {1}" />
     <Member Name="NotAuthorizedToRetrieve0" Description="No autorizado para recuperar '{0}'" />
     <Member Name="NotAuthorizedToSave0" Description="Not autorizado para guardar '{0}'" />
     <Member Name="NotUserLogged" Description="Ningún usuario logado" />
@@ -525,7 +525,6 @@
     <Member Name="SmtpConfiguration" Description="Configuración de SMTP" />
     <Member Name="StartDate" Description="Fecha de inicio" />
     <Member Name="SystemEmail" Description="Email del sistema" />
-    <Member Name="Tokens" Description="Tokens" />
   </Type>
   <Type Name="EmailTemplateMessage">
     <Member Name="EndDateMustBeHigherThanStartDate" Description="Fecha de fin debe ser superior a la fecha de inicio" />
@@ -742,7 +741,6 @@
     <Member Name="State" Description="Estado" />
     <Member Name="Subject" Description="Asunto" />
     <Member Name="Text" Description="Texto" />
-    <Member Name="Tokens" Description="Tokens" />
   </Type>
   <Type Name="NewsletterOperation">
     <Member Name="AddRecipients" Description="Agregar destinatarios" />
