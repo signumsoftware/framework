@@ -518,7 +518,8 @@ namespace Signum.Windows
         {
             DependencyProperty valueProperty = ValuePropertySelector.GetValue(fe.GetType());
 
-            bool isReadOnly = context.PropertyRouteType == PropertyRouteType.FieldOrProperty && context.PropertyInfo.IsReadOnly();
+            bool isReadOnly = context.PropertyRouteType == PropertyRouteType.FieldOrProperty && context.PropertyInfo.IsReadOnly() || 
+                context.PropertyRouteType == PropertyRouteType.Mixin;
 
             if (!BindingOperations.IsDataBound(fe, valueProperty))
             {
