@@ -161,7 +161,7 @@ namespace Signum.Entities.Omnibox
 
         internal Dictionary<string, Type> Types()
         {
-            return types.GetOrAdd(CultureInfo.CurrentCulture, ci =>
+            return types.GetOrAdd(CultureInfo.CurrentUICulture, ci =>
                GetAllTypes().Where(t => !t.IsEnumEntity()).ToDictionary(t => t.NicePluralName().ToOmniboxPascal(), "Translated Types"));
         }
     }
