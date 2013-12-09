@@ -137,7 +137,7 @@ namespace Signum.Web.Selenium
         public static void EntityComboValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value)
             where T : ModifiableEntity
         {
-            lineContainer.EntityLine(property).LiteValue = value is Lite<IIdentifiable> ? (Lite<IIdentifiable>)value : ((IIdentifiable)value).ToLite();
+            lineContainer.EntityCombo(property).LiteValue = value is Lite<IIdentifiable> ? (Lite<IIdentifiable>)value : ((IIdentifiable)value).ToLite();
         }
 
         public static EntityLineDetailProxy EntityLineDetail<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
