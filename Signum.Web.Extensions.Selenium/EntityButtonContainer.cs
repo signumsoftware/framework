@@ -14,6 +14,8 @@ namespace Signum.Web.Selenium
 
         string Prefix { get; }
 
+        RuntimeInfoProxy RuntimeInfo();
+
         bool HasChanges();
 
         string ButtonLocator(string buttonId);
@@ -86,9 +88,20 @@ namespace Signum.Web.Selenium
                 container.ButtonClick(operationKey.GetType().Name + "_" + operationKey.ToString());
         }
 
-        public static NormalPage<T> ConstructFromNormalPage<T>(this IEntityButtonContainer container, Enum operationKey, string group = "tmConstructors") where T: IdentifiableEntity
+        public static NormalPage<T> ConstructFromNormalPageSaved<T>(this IEntityButtonContainer container, Enum operationKey, string group = "tmConstructors") where T: IdentifiableEntity
         {
             container.ConstructFrom(operationKey, group);
+
+            container.Selenium.WaitForPageToLoad();
+
+            return new NormalPage<T>(container.Selenium, null);
+        }
+
+        public static NormalPage<T> ConstructFromNormalPageNew<T>(this IEntityButtonContainer container, Enum operationKey, string group = "tmConstructors") where T : IdentifiableEntity
+        {
+            container.ConstructFrom(operationKey, group);
+
+            container.Selenium.Wait(() => container.RuntimeInfo().IsNew);
 
             return new NormalPage<T>(container.Selenium, null);
         }
