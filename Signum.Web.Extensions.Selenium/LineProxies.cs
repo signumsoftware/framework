@@ -704,9 +704,9 @@ namespace Signum.Web.Selenium
 
         public void SetPath(string path)
         {
+            Selenium.WaitElementPresent("jq=#{0}_DivNew .sf-file-drop:visible".Formato(Prefix));
             Selenium.Type("{0}_sfFile".Formato(Prefix), path);
             Selenium.FireEvent("{0}_sfFile".Formato(Prefix), "change");
-            Selenium.WaitElementDisapear("jq=#{0}_sfFile:visible".Formato(Prefix));
         }
     }
 }
