@@ -19,6 +19,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace Signum.Windows.Disconnected
 {
@@ -86,8 +87,11 @@ namespace Signum.Windows.Disconnected
             pbUploading.Minimum = 0;
             pbUploading.Maximum = fi.Length;
 
+            var parent = Thread.CurrentThread;
+
             return Task.Factory.StartNew(() =>
             {
+                Thread.CurrentThread.AssignCultures(parent);
                 using (FileStream fs = fi.OpenRead())
                 using (ProgressStream ps = new ProgressStream(fs))
                 {
