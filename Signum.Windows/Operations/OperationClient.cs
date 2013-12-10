@@ -149,7 +149,7 @@ namespace Signum.Windows.Operations
 
             if (operations.Any(eoc => eoc.OperationInfo.HasCanExecute == true))
             {
-                Dictionary<Enum, string> canExecutes = Server.Return((IOperationServer os) => os.GetCanExecute(ident));
+                Dictionary<Enum, string> canExecutes = Server.Return((IOperationServer os) => os.GetCanExecuteAll(ident));
                 foreach (var eoc in operations)
                 {
                     var ce = canExecutes.TryGetC(eoc.OperationInfo.Key);
@@ -330,7 +330,7 @@ namespace Signum.Windows.Operations
 
             if (operations.Any(eomi => eomi.OperationInfo.HasCanExecute == true))
             {
-                Dictionary<Enum, string> canExecutes = Server.Return((IOperationServer os) => os.GetCanExecuteLite(sc.SelectedItem));
+                Dictionary<Enum, string> canExecutes = Server.Return((IOperationServer os) => os.GetCanExecuteLiteAll(sc.SelectedItem));
                 foreach (var coc in operations)
                 {
                     var ce = canExecutes.TryGetC(coc.OperationInfo.Key);
