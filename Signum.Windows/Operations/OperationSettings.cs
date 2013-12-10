@@ -41,7 +41,8 @@ namespace Signum.Windows.Operations
         public Func<string> Description;
         public Func<string, string> SimplifyName;
         public Brush Background;
-        public string AutomationName; 
+        public string AutomationName;
+        public double Order = 100;
     }
 
     public class EntityOperationSettings : OperationSettings
@@ -53,6 +54,7 @@ namespace Signum.Windows.Operations
         public ContextualOperationSettings Contextual { get; private set; }
 
         public bool AvoidMoveToSearchControl { get; set; }
+        public double Order { get; set; }
 
         public EntityOperationGroup Group { get; set; }
 
@@ -92,6 +94,7 @@ namespace Signum.Windows.Operations
     {
         public Action<ContextualOperationContext> Click { get; set; }
         public Func<ContextualOperationContext, bool> IsVisible { get; set; }
+        public double Order { get; set; }
 
         public ContextualOperationSettings(Enum key)
             : base(key)

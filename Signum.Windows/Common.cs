@@ -120,6 +120,17 @@ namespace Signum.Windows
             obj.SetValue(LabelVisibleProperty, value);
         }
 
+        public static readonly DependencyProperty OrderProperty =
+         DependencyProperty.RegisterAttached("Order", typeof(double), typeof(Common), new PropertyMetadata(0.0));
+        public static double GetOrder(DependencyObject obj)
+        {
+            return (double)obj.GetValue(OrderProperty);
+        }
+
+        public static void SetOrder(DependencyObject obj, double value)
+        {
+            obj.SetValue(OrderProperty, value);
+        }
 
         public static readonly DependencyProperty IsReadOnlyProperty =
           DependencyProperty.RegisterAttached("IsReadOnly", typeof(bool), typeof(Common), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.Inherits));

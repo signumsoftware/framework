@@ -59,6 +59,7 @@ namespace Signum.Web.Operations
     {
         public ContextualOperationSettings ContextualFromMany { get; private set; }
         public ContextualOperationSettings Contextual { get; private set; }
+        public double Order { get; set; }
 
         public EntityOperationSettings(Enum operationKey)
             : base(operationKey)
