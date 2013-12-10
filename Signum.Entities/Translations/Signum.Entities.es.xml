@@ -140,20 +140,24 @@
   <Type Name="IUserDN" />
   <Type Name="JavascriptMessage">
     <Member Name="addFilter" Description="Añadir filtro" />
+    <Member Name="create" Description="Ver" />
     <Member Name="editColumnName" Description="Editar nombre de columna" />
     <Member Name="enterTheNewColumnName" Description="Introduzca el nuevo nombre de la columna" />
-    <Member Name="entityRepeater_moveDown" Description="Bajar" />
-    <Member Name="entityRepeater_moveUp" Description="Subir" />
     <Member Name="error" Description="Error" />
     <Member Name="executed" Description="Ejecutado" />
+    <Member Name="find" Description="Encontrar" />
     <Member Name="hideFilters" Description="Ocultar filtros" />
     <Member Name="loading" Description="Cargando..." />
     <Member Name="loseChanges" Description="Hay cambios que no han sido guardados. &#xD;&#xA;¿Perder cambios?" />
+    <Member Name="moveDown" Description="Subir" />
+    <Member Name="moveUp" Description="Bajar" />
+    <Member Name="navigate" Description="Navegar" />
     <Member Name="noElementsSelected" Description="No hay elementos seleccionados" />
     <Member Name="noResults" Description="No se encontraron resultados" />
     <Member Name="onlyOneElement" Description="Puede seleccionar un único elemento" />
     <Member Name="popupErrors" Description="¿Hay errores en la entidad, que desea continuar?" />
     <Member Name="popupErrorsStop" Description="Hay errores en la entidad" />
+    <Member Name="remove" Description="Quitar" />
     <Member Name="removeColumn" Description="Eliminar columna" />
     <Member Name="reorderColumn_MoveLeft" Description="Mover a la izquierda" />
     <Member Name="reorderColumn_MoveRight" Description="Mover a la derecha" />
@@ -162,6 +166,7 @@
     <Member Name="searchControlMenuSelected" Description="seleccionado" />
     <Member Name="selectToken" Description="Seleccione un símbolo (token)" />
     <Member Name="showFilters" Description="Mostrar filtros" />
+    <Member Name="view" Description="Ver" />
   </Type>
   <Type Name="LiteMessage">
     <Member Name="IdNotValid" Description="Id no válido" />

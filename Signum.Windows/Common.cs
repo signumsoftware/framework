@@ -394,6 +394,7 @@ namespace Signum.Windows
             RouteTask += TaskSetImplementations;
             RouteTask += TaskSetCollaspeIfNull;
             RouteTask += TaskSetNotNullItemsSource;
+            RouteTask += TaskSetNullValueEntityCombo;
             RouteTask += TaskSetAutomationName;
             RouteTask += TaskSetVoteAutoHide;
             RouteTask += TaskSetMaxLenth;
@@ -529,7 +530,8 @@ namespace Signum.Windows
         {
             DependencyProperty valueProperty = ValuePropertySelector.GetValue(fe.GetType());
 
-            bool isReadOnly = context.PropertyRouteType == PropertyRouteType.FieldOrProperty && context.PropertyInfo.IsReadOnly();
+            bool isReadOnly = context.PropertyRouteType == PropertyRouteType.FieldOrProperty && context.PropertyInfo.IsReadOnly() || 
+                context.PropertyRouteType == PropertyRouteType.Mixin;
 
             if (!BindingOperations.IsDataBound(fe, valueProperty))
             {
@@ -634,9 +636,21 @@ namespace Signum.Windows
             if (vl != null && vl.NotSet(ValueLine.ItemSourceProperty) && context.PropertyRouteType == PropertyRouteType.FieldOrProperty)
             {
                 if (context.Type.IsNullable() && context.Type.UnNullify().IsEnum &&
-                   Validator.TryGetPropertyValidator(context).Let(pv => pv != null && pv.Validators.OfType<NotNullableAttribute>().Any()))
+                   Validator.TryGetPropertyValidator(context).Let(pv => pv != null && pv.Validators.OfType<NotNullValidatorAttribute>().Any()))
                 {
                     vl.ItemSource = EnumExtensions.UntypedGetValues(vl.Type.UnNullify()).ToObservableCollection();
+                }
+            }
+        }
+
+        static void TaskSetNullValueEntityCombo(FrameworkElement fe, string route, PropertyRoute context)
+        {
+            EntityCombo ec = fe as EntityCombo;
+            if (ec != null && ec.NotSet(EntityCombo.NullValueProperty) && context.PropertyRouteType == PropertyRouteType.FieldOrProperty)
+            {
+                if (Validator.TryGetPropertyValidator(context).Let(pv => pv != null && pv.Validators.OfType<NotNullValidatorAttribute>().Any()))
+                {
+                    ec.NullValue = false;
                 }
             }
         }
