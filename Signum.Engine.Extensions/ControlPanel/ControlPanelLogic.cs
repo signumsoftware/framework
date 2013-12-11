@@ -16,6 +16,7 @@ using Signum.Engine.UserQueries;
 using Signum.Engine.Operations;
 using Signum.Entities.UserQueries;
 using Signum.Entities.Chart;
+using Signum.Entities.Basics;
 
 namespace Signum.Engine.ControlPanel
 {

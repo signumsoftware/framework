@@ -53,7 +53,7 @@ namespace Signum.Web.SMS
             var type = this.ExtractEntity<TypeDN>(prefix);
             return Json(new
             {
-                literals = SMSLogic.GetLiteralsFromDataObjectProvider(TypeLogic.ToType(type))
+                literals = SMSLogic.GetLiteralsFromDataObjectProvider(type.ToType())
             });
         }
 
@@ -75,7 +75,7 @@ namespace Signum.Web.SMS
                 FilterOptions = new List<FilterOption> 
                 { 
                     { new FilterOption("IsActive", true) { Frozen = true } },
-                    { new FilterOption("AssociatedType", TypeLogic.ToTypeDN(ie.GetType()).ToLite()) }
+                    { new FilterOption("AssociatedType", ie.GetType().ToTypeDN().ToLite()) }
                 }
             }, prefix);
         }
@@ -113,7 +113,7 @@ namespace Signum.Web.SMS
                 FilterOptions = new List<FilterOption> 
                 { 
                     { new FilterOption("IsActive", true) { Frozen = true } },
-                    { new FilterOption("AssociatedType", TypeLogic.ToTypeDN(entitiesType).ToLite()) }
+                    { new FilterOption("AssociatedType", entitiesType.ToTypeDN().ToLite()) }
                 }
             }, prefix);
         }

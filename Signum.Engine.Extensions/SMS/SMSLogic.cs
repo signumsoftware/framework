@@ -203,7 +203,7 @@ namespace Signum.Engine.SMS
 
         public static List<Lite<TypeDN>> RegisteredDataObjectProviders()
         {
-            return dataObjectProviders.Keys.Select(t => TypeLogic.ToTypeDN(t).ToLite()).ToList();
+            return dataObjectProviders.Keys.Select(t => t.ToTypeDN().ToLite()).ToList();
         }
 
         public static List<string> GetLiteralsFromDataObjectProvider(Type type)
