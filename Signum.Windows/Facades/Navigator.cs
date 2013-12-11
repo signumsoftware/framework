@@ -21,6 +21,7 @@ using System.Collections.ObjectModel;
 using Signum.Windows.Operations;
 using System.Collections.Concurrent;
 using System.Threading;
+using Signum.Entities.Basics;
 
 namespace Signum.Windows
 {
@@ -283,7 +284,11 @@ namespace Signum.Windows
             EntitySettings = new Dictionary<Type, EntitySettings>();
             QuerySettings = new Dictionary<object, QuerySettings>();
 
-            Lite.SetTypeNameAndResolveType(Server.GetCleanName, Server.TryGetType);
+            TypeDN.SetTypeNameAndResolveType(
+                t => Server.ServerTypes.GetOrThrow(t).CleanName,
+                Server.TryGetType,
+                t => Server.ServerTypes.GetOrThrow(t),
+                tdn => Server.GetType(tdn.CleanName));
         }
         
         public event Action Initializing;

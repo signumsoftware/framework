@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Signum.Utilities;
 using System.Linq.Expressions;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.DynamicQuery
 {
@@ -38,7 +39,7 @@ namespace Signum.Entities.DynamicQuery
 
         public override string Key
         {
-            get { return "({0})".Formato(Lite.GetCleanName(entityType)); }
+            get { return "({0})".Formato(TypeDN.GetCleanName(entityType)); }
         }
 
         protected override Expression BuildExpressionInternal(BuildExpressionContext context)
