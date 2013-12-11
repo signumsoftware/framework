@@ -33,7 +33,7 @@ namespace Signum.Windows.Operations
         public static EntityOperationGroup Create = new EntityOperationGroup
         {
             Description = () => OperationMessage.Create.NiceToString(),
-            SimplifyName = cs => Regex.Replace(cs, OperationMessage.CreateFromRegex.NiceToString(), m => m.Groups[1].Value, RegexOptions.IgnoreCase),
+            SimplifyName = cs => Regex.Replace(cs, OperationMessage.CreateFromRegex.NiceToString(), m => m.Groups[1].Value.FirstUpper(), RegexOptions.IgnoreCase),
             Background = Brushes.Green,
             AutomationName = "Create"
         }; 

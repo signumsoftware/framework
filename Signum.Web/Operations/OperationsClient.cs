@@ -227,6 +227,7 @@ namespace Signum.Web.Operations
                             Text = group.Description(),
                             DivCssClass = " ".CombineIfNotEmpty(ToolBarButton.DefaultEntityDivCssClass, group.CssClass),
                             Items = new List<ToolBarButton>(),
+                            Order = group.Order,
                         };
 
                         buttons.Add(tbm);
@@ -242,7 +243,12 @@ namespace Signum.Web.Operations
                 }
             }
 
-            return buttons.OrderBy(a=>a is ToolBarMenu).ToArray();
+            foreach (var item in buttons.OfType<ToolBarMenu>())
+            {
+                item.Items = item.Items.OrderBy(a => a.Order).ToList();
+            }
+
+            return buttons.OrderBy(a=>a.Order).ToArray();
         }
 
         private EntityOperationGroup GetDefaultGroup(EntityOperationContext eoc)
@@ -268,6 +274,7 @@ namespace Signum.Web.Operations
 
                 AltText = ctx.CanExecute,
                 Enabled = ctx.CanExecute == null,
+                Order = ctx.OperationSettings != null ? ctx.OperationSettings.Order: 0,
 
                 Text = ctx.OperationSettings.TryCC(o => o.Text) ??  (group == null ? ctx.OperationInfo.Key.NiceToString() : group.SimplifyName(ctx.OperationInfo.Key.NiceToString())),
                 OnClick = ((ctx.OperationSettings != null && ctx.OperationSettings.OnClick != null) ? ctx.OperationSettings.OnClick(ctx) : DefaultClick(ctx)).ToJS(),
@@ -339,7 +346,9 @@ namespace Signum.Web.Operations
                      CanExecute = OperationDN.NotDefinedFor(g.Key, types.Except(g.Select(a => a.t)))
                  }
                  where os == null || os.IsVisible == null || os.IsVisible(coc)
-                 select CreateContextual(coc)).ToList();
+                 select CreateContextual(coc))
+                 .OrderBy(a => a.Order)
+                 .ToList();
 
             if (operations.IsEmpty())
                 return null;
@@ -405,7 +414,7 @@ namespace Signum.Web.Operations
                 }
             }
 
-            List<ContextualItem> buttons = context.Select(coc => CreateContextual(coc)).ToList();
+            List<ContextualItem> buttons = context.Select(coc => CreateContextual(coc)).OrderBy(a => a.Order).ToList();
 
             HtmlStringBuilder content = new HtmlStringBuilder();
             using (content.Surround(new HtmlTag("ul").Class("sf-search-ctxmenu-operations")))
@@ -459,6 +468,8 @@ namespace Signum.Web.Operations
 
                 AltText = ctx.CanExecute,
                 Enabled = ctx.CanExecute == null,
+
+                Order = ctx.OperationSettings != null ? ctx.OperationSettings.Order : 0,
 
                 Text = ctx.OperationSettings.TryCC(o => o.Text) ?? ctx.OperationInfo.Key.NiceToString(),
                 OnClick = (ctx.OperationSettings != null && ctx.OperationSettings.OnClick != null) ? ctx.OperationSettings.OnClick(ctx).ToJS() :
