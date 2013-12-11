@@ -30,6 +30,7 @@ namespace Signum.Web
                 using (sb.Surround(new HtmlTag("div").Class("sf-field-list")))
                 {
                     sb.AddLine(helper.HiddenStaticInfo(entityList));
+                    sb.AddLine(helper.Hidden(entityList.Compose(EntityListBaseKeys.ListPresent), ""));
 
                     //If it's an embeddedEntity write an empty template with index 0 to be used when creating a new item
                     if (entityList.ElementType.IsEmbeddedEntity())
