@@ -52,13 +52,15 @@ namespace Signum.Web.Operations
 
         public Func<string> Description;
         public Func<string, string> SimplifyName;
-        public string CssClass { get; set; }
+        public string CssClass;
+        public double Order = 100;
     }
 
     public class EntityOperationSettings : OperationSettings
     {
         public ContextualOperationSettings ContextualFromMany { get; private set; }
         public ContextualOperationSettings Contextual { get; private set; }
+        public double Order { get; set; }
 
         public EntityOperationSettings(Enum operationKey)
             : base(operationKey)
@@ -87,6 +89,7 @@ namespace Signum.Web.Operations
         {
         }
 
+        public double Order { get; set; }
         public Func<ContextualOperationContext, bool> IsVisible { get; set; }
         public Func<ContextualOperationContext, JsInstruction> OnClick { get; set; }
 

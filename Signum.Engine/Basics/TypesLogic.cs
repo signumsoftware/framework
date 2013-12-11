@@ -38,16 +38,6 @@ namespace Signum.Engine.Basics
             get { return Schema.Current.typeCachesLazy.Value.DnToType; }
         }
 
-        public static Type ToType(this TypeDN type)
-        {
-            return DnToType.GetOrThrow(type);
-        }
-
-        public static TypeDN ToTypeDN(this Type type)
-        {
-            return TypeToDN.GetOrThrow(type);
-        }
-
         public static void AssertStarted(SchemaBuilder sb)
         {
             sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null, null)));
@@ -82,7 +72,11 @@ namespace Signum.Engine.Basics
                         t.FullClassName,
                     });
 
-                Lite.SetTypeNameAndResolveType(TypeLogic.GetCleanName, TypeLogic.TryGetType);
+                TypeDN.SetTypeNameAndResolveType(
+                    TypeLogic.GetCleanName, 
+                    TypeLogic.TryGetType,
+                    t => TypeToDN.GetOrThrow(t),
+                    t => DnToType.GetOrThrow(t));
             }
         }
 

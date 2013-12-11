@@ -10,6 +10,7 @@ using Signum.Utilities;
 using System.Runtime.Serialization;
 using System.Globalization;
 using System.ComponentModel;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities.DynamicQuery
 {
@@ -194,7 +195,7 @@ namespace Signum.Entities.DynamicQuery
         {
             var lite = ((Lite<IdentifiableEntity>)obj);
 
-            return lite.Id + ";" + (lite.EntityType == defaultEntityType ? null : Lite.GetCleanName(lite.EntityType)) + ";" + lite.ToString();
+            return lite.Id + ";" + (lite.EntityType == defaultEntityType ? null : TypeDN.GetCleanName(lite.EntityType)) + ";" + lite.ToString();
         }
 
         static object DeserializeLite(string str, Type defaultEntityType)
@@ -207,7 +208,7 @@ namespace Signum.Entities.DynamicQuery
 
             string toStr = after.After(';');
 
-            return Lite.Create(string.IsNullOrEmpty(type) ? defaultEntityType : Lite.TryGetType(type), id, toStr);
+            return Lite.Create(string.IsNullOrEmpty(type) ? defaultEntityType : TypeDN.TryGetType(type), id, toStr);
         }
     }
 

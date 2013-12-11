@@ -63,10 +63,7 @@ namespace Signum.Utilities.ExpressionTrees
             return expression;
         }
     }
-}
 
-namespace Signum.Utilities
-{
     public static class LinqHints
     {
         public static T InSql<T>(this T value)

@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using Signum.Utilities;
 using Signum.Test.Environment;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Test.LinqProvider
 {

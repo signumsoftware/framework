@@ -10,6 +10,7 @@ using System.IO;
 using Signum.Utilities;
 using Signum.Test.Environment;
 using System.Linq.Expressions;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Test.LinqProvider
 {
@@ -46,7 +47,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void WhereExplicitConvert()
         {
-            var list = Database.Query<AlbumDN>().Where(a=>a.Id.ToString() == "1").ToList();
+            var list = Database.Query<AlbumDN>().Where(a => a.Id.ToString() == "1").ToList();
         }
 
         [TestMethod]
@@ -61,7 +62,7 @@ namespace Signum.Test.LinqProvider
         {
             var list = Database.Query<AlbumDN>().Where(a => a.Year < 1995).Select(a => new { a.Year, Author = a.Author.ToLite(), a.Name }).ToList();
         }
-        
+
         [TestMethod]
         public void WhereBool()
         {
@@ -128,7 +129,7 @@ namespace Signum.Test.LinqProvider
             BandDN smashing = (from b in Database.Query<BandDN>()
                                from a in b.Members
                                where a == wretzky
-                               select b).SingleEx(); 
+                               select b).SingleEx();
         }
 
 
@@ -236,10 +237,10 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void WhereInnerQueryable()
         {
-            var females = Database.Query<ArtistDN>().Where(a=>a.Sex == Sex.Female);
+            var females = Database.Query<ArtistDN>().Where(a => a.Sex == Sex.Female);
             string f = females.ToString();
 
-            var female = Database.Query<ArtistDN>().SingleEx(a=>females.Contains(a));
+            var female = Database.Query<ArtistDN>().SingleEx(a => females.Contains(a));
         }
 
         [TestMethod]
@@ -270,7 +271,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void WhereBindTuple()
         {
-            var albums = Database.Query<AlbumDN>().Select(a => Tuple.Create(a.Name, a.Label)).Where(t => t.Item2 == null).ToList(); 
+            var albums = Database.Query<AlbumDN>().Select(a => Tuple.Create(a.Name, a.Label)).Where(t => t.Item2 == null).ToList();
         }
 
         [TestMethod]
@@ -282,7 +283,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void WhereOutsideIs()
         {
-            var albums = Database.Query<BandDN>().Where(a =>  a.LastAward is PersonalAwardDN).ToList();
+            var albums = Database.Query<BandDN>().Where(a => a.LastAward is PersonalAwardDN).ToList();
         }
 
         [TestMethod]
@@ -326,7 +327,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void WhereMListLiteContainsSingle()
         {
-            var albums = Database.Query<ArtistDN>().Where(a => 
+            var albums = Database.Query<ArtistDN>().Where(a =>
                 a.Friends.Contains(Database.Query<ArtistDN>().Single(a2 => a2.Sex == Sex.Female).ToLite())
                 ).Select(a => a.ToLite()).ToList();
         }
@@ -352,7 +353,7 @@ namespace Signum.Test.LinqProvider
         [TestMethod]
         public void DistinctWithNulls()
         {
-            var nullRight = Database.Query<AlbumDN>().Where(alb =>LinqHints.DistinctNull(alb.Id, (int?)null)).Count();
+            var nullRight = Database.Query<AlbumDN>().Where(alb => LinqHints.DistinctNull(alb.Id, (int?)null)).Count();
             var notNullRight = Database.Query<AlbumDN>().Where(alb => LinqHints.DistinctNull(alb.Id, (int?)1)).Count();
 
             var nullLeft = Database.Query<AlbumDN>().Where(alb => LinqHints.DistinctNull((int?)null, alb.Id)).Count();

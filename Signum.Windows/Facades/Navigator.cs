@@ -21,6 +21,7 @@ using System.Collections.ObjectModel;
 using Signum.Windows.Operations;
 using System.Collections.Concurrent;
 using System.Threading;
+using Signum.Entities.Basics;
 
 namespace Signum.Windows
 {
@@ -283,7 +284,11 @@ namespace Signum.Windows
             EntitySettings = new Dictionary<Type, EntitySettings>();
             QuerySettings = new Dictionary<object, QuerySettings>();
 
-            Lite.SetTypeNameAndResolveType(Server.GetCleanName, Server.TryGetType);
+            TypeDN.SetTypeNameAndResolveType(
+                t => Server.ServerTypes.GetOrThrow(t).CleanName,
+                Server.TryGetType,
+                t => Server.ServerTypes.GetOrThrow(t),
+                tdn => Server.GetType(tdn.CleanName));
         }
         
         public event Action Initializing;
@@ -738,12 +743,14 @@ namespace Signum.Windows
             if (implementations == null || implementations.Count() == 0)
                 throw new ArgumentException("implementations");
 
-            var only = implementations.Only();
+            var filtered = implementations.Where(filterType).ToList();
+
+            var only = filtered.Only();
             if (only != null)
                 return only;
 
             Type sel;
-            if (SelectorWindow.ShowDialog(implementations.Where(filterType), out sel,
+            if (SelectorWindow.ShowDialog(filtered, out sel,
                 elementIcon: t => Navigator.Manager.GetEntityIcon(t, true),
                 elementText: t => t.NiceName(),
                 title: SelectorMessage.TypeSelector.NiceToString(),
@@ -855,7 +862,7 @@ namespace Signum.Windows
                 elements.AddRange(((IHaveToolBarElements)ctx.MainControl).GetToolBarElements(entity, ctx));
             }
 
-            return elements;
+            return elements.OrderBy(Common.GetOrder).ToList();
         }
 
         protected internal virtual void OpenIndependentWindow<W>(Func<W> windowConstructor, Action<W> afterShown, EventHandler closed) where W : Window

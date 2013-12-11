@@ -210,12 +210,12 @@ namespace Signum.Entities
 
         public string Key()
         {
-            return "{0};{1}".Formato(Lite.GetCleanName(this.EntityType), this.Id);
+            return "{0};{1}".Formato(TypeDN.GetCleanName(this.EntityType), this.Id);
         }
 
         public string KeyLong()
         {
-            return "{0};{1};{2}".Formato(Lite.GetCleanName(this.EntityType), this.Id, this.ToString());
+            return "{0};{1};{2}".Formato(TypeDN.GetCleanName(this.EntityType), this.Id, this.ToString());
         }
 
         public int CompareTo(Lite<IdentifiableEntity> other)
@@ -329,7 +329,7 @@ namespace Signum.Entities
             if (!match.Success)
                 return ValidationMessage.InvalidFormat.NiceToString();
 
-            Type type = TryGetType(match.Groups["type"].Value);
+            Type type = TypeDN.TryGetType(match.Groups["type"].Value);
             if (type == null)
                 return LiteMessage.Type0NotFound.NiceToString().Formato(match.Groups["type"].Value);
 
@@ -349,15 +349,6 @@ namespace Signum.Entities
             var result = Lite.TryParseLite(liteKey, out untypedLite);
             lite = (Lite<T>)untypedLite;
             return result;
-        }
-
-        public static Func<Type, string> GetCleanName = t => { throw new InvalidOperationException("Lite.GetCleanName is not set"); };
-        public static Func<string, Type> TryGetType = s => { throw new InvalidOperationException("Lite.TryGetType is not set"); };
-
-        public static void SetTypeNameAndResolveType(Func<Type, string> getCleanName, Func<string, Type> tryResolveType)
-        {
-            Lite.GetCleanName = getCleanName;
-            Lite.TryGetType = tryResolveType;
         }
 
         public static Lite<IdentifiableEntity> Create(Type type, int id)
