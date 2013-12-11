@@ -11,37 +11,55 @@ namespace Signum.Test
 {
     public static class Assert2
     {
-        public static void Throws<T>(Action action)
-            where T : Exception
+        public static void Throws<E>(Action action)
+            where E : Exception
         {
             try
             {
                 action();
             }
-            catch (T)
+            catch (E)
             {
                 return;
             }
 
-            throw new AssertFailedException("No {0} has been thrown".Formato(typeof(T).Name));
+            throw new AssertFailedException("No {0} has been thrown".Formato(typeof(E).Name));
         }
 
-        public static void Throws<T>(string messageToContain, Action action)
-           where T : Exception
+        public static void Throws<E>(string messageToContain, Action action)
+           where E : Exception
         {
             try
             {
                 action();
             }
-            catch (T ex)
+            catch (E ex)
             {
                 if(!ex.Message.Contains(messageToContain))
-                    throw new AssertFailedException("Exception thrown does not contain message {0}".Formato(ex.Message));
+                    throw new AssertFailedException("No {0} has been thrown with message {0}".Formato(typeof(E).Name, ex.Message));
 
                 return;
             }
 
-            throw new AssertFailedException("No {0} has been thrown".Formato(typeof(T).Name));
+            throw new AssertFailedException("No {0} has been thrown".Formato(typeof(E).Name));
+        }
+
+        public static void Throws<E>(Func<E, bool> exceptionCondition, Action action)
+          where E : Exception
+        {
+            try
+            {
+                action();
+            }
+            catch (E ex)
+            {
+                if (!exceptionCondition(ex))
+                    throw new AssertFailedException("No {0} has been thrown that satisfies the condition".Formato(typeof(E).Name));
+
+                return;
+            }
+
+            throw new AssertFailedException("No {0} has been thrown".Formato(typeof(E).Name));
         }
 
         public static void AssertAll<T>(this IEnumerable<T> collection, Expression<Func<T, bool>> predicate)
