@@ -119,7 +119,7 @@ namespace Signum.Web.Processes
                 }
             }
 
-            List<ContextualItem> operations = contexts.Select(op => OperationsClient.Manager.CreateContextual(op)).ToList();
+            List<ContextualItem> operations = contexts.Select(op => OperationsClient.Manager.CreateContextual(op)).OrderBy(o => o.Order).ToList();
 
             HtmlStringBuilder content = new HtmlStringBuilder();
             using (content.Surround(new HtmlTag("ul").Class("sf-search-ctxmenu-operations")))
