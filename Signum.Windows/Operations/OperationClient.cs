@@ -149,7 +149,7 @@ namespace Signum.Windows.Operations
 
             if (operations.Any(eoc => eoc.OperationInfo.HasCanExecute == true))
             {
-                Dictionary<Enum, string> canExecutes = Server.Return((IOperationServer os) => os.GetCanExecute(ident));
+                Dictionary<Enum, string> canExecutes = Server.Return((IOperationServer os) => os.GetCanExecuteAll(ident));
                 foreach (var eoc in operations)
                 {
                     var ce = canExecutes.TryGetC(eoc.OperationInfo.Key);
@@ -159,8 +159,9 @@ namespace Signum.Windows.Operations
             }
 
             List<FrameworkElement> buttons = new List<FrameworkElement>();
-            Dictionary<EntityOperationGroup, ContextMenu> groups = new Dictionary<EntityOperationGroup,ContextMenu>();
-
+            Dictionary<EntityOperationGroup, ToolBarButton> groups = new Dictionary<EntityOperationGroup,ToolBarButton>();
+            Dictionary<EntityOperationGroup, List<FrameworkElement>> groupButtons = new Dictionary<EntityOperationGroup,List<FrameworkElement>>();
+          
             foreach (var eoc in operations)
             {
                 if (eoc.OperationInfo.OperationType == OperationType.ConstructorFrom &&
@@ -174,14 +175,15 @@ namespace Signum.Windows.Operations
 
                 if(group != null)
                 {
-                    var cm = groups.GetOrCreate(group, () =>
+                    var list = groupButtons.GetOrCreate(group, () =>
                     {
                         var tbb = EntityOperationToolBarButton.CreateGroupContainer(group);
+                        groups.Add(group, tbb);
                         buttons.Add(tbb);
-                        return tbb.ContextMenu;
+                        return new List<FrameworkElement>();
                     });
 
-                   cm.Items.Add(EntityOperationToolBarButton.NewMenuItem(eoc, group));
+                   list.Add(EntityOperationToolBarButton.NewMenuItem(eoc, group));
                 }
                 else
                 {
@@ -189,7 +191,14 @@ namespace Signum.Windows.Operations
                 }
             }
 
-            return buttons.OrderByDescending(a=>a.ContextMenu == null).ToList();
+            foreach (var gr in groups)
+            {
+                var cm = gr.Value.ContextMenu;
+                foreach (var b in groupButtons.GetOrThrow(gr.Key).OrderBy(Common.GetOrder))
+                    cm.Items.Add(b);
+            }
+
+            return buttons.ToList();
         }
 
         private EntityOperationGroup GetDefaultGroup(EntityOperationContext eoc)
@@ -299,6 +308,7 @@ namespace Signum.Windows.Operations
                     }
                     where os == null || os.IsVisible == null || os.IsVisible(coc)
                     select ConstructFromManyMenuItemConsturctor.Construct(coc))
+                    .OrderBy(Common.GetOrder)
                    .ToList();
         }
 
@@ -330,7 +340,7 @@ namespace Signum.Windows.Operations
 
             if (operations.Any(eomi => eomi.OperationInfo.HasCanExecute == true))
             {
-                Dictionary<Enum, string> canExecutes = Server.Return((IOperationServer os) => os.GetCanExecuteLite(sc.SelectedItem));
+                Dictionary<Enum, string> canExecutes = Server.Return((IOperationServer os) => os.GetCanExecuteLiteAll(sc.SelectedItem));
                 foreach (var coc in operations)
                 {
                     var ce = canExecutes.TryGetC(coc.OperationInfo.Key);
@@ -339,7 +349,7 @@ namespace Signum.Windows.Operations
                 }
             }
 
-            return operations.Select(coc => EntityOperationMenuItemConsturctor.Construct(coc));
+            return operations.Select(coc => EntityOperationMenuItemConsturctor.Construct(coc)).OrderBy(Common.GetOrder);
         }
 
 

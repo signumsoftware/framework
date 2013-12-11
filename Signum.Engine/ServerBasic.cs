@@ -201,16 +201,28 @@ namespace Signum.Services
         #endregion
 
         #region IOperationServer Members
-        public Dictionary<Enum, string> GetCanExecute(IdentifiableEntity entity)
+        public Dictionary<Enum, string> GetCanExecuteAll(IdentifiableEntity entity)
         {
             return Return(MethodInfo.GetCurrentMethod(), entity.GetType().Name,
                 () => OperationLogic.ServiceCanExecute(entity));
         }
 
-        public Dictionary<Enum, string> GetCanExecuteLite(Lite<IdentifiableEntity> lite)
+        public Dictionary<Enum, string> GetCanExecuteLiteAll(Lite<IdentifiableEntity> lite)
         {
             return Return(MethodInfo.GetCurrentMethod(), lite.EntityType.Name,
                 () => OperationLogic.ServiceCanExecute(Database.Retrieve(lite)));
+        }
+
+        public string GetCanExecute(IdentifiableEntity entity, Enum operationKey)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), entity.GetType().Name + " " + OperationDN.UniqueKey(operationKey),
+                () => entity.CanExecute(operationKey));
+        }
+
+        public string GetCanExecuteLite(Lite<IdentifiableEntity> lite, Enum operationKey)
+        {
+            return Return(MethodInfo.GetCurrentMethod(), lite.EntityType.Name + " " + OperationDN.UniqueKey(operationKey),
+                () => lite.Retrieve().CanExecute(operationKey));
         }
 
         public List<OperationInfo> GetOperationInfos(Type entityType)
