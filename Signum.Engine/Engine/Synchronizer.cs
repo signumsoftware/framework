@@ -298,7 +298,7 @@ namespace Signum.Engine
                 string answer = Console.ReadLine();
 
                 if (answer == null)
-                    throw new InvalidOperationException("Impossible to Syncrhonize interactively without Console");
+                    throw new InvalidOperationException("Impossible to synchronize interactively without Console");
                 
                  answer= answer.ToLower();
 
