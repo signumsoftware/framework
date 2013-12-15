@@ -13,6 +13,7 @@ using Signum.Utilities;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using System.Globalization;
+using Signum.Entities.Basics;
 
 namespace Signum.Entities
 {
@@ -671,6 +672,35 @@ namespace Signum.Entities
         LessThanOrEqual,
     }
 
+    public class IsAssignableToValidatorAttribute : ValidatorAttribute
+    {
+        public Type Type { get; set; }
+
+        public IsAssignableToValidatorAttribute(Type type)
+        {
+            this.Type = type;
+        }
+
+        protected override string OverrideError(object value)
+        {
+            if (value == null)
+                return null;
+
+            var t = (TypeDN)value;
+            if (!Type.IsAssignableFrom(t.ToType()))
+            {
+                return ValidationMessage._0IsNotA1.NiceToString().Formato(t.ToType().NiceName(), Type.NiceName());
+            }
+
+            return null;
+        }
+
+        public override string HelpMessage
+        {
+            get { return ValidationMessage.BeA0.NiceToString().Formato(Type.NiceName()); }
+        }
+    }
+
     public class StateValidator<E, S> : IEnumerable
         where E : ModifiableEntity
         where S : struct
@@ -804,6 +834,10 @@ namespace Signum.Entities
         _0IsNotAllowedOnState1,
         [Description("{0} is not set")]
         _0IsNotSet,
+        [Description("{0} is not a {1}")]
+        _0IsNotA1,
+        [Description("be a {0}")]
+        BeA0,
         [Description("be ")]
         Be,
         [Description("be between {0} and {1}")]

@@ -9,6 +9,7 @@
     @Html.AntiForgeryToken()
     @Html.Hidden(ViewDataKeys.TabId, ViewData[ViewDataKeys.TabId])
     @Html.Hidden(ViewDataKeys.PartialViewName, ViewData[ViewDataKeys.PartialViewName])
+   
     <div class="ui-widget-header ui-corner-all sf-normal-control-header">
         <span class="sf-type-nice-name">@Navigator.Manager.GetTypeTitle(modifiable)</span>
         @Html.RenderWidgetsForEntity(modifiable, partialViewName, Model.ControlID)
@@ -35,6 +36,10 @@
 <div class="validationSummaryAjax">
     @Html.ValidationSummaryAjax()
     @Html.NormalPageHeader()
+     @if (((bool?)ViewData[ViewDataKeys.WriteEntityState]) == true)
+    {
+        @Html.Hidden(ViewDataKeys.EntityState, Navigator.Manager.SerializeEntity(modifiable))
+    }
 </div>
 <div id="divMainControl" class="sf-main-control" data-prefix="@Model.ControlID">
     @{ Html.RenderPartial(partialViewName, Model);}

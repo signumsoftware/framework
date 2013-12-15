@@ -29,6 +29,7 @@ namespace Signum.Test.Environment
                 sb.Include<NoteWithDateDN>();
                 sb.Include<PersonalAwardDN>();
                 sb.Include<AwardNominationDN>();
+                sb.Include<ConfigDN>();
 
                 MinimumExtensions.IncludeFunction(sb.Schema.Assets);
 
@@ -224,6 +225,13 @@ namespace Signum.Test.Environment
                 Lite = false,
                 Execute = (l, _) => { }
             }.Register();
+
+            new Graph<ConfigDN>.Execute(ConfigOperation.Save)
+            {
+                AllowsNew = true,
+                Lite = false,
+                Execute = (e, _) => { },
+            }.Register();
         }
     }
 
@@ -278,6 +286,10 @@ namespace Signum.Test.Environment
                     {
                         Author = g.Author,
                         Label = g.Label,
+                        BonusTrack = new SongDN
+                        {
+                            Name = "Clone bonus track"
+                        }
                     };
                 }
             }.Register();

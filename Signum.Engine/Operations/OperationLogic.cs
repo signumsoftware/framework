@@ -55,7 +55,7 @@ namespace Signum.Engine.Operations
         }
 
 
-        static readonly Polymorphic<Tuple<bool>> protectedSaveTypes = new Polymorphic<Tuple<bool>>(PolymorphicMerger.InheritanceAndInterfaces, typeof(IIdentifiable));
+        static readonly Polymorphic<Tuple<bool>> saveProtectedTypes = new Polymorphic<Tuple<bool>>(PolymorphicMerger.InheritanceAndInterfaces, typeof(IIdentifiable));
 
         static readonly Variable<ImmutableStack<Type>> allowedTypes = Statics.ThreadVariable<ImmutableStack<Type>>("saveOperationsAllowedTypes");
 
@@ -75,7 +75,7 @@ namespace Signum.Engine.Operations
             if (!typeof(IIdentifiable).IsAssignableFrom(type))
                 return false;
 
-            var tuple = protectedSaveTypes.TryGetValue(type);
+            var tuple = saveProtectedTypes.TryGetValue(type);
 
             return tuple != null && tuple.Item1;
         }
@@ -92,7 +92,7 @@ namespace Signum.Engine.Operations
 
         public static void SetProtectedSave(Type type, bool? isProtected)
         {
-            protectedSaveTypes.SetDefinition(type, isProtected == null ? null : Tuple.Create(isProtected.Value));
+            saveProtectedTypes.SetDefinition(type, isProtected == null ? null : Tuple.Create(isProtected.Value));
         }
 
         public static IDisposable AllowSave<T>() where T : class, IIdentifiable

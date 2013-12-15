@@ -42,12 +42,67 @@ namespace Signum.Web
             return false;
         }
 
-        public static MvcHtmlString RenderTypeContext(HtmlHelper helper, TypeContext typeContext, RenderMode mode, EntityBase line)
+        public static MvcHtmlString RenderPopup(HtmlHelper helper, TypeContext typeContext, RenderPopupMode mode, EntityBase line, bool isTemplate = false)
         {
-            Type cleanEntityType = (typeContext.UntypedValue as Lite<IIdentifiable>).TryCC(l => l.EntityType) ?? typeContext.UntypedValue.GetType();
-
             TypeContext tc = TypeContextUtilities.CleanTypeContext((TypeContext)typeContext);
 
+            ViewDataDictionary vdd = GetViewData(helper, line, tc);
+
+            string partialViewName = line.PartialViewName ?? OnPartialViewName(tc);
+
+            vdd[ViewDataKeys.PartialViewName] = partialViewName;
+            vdd[ViewDataKeys.OkVisible] = !line.ReadOnly;
+            vdd[ViewDataKeys.ViewButtons] = ViewButtons.Ok;
+            vdd[ViewDataKeys.ShowOperations] = true;
+            vdd[ViewDataKeys.SaveProtected] = OperationLogic.IsSaveProtected(tc.UntypedValue.GetType());
+            vdd[ViewDataKeys.WriteEntityState] = 
+                !isTemplate &&
+                !(tc.UntypedValue is EmbeddedEntity) &&
+                ((ModifiableEntity)tc.UntypedValue).Modified == ModifiedState.SelfModified;
+
+            switch (mode)
+            {
+                case RenderPopupMode.Popup:
+                    return helper.Partial(Navigator.Manager.PopupControlView, vdd);
+                case RenderPopupMode.PopupInDiv:
+                    return helper.Div(typeContext.Compose(EntityBaseKeys.Entity),
+                        helper.Partial(Navigator.Manager.PopupControlView, vdd),  
+                        "",
+                        new Dictionary<string, object> { { "style", "display:none" } });
+                default:
+                    throw new InvalidOperationException();
+            }
+        }
+        
+
+        public static MvcHtmlString RenderContent(HtmlHelper helper, TypeContext typeContext, RenderContentMode mode, EntityBase line)
+        {
+            TypeContext tc = TypeContextUtilities.CleanTypeContext((TypeContext)typeContext);
+
+            ViewDataDictionary vdd = GetViewData(helper, line, tc);
+            
+            string partialViewName = line.PartialViewName ?? OnPartialViewName(tc);
+
+            switch (mode)
+            {
+                case RenderContentMode.Content:
+                    return helper.Partial(partialViewName, vdd);
+
+                case RenderContentMode.ContentInVisibleDiv:
+                    return helper.Div(typeContext.Compose(EntityBaseKeys.Entity),
+                      helper.Partial(partialViewName, vdd), "",
+                      null);
+                case RenderContentMode.ContentInInvisibleDiv:
+                    return helper.Div(typeContext.Compose(EntityBaseKeys.Entity),
+                        helper.Partial(partialViewName, vdd), "",
+                         new Dictionary<string, object> { { "style", "display:none" } });
+                default:
+                    throw new InvalidOperationException();
+            }
+        }
+
+        private static ViewDataDictionary GetViewData(HtmlHelper helper, EntityBase line, TypeContext tc)
+        {
             ViewDataDictionary vdd;
             if (line.PreserveViewData)
             {
@@ -58,44 +113,16 @@ namespace Signum.Web
             {
                 vdd = new ViewDataDictionary(tc);
             }
-            
-            string partialViewName = line.PartialViewName;
-            if (partialViewName == null)
-            {
-                EntitySettings es = Navigator.EntitySettings(cleanEntityType);
-                partialViewName = es.OnPartialViewName((ModifiableEntity)tc.UntypedValue);
-                tc.ViewOverrides = es.ViewOverrides;
-            }
+            return vdd;
+        }
 
-            switch (mode)
-            {
-                case RenderMode.Content:
-                    return helper.Partial(partialViewName, vdd);
-                case RenderMode.Popup:
-                    vdd[ViewDataKeys.PartialViewName] = partialViewName;
-                    vdd[ViewDataKeys.OkVisible] = !line.ReadOnly;
-                    vdd[ViewDataKeys.ViewButtons] = ViewButtons.Ok;
-                    vdd[ViewDataKeys.ShowOperations] = true;
-                    vdd[ViewDataKeys.SaveProtected] = OperationLogic.IsSaveProtected(tc.UntypedValue.GetType());
-                    return helper.Partial(Navigator.Manager.PopupControlView, vdd);
-                case RenderMode.PopupInDiv:
-                    vdd[ViewDataKeys.PartialViewName] = partialViewName;
-                    vdd[ViewDataKeys.OkVisible] = !line.ReadOnly;
-                    vdd[ViewDataKeys.ViewButtons] = ViewButtons.Ok;
-                    vdd[ViewDataKeys.ShowOperations] = true;
-                    vdd[ViewDataKeys.SaveProtected] = OperationLogic.IsSaveProtected(tc.UntypedValue.GetType());
-                    return helper.Div(typeContext.Compose(EntityBaseKeys.Entity),
-                        helper.Partial(Navigator.Manager.PopupControlView, vdd),
-                        "",
-                        new Dictionary<string, object> { { "style", "display:none" } });
-                case RenderMode.ContentInVisibleDiv:
-                case RenderMode.ContentInInvisibleDiv:
-                    return helper.Div(typeContext.Compose(EntityBaseKeys.Entity),
-                        helper.Partial(partialViewName, vdd), "",
-                        (mode == RenderMode.ContentInInvisibleDiv) ? new Dictionary<string, object> { { "style", "display:none" } } : null);
-                default:
-                    throw new InvalidOperationException();
-            }
+        private static string OnPartialViewName(TypeContext tc)
+        {
+            EntitySettings es = Navigator.EntitySettings(tc.UntypedValue.GetType());
+           
+            var result = es.OnPartialViewName((ModifiableEntity)tc.UntypedValue);
+            tc.ViewOverrides = es.ViewOverrides;
+            return result;
         }
 
         public static string JsEscape(string input)
@@ -258,12 +285,17 @@ namespace Signum.Web
         }
     }
 
-    public enum RenderMode
+    public enum RenderContentMode
     {
-        Popup,
-        PopupInDiv,
         Content,
         ContentInVisibleDiv,
         ContentInInvisibleDiv
+    }
+
+
+    public enum RenderPopupMode
+    {
+        Popup,
+        PopupInDiv,
     }   
 }

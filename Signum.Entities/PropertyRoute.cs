@@ -61,7 +61,7 @@ namespace Signum.Entities
 
         MemberInfo GetMember(string fieldOrProperty)
         {
-            MemberInfo mi = (MemberInfo)Type.GetProperty(fieldOrProperty, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance) ??
+            MemberInfo mi = (MemberInfo)Type.GetProperty(fieldOrProperty, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, null, this.Type.IsMList() ? new[] { typeof(int) } : new Type[0], null) ??
                             (MemberInfo)Type.GetField(fieldOrProperty, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
             if (mi == null && Type.IsIdentifiableEntity())
@@ -157,7 +157,7 @@ namespace Signum.Entities
                             throw new ArgumentException("PropertyInfo {0} not found on {1}".Formato(pi.PropertyName(), parent.Type));
 
                         var otherProperty = parent.Type.FollowC(a => a.BaseType)
-                            .Select(a => a.GetProperty(fieldOrProperty.Name, BindingFlags.Public | BindingFlags.Instance)).NotNull().FirstEx();
+                            .Select(a => a.GetProperty(fieldOrProperty.Name, BindingFlags.Public | BindingFlags.Instance, null, null, new Type[0], null)).NotNull().FirstEx();
 
                         if (otherProperty == null)
                             throw new ArgumentException("PropertyInfo {0} not found on {1}".Formato(pi.PropertyName(), parent.Type));

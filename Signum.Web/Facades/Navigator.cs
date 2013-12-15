@@ -25,6 +25,15 @@ using Signum.Web.PortableAreas;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
 using Signum.Engine.Operations;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Web.UI;
+using Signum.Services;
+using System.IO;
+using System.IO.Compression;
+using System.Security.Cryptography;
+using System.Text;
+using System.Runtime.Serialization;
+using Microsoft.SqlServer.Types;
 #endregion
 
 namespace Signum.Web
@@ -474,10 +483,39 @@ namespace Signum.Web
             return urls;
         }
 
-        public NavigationManager()
+        public NavigationManager(string entityStateKeyToHash)
+            : this(new MD5CryptoServiceProvider().Using(p => p.ComputeHash(UTF8Encoding.UTF8.GetBytes(entityStateKeyToHash))))
+        {
+        }
+
+        public NavigationManager(byte[] entityStateKey)
         {
             EntitySettings = new Dictionary<Type, EntitySettings>();
             QuerySettings = new Dictionary<object, QuerySettings>();
+            EntityStateKey = entityStateKey;
+
+            formatter = new NetDataContractSerializer();
+
+            var ss = new SurrogateSelector();
+            ss.AddSurrogate(typeof(SqlHierarchyId),
+                new StreamingContext(StreamingContextStates.All),
+                new SqlHierarchySurrogate());
+
+            formatter.SurrogateSelector = ss;
+        }
+
+        class SqlHierarchySurrogate : ISerializationSurrogate 
+        {
+            public void GetObjectData(object obj, SerializationInfo info, StreamingContext context)
+            {
+                SqlHierarchyId shi = (SqlHierarchyId)obj;
+                info.AddValue("route", shi.ToString());
+            }
+
+            public object SetObjectData(object obj, SerializationInfo info, StreamingContext context, ISurrogateSelector selector)
+            {
+                return SqlHierarchyId.Parse(info.GetString("route"));
+            }
         }
         
         public event Action Initializing;
@@ -911,8 +949,13 @@ namespace Signum.Web
         protected internal virtual ModifiableEntity ExtractEntity(ControllerBase controller, string prefix)
         {
             NameValueCollection form = controller.ControllerContext.HttpContext.Request.Form;
-            
-            RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(form[TypeContextUtilities.Compose(prefix ?? "", EntityBaseKeys.RuntimeInfo)]);
+
+            var state = form[TypeContextUtilities.Compose(prefix, EntityBaseKeys.EntityState)];
+
+            if (state.HasText())
+                return Navigator.Manager.DeserializeEntity(state);
+
+            RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(form[TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo)]);
             if (runtimeInfo.IdOrNull != null)
                 return Database.Retrieve(runtimeInfo.EntityType, runtimeInfo.IdOrNull.Value);
             else
@@ -923,7 +966,7 @@ namespace Signum.Web
             where T:class, IIdentifiable
         {
             NameValueCollection form = controller.ControllerContext.HttpContext.Request.Form;
-            RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(form[TypeContextUtilities.Compose(prefix ?? "", EntityBaseKeys.RuntimeInfo)]);
+            RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(form[TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo)]);
 
             if (!runtimeInfo.IdOrNull.HasValue)
                 throw new ArgumentException("Could not create a Lite without an Id");
@@ -1040,6 +1083,94 @@ namespace Signum.Web
 
             return true;
         }
+
+        public byte[] EntityStateKey;
+
+        public string SerializeEntity(ModifiableEntity entity)
+        {
+            using (HeavyProfiler.LogNoStackTrace("SerializeEntity"))
+            {
+                var array = new MemoryStream().Using(ms =>
+                {
+                    using (DeflateStream ds = new DeflateStream(ms, CompressionMode.Compress))
+                        formatter.Serialize(ds, entity);
+                    return ms.ToArray();
+                });
+
+                if (EntityStateKey != null)
+                    array = Encrypt(array);
+
+                return Convert.ToBase64String(array); 
+            }
+        }
+
+        public IFormatter Formatter { get { return formatter; } }
+
+        IFormatter formatter;
+
+        public ModifiableEntity DeserializeEntity(string viewState)
+        {
+            using (HeavyProfiler.LogNoStackTrace("DeserializeEntity"))
+            {
+                var array = Convert.FromBase64String(viewState);
+
+                if (EntityStateKey != null)
+                    array = Decrypt(array);
+
+                using (var ms = new MemoryStream(array))
+                using (DeflateStream ds = new DeflateStream(ms, CompressionMode.Decompress))
+                    return (ModifiableEntity)formatter.Deserialize(ds);
+            }
+        }
+
+        //http://stackoverflow.com/questions/8041451/good-aes-initialization-vector-practice
+        byte[] Encrypt(byte[] toEncryptBytes)
+        {
+            using (var provider = new AesCryptoServiceProvider())
+            {
+                provider.Key = EntityStateKey;
+                provider.Mode = CipherMode.CBC;
+                provider.Padding = PaddingMode.PKCS7;
+                using (var encryptor = provider.CreateEncryptor(provider.Key, provider.IV))
+                {
+                    using (var ms = new MemoryStream())
+                    {
+                        ms.Write(provider.IV, 0, provider.IV.Length);
+                        using (var cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
+                        {
+                            cs.Write(toEncryptBytes, 0, toEncryptBytes.Length);
+                            cs.FlushFinalBlock();
+                        }
+                        return ms.ToArray();
+                    }
+                }
+            }
+        }
+
+        byte[] Decrypt(byte[] encryptedString)
+        {
+            using (var provider = new AesCryptoServiceProvider())
+            {
+                provider.Key = EntityStateKey;
+                using (var ms = new MemoryStream(encryptedString))
+                {
+                    // Read the first 16 bytes which is the IV.
+                    byte[] iv = new byte[16];
+                    ms.Read(iv, 0, 16);
+                    provider.IV = iv;
+
+                    using (var decryptor = provider.CreateDecryptor())
+                    {
+                        using (var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
+                        {
+                            return cs.ReadAllBytes();
+                        }
+                    }
+                }
+            }
+        }
+
+
     }
 
     public enum JsonResultType

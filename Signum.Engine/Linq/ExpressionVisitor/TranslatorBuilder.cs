@@ -341,20 +341,39 @@ namespace Signum.Engine.Linq
             static PropertyInfo piModified = ReflectionTools.GetPropertyInfo((ModifiableEntity me) => me.Modified);
             static Expression peModifiableState = Expression.Property(retriever, ReflectionTools.GetPropertyInfo((IRetriever re) => re.ModifiedState));
 
-            static MemberBinding mbModified = Expression.Bind(piModified, peModifiableState);
 
             protected override Expression VisitEmbeddedEntity(EmbeddedEntityExpression eee)
             {
-                Expression ctor = Expression.MemberInit(Expression.New(eee.Type),
-                       eee.Bindings.Select(b => Expression.Bind(b.FieldInfo, Visit(b.Binding)))
-                       .And(mbModified));
+                var embeddedParam = Expression.Parameter(eee.Type);
 
-                var entity = Expression.Call(retriever, miEmbeddedPostRetrieving.MakeGenericMethod(eee.Type), ctor);
+                var embeddedAssign = Expression.Assign(embeddedParam, Expression.New(eee.Type));
+
+                var embeddedBindings = 
+                       eee.Bindings.Select(b =>
+                       {
+                           var field = Expression.Field(embeddedParam, b.FieldInfo);
+
+                           var value = b.Binding is ChildProjectionExpression ?
+                               VisitMListChildProjection((ChildProjectionExpression)b.Binding, field) :
+                               Convert(Visit(b.Binding), b.FieldInfo.FieldType);
+
+                           return Expression.Assign(field, value);
+                       }).ToList<Expression>();
+
+                embeddedBindings.Insert(0, embeddedAssign);
+
+                embeddedBindings.Add(Expression.Assign(Expression.Property(embeddedParam, piModified), peModifiableState));
+
+                embeddedBindings.Add(Expression.Call(retriever, miEmbeddedPostRetrieving.MakeGenericMethod(eee.Type), embeddedParam));
+
+                var block = Expression.Block(eee.Type, new[] { embeddedParam }, embeddedBindings);
 
                 if (eee.HasValue == null)
-                    return entity;
+                    return block;
 
-                return Expression.Condition(Expression.Equal(Visit(eee.HasValue.Nullify()), Expression.Constant(true, typeof(bool?))), entity, Expression.Constant(null, ctor.Type));
+                return Expression.Condition(Expression.Equal(Visit(eee.HasValue.Nullify()), Expression.Constant(true, typeof(bool?))),
+                    block, 
+                    Expression.Constant(null, block.Type));
             }
 
             protected override Expression VisitImplementedBy(ImplementedByExpression rb)

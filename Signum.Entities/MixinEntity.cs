@@ -8,6 +8,7 @@ using System.Text;
 using Signum.Entities.Reflection;
 using Signum.Utilities;
 using Signum.Utilities.Reflection;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Entities
 {
@@ -126,9 +127,9 @@ namespace Signum.Entities
         public static void AssertDefined(Type mainEntity, Type mixinType)
         {
             var hs = GetMixinDeclarations(mainEntity);
-
+            
             if (!hs.Contains(mixinType))
-                throw new InvalidOperationException("Mixin {0} is not Registered for {1} in MixinsDeclarations"); 
+                throw new InvalidOperationException("Mixin {0} is not Registered for {1} in MixinsDeclarations".Formato(mixinType.TypeName(), mainEntity.TypeName())); 
         }
 
         internal static MixinEntity CreateMixins(IdentifiableEntity mainEntity)

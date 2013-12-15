@@ -236,6 +236,14 @@ namespace Signum.Test.Environment
 
             new AwardNominationDN { Author = michael.ToLite(), Award = pa.ToLite() }.Save();
             new AwardNominationDN { Author = michael.ToLite(), Award = null}.Save();
+
+            new ConfigDN
+            {
+                EmbeddedConfig = new EmbeddedConfigDN
+                {
+                    Awards = { ga.ToLite() }
+                }
+            }.Execute(ConfigOperation.Save);
         }
     }
 }

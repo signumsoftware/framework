@@ -33,12 +33,13 @@ namespace Signum.Web
                 sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, listDetail));
 
                 sb.AddLine(helper.HiddenStaticInfo(listDetail));
+                sb.AddLine(helper.Hidden(listDetail.Compose(EntityListBaseKeys.ListPresent), ""));
 
                 //If it's an embeddedEntity write an empty template with index 0 to be used when creating a new item
                 if (listDetail.ElementType.IsEmbeddedEntity())
                 {
                     TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)listDetail.Parent, 0);
-                    sb.AddLine(EntityBaseHelper.EmbeddedTemplate(listDetail, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Content, listDetail)));
+                    sb.AddLine(EntityBaseHelper.EmbeddedTemplate(listDetail, EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, listDetail)));
                 }
 
                 using (sb.Surround(new HtmlTag("div").Id(listDetail.ControlID).Class("sf-field-list")))
@@ -116,7 +117,7 @@ namespace Signum.Web
             sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
             if (EntityBaseHelper.EmbeddedOrNew((Modifiable)(object)itemTC.Value))
-                sb.AddLine(EntityBaseHelper.RenderTypeContext(helper, itemTC, RenderMode.ContentInInvisibleDiv, listDetail));
+                sb.AddLine(EntityBaseHelper.RenderContent(helper, itemTC, RenderContentMode.ContentInInvisibleDiv, listDetail));
             else if (itemTC.Value != null)
                 sb.Add(helper.Div(itemTC.Compose(EntityBaseKeys.Entity), null, "", new Dictionary<string, object> { { "style", "display:none" } }));
 

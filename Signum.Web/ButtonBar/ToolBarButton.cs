@@ -15,6 +15,7 @@ namespace Signum.Web
         public string AltText { get; set; }
         public string OnClick { get; set; }
         public string Href { get; set; }
+        public double Order { get; set; }
 
         public static string DefaultEntityDivCssClass = "sf-entity-button";
         public static string DefaultQueryCssClass = "sf-query-button";

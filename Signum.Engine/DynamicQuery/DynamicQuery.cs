@@ -104,6 +104,11 @@ namespace Signum.Engine.DynamicQuery
         {
             return this.Column(column, c => c.OverrideDisplayName = () => messageValue.NiceToString());
         }
+      
+        public DynamicQueryCore<T> ColumnDisplayName<S>(Expression<Func<T, S>> column, Func<string> messageValue)
+        {
+            return this.Column(column, c => c.OverrideDisplayName = messageValue);
+        }
 
         public DynamicQueryCore<T> Column<S>(Expression<Func<T, S>> column, Action<ColumnDescriptionFactory> change)
         {

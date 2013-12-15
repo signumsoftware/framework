@@ -304,7 +304,7 @@ namespace Signum.Web
         public static List<string> IndexPrefixes(this IDictionary<string, string> inputs)
         {
             return inputs.Keys
-                .Where(k => k != EntityListBaseKeys.List)
+                .Where(k => k != EntityListBaseKeys.ListPresent && k != EntityListBaseKeys.List && k != EntityBaseKeys.ToStr)
                 .Select(str => str.Substring(0, str.IndexOf(TypeContext.Separator)))
                 .Distinct()
                 .OrderBy(a => int.Parse(a))
@@ -993,11 +993,22 @@ namespace Signum.Web
                         newList.Add(itemCtx.Value);
                 }
 
-                if (newList.SequenceEqual(oldList))
+                if (AreEqual(newList, oldList))
                     return oldList;
 
                 return newList;
             }
+        }
+
+        private bool AreEqual(MList<S> newList, MList<S> oldList)
+        {
+            if (newList.IsNullOrEmpty() && oldList.IsNullOrEmpty())
+                return true;
+
+            if (newList == null || oldList == null)
+                return false;
+
+            return newList.SequenceEqual(oldList);
         }
 
     }

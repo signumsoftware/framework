@@ -36,7 +36,7 @@ namespace Signum.Web
                 if (entityStrip.ElementType.IsEmbeddedEntity())
                 {
                     TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)entityStrip.Parent, 0);
-                    sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityStrip, EntityBaseHelper.RenderTypeContext(helper, templateTC, RenderMode.Popup, entityStrip)));
+                    sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityStrip, EntityBaseHelper.RenderPopup(helper, templateTC, RenderPopupMode.Popup, entityStrip, isTemplate: true)));
                 }
 
                 using (sb.Surround(new HtmlTag("ul")
@@ -100,10 +100,10 @@ namespace Signum.Web
                 sb.AddLine(helper.HiddenRuntimeInfo(itemTC));
 
                 if (EntityBaseHelper.EmbeddedOrNew((Modifiable)(object)itemTC.Value))
-                    sb.AddLine(EntityBaseHelper.RenderTypeContext(helper, itemTC, RenderMode.PopupInDiv, entityStrip));
+                    sb.AddLine(EntityBaseHelper.RenderPopup(helper, itemTC, RenderPopupMode.PopupInDiv, entityStrip));
 
                 int? id = itemTC.UntypedValue is IdentifiableEntity ? ((IdentifiableEntity)itemTC.UntypedValue).IdOrNull :
-                    itemTC.UntypedValue is IdentifiableEntity ? ((Lite<IdentifiableEntity>)itemTC.UntypedValue).IdOrNull : null;
+                    itemTC.UntypedValue is Lite<IdentifiableEntity> ? ((Lite<IdentifiableEntity>)itemTC.UntypedValue).IdOrNull : null;
                 if (id != null && entityStrip.Navigate)
                 {
                     sb.AddLine(

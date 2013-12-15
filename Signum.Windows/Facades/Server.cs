@@ -104,7 +104,7 @@ namespace Signum.Windows
 
             S server = current as S;
             if (server == null)
-                throw new InvalidOperationException("Server {0} does not implement {1}".Formato(server.GetType(), typeof(S)));
+                throw new InvalidOperationException("Server does not implement {0}".Formato(typeof(S)));
             
             try
             {
@@ -324,29 +324,12 @@ namespace Signum.Windows
             return NameToType.GetOrThrow(cleanName, "Type {0} not found in the Server");
         }
 
-        public static Type ToType(this TypeDN typeDN)
-        {
-            return GetType(typeDN.CleanName);
-        }
-
-        public static string GetCleanName(Type type)
-        {
-            return ServerTypes.GetOrThrow(type).CleanName;
-        }
-
-        public static TypeDN ToTypeDN(this Type type)
-        {
-            return ServerTypes.GetOrThrow(type);
-        }
-
         public static Lite<T> FillToStr<T>(this Lite<T> lite) where T : class, IIdentifiable
         {
             lite.SetToString(Return((IBaseServer s) => s.GetToStr(lite.EntityType, lite.Id)));
 
            return lite;
         }
-
-      
     }
 
     [Serializable]

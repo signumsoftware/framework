@@ -29,6 +29,9 @@ namespace Signum.Windows.Operations
                 Icon = coc.OperationSettings.TryCC(f => f.Icon.ToSmallImage()),
             };
 
+            if (coc.OperationSettings != null && coc.OperationSettings.Order != 0)
+                Common.SetOrder(miResult, coc.OperationSettings.Order);
+
             if (coc.CanExecute != null)
             {
                 miResult.ToolTip = coc.CanExecute;

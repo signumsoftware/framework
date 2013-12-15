@@ -90,7 +90,7 @@ namespace Signum.Engine
             {
                 string name = replacements.Apply(Replacements.KeyTables, objectName.ToString());
 
-                return model.GetOrThrow(name).Name;
+                return model.TryGetC(name).TryCC(a => a.Name) ?? objectName;
             };
 
             Func<DiffTable, DiffIndex, Index, bool> columnsChanged = (dif, dix, mix) =>
