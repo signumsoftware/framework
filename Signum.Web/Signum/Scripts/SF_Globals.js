@@ -300,7 +300,7 @@ var SF;
         var currentForm = $("form");
         currentForm.after($form);
 
-        ($form[0]).submit();
+        $form[0].submit();
         $form.remove();
 
         return false;
@@ -329,6 +329,7 @@ var SF;
             if (opened) {
                 $elem.removeClass(clss);
             } else {
+                //topFix is used to correct top when the toggler element is inside another panel with borders or anything
                 if (typeof topFix == "undefined") {
                     topFix = 0;
                 }

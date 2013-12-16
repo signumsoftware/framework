@@ -19,7 +19,7 @@ var SF;
                 requestExtraJsonData: null
             }, _viewOptions);
 
-            this.backup = null;
+            this.backup = null; //jquery object with the cloned original elements
         }
         ViewNavigator.prototype.tempDivId = function () {
             return SF.compose(this.viewOptions.prefix, "Temp");
@@ -140,17 +140,17 @@ var SF;
 
         ViewNavigator.prototype.showViewOk = function (newHtml) {
             if (SF.isEmpty(newHtml)) {
-                newHtml = $('#' + this.viewOptions.containerDiv).children().clone(true);
+                newHtml = $('#' + this.viewOptions.containerDiv).children().clone(true); //preloaded
 
                 //Backup current Html (for cancel scenarios)
                 this.backup = SF.cloneContents(this.viewOptions.containerDiv);
-                $('#' + this.viewOptions.containerDiv).html('');
+                $('#' + this.viewOptions.containerDiv).html(''); //avoid id-collision
 
                 $("body").append($("<div></div>").attr("id", this.tempDivId()).css("display", "none").html(newHtml));
             } else {
                 //Backup current Html (for cancel scenarios)
                 this.backup = SF.cloneContents(this.viewOptions.containerDiv);
-                $('#' + this.viewOptions.containerDiv).html('');
+                $('#' + this.viewOptions.containerDiv).html(''); //avoid id-collision
 
                 $("body").append(SF.hiddenDiv(this.tempDivId(), newHtml));
             }
@@ -371,9 +371,9 @@ var SF;
         var requestData = "prefix=" + tempDivId;
         if (!SF.isEmpty(jsonOptionsListFormat)) {
             for (var i = 0; i < jsonOptionsListFormat.length; i++) {
-                requestData += "&buttons=" + jsonOptionsListFormat[i];
+                requestData += "&buttons=" + jsonOptionsListFormat[i]; //This will Bind to the List<string> "buttons"
                 if (chooserOptions && chooserOptions.ids != null) {
-                    requestData += "&ids=" + chooserOptions.ids[i];
+                    requestData += "&ids=" + chooserOptions.ids[i]; //This will Bind to the List<string> "ids"
                 }
             }
         }

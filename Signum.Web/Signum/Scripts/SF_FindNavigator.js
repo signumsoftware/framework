@@ -17,7 +17,7 @@ var SF;
                     var divId = SF.compose(findOptions.prefix, "Temp");
                     $("body").append(SF.hiddenDiv(divId, popupHtml));
                     SF.triggerNewContent($("#" + divId));
-                    $.extend(self.getFor(findOptions.prefix).options, findOptions);
+                    $.extend(self.getFor(findOptions.prefix).options, findOptions); //Copy all properties (i.e. onOk was not transmitted)
                     $("#" + divId).popup({
                         onOk: function () {
                             self.getFor(findOptions.prefix).onSearchOk();
@@ -147,7 +147,7 @@ var SF;
                 var currSubtoken = $("#" + SF.compose(prefix, "ddlTokens_" + i));
                 if (currSubtoken.length > 0)
                     tokenName = SF.compose(tokenName, currSubtoken.val(), ".");
-else
+                else
                     stop = true;
             }
             return tokenName;
@@ -356,8 +356,12 @@ else
                     self.fullScreen(e);
                 });
 
-                this.element.on("sf-new-subtokens-combo", function (event, idSelectedCombo) {
-                    self.newSubTokensComboAdded($("#" + idSelectedCombo));
+                this.element.on("sf-new-subtokens-combo", function (event) {
+                    var idSelectedCombo = [];
+                    for (var _i = 0; _i < (arguments.length - 1); _i++) {
+                        idSelectedCombo[_i] = arguments[_i + 1];
+                    }
+                    self.newSubTokensComboAdded($("#" + idSelectedCombo[0]));
                 });
 
                 this.element.find(".sf-tm-selected").click(function () {
@@ -403,7 +407,7 @@ else
                 var $clickTarget = $(e.target);
                 if ($clickTarget.hasClass("sf-search-ctxitem") || $clickTarget.parent().hasClass("sf-search-ctxitem"))
                     $cmenu.hide();
-else
+                else
                     $('.sf-search-ctxmenu-overlay').remove();
             }).append($cmenu);
 
@@ -565,7 +569,7 @@ else
 
             var valBool = $("input:checkbox[id=" + SF.compose(SF.compose(this.options.prefix, "value"), index) + "]", $filter);
             if (valBool.length > 0) {
-                value = (valBool[0]).checked;
+                value = valBool[0].checked;
             } else {
                 var info = new SF.RuntimeInfo(SF.compose(SF.compose(this.options.prefix, "value"), index));
                 if (info.find().length > 0) {
@@ -658,7 +662,7 @@ else
 
             var self = this;
             selected.each(function (i, v) {
-                var parts = (v).value.split("__");
+                var parts = v.value.split("__");
                 var item = {
                     id: parts[0],
                     type: parts[1],
@@ -708,7 +712,7 @@ else
 
             if (newOrder == "-")
                 $th.removeClass("sf-header-sort-down").addClass("sf-header-sort-up");
-else
+            else
                 $th.removeClass("sf-header-sort-up").addClass("sf-header-sort-down");
         };
 
@@ -768,7 +772,7 @@ else
                 $target.after($source);
             }
 
-            $source.removeAttr("style");
+            $source.removeAttr("style"); //remove absolute positioning
             this.clearResults();
             this.createMoveColumnDragDrop();
         };
@@ -784,7 +788,7 @@ else
                 distance: 8,
                 cursor: "move"
             });
-            $draggables.removeAttr("style");
+            $draggables.removeAttr("style"); //remove relative positioning
 
             var self = this;
             $droppables.droppable({

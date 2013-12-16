@@ -200,7 +200,7 @@ declare module D3 {
         *
         * @param map Array of objects to get the key values from
         */
-        keys(map: any[]): any[];
+        keys(map: any): string[];
         /**
         * List the values of an associative array.
         *
@@ -710,7 +710,7 @@ declare module D3 {
         insert: (name: string, before: string) => Selection;
         remove: () => Selection;
         empty: () => boolean;
-
+            
         data: {
             (values: (data: any, index?: number) => any[], key?: (data: any, index?: number) => string): UpdateSelection;
             (values: any[], key?: (data: any, index?: number) => string): UpdateSelection;
@@ -735,14 +735,38 @@ declare module D3 {
             (type: string, listener: (data: any, index: number) => any, capture?: boolean): Selection;
         };
 
-        transition(): Transition.Transition;
         /**
-        * sort elements in the document based on data.
+        * Returns the total number of elements in the current selection.
+        */
+        size(): number;
+
+        /**
+        * Starts a transition for the current selection. Transitions behave much like selections,
+        * except operators animate smoothly over time rather than applying instantaneously.
+        */
+        transition(): Transition.Transition;
+
+        /**
+        * Sorts the elements in the current selection according to the specified comparator
+        * function.
         *
-        * params comparator the specified comparator function
+        * @param comparator a comparison function, which will be passed two data elements a and b
+        * to compare, and should return either a negative, positive, or zero value to indicate
+        * their relative order.
         */
         sort<T>(comparator?: (a: T, b: T) => number): Selection;
+
+        /**
+        * Re-inserts elements into the document such that the document order matches the selection
+        * order. This is equivalent to calling sort() if the data is already sorted, but much
+        * faster.
+        */
         order: () => Selection;
+
+        /**
+        * Returns the first non-null element in the current selection. If the selection is empty,
+        * returns null.
+        */
         node: () => Element;
     }
 
@@ -944,7 +968,18 @@ declare module D3 {
                 iso: TimeFormat;
             };
 
-            scale(): Scale.TimeScale;
+            scale: {
+                /**
+                * Constructs a new time scale with the default domain and range;
+                * the ticks and tick format are configured for local time.
+                */
+                (): Scale.TimeScale;
+                /**
+                * Constructs a new time scale with the default domain and range;
+                * the ticks and tick format are configured for UTC time.
+                */
+                utc(): Scale.TimeScale;
+            };
         }
 
         export interface Range {
@@ -997,7 +1032,7 @@ declare module D3 {
         }
 
         export interface StackLayout {
-            (layers: any[], index?: number): any[];
+            <T>(layers: T[], index?: number): T[];
             values(accessor?: (d: any) => any): StackLayout;
             offset(offset: string): StackLayout;
         }
@@ -1400,7 +1435,7 @@ declare module D3 {
             */
             r: number;
             /**
-            * the greeb color channel.
+            * the green color channel.
             */
             g: number;
             /**
@@ -1415,6 +1450,18 @@ declare module D3 {
 
         export interface HSLColor extends Color{
             /**
+            * hue
+            */
+            h: number;
+            /**
+            * saturation
+            */
+            s: number;
+            /**
+            * lightness
+            */
+            l: number;
+            /**
             * convert from HSL to RGB.
             */
             rgb(): RGBColor;
@@ -1422,12 +1469,36 @@ declare module D3 {
 
         export interface LABColor extends Color{
             /**
+            * lightness
+            */
+            l: number;
+            /**
+            * a-dimension
+            */
+            a: number;
+            /**
+            * b-dimension
+            */
+            b: number;
+            /**
             * convert from LAB to RGB.
             */
             rgb(): RGBColor;
         }
 
         export interface HCLColor extends Color{
+            /**
+            * hue
+            */
+            h: number;
+            /**
+            * chroma
+            */
+            c: number;
+            /**
+            * luminance
+            */
+            l: number;
             /**
             * convert from HCL to RGB.
             */
@@ -2358,7 +2429,7 @@ declare module D3 {
             /*
             * Construct a threshold scale with a discrete output range.
             */
-            theshold(): ThresholdScale;
+            threshold(): ThresholdScale;
         }
 
         export interface Scale {
@@ -2438,8 +2509,10 @@ declare module D3 {
             clamp(clamp: boolean): QuantitiveScale;
             /**
             * extend the scale domain to nice round numbers.
+            * 
+            * @param count Optional number of ticks to exactly fit the domain
             */
-            nice(): QuantitiveScale;
+            nice(count?: number): QuantitiveScale;
             /**
             * get representative values from the input domain.
             *
@@ -2632,9 +2705,11 @@ declare module D3 {
 
         export interface Zoom {
             /**
-            * Execute zoom method
+            * Applies the zoom behavior to the specified selection,
+            * registering the necessary event listeners to support
+            * panning and zooming.
             */
-            (): any;
+            (selection: Selection): void;
 
             /**
             * Registers a listener to receive events

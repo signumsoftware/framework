@@ -1,4 +1,6 @@
-﻿var SF;
+﻿/// <reference path="references.ts"/>
+
+var SF;
 (function (SF) {
     SF.Urls;
     SF.Locale;
@@ -77,6 +79,10 @@
         });
 
         $(document).ajaxError(function (event, XMLHttpRequest, ajaxOptions, thrownError) {
+            //check request status
+            //request.abort() has status 0, so we don't show this "error", since we have
+            //explicitly aborted the request.
+            //this error is documented on http://bugs.jquery.com/ticket/7189
             if (XMLHttpRequest.status !== 0) {
                 $("body").trigger("sf-ajax-error", [XMLHttpRequest, ajaxOptions, thrownError]);
                 pendingRequests = 0;
@@ -87,7 +93,7 @@
     function stopPropagation(event) {
         if (event.stopPropagation)
             event.stopPropagation();
-else
+        else
             event.cancelBubble = true;
     }
     SF.stopPropagation = stopPropagation;

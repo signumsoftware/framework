@@ -3,7 +3,7 @@
 
 module SF {
     export interface ValidationOptions {
-        prefix: string;
+        prefix?: string;
         controllerUrl?: string;
         showInlineErrors?: string;
         fixedInlineErrorText?: string; //Set to "" for it to be populated from ModelState error messages
@@ -25,7 +25,7 @@ module SF {
         globalErrorsKey = "sfGlobalErrors";
         globalValidationSummary = "sfGlobalValidationSummary";
 
-        constructor(_valOptions: ValidationOptions) {
+        constructor(_valOptions?: ValidationOptions) {
             this.valOptions = $.extend({
                 prefix: "",
                 controllerUrl: null,
@@ -234,7 +234,7 @@ module SF {
     }
 
     export interface PartialValidationOptions extends ValidationOptions {
-        type: string;
+        type?: string;
         id?: number;
     }
 

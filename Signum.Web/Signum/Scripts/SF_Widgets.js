@@ -1,6 +1,6 @@
-﻿var SF;
+﻿/// <reference path="references.ts"/>
+var SF;
 (function (SF) {
-    /// <reference path="references.ts"/>
     (function (Widgets) {
         var highlightClass = "sf-alert-active";
 

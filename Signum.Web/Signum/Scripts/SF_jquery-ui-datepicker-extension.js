@@ -37,7 +37,7 @@
                     case 'y':
                         if (advanceChars > 2)
                             output += date.getFullYear();
-else {
+                        else {
                             var year = '' + date.getFullYear();
                             if (advanceChars == 2)
                                 output += year.charAt(2);
@@ -47,35 +47,35 @@ else {
                     case 'M':
                         if (advanceChars == 1)
                             output += formatNumber(date.getMonth() + 1, 1);
-else if (advanceChars == 2)
+                        else if (advanceChars == 2)
                             output += formatNumber(date.getMonth() + 1, 2);
-else if (advanceChars == 3)
+                        else if (advanceChars == 3)
                             output += monthNamesShort[date.getMonth()];
-else if (advanceChars == 4)
+                        else if (advanceChars == 4)
                             output += monthNames[date.getMonth()];
                         break;
                     case 'd':
                         if (advanceChars == 1)
                             output += formatNumber(date.getDate(), 1);
-else if (advanceChars == 2)
+                        else if (advanceChars == 2)
                             output += formatNumber(date.getDate(), 2);
-else if (advanceChars == 3)
+                        else if (advanceChars == 3)
                             output += dayNamesShort[date.getDay()];
-else if (advanceChars == 4)
+                        else if (advanceChars == 4)
                             output += dayNames[date.getDay()];
                         break;
                     case 'H':
                     case 'h':
-                        output += formatNumber(0, advanceChars);
+                        output += formatNumber(0, advanceChars); //Always set hours to 0 when selecting a date from the picker
                         break;
                     case 'm':
-                        output += formatNumber(0, advanceChars);
+                        output += formatNumber(0, advanceChars); //Always set minutes to 0 when selecting a date from the picker
                         break;
                     case 's':
-                        output += formatNumber(0, advanceChars);
+                        output += formatNumber(0, advanceChars); //Always set seconds to 0 when selecting a date from the picker
                         break;
                     case 't':
-                        output += 'a';
+                        output += 'a'; //Always set am/pm to am when selecting a date from the picker
                         if (advanceChars == 2)
                             output += 'm';
                         break;
@@ -166,22 +166,22 @@ else if (advanceChars == 4)
                     year = getNumber(valueCurrentIndex, valueAdvanceChars);
                     if (advanceChars > 2)
                         break;
-else {
+                    else {
                         var currYear = '' + new Date().getFullYear();
                         if (advanceChars == 2)
                             year = parseInt(currYear.charAt(0) + currYear.charAt(1) + year);
-else
+                        else
                             year = parseInt(currYear.charAt(0) + currYear.charAt(1) + currYear.charAt(2) + year);
                     }
                     break;
                 case 'M':
                     if (advanceChars == 1 || advanceChars == 2)
                         month = getNumber(valueCurrentIndex, valueAdvanceChars);
-else {
+                    else {
                         var monthStr = value.substr(valueCurrentIndex, valueAdvanceChars);
                         if (advanceChars == 3)
                             month = getNameIndex(monthStr, monthNamesShort);
-else if (advanceChars == 4)
+                        else if (advanceChars == 4)
                             month = getNameIndex(monthStr, monthNames);
                     }
 
@@ -189,11 +189,11 @@ else if (advanceChars == 4)
                 case 'd':
                     if (advanceChars == 1 || advanceChars == 2)
                         day = getNumber(valueCurrentIndex, valueAdvanceChars);
-else {
+                    else {
                         var dayStr = value.substr(valueCurrentIndex, valueAdvanceChars);
                         if (advanceChars == 3)
                             day = getNameIndex(dayStr, dayNamesShort);
-else if (advanceChars == 4)
+                        else if (advanceChars == 4)
                             day = getNameIndex(dayStr, dayNames);
                     }
                     break;
@@ -210,7 +210,7 @@ else if (advanceChars == 4)
                     break;
                 default: {
                     checkLiteral(iFormat, valueCurrentIndex);
-                    advanceChars = 1;
+                    advanceChars = 1; //Check only one literal at a time
                     valueAdvanceChars = 1;
                 }
             }

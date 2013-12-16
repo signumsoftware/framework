@@ -366,8 +366,8 @@ module SF {
                     self.fullScreen(e);
                 });
 
-                this.element.on("sf-new-subtokens-combo", function (event, idSelectedCombo) {
-                    self.newSubTokensComboAdded($("#" + idSelectedCombo));
+                this.element.on("sf-new-subtokens-combo", function (event, ...idSelectedCombo) {
+                    self.newSubTokensComboAdded($("#" + idSelectedCombo[0]));
                 });
 
                 this.element.find(".sf-tm-selected").click(function () {

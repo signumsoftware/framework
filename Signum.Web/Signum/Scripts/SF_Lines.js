@@ -157,6 +157,7 @@ var SF;
 
             var staticInfo = this.staticInfo();
 
+            //If Embedded Entity => send propertyInfo
             if (staticInfo.isEmbedded()) {
                 extraParams.rootType = staticInfo.rootType();
                 extraParams.propertyRoute = staticInfo.propertyRoute();
@@ -321,7 +322,7 @@ var SF;
             }
             $(this.pf(EntityBase.key_entity)).append(clonedElements);
 
-            $(this.pf(SF.Keys.toStr)).val('');
+            $(this.pf(SF.Keys.toStr)).val(''); //Clean
             if (typeof item.toStr != "undefined" && typeof item.link != "undefined") {
                 $(this.pf(SF.Keys.link)).html(item.toStr).attr('href', item.link);
             }
@@ -371,14 +372,12 @@ var SF;
         };
 
         EntityLine.prototype.onAutocompleteSelected = function (controlId, data) {
-            var selectedItems = [
-                {
+            var selectedItems = [{
                     id: data.id,
                     type: data.type,
                     toStr: data.text,
                     link: data.link
-                }
-            ];
+                }];
             this.onFindingOk(selectedItems);
             this.fireOnEntityChanged(true);
         };
@@ -426,7 +425,7 @@ var SF;
             }
             var runtimeInfo = this.runtimeInfo();
             runtimeInfo.setEntity(newEntityType, newId);
-            $(this.pf(EntityBase.key_entity)).html('');
+            $(this.pf(EntityBase.key_entity)).html(''); //Clean
             this.fireOnEntityChanged(newEntity);
         };
 
@@ -555,6 +554,7 @@ var SF;
 
             var staticInfo = this.staticInfo();
 
+            //If Embedded Entity => send propertyRoute
             if (staticInfo.isEmbedded()) {
                 extraParams.rootType = staticInfo.rootType();
                 extraParams.propertyRoute = staticInfo.propertyRoute();
@@ -708,7 +708,7 @@ var SF;
                 item.toStr = "&nbsp;";
             }
             select.append("\n<option id='" + SF.compose(itemPrefix, SF.Keys.toStr) + "' name='" + SF.compose(itemPrefix, SF.Keys.toStr) + "' value='' class='sf-value-line'>" + item.toStr + "</option>");
-            select.children('option').attr('selected', false);
+            select.children('option').attr('selected', false); //Fix for Firefox: Set selected after retrieving the html of the select
             select.children('option:last').attr('selected', true);
             this.fireOnEntityChanged(false);
         };
@@ -1356,14 +1356,12 @@ var SF;
         };
 
         EntityStrip.prototype.onAutocompleteSelected = function (controlId, data) {
-            var selectedItems = [
-                {
+            var selectedItems = [{
                     id: data.id,
                     type: data.type,
                     toStr: data.text,
                     link: data.link
-                }
-            ];
+                }];
             this.onFindingOk(selectedItems);
             $("#" + controlId).val("");
             this.fireOnEntityChanged(true);

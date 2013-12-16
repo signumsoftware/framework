@@ -266,8 +266,8 @@
     <Content Include="Signum\Headers\jquery\jquery.d.ts" />
     <Content Include="Signum\Headers\jqueryui\jqueryui.d.ts" />
     <TypeScriptCompile Include="Signum\Scripts\references.ts" />
-    <Content Include="Signum\Scripts\SF_FindNavigator.ts" />
-    <Content Include="Signum\Scripts\SF_Operations.ts" />
+    <TypeScriptCompile Include="Signum\Scripts\SF_FindNavigator.ts" />
+    <TypeScriptCompile Include="Signum\Scripts\SF_Operations.ts" />
     <Content Include="Signum\Views\Exception.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Exception.generated.cs</LastGenOutput>
@@ -299,7 +299,7 @@
       <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
     <Content Include="Signum\Content\SF_Widgets.css" />
-    <Content Include="Signum\Scripts\SF_Widgets.ts" />
+    <TypeScriptCompile Include="Signum\Scripts\SF_Widgets.ts" />
     <None Include="Signum\Views\SearchControl.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>SearchControl.generated.cs</LastGenOutput>
@@ -330,7 +330,7 @@
     <Content Include="Signum\Content\SF_NormalPage.css" />
     <Content Include="Signum\Content\SF_Notify.css" />
     <Content Include="Signum\Content\SF_Search.css" />
-    <Content Include="Signum\Scripts\SF_Slider.ts" />
+    <TypeScriptCompile Include="Signum\Scripts\SF_Slider.ts" />
     <None Include="Signum\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
@@ -344,14 +344,14 @@
     <Content Include="Signum\Views\Web.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Signum\Scripts\SF_Globals.ts" />
+    <TypeScriptCompile Include="Signum\Scripts\SF_Globals.ts" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Signum\Images\asc.gif" />
     <Content Include="Signum\Images\desc.gif" />
     <Content Include="Signum\Images\lineButtons.gif" />
     <Content Include="Signum\Images\sign_error.gif" />
-    <Content Include="Signum\Scripts\SF_jquery-ui-datepicker-extension.ts" />
+    <TypeScriptCompile Include="Signum\Scripts\SF_jquery-ui-datepicker-extension.ts" />
     <None Include="Signum\Views\NormalControl.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>NormalControl.generated.cs</LastGenOutput>
@@ -362,10 +362,10 @@
       <LastGenOutput>ValueLineBox.generated.cs</LastGenOutput>
       <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
-    <Content Include="Signum\Scripts\SF_Lines.ts" />
-    <Content Include="Signum\Scripts\SF_Popup.ts" />
-    <Content Include="Signum\Scripts\SF_Validator.ts" />
-    <Content Include="Signum\Scripts\SF_ViewNavigator.ts" />
+    <TypeScriptCompile Include="Signum\Scripts\SF_Lines.ts" />
+    <TypeScriptCompile Include="Signum\Scripts\SF_Popup.ts" />
+    <TypeScriptCompile Include="Signum\Scripts\SF_Validator.ts" />
+    <TypeScriptCompile Include="Signum\Scripts\SF_ViewNavigator.ts" />
     <None Include="Signum\Views\Error.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Error.generated.cs</LastGenOutput>

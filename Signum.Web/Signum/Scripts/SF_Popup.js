@@ -1,6 +1,6 @@
-﻿var SF;
+﻿/// <reference path="references.ts"/>
+var SF;
 (function (SF) {
-    /// <reference path="references.ts"/>
     (function (Popup) {
         function serialize(prefix) {
             var id = SF.compose(prefix, "panelPopup");
@@ -89,7 +89,7 @@
                     dragStop: function (event, ui) {
                         var $dialog = $(event.target).closest(".ui-dialog");
                         var w = $dialog.width();
-                        $dialog.width(w + 1);
+                        $dialog.width(w + 1); //auto -> xxx width
                         setTimeout(function () {
                             $dialog.css({ width: "auto" });
                         }, 500);
