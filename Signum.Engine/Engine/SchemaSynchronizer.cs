@@ -376,6 +376,7 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".Formato(tabCol.Name,
                                             }).ToList(),
 
                              Stats = (from st in t.Stats()
+                                      where !st.name.StartsWith("PK__")
                                       select new DiffStats
                                       {
                                           StatsName = st.name,
