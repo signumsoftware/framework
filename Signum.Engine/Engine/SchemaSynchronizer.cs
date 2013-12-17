@@ -204,7 +204,7 @@ namespace Signum.Engine
                          var name = SqlBuilder.ForeignKeyName(tab.Name.Name, colModel.Name);
                          return SqlPreCommand.Combine(Spacing.Simple,
                             name != coldb.ForeingKey.Name? SqlBuilder.RenameForeignKey(tab.Name.Schema, coldb.ForeingKey.Name, name) : null, 
-                            (coldb.ForeingKey.IsDisabled || coldb.ForeingKey.IsNotTrusted) ? SqlBuilder.EnableForeignKey(tab.Name,  name) : null);
+                            (coldb.ForeingKey.IsDisabled || coldb.ForeingKey.IsNotTrusted) && !ExecutionMode.IsSynchronizeSchemaOnly ? SqlBuilder.EnableForeignKey(tab.Name,  name) : null);
                      },
                      Spacing.Simple),
                  Spacing.Double);
@@ -456,6 +456,9 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".Formato(tabCol.Name,
 
         public static SqlPreCommand SnapshotIsolation(Replacements replacements)
         {
+            if (ExecutionMode.IsSynchronizeSchemaOnly)
+                return null;
+
             var list = Schema.Current.DatabaseNames().Select(a => a.TryToString()).ToList();
 
             if (list.Contains(null))

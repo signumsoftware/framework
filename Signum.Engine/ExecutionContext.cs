@@ -48,5 +48,19 @@ namespace Signum.Engine
             return new Disposable(() => cacheTempDisabled.Value = false);
         }
 
+
+        public static bool IsSynchronizeSchemaOnly
+        {
+            get { return synchronizeSchemaOnly.Value; }
+        }
+
+        static readonly ThreadVariable<bool> synchronizeSchemaOnly = Statics.ThreadVariable<bool>("synchronizeSchemaOnly");
+        public static IDisposable SynchronizeSchemaOnly()
+        {
+            if (synchronizeSchemaOnly.Value) return null;
+            synchronizeSchemaOnly.Value = true;
+            return new Disposable(() => synchronizeSchemaOnly.Value = false);
+        }
+
     }
 }
