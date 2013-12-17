@@ -49,12 +49,7 @@ namespace Signum.Windows.Chart
             if (ct == null)
                 return null;
 
-            BitmapImage image = new BitmapImage();
-            image.BeginInit();
-            image.StreamSource = new MemoryStream(ct.Retrieve().BinaryFile);
-            image.EndInit();
-
-            return image;
+            return new MemoryStream(ct.Retrieve().BinaryFile).Using(ImageLoader.ThreadSafeImage);
         });
 
         public QueryDescription Description;
@@ -74,7 +69,7 @@ namespace Signum.Windows.Chart
 
     public class ChartTypeBackgroundConverter : IMultiValueConverter
     {
-        Brush superLightBlue = (Brush)new BrushConverter().ConvertFromString("#dfefff");
+        Brush superLightBlue = ((Brush)new BrushConverter().ConvertFromString("#dfefff")).Do(b => b.Freeze());
 
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
