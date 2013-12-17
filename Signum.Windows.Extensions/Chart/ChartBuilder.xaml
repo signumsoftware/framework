@@ -30,6 +30,7 @@
                                     <Binding Path=""/>
                                     <Binding Path="DataContext" ElementName="mecb"/>
                                     <Binding Path="IsSelected" RelativeSource="{RelativeSource AncestorType={x:Type ListBoxItem}}" />
+                                    <Binding Path="DataContext.Invalidator" ElementName="mecb"/>
                                 </MultiBinding>
                             </Border.Background>
                             <Image Source="{Binding Icon, Converter={x:Static c:ChartBuilder.ChartTypeToImage}}" 
