@@ -104,6 +104,19 @@ namespace Signum.Engine
             };
 
             //use database without replacements to just remove indexes
+            SqlPreCommand dropStatistics =
+                Synchronizer.SynchronizeScript(model, database,
+                 null,
+                (tn, dif) => SqlBuilder.DropStatistics(tn, dif.Stats),
+                (tn, tab, dif) =>
+                {
+                    var removedColums = dif.Colums.Keys.Except(tab.Columns.Keys).ToHashSet();
+
+                    return SqlBuilder.DropStatistics(tn, dif.Stats.Where(a => a.Columns.Any(removedColums.Contains)).ToList());
+                },
+                 Spacing.Double);
+
+
             SqlPreCommand dropIndices =
                 Synchronizer.SynchronizeScript(model, database,
                  null,
@@ -218,7 +231,7 @@ namespace Signum.Engine
                     return SqlPreCommand.Combine(Spacing.Simple, controlledIndexes);
                 }, Spacing.Double);
 
-            return SqlPreCommand.Combine(Spacing.Triple, dropIndices, dropForeignKeys, tables, syncEnums, addForeingKeys, addIndices);
+            return SqlPreCommand.Combine(Spacing.Triple, dropStatistics, dropIndices, dropForeignKeys, tables, syncEnums, addForeingKeys, addIndices);
         }
 
 
@@ -362,6 +375,15 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".Formato(tabCol.Name,
 
                                             }).ToList(),
 
+                             Stats = (from st in t.Stats()
+                                      select new DiffStats
+                                      {
+                                          StatsName = st.name,
+                                          Columns = (from ic in st.StatsColumns()
+                                                     join c in t.Columns() on ic.column_id equals c.column_id
+                                                     select c.name).ToList()
+                                      }).ToList(),
+
                          }).ToList();
 
                     allTables.AddRange(tables);
@@ -482,6 +504,15 @@ EXEC(@SPId)".Formato(a.name)) : null,
         }
 
         public Dictionary<string, DiffIndex> Indices = new Dictionary<string, DiffIndex>();
+
+        public List<DiffStats> Stats = new List<DiffStats>();
+    }
+
+    public class DiffStats
+    {
+        public string StatsName;
+
+        public List<string> Columns;
     }
 
     public class DiffIndex

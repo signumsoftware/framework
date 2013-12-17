@@ -353,5 +353,13 @@ FROM {1} as [table]".Formato(
         {
             return new SqlPreCommandSimple("ALTER INDEX [{0}] ON {1} REBUILD".Formato(indexName, tableName));
         }
+
+        internal static SqlPreCommand DropStatistics(string tn, List<DiffStats> list)
+        {
+            if (list.IsEmpty())
+                return null;
+
+            return new SqlPreCommandSimple("DROP STATISTICS " + list.ToString(s => tn.SqlScape() + "." + s.StatsName.SqlScape(), ",\r\n"));
+        }
     }
 }
