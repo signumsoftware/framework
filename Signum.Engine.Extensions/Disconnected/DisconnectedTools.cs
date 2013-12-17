@@ -197,6 +197,11 @@ MOVE '{4}' TO '{5}'".Formato(databaseName, backupFile,
                 action((int)elapsed);
             });
         }
+
+        public static string CleanMachineName(string machineName)
+        {
+            return Regex.Replace(machineName, "[^A-Z0-9_]", "_");
+        }
     }
 
     public struct SeedInfo

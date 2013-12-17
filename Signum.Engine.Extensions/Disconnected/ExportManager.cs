@@ -280,22 +280,18 @@ namespace Signum.Engine.Disconnected
 
         protected virtual string DatabaseFileName(DisconnectedMachineDN machine)
         {
-            return Path.Combine(DisconnectedLogic.DatabaseFolder, Connector.Current.DatabaseName() + "_Export_" + CleanName(machine.MachineName) + ".mdf");
+            return Path.Combine(DisconnectedLogic.DatabaseFolder, Connector.Current.DatabaseName() + "_Export_" + 
+                DisconnectedTools.CleanMachineName(machine.MachineName) + ".mdf");
         }
 
         protected virtual string DatabaseLogFileName(DisconnectedMachineDN machine)
         {
-            return Path.Combine(DisconnectedLogic.DatabaseFolder, Connector.Current.DatabaseName() + "_Export_" + CleanName(machine.MachineName) + "_Log.ldf");
+            return Path.Combine(DisconnectedLogic.DatabaseFolder, Connector.Current.DatabaseName() + "_Export_" + DisconnectedTools.CleanMachineName(machine.MachineName) + "_Log.ldf");
         }
 
         protected virtual DatabaseName DatabaseName(DisconnectedMachineDN machine)
         {
-            return new DatabaseName(null, Connector.Current.DatabaseName() + "_Export_" + CleanName(machine.MachineName));
-        }
-
-        private string CleanName(string machineName)
-        {
-            return Regex.Replace(machineName, "[^A-Z0-9_]", "_");
+            return new DatabaseName(null, Connector.Current.DatabaseName() + "_Export_" + DisconnectedTools.CleanMachineName(machine.MachineName));
         }
 
         protected virtual string CreateDatabase(DisconnectedMachineDN machine)
