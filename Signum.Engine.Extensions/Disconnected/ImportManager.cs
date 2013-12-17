@@ -134,6 +134,8 @@ namespace Signum.Engine.Disconnected
                             using (token.MeasureTime(l => import.InDB().UnsafeUpdate(s => new DisconnectedImportDN { SynchronizeSchema = l })))
                             using (Connector.Override(newDatabase))
                             using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
+                            using (ExecutionMode.DisableCache())
+                            using (ExecutionMode.SynchronizeSchemaOnly())
                             {
                                 var script = Administrator.TotalSynchronizeScript(interactive: false);
 
