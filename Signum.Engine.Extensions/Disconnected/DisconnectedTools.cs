@@ -37,7 +37,7 @@ END".Formato(databaseName);
         public static void CreateDatabaseDirectory(string databaseFile)
         {
             string databaseDirectory = Path.GetDirectoryName(databaseFile);
-            if (!Directory.Exists(databaseDirectory))
+            if (databaseDirectory.HasText() &&  !Directory.Exists(databaseDirectory))
             {
                 Directory.CreateDirectory(databaseDirectory);
             }
