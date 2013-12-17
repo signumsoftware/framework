@@ -88,6 +88,7 @@ namespace Signum.Utilities
 
         public static string Ask(string question, params string[] answers)
         {
+
             Console.Write(question + " ({0}) ".Formato(answers.ToString("/")));
             do
             {
@@ -228,6 +229,9 @@ namespace Signum.Utilities
             CTRL_SHUTDOWN_EVENT = 6
         }
 
-     
+        public static bool IsConsolePresent
+        {
+            get { return Console.In.GetType().Name != "NullStreamReader"; }
+        }
     }
 }
