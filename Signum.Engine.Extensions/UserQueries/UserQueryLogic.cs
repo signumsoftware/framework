@@ -216,7 +216,7 @@ namespace Signum.Engine.UserQueries
                         case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq);
                         case FixTokenResult.RemoveToken: uq.Filters.Remove(item); break;
                         case FixTokenResult.SkipEntity: return null;
-                        case FixTokenResult.Fix: item.ValueString = val; goto retry; break;
+                        case FixTokenResult.Fix: item.ValueString = val; goto retry;
                     }
                 }
 
