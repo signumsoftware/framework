@@ -39,14 +39,6 @@ namespace Signum.Windows
             set { SetValue(TypesProperty, value); }
         }
 
-        public static readonly DependencyProperty MultiSelectProperty =
-          DependencyProperty.Register("MultiSelect", typeof(bool), typeof(MultiSelectorWindow), new PropertyMetadata(true));
-        public bool MultiSelect
-        {
-            get { return (bool)GetValue(MultiSelectProperty); }
-            set { SetValue(MultiSelectProperty, value); }
-        }
-
         public static readonly DependencyProperty MessageProperty =
             DependencyProperty.Register("Message", typeof(string), typeof(MultiSelectorWindow), new UIPropertyMetadata(null));
         public string Message
