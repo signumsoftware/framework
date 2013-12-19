@@ -58,7 +58,7 @@ namespace Signum.Windows.UIAutomation
 
         public static void Value(this AutomationElement element, string value)
         {
-            element.Pattern<ValuePattern>().SetValue(value);
+            element.Pattern<ValuePattern>().SetValue(value ?? "");
         }
 
         public static string Value(this AutomationElement element)
