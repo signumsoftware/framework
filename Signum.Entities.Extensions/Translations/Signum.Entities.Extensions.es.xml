@@ -227,6 +227,7 @@
     <Member Name="Columns" Description="Columnas" />
     <Member Name="Filters" Description="Filtros" />
     <Member Name="GroupResults" Description="Resultados de grupo" />
+    <Member Name="Invalidator" Description="Invalidador" />
     <Member Name="Multiplications" Description="Multiplicaciones" />
     <Member Name="Orders" Description="Órdenes" />
     <Member Name="QueryName" Description="Nombre consulta" />
@@ -1294,6 +1295,7 @@
     <Member Name="Filters" Description="Filtros" />
     <Member Name="GroupResults" Description="Agrupar Resultados" />
     <Member Name="Guid" Description="Guid" />
+    <Member Name="Invalidator" Description="Invalidador" />
     <Member Name="Orders" Description="Órdenes" />
     <Member Name="Query" Description="Consulta" />
     <Member Name="Related" Description="Relacionado" />
