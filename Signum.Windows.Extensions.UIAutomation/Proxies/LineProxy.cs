@@ -262,16 +262,18 @@ namespace Signum.Windows.UIAutomation
             SearchWindowProxy.Select(win, index);
         }
 
-        public void FindAutoByFilterId(int id, int? timeOut = null)
+        public void FindSelectId(int id, int? timeOut = null)
         {
             var win = FindCapture(timeOut);
-            var searchWindow = new SearchWindowProxy(win);
+            using (var searchWindow = new SearchWindowProxy(win))
+            {
+                searchWindow.AddFilterString("Id", FilterOperation.EqualTo, id.ToString());
+                searchWindow.Search();
+                searchWindow.SelectElementAt(0);
+                searchWindow.Ok();
+            }
+        }
 
-           
-            searchWindow.AddFilterString("Id", FilterOperation.EqualTo, id.ToString());
-            searchWindow.Search();
-            searchWindow.SelectElementAt(0);
-            searchWindow.Ok();
         }
 
         public AutomationElement FindCapture(int? timeOut = null)
