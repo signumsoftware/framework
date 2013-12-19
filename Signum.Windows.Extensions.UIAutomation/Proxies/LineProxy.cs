@@ -274,6 +274,16 @@ namespace Signum.Windows.UIAutomation
             }
         }
 
+        public void FindSelectFilter(string token, FilterOperation operation, string value, int? timeOut = null)
+        {
+            var win = FindCapture(timeOut);
+            using (var searchWindow = new SearchWindowProxy(win))
+            {
+                searchWindow.AddFilterString(token, operation, value);
+                searchWindow.Search();
+                searchWindow.SelectElementAt(0);
+                searchWindow.Ok();
+            }
         }
 
         public AutomationElement FindCapture(int? timeOut = null)
