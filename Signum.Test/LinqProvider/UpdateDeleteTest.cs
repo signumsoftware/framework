@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using Signum.Utilities;
 using Signum.Test.Environment;
+using System.Data.SqlClient;
 
 namespace Signum.Test.LinqProviderUpdateDelete
 {
@@ -246,6 +247,19 @@ namespace Signum.Test.LinqProviderUpdateDelete
             using (Transaction tr = new Transaction())
             {
                 int count = Database.Query<NoteWithDateDN>().UnsafeUpdate(a => new NoteWithDateDN().SetMixin((CorruptMixin ce) => ce.Corrupt, true));
+                //tr.Commit();
+            }
+        }
+
+        [TestMethod]
+        public void UpdateMixin2()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                Assert2.Throws<SqlException>("more than once", () =>
+                    Database.Query<NoteWithDateDN>().UnsafeUpdate(a => new NoteWithDateDN()
+                    .SetMixin((CorruptMixin ce) => ce.Corrupt, true)
+                    .SetMixin((CorruptMixin ce) => ce.Corrupt, false)));
                 //tr.Commit();
             }
         }

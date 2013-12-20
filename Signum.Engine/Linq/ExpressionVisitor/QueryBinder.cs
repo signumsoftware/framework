@@ -1771,8 +1771,7 @@ namespace Signum.Engine.Linq
                 if (mce.Method.IsInstantiationOf(miSetReadonly))
                 {
                     var prev = mce.Arguments[0];
-                    if (prev.NodeType != ExpressionType.New)
-                        FillColumnAssigments(assignments, param, prev);
+                    FillColumnAssigments(assignments, param, prev);
 
                     var pi = ReflectionTools.BasePropertyInfo(mce.Arguments[1].StripQuotes());
 
@@ -1783,6 +1782,9 @@ namespace Signum.Engine.Linq
                 }
                 else if (mce.Method.IsInstantiationOf(miSetMixin))
                 {
+                    var prev = mce.Arguments[0];
+                    FillColumnAssigments(assignments, param, prev);
+
                     Type mixinType = mce.Method.GetGenericArguments()[1];
 
                     var mi = ReflectionTools.BaseMemberInfo(mce.Arguments[1].StripQuotes());
@@ -1802,7 +1804,12 @@ namespace Signum.Engine.Linq
                 var mie = (MemberInitExpression)body;
                 assignments.AddRange(mie.Bindings.SelectMany(m => ColumnAssigments(param, m)));
 
-            }else
+            }
+            else if (body is NewExpression)
+            {
+                return;
+            }
+            else
             {
                 throw InvalidBody();
             }
