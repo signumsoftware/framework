@@ -97,7 +97,7 @@ namespace Signum.Utilities
                 return ReadStream<T>(ms, encoding, culture, skipLines, trim).ToList();
         }
 
-        public static IEnumerable<T> ReadStream<T>(this Stream stream, Encoding encoding = null, CultureInfo culture = null, int skipLines = 1, bool trim = true)
+        public static IEnumerable<T> ReadStream<T>(Stream stream, Encoding encoding = null, CultureInfo culture = null, int skipLines = 1, bool trim = true)
             where T : new()
         {
             encoding = encoding ?? DefaultEncoding;
