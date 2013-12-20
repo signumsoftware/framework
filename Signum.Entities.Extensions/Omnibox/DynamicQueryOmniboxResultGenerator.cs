@@ -338,7 +338,7 @@ namespace Signum.Entities.Omnibox
 
             bool isPascal = OmniboxUtils.IsPascalCasePattern(omniboxToken.Value);
 
-            var dic = QueryUtils.SubTokens(queryToken, queryDescription, canAggregate: false).ToDictionary(qt => qt.ToString().ToOmniboxPascal());
+            var dic = QueryUtils.SubTokens(queryToken, queryDescription, canAggregate: false).ToDictionary(qt => qt.ToString().ToOmniboxPascal(), "translations");
 
             var matches = OmniboxUtils.Matches(dic, qt => qt.IsAllowed() == null, omniboxToken.Value, isPascal);
 
