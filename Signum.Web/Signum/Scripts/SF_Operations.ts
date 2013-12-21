@@ -367,7 +367,7 @@ module SF
             }));
         }
 
-        public requestData(newPrefix, items) {
+        public requestDataItems(newPrefix, items) {
             var serializer = new SF.Serializer()
                 .add($('#' + SF.Keys.tabId).serialize())
                 .add($("input:hidden[name=" + SF.Keys.antiForgeryToken + "]").serialize())
@@ -386,7 +386,7 @@ module SF
             return serializer.serialize();
         }
 
-        public ajax(newPrefix, items, onSuccess) {
+        public ajaxItems(newPrefix, items, onSuccess) {
             if (SF.Blocker.isEnabled()) {
                 return false;
             }
@@ -397,7 +397,7 @@ module SF
             var self = this;
             $.ajax({
                 url: this.options.controllerUrl,
-                data: this.requestData(newPrefix, items),
+                data: this.requestDataItems(newPrefix, items),
                 success: function (operationResult) {
                     SF.Blocker.disable();
 

@@ -377,36 +377,43 @@ var SF;
     })(SF.Blocker || (SF.Blocker = {}));
     var Blocker = SF.Blocker;
 
-    $(function () {
-        $(document).on("click", function (e) {
-            $(".sf-dropdown").removeClass("sf-open");
+    once("closeDropDowns", function () {
+        return $(function () {
+            $(document).on("click", function (e) {
+                $(".sf-dropdown").removeClass("sf-open");
+            });
         });
     });
 
-    $(function () {
-        $('#form input[type=text]').keypress(function (e) {
-            return e.which != 13;
+    once("removeKeyPress", function () {
+        return $(function () {
+            $('#form input[type=text]').keypress(function (e) {
+                return e.which != 13;
+            });
         });
     });
 
-    $(function () {
-        $("body").bind("sf-ajax-error", function (event, XMLHttpRequest, textStatus, thrownError) {
-            var error = XMLHttpRequest.responseText;
-            if (!error) {
-                error = textStatus;
-            }
+    once("ajaxError", function () {
+        return $(function () {
+            $("body").bind("sf-ajax-error", function (event, XMLHttpRequest, textStatus, thrownError) {
+                var error = XMLHttpRequest.responseText;
+                if (!error) {
+                    error = textStatus;
+                }
 
-            var message = error.length > 50 ? error.substring(0, 49) + "..." : error;
-            SF.Notify.error(lang.signum.error + ": " + message, 2000);
+                var message = error.length > 50 ? error.substring(0, 49) + "..." : error;
+                SF.Notify.error(lang.signum.error + ": " + message, 2000);
 
-            SF.log(error);
-            SF.log(XMLHttpRequest);
-            SF.log(thrownError);
+                SF.log(error);
+                SF.log(XMLHttpRequest);
+                SF.log(thrownError);
 
-            alert(lang.signum.error + ": " + error);
-            if (Blocker.isEnabled()) {
-                Blocker.disable();
-            }
+                alert(lang.signum.error + ": " + error);
+                if (Blocker.isEnabled()) {
+                    Blocker.disable();
+                }
+            });
         });
     });
 })(SF || (SF = {}));
+//# sourceMappingURL=SF_Globals.js.map

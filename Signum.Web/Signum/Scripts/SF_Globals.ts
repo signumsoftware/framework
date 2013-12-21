@@ -221,7 +221,6 @@ module SF
         }
     }
 
-
     export function compose (str1: string, str2: string, separator?: string) {
         if (typeof (str1) !== "string" && str1 !== null && str1 != undefined) {
             throw "str1 " + str1 + " is not a string";
@@ -270,7 +269,7 @@ module SF
         return path;
     }
 
-    export function submit(urlController, requestExtraJsonData, $form) {
+    export function submit(urlController, requestExtraJsonData?, $form?) {
         $form = $form || $("form");
         if (!SF.isEmpty(requestExtraJsonData)) {
             if ($.isFunction(requestExtraJsonData)) {
@@ -384,34 +383,39 @@ module SF
         }
     }
 
+    once("closeDropDowns", () =>
+        $(function () {
+            $(document).on("click", function (e) {
+                $(".sf-dropdown").removeClass("sf-open");
+            });
+        })
+    );
 
-    $(function () {
-        $(document).on("click", function (e) {
-            $(".sf-dropdown").removeClass("sf-open");
-        });
-    });
+    once("removeKeyPress", () =>
+        $(function () { $('#form input[type=text]').keypress(function (e) { return e.which != 13 }) }));
 
-    $(function () { $('#form input[type=text]').keypress(function (e) { return e.which != 13 }) });
 
-    $(function () {
-        $("body").bind("sf-ajax-error", function (event, XMLHttpRequest, textStatus, thrownError) {
+    once("ajaxError", () =>
+        $(function () {
+            $("body").bind("sf-ajax-error", function (event, XMLHttpRequest, textStatus, thrownError) {
 
-            var error = XMLHttpRequest.responseText;
-            if (!error) {
-                error = textStatus;
-            }
+                var error = XMLHttpRequest.responseText;
+                if (!error) {
+                    error = textStatus;
+                }
 
-            var message = error.length > 50 ? error.substring(0, 49) + "..." : error;
-            SF.Notify.error(lang.signum.error + ": " + message, 2000);
+                var message = error.length > 50 ? error.substring(0, 49) + "..." : error;
+                SF.Notify.error(lang.signum.error + ": " + message, 2000);
 
-            SF.log(error);
-            SF.log(XMLHttpRequest);
-            SF.log(thrownError);
+                SF.log(error);
+                SF.log(XMLHttpRequest);
+                SF.log(thrownError);
 
-            alert(lang.signum.error + ": " + error);
-            if (Blocker.isEnabled()) {
-                Blocker.disable();
-            }
-        });
-    });
+                alert(lang.signum.error + ": " + error);
+                if (Blocker.isEnabled()) {
+                    Blocker.disable();
+                }
+            });
+        }));
 }
+

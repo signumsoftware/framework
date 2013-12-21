@@ -3,10 +3,11 @@ var SF;
 (function (SF) {
     (function (Widgets) {
         var highlightClass = "sf-alert-active";
-
-        $(document).on("click", ".sf-widget-toggler", function (evt) {
-            SF.Dropdowns.toggle(evt, this, 1);
-            return false;
+        once("widgetToggler", function () {
+            return $(document).on("click", ".sf-widget-toggler", function (evt) {
+                SF.Dropdowns.toggle(evt, this, 1);
+                return false;
+            });
         });
 
         function onNoteCreated(url, prefix, successMessage) {
@@ -47,3 +48,4 @@ var SF;
     })(SF.Widgets || (SF.Widgets = {}));
     var Widgets = SF.Widgets;
 })(SF || (SF = {}));
+//# sourceMappingURL=SF_Widgets.js.map

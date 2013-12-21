@@ -1,6 +1,7 @@
-﻿    // Overrides jquery calendar in (jquery-ui-1.7.2.js) to format dates in .net dateformat that can be found here:
-    // http://msdn.microsoft.com/en-us/library/8kb3ddd4%28v=VS.71%29.aspx
+﻿// Overrides jquery calendar in (jquery-ui-1.7.2.js) to format dates in .net dateformat that can be found here:
+// http://msdn.microsoft.com/en-us/library/8kb3ddd4%28v=VS.71%29.aspx
 
+once("datePickerFormat", () =>
     (function ($) {
         $.datepicker.formatDate = function (format, date, settings) {
             if (!date)
@@ -199,7 +200,7 @@
                         }
                         break;
                     case 'D':
-                        throw new Error("not implemented");  
+                        throw new Error("not implemented");
                         //getName('D', dayNamesShort, dayNames);
                         break;
                     case 'H':
@@ -227,4 +228,4 @@
                 throw 'Invalid date'; // E.g. 31/02/*
             return date;
         };
-    })(jQuery);
+    })(jQuery));

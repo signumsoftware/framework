@@ -1,13 +1,21 @@
 ﻿/// <reference path="references.ts"/>
 
+
 module SF {
     export module FindNavigator {
 
-        export function getFor(prefix) {
-            return $("#" + SF.compose(prefix, "sfSearchControl")).data("SF-findNavigator");
+        once("SF-searchControl", () =>
+            $.fn.searchControl = function (opt: FindOptions) {
+                var sc = new SearchControl(this, opt);
+
+                this.data("SF-searchControl", sc);
+            });
+
+        export function getFor(prefix: string) : SearchControl {
+            return $("#" + SF.compose(prefix, "sfSearchControl")).data("SF-searchControl");
         }
 
-        export function openFinder(findOptions) {
+        export function openFinder(findOptions: FindOptions) {
             var self = this;
             $.ajax({
                 url: findOptions.openFinderUrl || (SF.isEmpty(findOptions.prefix) ? SF.Urls.find : SF.Urls.partialFind),
@@ -26,7 +34,7 @@ module SF {
             });
         }
 
-        export function requestDataForOpenFinder(findOptions) {
+        export function requestDataForOpenFinder(findOptions: FindOptions) {
             var requestData = {
                 webQueryName: findOptions.webQueryName,
                 elems: findOptions.elems,
@@ -176,7 +184,7 @@ module SF {
         static OnlyResults = "OnlyResults";
     }
 
-    export class FindOptions {
+    export interface FindOptions {
         allowChangeColumns: boolean;
         allowOrder: boolean;
         allowMultiple: boolean;
@@ -210,7 +218,9 @@ module SF {
 
         options: FindOptions;
 
-        constructor(_options: FindOptions) {
+        constructor(element: JQuery, _options: FindOptions) {
+            this.element = element;
+
             this.options = $.extend({
                 allowChangeColumns: true,
                 allowOrder: true,

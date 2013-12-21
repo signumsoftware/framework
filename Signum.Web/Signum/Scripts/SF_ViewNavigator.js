@@ -410,3 +410,4 @@ var SF;
     }
     SF.openChooser = openChooser;
 })(SF || (SF = {}));
+//# sourceMappingURL=SF_ViewNavigator.js.map

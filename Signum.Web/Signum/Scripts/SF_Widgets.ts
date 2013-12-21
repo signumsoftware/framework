@@ -4,11 +4,11 @@
 module SF.Widgets
 {   
     var highlightClass = "sf-alert-active";
-
-    $(document).on("click", ".sf-widget-toggler", function (evt) {
-        SF.Dropdowns.toggle(evt, this, 1);
-        return false;
-    });
+    once("widgetToggler", () =>
+        $(document).on("click", ".sf-widget-toggler", function (evt) {
+            SF.Dropdowns.toggle(evt, this, 1);
+            return false;
+        }));
 
     export function onNoteCreated(url, prefix, successMessage) {
         $.ajax({

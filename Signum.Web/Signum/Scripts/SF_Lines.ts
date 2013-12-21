@@ -18,8 +18,9 @@ module SF {
 
     export class EntityBase {
         options: EntityBaseOptions;
-
-        constructor(_options: EntityBaseOptions) {
+        element: JQuery;
+        constructor(element: JQuery, _options: EntityBaseOptions) {
+            this.element = element;
             this.options = $.extend({
                 prefix: "",
                 partialViewName: "",
@@ -273,6 +274,12 @@ module SF {
         }
     }
 
+    once("SF-entityLine", () =>
+        $.fn.entityLine = function (opt: EntityBaseOptions) {
+            var sc = new EntityLine(this, opt);
+
+            this.data("SF-entityLine", sc);
+        });
 
     export class EntityLine extends EntityBase {
 
@@ -398,6 +405,13 @@ module SF {
         }
     }
 
+    once("SF-entityCombo", () =>
+        $.fn.entityCombo = function (opt: EntityBaseOptions) {
+            var sc = new EntityCombo(this, opt);
+
+            this.data("SF-entityCombo", sc);
+        });
+
     export class EntityCombo extends EntityBase {
 
         static key_entity = "sfEntity";
@@ -461,12 +475,19 @@ module SF {
         detailDiv: string;
     }
 
+    once("SF-entityLineDetail", () =>
+        $.fn.entityLineDetail = function (opt: EntityBaseDetailOptions) {
+            var sc = new EntityLineDetail(this, opt);
+
+            this.data("SF-entityLineDetail", sc);
+        });
+
     export class EntityLineDetail extends EntityBase {
 
         options: EntityBaseDetailOptions;
 
-        constructor(options: EntityBaseDetailOptions) {
-            super(options);
+        constructor(element: JQuery, options: EntityBaseDetailOptions) {
+            super(element, options);
         }
 
         typedCreate(_viewOptions: ViewOptions) {
@@ -549,7 +570,12 @@ module SF {
         }
     }
 
+    once("SF-entityList", () =>
+        $.fn.entityList = function (opt: EntityBaseOptions) {
+            var sc = new EntityList(this, opt);
 
+            this.data("SF-entityList", sc);
+        });
 
     export class EntityList extends EntityBase {
         static key_indexes = "sfIndexes";
@@ -874,13 +900,19 @@ module SF {
 
     }
 
+    once("SF-entityListDetail", () =>
+        $.fn.entityListDetail = function (opt: EntityBaseDetailOptions) {
+            var sc = new EntityListDetail(this, opt);
+
+            this.data("SF-entityListDetail", sc);
+        });
 
     export class EntityListDetail extends EntityList {
 
         options: EntityBaseDetailOptions;
 
-        constructor(options: EntityBaseDetailOptions) {
-            super(options);
+        constructor(element: JQuery, options: EntityBaseDetailOptions) {
+            super(element, options);
         }
 
         typedCreate(_viewOptions: ViewOptions) {
@@ -1043,13 +1075,18 @@ module SF {
         }
     }
 
-
     export interface EntityRepeaterOptions extends EntityBaseOptions {
         maxElements?: number;
         remove: boolean;
         reorder: boolean;
     }
 
+    once("SF-entityRepeater", () =>
+        $.fn.entityRepeater = function (opt: EntityRepeaterOptions) {
+            var sc = new EntityRepeater(this, opt);
+
+            this.data("SF-entityRepeater", sc);
+        });
 
     export class EntityRepeater extends EntityList {
         static key_itemsContainer = "sfItemsContainer";
@@ -1059,8 +1096,8 @@ module SF {
 
         options: EntityRepeaterOptions;
 
-        constructor(options: EntityRepeaterOptions) {
-            super(options);
+        constructor(element: JQuery, options: EntityRepeaterOptions) {
+            super(element, options);
         }
 
         itemSuffix() {
@@ -1243,6 +1280,12 @@ module SF {
         navigate?: boolean;
     }
 
+    once("SF-entityStrip", () =>
+        $.fn.entityStrip = function (opt: EntityStripOptions) {
+            var sc = new EntityStrip(this, opt);
+
+            this.data("SF-entityStrip", sc);
+        });
 
     export class EntityStrip extends EntityList {
         static key_itemsContainer = "sfItemsContainer";
@@ -1253,8 +1296,8 @@ module SF {
 
         options: EntityStripOptions;
 
-        constructor(options: EntityStripOptions) {
-            super(options);
+        constructor(element: JQuery, options: EntityStripOptions) {
+            super(element, options);
         }
 
         itemSuffix() {

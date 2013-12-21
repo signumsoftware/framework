@@ -2,8 +2,16 @@
 var SF;
 (function (SF) {
     (function (FindNavigator) {
+        once("SF-searchControl", function () {
+            return $.fn.searchControl = function (opt) {
+                var sc = new SF.SearchControl(this, opt);
+
+                this.data("SF-searchControl", sc);
+            };
+        });
+
         function getFor(prefix) {
-            return $("#" + SF.compose(prefix, "sfSearchControl")).data("SF-findNavigator");
+            return $("#" + SF.compose(prefix, "sfSearchControl")).data("SF-searchControl");
         }
         FindNavigator.getFor = getFor;
 
@@ -190,21 +198,16 @@ var SF;
     })();
     SF.FilterMode = FilterMode;
 
-    var FindOptions = (function () {
-        function FindOptions() {
-        }
-        return FindOptions;
-    })();
-    SF.FindOptions = FindOptions;
-
     var SearchControl = (function () {
-        function SearchControl(_options) {
+        function SearchControl(element, _options) {
             this.keys = {
                 elems: "sfElems",
                 page: "sfPage",
                 pagination: "sfPaginationMode"
             };
             this.searchOnLoadFinished = false;
+            this.element = element;
+
             this.options = $.extend({
                 allowChangeColumns: true,
                 allowOrder: true,
@@ -1050,3 +1053,4 @@ var SF;
     })();
     SF.SearchControl = SearchControl;
 })(SF || (SF = {}));
+//# sourceMappingURL=SF_FindNavigator.js.map

@@ -357,7 +357,7 @@ var SF;
                 returnType: null
             }));
         }
-        ConstructorFromMany.prototype.requestData = function (newPrefix, items) {
+        ConstructorFromMany.prototype.requestDataItems = function (newPrefix, items) {
             var serializer = new SF.Serializer().add($('#' + SF.Keys.tabId).serialize()).add($("input:hidden[name=" + SF.Keys.antiForgeryToken + "]").serialize()).add({
                 entityType: $(this.pf(SF.Keys.entityTypeNames)).val(),
                 operationFullKey: this.options.operationKey,
@@ -373,7 +373,7 @@ var SF;
             return serializer.serialize();
         };
 
-        ConstructorFromMany.prototype.ajax = function (newPrefix, items, onSuccess) {
+        ConstructorFromMany.prototype.ajaxItems = function (newPrefix, items, onSuccess) {
             if (SF.Blocker.isEnabled()) {
                 return false;
             } else {
@@ -383,7 +383,7 @@ var SF;
             var self = this;
             $.ajax({
                 url: this.options.controllerUrl,
-                data: this.requestData(newPrefix, items),
+                data: this.requestDataItems(newPrefix, items),
                 success: function (operationResult) {
                     SF.Blocker.disable();
 
@@ -456,6 +456,7 @@ var SF;
         var newPopupId = SF.compose(prefix, "panelPopup");
         var hasNewPopup = $result.filter("#" + newPopupId).length !== 0;
 
+        //If result is a NormalControl, or an already opened popup => ReloadContent
         if (!hasNewPopup || (hasNewPopup && $("#" + newPopupId + ":visible").length !== 0)) {
             SF.opReloadContent(prefix, operationResult, !SF.isEmpty(parentDiv) ? parentDiv : hasNewPopup ? newPopupId : "");
         } else {
@@ -532,6 +533,7 @@ var SF;
         var newPopupId = SF.compose(prefix, "panelPopup");
         var hasNewPopup = $result.filter("#" + newPopupId).length !== 0;
 
+        //If result is a NormalControl => Load it
         if (hasNewPopup) {
             SF.opOpenPopup(prefix, operationResult);
         } else {
@@ -543,3 +545,4 @@ var SF;
     }
     SF.opContextualOnSuccess = opContextualOnSuccess;
 })(SF || (SF = {}));
+//# sourceMappingURL=SF_Operations.js.map

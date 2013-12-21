@@ -1,5 +1,13 @@
 ﻿/// <reference path="references.ts"/>
 
+var onceStorage = {};
+function once(key, func) {
+    if (onceStorage[key] === undefined) {
+        func();
+        onceStorage[key] = "loaded";
+    }
+}
+
 var SF;
 (function (SF) {
     SF.Urls;
@@ -15,7 +23,9 @@ var SF;
     }
     SF.log = log;
 
-    setupAjaxPrefilters();
+    once("setupAjaxPrefilters", function () {
+        return setupAjaxPrefilters();
+    });
 
     function setupAjaxPrefilters() {
         var pendingRequests = 0;
@@ -336,88 +346,93 @@ var SF;
     var NewContentProcessor = SF.NewContentProcessor;
 })(SF || (SF = {}));
 
-(function ($) {
-    $.fn.placeholder = function () {
-        if ($.fn.placeholder.supported()) {
-            return $(this);
-        } else {
-            $(this).parent('form').submit(function (e) {
-                $('input[placeholder].sf-placeholder, textarea[placeholder].sf-placeholder', this).val('');
-            });
+once("placeHolder", function () {
+    return (function ($) {
+        $.fn.placeholder = function () {
+            if ($.fn.placeholder.supported()) {
+                return $(this);
+            } else {
+                $(this).parent('form').submit(function (e) {
+                    $('input[placeholder].sf-placeholder, textarea[placeholder].sf-placeholder', this).val('');
+                });
 
-            $(this).each(function () {
-                $.fn.placeholder.on(this);
-            });
-
-            return $(this).focus(function () {
-                if ($(this).hasClass('sf-placeholder')) {
-                    $.fn.placeholder.off(this);
-                }
-            }).blur(function () {
-                if ($(this).val() == '') {
+                $(this).each(function () {
                     $.fn.placeholder.on(this);
-                }
-            });
-        }
+                });
+
+                return $(this).focus(function () {
+                    if ($(this).hasClass('sf-placeholder')) {
+                        $.fn.placeholder.off(this);
+                    }
+                }).blur(function () {
+                    if ($(this).val() == '') {
+                        $.fn.placeholder.on(this);
+                    }
+                });
+            }
+        };
+
+        // Extracted from: http://diveintohtml5.org/detect.html#input-placeholder
+        $.fn.placeholder.supported = function () {
+            var input = document.createElement('input');
+            return !!('placeholder' in input);
+        };
+
+        $.fn.placeholder.on = function (el) {
+            var $el = $(el);
+            if ($el.val() == '')
+                $el.val($el.attr('placeholder')).addClass('sf-placeholder');
+        };
+
+        $.fn.placeholder.off = function (el) {
+            $(el).val('').removeClass('sf-placeholder');
+        };
+    })(jQuery);
+});
+
+once("stringExtensions", function () {
+    String.prototype.hasText = function () {
+        return (this == null || this == undefined || this == '') ? false : true;
     };
 
-    // Extracted from: http://diveintohtml5.org/detect.html#input-placeholder
-    $.fn.placeholder.supported = function () {
-        var input = document.createElement('input');
-        return !!('placeholder' in input);
+    String.prototype.startsWith = function (str) {
+        return (this.indexOf(str) === 0);
     };
 
-    $.fn.placeholder.on = function (el) {
-        var $el = $(el);
-        if ($el.val() == '')
-            $el.val($el.attr('placeholder')).addClass('sf-placeholder');
+    String.prototype.format = function () {
+        var regex = /\{([\w-]+)(?:\:([\w\.]*)(?:\((.*?)?\))?)?\}/g;
+
+        var args = arguments;
+
+        var getValue = function (key) {
+            if (args == null || typeof args === 'undefined')
+                return null;
+
+            var value = args[key];
+            var type = typeof value;
+
+            return type === 'string' || type === 'number' ? value : null;
+        };
+
+        return this.replace(regex, function (match) {
+            //match will look like {sample-match}
+            //key will be 'sample-match';
+            var key = match.substr(1, match.length - 2);
+
+            var value = getValue(key);
+
+            return value != null ? value : match;
+        });
     };
 
-    $.fn.placeholder.off = function (el) {
-        $(el).val('').removeClass('sf-placeholder');
-    };
-})(jQuery);
-
-String.prototype.hasText = function () {
-    return (this == null || this == undefined || this == '') ? false : true;
-};
-
-String.prototype.startsWith = function (str) {
-    return (this.indexOf(str) === 0);
-};
-
-String.prototype.format = function () {
-    var regex = /\{([\w-]+)(?:\:([\w\.]*)(?:\((.*?)?\))?)?\}/g;
-
-    var args = arguments;
-
-    var getValue = function (key) {
-        if (args == null || typeof args === 'undefined')
-            return null;
-
-        var value = args[key];
-        var type = typeof value;
-
-        return type === 'string' || type === 'number' ? value : null;
+    String.prototype.replaceAll = function (from, to) {
+        return this.split(from).join(to);
     };
 
-    return this.replace(regex, function (match) {
-        //match will look like {sample-match}
-        //key will be 'sample-match';
-        var key = match.substr(1, match.length - 2);
-
-        var value = getValue(key);
-
-        return value != null ? value : match;
-    });
-};
-
-String.prototype.replaceAll = function (from, to) {
-    return this.split(from).join(to);
-};
-
-if (typeof String.prototype.trim !== 'function') {
-    String.prototype.trim = function () {
-        return this.replace(/^\s+|\s+$/, '');
-    };
-}
+    if (typeof String.prototype.trim !== 'function') {
+        String.prototype.trim = function () {
+            return this.replace(/^\s+|\s+$/, '');
+        };
+    }
+});
+//# sourceMappingURL=SF_Utils.js.map

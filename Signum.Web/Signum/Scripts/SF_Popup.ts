@@ -16,7 +16,8 @@ module SF.Popup
         return data;
     }
 
-     export function serializeJson(prefix) {
+    export function serializeJson(prefix) {
+
         var id = SF.compose(prefix, "panelPopup");
         var arr = $("#" + id + " :input").serializeArray();
         var data = {};

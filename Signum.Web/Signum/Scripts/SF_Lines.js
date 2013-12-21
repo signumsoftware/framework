@@ -8,7 +8,8 @@ var __extends = this.__extends || function (d, b) {
 var SF;
 (function (SF) {
     var EntityBase = (function () {
-        function EntityBase(_options) {
+        function EntityBase(element, _options) {
+            this.element = element;
             this.options = $.extend({
                 prefix: "",
                 partialViewName: "",
@@ -250,6 +251,14 @@ var SF;
     })();
     SF.EntityBase = EntityBase;
 
+    once("SF-entityLine", function () {
+        return $.fn.entityLine = function (opt) {
+            var sc = new EntityLine(this, opt);
+
+            this.data("SF-entityLine", sc);
+        };
+    });
+
     var EntityLine = (function (_super) {
         __extends(EntityLine, _super);
         function EntityLine() {
@@ -389,6 +398,14 @@ var SF;
     })(EntityBase);
     SF.EntityLine = EntityLine;
 
+    once("SF-entityCombo", function () {
+        return $.fn.entityCombo = function (opt) {
+            var sc = new EntityCombo(this, opt);
+
+            this.data("SF-entityCombo", sc);
+        };
+    });
+
     var EntityCombo = (function (_super) {
         __extends(EntityCombo, _super);
         function EntityCombo() {
@@ -446,10 +463,18 @@ var SF;
     })(EntityBase);
     SF.EntityCombo = EntityCombo;
 
+    once("SF-entityLineDetail", function () {
+        return $.fn.entityLineDetail = function (opt) {
+            var sc = new EntityLineDetail(this, opt);
+
+            this.data("SF-entityLineDetail", sc);
+        };
+    });
+
     var EntityLineDetail = (function (_super) {
         __extends(EntityLineDetail, _super);
-        function EntityLineDetail(options) {
-            _super.call(this, options);
+        function EntityLineDetail(element, options) {
+            _super.call(this, element, options);
         }
         EntityLineDetail.prototype.typedCreate = function (_viewOptions) {
             if (SF.isEmpty(_viewOptions.type)) {
@@ -535,6 +560,14 @@ var SF;
         return EntityLineDetail;
     })(EntityBase);
     SF.EntityLineDetail = EntityLineDetail;
+
+    once("SF-entityList", function () {
+        return $.fn.entityList = function (opt) {
+            var sc = new EntityList(this, opt);
+
+            this.data("SF-entityList", sc);
+        };
+    });
 
     var EntityList = (function (_super) {
         __extends(EntityList, _super);
@@ -869,10 +902,18 @@ var SF;
     })(EntityBase);
     SF.EntityList = EntityList;
 
+    once("SF-entityListDetail", function () {
+        return $.fn.entityListDetail = function (opt) {
+            var sc = new EntityListDetail(this, opt);
+
+            this.data("SF-entityListDetail", sc);
+        };
+    });
+
     var EntityListDetail = (function (_super) {
         __extends(EntityListDetail, _super);
-        function EntityListDetail(options) {
-            _super.call(this, options);
+        function EntityListDetail(element, options) {
+            _super.call(this, element, options);
         }
         EntityListDetail.prototype.typedCreate = function (_viewOptions) {
             if (SF.isEmpty(_viewOptions.type)) {
@@ -1032,10 +1073,18 @@ var SF;
     })(EntityList);
     SF.EntityListDetail = EntityListDetail;
 
+    once("SF-entityRepeater", function () {
+        return $.fn.entityRepeater = function (opt) {
+            var sc = new EntityRepeater(this, opt);
+
+            this.data("SF-entityRepeater", sc);
+        };
+    });
+
     var EntityRepeater = (function (_super) {
         __extends(EntityRepeater, _super);
-        function EntityRepeater(options) {
-            _super.call(this, options);
+        function EntityRepeater(element, options) {
+            _super.call(this, element, options);
         }
         EntityRepeater.prototype.itemSuffix = function () {
             return EntityRepeater.key_repeaterItem;
@@ -1202,10 +1251,18 @@ var SF;
     })(EntityList);
     SF.EntityRepeater = EntityRepeater;
 
+    once("SF-entityStrip", function () {
+        return $.fn.entityStrip = function (opt) {
+            var sc = new EntityStrip(this, opt);
+
+            this.data("SF-entityStrip", sc);
+        };
+    });
+
     var EntityStrip = (function (_super) {
         __extends(EntityStrip, _super);
-        function EntityStrip(options) {
-            _super.call(this, options);
+        function EntityStrip(element, options) {
+            _super.call(this, element, options);
         }
         EntityStrip.prototype.itemSuffix = function () {
             return EntityStrip.key_stripItem;
@@ -1381,3 +1438,4 @@ var SF;
     SF.getInfoParams = getInfoParams;
     ;
 })(SF || (SF = {}));
+//# sourceMappingURL=SF_Lines.js.map

@@ -130,10 +130,10 @@ module SF {
 interface JQuery {
     disableTextSelect();
 }
-
-$.extend($.fn.disableTextSelect = function () {
-    return this.each(function () {
-        var $this = $(this);
-        $this.bind('selectstart', function () { return false; });
-    });
-});
+once("disableTextSelect", () =>
+    $.extend($.fn.disableTextSelect = function () {
+        return this.each(function () {
+            var $this = $(this);
+            $this.bind('selectstart', function () { return false; });
+        });
+    }));

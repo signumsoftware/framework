@@ -107,11 +107,14 @@ var SF;
     };
 })(SF || (SF = {}));
 
-$.extend($.fn.disableTextSelect = function () {
-    return this.each(function () {
-        var $this = $(this);
-        $this.bind('selectstart', function () {
-            return false;
+once("disableTextSelect", function () {
+    return $.extend($.fn.disableTextSelect = function () {
+        return this.each(function () {
+            var $this = $(this);
+            $this.bind('selectstart', function () {
+                return false;
+            });
         });
     });
 });
+//# sourceMappingURL=SF_Slider.js.map

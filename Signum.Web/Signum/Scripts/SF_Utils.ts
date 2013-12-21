@@ -3,6 +3,14 @@
 
 declare var lang: any;
 
+var onceStorage: any = {};
+function once(key: string, func: () => void) {
+    if (onceStorage[key] === undefined) {
+        func();
+        onceStorage[key] = "loaded";
+    }
+}
+
 module SF {
     export var Urls: any;
     export var Locale: any;
@@ -15,7 +23,8 @@ module SF {
         }
     }
 
-    setupAjaxPrefilters();
+    once("setupAjaxPrefilters", () =>
+        setupAjaxPrefilters());
 
     function setupAjaxPrefilters() {
         var pendingRequests = 0;
@@ -326,52 +335,52 @@ module SF.NewContentProcessor {
     }
 }
 
+once("placeHolder", () =>
+    (function ($) {
+        $.fn.placeholder = function () {
+            if ($.fn.placeholder.supported()) {
+                return $(this);
+            } else {
 
-(function ($) {
-    $.fn.placeholder = function () {
-        if ($.fn.placeholder.supported()) {
-            return $(this);
-        } else {
-
-            $(this).parent('form').submit(function (e) {
-                $('input[placeholder].sf-placeholder, textarea[placeholder].sf-placeholder', this).val('');
-            });
-
-            $(this).each(function () {
-                $.fn.placeholder.on(this);
-            });
-
-            return $(this)
-
-                .focus(function () {
-                    if ($(this).hasClass('sf-placeholder')) {
-                        $.fn.placeholder.off(this);
-                    }
-                })
-
-                .blur(function () {
-                    if ($(this).val() == '') {
-                        $.fn.placeholder.on(this);
-                    }
+                $(this).parent('form').submit(function (e) {
+                    $('input[placeholder].sf-placeholder, textarea[placeholder].sf-placeholder', this).val('');
                 });
-        }
-    };
 
-    // Extracted from: http://diveintohtml5.org/detect.html#input-placeholder
-    $.fn.placeholder.supported = function () {
-        var input = document.createElement('input');
-        return !!('placeholder' in input);
-    };
+                $(this).each(function () {
+                    $.fn.placeholder.on(this);
+                });
 
-    $.fn.placeholder.on = function (el) {
-        var $el = $(el);
-        if ($el.val() == '') $el.val($el.attr('placeholder')).addClass('sf-placeholder');
-    };
+                return $(this)
 
-    $.fn.placeholder.off = function (el) {
-        $(el).val('').removeClass('sf-placeholder');
-    };
-})(jQuery);
+                    .focus(function () {
+                        if ($(this).hasClass('sf-placeholder')) {
+                            $.fn.placeholder.off(this);
+                        }
+                    })
+
+                    .blur(function () {
+                        if ($(this).val() == '') {
+                            $.fn.placeholder.on(this);
+                        }
+                    });
+            }
+        };
+
+        // Extracted from: http://diveintohtml5.org/detect.html#input-placeholder
+        $.fn.placeholder.supported = function () {
+            var input = document.createElement('input');
+            return !!('placeholder' in input);
+        };
+
+        $.fn.placeholder.on = function (el) {
+            var $el = $(el);
+            if ($el.val() == '') $el.val($el.attr('placeholder')).addClass('sf-placeholder');
+        };
+
+        $.fn.placeholder.off = function (el) {
+            $(el).val('').removeClass('sf-placeholder');
+        };
+    })(jQuery));
 
 interface String {
     hasText(): boolean;
@@ -380,48 +389,50 @@ interface String {
     replaceAll(from: string, to: string);
 }
 
-String.prototype.hasText = function () {
-    return (this == null || this == undefined || this == '') ? false : true;
-}
+once("stringExtensions", () => {
+    String.prototype.hasText = function () {
+        return (this == null || this == undefined || this == '') ? false : true;
+    }
 
-String.prototype.startsWith = function (str) {
-    return (this.indexOf(str) === 0);
-}
+    String.prototype.startsWith = function (str) {
+        return (this.indexOf(str) === 0);
+    }
 
-String.prototype.format = function () {
-    var regex = /\{([\w-]+)(?:\:([\w\.]*)(?:\((.*?)?\))?)?\}/g;
+    String.prototype.format = function () {
+        var regex = /\{([\w-]+)(?:\:([\w\.]*)(?:\((.*?)?\))?)?\}/g;
 
-    var args = arguments;
+        var args = arguments;
 
-    var getValue = function (key) {
-        if (args == null || typeof args === 'undefined') return null;
+        var getValue = function (key) {
+            if (args == null || typeof args === 'undefined') return null;
 
-        var value = args[key];
-        var type = typeof value;
+            var value = args[key];
+            var type = typeof value;
 
-        return type === 'string' || type === 'number' ? value : null;
+            return type === 'string' || type === 'number' ? value : null;
+        };
+
+        return this.replace(regex, function (match) {
+            //match will look like {sample-match}
+            //key will be 'sample-match';
+            var key = match.substr(1, match.length - 2);
+
+            var value = getValue(key);
+
+            return value != null ? value : match;
+        });
     };
 
-    return this.replace(regex, function (match) {
-        //match will look like {sample-match}
-        //key will be 'sample-match';
-        var key = match.substr(1, match.length - 2);
+    String.prototype.replaceAll = function (from, to) {
+        return this.split(from).join(to)
+    };
 
-        var value = getValue(key);
-
-        return value != null ? value : match;
-    });
-};
-
-String.prototype.replaceAll = function (from, to) {
-    return this.split(from).join(to)
-};
-
-if (typeof String.prototype.trim !== 'function') {
-    String.prototype.trim = function () {
-        return this.replace(/^\s+|\s+$/, '');
+    if (typeof String.prototype.trim !== 'function') {
+        String.prototype.trim = function () {
+            return this.replace(/^\s+|\s+$/, '');
+        }
     }
-}
+});
 
 
 
