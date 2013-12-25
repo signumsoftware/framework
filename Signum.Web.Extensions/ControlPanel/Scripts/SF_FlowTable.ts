@@ -1,12 +1,14 @@
-﻿var SF = SF || {};
+﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
+/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/references.ts"/>
 
-SF.FlowTable = (function () {
-    var init = function ($containerTable) {
+module SF.FlowTable {
+
+    export function init($containerTable: JQuery) {
         createDraggables($containerTable.find(".sf-ftbl-part"));
         createDroppables($containerTable.find(".sf-ftbl-droppable"));
-    };
+    }
 
-    var setDraggingState = function (active) {
+    function setDraggingState(active : boolean) {
         if (active) {
             $(".sf-ftbl-column").addClass("sf-ftbl-dragging");
         }
@@ -17,14 +19,14 @@ SF.FlowTable = (function () {
         }
     }
 
-    var restoreDroppableSize = function ($droppable) {
+    function restoreDroppableSize($droppable : JQuery) {
         $droppable.css({
             width: "inherit",
             height: "20px"
         });
-    };
+    }
 
-    var updateRowAndColIndexes = function ($column) {
+    function updateRowAndColIndexes($column : JQuery) {
         var partRowClass = "sf-ftbl-part-row";
         var partColumnClass = "sf-ftbl-part-col";
 
@@ -35,18 +37,18 @@ SF.FlowTable = (function () {
             $part.find("." + partRowClass).val(index);
             $part.find("." + partColumnClass).val(column);
         });
-    };
+    }
 
-    var createDraggables = function ($target) {
+    function createDraggables($target : JQuery) {
         $target.draggable({
             handle: ".sf-ftbl-part-header",
             revert: "invalid",
             start: function (event, ui) { setDraggingState(true); },
             stop: function (event, ui) { setDraggingState(false); }
         });
-    };
+    }
 
-    var createDroppables = function ($target) {
+    function createDroppables ($target: JQuery) {
         $target.droppable({
             hoverClass: "ui-state-highlight sf-ftbl-droppable-active",
             tolerance: "pointer",
@@ -61,7 +63,7 @@ SF.FlowTable = (function () {
                 restoreDroppableSize($(this));
             },
             drop: function (event, ui) {
-                var $dragged = ui.draggable;
+                var $dragged = <JQuery>ui.draggable;
 
                 var $startContainer = $dragged.closest(".sf-ftbl-part-container");
                 var $targetPlaceholder = $(this); //droppable
@@ -96,13 +98,10 @@ SF.FlowTable = (function () {
                 restoreDroppableSize($targetPlaceholder);
             }
         });
-    };
+    }
 
-    $(document).on("click", ".sf-ftbl-part-header .sf-remove", function () {
-        $(this).closest(".sf-ftbl-part-container").html("");
-    });
-
-    return {
-        init: init
-    };
-})();
+    once("FlowTable", () =>
+        $(document).on("click", ".sf-ftbl-part-header .sf-remove", function () {
+            $(this).closest(".sf-ftbl-part-container").html("");
+        }));
+}

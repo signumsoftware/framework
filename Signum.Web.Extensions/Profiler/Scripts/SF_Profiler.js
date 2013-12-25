@@ -1,14 +1,17 @@
-﻿var SF = SF || {};
+﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
+/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/references.ts"/>
 
-SF.Profiler = (function () {
-    var initStats = function () {
+
+module SF.Profiler 
+{
+    export function initStats () {
         $(document).on("click", "table.sf-stats-table a.sf-stats-show", function (e) {
             e.preventDefault();
             $(this).closest("tr").next().toggle();
         });
-    };
+    }
 
-    var init = function (refreshCallback) {
+    function init(refreshCallback) {
         var refresh = refreshCallback;
         var $profileEnable = $("#sfProfileEnable");
         var $profileDisable = $("#sfProfileDisable");

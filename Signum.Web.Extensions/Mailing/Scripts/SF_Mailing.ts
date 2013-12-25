@@ -38,7 +38,7 @@ SF.registerModule("Mailing", function () {
             });
 
             $(".sf-email-replacements-container").on("sf-new-subtokens-combo", "select", function (event, idSelectedCombo) {
-                SF.Mailing.newSubTokensComboAdded.call(self, $("#" + idSelectedCombo));
+                SF.Mailing.newSubTokensComboAdded.call(self, $("#" + idSelectedCombo)/*idSelectedCombo*/);
             });
         };
 
