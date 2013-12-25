@@ -21,17 +21,20 @@ module SF {
         element: JQuery;
         constructor(element: JQuery, _options: EntityBaseOptions) {
             this.element = element;
+
             this.options = $.extend({
                 prefix: "",
                 partialViewName: "",
                 onEntityChanged: null
             }, _options);
+
+            this._create();
         }
 
         static key_entity = "sfEntity";
 
 
-        _create(ev, ui) {
+        _create() {
             var $txt = $(this.pf(SF.Keys.toStr) + ".sf-entity-autocomplete");
             if ($txt.length > 0) {
                 var data = $txt.data();

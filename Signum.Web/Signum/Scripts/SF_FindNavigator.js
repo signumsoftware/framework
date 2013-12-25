@@ -4,9 +4,7 @@ var SF;
     (function (FindNavigator) {
         once("SF-searchControl", function () {
             return $.fn.searchControl = function (opt) {
-                var sc = new SF.SearchControl(this, opt);
-
-                this.data("SF-searchControl", sc);
+                new SF.SearchControl(this, opt);
             };
         });
 
@@ -206,6 +204,8 @@ var SF;
                 pagination: "sfPaginationMode"
             };
             this.searchOnLoadFinished = false;
+            element.data("SF-searchControl", this);
+
             this.element = element;
 
             this.options = $.extend({
@@ -267,7 +267,7 @@ var SF;
 
             if (this.options.allowChangeColumns || (this.options.filterMode != SF.FilterMode[SF.FilterMode.AlwaysHidden] && this.options.filterMode != "OnlyResults")) {
                 $tblResults.on("contextmenu", "th:not(.sf-th-entity):not(.sf-th-selection)", function (e) {
-                    if (!this.closeMyOpenedCtxMenu()) {
+                    if (!self.closeMyOpenedCtxMenu()) {
                         return false;
                     }
                     self.headerContextMenu(e);
@@ -297,7 +297,7 @@ var SF;
 
             if (this.options.filterMode != "AlwaysHidden" && this.options.filterMode != "OnlyResults") {
                 $tblResults.on("contextmenu", "td:not(.sf-td-no-results):not(.sf-td-multiply,.sf-search-footer-pagination)", function (e) {
-                    if (!this.closeMyOpenedCtxMenu()) {
+                    if (!self.closeMyOpenedCtxMenu()) {
                         return false;
                     }
 
@@ -360,15 +360,15 @@ var SF;
                 });
 
                 this.element.on("sf-new-subtokens-combo", function (event) {
-                    var idSelectedCombo = [];
+                    var args = [];
                     for (var _i = 0; _i < (arguments.length - 1); _i++) {
-                        idSelectedCombo[_i] = arguments[_i + 1];
+                        args[_i] = arguments[_i + 1];
                     }
-                    self.newSubTokensComboAdded($("#" + idSelectedCombo[0]));
+                    self.newSubTokensComboAdded($("#" + args[0]));
                 });
 
                 this.element.find(".sf-tm-selected").click(function () {
-                    if (!this.closeMyOpenedCtxMenu()) {
+                    if (!self.closeMyOpenedCtxMenu()) {
                         return false;
                     }
 

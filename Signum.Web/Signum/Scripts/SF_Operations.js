@@ -355,7 +355,7 @@ var SF;
             _super.call(this, $.extend({
                 controllerUrl: SF.Urls.operationConstructFromMany,
                 returnType: null
-            }));
+            }, _options));
         }
         ConstructorFromMany.prototype.requestDataItems = function (newPrefix, items) {
             var serializer = new SF.Serializer().add($('#' + SF.Keys.tabId).serialize()).add($("input:hidden[name=" + SF.Keys.antiForgeryToken + "]").serialize()).add({
@@ -404,17 +404,13 @@ var SF;
         };
 
         ConstructorFromMany.prototype.ajaxSelected = function (newPrefix, onAjaxSuccess) {
+            var _this = this;
             if (SF.Blocker.isEnabled()) {
                 return false;
             }
 
-            var onSuccess = function (items) {
-                this.ajax(newPrefix, items, onAjaxSuccess || SF.opOnSuccessDispatcher);
-            };
-
-            var self = this;
             SF.FindNavigator.getFor(this.options.prefix).hasSelectedItems(function (items) {
-                onSuccess.call(self, items);
+                return _this.ajaxItems(newPrefix, items, onAjaxSuccess || SF.opOnSuccessDispatcher);
             });
         };
 

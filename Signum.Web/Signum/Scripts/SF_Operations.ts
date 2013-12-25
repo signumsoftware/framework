@@ -364,7 +364,7 @@ module SF
             super($.extend({
                 controllerUrl: SF.Urls.operationConstructFromMany,
                 returnType: null
-            }));
+            }, _options));
         }
 
         public requestDataItems(newPrefix, items) {
@@ -423,12 +423,8 @@ module SF
                 return false;
             }
 
-            var onSuccess = function (items) {
-                this.ajax(newPrefix, items, onAjaxSuccess || SF.opOnSuccessDispatcher);
-            }
-
-            var self = this;
-            SF.FindNavigator.getFor(this.options.prefix).hasSelectedItems(function (items) { onSuccess.call(self, items) });
+            SF.FindNavigator.getFor(this.options.prefix).hasSelectedItems(items =>
+                this.ajaxItems(newPrefix, items, onAjaxSuccess || SF.opOnSuccessDispatcher));
         }
 
         public submitSelected() {

@@ -2565,6 +2565,8 @@ declare module D3 {
             * @param value Domain Value
             */
             (value: number): number;
+
+            exponent(value: number): PowScale;
         }
 
         export interface LogScale extends QuantitiveScale {

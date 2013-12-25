@@ -10,13 +10,16 @@ var SF;
     var EntityBase = (function () {
         function EntityBase(element, _options) {
             this.element = element;
+
             this.options = $.extend({
                 prefix: "",
                 partialViewName: "",
                 onEntityChanged: null
             }, _options);
+
+            this._create();
         }
-        EntityBase.prototype._create = function (ev, ui) {
+        EntityBase.prototype._create = function () {
             var $txt = $(this.pf(SF.Keys.toStr) + ".sf-entity-autocomplete");
             if ($txt.length > 0) {
                 var data = $txt.data();

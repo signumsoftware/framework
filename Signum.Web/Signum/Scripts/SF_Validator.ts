@@ -8,7 +8,7 @@ module SF {
         showInlineErrors?: string;
         fixedInlineErrorText?: string; //Set to "" for it to be populated from ModelState error messages
         parentDiv?: string;
-        requestExtraJsonData?: string;
+        requestExtraJsonData?: any;
         ajaxError?: (jqXHR: JQueryXHR, textStatus: string, errorThrow: string) => any;
         errorSummaryId?: string;
     }
@@ -388,7 +388,7 @@ module SF {
         }
     }
 
-    export function EntityIsValid(validationOptions, onSuccess, sender) {
+    export function EntityIsValid(validationOptions : ValidationOptions, onSuccess: () => void, sender? : any) {
         SF.log("Validator EntityIsValid");
 
         var isValid;

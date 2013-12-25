@@ -6,9 +6,7 @@ module SF {
 
         once("SF-searchControl", () =>
             $.fn.searchControl = function (opt: FindOptions) {
-                var sc = new SearchControl(this, opt);
-
-                this.data("SF-searchControl", sc);
+                new SearchControl(this, opt);
             });
 
         export function getFor(prefix: string) : SearchControl {
@@ -219,6 +217,8 @@ module SF {
         options: FindOptions;
 
         constructor(element: JQuery, _options: FindOptions) {
+            element.data("SF-searchControl", this);
+
             this.element = element;
 
             this.options = $.extend({
@@ -282,7 +282,7 @@ module SF {
 
             if (this.options.allowChangeColumns || (this.options.filterMode !=  SF.FilterMode[SF.FilterMode.AlwaysHidden] && this.options.filterMode != "OnlyResults")) {
                 $tblResults.on("contextmenu", "th:not(.sf-th-entity):not(.sf-th-selection)", function (e) {
-                    if (!this.closeMyOpenedCtxMenu()) {
+                    if (!self.closeMyOpenedCtxMenu()) {
                         return false;
                     }
                     self.headerContextMenu(e);
@@ -312,7 +312,7 @@ module SF {
 
             if (this.options.filterMode != "AlwaysHidden" && this.options.filterMode != "OnlyResults") {
                 $tblResults.on("contextmenu", "td:not(.sf-td-no-results):not(.sf-td-multiply,.sf-search-footer-pagination)", function (e) {
-                    if (!this.closeMyOpenedCtxMenu()) {
+                    if (!self.closeMyOpenedCtxMenu()) {
                         return false;
                     }
 
@@ -376,12 +376,12 @@ module SF {
                     self.fullScreen(e);
                 });
 
-                this.element.on("sf-new-subtokens-combo", function (event, ...idSelectedCombo) {
-                    self.newSubTokensComboAdded($("#" + idSelectedCombo[0]));
+                this.element.on("sf-new-subtokens-combo", function (event, ...args) {
+                    self.newSubTokensComboAdded($("#" + args[0]));
                 });
 
                 this.element.find(".sf-tm-selected").click(function () {
-                    if (!this.closeMyOpenedCtxMenu()) {
+                    if (!self.closeMyOpenedCtxMenu()) {
                         return false;
                     }
 
@@ -918,7 +918,7 @@ module SF {
             return 0;
         }
 
-        newSubTokensComboAdded($selectedCombo) {
+        newSubTokensComboAdded($selectedCombo: JQuery) {
             var $btnAddFilter = $(this.pf("btnAddFilter"));
             var $btnAddColumn = $(this.pf("btnAddColumn"));
 
