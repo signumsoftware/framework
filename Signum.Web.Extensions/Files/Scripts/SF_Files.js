@@ -9,13 +9,19 @@ var __extends = this.__extends || function (d, b) {
 var SF;
 (function (SF) {
     (function (Files) {
+        once("SF-fileLine", function () {
+            return $.fn.fileLine = function (opt) {
+                var fl = new FileLine(this, opt);
+            };
+        });
+
         var FileLine = (function (_super) {
             __extends(FileLine, _super);
             function FileLine(element, _options) {
                 _super.call(this, element, _options);
             }
             FileLine.prototype._create = function () {
-                $("#" + this.options.prefix).data("SF-fileLine").initDragDrop($(this.pf("DivNew")));
+                $("#" + this.options.prefix).data("SF-control").initDragDrop($(this.pf("DivNew")));
             };
 
             FileLine.prototype.initDragDrop = function ($divNew) {
@@ -49,7 +55,7 @@ var SF;
             };
 
             FileLine.prototype.fileDropped = function (e) {
-                var files = e.target.files || e.dataTransfer.files;
+                var files = e.dataTransfer.files;
                 e.stopPropagation();
                 e.preventDefault();
 

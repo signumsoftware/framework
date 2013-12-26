@@ -5,8 +5,13 @@
 
 module SF.Chart
 {
+    once("SF-chartBuilder", () =>
+        $.fn.chartBuilder = function (opt: FindOptions) {
+            new ChartBuilder(this, opt);
+        });
+
     export function getFor(prefix: string) {
-        return $("#" + SF.compose(prefix, "sfChartBuilderContainer")).data("SF-chartBuilder");
+        return $("#" + SF.compose(prefix, "sfChartBuilderContainer")).data("SF-control");
     };
 
     export class ChartBuilder extends SF.SearchControl

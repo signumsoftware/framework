@@ -10,18 +10,23 @@ module SF.Files {
         asyncUpload?: boolean;
     }
 
+    once("SF-fileLine", () =>
+        $.fn.fileLine = function (opt: FileLineOptions) {
+            var fl = new FileLine(this, opt);
+        });
+
     class FileLine extends EntityBase {
         options: FileLineOptions;
         constructor(element: JQuery, _options: FileLineOptions) {
-            super(element, _options)
+            super(element, _options);
         }
 
         _create() {
-            $("#" + this.options.prefix).data("SF-fileLine").initDragDrop($(this.pf("DivNew")));
+            $("#" + this.options.prefix).data("SF-control").initDragDrop($(this.pf("DivNew")));
         }
 
         initDragDrop($divNew: JQuery) {
-            if (window.animationStartTime.File && window.FileList && window.FileReader && new XMLHttpRequest().upload) {
+            if (window.File && window.FileList && window.FileReader && new XMLHttpRequest().upload) {
                 var self = this;
                 var $fileDrop = $("<div></div>").addClass("sf-file-drop").html("or drag a file here")
                     .on("dragover", function (e) { self.fileDropHover(e, true); })
@@ -164,4 +169,10 @@ module SF.Files {
         }
     }
 
+}
+
+interface Window {
+    File: any;
+    FileList: any;
+    FileReader: any;
 }

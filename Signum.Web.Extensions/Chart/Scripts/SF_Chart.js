@@ -11,8 +11,14 @@ var __extends = this.__extends || function (d, b) {
 var SF;
 (function (SF) {
     (function (Chart) {
+        once("SF-chartBuilder", function () {
+            return $.fn.chartBuilder = function (opt) {
+                new ChartBuilder(this, opt);
+            };
+        });
+
         function getFor(prefix) {
-            return $("#" + SF.compose(prefix, "sfChartBuilderContainer")).data("SF-chartBuilder");
+            return $("#" + SF.compose(prefix, "sfChartBuilderContainer")).data("SF-control");
         }
         Chart.getFor = getFor;
         ;

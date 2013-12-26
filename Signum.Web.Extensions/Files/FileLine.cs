@@ -73,11 +73,6 @@ namespace Signum.Web.Files
             Remove = false;
         }
 
-        public override string ToJS()
-        {
-            return "$('#{0}').data('SF-fileLine')".Formato(ControlID);
-        }
-
         protected override JsOptionsBuilder OptionsJSInternal()
         {
             var result = base.OptionsJSInternal();
