@@ -21,7 +21,7 @@ module SF {
         element: JQuery;
         constructor(element: JQuery, _options: EntityBaseOptions) {
             this.element = element;
-
+            this.element.data("SF-control", this);
             this.options = $.extend({
                 prefix: "",
                 partialViewName: "",
@@ -279,9 +279,7 @@ module SF {
 
     once("SF-entityLine", () =>
         $.fn.entityLine = function (opt: EntityBaseOptions) {
-            var sc = new EntityLine(this, opt);
-
-            this.data("SF-entityLine", sc);
+            new EntityLine(this, opt);
         });
 
     export class EntityLine extends EntityBase {
@@ -411,8 +409,6 @@ module SF {
     once("SF-entityCombo", () =>
         $.fn.entityCombo = function (opt: EntityBaseOptions) {
             var sc = new EntityCombo(this, opt);
-
-            this.data("SF-entityCombo", sc);
         });
 
     export class EntityCombo extends EntityBase {
@@ -480,9 +476,7 @@ module SF {
 
     once("SF-entityLineDetail", () =>
         $.fn.entityLineDetail = function (opt: EntityBaseDetailOptions) {
-            var sc = new EntityLineDetail(this, opt);
-
-            this.data("SF-entityLineDetail", sc);
+            new EntityLineDetail(this, opt);
         });
 
     export class EntityLineDetail extends EntityBase {
@@ -575,9 +569,7 @@ module SF {
 
     once("SF-entityList", () =>
         $.fn.entityList = function (opt: EntityBaseOptions) {
-            var sc = new EntityList(this, opt);
-
-            this.data("SF-entityList", sc);
+            new EntityList(this, opt);
         });
 
     export class EntityList extends EntityBase {
@@ -905,9 +897,7 @@ module SF {
 
     once("SF-entityListDetail", () =>
         $.fn.entityListDetail = function (opt: EntityBaseDetailOptions) {
-            var sc = new EntityListDetail(this, opt);
-
-            this.data("SF-entityListDetail", sc);
+            new EntityListDetail(this, opt);
         });
 
     export class EntityListDetail extends EntityList {
@@ -1086,9 +1076,7 @@ module SF {
 
     once("SF-entityRepeater", () =>
         $.fn.entityRepeater = function (opt: EntityRepeaterOptions) {
-            var sc = new EntityRepeater(this, opt);
-
-            this.data("SF-entityRepeater", sc);
+            new EntityRepeater(this, opt);
         });
 
     export class EntityRepeater extends EntityList {
@@ -1185,7 +1173,7 @@ module SF {
         }
 
         _getRepeaterCall() {
-            return "$('#" + this.options.prefix + "').data('SF-entityRepeater')";
+            return "$('#" + this.options.prefix + "').data('SF-control')";
         }
 
         _getRemoving(itemPrefix) {
@@ -1285,9 +1273,7 @@ module SF {
 
     once("SF-entityStrip", () =>
         $.fn.entityStrip = function (opt: EntityStripOptions) {
-            var sc = new EntityStrip(this, opt);
-
-            this.data("SF-entityStrip", sc);
+            new EntityStrip(this, opt);
         });
 
     export class EntityStrip extends EntityList {
@@ -1376,7 +1362,7 @@ module SF {
         }
 
         _getRepeaterCall() {
-            return "$('#" + this.options.prefix + "').data('SF-entityStrip')";
+            return "$('#" + this.options.prefix + "').data('SF-control')";
         }
 
         _getRemoving(itemPrefix: string) {

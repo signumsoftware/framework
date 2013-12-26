@@ -49,11 +49,6 @@ namespace Signum.Web
             Remove = false;
         }
 
-        public override string ToJS()
-        {
-            return "$('#{0}').data('SF-entityCombo')".Formato(ControlID);
-        }
-
         protected override string DefaultView()
         {
             return JsView(DefaultJsViewOptions()).ToJS();

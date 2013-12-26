@@ -259,6 +259,53 @@ var SF;
 
 var SF;
 (function (SF) {
+    (function (Loader) {
+        var _jsSet = [], _jsloaded = [];
+
+        function setLoaded(url, position) {
+            _jsloaded[url] = true;
+            _jsSet[position].count--;
+
+            if (_jsSet[position].count === 0) {
+                _jsSet[position].func && _jsSet[position].func();
+                delete _jsSet[position];
+            }
+        }
+
+        function _loadJs(url, position) {
+            if (!_jsloaded[url]) {
+                $.getScript(url, function () {
+                    setLoaded(url, position);
+                });
+            } else {
+                setLoaded(url, position);
+            }
+        }
+
+        function loadJs(url, fn) {
+            if (typeof url === "object") {
+                var position = _jsSet.length;
+
+                _jsSet[position] = {
+                    count: url.length,
+                    func: fn
+                };
+
+                var i;
+                for (i = 0; i < url.length; i++) {
+                    _loadJs(url[i], position);
+                }
+            } else {
+                $.getScript(url, fn);
+            }
+        }
+        Loader.loadJs = loadJs;
+    })(SF.Loader || (SF.Loader = {}));
+    var Loader = SF.Loader;
+})(SF || (SF = {}));
+
+var SF;
+(function (SF) {
     (function (NewContentProcessor) {
         function defaultButtons($newContent) {
             $newContent.find(".sf-entity-button, .sf-query-button, .sf-line-button, .sf-chooser-button, .sf-button").each(function (i, val) {

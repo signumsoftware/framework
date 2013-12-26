@@ -34,11 +34,6 @@ namespace Signum.Web
             Reorder = false;
         }
 
-        public override string ToJS()
-        {
-            return "$('#{0}').data('SF-entityRepeater')".Formato(ControlID);
-        }
-
         protected override JsOptionsBuilder OptionsJSInternal()
         {
             var result = base.OptionsJSInternal();

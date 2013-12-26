@@ -39,11 +39,6 @@ namespace Signum.Web
             Autocomplete = false;
         }
 
-        public override string ToJS()
-        {
-            return "$('#{0}').data('SF-entityLine')".Formato(ControlID);
-        }
-
         protected override string DefaultView()
         {
             return JsView(DefaultJsViewOptions()).ToJS();

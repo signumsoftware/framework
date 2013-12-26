@@ -10,7 +10,7 @@ var SF;
     var EntityBase = (function () {
         function EntityBase(element, _options) {
             this.element = element;
-
+            this.element.data("SF-control", this);
             this.options = $.extend({
                 prefix: "",
                 partialViewName: "",
@@ -256,9 +256,7 @@ var SF;
 
     once("SF-entityLine", function () {
         return $.fn.entityLine = function (opt) {
-            var sc = new EntityLine(this, opt);
-
-            this.data("SF-entityLine", sc);
+            new EntityLine(this, opt);
         };
     });
 
@@ -404,8 +402,6 @@ var SF;
     once("SF-entityCombo", function () {
         return $.fn.entityCombo = function (opt) {
             var sc = new EntityCombo(this, opt);
-
-            this.data("SF-entityCombo", sc);
         };
     });
 
@@ -468,9 +464,7 @@ var SF;
 
     once("SF-entityLineDetail", function () {
         return $.fn.entityLineDetail = function (opt) {
-            var sc = new EntityLineDetail(this, opt);
-
-            this.data("SF-entityLineDetail", sc);
+            new EntityLineDetail(this, opt);
         };
     });
 
@@ -566,9 +560,7 @@ var SF;
 
     once("SF-entityList", function () {
         return $.fn.entityList = function (opt) {
-            var sc = new EntityList(this, opt);
-
-            this.data("SF-entityList", sc);
+            new EntityList(this, opt);
         };
     });
 
@@ -907,9 +899,7 @@ var SF;
 
     once("SF-entityListDetail", function () {
         return $.fn.entityListDetail = function (opt) {
-            var sc = new EntityListDetail(this, opt);
-
-            this.data("SF-entityListDetail", sc);
+            new EntityListDetail(this, opt);
         };
     });
 
@@ -1078,9 +1068,7 @@ var SF;
 
     once("SF-entityRepeater", function () {
         return $.fn.entityRepeater = function (opt) {
-            var sc = new EntityRepeater(this, opt);
-
-            this.data("SF-entityRepeater", sc);
+            new EntityRepeater(this, opt);
         };
     });
 
@@ -1158,7 +1146,7 @@ var SF;
         };
 
         EntityRepeater.prototype._getRepeaterCall = function () {
-            return "$('#" + this.options.prefix + "').data('SF-entityRepeater')";
+            return "$('#" + this.options.prefix + "').data('SF-control')";
         };
 
         EntityRepeater.prototype._getRemoving = function (itemPrefix) {
@@ -1256,9 +1244,7 @@ var SF;
 
     once("SF-entityStrip", function () {
         return $.fn.entityStrip = function (opt) {
-            var sc = new EntityStrip(this, opt);
-
-            this.data("SF-entityStrip", sc);
+            new EntityStrip(this, opt);
         };
     });
 
@@ -1328,7 +1314,7 @@ var SF;
         };
 
         EntityStrip.prototype._getRepeaterCall = function () {
-            return "$('#" + this.options.prefix + "').data('SF-entityStrip')";
+            return "$('#" + this.options.prefix + "').data('SF-control')";
         };
 
         EntityStrip.prototype._getRemoving = function (itemPrefix) {

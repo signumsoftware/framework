@@ -51,11 +51,6 @@ namespace Signum.Web
             Autocomplete = false;
         }
 
-        public override string ToJS()
-        {
-            return "$('#{0}').data('SF-entityStrip')".Formato(ControlID);
-        }
-
         protected override JsOptionsBuilder OptionsJSInternal()
         {
             var result = base.OptionsJSInternal();

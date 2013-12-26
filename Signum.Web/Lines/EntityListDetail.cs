@@ -30,11 +30,6 @@ namespace Signum.Web
             Reorder = false;
         }
 
-        public override string ToJS()
-        {
-            return "$('#{0}').data('SF-entityListDetail')".Formato(ControlID);
-        }
-
         protected override JsOptionsBuilder OptionsJSInternal()
         {
             var result = base.OptionsJSInternal();

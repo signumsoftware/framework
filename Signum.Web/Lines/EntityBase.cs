@@ -65,7 +65,10 @@ namespace Signum.Web
 
         public string PartialViewName { get; set; }
 
-        public abstract string ToJS();
+        public virtual string ToJS()
+        {
+            return "$('#{0}').data('SF-control')".Formato(ControlID);
+        }
 
         public string OptionsJS()
         {
