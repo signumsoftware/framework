@@ -49,7 +49,7 @@ module SF.Help
 
     once("SF.Help", () =>
         $(function () {
-            $(".shortcut").click(function () { $.copy($(this).html()); });
+            //$(".shortcut").click(function () { $.copy($(this).html()); });
 
             if (typeof window.location.hash != 'undefined' && window.location.hash != '') {
                 window.location.hash += "-editor";

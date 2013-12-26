@@ -1067,14 +1067,14 @@
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
     <Content Include="Mailing\Content\SF_Mailing.css" />
-    <Content Include="Mailing\Scripts\SF_Mailing.js" />
-    <Content Include="Mailing\Scripts\SF_TabsRepeater.js" />
+    <TypeScriptCompile Include="Mailing\Scripts\SF_Mailing.ts" />
+    <TypeScriptCompile Include="Mailing\Scripts\SF_TabsRepeater.ts" />
     <Content Include="Mailing\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Omnibox\Scripts\SF_Omnibox.js" />
-    <Content Include="Processes\Scripts\SF_Process.js" />
+    <TypeScriptCompile Include="Omnibox\Scripts\SF_Omnibox.ts" />
+    <TypeScriptCompile Include="Processes\Scripts\SF_Process.ts" />
     <Content Include="Processes\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
@@ -1113,7 +1113,7 @@
       <LastGenOutput>CountSearchControlPart.generated.cs</LastGenOutput>
     </Content>
     <Content Include="Profiler\Content\SF_Profiler.css" />
-    <Content Include="Profiler\Scripts\SF_Profiler.js" />
+    <TypeScriptCompile Include="Profiler\Scripts\SF_Profiler.ts" />
     <Content Include="Profiler\Views\Statistics.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Statistics.generated.cs</LastGenOutput>
@@ -1378,10 +1378,10 @@
       <LastGenOutput>Holiday.generated.cs</LastGenOutput>
     </None>
     <Content Include="SMS\Content\SF_SMS.css" />
-    <Content Include="SMS\Scripts\SF_SMS.js" />
+    <TypeScriptCompile Include="SMS\Scripts\SF_SMS.ts" />
     <Content Include="Translation\Content\SF_Translation.css" />
-    <Content Include="Translation\Scripts\SF_Translation.js" />
-    <Content Include="UserQueries\Scripts\SF_UserQuery.js" />
+    <TypeScriptCompile Include="Translation\Scripts\SF_Translation.ts" />
+    <TypeScriptCompile Include="UserQueries\Scripts\SF_UserQuery.ts" />
     <Content Include="Web.config" />
     <Content Include="Basic\Views\Web.config" />
     <Content Include="Captcha\Views\Web.config" />
