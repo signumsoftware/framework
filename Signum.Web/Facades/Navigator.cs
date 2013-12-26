@@ -441,14 +441,14 @@ namespace Signum.Web
 
         static readonly List<string> defaultScripts = new List<string>
         {
-            "~/signum/Scripts/SF_Globals.js",
-            "~/signum/Scripts/SF_Popup.js",
-            "~/signum/Scripts/SF_Lines.js",
-            "~/signum/Scripts/SF_ViewNavigator.js",
-            "~/signum/Scripts/SF_FindNavigator.js",
-            "~/signum/Scripts/SF_Validator.js",
-            "~/signum/Scripts/SF_Widgets.js",
-            "~/signum/Scripts/SF_Operations.js"
+            "~/signum/scripts/SF_Globals.js",
+            "~/signum/scripts/SF_Popup.js",
+            "~/signum/scripts/SF_Lines.js",
+            "~/signum/scripts/SF_ViewNavigator.js",
+            "~/signum/scripts/SF_FindNavigator.js",
+            "~/signum/scripts/SF_Validator.js",
+            "~/signum/scripts/SF_Widgets.js",
+            "~/signum/scripts/SF_Operations.js"
         };
         public Func<List<string>> DefaultScripts = () => defaultScripts;
 
