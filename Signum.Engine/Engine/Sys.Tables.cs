@@ -111,6 +111,13 @@ namespace Signum.Engine.SchemaInfoTables
             return IndicesExpression.Evaluate(this);
         }
 
+        static Expression<Func<SysTables, IQueryable<SysStats>>> StatsExpression =
+            t => Database.View<SysStats>().Where(ix => ix.object_id == t.object_id);
+        public IQueryable<SysStats> Stats()
+        {
+            return StatsExpression.Evaluate(this);
+        }
+
         static Expression<Func<SysTables, IQueryable<SysExtendedProperties>>> ExtendedPropertiesExpression =
             t => Database.View<SysExtendedProperties>().Where(ep => ep.major_id == t.object_id);
         public IQueryable<SysExtendedProperties> ExtendedProperties()
@@ -242,6 +249,34 @@ namespace Signum.Engine.SchemaInfoTables
         public int key_ordinal; 
         public bool is_included_column;
         public bool is_descending_key;
+    }
+
+    [SqlViewName("sys", "stats ")]
+    public class SysStats : IView
+    {
+        [SqlViewColumn(PrimaryKey = true)]
+        public int object_id;
+        public int stats_id;
+        public string name;
+        public bool auto_created;
+        public bool user_created;
+        public bool no_recompute;
+
+        static Expression<Func<SysStats, IQueryable<SysStatsColumn>>> StatsColumnsExpression =
+         ix => Database.View<SysStatsColumn>().Where(ixc => ixc.stats_id == ix.stats_id && ixc.object_id == ix.object_id);
+        public IQueryable<SysStatsColumn> StatsColumns()
+        {
+            return StatsColumnsExpression.Evaluate(this);
+        }
+    }
+
+    [SqlViewName("sys", "stats_columns")]
+    public class SysStatsColumn : IView
+    {
+        public int object_id;
+        public int stats_id;
+        public int stats_column_id;
+        public int column_id;
     }
 
     [SqlViewName("sys", "extended_properties")]

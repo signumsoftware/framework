@@ -21,7 +21,12 @@ namespace Signum.Windows
 
         public static BitmapSource LoadIcon(Uri uri)
         {
-            var result = BitmapFrame.Create(Application.GetResourceStream(uri).Stream, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
+            return ThreadSafeImage(Application.GetResourceStream(uri).Stream);
+        }
+
+        public static BitmapSource ThreadSafeImage(Stream stream)
+        {
+            var result = BitmapFrame.Create(stream, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
             result.Freeze();
             var writable = new WriteableBitmap(result);
             writable.Freeze();

@@ -345,10 +345,12 @@
     <Member Name="_0HasToBeUppercase" Description="{0} debe estar en mayúsculas" />
     <Member Name="_0IsNecessary" Description="es necesario {0}" />
     <Member Name="_0IsNecessaryOnState1" Description="{0} es necesario en estado {1}" />
+    <Member Name="_0IsNotA1" Description="{0} no es un {1}" />
     <Member Name="_0IsNotAllowed" Description="{0} no está permitido" />
     <Member Name="_0IsNotAllowedOnState1" Description="{0} no se permite en estado {1}" />
     <Member Name="_0IsNotSet" Description="{0} no establecido" />
     <Member Name="Be" Description="ser " />
+    <Member Name="BeA0" Description="ser un {0}" />
     <Member Name="BeBetween0And1" Description="estar entre {0} y {1}" />
     <Member Name="BeNotNull" Description="ser no nulo" />
     <Member Name="FileName" Description="Nombre de archivo" />

@@ -104,6 +104,19 @@ namespace Signum.Engine
             };
 
             //use database without replacements to just remove indexes
+            SqlPreCommand dropStatistics =
+                Synchronizer.SynchronizeScript(model, database,
+                 null,
+                (tn, dif) => SqlBuilder.DropStatistics(tn, dif.Stats),
+                (tn, tab, dif) =>
+                {
+                    var removedColums = dif.Colums.Keys.Except(tab.Columns.Keys).ToHashSet();
+
+                    return SqlBuilder.DropStatistics(tn, dif.Stats.Where(a => a.Columns.Any(removedColums.Contains)).ToList());
+                },
+                 Spacing.Double);
+
+
             SqlPreCommand dropIndices =
                 Synchronizer.SynchronizeScript(model, database,
                  null,
@@ -191,7 +204,7 @@ namespace Signum.Engine
                          var name = SqlBuilder.ForeignKeyName(tab.Name.Name, colModel.Name);
                          return SqlPreCommand.Combine(Spacing.Simple,
                             name != coldb.ForeingKey.Name? SqlBuilder.RenameForeignKey(tab.Name.Schema, coldb.ForeingKey.Name, name) : null, 
-                            (coldb.ForeingKey.IsDisabled || coldb.ForeingKey.IsNotTrusted) ? SqlBuilder.EnableForeignKey(tab.Name,  name) : null);
+                            (coldb.ForeingKey.IsDisabled || coldb.ForeingKey.IsNotTrusted) && !ExecutionMode.IsSynchronizeSchemaOnly ? SqlBuilder.EnableForeignKey(tab.Name,  name) : null);
                      },
                      Spacing.Simple),
                  Spacing.Double);
@@ -218,7 +231,7 @@ namespace Signum.Engine
                     return SqlPreCommand.Combine(Spacing.Simple, controlledIndexes);
                 }, Spacing.Double);
 
-            return SqlPreCommand.Combine(Spacing.Triple, dropIndices, dropForeignKeys, tables, syncEnums, addForeingKeys, addIndices);
+            return SqlPreCommand.Combine(Spacing.Triple, dropStatistics, dropIndices, dropForeignKeys, tables, syncEnums, addForeingKeys, addIndices);
         }
 
 
@@ -362,6 +375,16 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".Formato(tabCol.Name,
 
                                             }).ToList(),
 
+                             Stats = (from st in t.Stats()
+                                      where !st.name.StartsWith("PK__")
+                                      select new DiffStats
+                                      {
+                                          StatsName = st.name,
+                                          Columns = (from ic in st.StatsColumns()
+                                                     join c in t.Columns() on ic.column_id equals c.column_id
+                                                     select c.name).ToList()
+                                      }).ToList(),
+
                          }).ToList();
 
                     allTables.AddRange(tables);
@@ -433,6 +456,9 @@ JOIN {3} {4} ON {2}.{0} = {4}.Id".Formato(tabCol.Name,
 
         public static SqlPreCommand SnapshotIsolation(Replacements replacements)
         {
+            if (ExecutionMode.IsSynchronizeSchemaOnly)
+                return null;
+
             var list = Schema.Current.DatabaseNames().Select(a => a.TryToString()).ToList();
 
             if (list.Contains(null))
@@ -482,6 +508,15 @@ EXEC(@SPId)".Formato(a.name)) : null,
         }
 
         public Dictionary<string, DiffIndex> Indices = new Dictionary<string, DiffIndex>();
+
+        public List<DiffStats> Stats = new List<DiffStats>();
+    }
+
+    public class DiffStats
+    {
+        public string StatsName;
+
+        public List<string> Columns;
     }
 
     public class DiffIndex

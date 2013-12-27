@@ -115,6 +115,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="MultiSelectorWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="MiniExpander.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -158,6 +162,9 @@
       <DependentUpon>TimePicker.xaml</DependentUpon>
     </Compile>
     <Compile Include="Converters\EnumWindowsExtensions.cs" />
+    <Compile Include="MultiSelectorWindow.xaml.cs">
+      <DependentUpon>MultiSelectorWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MarkupExtensions\ContinueRouteExtension.cs" />
     <Compile Include="Converters\TimeSpanConverter.cs" />
     <Compile Include="DesignTimeResourceDictionary.cs" />
