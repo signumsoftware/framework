@@ -24,6 +24,7 @@ using Signum.Engine.Operations;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
+using Signum.Engine.Cache;
 
 namespace Signum.Engine.Disconnected
 {
@@ -134,6 +135,8 @@ namespace Signum.Engine.Disconnected
                             using (token.MeasureTime(l => import.InDB().UnsafeUpdate(s => new DisconnectedImportDN { SynchronizeSchema = l })))
                             using (Connector.Override(newDatabase))
                             using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
+                            using (ExecutionMode.DisableCache())
+                            using (ExecutionMode.SynchronizeSchemaOnly())
                             {
                                 var script = Administrator.TotalSynchronizeScript(interactive: false);
 
@@ -299,17 +302,17 @@ namespace Signum.Engine.Disconnected
 
         protected virtual string DatabaseFileName(DisconnectedMachineDN machine)
         {
-            return Path.Combine(DisconnectedLogic.DatabaseFolder, Connector.Current.DatabaseName() + "_Import_" + machine.MachineName + ".mdf");
+            return Path.Combine(DisconnectedLogic.DatabaseFolder, Connector.Current.DatabaseName() + "_Import_" + DisconnectedTools.CleanMachineName(machine.MachineName) + ".mdf");
         }
 
         protected virtual string DatabaseLogFileName(DisconnectedMachineDN machine)
         {
-            return Path.Combine(DisconnectedLogic.DatabaseFolder, Connector.Current.DatabaseName() + "_Import_" + machine.MachineName + "_Log.ldf");
+            return Path.Combine(DisconnectedLogic.DatabaseFolder, Connector.Current.DatabaseName() + "_Import_" + DisconnectedTools.CleanMachineName(machine.MachineName) + "_Log.ldf");
         }
 
         protected virtual DatabaseName DatabaseName(DisconnectedMachineDN machine)
         {
-            return new DatabaseName(null, Connector.Current.DatabaseName() + "_Import_" + machine.MachineName);
+            return new DatabaseName(null, Connector.Current.DatabaseName() + "_Import_" + DisconnectedTools.CleanMachineName(machine.MachineName));
         }
 
         public virtual string BackupNetworkFileName(DisconnectedMachineDN machine, Lite<DisconnectedImportDN> import)
@@ -319,7 +322,7 @@ namespace Signum.Engine.Disconnected
 
         protected virtual string BackupFileName(DisconnectedMachineDN machine, Lite<DisconnectedImportDN> import)
         {
-            return "{0}.{1}.Import.{2}.bak".Formato(Connector.Current.DatabaseName(), machine.MachineName.ToString(), import.Id);
+            return "{0}.{1}.Import.{2}.bak".Formato(Connector.Current.DatabaseName(), DisconnectedTools.CleanMachineName(machine.MachineName), import.Id);
         }
 
         private IQueryable<MListElement<DisconnectedImportDN, DisconnectedImportTableDN>> ImportTableQuery(Lite<DisconnectedImportDN> import, TypeDN type)

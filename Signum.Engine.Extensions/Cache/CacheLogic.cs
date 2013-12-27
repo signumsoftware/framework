@@ -153,6 +153,9 @@ namespace Signum.Engine.Cache
 
         public static SqlPreCommand Synchronize(Replacements replacements)
         {
+            if(ExecutionMode.IsSynchronizeSchemaOnly)
+                return null;
+
             SqlConnector connector = (SqlConnector)Connector.Current;
             List<SqlPreCommand> commands = new List<SqlPreCommand>();
 
@@ -691,6 +694,8 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(database.TryToString() ?? Connector.C
                 c.Load();
             }
         }
+
+      
     }
 
     internal interface ICacheLogicController : ICacheController

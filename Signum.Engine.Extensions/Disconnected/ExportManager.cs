@@ -23,6 +23,7 @@ using Signum.Engine.Operations;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
+using System.Text.RegularExpressions;
 
 namespace Signum.Engine.Disconnected
 {
@@ -279,17 +280,18 @@ namespace Signum.Engine.Disconnected
 
         protected virtual string DatabaseFileName(DisconnectedMachineDN machine)
         {
-            return Path.Combine(DisconnectedLogic.DatabaseFolder, Connector.Current.DatabaseName() + "_Export_" + machine.MachineName + ".mdf");
+            return Path.Combine(DisconnectedLogic.DatabaseFolder, Connector.Current.DatabaseName() + "_Export_" + 
+                DisconnectedTools.CleanMachineName(machine.MachineName) + ".mdf");
         }
 
         protected virtual string DatabaseLogFileName(DisconnectedMachineDN machine)
         {
-            return Path.Combine(DisconnectedLogic.DatabaseFolder, Connector.Current.DatabaseName() + "_Export_" + machine.MachineName + "_Log.ldf");
+            return Path.Combine(DisconnectedLogic.DatabaseFolder, Connector.Current.DatabaseName() + "_Export_" + DisconnectedTools.CleanMachineName(machine.MachineName) + "_Log.ldf");
         }
 
         protected virtual DatabaseName DatabaseName(DisconnectedMachineDN machine)
         {
-            return new DatabaseName(null, Connector.Current.DatabaseName() + "_Export_" + machine.MachineName);
+            return new DatabaseName(null, Connector.Current.DatabaseName() + "_Export_" + DisconnectedTools.CleanMachineName(machine.MachineName));
         }
 
         protected virtual string CreateDatabase(DisconnectedMachineDN machine)

@@ -25,6 +25,8 @@ namespace Signum.Entities.Chart
         MList<ChartColumnDN> Columns { get; }
 
         void InvalidateResults(bool needNewQuery);
+
+        bool Invalidator { get; }
     }
 
     [Serializable]
@@ -107,7 +109,11 @@ namespace Signum.Entities.Chart
 
             if (ChartRequestChanged != null)
                 ChartRequestChanged();
+
+            Notify(() => Invalidator);
         }
+
+        public bool Invalidator { get { return false; } }
 
         [NonSerialized]
         bool needNewQuery;

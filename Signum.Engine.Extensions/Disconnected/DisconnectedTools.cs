@@ -37,7 +37,7 @@ END".Formato(databaseName);
         public static void CreateDatabaseDirectory(string databaseFile)
         {
             string databaseDirectory = Path.GetDirectoryName(databaseFile);
-            if (!Directory.Exists(databaseDirectory))
+            if (databaseDirectory.HasText() &&  !Directory.Exists(databaseDirectory))
             {
                 Directory.CreateDirectory(databaseDirectory);
             }
@@ -196,6 +196,11 @@ MOVE '{4}' TO '{5}'".Formato(databaseName, backupFile,
 
                 action((int)elapsed);
             });
+        }
+
+        public static string CleanMachineName(string machineName)
+        {
+            return Regex.Replace(machineName, "[^A-Z0-9_]", "_");
         }
     }
 

@@ -123,9 +123,11 @@ namespace Signum.Engine.UserQueries
             return Database.Query<UserQueryDN>().Where(uq => uq.EntityType == null).Autocomplete(subString, limit);
         }
 
-
         static SqlPreCommand Schema_Synchronizing(Replacements replacements)
         {
+            if (!SafeConsole.IsConsolePresent)
+                return null;
+
             var list = Database.Query<UserQueryDN>().ToList();
 
             var table = Schema.Current.Table(typeof(UserQueryDN));
@@ -216,7 +218,7 @@ namespace Signum.Engine.UserQueries
                         case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq);
                         case FixTokenResult.RemoveToken: uq.Filters.Remove(item); break;
                         case FixTokenResult.SkipEntity: return null;
-                        case FixTokenResult.Fix: item.ValueString = val; goto retry; break;
+                        case FixTokenResult.Fix: item.ValueString = val; goto retry;
                     }
                 }
 

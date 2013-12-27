@@ -131,6 +131,9 @@ namespace Signum.Engine.Chart
 
         static SqlPreCommand Schema_Synchronizing(Replacements replacements)
         {
+            if (!SafeConsole.IsConsolePresent)
+                return null;
+
             var list = Database.Query<UserChartDN>().ToList();
 
             var table = Schema.Current.Table(typeof(UserChartDN));

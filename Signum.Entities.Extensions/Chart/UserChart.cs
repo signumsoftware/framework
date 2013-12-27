@@ -191,8 +191,10 @@ namespace Signum.Entities.Chart
 
         public void InvalidateResults(bool needNewQuery)
         {
-
+            Notify(() => Invalidator);
         }
+
+        public bool Invalidator { get { return true; } }
 
         public void SetFilterValues()
         {
