@@ -88,7 +88,7 @@ module SF
         prefix: string;
         $elem: JQuery;
 
-        constructor(prefix: string) {
+        constructor(prefix?: string) {
             this.prefix = prefix;
         }
 

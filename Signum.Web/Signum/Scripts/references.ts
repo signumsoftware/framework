@@ -10,4 +10,5 @@
 /// <reference path="SF_Validator.ts"/>
 /// <reference path="SF_Widgets.ts"/>
 /// <reference path="SF_jquery-ui-datepicker-extension.ts"/>
+/// <reference path="SF_Operations.ts"/>
 

@@ -2,19 +2,19 @@
 
 module SF
 {
-    export class OperationOptions
+    export interface OperationOptions
     {
-        sender: string;
-        prefix: string;
-        parentDiv: any;
-        operationKey: string;
-        isLite: boolean;
-        controllerUrl: string;
-        validationOptions: ValidationOptions;
-        onOk: any;
-        onCancelled: any;
-        contextual: boolean;
-        requestExtraJsonData: any;
+        sender?: string;
+        prefix?: string;
+        parentDiv?: any;
+        operationKey?: string;
+        isLite?: boolean;
+        controllerUrl?: string;
+        validationOptions?: ValidationOptions;
+        onOk?: any;
+        onCancelled?: any;
+        contextual?: boolean;
+        requestExtraJsonData?: any;
     }
 
     export class OperationManager
@@ -470,7 +470,7 @@ module SF
         }
     }
 
-    export function opReloadContent(prefix, operationResult, parentDiv) {
+    export function opReloadContent(prefix, operationResult, parentDiv?) {
         SF.opDisableCtxmenu();
         if (SF.isEmpty(prefix)) { //NormalWindow
             var $elem = SF.isEmpty(parentDiv) ? $("#divNormalControl") : $("#" + parentDiv);

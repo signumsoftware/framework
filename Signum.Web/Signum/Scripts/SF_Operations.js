@@ -7,13 +7,6 @@ var __extends = this.__extends || function (d, b) {
 };
 var SF;
 (function (SF) {
-    var OperationOptions = (function () {
-        function OperationOptions() {
-        }
-        return OperationOptions;
-    })();
-    SF.OperationOptions = OperationOptions;
-
     var OperationManager = (function () {
         function OperationManager(_options) {
             this.options = $.extend({
