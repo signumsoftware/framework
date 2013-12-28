@@ -81,7 +81,13 @@ declare module D3 {
         * @param a First value
         * @param b Second value
         */
-        descending<T>(a: T, b: T): number;
+        descending<T>(a: T, b: T): number;   /**
+        * Find the maximum value in an array
+        *
+        * @param arr Array to search
+        * @param map Accsessor function
+        */
+        min<T>(arr: T[]): T;
         /**
         * Find the minimum value in an array
         *
@@ -93,9 +99,15 @@ declare module D3 {
         * Find the maximum value in an array
         *
         * @param arr Array to search
+        */
+        max<T>(arr: T[]): T;
+        /**
+        * Find the maximum value in an array
+        *
+        * @param arr Array to search
         * @param map Accsessor function
         */
-        max<T, U>(arr: T[], map?: (v: T) => U): U;
+        max<T, U>(arr: T[], map: (v: T) => U): U;
         /**
         * Find the minimum and maximum value in an array
         *
@@ -1223,7 +1235,7 @@ declare module D3 {
             resume(): ForceLayout;
             stop(): ForceLayout;
             tick(): ForceLayout;
-            on(type: string, listener: () => void ): ForceLayout;
+            on(type: string, listener: (event: any) => void): ForceLayout;
             drag(): ForceLayout;
         }
 
@@ -2688,6 +2700,7 @@ declare module D3 {
                 (range: Range, count: number): any[];
             };
             tickFormat(count: number): (n: number) => string;
+            nice(count?: number): TimeScale;
             copy(): TimeScale;
         }
     }
