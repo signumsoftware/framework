@@ -140,7 +140,20 @@ module SF.Profiler {
         });
     }
 
-    export function heavyListChart(data) {
+
+    export interface HeavyProfilerEntryJson {
+        BeforeStart: string;
+        Start: string;
+        End: string;
+        Elapsed: string;
+        Role: string;
+        Color: string;
+        Depth: number;
+        AdditionalData: string;
+        FullIndex: string;
+    }
+
+    export function heavyListChart(data: HeavyProfilerEntryJson[]) {
         var fontSize = 12;
         var fontPadding = 4;
         var characterWidth = 7;
