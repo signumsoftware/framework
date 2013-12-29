@@ -14,13 +14,13 @@ declare module D3 {
             *
             * @param selector Selection String to match
             */
-            (selector: string): Selection;
+            (selector: string): Selection<any>;
             /**
             * Selects the specified node
             *
             * @param element Node element to select
             */
-            (element: EventTarget): Selection;
+            (element: EventTarget): Selection<any>;
         };
 
         /**
@@ -32,13 +32,13 @@ declare module D3 {
             *
             * @param selector Selection String to match
             */
-            (selector: string): Selection;
+            (selector: string): Selection<any>;
             /**
             * Selects the specified array of elements
             *
             * @param elements Array of node elements to select
             */
-            (elements: EventTarget[]): Selection;
+            (elements: EventTarget[]): Selection<any>;
         };
     }
 
@@ -422,7 +422,7 @@ declare module D3 {
         /**
         * Returns the root selection
         */
-        selection(): Selection;
+        selection(): Selection<any>;
         ns: {
             /**
             * The map of registered namespace prefixes
@@ -442,7 +442,7 @@ declare module D3 {
         /**
         * Returns a built-in easing function of the specified type
         */
-        ease: (type: string, ...arrs: any[]) => D3.Transition.Transition;
+        ease: (type: string, ...arrs: any[]) => D3.Transition.Transition<any>;
         /**
         * Constructs a new RGB color.
         */
@@ -513,8 +513,8 @@ declare module D3 {
         functor<R,T>(value: (p : R) => T): (p : R) => T;
         functor<T>(value: T): (p : any) => T;
 
-        map(object?: any): Map;
-        set(array?: Array<any>): Set;
+        map<T>(object?: any): Map<T>;
+        set<T>(array?: Array<any>): Set<T>;
         dispatch(...types: Array<string>): Dispatch;
         rebind(target: any, source: any, ...names: Array<any>): any;
         requote(str: string): string;
@@ -522,7 +522,7 @@ declare module D3 {
             (funct: () => boolean, delay?: number, mark?: number): void;
             flush(): void;
         }
-        transition(): Transition.Transition;
+        transition(): Transition.Transition<any>;
 
         round(x: number, n: number): number;
     }
@@ -680,71 +680,83 @@ declare module D3 {
         format(rows: any[]): string;
     }
 
-    export interface Selection extends Selectors, Array<any> {
+    export interface Selection<T> extends Selectors, Array<T> {
         attr: {
             (name: string): string;
-            (name: string, value: any): Selection;
-            (name: string, valueFunction: (data: any, index: number) => any): Selection;
-            (attrValueMap : any): Selection;
+            (name: string, valueFunction: (data: T, index: number) => any): Selection<T>;
+            (name: string, value: string): Selection<T>;
+            (name: string, value: number): Selection<T>;
+            (name: string, value: boolean): Selection<T>;
+            (attrValueMap: any): Selection<T>;
         };
 
         classed: {
             (name: string): string;
-            (name: string, value: any): Selection;
-            (name: string, valueFunction: (data: any, index: number) => any): Selection;
+            (name: string, valueFunction: (data: T, index: number) => any): Selection<T>;
+            (name: string, value: string): Selection<T>;
+            (name: string, value: number): Selection<T>;
+            (name: string, value: boolean): Selection<T>;
         };
 
         style: {
             (name: string): string;
-            (name: string, value: any, priority?: string): Selection;
-            (name: string, valueFunction: (data: any, index: number) => any, priority?: string): Selection;
+            (name: string, valueFunction: (data: T, index: number) => any, priority?: string): Selection<T>;
+            (name: string, value: string, priority?: string): Selection<T>;
+            (name: string, value: number, priority?: string): Selection<T>;
+            (name: string, value: boolean, priority?: string): Selection<T>;
         };
 
         property: {
             (name: string): void;
-            (name: string, value: any): Selection;
-            (name: string, valueFunction: (data: any, index: number) => any): Selection;
+            (name: string, valueFunction: (data: T, index: number) => any): Selection<T>;
+            (name: string, value: string): Selection<T>;
+            (name: string, value: number): Selection<T>;
+            (name: string, value: boolean): Selection<T>;
         };
 
         text: {
             (): string;
-            (value: any): Selection;
-            (valueFunction: (data: any, index: number) => any): Selection;
+            (valueFunction: (data: T, index: number) => any): Selection<T>;
+            (value: string): Selection<T>;
+            (value: number): Selection<T>;
+            (value: boolean): Selection<T>;
         };
 
         html: {
             (): string;
-            (value: any): Selection;
-            (valueFunction: (data: any, index: number) => any): Selection;
+            (valueFunction: (data: T, index: number) => any): Selection<T>;
+            (value: string): Selection<T>;
+            (value: number): Selection<T>;
+            (value: boolean): Selection<T>;
         };
 
-        append: (name: string) => Selection;
-        insert: (name: string, before: string) => Selection;
-        remove: () => Selection;
+        append: (name: string) => Selection<T>;
+        insert: (name: string, before: string) => Selection<T>;
+        remove: () => Selection<T>;
         empty: () => boolean;
             
         data: {
-            (values: (data: any, index?: number) => any[], key?: (data: any, index?: number) => string): UpdateSelection;
-            (values: any[], key?: (data: any, index?: number) => string): UpdateSelection;
-            (): any[];
+            <S>(values: (data: T, index?: number) => S[], key?: (data: S, index?: number) => any): UpdateSelection<S>;
+            <S>(values: S[], key?: (data: S, index?: number) => any): UpdateSelection<S>;
+            (): T[];
         };
 
         datum: {
-            (values: (data: any, index: number) => any): UpdateSelection;
-            (values: any): UpdateSelection;
-            () : any;
+            <S>(values: (data: T, index: number) => S): UpdateSelection<S>;
+            <S>(values: S): UpdateSelection<T>;
+            () : T;
         };
 
         filter: {
-            (filter: (data: any, index: number) => boolean, thisArg?: any): UpdateSelection;
+            (filter: (data: T, index: number) => boolean, thisArg?: any): UpdateSelection<T>;
             //(filter: string): UpdateSelection;
         };
 
-        call(callback: (selection: Selection) => void ): Selection;
-        each(eachFunction: (data: any, index: number) => any): Selection;
+        call(callback: (selection: Selection<T>) => void): Selection<T>;
+        each(eachFunction: (data: T, index: number) => any): Selection<T>;
         on: {
-            (type: string): (data: any, index: number) => any;
-            (type: string, listener: (data: any, index: number) => any, capture?: boolean): Selection;
+            (type: string): (data: T, index: number) => any;
+            (type: string, listener: (data: any, index: number) => any, capture?: boolean): Selection<T>;
         };
 
         /**
@@ -756,7 +768,7 @@ declare module D3 {
         * Starts a transition for the current selection. Transitions behave much like selections,
         * except operators animate smoothly over time rather than applying instantaneously.
         */
-        transition(): Transition.Transition;
+        transition(): Transition.Transition<T>;
 
         /**
         * Sorts the elements in the current selection according to the specified comparator
@@ -766,14 +778,14 @@ declare module D3 {
         * to compare, and should return either a negative, positive, or zero value to indicate
         * their relative order.
         */
-        sort<T>(comparator?: (a: T, b: T) => number): Selection;
+        sort<T>(comparator?: (a: T, b: T) => number): Selection<T>;
 
         /**
         * Re-inserts elements into the document such that the document order matches the selection
         * order. This is equivalent to calling sort() if the data is already sorted, but much
         * faster.
         */
-        order: () => Selection;
+        order: () => Selection<T>;
 
         /**
         * Returns the first non-null element in the current selection. If the selection is empty,
@@ -782,18 +794,18 @@ declare module D3 {
         node: () => Element;
     }
 
-    export interface EnterSelection {
-        append: (name: string) => Selection;
-        insert: (name: string, before: string) => Selection;
-        select: (selector: string) => Selection;
+    export interface EnterSelection<T> {
+        append: (name: string) => Selection<T>;
+        insert: (name: string, before: string) => Selection<T>;
+        select: (selector: string) => Selection<T>;
         empty: () => boolean;
         node: () => Element;
     }
 
-    export interface UpdateSelection extends Selection {
-        enter: () => EnterSelection;
-        update: () => Selection;
-        exit: () => Selection;
+    export interface UpdateSelection<T> extends Selection<T> {
+        enter: () => EnterSelection<T>;
+        update: () => Selection<T>;
+        exit: () => Selection<T>;
     }
 
     export interface NestKeyValue {
@@ -810,23 +822,23 @@ declare module D3 {
         entries(values: any[]): NestKeyValue[];
     }
 
-    export interface Map {
+    export interface Map<T> {
         has(key: string): boolean;
-        get(key: string): any;
-        set<T>(key: string, value: T): T;
+        get(key: string): T;
+        set(key: string, value: T): T;
         remove(key: string): boolean;
         keys(): Array<string>;
-        values(): Array<any>;
-        entries(): Array<any>;
-        forEach(func: (key: string, value: any) => void ): void;
+        values(): Array<T>;
+        entries(): Array<T>;
+        forEach(func: (key: string, value: T) => void ): void;
     }
 
-    export interface Set{
-        has(value: any): boolean;
-        Add(value: any): any;
-        remove(value: any): boolean;
-        values(): Array<any>;
-        forEach(func: (value: any) => void ): void;
+    export interface Set<T>{
+        has(value: T): boolean;
+        Add(value: T): T;
+        remove(value: T): boolean;
+        values(): Array<T>;
+        forEach(func: (value: T) => void ): void;
     }
 
     export interface Random {
@@ -854,27 +866,27 @@ declare module D3 {
 
     // Transitions
     export module Transition {
-        export interface Transition {
+        export interface Transition<T> {
             duration: {
-                (duration: number): Transition;
-                (duration: (data: any, index: number) => any): Transition;
+                (duration: (data: T, index: number) => any): Transition<T>;
+                (duration: number): Transition<T>;
             };
             delay: {
-                (delay: number): Transition;
-                (delay: (data: any, index: number) => any): Transition;
+                (delay: (data: T, index: number) => any): Transition<T>;
+                (delay: number): Transition<T>;
             };
             attr: {
                 (name: string): string;
-                (name: string, value: any): Transition;
-                (name: string, valueFunction: (data: any, index: number) => any): Transition;
-                (attrValueMap : any): Transition;
+                (name: string, valueFunction: (data: T, index: number) => any): Transition<T>;
+                (name: string, value: any): Transition<T>;
+                (attrValueMap: any): Transition<T>;
             };
             style: {
                 (name: string): string;
-                (name: string, value: any, priority?: string): Transition;
-                (name: string, valueFunction: (data: any, index: number) => any, priority?: string): Transition;
+                (name: string, valueFunction: (data: T, index: number) => any, priority?: string): Transition<T>;
+                (name: string, value: any, priority?: string): Transition<T>;
             };
-            call(callback: (selection: Selection) => void ): Transition;
+            call(callback: (selection: Selection<T>) => void): Transition<T>;
             /**
             * Select an element from the current document
             */
@@ -884,13 +896,13 @@ declare module D3 {
                 *
                 * @param selector Selection String to match
                 */
-                (selector: string): Transition;
+                (selector: string): Transition<T>;
                 /**
                 * Selects the specified node
                 *
                 * @param element Node element to select
                 */
-                (element: EventTarget): Transition;
+                (element: EventTarget): Transition<T>;
             };
 
             /**
@@ -902,29 +914,29 @@ declare module D3 {
                 *
                 * @param selector Selection String to match
                 */
-                (selector: string): Transition;
+                (selector: string): Transition<T>;
                 /**
                 * Selects the specified array of elements
                 *
                 * @param elements Array of node elements to select
                 */
-                (elements: EventTarget[]): Transition;
+                (elements: EventTarget[]): Transition<T>;
             }
-            each: (type?: string, eachFunction?: (data: any, index: number) => any) => Transition;
-            transition: () => Transition;
-            ease: (value: string, ...arrs: any[]) => Transition;
-            attrTween(name: string, tween: (d: any, i: number, a: any) => BaseInterpolate): Transition;
-            styleTween(name: string, tween: (d: any, i: number, a: any) => BaseInterpolate, priority?: string): Transition;
+            each: (type?: string, eachFunction?: (data: T, index: number) => any) => Transition<T>;
+            transition: () => Transition<T>;
+            ease: (value: string, ...arrs: any[]) => Transition<T>;
+            attrTween(name: string, tween: (d: any, i: number, a: any) => BaseInterpolate): Transition<T>;
+            styleTween(name: string, tween: (d: any, i: number, a: any) => BaseInterpolate, priority?: string): Transition<T>;
             text: {
-                (text: string): Transition;
-                (text: (d: any, i: number) => string): Transition;
+                (text: string): Transition<T>;
+                (text: (d: any, i: number) => string): Transition<T>;
             }
-            tween(name: string, factory: InterpolateFactory): Transition;
+            tween(name: string, factory: InterpolateFactory): Transition<T>;
             filter: {
-                (selector: string): Transition;
-                (selector: (data: any, index: number) => boolean): Transition;
+                (selector: string): Transition<T>;
+                (selector: (data: any, index: number) => boolean): Transition<T>;
             };
-            remove(): Transition;
+            remove(): Transition<T>;
         }
 
         export interface InterpolateFactory {
@@ -1577,7 +1589,7 @@ declare module D3 {
             /**
             * Draws or redraws this brush into the specified selection of elements
             */
-            (selection: Selection): void;
+            (selection: Selection<any>): void;
             /**
             * Gets or sets the x-scale associated with the brush
             */
@@ -1645,7 +1657,7 @@ declare module D3 {
         }
 
         export interface Axis {
-            (selection: Selection): void;
+            (selection: Selection<any>): void;
             scale: {
                 (): any;
                 (scale: any): Axis;
@@ -2724,7 +2736,7 @@ declare module D3 {
             * registering the necessary event listeners to support
             * panning and zooming.
             */
-            (selection: Selection): void;
+            (selection: Selection<any>): void;
 
             /**
             * Registers a listener to receive events
