@@ -18,6 +18,14 @@ namespace Signum.Entities.Basics
             set { Set(ref target, value, () => Target); }
         }
 
+        [ImplementedByAll]
+        Lite<IIdentifiable> origin;
+        public Lite<IIdentifiable> Origin
+        {
+            get { return origin; }
+            set { Set(ref origin, value, () => Origin); }
+        }
+
         OperationDN operation;
         [NotNullValidator]
         public OperationDN Operation

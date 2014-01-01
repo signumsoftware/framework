@@ -106,6 +106,8 @@ namespace Signum.Engine.Operations
             OperationType IOperation.OperationType { get { return OperationType.ConstructorFrom; } }
 
             public bool Lite { get; set; }
+            public bool LogAlsoIfNotSaved { get; set; }
+
             bool IOperation.Returns { get { return true; } }
             Type IOperation.ReturnType { get { return typeof(T); } }
 
@@ -159,7 +161,8 @@ namespace Signum.Engine.Operations
                                 {
                                     Operation = MultiEnumLogic<OperationDN>.ToEntity(key),
                                     Start = TimeZoneManager.Now,
-                                    User = UserHolder.Current.ToLite()
+                                    User = UserHolder.Current.ToLite(),
+                                    Origin = entity.ToLiteFat(),
                                 };
 
                                 OnBeginOperation((IdentifiableEntity)entity);
@@ -168,12 +171,15 @@ namespace Signum.Engine.Operations
 
                                 OnEndOperation(result);
 
-                                if (!entity.IsNew)
-                                    log.Target = entity.ToLite();
-
                                 log.End = TimeZoneManager.Now;
-                                using (ExecutionMode.Global())
-                                    log.Save();
+
+                                if (!result.IsNew || LogAlsoIfNotSaved)
+                                {
+                                    log.Target = result.IsNew ? null : result.ToLite();
+
+                                    using (ExecutionMode.Global())
+                                        log.Save();
+                                }
 
                                 return tr.Commit(result);
                             }
