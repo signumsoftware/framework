@@ -344,10 +344,7 @@ module SF {
             }
             $(this.pf(EntityBase.key_entity)).append(clonedElements);
 
-            $(this.pf(SF.Keys.toStr)).val(''); //Clean
-            if (typeof item.toStr != "undefined" && typeof item.link != "undefined") {
-                $(this.pf(SF.Keys.link)).html(item.toStr).attr('href', item.link);
-            }
+            this.updateLinks(item.toStr, item.link);
         }
 
         onCreatingOk(clonedElements: JQuery, validatorOptions: ValidationOptions, entityType: string, itemPrefix?: string) {
