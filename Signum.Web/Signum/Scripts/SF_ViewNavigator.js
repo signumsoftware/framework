@@ -372,12 +372,12 @@ var SF;
         if (!SF.isEmpty(jsonOptionsListFormat)) {
             for (var i = 0; i < jsonOptionsListFormat.length; i++) {
                 requestData += "&buttons=" + jsonOptionsListFormat[i]; //This will Bind to the List<string> "buttons"
-                if (chooserOptions && chooserOptions.ids != null) {
+                if (chooserOptions.ids != null) {
                     requestData += "&ids=" + chooserOptions.ids[i]; //This will Bind to the List<string> "ids"
                 }
             }
         }
-        if (chooserOptions && chooserOptions.title) {
+        if (chooserOptions.title) {
             requestData += "&title=" + chooserOptions.title;
         }
         $.ajax({
