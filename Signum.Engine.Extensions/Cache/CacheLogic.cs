@@ -57,6 +57,7 @@ namespace Signum.Engine.Cache
                 sb.SwitchGlobalLazyManager(new CacheGlobalLazyManager());
 
                 sb.Schema.Synchronizing += Synchronize;
+                sb.Schema.Generating += () => Synchronize(null).TryCC(s => s.ToSimple());
             }
         }
 
