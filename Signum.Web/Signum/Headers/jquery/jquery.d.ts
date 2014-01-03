@@ -586,10 +586,10 @@ interface JQueryStatic {
     // Utilities
     contains(container: Element, contained: Element): boolean;
 
-    each(collection: any, callback: (indexInArray: any, valueOfElement: any) => any): any;
-    each(collection: JQuery, callback: (indexInArray: number, valueOfElement: HTMLElement) => any): any;
     each<T>(collection: T[], callback: (indexInArray: number, valueOfElement: T) => any): any;
-
+    each(collection: JQuery, callback: (indexInArray: number, valueOfElement: HTMLElement) => any): any;
+    each(collection: any, callback: (indexInArray: any, valueOfElement: any) => any): any;
+    
     extend(target: any, ...objs: any[]): any;
     extend(deep: boolean, target: any, ...objs: any[]): any;
 

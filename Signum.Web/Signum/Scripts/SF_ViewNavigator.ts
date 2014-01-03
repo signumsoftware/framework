@@ -1,9 +1,7 @@
 ﻿/// <reference path="references.ts"/>
 
-module SF
-{
-    export interface  ViewOptions
-    {
+module SF {
+    export interface ViewOptions {
         containerDiv?: string;
         onOk?: (element?: JQuery) => any;
         onSave?: (element?: string) => boolean;
@@ -24,7 +22,7 @@ module SF
         viewOptions: ViewOptions;
         backup: JQuery;
 
-        constructor(_viewOptions: ViewOptions) {
+        constructor(_viewOptions?: ViewOptions) {
             this.viewOptions = $.extend({
                 containerDiv: null,
                 onOk: null,
@@ -362,19 +360,25 @@ module SF
         });
     }
 
-    export function openChooser(_prefix, onOptionClicked, jsonOptionsListFormat, onCancelled, chooserOptions) {
+    export interface ChooserOptions {
+        ids?: string[];
+        title?: string;
+        controllerUrl: string;
+    }
+
+    export function openChooser(_prefix: string, onOptionClicked: (option: string) => void, jsonOptionsListFormat: string[], onCancelled: () => void, chooserOptions: ChooserOptions) {
         //Construct popup
         var tempDivId = SF.compose(_prefix, "Temp");
         var requestData = "prefix=" + tempDivId;
         if (!SF.isEmpty(jsonOptionsListFormat)) {
             for (var i = 0; i < jsonOptionsListFormat.length; i++) {
                 requestData += "&buttons=" + jsonOptionsListFormat[i];  //This will Bind to the List<string> "buttons"
-                if (chooserOptions && chooserOptions.ids != null) {
+                if (chooserOptions.ids != null) {
                     requestData += "&ids=" + chooserOptions.ids[i];  //This will Bind to the List<string> "ids"            
                 }
             }
         }
-        if (chooserOptions && chooserOptions.title) {
+        if (chooserOptions.title) {
             requestData += "&title=" + chooserOptions.title;
         }
         $.ajax({
@@ -405,5 +409,5 @@ module SF
         });
     }
 
-   
+
 }
