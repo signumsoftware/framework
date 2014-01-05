@@ -135,21 +135,23 @@ namespace Signum.Web.Files
             sb.AppendLine("<script type='text/javascript'>");
             sb.AppendLine("var parDoc = window.parent.document;");
 
+            Context c = new Context(null, prefix);
+
             if (file.BinaryFile == null /* If file has been saved */ || !shouldHaveSaved)
             {
                 RuntimeInfo ri = file is EmbeddedEntity ? new RuntimeInfo((EmbeddedEntity)file) : new RuntimeInfo((IIdentifiable)file);
 
-                sb.AppendLine("parDoc.getElementById('{0}loading').style.display='none';".Formato(prefix));
-                sb.AppendLine("parDoc.getElementById('{0}').innerHTML='{1}';".Formato(TypeContextUtilities.Compose(prefix, file is EmbeddedEntity ? EntityBaseKeys.ToStr : EntityBaseKeys.ToStrLink), file.FileName));
-                sb.AppendLine("parDoc.getElementById('{0}').value='{1}';".Formato(TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo), ri.ToString()));
-                sb.AppendLine("parDoc.getElementById('{0}').style.display='none';".Formato(TypeContextUtilities.Compose(prefix, "DivNew")));
-                sb.AppendLine("parDoc.getElementById('{0}').style.display='block';".Formato(TypeContextUtilities.Compose(prefix, "DivOld")));
-                sb.AppendLine("parDoc.getElementById('{0}').style.display='block';".Formato(TypeContextUtilities.Compose(prefix, "btnRemove")));
-                sb.AppendLine("var frame = parDoc.getElementById('{0}'); frame.parentNode.removeChild(frame);".Formato(TypeContextUtilities.Compose(prefix, "frame")));
+                sb.AppendLine("parDoc.getElementById('{0}').style.display='none';".Formato(c.Compose("loading")));
+                sb.AppendLine("parDoc.getElementById('{0}').innerHTML='{1}';".Formato(c.Compose(file is EmbeddedEntity ? EntityBaseKeys.ToStr : EntityBaseKeys.ToStrLink), file.FileName));
+                sb.AppendLine("parDoc.getElementById('{0}').value='{1}';".Formato(c.Compose(EntityBaseKeys.RuntimeInfo), ri.ToString()));
+                sb.AppendLine("parDoc.getElementById('{0}').style.display='none';".Formato(c.Compose( "DivNew")));
+                sb.AppendLine("parDoc.getElementById('{0}').style.display='block';".Formato(c.Compose("DivOld")));
+                sb.AppendLine("parDoc.getElementById('{0}').style.display='inline-block';".Formato(c.Compose("btnRemove")));
+                sb.AppendLine("var frame = parDoc.getElementById('{0}'); frame.parentNode.removeChild(frame);".Formato(c.Compose("frame")));
             }
             else
             {
-                sb.AppendLine("parDoc.getElementById('{0}loading').style.display='none';".Formato(prefix));
+                sb.AppendLine("parDoc.getElementById('{0}').style.display='none';".Formato(c.Compose("loading")));
                 sb.AppendLine("window.parent.alert('{0}');".Formato(FileMessage.ErrorSavingFile.NiceToString()));
             }
 

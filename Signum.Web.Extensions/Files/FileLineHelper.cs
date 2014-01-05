@@ -152,7 +152,7 @@ namespace Signum.Web.Files
                     using (sb.Surround(new HtmlTag("div").Class("sf-value-container")))
                     {
                         sb.AddLine(MvcHtmlString.Create("<input type='file' onchange=\"{0}\" id='{1}' name='{1}' class='sf-value-line'/>".Formato(fileLine.GetOnChanged(), fileLine.Compose(FileLineKeys.File))));
-                        sb.AddLine(MvcHtmlString.Create("<img src='{0}' id='{1}loading' alt='loading' style='display:none'/>".Formato(RouteHelper.New().Content("~/Files/Images/loading.gif"), fileLine.ControlID)));
+                        sb.AddLine(MvcHtmlString.Create("<img src='{0}' id='{1}_loading' alt='loading' style='display:none'/>".Formato(RouteHelper.New().Content("~/Files/Images/loading.gif"), fileLine.ControlID)));
                         
                         if (fileLine.ValueFirst)
                             sb.AddLine(label);
