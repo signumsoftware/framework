@@ -100,6 +100,7 @@ module SF.Files {
             this.uploadAsync(files[0]);
         }
 
+
         removeSpecific() {
             $(this.pf('DivOld')).hide();
             $(this.pf('DivNew')).show();
@@ -155,7 +156,7 @@ module SF.Files {
         onUploaded(fileName: string, link: string, runtimeInfo: string, entityState : string) {
             $(this.pf(Keys.loading)).hide();
             $(this.pf(Keys.toStr)).html(fileName);
-            $(this.pf(Keys.link)).html(fileName).attr("href", link);
+            $(this.pf(Keys.link)).html(fileName).attr("download", fileName).attr("href", link);
             this.runtimeInfo().find().val(runtimeInfo);
             $(this.pf(Keys.entityState)).val(entityState);
 

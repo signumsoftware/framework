@@ -146,7 +146,7 @@ var SF;
             FileLine.prototype.onUploaded = function (fileName, link, runtimeInfo, entityState) {
                 $(this.pf(SF.Keys.loading)).hide();
                 $(this.pf(SF.Keys.toStr)).html(fileName);
-                $(this.pf(SF.Keys.link)).html(fileName).attr("href", link);
+                $(this.pf(SF.Keys.link)).html(fileName).attr("download", fileName).attr("href", link);
                 this.runtimeInfo().find().val(runtimeInfo);
                 $(this.pf(SF.Keys.entityState)).val(entityState);
 
@@ -157,7 +157,6 @@ var SF;
             };
 
             FileLine.prototype.onChanged = function () {
-                debugger;
                 if (this.options.asyncUpload) {
                     this.upload();
                 } else {

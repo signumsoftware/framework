@@ -101,11 +101,11 @@ namespace Signum.Web.Files
                         {
                             sb.AddLine(
                                     helper.Href(fileLine.Compose(EntityBaseKeys.Link),
-                                        value.TryCC(f => f.FileName) ?? "",
+                                        value.TryCC(f => f.FileName),
                                         hasEntity ? FilesClient.GetDownloadPath(value) : null,
                                         "Download",
                                         "sf-value-line",
-                                        null));
+                                        new Dictionary<string, object> { { "download", value.TryCC(f => f.FileName)} }));
                         }
                         else
                         {
