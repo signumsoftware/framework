@@ -77,7 +77,7 @@ namespace Signum.Web
                         else
                         {
                             sb.AddLine(
-                                helper.Span(entityLine.Compose(EntityBaseKeys.ToStrLink),
+                                helper.Span(entityLine.Compose(EntityBaseKeys.Link),
                                     entityLine.UntypedValue.TryToString() ?? " ",
                                     "sf-value-line",
                                     new Dictionary<string, object> { { "style", "display:" + ((entityLine.UntypedValue == null) ? "none" : "block") } }));
@@ -94,7 +94,7 @@ namespace Signum.Web
                         if (entityLine.UntypedValue != null)
                             sb.AddLine(EntityBaseHelper.RenderPopup(helper, (TypeContext)entityLine.Parent, RenderPopupMode.PopupInDiv, entityLine));
 
-                        sb.AddLine(helper.Span(entityLine.Compose(EntityBaseKeys.ToStrLink), entityLine.UntypedValue.TryToString(), "sf-value-line"));
+                        sb.AddLine(helper.Span(entityLine.Compose(EntityBaseKeys.Link), entityLine.UntypedValue.TryToString(), "sf-value-line"));
                     }
 
                     sb.AddLine(EntityBaseHelper.ViewButton(helper, entityLine));

@@ -18,7 +18,7 @@ namespace Signum.Web
         public const string Entity = "sfEntity";
         public const string Template = "sfTemplate";
         public const string ToStr = "sfToStr";
-        public const string ToStrLink = "sfLink";
+        public const string Link = "sfLink";
         public const string IsNew = "sfIsNew";
         public const string Detail = "sfDetail";
     }

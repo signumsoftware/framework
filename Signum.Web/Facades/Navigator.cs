@@ -1209,7 +1209,7 @@ namespace Signum.Web
             if (newToString != null)
                 result.Add(EntityBaseKeys.ToStr, newToString);
             if (newToStringLink != null)
-                result.Add(EntityBaseKeys.ToStrLink, newToStringLink);
+                result.Add(EntityBaseKeys.Link, newToStringLink);
 
             return new JsonResult { Data = result };
         }
