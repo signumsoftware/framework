@@ -69,12 +69,15 @@ namespace Signum.Web.Files
                                 }
                                 else
                                 {
-                                    return (FilePathDN)GetSessionFile(ctx);
+                                    throw new InvalidOperationException("Impossible to create new FilePath {0}".Formato(ctx.ControlID));
                                 }
                             }
+                            else
+                                return baseMapping(ctx);
+                             
                         }
 
-                        return baseMapping(ctx);
+                      
                     };
 
                     es.MappingMain = es.MappingLine;
@@ -112,12 +115,14 @@ namespace Signum.Web.Files
                                 }
                                 else
                                 {
-                                    return (FileDN)GetSessionFile(ctx);
+                                    throw new InvalidOperationException("Impossible to create new FileDN {0}".Formato(ctx.ControlID));
                                 }
                             }
+                            else
+                                return baseMapping(ctx);
                         }
 
-                        return baseMapping(ctx);
+                        
                     };
 
                     FileLogic.DownloadFileUrl = DownloadFileUrl;
@@ -151,14 +156,12 @@ namespace Signum.Web.Files
                                     BinaryFile = hpf.InputStream.ReadAllBytes()
                                 };
                             }
-                            else
+                            else if (ctx.Inputs.ContainsKey(EntityBaseKeys.EntityState))
                             {
-                                var sessionFile = (EmbeddedFileDN)GetSessionFile(ctx);
-                                if (sessionFile != null)
-                                    return sessionFile;
-                                else 
-                                    return baseMapping(ctx);
+                                return (EmbeddedFileDN)Navigator.Manager.DeserializeEntity(ctx.Inputs[EntityBaseKeys.EntityState]);
                             }
+                            else
+                                return baseMapping(ctx);
                         }
                     };
                 }
@@ -173,7 +176,6 @@ namespace Signum.Web.Files
                                "' alt='" + typeof(WebImage).NiceName() + "' class='sf-search-control-image' />")
                  ));
 
-
                 QuerySettings.FormatRules.Add(new FormatterRule(
                        col => col.Type == typeof(WebDownload),
                        col => (help, obj) => ((WebDownload)obj).FullWebPath == null ? null :
@@ -182,13 +184,6 @@ namespace Signum.Web.Files
 
             }
 
-            
-
-        }
-
-        private static object GetSessionFile(MappingContext ctx)
-        {
-            return ctx.ControllerContext.HttpContext.Session[Navigator.TabID(ctx.ControllerContext.Controller) + ctx.ControlID];
         }
 
         private static HttpPostedFileBase GetHttpRequestFile(MappingContext ctx)
@@ -205,6 +200,18 @@ namespace Signum.Web.Files
                 return null;
 
             return RouteHelper.New().Action((FileController fc) => fc.Download(new RuntimeInfo(file).ToString())); 
+        }
+
+        public static string GetDownloadPath(IFile file)
+        {
+            var webPath = file.FullWebPath;
+            if (webPath.HasText())
+                return RouteHelper.New().Content(webPath);
+
+            if (file is FilePathDN || file is FileDN)
+                return RouteHelper.New().Action((FileController fc) => fc.Download(new RuntimeInfo((IdentifiableEntity)file).ToString()));
+
+            return null;
         }
     }
 

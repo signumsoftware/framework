@@ -1,6 +1,4 @@
-﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
-/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/references.ts"/>
-var __extends = this.__extends || function (d, b) {
+﻿var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
@@ -8,6 +6,8 @@ var __extends = this.__extends || function (d, b) {
 };
 var SF;
 (function (SF) {
+    /// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
+    /// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/references.ts"/>
     (function (Files) {
         once("SF-fileLine", function () {
             return $.fn.fileLine = function (opt) {
@@ -85,7 +85,9 @@ var SF;
                     xhr.onreadystatechange = function () {
                         if (xhr.readyState === 4) {
                             if (xhr.status === 200) {
-                                self.createTargetIframe().html(xhr.responseText);
+                                var result = JSON.parse(xhr.responseText);
+
+                                self.onUploaded(result.FileName, result.FullWebPath, result.RuntimeInfo, result.EntityState);
                             } else {
                                 SF.log("Error " + xhr.statusText);
                             }
@@ -94,15 +96,6 @@ var SF;
 
                     xhr.send(f);
                 }
-            };
-
-            FileLine.prototype.download = function () {
-                var info = this.runtimeInfo();
-                if (SF.isEmpty(info.id)) {
-                    return;
-                }
-                var url = this.options.downloadUrl || SF.Urls.downloadFile;
-                window.open(url + "?file=" + info.value());
             };
 
             FileLine.prototype.removeSpecific = function () {
@@ -148,7 +141,21 @@ var SF;
                 return $("<iframe id='" + name + "' name='" + name + "' src='about:blank' style='position:absolute;left:-1000px;top:-1000px'></iframe>").appendTo($("body"));
             };
 
+            FileLine.prototype.onUploaded = function (fileName, link, runtimeInfo, entityState) {
+                $(this.pf(SF.Keys.loading)).hide();
+                $(this.pf(SF.Keys.toStr)).html(fileName);
+                $(this.pf(SF.Keys.link)).html(fileName).attr("href", link);
+                this.runtimeInfo().find().val(runtimeInfo);
+                $(this.pf(SF.Keys.entityState)).val(entityState);
+
+                $(this.pf("DivNew")).hide();
+                $(this.pf("DivOld")).show();
+                $(this.pf("btnRemove")).show();
+                $(this.pf("frame")).remove();
+            };
+
             FileLine.prototype.onChanged = function () {
+                debugger;
                 if (this.options.asyncUpload) {
                     this.upload();
                 } else {

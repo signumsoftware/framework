@@ -54,6 +54,8 @@ namespace Signum.Web.Files
 
             EntityBaseHelper.ConfigureEntityBase(fl, fl.Type.CleanType());
 
+            fl.Download = (context.Type.IsIIdentifiable() || context.Type.IsLite());
+
             Common.FireCommonTasks(fl);
 
             if (settingsModifier != null)
@@ -88,25 +90,30 @@ namespace Signum.Web.Files
                 using (sb.Surround(new HtmlTag("div", fileLine.Compose("DivOld")).Attr("style", "display:" + (hasEntity ? "block" : "none"))))
                 {
                     var label = EntityBaseHelper.BaseLineLabel(helper, fileLine,
-                            fileLine.Download ? fileLine.Compose(EntityBaseKeys.ToStrLink) : fileLine.Compose(EntityBaseKeys.ToStr));
+                            fileLine.Download ? fileLine.Compose(EntityBaseKeys.Link) : fileLine.Compose(EntityBaseKeys.ToStr));
 
                     if (!fileLine.ValueFirst)
                         sb.AddLine(label);
 
                     using (sb.Surround(new HtmlTag("div").Class("sf-value-container")))
                     {
-                        if (fileLine.Download && (fileLine.Type.IsIIdentifiable() || fileLine.Type.IsLite()))
+                        if (fileLine.Download)
                         {
                             sb.AddLine(
-                                    helper.Href(fileLine.Compose(EntityBaseKeys.ToStrLink),
+                                    helper.Href(fileLine.Compose(EntityBaseKeys.Link),
                                         value.TryCC(f => f.FileName) ?? "",
-                                        "",
+                                        hasEntity ? FilesClient.GetDownloadPath(value) : null,
                                         "Download",
                                         "sf-value-line",
-                                        new Dictionary<string, object> { { "onclick", fileLine.GetDownloading() } }));
+                                        null));
                         }
                         else
+                        {
                             sb.AddLine(helper.Span(fileLine.Compose(EntityBaseKeys.ToStr), value.TryCC(f => f.FileName) ?? "", "sf-value-line", null));
+                        }
+
+                        if (fileLine.Type.IsEmbeddedEntity())
+                            sb.AddLine(helper.Hidden(fileLine.Compose(EntityBaseKeys.EntityState), value.TryCC(f => Navigator.Manager.SerializeEntity((ModifiableEntity)f))));
 
                         sb.AddLine(EntityBaseHelper.RemoveButton(helper, fileLine));
 
@@ -181,19 +188,6 @@ namespace Signum.Web.Files
                 .ToHtml());
 
             return sb.ToHtml();
-        }
-
-        private static Enum GetFileTypeFromValue(FilePathDN fp)
-        {
-            if (fp == null)
-                return null;
-
-            if (fp.FileTypeEnum != null)
-                return fp.FileTypeEnum;
-            else if (fp.FileType != null)
-                return fp.FileType.ToEnum<FileTypeDN>();
-
-            return null;
         }
     }
 }

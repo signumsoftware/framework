@@ -1,6 +1,5 @@
 ﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
 /// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/references.ts"/>
-
 module SF.Files {
 
     interface FileLineOptions extends EntityBaseOptions {
@@ -84,7 +83,9 @@ module SF.Files {
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState === 4) {
                         if (xhr.status === 200) {
-                            self.createTargetIframe().html(xhr.responseText);
+                            var result = JSON.parse(xhr.responseText);
+
+                            self.onUploaded(result.FileName, result.FullWebPath, result.RuntimeInfo, result.EntityState);
                         }
                         else {
                             SF.log("Error " + xhr.statusText);
@@ -94,15 +95,6 @@ module SF.Files {
 
                 xhr.send(f);
             }
-        }
-
-        download() {
-            var info = this.runtimeInfo();
-            if (SF.isEmpty(info.id)) {
-                return;
-            }
-            var url = this.options.downloadUrl || SF.Urls.downloadFile;
-            window.open(url + "?file=" + info.value());
         }
 
         removeSpecific() {
@@ -156,6 +148,20 @@ module SF.Files {
                 .appendTo($("body"));
         }
 
+
+        onUploaded(fileName: string, link: string, runtimeInfo: string, entityState : string) {
+            $(this.pf(Keys.loading)).hide();
+            $(this.pf(Keys.toStr)).html(fileName);
+            $(this.pf(Keys.link)).html(fileName).attr("href", link);
+            this.runtimeInfo().find().val(runtimeInfo);
+            $(this.pf(Keys.entityState)).val(entityState);
+
+            $(this.pf("DivNew")).hide();
+            $(this.pf("DivOld")).show();
+            $(this.pf("btnRemove")).show();
+            $(this.pf("frame")).remove();
+        }
+
         onChanged() {
             if (this.options.asyncUpload) {
                 this.upload();
@@ -166,11 +172,10 @@ module SF.Files {
         }
 
         updateButtonsDisplay(hasEntity) {
+
         }
     }
-
 }
-
 interface Window {
     File: any;
     FileList: any;

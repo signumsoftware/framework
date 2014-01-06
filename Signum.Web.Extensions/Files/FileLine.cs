@@ -39,17 +39,8 @@ namespace Signum.Web.Files
 
         public bool Download { get; set; }
 
-        public string DownloadUrl { get; set; }
         public string UploadUrl { get; set; }
         public string UploadDroppedUrl { get; set; }
-
-        public string Downloading { get; set; }
-        internal string GetDownloading()
-        {
-            if (!Download)
-                return "";
-            return Downloading ?? DefaultDownloading();
-        }
 
         public string OnChanged { get; set; }
         internal string GetOnChanged()
@@ -77,8 +68,6 @@ namespace Signum.Web.Files
         {
             var result = base.OptionsJSInternal();
             result.Add("asyncUpload", AsyncUpload ? "true" : "false");
-            if (DownloadUrl.HasText())
-                result.Add("downloadUrl", DownloadUrl.SingleQuote());
             if (UploadUrl.HasText())
                 result.Add("uploadUrl", UploadUrl.SingleQuote());
             if (UploadDroppedUrl.HasText())
@@ -96,15 +85,6 @@ namespace Signum.Web.Files
             return new JsInstruction(() => "{0}.remove()".Formato(this.ToJS()));
         }
 
-        protected string DefaultDownloading()
-        {
-            return JsDownloading().ToJS();
-        }
-
-        public JsInstruction JsDownloading()
-        {
-            return new JsInstruction(() => "{0}.download()".Formato(this.ToJS()));
-        }
 
         protected string DefaultOnChanged()
         {

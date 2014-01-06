@@ -23,6 +23,7 @@ using Signum.Engine.Files;
 using System.Reflection;
 using Signum.Web.Controllers;
 using Signum.Web.PortableAreas;
+using Signum.Entities.Reflection;
 #endregion
 
 namespace Signum.Web.Files
@@ -30,10 +31,7 @@ namespace Signum.Web.Files
     public class FileController : Controller
     {
         [HttpPost]
-        public PartialViewResult PartialView(
-            string prefix,
-            string fileType,
-            int? sfId)
+        public PartialViewResult PartialView(string prefix, string fileType, int? sfId)
         {
             Type type = typeof(FilePathDN);
             FilePathDN entity = null;
@@ -56,16 +54,15 @@ namespace Signum.Web.Files
 
         public ActionResult Upload()
         {
-            bool shouldSaveFilePath = !RuntimeInfo.FromFormValue((string)Request["fileParentRuntimeInfo"]).IsNew;
-
             string fileName = Request.Files.Cast<string>().Single();
 
             string prefix = fileName.Substring(0, fileName.IndexOf(FileLineKeys.File) - 1);
 
             RuntimeInfo info = RuntimeInfo.FromFormValue((string)Request.Form[TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo)]);
 
-            IFile file;
+            bool isEmbedded = info.EntityType.IsEmbeddedEntity(); 
 
+            IFile file;
             if (info.EntityType == typeof(FilePathDN))
             {
                 string fileType = (string)Request.Form[TypeContextUtilities.Compose(prefix, FileLineKeys.FileType)];
@@ -84,24 +81,36 @@ namespace Signum.Web.Files
             file.FileName = Path.GetFileName(hpf.FileName);
             file.BinaryFile = hpf.InputStream.ReadAllBytes();
 
-            if (shouldSaveFilePath)
+            if (!isEmbedded)
                 ((IdentifiableEntity)file).Save();
-            else
-                Session[Request.Form[ViewDataKeys.TabId] + prefix] = file;
 
+            StringBuilder sb = new StringBuilder();
+            //Use plain javascript not to have to add also the reference to jquery in the result iframe
+            sb.AppendLine("<html><head><title>-</title></head><body>");
+            sb.AppendLine("<script type='text/javascript'>");
+            RuntimeInfo ri = file is EmbeddedEntity ? new RuntimeInfo((EmbeddedEntity)file) : new RuntimeInfo((IIdentifiable)file);
+            sb.AppendLine("window.parent.$.data(window.parent.document.getElementById('{0}'), 'SF-control').onUploaded('{1}', '{2}', '{3}', '{4}')".Formato(
+                prefix,
+                file.FileName,
+                FilesClient.GetDownloadPath(file),
+                ri.ToString(),
+                isEmbedded ? Navigator.Manager.SerializeEntity((EmbeddedEntity)file) : null));
+            sb.AppendLine("</script>");
+            sb.AppendLine("</body></html>");
 
-            return UploadResult(prefix, file, shouldSaveFilePath);
+            return Content(sb.ToString());
         }
 
-        public ContentResult UploadDropped()
+        public JsonResult UploadDropped()
         {
-            bool shouldSaveFilePath = !RuntimeInfo.FromFormValue((string)Request.Headers["X-" + EntityBaseKeys.RuntimeInfo]).IsNew;
-
             string fileName = Request.Headers["X-FileName"];
 
             string prefix = Request.Headers["X-Prefix"];
 
             RuntimeInfo info = RuntimeInfo.FromFormValue((string)Request.Headers["X-" + TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo)]);
+
+            bool isEmbedded = info.EntityType.IsEmbeddedEntity(); 
+            
             IFile file;
             if (info.EntityType == typeof(FilePathDN))
             {
@@ -119,46 +128,18 @@ namespace Signum.Web.Files
             file.FileName = fileName;
             file.BinaryFile = Request.InputStream.ReadAllBytes();
 
-            if (shouldSaveFilePath)
+            if (!isEmbedded)
                 ((IdentifiableEntity)file).Save();
-            else
-                Session[Request.Headers["X-" + ViewDataKeys.TabId] + prefix] = file;
 
-            return UploadResult(prefix, file, shouldSaveFilePath);
-        }
-
-        private ContentResult UploadResult(string prefix, IFile file, bool shouldHaveSaved)
-        {
-            StringBuilder sb = new StringBuilder();
-            //Use plain javascript not to have to add also the reference to jquery in the result iframe
-            sb.AppendLine("<html><head><title>-</title></head><body>");
-            sb.AppendLine("<script type='text/javascript'>");
-            sb.AppendLine("var parDoc = window.parent.document;");
-
-            Context c = new Context(null, prefix);
-
-            if (file.BinaryFile == null /* If file has been saved */ || !shouldHaveSaved)
+            RuntimeInfo ri = file is EmbeddedEntity ? new RuntimeInfo((EmbeddedEntity)file) : new RuntimeInfo((IIdentifiable)file);
+            
+            return Json(new
             {
-                RuntimeInfo ri = file is EmbeddedEntity ? new RuntimeInfo((EmbeddedEntity)file) : new RuntimeInfo((IIdentifiable)file);
-
-                sb.AppendLine("parDoc.getElementById('{0}').style.display='none';".Formato(c.Compose("loading")));
-                sb.AppendLine("parDoc.getElementById('{0}').innerHTML='{1}';".Formato(c.Compose(file is EmbeddedEntity ? EntityBaseKeys.ToStr : EntityBaseKeys.ToStrLink), file.FileName));
-                sb.AppendLine("parDoc.getElementById('{0}').value='{1}';".Formato(c.Compose(EntityBaseKeys.RuntimeInfo), ri.ToString()));
-                sb.AppendLine("parDoc.getElementById('{0}').style.display='none';".Formato(c.Compose( "DivNew")));
-                sb.AppendLine("parDoc.getElementById('{0}').style.display='block';".Formato(c.Compose("DivOld")));
-                sb.AppendLine("parDoc.getElementById('{0}').style.display='inline-block';".Formato(c.Compose("btnRemove")));
-                sb.AppendLine("var frame = parDoc.getElementById('{0}'); frame.parentNode.removeChild(frame);".Formato(c.Compose("frame")));
-            }
-            else
-            {
-                sb.AppendLine("parDoc.getElementById('{0}').style.display='none';".Formato(c.Compose("loading")));
-                sb.AppendLine("window.parent.alert('{0}');".Formato(FileMessage.ErrorSavingFile.NiceToString()));
-            }
-
-            sb.AppendLine("</script>");
-            sb.AppendLine("</body></html>");
-
-            return Content(sb.ToString());
+                file.FileName,
+                FullWebPath = FilesClient.GetDownloadPath(file),
+                RuntimeInfo = ri.ToString(),
+                EntityState = isEmbedded ? Navigator.Manager.SerializeEntity((EmbeddedEntity)file) : null,
+            }); 
         }
 
         public ActionResult Download(string file)
