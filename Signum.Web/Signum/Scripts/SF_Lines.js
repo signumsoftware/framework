@@ -5,8 +5,15 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
+
 var SF;
 (function (SF) {
+    once("SF-control", function () {
+        jQuery.fn.SFControl = function () {
+            return this.data("SF-control");
+        };
+    });
+
     var EntityBase = (function () {
         function EntityBase(element, _options) {
             this.element = element;
@@ -18,6 +25,8 @@ var SF;
             }, _options);
 
             this._create();
+
+            this.element.trigger("SF-ready");
         }
         EntityBase.prototype._create = function () {
             var $txt = $(this.pf(SF.Keys.toStr) + ".sf-entity-autocomplete");

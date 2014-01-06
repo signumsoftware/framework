@@ -10,7 +10,7 @@ module SF {
             });
 
         export function getFor(prefix: string) : SearchControl {
-            return $("#" + SF.compose(prefix, "sfSearchControl")).data("SF-control");
+            return $("#" + SF.compose(prefix, "sfSearchControl")).SFControl<SearchControl>();
         }
 
         export function openFinder(findOptions: FindOptions) {
