@@ -10,8 +10,8 @@ module SF.Chart
             new ChartBuilder(this, opt);
         });
 
-    export function getFor(prefix: string) {
-        return $("#" + SF.compose(prefix, "sfChartBuilderContainer")).data("SF-control");
+    export function getFor(prefix: string): ChartBuilder {
+        return $("#" + SF.compose(prefix, "sfChartBuilderContainer")).SFControl<ChartBuilder>();
     };
 
     export class ChartBuilder extends SF.SearchControl
@@ -335,7 +335,7 @@ module SF.Chart
 
                 var options = $chartControl.find(":input").not($chartControl.find(".sf-filters-list :input")).serialize();
                 options += "&webQueryName=" + findNavigator.options.webQueryName;
-                options += "&orders=" + findNavigator.serializeOrders(findNavigator.options.orders);
+                options += "&orders=" + findNavigator.serializeOrders();
                 options += "&filters=" + findNavigator.serializeFilters();
                 options += $(this).data("click");
 
