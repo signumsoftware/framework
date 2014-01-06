@@ -46,32 +46,33 @@ namespace Signum.Web
                         if (entityLine.Autocomplete && entityLine.Implementations.Value.IsByAll)
                             throw new InvalidOperationException("Autocomplete is not possible with ImplementedByAll");
 
-                        var htmlAttr = new Dictionary<string, object>
-                        {
-                            {"class", "sf-value-line" + (entityLine.Autocomplete ? " sf-entity-autocomplete" : "")},
-                            { "autocomplete", "off" }, 
-                            { "style", "display:" + ((entityLine.UntypedValue==null && !entityLine.ReadOnly) ? "block" : "none")}
-                        };
-
                         if (entityLine.Autocomplete)
                         {
+                            var htmlAttr = new Dictionary<string, object>
+                            {
+                                {"class", "sf-value-line" + (entityLine.Autocomplete ? " sf-entity-autocomplete" : "")},
+                                { "autocomplete", "off" }, 
+                                { "style", "display:" + ((entityLine.UntypedValue==null && !entityLine.ReadOnly) ? "block" : "none")}
+                            };
+
                             htmlAttr.Add("data-types", new StaticInfo(entityLine.Type, entityLine.Implementations, entityLine.PropertyRoute, entityLine.ReadOnly).Types.ToString(Navigator.ResolveWebTypeName, ","));
 
                             if (entityLine.AutocompleteUrl.HasText())
-                                htmlAttr.Add("data-url", entityLine.AutocompleteUrl); 
+                                htmlAttr.Add("data-url", entityLine.AutocompleteUrl);
+
+                            sb.AddLine(helper.TextBox(
+                                entityLine.Compose(EntityBaseKeys.ToStr),
+                                entityLine.ToStr,
+                                htmlAttr));
                         }
 
-                        sb.AddLine(helper.TextBox(
-                            entityLine.Compose(EntityBaseKeys.ToStr),
-                            entityLine.ToStr,
-                            htmlAttr));
-
-                        int? id = entityLine.IdOrNull;
-                        if (id != null && entityLine.Navigate)
+                        if (entityLine.Navigate)
                         {
                             sb.AddLine(
-                                helper.Href(entityLine.Compose(EntityBaseKeys.ToStrLink),
-                                    entityLine.UntypedValue.ToString(), Navigator.NavigateRoute(entityLine.CleanRuntimeType, id), JavascriptMessage.navigate.NiceToString(), "sf-value-line",
+                                helper.Href(entityLine.Compose(EntityBaseKeys.Link),
+                                    entityLine.UntypedValue.TryToString(),
+                                    entityLine.IdOrNull != null ? Navigator.NavigateRoute(entityLine.CleanRuntimeType, entityLine.IdOrNull.Value) : null, 
+                                    JavascriptMessage.navigate.NiceToString(), "sf-value-line",
                                     new Dictionary<string, object> { { "style", "display:" + ((entityLine.UntypedValue == null) ? "none" : "block") } }));
                         }
                         else
