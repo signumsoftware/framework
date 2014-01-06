@@ -52,6 +52,41 @@ module SF.Files {
             }
         }
 
+
+        uploadAsync(f: File) {
+            $(this.pf('loading')).show();
+            this.runtimeInfo().setEntity(this.staticInfo().singleType(), '');
+
+            var fileName = f.name;
+
+            var $divNew = $(this.pf("DivNew"));
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", this.options.uploadDroppedUrl || SF.Urls.uploadDroppedFile, true);
+            xhr.setRequestHeader("X-FileName", fileName);
+            xhr.setRequestHeader("X-" + SF.Keys.runtimeInfo, this.getParentRuntimeInfo($divNew.attr("data-parent-prefix")));
+            xhr.setRequestHeader("X-Prefix", this.options.prefix);
+            xhr.setRequestHeader("X-" + SF.compose(this.options.prefix, SF.Keys.runtimeInfo), this.runtimeInfo().find().val());
+            xhr.setRequestHeader("X-sfFileType", $(this.pf("sfFileType")).val());
+            xhr.setRequestHeader("X-sfTabId", $("#sfTabId").val());
+
+            var self = this;
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        var result = JSON.parse(xhr.responseText);
+
+                        self.onUploaded(result.FileName, result.FullWebPath, result.RuntimeInfo, result.EntityState);
+                    }
+                    else {
+                        SF.log("Error " + xhr.statusText);
+                    }
+                }
+            };
+
+            xhr.send(f);
+        }
+
         fileDropped(e: DragEvent) {
             var files = e.dataTransfer.files;
             e.stopPropagation();
@@ -62,39 +97,7 @@ module SF.Files {
                 return;
             }
 
-            for (var i = 0, f; f = files[i]; i++) {
-                $(this.pf('loading')).show();
-                this.runtimeInfo().setEntity(this.staticInfo().singleType(), '');
-
-                var fileName = f.name;
-
-                var $divNew = $(this.pf("DivNew"));
-
-                var xhr = new XMLHttpRequest();
-                xhr.open("POST", this.options.uploadDroppedUrl || SF.Urls.uploadDroppedFile, true);
-                xhr.setRequestHeader("X-FileName", fileName);
-                xhr.setRequestHeader("X-" + SF.Keys.runtimeInfo, this.getParentRuntimeInfo($divNew.attr("data-parent-prefix")));
-                xhr.setRequestHeader("X-Prefix", this.options.prefix);
-                xhr.setRequestHeader("X-" + SF.compose(this.options.prefix, SF.Keys.runtimeInfo), this.runtimeInfo().find().val());
-                xhr.setRequestHeader("X-sfFileType", $(this.pf("sfFileType")).val());
-                xhr.setRequestHeader("X-sfTabId", $("#sfTabId").val());
-
-                var self = this;
-                xhr.onreadystatechange = function () {
-                    if (xhr.readyState === 4) {
-                        if (xhr.status === 200) {
-                            var result = JSON.parse(xhr.responseText);
-
-                            self.onUploaded(result.FileName, result.FullWebPath, result.RuntimeInfo, result.EntityState);
-                        }
-                        else {
-                            SF.log("Error " + xhr.statusText);
-                        }
-                    }
-                };
-
-                xhr.send(f);
-            }
+            this.uploadAsync(files[0]);
         }
 
         removeSpecific() {
