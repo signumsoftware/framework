@@ -3,6 +3,10 @@
 
 @using (var sc = Html.TypeContext<EmailAttachmentDN>())
 {
-    @Html.FileLine(sc, ea => ea.File, fl => { fl.FileType = EmailFileType.Attachment; fl.LabelVisible = false; })
-    @Html.ValueLine(sc, c => c.Type, vl => { vl.ReadOnly = true; vl.WriteHiddenOnReadonly = true; })
+    using (Html.FieldInline())
+    {
+        sc.LabelVisible = false;
+    @Html.FileLine(sc, ea => ea.File, fl => { fl.FileType = EmailFileType.Attachment; fl.Remove = false; })
+    @Html.ValueLine(sc, c => c.Type)
+    }
 }
