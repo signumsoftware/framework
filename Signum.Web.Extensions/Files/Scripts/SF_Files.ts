@@ -2,11 +2,19 @@
 /// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/references.ts"/>
 module SF.Files {
 
-    interface FileLineOptions extends EntityBaseOptions {
+    export interface FileLineOptions extends EntityBaseOptions {
         downloadUrl?: string;
         uploadUrl?: string;
         uploadDroppedUrl?: string;
         asyncUpload?: boolean;
+        dragAndDrop? : boolean
+    }
+
+    export interface FileAsyncUploadResult {
+        FileName: string;
+        FullWebPath: string;
+        RuntimeInfo: string;
+        EntityState: string;
     }
 
     once("SF-fileLine", () =>
@@ -14,28 +22,33 @@ module SF.Files {
             var fl = new FileLine(this, opt);
         });
 
-    class FileLine extends EntityBase {
+    export class FileLine extends EntityBase {
         options: FileLineOptions;
         constructor(element: JQuery, _options: FileLineOptions) {
             super(element, _options);
         }
 
         _create() {
-            $("#" + this.options.prefix).data("SF-control").initDragDrop($(this.pf("DivNew")));
+            if ((this.options.dragAndDrop || true) == true)
+                FileLine.initDragDrop($(this.pf("DivNew")),
+                    e=> this.fileDropped(e));
         }
 
-        initDragDrop($divNew: JQuery) {
+        static initDragDrop($div: JQuery, onDropped: (e:DragEvent) => void ) {
             if (window.File && window.FileList && window.FileReader && new XMLHttpRequest().upload) {
                 var self = this;
-                var $fileDrop = $("<div></div>").addClass("sf-file-drop").html("or drag a file here")
-                    .on("dragover", function (e) { self.fileDropHover(e, true); })
-                    .on("dragleave", function (e) { self.fileDropHover(e, false); })
-                    .appendTo($divNew);
-                $fileDrop[0].addEventListener("drop", function (e) { self.fileDropped(e); }, false);
+                var $fileDrop = $("<div></div>").addClass("sf-file-drop").html("drag a file here")
+                    .on("dragover", function (e) { FileLine.fileDropHover(e, true); })
+                    .on("dragleave", function (e) { FileLine.fileDropHover(e, false); })
+                    .appendTo($div);
+                $fileDrop[0].addEventListener("drop", function (e) {
+                    FileLine.fileDropHover(e, false);
+                    onDropped(e);
+                }, false);
             }
         }
 
-        fileDropHover(e, toggle : boolean) {
+        static fileDropHover(e, toggle : boolean) {
             e.stopPropagation();
             e.preventDefault();
             $(e.target).toggleClass("sf-file-drop-over", toggle);
@@ -52,8 +65,9 @@ module SF.Files {
             }
         }
 
+        
 
-        uploadAsync(f: File) {
+        uploadAsync(f: File, onLoaded?: (result: FileAsyncUploadResult) => void) {
             $(this.pf('loading')).show();
             this.runtimeInfo().setEntity(this.staticInfo().singleType(), '');
 
@@ -74,9 +88,12 @@ module SF.Files {
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4) {
                     if (xhr.status === 200) {
-                        var result = JSON.parse(xhr.responseText);
+                        var result = <FileAsyncUploadResult>JSON.parse(xhr.responseText);
 
                         self.onUploaded(result.FileName, result.FullWebPath, result.RuntimeInfo, result.EntityState);
+
+                        if (onLoaded != undefined)
+                            onLoaded(result);
                     }
                     else {
                         SF.log("Error " + xhr.statusText);
@@ -91,11 +108,6 @@ module SF.Files {
             var files = e.dataTransfer.files;
             e.stopPropagation();
             e.preventDefault();
-
-            if (files.length == 0) {
-                this.fileDropHover(e, false);
-                return;
-            }
 
             this.uploadAsync(files[0]);
         }

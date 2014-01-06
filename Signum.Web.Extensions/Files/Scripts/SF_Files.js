@@ -21,24 +21,29 @@ var SF;
                 _super.call(this, element, _options);
             }
             FileLine.prototype._create = function () {
-                $("#" + this.options.prefix).data("SF-control").initDragDrop($(this.pf("DivNew")));
+                var _this = this;
+                if ((this.options.dragAndDrop || true) == true)
+                    FileLine.initDragDrop($(this.pf("DivNew")), function (e) {
+                        return _this.fileDropped(e);
+                    });
             };
 
-            FileLine.prototype.initDragDrop = function ($divNew) {
+            FileLine.initDragDrop = function ($div, onDropped) {
                 if (window.File && window.FileList && window.FileReader && new XMLHttpRequest().upload) {
                     var self = this;
-                    var $fileDrop = $("<div></div>").addClass("sf-file-drop").html("or drag a file here").on("dragover", function (e) {
-                        self.fileDropHover(e, true);
+                    var $fileDrop = $("<div></div>").addClass("sf-file-drop").html("drag a file here").on("dragover", function (e) {
+                        FileLine.fileDropHover(e, true);
                     }).on("dragleave", function (e) {
-                        self.fileDropHover(e, false);
-                    }).appendTo($divNew);
+                        FileLine.fileDropHover(e, false);
+                    }).appendTo($div);
                     $fileDrop[0].addEventListener("drop", function (e) {
-                        self.fileDropped(e);
+                        FileLine.fileDropHover(e, false);
+                        onDropped(e);
                     }, false);
                 }
             };
 
-            FileLine.prototype.fileDropHover = function (e, toggle) {
+            FileLine.fileDropHover = function (e, toggle) {
                 e.stopPropagation();
                 e.preventDefault();
                 $(e.target).toggleClass("sf-file-drop-over", toggle);
@@ -54,7 +59,7 @@ var SF;
                 }
             };
 
-            FileLine.prototype.uploadAsync = function (f) {
+            FileLine.prototype.uploadAsync = function (f, onLoaded) {
                 $(this.pf('loading')).show();
                 this.runtimeInfo().setEntity(this.staticInfo().singleType(), '');
 
@@ -78,6 +83,9 @@ var SF;
                             var result = JSON.parse(xhr.responseText);
 
                             self.onUploaded(result.FileName, result.FullWebPath, result.RuntimeInfo, result.EntityState);
+
+                            if (onLoaded != undefined)
+                                onLoaded(result);
                         } else {
                             SF.log("Error " + xhr.statusText);
                         }
@@ -91,11 +99,6 @@ var SF;
                 var files = e.dataTransfer.files;
                 e.stopPropagation();
                 e.preventDefault();
-
-                if (files.length == 0) {
-                    this.fileDropHover(e, false);
-                    return;
-                }
 
                 this.uploadAsync(files[0]);
             };
@@ -168,6 +171,7 @@ var SF;
             };
             return FileLine;
         })(SF.EntityBase);
+        Files.FileLine = FileLine;
     })(SF.Files || (SF.Files = {}));
     var Files = SF.Files;
 })(SF || (SF = {}));
