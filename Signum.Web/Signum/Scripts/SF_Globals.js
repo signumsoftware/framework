@@ -160,7 +160,9 @@ var SF;
         runtimeInfo: "sfRuntimeInfo",
         staticInfo: "sfStaticInfo",
         toStr: "sfToStr",
-        link: "sfLink"
+        link: "sfLink",
+        loading: "loading",
+        entityState: "sfEntityState"
     };
 
     var Serializer = (function () {
