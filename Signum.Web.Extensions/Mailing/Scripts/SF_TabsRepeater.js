@@ -11,7 +11,7 @@ var SF;
         function removeItem(elem) {
             var $elem = $(elem);
             var itemPrefix = elem.id.substring(0, elem.id.indexOf("_btnRemove"));
-            $elem.closest('.sf-repeater-field').data('SF-control').remove(itemPrefix);
+            $elem.closest('.sf-repeater-field').SFControl().remove(itemPrefix);
             var $li = $elem.closest('li');
             if ($li.hasClass("ui-tabs-selected")) {
                 $control().tabs("select", 0);
@@ -28,7 +28,7 @@ var SF;
         function addItem() {
             var $container = $control();
             var controlId = $container.attr("id");
-            var repeater = $('#' + controlId).data('SF-control');
+            var repeater = $('#' + controlId).SFControl();
 
             var newPrefixIndex = 0;
             var $lastElement = $container.children("ul").find("li:last").find(".sf-remove");
@@ -41,7 +41,7 @@ var SF;
             var viewOptions = {
                 containerDiv: "",
                 prefix: itemPrefix,
-                type: repeater.staticInfo().types().split(",")
+                type: repeater.staticInfo().types()
             };
 
             var template = repeater.getEmbeddedTemplate();
