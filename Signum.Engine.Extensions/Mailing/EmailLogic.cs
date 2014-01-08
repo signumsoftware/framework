@@ -75,7 +75,6 @@ namespace Signum.Engine.Mailing
                         Text = e.Body,
                         e.Template,
                         e.Sent,
-                        e.Received,
                         e.Package,
                         e.Exception,
                     });
@@ -365,7 +364,6 @@ namespace Signum.Engine.Mailing
 
                     email.State = EmailMessageState.Sent;
                     email.Sent = TimeZoneManager.Now;
-                    email.Received = null;
                     email.Save();
                 }
                 catch (Exception ex)
@@ -424,7 +422,6 @@ namespace Signum.Engine.Mailing
                     {
                         email.State = EmailMessageState.Sent;
                         email.Sent = TimeZoneManager.Now;
-                        email.Received = null;
                         email.Save();
                     }
                     else
@@ -434,7 +431,6 @@ namespace Signum.Engine.Mailing
                         MailMessage message = CreateMailMessage(email);
 
                         email.Sent = null;
-                        email.Received = null;
                         email.Save();
 
                         client.SafeSendMailAsync(message, args =>
