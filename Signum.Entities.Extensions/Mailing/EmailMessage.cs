@@ -87,13 +87,6 @@ namespace Signum.Entities.Mailing
             set { Set(ref receptionNotified, value, () => ReceptionNotified); }
         }
 
-        DateTime? received;
-        public DateTime? Received
-        {
-            get { return received; }
-            set { Set(ref received, value, () => Received); }
-        }
-
         [SqlDbType(Size = int.MaxValue)]
         string subject;
         [StringLengthValidator(AllowNulls = true, Min = 3)]
@@ -177,6 +170,40 @@ namespace Signum.Entities.Mailing
             set { Set(ref package, value, () => Package); }
         }
 
+        [NotNullable]
+        MList<EmailAttachmentDN> attachments = new MList<EmailAttachmentDN>();
+        [NotNullValidator, NoRepeatValidator]
+        public MList<EmailAttachmentDN> Attachments
+        {
+            get { return attachments; }
+            set { Set(ref attachments, value, () => Attachments); }
+        }
+
+        static StateValidator<EmailMessageDN, EmailMessageState> validator = new StateValidator<EmailMessageDN, EmailMessageState>(
+            m => m.State, m => m.Exception, m => m.Sent, m => m.ReceptionNotified, m => m.Package)
+            {
+{EmailMessageState.Created,      false,         false,        false,                    null },
+{EmailMessageState.Sent,         false,         true,         false,                    null },
+{EmailMessageState.SentException,true,          true,         false,                    null },
+{EmailMessageState.ReceptionNotified,true,      true,         true,                     null },
+{EmailMessageState.Received,     false,         null,         false,                    false },
+            };
+
+        static Expression<Func<EmailMessageDN, string>> ToStringExpression = e => e.Subject;
+        public override string ToString()
+        {
+            return ToStringExpression.Evaluate(this);
+        }
+    }
+
+
+    [Serializable]
+    public class EmailReceptionMixin : MixinEntity
+    {
+        protected EmailReceptionMixin(IdentifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next)
+        {
+        }
+
         [Ignore]
         Lite<Pop3ReceptionDN> reception;
         public Lite<Pop3ReceptionDN> Reception
@@ -193,31 +220,15 @@ namespace Signum.Entities.Mailing
             set { Set(ref rawContent, value, () => RawContent); }
         }
 
-        [NotNullable]
-        MList<EmailAttachmentDN> attachments = new MList<EmailAttachmentDN>();
-        [NotNullValidator, NoRepeatValidator]
-        public MList<EmailAttachmentDN> Attachments
+        DateTime? received;
+        public DateTime? Received
         {
-            get { return attachments; }
-            set { Set(ref attachments, value, () => Attachments); }
-        }
-
-        static StateValidator<EmailMessageDN, EmailMessageState> validator = new StateValidator<EmailMessageDN, EmailMessageState>(
-            m => m.State, m => m.Exception, m => m.Sent, m => m.Received, m => m.ReceptionNotified, m => m.Package)
-            {
-{EmailMessageState.Created,      false,         false,        false,           false,                    null },
-{EmailMessageState.Sent,         false,         true,         false,           false,                    null },
-{EmailMessageState.SentException,true,          true,         false,           false,                    null },
-{EmailMessageState.ReceptionNotified,true,      true,         false,           true,                     null },
-{EmailMessageState.Received,     false,         null,         true,            false,                    false },
-            };
-
-        static Expression<Func<EmailMessageDN, string>> ToStringExpression = e => e.Subject;
-        public override string ToString()
-        {
-            return ToStringExpression.Evaluate(this);
+            get { return received; }
+            set { Set(ref received, value, () => Received); }
         }
     }
+
+
 
     [Serializable]
     public class EmailAttachmentDN : EmbeddedEntity

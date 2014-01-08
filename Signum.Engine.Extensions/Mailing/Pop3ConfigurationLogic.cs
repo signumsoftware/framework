@@ -30,10 +30,26 @@ namespace Signum.Engine.Mailing
             {
                 FilePathLogic.Register(EmailFileType.Attachment, new FileTypeAlgorithm { CalculateSufix = FileTypeAlgorithm.YearMonth_Guid_Filename_Sufix });
 
-                sb.Settings.AssertNotIgnored((EmailMessageDN em) => em.Reception, "start Pop3ConfigurationLogic");
+                MixinDeclarations.AssertDefined(typeof(EmailMessageDN), typeof(EmailReceptionMixin));
                
                 sb.Include<Pop3ConfigurationDN>();
                 sb.Include<Pop3ReceptionDN>();
+
+                dqm.RegisterQuery(typeof(EmailMessageDN), () =>
+                   from e in Database.Query<EmailMessageDN>()
+                   select new
+                   {
+                       Entity = e,
+                       e.Id,
+                       e.State,
+                       e.Subject,
+                       Text = e.Body,
+                       e.Template,
+                       e.Sent,
+                       e.Mixin<EmailReceptionMixin>().Received,
+                       e.Package,
+                       e.Exception,
+                   });
 
                 dqm.RegisterQuery(typeof(Pop3ReceptionDN), () =>
                     from s in Database.Query<Pop3ReceptionDN>()
@@ -147,7 +163,7 @@ namespace Signum.Engine.Mailing
                                 }
                                 else
                                 {
-                                    email.Reception = reception.ToLite();
+                                    email.Mixin<EmailReceptionMixin>().Reception = reception.ToLite();
 
                                     if (AssociateWithEntities != null)
                                         AssociateWithEntities(email);
@@ -226,8 +242,6 @@ namespace Signum.Engine.Mailing
                    mm.Bcc.Select(ma => new EmailRecipientDN(ma, EmailRecipientKind.Bcc))).ToMList(),
                 State = EmailMessageState.Received,
                 Subject = mm.Subject,
-                Received = TimeZoneManager.Now,
-                RawContent = rawContent,
                 Attachments = mm.Attachments.Select(a => 
                     new EmailAttachmentDN 
                     {
@@ -236,6 +250,10 @@ namespace Signum.Engine.Mailing
                         Type = EmailAttachmentType.Attachment 
                     }).ToMList()
             };
+
+            dn.Mixin<EmailReceptionMixin>().Received = TimeZoneManager.Now;
+            dn.Mixin<EmailReceptionMixin>().RawContent = rawContent;
+
 
 
             DateTime parse;

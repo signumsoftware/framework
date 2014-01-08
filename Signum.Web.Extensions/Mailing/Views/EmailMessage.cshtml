@@ -8,11 +8,11 @@
         padding: 2px 10px;
     }
 
-    .sf-email-message .sf-repeater-element legend
-    {
-        float: left;
-        margin-right: 10px;
-    }
+        .sf-email-message .sf-repeater-element legend
+        {
+            float: left;
+            margin-right: 10px;
+        }
 </style>
 
 @Html.ScriptCss("~/Mailing/Content/SF_Mailing.css")
@@ -20,6 +20,8 @@
 <div class="sf-email-message">
     @using (var e = Html.TypeContext<EmailMessageDN>())
     {
+        var hasReceptionMixin = e.Value.Mixins.OfType<EmailReceptionMixin>().Any();
+
         if (e.Value.State != EmailMessageState.Created)
         {
             e.ReadOnly = true;
@@ -36,7 +38,11 @@
             @Html.EntityLine(e, f => f.Target)
             @Html.ValueLine(e, f => f.State)
             @Html.ValueLine(e, f => f.Sent)
-            @Html.ValueLine(e, f => f.Received)
+            @if (hasReceptionMixin)
+            {
+                @Html.ValueLine(e, f => f.Mixin<EmailReceptionMixin>().Received)
+                @Html.ValueLine(e, f => f.Mixin<EmailReceptionMixin>().Reception)
+            }
             @Html.EntityLine(e, f => f.Exception)
             @Html.EntityLine(e, f => f.Template)
             @Html.EntityLine(e, f => f.Package)
@@ -48,8 +54,8 @@
         <div class="clearall" />
     
         @Html.ValueLine(e, f => f.Subject) 
-        if (e.Value.State == EmailMessageState.Created)
-        {
+            if (e.Value.State == EmailMessageState.Created)
+            {
         @Html.ValueLine(e, f => f.Body, vl =>
         {
             vl.ValueLineType = ValueLineType.TextArea;
@@ -62,11 +68,11 @@
         <script>
             $(function () {
                 SF.Mailing.initHtmlEditor('@e.Compose("Body")');
-        });
+            });
         </script>
-        }
-        else
-        {
+            }
+            else
+            {
         <h3>@EmailMessageMessage.Message.NiceToString():</h3>
         <div>
             @if (e.Value.IsBodyHtml)
@@ -79,8 +85,8 @@
                 <script>
                     $(function () {
                         var iframe = $("@e.Compose("iframe")");
-                    SF.Mailing.activateIFrame(iframe);
-                });
+                        SF.Mailing.activateIFrame(iframe);
+                    });
                 </script>
             }
             else
@@ -90,7 +96,7 @@
             </pre>
             }
         </div>
-        }
+            }
     }
 </div>
 
