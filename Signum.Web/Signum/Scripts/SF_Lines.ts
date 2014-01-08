@@ -737,7 +737,7 @@ module SF {
             return validatorResult.acceptChanges;
         }
 
-        newListItem(clonedElements: JQuery, itemPrefix: string, item: EntityData) {
+        newListItem(clonedElements: any, itemPrefix: string, item: EntityData) {
             var $table = $("#" + this.options.prefix + "> .sf-field-list > .sf-field-list-table");
 
             $table.before(SF.hiddenInput(SF.compose(itemPrefix, EntityList.key_indexes), ";" + (this.getLastNewIndex() + 1).toString()));

@@ -67,7 +67,7 @@ namespace Signum.Web
 
         public virtual string ToJS()
         {
-            return "$('#{0}').data('SF-control')".Formato(ControlID);
+            return "$('#{0}').SFControl()".Formato(ControlID);
         }
 
         public string OptionsJS()
