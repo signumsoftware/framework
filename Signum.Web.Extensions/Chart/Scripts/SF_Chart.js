@@ -18,7 +18,7 @@ var SF;
         });
 
         function getFor(prefix) {
-            return $("#" + SF.compose(prefix, "sfChartBuilderContainer")).data("SF-control");
+            return $("#" + SF.compose(prefix, "sfChartBuilderContainer")).SFControl();
         }
         Chart.getFor = getFor;
         ;
@@ -336,7 +336,7 @@ var SF;
 
                     var options = $chartControl.find(":input").not($chartControl.find(".sf-filters-list :input")).serialize();
                     options += "&webQueryName=" + findNavigator.options.webQueryName;
-                    options += "&orders=" + findNavigator.serializeOrders(findNavigator.options.orders);
+                    options += "&orders=" + findNavigator.serializeOrders();
                     options += "&filters=" + findNavigator.serializeFilters();
                     options += $(this).data("click");
 
