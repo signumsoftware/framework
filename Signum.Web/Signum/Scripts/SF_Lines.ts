@@ -1,6 +1,18 @@
 ﻿/// <reference path="references.ts"/>
 
+interface JQuery {
+    SFControl<T>(): T;
+}
+
 module SF {
+
+    once("SF-control", () => {
+        jQuery.fn.SFControl = function () {
+            return this.data("SF-control");
+        };
+    });
+
+
     export interface EntityBaseOptions {
         prefix: string;
         partialViewName: string;
@@ -29,6 +41,8 @@ module SF {
             }, _options);
 
             this._create();
+
+            this.element.trigger("SF-ready");
         }
 
         static key_entity = "sfEntity";

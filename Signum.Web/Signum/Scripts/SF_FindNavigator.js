@@ -9,7 +9,7 @@ var SF;
         });
 
         function getFor(prefix) {
-            return $("#" + SF.compose(prefix, "sfSearchControl")).data("SF-control");
+            return $("#" + SF.compose(prefix, "sfSearchControl")).SFControl();
         }
         FindNavigator.getFor = getFor;
 

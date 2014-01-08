@@ -172,7 +172,9 @@ module SF
         runtimeInfo: "sfRuntimeInfo",
         staticInfo: "sfStaticInfo",
         toStr: "sfToStr",
-        link: "sfLink"
+        link: "sfLink",
+        loading: "loading",
+        entityState: "sfEntityState",
     };
 
     export class Serializer {
