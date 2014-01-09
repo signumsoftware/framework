@@ -66,14 +66,14 @@ WriteLiteral("\r\n");
             #line hidden
             
             #line 9 "..\..\Mailing\Views\EmailAttachment.cshtml"
-Write(Html.FileLine(sc, ea => ea.File, fl => { fl.FileType = EmailFileType.Attachment; fl.Remove = false; }));
+Write(Html.FileLine(sc, ea => ea.File, fl => { fl.FileType = EmailFileType.Attachment; fl.Remove = false; fl.DragAndDrop = false; }));
 
             
             #line default
             #line hidden
             
             #line 9 "..\..\Mailing\Views\EmailAttachment.cshtml"
-                                                                                                           
+                                                                                                                                   
     
             
             #line default

@@ -7,7 +7,7 @@ module SF.Files {
         uploadUrl?: string;
         uploadDroppedUrl?: string;
         asyncUpload?: boolean;
-        dragAndDrop? : boolean
+        dragAndDrop?: boolean;
     }
 
     export interface FileAsyncUploadResult {
@@ -29,7 +29,7 @@ module SF.Files {
         }
 
         _create() {
-            if ((this.options.dragAndDrop || true) == true)
+            if (this.options.dragAndDrop == null || this.options.dragAndDrop == true)
                 FileLine.initDragDrop($(this.pf("DivNew")),
                     e=> this.fileDropped(e));
         }

@@ -6,7 +6,7 @@
     using (Html.FieldInline())
     {
         sc.LabelVisible = false;
-    @Html.FileLine(sc, ea => ea.File, fl => { fl.FileType = EmailFileType.Attachment; fl.Remove = false; })
+    @Html.FileLine(sc, ea => ea.File, fl => { fl.FileType = EmailFileType.Attachment; fl.Remove = false; fl.DragAndDrop = false; })
     @Html.ValueLine(sc, c => c.Type)
     }
 }

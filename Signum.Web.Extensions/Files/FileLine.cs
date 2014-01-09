@@ -30,12 +30,8 @@ namespace Signum.Web.Files
 
         public readonly RouteValueDictionary ValueHtmlProps = new RouteValueDictionary();
 
-        bool asyncUpload = true;
-        public bool AsyncUpload
-        {
-            get { return asyncUpload; }
-            set { asyncUpload = value; }
-        }
+        public bool AsyncUpload { get; set; }
+        public bool DragAndDrop { get; set; }
 
         public bool Download { get; set; }
 
@@ -51,6 +47,8 @@ namespace Signum.Web.Files
         public FileLine(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
             : base(type, untypedValue, parent, controlID, propertyRoute)
         {
+            AsyncUpload = true;
+            DragAndDrop = true;
             Download = true;
             Create = false;
             View = false;
@@ -72,6 +70,8 @@ namespace Signum.Web.Files
                 result.Add("uploadUrl", UploadUrl.SingleQuote());
             if (UploadDroppedUrl.HasText())
                 result.Add("uploadDroppedUrl", UploadDroppedUrl.SingleQuote());
+            if (!DragAndDrop)
+                result.Add("dragAndDrop", "false");
             return result;
         }
 

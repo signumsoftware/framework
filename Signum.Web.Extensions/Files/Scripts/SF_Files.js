@@ -22,7 +22,7 @@ var SF;
             }
             FileLine.prototype._create = function () {
                 var _this = this;
-                if ((this.options.dragAndDrop || true) == true)
+                if (this.options.dragAndDrop == null || this.options.dragAndDrop == true)
                     FileLine.initDragDrop($(this.pf("DivNew")), function (e) {
                         return _this.fileDropped(e);
                     });
