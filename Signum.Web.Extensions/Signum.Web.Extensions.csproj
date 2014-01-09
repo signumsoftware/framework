@@ -13,21 +13,16 @@
     <RootNamespace>Signum.Web.Extensions</RootNamespace>
     <AssemblyName>Signum.Web.Extensions</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <SccProjectName>
-    </SccProjectName>
-    <SccLocalPath>
-    </SccLocalPath>
-    <SccAuxPath>
-    </SccAuxPath>
-    <SccProvider>
-    </SccProvider>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <MvcBuildViews>false</MvcBuildViews>
+    <UseIISExpress>false</UseIISExpress>
+    <TypeScriptToolsVersion>0.9</TypeScriptToolsVersion>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>4.0</OldToolsVersion>
-    <UpgradeBackupLocation>
-    </UpgradeBackupLocation>
-    <TargetFrameworkProfile />
-    <UseIISExpress>false</UseIISExpress>
+    <UpgradeBackupLocation />
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
@@ -968,7 +963,7 @@
     <Content Include="AuthAdmin\Images\radioYellow.png" />
     <Content Include="AuthAdmin\Images\thumb.png" />
     <Content Include="AuthAdmin\Images\treeView.png" />
-    <Content Include="AuthAdmin\Scripts\SF_AuthAdmin.js" />
+    <TypeScriptCompile Include="AuthAdmin\Scripts\SF_AuthAdmin.ts" />
     <Content Include="AuthAdmin\Views\PasswordValidInterval.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>PasswordValidInterval.generated.cs</LastGenOutput>
@@ -1029,13 +1024,13 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </None>
-    <Content Include="Cache\Scripts\SF_Cache.js" />
+    <TypeScriptCompile Include="Cache\Scripts\SF_Cache.ts" />
     <Content Include="Calendar\Content\calendar.css" />
-    <Content Include="Calendar\Scripts\calendar.js" />
+    <TypeScriptCompile Include="Calendar\Scripts\calendar.ts" />
     <Content Include="Chart\Content\SF_Chart.css" />
     <Content Include="Chart\Images\unknown.png" />
-    <Content Include="Chart\Scripts\SF_Chart.js" />
-    <Content Include="Chart\Scripts\SF_Chart_Utils.js" />
+    <TypeScriptCompile Include="Chart\Scripts\SF_Chart.ts" />
+    <TypeScriptCompile Include="Chart\Scripts\SF_Chart_Utils.ts" />
     <Content Include="Chart\Views\ChartRequestView.cshtml">
       <SubType>Code</SubType>
       <Generator>RazorGenerator</Generator>
@@ -1043,7 +1038,7 @@
     </Content>
     <Content Include="ControlPanel\Content\SF_FlowTable.css" />
     <Content Include="ControlPanel\Content\SF_ControlPanel.css" />
-    <Content Include="ControlPanel\Scripts\SF_FlowTable.js" />
+    <TypeScriptCompile Include="ControlPanel\Scripts\SF_FlowTable.ts" />
     <Content Include="ControlPanel\Views\LinkListPart.cshtml">
       <SubType>Code</SubType>
       <Generator>RazorGenerator</Generator>
@@ -1065,21 +1060,21 @@
     </Content>
     <Content Include="Files\Content\SF_Files.css" />
     <Content Include="Files\Images\loading.gif" />
-    <Content Include="Files\Scripts\SF_Files.js" />
-    <Content Include="Help\Scripts\help.js" />
+    <TypeScriptCompile Include="Files\Scripts\SF_Files.ts" />
+    <TypeScriptCompile Include="Help\Scripts\help.ts" />
     <Content Include="Help\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
     <Content Include="Mailing\Content\SF_Mailing.css" />
-    <Content Include="Mailing\Scripts\SF_Mailing.js" />
-    <Content Include="Mailing\Scripts\SF_TabsRepeater.js" />
+    <TypeScriptCompile Include="Mailing\Scripts\SF_Mailing.ts" />
+    <TypeScriptCompile Include="Mailing\Scripts\SF_TabsRepeater.ts" />
     <Content Include="Mailing\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
-    <Content Include="Omnibox\Scripts\SF_Omnibox.js" />
-    <Content Include="Processes\Scripts\SF_Process.js" />
+    <TypeScriptCompile Include="Omnibox\Scripts\SF_Omnibox.ts" />
+    <TypeScriptCompile Include="Processes\Scripts\SF_Process.ts" />
     <Content Include="Processes\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
@@ -1118,7 +1113,7 @@
       <LastGenOutput>CountSearchControlPart.generated.cs</LastGenOutput>
     </Content>
     <Content Include="Profiler\Content\SF_Profiler.css" />
-    <Content Include="Profiler\Scripts\SF_Profiler.js" />
+    <TypeScriptCompile Include="Profiler\Scripts\SF_Profiler.ts" />
     <Content Include="Profiler\Views\Statistics.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Statistics.generated.cs</LastGenOutput>
@@ -1383,10 +1378,10 @@
       <LastGenOutput>Holiday.generated.cs</LastGenOutput>
     </None>
     <Content Include="SMS\Content\SF_SMS.css" />
-    <Content Include="SMS\Scripts\SF_SMS.js" />
+    <TypeScriptCompile Include="SMS\Scripts\SF_SMS.ts" />
     <Content Include="Translation\Content\SF_Translation.css" />
-    <Content Include="Translation\Scripts\SF_Translation.js" />
-    <Content Include="UserQueries\Scripts\SF_UserQuery.js" />
+    <TypeScriptCompile Include="Translation\Scripts\SF_Translation.ts" />
+    <TypeScriptCompile Include="UserQueries\Scripts\SF_UserQuery.ts" />
     <Content Include="Web.config" />
     <Content Include="Basic\Views\Web.config" />
     <Content Include="Captcha\Views\Web.config" />
@@ -1678,7 +1673,6 @@
       <Name>Signum.Entities.Extensions</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
@@ -1686,14 +1680,27 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
-  <!--<Target Name="MvcBuildViews" AfterTargets="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
-    <AspNetCompiler VirtualPath="temp" PhysicalPath="$(WebProjectOutputDir)" />
-  </Target>-->
   <Target Name="BeforeBuild">
     <ItemGroup>
-      <EmbeddedResource Include="**\*.gif;**\*.png;**\*.jpg;**\*.css;**\*.js" />
+      <EmbeddedResource Include="**\*.gif;**\*.png;**\*.jpg;**\*.css;**\*.js;**\*.ts;**\*.map" />
     </ItemGroup>
   </Target>
+  <Target Name="MvcBuildViews" AfterTargets="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
+    <AspNetCompiler VirtualPath="temp" PhysicalPath="$(WebProjectOutputDir)" />
+  </Target>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <TypeScriptTarget>ES5</TypeScriptTarget>
+    <TypeScriptRemoveComments>false</TypeScriptRemoveComments>
+    <TypeScriptSourceMap>true</TypeScriptSourceMap>
+    <TypeScriptModuleKind>AMD</TypeScriptModuleKind>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <TypeScriptTarget>ES5</TypeScriptTarget>
+    <TypeScriptRemoveComments>true</TypeScriptRemoveComments>
+    <TypeScriptSourceMap>true</TypeScriptSourceMap>
+    <TypeScriptModuleKind>AMD</TypeScriptModuleKind>
+  </PropertyGroup>
+  <Import Project="$(VSToolsPath)\TypeScript\Microsoft.TypeScript.targets" Condition="Exists('$(VSToolsPath)\TypeScript\Microsoft.TypeScript.targets')" />
   <ProjectExtensions>
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">

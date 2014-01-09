@@ -1,72 +1,73 @@
-﻿var SF = SF || {};
-SF.Help = (function () {
+﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
+/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/references.ts"/>
+var SF;
+(function (SF) {
+    (function (Help) {
+        function edit() {
+            $(".editable").each(function () {
+                var self = $(this);
+                self.bind('focus', function (event) {
+                    $(this).addClass("modified");
+                });
 
-    var defaultString = "";
-
-    function edit() {
-        $(".editable").each(function () {
-            var self = $(this);
-            self.bind('focus', function (event) {
-                $(this).addClass("modified");
+                $("dd").addClass("editing");
+                $("#entityName").addClass("editing");
             });
 
-            $("dd").addClass("editing");
-            $("#entityName").addClass("editing");
-        });
-
-        $(".shortcut").css("display", "block");
-        $("#edit-action").hide();
-        $("#syntax-action").show();
-        $("#save-action").show();
-    }
-
-    function save() {
-        $("#save-action").html("Guardando...");
-        $.ajax({
-            url: document.getElementById("form-save").action,
-            async: false,
-            data: $("form#form-save .modified").serialize(),
-            success: function (msg) {
-                location.reload(true);
-                $("#saving-error").hide();
-            },
-            error: function (XMLHttpRequest, textStatus, errorThrown) {
-                var msg;
-                if (XMLHttpRequest.responseText != null && XMLHttpRequest.responseText != undefined) {
-                    var startError = XMLHttpRequest.responseText.indexOf("<title>");
-                    var endError = XMLHttpRequest.responseText.indexOf("</title>");
-                    if ((startError != -1) && (endError != -1))
-                        msg = XMLHttpRequest.responseText.substring(startError + 7, endError);
-                    else
-                        msg = XMLHttpRequest.responseText;
-                }
-                $("#saving-error .text").html(msg);
-                $("#saving-error").show();
-            }
-        });
-    }
-
-    $(function () {
-        $(".shortcut").click(function () { $.copy($(this).html()); });
-        if (typeof window.location.hash != 'undefined' && window.location.hash != '') {
-            window.location.hash += "-editor";
-
-            var $dd = $(window.location.hash).parents("dd").first();
-
-            $dd.css('background-color', '#ccffaa');
-            $dd.prev().css('background-color', '#ccffaa');
-
+            $(".shortcut").css("display", "block");
+            $("#edit-action").hide();
+            $("#syntax-action").show();
+            $("#save-action").show();
         }
+        Help.edit = edit;
 
-        $("#syntax-action").click(function () {
-            $("#syntax-list").slideToggle("slow");
-            $(this).toggleClass("active");
-            return null;
+        function save() {
+            $("#save-action").html("Guardando...");
+            $.ajax({
+                url: document.getElementById("form-save").action,
+                async: false,
+                data: $("form#form-save .modified").serialize(),
+                success: function (msg) {
+                    location.reload(true);
+                    $("#saving-error").hide();
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    var msg;
+                    if (XMLHttpRequest.responseText != null && XMLHttpRequest.responseText != undefined) {
+                        var startError = XMLHttpRequest.responseText.indexOf("<title>");
+                        var endError = XMLHttpRequest.responseText.indexOf("</title>");
+                        if ((startError != -1) && (endError != -1))
+                            msg = XMLHttpRequest.responseText.substring(startError + 7, endError);
+                        else
+                            msg = XMLHttpRequest.responseText;
+                    }
+                    $("#saving-error .text").html(msg);
+                    $("#saving-error").show();
+                }
+            });
+        }
+        Help.save = save;
+
+        once("SF.Help", function () {
+            return $(function () {
+                //$(".shortcut").click(function () { $.copy($(this).html()); });
+                if (typeof window.location.hash != 'undefined' && window.location.hash != '') {
+                    window.location.hash += "-editor";
+
+                    var $dd = $(window.location.hash).parents("dd").first();
+
+                    $dd.css('background-color', '#ccffaa');
+                    $dd.prev().css('background-color', '#ccffaa');
+                }
+
+                $("#syntax-action").click(function () {
+                    $("#syntax-list").slideToggle("slow");
+                    $(this).toggleClass("active");
+                    return null;
+                });
+            });
         });
-    });
-
-    return {
-        edit: edit,
-        save: save
-    }
-})();
+    })(SF.Help || (SF.Help = {}));
+    var Help = SF.Help;
+})(SF || (SF = {}));
+//# sourceMappingURL=help.js.map

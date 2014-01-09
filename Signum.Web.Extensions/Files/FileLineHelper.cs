@@ -88,7 +88,7 @@ namespace Signum.Web.Files
                 using (sb.Surround(new HtmlTag("div", fileLine.Compose("DivOld")).Attr("style", "display:" + (hasEntity ? "block" : "none"))))
                 {
                     var label = EntityBaseHelper.BaseLineLabel(helper, fileLine,
-                            fileLine.Download ? fileLine.Compose(EntityBaseKeys.ToStrLink) : fileLine.Compose(EntityBaseKeys.ToStr));
+                            fileLine.Download ? fileLine.Compose(EntityBaseKeys.Link) : fileLine.Compose(EntityBaseKeys.ToStr));
 
                     if (!fileLine.ValueFirst)
                         sb.AddLine(label);
@@ -98,7 +98,7 @@ namespace Signum.Web.Files
                         if (fileLine.Download && (fileLine.Type.IsIIdentifiable() || fileLine.Type.IsLite()))
                         {
                             sb.AddLine(
-                                    helper.Href(fileLine.Compose(EntityBaseKeys.ToStrLink),
+                                    helper.Href(fileLine.Compose(EntityBaseKeys.Link),
                                         value.TryCC(f => f.FileName) ?? "",
                                         "",
                                         "Download",

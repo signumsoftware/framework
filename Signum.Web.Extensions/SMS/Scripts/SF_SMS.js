@@ -1,17 +1,15 @@
-﻿var SF = SF || {};
-
-if (typeof SF.SMS != "undefined") {
-    SF.SMS.init();
-}
-else {
-    SF.SMS = (function () {
+﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
+/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/references.ts"/>
+var SF;
+(function (SF) {
+    (function (SMS) {
         var SMSMaxTextLength;
         var SMSWarningTextLength;
 
         var normalCharacters;
         var doubleCharacters;
 
-        var init = function () {
+        function init() {
             if (!editable()) {
                 return;
             }
@@ -49,17 +47,17 @@ else {
             $("#sfInsertLiteral").click(function () {
                 insertLiteral();
             });
-        };
+        }
 
-        var $control = function () {
+        function $control() {
             return $('.sf-sms-msg-text:visible');
-        };
+        }
 
-        var editable = function () {
+        function editable() {
             return $control().length > 0 || $(".sf-sms-template-messages").length > 0;
-        };
+        }
 
-        var charactersToEnd = function ($textarea) {
+        function charactersToEnd($textarea) {
             if (!editable()) {
                 return;
             }
@@ -71,8 +69,7 @@ else {
                 if (normalCharacters.indexOf(current) == -1) {
                     if (doubleCharacters.indexOf(current) != -1) {
                         count++;
-                    }
-                    else {
+                    } else {
                         maxLength = 60;
                         count = text.length;
                         break;
@@ -80,9 +77,9 @@ else {
                 }
             }
             return maxLength - count;
-        };
+        }
 
-        var loadLists = function () {
+        function loadLists() {
             $.ajax({
                 url: SF.Urls.getDictionaries,
                 data: {},
@@ -95,15 +92,15 @@ else {
                     $('.sf-sms-chars-left:visible').html(SMSMaxTextLength);
                 }
             });
-        };
+        }
 
-        var remainingCharacters = function ($textarea) {
+        function remainingCharacters($textarea) {
             $textarea = $textarea || $control();
             var $remainingChars = $textarea.closest(".sf-sms-edit-container").find('.sf-sms-chars-left');
             var $remainingCharacters = $textarea.closest(".sf-sms-edit-container").find('.sf-sms-characters-left > p');
 
             var numberCharsLeft = charactersToEnd($textarea);
-            $remainingChars.html(numberCharsLeft);
+            $remainingChars.html(numberCharsLeft.toString());
 
             $remainingCharacters.removeClass('sf-sms-no-more-chars').removeClass('sf-sms-warning');
             $textarea.removeClass('sf-sms-red');
@@ -113,14 +110,13 @@ else {
                 $remainingCharacters.addClass('sf-sms-no-more-chars');
                 $remainingChars.addClass('sf-sms-highlight');
                 $textarea.addClass('sf-sms-red');
-            }
-            else if (numberCharsLeft < SMSWarningTextLength) {
+            } else if (numberCharsLeft < SMSWarningTextLength) {
                 $remainingCharacters.addClass('sf-sms-warning');
                 $remainingChars.addClass('sf-sms-highlight');
             }
-        };
+        }
 
-        var fillLiterals = function () {
+        function fillLiterals() {
             var $combo = $(".sf-associated-type");
             var prefix = $combo.attr("data-control-id");
             var url = $combo.attr("data-url");
@@ -144,27 +140,19 @@ else {
                     remainingCharacters();
                 }
             });
-        };
+        }
+        SMS.fillLiterals = fillLiterals;
 
-        var insertLiteral = function () {
+        function insertLiteral() {
             var selected = $("#sfLiterals").find(":selected").val();
             if (selected == "") {
                 alert("No element selected");
                 return;
             }
             var $message = $control();
-            $message.val(
-                $message.val().substring(0, $message[0].selectionStart) +
-                selected +
-                $message.val().substring($message[0].selectionEnd)
-                );
-        };
-
-        return {
-            init: init,
-            fillLiterals: fillLiterals
-        };
-    })();
-
-    SF.SMS.init();
-}
+            $message.val($message.val().substring(0, $message[0].selectionStart) + selected + $message.val().substring($message[0].selectionEnd));
+        }
+    })(SF.SMS || (SF.SMS = {}));
+    var SMS = SF.SMS;
+})(SF || (SF = {}));
+//# sourceMappingURL=SF_SMS.js.map

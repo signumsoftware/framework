@@ -1,14 +1,14 @@
-﻿var SF = SF || {};
+﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
+/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/references.ts"/>
 
-SF.registerModule("Mailing", function () {
-
-    SF.Mailing = (function () {
-
+var SF;
+(function (SF) {
+    (function (Mailing) {
         var cssClassActive = "sf-email-inserttoken-targetactive";
         var $lastTokenTarget;
         var onInsertToken;
 
-        var initReplacements = function () {
+        function initReplacements() {
             var self = this;
 
             $(".sf-email-replacements-container").on("focus", ".sf-email-inserttoken-target", function () {
@@ -25,11 +25,9 @@ SF.registerModule("Mailing", function () {
 
                 if (typeof onInsertToken != "undefined" && onInsertToken != null) {
                     onInsertToken(tokenTag);
-                }
-                else if (!$lastTokenTarget || $lastTokenTarget.filter(":visible").length == 0) {
+                } else if (!$lastTokenTarget || $lastTokenTarget.filter(":visible").length == 0) {
                     window.alert("Select the target first");
-                }
-                else if ($lastTokenTarget.filter(":text").length > 0) {
+                } else if ($lastTokenTarget.filter(":text").length > 0) {
                     var oldValue = $lastTokenTarget.val();
                     var currentPosition = $lastTokenTarget[0].selectionStart;
                     var newValue = oldValue.substr(0, currentPosition) + tokenTag + oldValue.substring(currentPosition);
@@ -37,42 +35,48 @@ SF.registerModule("Mailing", function () {
                 }
             });
 
-            $(".sf-email-replacements-container").on("sf-new-subtokens-combo", "select", function (event, idSelectedCombo) {
-                SF.Mailing.newSubTokensComboAdded.call(self, $("#" + idSelectedCombo));
+            $(".sf-email-replacements-container").on("sf-new-subtokens-combo", "select", function (event) {
+                var idSelectedCombo = [];
+                for (var _i = 0; _i < (arguments.length - 1); _i++) {
+                    idSelectedCombo[_i] = arguments[_i + 1];
+                }
+                SF.Mailing.newSubTokensComboAdded.call(self, $("#" + idSelectedCombo[0]));
             });
-        };
+        }
+        Mailing.initReplacements = initReplacements;
 
-        var setTokenTargetFocus = function ($element) {
+        function setTokenTargetFocus($element) {
             $("." + cssClassActive).removeClass(cssClassActive);
             onInsertToken = null;
 
             $element.addClass(cssClassActive);
             $lastTokenTarget = $element;
-        };
+        }
+        Mailing.setTokenTargetFocus = setTokenTargetFocus;
+        ;
 
-        var removeTokenTargetFocus = function ($element) {
+        function removeTokenTargetFocus($element) {
             $element.removeClass(cssClassActive);
-        };
+        }
+        Mailing.removeTokenTargetFocus = removeTokenTargetFocus;
+        ;
 
-        var constructTokenTag = function (tokenName, block) {
+        function constructTokenTag(tokenName, block) {
             if (typeof block == "undefined") {
                 return "@[" + tokenName + "]";
-            }
-            else if (block === "if") {
+            } else if (block === "if") {
                 return "<!--@if[" + tokenName + "]--> <!--@else--> <!--@endif-->";
-            }
-            else if (block === "foreach") {
+            } else if (block === "foreach") {
                 return "<!--@foreach[" + tokenName + "]--> <!--@endforeach-->";
-            }
-            else if (block === "any") {
+            } else if (block === "any") {
                 return "<!--@any[" + tokenName + "=value]--> <!--@notany--> <!--@endany-->";
-            }
-            else {
+            } else {
                 throw "invalid block name";
             }
-        };
+        }
+        ;
 
-        var newSubTokensComboAdded = function ($selectedCombo) {
+        function newSubTokensComboAdded($selectedCombo) {
             var $btnInsertBasic = $(".sf-email-inserttoken-basic");
             var $btnInsertIf = $(".sf-email-inserttoken-if");
             var $btnInsertForeach = $(".sf-email-inserttoken-foreach");
@@ -89,8 +93,7 @@ SF.registerModule("Mailing", function () {
                     changeButtonState($btnInsertIf, lang.signum.selectToken);
                     changeButtonState($btnInsertForeach, lang.signum.selectToken);
                     changeButtonState($btnInsertAny, lang.signum.selectToken);
-                }
-                else {
+                } else {
                     changeButtonState($btnInsertBasic);
                     var $prevSelectedOption = $prevSelect.find("option:selected");
                     changeButtonState($btnInsertIf, $prevSelectedOption.attr("data-if"));
@@ -104,27 +107,31 @@ SF.registerModule("Mailing", function () {
             changeButtonState($btnInsertIf, $selectedOption.attr("data-if"));
             changeButtonState($btnInsertForeach, $selectedOption.attr("data-foreach"));
             changeButtonState($btnInsertAny, $selectedOption.attr("data-any"));
-        };
+        }
+        Mailing.newSubTokensComboAdded = newSubTokensComboAdded;
+        ;
 
-        var changeButtonState = function ($button, disablingMessage) {
+        function changeButtonState($button, disablingMessage) {
             var hiddenId = $button.attr("id") + "temp";
             if (typeof disablingMessage != "undefined") {
                 $button.addClass("ui-button-disabled").addClass("ui-state-disabled").addClass("sf-disabled").attr("disabled", "disabled").attr("title", disablingMessage);
-                $button.unbind('click').bind('click', function (e) { e.preventDefault(); return false; });
-            }
-            else {
+                $button.unbind('click').bind('click', function (e) {
+                    e.preventDefault();
+                    return false;
+                });
+            } else {
                 var self = this;
                 $button.removeClass("ui-button-disabled").removeClass("ui-state-disabled").removeClass("sf-disabled").prop("disabled", null).attr("title", "");
                 $button.unbind('click');
             }
-        };
+        }
 
-        var updateHtmlEditorTextArea = function (idTargetTextArea) {
+        function updateHtmlEditorTextArea(idTargetTextArea) {
             CKEDITOR.instances[idTargetTextArea].updateElement();
-        };
+        }
+        ;
 
-        var initHtmlEditor = function (idTargetTextArea) {
-
+        function initHtmlEditor(idTargetTextArea) {
             CKEDITOR.replace(idTargetTextArea);
 
             // Update origin textarea
@@ -140,23 +147,23 @@ SF.registerModule("Mailing", function () {
             CKEDITOR.instances[idTargetTextArea].on('saveSnapshot', changed);
             CKEDITOR.instances[idTargetTextArea].on('afterUndo', changed);
             CKEDITOR.instances[idTargetTextArea].on('afterRedo', changed);
-        };
+        }
+        Mailing.initHtmlEditor = initHtmlEditor;
+        ;
 
-        var initHtmlEditorMasterTemplate = function (idTargetTextArea) {
-
+        function initHtmlEditorMasterTemplate(idTargetTextArea) {
             initHtmlEditor(idTargetTextArea);
 
-            var $insertContent = $("#" + idTargetTextArea).closest(".sf-email-template-message")
-                .find(".sf-master-template-insert-content");
+            var $insertContent = $("#" + idTargetTextArea).closest(".sf-email-template-message").find(".sf-master-template-insert-content");
 
             $insertContent.on("click", "", function () {
                 CKEDITOR.instances[idTargetTextArea].insertText(constructTokenTag("content"));
                 updateHtmlEditorTextArea(idTargetTextArea);
             });
-        };
+        }
+        Mailing.initHtmlEditorMasterTemplate = initHtmlEditorMasterTemplate;
 
-        var initHtmlEditorWithTokens = function (idTargetTextArea) {
-
+        function initHtmlEditorWithTokens(idTargetTextArea) {
             initHtmlEditor(idTargetTextArea);
 
             var lastCursorPosition;
@@ -166,12 +173,10 @@ SF.registerModule("Mailing", function () {
             var ckEditorOnInsertToken = function (tokenTag) {
                 if ($("#cke_" + idTargetTextArea + ":visible").length == 0) {
                     window.alert("Select the target first");
-                }
-                else {
+                } else {
                     if (CKEDITOR.instances[idTargetTextArea].mode == "source") {
                         codeMirrorInstance.replaceRange(tokenTag, lastCursorPosition || { line: 0, ch: 0 });
-                    }
-                    else {
+                    } else {
                         CKEDITOR.instances[idTargetTextArea].insertHtml(tokenTag);
                         updateHtmlEditorTextArea(idTargetTextArea);
                         if (tokenTag.indexOf("<!--") == 0) {
@@ -222,33 +227,26 @@ SF.registerModule("Mailing", function () {
             CKEDITOR.instances[idTargetTextArea].on('blur', function () {
                 SF.Mailing.removeTokenTargetFocus($("#cke_" + idTargetTextArea));
             });
-        };
+        }
+        Mailing.initHtmlEditorWithTokens = initHtmlEditorWithTokens;
 
+        function activateIFrame($iframe) {
+            var iframe = $iframe[0];
 
-        var activateIFrame = function ($iframe) {
-            var doc = $iframe[0].document;
-            if ($iframe[0].contentDocument)
-                doc = $iframe[0].contentDocument; // For NS6
-            else if ($iframe[0].contentWindow)
-                doc = $iframe[0].contentWindow.document; // For IE5.5 and IE6
+            var doc = iframe.document;
+            if (iframe.contentDocument)
+                doc = iframe.contentDocument; // For NS6
+            else if (iframe.contentWindow)
+                doc = iframe.contentWindow.document; // For IE5.5 and IE6
 
             doc.open();
             doc.writeln($iframe.text());
             doc.close();
 
             $iframe.height($iframe.contents().find("html").height() + 10);
-        };
-
-
-        return {
-            initReplacements: initReplacements,
-            initHtmlEditor: initHtmlEditor,
-            initHtmlEditorMasterTemplate: initHtmlEditorMasterTemplate,
-            initHtmlEditorWithTokens: initHtmlEditorWithTokens,
-            setTokenTargetFocus: setTokenTargetFocus,
-            removeTokenTargetFocus: removeTokenTargetFocus,
-            newSubTokensComboAdded: newSubTokensComboAdded,
-            activateIFrame: activateIFrame
-        };
-    })();
-});
+        }
+        Mailing.activateIFrame = activateIFrame;
+    })(SF.Mailing || (SF.Mailing = {}));
+    var Mailing = SF.Mailing;
+})(SF || (SF = {}));
+//# sourceMappingURL=SF_Mailing.js.map
