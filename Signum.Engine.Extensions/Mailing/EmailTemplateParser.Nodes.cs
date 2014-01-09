@@ -378,7 +378,11 @@ namespace Signum.Engine.Mailing
                     if (s == null)
                         return null;
 
-                    fields.Add(allMembers.GetOrThrow(s));
+                    var member = allMembers.GetOrThrow(s);
+
+                    fields.Add(member);
+
+                    type = member.ReturningType();
                 }
 
                 return fields;
