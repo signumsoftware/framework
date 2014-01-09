@@ -204,7 +204,6 @@ namespace Signum.Entities.Mailing
         {
         }
 
-        [Ignore]
         Lite<Pop3ReceptionDN> reception;
         public Lite<Pop3ReceptionDN> Reception
         {

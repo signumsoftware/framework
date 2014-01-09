@@ -145,7 +145,7 @@ namespace Signum.Web.Mailing
                     Navigator.AddSettings(new List<EntitySettings>
                 {
                     new EntitySettings<Pop3ConfigurationDN> { PartialViewName = e => ViewPrefix.Formato("Pop3Configuration") },
-                    new EntitySettings<Pop3ReceptionDN> { PartialViewName = e => ViewPrefix.Formato("Pop3Configuration") },
+                    new EntitySettings<Pop3ReceptionDN> { PartialViewName = e => ViewPrefix.Formato("Pop3Reception") },
                 });
             }
         }

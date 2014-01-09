@@ -82,7 +82,8 @@ namespace Signum.Engine.Mailing
 
             var newTemplate = CreateDefaultMasterTemplate();
 
-            return newTemplate.Save().ToLite();
+            using (OperationLogic.AllowSave<EmailMasterTemplateDN>())
+                return newTemplate.Save().ToLite();
         }
     }
 }

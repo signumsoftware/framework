@@ -38,6 +38,12 @@ namespace Signum.Web.Reports
 
                 if (excelReport)
                 {
+                    if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(EmbeddedFileDN)))
+                        throw new InvalidOperationException("Call EmbeddedFileDN first");
+
+                    if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(QueryDN)))
+                        Navigator.Manager.EntitySettings.Add(typeof(QueryDN), new EntitySettings<QueryDN>());
+
                     string viewPrefix = "~/ReportSpreadsheet/Views/{0}.cshtml";
                     Navigator.AddSettings(new List<EntitySettings>{
                         new EntitySettings<ExcelReportDN> 
@@ -46,11 +52,6 @@ namespace Signum.Web.Reports
                             MappingMain = new ExcelReportMapping()
                         }
                     });
-
-                    FilesClient.Start(false, false, true);
-
-                    if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(QueryDN)))
-                        Navigator.Manager.EntitySettings.Add(typeof(QueryDN), new EntitySettings<QueryDN>());
 
                     ButtonBarEntityHelper.RegisterEntityButtons<ExcelReportDN>((ctx, entity) =>
                     {

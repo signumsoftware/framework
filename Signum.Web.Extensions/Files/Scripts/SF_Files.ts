@@ -1,13 +1,20 @@
 ﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
 /// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/references.ts"/>
-
 module SF.Files {
 
-    interface FileLineOptions extends EntityBaseOptions {
+    export interface FileLineOptions extends EntityBaseOptions {
         downloadUrl?: string;
         uploadUrl?: string;
         uploadDroppedUrl?: string;
         asyncUpload?: boolean;
+        dragAndDrop?: boolean;
+    }
+
+    export interface FileAsyncUploadResult {
+        FileName: string;
+        FullWebPath: string;
+        RuntimeInfo: string;
+        EntityState: string;
     }
 
     once("SF-fileLine", () =>
@@ -15,28 +22,35 @@ module SF.Files {
             var fl = new FileLine(this, opt);
         });
 
-    class FileLine extends EntityBase {
+    export class FileLine extends EntityBase {
         options: FileLineOptions;
         constructor(element: JQuery, _options: FileLineOptions) {
             super(element, _options);
         }
 
         _create() {
-            $("#" + this.options.prefix).data("SF-control").initDragDrop($(this.pf("DivNew")));
+            if (this.options.dragAndDrop == null || this.options.dragAndDrop == true)
+                FileLine.initDragDrop($(this.pf("DivNew")),
+                    e=> this.fileDropped(e));
+
+
         }
 
-        initDragDrop($divNew: JQuery) {
+        static initDragDrop($div: JQuery, onDropped: (e:DragEvent) => void ) {
             if (window.File && window.FileList && window.FileReader && new XMLHttpRequest().upload) {
                 var self = this;
-                var $fileDrop = $("<div></div>").addClass("sf-file-drop").html("or drag a file here")
-                    .on("dragover", function (e) { self.fileDropHover(e, true); })
-                    .on("dragleave", function (e) { self.fileDropHover(e, false); })
-                    .appendTo($divNew);
-                $fileDrop[0].addEventListener("drop", function (e) { self.fileDropped(e); }, false);
+                var $fileDrop = $("<div></div>").addClass("sf-file-drop").html("drag a file here")
+                    .on("dragover", function (e) { FileLine.fileDropHover(e, true); })
+                    .on("dragleave", function (e) { FileLine.fileDropHover(e, false); })
+                    .appendTo($div);
+                $fileDrop[0].addEventListener("drop", function (e) {
+                    FileLine.fileDropHover(e, false);
+                    onDropped(e);
+                }, false);
             }
         }
 
-        fileDropHover(e, toggle : boolean) {
+        static fileDropHover(e, toggle : boolean) {
             e.stopPropagation();
             e.preventDefault();
             $(e.target).toggleClass("sf-file-drop-over", toggle);
@@ -53,57 +67,50 @@ module SF.Files {
             }
         }
 
+        
+
+        uploadAsync(f: File, customizeXHR?: (xhr: XMLHttpRequest) => void) {
+            $(this.pf('loading')).show();
+            this.runtimeInfo().setEntity(this.staticInfo().singleType(), '');
+
+            var fileName = f.name;
+
+            var $divNew = $(this.pf("DivNew"));
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", this.options.uploadDroppedUrl || SF.Urls.uploadDroppedFile, true);
+            xhr.setRequestHeader("X-FileName", fileName);
+            xhr.setRequestHeader("X-" + SF.Keys.runtimeInfo, this.getParentRuntimeInfo($divNew.attr("data-parent-prefix")));
+            xhr.setRequestHeader("X-Prefix", this.options.prefix);
+            xhr.setRequestHeader("X-" + SF.compose(this.options.prefix, SF.Keys.runtimeInfo), this.runtimeInfo().find().val());
+            xhr.setRequestHeader("X-sfFileType", $(this.pf("sfFileType")).val());
+            xhr.setRequestHeader("X-sfTabId", $("#sfTabId").val());
+
+            var self = this;
+            xhr.onload = function (e) {
+                var result = <FileAsyncUploadResult>JSON.parse(xhr.responseText);
+
+                self.onUploaded(result.FileName, result.FullWebPath, result.RuntimeInfo, result.EntityState);
+            }; 
+
+            xhr.onerror = function (e) {
+                SF.log("Error " + xhr.statusText);
+            }; 
+
+            if (customizeXHR != null)
+                customizeXHR(xhr);
+
+            xhr.send(f);
+        }
+
         fileDropped(e: DragEvent) {
             var files = e.dataTransfer.files;
             e.stopPropagation();
             e.preventDefault();
 
-            if (files.length == 0) {
-                this.fileDropHover(e, false);
-                return;
-            }
-
-            for (var i = 0, f; f = files[i]; i++) {
-                $(this.pf('loading')).show();
-                this.runtimeInfo().setEntity(this.staticInfo().singleType(), '');
-
-                var fileName = f.name;
-
-                var $divNew = $(this.pf("DivNew"));
-
-                var xhr = new XMLHttpRequest();
-                xhr.open("POST", this.options.uploadDroppedUrl || SF.Urls.uploadDroppedFile, true);
-                xhr.setRequestHeader("X-FileName", fileName);
-                xhr.setRequestHeader("X-" + SF.Keys.runtimeInfo, this.getParentRuntimeInfo($divNew.attr("data-parent-prefix")));
-                xhr.setRequestHeader("X-Prefix", this.options.prefix);
-                xhr.setRequestHeader("X-" + SF.compose(this.options.prefix, SF.Keys.runtimeInfo), this.runtimeInfo().find().val());
-                xhr.setRequestHeader("X-sfFileType", $(this.pf("sfFileType")).val());
-                xhr.setRequestHeader("X-sfTabId", $("#sfTabId").val());
-
-                var self = this;
-                xhr.onreadystatechange = function () {
-                    if (xhr.readyState === 4) {
-                        if (xhr.status === 200) {
-                            self.createTargetIframe().html(xhr.responseText);
-                        }
-                        else {
-                            SF.log("Error " + xhr.statusText);
-                        }
-                    }
-                };
-
-                xhr.send(f);
-            }
+            this.uploadAsync(files[0]);
         }
 
-        download() {
-            var info = this.runtimeInfo();
-            if (SF.isEmpty(info.id)) {
-                return;
-            }
-            var url = this.options.downloadUrl || SF.Urls.downloadFile;
-            window.open(url + "?file=" + info.value());
-        }
 
         removeSpecific() {
             $(this.pf('DivOld')).hide();
@@ -156,6 +163,20 @@ module SF.Files {
                 .appendTo($("body"));
         }
 
+
+        onUploaded(fileName: string, link: string, runtimeInfo: string, entityState : string) {
+            $(this.pf(Keys.loading)).hide();
+            $(this.pf(Keys.toStr)).html(fileName);
+            $(this.pf(Keys.link)).html(fileName).attr("download", fileName).attr("href", link);
+            this.runtimeInfo().find().val(runtimeInfo);
+            $(this.pf(Keys.entityState)).val(entityState);
+
+            $(this.pf("DivNew")).hide();
+            $(this.pf("DivOld")).show();
+            $(this.pf("btnRemove")).show();
+            $(this.pf("frame")).remove();
+        }
+
         onChanged() {
             if (this.options.asyncUpload) {
                 this.upload();
@@ -166,11 +187,10 @@ module SF.Files {
         }
 
         updateButtonsDisplay(hasEntity) {
+
         }
     }
-
 }
-
 interface Window {
     File: any;
     FileList: any;

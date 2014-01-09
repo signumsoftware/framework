@@ -268,6 +268,6 @@ namespace Signum.Engine.Files
         public static readonly Func<FilePathDN, string> Year_GuidExtension_Sufix = (FilePathDN fp) => Path.Combine(TimeZoneManager.Now.Year.ToString(), Guid.NewGuid().ToString() + Path.GetExtension(fp.FileName));
         public static readonly Func<FilePathDN, string> Year_Month_GuidExtension_Sufix = (FilePathDN fp) => Path.Combine(TimeZoneManager.Now.Year.ToString(), Path.Combine(TimeZoneManager.Now.Month.ToString(), Guid.NewGuid() + Path.GetExtension(fp.FileName)));
 
-        public static readonly Func<FilePathDN, string> YearMonth_Guid_Filename_Sufix = (FilePathDN fp) => Path.Combine(TimeZoneManager.Now.Year.ToString("yyyy-MM"), Path.Combine(Guid.NewGuid().ToString(), fp.FileName));
+        public static readonly Func<FilePathDN, string> YearMonth_Guid_Filename_Sufix = (FilePathDN fp) => Path.Combine(TimeZoneManager.Now.ToString("yyyy-MM"), Path.Combine(Guid.NewGuid().ToString(), fp.FileName));
     }
 }

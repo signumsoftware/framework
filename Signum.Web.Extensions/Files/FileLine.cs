@@ -30,26 +30,13 @@ namespace Signum.Web.Files
 
         public readonly RouteValueDictionary ValueHtmlProps = new RouteValueDictionary();
 
-        bool asyncUpload = true;
-        public bool AsyncUpload
-        {
-            get { return asyncUpload; }
-            set { asyncUpload = value; }
-        }
+        public bool AsyncUpload { get; set; }
+        public bool DragAndDrop { get; set; }
 
         public bool Download { get; set; }
 
-        public string DownloadUrl { get; set; }
         public string UploadUrl { get; set; }
         public string UploadDroppedUrl { get; set; }
-
-        public string Downloading { get; set; }
-        internal string GetDownloading()
-        {
-            if (!Download)
-                return "";
-            return Downloading ?? DefaultDownloading();
-        }
 
         public string OnChanged { get; set; }
         internal string GetOnChanged()
@@ -60,6 +47,8 @@ namespace Signum.Web.Files
         public FileLine(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
             : base(type, untypedValue, parent, controlID, propertyRoute)
         {
+            AsyncUpload = true;
+            DragAndDrop = true;
             Download = true;
             Create = false;
             View = false;
@@ -77,12 +66,12 @@ namespace Signum.Web.Files
         {
             var result = base.OptionsJSInternal();
             result.Add("asyncUpload", AsyncUpload ? "true" : "false");
-            if (DownloadUrl.HasText())
-                result.Add("downloadUrl", DownloadUrl.SingleQuote());
             if (UploadUrl.HasText())
                 result.Add("uploadUrl", UploadUrl.SingleQuote());
             if (UploadDroppedUrl.HasText())
                 result.Add("uploadDroppedUrl", UploadDroppedUrl.SingleQuote());
+            if (!DragAndDrop)
+                result.Add("dragAndDrop", "false");
             return result;
         }
 
@@ -96,15 +85,6 @@ namespace Signum.Web.Files
             return new JsInstruction(() => "{0}.remove()".Formato(this.ToJS()));
         }
 
-        protected string DefaultDownloading()
-        {
-            return JsDownloading().ToJS();
-        }
-
-        public JsInstruction JsDownloading()
-        {
-            return new JsInstruction(() => "{0}.download()".Formato(this.ToJS()));
-        }
 
         protected string DefaultOnChanged()
         {
