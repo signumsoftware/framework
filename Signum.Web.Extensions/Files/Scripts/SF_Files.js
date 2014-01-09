@@ -59,7 +59,7 @@ var SF;
                 }
             };
 
-            FileLine.prototype.uploadAsync = function (f, onLoaded) {
+            FileLine.prototype.uploadAsync = function (f, customizeXHR) {
                 $(this.pf('loading')).show();
                 this.runtimeInfo().setEntity(this.staticInfo().singleType(), '');
 
@@ -77,20 +77,18 @@ var SF;
                 xhr.setRequestHeader("X-sfTabId", $("#sfTabId").val());
 
                 var self = this;
-                xhr.onreadystatechange = function () {
-                    if (xhr.readyState === 4) {
-                        if (xhr.status === 200) {
-                            var result = JSON.parse(xhr.responseText);
+                xhr.onload = function (e) {
+                    var result = JSON.parse(xhr.responseText);
 
-                            self.onUploaded(result.FileName, result.FullWebPath, result.RuntimeInfo, result.EntityState);
-
-                            if (onLoaded != undefined)
-                                onLoaded(result);
-                        } else {
-                            SF.log("Error " + xhr.statusText);
-                        }
-                    }
+                    self.onUploaded(result.FileName, result.FullWebPath, result.RuntimeInfo, result.EntityState);
                 };
+
+                xhr.onerror = function (e) {
+                    SF.log("Error " + xhr.statusText);
+                };
+
+                if (customizeXHR != null)
+                    customizeXHR(xhr);
 
                 xhr.send(f);
             };

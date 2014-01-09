@@ -32,6 +32,8 @@ module SF.Files {
             if (this.options.dragAndDrop == null || this.options.dragAndDrop == true)
                 FileLine.initDragDrop($(this.pf("DivNew")),
                     e=> this.fileDropped(e));
+
+
         }
 
         static initDragDrop($div: JQuery, onDropped: (e:DragEvent) => void ) {
@@ -67,7 +69,7 @@ module SF.Files {
 
         
 
-        uploadAsync(f: File, onLoaded?: (result: FileAsyncUploadResult) => void) {
+        uploadAsync(f: File, customizeXHR?: (xhr: XMLHttpRequest) => void) {
             $(this.pf('loading')).show();
             this.runtimeInfo().setEntity(this.staticInfo().singleType(), '');
 
@@ -85,21 +87,18 @@ module SF.Files {
             xhr.setRequestHeader("X-sfTabId", $("#sfTabId").val());
 
             var self = this;
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200) {
-                        var result = <FileAsyncUploadResult>JSON.parse(xhr.responseText);
+            xhr.onload = function (e) {
+                var result = <FileAsyncUploadResult>JSON.parse(xhr.responseText);
 
-                        self.onUploaded(result.FileName, result.FullWebPath, result.RuntimeInfo, result.EntityState);
+                self.onUploaded(result.FileName, result.FullWebPath, result.RuntimeInfo, result.EntityState);
+            }; 
 
-                        if (onLoaded != undefined)
-                            onLoaded(result);
-                    }
-                    else {
-                        SF.log("Error " + xhr.statusText);
-                    }
-                }
-            };
+            xhr.onerror = function (e) {
+                SF.log("Error " + xhr.statusText);
+            }; 
+
+            if (customizeXHR != null)
+                customizeXHR(xhr);
 
             xhr.send(f);
         }
