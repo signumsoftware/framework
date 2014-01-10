@@ -31,9 +31,9 @@
     <Member Name="Element" Description="Elemento" />
     <Member Name="Element2" Description="Elemento (2)" />
     <Member Name="Element3" Description="Elemento (3)" />
-    <Member Name="NoOne" Description="Nadie" />
-    <Member Name="NoOne2" Description="Nadie (2)" />
-    <Member Name="NoOne3" Description="Nadie (3)" />
+    <Member Name="NoOne" Description="Ninguno" />
+    <Member Name="NoOne2" Description="Ninguno (2)" />
+    <Member Name="NoOne3" Description="Ninguno (3)" />
   </Type>
   <Type Name="ColorDN" Description="Color">
     <Member Name="Argb" Description="Argb" />
@@ -140,24 +140,20 @@
   <Type Name="IUserDN" />
   <Type Name="JavascriptMessage">
     <Member Name="addFilter" Description="Añadir filtro" />
-    <Member Name="create" Description="Ver" />
     <Member Name="editColumnName" Description="Editar nombre de columna" />
     <Member Name="enterTheNewColumnName" Description="Introduzca el nuevo nombre de la columna" />
+    <Member Name="entityRepeater_moveDown" Description="Bajar" />
+    <Member Name="entityRepeater_moveUp" Description="Subir" />
     <Member Name="error" Description="Error" />
     <Member Name="executed" Description="Ejecutado" />
-    <Member Name="find" Description="Encontrar" />
     <Member Name="hideFilters" Description="Ocultar filtros" />
     <Member Name="loading" Description="Cargando..." />
     <Member Name="loseChanges" Description="Hay cambios que no han sido guardados. &#xD;&#xA;¿Perder cambios?" />
-    <Member Name="moveDown" Description="Subir" />
-    <Member Name="moveUp" Description="Bajar" />
-    <Member Name="navigate" Description="Navegar" />
     <Member Name="noElementsSelected" Description="No hay elementos seleccionados" />
     <Member Name="noResults" Description="No se encontraron resultados" />
     <Member Name="onlyOneElement" Description="Puede seleccionar un único elemento" />
     <Member Name="popupErrors" Description="¿Hay errores en la entidad, que desea continuar?" />
     <Member Name="popupErrorsStop" Description="Hay errores en la entidad" />
-    <Member Name="remove" Description="Quitar" />
     <Member Name="removeColumn" Description="Eliminar columna" />
     <Member Name="reorderColumn_MoveLeft" Description="Mover a la izquierda" />
     <Member Name="reorderColumn_MoveRight" Description="Mover a la derecha" />
@@ -166,7 +162,6 @@
     <Member Name="searchControlMenuSelected" Description="seleccionado" />
     <Member Name="selectToken" Description="Seleccione un símbolo (token)" />
     <Member Name="showFilters" Description="Mostrar filtros" />
-    <Member Name="view" Description="Ver" />
   </Type>
   <Type Name="LiteMessage">
     <Member Name="IdNotValid" Description="Id no válido" />
@@ -219,7 +214,7 @@
   </Type>
   <Type Name="OperationMessage">
     <Member Name="Create" Description="Crear..." />
-    <Member Name="CreateFromRegex" Description="^Crear (.*) desde .*$" />
+    <Member Name="CreateFromRegex" Description="^ Crear (. *) de. *$" />
     <Member Name="Delete" Description="¿Borrar?" />
     <Member Name="InUserInterface" Description="(en interfaz de usuario)" />
     <Member Name="Logs" Description="Registros" />
@@ -229,7 +224,7 @@
     <Member Name="StateShouldBe0InsteadOf1" Description="Estado debe ser {0} (en lugar de {1})" />
     <Member Name="TheOperation0DidNotReturnAnEntity" Description="{0} no devolvió ninguna entidad" />
   </Type>
-  <Type Name="OrderType" Description="Tipo de órden">
+  <Type Name="OrderType" Description="Tipo de orden">
     <Member Name="Ascending" Description="Ascendente" />
     <Member Name="Descending" Description="Descendente" />
   </Type>
@@ -271,7 +266,7 @@
     <Member Name="Year" Description="Año" />
   </Type>
   <Type Name="QuickLinkMessage">
-    <Member Name="No0Found" Description="No {0} encontrado" />
+    <Member Name="No0Found" Description="Ningún {0} encontrado" />
     <Member Name="Quicklinks" Description="Vínculos rápidos" />
   </Type>
   <Type Name="SearchMessage">
@@ -345,12 +340,10 @@
     <Member Name="_0HasToBeUppercase" Description="{0} debe estar en mayúsculas" />
     <Member Name="_0IsNecessary" Description="es necesario {0}" />
     <Member Name="_0IsNecessaryOnState1" Description="{0} es necesario en estado {1}" />
-    <Member Name="_0IsNotA1" Description="{0} no es un {1}" />
     <Member Name="_0IsNotAllowed" Description="{0} no está permitido" />
     <Member Name="_0IsNotAllowedOnState1" Description="{0} no se permite en estado {1}" />
     <Member Name="_0IsNotSet" Description="{0} no establecido" />
     <Member Name="Be" Description="ser " />
-    <Member Name="BeA0" Description="ser un {0}" />
     <Member Name="BeBetween0And1" Description="estar entre {0} y {1}" />
     <Member Name="BeNotNull" Description="ser no nulo" />
     <Member Name="FileName" Description="Nombre de archivo" />
