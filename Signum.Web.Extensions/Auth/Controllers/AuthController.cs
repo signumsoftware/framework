@@ -127,64 +127,63 @@ namespace Signum.Web.Auth
         public ActionResult ChangePassword(FormCollection form)
         {
             UserDN user = null;
-
-            if (UserDN.Current == null)
-            {
-                var username = (string)TempData["username"];
-                if (!username.HasText())
-                    username = (string)form["username"];
-
-
-                using (AuthLogic.Disable())
-                    user = AuthLogic.RetrieveUser(username);
-
-                var context = user.ApplyChanges(this.ControllerContext, "", UserMapping.ChangePasswordOld).ValidateGlobal();
-
-                if (context.GlobalErrors.Any())
-                {
-                    ViewData["username"] = username;
-                    ViewData["Title"] = AuthMessage.ChangePassword.NiceToString();
-                    ModelState.FromContext(context);
-                    return View(AuthClient.ChangePasswordView);
-                }
-
-                string errorPasswordValidation = UserDN.OnValidatePassword(Request.Params[UserMapping.NewPasswordKey]);
-                if (errorPasswordValidation.HasText())
-                {
-                    ViewData["username"] = username;
-                    ViewData["Title"] = AuthMessage.ChangePassword.NiceToString();
-                    ModelState.AddModelError("password", errorPasswordValidation);
-                    return View(AuthClient.ChangePasswordView);
-                }
-
-            }
-
-            else
-            {
-                var context = UserDN.Current.ApplyChanges(this.ControllerContext, "", UserMapping.ChangePasswordOld).ValidateGlobal();
-                if (context.GlobalErrors.Any())
-                {
-                    ViewData["Title"] = AuthMessage.ChangePassword.NiceToString();
-                    ModelState.FromContext(context);
-                    RefreshSessionUserChanges();
-                    return View(AuthClient.ChangePasswordView);
-                }
-
-                string errorPasswordValidation = UserDN.OnValidatePassword(Request.Params[UserMapping.NewPasswordKey]);
-                if (errorPasswordValidation.HasText())
-                {
-                    ModelState.AddModelError("password", errorPasswordValidation);
-                    RefreshSessionUserChanges();
-                    return View(AuthClient.ChangePasswordView);
-                }
-
-                user = context.Value;
-            }
-
             using (AuthLogic.Disable())
+            {
+                ViewData["Title"] = AuthMessage.ChangePassword.NiceToString();
+
+                if (UserDN.Current == null)
+                {
+                    var username = (string)TempData["username"];
+                    if (!username.HasText())
+                        username = (string)form["username"];
+
+
+                    using (AuthLogic.Disable())
+                        user = AuthLogic.RetrieveUser(username);
+
+                    var context = user.ApplyChanges(this.ControllerContext, "", UserMapping.ChangePasswordOld).ValidateGlobal();
+
+                    if (context.GlobalErrors.Any())
+                    {
+                        ViewData["username"] = username;
+                        ModelState.FromContext(context);
+                        return View(AuthClient.ChangePasswordView);
+                    }
+
+                    string errorPasswordValidation = UserDN.OnValidatePassword(Request.Params[UserMapping.NewPasswordKey]);
+                    if (errorPasswordValidation.HasText())
+                    {
+                        ViewData["username"] = username;
+                        ModelState.AddModelError("password", errorPasswordValidation);
+                        return View(AuthClient.ChangePasswordView);
+                    }
+                }
+                else
+                {
+                    var context = UserDN.Current.ApplyChanges(this.ControllerContext, "", UserMapping.ChangePasswordOld).ValidateGlobal();
+                    if (context.GlobalErrors.Any())
+                    {
+                        ModelState.FromContext(context);
+                        RefreshSessionUserChanges();
+                        return View(AuthClient.ChangePasswordView);
+                    }
+
+                    string errorPasswordValidation = UserDN.OnValidatePassword(Request.Params[UserMapping.NewPasswordKey]);
+                    if (errorPasswordValidation.HasText())
+                    {
+                        ModelState.AddModelError("password", errorPasswordValidation);
+                        RefreshSessionUserChanges();
+                        return View(AuthClient.ChangePasswordView);
+                    }
+
+                    user = context.Value;
+                }
+
+
                 AuthLogic.ChangePassword(user.ToLite(),
                     Security.EncodePassword(form[UserMapping.OldPasswordKey]),
                     Security.EncodePassword(form[UserMapping.NewPasswordKey]));
+            }
             Login(user.UserName, form[UserMapping.NewPasswordKey], false, null);
 
             return RedirectToAction("ChangePasswordSuccess");
@@ -247,14 +246,12 @@ namespace Signum.Web.Auth
         [AcceptVerbs(HttpVerbs.Get)]
         public ActionResult ResetPasswordCode(string email, string code)
         {
-            ResetPasswordRequestDN rpr = null;
             using (AuthLogic.Disable())
             {
-                rpr = Database.Query<ResetPasswordRequestDN>()
-                    .Where(r => r.User.Email == email && r.Code == code)
-                    .SingleOrDefaultEx(() => AuthMessage.TheConfirmationCodeThatYouHaveJustSentIsInvalid.NiceToString());
+                TempData["ResetPasswordRequest"] = Database.Query<ResetPasswordRequestDN>()
+                  .Where(r => r.User.Email == email && r.Code == code)
+                  .SingleOrDefaultEx(() => AuthMessage.TheConfirmationCodeThatYouHaveJustSentIsInvalid.NiceToString());
             }
-            TempData["ResetPasswordRequest"] = rpr;
 
             return RedirectToAction("ResetPasswordSetNew");
         }
@@ -275,29 +272,27 @@ namespace Signum.Web.Auth
         [HttpPost]
         public ActionResult ResetPasswordSetNew(Lite<ResetPasswordRequestDN> rpr)
         {
-            ResetPasswordRequestDN request = null;
             using (AuthLogic.Disable())
             {
-                request = rpr.Retrieve();
-            }
-            var user = request.User;
+                ResetPasswordRequestDN request = rpr.Retrieve();
 
-            var context = user.ApplyChanges(this.ControllerContext, "", UserMapping.ChangePassword).ValidateGlobal();
+                var user = request.User;
 
-            if (!context.Errors.TryGetC(UserMapping.NewPasswordKey).IsNullOrEmpty() ||
-                !context.Errors.TryGetC(UserMapping.NewPasswordBisKey).IsNullOrEmpty())
-            {
-                ViewData["Title"] = AuthMessage.ChangePassword.NiceToString();
-                ModelState.FromContext(context);
-                return ResetPasswordSetNewError(request.Id, "");
-            }
+                var context = user.ApplyChanges(this.ControllerContext, "", UserMapping.ChangePassword).ValidateGlobal();
 
-            string errorPasswordValidation = UserDN.OnValidatePassword(Request.Params[UserMapping.NewPasswordKey]);
-            if (errorPasswordValidation.HasText())
-                return ResetPasswordSetNewError(request.Id, errorPasswordValidation);
+                if (!context.Errors.TryGetC(UserMapping.NewPasswordKey).IsNullOrEmpty() ||
+                    !context.Errors.TryGetC(UserMapping.NewPasswordBisKey).IsNullOrEmpty())
+                {
+                    ViewData["Title"] = AuthMessage.ChangePassword.NiceToString();
+                    ModelState.FromContext(context);
+                    return ResetPasswordSetNewError(request.Id, "");
+                }
 
-            using (AuthLogic.Disable())
-            {
+                string errorPasswordValidation = UserDN.OnValidatePassword(Request.Params[UserMapping.NewPasswordKey]);
+                if (errorPasswordValidation.HasText())
+                    return ResetPasswordSetNewError(request.Id, errorPasswordValidation);
+
+
                 using (OperationLogic.AllowSave<UserDN>())
                 {
                     context.Value.Save();
