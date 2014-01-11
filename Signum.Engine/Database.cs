@@ -568,10 +568,10 @@ namespace Signum.Engine
         }
 
         [MethodExpander(typeof(MListQueryExpander))]
-        public static IQueryable<MListElement<E, V>> MListQuery<E, V>(Expression<Func<E, MList<V>>> mlistProperty)
+        public static IQueryable<MListElement<E, V>> MListQuery<E, V>(Expression<Func<E, MList<V>>> mListProperty)
             where E : IdentifiableEntity
         {
-            PropertyInfo pi = ReflectionTools.GetPropertyInfo(mlistProperty);
+            PropertyInfo pi = ReflectionTools.GetPropertyInfo(mListProperty);
 
             var list = (FieldMList)Schema.Current.Table<E>().GetField(pi);
 
@@ -585,6 +585,34 @@ namespace Signum.Engine
                 var query = Expression.Lambda<Func<IQueryable>>(Expression.Call(mi, arguments)).Compile()();
 
                 return Expression.Constant(query, mi.ReturnType);
+            }
+        }
+
+        [MethodExpander(typeof(MListQueryExpander))]
+        public static IQueryable<MListElement<E, V>> MListElements<E, V>(this E entity, Expression<Func<E, MList<V>>> mListProperty)
+                where E : IdentifiableEntity
+        {
+            return MListQuery(mListProperty).Where(mle => mle.Parent == entity);
+        }
+
+        class MListElementsExpander : IMethodExpander
+        {
+            static readonly MethodInfo miMListQuery = ReflectionTools.GetMethodInfo(() => Database.MListQuery<IdentifiableEntity, int>(null)).MakeGenericMethod();
+            static readonly MethodInfo miWhere = ReflectionTools.GetMethodInfo(() => Queryable.Where<IdentifiableEntity>(null, a => false)).MakeGenericMethod();
+
+            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            {
+                Type[] types = mi.GetGenericArguments();
+
+                Type mleType = typeof(MListElement<,>).MakeGenericType(types);
+
+                var query = Expression.Lambda<Func<IQueryable>>(Expression.Call(miMListQuery.MakeGenericMethod(mi.GetGenericArguments()), arguments[1])).Compile()();
+
+                var p = Expression.Parameter(mleType, "e");
+
+                var lambda = Expression.Lambda(Expression.Equal(Expression.Property(p, "Parent"), arguments[0]), p);
+
+                return Expression.Call(miWhere.MakeGenericMethod(mleType), Expression.Constant(query, mi.ReturnType), lambda);
             }
         }
 
