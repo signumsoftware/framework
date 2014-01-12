@@ -43,6 +43,11 @@ namespace Signum.Engine.Linq
                 return this.Translate(expression, tr => tr.Execute());
         }
 
+        public ITranslateResult GetRawTranslateResult(Expression expression)
+        {
+            return Translate(expression, tr => tr);
+        }
+
         internal R Translate<R>(Expression expression, Func<ITranslateResult, R> continuation) //For debugging purposes
         {
             AliasGenerator aliasGenerator = new AliasGenerator();
@@ -120,7 +125,7 @@ namespace Signum.Engine.Linq
             return continuation(cr);
         }
 
-        internal R Update<R>(IQueryable query, LambdaExpression entitySelector, LambdaExpression updateConstructor, Func<CommandResult, R> continuation, bool removeSelectRowCount = false)
+        internal R Update<R>(IUpdateable updateable, Func<CommandResult, R> continuation, bool removeSelectRowCount = false)
         {
             AliasGenerator aliasGenerator = new AliasGenerator();
 
@@ -128,21 +133,16 @@ namespace Signum.Engine.Linq
             using (HeavyProfiler.Log("LINQ"))
             using (var log = HeavyProfiler.LogNoStackTrace("Clean"))
             {
-                Expression cleaned = Clean(query.Expression, true, log);
+                Expression cleaned = Clean(updateable.Query.Expression, true, log);
                 var binder = new QueryBinder(aliasGenerator);
                 log.Switch("Bind");
-                CommandExpression update = binder.BindUpdate(cleaned, entitySelector, updateConstructor);
+                CommandExpression update = binder.BindUpdate(cleaned, updateable.PartSelector, updateable.SetterExpressions);
                 CommandExpression updateOptimized = (CommandExpression)Optimize(update, binder, aliasGenerator, log);
                 CommandExpression updateSimplified = UpdateDeleteSimplifier.Simplify(updateOptimized, removeSelectRowCount, aliasGenerator);
                 log.Switch("TR");
                 cr = TranslatorBuilder.BuildCommandResult(updateSimplified);
             }
             return continuation(cr);
-        }
-
-        public ITranslateResult GetRawTranslateResult(Expression expression)
-        {
-            return Translate(expression, tr => tr);
         }
     }
 }
