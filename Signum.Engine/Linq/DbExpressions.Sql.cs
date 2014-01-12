@@ -49,6 +49,7 @@ namespace Signum.Engine.Linq
         IsNotNull,
         Update,
         Delete,
+        InsertSelect,
         CommandAggregate,
         SelectRowCount,
         Entity = 2000,
@@ -1058,6 +1059,30 @@ namespace Signum.Engine.Linq
                 Assigments.ToString("\r\n"),
                 Source.NiceToString(),
                 Where.TryCC(w => "WHERE " + w.NiceToString()));
+        }
+    }
+
+    internal class InsertSelectExpression : CommandExpression
+    {
+        public readonly ITable Table;
+        public readonly ReadOnlyCollection<ColumnAssignment> Assigments;
+        public readonly SourceWithAliasExpression Source;
+
+        public InsertSelectExpression(ITable table, SourceWithAliasExpression source, IEnumerable<ColumnAssignment> assigments)
+            : base(DbExpressionType.InsertSelect)
+        {
+            this.Table = table;
+            this.Assigments = assigments.ToReadOnly();
+            this.Source = source;
+        }
+
+        public override string ToString()
+        {
+            return "INSERT INTO {0}({1})\r\nSELECT {2}\r\nFROM {3}".Formato(
+                Table.Name,
+                Assigments.ToString(a => a.Column, ",\r\n"),
+                Assigments.ToString(a => a.Expression.NiceToString(), ",\r\n"),
+                Source.NiceToString());
         }
     }
 

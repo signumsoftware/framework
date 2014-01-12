@@ -150,6 +150,15 @@ namespace Signum.Engine.Linq
             return update;
         }
 
+        protected override Expression VisitInsertSelect(InsertSelectExpression insertSelect)
+        {
+            var assigments = insertSelect.Assigments.NewIfChange(VisitColumnAssigment);
+            var source = Visit(insertSelect.Source);
+            if (source != insertSelect.Source || assigments != insertSelect.Assigments)
+                return new InsertSelectExpression(insertSelect.Table, (SourceWithAliasExpression)source, assigments);
+            return insertSelect;
+        }
+
         protected override Expression VisitRowNumber(RowNumberExpression rowNumber)
         {
             var orderBys = rowNumber.OrderBy.NewIfChange(o => IsConstant(o.Expression) ? null : Visit(o.Expression).Let(e => e == o.Expression ? o : new OrderExpression(o.OrderType, e))); ;

@@ -165,6 +165,16 @@ namespace Signum.Engine.Maps
                 ee.OnPreUnsafeUpdate(update);
         }
 
+        internal void OnPreUnsafeInsert(Type type, IQueryable query, LambdaExpression constructor)
+        {
+            AssertAllowed(type);
+
+            var ee = entityEvents.TryGetC(type);
+
+            if (ee != null)
+                ee.OnPreUnsafeInsert(query, constructor);
+        }
+
         public ICacheController CacheController(Type type)
         {
             IEntityEvents ee = entityEvents.TryGetC(type);
@@ -506,9 +516,8 @@ namespace Signum.Engine.Maps
 
         /// <summary>
         /// Uses a lambda navigate in a strongly-typed way, you can acces field using the property and collections using Single().
-        /// Nota: Haz el campo internal y añade [assembly:InternalsVisibleTo]
         /// </summary>
-        public Field Field<T>(Expression<Func<T, object>> lambdaToField)
+        public Field Field<T, V>(Expression<Func<T, V>> lambdaToField)
             where T : IdentifiableEntity
         {
             return FindField(Table(typeof(T)), Reflector.GetMemberList(lambdaToField));
@@ -544,6 +553,8 @@ namespace Signum.Engine.Maps
         {
             return typeCachesLazy.Value.IdToType[id];
         }
+
+      
     }
 
     public class RelationInfo
@@ -561,6 +572,7 @@ namespace Signum.Engine.Maps
         void OnRetrieved(IdentifiableEntity entity);
 
         void OnPreUnsafeUpdate(IUpdateable update);
+        void OnPreUnsafeInsert(IQueryable query, LambdaExpression constructor);
 
         ICacheController CacheController { get; }
 
@@ -616,6 +628,8 @@ namespace Signum.Engine.Maps
 
         public event UpdateHandler PreUnsafeUpdate;
 
+        public event InsertHandler PreUnsafeInsert;
+
         internal IQueryable<T> OnFilterQuery(IQueryable<T> query)
         {
             if (FilterQuery != null)
@@ -642,6 +656,14 @@ namespace Signum.Engine.Maps
             if (PreUnsafeUpdate != null)
                 foreach (UpdateHandler action in PreUnsafeUpdate.GetInvocationList().Reverse())
                     action(update);
+
+        }
+
+        void IEntityEvents.OnPreUnsafeInsert(IQueryable query, LambdaExpression constructor)
+        {
+            if (PreUnsafeInsert != null)
+                foreach (InsertHandler action in PreUnsafeInsert.GetInvocationList().Reverse())
+                    action(query, constructor);
 
         }
 
@@ -678,6 +700,7 @@ namespace Signum.Engine.Maps
 
     public delegate void QueryHandler<T>(IQueryable<T> query);
     public delegate void UpdateHandler(IUpdateable update);
+    public delegate void InsertHandler(IQueryable query, LambdaExpression constructor);
 
     public class SavedEventArgs
     {

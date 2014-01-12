@@ -741,8 +741,9 @@ namespace Signum.Engine
         }
         #endregion
 
+        #region UnsafeDelete
         public static int UnsafeDelete<T>(this IQueryable<T> query)
-              where T : IdentifiableEntity
+            where T : IdentifiableEntity
         {
             using (HeavyProfiler.Log("DBUnsafeDelete", () => typeof(T).TypeName()))
             {
@@ -777,10 +778,12 @@ namespace Signum.Engine
                     return tr.Commit(rows);
                 }
             }
-        }
+        } 
+        #endregion
 
+        #region UnsafeUpdate
         public static IUpdateable<E> UnsafeUpdate<E>(this IQueryable<E> query)
-            where E : IdentifiableEntity
+          where E : IdentifiableEntity
         {
             return new Updateable<E>(query, null);
         }
@@ -813,12 +816,61 @@ namespace Signum.Engine
                 using (Transaction tr = new Transaction())
                 {
                     Schema.Current.OnPreUnsafeUpdate(update);
-                    int rows = ((DbQueryProvider)update.Query.Provider).Update(update, cr => cr.ExecuteScalar());
+                    int rows = DbQueryProvider.Single.Update(update, cr => cr.ExecuteScalar());
+
+                    return tr.Commit(rows);
+                }
+            }
+        } 
+        #endregion
+
+        #region UnsafeInsert
+
+        public static int UnsafeInsert<T, E>(this IQueryable<T> query, Expression<Func<T, E>> constructor)
+        {
+            using (HeavyProfiler.Log("DBUnsafeInsert", () => typeof(E).TypeName()))
+            {
+                if (query == null)
+                    throw new ArgumentNullException("query");
+
+                if (constructor == null)
+                    throw new ArgumentNullException("constructor");
+
+                using (Transaction tr = new Transaction())
+                {
+                    Schema.Current.OnPreUnsafeInsert(typeof(E), query, constructor);
+                    var table = Schema.Current.Table(typeof(E));
+                    int rows = DbQueryProvider.Single.Insert(query, constructor, table, cr => cr.ExecuteScalar());
 
                     return tr.Commit(rows);
                 }
             }
         }
+
+         
+        public static int UnsafeInsertMList<T, E, V>(this IQueryable<T> query, Expression<Func<E, MList<V>>> mListProperty,  Expression<Func<T, MListElement<E, V>>> constructor)
+               where E : IdentifiableEntity
+        {
+            using (HeavyProfiler.Log("DBUnsafeInsert", () => typeof(E).TypeName()))
+            {
+                if (query == null)
+                    throw new ArgumentNullException("query");
+
+                if (constructor == null)
+                    throw new ArgumentNullException("constructor");
+
+                using (Transaction tr = new Transaction())
+                {
+                    Schema.Current.OnPreUnsafeInsert(typeof(E), query, constructor);
+                    var table = ((FieldMList)Schema.Current.Field(mListProperty)).RelationalTable;
+                    int rows = DbQueryProvider.Single.Insert(query, constructor, table, cr => cr.ExecuteScalar());
+
+                    return tr.Commit(rows);
+                }
+            }
+        }
+
+        #endregion
     }
 
     public class MListElement<E, V> where E : IdentifiableEntity

@@ -133,6 +133,18 @@ namespace Signum.Engine.Linq
             return update;
         }
 
+        protected override Expression VisitInsertSelect(InsertSelectExpression insertSelect)
+        {
+            insertSelect.Assigments.NewIfChange(VisitColumnAssigment);
+
+            var source = Visit(insertSelect.Source);
+            var assigments = insertSelect.Assigments.NewIfChange(VisitColumnAssigment);
+            if (source != insertSelect.Source ||  assigments != insertSelect.Assigments)
+                return new InsertSelectExpression(insertSelect.Table, (SourceWithAliasExpression)source, assigments);
+
+            return insertSelect;
+        }
+
         protected override Expression VisitSelect(SelectExpression select)
         {
             Dictionary<ColumnExpression, Expression> askedColumns = CurrentScope.Keys.Where(k => select.KnownAliases.Contains(k.Alias)).ToDictionary(k => k, k => (Expression)null);

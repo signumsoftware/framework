@@ -73,7 +73,6 @@ namespace Signum.Engine.Linq
             objectNameOptions = ObjectName.CurrentOptions;
         }
 
-
         static internal string Format(Expression expression, out List<DbParameter> getParameters)
         {
             QueryFormatter qf = new QueryFormatter();
@@ -718,6 +717,42 @@ namespace Signum.Engine.Linq
                 Visit(update.Where);
             }
             return update; 
+
+        }
+
+        protected override Expression VisitInsertSelect(InsertSelectExpression insertSelect)
+        {
+            sb.Append("INSERT INTO ");
+            sb.Append(insertSelect.Table.Name.ToString());
+            sb.Append("(");
+            for (int i = 0, n = insertSelect.Assigments.Count; i < n; i++)
+            {
+                ColumnAssignment assignment = insertSelect.Assigments[i];
+                if (i > 0)
+                {
+                    sb.Append(", ");
+                    if (i % 4 == 0)
+                        this.AppendNewLine(Indentation.Same);
+                }
+                sb.Append(assignment.Column.SqlScape());
+            }
+            sb.Append(")");
+            this.AppendNewLine(Indentation.Same);
+            sb.Append("SELECT ");
+            for (int i = 0, n = insertSelect.Assigments.Count; i < n; i++)
+            {
+                ColumnAssignment assignment = insertSelect.Assigments[i];
+                if (i > 0)
+                {
+                    sb.Append(", ");
+                    if (i % 4 == 0)
+                        this.AppendNewLine(Indentation.Same);
+                }
+                this.Visit(assignment.Expression);
+            }
+            sb.Append(" FROM ");
+            VisitSource(insertSelect.Source);
+            return insertSelect;
 
         }
 

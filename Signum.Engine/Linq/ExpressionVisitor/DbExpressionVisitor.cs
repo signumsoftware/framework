@@ -131,6 +131,8 @@ namespace Signum.Engine.Linq
                     return this.VisitDelete((DeleteExpression)exp);
                 case (ExpressionType)DbExpressionType.Update:
                     return this.VisitUpdate((UpdateExpression)exp);
+                case (ExpressionType)DbExpressionType.InsertSelect:
+                    return this.VisitInsertSelect((InsertSelectExpression)exp);
                 case (ExpressionType)DbExpressionType.CommandAggregate:
                     return this.VisitCommandAggregate((CommandAggregateExpression)exp);
                 case (ExpressionType)DbExpressionType.SelectRowCount:
@@ -167,8 +169,6 @@ namespace Signum.Engine.Linq
             }
         }
 
-  
-
         protected virtual Expression VisitCommandAggregate(CommandAggregateExpression cea)
         {
             var commands = VisitCommands(cea.Commands);
@@ -199,6 +199,15 @@ namespace Signum.Engine.Linq
             if(source != update.Source || where != update.Where || assigments != update.Assigments)
                 return new UpdateExpression(update.Table, (SourceWithAliasExpression)source, where, assigments);
             return update;
+        }
+
+        protected virtual Expression VisitInsertSelect(InsertSelectExpression insertSelect)
+        {
+            var source = VisitSource(insertSelect.Source);
+            var assigments = insertSelect.Assigments.NewIfChange(VisitColumnAssigment);
+            if (source != insertSelect.Source ||  assigments != insertSelect.Assigments)
+                return new InsertSelectExpression(insertSelect.Table, (SourceWithAliasExpression)source, assigments);
+            return insertSelect;
         }
 
         protected virtual ColumnAssignment VisitColumnAssigment(ColumnAssignment c)
