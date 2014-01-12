@@ -109,7 +109,7 @@ namespace Signum.Engine
         }
 
         public static T SetReadonly<T, V>(this T ident, Expression<Func<T, V>> readonlyProperty, V value)
-            where T : ModifiableEntity
+             where T : ModifiableEntity
         {
             var pi = ReflectionTools.BasePropertyInfo(readonlyProperty);
 
@@ -164,14 +164,18 @@ namespace Signum.Engine
             return ident;
         }
 
-        /// <summary>
-        /// Disables Identity in a table for the current transaction
-        /// </summary>
         public static IDisposable DisableIdentity<T>()
             where T : IdentifiableEntity
         {
             Table table = Schema.Current.Table<T>();
             return DisableIdentity(table);
+        }
+
+        public static IDisposable DisableIdentity<T, V>(Expression<Func<T, MList<V>>> mListField)
+          where T : IdentifiableEntity
+        {
+            RelationalTable table = ((FieldMList)Schema.Current.Field(mListField)).RelationalTable;
+            return DisableIdentity(table.Name);
         }
 
         public static IDisposable DisableIdentity(Table table)
