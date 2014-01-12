@@ -85,7 +85,7 @@ namespace Signum.Engine.Disconnected
 
                     try
                     {
-                        using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { Lock = l })))
+                        using (token.MeasureTime(l => export.InDB().UnsafeUpdate().Set(s => s.Lock, s => l).Execute()))
                         {
                             foreach (var tuple in downloadTables)
                             {
@@ -97,20 +97,20 @@ namespace Signum.Engine.Disconnected
                         }
 
                         string connectionString;
-                        using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { CreateDatabase = l })))
+                        using (token.MeasureTime(l => export.InDB().UnsafeUpdate().Set(s => s.CreateDatabase, s => l).Execute()))
                             connectionString = CreateDatabase(machine);
 
                         var newDatabase = new SqlConnector(connectionString, Schema.Current, DynamicQueryManager.Current);
 
 
-                        using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { CreateSchema = l })))
+                        using (token.MeasureTime(l => export.InDB().UnsafeUpdate().Set(s => s.CreateSchema, s => l).Execute()))
                         using (Connector.Override(newDatabase))
                         using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
                         {
                             Administrator.TotalGeneration();
                         }
 
-                        using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { DisableForeignKeys = l })))
+                        using (token.MeasureTime(l => export.InDB().UnsafeUpdate().Set(s => s.DisableForeignKeys, s => l).Execute()))
                         using (Connector.Override(newDatabase))
                         using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
                         {
@@ -135,18 +135,13 @@ namespace Signum.Engine.Disconnected
 
                             int? maxId = tuple.Strategy.Upload == Upload.New ? DisconnectedTools.MaxIdInRange(tuple.Table, machine.SeedMin, machine.SeedMax) : null;
 
-                            ExportTableQuery(export, tuple.Type.ToTypeDN()).UnsafeUpdate(e =>
-                                new MListElement<DisconnectedExportDN, DisconnectedExportTableDN>
-                                {
-                                    Element =
-                                    {
-                                        CopyTable = ms,
-                                        MaxIdInRange = maxId,
-                                    }
-                                });
+                            export.MListElementsLite(_ => _.Copies).Where(c => c.Element.Type == tuple.Type.ToTypeDN()).UnsafeUpdateMList()
+                            .Set(mle => mle.Element.CopyTable, mle => ms)
+                            .Set(mle => mle.Element.MaxIdInRange, mle => maxId)
+                            .Execute();
                         }
 
-                        using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { EnableForeignKeys = l })))
+                        using (token.MeasureTime(l => export.InDB().UnsafeUpdate().Set(s =>s.EnableForeignKeys, s=>l).Execute()))
                             foreach (var tuple in downloadTables.Where(t => !t.Type.IsEnumEntity()))
                             {
                                 token.ThrowIfCancellationRequested();
@@ -154,7 +149,7 @@ namespace Signum.Engine.Disconnected
                                 EnableForeignKeys(tuple.Table);
                             }
 
-                        using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { ReseedIds = l })))
+                        using (token.MeasureTime(l => export.InDB().UnsafeUpdate().Set(s => s.ReseedIds, s => l).Execute()))
                         {
                             var tablesToUpload = Schema.Current.Tables.Values.Where(t => DisconnectedLogic.GetStrategy(t.Type).Upload != Upload.None);
 
@@ -177,26 +172,32 @@ namespace Signum.Engine.Disconnected
 
                         CopyExport(export, newDatabase);
 
-                        machine.InDB().UnsafeUpdate(m => new DisconnectedMachineDN { State = DisconnectedMachineState.Disconnected });
+                        machine.InDB().UnsafeUpdate().Set(s => s.State, s => DisconnectedMachineState.Disconnected).Execute(); 
                         using (SqlConnector.Override(newDatabase))
                         using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
-                            machine.InDB().UnsafeUpdate(m => new DisconnectedMachineDN { State = DisconnectedMachineState.Disconnected });
+                            machine.InDB().UnsafeUpdate().Set(s => s.State, s => DisconnectedMachineState.Disconnected).Execute();
 
-                        using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { BackupDatabase = l })))
+                        using (token.MeasureTime(l => export.InDB().UnsafeUpdate().Set(s => s.BackupDatabase, s => l).Execute()))
                             BackupDatabase(machine, export, newDatabase);
 
-                        using (token.MeasureTime(l => export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { DropDatabase = l })))
+                        using (token.MeasureTime(l => export.InDB().UnsafeUpdate().Set(s => s.DropDatabase, s => l).Execute()))
                             DropDatabase(newDatabase);
 
                         token.ThrowIfCancellationRequested();
 
-                        export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { State = DisconnectedExportState.Completed, Total = s.CalculateTotal() });
+                        export.InDB().UnsafeUpdate()
+                        .Set(s=>s.State, s=>DisconnectedExportState.Completed)
+                        .Set(s=>s.Total, s=>s.CalculateTotal())
+                        .Execute();
                     }
                     catch (Exception e)
                     {
                         var ex = e.LogException();
 
-                        export.InDB().UnsafeUpdate(s => new DisconnectedExportDN { Exception = ex.ToLite(), State = DisconnectedExportState.Error });
+                        export.InDB().UnsafeUpdate()
+                        .Set(s => s.Exception, s => ex.ToLite())
+                        .Set(s => s.State, s => DisconnectedExportState.Error)
+                        .Execute();
 
                         OnExportingError(machine, export, e);
                     }
@@ -251,21 +252,15 @@ namespace Signum.Engine.Disconnected
                     "{0} locked in {1}".Formato(a.Id, a.Mixin<DisconnectedMixin>().DisconnectedMachine.Entity.MachineName)).ToString("\r\n");
 
                 if (result.HasText())
-                    ExportTableQuery(stats, typeof(T).ToTypeDN()).UnsafeUpdate(e =>
-                            new MListElement<DisconnectedExportDN, DisconnectedExportTableDN>
-                            {
-                                Element = { Errors = result }
-                            });
+                    stats.MListElementsLite(_ => _.Copies).Where(a => a.Element.Type == typeof(T).ToTypeDN()).UnsafeUpdateMList()
+                        .Set(mle => mle.Element.Error, mle => result)
+                        .Execute();
 
-                return Database.Query<T>().Where(strategy.UploadSubset).UnsafeUpdate(a => new T()
-                    .SetMixin((DisconnectedMixin dm) => dm.DisconnectedMachine, machine)
-                    .SetMixin((DisconnectedMixin dm) => dm.LastOnlineTicks, a.Ticks));
+                return Database.Query<T>().Where(strategy.UploadSubset).UnsafeUpdate()
+                    .Set(a => a.Mixin<DisconnectedMixin>().DisconnectedMachine, a => machine)
+                    .Set(a => a.Mixin<DisconnectedMixin>().LastOnlineTicks, a => a.Ticks)
+                    .Execute();
             }
-        }
-
-        private IQueryable<MListElement<DisconnectedExportDN, DisconnectedExportTableDN>> ExportTableQuery(Lite<DisconnectedExportDN> stats, TypeDN type)
-        {
-            return Database.MListQuery((DisconnectedExportDN s) => s.Copies).Where(dst => dst.Parent.ToLite() == stats && dst.Element.Type.RefersTo(type));
         }
 
         public virtual void AbortExport(Lite<DisconnectedExportDN> stat)

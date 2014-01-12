@@ -347,7 +347,7 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(database.TryToString() ?? Connector.C
                 cachedTable = new CachedTable<T>(this, new Linq.AliasGenerator(), null, null);
             }
 
-            void UnsafeUpdated(IQueryable<T> query)
+            void UnsafeUpdated(IUpdateable update)
             {
                 DisableAllConnectedTypesInTransaction(typeof(T));
 
