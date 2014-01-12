@@ -547,9 +547,9 @@ INNER JOIN {1} as [table] ON {0}.id = [table].id
             var s = Schema.Current;
 
             var where = "\r\nWHERE [table].{0} = @machineId AND [table].{1} != [table].{2}".Formato(
-                ((FieldReference)s.Field<T>(t => t.Mixin<DisconnectedMixin>().DisconnectedMachine)).Name.SqlScape(),
-                ((FieldValue)s.Field<T>(t => t.Ticks)).Name.SqlScape(),
-                ((FieldValue)s.Field<T>(t => t.Mixin<DisconnectedMixin>().LastOnlineTicks)).Name.SqlScape());
+                ((FieldReference)s.Field((T t) => t.Mixin<DisconnectedMixin>().DisconnectedMachine)).Name.SqlScape(),
+                ((FieldValue)s.Field((T t) => t.Ticks)).Name.SqlScape(),
+                ((FieldValue)s.Field((T t) => t.Mixin<DisconnectedMixin>().LastOnlineTicks)).Name.SqlScape());
             return where;
         }
     }
