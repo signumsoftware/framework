@@ -106,6 +106,8 @@ namespace Signum.Engine.Linq
                     return CompareDelete((DeleteExpression)a, (DeleteExpression)b);
                 case DbExpressionType.Update:
                     return CompareUpdate((UpdateExpression)a, (UpdateExpression)b);
+                case DbExpressionType.InsertSelect:
+                    return CompareInsertSelect((InsertSelectExpression)a, (InsertSelectExpression)b);
                 case DbExpressionType.CommandAggregate:
                     return CompareCommandAggregate((CommandAggregateExpression)a, (CommandAggregateExpression)b);
                 case DbExpressionType.SelectRowCount:
@@ -411,6 +413,13 @@ namespace Signum.Engine.Linq
                 && CompareList(a.Assigments, b.Assigments, CompareAssigment)
                 && Compare(a.Source, b.Source)
                 && Compare(a.Where, b.Where);
+        }
+
+        protected virtual bool CompareInsertSelect(InsertSelectExpression a, InsertSelectExpression b)
+        {
+            return a.Table == b.Table
+                && CompareList(a.Assigments, b.Assigments, CompareAssigment)
+                && Compare(a.Source, b.Source);
         }
 
         protected virtual bool CompareAssigment(ColumnAssignment a, ColumnAssignment b)

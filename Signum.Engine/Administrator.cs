@@ -109,7 +109,7 @@ namespace Signum.Engine
         }
 
         public static T SetReadonly<T, V>(this T ident, Expression<Func<T, V>> readonlyProperty, V value)
-            where T : ModifiableEntity
+             where T : ModifiableEntity
         {
             var pi = ReflectionTools.BasePropertyInfo(readonlyProperty);
 
@@ -164,14 +164,18 @@ namespace Signum.Engine
             return ident;
         }
 
-        /// <summary>
-        /// Disables Identity in a table for the current transaction
-        /// </summary>
         public static IDisposable DisableIdentity<T>()
             where T : IdentifiableEntity
         {
             Table table = Schema.Current.Table<T>();
             return DisableIdentity(table);
+        }
+
+        public static IDisposable DisableIdentity<T, V>(Expression<Func<T, MList<V>>> mListField)
+          where T : IdentifiableEntity
+        {
+            RelationalTable table = ((FieldMList)Schema.Current.Field(mListField)).RelationalTable;
+            return DisableIdentity(table.Name);
         }
 
         public static IDisposable DisableIdentity(Table table)
@@ -258,7 +262,7 @@ namespace Signum.Engine
             return prov.Delete<SqlPreCommandSimple>(query, cm => cm.ToPreCommand(), removeSelectRowCount: true);
         }
 
-        public static SqlPreCommandSimple UnsafeDeletePreCommand<E, V>(this IQueryable<MListElement<E, V>> query)
+        public static SqlPreCommandSimple UnsafeDeletePreCommand<E, V>(IQueryable<MListElement<E, V>> query)
             where E : IdentifiableEntity
         {
             var prov = ((DbQueryProvider)query.Provider);
@@ -266,29 +270,11 @@ namespace Signum.Engine
             return prov.Delete<SqlPreCommandSimple>(query, cm => cm.ToPreCommand(), removeSelectRowCount: true);
         }
 
-        public static SqlPreCommandSimple UnsafeUpdatePreCommand<E>(this IQueryable<E> query, Expression<Func<E, E>> updateConstructor)
-            where E : IdentifiableEntity
+        public static SqlPreCommandSimple UnsafeUpdatePartPreCommand(IUpdateable update)
         {
-            var prov = ((DbQueryProvider)query.Provider);
+            var prov = ((DbQueryProvider)update.Query.Provider);
 
-            return prov.Update(query, null, updateConstructor, cm => cm.ToPreCommand(), removeSelectRowCount: true);
-        }
-
-
-        public static SqlPreCommandSimple UnsafeUpdatePartPreCommand<T, E>(this IQueryable<T> query, Expression<Func<T, E>> entitySelector, Expression<Func<T, E>> updateConstructor)
-            where T : IdentifiableEntity
-        {
-            var prov = ((DbQueryProvider)query.Provider);
-
-            return prov.Update(query, entitySelector, updateConstructor, cm => cm.ToPreCommand(), removeSelectRowCount: true);
-        }
-
-        public static SqlPreCommandSimple UnsafeUpdatePreCommand<E, V>(this IQueryable<MListElement<E, V>> query, Expression<Func<MListElement<E, V>, MListElement<E, V>>> updateConstructor)
-            where E : IdentifiableEntity
-        {
-            var prov = ((DbQueryProvider)query.Provider);
-
-            return prov.Update(query, null, updateConstructor, cm => cm.ToPreCommand(), removeSelectRowCount: true);
+            return prov.Update(update, cr => cr.ToPreCommand(), removeSelectRowCount: true);
         }
 
         public static void UpdateToStrings<T>() where T : IdentifiableEntity, new()
@@ -313,21 +299,28 @@ namespace Signum.Engine
                 foreach (var item in list)
                 {
                     if (item.ToString() != item.toStr)
-                        item.InDB().UnsafeUpdate(a => new T { toStr = item.ToString() });
+                        item.InDB().UnsafeUpdate()
+                            .Set(a => a.toStr, a => item.ToString())
+                            .Execute();
                 }
             });
         }
 
+        public static IUpdateablePart<A, T> SetToStr<A, T>(this IUpdateablePart<A, T> update, Expression<Func<A, string>> expression)
+            where T:  IdentifiableEntity
+        {
+            return update.Set(a => a.toStr, expression);
+        }
+
         public static void UpdateToStrings<T>(Expression<Func<T, string>> expression) where T : IdentifiableEntity, new()
         {
-            SafeConsole.WaitRows("UnsafeUpdate toStr for {0}".Formato(typeof(T).TypeName()), () =>
-                Database.Query<T>().UnsafeUpdate(a => new T { toStr = expression.Evaluate(a) }));
+            UpdateToStrings(Database.Query<T>(), expression);
         }
 
         public static void UpdateToStrings<T>(IQueryable<T> query, Expression<Func<T, string>> expression) where T : IdentifiableEntity, new()
         {
             SafeConsole.WaitRows("UnsafeUpdate toStr for {0}".Formato(typeof(T).TypeName()), () =>
-                query.UnsafeUpdate(a => new T { toStr = expression.Evaluate(a) }));
+                query.UnsafeUpdate().Set(a => a.toStr, expression).Execute());
         }
 
         public static IDisposable PrepareForBatchLoadScope<T>(bool disableForeignKeys = true, bool disableMultipleIndexes = true, bool disableUniqueIndexes = false) where T : IdentifiableEntity

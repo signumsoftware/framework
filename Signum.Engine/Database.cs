@@ -16,6 +16,7 @@ using System.Collections;
 using Signum.Utilities.Reflection;
 using System.Threading;
 using Signum.Entities.Basics;
+using System.Collections.ObjectModel;
 
 namespace Signum.Engine
 {
@@ -568,12 +569,12 @@ namespace Signum.Engine
         }
 
         [MethodExpander(typeof(MListQueryExpander))]
-        public static IQueryable<MListElement<E, V>> MListQuery<E, V>(Expression<Func<E, MList<V>>> mlistProperty)
+        public static IQueryable<MListElement<E, V>> MListQuery<E, V>(Expression<Func<E, MList<V>>> mListProperty)
             where E : IdentifiableEntity
         {
-            PropertyInfo pi = ReflectionTools.GetPropertyInfo(mlistProperty);
+            PropertyInfo pi = ReflectionTools.GetPropertyInfo(mListProperty);
 
-            var list = (FieldMList)Schema.Current.Table<E>().GetField(pi);
+            var list = (FieldMList)Schema.Current.Field(mListProperty);
 
             return new SignumTable<MListElement<E, V>>(DbQueryProvider.Single, list.RelationalTable);
         }
@@ -585,6 +586,49 @@ namespace Signum.Engine
                 var query = Expression.Lambda<Func<IQueryable>>(Expression.Call(mi, arguments)).Compile()();
 
                 return Expression.Constant(query, mi.ReturnType);
+            }
+        }
+
+        [MethodExpander(typeof(MListElementsExpander))]
+        public static IQueryable<MListElement<E, V>> MListElements<E, V>(this E entity, Expression<Func<E, MList<V>>> mListProperty)
+                where E : IdentifiableEntity
+        {
+            return MListQuery(mListProperty).Where(mle => mle.Parent == entity);
+        }
+
+        [MethodExpander(typeof(MListElementsExpander))]
+        public static IQueryable<MListElement<E, V>> MListElementsLite<E, V>(this Lite<E> entity, Expression<Func<E, MList<V>>> mListProperty)
+                where E : IdentifiableEntity
+        {
+            return MListQuery(mListProperty).Where(mle => mle.Parent.ToLite() == entity);
+        }
+
+        class MListElementsExpander : IMethodExpander
+        {
+            static readonly MethodInfo miMListQuery = ReflectionTools.GetMethodInfo(() => Database.MListQuery<IdentifiableEntity, int>(null)).GetGenericMethodDefinition();
+            static readonly MethodInfo miWhere = ReflectionTools.GetMethodInfo(() => Queryable.Where<IdentifiableEntity>(null, a => false)).GetGenericMethodDefinition();
+            static readonly MethodInfo miToLite = ReflectionTools.GetMethodInfo((IdentifiableEntity e) => e.ToLite()).GetGenericMethodDefinition();
+
+            public Expression Expand(Expression instance, Expression[] arguments, MethodInfo mi)
+            {
+                Type[] types = mi.GetGenericArguments();
+
+                Type mleType = typeof(MListElement<,>).MakeGenericType(types);
+
+                var query = Expression.Lambda<Func<IQueryable>>(Expression.Call(miMListQuery.MakeGenericMethod(mi.GetGenericArguments()), arguments[1])).Compile()();
+
+                var p = Expression.Parameter(mleType, "e");
+
+                var prop = (Expression)Expression.Property(p, "Parent");
+
+                var entity = arguments[0];
+
+                if(entity.Type.IsLite())
+                    prop = Expression.Call(miToLite.MakeGenericMethod(prop.Type), prop);
+
+                var lambda = Expression.Lambda(Expression.Equal(prop, entity), p);
+
+                return Expression.Call(miWhere.MakeGenericMethod(mleType), Expression.Constant(query, mi.ReturnType), lambda);
             }
         }
 
@@ -697,8 +741,9 @@ namespace Signum.Engine
         }
         #endregion
 
+        #region UnsafeDelete
         public static int UnsafeDelete<T>(this IQueryable<T> query)
-              where T : IdentifiableEntity
+            where T : IdentifiableEntity
         {
             using (HeavyProfiler.Log("DBUnsafeDelete", () => typeof(T).TypeName()))
             {
@@ -719,86 +764,118 @@ namespace Signum.Engine
         public static int UnsafeDelete<E, V>(this IQueryable<MListElement<E, V>> query)
             where E : IdentifiableEntity
         {
-            using (HeavyProfiler.Log("DBUnsafeDelete", () => typeof(MListElement<E, V>).NiceName()))
+            using (HeavyProfiler.Log("DBUnsafeDelete", () => typeof(MListElement<E, V>).TypeName()))
             {
                 if (query == null)
                     throw new ArgumentNullException("query");
 
                 using (Transaction tr = new Transaction())
                 {
-                    Schema.Current.OnPreUnsafeUpdate<E>(query.Select(mle => mle.Parent));
+                    Schema.Current.OnPreUnsafeDelete<E>(query.Select(mle => mle.Parent));
 
                     int rows = DbQueryProvider.Single.Delete(query, cm => cm.ExecuteScalar());
 
                     return tr.Commit(rows);
                 }
             }
+        } 
+        #endregion
+
+        #region UnsafeUpdate
+        public static IUpdateable<E> UnsafeUpdate<E>(this IQueryable<E> query)
+          where E : IdentifiableEntity
+        {
+            return new Updateable<E>(query, null);
         }
 
-        /// <param name="updateConstructor">Use a object initializer to make the update (no entity will be created)</param>
-        public static int UnsafeUpdate<E>(this IQueryable<E> query, Expression<Func<E, E>> updateConstructor)
+        public static IUpdateable<MListElement<E, V>> UnsafeUpdateMList<E, V>(this IQueryable<MListElement<E, V>> query)
+             where E : IdentifiableEntity
+        {
+            return new Updateable<MListElement<E, V>>(query, null);
+        }
+
+        public static IUpdateablePart<A, E> UnsafeUpdatePart<A, E>(this IQueryable<A> query, Expression<Func<A, E>> partSelector)
             where E : IdentifiableEntity
         {
-            using (HeavyProfiler.Log("DBUnsafeUpdate", () => typeof(E).TypeName()))
-            {
-                if (query == null)
-                    throw new ArgumentNullException("query");
-
-                using (Transaction tr = new Transaction())
-                {
-                    Schema.Current.OnPreUnsafeUpdate<E>(query);
-
-                    int rows = DbQueryProvider.Single.Update(query, null, updateConstructor, cm => cm.ExecuteScalar());
-
-                    return tr.Commit(rows);
-                }
-            }
+            return new UpdateablePart<A, E>(query, partSelector, null);
         }
 
-        /// <param name="updateConstructor">Use a object initializer to make the update (no entity will be created)</param>
-        public static int UnsafeUpdatePart<T, E>(this IQueryable<T> query, Expression<Func<T, E>> entitySelector, Expression<Func<T, E>> updateConstructor)
+        public static IUpdateablePart<A, MListElement<E, V>> UnsafeUpdateMListPart<A, E, V>(this IQueryable<A> query, Expression<Func<A, MListElement<E, V>>> partSelector)
             where E : IdentifiableEntity
         {
-            using (HeavyProfiler.Log("DBUnsafeUpdate", () => typeof(E).TypeName()))
-            {
-                if (query == null)
-                    throw new ArgumentNullException("query");
-
-                using (Transaction tr = new Transaction())
-                {
-                    Schema.Current.OnPreUnsafeUpdate<E>(query.Select(entitySelector));
-
-                    int rows = DbQueryProvider.Single.Update(query, entitySelector, updateConstructor, cm => cm.ExecuteScalar());
-
-                    return tr.Commit(rows);
-                }
-            }
+            return new UpdateablePart<A, MListElement<E, V>>(query, partSelector, null);
         }
 
-        /// <param name="updateConstructor">Use a object initializer to make the update (no entity will be created)</param>
-        public static int UnsafeUpdate<E, V>(this IQueryable<MListElement<E, V>> query, Expression<Func<MListElement<E, V>, MListElement<E, V>>> updateConstructor)
-           where E : IdentifiableEntity
+        public static int Execute(this IUpdateable update)
         {
-            using (HeavyProfiler.Log("DBUnsafeUpdate", () => typeof(MListElement<E, V>).TypeName()))
+            using (HeavyProfiler.Log("DBUnsafeUpdate", () => update.EntityType.TypeName()))
+            {
+                if (update == null)
+                    throw new ArgumentNullException("update");
+
+                using (Transaction tr = new Transaction())
+                {
+                    Schema.Current.OnPreUnsafeUpdate(update);
+                    int rows = DbQueryProvider.Single.Update(update, cr => cr.ExecuteScalar());
+
+                    return tr.Commit(rows);
+                }
+            }
+        } 
+        #endregion
+
+        #region UnsafeInsert
+
+        public static int UnsafeInsert<T, E>(this IQueryable<T> query, Expression<Func<T, E>> constructor)
+        {
+            using (HeavyProfiler.Log("DBUnsafeInsert", () => typeof(E).TypeName()))
             {
                 if (query == null)
                     throw new ArgumentNullException("query");
 
+                if (constructor == null)
+                    throw new ArgumentNullException("constructor");
+
                 using (Transaction tr = new Transaction())
                 {
-                    Schema.Current.OnPreUnsafeUpdate<E>(query.Select(q => q.Parent));
-
-                    int rows = DbQueryProvider.Single.Update(query, null, updateConstructor, cm => cm.ExecuteScalar());
+                    Schema.Current.OnPreUnsafeInsert(typeof(E), query, constructor);
+                    var table = Schema.Current.Table(typeof(E));
+                    int rows = DbQueryProvider.Single.Insert(query, constructor, table, cr => cr.ExecuteScalar());
 
                     return tr.Commit(rows);
                 }
             }
         }
+
+         
+        public static int UnsafeInsertMList<T, E, V>(this IQueryable<T> query, Expression<Func<E, MList<V>>> mListProperty,  Expression<Func<T, MListElement<E, V>>> constructor)
+               where E : IdentifiableEntity
+        {
+            using (HeavyProfiler.Log("DBUnsafeInsert", () => typeof(E).TypeName()))
+            {
+                if (query == null)
+                    throw new ArgumentNullException("query");
+
+                if (constructor == null)
+                    throw new ArgumentNullException("constructor");
+
+                using (Transaction tr = new Transaction())
+                {
+                    Schema.Current.OnPreUnsafeInsert(typeof(E), query, constructor);
+                    var table = ((FieldMList)Schema.Current.Field(mListProperty)).RelationalTable;
+                    int rows = DbQueryProvider.Single.Insert(query, constructor, table, cr => cr.ExecuteScalar());
+
+                    return tr.Commit(rows);
+                }
+            }
+        }
+
+        #endregion
     }
 
     public class MListElement<E, V> where E : IdentifiableEntity
     {
-        public int RowId { get; internal set; }
+        public int RowId { get; set; }
         public E Parent { get; set; }
         public V Element { get; set; }
     }
@@ -816,6 +893,104 @@ namespace Signum.Engine
             : base(provider)
         {
             this.Table = table;
+        }
+    }
+
+    public interface IUpdateable
+    {
+        IQueryable Query{ get; }
+        LambdaExpression PartSelector { get; }
+        IEnumerable<SetterExpressions> SetterExpressions{ get; }
+
+        Type EntityType { get; }
+    }
+
+    //E -> E
+    //A -> E
+    //MLE<E, M> -> MLE<E, M> 
+    //A -> MLE<E, M>
+
+    public interface IUpdateablePart<A, T> : IUpdateable
+    {
+        IUpdateablePart<A, T> Set<V>(Expression<Func<T, V>> propertyExpression, Expression<Func<A, V>> valueExpression);
+    }
+
+    class UpdateablePart<A, T> : IUpdateablePart<A, T>
+    { 
+        IQueryable<A> query;
+        Expression<Func<A, T>> partSelector; 
+        ReadOnlyCollection<SetterExpressions> settersExpressions;
+
+        public UpdateablePart(IQueryable<A> query, Expression<Func<A, T>> partSelector, IEnumerable<SetterExpressions> setters)
+        {
+            this.query = query;
+            this.partSelector = partSelector;
+            this.settersExpressions = (setters ?? Enumerable.Empty<SetterExpressions>()).ToReadOnly();
+        }
+
+        public IQueryable Query { get { return this.query; } }
+
+        public LambdaExpression PartSelector { get { return this.partSelector; } }
+
+        public IEnumerable<SetterExpressions> SetterExpressions { get { return this.settersExpressions; } }
+
+        public Type EntityType { get { return typeof(T); } }
+
+        public IUpdateablePart<A, T> Set<V>(Expression<Func<T, V>> propertyExpression, Expression<Func<A, V>> valueExpression)
+        {
+            return new UpdateablePart<A, T>(this.query, this.partSelector,
+                this.settersExpressions.And(new SetterExpressions(propertyExpression, valueExpression)));
+        }
+    }
+
+
+    public interface IUpdateable<T> : IUpdateable
+    {
+        IUpdateable<T> Set<V>(Expression<Func<T, V>> propertyExpression, Expression<Func<T, V>> valueExpression);
+    }
+
+    class Updateable<T> : IUpdateable<T>
+    {
+        IQueryable<T> query;
+        ReadOnlyCollection<SetterExpressions> settersExpressions;
+
+        public Updateable(IQueryable<T> query, IEnumerable<SetterExpressions> setters)
+        {
+            this.query = query;
+            this.settersExpressions = (setters ?? Enumerable.Empty<SetterExpressions>()).ToReadOnly();
+        }
+
+        public IQueryable Query { get { return this.query; } }
+
+        public LambdaExpression PartSelector { get { return null; } }
+
+        public IEnumerable<SetterExpressions> SetterExpressions { get { return this.settersExpressions; } }
+
+        public Type EntityType { get { return typeof(T); } }
+
+        public IUpdateable<T> Set<V>(Expression<Func<T, V>> propertyExpression, Expression<Func<T, V>> valueExpression)
+        {
+            return new Updateable<T>(this.query,
+                this.settersExpressions.And(new SetterExpressions(propertyExpression, valueExpression)));
+        }
+    }
+
+    public class SetterExpressions
+    {
+        public LambdaExpression PropertyExpression { get; private set; }
+        public LambdaExpression ValueExpression { get; private set; }
+
+        public SetterExpressions(LambdaExpression propertyExpression, LambdaExpression valueExpression)
+        {
+            if (propertyExpression == null)
+                throw new ArgumentNullException("propertyExpression");
+
+            if (valueExpression == null)
+                throw new ArgumentNullException("valueExpression");
+
+
+            this.PropertyExpression = propertyExpression;
+            this.ValueExpression = valueExpression; 
         }
     }
 }

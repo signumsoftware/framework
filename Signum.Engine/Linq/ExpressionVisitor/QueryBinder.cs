@@ -1689,16 +1689,16 @@ namespace Signum.Engine.Linq
             return new CommandAggregateExpression(commands);
         }
 
-        internal CommandExpression BindUpdate(Expression source, LambdaExpression entitySelector, LambdaExpression updateConstructor)
+        internal CommandExpression BindUpdate(Expression source, LambdaExpression partSelector, IEnumerable<SetterExpressions> setterExpressions)
         {
             ProjectionExpression pr = VisitCastProjection(source);
 
             Expression entity = pr.Projector;
-            if (entitySelector == null)
+            if (partSelector == null)
                 entity = pr.Projector;
             else
             {
-                var cleanedSelector = (LambdaExpression)DbQueryProvider.Clean(entitySelector, false, null);
+                var cleanedSelector = (LambdaExpression)DbQueryProvider.Clean(partSelector, false, null);
                 map.Add(cleanedSelector.Parameters[0], pr.Projector);
                 entity = Visit(cleanedSelector.Body);
                 map.Remove(cleanedSelector.Parameters[0]);
@@ -1714,17 +1714,24 @@ namespace Signum.Engine.Linq
                 ((Table)table).GetProjectorExpression(alias, this) :
                 ((RelationalTable)table).GetProjectorExpression(alias, this);
 
-            ParameterExpression param = updateConstructor.Parameters[0];
-            ParameterExpression toUpdateParam = Expression.Parameter(toUpdate.Type, "toUpdate");
-
             List<ColumnAssignment> assignments = new List<ColumnAssignment>();
             using (SetCurrentSource(pr.Select.From))
             {
-                map.Add(param, pr.Projector);
-                map.Add(toUpdateParam, toUpdate);
-                FillColumnAssigments(assignments, toUpdateParam, updateConstructor.Body);
-                map.Remove(toUpdateParam);
-                map.Remove(param);
+                foreach (var setter in setterExpressions)
+                {
+                    var toUpdateParam = setter.PropertyExpression.Parameters.Single();
+                    map.Add(toUpdateParam, toUpdate);
+                    Expression colExpression = Visit(setter.PropertyExpression.Body);
+                    map.Remove(toUpdateParam);
+
+                    var param = setter.ValueExpression.Parameters.Single();
+                    map.Add(param, pr.Projector);
+                    var cleanedValue = DbQueryProvider.Clean(setter.ValueExpression.Body, false, null);
+                    Expression valExpression = Visit(cleanedValue);
+                    map.Remove(param);
+
+                    assignments.AddRange(Assign(colExpression, valExpression));
+                }
             }
 
             Expression condition;
@@ -1759,41 +1766,72 @@ namespace Signum.Engine.Linq
             return (CommandAggregateExpression)QueryJoinExpander.ExpandJoins(result, this);
         }
 
+        internal CommandExpression BindInsert(Expression source, LambdaExpression constructor, ITable table)
+        {
+            ProjectionExpression pr = VisitCastProjection(source);
+
+            Alias alias = aliasGenerator.Table(table.Name);
+
+            Expression toInsert = table is Table ?
+                ((Table)table).GetProjectorExpression(alias, this) :
+                ((RelationalTable)table).GetProjectorExpression(alias, this);
+
+            ParameterExpression param = constructor.Parameters[0];
+            ParameterExpression toInsertParam = Expression.Parameter(toInsert.Type, "toInsert");
+
+            List<ColumnAssignment> assignments = new List<ColumnAssignment>();
+            using (SetCurrentSource(pr.Select.From))
+            {
+                map.Add(param, pr.Projector);
+                map.Add(toInsertParam, toInsert);
+                var cleanedConstructor = DbQueryProvider.Clean(constructor.Body, false, null);
+                FillColumnAssigments(assignments, toInsertParam, cleanedConstructor);
+                map.Remove(toInsertParam);
+                map.Remove(param);
+            }
+
+            var result = new CommandAggregateExpression(new CommandExpression[]
+            { 
+                new InsertSelectExpression(table, pr.Select, assignments),
+                new SelectRowCountExpression()
+            });
+
+            return (CommandAggregateExpression)QueryJoinExpander.ExpandJoins(result, this);
+        }
+
         static readonly MethodInfo miSetReadonly = ReflectionTools.GetMethodInfo(() => Administrator.SetReadonly(null, (IdentifiableEntity a) => a.Id, 1)).GetGenericMethodDefinition();
         static readonly MethodInfo miSetMixin = ReflectionTools.GetMethodInfo(() => ((IdentifiableEntity)null).SetMixin((CorruptMixin m) => m.Corrupt, true)).GetGenericMethodDefinition();
-
-        public void FillColumnAssigments(List<ColumnAssignment> assignments, Expression param, Expression body)
+    
+        public void FillColumnAssigments(List<ColumnAssignment> assignments, ParameterExpression toInsert, Expression body)
         {
             if (body is MethodCallExpression)
             {
                 var mce = (MethodCallExpression)body;
 
+                var prev = mce.Arguments[0];
+                FillColumnAssigments(assignments, toInsert, prev);
+
                 if (mce.Method.IsInstantiationOf(miSetReadonly))
                 {
-                    var prev = mce.Arguments[0];
-                    FillColumnAssigments(assignments, param, prev);
-
                     var pi = ReflectionTools.BasePropertyInfo(mce.Arguments[1].StripQuotes());
 
-                    Expression colExpression = Visit(Expression.MakeMemberAccess(param, Reflector.FindFieldInfo(body.Type, pi)));
+                    Expression colExpression = Visit(Expression.MakeMemberAccess(toInsert, Reflector.FindFieldInfo(body.Type, pi)));
                     Expression cleaned = DbQueryProvider.Clean(mce.Arguments[2], true, null);
                     Expression expression = Visit(cleaned);
                     assignments.AddRange(Assign(colExpression, expression));
                 }
                 else if (mce.Method.IsInstantiationOf(miSetMixin))
                 {
-                    var prev = mce.Arguments[0];
-                    FillColumnAssigments(assignments, param, prev);
-
                     Type mixinType = mce.Method.GetGenericArguments()[1];
 
                     var mi = ReflectionTools.BaseMemberInfo(mce.Arguments[1].StripQuotes());
 
-                    Expression mixin = Expression.Call(param, MixinDeclarations.miMixin.MakeGenericMethod(mixinType));
+                    Expression mixin = Expression.Call(toInsert, MixinDeclarations.miMixin.MakeGenericMethod(mixinType));
 
-                    Expression colExpression = Visit(Expression.MakeMemberAccess(mixin, mi));
                     Expression cleaned = DbQueryProvider.Clean(mce.Arguments[2], true, null);
                     Expression expression = Visit(cleaned);
+
+                    Expression colExpression = Visit(Expression.MakeMemberAccess(mixin, mi));
                     assignments.AddRange(Assign(colExpression, expression));
                 }
                 else
@@ -1802,8 +1840,14 @@ namespace Signum.Engine.Linq
             else if (body is MemberInitExpression)
             {
                 var mie = (MemberInitExpression)body;
-                assignments.AddRange(mie.Bindings.SelectMany(m => ColumnAssigments(param, m)));
-
+                assignments.AddRange(mie.Bindings.SelectMany(m =>
+                {
+                    MemberAssignment ma = (MemberAssignment)m;
+                    Expression colExpression = Visit(Expression.MakeMemberAccess(toInsert, ma.Member));
+                    Expression cleaned = DbQueryProvider.Clean(ma.Expression, true, null);
+                    Expression expression = Visit(cleaned);
+                    return Assign(colExpression, expression);
+                }));
             }
             else if (body is NewExpression)
             {
@@ -1819,41 +1863,7 @@ namespace Signum.Engine.Linq
         {
             throw new InvalidOperationException("The only allowed expressions on UnsafeUpdate are: object initializers, calling method SetMixin, or or calling Administrator.SetReadonly");
         }
-
-        private ColumnAssignment[] ColumnAssigments(Expression obj, MemberBinding m)
-        {
-            if (m is MemberAssignment)
-            {
-                MemberAssignment ma = (MemberAssignment)m;
-                Expression colExpression = Visit(Expression.MakeMemberAccess(obj, ma.Member));
-                Expression cleaned = DbQueryProvider.Clean(ma.Expression, true, null);
-                Expression expression = Visit(cleaned);
-                return Assign(colExpression, expression);
-            }
-            else if (m is MemberMemberBinding)
-            {
-                MemberMemberBinding mmb = (MemberMemberBinding)m;
-                if(!m.Member.ReturningType().IsEmbeddedEntity())
-                    throw new InvalidOperationException("{0} does not inherit from EmbeddedEntity".Formato(m.Member.ReturningType()));
-
-                Expression obj2 = Expression.MakeMemberAccess(obj, mmb.Member);
-
-                return mmb.Bindings.SelectMany(m2 => ColumnAssigments(obj2, m2)).ToArray();
-            }
-            
-            throw new NotImplementedException(m.ToString()); 
-        }
-
-        ColumnAssignment AssignColumn(Expression column, Expression expression)
-        {
-            var col = column as ColumnExpression;
-
-            if (col == null)
-                throw new InvalidOperationException("{0} does not represent a column".Formato(column.NiceToString()));
-
-            return new ColumnAssignment(col.Name, DbExpressionNominator.FullNominate(expression));
-        }
-
+     
         private ColumnAssignment[] Assign(Expression colExpression, Expression expression)
         {
             if (expression.IsNull())
@@ -1884,10 +1894,12 @@ namespace Signum.Engine.Linq
                 EmbeddedEntityExpression eee = (EmbeddedEntityExpression)colExpression;
 
                 EmbeddedEntityExpression eee2;
-                if(expression is ConstantExpression)
+                if (expression is ConstantExpression)
                     eee2 = eee.FieldEmbedded.FromConstantExpression((ConstantExpression)expression, this);
-                else if(expression is MemberInitExpression)
+                else if (expression is MemberInitExpression)
                     eee2 = eee.FieldEmbedded.FromMemberInitiExpression(((MemberInitExpression)expression), this);
+                else if (expression is EmbeddedEntityExpression)
+                    eee2 = (EmbeddedEntityExpression)expression;
                 else throw new InvalidOperationException("Impossible to assign to {0} the expression {1}".Formato(colExpression.NiceToString(), expression.NiceToString()));
 
                 var bindings = eee.Bindings.SelectMany(b => Assign(b.Binding,
@@ -1895,7 +1907,7 @@ namespace Signum.Engine.Linq
 
                 if(eee.HasValue != null)
                 {
-                    var setValue = AssignColumn(eee.HasValue, Expression.Constant(true));
+                    var setValue = AssignColumn(eee.HasValue, eee2.HasValue);
                     bindings = bindings.PreAnd(setValue);
                 }
 
@@ -1973,6 +1985,7 @@ namespace Signum.Engine.Linq
             throw new NotImplementedException("{0} can not be assigned from expression:\n{1}".Formato(colExpression.Type.TypeName(), expression.NiceToString())); 
         }
 
+
         private ColumnAssignment[] AssignNull(Expression colExpression)
         {
             if (colExpression is ColumnExpression)
@@ -2030,7 +2043,15 @@ namespace Signum.Engine.Linq
             throw new NotImplementedException("{0} can not be assigned to null".Formato(colExpression.Type.Name));
         }
 
+        ColumnAssignment AssignColumn(Expression column, Expression expression)
+        {
+            var col = column as ColumnExpression;
 
+            if (col == null)
+                throw new InvalidOperationException("{0} does not represent a column".Formato(column.NiceToString()));
+
+            return new ColumnAssignment(col.Name, DbExpressionNominator.FullNominate(expression));
+        }
         #region BinderTools
 
         Dictionary<ImplementedByExpression, UnionAllRequest> implementedByReplacements = new Dictionary<ImplementedByExpression, UnionAllRequest>(DbExpressionComparer.GetComparer<ImplementedByExpression>());

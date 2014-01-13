@@ -8,7 +8,7 @@ using Signum.Engine.Maps;
 
 namespace Signum.Engine.Linq
 {
-    class UpdateDeleteSimplifier: DbExpressionVisitor
+    class CommandSimplifier: DbExpressionVisitor
     {
         bool removeSelectRowCount;
         AliasGenerator aliasGenerator;
@@ -16,7 +16,7 @@ namespace Signum.Engine.Linq
 
         public static CommandExpression Simplify(CommandExpression ce, bool removeSelectRowCount, AliasGenerator aliasGenerator)
         {
-            return (CommandExpression)new UpdateDeleteSimplifier { removeSelectRowCount = removeSelectRowCount, aliasGenerator = aliasGenerator }.Visit(ce);
+            return (CommandExpression)new CommandSimplifier { removeSelectRowCount = removeSelectRowCount, aliasGenerator = aliasGenerator }.Visit(ce);
         }
 
         protected override Expression VisitSelectRowCount(SelectRowCountExpression src)

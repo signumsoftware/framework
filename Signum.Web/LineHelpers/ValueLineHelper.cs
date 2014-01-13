@@ -195,7 +195,8 @@ namespace Signum.Web
 
             valueLine.ValueHtmlProps["onblur"] = "this.setAttribute('value', this.value); " + valueLine.ValueHtmlProps.TryGetC("onblur");
 
-            valueLine.ValueHtmlProps["type"] = "text";
+            if (!valueLine.ValueHtmlProps.ContainsKey("type"))
+                valueLine.ValueHtmlProps["type"] = "text";
 
             return helper.TextBox(valueLine.ControlID, value, valueLine.ValueHtmlProps);
         }

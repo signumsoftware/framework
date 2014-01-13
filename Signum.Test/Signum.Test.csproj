@@ -74,6 +74,7 @@
     <Compile Include="Assert2.cs" />
     <Compile Include="Environment\Entities.cs" />
     <Compile Include="LinqProvider\AllAnyContainsTest.cs" />
+    <Compile Include="LinqProvider\UnsafeInsertTest.cs" />
     <Compile Include="LinqProvider\ToStringTest.cs" />
     <Compile Include="LinqProvider\InDBTest.cs" />
     <Compile Include="LinqProvider\RetriverTest.cs" />
@@ -83,7 +84,8 @@
     <Compile Include="LinqProvider\SelectManyTest.cs" />
     <Compile Include="LinqProvider\SingleFirstTest.cs" />
     <Compile Include="LinqProvider\SelectImplementations.cs" />
-    <Compile Include="LinqProvider\UpdateDeleteTest.cs" />
+    <Compile Include="LinqProvider\UnsafeDeleteTest.cs" />
+    <Compile Include="LinqProvider\UnsafeUpdateTest.cs" />
     <Compile Include="LinqProvider\SqlFunctionsTest.cs" />
     <Compile Include="LinqProvider\TakeSkipTest.cs" />
     <Compile Include="LinqProvider\GroupByTest.cs" />
