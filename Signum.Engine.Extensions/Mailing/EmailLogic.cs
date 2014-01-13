@@ -435,30 +435,20 @@ namespace Signum.Engine.Mailing
 
                         client.SafeSendMailAsync(message, args =>
                         {
-                            Expression<Func<EmailMessageDN, EmailMessageDN>> updater;
                             if (args.Error != null)
                             {
                                 var exLog = args.Error.LogException().ToLite();
-                                updater = em => new EmailMessageDN
-                                {
-                                    Exception = exLog,
-                                    State = EmailMessageState.SentException
-                                };
+                                email.InDB().UnsafeUpdate()
+                                    .Set(a => a.Exception, a => exLog)
+                                    .Set(a => a.State, a => EmailMessageState.SentException)
+                                    .Execute();
                             }
                             else
-                                updater = em => new EmailMessageDN
-                                {
-                                    State = EmailMessageState.Sent,
-                                    Sent = TimeZoneManager.Now
-                                };
-
-                            for (int i = 0; i < 4; i++) //to allow main thread to save email asynchronously
                             {
-                                if (email.InDB().UnsafeUpdate(updater) > 0)
-                                    return;
-
-                                if (i != 3)
-                                    Thread.Sleep(3000);
+                                email.InDB().UnsafeUpdate()
+                                   .Set(a => a.Sent, a => TimeZoneManager.Now)
+                                   .Set(a => a.State, a => EmailMessageState.SentException)
+                                   .Execute();
                             }
                         });
                     }

@@ -399,12 +399,12 @@ namespace Signum.Engine.Mailing
                 var sent = group.Select(sl => sl.NewsletterDelivery).ToList();
                 if (sent.Any())
                 {
-                    Database.Query<NewsletterDeliveryDN>().Where(nd => sent.Contains(nd.ToLite()))
-                        .UnsafeUpdate(nd => new NewsletterDeliveryDN
-                        {
-                            Sent = true,
-                            SendDate = TimeZoneManager.Now.TrimToSeconds(),
-                        });
+                    Database.Query<NewsletterDeliveryDN>()
+                        .Where(nd => sent.Contains(nd.ToLite()))
+                        .UnsafeUpdate()
+                        .Set(nd => nd.Sent, nd => true)
+                        .Set(nd => nd.SendDate, nd => TimeZoneManager.Now.TrimToSeconds())
+                        .Execute();
                 }
 
                 executingProcess.ProgressChanged(processed, lines.Count);

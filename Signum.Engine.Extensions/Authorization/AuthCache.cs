@@ -108,7 +108,7 @@ namespace Signum.Entities.Authorization
             }
             else
             {
-                if (query.UnsafeUpdate(a => new RT { Allowed = allowed }) == 0)
+                if (query.UnsafeUpdate().Set(a => a.Allowed, a => allowed).Execute() == 0)
                     new RT
                     {
                         Role = role,

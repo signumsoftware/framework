@@ -76,19 +76,18 @@ namespace Signum.Engine.Processes
 
         static int SetAsQueued(this IQueryable<ProcessDN> query)
         {
-            return query.UnsafeUpdate(p => new ProcessDN
-            {
-                State = ProcessState.Queued,
-                QueuedDate = TimeZoneManager.Now,
-                ExecutionStart = null,
-                ExecutionEnd = null,
-                SuspendDate = null,
-                Progress = null,
-                Exception = null,
-                ExceptionDate = null,
-                MachineName = ProcessLogic.JustMyProcesses ? Environment.MachineName : ProcessDN.None,
-                ApplicationName = ProcessLogic.JustMyProcesses ? Schema.Current.ApplicationName : ProcessDN.None
-            });
+            return query.UnsafeUpdate()
+            .Set(p => p.State, p => ProcessState.Queued)
+            .Set(p => p.QueuedDate, p => TimeZoneManager.Now)
+            .Set(p => p.ExecutionStart, p => null)
+            .Set(p => p.ExecutionEnd, p => null)
+            .Set(p => p.SuspendDate, p => null)
+            .Set(p => p.Progress, p => null)
+            .Set(p => p.Exception, p => null)
+            .Set(p => p.ExceptionDate, p => null)
+            .Set(p => p.MachineName, p => ProcessLogic.JustMyProcesses ? Environment.MachineName : ProcessDN.None)
+            .Set(p => p.ApplicationName, p => ProcessLogic.JustMyProcesses ? Schema.Current.ApplicationName : ProcessDN.None)
+            .Execute();
         }
 
         internal static void SetAsQueued(this ProcessDN process)
@@ -194,11 +193,11 @@ namespace Signum.Engine.Processes
                                             {
                                                 Database.Query<ProcessDN>()
                                                     .Where(p => taken.Contains(p.ToLite()) && p.MachineName == ProcessDN.None)
-                                                    .UnsafeUpdate(p => new ProcessDN
-                                                    {
-                                                        MachineName = Environment.MachineName,
-                                                        ApplicationName = Schema.Current.ApplicationName,
-                                                    });
+                                                    .UnsafeUpdate()
+                                                    .Set(p => p.MachineName, p => Environment.MachineName)
+                                                    .Set(p => p.MachineName, p => Schema.Current.ApplicationName)
+                                                    .Execute();
+
                                                 tr.Commit();
                                             }
 
@@ -379,7 +378,7 @@ namespace Signum.Engine.Processes
             if (progress != CurrentExecution.Progress)
             {
                 CurrentExecution.Progress = progress;
-                CurrentExecution.InDB().UnsafeUpdate(a => new ProcessDN { Progress = progress });
+                CurrentExecution.InDB().UnsafeUpdate().Set(a => a.Progress, a => progress).Execute();
             }
         }
 

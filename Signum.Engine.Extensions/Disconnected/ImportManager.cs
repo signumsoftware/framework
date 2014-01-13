@@ -121,7 +121,7 @@ namespace Signum.Engine.Disconnected
                         {
                             if (file != null)
                             {
-                                using (token.MeasureTime(l => import.InDB().UnsafeUpdate(s => new DisconnectedImportDN { RestoreDatabase = l })))
+                                using (token.MeasureTime(l => import.InDB().UnsafeUpdate().Set(s=>s.RestoreDatabase, s=>l).Execute()))
                                 {
                                     DropDatabaseIfExists(machine);
                                     RestoreDatabase(machine, import);
@@ -132,7 +132,7 @@ namespace Signum.Engine.Disconnected
 
                             var newDatabase = new SqlConnector(connectionString, Schema.Current, DynamicQueryManager.Current);
 
-                            using (token.MeasureTime(l => import.InDB().UnsafeUpdate(s => new DisconnectedImportDN { SynchronizeSchema = l })))
+                            using (token.MeasureTime(l => import.InDB().UnsafeUpdate().Set(s => s.SynchronizeSchema, s => l).Execute()))
                             using (Connector.Override(newDatabase))
                             using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
                             using (ExecutionMode.DisableCache())
@@ -150,7 +150,7 @@ namespace Signum.Engine.Disconnected
 
                             try
                             {
-                                using (token.MeasureTime(l => import.InDB().UnsafeUpdate(s => new DisconnectedImportDN { DisableForeignKeys = l })))
+                                using (token.MeasureTime(l => import.InDB().UnsafeUpdate().Set(s => s.DisableForeignKeys, s => l).Execute()))
                                     foreach (var item in uploadTables.Where(u => u.Strategy.DisableForeignKeys.Value))
                                     {
                                         DisableForeignKeys(item.Table);
@@ -162,56 +162,56 @@ namespace Signum.Engine.Disconnected
                                     using (token.MeasureTime(l =>
                                     {
                                         if (result != null)
-                                            ImportTableQuery(import, tuple.Type.ToTypeDN()).UnsafeUpdate(s =>
-                                                new MListElement<DisconnectedImportDN, DisconnectedImportTableDN>
-                                                {
-                                                    Element =
-                                                    {
-                                                        CopyTable = l,
-                                                        DisableForeignKeys = tuple.Strategy.DisableForeignKeys.Value,
-                                                        InsertedRows = result.Inserted,
-                                                        UpdatedRows = result.Updated,
-                                                    }
-                                                });
+                                            import.MListElementsLite(_ => _.Copies).Where(mle => mle.Element.Type == tuple.Type.ToTypeDN()).UnsafeUpdateMList()
+                                                .Set(mle => mle.Element.CopyTable, mle => l)
+                                                .Set(mle => mle.Element.DisableForeignKeys, mle => tuple.Strategy.DisableForeignKeys.Value)
+                                                .Set(mle => mle.Element.InsertedRows, mle => result.Inserted)
+                                                .Set(mle => mle.Element.UpdatedRows, mle => result.Updated)
+                                                .Execute();
                                     }))
                                     {
                                         result = tuple.Strategy.Importer.Import(machine, tuple.Table, tuple.Strategy, newDatabase);
                                     }
                                 }
 
-                                using (token.MeasureTime(l => import.InDB().UnsafeUpdate(s => new DisconnectedImportDN { EnableForeignKeys = l })))
+                                using (token.MeasureTime(l => import.InDB().UnsafeUpdate().Set(s => s.Unlock, s => l).Execute()))
                                     UnlockTables(machine.ToLite());
                             }
                             finally
                             {
-                                using (token.MeasureTime(l => import.InDB().UnsafeUpdate(s => new DisconnectedImportDN { EnableForeignKeys = l })))
+                                using (token.MeasureTime(l => import.InDB().UnsafeUpdate().Set(s => s.EnableForeignKeys, s => l).Execute()))
                                     foreach (var item in uploadTables.Where(u => u.Strategy.DisableForeignKeys.Value))
                                     {
                                         EnableForeignKeys(item.Table);
                                     }
                             }
 
-                            using (token.MeasureTime(l => import.InDB().UnsafeUpdate(s => new DisconnectedImportDN { DropDatabase = l })))
+                            using (token.MeasureTime(l => import.InDB().UnsafeUpdate().Set(s => s.DropDatabase, s => l).Execute()))
                                 DropDatabase(newDatabase);
 
                             token.ThrowIfCancellationRequested();
 
-                            import.InDB().UnsafeUpdate(s => new DisconnectedImportDN { State = DisconnectedImportState.Completed, Total = s.CalculateTotal() });
+                            import.InDB().UnsafeUpdate()
+                                .Set(s => s.State,s=> DisconnectedImportState.Completed)
+                                .Set(s => s.Total,s=>  s.CalculateTotal())
+                                .Execute();
 
-                            machine.InDB().UnsafeUpdate(m => new DisconnectedMachineDN
-                            {
-                                State =
-                                    file == null ? DisconnectedMachineState.Fixed :
-                                    DisconnectedMachineState.Connected
-                            });
+                            machine.InDB().UnsafeUpdate()
+                                .Set(m => m.State, m => file == null ? DisconnectedMachineState.Fixed : DisconnectedMachineState.Connected)
+                                .Execute();
                         }
                         catch (Exception e)
                         {
                             var ex = e.LogException();
 
-                            import.InDB().UnsafeUpdate(s => new DisconnectedImportDN { Exception = ex.ToLite(), State = DisconnectedImportState.Error });
+                            import.InDB().UnsafeUpdate()
+                               .Set(m => m.Exception, m => ex.ToLite())
+                               .Set(m => m.State, m => DisconnectedImportState.Error)
+                               .Execute();
 
-                            machine.InDB().UnsafeUpdate(m => new DisconnectedMachineDN { State = DisconnectedMachineState.Faulted });
+                            machine.InDB().UnsafeUpdate()
+                                .Set(m => m.State, m => DisconnectedMachineState.Faulted)
+                                .Execute();
 
                             OnImportingError(machine, import, e);
                         }
@@ -236,12 +236,12 @@ namespace Signum.Engine.Disconnected
         {
             UnlockTables(machine);
 
-            machine.InDB().UnsafeUpdate(m => new DisconnectedMachineDN { State = DisconnectedMachineState.Connected });
+            machine.InDB().UnsafeUpdate().Set(m => m.State, m => DisconnectedMachineState.Connected).Execute();
         }
 
         public virtual void ConnectAfterFix(Lite<DisconnectedMachineDN> machine)
         {
-            machine.InDB().UnsafeUpdate(m => new DisconnectedMachineDN { State = DisconnectedMachineState.Connected });
+            machine.InDB().UnsafeUpdate().Set(m => m.State, m => DisconnectedMachineState.Connected).Execute();
         }
 
         protected virtual void OnStartImporting(DisconnectedMachineDN machine)
@@ -340,13 +340,14 @@ namespace Signum.Engine.Disconnected
         }
 
         static readonly MethodInfo miUnlockTable = typeof(ImportManager).GetMethod("UnlockTable", BindingFlags.NonPublic | BindingFlags.Static);
-        static int UnlockTable<T>(Lite<DisconnectedMachineDN> machine) where T : Entity, new()
+        static int UnlockTable<T>(Lite<DisconnectedMachineDN> machine) where T : Entity
         {
             using (ExecutionMode.Global())
                 return Database.Query<T>().Where(a => a.Mixin<DisconnectedMixin>().DisconnectedMachine == machine)
-                    .UnsafeUpdate(a => new T()
-                        .SetMixin((DisconnectedMixin d) => d.DisconnectedMachine, null)
-                        .SetMixin((DisconnectedMixin d) => d.LastOnlineTicks, null));
+                    .UnsafeUpdate()
+                    .Set(a => a.Mixin<DisconnectedMixin>().DisconnectedMachine, a => null)
+                    .Set(a => a.Mixin<DisconnectedMixin>().LastOnlineTicks, a => null)
+                    .Execute();
         }
     }
 
@@ -546,9 +547,9 @@ INNER JOIN {1} as [table] ON {0}.id = [table].id
             var s = Schema.Current;
 
             var where = "\r\nWHERE [table].{0} = @machineId AND [table].{1} != [table].{2}".Formato(
-                ((FieldReference)s.Field<T>(t => t.Mixin<DisconnectedMixin>().DisconnectedMachine)).Name.SqlScape(),
-                ((FieldValue)s.Field<T>(t => t.Ticks)).Name.SqlScape(),
-                ((FieldValue)s.Field<T>(t => t.Mixin<DisconnectedMixin>().LastOnlineTicks)).Name.SqlScape());
+                ((FieldReference)s.Field((T t) => t.Mixin<DisconnectedMixin>().DisconnectedMachine)).Name.SqlScape(),
+                ((FieldValue)s.Field((T t) => t.Ticks)).Name.SqlScape(),
+                ((FieldValue)s.Field((T t) => t.Mixin<DisconnectedMixin>().LastOnlineTicks)).Name.SqlScape());
             return where;
         }
     }
