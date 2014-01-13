@@ -133,7 +133,7 @@ namespace Signum.Web
             }
 
             if (options.WriteQueryName == WriteQueryName.Field)
-                return helper.Field(QueryUtils.GetNiceName(findOptions.QueryName), sb.ToHtml());
+                return helper.Field(options.QueryLabelText ?? QueryUtils.GetNiceName(findOptions.QueryName), sb.ToHtml());
 
             return sb.ToHtml();
         }
