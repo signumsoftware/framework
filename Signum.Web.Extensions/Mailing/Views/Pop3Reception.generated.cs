@@ -57,14 +57,14 @@ WriteLiteral("\r\n");
             #line hidden
             
             #line 5 "..\..\Mailing\Views\Pop3Reception.cshtml"
-Write(Html.ValueLine(sc, s => s.Pop3Configuration));
+Write(Html.EntityLine(sc, s => s.Pop3Configuration));
 
             
             #line default
             #line hidden
             
             #line 5 "..\..\Mailing\Views\Pop3Reception.cshtml"
-                                                 
+                                                  
     
             
             #line default
@@ -130,15 +130,15 @@ Write(Html.EntityLine(sc, s => s.Exception));
             #line 11 "..\..\Mailing\Views\Pop3Reception.cshtml"
 Write(Html.CountSearchControl(new FindOptions(typeof(EmailMessageDN))
     {
-        FilterOptions = { new FilterOption("Reception", sc.Value) }
-    }, csc => csc.PopupViewPrefix = sc.Compose("mm")));
+        FilterOptions = { new FilterOption("ReceptionInfo.Reception", sc.Value) }
+    }, csc => { csc.PopupViewPrefix = sc.Compose("mm"); csc.WriteQueryName = WriteQueryName.Field; }));
 
             
             #line default
             #line hidden
             
             #line 14 "..\..\Mailing\Views\Pop3Reception.cshtml"
-                                                     ;
+                                                                                                     ;
 }
 
             

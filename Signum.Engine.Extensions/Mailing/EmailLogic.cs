@@ -72,7 +72,6 @@ namespace Signum.Engine.Mailing
                         e.Id,
                         e.State,
                         e.Subject,
-                        Text = e.Body,
                         e.Template,
                         e.Sent,
                         e.Package,

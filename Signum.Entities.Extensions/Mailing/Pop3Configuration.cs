@@ -85,11 +85,12 @@ namespace Signum.Entities.Mailing
             set { Set(ref maxDownloadEmails, value, () => MaxDownloadEmails); }
         }
 
-        bool deleteAfterReception =  true;
-        public bool DeleteAfterReception
+        int? deleteMessagesAfter = 14;
+        [Unit("d")]
+        public int? DeleteMessagesAfter
         {
-            get { return deleteAfterReception; }
-            set { Set(ref deleteAfterReception, value, () => DeleteAfterReception); }
+            get { return deleteMessagesAfter; }
+            set { Set(ref deleteMessagesAfter, value, () => DeleteMessagesAfter); }
         }
 
         [NotNullable]

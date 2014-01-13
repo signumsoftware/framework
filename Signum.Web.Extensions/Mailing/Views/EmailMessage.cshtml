@@ -38,10 +38,16 @@
             @Html.EntityLine(e, f => f.Target)
             @Html.ValueLine(e, f => f.State)
             @Html.ValueLine(e, f => f.Sent)
-            @if (hasReceptionMixin)
+            @if (e.Value.Mixins.OfType<EmailReceptionMixin>().Any())
             {
-                @Html.ValueLine(e, f => f.Mixin<EmailReceptionMixin>().Received)
-                @Html.ValueLine(e, f => f.Mixin<EmailReceptionMixin>().Reception)
+                using (var ri = e.SubContext(f => f.Mixin<EmailReceptionMixin>().ReceptionInfo))
+                {
+                @Html.ValueLine(ri, f => f.Reception)
+                @Html.ValueLine(ri, f => f.UniqueId)
+                @Html.ValueLine(ri, f => f.SentDate)
+                @Html.ValueLine(ri, f => f.ReceivedDate)
+                @Html.ValueLine(ri, f => f.DeletionDate)
+                }
             }
             @Html.EntityLine(e, f => f.Exception)
             @Html.EntityLine(e, f => f.Template)

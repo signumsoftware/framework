@@ -334,18 +334,14 @@ namespace Signum.Engine.Mailing.Pop3
             if (Regex.IsMatch(ct, @"name=""?(.*?)""?($|;)", RegexOptions.IgnoreCase))
                 returnValue.Name = Regex.Match(ct, @"name=""?(.*?)""?($|;)", RegexOptions.IgnoreCase).Groups[1].Value;
 
-            if (Regex.IsMatch(ct, @"boundary=""(.*?)""", RegexOptions.IgnoreCase))
-                returnValue.Boundary = Regex.Match(ct, @"boundary=""(.*?)""", RegexOptions.IgnoreCase).Groups[1].Value;
-            else if (Regex.IsMatch(ct, @"boundary=(.*?)(;|$)", RegexOptions.IgnoreCase))
-                returnValue.Boundary = Regex.Match(ct, @"boundary=(.*?)(;|$)", RegexOptions.IgnoreCase).Groups[1].Value;
+            if (Regex.IsMatch(ct, @"boundary=(.*?)(;|$)", RegexOptions.IgnoreCase))
+                returnValue.Boundary = Regex.Match(ct, @"boundary=(.*?)(;|$)", RegexOptions.IgnoreCase).Groups[1].Value.Trim('\'', '"');
 
-            if (Regex.IsMatch(ct, @"charset=""(.*?)""", RegexOptions.IgnoreCase))
-                returnValue.CharSet = Regex.Match(ct, @"charset=""(.*?)""", RegexOptions.IgnoreCase).Groups[1].Value;
+            if (Regex.IsMatch(ct, @"charset=(.*?)(;|$)", RegexOptions.IgnoreCase))
+                returnValue.CharSet = Regex.Match(ct, @"charset=(.*?)(;|$)", RegexOptions.IgnoreCase).Groups[1].Value.Trim('\'', '"');
 
             return returnValue;
         }
-
-        
 
         static void DecodeHeaders(NameValueCollection headers)
         {
