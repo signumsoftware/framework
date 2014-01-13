@@ -267,7 +267,14 @@ namespace Signum.Entities
             {
                 var validators = Validator.GetPropertyValidators(GetType());
 
-                return validators.Values.Select(pv => pv.PropertyCheck(this)).NotNull().ToString("\r\n").DefaultText(null);
+                return validators.Values.Select(pv =>
+                {
+                    var result = pv.PropertyCheck(this);
+                    if (result == null)
+                        return null;
+
+                    return result; // place breakpoint here
+                }).NotNull().ToString("\r\n").DefaultText(null);
             }
         }
 
