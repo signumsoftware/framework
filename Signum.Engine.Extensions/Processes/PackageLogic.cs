@@ -111,12 +111,10 @@ namespace Signum.Engine.Processes
         {
             package.Save();
 
-            lites.GroupsOf(20).SelectMany(gr =>
-                gr.RetrieveFromListOfLite().Select(entity => new PackageLineDN
-                {
-                    Package = package.ToLite(),
-                    Target = (IdentifiableEntity)entity
-                })).SaveList();
+            int inserts =
+                lites.GroupBy(a => a.EntityType).Sum(gr =>
+                    gr.GroupsOf(100).Sum(gr2 =>
+                        giInsertLines.GetInvoker(gr.Key)(package, gr2)));
 
             return package;
         }
@@ -125,13 +123,24 @@ namespace Signum.Engine.Processes
         {
             package.Save();
 
-            entities.Select(entity => new PackageLineDN
-            {
-                Package = package.ToLite(),
-                Target = (IdentifiableEntity)entity
-            }).SaveList();
+            int inserts =
+                entities.GroupBy(a => a.GetType()).Sum(gr =>
+                    gr.GroupsOf(100).Sum(gr2 =>
+                        giInsertLines.GetInvoker(gr.Key)(package, gr2.Select(a => a.ToLite()))));
 
             return package;
+        }
+
+        static readonly GenericInvoker<Func<PackageDN, IEnumerable<Lite<IIdentifiable>>, int>> giInsertLines = new GenericInvoker<Func<PackageDN, IEnumerable<Lite<IIdentifiable>>, int>>(
+            (package, lites) => InsertLines<IdentifiableEntity>(package, (IEnumerable<Lite<IdentifiableEntity>>)lites));
+        static int InsertLines<T>(PackageDN package, IEnumerable<Lite<T>> lites)
+            where T :IdentifiableEntity
+        {
+            return Database.Query<T>().Where(p => lites.Contains(p.ToLite())).UnsafeInsert(p => new PackageLineDN
+            {
+                Package = package.ToLite(),
+                Target = p,
+            }); 
         }
 
         public static ProcessDN CreatePackageOperation(IEnumerable<Lite<IIdentifiable>> entities, Enum operationKey)
