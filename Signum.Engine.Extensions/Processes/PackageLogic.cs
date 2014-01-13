@@ -114,7 +114,7 @@ namespace Signum.Engine.Processes
             int inserts =
                 lites.GroupBy(a => a.EntityType).Sum(gr =>
                     gr.GroupsOf(100).Sum(gr2 =>
-                        giInsertLines.GetInvoker(gr.Key)(package, gr2)));
+                        giInsertPackageLines.GetInvoker(gr.Key)(package, gr2)));
 
             return package;
         }
@@ -126,14 +126,14 @@ namespace Signum.Engine.Processes
             int inserts =
                 entities.GroupBy(a => a.GetType()).Sum(gr =>
                     gr.GroupsOf(100).Sum(gr2 =>
-                        giInsertLines.GetInvoker(gr.Key)(package, gr2.Select(a => a.ToLite()))));
+                        giInsertPackageLines.GetInvoker(gr.Key)(package, gr2.Select(a => a.ToLite()))));
 
             return package;
         }
 
-        static readonly GenericInvoker<Func<PackageDN, IEnumerable<Lite<IIdentifiable>>, int>> giInsertLines = new GenericInvoker<Func<PackageDN, IEnumerable<Lite<IIdentifiable>>, int>>(
-            (package, lites) => InsertLines<IdentifiableEntity>(package, (IEnumerable<Lite<IdentifiableEntity>>)lites));
-        static int InsertLines<T>(PackageDN package, IEnumerable<Lite<T>> lites)
+        static readonly GenericInvoker<Func<PackageDN, IEnumerable<Lite<IIdentifiable>>, int>> giInsertPackageLines = new GenericInvoker<Func<PackageDN, IEnumerable<Lite<IIdentifiable>>, int>>(
+            (package, lites) => InsertPackageLines<Entity>(package, lites));
+        static int InsertPackageLines<T>(PackageDN package, IEnumerable<Lite<IIdentifiable>> lites)
             where T :IdentifiableEntity
         {
             return Database.Query<T>().Where(p => lites.Contains(p.ToLite())).UnsafeInsert(p => new PackageLineDN
