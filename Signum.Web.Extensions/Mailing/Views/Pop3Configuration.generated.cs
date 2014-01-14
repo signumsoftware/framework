@@ -169,41 +169,27 @@ Write(Html.ValueLine(sc, s => s.ReadTimeout));
             #line hidden
             
             #line 13 "..\..\Mailing\Views\Pop3Configuration.cshtml"
-Write(Html.ValueLine(sc, s => s.MaxDownloadEmails));
-
-            
-            #line default
-            #line hidden
-            
-            #line 13 "..\..\Mailing\Views\Pop3Configuration.cshtml"
-                                                 
-    
-            
-            #line default
-            #line hidden
-            
-            #line 14 "..\..\Mailing\Views\Pop3Configuration.cshtml"
 Write(Html.ValueLine(sc, s => s.DeleteMessagesAfter));
 
             
             #line default
             #line hidden
             
-            #line 14 "..\..\Mailing\Views\Pop3Configuration.cshtml"
+            #line 13 "..\..\Mailing\Views\Pop3Configuration.cshtml"
                                                    
     
             
             #line default
             #line hidden
             
-            #line 15 "..\..\Mailing\Views\Pop3Configuration.cshtml"
+            #line 14 "..\..\Mailing\Views\Pop3Configuration.cshtml"
 Write(Html.EntityRepeater(sc, s => s.ClientCertificationFiles));
 
             
             #line default
             #line hidden
             
-            #line 15 "..\..\Mailing\Views\Pop3Configuration.cshtml"
+            #line 14 "..\..\Mailing\Views\Pop3Configuration.cshtml"
                                                              
 
     if (!sc.Value.IsNew)
@@ -213,7 +199,7 @@ Write(Html.EntityRepeater(sc, s => s.ClientCertificationFiles));
             #line default
             #line hidden
             
-            #line 19 "..\..\Mailing\Views\Pop3Configuration.cshtml"
+            #line 18 "..\..\Mailing\Views\Pop3Configuration.cshtml"
 Write(Html.CountSearchControl(new FindOptions(typeof(Pop3ReceptionDN))
     {
         FilterOptions = { new FilterOption("Pop3Configuration", sc.Value) }
@@ -223,7 +209,7 @@ Write(Html.CountSearchControl(new FindOptions(typeof(Pop3ReceptionDN))
             #line default
             #line hidden
             
-            #line 22 "..\..\Mailing\Views\Pop3Configuration.cshtml"
+            #line 21 "..\..\Mailing\Views\Pop3Configuration.cshtml"
                                                                                                      ;
     }
 }

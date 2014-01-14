@@ -525,7 +525,8 @@ namespace Signum.Entities.Mailing
         ReSend,
         ReSendEmails,
         CreateMail,
-        CreateMailFromTemplate
+        CreateMailFromTemplate,
+        Delete,
     }
 
     public enum EmailMessageMessage

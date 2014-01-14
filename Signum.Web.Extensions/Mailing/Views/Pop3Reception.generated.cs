@@ -28,6 +28,12 @@ namespace Signum.Web.Extensions.Mailing.Views
     using System.Web.WebPages;
     using Signum.Entities;
     
+    #line 2 "..\..\Mailing\Views\Pop3Reception.cshtml"
+    using Signum.Entities.Basics;
+    
+    #line default
+    #line hidden
+    
     #line 1 "..\..\Mailing\Views\Pop3Reception.cshtml"
     using Signum.Entities.Mailing;
     
@@ -48,7 +54,7 @@ namespace Signum.Web.Extensions.Mailing.Views
 WriteLiteral("\r\n");
 
             
-            #line 3 "..\..\Mailing\Views\Pop3Reception.cshtml"
+            #line 4 "..\..\Mailing\Views\Pop3Reception.cshtml"
  using (var sc = Html.TypeContext<Pop3ReceptionDN>())
 {
     
@@ -56,57 +62,43 @@ WriteLiteral("\r\n");
             #line default
             #line hidden
             
-            #line 5 "..\..\Mailing\Views\Pop3Reception.cshtml"
+            #line 6 "..\..\Mailing\Views\Pop3Reception.cshtml"
 Write(Html.EntityLine(sc, s => s.Pop3Configuration));
 
             
             #line default
             #line hidden
             
-            #line 5 "..\..\Mailing\Views\Pop3Reception.cshtml"
+            #line 6 "..\..\Mailing\Views\Pop3Reception.cshtml"
                                                   
     
             
             #line default
             #line hidden
             
-            #line 6 "..\..\Mailing\Views\Pop3Reception.cshtml"
+            #line 7 "..\..\Mailing\Views\Pop3Reception.cshtml"
 Write(Html.ValueLine(sc, s => s.StartDate));
 
             
             #line default
             #line hidden
             
-            #line 6 "..\..\Mailing\Views\Pop3Reception.cshtml"
+            #line 7 "..\..\Mailing\Views\Pop3Reception.cshtml"
                                          
     
             
             #line default
             #line hidden
             
-            #line 7 "..\..\Mailing\Views\Pop3Reception.cshtml"
+            #line 8 "..\..\Mailing\Views\Pop3Reception.cshtml"
 Write(Html.ValueLine(sc, s => s.EndDate));
 
             
             #line default
             #line hidden
             
-            #line 7 "..\..\Mailing\Views\Pop3Reception.cshtml"
+            #line 8 "..\..\Mailing\Views\Pop3Reception.cshtml"
                                        
-    
-            
-            #line default
-            #line hidden
-            
-            #line 8 "..\..\Mailing\Views\Pop3Reception.cshtml"
-Write(Html.ValueLine(sc, s => s.NumberOfMails));
-
-            
-            #line default
-            #line hidden
-            
-            #line 8 "..\..\Mailing\Views\Pop3Reception.cshtml"
-                                             
     
             
             #line default
@@ -138,6 +130,24 @@ Write(Html.CountSearchControl(new FindOptions(typeof(EmailMessageDN))
             #line hidden
             
             #line 14 "..\..\Mailing\Views\Pop3Reception.cshtml"
+                                                                                                     ;
+
+    
+            
+            #line default
+            #line hidden
+            
+            #line 16 "..\..\Mailing\Views\Pop3Reception.cshtml"
+Write(Html.CountSearchControl(new FindOptions(typeof(ExceptionDN))
+    {
+        FilterOptions = { new FilterOption("Pop3Reception", sc.Value) }
+    }, csc => { csc.PopupViewPrefix = sc.Compose("mm"); csc.WriteQueryName = WriteQueryName.Field; }));
+
+            
+            #line default
+            #line hidden
+            
+            #line 19 "..\..\Mailing\Views\Pop3Reception.cshtml"
                                                                                                      ;
 }
 

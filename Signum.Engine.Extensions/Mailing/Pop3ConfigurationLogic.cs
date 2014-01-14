@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
+using Signum.Entities.DynamicQuery;
 using Signum.Engine.Files;
 using Signum.Engine.Mailing.Pop3;
 using Signum.Engine.Maps;
@@ -19,6 +20,7 @@ using Signum.Entities.Files;
 using Signum.Entities.Mailing;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
+using Signum.Entities.Basics;
 
 namespace Signum.Engine.Mailing
 {
@@ -38,6 +40,21 @@ namespace Signum.Engine.Mailing
             return MessagesExpression.Evaluate(r);
         }
 
+        static Expression<Func<Pop3ReceptionDN, IQueryable<ExceptionDN>>> ExceptionsExpression =
+            e => Database.Query<Pop3ReceptionExceptionDN>().Where(a => a.Reception.RefersTo(e)).Select(a => a.Exception.Entity);
+        public static IQueryable<ExceptionDN> Exceptions(this Pop3ReceptionDN e)
+        {
+            return ExceptionsExpression.Evaluate(e);
+        }
+
+
+        static Expression<Func<ExceptionDN, Pop3ReceptionDN>> Pop3ReceptionExpression =
+            ex => Database.Query<Pop3ReceptionExceptionDN>().Where(re => re.Exception.RefersTo(ex)).Select(re => re.Reception.Entity).SingleOrDefaultEx(); 
+        public static Pop3ReceptionDN Pop3Reception(this ExceptionDN entity)
+        {
+            return Pop3ReceptionExpression.Evaluate(entity);
+        }
+
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -48,6 +65,7 @@ namespace Signum.Engine.Mailing
 
                 sb.Include<Pop3ConfigurationDN>();
                 sb.Include<Pop3ReceptionDN>();
+                sb.Include<Pop3ReceptionExceptionDN>();
 
                 dqm.RegisterQuery(typeof(EmailMessageDN), () =>
                    from e in Database.Query<EmailMessageDN>()
@@ -55,27 +73,46 @@ namespace Signum.Engine.Mailing
                    {
                        Entity = e,
                        e.Id,
-                       e.State,
+                       e.From,
                        e.Subject,
                        e.Template,
+                       e.State,
                        e.Sent,
-                       e.Mixin<EmailReceptionMixin>().ReceptionInfo.ReceivedDate,
+                       e.Mixin<EmailReceptionMixin>().ReceptionInfo.SentDate,
                        e.Package,
                        e.Exception,
                    });
 
-                dqm.RegisterQuery(typeof(Pop3ReceptionDN), () =>
-                    from s in Database.Query<Pop3ReceptionDN>()
+             
+
+                dqm.RegisterQuery(typeof(Pop3ConfigurationDN), () =>
+                    from s in Database.Query<Pop3ConfigurationDN>()
                     select new
                     {
                         Entity = s,
                         s.Id,
-                        s.Pop3Configuration,
-                        s.StartDate,
-                        s.EndDate,
-                        s.NumberOfMails,
-                        s.Exception
+                        s.Name,
+                        s.Host,
+                        s.Port,
+                        s.Username,
+                        s.EnableSSL
                     });
+
+                dqm.RegisterQuery(typeof(Pop3ReceptionDN), () => DynamicQuery.DynamicQuery.Auto(
+                 from s in Database.Query<Pop3ReceptionDN>()
+                 select new
+                 {
+                     Entity = s,
+                     s.Id,
+                     s.Pop3Configuration,
+                     s.StartDate,
+                     s.EndDate,
+                     Messages = s.Messages().Count(),
+                     Exceptions = s.Exceptions().Count(),
+                     s.Exception,
+                 })
+                 .ColumnDisplayName(a => a.Messages, () => typeof(EmailMessageDN).NicePluralName())
+                 .ColumnDisplayName(a => a.Exceptions, () => typeof(ExceptionDN).NicePluralName()));
 
                 dqm.RegisterQuery(typeof(Pop3ConfigurationDN), () =>
                     from s in Database.Query<Pop3ConfigurationDN>()
@@ -92,6 +129,8 @@ namespace Signum.Engine.Mailing
 
                 dqm.RegisterExpression((Pop3ConfigurationDN c) => c.Receptions(), () => typeof(Pop3ReceptionDN).NicePluralName());
                 dqm.RegisterExpression((Pop3ReceptionDN r) => r.Messages(), () => typeof(EmailMessageDN).NicePluralName());
+                dqm.RegisterExpression((Pop3ReceptionDN r) => r.Exceptions(), () => typeof(ExceptionDN).NicePluralName());
+                dqm.RegisterExpression((ExceptionDN r) => r.Pop3Reception(), () => typeof(Pop3ReceptionDN).NiceName());
 
                 new Graph<Pop3ConfigurationDN>.Execute(Pop3ConfigurationOperation.Save)
                 {
@@ -140,18 +179,11 @@ namespace Signum.Engine.Mailing
 
                     var dic = client.GetMessageUniqueIdentifiers();
 
-                    reception.NumberOfMails = dic.Count;
-
-                    if (reception.NumberOfMails == 0)
-                        return null;
-
                     using (Transaction tr = Transaction.ForceNew())
                     {
                         reception.Save();
                         tr.Commit();
                     }
-
-                    int maxids = Math.Min(dic.Count, config.MaxDownloadEmails);
 
                     foreach (var kvp in dic)
                     {
@@ -197,8 +229,19 @@ namespace Signum.Engine.Mailing
                                     tr.Commit();
                                 }
                                 catch (Exception e)
-                                {
-                                    e.LogException();
+                                {   
+                                    var ex = e.LogException();
+
+                                    using (Transaction tr2 = Transaction.ForceNew())
+                                    {
+                                        new Pop3ReceptionExceptionDN
+                                        {
+                                            Exception = ex.ToLite(),
+                                            Reception = reception.ToLite()
+                                        }.Save();
+
+                                        tr2.Commit();
+                                    }
                                 }
                             }
                         }

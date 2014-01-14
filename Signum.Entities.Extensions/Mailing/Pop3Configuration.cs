@@ -78,13 +78,6 @@ namespace Signum.Entities.Mailing
             set { Set(ref readTimeout, value, () => ReadTimeout); }
         }
 
-        int maxDownloadEmails = 100;
-        public int MaxDownloadEmails
-        {
-            get { return maxDownloadEmails; }
-            set { Set(ref maxDownloadEmails, value, () => MaxDownloadEmails); }
-        }
-
         int? deleteMessagesAfter = 14;
         [Unit("d")]
         public int? DeleteMessagesAfter
@@ -146,14 +139,30 @@ namespace Signum.Entities.Mailing
             set { Set(ref endDate, value, () => EndDate); }
         }
 
-        int numberOfMails;
-        public int NumberOfMails
+        Lite<ExceptionDN> exception;
+        public Lite<ExceptionDN> Exception
         {
-            get { return numberOfMails; }
-            set { Set(ref numberOfMails, value, () => NumberOfMails); }
+            get { return exception; }
+            set { Set(ref exception, value, () => Exception); }
+        }
+    }
+
+
+    [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
+    public class Pop3ReceptionExceptionDN : Entity
+    {
+        [NotNullable]
+        Lite<Pop3ReceptionDN> reception;
+        [NotNullValidator]
+        public Lite<Pop3ReceptionDN> Reception
+        {
+            get { return reception; }
+            set { Set(ref reception, value, () => Reception); }
         }
 
+        [NotNullable, UniqueIndex]
         Lite<ExceptionDN> exception;
+        [NotNullValidator]
         public Lite<ExceptionDN> Exception
         {
             get { return exception; }

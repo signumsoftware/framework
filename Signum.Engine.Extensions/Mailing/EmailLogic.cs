@@ -283,6 +283,11 @@ namespace Signum.Engine.Mailing
                         State = EmailMessageState.Created
                     }
                 }.Register();
+
+                new Graph<EmailMessageDN>.Delete(EmailMessageOperation.Delete)
+                {
+                    Delete = (m, _) => m.Delete()
+                }.Register();
             }
         }
     }
