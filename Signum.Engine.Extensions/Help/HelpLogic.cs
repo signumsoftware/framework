@@ -298,6 +298,9 @@ namespace Signum.Engine.Help
 
         static string SyncronizeContent(string content, Replacements r, StringDistance sd, HashSet<string> namespaces)
         {
+            if (content == null)
+                return null;
+
             return WikiMarkup.WikiParserExtensions.TokenRegex.Replace(content, m =>
             {
                 var m2 = HelpLinkRegex.Match(m.Groups["content"].Value);
