@@ -72,7 +72,6 @@ namespace Signum.Engine.Mailing
                         e.Id,
                         e.State,
                         e.Subject,
-                        Text = e.Body,
                         e.Template,
                         e.Sent,
                         e.Package,
@@ -283,6 +282,11 @@ namespace Signum.Engine.Mailing
                         EditableMessage = m.EditableMessage,
                         State = EmailMessageState.Created
                     }
+                }.Register();
+
+                new Graph<EmailMessageDN>.Delete(EmailMessageOperation.Delete)
+                {
+                    Delete = (m, _) => m.Delete()
                 }.Register();
             }
         }

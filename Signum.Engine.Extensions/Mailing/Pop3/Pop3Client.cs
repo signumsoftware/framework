@@ -66,7 +66,7 @@ namespace Signum.Engine.Mailing.Pop3
             stream.Write(buffer, 0, buffer.Length);
         }
 
-        public Dictionary<int, int> GetMessages()
+        public Dictionary<int, int> GetMessageSizes()
         {
             SendCommand("LIST\r\n");
             string response = reader.ReadLine();
@@ -82,6 +82,28 @@ namespace Signum.Engine.Mailing.Pop3
                     int id = System.Convert.ToInt32(parts[0]);
                     int size = System.Convert.ToInt32(parts[1]);
                     returnValue[id] = size;
+                }
+            }
+
+            return returnValue;
+        }
+
+        public Dictionary<int, string> GetMessageUniqueIdentifiers()
+        {
+            SendCommand("UIDL\r\n");
+            string response = reader.ReadLine();
+            if (!response.StartsWith("+OK"))
+                throw new Pop3ClientException("List emails not accepted: " + response);
+
+            Dictionary<int, string> returnValue = new Dictionary<int, string>();
+            while (!(response = reader.ReadLine()).Equals("."))
+            {
+                string[] parts = response.Split(' ');
+                if (parts.Length == 2)
+                {
+                    int id = System.Convert.ToInt32(parts[0]);
+                    string uid = parts[1];
+                    returnValue[id] = uid;
                 }
             }
 

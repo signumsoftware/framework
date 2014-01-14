@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Signum.Engine.Basics;
 using Signum.Engine.DynamicQuery;
+using Signum.Entities.DynamicQuery;
 using Signum.Engine.Files;
 using Signum.Engine.Mailing.Pop3;
 using Signum.Engine.Maps;
@@ -19,11 +20,41 @@ using Signum.Entities.Files;
 using Signum.Entities.Mailing;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
+using Signum.Entities.Basics;
 
 namespace Signum.Engine.Mailing
 {
     public static class Pop3ConfigurationLogic
     {
+        static Expression<Func<Pop3ConfigurationDN, IQueryable<Pop3ReceptionDN>>> ReceptionsExpression =
+            c => Database.Query<Pop3ReceptionDN>().Where(r => r.Pop3Configuration.RefersTo(c));
+        public static IQueryable<Pop3ReceptionDN> Receptions(this Pop3ConfigurationDN c)
+        {
+            return ReceptionsExpression.Evaluate(c);
+        }
+
+        static Expression<Func<Pop3ReceptionDN, IQueryable<EmailMessageDN>>> MessagesExpression =
+            r => Database.Query<EmailMessageDN>().Where(m => m.Mixin<EmailReceptionMixin>().ReceptionInfo.Reception.RefersTo(r));
+        public static IQueryable<EmailMessageDN> Messages(this Pop3ReceptionDN r)
+        {
+            return MessagesExpression.Evaluate(r);
+        }
+
+        static Expression<Func<Pop3ReceptionDN, IQueryable<ExceptionDN>>> ExceptionsExpression =
+            e => Database.Query<Pop3ReceptionExceptionDN>().Where(a => a.Reception.RefersTo(e)).Select(a => a.Exception.Entity);
+        public static IQueryable<ExceptionDN> Exceptions(this Pop3ReceptionDN e)
+        {
+            return ExceptionsExpression.Evaluate(e);
+        }
+
+
+        static Expression<Func<ExceptionDN, Pop3ReceptionDN>> Pop3ReceptionExpression =
+            ex => Database.Query<Pop3ReceptionExceptionDN>().Where(re => re.Exception.RefersTo(ex)).Select(re => re.Reception.Entity).SingleOrDefaultEx(); 
+        public static Pop3ReceptionDN Pop3Reception(this ExceptionDN entity)
+        {
+            return Pop3ReceptionExpression.Evaluate(entity);
+        }
+
         public static void Start(SchemaBuilder sb, DynamicQueryManager dqm)
         {
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -31,9 +62,10 @@ namespace Signum.Engine.Mailing
                 FilePathLogic.Register(EmailFileType.Attachment, new FileTypeAlgorithm { CalculateSufix = FileTypeAlgorithm.YearMonth_Guid_Filename_Sufix });
 
                 MixinDeclarations.AssertDefined(typeof(EmailMessageDN), typeof(EmailReceptionMixin));
-               
+
                 sb.Include<Pop3ConfigurationDN>();
                 sb.Include<Pop3ReceptionDN>();
+                sb.Include<Pop3ReceptionExceptionDN>();
 
                 dqm.RegisterQuery(typeof(EmailMessageDN), () =>
                    from e in Database.Query<EmailMessageDN>()
@@ -41,28 +73,17 @@ namespace Signum.Engine.Mailing
                    {
                        Entity = e,
                        e.Id,
-                       e.State,
+                       e.From,
                        e.Subject,
-                       Text = e.Body,
                        e.Template,
+                       e.State,
                        e.Sent,
-                       e.Mixin<EmailReceptionMixin>().Received,
+                       e.Mixin<EmailReceptionMixin>().ReceptionInfo.SentDate,
                        e.Package,
                        e.Exception,
                    });
 
-                dqm.RegisterQuery(typeof(Pop3ReceptionDN), () =>
-                    from s in Database.Query<Pop3ReceptionDN>()
-                    select new
-                    {
-                        Entity = s,
-                        s.Id,
-                        s.Pop3Configuration,
-                        s.StartDate,
-                        s.EndDate,
-                        s.NumberOfMails,
-                        s.Exception
-                    });
+             
 
                 dqm.RegisterQuery(typeof(Pop3ConfigurationDN), () =>
                     from s in Database.Query<Pop3ConfigurationDN>()
@@ -74,9 +95,42 @@ namespace Signum.Engine.Mailing
                         s.Host,
                         s.Port,
                         s.Username,
-                        s.Password,
                         s.EnableSSL
                     });
+
+                dqm.RegisterQuery(typeof(Pop3ReceptionDN), () => DynamicQuery.DynamicQuery.Auto(
+                 from s in Database.Query<Pop3ReceptionDN>()
+                 select new
+                 {
+                     Entity = s,
+                     s.Id,
+                     s.Pop3Configuration,
+                     s.StartDate,
+                     s.EndDate,
+                     Messages = s.Messages().Count(),
+                     Exceptions = s.Exceptions().Count(),
+                     s.Exception,
+                 })
+                 .ColumnDisplayName(a => a.Messages, () => typeof(EmailMessageDN).NicePluralName())
+                 .ColumnDisplayName(a => a.Exceptions, () => typeof(ExceptionDN).NicePluralName()));
+
+                dqm.RegisterQuery(typeof(Pop3ConfigurationDN), () =>
+                    from s in Database.Query<Pop3ConfigurationDN>()
+                    select new
+                    {
+                        Entity = s,
+                        s.Id,
+                        s.Name,
+                        s.Host,
+                        s.Port,
+                        s.Username,
+                        s.EnableSSL
+                    });
+
+                dqm.RegisterExpression((Pop3ConfigurationDN c) => c.Receptions(), () => typeof(Pop3ReceptionDN).NicePluralName());
+                dqm.RegisterExpression((Pop3ReceptionDN r) => r.Messages(), () => typeof(EmailMessageDN).NicePluralName());
+                dqm.RegisterExpression((Pop3ReceptionDN r) => r.Exceptions(), () => typeof(ExceptionDN).NicePluralName());
+                dqm.RegisterExpression((ExceptionDN r) => r.Pop3Reception(), () => typeof(Pop3ReceptionDN).NiceName());
 
                 new Graph<Pop3ConfigurationDN>.Execute(Pop3ConfigurationOperation.Save)
                 {
@@ -91,7 +145,7 @@ namespace Signum.Engine.Mailing
                     Lite = false,
                     Execute = (e, _) =>
                     {
-                        using(Transaction tr = Transaction.None())
+                        using (Transaction tr = Transaction.None())
                         {
                             e.ReceiveEmails();
                             tr.Commit();
@@ -103,32 +157,27 @@ namespace Signum.Engine.Mailing
 
                 SimpleTaskLogic.Register(Pop3ConfigurationAction.ReceiveAllActivePop3Configurations, () =>
                 {
-                    foreach (var item in Database.Query<Pop3ConfigurationDN>().Where(a=>a.Active).ToList())
+                    foreach (var item in Database.Query<Pop3ConfigurationDN>().Where(a => a.Active).ToList())
                     {
                         item.ReceiveEmails();
                     }
 
                     return null;
-                }); 
+                });
             }
         }
 
         public static Pop3ReceptionDN ReceiveEmails(this Pop3ConfigurationDN config)
         {
             Pop3ReceptionDN reception = new Pop3ReceptionDN { Pop3Configuration = config.ToLite(), StartDate = TimeZoneManager.Now };
-
+            var now = TimeZoneManager.Now;
             try
             {
                 using (Pop3Client client = new Pop3Client(config.Username, config.Password, config.Host, config.Port, config.EnableSSL))
                 {
                     client.Connect();
 
-                    var dic = client.GetMessages();
-
-                    reception.NumberOfMails = dic.Count;
-
-                    if (reception.NumberOfMails == 0)
-                        return null;
+                    var dic = client.GetMessageUniqueIdentifiers();
 
                     using (Transaction tr = Transaction.ForceNew())
                     {
@@ -136,62 +185,85 @@ namespace Signum.Engine.Mailing
                         tr.Commit();
                     }
 
-                    int maxids = Math.Min(dic.Count, config.MaxDownloadEmails);
-
-                    for (int i = 1; i <= maxids; i++)
+                    foreach (var kvp in dic)
                     {
-                        using (Transaction tr = Transaction.ForceNew())
+                        var sent = (from em in Database.Query<EmailMessageDN>()
+                                    let ri = em.Mixin<EmailReceptionMixin>().ReceptionInfo
+                                    where ri != null && ri.UniqueId == kvp.Value
+                                    select (DateTime?)ri.SentDate).SingleOrDefault();
+
+                        if (sent == null)
                         {
-                            try
+                            using (OperationLogic.AllowSave<EmailMessageDN>())
+                            using (Transaction tr = Transaction.ForceNew())
                             {
-                                string rawContent = client.GetMessage(i);
-
-                                MailMessage mm = new StringReader(rawContent).Using(MailMimeParser.Parse);
-
-                                EmailMessageDN email = ToEmailMessage(mm, rawContent);
-
-                                Lite<EmailMessageDN> duplicate = Database.Query<EmailMessageDN>()
-                                    .Where(a => a.BodyHash == email.BodyHash)
-                                    .Select(a => a.ToLite())
-                                    .SingleOrDefaultEx();
-
-                                if (duplicate != null && AreDuplicates(email, duplicate.Retrieve()))
+                                try
                                 {
-                                    var dup = duplicate.Retrieve();
-                                    dup.Duplicates++;
-                                    dup.Save();
-                                }
-                                else
-                                {
-                                    email.Mixin<EmailReceptionMixin>().Reception = reception.ToLite();
+                                    string rawContent = client.GetMessage(kvp.Key);
 
-                                    if (AssociateWithEntities != null)
-                                        AssociateWithEntities(email);
+                                    MailMessage mm = new StringReader(rawContent).Using(MailMimeParser.Parse);
 
-                                    using (OperationLogic.AllowSave<EmailMessageDN>())
+                                    EmailMessageDN email = ToEmailMessage(mm, rawContent, kvp.Value, reception.ToLite());
+
+                                    Lite<EmailMessageDN> duplicate = Database.Query<EmailMessageDN>()
+                                        .Where(a => a.BodyHash == email.BodyHash)
+                                        .Select(a => a.ToLite())
+                                        .SingleOrDefaultEx();
+
+                                    if (duplicate != null && AreDuplicates(email, duplicate.Retrieve()))
+                                    {
+                                        var dup = duplicate.Retrieve();
+                                        dup.Duplicates++;
+                                        dup.Save();
+                                    }
+                                    else
+                                    {
+                                        if (AssociateWithEntities != null)
+                                            AssociateWithEntities(email);
+
                                         email.Save();
+                                    }
+
+                                    sent = email.Mixin<EmailReceptionMixin>().ReceptionInfo.SentDate;
+
+                                    tr.Commit();
                                 }
+                                catch (Exception e)
+                                {   
+                                    var ex = e.LogException();
 
-                                if (config.DeleteAfterReception)
-                                    client.DeleteMessage(i);
-                            }
-                            catch (Exception e)
-                            {
-                                e.LogException();
-                            }
+                                    using (Transaction tr2 = Transaction.ForceNew())
+                                    {
+                                        new Pop3ReceptionExceptionDN
+                                        {
+                                            Exception = ex.ToLite(),
+                                            Reception = reception.ToLite()
+                                        }.Save();
 
-                            tr.Commit();
+                                        tr2.Commit();
+                                    }
+                                }
+                            }
                         }
-                    }
 
-                    using (Transaction tr = Transaction.ForceNew())
-                    {
-                        reception.Save();
-                        tr.Commit();
+                        if (config.DeleteMessagesAfter != null && sent != null &&
+                             sent.Value.Date.AddDays(config.DeleteMessagesAfter.Value) < TimeZoneManager.Now.Date)
+                        {
+                            client.DeleteMessage(kvp.Key);
+
+                            (from em in Database.Query<EmailMessageDN>()
+                             let ri = em.Mixin<EmailReceptionMixin>().ReceptionInfo
+                             where ri != null && ri.UniqueId == kvp.Value
+                             select em)
+                             .UnsafeUpdate()
+                             .Set(em => em.Mixin<EmailReceptionMixin>().ReceptionInfo.DeletionDate, em => now)
+                             .Execute();
+                        }
                     }
 
                     reception.EndDate = TimeZoneManager.Now;
                     reception.Save();
+
 
                     client.Disconnect(); //Delete messages now
                 }
@@ -202,9 +274,13 @@ namespace Signum.Engine.Mailing
 
                 try
                 {
-                    reception.EndDate = TimeZoneManager.Now;
-                    reception.Exception = ex.ToLite();
-                    reception.Save();
+                    using (Transaction tr = Transaction.ForceNew())
+                    {
+                        reception.EndDate = TimeZoneManager.Now;
+                        reception.Exception = ex.ToLite();
+                        reception.Save();
+                        tr.Commit();
+                    }
                 }
                 catch { }
             }
@@ -230,7 +306,7 @@ namespace Signum.Engine.Mailing
 
         public static Action<EmailMessageDN> AssociateWithEntities;
 
-        private static EmailMessageDN ToEmailMessage(MailMessage mm, string rawContent)
+        private static EmailMessageDN ToEmailMessage(MailMessage mm, string rawContent, string uniqueId, Lite<Pop3ReceptionDN> reception)
         {
             var dn = new EmailMessageDN
             {
@@ -242,25 +318,25 @@ namespace Signum.Engine.Mailing
                    mm.Bcc.Select(ma => new EmailRecipientDN(ma, EmailRecipientKind.Bcc))).ToMList(),
                 State = EmailMessageState.Received,
                 Subject = mm.Subject,
-                Attachments = mm.Attachments.Select(a => 
-                    new EmailAttachmentDN 
+                Attachments = mm.Attachments.Select(a =>
+                    new EmailAttachmentDN
                     {
                         ContentId = a.ContentId,
-                        File = new FilePathDN(EmailFileType.Attachment, a.ContentType.Name, a.ContentStream.ReadAllBytes()).Save(), 
-                        Type = EmailAttachmentType.Attachment 
+                        File = new FilePathDN(EmailFileType.Attachment, a.ContentType.Name, a.ContentStream.ReadAllBytes()).Save(),
+                        Type = EmailAttachmentType.Attachment
                     }).ToMList()
             };
 
-            dn.Mixin<EmailReceptionMixin>().Received = TimeZoneManager.Now;
-            dn.Mixin<EmailReceptionMixin>().RawContent = rawContent;
-
-
-
-            DateTime parse;
-            if (DateTime.TryParse(mm.Headers["Date"], out parse))
+            var receptionInfo = new EmailReceptionInfoDN
             {
-                dn.Sent = parse;
-            }
+                Reception = reception,
+                UniqueId = uniqueId,
+                RawContent = rawContent,
+                SentDate = GetDate(mm),
+                ReceivedDate = TimeZoneManager.Now,
+            };
+
+            dn.Mixin<EmailReceptionMixin>().ReceptionInfo = receptionInfo;
 
             if (mm.Body.HasText())
             {
@@ -277,10 +353,10 @@ namespace Signum.Engine.Mailing
                 if (bestView != null)
                 {
                     dn.IsBodyHtml = bestView.ContentType.MediaType.Contains("htm");
-                    string body = 
+                    string body =
 
                     dn.Body = MailMimeParser.GetStringFromStream(bestView.ContentStream, bestView.ContentType);
-                    dn.Attachments.AddRange(bestView.LinkedResources.Select(a => 
+                    dn.Attachments.AddRange(bestView.LinkedResources.Select(a =>
                         new EmailAttachmentDN
                         {
                             ContentId = a.ContentId,
@@ -308,6 +384,15 @@ namespace Signum.Engine.Mailing
             }
 
             return dn;
+        }
+
+        private static DateTime GetDate(MailMessage mm)
+        {
+            DateTime result;
+            if (DateTime.TryParse(mm.Headers["Date"], out result))
+                return result;
+
+            return TimeZoneManager.Now;
         }
     }
 }

@@ -186,7 +186,7 @@ namespace Signum.Entities.Mailing
 {EmailMessageState.Sent,         false,         true,         false,                    null },
 {EmailMessageState.SentException,true,          true,         false,                    null },
 {EmailMessageState.ReceptionNotified,true,      true,         true,                     null },
-{EmailMessageState.Received,     false,         null,         false,                    false },
+{EmailMessageState.Received,     false,         false,         false,                    false },
             };
 
         static Expression<Func<EmailMessageDN, string>> ToStringExpression = e => e.Subject;
@@ -204,14 +204,36 @@ namespace Signum.Entities.Mailing
         {
         }
 
+        EmailReceptionInfoDN receptionInfo;
+        public EmailReceptionInfoDN ReceptionInfo
+        {
+            get { return receptionInfo; }
+            set { Set(ref receptionInfo, value, () => ReceptionInfo); }
+        }
+    }
+
+    [Serializable]
+    public class EmailReceptionInfoDN : EmbeddedEntity
+    {
+        [NotNullable, SqlDbType(Size = 100), UniqueIndex(AllowMultipleNulls = true)]
+        string uniqueId;
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
+        public string UniqueId
+        {
+            get { return uniqueId; }
+            set { Set(ref uniqueId, value, () => UniqueId); }
+        }
+
+        [NotNullable]
         Lite<Pop3ReceptionDN> reception;
+        [NotNullValidator]
         public Lite<Pop3ReceptionDN> Reception
         {
             get { return reception; }
             set { Set(ref reception, value, () => Reception); }
         }
 
-        [SqlDbType(Size = int.MaxValue)]
+        [SqlDbType(Size = int.MaxValue), NotNullable]
         string rawContent;
         public string RawContent
         {
@@ -219,13 +241,30 @@ namespace Signum.Entities.Mailing
             set { Set(ref rawContent, value, () => RawContent); }
         }
 
-        DateTime? received;
-        public DateTime? Received
+        DateTime sentDate;
+        public DateTime SentDate
         {
-            get { return received; }
-            set { Set(ref received, value, () => Received); }
+            get { return sentDate; }
+            set { Set(ref sentDate, value, () => SentDate); }
+        }
+
+        DateTime receivedDate;
+        public DateTime ReceivedDate
+        {
+            get { return receivedDate; }
+            set { Set(ref receivedDate, value, () => ReceivedDate); }
+        }
+
+        DateTime? deletionDate;
+        public DateTime? DeletionDate
+        {
+            get { return deletionDate; }
+            set { Set(ref deletionDate, value, () => DeletionDate); }
         }
     }
+
+
+
 
 
 
@@ -486,7 +525,8 @@ namespace Signum.Entities.Mailing
         ReSend,
         ReSendEmails,
         CreateMail,
-        CreateMailFromTemplate
+        CreateMailFromTemplate,
+        Delete,
     }
 
     public enum EmailMessageMessage
