@@ -173,9 +173,9 @@ namespace Signum.Engine.Operations
 
                                 log.End = TimeZoneManager.Now;
 
-                                if (!result.IsNew || LogAlsoIfNotSaved)
+                                if ((result != null && !result.IsNew) || LogAlsoIfNotSaved)
                                 {
-                                    log.Target = result.IsNew ? null : result.ToLite();
+                                    log.Target = result == null || result.IsNew ? null : result.ToLite();
 
                                     using (ExecutionMode.Global())
                                         log.Save();
