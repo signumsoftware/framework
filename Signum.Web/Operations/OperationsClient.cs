@@ -276,7 +276,7 @@ namespace Signum.Web.Operations
                 Enabled = ctx.CanExecute == null,
                 Order = ctx.OperationSettings != null ? ctx.OperationSettings.Order: 0,
 
-                Text = ctx.OperationSettings.TryCC(o => o.Text) ??  (group == null ? ctx.OperationInfo.Key.NiceToString() : group.SimplifyName(ctx.OperationInfo.Key.NiceToString())),
+                Text = ctx.OperationSettings.TryCC(o => o.Text) ?? (group == null || group.SimplifyName == null ? ctx.OperationInfo.Key.NiceToString() : group.SimplifyName(ctx.OperationInfo.Key.NiceToString())),
                 OnClick = ((ctx.OperationSettings != null && ctx.OperationSettings.OnClick != null) ? ctx.OperationSettings.OnClick(ctx) : DefaultClick(ctx)).ToJS(),
             };
         }

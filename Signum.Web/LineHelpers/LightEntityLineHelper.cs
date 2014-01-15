@@ -20,7 +20,7 @@ namespace Signum.Web
             if (lite == null)
                 return MvcHtmlString.Empty;
 
-            if (string.IsNullOrEmpty(lite.ToString()))
+            if (lite.ToString() == null)
                 Database.FillToString(lite);
 
             MvcHtmlString result = Navigator.IsNavigable(lite.EntityType, null, isSearchEntity) ?

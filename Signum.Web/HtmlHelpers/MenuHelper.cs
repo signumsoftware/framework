@@ -153,12 +153,11 @@ namespace Signum.Web
                 {
                     string link = Link.ToString();
 
-                    /*     bool active = false;
-
-                         if (link.HasText() && currentUrl.EndsWith(link)) { active = true; }*/
-                    if (ManualA == null)
+                    if (ManualA != null)
+                        sb.AddLine(ManualA(link, title, " ".CombineIfNotEmpty(Class, "selected")));
+                    else
                     {
-                        HtmlTag tbA = /*active ? new FluentTagBuilder("span").AddCssClass("selected") :*/ new HtmlTag("a")
+                        HtmlTag tbA = new HtmlTag("a")
                                 .Attrs(new { href = link, title = Title, id = Id })
                                 .Class(Class);
 
@@ -169,8 +168,14 @@ namespace Signum.Web
 
                         sb.AddLine(tbA.ToHtml());
                     }
-                    else
-                        sb.AddLine(ManualA(link, title, " ".CombineIfNotEmpty(Class, "selected")));
+                }
+                else if (html != null)
+                {
+                    sb.AddLine(html);
+                }
+                else if (text.HasText())
+                {
+                    sb.Add(new HtmlTag("span").SetInnerText(Text));
                 }
 
             }

@@ -140,20 +140,24 @@
   <Type Name="IUserDN" />
   <Type Name="JavascriptMessage">
     <Member Name="addFilter" Description="Añadir filtro" />
+    <Member Name="create" Description="Crear" />
     <Member Name="editColumnName" Description="Editar nombre de columna" />
     <Member Name="enterTheNewColumnName" Description="Introduzca el nuevo nombre de la columna" />
-    <Member Name="entityRepeater_moveDown" Description="Bajar" />
-    <Member Name="entityRepeater_moveUp" Description="Subir" />
     <Member Name="error" Description="Error" />
     <Member Name="executed" Description="Ejecutado" />
+    <Member Name="find" Description="Buscar" />
     <Member Name="hideFilters" Description="Ocultar filtros" />
     <Member Name="loading" Description="Cargando..." />
     <Member Name="loseChanges" Description="Hay cambios que no han sido guardados. &#xD;&#xA;¿Perder cambios?" />
+    <Member Name="moveDown" Description="Bajar" />
+    <Member Name="moveUp" Description="Subir" />
+    <Member Name="navigate" Description="Navegar" />
     <Member Name="noElementsSelected" Description="No hay elementos seleccionados" />
     <Member Name="noResults" Description="No se encontraron resultados" />
     <Member Name="onlyOneElement" Description="Puede seleccionar un único elemento" />
     <Member Name="popupErrors" Description="¿Hay errores en la entidad, que desea continuar?" />
     <Member Name="popupErrorsStop" Description="Hay errores en la entidad" />
+    <Member Name="remove" Description="Quitar" />
     <Member Name="removeColumn" Description="Eliminar columna" />
     <Member Name="reorderColumn_MoveLeft" Description="Mover a la izquierda" />
     <Member Name="reorderColumn_MoveRight" Description="Mover a la derecha" />
@@ -162,6 +166,7 @@
     <Member Name="searchControlMenuSelected" Description="seleccionado" />
     <Member Name="selectToken" Description="Seleccione un símbolo (token)" />
     <Member Name="showFilters" Description="Mostrar filtros" />
+    <Member Name="view" Description="Ver" />
   </Type>
   <Type Name="LiteMessage">
     <Member Name="IdNotValid" Description="Id no válido" />
@@ -208,6 +213,7 @@
     <Member Name="End" Description="Final" />
     <Member Name="Exception" Description="Excepción" />
     <Member Name="Operation" Description="Operación" />
+    <Member Name="Origin" Description="Origen" />
     <Member Name="Start" Description="Inicio" />
     <Member Name="Target" Description="Destino" />
     <Member Name="User" Description="Usuario" />
@@ -340,10 +346,12 @@
     <Member Name="_0HasToBeUppercase" Description="{0} debe estar en mayúsculas" />
     <Member Name="_0IsNecessary" Description="es necesario {0}" />
     <Member Name="_0IsNecessaryOnState1" Description="{0} es necesario en estado {1}" />
+    <Member Name="_0IsNotA1" Description="{0} no es [m:un|f:una] {1}" />
     <Member Name="_0IsNotAllowed" Description="{0} no está permitido" />
     <Member Name="_0IsNotAllowedOnState1" Description="{0} no se permite en estado {1}" />
     <Member Name="_0IsNotSet" Description="{0} no establecido" />
     <Member Name="Be" Description="ser " />
+    <Member Name="BeA0" Description="ser [m:un|f:una] {0}" />
     <Member Name="BeBetween0And1" Description="estar entre {0} y {1}" />
     <Member Name="BeNotNull" Description="ser no nulo" />
     <Member Name="FileName" Description="Nombre de archivo" />
