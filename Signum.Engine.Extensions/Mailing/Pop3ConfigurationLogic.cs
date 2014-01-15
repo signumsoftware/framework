@@ -179,18 +179,22 @@ namespace Signum.Engine.Mailing
 
                     var dic = client.GetMessageUniqueIdentifiers();
 
+                    var already = dic.Values.GroupsOf(50).SelectMany(l =>
+                        (from em in Database.Query<EmailMessageDN>()
+                         let ri = em.Mixin<EmailReceptionMixin>().ReceptionInfo
+                         where ri != null && l.Contains(ri.UniqueId)
+                         select KVP.Create(ri.UniqueId, (DateTime?)ri.SentDate))).ToDictionary();
+
                     using (Transaction tr = Transaction.ForceNew())
                     {
+                        reception.NewEmails = dic.Count - already.Count;
                         reception.Save();
                         tr.Commit();
                     }
 
                     foreach (var kvp in dic)
                     {
-                        var sent = (from em in Database.Query<EmailMessageDN>()
-                                    let ri = em.Mixin<EmailReceptionMixin>().ReceptionInfo
-                                    where ri != null && ri.UniqueId == kvp.Value
-                                    select (DateTime?)ri.SentDate).SingleOrDefault();
+                        var sent = already.TryGetS(kvp.Value);
 
                         if (sent == null)
                         {
@@ -353,8 +357,6 @@ namespace Signum.Engine.Mailing
                 if (bestView != null)
                 {
                     dn.IsBodyHtml = bestView.ContentType.MediaType.Contains("htm");
-                    string body =
-
                     dn.Body = MailMimeParser.GetStringFromStream(bestView.ContentStream, bestView.ContentType);
                     dn.Attachments.AddRange(bestView.LinkedResources.Select(a =>
                         new EmailAttachmentDN
