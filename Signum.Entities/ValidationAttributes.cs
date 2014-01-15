@@ -689,7 +689,7 @@ namespace Signum.Entities
             var t = (TypeDN)value;
             if (!Type.IsAssignableFrom(t.ToType()))
             {
-                return ValidationMessage._0IsNotA1.NiceToString().Formato(t.ToType().NiceName(), Type.NiceName());
+                return ValidationMessage._0IsNotA1.NiceToString().ForGenderAndNumber(Type.GetGender()).Formato(t.ToType().NiceName(), Type.NiceName());
             }
 
             return null;
@@ -697,7 +697,7 @@ namespace Signum.Entities
 
         public override string HelpMessage
         {
-            get { return ValidationMessage.BeA0.NiceToString().Formato(Type.NiceName()); }
+            get { return ValidationMessage.BeA0.NiceToString().ForGenderAndNumber(Type.GetGender()).Formato(Type.NiceName()); }
         }
     }
 

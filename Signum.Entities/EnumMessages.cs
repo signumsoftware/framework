@@ -277,7 +277,7 @@ Lose changes?")]
         remove,
         [Description("View")]
         view,
-        [Description("View")]
+        [Description("Create")]
         create,
         [Description("Move down")]
         moveDown,
