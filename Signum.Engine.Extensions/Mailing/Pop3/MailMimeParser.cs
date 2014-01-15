@@ -38,29 +38,25 @@ namespace Signum.Engine.Mailing.Pop3
 
             ContentType tmpContentType = FindContentType(returnValue.Headers);
 
-            switch (tmpContentType.MediaType)
+            if (tmpContentType.MediaType != null && tmpContentType.MediaType.StartsWith("multipart/"))
             {
-                case "multipart/alternative":
-                case "multipart/related":
-                case "multipart/mixed":
-                    MailMessage tmpMessage = ParseAlternative(tmpContentType.Boundary, mimeMail);
+                MailMessage tmpMessage = ParseAlternative(tmpContentType.Boundary, mimeMail);
 
-                    foreach (AlternateView view in tmpMessage.AlternateViews)
-                        returnValue.AlternateViews.Add(view);
+                foreach (AlternateView view in tmpMessage.AlternateViews)
+                    returnValue.AlternateViews.Add(view);
 
-                    foreach (Attachment att in tmpMessage.Attachments)
-                        returnValue.Attachments.Add(att);
-
-                    break;
-                case "text/html":
-                case "text/plain":
-                    returnValue.AlternateViews.Add(ParseTextView(mimeMail, contentTransferEncoding, tmpContentType));
-                    break;
-                default:
-                    returnValue.Attachments.Add(ParseAttachment(mimeMail, contentTransferEncoding, tmpContentType, returnValue.Headers));
-                    break;
-
+                foreach (Attachment att in tmpMessage.Attachments)
+                    returnValue.Attachments.Add(att);
             }
+            else if (tmpContentType.MediaType != null && tmpContentType.MediaType.StartsWith("text/"))
+            {
+                returnValue.AlternateViews.Add(ParseTextView(mimeMail, contentTransferEncoding, tmpContentType));
+            }
+            else
+            {
+                returnValue.Attachments.Add(ParseAttachment(mimeMail, contentTransferEncoding, tmpContentType, returnValue.Headers));
+            }
+           
             return returnValue;
         }
 
