@@ -441,9 +441,6 @@
     <Member Name="From" Description="De" />
     <Member Name="IsBodyHtml" Description="Cuerpo html" />
     <Member Name="Package" Description="Paquete" />
-    <Member Name="RawContent" Description="Contenido original" />
-    <Member Name="Received" Description="Recibido" />
-    <Member Name="Reception" Description="Recepción" />
     <Member Name="ReceptionNotified" Description="Recepción notificada" />
     <Member Name="Recipients" Description="Destinatarios" />
     <Member Name="Sent" Description="Enviado" />
@@ -464,6 +461,7 @@
   <Type Name="EmailMessageOperation">
     <Member Name="CreateMail" Description="Crear email" />
     <Member Name="CreateMailFromTemplate" Description="Crear email desde plantilla" />
+    <Member Name="Delete" Description="Eliminar" />
     <Member Name="ReSend" Description="Re enviar" />
     <Member Name="ReSendEmails" Description="Re enviar correos electrónicos" />
     <Member Name="Send" Description="Enviar" />
@@ -483,6 +481,17 @@
   </Type>
   <Type Name="EmailPackageDN" Description="Paquete de e-mail">
     <Member Name="Name" Description="Nombre" />
+  </Type>
+  <Type Name="EmailReceptionInfoDN" Description="Información de recepción de correo electrónico">
+    <Member Name="DeletionDate" Description="Fecha eliminación" />
+    <Member Name="RawContent" Description="Contenido sin formato" />
+    <Member Name="ReceivedDate" Description="Fecha recepción" />
+    <Member Name="Reception" Description="Recepción" />
+    <Member Name="SentDate" Description="Fecha envío" />
+    <Member Name="UniqueId" Description="Id único" />
+  </Type>
+  <Type Name="EmailReceptionMixin">
+    <Member Name="ReceptionInfo" Description="Info recepción" />
   </Type>
   <Type Name="EmailRecipientDN" Description="Destinatario email">
     <Member Name="Kind" Description="Tipo" />
@@ -836,10 +845,9 @@
   <Type Name="Pop3ConfigurationDN" Description="Configuración POP3">
     <Member Name="Active" Description="Activo" />
     <Member Name="ClientCertificationFiles" Description="Certificación de cliente" />
-    <Member Name="DeleteAfterReception" Description="Eliminar después de la recepción" />
+    <Member Name="DeleteMessagesAfter" Description="Borrar mensajes después de" />
     <Member Name="EnableSSL" Description="Activar SSL" />
     <Member Name="Host" Description="Host" />
-    <Member Name="MaxDownloadEmails" Description="Max Descarga Emails" />
     <Member Name="Name" Description="Nombre" />
     <Member Name="Password" Description="Contraseña" />
     <Member Name="Port" Description="Puerto" />
@@ -853,9 +861,12 @@
   <Type Name="Pop3ReceptionDN" Description="Recepción POP3">
     <Member Name="EndDate" Description="Fecha de fin" />
     <Member Name="Exception" Description="Excepción" />
-    <Member Name="NumberOfMails" Description="Número de emails" />
     <Member Name="Pop3Configuration" Description="Configuración POP3" />
     <Member Name="StartDate" Description="Fecha de inicio" />
+  </Type>
+  <Type Name="Pop3ReceptionExceptionDN" Description="Excepción recepción POP3">
+    <Member Name="Exception" Description="Excepción" />
+    <Member Name="Reception" Description="Recepción" />
   </Type>
   <Type Name="ProcessAlgorithmDN" Description="Algoritmo de proceso" />
   <Type Name="ProcessDN" Description="Proceso">
