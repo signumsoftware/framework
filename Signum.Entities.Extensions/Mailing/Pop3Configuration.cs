@@ -20,15 +20,6 @@ namespace Signum.Entities.Mailing
             set { Set(ref active, value, () => Active); }
         }
 
-        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
-        string name;
-        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
-        public string Name
-        {
-            get { return name; }
-            set { SetToStr(ref name, value, () => Name); }
-        }
-
         int port = 110;
         public int Port
         {
@@ -94,10 +85,9 @@ namespace Signum.Entities.Mailing
             set { Set(ref clientCertificationFiles, value, () => ClientCertificationFiles); }
         }
 
-        static Expression<Func<Pop3ConfigurationDN, string>> ToStringExpression = e => e.Name;
         public override string ToString()
         {
-            return ToStringExpression.Evaluate(this);
+            return "{0} ({1})".Formato(Username, Host);
         }
 
     }
@@ -137,6 +127,13 @@ namespace Signum.Entities.Mailing
         {
             get { return endDate; }
             set { Set(ref endDate, value, () => EndDate); }
+        }
+
+        int newEmails;
+        public int NewEmails
+        {
+            get { return newEmails; }
+            set { Set(ref newEmails, value, () => NewEmails); }
         }
 
         Lite<ExceptionDN> exception;

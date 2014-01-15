@@ -105,13 +105,27 @@ Write(Html.ValueLine(sc, s => s.EndDate));
             #line hidden
             
             #line 9 "..\..\Mailing\Views\Pop3Reception.cshtml"
-Write(Html.EntityLine(sc, s => s.Exception));
+Write(Html.ValueLine(sc, s => s.NewEmails));
 
             
             #line default
             #line hidden
             
             #line 9 "..\..\Mailing\Views\Pop3Reception.cshtml"
+                                         
+    
+            
+            #line default
+            #line hidden
+            
+            #line 10 "..\..\Mailing\Views\Pop3Reception.cshtml"
+Write(Html.EntityLine(sc, s => s.Exception));
+
+            
+            #line default
+            #line hidden
+            
+            #line 10 "..\..\Mailing\Views\Pop3Reception.cshtml"
                                           
 
     
@@ -119,7 +133,7 @@ Write(Html.EntityLine(sc, s => s.Exception));
             #line default
             #line hidden
             
-            #line 11 "..\..\Mailing\Views\Pop3Reception.cshtml"
+            #line 12 "..\..\Mailing\Views\Pop3Reception.cshtml"
 Write(Html.CountSearchControl(new FindOptions(typeof(EmailMessageDN))
     {
         FilterOptions = { new FilterOption("ReceptionInfo.Reception", sc.Value) }
@@ -129,7 +143,7 @@ Write(Html.CountSearchControl(new FindOptions(typeof(EmailMessageDN))
             #line default
             #line hidden
             
-            #line 14 "..\..\Mailing\Views\Pop3Reception.cshtml"
+            #line 15 "..\..\Mailing\Views\Pop3Reception.cshtml"
                                                                                                      ;
 
     
@@ -137,7 +151,7 @@ Write(Html.CountSearchControl(new FindOptions(typeof(EmailMessageDN))
             #line default
             #line hidden
             
-            #line 16 "..\..\Mailing\Views\Pop3Reception.cshtml"
+            #line 17 "..\..\Mailing\Views\Pop3Reception.cshtml"
 Write(Html.CountSearchControl(new FindOptions(typeof(ExceptionDN))
     {
         FilterOptions = { new FilterOption("Pop3Reception", sc.Value) }
@@ -147,7 +161,7 @@ Write(Html.CountSearchControl(new FindOptions(typeof(ExceptionDN))
             #line default
             #line hidden
             
-            #line 19 "..\..\Mailing\Views\Pop3Reception.cshtml"
+            #line 20 "..\..\Mailing\Views\Pop3Reception.cshtml"
                                                                                                      ;
 }
 

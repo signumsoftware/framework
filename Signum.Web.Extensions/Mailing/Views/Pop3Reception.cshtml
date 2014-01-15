@@ -6,6 +6,7 @@
     @Html.EntityLine(sc, s => s.Pop3Configuration)
     @Html.ValueLine(sc, s => s.StartDate)
     @Html.ValueLine(sc, s => s.EndDate)
+    @Html.ValueLine(sc, s => s.NewEmails)
     @Html.EntityLine(sc, s => s.Exception)
 
     @Html.CountSearchControl(new FindOptions(typeof(EmailMessageDN))

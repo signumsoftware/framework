@@ -3,7 +3,6 @@
 @using (var sc = Html.TypeContext<SmtpConfigurationDN>()) 
 {
 	@Html.ValueLine(sc, s => s.IsDefault)
-	@Html.ValueLine(sc, s => s.Name)
 	@Html.ValueLine(sc, s => s.Port)
 	@Html.ValueLine(sc, s => s.Host)
 	@Html.ValueLine(sc, s => s.UseDefaultCredentials)
