@@ -374,6 +374,27 @@ namespace Signum.Utilities
             return str.Substring(numChars);
         }
 
+        public static List<string> SplitInGroupsOf(this string str, int maxChars)
+        {
+            if (string.IsNullOrEmpty(str))
+                return new List<string>();
+
+            if (maxChars <= 0)
+                throw new ArgumentOutOfRangeException("maxChars should be greater than 0");
+
+            List<string> result = new List<string>();
+
+            for (int i = 0; i < str.Length; i+= maxChars)
+            {
+                if (i + maxChars < str.Length)
+                    result.Add(str.Substring(i, maxChars));
+                else
+                    result.Add(str.Substring(i));
+            }
+
+            return result;
+        }
+
         public static string RemoveEnd(this string str, int numChars)
         {
             if (numChars > str.Length)
