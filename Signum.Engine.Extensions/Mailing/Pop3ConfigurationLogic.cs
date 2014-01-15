@@ -366,23 +366,6 @@ namespace Signum.Engine.Mailing
                 }
             }
 
-            if (dn.Attachments.Any())
-            {
-                dn.Body = Regex.Replace(dn.Body, "src=\"(?<link>[^\"]*)\"", m =>
-                {
-                    var value = m.Groups["link"].Value;
-
-                    if (!value.StartsWith("cid:"))
-                        return m.Value;
-
-                    value = value.After("cid:");
-
-                    var link = dn.Attachments.Where(a => a.ContentId == value).Select(a => a.File.FullWebPath).FirstOrDefault() ?? "http://missing/missing.jpg";
-
-                    return "src=\"{0}\"".Formato(link);
-                });
-            }
-
             return dn;
         }
 

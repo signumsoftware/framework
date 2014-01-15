@@ -155,17 +155,6 @@ WriteLiteral("            ");
 
             
             #line 38 "..\..\Mailing\Views\EmailMessage.cshtml"
-       Write(Html.EntityLine(e, f => f.Target));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n");
-
-WriteLiteral("            ");
-
-            
-            #line 39 "..\..\Mailing\Views\EmailMessage.cshtml"
        Write(Html.ValueLine(e, f => f.State));
 
             
@@ -176,7 +165,7 @@ WriteLiteral("\r\n");
 WriteLiteral("            ");
 
             
-            #line 40 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 39 "..\..\Mailing\Views\EmailMessage.cshtml"
        Write(Html.ValueLine(e, f => f.Sent));
 
             
@@ -185,13 +174,13 @@ WriteLiteral("            ");
 WriteLiteral("\r\n");
 
             
-            #line 41 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 40 "..\..\Mailing\Views\EmailMessage.cshtml"
             
             
             #line default
             #line hidden
             
-            #line 41 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 40 "..\..\Mailing\Views\EmailMessage.cshtml"
              if (e.Value.Mixins.OfType<EmailReceptionMixin>().Any())
             {
                 using (var ri = e.SubContext(f => f.Mixin<EmailReceptionMixin>().ReceptionInfo))
@@ -201,27 +190,41 @@ WriteLiteral("\r\n");
             #line default
             #line hidden
             
-            #line 45 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 44 "..\..\Mailing\Views\EmailMessage.cshtml"
            Write(Html.ValueLine(ri, f => f.Reception));
 
             
             #line default
             #line hidden
             
-            #line 45 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 44 "..\..\Mailing\Views\EmailMessage.cshtml"
                                                      
                 
             
             #line default
             #line hidden
             
-            #line 46 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 45 "..\..\Mailing\Views\EmailMessage.cshtml"
            Write(Html.ValueLine(ri, f => f.UniqueId));
 
             
             #line default
             #line hidden
             
+            #line 45 "..\..\Mailing\Views\EmailMessage.cshtml"
+                                                    
+                
+            
+            #line default
+            #line hidden
+            
+            #line 46 "..\..\Mailing\Views\EmailMessage.cshtml"
+           Write(Html.ValueLine(ri, f => f.SentDate));
+
+            
+            #line default
+            #line hidden
+            
             #line 46 "..\..\Mailing\Views\EmailMessage.cshtml"
                                                     
                 
@@ -230,41 +233,27 @@ WriteLiteral("\r\n");
             #line hidden
             
             #line 47 "..\..\Mailing\Views\EmailMessage.cshtml"
-           Write(Html.ValueLine(ri, f => f.SentDate));
-
-            
-            #line default
-            #line hidden
-            
-            #line 47 "..\..\Mailing\Views\EmailMessage.cshtml"
-                                                    
-                
-            
-            #line default
-            #line hidden
-            
-            #line 48 "..\..\Mailing\Views\EmailMessage.cshtml"
            Write(Html.ValueLine(ri, f => f.ReceivedDate));
 
             
             #line default
             #line hidden
             
-            #line 48 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 47 "..\..\Mailing\Views\EmailMessage.cshtml"
                                                         
                 
             
             #line default
             #line hidden
             
-            #line 49 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 48 "..\..\Mailing\Views\EmailMessage.cshtml"
            Write(Html.ValueLine(ri, f => f.DeletionDate));
 
             
             #line default
             #line hidden
             
-            #line 49 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 48 "..\..\Mailing\Views\EmailMessage.cshtml"
                                                         
                 }
             }
@@ -275,7 +264,7 @@ WriteLiteral("\r\n");
 WriteLiteral("            ");
 
             
-            #line 52 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 51 "..\..\Mailing\Views\EmailMessage.cshtml"
        Write(Html.EntityLine(e, f => f.Exception));
 
             
@@ -286,7 +275,7 @@ WriteLiteral("\r\n");
 WriteLiteral("            ");
 
             
-            #line 53 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 52 "..\..\Mailing\Views\EmailMessage.cshtml"
        Write(Html.EntityLine(e, f => f.Template));
 
             
@@ -297,7 +286,7 @@ WriteLiteral("\r\n");
 WriteLiteral("            ");
 
             
-            #line 54 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 53 "..\..\Mailing\Views\EmailMessage.cshtml"
        Write(Html.EntityLine(e, f => f.Package));
 
             
@@ -308,7 +297,7 @@ WriteLiteral("\r\n");
 WriteLiteral("            ");
 
             
-            #line 55 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 54 "..\..\Mailing\Views\EmailMessage.cshtml"
        Write(Html.ValueLine(e, f => f.IsBodyHtml));
 
             
@@ -317,9 +306,7 @@ WriteLiteral("            ");
 WriteLiteral("\r\n        </fieldset>\r\n");
 
             
-            #line 57 "..\..\Mailing\Views\EmailMessage.cshtml"
-    
-  
+            #line 56 "..\..\Mailing\Views\EmailMessage.cshtml"
      
 
             
@@ -332,21 +319,34 @@ WriteLiteral(" class=\"clearall\"");
 WriteLiteral(" />\r\n");
 
             
-            #line 61 "..\..\Mailing\Views\EmailMessage.cshtml"
-    
+            #line 58 "..\..\Mailing\Views\EmailMessage.cshtml"
         
             
             #line default
             #line hidden
             
-            #line 62 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 58 "..\..\Mailing\Views\EmailMessage.cshtml"
+   Write(Html.EntityLine(e, f => f.Target));
+
+            
+            #line default
+            #line hidden
+            
+            #line 58 "..\..\Mailing\Views\EmailMessage.cshtml"
+                                          
+        
+            
+            #line default
+            #line hidden
+            
+            #line 59 "..\..\Mailing\Views\EmailMessage.cshtml"
    Write(Html.ValueLine(e, f => f.Subject));
 
             
             #line default
             #line hidden
             
-            #line 62 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 59 "..\..\Mailing\Views\EmailMessage.cshtml"
                                            
             if (e.Value.State == EmailMessageState.Created)
             {
@@ -355,7 +355,7 @@ WriteLiteral(" />\r\n");
             #line default
             #line hidden
             
-            #line 65 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 62 "..\..\Mailing\Views\EmailMessage.cshtml"
    Write(Html.ValueLine(e, f => f.Body, vl =>
         {
             vl.ValueLineType = ValueLineType.TextArea;
@@ -366,7 +366,7 @@ WriteLiteral(" />\r\n");
             #line default
             #line hidden
             
-            #line 69 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 66 "..\..\Mailing\Views\EmailMessage.cshtml"
           
 
         
@@ -374,28 +374,28 @@ WriteLiteral(" />\r\n");
             #line default
             #line hidden
             
-            #line 71 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 68 "..\..\Mailing\Views\EmailMessage.cshtml"
    Write(Html.ScriptsJs("~/Scripts/ckeditor/ckeditor.js"));
 
             
             #line default
             #line hidden
             
-            #line 71 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 68 "..\..\Mailing\Views\EmailMessage.cshtml"
                                                          
         
             
             #line default
             #line hidden
             
-            #line 72 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 69 "..\..\Mailing\Views\EmailMessage.cshtml"
    Write(Html.ScriptsJs("~/Mailing/Scripts/SF_Mailing.js"));
 
             
             #line default
             #line hidden
             
-            #line 72 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 69 "..\..\Mailing\Views\EmailMessage.cshtml"
                                                           
 
 
@@ -406,7 +406,7 @@ WriteLiteral("        <script>\r\n            $(function () {\r\n               
 "lEditor(\'");
 
             
-            #line 76 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 73 "..\..\Mailing\Views\EmailMessage.cshtml"
                                       Write(e.Compose("Body"));
 
             
@@ -415,7 +415,7 @@ WriteLiteral("        <script>\r\n            $(function () {\r\n               
 WriteLiteral("\');\r\n            });\r\n        </script>\r\n");
 
             
-            #line 79 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 76 "..\..\Mailing\Views\EmailMessage.cshtml"
             }
             else
             {
@@ -426,7 +426,7 @@ WriteLiteral("\');\r\n            });\r\n        </script>\r\n");
 WriteLiteral("        <h3>");
 
             
-            #line 82 "..\..\Mailing\Views\EmailMessage.cshtml"
+            #line 79 "..\..\Mailing\Views\EmailMessage.cshtml"
        Write(EmailMessageMessage.Message.NiceToString());
 
             
@@ -435,6 +435,22 @@ WriteLiteral("        <h3>");
 WriteLiteral(":</h3>\r\n");
 
 WriteLiteral("        <div>\r\n");
+
+            
+            #line 81 "..\..\Mailing\Views\EmailMessage.cshtml"
+            
+            
+            #line default
+            #line hidden
+            
+            #line 81 "..\..\Mailing\Views\EmailMessage.cshtml"
+              
+                var body = Signum.Web.Mailing.MailingClient.GetWebMailBody(e.Value.Body, e.Value.Attachments);
+            
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n");
 
             
             #line 84 "..\..\Mailing\Views\EmailMessage.cshtml"
@@ -467,14 +483,14 @@ WriteLiteral("        <div>\r\n");
             #line hidden
 WriteLiteral("                <iframe");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 2821), Tuple.Create("\"", 2846)
+WriteAttribute("id", Tuple.Create(" id=\"", 2944), Tuple.Create("\"", 2969)
             
             #line 88 "..\..\Mailing\Views\EmailMessage.cshtml"
-, Tuple.Create(Tuple.Create("", 2826), Tuple.Create<System.Object, System.Int32>(e.Compose("iframe")
+, Tuple.Create(Tuple.Create("", 2949), Tuple.Create<System.Object, System.Int32>(e.Compose("iframe")
             
             #line default
             #line hidden
-, 2826), false)
+, 2949), false)
 );
 
 WriteLiteral(" style=\"width:90%\"");
@@ -485,7 +501,7 @@ WriteLiteral("                    ");
 
             
             #line 89 "..\..\Mailing\Views\EmailMessage.cshtml"
-               Write(Html.Raw(e.Value.Body));
+               Write(Html.Raw(body));
 
             
             #line default
@@ -520,7 +536,7 @@ WriteLiteral("            ");
 
             
             #line 101 "..\..\Mailing\Views\EmailMessage.cshtml"
-       Write(Html.Raw(HttpUtility.HtmlEncode(e.Value.Body)));
+       Write(Html.Raw(HttpUtility.HtmlEncode(body)));
 
             
             #line default

@@ -23,6 +23,7 @@ using Signum.Entities.DynamicQuery;
 using Signum.Entities.UserQueries;
 using Signum.Web.Operations;
 using Signum.Web.UserQueries;
+using System.Text.RegularExpressions;
 #endregion
 
 namespace Signum.Web.Mailing
@@ -147,6 +148,13 @@ namespace Signum.Web.Mailing
                     new EntitySettings<Pop3ConfigurationDN> { PartialViewName = e => ViewPrefix.Formato("Pop3Configuration") },
                     new EntitySettings<Pop3ReceptionDN> { PartialViewName = e => ViewPrefix.Formato("Pop3Reception") },
                 });
+
+                Navigator.EntitySettings<EmailMessageDN>().MappingMain.AsEntityMapping()
+                    .RemoveProperty(a => a.Body)
+                    .SetProperty(a => a.Body, ctx =>
+                    {
+                        return SetWebMailBody(ctx.Value, ((EmailMessageDN)ctx.Parent.UntypedValue).Attachments);
+                    }); 
             }
         }
 
@@ -265,6 +273,55 @@ namespace Signum.Web.Mailing
                 return EmailTemplateCanAddTokenMessage.YouCannotAddBlocksWithAllOrAny.NiceToString();
 
             return null;
+        }
+
+        public static string GetWebMailBody(string body, IEnumerable<EmailAttachmentDN> attachments)
+        {
+            if (!attachments.Any())
+                return body;
+
+            var r = RouteHelper.New();
+
+            var dic = attachments.Where(a => a.File.FullWebPath.HasText()).ToDictionary(a => a.ContentId, a => r.Content(a.File.FullWebPath));
+
+            return Regex.Replace(body, "src=\"(?<link>[^\"]*)\"", m =>
+            {
+                var value = m.Groups["link"].Value;
+
+                if (!value.StartsWith("cid:"))
+                    return m.Value;
+
+                value = value.After("cid:");
+
+                var link = dic.TryGetC(value);
+
+                if (link == null)
+                    return m.Value;
+
+                return "src=\"{0}\"".Formato(r.Content(link));
+            });
+        }
+        
+        public static string SetWebMailBody(string body, IEnumerable<EmailAttachmentDN> attachments)
+        {
+            if (!attachments.Any())
+                return body;
+
+            var r = RouteHelper.New();
+
+            var dic = attachments.Where(a => a.File.FullWebPath.HasText()).ToDictionary(a => r.Content(a.File.FullWebPath), a => a.ContentId);
+
+            return Regex.Replace(body, "src=\"(?<link>[^\"]*)\"", m =>
+            {
+                var value = m.Groups["link"].Value;
+
+                var link = dic.TryGetC(value);
+
+                if (link == null)
+                    return m.Value;
+
+                return "src=\"cid:{0}\"".Formato(link);
+            });
         }
     }
 }

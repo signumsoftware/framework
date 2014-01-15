@@ -35,7 +35,6 @@
     
         <fieldset style="float: left">
             <legend>Properties</legend>
-            @Html.EntityLine(e, f => f.Target)
             @Html.ValueLine(e, f => f.State)
             @Html.ValueLine(e, f => f.Sent)
             @if (e.Value.Mixins.OfType<EmailReceptionMixin>().Any())
@@ -54,11 +53,9 @@
             @Html.EntityLine(e, f => f.Package)
             @Html.ValueLine(e, f => f.IsBodyHtml)
         </fieldset>
-    
-  
      
         <div class="clearall" />
-    
+        @Html.EntityLine(e, f => f.Target)
         @Html.ValueLine(e, f => f.Subject) 
             if (e.Value.State == EmailMessageState.Created)
             {
@@ -81,12 +78,15 @@
             {
         <h3>@EmailMessageMessage.Message.NiceToString():</h3>
         <div>
+            @{
+                var body = Signum.Web.Mailing.MailingClient.GetWebMailBody(e.Value.Body, e.Value.Attachments);
+            }
             @if (e.Value.IsBodyHtml)
             {
                 @Html.ScriptsJs("~/Mailing/Scripts/SF_Mailing.js")
             
                 <iframe id="@e.Compose("iframe")" style="width:90%">
-                    @Html.Raw(e.Value.Body)
+                    @Html.Raw(body)
                 </iframe>
                 <script>
                     $(function () {
@@ -98,7 +98,7 @@
             else
             {
                 <pre>
-            @Html.Raw(HttpUtility.HtmlEncode(e.Value.Body))
+            @Html.Raw(HttpUtility.HtmlEncode(body))
             </pre>
             }
         </div>
