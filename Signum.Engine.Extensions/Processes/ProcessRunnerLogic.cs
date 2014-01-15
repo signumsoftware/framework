@@ -195,7 +195,7 @@ namespace Signum.Engine.Processes
                                                     .Where(p => taken.Contains(p.ToLite()) && p.MachineName == ProcessDN.None)
                                                     .UnsafeUpdate()
                                                     .Set(p => p.MachineName, p => Environment.MachineName)
-                                                    .Set(p => p.MachineName, p => Schema.Current.ApplicationName)
+                                                    .Set(p => p.ApplicationName, p => Schema.Current.ApplicationName)
                                                     .Execute();
 
                                                 tr.Commit();
