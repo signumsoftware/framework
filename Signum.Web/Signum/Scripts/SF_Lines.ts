@@ -300,7 +300,7 @@ module SF {
 
         updateLinks(newToStr: string, newLink: string, itemPrefix?: string) {
             var link = $(this.pf(SF.Keys.link));
-            link.html(newToStr);
+            link.text(newToStr);
             if (link.filter('a').length !== 0)
                 link.attr('href', newLink);
             $(this.pf(SF.Keys.toStr)).val('');

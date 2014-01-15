@@ -276,7 +276,7 @@ var SF;
         }
         EntityLine.prototype.updateLinks = function (newToStr, newLink, itemPrefix) {
             var link = $(this.pf(SF.Keys.link));
-            link.html(newToStr);
+            link.text(newToStr);
             if (link.filter('a').length !== 0)
                 link.attr('href', newLink);
             $(this.pf(SF.Keys.toStr)).val('');
