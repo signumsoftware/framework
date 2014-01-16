@@ -346,8 +346,8 @@ namespace Signum.Engine.Mailing.Pop3
             foreach (string key in headers.AllKeys)
             {
                 //strip qp encoding information from the header if present
-                headers[key] = Regex.Replace(headers[key].ToString(), @"=\?.*?\?Q\?(.*?)\?=", m => DecodeQP(m.Groups[1].Value), options);
-                headers[key] = Regex.Replace(headers[key].ToString(), @"=\?.*?\?B\?(.*?)\?=", m => Encoding.UTF7.GetString(Convert.FromBase64String(m.Groups[1].Value)), options);
+                headers[key] = Regex.Replace(headers[key].ToString(), @"=\?.*?\?Q\?(.*?)\?=", m => Attachment.CreateAttachmentFromString("", m.Value).Name, options);
+                headers[key] = Regex.Replace(headers[key].ToString(), @"=\?.*?\?B\?(.*?)\?=", m => Attachment.CreateAttachmentFromString("", m.Value).Name, options);
             }
         }
 
