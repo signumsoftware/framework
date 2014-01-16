@@ -195,12 +195,7 @@ var SF;
             //update indexes
             var $trsInGroup = findTrsInGroup($typeTr.attr("data-ns"), $typeTr.attr("data-type"));
             var $lastTrInGroup = $trsInGroup.filter(":last");
-            var lastConditionIndex = parseInt($lastTrInGroup.attr("data-index"));
-            if (lastConditionIndex == NaN) {
-                lastConditionIndex = 0;
-            } else {
-                lastConditionIndex++;
-            }
+            var lastConditionIndex = $lastTrInGroup.attr("data-index") == undefined ? 0 : (parseInt($lastTrInGroup.attr("data-index")) + 1);
             $newTr.attr("data-index", lastConditionIndex);
 
             $newTr.find("td:first input[type='hidden']").remove();

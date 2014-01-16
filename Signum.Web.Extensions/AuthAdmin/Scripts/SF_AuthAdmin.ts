@@ -96,7 +96,7 @@ module SF.Auth {
         });
     }
 
-    export function openDialog(e) {
+    export function openDialog(e: Event) {
         e.preventDefault();
         var $this = $(this);
         var navigator = new SF.ViewNavigator({
@@ -125,7 +125,7 @@ module SF.Auth {
         return $(".sf-auth-rules tr[data-ns='" + ns + "'][data-type='" + type + "']");
     }
 
-    export function removeCondition(e) {
+    export function removeCondition(e : Event) {
         e.preventDefault();
         var $this = $(this);
         var $tr = $this.closest("tr");
@@ -140,7 +140,7 @@ module SF.Auth {
         $lastConditionTr.find(".sf-auth-tree:eq(2)").removeClass().addClass("sf-auth-tree sf-auth-leaf-last");
     }
 
-    export function chooseConditionToAdd($sender, url, title) {
+    export function chooseConditionToAdd($sender : JQuery, url : string, title : string) {
         var $tr = $sender.closest("tr");
         var ns = $tr.attr("data-ns");
         var type = $tr.attr("data-type");
@@ -158,7 +158,7 @@ module SF.Auth {
             });
     };
 
-    function addCondition($typeTr, condition) {
+    function addCondition($typeTr : JQuery, condition: string) {
         var $newTr = $typeTr.clone();
         $newTr.attr("data-condition", condition);
 
@@ -178,13 +178,7 @@ module SF.Auth {
         //update indexes
         var $trsInGroup = findTrsInGroup($typeTr.attr("data-ns"), $typeTr.attr("data-type"));
         var $lastTrInGroup = $trsInGroup.filter(":last");
-        var lastConditionIndex = parseInt($lastTrInGroup.attr("data-index"));
-        if (lastConditionIndex == NaN) {
-            lastConditionIndex = 0;
-        }
-        else {
-            lastConditionIndex++;
-        }
+        var lastConditionIndex = $lastTrInGroup.attr("data-index") == undefined ? 0 : (parseInt($lastTrInGroup.attr("data-index")) + 1);
         $newTr.attr("data-index", lastConditionIndex);
 
         $newTr.find("td:first input[type='hidden']").remove();
