@@ -3,7 +3,7 @@
 @model TypeContext
 @{ var modifiable = (ModifiableEntity)Model.UntypedValue; }
 <div id="@Model.Compose("panelPopup")" class="sf-popup-control" data-prefix="@Model.ControlID">
-    <span class="sf-popup-title" style="display:none">
+    <span class="sf-popup-title">
     <span style="float:left; display:block">
     @Navigator.Manager.GetTypeTitle(modifiable)
     </span>

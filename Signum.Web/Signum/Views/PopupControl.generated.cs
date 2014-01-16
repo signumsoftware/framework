@@ -86,8 +86,6 @@ WriteLiteral(">\r\n    <span");
 
 WriteLiteral(" class=\"sf-popup-title\"");
 
-WriteLiteral(" style=\"display:none\"");
-
 WriteLiteral(">\r\n    <span");
 
 WriteLiteral(" style=\"float:left; display:block\"");
@@ -124,14 +122,14 @@ WriteLiteral("\r\n    </span>\r\n");
             #line hidden
 WriteLiteral("                <a");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 608), Tuple.Create("\"", 646)
+WriteAttribute("href", Tuple.Create(" href=\"", 587), Tuple.Create("\"", 625)
             
             #line 15 "..\..\Signum\Views\PopupControl.cshtml"
-, Tuple.Create(Tuple.Create("", 615), Tuple.Create<System.Object, System.Int32>(Navigator.NavigateRoute(ident)
+, Tuple.Create(Tuple.Create("", 594), Tuple.Create<System.Object, System.Int32>(Navigator.NavigateRoute(ident)
             
             #line default
             #line hidden
-, 615), false)
+, 594), false)
 );
 
 WriteLiteral(" class=\"sf-popup-fullscreen\"");
@@ -185,26 +183,26 @@ WriteLiteral(">\r\n");
             #line hidden
 WriteLiteral("            <button");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 1151), Tuple.Create("\"", 1179)
+WriteAttribute("id", Tuple.Create(" id=\"", 1130), Tuple.Create("\"", 1158)
             
             #line 26 "..\..\Signum\Views\PopupControl.cshtml"
-, Tuple.Create(Tuple.Create("", 1156), Tuple.Create<System.Object, System.Int32>(Model.Compose("btnOk")
+, Tuple.Create(Tuple.Create("", 1135), Tuple.Create<System.Object, System.Int32>(Model.Compose("btnOk")
             
             #line default
             #line hidden
-, 1156), false)
+, 1135), false)
 );
 
-WriteAttribute("class", Tuple.Create(" class=\"", 1180), Tuple.Create("\"", 1261)
-, Tuple.Create(Tuple.Create("", 1188), Tuple.Create("sf-entity-button", 1188), true)
-, Tuple.Create(Tuple.Create(" ", 1204), Tuple.Create("sf-ok-button", 1205), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 1159), Tuple.Create("\"", 1240)
+, Tuple.Create(Tuple.Create("", 1167), Tuple.Create("sf-entity-button", 1167), true)
+, Tuple.Create(Tuple.Create(" ", 1183), Tuple.Create("sf-ok-button", 1184), true)
             
             #line 26 "..\..\Signum\Views\PopupControl.cshtml"
-      , Tuple.Create(Tuple.Create("", 1217), Tuple.Create<System.Object, System.Int32>(saveProtected ? " sf-save-protected" : ""
+      , Tuple.Create(Tuple.Create("", 1196), Tuple.Create<System.Object, System.Int32>(saveProtected ? " sf-save-protected" : ""
             
             #line default
             #line hidden
-, 1217), false)
+, 1196), false)
 );
 
 WriteLiteral(" ");
@@ -256,25 +254,25 @@ Write(Html.ValidationSummaryAjax(Model));
             #line hidden
 WriteLiteral("\r\n    <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 1942), Tuple.Create("\"", 1979)
+WriteAttribute("id", Tuple.Create(" id=\"", 1921), Tuple.Create("\"", 1958)
             
             #line 40 "..\..\Signum\Views\PopupControl.cshtml"
-, Tuple.Create(Tuple.Create("", 1947), Tuple.Create<System.Object, System.Int32>(Model.Compose("divMainControl")
+, Tuple.Create(Tuple.Create("", 1926), Tuple.Create<System.Object, System.Int32>(Model.Compose("divMainControl")
             
             #line default
             #line hidden
-, 1947), false)
+, 1926), false)
 );
 
-WriteAttribute("class", Tuple.Create(" class=\"", 1980), Tuple.Create("\"", 2053)
-, Tuple.Create(Tuple.Create("", 1988), Tuple.Create("sf-main-control", 1988), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 1959), Tuple.Create("\"", 2032)
+, Tuple.Create(Tuple.Create("", 1967), Tuple.Create("sf-main-control", 1967), true)
             
             #line 40 "..\..\Signum\Views\PopupControl.cshtml"
-, Tuple.Create(Tuple.Create("", 2003), Tuple.Create<System.Object, System.Int32>(modifiable.IsGraphModified ? " sf-changed" : ""
+, Tuple.Create(Tuple.Create("", 1982), Tuple.Create<System.Object, System.Int32>(modifiable.IsGraphModified ? " sf-changed" : ""
             
             #line default
             #line hidden
-, 2003), false)
+, 1982), false)
 );
 
 WriteLiteral(" \r\n        data-prefix=\"");

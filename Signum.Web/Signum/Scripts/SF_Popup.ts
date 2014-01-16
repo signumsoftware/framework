@@ -56,7 +56,7 @@ interface JQuery
 }
 
 
-(function ($) {
+(function ($: JQueryStatic) {
     // $.fn is the object we add our custom functions to
     $.fn.popup = function (opt: JQueryUI.PopupOptions) {
 
@@ -120,7 +120,7 @@ interface JQuery
                         if ($this.hasClass("sf-save-protected")) {
                             var $popupDialog = $this.closest(".sf-popup-dialog");
                             var $mainControl = $popupDialog.find(".sf-main-control");
-                            if ($mainControl < 1) {
+                            if ($mainControl.length < 1) {
                                 options.onOk();
                             }
                             else if (!$mainControl.hasClass("sf-changed")) {
@@ -148,10 +148,10 @@ interface JQuery
 
                 if ($htmlTitle.length > 0) {
                     dialog.data("ui-dialog")._title = function (title) {
-                        title.html(this.options.title);
+                        title.append(this.options.title);
                     };
 
-                    dialog.dialog('option', 'title', $htmlTitle.html());
+                    dialog.dialog('option', 'title', $htmlTitle);
 
                     //$htmlTitle.remove();
                 }
