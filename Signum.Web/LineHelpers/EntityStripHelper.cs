@@ -183,7 +183,6 @@ namespace Signum.Web
         }
 
         public static MvcHtmlString EntityStrip<T, S>(this HtmlHelper helper, TypeContext<T> tc, Expression<Func<T, MList<S>>> property)
-            where S : Modifiable
         {
             return helper.EntityStrip(tc, property, null);
         }
