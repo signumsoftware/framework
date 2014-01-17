@@ -387,6 +387,11 @@ namespace Signum.Engine.Mailing
 
         SmtpClient CreateSmtpClient(EmailMessageDN email)
         {
+            if (email.SmtpConfiguration != null)
+            {
+                return email.SmtpConfiguration.Retrieve().GenerateSmtpClient();
+            }
+
             if (email.Template != null)
             {
                 var smtp = email.Template.InDB(t => t.SmtpConfiguration);
