@@ -187,16 +187,7 @@ namespace Signum.Engine.Mailing.Pop3
             stream.Seek(0, new SeekOrigin());
             byte[] buffer = new byte[stream.Length];
             stream.Read(buffer, 0, (int)stream.Length);
-            string returnValue = string.Empty;
-            switch (contentType.CharSet.ToLower())
-            {
-                case "utf-8":
-                    returnValue = System.Text.UTF8Encoding.UTF8.GetString(buffer);
-                    break;
-                case "utf-7":
-                    returnValue = System.Text.UTF7Encoding.UTF7.GetString(buffer);
-                    break;
-            }
+            string returnValue = Encoding.GetEncoding(contentType.CharSet.ToLower()).GetString(buffer);
             return returnValue;
         }
 
@@ -225,28 +216,25 @@ namespace Signum.Engine.Mailing.Pop3
 
         static AlternateView ParseTextView(StringReader r, string encoding, System.Net.Mime.ContentType contentType)
         {
-            string line = string.Empty;
-            StringBuilder b = new StringBuilder();
-            while ((line = r.ReadLine()) != null)
+            string content = r.ReadToEnd();
+
+            string result;
+
+            switch (encoding)
             {
-                switch (encoding)
-                {
-                    case "quoted-printable":
-                        if (line.EndsWith("="))
-                            b.Append(DecodeQP(line.TrimEnd('=')));
-                        else
-                            b.Append(DecodeQP(line) + "\n");
-                        break;
-                    case "base64":
-                        b.Append(DecodeBase64(line, contentType.CharSet));
-                        break;
-                    default:
-                        b.Append(line);
-                        break;
-                }
+                case "quoted-printable":
+                    result = Encoding.GetEncoding(contentType.CharSet.ToLower()).GetString(DecodeQuotePrintable(content));
+
+                    break;
+                case "base64":
+                    result = Encoding.GetEncoding(contentType.CharSet.ToLower()).GetString(Convert.FromBase64String(content));
+                    break;
+                default:
+                    result = content;
+                    break;
             }
 
-            AlternateView returnValue = AlternateView.CreateAlternateViewFromString(b.ToString(), null, contentType.MediaType);
+            AlternateView returnValue = AlternateView.CreateAlternateViewFromString(result.ToString(), null, contentType.MediaType);
             returnValue.TransferEncoding = TransferEncoding.QuotedPrintable;
             return returnValue;
         }
@@ -258,10 +246,10 @@ namespace Signum.Engine.Mailing.Pop3
             switch (encoding)
             {
                 case "quoted-printable":
-                    returnValue = new Attachment(new MemoryStream(DecodeBase64Binary(line)), contentType) { TransferEncoding = TransferEncoding.QuotedPrintable };
+                    returnValue = new Attachment(new MemoryStream(Convert.FromBase64String(line)), contentType) { TransferEncoding = TransferEncoding.QuotedPrintable };
                     break;
                 case "base64":
-                    returnValue = new Attachment(new MemoryStream(DecodeBase64Binary(line)), contentType) { TransferEncoding = TransferEncoding.Base64 };
+                    returnValue = new Attachment(new MemoryStream(Convert.FromBase64String(line)), contentType) { TransferEncoding = TransferEncoding.Base64 };
                     break;
                 default:
                     returnValue = new Attachment(new MemoryStream(Encoding.ASCII.GetBytes(line)), contentType) { TransferEncoding = TransferEncoding.SevenBit };
@@ -346,43 +334,53 @@ namespace Signum.Engine.Mailing.Pop3
             foreach (string key in headers.AllKeys)
             {
                 //strip qp encoding information from the header if present
-                headers[key] = Regex.Replace(headers[key].ToString(), @"=\?.*?\?Q\?(.*?)\?=", m => Attachment.CreateAttachmentFromString("", m.Value).Name, options);
-                headers[key] = Regex.Replace(headers[key].ToString(), @"=\?.*?\?B\?(.*?)\?=", m => Attachment.CreateAttachmentFromString("", m.Value).Name, options);
-            }
-        }
-
-        static string DecodeBase64(string line, string enc)
-        {
-            switch (enc.ToLower())
-            {
-                case "utf-7": return Encoding.UTF7.GetString(Convert.FromBase64String(line));
-                case "utf-8": return Encoding.UTF8.GetString(Convert.FromBase64String(line));
-                default: return "";
-            }
-        }
-
-        static byte[] DecodeBase64Binary(string line)
-        {
-            return Convert.FromBase64String(line);
-        }
-
-        static string DecodeQP(string trall)
-        {
-            StringBuilder b = new StringBuilder();
-            for (int i = 0; i < trall.Length; i++)
-            {
-                if (trall[i] == '=')
+                headers[key] = Regex.Replace(headers[key].ToString(), @"=\?(?<enc>[^?]*)?\?(?<cod>Q|B)\?(?<text>.*?)\?=", m =>
                 {
-                    byte tmpbyte = Convert.ToByte(trall.Substring(i + 1, 2), 16);
-                    i += 2;
-                    b.Append((char)tmpbyte);
+                    string text = m.Groups["text"].Value;
+
+                    byte[] bytes = m.Groups["cod"].Value == "Q" ? DecodeQuotePrintable(text.Replace('_', ' ')) : Convert.FromBase64String(text);
+
+                    var result = Encoding.GetEncoding(m.Groups["enc"].Value.ToLower()).GetString(bytes);
+
+                    string result2 = Attachment.CreateAttachmentFromString("", m.Value).Name;
+
+                    if (result != result2)
+                        throw new InvalidOperationException();
+
+                    return result2;
                 }
-                else if (trall[i] == '_')
-                    b.Append(' ');
-                else
-                    b.Append(trall[i]);
+                , options);
             }
-            return b.ToString();
+        }
+
+        private static byte[] DecodeQuotePrintable(string input)
+        {
+            var i = 0;
+            var output = new List<byte>();
+            while (i < input.Length)
+            {
+                if (input[i] == '=' && input[i + 1] == '\r' && input[i + 2] == '\n')
+                {
+                    //Skip
+                    i += 3;
+                }
+                else if (input[i] == '=')
+                {
+                    string sHex = input;
+                    sHex = sHex.Substring(i + 1, 2);
+                    int hex = Convert.ToInt32(sHex, 16);
+                    byte b = Convert.ToByte(hex);
+                    output.Add(b);
+                    i += 3;
+                }
+                else
+                {
+                    output.Add((byte)input[i]);
+                    i++;
+                }
+            }
+
+            return output.ToArray();
         }
     }
 }
