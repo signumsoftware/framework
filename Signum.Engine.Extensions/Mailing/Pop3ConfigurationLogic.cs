@@ -211,21 +211,21 @@ namespace Signum.Engine.Mailing
                                     Lite<EmailMessageDN> duplicate = Database.Query<EmailMessageDN>()
                                         .Where(a => a.BodyHash == email.BodyHash)
                                         .Select(a => a.ToLite())
-                                        .SingleOrDefaultEx();
+                                        .FirstOrDefault();
 
                                     if (duplicate != null && AreDuplicates(email, duplicate.Retrieve()))
                                     {
                                         var dup = duplicate.Retrieve();
-                                        dup.Duplicates++;
-                                        dup.Save();
+
+                                        email.AssignEntities(dup);
                                     }
                                     else
                                     {
                                         if (AssociateWithEntities != null)
                                             AssociateWithEntities(email);
-
-                                        email.Save();
                                     }
+
+                                    email.Save();
 
                                     sent = email.Mixin<EmailReceptionMixin>().ReceptionInfo.SentDate;
 
@@ -289,6 +289,17 @@ namespace Signum.Engine.Mailing
             }
 
             return reception;
+        }
+
+        private static void AssignEntities(this EmailMessageDN email, EmailMessageDN dup)
+        {
+            email.Target = dup.Target;
+            foreach (var att in email.Attachments)
+                att.File = dup.Attachments.FirstOrDefault(a => a.ContentId == att.ContentId).File;
+
+            email.From.EmailOwner = dup.From.EmailOwner;
+            foreach (var rec in email.Recipients)
+                rec.EmailOwner = dup.Recipients.FirstOrDefault(a => a.EmailAddress == rec.EmailAddress).EmailOwner;
         }
 
         static LambdaComparer<EmailAttachmentDN, string> fileComparer = new LambdaComparer<EmailAttachmentDN, string>(fp => fp.File.FileName);
@@ -361,7 +372,7 @@ namespace Signum.Engine.Mailing
                         new EmailAttachmentDN
                         {
                             ContentId = a.ContentId,
-                            File = new FilePathDN(EmailFileType.Attachment, a.ContentType.Name, a.ContentStream.ReadAllBytes()).Save(),
+                            File = new FilePathDN(EmailFileType.Attachment, a.ContentType.Name, a.ContentStream.ReadAllBytes()),
                             Type = EmailAttachmentType.LinkedResource
                         }));
                 }

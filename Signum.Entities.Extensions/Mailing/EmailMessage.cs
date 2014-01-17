@@ -121,13 +121,6 @@ namespace Signum.Entities.Mailing
             set { Set(ref bodyHash, value, () => BodyHash); }
         }
 
-        int duplicates;
-        public int Duplicates
-        {
-            get { return duplicates; }
-            set { Set(ref duplicates, value, () => Duplicates); }
-        }
-
         bool isBodyHtml = false;
         public bool IsBodyHtml
         {
