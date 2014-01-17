@@ -33,11 +33,11 @@ namespace Signum.Engine.Mailing
             return ReceptionsExpression.Evaluate(c);
         }
 
-        static Expression<Func<Pop3ReceptionDN, IQueryable<EmailMessageDN>>> MessagesExpression =
+        static Expression<Func<Pop3ReceptionDN, IQueryable<EmailMessageDN>>> EmailMessagesExpression =
             r => Database.Query<EmailMessageDN>().Where(m => m.Mixin<EmailReceptionMixin>().ReceptionInfo.Reception.RefersTo(r));
-        public static IQueryable<EmailMessageDN> Messages(this Pop3ReceptionDN r)
+        public static IQueryable<EmailMessageDN> EmailMessages(this Pop3ReceptionDN r)
         {
-            return MessagesExpression.Evaluate(r);
+            return EmailMessagesExpression.Evaluate(r);
         }
 
         static Expression<Func<Pop3ReceptionDN, IQueryable<ExceptionDN>>> ExceptionsExpression =
@@ -106,11 +106,12 @@ namespace Signum.Engine.Mailing
                      s.Pop3Configuration,
                      s.StartDate,
                      s.EndDate,
-                     Messages = s.Messages().Count(),
+                     s.NewEmails,
+                     EmailMessages = s.EmailMessages().Count(),
                      Exceptions = s.Exceptions().Count(),
                      s.Exception,
                  })
-                 .ColumnDisplayName(a => a.Messages, () => typeof(EmailMessageDN).NicePluralName())
+                 .ColumnDisplayName(a => a.EmailMessages, () => typeof(EmailMessageDN).NicePluralName())
                  .ColumnDisplayName(a => a.Exceptions, () => typeof(ExceptionDN).NicePluralName()));
 
                 dqm.RegisterQuery(typeof(Pop3ConfigurationDN), () =>
@@ -126,7 +127,7 @@ namespace Signum.Engine.Mailing
                     });
 
                 dqm.RegisterExpression((Pop3ConfigurationDN c) => c.Receptions(), () => typeof(Pop3ReceptionDN).NicePluralName());
-                dqm.RegisterExpression((Pop3ReceptionDN r) => r.Messages(), () => typeof(EmailMessageDN).NicePluralName());
+                dqm.RegisterExpression((Pop3ReceptionDN r) => r.EmailMessages(), () => typeof(EmailMessageDN).NicePluralName());
                 dqm.RegisterExpression((Pop3ReceptionDN r) => r.Exceptions(), () => typeof(ExceptionDN).NicePluralName());
                 dqm.RegisterExpression((ExceptionDN r) => r.Pop3Reception(), () => typeof(Pop3ReceptionDN).NiceName());
 
