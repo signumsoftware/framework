@@ -393,8 +393,11 @@ namespace Signum.Engine.Linq
 
         public static Expression LiteEquals(Expression e1, Expression e2)
         {
-            if (e1.Type.IsLite() || e2.Type.IsLite())
+            if ( e1.Type.IsLite() || e2.Type.IsLite())
             {
+                if (!e1.Type.IsLite() && !e1.IsNull() || !e2.Type.IsLite() && !e2.IsNull())
+                    throw new InvalidOperationException("Imposible to compare expressions of type {0} == {1}".Formato(e1.Type.TypeName(), e2.Type.TypeName()));
+
                 return PolymorphicEqual(GetEntity(e1), GetEntity(e2)); //Conditional and Coalesce could be inside
             }
 
