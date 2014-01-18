@@ -378,7 +378,7 @@ namespace Signum.Entities.Mailing
     public enum EmailRecipientKind
     { 
         To,
-        CC,
+        Cc,
         Bcc
     }
 

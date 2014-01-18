@@ -328,7 +328,7 @@ namespace Signum.Engine.Mailing
                 From = new EmailAddressDN(mm.From),
                 Recipients =
                    mm.To.Select(ma => new EmailRecipientDN(ma, EmailRecipientKind.To)).Concat(
-                   mm.CC.Select(ma => new EmailRecipientDN(ma, EmailRecipientKind.CC))).Concat(
+                   mm.CC.Select(ma => new EmailRecipientDN(ma, EmailRecipientKind.Cc))).Concat(
                    mm.Bcc.Select(ma => new EmailRecipientDN(ma, EmailRecipientKind.Bcc))).ToMList(),
                 State = EmailMessageState.Received,
                 Subject = mm.Subject,

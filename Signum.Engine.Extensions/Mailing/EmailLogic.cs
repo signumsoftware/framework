@@ -335,7 +335,7 @@ namespace Signum.Engine.Mailing
             }
 
             message.To.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.To).Select(r => r.ToMailAddress()).ToList());
-            message.CC.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.CC).Select(r => r.ToMailAddress()).ToList());
+            message.CC.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.Cc).Select(r => r.ToMailAddress()).ToList());
             message.Bcc.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.Bcc).Select(r => r.ToMailAddress()).ToList());
 
             return message;
