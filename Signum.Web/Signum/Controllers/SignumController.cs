@@ -157,13 +157,7 @@ namespace Signum.Web.Controllers
 
             List<Lite<IdentifiableEntity>> lites = AutocompleteUtils.FindLiteLike(Implementations.By(typeArray), q, l);
 
-            var result = lites.Select(o => new
-            {
-                id = o.Id,
-                text = o.ToString(),
-                type = Navigator.ResolveWebTypeName(o.EntityType),
-                link = Navigator.NavigateRoute(o.EntityType, o.Id)
-            }).ToList();
+            var result = lites.Select(o => new AutoCompleteResult(o)).ToList();
 
             return Json(result);
         }
@@ -174,7 +168,7 @@ namespace Signum.Web.Controllers
             var result = TypeClient.ViewableServerTypes()
                 .Where(t => t.CleanName.Contains(q, StringComparison.InvariantCultureIgnoreCase)).
                 Take(l)
-                .Select(o => new
+                .Select(o => new AutoCompleteResult
                 {
                     id = o.Id,
                     text = o.ToString(),
@@ -368,5 +362,25 @@ namespace Signum.Web.Controllers
                 throw new InvalidOperationException();
             }
         }
+    }
+
+    public class AutoCompleteResult
+    {
+        public AutoCompleteResult()
+        {
+        }
+
+        public AutoCompleteResult(Lite<IdentifiableEntity> lite)
+        {
+            id = lite.Id;
+            text = lite.ToString();
+            type = Navigator.ResolveWebTypeName(lite.EntityType);
+            link = Navigator.NavigateRoute(lite);
+        }
+
+        public int id;
+        public string text;
+        public string type;
+        public string link;
     }
 }
