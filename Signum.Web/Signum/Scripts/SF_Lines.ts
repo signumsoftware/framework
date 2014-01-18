@@ -1353,8 +1353,8 @@ module SF {
                 SF.hiddenInput(SF.compose(itemPrefix, EntityStrip.key_indexes), ";" + (this.getLastNewIndex() + 1).toString()) +
                 SF.hiddenInput(SF.compose(itemPrefix, SF.Keys.runtimeInfo), itemInfoValue) +
                 (this.options.navigate ?
-                ("<a class='sf-value-line' id='" + SF.compose(itemPrefix, EntityStrip.key_link) + "' href='" + item.link + "' title='" + lang.signum.navigate + "'>" + item.toStr + "</a>") :
-                ("<span class='sf-value-line' id='" + SF.compose(itemPrefix, EntityStrip.key_link) + "'>" + item.toStr + "</span>")) +
+                ("<a class='sf-entitStrip-link' id='" + SF.compose(itemPrefix, EntityStrip.key_link) + "' href='" + item.link + "' title='" + lang.signum.navigate + "'>" + item.toStr + "</a>") :
+                ("<span class='sf-entitStrip-link' id='" + SF.compose(itemPrefix, EntityStrip.key_link) + "'>" + item.toStr + "</span>")) +
                 "<span class='sf-button-container'>" + (
                 (this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this._getMovingUp(itemPrefix) + "\" class='sf-line-button sf-move-up' data-icon='ui-icon-triangle-1-" + (this.options.vertical ? "w" : "n") + "' data-text='false'>" + lang.signum.moveUp + "</span>") : "") +
                 (this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this._getMovingDown(itemPrefix) + "\" class='sf-line-button sf-move-down' data-icon='ui-icon-triangle-1-" + (this.options.vertical ? "e" : "s") + "' data-text='false'>" + lang.signum.moveDown + "</span>") : "") +

@@ -108,14 +108,13 @@ namespace Signum.Web
                 {
                     sb.AddLine(
                         helper.Href(itemTC.Compose(EntityBaseKeys.Link),
-                            itemTC.UntypedValue.ToString(), Navigator.NavigateRoute(itemTC.Type.CleanType(), id), JavascriptMessage.navigate.NiceToString(), "sf-value-line", null));
+                            itemTC.UntypedValue.ToString(), Navigator.NavigateRoute(itemTC.Type.CleanType(), id), JavascriptMessage.navigate.NiceToString(), "sf-entitStrip-link", null));
                 }
                 else
                 {
                     sb.AddLine(
                         helper.Span(itemTC.Compose(EntityBaseKeys.Link),
-                            itemTC.UntypedValue.ToString() ?? " ",
-                            "sf-value-line"));
+                            itemTC.UntypedValue.ToString() ?? " ", "sf-entitStrip-link"));
                 }
 
 
