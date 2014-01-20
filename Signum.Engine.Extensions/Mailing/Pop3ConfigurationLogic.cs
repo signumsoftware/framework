@@ -33,11 +33,11 @@ namespace Signum.Engine.Mailing
             return ReceptionsExpression.Evaluate(c);
         }
 
-        static Expression<Func<Pop3ReceptionDN, IQueryable<EmailMessageDN>>> MessagesExpression =
+        static Expression<Func<Pop3ReceptionDN, IQueryable<EmailMessageDN>>> EmailMessagesExpression =
             r => Database.Query<EmailMessageDN>().Where(m => m.Mixin<EmailReceptionMixin>().ReceptionInfo.Reception.RefersTo(r));
-        public static IQueryable<EmailMessageDN> Messages(this Pop3ReceptionDN r)
+        public static IQueryable<EmailMessageDN> EmailMessages(this Pop3ReceptionDN r)
         {
-            return MessagesExpression.Evaluate(r);
+            return EmailMessagesExpression.Evaluate(r);
         }
 
         static Expression<Func<Pop3ReceptionDN, IQueryable<ExceptionDN>>> ExceptionsExpression =
@@ -106,11 +106,12 @@ namespace Signum.Engine.Mailing
                      s.Pop3Configuration,
                      s.StartDate,
                      s.EndDate,
-                     Messages = s.Messages().Count(),
+                     s.NewEmails,
+                     EmailMessages = s.EmailMessages().Count(),
                      Exceptions = s.Exceptions().Count(),
                      s.Exception,
                  })
-                 .ColumnDisplayName(a => a.Messages, () => typeof(EmailMessageDN).NicePluralName())
+                 .ColumnDisplayName(a => a.EmailMessages, () => typeof(EmailMessageDN).NicePluralName())
                  .ColumnDisplayName(a => a.Exceptions, () => typeof(ExceptionDN).NicePluralName()));
 
                 dqm.RegisterQuery(typeof(Pop3ConfigurationDN), () =>
@@ -126,7 +127,7 @@ namespace Signum.Engine.Mailing
                     });
 
                 dqm.RegisterExpression((Pop3ConfigurationDN c) => c.Receptions(), () => typeof(Pop3ReceptionDN).NicePluralName());
-                dqm.RegisterExpression((Pop3ReceptionDN r) => r.Messages(), () => typeof(EmailMessageDN).NicePluralName());
+                dqm.RegisterExpression((Pop3ReceptionDN r) => r.EmailMessages(), () => typeof(EmailMessageDN).NicePluralName());
                 dqm.RegisterExpression((Pop3ReceptionDN r) => r.Exceptions(), () => typeof(ExceptionDN).NicePluralName());
                 dqm.RegisterExpression((ExceptionDN r) => r.Pop3Reception(), () => typeof(Pop3ReceptionDN).NiceName());
 
@@ -210,21 +211,21 @@ namespace Signum.Engine.Mailing
                                     Lite<EmailMessageDN> duplicate = Database.Query<EmailMessageDN>()
                                         .Where(a => a.BodyHash == email.BodyHash)
                                         .Select(a => a.ToLite())
-                                        .SingleOrDefaultEx();
+                                        .FirstOrDefault();
 
                                     if (duplicate != null && AreDuplicates(email, duplicate.Retrieve()))
                                     {
                                         var dup = duplicate.Retrieve();
-                                        dup.Duplicates++;
-                                        dup.Save();
+
+                                        email.AssignEntities(dup);
                                     }
                                     else
                                     {
                                         if (AssociateWithEntities != null)
                                             AssociateWithEntities(email);
-
-                                        email.Save();
                                     }
+
+                                    email.Save();
 
                                     sent = email.Mixin<EmailReceptionMixin>().ReceptionInfo.SentDate;
 
@@ -290,6 +291,17 @@ namespace Signum.Engine.Mailing
             return reception;
         }
 
+        private static void AssignEntities(this EmailMessageDN email, EmailMessageDN dup)
+        {
+            email.Target = dup.Target;
+            foreach (var att in email.Attachments)
+                att.File = dup.Attachments.FirstOrDefault(a => a.ContentId == att.ContentId).File;
+
+            email.From.EmailOwner = dup.From.EmailOwner;
+            foreach (var rec in email.Recipients)
+                rec.EmailOwner = dup.Recipients.FirstOrDefault(a => a.EmailAddress == rec.EmailAddress).EmailOwner;
+        }
+
         static LambdaComparer<EmailAttachmentDN, string> fileComparer = new LambdaComparer<EmailAttachmentDN, string>(fp => fp.File.FileName);
 
         private static bool AreDuplicates(EmailMessageDN email, EmailMessageDN dup)
@@ -316,7 +328,7 @@ namespace Signum.Engine.Mailing
                 From = new EmailAddressDN(mm.From),
                 Recipients =
                    mm.To.Select(ma => new EmailRecipientDN(ma, EmailRecipientKind.To)).Concat(
-                   mm.CC.Select(ma => new EmailRecipientDN(ma, EmailRecipientKind.CC))).Concat(
+                   mm.CC.Select(ma => new EmailRecipientDN(ma, EmailRecipientKind.Cc))).Concat(
                    mm.Bcc.Select(ma => new EmailRecipientDN(ma, EmailRecipientKind.Bcc))).ToMList(),
                 State = EmailMessageState.Received,
                 Subject = mm.Subject,
@@ -360,7 +372,7 @@ namespace Signum.Engine.Mailing
                         new EmailAttachmentDN
                         {
                             ContentId = a.ContentId,
-                            File = new FilePathDN(EmailFileType.Attachment, a.ContentType.Name, a.ContentStream.ReadAllBytes()).Save(),
+                            File = new FilePathDN(EmailFileType.Attachment, a.ContentType.Name, a.ContentStream.ReadAllBytes()),
                             Type = EmailAttachmentType.LinkedResource
                         }));
                 }

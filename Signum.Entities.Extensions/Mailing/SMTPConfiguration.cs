@@ -35,11 +35,31 @@ namespace Signum.Entities.Mailing
             set { Set(ref port, value, () => Port); }
         }
 
+        [NotNullable, SqlDbType(Size = 100)]
         string host;
+        [StringLengthValidator(AllowNulls = false, Min = 3, Max = 100)]
         public string Host
         {
             get { return host; }
             set { Set(ref host, value, () => Host); }
+        }
+
+        [SqlDbType(Size = 100)]
+        string username;
+        [StringLengthValidator(AllowNulls = true, Max = 100)]
+        public string Username
+        {
+            get { return username; }
+            set { Set(ref username, value, () => Username); }
+        }
+
+        [SqlDbType(Size = 100)]
+        string password;
+        [StringLengthValidator(AllowNulls = true, Max = 100)]
+        public string Password
+        {
+            get { return password; }
+            set { Set(ref password, value, () => Password); }
         }
 
         bool useDefaultCredentials = true;
@@ -47,20 +67,6 @@ namespace Signum.Entities.Mailing
         {
             get { return useDefaultCredentials; }
             set { Set(ref useDefaultCredentials, value, () => UseDefaultCredentials); }
-        }
-
-        string username;
-        public string Username
-        {
-            get { return username; }
-            set { Set(ref username, value, () => Username); }
-        }
-
-        string password;
-        public string Password
-        {
-            get { return password; }
-            set { Set(ref password, value, () => Password); }
         }
 
         [NotNullable]

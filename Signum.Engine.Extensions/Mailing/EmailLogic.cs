@@ -335,7 +335,7 @@ namespace Signum.Engine.Mailing
             }
 
             message.To.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.To).Select(r => r.ToMailAddress()).ToList());
-            message.CC.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.CC).Select(r => r.ToMailAddress()).ToList());
+            message.CC.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.Cc).Select(r => r.ToMailAddress()).ToList());
             message.Bcc.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.Bcc).Select(r => r.ToMailAddress()).ToList());
 
             return message;
@@ -387,6 +387,11 @@ namespace Signum.Engine.Mailing
 
         SmtpClient CreateSmtpClient(EmailMessageDN email)
         {
+            if (email.SmtpConfiguration != null)
+            {
+                return email.SmtpConfiguration.Retrieve().GenerateSmtpClient();
+            }
+
             if (email.Template != null)
             {
                 var smtp = email.Template.InDB(t => t.SmtpConfiguration);
