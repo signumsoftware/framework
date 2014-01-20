@@ -72,7 +72,8 @@
                     <h3>@EmailMessageMessage.Message.NiceToString():</h3>
                     <div>
                         @{
-                    var body = Signum.Web.Mailing.MailingClient.GetWebMailBody(e.Value.Body, e.Value.Attachments);
+                    bool hasUntrusted;
+                    var body = Signum.Web.Mailing.MailingClient.GetWebMailBody(e.Value.Body, e.Value.Attachments, null, out hasUntrusted);
                         }
                         @if (e.Value.IsBodyHtml)
                         {
