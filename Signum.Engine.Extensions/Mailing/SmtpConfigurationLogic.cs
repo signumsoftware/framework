@@ -35,6 +35,7 @@ namespace Signum.Engine.Mailing
                     {
                         Entity = s,
                         s.Id,
+                        s.Name,
                         s.Host,
                         s.Port,
                         s.UseDefaultCredentials,

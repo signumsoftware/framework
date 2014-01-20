@@ -19,6 +19,15 @@ namespace Signum.Entities.Mailing
             set { Set(ref isDefault, value, () => IsDefault); }
         }
 
+        [NotNullable, SqlDbType(Size = 100), UniqueIndex]
+        string name;
+        [StringLengthValidator(AllowNulls = false, Min = 1, Max = 100)]
+        public string Name
+        {
+            get { return name; }
+            set { SetToStr(ref name, value, () => Name); }
+        }
+
         int port = 25;
         public int Port
         {
@@ -93,9 +102,10 @@ namespace Signum.Entities.Mailing
             set { Set(ref clientCertificationFiles, value, () => ClientCertificationFiles); }
         }
 
+        static readonly Expression<Func<SmtpConfigurationDN, string>> ToStringExpression = e => e.name;
         public override string ToString()
         {
-            return "{0} ({1})".Formato(Username, Host);
+            return ToStringExpression.Evaluate(this);
         }
     }
 
