@@ -275,21 +275,36 @@ namespace Signum.Web.Mailing
             return null;
         }
 
-        public static string GetWebMailBody(string body, IEnumerable<EmailAttachmentDN> attachments)
+        public static string GetWebMailBody(string body, IEnumerable<EmailAttachmentDN> attachments, string untrustedImage, out bool hasUntrusted)
         {
-            if (!attachments.Any())
+            if (!attachments.Any() && untrustedImage == null)
+            {
+                hasUntrusted = false;
                 return body;
+            }
 
             var r = RouteHelper.New();
 
+            bool hasUntrustedInternal = false;
+
             var dic = attachments.Where(a => a.File.FullWebPath.HasText()).ToDictionary(a => a.ContentId, a => r.Content(a.File.FullWebPath));
 
-            return Regex.Replace(body, "src=\"(?<link>[^\"]*)\"", m =>
+            var result = Regex.Replace(body, "src=\"(?<link>[^\"]*)\"", m =>
             {
                 var value = m.Groups["link"].Value;
 
                 if (!value.StartsWith("cid:"))
+                {
+                    hasUntrustedInternal = true;
+
+                    if (untrustedImage != null)
+                    {
+                        return "src=\"{0}\"".Formato(r.Content(untrustedImage));
+                    }
+
                     return m.Value;
+
+                }
 
                 value = value.After("cid:");
 
@@ -300,6 +315,10 @@ namespace Signum.Web.Mailing
 
                 return "src=\"{0}\"".Formato(r.Content(link));
             });
+
+            hasUntrusted = hasUntrustedInternal;
+
+            return result;
         }
         
         public static string SetWebMailBody(string body, IEnumerable<EmailAttachmentDN> attachments)
