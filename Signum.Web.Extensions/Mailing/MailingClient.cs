@@ -289,32 +289,48 @@ namespace Signum.Web.Mailing
 
             var dic = attachments.Where(a => a.File.FullWebPath.HasText()).ToDictionary(a => a.ContentId, a => r.Content(a.File.FullWebPath));
 
-            var result = Regex.Replace(body, "src=\"(?<link>[^\"]*)\"", m =>
+            var result = Regex.Replace(body, @"<img [^>]*>", img =>
             {
-                var value = m.Groups["link"].Value;
+                string prevSource = null;
 
-                if (!value.StartsWith("cid:"))
+                var newImg = Regex.Replace(img.Value, "src=\"(?<link>[^\"]*)\"", src =>
                 {
-                    hasUntrustedInternal = true;
+                    var value = src.Groups["link"].Value;
 
-                    if (untrustedImage != null)
+                    if (!value.StartsWith("cid:"))
                     {
-                        return "src=\"{0}\"".Formato(r.Content(untrustedImage));
+                        if (untrustedImage != null)
+                        {
+                            hasUntrustedInternal = true;
+                            prevSource = value;
+                            return "src=\"{0}\"".Formato(r.Content(untrustedImage));
+                        }
+
+                        return src.Value;
+
                     }
 
-                    return m.Value;
+                    value = value.After("cid:");
 
-                }
+                    var link = dic.TryGetC(value);
 
-                value = value.After("cid:");
+                    if (link == null)
+                        return src.Value;
 
-                var link = dic.TryGetC(value);
+                    return "src=\"{0}\"".Formato(r.Content(link));
+                });
 
-                if (link == null)
-                    return m.Value;
+                if (prevSource == null)
+                    return newImg;
+               
+                var title = prevSource;
 
-                return "src=\"{0}\"".Formato(r.Content(link));
-            });
+                var alt = Regex.Match(img.Value, "alt=\"(?<alt>[^\"]*)\"");
+                if (alt.Success && alt.Groups["alt"].Value.HasText())
+                    title = alt.Groups["alt"].Value + "\r\n" + title;
+
+                return newImg.Insert("<img ".Length, "title=\"" + title + "\" ");
+            }); 
 
             hasUntrusted = hasUntrustedInternal;
 
