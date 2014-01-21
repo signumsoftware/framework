@@ -3,10 +3,7 @@
 <head>
     <title>Chart container</title>
     <meta http-equiv="X-UA-Compatible" content="IE=9" />
-    <script src="jquery-1.7.2.min.js" />
-    <script src="d3.v2.min.js" />
-    <script src="SF_Chart_Utils.js" />
-    <script src="colorbrewer.js" />
+   
     <style src="reset.css" />
     <style type="text/css">
         body
@@ -24,9 +21,20 @@
 <body>
     <div id="container">
     </div>
+    <script>
+        function once(key, func) {
+            func();
+        }
+    </script>
+    <script src="jquery-1.7.2.min.js" />
+    <script src="d3.v2.min.js" />
+    <script src="SF_Chart_Utils.js" />
+    <script src="colorbrewer.js" />
     <script type="text/javascript">
 
         var exceptionLine = null;
+
+       
 
         function reDraw(rawCode, rawData) {
             var $container = $("#container");
