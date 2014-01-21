@@ -315,15 +315,19 @@ namespace Signum.Engine.Mailing.Pop3
                 return returnValue;
 
             returnValue = new ContentType(Regex.Match(ct, @"^([^;]*)", RegexOptions.IgnoreCase).Groups[1].Value);
-            if (Regex.IsMatch(ct, @"name=""?(.*?)""?($|;)", RegexOptions.IgnoreCase))
-                returnValue.Name = Regex.Match(ct, @"name=""?(.*?)""?($|;)", RegexOptions.IgnoreCase).Groups[1].Value;
 
-            if (Regex.IsMatch(ct, @"boundary=(.*?)(;|$)", RegexOptions.IgnoreCase))
-                returnValue.Boundary = Regex.Match(ct, @"boundary=(.*?)(;|$)", RegexOptions.IgnoreCase).Groups[1].Value.Trim('\'', '"');
+            var m = Regex.Match(ct, @"name\s*=\s*(.*?)\s*($|;)", RegexOptions.IgnoreCase);
+            if(m.Success)
+                returnValue.Name = m.Groups[1].Value.Trim('\'', '"');
 
-            if (Regex.IsMatch(ct, @"charset=(.*?)(;|$)", RegexOptions.IgnoreCase))
-                returnValue.CharSet = Regex.Match(ct, @"charset=(.*?)(;|$)", RegexOptions.IgnoreCase).Groups[1].Value.Trim('\'', '"');
+            m = Regex.Match(ct, @"boundary\s*=\s*(.*?)\s*($|;)", RegexOptions.IgnoreCase);
+            if (m.Success)
+                returnValue.Boundary = m.Groups[1].Value.Trim('\'', '"');
 
+            m = Regex.Match(ct, @"charset\s*=\s*(.*?)\s*($|;)", RegexOptions.IgnoreCase);
+            if (m.Success)
+                returnValue.CharSet = m.Groups[1].Value.Trim('\'', '"');
+        
             return returnValue;
         }
 
