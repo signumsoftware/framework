@@ -93,7 +93,7 @@ module SF {
             this.callServer(function (controlHtml) { onHtmlReceived(controlHtml) });
         }
 
-        public viewSave(html) {
+        public viewSave(html?: string) {
             if (SF.isEmpty(this.viewOptions.containerDiv)) {
                 throw "No ContainerDiv was specified to Navigator on viewSave mode";
             }
