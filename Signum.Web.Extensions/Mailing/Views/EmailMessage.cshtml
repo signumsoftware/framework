@@ -69,12 +69,10 @@
                 }
                 else
                 {
-                    <h3>@EmailMessageMessage.Message.NiceToString():</h3>
-                    <div>
-                        @{
                     bool hasUntrusted;
                     var body = Signum.Web.Mailing.MailingClient.GetWebMailBody(e.Value.Body, e.Value.Attachments, null, out hasUntrusted);
-                        }
+                    <h3>@EmailMessageMessage.Message.NiceToString():</h3>
+                    <div>
                         @if (e.Value.IsBodyHtml)
                         {
                             @Html.ScriptsJs("~/Mailing/Scripts/SF_Mailing.js")
@@ -92,8 +90,8 @@
                         else
                         {
                             <pre>
-            @Html.Raw(HttpUtility.HtmlEncode(body))
-            </pre>
+                            @Html.Raw(HttpUtility.HtmlEncode(e.Value.Body))
+                            </pre>
                         }
                     </div>
                 }
