@@ -246,7 +246,7 @@ namespace Signum.Engine.Mailing.Pop3
             switch (encoding)
             {
                 case "quoted-printable":
-                    returnValue = new Attachment(new MemoryStream(Convert.FromBase64String(line)), contentType) { TransferEncoding = TransferEncoding.QuotedPrintable };
+                    returnValue = new Attachment(new MemoryStream(DecodeQuotePrintable(line)), contentType) { TransferEncoding = TransferEncoding.QuotedPrintable };
                     break;
                 case "base64":
                     returnValue = new Attachment(new MemoryStream(Convert.FromBase64String(line)), contentType) { TransferEncoding = TransferEncoding.Base64 };
