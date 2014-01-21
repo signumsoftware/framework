@@ -27,19 +27,10 @@ namespace Signum.Web.Processes
         [HttpPost]
         public ContentResult GetProgressExecution(int id)
         {
-            decimal progress = Database.Query<ProcessDN>().Where(pe => 
-                    pe.Id == id).Select(pe => pe.Progress).SingleEx() ?? 100;
+            decimal progress = Database.Query<ProcessDN>().Where(pe =>
+                    pe.Id == id && pe.State != ProcessState.Error).Select(pe => pe.Progress).SingleOrDefaultEx() ?? 100;
 
             return Content(Math.Round(progress, 0).ToString());
-        }
-
-        [HttpPost]
-        public PartialViewResult FinishProcessNormalPage()
-        {
-            ProcessDN process = this.ExtractEntity<ProcessDN>()
-                .ThrowIfNullC("Entity was not possible to Extract");
-
-            return Navigator.NormalControl(this, process);
         }
 
         [HttpGet]

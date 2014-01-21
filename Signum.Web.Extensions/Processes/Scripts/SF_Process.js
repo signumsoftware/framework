@@ -3,16 +3,10 @@
 var SF;
 (function (SF) {
     (function (Process) {
-        var $processEnable = $("#sfProcessEnable");
-        var $processDisable = $("#sfProcessDisable");
-        var refresh;
+        function initControlPanel(refreshCallback) {
+            var $processEnable = $("#sfProcessEnable");
+            var $processDisable = $("#sfProcessDisable");
 
-        function init(refreshCallback) {
-            refresh = refreshCallback;
-        }
-        Process.init = init;
-
-        once("SF-Process", function () {
             $processEnable.click(function (e) {
                 e.preventDefault();
                 $.ajax({
@@ -20,7 +14,7 @@ var SF;
                     success: function () {
                         $processEnable.hide();
                         $processDisable.show();
-                        refresh();
+                        refreshCallback();
                     }
                 });
             });
@@ -32,11 +26,40 @@ var SF;
                     success: function () {
                         $processDisable.hide();
                         $processEnable.show();
-                        refresh();
+                        refreshCallback();
                     }
                 });
             });
-        });
+        }
+        Process.initControlPanel = initControlPanel;
+
+        function refreshUpdate(idProcess, prefix, getProgressUrl) {
+            setTimeout(function () {
+                $.post(getProgressUrl, { id: idProcess }, function (data) {
+                    $("#progressBar").width(data + '%');
+                    if (data < 100) {
+                        refreshUpdate(idProcess, prefix, getProgressUrl);
+                    } else {
+                        if (SF.isEmpty(prefix)) {
+                            window.location.reload();
+                        } else {
+                            var oldViewNav = new SF.ViewNavigator({ prefix: prefix });
+                            var tempDivId = oldViewNav.tempDivId();
+
+                            SF.closePopup(prefix);
+
+                            new SF.ViewNavigator({
+                                type: "Process",
+                                id: idProcess,
+                                prefix: prefix,
+                                containerDiv: tempDivId
+                            }).viewSave();
+                        }
+                    }
+                });
+            }, 2000);
+        }
+        Process.refreshUpdate = refreshUpdate;
     })(SF.Process || (SF.Process = {}));
     var Process = SF.Process;
 })(SF || (SF = {}));

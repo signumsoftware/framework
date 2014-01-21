@@ -236,6 +236,11 @@ namespace Signum.Entities.Processes
                 User = UserDN.Current.ToLite(),
             };
         }
+
+        public override string ToString()
+        {
+            return GetType().NiceName() + ":" + user.TryToString();
+        }
     }
 
     public enum ProcessState

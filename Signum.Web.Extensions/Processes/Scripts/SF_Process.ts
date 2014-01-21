@@ -2,15 +2,11 @@
 /// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/references.ts"/>
 
 module SF.Process {
-    var $processEnable = $("#sfProcessEnable");
-    var $processDisable = $("#sfProcessDisable");
-    var refresh: () => void;
+    export function initControlPanel(refreshCallback: () => void) {
 
-    export function init(refreshCallback: () => void) {
-        refresh = refreshCallback;
-    }
+        var $processEnable = $("#sfProcessEnable");
+        var $processDisable = $("#sfProcessDisable");
 
-    once("SF-Process", () => {
         $processEnable.click(function (e) {
             e.preventDefault();
             $.ajax({
@@ -18,7 +14,7 @@ module SF.Process {
                 success: function () {
                     $processEnable.hide();
                     $processDisable.show();
-                    refresh();
+                    refreshCallback();
                 }
             });
         });
@@ -30,9 +26,40 @@ module SF.Process {
                 success: function () {
                     $processDisable.hide();
                     $processEnable.show();
-                    refresh();
+                    refreshCallback();
                 }
             });
         });
-    });
+    }
+
+
+    export function refreshUpdate(idProcess: string, prefix: string, getProgressUrl: string) {
+        setTimeout(function () {
+            $.post(getProgressUrl, { id: idProcess }, function (data) {
+                $("#progressBar").width(data + '%');
+                if (data < 100) {
+                    refreshUpdate(idProcess, prefix, getProgressUrl);
+                }
+                else {
+                    if (SF.isEmpty(prefix)) {
+                        window.location.reload();
+                    }
+                    else {
+                        var oldViewNav = new SF.ViewNavigator({ prefix: prefix });
+                        var tempDivId = oldViewNav.tempDivId();
+
+                        SF.closePopup(prefix);
+
+                        new SF.ViewNavigator({
+                            type: "Process",
+                            id: idProcess,
+                            prefix: prefix,
+                            containerDiv: tempDivId
+                        }).viewSave();
+                    }
+                }
+            });
+        }, 2000);
+
+    }
 }

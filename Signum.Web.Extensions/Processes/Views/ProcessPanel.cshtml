@@ -18,7 +18,7 @@
     @Html.Partial(ProcessesClient.ViewPrefix.Formato("ProcessPanelTable"))
     <script language="javascript">
         $(function () {
-            SF.Process.init(function () {
+            SF.Process.initControlPanel(function () {
                 $.get("@Url.Action((ProcessController p) => p.View())", function (data) {
                     $("div.processMainDiv").replaceWith(data);
                 });

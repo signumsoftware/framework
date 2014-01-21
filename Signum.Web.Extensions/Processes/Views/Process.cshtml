@@ -1,6 +1,7 @@
 ﻿@using Signum.Entities.Processes
 
 @Html.ScriptCss("~/processes/Content/Processes.css")
+@Html.ScriptsJs("~/Processes/Scripts/SF_Process.js")
 
 @using (var e = Html.TypeContext<ProcessDN>())
 {
@@ -31,42 +32,11 @@
     </div>
 
     <script type="text/javascript">
-    $(function() {
-        var idProcess = '@e.Value.Id';
-        var prefix = '@e.ControlID';
-
-        refreshUpdate(idProcess, prefix);
+        $(function () {
+            SF.Process.refreshUpdate('@e.Value.Id', '@e.ControlID',
+            "@Url.Action("GetProgressExecution", "Process")");
     })
-
-    function refreshUpdate(idProcess, prefix) {
-        setTimeout(function() {
-            $.post("@Url.Action("GetProgressExecution", "Process")", { id: idProcess }, function(data) {
-                $("#progressBar").width(data + '%');
-                if (data < 100) {
-                    refreshUpdate(idProcess, prefix);
-                }
-                else {
-                    if (SF.isEmpty(prefix)) {
-                        /*SF.reloadEntity("@Url.Action("FinishProcessNormalPage", "Process")", idPrefix);*/
-                    }
-                    else {
-                        var oldViewNav = new SF.ViewNavigator({ prefix: prefix });
-                        var tempDivId = oldViewNav.tempDivId();
-                    
-                        SF.closePopup(prefix);
-
-                        new SF.ViewNavigator({
-                            type: "Process",
-                            id: idProcess,
-                            prefix: prefix,
-                            containerDiv: tempDivId
-                        }).viewSave();
-                    }
-                }
-            });
-        }, 2000);
-     }
     </script>
 
     }
-} 
+}
