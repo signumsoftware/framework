@@ -293,12 +293,12 @@ module SF
             }
             onAjaxSuccess = typeof onAjaxSuccess == "undefined" ? SF.opOnSuccessDispatcher : onAjaxSuccess;
 
-            var onSuccess = function () {
+            var onSuccess = () => {
                 this.ajax(newPrefix, onAjaxSuccess);
             }
 
             if (SF.isTrue(this.options.isLite)) {
-                onSuccess.call(this);
+                onSuccess();
             }
             else {
                 var self = this;
@@ -306,7 +306,7 @@ module SF
                 if (!SF.isEmpty(this.options.parentDiv)) { // So as not to override parentDiv to be set in PartialValidator constructor
                     valOptions.parentDiv = this.options.parentDiv;
                 }
-                if (!SF.EntityIsValid(valOptions, function () { onSuccess.call(self) }, this.options.sender)) {
+                if (!SF.EntityIsValid(valOptions, function () { onSuccess() }, this.options.sender)) {
                     return;
                 }
             }

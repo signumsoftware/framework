@@ -267,6 +267,7 @@ var SF;
             }, _options));
         }
         ConstructorFrom.prototype.validateAndAjax = function (newPrefix, onAjaxSuccess) {
+            var _this = this;
             if (SF.Blocker.isEnabled()) {
                 return false;
             }
@@ -277,11 +278,11 @@ var SF;
             onAjaxSuccess = typeof onAjaxSuccess == "undefined" ? SF.opOnSuccessDispatcher : onAjaxSuccess;
 
             var onSuccess = function () {
-                this.ajax(newPrefix, onAjaxSuccess);
+                _this.ajax(newPrefix, onAjaxSuccess);
             };
 
             if (SF.isTrue(this.options.isLite)) {
-                onSuccess.call(this);
+                onSuccess();
             } else {
                 var self = this;
                 var valOptions = $.extend({ prefix: this.options.prefix }, this.options.validationOptions);
@@ -289,7 +290,7 @@ var SF;
                     valOptions.parentDiv = this.options.parentDiv;
                 }
                 if (!SF.EntityIsValid(valOptions, function () {
-                    onSuccess.call(self);
+                    onSuccess();
                 }, this.options.sender)) {
                     return;
                 }
