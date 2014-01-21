@@ -120,7 +120,10 @@ namespace Signum.Engine.Mailing.Pop3
             StringBuilder sb = new StringBuilder();
             while (!(response = reader.ReadLine()).Equals("."))
             {
-                sb.AppendLine(response);
+                if (response.StartsWith(".."))
+                    sb.AppendLine(response.Substring(1));
+                else
+                    sb.AppendLine(response);
             }
             return sb.ToString();
         }
