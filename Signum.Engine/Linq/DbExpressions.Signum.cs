@@ -159,9 +159,13 @@ namespace Signum.Engine.Linq
         public readonly FieldInfo FieldInfo;
         public readonly Expression Binding;
 
-        public FieldBinding(FieldInfo fieldInfo, Expression binding)
+        public FieldBinding(FieldInfo fieldInfo, Expression binding, bool allowForcedNull = false)
         {
-            if (!fieldInfo.FieldType.IsAssignableFrom(binding.Type))
+            var ft = fieldInfo.FieldType;
+            if(allowForcedNull)
+                ft = ft.Nullify();
+
+            if (!ft.IsAssignableFrom(binding.Type))
                 throw new ArgumentException("Type of expression is {0} but type of field is {1}".Formato(binding.Type.TypeName(), fieldInfo.FieldType.TypeName()));
             
             this.FieldInfo = fieldInfo;

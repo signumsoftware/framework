@@ -198,32 +198,6 @@ namespace Signum.Engine.Maps
             ColumnExpression hasValue = HasValue == null ? null : new ColumnExpression(typeof(bool), tableAlias, HasValue.Name);
             return new EmbeddedEntityExpression(this.FieldType, hasValue, bindings, this); 
         }
-
-        internal EmbeddedEntityExpression FromConstantExpression(ConstantExpression contant, QueryBinder tools)
-        {
-            var value = contant.Value;
-
-            var bindings = (from kvp in EmbeddedFields
-                            let fi = kvp.Value.FieldInfo
-                            select new FieldBinding(fi,
-                                tools.VisitConstant(kvp.Value.Getter(value), kvp.Value.FieldInfo.FieldType))).ToReadOnly();
-
-            return new EmbeddedEntityExpression(this.FieldType, Expression.Constant(true), bindings, this); 
-        }
-
-        internal EmbeddedEntityExpression FromMemberInitiExpression(MemberInitExpression mie, QueryBinder tools)
-        {
-            var dic = mie.Bindings.OfType<MemberAssignment>().ToDictionary(a=>(a.Member as FieldInfo ?? Reflector.FindFieldInfo(mie.Type,  (PropertyInfo)a.Member)).Name, a=>a.Expression);
-
-            var bindings = (from kvp in EmbeddedFields
-                            let fi = kvp.Value.FieldInfo
-                            select new FieldBinding(fi, 
-                                !(fi.FieldType.IsByRef || fi.FieldType.IsNullable()) ?  dic.GetOrThrow(fi.Name, "No value defined for non-nullable field {0}") : 
-                                (dic.TryGetC(fi.Name) ?? tools.VisitConstant(Expression.Constant(null, fi.FieldType), fi.FieldType))
-                            )).ToReadOnly();
-
-            return new EmbeddedEntityExpression(this.FieldType, Expression.Constant(true), bindings, this);
-        }
     }
 
     public partial class FieldMixin
