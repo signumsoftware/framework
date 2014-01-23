@@ -2563,7 +2563,7 @@ namespace Signum.Engine.Linq
             if (colExpression is EmbeddedEntityExpression)
                 return Combiner<EmbeddedEntityExpression>(ifTrue, ifFalse, (col, t, f) =>
                    new EmbeddedEntityExpression(col.Type,
-                       col.HasValue == null ? null : Expression.Condition(test, t.HasValue.Nullify(), f.HasValue.Nullify()),
+                       col.HasValue == null ? null : Expression.Condition(test, t.HasValue, f.HasValue),
                        col.Bindings.Select(bin => GetBinding(bin.FieldInfo, Expression.Condition(test, t.GetBinding(bin.FieldInfo).Nullify(), f.GetBinding(bin.FieldInfo).Nullify()), bin.Binding)), 
                        col.FieldEmbedded));
 
@@ -2599,7 +2599,7 @@ namespace Signum.Engine.Linq
                 if (colExpression is EmbeddedEntityExpression)
                     return Combiner<EmbeddedEntityExpression>(left, right, (col, l, r) =>
                        new EmbeddedEntityExpression(col.Type,
-                           col.HasValue == null ? null : Expression.Coalesce(l.HasValue, r.HasValue),
+                           col.HasValue == null ? null : Expression.Or(l.HasValue, r.HasValue),
                            col.Bindings.Select(bin => GetBinding(bin.FieldInfo, Expression.Coalesce(l.GetBinding(bin.FieldInfo).Nullify(), r.GetBinding(bin.FieldInfo).Nullify()), bin.Binding)),
                            col.FieldEmbedded));
             }
@@ -2625,7 +2625,7 @@ namespace Signum.Engine.Linq
             if (colExpression is ImplementedByAllExpression)
                 return new ImplementedByAllExpression(colExpression.Type,
                     ee.ExternalId,
-                    new TypeImplementedByAllExpression(Expression.Condition(Expression.Equal(ee.ExternalId, null), nullId, QueryBinder.TypeConstant(ee.Type))));
+                    new TypeImplementedByAllExpression(Expression.Condition(Expression.Equal(ee.ExternalId.Nullify(), nullId), nullId, QueryBinder.TypeConstant(ee.Type))));
 
             if (colExpression is ImplementedByExpression)
             {
