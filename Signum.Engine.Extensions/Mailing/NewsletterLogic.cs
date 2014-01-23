@@ -94,7 +94,7 @@ namespace Signum.Engine.Mailing
                         var smtp = input.SmtpConfig.Retrieve();
 
                         if (smtp.DefaultFrom == null)
-                            return EmailMessageMessage.DefaultFromIsMandatoryInSmtpConfig.NiceToString();
+                            return EmailMessageMessage.DefaultFromIsMandatory.NiceToString();
                     }
 
                     return null;

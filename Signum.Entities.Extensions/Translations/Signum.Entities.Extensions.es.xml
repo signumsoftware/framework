@@ -435,7 +435,6 @@
     <Member Name="Body" Description="Cuerpo" />
     <Member Name="BodyHash" Description="Hash Cuerpo" />
     <Member Name="CreationTime" Description="Fecha de creación" />
-    <Member Name="Duplicates" Description="Duplicados" />
     <Member Name="EditableMessage" Description="Mensaje editable" />
     <Member Name="Exception" Description="Error" />
     <Member Name="From" Description="De" />
@@ -452,6 +451,7 @@
     <Member Name="UniqueIdentifier" Description="Identificador único" />
   </Type>
   <Type Name="EmailMessageMessage">
+    <Member Name="DefaultFromIsMandatory" Description="Desde por defecto es obligatorio" />
     <Member Name="ExceptionMessages" Description="Mensajes excepción" />
     <Member Name="Message" Description="Mensaje" />
     <Member Name="Messages" Description="Mensajes" />
@@ -498,7 +498,7 @@
   </Type>
   <Type Name="EmailRecipientKind" Description="Tipo destinatario email">
     <Member Name="Bcc" Description="CCO" />
-    <Member Name="CC" Description="CC" />
+    <Member Name="Cc" Description="CC" />
     <Member Name="To" Description="Para" />
   </Type>
   <Type Name="EmailRecipientOperation">
@@ -848,7 +848,6 @@
     <Member Name="DeleteMessagesAfter" Description="Borrar mensajes después de" />
     <Member Name="EnableSSL" Description="Activar SSL" />
     <Member Name="Host" Description="Host" />
-    <Member Name="Name" Description="Nombre" />
     <Member Name="Password" Description="Contraseña" />
     <Member Name="Port" Description="Puerto" />
     <Member Name="ReadTimeout" Description="Read timeout" />
@@ -861,6 +860,7 @@
   <Type Name="Pop3ReceptionDN" Description="Recepción POP3">
     <Member Name="EndDate" Description="Fecha de fin" />
     <Member Name="Exception" Description="Excepción" />
+    <Member Name="NewEmails" Description="Nuevos emails" />
     <Member Name="Pop3Configuration" Description="Configuración POP3" />
     <Member Name="StartDate" Description="Fecha de inicio" />
   </Type>
