@@ -239,6 +239,15 @@ module SF.Mailing {
         doc.writeln($iframe.text());
         doc.close();
 
-        $iframe.height($iframe.contents().find("html").height() + 10);
+        var container = $iframe.contents().find("body");
+        if (container.length == 0)
+            container = $iframe.contents();
+
+
+        function fixHeight() {
+            $iframe.height(container.children().height() + 100);
+        }
+        fixHeight();
+        setInterval(fixHeight, 500);
     }
 }
