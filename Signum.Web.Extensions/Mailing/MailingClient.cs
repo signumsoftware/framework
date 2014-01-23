@@ -149,11 +149,25 @@ namespace Signum.Web.Mailing
                     new EntitySettings<Pop3ReceptionDN> { PartialViewName = e => ViewPrefix.Formato("Pop3Reception") },
                 });
 
+
+                TasksGetWebMailBody += WebMailProcessor.ReplaceUntrusted;
+                TasksGetWebMailBody += WebMailProcessor.CidToFilePath;
+
+                TasksSetWebMailBody += WebMailProcessor.AssertNoUntrusted;
+                TasksSetWebMailBody += WebMailProcessor.FilePathToCid;
+
                 Navigator.EntitySettings<EmailMessageDN>().MappingMain.AsEntityMapping()
                     .RemoveProperty(a => a.Body)
                     .SetProperty(a => a.Body, ctx =>
                     {
-                        return SetWebMailBody(ctx.Value, ((EmailMessageDN)ctx.Parent.UntypedValue).Attachments);
+                        var email = ((EmailMessageDN)ctx.Parent.UntypedValue);
+
+                        return SetWebMailBody(ctx.Value, new WebMailOptions
+                        {
+                             Attachments = email.Attachments,
+                             UntrustedImage = null,
+                             Url = RouteHelper.New(),
+                        });
                     }); 
             }
         }
@@ -275,88 +289,29 @@ namespace Signum.Web.Mailing
             return null;
         }
 
-        public static string GetWebMailBody(string body, IEnumerable<EmailAttachmentDN> attachments, string untrustedImage, out bool hasUntrusted)
+
+        public static Func<string, WebMailOptions, string> TasksSetWebMailBody; 
+        public static string SetWebMailBody(string body, WebMailOptions options)
         {
-            if (!attachments.Any() && untrustedImage == null)
-            {
-                hasUntrusted = false;
-                return body;
-            }
+            if (body == null)
+                return null;
 
-            var r = RouteHelper.New();
+            foreach (var item in TasksSetWebMailBody.GetInvocationList().Cast<Func<string, WebMailOptions, string>>())
+                body = item(body, options); 
 
-            bool hasUntrustedInternal = false;
-
-            var dic = attachments.Where(a => a.File.FullWebPath.HasText()).ToDictionary(a => a.ContentId, a => r.Content(a.File.FullWebPath));
-
-            var result = Regex.Replace(body, @"<img [^>]*>", img =>
-            {
-                string prevSource = null;
-
-                var newImg = Regex.Replace(img.Value, "src=\"(?<link>[^\"]*)\"", src =>
-                {
-                    var value = src.Groups["link"].Value;
-
-                    if (!value.StartsWith("cid:"))
-                    {
-                        if (untrustedImage != null)
-                        {
-                            hasUntrustedInternal = true;
-                            prevSource = value;
-                            return "src=\"{0}\"".Formato(r.Content(untrustedImage));
-                        }
-
-                        return src.Value;
-
-                    }
-
-                    value = value.After("cid:");
-
-                    var link = dic.TryGetC(value);
-
-                    if (link == null)
-                        return src.Value;
-
-                    return "src=\"{0}\"".Formato(r.Content(link));
-                });
-
-                if (prevSource == null)
-                    return newImg;
-               
-                var title = prevSource;
-
-                var alt = Regex.Match(img.Value, "alt=\"(?<alt>[^\"]*)\"");
-                if (alt.Success && alt.Groups["alt"].Value.HasText())
-                    title = alt.Groups["alt"].Value + "\r\n" + title;
-
-                return newImg.Insert("<img ".Length, "title=\"" + title + "\" ");
-            }); 
-
-            hasUntrusted = hasUntrustedInternal;
-
-            return result;
+            return body;
         }
-        
-        public static string SetWebMailBody(string body, IEnumerable<EmailAttachmentDN> attachments)
+
+        public static Func<string, WebMailOptions, string> TasksGetWebMailBody;
+        public static string GetWebMailBody(string body, WebMailOptions options)
         {
-            if (!attachments.Any())
-                return body;
+            if (body == null)
+                return null;
 
-            var r = RouteHelper.New();
+            foreach (var item in TasksGetWebMailBody.GetInvocationList().Cast<Func<string, WebMailOptions, string>>())
+                body = item(body, options);
 
-            var dic = attachments.Where(a => a.File.FullWebPath.HasText()).ToDictionary(a => r.Content(a.File.FullWebPath), a => a.ContentId);
-
-            return Regex.Replace(body, "src=\"(?<link>[^\"]*)\"", m =>
-            {
-                var value = m.Groups["link"].Value;
-
-                var link = dic.TryGetC(value);
-
-                if (link == null)
-                    return m.Value;
-
-                return "src=\"cid:{0}\"".Formato(link);
-            });
+            return body;
         }
     }
 }

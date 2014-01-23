@@ -1,5 +1,6 @@
 ﻿@using Signum.Engine
 @using Signum.Entities.Mailing
+@using Signum.Web.Mailing
 @using Signum.Web.Files
 
 <style type="text/css">
@@ -69,8 +70,12 @@
                 }
                 else
                 {
-                    bool hasUntrusted;
-                    var body = Signum.Web.Mailing.MailingClient.GetWebMailBody(e.Value.Body, e.Value.Attachments, null, out hasUntrusted);
+                    var body = MailingClient.GetWebMailBody(e.Value.Body, new WebMailOptions
+                        {
+                            Attachments = e.Value.Attachments,
+                            UntrustedImage = null,
+                            Url = Url,
+                        });
                     <h3>@EmailMessageMessage.Message.NiceToString():</h3>
                     <div>
                         @if (e.Value.IsBodyHtml)

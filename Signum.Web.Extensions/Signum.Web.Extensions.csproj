@@ -224,6 +224,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Pop3Configuration.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Mailing\WebMailProcessor.cs" />
     <Compile Include="Scheduler\Controllers\SchedulerController.cs" />
     <Compile Include="Scheduler\Views\SchedulerPanel.generated.cs">
       <DependentUpon>SchedulerPanel.cshtml</DependentUpon>
