@@ -268,7 +268,7 @@ namespace Signum.Engine.Mailing
                 new ConstructFrom<EmailMessageDN>(EmailMessageOperation.ReSend)
                 {
                     AllowsNew = false,
-                    ToState = EmailMessageState.Sent,
+                    ToState = EmailMessageState.Created,
                     Construct = (m, _) => new EmailMessageDN
                     {
                         From = m.From.Clone(),
