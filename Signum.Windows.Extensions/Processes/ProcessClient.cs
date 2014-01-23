@@ -30,6 +30,7 @@ namespace Signum.Windows.Processes
             {
                 Navigator.AddSetting(new EntitySettings<ProcessAlgorithmDN> { View = e => new ProcessAlgorithm(), Icon = Image("processAlgorithm.png") });
                 Navigator.AddSetting(new EntitySettings<ProcessDN> { View = e => new ProcessUI(), Icon = Image("process.png") });
+                Navigator.AddSetting(new EntitySettings<UserProcessSessionDN> { View = e => new UserProcessSession(), Icon = ImageLoader.GetImageSortName("user.png") });
 
                 OperationClient.AddSettings(new List<OperationSettings>()
                 {
