@@ -69,9 +69,7 @@ namespace Signum.Entities.Mailing
             set { Set(ref useDefaultCredentials, value, () => UseDefaultCredentials); }
         }
 
-        [NotNullable]
         EmailAddressDN defaultFrom;
-        [NotNullValidator]
         public EmailAddressDN DefaultFrom
         {
             get { return defaultFrom; }
@@ -80,7 +78,7 @@ namespace Signum.Entities.Mailing
 
         [NotNullable]
         MList<EmailRecipientDN> aditionalRecipients = new MList<EmailRecipientDN>();
-        [NotNullValidator, NoRepeatValidator]
+        [NoRepeatValidator]
         public MList<EmailRecipientDN> AditionalRecipients
         {
             get { return aditionalRecipients; }

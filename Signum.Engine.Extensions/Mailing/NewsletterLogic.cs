@@ -86,6 +86,19 @@ namespace Signum.Engine.Mailing
                 Validator.PropertyValidator((NewsletterDN news) => news.Subject).StaticPropertyValidation += (sender, pi) => ValidateTokens(sender, sender.Subject);
 
                 sb.Schema.EntityEvents<NewsletterDN>().PreSaving += Newsletter_PreSaving;
+
+                Validator.PropertyValidator((NewsletterDN m) => m.SmtpConfig).StaticPropertyValidation += (input, pi) =>
+                {
+                    if (input.SmtpConfig != null)
+                    {
+                        var smtp = input.SmtpConfig.Retrieve();
+
+                        if (smtp.DefaultFrom == null)
+                            return EmailMessageMessage.DefaultFromIsMandatoryInSmtpConfig.NiceToString();
+                    }
+
+                    return null;
+                }; 
             }
         }
 

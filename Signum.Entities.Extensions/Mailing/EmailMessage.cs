@@ -531,6 +531,7 @@ namespace Signum.Entities.Mailing
         Messages,
         RemainingMessages,
         ExceptionMessages,
+        DefaultFromIsMandatoryInSmtpConfig,
     }
 
     [Serializable, EntityKind(EntityKind.System, EntityData.Transactional)]
