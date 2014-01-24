@@ -298,7 +298,7 @@ var SF;
         ViewNavigator.prototype.onCreateSave = function () {
             var doDefault = (this.viewOptions.onSave != null) ? this.viewOptions.onSave(this.tempDivId()) : true;
             if (doDefault != false) {
-                var validatorResult = new SF.PartialValidator({ prefix: this.viewOptions.prefix, type: this.viewOptions.type }).trySave();
+                var validatorResult = SF.Validation.trySavePartial({ prefix: this.viewOptions.prefix, type: this.viewOptions.type });
                 if (!validatorResult.isValid) {
                     window.alert(lang.signum.popupErrorsStop);
                     return;

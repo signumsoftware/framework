@@ -32,7 +32,7 @@ var SF;
             var $txt = $(this.pf(SF.Keys.toStr) + ".sf-entity-autocomplete");
             if ($txt.length > 0) {
                 var data = $txt.data();
-                this.entityAutocomplete($txt, { delay: 200, types: data.types, url: data.url || SF.Urls.autocomplete, count: 5 });
+                this.entityAutocomplete($txt);
             }
         };
 
@@ -58,14 +58,13 @@ var SF;
                 prefix: this.options.prefix,
                 id: (info.find().length !== 0) ? info.id() : ''
             });
-            var validator = new SF.PartialValidator(validatorOptions);
-            var validatorResult = validator.validate();
+            var validatorResult = SF.Validation.validatePartial(validatorOptions);
             if (!validatorResult.isValid) {
                 if (!confirm(lang.signum.popupErrors)) {
                     $.extend(validatorResult, { acceptChanges: false });
                     return validatorResult;
                 } else {
-                    validator.showErrors(validatorResult.modelState, true);
+                    SF.Validation.showErrors(validatorResult.modelState, true);
                 }
             }
             this.updateLinks(validatorResult.newToStr, validatorResult.newLink);
@@ -79,14 +78,14 @@ var SF;
 
         EntityBase.prototype.fireOnEntityChanged = function (hasEntity) {
             this.updateButtonsDisplay(hasEntity);
-            if (!SF.isEmpty(this.options.onEntityChanged)) {
-                this.options.onEntityChanged();
+            if (!SF.isEmpty(this.onEntityChanged)) {
+                this.onEntityChanged();
             }
         };
 
         EntityBase.prototype.remove = function (itemPrefix) {
-            $(this.pf(SF.Keys.toStr)).val("").removeClass(SF.Validator.inputErrorClass);
-            $(this.pf(SF.Keys.link)).val("").html("").removeClass(SF.Validator.inputErrorClass);
+            SF.Validation.cleanError($(this.pf(SF.Keys.toStr)).val(""));
+            SF.Validation.cleanError($(this.pf(SF.Keys.link)).val("").html(""));
             this.runtimeInfo().removeEntity();
 
             this.removeSpecific();
@@ -216,17 +215,25 @@ var SF;
             }
         };
 
-        EntityBase.prototype.entityAutocomplete = function ($elem, options) {
+        EntityBase.prototype.entityAutocomplete = function ($txt) {
             var lastXhr;
             var self = this;
-            var auto = $elem.autocomplete({
-                delay: options.delay || 200,
+            var auto = $txt.autocomplete({
+                delay: 200,
                 source: function (request, response) {
                     if (lastXhr)
                         lastXhr.abort();
+
+                    var txtData = $($txt).data();
+
+                    var data = { types: data.types, l: 5, q: request.term };
+
+                    if (!SF.isEmpty(self.onAutoCompleteRequest))
+                        self.onAutoCompleteRequest(data);
+
                     lastXhr = $.ajax({
-                        url: options.url,
-                        data: { types: options.types, l: options.count || 5, q: request.term },
+                        url: txtData.url || SF.Urls.autocomplete,
+                        data: data,
                         success: function (data) {
                             lastXhr = null;
                             response($.map(data, function (item) {
@@ -239,11 +246,11 @@ var SF;
                     });
                 },
                 focus: function (event, ui) {
-                    $elem.val(ui.item.value.text);
+                    $txt.val(ui.item.value.text);
                     return false;
                 },
                 select: function (event, ui) {
-                    var controlId = $elem.attr("id");
+                    var controlId = $txt.attr("id");
                     var prefix = controlId.substr(0, controlId.indexOf(SF.Keys.toStr) - 1);
                     self.onAutocompleteSelected(controlId, ui.item.value);
                     event.preventDefault();
@@ -265,7 +272,7 @@ var SF;
 
     once("SF-entityLine", function () {
         return $.fn.entityLine = function (opt) {
-            new EntityLine(this, opt);
+            return new EntityLine(this, opt);
         };
     });
 
@@ -407,7 +414,7 @@ var SF;
 
     once("SF-entityCombo", function () {
         return $.fn.entityCombo = function (opt) {
-            var sc = new EntityCombo(this, opt);
+            return new EntityCombo(this, opt);
         };
     });
 
@@ -470,7 +477,7 @@ var SF;
 
     once("SF-entityLineDetail", function () {
         return $.fn.entityLineDetail = function (opt) {
-            new EntityLineDetail(this, opt);
+            return new EntityLineDetail(this, opt);
         };
     });
 
@@ -566,7 +573,7 @@ var SF;
 
     once("SF-entityList", function () {
         return $.fn.entityList = function (opt) {
-            new EntityList(this, opt);
+            return new EntityList(this, opt);
         };
     });
 
@@ -669,14 +676,13 @@ var SF;
                 id: (info.find().length > 0) ? info.id() : ''
             });
 
-            var validator = new SF.PartialValidator(validatorOptions);
-            var validatorResult = validator.validate();
+            var validatorResult = SF.Validation.validatePartial(validatorOptions);
             if (!validatorResult.isValid) {
                 if (!confirm(lang.signum.popupErrors)) {
                     $.extend(validatorResult, { acceptChanges: false });
                     return validatorResult;
                 } else
-                    validator.showErrors(validatorResult.modelState, true);
+                    SF.Validation.showErrors(validatorOptions, validatorResult.modelState, true);
             }
             this.updateLinks(validatorResult.newToStr, validatorResult.newLink, itemPrefix);
             $.extend(validatorResult, { acceptChanges: true });
@@ -905,7 +911,7 @@ var SF;
 
     once("SF-entityListDetail", function () {
         return $.fn.entityListDetail = function (opt) {
-            new EntityListDetail(this, opt);
+            return new EntityListDetail(this, opt);
         };
     });
 
@@ -1074,7 +1080,7 @@ var SF;
 
     once("SF-entityRepeater", function () {
         return $.fn.entityRepeater = function (opt) {
-            new EntityRepeater(this, opt);
+            return new EntityRepeater(this, opt);
         };
     });
 
@@ -1250,7 +1256,7 @@ var SF;
 
     once("SF-entityStrip", function () {
         return $.fn.entityStrip = function (opt) {
-            new EntityStrip(this, opt);
+            return new EntityStrip(this, opt);
         };
     });
 

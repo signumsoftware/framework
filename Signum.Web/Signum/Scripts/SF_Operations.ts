@@ -10,7 +10,7 @@ module SF
         operationKey?: string;
         isLite?: boolean;
         controllerUrl?: string;
-        validationOptions?: ValidationOptions;
+        validationOptions?: Validation.ValidationOptions;
         onOk?: any;
         onCancelled?: any;
         contextual?: boolean;
@@ -179,12 +179,10 @@ module SF
             var modelState = operationResult.ModelState;
 
             if (SF.isEmpty(this.options.prefix)) {
-                new SF.Validator().showErrors(modelState);
+                SF.Validation.showErrors(null, modelState);
             }
             else {
-                new SF.PartialValidator({
-                    prefix: this.options.prefix
-                }).showErrors(modelState);
+                SF.Validation.showErrors({ prefix: this.options.prefix }, modelState); 
             }
             return false;
         }
@@ -205,7 +203,7 @@ module SF
                 if (!SF.isEmpty(this.options.parentDiv)) { // So as not to override parentDiv to be set in PartialValidator constructor
                     valOptions.parentDiv = this.options.parentDiv;
                 }
-                if (!SF.EntityIsValid(valOptions, function () { onSuccess.call(self) }, this.options.sender)) {
+                if (!SF.Validation.EntityIsValid(valOptions, function () { onSuccess.call(self) }, this.options.sender)) {
                     return;
                 }
             }
@@ -244,7 +242,7 @@ module SF
                 if (!SF.isEmpty(this.options.parentDiv)) { // So as not to override parentDiv to be set in PartialValidator constructor
                     valOptions.parentDiv = this.options.parentDiv;
                 }
-                if (!SF.EntityIsValid(valOptions, function () { onSuccess.call(self) }, this.options.sender)) {
+                if (!SF.Validation.EntityIsValid(valOptions, function () { onSuccess.call(self) }, this.options.sender)) {
                     return;
                 }
             }
@@ -306,7 +304,7 @@ module SF
                 if (!SF.isEmpty(this.options.parentDiv)) { // So as not to override parentDiv to be set in PartialValidator constructor
                     valOptions.parentDiv = this.options.parentDiv;
                 }
-                if (!SF.EntityIsValid(valOptions, function () { onSuccess() }, this.options.sender)) {
+                if (!SF.Validation.EntityIsValid(valOptions, function () { onSuccess() }, this.options.sender)) {
                     return;
                 }
             }

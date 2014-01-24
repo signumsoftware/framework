@@ -158,11 +158,9 @@ var SF;
             var modelState = operationResult.ModelState;
 
             if (SF.isEmpty(this.options.prefix)) {
-                new SF.Validator().showErrors(modelState);
+                SF.Validation.showErrors(null, modelState);
             } else {
-                new SF.PartialValidator({
-                    prefix: this.options.prefix
-                }).showErrors(modelState);
+                SF.Validation.showErrors({ prefix: this.options.prefix }, modelState);
             }
             return false;
         };
@@ -183,7 +181,7 @@ var SF;
                 if (!SF.isEmpty(this.options.parentDiv)) {
                     valOptions.parentDiv = this.options.parentDiv;
                 }
-                if (!SF.EntityIsValid(valOptions, function () {
+                if (!SF.Validation.EntityIsValid(valOptions, function () {
                     onSuccess.call(self);
                 }, this.options.sender)) {
                     return;
@@ -225,7 +223,7 @@ var SF;
                 if (!SF.isEmpty(this.options.parentDiv)) {
                     valOptions.parentDiv = this.options.parentDiv;
                 }
-                if (!SF.EntityIsValid(valOptions, function () {
+                if (!SF.Validation.EntityIsValid(valOptions, function () {
                     onSuccess.call(self);
                 }, this.options.sender)) {
                     return;
@@ -289,7 +287,7 @@ var SF;
                 if (!SF.isEmpty(this.options.parentDiv)) {
                     valOptions.parentDiv = this.options.parentDiv;
                 }
-                if (!SF.EntityIsValid(valOptions, function () {
+                if (!SF.Validation.EntityIsValid(valOptions, function () {
                     onSuccess();
                 }, this.options.sender)) {
                     return;

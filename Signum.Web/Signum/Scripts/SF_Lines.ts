@@ -16,7 +16,6 @@ module SF {
     export interface EntityBaseOptions {
         prefix: string;
         partialViewName: string;
-        onEntityChanged: () => any
     }
 
     export interface EntityData {
@@ -30,6 +29,8 @@ module SF {
 
     export class EntityBase {
         options: EntityBaseOptions;
+        onAutoCompleteRequest: (data: any) => void;
+        onEntityChanged: () => any;
         element: JQuery;
         constructor(element: JQuery, _options: EntityBaseOptions) {
             this.element = element;
@@ -52,7 +53,7 @@ module SF {
             var $txt = $(this.pf(SF.Keys.toStr) + ".sf-entity-autocomplete");
             if ($txt.length > 0) {
                 var data = $txt.data();
-                this.entityAutocomplete($txt, { delay: 200, types: data.types, url: data.url || SF.Urls.autocomplete, count: 5 });
+                this.entityAutocomplete($txt);
             }
         }
 
@@ -70,7 +71,7 @@ module SF {
         }
 
 
-        checkValidation(validatorOptions: PartialValidationOptions, itemPrefix?: string) {
+        checkValidation(validatorOptions: Validation.PartialValidationOptions, itemPrefix?: string) {
             if (typeof validatorOptions == "undefined" || typeof validatorOptions.type == "undefined") {
                 throw "validatorOptions.type must be supplied to checkValidation";
             }
@@ -80,15 +81,14 @@ module SF {
                 prefix: this.options.prefix,
                 id: (info.find().length !== 0) ? info.id() : ''
             });
-            var validator = new SF.PartialValidator(validatorOptions);
-            var validatorResult = validator.validate();
+            var validatorResult = Validation.validatePartial(validatorOptions) ;
             if (!validatorResult.isValid) {
                 if (!confirm(lang.signum.popupErrors)) {
                     $.extend(validatorResult, { acceptChanges: false });
                     return validatorResult;
                 }
                 else {
-                    validator.showErrors(validatorResult.modelState, true);
+                    Validation.showErrors(validatorResult.modelState, true);
                 }
             }
             this.updateLinks(validatorResult.newToStr, validatorResult.newLink);
@@ -103,14 +103,14 @@ module SF {
 
         fireOnEntityChanged(hasEntity: boolean) {
             this.updateButtonsDisplay(hasEntity);
-            if (!SF.isEmpty(this.options.onEntityChanged)) {
-                this.options.onEntityChanged();
+            if (!SF.isEmpty(this.onEntityChanged)) {
+                this.onEntityChanged();
             }
         }
 
         remove(itemPrefix?: string) {
-            $(this.pf(SF.Keys.toStr)).val("").removeClass(SF.Validator.inputErrorClass);
-            $(this.pf(SF.Keys.link)).val("").html("").removeClass(SF.Validator.inputErrorClass);
+            Validation.cleanError($(this.pf(SF.Keys.toStr)).val(""));
+            Validation.cleanError($(this.pf(SF.Keys.link)).val("").html(""));
             this.runtimeInfo().removeEntity();
 
             this.removeSpecific();
@@ -242,18 +242,26 @@ module SF {
         }
 
 
-        entityAutocomplete($elem, options) {
+        entityAutocomplete($txt) {
+           
             var lastXhr; //To avoid previous requests results to be shown
             var self = this;
-            var auto = $elem.autocomplete({
-                delay: options.delay || 200,
-
+            var auto = $txt.autocomplete({
+                delay: 200,
                 source: function (request, response) {
                     if (lastXhr)
                         lastXhr.abort();
+
+                    var txtData = $($txt).data();
+
+                    var data = { types: data.types, l: 5, q: request.term }
+
+                    if (!SF.isEmpty(self.onAutoCompleteRequest))
+                        self.onAutoCompleteRequest(data);
+
                     lastXhr = $.ajax({
-                        url: options.url,
-                        data: { types: options.types, l: options.count || 5, q: request.term },
+                        url: txtData.url || SF.Urls.autocomplete,
+                        data: data,
                         success: function (data) {
                             lastXhr = null;
                             response($.map(data, function (item) {
@@ -266,11 +274,11 @@ module SF {
                     });
                 },
                 focus: function (event, ui) {
-                    $elem.val(ui.item.value.text);
+                    $txt.val(ui.item.value.text);
                     return false;
                 },
                 select: function (event, ui) {
-                    var controlId = $elem.attr("id");
+                    var controlId = $txt.attr("id");
                     var prefix = controlId.substr(0, controlId.indexOf(SF.Keys.toStr) - 1);
                     self.onAutocompleteSelected(controlId, ui.item.value);
                     event.preventDefault();
@@ -293,7 +301,7 @@ module SF {
 
     once("SF-entityLine", () =>
         $.fn.entityLine = function (opt: EntityBaseOptions) {
-            new EntityLine(this, opt);
+            return new EntityLine(this, opt);
         });
 
     export class EntityLine extends EntityBase {
@@ -326,7 +334,7 @@ module SF {
             }, _viewOptions);
         }
 
-        onViewingOk(validatorOptions: ValidationOptions) {
+        onViewingOk(validatorOptions: Validation.ValidationOptions) {
             var valOptions = $.extend(validatorOptions || {}, {
                 type: this.runtimeInfo().entityType()
             });
@@ -361,7 +369,7 @@ module SF {
             this.updateLinks(item.toStr, item.link);
         }
 
-        onCreatingOk(clonedElements: JQuery, validatorOptions: ValidationOptions, entityType: string, itemPrefix?: string) {
+        onCreatingOk(clonedElements: JQuery, validatorOptions: Validation.ValidationOptions, entityType: string, itemPrefix?: string) {
             var valOptions = $.extend(validatorOptions || {}, {
                 type: entityType
             });
@@ -419,7 +427,7 @@ module SF {
 
     once("SF-entityCombo", () =>
         $.fn.entityCombo = function (opt: EntityBaseOptions) {
-            var sc = new EntityCombo(this, opt);
+            return new EntityCombo(this, opt);
         });
 
     export class EntityCombo extends EntityBase {
@@ -487,7 +495,7 @@ module SF {
 
     once("SF-entityLineDetail", () =>
         $.fn.entityLineDetail = function (opt: EntityBaseDetailOptions) {
-            new EntityLineDetail(this, opt);
+            return new EntityLineDetail(this, opt);
         });
 
     export class EntityLineDetail extends EntityBase {
@@ -580,7 +588,7 @@ module SF {
 
     once("SF-entityList", () =>
         $.fn.entityList = function (opt: EntityBaseOptions) {
-            new EntityList(this, opt);
+            return new EntityList(this, opt);
         });
 
     export class EntityList extends EntityBase {
@@ -671,7 +679,7 @@ module SF {
             return this.getNewIndex(lastPrefix);
         }
 
-        checkValidation(validatorOptions: PartialValidationOptions, itemPrefix?: string) {
+        checkValidation(validatorOptions: Validation.PartialValidationOptions, itemPrefix?: string) {
             if (typeof validatorOptions == "undefined" || typeof validatorOptions.type == "undefined") {
                 throw "validatorOptions.type must be supplied to checkValidation";
             }
@@ -682,15 +690,14 @@ module SF {
                 id: (info.find().length > 0) ? info.id() : ''
             });
 
-            var validator = new SF.PartialValidator(validatorOptions);
-            var validatorResult = validator.validate();
+            var validatorResult = Validation.validatePartial(validatorOptions);
             if (!validatorResult.isValid) {
                 if (!confirm(lang.signum.popupErrors)) {
                     $.extend(validatorResult, { acceptChanges: false });
                     return validatorResult;
                 }
                 else
-                    validator.showErrors(validatorResult.modelState, true);
+                    Validation.showErrors(validatorOptions, validatorResult.modelState, true);
             }
             this.updateLinks(validatorResult.newToStr, validatorResult.newLink, itemPrefix);
             $.extend(validatorResult, { acceptChanges: true });
@@ -721,7 +728,7 @@ module SF {
             }, _viewOptions);
         }
 
-        onCreatingOk(clonedElements: JQuery, validatorOptions: PartialValidationOptions, entityType: string, itemPrefix?: string) {
+        onCreatingOk(clonedElements: JQuery, validatorOptions: Validation.PartialValidationOptions, entityType: string, itemPrefix?: string) {
             var valOptions = $.extend(validatorOptions || {}, {
                 type: entityType
             });
@@ -796,7 +803,7 @@ module SF {
             }, _viewOptions);
         }
 
-        onViewingOk(validatorOptions: ValidationOptions, itemPrefix) {
+        onViewingOk(validatorOptions: Validation.ValidationOptions, itemPrefix) {
             var valOptions = $.extend(validatorOptions || {}, {
                 type: this.itemRuntimeInfo(itemPrefix).entityType()
             });
@@ -908,7 +915,7 @@ module SF {
 
     once("SF-entityListDetail", () =>
         $.fn.entityListDetail = function (opt: EntityBaseDetailOptions) {
-            new EntityListDetail(this, opt);
+            return new EntityListDetail(this, opt);
         });
 
     export class EntityListDetail extends EntityList {
@@ -1087,7 +1094,7 @@ module SF {
 
     once("SF-entityRepeater", () =>
         $.fn.entityRepeater = function (opt: EntityRepeaterOptions) {
-            new EntityRepeater(this, opt);
+            return new EntityRepeater(this, opt);
         });
 
     export class EntityRepeater extends EntityList {
@@ -1284,7 +1291,7 @@ module SF {
 
     once("SF-entityStrip", () =>
         $.fn.entityStrip = function (opt: EntityStripOptions) {
-            new EntityStrip(this, opt);
+            return new EntityStrip(this, opt);
         });
 
     export class EntityStrip extends EntityList {
@@ -1331,7 +1338,7 @@ module SF {
             }, _viewOptions);
         }
 
-        onCreatingOk(clonedElements: JQuery, validatorOptions: PartialValidationOptions, entityType: string, itemPrefix?: string) {
+        onCreatingOk(clonedElements: JQuery, validatorOptions: Validation.PartialValidationOptions, entityType: string, itemPrefix?: string) {
             var valOptions = $.extend(validatorOptions || {}, {
                 type: entityType
             });

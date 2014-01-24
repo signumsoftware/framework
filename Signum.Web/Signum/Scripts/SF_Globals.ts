@@ -288,7 +288,7 @@ module SF
         return false;
     };
 
-    export function submitOnly(urlController, requestExtraJsonData) {
+    export function submitOnly(urlController : string, requestExtraJsonData) {
         if (requestExtraJsonData == null)
             throw "SubmitOnly needs requestExtraJsonData. Use Submit instead";
 
@@ -318,11 +318,11 @@ module SF
         return false;
     }
 
-    export function hiddenInput(id, value) {
+    export function hiddenInput(id : string, value : any) {
         return "<input type='hidden' id='" + id + "' name='" + id + "' value='" + value + "' />\n";
     }
 
-    export function hiddenDiv(id, innerHtml) {
+    export function hiddenDiv(id : string, innerHtml : any) {
         return "<div id='" + id + "' name='" + id + "' style='display:none'>" + innerHtml + "</div>";
     }
 
