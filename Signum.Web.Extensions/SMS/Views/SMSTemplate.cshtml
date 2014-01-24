@@ -34,11 +34,15 @@
             @Html.EntityCombo(tc, s => s.AssociatedType, ec =>
             {
                 ec.Data = SMSLogic.RegisteredDataObjectProviders();
-                ec.OnEntityChanged = "SF.SMS.fillLiterals()";
                 ec.ComboHtmlProperties["class"] = "sf-associated-type";
                 ec.ComboHtmlProperties["data-url"] = Url.Action<SMSController>(s => s.GetLiteralsForType(ec.ControlID));
                 ec.ComboHtmlProperties["data-control-id"] = ec.ControlID;
             })
+            <script>
+                $(function () {
+                    $("#@(tc.SubContext(s => s.AssociatedType).ControlID)").SFControl().onEntityChanged = SF.SMS.fillLiterals;
+                });
+            </script>
         }
         @(new HtmlTag("select").Attr("multiple", "multiple").Id("sfLiterals").ToHtml())
         <br />
@@ -48,8 +52,7 @@
     <div class="sf-tabs-repeater sf-sms-template-messages">
         @Html.EntityRepeater(tc, e => e.Messages, er =>
         {
-            er.Removing = "";
-            er.Creating = "SF.TabsRepeater.addItem();";
+            er.AttachFunction = "SF.TabRepeater.attachTabRepeater";
             er.PreserveViewData = true;
         })
     </div>

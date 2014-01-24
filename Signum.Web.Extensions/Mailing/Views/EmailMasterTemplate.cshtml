@@ -11,8 +11,7 @@
     <div class="sf-email-replacements-container sf-tabs-repeater">
         @Html.EntityRepeater(ec, e => e.Messages, er =>
         {
-            er.Removing = "";
-            er.Creating = "SF.TabsRepeater.addItem();";
+            er.AttachFunction = "SF.TabsRepeater.attachTabRepeater";
             er.PreserveViewData = true;
         })
     </div>
