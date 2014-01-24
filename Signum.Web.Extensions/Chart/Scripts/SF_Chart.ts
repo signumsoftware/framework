@@ -79,12 +79,12 @@ module SF.Chart
                         if (typeof result === "object") {
                             if (typeof result.ModelState != "undefined") {
                                 var modelState = result.ModelState;
-                                new SF.Validator().showErrors(modelState, true);
+                                SF.Validation.showErrors({}, modelState, true);
                                 SF.Notify.error(lang.signum.error, 2000);
                             }
                         }
                         else {
-                            new SF.Validator().showErrors(null);
+                            SF.Validation.showErrors({}, null, true);
                             self.$chartControl.find(".sf-search-results-container").html(result);
                             SF.triggerNewContent(self.$chartControl.find(".sf-search-results-container"));
                             self.initOrders();
@@ -291,7 +291,7 @@ module SF.Chart
                 data[this.id] = $(this).val();
             });
 
-            SF.EntityIsValid({ prefix: this.options.prefix, controllerUrl: validateUrl, requestExtraJsonData: data }, function () {
+            SF.Validation.EntityIsValid({ prefix: this.options.prefix, controllerUrl: validateUrl, requestExtraJsonData: data }, function () {
                 SF.submitOnly(exportUrl, data)
             });
         }

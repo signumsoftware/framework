@@ -115,7 +115,7 @@ module SF.Auth {
     }
 
     export function postDialog(controllerUrl : string, prefix: string) {
-        var result = new SF.PartialValidator({ controllerUrl: controllerUrl, prefix: prefix }).trySave();
+        var result = Validation.trySavePartial({ controllerUrl: controllerUrl, prefix: prefix });
         if (result.isValid) {
             $(".sf-main-control[data-prefix='" + prefix + "']").removeClass("sf-changed");
         }
