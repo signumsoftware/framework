@@ -16,6 +16,17 @@ var SF;
                 }
             });
         });
+
+        function attachShowCurrentEntity(el) {
+            var showOnEntity = function () {
+                el.element.next("p").toggle(el.runtimeInfo().entityType() != "");
+            };
+
+            showOnEntity();
+
+            el.onEntityChanged = showOnEntity;
+        }
+        UserQuery.attachShowCurrentEntity = attachShowCurrentEntity;
     })(SF.UserQuery || (SF.UserQuery = {}));
     var UserQuery = SF.UserQuery;
 })(SF || (SF = {}));

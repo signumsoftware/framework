@@ -38,12 +38,6 @@ namespace Signum.Web.Files
         public string UploadUrl { get; set; }
         public string UploadDroppedUrl { get; set; }
 
-        public string OnChanged { get; set; }
-        internal string GetOnChanged()
-        {
-            return OnChanged ?? DefaultOnChanged();
-        }
-
         public FileLine(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
             : base(type, untypedValue, parent, controlID, propertyRoute)
         {
@@ -75,41 +69,6 @@ namespace Signum.Web.Files
             return result;
         }
 
-        protected override string DefaultRemove()
-        {
-            return JsRemoving().ToJS();
-        }
-
-        public JsInstruction JsRemoving()
-        {
-            return new JsInstruction(() => "{0}.remove()".Formato(this.ToJS()));
-        }
-
-
-        protected string DefaultOnChanged()
-        {
-            return JsOnChanged().ToJS();
-        }
-
-        public JsInstruction JsOnChanged()
-        {
-            return new JsInstruction(() => "{0}.onChanged()".Formato(this.ToJS()));
-        }
-
-        protected override string DefaultFind()
-        {
-            return null;
-        }
-
-        protected override string DefaultView()
-        {
-            return null;
-        }
-
-        protected override string DefaultCreate()
-        {
-            return null;
-        }
 
         public IFile GetFileValue()
         {

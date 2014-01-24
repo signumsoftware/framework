@@ -47,8 +47,12 @@
         
         var entityTypePrefix = e.SubContext(a => a.EntityType).ControlID;
         
-        @Html.EntityLine(e, f => f.EntityType, el => { el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Signum"); el.OnEntityChanged = "showOnEntity()"; })
-        <p id="@TypeContextUtilities.Compose(entityTypePrefix, "CurrentEntityMessage")">
+        @Html.EntityLine(e, f => f.EntityType, el => 
+        { 
+            el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Signum"); 
+            el.AttachFunction = "SF.UserQuery.attachShowCurrentEntity"; 
+        })
+        <p>
             @UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().Formato(CurrentEntityConverter.CurrentEntityKey)
         </p>
         @Html.ValueLine(e, f => f.WithoutFilters)
@@ -58,18 +62,5 @@
         @Html.EntityRepeater(e, f => f.Orders, er => { er.PreserveViewData = true; })
         @Html.ValueLine(e, f => f.PaginationMode)
         @Html.ValueLine(e, f => f.ElementsPerPage)
-        <script>
-            var showOnEntity = function () {
-
-                var ri = SF.RuntimeInfo("@entityTypePrefix");
-
-                $("#" + SF.compose("@entityTypePrefix", "CurrentEntityMessage")).toggle(ri.entityType() != "");
-            };
-
-            $(function () {
-                showOnEntity();
-            });
-
-        </script>
     }
 </div>

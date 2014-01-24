@@ -16,4 +16,14 @@ module SF.UserQuery {
             }
         });
     });
+
+    export function attachShowCurrentEntity(el: SF.EntityLine) {
+        var showOnEntity = function () {
+            el.element.next("p").toggle(el.runtimeInfo().entityType() != "");
+        }; 
+
+        showOnEntity(); 
+
+        el.onEntityChanged = showOnEntity; 
+    }
 }

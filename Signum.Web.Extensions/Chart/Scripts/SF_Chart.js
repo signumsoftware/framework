@@ -17,6 +17,17 @@ var SF;
             };
         });
 
+        function attachShowCurrentEntity(el) {
+            var showOnEntity = function () {
+                el.element.next("p").toggle(el.runtimeInfo().entityType() != "");
+            };
+
+            showOnEntity();
+
+            el.onEntityChanged = showOnEntity;
+        }
+        Chart.attachShowCurrentEntity = attachShowCurrentEntity;
+
         function getFor(prefix) {
             return $("#" + SF.compose(prefix, "sfChartBuilderContainer")).SFControl();
         }
