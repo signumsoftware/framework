@@ -49,7 +49,7 @@ namespace Signum.Web
                     var sbSelectContainer = new HtmlTag("select").Attr("multiple", "multiple")
                         .IdName(listDetail.Compose(EntityListBaseKeys.List))
                         .Class("sf-entity-list")
-                        .Attr("ondblclick", listDetail.GetViewing());
+                        .Attr("ondblclick", "{0}.view()".Formato(listDetail.ToJS()));
 
                     if (listDetail.ListHtmlProps.Any())
                         sbSelectContainer.Attrs(listDetail.ListHtmlProps);
@@ -74,11 +74,11 @@ namespace Signum.Web
                         using (sb.Surround(new HtmlTag("td")))
                         using (sb.Surround(new HtmlTag("ul")))
                         {
-                            sb.AddLine(ListBaseHelper.CreateButton(helper, listDetail).Surround("li"));
-                            sb.AddLine(ListBaseHelper.FindButton(helper, listDetail).Surround("li"));
-                            sb.AddLine(ListBaseHelper.RemoveButton(helper, listDetail).Surround("li"));
-                            sb.AddLine(ListBaseHelper.MoveUpButton(helper, listDetail).Surround("li"));
-                            sb.AddLine(ListBaseHelper.MoveDownButton(helper, listDetail).Surround("li"));
+                            sb.AddLine(EntityBaseHelper.CreateButton(helper, listDetail, hidden: false).Surround("li"));
+                            sb.AddLine(EntityBaseHelper.FindButton(helper, listDetail, hidden: false).Surround("li"));
+                            sb.AddLine(EntityBaseHelper.RemoveButton(helper, listDetail, hidden: false).Surround("li"));
+                            sb.AddLine(ListBaseHelper.MoveUpButton(helper, listDetail, hidden: false).Surround("li"));
+                            sb.AddLine(ListBaseHelper.MoveDownButton(helper, listDetail, hidden: false).Surround("li"));
                         }
                     }
                 }
@@ -92,9 +92,8 @@ namespace Signum.Web
                         .ToHtml());
                 }
 
-                sb.AddLine(new HtmlTag("script").Attr("type", "text/javascript")
-                    .InnerHtml(new MvcHtmlString("$('#{0}').entityListDetail({1})".Formato(listDetail.ControlID, listDetail.OptionsJS())))
-                    .ToHtml());
+
+                sb.AddLine(listDetail.ConstructorSript("entityListDetail"));
             }
 
             if (listDetail.DetailDiv == defaultDetailDiv)

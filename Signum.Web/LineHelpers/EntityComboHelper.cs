@@ -88,8 +88,8 @@ namespace Signum.Web
                                 entityCombo.ComboHtmlProperties));
                     }
 
-                    sb.AddLine(EntityBaseHelper.ViewButton(helper, entityCombo));
-                    sb.AddLine(EntityBaseHelper.CreateButton(helper, entityCombo));
+                    sb.AddLine(EntityBaseHelper.ViewButton(helper, entityCombo, hidden: entityCombo.UntypedValue == null));
+                    sb.AddLine(EntityBaseHelper.CreateButton(helper, entityCombo, hidden: entityCombo.UntypedValue != null));
 
                     if (entityCombo.ShowValidationMessage)
                     {
@@ -102,9 +102,7 @@ namespace Signum.Web
                     sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityCombo, entityCombo.ControlID));
             }
 
-            sb.AddLine(new HtmlTag("script").Attr("type", "text/javascript")
-                .InnerHtml(new MvcHtmlString("$('#{0}').entityCombo({1})".Formato(entityCombo.ControlID, entityCombo.OptionsJS())))
-                .ToHtml());
+            sb.AddLine(entityCombo.ConstructorSript("entityCombo"));
 
             return sb.ToHtml();
         }

@@ -61,8 +61,6 @@ namespace Signum.Web
             set { preserveViewData = value; }
         }
 
-        public string OnEntityChanged { get; set; }
-
         public string PartialViewName { get; set; }
 
         public virtual string ToJS()
@@ -82,64 +80,10 @@ namespace Signum.Web
                 {"prefix", ControlID.SingleQuote()}
             };
 
-            if (OnEntityChanged.HasText())
-                options.Add("onEntityChanged", "function(){ " + OnEntityChanged + " }");
-
             if (PartialViewName.HasText() && !Type.IsEmbeddedEntity())
                 options.Add("partialViewName", PartialViewName.SingleQuote());
 
             return options;
-        }
-
-        public virtual JsViewOptions DefaultJsViewOptions()
-        {
-            var options = new JsViewOptions();
-
-            if (PartialViewName.HasText())
-                options.PartialViewName = this.PartialViewName;
-            
-            return options;
-        }
-
-        public JsFindOptions DefaultJsfindOptions()
-        {
-            return new JsFindOptions();
-        }
-
-        public string Viewing { get; set; }
-        protected abstract string DefaultView();
-        internal string GetViewing()
-        {
-            if (!View)
-                return "";
-            return Viewing ?? DefaultView();
-        }
-
-        public string Creating { get; set; }
-        protected abstract string DefaultCreate();
-        internal string GetCreating()
-        {
-            if (!Create)
-                return "";
-            return Creating ?? DefaultCreate();
-        }
-
-        public string Finding { get; set; }
-        protected abstract string DefaultFind();
-        internal string GetFinding()
-        { 
-            if (!Find)
-                return "";
-            return Finding ?? DefaultFind();
-        }
-
-        public string Removing { get; set; }
-        protected abstract string DefaultRemove();
-        internal string GetRemoving()
-        {
-            if (!Remove)
-                return "";
-            return Removing ?? DefaultRemove();
         }
 
         internal Type CleanRuntimeType 
@@ -178,6 +122,21 @@ namespace Signum.Web
                 return (UntypedValue as IIdentifiable).TryCC(i => i.ToString()) ??
                        (UntypedValue as Lite<IIdentifiable>).TryCC(l => l.ToString());
             }
+        }
+
+
+        public string AttachFunction; 
+
+        internal MvcHtmlString ConstructorSript(string name)
+        {
+            var construtor = "$('#{0}').{1}({2})".Formato(ControlID, name, OptionsJS());
+
+            if (AttachFunction != null)
+                construtor = AttachFunction.Formato(construtor);
+
+            return new HtmlTag("script").Attr("type", "text/javascript")
+                .InnerHtml(new MvcHtmlString(construtor))
+                .ToHtml();
         }
     }
 }

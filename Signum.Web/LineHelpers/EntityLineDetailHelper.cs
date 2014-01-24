@@ -30,9 +30,9 @@ namespace Signum.Web
                 {
                     sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityDetail));
 
-                    sb.AddLine(EntityBaseHelper.CreateButton(helper, entityDetail));
-                    sb.AddLine(EntityBaseHelper.FindButton(helper, entityDetail));
-                    sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityDetail));
+                    sb.AddLine(EntityBaseHelper.CreateButton(helper, entityDetail, hidden: entityDetail.UntypedValue != null));
+                    sb.AddLine(EntityBaseHelper.FindButton(helper, entityDetail, hidden: entityDetail.UntypedValue != null));
+                    sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityDetail, hidden: entityDetail.UntypedValue == null));
                 }
 
                 sb.AddLine(helper.HiddenEntityInfo(entityDetail));
@@ -57,9 +57,7 @@ namespace Signum.Web
                             "</script>"));
             }
 
-            sb.AddLine(new HtmlTag("script").Attr("type", "text/javascript")
-                .InnerHtml(new MvcHtmlString("$('#{0}').entityLineDetail({1})".Formato(entityDetail.ControlID, entityDetail.OptionsJS())))
-                .ToHtml());
+            sb.AddLine(entityDetail.ConstructorSript("entityLineDetail"));
 
             return sb.ToHtml();
         }

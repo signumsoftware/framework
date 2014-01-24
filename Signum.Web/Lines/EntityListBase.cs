@@ -56,24 +56,6 @@ namespace Signum.Web
             Reorder = false;
         }
 
-        public string MovingUp { get; set; }
-        protected abstract string DefaultMoveUp();
-        internal string GetMovingUp()
-        {
-            if (!Reorder)
-                return "";
-            return MovingUp ?? DefaultMoveUp();
-        }
-
-        public string MovingDown { get; set; }
-        protected abstract string DefaultMoveDown();
-        internal string GetMovingDown()
-        {
-            if (!Reorder)
-                return "";
-            return MovingDown ?? DefaultMoveDown();
-        }
-
         public Type ElementType
         {
             get { return Type.ElementType(); }

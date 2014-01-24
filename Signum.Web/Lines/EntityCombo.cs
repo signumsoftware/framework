@@ -48,45 +48,5 @@ namespace Signum.Web
             Create = false;
             Remove = false;
         }
-
-        protected override string DefaultView()
-        {
-            return JsView(DefaultJsViewOptions()).ToJS();
-        }
-
-        public JsInstruction JsView(JsViewOptions viewOptions)
-        {
-            if (Navigate)
-            {
-                viewOptions.Navigate = true;
-                viewOptions.ControllerUrl = Navigator.NavigateRoute(Type.CleanType(), null);
-            }
-            
-            return new JsInstruction(() => "{0}.view({1})".Formato(
-                    this.ToJS(),
-                    viewOptions.TryCC(v => v.ToJS()) ?? ""));
-        }
-
-        protected override string DefaultCreate()
-        {
-            return JsCreate(DefaultJsViewOptions()).ToJS();
-        }
-
-        private JsInstruction JsCreate(JsViewOptions viewOptions)
-        {
-            return new JsInstruction(() => "{0}.create({1})".Formato(
-                this.ToJS(),
-                viewOptions.TryCC(v => v.ToJS()) ?? ""));
-        }
-
-        protected override string DefaultFind()
-        {
-            return null;
-        }
-
-        protected override string DefaultRemove()
-        {
-            return null;
-        }
     }
 }

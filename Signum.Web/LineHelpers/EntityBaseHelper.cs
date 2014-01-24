@@ -130,19 +130,19 @@ namespace Signum.Web
             return input.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("/", "\\/").Replace("\r\n", "").Replace("\n", "");
         }
 
-        public static MvcHtmlString ViewButton(HtmlHelper helper, EntityBase entityBase)
+        public static MvcHtmlString ViewButton(HtmlHelper helper, EntityBase entityBase, bool hidden)
         {
             if (!entityBase.View)
                 return MvcHtmlString.Empty;
 
             var htmlAttr = new Dictionary<string, object>
             {
-                { "onclick", new MvcHtmlString(entityBase.GetViewing()) },
+                { "onclick", new MvcHtmlString("{0}.view()".Formato(entityBase.ToJS())) },
                 { "data-icon",  "ui-icon-circle-arrow-e" },
                 { "data-text", false}
             };
 
-            if (entityBase.UntypedValue == null)
+            if (hidden)
                 htmlAttr.Add("style", "display:none");
 
             return helper.Href(entityBase.Compose("btnView"),
@@ -160,7 +160,7 @@ namespace Signum.Web
 
             var htmlAttr = new Dictionary<string, object>
             {
-                { "onclick", new MvcHtmlString(entityBase.GetViewing()) },
+                { "onclick", new MvcHtmlString("{0}.view()".Formato(entityBase.ToJS())) },
                 { "data-icon", "ui-icon-arrowthick-1-e" },
                 { "data-text", false}
             };
@@ -176,7 +176,7 @@ namespace Signum.Web
                   htmlAttr);
         }
 
-        public static MvcHtmlString CreateButton(HtmlHelper helper, EntityBase entityBase)
+        public static MvcHtmlString CreateButton(HtmlHelper helper, EntityBase entityBase, bool hidden)
         {
             if (!entityBase.Create)
                 return MvcHtmlString.Empty;
@@ -185,12 +185,12 @@ namespace Signum.Web
 
             var htmlAttr = new Dictionary<string, object>
             {
-                { "onclick", entityBase.GetCreating() },
+                { "onclick", "{0}.create()".Formato(entityBase.ToJS()) },
                 { "data-icon", "ui-icon-circle-plus" },
                 { "data-text", false}
             };
 
-            if (entityBase.UntypedValue != null)
+            if (hidden)
                 htmlAttr.Add("style", "display:none");
 
             return helper.Href(entityBase.Compose("btnCreate"),
@@ -201,19 +201,19 @@ namespace Signum.Web
                   htmlAttr);
         }
 
-        public static MvcHtmlString FindButton(HtmlHelper helper, EntityBase entityBase)
+        public static MvcHtmlString FindButton(HtmlHelper helper, EntityBase entityBase, bool hidden)
         {
             if (!entityBase.Find)
                 return MvcHtmlString.Empty;
 
             var htmlAttr = new Dictionary<string, object>
             {
-                { "onclick", entityBase.GetFinding() },
+                { "onclick", "{0}.find()".Formato(entityBase.ToJS()) },
                 { "data-icon", "ui-icon-circle-zoomin" },
                 { "data-text", false}
             };
 
-            if (entityBase.UntypedValue != null)
+            if (hidden)
                 htmlAttr.Add("style", "display:none");
 
             return helper.Href(entityBase.Compose("btnFind"),
@@ -224,19 +224,19 @@ namespace Signum.Web
                   htmlAttr);
         }
 
-        public static MvcHtmlString RemoveButton(HtmlHelper helper, EntityBase entityBase)
+        public static MvcHtmlString RemoveButton(HtmlHelper helper, EntityBase entityBase, bool hidden)
         {
             if (!entityBase.Remove)
                 return MvcHtmlString.Empty;
 
             var htmlAttr = new Dictionary<string, object>
             {
-                { "onclick", entityBase.GetRemoving() },
+                { "onclick", "{0}.remove()".Formato(entityBase.ToJS()) },
                 { "data-icon", "ui-icon-circle-close" },
                 { "data-text", false}
             };
 
-            if (entityBase.UntypedValue == null)
+            if (hidden)
                 htmlAttr.Add("style", "display:none");
 
             return helper.Href(entityBase.Compose("btnRemove"),

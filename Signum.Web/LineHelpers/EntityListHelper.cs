@@ -68,20 +68,18 @@ namespace Signum.Web
                         using (sb.Surround(new HtmlTag("td")))
                         using (sb.Surround(new HtmlTag("ul")))
                         {
-                            sb.AddLine(ListBaseHelper.ViewButton(helper, entityList).Surround("li"));
-                            sb.AddLine(ListBaseHelper.CreateButton(helper, entityList).Surround("li"));
-                            sb.AddLine(ListBaseHelper.FindButton(helper, entityList).Surround("li"));
-                            sb.AddLine(ListBaseHelper.RemoveButton(helper, entityList).Surround("li"));
-                            sb.AddLine(ListBaseHelper.MoveUpButton(helper, entityList).Surround("li"));
-                            sb.AddLine(ListBaseHelper.MoveDownButton(helper, entityList).Surround("li"));
+                            sb.AddLine(EntityBaseHelper.ViewButton(helper, entityList, hidden: false).Surround("li"));
+                            sb.AddLine(EntityBaseHelper.CreateButton(helper, entityList, hidden: false).Surround("li"));
+                            sb.AddLine(EntityBaseHelper.FindButton(helper, entityList, hidden: false).Surround("li"));
+                            sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityList, hidden: false).Surround("li"));
+                            sb.AddLine(ListBaseHelper.MoveUpButton(helper, entityList, hidden: false).Surround("li"));
+                            sb.AddLine(ListBaseHelper.MoveDownButton(helper, entityList, hidden: false).Surround("li"));
                         }
                     }
                 }
             }
 
-            sb.AddLine(new HtmlTag("script").Attr("type", "text/javascript")
-                .InnerHtml(new MvcHtmlString("$('#{0}').entityList({1})".Formato(entityList.ControlID, entityList.OptionsJS())))
-                .ToHtml());
+            sb.AddLine(entityList.ConstructorSript("entityList"));
 
             return sb.ToHtml();
         }

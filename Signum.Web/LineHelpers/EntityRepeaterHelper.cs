@@ -30,9 +30,9 @@ namespace Signum.Web
                 using (sb.Surround(new HtmlTag("legend")))
                 {
                     sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityRepeater));
-                    
-                    sb.AddLine(ListBaseHelper.CreateButton(helper, entityRepeater));
-                    sb.AddLine(ListBaseHelper.FindButton(helper, entityRepeater));
+
+                    sb.AddLine(EntityBaseHelper.CreateButton(helper, entityRepeater, hidden: false));
+                    sb.AddLine(EntityBaseHelper.FindButton(helper, entityRepeater, hidden: false));
                 }
 
                 sb.AddLine(helper.HiddenStaticInfo(entityRepeater));
@@ -55,9 +55,7 @@ namespace Signum.Web
                 }
             }
 
-            sb.AddLine(new HtmlTag("script").Attr("type", "text/javascript")
-                .InnerHtml(new MvcHtmlString("$('#{0}').entityRepeater({1})".Formato(entityRepeater.ControlID, entityRepeater.OptionsJS())))
-                .ToHtml());
+            sb.AddLine(entityRepeater.ConstructorSript("entityRepeater"));
 
             return sb.ToHtml();
         }
@@ -79,7 +77,7 @@ namespace Signum.Web
                                     "sf-line-button sf-remove",
                                     new Dictionary<string, object> 
                                     {
-                                        { "onclick", entityRepeater.Removing ?? "{0}.remove('{1}');".Formato(entityRepeater.ToJS(), itemTC.ControlID) },
+                                        { "onclick", "{0}.remove('{1}');".Formato(entityRepeater.ToJS(), itemTC.ControlID) },
                                         { "data-icon", "ui-icon-circle-close" }, 
                                         { "data-text", false } 
                                     }));

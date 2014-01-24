@@ -69,8 +69,8 @@ namespace Signum.Web
                                 htmlAttr));
                         }
 
-                        sb.AddLine(ListBaseHelper.CreateButton(helper, entityStrip));
-                        sb.AddLine(ListBaseHelper.FindButton(helper, entityStrip));
+                        sb.AddLine(EntityBaseHelper.CreateButton(helper, entityStrip, hidden: false));
+                        sb.AddLine(EntityBaseHelper.FindButton(helper, entityStrip, hidden: false));
                     }
                 }
 
@@ -83,9 +83,7 @@ namespace Signum.Web
                     sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityStrip));
             }
 
-            sb.AddLine(new HtmlTag("script").Attr("type", "text/javascript")
-                .InnerHtml(new MvcHtmlString("$('#{0}').entityStrip({1})".Formato(entityStrip.ControlID, entityStrip.OptionsJS())))
-                .ToHtml());
+            sb.AddLine(entityStrip.ConstructorSript("entityStrip"));
 
             return sb.ToHtml();
         }
@@ -157,7 +155,7 @@ namespace Signum.Web
                                     "sf-line-button sf-view",
                                     new Dictionary<string, object> 
                                 {
-                                    { "onclick", entityStrip.Removing ?? "{0}.view('{1}');".Formato(entityStrip.ToJS(), itemTC.ControlID) },
+                                    { "onclick", "{0}.view('{1}');".Formato(entityStrip.ToJS(), itemTC.ControlID) },
                                     { "data-icon",  "ui-icon-circle-arrow-e" },
                                     { "data-text", false } 
                                 }));
@@ -171,7 +169,7 @@ namespace Signum.Web
                                     "sf-line-button sf-remove",
                                     new Dictionary<string, object> 
                                 {
-                                    { "onclick", entityStrip.Removing ?? "{0}.remove('{1}');".Formato(entityStrip.ToJS(), itemTC.ControlID) },
+                                    { "onclick", "{0}.remove('{1}');".Formato(entityStrip.ToJS(), itemTC.ControlID) },
                                     { "data-icon", "ui-icon-circle-close" }, 
                                     { "data-text", false } 
                                 }));

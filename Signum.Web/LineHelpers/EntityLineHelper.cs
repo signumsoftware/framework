@@ -98,10 +98,10 @@ namespace Signum.Web
                         sb.AddLine(helper.Span(entityLine.Compose(EntityBaseKeys.Link), entityLine.UntypedValue.TryToString(), "sf-value-line"));
                     }
 
-                    sb.AddLine(EntityBaseHelper.ViewButton(helper, entityLine));
-                    sb.AddLine(EntityBaseHelper.CreateButton(helper, entityLine));
-                    sb.AddLine(EntityBaseHelper.FindButton(helper, entityLine));
-                    sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityLine));
+                    sb.AddLine(EntityBaseHelper.ViewButton(helper, entityLine, hidden: entityLine.UntypedValue == null));
+                    sb.AddLine(EntityBaseHelper.CreateButton(helper, entityLine, hidden: entityLine.UntypedValue != null));
+                    sb.AddLine(EntityBaseHelper.FindButton(helper, entityLine, hidden: entityLine.UntypedValue != null));
+                    sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityLine, hidden: entityLine.UntypedValue == null));
 
                     if (entityLine.ShowValidationMessage)
                     {
@@ -113,9 +113,7 @@ namespace Signum.Web
                     sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityLine));
             }
 
-            sb.AddLine(new HtmlTag("script").Attr("type", "text/javascript")
-                .InnerHtml(new MvcHtmlString("$('#{0}').entityLine({1})".Formato(entityLine.ControlID, entityLine.OptionsJS())))
-                .ToHtml());
+            sb.AddLine(entityLine.ConstructorSript("entityLine"));
 
             return sb.ToHtml();
         }

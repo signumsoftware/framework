@@ -57,52 +57,5 @@ namespace Signum.Web
             result.Add("maxElements", MaxElements.TryToString());
             return result;
         }
-
-        protected override string DefaultView()
-        {
-            return null;
-        }
-
-        protected override string DefaultCreate()
-        {
-            return JsCreate(DefaultJsViewOptions()).ToJS();
-        }
-
-        public JsInstruction JsCreate(JsViewOptions viewOptions)
-        {
-            return new JsInstruction(() => "{0}.create({1})".Formato(
-                this.ToJS(),
-                viewOptions.TryCC(v => v.ToJS()) ?? ""));
-        }
-
-        protected override string DefaultFind()
-        {
-            return JsFind(DefaultJsfindOptions(), DefaultJsViewOptions()).ToJS();
-        }
-
-        public JsInstruction JsFind(JsFindOptions findOptions, JsViewOptions viewOptions)
-        {
-            string findParams = ",".Combine(
-                findOptions.TryCC(v => v.ToJS()),
-                viewOptions.TryCC(v => v.ToJS()));
-
-            return new JsInstruction(() => "{0}.find({1})".Formato(this.ToJS(), findParams));
-        }
-
-        protected override string DefaultRemove()
-        {
-            return null;
-        }
-
-        protected override string DefaultMoveUp()
-        {
-            return null;
-        }
-
-        protected override string DefaultMoveDown()
-        {
-            return null;
-        }
-
     }
 }
