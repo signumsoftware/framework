@@ -7,6 +7,7 @@ using System.Web.Mvc.Html;
 using Signum.Utilities;
 using Signum.Entities;
 using Signum.Entities.Reflection;
+using System.Web.Script.Serialization;
 
 namespace Signum.Web
 {
@@ -125,14 +126,19 @@ namespace Signum.Web
         }
 
 
-        public string AttachFunction; 
+        public string AttachFunction;
+        public object AttachFunctionExtraArguments; 
 
         internal MvcHtmlString ConstructorSript(string name)
         {
             var construtor = "$('#{0}').{1}({2})".Formato(ControlID, name, OptionsJS());
 
             if (AttachFunction != null)
-                construtor = AttachFunction.Formato(construtor);
+            {
+                construtor = AttachFunction + "(" + construtor +
+                    (AttachFunctionExtraArguments == null ? null : new JavaScriptSerializer().Serialize(AttachFunctionExtraArguments)) +
+                    ")";
+            }
 
             return new HtmlTag("script").Attr("type", "text/javascript")
                 .InnerHtml(new MvcHtmlString(construtor))
