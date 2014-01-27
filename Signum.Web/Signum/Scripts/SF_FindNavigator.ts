@@ -1,173 +1,203 @@
 ﻿/// <reference path="references.ts"/>
 
+module SF.FindNavigator {
 
-module SF {
-    export module FindNavigator {
+    once("SF-searchControl", () =>
+        $.fn.searchControl = function (opt: FindOptions) {
+            return new SearchControl(this, opt);
+        });
 
-        once("SF-searchControl", () =>
-            $.fn.searchControl = function (opt: FindOptions) {
-                new SearchControl(this, opt);
-            });
+    export function getFor(prefix: string): SearchControl {
+        return $("#" + SF.compose(prefix, "sfSearchControl")).SFControl<SearchControl>();
+    }
 
-        export function getFor(prefix: string) : SearchControl {
-            return $("#" + SF.compose(prefix, "sfSearchControl")).SFControl<SearchControl>();
-        }
+    export function findMany(findOptions: FindOptions): Promise<Array<SF.EntityValue>> {
+        findOptions.allowMultiple = true;
+        return findInternal(findOptions);
+    }
 
-        export function openFinder(findOptions: FindOptions) {
-            var self = this;
+    export function find(findOptions: FindOptions): Promise<SF.EntityValue> {
+        findOptions.allowMultiple = false;
+        return findInternal(findOptions).then(array=> array == null ? null : array[0]);
+    }
+
+    function findInternal(findOptions: FindOptions): Promise<Array<SF.EntityValue>> {
+        return new Promise<Array<SF.EntityValue>>(function (resolve) {
             $.ajax({
                 url: findOptions.openFinderUrl || (SF.isEmpty(findOptions.prefix) ? SF.Urls.find : SF.Urls.partialFind),
-                data: this.requestDataForOpenFinder(findOptions),
+                data: requestDataForOpenFinder(findOptions),
                 async: false,
                 success: function (popupHtml) {
                     var divId = SF.compose(findOptions.prefix, "Temp");
                     $("body").append(SF.hiddenDiv(divId, popupHtml));
-                    SF.triggerNewContent($("#" + divId));
-                    $.extend(self.getFor(findOptions.prefix).options, findOptions); //Copy all properties (i.e. onOk was not transmitted)
+                    var div = $("#" + divId);
+                    SF.triggerNewContent(div);
+
+                    var sc = getFor(findOptions.prefix)
+
+                    //$.extend(sc.options, findOptions); //Copy all properties (i.e. onOk was not transmitted)
                     $("#" + divId).popup({
-                        onOk: function () { self.getFor(findOptions.prefix).onSearchOk(); },
-                        onCancel: function () { self.getFor(findOptions.prefix).onSearchCancel(); }
+                        onOk: function () {
+
+                            var items = sc.selectedItems();
+
+                            if (items.length == 0) {
+                                SF.Notify.info(lang.signum.noElementsSelected);
+                                return null;
+                            }
+
+                            if (items.length > 1 && !findOptions.allowMultiple) {
+                                SF.Notify.info(lang.signum.onlyOneElement);
+                                return;
+                            }
+
+                            div.remove();
+
+                            resolve(items);
+                        },
+                        onCancel: function () { div.remove(); resolve(null); }
                     });
                 }
             });
-        }
+        });
+    }
 
-        export function requestDataForOpenFinder(findOptions: FindOptions) {
-            var requestData = {
-                webQueryName: findOptions.webQueryName,
-                elems: findOptions.elems,
-                allowMultiple: findOptions.allowMultiple,
-                prefix: findOptions.prefix
-            };
-
-            if (findOptions.navigate == false) {
-                requestData["navigate"] = findOptions.navigate;
-            }
-            if (findOptions.searchOnLoad == true) {
-                requestData["searchOnLoad"] = findOptions.searchOnLoad;
-            }
-            if (findOptions.filterMode != null) {
-                requestData["filterMode"] = findOptions.filterMode;
-            }
-            if (!findOptions.create) {
-                requestData["create"] = findOptions.create;
-            }
-            if (!findOptions.allowChangeColumns) {
-                requestData["allowChangeColumns"] = findOptions.allowChangeColumns;
-            }
-            if (findOptions.filters != null) {
-                requestData["filters"] = findOptions.filters;
-            }
-            if (findOptions.orders != null) {
-                requestData["orders"] = this.serializeOrders(findOptions.orders);
-            }
-            if (findOptions.columns != null) {
-                requestData["columns"] = findOptions.columns;
-            }
-            if (findOptions.columnMode != null) {
-                requestData["columnMode"] = findOptions.columnMode;
-            }
-
-            return requestData;
-        }
-
-        export function serializeOrders(orderArray) {
-            var currOrders = orderArray.join(";");
-            if (!SF.isEmpty(currOrders)) {
-                currOrders += ";";
-            }
-            return currOrders; //.replace(/"/g, "");
-        }
-
-        export function newSubTokensCombo(webQueryName, prefix, index, controllerUrl, requestExtraJsonData) {
-            var $selectedCombo = $("#" + SF.compose(prefix, "ddlTokens_" + index));
-            if ($selectedCombo.length == 0) {
-                return;
-            }
-
-            this.clearChildSubtokenCombos($selectedCombo, prefix, index);
-
-            var $container = $selectedCombo.closest(".sf-search-control");
-            if ($container.length > 0) {
-                $container.trigger("sf-new-subtokens-combo", $selectedCombo.attr("id"));
-            }
-            else {
-                $selectedCombo.trigger("sf-new-subtokens-combo", $selectedCombo.attr("id"));
-            }
-
-            var $selectedOption = $selectedCombo.children("option:selected");
-            if ($selectedOption.val() == "") {
-                return;
-            }
-
-            var serializer = new SF.Serializer().add({
-                webQueryName: webQueryName,
-                tokenName: this.constructTokenName(prefix),
-                index: index,
-                prefix: prefix
-            });
-            if (!SF.isEmpty(requestExtraJsonData)) {
-                serializer.add(requestExtraJsonData);
-            }
-
-            var self = this;
-            $.ajax({
-                url: controllerUrl || SF.Urls.subTokensCombo,
-                data: serializer.serialize(),
-                dataType: "html",
-                success: function (newCombo) {
-                    if (newCombo != "<span>no-results</span>") {
-                        $("#" + SF.compose(prefix, "ddlTokens_" + index)).after(newCombo);
-                    }
-                }
-            });
+    export function requestDataForOpenFinder(findOptions: FindOptions) {
+        var requestData = {
+            webQueryName: findOptions.webQueryName,
+            elems: findOptions.elems,
+            allowMultiple: findOptions.allowMultiple,
+            prefix: findOptions.prefix
         };
 
-        export function clearChildSubtokenCombos($selectedCombo, prefix, index) {
-            $selectedCombo.siblings("select,span")
-                .filter(function () {
-                    var elementId = $(this).attr("id");
-                    if (typeof elementId == "undefined") {
-                        return false;
-                    }
-                    if ((elementId.indexOf(SF.compose(prefix, "ddlTokens_")) != 0)
-                        && (elementId.indexOf(SF.compose(prefix, "lblddlTokens_")) != 0)) {
-                        return false;
-                    }
-                    var currentIndex = elementId.substring(elementId.lastIndexOf("_") + 1, elementId.length);
-                    return parseInt(currentIndex) > index;
-                })
-                .remove();
+        if (findOptions.navigate == false) {
+            requestData["navigate"] = findOptions.navigate;
+        }
+        if (findOptions.searchOnLoad == true) {
+            requestData["searchOnLoad"] = findOptions.searchOnLoad;
+        }
+        if (findOptions.filterMode != null) {
+            requestData["filterMode"] = findOptions.filterMode;
+        }
+        if (!findOptions.create) {
+            requestData["create"] = findOptions.create;
+        }
+        if (!findOptions.allowChangeColumns) {
+            requestData["allowChangeColumns"] = findOptions.allowChangeColumns;
+        }
+        if (findOptions.filters != null) {
+            requestData["filters"] = findOptions.filters;
+        }
+        if (findOptions.orders != null) {
+            requestData["orders"] = this.serializeOrders(findOptions.orders);
+        }
+        if (findOptions.columns != null) {
+            requestData["columns"] = findOptions.columns;
+        }
+        if (findOptions.columnMode != null) {
+            requestData["columnMode"] = findOptions.columnMode;
         }
 
-        export function constructTokenName(prefix) {
-            var tokenName = "";
-            var stop = false;
-            for (var i = 0; !stop; i++) {
-                var currSubtoken = $("#" + SF.compose(prefix, "ddlTokens_" + i));
-                if (currSubtoken.length > 0)
-                    tokenName = SF.compose(tokenName, currSubtoken.val(), ".");
-                else
-                    stop = true;
-            }
-            return tokenName;
-        }
-
-        export function deleteFilter(elem) {
-            var $tr = $(elem).closest("tr");
-            if ($tr.find("select[disabled]").length > 0) {
-                return;
-            }
-
-            if ($tr.siblings().length == 0) {
-                var $filterList = $tr.closest(".sf-filters-list");
-                $filterList.find(".sf-explanation").show();
-                $filterList.find("table").hide();
-            }
-
-            $tr.remove();
-        }
+        return requestData;
     }
+
+    export function serializeOrders(orderArray) {
+        var currOrders = orderArray.join(";");
+        if (!SF.isEmpty(currOrders)) {
+            currOrders += ";";
+        }
+        return currOrders; //.replace(/"/g, "");
+    }
+
+    export function newSubTokensCombo(webQueryName, prefix, index, controllerUrl, requestExtraJsonData) {
+        var $selectedCombo = $("#" + SF.compose(prefix, "ddlTokens_" + index));
+        if ($selectedCombo.length == 0) {
+            return;
+        }
+
+        this.clearChildSubtokenCombos($selectedCombo, prefix, index);
+
+        var $container = $selectedCombo.closest(".sf-search-control");
+        if ($container.length > 0) {
+            $container.trigger("sf-new-subtokens-combo", $selectedCombo.attr("id"));
+        }
+        else {
+            $selectedCombo.trigger("sf-new-subtokens-combo", $selectedCombo.attr("id"));
+        }
+
+        var $selectedOption = $selectedCombo.children("option:selected");
+        if ($selectedOption.val() == "") {
+            return;
+        }
+
+        var serializer = new SF.Serializer().add({
+            webQueryName: webQueryName,
+            tokenName: this.constructTokenName(prefix),
+            index: index,
+            prefix: prefix
+        });
+        if (!SF.isEmpty(requestExtraJsonData)) {
+            serializer.add(requestExtraJsonData);
+        }
+
+        var self = this;
+        $.ajax({
+            url: controllerUrl || SF.Urls.subTokensCombo,
+            data: serializer.serialize(),
+            dataType: "html",
+            success: function (newCombo) {
+                if (newCombo != "<span>no-results</span>") {
+                    $("#" + SF.compose(prefix, "ddlTokens_" + index)).after(newCombo);
+                }
+            }
+        });
+    };
+
+    export function clearChildSubtokenCombos($selectedCombo, prefix, index) {
+        $selectedCombo.siblings("select,span")
+            .filter(function () {
+                var elementId = $(this).attr("id");
+                if (typeof elementId == "undefined") {
+                    return false;
+                }
+                if ((elementId.indexOf(SF.compose(prefix, "ddlTokens_")) != 0)
+                    && (elementId.indexOf(SF.compose(prefix, "lblddlTokens_")) != 0)) {
+                    return false;
+                }
+                var currentIndex = elementId.substring(elementId.lastIndexOf("_") + 1, elementId.length);
+                return parseInt(currentIndex) > index;
+            })
+            .remove();
+    }
+
+    export function constructTokenName(prefix) {
+        var tokenName = "";
+        var stop = false;
+        for (var i = 0; !stop; i++) {
+            var currSubtoken = $("#" + SF.compose(prefix, "ddlTokens_" + i));
+            if (currSubtoken.length > 0)
+                tokenName = SF.compose(tokenName, currSubtoken.val(), ".");
+            else
+                stop = true;
+        }
+        return tokenName;
+    }
+
+    export function deleteFilter(elem) {
+        var $tr = $(elem).closest("tr");
+        if ($tr.find("select[disabled]").length > 0) {
+            return;
+        }
+
+        if ($tr.siblings().length == 0) {
+            var $filterList = $tr.closest(".sf-filters-list");
+            $filterList.find(".sf-explanation").show();
+            $filterList.find("table").hide();
+        }
+
+        $tr.remove();
+    }
+
 
     export enum ColumnOptionsMode {
         Add,
@@ -183,25 +213,22 @@ module SF {
     }
 
     export interface FindOptions {
-        allowChangeColumns: boolean;
-        allowOrder: boolean;
-        allowMultiple: boolean;
-        columnMode: ColumnOptionsMode;
-        columns: string; //List of column names "token1,displayName1;token2,displayName2"
-        create: boolean;
-        elems: number;
-        selectedItemsContextMenu: boolean;
-        filterMode: FilterMode;
-        filters: string; //List of filter names "token1,operation1,value1;token2,operation2,value2"
-        navigate: boolean;
-        openFinderUrl: boolean;
-        onCancelled: () => void;
-        onOk: (item: Array<SF.EntityData>) => boolean;
-        onOkClosed: () => void;
-        orders: string[]; //A Json array like ["Id","-Name"] => Id asc, then Name desc
+        allowChangeColumns?: boolean;
+        allowOrder?: boolean;
+        allowMultiple?: boolean;
+        columnMode?: ColumnOptionsMode;
+        columns?: string; //List of column names "token1,displayName1;token2,displayName2"
+        create?: boolean;
+        elems?: number;
+        selectedItemsContextMenu?: boolean;
+        filterMode?: FilterMode;
+        filters?: string; //List of filter names "token1,operation1,value1;token2,operation2,value2"
+        navigate?: boolean;
+        openFinderUrl?: boolean;
+        orders?: string[]; //A Json array like ["Id","-Name"] => Id asc, then Name desc
         prefix: string;
-        searchOnLoad: boolean;
         webQueryName: string;
+        searchOnLoad?: boolean;
     }
 
     export class SearchControl {
@@ -215,6 +242,8 @@ module SF {
         };
 
         options: FindOptions;
+
+        creating: () => void;
 
         constructor(element: JQuery, _options: FindOptions) {
             element.data("SF-control", this);
@@ -250,10 +279,6 @@ module SF {
             return "#" + SF.compose(this.options.prefix, s);
         }
 
-        public tempDivId() {
-            return SF.compose(this.options.prefix, "Temp");
-        }
-
         public closeMyOpenedCtxMenu() {
             if (this.element.find(".sf-search-ctxmenu-overlay").length > 0) {
                 $('.sf-search-ctxmenu-overlay').remove();
@@ -280,7 +305,7 @@ module SF {
                 });
             }
 
-            if (this.options.allowChangeColumns || (this.options.filterMode !=  SF.FilterMode[SF.FilterMode.AlwaysHidden] && this.options.filterMode != "OnlyResults")) {
+            if (this.options.allowChangeColumns || (this.options.filterMode != FilterMode[FilterMode.AlwaysHidden] && this.options.filterMode != "OnlyResults")) {
                 $tblResults.on("contextmenu", "th:not(.sf-th-entity):not(.sf-th-selection)", function (e) {
                     if (!self.closeMyOpenedCtxMenu()) {
                         return false;
@@ -601,12 +626,9 @@ module SF {
                 value = (<HTMLInputElement> valBool[0]).checked;
             }
             else {
-                var info = new SF.RuntimeInfo(SF.compose(SF.compose(this.options.prefix, "value"), index));
-                if (info.find().length > 0) { //If it's a Lite, the value is the Id
-                    value = info.entityType() + ";" + info.id();
-                    if (value == ";") {
-                        value = "";
-                    }
+                var info = new SF.RuntimeInfoElement(SF.compose(SF.compose(this.options.prefix, "value"), index));
+                if (info.getElem().length > 0) { //If it's a Lite, the value is the Id
+                    value = info.value().key();
                 }
 
                 //Encode value CSV-ish style
@@ -644,27 +666,26 @@ module SF {
             return result;
         }
 
-        onSearchOk() {
+        selectedItems(): Array<SF.EntityValue> {
+            var items = [];
+            var selected = $("input:checkbox[name^=" + SF.compose(this.options.prefix, "rowSelection") + "]:checked");
+            if (selected.length == 0)
+                return items;
+
             var self = this;
-            this.hasSelectedItems(function (items) {
-                var doDefault = (self.options.onOk != null) ? self.options.onOk(items) : true;
-                if (doDefault != false) {
-                    $('#' + self.tempDivId()).remove();
-                    if (self.options.onOkClosed != null) {
-                        self.options.onOkClosed();
-                    }
-                }
+            selected.each(function (i, v) {
+                var parts = (<HTMLInputElement>v).value.split("__");
+                var val = new EntityValue(new RuntimeInfoValue(parts[1], parseInt(parts[0])),
+                    parts[2],
+                    $(this).parent().next().children('a').attr('href'));
+
+                items.push(val);
             });
+
+            return items;
         }
 
-        onSearchCancel() {
-            $('#' + this.tempDivId()).remove();
-            if (this.options.onCancelled != null) {
-                this.options.onCancelled();
-            }
-        }
-
-        hasSelectedItems(onSuccess : (item : Array<SF.EntityData>)=>void) {
+        hasSelectedItems(onSuccess: (item: Array<SF.EntityValue>) => void) {
             var items = this.selectedItems();
             if (items.length == 0) {
                 SF.Notify.info(lang.signum.noElementsSelected);
@@ -673,7 +694,7 @@ module SF {
             onSuccess(items);
         }
 
-        hasSelectedItem(onSuccess: (item: SF.EntityData) => void) {
+        hasSelectedItem(onSuccess: (item: SF.EntityValue) => void) {
             var items = this.selectedItems();
             if (items.length == 0) {
                 SF.Notify.info(lang.signum.noElementsSelected);
@@ -686,36 +707,8 @@ module SF {
             onSuccess(items[0]);
         }
 
-        selectedItems() : Array<SF.EntityData> {
-            var items = [];
-            var selected = $("input:checkbox[name^=" + SF.compose(this.options.prefix, "rowSelection") + "]:checked");
-            if (selected.length == 0)
-                return items;
-
-            var self = this;
-            selected.each(function (i, v) {
-                var parts = (<HTMLInputElement>v).value.split("__");
-                var item = {
-                    id: parts[0],
-                    type: parts[1],
-                    key: parts[1] + ";" + parts[0],
-                    toStr: parts[2],
-                    link: $(this).parent().next().children('a').attr('href')
-                };
-                items.push(item);
-            });
-
-            return items;
-        }
-
-        splitSelectedKeys() {
-            var selected = this.selectedItems();
-            if (selected.length < 1) {
-                return '';
-            }
-            else {
-                return selected.map(function (item) { return item.key; }).join(',');
-            }
+        selectedKeys() {
+            return this.selectedItems().map(function (item) { return item.runtimeInfo.key(); }).join(',');
         }
 
         newSortOrder($th, multiCol) {
@@ -799,10 +792,9 @@ module SF {
 
             var $tempContainer = $("<div></div>").append($div);
 
-            new SF.ViewNavigator({
+            $tempContainer.popup({
                 onOk: function () { $th.find("span").html($("#columnNewName > input:text").val()); },
-                prefix: popupPrefix
-            }).showViewOk($tempContainer.html());
+            });
         }
 
 
@@ -910,7 +902,7 @@ module SF {
             });
         }
 
-        newFilterRowIndex()  : number{
+        newFilterRowIndex(): number {
             var lastRow = $(this.pf("tblFilters tbody tr:last"));
             if (lastRow.length == 1) {
                 return parseInt(lastRow[0].id.substr(lastRow[0].id.lastIndexOf("_") + 1, lastRow[0].id.length)) + 1;
@@ -944,7 +936,7 @@ module SF {
             this.changeButtonState($btnAddColumn, $selectedOption.attr("data-column"), function () { self.addColumn(); });
         }
 
-        changeButtonState($button: JQuery, disablingMessage : string, enableCallback?: (eventObject: JQueryEventObject) => any) {
+        changeButtonState($button: JQuery, disablingMessage: string, enableCallback?: (eventObject: JQueryEventObject) => any) {
             var hiddenId = $button.attr("id") + "temp";
             if (typeof disablingMessage != "undefined") {
                 $button.addClass("ui-button-disabled").addClass("ui-state-disabled").addClass("sf-disabled").attr("disabled", "disabled").attr("title", disablingMessage);
@@ -1006,35 +998,38 @@ module SF {
             this.quickFilter("", $elem.find("input:hidden").val());
         }
 
-        create(viewOptions) {
-            var self = this;
-            var type = this.getEntityType(function (type) {
-                self.typedCreate($.extend({
-                    type: type
-                }, viewOptions || {}));
+        create_click() {
+            this.onCreate(); 
+        }
+
+
+        onCreate() {
+            if (this.creating != null)
+                this.creating();
+            else
+                this.getEntityType().then(type => {
+                    if (type == null)
+                        return;
+
+                    var runtimeInfo = new RuntimeInfoValue(type, null);
+                    if (SF.isEmpty(this.options.prefix))
+                        ViewNavigator.navigate(runtimeInfo);
+                    else
+                        ViewNavigator.navigatePopup(new EntityHtml(SF.compose(this.options.prefix, "Temp"), runtimeInfo));
+                });
+        }
+
+        getEntityType() : Promise<string> {
+            var options = $(this.pf(SF.Keys.entityTypeNames)).val().split(",").map(p=> <ViewNavigator.ChooserOption>{
+                id: p.split(';')[0],
+                text: p.split(';')[1]
             });
+            if (options.length == 1) {
+                return Promise.resolve(options[0].id);
+            }
+            return ViewNavigator.chooser(this.options.prefix, lang.signum.chooseAType, options).then(o=> o.id);
         }
 
-        getEntityType(_onTypeFound) {
-            var typeStr = $(this.pf(SF.Keys.entityTypeNames)).val();
-            var types = typeStr.split(",");
-            if (types.length == 1) {
-                return _onTypeFound(types[0]);
-            }
-            SF.openTypeChooser(this.options.prefix, _onTypeFound, { types: typeStr });
-        }
-
-        typedCreate(viewOptions) {
-            viewOptions.prefix = viewOptions.prefix || this.options.prefix;
-            if (SF.isEmpty(viewOptions.prefix)) {
-                var fullViewOptions = this.viewOptionsForSearchCreate(viewOptions);
-                new SF.ViewNavigator(fullViewOptions).navigate();
-            }
-            else {
-                var fullViewOptions = this.viewOptionsForSearchPopupCreate(viewOptions);
-                new SF.ViewNavigator(fullViewOptions).createSave();
-            }
-        }
 
         viewOptionsForSearchCreate(viewOptions) {
             return $.extend({
@@ -1087,6 +1082,5 @@ module SF {
                 });
             }
         }
-
     }
 }

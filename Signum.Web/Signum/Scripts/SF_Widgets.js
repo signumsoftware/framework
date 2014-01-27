@@ -13,7 +13,7 @@ var SF;
         function onNoteCreated(url, prefix, successMessage) {
             $.ajax({
                 url: url,
-                data: { sfRuntimeInfo: new SF.RuntimeInfo(prefix).find().val() },
+                data: { sfRuntimeInfo: new SF.RuntimeInfoElement(prefix).getElem().val() },
                 success: function (newCount) {
                     var $notesWidget = $("#" + SF.compose(prefix, "notesWidget"));
                     $notesWidget.find(".sf-widget-count").html(newCount);
@@ -26,7 +26,7 @@ var SF;
         function onAlertCreated(url, prefix, successMessage) {
             $.ajax({
                 url: url,
-                data: { sfRuntimeInfo: new SF.RuntimeInfo(prefix).find().val() },
+                data: { sfRuntimeInfo: new SF.RuntimeInfoElement(prefix).getElem().val() },
                 success: function (jsonNewCount) {
                     var $alertsWidget = $("#" + SF.compose(prefix, "alertsWidget"));
                     updateCountAndHighlight($alertsWidget, "warned", jsonNewCount.warned);

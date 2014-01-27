@@ -46,7 +46,6 @@ declare module JQueryUI
         modal?: boolean;
         onOk? : () => void;
         onCancel? : () => void;
-        onSave? : () => void;
     }
 }
 
@@ -138,10 +137,6 @@ interface JQuery
                             options.onOk();
                         }
                     });
-                }
-
-                if (typeof options.onSave != "undefined") {
-                    $this.find(".sf-save").off('click').click(options.onSave);
                 }
 
                 var dialog = $this.dialog(o);

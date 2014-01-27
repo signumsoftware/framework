@@ -24,7 +24,7 @@ var SF;
             }, _options);
         }
         OperationManager.prototype.runtimeInfo = function () {
-            return new SF.RuntimeInfo(this.options.prefix);
+            return new SF.RuntimeInfoElement(this.options.prefix);
         };
 
         OperationManager.prototype.pf = function (s) {
@@ -401,7 +401,7 @@ var SF;
                 return false;
             }
 
-            SF.FindNavigator.getFor(this.options.prefix).hasSelectedItems(function (items) {
+            var items = SF.FindNavigator.getFor(this.options.prefix).hasSelectedItems(function (items) {
                 return _this.ajaxItems(newPrefix, items, onAjaxSuccess || SF.opOnSuccessDispatcher);
             });
         };

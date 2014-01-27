@@ -321,34 +321,7 @@ namespace Signum.Web.Controllers
 
             return PartialView(Navigator.Manager.PopupCancelControlView);
         }
-
-        [HttpPost]
-        public PartialViewResult GetChooser(List<string> buttons, List<string> ids, string prefix, string title)
-        {
-            if (buttons == null || buttons.Count == 0)
-                throw new InvalidOperationException("GetChooser needs a list of options");
-
-            HtmlStringBuilder sb = new HtmlStringBuilder();
-            int i = 0;
-            foreach (string button in buttons) 
-            {
-                string id = ids != null ? ids[i] : button.Replace(" ", "");
-                sb.Add(new HtmlTag("input")
-                    .IdName("option_" + id)
-                    .Attrs(new Dictionary<string, string> { { "data-id", id }, { "type", "button" }, { "value", button }, { "class", "sf-chooser-button" } })
-                    .ToHtmlSelf());
-                sb.Add(new HtmlTag("br").ToHtmlSelf());
-                i++;
-            }
-
-            ViewData.Model = new Context(null, prefix);
-            ViewData[ViewDataKeys.CustomHtml] = sb.ToHtml();
-            if (title.HasText())
-                ViewData[ViewDataKeys.Title] = title;
-
-            return PartialView(Navigator.Manager.PopupCancelControlView);
-        }
-
+     
         public static HtmlHelper CreateHtmlHelper(Controller c)
         {
             var viewContext = new ViewContext(c.ControllerContext, new FakeView(), c.ViewData, c.TempData, TextWriter.Null);

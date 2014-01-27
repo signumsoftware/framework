@@ -119,10 +119,6 @@ var SF;
                     });
                 }
 
-                if (typeof options.onSave != "undefined") {
-                    $this.find(".sf-save").off('click').click(options.onSave);
-                }
-
                 var dialog = $this.dialog(o);
 
                 if ($htmlTitle.length > 0) {

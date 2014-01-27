@@ -38,7 +38,7 @@ module SF
         }
 
         public runtimeInfo() {
-            return new SF.RuntimeInfo(this.options.prefix);
+            return new SF.RuntimeInfoElement(this.options.prefix);
         }
 
         public pf(s) {
@@ -421,7 +421,7 @@ module SF
                 return false;
             }
 
-            SF.FindNavigator.getFor(this.options.prefix).hasSelectedItems(items =>
+            var items = SF.FindNavigator.getFor(this.options.prefix).hasSelectedItems(items =>
                 this.ajaxItems(newPrefix, items, onAjaxSuccess || SF.opOnSuccessDispatcher));
         }
 

@@ -94,9 +94,9 @@ namespace Signum.Web
             if (Types == null)
                 throw new ArgumentException("StaticInfo.Types must be set");
 
-            return "{0};{1};{2};{3};{4}".Formato(
-                    Types == ImplementedByAll ? ImplementedByAllKey :
-                    Types.ToString(t => Navigator.ResolveWebTypeName(t), ","),
+            return "{0};{1};{2};{3};{4};{5}".Formato(
+                    Types == ImplementedByAll ? ImplementedByAllKey : Types.ToString(t => Navigator.ResolveWebTypeName(t), ","),
+                    Types == ImplementedByAll ? ImplementedByAllKey : Types.ToString(t => t.NiceName(), ","),
                     IsEmbedded ? "e" : "i",
                     IsReadOnly ? "r" : "",
                     EmbeddedRoute != null ? Navigator.ResolveWebTypeName(EmbeddedRoute.RootType) : "",

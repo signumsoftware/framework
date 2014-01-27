@@ -259,6 +259,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Signum\Headers\d3\d3.d.ts" />
+    <Content Include="Signum\Headers\es6-promises\es6-promises.d.ts" />
     <Content Include="Signum\Headers\jquery\jquery.d.ts" />
     <Content Include="Signum\Headers\jqueryui\jqueryui.d.ts" />
     <TypeScriptCompile Include="Signum\Scripts\references.ts" />

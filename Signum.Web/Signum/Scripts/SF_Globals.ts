@@ -4,10 +4,11 @@ module SF
 {
     export class StaticInfo {
         static _types = 0;
-        static _isEmbedded = 1;
-        static _isReadOnly = 2;
-        static _rootType = 3;
-        static _propertyRoute = 4;
+        static _typeNiceNames = 1;
+        static _isEmbedded = 2;
+        static _isReadOnly = 3;
+        static _rootType = 4;
+        static _propertyRoute = 5;
 
         prefix: string;
         $elem: JQuery;
@@ -41,121 +42,172 @@ module SF
         }
 
         public singleType() {
-            var typeArray = this.types().split(',');
+            var typeArray = this.types();
             if (typeArray.length !== 1) {
                 throw "types should have only one element for element {0}".format(this.prefix);
             }
             return typeArray[0];
         }
 
-        public types() {
-            return this.getValue(StaticInfo._types);
+        public types() : string[] {
+            return this.getValue(StaticInfo._types).split(',');
         }
 
-        public isEmbedded() {
+        public typeNiceNames(): string[] {
+            return this.getValue(StaticInfo._typeNiceNames).split(',');
+        }
+
+        public isEmbedded() : boolean {
             return this.getValue(StaticInfo._isEmbedded) == "e";
         }
 
-        public isReadOnly() {
+        public isReadOnly() : boolean {
             return this.getValue(StaticInfo._isReadOnly) == "r";
         }
 
-        public rootType() {
+        public rootType(): string{
             return this.getValue(StaticInfo._rootType);
         }
 
-        public propertyRoute() {
+        public propertyRoute(): string{
             return this.getValue(StaticInfo._propertyRoute);
-        }
-
-        public createValue(types, isEmbedded, isReadOnly, rootType, propertyRoute) {
-            var array = [];
-            array[StaticInfo._types] = types;
-            array[StaticInfo._isEmbedded] = isEmbedded ? "e" : "i";
-            array[StaticInfo._isReadOnly] = isReadOnly ? "r" : "";
-            array[StaticInfo._rootType] = rootType;
-            array[StaticInfo._propertyRoute] = propertyRoute;
-            return this.toValue(array);
         }
     }
 
-    export class RuntimeInfo {
-        static _entityType = 0;
-        static _id = 1;
-        static _isNew = 2;
-        static _ticks = 3;
+    export class EntityHtml extends EntityValue
+    {
+        prefix: string;
+        html: JQuery; 
+      
+        hasErrors: boolean;
 
+        constructor(prefix: string, runtimeInfo: RuntimeInfoValue, toString?: string, link?: string) {
+            super(runtimeInfo, toString, link); 
+
+            if (this.prefix == null)
+                throw new Error("prefix is mandatory for EntityHtml"); 
+        }
+
+        assertPrefixAndType(prefix: string, staticInfo: StaticInfo) {
+
+            super.assertPrefixAndType(prefix, staticInfo);
+
+            if (this.prefix != null && this.prefix != prefix)
+                throw Error("EntityHtml prefix should be {0} instead of  {1}".format(prefix, this.prefix));
+        }
+
+        isLoaded() {
+            return this.html != null && this.html.length != 0;
+        }
+    }
+
+    export class EntityValue
+    {
+        constructor(runtimeInfo: RuntimeInfoValue, toString?: string, link?: string) {
+            if (runtimeInfo == null)
+                throw new Error("runtimeInfo is mandatory for an EntityValue");
+
+            this.runtimeInfo = runtimeInfo;
+            this.toStr = toString;
+            this.link = link;
+        }
+
+        runtimeInfo: RuntimeInfoValue;
+        toStr: string;
+        link: string;
+
+        assertPrefixAndType(prefix: string, staticInfo: StaticInfo)
+        {
+            var types = staticInfo.types();
+
+            if (types.length == 0 && types[0] == "[All]")
+                return;
+
+            if (types.indexOf(this.runtimeInfo.type) == -1)
+                throw new Error("{0} not found in types {1}".format(this.runtimeInfo.type, types.join(", ")));
+        }
+
+        isLoaded() {
+            return false;
+        }
+    }
+
+    export class RuntimeInfoValue {
+        type: string;
+        id: number;
+        isNew: boolean;
+        ticks: number;
+
+        constructor(entityType: string, id: number, isNew?: boolean, ticks?: number) {
+            if (SF.isEmpty(entityType))
+                throw new Error("entityTyp is mandatory for RuntimeInfoValue");
+
+            this.type = entityType;
+            this.id = id;
+            this.isNew = isNew;
+            this.ticks = ticks;
+        }
+
+        public static parse(runtimeInfoString: string): RuntimeInfoValue {
+            if (SF.isEmpty(runtimeInfoString))
+                return null;
+
+            var array = runtimeInfoString.split(',');
+            return new RuntimeInfoValue(
+                array[0],
+                SF.isEmpty(array[1]) ? null : parseInt(array[1]),
+                array[2] == "n",
+                SF.isEmpty(array[3]) ? null : parseInt(array[3]));
+        }
+
+        toString() {
+            return [this.type,
+                this.id,
+                this.isNew ? "n" : "o",
+                this.ticks].join(";");
+        }
+
+        public static fromKey(key: string): RuntimeInfoValue {
+            if (SF.isEmpty(key))
+                return null;
+
+            var array = key.split(',');
+            return new RuntimeInfoValue(
+                array[0],
+                parseInt(array[1]),
+                false, null);
+        }
+
+        key(): string {
+            if (this.id == null)
+                throw Error("RuntimeInfoValue has no Id");
+
+            return this.type + ";" + this.id;
+        }
+    }
+
+    export class RuntimeInfoElement {
+      
         prefix: string;
         $elem: JQuery;
 
-        constructor(prefix?: string) {
+        constructor(prefix: string) {
             this.prefix = prefix;
         }
 
-
-        public find() {
+        public getElem() {
             if (!this.$elem) {
                 this.$elem = $('#' + SF.compose(this.prefix, SF.Keys.runtimeInfo));
             }
             return this.$elem;
         }
-        public value() {
-            return this.find().val();
+
+        value(): RuntimeInfoValue {
+            return RuntimeInfoValue.parse(this.getElem().val());
         }
-        public toArray() {
-            return this.value().split(";");
-        }
-        public toValue(array) {
-            return array.join(";");
-        }
-        public getSet(key, val?) {
-            var array = this.toArray();
-            if (val === undefined) {
-                return array[key];
-            }
-            array[key] = val;
-            this.find().val(this.toValue(array));
-        }
-        public entityType() {
-            return this.getSet(RuntimeInfo._entityType);
-        }
-        public id() {
-            return this.getSet(RuntimeInfo._id);
-        }
-        public isNew() {
-            return this.getSet(RuntimeInfo._isNew);
-        }
-        public ticks() {
-            return this.getSet(RuntimeInfo._ticks);
-        }
-        public setEntity(entityType, id) {
-            this.getSet(RuntimeInfo._entityType, entityType);
-            if (SF.isEmpty(id)) {
-                this.getSet(RuntimeInfo._id, '');
-                this.getSet(RuntimeInfo._isNew, 'n');
-            }
-            else {
-                this.getSet(RuntimeInfo._id, id);
-                this.getSet(RuntimeInfo._isNew, 'o');
-            }
-        }
-        public removeEntity() {
-            this.getSet(RuntimeInfo._entityType, '');
-            this.getSet(RuntimeInfo._id, '');
-            this.getSet(RuntimeInfo._isNew, 'o');
-        }
-        public createValue(entityType, id, isNew, ticks) {
-            var array = [];
-            array[RuntimeInfo._entityType] = entityType;
-            array[RuntimeInfo._id] = id;
-            if (SF.isEmpty(isNew)) {
-                array[RuntimeInfo._isNew] = SF.isEmpty(id) ? "n" : "o";
-            }
-            else {
-                array[RuntimeInfo._isNew] = isNew;
-            }
-            array[RuntimeInfo._ticks] = ticks;
-            return this.toValue(array);
+
+        setValue(runtimeInfo: RuntimeInfoValue) {
+            this.getElem().val(runtimeInfo == null ? null : runtimeInfo.toString());
         }
     }
 }
@@ -247,19 +299,24 @@ module SF
         return str1 + separator + str2;
     }
 
-    export function cloneContents(sourceContainerId) : JQuery {
-        var $source = $('#' + sourceContainerId);
-        var $clone = $source.children().clone(true);
+    export function cloneContents(sourceContainerId : string) : JQuery {
+        return cloneWithValues($('#' + sourceContainerId).children());
+    }
 
-        var $sourceSelect = $source.find("select");
-        var $cloneSelect = $clone.find("select");
+    export function cloneWithValues(elements: JQuery): JQuery {
+        var clone = elements.clone(true);
 
-        for (var i = 0, l = $sourceSelect.length; i < l; i++) {
-            $cloneSelect.eq(i).val($sourceSelect.eq(i).val());
+        var sourceSelect = elements.filter("select").add(elements.find("select"));
+        var cloneSelect = clone.filter("select").add(clone.filter("selet"));
+
+        for (var i = 0, l = sourceSelect.length; i < l; i++) {
+            cloneSelect.eq(i).val(sourceSelect.eq(i).val());
         }
 
-        return $clone;
+        return clone;
     }
+
+
 
     export function getPathPrefixes(prefix) {
         var path = [],
@@ -323,7 +380,7 @@ module SF
     }
 
     export function hiddenDiv(id : string, innerHtml : any) {
-        return "<div id='" + id + "' name='" + id + "' style='display:none'>" + innerHtml + "</div>";
+        return $("<div id='" + id + "' style='display:none'></div>").html(innerHtml);
     }
 
     export module Dropdowns

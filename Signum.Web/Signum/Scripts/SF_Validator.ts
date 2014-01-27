@@ -3,6 +3,7 @@
 
 module SF.Validation {
 
+
     export interface ValidationOptions {
         prefix?: string;
         controllerUrl?: string;
@@ -225,12 +226,7 @@ module SF.Validation {
         }
     }
 
-    export interface PartialValidationOptions extends ValidationOptions {
-        type?: string;
-        id?: number;
-    }
-
-    function completePartialOptions(valOptions: PartialValidationOptions): PartialValidationOptions {
+    function completePartialOptions(valOptions: ValidationOptions): ValidationOptions {
         return $.extend({
             parentDiv: SF.compose(valOptions.prefix, "panelPopup"),
             type: null,
@@ -238,7 +234,7 @@ module SF.Validation {
         }, completeOptions(valOptions));
     }
 
-    function checkOrAddRuntimeInfo(valOptions: PartialValidationOptions, $formChildren: JQuery, serializer: SF.Serializer) {
+    function checkOrAddRuntimeInfo(valOptions: ValidationOptions, $formChildren: JQuery, serializer: SF.Serializer) {
         //Check runtimeInfo present => if it's a popup from a LineControl it will not be
         var myRuntimeInfoKey = SF.compose(valOptions.prefix, SF.Keys.runtimeInfo);
         if ($formChildren.filter("#" + myRuntimeInfoKey).length == 0) {
@@ -248,13 +244,13 @@ module SF.Validation {
     }
 
 
-    function constructRequestDataForSaving(valOptions: PartialValidationOptions) {
+    function constructRequestDataForSaving(valOptions: ValidationOptions) {
         SF.log("PartialValidator constructRequestDataForSaving");
         var prefix = valOptions.prefix;
         var formChildren = $("#" + valOptions.parentDiv + " :input")
             .add("#" + SF.Keys.tabId)
             .add("input:hidden[name=" + SF.Keys.antiForgeryToken + "]")
-            .add(SF.getInfoParams(prefix));
+            .add(getInfoParams(prefix));
         formChildren = formChildren.not(".sf-search-control *");
 
         var serializer = new SF.Serializer();
@@ -271,6 +267,10 @@ module SF.Validation {
         return serializer.serialize();
     }
 
+    function getInfoParams(prefix : string) {
+        return $("#" + SF.compose(prefix, SF.Keys.runtimeInfo));
+    };
+
     function createValidatorResult(r): ValidationResult {
         var validatorResult = {
             modelState: r["ModelState"],
@@ -282,7 +282,7 @@ module SF.Validation {
     }
 
 
-    export function trySavePartial(valOptions: PartialValidationOptions): any {
+    export function trySavePartial(valOptions: ValidationOptions): any {
         valOptions = completePartialOptions(valOptions);
         SF.log("PartialValidator trySave");
         var validatorResult = null;
@@ -304,7 +304,7 @@ module SF.Validation {
     }
 
 
-    function constructRequestDataForValidating(valOptions: PartialValidationOptions) {
+    function constructRequestDataForValidating(valOptions: ValidationOptions) {
         SF.log("PartialValidator constructRequestDataForValidating");
 
         //Send main form (or parent popup) to be able to construct a typecontext if EmbeddedEntity
@@ -353,7 +353,7 @@ module SF.Validation {
         return serializer.serialize();
     }
 
-    export function validatePartial(valOptions: PartialValidationOptions): ValidationResult {
+    export function validatePartial(valOptions: ValidationOptions): ValidationResult {
         SF.log("PartialValidator validate");
         var validatorResult = null;
         $.ajax({
@@ -373,7 +373,6 @@ module SF.Validation {
         isValid: boolean;
         newToStr: string;
         newLink: string;
-        acceptChanges?: boolean;
     }
 
     export function EntityIsValid(validationOptions: ValidationOptions, onSuccess: () => void, sender?: any) {

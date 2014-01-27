@@ -23,8 +23,8 @@
      >
 
     @Html.Hidden(Model.Compose("sfEntityTypeNames"), 
-                                implementations.IsByAll ? "[All]" :
-                                implementations.Types.ToString(t => Navigator.ResolveWebTypeName(t), ","), 
+                                implementations.IsByAll ? StaticInfo.ImplementedByAllKey  :
+                                implementations.Types.ToString(t =>  Navigator.ResolveWebTypeName(t) + ";" + t.NiceName(), ","), 
         new { disabled = "disabled" })
     
     @{
@@ -105,7 +105,7 @@
         {
             string creating = findOptions.Creating.HasText() ? 
                     findOptions.Creating :
-                    "{0}.create();return false;".Formato(jsFindNavigator.ToJS());
+                    "{0}.create_click();return false;".Formato(jsFindNavigator.ToJS());
             <a class="sf-query-button" data-icon="ui-icon-plusthick" data-text="false" id="@Model.Compose("qbSearchCreate")" onclick="@creating">@SearchMessage.Search_Create.NiceToString()</a>
         }
         @ButtonBarQueryHelper.GetButtonBarElementsForQuery(new QueryButtonContext

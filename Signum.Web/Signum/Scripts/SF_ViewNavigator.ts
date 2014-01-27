@@ -1,413 +1,293 @@
 ﻿/// <reference path="references.ts"/>
 
-module SF {
-    export interface ViewOptions {
-        containerDiv?: string;
-        onOk?: (element?: JQuery) => any;
-        onSave?: (element?: string) => boolean;
-        onOkClosed?: () => void;
-        onCancelled?: () => void;
-        onLoaded?: (tempDiv: string) => void;
+module SF.ViewNavigator {
+
+    export interface ViewOptionsBase {
         controllerUrl?: string;
-        type?: string;
-        id?: string;
-        prefix?: string;
         partialViewName?: string;
-        navigate?: string;
         requestExtraJsonData?: any;
-        validationOptions?: SF.Validation.PartialValidationOptions
+        readOnly?: boolean;
     }
 
-    export class ViewNavigator {
-        viewOptions: ViewOptions;
-        backup: JQuery;
+    export function loadPartialView(entityHtml: EntityHtml, viewOptions?: ViewOptionsBase): Promise<EntityHtml> {
+        viewOptions = $.extend(viewOptions || {}, {
+            controllerUrl: SF.Urls.partialView,
+            partialViewName: null,
+            requestExtraJsonData: null,
+            readOnly: false,
+        });
 
-        constructor(_viewOptions?: ViewOptions) {
-            this.viewOptions = $.extend({
-                containerDiv: null,
-                onOk: null,
-                onSave: null,
-                onOkClosed: null,
-                onCancelled: null,
-                onLoaded: null,
-                controllerUrl: null,
-                type: null,
-                id: null,
-                prefix: "",
-                partialViewName: null,
-                navigate: null,
-                requestExtraJsonData: null
-            }, _viewOptions);
+        return requestHtml(entityHtml, viewOptions);
+    }
 
-            this.backup = null; //jquery object with the cloned original elements
+    export function navigate(runtimeInfo: RuntimeInfoValue, viewOptions?: ViewOptionsBase) {
+        viewOptions = $.extend(viewOptions || {}, {
+            controllerUrl: runtimeInfo.isNew ? SF.Urls.create : SF.Urls.view,
+            partialViewName: null,
+            requestExtraJsonData: null,
+            readOnly: false,
+        });
+
+        $.ajax({
+            url: viewOptions.controllerUrl,
+            data: requestData(new EntityHtml(null, runtimeInfo), viewOptions),
+            async: false,
+        });
+    }
+
+    export interface NavigatePopupOptions extends ViewOptionsBase {
+        onPopupLoaded: (popupDiv: JQuery) => void;
+        onClosed: () => void;
+    }
+
+    export function createTempDiv(entityValue: EntityHtml) : JQuery {
+        var tempDivId = SF.compose(entityValue.prefix, "Temp");
+
+        $("body").append(SF.hiddenDiv(tempDivId, ""));
+
+        return $("#" + tempDivId); 
+    }
+
+    export function navigatePopup(entityHtml: EntityHtml, viewOptions?: NavigatePopupOptions): void {
+        viewOptions = $.extend(viewOptions || {}, {
+            controllerUrl: SF.Urls.popupNavigate,
+            partialViewName: "",
+            requestExtraJsonData: null,
+            readOnly: false,
+            onPopupLoaded: null,
+            onClosed: null,
+        });
+
+        if (entityHtml.html != null)
+            openNavigatePopup(entityHtml, viewOptions);
+
+        requestHtml(entityHtml, viewOptions).then(eHTml => {
+            openNavigatePopup(eHTml, viewOptions);
+        }); 
+    }
+
+    function openNavigatePopup(entityHtml: EntityHtml, viewOptions: NavigatePopupOptions) : void {
+
+        var tempDiv = createTempDiv(entityHtml);
+
+        tempDiv.html(entityHtml.html);
+
+        SF.triggerNewContent(tempDiv);
+
+        tempDiv.popup({
+            onCancel: function () {
+
+                tempDiv.remove();
+
+                if (viewOptions.onClosed != null)
+                    viewOptions.onClosed(); 
+            }
+        });
+
+        if (viewOptions.onPopupLoaded != null)
+            viewOptions.onPopupLoaded(tempDiv);
+    }
+
+
+    export interface ViewPopupOptions extends ViewOptionsBase {
+        avoidClone?: boolean;
+        avoidValidate?: boolean;
+        validationOptions?: SF.Validation.ValidationOptions;
+        allowErrors?: AllowErrors;
+        onPopupLoaded?: (popupDiv: JQuery) => void;
+    }
+
+    export enum AllowErrors {
+        Ask,
+        Yes,
+        No,
+    }
+
+    export function viewPopup(entityHtml : EntityHtml, viewOptions?: ViewPopupOptions): Promise<EntityHtml> {
+
+        viewOptions = $.extend(viewOptions || {}, {
+            controllerUrl: SF.Urls.popupView,
+            partialViewName: null,
+            requestExtraJsonData: null,
+            readOnly: false,
+            avoidClone: false,
+            avoidValidate: false,
+            allowErrors: AllowErrors.Ask,
+            onPopupLoaded : null,
+        }); 
+
+        if (!viewOptions.avoidValidate)
+            viewOptions.validationOptions = $.extend(viewOptions.validationOptions || {}, {
+                prefix: entityHtml.prefix,
+            }); 
+
+        
+        if (entityHtml.html != null) {
+
+            if (viewOptions.avoidClone)
+                return openPopupView(entityHtml, viewOptions); 
+
+            var clone = new EntityHtml(entityHtml.prefix, entityHtml.runtimeInfo, entityHtml.toStr, entityHtml.link);
+
+            clone.html = cloneWithValues(entityHtml.html);
+
+            return openPopupView(clone, viewOptions);
         }
 
+        return requestHtml(entityHtml, viewOptions).then(eHtml => openPopupView(eHtml, viewOptions));
+    }
 
-        public tempDivId() {
-            return SF.compose(this.viewOptions.prefix, "Temp");
-        }
+    function openPopupView(entityHtml: EntityHtml, viewOptions: ViewPopupOptions): Promise<EntityHtml>
+    {
+        var tempDiv = createTempDiv(entityHtml);
 
-        public viewOk() {
-            if (SF.isEmpty(this.viewOptions.containerDiv)) {
-                throw "No containerDiv was specified to Navigator on viewOk mode";
-            }
-            if (this.isLoaded()) {
-                return this.showViewOk(null);
-            }
-            if (SF.isEmpty(this.viewOptions.controllerUrl)) {
-                this.viewOptions.controllerUrl = SF.Urls.popupView;
-            }
-            var self = this;
-            this.callServer(function (controlHtml) { self.showViewOk(controlHtml); });
-        }
+        SF.triggerNewContent(tempDiv);
 
-        public createOk() {
-            if (!SF.isEmpty(this.viewOptions.containerDiv)) {
-                throw "ContainerDiv cannot be specified to Navigator on createOk mode";
-            }
-            if (SF.isEmpty(this.viewOptions.controllerUrl)) {
-                this.viewOptions.controllerUrl = SF.Urls.popupView;
-            }
-            var self = this;
-            this.callServer(function (controlHtml) { self.showCreateOk(controlHtml); });
-        }
+        return new Promise<EntityHtml>(function (resolve) {
+            tempDiv.popup({
+                onOk: function ()
+                {
+                    if (!viewOptions.avoidValidate)
+                    {
+                        var valResult = checkValidation(viewOptions.validationOptions, viewOptions.allowErrors); 
+                        if (valResult == null)
+                            return;
 
-        public viewEmbedded() {
-            if (SF.isEmpty(this.viewOptions.containerDiv)) {
-                throw "No containerDiv was specified to Navigator on viewEmbedded mode";
-            }
-            if (SF.isEmpty(this.viewOptions.controllerUrl)) {
-                this.viewOptions.controllerUrl = SF.Urls.partialView;
-            }
-            var self = this;
-            this.callServer(function (controlHtml) { $('#' + self.viewOptions.containerDiv).html(controlHtml); });
-        }
+                        entityHtml.hasErrors = !valResult.isValid;
+                        entityHtml.link = valResult.newLink;
+                        entityHtml.toStr = valResult.newToStr;
+                    }
 
-        public createEmbedded(onHtmlReceived) {
-            if (!SF.isEmpty(this.viewOptions.containerDiv)) {
-                throw "ContainerDiv cannot be specified to Navigator on createEmbedded mode";
-            }
-            if (SF.isEmpty(this.viewOptions.controllerUrl)) {
-                this.viewOptions.controllerUrl = SF.Urls.partialView;
-            }
-            this.callServer(function (controlHtml) { onHtmlReceived(controlHtml) });
-        }
+                    var $mainControl = tempDiv.find(".sf-main-control[data-prefix=" + entityHtml.prefix + "]");
+                    if ($mainControl.length > 0) {
+                        entityHtml.runtimeInfo = RuntimeInfoValue.parse($mainControl.data("runtimeinfo"));
+                    }
 
-        public viewSave(html?: string) {
-            if (SF.isEmpty(this.viewOptions.containerDiv)) {
-                throw "No ContainerDiv was specified to Navigator on viewSave mode";
-            }
-            if ($('#' + this.viewOptions.containerDiv).length == 0) {
-                $("body").append(SF.hiddenDiv(this.viewOptions.containerDiv, ""));
-            }
-            if (!SF.isEmpty(html)) {
-                $('#' + this.viewOptions.containerDiv).html(html);
-            }
-            if (this.isLoaded()) {
-                return this.showViewSave();
-            }
-            else {
-                if (SF.isEmpty(this.viewOptions.type) && new SF.RuntimeInfo(this.viewOptions.prefix).find().length == 0) {
-                    throw "Type must be specified to Navigator on viewSave mode";
+                    tempDiv.popup('destroy');
+                    tempDiv.remove();
+
+                    resolve(entityHtml);
+                },
+                onCancel: function () {
+                    tempDiv.remove();
+
+                    resolve(null);
                 }
-                if (SF.isEmpty(this.viewOptions.controllerUrl)) {
-                    this.viewOptions.controllerUrl = SF.Urls.popupNavigate;
-                }
-                var self = this;
-                this.callServer(function (controlHtml) { self.showViewSave(controlHtml); });
-            }
-        }
-
-        public createSave() {
-            if (!SF.isEmpty(this.viewOptions.containerDiv)) {
-                throw "ContainerDiv cannot be specified to Navigator on createSave mode";
-            }
-            if (SF.isEmpty(this.viewOptions.type)) {
-                throw "Type must be specified to Navigator on createSave mode";
-            }
-            this.viewOptions.prefix = SF.compose("New", this.viewOptions.prefix);
-            if (SF.isEmpty(this.viewOptions.controllerUrl)) {
-                this.viewOptions.controllerUrl = SF.Urls.popupNavigate;
-            }
-            var self = this;
-            this.callServer(function (controlHtml) { self.showCreateSave(controlHtml); });
-        }
-
-        public navigate() {
-            if (!SF.isEmpty(this.viewOptions.containerDiv)) {
-                throw "ContainerDiv cannot be specified to Navigator on Navigate mode";
-            }
-            if (SF.isEmpty(this.viewOptions.type)) {
-                throw "Type must be specified to Navigator on Navigate mode";
-            }
-            var self = this;
-            this.callServer(function (url) { /*$.ajaxPrefilter will handle the redirect*/ });
-        }
-
-        public isLoaded() {
-            return !SF.isEmpty($('#' + this.viewOptions.containerDiv).html());
-        }
-
-        public showViewOk(newHtml) {
-            if (SF.isEmpty(newHtml)) {
-                newHtml = $('#' + this.viewOptions.containerDiv).children().clone(true); //preloaded
-
-                //Backup current Html (for cancel scenarios)
-                this.backup = SF.cloneContents(this.viewOptions.containerDiv);
-                $('#' + this.viewOptions.containerDiv).html(''); //avoid id-collision
-
-                $("body").append($("<div></div>").attr("id", this.tempDivId()).css("display", "none").html(newHtml));
-            }
-            else {
-                //Backup current Html (for cancel scenarios)
-                this.backup = SF.cloneContents(this.viewOptions.containerDiv);
-                $('#' + this.viewOptions.containerDiv).html(''); //avoid id-collision
-
-                $("body").append(SF.hiddenDiv(this.tempDivId(), newHtml));
-            }
-
-            SF.triggerNewContent($("#" + this.tempDivId()));
-
-            var self = this;
-            $("#" + this.tempDivId()).data("viewOptions", this.viewOptions).popup({
-                onOk: function () { self.onViewOk() },
-                onCancel: function () { self.onViewCancel() }
-            });
-        }
-
-        public showViewSave(newHtml?) {
-            if (!SF.isEmpty(newHtml)) {
-                $('#' + this.viewOptions.containerDiv).html(newHtml);
-            }
-
-            SF.triggerNewContent($("#" + this.viewOptions.containerDiv));
-
-            var self = this;
-            $("#" + this.viewOptions.containerDiv).data("viewOptions", this.viewOptions).popup({
-                onSave: function () { self.onCreateSave() },
-                onCancel: function () { self.onCreateCancel() }
-            });
-        }
-
-
-        public showCreateOk(newHtml) {
-            var tempDivId = this.tempDivId();
-
-            if (!SF.isEmpty(newHtml)) {
-                $("body").append(SF.hiddenDiv(tempDivId, newHtml));
-            }
-
-            SF.triggerNewContent($("#" + tempDivId));
-
-            var self = this;
-            $("#" + tempDivId).data("viewOptions", this.viewOptions).popup({
-                onOk: function () { self.onCreateOk() },
-                onCancel: function () { self.onCreateCancel() }
             });
 
-            if (this.viewOptions.onLoaded != null) {
-                this.viewOptions.onLoaded(this.tempDivId());
-            }
+            if (viewOptions.onPopupLoaded != null)
+                viewOptions.onPopupLoaded(tempDiv);
+        });
+    }
+
+    function checkValidation(validatorOptions: Validation.ValidationOptions, allowErrors: AllowErrors): SF.Validation.ValidationResult {
+
+        var result = Validation.validatePartial(validatorOptions);
+
+        if (result.isValid)
+            return result;
+
+        Validation.showErrors(validatorOptions, result.modelState, true);
+
+        if (allowErrors == AllowErrors.Yes)
+            return result; 
+
+        if (allowErrors == AllowErrors.Ask) {
+            if (!confirm(lang.signum.popupErrors))
+                return null;
+
+            return result;
         }
 
-        public showCreateSave(newHtml) {
-            var tempDivId = this.tempDivId();
+        return null;
+    }
 
-            if (!SF.isEmpty(newHtml)) {
-                $("body").append(SF.hiddenDiv(tempDivId, newHtml));
-            }
-
-            SF.triggerNewContent($("#" + tempDivId));
-
-            var self = this;
-            $("#" + tempDivId).data("viewOptions", this.viewOptions).popup({
-                onSave: function () { self.onCreateSave() },
-                onCancel: function () { self.onCreateCancel() }
-            });
-
-            if (this.viewOptions.onLoaded != null) {
-                this.viewOptions.onLoaded(this.tempDivId());
-            }
-        }
-
-        public constructRequestData() {
-            var options = this.viewOptions,
-                serializer = new SF.Serializer()
-                    .add({
-                        entityType: options.type,
-                        id: options.id,
-                        prefix: options.prefix
-                    });
-
-            if (!SF.isEmpty(options.partialViewName)) { //Send specific partialview if given
-                serializer.add("partialViewName", options.partialViewName);
-            }
-
-            serializer.add(options.requestExtraJsonData);
-            return serializer.serialize();
-        }
-
-        public callServer(onSuccess) {
+    function requestHtml(entityHtml: EntityHtml, viewOptions: ViewOptionsBase): Promise<EntityHtml> {
+        return new Promise<string>(function (resolve, reject) {
             $.ajax({
-                url: this.viewOptions.controllerUrl || SF.Urls.popupView,
-                data: this.constructRequestData(),
+                url: viewOptions.controllerUrl,
+                data: requestData(entityHtml, viewOptions),
                 async: false,
-                success: function (newHtml) {
-                    onSuccess(newHtml);
+                success: resolve,
+                error: reject
+            });
+        }).then(html=> {
+                entityHtml.html = $(html);
+            return entityHtml
+            });
+    }
+
+    function requestData(entityHtml: EntityHtml,  options: ViewOptionsBase) {
+        var serializer = new SF.Serializer()
+            .add({
+                entityType: entityHtml.runtimeInfo.type,
+                id: entityHtml.runtimeInfo.id,
+                prefix: entityHtml.prefix
+            });
+
+        if (options.readOnly == true)
+            serializer.add("readOnly", options.readOnly);
+
+        if (!SF.isEmpty(options.partialViewName)) { //Send specific partialview if given
+            serializer.add("partialViewName", options.partialViewName);
+        }
+
+        serializer.add(options.requestExtraJsonData);
+        return serializer.serialize();
+    }
+
+
+    export interface ChooserOption {
+        id: string;
+        text: string;
+    }
+
+    export function typeChooser(staticInfo: StaticInfo): Promise<string>
+    {
+        var types = staticInfo.types();
+        if (types.length == 1) {
+            return Promise.resolve(types[0]);
+        }
+
+        var typesNiceNames = staticInfo.typeNiceNames();
+
+        var options = types.map((t, i) => <ChooserOption>{ id: t, text: typesNiceNames[i] });
+
+        return chooser(staticInfo.prefix, lang.signum.chooseAType, options)
+            .then(t=> t == null ? null : t.id);
+    } 
+
+    export function chooser(prefix: string, title: string, options: ChooserOption[]): Promise<ChooserOption>
+    {
+        var tempDivId = SF.compose(prefix, "Temp");
+
+        var div = $('<div id="{0}" class="sf-popup-control" data-prefix="{1}" data-title="{2}"></div>'
+            .format(SF.compose(tempDivId, "panelPopup"), tempDivId, title || lang.signum.chooseAValue));
+
+        options.forEach(o=> div.append($('<input type="button" class="sf-chooser-button" value="{1}"/>'
+            .format(o.id, o.text)).data("option", o)));
+
+        $("body").append(SF.hiddenDiv(tempDivId, div));
+
+        var tempDiv = $("#" + tempDivId);
+
+        SF.triggerNewContent(tempDiv);
+
+        return new Promise<ChooserOption>((resolve, reject) => {
+
+            tempDiv.on("click", ":button", function () {
+                var option = <ChooserOption>$(this).data("option");
+                tempDiv.remove();
+                resolve(option);
+            });
+
+            tempDiv.popup({
+                onCancel: function () {
+                    tempDiv.remove();
+                    resolve(null);
                 }
             });
-        }
-
-        public onViewOk() {
-            var doDefault = (this.viewOptions.onOk != null) ? this.viewOptions.onOk() : true;
-            if (doDefault != false) {
-                $('#' + this.tempDivId()).popup('destroy');
-                this.backup = SF.cloneContents(this.tempDivId());
-                $('#' + this.tempDivId()).remove();
-                $('#' + this.viewOptions.containerDiv).html(this.backup);
-
-                if (this.viewOptions.onOkClosed != null) {
-                    this.viewOptions.onOkClosed();
-                }
-            }
-        }
-
-        public onViewCancel() {
-            $('#' + this.tempDivId()).remove();
-            var $popupPanel = $('#' + this.viewOptions.containerDiv);
-            $popupPanel.html(this.backup);
-            this.backup = null;
-
-            if (this.viewOptions.onCancelled != null) {
-                this.viewOptions.onCancelled();
-            }
-        }
-
-        public onCreateOk() {
-            var doDefault = (this.viewOptions.onOk != null) ? this.viewOptions.onOk(SF.cloneContents(this.tempDivId())) : true;
-            if (doDefault != false) {
-                $('#' + this.tempDivId()).remove();
-                if (this.viewOptions.onOkClosed != null) {
-                    this.viewOptions.onOkClosed();
-                }
-            }
-        }
-
-        public onCreateSave() {
-            var doDefault = (this.viewOptions.onSave != null) ? this.viewOptions.onSave(this.tempDivId()) : true;
-            if (doDefault != false) {
-                var validatorResult = Validation.trySavePartial({ prefix: this.viewOptions.prefix, type: this.viewOptions.type });
-                if (!validatorResult.isValid) {
-                    window.alert(lang.signum.popupErrorsStop);
-                    return;
-                }
-                if (SF.isEmpty(this.viewOptions.containerDiv)) {
-                    $('#' + this.tempDivId()).remove();
-                }
-                else {
-                    $('#' + this.viewOptions.containerDiv).remove();
-                }
-                if (this.viewOptions.onOkClosed != null) {
-                    this.viewOptions.onOkClosed();
-                }
-            }
-        }
-
-        public onCreateCancel() {
-            if (SF.isEmpty(this.viewOptions.containerDiv)) {
-                $('#' + this.tempDivId()).remove();
-            }
-            else {
-                $('#' + this.viewOptions.containerDiv).remove();
-            }
-            if (this.viewOptions.onCancelled != null) {
-                this.viewOptions.onCancelled();
-            }
-        }
-    }
-
-    export function closePopup(prefix) {
-        $('#' + SF.compose(prefix, "panelPopup")).closest(".ui-dialog-content,.ui-dialog").remove();
-    }
-
-    export function openTypeChooser(prefix, onTypeChosen, chooserOptions?) {
-        chooserOptions = chooserOptions || {};
-        var tempDivId = SF.compose(prefix, "Temp");
-        $.ajax({
-            url: chooserOptions.controllerUrl || SF.Urls.typeChooser,
-            data: { prefix: tempDivId, types: (SF.isEmpty(chooserOptions.types) ? new SF.StaticInfo(prefix).types() : chooserOptions.types) },
-            async: false,
-            success: function (chooserHTML) {
-                $("body").append(SF.hiddenDiv(tempDivId, chooserHTML));
-                SF.triggerNewContent($("#" + tempDivId));
-                //Set continuation for each type button
-                $('#' + tempDivId + " :button").each(function () {
-                    $('#' + this.id).unbind('click').click(function () {
-                        var option = this.id;
-                        $('#' + tempDivId).remove();
-                        onTypeChosen(option);
-                    });
-                });
-
-                $("#" + tempDivId).popup({
-                    onCancel: function () {
-                        $('#' + tempDivId).remove();
-                        if (chooserOptions.onCancelled != null)
-                            chooserOptions.onCancelled();
-                    }
-                });
-            }
         });
     }
-
-    export interface ChooserOptions {
-        ids?: string[];
-        title?: string;
-        controllerUrl: string;
-    }
-
-    export function openChooser(_prefix: string, onOptionClicked: (option: string) => void, jsonOptionsListFormat: string[], onCancelled: () => void, chooserOptions: ChooserOptions) {
-        //Construct popup
-        var tempDivId = SF.compose(_prefix, "Temp");
-        var requestData = "prefix=" + tempDivId;
-        if (!SF.isEmpty(jsonOptionsListFormat)) {
-            for (var i = 0; i < jsonOptionsListFormat.length; i++) {
-                requestData += "&buttons=" + jsonOptionsListFormat[i];  //This will Bind to the List<string> "buttons"
-                if (chooserOptions.ids != null) {
-                    requestData += "&ids=" + chooserOptions.ids[i];  //This will Bind to the List<string> "ids"            
-                }
-            }
-        }
-        if (chooserOptions.title) {
-            requestData += "&title=" + chooserOptions.title;
-        }
-        $.ajax({
-            url: chooserOptions.controllerUrl,
-            data: requestData,
-            async: false,
-            success: function (chooserHTML) {
-                $("body").append(SF.hiddenDiv(tempDivId, chooserHTML));
-                SF.triggerNewContent($("#" + tempDivId));
-                //Set continuation for each type button
-                $('#' + tempDivId + " :button").each(function () {
-                    $('#' + this.id).unbind('click').click(function () {
-                        var option = $(this).attr("data-id");
-                        $('#' + tempDivId).remove();
-                        onOptionClicked(option);
-                    });
-                });
-
-                $("#" + tempDivId).popup({
-                    onCancel: function () {
-                        $('#' + tempDivId).remove();
-                        if (onCancelled != null) {
-                            onCancelled();
-                        }
-                    }
-                });
-            }
-        });
-    }
-
 
 }

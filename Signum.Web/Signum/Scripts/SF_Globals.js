@@ -1,4 +1,10 @@
 ﻿/// <reference path="references.ts"/>
+var __extends = this.__extends || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+};
 var SF;
 (function (SF) {
     var StaticInfo = (function () {
@@ -30,7 +36,7 @@ var SF;
         };
 
         StaticInfo.prototype.singleType = function () {
-            var typeArray = this.types().split(',');
+            var typeArray = this.types();
             if (typeArray.length !== 1) {
                 throw "types should have only one element for element {0}".format(this.prefix);
             }
@@ -38,7 +44,11 @@ var SF;
         };
 
         StaticInfo.prototype.types = function () {
-            return this.getValue(StaticInfo._types);
+            return this.getValue(StaticInfo._types).split(',');
+        };
+
+        StaticInfo.prototype.typeNiceNames = function () {
+            return this.getValue(StaticInfo._typeNiceNames).split(',');
         };
 
         StaticInfo.prototype.isEmbedded = function () {
@@ -56,98 +66,129 @@ var SF;
         StaticInfo.prototype.propertyRoute = function () {
             return this.getValue(StaticInfo._propertyRoute);
         };
-
-        StaticInfo.prototype.createValue = function (types, isEmbedded, isReadOnly, rootType, propertyRoute) {
-            var array = [];
-            array[StaticInfo._types] = types;
-            array[StaticInfo._isEmbedded] = isEmbedded ? "e" : "i";
-            array[StaticInfo._isReadOnly] = isReadOnly ? "r" : "";
-            array[StaticInfo._rootType] = rootType;
-            array[StaticInfo._propertyRoute] = propertyRoute;
-            return this.toValue(array);
-        };
         StaticInfo._types = 0;
-        StaticInfo._isEmbedded = 1;
-        StaticInfo._isReadOnly = 2;
-        StaticInfo._rootType = 3;
-        StaticInfo._propertyRoute = 4;
+        StaticInfo._typeNiceNames = 1;
+        StaticInfo._isEmbedded = 2;
+        StaticInfo._isReadOnly = 3;
+        StaticInfo._rootType = 4;
+        StaticInfo._propertyRoute = 5;
         return StaticInfo;
     })();
     SF.StaticInfo = StaticInfo;
 
-    var RuntimeInfo = (function () {
-        function RuntimeInfo(prefix) {
+    var EntityHtml = (function (_super) {
+        __extends(EntityHtml, _super);
+        function EntityHtml(prefix, runtimeInfo, toString, link) {
+            _super.call(this, runtimeInfo, toString, link);
+
+            if (this.prefix == null)
+                throw new Error("prefix is mandatory for EntityHtml");
+        }
+        EntityHtml.prototype.assertPrefixAndType = function (prefix, staticInfo) {
+            _super.prototype.assertPrefixAndType.call(this, prefix, staticInfo);
+
+            if (this.prefix != null && this.prefix != prefix)
+                throw Error("EntityHtml prefix should be {0} instead of  {1}".format(prefix, this.prefix));
+        };
+
+        EntityHtml.prototype.isLoaded = function () {
+            return this.html != null && this.html.length != 0;
+        };
+        return EntityHtml;
+    })(EntityValue);
+    SF.EntityHtml = EntityHtml;
+
+    var EntityValue = (function () {
+        function EntityValue(runtimeInfo, toString, link) {
+            if (runtimeInfo == null)
+                throw new Error("runtimeInfo is mandatory for an EntityValue");
+
+            this.runtimeInfo = runtimeInfo;
+            this.toStr = toString;
+            this.link = link;
+        }
+        EntityValue.prototype.assertPrefixAndType = function (prefix, staticInfo) {
+            var types = staticInfo.types();
+
+            if (types.length == 0 && types[0] == "[All]")
+                return;
+
+            if (types.indexOf(this.runtimeInfo.type) == -1)
+                throw new Error("{0} not found in types {1}".format(this.runtimeInfo.type, types.join(", ")));
+        };
+
+        EntityValue.prototype.isLoaded = function () {
+            return false;
+        };
+        return EntityValue;
+    })();
+    SF.EntityValue = EntityValue;
+
+    var RuntimeInfoValue = (function () {
+        function RuntimeInfoValue(entityType, id, isNew, ticks) {
+            if (SF.isEmpty(entityType))
+                throw new Error("entityTyp is mandatory for RuntimeInfoValue");
+
+            this.type = entityType;
+            this.id = id;
+            this.isNew = isNew;
+            this.ticks = ticks;
+        }
+        RuntimeInfoValue.parse = function (runtimeInfoString) {
+            if (SF.isEmpty(runtimeInfoString))
+                return null;
+
+            var array = runtimeInfoString.split(',');
+            return new RuntimeInfoValue(array[0], SF.isEmpty(array[1]) ? null : parseInt(array[1]), array[2] == "n", SF.isEmpty(array[3]) ? null : parseInt(array[3]));
+        };
+
+        RuntimeInfoValue.prototype.toString = function () {
+            return [
+                this.type,
+                this.id,
+                this.isNew ? "n" : "o",
+                this.ticks].join(";");
+        };
+
+        RuntimeInfoValue.fromKey = function (key) {
+            if (SF.isEmpty(key))
+                return null;
+
+            var array = key.split(',');
+            return new RuntimeInfoValue(array[0], parseInt(array[1]), false, null);
+        };
+
+        RuntimeInfoValue.prototype.key = function () {
+            if (this.id == null)
+                throw Error("RuntimeInfoValue has no Id");
+
+            return this.type + ";" + this.id;
+        };
+        return RuntimeInfoValue;
+    })();
+    SF.RuntimeInfoValue = RuntimeInfoValue;
+
+    var RuntimeInfoElement = (function () {
+        function RuntimeInfoElement(prefix) {
             this.prefix = prefix;
         }
-        RuntimeInfo.prototype.find = function () {
+        RuntimeInfoElement.prototype.getElem = function () {
             if (!this.$elem) {
                 this.$elem = $('#' + SF.compose(this.prefix, SF.Keys.runtimeInfo));
             }
             return this.$elem;
         };
-        RuntimeInfo.prototype.value = function () {
-            return this.find().val();
+
+        RuntimeInfoElement.prototype.value = function () {
+            return RuntimeInfoValue.parse(this.getElem().val());
         };
-        RuntimeInfo.prototype.toArray = function () {
-            return this.value().split(";");
+
+        RuntimeInfoElement.prototype.setValue = function (runtimeInfo) {
+            this.getElem().val(runtimeInfo == null ? null : runtimeInfo.toString());
         };
-        RuntimeInfo.prototype.toValue = function (array) {
-            return array.join(";");
-        };
-        RuntimeInfo.prototype.getSet = function (key, val) {
-            var array = this.toArray();
-            if (val === undefined) {
-                return array[key];
-            }
-            array[key] = val;
-            this.find().val(this.toValue(array));
-        };
-        RuntimeInfo.prototype.entityType = function () {
-            return this.getSet(RuntimeInfo._entityType);
-        };
-        RuntimeInfo.prototype.id = function () {
-            return this.getSet(RuntimeInfo._id);
-        };
-        RuntimeInfo.prototype.isNew = function () {
-            return this.getSet(RuntimeInfo._isNew);
-        };
-        RuntimeInfo.prototype.ticks = function () {
-            return this.getSet(RuntimeInfo._ticks);
-        };
-        RuntimeInfo.prototype.setEntity = function (entityType, id) {
-            this.getSet(RuntimeInfo._entityType, entityType);
-            if (SF.isEmpty(id)) {
-                this.getSet(RuntimeInfo._id, '');
-                this.getSet(RuntimeInfo._isNew, 'n');
-            } else {
-                this.getSet(RuntimeInfo._id, id);
-                this.getSet(RuntimeInfo._isNew, 'o');
-            }
-        };
-        RuntimeInfo.prototype.removeEntity = function () {
-            this.getSet(RuntimeInfo._entityType, '');
-            this.getSet(RuntimeInfo._id, '');
-            this.getSet(RuntimeInfo._isNew, 'o');
-        };
-        RuntimeInfo.prototype.createValue = function (entityType, id, isNew, ticks) {
-            var array = [];
-            array[RuntimeInfo._entityType] = entityType;
-            array[RuntimeInfo._id] = id;
-            if (SF.isEmpty(isNew)) {
-                array[RuntimeInfo._isNew] = SF.isEmpty(id) ? "n" : "o";
-            } else {
-                array[RuntimeInfo._isNew] = isNew;
-            }
-            array[RuntimeInfo._ticks] = ticks;
-            return this.toValue(array);
-        };
-        RuntimeInfo._entityType = 0;
-        RuntimeInfo._id = 1;
-        RuntimeInfo._isNew = 2;
-        RuntimeInfo._ticks = 3;
-        return RuntimeInfo;
+        return RuntimeInfoElement;
     })();
-    SF.RuntimeInfo = RuntimeInfo;
+    SF.RuntimeInfoElement = RuntimeInfoElement;
 })(SF || (SF = {}));
 
 var SF;
@@ -236,19 +277,23 @@ var SF;
     SF.compose = compose;
 
     function cloneContents(sourceContainerId) {
-        var $source = $('#' + sourceContainerId);
-        var $clone = $source.children().clone(true);
-
-        var $sourceSelect = $source.find("select");
-        var $cloneSelect = $clone.find("select");
-
-        for (var i = 0, l = $sourceSelect.length; i < l; i++) {
-            $cloneSelect.eq(i).val($sourceSelect.eq(i).val());
-        }
-
-        return $clone;
+        return cloneWithValues($('#' + sourceContainerId).children());
     }
     SF.cloneContents = cloneContents;
+
+    function cloneWithValues(elements) {
+        var clone = elements.clone(true);
+
+        var sourceSelect = elements.filter("select").add(elements.find("select"));
+        var cloneSelect = clone.filter("select").add(clone.filter("selet"));
+
+        for (var i = 0, l = sourceSelect.length; i < l; i++) {
+            cloneSelect.eq(i).val(sourceSelect.eq(i).val());
+        }
+
+        return clone;
+    }
+    SF.cloneWithValues = cloneWithValues;
 
     function getPathPrefixes(prefix) {
         var path = [], pathSplit = prefix.split("_");
@@ -315,7 +360,7 @@ var SF;
     SF.hiddenInput = hiddenInput;
 
     function hiddenDiv(id, innerHtml) {
-        return "<div id='" + id + "' name='" + id + "' style='display:none'>" + innerHtml + "</div>";
+        return $("<div id='" + id + "' style='display:none'></div>").html(innerHtml);
     }
     SF.hiddenDiv = hiddenDiv;
 

@@ -470,6 +470,7 @@ namespace Signum.Web
                 { "quickFilter", url.SignumAction("QuickFilter") },
                 { "selectedItemsContextMenu", url.SignumAction("SelectedItemsContextMenu") },
                 { "create", url.SignumAction("Create") },
+                { "view", url.SignumAction("View") },
                 { "popupNavigate", url.SignumAction("PopupNavigate") },
                 { "typeChooser", url.SignumAction("GetTypeChooser") },
                 { "autocomplete", url.SignumAction("Autocomplete") }

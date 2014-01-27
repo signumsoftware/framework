@@ -432,6 +432,10 @@ interface String {
     startsWith(str: string): boolean;
     format(...parameters: any[]): string;
     replaceAll(from: string, to: string);
+    after(separator: string): string;
+    before(separator: string): string;
+    tryAfter(separator: string): string;
+    tryBefore(separator: string): string;
 }
 
 once("stringExtensions", () => {
@@ -470,6 +474,38 @@ once("stringExtensions", () => {
 
     String.prototype.replaceAll = function (from, to) {
         return this.split(from).join(to)
+    };
+
+    String.prototype.before = function (separator) {
+        var index = this.indexOf(separator);
+        if (index == -1)
+            throw Error("{0} not found");
+
+        return this.substring(0, index);
+    };
+
+    String.prototype.after = function (separator) {
+        var index = this.indexOf(separator);
+        if (index == -1)
+            throw Error("{0} not found");
+
+        return this.substring(index + separator.length);
+    };
+
+    String.prototype.tryBefore = function (separator) {
+        var index = this.indexOf(separator);
+        if (index == -1)
+            return null;
+
+        return this.substring(0, index);
+    };
+
+    String.prototype.tryAfter = function (separator) {
+        var index = this.indexOf(separator);
+        if (index == -1)
+            return null;
+
+        return this.substring(index + separator.length);
     };
 
     if (typeof String.prototype.trim !== 'function') {

@@ -175,8 +175,6 @@ Lose changes?")]
 
     public enum SelectorMessage
     {
-        ChooseAType,
-        ChooseAValue,
         [Description("Constructor Selector")]
         ConstructorSelector,
         [Description("Please, choose a value to continue:")]
@@ -228,6 +226,8 @@ Lose changes?")]
 
     public enum JavascriptMessage
     {
+        chooseAType,
+        chooseAValue,
         [Description("Add filter")]
         addFilter,
         [Description("Edit column name")]

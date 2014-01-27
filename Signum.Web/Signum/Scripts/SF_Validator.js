@@ -217,7 +217,7 @@ var SF;
         function constructRequestDataForSaving(valOptions) {
             SF.log("PartialValidator constructRequestDataForSaving");
             var prefix = valOptions.prefix;
-            var formChildren = $("#" + valOptions.parentDiv + " :input").add("#" + SF.Keys.tabId).add("input:hidden[name=" + SF.Keys.antiForgeryToken + "]").add(SF.getInfoParams(prefix));
+            var formChildren = $("#" + valOptions.parentDiv + " :input").add("#" + SF.Keys.tabId).add("input:hidden[name=" + SF.Keys.antiForgeryToken + "]").add(getInfoParams(prefix));
             formChildren = formChildren.not(".sf-search-control *");
 
             var serializer = new SF.Serializer();
@@ -233,6 +233,11 @@ var SF;
 
             return serializer.serialize();
         }
+
+        function getInfoParams(prefix) {
+            return $("#" + SF.compose(prefix, SF.Keys.runtimeInfo));
+        }
+        ;
 
         function createValidatorResult(r) {
             var validatorResult = {
