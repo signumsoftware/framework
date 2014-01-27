@@ -32,9 +32,14 @@ namespace Signum.Web.Operations
                 return new Dictionary<string, string> 
                 { 
                     { "operationExecute", url.Action("Execute", "Operation") },
-                    { "operationContextual", url.Action("ContextualExecute", "Operation") },
+                    { "operationContextualExecute", url.Action("ContextualExecute", "Operation") },
+
                     { "operationDelete", url.Action("Delete", "Operation") },
+                    { "operationContextualDelete", url.Action("ContextualDelete", "Operation") },
+
                     { "operationConstructFrom", url.Action("ConstructFrom", "Operation") },
+                    { "operationContextualConstructFrom", url.Action("ContextualConstructFrom", "Operation") },
+
                     { "operationConstructFromMany", url.Action("ConstructFromMany", "Operation") },
                 };
             });

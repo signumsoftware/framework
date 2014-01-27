@@ -43,17 +43,25 @@ var SF;
 
 (function ($) {
     // $.fn is the object we add our custom functions to
-    $.fn.popup = function (opt) {
+    $.fn.popup = function (val) {
+        if (typeof val == "string") {
+            if (val == "destroy") {
+                this.dialog('destroy');
+                return;
+            }
+
+            throw Error("unknown command");
+        }
+
+        if (!val)
+            return this[0];
+
         /*
         prefix, onOk, onClose
         */
-        var options = {
+        var options = options = $.extend({
             modal: true
-        };
-
-        if (opt) {
-            options = $.extend(options, opt);
-        }
+        }, val);
 
         var canClose = function ($popupDialog) {
             var $mainControl = $popupDialog.find(".sf-main-control");
@@ -67,70 +75,63 @@ var SF;
             return true;
         };
 
-        return this.each(function () {
-            var $this = $(this);
+        var $this = $(this);
 
-            if (typeof opt == "string") {
-                if (opt == "destroy") {
-                    $this.dialog('destroy');
-                }
-            } else {
-                var $htmlTitle = $this.find("span.sf-popup-title").first();
+        $this.data("SF-popupOptions", $this);
 
-                var o = {
-                    dialogClass: 'sf-popup-dialog',
-                    modal: options.modal,
-                    title: $htmlTitle.length == 0 ? $this.attr("data-title") || $this.children().attr("data-title") : "",
-                    width: 'auto',
-                    beforeClose: function (evt, ui) {
-                        return canClose($(this));
-                    },
-                    close: options.onCancel,
-                    dragStop: function (event, ui) {
-                        var $dialog = $(event.target).closest(".ui-dialog");
-                        var w = $dialog.width();
-                        $dialog.width(w + 1); //auto -> xxx width
-                        setTimeout(function () {
-                            $dialog.css({ width: "auto" });
-                        }, 500);
-                    }
-                };
+        var $htmlTitle = $this.find("span.sf-popup-title").first();
 
-                if (typeof options.onOk != "undefined") {
-                    $this.find(".sf-ok-button").off('click').click(function () {
-                        var $this = $(this);
-                        if ($this.hasClass("sf-save-protected")) {
-                            var $popupDialog = $this.closest(".sf-popup-dialog");
-                            var $mainControl = $popupDialog.find(".sf-main-control");
-                            if ($mainControl.length < 1) {
-                                options.onOk();
-                            } else if (!$mainControl.hasClass("sf-changed")) {
-                                options.onOk();
-                            } else if (canClose($popupDialog)) {
-                                if (typeof options.onCancel != "undefined") {
-                                    if (options.onCancel()) {
-                                        $popupDialog.remove();
-                                    }
-                                }
-                            }
-                        } else {
-                            options.onOk();
-                        }
-                    });
-                }
-
-                var dialog = $this.dialog(o);
-
-                if ($htmlTitle.length > 0) {
-                    dialog.data("ui-dialog")._title = function (title) {
-                        title.append(this.options.title);
-                    };
-
-                    dialog.dialog('option', 'title', $htmlTitle);
-                    //$htmlTitle.remove();
-                }
+        var o = {
+            dialogClass: 'sf-popup-dialog',
+            modal: options.modal,
+            title: $htmlTitle.length == 0 ? $this.attr("data-title") || $this.children().attr("data-title") : "",
+            width: 'auto',
+            beforeClose: function (evt, ui) {
+                return canClose($(this));
+            },
+            close: options.onCancel,
+            dragStop: function (event, ui) {
+                var $dialog = $(event.target).closest(".ui-dialog");
+                var w = $dialog.width();
+                $dialog.width(w + 1); //auto -> xxx width
+                setTimeout(function () {
+                    $dialog.css({ width: "auto" });
+                }, 500);
             }
-        });
+        };
+
+        if (typeof options.onOk != "undefined") {
+            $this.find(".sf-ok-button").off('click').click(function () {
+                var $this = $(this);
+                if ($this.hasClass("sf-save-protected")) {
+                    var $popupDialog = $this.closest(".sf-popup-dialog");
+                    var $mainControl = $popupDialog.find(".sf-main-control");
+                    if ($mainControl.length < 1) {
+                        options.onOk();
+                    } else if (!$mainControl.hasClass("sf-changed")) {
+                        options.onOk();
+                    } else if (canClose($popupDialog)) {
+                        if (typeof options.onCancel != "undefined") {
+                            if (options.onCancel()) {
+                                $popupDialog.remove();
+                            }
+                        }
+                    }
+                } else {
+                    options.onOk();
+                }
+            });
+        }
+
+        var dialog = $this.dialog(o);
+
+        if ($htmlTitle.length > 0) {
+            dialog.data("ui-dialog")._title = function (title) {
+                title.append(this.options.title);
+            };
+
+            dialog.dialog('option', 'title', $htmlTitle);
+        }
     };
 })(jQuery);
 //# sourceMappingURL=SF_Popup.js.map

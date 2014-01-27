@@ -1,519 +1,152 @@
 ﻿/// <reference path="references.ts"/>
 
-module SF
+module SF.Operations
 {
-    export interface OperationOptions
-    {
-        sender?: string;
-        prefix?: string;
-        parentDiv?: any;
-        operationKey?: string;
-        isLite?: boolean;
+    export interface OperationOptions {
+        prefix: string;
+        operationKey: string;
         controllerUrl?: string;
-        validationOptions?: Validation.ValidationOptions;
-        onOk?: any;
-        onCancelled?: any;
-        contextual?: boolean;
         requestExtraJsonData?: any;
+        isLite: boolean;
     }
 
-    export class OperationManager
-    {
-        options: OperationOptions;
+    export interface EntityOperationOptions extends OperationOptions {
+        sender?: string;
 
-        constructor(_options: OperationOptions) {
-            this.options = $.extend({
-                sender: null,
-                prefix: "",
-                parentDiv: "",
-                operationKey: null,
-                isLite: false,
-                controllerUrl: null,
-                validationOptions: {},
-                onOk: null,
-                onCancelled: null,
-                contextual: false,
-                requestExtraJsonData: null
-            }, _options);    
-        }
-
-        public runtimeInfo() {
-            return new SF.RuntimeInfoElement(this.options.prefix);
-        }
-
-        public pf(s) {
-            return "#" + SF.compose(this.options.prefix, s);
-        }
-
-        public newPrefix() {
-            return SF.compose("New", this.options.prefix);
-        }
-
-        public requestData(newPrefix) {
-            var formChildren : JQuery = null;
-            if (SF.isFalse(this.options.isLite)) {
-                if (SF.isEmpty(this.options.prefix)) { //NormalWindow 
-                    formChildren = SF.isEmpty(this.options.parentDiv) ? $(this.options.sender).closest("form").find(":input") : $("#" + this.options.parentDiv + " :input");
-                }
-                else { //PopupWindow
-                    formChildren = $(this.pf("panelPopup :input"))
-                        .add("#" + SF.Keys.tabId)
-                        .add("input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
-                }
-            }
-            else {
-                formChildren = $('#' + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "], " + this.pf(SF.Keys.runtimeInfo));
-            }
-            formChildren = formChildren.not(".sf-search-control *");
-
-            var serializer = new SF.Serializer();
-            serializer.add(formChildren.serialize());
-
-            serializer.add({
-                isLite: this.options.isLite,
-                operationFullKey: this.options.operationKey,
-                prefix: newPrefix,
-                oldPrefix: this.options.prefix
-            });
-
-            if (!SF.isEmpty(this.options.prefix)) {
-                var $mainControl = $(".sf-main-control[data-prefix=" + this.options.prefix + "]");
-
-                //Check runtimeInfo present => if it's a popup from a LineControl it will not be
-                var myRuntimeInfoKey = SF.compose(this.options.prefix, SF.Keys.runtimeInfo);
-                if (formChildren.filter("#" + myRuntimeInfoKey).length == 0) {
-                    var value = $mainControl.data("runtimeinfo");
-                    serializer.add(myRuntimeInfoKey, value);
-                }
-
-                if ($mainControl.closest(".sf-popup-control").children(".sf-button-bar").find(".sf-ok-button").length > 0) {
-                    serializer.add("sfOkVisible", true);
-                }
-            }
-
-            serializer.add(this.options.requestExtraJsonData);
-
-            return serializer.serialize();
-        }
-
-
-        public contextualRequestData(newPrefix) {
-            var serializer = new SF.Serializer();
-            serializer.add($("input:hidden[name=" + SF.Keys.antiForgeryToken + "]").serialize());
-            serializer.add({
-                isLite: this.options.isLite,
-                operationFullKey: this.options.operationKey,
-                prefix: newPrefix,
-                oldPrefix: this.options.prefix,
-                liteKeys: $(this.pf("sfSearchControl .sf-td-selection:checked")).closest("tr").map(function () { return $(this).data("entity"); }).toArray().join(",")
-            })
-            serializer.add(this.options.requestExtraJsonData);
-
-            return serializer.serialize();
-        }
-
-
-        public ajax(newPrefix, onSuccess) {
-            if (SF.Blocker.isEnabled()) {
-                return false;
-            } else {
-                SF.Blocker.enable();
-            }
-
-            if (SF.isEmpty(newPrefix)) {
-                newPrefix = this.options.prefix;
-            }
-            var self = this;
-            $.ajax({
-                url: this.options.controllerUrl,
-                data: this.options.contextual ? this.contextualRequestData(newPrefix) : this.requestData(newPrefix),
-                success: function (operationResult) {
-                    SF.Blocker.disable();
-                    if (self.executedSuccessfully(operationResult)) {
-                        if (onSuccess != null) {
-                            onSuccess(newPrefix, operationResult, self.options.parentDiv);
-                        }
-                    }
-                    else {
-                        SF.Notify.error(lang.signum.error, 2000);
-                        return;
-                    }
-                },
-                error: function () {
-                    SF.Blocker.disable();
-                    SF.Notify.error(lang.signum.error, 2000);
-                }
-            });
-
-            return false;
-        }
-
-        public submit() {
-            if (SF.Blocker.isEnabled()) {
-                return false;
-            }
-
-            var $form = $(this.options.sender).closest("form");
-            $form.append(SF.hiddenInput('isLite', this.options.isLite) +
-                SF.hiddenInput('operationFullKey', this.options.operationKey) +
-                SF.hiddenInput("oldPrefix", this.options.prefix));
-
-            if (!SF.isEmpty(this.options.prefix)) {
-                //Check runtimeInfo present => if it's a popup from a LineControl it will not be
-                var myRuntimeInfoKey = SF.compose(this.options.prefix, SF.Keys.runtimeInfo);
-                if ($form.filter("#" + myRuntimeInfoKey).length == 0) {
-                    var $mainControl = $(".sf-main-control[data-prefix=" + this.options.prefix + "]");
-                    SF.hiddenInput(myRuntimeInfoKey, $mainControl.data("runtimeinfo"));
-                }
-            }
-
-            SF.submit(this.options.controllerUrl, this.options.requestExtraJsonData, $form);
-
-            return false;
-        }
-
-        public executedSuccessfully(operationResult) {
-            if ((typeof (operationResult) !== "object") || (operationResult.result != "ModelState")) {
-                return true;
-            }
-            var modelState = operationResult.ModelState;
-
-            if (SF.isEmpty(this.options.prefix)) {
-                SF.Validation.showErrors(null, modelState);
-            }
-            else {
-                SF.Validation.showErrors({ prefix: this.options.prefix }, modelState); 
-            }
-            return false;
-        }
-
-
-        public validateAndSubmit() {
-            if (SF.Blocker.isEnabled()) {
-                return false;
-            }
-
-            if (SF.isTrue(this.options.isLite)) {
-                this.submit();
-            }
-            else {
-                var onSuccess = function () { this.submit(); };
-                var self = this;
-                var valOptions = $.extend({ prefix: this.options.prefix }, this.options.validationOptions);
-                if (!SF.isEmpty(this.options.parentDiv)) { // So as not to override parentDiv to be set in PartialValidator constructor
-                    valOptions.parentDiv = this.options.parentDiv;
-                }
-                if (!SF.Validation.EntityIsValid(valOptions, function () { onSuccess.call(self) }, this.options.sender)) {
-                    return;
-                }
-            }
-
-            return false;
-        }
+        avoidValidate?: boolean;
+        validationOptions?: Validation.ValidationOptions;
+        parentDiv?: string;
     }
 
-    export class OperationExecutor extends OperationManager {
-        constructor(_options: OperationOptions) {
-            super($.extend({
-                controllerUrl: SF.Urls.operationExecute
-            }, _options));
-        }
+    function execute(options: EntityOperationOptions): Promise<void> {
+        options = $.extend({
+            controllerUrl: SF.Urls.operationExecute,
+            requestExtraJsonData: null,
 
-        public validateAndAjax(newPrefix, onAjaxSuccess) {
-            if (SF.Blocker.isEnabled()) {
-                return false;
-            }
+            sender: null,
+            avoidValidate: false,
+            validationOptions: {},
+            isLite: false,
+            parentDiv: null
+        }, options);
 
-            if (SF.isEmpty(newPrefix)) {
-                newPrefix = null;
-            }
-            onAjaxSuccess = typeof onAjaxSuccess == "undefined" ? SF.opOnSuccessDispatcher : onAjaxSuccess;
+        if (!entityIsValidOrLite(options))
+            return Promise.reject(new Error("validation error")); 
 
-            var onSuccess = function () {
-                this.ajax(newPrefix, onAjaxSuccess);
-            };
+        return ajax(options, entityRequestData(options)).then(result=>
+            reloadContent(options, result));
+    }
 
-            if (SF.isTrue(this.options.isLite)) {
-                onSuccess.call(this);
-            }
-            else {
-                var self = this;
-                var valOptions = $.extend({ prefix: this.options.prefix }, this.options.validationOptions);
-                if (!SF.isEmpty(this.options.parentDiv)) { // So as not to override parentDiv to be set in PartialValidator constructor
-                    valOptions.parentDiv = this.options.parentDiv;
-                }
-                if (!SF.Validation.EntityIsValid(valOptions, function () { onSuccess.call(self) }, this.options.sender)) {
-                    return;
-                }
-            }
-        }
+    function executeContextual(options: OperationOptions): Promise<void> {
+        options = $.extend({
+            controllerUrl: SF.Urls.operationContextualExecute,
+            requestExtraJsonData: null,
+        }, options);
 
-        public contextualExecute(entityType, id) {
-            if (SF.Blocker.isEnabled()) {
-                return false;
-            }
+        SF.FindNavigator.removeOverlay()
 
-            $('.sf-search-ctxmenu-overlay').remove();
-
-            var multipleOperation = $(this.pf("sfSearchControl .sf-td-selection:checked")).length > 1;
-            var defaultController = this.options.controllerUrl == SF.Urls.operationExecute;
-            if (multipleOperation) {
-                if (defaultController) {
-                    this.options.controllerUrl = SF.Urls.operationContextualFromMany;
-                }
-                this.ajax(this.newPrefix(), SF.opOnSuccessDispatcher);
-            }
-            else {
-                if (defaultController) {
-                    this.options.controllerUrl = SF.Urls.operationContextual;
-                }
-                this.ajax(null, SF.opMarkCellOnSuccess);
-            }
-        }
+        return ajax(options, contextualRequestData(options, true)).then(result=> {
+            markCells(options.prefix, result);
+        }); 
     }
 
 
-    export class ConstructorFrom extends OperationManager {
-        constructor(_options: OperationOptions) {
-            super($.extend({
-                controllerUrl: SF.Urls.operationConstructFrom,
-                returnType: null
-            }, _options));
-        }
+    function constructFrom(options: EntityOperationOptions, newPrefix?: string): Promise<void>  {
+        options = $.extend({
+            controllerUrl: SF.Urls.operationConstructFrom,
+            requestExtraJsonData: null,
 
-        public validateAndAjax(newPrefix, onAjaxSuccess) {
-            if (SF.Blocker.isEnabled()) {
-                return false;
-            }
+            sender: null,
+            avoidValidate: false,
+            validationOptions: {},
+            isLite: false,
+            parentDiv: null
+        }, options);
 
-            if (SF.isEmpty(newPrefix)) {
-                newPrefix = null;
-            }
-            onAjaxSuccess = typeof onAjaxSuccess == "undefined" ? SF.opOnSuccessDispatcher : onAjaxSuccess;
+        if (!entityIsValidOrLite(options))
+            return Promise.reject(new Error("validation error")); 
 
-            var onSuccess = () => {
-                this.ajax(newPrefix, onAjaxSuccess);
-            }
+        if (!newPrefix)
+            newPrefix = getNewPrefix(options);
 
-            if (SF.isTrue(this.options.isLite)) {
-                onSuccess();
-            }
-            else {
-                var self = this;
-                var valOptions = $.extend({ prefix: this.options.prefix }, this.options.validationOptions);
-                if (!SF.isEmpty(this.options.parentDiv)) { // So as not to override parentDiv to be set in PartialValidator constructor
-                    valOptions.parentDiv = this.options.parentDiv;
-                }
-                if (!SF.Validation.EntityIsValid(valOptions, function () { onSuccess() }, this.options.sender)) {
-                    return;
-                }
-            }
-
-
-        }
-
-
-        public contextualConstruct(entityType, id) {
-            if (SF.Blocker.isEnabled()) {
-                return false;
-            }
-
-            $('.sf-search-ctxmenu-overlay').remove();
-            if ($(this.pf("sfSearchControl .sf-td-selection:checked")).length > 1) {
-                if (this.options.controllerUrl == SF.Urls.operationConstructFrom) {
-                    this.options.controllerUrl = SF.Urls.operationContextualFromMany;
-                }
-                this.ajax(this.newPrefix(), SF.opOnSuccessDispatcher);
-            }
-            else {
-                this.ajax(this.newPrefix(), SF.opContextualOnSuccess);
-            }
-        }
+        return ajax(options, entityRequestData(options, newPrefix)).then(result=>
+            openPopup(newPrefix, result));
     }
 
-    export class DeleteExecutor extends OperationExecutor {
-        constructor(_options: OperationOptions) {
-            super($.extend({
-                controllerUrl: SF.Urls.operationDelete
-            }, _options));
+    function constructFromContextual(options: OperationOptions, newPrefix?: string): Promise<void> {
+        options = $.extend({
+            controllerUrl: SF.Urls.operationContextualConstructFrom,
+            requestExtraJsonData: null,
+        }, options);
 
-        }
+        SF.FindNavigator.removeOverlay();
 
+        if (!newPrefix)
+            newPrefix = getNewPrefix(options);
 
-        public contextualDelete(entityType, id) {
-            if (SF.Blocker.isEnabled()) {
-                return false;
-            }
-
-            if ($(this.pf("sfSearchControl .sf-td-selection:checked")).length > 1) {
-                if (this.options.controllerUrl == SF.Urls.operationDelete) {
-                    this.options.controllerUrl = SF.Urls.operationContextualFromMany;
-                }
-                this.ajax(this.newPrefix(), SF.opOnSuccessDispatcher);
-            }
-            else {
-                this.ajax(this.options.prefix, function () { SF.Notify.info(lang.signum.executed, 2000); });
-            }
-        }
+        return ajax(options, contextualRequestData(options, true, newPrefix)).then(result=> {
+            openPopup(newPrefix, result); 
+            markCells(options.prefix, null);
+        });
     }
 
-    export class ConstructorFromMany extends OperationManager {
-        constructor(_options: OperationOptions) {
-            super($.extend({
-                controllerUrl: SF.Urls.operationConstructFromMany,
-                returnType: null
-            }, _options));
-        }
+    function deleteEntity(options: EntityOperationOptions): Promise<void> {
+        options = $.extend({
+            controllerUrl: SF.Urls.operationDelete,
+            requestExtraJsonData: null,
 
-        public requestDataItems(newPrefix, items) {
-            var serializer = new SF.Serializer()
-                .add($('#' + SF.Keys.tabId).serialize())
-                .add($("input:hidden[name=" + SF.Keys.antiForgeryToken + "]").serialize())
-                .add({
-                    entityType: $(this.pf(SF.Keys.entityTypeNames)).val(),
-                    operationFullKey: this.options.operationKey,
-                    prefix: newPrefix,
-                    oldPrefix: this.options.prefix
-                });
+            sender: null,
+            avoidValidate: false,
+            validationOptions: {},
+            isLite: false,
+            parentDiv: null
+        }, options);
 
-            for (var i = 0, l = items.length; i < l; i++) {
-                serializer.add("keys", items[i].key);
-            }
-
-            serializer.add(this.options.requestExtraJsonData);
-            return serializer.serialize();
-        }
-
-        public ajaxItems(newPrefix, items, onSuccess) {
-            if (SF.Blocker.isEnabled()) {
-                return false;
-            }
-            else {
-                SF.Blocker.enable();
-            }
-
-            var self = this;
-            $.ajax({
-                url: this.options.controllerUrl,
-                data: this.requestDataItems(newPrefix, items),
-                success: function (operationResult) {
-                    SF.Blocker.disable();
-
-                    if (self.executedSuccessfully(operationResult)) {
-                        if (onSuccess != null) {
-                            onSuccess(newPrefix, operationResult, self.options.parentDiv);
-                        }
-                    }
-                    else {
-                        SF.Notify.error(lang.signum.error, 2000);
-                        return;
-                    }
-                },
-                error: function () {
-                    SF.Blocker.disable();
-                    SF.Notify.error(lang.signum.error, 2000);
-                }
-            });
-        }
-
-        public ajaxSelected(newPrefix, onAjaxSuccess) {
-            if (SF.Blocker.isEnabled()) {
-                return false;
-            }
-
-            var items = SF.FindNavigator.getFor(this.options.prefix).hasSelectedItems(items =>
-                this.ajaxItems(newPrefix, items, onAjaxSuccess || SF.opOnSuccessDispatcher));
-        }
-
-        public submitSelected() {
-            if (SF.Blocker.isEnabled()) {
-                return false;
-            }
-
-            var onSuccess = function (items) {
-                for (var i = 0, l = items.length; i < l; i++) {
-                    $(this.options.sender).closest("form").append(SF.hiddenInput('keys', items[i].key));
-                }
-                this.submit();
-            };
-
-            var self = this;
-            SF.FindNavigator.getFor(this.options.prefix).hasSelectedItems(function (items) { onSuccess.call(self, items) });
-        }
+        return ajax(options, entityRequestData(options)); //ajax prefilter will take redirect
     }
 
+    function deleteContextual(options: OperationOptions): Promise<void> {
+        options = $.extend({
+            controllerUrl: SF.Urls.operationContextualDelete,
+            requestExtraJsonData: null,
+        }, options);
 
-    export function opDisableCtxmenu() {
-        var clss = "sf-ctxmenu-active";
-        $("." + clss).removeClass(clss);
+        SF.FindNavigator.removeOverlay()
+
+        return ajax(options, contextualRequestData(options, true)).then(result=> {
+            markCells(options.prefix, result);
+        });
     }
 
-    export function opOnSuccessDispatcher(prefix, operationResult, parentDiv) {
-        SF.opDisableCtxmenu();
+    function constructFromMany(options: OperationOptions, newPrefix?: string): Promise<void> {
+        options = $.extend({
+            controllerUrl: SF.Urls.operationConstructFromMany,
+            requestExtraJsonData: null,
+        }, options);
 
-        if (SF.isEmpty(operationResult)) {
-            return null;
-        }
+        SF.FindNavigator.removeOverlay();
 
-        var $result = $(operationResult);
-        var newPopupId = SF.compose(prefix, "panelPopup");
-        var hasNewPopup = $result.filter("#" + newPopupId).length !== 0;
+        if (!newPrefix)
+            newPrefix = getNewPrefix(options);
 
-        //If result is a NormalControl, or an already opened popup => ReloadContent
-        if (!hasNewPopup || (hasNewPopup && $("#" + newPopupId + ":visible").length !== 0)) {
-            SF.opReloadContent(prefix, operationResult, !SF.isEmpty(parentDiv) ? parentDiv : hasNewPopup ? newPopupId : "");
-        }
-        else {
-            SF.opOpenPopup(prefix, operationResult);
-        }
+        return ajax(options, contextualRequestData(options, false, newPrefix)).then(result=> {
+            openPopup(newPrefix, result);
+            markCells(options.prefix, null);
+        });
     }
 
-    export function opReloadContent(prefix, operationResult, parentDiv?) {
-        SF.opDisableCtxmenu();
-        if (SF.isEmpty(prefix)) { //NormalWindow
-            var $elem = SF.isEmpty(parentDiv) ? $("#divNormalControl") : $("#" + parentDiv);
-            $elem.html(operationResult);
-            SF.triggerNewContent($elem);
-        }
-        else { //PopupWindow
-            var oldViewNav = new SF.ViewNavigator({ prefix: prefix });
-            var tempDivId = oldViewNav.tempDivId();
-            var oldViewOptions = $("#" + tempDivId).data("viewOptions");
-
-            SF.closePopup(prefix);
-
-            var viewNavigator = new SF.ViewNavigator($.extend({}, oldViewOptions, {
-                prefix: prefix,
-                containerDiv: tempDivId
-            }));
-
-            if (oldViewOptions.onOk != null) {
-                viewNavigator.showViewOk(operationResult);
-            }
-            else {
-                viewNavigator.viewSave(operationResult);
-            }
-        }
+    export function openPopup(newPrefix : string, newHtml: string) {
+        disableContextMenu();
+        var entity = EntityHtml.fromHtml(newPrefix, newHtml);
+        ViewNavigator.navigatePopup(entity);
         SF.Notify.info(lang.signum.executed, 2000);
     }
 
-    export function opOpenPopup(prefix, operationResult) {
-        SF.opDisableCtxmenu();
-        new SF.ViewNavigator({ prefix: prefix }).showCreateSave(operationResult);
-        SF.Notify.info(lang.signum.executed, 2000);
+    export function disableContextMenu() {
+        $(".sf-ctxmenu-active").removeClass("sf-ctxmenu-active");
     }
 
-    export function opOpenPopupNoDefaultOk(prefix, operationResult) {
-        SF.opDisableCtxmenu();
-        new SF.ViewNavigator({ prefix: prefix, onOk: function () { return false; }, onSave: function () { return false; } }).showCreateSave(operationResult);
-        SF.Notify.info(lang.signum.executed, 2000);
-    }
-
-    export function opNavigate(prefix, operationResult) {
-        SF.submit(operationResult);
-    }
-
-    export function opMarkCellOnSuccess (prefix, operationResult) {
+    function markCells(prefix: string, operationResult: any) {
         $(".sf-ctxmenu-active")
             .addClass("sf-entity-ctxmenu-" + (SF.isEmpty(operationResult) ? "success" : "error"))
             .removeClass("sf-ctxmenu-active");
@@ -521,24 +154,158 @@ module SF
         SF.Notify.info(lang.signum.executed, 2000);
     }
 
-    export function opContextualOnSuccess(prefix, operationResult) {
-        SF.opDisableCtxmenu();
-        if (SF.isEmpty(operationResult)) {
-            return null;
+    export function reloadContent(options: EntityOperationOptions, newHtml: string) {
+        if (!options.prefix) { //NormalWindow
+            var $elem = SF.isEmpty(options.parentDiv) ? $("#divNormalControl") : $("#" + options.parentDiv );
+            $elem.html(newHtml);
+            SF.triggerNewContent($elem);
         }
+        else { //PopupWindow
+            ViewNavigator.reloadPopup(options.prefix, newHtml);
+        }
+        SF.Notify.info(lang.signum.executed, 2000);
+    }
 
-        var $result = $(operationResult);
-        var newPopupId = SF.compose(prefix, "panelPopup");
-        var hasNewPopup = $result.filter("#" + newPopupId).length !== 0;
-        //If result is a NormalControl => Load it
-        if (hasNewPopup) {
-            SF.opOpenPopup(prefix, operationResult)
+    export function getNewPrefix(optons: OperationOptions) {
+        return SF.compose("New", this.options.prefix);
+    }
+
+    export function entityRequestData(options: EntityOperationOptions, newPrefix?: string) {
+        var formChildren: JQuery = null;
+        if (SF.isFalse(options.isLite)) {
+            if (SF.isEmpty(options.prefix)) { //NormalWindow 
+                formChildren = SF.isEmpty(options.parentDiv) ? $(options.sender).closest("form").find(":input") : $("#" + options.parentDiv + " :input");
+            }
+            else { //PopupWindow
+                formChildren = $("#{0}_panelPopup :input".format(options.prefix))
+                    .add("#" + SF.Keys.tabId)
+                    .add("input:hidden[name=" + SF.Keys.antiForgeryToken + "]");
+            }
         }
         else {
-            var $form = $("form");
-            $form.html(operationResult);
-            SF.triggerNewContent($form);
-            SF.Notify.info(lang.signum.executed, 2000);
+            formChildren = $('#' + SF.Keys.tabId + ", input:hidden[name=" + SF.Keys.antiForgeryToken + "], #" + SF.compose(options.prefix, SF.Keys.runtimeInfo));
         }
+        formChildren = formChildren.not(".sf-search-control *");
+
+        var serializer = new SF.Serializer();
+        serializer.add(formChildren.serialize());
+
+        serializer.add({
+            isLite: options.isLite,
+            operationFullKey: options.operationKey,
+            prefix: options.prefix,
+            newPrefix: newPrefix,
+        });
+
+        if (options.prefix) {
+            var $mainControl = $(".sf-main-control[data-prefix=" + options.prefix + "]");
+
+            //Check runtimeInfo present => if it's a popup from a LineControl it will not be
+            var myRuntimeInfoKey = SF.compose(options.prefix, SF.Keys.runtimeInfo);
+            if (formChildren.filter("#" + myRuntimeInfoKey).length == 0) {
+                var value = $mainControl.data("runtimeinfo");
+                serializer.add(myRuntimeInfoKey, value);
+            }
+
+            if ($mainControl.closest(".sf-popup-control").children(".sf-button-bar").find(".sf-ok-button").length > 0) {
+                serializer.add("sfOkVisible", true);
+            }
+        }
+
+        serializer.add(options.requestExtraJsonData);
+
+        return serializer.serialize();
+    }
+
+    export function contextualRequestData(options: OperationOptions, justOne : boolean, newPrefix?: string) {
+
+        var items = FindNavigator.getFor(options.prefix).selectedItems();
+
+        if (items.length > 1 && justOne)
+            throw new Error("just one entity should have been selected"); 
+
+        var serializer = new SF.Serializer();
+        serializer.add($("input:hidden[name=" + SF.Keys.antiForgeryToken + "]").serialize());
+
+        serializer.add({
+            isLite: options.isLite,
+            operationFullKey: options.operationKey,
+            newprefix: newPrefix,
+            prefix: options.prefix,
+            liteKeys: items.map(i=>i.runtimeInfo.key()).join(","),
+        });
+        serializer.add(options.requestExtraJsonData);
+
+        return serializer.serialize();
+    }
+
+
+    export function ajax(options: OperationOptions, data: any): Promise<any> {
+        return Blocker.wrap(() =>
+            new Promise<any>((resolve, reject) => {
+                $.ajax({
+                    url: options.controllerUrl,
+                    data: data,
+                    success: (operationResult) => {
+                        if (modelStateErrors(operationResult, options)) {
+                            SF.Notify.error(lang.signum.error, 2000);
+
+                            reject(operationResult);
+                        }
+                        else
+                            resolve(operationResult);
+                    },
+                    error: error => {
+                        SF.Notify.error(lang.signum.error, 2000);
+                        reject(error);
+                    }
+                });
+
+            }));
+    }
+
+    function modelStateErrors(operationResult: any, options: OperationOptions) {
+        if ((typeof (operationResult) !== "object") || (operationResult.result != "ModelState"))
+            return false;
+
+        var modelState = operationResult.ModelState;
+
+        SF.Validation.showErrors({ prefix: options.prefix }, modelState);
+
+        return true;
+    }
+
+    export function entityIsValidOrLite(options: EntityOperationOptions) {
+        if (options.isLite || options.avoidValidate)
+            return true;
+
+        var valOptions = $.extend({ prefix: options.prefix, parentDiv: options.parentDiv }, options.validationOptions);
+
+        return SF.Validation.entityIsValid(valOptions);
+    }
+
+    export function validateAndSubmit(options: EntityOperationOptions) {
+        if (entityIsValidOrLite(options))
+            submit(options);
+    }
+
+     export function submit(options: EntityOperationOptions) {
+        var $form = $(options.sender).closest("form");
+        $form.append(SF.hiddenInput('isLite', options.isLite) +
+            SF.hiddenInput('operationFullKey', options.operationKey) +
+            SF.hiddenInput("oldPrefix", options.prefix));
+
+        if (!SF.isEmpty(options.prefix)) {
+            //Check runtimeInfo present => if it's a popup from a LineControl it will not be
+            var myRuntimeInfoKey = SF.compose(options.prefix, SF.Keys.runtimeInfo);
+            if ($form.filter("#" + myRuntimeInfoKey).length == 0) {
+                var $mainControl = $(".sf-main-control[data-prefix=" + options.prefix + "]");
+                SF.hiddenInput(myRuntimeInfoKey, $mainControl.data("runtimeinfo"));
+            }
+        }
+
+        SF.submit(options.controllerUrl, options.requestExtraJsonData, $form);
+
+        return false;
     }
 }

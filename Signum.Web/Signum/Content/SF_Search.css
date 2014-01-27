@@ -304,3 +304,19 @@ span.count-no-results
 {
     font-weight:normal;
 }
+
+/*just to remember*/
+td.sf-ctxmenu-active
+{
+    background: blue;
+}
+
+td.sf-ctxmenu-success
+{
+    background: green;
+}
+
+td.sf-ctxmenu-error
+{
+    background: red;
+}

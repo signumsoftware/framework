@@ -10,23 +10,23 @@ module SF.ViewNavigator {
     }
 
     export function loadPartialView(entityHtml: EntityHtml, viewOptions?: ViewOptionsBase): Promise<EntityHtml> {
-        viewOptions = $.extend(viewOptions || {}, {
+        viewOptions = $.extend( {
             controllerUrl: SF.Urls.partialView,
             partialViewName: null,
             requestExtraJsonData: null,
             readOnly: false,
-        });
+        }, viewOptions);
 
         return requestHtml(entityHtml, viewOptions);
     }
 
     export function navigate(runtimeInfo: RuntimeInfoValue, viewOptions?: ViewOptionsBase) {
-        viewOptions = $.extend(viewOptions || {}, {
+        viewOptions = $.extend({
             controllerUrl: runtimeInfo.isNew ? SF.Urls.create : SF.Urls.view,
             partialViewName: null,
             requestExtraJsonData: null,
             readOnly: false,
-        });
+        }, viewOptions);
 
         $.ajax({
             url: viewOptions.controllerUrl,
@@ -49,14 +49,14 @@ module SF.ViewNavigator {
     }
 
     export function navigatePopup(entityHtml: EntityHtml, viewOptions?: NavigatePopupOptions): void {
-        viewOptions = $.extend(viewOptions || {}, {
+        viewOptions = $.extend( {
             controllerUrl: SF.Urls.popupNavigate,
             partialViewName: "",
             requestExtraJsonData: null,
             readOnly: false,
             onPopupLoaded: null,
             onClosed: null,
-        });
+        }, viewOptions);
 
         if (entityHtml.html != null)
             openNavigatePopup(entityHtml, viewOptions);
@@ -105,7 +105,7 @@ module SF.ViewNavigator {
 
     export function viewPopup(entityHtml : EntityHtml, viewOptions?: ViewPopupOptions): Promise<EntityHtml> {
 
-        viewOptions = $.extend(viewOptions || {}, {
+        viewOptions = $.extend({
             controllerUrl: SF.Urls.popupView,
             partialViewName: null,
             requestExtraJsonData: null,
@@ -114,12 +114,12 @@ module SF.ViewNavigator {
             avoidValidate: false,
             allowErrors: AllowErrors.Ask,
             onPopupLoaded : null,
-        }); 
+        }, viewOptions); 
 
         if (!viewOptions.avoidValidate)
-            viewOptions.validationOptions = $.extend(viewOptions.validationOptions || {}, {
+            viewOptions.validationOptions = $.extend({
                 prefix: entityHtml.prefix,
-            }); 
+            }, viewOptions.validationOptions); 
 
         
         if (entityHtml.html != null) {
@@ -178,6 +178,23 @@ module SF.ViewNavigator {
             if (viewOptions.onPopupLoaded != null)
                 viewOptions.onPopupLoaded(tempDiv);
         });
+    }
+
+    export function reloadPopup(prefix: string, newHtml: string) {
+
+        var tempDivId = SF.compose(prefix, "Temp");
+
+        var tempDiv = $("#" + tempDivId); 
+
+        var popupOptions = tempDiv.popup();
+
+        tempDiv.popup("destroy");
+
+        tempDiv.html(newHtml); 
+
+        SF.triggerNewContent(tempDiv);
+
+        tempDiv.popup(popupOptions); 
     }
 
     function checkValidation(validatorOptions: Validation.ValidationOptions, allowErrors: AllowErrors): SF.Validation.ValidationResult {

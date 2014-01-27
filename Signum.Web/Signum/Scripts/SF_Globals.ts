@@ -99,6 +99,12 @@ module SF
         isLoaded() {
             return this.html != null && this.html.length != 0;
         }
+
+        static fromHtml(prefix: string, html: string): EntityHtml {
+            var result = new EntityHtml(prefix, new RuntimeInfoValue("?", null));
+            result.html = $(html);
+            return result;
+        }
     }
 
     export class EntityValue
@@ -210,10 +216,7 @@ module SF
             this.getElem().val(runtimeInfo == null ? null : runtimeInfo.toString());
         }
     }
-}
 
-module SF
-{
     export var Keys = {
         separator: "_",
         tabId: "sfTabId",
@@ -328,12 +331,12 @@ module SF
         return path;
     }
 
-    export function submit(urlController, requestExtraJsonData?, $form?) {
+    export function submit(urlController: string, requestExtraJsonData?: any, $form?: JQuery) {
         $form = $form || $("form");
         if (!SF.isEmpty(requestExtraJsonData)) {
-            if ($.isFunction(requestExtraJsonData)) {
+            if ($.isFunction(requestExtraJsonData)) 
                 requestExtraJsonData = requestExtraJsonData();
-            }
+
             for (var key in requestExtraJsonData) {
                 if (requestExtraJsonData.hasOwnProperty(key)) {
                     $form.append(SF.hiddenInput(key, requestExtraJsonData[key]));
@@ -341,9 +344,9 @@ module SF
             }
         }
 
-        $form.attr("action", urlController)[0].submit();
+        (<HTMLFormElement>$form.attr("action", urlController)[0]).submit();
         return false;
-    };
+    }
 
     export function submitOnly(urlController : string, requestExtraJsonData) {
         if (requestExtraJsonData == null)
@@ -439,6 +442,17 @@ module SF
         export function disable() {
             blocked = false;
             $elem.remove();
+        }
+
+        export function wrap<T>(promise: ()=>Promise<T>): Promise<T> {
+            if (blocked)
+                return promise();
+
+            enable();
+
+            return promise()
+                .then(val=> { disable(); return val; })
+                .catch(err=> { disable(); throw err; return <T>null; }); //Typescript bug?
         }
     }
 

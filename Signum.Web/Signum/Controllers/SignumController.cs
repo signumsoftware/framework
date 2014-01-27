@@ -292,36 +292,7 @@ namespace Signum.Web.Controllers
                 return Content("<span>no-results</span>");
         }
 
-        [HttpPost]
-        public PartialViewResult GetTypeChooser(string types, string prefix)
-        {
-            Type[] typeArray = StaticInfo.ParseTypes(types);
-
-            if (typeArray == StaticInfo.ImplementedByAll)
-                throw new ArgumentException("ImplementedByAll is not allowed in GetTypeChooser");
-
-            if (typeArray.Length == 1)
-                throw new ArgumentException("GetTypeChooser must recieve at least 2 types to chose from");
-
-            HtmlStringBuilder sb = new HtmlStringBuilder();
-            foreach (Type t in typeArray)
-            {
-                string webTypeName = Navigator.ResolveWebTypeName(t);
-
-                sb.Add(new HtmlTag("input")
-                    .IdName(webTypeName)
-                    .Attrs(new { type = "button", value = t.NiceName(), @class = "sf-chooser-button" })
-                    .ToHtmlSelf());
-                sb.Add(new HtmlTag("br").ToHtmlSelf());
-            }
-
-            ViewData.Model = new Context(null, prefix);
-            ViewData[ViewDataKeys.CustomHtml] = sb.ToHtml();
-            ViewData[ViewDataKeys.Title] = SelectorMessage.ChooseAType.NiceToString();
-
-            return PartialView(Navigator.Manager.PopupCancelControlView);
-        }
-     
+       
         public static HtmlHelper CreateHtmlHelper(Controller c)
         {
             var viewContext = new ViewContext(c.ControllerContext, new FakeView(), c.ViewData, c.TempData, TextWriter.Null);

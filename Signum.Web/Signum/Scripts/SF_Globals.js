@@ -94,6 +94,12 @@ var SF;
         EntityHtml.prototype.isLoaded = function () {
             return this.html != null && this.html.length != 0;
         };
+
+        EntityHtml.fromHtml = function (prefix, html) {
+            var result = new EntityHtml(prefix, new RuntimeInfoValue("?", null));
+            result.html = $(html);
+            return result;
+        };
         return EntityHtml;
     })(EntityValue);
     SF.EntityHtml = EntityHtml;
@@ -189,10 +195,7 @@ var SF;
         return RuntimeInfoElement;
     })();
     SF.RuntimeInfoElement = RuntimeInfoElement;
-})(SF || (SF = {}));
 
-var SF;
-(function (SF) {
     SF.Keys = {
         separator: "_",
         tabId: "sfTabId",
@@ -308,9 +311,9 @@ var SF;
     function submit(urlController, requestExtraJsonData, $form) {
         $form = $form || $("form");
         if (!SF.isEmpty(requestExtraJsonData)) {
-            if ($.isFunction(requestExtraJsonData)) {
+            if ($.isFunction(requestExtraJsonData))
                 requestExtraJsonData = requestExtraJsonData();
-            }
+
             for (var key in requestExtraJsonData) {
                 if (requestExtraJsonData.hasOwnProperty(key)) {
                     $form.append(SF.hiddenInput(key, requestExtraJsonData[key]));
@@ -322,7 +325,6 @@ var SF;
         return false;
     }
     SF.submit = submit;
-    ;
 
     function submitOnly(urlController, requestExtraJsonData) {
         if (requestExtraJsonData == null)
@@ -421,6 +423,23 @@ var SF;
             $elem.remove();
         }
         Blocker.disable = disable;
+
+        function wrap(promise) {
+            if (blocked)
+                return promise();
+
+            enable();
+
+            return promise().then(function (val) {
+                disable();
+                return val;
+            }).catch(function (err) {
+                disable();
+                throw err;
+                return null;
+            });
+        }
+        Blocker.wrap = wrap;
     })(SF.Blocker || (SF.Blocker = {}));
     var Blocker = SF.Blocker;
 

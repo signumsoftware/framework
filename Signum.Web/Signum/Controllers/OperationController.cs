@@ -23,19 +23,19 @@ namespace Signum.Web.Controllers
     public class OperationController : Controller
     {
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Execute(string operationFullKey, bool isLite, string prefix, string oldPrefix)
+        public ActionResult Execute(string operationFullKey, bool isLite, string prefix)
         {
             Enum operationKey = OperationsClient.GetOperationKeyAssert(operationFullKey);
 
             IdentifiableEntity entity = null;
             if (isLite)
             {
-                Lite<IdentifiableEntity> lite = this.ExtractLite<IdentifiableEntity>(oldPrefix);
+                Lite<IdentifiableEntity> lite = this.ExtractLite<IdentifiableEntity>(prefix);
                 entity = OperationLogic.ExecuteLite<IdentifiableEntity>(lite, operationKey);
             }
             else
             {
-                MappingContext context = this.UntypedExtractEntity(oldPrefix).UntypedApplyChanges(this.ControllerContext, oldPrefix, true).UntypedValidateGlobal();
+                MappingContext context = this.UntypedExtractEntity(prefix).UntypedApplyChanges(this.ControllerContext, prefix, true).UntypedValidateGlobal();
                 entity = (IdentifiableEntity)context.UntypedValue;
 
                 if (context.GlobalErrors.Any())
@@ -52,58 +52,57 @@ namespace Signum.Web.Controllers
 
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult ContextualExecute(string operationFullKey, string oldPrefix)
+        public ActionResult ContextualExecute(string operationFullKey, string liteKeys)
         {
             Enum operationKey = OperationsClient.GetOperationKeyAssert(operationFullKey);
 
-            RuntimeInfo runtimeInfo = GetRuntimeInfoWithId(oldPrefix, operationKey);
+            var lite = Navigator.ParseLiteKeys<IdentifiableEntity>(liteKeys).Single();
 
-            Lite<IdentifiableEntity> lite = Lite.Create(runtimeInfo.EntityType, runtimeInfo.IdOrNull.Value);
             IdentifiableEntity entity = OperationLogic.ExecuteLite(lite, operationKey);
 
             return Content("");
         }
 
-    
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Delete(string operationFullKey, string prefix, string oldPrefix)
+        public ActionResult Delete(string operationFullKey, string prefix)
         {
             Enum operationKey = OperationsClient.GetOperationKeyAssert(operationFullKey);
 
-            RuntimeInfo runtimeInfo = GetRuntimeInfoWithId(oldPrefix, operationKey);
-
-            Lite<IIdentifiable> lite = Lite.Create(runtimeInfo.EntityType, runtimeInfo.IdOrNull.Value);
+            Lite<IdentifiableEntity> lite = this.ExtractLite<IdentifiableEntity>(prefix);
 
             OperationLogic.Delete(lite, MultiEnumLogic<OperationDN>.ToEnum(operationFullKey), null);
-
-            if (Navigator.Manager.QuerySettings.ContainsKey(runtimeInfo.EntityType))
-                return JsonAction.Redirect(Navigator.FindRoute(runtimeInfo.EntityType));
-            return Content("");
-        }
-
-        RuntimeInfo GetRuntimeInfoWithId(string oldPrefix, Enum operationKey)
-        {
-            RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(Request.Form[TypeContextUtilities.Compose(oldPrefix, EntityBaseKeys.RuntimeInfo)]);
-            if (!runtimeInfo.IdOrNull.HasValue)
-                throw new ArgumentException("Could not create a Lite without an Id to call Operation {0}".Formato(operationKey.ToString()));
-            return runtimeInfo;
+            
+            return JsonAction.Redirect(Navigator.FindRoute(lite.EntityType));
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult ConstructFrom(string operationFullKey, bool isLite, string prefix, string oldPrefix)
+        public ActionResult ContextualDelete(string operationFullKey, string liteKeys)
+        {
+            Enum operationKey = OperationsClient.GetOperationKeyAssert(operationFullKey);
+
+            var lite = Navigator.ParseLiteKeys<IdentifiableEntity>(liteKeys).Single();
+
+            OperationLogic.Delete(lite, operationKey);
+
+            return Content("");
+        }
+
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult ConstructFrom(string operationFullKey, bool isLite, string prefix, string newPrefix)
         {
             Enum operationKey = OperationsClient.GetOperationKeyAssert(operationFullKey);
 
             IdentifiableEntity entity = null;
             if (isLite)
             {
-                Lite<IdentifiableEntity> lite = this.ExtractLite<IdentifiableEntity>(oldPrefix);
+                Lite<IdentifiableEntity> lite = this.ExtractLite<IdentifiableEntity>(prefix);
                 entity = OperationLogic.ConstructFromLite<IdentifiableEntity>(lite, operationKey);
             }
             else
             {
-                MappingContext context = this.UntypedExtractEntity(oldPrefix).UntypedApplyChanges(this.ControllerContext, oldPrefix, true).UntypedValidateGlobal();
+                MappingContext context = this.UntypedExtractEntity(prefix).UntypedApplyChanges(this.ControllerContext, prefix, true).UntypedValidateGlobal();
                 entity = (IdentifiableEntity)context.UntypedValue;
 
                 if (context.GlobalErrors.Any())
@@ -115,26 +114,31 @@ namespace Signum.Web.Controllers
                 entity = OperationLogic.ConstructFrom<IdentifiableEntity>(entity, operationKey);
             }
 
-            return OperationsClient.DefaultConstructResult(this, entity, prefix);
+            return OperationsClient.DefaultConstructResult(this, entity, newPrefix);
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult ConstructFromMany(string entityType, string operationFullKey, string prefix)
+        public ActionResult ContextualConstructFrom(string operationFullKey, string liteKeys, string newPrefix)
         {
             Enum operationKey = OperationsClient.GetOperationKeyAssert(operationFullKey);
 
-            var keys = Request["keys"];
-            if (string.IsNullOrEmpty(keys))
-                throw new ArgumentException("Construct from many operation {0} needs source Lite keys".Formato(operationFullKey));
-            
-            Type type = Navigator.ResolveType(entityType);
-            
-            List<Lite<IIdentifiable>> sourceEntities = keys.Split(new [] { "," }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(k => (Lite<IIdentifiable>)Lite.Parse(k)).ToList();
+            var lite = Navigator.ParseLiteKeys<IdentifiableEntity>(liteKeys).Single();
 
-            IdentifiableEntity entity = OperationLogic.ServiceConstructFromMany(sourceEntities, type, operationKey);
+            var entity = lite.ConstructFromLite<IdentifiableEntity>(operationKey);
 
-            return OperationsClient.DefaultConstructResult(this, entity, prefix);
+          return OperationsClient.DefaultConstructResult(this, entity, newPrefix);
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public ActionResult ConstructFromMany(string operationFullKey, string liteKeys, string newPrefix)
+        {
+            Enum operationKey = OperationsClient.GetOperationKeyAssert(operationFullKey);
+
+            var lites = Navigator.ParseLiteKeys<IdentifiableEntity>(liteKeys);
+
+            IdentifiableEntity entity = OperationLogic.ServiceConstructFromMany(lites, lites.Select(a => a.EntityType).First(), operationKey);
+
+            return OperationsClient.DefaultConstructResult(this, entity, newPrefix);
         }
     }
 }

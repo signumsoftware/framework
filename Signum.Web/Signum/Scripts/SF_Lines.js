@@ -105,19 +105,15 @@ var SF;
 
         EntityBase.prototype.remove_click = function () {
             var _this = this;
-            var entity = this.extractEntityHtml();
-
-            this.onRemove(entity).then(function (result) {
+            this.onRemove(this.options.prefix).then(function (result) {
                 if (result)
                     _this.setEntity(null);
-                else
-                    _this.setEntity(entity);
             });
         };
 
-        EntityBase.prototype.onRemove = function (entityHtml) {
+        EntityBase.prototype.onRemove = function (prefix) {
             if (this.removing != null)
-                return this.removing(entityHtml);
+                return this.removing(prefix);
 
             return Promise.resolve(true);
         };
@@ -145,7 +141,7 @@ var SF;
                 if (!SF.isEmpty(template))
                     newEntity.html = $(template);
 
-                return SF.ViewNavigator.viewPopup(newEntity, _this.getDefaultPopupViewOptions());
+                return SF.ViewNavigator.viewPopup(newEntity, _this.defaultViewOptions());
             });
         };
 
@@ -169,7 +165,7 @@ var SF;
             if (this.viewing != null)
                 return this.viewing(entityHtml);
 
-            return SF.ViewNavigator.viewPopup(entityHtml, this.getDefaultPopupViewOptions());
+            return SF.ViewNavigator.viewPopup(entityHtml, this.defaultViewOptions());
         };
 
         EntityBase.prototype.find_click = function () {
@@ -194,13 +190,11 @@ var SF;
             });
         };
 
-        EntityBase.prototype.getDefaultPopupViewOptions = function () {
-            var staticInfo = this.staticInfo();
-
-            if (staticInfo.isReadOnly())
-                return { readOnly: true };
-
-            return null;
+        EntityBase.prototype.defaultViewOptions = function () {
+            return {
+                readOnly: this.staticInfo().isReadOnly(),
+                partialViewName: this.options.partialViewName
+            };
         };
 
         EntityBase.prototype.updateButtonsDisplay = function () {
@@ -215,11 +209,11 @@ var SF;
         };
 
         EntityBase.prototype.entityAutocomplete = function ($txt) {
-            var self = this;
+            var _this = this;
             var auto = $txt.autocomplete({
                 delay: 200,
                 source: function (request, response) {
-                    self.autoCompleter.getResults(request.term).then(function (entities) {
+                    _this.autoCompleter.getResults(request.term).then(function (entities) {
                         response(entities.map(function (e) {
                             return ({ label: e.toStr, value: e });
                         }));
@@ -230,7 +224,8 @@ var SF;
                     return false;
                 },
                 select: function (event, ui) {
-                    self.setEntity(ui.item.value);
+                    _this.onAutocompleteSelected(ui.item.value);
+                    _this.setEntity(ui.item.value);
                     event.preventDefault();
                 }
             });
@@ -242,7 +237,7 @@ var SF;
             };
         };
 
-        EntityBase.prototype.onAutocompleteSelected = function (controlId, data) {
+        EntityBase.prototype.onAutocompleteSelected = function (entityValue) {
             throw new Error("onAutocompleteSelected is abstract");
         };
         EntityBase.key_entity = "sfEntity";
@@ -294,6 +289,10 @@ var SF;
             if (link.filter('a').length !== 0)
                 link.attr('href', entityValue == null ? null : entityValue.link);
             $(this.pf(SF.Keys.toStr)).val('');
+        };
+
+        EntityLine.prototype.onAutocompleteSelected = function (entityValue) {
+            this.setEntity(entityValue);
         };
         return EntityLine;
     })(EntityBase);
@@ -382,7 +381,7 @@ var SF;
                     return Promise.resolve(newEntity);
                 }
 
-                return SF.ViewNavigator.loadPartialView(newEntity);
+                return SF.ViewNavigator.loadPartialView(newEntity, _this.defaultViewOptions());
             });
         };
 
@@ -395,7 +394,7 @@ var SF;
                 if (entity.html != null)
                     return Promise.resolve(entity);
 
-                return SF.ViewNavigator.loadPartialView(new SF.EntityHtml(_this.options.prefix, entity.runtimeInfo));
+                return SF.ViewNavigator.loadPartialView(new SF.EntityHtml(_this.options.prefix, entity.runtimeInfo), _this.defaultViewOptions());
             });
         };
         return EntityLineDetail;
@@ -485,11 +484,11 @@ var SF;
             }
         };
 
-        EntityListBase.prototype.removeEntitySpecific = function (entityValue) {
+        EntityListBase.prototype.removeEntitySpecific = function (prefix) {
             //virtual
         };
 
-        EntityListBase.prototype.removeEntity = function (entityValue) {
+        EntityListBase.prototype.removeEntity = function (prefix) {
             this.updateButtonsDisplay();
             if (!SF.isEmpty(this.entityChanged)) {
                 this.entityChanged();
@@ -525,6 +524,10 @@ var SF;
             return this.getPosIndex(lastPrefix);
         };
 
+        EntityListBase.prototype.getNextPosIndex = function () {
+            return ";" + (this.getLastPosIndex() + 1).toString();
+        };
+
         EntityListBase.prototype.canAddItems = function () {
             return SF.isEmpty(this.options.maxElements) || this.getItems().length < this.options.maxElements;
         };
@@ -532,9 +535,10 @@ var SF;
         EntityListBase.prototype.find_click = function () {
             var _this = this;
             this.onFindingMany(this.options.prefix).then(function (result) {
-                result.forEach(function (ev) {
-                    return _this.addEntity(ev, _this.getNextPrefix());
-                });
+                if (result)
+                    result.forEach(function (ev) {
+                        return _this.addEntity(ev, _this.getNextPrefix());
+                    });
             });
         };
 
@@ -557,9 +561,9 @@ var SF;
             });
         };
 
-        EntityListBase.prototype.moveUp = function (selectedItemPrefix) {
+        EntityListBase.prototype.moveUp = function (itemPrefix) {
             var suffix = this.itemSuffix();
-            var $item = $("#" + SF.compose(selectedItemPrefix, suffix));
+            var $item = $("#" + SF.compose(itemPrefix, suffix));
             var $itemPrev = $item.prev();
 
             if ($itemPrev.length == 0) {
@@ -569,15 +573,15 @@ var SF;
             var itemPrevPrefix = $itemPrev[0].id.before("_" + suffix);
 
             var prevNewIndex = this.getPosIndex(itemPrevPrefix);
-            this.setPosIndex(selectedItemPrefix, prevNewIndex);
+            this.setPosIndex(itemPrefix, prevNewIndex);
             this.setPosIndex(itemPrevPrefix, prevNewIndex + 1);
 
             $item.insertBefore($itemPrev);
         };
 
-        EntityListBase.prototype.moveDown = function (selectedItemPrefix) {
+        EntityListBase.prototype.moveDown = function (itemPrefix) {
             var suffix = this.itemSuffix();
-            var $item = $("#" + SF.compose(selectedItemPrefix, suffix));
+            var $item = $("#" + SF.compose(itemPrefix, suffix));
             var $itemNext = $item.next();
 
             if ($itemNext.length == 0) {
@@ -587,20 +591,21 @@ var SF;
             var itemNextPrefix = $itemNext[0].id.before("_" + suffix);
 
             var nextNewIndex = this.getPosIndex(itemNextPrefix);
-            this.setPosIndex(selectedItemPrefix, nextNewIndex);
+            this.setPosIndex(itemPrefix, nextNewIndex);
             this.setPosIndex(itemNextPrefix, nextNewIndex - 1);
 
             $item.insertAfter($itemNext);
         };
 
         EntityListBase.prototype.getPosIndex = function (itemPrefix) {
-            return parseInt($("#" + SF.compose(itemPrefix, EntityList.key_indexes)).val().after(";"));
+            return parseInt($("#" + SF.compose(itemPrefix, EntityListBase.key_indexes)).val().after(";"));
         };
 
         EntityListBase.prototype.setPosIndex = function (itemPrefix, newIndex) {
-            var $indexes = $("#" + SF.compose(itemPrefix, EntityList.key_indexes));
+            var $indexes = $("#" + SF.compose(itemPrefix, EntityListBase.key_indexes));
             $indexes.val($indexes.val().before(";") + ";" + newIndex.toString());
         };
+        EntityListBase.key_indexes = "sfIndexes";
         return EntityListBase;
     })(EntityBase);
     SF.EntityListBase = EntityListBase;
@@ -678,7 +683,7 @@ var SF;
         EntityList.prototype.addEntitySpecific = function (entityValue, itemPrefix) {
             var $table = $("#" + this.options.prefix + "> .sf-field-list > .sf-field-list-table");
 
-            $table.before(SF.hiddenInput(SF.compose(itemPrefix, EntityList.key_indexes), ";" + (this.getLastPosIndex() + 1).toString()));
+            $table.before(SF.hiddenInput(SF.compose(itemPrefix, EntityList.key_indexes), this.getNextPosIndex()));
 
             $table.before(SF.hiddenInput(SF.compose(itemPrefix, SF.Keys.runtimeInfo), entityValue.runtimeInfo.toString()));
 
@@ -693,24 +698,26 @@ var SF;
         EntityList.prototype.remove_click = function () {
             var _this = this;
             var selectedItemPrefix = this.selectedItemPrefix();
-
-            var entity = this.extractEntityHtml(selectedItemPrefix);
-
-            this.onRemove(entity).then(function (result) {
+            this.onRemove(selectedItemPrefix).then(function (result) {
                 if (result)
-                    _this.removeEntity(entity);
-                else
-                    _this.setEntity(entity);
+                    _this.removeEntity(selectedItemPrefix);
             });
         };
 
-        EntityList.prototype.removeEntitySpecific = function (entityValue) {
-            $("#" + SF.compose(entityValue.prefix, SF.Keys.runtimeInfo)).remove();
-            $("#" + SF.compose(entityValue.prefix, SF.Keys.toStr)).remove();
-            $("#" + SF.compose(entityValue.prefix, EntityList.key_entity)).remove();
-            $("#" + SF.compose(entityValue.prefix, EntityList.key_indexes)).remove();
+        EntityList.prototype.removeEntitySpecific = function (prefix) {
+            $("#" + SF.compose(prefix, SF.Keys.runtimeInfo)).remove();
+            $("#" + SF.compose(prefix, SF.Keys.toStr)).remove();
+            $("#" + SF.compose(prefix, EntityList.key_entity)).remove();
+            $("#" + SF.compose(prefix, EntityList.key_indexes)).remove();
         };
-        EntityList.key_indexes = "sfIndexes";
+
+        EntityList.prototype.moveUp_click = function () {
+            this.moveUp(this.selectedItemPrefix());
+        };
+
+        EntityList.prototype.moveDown_click = function () {
+            this.moveDown(this.selectedItemPrefix());
+        };
         EntityList.key_list = "sfList";
         return EntityList;
     })(EntityListBase);
@@ -727,179 +734,66 @@ var SF;
         function EntityListDetail(element, options) {
             _super.call(this, element, options);
         }
-        EntityListDetail.prototype.setEntitySpecific = function (entityValue) {
-            if (entityValue == null)
-                return;
-
-            if (!entityValue.isLoaded())
-                throw new Error("EntityListDetail requires a loaded EntityHtml, consider calling ViewNavigator.loadPartialView");
-        };
-
-        EntityListDetail.prototype.onCreating = function (prefix) {
-            var _this = this;
-            if (this.creating != null)
-                return this.creating(prefix);
-
-            SF.ViewNavigator.typeChooser(this.staticInfo()).then(function (type) {
-                if (type == null)
-                    return null;
-
-                var newEntity = new SF.EntityHtml(_this.options.prefix, new SF.RuntimeInfoValue(type, null));
-
-                var template = _this.getEmbeddedTemplate();
-                if (!SF.isEmpty(template)) {
-                    newEntity.html = $(template);
-                    return Promise.resolve(newEntity);
-                }
-
-                return SF.ViewNavigator.loadPartialView(newEntity);
-            });
-        };
-
-        EntityListDetail.prototype.onFindingMany = function (prefix) {
-            var _this = this;
-            return _super.prototype.onFindingMany.call(this, prefix).then(function (entites) {
-                if (entites == null)
-                    return null;
-
-                var promises = entites.map(function (entity) {
-                    if (entity.html != null)
-                        return Promise.resolve(entity);
-
-                    return SF.ViewNavigator.loadPartialView(new SF.EntityHtml(_this.options.prefix, entity.runtimeInfo));
-                });
-
-                var result = Promise.all(promises);
-
-                return result;
-            });
+        //create_click() {
+        //    var prefix = this.getNextPrefix();
+        //    this.onCreating(prefix).then(entity => {
+        //        if (entity) {
+        //            this.addEntity(entity, prefix);
+        //            this.stageCurrentSelected();
+        //        }
+        //    });
+        //}
+        //find_click() {
+        //    this.onFindingMany(this.options.prefix).then(result => {
+        //        if (result) {
+        //            result.forEach(ev=> this.addEntity(ev, this.getNextPrefix()));
+        //            this.stageCurrentSelected();
+        //        }
+        //    });
+        //}
+        //remove_click() {
+        //    var selectedItemPrefix = this.selectedItemPrefix();
+        //    this.onRemove(selectedItemPrefix).then(result=> {
+        //        if (result) {
+        //            this.removeEntity(selectedItemPrefix);
+        //            this.stageCurrentSelected();
+        //        }
+        //    });
+        //}
+        EntityListDetail.prototype.selection_Changed = function () {
+            this.stageCurrentSelected();
         };
 
         EntityListDetail.prototype.stageCurrentSelected = function () {
-            var selPrefix = this.getLastPosIndex();
+            var selPrefix = this.selectedItemPrefix();
 
-            var child = $("#" + this.options.detailDiv).children();
+            var detailDiv = $("#" + this.options.detailDiv);
 
-            if (child.length != 0) {
-                var prefix = child[0].id.before("_" + EntityList.key_entity);
+            var children = detailDiv.children();
 
-                if (selPrefix == prefix)
-                    child[0].show();
-            }
-
-            var itemPrefix = this.getVisibleItemPrefix();
-            if (!SF.isEmpty(itemPrefix)) {
-                $('#' + SF.compose(itemPrefix, EntityBase.key_entity)).html('').append(SF.cloneContents(this.options.detailDiv));
-            }
-        };
-
-        EntityListDetail.prototype.onItemCreated = function (viewOptions) {
-            if (SF.isEmpty(viewOptions.type)) {
-                throw "ViewOptions type parameter must not be null in entityListDetail onItemCreated. Call create instead";
-            }
-
-            var itemPrefix = viewOptions.prefix;
-            this.newListItem(null, itemPrefix, { type: viewOptions.type, toStr: null });
-        };
-
-        EntityListDetail.prototype.view = function (_viewOptions) {
-            var selectedItemPrefix = this.selectedItemPrefix();
-            if (SF.isEmpty(selectedItemPrefix)) {
-                return;
-            }
-            this.viewInIndex(_viewOptions, selectedItemPrefix);
-        };
-
-        EntityListDetail.prototype.viewInIndex = function (_viewOptions, selectedItemPrefix) {
-            this.restoreCurrent();
-            if (this.isLoaded(selectedItemPrefix)) {
-                this.cloneAndShow(selectedItemPrefix);
-            } else {
-                var viewOptions = this.viewOptionsForViewing(_viewOptions, selectedItemPrefix);
-                new SF.ViewNavigator(viewOptions).viewEmbedded();
-                SF.triggerNewContent($('#' + viewOptions.containerDiv));
-            }
-        };
-
-        EntityListDetail.prototype.viewOptionsForViewing = function (_viewOptions, itemPrefix) {
-            var self = this;
-            var info = this.itemRuntimeInfo(itemPrefix);
-            return $.extend({
-                containerDiv: this.options.detailDiv,
-                type: info.entityType(),
-                id: info.id(),
-                prefix: itemPrefix,
-                partialViewName: this.options.partialViewName,
-                requestExtraJsonData: this.extraJsonParams(itemPrefix)
-            }, _viewOptions);
-        };
-
-        EntityListDetail.prototype.isLoaded = function (selectedItemPrefix) {
-            return !SF.isEmpty($('#' + SF.compose(selectedItemPrefix, EntityBase.key_entity)).html());
-        };
-
-        EntityListDetail.prototype.cloneAndShow = function (selectedItemPrefix) {
-            $('#' + this.options.detailDiv).html('').append(SF.cloneContents(SF.compose(selectedItemPrefix, EntityBase.key_entity)));
-
-            $('#' + SF.compose(selectedItemPrefix, EntityBase.key_entity)).html('');
-        };
-
-        EntityListDetail.prototype.find = function (_findOptions, _viewOptions) {
-            var _self = this;
-            var type = this.getEntityType(function (type) {
-                _self.typedFind($.extend({ webQueryName: type }, _findOptions), _viewOptions);
-            });
-        };
-
-        EntityListDetail.prototype.typedFind = function (_findOptions, _viewOptions) {
-            if (SF.isEmpty(_findOptions.webQueryName)) {
-                throw "FindOptions webQueryName parameter must not be null in entityListDetail typedFind. Call find instead";
-            }
-
-            this.restoreCurrent();
-            var findOptions = this.createFindOptions(_findOptions, _viewOptions);
-            SF.FindNavigator.openFinder(findOptions);
-        };
-
-        EntityListDetail.prototype.createFindOptions = function (_findOptions, _viewOptions) {
-            var newPrefixIndex = this.getLastPrefixIndex() + 1;
-            var itemPrefix = SF.compose(this.options.prefix, newPrefixIndex.toString());
-            var self = this;
-            return $.extend({
-                prefix: itemPrefix,
-                onOk: function (selectedItems) {
-                    return self.onFindingOk(selectedItems);
+            if (children.length != 0) {
+                var prefix = children[0].id.before("_" + EntityListDetail.key_entity);
+                if (selPrefix == prefix) {
+                    children.show();
+                    return;
                 }
-            }, _findOptions);
-        };
-
-        EntityListDetail.prototype.onFindingOk = function (selectedItems, _viewOptions) {
-            if (selectedItems == null || selectedItems.length == 0) {
-                throw "No item was returned from Find Window";
+                children.hide();
+                this.runtimeInfo(prefix).$elem.after(children);
             }
-            var self = this;
-            this.foreachNewItem(selectedItems, function (item, itemPrefix) {
-                self.newListItem(null, itemPrefix, item);
-            });
 
-            //View result in the detailDiv
-            $(this.pf(EntityList.key_list)).dblclick();
-            return true;
-        };
+            var selContainer = this.containerDiv(selPrefix);
 
-        EntityListDetail.prototype.remove = function (itemPrefix) {
-            var selectedItemPrefix = this.selectedItemPrefix();
-            if (SF.isEmpty(selectedItemPrefix)) {
-                return;
+            if (selContainer.children().length == 0) {
+                detailDiv.append(selContainer);
+                selContainer.show();
+            } else {
+                var entity = new SF.EntityHtml(selPrefix, this.runtimeInfo(selPrefix).value(), null, null);
+
+                SF.ViewNavigator.loadPartialView(entity, this.defaultViewOptions()).then(function (e) {
+                    selContainer.html(e.html);
+                    detailDiv.append(selContainer);
+                });
             }
-            this.edlineRemoveInIndex(selectedItemPrefix);
-        };
-
-        EntityListDetail.prototype.edlineRemoveInIndex = function (itemPrefix) {
-            var currentVisible = this.getVisibleItemPrefix();
-            if (!SF.isEmpty(currentVisible) && currentVisible == itemPrefix)
-                $('#' + this.options.detailDiv).html('');
-            this.removeInIndex(itemPrefix);
         };
         return EntityListDetail;
     })(EntityList);
@@ -913,8 +807,8 @@ var SF;
 
     var EntityRepeater = (function (_super) {
         __extends(EntityRepeater, _super);
-        function EntityRepeater(element, options) {
-            _super.call(this, element, options);
+        function EntityRepeater() {
+            _super.apply(this, arguments);
         }
         EntityRepeater.prototype.itemSuffix = function () {
             return EntityRepeater.key_repeaterItem;
@@ -924,64 +818,10 @@ var SF;
             return $(this.pf(EntityRepeater.key_itemsContainer) + " > ." + EntityRepeater.key_repeaterItemClass);
         };
 
-        EntityRepeater.prototype.canAddItems = function () {
-            if (!SF.isEmpty(this.options.maxElements)) {
-                if (this.getItems().length >= +this.options.maxElements) {
-                    return false;
-                }
-            }
-            return true;
-        };
-
-        EntityRepeater.prototype.typedCreate = function (_viewOptions) {
-            if (SF.isEmpty(_viewOptions.type)) {
-                throw "ViewOptions type parameter must not be null in entityRepeater typedCreate. Call create instead";
-            }
-            if (!this.canAddItems()) {
-                return;
-            }
-
-            var viewOptions = this.viewOptionsForCreating(_viewOptions);
-            var template = this.getEmbeddedTemplate();
-            if (!SF.isEmpty(template)) {
-                template = template.replace(new RegExp(SF.compose(this.options.prefix, "0"), "gi"), viewOptions.prefix);
-                this.onItemCreated(template, viewOptions);
-            } else {
-                var self = this;
-                new SF.ViewNavigator(viewOptions).createEmbedded(function (newHtml) {
-                    self.onItemCreated(newHtml, viewOptions);
-                });
-            }
-        };
-
-        EntityRepeater.prototype.viewOptionsForCreating = function (_viewOptions) {
-            var newPrefixIndex = this.getLastPrefixIndex() + 1;
-            var itemPrefix = SF.compose(this.options.prefix, newPrefixIndex.toString());
-            return $.extend({
-                containerDiv: "",
-                prefix: itemPrefix,
-                partialViewName: this.options.partialViewName,
-                requestExtraJsonData: this.extraJsonParams(itemPrefix)
-            }, _viewOptions);
-        };
-
-        EntityRepeater.prototype.onItemCreated = function (newHtml, viewOptions) {
-            if (SF.isEmpty(viewOptions.type)) {
-                throw "ViewOptions type parameter must not be null in entityRepeater onItemCreated";
-            }
-
-            var itemPrefix = viewOptions.prefix;
-            this.newRepItem(newHtml, itemPrefix, { type: viewOptions.type });
-        };
-
-        EntityRepeater.prototype.newRepItem = function (newHtml, itemPrefix, item) {
-            var itemInfoValue = this.itemRuntimeInfo(itemPrefix).createValue(item.type, item.id || '', typeof item.id == "undefined" ? 'n' : 'o', null);
-            var $div = $("<fieldset id='" + SF.compose(itemPrefix, EntityRepeater.key_repeaterItem) + "' name='" + SF.compose(itemPrefix, EntityRepeater.key_repeaterItem) + "' class='" + EntityRepeater.key_repeaterItemClass + "'>" + "<legend>" + (this.options.remove ? ("<a id='" + SF.compose(itemPrefix, "btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this._getRemoving(itemPrefix) + "\" class='sf-line-button sf-remove' data-icon='ui-icon-circle-close' data-text='false'>" + lang.signum.remove + "</a>") : "") + (this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this._getMovingUp(itemPrefix) + "\" class='sf-line-button sf-move-up' data-icon='ui-icon-triangle-1-n' data-text='false'>" + lang.signum.moveUp + "</span>") : "") + (this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this._getMovingDown(itemPrefix) + "\" class='sf-line-button sf-move-down' data-icon='ui-icon-triangle-1-s' data-text='false'>" + lang.signum.moveDown + "</span>") : "") + "</legend>" + SF.hiddenInput(SF.compose(itemPrefix, EntityRepeater.key_indexes), ";" + (this.getLastNewIndex() + 1).toString()) + SF.hiddenInput(SF.compose(itemPrefix, SF.Keys.runtimeInfo), itemInfoValue) + "<div id='" + SF.compose(itemPrefix, EntityRepeater.key_entity) + "' name='" + SF.compose(itemPrefix, EntityRepeater.key_entity) + "' class='sf-line-entity'>" + "</div>" + "</fieldset>");
+        EntityRepeater.prototype.addEntitySpecific = function (entityValue, itemPrefix) {
+            var $div = $("<fieldset id='" + SF.compose(itemPrefix, EntityRepeater.key_repeaterItem) + "' name='" + SF.compose(itemPrefix, EntityRepeater.key_repeaterItem) + "' class='" + EntityRepeater.key_repeaterItemClass + "'>" + "<legend>" + (this.options.remove ? ("<a id='" + SF.compose(itemPrefix, "btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this._getRemoving(itemPrefix) + "\" class='sf-line-button sf-remove' data-icon='ui-icon-circle-close' data-text='false'>" + lang.signum.remove + "</a>") : "") + (this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this._getMovingUp(itemPrefix) + "\" class='sf-line-button sf-move-up' data-icon='ui-icon-triangle-1-n' data-text='false'>" + lang.signum.moveUp + "</span>") : "") + (this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this._getMovingDown(itemPrefix) + "\" class='sf-line-button sf-move-down' data-icon='ui-icon-triangle-1-s' data-text='false'>" + lang.signum.moveDown + "</span>") : "") + "</legend>" + SF.hiddenInput(SF.compose(itemPrefix, EntityListBase.key_indexes), this.getNextPosIndex()) + SF.hiddenInput(SF.compose(itemPrefix, SF.Keys.runtimeInfo), null) + "<div id='" + SF.compose(itemPrefix, EntityRepeater.key_entity) + "' name='" + SF.compose(itemPrefix, EntityRepeater.key_entity) + "' class='sf-line-entity'>" + "</div>" + "</fieldset>");
 
             $(this.pf(EntityRepeater.key_itemsContainer)).append($div);
-            $("#" + SF.compose(itemPrefix, EntityRepeater.key_entity)).html(newHtml);
-            SF.triggerNewContent($("#" + SF.compose(itemPrefix, EntityRepeater.key_repeaterItem)));
-            this.fireOnEntityChanged(false);
         };
 
         EntityRepeater.prototype._getRepeaterCall = function () {
@@ -989,7 +829,7 @@ var SF;
         };
 
         EntityRepeater.prototype._getRemoving = function (itemPrefix) {
-            return this._getRepeaterCall() + ".remove('" + itemPrefix + "');";
+            return this._getRepeaterCall() + ".removeItem_click('" + itemPrefix + "');";
         };
 
         EntityRepeater.prototype._getMovingUp = function (itemPrefix) {
@@ -1000,85 +840,30 @@ var SF;
             return this._getRepeaterCall() + ".moveDown('" + itemPrefix + "');";
         };
 
-        EntityRepeater.prototype.viewOptionsForViewing = function (_viewOptions, itemPrefix) {
-            return $.extend({
-                containerDiv: SF.compose(itemPrefix, EntityBase.key_entity),
-                prefix: itemPrefix,
-                partialViewName: this.options.partialViewName,
-                requestExtraJsonData: this.extraJsonParams(itemPrefix)
-            }, _viewOptions);
+        EntityRepeater.prototype.remove_click = function () {
+            throw new Error("remove_click is deprecated in EntityRepeater");
         };
 
-        EntityRepeater.prototype.find = function (_findOptions, _viewOptions) {
-            var _self = this;
-            var type = this.getEntityType(function (type) {
-                _self.typedFind($.extend({ webQueryName: type }, _findOptions), _viewOptions);
+        EntityRepeater.prototype.removeItem_click = function (itemPrefix) {
+            var _this = this;
+            this.onRemove(itemPrefix).then(function (result) {
+                if (result)
+                    _this.removeEntity(itemPrefix);
             });
-        };
-
-        EntityRepeater.prototype.typedFind = function (_findOptions, _viewOptions) {
-            if (SF.isEmpty(_findOptions.webQueryName)) {
-                throw "FindOptions webQueryName parameter must not be null in ERep typedFind. Call find instead";
-            }
-            if (!this.canAddItems()) {
-                return;
-            }
-
-            var findOptions = this.createFindOptions(_findOptions, _viewOptions);
-            SF.FindNavigator.openFinder(findOptions);
-        };
-
-        EntityRepeater.prototype.createFindOptions = function (_findOptions, _viewOptions) {
-            var newPrefixIndex = this.getLastPrefixIndex() + 1;
-            var itemPrefix = SF.compose(this.options.prefix, newPrefixIndex.toString());
-            var self = this;
-            return $.extend({
-                prefix: itemPrefix,
-                onOk: function (selectedItems) {
-                    return self.onFindingOk(selectedItems, _viewOptions);
-                }
-            }, _findOptions);
-        };
-
-        EntityRepeater.prototype.onFindingOk = function (selectedItems, _viewOptions) {
-            if (selectedItems == null || selectedItems.length == 0) {
-                throw "No item was returned from Find Window";
-            }
-            var self = this;
-            this.foreachNewItem(selectedItems, function (item, itemPrefix) {
-                if (!self.canAddItems()) {
-                    return;
-                }
-
-                self.newRepItem('', itemPrefix, item);
-
-                //View results in the repeater
-                var viewOptions = self.viewOptionsForViewing($.extend(_viewOptions, { type: item.type, id: item.id }), itemPrefix);
-                new SF.ViewNavigator(viewOptions).viewEmbedded();
-                SF.triggerNewContent($(SF.compose(itemPrefix, EntityRepeater.key_entity)));
-            });
-            return true;
-        };
-
-        EntityRepeater.prototype.remove = function (itemPrefix) {
-            $('#' + SF.compose(itemPrefix, EntityRepeater.key_repeaterItem)).remove();
-            this.fireOnEntityChanged(false);
         };
 
         EntityRepeater.prototype.updateButtonsDisplay = function () {
-            var $buttons = $(this.pf("btnFind"), this.pf("btnCreate"));
-            if (this.canAddItems()) {
-                $buttons.show();
-            } else {
-                $buttons.hide();
-            }
+            var canAdd = this.canAddItems();
+
+            $(this.pf("btnCreate")).toggle(canAdd);
+            $(this.pf("btnFind")).toggle(canAdd);
         };
         EntityRepeater.key_itemsContainer = "sfItemsContainer";
         EntityRepeater.key_repeaterItem = "sfRepeaterItem";
         EntityRepeater.key_repeaterItemClass = "sf-repeater-element";
         EntityRepeater.key_link = "sfLink";
         return EntityRepeater;
-    })(EntityList);
+    })(EntityListBase);
     SF.EntityRepeater = EntityRepeater;
 
     once("SF-entityStrip", function () {
@@ -1100,47 +885,14 @@ var SF;
             return $(this.pf(EntityStrip.key_itemsContainer) + " > ." + EntityStrip.key_stripItemClass);
         };
 
-        EntityStrip.prototype.viewOptionsForCreating = function (_viewOptions) {
-            var self = this;
-            var newPrefixIndex = this.getLastPrefixIndex() + 1;
-            var itemPrefix = SF.compose(this.options.prefix, newPrefixIndex.toString());
-            return $.extend({
-                onOk: function (clonedElements) {
-                    return self.onCreatingOk(clonedElements, _viewOptions.validationOptions, _viewOptions.type, itemPrefix);
-                },
-                onCancelled: null,
-                controllerUrl: null,
-                prefix: itemPrefix,
-                partialViewName: this.options.partialViewName,
-                requestExtraJsonData: this.extraJsonParams(itemPrefix)
-            }, _viewOptions);
+        EntityStrip.prototype.setEntitySpecific = function (entityValue, itemPrefix) {
+            $('#' + SF.compose(itemPrefix, SF.Keys.link)).html(entityValue.toStr);
         };
 
-        EntityStrip.prototype.onCreatingOk = function (clonedElements, validatorOptions, entityType, itemPrefix) {
-            var valOptions = $.extend(validatorOptions || {}, {
-                type: entityType
-            });
-            var validatorResult = this.checkValidation(valOptions, itemPrefix);
-            if (validatorResult.acceptChanges) {
-                var runtimeInfo;
-                var $mainControl = $(".sf-main-control[data-prefix=" + itemPrefix + "]");
-                if ($mainControl.length > 0) {
-                    runtimeInfo = $mainControl.data("runtimeinfo");
-                }
-                this.newStripItem(clonedElements, itemPrefix, { runtimeInfo: runtimeInfo, type: entityType, toStr: validatorResult.newToStr, link: validatorResult.newLink });
-            }
-            return validatorResult.acceptChanges;
-        };
-
-        EntityStrip.prototype.newStripItem = function (newHtml, itemPrefix, item) {
-            var itemInfoValue = item.runtimeInfo || this.itemRuntimeInfo(itemPrefix).createValue(item.type, item.id || '', typeof item.id == "undefined" ? 'n' : 'o', null);
-            var $li = $("<li id='" + SF.compose(itemPrefix, EntityStrip.key_stripItem) + "' name='" + SF.compose(itemPrefix, EntityStrip.key_stripItem) + "' class='" + EntityStrip.key_stripItemClass + "'>" + SF.hiddenInput(SF.compose(itemPrefix, EntityStrip.key_indexes), ";" + (this.getLastNewIndex() + 1).toString()) + SF.hiddenInput(SF.compose(itemPrefix, SF.Keys.runtimeInfo), itemInfoValue) + (this.options.navigate ? ("<a class='sf-entitStrip-link' id='" + SF.compose(itemPrefix, EntityStrip.key_link) + "' href='" + item.link + "' title='" + lang.signum.navigate + "'>" + item.toStr + "</a>") : ("<span class='sf-entitStrip-link' id='" + SF.compose(itemPrefix, EntityStrip.key_link) + "'>" + item.toStr + "</span>")) + "<span class='sf-button-container'>" + ((this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this._getMovingUp(itemPrefix) + "\" class='sf-line-button sf-move-up' data-icon='ui-icon-triangle-1-" + (this.options.vertical ? "w" : "n") + "' data-text='false'>" + lang.signum.moveUp + "</span>") : "") + (this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this._getMovingDown(itemPrefix) + "\" class='sf-line-button sf-move-down' data-icon='ui-icon-triangle-1-" + (this.options.vertical ? "e" : "s") + "' data-text='false'>" + lang.signum.moveDown + "</span>") : "") + (this.options.view ? ("<a id='" + SF.compose(itemPrefix, "btnView") + "' title='" + lang.signum.view + "' onclick=\"" + this._getView(itemPrefix) + "\" class='sf-line-button sf-view' data-icon='ui-icon-circle-arrow-e' data-text='false'>" + lang.signum.view + "</a>") : "") + (this.options.remove ? ("<a id='" + SF.compose(itemPrefix, "btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this._getRemoving(itemPrefix) + "\" class='sf-line-button sf-remove' data-icon='ui-icon-circle-close' data-text='false'>" + lang.signum.remove + "</a>") : "")) + "</span>" + (!SF.isEmpty(newHtml) ? "<div id='" + SF.compose(itemPrefix, EntityStrip.key_entity) + "' name='" + SF.compose(itemPrefix, EntityStrip.key_entity) + "' style='display:none'></div>" : "") + "</li>");
+        EntityStrip.prototype.addEntitySpecific = function (entityValue, itemPrefix) {
+            var $li = $("<li id='" + SF.compose(itemPrefix, EntityStrip.key_stripItem) + "' name='" + SF.compose(itemPrefix, EntityStrip.key_stripItem) + "' class='" + EntityStrip.key_stripItemClass + "'>" + SF.hiddenInput(SF.compose(itemPrefix, EntityStrip.key_indexes), this.getNextPosIndex()) + SF.hiddenInput(SF.compose(itemPrefix, SF.Keys.runtimeInfo), null) + (this.options.navigate ? ("<a class='sf-entitStrip-link' id='" + SF.compose(itemPrefix, EntityStrip.key_link) + "' href='" + entityValue.link + "' title='" + lang.signum.navigate + "'>" + entityValue.toStr + "</a>") : ("<span class='sf-entitStrip-link' id='" + SF.compose(itemPrefix, EntityStrip.key_link) + "'>" + entityValue.toStr + "</span>")) + "<span class='sf-button-container'>" + ((this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this._getMovingUp(itemPrefix) + "\" class='sf-line-button sf-move-up' data-icon='ui-icon-triangle-1-" + (this.options.vertical ? "w" : "n") + "' data-text='false'>" + lang.signum.moveUp + "</span>") : "") + (this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this._getMovingDown(itemPrefix) + "\" class='sf-line-button sf-move-down' data-icon='ui-icon-triangle-1-" + (this.options.vertical ? "e" : "s") + "' data-text='false'>" + lang.signum.moveDown + "</span>") : "") + (this.options.view ? ("<a id='" + SF.compose(itemPrefix, "btnView") + "' title='" + lang.signum.view + "' onclick=\"" + this._getView(itemPrefix) + "\" class='sf-line-button sf-view' data-icon='ui-icon-circle-arrow-e' data-text='false'>" + lang.signum.view + "</a>") : "") + (this.options.remove ? ("<a id='" + SF.compose(itemPrefix, "btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this._getRemoving(itemPrefix) + "\" class='sf-line-button sf-remove' data-icon='ui-icon-circle-close' data-text='false'>" + lang.signum.remove + "</a>") : "")) + "</span>" + "<div id='" + SF.compose(itemPrefix, EntityStrip.key_entity) + "' name='" + SF.compose(itemPrefix, EntityStrip.key_entity) + "' style='display:none'></div>" + "</li>");
 
             $(this.pf(EntityStrip.key_itemsContainer) + " ." + EntityStrip.key_input).before($li);
-            if (!SF.isEmpty(newHtml))
-                $("#" + SF.compose(itemPrefix, EntityStrip.key_entity)).html(newHtml);
-            SF.triggerNewContent($("#" + SF.compose(itemPrefix, EntityStrip.key_stripItem)));
-            this.fireOnEntityChanged(false);
         };
 
         EntityStrip.prototype._getRepeaterCall = function () {
@@ -1148,7 +900,7 @@ var SF;
         };
 
         EntityStrip.prototype._getRemoving = function (itemPrefix) {
-            return this._getRepeaterCall() + ".remove('" + itemPrefix + "');";
+            return this._getRepeaterCall() + ".removeItem_click('" + itemPrefix + "');";
         };
 
         EntityStrip.prototype._getView = function (itemPrefix) {
@@ -1163,84 +915,44 @@ var SF;
             return this._getRepeaterCall() + ".moveDown('" + itemPrefix + "');";
         };
 
-        EntityStrip.prototype.find = function (_findOptions, _viewOptions) {
-            var _self = this;
-            var type = this.getEntityType(function (type) {
-                _self.typedFind($.extend({ webQueryName: type }, _findOptions), _viewOptions);
+        EntityStrip.prototype.remove_click = function () {
+            throw new Error("remove_click is deprecated in EntityRepeater");
+        };
+
+        EntityStrip.prototype.removeItem_click = function (itemPrefix) {
+            var _this = this;
+            this.onRemove(itemPrefix).then(function (result) {
+                if (result)
+                    _this.removeEntity(itemPrefix);
             });
         };
 
-        EntityStrip.prototype.typedFind = function (_findOptions, _viewOptions) {
-            if (SF.isEmpty(_findOptions.webQueryName)) {
-                throw "FindOptions webQueryName parameter must not be null in ERep typedFind. Call find instead";
-            }
-            if (!this.canAddItems()) {
-                return;
-            }
-
-            var findOptions = this.createFindOptions(_findOptions, _viewOptions);
-            SF.FindNavigator.openFinder(findOptions);
+        EntityStrip.prototype.view_click = function () {
+            throw new Error("remove_click is deprecated in EntityRepeater");
         };
 
-        EntityStrip.prototype.createFindOptions = function (_findOptions, _viewOptions) {
-            var newPrefixIndex = this.getLastPrefixIndex() + 1;
-            var itemPrefix = SF.compose(this.options.prefix, newPrefixIndex.toString());
-            var self = this;
-            return $.extend({
-                prefix: itemPrefix,
-                onOk: function (selectedItems) {
-                    return self.onFindingOk(selectedItems, _viewOptions);
-                }
-            }, _findOptions);
-        };
+        EntityStrip.prototype.viewItem_click = function (itemPrefix) {
+            var _this = this;
+            var entityHtml = this.extractEntityHtml(itemPrefix);
 
-        EntityStrip.prototype.onFindingOk = function (selectedItems, _viewOptions) {
-            if (selectedItems == null || selectedItems.length == 0) {
-                throw "No item was returned from Find Window";
-            }
-            var self = this;
-            this.foreachNewItem(selectedItems, function (item, itemPrefix) {
-                if (!self.canAddItems()) {
-                    return;
-                }
-
-                self.newStripItem(null, itemPrefix, item);
+            this.onViewing(entityHtml).then(function (result) {
+                if (result)
+                    _this.setEntity(result, itemPrefix);
+                else
+                    _this.setEntity(entityHtml, itemPrefix); //previous entity passed by reference
             });
-            return true;
-        };
-
-        EntityStrip.prototype.remove = function (itemPrefix) {
-            $('#' + SF.compose(itemPrefix, EntityStrip.key_stripItem)).remove();
-            this.fireOnEntityChanged(false);
-        };
-
-        EntityStrip.prototype.view = function (_viewOptions, itemPrefix) {
-            this.viewInIndex(_viewOptions || {}, itemPrefix);
         };
 
         EntityStrip.prototype.updateButtonsDisplay = function () {
-            var $buttons = $(this.pf("btnFind") + ", " + this.pf("btnCreate") + ", " + this.pf("sfToStr"));
-            if (this.canAddItems()) {
-                $buttons.show();
-            } else {
-                $buttons.hide();
-            }
+            var canAdd = this.canAddItems();
+
+            $(this.pf("btnCreate")).toggle(canAdd);
+            $(this.pf("btnFind")).toggle(canAdd);
+            $(this.pf("sfToStr")).toggle(canAdd);
         };
 
-        EntityStrip.prototype.updateLinks = function (newToStr, newLink, itemPrefix) {
-            $('#' + SF.compose(itemPrefix, SF.Keys.link)).html(newToStr);
-        };
-
-        EntityStrip.prototype.onAutocompleteSelected = function (controlId, data) {
-            var selectedItems = [{
-                    id: data.id,
-                    type: data.type,
-                    toStr: data.text,
-                    link: data.link
-                }];
-            this.onFindingOk(selectedItems);
-            $("#" + controlId).val("");
-            this.fireOnEntityChanged(true);
+        EntityStrip.prototype.onAutocompleteSelected = function (entityValue) {
+            this.addEntity(entityValue, this.getNextPrefix());
         };
         EntityStrip.key_itemsContainer = "sfItemsContainer";
         EntityStrip.key_stripItem = "sfStripItem";

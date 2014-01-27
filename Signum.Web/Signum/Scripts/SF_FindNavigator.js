@@ -209,6 +209,11 @@ var SF;
         }
         FindNavigator.deleteFilter = deleteFilter;
 
+        function removeOverlay() {
+            $('.sf-search-ctxmenu-overlay').remove();
+        }
+        FindNavigator.removeOverlay = removeOverlay;
+
         (function (ColumnOptionsMode) {
             ColumnOptionsMode[ColumnOptionsMode["Add"] = 0] = "Add";
             ColumnOptionsMode[ColumnOptionsMode["Remove"] = 1] = "Remove";

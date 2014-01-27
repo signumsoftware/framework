@@ -198,6 +198,9 @@ module SF.FindNavigator {
         $tr.remove();
     }
 
+    export function removeOverlay() {
+        $('.sf-search-ctxmenu-overlay').remove();
+    }
 
     export enum ColumnOptionsMode {
         Add,

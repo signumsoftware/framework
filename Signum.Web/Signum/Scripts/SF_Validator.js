@@ -332,31 +332,25 @@ var SF;
         }
         Validation.validatePartial = validatePartial;
 
-        function EntityIsValid(validationOptions, onSuccess, sender) {
+        function entityIsValid(validationOptions) {
             SF.log("Validator EntityIsValid");
 
             var isValid;
 
-            if (SF.isEmpty(validationOptions.prefix)) {
+            if (validationOptions.prefix)
                 isValid = validate(validationOptions);
-            } else {
-                isValid = validatePartial(validationOptions);
-            }
+            else
+                isValid = validatePartial(validationOptions).isValid;
 
-            if (isValid) {
-                if (onSuccess != null) {
-                    if (typeof sender != "undefined") {
-                        onSuccess.call(sender);
-                    } else {
-                        onSuccess();
-                    }
-                }
-            } else {
-                SF.Notify.error(lang.signum.error, 2000);
-                alert(lang.signum.popupErrorsStop);
-            }
+            if (isValid)
+                return true;
+
+            SF.Notify.error(lang.signum.error, 2000);
+            alert(lang.signum.popupErrorsStop);
+
+            return false;
         }
-        Validation.EntityIsValid = EntityIsValid;
+        Validation.entityIsValid = entityIsValid;
     })(SF.Validation || (SF.Validation = {}));
     var Validation = SF.Validation;
 })(SF || (SF = {}));

@@ -3,24 +3,24 @@ var SF;
 (function (SF) {
     (function (ViewNavigator) {
         function loadPartialView(entityHtml, viewOptions) {
-            viewOptions = $.extend(viewOptions || {}, {
+            viewOptions = $.extend({
                 controllerUrl: SF.Urls.partialView,
                 partialViewName: null,
                 requestExtraJsonData: null,
                 readOnly: false
-            });
+            }, viewOptions);
 
             return requestHtml(entityHtml, viewOptions);
         }
         ViewNavigator.loadPartialView = loadPartialView;
 
         function navigate(runtimeInfo, viewOptions) {
-            viewOptions = $.extend(viewOptions || {}, {
+            viewOptions = $.extend({
                 controllerUrl: runtimeInfo.isNew ? SF.Urls.create : SF.Urls.view,
                 partialViewName: null,
                 requestExtraJsonData: null,
                 readOnly: false
-            });
+            }, viewOptions);
 
             $.ajax({
                 url: viewOptions.controllerUrl,
@@ -40,14 +40,14 @@ var SF;
         ViewNavigator.createTempDiv = createTempDiv;
 
         function navigatePopup(entityHtml, viewOptions) {
-            viewOptions = $.extend(viewOptions || {}, {
+            viewOptions = $.extend({
                 controllerUrl: SF.Urls.popupNavigate,
                 partialViewName: "",
                 requestExtraJsonData: null,
                 readOnly: false,
                 onPopupLoaded: null,
                 onClosed: null
-            });
+            }, viewOptions);
 
             if (entityHtml.html != null)
                 openNavigatePopup(entityHtml, viewOptions);
@@ -86,7 +86,7 @@ var SF;
         var AllowErrors = ViewNavigator.AllowErrors;
 
         function viewPopup(entityHtml, viewOptions) {
-            viewOptions = $.extend(viewOptions || {}, {
+            viewOptions = $.extend({
                 controllerUrl: SF.Urls.popupView,
                 partialViewName: null,
                 requestExtraJsonData: null,
@@ -95,12 +95,12 @@ var SF;
                 avoidValidate: false,
                 allowErrors: 0 /* Ask */,
                 onPopupLoaded: null
-            });
+            }, viewOptions);
 
             if (!viewOptions.avoidValidate)
-                viewOptions.validationOptions = $.extend(viewOptions.validationOptions || {}, {
+                viewOptions.validationOptions = $.extend({
                     prefix: entityHtml.prefix
-                });
+                }, viewOptions.validationOptions);
 
             if (entityHtml.html != null) {
                 if (viewOptions.avoidClone)
@@ -158,6 +158,23 @@ var SF;
                     viewOptions.onPopupLoaded(tempDiv);
             });
         }
+
+        function reloadPopup(prefix, newHtml) {
+            var tempDivId = SF.compose(prefix, "Temp");
+
+            var tempDiv = $("#" + tempDivId);
+
+            var popupOptions = tempDiv.popup();
+
+            tempDiv.popup("destroy");
+
+            tempDiv.html(newHtml);
+
+            SF.triggerNewContent(tempDiv);
+
+            tempDiv.popup(popupOptions);
+        }
+        ViewNavigator.reloadPopup = reloadPopup;
 
         function checkValidation(validatorOptions, allowErrors) {
             var result = SF.Validation.validatePartial(validatorOptions);

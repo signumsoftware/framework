@@ -139,7 +139,7 @@ namespace Signum.Web.PortableAreas
                 });
 
             Controller<OperationController>()
-                 .Action(c => c.Execute(null, true, null, null))
+                 .Action(c => c.Execute(null, true, null))
                  .AddFilters(ctx =>
                  {
                      var form = ctx.ControllerContext.HttpContext.Request.Form;
