@@ -122,12 +122,9 @@ namespace Signum.Web.Files
                     }
                 }
 
-                var filesParentPrefix = ((TypeContext)fileLine).FollowC(fl => (TypeContext)fl.Parent).First(ctx => ctx.Type != typeof(FilePathDN) && ctx.Type != typeof(MList<FilePathDN>)).ControlID;
-
                 var divNew = new HtmlTag("div", fileLine.Compose("DivNew"))
                     .Class("sf-file-line-new")
-                    .Attr("style", "display:" + (hasEntity ? "none" : "block"))
-                    .Attr("data-parent-prefix", filesParentPrefix.HasText() ? filesParentPrefix : "");
+                    .Attr("style", "display:" + (hasEntity ? "none" : "block"));
 
                 using (sb.Surround(divNew))
                 //using (sb.Surround(new HtmlTag("form").Attrs(new { method = "post", enctype = "multipart/form-data", encoding = "multipart/form-data", target = "frame" + fileLine.ControlID })))

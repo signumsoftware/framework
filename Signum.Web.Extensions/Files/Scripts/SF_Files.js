@@ -49,19 +49,9 @@ var SF;
                 $(e.target).toggleClass("sf-file-drop-over", toggle);
             };
 
-            FileLine.prototype.getParentRuntimeInfo = function (parentPrefix) {
-                var $runtimeInfoField = new SF.RuntimeInfo(parentPrefix).find();
-                if ($runtimeInfoField.length > 0) {
-                    return $runtimeInfoField.val();
-                } else {
-                    var $mainControl = $(".sf-main-control[data-prefix=" + parentPrefix + "]");
-                    return $mainControl.data("runtimeinfo");
-                }
-            };
-
             FileLine.prototype.uploadAsync = function (f, customizeXHR) {
                 $(this.pf('loading')).show();
-                this.runtimeInfo().setEntity(this.staticInfo().singleType(), '');
+                this.runtimeInfo().setValue(new SF.RuntimeInfoValue(this.staticInfo().singleType(), null));
 
                 var fileName = f.name;
 
@@ -70,9 +60,8 @@ var SF;
                 var xhr = new XMLHttpRequest();
                 xhr.open("POST", this.options.uploadDroppedUrl || SF.Urls.uploadDroppedFile, true);
                 xhr.setRequestHeader("X-FileName", fileName);
-                xhr.setRequestHeader("X-" + SF.Keys.runtimeInfo, this.getParentRuntimeInfo($divNew.attr("data-parent-prefix")));
                 xhr.setRequestHeader("X-Prefix", this.options.prefix);
-                xhr.setRequestHeader("X-" + SF.compose(this.options.prefix, SF.Keys.runtimeInfo), this.runtimeInfo().find().val());
+                xhr.setRequestHeader("X-" + SF.compose(this.options.prefix, SF.Keys.runtimeInfo), this.runtimeInfo().value.toString());
                 xhr.setRequestHeader("X-sfFileType", $(this.pf("sfFileType")).val());
                 xhr.setRequestHeader("X-sfTabId", $("#sfTabId").val());
 
@@ -101,21 +90,16 @@ var SF;
                 this.uploadAsync(files[0]);
             };
 
-            FileLine.prototype.removeSpecific = function () {
-                $(this.pf('DivOld')).hide();
-                $(this.pf('DivNew')).show();
-            };
-
             FileLine.prototype.prepareSyncUpload = function () {
                 //New file in FileLine but not to be uploaded asyncronously => prepare form for multipart and set runtimeInfo
                 $(this.pf(''))[0].setAttribute('value', $(this.pf(''))[0].value);
                 var $mform = $('form');
                 $mform.attr('enctype', 'multipart/form-data').attr('encoding', 'multipart/form-data');
-                this.runtimeInfo().setEntity(this.staticInfo().singleType(), '');
+                this.runtimeInfo().setValue(new SF.RuntimeInfoValue(this.staticInfo().singleType(), null));
             };
 
             FileLine.prototype.upload = function () {
-                this.runtimeInfo().setEntity(this.staticInfo().singleType(), '');
+                this.runtimeInfo().setValue(new SF.RuntimeInfoValue(this.staticInfo().singleType(), null));
 
                 var $fileInput = $(this.pf(''));
                 $fileInput[0].setAttribute('value', $fileInput[0].value);
@@ -131,8 +115,6 @@ var SF;
                 var $clonedDivNew = $divNew.clone(true);
                 $divNew.after($clonedDivNew).appendTo($fileForm);
 
-                var $parentPrefix = $("<input />").attr("type", "hidden").attr("name", "fileParentRuntimeInfo").val(this.getParentRuntimeInfo($divNew.attr("data-parent-prefix"))).addClass("sf-file-parent-prefix").appendTo($fileForm);
-
                 var $tabId = $("#" + SF.Keys.tabId).clone().appendTo($fileForm);
                 var $antiForgeryToken = $("input[name=" + SF.Keys.antiForgeryToken + "]").clone().appendTo($fileForm);
 
@@ -144,16 +126,17 @@ var SF;
                 return $("<iframe id='" + name + "' name='" + name + "' src='about:blank' style='position:absolute;left:-1000px;top:-1000px'></iframe>").appendTo($("body"));
             };
 
-            FileLine.prototype.onUploaded = function (fileName, link, runtimeInfo, entityState) {
+            FileLine.prototype.setEntitySpecific = function (entityValue, itemPrefix) {
                 $(this.pf(SF.Keys.loading)).hide();
-                $(this.pf(SF.Keys.toStr)).html(fileName);
-                $(this.pf(SF.Keys.link)).html(fileName).attr("download", fileName).attr("href", link);
-                this.runtimeInfo().find().val(runtimeInfo);
+                $(this.pf(SF.Keys.toStr)).html(entityValue.toStr);
+                $(this.pf(SF.Keys.link)).html(entityValue.toStr).attr("download", entityValue.toStr).attr("href", entityValue.link);
+            };
+
+            FileLine.prototype.onUploaded = function (fileName, link, runtimeInfo, entityState) {
+                this.setEntity(new SF.EntityValue(SF.RuntimeInfoValue.parse(runtimeInfo), fileName, link));
+
                 $(this.pf(SF.Keys.entityState)).val(entityState);
 
-                $(this.pf("DivNew")).hide();
-                $(this.pf("DivOld")).show();
-                $(this.pf("btnRemove")).show();
                 $(this.pf("frame")).remove();
             };
 
@@ -165,7 +148,13 @@ var SF;
                 }
             };
 
-            FileLine.prototype.updateButtonsDisplay = function (hasEntity) {
+            FileLine.prototype.updateButtonsDisplay = function () {
+                var hasEntity = !!this.runtimeInfo().value;
+
+                $(this.pf('DivOld')).toggle(hasEntity);
+                $(this.pf('DivNew')).toggle(!hasEntity);
+
+                $(this.pf("btnRemove")).toggle(hasEntity);
             };
             return FileLine;
         })(SF.EntityBase);

@@ -40,21 +40,7 @@ var SF;
                     if (data < 100) {
                         refreshUpdate(idProcess, prefix, getProgressUrl);
                     } else {
-                        if (SF.isEmpty(prefix)) {
-                            window.location.reload();
-                        } else {
-                            var oldViewNav = new SF.ViewNavigator({ prefix: prefix });
-                            var tempDivId = oldViewNav.tempDivId();
-
-                            SF.closePopup(prefix);
-
-                            new SF.ViewNavigator({
-                                type: "Process",
-                                id: idProcess,
-                                prefix: prefix,
-                                containerDiv: tempDivId
-                            }).viewSave();
-                        }
+                        SF.ViewNavigator.reloadContent(prefix);
                     }
                 });
             }, 2000);

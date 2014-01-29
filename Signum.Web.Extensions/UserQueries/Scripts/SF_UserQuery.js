@@ -19,12 +19,12 @@ var SF;
 
         function attachShowCurrentEntity(el) {
             var showOnEntity = function () {
-                el.element.next("p").toggle(el.runtimeInfo().entityType() != "");
+                el.element.next("p").toggle(el.runtimeInfo().value != null);
             };
 
             showOnEntity();
 
-            el.onEntityChanged = showOnEntity;
+            el.entityChanged = showOnEntity;
         }
         UserQuery.attachShowCurrentEntity = attachShowCurrentEntity;
     })(SF.UserQuery || (SF.UserQuery = {}));

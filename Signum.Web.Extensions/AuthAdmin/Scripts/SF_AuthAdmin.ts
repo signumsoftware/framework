@@ -99,19 +99,15 @@ module SF.Auth {
     export function openDialog(e: Event) {
         e.preventDefault();
         var $this = $(this);
-        var navigator = new SF.ViewNavigator({
-            controllerUrl: $this.attr("href"),
-            requestExtraJsonData: null,
-            type: 'PropertyRulePack',
-            onCancelled: function () {
-                $this.closest("div").css("opacity", 0.5);
-                $this.find(".sf-auth-thumb").css("opacity", 0.5);
-            },
-            onLoaded: function (divId) {
-                coloredRadios($("#" + divId));
-            }
-        });
-        navigator.createSave();
+        SF.ViewNavigator.navigatePopup(new EntityHtml("New", new RuntimeInfoValue("PropertyRulePack", null)),
+            {
+                controllerUrl: $this.attr("href"),
+                onClosed: () => {
+                    $this.closest("div").css("opacity", 0.5);
+                    $this.find(".sf-auth-thumb").css("opacity", 0.5);
+                },
+                onPopupLoaded: div => coloredRadios(div)
+            });
     }
 
     export function postDialog(controllerUrl : string, prefix: string) {
@@ -140,22 +136,18 @@ module SF.Auth {
         $lastConditionTr.find(".sf-auth-tree:eq(2)").removeClass().addClass("sf-auth-tree sf-auth-leaf-last");
     }
 
-    export function chooseConditionToAdd($sender : JQuery, url : string, title : string) {
+    export function chooseConditionToAdd($sender : JQuery, title : string) {
         var $tr = $sender.closest("tr");
         var ns = $tr.attr("data-ns");
         var type = $tr.attr("data-type");
-        var conditions = $tr.find(".sf-auth-available-conditions").val().split(",");
+        var conditions : string[]= $tr.find(".sf-auth-available-conditions").val().split(",");
         var $rules = $(".sf-auth-rules tr");
-        var conditionsNotSet = conditions.filter(function (c) { return $rules.filter("[data-ns='" + ns + "'][data-type='" + type + "'][data-condition='" + c.split("|")[0] + "']").length == 0; });
-        SF.openChooser("New",
-            function (chosenCondition) { addCondition($tr, chosenCondition); },
-            $.map(conditionsNotSet, function (c) { return c.split("|")[1]; }),
-            null,
-            {
-                controllerUrl: url,
-                title: title,
-                ids: $.map(conditionsNotSet, function (c) { return c.split("|")[0]; })
-            });
+        var conditionsNotSet = conditions
+            .filter(c => $rules.filter("[data-ns='" + ns + "'][data-type='" + type + "'][data-condition='" + c.before("|") + "']").length == 0)
+            .map(c=> ({ id : c.before("|"), text : c.after("|")  })); 
+
+        SF.ViewNavigator.chooser("New", title, conditionsNotSet)
+            .then(c=> addCondition($tr, c.id));
     };
 
     function addCondition($typeTr : JQuery, condition: string) {

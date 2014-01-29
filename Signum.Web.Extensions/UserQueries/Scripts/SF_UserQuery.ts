@@ -19,11 +19,11 @@ module SF.UserQuery {
 
     export function attachShowCurrentEntity(el: SF.EntityLine) {
         var showOnEntity = function () {
-            el.element.next("p").toggle(el.runtimeInfo().entityType() != "");
+            el.element.next("p").toggle(el.runtimeInfo().value != null);
         }; 
 
         showOnEntity(); 
 
-        el.onEntityChanged = showOnEntity; 
+        el.entityChanged = showOnEntity; 
     }
 }

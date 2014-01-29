@@ -11,7 +11,7 @@
         $(document).on("click", ".sf-auth-rules .sf-remove", SF.Auth.removeCondition);
         $(document).on("click", ".sf-auth-rules .sf-create", function (e) {
             e.preventDefault();
-            SF.Auth.chooseConditionToAdd($(this), '@Url.Action("GetChooser", "Signum")', '@AuthMessage.AuthAdmin_ChooseACondition.NiceToString()');
+            SF.Auth.chooseConditionToAdd($(this), '@AuthMessage.AuthAdmin_ChooseACondition.NiceToString()');
         });
     });
 </script>

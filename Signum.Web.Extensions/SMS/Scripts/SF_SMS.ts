@@ -126,14 +126,14 @@ module SF.SMS {
         if ($list.length == 0) {
             return;
         }
-        var runtimeInfo = new SF.RuntimeInfo(prefix);
-        if (SF.isEmpty(runtimeInfo.entityType())) {
+        var runtimeInfo = new SF.RuntimeInfoElement(prefix);
+        if (SF.isEmpty(runtimeInfo.value)) {
             $list.html("");
             return;
         }
         $.ajax({
             url: url,
-            data: runtimeInfo.find().serialize(),
+            data: runtimeInfo.value().toString(),
             success: function (data) {
                 $list.html("");
                 for (var i = 0; i < data.literals.length; i++) {

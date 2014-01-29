@@ -105,19 +105,16 @@ var SF;
         function openDialog(e) {
             e.preventDefault();
             var $this = $(this);
-            var navigator = new SF.ViewNavigator({
+            SF.ViewNavigator.navigatePopup(new SF.EntityHtml("New", new SF.RuntimeInfoValue("PropertyRulePack", null)), {
                 controllerUrl: $this.attr("href"),
-                requestExtraJsonData: null,
-                type: 'PropertyRulePack',
-                onCancelled: function () {
+                onClosed: function () {
                     $this.closest("div").css("opacity", 0.5);
                     $this.find(".sf-auth-thumb").css("opacity", 0.5);
                 },
-                onLoaded: function (divId) {
-                    coloredRadios($("#" + divId));
+                onPopupLoaded: function (div) {
+                    return coloredRadios(div);
                 }
             });
-            navigator.createSave();
         }
         Auth.openDialog = openDialog;
 
@@ -149,25 +146,20 @@ var SF;
         }
         Auth.removeCondition = removeCondition;
 
-        function chooseConditionToAdd($sender, url, title) {
+        function chooseConditionToAdd($sender, title) {
             var $tr = $sender.closest("tr");
             var ns = $tr.attr("data-ns");
             var type = $tr.attr("data-type");
             var conditions = $tr.find(".sf-auth-available-conditions").val().split(",");
             var $rules = $(".sf-auth-rules tr");
             var conditionsNotSet = conditions.filter(function (c) {
-                return $rules.filter("[data-ns='" + ns + "'][data-type='" + type + "'][data-condition='" + c.split("|")[0] + "']").length == 0;
+                return $rules.filter("[data-ns='" + ns + "'][data-type='" + type + "'][data-condition='" + c.before("|") + "']").length == 0;
+            }).map(function (c) {
+                return ({ id: c.before("|"), text: c.after("|") });
             });
-            SF.openChooser("New", function (chosenCondition) {
-                addCondition($tr, chosenCondition);
-            }, $.map(conditionsNotSet, function (c) {
-                return c.split("|")[1];
-            }), null, {
-                controllerUrl: url,
-                title: title,
-                ids: $.map(conditionsNotSet, function (c) {
-                    return c.split("|")[0];
-                })
+
+            SF.ViewNavigator.chooser("New", title, conditionsNotSet).then(function (c) {
+                return addCondition($tr, c.id);
             });
         }
         Auth.chooseConditionToAdd = chooseConditionToAdd;

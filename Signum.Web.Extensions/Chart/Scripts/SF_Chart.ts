@@ -6,25 +6,25 @@
 module SF.Chart
 {
     once("SF-chartBuilder", () =>
-        $.fn.chartBuilder = function (opt: FindOptions) {
+        $.fn.chartBuilder = function (opt: FindNavigator.FindOptions) {
             new ChartBuilder(this, opt);
         });
 
     export function attachShowCurrentEntity(el: SF.EntityLine) {
         var showOnEntity = function () {
-            el.element.next("p").toggle(el.runtimeInfo().entityType() != "");
+            el.element.next("p").toggle(!!el.runtimeInfo().value);
         };
 
         showOnEntity();
 
-        el.onEntityChanged = showOnEntity;
+        el.entityChanged = showOnEntity;
     }
 
     export function getFor(prefix: string): ChartBuilder {
         return $("#" + SF.compose(prefix, "sfChartBuilderContainer")).SFControl<ChartBuilder>();
     };
 
-    export class ChartBuilder extends SF.SearchControl
+    export class ChartBuilder extends SF.FindNavigator.SearchControl
     {
         exceptionLine: number;
         $chartControl : JQuery;
@@ -291,9 +291,8 @@ module SF.Chart
                 data[this.id] = $(this).val();
             });
 
-            SF.Validation.EntityIsValid({ prefix: this.options.prefix, controllerUrl: validateUrl, requestExtraJsonData: data }, function () {
-                SF.submitOnly(exportUrl, data)
-            });
+            if (SF.Validation.entityIsValid({ prefix: this.options.prefix, controllerUrl: validateUrl, requestExtraJsonData: data }))
+                SF.submitOnly(exportUrl, data);
         }
 
         requestProcessedData() {

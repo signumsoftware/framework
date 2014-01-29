@@ -19,12 +19,12 @@ var SF;
 
         function attachShowCurrentEntity(el) {
             var showOnEntity = function () {
-                el.element.next("p").toggle(el.runtimeInfo().entityType() != "");
+                el.element.next("p").toggle(!!el.runtimeInfo().value);
             };
 
             showOnEntity();
 
-            el.onEntityChanged = showOnEntity;
+            el.entityChanged = showOnEntity;
         }
         Chart.attachShowCurrentEntity = attachShowCurrentEntity;
 
@@ -297,9 +297,8 @@ var SF;
                     data[this.id] = $(this).val();
                 });
 
-                SF.Validation.EntityIsValid({ prefix: this.options.prefix, controllerUrl: validateUrl, requestExtraJsonData: data }, function () {
+                if (SF.Validation.entityIsValid({ prefix: this.options.prefix, controllerUrl: validateUrl, requestExtraJsonData: data }))
                     SF.submitOnly(exportUrl, data);
-                });
             };
 
             ChartBuilder.prototype.requestProcessedData = function () {
@@ -355,7 +354,7 @@ var SF;
                 });
             };
             return ChartBuilder;
-        })(SF.SearchControl);
+        })(SF.FindNavigator.SearchControl);
         Chart.ChartBuilder = ChartBuilder;
     })(SF.Chart || (SF.Chart = {}));
     var Chart = SF.Chart;

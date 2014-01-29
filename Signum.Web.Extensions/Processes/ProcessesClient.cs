@@ -36,7 +36,7 @@ namespace Signum.Web.Processes
                 {
                     return new Dictionary<string, string> 
                     { 
-                       { "operationContextualFromMany", url.Action("ContextualExecute", "Process") }
+                       { "processFromMany", url.Action("ProcessFromMany", "Process") }
                     };
                 });
 

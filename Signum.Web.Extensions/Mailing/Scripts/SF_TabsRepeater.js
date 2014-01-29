@@ -11,8 +11,8 @@ var SF;
 
             function removeItem(elem) {
                 var $elem = $(elem);
-                var itemPrefix = elem.id.substring(0, elem.id.indexOf("_btnRemove"));
-                $elem.closest('.sf-repeater-field').SFControl().remove(itemPrefix);
+                var itemPrefix = elem.id.before("_btnRemove");
+                $elem.closest('.sf-repeater-field').SFControl().removeItem_click(itemPrefix);
                 var $li = $elem.closest('li');
                 if ($li.hasClass("ui-tabs-selected")) {
                     $control().tabs("select", 0);
@@ -48,7 +48,7 @@ var SF;
                 var template = repeater.getEmbeddedTemplate();
                 if (!SF.isEmpty(template)) {
                     template = template.replace(new RegExp(SF.compose(controlId, "0"), "gi"), viewOptions.prefix);
-                    repeater.onItemCreated(template, viewOptions);
+                    // repeater.onItemCreated(template, viewOptions);
                 }
 
                 var $tabsContainer = $container.find(".ui-tabs-nav");
