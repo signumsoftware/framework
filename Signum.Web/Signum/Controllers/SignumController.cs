@@ -115,10 +115,20 @@ namespace Signum.Web.Controllers
             
             TypeContext tc = TypeContextUtilities.UntypedNew((IdentifiableEntity)entity, prefix);
 
-            if (readOnly.HasValue)
+            if (readOnly == true)
                 tc.ReadOnly = true;
 
             return Navigator.PartialView(this, tc, partialViewName);
+        }
+
+        [HttpPost]
+        public PartialViewResult NormalControl(string entityType, int id, bool? readOnly, string partialViewName)
+        {
+            Type type = Navigator.ResolveType(entityType);
+
+            IdentifiableEntity entity =  Database.Retrieve(type, id);
+
+            return Navigator.NormalControl(this, new NavigateOptions(entity) { ReadOnly = readOnly, PartialViewName = partialViewName });
         }
 
         [HttpPost]

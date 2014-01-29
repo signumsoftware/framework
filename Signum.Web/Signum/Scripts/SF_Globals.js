@@ -308,6 +308,18 @@ var SF;
     }
     SF.getPathPrefixes = getPathPrefixes;
 
+    function ajax(settings) {
+        return new Promise(function (resolve, reject) {
+            settings.success = resolve;
+            settings.error = function (jqXHR, textStatus, errorThrow) {
+                return reject({ jqXHR: jqXHR, textStatus: textStatus, errorThrow: errorThrow });
+            };
+
+            $.ajax(settings);
+        });
+    }
+    SF.ajax = ajax;
+
     function submit(urlController, requestExtraJsonData, $form) {
         $form = $form || $("form");
         if (!SF.isEmpty(requestExtraJsonData)) {

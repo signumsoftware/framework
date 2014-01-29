@@ -36,8 +36,8 @@ module SF.ViewNavigator {
     }
 
     export interface NavigatePopupOptions extends ViewOptionsBase {
-        onPopupLoaded: (popupDiv: JQuery) => void;
-        onClosed: () => void;
+        onPopupLoaded?: (popupDiv: JQuery) => void;
+        onClosed?: () => void;
     }
 
     export function createTempDiv(entityValue: EntityHtml) : JQuery {
@@ -180,7 +180,43 @@ module SF.ViewNavigator {
         });
     }
 
-    export function reloadPopup(prefix: string, newHtml: string) {
+    export function reloadContent(prefix: string, options?: ViewOptionsBase) : Promise<EntityHtml> {
+        if (!prefix) { //NormalWindow
+
+            options = $.extend({
+                controllerUrl: SF.Urls.normalControl,
+            }, options);
+
+            var mainControl = $("#divNormalControl");
+
+            return requestHtml(new EntityHtml(prefix, new RuntimeInfoElement(prefix).value()), options).then(eHtml=> {
+               
+                mainControl.html(eHtml.html);
+
+                SF.triggerNewContent(mainControl);
+
+                return eHtml;
+            });
+        }
+        else { //PopupWindow
+
+            options = $.extend({
+                controllerUrl: SF.Urls.popupView,
+            }, options);
+
+            var mainControl = $("#{0}_divNormalControl".format(prefix));
+
+            return requestHtml(new EntityHtml(prefix, RuntimeInfoValue.parse(mainControl.data("runtimeInfo"))), options).then(eHtml=> {
+                var mainControl = $("#divNormalControl");
+
+                ViewNavigator.reloadPopup(prefix, eHtml.html);
+
+                return eHtml;
+            });
+        }
+    }
+
+    export function reloadPopup(prefix: string, newHtml: any) {
 
         var tempDivId = SF.compose(prefix, "Temp");
 
@@ -254,11 +290,6 @@ module SF.ViewNavigator {
     }
 
 
-    export interface ChooserOption {
-        id: string;
-        text: string;
-    }
-
     export function typeChooser(staticInfo: StaticInfo): Promise<string>
     {
         var types = staticInfo.types();
@@ -268,21 +299,27 @@ module SF.ViewNavigator {
 
         var typesNiceNames = staticInfo.typeNiceNames();
 
-        var options = types.map((t, i) => <ChooserOption>{ id: t, text: typesNiceNames[i] });
+        var options = types.map((t, i) => ({ type: t, text: typesNiceNames[i] }));
 
         return chooser(staticInfo.prefix, lang.signum.chooseAType, options)
-            .then(t=> t == null ? null : t.id);
+            .then(t=> t == null ? null : t.type);
     } 
 
-    export function chooser(prefix: string, title: string, options: ChooserOption[]): Promise<ChooserOption>
-    {
+    export function chooser<T>(prefix: string, title: string, options: T[], getStr?: (data: T) => string): Promise<T> {
         var tempDivId = SF.compose(prefix, "Temp");
+
+        if (getStr == null) {
+            getStr = (a: any) => a.toString ? a.toString() :
+                a.toStr ? a.toStr :
+                a.text ? a.text :
+                a;
+        }
 
         var div = $('<div id="{0}" class="sf-popup-control" data-prefix="{1}" data-title="{2}"></div>'
             .format(SF.compose(tempDivId, "panelPopup"), tempDivId, title || lang.signum.chooseAValue));
 
-        options.forEach(o=> div.append($('<input type="button" class="sf-chooser-button" value="{1}"/>'
-            .format(o.id, o.text)).data("option", o)));
+        options.forEach(o=> div.append($('<input type="button" class="sf-chooser-button"/>')
+            .data("option", o).text(getStr(o))));
 
         $("body").append(SF.hiddenDiv(tempDivId, div));
 
@@ -290,10 +327,10 @@ module SF.ViewNavigator {
 
         SF.triggerNewContent(tempDiv);
 
-        return new Promise<ChooserOption>((resolve, reject) => {
+        return new Promise<T>((resolve, reject) => {
 
             tempDiv.on("click", ":button", function () {
-                var option = <ChooserOption>$(this).data("option");
+                var option = <T>$(this).data("option");
                 tempDiv.remove();
                 resolve(option);
             });

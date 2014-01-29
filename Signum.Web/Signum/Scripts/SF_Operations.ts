@@ -33,7 +33,7 @@ module SF.Operations
         if (!entityIsValidOrLite(options))
             return Promise.reject(new Error("validation error")); 
 
-        return ajax(options, entityRequestData(options)).then(result=>
+        return Operations.ajax(options, entityRequestData(options)).then(result=>
             reloadContent(options, result));
     }
 
@@ -45,7 +45,7 @@ module SF.Operations
 
         SF.FindNavigator.removeOverlay()
 
-        return ajax(options, contextualRequestData(options, true)).then(result=> {
+        return Operations.ajax(options, contextualRequestData(options, true)).then(result=> {
             markCells(options.prefix, result);
         }); 
     }
@@ -69,7 +69,7 @@ module SF.Operations
         if (!newPrefix)
             newPrefix = getNewPrefix(options);
 
-        return ajax(options, entityRequestData(options, newPrefix)).then(result=>
+        return Operations.ajax(options, entityRequestData(options, newPrefix)).then(result=>
             openPopup(newPrefix, result));
     }
 
@@ -84,7 +84,7 @@ module SF.Operations
         if (!newPrefix)
             newPrefix = getNewPrefix(options);
 
-        return ajax(options, contextualRequestData(options, true, newPrefix)).then(result=> {
+        return Operations.ajax(options, contextualRequestData(options, true, newPrefix)).then(result=> {
             openPopup(newPrefix, result); 
             markCells(options.prefix, null);
         });
@@ -102,7 +102,7 @@ module SF.Operations
             parentDiv: null
         }, options);
 
-        return ajax(options, entityRequestData(options)); //ajax prefilter will take redirect
+        return Operations.ajax(options, entityRequestData(options)); //ajax prefilter will take redirect
     }
 
     function deleteContextual(options: OperationOptions): Promise<void> {
@@ -113,7 +113,7 @@ module SF.Operations
 
         SF.FindNavigator.removeOverlay()
 
-        return ajax(options, contextualRequestData(options, true)).then(result=> {
+        return Operations.ajax(options, contextualRequestData(options, true)).then(result=> {
             markCells(options.prefix, result);
         });
     }
@@ -129,7 +129,7 @@ module SF.Operations
         if (!newPrefix)
             newPrefix = getNewPrefix(options);
 
-        return ajax(options, contextualRequestData(options, false, newPrefix)).then(result=> {
+        return Operations.ajax(options, contextualRequestData(options, false, newPrefix)).then(result=> {
             openPopup(newPrefix, result);
             markCells(options.prefix, null);
         });

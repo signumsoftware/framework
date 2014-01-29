@@ -166,7 +166,7 @@ module SF
                 SF.isEmpty(array[3]) ? null : parseInt(array[3]));
         }
 
-        toString() {
+        public toString() {
             return [this.type,
                 this.id,
                 this.isNew ? "n" : "o",
@@ -320,7 +320,6 @@ module SF
     }
 
 
-
     export function getPathPrefixes(prefix) {
         var path = [],
             pathSplit = prefix.split("_");
@@ -329,6 +328,16 @@ module SF
             path[i] = pathSplit.slice(0, i).join("_");
 
         return path;
+    }
+
+    export function ajax(settings: JQueryAjaxSettings) : Promise<any> {
+        return new Promise<any>((resolve, reject) => {
+
+            settings.success = resolve;
+            settings.error = (jqXHR: JQueryXHR, textStatus: string, errorThrow: string) => reject({ jqXHR: jqXHR, textStatus: textStatus, errorThrow: errorThrow });
+
+            $.ajax(settings);
+        });
     }
 
     export function submit(urlController: string, requestExtraJsonData?: any, $form?: JQuery) {

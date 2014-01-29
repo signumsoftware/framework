@@ -159,6 +159,39 @@ var SF;
             });
         }
 
+        function reloadContent(prefix, options) {
+            if (!prefix) {
+                options = $.extend({
+                    controllerUrl: SF.Urls.normalControl
+                }, options);
+
+                var mainControl = $("#divNormalControl");
+
+                return requestHtml(new SF.EntityHtml(prefix, new SF.RuntimeInfoElement(prefix).value()), options).then(function (eHtml) {
+                    mainControl.html(eHtml.html);
+
+                    SF.triggerNewContent(mainControl);
+
+                    return eHtml;
+                });
+            } else {
+                options = $.extend({
+                    controllerUrl: SF.Urls.popupView
+                }, options);
+
+                var mainControl = $("#{0}_divNormalControl".format(prefix));
+
+                return requestHtml(new SF.EntityHtml(prefix, SF.RuntimeInfoValue.parse(mainControl.data("runtimeInfo"))), options).then(function (eHtml) {
+                    var mainControl = $("#divNormalControl");
+
+                    ViewNavigator.reloadPopup(prefix, eHtml.html);
+
+                    return eHtml;
+                });
+            }
+        }
+        ViewNavigator.reloadContent = reloadContent;
+
         function reloadPopup(prefix, newHtml) {
             var tempDivId = SF.compose(prefix, "Temp");
 
@@ -239,22 +272,28 @@ var SF;
             var typesNiceNames = staticInfo.typeNiceNames();
 
             var options = types.map(function (t, i) {
-                return { id: t, text: typesNiceNames[i] };
+                return ({ type: t, text: typesNiceNames[i] });
             });
 
             return chooser(staticInfo.prefix, lang.signum.chooseAType, options).then(function (t) {
-                return t == null ? null : t.id;
+                return t == null ? null : t.type;
             });
         }
         ViewNavigator.typeChooser = typeChooser;
 
-        function chooser(prefix, title, options) {
+        function chooser(prefix, title, options, getStr) {
             var tempDivId = SF.compose(prefix, "Temp");
+
+            if (getStr == null) {
+                getStr = function (a) {
+                    return a.toString ? a.toString() : a.toStr ? a.toStr : a.text ? a.text : a;
+                };
+            }
 
             var div = $('<div id="{0}" class="sf-popup-control" data-prefix="{1}" data-title="{2}"></div>'.format(SF.compose(tempDivId, "panelPopup"), tempDivId, title || lang.signum.chooseAValue));
 
             options.forEach(function (o) {
-                return div.append($('<input type="button" class="sf-chooser-button" value="{1}"/>'.format(o.id, o.text)).data("option", o));
+                return div.append($('<input type="button" class="sf-chooser-button"/>').data("option", o).text(getStr(o)));
             });
 
             $("body").append(SF.hiddenDiv(tempDivId, div));

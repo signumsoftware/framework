@@ -472,6 +472,7 @@ namespace Signum.Web
                 { "create", url.SignumAction("Create") },
                 { "view", url.SignumAction("View") },
                 { "popupNavigate", url.SignumAction("PopupNavigate") },
+                { "normalControl", url.SignumAction("NormalControl") },
                 { "typeChooser", url.SignumAction("GetTypeChooser") },
                 { "autocomplete", url.SignumAction("Autocomplete") }
             }

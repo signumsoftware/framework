@@ -993,16 +993,16 @@ var SF;
 
             SearchControl.prototype.getEntityType = function () {
                 var options = $(this.pf(SF.Keys.entityTypeNames)).val().split(",").map(function (p) {
-                    return {
-                        id: p.split(';')[0],
-                        text: p.split(';')[1]
-                    };
+                    return ({
+                        type: p.split(';')[0],
+                        toStr: p.split(';')[1]
+                    });
                 });
                 if (options.length == 1) {
-                    return Promise.resolve(options[0].id);
+                    return Promise.resolve(options[0].type);
                 }
                 return SF.ViewNavigator.chooser(this.options.prefix, lang.signum.chooseAType, options).then(function (o) {
-                    return o.id;
+                    return o == null ? null : o.type;
                 });
             };
 

@@ -1023,14 +1023,14 @@ module SF.FindNavigator {
         }
 
         getEntityType() : Promise<string> {
-            var options = $(this.pf(SF.Keys.entityTypeNames)).val().split(",").map(p=> <ViewNavigator.ChooserOption>{
-                id: p.split(';')[0],
-                text: p.split(';')[1]
-            });
+            var options = (<string>$(this.pf(SF.Keys.entityTypeNames)).val()).split(",").map(p=> ({
+                type: p.split(';')[0],
+                toStr: p.split(';')[1]
+            }));
             if (options.length == 1) {
-                return Promise.resolve(options[0].id);
+                return Promise.resolve(options[0].type);
             }
-            return ViewNavigator.chooser(this.options.prefix, lang.signum.chooseAType, options).then(o=> o.id);
+            return ViewNavigator.chooser(this.options.prefix, lang.signum.chooseAType, options).then(o=> o == null ? null : o.type);
         }
 
 
