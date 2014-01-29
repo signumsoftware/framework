@@ -65,9 +65,9 @@ namespace Signum.Entities.SMS
             set { Set(ref state, value, () => State); }
         }
 
-        [NotNullable]
+        [NotNullable, SqlDbType(Size = int.MaxValue)]
         string destinationNumber;
-        [StringLengthValidator(AllowNulls = false, Min = 9, Max = 20), TelephoneValidator]
+        [StringLengthValidator(AllowNulls = false, Min = 9), MultipleTelephoneValidator]
         public string DestinationNumber
         {
             get { return destinationNumber; }
