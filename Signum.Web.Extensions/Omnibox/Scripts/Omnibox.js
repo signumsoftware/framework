@@ -1,12 +1,10 @@
 ﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
-/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/references.ts"/>
-
-module SF.Omnibox 
-{
-    export function initialize ($omnibox :JQuery , autocompleteOptions?:any) {
+/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
+define(["require", "exports"], function(require, exports) {
+    function initialize($omnibox, autocompleteOptions) {
         autocompleteOptions = autocompleteOptions || {};
 
-        var lastXhr; //To avoid previous requests results to be shown
+        var lastXhr;
         $omnibox.autocomplete($.extend({
             delay: 0,
             minLength: 1,
@@ -24,7 +22,7 @@ module SF.Omnibox
                                 label: item.label,
                                 cleanText: item.cleanText,
                                 value: item
-                            }
+                            };
                         }));
                     }
                 });
@@ -32,13 +30,11 @@ module SF.Omnibox
             select: function (event, ui) {
                 if (event.keyCode == 9) {
                     $omnibox.val(ui.item.cleanText);
-                }
-                else {
+                } else {
                     var url = $(ui.item.label).attr("href");
                     if (event.ctrlKey || event.which == 2) {
                         window.open(url);
-                    }
-                    else {
+                    } else {
                         window.location.assign(url);
                     }
                 }
@@ -51,10 +47,9 @@ module SF.Omnibox
         }, autocompleteOptions));
 
         $omnibox.data("ui-autocomplete")._renderItem = function (ul, item) {
-            return $("<li></li>")
-                .data("ui-autocomplete-item", item)
-                .append(item.label)
-                .appendTo(ul);
+            return $("<li></li>").data("ui-autocomplete-item", item).append(item.label).appendTo(ul);
         };
     }
-}
+    exports.initialize = initialize;
+});
+//# sourceMappingURL=Omnibox.js.map

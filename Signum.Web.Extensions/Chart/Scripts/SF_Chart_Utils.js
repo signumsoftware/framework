@@ -1,15 +1,12 @@
 ﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
 /// <reference path="../../../../Framework/Signum.Web/Signum/Headers/d3/d3.d.ts"/>
-/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/references.ts"/>
 var SF;
 (function (SF) {
     (function (Chart) {
         (function (Utils) {
-            once("enterData", function () {
-                return Array.prototype.enterData = function (data, tag, cssClass) {
-                    return this.selectAll(tag + "." + cssClass).data(data).enter().append("svg:" + tag).attr("class", cssClass);
-                };
-            });
+            Array.prototype.enterData = function (data, tag, cssClass) {
+                return this.selectAll(tag + "." + cssClass).data(data).enter().append("svg:" + tag).attr("class", cssClass);
+            };
 
             function fillAllTokenValueFuntions(data) {
                 for (var i = 0; ; i++) {

@@ -58,7 +58,7 @@ namespace Signum.Web.Auth
             }
 
             context.Value.Execute(UserOperation.SaveNew);
-            return JsonAction.Redirect(Navigator.NavigateRoute(context.Value));
+            return new RedirectResult(Navigator.NavigateRoute(context.Value));
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -81,7 +81,7 @@ namespace Signum.Web.Auth
             }
 
             context.Value.Execute(UserOperation.Save);
-            return JsonAction.Redirect(Navigator.NavigateRoute(context.Value));
+            return new RedirectResult(Navigator.NavigateRoute(context.Value));
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -103,13 +103,13 @@ namespace Signum.Web.Auth
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public JsonResult SetPasswordOnOk(string prefix)
+        public RedirectResult SetPasswordOnOk(string prefix)
         {
             var context = this.ExtractEntity<SetPasswordModel>(prefix).ApplyChanges(this.ControllerContext, prefix, true);
 
             UserDN g = context.Value.User.ExecuteLite(UserOperation.SetPassword, context.Value.Password);
 
-            return JsonAction.Redirect(Navigator.NavigateRoute(typeof(UserDN), g.Id));
+            return new RedirectResult(Navigator.NavigateRoute(typeof(UserDN), g.Id));
         }
 
         #region "Change password"
@@ -396,7 +396,7 @@ namespace Signum.Web.Auth
             TempData["Message"] = AuthLogic.OnLoginMessage();
 
 
-            return LoginRedirectAjaxOrForm(OnUserLoggedDefaultRedirect(this));
+            return new RedirectResult(OnUserLoggedDefaultRedirect(this));
 
         }
 
@@ -410,14 +410,6 @@ namespace Signum.Web.Auth
             }
             else
                 return LoginError(key, message);
-        }
-
-        public ActionResult LoginRedirectAjaxOrForm(string url)
-        {
-            if (Request.IsAjaxRequest())
-                return JsonAction.Redirect(url);
-            else
-                return Redirect(url);
         }
 
         ViewResult LoginError(string key, string error)
@@ -500,7 +492,7 @@ namespace Signum.Web.Auth
         {
             LogoutDo();
 
-            return LoginRedirectAjaxOrForm(OnUserLogoutRedirect(this));
+            return new RedirectResult(OnUserLogoutRedirect(this));
         }
 
         public static void LogoutDo()

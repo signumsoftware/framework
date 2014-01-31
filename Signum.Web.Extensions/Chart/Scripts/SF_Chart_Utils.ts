@@ -1,14 +1,13 @@
 ﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
 /// <reference path="../../../../Framework/Signum.Web/Signum/Headers/d3/d3.d.ts"/>
-/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/references.ts"/>
 
 module SF.Chart.Utils {
-    once("enterData", () =>
-        (<D3.Selection<any>>Array.prototype).enterData = function (data: any, tag: string, cssClass: string) {
-            return this.selectAll(tag + "." + cssClass).data(data)
-                .enter().append("svg:" + tag)
-                .attr("class", cssClass);
-        });
+
+    (<D3.Selection<any>>Array.prototype).enterData = function (data: any, tag: string, cssClass: string) {
+        return this.selectAll(tag + "." + cssClass).data(data)
+            .enter().append("svg:" + tag)
+            .attr("class", cssClass);
+    };
 
     export function fillAllTokenValueFuntions(data) {
         for (var i = 0; ; i++) {

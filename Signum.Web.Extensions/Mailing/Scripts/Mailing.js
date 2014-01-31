@@ -1,23 +1,17 @@
-﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
-/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/references.ts"/>
-
-declare var CKEDITOR: any;
-
-module SF.Mailing {
-
+﻿define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder"], function(require, exports, Finder) {
     var cssClassActive = "sf-email-inserttoken-targetactive";
-    var $lastTokenTarget: JQuery;
-    var onInsertToken: (string) => void;
+    var $lastTokenTarget;
+    var onInsertToken;
 
-    export function initReplacements() {
+    function initReplacements() {
         var self = this;
 
         $(".sf-email-replacements-container").on("focus", ".sf-email-inserttoken-target", function () {
-            setTokenTargetFocus($(this));
+            exports.setTokenTargetFocus($(this));
         });
 
         $(".sf-email-replacements-container").on("click", ".sf-email-inserttoken", function () {
-            var tokenName = SF.FindNavigator.constructTokenName($(this).data("prefix"));
+            var tokenName = Finder.constructTokenName($(this).data("prefix"));
             if (SF.isEmpty(tokenName)) {
                 return;
             }
@@ -26,54 +20,58 @@ module SF.Mailing {
 
             if (typeof onInsertToken != "undefined" && onInsertToken != null) {
                 onInsertToken(tokenTag);
-            }
-            else if (!$lastTokenTarget || $lastTokenTarget.filter(":visible").length == 0) {
+            } else if (!$lastTokenTarget || $lastTokenTarget.filter(":visible").length == 0) {
                 window.alert("Select the target first");
-            }
-            else if ($lastTokenTarget.filter(":text").length > 0) {
+            } else if ($lastTokenTarget.filter(":text").length > 0) {
                 var oldValue = $lastTokenTarget.val();
-                var currentPosition = (<HTMLTextAreaElement>$lastTokenTarget[0]).selectionStart;
+                var currentPosition = $lastTokenTarget[0].selectionStart;
                 var newValue = oldValue.substr(0, currentPosition) + tokenTag + oldValue.substring(currentPosition);
                 $lastTokenTarget.val(newValue);
             }
         });
 
-        $(".sf-email-replacements-container").on("sf-new-subtokens-combo", "select", function (event, ...idSelectedCombo) {
-            SF.Mailing.newSubTokensComboAdded.call(self, $("#" + idSelectedCombo[0]));
+        $(".sf-email-replacements-container").on("sf-new-subtokens-combo", "select", function (event) {
+            var idSelectedCombo = [];
+            for (var _i = 0; _i < (arguments.length - 1); _i++) {
+                idSelectedCombo[_i] = arguments[_i + 1];
+            }
+            exports.newSubTokensComboAdded.call(self, $("#" + idSelectedCombo[0]));
         });
     }
+    exports.initReplacements = initReplacements;
 
-    export function setTokenTargetFocus($element: JQuery) {
+    function setTokenTargetFocus($element) {
         $("." + cssClassActive).removeClass(cssClassActive);
         onInsertToken = null;
 
         $element.addClass(cssClassActive);
         $lastTokenTarget = $element;
-    };
+    }
+    exports.setTokenTargetFocus = setTokenTargetFocus;
+    ;
 
-    export function removeTokenTargetFocus($element: JQuery) {
+    function removeTokenTargetFocus($element) {
         $element.removeClass(cssClassActive);
-    };
+    }
+    exports.removeTokenTargetFocus = removeTokenTargetFocus;
+    ;
 
-    function constructTokenTag(tokenName: string, block?: string) {
+    function constructTokenTag(tokenName, block) {
         if (typeof block == "undefined") {
             return "@[" + tokenName + "]";
-        }
-        else if (block === "if") {
+        } else if (block === "if") {
             return "<!--@if[" + tokenName + "]--> <!--@else--> <!--@endif-->";
-        }
-        else if (block === "foreach") {
+        } else if (block === "foreach") {
             return "<!--@foreach[" + tokenName + "]--> <!--@endforeach-->";
-        }
-        else if (block === "any") {
+        } else if (block === "any") {
             return "<!--@any[" + tokenName + "=value]--> <!--@notany--> <!--@endany-->";
-        }
-        else {
+        } else {
             throw "invalid block name";
         }
-    };
+    }
+    ;
 
-    export function newSubTokensComboAdded($selectedCombo: JQuery) {
+    function newSubTokensComboAdded($selectedCombo) {
         var $btnInsertBasic = $(".sf-email-inserttoken-basic");
         var $btnInsertIf = $(".sf-email-inserttoken-if");
         var $btnInsertForeach = $(".sf-email-inserttoken-foreach");
@@ -90,8 +88,7 @@ module SF.Mailing {
                 changeButtonState($btnInsertIf, lang.signum.selectToken);
                 changeButtonState($btnInsertForeach, lang.signum.selectToken);
                 changeButtonState($btnInsertAny, lang.signum.selectToken);
-            }
-            else {
+            } else {
                 changeButtonState($btnInsertBasic);
                 var $prevSelectedOption = $prevSelect.find("option:selected");
                 changeButtonState($btnInsertIf, $prevSelectedOption.attr("data-if"));
@@ -105,27 +102,31 @@ module SF.Mailing {
         changeButtonState($btnInsertIf, $selectedOption.attr("data-if"));
         changeButtonState($btnInsertForeach, $selectedOption.attr("data-foreach"));
         changeButtonState($btnInsertAny, $selectedOption.attr("data-any"));
-    };
+    }
+    exports.newSubTokensComboAdded = newSubTokensComboAdded;
+    ;
 
-    function changeButtonState($button: JQuery, disablingMessage?: string) {
+    function changeButtonState($button, disablingMessage) {
         var hiddenId = $button.attr("id") + "temp";
         if (typeof disablingMessage != "undefined") {
             $button.addClass("ui-button-disabled").addClass("ui-state-disabled").addClass("sf-disabled").attr("disabled", "disabled").attr("title", disablingMessage);
-            $button.unbind('click').bind('click', function (e) { e.preventDefault(); return false; });
-        }
-        else {
+            $button.unbind('click').bind('click', function (e) {
+                e.preventDefault();
+                return false;
+            });
+        } else {
             var self = this;
             $button.removeClass("ui-button-disabled").removeClass("ui-state-disabled").removeClass("sf-disabled").prop("disabled", null).attr("title", "");
             $button.unbind('click');
         }
     }
 
-    function updateHtmlEditorTextArea(idTargetTextArea: string) {
+    function updateHtmlEditorTextArea(idTargetTextArea) {
         CKEDITOR.instances[idTargetTextArea].updateElement();
-    };
+    }
+    ;
 
-    export function initHtmlEditor(idTargetTextArea: string) {
-
+    function initHtmlEditor(idTargetTextArea) {
         CKEDITOR.replace(idTargetTextArea);
 
         // Update origin textarea
@@ -141,24 +142,24 @@ module SF.Mailing {
         CKEDITOR.instances[idTargetTextArea].on('saveSnapshot', changed);
         CKEDITOR.instances[idTargetTextArea].on('afterUndo', changed);
         CKEDITOR.instances[idTargetTextArea].on('afterRedo', changed);
-    };
+    }
+    exports.initHtmlEditor = initHtmlEditor;
+    ;
 
-    export function initHtmlEditorMasterTemplate(idTargetTextArea: string) {
+    function initHtmlEditorMasterTemplate(idTargetTextArea) {
+        exports.initHtmlEditor(idTargetTextArea);
 
-        initHtmlEditor(idTargetTextArea);
-
-        var $insertContent = $("#" + idTargetTextArea).closest(".sf-email-template-message")
-            .find(".sf-master-template-insert-content");
+        var $insertContent = $("#" + idTargetTextArea).closest(".sf-email-template-message").find(".sf-master-template-insert-content");
 
         $insertContent.on("click", "", function () {
             CKEDITOR.instances[idTargetTextArea].insertText(constructTokenTag("content"));
             updateHtmlEditorTextArea(idTargetTextArea);
         });
     }
+    exports.initHtmlEditorMasterTemplate = initHtmlEditorMasterTemplate;
 
-    export function initHtmlEditorWithTokens(idTargetTextArea: string) {
-
-        initHtmlEditor(idTargetTextArea);
+    function initHtmlEditorWithTokens(idTargetTextArea) {
+        exports.initHtmlEditor(idTargetTextArea);
 
         var lastCursorPosition;
 
@@ -167,12 +168,10 @@ module SF.Mailing {
         var ckEditorOnInsertToken = function (tokenTag) {
             if ($("#cke_" + idTargetTextArea + ":visible").length == 0) {
                 window.alert("Select the target first");
-            }
-            else {
+            } else {
                 if (CKEDITOR.instances[idTargetTextArea].mode == "source") {
                     codeMirrorInstance.replaceRange(tokenTag, lastCursorPosition || { line: 0, ch: 0 });
-                }
-                else {
+                } else {
                     CKEDITOR.instances[idTargetTextArea].insertHtml(tokenTag);
                     updateHtmlEditorTextArea(idTargetTextArea);
                     if (tokenTag.indexOf("<!--") == 0) {
@@ -215,19 +214,19 @@ module SF.Mailing {
                 });
 
                 codeMirrorInstance.on("blur", function () {
-                    SF.Mailing.removeTokenTargetFocus($("#cke_" + idTargetTextArea));
+                    exports.removeTokenTargetFocus($("#cke_" + idTargetTextArea));
                 });
             }
         });
 
         CKEDITOR.instances[idTargetTextArea].on('blur', function () {
-            SF.Mailing.removeTokenTargetFocus($("#cke_" + idTargetTextArea));
+            exports.removeTokenTargetFocus($("#cke_" + idTargetTextArea));
         });
     }
+    exports.initHtmlEditorWithTokens = initHtmlEditorWithTokens;
 
-
-    export function activateIFrame($iframe: JQuery) {
-        var iframe = <HTMLIFrameElement>$iframe[0]
+    function activateIFrame($iframe) {
+        var iframe = $iframe[0];
 
         var doc = iframe.document;
         if (iframe.contentDocument)
@@ -243,11 +242,12 @@ module SF.Mailing {
         if (container.length == 0)
             container = $iframe.contents();
 
-
         function fixHeight() {
             $iframe.height(container.children().height() + 100);
         }
         fixHeight();
         setInterval(fixHeight, 500);
     }
-}
+    exports.activateIFrame = activateIFrame;
+});
+//# sourceMappingURL=Mailing.js.map

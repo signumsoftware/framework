@@ -1,32 +1,31 @@
 ﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
-/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/references.ts"/>
-
-module SF.FlowTable {
-
-    export function init($containerTable: JQuery) {
+/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
+define(["require", "exports"], function(require, exports) {
+    function init($containerTable) {
         createDraggables($containerTable.find(".sf-ftbl-part"));
         createDroppables($containerTable.find(".sf-ftbl-droppable"));
     }
+    exports.init = init;
 
-    function setDraggingState(active : boolean) {
+    function setDraggingState(active) {
         if (active) {
             $(".sf-ftbl-column").addClass("sf-ftbl-dragging");
-        }
-        else {
+        } else {
             $(".sf-ftbl-dragging").removeClass("sf-ftbl-dragging");
+
             //as I clone parts it's not done automatically:
             $(".ui-draggable-dragging").removeClass("ui-draggable-dragging");
         }
     }
 
-    function restoreDroppableSize($droppable : JQuery) {
+    function restoreDroppableSize($droppable) {
         $droppable.css({
             width: "inherit",
             height: "20px"
         });
     }
 
-    function updateRowAndColIndexes($column : JQuery) {
+    function updateRowAndColIndexes($column) {
         var partRowClass = "sf-ftbl-part-row";
         var partColumnClass = "sf-ftbl-part-col";
 
@@ -39,16 +38,20 @@ module SF.FlowTable {
         });
     }
 
-    function createDraggables($target : JQuery) {
+    function createDraggables($target) {
         $target.draggable({
             handle: ".sf-ftbl-part-header",
             revert: "invalid",
-            start: function (event, ui) { setDraggingState(true); },
-            stop: function (event, ui) { setDraggingState(false); }
+            start: function (event, ui) {
+                setDraggingState(true);
+            },
+            stop: function (event, ui) {
+                setDraggingState(false);
+            }
         });
     }
 
-    function createDroppables ($target: JQuery) {
+    function createDroppables($target) {
         $target.droppable({
             hoverClass: "ui-state-highlight sf-ftbl-droppable-active",
             tolerance: "pointer",
@@ -63,10 +66,10 @@ module SF.FlowTable {
                 restoreDroppableSize($(this));
             },
             drop: function (event, ui) {
-                var $dragged = <JQuery>ui.draggable;
+                var $dragged = ui.draggable;
 
                 var $startContainer = $dragged.closest(".sf-ftbl-part-container");
-                var $targetPlaceholder = $(this); //droppable
+                var $targetPlaceholder = $(this);
 
                 var $targetCol = $targetPlaceholder.closest(".sf-ftbl-column");
                 var $originCol = $startContainer.closest(".sf-ftbl-column");
@@ -100,8 +103,10 @@ module SF.FlowTable {
         });
     }
 
-    once("FlowTable", () =>
-        $(document).on("click", ".sf-ftbl-part-header .sf-remove", function () {
+    once("FlowTable", function () {
+        return $(document).on("click", ".sf-ftbl-part-header .sf-remove", function () {
             $(this).closest(".sf-ftbl-part-container").html("");
-        }));
-}
+        });
+    });
+});
+//# sourceMappingURL=FlowTable.js.map

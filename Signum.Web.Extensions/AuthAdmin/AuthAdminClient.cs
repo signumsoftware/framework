@@ -147,8 +147,7 @@ namespace Signum.Web.AuthAdmin
                         new UrlHelper(ctx.ControllerContext.RequestContext).Action((embedded? "save" : "") +  partialViewName, "AuthAdmin"), ctx.Prefix), 
                     Text = AuthMessage.Save.NiceToString(),
                     DivCssClass = ToolBarButton.DefaultEntityDivCssClass 
-                } 
-                });
+                }});
         }
 
     }

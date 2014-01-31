@@ -1,14 +1,11 @@
-/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
-/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/references.ts"/>
-
-module SF.Auth {
-
+/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
+define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Validator", "Framework/Signum.Web/Signum/Scripts/Navigator"], function(require, exports, Entities, Validator, Navigator) {
     function updateColoredBackground() {
         var $this = $(this);
         $this.toggleClass("sf-auth-chooser-disabled", !$this.find(":radio").prop("checked"));
     }
 
-    export function coloredRadios($ctx : JQuery) {
+    function coloredRadios($ctx) {
         var $links = $ctx.find(".sf-auth-rules .sf-auth-chooser");
 
         $links.find(":radio").hide();
@@ -24,24 +21,30 @@ module SF.Auth {
             $tr.find(".sf-auth-chooser").each(updateColoredBackground);
         });
     }
+    exports.coloredRadios = coloredRadios;
 
     function updateMultiSelBackground() {
         var $this = $(this);
         $this.toggleClass("sf-auth-chooser-disabled", !$this.find(":checkbox").prop("checked"));
     }
 
-    function multiSelToStringParts($tr: JQuery) {
-        return $.map($tr.find(".sf-auth-chooser :checkbox:checked"), function (a) { return $(a).attr("data-tag"); }).join(",");
-    };
+    function multiSelToStringParts($tr) {
+        return $.map($tr.find(".sf-auth-chooser :checkbox:checked"), function (a) {
+            return $(a).attr("data-tag");
+        }).join(",");
+    }
+    ;
 
-    export function multiSelRadios($ctx : JQuery) {
+    function multiSelRadios($ctx) {
         var $links = $ctx.find(".sf-auth-chooser");
 
         $links.find(":checkbox").hide();
         $links.each(updateMultiSelBackground);
 
         $links.bind("mousedown", function () {
-            this.onselectstart = function () { return false; };
+            this.onselectstart = function () {
+                return false;
+            };
         });
         $links.click(function (e) {
             var $this = $(this);
@@ -55,8 +58,7 @@ module SF.Auth {
                 var num = $tr.find(".sf-auth-chooser :checkbox:checked").length;
                 if (!$cb.prop("checked") && num == 1) {
                     $cb.prop("checked", true);
-                }
-                else if ($cb.prop("checked") && num >= 2) {
+                } else if ($cb.prop("checked") && num >= 2) {
                     $cb.prop("checked", false);
                 }
             }
@@ -66,8 +68,7 @@ module SF.Auth {
             if (typeof type == "undefined") {
                 total = multiSelToStringParts($tr);
                 $tr.find(".sf-auth-overriden").prop("checked", total != $tr.find("input[name$=AllowedBase]").val());
-            }
-            else {
+            } else {
                 var $groupTrs = findTrsInGroup($tr.attr("data-ns"), type);
                 var $typeTr = $groupTrs.filter(".sf-auth-type");
                 total = multiSelToStringParts($typeTr);
@@ -82,8 +83,9 @@ module SF.Auth {
             $tr.find(".sf-auth-chooser").each(updateMultiSelBackground);
         });
     }
+    exports.multiSelRadios = multiSelRadios;
 
-    export function treeView() {
+    function treeView() {
         $(document).on("click", ".sf-auth-namespace", function (e) {
             e.preventDefault();
             var $this = $(this);
@@ -95,33 +97,37 @@ module SF.Auth {
             }).toggle();
         });
     }
+    exports.treeView = treeView;
 
-    export function openDialog(e: Event) {
+    function openDialog(e) {
         e.preventDefault();
         var $this = $(this);
-        SF.ViewNavigator.navigatePopup(new EntityHtml("New", new RuntimeInfoValue("PropertyRulePack", null)),
-            {
-                controllerUrl: $this.attr("href"),
-                onClosed: () => {
-                    $this.closest("div").css("opacity", 0.5);
-                    $this.find(".sf-auth-thumb").css("opacity", 0.5);
-                },
-                onPopupLoaded: div => coloredRadios(div)
-            });
+        Navigator.navigatePopup(new Entities.EntityHtml("New", new Entities.RuntimeInfoValue("PropertyRulePack", null)), {
+            controllerUrl: $this.attr("href"),
+            onPopupLoaded: function (div) {
+                return exports.coloredRadios(div);
+            }
+        }).then(function () {
+            $this.closest("div").css("opacity", 0.5);
+            $this.find(".sf-auth-thumb").css("opacity", 0.5);
+        });
     }
+    exports.openDialog = openDialog;
 
-    export function postDialog(controllerUrl : string, prefix: string) {
-        var result = Validation.trySavePartial({ controllerUrl: controllerUrl, prefix: prefix });
-        if (result.isValid) {
-            $(".sf-main-control[data-prefix='" + prefix + "']").removeClass("sf-changed");
-        }
+    function postDialog(controllerUrl, prefix) {
+        Validator.validate({ controllerUrl: controllerUrl, prefix: prefix }).then(function (vr) {
+            if (vr.isValid) {
+                $(".sf-main-control[data-prefix='" + prefix + "']").removeClass("sf-changed");
+            }
+        });
     }
+    exports.postDialog = postDialog;
 
-    function findTrsInGroup (ns : string, type: string) : JQuery {
+    function findTrsInGroup(ns, type) {
         return $(".sf-auth-rules tr[data-ns='" + ns + "'][data-type='" + type + "']");
     }
 
-    export function removeCondition(e : Event) {
+    function removeCondition(e) {
         e.preventDefault();
         var $this = $(this);
         var $tr = $this.closest("tr");
@@ -135,26 +141,34 @@ module SF.Auth {
         var $lastConditionTr = $trsInGroup.filter(":last").not(".sf-auth-type");
         $lastConditionTr.find(".sf-auth-tree:eq(2)").removeClass().addClass("sf-auth-tree sf-auth-leaf-last");
     }
+    exports.removeCondition = removeCondition;
 
-    export function chooseConditionToAdd($sender : JQuery, title : string) {
+    function chooseConditionToAdd($sender, title) {
         var $tr = $sender.closest("tr");
         var ns = $tr.attr("data-ns");
         var type = $tr.attr("data-type");
-        var conditions : string[]= $tr.find(".sf-auth-available-conditions").val().split(",");
+        var conditions = $tr.find(".sf-auth-available-conditions").val().split(",");
         var $rules = $(".sf-auth-rules tr");
-        var conditionsNotSet = conditions
-            .filter(c => $rules.filter("[data-ns='" + ns + "'][data-type='" + type + "'][data-condition='" + c.before("|") + "']").length == 0)
-            .map(c=> ({ id : c.before("|"), text : c.after("|")  })); 
+        var conditionsNotSet = conditions.filter(function (c) {
+            return $rules.filter("[data-ns='" + ns + "'][data-type='" + type + "'][data-condition='" + c.before("|") + "']").length == 0;
+        }).map(function (c) {
+            return ({ id: c.before("|"), text: c.after("|") });
+        });
 
-        SF.ViewNavigator.chooser("New", title, conditionsNotSet)
-            .then(c=> addCondition($tr, c.id));
-    };
+        Navigator.chooser("New", title, conditionsNotSet).then(function (c) {
+            return addCondition($tr, c.id);
+        });
+    }
+    exports.chooseConditionToAdd = chooseConditionToAdd;
+    ;
 
-    function addCondition($typeTr : JQuery, condition: string) {
+    function addCondition($typeTr, condition) {
         var $newTr = $typeTr.clone();
         $newTr.attr("data-condition", condition);
 
-        var conditionNiceName = $typeTr.find(".sf-auth-available-conditions").val().split(",").filter(function (c) { return c.split("|")[0] == condition; })[0].split("|")[1];
+        var conditionNiceName = $typeTr.find(".sf-auth-available-conditions").val().split(",").filter(function (c) {
+            return c.split("|")[0] == condition;
+        })[0].split("|")[1];
         $newTr.find(".sf-auth-label").html(conditionNiceName);
 
         $newTr.removeClass("sf-auth-type").addClass("sf-auth-condition");
@@ -187,7 +201,7 @@ module SF.Auth {
         var $conditionName = $("<input>").attr("type", "hidden").val(condition).attr("id", fullName).attr("name", fullName);
         $newTr.find("td:first").append($conditionName);
 
-        multiSelRadios($newTr);
+        exports.multiSelRadios($newTr);
         $lastTrInGroup.after($newTr);
         $lastTrInGroup.find(".sf-auth-tree:eq(2)").removeClass().addClass("sf-auth-tree sf-auth-leaf");
 
@@ -195,7 +209,5 @@ module SF.Auth {
             $typeTr.find(".sf-create").hide();
         }
     }
-
-
-}
-
+});
+//# sourceMappingURL=AuthAdmin.js.map

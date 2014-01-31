@@ -969,7 +969,7 @@
     <Content Include="AuthAdmin\Images\radioYellow.png" />
     <Content Include="AuthAdmin\Images\thumb.png" />
     <Content Include="AuthAdmin\Images\treeView.png" />
-    <TypeScriptCompile Include="AuthAdmin\Scripts\SF_AuthAdmin.ts" />
+    <TypeScriptCompile Include="AuthAdmin\Scripts\AuthAdmin.ts" />
     <Content Include="AuthAdmin\Views\PasswordValidInterval.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>PasswordValidInterval.generated.cs</LastGenOutput>
@@ -1030,12 +1030,12 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </None>
-    <TypeScriptCompile Include="Cache\Scripts\SF_Cache.ts" />
+    <TypeScriptCompile Include="Cache\Scripts\Cache.ts" />
     <Content Include="Calendar\Content\calendar.css" />
     <TypeScriptCompile Include="Calendar\Scripts\calendar.ts" />
     <Content Include="Chart\Content\SF_Chart.css" />
     <Content Include="Chart\Images\unknown.png" />
-    <TypeScriptCompile Include="Chart\Scripts\SF_Chart.ts" />
+    <TypeScriptCompile Include="Chart\Scripts\Chart.ts" />
     <TypeScriptCompile Include="Chart\Scripts\SF_Chart_Utils.ts" />
     <Content Include="Chart\Views\ChartRequestView.cshtml">
       <SubType>Code</SubType>
@@ -1044,7 +1044,7 @@
     </Content>
     <Content Include="ControlPanel\Content\SF_FlowTable.css" />
     <Content Include="ControlPanel\Content\SF_ControlPanel.css" />
-    <TypeScriptCompile Include="ControlPanel\Scripts\SF_FlowTable.ts" />
+    <TypeScriptCompile Include="ControlPanel\Scripts\FlowTable.ts" />
     <Content Include="ControlPanel\Views\LinkListPart.cshtml">
       <SubType>Code</SubType>
       <Generator>RazorGenerator</Generator>
@@ -1066,21 +1066,21 @@
     </Content>
     <Content Include="Files\Content\SF_Files.css" />
     <Content Include="Files\Images\loading.gif" />
-    <TypeScriptCompile Include="Files\Scripts\SF_Files.ts" />
+    <TypeScriptCompile Include="Files\Scripts\Files.ts" />
     <TypeScriptCompile Include="Help\Scripts\help.ts" />
     <Content Include="Help\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
     <Content Include="Mailing\Content\SF_Mailing.css" />
-    <TypeScriptCompile Include="Mailing\Scripts\SF_Mailing.ts" />
-    <TypeScriptCompile Include="Mailing\Scripts\SF_TabsRepeater.ts" />
+    <TypeScriptCompile Include="Mailing\Scripts\Mailing.ts" />
+    <TypeScriptCompile Include="Mailing\Scripts\TabsRepeater.ts" />
     <Content Include="Mailing\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
     </Content>
-    <TypeScriptCompile Include="Omnibox\Scripts\SF_Omnibox.ts" />
-    <TypeScriptCompile Include="Processes\Scripts\SF_Process.ts" />
+    <TypeScriptCompile Include="Omnibox\Scripts\Omnibox.ts" />
+    <TypeScriptCompile Include="Processes\Scripts\Processes.ts" />
     <Content Include="Processes\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
@@ -1388,10 +1388,10 @@
       <LastGenOutput>Holiday.generated.cs</LastGenOutput>
     </None>
     <Content Include="SMS\Content\SF_SMS.css" />
-    <TypeScriptCompile Include="SMS\Scripts\SF_SMS.ts" />
+    <TypeScriptCompile Include="SMS\Scripts\SMS.ts" />
     <Content Include="Translation\Content\SF_Translation.css" />
-    <TypeScriptCompile Include="Translation\Scripts\SF_Translation.ts" />
-    <TypeScriptCompile Include="UserQueries\Scripts\SF_UserQuery.ts" />
+    <TypeScriptCompile Include="Translation\Scripts\Translation.ts" />
+    <TypeScriptCompile Include="UserQueries\Scripts\UserQuery.ts" />
     <Content Include="Web.config" />
     <Content Include="Basic\Views\Web.config" />
     <Content Include="Captcha\Views\Web.config" />

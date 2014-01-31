@@ -309,7 +309,7 @@ namespace Signum.Web.Chart
 
             userChart.Delete();
 
-            return JsonAction.Redirect(Navigator.FindRoute(queryName));
+            return new RedirectResult(Navigator.FindRoute(queryName));
         }
         #endregion
     }

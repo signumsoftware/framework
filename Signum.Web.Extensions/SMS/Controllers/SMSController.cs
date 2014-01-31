@@ -165,7 +165,7 @@ namespace Signum.Web.SMS
             var process = OperationLogic.ServiceConstructFromMany(providers.Cast<Lite<IIdentifiable>>(), entitiesType,
                 SMSProviderOperation.SendSMSMessage, cp);
 
-            return JsonAction.Redirect(Navigator.NavigateRoute(process));
+            return new RedirectResult(Navigator.NavigateRoute(process));
         }
     }
 }

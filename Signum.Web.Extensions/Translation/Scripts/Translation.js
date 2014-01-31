@@ -1,9 +1,7 @@
 ﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
-/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/references.ts"/>
-
-module SF.Translation {
-
-    export function pluralAndGender() {
+/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
+define(["require", "exports"], function(require, exports) {
+    function pluralAndGender() {
         var url = $("#results").attr("data-pluralAndGender");
 
         $("#results").on("change", "textarea[name$='.Description'], select[name$='.Description']", function () {
@@ -14,28 +12,22 @@ module SF.Translation {
             });
         });
     }
+    exports.pluralAndGender = pluralAndGender;
 
-    export function editAndRemember(remember: boolean) {
-
+    function editAndRemember(remember) {
         $("a.edit").bind("click", function () {
             var select = $(this).parent().find("select");
-            var input = $("<textarea/>").attr("type", "text")
-                .attr("name", select.attr("name"))
-                .val(select.val())
-                .attr("style", "width:90%");
+            var input = $("<textarea/>").attr("type", "text").attr("name", select.attr("name")).val(select.val()).attr("style", "width:90%");
             select.after(input);
 
             $(this).remove();
 
             if (!remember) {
                 select.remove();
-            }
-            else {
+            } else {
                 var selectName = select.attr("name");
 
-                input.after($("<button/>")
-                    .click(onFeedbackClick)
-                    .text(lang.translation.RememberChange));
+                input.after($("<button/>").click(exports.onFeedbackClick).text(lang.translation.RememberChange));
 
                 select.attr('name', selectName + "#Automatic");
                 select.hide();
@@ -43,10 +35,10 @@ module SF.Translation {
 
             return false;
         });
-
     }
+    exports.editAndRemember = editAndRemember;
 
-    export function onFeedbackClick(e: MouseEvent) {
+    function onFeedbackClick(e) {
         e.preventDefault();
 
         var $this = $(this);
@@ -69,8 +61,7 @@ module SF.Translation {
             wrong = prompt(lang.translation.WrongTranslationToSubstitute, original);
             if (wrong == null)
                 return;
-        } while (wrong.length == 0);
-
+        } while(wrong.length == 0);
 
         var right;
         do {
@@ -78,14 +69,15 @@ module SF.Translation {
 
             if (right == null)
                 return;
-        } while (right.length == 0);
+        } while(right.length == 0);
 
         var $results = $this.parents("#results");
 
         $.post($results.attr("data-feedback"), { culture: $results.attr("data-culture"), wrong: wrong, right: right }, function (data) {
-
         });
 
         return;
     }
-}
+    exports.onFeedbackClick = onFeedbackClick;
+});
+//# sourceMappingURL=Translation.js.map

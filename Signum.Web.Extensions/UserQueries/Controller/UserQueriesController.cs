@@ -92,7 +92,7 @@ namespace Signum.Web.UserQueries
             }
 
             userQuery = context.Value.Execute(UserQueryOperation.Save);
-            return JsonAction.Redirect(Navigator.NavigateRoute(userQuery.ToLite()));
+            return new RedirectResult(Navigator.NavigateRoute(userQuery.ToLite()));
         }
 
         [HttpPost]
@@ -104,7 +104,7 @@ namespace Signum.Web.UserQueries
 
             userQuery.Delete();
 
-            return JsonAction.Redirect(Navigator.FindRoute(queryName));
+            return new RedirectResult(Navigator.FindRoute(queryName));
         }
     }
 }

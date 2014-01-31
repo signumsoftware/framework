@@ -1,8 +1,6 @@
 ﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
-/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/references.ts"/>
-
-module SF.SMS {
-
+/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
+define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], function(require, exports, Entities) {
     var SMSMaxTextLength;
     var SMSWarningTextLength;
 
@@ -21,7 +19,7 @@ module SF.SMS {
             remainingCharacters($($textAreasPresent[i]));
         }
 
-        fillLiterals();
+        exports.fillLiterals();
 
         $(document).on('keyup', 'textarea.sf-sms-msg-text', function () {
             remainingCharacters();
@@ -69,8 +67,7 @@ module SF.SMS {
             if (normalCharacters.indexOf(current) == -1) {
                 if (doubleCharacters.indexOf(current) != -1) {
                     count++;
-                }
-                else {
+                } else {
                     maxLength = 60;
                     count = text.length;
                     break;
@@ -95,7 +92,7 @@ module SF.SMS {
         });
     }
 
-    function remainingCharacters($textarea?: JQuery) {
+    function remainingCharacters($textarea) {
         $textarea = $textarea || $control();
         var $remainingChars = $textarea.closest(".sf-sms-edit-container").find('.sf-sms-chars-left');
         var $remainingCharacters = $textarea.closest(".sf-sms-edit-container").find('.sf-sms-characters-left > p');
@@ -111,14 +108,13 @@ module SF.SMS {
             $remainingCharacters.addClass('sf-sms-no-more-chars');
             $remainingChars.addClass('sf-sms-highlight');
             $textarea.addClass('sf-sms-red');
-        }
-        else if (numberCharsLeft < SMSWarningTextLength) {
+        } else if (numberCharsLeft < SMSWarningTextLength) {
             $remainingCharacters.addClass('sf-sms-warning');
             $remainingChars.addClass('sf-sms-highlight');
         }
     }
 
-    export function fillLiterals() {
+    function fillLiterals() {
         var $combo = $(".sf-associated-type");
         var prefix = $combo.attr("data-control-id");
         var url = $combo.attr("data-url");
@@ -126,7 +122,7 @@ module SF.SMS {
         if ($list.length == 0) {
             return;
         }
-        var runtimeInfo = new SF.RuntimeInfoElement(prefix);
+        var runtimeInfo = new Entities.RuntimeInfoElement(prefix);
         if (SF.isEmpty(runtimeInfo.value)) {
             $list.html("");
             return;
@@ -143,6 +139,7 @@ module SF.SMS {
             }
         });
     }
+    exports.fillLiterals = fillLiterals;
 
     function insertLiteral() {
         var selected = $("#sfLiterals").find(":selected").val();
@@ -151,11 +148,7 @@ module SF.SMS {
             return;
         }
         var $message = $control();
-        $message.val(
-            $message.val().substring(0, (<HTMLTextAreaElement>$message[0]).selectionStart) +
-            selected +
-            $message.val().substring((<HTMLTextAreaElement>$message[0]).selectionEnd)
-            );
+        $message.val($message.val().substring(0, $message[0].selectionStart) + selected + $message.val().substring($message[0].selectionEnd));
     }
-
-}
+});
+//# sourceMappingURL=SMS.js.map

@@ -52,13 +52,13 @@ namespace Signum.Web.Mailing
         }
 
         [HttpPost]
-        public JsonResult RemoveRecipientsExecute(Lite<NewsletterDN> newsletter, string prefix)
+        public RedirectResult RemoveRecipientsExecute(Lite<NewsletterDN> newsletter, string prefix)
         {
             var deliveries = Navigator.ParseLiteKeys<NewsletterDeliveryDN>(Request["keys"]);
 
             newsletter.ExecuteLite(NewsletterOperation.RemoveRecipients, deliveries);
 
-            return JsonAction.Redirect(Navigator.NavigateRoute(newsletter));
+            return new RedirectResult(Navigator.NavigateRoute(newsletter));
         }
 
         [HttpPost]

@@ -89,7 +89,7 @@ namespace Signum.Web.ControlPanel
                             OnClick = panel.IsNew ? "" : 
                                 JsValidator.EntityIsValid(new JsValidatorOptions
                                 {
-                                    ControllerUrl = RouteHelper.New().Action<SignumController>(sc => sc.Validate())
+                                    ControllerUrl = RouteHelper.New().Action<SignumController>(sc => sc.Validate("bla", null, null))
                                 }, new JsFunction() 
                                 {
                                     Js.OpenTypeChooser(

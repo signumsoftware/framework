@@ -1,27 +1,25 @@
-/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
-/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/references.ts"/> 
+/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
+define(["require", "exports"], function(require, exports) {
+    var refresh;
 
-
-module SF.Cache {
-
-    var refresh: () => void;
-
-    export function init (refreshCallback : ()=> void) {
+    function init(refreshCallback) {
         refresh = refreshCallback;
-    };
+    }
+    exports.init = init;
+    ;
 
-    export function initStats() {
+    function initStats() {
         $(document).on("click", "table.sf-stats-table a.sf-stats-show", function (e) {
             e.preventDefault();
             $(this).closest("tr").next().toggle();
         });
-    };
+    }
+    exports.initStats = initStats;
+    ;
 
-    once("SF-Cache", () => {
-
+    once("SF-Cache", function () {
         var $cacheEnable = $("#sfCacheEnable");
         var $cacheDisable = $("#sfCacheDisable");
-
 
         $("#sfCacheClear").click(function (e) {
             e.preventDefault();
@@ -57,4 +55,5 @@ module SF.Cache {
             });
         });
     });
-}
+});
+//# sourceMappingURL=Cache.js.map
