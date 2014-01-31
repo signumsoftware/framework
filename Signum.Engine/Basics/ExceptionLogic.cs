@@ -84,8 +84,8 @@ namespace Signum.Engine.Basics
             string innerMessages = ex.FollowC(e => e.InnerException).ToString(e => e.Message, "\r\n\r\n");
             if (innerMessages.HasText())
                 innerMessages = "\r\n\r\n".Formato(innerMessages);
-            entity.ExceptionMessage = ex.Message + innerMessages;
-            entity.StackTrace = ex.StackTrace;
+            entity.ExceptionMessage = (ex.Message + innerMessages).DefaultText("- No message - ");
+            entity.StackTrace = ex.StackTrace.DefaultText("- No stacktrace -");
             entity.ThreadId = Thread.CurrentThread.ManagedThreadId;
             entity.ApplicationName = Schema.Current.ApplicationName;
 
