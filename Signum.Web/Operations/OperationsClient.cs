@@ -15,6 +15,7 @@ using Signum.Engine.Basics;
 using Signum.Engine;
 using Signum.Utilities.ExpressionTrees;
 using System.Collections.Concurrent;
+using Signum.Web.PortableAreas;
 #endregion
 
 namespace Signum.Web.Operations
@@ -27,16 +28,13 @@ namespace Signum.Web.Operations
         {
             Manager = operationManager;
 
-            Navigator.Manager.DefaultSFUrls.Add(url =>
-            {
-                return new Dictionary<string, string> 
+            UrlsRepository.DefaultSFUrls.AddRange(new Dictionary<string, Func<UrlHelper, string>> 
                 { 
-                    { "operationExecute", url.Action("Execute", "Operation") },
-                    { "operationDelete", url.Action("Delete", "Operation") },
-                    { "operationConstructFrom", url.Action("ConstructFrom", "Operation") },
-                    { "operationConstructFromMany", url.Action("ConstructFromMany", "Operation") },
-                };
-            });
+                    { "operationExecute", url =>url.Action("Execute", "Operation") },
+                    { "operationDelete", url =>url.Action("Delete", "Operation") },
+                    { "operationConstructFrom", url =>url.Action("ConstructFrom", "Operation") },
+                    { "operationConstructFromMany", url =>url.Action("ConstructFromMany", "Operation") },
+                });
 
             ButtonBarEntityHelper.RegisterGlobalButtons(Manager.ButtonBar_GetButtonBarElement);
 

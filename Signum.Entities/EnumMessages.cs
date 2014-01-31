@@ -186,7 +186,8 @@ Lose changes?")]
         [Description("Type Selector")]
         TypeSelector,
         [Description("A value must be specified for {0}")]
-        ValueMustBeSpecifiedFor0
+        ValueMustBeSpecifiedFor0,
+        ChooseAValue
     }
 
     public enum ConnectionMessage

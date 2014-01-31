@@ -113,6 +113,7 @@
     <Compile Include="PortableAreas\FileRepositoryManager.cs" />
     <Compile Include="PortableAreas\CompiledRazorBuildProvider.cs" />
     <Compile Include="PortableAreas\CompiledVirtualPathProvider.cs" />
+    <Compile Include="PortableAreas\Repositories\UrlsRepository.cs" />
     <Compile Include="PortableAreas\SignumControllerFactory.cs" />
     <Compile Include="PortableAreas\StaticContentResult.cs" />
     <Compile Include="ButtonBar\ToolBarMenu.cs" />

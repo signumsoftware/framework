@@ -438,52 +438,7 @@ namespace Signum.Web
         protected Dictionary<string, object> WebQueryNames { get; private set; }
 
         public Func<bool> AllowChangeColumns = () => true;
-
-        static readonly List<string> defaultScripts = new List<string>
-        {
-            "~/signum/scripts/SF_Globals.js",
-            "~/signum/scripts/SF_Popup.js",
-            "~/signum/scripts/SF_Lines.js",
-            "~/signum/scripts/SF_ViewNavigator.js",
-            "~/signum/scripts/SF_FindNavigator.js",
-            "~/signum/scripts/SF_Validator.js",
-            "~/signum/scripts/SF_Widgets.js",
-            "~/signum/scripts/SF_Operations.js"
-        };
-        public Func<List<string>> DefaultScripts = () => defaultScripts;
-
-        public List<Func<UrlHelper, Dictionary<string, string>>> DefaultSFUrls = new List<Func<UrlHelper,Dictionary<string,string>>>
-        {
-            url => new Dictionary<string, string>
-            {
-                { "popupView", url.SignumAction("PopupView") },
-                { "partialView", url.SignumAction("PartialView") },
-                { "validate", url.SignumAction("Validate") },
-                { "trySave", url.SignumAction("TrySave") },
-                { "trySavePartial", url.SignumAction("TrySavePartial") },
-                { "find", url.SignumAction("Find") },
-                { "partialFind", url.SignumAction("PartialFind") },
-                { "search", url.SignumAction("Search") },
-                { "subTokensCombo", url.SignumAction("NewSubTokensCombo") },
-                { "addFilter", url.Action("AddFilter", "Signum") },
-                { "quickFilter", url.SignumAction("QuickFilter") },
-                { "selectedItemsContextMenu", url.SignumAction("SelectedItemsContextMenu") },
-                { "create", url.SignumAction("Create") },
-                { "view", url.SignumAction("View") },
-                { "popupNavigate", url.SignumAction("PopupNavigate") },
-                { "normalControl", url.SignumAction("NormalControl") },
-                { "typeChooser", url.SignumAction("GetTypeChooser") },
-                { "autocomplete", url.SignumAction("Autocomplete") }
-            }
-        };
-
-        public Dictionary<string, string> GetDefaultSFUrls(UrlHelper url) 
-        {
-            var urls = new Dictionary<string, string>();
-            urls.AddRange(DefaultSFUrls.SelectMany(f => f(url)));
-            return urls;
-        }
-
+      
         public NavigationManager(string entityStateKeyToHash)
             : this(new MD5CryptoServiceProvider().Using(p => p.ComputeHash(UTF8Encoding.UTF8.GetBytes(entityStateKeyToHash))))
         {
@@ -552,6 +507,9 @@ namespace Signum.Web
                 Navigator.RegisterArea(typeof(Navigator), "signum");
                 FileRepositoryManager.Register(new LocalizedJavaScriptRepository(typeof(JavascriptMessage), "signum"));
                 FileRepositoryManager.Register(new CalendarLocalizedJavaScriptRepository("~/signum/calendarResources/"));
+                FileRepositoryManager.Register(new UrlsRepository("~/signum/urls/"));
+
+
 
                 Schema.Current.ApplicationName = System.Web.Hosting.HostingEnvironment.ApplicationHost.GetPhysicalPath();
 
