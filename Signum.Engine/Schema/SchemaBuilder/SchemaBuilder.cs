@@ -197,6 +197,10 @@ namespace Signum.Engine.Maps
                 if (!Reflector.IsIdentifiableEntity(type))
                     throw new InvalidOperationException(route.TryCC(r => "Error on field {0}: ".Formato(r)) + "Impossible to include in the Schema the type {0} because is not and IdentifiableEntity".Formato(type));
 
+                foreach (var t in type.FollowC(a => a.BaseType))
+                    if (!t.IsSerializable)
+                        throw new InvalidOperationException("Type {0} is not marked as serializable".Formato(t.TypeName()));
+
                 result = new Table(type);
 
                 schema.Tables.Add(type, result);
