@@ -330,7 +330,7 @@ namespace Signum.Engine.Mailing
 
             var entityColumn = resultTable.Columns.Single(c => c.Column.Token.FullKey() == "Entity");
             var deliveryColumn = resultTable.Columns.Single(c => c.Column.Token.FullKey() == "Entity.NewsletterDeliveries.Element");
-            var emailOwnerColumn = resultTable.Columns.Single(c => c.Column.Token.FullKey() == "Entity.EmailOwnerData");
+            var emailOwnerColumn = resultTable.Columns.Single(c => c.Column.Token.FullKey() == "EmailOwnerData");
 
             var lines = resultTable.Rows.GroupBy(r => (Lite<IdentifiableEntity>)r[entityColumn]).Select(g => new SendLine
                 {

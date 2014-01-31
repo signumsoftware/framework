@@ -30,9 +30,9 @@ namespace Signum.Engine.SMS
         {
             return template.Messages.SingleOrDefault(tm => tm.CultureInfo.ToCultureInfo() == ci);
         }
-        
-        public static Expression<Func<IdentifiableEntity, IQueryable<SMSMessageDN>>> SMSMessagesExpression = 
-            e => Database.Query<SMSMessageDN>().Where(m=>m.Referred.RefersTo(e)); 
+
+        public static Expression<Func<IdentifiableEntity, IQueryable<SMSMessageDN>>> SMSMessagesExpression =
+            e => Database.Query<SMSMessageDN>().Where(m => m.Referred.RefersTo(e));
         public static IQueryable<SMSMessageDN> SMSMessages(this IdentifiableEntity e)
         {
             return SMSMessagesExpression.Evaluate(e);
@@ -74,7 +74,7 @@ namespace Signum.Engine.SMS
             if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
             {
                 SMSLogic.getConfiguration = getConfiguration;
-                 
+
                 sb.Include<SMSMessageDN>();
                 sb.Include<SMSTemplateDN>();
 
@@ -118,7 +118,7 @@ namespace Signum.Engine.SMS
                         return SMSTemplateMessage.ThereMustBeAMessageFor0.NiceToString().Formato(SMSLogic.Configuration.DefaultCulture.EnglishName);
 
                     return null;
-                }; 
+                };
             }
         }
 
@@ -136,6 +136,12 @@ namespace Signum.Engine.SMS
                 {
                     var numbers = Database.Query<T>().Where(p => providers.Contains(p.ToLite()))
                         .Select(pr => new { Exp = phoneExpression.Evaluate(pr), Referred = pr.ToLite() }).AsEnumerable().NotNull().Distinct().ToList();
+
+                    var splitNumbers = (from p in numbers.Where(p => p.Exp.Contains(','))
+                                        from n in p.Exp.Split('n')
+                                        select new { Exp = n.Trim(), p.Referred }).Concat(numbers.Where(p => !p.Exp.Contains(','))).Distinct().ToList();
+
+                    numbers = splitNumbers;
 
                     CreateMessageParams createParams = args.GetArg<CreateMessageParams>();
 
@@ -245,6 +251,18 @@ namespace Signum.Engine.SMS
                               Culture = cultureFunc.Evaluate(p)
                           }).Where(n => n.Phone.HasText()).AsEnumerable().ToList();
 
+                    var splitdNumbers = (from p in numbers.Where(p => p.Phone.Contains(','))
+                                         from n in p.Phone.Split(',')
+                                         select new
+                                         {
+                                             Phone = n.Trim(),
+                                             p.Data,
+                                             p.Referred,
+                                             p.Culture
+                                         }).Concat(numbers.Where(p => !p.Phone.Contains(','))).Distinct().ToList();
+
+                    numbers = splitdNumbers;
+
                     SMSSendPackageDN package = new SMSSendPackageDN().Save();
                     var packLite = package.ToLite();
 
@@ -310,7 +328,7 @@ namespace Signum.Engine.SMS
 
         static Regex literalFinder = new Regex(@"{(?<name>[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*)}");
 
-        static string ComposeMessage(this SMSTemplateDN template, object o, CultureInfo culture)
+        public static string ComposeMessage(this SMSTemplateDN template, object o, CultureInfo culture)
         {
             var defaultCulture = SMSLogic.Configuration.DefaultCulture.ToCultureInfo();
             var templateMessage = template.GetCultureMessage(culture ?? defaultCulture) ??
@@ -347,7 +365,7 @@ namespace Signum.Engine.SMS
         static string CombineText(SMSTemplateDN template, SMSTemplateMessageDN templateMessage, List<Combination> combinations)
         {
             string text = templateMessage.Message;
-            
+
             if (template.RemoveNoSMSCharacters)
             {
                 text = SMSCharacters.RemoveNoSMSCharacters(templateMessage.Message);
@@ -484,6 +502,37 @@ namespace Signum.Engine.SMS
             if (SMSSendAndGetTicketAction == null)
                 throw new InvalidOperationException("SMSSendAction was not established");
 
+            if (!message.DestinationNumber.Contains(','))
+            {
+                SendOneMessage(message);
+            }
+            else
+            {
+                var numbers = message.DestinationNumber.Split(',').Select(n => n.Trim()).Distinct();
+                message.DestinationNumber = numbers.FirstEx();
+                SendOneMessage(message);
+                foreach (var number in numbers.Skip(1))
+                {
+                    SendOneMessage(new SMSMessageDN 
+                    {
+                        DestinationNumber = number,
+                        Certified = message.Certified,
+                        EditableMessage = message.EditableMessage,
+                        From = message.From,
+                        Message = message.Message,
+                        Referred = message.Referred,
+                        State = SMSMessageState.Created,
+                        Template = message.Template,
+                        SendPackage = message.SendPackage,
+                        UpdatePackage = message.UpdatePackage,
+                        UpdatePackageProcessed = message.UpdatePackageProcessed,
+                    });
+                }
+            }
+        }
+
+        private static void SendOneMessage(SMSMessageDN message)
+        {
             message.MessageID = SMSSendAndGetTicketAction(message);
             message.SendDate = TimeZoneManager.Now.TrimToSeconds();
             message.State = SMSMessageState.Sent;
@@ -492,7 +541,7 @@ namespace Signum.Engine.SMS
 
         public static void SendAsyncSMS(SMSMessageDN message)
         {
-            Task.Factory.StartNew(() => 
+            Task.Factory.StartNew(() =>
             {
                 SendSMS(message);
             });
@@ -559,7 +608,7 @@ namespace Signum.Engine.SMS
                         State = SMSMessageState.Created,
                         DestinationNumber = args.TryGetArgC<string>(),
                         Certified = t.Certified
-                    };  
+                    };
                 }
             }.Register();
 
