@@ -658,9 +658,11 @@ namespace Signum.Engine.Linq
                 }
                 else
                 {
-                    Expression @default = ifFalse.IsNull() ? null : ifFalse;
+                    if (ifTrue.IsNull() && ifFalse.IsNull())
+                        return ifTrue; //cond? null: null doesn't work in sql
 
-                    result = new CaseExpression(new[] { new When(test, ifTrue) }, @default);
+                    result = new CaseExpression(new[] { new When(test, ifTrue) }, 
+                        ifFalse.IsNull() ? null : ifFalse);
                 }
 
                 return Add(result);

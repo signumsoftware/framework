@@ -1730,7 +1730,7 @@ namespace Signum.Engine.Linq
                     Expression valExpression = Visit(cleanedValue);
                     map.Remove(param);
 
-                    assignments.AddRange(Assign(colExpression, valExpression));
+                    assignments.AddRange(AdaptAssign(colExpression, valExpression));
                 }
             }
 
@@ -1818,7 +1818,7 @@ namespace Signum.Engine.Linq
                     Expression colExpression = Visit(Expression.MakeMemberAccess(toInsert, Reflector.FindFieldInfo(body.Type, pi)));
                     Expression cleaned = DbQueryProvider.Clean(mce.Arguments[2], true, null);
                     Expression expression = Visit(cleaned);
-                    assignments.AddRange(Assign(colExpression, expression));
+                    assignments.AddRange(AdaptAssign(colExpression, expression));
                 }
                 else if (mce.Method.IsInstantiationOf(miSetMixin))
                 {
@@ -1832,7 +1832,7 @@ namespace Signum.Engine.Linq
                     Expression expression = Visit(cleaned);
 
                     Expression colExpression = Visit(Expression.MakeMemberAccess(mixin, mi));
-                    assignments.AddRange(Assign(colExpression, expression));
+                    assignments.AddRange(AdaptAssign(colExpression, expression));
                 }
                 else
                     throw InvalidBody();
@@ -1846,7 +1846,7 @@ namespace Signum.Engine.Linq
                     Expression colExpression = Visit(Expression.MakeMemberAccess(toInsert, ma.Member));
                     Expression cleaned = DbQueryProvider.Clean(ma.Expression, true, null);
                     Expression expression = Visit(cleaned);
-                    return Assign(colExpression, expression);
+                    return AdaptAssign(colExpression, expression);
                 }));
             }
             else if (body is NewExpression)
@@ -1863,17 +1863,16 @@ namespace Signum.Engine.Linq
         {
             throw new InvalidOperationException("The only allowed expressions on UnsafeUpdate are: object initializers, calling method SetMixin, or or calling Administrator.SetReadonly");
         }
+
+        private ColumnAssignment[] AdaptAssign(Expression colExpression, Expression exp)
+        {
+            var adaped = AssignAdapterExpander.Adapt(exp, colExpression);
+
+            return Assign(colExpression, adaped);
+        }
      
         private ColumnAssignment[] Assign(Expression colExpression, Expression expression)
         {
-            if (expression.IsNull())
-                return AssignNull(colExpression);
-
-            expression = SmartEqualizer.ConstantToEntity(expression) ?? SmartEqualizer.ConstantToLite(expression) ?? expression;
-
-            if (expression is EntityExpression && IsNewId(((EntityExpression)expression).ExternalId))
-                throw new InvalidOperationException("The entity is new");
-
             if (colExpression is ColumnExpression)
             {
                 return new[] { AssignColumn(colExpression, expression) };
@@ -1882,166 +1881,57 @@ namespace Signum.Engine.Linq
             {
                 return new[] { AssignColumn(((UnaryExpression)colExpression).Operand, expression) };
             }
-            else if (colExpression is LiteReferenceExpression)
+            else if (colExpression is LiteReferenceExpression && colExpression is LiteReferenceExpression)
             {
-                Expression reference = ((LiteReferenceExpression)colExpression).Reference;
-                if (expression is LiteReferenceExpression)
-                    return Assign(reference, ((LiteReferenceExpression)expression).Reference);
-
+                return Assign(
+                    ((LiteReferenceExpression)colExpression).Reference, 
+                    ((LiteReferenceExpression)expression).Reference);
             }
-            else if (colExpression is EmbeddedEntityExpression)
+            else if (colExpression is EmbeddedEntityExpression && expression is EmbeddedEntityExpression)
             {
-                EmbeddedEntityExpression eee = (EmbeddedEntityExpression)colExpression;
+                EmbeddedEntityExpression cEmb = (EmbeddedEntityExpression)colExpression;
+                EmbeddedEntityExpression expEmb = (EmbeddedEntityExpression)expression;
 
-                EmbeddedEntityExpression eee2;
-                if (expression is ConstantExpression)
-                    eee2 = eee.FieldEmbedded.FromConstantExpression((ConstantExpression)expression, this);
-                else if (expression is MemberInitExpression)
-                    eee2 = eee.FieldEmbedded.FromMemberInitiExpression(((MemberInitExpression)expression), this);
-                else if (expression is EmbeddedEntityExpression)
-                    eee2 = (EmbeddedEntityExpression)expression;
-                else throw new InvalidOperationException("Impossible to assign to {0} the expression {1}".Formato(colExpression.NiceToString(), expression.NiceToString()));
+                var bindings = cEmb.Bindings.SelectMany(b => Assign(b.Binding, expEmb.GetBinding(b.FieldInfo)));
 
-                var bindings = eee.Bindings.SelectMany(b => Assign(b.Binding,
-                    eee2.Bindings.SingleEx(b2 => ReflectionTools.FieldEquals(b.FieldInfo, b2.FieldInfo)).Binding));
-
-                if(eee.HasValue != null)
+                if (cEmb.HasValue != null)
                 {
-                    var setValue = AssignColumn(eee.HasValue, eee2.HasValue);
+                    var setValue = AssignColumn(cEmb.HasValue, expEmb.HasValue);
                     bindings = bindings.PreAnd(setValue);
                 }
 
                 return bindings.ToArray();
             }
-            else if (colExpression is EntityExpression)
+            else if (colExpression is EntityExpression && expression is EntityExpression)
             {
-                EntityExpression colFie = (EntityExpression)colExpression;
-                if (expression is EntityExpression)
-                    return new[] { AssignColumn(colFie.ExternalId, ((EntityExpression)expression).ExternalId) };
+                return new[] { AssignColumn(
+                        ((EntityExpression)colExpression).ExternalId, 
+                        ((EntityExpression)expression).ExternalId) };
 
             }
-            else if (colExpression is ImplementedByExpression)
+            else if (colExpression is ImplementedByExpression && expression is ImplementedByExpression)
             {
                 ImplementedByExpression colIb = (ImplementedByExpression)colExpression;
-                if (expression is EntityExpression)
-                {
-                    EntityExpression ee = (EntityExpression)expression;
+                ImplementedByExpression expIb = (ImplementedByExpression)expression;
 
-                    if (!colIb.Implementations.ContainsKey(ee.Type))
-                        throw new InvalidOperationException("Type {0} is not in {1}".Formato(ee.Type.Name, colIb.Implementations.ToString(i => i.Key.Name, ", ")));
-
-                    return colIb.Implementations
-                        .Select(imp => AssignColumn(imp.Value.ExternalId, imp.Key == ee.Type ? ee.ExternalId : NullId))
-                        .ToArray();
-                }
-                else if (expression is ImplementedByExpression)
-                {
-                    ImplementedByExpression ib = (ImplementedByExpression)expression;
-
-                    Type[] types = ib.Implementations.Select(i => i.Key).Except(colIb.Implementations.Select(i => i.Key)).ToArray();
-                    if (types.Any())
-                        throw new InvalidOperationException("No implementation for type(s) {0} found".Formato(types.ToString(t => t.Name, ", ")));
-
-                    return colIb.Implementations.Select(cImp => AssignColumn(cImp.Value.ExternalId,
-                            ib.Implementations.TryGetC(cImp.Key).TryCC(imp => imp.ExternalId) ?? NullId)).ToArray();
-                }
-
+                return colIb.Implementations.Select(cImp => AssignColumn(cImp.Value.ExternalId,
+                        expIb.Implementations.GetOrThrow(cImp.Key).ExternalId)).ToArray();
             }
-            else if (colExpression is ImplementedByAllExpression)
+            else if (colExpression is ImplementedByAllExpression && expression is ImplementedByAllExpression)
             {
                 ImplementedByAllExpression colIba = (ImplementedByAllExpression)colExpression;
-                if (expression is EntityExpression)
-                {
-                    EntityExpression ee = (EntityExpression)expression;
-                    return new[]
-                    {
-                        AssignColumn(colIba.Id, ee.ExternalId),
-                        AssignColumn(colIba.TypeId.TypeColumn, TypeConstant(ee.Type))
-                    };
-                }
+                ImplementedByAllExpression expIba = (ImplementedByAllExpression)expression;
 
-                if (expression is ImplementedByExpression)
+                return new[]
                 {
-                    ImplementedByExpression ib = (ImplementedByExpression)expression;
-                    return new[]
-                    {
-                        AssignColumn(colIba.Id, Coalesce(typeof(int?), ib.Implementations.Select(e => e.Value.ExternalId))),
-                        AssignColumn(colIba.TypeId.TypeColumn, ib.Implementations.Select(imp => 
-                            new When(imp.Value.ExternalId.NotEqualsNulll(), TypeConstant(imp.Key))).ToList().ToCondition(typeof(int?)))
-                    };
-                }
-
-                if (expression is ImplementedByAllExpression)
-                {
-                    ImplementedByAllExpression iba = (ImplementedByAllExpression)expression;
-                    return new[]
-                    {
-                        AssignColumn(colIba.Id, iba.Id),
-                        AssignColumn(colIba.TypeId.TypeColumn, iba.TypeId.TypeColumn)
-                    };
-                }
+                    AssignColumn(colIba.Id, expIba.Id),
+                    AssignColumn(colIba.TypeId.TypeColumn, expIba.TypeId.TypeColumn)
+                };
             }
 
             throw new NotImplementedException("{0} can not be assigned from expression:\n{1}".Formato(colExpression.Type.TypeName(), expression.NiceToString())); 
         }
 
-
-        private ColumnAssignment[] AssignNull(Expression colExpression)
-        {
-            if (colExpression is ColumnExpression)
-            {
-                return new[] { AssignColumn(colExpression, new SqlConstantExpression(null, colExpression.Type)) };
-            }
-            else if (colExpression.NodeType == ExpressionType.Convert && colExpression.Type.UnNullify().IsEnum && ((UnaryExpression)colExpression).Operand is ColumnExpression)
-            {
-                ColumnExpression col2 = (ColumnExpression)((UnaryExpression)colExpression).Operand;
-
-                return new[] { AssignColumn(col2, new SqlConstantExpression(null, colExpression.Type)) };
-            }
-            else if (colExpression is LiteReferenceExpression)
-            {
-                Expression reference = ((LiteReferenceExpression)colExpression).Reference;
-                return AssignNull(reference); 
-            }
-            else if (colExpression is EmbeddedEntityExpression)
-            {
-                EmbeddedEntityExpression eee = (EmbeddedEntityExpression)colExpression;
-                if (eee.HasValue == null)
-                    throw new InvalidOperationException("The EmbeddedField doesn't accept null values");
-
-                var setNull = AssignColumn(eee.HasValue, Expression.Constant(false));
-
-                return eee.Bindings.SelectMany(b => AssignNull(b.Binding)).PreAnd(setNull).ToArray();
-            }
-            else if (colExpression is EntityExpression)
-            {
-                EntityExpression colFie = (EntityExpression)colExpression;
-                return new[] { AssignColumn(colFie.ExternalId, NullId) };
-            }
-            else if (colExpression is ImplementedByExpression)
-            {
-                ImplementedByExpression colIb = (ImplementedByExpression)colExpression;
-                return colIb.Implementations.Values.Select(imp => (AssignColumn(imp.ExternalId, NullId))).ToArray();
-            }
-            else if (colExpression is ImplementedByAllExpression)
-            {
-                ImplementedByAllExpression colIba = (ImplementedByAllExpression)colExpression;
-
-                return new[]
-                {
-                    AssignColumn(colIba.Id, NullId),
-                    AssignColumn(colIba.TypeId.TypeColumn, NullId)
-                };
-            }
-            else if (colExpression is EmbeddedEntityExpression)
-            {
-                EmbeddedEntityExpression colEfie = (EmbeddedEntityExpression)colExpression;
-                ColumnAssignment ca = AssignColumn(colEfie.HasValue, new SqlConstantExpression(true, typeof(bool)));
-                return colEfie.Bindings.SelectMany(fb => AssignNull(fb.Binding)).PreAnd(ca).ToArray();
-            }
-
-            throw new NotImplementedException("{0} can not be assigned to null".Formato(colExpression.Type.Name));
-        }
 
         ColumnAssignment AssignColumn(Expression column, Expression expression)
         {
@@ -2632,6 +2522,247 @@ namespace Signum.Engine.Linq
             return new ProjectionExpression(
                     new SelectExpression(newAlias, false, null, pc.Columns, source, null, null, null, 0),
                     pc.Projector, proj.UniqueFunction, proj.Type);
+        }
+    }
+
+
+    class AssignAdapterExpander : DbExpressionVisitor
+    {
+        Expression colExpression; 
+
+        public static Expression Adapt(Expression exp, Expression colExpression)
+        {
+            return new AssignAdapterExpander { colExpression = colExpression }.Visit(exp);
+        }
+
+        protected override Expression VisitConditional(ConditionalExpression c)
+        {
+            var test = c.Test;
+            var ifTrue = Visit(c.IfTrue);
+            var ifFalse = Visit(c.IfFalse);
+
+            if (colExpression is EntityExpression)
+                return Combiner<EntityExpression>(ifTrue, ifFalse, (col, t, f) =>
+                    new EntityExpression(col.Type, Expression.Condition(test, t.ExternalId.Nullify(), f.ExternalId.Nullify()), null, null, null, false));
+
+            if (colExpression is ImplementedByExpression)
+                return Combiner<ImplementedByExpression>(ifTrue, ifFalse, (col, t, f) =>
+                    new ImplementedByExpression(col.Type, 
+                        col.Strategy,
+                        col.Implementations.ToDictionary(a => a.Key, a => new EntityExpression(a.Key, 
+                            Expression.Condition(test,
+                            t.Implementations[a.Key].ExternalId.Nullify(),
+                            f.Implementations[a.Key].ExternalId.Nullify()), null, null, null, false))));
+
+            if (colExpression is ImplementedByAllExpression)
+                return Combiner<ImplementedByAllExpression>(ifTrue, ifFalse, (col, t, f) =>
+                    new ImplementedByAllExpression(col.Type,
+                        Expression.Condition(test, t.Id.Nullify(), f.Id.Nullify()),
+                        new TypeImplementedByAllExpression(Expression.Condition(test, t.TypeId.TypeColumn.Nullify(), f.TypeId.TypeColumn.Nullify()))));
+
+            if (colExpression is EmbeddedEntityExpression)
+                return Combiner<EmbeddedEntityExpression>(ifTrue, ifFalse, (col, t, f) =>
+                   new EmbeddedEntityExpression(col.Type,
+                       col.HasValue == null ? null : Expression.Condition(test, t.HasValue, f.HasValue),
+                       col.Bindings.Select(bin => GetBinding(bin.FieldInfo, Expression.Condition(test, t.GetBinding(bin.FieldInfo).Nullify(), f.GetBinding(bin.FieldInfo).Nullify()), bin.Binding)), 
+                       col.FieldEmbedded));
+
+            return c;
+        }
+
+        protected override Expression VisitBinary(BinaryExpression b)
+        {
+            if (b.NodeType == ExpressionType.Coalesce)
+            {
+                var left = Visit(b.Left);
+                var right = Visit(b.Right);
+
+                if (colExpression is EntityExpression)
+                    return Combiner<EntityExpression>(left, right, (col, l, r) =>
+                        new EntityExpression(col.Type, Expression.Coalesce(l.ExternalId.Nullify(), r.ExternalId.Nullify()), null, null, null, false));
+
+                if (colExpression is ImplementedByExpression)
+                    return Combiner<ImplementedByExpression>(left, right, (col, l, r) =>
+                        new ImplementedByExpression(col.Type,
+                            col.Strategy,
+                            col.Implementations.ToDictionary(a => a.Key, a => new EntityExpression(col.Type,
+                                Expression.Coalesce(
+                                l.Implementations[a.Key].ExternalId.Nullify(),
+                                r.Implementations[a.Key].ExternalId.Nullify()), null, null, null, false))));
+
+                if (colExpression is ImplementedByAllExpression)
+                    return Combiner<ImplementedByAllExpression>(left, right, (col, l, r) =>
+                        new ImplementedByAllExpression(col.Type,
+                            Expression.Coalesce(l.Id, r.Id),
+                            new TypeImplementedByAllExpression(Expression.Coalesce(l.TypeId.TypeColumn.Nullify(), r.TypeId.TypeColumn.Nullify()))));
+
+                if (colExpression is EmbeddedEntityExpression)
+                    return Combiner<EmbeddedEntityExpression>(left, right, (col, l, r) =>
+                       new EmbeddedEntityExpression(col.Type,
+                           col.HasValue == null ? null : Expression.Or(l.HasValue, r.HasValue),
+                           col.Bindings.Select(bin => GetBinding(bin.FieldInfo, Expression.Coalesce(l.GetBinding(bin.FieldInfo).Nullify(), r.GetBinding(bin.FieldInfo).Nullify()), bin.Binding)),
+                           col.FieldEmbedded));
+            }
+
+            return b;
+        }
+
+
+        public T Combiner<T>(Expression e1, Expression e2, Func<T, T, T, T> combiner) where T : Expression
+        {
+            Debug.Assert(e1.Type == colExpression.Type);
+            Debug.Assert(e2.Type == colExpression.Type);
+
+            var result = combiner((T)colExpression, (T)e1, (T)e2);
+
+            Debug.Assert(result.Type == colExpression.Type);
+
+            return result;
+        }
+
+        protected override Expression VisitEntity(EntityExpression ee)
+        {
+            if (colExpression is ImplementedByAllExpression)
+                return new ImplementedByAllExpression(colExpression.Type,
+                    ee.ExternalId,
+                    new TypeImplementedByAllExpression(Expression.Condition(Expression.Equal(ee.ExternalId.Nullify(), nullId), nullId, QueryBinder.TypeConstant(ee.Type))));
+
+            if (colExpression is ImplementedByExpression)
+            {
+                var ib = ((ImplementedByExpression)colExpression);
+
+                return new ImplementedByExpression(colExpression.Type, ib.Strategy, ib.Implementations.ToDictionary(kvp => kvp.Key, kvp =>
+                    kvp.Key == ee.Type ? ee :
+                      new EntityExpression(kvp.Key, nullId, null, null, null, false)));
+            }
+
+            return ee;
+        }
+
+        protected override Expression VisitImplementedBy(ImplementedByExpression ib)
+        {
+            if (colExpression is ImplementedByAllExpression)
+            {
+                return new ImplementedByAllExpression(colExpression.Type,
+                    QueryBinder.Coalesce(typeof(int?), ib.Implementations.Select(e => e.Value.ExternalId)), new TypeImplementedByAllExpression(
+                     ib.Implementations.Select(imp => new When(imp.Value.ExternalId.NotEqualsNulll(), QueryBinder.TypeConstant(imp.Key))).ToList().ToCondition(typeof(int?))));
+            }
+
+            if (colExpression is ImplementedByExpression)
+            {
+                var colId = ((ImplementedByExpression)colExpression);
+
+                if (colId.Implementations.Keys.SequenceEqual(ib.Implementations.Keys))
+                    return ib;
+
+                return new ImplementedByExpression(colId.Type, ib.Strategy, colId.Implementations.ToDictionary(kvp => kvp.Key, kvp =>
+                    ib.Implementations.TryGetC(kvp.Key) ?? new EntityExpression(kvp.Key, nullId, null, null, null, false)));
+            }
+
+            return ib;
+        }
+
+        static Expression nullId = QueryBinder.NullId;
+
+        protected override Expression VisitConstant(ConstantExpression c)
+        {
+            if (colExpression is EntityExpression ||
+                colExpression is ImplementedByExpression ||
+                colExpression is ImplementedByAllExpression)
+            {
+                var ident = (IdentifiableEntity)c.Value;
+
+                return GetEntityConstant(ident == null ? nullId : Expression.Constant(ident.Id), ident == null ? null : ident.GetType());
+            }
+
+            if (colExpression is EmbeddedEntityExpression)
+                return EmbeddedFromConstant(c);
+
+            if (colExpression is LiteReferenceExpression)
+            {
+                var colLite =  ((LiteReferenceExpression)colExpression);
+                var lite = (Lite<IIdentifiable>)c.Value;
+
+                using(OverrideColExpression(colLite.Reference))
+                {
+                    var entity = GetEntityConstant(lite == null ? nullId : Expression.Constant(lite.Id), lite == null ? null : lite.GetType().CleanType());
+                    return new LiteReferenceExpression(colLite.Type, entity, null);
+                }
+            }
+
+            return c;
+        }
+
+        private Expression GetEntityConstant(Expression id, Type type)
+        {
+            if (colExpression is EntityExpression)
+            {
+                if (id != nullId && type != colExpression.Type)
+                    throw new InvalidOperationException("Impossible to convert {0} to {1}".Formato(type.TypeName(), colExpression.Type.TypeName()));
+
+                return new EntityExpression(colExpression.Type, id, null, null, null, false);
+            }
+
+            if (colExpression is ImplementedByAllExpression)
+                return new ImplementedByAllExpression(colExpression.Type,
+                    id,
+                    new TypeImplementedByAllExpression(id == nullId ? nullId : QueryBinder.TypeConstant(type)));
+
+            if (colExpression is ImplementedByExpression)
+            {
+                var ib = ((ImplementedByExpression)colExpression);
+
+                return new ImplementedByExpression(colExpression.Type, ib.Strategy, ib.Implementations.ToDictionary(kvp => kvp.Key, kvp =>
+                      new EntityExpression(kvp.Key, type != kvp.Key ? nullId : id, null, null, null, false)));
+            }
+
+            throw new InvalidOperationException("colExpression is not an entity");
+        }
+
+        internal EmbeddedEntityExpression EmbeddedFromConstant(ConstantExpression contant)
+        {
+            var value = contant.Value;
+
+            var embedded = (EmbeddedEntityExpression)colExpression;
+
+            var bindings = (from kvp in embedded.FieldEmbedded.EmbeddedFields
+                            let fi = kvp.Value.FieldInfo
+                            let bind = embedded.GetBinding(fi)
+                            select GetBinding(fi, value == null ?
+                            Expression.Constant(null, fi.FieldType.Nullify()) :
+                            Expression.Constant(kvp.Value.Getter(value), fi.FieldType), bind)).ToReadOnly();
+
+            return new EmbeddedEntityExpression(contant.Type, Expression.Constant(value != null), bindings, embedded.FieldEmbedded);
+        }
+
+        internal FieldBinding GetBinding(FieldInfo fi, Expression value, Expression binding)
+        {
+            using (OverrideColExpression(binding))
+                return new FieldBinding(fi, Visit(value), allowForcedNull: true);
+        }
+
+        protected override Expression VisitMemberInit(MemberInitExpression init)
+        {
+            var dic = init.Bindings.OfType<MemberAssignment>().ToDictionary(a => (a.Member as FieldInfo ?? Reflector.FindFieldInfo(init.Type, (PropertyInfo)a.Member)).Name, a => a.Expression);
+
+            var embedded = (EmbeddedEntityExpression)colExpression;
+
+            var bindings = (from kvp in embedded.FieldEmbedded.EmbeddedFields
+                            let fi = kvp.Value.FieldInfo
+                            select new FieldBinding(fi,
+                                !(fi.FieldType.IsByRef || fi.FieldType.IsNullable()) ? dic.GetOrThrow(fi.Name, "No value defined for non-nullable field {0}") :
+                                (dic.TryGetC(fi.Name) ?? Expression.Constant(null, fi.FieldType)))
+                            ).ToReadOnly();
+
+            return new EmbeddedEntityExpression(init.Type, Expression.Constant(true), bindings, embedded.FieldEmbedded);
+        }
+
+        IDisposable OverrideColExpression(Expression newColExpression)
+        {
+            var save = this.colExpression;
+            this.colExpression = newColExpression;
+
+            return new Disposable(() => this.colExpression = save);
         }
     }
 }

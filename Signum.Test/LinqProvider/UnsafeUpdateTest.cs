@@ -78,19 +78,6 @@ namespace Signum.Test.LinqProviderUpdateDelete
         }
 
         [TestMethod]
-        public void UpdateEnum()
-        {
-            using (Transaction tr = new Transaction())
-            {
-                int count = Database.Query<ArtistDN>().UnsafeUpdate()
-                .Set(a => a.Sex, a => a.Sex == Sex.Female ? Sex.Male : Sex.Female)
-                .Execute();
-                //tr.Commit();
-            }
-
-        }
-
-        [TestMethod]
         public void UpdateEnumConstant()
         {
             using (Transaction tr = new Transaction())
@@ -100,8 +87,21 @@ namespace Signum.Test.LinqProviderUpdateDelete
                 .Execute();
                 //tr.Commit();
             }
-
         }
+
+        [TestMethod]
+        public void UpdateEnum()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                int count = Database.Query<ArtistDN>().UnsafeUpdate()
+                .Set(a => a.Sex, a => a.Sex == Sex.Female ? Sex.Male : Sex.Female)
+                .Execute();
+                //tr.Commit();
+            }
+        }
+
+     
 
         [TestMethod]
         public void UpdateEfie()
@@ -140,7 +140,28 @@ namespace Signum.Test.LinqProviderUpdateDelete
                 Assert.IsTrue(Database.Query<AlbumDN>().All(a => a.BonusTrack.Name == null));
                 //tr.Commit();
             }
+        }
 
+        [TestMethod]
+        public void UpdateEfieConditional()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                SongDN song = new SongDN
+                {
+                    Name = "Mana Mana",
+                    Duration = TimeSpan.FromSeconds(184),
+                };
+
+
+                int count = Database.Query<AlbumDN>().UnsafeUpdate()
+                    .Set(a => a.BonusTrack, a => a.Id % 2 == 0 ? song : null)
+                .Execute();
+
+                Assert.IsTrue(Database.Query<AlbumDN>().All(a => a.Id % 2 == 0 ? a.BonusTrack.Name == "Mana Mana" : a.BonusTrack.Name == null));
+
+                //tr.Commit();
+            }
         }
 
 
@@ -157,6 +178,21 @@ namespace Signum.Test.LinqProviderUpdateDelete
                 //tr.Commit();
             }
 
+        }
+
+
+        [TestMethod]
+        public void UpdateFieConditional()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                LabelDN label = Database.Query<LabelDN>().FirstEx();
+
+                int count = Database.Query<AlbumDN>().UnsafeUpdate()
+                    .Set(a => a.Label, a => a.Id % 2 == 0 ? label : null)
+                    .Execute();
+                //tr.Commit();
+            }
         }
 
         [TestMethod]
@@ -244,6 +280,21 @@ namespace Signum.Test.LinqProviderUpdateDelete
         }
 
 
+        [TestMethod]
+        public void UpdateIbFieConditional()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                ArtistDN michael = Database.Query<ArtistDN>().SingleEx(a => a.Dead);
+
+                int count = Database.Query<AlbumDN>().UnsafeUpdate()
+                    .Set(a => a.Author, a => a.Id > 1 ? michael : null)
+                    .Execute();
+                //tr.Commit();
+            }
+        }
+
+
         public void UpdateIbNull()
         {
             using (Transaction tr = new Transaction())
@@ -282,6 +333,20 @@ namespace Signum.Test.LinqProviderUpdateDelete
                 //tr.Commit();
             }
 
+        }
+
+        [TestMethod]
+        public void UpdateIbaConditional()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                ArtistDN michael = Database.Query<ArtistDN>().SingleEx(a => a.Dead);
+
+                int count = Database.Query<NoteWithDateDN>().UnsafeUpdate()
+                    .Set(a => a.Target, a => a.Id > 1 ? michael : null)
+                    .Execute();
+                //tr.Commit();
+            }
         }
 
         [TestMethod]

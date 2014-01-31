@@ -212,6 +212,21 @@ namespace Signum.Entities
         }
     }
 
+    public class MultipleTelephoneValidatorAttribute : RegexValidatorAttribute
+    {
+        public static readonly Regex MultipleTelephoneRegex = new Regex(@"^((\+|00)\d\d)? *(\([ 0-9]+\))? *[0-9][ \-\.0-9]+(,\s*((\+|00)\d\d)? *(\([ 0-9]+\))? *[0-9][ \-\.0-9]+)*");
+
+        public MultipleTelephoneValidatorAttribute()
+            : base(MultipleTelephoneRegex)
+        {
+        }
+
+        public override string FormatName
+        {
+            get { return ValidationMessage.Telephone.NiceToString(); }
+        }
+    }
+
     public class NumericTextValidatorAttribute : RegexValidatorAttribute
     {
         public static readonly Regex NumericTextRegex = new Regex(@"^[0-9]*$");
