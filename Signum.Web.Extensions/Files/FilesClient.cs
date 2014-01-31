@@ -19,6 +19,7 @@ using Signum.Engine;
 using System.Linq.Expressions;
 using Signum.Engine.DynamicQuery;
 using Signum.Utilities.ExpressionTrees;
+using Signum.Web.PortableAreas;
 #endregion
 
 namespace Signum.Web.Files
@@ -34,6 +35,13 @@ namespace Signum.Web.Files
                 Navigator.RegisterArea(typeof(FilesClient));
 
                 FileRepositoryDN.OverridenPhisicalCurrentDirectory = AppDomain.CurrentDomain.BaseDirectory;
+
+                UrlsRepository.DefaultSFUrls.AddRange(new Dictionary<string, Func<UrlHelper, string>>
+                {
+                    { "uploadFile", url=>url.Action<FileController>(fc => fc.Upload()) },
+                    { "uploadDroppedFile", url=>url.Action<FileController>(fc => fc.UploadDropped()) },
+                    { "downloadFile", url=>url.Action("Download", "File") },
+                });  
 
                 if (filePath)
                 {

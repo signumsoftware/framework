@@ -10,10 +10,6 @@
         <a href="@Url.Action((ProcessController pc) => pc.Start())" class="sf-button"  style="@(!Model.Running ? "" : "display:none")" id="sfProcessEnable">
                 Start </a>
     </div>
-    
-    @Html.ScriptsJs("~/signum/scripts/SF_FindNavigator.js", 
-                    "~/Processes/Scripts/SF_Process.js")
-    @Html.RegisterSFUrls(Url)
 
     @Html.Partial(ProcessesClient.ViewPrefix.Formato("ProcessPanelTable"))
     <script language="javascript">

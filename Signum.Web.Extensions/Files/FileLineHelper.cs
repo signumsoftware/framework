@@ -14,6 +14,7 @@ using System.Linq.Expressions;
 using Signum.Entities.Basics;
 using Signum.Engine.Basics;
 using Signum.Engine;
+using Signum.Web.PortableAreas;
 #endregion
 
 namespace Signum.Web.Files
@@ -166,13 +167,6 @@ namespace Signum.Web.Files
                 if (fileLine.ShowValidationMessage)
                     sb.AddLine(helper.ValidationMessage(fileLine.Compose(FileLineKeys.File)));
             }
-
-            sb.AddLine(helper.RegisterUrls(new Dictionary<string,string>
-            {
-                { "uploadFile", RouteHelper.New().Action<FileController>(fc => fc.Upload()) },
-                { "uploadDroppedFile", RouteHelper.New().Action<FileController>(fc => fc.UploadDropped()) },
-                { "downloadFile", RouteHelper.New().Action("Download", "File") },
-            }));            
 
             sb.AddLine(new HtmlTag("script")
                 .Attr("type", "text/javascript")

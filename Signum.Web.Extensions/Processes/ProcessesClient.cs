@@ -19,6 +19,7 @@ using System.Web.Routing;
 using Signum.Entities.Processes;
 using Signum.Engine.Operations;
 using Signum.Web.Omnibox;
+using Signum.Web.PortableAreas;
 
 namespace Signum.Web.Processes
 {
@@ -32,13 +33,7 @@ namespace Signum.Web.Processes
             {
                 Navigator.RegisterArea(typeof(ProcessesClient));
 
-                Navigator.Manager.DefaultSFUrls.Add(url =>
-                {
-                    return new Dictionary<string, string> 
-                    { 
-                       { "processFromMany", url.Action("ProcessFromMany", "Process") }
-                    };
-                });
+                UrlsRepository.DefaultSFUrls.Add("processFromMany", url => url.Action("ProcessFromMany", "Process"));
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {

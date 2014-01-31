@@ -7,12 +7,22 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
     var normalCharacters;
     var doubleCharacters;
 
-    function init() {
+    function init(removeCharactersUrl, getDictionariesUrl) {
         if (!editable()) {
             return;
         }
-
-        loadLists();
+        $.ajax({
+            url: getDictionariesUrl,
+            data: {},
+            async: false,
+            success: function (data) {
+                SMSMaxTextLength = data.smsLength;
+                SMSWarningTextLength = data.smsWarningLength;
+                normalCharacters = data.normalChar;
+                doubleCharacters = data.doubleChar;
+                $('.sf-sms-chars-left:visible').html(SMSMaxTextLength);
+            }
+        });
 
         var $textAreasPresent = $(".sf-sms-msg-text");
         for (var i = 0; i < $textAreasPresent.length; i++) {
@@ -29,7 +39,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
             var $textarea = $control();
             $.ajax({
                 dataType: "text",
-                url: SF.Urls.removeCharacters,
+                url: removeCharactersUrl,
                 data: { text: $textarea.val() },
                 success: function (result) {
                     $textarea.val(result);
@@ -75,21 +85,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
             }
         }
         return maxLength - count;
-    }
-
-    function loadLists() {
-        $.ajax({
-            url: SF.Urls.getDictionaries,
-            data: {},
-            async: false,
-            success: function (data) {
-                SMSMaxTextLength = data.smsLength;
-                SMSWarningTextLength = data.smsWarningLength;
-                normalCharacters = data.normalChar;
-                doubleCharacters = data.doubleChar;
-                $('.sf-sms-chars-left:visible').html(SMSMaxTextLength);
-            }
-        });
     }
 
     function remainingCharacters($textarea) {

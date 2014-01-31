@@ -5,18 +5,30 @@ import Entities = require("Framework/Signum.Web/Signum/Scripts/Entities")
 import Lines = require("Framework/Signum.Web/Signum/Scripts/Lines")
 
 
-    var SMSMaxTextLength;
+var SMSMaxTextLength;
 var SMSWarningTextLength;
 
 var normalCharacters;
 var doubleCharacters;
 
-function init() {
+
+
+function init(removeCharactersUrl: string, getDictionariesUrl: string) {
     if (!editable()) {
         return;
     }
-
-    loadLists();
+    $.ajax({
+        url: getDictionariesUrl,
+        data: {},
+        async: false,
+        success: function (data) {
+            SMSMaxTextLength = data.smsLength;
+            SMSWarningTextLength = data.smsWarningLength;
+            normalCharacters = data.normalChar;
+            doubleCharacters = data.doubleChar;
+            $('.sf-sms-chars-left:visible').html(SMSMaxTextLength);
+        }
+    });
 
     var $textAreasPresent = $(".sf-sms-msg-text");
     for (var i = 0; i < $textAreasPresent.length; i++) {
@@ -33,7 +45,7 @@ function init() {
         var $textarea = $control();
         $.ajax({
             dataType: "text",
-            url: SF.Urls.removeCharacters,
+            url: removeCharactersUrl,
             data: { text: $textarea.val() },
             success: function (result) {
                 $textarea.val(result);
@@ -82,20 +94,6 @@ function charactersToEnd($textarea) {
     return maxLength - count;
 }
 
-function loadLists() {
-    $.ajax({
-        url: SF.Urls.getDictionaries,
-        data: {},
-        async: false,
-        success: function (data) {
-            SMSMaxTextLength = data.smsLength;
-            SMSWarningTextLength = data.smsWarningLength;
-            normalCharacters = data.normalChar;
-            doubleCharacters = data.doubleChar;
-            $('.sf-sms-chars-left:visible').html(SMSMaxTextLength);
-        }
-    });
-}
 
 function remainingCharacters($textarea?: JQuery) {
     $textarea = $textarea || $control();

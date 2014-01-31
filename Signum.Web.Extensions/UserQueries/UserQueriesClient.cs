@@ -52,10 +52,6 @@ namespace Signum.Web.UserQueries
                 UserAssetsClient.Start();
                 UserAssetsClient.RegisterExportAssertLink<UserQueryDN>();
 
-                var defaultScripts = Navigator.Manager.DefaultScripts();
-                defaultScripts.Add("~/UserQueries/Scripts/SF_UserQuery.js");
-                Navigator.Manager.DefaultScripts = () => defaultScripts;
-
                 RouteTable.Routes.MapRoute(null, "UQ/{webQueryName}/{lite}",
                     new { controller = "UserQueries", action = "View" });
 

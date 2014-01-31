@@ -123,35 +123,12 @@ WriteAttribute("style", Tuple.Create("  style=\"", 484), Tuple.Create("\"", 532)
 
 WriteLiteral(" id=\"sfProcessEnable\"");
 
-WriteLiteral(">\r\n                Start </a>\r\n    </div>\r\n    \r\n");
+WriteLiteral(">\r\n                Start </a>\r\n    </div>\r\n\r\n");
 
 WriteLiteral("    ");
 
             
             #line 14 "..\..\Processes\Views\ProcessPanel.cshtml"
-Write(Html.ScriptsJs("~/signum/scripts/SF_FindNavigator.js", 
-                    "~/Processes/Scripts/SF_Process.js"));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n");
-
-WriteLiteral("    ");
-
-            
-            #line 16 "..\..\Processes\Views\ProcessPanel.cshtml"
-Write(Html.RegisterSFUrls(Url));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n\r\n");
-
-WriteLiteral("    ");
-
-            
-            #line 18 "..\..\Processes\Views\ProcessPanel.cshtml"
 Write(Html.Partial(ProcessesClient.ViewPrefix.Formato("ProcessPanelTable")));
 
             
@@ -165,7 +142,7 @@ WriteLiteral(">\r\n        $(function () {\r\n            SF.Process.initControl
 "\r\n                $.get(\"");
 
             
-            #line 22 "..\..\Processes\Views\ProcessPanel.cshtml"
+            #line 18 "..\..\Processes\Views\ProcessPanel.cshtml"
                   Write(Url.Action((ProcessController p) => p.View()));
 
             

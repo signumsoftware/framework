@@ -4,11 +4,6 @@
 @using Signum.Utilities;
 @using Signum.Web.SMS;
 
-@Html.RegisterUrls(new Dictionary<string, string> 
-{ 
-    { "getDictionaries", Url.Action<SMSController>(s => s.GetDictionaries()) },
-    { "removeCharacters", Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")) }
-})
 @Html.ScriptCss("~/SMS/Content/SF_SMS.css")
 
 @using (var e = Html.TypeContext<SMSMessageDN>())
@@ -57,3 +52,9 @@
     }
 }
 @Html.ScriptsJs("~/SMS/Scripts/SF_SMS.js")
+
+@*@Html.RegisterUrls(new Dictionary<string, string> 
+{ 
+    { "getDictionaries", Url.Action<SMSController>(s => s.GetDictionaries()) },
+    { "removeCharacters", Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")) }
+})*@
