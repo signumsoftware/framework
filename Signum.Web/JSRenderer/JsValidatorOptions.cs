@@ -12,7 +12,6 @@ namespace Signum.Web
     public class JsValidatorOptions : JsRenderer
     {
         public JsValue<string> Prefix { get; set; }
-        public JsValue<string> ParentDiv { get; set; }
         public JsValue<string> ControllerUrl { get; set; }
         public JsValue<bool> ShowInlineErrors { get; set; }
         public JsValue<string> FixedInlineErrorText { get; set; }
@@ -27,7 +26,6 @@ namespace Signum.Web
                 return new JsOptionsBuilder(false)
                 {
                     {"prefix", Prefix.TryCC(a=>a.ToJS())},
-                    {"parentDiv", ParentDiv.TryCC(a=>a.ToJS())},
                     {"controllerUrl", ControllerUrl.TryCC(a=>a.ToJS())},
                     {"showInlineErrors",  ShowInlineErrors.TryCC(a=>a.ToJS())},
                     {"fixedInlineErrorText", FixedInlineErrorText.TryCC(a=>a.ToJS())},

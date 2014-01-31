@@ -174,7 +174,7 @@ WriteLiteral(">\r\n");
             #line hidden
             
             #line 23 "..\..\Signum\Views\PopupControl.cshtml"
-         if (ViewData.ContainsKey(ViewDataKeys.OkVisible) && (bool)ViewData[ViewDataKeys.OkVisible])
+         if (((ViewMode)ViewData[ViewDataKeys.ViewMode]) == ViewMode.View)
         {
             var saveProtected = (bool)ViewData[ViewDataKeys.SaveProtected]; 
 
@@ -183,26 +183,26 @@ WriteLiteral(">\r\n");
             #line hidden
 WriteLiteral("            <button");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 1130), Tuple.Create("\"", 1158)
+WriteAttribute("id", Tuple.Create(" id=\"", 1104), Tuple.Create("\"", 1132)
             
             #line 26 "..\..\Signum\Views\PopupControl.cshtml"
-, Tuple.Create(Tuple.Create("", 1135), Tuple.Create<System.Object, System.Int32>(Model.Compose("btnOk")
+, Tuple.Create(Tuple.Create("", 1109), Tuple.Create<System.Object, System.Int32>(Model.Compose("btnOk")
             
             #line default
             #line hidden
-, 1135), false)
+, 1109), false)
 );
 
-WriteAttribute("class", Tuple.Create(" class=\"", 1159), Tuple.Create("\"", 1240)
-, Tuple.Create(Tuple.Create("", 1167), Tuple.Create("sf-entity-button", 1167), true)
-, Tuple.Create(Tuple.Create(" ", 1183), Tuple.Create("sf-ok-button", 1184), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 1133), Tuple.Create("\"", 1214)
+, Tuple.Create(Tuple.Create("", 1141), Tuple.Create("sf-entity-button", 1141), true)
+, Tuple.Create(Tuple.Create(" ", 1157), Tuple.Create("sf-ok-button", 1158), true)
             
             #line 26 "..\..\Signum\Views\PopupControl.cshtml"
-      , Tuple.Create(Tuple.Create("", 1196), Tuple.Create<System.Object, System.Int32>(saveProtected ? " sf-save-protected" : ""
+      , Tuple.Create(Tuple.Create("", 1170), Tuple.Create<System.Object, System.Int32>(saveProtected ? " sf-save-protected" : ""
             
             #line default
             #line hidden
-, 1196), false)
+, 1170), false)
 );
 
 WriteLiteral(" ");
@@ -231,7 +231,7 @@ WriteLiteral("        ");
             #line 30 "..\..\Signum\Views\PopupControl.cshtml"
    Write(ButtonBarEntityHelper.GetForEntity(new EntityButtonContext
         {
-            ViewButtons = (ViewButtons)ViewData[ViewDataKeys.ViewButtons],
+            ViewMode = (ViewMode)ViewData[ViewDataKeys.ViewMode],
             ControllerContext = this.ViewContext,
             PartialViewName = ViewData[ViewDataKeys.PartialViewName].ToString(),
             Prefix = Model.ControlID,
@@ -254,25 +254,25 @@ Write(Html.ValidationSummaryAjax(Model));
             #line hidden
 WriteLiteral("\r\n    <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 1921), Tuple.Create("\"", 1958)
+WriteAttribute("id", Tuple.Create(" id=\"", 1886), Tuple.Create("\"", 1923)
             
             #line 40 "..\..\Signum\Views\PopupControl.cshtml"
-, Tuple.Create(Tuple.Create("", 1926), Tuple.Create<System.Object, System.Int32>(Model.Compose("divMainControl")
+, Tuple.Create(Tuple.Create("", 1891), Tuple.Create<System.Object, System.Int32>(Model.Compose("divMainControl")
             
             #line default
             #line hidden
-, 1926), false)
+, 1891), false)
 );
 
-WriteAttribute("class", Tuple.Create(" class=\"", 1959), Tuple.Create("\"", 2032)
-, Tuple.Create(Tuple.Create("", 1967), Tuple.Create("sf-main-control", 1967), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 1924), Tuple.Create("\"", 1997)
+, Tuple.Create(Tuple.Create("", 1932), Tuple.Create("sf-main-control", 1932), true)
             
             #line 40 "..\..\Signum\Views\PopupControl.cshtml"
-, Tuple.Create(Tuple.Create("", 1982), Tuple.Create<System.Object, System.Int32>(modifiable.IsGraphModified ? " sf-changed" : ""
+, Tuple.Create(Tuple.Create("", 1947), Tuple.Create<System.Object, System.Int32>(modifiable.IsGraphModified ? " sf-changed" : ""
             
             #line default
             #line hidden
-, 1982), false)
+, 1947), false)
 );
 
 WriteLiteral(" \r\n        data-prefix=\"");

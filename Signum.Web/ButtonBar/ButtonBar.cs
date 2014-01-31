@@ -14,7 +14,7 @@ namespace Signum.Web
         public ControllerContext ControllerContext { get; internal set; }
         public string PartialViewName { get; internal set; }
         public string Prefix{ get; internal set; }
-        public ViewButtons ViewButtons { get; set; }
+        public ViewMode ViewMode { get; set; }
         public bool ShowOperations { get; set; }
     }
     

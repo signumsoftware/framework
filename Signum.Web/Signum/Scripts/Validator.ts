@@ -1,0 +1,210 @@
+﻿/// <reference path="globals.ts"/>
+
+import Entities = require("Entities");
+
+export interface ValidationOptions {
+    prefix?: string;
+    controllerUrl?: string;
+    showInlineErrors?: boolean;
+    fixedInlineErrorText?: string; //Set to "" for it to be populated from ModelState error messages
+    requestExtraJsonData?: any;
+    errorSummaryId?: string;
+}
+
+export function cleanError($element: JQuery) {
+    $element.removeClass(inputErrorClass)
+}
+
+
+export interface ValidationResult {
+    modelState: ModelState;
+    isValid: boolean;
+    newToStr: string;
+    newLink: string;
+}
+
+export interface ModelState {
+    [controlId: string]: string[];
+}
+
+var inputErrorClass = "input-validation-error";
+var fieldErrorClass = "sf-field-validation-error";
+var summaryErrorClass = "validation-summary-errors";
+var inlineErrorVal = "inlineVal";
+var globalErrorsKey = "sfGlobalErrors";
+var globalValidationSummary = "sfGlobalValidationSummary";
+
+export function validate(valOptions: ValidationOptions): Promise<ValidationResult> {
+    SF.log("validate");
+
+    valOptions = $.extend({
+        prefix: "",
+        controllerUrl: valOptions.prefix || SF.Urls.validate,
+        showInlineErrors: true,
+        fixedInlineErrorText: "*", //Set to "" for it to be populated from ModelState error messages
+        parentDiv: "",
+        requestExtraJsonData: null,
+        ajaxError: null,
+        errorSummaryId: null
+    }, valOptions);
+
+    return SF.ajaxPost({
+        url: valOptions.controllerUrl,
+        async: false,
+        data: constructRequestData(valOptions),
+    }).then(result => {
+            var validatorResult: ValidationResult = {
+                modelState: result.ModelState,
+                isValid: isValid(result.ModelState),
+                newToStr: result[Entities.Keys.toStr],
+                newLink: result[Entities.Keys.link]
+            };
+            showErrors(valOptions, validatorResult.modelState);
+            return validatorResult
+        });
+}
+
+
+function constructRequestData(valOptions: ValidationOptions) : FormObject {
+    SF.log("Validator constructRequestData");
+
+    var formValues = getFormValues(valOptions.prefix);
+
+    formValues["prefix"] = valOptions.prefix;
+
+    var staticInfo = Entities.StaticInfo.getFor(valOptions.prefix);
+
+    if (staticInfo.find().length > 0 && staticInfo.isEmbedded()) {
+        formValues["rootType"] = staticInfo.rootType();
+        formValues["propertyRoute"] = staticInfo.propertyRoute();
+    }
+
+    return $.extend(formValues, valOptions.requestExtraJsonData);
+}
+
+export function getFormValues(prefix: string) : FormObject {
+    if (!prefix)
+        return cleanFormInputs($("form :input")).serializeObject();
+
+    var mainControl = $("#{0}_divNormalControl".format(prefix)); 
+
+    var result = cleanFormInputs(mainControl.filter(":input")).serializeObject(); 
+
+    result[SF.compose(prefix, Entities.Keys.runtimeInfo)] = mainControl.data("runtimeinfo");
+
+    return $.extend(result, getFormBasics());
+}
+
+export function getFormValuesLite(prefix: string): FormObject {
+
+    var result = getFormBasics();
+
+    result[SF.compose(prefix, Entities.Keys.runtimeInfo)] = prefix ?
+    $("#{0}_divNormalControl".format(prefix)).data("runtimeinfo") :
+    $('#' + SF.compose(prefix, Entities.Keys.runtimeInfo)).val();
+
+    return result;
+}
+
+export function getFormBasics(): FormObject {
+    return $('#' + Entities.Keys.tabId + ", input:hidden[name=" + Entities.Keys.antiForgeryToken + "]").serializeObject();
+}
+
+function cleanFormInputs(form: JQuery): JQuery {
+    return form.not(".sf-search-control :input");
+}
+
+export function showErrors(valOptions: ValidationOptions, modelState: ModelState , showPathErrors?: boolean): boolean {
+    SF.log("Validator showErrors");
+    //Remove previous errors
+    $('.' + fieldErrorClass).remove()
+            $('.' + inputErrorClass).removeClass(inputErrorClass);
+    $('.' + summaryErrorClass).remove();
+
+    var allErrors: string[][]= [];
+    
+    var controlID: string;
+    for (controlID in modelState) {
+        if (modelState.hasOwnProperty(controlID)) {
+            var errorsArray = modelState[controlID];
+            var partialErrors = errorsArray.map(a=> "<li>" + a + "</li>");
+            allErrors.push(errorsArray);
+
+            if (controlID != globalErrorsKey && controlID != "") {
+                var $control = $('#' + controlID);
+                $control.addClass(inputErrorClass);
+                $('#' + SF.compose(controlID, Entities.Keys.toStr) + ',#' + SF.compose(controlID, Entities.Keys.link)).addClass(inputErrorClass);
+                if (valOptions.showInlineErrors && $control.hasClass(inlineErrorVal)) {
+
+                    var errorMessage = '<span class="' + fieldErrorClass + '">' + (valOptions.fixedInlineErrorText || errorsArray.join('')) + "</span>";
+
+                    if ($control.next().hasClass("ui-datepicker-trigger"))
+                        $control.next().after(errorMessage);
+                    else
+                        $control.after(errorMessage);
+                }
+            }
+            setPathErrors(valOptions, controlID, partialErrors.join(''), showPathErrors);
+        }
+    }
+
+    if (allErrors.length) {
+        SF.log("(Errors Validator showErrors): " + allErrors.join(''));
+        return false;
+    }
+    return true;
+}
+
+
+//This will mark all the path with the error class, and it will also set summary error entries for the controls more inner than the current one
+function setPathErrors(valOptions: ValidationOptions, controlID: string, partialErrors: string, showPathErrors: boolean) {
+    var pathPrefixes = (controlID != globalErrorsKey) ? SF.getPathPrefixes(controlID) : new Array("");
+    for (var i = 0, l = pathPrefixes.length; i < l; i++) {
+        var currPrefix = pathPrefixes[i];
+        if (currPrefix != undefined) {
+            var isEqual = (currPrefix === valOptions.prefix);
+            var isMoreInner = !isEqual && (currPrefix.indexOf(valOptions.prefix) > -1);
+            if (showPathErrors || isMoreInner) {
+                $('#' + SF.compose(currPrefix, Entities.Keys.toStr)).addClass(inputErrorClass);
+                $('#' + SF.compose(currPrefix, Entities.Keys.link)).addClass(inputErrorClass);
+            }
+            if ((isMoreInner || isEqual) && $('#' + SF.compose(currPrefix, globalValidationSummary)).length > 0 && !SF.isEmpty(partialErrors)) {
+                var currentSummary = valOptions.errorSummaryId ? $('#' + valOptions.errorSummaryId) : $('#' + SF.compose(currPrefix, globalValidationSummary));
+
+                var summaryUL = currentSummary.children('.' + summaryErrorClass);
+                if (summaryUL.length === 0) {
+                    currentSummary.append('<ul class="' + summaryErrorClass + '">\n' + partialErrors + '</ul>');
+                }
+                else {
+                    summaryUL.append(partialErrors);
+                }
+            }
+        }
+    }
+}
+
+
+function isValid(modelState : ModelState) {
+    SF.log("Validator isValid");
+    var controlID;
+    for (controlID in modelState) {
+        if (modelState.hasOwnProperty(controlID) && modelState[controlID].length) {
+            return false; //Stop as soon as I find an error
+        }
+    }
+    return true;
+}
+
+
+export function entityIsValid(validationOptions: ValidationOptions): Promise<void> {
+    SF.log("Validator EntityIsValid");
+
+    return validate(validationOptions).then(result => {
+        if (result.isValid)
+            return;
+
+        SF.Notify.error(lang.signum.error, 2000);
+        alert(lang.signum.popupErrorsStop);
+        throw result; 
+    });
+}

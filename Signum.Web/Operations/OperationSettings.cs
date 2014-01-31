@@ -114,7 +114,7 @@ namespace Signum.Web.Operations
         public IdentifiableEntity Entity { get; internal set; }
         public EntityOperationSettings OperationSettings { get; internal set; }
         public string CanExecute { get; internal set; }
-        public ViewButtons ViewButtons { get; internal set; }
+        public ViewMode ViewButtons { get; internal set; }
         public bool ShowOperations { get; set; }
 
         public JsOperationOptions Options()

@@ -1,19 +1,11 @@
-﻿/// <reference path="references.ts"/>
+﻿/// <reference path="globals.ts"/>
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-
-var SF;
-(function (SF) {
-    once("SF-control", function () {
-        jQuery.fn.SFControl = function () {
-            return this.data("SF-control");
-        };
-    });
-
+define(["require", "exports", "Entities", "Validator", "Navigator", "Finder"], function(require, exports, Entities, Validator, Navigator, Finder) {
     var EntityBase = (function () {
         function EntityBase(element, _options) {
             this.element = element;
@@ -29,7 +21,7 @@ var SF;
         }
         EntityBase.prototype._create = function () {
             var _this = this;
-            var $txt = $(this.pf(SF.Keys.toStr) + ".sf-entity-autocomplete");
+            var $txt = $(this.pf(Entities.Keys.toStr) + ".sf-entity-autocomplete");
             if ($txt.length > 0) {
                 var data = $txt.data();
 
@@ -37,16 +29,16 @@ var SF;
                     return ({ types: _this.staticInfo().types(), l: 5, q: term });
                 });
 
-                this.entityAutocomplete($txt);
+                this.setupAutocomplete($txt);
             }
         };
 
         EntityBase.prototype.runtimeInfo = function (itemPrefix) {
-            return new SF.RuntimeInfoElement(this.options.prefix);
+            return new Entities.RuntimeInfoElement(this.options.prefix);
         };
 
         EntityBase.prototype.staticInfo = function () {
-            return new SF.StaticInfo(this.options.prefix);
+            return new Entities.StaticInfo(this.options.prefix);
         };
 
         EntityBase.prototype.pf = function (s) {
@@ -69,7 +61,7 @@ var SF;
 
             var div = this.containerDiv();
 
-            var result = new SF.EntityHtml(this.options.prefix, runtimeInfo, null, null);
+            var result = new Entities.EntityHtml(this.options.prefix, runtimeInfo, null, null);
 
             result.html = div.children();
 
@@ -93,8 +85,8 @@ var SF;
             this.runtimeInfo().setValue(entityValue == null ? null : entityValue.runtimeInfo);
 
             if (entityValue == null) {
-                SF.Validation.cleanError($(this.pf(SF.Keys.toStr)).val(""));
-                SF.Validation.cleanError($(this.pf(SF.Keys.link)).val("").html(""));
+                Validator.cleanError($(this.pf(Entities.Keys.toStr)).val(""));
+                Validator.cleanError($(this.pf(Entities.Keys.link)).val("").html(""));
             }
 
             this.updateButtonsDisplay();
@@ -105,7 +97,7 @@ var SF;
 
         EntityBase.prototype.remove_click = function () {
             var _this = this;
-            this.onRemove(this.options.prefix).then(function (result) {
+            return this.onRemove(this.options.prefix).then(function (result) {
                 if (result)
                     _this.setEntity(null);
             });
@@ -120,7 +112,7 @@ var SF;
 
         EntityBase.prototype.create_click = function () {
             var _this = this;
-            this.onCreating(this.options.prefix).then(function (result) {
+            return this.onCreating(this.options.prefix).then(function (result) {
                 if (result)
                     _this.setEntity(result);
             });
@@ -131,17 +123,17 @@ var SF;
             if (this.creating != null)
                 return this.creating(prefix);
 
-            SF.ViewNavigator.typeChooser(this.staticInfo()).then(function (type) {
+            Navigator.typeChooser(this.staticInfo()).then(function (type) {
                 if (type == null)
                     return null;
 
-                var newEntity = new SF.EntityHtml(_this.options.prefix, new SF.RuntimeInfoValue(type, null));
+                var newEntity = new Entities.EntityHtml(_this.options.prefix, new Entities.RuntimeInfoValue(type, null));
 
                 var template = _this.getEmbeddedTemplate();
                 if (!SF.isEmpty(template))
                     newEntity.html = $(template);
 
-                return SF.ViewNavigator.viewPopup(newEntity, _this.defaultViewOptions());
+                return Navigator.viewPopup(newEntity, _this.defaultViewOptions());
             });
         };
 
@@ -153,7 +145,7 @@ var SF;
             var _this = this;
             var entityHtml = this.extractEntityHtml();
 
-            this.onViewing(entityHtml).then(function (result) {
+            return this.onViewing(entityHtml).then(function (result) {
                 if (result)
                     _this.setEntity(result);
                 else
@@ -165,13 +157,14 @@ var SF;
             if (this.viewing != null)
                 return this.viewing(entityHtml);
 
-            return SF.ViewNavigator.viewPopup(entityHtml, this.defaultViewOptions());
+            return Navigator.viewPopup(entityHtml, this.defaultViewOptions());
         };
 
         EntityBase.prototype.find_click = function () {
             var _this = this;
-            this.onFinding(this.options.prefix).then(function (result) {
-                _this.setEntity(result);
+            return this.onFinding(this.options.prefix).then(function (result) {
+                if (result)
+                    _this.setEntity(result);
             });
         };
 
@@ -179,11 +172,11 @@ var SF;
             if (this.finding != null)
                 return this.finding(this.options.prefix);
 
-            return SF.ViewNavigator.typeChooser(this.staticInfo()).then(function (type) {
+            return Navigator.typeChooser(this.staticInfo()).then(function (type) {
                 if (type == null)
                     return null;
 
-                return SF.FindNavigator.find({
+                return Finder.find({
                     webQueryName: type,
                     prefix: prefix
                 });
@@ -204,11 +197,11 @@ var SF;
             $(this.pf("btnFind")).toggle(!hasEntity);
             $(this.pf("btnRemove")).toggle(hasEntity);
             $(this.pf("btnView")).toggle(hasEntity);
-            $(this.pf(SF.Keys.link)).toggle(hasEntity);
-            $(this.pf(SF.Keys.toStr)).toggle(!hasEntity);
+            $(this.pf(Entities.Keys.link)).toggle(hasEntity);
+            $(this.pf(Entities.Keys.toStr)).toggle(!hasEntity);
         };
 
-        EntityBase.prototype.entityAutocomplete = function ($txt) {
+        EntityBase.prototype.setupAutocomplete = function ($txt) {
             var _this = this;
             var auto = $txt.autocomplete({
                 delay: 200,
@@ -243,7 +236,7 @@ var SF;
         EntityBase.key_entity = "sfEntity";
         return EntityBase;
     })();
-    SF.EntityBase = EntityBase;
+    exports.EntityBase = EntityBase;
 
     var AjaxEntityAutoCompleter = (function () {
         function AjaxEntityAutoCompleter(controllerUrl, getData) {
@@ -262,7 +255,7 @@ var SF;
                     success: function (data) {
                         this.lastXhr = null;
                         resolve(data.map(function (item) {
-                            return new SF.EntityValue(new SF.RuntimeInfoValue(item.type, parseInt(item.id)), item.toStr, item.link);
+                            return new Entities.EntityValue(new Entities.RuntimeInfoValue(item.type, parseInt(item.id)), item.toStr, item.link);
                         }));
                     }
                 });
@@ -270,7 +263,7 @@ var SF;
         };
         return AjaxEntityAutoCompleter;
     })();
-    SF.AjaxEntityAutoCompleter = AjaxEntityAutoCompleter;
+    exports.AjaxEntityAutoCompleter = AjaxEntityAutoCompleter;
 
     once("SF-entityLine", function () {
         return $.fn.entityLine = function (opt) {
@@ -284,11 +277,11 @@ var SF;
             _super.apply(this, arguments);
         }
         EntityLine.prototype.setEntitySpecific = function (entityValue) {
-            var link = $(this.pf(SF.Keys.link));
+            var link = $(this.pf(Entities.Keys.link));
             link.text(entityValue == null ? null : entityValue.toStr);
             if (link.filter('a').length !== 0)
                 link.attr('href', entityValue == null ? null : entityValue.link);
-            $(this.pf(SF.Keys.toStr)).val('');
+            $(this.pf(Entities.Keys.toStr)).val('');
         };
 
         EntityLine.prototype.onAutocompleteSelected = function (entityValue) {
@@ -296,7 +289,7 @@ var SF;
         };
         return EntityLine;
     })(EntityBase);
-    SF.EntityLine = EntityLine;
+    exports.EntityLine = EntityLine;
 
     once("SF-entityCombo", function () {
         return $.fn.entityCombo = function (opt) {
@@ -332,14 +325,14 @@ var SF;
         EntityCombo.prototype.combo_selected = function () {
             var val = this.combo().val();
 
-            var ri = SF.RuntimeInfoValue.fromKey(val);
+            var ri = Entities.RuntimeInfoValue.fromKey(val);
 
-            this.setEntity(ri == null ? null : new SF.EntityValue(ri));
+            this.setEntity(ri == null ? null : new Entities.EntityValue(ri));
         };
         EntityCombo.key_combo = "sfCombo";
         return EntityCombo;
     })(EntityBase);
-    SF.EntityCombo = EntityCombo;
+    exports.EntityCombo = EntityCombo;
 
     once("SF-entityLineDetail", function () {
         return $.fn.entityLineDetail = function (opt) {
@@ -361,7 +354,7 @@ var SF;
                 return;
 
             if (!entityValue.isLoaded())
-                throw new Error("EntityLineDetail requires a loaded EntityHtml, consider calling ViewNavigator.loadPartialView");
+                throw new Error("EntityLineDetail requires a loaded Entities.EntityHtml, consider calling Navigator.loadPartialView");
         };
 
         EntityLineDetail.prototype.onCreating = function (prefix) {
@@ -369,11 +362,11 @@ var SF;
             if (this.creating != null)
                 return this.creating(prefix);
 
-            SF.ViewNavigator.typeChooser(this.staticInfo()).then(function (type) {
+            Navigator.typeChooser(this.staticInfo()).then(function (type) {
                 if (type == null)
                     return null;
 
-                var newEntity = new SF.EntityHtml(_this.options.prefix, new SF.RuntimeInfoValue(type, null));
+                var newEntity = new Entities.EntityHtml(_this.options.prefix, new Entities.RuntimeInfoValue(type, null));
 
                 var template = _this.getEmbeddedTemplate();
                 if (!SF.isEmpty(template)) {
@@ -381,7 +374,7 @@ var SF;
                     return Promise.resolve(newEntity);
                 }
 
-                return SF.ViewNavigator.loadPartialView(newEntity, _this.defaultViewOptions());
+                return Navigator.requestPartialView(newEntity, _this.defaultViewOptions());
             });
         };
 
@@ -394,12 +387,12 @@ var SF;
                 if (entity.html != null)
                     return Promise.resolve(entity);
 
-                return SF.ViewNavigator.loadPartialView(new SF.EntityHtml(_this.options.prefix, entity.runtimeInfo), _this.defaultViewOptions());
+                return Navigator.requestPartialView(new Entities.EntityHtml(_this.options.prefix, entity.runtimeInfo), _this.defaultViewOptions());
             });
         };
         return EntityLineDetail;
     })(EntityBase);
-    SF.EntityLineDetail = EntityLineDetail;
+    exports.EntityLineDetail = EntityLineDetail;
 
     var EntityListBase = (function (_super) {
         __extends(EntityListBase, _super);
@@ -407,7 +400,7 @@ var SF;
             _super.call(this, element, options);
         }
         EntityListBase.prototype.runtimeInfo = function (itemPrefix) {
-            return new SF.RuntimeInfoElement(itemPrefix);
+            return new Entities.RuntimeInfoElement(itemPrefix);
         };
 
         EntityListBase.prototype.containerDiv = function (itemPrefix) {
@@ -432,7 +425,7 @@ var SF;
 
             var div = this.containerDiv(itemPrefix);
 
-            var result = new SF.EntityHtml(itemPrefix, runtimeInfo, null, null);
+            var result = new Entities.EntityHtml(itemPrefix, runtimeInfo, null, null);
 
             result.html = div.children();
 
@@ -534,7 +527,7 @@ var SF;
 
         EntityListBase.prototype.find_click = function () {
             var _this = this;
-            this.onFindingMany(this.options.prefix).then(function (result) {
+            return this.onFindingMany(this.options.prefix).then(function (result) {
                 if (result)
                     result.forEach(function (ev) {
                         return _this.addEntity(ev, _this.getNextPrefix());
@@ -550,11 +543,11 @@ var SF;
             if (this.findingMany != null)
                 return this.findingMany(this.options.prefix);
 
-            return SF.ViewNavigator.typeChooser(this.staticInfo()).then(function (type) {
+            return Navigator.typeChooser(this.staticInfo()).then(function (type) {
                 if (type == null)
                     return null;
 
-                return SF.FindNavigator.findMany({
+                return Finder.findMany({
                     webQueryName: type,
                     prefix: prefix
                 });
@@ -608,7 +601,7 @@ var SF;
         EntityListBase.key_indexes = "sfIndexes";
         return EntityListBase;
     })(EntityBase);
-    SF.EntityListBase = EntityListBase;
+    exports.EntityListBase = EntityListBase;
 
     once("SF-entityList", function () {
         return $.fn.entityList = function (opt) {
@@ -622,11 +615,11 @@ var SF;
             _super.apply(this, arguments);
         }
         EntityList.prototype.itemSuffix = function () {
-            return SF.Keys.toStr;
+            return Entities.Keys.toStr;
         };
 
         EntityList.prototype.updateLinks = function (newToStr, newLink, itemPrefix) {
-            $('#' + SF.compose(itemPrefix, SF.Keys.toStr)).html(newToStr);
+            $('#' + SF.compose(itemPrefix, Entities.Keys.toStr)).html(newToStr);
         };
 
         EntityList.prototype.selectedItemPrefix = function () {
@@ -650,7 +643,7 @@ var SF;
 
             var entityHtml = this.extractEntityHtml(selectedItemPrefix);
 
-            this.onViewing(entityHtml).then(function (result) {
+            return this.onViewing(entityHtml).then(function (result) {
                 if (result)
                     _this.setEntity(result, selectedItemPrefix);
                 else
@@ -661,7 +654,7 @@ var SF;
         EntityList.prototype.create_click = function () {
             var _this = this;
             var prefix = this.getNextPrefix();
-            this.onCreating(prefix).then(function (entity) {
+            return this.onCreating(prefix).then(function (entity) {
                 if (entity)
                     _this.addEntity(entity, prefix);
             });
@@ -685,12 +678,12 @@ var SF;
 
             $table.before(SF.hiddenInput(SF.compose(itemPrefix, EntityList.key_indexes), this.getNextPosIndex()));
 
-            $table.before(SF.hiddenInput(SF.compose(itemPrefix, SF.Keys.runtimeInfo), entityValue.runtimeInfo.toString()));
+            $table.before(SF.hiddenInput(SF.compose(itemPrefix, Entities.Keys.runtimeInfo), entityValue.runtimeInfo.toString()));
 
             $table.before(SF.hiddenDiv(SF.compose(itemPrefix, EntityList.key_entity), ""));
 
             var select = $(this.pf(EntityList.key_list));
-            select.append("\n<option id='" + SF.compose(itemPrefix, SF.Keys.toStr) + "' name='" + SF.compose(itemPrefix, SF.Keys.toStr) + "' value='' class='sf-value-line'>" + entityValue.toStr + "</option>");
+            select.append("\n<option id='" + SF.compose(itemPrefix, Entities.Keys.toStr) + "' name='" + SF.compose(itemPrefix, Entities.Keys.toStr) + "' value='' class='sf-value-line'>" + entityValue.toStr + "</option>");
             select.children('option').attr('selected', false); //Fix for Firefox: Set selected after retrieving the html of the select
             select.children('option:last').attr('selected', true);
         };
@@ -698,15 +691,15 @@ var SF;
         EntityList.prototype.remove_click = function () {
             var _this = this;
             var selectedItemPrefix = this.selectedItemPrefix();
-            this.onRemove(selectedItemPrefix).then(function (result) {
+            return this.onRemove(selectedItemPrefix).then(function (result) {
                 if (result)
                     _this.removeEntity(selectedItemPrefix);
             });
         };
 
         EntityList.prototype.removeEntitySpecific = function (prefix) {
-            $("#" + SF.compose(prefix, SF.Keys.runtimeInfo)).remove();
-            $("#" + SF.compose(prefix, SF.Keys.toStr)).remove();
+            $("#" + SF.compose(prefix, Entities.Keys.runtimeInfo)).remove();
+            $("#" + SF.compose(prefix, Entities.Keys.toStr)).remove();
             $("#" + SF.compose(prefix, EntityList.key_entity)).remove();
             $("#" + SF.compose(prefix, EntityList.key_indexes)).remove();
         };
@@ -721,7 +714,7 @@ var SF;
         EntityList.key_list = "sfList";
         return EntityList;
     })(EntityListBase);
-    SF.EntityList = EntityList;
+    exports.EntityList = EntityList;
 
     once("SF-entityListDetail", function () {
         return $.fn.entityListDetail = function (opt) {
@@ -734,32 +727,6 @@ var SF;
         function EntityListDetail(element, options) {
             _super.call(this, element, options);
         }
-        //create_click() {
-        //    var prefix = this.getNextPrefix();
-        //    this.onCreating(prefix).then(entity => {
-        //        if (entity) {
-        //            this.addEntity(entity, prefix);
-        //            this.stageCurrentSelected();
-        //        }
-        //    });
-        //}
-        //find_click() {
-        //    this.onFindingMany(this.options.prefix).then(result => {
-        //        if (result) {
-        //            result.forEach(ev=> this.addEntity(ev, this.getNextPrefix()));
-        //            this.stageCurrentSelected();
-        //        }
-        //    });
-        //}
-        //remove_click() {
-        //    var selectedItemPrefix = this.selectedItemPrefix();
-        //    this.onRemove(selectedItemPrefix).then(result=> {
-        //        if (result) {
-        //            this.removeEntity(selectedItemPrefix);
-        //            this.stageCurrentSelected();
-        //        }
-        //    });
-        //}
         EntityListDetail.prototype.selection_Changed = function () {
             this.stageCurrentSelected();
         };
@@ -787,9 +754,9 @@ var SF;
                 detailDiv.append(selContainer);
                 selContainer.show();
             } else {
-                var entity = new SF.EntityHtml(selPrefix, this.runtimeInfo(selPrefix).value(), null, null);
+                var entity = new Entities.EntityHtml(selPrefix, this.runtimeInfo(selPrefix).value(), null, null);
 
-                SF.ViewNavigator.loadPartialView(entity, this.defaultViewOptions()).then(function (e) {
+                Navigator.requestPartialView(entity, this.defaultViewOptions()).then(function (e) {
                     selContainer.html(e.html);
                     detailDiv.append(selContainer);
                 });
@@ -797,7 +764,7 @@ var SF;
         };
         return EntityListDetail;
     })(EntityList);
-    SF.EntityListDetail = EntityListDetail;
+    exports.EntityListDetail = EntityListDetail;
 
     once("SF-entityRepeater", function () {
         return $.fn.entityRepeater = function (opt) {
@@ -819,7 +786,7 @@ var SF;
         };
 
         EntityRepeater.prototype.addEntitySpecific = function (entityValue, itemPrefix) {
-            var $div = $("<fieldset id='" + SF.compose(itemPrefix, EntityRepeater.key_repeaterItem) + "' name='" + SF.compose(itemPrefix, EntityRepeater.key_repeaterItem) + "' class='" + EntityRepeater.key_repeaterItemClass + "'>" + "<legend>" + (this.options.remove ? ("<a id='" + SF.compose(itemPrefix, "btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this._getRemoving(itemPrefix) + "\" class='sf-line-button sf-remove' data-icon='ui-icon-circle-close' data-text='false'>" + lang.signum.remove + "</a>") : "") + (this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this._getMovingUp(itemPrefix) + "\" class='sf-line-button sf-move-up' data-icon='ui-icon-triangle-1-n' data-text='false'>" + lang.signum.moveUp + "</span>") : "") + (this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this._getMovingDown(itemPrefix) + "\" class='sf-line-button sf-move-down' data-icon='ui-icon-triangle-1-s' data-text='false'>" + lang.signum.moveDown + "</span>") : "") + "</legend>" + SF.hiddenInput(SF.compose(itemPrefix, EntityListBase.key_indexes), this.getNextPosIndex()) + SF.hiddenInput(SF.compose(itemPrefix, SF.Keys.runtimeInfo), null) + "<div id='" + SF.compose(itemPrefix, EntityRepeater.key_entity) + "' name='" + SF.compose(itemPrefix, EntityRepeater.key_entity) + "' class='sf-line-entity'>" + "</div>" + "</fieldset>");
+            var $div = $("<fieldset id='" + SF.compose(itemPrefix, EntityRepeater.key_repeaterItem) + "' name='" + SF.compose(itemPrefix, EntityRepeater.key_repeaterItem) + "' class='" + EntityRepeater.key_repeaterItemClass + "'>" + "<legend>" + (this.options.remove ? ("<a id='" + SF.compose(itemPrefix, "btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this._getRemoving(itemPrefix) + "\" class='sf-line-button sf-remove' data-icon='ui-icon-circle-close' data-text='false'>" + lang.signum.remove + "</a>") : "") + (this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this._getMovingUp(itemPrefix) + "\" class='sf-line-button sf-move-up' data-icon='ui-icon-triangle-1-n' data-text='false'>" + lang.signum.moveUp + "</span>") : "") + (this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this._getMovingDown(itemPrefix) + "\" class='sf-line-button sf-move-down' data-icon='ui-icon-triangle-1-s' data-text='false'>" + lang.signum.moveDown + "</span>") : "") + "</legend>" + SF.hiddenInput(SF.compose(itemPrefix, EntityListBase.key_indexes), this.getNextPosIndex()) + SF.hiddenInput(SF.compose(itemPrefix, Entities.Keys.runtimeInfo), null) + "<div id='" + SF.compose(itemPrefix, EntityRepeater.key_entity) + "' name='" + SF.compose(itemPrefix, EntityRepeater.key_entity) + "' class='sf-line-entity'>" + "</div>" + "</fieldset>");
 
             $(this.pf(EntityRepeater.key_itemsContainer)).append($div);
         };
@@ -846,7 +813,7 @@ var SF;
 
         EntityRepeater.prototype.removeItem_click = function (itemPrefix) {
             var _this = this;
-            this.onRemove(itemPrefix).then(function (result) {
+            return this.onRemove(itemPrefix).then(function (result) {
                 if (result)
                     _this.removeEntity(itemPrefix);
             });
@@ -864,7 +831,7 @@ var SF;
         EntityRepeater.key_link = "sfLink";
         return EntityRepeater;
     })(EntityListBase);
-    SF.EntityRepeater = EntityRepeater;
+    exports.EntityRepeater = EntityRepeater;
 
     once("SF-entityStrip", function () {
         return $.fn.entityStrip = function (opt) {
@@ -886,11 +853,11 @@ var SF;
         };
 
         EntityStrip.prototype.setEntitySpecific = function (entityValue, itemPrefix) {
-            $('#' + SF.compose(itemPrefix, SF.Keys.link)).html(entityValue.toStr);
+            $('#' + SF.compose(itemPrefix, Entities.Keys.link)).html(entityValue.toStr);
         };
 
         EntityStrip.prototype.addEntitySpecific = function (entityValue, itemPrefix) {
-            var $li = $("<li id='" + SF.compose(itemPrefix, EntityStrip.key_stripItem) + "' name='" + SF.compose(itemPrefix, EntityStrip.key_stripItem) + "' class='" + EntityStrip.key_stripItemClass + "'>" + SF.hiddenInput(SF.compose(itemPrefix, EntityStrip.key_indexes), this.getNextPosIndex()) + SF.hiddenInput(SF.compose(itemPrefix, SF.Keys.runtimeInfo), null) + (this.options.navigate ? ("<a class='sf-entitStrip-link' id='" + SF.compose(itemPrefix, EntityStrip.key_link) + "' href='" + entityValue.link + "' title='" + lang.signum.navigate + "'>" + entityValue.toStr + "</a>") : ("<span class='sf-entitStrip-link' id='" + SF.compose(itemPrefix, EntityStrip.key_link) + "'>" + entityValue.toStr + "</span>")) + "<span class='sf-button-container'>" + ((this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this._getMovingUp(itemPrefix) + "\" class='sf-line-button sf-move-up' data-icon='ui-icon-triangle-1-" + (this.options.vertical ? "w" : "n") + "' data-text='false'>" + lang.signum.moveUp + "</span>") : "") + (this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this._getMovingDown(itemPrefix) + "\" class='sf-line-button sf-move-down' data-icon='ui-icon-triangle-1-" + (this.options.vertical ? "e" : "s") + "' data-text='false'>" + lang.signum.moveDown + "</span>") : "") + (this.options.view ? ("<a id='" + SF.compose(itemPrefix, "btnView") + "' title='" + lang.signum.view + "' onclick=\"" + this._getView(itemPrefix) + "\" class='sf-line-button sf-view' data-icon='ui-icon-circle-arrow-e' data-text='false'>" + lang.signum.view + "</a>") : "") + (this.options.remove ? ("<a id='" + SF.compose(itemPrefix, "btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this._getRemoving(itemPrefix) + "\" class='sf-line-button sf-remove' data-icon='ui-icon-circle-close' data-text='false'>" + lang.signum.remove + "</a>") : "")) + "</span>" + "<div id='" + SF.compose(itemPrefix, EntityStrip.key_entity) + "' name='" + SF.compose(itemPrefix, EntityStrip.key_entity) + "' style='display:none'></div>" + "</li>");
+            var $li = $("<li id='" + SF.compose(itemPrefix, EntityStrip.key_stripItem) + "' name='" + SF.compose(itemPrefix, EntityStrip.key_stripItem) + "' class='" + EntityStrip.key_stripItemClass + "'>" + SF.hiddenInput(SF.compose(itemPrefix, EntityStrip.key_indexes), this.getNextPosIndex()) + SF.hiddenInput(SF.compose(itemPrefix, Entities.Keys.runtimeInfo), null) + (this.options.navigate ? ("<a class='sf-entitStrip-link' id='" + SF.compose(itemPrefix, EntityStrip.key_link) + "' href='" + entityValue.link + "' title='" + lang.signum.navigate + "'>" + entityValue.toStr + "</a>") : ("<span class='sf-entitStrip-link' id='" + SF.compose(itemPrefix, EntityStrip.key_link) + "'>" + entityValue.toStr + "</span>")) + "<span class='sf-button-container'>" + ((this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnUp") + "' title='" + lang.signum.moveUp + "' onclick=\"" + this._getMovingUp(itemPrefix) + "\" class='sf-line-button sf-move-up' data-icon='ui-icon-triangle-1-" + (this.options.vertical ? "w" : "n") + "' data-text='false'>" + lang.signum.moveUp + "</span>") : "") + (this.options.reorder ? ("<span id='" + SF.compose(itemPrefix, "btnDown") + "' title='" + lang.signum.moveDown + "' onclick=\"" + this._getMovingDown(itemPrefix) + "\" class='sf-line-button sf-move-down' data-icon='ui-icon-triangle-1-" + (this.options.vertical ? "e" : "s") + "' data-text='false'>" + lang.signum.moveDown + "</span>") : "") + (this.options.view ? ("<a id='" + SF.compose(itemPrefix, "btnView") + "' title='" + lang.signum.view + "' onclick=\"" + this._getView(itemPrefix) + "\" class='sf-line-button sf-view' data-icon='ui-icon-circle-arrow-e' data-text='false'>" + lang.signum.view + "</a>") : "") + (this.options.remove ? ("<a id='" + SF.compose(itemPrefix, "btnRemove") + "' title='" + lang.signum.remove + "' onclick=\"" + this._getRemoving(itemPrefix) + "\" class='sf-line-button sf-remove' data-icon='ui-icon-circle-close' data-text='false'>" + lang.signum.remove + "</a>") : "")) + "</span>" + "<div id='" + SF.compose(itemPrefix, EntityStrip.key_entity) + "' name='" + SF.compose(itemPrefix, EntityStrip.key_entity) + "' style='display:none'></div>" + "</li>");
 
             $(this.pf(EntityStrip.key_itemsContainer) + " ." + EntityStrip.key_input).before($li);
         };
@@ -921,7 +888,7 @@ var SF;
 
         EntityStrip.prototype.removeItem_click = function (itemPrefix) {
             var _this = this;
-            this.onRemove(itemPrefix).then(function (result) {
+            return this.onRemove(itemPrefix).then(function (result) {
                 if (result)
                     _this.removeEntity(itemPrefix);
             });
@@ -935,7 +902,7 @@ var SF;
             var _this = this;
             var entityHtml = this.extractEntityHtml(itemPrefix);
 
-            this.onViewing(entityHtml).then(function (result) {
+            return this.onViewing(entityHtml).then(function (result) {
                 if (result)
                     _this.setEntity(result, itemPrefix);
                 else
@@ -961,6 +928,6 @@ var SF;
         EntityStrip.key_input = "sf-strip-input";
         return EntityStrip;
     })(EntityList);
-    SF.EntityStrip = EntityStrip;
-})(SF || (SF = {}));
-//# sourceMappingURL=SF_Lines.js.map
+    exports.EntityStrip = EntityStrip;
+});
+//# sourceMappingURL=Lines.js.map

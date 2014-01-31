@@ -51,8 +51,8 @@ namespace Signum.Web
             string partialViewName = line.PartialViewName ?? OnPartialViewName(tc);
 
             vdd[ViewDataKeys.PartialViewName] = partialViewName;
-            vdd[ViewDataKeys.OkVisible] = !line.ReadOnly;
-            vdd[ViewDataKeys.ViewButtons] = ViewButtons.Ok;
+            vdd[ViewDataKeys.ViewMode] = !line.ReadOnly;
+            vdd[ViewDataKeys.ViewMode] = ViewMode.View;
             vdd[ViewDataKeys.ShowOperations] = true;
             vdd[ViewDataKeys.SaveProtected] = OperationLogic.IsSaveProtected(tc.UntypedValue.GetType());
             vdd[ViewDataKeys.WriteEntityState] = 

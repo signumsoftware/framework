@@ -32,14 +32,8 @@ namespace Signum.Web.Operations
                 return new Dictionary<string, string> 
                 { 
                     { "operationExecute", url.Action("Execute", "Operation") },
-                    { "operationContextualExecute", url.Action("ContextualExecute", "Operation") },
-
                     { "operationDelete", url.Action("Delete", "Operation") },
-                    { "operationContextualDelete", url.Action("ContextualDelete", "Operation") },
-
                     { "operationConstructFrom", url.Action("ConstructFrom", "Operation") },
-                    { "operationContextualConstructFrom", url.Action("ContextualConstructFrom", "Operation") },
-
                     { "operationConstructFromMany", url.Action("ConstructFromMany", "Operation") },
                 };
             });
@@ -69,65 +63,67 @@ namespace Signum.Web.Operations
 
         public static ActionResult DefaultExecuteResult(ControllerBase controller, IdentifiableEntity entity, string prefix)
         {
+            var request = controller.ControllerContext.HttpContext.Request;
+
+            if (request[ViewDataKeys.AvoidReturnView].HasText())
+                return new ContentResult(); 
+
             if (prefix.HasText())
             {
                 TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);
-                var popupOptions = controller.ControllerContext.HttpContext.Request[ViewDataKeys.OkVisible].HasText() ?
+                var popupOptions = request[ViewDataKeys.ViewMode].HasText() ?
                     (PopupOptionsBase)new PopupViewOptions(tc) :
-                    new PopupNavigateOptions(tc);
+                    (PopupOptionsBase)new PopupNavigateOptions(tc);
 
                 return controller.PopupOpen(popupOptions);
             }
             else
             {
-                var request = controller.ControllerContext.RequestContext.HttpContext.Request;
-
                 string newUrl = Navigator.NavigateRoute(entity);
+                if (!request.UrlReferrer.AbsolutePath.Contains(newUrl) && !request[ViewDataKeys.AvoidReturnRedirect].HasText())
+                     return new RedirectResult(newUrl);
+
                 if (request.IsAjaxRequest())
-                {
-                    if (request.UrlReferrer.AbsolutePath.Contains(newUrl))
-                        return Navigator.NormalControl(controller, entity);
-                    else
-                        return JsonAction.Redirect(newUrl);
-                }
+                    return Navigator.NormalControl(controller, entity);
                 else
-                {
-                    if (request.UrlReferrer.AbsolutePath.Contains(newUrl))
-                        return Navigator.NormalPage(controller, entity);
-                    else
-                        return new RedirectResult(newUrl);
-                }
+                    return Navigator.NormalPage(controller, entity);
             }
         }
 
-        public static ActionResult DefaultConstructResult(ControllerBase controller, IdentifiableEntity entity, string prefix)
+        public static ActionResult DefaultDelete(ControllerBase controller, Type type)
         {
+            var request = controller.ControllerContext.HttpContext.Request;
+
+            if (!request[ViewDataKeys.AvoidReturnRedirect].HasText())
+                return new RedirectResult(Navigator.FindRoute(type));
+
+            return new ContentResult(); 
+        }
+
+        public static ActionResult DefaultConstructResult(ControllerBase controller, IdentifiableEntity entity, string newPrefix)
+        {
+            var request = controller.ControllerContext.HttpContext.Request;
+
+            if (request[ViewDataKeys.AvoidReturnView].HasText())
+                return new ContentResult(); 
+
             if (entity.Modified == ModifiedState.SelfModified)
                 controller.ViewData[ViewDataKeys.WriteEntityState] = true;
 
-            if (prefix.HasText())
+            if (newPrefix.HasText())
             {
-                TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);
+                TypeContext tc = TypeContextUtilities.UntypedNew(entity, newPrefix);
                 return controller.PopupOpen(new PopupNavigateOptions(tc));
             }
             else //NormalWindow
             {
-                var request = controller.ControllerContext.RequestContext.HttpContext.Request;
+                if (!entity.IsNew && !request[ViewDataKeys.AvoidReturnRedirect].HasText())
+                    return new RedirectResult(Navigator.NavigateRoute(entity));
 
                 if (request.IsAjaxRequest())
-                {
-                    if (entity.IsNew)
-                        return Navigator.NormalControl(controller, entity);
-                    else
-                        return JsonAction.Redirect(Navigator.NavigateRoute(entity));
-                }
+                    return Navigator.NormalControl(controller, entity);
                 else
-                {
-                    if (entity.IsNew)
-                        return Navigator.NormalPage(controller, entity);
-                    else
-                        return new RedirectResult(Navigator.NavigateRoute(entity));
-                }
+                    return Navigator.NormalPage(controller, entity);
             }
         }
 
@@ -187,7 +183,7 @@ namespace Signum.Web.Operations
                               {
                                   Entity = (IdentifiableEntity)entity,
                                   OperationInfo = oi,
-                                  ViewButtons = ctx.ViewButtons,
+                                  ViewButtons = ctx.ViewMode,
                                   ShowOperations = ctx.ShowOperations,
                                   PartialViewName = ctx.PartialViewName,
                                   Prefix = ctx.Prefix,

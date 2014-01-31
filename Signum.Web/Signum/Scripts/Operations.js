@@ -1,0 +1,324 @@
+﻿/// <reference path="globals.ts"/>
+define(["require", "exports", "Entities", "Validator", "Navigator", "Finder"], function(require, exports, Entities, Validator, Navigator, Finder) {
+    function executeDefault(options) {
+        options = $.extend({
+            avoidValidate: false,
+            validationOptions: {},
+            isLite: false
+        }, options);
+
+        return exports.entityIsValidOrLite(options).then(function () {
+            return exports.executeAjax(options).then(function (eHtml) {
+                Navigator.reload(eHtml);
+                exports.notifyExecuted();
+            });
+        });
+    }
+    exports.executeDefault = executeDefault;
+
+    function executeAjax(options) {
+        options = $.extend({
+            controllerUrl: SF.Urls.operationExecute,
+            isLite: false
+        }, options);
+
+        return SF.ajaxPost({ url: options.controllerUrl, data: exports.entityRequestData(options) }).then(function (result) {
+            assertModelStateErrors(result, options);
+            return Entities.EntityHtml.fromHtml(options.prefix, result);
+        });
+    }
+    exports.executeAjax = executeAjax;
+
+    function executeDefaultContextual(options) {
+        Finder.removeOverlay();
+
+        return exports.executeAjaxContextual(options).then(function (result) {
+            return exports.markCells(options.prefix, result);
+        });
+    }
+    exports.executeDefaultContextual = executeDefaultContextual;
+
+    function executeAjaxContextual(options, runtimeInfo) {
+        options = $.extend({
+            controllerUrl: SF.Urls.operationExecute,
+            avoidReturnView: true,
+            isLite: true
+        }, options);
+
+        return SF.ajaxPost({ url: options.controllerUrl, data: exports.contextualRequestData(options, null, runtimeInfo) }).then(SF.isEmpty);
+    }
+    exports.executeAjaxContextual = executeAjaxContextual;
+
+    function constructFromDefault(options) {
+        options = $.extend({
+            avoidValidate: false,
+            validationOptions: {},
+            isLite: true
+        }, options);
+
+        return exports.entityIsValidOrLite(options).then(function () {
+            return exports.constructFromAjax(options);
+        }).then(function (eHtml) {
+            return exports.openPopup(eHtml);
+        });
+    }
+    exports.constructFromDefault = constructFromDefault;
+
+    function constructFromAjax(options, newPrefix) {
+        options = $.extend({
+            controllerUrl: SF.Urls.operationConstructFrom
+        }, options);
+
+        if (!newPrefix)
+            newPrefix = exports.getNewPrefix(options);
+
+        return SF.ajaxPost({ url: options.controllerUrl, data: exports.entityRequestData(options, newPrefix) }).then(function (html) {
+            return Entities.EntityHtml.fromHtml(newPrefix, html);
+        });
+    }
+    exports.constructFromAjax = constructFromAjax;
+
+    function constructFromDefaultContextual(options, newPrefix) {
+        Finder.removeOverlay();
+
+        return exports.constructFromAjaxContextual(options).then(function (eHtml) {
+            exports.openPopup(eHtml);
+            exports.markCells(options.prefix, null);
+        });
+    }
+    exports.constructFromDefaultContextual = constructFromDefaultContextual;
+
+    function constructFromAjaxContextual(options, newPrefix, runtimeInfo) {
+        options = $.extend({
+            controllerUrl: SF.Urls.operationConstructFrom
+        }, options);
+
+        if (!newPrefix)
+            newPrefix = exports.getNewPrefix(options);
+
+        return SF.ajaxPost({ url: options.controllerUrl, data: exports.contextualRequestData(options, newPrefix, runtimeInfo) }).then(function (html) {
+            return Entities.EntityHtml.fromHtml(newPrefix, html);
+        });
+    }
+    exports.constructFromAjaxContextual = constructFromAjaxContextual;
+
+    function deleteDefault(options) {
+        options = $.extend({
+            avoidValidate: true,
+            isLite: true
+        }, options);
+
+        exports.entityIsValidOrLite(options).then(function () {
+            return exports.deleteAjax(options);
+        }); //ajax prefilter will take redirect
+    }
+    exports.deleteDefault = deleteDefault;
+
+    function deleteAjax(options) {
+        options = $.extend({
+            controllerUrl: SF.Urls.operationDelete,
+            isLite: true
+        }, options);
+
+        SF.ajaxPost({ url: options.controllerUrl, data: exports.entityRequestData(options) }); //ajax prefilter will take redirect
+    }
+    exports.deleteAjax = deleteAjax;
+
+    function deleteDefaultContextual(options) {
+        options = $.extend({
+            avoidReturnRedirect: true
+        }, options);
+
+        Finder.removeOverlay();
+
+        return exports.deleteAjaxContextual(options).then(function (result) {
+            exports.markCells(options.prefix, result);
+        });
+    }
+    exports.deleteDefaultContextual = deleteDefaultContextual;
+
+    function deleteAjaxContextual(options, runtimeInfo) {
+        options = $.extend({
+            controllerUrl: SF.Urls.operationDelete,
+            isLite: true
+        }, options);
+
+        return SF.ajaxPost({ url: options.controllerUrl, data: exports.contextualRequestData(options, null, runtimeInfo) });
+    }
+    exports.deleteAjaxContextual = deleteAjaxContextual;
+
+    function constructFromManyDefault(options, newPrefix) {
+        options = $.extend({
+            controllerUrl: SF.Urls.operationConstructFromMany
+        }, options);
+
+        Finder.removeOverlay();
+
+        return exports.constructFromManyAjax(options).then(function (eHtml) {
+            exports.openPopup(eHtml);
+            exports.markCells(options.prefix, null);
+        });
+    }
+    exports.constructFromManyDefault = constructFromManyDefault;
+
+    function constructFromManyAjax(options, newPrefix) {
+        options = $.extend({
+            controllerUrl: SF.Urls.operationConstructFromMany
+        }, options);
+
+        if (!newPrefix)
+            newPrefix = exports.getNewPrefix(options);
+
+        return SF.ajaxPost({ url: options.controllerUrl, data: exports.constructFromManyRequestData(options, newPrefix) }).then(function (html) {
+            return Entities.EntityHtml.fromHtml(newPrefix, html);
+        });
+    }
+    exports.constructFromManyAjax = constructFromManyAjax;
+
+    function reload(entityHtml) {
+        exports.disableContextMenu();
+        Navigator.reload(entityHtml);
+    }
+    exports.reload = reload;
+
+    function openPopup(entityHtml) {
+        exports.disableContextMenu();
+        Navigator.navigatePopup(entityHtml);
+        exports.notifyExecuted();
+    }
+    exports.openPopup = openPopup;
+
+    function disableContextMenu() {
+        $(".sf-ctxmenu-active").removeClass("sf-ctxmenu-active");
+    }
+    exports.disableContextMenu = disableContextMenu;
+
+    function markCells(prefix, success) {
+        $(".sf-ctxmenu-active").addClass("sf-entity-ctxmenu-" + (success ? "success" : "error")).removeClass("sf-ctxmenu-active");
+        exports.notifyExecuted();
+    }
+    exports.markCells = markCells;
+
+    function notifyExecuted() {
+        SF.Notify.info(lang.signum.executed, 2000);
+    }
+    exports.notifyExecuted = notifyExecuted;
+
+    function getNewPrefix(optons) {
+        return SF.compose("New", this.options.prefix);
+    }
+    exports.getNewPrefix = getNewPrefix;
+
+    function entityRequestData(options, newPrefix) {
+        var result = exports.baseRequestData(options, newPrefix);
+
+        var formValues = options.isLite ? Validator.getFormValuesLite(options.prefix) : Validator.getFormValues(options.prefix);
+
+        return $.extend(result, formValues);
+    }
+    exports.entityRequestData = entityRequestData;
+
+    function constructFromManyRequestData(options, newPrefix, liteKey) {
+        var result = exports.baseRequestData(options, newPrefix);
+
+        if (!liteKey) {
+            var items = Finder.getFor(options.prefix).selectedItems();
+            liteKey = items.map(function (i) {
+                return i.runtimeInfo.key();
+            });
+        }
+
+        result["liteKeys"] = liteKey.join(",");
+
+        return result;
+    }
+    exports.constructFromManyRequestData = constructFromManyRequestData;
+
+    function contextualRequestData(options, newPrefix, runtimeInfo) {
+        var result = exports.baseRequestData(options, newPrefix);
+
+        if (!runtimeInfo) {
+            var items = Finder.getFor(options.prefix).selectedItems();
+
+            if (items.length > 1)
+                throw new Error("just one entity should have been selected");
+
+            runtimeInfo = items[0].runtimeInfo;
+        }
+
+        result[SF.compose(options.prefix, Entities.Keys.runtimeInfo)] = runtimeInfo.toString();
+
+        return result;
+    }
+    exports.contextualRequestData = contextualRequestData;
+
+    function baseRequestData(options, newPrefix) {
+        var formValues = Validator.getFormBasics();
+
+        formValues = $.extend({
+            isLite: options.isLite,
+            operationFullKey: options.operationKey,
+            newprefix: newPrefix,
+            prefix: options.prefix
+        }, formValues);
+
+        if (options.avoidReturnRedirect)
+            formValues["sfAvoidReturnRedirect"] = true;
+
+        if (options.avoidReturnView)
+            formValues["sfAvoidReturnView"] = true;
+
+        return $.extend(formValues, options.requestExtraJsonData);
+    }
+    exports.baseRequestData = baseRequestData;
+
+    function assertModelStateErrors(operationResult, options) {
+        if ((typeof (operationResult) !== "object") || (operationResult.result != "ModelState"))
+            return false;
+
+        var modelState = operationResult.ModelState;
+
+        Validator.showErrors({ prefix: options.prefix }, modelState);
+
+        SF.Notify.error(lang.signum.error, 2000);
+
+        throw modelState;
+    }
+
+    function entityIsValidOrLite(options) {
+        if (options.isLite || options.avoidValidate)
+            return Promise.resolve(null);
+
+        var valOptions = $.extend({ prefix: options.prefix }, options.validationOptions);
+
+        return Validator.entityIsValid(valOptions);
+    }
+    exports.entityIsValidOrLite = entityIsValidOrLite;
+
+    function validateAndSubmit(options) {
+        if (exports.entityIsValidOrLite(options))
+            exports.submit(options);
+    }
+    exports.validateAndSubmit = validateAndSubmit;
+
+    function submit(options) {
+        var mainControl = options.prefix ? $("#{0}_divNormalControl".format(options.prefix)) : $("#divNormalControl");
+
+        var $form = mainControl.closest("form");
+        $form.append(SF.hiddenInput('isLite', options.isLite) + SF.hiddenInput('operationFullKey', options.operationKey) + SF.hiddenInput("prefix", options.prefix));
+
+        if (!SF.isEmpty(options.prefix)) {
+            //Check runtimeInfo present => if it's a popup from a LineControl it will not be
+            var myRuntimeInfoKey = SF.compose(options.prefix, Entities.Keys.runtimeInfo);
+            if ($form.filter("#" + myRuntimeInfoKey).length == 0) {
+                SF.hiddenInput(myRuntimeInfoKey, mainControl.data("runtimeinfo"));
+            }
+        }
+
+        SF.submit(options.controllerUrl, options.requestExtraJsonData, $form);
+
+        return false;
+    }
+    exports.submit = submit;
+});
+//# sourceMappingURL=Operations.js.map

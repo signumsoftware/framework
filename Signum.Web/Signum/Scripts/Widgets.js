@@ -1,19 +1,17 @@
-﻿/// <reference path="references.ts"/>
-
-
-module SF.Widgets
-{   
+﻿/// <reference path="globals.ts"/>
+define(["require", "exports", "Entities"], function(require, exports, Entities) {
     var highlightClass = "sf-alert-active";
-    once("widgetToggler", () =>
-        $(document).on("click", ".sf-widget-toggler", function (evt) {
+    once("widgetToggler", function () {
+        return $(document).on("click", ".sf-widget-toggler", function (evt) {
             SF.Dropdowns.toggle(evt, this, 1);
             return false;
-        }));
+        });
+    });
 
-    export function onNoteCreated(url, prefix, successMessage) {
+    function onNoteCreated(url, prefix, successMessage) {
         $.ajax({
             url: url,
-            data: { sfRuntimeInfo: new SF.RuntimeInfoElement(prefix).getElem().val() },
+            data: { sfRuntimeInfo: new Entities.RuntimeInfoElement(prefix).getElem().val() },
             success: function (newCount) {
                 var $notesWidget = $("#" + SF.compose(prefix, "notesWidget"));
                 $notesWidget.find(".sf-widget-count").html(newCount);
@@ -21,11 +19,12 @@ module SF.Widgets
             }
         });
     }
+    exports.onNoteCreated = onNoteCreated;
 
-    export function onAlertCreated(url, prefix, successMessage) {
+    function onAlertCreated(url, prefix, successMessage) {
         $.ajax({
             url: url,
-            data: { sfRuntimeInfo: new SF.RuntimeInfoElement(prefix).getElem().val() },
+            data: { sfRuntimeInfo: new Entities.RuntimeInfoElement(prefix).getElem().val() },
             success: function (jsonNewCount) {
                 var $alertsWidget = $("#" + SF.compose(prefix, "alertsWidget"));
                 updateCountAndHighlight($alertsWidget, "warned", jsonNewCount.warned);
@@ -35,6 +34,7 @@ module SF.Widgets
             }
         });
     }
+    exports.onAlertCreated = onAlertCreated;
 
     function updateCountAndHighlight($alertsWidget, key, count) {
         var $current = $alertsWidget.find(".sf-alert-" + key);
@@ -43,4 +43,5 @@ module SF.Widgets
             $current.addClass(highlightClass);
         }
     }
-}
+});
+//# sourceMappingURL=Widgets.js.map

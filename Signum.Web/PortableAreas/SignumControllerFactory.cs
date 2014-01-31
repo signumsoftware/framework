@@ -104,20 +104,10 @@ namespace Signum.Web.PortableAreas
 
         public static void AvoidValidate(Type[] doNotValidateInput)
         {
-
             ValidateInputAttribute doNotValidateInputAttribute = new ValidateInputAttribute(false);
+         
             Controller<SignumController>()
-                .Action(c => c.Validate())
-                .AddFilters(ctx =>
-                {
-                    RuntimeInfo ri = RuntimeInfo.FromFormValue(ctx.ControllerContext.HttpContext.Request.Form[EntityBaseKeys.RuntimeInfo]);
-                    if (doNotValidateInput.Contains(ri.EntityType))
-                        return doNotValidateInputAttribute;
-                    return null;
-                });
-
-            Controller<SignumController>()
-                .Action(c => c.ValidatePartial(null, null, null))
+                .Action(c => c.Validate(null, null, null))
                 .AddFilters(ctx =>
                 {
                     var form = ctx.ControllerContext.HttpContext.Request.Form;

@@ -168,7 +168,7 @@ WriteLiteral("    ");
             #line 25 "..\..\Signum\Views\NormalControl.cshtml"
 Write(ButtonBarEntityHelper.GetForEntity(new EntityButtonContext
     { 
-        ViewButtons = ViewButtons.Save,
+        ViewMode = ViewMode.Navigate,
         ShowOperations = (bool)ViewData[ViewDataKeys.ShowOperations],
         ControllerContext = this.ViewContext,
         PartialViewName = ViewData[ViewDataKeys.PartialViewName].ToString(),

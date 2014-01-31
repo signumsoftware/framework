@@ -50,44 +50,29 @@ namespace Signum.Web.Controllers
            return OperationsClient.DefaultExecuteResult(this, entity, prefix);
         }
 
-
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult ContextualExecute(string operationFullKey, string liteKeys)
+        public ActionResult Delete(string operationFullKey, bool isLite, string prefix)
         {
             Enum operationKey = OperationsClient.GetOperationKeyAssert(operationFullKey);
 
-            var lite = Navigator.ParseLiteKeys<IdentifiableEntity>(liteKeys).Single();
+            if (isLite)
+            {
+                Lite<IdentifiableEntity> lite = this.ExtractLite<IdentifiableEntity>(prefix);
 
-            IdentifiableEntity entity = OperationLogic.ExecuteLite(lite, operationKey);
+                OperationLogic.Delete(lite, operationKey, null);
 
-            return Content("");
+                return OperationsClient.DefaultDelete(this, lite.EntityType);
+            }
+            else
+            {
+                MappingContext context = this.UntypedExtractEntity(prefix).UntypedApplyChanges(this.ControllerContext, prefix, true).UntypedValidateGlobal();
+                IdentifiableEntity entity = (IdentifiableEntity)context.UntypedValue;
+
+                OperationLogic.Delete(entity, operationKey, null);
+
+                return OperationsClient.DefaultDelete(this, entity.GetType());
+            }
         }
-
-
-        [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Delete(string operationFullKey, string prefix)
-        {
-            Enum operationKey = OperationsClient.GetOperationKeyAssert(operationFullKey);
-
-            Lite<IdentifiableEntity> lite = this.ExtractLite<IdentifiableEntity>(prefix);
-
-            OperationLogic.Delete(lite, MultiEnumLogic<OperationDN>.ToEnum(operationFullKey), null);
-            
-            return JsonAction.Redirect(Navigator.FindRoute(lite.EntityType));
-        }
-
-        [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult ContextualDelete(string operationFullKey, string liteKeys)
-        {
-            Enum operationKey = OperationsClient.GetOperationKeyAssert(operationFullKey);
-
-            var lite = Navigator.ParseLiteKeys<IdentifiableEntity>(liteKeys).Single();
-
-            OperationLogic.Delete(lite, operationKey);
-
-            return Content("");
-        }
-
 
         [HttpPost, ValidateAntiForgeryToken]
         public ActionResult ConstructFrom(string operationFullKey, bool isLite, string prefix, string newPrefix)
@@ -115,18 +100,6 @@ namespace Signum.Web.Controllers
             }
 
             return OperationsClient.DefaultConstructResult(this, entity, newPrefix);
-        }
-
-        [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult ContextualConstructFrom(string operationFullKey, string liteKeys, string newPrefix)
-        {
-            Enum operationKey = OperationsClient.GetOperationKeyAssert(operationFullKey);
-
-            var lite = Navigator.ParseLiteKeys<IdentifiableEntity>(liteKeys).Single();
-
-            var entity = lite.ConstructFromLite<IdentifiableEntity>(operationKey);
-
-          return OperationsClient.DefaultConstructResult(this, entity, newPrefix);
         }
 
         [HttpPost, ValidateAntiForgeryToken]

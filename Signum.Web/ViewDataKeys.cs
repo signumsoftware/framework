@@ -13,8 +13,9 @@ namespace Signum.Web
         public const string Title = "Title";
         public const string CustomHtml = "sfCustomHtml";
 
-        public const string ViewButtons = "sfViewButtons";
-        public const string OkVisible = "sfOkVisible";
+        public const string ViewMode = "sfViewMode";
+        public const string AvoidReturnView = "sfAvoidReturnView";
+        public const string AvoidReturnRedirect = "sfAvoidReturnRedirect";
         public const string OnOk = "sfOnOk";
 
         public const string ManualToolbarButtons = "sfManualToolbarButtons";
@@ -47,4 +48,6 @@ namespace Signum.Web
                 return tc.ControlID;
         }
     }
+
+
 }

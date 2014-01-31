@@ -20,7 +20,7 @@
     </span>
     <span class="sf-entity-title">@(ViewBag.Title ?? Model.UntypedValue.TryToString()) </span>
     <div class="sf-button-bar">
-        @if (ViewData.ContainsKey(ViewDataKeys.OkVisible) && (bool)ViewData[ViewDataKeys.OkVisible])
+        @if (((ViewMode)ViewData[ViewDataKeys.ViewMode]) == ViewMode.View)
         {
             var saveProtected = (bool)ViewData[ViewDataKeys.SaveProtected]; 
             <button id="@Model.Compose("btnOk")" class="sf-entity-button sf-ok-button@(saveProtected ? " sf-save-protected" : "")" @(ViewData[ViewDataKeys.OnOk] != null ? Html.Raw("onclick=\"" + ViewData[ViewDataKeys.OnOk] + "\"") : null)>
@@ -29,7 +29,7 @@
 
         @ButtonBarEntityHelper.GetForEntity(new EntityButtonContext
         {
-            ViewButtons = (ViewButtons)ViewData[ViewDataKeys.ViewButtons],
+            ViewMode = (ViewMode)ViewData[ViewDataKeys.ViewMode],
             ControllerContext = this.ViewContext,
             PartialViewName = ViewData[ViewDataKeys.PartialViewName].ToString(),
             Prefix = Model.ControlID,

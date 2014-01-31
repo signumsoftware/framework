@@ -1,0 +1,471 @@
+﻿/// <reference path="../Headers/es6-promises/es6-promises.d.ts"/>
+/// <reference path="../Headers/jquery/jquery.d.ts"/>
+
+
+declare var lang: any;
+
+var onceStorage: any = {};
+function once(key: string, func: () => void) {
+    if (onceStorage[key] === undefined) {
+        func();
+        onceStorage[key] = "loaded";
+    }
+}
+
+module SF {
+    export var Urls: any;
+    export var Locale: any;
+
+    export var debug = true;
+
+    export function log(s: string) {
+        if (debug) {
+            if (typeof console != "undefined" && typeof console.debug != "undefined") console.log(s);
+        }
+    }
+
+    once("setupAjaxRedirectPrefilter", () =>
+        setupAjaxRedirect());
+
+    function setupAjaxRedirect() {
+
+        $.ajaxPrefilter(function (options : JQueryAjaxSettings, originalOptions : JQueryAjaxSettings, jqXHR : JQueryXHR) {
+
+            var originalSuccess = options.success;
+
+            options.success = function (result, text, xhr) {
+                if (!options.avoidRedirect && jqXHR.status == 302)
+                    location.href = jqXHR.getResponseHeader("Location");
+
+                originalSuccess(result, text, xhr);
+            };
+        });
+
+        $(document).ajaxError(function (event, XMLHttpRequest, ajaxOptions, thrownError) {
+            //check request status
+            //request.abort() has status 0, so we don't show this "error", since we have
+            //explicitly aborted the request.
+            //this error is documented on http://bugs.jquery.com/ticket/7189
+            if (XMLHttpRequest.status !== 0) {
+                $("body").trigger("sf-ajax-error", [XMLHttpRequest, ajaxOptions, thrownError]);
+            }
+        });
+    }
+
+    export function isEmpty(value): boolean {
+        return (value == undefined || value == null || value === "" || value.toString() == "");
+    };
+
+    export module InputValidator {
+        export function isNumber(e: KeyboardEvent): boolean {
+            var c = e.keyCode;
+            return ((c >= 48 && c <= 57) /*0-9*/ ||
+                (c >= 96 && c <= 105) /*NumPad 0-9*/ ||
+                (c == 8) /*BackSpace*/ ||
+                (c == 9) /*Tab*/ ||
+                (c == 12) /*Clear*/ ||
+                (c == 27) /*Escape*/ ||
+                (c == 37) /*Left*/ ||
+                (c == 39) /*Right*/ ||
+                (c == 46) /*Delete*/ ||
+                (c == 36) /*Home*/ ||
+                (c == 35) /*End*/ ||
+                (c == 109) /*NumPad -*/ ||
+                (c == 189) /*-*/ ||
+                (e.ctrlKey && c == 86) /*Ctrl + v*/ ||
+                (e.ctrlKey && c == 67) /*Ctrl + v*/
+                );
+        }
+
+        export function isDecimal(e: KeyboardEvent): boolean {
+            var c = e.keyCode;
+            return (
+                this.isNumber(e) ||
+                (c == 110) /*NumPad Decimal*/ ||
+                (c == 190) /*.*/ ||
+                (c == 188) /*,*/
+                );
+        }
+    }
+
+    export module Cookies {
+        export function read(name: string) {
+            var nameEQ = name + "=";
+            var ca = document.cookie.split(';');
+            for (var i = 0; i < ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
+        export function create(name: string, value: string, days: number, domain?: string) {
+            var expires = null,
+                path = "/";
+
+            if (days) {
+                var date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = date;
+            }
+
+            document.cookie = name + "=" + encodeURI(value) + ((expires) ? ";expires=" + expires.toGMTString() : "") + ((path) ? ";path=" + path : "") + ((domain) ? ";domain=" + domain : "");
+        }
+    }
+
+
+    export module LocalStorage {
+        var isSupported = typeof (localStorage) != 'undefined';
+
+        export function getItem(key: string) {
+            if (isSupported) {
+                try {
+                    return localStorage.getItem(key);
+                } catch (e) { }
+            }
+            return Cookies.read(key);
+        };
+
+        export function setItem(key: string, value: string, days?: number) {
+            if (isSupported) {
+                try {
+                    localStorage.setItem(key, value);
+                    return true;
+                } catch (e) { }
+            } else
+                Cookies.create(key, value, days ? days : 30);
+        };
+
+        return {
+            getItem: getItem,
+            setItem: setItem
+        };
+    }
+
+    export function triggerNewContent($source: JQuery) {
+        $source.trigger("sf-new-content");
+    }
+
+    export function hiddenInput(id: string, value: any) {
+        return "<input type='hidden' id='" + id + "' name='" + id + "' value='" + value + "' />\n";
+    }
+
+    export function hiddenDiv(id: string, innerHtml: any) {
+        return $("<div id='" + id + "' style='display:none'></div>").html(innerHtml);
+    }
+
+    export function compose(str1: string, str2: string, separator?: string) {
+        if (typeof (str1) !== "string" && str1 !== null && str1 != undefined) {
+            throw "str1 " + str1 + " is not a string";
+        }
+
+        if (typeof (str2) !== "string" && str2 !== null && str2 != undefined) {
+            throw "str2 " + str2 + " is not a string";
+        }
+
+        if (SF.isEmpty(str1)) {
+            return str2;
+        }
+
+        if (SF.isEmpty(str2)) {
+            return str1;
+        }
+
+        if (SF.isEmpty(separator)) {
+            separator = "_";
+        }
+
+        return str1 + separator + str2;
+    }
+
+    export function cloneWithValues(elements: JQuery): JQuery {
+        var clone = elements.clone(true);
+
+        var sourceSelect = elements.filter("select").add(elements.find("select"));
+        var cloneSelect = clone.filter("select").add(clone.filter("selet"));
+
+        for (var i = 0, l = sourceSelect.length; i < l; i++) {
+            cloneSelect.eq(i).val(sourceSelect.eq(i).val());
+        }
+
+        return clone;
+    }
+
+
+    export function getPathPrefixes(prefix) {
+        var path = [],
+            pathSplit = prefix.split("_");
+
+        for (var i = 0, l = pathSplit.length; i < l; i++)
+            path[i] = pathSplit.slice(0, i).join("_");
+
+        return path;
+    }
+
+    export function ajaxPost(settings: JQueryAjaxSettings): Promise<any> {
+        return new Promise<any>((resolve, reject) => {
+            settings.success = resolve;
+            settings.error = (jqXHR: JQueryXHR, textStatus: string, errorThrow: string) => reject({ jqXHR: jqXHR, textStatus: textStatus, errorThrow: errorThrow });
+            settings.type = "POST";
+            $.ajax(settings);
+        });
+    }
+
+    export function ajaxGet(settings: JQueryAjaxSettings): Promise<any> {
+        return new Promise<any>((resolve, reject) => {
+            settings.success = resolve;
+            settings.error = (jqXHR: JQueryXHR, textStatus: string, errorThrow: string) => reject({ jqXHR: jqXHR, textStatus: textStatus, errorThrow: errorThrow });
+            settings.type = "GET";
+            $.ajax(settings);
+        });
+    }
+
+    export function redirectUrl(ajaxResult): void {
+        if (SF.isEmpty(ajaxResult))
+            return;
+
+        if (typeof ajaxResult !== "object")
+            return;
+
+        if (ajaxResult.result == null)
+            return;
+
+        if (ajaxResult.result == 'url')
+            location.href = ajaxResult.url;
+
+        return;
+    }
+
+    export function submit(urlController: string, requestExtraJsonData?: any, $form?: JQuery) {
+        $form = $form || $("form");
+        if (!SF.isEmpty(requestExtraJsonData)) {
+            if ($.isFunction(requestExtraJsonData))
+                requestExtraJsonData = requestExtraJsonData();
+
+            for (var key in requestExtraJsonData) {
+                if (requestExtraJsonData.hasOwnProperty(key)) {
+                    $form.append(SF.hiddenInput(key, requestExtraJsonData[key]));
+                }
+            }
+        }
+
+        (<HTMLFormElement>$form.attr("action", urlController)[0]).submit();
+        return false;
+    }
+
+    export function submitOnly(urlController: string, requestExtraJsonData: any) {
+        if (requestExtraJsonData == null)
+            throw "SubmitOnly needs requestExtraJsonData. Use Submit instead";
+
+        var $form = $("<form />",
+            {
+                method: 'post',
+                action: urlController
+            });
+
+        if (!SF.isEmpty(requestExtraJsonData)) {
+            if ($.isFunction(requestExtraJsonData)) {
+                requestExtraJsonData = requestExtraJsonData();
+            }
+            for (var key in requestExtraJsonData) {
+                if (requestExtraJsonData.hasOwnProperty(key)) {
+                    $form.append(SF.hiddenInput(key, requestExtraJsonData[key]));
+                }
+            }
+        }
+
+        var currentForm = $("form");
+        currentForm.after($form);
+
+        (<HTMLFormElement>$form[0]).submit();
+        $form.remove();
+
+        return false;
+    }
+}
+
+interface JQuery {
+    serializeObject(): FormObject
+}
+
+interface JQueryAjaxSettings {
+    avoidRedirect?: boolean;
+}
+
+interface FormObject {
+    [formKey: string]: any
+}
+
+$.fn.serializeObject = function () {
+    var o = {};
+    var a = this.serializeArray();
+    $.each(a, function () {
+        if (o[this.name] !== undefined) {
+            if (!o[this.name].push) {
+                o[this.name] = [o[this.name]];
+            }
+            o[this.name].push(this.value || '');
+        } else {
+            o[this.name] = this.value || '';
+        }
+    });
+    return o;
+};
+
+interface String {
+    hasText(): boolean;
+    startsWith(str: string): boolean;
+    format(...parameters: any[]): string;
+    replaceAll(from: string, to: string);
+    after(separator: string): string;
+    before(separator: string): string;
+    tryAfter(separator: string): string;
+    tryBefore(separator: string): string;
+    afterLast(separator: string): string;
+    beforeLast(separator: string): string;
+    tryAfterLast(separator: string): string;
+    tryBeforeLast(separator: string): string;
+}
+
+once("stringExtensions", () => {
+    String.prototype.hasText = function () {
+        return (this == null || this == undefined || this == '') ? false : true;
+    }
+
+    String.prototype.startsWith = function (str) {
+        return (this.indexOf(str) === 0);
+    }
+
+    String.prototype.format = function () {
+        var regex = /\{([\w-]+)(?:\:([\w\.]*)(?:\((.*?)?\))?)?\}/g;
+
+        var args = arguments;
+
+        var getValue = function (key) {
+            if (args == null || typeof args === 'undefined') return null;
+
+            var value = args[key];
+            var type = typeof value;
+
+            return type === 'string' || type === 'number' ? value : null;
+        };
+
+        return this.replace(regex, function (match) {
+            //match will look like {sample-match}
+            //key will be 'sample-match';
+            var key = match.substr(1, match.length - 2);
+
+            var value = getValue(key);
+
+            return value != null ? value : match;
+        });
+    };
+
+    String.prototype.replaceAll = function (from, to) {
+        return this.split(from).join(to)
+    };
+
+    String.prototype.before = function (separator) {
+        var index = this.indexOf(separator);
+        if (index == -1)
+            throw Error("{0} not found");
+
+        return this.substring(0, index);
+    };
+
+    String.prototype.after = function (separator) {
+        var index = this.indexOf(separator);
+        if (index == -1)
+            throw Error("{0} not found");
+
+        return this.substring(index + separator.length);
+    };
+
+    String.prototype.tryBefore = function (separator) {
+        var index = this.indexOf(separator);
+        if (index == -1)
+            return null;
+
+        return this.substring(0, index);
+    };
+
+    String.prototype.tryAfter = function (separator) {
+        var index = this.indexOf(separator);
+        if (index == -1)
+            return null;
+
+        return this.substring(index + separator.length);
+    };
+
+    String.prototype.beforeLast = function (separator) {
+        var index = this.lastIndexOf(separator);
+        if (index == -1)
+            throw Error("{0} not found");
+
+        return this.substring(0, index);
+    };
+
+    String.prototype.afterLast = function (separator) {
+        var index = this.lastIndexOf(separator);
+        if (index == -1)
+            throw Error("{0} not found");
+
+        return this.substring(index + separator.length);
+    };
+
+    String.prototype.tryBeforeLast = function (separator) {
+        var index = this.lastIndexOf(separator);
+        if (index == -1)
+            return null;
+
+        return this.substring(0, index);
+    };
+
+    String.prototype.tryAfterLast = function (separator) {
+        var index = this.lastIndexOf(separator);
+        if (index == -1)
+            return null;
+
+        return this.substring(index + separator.length);
+    };
+
+    if (typeof String.prototype.trim !== 'function') {
+        String.prototype.trim = function () {
+            return this.replace(/^\s+|\s+$/, '');
+        }
+    }
+});
+
+interface Window {
+    File: any;
+    FileList: any;
+    FileReader: any;
+}
+
+interface Window {
+    changeTextArea(value: string, runtimeInfo: string);
+
+    getExceptionNumber(): number;
+}
+
+interface Error {
+    lineNumber: number;
+}
+
+interface Document {
+    onpaste: (ev: { clipboardData: DataTransfer }) => any;
+}
+
+interface DataTransfer {
+    items: {
+        type: string;
+        kind: string;
+        getAsFile(): Blob;
+    }[]
+}
+
+
+
+
+

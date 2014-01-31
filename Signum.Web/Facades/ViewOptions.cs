@@ -36,7 +36,7 @@ namespace Signum.Web
     
         public TypeContext TypeContext { get; set; }
 
-        public abstract ViewButtons ViewButtons { get; }
+        public abstract ViewMode ViewMode { get; }
 
         public bool ShowOperations { get; set; }
     }
@@ -50,9 +50,9 @@ namespace Signum.Web
 
         public bool? SaveProtected { get; set; }
 
-        public override ViewButtons ViewButtons 
+        public override ViewMode ViewMode 
         {
-            get { return Web.ViewButtons.Ok; } 
+            get { return Web.ViewMode.View; } 
         }
     }
 
@@ -63,15 +63,15 @@ namespace Signum.Web
             TypeContext = tc;
         }
 
-        public override ViewButtons ViewButtons
+        public override ViewMode ViewMode
         {
-            get { return Web.ViewButtons.Save; }
+            get { return Web.ViewMode.Navigate; }
         }
     }
 
-    public enum ViewButtons
+    public enum ViewMode
     {
-        Ok,
-        Save
+        View,
+        Navigate
     }
 }

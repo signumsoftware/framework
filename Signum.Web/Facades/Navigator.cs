@@ -459,7 +459,6 @@ namespace Signum.Web
                 { "popupView", url.SignumAction("PopupView") },
                 { "partialView", url.SignumAction("PartialView") },
                 { "validate", url.SignumAction("Validate") },
-                { "validatePartial", url.SignumAction("ValidatePartial") },
                 { "trySave", url.SignumAction("TrySave") },
                 { "trySavePartial", url.SignumAction("TrySavePartial") },
                 { "find", url.SignumAction("Find") },
@@ -662,11 +661,10 @@ namespace Signum.Web
             if (isReadOnly)
                 typeContext.ReadOnly = true;
 
-            ViewButtons buttons = viewOptions.ViewButtons;
-            controller.ViewData[ViewDataKeys.ViewButtons] = buttons;
-            controller.ViewData[ViewDataKeys.OkVisible] = buttons == ViewButtons.Ok;
+            ViewMode mode = viewOptions.ViewMode;
+            controller.ViewData[ViewDataKeys.ViewMode] = mode == ViewMode.View;
             controller.ViewData[ViewDataKeys.ShowOperations] = viewOptions.ShowOperations;
-            if (buttons == ViewButtons.Ok)
+            if (mode == ViewMode.View)
             {
                 controller.ViewData[ViewDataKeys.SaveProtected] = ((PopupViewOptions)viewOptions).SaveProtected ??
                     OperationLogic.IsSaveProtected(entity.GetType());
@@ -1183,18 +1181,6 @@ namespace Signum.Web
 
     public static class JsonAction
     {
-        public static JsonResult Redirect(string url)
-        {
-            return new JsonResult
-            {
-                Data = new
-                {
-                    result = JsonResultType.url.ToString(),
-                    url = url
-                }
-            };
-        }
-
         public static JsonResult ModelState(ModelStateDictionary dictionary)
         {
             return ModelState(dictionary, null, null); 

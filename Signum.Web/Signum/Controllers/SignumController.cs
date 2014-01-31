@@ -132,16 +132,7 @@ namespace Signum.Web.Controllers
         }
 
         [HttpPost]
-        public JsonResult Validate()
-        {
-            MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(ControllerContext, null, true).UntypedValidateGlobal();
-
-            this.ModelState.FromContext(context);
-            return JsonAction.ModelState(ModelState);
-        }
-
-        [HttpPost]
-        public JsonResult ValidatePartial(string prefix, string rootType = null, string propertyRoute = null)
+        public JsonResult Validate(string prefix, string rootType = null, string propertyRoute = null)
         {
             ModifiableEntity mod = this.UntypedExtractEntity(prefix);
 

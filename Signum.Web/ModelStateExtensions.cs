@@ -12,6 +12,8 @@ namespace Signum.Web
     {
         public static void FromContext(this ModelStateDictionary modelState, MappingContext context)
         {
+            modelState.Clear();
+
             if (context.GlobalErrors.Count > 0)
                 foreach (var p in context.GlobalErrors)
                     foreach (var v in p.Value)
@@ -20,6 +22,8 @@ namespace Signum.Web
 
         public static void FromDictionary(this ModelStateDictionary modelState, Dictionary<string, List<string>> errors, NameValueCollection form)
         {
+            modelState.Clear();
+
             if (errors != null)
                 foreach (var p in errors)
                     foreach (var v in p.Value)
