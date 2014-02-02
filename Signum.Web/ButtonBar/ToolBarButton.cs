@@ -13,7 +13,7 @@ namespace Signum.Web
         public string Id { get; set; }
         public string Text { get; set; }
         public string AltText { get; set; }
-        public string OnClick { get; set; }
+        public JsFunction OnClick { get; set; }
         public string Href { get; set; }
         public double Order { get; set; }
 
@@ -42,7 +42,7 @@ namespace Signum.Web
 
         public virtual MvcHtmlString ToHtml(HtmlHelper helper)
         {
-            if (enabled && (OnClick.HasText() || Href.HasText()))
+            if (enabled && (OnClick != null || Href.HasText()))
                 HtmlProps.Add("onclick", OnClick);
             else
                 DivCssClass = DivCssClass + " sf-disabled";

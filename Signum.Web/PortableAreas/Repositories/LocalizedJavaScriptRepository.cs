@@ -12,6 +12,7 @@ using System.Resources;
 using System.Collections.Concurrent;
 using System.Web;
 using System.Web.Mvc;
+using Newtonsoft.Json;
 
 namespace Signum.Web.PortableAreas
 {
@@ -61,10 +62,7 @@ namespace Signum.Web.PortableAreas
                 {
                     sw.WriteLine("if(typeof lang == 'undefined' || lang == null) lang = {};");
                     sw.WriteLine("lang.{0} =".Formato(JavaScriptVariableName));
-                    sw.WriteLine("{");
-
-                    sw.WriteLine(string.Join(",\r\n", dic.Select(p => "   {0}: {1}".Formato(p.Key, p.Value.Quote()))));
-
+                    sw.WriteLine(JsonConvert.SerializeObject(dic));
                     sw.WriteLine("};");
                 }
 

@@ -24,7 +24,8 @@
 <div class="sf-button-bar">
     @ButtonBarEntityHelper.GetForEntity(new EntityButtonContext
     { 
-        ViewButtons = ViewButtons.Save,
+        Url = Url,
+        ViewMode = ViewMode.Navigate,
         ShowOperations = (bool)ViewData[ViewDataKeys.ShowOperations],
         ControllerContext = this.ViewContext,
         PartialViewName = ViewData[ViewDataKeys.PartialViewName].ToString(),

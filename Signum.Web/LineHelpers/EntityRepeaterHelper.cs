@@ -55,7 +55,7 @@ namespace Signum.Web
                 }
             }
 
-            sb.AddLine(entityRepeater.ConstructorSript("entityRepeater"));
+            sb.AddLine(entityRepeater.ConstructorScript(JsFunction.LinesModule, "entityRepeater"));
 
             return sb.ToHtml();
         }
@@ -77,7 +77,7 @@ namespace Signum.Web
                                     "sf-line-button sf-remove",
                                     new Dictionary<string, object> 
                                     {
-                                        { "onclick", "{0}.remove('{1}');".Formato(entityRepeater.ToJS(), itemTC.ControlID) },
+                                        { "onclick", "{0}.remove('{1}');".Formato(entityRepeater.SFControl(), itemTC.ControlID) },
                                         { "data-icon", "ui-icon-circle-close" }, 
                                         { "data-text", false } 
                                     }));
@@ -90,7 +90,7 @@ namespace Signum.Web
                                 "sf-line-button sf-move-up",
                                 new Dictionary<string, object> 
                                 {  
-                                   { "onclick", "{0}.moveUp('{1}');".Formato(entityRepeater.ToJS(), itemTC.ControlID) },
+                                   { "onclick", "{0}.moveUp('{1}');".Formato(entityRepeater.SFControl(), itemTC.ControlID) },
                                    { "data-icon", "ui-icon-triangle-1-n" },
                                    { "data-text", false },
                                    { "title", JavascriptMessage.moveUp.NiceToString() }
@@ -102,7 +102,7 @@ namespace Signum.Web
                                 "sf-line-button sf-move-down",
                                 new Dictionary<string, object> 
                                 {   
-                                   { "onclick", "{0}.moveDown('{1}');".Formato(entityRepeater.ToJS(), itemTC.ControlID) },
+                                   { "onclick", "{0}.moveDown('{1}');".Formato(entityRepeater.SFControl(), itemTC.ControlID) },
                                    { "data-icon", "ui-icon-triangle-1-s" },
                                    { "data-text", false },
                                    { "title", JavascriptMessage.moveDown.NiceToString() }

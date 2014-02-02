@@ -87,12 +87,6 @@ namespace Signum.Web
                 FilterOptions = findOptions.FilterOptions
             });
 
-            JsFindOptions foptions = new JsFindOptions
-            {
-                Prefix = options.PopupViewPrefix,
-                FindOptions = findOptions
-            };
-
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
             if (options.WriteQueryName == WriteQueryName.Span)
@@ -105,7 +99,7 @@ namespace Signum.Web
             {
                 sb.Add(new HtmlTag("a")
                     .Class("count-search").Class(count > 0 ? "count-with-results" : "count-no-results")
-                    .Attr("href", options.Href.HasText() ? options.Href : foptions.FindOptions.ToString())
+                    .Attr("href", options.Href.HasText() ? options.Href : findOptions.ToString())
                     .SetInnerText(count.ToString()));
             }
             else
@@ -118,11 +112,11 @@ namespace Signum.Web
             if (options.PopupViewPrefix != null)
             {
                 var htmlAttr = new Dictionary<string, object>
-                    {
-                        { "onclick", "SF.FindNavigator.openFinder({0});".Formato(foptions.ToJS()) },
-                        { "data-icon", "ui-icon-circle-arrow-e" },
-                        { "data-text", false}
-                    };
+                {
+                    { "onclick", new JsFunction(JsFunction.FinderModule, "explore", findOptions.ToJS(options.PopupViewPrefix)) },
+                    { "data-icon", "ui-icon-circle-arrow-e" },
+                    { "data-text", false}
+                };
 
                 sb.Add(helper.Href(options.PopupViewPrefix + "csbtnView",
                       EntityControlMessage.View.NiceToString(),

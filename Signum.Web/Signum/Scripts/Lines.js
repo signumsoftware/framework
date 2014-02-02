@@ -5,7 +5,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-define(["require", "exports", "Entities", "Validator", "Navigator", "Finder"], function(require, exports, Entities, Validator, Navigator, Finder) {
+define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Validator", "Framework/Signum.Web/Signum/Scripts/Navigator", "Framework/Signum.Web/Signum/Scripts/Finder"], function(require, exports, Entities, Validator, Navigator, Finder) {
     var EntityBase = (function () {
         function EntityBase(element, _options) {
             this.element = element;
@@ -265,12 +265,6 @@ define(["require", "exports", "Entities", "Validator", "Navigator", "Finder"], f
     })();
     exports.AjaxEntityAutoCompleter = AjaxEntityAutoCompleter;
 
-    once("SF-entityLine", function () {
-        return $.fn.entityLine = function (opt) {
-            return new EntityLine(this, opt);
-        };
-    });
-
     var EntityLine = (function (_super) {
         __extends(EntityLine, _super);
         function EntityLine() {
@@ -290,12 +284,6 @@ define(["require", "exports", "Entities", "Validator", "Navigator", "Finder"], f
         return EntityLine;
     })(EntityBase);
     exports.EntityLine = EntityLine;
-
-    once("SF-entityCombo", function () {
-        return $.fn.entityCombo = function (opt) {
-            return new EntityCombo(this, opt);
-        };
-    });
 
     var EntityCombo = (function (_super) {
         __extends(EntityCombo, _super);
@@ -333,12 +321,6 @@ define(["require", "exports", "Entities", "Validator", "Navigator", "Finder"], f
         return EntityCombo;
     })(EntityBase);
     exports.EntityCombo = EntityCombo;
-
-    once("SF-entityLineDetail", function () {
-        return $.fn.entityLineDetail = function (opt) {
-            return new EntityLineDetail(this, opt);
-        };
-    });
 
     var EntityLineDetail = (function (_super) {
         __extends(EntityLineDetail, _super);
@@ -603,12 +585,6 @@ define(["require", "exports", "Entities", "Validator", "Navigator", "Finder"], f
     })(EntityBase);
     exports.EntityListBase = EntityListBase;
 
-    once("SF-entityList", function () {
-        return $.fn.entityList = function (opt) {
-            return new EntityList(this, opt);
-        };
-    });
-
     var EntityList = (function (_super) {
         __extends(EntityList, _super);
         function EntityList() {
@@ -716,12 +692,6 @@ define(["require", "exports", "Entities", "Validator", "Navigator", "Finder"], f
     })(EntityListBase);
     exports.EntityList = EntityList;
 
-    once("SF-entityListDetail", function () {
-        return $.fn.entityListDetail = function (opt) {
-            return new EntityListDetail(this, opt);
-        };
-    });
-
     var EntityListDetail = (function (_super) {
         __extends(EntityListDetail, _super);
         function EntityListDetail(element, options) {
@@ -765,12 +735,6 @@ define(["require", "exports", "Entities", "Validator", "Navigator", "Finder"], f
         return EntityListDetail;
     })(EntityList);
     exports.EntityListDetail = EntityListDetail;
-
-    once("SF-entityRepeater", function () {
-        return $.fn.entityRepeater = function (opt) {
-            return new EntityRepeater(this, opt);
-        };
-    });
 
     var EntityRepeater = (function (_super) {
         __extends(EntityRepeater, _super);
@@ -832,12 +796,6 @@ define(["require", "exports", "Entities", "Validator", "Navigator", "Finder"], f
         return EntityRepeater;
     })(EntityListBase);
     exports.EntityRepeater = EntityRepeater;
-
-    once("SF-entityStrip", function () {
-        return $.fn.entityStrip = function (opt) {
-            return new EntityStrip(this, opt);
-        };
-    });
 
     var EntityStrip = (function (_super) {
         __extends(EntityStrip, _super);

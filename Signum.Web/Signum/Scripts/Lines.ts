@@ -1,9 +1,9 @@
 ﻿/// <reference path="globals.ts"/>
 
-import Entities = require("Entities")
-import Validator = require("Validator")
-import Navigator = require("Navigator")
-import Finder = require("Finder")
+import Entities = require("Framework/Signum.Web/Signum/Scripts/Entities")
+import Validator = require("Framework/Signum.Web/Signum/Scripts/Validator")
+import Navigator = require("Framework/Signum.Web/Signum/Scripts/Navigator")
+import Finder = require("Framework/Signum.Web/Signum/Scripts/Finder")
 
 export interface EntityBaseOptions {
     prefix: string;
@@ -288,11 +288,6 @@ export class AjaxEntityAutoCompleter implements EntityAutoCompleter {
 
 }
 
-once("SF-entityLine", () =>
-    $.fn.entityLine = function (opt: EntityBaseOptions) {
-        return new EntityLine(this, opt);
-    });
-
 export class EntityLine extends EntityBase {
 
     setEntitySpecific(entityValue: Entities.EntityValue) {
@@ -307,11 +302,6 @@ export class EntityLine extends EntityBase {
         this.setEntity(entityValue);
     }
 }
-
-once("SF-entityCombo", () =>
-    $.fn.entityCombo = function (opt: EntityBaseOptions) {
-        return new EntityCombo(this, opt);
-    });
 
 export class EntityCombo extends EntityBase {
 
@@ -349,11 +339,6 @@ export class EntityCombo extends EntityBase {
 export interface EntityDetailOptions extends EntityBaseOptions {
     detailDiv: string;
 }
-
-once("SF-entityLineDetail", () =>
-    $.fn.entityLineDetail = function (opt: EntityDetailOptions) {
-        return new EntityLineDetail(this, opt);
-    });
 
 export class EntityLineDetail extends EntityBase {
 
@@ -629,11 +614,6 @@ export class EntityListBase extends EntityBase {
     }
 }
 
-once("SF-entityList", () =>
-    $.fn.entityList = function (opt: EntityListBaseOptions) {
-        return new EntityList(this, opt);
-    });
-
 export class EntityList extends EntityListBase {
 
     static key_list = "sfList";
@@ -733,11 +713,6 @@ export class EntityList extends EntityListBase {
     }
 }
 
-once("SF-entityListDetail", () =>
-    $.fn.entityListDetail = function (opt: EntityDetailOptions) {
-        return new EntityListDetail(this, opt);
-    });
-
 export interface EntityListDetailOptions extends EntityListBaseOptions {
     detailDiv: string;
 }
@@ -786,11 +761,6 @@ export class EntityListDetail extends EntityList {
         }
     }
 }
-
-once("SF-entityRepeater", () =>
-    $.fn.entityRepeater = function (opt: EntityListBaseOptions) {
-        return new EntityRepeater(this, opt);
-    });
 
 export class EntityRepeater extends EntityListBase {
     static key_itemsContainer = "sfItemsContainer";
@@ -865,11 +835,6 @@ export interface EntityStripOptions extends EntityBaseOptions {
     view?: boolean;
     navigate?: boolean;
 }
-
-once("SF-entityStrip", () =>
-    $.fn.entityStrip = function (opt: EntityStripOptions) {
-        return new EntityStrip(this, opt);
-    });
 
 export class EntityStrip extends EntityList {
     static key_itemsContainer = "sfItemsContainer";

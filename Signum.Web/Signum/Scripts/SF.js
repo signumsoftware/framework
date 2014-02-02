@@ -256,7 +256,6 @@ var SF;
         }
 
         $form.attr("action", urlController)[0].submit();
-        return false;
     }
     SF.submit = submit;
 

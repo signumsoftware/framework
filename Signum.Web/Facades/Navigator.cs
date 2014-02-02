@@ -154,14 +154,14 @@ namespace Signum.Web
             return Manager.Find(controller, findOptions);
         }
 
-        public static PartialViewResult PartialFind(ControllerBase controller, FindOptions findOptions, Context context)
+        public static PartialViewResult PartialFind(ControllerBase controller, FindOptions findOptions, FindMode mode, Context context)
         {
-            return Manager.PartialFind(controller, findOptions, context);
+            return Manager.PartialFind(controller, findOptions, mode, context);
         }
 
-        public static PartialViewResult PartialFind(ControllerBase controller, FindOptions findOptions, string prefix)
+        public static PartialViewResult PartialFind(ControllerBase controller, FindOptions findOptions, FindMode mode, string prefix)
         {
-            return Manager.PartialFind(controller, findOptions, new Context(null, prefix));
+            return Manager.PartialFind(controller, findOptions, mode, new Context(null, prefix));
         }
 
         public static Lite<IdentifiableEntity> FindUnique(FindUniqueOptions options)
@@ -774,7 +774,7 @@ namespace Signum.Web
             }
         }
         
-        protected internal virtual PartialViewResult PartialFind(ControllerBase controller, FindOptions findOptions, Context context)
+        protected internal virtual PartialViewResult PartialFind(ControllerBase controller, FindOptions findOptions, FindMode mode, Context context)
         {
             if (!Navigator.IsFindable(findOptions.QueryName))
                 throw new UnauthorizedAccessException(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().Formato(findOptions.QueryName));
@@ -786,7 +786,8 @@ namespace Signum.Web
 
             controller.ViewData.Model = context;
             controller.ViewData[ViewDataKeys.PartialViewName] = SearchControlView;
-            
+
+            controller.ViewData[ViewDataKeys.FindMode] = mode;
             controller.ViewData[ViewDataKeys.FindOptions] = findOptions;
             controller.ViewData[ViewDataKeys.QueryDescription] = desc;
             

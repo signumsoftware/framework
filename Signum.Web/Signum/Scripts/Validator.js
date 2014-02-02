@@ -1,5 +1,5 @@
 ﻿/// <reference path="globals.ts"/>
-define(["require", "exports", "Entities"], function(require, exports, Entities) {
+define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], function(require, exports, Entities) {
     function cleanError($element) {
         $element.removeClass(inputErrorClass);
     }

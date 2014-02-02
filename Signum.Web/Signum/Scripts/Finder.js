@@ -1,10 +1,44 @@
 ﻿/// <reference path="globals.ts"/>
-define(["require", "exports", "Entities", "Navigator"], function(require, exports, Entities, Navigator) {
-    once("SF-searchControl", function () {
-        return $.fn.searchControl = function (opt) {
-            return new SearchControl(this, opt);
-        };
-    });
+define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Navigator"], function(require, exports, Entities, Navigator) {
+    (function (FilterOperation) {
+        FilterOperation[FilterOperation["EqualTo"] = 0] = "EqualTo";
+        FilterOperation[FilterOperation["DistinctTo"] = 1] = "DistinctTo";
+        FilterOperation[FilterOperation["GreaterThan"] = 2] = "GreaterThan";
+        FilterOperation[FilterOperation["GreaterThanOrEqual"] = 3] = "GreaterThanOrEqual";
+        FilterOperation[FilterOperation["LessThan"] = 4] = "LessThan";
+        FilterOperation[FilterOperation["LessThanOrEqual"] = 5] = "LessThanOrEqual";
+        FilterOperation[FilterOperation["Contains"] = 6] = "Contains";
+        FilterOperation[FilterOperation["StartsWith"] = 7] = "StartsWith";
+        FilterOperation[FilterOperation["EndsWith"] = 8] = "EndsWith";
+        FilterOperation[FilterOperation["Like"] = 9] = "Like";
+        FilterOperation[FilterOperation["NotContains"] = 10] = "NotContains";
+        FilterOperation[FilterOperation["NotStartsWith"] = 11] = "NotStartsWith";
+        FilterOperation[FilterOperation["NotEndsWith"] = 12] = "NotEndsWith";
+        FilterOperation[FilterOperation["NotLike"] = 13] = "NotLike";
+        FilterOperation[FilterOperation["IsIn"] = 14] = "IsIn";
+    })(exports.FilterOperation || (exports.FilterOperation = {}));
+    var FilterOperation = exports.FilterOperation;
+
+    (function (FilterMode) {
+        FilterMode[FilterMode["Visible"] = 0] = "Visible";
+        FilterMode[FilterMode["Hidden"] = 1] = "Hidden";
+        FilterMode[FilterMode["AlwaysHidden"] = 2] = "AlwaysHidden";
+        FilterMode[FilterMode["OnlyResults"] = 3] = "OnlyResults";
+    })(exports.FilterMode || (exports.FilterMode = {}));
+    var FilterMode = exports.FilterMode;
+
+    (function (OrderType) {
+        OrderType[OrderType["Ascending"] = 0] = "Ascending";
+        OrderType[OrderType["Descending"] = 1] = "Descending";
+    })(exports.OrderType || (exports.OrderType = {}));
+    var OrderType = exports.OrderType;
+
+    (function (ColumnOptionsMode) {
+        ColumnOptionsMode[ColumnOptionsMode["Add"] = 0] = "Add";
+        ColumnOptionsMode[ColumnOptionsMode["Remove"] = 1] = "Remove";
+        ColumnOptionsMode[ColumnOptionsMode["Replace"] = 2] = "Replace";
+    })(exports.ColumnOptionsMode || (exports.ColumnOptionsMode = {}));
+    var ColumnOptionsMode = exports.ColumnOptionsMode;
 
     function getFor(prefix) {
         return $("#" + SF.compose(prefix, "sfSearchControl")).SFControl();
@@ -28,8 +62,8 @@ define(["require", "exports", "Entities", "Navigator"], function(require, export
     function findInternal(findOptions) {
         return new Promise(function (resolve) {
             $.ajax({
-                url: findOptions.openFinderUrl || (SF.isEmpty(findOptions.prefix) ? SF.Urls.find : SF.Urls.partialFind),
-                data: exports.requestDataForOpenFinder(findOptions),
+                url: findOptions.openFinderUrl || SF.Urls.partialFind,
+                data: exports.requestDataForOpenFinder(findOptions, false),
                 async: false,
                 success: function (popupHtml) {
                     var divId = SF.compose(findOptions.prefix, "Temp");
@@ -68,7 +102,34 @@ define(["require", "exports", "Entities", "Navigator"], function(require, export
         });
     }
 
-    function requestDataForOpenFinder(findOptions) {
+    function explore(findOptions) {
+        return new Promise(function (resolve) {
+            $.ajax({
+                url: findOptions.openFinderUrl || SF.Urls.partialFind,
+                data: exports.requestDataForOpenFinder(findOptions, true),
+                async: false,
+                success: function (popupHtml) {
+                    var divId = SF.compose(findOptions.prefix, "Temp");
+                    $("body").append(SF.hiddenDiv(divId, popupHtml));
+                    var div = $("#" + divId);
+                    SF.triggerNewContent(div);
+
+                    var sc = exports.getFor(findOptions.prefix);
+
+                    //$.extend(sc.options, findOptions); //Copy all properties (i.e. onOk was not transmitted)
+                    $("#" + divId).popup({
+                        onCancel: function () {
+                            div.remove();
+                            resolve(null);
+                        }
+                    });
+                }
+            });
+        });
+    }
+    exports.explore = explore;
+
+    function requestDataForOpenFinder(findOptions, isExplore) {
         var requestData = {
             webQueryName: findOptions.webQueryName,
             elems: findOptions.elems,
@@ -92,30 +153,33 @@ define(["require", "exports", "Entities", "Navigator"], function(require, export
             requestData["allowChangeColumns"] = findOptions.allowChangeColumns;
         }
         if (findOptions.filters != null) {
-            requestData["filters"] = findOptions.filters;
+            requestData["filters"] = findOptions.filters.map(function (f) {
+                return f.columnName + "," + FilterOperation[f.operation] + "," + f.value;
+            }).join(";"); //List of filter names "token1,operation1,value1;token2,operation2,value2"
         }
         if (findOptions.orders != null) {
-            requestData["orders"] = this.serializeOrders(findOptions.orders);
+            requestData["orders"] = serializeOrders(findOptions.orders);
         }
         if (findOptions.columns != null) {
-            requestData["columns"] = findOptions.columns;
+            requestData["columns"] = findOptions.columns.map(function (c) {
+                return c.columnName + "," + c.displayName;
+            }).join(";"); //List of column names "token1,displayName1;token2,displayName2"
         }
         if (findOptions.columnMode != null) {
             requestData["columnMode"] = findOptions.columnMode;
         }
 
+        requestData["isExplore"] = isExplore;
+
         return requestData;
     }
     exports.requestDataForOpenFinder = requestDataForOpenFinder;
 
-    function serializeOrders(orderArray) {
-        var currOrders = orderArray.join(";");
-        if (!SF.isEmpty(currOrders)) {
-            currOrders += ";";
-        }
-        return currOrders;
+    function serializeOrders(orders) {
+        return orders.map(function (f) {
+            return (f.orderType == 0 /* Ascending */ ? "" : "-") + f.columnName;
+        }).join(";");
     }
-    exports.serializeOrders = serializeOrders;
 
     function newSubTokensCombo(webQueryName, prefix, index, controllerUrl, requestExtraJsonData) {
         var $selectedCombo = $("#" + SF.compose(prefix, "ddlTokens_" + index));
@@ -209,24 +273,6 @@ define(["require", "exports", "Entities", "Navigator"], function(require, export
     }
     exports.removeOverlay = removeOverlay;
 
-    (function (ColumnOptionsMode) {
-        ColumnOptionsMode[ColumnOptionsMode["Add"] = 0] = "Add";
-        ColumnOptionsMode[ColumnOptionsMode["Remove"] = 1] = "Remove";
-        ColumnOptionsMode[ColumnOptionsMode["Replace"] = 2] = "Replace";
-    })(exports.ColumnOptionsMode || (exports.ColumnOptionsMode = {}));
-    var ColumnOptionsMode = exports.ColumnOptionsMode;
-
-    var FilterMode = (function () {
-        function FilterMode() {
-        }
-        FilterMode.Visible = "Visible";
-        FilterMode.Hidden = "Hidden";
-        FilterMode.AlwaysHidden = "AlwaysHidden";
-        FilterMode.OnlyResults = "OnlyResults";
-        return FilterMode;
-    })();
-    exports.FilterMode = FilterMode;
-
     var SearchControl = (function () {
         function SearchControl(element, _options) {
             this.keys = {
@@ -292,7 +338,7 @@ define(["require", "exports", "Entities", "Navigator"], function(require, export
                 });
             }
 
-            if (this.options.allowChangeColumns || (this.options.filterMode != FilterMode[FilterMode.AlwaysHidden] && this.options.filterMode != "OnlyResults")) {
+            if (this.options.allowChangeColumns || (this.options.filterMode != 2 /* AlwaysHidden */ && this.options.filterMode != 3 /* OnlyResults */)) {
                 $tblResults.on("contextmenu", "th:not(.sf-th-entity):not(.sf-th-selection)", function (e) {
                     if (!self.closeMyOpenedCtxMenu()) {
                         return false;
@@ -322,7 +368,7 @@ define(["require", "exports", "Entities", "Navigator"], function(require, export
                 this.createMoveColumnDragDrop();
             }
 
-            if (this.options.filterMode != "AlwaysHidden" && this.options.filterMode != "OnlyResults") {
+            if (this.options.filterMode != 2 /* AlwaysHidden */ && this.options.filterMode != 3 /* OnlyResults */) {
                 $tblResults.on("contextmenu", "td:not(.sf-td-no-results):not(.sf-td-multiply,.sf-search-footer-pagination)", function (e) {
                     if (!self.closeMyOpenedCtxMenu()) {
                         return false;
@@ -363,7 +409,7 @@ define(["require", "exports", "Entities", "Navigator"], function(require, export
                 });
             }
 
-            if (this.options.filterMode != "OnlyResults") {
+            if (this.options.filterMode != 3 /* OnlyResults */) {
                 $tblResults.on("click", ".sf-pagination-button", function () {
                     $(self.pf(self.keys.page)).val($(this).attr("data-page"));
                     self.search();
@@ -449,7 +495,7 @@ define(["require", "exports", "Entities", "Navigator"], function(require, export
             var $menu = this.createCtxMenu($th);
 
             var $itemContainer = $menu.find(".sf-search-ctxmenu");
-            if (this.options.filterMode != "AlwaysHidden" && this.options.filterMode != "OnlyResults") {
+            if (this.options.filterMode != 2 /* AlwaysHidden */ && this.options.filterMode != 3 /* OnlyResults */) {
                 $itemContainer.append("<div class='sf-search-ctxitem sf-quickfilter-header'><span>" + lang.signum.addFilter + "</span></div>");
             }
 
@@ -620,7 +666,7 @@ define(["require", "exports", "Entities", "Navigator"], function(require, export
         };
 
         SearchControl.prototype.serializeOrders = function () {
-            return exports.serializeOrders(this.options.orders);
+            return serializeOrders(this.options.orders);
         };
 
         SearchControl.prototype.serializeColumns = function () {
@@ -689,25 +735,25 @@ define(["require", "exports", "Entities", "Navigator"], function(require, export
             var currentOrders = this.options.orders;
 
             var indexCurrOrder = $.inArray(columnName, currentOrders);
-            var newOrder = "";
+            var orderType = 0 /* Ascending */;
             if (indexCurrOrder === -1) {
                 indexCurrOrder = $.inArray("-" + columnName, currentOrders);
             } else {
-                newOrder = "-";
+                orderType = 1 /* Descending */;
             }
 
             if (!multiCol) {
                 this.element.find(".sf-search-results-container th").removeClass("sf-header-sort-up sf-header-sort-down");
-                this.options.orders = [newOrder + columnName];
+                this.options.orders = [{ columnName: columnName, orderType: orderType }];
             } else {
                 if (indexCurrOrder !== -1) {
-                    this.options.orders[indexCurrOrder] = newOrder + columnName;
+                    this.options.orders[indexCurrOrder] = { columnName: columnName, orderType: orderType };
                 } else {
-                    this.options.orders.push(newOrder + columnName);
+                    this.options.orders.push({ columnName: columnName, orderType: orderType });
                 }
             }
 
-            if (newOrder == "-")
+            if (orderType == 1 /* Descending */)
                 $th.removeClass("sf-header-sort-down").addClass("sf-header-sort-up");
             else
                 $th.removeClass("sf-header-sort-up").addClass("sf-header-sort-down");

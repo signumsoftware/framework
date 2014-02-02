@@ -23,12 +23,12 @@
         @if (((ViewMode)ViewData[ViewDataKeys.ViewMode]) == ViewMode.View)
         {
             var saveProtected = (bool)ViewData[ViewDataKeys.SaveProtected]; 
-            <button id="@Model.Compose("btnOk")" class="sf-entity-button sf-ok-button@(saveProtected ? " sf-save-protected" : "")" @(ViewData[ViewDataKeys.OnOk] != null ? Html.Raw("onclick=\"" + ViewData[ViewDataKeys.OnOk] + "\"") : null)>
-                OK</button>                
+            <button id="@Model.Compose("btnOk")" class="sf-entity-button sf-ok-button@(saveProtected ? " sf-save-protected" : "")">OK</button>                
         }
 
         @ButtonBarEntityHelper.GetForEntity(new EntityButtonContext
         {
+            Url = Url,
             ViewMode = (ViewMode)ViewData[ViewDataKeys.ViewMode],
             ControllerContext = this.ViewContext,
             PartialViewName = ViewData[ViewDataKeys.PartialViewName].ToString(),

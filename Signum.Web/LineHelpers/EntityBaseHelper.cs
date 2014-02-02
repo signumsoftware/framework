@@ -137,7 +137,7 @@ namespace Signum.Web
 
             var htmlAttr = new Dictionary<string, object>
             {
-                { "onclick", new MvcHtmlString("{0}.view()".Formato(entityBase.ToJS())) },
+                { "onclick", new MvcHtmlString("{0}.view()".Formato(entityBase.SFControl())) },
                 { "data-icon",  "ui-icon-circle-arrow-e" },
                 { "data-text", false}
             };
@@ -160,7 +160,7 @@ namespace Signum.Web
 
             var htmlAttr = new Dictionary<string, object>
             {
-                { "onclick", new MvcHtmlString("{0}.view()".Formato(entityBase.ToJS())) },
+                { "onclick", new MvcHtmlString("{0}.view()".Formato(entityBase.SFControl())) },
                 { "data-icon", "ui-icon-arrowthick-1-e" },
                 { "data-text", false}
             };
@@ -185,7 +185,7 @@ namespace Signum.Web
 
             var htmlAttr = new Dictionary<string, object>
             {
-                { "onclick", "{0}.create()".Formato(entityBase.ToJS()) },
+                { "onclick", "{0}.create()".Formato(entityBase.SFControl()) },
                 { "data-icon", "ui-icon-circle-plus" },
                 { "data-text", false}
             };
@@ -208,7 +208,7 @@ namespace Signum.Web
 
             var htmlAttr = new Dictionary<string, object>
             {
-                { "onclick", "{0}.find()".Formato(entityBase.ToJS()) },
+                { "onclick", "{0}.find()".Formato(entityBase.SFControl()) },
                 { "data-icon", "ui-icon-circle-zoomin" },
                 { "data-text", false}
             };
@@ -231,7 +231,7 @@ namespace Signum.Web
 
             var htmlAttr = new Dictionary<string, object>
             {
-                { "onclick", "{0}.remove()".Formato(entityBase.ToJS()) },
+                { "onclick", "{0}.remove()".Formato(entityBase.SFControl()) },
                 { "data-icon", "ui-icon-circle-close" },
                 { "data-text", false}
             };

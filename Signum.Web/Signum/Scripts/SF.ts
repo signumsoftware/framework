@@ -237,7 +237,7 @@ module SF {
         return;
     }
 
-    export function submit(urlController: string, requestExtraJsonData?: any, $form?: JQuery) {
+    export function submit(urlController: string, requestExtraJsonData?: any, $form?: JQuery) : void {
         $form = $form || $("form");
         if (!SF.isEmpty(requestExtraJsonData)) {
             if ($.isFunction(requestExtraJsonData))
@@ -251,7 +251,6 @@ module SF {
         }
 
         (<HTMLFormElement>$form.attr("action", urlController)[0]).submit();
-        return false;
     }
 
     export function submitOnly(urlController: string, requestExtraJsonData: any) {

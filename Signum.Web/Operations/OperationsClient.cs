@@ -20,7 +20,7 @@ using Signum.Web.PortableAreas;
 
 namespace Signum.Web.Operations
 {
-    public static class OperationsClient
+    public static class OperationClient
     {
         public static OperationManager Manager { get; private set; }
 
@@ -174,11 +174,13 @@ namespace Signum.Web.Operations
 
             Type type = ident.GetType();
 
+
             var operations = (from oi in OperationInfos(ident.GetType())
                               where oi.IsEntityOperation && (oi.AllowsNew.Value || !ident.IsNew)
                               let os = GetSettings<EntityOperationSettings>(oi.Key)
                               let eoc = new EntityOperationContext
                               {
+                                  Url = ctx.Url,
                                   Entity = (IdentifiableEntity)entity,
                                   OperationInfo = oi,
                                   ViewButtons = ctx.ViewMode,
@@ -276,21 +278,20 @@ namespace Signum.Web.Operations
                 Order = ctx.OperationSettings != null ? ctx.OperationSettings.Order: 0,
 
                 Text = ctx.OperationSettings.TryCC(o => o.Text) ?? (group == null || group.SimplifyName == null ? ctx.OperationInfo.Key.NiceToString() : group.SimplifyName(ctx.OperationInfo.Key.NiceToString())),
-                OnClick = ((ctx.OperationSettings != null && ctx.OperationSettings.OnClick != null) ? ctx.OperationSettings.OnClick(ctx) : DefaultClick(ctx)).ToJS(),
+                OnClick = ((ctx.OperationSettings != null && ctx.OperationSettings.OnClick != null) ? ctx.OperationSettings.OnClick(ctx) : DefaultClick(ctx)).SetOptions(ctx.Options()),
             };
         }
 
-
-        protected internal virtual JsInstruction DefaultClick(EntityOperationContext ctx)
+        protected internal virtual JsOperationFunction DefaultClick(EntityOperationContext ctx)
         {
             switch (ctx.OperationInfo.OperationType)
             {
                 case OperationType.Execute:
-                    return new JsOperationExecutor(ctx.Options()).validateAndAjax();
+                    return new JsOperationFunction(JsOperationFunction.OperationsModule, "executeDefault");
                 case OperationType.Delete:
-                    return new JsOperationDelete(ctx.Options()).confirmAndAjax(ctx.Entity);
+                    return new JsOperationFunction(JsOperationFunction.OperationsModule, "deleteDefault");
                 case OperationType.ConstructorFrom:
-                    return new JsOperationConstructorFrom(ctx.Options()).validateAndAjax();
+                    return new JsOperationFunction(JsOperationFunction.OperationsModule, "constructFromDefault");
                 default:
                     throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".Formato(ctx.OperationInfo.OperationType.ToString(), MultiEnumDN.UniqueKey(ctx.OperationInfo.Key)));
             }
@@ -338,6 +339,7 @@ namespace Signum.Web.Operations
                  let os = GetSettings<ContextualOperationSettings>(g.Key)
                  let coc = new ContextualOperationContext
                  {
+                     Url = ctx.Url,
                      Prefix = ctx.Prefix,
                      Entities = ctx.Lites,
                      OperationSettings = os,
@@ -388,6 +390,7 @@ namespace Signum.Web.Operations
                  let os = GetSettings<EntityOperationSettings>(oi.Key)
                  let coc = new ContextualOperationContext
                  {
+                     Url = ctx.Url,
                      Entities = ctx.Lites,
                      QueryName = ctx.QueryName,
                      OperationSettings = os == null ? null : os.Contextual,
@@ -450,7 +453,7 @@ namespace Signum.Web.Operations
             return new HtmlTag("a", oci.Id)
                         .Attrs(oci.HtmlProps)
                         .Attr("title", oci.AltText ?? "")
-                        .Class("sf-operation-ctxitem" + ((!oci.Enabled || string.IsNullOrEmpty(oci.OnClick)) ? " sf-disabled" : ""))
+                        .Class("sf-operation-ctxitem" + ((!oci.Enabled || oci.OnClick == null ? " sf-disabled" : "")))
                         .SetInnerText(oci.Text)
                         .ToHtml();
         }
@@ -471,23 +474,23 @@ namespace Signum.Web.Operations
                 Order = ctx.OperationSettings != null ? ctx.OperationSettings.Order : 0,
 
                 Text = ctx.OperationSettings.TryCC(o => o.Text) ?? ctx.OperationInfo.Key.NiceToString(),
-                OnClick = (ctx.OperationSettings != null && ctx.OperationSettings.OnClick != null) ? ctx.OperationSettings.OnClick(ctx).ToJS() :
-                        DefaultClick(ctx).ToJS()
+                OnClick = ((ctx.OperationSettings != null && ctx.OperationSettings.OnClick != null) ? ctx.OperationSettings.OnClick(ctx) :
+                        DefaultClick(ctx)).SetOptions(ctx.Options())
             };
         }
 
-        protected virtual JsInstruction DefaultClick(ContextualOperationContext ctx)
+        protected virtual JsOperationFunction DefaultClick(ContextualOperationContext ctx)
         {
             switch (ctx.OperationInfo.OperationType)
             {
                 case OperationType.Execute:
-                    return new JsOperationExecutor(ctx.Options()).ContextualExecute();
+                    return new JsOperationFunction(JsOperationFunction.OperationsModule, "executeDefaultContextal");
                 case OperationType.Delete:
-                    return new JsOperationDelete(ctx.Options()).ContextualDelete(ctx.Entities);
+                    return new JsOperationFunction(JsOperationFunction.OperationsModule, "deleteDefaultContextual");
                 case OperationType.ConstructorFrom:
-                    return new JsOperationConstructorFrom(ctx.Options()).ContextualConstruct();
+                    return new JsOperationFunction(JsOperationFunction.OperationsModule, "constructFromDefaultContextual");
                 case OperationType.ConstructorFromMany:
-                    return new JsOperationConstructorFromMany(ctx.Options()).ajaxSelected(Js.NewPrefix(ctx.Prefix), JsOpSuccess.DefaultDispatcher);
+                    return new JsOperationFunction(JsOperationFunction.OperationsModule, "constructFromManyDefault");
                 default:
                     throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".Formato(ctx.OperationInfo.OperationType.ToString(), MultiEnumDN.UniqueKey(ctx.OperationInfo.Key)));
             }

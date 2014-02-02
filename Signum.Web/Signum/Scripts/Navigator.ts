@@ -1,7 +1,7 @@
 ﻿/// <reference path="globals.ts"/>
 
-import Entities = require("Entities")
-import Validator = require("Validator")
+import Entities = require("Framework/Signum.Web/Signum/Scripts/Entities")
+import Validator = require("Framework/Signum.Web/Signum/Scripts/Validator")
 
 
 export interface ViewOptionsBase {
@@ -395,3 +395,16 @@ export function chooser<T>(prefix: string, title: string, options: T[], getStr?:
         });
     });
 }
+
+export interface ChooserOption {
+    value: string;
+    toStr: string;
+}
+
+
+once("widgetToggler", () =>
+    $(document).on("click", ".sf-widget-toggler", function (evt) {
+        SF.Dropdowns.toggle(evt, this, 1);
+        return false;
+    }));
+

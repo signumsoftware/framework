@@ -12,6 +12,7 @@ using Signum.Entities.Reflection;
 using Signum.Utilities;
 using System.Configuration;
 using System.Web.Routing;
+using Newtonsoft.Json.Linq;
 #endregion
 
 namespace Signum.Web
@@ -30,11 +31,11 @@ namespace Signum.Web
             Reorder = false;
         }
 
-        protected override JsOptionsBuilder OptionsJSInternal()
+        protected override JObject OptionsJSInternal()
         {
             var result = base.OptionsJSInternal();
             if (DetailDiv.HasText())
-                result.Add("detailDiv", DetailDiv.SingleQuote());
+                result.Add("detailDiv", DetailDiv);
             return result;
         }
     }

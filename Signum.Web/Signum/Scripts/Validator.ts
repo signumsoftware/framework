@@ -1,6 +1,6 @@
 ﻿/// <reference path="globals.ts"/>
 
-import Entities = require("Entities");
+import Entities = require("Framework/Signum.Web/Signum/Scripts/Entities");
 
 export interface ValidationOptions {
     prefix?: string;

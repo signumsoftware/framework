@@ -121,13 +121,13 @@ export function deleteDefault(options: EntityOperationOptions): void {
     entityIsValidOrLite(options).then(() => deleteAjax(options)); //ajax prefilter will take redirect
 }
 
-export function deleteAjax(options: EntityOperationOptions): void {
+export function deleteAjax(options: EntityOperationOptions): Promise<any> {
     options = $.extend({
         controllerUrl: SF.Urls.operationDelete,
         isLite: true
     }, options);
 
-    SF.ajaxPost({ url: options.controllerUrl, data: entityRequestData(options) }); //ajax prefilter will take redirect
+    return SF.ajaxPost({ url: options.controllerUrl, data: entityRequestData(options) }); //ajax prefilter will take redirect
 }
 
 export function deleteDefaultContextual(options: OperationOptions): Promise<any> {

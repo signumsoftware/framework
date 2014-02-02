@@ -79,7 +79,7 @@ namespace Signum.Web
                 }
             }
 
-            sb.AddLine(entityList.ConstructorSript("entityList"));
+            sb.AddLine(entityList.ConstructorScript(JsFunction.LinesModule, "entityList"));
 
             return sb.ToHtml();
         }

@@ -14,9 +14,9 @@ namespace Signum.Web
         public const string CustomHtml = "sfCustomHtml";
 
         public const string ViewMode = "sfViewMode";
+        public const string FindMode = "sfFindMode";
         public const string AvoidReturnView = "sfAvoidReturnView";
         public const string AvoidReturnRedirect = "sfAvoidReturnRedirect";
-        public const string OnOk = "sfOnOk";
 
         public const string ManualToolbarButtons = "sfManualToolbarButtons";
         public const string FindOptions = "sfFindOptions";

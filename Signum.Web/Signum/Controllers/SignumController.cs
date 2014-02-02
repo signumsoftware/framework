@@ -185,9 +185,9 @@ namespace Signum.Web.Controllers
         }
 
         [HttpPost]
-        public PartialViewResult PartialFind(FindOptions findOptions, string prefix)
+        public PartialViewResult PartialFind(FindOptions findOptions, string prefix, bool isExplore)
         {
-            return Navigator.PartialFind(this, findOptions, prefix);
+            return Navigator.PartialFind(this, findOptions, isExplore ? FindMode.Explore : FindMode.Find, prefix);
         }
 
         [HttpPost]
@@ -238,6 +238,7 @@ namespace Signum.Web.Controllers
             
             string result = ContextualItemsHelper.GetContextualItemListForLites(new SelectedItemsMenuContext
             {
+                Url = RouteHelper.New(),
                 ControllerContext = this.ControllerContext,
                 Lites = lites,
                 QueryName = queryName,

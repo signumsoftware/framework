@@ -83,7 +83,7 @@ namespace Signum.Web
                     sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityStrip));
             }
 
-            sb.AddLine(entityStrip.ConstructorSript("entityStrip"));
+            sb.AddLine(entityStrip.ConstructorScript(JsFunction.LinesModule, "entityStrip"));
 
             return sb.ToHtml();
         }
@@ -127,7 +127,7 @@ namespace Signum.Web
                                 "sf-line-button sf-move-up",
                                 new Dictionary<string, object> 
                                 {  
-                                   { "onclick", "{0}.moveUp('{1}');".Formato(entityStrip.ToJS(), itemTC.ControlID) },
+                                   { "onclick", "{0}.moveUp('{1}');".Formato(entityStrip.SFControl(), itemTC.ControlID) },
                                    { "data-icon",  "ui-icon-triangle-1-" + (entityStrip.Vertical ? "n" : "w") },
                                    { "data-text", false },
                                    { "title", JavascriptMessage.moveUp.NiceToString() }
@@ -139,7 +139,7 @@ namespace Signum.Web
                                 "sf-line-button sf-move-down",
                                 new Dictionary<string, object> 
                                 {   
-                                   { "onclick", "{0}.moveDown('{1}');".Formato(entityStrip.ToJS(), itemTC.ControlID) },
+                                   { "onclick", "{0}.moveDown('{1}');".Formato(entityStrip.SFControl(), itemTC.ControlID) },
                                    { "data-icon", "ui-icon-triangle-1-" + (entityStrip.Vertical ? "s" : "e")  },
                                    { "data-text", false },
                                    { "title", JavascriptMessage.moveDown.NiceToString() }
@@ -155,7 +155,7 @@ namespace Signum.Web
                                     "sf-line-button sf-view",
                                     new Dictionary<string, object> 
                                 {
-                                    { "onclick", "{0}.view('{1}');".Formato(entityStrip.ToJS(), itemTC.ControlID) },
+                                    { "onclick", "{0}.view('{1}');".Formato(entityStrip.SFControl(), itemTC.ControlID) },
                                     { "data-icon",  "ui-icon-circle-arrow-e" },
                                     { "data-text", false } 
                                 }));
@@ -169,7 +169,7 @@ namespace Signum.Web
                                     "sf-line-button sf-remove",
                                     new Dictionary<string, object> 
                                 {
-                                    { "onclick", "{0}.remove('{1}');".Formato(entityStrip.ToJS(), itemTC.ControlID) },
+                                    { "onclick", "{0}.remove('{1}');".Formato(entityStrip.SFControl(), itemTC.ControlID) },
                                     { "data-icon", "ui-icon-circle-close" }, 
                                     { "data-text", false } 
                                 }));

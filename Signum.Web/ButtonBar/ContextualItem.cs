@@ -11,6 +11,7 @@ namespace Signum.Web
 {
     public class SelectedItemsMenuContext
     {
+        public UrlHelper Url { get; set; }
         public ControllerContext ControllerContext { get; set; }
         public List<Lite<IdentifiableEntity>> Lites { get; set; }
         public object QueryName { get; set; }

@@ -120,7 +120,7 @@ define(["require", "exports", "Entities", "Validator", "Navigator", "Finder"], f
             isLite: true
         }, options);
 
-        SF.ajaxPost({ url: options.controllerUrl, data: exports.entityRequestData(options) }); //ajax prefilter will take redirect
+        return SF.ajaxPost({ url: options.controllerUrl, data: exports.entityRequestData(options) });
     }
     exports.deleteAjax = deleteAjax;
 

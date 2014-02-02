@@ -10,6 +10,8 @@ using Signum.Utilities;
 using Signum.Entities.Basics;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 #endregion
 
 namespace Signum.Web.Operations
@@ -24,7 +26,6 @@ namespace Signum.Web.Operations
         public Enum Key { get; private set; }
 
         public string Text { get; set; }
-        public string RequestExtraJsonData { get; set; }
     }
 
     public class ConstructorSettings : OperationSettings
@@ -79,7 +80,7 @@ namespace Signum.Web.Operations
         public EntityOperationGroup Group { get; set; }
 
         public Func<EntityOperationContext, bool> IsVisible { get; set; }
-        public Func<EntityOperationContext, JsInstruction> OnClick { get; set; }
+        public Func<EntityOperationContext, JsOperationFunction> OnClick { get; set; }
     }
 
     public class ContextualOperationSettings : OperationSettings
@@ -91,7 +92,7 @@ namespace Signum.Web.Operations
 
         public double Order { get; set; }
         public Func<ContextualOperationContext, bool> IsVisible { get; set; }
-        public Func<ContextualOperationContext, JsInstruction> OnClick { get; set; }
+        public Func<ContextualOperationContext, JsOperationFunction> OnClick { get; set; }
 
     }
 
@@ -99,7 +100,7 @@ namespace Signum.Web.Operations
     {
         public string Prefix { get; set; }
         public OperationInfo OperationInfo { get; set; }
-
+        public UrlHelper Url { get; set; }
     }
 
     public class ConstructorOperationContext : OperationContext
@@ -117,32 +118,14 @@ namespace Signum.Web.Operations
         public ViewMode ViewButtons { get; internal set; }
         public bool ShowOperations { get; set; }
 
-        public JsOperationOptions Options()
+        public JObject Options()
         {
-            return Options(null);
-        }
-
-        public JsOperationOptions Options(string actionName, string controllerName)
-        {
-            return Options(RouteHelper.New().Action(actionName,controllerName));
-        }
-
-        public JsOperationOptions Options<TController>(Expression<Action<TController>> action)
-            where TController : Controller
-        {
-            return Options(RouteHelper.New().Action(action));
-        }
-
-        public JsOperationOptions Options(string controllerUrl)
-        {
-            return new JsOperationOptions
-            {
-                Operation = OperationInfo.Key,
-                IsLite = OperationInfo.Lite,
-                Prefix = this.Prefix,
-                ControllerUrl = (JsValue<string>)controllerUrl,
-                RequestExtraJsonData = OperationSettings.TryCC(opt => opt.RequestExtraJsonData),
-            };
+            return new JObject()
+            { 
+                { "Operation", OperationDN.UniqueKey(OperationInfo.Key) },
+                { "IsLite", OperationInfo.Lite },
+                { "Prefix", this.Prefix },
+            }; 
         }
 
         public override string ToString()
@@ -159,43 +142,42 @@ namespace Signum.Web.Operations
         public ContextualOperationSettings OperationSettings { get; set; }
         public string CanExecute { get; set; }
 
-        public JsOperationOptions Options()
+        public JObject Options()
         {
-            return Options(null);
+            return new JObject()
+            { 
+                { "Operation", OperationDN.UniqueKey(OperationInfo.Key) },
+                { "IsLite", OperationInfo.Lite },
+                { "Prefix", this.Prefix },
+            }; 
+        }
+    }
+
+    public class JsOperationFunction : JsFunction
+    {
+        /// <summary>
+        /// require("module", function(mod) { mod.functionName(operationSettings, arguments...); }
+        /// </summary>
+        public JsOperationFunction(string module, string functionName, params object[] arguments) :
+            base(module, functionName, arguments)
+        {
         }
 
-        public JsOperationOptions Options(string actionName, string controllerName)
+        JObject OperationObjects;
+        internal JsOperationFunction SetOptions(JObject operationObjects)
         {
-            return Options(RouteHelper.New().Action(actionName, controllerName));
+            this.OperationObjects = operationObjects;
+            return this;
         }
 
-        public JsOperationOptions Options<TController>(Expression<Action<TController>> action)
-            where TController : Controller
+        public override string ToString()
         {
-            return Options(RouteHelper.New().Action(action));
-        }
+            var varName = VarName(Module);
 
-        public JsOperationOptions Options(string controllerUrl)
-        {
-            var requestData = OperationSettings.TryCC(opt => opt.RequestExtraJsonData);
-            if (requestData == null)
-            {
-                if (Entities.Count == 1) 
-                    requestData = "{{{0}:'{1}'}}".Formato(TypeContextUtilities.Compose(Prefix, EntityBaseKeys.RuntimeInfo), 
-                        new RuntimeInfo(Entities[0]).ToString());
-                else 
-                    requestData = "{{lites:'{0}'}}".Formato(Entities.Select(e => e.Key()).ToString(",")); 
-            }
+            var args = (Arguments.IsNullOrEmpty() ? null :
+                (", " + Arguments.EmptyIfNull().ToString(a => JsonConvert.SerializeObject(a, JsonSerializerSettings), ", ")));
 
-            return new JsOperationOptions
-            {
-                Operation = OperationInfo.Key,
-                IsLite = OperationInfo.Lite,
-                Prefix = this.Prefix,
-                IsContextual = true,
-                ControllerUrl = (JsValue<string>)controllerUrl,
-                RequestExtraJsonData = requestData
-            };
+            return "require('" + Module + "', function(" + varName + ") { " + varName + "." + FunctionName + "(" + OperationObjects.ToString() + args + "); }";
         }
     }
 }

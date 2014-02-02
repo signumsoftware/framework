@@ -113,6 +113,11 @@ export class EntityHtml extends EntityValue {
         result.html = $(html);
         return result;
     }
+
+    static withoutType(prefix: string): EntityHtml {
+        var result = new EntityHtml(prefix, new RuntimeInfoValue("?", null));
+        return result;
+    }
 }
 
 export class EntityValue {

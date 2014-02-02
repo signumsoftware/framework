@@ -115,7 +115,22 @@ WriteLiteral(">fullscreen</span>\r\n            </a>\r\n");
             
             #line default
             #line hidden
-WriteLiteral("\r\n    </span>\r\n    <div");
+WriteLiteral("\r\n    </span>\r\n");
+
+            
+            #line 12 "..\..\Signum\Views\SearchPopupControl.cshtml"
+    
+            
+            #line default
+            #line hidden
+            
+            #line 12 "..\..\Signum\Views\SearchPopupControl.cshtml"
+     if(ViewData[ViewDataKeys.FindMode].Equals(FindMode.Find)){
+
+            
+            #line default
+            #line hidden
+WriteLiteral("    <div");
 
 WriteLiteral(" class=\"sf-query-button-bar\"");
 
@@ -123,43 +138,43 @@ WriteLiteral(">\r\n        <input");
 
 WriteLiteral(" type=\"button\"");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 519), Tuple.Create("\"", 547)
+WriteAttribute("id", Tuple.Create(" id=\"", 584), Tuple.Create("\"", 612)
             
-            #line 13 "..\..\Signum\Views\SearchPopupControl.cshtml"
-, Tuple.Create(Tuple.Create("", 524), Tuple.Create<System.Object, System.Int32>(Model.Compose("btnOk")
+            #line 14 "..\..\Signum\Views\SearchPopupControl.cshtml"
+, Tuple.Create(Tuple.Create("", 589), Tuple.Create<System.Object, System.Int32>(Model.Compose("btnOk")
             
             #line default
             #line hidden
-, 524), false)
+, 589), false)
 );
 
 WriteLiteral(" class=\"sf-query-button sf-ok-button\"");
 
 WriteLiteral(" value=\"OK\"");
 
-WriteLiteral(" ");
+WriteLiteral(" />\r\n    </div>\r\n");
 
             
-            #line 13 "..\..\Signum\Views\SearchPopupControl.cshtml"
-                                                                                                      Write(ViewData[ViewDataKeys.OnOk] != null ? Html.Raw("onclick=\"" + ViewData[ViewDataKeys.OnOk] + "\"") : null);
+            #line 16 "..\..\Signum\Views\SearchPopupControl.cshtml"
+    }
 
             
             #line default
             #line hidden
-WriteLiteral(" />\r\n    </div>\r\n    <div");
+WriteLiteral("    <div");
 
 WriteLiteral(" class=\"sf-popup-body\"");
 
 WriteLiteral(">\r\n");
 
             
-            #line 16 "..\..\Signum\Views\SearchPopupControl.cshtml"
+            #line 18 "..\..\Signum\Views\SearchPopupControl.cshtml"
         
             
             #line default
             #line hidden
             
-            #line 16 "..\..\Signum\Views\SearchPopupControl.cshtml"
+            #line 18 "..\..\Signum\Views\SearchPopupControl.cshtml"
            
             ViewData[ViewDataKeys.InPopup] = true;
             Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);
@@ -172,7 +187,7 @@ WriteLiteral("\r\n");
 WriteLiteral("        ");
 
             
-            #line 20 "..\..\Signum\Views\SearchPopupControl.cshtml"
+            #line 22 "..\..\Signum\Views\SearchPopupControl.cshtml"
    Write(Html.ValidationSummaryAjax(Model));
 
             

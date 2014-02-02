@@ -110,6 +110,11 @@ define(["require", "exports"], function(require, exports) {
             result.html = $(html);
             return result;
         };
+
+        EntityHtml.withoutType = function (prefix) {
+            var result = new EntityHtml(prefix, new RuntimeInfoValue("?", null));
+            return result;
+        };
         return EntityHtml;
     })(EntityValue);
     exports.EntityHtml = EntityHtml;

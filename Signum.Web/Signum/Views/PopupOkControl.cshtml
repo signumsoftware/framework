@@ -4,8 +4,7 @@
 <div id="@Model.Compose("panelPopup")" class="sf-popup-control" data-prefix="@Model.ControlID" data-title="@Navigator.Manager.GetTypeTitle(modifiable)">
     <h2><span class="sf-entity-title">@(ViewBag.Title ?? Model.UntypedValue.TryToString())</span></h2>
     <div class="sf-button-bar">
-        <button id="@Model.Compose("btnOk")" class="sf-entity-button sf-ok-button" @(ViewData[ViewDataKeys.OnOk] != null ? Html.Raw("onclick=\"" + ViewData[ViewDataKeys.OnOk] + "\"") : null)>
-                OK</button>                
+        <button id="@Model.Compose("btnOk")" class="sf-entity-button sf-ok-button">OK</button>                
     </div>
     @Html.ValidationSummaryAjax(Model)
     <div id="@Model.Compose("divMainControl")" class="sf-main-control@(modifiable != null && modifiable.IsGraphModified ? " sf-changed" : "")">

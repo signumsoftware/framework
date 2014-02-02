@@ -9,6 +9,7 @@ using Signum.Utilities;
 using Signum.Entities;
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
+using Newtonsoft.Json.Linq;
 #endregion
 
 namespace Signum.Web
@@ -24,12 +25,16 @@ namespace Signum.Web
     {
         public bool Reorder { get; set; }
 
+        
+        public int? MaxElements { get; set; }
+        
+
         public EntityListBase(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
             : base(type, untypedValue, parent, controlID, propertyRoute)
         {
         }
 
-        protected override JsOptionsBuilder OptionsJSInternal()
+        protected override JObject OptionsJSInternal()
         {
             var result = base.OptionsJSInternal();
             if(Create)
@@ -44,6 +49,8 @@ namespace Signum.Web
                 result.Add("navigate", "true");
             if (Reorder)
                 result.Add("reorder", "true");
+            if (MaxElements != null)
+                result.Add("maxElements", MaxElements.Value);
             return result;
         }
 

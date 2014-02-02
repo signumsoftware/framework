@@ -9,6 +9,7 @@ using Signum.Entities.Reflection;
 using Signum.Engine;
 using Signum.Utilities.DataStructures;
 using Signum.Engine.DynamicQuery;
+using Newtonsoft.Json.Linq;
 
 namespace Signum.Web
 {
@@ -133,8 +134,6 @@ namespace Signum.Web
             set { create = value; }
         }
 
-        public string Creating { get; set; }
-
         bool navigate = true;
         public bool Navigate
         {
@@ -184,8 +183,15 @@ namespace Signum.Web
                 return Navigator.FindRoute(QueryName);
         }
 
-        public void Fill(JsOptionsBuilder op)
+        public JObject ToJS(string parentPrefix, string newPart)
         {
+            return ToJS(TypeContextUtilities.Compose(parentPrefix, newPart));
+        }
+
+        public JObject ToJS(string prefix)
+        {
+            JObject op = new JObject() { { "prefix", prefix } };
+
             if (FilterOptions.Any())
             {
                 QueryDescription queryDescription = DynamicQueryManager.Current.QueryDescription(QueryName);
@@ -193,20 +199,26 @@ namespace Signum.Web
                 Navigator.SetTokens(this.FilterOptions, queryDescription, false);
             }
 
-            op.Add("webQueryName", QueryName.TryCC(qn => Navigator.ResolveWebQueryName(qn).SingleQuote()));
-            op.Add("searchOnLoad", SearchOnLoad == true ? "true" : null);
-            op.Add("filterMode", FilterMode != FilterMode.Visible ? FilterMode.ToString().SingleQuote() : null);
-            op.Add("navigate", !Navigate ? "false" : null);
-            op.Add("create", !Create ? "false" : null);
-            op.Add("allowMultiple", !AllowMultiple ? "false" : null);
-            op.Add("selectedItemsContextMenu", !SelectedItemsContextMenu ? "false" : null);
-            op.Add("allowChangeColumns", !AllowChangeColumns ? "false" : null);
-            op.Add("allowOrder", !AllowOrder ? "false" : null);
-            op.Add("filterMode", FilterMode != FilterMode.Visible ? FilterMode.ToString().SingleQuote() : null);
-            op.Add("filters", filterOptions.IsEmpty() ? null : (filterOptions.ToString(";") + ";").SingleQuote());
-            op.Add("orders", OrderOptions.IsEmpty() ? null : ("[" + OrderOptions.ToString(oo => oo.ToString().SingleQuote(), ",") + "]"));
-            op.Add("columns", ColumnOptions.IsEmpty() ? null : (ColumnOptions.ToString(";") + ";").SingleQuote());
-            op.Add("columnMode", ColumnOptionsMode != ColumnOptionsMode.Add ? ColumnOptionsMode.ToString().SingleQuote() : null);
+            if (QueryName != null) op.Add("webQueryName", Navigator.ResolveWebQueryName(QueryName));
+            if (SearchOnLoad == true) op.Add("searchOnLoad", true);
+            if (!Navigate) op.Add("navigate", false);
+            if (!Create) op.Add("create", false);
+            if (!AllowMultiple) op.Add("allowMultiple", false);
+            if (!SelectedItemsContextMenu) op.Add("selectedItemsContextMenu", false);
+            if (!AllowChangeColumns) op.Add("allowChangeColumns", false);
+            if (AllowOrder) op.Add("allowOrder", false);
+            if (FilterMode != Web.FilterMode.Visible) op.Add("filterMode", FilterMode.ToString());
+            if (FilterOptions.Any()) op.Add("filters", new JArray(filterOptions.Select(f => new { columnName = f.ColumnName, operation = (int)f.Operation, val = f.StringValue() })));
+            if (OrderOptions.Any()) op.Add("orders", new JArray(OrderOptions.Select(oo => new { columnName = oo.ColumnName, orderType = oo.OrderType })));
+            if (ColumnOptions.Any()) op.Add("columns", new JArray(ColumnOptions.Select(oo => new { columnName = oo.ColumnName, displayName = oo.DisplayName })));
+            if (ColumnOptionsMode != Entities.DynamicQuery.ColumnOptionsMode.Add) op.Add("columnMode", ColumnOptionsMode.ToString());
+
+            op.Add("pagination", Pagination.GetMode().ToString());
+            int? elems = Pagination.GetElementsPerPage();
+            if (elems != null)
+                op.Add("elems", elems.Value.ToString());
+
+            return op;
         }
 
         public QueryRequest ToQueryRequest()
@@ -238,6 +250,8 @@ namespace Signum.Web
                     throw new InvalidOperationException("{0} is not a valid ColumnOptionMode".Formato(ColumnOptionsMode));
             }
         }
+
+     
     }
 
     public class FindUniqueOptions
@@ -299,27 +313,22 @@ namespace Signum.Web
 
         public override string ToString()
         {
-            string result = "";
+            return "{0},{1},{2}".Formato(ColumnName, Operation.ToString(), EncodeCSV(StringValue()));
+        }
 
-            string value = "";
-
+        public string StringValue()
+        {
             object v = Common.Convert(Value, Token.Type);
-            if (v != null)
+            if (v == null)
+                return null;
+
+            if (v.GetType().IsLite())
             {
-                if (v.GetType().IsLite())
-                {
-                    Lite<IdentifiableEntity> lite = (Lite<IdentifiableEntity>)v;
-                    value = lite.Key();
-                }
-                else
-                    value = v.ToString();
+                Lite<IdentifiableEntity> lite = (Lite<IdentifiableEntity>)v;
+                return lite.Key();
             }
-
-            result = "{0},{1},{2}".Formato(ColumnName, Operation.ToString(), EncodeCSV(value));
-            //if (Frozen)
-            //    result += "&fz{0}=true".Formato(filterIndex);
-
-            return result;
+            
+            return v.ToString();
         }
 
         string EncodeCSV(string p)
@@ -399,5 +408,11 @@ namespace Signum.Web
         {
             return DisplayName.HasText() ? "{0},{1}".Formato(ColumnName, DisplayName) : ColumnName;
         }
+    }
+
+    public enum FindMode
+    {
+        Find,
+        Explore
     }
 }

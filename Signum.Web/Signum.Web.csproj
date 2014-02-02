@@ -47,6 +47,9 @@
     <Reference Include="Microsoft.SqlServer.Types, Version=10.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
       <HintPath>C:/Program%20Files%20(x86)/Microsoft%20SQL%20Server/100/SDK/Assemblies/Microsoft.SqlServer.Types.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\Dependencies\Json.Net\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System.Activities" />
     <Reference Include="System.IdentityModel" />
     <Reference Include="System.Runtime.Serialization" />
@@ -85,6 +88,7 @@
     </Compile>
     <Compile Include="AspNetSessionFactory.cs" />
     <Compile Include="ButtonBar\ButtonBar.cs" />
+    <Compile Include="Facades\JsFunction.cs" />
     <Compile Include="Facades\TypeClient.cs" />
     <Compile Include="Facades\ExceptionClient.cs" />
     <Compile Include="Facades\QueryRequestModelBinder.cs" />
@@ -101,8 +105,6 @@
     <Compile Include="LineHelpers\EntityStripHelper.cs" />
     <Compile Include="Lines\EntityStrip.cs" />
     <Compile Include="Lines\HourMinuteLine.cs" />
-    <Compile Include="Operations\JsOperationOptions.cs" />
-    <Compile Include="Operations\JsOperations.cs" />
     <Compile Include="Operations\OperationsClient.cs" />
     <Compile Include="Operations\OperationSettings.cs" />
     <Compile Include="PortableAreas\ActionFilterConfig.cs" />
@@ -118,8 +120,6 @@
     <Compile Include="PortableAreas\StaticContentResult.cs" />
     <Compile Include="ButtonBar\ToolBarMenu.cs" />
     <Compile Include="HtmlHelpers\HtmlTag.cs" />
-    <Compile Include="JSRenderer\JsFunction.cs" />
-    <Compile Include="JSRenderer\JsOptions.cs" />
     <Compile Include="Lines\EntityListBase.cs" />
     <Compile Include="PortableAreas\Repositories\EmbeddedFilesRespository.cs" />
     <Compile Include="PortableAreas\Repositories\LocalizedJavaScriptRepository.cs" />
@@ -221,9 +221,6 @@
     <Compile Include="TypeContext\TypeContextHelper.cs" />
     <Compile Include="TypeContext\TypeContextUtilities.cs" />
     <Compile Include="LineHelpers\EntityInfo.cs" />
-    <Compile Include="JSRenderer\JsValidatorOptions.cs" />
-    <Compile Include="JSRenderer\JsFindOptions.cs" />
-    <Compile Include="JSRenderer\JsViewOptions.cs" />
     <Compile Include="Lines\BaseLine.cs" />
     <Compile Include="Lines\EntityRepeater.cs" />
     <Compile Include="Lines\EntityListDetail.cs" />
@@ -237,7 +234,6 @@
     <Compile Include="LineHelpers\EntityLineDetailHelper.cs" />
     <Compile Include="LineHelpers\EmbeddedControlHelper.cs" />
     <Compile Include="Facades\FindOptionsModelBinder.cs" />
-    <Compile Include="JSRenderer\JsRenderer.cs" />
     <Compile Include="TypeContext\Widgets\LinksClient.cs" />
     <Compile Include="TypeContext\Widgets\WidgetsHelper.cs" />
     <Compile Include="HtmlHelpers\MenuHelper.cs" />
@@ -298,7 +294,6 @@
       <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
     <Content Include="Signum\Content\SF_Widgets.css" />
-    <TypeScriptCompile Include="Signum\Scripts\Widgets.ts" />
     <None Include="Signum\Views\SearchControl.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>SearchControl.generated.cs</LastGenOutput>

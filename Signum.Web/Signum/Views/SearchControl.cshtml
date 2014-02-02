@@ -13,8 +13,8 @@
     findOptions.Pagination = findOptions.Pagination ?? (Navigator.Manager.QuerySettings.GetOrThrow(findOptions.QueryName, "Missing QuerySettings for QueryName {0}").Pagination) ?? FindOptions.DefaultPagination;
     
     ViewData[ViewDataKeys.FindOptions] = findOptions;
-    
-    JsFindNavigator jsFindNavigator = JsFindNavigator.GetFor(Model.ControlID);
+
+    var searchControl = "$('#" + Model.Compose("sfSearchControl") + "').SFControl()";
 }
 <div id="@Model.Compose("sfSearchControl")" 
      class="sf-search-control" 
@@ -81,7 +81,7 @@
                 "sf-query-button sf-filters-header" + (filtersVisible ? "" : " close"),
                 new Dictionary<string, object> 
                 { 
-                    { "onclick", "{0}.toggleFilters()".Formato(jsFindNavigator.ToJS()) },
+                    { "onclick", "{0}.toggleFilters()".Formato(searchControl) },
                     { "data-icon", filtersVisible ? "ui-icon-triangle-1-n" : "ui-icon-triangle-1-e" }
                 })
     }
@@ -100,22 +100,20 @@
     }
     
     <div class="sf-query-button-bar" style="display:@((findOptions.FilterMode != FilterMode.OnlyResults) ? "block" : "none")">
-        <button type="submit" class="sf-query-button sf-search" data-icon="ui-icon-search" id="@Model.Compose("qbSearch")" onclick="@(jsFindNavigator.search().ToJS() + ";return false")">@SearchMessage.Search.NiceToString()</button>
+        <button type="submit" class="sf-query-button sf-search" data-icon="ui-icon-search" id="@Model.Compose("qbSearch")" onclick="@(searchControl).search()">@SearchMessage.Search.NiceToString()</button>
         @if (findOptions.Create)
         {
-            string creating = findOptions.Creating.HasText() ? 
-                    findOptions.Creating :
-                    "{0}.create_click();return false;".Formato(jsFindNavigator.ToJS());
-            <a class="sf-query-button" data-icon="ui-icon-plusthick" data-text="false" id="@Model.Compose("qbSearchCreate")" onclick="@creating">@SearchMessage.Search_Create.NiceToString()</a>
+            <a class="sf-query-button" data-icon="ui-icon-plusthick" data-text="false" id="@Model.Compose("qbSearchCreate")" onclick="@(searchControl).create_click()">@SearchMessage.Search_Create.NiceToString()</a>
         }
         @ButtonBarQueryHelper.GetButtonBarElementsForQuery(new QueryButtonContext
-   {
-       ControllerContext = this.ViewContext,
-       QueryName = findOptions.QueryName,
-       ManualQueryButtons = (ToolBarButton[])ViewData[ViewDataKeys.ManualToolbarButtons],
-       EntityType = entitiesType,
-       Prefix = Model.ControlID
-   }).ToString(Html)
+       {
+           Url = Url,
+           ControllerContext = this.ViewContext,
+           QueryName = findOptions.QueryName,
+           ManualQueryButtons = (ToolBarButton[])ViewData[ViewDataKeys.ManualToolbarButtons],
+           EntityType = entitiesType,
+           Prefix = Model.ControlID
+       }).ToString(Html)
     </div>
     @if (findOptions.FilterMode != FilterMode.OnlyResults)
     {
@@ -129,7 +127,7 @@
                     @if (findOptions.AllowMultiple)
                     {
                         <th class="ui-state-default sf-th-selection">
-                            @Html.CheckBox(Model.Compose("cbSelectAll"), false, new { onclick = "{0}.toggleSelectAll()".Formato(jsFindNavigator.ToJS()) })
+                            @Html.CheckBox(Model.Compose("cbSelectAll"), false, new { onclick = "{0}.toggleSelectAll()".Formato(searchControl) })
                         </th>
                     }
                     @if (findOptions.Navigate)
@@ -170,14 +168,6 @@
         </table>
     </div>
 </div>
-@{ 
-    var jsFindOptions = new JsFindOptions() 
-    { 
-        FindOptions = findOptions,
-        Prefix = Model.ControlID,
-        Pagination = findOptions.Pagination
-    };
-}
 <script type="text/javascript">
-    $("#@Model.Compose("sfSearchControl")").searchControl(@MvcHtmlString.Create(jsFindOptions.ToJS()));
+    require("@JsFunction.FinderModule", function(Finder) { new Finder.searchControl($("#@Model.Compose("sfSearchControl")"), @(findOptions.ToJS(Model.ControlID).ToString()));});
 </script>

@@ -72,7 +72,7 @@ namespace Signum.Web
                         if (entityCombo.ComboHtmlProperties.ContainsKey("onchange"))
                             throw new InvalidOperationException("EntityCombo cannot have onchange html property, use onEntityChanged instead");
 
-                        entityCombo.ComboHtmlProperties.Add("onchange", "{0}.setSelected();".Formato(entityCombo.ToJS()));
+                        entityCombo.ComboHtmlProperties.Add("onchange", "{0}.setSelected();".Formato(entityCombo.SFControl()));
 
                         if (entityCombo.Size > 0)
                         {
@@ -100,7 +100,7 @@ namespace Signum.Web
                     sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityCombo, entityCombo.ControlID));
             }
 
-            sb.AddLine(entityCombo.ConstructorSript("entityCombo"));
+            sb.AddLine(entityCombo.ConstructorScript(JsFunction.LinesModule, "entityCombo"));
 
             return sb.ToHtml();
         }

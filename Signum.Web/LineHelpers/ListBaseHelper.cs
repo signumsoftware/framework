@@ -27,7 +27,7 @@ namespace Signum.Web
 
             var htmlAttr = new Dictionary<string, object>
             {
-                { "onclick",  "{0}.moveUp()".Formato(listBase.ToJS()) },
+                { "onclick",  "{0}.moveUp()".Formato(listBase.SFControl()) },
                 { "data-icon", "ui-icon-triangle-1-n" },
                 { "data-text", false}
             };
@@ -55,7 +55,7 @@ namespace Signum.Web
 
             var htmlAttr = new Dictionary<string, object>
             {
-                { "onclick", "{0}.moveDown()".Formato(listBase.ToJS()) },
+                { "onclick", "{0}.moveDown()".Formato(listBase.SFControl()) },
                 { "data-icon", "ui-icon-triangle-1-s" },
                 { "data-text", false}
             };

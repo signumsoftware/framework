@@ -9,6 +9,7 @@ using Signum.Entities;
 using Signum.Entities.DynamicQuery;
 using Signum.Engine;
 using System.Reflection;
+using Newtonsoft.Json.Linq;
 
 namespace Signum.Web
 {
@@ -221,13 +222,11 @@ namespace Signum.Web
 
         public override MvcHtmlString Execute()
         {
-            string onclick = JsFindNavigator.openFinder(new JsFindOptions
-            {
-                FindOptions = FindOptions,
-                Prefix = Js.NewPrefix(Prefix ?? "")
-            }).ToJS();
+            JObject jsFindOptions = FindOptions.ToJS(TypeContextUtilities.Compose("New", Prefix));
 
-            return new HtmlTag("a").Attr("onclick", onclick).SetInnerText(Text);
+            return new HtmlTag("a")
+                .Attr("onclick", new JsFunction(JsFunction.FinderModule, "explore", jsFindOptions.ToString()).ToString())
+                .SetInnerText(Text);
         }
     }
 

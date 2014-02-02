@@ -11,6 +11,7 @@ namespace Signum.Web
 {
     public class EntityButtonContext
     {
+        public UrlHelper Url { get; internal set; }
         public ControllerContext ControllerContext { get; internal set; }
         public string PartialViewName { get; internal set; }
         public string Prefix{ get; internal set; }
@@ -56,6 +57,7 @@ namespace Signum.Web
 
     public class QueryButtonContext
     {
+        public UrlHelper Url { get; internal set; }
         public object QueryName { get; internal set; }
         public ToolBarButton[] ManualQueryButtons { get; internal set; }
         public Type EntityType { get; internal set; }

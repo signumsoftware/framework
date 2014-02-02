@@ -12,6 +12,7 @@ using Signum.Entities.Reflection;
 using Signum.Utilities;
 using System.Configuration;
 using Signum.Engine;
+using Newtonsoft.Json.Linq;
 #endregion
 
 namespace Signum.Web
@@ -24,7 +25,6 @@ namespace Signum.Web
 
     public class EntityStrip : EntityListBase
     {
-        public int? MaxElements { get; set; }
 
         public bool Autocomplete { get; set; }
         public string AutocompleteUrl { get; set; }
@@ -51,10 +51,9 @@ namespace Signum.Web
             Autocomplete = false;
         }
 
-        protected override JsOptionsBuilder OptionsJSInternal()
+        protected override JObject OptionsJSInternal()
         {
             var result = base.OptionsJSInternal();
-            result.Add("maxElements", MaxElements.TryToString());
             return result;
         }
     }

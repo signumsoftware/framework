@@ -1,13 +1,80 @@
 ﻿/// <reference path="globals.ts"/>
 
-import Entities = require("Entities")
+import Entities = require("Framework/Signum.Web/Signum/Scripts/Entities")
 import Navigator = require("Navigator")
 
+export interface FindOptions {
+    allowChangeColumns?: boolean;
+    allowOrder?: boolean;
+    allowMultiple?: boolean;
+    columnMode?: ColumnOptionsMode;
+    columns?: ColumnOption[]; 
+    create?: boolean;
+    elems?: number;
+    selectedItemsContextMenu?: boolean;
+    filterMode?: FilterMode;
+    filters?: FilterOption[]; 
+    navigate?: boolean;
+    openFinderUrl?: boolean;
+    orders?: OrderOption[]; 
+    prefix: string;
+    webQueryName: string;
+    searchOnLoad?: boolean;
+}
 
-once("SF-searchControl", () =>
-$.fn.searchControl = function (opt: FindOptions) {
-    return new SearchControl(this, opt);
-});
+export interface FilterOption {
+    columnName: string;
+    operation: FilterOperation;
+    value: string
+}
+
+export enum FilterOperation {
+    EqualTo,
+    DistinctTo,
+    GreaterThan,
+    GreaterThanOrEqual,
+    LessThan,
+    LessThanOrEqual,
+    Contains,
+    StartsWith,
+    EndsWith,
+    Like,
+    NotContains,
+    NotStartsWith,
+    NotEndsWith,
+    NotLike,
+    IsIn,
+}
+
+export enum FilterMode {
+    Visible,
+    Hidden,
+    AlwaysHidden,
+    OnlyResults,
+}
+
+
+export interface OrderOption {
+    columnName: string;
+    orderType: OrderType;
+}
+
+export enum OrderType {
+    Ascending,
+    Descending
+}
+
+
+export interface ColumnOption {
+    columnName: string;
+    displayName: string;
+}
+
+export enum ColumnOptionsMode {
+    Add,
+    Remove,
+    Replace,
+}
 
 export function getFor(prefix: string): SearchControl {
     return $("#" + SF.compose(prefix, "sfSearchControl")).SFControl<SearchControl>();
@@ -26,8 +93,8 @@ export function find(findOptions: FindOptions): Promise<Entities.EntityValue> {
 function findInternal(findOptions: FindOptions): Promise<Array<Entities.EntityValue>> {
     return new Promise<Array<Entities.EntityValue>>(function (resolve) {
         $.ajax({
-            url: findOptions.openFinderUrl || (SF.isEmpty(findOptions.prefix) ? SF.Urls.find : SF.Urls.partialFind),
-            data: requestDataForOpenFinder(findOptions),
+            url: findOptions.openFinderUrl || SF.Urls.partialFind,
+            data: requestDataForOpenFinder(findOptions, false),
             async: false,
             success: function (popupHtml) {
                 var divId = SF.compose(findOptions.prefix, "Temp");
@@ -38,7 +105,7 @@ function findInternal(findOptions: FindOptions): Promise<Array<Entities.EntityVa
                 var sc = getFor(findOptions.prefix)
 
                     //$.extend(sc.options, findOptions); //Copy all properties (i.e. onOk was not transmitted)
-                    $("#" + divId).popup({
+                $("#" + divId).popup({
                     onOk: function () {
 
                         var items = sc.selectedItems();
@@ -64,7 +131,30 @@ function findInternal(findOptions: FindOptions): Promise<Array<Entities.EntityVa
     });
 }
 
-export function requestDataForOpenFinder(findOptions: FindOptions) {
+export function explore(findOptions: FindOptions): Promise<void> {
+    return new Promise<void>(function (resolve) {
+        $.ajax({
+            url: findOptions.openFinderUrl || SF.Urls.partialFind,
+            data: requestDataForOpenFinder(findOptions, true),
+            async: false,
+            success: function (popupHtml) {
+                var divId = SF.compose(findOptions.prefix, "Temp");
+                $("body").append(SF.hiddenDiv(divId, popupHtml));
+                var div = $("#" + divId);
+                SF.triggerNewContent(div);
+
+                var sc = getFor(findOptions.prefix)
+
+                    //$.extend(sc.options, findOptions); //Copy all properties (i.e. onOk was not transmitted)
+                $("#" + divId).popup({
+                    onCancel: function () { div.remove(); resolve(null); }
+                });
+            }
+        });
+    });
+}
+
+export function requestDataForOpenFinder(findOptions: FindOptions, isExplore : boolean) {
     var requestData = {
         webQueryName: findOptions.webQueryName,
         elems: findOptions.elems,
@@ -88,27 +178,25 @@ export function requestDataForOpenFinder(findOptions: FindOptions) {
         requestData["allowChangeColumns"] = findOptions.allowChangeColumns;
     }
     if (findOptions.filters != null) {
-        requestData["filters"] = findOptions.filters;
+        requestData["filters"] = findOptions.filters.map(f=> f.columnName + "," + FilterOperation[f.operation] + "," + f.value).join(";");//List of filter names "token1,operation1,value1;token2,operation2,value2"
     }
     if (findOptions.orders != null) {
-        requestData["orders"] = this.serializeOrders(findOptions.orders);
+        requestData["orders"] = serializeOrders(findOptions.orders);
     }
     if (findOptions.columns != null) {
-        requestData["columns"] = findOptions.columns;
+        requestData["columns"] = findOptions.columns.map(c=> c.columnName + "," + c.displayName).join(";");//List of column names "token1,displayName1;token2,displayName2"
     }
     if (findOptions.columnMode != null) {
         requestData["columnMode"] = findOptions.columnMode;
     }
 
+    requestData["isExplore"] = isExplore;
+
     return requestData;
 }
 
-export function serializeOrders(orderArray) {
-    var currOrders = orderArray.join(";");
-    if (!SF.isEmpty(currOrders)) {
-        currOrders += ";";
-    }
-    return currOrders; //.replace(/"/g, "");
+function serializeOrders(orders: OrderOption[]) {
+    return orders.map(f=> (f.orderType == OrderType.Ascending ? "" : "-") + f.columnName).join(";");//A Json array like ["Id","-Name"] => Id asc, then Name desc
 }
 
 export function newSubTokensCombo(webQueryName, prefix, index, controllerUrl, requestExtraJsonData) {
@@ -201,37 +289,9 @@ export function removeOverlay() {
     $('.sf-search-ctxmenu-overlay').remove();
 }
 
-export enum ColumnOptionsMode {
-    Add,
-    Remove,
-    Replace,
-}
 
-export class FilterMode {
-    static Visible = "Visible";
-    static Hidden = "Hidden";
-    static AlwaysHidden = "AlwaysHidden";
-    static OnlyResults = "OnlyResults";
-}
 
-export interface FindOptions {
-    allowChangeColumns?: boolean;
-    allowOrder?: boolean;
-    allowMultiple?: boolean;
-    columnMode?: ColumnOptionsMode;
-    columns?: string; //List of column names "token1,displayName1;token2,displayName2"
-    create?: boolean;
-    elems?: number;
-    selectedItemsContextMenu?: boolean;
-    filterMode?: FilterMode;
-    filters?: string; //List of filter names "token1,operation1,value1;token2,operation2,value2"
-    navigate?: boolean;
-    openFinderUrl?: boolean;
-    orders?: string[]; //A Json array like ["Id","-Name"] => Id asc, then Name desc
-    prefix: string;
-    webQueryName: string;
-    searchOnLoad?: boolean;
-}
+
 
 export class SearchControl {
 
@@ -307,7 +367,7 @@ export class SearchControl {
             });
         }
 
-        if (this.options.allowChangeColumns || (this.options.filterMode != FilterMode[FilterMode.AlwaysHidden] && this.options.filterMode != "OnlyResults")) {
+        if (this.options.allowChangeColumns || (this.options.filterMode != FilterMode.AlwaysHidden && this.options.filterMode != FilterMode.OnlyResults)) {
             $tblResults.on("contextmenu", "th:not(.sf-th-entity):not(.sf-th-selection)", function (e) {
                 if (!self.closeMyOpenedCtxMenu()) {
                     return false;
@@ -337,7 +397,7 @@ export class SearchControl {
             this.createMoveColumnDragDrop();
         }
 
-        if (this.options.filterMode != "AlwaysHidden" && this.options.filterMode != "OnlyResults") {
+        if (this.options.filterMode != FilterMode.AlwaysHidden && this.options.filterMode != FilterMode.OnlyResults) {
             $tblResults.on("contextmenu", "td:not(.sf-td-no-results):not(.sf-td-multiply,.sf-search-footer-pagination)", function (e) {
                 if (!self.closeMyOpenedCtxMenu()) {
                     return false;
@@ -379,7 +439,7 @@ export class SearchControl {
             });
         }
 
-        if (this.options.filterMode != "OnlyResults") {
+        if (this.options.filterMode != FilterMode.OnlyResults) {
             $tblResults.on("click", ".sf-pagination-button", function () {
                 $(self.pf(self.keys.page)).val($(this).attr("data-page"));
                 self.search();
@@ -464,7 +524,7 @@ export class SearchControl {
         var $menu = this.createCtxMenu($th);
 
         var $itemContainer = $menu.find(".sf-search-ctxmenu");
-        if (this.options.filterMode != "AlwaysHidden" && this.options.filterMode != "OnlyResults") {
+        if (this.options.filterMode != FilterMode.AlwaysHidden && this.options.filterMode != FilterMode.OnlyResults){
             $itemContainer.append("<div class='sf-search-ctxitem sf-quickfilter-header'><span>" + lang.signum.addFilter + "</span></div>");
         }
 
@@ -713,33 +773,33 @@ export class SearchControl {
         return this.selectedItems().map(function (item) { return item.runtimeInfo.key(); }).join(',');
     }
 
-    newSortOrder($th, multiCol) {
+    newSortOrder($th : JQuery, multiCol : boolean) {
         var columnName = $th.find("input:hidden").val();
         var currentOrders = this.options.orders;
 
         var indexCurrOrder = $.inArray(columnName, currentOrders);
-        var newOrder = "";
+        var orderType = OrderType.Ascending;
         if (indexCurrOrder === -1) {
             indexCurrOrder = $.inArray("-" + columnName, currentOrders);
         }
         else {
-            newOrder = "-";
+            orderType = OrderType.Descending;
         }
 
         if (!multiCol) {
             this.element.find(".sf-search-results-container th").removeClass("sf-header-sort-up sf-header-sort-down");
-            this.options.orders = [newOrder + columnName];
+            this.options.orders = [{ columnName: columnName, orderType: orderType }];
         }
         else {
             if (indexCurrOrder !== -1) {
-                this.options.orders[indexCurrOrder] = newOrder + columnName;
+                this.options.orders[indexCurrOrder] = { columnName: columnName, orderType: orderType };
             }
             else {
-                this.options.orders.push(newOrder + columnName);
+                this.options.orders.push({ columnName: columnName, orderType: orderType });
             }
         }
 
-        if (newOrder == "-")
+        if (orderType == OrderType.Descending)
             $th.removeClass("sf-header-sort-down").addClass("sf-header-sort-up");
         else
             $th.removeClass("sf-header-sort-up").addClass("sf-header-sort-down");

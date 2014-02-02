@@ -1,5 +1,5 @@
 ﻿/// <reference path="globals.ts"/>
-define(["require", "exports", "Entities", "Validator"], function(require, exports, Entities, Validator) {
+define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Validator"], function(require, exports, Entities, Validator) {
     function requestPartialView(entityHtml, viewOptions) {
         viewOptions = $.extend({
             controllerUrl: SF.Urls.partialView,
@@ -374,5 +374,12 @@ define(["require", "exports", "Entities", "Validator"], function(require, export
         });
     }
     exports.chooser = chooser;
+
+    once("widgetToggler", function () {
+        return $(document).on("click", ".sf-widget-toggler", function (evt) {
+            SF.Dropdowns.toggle(evt, this, 1);
+            return false;
+        });
+    });
 });
 //# sourceMappingURL=Navigator.js.map

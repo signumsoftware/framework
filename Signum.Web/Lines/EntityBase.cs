@@ -8,6 +8,9 @@ using Signum.Utilities;
 using Signum.Entities;
 using Signum.Entities.Reflection;
 using System.Web.Script.Serialization;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using System.Web;
 
 namespace Signum.Web
 {
@@ -64,25 +67,20 @@ namespace Signum.Web
 
         public string PartialViewName { get; set; }
 
-        public virtual string ToJS()
+        public virtual string SFControl()
         {
             return "$('#{0}').SFControl()".Formato(ControlID);
         }
 
-        public string OptionsJS()
+        protected virtual JObject OptionsJSInternal()
         {
-            return OptionsJSInternal().ToJS();
-        }
-
-        protected virtual JsOptionsBuilder OptionsJSInternal()
-        {
-            var options = new JsOptionsBuilder(false)
+            JObject options = new JObject
             {
-                {"prefix", ControlID.SingleQuote()}
-            };
+                {"prefix", ControlID }
+            }; 
 
             if (PartialViewName.HasText() && !Type.IsEmbeddedEntity())
-                options.Add("partialViewName", PartialViewName.SingleQuote());
+                options.Add("partialViewName", PartialViewName);
 
             return options;
         }
@@ -125,24 +123,84 @@ namespace Signum.Web
             }
         }
 
+        public JsLineFunction AttachFunction;
 
-        public string AttachFunction;
-        public object AttachFunctionExtraArguments; 
-
-        internal MvcHtmlString ConstructorSript(string name)
+        public MvcHtmlString ConstructorScript(string module, string type)
         {
-            var construtor = "$('#{0}').{1}({2})".Formato(ControlID, name, OptionsJS());
-
-            if (AttachFunction != null)
+            var info = new JsLineFunction.LineInfo
             {
-                construtor = AttachFunction + "(" + construtor +
-                    (AttachFunctionExtraArguments == null ? null : new JavaScriptSerializer().Serialize(AttachFunctionExtraArguments)) +
-                    ")";
-            }
+                Module = module,
+                Type = type,
+                ControlID = ControlID,
+                Options = OptionsJSInternal()
+            };
 
-            return new HtmlTag("script").Attr("type", "text/javascript")
-                .InnerHtml(new MvcHtmlString(construtor))
-                .ToHtml();
+            var result = AttachFunction != null ? AttachFunction.SetOptions(info).ToString() :
+                JsLineFunction.BasicConstructor(info);
+
+            return new MvcHtmlString("<script>" + result + "</script>");
         }
     }
+
+
+    public class JsLineFunction : JsFunction
+    {
+
+        /// <summary>
+        /// require("Signum/Lines", "module", function(Lines, mod) { mod.functionName(new Lines.EntityLine($("#Prefix")), arguments...); });
+        /// </summary>
+        public JsLineFunction(string module, string functionName, params object[] arguments) :
+            base(module, functionName, arguments)
+        {
+        }
+
+        LineInfo lineInfo; 
+        internal JsLineFunction SetOptions(LineInfo lineInfo)
+        {
+            this.lineInfo = lineInfo;
+            return this;
+        }
+
+        public override string ToString()
+        {
+            var varModule = VarName(Module);
+
+            var varLines = VarName(lineInfo.Module);
+
+            var args = (Arguments.IsNullOrEmpty() ? null :
+             (", " + Arguments.EmptyIfNull().ToString(a => JsonConvert.SerializeObject(a, JsonSerializerSettings), ", ")));
+
+            return "require('" + lineInfo.Module + "', '" + Module + "', function(" + varLines + ", " + varModule + ") { " +
+                varModule + "." + FunctionName + "(" + NewLine(varLines, lineInfo) + args + "; }";
+        }
+
+        public static string BasicConstructor(LineInfo lineInfo)
+        {
+            var varNameLines = VarName(lineInfo.Module);
+
+            var result = "require('" + lineInfo.Module + "', function(" + varNameLines + ") { " + NewLine(varNameLines, lineInfo) + "; }";
+
+            return result; 
+        }
+
+        static string NewLine(string varLines, LineInfo lineInfo)
+        {
+            return "new {0}.{1}($('{2}'), {3})".Formato(varLines, lineInfo.Type, lineInfo.ControlID, lineInfo.Options.ToString());
+        }
+
+        public class LineInfo
+        {
+            public string Module; 
+            public string Type;
+            public string ControlID;
+            public JObject Options;
+        }
+    }
+   
 }
+
+//require("Lines", function(Lines) { new EntityLine($("#myLine")); });
+//require("Lines", "Blas" , function(Blas, Lines) { Blas.Attach(new EntityLine($("#myLine"))); });
+//require("Lines", "Blas" , function(Blas, Lines) { Blas.Attach(new EntityLine($("#myLine"), {num : "hola"})); });
+
+//require("Operations", function(Operations) { Operations.defaultClick({}); });

@@ -205,19 +205,10 @@ WriteAttribute("class", Tuple.Create(" class=\"", 1133), Tuple.Create("\"", 1214
 , 1170), false)
 );
 
-WriteLiteral(" ");
+WriteLiteral(">OK</button>                \r\n");
 
             
-            #line 26 "..\..\Signum\Views\PopupControl.cshtml"
-                                                                                                                               Write(ViewData[ViewDataKeys.OnOk] != null ? Html.Raw("onclick=\"" + ViewData[ViewDataKeys.OnOk] + "\"") : null);
-
-            
-            #line default
-            #line hidden
-WriteLiteral(">\r\n                OK</button>                \r\n");
-
-            
-            #line 28 "..\..\Signum\Views\PopupControl.cshtml"
+            #line 27 "..\..\Signum\Views\PopupControl.cshtml"
         }
 
             
@@ -228,9 +219,10 @@ WriteLiteral("\r\n");
 WriteLiteral("        ");
 
             
-            #line 30 "..\..\Signum\Views\PopupControl.cshtml"
+            #line 29 "..\..\Signum\Views\PopupControl.cshtml"
    Write(ButtonBarEntityHelper.GetForEntity(new EntityButtonContext
         {
+            Url = Url,
             ViewMode = (ViewMode)ViewData[ViewDataKeys.ViewMode],
             ControllerContext = this.ViewContext,
             PartialViewName = ViewData[ViewDataKeys.PartialViewName].ToString(),
@@ -254,25 +246,25 @@ Write(Html.ValidationSummaryAjax(Model));
             #line hidden
 WriteLiteral("\r\n    <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 1886), Tuple.Create("\"", 1923)
+WriteAttribute("id", Tuple.Create(" id=\"", 1784), Tuple.Create("\"", 1821)
             
             #line 40 "..\..\Signum\Views\PopupControl.cshtml"
-, Tuple.Create(Tuple.Create("", 1891), Tuple.Create<System.Object, System.Int32>(Model.Compose("divMainControl")
+, Tuple.Create(Tuple.Create("", 1789), Tuple.Create<System.Object, System.Int32>(Model.Compose("divMainControl")
             
             #line default
             #line hidden
-, 1891), false)
+, 1789), false)
 );
 
-WriteAttribute("class", Tuple.Create(" class=\"", 1924), Tuple.Create("\"", 1997)
-, Tuple.Create(Tuple.Create("", 1932), Tuple.Create("sf-main-control", 1932), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 1822), Tuple.Create("\"", 1895)
+, Tuple.Create(Tuple.Create("", 1830), Tuple.Create("sf-main-control", 1830), true)
             
             #line 40 "..\..\Signum\Views\PopupControl.cshtml"
-, Tuple.Create(Tuple.Create("", 1947), Tuple.Create<System.Object, System.Int32>(modifiable.IsGraphModified ? " sf-changed" : ""
+, Tuple.Create(Tuple.Create("", 1845), Tuple.Create<System.Object, System.Int32>(modifiable.IsGraphModified ? " sf-changed" : ""
             
             #line default
             #line hidden
-, 1947), false)
+, 1845), false)
 );
 
 WriteLiteral(" \r\n        data-prefix=\"");

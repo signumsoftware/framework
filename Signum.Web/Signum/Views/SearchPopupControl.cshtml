@@ -9,9 +9,11 @@
             </a>
         }
     </span>
+    @if(ViewData[ViewDataKeys.FindMode].Equals(FindMode.Find)){
     <div class="sf-query-button-bar">
-        <input type="button" id="@Model.Compose("btnOk")" class="sf-query-button sf-ok-button" value="OK" @(ViewData[ViewDataKeys.OnOk] != null ? Html.Raw("onclick=\"" + ViewData[ViewDataKeys.OnOk] + "\"") : null) />
+        <input type="button" id="@Model.Compose("btnOk")" class="sf-query-button sf-ok-button" value="OK" />
     </div>
+    }
     <div class="sf-popup-body">
         @{ 
             ViewData[ViewDataKeys.InPopup] = true;
