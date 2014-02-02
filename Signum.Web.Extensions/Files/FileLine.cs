@@ -14,6 +14,8 @@ using Signum.Entities.Basics;
 using Signum.Engine.Basics;
 using System.Web.Routing;
 using Signum.Engine;
+using Signum.Web.Extensions.Files;
+using Newtonsoft.Json.Linq;
 #endregion
 
 namespace Signum.Web.Files
@@ -56,19 +58,18 @@ namespace Signum.Web.Files
             Remove = false;
         }
 
-        protected override JsOptionsBuilder OptionsJSInternal()
+        protected override JObject OptionsJSInternal()
         {
             var result = base.OptionsJSInternal();
-            result.Add("asyncUpload", AsyncUpload ? "true" : "false");
+            result.Add("asyncUpload", AsyncUpload);
             if (UploadUrl.HasText())
-                result.Add("uploadUrl", UploadUrl.SingleQuote());
+                result.Add("uploadUrl", UploadUrl);
             if (UploadDroppedUrl.HasText())
-                result.Add("uploadDroppedUrl", UploadDroppedUrl.SingleQuote());
+                result.Add("uploadDroppedUrl", UploadDroppedUrl);
             if (!DragAndDrop)
-                result.Add("dragAndDrop", "false");
+                result.Add("dragAndDrop", false);
             return result;
         }
-
 
         public IFile GetFileValue()
         {

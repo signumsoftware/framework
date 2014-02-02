@@ -60,7 +60,10 @@
         
         var entityTypePrefix = uc.SubContext(a => a.EntityType).ControlID;
         
-        @Html.EntityLine(uc, f => f.EntityType, el => { el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Signum"); el.AttachFunction = "SF.Chart.attachShowCurrentEntity"; })
+        @Html.EntityLine(uc, f => f.EntityType, el => { 
+       el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Signum");
+       el.AttachFunction = new JsLineFunction(ChartClient.Module, "attachShowCurrentEntity"); 
+   })
         <p>
             @UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().Formato(CurrentEntityConverter.CurrentEntityKey)
         </p>

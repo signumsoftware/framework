@@ -14,6 +14,7 @@ namespace Signum.Web.Notes
     public static class NoteClient
     {
         public static string ViewPrefix = "~/Note/Views/{0}.cshtml";
+        public static string Module = "Extensions/Signum.Web.Extensions/Notes/Scripts/Notes";
 
         public static void Start(params Type[] types)
         {
@@ -35,25 +36,11 @@ namespace Signum.Web.Notes
                     SupportsNotes(entity, types) ? NoteWidgetHelper.CreateWidget(entity as IdentifiableEntity, partialViewName, prefix) :
                     null;
 
-                OperationsClient.AddSettings(new List<OperationSettings>
+                OperationClient.AddSettings(new List<OperationSettings>
                 {
-                    new EntityOperationSettings(NoteOperation.Save)
+                    new EntityOperationSettings(NoteOperation.CreateFromEntity) 
                     { 
-                        OnClick = ctx => {
-                            string prevPopupLevel = ""; //To update notes count
-                            if (ctx.Prefix.HasText())
-                            {
-                                int index = ctx.Prefix.LastIndexOf(TypeContext.Separator);
-                                if (index > 0)
-                                prevPopupLevel =  ctx.Prefix.Substring(0, ctx.Prefix.LastIndexOf(TypeContext.Separator));
-                            }
-
-                            return new JsOperationExecutor(ctx.Options()).validateAndAjax(ctx.Prefix, new JsFunction("prefix")
-                            {
-                                JsViewNavigator.closePopup(ctx.Prefix),
-                                NoteWidgetHelper.JsOnNoteCreated(prevPopupLevel, "Nota creada correctamente")
-                            });
-                        }
+                        IsVisible  = _ => false
                     }
                 });
             }

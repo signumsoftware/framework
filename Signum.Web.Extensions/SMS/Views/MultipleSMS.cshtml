@@ -29,13 +29,4 @@
     </div>
     <br />
     @Html.ValueLine(e, s => s.From)
-    @Html.Hidden(e.Compose("ProviderKeys"), e.Value.ProviderKeys);
-    @Html.Hidden(e.Compose("WebTypeName"), e.Value.WebTypeName);
 }
-@Html.ScriptsJs("~/SMS/Scripts/SF_SMS.js")
-
-@*@Html.RegisterUrls(new Dictionary<string, string> 
-{ 
-    { "getDictionaries", Url.Action<SMSController>(s => s.GetDictionaries()) },
-    { "removeCharacters", Url.Action<SMSController>(s => s.RemoveNoSMSCharacters("")) }
-})*@

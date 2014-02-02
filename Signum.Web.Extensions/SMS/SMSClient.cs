@@ -16,6 +16,9 @@ using System.Web.Routing;
 using Signum.Entities.SMS;
 using Signum.Web.Operations;
 using Signum.Web.Extensions.SMS.Models;
+using System.Linq.Expressions;
+using Newtonsoft.Json.Linq;
+using Signum.Engine.DynamicQuery;
 #endregion
 
 
@@ -24,11 +27,13 @@ namespace Signum.Web.SMS
     public static class SMSClient
     {
         public static string ViewPrefix = "~/SMS/Views/{0}.cshtml";
+        public static string Module = "Extensions/Signum.Web.Extensions/SMS/Scripts/SMS";
 
         public static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
+               
                 Navigator.RegisterArea(typeof(SMSClient));
                 Navigator.AddSettings(new List<EntitySettings>
                 {
@@ -44,46 +49,42 @@ namespace Signum.Web.SMS
                     new EmbeddedEntitySettings<MultipleSMSModel> { PartialViewName = e => ViewPrefix.Formato("MultipleSMS") },
                 });
 
-                OperationsClient.AddSettings(new List<OperationSettings> 
+                OperationClient.AddSettings(new List<OperationSettings> 
                 {
                     new EntityOperationSettings(SMSMessageOperation.CreateSMSWithTemplateFromEntity)
                     {
-                        OnClick = ctx => new JsOperationExecutor(ctx.Options("CreateSMSMessageFromTemplate", "SMS"))
-                        .ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk)
+                        OnClick = ctx => new JsOperationFunction(Module, "createSmsWithTemplateFromEntity",
+                            ctx.Url.Action("CreateSMSMessageFromTemplate", "SMS"), 
+                            SmsTemplateFindOptions(ctx.Entity.GetType()).ToJS(ctx.Prefix, "New"))
                     },
 
                     new ContextualOperationSettings(SMSProviderOperation.SendSMSMessagesFromTemplate)
                     {
-                        RequestExtraJsonData = "function(){ return { providerWebQueryName: SF.FindNavigator.getFor('').options.webQueryName }; }",
-                        OnClick = ctx => new JsOperationConstructorFromMany(ctx.Options("SendMultipleSMSMessagesFromTemplate","SMS"))
-                                .ajaxSelected(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk),
+                        OnClick = ctx =>  new JsOperationFunction(Module, "sendMultipleSMSMessagesFromTemplate",
+                            ctx.Url.Action("SendMultipleMessagesFromTemplate", "SMS"), 
+                            SmsTemplateFindOptions(DynamicQueryManager.Current.GetQuery(ctx.QueryName).EntityImplementations.Types.Single()).ToJS(ctx.Prefix, "New"))
                     },
 
                     new ContextualOperationSettings(SMSProviderOperation.SendSMSMessage)
                     {
-                        RequestExtraJsonData = "function(){ return { providerWebQueryName: SF.FindNavigator.getFor('').options.webQueryName }; }",
-                        OnClick = ctx => new JsOperationConstructorFromMany(ctx.Options("SendMultipleSMSMessages","SMS"))
-                                .ajaxSelected(ctx.Prefix, JsOpSuccess.DefaultDispatcher),
+                        OnClick = ctx => new JsOperationFunction(Module, "sentMultipleSms", ctx.Prefix, 
+                            ctx.Url.Action("SendMultipleSMSMessagesModel", "SMS"),
+                            ctx.Url.Action("SendMultipleMessages", "SMS"))
                     },
                 });
-
-                ButtonBarEntityHelper.RegisterEntityButtons<MultipleSMSModel>((ctx, entity) => 
-                {
-                    return new ToolBarButton[]
-                    {
-                        new ToolBarButton 
-                        { 
-                            Id = "Send", 
-                            Text = "Send Message", 
-                            DivCssClass = ToolBarButton.DefaultEntityDivCssClass,
-                            OnClick = new JsOperationExecutor(new JsOperationOptions
-                            {
-                                ControllerUrl = RouteHelper.New().Action<SMSController>(cu => cu.SendMultipleMessages())
-                            }).validateAndAjax().ToJS()
-                        }
-                    };
-                });
             }
+        }
+
+        private static FindOptions SmsTemplateFindOptions(Type type)
+        {
+            return new FindOptions(typeof(SMSTemplateDN))
+            {
+                FilterOptions = new List<FilterOption> 
+                                { 
+                                    { new FilterOption("IsActive", true) { Frozen = true } },
+                                    { new FilterOption("AssociatedType", type.ToTypeDN().ToLite()) }
+                                }
+            };
         }
     }
 }

@@ -63,6 +63,12 @@ namespace Signum.Web.Extensions.SMS.Views
     #line default
     #line hidden
     
+    #line 8 "..\..\SMS\Views\SMSTemplate.cshtml"
+    using Signum.Web.Mailing;
+    
+    #line default
+    #line hidden
+    
     #line 5 "..\..\SMS\Views\SMSTemplate.cshtml"
     using Signum.Web.SMS;
     
@@ -81,7 +87,7 @@ namespace Signum.Web.Extensions.SMS.Views
 WriteLiteral("\r\n\r\n");
 
             
-            #line 10 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 11 "..\..\SMS\Views\SMSTemplate.cshtml"
 Write(Html.ScriptCss("~/SMS/Content/SF_SMS.css"));
 
             
@@ -90,7 +96,7 @@ Write(Html.ScriptCss("~/SMS/Content/SF_SMS.css"));
 WriteLiteral("\r\n\r\n");
 
             
-            #line 12 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 13 "..\..\SMS\Views\SMSTemplate.cshtml"
  using (var tc = Html.TypeContext<SMSTemplateDN>())
 {   
     
@@ -98,56 +104,56 @@ WriteLiteral("\r\n\r\n");
             #line default
             #line hidden
             
-            #line 14 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 15 "..\..\SMS\Views\SMSTemplate.cshtml"
 Write(Html.ValueLine(tc, s => s.Name));
 
             
             #line default
             #line hidden
             
-            #line 14 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 15 "..\..\SMS\Views\SMSTemplate.cshtml"
                                     
     
             
             #line default
             #line hidden
             
-            #line 15 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 16 "..\..\SMS\Views\SMSTemplate.cshtml"
 Write(Html.ValueLine(tc, s => s.Active, vl => vl.ReadOnly = true));
 
             
             #line default
             #line hidden
             
-            #line 15 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 16 "..\..\SMS\Views\SMSTemplate.cshtml"
                                                                 
     
             
             #line default
             #line hidden
             
-            #line 16 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 17 "..\..\SMS\Views\SMSTemplate.cshtml"
 Write(Html.ValueLine(tc, s => s.StartDate));
 
             
             #line default
             #line hidden
             
-            #line 16 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 17 "..\..\SMS\Views\SMSTemplate.cshtml"
                                          
     
             
             #line default
             #line hidden
             
-            #line 17 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 18 "..\..\SMS\Views\SMSTemplate.cshtml"
 Write(Html.ValueLine(tc, s => s.EndDate));
 
             
             #line default
             #line hidden
             
-            #line 17 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 18 "..\..\SMS\Views\SMSTemplate.cshtml"
                                         
     
     
@@ -155,42 +161,42 @@ Write(Html.ValueLine(tc, s => s.EndDate));
             #line default
             #line hidden
             
-            #line 19 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 20 "..\..\SMS\Views\SMSTemplate.cshtml"
 Write(Html.ValueLine(tc, s => s.From));
 
             
             #line default
             #line hidden
             
-            #line 19 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 20 "..\..\SMS\Views\SMSTemplate.cshtml"
                                      
     
             
             #line default
             #line hidden
             
-            #line 20 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 21 "..\..\SMS\Views\SMSTemplate.cshtml"
 Write(Html.ValueLine(tc, s => s.Certified));
 
             
             #line default
             #line hidden
             
-            #line 20 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 21 "..\..\SMS\Views\SMSTemplate.cshtml"
                                          
     
             
             #line default
             #line hidden
             
-            #line 21 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 22 "..\..\SMS\Views\SMSTemplate.cshtml"
 Write(Html.ValueLine(tc, s => s.EditableMessage));
 
             
             #line default
             #line hidden
             
-            #line 21 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 22 "..\..\SMS\Views\SMSTemplate.cshtml"
                                                
     
     
@@ -198,28 +204,28 @@ Write(Html.ValueLine(tc, s => s.EditableMessage));
             #line default
             #line hidden
             
-            #line 23 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 24 "..\..\SMS\Views\SMSTemplate.cshtml"
 Write(Html.ValueLine(tc, s => s.RemoveNoSMSCharacters));
 
             
             #line default
             #line hidden
             
-            #line 23 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 24 "..\..\SMS\Views\SMSTemplate.cshtml"
                                                      
     
             
             #line default
             #line hidden
             
-            #line 24 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 25 "..\..\SMS\Views\SMSTemplate.cshtml"
 Write(Html.ValueLine(tc, s => s.MessageLengthExceeded));
 
             
             #line default
             #line hidden
             
-            #line 24 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 25 "..\..\SMS\Views\SMSTemplate.cshtml"
                                                      
     
 
@@ -239,13 +245,13 @@ WriteLiteral(" id=\"sfTemplateLiterals\"");
 WriteLiteral(">\r\n");
 
             
-            #line 28 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 29 "..\..\SMS\Views\SMSTemplate.cshtml"
         
             
             #line default
             #line hidden
             
-            #line 28 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 29 "..\..\SMS\Views\SMSTemplate.cshtml"
          using (Html.FieldInline())
         {
             
@@ -253,7 +259,7 @@ WriteLiteral(">\r\n");
             #line default
             #line hidden
             
-            #line 30 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 31 "..\..\SMS\Views\SMSTemplate.cshtml"
        Write(Html.EntityCombo(tc, s => s.AssociatedType, ec =>
             {
                 ec.Data = SMSLogic.RegisteredDataObjectProviders();
@@ -266,7 +272,7 @@ WriteLiteral(">\r\n");
             #line default
             #line hidden
             
-            #line 36 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 37 "..\..\SMS\Views\SMSTemplate.cshtml"
               
 
             
@@ -275,7 +281,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("            <script>\r\n                $(function () {\r\n                    $(\"#");
 
             
-            #line 39 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 40 "..\..\SMS\Views\SMSTemplate.cshtml"
                     Write(tc.SubContext(s => s.AssociatedType).ControlID);
 
             
@@ -285,7 +291,7 @@ WriteLiteral("\").SFControl().onEntityChanged = SF.SMS.fillLiterals;\r\n        
 "       </script>\r\n");
 
             
-            #line 42 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 43 "..\..\SMS\Views\SMSTemplate.cshtml"
         }
 
             
@@ -294,7 +300,7 @@ WriteLiteral("\").SFControl().onEntityChanged = SF.SMS.fillLiterals;\r\n        
 WriteLiteral("        ");
 
             
-            #line 43 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 44 "..\..\SMS\Views\SMSTemplate.cshtml"
     Write(new HtmlTag("select").Attr("multiple", "multiple").Id("sfLiterals").ToHtml());
 
             
@@ -308,20 +314,20 @@ WriteLiteral(" class=\"sf-button\"");
 
 WriteLiteral(" id=\"sfInsertLiteral\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 1686), Tuple.Create("\"", 1727)
+WriteAttribute("value", Tuple.Create(" value=\"", 1713), Tuple.Create("\"", 1754)
             
-            #line 45 "..\..\SMS\Views\SMSTemplate.cshtml"
-, Tuple.Create(Tuple.Create("", 1694), Tuple.Create<System.Object, System.Int32>(SmsMessage.Insert.NiceToString()
+            #line 46 "..\..\SMS\Views\SMSTemplate.cshtml"
+, Tuple.Create(Tuple.Create("", 1721), Tuple.Create<System.Object, System.Int32>(SmsMessage.Insert.NiceToString()
             
             #line default
             #line hidden
-, 1694), false)
+, 1721), false)
 );
 
 WriteLiteral(" />\r\n    </div>\r\n");
 
             
-            #line 47 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 48 "..\..\SMS\Views\SMSTemplate.cshtml"
     
 
             
@@ -336,10 +342,10 @@ WriteLiteral(">\r\n");
 WriteLiteral("        ");
 
             
-            #line 49 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 50 "..\..\SMS\Views\SMSTemplate.cshtml"
    Write(Html.EntityRepeater(tc, e => e.Messages, er =>
         {
-            er.AttachFunction = "SF.TabRepeater.attachTabRepeater";
+            er.AttachFunction = new JsLineFunction(MailingClient.TabsRepeaterModule, "attachTabRepeater");
             er.PreserveViewData = true;
         }));
 
@@ -349,29 +355,13 @@ WriteLiteral("        ");
 WriteLiteral("\r\n    </div>\r\n");
 
             
-            #line 55 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 56 "..\..\SMS\Views\SMSTemplate.cshtml"
 }
 
             
             #line default
             #line hidden
-            
-            #line 56 "..\..\SMS\Views\SMSTemplate.cshtml"
-Write(Html.ScriptsJs("~/SMS/Scripts/SF_SMS.js"));
-
-            
-            #line default
-            #line hidden
 WriteLiteral("\r\n");
-
-            
-            #line 57 "..\..\SMS\Views\SMSTemplate.cshtml"
-Write(Html.ScriptsJs("~/Mailing/Scripts/SF_TabsRepeater.js"));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n\r\n");
 
         }
     }

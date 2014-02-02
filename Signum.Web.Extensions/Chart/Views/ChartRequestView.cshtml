@@ -62,13 +62,13 @@
         @Html.Partial(ChartClient.ChartBuilderView, Model.Value)
     </div>
     <script type="text/javascript">
-        var str = @(MvcHtmlString.Create(Model.Value.ToJS()));
-        $('#@Model.Compose("sfChartBuilderContainer")').chartBuilder($.extend({ prefix: '@Model.ControlID' }, str));
+        var findOptions = @(MvcHtmlString.Create(Model.Value.ToJS().ToString()))
+        require("@ChartClient.Module", function (Chart) { new Chart.ChartBuilder($('#@Model.Compose("sfChartBuilderContainer")'), $.extend({ prefix: '@Model.ControlID' }, findOptions)); }); 
     </script>
     <div class="sf-query-button-bar">
         <button type="submit" class="sf-query-button sf-chart-draw" data-icon="ui-icon-refresh" id="@Model.Compose("qbDraw")" data-url="@(Url.Action<ChartController>(cc => cc.Draw(Model.ControlID)))">@ChartMessage.Chart_Draw.NiceToString()</button>
         <button class="sf-query-button sf-chart-script-edit" data-icon="ui-icon-script" id="@Model.Compose("qbEdit")">@ChartMessage.UserChart_Edit.NiceToString()</button>
-        @UserChartClient.GetChartMenu(this.ViewContext, queryDescription.QueryName, entitiesType, Model.ControlID, (Lite<UserChartDN>)ViewData["UserChart"]).ToString(Html)
+        @UserChartClient.GetChartMenu(this.ViewContext, Url, queryDescription.QueryName, entitiesType, Model.ControlID, (Lite<UserChartDN>)ViewData["UserChart"]).ToString(Html)
         @Html.Href(Model.Compose("sfFullScreen"),
             "Full Screen",
             "",
@@ -85,10 +85,4 @@
     <div id="@Model.Compose("divResults")" class="ui-widget ui-corner-all sf-search-results-container">
         @{ Html.RenderPartial(ChartClient.ChartResultsView); }
     </div>
-    <script type="text/javascript">
-        (function () {
-            var $myChart = SF.Chart.getFor('@Model.ControlID');
-            //$myChart.initOrders();
-        })();
-    </script>
 </div>

@@ -147,6 +147,20 @@ namespace Signum.Engine.Alerts
         {
             GetState = a => a.State;
 
+            new ConstructFrom<IdentifiableEntity>(AlertOperation.CreateFromEntity)
+            {
+                ToState = AlertState.Saved,
+                Construct = (a, _) => new AlertDN
+                {
+                    AlertDate = TimeZoneManager.Now,
+                    CreatedBy = UserDN.Current.ToLite(),
+                    Text = null,
+                    Title = null,
+                    Target = a.ToLite(),
+                    AlertType = null
+                }
+            }.Register();
+
             new Execute(AlertOperation.SaveNew)
             {
                 FromStates = { AlertState.New },

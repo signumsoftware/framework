@@ -30,6 +30,7 @@ namespace Signum.Web.UserQueries
         public const string QueryKey = "QueryKey";
 
         public static string ViewPrefix = "~/UserQueries/Views/{0}.cshtml";
+        public static string Module = "Extensions/Signum.Web.Extensions/UserQueries/Scripts/UserQuery";
 
         public static Mapping<QueryTokenDN> QueryTokenMapping = ctx =>
         {
@@ -87,17 +88,15 @@ namespace Signum.Web.UserQueries
 
                 ButtonBarQueryHelper.RegisterGlobalButtons(ButtonBarQueryHelper_GetButtonBarForQueryName);
 
-                OperationsClient.AddSettings(new List<OperationSettings>
+                OperationClient.AddSettings(new List<OperationSettings>
                 {
                     new EntityOperationSettings(UserQueryOperation.Save)
                     {
-                        OnClick = ctx => new JsOperationExecutor(ctx.Options("Save", "UserQueries"))
-                            .ajax(ctx.Prefix, JsOpSuccess.DefaultDispatcher)
+                        OnClick = ctx => new JsOperationFunction(Module, "saveUserQuery", ctx.Url.Action("Save", "UserQueries"))
                     },
                     new EntityOperationSettings(UserQueryOperation.Delete)
                     {
-                        OnClick = ctx => new JsOperationDelete(ctx.Options("Delete", "UserQueries"))
-                            .confirmAndAjax(ctx.Entity)
+                        OnClick = ctx => new JsOperationFunction(Module, "deleteUserQuery", Navigator.FindRoute( ((UserQueryDN)ctx.Entity).Query.ToQueryName()))
                     }
                 });
 
@@ -168,7 +167,7 @@ namespace Signum.Web.UserQueries
                     Id = TypeContextUtilities.Compose(ctx.Prefix, "qbUserQueryNew"),
                     AltText = uqNewText,
                     Text = uqNewText,
-                    OnClick = Js.SubmitOnly(RouteHelper.New().Action("Create", "UserQueries"), JsFindNavigator.GetFor(ctx.Prefix).requestData()).ToJS(),
+                    OnClick = new JsFunction(Module,  "createUserQuery", ctx.Prefix, ctx.Url.Action("Create", "UserQueries")),
                     DivCssClass = ToolBarButton.DefaultQueryCssClass
                 });
             }

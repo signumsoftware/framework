@@ -2,6 +2,8 @@
 import Entities = require("Framework/Signum.Web/Signum/Scripts/Entities")
 import Lines = require("Framework/Signum.Web/Signum/Scripts/Lines")
 import Finder = require("Framework/Signum.Web/Signum/Scripts/Finder")
+import Operations = require("Framework/Signum.Web/Signum/Scripts/Operations")
+import Navigator = require("Framework/Signum.Web/Signum/Scripts/Navigator")
 
 
 declare var CKEDITOR: any;
@@ -251,4 +253,31 @@ export function activateIFrame($iframe: JQuery) {
     }
     fixHeight();
     setInterval(fixHeight, 500);
+}
+
+
+export function createMailFromTemplate(options: Operations.EntityOperationOptions, findOptions: Finder.FindOptions, url: string)
+{
+    Finder.find(findOptions).then(entity => {
+        if (entity == null)
+            return;
+
+        Operations.constructFromDefault($.extend({
+            keys: entity.runtimeInfo.key(),
+            controllerUrl: url
+        }, options));
+    }); 
+}
+
+
+export function removeRecipients(options: Operations.EntityOperationOptions, newsletterDeliveryFindOptions: Finder.FindOptions, url: string) {
+    Finder.findMany(newsletterDeliveryFindOptions).then(entities => {
+        if (entities == null)
+            return;
+
+        Operations.executeDefault($.extend({
+            keys: entities.map(e=> e.runtimeInfo.key()).join(","),
+            controllerUrl: url
+        }, options));
+    }); 
 }

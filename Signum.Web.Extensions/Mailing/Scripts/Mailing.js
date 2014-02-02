@@ -1,4 +1,4 @@
-﻿define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder"], function(require, exports, Finder) {
+﻿define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Framework/Signum.Web/Signum/Scripts/Operations"], function(require, exports, Finder, Operations) {
     var cssClassActive = "sf-email-inserttoken-targetactive";
     var $lastTokenTarget;
     var onInsertToken;
@@ -249,5 +249,33 @@
         setInterval(fixHeight, 500);
     }
     exports.activateIFrame = activateIFrame;
+
+    function createMailFromTemplate(options, findOptions, url) {
+        Finder.find(findOptions).then(function (entity) {
+            if (entity == null)
+                return;
+
+            Operations.constructFromDefault($.extend({
+                keys: entity.runtimeInfo.key(),
+                controllerUrl: url
+            }, options));
+        });
+    }
+    exports.createMailFromTemplate = createMailFromTemplate;
+
+    function removeRecipients(options, newsletterDeliveryFindOptions, url) {
+        Finder.findMany(newsletterDeliveryFindOptions).then(function (entities) {
+            if (entities == null)
+                return;
+
+            Operations.executeDefault($.extend({
+                keys: entities.map(function (e) {
+                    return e.runtimeInfo.key();
+                }).join(","),
+                controllerUrl: url
+            }, options));
+        });
+    }
+    exports.removeRecipients = removeRecipients;
 });
 //# sourceMappingURL=Mailing.js.map

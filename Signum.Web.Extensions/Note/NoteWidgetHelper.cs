@@ -12,13 +12,6 @@ namespace Signum.Web.Notes
 {
     public static class NoteWidgetHelper
     {
-        public static NoteDN CreateNote(IdentifiableEntity entity)
-        {
-            if (entity.IsNew)
-                return null;
-
-            return new NoteDN { Target = entity.ToLite() };
-        }
 
         public static int CountNotes(IdentifiableEntity identifiable)
         { 
@@ -28,23 +21,12 @@ namespace Signum.Web.Notes
             });
         }
 
-        public static string JsOnNoteCreated(string prefix, string successMessage)
-        {
-            return "SF.Widgets.onNoteCreated('{0}','{1}','{2}')".Formato(
-                RouteHelper.New().Action<NoteController>(wc => wc.NotesCount()), 
-                prefix,
-                successMessage);
-        }
-
         public static WidgetItem CreateWidget(IdentifiableEntity identifiable, string partialViewName, string prefix)
         {
             if (identifiable == null || identifiable.IsNew || identifiable is NoteDN)
                 return null;
 
-            JsFindOptions foptions = new JsFindOptions
-            {
-                Prefix = TypeContextUtilities.Compose(prefix, "New"),
-                FindOptions = new FindOptions
+            var findOptions = new FindOptions
                 {
                     QueryName = typeof(NoteDN),
                     Create = false,
@@ -53,26 +35,17 @@ namespace Signum.Web.Notes
                     FilterOptions = { new FilterOption("Target", identifiable.ToLite()) },
                     ColumnOptions = { new ColumnOption("Target") },
                     ColumnOptionsMode = ColumnOptionsMode.Remove,
-                }
-            };
-
-            JsViewOptions voptions = new JsViewOptions
-            {
-                Type = typeof(NoteDN).Name,
-                Prefix = prefix,
-                ControllerUrl = RouteHelper.New().Action<NoteController>(nc => nc.CreateNote(prefix)),
-                RequestExtraJsonData = "function(){{ return {{ {0}: new SF.RuntimeInfo('{1}').find().val() }}; }}".Formato(EntityBaseKeys.RuntimeInfo, prefix),
-                OnOkClosed = new JsFunction() { JsOnNoteCreated(prefix, NoteMessage.ViewNotes.NiceToString()) }
-            };
-
+                }.ToJS(prefix, "New"); 
+         
             HtmlStringBuilder content = new HtmlStringBuilder();
-            using (content.Surround(new HtmlTag("ul").Class("sf-menu-button sf-widget-content sf-notes")))
+            using (content.Surround(new HtmlTag("ul")
+                .Class("sf-menu-button sf-widget-content sf-notes")))
             {
                 using (content.Surround(new HtmlTag("li").Class("sf-note")))
                 {
                     content.AddLine(new HtmlTag("a")
                         .Class("sf-note-view")
-                        .Attr("onclick", JsFindNavigator.openFinder(foptions).ToJS())
+                        .Attr("onclick", new JsFunction(NoteClient.Module, "explore", prefix, findOptions).ToString())
                         .InnerHtml(NoteMessage.ViewNotes.NiceToString().EncodeHtml())
                         .ToHtml());
                 }
@@ -81,7 +54,7 @@ namespace Signum.Web.Notes
                 {
                     content.AddLine(new HtmlTag("a")
                        .Class("sf-note-create")
-                       .Attr("onclick", new JsViewNavigator(voptions).createSave(RouteHelper.New().SignumAction("TrySavePartial")).ToJS())
+                       .Attr("onclick", new JsFunction(NoteClient.Module, "createAlert", prefix, OperationDN.UniqueKey(NoteOperation.CreateFromEntity)).ToString())
                        .InnerHtml(NoteMessage.CreateNote.NiceToString().EncodeHtml())
                        .ToHtml());
                 }

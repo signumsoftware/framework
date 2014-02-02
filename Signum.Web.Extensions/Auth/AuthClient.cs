@@ -35,6 +35,8 @@ namespace Signum.Web.Auth
         public static string CookieName = "sfUser";
          
         public static string ViewPrefix = "~/auth/Views/{0}.cshtml";
+
+        public static string Module = "Extensions/Signum.Web.Extensions/Auth/Scripts/Auth";
         
         public static string LoginView = ViewPrefix.Formato("Login");
         public static string LoginUserControlView = ViewPrefix.Formato("LoginUserControl");
@@ -78,7 +80,6 @@ namespace Signum.Web.Auth
                     PartialViewName = _ => ViewPrefix.Formato("SetPassword"),
                     MappingDefault = new EntityMapping<SetPasswordModel>(false)
                     .SetProperty(a => a.Password, ctx => UserMapping.GetNewPassword(ctx, UserMapping.NewPasswordKey, UserMapping.NewPasswordBisKey))
-                    .CreateProperty(a => a.User)
                 });
 
                 if (property)
@@ -131,25 +132,20 @@ namespace Signum.Web.Auth
                     }
                 };
 
-                OperationsClient.AddSettings(new List<OperationSettings>
+                OperationClient.AddSettings(new List<OperationSettings>
                 {
                     new EntityOperationSettings(UserOperation.SetPassword) 
                     { 
-                        OnClick = ctx => new JsOperationConstructorFrom(ctx.Options("SetPassword","Auth"))
-                            .ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk),
+                        OnClick = ctx => new JsOperationFunction(Module, "setPassword", 
+                            ctx.Url.Action("SetPasswordModel", "Auth"), 
+                            ctx.Url.Action("SetPasswordOnOk", "Auth")), 
                     },
 
                     new EntityOperationSettings(UserOperation.SaveNew) 
                     { 
-                        OnClick = ctx => new JsOperationExecutor(ctx.Options("SaveNewUser","Auth"))
-                            .ajax(ctx.Prefix, JsOpSuccess.DefaultDispatcher)
-                    },
-
-                    new EntityOperationSettings(UserOperation.Save) 
-                    { 
-                        OnClick = ctx => new JsOperationExecutor(ctx.Options("SaveUser","Auth"))
-                            .validateAndAjax(),
-                    },
+                         OnClick = ctx => new JsOperationFunction(Module, "saveNew", 
+                            ctx.Url.Action("SaveNewUser", "Auth"))
+                    }
                 });
 
 

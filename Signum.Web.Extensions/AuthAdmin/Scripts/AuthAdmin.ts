@@ -118,6 +118,10 @@ export function postDialog(controllerUrl: string, prefix: string) {
     });
 }
 
+export function submitPage(controllerUrl: string, prefix: string) {
+    SF.submit(controllerUrl, null, null);
+}
+
 function findTrsInGroup(ns: string, type: string): JQuery {
     return $(".sf-auth-rules tr[data-ns='" + ns + "'][data-type='" + type + "']");
 }

@@ -25,6 +25,7 @@ namespace Signum.Web.AuthAdmin
     public static class AuthAdminClient
     {
         public static string ViewPrefix = "~/authAdmin/Views/{0}.cshtml";
+        public static string Module = "Extensions/Signum.Web.Extensions/AuthAdmin/Scripts/AuthAdmin";
 
         public static void Start(bool types, bool properties, bool queries, bool operations, bool permissions)
         {
@@ -143,8 +144,9 @@ namespace Signum.Web.AuthAdmin
         {
             ButtonBarEntityHelper.RegisterEntityButtons<T>((ctx, entity) =>
                 new[] { new ToolBarButton { 
-                    OnClick = (embedded ? "SF.Auth.postDialog('{0}', '{1}')" :  "SF.submit('{0}', '{1}')").Formato(
-                        new UrlHelper(ctx.ControllerContext.RequestContext).Action((embedded? "save" : "") +  partialViewName, "AuthAdmin"), ctx.Prefix), 
+                    OnClick =  embedded?
+                    new JsFunction(Module, "postDialog",  ctx.Url.Action( "save" +  partialViewName, "AuthAdmin"), ctx.Prefix):
+                    new JsFunction(Module, "submitPage",  ctx.Url.Action( partialViewName, "AuthAdmin"), ctx.Prefix),
                     Text = AuthMessage.Save.NiceToString(),
                     DivCssClass = ToolBarButton.DefaultEntityDivCssClass 
                 }});

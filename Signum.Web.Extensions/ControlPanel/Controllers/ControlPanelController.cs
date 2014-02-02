@@ -11,6 +11,7 @@ using Signum.Engine;
 using Signum.Entities.Reflection;
 using Signum.Entities.UserQueries;
 using Signum.Engine.Authorization;
+using Signum.Web.Operations;
 
 namespace Signum.Web.ControlPanel
 {
@@ -32,11 +33,9 @@ namespace Signum.Web.ControlPanel
             return View(ControlPanelClient.ViewPrefix.Formato("ControlPanel"), cp);
         }
 
-        public ActionResult AddNewPart()
+        public ActionResult AddNewPart(string prefix, string newPartType)
         {
-            string partType = Request.Form["newPartType"];
-
-            var cp = this.ExtractEntity<ControlPanelDN>().ApplyChanges(this.ControllerContext, "", true).Value;
+            var cp = this.ExtractEntity<ControlPanelDN>().ApplyChanges(this.ControllerContext, prefix, true).Value;
 
             var lastColumn = 0.To(cp.NumberOfColumns).WithMin(c => cp.Parts.Count(p => p.Column == c));
 
@@ -45,12 +44,12 @@ namespace Signum.Web.ControlPanel
                 Column = lastColumn,
                 Row = (cp.Parts.Where(a => a.Column == lastColumn).Max(a => (int?)a.Row + 1) ?? 0),
                 Title = "",
-                Content = (IPartDN)Activator.CreateInstance(Navigator.ResolveType(partType))
+                Content = (IPartDN)Activator.CreateInstance(Navigator.ResolveType(newPartType))
             };
 
             cp.Parts.Add(newPart);
 
-            return Navigator.NormalPage(this, cp);
+            return OperationClient.DefaultExecuteResult(this, cp, prefix);
         }
     }
 }

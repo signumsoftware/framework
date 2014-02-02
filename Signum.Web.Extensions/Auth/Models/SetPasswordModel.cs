@@ -28,14 +28,6 @@ namespace Signum.Web.Auth
     [Serializable, Description("")]
     public class SetPasswordModel : ModelEntity
     {
-        Lite<UserDN> user;
-        [NotNullValidator]
-        public Lite<UserDN> User
-        {
-            get { return user; }
-            set { Set(ref user, value, () => User); }
-        }
-
         string password;
         [NotNullValidator]
         public string Password

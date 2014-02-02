@@ -5,6 +5,7 @@
 @using Signum.Web.SMS
 @using Signum.Engine.SMS
 @using Signum.Utilities
+@using Signum.Web.Mailing
 
 
 @Html.ScriptCss("~/SMS/Content/SF_SMS.css")
@@ -48,13 +49,11 @@
     <div class="sf-tabs-repeater sf-sms-template-messages">
         @Html.EntityRepeater(tc, e => e.Messages, er =>
         {
-            er.AttachFunction = "SF.TabRepeater.attachTabRepeater";
+            er.AttachFunction = new JsLineFunction(MailingClient.TabsRepeaterModule, "attachTabRepeater");
             er.PreserveViewData = true;
         })
     </div>
 }
-@Html.ScriptsJs("~/SMS/Scripts/SF_SMS.js")
-@Html.ScriptsJs("~/Mailing/Scripts/SF_TabsRepeater.js")
 
 @*@Html.RegisterUrls(new Dictionary<string, string> 
 { 

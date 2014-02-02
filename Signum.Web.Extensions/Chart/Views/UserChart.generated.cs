@@ -308,14 +308,17 @@ WriteLiteral(">\r\n        </div>\r\n");
             #line hidden
             
             #line 63 "..\..\Chart\Views\UserChart.cshtml"
-   Write(Html.EntityLine(uc, f => f.EntityType, el => { el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Signum"); el.AttachFunction = "SF.Chart.attachShowCurrentEntity"; }));
+   Write(Html.EntityLine(uc, f => f.EntityType, el => { 
+       el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Signum");
+       el.AttachFunction = new JsLineFunction(ChartClient.Module, "attachShowCurrentEntity"); 
+   }));
 
             
             #line default
             #line hidden
             
-            #line 63 "..\..\Chart\Views\UserChart.cshtml"
-                                                                                                                                                                                 
+            #line 66 "..\..\Chart\Views\UserChart.cshtml"
+     
 
             
             #line default
@@ -325,7 +328,7 @@ WriteLiteral("        <p>\r\n");
 WriteLiteral("            ");
 
             
-            #line 65 "..\..\Chart\Views\UserChart.cshtml"
+            #line 68 "..\..\Chart\Views\UserChart.cshtml"
        Write(UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().Formato(CurrentEntityConverter.CurrentEntityKey));
 
             
@@ -334,21 +337,21 @@ WriteLiteral("            ");
 WriteLiteral("\r\n        </p>\r\n");
 
             
-            #line 67 "..\..\Chart\Views\UserChart.cshtml"
+            #line 70 "..\..\Chart\Views\UserChart.cshtml"
 
         
             
             #line default
             #line hidden
             
-            #line 68 "..\..\Chart\Views\UserChart.cshtml"
+            #line 71 "..\..\Chart\Views\UserChart.cshtml"
    Write(Html.EntityRepeater(uc, tc => tc.Filters, er => { er.PreserveViewData = true; er.PartialViewName = "~/Chart/Views/UserChartFilter.cshtml"; }));
 
             
             #line default
             #line hidden
             
-            #line 68 "..\..\Chart\Views\UserChart.cshtml"
+            #line 71 "..\..\Chart\Views\UserChart.cshtml"
                                                                                                                                                       
 
         
@@ -356,14 +359,14 @@ WriteLiteral("\r\n        </p>\r\n");
             #line default
             #line hidden
             
-            #line 70 "..\..\Chart\Views\UserChart.cshtml"
+            #line 73 "..\..\Chart\Views\UserChart.cshtml"
    Write(Html.EntityRepeater(uc, tc => tc.Orders, er => { er.PreserveViewData = true; er.PartialViewName = "~/Chart/Views/UserChartOrder.cshtml"; }));
 
             
             #line default
             #line hidden
             
-            #line 70 "..\..\Chart\Views\UserChart.cshtml"
+            #line 73 "..\..\Chart\Views\UserChart.cshtml"
                                                                                                                                                     
 
 
@@ -372,14 +375,14 @@ WriteLiteral("\r\n        </p>\r\n");
             #line hidden
 WriteLiteral("        <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 2886), Tuple.Create("\"", 2929)
+WriteAttribute("id", Tuple.Create(" id=\"", 2939), Tuple.Create("\"", 2982)
             
-            #line 72 "..\..\Chart\Views\UserChart.cshtml"
-, Tuple.Create(Tuple.Create("", 2891), Tuple.Create<System.Object, System.Int32>(uc.Compose("sfChartBuilderContainer")
+            #line 75 "..\..\Chart\Views\UserChart.cshtml"
+, Tuple.Create(Tuple.Create("", 2944), Tuple.Create<System.Object, System.Int32>(uc.Compose("sfChartBuilderContainer")
             
             #line default
             #line hidden
-, 2891), false)
+, 2944), false)
 );
 
 WriteLiteral(">\r\n");
@@ -387,7 +390,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("            ");
 
             
-            #line 73 "..\..\Chart\Views\UserChart.cshtml"
+            #line 76 "..\..\Chart\Views\UserChart.cshtml"
        Write(Html.Partial(ChartClient.ChartBuilderView, uc.Value));
 
             
@@ -396,7 +399,7 @@ WriteLiteral("            ");
 WriteLiteral("\r\n        </div>\r\n");
 
             
-            #line 75 "..\..\Chart\Views\UserChart.cshtml"
+            #line 78 "..\..\Chart\Views\UserChart.cshtml"
     }
 
             

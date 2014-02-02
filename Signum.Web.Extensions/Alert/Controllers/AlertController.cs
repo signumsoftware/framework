@@ -13,22 +13,14 @@ namespace Signum.Web.Alerts
 {
     public class AlertController : Controller
     {
-        public PartialViewResult CreateAlert(string prefix)
-        {
-            var entity = (IdentifiableEntity)this.UntypedExtractEntity(); //Related entity always sent with no prefix
-
-            TypeContext tc = TypeContextUtilities.UntypedNew(AlertWidgetHelper.CreateAlert(entity), prefix);
-            return this.PopupOpen(new PopupNavigateOptions(tc));
-        }
-
         public JsonResult AlertsCount()
         {
             var entity = (IdentifiableEntity)this.UntypedExtractEntity(); //Related entity always sent with no prefix
             return Json(new
             {
-                warned = AlertWidgetHelper.CountAlerts(entity, "Alerted"),
-                future = AlertWidgetHelper.CountAlerts(entity, "Future"),
-                attended = AlertWidgetHelper.CountAlerts(entity, "Attended"),
+                Alerted = AlertWidgetHelper.CountAlerts(entity, "Alerted"),
+                Future = AlertWidgetHelper.CountAlerts(entity, "Future"),
+                Attended = AlertWidgetHelper.CountAlerts(entity, "Attended"),
             });
         }
     }

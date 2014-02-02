@@ -299,18 +299,6 @@ namespace Signum.Web.Chart
                 IsNavigableEntity(request.QueryName),
                 uc.ToLite());
         }
-
-        [HttpPost]
-        public ActionResult DeleteUserChart(string prefix)
-        {
-            var userChart = this.ExtractLite<UserChartDN>(prefix);
-
-            var queryName = QueryLogic.ToQueryName(userChart.InDB().Select(uq => uq.Query.Key).FirstEx());
-
-            userChart.Delete();
-
-            return new RedirectResult(Navigator.FindRoute(queryName));
-        }
         #endregion
     }
 }

@@ -49,8 +49,8 @@
         
         @Html.EntityLine(e, f => f.EntityType, el => 
         { 
-            el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Signum"); 
-            el.AttachFunction = "SF.UserQuery.attachShowCurrentEntity"; 
+            el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Signum");
+            el.AttachFunction = new JsLineFunction(UserQueriesClient.Module, "attachShowCurrentEntity"); 
         })
         <p>
             @UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().Formato(CurrentEntityConverter.CurrentEntityKey)

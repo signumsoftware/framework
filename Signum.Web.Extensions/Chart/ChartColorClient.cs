@@ -23,6 +23,8 @@ namespace Signum.Web.Chart
 {
     public static class ChartColorClient
     {
+        public static string Module = "Extensions/Signum.Web.Extensions/Chart/Scripts/Chart"; 
+
         public static void Start()
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -62,7 +64,7 @@ namespace Signum.Web.Chart
                         {
                             Id = TypeContextUtilities.Compose(ctx.Prefix, "ebChartColorSave"),
                             Text = ChartMessage.SavePalette.NiceToString(),
-                            OnClick = "SF.ChartColors.savePalette('{0}')".Formato(RouteHelper.New().Action<ColorChartController>(pc => pc.SavePalette(typeName)))
+                            OnClick = new JsFunction(Module, "savePalette", ctx.Url.Action<ColorChartController>(pc => pc.SavePalette(typeName)))
                         },
                         new ToolBarButton
                         {

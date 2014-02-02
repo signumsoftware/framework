@@ -25,12 +25,15 @@ using System.Diagnostics;
 using System.Text;
 using Signum.Entities.Files;
 using Signum.Web.UserQueries;
+using Newtonsoft.Json.Linq;
 
 namespace Signum.Web.Chart
 {
     public static class ChartClient
     {
         public static string ViewPrefix = "~/Chart/Views/{0}.cshtml";
+
+        public static string Module = "Extensions/Signum.Web.Extensions/Chart/Scripts/Chart";
 
         public static string ChartRequestView = ViewPrefix.Formato("ChartRequestView");
         public static string ChartBuilderView = ViewPrefix.Formato("ChartBuilder");
@@ -41,7 +44,7 @@ namespace Signum.Web.Chart
         public static void Start()
         {
             if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(FileDN)))
-                throw new InvalidOperationException("Call FileDN first"); 
+                throw new InvalidOperationException("Call FileClient.Start first with FileDN"); 
 
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
             {
@@ -161,25 +164,24 @@ namespace Signum.Web.Chart
             if (ctx.Prefix.HasText())
                 return null;
 
-            return new[] { ChartQueryButton(ctx.Prefix) };
+            return new[] { ChartQueryButton(ctx) };
         }
 
-        public static ToolBarButton ChartQueryButton(string prefix)
+        public static ToolBarButton ChartQueryButton(QueryButtonContext ctx)
         {
             if (!ChartPermission.ViewCharting.IsAuthorized())
                 return null;
 
             string chartNewText = ChartMessage.Chart.NiceToString();
 
-            return
-                new ToolBarButton
-                {
-                    Id = TypeContextUtilities.Compose(prefix, "qbChartNew"),
-                    AltText = chartNewText,
-                    Text = chartNewText,
-                    OnClick = Js.SubmitOnly(RouteHelper.New().Action("Index", "Chart"), JsFindNavigator.GetFor(prefix).requestData()).ToJS(),
-                    DivCssClass = ToolBarButton.DefaultQueryCssClass
-                };
+            return new ToolBarButton
+            {
+                Id = TypeContextUtilities.Compose(ctx.Prefix, "qbChartNew"),
+                AltText = chartNewText,
+                Text = chartNewText,
+                OnClick = new JsFunction(Module, "openChart", ctx.Prefix, ctx.Url.Action("Index", "Chart")),
+                DivCssClass = ToolBarButton.DefaultQueryCssClass
+            };
         }
 
         public static string ChartTypeImgClass(IChartBase chartBase, ChartScriptDN current, ChartScriptDN script)
@@ -195,27 +197,22 @@ namespace Signum.Web.Chart
             return css;
         }
 
-        public static string ToJS(this ChartRequest request)
+        public static JObject ToJS(this ChartRequest request)
         {
-            return new JsOptionsBuilder(true)
+            return new JObject
             {
-                { "webQueryName", request.QueryName.TryCC(q => Navigator.ResolveWebQueryName(q).SingleQuote()) },
-                { "orders", request.Orders.IsEmpty() ? null : ("[" + request.Orders.ToString(oo => oo.ToJS().SingleQuote(), ",") + "]") }
-            }.ToJS();
+            { "webQueryName", Navigator.ResolveWebQueryName(request.QueryName) },
+            { "orders", new JArray(request.Orders.Select(o=>new { orderType = o.OrderType, columnName = o.Token.FullKey()}))},
+            };
         }
 
-        public static string ToJS(this Order order)
+        public static JObject ToJS(this UserChartDN userChart)
         {
-            return (order.OrderType == OrderType.Descending ? "-" : "") + order.Token.FullKey();
-        }
-
-        public static string ToJS(this UserChartDN userChart)
-        {
-            return new JsOptionsBuilder(true)
+            return new JObject
             {
-                { "webQueryName", userChart.QueryName.TryCC(q => Navigator.ResolveWebQueryName(q).SingleQuote()) },
-                { "orders", userChart.Orders.IsEmpty() ? null : ("[" + userChart.Orders.ToString(oo => oo.ToJS().SingleQuote(), ",") + "]") }
-            }.ToJS();
+            { "webQueryName", Navigator.ResolveWebQueryName(userChart.QueryName) },
+            { "orders", new JArray(userChart.Orders.Select(o=>new { orderType = o.OrderType, columnName = o.Token.Token.FullKey()}))},
+            };
         }
 
         public static string ToJS(this QueryOrderDN order)

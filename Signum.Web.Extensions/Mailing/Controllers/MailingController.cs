@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using Signum.Web.Operations;
 
 namespace Signum.Web.Mailing
 {
@@ -37,21 +38,6 @@ namespace Signum.Web.Mailing
         }
 
         [HttpPost]
-        public PartialViewResult RemoveRecipients(string oldPrefix, string prefix)
-        { 
-            var newsletter = this.ExtractLite<NewsletterDN>(oldPrefix);
-
-            ViewData[ViewDataKeys.OnOk] = JsFindNavigator.GetFor(prefix).hasSelectedItems(new JsFunction("items") 
-            {
-                Js.AjaxCall<MailingController>(mc => mc.RemoveRecipientsExecute(newsletter, prefix), 
-                    "{ keys: items.map(function(i) { return i.key; }).join(',') }",
-                    new JsFunction())
-            }).ToJS();
-
-            return Navigator.PartialFind(this, new FindOptions(typeof(NewsletterDeliveryDN), "Newsletter", newsletter), prefix);
-        }
-
-        [HttpPost]
         public RedirectResult RemoveRecipientsExecute(Lite<NewsletterDN> newsletter, string prefix)
         {
             var deliveries = Navigator.ParseLiteKeys<NewsletterDeliveryDN>(Request["keys"]);
@@ -62,29 +48,14 @@ namespace Signum.Web.Mailing
         }
 
         [HttpPost]
-        public PartialViewResult CreateMailFromTemplate(string prefix, string oldPrefix)
-        {
-            var et = this.ExtractLite<EmailTemplateDN>(oldPrefix);
-
-            var queryName = QueryLogic.ToQueryName(et.InDB(t => t.Query.Key));
-           
-            ViewData[ViewDataKeys.OnOk] = JsFindNavigator.GetFor(prefix).hasSelectedItems(new JsFunction("items") 
-            {
-                Js.Submit<MailingController>(mc => mc.CreateMailFromTemplateAndEntity(et, prefix), 
-                    "{ keys: items.map(function(i) { return i.key; }).join(',') }")
-            }).ToJS();
-
-            return Navigator.PartialFind(this, new FindOptions(queryName), prefix);
-        }
-
-        [HttpPost]
-        public ViewResult CreateMailFromTemplateAndEntity(Lite<EmailTemplateDN> emailTemplate, string prefix)
+        public ActionResult CreateMailFromTemplateAndEntity(string prefix, string newPrefix)
         {
             var entity = Lite.Parse(Request["keys"]).Retrieve();
 
-            var emailMessage = emailTemplate.ConstructFromLite<EmailMessageDN>(EmailMessageOperation.CreateMailFromTemplate, entity);
+            var emailMessage = this.ExtractEntity<EmailTemplateDN>(prefix)
+                .ConstructFrom<EmailMessageDN>(EmailMessageOperation.CreateMailFromTemplate, entity);
 
-            return Navigator.NormalPage(this, emailMessage);
+            return OperationClient.DefaultConstructResult(this, emailMessage, newPrefix);
         }
     }
 }

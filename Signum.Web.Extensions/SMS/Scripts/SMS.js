@@ -1,6 +1,6 @@
 ﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
 /// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
-define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], function(require, exports, Entities) {
+define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Finder", "Framework/Signum.Web/Signum/Scripts/Operations", "Framework/Signum.Web/Signum/Scripts/Navigator"], function(require, exports, Entities, Finder, Operations, Navigator) {
     var SMSMaxTextLength;
     var SMSWarningTextLength;
 
@@ -145,5 +145,47 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
         var $message = $control();
         $message.val($message.val().substring(0, $message[0].selectionStart) + selected + $message.val().substring($message[0].selectionEnd));
     }
+
+    function createSmsWithTemplateFromEntity(options, url, smsTemplateFindOptions) {
+        Finder.find(smsTemplateFindOptions).then(function (entity) {
+            if (entity != null)
+                return;
+
+            options.requestExtraJsonData = { template: entity.runtimeInfo.key() };
+            options.controllerUrl = url;
+
+            Operations.constructFromDefault(options);
+        });
+    }
+    exports.createSmsWithTemplateFromEntity = createSmsWithTemplateFromEntity;
+
+    function sendMultipleSMSMessagesFromTemplate(options, url, smsTemplateFindOptions) {
+        Finder.find(smsTemplateFindOptions).then(function (entity) {
+            if (entity != null)
+                return;
+
+            options.requestExtraJsonData = { template: entity.runtimeInfo.key() };
+            options.controllerUrl = url;
+
+            Operations.constructFromManyDefault(options);
+        });
+    }
+    exports.sendMultipleSMSMessagesFromTemplate = sendMultipleSMSMessagesFromTemplate;
+
+    function sentMultipleSms(options, prefix, urlModel, urlOperation) {
+        var prefixModel = SF.compose(prefix, "New");
+        Navigator.viewPopup(Entities.EntityHtml.withoutType(prefixModel), {
+            controllerUrl: urlModel
+        }).then(function (eHtml) {
+            if (eHtml == null)
+                return null;
+
+            options.requestExtraJsonData = $.extend({ prefixModel: prefixModel }, eHtml.html.serializeObject());
+            options.controllerUrl = urlOperation;
+
+            Operations.constructFromManyDefault(options);
+        });
+    }
+    exports.sentMultipleSms = sentMultipleSms;
 });
 //# sourceMappingURL=SMS.js.map

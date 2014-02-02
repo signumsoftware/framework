@@ -4,6 +4,7 @@
 import Entities = require("Framework/Signum.Web/Signum/Scripts/Entities")
 import Lines = require("Framework/Signum.Web/Signum/Scripts/Lines")
 import Finder = require("Framework/Signum.Web/Signum/Scripts/Finder")
+import Operations = require("Framework/Signum.Web/Signum/Scripts/Operations")
 
 
 once("SF-UserQuery", () => {
@@ -30,3 +31,25 @@ export function attachShowCurrentEntity(el: Lines.EntityLine) {
 
     el.entityChanged = showOnEntity;
 }
+
+export function deleteUserQuery(os: Operations.EntityOperationOptions, urlRedirect: string) {
+
+    os.avoidReturnRedirect = true;
+
+    Operations.deleteAjaxContextual(os).then(() => {
+        if (!os.prefix)
+            window.location.href = urlRedirect;
+    });
+} 
+
+export function saveUserQuery(os: Operations.EntityOperationOptions, url: string) {
+
+    os.controllerUrl = url;
+
+    Operations.executeDefault(os); 
+} 
+
+export function createUserQuery(prefix: string, url: string) {
+    return SF.submit(url, Finder.getFor(prefix).requestDataForSearch()); 
+}
+

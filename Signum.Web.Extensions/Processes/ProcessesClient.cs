@@ -79,10 +79,10 @@ namespace Signum.Web.Processes
             var types = ctx.Lites.Select(a => a.EntityType).Distinct().ToList();
 
             var contexts = (from t in types
-                            from oi in OperationsClient.Manager.OperationInfos(t)
+                            from oi in OperationClient.Manager.OperationInfos(t)
                             where oi.IsEntityOperation
                             group new { t, oi } by oi.Key into g
-                            let os = OperationsClient.Manager.GetSettings<EntityOperationSettings>(g.Key)
+                            let os = OperationClient.Manager.GetSettings<EntityOperationSettings>(g.Key)
                             let oi = g.First().oi
                             let context = new ContextualOperationContext
                             {
@@ -115,7 +115,7 @@ namespace Signum.Web.Processes
                 }
             }
 
-            List<ContextualItem> operations = contexts.Select(op => OperationsClient.Manager.CreateContextual(op)).OrderBy(o => o.Order).ToList();
+            List<ContextualItem> operations = contexts.Select(op => OperationClient.Manager.CreateContextual(op)).OrderBy(o => o.Order).ToList();
 
             HtmlStringBuilder content = new HtmlStringBuilder();
             using (content.Surround(new HtmlTag("ul").Class("sf-search-ctxmenu-operations")))
@@ -130,7 +130,7 @@ namespace Signum.Web.Processes
                 {
                     content.AddLine(new HtmlTag("li")
                         .Class(ctxItemClass)
-                        .InnerHtml(OperationsClient.Manager.IndividualOperationToString(operation)));
+                        .InnerHtml(OperationClient.Manager.IndividualOperationToString(operation)));
                 }
             }
 

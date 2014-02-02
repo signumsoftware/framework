@@ -227,8 +227,8 @@ WriteLiteral("></div>\r\n");
             #line 50 "..\..\UserQueries\Views\UserQuery.cshtml"
    Write(Html.EntityLine(e, f => f.EntityType, el => 
         { 
-            el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Signum"); 
-            el.AttachFunction = "SF.UserQuery.attachShowCurrentEntity"; 
+            el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Signum");
+            el.AttachFunction = new JsLineFunction(UserQueriesClient.Module, "attachShowCurrentEntity"); 
         }));
 
             

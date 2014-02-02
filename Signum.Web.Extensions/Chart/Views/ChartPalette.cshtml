@@ -1,5 +1,4 @@
 ﻿@using Signum.Web
-@using Signum.Web.Extensions.Properties
 @using Signum.Entities.DynamicQuery
 @using Signum.Engine.DynamicQuery
 @using System.Configuration
@@ -54,40 +53,3 @@
         </tbody>
     </table>
 }
-<script type="text/javascript">
-    var SF = SF || {};
-
-    SF.ChartColors = (function () {
-        var updateColor = function (input) {
-            var $input = $(input);
-            $input.closest("tr").find("div.sf-chart-color-box").css("background-color", "#" + ($input.val() || "FFFFFF"));
-        }
-
-        $(function () {
-            $("input.sf-chart-color-input")
-                .each(function (i, input) { updateColor(input); })
-                .change(function () { updateColor(this); });
-
-            $("#sfChartSavePalette").on("click", function (e) {
-                e.preventDefault();
-
-            });
-        });
-
-        var savePalette = function (url) {
-            $.ajax({
-                url: url,
-                data: $("#divMainControl :input").serialize(),
-                success: function (result) {
-                    if (typeof result.ModelState != "undefined") {
-                        new SF.Validator().showErrors(result.ModelState);
-                    }
-                }
-            });
-        };
-
-        return {
-            savePalette: savePalette
-        };
-    })();
-</script>

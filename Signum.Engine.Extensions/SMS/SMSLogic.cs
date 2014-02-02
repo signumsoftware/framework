@@ -170,7 +170,6 @@ namespace Signum.Engine.SMS
             public string Message;
             public string From;
             public bool Certified;
-            public List<Lite<IdentifiableEntity>> Referreds;
 
             public SMSMessageDN CreateStaticSMSMessage(string destinationNumber, Lite<SMSSendPackageDN> packLite, Lite<IdentifiableEntity> referred, bool certified)
             {

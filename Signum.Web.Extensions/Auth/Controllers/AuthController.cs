@@ -58,64 +58,33 @@ namespace Signum.Web.Auth
             }
 
             context.Value.Execute(UserOperation.SaveNew);
-            return new RedirectResult(Navigator.NavigateRoute(context.Value));
+            return OperationClient.DefaultExecuteResult(this, context.Value, prefix);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public ActionResult SaveUserWithNewPwd(string prefix)
+        public ActionResult SetPasswordModel(string prefix)
         {
-            var context = this.ExtractEntity<UserDN>(prefix).ApplyChanges(this.ControllerContext, prefix, true);
-            ViewData["NewPwd"] = true;
-            return Navigator.NormalControl(this, context.Value);
-        }
-
-        [AcceptVerbs(HttpVerbs.Post)]
-        public ActionResult SaveUser(string prefix)
-        {
-            var context = this.ExtractEntity<UserDN>(prefix).ApplyChanges(this.ControllerContext, prefix, true).ValidateGlobal();
-
-            if (context.GlobalErrors.Any())
-            {
-                this.ModelState.FromContext(context);
-                return JsonAction.ModelState(ModelState);
-            }
-
-            context.Value.Execute(UserOperation.Save);
-            return new RedirectResult(Navigator.NavigateRoute(context.Value));
-        }
-
-        [AcceptVerbs(HttpVerbs.Post)]
-        public ActionResult SetPassword(string prefix, string oldPrefix)
-        {
-            UserDN entity = this.ExtractEntity<UserDN>(oldPrefix);
-            var model = new SetPasswordModel { User = entity.ToLite() };
-
-            ViewData[ViewDataKeys.OnOk] = new JsOperationExecutor(new JsOperationOptions
-            {
-                ControllerUrl = Url.Action("SetPasswordOnOk", "Auth"),
-                Prefix = prefix,
-            }).validateAndAjax().ToJS();
-
             ViewData[ViewDataKeys.Title] = AuthMessage.EnterTheNewPassword.NiceToString();
 
+            var model = new SetPasswordModel { };
             TypeContext tc = TypeContextUtilities.UntypedNew(model, prefix);
             return this.PopupOpen(new PopupViewOptions(tc));
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public RedirectResult SetPasswordOnOk(string prefix)
+        public ActionResult SetPasswordOnOk(string prefix, string passPrefix)
         {
-            var context = this.ExtractEntity<SetPasswordModel>(prefix).ApplyChanges(this.ControllerContext, prefix, true);
+            var context = this.ExtractEntity<SetPasswordModel>(passPrefix).ApplyChanges(this.ControllerContext, prefix, true);
 
-            UserDN g = context.Value.User.ExecuteLite(UserOperation.SetPassword, context.Value.Password);
+            UserDN user = this.ExtractLite<UserDN>(prefix)
+                .ExecuteLite(UserOperation.SetPassword, context.Value.Password);
 
-            return new RedirectResult(Navigator.NavigateRoute(typeof(UserDN), g.Id));
+            return OperationClient.DefaultExecuteResult(this, user, prefix);
         }
 
         #region "Change password"
         public ActionResult ChangePassword()
         {
-
             if (TempData.ContainsKey("message") && TempData["message"] != null)
                 ViewData["message"] = TempData["message"].ToString();
 

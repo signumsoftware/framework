@@ -6,12 +6,12 @@ import Entities = require("Framework/Signum.Web/Signum/Scripts/Entities")
 import Lines = require("Framework/Signum.Web/Signum/Scripts/Lines")
 import Finder = require("Framework/Signum.Web/Signum/Scripts/Finder")
 import Validator = require("Framework/Signum.Web/Signum/Scripts/Validator")
+import Operations = require("Framework/Signum.Web/Signum/Scripts/Operations")
 
 
-    once("SF-chartBuilder", () =>
-    $.fn.chartBuilder = function (opt: Finder.FindOptions) {
-        new ChartBuilder(this, opt);
-    });
+export function openChart(prefix: string, url : string) {
+    SF.submit(url,Finder.getFor(prefix).requestDataForSearch());
+}
 
 export function attachShowCurrentEntity(el: Lines.EntityLine) {
     var showOnEntity = function () {
@@ -22,6 +22,24 @@ export function attachShowCurrentEntity(el: Lines.EntityLine) {
 
     el.entityChanged = showOnEntity;
 }
+
+export function deleteUserChart(options: Operations.EntityOperationOptions, url: string) {
+    options.avoidReturnRedirect = true;
+    Operations.deleteAjax(options).then(a=> {
+        if (!options.prefix)
+            location.href = url; 
+    }); 
+}
+
+export function createUserChart(prefix: string, url: string) {
+    SF.submit(url, getFor(prefix).requestProcessedData());
+}
+
+export function exportData(prefix: string, validateUrl: string, exportUrl: string) {
+    getFor(prefix).exportData(validateUrl, exportUrl); 
+}
+
+
 
 export function getFor(prefix: string): ChartBuilder {
     return $("#" + SF.compose(prefix, "sfChartBuilderContainer")).SFControl<ChartBuilder>();

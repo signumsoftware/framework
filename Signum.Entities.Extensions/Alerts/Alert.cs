@@ -163,6 +163,7 @@ namespace Signum.Entities.Alerts
 
     public enum AlertOperation
     {
+        CreateFromEntity,
         SaveNew,
         Save,
         Attend,
@@ -194,7 +195,6 @@ namespace Signum.Entities.Alerts
         Alert,
         [Description("New Alert")]
         NewAlert,
-        AlertCreated,
         Alerts,
         [Description("Attended")]
         Alerts_Attended,

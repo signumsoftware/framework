@@ -3,6 +3,9 @@
 
 import Entities = require("Framework/Signum.Web/Signum/Scripts/Entities")
 import Lines = require("Framework/Signum.Web/Signum/Scripts/Lines")
+import Finder = require("Framework/Signum.Web/Signum/Scripts/Finder")
+import Operations = require("Framework/Signum.Web/Signum/Scripts/Operations")
+import Navigator = require("Framework/Signum.Web/Signum/Scripts/Navigator")
 
 
 var SMSMaxTextLength;
@@ -156,5 +159,49 @@ function insertLiteral() {
         selected +
         $message.val().substring((<HTMLTextAreaElement>$message[0]).selectionEnd)
         );
+}
+
+export function createSmsWithTemplateFromEntity(options: Operations.EntityOperationOptions, url: string,
+    smsTemplateFindOptions: Finder.FindOptions) {
+
+    Finder.find(smsTemplateFindOptions).then(entity=> {
+        if (entity != null)
+            return;
+
+        options.requestExtraJsonData = { template: entity.runtimeInfo.key() };
+        options.controllerUrl = url;
+
+        Operations.constructFromDefault(options);
+    }); 
+}
+
+
+export function sendMultipleSMSMessagesFromTemplate(options: Operations.OperationOptions, url: string,
+    smsTemplateFindOptions: Finder.FindOptions) {
+
+    Finder.find(smsTemplateFindOptions).then(entity=> {
+        if (entity != null)
+            return;
+
+        options.requestExtraJsonData = { template: entity.runtimeInfo.key() };
+        options.controllerUrl = url;
+
+        Operations.constructFromManyDefault(options);
+    });
+}
+
+export function sentMultipleSms(options: Operations.OperationOptions, prefix: string, urlModel: string, urlOperation: string) {
+    var prefixModel = SF.compose(prefix, "New");
+    Navigator.viewPopup(Entities.EntityHtml.withoutType(prefixModel), {
+        controllerUrl: urlModel
+    }).then(eHtml=> {
+            if (eHtml == null)
+                return null;
+
+        options.requestExtraJsonData = $.extend({ prefixModel: prefixModel }, eHtml.html.serializeObject());
+            options.controllerUrl = urlOperation;
+
+            Operations.constructFromManyDefault(options);
+        });
 }
 

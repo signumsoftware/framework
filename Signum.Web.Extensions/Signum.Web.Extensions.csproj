@@ -50,6 +50,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.VisualStudio.Web.PageInspector.Loader, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\Framework\Dependencies\Json.Net\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System.Activities" />
     <Reference Include="System.IdentityModel" />
     <Reference Include="System.Runtime.Serialization" />
@@ -364,26 +367,6 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Calendar.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="Captcha\CaptchaClient.cs" />
-    <Compile Include="Captcha\Controllers\CaptchaController.cs" />
-    <Compile Include="Captcha\CaptchaHtmlHelper.cs" />
-    <Compile Include="Captcha\CaptchaImage.cs" />
-    <Compile Include="Captcha\CaptchaValidationAttribute.cs" />
-    <Compile Include="Captcha\Views\captcha.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>captcha.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="Captcha\Views\captchaImage.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>captchaImage.cshtml</DependentUpon>
-    </Compile>
-    <Compile Include="Captcha\Views\_ViewStart.generated.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>_ViewStart.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Chart\ChartClient.cs" />
     <Compile Include="Chart\ChartOmniboxProvider.cs" />
@@ -958,6 +941,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="Alert\Scripts\Alerts.ts" />
     <Content Include="AuthAdmin\Content\SF_AuthAdmin.css" />
     <Content Include="AuthAdmin\Images\namespace.png" />
     <Content Include="AuthAdmin\Images\operation.png" />
@@ -1018,6 +1002,7 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>User.generated.cs</LastGenOutput>
     </None>
+    <TypeScriptCompile Include="Auth\Scripts\Auth.ts" />
     <Content Include="Auth\Views\SetPassword.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>SetPassword.generated.cs</LastGenOutput>
@@ -1037,6 +1022,7 @@
     <Content Include="Chart\Images\unknown.png" />
     <TypeScriptCompile Include="Chart\Scripts\Chart.ts" />
     <TypeScriptCompile Include="Chart\Scripts\SF_Chart_Utils.ts" />
+    <TypeScriptCompile Include="Chart\Scripts\ChartColors.ts" />
     <Content Include="Chart\Views\ChartRequestView.cshtml">
       <SubType>Code</SubType>
       <Generator>RazorGenerator</Generator>
@@ -1045,6 +1031,7 @@
     <Content Include="ControlPanel\Content\SF_FlowTable.css" />
     <Content Include="ControlPanel\Content\SF_ControlPanel.css" />
     <TypeScriptCompile Include="ControlPanel\Scripts\FlowTable.ts" />
+    <TypeScriptCompile Include="ControlPanel\Scripts\ControlPanel.ts" />
     <Content Include="ControlPanel\Views\LinkListPart.cshtml">
       <SubType>Code</SubType>
       <Generator>RazorGenerator</Generator>
@@ -1081,6 +1068,7 @@
     </Content>
     <TypeScriptCompile Include="Omnibox\Scripts\Omnibox.ts" />
     <TypeScriptCompile Include="Processes\Scripts\Processes.ts" />
+    <TypeScriptCompile Include="Note\Scripts\Notes.ts" />
     <Content Include="Processes\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
@@ -1106,10 +1094,6 @@
       <LastGenOutput>Statistics.generated.cs</LastGenOutput>
     </Content>
     <Content Include="Cache\Views\Web.config" />
-    <None Include="Captcha\Views\_ViewStart.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
-    </None>
     <Content Include="ControlPanel\Views\SearchControlPart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>SearchControlPart.generated.cs</LastGenOutput>
@@ -1347,6 +1331,7 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>HolidayCalendar.generated.cs</LastGenOutput>
     </None>
+    <TypeScriptCompile Include="ReportSpreadsheet\Scripts\Report.ts" />
     <Content Include="Scheduler\Views\ScheduleRuleMinutely.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ScheduleRuleMinutely.generated.cs</LastGenOutput>
@@ -1394,7 +1379,6 @@
     <TypeScriptCompile Include="UserQueries\Scripts\UserQuery.ts" />
     <Content Include="Web.config" />
     <Content Include="Basic\Views\Web.config" />
-    <Content Include="Captcha\Views\Web.config" />
     <Content Include="ControlPanel\Views\Web.config" />
     <Content Include="Help\Views\Web.config" />
     <Content Include="Mailing\Views\Web.config" />
@@ -1409,14 +1393,6 @@
     <None Include="Auth\Views\CreateUserAccount.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>CreateUserAccount.generated.cs</LastGenOutput>
-    </None>
-    <None Include="Captcha\Views\captcha.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>captcha.generated.cs</LastGenOutput>
-    </None>
-    <None Include="Captcha\Views\captchaImage.cshtml">
-      <Generator>RazorGenerator</Generator>
-      <LastGenOutput>captchaImage.generated.cs</LastGenOutput>
     </None>
     <None Include="Auth\Views\ChangePassword.cshtml">
       <Generator>RazorGenerator</Generator>

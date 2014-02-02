@@ -24,8 +24,11 @@ namespace Signum.Web.Reports
 {
     public class ReportSpreadsheetClient
     {
+        public static string ViewPrefix = "~/ReportSpreadsheet/Views/{0}.cshtml";
+        public static string Module = "Extensions/Signum.Web.Extensions/ReportSpreadsheet/Scripts/Report";
+
         public static bool ToExcelPlain { get; private set; }
-        static bool ExcelReport;
+        public static bool ExcelReport { get; private set; }
 
         public static void Start(bool toExcelPlain, bool excelReport)
         {
@@ -44,57 +47,17 @@ namespace Signum.Web.Reports
                     if (!Navigator.Manager.EntitySettings.ContainsKey(typeof(QueryDN)))
                         Navigator.Manager.EntitySettings.Add(typeof(QueryDN), new EntitySettings<QueryDN>());
 
-                    string viewPrefix = "~/ReportSpreadsheet/Views/{0}.cshtml";
+                    
                     Navigator.AddSettings(new List<EntitySettings>{
                         new EntitySettings<ExcelReportDN> 
                         { 
-                            PartialViewName = _ => viewPrefix.Formato("ExcelReport"),
-                            MappingMain = new ExcelReportMapping()
+                            PartialViewName = _ => ViewPrefix.Formato("ExcelReport"),
                         }
-                    });
-
-                    ButtonBarEntityHelper.RegisterEntityButtons<ExcelReportDN>((ctx, entity) =>
-                    {
-                        if (entity.IsNew)
-                            return null;
-
-                        return new List<ToolBarButton>
-                        {
-                            new ToolBarButton
-                            {
-                                Id = TypeContextUtilities.Compose(ctx.Prefix, "ebReportDownload"),
-                                Text = ExcelMessage.Download.NiceToString(),
-                                OnClick = "window.open('" + RouteHelper.New().Action("DownloadTemplate", "Report", new { excelReport = entity.Id } ) + "');",
-                            }
-                        }.ToArray();
                     });
                 }
 
                 if (toExcelPlain || excelReport)
                     ButtonBarQueryHelper.RegisterGlobalButtons(ButtonBarQueryHelper_GetButtonBarForQueryName); 
-            }
-        }
-
-        public class ExcelReportMapping : EntityMapping<ExcelReportDN>
-        {
-            public ExcelReportMapping() : base(true) { }
-
-            public override ExcelReportDN GetEntity(MappingContext<ExcelReportDN> ctx)
-            {
-                RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
-                if (runtimeInfo.IsNew)
-                {
-                    var result = new ExcelReportDN();
-
-                    string queryKey = ctx.Inputs[TypeContextUtilities.Compose("Query", "Key")];
-                    object queryName = Navigator.Manager.QuerySettings.Keys.FirstEx(key => QueryUtils.GetQueryUniqueKey(key) == queryKey);
-
-                    result.Query = QueryLogic.GetQuery(queryName);
-
-                    return result;
-                }
-                else
-                    return Database.Retrieve<ExcelReportDN>(runtimeInfo.IdOrNull.Value);
             }
         }
 
@@ -113,7 +76,7 @@ namespace Signum.Web.Reports
                 Id = TypeContextUtilities.Compose(ctx.Prefix, "qbToExcelPlain"),
                 AltText = ExcelMessage.ExcelReport.NiceToString(),
                 Text = ExcelMessage.ExcelReport.NiceToString(),
-                OnClick = Js.SubmitOnly(RouteHelper.New().Action("ToExcelPlain", "Report"), "$.extend({{userQuery:'{0}'}}, SF.FindNavigator.getFor('{1}').requestDataForSearch())".Formato((currentUserQuery != null ? currentUserQuery.IdOrNull : null), ctx.Prefix)).ToJS(),
+                OnClick = new JsFunction(Module, "toPlainExcel", ctx.Prefix, ctx.Url.Action("ToExcelPlain", "Report")),
                 DivCssClass = ToolBarButton.DefaultQueryCssClass
             };
 
@@ -137,7 +100,7 @@ namespace Signum.Web.Reports
                         {
                             AltText = report.ToString(),
                             Text = report.ToString(),
-                            OnClick = Js.SubmitOnly(RouteHelper.New().Action("ExcelReport", "Report"), "$.extend({{excelReport:'{0}'}}, SF.FindNavigator.getFor('{1}').requestDataForSearch())".Formato(report.Id, ctx.Prefix)).ToJS(),
+                            OnClick = new JsFunction(Module, "toExcelReport", ctx.Prefix, ctx.Url.Action("ExcelReport", "Report"), report.Key()),
                             DivCssClass = ToolBarButton.DefaultQueryCssClass
                         });
                     }
@@ -145,12 +108,23 @@ namespace Signum.Web.Reports
 
                 items.Add(new ToolBarSeparator());
 
+                var current =  QueryLogic.GetQuery(ctx.QueryName).ToLite().Key(); 
+
                 items.Add(new ToolBarButton
                 {
                     Id = TypeContextUtilities.Compose(ctx.Prefix, "qbReportAdminister"),
-                    AltText = ExcelMessage.ExcelAdminister.NiceToString(),
-                    Text = ExcelMessage.ExcelAdminister.NiceToString(),
-                    OnClick = Js.SubmitOnly(RouteHelper.New().Action("Administer", "Report"), "{{webQueryName:'{0}'}}".Formato(Navigator.ResolveWebQueryName(ctx.QueryName))).ToJS(),
+                    AltText = ExcelMessage.Administer.NiceToString(),
+                    Text = ExcelMessage.Administer.NiceToString(),
+                    OnClick = new JsFunction(Module, "administerExcelReports", ctx.Prefix, Navigator.ResolveWebQueryName(typeof(ExcelReportDN)),current),
+                    DivCssClass = ToolBarButton.DefaultQueryCssClass
+                });
+
+                items.Add(new ToolBarButton
+                {
+                    Id = TypeContextUtilities.Compose(ctx.Prefix, "qbCreateAdminister"),
+                    AltText = ExcelMessage.CreateNew.NiceToString(),
+                    Text = ExcelMessage.CreateNew.NiceToString(),
+                    OnClick = new JsFunction(Module, "createExcelReports", ctx.Prefix, ctx.Url.Action("Create", "Report"),current),
                     DivCssClass = ToolBarButton.DefaultQueryCssClass
                 });
 

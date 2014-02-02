@@ -15,6 +15,8 @@ namespace Signum.Web.Alerts
     {
         public static string ViewPrefix = "~/Alert/Views/{0}.cshtml";
 
+        public static string Module = "Extensions/Signum.Web.Extensions/Alerts/Scripts/Alerts";
+
         public static void Start(params Type[] types)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -31,27 +33,11 @@ namespace Signum.Web.Alerts
                     SupportAlerts(entity, types) ? AlertWidgetHelper.CreateWidget(entity as IdentifiableEntity, partialViewName, prefix) :
                     null;
 
-                OperationsClient.AddSettings(new List<OperationSettings>
+                OperationClient.AddSettings(new List<OperationSettings>
                 {
-                     new EntityOperationSettings(AlertOperation.SaveNew) 
-                     { 
-                         OnClick = ctx => 
-                         {
-                             string prevPopupLevel = ""; //To update notes count
-                             if (ctx.Prefix.HasText())
-                             {
-                                int index = ctx.Prefix.LastIndexOf(TypeContext.Separator);
-                                if (index > 0)
-                                prevPopupLevel =  ctx.Prefix.Substring(0, ctx.Prefix.LastIndexOf(TypeContext.Separator));
-                             }
-
-                             return new JsOperationExecutor(ctx.Options()).validateAndAjax(ctx.Prefix, new JsFunction("prefix")
-                             {
-                                 JsViewNavigator.closePopup(ctx.Prefix),
-                                 AlertWidgetHelper.JsOnAlertCreated(prevPopupLevel, "Alerta creada correctamente")
-                             });
-                         }
-                     },
+                    new EntityOperationSettings(AlertOperation.CreateFromEntity){ IsVisible = a => false },
+                    new EntityOperationSettings(AlertOperation.SaveNew){ IsVisible = a => a.Entity.IsNew },
+                    new EntityOperationSettings(AlertOperation.Save){ IsVisible = a => !a.Entity.IsNew }
                 });
             }
         }

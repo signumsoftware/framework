@@ -9,6 +9,8 @@ using Signum.Web.Controllers;
 using System.Web.Mvc;
 using Signum.Entities.Alerts;
 using Signum.Entities.Notes;
+using Newtonsoft.Json.Linq;
+using Signum.Engine.DynamicQuery;
 
 namespace Signum.Web.Alerts
 {
@@ -34,37 +36,41 @@ namespace Signum.Web.Alerts
             });
         }
 
-        public static string JsOnAlertCreated(string prefix, string successMessage)
-        {
-            return "SF.Widgets.onAlertCreated('{0}','{1}','{2}')".Formato(
-                RouteHelper.New().Action<AlertController>(wc => wc.AlertsCount()),
-                prefix,
-                successMessage);
-        }
-
         public static WidgetItem CreateWidget(IdentifiableEntity identifiable, string partialViewName, string prefix)
         {
             if (identifiable == null || identifiable.IsNew || identifiable is AlertDN)
                 return null;
 
+         
+
             var alertList = new[]
             {
-                new { Count = CountAlerts(identifiable, "Attended"), Query = "Attended", AlertClass = "sf-alert-attended", Title = AlertMessage.Alerts_Attended.NiceToString() },
-                new { Count = CountAlerts(identifiable, "Alerted"), Query = "Alerted", AlertClass = "sf-alert-warned", Title = AlertMessage.Alerts_NotAttended.NiceToString() },
-                new { Count = CountAlerts(identifiable, "Future"), Query = "Future", AlertClass = "sf-alert-future", Title = AlertMessage.Alerts_Future.NiceToString() },
+                new { Count = CountAlerts(identifiable, "Attended"), Property = "Attended", AlertClass = "sf-alert-attended", Title = AlertMessage.Alerts_Attended.NiceToString() },
+                new { Count = CountAlerts(identifiable, "Alerted"), Property = "Alerted", AlertClass = "sf-alert-alerted", Title = AlertMessage.Alerts_NotAttended.NiceToString() },
+                new { Count = CountAlerts(identifiable, "Future"), Property = "Future", AlertClass = "sf-alert-future", Title = AlertMessage.Alerts_Future.NiceToString() },
             };
 
-            JsViewOptions voptions = new JsViewOptions
+            var options = new FindOptions
             {
-                Type = typeof(AlertDN).Name,
-                Prefix = prefix,
-                ControllerUrl = RouteHelper.New().Action<AlertController>(ac => ac.CreateAlert(prefix)),
-                RequestExtraJsonData = "function(){{ return {{ {0}: new SF.RuntimeInfo('{1}').find().val() }}; }}".Formato(EntityBaseKeys.RuntimeInfo, prefix),
-                OnOkClosed = new JsFunction() { JsOnAlertCreated(prefix, AlertMessage.AlertCreated.NiceToString()) }
-            };
+                QueryName = typeof(AlertDN),
+                Create = false,
+                SearchOnLoad = true,
+                FilterMode = FilterMode.AlwaysHidden,
+                FilterOptions = 
+                { 
+                    new FilterOption("Target", identifiable.ToLite()),
+                    //new FilterOption("Entity." + fieldToFilter, true),
+                },
+                ColumnOptions = { new ColumnOption("Target") },
+                ColumnOptionsMode = ColumnOptionsMode.Remove,
+            }.ToJS(TypeContextUtilities.Compose(prefix, "New"));
 
             HtmlStringBuilder content = new HtmlStringBuilder();
-            using (content.Surround(new HtmlTag("ul").Class("sf-menu-button sf-widget-content sf-alerts")))
+
+            using (content.Surround(new HtmlTag("ul")
+                .Attr("data-url",RouteHelper.New().Action((AlertController ac)=>ac.AlertsCount()))
+                .Attr("data-findOptions", options.ToString())
+                .Class("sf-menu-button sf-widget-content sf-alerts")))
             {
                 foreach (var a in alertList)
                 {
@@ -72,7 +78,7 @@ namespace Signum.Web.Alerts
                     {
                         content.AddLine(new HtmlTag("a")
                             .Class("sf-alert-view")
-                            .Attr("onclick", JsFindNavigator.openFinder(GetJsFindOptions(identifiable, a.Query, prefix)).ToJS())
+                            .Attr("onclick", new JsFunction(AlertClient.Module, "explore", prefix, a.Property).ToString())
                             .InnerHtml(
                             new HtmlTag("span").Class("sf-alert-count-label").Class(a.AlertClass).Class(a.Count > 0 ? "sf-alert-active" : null).InnerHtml((a.Title + ": ").EncodeHtml()),
                             new HtmlTag("span").Class(a.AlertClass).Class(a.Count > 0 ? "sf-alert-active" : null).SetInnerText(a.Count.ToString()))
@@ -86,7 +92,7 @@ namespace Signum.Web.Alerts
                 {
                     content.AddLine(new HtmlTag("a")
                        .Class("sf-alert-create")
-                       .Attr("onclick", new JsViewNavigator(voptions).createSave(RouteHelper.New().SignumAction("TrySavePartial")).ToJS())
+                       .Attr("onclick", new JsFunction(AlertClient.Module, "createAlert", prefix, OperationDN.UniqueKey(AlertOperation.CreateFromEntity)).ToString())
                        .InnerHtml(AlertMessage.CreateAlert.NiceToString().EncodeHtml())
                        .ToHtml());
                 }
@@ -131,28 +137,6 @@ namespace Signum.Web.Alerts
                 Id = TypeContextUtilities.Compose(prefix, "alertsWidget"),
                 Label = label.ToHtml(),
                 Content = content.ToHtml()
-            };
-        }
-
-        static JsFindOptions GetJsFindOptions(IdentifiableEntity identifiable, string fieldToFilter, string prefix)
-        {
-            return new JsFindOptions
-            {
-                Prefix = TypeContextUtilities.Compose(prefix, "New"),
-                FindOptions = new FindOptions
-                {
-                    QueryName = typeof(AlertDN),
-                    Create = false,
-                    SearchOnLoad = true,
-                    FilterMode = FilterMode.AlwaysHidden,
-                    FilterOptions = 
-                    { 
-                        new FilterOption("Target", identifiable.ToLite()),
-                        new FilterOption("Entity." + fieldToFilter, true),
-                    },
-                    ColumnOptions = { new ColumnOption("Target") },
-                    ColumnOptionsMode = ColumnOptionsMode.Remove,
-                }
             };
         }
     }

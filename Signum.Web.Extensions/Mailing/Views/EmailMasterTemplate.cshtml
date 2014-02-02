@@ -1,5 +1,5 @@
 ﻿@using Signum.Entities.Mailing
-
+@using Signum.Web.Mailing
 @Html.ScriptCss("~/Mailing/Content/SF_Mailing.css")
 @Html.ScriptsJs("~/Scripts/ckeditor/ckeditor.js")
 @Html.ScriptsJs("~/Mailing/Scripts/SF_Mailing.js")
@@ -11,10 +11,8 @@
     <div class="sf-email-replacements-container sf-tabs-repeater">
         @Html.EntityRepeater(ec, e => e.Messages, er =>
         {
-            er.AttachFunction = "SF.TabsRepeater.attachTabRepeater";
+            er.AttachFunction = new JsLineFunction(MailingClient.TabsRepeaterModule, "attachTabRepeater");
             er.PreserveViewData = true;
         })
     </div>
 }
-
-@Html.ScriptsJs("~/Mailing/Scripts/SF_TabsRepeater.js")

@@ -7,12 +7,11 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Framework/Signum.Web/Signum/Scripts/Validator"], function(require, exports, Finder, Validator) {
-    once("SF-chartBuilder", function () {
-        return $.fn.chartBuilder = function (opt) {
-            new ChartBuilder(this, opt);
-        };
-    });
+define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Framework/Signum.Web/Signum/Scripts/Validator", "Framework/Signum.Web/Signum/Scripts/Operations"], function(require, exports, Finder, Validator, Operations) {
+    function openChart(prefix, url) {
+        SF.submit(url, Finder.getFor(prefix).requestDataForSearch());
+    }
+    exports.openChart = openChart;
 
     function attachShowCurrentEntity(el) {
         var showOnEntity = function () {
@@ -24,6 +23,25 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
         el.entityChanged = showOnEntity;
     }
     exports.attachShowCurrentEntity = attachShowCurrentEntity;
+
+    function deleteUserChart(options, url) {
+        options.avoidReturnRedirect = true;
+        Operations.deleteAjax(options).then(function (a) {
+            if (!options.prefix)
+                location.href = url;
+        });
+    }
+    exports.deleteUserChart = deleteUserChart;
+
+    function createUserChart(prefix, url) {
+        SF.submit(url, exports.getFor(prefix).requestProcessedData());
+    }
+    exports.createUserChart = createUserChart;
+
+    function exportData(prefix, validateUrl, exportUrl) {
+        exports.getFor(prefix).exportData(validateUrl, exportUrl);
+    }
+    exports.exportData = exportData;
 
     function getFor(prefix) {
         return $("#" + SF.compose(prefix, "sfChartBuilderContainer")).SFControl();

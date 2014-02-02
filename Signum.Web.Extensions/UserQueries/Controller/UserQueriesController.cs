@@ -24,6 +24,7 @@ using Signum.Entities.UserQueries;
 using Signum.Engine.UserQueries;
 using Signum.Engine.Operations;
 using Signum.Engine.Authorization;
+using Signum.Web.Operations;
 #endregion
 
 namespace Signum.Web.UserQueries
@@ -73,7 +74,7 @@ namespace Signum.Web.UserQueries
         }
 
         [HttpPost]
-        public ActionResult Save()
+        public ActionResult Save(string prefix)
         {
             UserQueryDN userQuery = null;
             
@@ -92,19 +93,7 @@ namespace Signum.Web.UserQueries
             }
 
             userQuery = context.Value.Execute(UserQueryOperation.Save);
-            return new RedirectResult(Navigator.NavigateRoute(userQuery.ToLite()));
-        }
-
-        [HttpPost]
-        public ActionResult Delete(string prefix)
-        {
-            var userQuery = this.ExtractLite<UserQueryDN>(prefix);
-            
-            var queryName = QueryLogic.ToQueryName(userQuery.InDB().Select(uq => uq.Query.Key).SingleEx());
-
-            userQuery.Delete();
-
-            return new RedirectResult(Navigator.FindRoute(queryName));
+            return OperationClient.DefaultExecuteResult(this, userQuery, prefix);
         }
     }
 }

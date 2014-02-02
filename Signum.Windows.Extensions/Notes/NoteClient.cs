@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Windows.Media.Imaging;
+using Signum.Windows.Operations;
 
 namespace Signum.Windows.Notes
 {
@@ -23,6 +24,14 @@ namespace Signum.Windows.Notes
 
                     return null;
                 };
+
+                OperationClient.AddSettings(new List<OperationSettings>
+                {
+                    new EntityOperationSettings(NoteOperation.CreateFromEntity) 
+                    { 
+                        IsVisible  = _ => false
+                    }
+                });
 
                 Navigator.AddSetting(new EntitySettings<NoteTypeDN> { View = e => new NoteType() });
                 Navigator.AddSetting(new EntitySettings<NoteDN>

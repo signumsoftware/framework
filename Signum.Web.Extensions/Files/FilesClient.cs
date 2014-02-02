@@ -28,6 +28,8 @@ namespace Signum.Web.Files
     {
         public static string ViewPrefix = "~/Files/Views/{0}.cshtml";
 
+        public static string Module = "Extensions/Signum.Web.Extensions/Files/Scripts/Files";
+
         public static void Start(bool filePath, bool file, bool embeddedFile)
         {
             if (Navigator.Manager.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -221,6 +223,7 @@ namespace Signum.Web.Files
 
             return null;
         }
+
     }
 
 }

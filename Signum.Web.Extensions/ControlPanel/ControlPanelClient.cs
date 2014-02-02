@@ -24,6 +24,7 @@ namespace Signum.Web.ControlPanel
 
         public static string AdminViewPrefix = "~/ControlPanel/Views/Admin/{0}.cshtml";
         public static string ViewPrefix = "~/ControlPanel/Views/{0}.cshtml";
+        public static string Module = "Extensions/Signum.Web.Extensions/ControlPanel/Scripts/ControlPanel";
 
         public struct PartViews
         {
@@ -86,21 +87,7 @@ namespace Signum.Web.ControlPanel
                             Text = ControlPanelMessage.ControlPanel_CreateNewPart.NiceToString(),
                             Enabled = !panel.IsNew,
                             AltText = panel.IsNew ? ControlPanelMessage.ControlPanel_YouMustSaveThePanelBeforeAddingParts.NiceToString() : ControlPanelMessage.ControlPanel_CreateNewPart.NiceToString(),
-                            OnClick = panel.IsNew ? "" : 
-                                JsValidator.EntityIsValid(new JsValidatorOptions
-                                {
-                                    ControllerUrl = RouteHelper.New().Action<SignumController>(sc => sc.Validate("bla", null, null))
-                                }, new JsFunction() 
-                                {
-                                    Js.OpenTypeChooser(
-                                        "New", 
-                                        new JsFunction("chosen") 
-                                        {  
-                                            Js.Submit(RouteHelper.New().Action<ControlPanelController>(cpc => cpc.AddNewPart()), "{ newPartType: chosen }"),
-                                        },
-                                        PanelPartViews.Keys.Select(t => Navigator.ResolveWebTypeName(t)).ToArray()
-                                    )
-                                }).ToJS()
+                            OnClick = new JsFunction(Module, "createNewPart", ctx.Prefix, ctx.Url.Action("AddNewPart", "ControlPanel"), PanelPartViews.Keys.Select(t=>t.ToChooserOption()).ToArray())
                         }
                     };
                 });

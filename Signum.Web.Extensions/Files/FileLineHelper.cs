@@ -156,7 +156,7 @@ namespace Signum.Web.Files
 
                     using (sb.Surround(new HtmlTag("div").Class("sf-value-container")))
                     {
-                        sb.AddLine(MvcHtmlString.Create("<input type='file' onchange=\"{0}.onChanged()\" id='{1}' name='{1}' class='sf-value-line'/>".Formato(fileLine.ToJS(), fileLine.Compose(FileLineKeys.File))));
+                        sb.AddLine(MvcHtmlString.Create("<input type='file' onchange=\"{0}.onChanged()\" id='{1}' name='{1}' class='sf-value-line'/>".Formato(fileLine.SFControl(), fileLine.Compose(FileLineKeys.File))));
                         sb.AddLine(MvcHtmlString.Create("<img src='{0}' id='{1}_loading' alt='loading' style='display:none'/>".Formato(RouteHelper.New().Content("~/Files/Images/loading.gif"), fileLine.ControlID)));
                         
                         if (fileLine.ValueFirst)
@@ -168,15 +168,7 @@ namespace Signum.Web.Files
                     sb.AddLine(helper.ValidationMessage(fileLine.Compose(FileLineKeys.File)));
             }
 
-            sb.AddLine(new HtmlTag("script")
-                .Attr("type", "text/javascript")
-                .InnerHtml(MvcHtmlString.Create("$(function(){ " +
-                    "SF.Loader.loadJs('{0}', function(){{ $('#{1}').fileLine({2}); }});".Formato(
-                        RouteHelper.New().Content("~/Files/Scripts/SF_Files.js"),
-                        fileLine.ControlID,
-                        fileLine.OptionsJS()) +
-                    "});"))
-                .ToHtml());
+            sb.AddLine(fileLine.ConstructorScript(FilesClient.Module, "fileLine"));
 
             return sb.ToHtml();
         }

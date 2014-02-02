@@ -73,7 +73,7 @@ namespace Signum.Web.Processes
         {
             var lites = Navigator.ParseLiteKeys<IdentifiableEntity>(liteKeys);
 
-            ProcessDN process = PackageLogic.CreatePackageOperation(lites, OperationsClient.GetOperationKeyAssert(operationFullKey));
+            ProcessDN process = PackageLogic.CreatePackageOperation(lites, OperationClient.GetOperationKeyAssert(operationFullKey));
 
             return Navigator.PopupOpen(this, new PopupNavigateOptions(new TypeContext<ProcessDN>(process, newPrefix)));
         }

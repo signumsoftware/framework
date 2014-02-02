@@ -123,6 +123,11 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     }
     exports.postDialog = postDialog;
 
+    function submitPage(controllerUrl, prefix) {
+        SF.submit(controllerUrl, null, null);
+    }
+    exports.submitPage = submitPage;
+
     function findTrsInGroup(ns, type) {
         return $(".sf-auth-rules tr[data-ns='" + ns + "'][data-type='" + type + "']");
     }

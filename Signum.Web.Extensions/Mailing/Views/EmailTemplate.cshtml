@@ -1,6 +1,7 @@
 ﻿@using Signum.Entities.Mailing
 @using Signum.Engine.DynamicQuery
 @using Signum.Engine.Basics
+@using Signum.Web.Mailing
 
 @Html.ScriptCss("~/Mailing/Content/SF_Mailing.css")
 @Html.ScriptsJs("~/Scripts/ckeditor/ckeditor.js")
@@ -17,7 +18,7 @@
         @Html.ValueLine(ec, e => e.DisableAuthorization)
     </div>
     
-    if(!ec.Value.IsNew)
+    if (!ec.Value.IsNew)
     {
     <fieldset style="float: left">
         <legend>Active</legend>
@@ -43,10 +44,10 @@
 
         <div class="sf-email-replacements-container sf-tabs-repeater">
             @Html.EntityRepeater(ec, e => e.Messages, er =>
-            {
-                er.AttachFunction = "SF.TabsRepeater.attachTabRepeater";
-                er.PreserveViewData = true;
-            })
+       {
+           er.AttachFunction = new JsLineFunction(MailingClient.TabsRepeaterModule, "attachTabRepeater");
+           er.PreserveViewData = true;
+       })
         </div>
     }
 }
@@ -55,6 +56,6 @@
 
 <script>
     $(function () {
-        SF.Mailing.initReplacements();
+        @(new JsLineFunction(MailingClient.Module, "initReplacements"))
     });
 </script>

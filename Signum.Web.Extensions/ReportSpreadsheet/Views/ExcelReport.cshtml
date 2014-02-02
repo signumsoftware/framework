@@ -6,15 +6,8 @@
 
 @using (var e = Html.TypeContext<ExcelReportDN>())
 {
-    using (var query = e.SubContext(f => f.Query))
-    {
-        @Html.HiddenRuntimeInfo(query)
-        @Html.ValueLine(query, f => f.Name, f => { f.ReadOnly = true; f.LabelText = "Query"; })
-        @Html.Hidden(query.Compose("Key"), query.Value.Key)
-        @Html.Hidden(query.Compose("DisplayName"), query.Value.Name)
-    }
-
+    @Html.EntityLine(e, f => f.Query, el => { el.ReadOnly = true; })
     @Html.ValueLine(e, f => f.DisplayName)
-    //@Html.FileLine(e, f => f.File, fl => fl.AsyncUpload = false)
+    @Html.FileLine(e, f => f.File, fl => fl.AsyncUpload = false)
     @Html.FileLine(e, f => f.File)
 }

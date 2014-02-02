@@ -36,6 +36,12 @@ namespace Signum.Web.Extensions.Mailing.Views
     using Signum.Utilities;
     using Signum.Web;
     
+    #line 2 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
+    using Signum.Web.Mailing;
+    
+    #line default
+    #line hidden
+    
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     [System.Web.WebPages.PageVirtualPathAttribute("~/Mailing/Views/EmailMasterTemplate.cshtml")]
     public partial class EmailMasterTemplate : System.Web.Mvc.WebViewPage<dynamic>
@@ -45,8 +51,6 @@ namespace Signum.Web.Extensions.Mailing.Views
         }
         public override void Execute()
         {
-WriteLiteral("\r\n");
-
             
             #line 3 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
 Write(Html.ScriptCss("~/Mailing/Content/SF_Mailing.css"));
@@ -114,7 +118,7 @@ WriteLiteral("        ");
             #line 12 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
    Write(Html.EntityRepeater(ec, e => e.Messages, er =>
         {
-            er.AttachFunction = "SF.TabsRepeater.attachTabRepeater";
+            er.AttachFunction = new JsLineFunction(MailingClient.TabsRepeaterModule, "attachTabRepeater");
             er.PreserveViewData = true;
         }));
 
@@ -126,16 +130,6 @@ WriteLiteral("\r\n    </div>\r\n");
             
             #line 18 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
 }
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n");
-
-            
-            #line 20 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
-Write(Html.ScriptsJs("~/Mailing/Scripts/SF_TabsRepeater.js"));
-
             
             #line default
             #line hidden

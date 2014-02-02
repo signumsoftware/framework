@@ -24,19 +24,5 @@ namespace Signum.Web.Extensions.SMS.Models
             get { return from; }
             set { Set(ref from, value, () => From); }
         }
-
-        string providerKeys;
-        public string ProviderKeys
-        {
-            get { return providerKeys; }
-            set { Set(ref providerKeys, value, () => ProviderKeys); }
-        }
-
-        string webTypeName;
-        public string WebTypeName
-        {
-            get { return webTypeName; }
-            set { Set(ref webTypeName, value, () => WebTypeName); }
-        }
     }
 }

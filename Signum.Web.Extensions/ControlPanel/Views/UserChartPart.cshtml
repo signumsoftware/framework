@@ -36,7 +36,8 @@
                 @Html.Partial(ChartClient.ChartBuilderView, crc)
             </div>
             <script type="text/javascript">
-                        $('#@crc.Compose("sfChartBuilderContainer")').chartBuilder($.extend({ prefix: '@crc.ControlID'}, @MvcHtmlString.Create(uc.ToJS())));
+                var findOptions = @(MvcHtmlString.Create(uc.ToJS().ToString()))
+                 require("@ChartClient.Module", function (Chart) { new Chart.ChartBuilder($('#@crc.Compose("sfChartBuilderContainer")'), $.extend({ prefix: '@crc.ControlID' }, findOptions)); }); 
             </script>
         </div>
         <div id="@crc.Compose("sfChartContainer")">

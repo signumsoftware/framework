@@ -157,50 +157,11 @@ Write(Html.ValueLine(e, s => s.From));
             
             #line 31 "..\..\SMS\Views\MultipleSMS.cshtml"
                                    
-    
-            
-            #line default
-            #line hidden
-            
-            #line 32 "..\..\SMS\Views\MultipleSMS.cshtml"
-Write(Html.Hidden(e.Compose("ProviderKeys"), e.Value.ProviderKeys));
-
-            
-            #line default
-            #line hidden
-            
-            #line 32 "..\..\SMS\Views\MultipleSMS.cshtml"
-                                                                 ;
-    
-            
-            #line default
-            #line hidden
-            
-            #line 33 "..\..\SMS\Views\MultipleSMS.cshtml"
-Write(Html.Hidden(e.Compose("WebTypeName"), e.Value.WebTypeName));
-
-            
-            #line default
-            #line hidden
-            
-            #line 33 "..\..\SMS\Views\MultipleSMS.cshtml"
-                                                               ;
 }
 
             
             #line default
             #line hidden
-            
-            #line 35 "..\..\SMS\Views\MultipleSMS.cshtml"
-Write(Html.ScriptsJs("~/SMS/Scripts/SF_SMS.js"));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n\r\n");
-
-WriteLiteral("\r\n");
-
         }
     }
 }

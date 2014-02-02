@@ -13,14 +13,6 @@ namespace Signum.Web.Notes
 {
     public class NoteController : Controller
     {
-        public PartialViewResult CreateNote(string prefix)
-        {
-            var entity = (IdentifiableEntity)this.UntypedExtractEntity(); //Related entity always sent with no prefix
-            
-            TypeContext tc = TypeContextUtilities.UntypedNew(NoteWidgetHelper.CreateNote(entity), prefix);
-            return this.PopupOpen(new PopupNavigateOptions(tc));
-        }
-
         public ContentResult NotesCount()
         {
             var entity = (IdentifiableEntity)this.UntypedExtractEntity(); //Related entity always sent with no prefix

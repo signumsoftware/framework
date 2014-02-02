@@ -60,7 +60,7 @@ namespace Signum.Entities.Reports
         [Description("Microsoft Office Excel 2007 Spreadsheet (*.xlsx)|*.xlsx")]
         Excel2007Spreadsheet,
         [Description("Administer")]
-        ExcelAdminister,
+        Administer,
         [Description("Excel Report")]
         ExcelReport,
         [Description("Excel template must have .xlsx extension, and the current one has {0}")]
@@ -70,7 +70,8 @@ namespace Signum.Entities.Reports
         Reports,
         [Description("The Excel Template has a column {0} not present in the Find Window")]
         TheExcelTemplateHasAColumn0NotPresentInTheFindWindow,
-        ThereAreNoResultsToWrite
+        ThereAreNoResultsToWrite,
+        CreateNew
     }
 
 }

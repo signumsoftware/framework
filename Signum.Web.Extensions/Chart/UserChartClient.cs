@@ -77,10 +77,9 @@ namespace Signum.Web.Chart
                 UserChartDN.SetConverters(query => QueryLogic.ToQueryName(query.Key), queryName =>
                     QueryLogic.GetQuery(queryName));
 
-                OperationsClient.AddSetting(new EntityOperationSettings(UserChartOperation.Delete)
+                OperationClient.AddSetting(new EntityOperationSettings(UserChartOperation.Delete)
                 {
-                    OnClick = ctx => new JsOperationDelete(ctx.Options("DeleteUserChart", "Chart"))
-                        .confirmAndAjax(ctx.Entity)
+                    OnClick = ctx => new JsOperationFunction(ChartClient.Module, "deleteUserChart", Navigator.FindRoute(((UserChartDN)ctx.Entity).Query.ToQueryName()))
                 });
 
                 LinksClient.RegisterEntityLinks<IdentifiableEntity>((entity, ctrl) =>
@@ -114,7 +113,7 @@ namespace Signum.Web.Chart
             }
         }
 
-        public static List<ToolBarButton> GetChartMenu(ControllerContext controllerContext, object queryName, Type entityType, string prefix, Lite<UserChartDN> currentUserChart)
+        public static List<ToolBarButton> GetChartMenu(ControllerContext controllerContext, UrlHelper url, object queryName, Type entityType, string prefix, Lite<UserChartDN> currentUserChart)
         {
             if (!Navigator.IsNavigable(typeof(UserChartDN), null,  isSearchEntity: true))
                 return new List<ToolBarButton>();
@@ -143,7 +142,7 @@ namespace Signum.Web.Chart
                     Id = TypeContextUtilities.Compose(prefix, "qbUserChartNew"),
                     AltText = uqNewText,
                     Text = uqNewText,
-                    OnClick = Js.Submit(RouteHelper.New().Action("CreateUserChart", "Chart"), "SF.Chart.getFor('{0}').requestProcessedData()".Formato(prefix)).ToJS(),
+                    OnClick = new JsFunction(ChartClient.Module, "createUserChart", prefix, url.Action("CreateUserChart", "Chart")),
                     DivCssClass = ToolBarButton.DefaultQueryCssClass
                 });
             }            
@@ -182,7 +181,9 @@ namespace Signum.Web.Chart
                     Id = TypeContextUtilities.Compose(prefix, "qbUserChartExportData"),
                     AltText = ucExportDataText,
                     Text = ucExportDataText,
-                    OnClick = "SF.Chart.getFor('{0}').exportData('{1}', '{2}')".Formato(prefix, RouteHelper.New().Action("Validate", "Chart"), RouteHelper.New().Action("ExportData", "Chart")),
+                    OnClick = new JsFunction(ChartClient.Module, "exportData", prefix, 
+                        url.Action("Validate", "Chart"),
+                        url.Action("ExportData", "Chart")),
                     DivCssClass = ToolBarButton.DefaultQueryCssClass
                 });
             }

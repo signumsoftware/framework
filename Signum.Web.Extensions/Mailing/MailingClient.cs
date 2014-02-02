@@ -31,6 +31,8 @@ namespace Signum.Web.Mailing
     public static class MailingClient
     {
         public static string ViewPrefix = "~/Mailing/Views/{0}.cshtml";
+        public static string Module = "Extensions/Signum.Web.Extensions/Mailing/Scripts/Mailing";
+        public static string TabsRepeaterModule = "Extensions/Signum.Web.Extensions/Mailing/Scripts/Mailing";
 
         private static QueryTokenDN ParseQueryToken(string tokenString, string queryRuntimeInfoInput)
         {
@@ -114,13 +116,14 @@ namespace Signum.Web.Mailing
                     new EmbeddedEntitySettings<ClientCertificationFileDN> { PartialViewName = e => ViewPrefix.Formato("ClientCertificationFile")},
                 });
 
-                OperationsClient.AddSettings(new List<OperationSettings>
+                OperationClient.AddSettings(new List<OperationSettings>
                 {
                     new EntityOperationSettings(EmailMessageOperation.CreateMailFromTemplate)
                     {
                         Group = EntityOperationGroup.None,
-                        OnClick = ctx => new JsOperationConstructorFrom(ctx.Options("CreateMailFromTemplate", "Mailing"))
-                            .ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk)
+                        OnClick = ctx => new JsOperationFunction(Module, "createMailFromTemplate",
+                            new FindOptions(((EmailTemplateDN)ctx.Entity).Query.ToQueryName()).ToJS(ctx.Prefix, "New"), 
+                            ctx.Url.Action("CreateMailFromTemplateAndEntity", "Mailing"))
                     }
                 });
 
@@ -132,12 +135,13 @@ namespace Signum.Web.Mailing
                         new EntitySettings<NewsletterDeliveryDN> { PartialViewName = e => ViewPrefix.Formato("NewsletterDelivery") },
                     });
 
-                    OperationsClient.AddSettings(new List<OperationSettings>
+                    OperationClient.AddSettings(new List<OperationSettings>
                     {
                         new EntityOperationSettings(NewsletterOperation.RemoveRecipients)
                         {
-                            OnClick = ctx => new JsOperationExecutor(ctx.Options("RemoveRecipients", "Mailing"))
-                                .ajax(Js.NewPrefix(ctx.Prefix), JsOpSuccess.OpenPopupNoDefaultOk)
+                            OnClick = ctx =>new JsOperationFunction(Module, "removeRecipients",
+                                new FindOptions(typeof(NewsletterDeliveryDN), "Newsletter", ctx.Entity).ToJS(ctx.Prefix, "New"),
+                                ctx.Url.Action("RemoveRecipientsExecute", "Mailing"))
                         }
                     });
                 }
