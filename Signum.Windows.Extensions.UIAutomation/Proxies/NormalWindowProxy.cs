@@ -115,6 +115,11 @@ namespace Signum.Windows.UIAutomation
                 actionDescription: () => "Executing {0} from {1}".Formato(OperationDN.UniqueKey(operationKey), entityId));
         }
 
+        public bool IsOperationOperationEnabled(Enum operationKey)
+        {
+           return ButtonBar.GetButton(operationKey).Current.IsEnabled;
+        }
+
         public AutomationElement ExecuteCapture(Enum operationKey, int? timeOut = null)
         {
             var time = timeOut ?? OperationTimeouts.ExecuteTimeout;
