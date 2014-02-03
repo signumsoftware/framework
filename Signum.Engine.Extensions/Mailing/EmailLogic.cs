@@ -34,6 +34,7 @@ using Signum.Entities.UserQueries;
 using System.IO;
 using Signum.Utilities.ExpressionTrees;
 using Signum.Engine.Files;
+using System.Threading.Tasks;
 
 namespace Signum.Engine.Mailing
 {
@@ -137,7 +138,8 @@ namespace Signum.Engine.Mailing
                     }
                 }
             };
-            client.SendAsync(message, null);
+            //http://stackoverflow.com/questions/6935427/smtpclient-sendasync-blocking-my-asp-net-mvc-request
+            Task.Factory.StartNew(() => client.SendAsync(message, null), TaskCreationOptions.LongRunning);
         }
 
         public static SmtpClient SafeSmtpClient()
@@ -413,6 +415,9 @@ namespace Signum.Engine.Mailing
         {
             using (OperationLogic.AllowSave<EmailMessageDN>())
             {
+
+                
+
                 try
                 {
                     if (!EmailLogic.Configuration.SendEmails)
