@@ -1,7 +1,7 @@
 ﻿/// <reference path="globals.ts"/>
 
 import Entities = require("Framework/Signum.Web/Signum/Scripts/Entities")
-import Navigator = require("Navigator")
+import Navigator = require("Framework/Signum.Web/Signum/Scripts/Navigator")
 
 export interface FindOptions {
     allowChangeColumns?: boolean;
@@ -270,8 +270,8 @@ export function constructTokenName(prefix) {
     return tokenName;
 }
 
-export function deleteFilter(elem) {
-    var $tr = $(elem).closest("tr");
+export function deleteFilter(trId) {
+    var $tr = $("tr#" + trId);
     if ($tr.find("select[disabled]").length > 0) {
         return;
     }

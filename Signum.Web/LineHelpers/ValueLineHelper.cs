@@ -204,7 +204,9 @@ namespace Signum.Web
         public static MvcHtmlString NumericTextbox(this HtmlHelper helper, ValueLine valueLine)
         {
             if (!valueLine.ReadOnly)
-                valueLine.ValueHtmlProps.Add("onkeydown", Reflector.IsDecimalNumber(valueLine.Type) ? "return SF.InputValidator.isDecimal(event);" : "return SF.InputValidator.isNumber(event);");    
+                valueLine.ValueHtmlProps.Add("onkeydown", Reflector.IsDecimalNumber(valueLine.Type) ? 
+                    "return SF.InputValidator.isDecimal(event);" : 
+                    "return SF.InputValidator.isNumber(event);");    
             
             return helper.TextboxInLine(valueLine);
         }

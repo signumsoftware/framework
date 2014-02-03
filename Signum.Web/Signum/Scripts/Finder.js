@@ -1,5 +1,5 @@
 ﻿/// <reference path="globals.ts"/>
-define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Navigator"], function(require, exports, Entities, Navigator) {
+define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Navigator"], function(require, exports, Entities, Navigator) {
     (function (FilterOperation) {
         FilterOperation[FilterOperation["EqualTo"] = 0] = "EqualTo";
         FilterOperation[FilterOperation["DistinctTo"] = 1] = "DistinctTo";
@@ -252,8 +252,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "N
     }
     exports.constructTokenName = constructTokenName;
 
-    function deleteFilter(elem) {
-        var $tr = $(elem).closest("tr");
+    function deleteFilter(trId) {
+        var $tr = $("tr#" + trId);
         if ($tr.find("select[disabled]").length > 0) {
             return;
         }

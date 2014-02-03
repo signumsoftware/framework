@@ -83,6 +83,35 @@ export class StaticInfo {
     }
 }
 
+export class EntityValue {
+    constructor(runtimeInfo: RuntimeInfoValue, toString?: string, link?: string) {
+        if (runtimeInfo == null)
+            throw new Error("runtimeInfo is mandatory for an EntityValue");
+
+        this.runtimeInfo = runtimeInfo;
+        this.toStr = toString;
+        this.link = link;
+    }
+
+    runtimeInfo: RuntimeInfoValue;
+    toStr: string;
+    link: string;
+
+    assertPrefixAndType(prefix: string, staticInfo: StaticInfo) {
+        var types = staticInfo.types();
+
+        if (types.length == 0 && types[0] == "[All]")
+            return;
+
+        if (types.indexOf(this.runtimeInfo.type) == -1)
+            throw new Error("{0} not found in types {1}".format(this.runtimeInfo.type, types.join(", ")));
+    }
+
+    isLoaded() {
+        return false;
+    }
+}
+
 export class EntityHtml extends EntityValue {
     prefix: string;
     html: JQuery;
@@ -120,34 +149,7 @@ export class EntityHtml extends EntityValue {
     }
 }
 
-export class EntityValue {
-    constructor(runtimeInfo: RuntimeInfoValue, toString?: string, link?: string) {
-        if (runtimeInfo == null)
-            throw new Error("runtimeInfo is mandatory for an EntityValue");
 
-        this.runtimeInfo = runtimeInfo;
-        this.toStr = toString;
-        this.link = link;
-    }
-
-    runtimeInfo: RuntimeInfoValue;
-    toStr: string;
-    link: string;
-
-    assertPrefixAndType(prefix: string, staticInfo: StaticInfo) {
-        var types = staticInfo.types();
-
-        if (types.length == 0 && types[0] == "[All]")
-            return;
-
-        if (types.indexOf(this.runtimeInfo.type) == -1)
-            throw new Error("{0} not found in types {1}".format(this.runtimeInfo.type, types.join(", ")));
-    }
-
-    isLoaded() {
-        return false;
-    }
-}
 
 export class RuntimeInfoValue {
     type: string;
@@ -169,7 +171,7 @@ export class RuntimeInfoValue {
         if (SF.isEmpty(runtimeInfoString))
             return null;
 
-        var array = runtimeInfoString.split(',');
+        var array = runtimeInfoString.split(';');
         return new RuntimeInfoValue(
             array[0],
             SF.isEmpty(array[1]) ? null : parseInt(array[1]),

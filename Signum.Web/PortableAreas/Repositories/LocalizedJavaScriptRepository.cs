@@ -61,9 +61,7 @@ namespace Signum.Web.PortableAreas
                 using (StreamWriter sw = new StreamWriter(ms, Encoding.UTF8))
                 {
                     sw.WriteLine("if(typeof lang == 'undefined' || lang == null) lang = {};");
-                    sw.WriteLine("lang.{0} =".Formato(JavaScriptVariableName));
-                    sw.WriteLine(JsonConvert.SerializeObject(dic));
-                    sw.WriteLine("};");
+                    sw.WriteLine("lang.{0} = {1};".Formato(JavaScriptVariableName, JsonConvert.SerializeObject(dic, Formatting.Indented)));
                 }
 
                 return ms.ToArray();

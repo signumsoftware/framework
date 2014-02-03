@@ -1,9 +1,9 @@
 ﻿/// <reference path="globals.ts"/>
 
-import Entities = require("Entities")
-import Validator = require("Validator")
-import Navigator = require("Navigator")
-import Finder = require("Finder")
+import Entities = require("Framework/Signum.Web/Signum/Scripts/Entities")
+import Validator = require("Framework/Signum.Web/Signum/Scripts/Validator")
+import Navigator = require("Framework/Signum.Web/Signum/Scripts/Navigator")
+import Finder = require("Framework/Signum.Web/Signum/Scripts/Finder")
 
 
 export interface OperationOptions {

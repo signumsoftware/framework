@@ -208,9 +208,9 @@ namespace Signum.Web
             if (!AllowChangeColumns) op.Add("allowChangeColumns", false);
             if (AllowOrder) op.Add("allowOrder", false);
             if (FilterMode != Web.FilterMode.Visible) op.Add("filterMode", FilterMode.ToString());
-            if (FilterOptions.Any()) op.Add("filters", new JArray(filterOptions.Select(f => new { columnName = f.ColumnName, operation = (int)f.Operation, val = f.StringValue() })));
-            if (OrderOptions.Any()) op.Add("orders", new JArray(OrderOptions.Select(oo => new { columnName = oo.ColumnName, orderType = oo.OrderType })));
-            if (ColumnOptions.Any()) op.Add("columns", new JArray(ColumnOptions.Select(oo => new { columnName = oo.ColumnName, displayName = oo.DisplayName })));
+            if (FilterOptions.Any()) op.Add("filters", new JArray(filterOptions.Select(f => new JObject { { "columnName", f.ColumnName }, { "operation", (int)f.Operation }, { "val", f.StringValue() } })));
+            if (OrderOptions.Any()) op.Add("orders", new JArray(OrderOptions.Select(oo => new JObject { { "columnName", oo.ColumnName }, { "orderType", (int)oo.OrderType } })));
+            if (ColumnOptions.Any()) op.Add("columns", new JArray(ColumnOptions.Select(oo => new JObject { { "columnName", oo.ColumnName }, { "displayName", oo.DisplayName } })));
             if (ColumnOptionsMode != Entities.DynamicQuery.ColumnOptionsMode.Add) op.Add("columnMode", ColumnOptionsMode.ToString());
 
             op.Add("pagination", Pagination.GetMode().ToString());

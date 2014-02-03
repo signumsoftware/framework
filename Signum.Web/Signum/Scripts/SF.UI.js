@@ -32,8 +32,7 @@ var SF;
                         Notify.info(lang.signum.loading);
                     }
                 }
-            }
-            if (options.sfCheckRedirection) {
+
                 var originalSuccess = options.success;
 
                 options.success = function (result) {

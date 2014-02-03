@@ -100,10 +100,10 @@
     }
     
     <div class="sf-query-button-bar" style="display:@((findOptions.FilterMode != FilterMode.OnlyResults) ? "block" : "none")">
-        <button type="submit" class="sf-query-button sf-search" data-icon="ui-icon-search" id="@Model.Compose("qbSearch")" onclick="@(searchControl).search()">@SearchMessage.Search.NiceToString()</button>
+        <button class="sf-query-button sf-search" data-icon="ui-icon-search" id="@Model.Compose("qbSearch")" onclick="event.preventDefault();@(searchControl).search();">@SearchMessage.Search.NiceToString()</button>
         @if (findOptions.Create)
         {
-            <a class="sf-query-button" data-icon="ui-icon-plusthick" data-text="false" id="@Model.Compose("qbSearchCreate")" onclick="@(searchControl).create_click()">@SearchMessage.Search_Create.NiceToString()</a>
+            <a class="sf-query-button" data-icon="ui-icon-plusthick" data-text="false" id="@Model.Compose("qbSearchCreate")" onclick="event.preventDefault();@(searchControl).create_click();">@SearchMessage.Search_Create.NiceToString()</a>
         }
         @ButtonBarQueryHelper.GetButtonBarElementsForQuery(new QueryButtonContext
        {
@@ -169,5 +169,5 @@
     </div>
 </div>
 <script type="text/javascript">
-    require("@JsFunction.FinderModule", function(Finder) { new Finder.searchControl($("#@Model.Compose("sfSearchControl")"), @(findOptions.ToJS(Model.ControlID).ToString()));});
+    require(["@JsFunction.FinderModule"], function(Finder) { new Finder.SearchControl($("#@Model.Compose("sfSearchControl")"), @(MvcHtmlString.Create(findOptions.ToJS(Model.ControlID).ToString())));});
 </script>

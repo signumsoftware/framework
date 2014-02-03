@@ -113,7 +113,7 @@ namespace Signum.Web
                     sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityLine));
             }
 
-            sb.AddLine(entityLine.ConstructorScript(JsFunction.LinesModule, "entityLine"));
+            sb.AddLine(entityLine.ConstructorScript(JsFunction.LinesModule, "EntityLine"));
 
             return sb.ToHtml();
         }

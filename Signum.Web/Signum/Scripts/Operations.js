@@ -1,5 +1,5 @@
 ﻿/// <reference path="globals.ts"/>
-define(["require", "exports", "Entities", "Validator", "Navigator", "Finder"], function(require, exports, Entities, Validator, Navigator, Finder) {
+define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Validator", "Framework/Signum.Web/Signum/Scripts/Navigator", "Framework/Signum.Web/Signum/Scripts/Finder"], function(require, exports, Entities, Validator, Navigator, Finder) {
     function executeDefault(options) {
         options = $.extend({
             avoidValidate: false,

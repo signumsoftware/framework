@@ -57,7 +57,7 @@ namespace Signum.Web
                             "</script>"));
             }
 
-            sb.AddLine(entityDetail.ConstructorScript(JsFunction.LinesModule, "entityLineDetail"));
+            sb.AddLine(entityDetail.ConstructorScript(JsFunction.LinesModule, "EntityLineDetail"));
 
             return sb.ToHtml();
         }

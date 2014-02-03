@@ -93,7 +93,7 @@ namespace Signum.Web
                 }
 
 
-                sb.AddLine(listDetail.ConstructorScript(JsFunction.LinesModule, "entityListDetail"));
+                sb.AddLine(listDetail.ConstructorScript(JsFunction.LinesModule, "EntityListDetail"));
             }
 
             if (listDetail.DetailDiv == defaultDetailDiv)

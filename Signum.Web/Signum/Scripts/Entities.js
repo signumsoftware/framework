@@ -86,6 +86,32 @@ define(["require", "exports"], function(require, exports) {
     })();
     exports.StaticInfo = StaticInfo;
 
+    var EntityValue = (function () {
+        function EntityValue(runtimeInfo, toString, link) {
+            if (runtimeInfo == null)
+                throw new Error("runtimeInfo is mandatory for an EntityValue");
+
+            this.runtimeInfo = runtimeInfo;
+            this.toStr = toString;
+            this.link = link;
+        }
+        EntityValue.prototype.assertPrefixAndType = function (prefix, staticInfo) {
+            var types = staticInfo.types();
+
+            if (types.length == 0 && types[0] == "[All]")
+                return;
+
+            if (types.indexOf(this.runtimeInfo.type) == -1)
+                throw new Error("{0} not found in types {1}".format(this.runtimeInfo.type, types.join(", ")));
+        };
+
+        EntityValue.prototype.isLoaded = function () {
+            return false;
+        };
+        return EntityValue;
+    })();
+    exports.EntityValue = EntityValue;
+
     var EntityHtml = (function (_super) {
         __extends(EntityHtml, _super);
         function EntityHtml(prefix, runtimeInfo, toString, link) {
@@ -119,32 +145,6 @@ define(["require", "exports"], function(require, exports) {
     })(EntityValue);
     exports.EntityHtml = EntityHtml;
 
-    var EntityValue = (function () {
-        function EntityValue(runtimeInfo, toString, link) {
-            if (runtimeInfo == null)
-                throw new Error("runtimeInfo is mandatory for an EntityValue");
-
-            this.runtimeInfo = runtimeInfo;
-            this.toStr = toString;
-            this.link = link;
-        }
-        EntityValue.prototype.assertPrefixAndType = function (prefix, staticInfo) {
-            var types = staticInfo.types();
-
-            if (types.length == 0 && types[0] == "[All]")
-                return;
-
-            if (types.indexOf(this.runtimeInfo.type) == -1)
-                throw new Error("{0} not found in types {1}".format(this.runtimeInfo.type, types.join(", ")));
-        };
-
-        EntityValue.prototype.isLoaded = function () {
-            return false;
-        };
-        return EntityValue;
-    })();
-    exports.EntityValue = EntityValue;
-
     var RuntimeInfoValue = (function () {
         function RuntimeInfoValue(entityType, id, isNew, ticks) {
             if (SF.isEmpty(entityType))
@@ -159,7 +159,7 @@ define(["require", "exports"], function(require, exports) {
             if (SF.isEmpty(runtimeInfoString))
                 return null;
 
-            var array = runtimeInfoString.split(',');
+            var array = runtimeInfoString.split(';');
             return new RuntimeInfoValue(array[0], SF.isEmpty(array[1]) ? null : parseInt(array[1]), array[2] == "n", SF.isEmpty(array[3]) ? null : parseInt(array[3]));
         };
 

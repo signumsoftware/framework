@@ -504,10 +504,10 @@ namespace Signum.Web
                     WebQueryNames = QuerySettings.ToDictionary(kvp => kvp.Value.WebQueryName, kvp => kvp.Key, StringComparer.InvariantCultureIgnoreCase, "WebQueryNames");
                 }
 
-                Navigator.RegisterArea(typeof(Navigator), "signum");
-                FileRepositoryManager.Register(new LocalizedJavaScriptRepository(typeof(JavascriptMessage), "signum"));
-                FileRepositoryManager.Register(new CalendarLocalizedJavaScriptRepository("~/signum/calendarResources/"));
-                FileRepositoryManager.Register(new UrlsRepository("~/signum/urls/"));
+                Navigator.RegisterArea(typeof(Navigator), "Signum");
+                FileRepositoryManager.Register(new LocalizedJavaScriptRepository(typeof(JavascriptMessage), "Signum"));
+                FileRepositoryManager.Register(new CalendarLocalizedJavaScriptRepository("~/Signum/calendarResources/"));
+                FileRepositoryManager.Register(new UrlsRepository("~/Signum/urls/"));
 
 
 

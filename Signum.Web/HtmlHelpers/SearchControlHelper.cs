@@ -145,7 +145,9 @@ namespace Signum.Web
             FilterType filterType = QueryUtils.GetFilterType(filterOptions.Token.Type);
             List<FilterOperation> possibleOperations = QueryUtils.GetFilterOperations(filterType);
 
-            using (sb.Surround(new HtmlTag("tr").IdName(context.Compose("trFilter", index.ToString()))))
+            var id = context.Compose("trFilter", index.ToString());
+
+            using (sb.Surround(new HtmlTag("tr").Id(id)))
             {
                 using (sb.Surround("td"))
                 {
@@ -155,7 +157,7 @@ namespace Signum.Web
                         {
                             { "data-icon", "ui-icon-close" },
                             { "data-text", false},
-                            { "onclick", "SF.FindNavigator.deleteFilter(this)" },
+                            { "onclick", new JsFunction(JsFunction.FinderModule, "deleteFilter",  id) },
                         };
                         sb.AddLine(helper.Href(
                             context.Compose("btnDelete", index.ToString()),
@@ -253,7 +255,8 @@ namespace Signum.Web
             HtmlTag dropdown = new HtmlTag("select")
                 .IdName(context.Compose("ddlTokens_" + index))
                 .InnerHtml(options.ToHtml())
-                .Attr("onchange", "SF.FindNavigator.newSubTokensCombo('{0}','{1}',{2})".Formato(Navigator.ResolveWebQueryName(qd.QueryName), context.ControlID, index));
+                .Attr("onchange", new JsFunction(JsFunction.FinderModule, "newSubTokensCombo",
+                    Navigator.ResolveWebQueryName(qd.QueryName), context.ControlID, index).ToString());
 
             if(selected != null)
             {

@@ -170,22 +170,22 @@ namespace Signum.Web
             var args = (Arguments.IsNullOrEmpty() ? null :
              (", " + Arguments.EmptyIfNull().ToString(a => JsonConvert.SerializeObject(a, JsonSerializerSettings), ", ")));
 
-            return "require('" + lineInfo.Module + "', '" + Module + "', function(" + varLines + ", " + varModule + ") { " +
-                varModule + "." + FunctionName + "(" + NewLine(varLines, lineInfo) + args + "; }";
+            return "require(['" + lineInfo.Module + "', '" + Module + "'], function(" + varLines + ", " + varModule + ") { " +
+                varModule + "." + FunctionName + "(" + NewLine(varLines, lineInfo) + args + "; });";
         }
 
         public static string BasicConstructor(LineInfo lineInfo)
         {
             var varNameLines = VarName(lineInfo.Module);
 
-            var result = "require('" + lineInfo.Module + "', function(" + varNameLines + ") { " + NewLine(varNameLines, lineInfo) + "; }";
+            var result = "require(['" + lineInfo.Module + "'], function(" + varNameLines + ") { " + NewLine(varNameLines, lineInfo) + "; });";
 
             return result; 
         }
 
         static string NewLine(string varLines, LineInfo lineInfo)
         {
-            return "new {0}.{1}($('{2}'), {3})".Formato(varLines, lineInfo.Type, lineInfo.ControlID, lineInfo.Options.ToString());
+            return "new {0}.{1}($('#{2}'), {3})".Formato(varLines, lineInfo.Type, lineInfo.ControlID, lineInfo.Options.ToString());
         }
 
         public class LineInfo

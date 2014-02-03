@@ -100,7 +100,7 @@ namespace Signum.Web
                     sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityCombo, entityCombo.ControlID));
             }
 
-            sb.AddLine(entityCombo.ConstructorScript(JsFunction.LinesModule, "entityCombo"));
+            sb.AddLine(entityCombo.ConstructorScript(JsFunction.LinesModule, "EntityCombo"));
 
             return sb.ToHtml();
         }

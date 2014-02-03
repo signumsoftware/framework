@@ -37,8 +37,7 @@ module SF {
                         Notify.info(lang.signum.loading);
                     }
                 }
-            }
-            if (options.sfCheckRedirection) {
+
                 var originalSuccess = options.success;
 
                 options.success = function (result) {
@@ -47,7 +46,7 @@ module SF {
                         pendingRequests = 0;
                         Notify.clear();
                     }
-                   
+
                     if (originalSuccess != null) {
                         originalSuccess(result);
                     }

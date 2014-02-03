@@ -55,7 +55,7 @@ namespace Signum.Web
                 }
             }
 
-            sb.AddLine(entityRepeater.ConstructorScript(JsFunction.LinesModule, "entityRepeater"));
+            sb.AddLine(entityRepeater.ConstructorScript(JsFunction.LinesModule, "EntityRepeater"));
 
             return sb.ToHtml();
         }

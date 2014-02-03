@@ -34,7 +34,7 @@ namespace Signum.Web
                 throw new ArgumentNullException("functionName");
 
             this.Module = module;
-            this.FunctionName = FunctionName;
+            this.FunctionName = functionName;
             this.Arguments = arguments;
         }
 
@@ -44,7 +44,7 @@ namespace Signum.Web
 
             var args = Arguments.EmptyIfNull().ToString(a => JsonConvert.SerializeObject(a, JsonSerializerSettings), ", ");
 
-            return "require('" + Module + "', function(" + varName + ") { " + varName + "." + FunctionName + "(" + args + "); }";
+            return "require(['" + Module + "'], function(" + varName + ") { " + varName + "." + FunctionName + "(" + args + "); });";
         }
 
         protected static string VarName(string module)
@@ -57,6 +57,40 @@ namespace Signum.Web
         public string ToHtmlString()
         {
             return this.ToString();
+        }
+
+        public static JsLiteral Literal(string jsText)
+        {
+            return new JsLiteral(jsText);
+        }
+
+        [JsonConverter(typeof(JsLiteralConverter))]
+        public class JsLiteral
+        {
+            public string JsText { get; private set; }
+
+            public JsLiteral(string jsText)
+            {
+                this.JsText = jsText;
+            }
+        }
+
+        class JsLiteralConverter : JsonConverter
+        {
+            public override bool CanConvert(Type objectType)
+            {
+                return typeof(JsLiteral) == objectType;
+            }
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+            {
+                writer.WriteRaw(((JsLiteral)value).JsText);
+            }
         }
     }
 

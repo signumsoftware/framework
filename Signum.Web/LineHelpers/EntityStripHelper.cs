@@ -83,7 +83,7 @@ namespace Signum.Web
                     sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityStrip));
             }
 
-            sb.AddLine(entityStrip.ConstructorScript(JsFunction.LinesModule, "entityStrip"));
+            sb.AddLine(entityStrip.ConstructorScript(JsFunction.LinesModule, "EntityStrip"));
 
             return sb.ToHtml();
         }
