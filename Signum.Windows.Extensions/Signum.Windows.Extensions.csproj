@@ -997,9 +997,6 @@
     <EmbeddedResource Include="Chart\Html\colorbrewer.js" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Chart\Html\d3.v2.min.js" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Images\execute.png" />
   </ItemGroup>
   <ItemGroup>
@@ -1028,6 +1025,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\chartScript.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Chart\Html\d3.v3.min.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
