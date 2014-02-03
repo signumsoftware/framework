@@ -1,6 +1,7 @@
 ﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
 /// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
 
+
 export function pluralAndGender() {
     var url = $("#results").attr("data-pluralAndGender");
 
@@ -42,9 +43,10 @@ export function editAndRemember(remember: boolean) {
         return false;
     });
 
+    $("button.rememberChange").bind("click", onFeedbackClick); 
 }
 
-export function onFeedbackClick(e: MouseEvent) {
+function onFeedbackClick(e: MouseEvent) {
     e.preventDefault();
 
     var $this = $(this);

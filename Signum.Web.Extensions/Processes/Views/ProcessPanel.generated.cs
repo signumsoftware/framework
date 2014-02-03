@@ -138,18 +138,18 @@ WriteLiteral("\r\n    <script");
 
 WriteLiteral(" language=\"javascript\"");
 
-WriteLiteral(">\r\n        $(function () {\r\n            SF.Process.initControlPanel(function () {" +
-"\r\n                $.get(\"");
+WriteLiteral(">\r\n        $(function () {\r\n");
+
+WriteLiteral("             ");
 
             
-            #line 18 "..\..\Processes\Views\ProcessPanel.cshtml"
-                  Write(Url.Action((ProcessController p) => p.View()));
+            #line 17 "..\..\Processes\Views\ProcessPanel.cshtml"
+         Write(new JsFunction(ProcessesClient.Module, "initControlPanel", Url.Action((ProcessController p) => p.View())));
 
             
             #line default
             #line hidden
-WriteLiteral("\", function (data) {\r\n                    $(\"div.processMainDiv\").replaceWith(dat" +
-"a);\r\n                });\r\n            });\r\n        });\r\n    </script>\r\n</div>\r\n");
+WriteLiteral("\r\n        });\r\n    </script>\r\n</div>\r\n");
 
         }
     }

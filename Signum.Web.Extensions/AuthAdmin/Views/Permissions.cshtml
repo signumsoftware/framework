@@ -1,9 +1,9 @@
 @Html.ScriptCss("~/authAdmin/Content/SF_AuthAdmin.css")
-@Html.ScriptsJs("~/authAdmin/Scripts/SF_AuthAdmin.js")
+@using Signum.Web.AuthAdmin
 <script type="text/javascript">
-    $(function () {
-        SF.Auth.coloredRadios($(document));
-    });
+    require(["@AuthAdminClient.Module"], function (AuthAdmin) {
+        AuthAdmin.coloredRadios($(document));
+    }); 
 </script>
 @using (var tc = Html.TypeContext<PermissionRulePack>())
 {

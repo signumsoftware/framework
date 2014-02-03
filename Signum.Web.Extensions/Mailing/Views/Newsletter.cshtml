@@ -5,7 +5,6 @@
 @using Signum.Web.Mailing
 @Html.ScriptCss("~/Mailing/Content/SF_Mailing.css")
 @Html.ScriptsJs("~/Scripts/ckeditor/ckeditor.js")
-@Html.ScriptsJs("~/Mailing/Scripts/SF_Mailing.js")
 @using (var nc = Html.TypeContext<NewsletterDN>())
 {  
     <div class="@(nc.Value.IsNew ? "" : "sf-tabs")">
@@ -62,7 +61,7 @@
                     })
                     <script>
                         $(function () {
-                            SF.Mailing.initHtmlEditorWithTokens("@nc.SubContext(e => e.Text).ControlID");
+                            @(new JsFunction(MailingClient.Module, "initHtmlEditorWithTokens", nc.SubContext(e => e.Text).ControlID));
                         });
                     </script>
                 </div>
@@ -86,6 +85,6 @@
 }
 <script>
     $(function () {
-        SF.Mailing.initReplacements();
+        @(new JsFunction(MailingClient.Module, "initReplacements"));
     });
 </script>

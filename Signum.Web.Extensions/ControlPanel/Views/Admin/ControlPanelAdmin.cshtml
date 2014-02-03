@@ -23,6 +23,8 @@
 
 <script type="text/javascript">
     $(function () {
-        SF.FlowTable.init($("#sfCpAdminContainer"));
+        require(["@ControlPanelClient.FlowTableModule"], function (FlowTable) {
+            FlowTable.init($("#sfCpAdminContainer"));
+        }); 
     });
 </script>

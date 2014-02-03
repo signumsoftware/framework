@@ -96,10 +96,10 @@ else
                         var translations = route.Value.Values.Select(a => a.AutomaticTranslation);
                         string elementName = culture.Name + "#" + instance.Instance.Key() + "#" + route.Key.PropertyString();
                         
-                        if (translations.Count() == 1 && translations.First().Length > 200)
+                        if (translations.Count() == 1)
                         {
                             <textarea name="@elementName" style="width:90%">@translations.First()</textarea>
-                            <button onclick="SF.Translation.onFeedbackClick()">@TranslationJavascriptMessage.RememberChange.NiceToString()</button>
+                            <button class="rememberChange">@TranslationJavascriptMessage.RememberChange.NiceToString()</button>
                         }
                         else 
                         {
@@ -119,6 +119,6 @@ else
 
 <script>
     $(function () {
-        SF.Translation.editAndRemember(@((TranslationClient.Translator is ITranslatorWithFeedback).ToString().ToLower()));
+        @(new JsFunction(TranslationClient.Module, "editAndRemember", TranslationClient.Translator is ITranslatorWithFeedback))
     });
 </script>

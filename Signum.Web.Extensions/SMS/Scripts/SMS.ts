@@ -15,7 +15,6 @@ var normalCharacters;
 var doubleCharacters;
 
 
-
 function init(removeCharactersUrl: string, getDictionariesUrl: string) {
     if (!editable()) {
         return;
@@ -98,6 +97,8 @@ function charactersToEnd($textarea) {
 }
 
 
+
+
 function remainingCharacters($textarea?: JQuery) {
     $textarea = $textarea || $control();
     var $remainingChars = $textarea.closest(".sf-sms-edit-container").find('.sf-sms-chars-left');
@@ -119,6 +120,12 @@ function remainingCharacters($textarea?: JQuery) {
         $remainingCharacters.addClass('sf-sms-warning');
         $remainingChars.addClass('sf-sms-highlight');
     }
+}
+
+
+export function attachAssociatedType(entityCombo: Lines.EntityCombo)
+{
+    entityCombo.entityChanged = fillLiterals;
 }
 
 export function fillLiterals() {

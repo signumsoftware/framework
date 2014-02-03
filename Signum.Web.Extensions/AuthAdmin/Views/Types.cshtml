@@ -5,13 +5,15 @@
 @Html.ScriptsJs("~/authAdmin/Scripts/SF_AuthAdmin.js")
 <script type="text/javascript">
     $(function () {
-        SF.Auth.multiSelRadios($(document));
-        SF.Auth.treeView();
-        $(".sf-auth-rules .sf-submodule-trigger").click(SF.Auth.openDialog);
-        $(document).on("click", ".sf-auth-rules .sf-remove", SF.Auth.removeCondition);
-        $(document).on("click", ".sf-auth-rules .sf-create", function (e) {
-            e.preventDefault();
-            SF.Auth.chooseConditionToAdd($(this), '@AuthMessage.AuthAdmin_ChooseACondition.NiceToString()');
+        require(["@AuthAdminClient.Module"], function (AuthAdmin) {
+            AuthAdmin.multiSelRadios($(document));
+            AuthAdmin.treeView();
+            $(".sf-auth-rules .sf-submodule-trigger").click(AuthAdmin.openDialog);
+            $(document).on("click", ".sf-auth-rules .sf-remove", AuthAdmin.removeCondition);
+            $(document).on("click", ".sf-auth-rules .sf-create", function (e) {
+                e.preventDefault();
+                AuthAdmin.chooseConditionToAdd($(this), '@AuthMessage.AuthAdmin_ChooseACondition.NiceToString()');
+            });
         });
     });
 </script>

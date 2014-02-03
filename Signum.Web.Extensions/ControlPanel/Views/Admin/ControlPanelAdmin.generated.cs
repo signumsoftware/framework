@@ -182,8 +182,17 @@ WriteLiteral("</div>\r\n\r\n<script");
 
 WriteLiteral(" type=\"text/javascript\"");
 
-WriteLiteral(">\r\n    $(function () {\r\n        SF.FlowTable.init($(\"#sfCpAdminContainer\"));\r\n   " +
-" });\r\n</script>");
+WriteLiteral(">\r\n    $(function () {\r\n        require([\"");
+
+            
+            #line 26 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
+             Write(ControlPanelClient.FlowTableModule);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\"], function (FlowTable) {\r\n            FlowTable.init($(\"#sfCpAdminContainer\"));" +
+"\r\n        }); \r\n    });\r\n</script>");
 
         }
     }

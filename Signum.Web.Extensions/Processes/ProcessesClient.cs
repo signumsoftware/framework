@@ -26,6 +26,7 @@ namespace Signum.Web.Processes
     public static class ProcessesClient
     {
         public static string ViewPrefix = "~/processes/Views/{0}.cshtml";
+        public static string Module = "Extensions/Signum.Web.Extensions/Processes/Scripts/Processes"; 
 
         public static void Start(bool packages, bool packageOperations)
         {

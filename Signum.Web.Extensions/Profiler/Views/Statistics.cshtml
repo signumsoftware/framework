@@ -14,14 +14,6 @@
 @Html.ScriptsJs("~/Profiler/Scripts/SF_Profiler.js")
 <script language="javascript">
     $(function () {
-        SF.Profiler.init(function () {
-            $.ajax({
-                url: "@Url.Action((ProfilerController p) => p.Statistics(order))",
-                success: function(data){
-                    $("table.sf-stats-table").replaceWith(data); 
-                }
-             }); 
-        });
-        SF.Profiler.initStats();
+        @(new JsFunction(ProfilerClient.Module, "initStats"));
     });
 </script>

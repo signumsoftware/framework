@@ -94,6 +94,6 @@ else
 }
 <script type="text/javascript">
     $(function() {
-        SF.Profiler.heavyDetailsChart(@Html.Raw(fullTree.HeavyDetailsToJson()), @Model.Depth);
+       @(new JsFunction(ProfilerClient.Module, "heavyDetailsChart", fullTree.HeavyDetailsToJson(), Model.Depth));
     });
 </script>

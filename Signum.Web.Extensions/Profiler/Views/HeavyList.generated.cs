@@ -216,28 +216,18 @@ WriteLiteral("\r\n\r\n<script");
 
 WriteLiteral(" language=\"javascript\"");
 
-WriteLiteral(">\r\n    $(function () {\r\n        SF.Profiler.init(function () {\r\n            $.aja" +
-"x({\r\n                url: \"");
+WriteLiteral(">\r\n\r\n    $(function () {\r\n");
+
+WriteLiteral("         ");
 
             
-            #line 38 "..\..\Profiler\Views\HeavyList.cshtml"
-                 Write(Url.Action((ProfilerController p) => p.Heavy(orderByTime)));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\",\r\n                success: function (data) {\r\n                    $(\"table.sf-p" +
-"rofiler-table\").replaceWith(data);\r\n                }\r\n            });\r\n        " +
-"});\r\n\r\n        SF.Profiler.heavyListChart(");
-
-            
-            #line 45 "..\..\Profiler\Views\HeavyList.cshtml"
-                              Write(Html.Raw(Model.HeavyDetailsToJson()));
+            #line 37 "..\..\Profiler\Views\HeavyList.cshtml"
+     Write(new JsFunction(ProfilerClient.Module, "heavyListChart", Model.HeavyDetailsToJson()));
 
             
             #line default
             #line hidden
-WriteLiteral(");\r\n    });\r\n</script>\r\n");
+WriteLiteral(";\r\n    });\r\n</script>\r\n");
 
         }
     }

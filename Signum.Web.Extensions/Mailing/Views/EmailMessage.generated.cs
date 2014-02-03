@@ -332,17 +332,18 @@ WriteLiteral("\r\n");
             
             #line default
             #line hidden
-WriteLiteral("                    <script>\r\n                        $(function () {\r\n          " +
-"                  SF.Mailing.initHtmlEditor(\'");
+WriteLiteral("                    <script>\r\n                        $(function () {\r\n");
+
+WriteLiteral("                            ");
 
             
             #line 67 "..\..\Mailing\Views\EmailMessage.cshtml"
-                                                  Write(e.Compose("Body"));
+                        Write(new JsFunction(MailingClient.Module, "initHtmlEditor", e.Compose("Body")));
 
             
             #line default
             #line hidden
-WriteLiteral("\');\r\n                        });\r\n                    </script>\r\n");
+WriteLiteral("\r\n                        });\r\n                    </script>\r\n");
 
             
             #line 70 "..\..\Mailing\Views\EmailMessage.cshtml"
@@ -403,14 +404,14 @@ WriteLiteral("                    <div>\r\n");
             #line hidden
 WriteLiteral("                            <iframe");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 3037), Tuple.Create("\"", 3062)
+WriteAttribute("id", Tuple.Create(" id=\"", 3065), Tuple.Create("\"", 3090)
             
             #line 85 "..\..\Mailing\Views\EmailMessage.cshtml"
-, Tuple.Create(Tuple.Create("", 3042), Tuple.Create<System.Object, System.Int32>(e.Compose("iframe")
+, Tuple.Create(Tuple.Create("", 3070), Tuple.Create<System.Object, System.Int32>(e.Compose("iframe")
             
             #line default
             #line hidden
-, 3042), false)
+, 3070), false)
 );
 
 WriteLiteral(" style=\"width:90%\"");
@@ -438,8 +439,18 @@ WriteLiteral("                            <script>\r\n                          
             
             #line default
             #line hidden
-WriteLiteral("\");\r\n                                    SF.Mailing.activateIFrame(iframe);\r\n    " +
-"                            });\r\n                            </script>\r\n");
+WriteLiteral("\");\r\n");
+
+WriteLiteral("                                    ");
+
+            
+            #line 91 "..\..\Mailing\Views\EmailMessage.cshtml"
+                                Write(new JsFunction(MailingClient.Module, "activateIFrame", JsFunction.Literal("iframe")));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n                                });\r\n                            </script>\r\n");
 
             
             #line 94 "..\..\Mailing\Views\EmailMessage.cshtml"
@@ -499,14 +510,14 @@ WriteLiteral("\r\n\r\n            </fieldset>\r\n");
             #line hidden
 WriteLiteral("                <fieldset");
 
-WriteAttribute("id", Tuple.Create("  id=\"", 4108), Tuple.Create("\"", 4148)
+WriteAttribute("id", Tuple.Create("  id=\"", 4189), Tuple.Create("\"", 4229)
             
             #line 110 "..\..\Mailing\Views\EmailMessage.cshtml"
-, Tuple.Create(Tuple.Create("", 4114), Tuple.Create<System.Object, System.Int32>(e.Compose("sfEmailReceptionInfo")
+, Tuple.Create(Tuple.Create("", 4195), Tuple.Create<System.Object, System.Int32>(e.Compose("sfEmailReceptionInfo")
             
             #line default
             #line hidden
-, 4114), false)
+, 4195), false)
 );
 
 WriteLiteral(">\r\n                    <legend>");

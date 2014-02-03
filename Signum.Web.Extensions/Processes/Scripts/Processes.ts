@@ -2,7 +2,14 @@
 
 import Navigator = require("Framework/Signum.Web/Signum/Scripts/Navigator")
 
-export function initControlPanel(refreshCallback: () => void) {
+export function initControlPanel(url : string) {
+
+    var refreshCallback = () => {
+        $.get("url", function (data) {
+            $("div.processMainDiv").replaceWith(data);
+        });
+    };
+
 
     var $processEnable = $("#sfProcessEnable");
     var $processDisable = $("#sfProcessDisable");

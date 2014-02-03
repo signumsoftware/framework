@@ -237,16 +237,16 @@ namespace Signum.Web.Mailing
                 options.AddLine(option.ToHtml());
             }
 
-            string onChange = "SF.FindNavigator.newSubTokensCombo('{0}','{1}',{2},'{3}')".Formato(
-                Navigator.ResolveWebQueryName(qd.QueryName), 
-                context.ControlID, 
+            JsFunction onChange = new JsFunction(JsFunction.FinderModule, "newSubTokensCombo",
+                Navigator.ResolveWebQueryName(qd.QueryName),
+                context.ControlID,
                 index,
                 RouteHelper.New().Action("NewSubTokensCombo", "Mailing"));
-            
+
             HtmlTag dropdown = new HtmlTag("select")
                 .IdName(context.Compose("ddlTokens_" + index))
                 .InnerHtml(options.ToHtml())
-                .Attr("onchange", onChange);
+                .Attr("onchange", onChange.ToString());
 
             if (selected != null)
             {

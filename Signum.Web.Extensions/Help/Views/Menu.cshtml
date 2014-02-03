@@ -1,5 +1,5 @@
 ﻿@Html.ScriptsJs("~/help/scripts/help.js")
-
+@using Signum.Web.Help
 <div id="syntax-help">
     <div id="syntax-list">
         Utiliza la siguiente sintaxis:
@@ -46,8 +46,8 @@
 </div>
 <div class="help_right">
    <!-- <a id="refresh" href="javascript:location.reload(true);">Refresca la página para wikificar correctamente el texto modificado</a> -->
-    <a id="edit-action" class="action" href="javascript:SF.Help.edit();">Editar</a>
+    <a id="edit-action" class="action" href="@(new JsFunction(HelpClient.Module, "edit"))">Editar</a>
     <a id="syntax-action" class="action" style="display: none">Sintaxis</a>    
-    <a id="save-action" class="action" href="javascript:SF.Help.save();" style="display: none">Guardar</a>    
+    <a id="save-action" class="action" href="@(new JsFunction(HelpClient.Module, "save"))" style="display: none">Guardar</a>    
 </div>
 <div class="clearall"></div>

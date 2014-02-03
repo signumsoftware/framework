@@ -128,9 +128,16 @@ else
                     @{  
                     var items = selectListItems(typeChanges.TypeConflict.Values.Select(a => a.Translated));
 
-                        @Html.DropDownList(locKey(typeChanges.Type) + ".Description", items, new { style = "width:90%" });
+                    var elemName = locKey(typeChanges.Type) + ".Description";
+                    if(items.Count ==1){
+                        <textarea name="@elemName" style="width:90%">@items.First()</textarea>
+                        <button class="rememberChange">@TranslationJavascriptMessage.RememberChange.NiceToString()</button>
+                    }else{
+                        @Html.DropDownList(elemName, items, new { style = "width:90%" });
+                         <a href="#" class="edit">@TranslationMessage.Edit.NiceToString()</a>
                     }
-                    <a href="#" class="edit">@TranslationMessage.Edit.NiceToString()</a>
+                    }
+                   
                 </th>
                 <th class="smallCell monospaceCell">
                     @if (hasGender && hasPlural)
@@ -176,9 +183,17 @@ else
                 <td colspan="4" class="monospaceCell">
                     @{  
                     var items = selectListItems(conflict.Value.Values.Select(a => a.Translated));
-                        @Html.DropDownList(locKey(typeChanges.Type) + ".Member." + conflict.Key, items);
+                    var elemName = locKey(typeChanges.Type) + ".Member." + conflict.Key;
+                    if(items.Count == 1)
+                    {
+                        <textarea name="@elemName" style="width:90%">@items.First()</textarea>
+                        <button class="rememberChange">@TranslationJavascriptMessage.RememberChange.NiceToString()</button>
+                    }else{
+                         @Html.DropDownList(elemName, items);
+                        <a href="#" class="edit">@TranslationMessage.Edit.NiceToString()</a>
                     }
-                    <a href="#" class="edit">@TranslationMessage.Edit.NiceToString()</a>
+                    }
+                  
                 </td>
             </tr>
                 }
@@ -192,7 +207,7 @@ else
 
 <script>
     $(function () {
-        SF.Translation.pluralAndGender();
-        SF.Translation.editAndRemember(@((TranslationClient.Translator is ITranslatorWithFeedback).ToString().ToLower()));
+        @(new JsFunction(TranslationClient.Module, "pluralAndGender"))
+        @(new JsFunction(TranslationClient.Module, "editAndRemember", TranslationClient.Translator is ITranslatorWithFeedback))
     });
 </script>

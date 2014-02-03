@@ -109,6 +109,11 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         }
     }
 
+    function attachAssociatedType(entityCombo) {
+        entityCombo.entityChanged = exports.fillLiterals;
+    }
+    exports.attachAssociatedType = attachAssociatedType;
+
     function fillLiterals() {
         var $combo = $(".sf-associated-type");
         var prefix = $combo.attr("data-control-id");

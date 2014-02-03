@@ -342,25 +342,18 @@ WriteLiteral("\r\n<script");
 
 WriteLiteral(" type=\"text/javascript\"");
 
-WriteLiteral(">\r\n    $(function() {\r\n        SF.Profiler.heavyDetailsChart(");
+WriteLiteral(">\r\n    $(function() {\r\n");
+
+WriteLiteral("       ");
 
             
             #line 97 "..\..\Profiler\Views\HeavyDetails.cshtml"
-                                 Write(Html.Raw(fullTree.HeavyDetailsToJson()));
+   Write(new JsFunction(ProfilerClient.Module, "heavyDetailsChart", fullTree.HeavyDetailsToJson(), Model.Depth));
 
             
             #line default
             #line hidden
-WriteLiteral(", ");
-
-            
-            #line 97 "..\..\Profiler\Views\HeavyDetails.cshtml"
-                                                                           Write(Model.Depth);
-
-            
-            #line default
-            #line hidden
-WriteLiteral(");\r\n    });\r\n</script>\r\n");
+WriteLiteral(";\r\n    });\r\n</script>\r\n");
 
         }
     }

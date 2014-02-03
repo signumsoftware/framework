@@ -28,6 +28,7 @@ namespace Signum.Web.Profiler
     public static class ProfilerClient
     {
         public static string ViewPrefix = "~/Profiler/Views/{0}.cshtml";
+        public static string Module = "Extensions/Signum.Web.Extensions/Profiler/Scripts/Profiler";
 
         public static void Start()
         {
@@ -62,10 +63,9 @@ namespace Signum.Web.Profiler
             { "MvcResult", Color.SeaGreen }
         };
 
-        public static string HeavyDetailsToJson(this IEnumerable<HeavyProfilerEntry> entries)
+        public static object HeavyDetailsToJson(this IEnumerable<HeavyProfilerEntry> entries)
         {
-            var serializer = new JavaScriptSerializer() { MaxJsonLength = int.MaxValue };
-            return serializer.Serialize(entries.Select(e => new 
+            return entries.Select(e => new 
             {
                 e.BeforeStart,
                 e.Start,
@@ -76,7 +76,7 @@ namespace Signum.Web.Profiler
                 e.Depth,
                 AdditionalData = e.AdditionalDataPreview(),
                 FullIndex = e.FullIndex()
-            }));
+            }).ToList();
         }
 
         private static string GetColor(string role)

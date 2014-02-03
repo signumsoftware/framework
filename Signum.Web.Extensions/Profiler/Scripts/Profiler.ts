@@ -22,8 +22,7 @@ export function initStats() {
     });
 }
 
-export function init(refreshCallback) {
-    var refresh = refreshCallback;
+export function init() {
     var $profileEnable = $("#sfProfileEnable");
     var $profileDisable = $("#sfProfileDisable");
 
@@ -152,6 +151,9 @@ export interface HeavyProfilerEntryJson {
 }
 
 export function heavyListChart(data: HeavyProfilerEntryJson[]) {
+
+    init();
+
     var fontSize = 12;
     var fontPadding = 4;
     var characterWidth = 7;

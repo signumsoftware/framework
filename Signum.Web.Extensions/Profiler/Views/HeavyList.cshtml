@@ -32,16 +32,8 @@
                 "~/Profiler/Scripts/SF_Profiler.js")
 
 <script language="javascript">
-    $(function () {
-        SF.Profiler.init(function () {
-            $.ajax({
-                url: "@Url.Action((ProfilerController p) => p.Heavy(orderByTime))",
-                success: function (data) {
-                    $("table.sf-profiler-table").replaceWith(data);
-                }
-            });
-        });
 
-        SF.Profiler.heavyListChart(@Html.Raw(Model.HeavyDetailsToJson()));
+    $(function () {
+         @(new JsFunction(ProfilerClient.Module, "heavyListChart", Model.HeavyDetailsToJson()));
     });
 </script>

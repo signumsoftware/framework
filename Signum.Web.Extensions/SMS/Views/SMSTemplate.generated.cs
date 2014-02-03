@@ -266,32 +266,15 @@ WriteLiteral(">\r\n");
                 ec.ComboHtmlProperties["class"] = "sf-associated-type";
                 ec.ComboHtmlProperties["data-url"] = Url.Action<SMSController>(s => s.GetLiteralsForType(ec.ControlID));
                 ec.ComboHtmlProperties["data-control-id"] = ec.ControlID;
+                ec.AttachFunction = new JsLineFunction(SMSClient.Module, "attachAssociatedType");
             }));
 
             
             #line default
             #line hidden
             
-            #line 37 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 38 "..\..\SMS\Views\SMSTemplate.cshtml"
               
-
-            
-            #line default
-            #line hidden
-WriteLiteral("            <script>\r\n                $(function () {\r\n                    $(\"#");
-
-            
-            #line 40 "..\..\SMS\Views\SMSTemplate.cshtml"
-                    Write(tc.SubContext(s => s.AssociatedType).ControlID);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\").SFControl().onEntityChanged = SF.SMS.fillLiterals;\r\n                });\r\n     " +
-"       </script>\r\n");
-
-            
-            #line 43 "..\..\SMS\Views\SMSTemplate.cshtml"
         }
 
             
@@ -300,7 +283,7 @@ WriteLiteral("\").SFControl().onEntityChanged = SF.SMS.fillLiterals;\r\n        
 WriteLiteral("        ");
 
             
-            #line 44 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 40 "..\..\SMS\Views\SMSTemplate.cshtml"
     Write(new HtmlTag("select").Attr("multiple", "multiple").Id("sfLiterals").ToHtml());
 
             
@@ -314,20 +297,20 @@ WriteLiteral(" class=\"sf-button\"");
 
 WriteLiteral(" id=\"sfInsertLiteral\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 1713), Tuple.Create("\"", 1754)
+WriteAttribute("value", Tuple.Create(" value=\"", 1585), Tuple.Create("\"", 1626)
             
-            #line 46 "..\..\SMS\Views\SMSTemplate.cshtml"
-, Tuple.Create(Tuple.Create("", 1721), Tuple.Create<System.Object, System.Int32>(SmsMessage.Insert.NiceToString()
+            #line 42 "..\..\SMS\Views\SMSTemplate.cshtml"
+, Tuple.Create(Tuple.Create("", 1593), Tuple.Create<System.Object, System.Int32>(SmsMessage.Insert.NiceToString()
             
             #line default
             #line hidden
-, 1721), false)
+, 1593), false)
 );
 
 WriteLiteral(" />\r\n    </div>\r\n");
 
             
-            #line 48 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 44 "..\..\SMS\Views\SMSTemplate.cshtml"
     
 
             
@@ -342,7 +325,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("        ");
 
             
-            #line 50 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 46 "..\..\SMS\Views\SMSTemplate.cshtml"
    Write(Html.EntityRepeater(tc, e => e.Messages, er =>
         {
             er.AttachFunction = new JsLineFunction(MailingClient.TabsRepeaterModule, "attachTabRepeater");
@@ -355,7 +338,7 @@ WriteLiteral("        ");
 WriteLiteral("\r\n    </div>\r\n");
 
             
-            #line 56 "..\..\SMS\Views\SMSTemplate.cshtml"
+            #line 52 "..\..\SMS\Views\SMSTemplate.cshtml"
 }
 
             

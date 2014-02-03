@@ -36,7 +36,7 @@
         
         <script>
             $(function () {
-                SF.Mailing.initHtmlEditorWithTokens("@ec.SubContext(e => e.Text).ControlID");
+                 @(new JsFunction(MailingClient.Module, "initHtmlEditorWithTokens", ec.SubContext(e => e.Text).ControlID));
             });
         </script>
     </div>

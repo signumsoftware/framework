@@ -27,7 +27,7 @@ define(["require", "exports"], function(require, exports) {
             } else {
                 var selectName = select.attr("name");
 
-                input.after($("<button/>").click(exports.onFeedbackClick).text(lang.translation.RememberChange));
+                input.after($("<button/>").click(onFeedbackClick).text(lang.translation.RememberChange));
 
                 select.attr('name', selectName + "#Automatic");
                 select.hide();
@@ -35,6 +35,8 @@ define(["require", "exports"], function(require, exports) {
 
             return false;
         });
+
+        $("button.rememberChange").bind("click", onFeedbackClick);
     }
     exports.editAndRemember = editAndRemember;
 
@@ -78,6 +80,5 @@ define(["require", "exports"], function(require, exports) {
 
         return;
     }
-    exports.onFeedbackClick = onFeedbackClick;
 });
 //# sourceMappingURL=Translation.js.map

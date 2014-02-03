@@ -1,6 +1,12 @@
 ﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
 define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Navigator"], function(require, exports, Navigator) {
-    function initControlPanel(refreshCallback) {
+    function initControlPanel(url) {
+        var refreshCallback = function () {
+            $.get("url", function (data) {
+                $("div.processMainDiv").replaceWith(data);
+            });
+        };
+
         var $processEnable = $("#sfProcessEnable");
         var $processDisable = $("#sfProcessDisable");
 

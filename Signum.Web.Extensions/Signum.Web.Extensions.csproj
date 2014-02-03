@@ -1103,7 +1103,7 @@
       <LastGenOutput>CountSearchControlPart.generated.cs</LastGenOutput>
     </Content>
     <Content Include="Profiler\Content\SF_Profiler.css" />
-    <TypeScriptCompile Include="Profiler\Scripts\SF_Profiler.ts" />
+    <TypeScriptCompile Include="Profiler\Scripts\Profiler.ts" />
     <Content Include="Profiler\Views\Statistics.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>Statistics.generated.cs</LastGenOutput>

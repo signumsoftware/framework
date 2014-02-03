@@ -1,7 +1,6 @@
 ﻿@using Signum.Entities.Processes
-
+@using Signum.Web.Processes
 @Html.ScriptCss("~/processes/Content/Processes.css")
-@Html.ScriptsJs("~/Processes/Scripts/SF_Process.js")
 
 @using (var e = Html.TypeContext<ProcessDN>())
 {
@@ -33,9 +32,8 @@
 
     <script type="text/javascript">
         $(function () {
-            SF.Process.refreshUpdate('@e.Value.Id', '@e.ControlID',
-            "@Url.Action("GetProgressExecution", "Process")");
-    })
+            @(new JsFunction(ProcessesClient.Module, "refreshUpdate", e.Value.Id, e.ControlID, Url.Action("GetProgressExecution", "Process")))
+        })
     </script>
 
     }

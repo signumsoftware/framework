@@ -25,6 +25,7 @@ namespace Signum.Web.ControlPanel
         public static string AdminViewPrefix = "~/ControlPanel/Views/Admin/{0}.cshtml";
         public static string ViewPrefix = "~/ControlPanel/Views/{0}.cshtml";
         public static string Module = "Extensions/Signum.Web.Extensions/ControlPanel/Scripts/ControlPanel";
+        public static string FlowTableModule = "Extensions/Signum.Web.Extensions/ControlPanel/Scripts/FlowTable";
 
         public struct PartViews
         {

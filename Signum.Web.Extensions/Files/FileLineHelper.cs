@@ -168,7 +168,7 @@ namespace Signum.Web.Files
                     sb.AddLine(helper.ValidationMessage(fileLine.Compose(FileLineKeys.File)));
             }
 
-            sb.AddLine(fileLine.ConstructorScript(FilesClient.Module, "fileLine"));
+            sb.AddLine(fileLine.ConstructorScript(FilesClient.Module, "FileLine"));
 
             return sb.ToHtml();
         }

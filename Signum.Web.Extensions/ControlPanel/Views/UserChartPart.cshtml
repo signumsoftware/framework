@@ -16,6 +16,8 @@
     var ucPart = (UserChartPartDN)Model.Content;
     UserChartDN uc = ucPart.UserChart;
     ChartRequest request = uc.ToRequest();
+    
+    var containerId = crc.Compose("sfChartBuilderContainer");
 
     using (var crc = new TypeContext<ChartRequest>(request, "r{0}c{1}".Formato(Model.Row, Model.Column)))
     {
@@ -32,12 +34,12 @@
         ViewData[ViewDataKeys.FilterOptions] = request.Filters.Select(f => new FilterOption { Token = f.Token, Operation = f.Operation, Value = f.Value }).ToList();
             }
             @Html.Partial(Navigator.Manager.FilterBuilderView, crc)
-            <div id="@crc.Compose("sfChartBuilderContainer")">
+            <div id="@containerId">
                 @Html.Partial(ChartClient.ChartBuilderView, crc)
             </div>
             <script type="text/javascript">
                 var findOptions = @(MvcHtmlString.Create(uc.ToJS().ToString()))
-                 require("@ChartClient.Module", function (Chart) { new Chart.ChartBuilder($('#@crc.Compose("sfChartBuilderContainer")'), $.extend({ prefix: '@crc.ControlID' }, findOptions)); }); 
+                 require(["@ChartClient.Module"], function (Chart) { new Chart.ChartBuilder($('#@containerId'), $.extend({ prefix: '@crc.ControlID' }, findOptions)); }); 
             </script>
         </div>
         <div id="@crc.Compose("sfChartContainer")">
@@ -65,16 +67,14 @@
    
             <script type="text/javascript">
                 (function () {
-                    var $myChart = SF.Chart.getFor('@crc.ControlID');
-                    $myChart.reDraw();
+                    $("#@containerId").SFControl().reDraw();
                 })();
             </script>
         }
         <script type="text/javascript">
             (function () {
                 $("#" + SF.compose("@crc.ControlID", "sfFullScreen")).on("mousedown", function (e) {
-                    var $myChart = SF.Chart.getFor('@crc.ControlID');
-                    $myChart.fullScreen(e);
+                    $("#@containerId").SFControl().fullScreen();
                 });
             })();
         </script>

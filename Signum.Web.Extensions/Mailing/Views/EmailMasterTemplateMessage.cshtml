@@ -30,7 +30,7 @@
         
         <script>
             $(function () {
-                SF.Mailing.initHtmlEditorMasterTemplate("@ec.SubContext(e => e.Text).ControlID");
+               @(new JsFunction(MailingClient.Module, "initHtmlEditorMasterTemplate", ec.SubContext(e => e.Text).ControlID))
             });
         </script>
     </div>
