@@ -56,7 +56,13 @@ namespace Signum.Engine.Exceptions
                             if(index == null)
                                 return null;
 
-                            var properties = tup.Item1.Fields.Values.Where(f=>f.Field.Columns().All(index.Columns.Contains)).Select(f=>Reflector.TryFindPropertyInfo(f.FieldInfo)).NotNull().ToList();
+                            var properties = (from f in tup.Item1.Fields.Values
+                                              let cols = f.Field.Columns()
+                                              where cols.Any() && cols.All(index.Columns.Contains)
+                                              select Reflector.TryFindPropertyInfo(f.FieldInfo)).NotNull().ToList();
+
+                            if (properties.IsEmpty())
+                                return null;
 
                             return Tuple.Create(index, properties); 
                         });
@@ -81,7 +87,7 @@ namespace Signum.Engine.Exceptions
                 if (Table == null)
                     return InnerException.Message;
 
-                return EngineMessage.TheresAlreadyA0With12.NiceToString().Formato(
+                return EngineMessage.TheresAlreadyA0With1EqualsTo2.NiceToString().Formato(
                     Table == null ? TableName : Table.Type.NiceName(),
                     Index == null ? IndexName :
                     Properties.IsNullOrEmpty() ? Index.Columns.CommaAnd(c => c.Name) : 
