@@ -25,7 +25,6 @@ namespace Signum.Web
     {
         public bool Reorder { get; set; }
 
-        
         public int? MaxElements { get; set; }
         
 
@@ -38,17 +37,17 @@ namespace Signum.Web
         {
             var result = base.OptionsJSInternal();
             if(Create)
-                result.Add("create", "true");
+                result.Add("create", true);
             if (Remove)
-                result.Add("remove", "true");
+                result.Add("remove", true);
             if (Find)
-                result.Add("find", "true");
+                result.Add("find", true);
             if (View)
-                result.Add("view", "true");
+                result.Add("view", true);
             if (Navigate)
-                result.Add("navigate", "true");
+                result.Add("navigate", true);
             if (Reorder)
-                result.Add("reorder", "true");
+                result.Add("reorder", true);
             if (MaxElements != null)
                 result.Add("maxElements", MaxElements.Value);
             return result;

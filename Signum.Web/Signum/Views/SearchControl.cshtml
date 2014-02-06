@@ -24,8 +24,11 @@
 
     @Html.Hidden(Model.Compose("sfEntityTypeNames"), 
                                 implementations.IsByAll ? StaticInfo.ImplementedByAllKey  :
-                                implementations.Types.ToString(t =>  Navigator.ResolveWebTypeName(t) + ";" + t.NiceName(), ","), 
-        new { disabled = "disabled" })
+                                implementations.Types.ToString(t => Navigator.ResolveWebTypeName(t), ","), new { disabled = "disabled" })
+     @Html.Hidden(Model.Compose("sfEntityTypeNiceNames"), 
+                                implementations.IsByAll ? StaticInfo.ImplementedByAllKey  :
+                                implementations.Types.ToString(t =>  t.NiceName(), ","), new { disabled = "disabled" })
+        
     
     @{
         bool filtersAlwaysHidden = findOptions.FilterMode == FilterMode.AlwaysHidden || findOptions.FilterMode == FilterMode.OnlyResults;
@@ -124,7 +127,7 @@
         <table id="@Model.Compose("tblResults")" class="sf-search-results">
             <thead class="ui-widget-header ui-corner-top">
                 <tr>
-                    @if (findOptions.AllowMultiple)
+                    @if (findOptions.AllowSelection)
                     {
                         <th class="ui-state-default sf-th-selection">
                             @Html.CheckBox(Model.Compose("cbSelectAll"), false, new { onclick = "{0}.toggleSelectAll()".Formato(searchControl) })
@@ -154,7 +157,7 @@
                 </tr>
             </thead>
             <tbody class="ui-widget-content">
-                @{ int columnsCount = columns.Count + (findOptions.Navigate ? 1 : 0) + (findOptions.AllowMultiple ? 1 : 0); }
+                @{ int columnsCount = columns.Count + (findOptions.Navigate ? 1 : 0) + (findOptions.AllowSelection ? 1 : 0); }
                 <tr>
                     <td colspan="@columnsCount">@JavascriptMessage.noResults.NiceToString()</td>
                 </tr>

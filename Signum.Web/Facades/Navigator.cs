@@ -72,16 +72,6 @@ namespace Signum.Web
             return NavigateRoute(lite.EntityType, lite.Id);
         }
 
-        public static RedirectResult RedirectToEntity(IIdentifiable ie)
-        {
-            return new RedirectResult(NavigateRoute(ie));
-        }
-
-        public static RedirectResult RedirectToEntity(Lite<IIdentifiable> lite)
-        {
-            return new RedirectResult(NavigateRoute(lite));
-        }
-
         public const string FindRouteName = "sfFind";
 
         public static string FindRoute(object queryName)
@@ -174,9 +164,9 @@ namespace Signum.Web
             return Manager.QueryCount(options);
         }
 
-        public static PartialViewResult Search(ControllerBase controller, QueryRequest request, bool allowMultiple, bool navigate, FilterMode filterMode, string prefix)
+        public static PartialViewResult Search(ControllerBase controller, QueryRequest request, bool allowSelection, bool navigate, FilterMode filterMode, string prefix)
         {
-            return Manager.Search(controller, request, allowMultiple, navigate, filterMode, new Context(null, prefix));
+            return Manager.Search(controller, request, allowSelection, navigate, filterMode, new Context(null, prefix));
         }
 
         public static string SearchTitle(object queryName)
@@ -311,9 +301,14 @@ namespace Signum.Web
             return (Lite<T>)Manager.ExtractLite<T>(controller, prefix);
         }
 
-        public static List<Lite<T>> ParseLiteKeys<T>(string commaSeparatedLites) where T : class, IIdentifiable
+        public static List<Lite<T>> ParseLiteKeys<T>(this ControllerBase controller) where T : class, IIdentifiable
         {
-            return commaSeparatedLites.Split(',').Select(Lite.Parse<T>).ToList();
+            return ParseLiteKeys<T>(controller.ControllerContext.RequestContext.HttpContext.Request["liteKeys"]);
+        }
+
+        public static List<Lite<T>> ParseLiteKeys<T>(string liteKeys) where T : class, IIdentifiable
+        {
+            return liteKeys.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(Lite.Parse<T>).ToList();
         }
 
         public static string ResolveWebTypeName(Type type)
@@ -620,7 +615,7 @@ namespace Signum.Web
                 typeContext.ReadOnly = true;
 
             ViewMode mode = viewOptions.ViewMode;
-            controller.ViewData[ViewDataKeys.ViewMode] = mode == ViewMode.View;
+            controller.ViewData[ViewDataKeys.ViewMode] = mode;
             controller.ViewData[ViewDataKeys.ShowOperations] = viewOptions.ShowOperations;
             if (mode == ViewMode.View)
             {
@@ -811,7 +806,7 @@ namespace Signum.Web
                 return QueryUtils.GetNiceName(queryName);
         }
 
-        protected internal virtual PartialViewResult Search(ControllerBase controller, QueryRequest request, bool allowMultiple, bool navigate, FilterMode filterMode, Context context)
+        protected internal virtual PartialViewResult Search(ControllerBase controller, QueryRequest request, bool allowSelection, bool navigate, FilterMode filterMode, Context context)
         {
             if (!Navigator.IsFindable(request.QueryName))
                 throw new UnauthorizedAccessException(NormalControlMessage.ViewForType0IsNotAllowed.NiceToString().Formato(request.QueryName));
@@ -820,7 +815,7 @@ namespace Signum.Web
             
             controller.ViewData.Model = context;
 
-            controller.ViewData[ViewDataKeys.AllowMultiple] = allowMultiple;
+            controller.ViewData[ViewDataKeys.AllowSelection] = allowSelection;
             controller.ViewData[ViewDataKeys.Navigate] = navigate;
             controller.ViewData[ViewDataKeys.FilterMode] = filterMode;
 
@@ -914,7 +909,14 @@ namespace Signum.Web
             if (state.HasText())
                 return Navigator.Manager.DeserializeEntity(state);
 
-            RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(form[TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo)]);
+
+            var key = TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo);
+
+            RuntimeInfo runtimeInfo = RuntimeInfo.FromFormValue(form[key]);
+
+            if (runtimeInfo == null)
+                throw new ArgumentNullException("{0} not found in form request".Formato(key));
+
             if (runtimeInfo.IdOrNull != null)
                 return Database.Retrieve(runtimeInfo.EntityType, runtimeInfo.IdOrNull.Value);
             else
@@ -930,7 +932,7 @@ namespace Signum.Web
             if (!runtimeInfo.IdOrNull.HasValue)
                 throw new ArgumentException("Could not create a Lite without an Id");
 
-            return (Lite<T>)Lite.Create(runtimeInfo.EntityType, runtimeInfo.IdOrNull.Value);
+            return (Lite<T>)runtimeInfo.ToLite();
         }
 
         public event Func<Type, bool> IsCreable;
@@ -1140,6 +1142,26 @@ namespace Signum.Web
 
     public static class JsonAction
     {
+        public static ActionResult RedirectHttpOrAjax(this ControllerBase controller,string url)
+        {
+            if (controller.ControllerContext.HttpContext.Request.IsAjaxRequest())
+                return RedirectAjax(url);
+            else
+                return new RedirectResult(url);
+        }
+
+        public static JsonResult RedirectAjax(string url)
+        {
+            return new JsonResult
+            {
+                Data = new
+                {
+                    result = JsonResultType.url.ToString(),
+                    url = url
+                }
+            };
+        }
+
         public static JsonResult ModelState(ModelStateDictionary dictionary)
         {
             return ModelState(dictionary, null, null); 

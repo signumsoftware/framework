@@ -31,6 +31,7 @@ namespace Signum.Web
                     sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityStrip));
 
                 sb.AddLine(helper.HiddenStaticInfo(entityStrip));
+                sb.AddLine(helper.Hidden(entityStrip.Compose(EntityListBaseKeys.ListPresent), ""));
 
                 //If it's an embeddedEntity write an empty template with index 0 to be used when creating a new item
                 if (entityStrip.ElementType.IsEmbeddedEntity())
@@ -155,7 +156,7 @@ namespace Signum.Web
                                     "sf-line-button sf-view",
                                     new Dictionary<string, object> 
                                 {
-                                    { "onclick", "{0}.view('{1}');".Formato(entityStrip.SFControl(), itemTC.ControlID) },
+                                    { "onclick", "{0}.viewItem_click('{1}');".Formato(entityStrip.SFControl(), itemTC.ControlID) },
                                     { "data-icon",  "ui-icon-circle-arrow-e" },
                                     { "data-text", false } 
                                 }));
@@ -169,7 +170,7 @@ namespace Signum.Web
                                     "sf-line-button sf-remove",
                                     new Dictionary<string, object> 
                                 {
-                                    { "onclick", "{0}.remove('{1}');".Formato(entityStrip.SFControl(), itemTC.ControlID) },
+                                    { "onclick", "{0}.removeItem_click('{1}');".Formato(entityStrip.SFControl(), itemTC.ControlID) },
                                     { "data-icon", "ui-icon-circle-close" }, 
                                     { "data-text", false } 
                                 }));

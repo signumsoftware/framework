@@ -46,13 +46,15 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.getFor = getFor;
 
     function findMany(findOptions) {
-        findOptions.allowMultiple = true;
+        findOptions.allowSelection = true;
+        findOptions.multipleSelection = true;
         return findInternal(findOptions);
     }
     exports.findMany = findMany;
 
     function find(findOptions) {
-        findOptions.allowMultiple = false;
+        findOptions.allowSelection = true;
+        findOptions.multipleSelection = false;
         return findInternal(findOptions).then(function (array) {
             return array == null ? null : array[0];
         });
@@ -71,19 +73,16 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     var div = $("#" + divId);
                     SF.triggerNewContent(div);
 
-                    var sc = exports.getFor(findOptions.prefix);
-
-                    //$.extend(sc.options, findOptions); //Copy all properties (i.e. onOk was not transmitted)
                     $("#" + divId).popup({
                         onOk: function () {
-                            var items = sc.selectedItems();
+                            var items = exports.getFor(findOptions.prefix).selectedItems();
 
                             if (items.length == 0) {
                                 SF.Notify.info(lang.signum.noElementsSelected);
                                 return null;
                             }
 
-                            if (items.length > 1 && !findOptions.allowMultiple) {
+                            if (items.length > 1 && !findOptions.multipleSelection) {
                                 SF.Notify.info(lang.signum.onlyOneElement);
                                 return;
                             }
@@ -133,7 +132,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         var requestData = {
             webQueryName: findOptions.webQueryName,
             elems: findOptions.elems,
-            allowMultiple: findOptions.allowMultiple,
+            allowSelection: findOptions.allowSelection,
             prefix: findOptions.prefix
         };
 
@@ -154,7 +153,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         }
         if (findOptions.filters != null) {
             requestData["filters"] = findOptions.filters.map(function (f) {
-                return f.columnName + "," + FilterOperation[f.operation] + "," + f.value;
+                return f.columnName + "," + FilterOperation[f.operation] + "," + SearchControl.encodeCSV(f.value);
             }).join(";"); //List of filter names "token1,operation1,value1;token2,operation2,value2"
         }
         if (findOptions.orders != null) {
@@ -288,6 +287,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             this.options = $.extend({
                 allowChangeColumns: true,
                 allowOrder: true,
+                allowSelection: true,
                 allowMultiple: true,
                 columnMode: "Add",
                 columns: null,
@@ -524,7 +524,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 }).toArray().join(","),
                 webQueryName: this.options.webQueryName,
                 prefix: this.options.prefix,
-                implementationsKey: $(this.pf("sfEntityTypeNames")).val()
+                implementationsKey: $(this.pf(Entities.Keys.entityTypeNames)).val()
             };
         };
 
@@ -606,7 +606,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             requestData["pagination"] = $(this.pf(this.keys.pagination)).val();
             requestData["elems"] = $(this.pf(this.keys.elems)).val();
             requestData["page"] = ($(this.pf(this.keys.page)).val() || "1");
-            requestData["allowMultiple"] = this.options.allowMultiple;
+            requestData["allowSelection"] = this.options.allowSelection;
             requestData["navigate"] = this.options.navigate;
             requestData["filters"] = this.serializeFilters();
             requestData["filterMode"] = this.options.filterMode;
@@ -621,48 +621,52 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         SearchControl.prototype.requestDataForSearchInUrl = function () {
             var url = "?pagination=" + $(this.pf(this.keys.pagination)).val() + "&elems=" + $(this.pf(this.keys.elems)).val() + "&page=" + $(this.pf(this.keys.page)).val() + "&filters=" + this.serializeFilters() + "&filterMode=Visible" + "&orders=" + this.serializeOrders() + "&columns=" + this.serializeColumns() + "&columnMode=Replace" + "&navigate=" + this.options.navigate;
 
-            if (!this.options.allowMultiple) {
-                url += "&allowMultiple=" + this.options.allowMultiple;
+            if (!this.options.allowSelection) {
+                url += "&allowSelection=" + this.options.allowSelection;
             }
 
             return url;
         };
 
         SearchControl.prototype.serializeFilters = function () {
-            var result = "", self = this;
-            $(this.pf("tblFilters > tbody > tr")).each(function () {
-                result += self.serializeFilter($(this)) + ";";
-            });
-            return result;
+            var _this = this;
+            return $(this.pf("tblFilters > tbody > tr")).toArray().map(function (f) {
+                var $filter = $(f);
+
+                var id = $filter[0].id;
+                var index = id.afterLast("_");
+
+                var selector = $(SF.compose(_this.pf("ddlSelector"), index) + " option:selected", $filter);
+
+                var value = _this.encodeValue($filter, index);
+
+                return $filter.find("td:nth-child(2) > :hidden").val() + "," + selector.val() + "," + value;
+            }).join(";");
         };
 
-        SearchControl.prototype.serializeFilter = function ($filter) {
-            var id = $filter[0].id;
-            var index = id.substring(id.lastIndexOf("_") + 1, id.length);
-
-            var selector = $(SF.compose(this.pf("ddlSelector"), index) + " option:selected", $filter);
-            var value = $(SF.compose(this.pf("value"), index), $filter).val();
-
+        SearchControl.prototype.encodeValue = function ($filter, index) {
             var valBool = $("input:checkbox[id=" + SF.compose(SF.compose(this.options.prefix, "value"), index) + "]", $filter);
-            if (valBool.length > 0) {
-                value = valBool[0].checked;
-            } else {
-                var info = new Entities.RuntimeInfoElement(SF.compose(SF.compose(this.options.prefix, "value"), index));
-                if (info.getElem().length > 0) {
-                    value = info.value().key();
-                }
+            if (valBool.length > 0)
+                return valBool[0].checked;
 
-                //Encode value CSV-ish style
-                var hasQuote = value.indexOf("\"") != -1;
-                if (hasQuote || value.indexOf(",") != -1 || value.indexOf(";") != -1) {
-                    if (hasQuote) {
-                        value = value.replace(/"/g, "\"\"");
-                    }
-                    value = "\"" + value + "\"";
-                }
+            var info = new Entities.RuntimeInfoElement(SF.compose(SF.compose(this.options.prefix, "value"), index));
+            if (info.getElem().length > 0) {
+                var val = info.value();
+                return SearchControl.encodeCSV(val == null ? null : val.key());
             }
 
-            return $filter.find("td:nth-child(2) > :hidden").val() + "," + selector.val() + "," + value;
+            return SearchControl.encodeCSV($(SF.compose(this.pf("value"), index), $filter).val());
+        };
+
+        SearchControl.encodeCSV = function (value) {
+            var hasQuote = value.indexOf("\"") != -1;
+            if (hasQuote || value.indexOf(",") != -1 || value.indexOf(";") != -1) {
+                if (hasQuote)
+                    value = value.replace(/"/g, "\"\"");
+                return "\"" + value + "\"";
+            }
+
+            return value;
         };
 
         SearchControl.prototype.serializeOrders = function () {
@@ -670,20 +674,16 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         SearchControl.prototype.serializeColumns = function () {
-            var result = "";
             var self = this;
-            $(this.pf("tblResults thead tr th:not(.sf-th-entity):not(.sf-th-selection)")).each(function () {
-                var $this = $(this);
+            return $(this.pf("tblResults thead tr th:not(.sf-th-entity):not(.sf-th-selection)")).toArray().map(function (th) {
+                var $this = $(th);
                 var token = $this.find("input:hidden").val();
                 var displayName = $this.text().trim();
-                if (token == displayName) {
-                    result += token;
-                } else {
-                    result += token + "," + displayName;
-                }
-                result += ";";
-            });
-            return result;
+                if (token == displayName)
+                    return token;
+                else
+                    return token + "," + displayName;
+            }).join(";");
         };
 
         SearchControl.prototype.selectedItems = function () {
@@ -695,7 +695,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var self = this;
             selected.each(function (i, v) {
                 var parts = v.value.split("__");
-                var val = new Entities.EntityValue(new Entities.RuntimeInfoValue(parts[1], parseInt(parts[0])), parts[2], $(this).parent().next().children('a').attr('href'));
+                var val = new Entities.EntityValue(new Entities.RuntimeInfoValue(parts[1], parseInt(parts[0]), false), parts[2], $(this).parent().next().children('a').attr('href'));
 
                 items.push(val);
             });
@@ -732,28 +732,26 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         SearchControl.prototype.newSortOrder = function ($th, multiCol) {
             var columnName = $th.find("input:hidden").val();
-            var currentOrders = this.options.orders;
 
-            var indexCurrOrder = $.inArray(columnName, currentOrders);
-            var orderType = 0 /* Ascending */;
-            if (indexCurrOrder === -1) {
-                indexCurrOrder = $.inArray("-" + columnName, currentOrders);
-            } else {
-                orderType = 1 /* Descending */;
-            }
+            var cols = this.options.orders.filter(function (o) {
+                return o.columnName == columnName;
+            });
+            var col = cols.length == 0 ? null : cols[0];
+
+            var oposite = col == null ? 0 /* Ascending */ : col.orderType == 0 /* Ascending */ ? 1 /* Descending */ : 0 /* Ascending */;
 
             if (!multiCol) {
                 this.element.find(".sf-search-results-container th").removeClass("sf-header-sort-up sf-header-sort-down");
-                this.options.orders = [{ columnName: columnName, orderType: orderType }];
+                this.options.orders = [{ columnName: columnName, orderType: oposite }];
             } else {
-                if (indexCurrOrder !== -1) {
-                    this.options.orders[indexCurrOrder] = { columnName: columnName, orderType: orderType };
+                if (col !== null) {
+                    col.orderType = oposite;
                 } else {
-                    this.options.orders.push({ columnName: columnName, orderType: orderType });
+                    this.options.orders.push({ columnName: columnName, orderType: oposite });
                 }
             }
 
-            if (orderType == 1 /* Descending */)
+            if (oposite == 1 /* Descending */)
                 $th.removeClass("sf-header-sort-down").addClass("sf-header-sort-up");
             else
                 $th.removeClass("sf-header-sort-up").addClass("sf-header-sort-down");
@@ -1021,7 +1019,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     if (type == null)
                         return;
 
-                    var runtimeInfo = new Entities.RuntimeInfoValue(type, null);
+                    var runtimeInfo = new Entities.RuntimeInfoValue(type, null, true);
                     if (SF.isEmpty(_this.options.prefix))
                         Navigator.navigate(runtimeInfo);
                     else
@@ -1030,10 +1028,13 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         SearchControl.prototype.getEntityType = function () {
-            var options = $(this.pf(Entities.Keys.entityTypeNames)).val().split(",").map(function (p) {
+            var names = $(this.pf(Entities.Keys.entityTypeNames)).val().split(",");
+            var niceNames = $(this.pf(Entities.Keys.entityTypeNiceNames)).val().split(",");
+
+            var options = names.map(function (p, i) {
                 return ({
-                    type: p.split(';')[0],
-                    toStr: p.split(';')[1]
+                    type: p,
+                    toStr: niceNames[i]
                 });
             });
             if (options.length == 1) {

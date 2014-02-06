@@ -1,4 +1,4 @@
-﻿/// <reference path="globals.ts"/>
+/// <reference path="globals.ts"/>
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -74,7 +74,7 @@ define(["require", "exports"], function(require, exports) {
             if (staticInfo.find().length > 0)
                 return staticInfo;
 
-            return new StaticInfo(prefix.beforeLast("_"));
+            return new StaticInfo(prefix.tryBeforeLast("_") || prefix);
         };
         StaticInfo._types = 0;
         StaticInfo._typeNiceNames = 1;
@@ -117,8 +117,10 @@ define(["require", "exports"], function(require, exports) {
         function EntityHtml(prefix, runtimeInfo, toString, link) {
             _super.call(this, runtimeInfo, toString, link);
 
-            if (this.prefix == null)
+            if (prefix == null)
                 throw new Error("prefix is mandatory for EntityHtml");
+
+            this.prefix = prefix;
         }
         EntityHtml.prototype.assertPrefixAndType = function (prefix, staticInfo) {
             _super.prototype.assertPrefixAndType.call(this, prefix, staticInfo);
@@ -131,14 +133,18 @@ define(["require", "exports"], function(require, exports) {
             return this.html != null && this.html.length != 0;
         };
 
-        EntityHtml.fromHtml = function (prefix, html) {
-            var result = new EntityHtml(prefix, new RuntimeInfoValue("?", null));
-            result.html = $(html);
+        EntityHtml.prototype.loadHtml = function (htmlText) {
+            this.html = $('<div/>').html(htmlText).contents();
+        };
+
+        EntityHtml.fromHtml = function (prefix, htmlText) {
+            var result = new EntityHtml(prefix, new RuntimeInfoValue("?", null, false));
+            result.loadHtml(htmlText);
             return result;
         };
 
         EntityHtml.withoutType = function (prefix) {
-            var result = new EntityHtml(prefix, new RuntimeInfoValue("?", null));
+            var result = new EntityHtml(prefix, new RuntimeInfoValue("?", null, false));
             return result;
         };
         return EntityHtml;
@@ -175,8 +181,7 @@ define(["require", "exports"], function(require, exports) {
             if (SF.isEmpty(key))
                 return null;
 
-            var array = key.split(',');
-            return new RuntimeInfoValue(array[0], parseInt(array[1]), false, null);
+            return new RuntimeInfoValue(key.before(";"), parseInt(key.after(";")), false);
         };
 
         RuntimeInfoValue.prototype.key = function () {
@@ -215,6 +220,7 @@ define(["require", "exports"], function(require, exports) {
         tabId: "sfTabId",
         antiForgeryToken: "__RequestVerificationToken",
         entityTypeNames: "sfEntityTypeNames",
+        entityTypeNiceNames: "sfEntityTypeNiceNames",
         runtimeInfo: "sfRuntimeInfo",
         staticInfo: "sfStaticInfo",
         toStr: "sfToStr",

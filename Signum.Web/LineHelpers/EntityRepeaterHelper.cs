@@ -77,7 +77,7 @@ namespace Signum.Web
                                     "sf-line-button sf-remove",
                                     new Dictionary<string, object> 
                                     {
-                                        { "onclick", "{0}.remove('{1}');".Formato(entityRepeater.SFControl(), itemTC.ControlID) },
+                                        { "onclick", "{0}.removeItem_click('{1}');".Formato(entityRepeater.SFControl(), itemTC.ControlID) },
                                         { "data-icon", "ui-icon-circle-close" }, 
                                         { "data-text", false } 
                                     }));

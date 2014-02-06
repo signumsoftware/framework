@@ -57,8 +57,8 @@ namespace Signum.Entities
         ThereAreRecordsIn0PointingToThisTableByColumn1,
         [Description("Unautorized access to {0} because {1}")]
         UnauthorizedAccessTo0Because1,
-        [Description("There's already a '{0}' with '{1}' {2}")]
-        TheresAlreadyA0With12
+        [Description("There's already a {0} with {1} equals to '{2}'")]
+        TheresAlreadyA0With1EqualsTo2
     }
 
     public enum NormalWindowMessage
@@ -158,10 +158,7 @@ Lose changes?")]
         [Description("{0} - {1} of {2} result[s].")]
         _01of2Results,
         Search,
-        [Description("Create")]
-        Search_Create,
-        [Description("Operations")]
-        Search_CtxMenuItem_Operations,
+        Create,
         [Description("All")]
         SearchControl_Pagination_All,
         SelectAnElement,
@@ -170,7 +167,9 @@ Lose changes?")]
         Value,
         View,
         [Description("View Selected")]
-        ViewSelected
+        ViewSelected,
+        Operations,
+        Processes
     }
 
     public enum SelectorMessage

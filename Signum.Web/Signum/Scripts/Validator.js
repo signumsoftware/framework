@@ -17,7 +17,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
 
         valOptions = $.extend({
             prefix: "",
-            controllerUrl: valOptions.prefix || SF.Urls.validate,
+            controllerUrl: SF.Urls.validate,
             showInlineErrors: true,
             fixedInlineErrorText: "*",
             parentDiv: "",
@@ -50,11 +50,13 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
 
         formValues["prefix"] = valOptions.prefix;
 
-        var staticInfo = Entities.StaticInfo.getFor(valOptions.prefix);
+        if (valOptions.prefix) {
+            var staticInfo = Entities.StaticInfo.getFor(valOptions.prefix);
 
-        if (staticInfo.find().length > 0 && staticInfo.isEmbedded()) {
-            formValues["rootType"] = staticInfo.rootType();
-            formValues["propertyRoute"] = staticInfo.propertyRoute();
+            if (staticInfo.find().length > 0 && staticInfo.isEmbedded()) {
+                formValues["rootType"] = staticInfo.rootType();
+                formValues["propertyRoute"] = staticInfo.propertyRoute();
+            }
         }
 
         return $.extend(formValues, valOptions.requestExtraJsonData);
@@ -64,9 +66,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
         if (!prefix)
             return cleanFormInputs($("form :input")).serializeObject();
 
-        var mainControl = $("#{0}_divNormalControl".format(prefix));
+        var mainControl = $("#{0}_divMainControl".format(prefix));
 
-        var result = cleanFormInputs(mainControl.filter(":input")).serializeObject();
+        var result = cleanFormInputs(mainControl.find(":input")).serializeObject();
 
         result[SF.compose(prefix, Entities.Keys.runtimeInfo)] = mainControl.data("runtimeinfo");
 
@@ -74,10 +76,21 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
     }
     exports.getFormValues = getFormValues;
 
+    function getFormValuesHtml(entityHtml) {
+        var mainControl = entityHtml.html.find("#{0}_divMainControl".format(entityHtml.prefix));
+
+        var result = cleanFormInputs(mainControl.find(":input")).serializeObject();
+
+        result[SF.compose(entityHtml.prefix, Entities.Keys.runtimeInfo)] = mainControl.data("runtimeinfo");
+
+        return $.extend(result, exports.getFormBasics());
+    }
+    exports.getFormValuesHtml = getFormValuesHtml;
+
     function getFormValuesLite(prefix) {
         var result = exports.getFormBasics();
 
-        result[SF.compose(prefix, Entities.Keys.runtimeInfo)] = prefix ? $("#{0}_divNormalControl".format(prefix)).data("runtimeinfo") : $('#' + SF.compose(prefix, Entities.Keys.runtimeInfo)).val();
+        result[SF.compose(prefix, Entities.Keys.runtimeInfo)] = prefix ? $("#{0}_divMainControl".format(prefix)).data("runtimeinfo") : $('#' + SF.compose(prefix, Entities.Keys.runtimeInfo)).val();
 
         return result;
     }

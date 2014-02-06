@@ -22,18 +22,24 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         $.ajax({
             url: viewOptions.controllerUrl,
-            data: requestData(new Entities.EntityHtml(null, runtimeInfo), viewOptions),
+            data: requestData(new Entities.EntityHtml("", runtimeInfo), viewOptions),
             async: false
         });
     }
     exports.navigate = navigate;
 
-    function createTempDiv(entityValue) {
-        var tempDivId = SF.compose(entityValue.prefix, "Temp");
+    function createTempDiv(entityHtml) {
+        var tempDivId = SF.compose(entityHtml.prefix, "Temp");
 
         $("body").append(SF.hiddenDiv(tempDivId, ""));
 
-        return $("#" + tempDivId);
+        var tempDiv = $("#" + tempDivId);
+
+        tempDiv.html(entityHtml.html);
+
+        SF.triggerNewContent(tempDiv);
+
+        return tempDivId;
     }
     exports.createTempDiv = createTempDiv;
 
@@ -46,26 +52,24 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             onPopupLoaded: null
         }, viewOptions);
 
-        if (entityHtml.html != null)
+        if (entityHtml.isLoaded())
             return openNavigatePopup(entityHtml, viewOptions);
 
-        requestHtml(entityHtml, viewOptions).then(function (eHTml) {
+        return requestHtml(entityHtml, viewOptions).then(function (eHTml) {
             return openNavigatePopup(eHTml, viewOptions);
         });
     }
     exports.navigatePopup = navigatePopup;
 
     function openNavigatePopup(entityHtml, viewOptions) {
-        var tempDiv = exports.createTempDiv(entityHtml);
+        var tempDivId = exports.createTempDiv(entityHtml);
 
-        tempDiv.html(entityHtml.html);
-
-        SF.triggerNewContent(tempDiv);
+        var tempDiv = $("#" + tempDivId);
 
         var result = new Promise(function (resolve) {
             tempDiv.popup({
                 onCancel: function () {
-                    tempDiv.remove();
+                    $("#" + tempDivId).remove(); // could be reloaded
 
                     resolve(null);
                 }
@@ -102,7 +106,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 prefix: entityHtml.prefix
             }, viewOptions.validationOptions);
 
-        if (entityHtml.html != null) {
+        if (entityHtml.isLoaded()) {
             if (viewOptions.avoidClone)
                 return openPopupView(entityHtml, viewOptions);
 
@@ -120,9 +124,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.viewPopup = viewPopup;
 
     function openPopupView(entityHtml, viewOptions) {
-        var tempDiv = exports.createTempDiv(entityHtml);
+        var tempDivId = exports.createTempDiv(entityHtml);
 
-        SF.triggerNewContent(tempDiv);
+        var tempDiv = $("#" + tempDivId);
 
         return new Promise(function (resolve) {
             tempDiv.popup({
@@ -139,21 +143,24 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     });
 
                     continuePromise.then(function (result) {
+                        var newTempDiv = $("#" + tempDivId);
+
                         if (result) {
-                            var $mainControl = tempDiv.find(".sf-main-control[data-prefix=" + entityHtml.prefix + "]");
+                            var $mainControl = newTempDiv.find(".sf-main-control[data-prefix=" + entityHtml.prefix + "]");
                             if ($mainControl.length > 0) {
                                 entityHtml.runtimeInfo = Entities.RuntimeInfoValue.parse($mainControl.data("runtimeinfo"));
                             }
 
-                            tempDiv.popup('destroy');
-                            tempDiv.remove();
+                            newTempDiv.popup('restoreTitle');
+                            newTempDiv.popup('destroy');
+                            newTempDiv.remove();
 
                             resolve(entityHtml);
                         }
                     });
                 },
                 onCancel: function () {
-                    tempDiv.remove();
+                    $("#" + tempDivId).remove();
 
                     resolve(null);
                 }
@@ -166,7 +173,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
     function requestAndReload(prefix, options) {
         options = $.extend({
-            controllerUrl: prefix ? SF.Urls.popupView : SF.Urls.normalControl
+            controllerUrl: !prefix ? SF.Urls.normalControl : exports.isNavigatePopup(prefix) ? SF.Urls.popupNavigate : SF.Urls.popupView
         }, options);
 
         return requestHtml(exports.getEmptyEntityHtml(prefix), options).then(function (eHtml) {
@@ -183,9 +190,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         if (!prefix)
             return new Entities.RuntimeInfoElement(prefix).value();
 
-        var mainControl = $("#{0}_divNormalControl".format(prefix));
+        var mainControl = $("#{0}_divMainControl".format(prefix));
 
-        return Entities.RuntimeInfoValue.parse(mainControl.data("runtimeInfo"));
+        return Entities.RuntimeInfoValue.parse(mainControl.data("runtimeinfo"));
     }
     exports.getRuntimeInfoValue = getRuntimeInfoValue;
 
@@ -200,6 +207,30 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         SF.triggerNewContent($elem);
     }
     exports.reloadMain = reloadMain;
+
+    function closePopup(prefix) {
+        var tempDivId = SF.compose(prefix, "Temp");
+
+        var tempDiv = $("#" + tempDivId);
+
+        var popupOptions = tempDiv.popup();
+
+        tempDiv.popup("destroy");
+
+        tempDiv.remove();
+    }
+    exports.closePopup = closePopup;
+
+    function isNavigatePopup(prefix) {
+        var tempDivId = SF.compose(prefix, "Temp");
+
+        var tempDiv = $("#" + tempDivId);
+
+        var popupOptions = tempDiv.popup();
+
+        return popupOptions.onOk == null;
+    }
+    exports.isNavigatePopup = isNavigatePopup;
 
     function reloadPopup(entityHtml) {
         var tempDivId = SF.compose(entityHtml.prefix, "Temp");
@@ -261,8 +292,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 success: resolve,
                 error: reject
             });
-        }).then(function (html) {
-            entityHtml.html = $(html);
+        }).then(function (htmlText) {
+            entityHtml.loadHtml(htmlText);
             return entityHtml;
         });
     }
@@ -337,19 +368,25 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     }
     exports.typeChooser = typeChooser;
 
-    function chooser(prefix, title, options, getStr) {
-        var tempDivId = SF.compose(prefix, "Temp");
+    function chooser(parentPrefix, title, options, getStr, getValue) {
+        var tempDivId = SF.compose(parentPrefix, "Temp");
 
         if (getStr == null) {
             getStr = function (a) {
-                return a.toString ? a.toString() : a.toStr ? a.toStr : a.text ? a.text : a;
+                return a.toStr ? a.toStr : a.text ? a.text : a.toString();
+            };
+        }
+
+        if (getValue == null) {
+            getValue = function (a) {
+                return a.toStr ? a.type : a.text ? a.value : a.toString();
             };
         }
 
         var div = $('<div id="{0}" class="sf-popup-control" data-prefix="{1}" data-title="{2}"></div>'.format(SF.compose(tempDivId, "panelPopup"), tempDivId, title || lang.signum.chooseAValue));
 
         options.forEach(function (o) {
-            return div.append($('<input type="button" class="sf-chooser-button"/>').data("option", o).text(getStr(o)));
+            return div.append($('<button type="button" class="sf-chooser-button"/>').data("option", o).text(getStr(o)));
         });
 
         $("body").append(SF.hiddenDiv(tempDivId, div));

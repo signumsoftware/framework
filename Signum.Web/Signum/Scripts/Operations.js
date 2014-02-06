@@ -108,15 +108,21 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             isLite: true
         }, options);
 
-        exports.entityIsValidOrLite(options).then(function () {
+        return exports.entityIsValidOrLite(options).then(function () {
             return exports.deleteAjax(options);
-        }); //ajax prefilter will take redirect
+        }).then(function () {
+            //ajax prefilter will take redirect
+            if (options.prefix) {
+                Navigator.closePopup(options.prefix);
+            }
+        });
     }
     exports.deleteDefault = deleteDefault;
 
     function deleteAjax(options) {
         options = $.extend({
             controllerUrl: SF.Urls.operationDelete,
+            avoidReturnRedirect: !!options.prefix,
             isLite: true
         }, options);
 
@@ -125,9 +131,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.deleteAjax = deleteAjax;
 
     function deleteDefaultContextual(options) {
-        options = $.extend({
-            avoidReturnRedirect: true
-        }, options);
+        options = $.extend({}, options);
 
         Finder.removeOverlay();
 
@@ -140,6 +144,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     function deleteAjaxContextual(options, runtimeInfo) {
         options = $.extend({
             controllerUrl: SF.Urls.operationDelete,
+            avoidReturnRedirect: true,
             isLite: true
         }, options);
 
@@ -163,6 +168,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
     function constructFromManyAjax(options, newPrefix) {
         options = $.extend({
+            isLite: true,
             controllerUrl: SF.Urls.operationConstructFromMany
         }, options);
 
@@ -204,8 +210,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     }
     exports.notifyExecuted = notifyExecuted;
 
-    function getNewPrefix(optons) {
-        return SF.compose("New", this.options.prefix);
+    function getNewPrefix(options) {
+        return SF.compose(options.prefix, "New");
     }
     exports.getNewPrefix = getNewPrefix;
 
@@ -302,7 +308,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.validateAndSubmit = validateAndSubmit;
 
     function submit(options) {
-        var mainControl = options.prefix ? $("#{0}_divNormalControl".format(options.prefix)) : $("#divNormalControl");
+        var mainControl = options.prefix ? $("#{0}_divMainControl".format(options.prefix)) : $("#divNormalControl");
 
         var $form = mainControl.closest("form");
         $form.append(SF.hiddenInput('isLite', options.isLite) + SF.hiddenInput('operationFullKey', options.operationKey) + SF.hiddenInput("prefix", options.prefix));

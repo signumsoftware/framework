@@ -79,7 +79,8 @@ namespace Signum.Web.Operations
             {
                 string newUrl = Navigator.NavigateRoute(entity);
                 if (!request.UrlReferrer.AbsolutePath.Contains(newUrl) && !request[ViewDataKeys.AvoidReturnRedirect].HasText())
-                     return new RedirectResult(newUrl);
+                    return controller.RedirectHttpOrAjax(newUrl);
+
 
                 if (request.IsAjaxRequest())
                     return Navigator.NormalControl(controller, entity);
@@ -93,7 +94,7 @@ namespace Signum.Web.Operations
             var request = controller.ControllerContext.HttpContext.Request;
 
             if (!request[ViewDataKeys.AvoidReturnRedirect].HasText())
-                return new RedirectResult(Navigator.FindRoute(type));
+                return controller.RedirectHttpOrAjax(Navigator.FindRoute(type));
 
             return new ContentResult(); 
         }
@@ -116,7 +117,7 @@ namespace Signum.Web.Operations
             else //NormalWindow
             {
                 if (!entity.IsNew && !request[ViewDataKeys.AvoidReturnRedirect].HasText())
-                    return new RedirectResult(Navigator.NavigateRoute(entity));
+                    return controller.RedirectHttpOrAjax(Navigator.NavigateRoute(entity));
 
                 if (request.IsAjaxRequest())
                     return Navigator.NormalControl(controller, entity);
@@ -347,7 +348,7 @@ namespace Signum.Web.Operations
                      CanExecute = OperationDN.NotDefinedFor(g.Key, types.Except(g.Select(a => a.t)))
                  }
                  where os == null || os.IsVisible == null || os.IsVisible(coc)
-                 select CreateContextual(coc))
+                 select CreateContextual(coc, _ => new JsOperationFunction(JsOperationFunction.OperationsModule, "constructFromManyDefault")))
                  .OrderBy(a => a.Order)
                  .ToList();
 
@@ -361,13 +362,13 @@ namespace Signum.Web.Operations
 
                 content.AddLine(new HtmlTag("li")
                     .Class(ctxItemClass + " sf-search-ctxitem-header")
-                    .InnerHtml(new HtmlTag("span").InnerHtml(SearchMessage.Search_CtxMenuItem_Operations.NiceToString().EncodeHtml())));
+                    .InnerHtml(new HtmlTag("span").InnerHtml(SearchMessage.Create.NiceToString().EncodeHtml())));
 
                 foreach (var operation in operations)
                 {
                     content.AddLine(new HtmlTag("li")
                         .Class(ctxItemClass)
-                        .InnerHtml(IndividualOperationToString(operation)));
+                        .InnerHtml(ContextualOperationLink(operation)));
                 }
             }
 
@@ -416,7 +417,7 @@ namespace Signum.Web.Operations
                 }
             }
 
-            List<ContextualItem> buttons = context.Select(coc => CreateContextual(coc)).OrderBy(a => a.Order).ToList();
+            List<ContextualItem> buttons = context.Select(coc => CreateContextual(coc, DefaultEntityClick)).OrderBy(a => a.Order).ToList();
 
             HtmlStringBuilder content = new HtmlStringBuilder();
             using (content.Surround(new HtmlTag("ul").Class("sf-search-ctxmenu-operations")))
@@ -426,14 +427,14 @@ namespace Signum.Web.Operations
                 content.AddLine(new HtmlTag("li")
                     .Class(ctxItemClass + " sf-search-ctxitem-header")
                     .InnerHtml(
-                        new HtmlTag("span").InnerHtml(SearchMessage.Search_CtxMenuItem_Operations.NiceToString().EncodeHtml()))
+                        new HtmlTag("span").InnerHtml(SearchMessage.Operations.NiceToString().EncodeHtml()))
                     );
 
                 foreach (var operation in buttons)
                 {
                     content.AddLine(new HtmlTag("li")
                         .Class(ctxItemClass)
-                        .InnerHtml(IndividualOperationToString(operation)));
+                        .InnerHtml(ContextualOperationLink(operation)));
                 }
             }
 
@@ -444,8 +445,22 @@ namespace Signum.Web.Operations
             };
         }
 
+        protected virtual JsOperationFunction DefaultEntityClick(ContextualOperationContext ctx)
+        {
+            switch (ctx.OperationInfo.OperationType)
+            {
+                case OperationType.Execute:
+                    return new JsOperationFunction(JsOperationFunction.OperationsModule, "executeDefaultContextual");
+                case OperationType.Delete:
+                    return new JsOperationFunction(JsOperationFunction.OperationsModule, "deleteDefaultContextual");
+                case OperationType.ConstructorFrom:
+                    return new JsOperationFunction(JsOperationFunction.OperationsModule, "constructFromDefaultContextual");
+                default:
+                    throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".Formato(ctx.OperationInfo.OperationType.ToString(), MultiEnumDN.UniqueKey(ctx.OperationInfo.Key)));
+            }
+        }
 
-        public virtual MvcHtmlString IndividualOperationToString(ContextualItem oci)
+        public virtual MvcHtmlString ContextualOperationLink(ContextualItem oci)
         {
             if (oci.Enabled)
                 oci.HtmlProps.Add("onclick", oci.OnClick);
@@ -458,7 +473,7 @@ namespace Signum.Web.Operations
                         .ToHtml();
         }
 
-        public virtual ContextualItem CreateContextual(ContextualOperationContext ctx)
+        public virtual ContextualItem CreateContextual(ContextualOperationContext ctx, Func<ContextualOperationContext, JsOperationFunction> defaultClick)
         {
             return new ContextualItem
             {
@@ -475,25 +490,10 @@ namespace Signum.Web.Operations
 
                 Text = ctx.OperationSettings.TryCC(o => o.Text) ?? ctx.OperationInfo.Key.NiceToString(),
                 OnClick = ((ctx.OperationSettings != null && ctx.OperationSettings.OnClick != null) ? ctx.OperationSettings.OnClick(ctx) :
-                        DefaultClick(ctx)).SetOptions(ctx.Options())
+                        defaultClick(ctx)).SetOptions(ctx.Options())
             };
         }
 
-        protected virtual JsOperationFunction DefaultClick(ContextualOperationContext ctx)
-        {
-            switch (ctx.OperationInfo.OperationType)
-            {
-                case OperationType.Execute:
-                    return new JsOperationFunction(JsOperationFunction.OperationsModule, "executeDefaultContextal");
-                case OperationType.Delete:
-                    return new JsOperationFunction(JsOperationFunction.OperationsModule, "deleteDefaultContextual");
-                case OperationType.ConstructorFrom:
-                    return new JsOperationFunction(JsOperationFunction.OperationsModule, "constructFromDefaultContextual");
-                case OperationType.ConstructorFromMany:
-                    return new JsOperationFunction(JsOperationFunction.OperationsModule, "constructFromManyDefault");
-                default:
-                    throw new InvalidOperationException("Invalid Operation Type '{0}' in the construction of the operation '{1}'".Formato(ctx.OperationInfo.OperationType.ToString(), MultiEnumDN.UniqueKey(ctx.OperationInfo.Key)));
-            }
-        }
+        
     }
 }

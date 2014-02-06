@@ -46,11 +46,11 @@ namespace Signum.Web
             fo.OrderOptions = ExtractOrderOptions(controllerContext.HttpContext, queryDescription);
             fo.ColumnOptions = ExtractColumnsOptions(controllerContext.HttpContext, queryDescription);
 
-            if (parameters.AllKeys.Contains("allowMultiple"))
+            if (parameters.AllKeys.Contains("allowSelection"))
             {
                 bool aux;
-                if (bool.TryParse(parameters["allowMultiple"], out aux))
-                    fo.AllowMultiple = aux;
+                if (bool.TryParse(parameters["allowSelection"], out aux))
+                    fo.AllowSelection = aux;
             }
 
             if (parameters.AllKeys.Contains("allowChangeColumns"))
@@ -96,9 +96,9 @@ namespace Signum.Web
             return fo;
         }
 
-        //name1,operation1,value1;name2,operation2,value2; being values CSV encoded
+        //name1,operation1,value1;name2,operation2,value2 being values CSV encoded
         internal static Regex FilterRegex = new Regex(
-            "(?<token>[^;,]+),(?<op>[^;,]+),(?<value>'(?:[^']+|'')*'|[^;,]*);".Replace('\'', '"'),
+            "(?<token>[^;,]+),(?<op>[^;,]+),(?<value>'(?:[^']+|'')*'|[^;,]*)(;|$)".Replace('\'', '"'),
             RegexOptions.Multiline | RegexOptions.ExplicitCapture);
 
         public static List<FilterOption> ExtractFilterOptions(HttpContextBase httpContext, QueryDescription qd, bool canAggregate = false)
@@ -131,7 +131,7 @@ namespace Signum.Web
 
         //order1,-order2; minus symbol indicating descending
         internal static Regex OrderRegex = new Regex(
-            "(?<token>-?[^;,]+);".Replace('\'', '"'),
+            "(?<token>-?[^;,]+)(;|$)".Replace('\'', '"'),
             RegexOptions.Multiline | RegexOptions.ExplicitCapture);
 
         public static List<OrderOption> ExtractOrderOptions(HttpContextBase httpContext, QueryDescription qd, bool canAggregate = false)
@@ -162,7 +162,7 @@ namespace Signum.Web
 
         //columnName1,displayName1;columnName2,displayName2; being displayNames CSV encoded
         internal static Regex ColumnRegex = new Regex(
-            "(?<token>[^;,]+)(,(?<name>'(?:[^']+|'')*'|[^;,]*))?;".Replace('\'', '"'),
+            "(?<token>[^;,]+)(,(?<name>'(?:[^']+|'')*'|[^;,]*))?(;|$)".Replace('\'', '"'),
             RegexOptions.Multiline | RegexOptions.ExplicitCapture);
 
         public static List<ColumnOption> ExtractColumnsOptions(HttpContextBase httpContext, QueryDescription qd, bool canAggregate = false)

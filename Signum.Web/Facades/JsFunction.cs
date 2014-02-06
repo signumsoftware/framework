@@ -49,9 +49,9 @@ namespace Signum.Web
 
         protected static string VarName(string module)
         {
-            var result = module.AfterLast(".") ?? module;
+            var result = module.TryAfterLast(".") ?? module;
 
-            return result.AfterLast("/") ?? result;
+            return result.TryAfterLast("/") ?? result;
         }
 
         public string ToHtmlString()

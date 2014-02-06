@@ -384,15 +384,15 @@ namespace Signum.Web
             if (ctx.Inputs.TryGetValue(EntityBaseKeys.RuntimeInfo, out strRuntimeInfo))
             {
                 if (!DisambiguateRuntimeInfo)
-                    return RuntimeInfo.FromFormValue(strRuntimeInfo).EntityType;
+                    return RuntimeInfo.FromFormValue(strRuntimeInfo).TryCC(ri => ri.EntityType);
                 else
                 {
-                    RuntimeInfo ri = strRuntimeInfo.Split(',')
+                    RuntimeInfo runtimeInfo = strRuntimeInfo.Split(',')
                         .Select(r => RuntimeInfo.FromFormValue(r))
                         .OrderBy(a => !a.ToLite().RefersTo((IdentifiableEntity)(object)ctx.Value))
                         .FirstEx();
 
-                    return ri.EntityType;
+                    return runtimeInfo.TryCC(ri => ri.EntityType);
                 }
             }
             else
@@ -671,7 +671,7 @@ namespace Signum.Web
                     .FirstEx();
             }
 
-            if (runtimeInfo.EntityType == null)
+            if (runtimeInfo == null)
                 return null;
 
             if (typeof(T).IsEmbeddedEntity())
@@ -871,7 +871,7 @@ namespace Signum.Web
 
             Lite<S> lite = (Lite<S>)ctx.Value;
 
-            if (runtimeInfo.EntityType == null)
+            if (runtimeInfo == null)
                 return null;
 
             if (runtimeInfo.IsNew)

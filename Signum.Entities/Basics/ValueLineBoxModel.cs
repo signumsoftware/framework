@@ -15,20 +15,11 @@ namespace Signum.Web
         {
         }
 
-        public ValueLineBoxModel(ModifiableEntity relatedEntity, ValueLineBoxType boxType, string fieldName, string topText)
+        public ValueLineBoxModel(ValueLineBoxType boxType, string fieldName, string topText)
         {
-            related = relatedEntity;
             this.boxType = boxType;
             this.fieldName = fieldName;
             this.topText = topText;
-        }
-
-        ModifiableEntity related;
-        [NotNullValidator]
-        public ModifiableEntity Related
-        {
-            get { return related; }
-            set { Set(ref related, value, () => Related); }
         }
 
         string topText;

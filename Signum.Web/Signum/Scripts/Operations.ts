@@ -112,27 +112,33 @@ export function constructFromAjaxContextual(options: OperationOptions, newPrefix
         .then(html=> Entities.EntityHtml.fromHtml(newPrefix, html));
 }
 
-export function deleteDefault(options: EntityOperationOptions): void {
+export function deleteDefault(options: EntityOperationOptions) : Promise <void> {
     options = $.extend({
         avoidValidate: true,
-        isLite: true
+        isLite: true,
     }, options);
 
-    entityIsValidOrLite(options).then(() => deleteAjax(options)); //ajax prefilter will take redirect
+    return entityIsValidOrLite(options).then(() => deleteAjax(options)).then(() => {
+        //ajax prefilter will take redirect
+        if (options.prefix) {
+            Navigator.closePopup(options.prefix);
+        }
+    });
 }
 
 export function deleteAjax(options: EntityOperationOptions): Promise<any> {
     options = $.extend({
         controllerUrl: SF.Urls.operationDelete,
-        isLite: true
+        avoidReturnRedirect: !!options.prefix,
+        isLite: true,
     }, options);
 
-    return SF.ajaxPost({ url: options.controllerUrl, data: entityRequestData(options) }); //ajax prefilter will take redirect
+    return SF.ajaxPost({ url: options.controllerUrl, data: entityRequestData(options) })
 }
 
 export function deleteDefaultContextual(options: OperationOptions): Promise<any> {
     options = $.extend({
-        avoidReturnRedirect: true,
+        
     }, options);
 
     Finder.removeOverlay();
@@ -145,6 +151,7 @@ export function deleteDefaultContextual(options: OperationOptions): Promise<any>
 export function deleteAjaxContextual(options: EntityOperationOptions, runtimeInfo?: Entities.RuntimeInfoValue): Promise<any> {
     options = $.extend({
         controllerUrl: SF.Urls.operationDelete,
+        avoidReturnRedirect: true,
         isLite: true
     }, options);
 
@@ -167,6 +174,7 @@ export function constructFromManyDefault(options: OperationOptions, newPrefix?: 
 
 export function constructFromManyAjax(options: OperationOptions, newPrefix?: string): Promise<Entities.EntityHtml> {
     options = $.extend({
+        isLite: true,
         controllerUrl: SF.Urls.operationConstructFromMany,
     }, options);
 
@@ -204,8 +212,8 @@ export function notifyExecuted() {
     SF.Notify.info(lang.signum.executed, 2000);
 }
 
-export function getNewPrefix(optons: OperationOptions) {
-    return SF.compose("New", this.options.prefix);
+export function getNewPrefix(options: OperationOptions) {
+    return SF.compose(options.prefix, "New");
 }
 
 export function entityRequestData(options: EntityOperationOptions, newPrefix?: string): FormData {
@@ -301,7 +309,7 @@ export function validateAndSubmit(options: EntityOperationOptions) {
 
 export function submit(options: EntityOperationOptions) {
 
-    var mainControl = options.prefix ? $("#{0}_divNormalControl".format(options.prefix)) : $("#divNormalControl")
+    var mainControl = options.prefix ? $("#{0}_divMainControl".format(options.prefix)) : $("#divNormalControl")
 
     var $form = mainControl.closest("form");
     $form.append(SF.hiddenInput('isLite', options.isLite) +

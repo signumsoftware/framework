@@ -103,11 +103,11 @@ namespace Signum.Web.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult ConstructFromMany(string operationFullKey, string liteKeys, string newPrefix)
+        public ActionResult ConstructFromMany(string operationFullKey, string newPrefix)
         {
             Enum operationKey = OperationClient.GetOperationKeyAssert(operationFullKey);
 
-            var lites = Navigator.ParseLiteKeys<IdentifiableEntity>(liteKeys);
+            var lites = this.ParseLiteKeys<IdentifiableEntity>();
 
             IdentifiableEntity entity = OperationLogic.ServiceConstructFromMany(lites, lites.First().EntityType, operationKey);
 

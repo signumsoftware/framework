@@ -8,14 +8,14 @@
    var entityColumn = queryDescription.Columns.SingleEx(a => a.IsEntity);
    Implementations implementations = entityColumn.Implementations.Value;
    bool navigable = (bool)ViewData[ViewDataKeys.Navigate] && (implementations.IsByAll ? true : implementations.Types.Any(t => Navigator.IsNavigable(t, null, isSearchEntity: true)));
-   bool allowMultiple = (bool)ViewData[ViewDataKeys.AllowMultiple];
+   bool allowSelection = (bool)ViewData[ViewDataKeys.AllowSelection];
 
    FilterMode filterMode = (FilterMode)ViewData[ViewDataKeys.FilterMode];
    
    ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
    Dictionary<int, CellFormatter> formatters = (Dictionary<int, CellFormatter>)ViewData[ViewDataKeys.Formatters];
 
-   int columnsCount = queryResult.Columns.Count() + (navigable ? 1 : 0) + (allowMultiple ? 1 : 0);
+   int columnsCount = queryResult.Columns.Count() + (navigable ? 1 : 0) + (allowSelection ? 1 : 0);
 }
 
 @if (ViewData.ContainsKey(ViewDataKeys.MultipliedMessage))
@@ -32,7 +32,7 @@
 {
     Lite<IIdentifiable> entityField = row.Entity;
     <tr data-entity="@entityField.Key()">
-        @if (allowMultiple)
+        @if (allowSelection)
         {
             <td>
                 @Html.CheckBox(

@@ -1,4 +1,4 @@
-﻿/// <reference path="globals.ts"/>
+/// <reference path="globals.ts"/>
 
 export class StaticInfo {
     static _types = 0;
@@ -79,7 +79,7 @@ export class StaticInfo {
         if (staticInfo.find().length > 0)
             return staticInfo;
 
-        return new StaticInfo(prefix.beforeLast("_"));  //If List => use parent
+        return new StaticInfo(prefix.tryBeforeLast("_") || prefix);  //If List => use parent
     }
 }
 
@@ -121,8 +121,10 @@ export class EntityHtml extends EntityValue {
     constructor(prefix: string, runtimeInfo: RuntimeInfoValue, toString?: string, link?: string) {
         super(runtimeInfo, toString, link);
 
-        if (this.prefix == null)
+        if (prefix == null)
             throw new Error("prefix is mandatory for EntityHtml");
+
+        this.prefix = prefix; 
     }
 
     assertPrefixAndType(prefix: string, staticInfo: StaticInfo) {
@@ -137,14 +139,18 @@ export class EntityHtml extends EntityValue {
         return this.html != null && this.html.length != 0;
     }
 
-    static fromHtml(prefix: string, html: string): EntityHtml {
-        var result = new EntityHtml(prefix, new RuntimeInfoValue("?", null));
-        result.html = $(html);
+    loadHtml(htmlText: string) {
+        this.html = $('<div/>').html(htmlText).contents();
+    }
+
+    static fromHtml(prefix: string, htmlText: string): EntityHtml {
+        var result = new EntityHtml(prefix, new RuntimeInfoValue("?", null, false));
+        result.loadHtml(htmlText);
         return result;
     }
 
     static withoutType(prefix: string): EntityHtml {
-        var result = new EntityHtml(prefix, new RuntimeInfoValue("?", null));
+        var result = new EntityHtml(prefix, new RuntimeInfoValue("?", null, false));
         return result;
     }
 }
@@ -157,7 +163,7 @@ export class RuntimeInfoValue {
     isNew: boolean;
     ticks: number;
 
-    constructor(entityType: string, id: number, isNew?: boolean, ticks?: number) {
+    constructor(entityType: string, id: number, isNew: boolean, ticks?: number) {
         if (SF.isEmpty(entityType))
             throw new Error("entityTyp is mandatory for RuntimeInfoValue");
 
@@ -190,11 +196,10 @@ export class RuntimeInfoValue {
         if (SF.isEmpty(key))
             return null;
 
-        var array = key.split(',');
         return new RuntimeInfoValue(
-            array[0],
-            parseInt(array[1]),
-            false, null);
+            key.before(";"),
+            parseInt(key.after(";")),
+            false);
     }
 
     key(): string {
@@ -208,7 +213,7 @@ export class RuntimeInfoValue {
 export class RuntimeInfoElement {
 
     prefix: string;
-    $elem: JQuery;
+    private $elem: JQuery;
 
     constructor(prefix: string) {
         this.prefix = prefix;
@@ -235,6 +240,7 @@ export var Keys = {
     antiForgeryToken: "__RequestVerificationToken",
 
     entityTypeNames: "sfEntityTypeNames",
+    entityTypeNiceNames: "sfEntityTypeNiceNames",
 
     runtimeInfo: "sfRuntimeInfo",
     staticInfo: "sfStaticInfo",

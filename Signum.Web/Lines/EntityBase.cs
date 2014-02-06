@@ -171,7 +171,7 @@ namespace Signum.Web
              (", " + Arguments.EmptyIfNull().ToString(a => JsonConvert.SerializeObject(a, JsonSerializerSettings), ", ")));
 
             return "require(['" + lineInfo.Module + "', '" + Module + "'], function(" + varLines + ", " + varModule + ") { " +
-                varModule + "." + FunctionName + "(" + NewLine(varLines, lineInfo) + args + "; });";
+                varModule + "." + FunctionName + "(" + NewLine(varLines, lineInfo) + args + "); });";
         }
 
         public static string BasicConstructor(LineInfo lineInfo)

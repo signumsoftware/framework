@@ -6,7 +6,8 @@ import Navigator = require("Framework/Signum.Web/Signum/Scripts/Navigator")
 export interface FindOptions {
     allowChangeColumns?: boolean;
     allowOrder?: boolean;
-    allowMultiple?: boolean;
+    allowSelection?: boolean;
+    multipleSelection?: boolean;
     columnMode?: ColumnOptionsMode;
     columns?: ColumnOption[]; 
     create?: boolean;
@@ -81,12 +82,14 @@ export function getFor(prefix: string): SearchControl {
 }
 
 export function findMany(findOptions: FindOptions): Promise<Array<Entities.EntityValue>> {
-    findOptions.allowMultiple = true;
+    findOptions.allowSelection = true;
+    findOptions.multipleSelection = true;
     return findInternal(findOptions);
 }
 
 export function find(findOptions: FindOptions): Promise<Entities.EntityValue> {
-    findOptions.allowMultiple = false;
+    findOptions.allowSelection = true;
+    findOptions.multipleSelection = false;
     return findInternal(findOptions).then(array=> array == null ? null : array[0]);
 }
 
@@ -101,21 +104,18 @@ function findInternal(findOptions: FindOptions): Promise<Array<Entities.EntityVa
                 $("body").append(SF.hiddenDiv(divId, popupHtml));
                 var div = $("#" + divId);
                 SF.triggerNewContent(div);
-
-                var sc = getFor(findOptions.prefix)
-
-                    //$.extend(sc.options, findOptions); //Copy all properties (i.e. onOk was not transmitted)
+                   
                 $("#" + divId).popup({
                     onOk: function () {
 
-                        var items = sc.selectedItems();
+                        var items = getFor(findOptions.prefix).selectedItems();
 
                         if (items.length == 0) {
                             SF.Notify.info(lang.signum.noElementsSelected);
                             return null;
                         }
 
-                        if (items.length > 1 && !findOptions.allowMultiple) {
+                        if (items.length > 1 && !findOptions.multipleSelection) {
                             SF.Notify.info(lang.signum.onlyOneElement);
                             return;
                         }
@@ -158,7 +158,7 @@ export function requestDataForOpenFinder(findOptions: FindOptions, isExplore : b
     var requestData = {
         webQueryName: findOptions.webQueryName,
         elems: findOptions.elems,
-        allowMultiple: findOptions.allowMultiple,
+        allowSelection: findOptions.allowSelection,
         prefix: findOptions.prefix
     };
 
@@ -178,7 +178,7 @@ export function requestDataForOpenFinder(findOptions: FindOptions, isExplore : b
         requestData["allowChangeColumns"] = findOptions.allowChangeColumns;
     }
     if (findOptions.filters != null) {
-        requestData["filters"] = findOptions.filters.map(f=> f.columnName + "," + FilterOperation[f.operation] + "," + f.value).join(";");//List of filter names "token1,operation1,value1;token2,operation2,value2"
+        requestData["filters"] = findOptions.filters.map(f=> f.columnName + "," + FilterOperation[f.operation] + "," + SearchControl.encodeCSV(f.value)).join(";");//List of filter names "token1,operation1,value1;token2,operation2,value2"
     }
     if (findOptions.orders != null) {
         requestData["orders"] = serializeOrders(findOptions.orders);
@@ -315,6 +315,7 @@ export class SearchControl {
         this.options = $.extend({
             allowChangeColumns: true,
             allowOrder: true,
+            allowSelection: true,
             allowMultiple: true,
             columnMode: "Add",
             columns: null,
@@ -553,7 +554,7 @@ export class SearchControl {
             liteKeys: this.element.find(".sf-td-selection:checked").closest("tr").map(function () { return $(this).data("entity"); }).toArray().join(","),
             webQueryName: this.options.webQueryName,
             prefix: this.options.prefix,
-            implementationsKey: $(this.pf("sfEntityTypeNames")).val()
+            implementationsKey: $(this.pf(Entities.Keys.entityTypeNames)).val()
         };
     }
 
@@ -637,7 +638,7 @@ export class SearchControl {
         requestData["pagination"] = $(this.pf(this.keys.pagination)).val();
         requestData["elems"] = $(this.pf(this.keys.elems)).val();
         requestData["page"] = ($(this.pf(this.keys.page)).val() || "1");
-        requestData["allowMultiple"] = this.options.allowMultiple;
+        requestData["allowSelection"] = this.options.allowSelection;
         requestData["navigate"] = this.options.navigate;
         requestData["filters"] = this.serializeFilters();
         requestData["filterMode"] = this.options.filterMode;
@@ -660,50 +661,53 @@ export class SearchControl {
             "&columnMode=Replace" +
             "&navigate=" + this.options.navigate;
 
-        if (!this.options.allowMultiple) {
-            url += "&allowMultiple=" + this.options.allowMultiple;
+        if (!this.options.allowSelection) {
+            url += "&allowSelection=" + this.options.allowSelection;
         }
 
         return url;
     }
 
     serializeFilters() {
-        var result = "", self = this;
-        $(this.pf("tblFilters > tbody > tr")).each(function () {
-            result += self.serializeFilter($(this)) + ";";
-        });
-        return result;
+
+        return $(this.pf("tblFilters > tbody > tr")).toArray().map(f=> {
+            var $filter = $(f);
+
+            var id = $filter[0].id;
+            var index = id.afterLast("_");
+
+            var selector = $(SF.compose(this.pf("ddlSelector"), index) + " option:selected", $filter);
+
+            var value = this.encodeValue($filter, index);
+
+            return $filter.find("td:nth-child(2) > :hidden").val() + "," + selector.val() + "," + value;
+        }).join(";");
     }
 
-
-    serializeFilter($filter) {
-        var id = $filter[0].id;
-        var index = id.substring(id.lastIndexOf("_") + 1, id.length);
-
-        var selector = $(SF.compose(this.pf("ddlSelector"), index) + " option:selected", $filter);
-        var value = $(SF.compose(this.pf("value"), index), $filter).val();
-
+    encodeValue($filter: JQuery, index: string) {
         var valBool = $("input:checkbox[id=" + SF.compose(SF.compose(this.options.prefix, "value"), index) + "]", $filter); //it's a checkbox
-        if (valBool.length > 0) {
-            value = (<HTMLInputElement> valBool[0]).checked;
-        }
-        else {
-            var info = new Entities.RuntimeInfoElement(SF.compose(SF.compose(this.options.prefix, "value"), index));
-            if (info.getElem().length > 0) { //If it's a Lite, the value is the Id
-                value = info.value().key();
-            }
+        if (valBool.length > 0)
+            return (<HTMLInputElement> valBool[0]).checked;
 
-            //Encode value CSV-ish style
-            var hasQuote = value.indexOf("\"") != -1;
-            if (hasQuote || value.indexOf(",") != -1 || value.indexOf(";") != -1) {
-                if (hasQuote) {
-                    value = value.replace(/"/g, "\"\"");
-                }
-                value = "\"" + value + "\"";
-            }
+        var info = new Entities.RuntimeInfoElement(SF.compose(SF.compose(this.options.prefix, "value"), index));
+        if (info.getElem().length > 0) { //If it's a Lite, the value is the Id
+            var val = info.value(); 
+            return SearchControl.encodeCSV(val == null ? null : val.key());
         }
 
-        return $filter.find("td:nth-child(2) > :hidden").val() + "," + selector.val() + "," + value;
+        return SearchControl.encodeCSV($(SF.compose(this.pf("value"), index), $filter).val());
+
+    }
+
+    static encodeCSV(value: string) {
+        var hasQuote = value.indexOf("\"") != -1;
+        if (hasQuote || value.indexOf(",") != -1 || value.indexOf(";") != -1) {
+            if (hasQuote)
+                value = value.replace(/"/g, "\"\"");
+            return "\"" + value + "\"";
+        }
+
+        return value;
     }
 
     serializeOrders() {
@@ -711,21 +715,16 @@ export class SearchControl {
     }
 
     serializeColumns() {
-        var result = "";
         var self = this;
-        $(this.pf("tblResults thead tr th:not(.sf-th-entity):not(.sf-th-selection)")).each(function () {
-            var $this = $(this);
+        return $(this.pf("tblResults thead tr th:not(.sf-th-entity):not(.sf-th-selection)")).toArray().map(th=> {
+            var $this = $(th);
             var token = $this.find("input:hidden").val();
             var displayName = $this.text().trim();
-            if (token == displayName) {
-                result += token;
-            }
-            else {
-                result += token + "," + displayName;
-            }
-            result += ";";
-        });
-        return result;
+            if (token == displayName)
+                return token;
+            else
+                return token + "," + displayName;
+        }).join(";");
     }
 
     selectedItems(): Array<Entities.EntityValue> {
@@ -737,7 +736,7 @@ export class SearchControl {
         var self = this;
         selected.each(function (i, v) {
             var parts = (<HTMLInputElement>v).value.split("__");
-            var val = new Entities.EntityValue(new Entities.RuntimeInfoValue(parts[1], parseInt(parts[0])),
+            var val = new Entities.EntityValue(new Entities.RuntimeInfoValue(parts[1], parseInt(parts[0]), false),
                 parts[2],
                 $(this).parent().next().children('a').attr('href'));
 
@@ -775,31 +774,29 @@ export class SearchControl {
 
     newSortOrder($th : JQuery, multiCol : boolean) {
         var columnName = $th.find("input:hidden").val();
-        var currentOrders = this.options.orders;
+        
+        var cols = this.options.orders.filter(o=> o.columnName == columnName);
+        var col = cols.length == 0 ? null : cols[0];
 
-        var indexCurrOrder = $.inArray(columnName, currentOrders);
-        var orderType = OrderType.Ascending;
-        if (indexCurrOrder === -1) {
-            indexCurrOrder = $.inArray("-" + columnName, currentOrders);
-        }
-        else {
-            orderType = OrderType.Descending;
-        }
+
+        var oposite = col == null ? OrderType.Ascending :
+            col.orderType == OrderType.Ascending ? OrderType.Descending : OrderType.Ascending;
+     
 
         if (!multiCol) {
             this.element.find(".sf-search-results-container th").removeClass("sf-header-sort-up sf-header-sort-down");
-            this.options.orders = [{ columnName: columnName, orderType: orderType }];
+            this.options.orders = [{ columnName: columnName, orderType: oposite }];
         }
         else {
-            if (indexCurrOrder !== -1) {
-                this.options.orders[indexCurrOrder] = { columnName: columnName, orderType: orderType };
+            if (col !== null) {
+                col.orderType = oposite;
             }
             else {
-                this.options.orders.push({ columnName: columnName, orderType: orderType });
+                this.options.orders.push({ columnName: columnName, orderType: oposite });
             }
         }
 
-        if (orderType == OrderType.Descending)
+        if (oposite == OrderType.Descending)
             $th.removeClass("sf-header-sort-down").addClass("sf-header-sort-up");
         else
             $th.removeClass("sf-header-sort-up").addClass("sf-header-sort-down");
@@ -1070,7 +1067,7 @@ export class SearchControl {
                 if (type == null)
                     return;
 
-                var runtimeInfo = new Entities.RuntimeInfoValue(type, null);
+                var runtimeInfo = new Entities.RuntimeInfoValue(type, null, true);
                 if (SF.isEmpty(this.options.prefix))
                     Navigator.navigate(runtimeInfo);
                 else
@@ -1079,9 +1076,12 @@ export class SearchControl {
     }
 
     getEntityType(): Promise<string> {
-        var options = (<string>$(this.pf(Entities.Keys.entityTypeNames)).val()).split(",").map(p=> ({
-            type: p.split(';')[0],
-            toStr: p.split(';')[1]
+        var names = (<string>$(this.pf(Entities.Keys.entityTypeNames)).val()).split(","); 
+        var niceNames = (<string>$(this.pf(Entities.Keys.entityTypeNiceNames)).val()).split(","); 
+
+        var options = names.map((p, i)=> ({
+            type: p,
+            toStr: niceNames[i]
         }));
         if (options.length == 1) {
             return Promise.resolve(options[0].type);

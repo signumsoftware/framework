@@ -191,9 +191,9 @@ namespace Signum.Web.Controllers
         }
 
         [HttpPost]
-        public PartialViewResult Search(QueryRequest queryRequest, bool allowMultiple, bool navigate, FilterMode filterMode, string prefix)
+        public PartialViewResult Search(QueryRequest queryRequest, bool allowSelection, bool navigate, FilterMode filterMode, string prefix)
         {
-            return Navigator.Search(this, queryRequest, allowMultiple, navigate, filterMode, prefix);
+            return Navigator.Search(this, queryRequest, allowSelection, navigate, filterMode, prefix);
         }
 
         [HttpPost]
@@ -222,16 +222,12 @@ namespace Signum.Web.Controllers
         }
 
         [HttpPost]
-        public ContentResult SelectedItemsContextMenu(string liteKeys, string webQueryName, string implementationsKey, string prefix)
+        public ContentResult SelectedItemsContextMenu(string webQueryName, string implementationsKey, string prefix)
         {
-            var noResults = new HtmlTag("li").Class("sf-search-ctxitem sf-search-ctxitem-no-results")
-                .InnerHtml(new HtmlTag("span").InnerHtml(SearchMessage.NoResults.NiceToString().EncodeHtml()).ToHtml())
-                .ToHtml().ToString();
+            var lites = this.ParseLiteKeys<IdentifiableEntity>();
+            if (lites.IsEmpty())
+                return Content(NoResult());
 
-            if (string.IsNullOrEmpty(liteKeys))
-                return Content(noResults);
-
-            var lites = Navigator.ParseLiteKeys<IdentifiableEntity>(liteKeys);
             object queryName = Navigator.ResolveQueryName(webQueryName);
             Implementations implementations = implementationsKey == "[All]" ? Implementations.ByAll :
                 Implementations.By(implementationsKey.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries).Select(t => Navigator.ResolveType(t)).ToArray());
@@ -247,9 +243,17 @@ namespace Signum.Web.Controllers
             }).ToString("");
 
             if (string.IsNullOrEmpty(result))
-                return Content(noResults); 
+                return Content(NoResult()); 
             else 
                 return Content(result);
+        }
+
+        static string NoResult()
+        {
+            var noResults = new HtmlTag("li").Class("sf-search-ctxitem sf-search-ctxitem-no-results")
+                .InnerHtml(new HtmlTag("span").InnerHtml(SearchMessage.NoResults.NiceToString().EncodeHtml()).ToHtml())
+                .ToHtml().ToString();
+            return noResults;
         }
 
         [HttpPost]

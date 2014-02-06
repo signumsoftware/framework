@@ -49,7 +49,7 @@ namespace Signum.Web
                     var sbSelectContainer = new HtmlTag("select").Attr("multiple", "multiple")
                         .IdName(listDetail.Compose(EntityListBaseKeys.List))
                         .Class("sf-entity-list")
-                        .Attr("ondblclick", "{0}.view()".Formato(listDetail.SFControl()));
+                        .Attr("onchange", "{0}.selection_Changed()".Formato(listDetail.SFControl()));
 
                     if (listDetail.ListHtmlProps.Any())
                         sbSelectContainer.Attrs(listDetail.ListHtmlProps);
@@ -87,7 +87,7 @@ namespace Signum.Web
                 {
                     sb.AddLine(new HtmlTag("script").Attr("type", "text/javascript").InnerHtml(new MvcHtmlString(
                             "$(document).ready(function() {" +
-                            "$('#" + listDetail.Compose(EntityListBaseKeys.List) + "').dblclick();\n" +
+                            "$('#" + listDetail.Compose(EntityListBaseKeys.List) + "').change();\n" +
                             "});"))
                         .ToHtml());
                 }

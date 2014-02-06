@@ -39,7 +39,7 @@ export function validate(valOptions: ValidationOptions): Promise<ValidationResul
 
     valOptions = $.extend({
         prefix: "",
-        controllerUrl: valOptions.prefix || SF.Urls.validate,
+        controllerUrl: SF.Urls.validate,
         showInlineErrors: true,
         fixedInlineErrorText: "*", //Set to "" for it to be populated from ModelState error messages
         parentDiv: "",
@@ -72,11 +72,13 @@ function constructRequestData(valOptions: ValidationOptions) : FormObject {
 
     formValues["prefix"] = valOptions.prefix;
 
-    var staticInfo = Entities.StaticInfo.getFor(valOptions.prefix);
+    if (valOptions.prefix) {
+        var staticInfo = Entities.StaticInfo.getFor(valOptions.prefix);
 
-    if (staticInfo.find().length > 0 && staticInfo.isEmbedded()) {
-        formValues["rootType"] = staticInfo.rootType();
-        formValues["propertyRoute"] = staticInfo.propertyRoute();
+        if (staticInfo.find().length > 0 && staticInfo.isEmbedded()) {
+            formValues["rootType"] = staticInfo.rootType();
+            formValues["propertyRoute"] = staticInfo.propertyRoute();
+        }
     }
 
     return $.extend(formValues, valOptions.requestExtraJsonData);
@@ -86,11 +88,22 @@ export function getFormValues(prefix: string) : FormObject {
     if (!prefix)
         return cleanFormInputs($("form :input")).serializeObject();
 
-    var mainControl = $("#{0}_divNormalControl".format(prefix)); 
+    var mainControl = $("#{0}_divMainControl".format(prefix)); 
 
-    var result = cleanFormInputs(mainControl.filter(":input")).serializeObject(); 
+    var result = cleanFormInputs(mainControl.find(":input")).serializeObject(); 
 
     result[SF.compose(prefix, Entities.Keys.runtimeInfo)] = mainControl.data("runtimeinfo");
+
+    return $.extend(result, getFormBasics());
+}
+
+export function getFormValuesHtml(entityHtml: Entities.EntityHtml): FormObject {
+
+    var mainControl = entityHtml.html.find("#{0}_divMainControl".format(entityHtml.prefix)); 
+
+    var result = cleanFormInputs(mainControl.find(":input")).serializeObject();
+
+    result[SF.compose(entityHtml.prefix, Entities.Keys.runtimeInfo)] = mainControl.data("runtimeinfo");
 
     return $.extend(result, getFormBasics());
 }
@@ -100,7 +113,7 @@ export function getFormValuesLite(prefix: string): FormObject {
     var result = getFormBasics();
 
     result[SF.compose(prefix, Entities.Keys.runtimeInfo)] = prefix ?
-    $("#{0}_divNormalControl".format(prefix)).data("runtimeinfo") :
+    $("#{0}_divMainControl".format(prefix)).data("runtimeinfo") :
     $('#' + SF.compose(prefix, Entities.Keys.runtimeInfo)).val();
 
     return result;

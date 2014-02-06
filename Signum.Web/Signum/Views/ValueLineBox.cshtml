@@ -5,9 +5,7 @@
         @e.Value.TopText 
         <div class='clearall'></div>
     }
-    @Html.HiddenRuntimeInfo(e, f => f.Related)
     <div style="display: none">
-    
         @Html.ValueLine(e, f => f.BoxType)
         @Html.Hidden(e.Compose("IsNullable"), e.Value.IsNullable)
     </div>

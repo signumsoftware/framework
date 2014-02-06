@@ -7,7 +7,12 @@ interface JQuery {
 
 once("SF-control", () => {
     jQuery.fn.SFControl = function () {
-        return this.data("SF-control");
+        var result = this.data("SF-control");
+
+        if (result)
+            return result;
+
+        throw Error("this element has not SF-control"); 
     };
 });
 
@@ -494,6 +499,10 @@ interface JQuery {
     // $.fn is the object we add our custom functions to
     $.fn.popup = function (val: any) {
 
+        var $this = $(this);
+
+        if (!val)
+            return $this.data("SF-popupOptions");
 
         if (typeof val == "string") {
             if (val == "destroy") {
@@ -501,13 +510,13 @@ interface JQuery {
                 return;
             }
 
+            if (val == "restoreTitle") {
+                $this.data("SF-popupOptions").restoreTitle(); 
+                return;
+            }
+
             throw Error("unknown command");
         }
-
-
-        if (!val)
-            return this[0]
-
 
         /*
         prefix, onOk, onClose
@@ -529,16 +538,17 @@ interface JQuery {
             return true;
         };
 
-        var $this = $(this);
+      
 
-        $this.data("SF-popupOptions", $this);
+        $this.data("SF-popupOptions", options);
 
-        var $htmlTitle = $this.find("span.sf-popup-title").first();
+        var htmlTitle = $this.find("span.sf-popup-title").first();
+        var titleParent = htmlTitle.parent();  
 
         var o = {
             dialogClass: 'sf-popup-dialog',
             modal: options.modal,
-            title: $htmlTitle.length == 0 ? $this.attr("data-title") || $this.children().attr("data-title") : "",
+            title: htmlTitle.length == 0 ? $this.attr("data-title") || $this.children().attr("data-title") : "",
             width: 'auto',
             beforeClose: function (evt, ui) {
                 return canClose($(this));
@@ -582,12 +592,16 @@ interface JQuery {
 
         var dialog = $this.dialog(o);
 
-        if ($htmlTitle.length > 0) {
+        if (htmlTitle.length > 0) {
             dialog.data("ui-dialog")._title = function (title) {
                 title.append(this.options.title);
             };
 
-            dialog.dialog('option', 'title', $htmlTitle);
+            dialog.dialog('option', 'title', htmlTitle);
+
+            (<any>options).restoreTitle = () => {
+                titleParent.append(htmlTitle);
+            }; 
         }
     }
 })(jQuery);

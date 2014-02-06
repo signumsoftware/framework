@@ -3312,3 +3312,7 @@ declare module D3 {
 }
 
 declare var d3: D3.Base;
+
+declare module "d3" {
+    export = d3;
+}

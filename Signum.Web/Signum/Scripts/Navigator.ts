@@ -32,7 +32,7 @@ export function navigate(runtimeInfo: Entities.RuntimeInfoValue, viewOptions?: V
 
     $.ajax({
         url: viewOptions.controllerUrl,
-        data: requestData(new Entities.EntityHtml(null, runtimeInfo), viewOptions),
+        data: requestData(new Entities.EntityHtml("", runtimeInfo), viewOptions),
         async: false,
     });
 }
@@ -41,12 +41,18 @@ export interface NavigatePopupOptions extends ViewOptionsBase {
     onPopupLoaded?: (popupDiv: JQuery) => void;
 }
 
-export function createTempDiv(entityValue: Entities.EntityHtml): JQuery {
-    var tempDivId = SF.compose(entityValue.prefix, "Temp");
+export function createTempDiv(entityHtml: Entities.EntityHtml): string {
+    var tempDivId = SF.compose(entityHtml.prefix, "Temp");
 
     $("body").append(SF.hiddenDiv(tempDivId, ""));
 
-    return $("#" + tempDivId);
+    var tempDiv = $("#" + tempDivId);
+
+    tempDiv.html(entityHtml.html);
+
+    SF.triggerNewContent(tempDiv);
+
+    return tempDivId; 
 }
 
 export function navigatePopup(entityHtml: Entities.EntityHtml, viewOptions?: NavigatePopupOptions): Promise<void> {
@@ -58,27 +64,25 @@ export function navigatePopup(entityHtml: Entities.EntityHtml, viewOptions?: Nav
         onPopupLoaded: null,
     }, viewOptions);
 
-    if (entityHtml.html != null)
+    if (entityHtml.isLoaded())
         return openNavigatePopup(entityHtml, viewOptions);
 
-    requestHtml(entityHtml, viewOptions).then(eHTml => {
+    return requestHtml(entityHtml, viewOptions).then(eHTml => {
         return openNavigatePopup(eHTml, viewOptions);
     });
 }
 
 function openNavigatePopup(entityHtml: Entities.EntityHtml, viewOptions: NavigatePopupOptions): Promise<void> {
 
-    var tempDiv = createTempDiv(entityHtml);
+    var tempDivId = createTempDiv(entityHtml);
 
-    tempDiv.html(entityHtml.html);
-
-    SF.triggerNewContent(tempDiv);
+    var tempDiv = $("#" + tempDivId);
 
     var result = new Promise<void>(resolve => {
         tempDiv.popup({
             onCancel: function () {
 
-                tempDiv.remove();
+                $("#" + tempDivId).remove(); // could be reloaded
 
                 resolve(null);
             }
@@ -125,7 +129,7 @@ export function viewPopup(entityHtml: Entities.EntityHtml, viewOptions?: ViewPop
         }, viewOptions.validationOptions);
 
 
-    if (entityHtml.html != null) {
+    if (entityHtml.isLoaded()) {
 
         if (viewOptions.avoidClone)
             return openPopupView(entityHtml, viewOptions);
@@ -141,9 +145,10 @@ export function viewPopup(entityHtml: Entities.EntityHtml, viewOptions?: ViewPop
 }
 
 function openPopupView(entityHtml: Entities.EntityHtml, viewOptions: ViewPopupOptions): Promise<Entities.EntityHtml> {
-    var tempDiv = createTempDiv(entityHtml);
 
-    SF.triggerNewContent(tempDiv);
+    var tempDivId = createTempDiv(entityHtml);
+
+    var tempDiv = $("#" + tempDivId);
 
     return new Promise<Entities.EntityHtml>(function (resolve) {
         tempDiv.popup({
@@ -163,21 +168,24 @@ function openPopupView(entityHtml: Entities.EntityHtml, viewOptions: ViewPopupOp
                     });
 
                 continuePromise.then(result=> {
+                    var newTempDiv = $("#" + tempDivId);
+
                     if (result) {
-                        var $mainControl = tempDiv.find(".sf-main-control[data-prefix=" + entityHtml.prefix + "]");
+                        var $mainControl = newTempDiv.find(".sf-main-control[data-prefix=" + entityHtml.prefix + "]");
                         if ($mainControl.length > 0) {
                             entityHtml.runtimeInfo = Entities.RuntimeInfoValue.parse($mainControl.data("runtimeinfo"));
                         }
 
-                        tempDiv.popup('destroy');
-                        tempDiv.remove();
+                        newTempDiv.popup('restoreTitle');
+                        newTempDiv.popup('destroy');
+                        newTempDiv.remove();
 
                         resolve(entityHtml);
                     }
                 });
             },
             onCancel: function () {
-                tempDiv.remove();
+                $("#" + tempDivId).remove();
 
                 resolve(null);
             }
@@ -191,7 +199,8 @@ function openPopupView(entityHtml: Entities.EntityHtml, viewOptions: ViewPopupOp
 export function requestAndReload(prefix: string, options?: ViewOptionsBase): Promise<Entities.EntityHtml> {
 
     options = $.extend({
-        controllerUrl: prefix ? SF.Urls.popupView : SF.Urls.normalControl,
+        controllerUrl: !prefix ? SF.Urls.normalControl :
+        isNavigatePopup(prefix) ? SF.Urls.popupNavigate : SF.Urls.popupView,
     }, options);
 
     return requestHtml(getEmptyEntityHtml(prefix), options).then(eHtml=> {
@@ -208,9 +217,9 @@ export function getRuntimeInfoValue(prefix: string) : Entities.RuntimeInfoValue 
     if (!prefix)
         return new Entities.RuntimeInfoElement(prefix).value();
 
-    var mainControl = $("#{0}_divNormalControl".format(prefix)); 
+    var mainControl = $("#{0}_divMainControl".format(prefix)); 
 
-    return Entities.RuntimeInfoValue.parse(mainControl.data("runtimeInfo"));
+    return Entities.RuntimeInfoValue.parse(mainControl.data("runtimeinfo"));
 }
 
 export function getEmptyEntityHtml(prefix: string): Entities.EntityHtml {
@@ -221,6 +230,30 @@ export function reloadMain(entityHtml: Entities.EntityHtml) {
     var $elem = $("#divNormalControl");
     $elem.html(entityHtml.html);
     SF.triggerNewContent($elem);
+}
+
+export function closePopup(prefix: string): void {
+
+    var tempDivId = SF.compose(prefix, "Temp");
+
+    var tempDiv = $("#" + tempDivId);
+
+    var popupOptions = tempDiv.popup();
+
+    tempDiv.popup("destroy");
+
+    tempDiv.remove();
+}
+
+export function isNavigatePopup(prefix: string)
+{
+    var tempDivId = SF.compose(prefix, "Temp");
+
+    var tempDiv = $("#" + tempDivId);
+
+    var popupOptions = tempDiv.popup();
+
+    return popupOptions.onOk == null
 }
 
 export function reloadPopup(entityHtml : Entities.EntityHtml) {
@@ -285,8 +318,8 @@ function requestHtml(entityHtml: Entities.EntityHtml, viewOptions: ViewOptionsBa
             success: resolve,
             error: reject
         });
-    }).then(html=> {
-            entityHtml.html = $(html);
+    }).then(htmlText=> {
+            entityHtml.loadHtml(htmlText);
             return entityHtml
             });
 }
@@ -357,20 +390,28 @@ export function typeChooser(staticInfo: Entities.StaticInfo): Promise<string> {
         .then(t=> t == null ? null : t.type);
 }
 
-export function chooser<T>(prefix: string, title: string, options: T[], getStr?: (data: T) => string): Promise<T> {
-    var tempDivId = SF.compose(prefix, "Temp");
+export function chooser<T>(parentPrefix: string, title: string, options: T[], getStr?: (data: T) => string, getValue?: (data: T) => string): Promise<T> {
+
+    var tempDivId = SF.compose(parentPrefix, "Temp");
 
     if (getStr == null) {
-        getStr = (a: any) => a.toString ? a.toString() :
+        getStr = (a: any) =>
             a.toStr ? a.toStr :
             a.text ? a.text :
-            a;
+            a.toString();
+    }
+
+    if (getValue == null) {
+        getValue = (a: any) =>
+            a.toStr ? a.type :
+            a.text ? a.value :
+            a.toString();
     }
 
     var div = $('<div id="{0}" class="sf-popup-control" data-prefix="{1}" data-title="{2}"></div>'
         .format(SF.compose(tempDivId, "panelPopup"), tempDivId, title || lang.signum.chooseAValue));
 
-    options.forEach(o=> div.append($('<input type="button" class="sf-chooser-button"/>')
+    options.forEach(o=> div.append($('<button type="button" class="sf-chooser-button"/>')
         .data("option", o).text(getStr(o))));
 
     $("body").append(SF.hiddenDiv(tempDivId, div));

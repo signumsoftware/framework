@@ -122,9 +122,9 @@ namespace Signum.Web.Operations
         {
             return new JObject()
             { 
-                { "Operation", OperationDN.UniqueKey(OperationInfo.Key) },
-                { "IsLite", OperationInfo.Lite },
-                { "Prefix", this.Prefix },
+                { "operationKey", OperationDN.UniqueKey(OperationInfo.Key) },
+                { "isLite", OperationInfo.Lite },
+                { "prefix", this.Prefix },
             }; 
         }
 
@@ -146,9 +146,9 @@ namespace Signum.Web.Operations
         {
             return new JObject()
             { 
-                { "Operation", OperationDN.UniqueKey(OperationInfo.Key) },
-                { "IsLite", OperationInfo.Lite },
-                { "Prefix", this.Prefix },
+                { "operationKey", OperationDN.UniqueKey(OperationInfo.Key) },
+                { "isLite", OperationInfo.Lite },
+                { "prefix", this.Prefix },
             }; 
         }
     }

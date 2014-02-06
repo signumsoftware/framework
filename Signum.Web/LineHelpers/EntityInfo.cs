@@ -27,7 +27,7 @@ namespace Signum.Web
 
         public static MvcHtmlString HiddenRuntimeInfo(this HtmlHelper helper, TypeContext tc)
         {
-            return helper.Hidden(tc.Compose(EntityBaseKeys.RuntimeInfo), tc.RuntimeInfo().ToString());
+            return helper.Hidden(tc.Compose(EntityBaseKeys.RuntimeInfo), tc.RuntimeInfo().TryToString());
         }
 
         public static MvcHtmlString HiddenStaticInfo(this HtmlHelper helper, EntityBase tc)
@@ -118,52 +118,36 @@ namespace Signum.Web
 
     public class RuntimeInfo
     {
-        public Type EntityType { get; set; }
-        public int? IdOrNull { get; set; }
-        public bool IsNew { get; set; }
-        public long? Ticks { get; set; }
+        public Type EntityType { get; private set; }
+        public int? IdOrNull { get; private set; }
+        public bool IsNew { get; private set; }
+        public long? Ticks { get; private set; }
 
-        public RuntimeInfo() { }
-
-        public RuntimeInfo(Lite<IIdentifiable> lite)
+        public RuntimeInfo(Type type, int? idOrNull, bool isNew, long? ticks) 
         {
-            if (lite == null)
-            {
-                EntityType = null;
-                return;
-            }
+            if(type == null)
+                throw new ArgumentNullException("type"); 
 
-            EntityType = lite.EntityType;
-            IdOrNull = lite.IdOrNull;
-            IsNew = lite.IdOrNull == null;
+            this.EntityType = type;
+            this.IdOrNull = idOrNull;
+            this.IsNew = isNew;
+            this.Ticks = ticks;
         }
 
-        public RuntimeInfo(EmbeddedEntity entity)
+        public RuntimeInfo(Lite<IIdentifiable> lite) :
+            this(lite.EntityType, lite.IdOrNull, lite.IdOrNull == null, null)
         {
-            if (entity == null)
-            {
-                EntityType = null;
-                return;
-            }
+        }
 
-            EntityType = entity.GetType();
+        public RuntimeInfo(EmbeddedEntity entity): 
+            this(entity.GetType(), null, false, null)
+        {
         }
 
         public RuntimeInfo(IIdentifiable entity)
+            : this(entity.GetType(), entity.IdOrNull, entity.IsNew,
+                 entity is Entity ? ((Entity)entity).Ticks : (long?)null)
         {
-            if (entity == null)
-            {
-                EntityType = null;
-                return;
-            }
-
-            EntityType = entity.GetType();
-            IdOrNull = entity.IdOrNull;
-            IsNew = entity.IsNew;
-            if (entity is Entity)
-            {
-                Ticks = ((Entity)entity).Ticks;
-            }
         }
 
         public override string ToString()
@@ -175,7 +159,7 @@ namespace Signum.Web
                 throw new ArgumentException("RuntimeInfo's RuntimeType cannot be of type Lite. Use ExtractLite or construct a RuntimeInfo<T> instead");
 
             return "{0};{1};{2};{3}".Formato(
-                (EntityType == null) ? "" : Navigator.ResolveWebTypeName(EntityType),
+                Navigator.ResolveWebTypeName(EntityType),
                 IdOrNull.TryToString(),
                 IsNew ? "n" : "o",
                 Ticks
@@ -184,28 +168,27 @@ namespace Signum.Web
 
         public static RuntimeInfo FromFormValue(string formValue)
         {
+            if(string.IsNullOrEmpty(formValue))
+                return null;
+
             string[] parts = formValue.Split(new[] { ";" }, StringSplitOptions.None);
             if (parts.Length != 4)
                 throw new ArgumentException("Incorrect sfRuntimeInfo format: {0}".Formato(formValue));
 
             string entityTypeString = parts[0];
 
-            return new RuntimeInfo
-            {
-                EntityType = string.IsNullOrEmpty(entityTypeString) ? null : Navigator.ResolveType(entityTypeString),
-                IdOrNull = (parts[1].HasText()) ? int.Parse(parts[1]) : (int?)null,
-                IsNew = parts[2]=="n",
-                Ticks = parts.Length == 4 && parts[3].HasText() ? long.Parse(parts[3]) : (long?)null
-            };
+            return new RuntimeInfo(
+                Navigator.ResolveType(entityTypeString),
+                (parts[1].HasText()) ? int.Parse(parts[1]) : (int?)null,
+                parts[2] == "n",
+                parts.Length == 4 && parts[3].HasText() ? long.Parse(parts[3]) : (long?)null
+            );
         }
 
         public Lite<IdentifiableEntity> ToLite()
         {
             if (IsNew)
                 throw new InvalidOperationException("The RuntimeInfo represents a new entity");
-
-            if (this.EntityType == null)
-                return null;
 
             return Lite.Create(this.EntityType, this.IdOrNull.Value);
         }

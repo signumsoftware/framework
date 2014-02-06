@@ -98,11 +98,11 @@ namespace Signum.Web
 
         public bool SearchOnLoad { get; set; }
 
-        bool allowMultiple = true;
-        public bool AllowMultiple
+        bool allowSelection = true;
+        public bool AllowSelection
         {
-            get { return allowMultiple; }
-            set { allowMultiple = value; }
+            get { return allowSelection; }
+            set { allowSelection = value; }
         }
 
         bool allowOrder = true;
@@ -122,7 +122,7 @@ namespace Signum.Web
                 if (value == FilterMode.OnlyResults)
                 {
                     SearchOnLoad = true;
-                    AllowMultiple = false;
+                    AllowSelection = false;
                 }
             }
         }
@@ -166,13 +166,13 @@ namespace Signum.Web
                 SearchOnLoad ? "searchOnLoad=true" : null,
                 !Create ? "create=false": null, 
                 !Navigate ? "navigate=false": null, 
-                !AllowMultiple ? "allowMultiple=false" : null,
+                !AllowSelection ? "allowSelection=false" : null,
                 !AllowChangeColumns ? "allowChangeColumns=false" : null,
                 !AllowOrder ? "allowOrder=false" : null,
                 FilterMode != FilterMode.Visible ? "filterMode=" + FilterMode.ToString() : null,
-                (FilterOptions != null && FilterOptions.Count > 0) ? ("filters=" + FilterOptions.ToString(";") + ";") : null,
-                (OrderOptions != null && OrderOptions.Count > 0) ? ("orders=" + OrderOptions.ToString(";") + ";") : null,
-                (ColumnOptions != null && ColumnOptions.Count > 0) ? ("columns=" + ColumnOptions.ToString(";") + ";") : null, 
+                (FilterOptions != null && FilterOptions.Count > 0) ? ("filters=" + FilterOptions.ToString(";")) : null,
+                (OrderOptions != null && OrderOptions.Count > 0) ? ("orders=" + OrderOptions.ToString(";")) : null,
+                (ColumnOptions != null && ColumnOptions.Count > 0) ? ("columns=" + ColumnOptions.ToString(";")) : null, 
                 (ColumnOptionsMode != ColumnOptionsMode.Add ? ("columnMode=" + ColumnOptionsMode.ToString()) : null),
                 !SelectedItemsContextMenu ? "selectedItemsContextMenu=false" : null 
             }.NotNull().ToString("&");
@@ -203,20 +203,23 @@ namespace Signum.Web
             if (SearchOnLoad == true) op.Add("searchOnLoad", true);
             if (!Navigate) op.Add("navigate", false);
             if (!Create) op.Add("create", false);
-            if (!AllowMultiple) op.Add("allowMultiple", false);
+            if (!AllowSelection) op.Add("allowSelection", false);
             if (!SelectedItemsContextMenu) op.Add("selectedItemsContextMenu", false);
             if (!AllowChangeColumns) op.Add("allowChangeColumns", false);
-            if (AllowOrder) op.Add("allowOrder", false);
+            if (!AllowOrder) op.Add("allowOrder", false);
             if (FilterMode != Web.FilterMode.Visible) op.Add("filterMode", FilterMode.ToString());
             if (FilterOptions.Any()) op.Add("filters", new JArray(filterOptions.Select(f => new JObject { { "columnName", f.ColumnName }, { "operation", (int)f.Operation }, { "val", f.StringValue() } })));
             if (OrderOptions.Any()) op.Add("orders", new JArray(OrderOptions.Select(oo => new JObject { { "columnName", oo.ColumnName }, { "orderType", (int)oo.OrderType } })));
             if (ColumnOptions.Any()) op.Add("columns", new JArray(ColumnOptions.Select(oo => new JObject { { "columnName", oo.ColumnName }, { "displayName", oo.DisplayName } })));
             if (ColumnOptionsMode != Entities.DynamicQuery.ColumnOptionsMode.Add) op.Add("columnMode", ColumnOptionsMode.ToString());
 
-            op.Add("pagination", Pagination.GetMode().ToString());
-            int? elems = Pagination.GetElementsPerPage();
-            if (elems != null)
-                op.Add("elems", elems.Value.ToString());
+            if (Pagination != null)
+            {
+                op.Add("pagination", Pagination.GetMode().ToString());
+                int? elems = Pagination.GetElementsPerPage();
+                if (elems != null)
+                    op.Add("elems", elems.Value.ToString());
+            }
 
             return op;
         }

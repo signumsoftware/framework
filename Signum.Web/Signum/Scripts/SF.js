@@ -32,22 +32,31 @@ var SF;
         $.ajaxPrefilter(function (options, originalOptions, jqXHR) {
             var originalSuccess = options.success;
 
+            var getRredirectUrl = function (ajaxResult) {
+                if (SF.isEmpty(ajaxResult))
+                    return null;
+
+                if (typeof ajaxResult !== "object")
+                    return null;
+
+                if (ajaxResult.result == null)
+                    return null;
+
+                if (ajaxResult.result == 'url')
+                    return ajaxResult.url;
+
+                return null;
+            };
+
             options.success = function (result, text, xhr) {
-                if (!options.avoidRedirect && jqXHR.status == 302)
-                    location.href = jqXHR.getResponseHeader("Location");
+                //if (!options.avoidRedirect && jqXHR.status == 302)
+                //    location.href = jqXHR.getResponseHeader("Location");
+                var url = getRredirectUrl(result);
+                if (!SF.isEmpty(url))
+                    location.href = url;
 
                 originalSuccess(result, text, xhr);
             };
-        });
-
-        $(document).ajaxError(function (event, XMLHttpRequest, ajaxOptions, thrownError) {
-            //check request status
-            //request.abort() has status 0, so we don't show this "error", since we have
-            //explicitly aborted the request.
-            //this error is documented on http://bugs.jquery.com/ticket/7189
-            if (XMLHttpRequest.status !== 0) {
-                $("body").trigger("sf-ajax-error", [XMLHttpRequest, ajaxOptions, thrownError]);
-            }
         });
     }
 
@@ -225,6 +234,15 @@ var SF;
     }
     SF.ajaxGet = ajaxGet;
 
+    function promiseForeach(array, action) {
+        return array.reduce(function (prom, val) {
+            return prom.then(function () {
+                return action(val);
+            });
+        }, Promise.resolve(null));
+    }
+    SF.promiseForeach = promiseForeach;
+
     function redirectUrl(ajaxResult) {
         if (SF.isEmpty(ajaxResult))
             return;
@@ -348,7 +366,7 @@ once("stringExtensions", function () {
     String.prototype.before = function (separator) {
         var index = this.indexOf(separator);
         if (index == -1)
-            throw Error("{0} not found");
+            throw Error("{0} not found".format(separator));
 
         return this.substring(0, index);
     };
@@ -356,7 +374,7 @@ once("stringExtensions", function () {
     String.prototype.after = function (separator) {
         var index = this.indexOf(separator);
         if (index == -1)
-            throw Error("{0} not found");
+            throw Error("{0} not found".format(separator));
 
         return this.substring(index + separator.length);
     };
@@ -380,7 +398,7 @@ once("stringExtensions", function () {
     String.prototype.beforeLast = function (separator) {
         var index = this.lastIndexOf(separator);
         if (index == -1)
-            throw Error("{0} not found");
+            throw Error("{0} not found".format(separator));
 
         return this.substring(0, index);
     };
@@ -388,7 +406,7 @@ once("stringExtensions", function () {
     String.prototype.afterLast = function (separator) {
         var index = this.lastIndexOf(separator);
         if (index == -1)
-            throw Error("{0} not found");
+            throw Error("{0} not found".format(separator));
 
         return this.substring(index + separator.length);
     };
