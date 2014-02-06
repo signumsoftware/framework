@@ -110,7 +110,7 @@ namespace Signum.Web.Auth
 
                         //send them off to the login page
                         string loginUrl = PublicLoginUrl(returnUrl);
-                        context.Result = new RedirectResult(loginUrl);
+                        context.Result = context.Controller.RedirectHttpOrAjax(loginUrl);
                     }
                 };
 
@@ -204,7 +204,7 @@ namespace Signum.Web.Auth
             if (SignumExceptionHandlerAttribute.LogException != null)
                 SignumExceptionHandlerAttribute.LogException(model);
 
-            ctx.Result = new RedirectResult(absoluteLoginUrl); 
+            ctx.Result = ctx.Controller.RedirectHttpOrAjax(absoluteLoginUrl); 
 
             ctx.ExceptionHandled = true;
             ctx.HttpContext.Response.Clear();

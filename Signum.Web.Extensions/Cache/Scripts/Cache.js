@@ -1,23 +1,11 @@
 /// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
 define(["require", "exports"], function(require, exports) {
-    var refresh;
-
-    function init(refreshCallback) {
-        refresh = refreshCallback;
+    function refresh() {
+        location.href = location.href;
     }
-    exports.init = init;
     ;
 
-    function initStats() {
-        $(document).on("click", "table.sf-stats-table a.sf-stats-show", function (e) {
-            e.preventDefault();
-            $(this).closest("tr").next().toggle();
-        });
-    }
-    exports.initStats = initStats;
-    ;
-
-    once("SF-Cache", function () {
+    function init() {
         var $cacheEnable = $("#sfCacheEnable");
         var $cacheDisable = $("#sfCacheDisable");
 
@@ -54,6 +42,7 @@ define(["require", "exports"], function(require, exports) {
                 }
             });
         });
-    });
+    }
+    exports.init = init;
 });
 //# sourceMappingURL=Cache.js.map

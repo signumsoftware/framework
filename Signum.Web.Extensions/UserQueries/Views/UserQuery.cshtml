@@ -19,8 +19,6 @@
         }
 </style>
 
-@Html.ScriptsJs("~/UserQueries/Scripts/SF_UserQuery.js")
-
 <div class="sf-user-query-edit">
     @using (var e = Html.TypeContext<UserQueryDN>())
     {
@@ -32,7 +30,7 @@
         using (var query = e.SubContext(f => f.Query))
         {
         @Html.HiddenRuntimeInfo(query)
-        
+       
         @Html.Hidden(query.Compose("Key"), query.Value.Key)
         @Html.Hidden(query.Compose("Name"), query.Value.Name)
 
@@ -52,7 +50,7 @@
             el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Signum");
             el.AttachFunction = new JsLineFunction(UserQueriesClient.Module, "attachShowCurrentEntity"); 
         })
-        <p>
+        <p class="messageEntity">
             @UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().Formato(CurrentEntityConverter.CurrentEntityKey)
         </p>
         @Html.ValueLine(e, f => f.WithoutFilters)

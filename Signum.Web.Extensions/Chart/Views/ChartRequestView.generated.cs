@@ -96,18 +96,6 @@ WriteLiteral("\r\n");
 
             
             #line 11 "..\..\Chart\Views\ChartRequestView.cshtml"
-Write(Html.ScriptsJs("~/Chart/Scripts/SF_Chart.js",
-                "~/Chart/Scripts/SF_Chart_Utils.js",
-                "~/scripts/d3.v3.min.js",
-                "~/scripts/colorbrewer.js"));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n");
-
-            
-            #line 15 "..\..\Chart\Views\ChartRequestView.cshtml"
    
     QueryDescription queryDescription =  (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
     if (queryDescription == null)
@@ -126,14 +114,14 @@ WriteLiteral("\r\n");
             #line hidden
 WriteLiteral("\r\n<div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 1073), Tuple.Create("\"", 1110)
+WriteAttribute("id", Tuple.Create(" id=\"", 883), Tuple.Create("\"", 920)
             
-            #line 28 "..\..\Chart\Views\ChartRequestView.cshtml"
-, Tuple.Create(Tuple.Create("", 1078), Tuple.Create<System.Object, System.Int32>(Model.Compose("sfChartControl")
+            #line 24 "..\..\Chart\Views\ChartRequestView.cshtml"
+, Tuple.Create(Tuple.Create("", 888), Tuple.Create<System.Object, System.Int32>(Model.Compose("sfChartControl")
             
             #line default
             #line hidden
-, 1078), false)
+, 888), false)
 );
 
 WriteLiteral(" \r\n    class=\"sf-search-control sf-chart-control\"");
@@ -141,7 +129,7 @@ WriteLiteral(" \r\n    class=\"sf-search-control sf-chart-control\"");
 WriteLiteral(" \r\n    data-subtokens-url=\"");
 
             
-            #line 30 "..\..\Chart\Views\ChartRequestView.cshtml"
+            #line 26 "..\..\Chart\Views\ChartRequestView.cshtml"
                    Write(Url.Action("NewSubTokensCombo", "Chart"));
 
             
@@ -152,7 +140,7 @@ WriteLiteral("\"");
 WriteLiteral(" \r\n    data-add-filter-url=\"");
 
             
-            #line 31 "..\..\Chart\Views\ChartRequestView.cshtml"
+            #line 27 "..\..\Chart\Views\ChartRequestView.cshtml"
                     Write(Url.Action("AddFilter", "Chart"));
 
             
@@ -163,7 +151,7 @@ WriteLiteral("\"");
 WriteLiteral(" \r\n    data-prefix=\"");
 
             
-            #line 32 "..\..\Chart\Views\ChartRequestView.cshtml"
+            #line 28 "..\..\Chart\Views\ChartRequestView.cshtml"
             Write(Model.ControlID);
 
             
@@ -174,7 +162,7 @@ WriteLiteral("\"");
 WriteLiteral("\r\n    data-fullscreen-url=\"");
 
             
-            #line 33 "..\..\Chart\Views\ChartRequestView.cshtml"
+            #line 29 "..\..\Chart\Views\ChartRequestView.cshtml"
                      Write(Url.Action<ChartController>(cc => cc.FullScreen(Model.ControlID)));
 
             
@@ -187,7 +175,7 @@ WriteLiteral("\r\n    >\r\n");
 WriteLiteral("    ");
 
             
-            #line 35 "..\..\Chart\Views\ChartRequestView.cshtml"
+            #line 31 "..\..\Chart\Views\ChartRequestView.cshtml"
 Write(Html.HiddenRuntimeInfo(Model));
 
             
@@ -198,7 +186,7 @@ WriteLiteral("\r\n");
 WriteLiteral("    ");
 
             
-            #line 36 "..\..\Chart\Views\ChartRequestView.cshtml"
+            #line 32 "..\..\Chart\Views\ChartRequestView.cshtml"
 Write(Html.Hidden(Model.Compose("sfOrders"), Model.Value.Orders.IsNullOrEmpty() ? "" :
         (Model.Value.Orders.ToString(oo => (oo.OrderType == OrderType.Ascending ? "" : "-") + oo.Token.FullKey(), ";") + ";")));
 
@@ -222,7 +210,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("                    ");
 
             
-            #line 42 "..\..\Chart\Views\ChartRequestView.cshtml"
+            #line 38 "..\..\Chart\Views\ChartRequestView.cshtml"
                Write(Html.QueryTokenBuilder(null, Model, queryDescription, canAggregate: Model.Value.GroupResults));
 
             
@@ -233,7 +221,7 @@ WriteLiteral("\r\n");
 WriteLiteral("                    ");
 
             
-            #line 43 "..\..\Chart\Views\ChartRequestView.cshtml"
+            #line 39 "..\..\Chart\Views\ChartRequestView.cshtml"
                Write(Html.Href(
                             Model.Compose("btnAddFilter"),
                             SearchMessage.FilterBuilder_AddFilter.NiceToString(),
@@ -252,13 +240,13 @@ WriteLiteral("                    ");
 WriteLiteral("\r\n                </div>\r\n");
 
             
-            #line 55 "..\..\Chart\Views\ChartRequestView.cshtml"
+            #line 51 "..\..\Chart\Views\ChartRequestView.cshtml"
                 
             
             #line default
             #line hidden
             
-            #line 55 "..\..\Chart\Views\ChartRequestView.cshtml"
+            #line 51 "..\..\Chart\Views\ChartRequestView.cshtml"
                    
                     Html.RenderPartial(Navigator.Manager.FilterBuilderView); 
                 
@@ -267,14 +255,14 @@ WriteLiteral("\r\n                </div>\r\n");
             #line hidden
 WriteLiteral("\r\n            </div>\r\n        </div>\r\n    </div>\r\n    <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 2812), Tuple.Create("\"", 2858)
+WriteAttribute("id", Tuple.Create(" id=\"", 2622), Tuple.Create("\"", 2668)
             
-            #line 61 "..\..\Chart\Views\ChartRequestView.cshtml"
-, Tuple.Create(Tuple.Create("", 2817), Tuple.Create<System.Object, System.Int32>(Model.Compose("sfChartBuilderContainer")
+            #line 57 "..\..\Chart\Views\ChartRequestView.cshtml"
+, Tuple.Create(Tuple.Create("", 2627), Tuple.Create<System.Object, System.Int32>(Model.Compose("sfChartBuilderContainer")
             
             #line default
             #line hidden
-, 2817), false)
+, 2627), false)
 );
 
 WriteLiteral(">\r\n");
@@ -282,7 +270,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("        ");
 
             
-            #line 62 "..\..\Chart\Views\ChartRequestView.cshtml"
+            #line 58 "..\..\Chart\Views\ChartRequestView.cshtml"
    Write(Html.Partial(ChartClient.ChartBuilderView, Model.Value));
 
             
@@ -295,7 +283,7 @@ WriteLiteral(" type=\"text/javascript\"");
 WriteLiteral(">\r\n        var findOptions = ");
 
             
-            #line 65 "..\..\Chart\Views\ChartRequestView.cshtml"
+            #line 61 "..\..\Chart\Views\ChartRequestView.cshtml"
                       Write(MvcHtmlString.Create(Model.Value.ToJS().ToString()));
 
             
@@ -304,7 +292,7 @@ WriteLiteral(">\r\n        var findOptions = ");
 WriteLiteral("\r\n        require([\"");
 
             
-            #line 66 "..\..\Chart\Views\ChartRequestView.cshtml"
+            #line 62 "..\..\Chart\Views\ChartRequestView.cshtml"
              Write(ChartClient.Module);
 
             
@@ -313,7 +301,7 @@ WriteLiteral("\r\n        require([\"");
 WriteLiteral("\"], function (Chart) { new Chart.ChartBuilder($(\'#");
 
             
-            #line 66 "..\..\Chart\Views\ChartRequestView.cshtml"
+            #line 62 "..\..\Chart\Views\ChartRequestView.cshtml"
                                                                                   Write(Model.Compose("sfChartBuilderContainer"));
 
             
@@ -322,7 +310,7 @@ WriteLiteral("\"], function (Chart) { new Chart.ChartBuilder($(\'#");
 WriteLiteral("\'), $.extend({ prefix: \'");
 
             
-            #line 66 "..\..\Chart\Views\ChartRequestView.cshtml"
+            #line 62 "..\..\Chart\Views\ChartRequestView.cshtml"
                                                                                                                                                    Write(Model.ControlID);
 
             
@@ -340,20 +328,20 @@ WriteLiteral(" class=\"sf-query-button sf-chart-draw\"");
 
 WriteLiteral(" data-icon=\"ui-icon-refresh\"");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 3402), Tuple.Create("\"", 3431)
+WriteAttribute("id", Tuple.Create(" id=\"", 3212), Tuple.Create("\"", 3241)
             
-            #line 69 "..\..\Chart\Views\ChartRequestView.cshtml"
-                    , Tuple.Create(Tuple.Create("", 3407), Tuple.Create<System.Object, System.Int32>(Model.Compose("qbDraw")
+            #line 65 "..\..\Chart\Views\ChartRequestView.cshtml"
+                    , Tuple.Create(Tuple.Create("", 3217), Tuple.Create<System.Object, System.Int32>(Model.Compose("qbDraw")
             
             #line default
             #line hidden
-, 3407), false)
+, 3217), false)
 );
 
 WriteLiteral(" data-url=\"");
 
             
-            #line 69 "..\..\Chart\Views\ChartRequestView.cshtml"
+            #line 65 "..\..\Chart\Views\ChartRequestView.cshtml"
                                                                                                                                     Write(Url.Action<ChartController>(cc => cc.Draw(Model.ControlID)));
 
             
@@ -364,7 +352,7 @@ WriteLiteral("\"");
 WriteLiteral(">");
 
             
-            #line 69 "..\..\Chart\Views\ChartRequestView.cshtml"
+            #line 65 "..\..\Chart\Views\ChartRequestView.cshtml"
                                                                                                                                                                                                    Write(ChartMessage.Chart_Draw.NiceToString());
 
             
@@ -376,20 +364,20 @@ WriteLiteral(" class=\"sf-query-button sf-chart-script-edit\"");
 
 WriteLiteral(" data-icon=\"ui-icon-script\"");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 3644), Tuple.Create("\"", 3673)
+WriteAttribute("id", Tuple.Create(" id=\"", 3454), Tuple.Create("\"", 3483)
             
-            #line 70 "..\..\Chart\Views\ChartRequestView.cshtml"
-            , Tuple.Create(Tuple.Create("", 3649), Tuple.Create<System.Object, System.Int32>(Model.Compose("qbEdit")
+            #line 66 "..\..\Chart\Views\ChartRequestView.cshtml"
+            , Tuple.Create(Tuple.Create("", 3459), Tuple.Create<System.Object, System.Int32>(Model.Compose("qbEdit")
             
             #line default
             #line hidden
-, 3649), false)
+, 3459), false)
 );
 
 WriteLiteral(">");
 
             
-            #line 70 "..\..\Chart\Views\ChartRequestView.cshtml"
+            #line 66 "..\..\Chart\Views\ChartRequestView.cshtml"
                                                                                                                  Write(ChartMessage.UserChart_Edit.NiceToString());
 
             
@@ -400,7 +388,7 @@ WriteLiteral("</button>\r\n");
 WriteLiteral("        ");
 
             
-            #line 71 "..\..\Chart\Views\ChartRequestView.cshtml"
+            #line 67 "..\..\Chart\Views\ChartRequestView.cshtml"
    Write(UserChartClient.GetChartMenu(this.ViewContext, Url, queryDescription.QueryName, entitiesType, Model.ControlID, (Lite<UserChartDN>)ViewData["UserChart"]).ToString(Html));
 
             
@@ -411,7 +399,7 @@ WriteLiteral("\r\n");
 WriteLiteral("        ");
 
             
-            #line 72 "..\..\Chart\Views\ChartRequestView.cshtml"
+            #line 68 "..\..\Chart\Views\ChartRequestView.cshtml"
    Write(Html.Href(Model.Compose("sfFullScreen"),
             "Full Screen",
             "",
@@ -432,14 +420,14 @@ WriteLiteral(" class=\"clearall\"");
 
 WriteLiteral(">\r\n    </div>\r\n    <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 4314), Tuple.Create("\"", 4347)
+WriteAttribute("id", Tuple.Create(" id=\"", 4124), Tuple.Create("\"", 4157)
             
-            #line 85 "..\..\Chart\Views\ChartRequestView.cshtml"
-, Tuple.Create(Tuple.Create("", 4319), Tuple.Create<System.Object, System.Int32>(Model.Compose("divResults")
+            #line 81 "..\..\Chart\Views\ChartRequestView.cshtml"
+, Tuple.Create(Tuple.Create("", 4129), Tuple.Create<System.Object, System.Int32>(Model.Compose("divResults")
             
             #line default
             #line hidden
-, 4319), false)
+, 4129), false)
 );
 
 WriteLiteral(" class=\"ui-widget ui-corner-all sf-search-results-container\"");
@@ -447,13 +435,13 @@ WriteLiteral(" class=\"ui-widget ui-corner-all sf-search-results-container\"");
 WriteLiteral(">\r\n");
 
             
-            #line 86 "..\..\Chart\Views\ChartRequestView.cshtml"
+            #line 82 "..\..\Chart\Views\ChartRequestView.cshtml"
         
             
             #line default
             #line hidden
             
-            #line 86 "..\..\Chart\Views\ChartRequestView.cshtml"
+            #line 82 "..\..\Chart\Views\ChartRequestView.cshtml"
            Html.RenderPartial(ChartClient.ChartResultsView); 
             
             #line default

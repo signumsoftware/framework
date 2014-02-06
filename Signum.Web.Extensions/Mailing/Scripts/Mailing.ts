@@ -1,12 +1,12 @@
 ﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
+/// <reference path="../../../../Extensions/Signum.Web.Extensions/Mailing/Scripts/ckeditor.ts"/>
 import Entities = require("Framework/Signum.Web/Signum/Scripts/Entities")
 import Lines = require("Framework/Signum.Web/Signum/Scripts/Lines")
 import Finder = require("Framework/Signum.Web/Signum/Scripts/Finder")
 import Operations = require("Framework/Signum.Web/Signum/Scripts/Operations")
 import Navigator = require("Framework/Signum.Web/Signum/Scripts/Navigator")
 
-
-declare var CKEDITOR: any;
+import CKEDITOR = require("ckeditor"); 
 
 
 var cssClassActive = "sf-email-inserttoken-targetactive";
@@ -15,7 +15,7 @@ var onInsertToken: (string) => void;
 
 export function initReplacements() {
     var self = this;
-
+    
     $(".sf-email-replacements-container").on("focus", ".sf-email-inserttoken-target", function () {
         setTokenTargetFocus($(this));
     });

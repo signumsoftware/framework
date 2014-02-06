@@ -1,11 +1,12 @@
 ﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
 
 import Navigator = require("Framework/Signum.Web/Signum/Scripts/Navigator")
+import Operations = require("Framework/Signum.Web/Signum/Scripts/Operations")
 
 export function initControlPanel(url : string) {
 
     var refreshCallback = () => {
-        $.get("url", function (data) {
+        $.get(url, function (data) {
             $("div.processMainDiv").replaceWith(data);
         });
     };
@@ -52,4 +53,10 @@ export function refreshUpdate(idProcess: string, prefix: string, getProgressUrl:
             }
         });
     }, 2000);
+}
+
+export function processFromMany(options: Operations.EntityOperationOptions ) : Promise<void> {
+    options.controllerUrl = SF.Urls.processFromMany; 
+
+    return Operations.constructFromManyDefault(options); 
 }

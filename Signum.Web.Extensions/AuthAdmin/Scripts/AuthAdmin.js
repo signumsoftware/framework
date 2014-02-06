@@ -102,7 +102,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     function openDialog(e) {
         e.preventDefault();
         var $this = $(this);
-        Navigator.navigatePopup(new Entities.EntityHtml("New", new Entities.RuntimeInfoValue("PropertyRulePack", null)), {
+        Navigator.navigatePopup(Entities.EntityHtml.withoutType("New"), {
             controllerUrl: $this.attr("href"),
             onPopupLoaded: function (div) {
                 return exports.coloredRadios(div);

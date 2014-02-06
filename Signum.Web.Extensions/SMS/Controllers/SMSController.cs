@@ -69,11 +69,11 @@ namespace Signum.Web.SMS
         }
 
         [HttpPost]
-        public ActionResult SendMultipleMessagesFromTemplate(string liteKeys, string newPrefix)
+        public ActionResult SendMultipleMessagesFromTemplate(string newPrefix)
         {
             var template = Lite.Parse<SMSTemplateDN>(Request["template"]);
 
-            var lites = Navigator.ParseLiteKeys<IdentifiableEntity>(liteKeys);
+            var lites = this.ParseLiteKeys<IdentifiableEntity>();
 
             var process = OperationLogic.ServiceConstructFromMany(lites, lites.First().EntityType, SMSProviderOperation.SendSMSMessagesFromTemplate, template.Retrieve());
 
@@ -91,11 +91,11 @@ namespace Signum.Web.SMS
         }
 
         [HttpPost]
-        public ActionResult SendMultipleMessages(string liteKeys, string prefixModel, string newPrefix)
+        public ActionResult SendMultipleMessages(string prefixModel, string newPrefix)
         {
             var model = this.ExtractEntity<MultipleSMSModel>(prefixModel).ApplyChanges(this.ControllerContext, null, true).Value;
 
-            var lites = Navigator.ParseLiteKeys<IdentifiableEntity>(liteKeys);
+            var lites = this.ParseLiteKeys<IdentifiableEntity>();
 
             var cp = new Signum.Engine.SMS.SMSLogic.CreateMessageParams
             {

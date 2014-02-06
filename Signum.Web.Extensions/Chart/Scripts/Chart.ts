@@ -1,6 +1,6 @@
 ﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
 /// <reference path="../../../../Framework/Signum.Web/Signum/Headers/d3/d3.d.ts"/>
-/// <reference path="SF_Chart_Utils.ts"/>
+/// <reference path="ChartUtils.ts"/>
 
 import Entities = require("Framework/Signum.Web/Signum/Scripts/Entities")
 import Lines = require("Framework/Signum.Web/Signum/Scripts/Lines")
@@ -8,14 +8,16 @@ import Finder = require("Framework/Signum.Web/Signum/Scripts/Finder")
 import Validator = require("Framework/Signum.Web/Signum/Scripts/Validator")
 import Operations = require("Framework/Signum.Web/Signum/Scripts/Operations")
 
+import ChartUtils = require("ChartUtils")
+import d3 = require("d3")
 
 export function openChart(prefix: string, url : string) {
-    SF.submit(url,Finder.getFor(prefix).requestDataForSearch());
+    SF.submit(url, Finder.getFor(prefix).requestDataForSearch());
 }
 
 export function attachShowCurrentEntity(el: Lines.EntityLine) {
     var showOnEntity = function () {
-        el.element.next("p").toggle(!!el.runtimeInfo().value);
+        el.element.nextAll("p.messageEntity").toggle(!!el.runtimeInfo().value());
     };
 
     showOnEntity();
@@ -240,7 +242,7 @@ export class ChartBuilder extends Finder.SearchControl {
         $chartContainer.html("");
 
         var data = $chartContainer.data("json");
-        SF.Chart.Utils.fillAllTokenValueFuntions(data);
+        ChartUtils.fillAllTokenValueFuntions(data);
 
         var self = this;
         $(".sf-chart-redraw-onchange", this.$chartControl).each(function (i, element) {
@@ -275,15 +277,15 @@ export class ChartBuilder extends Finder.SearchControl {
         var func;
         var __baseLineNumber__: number;
         try {
-            var getClickKeys = SF.Chart.Utils.getClickKeys;
-            var translate = SF.Chart.Utils.translate;
-            var scale = SF.Chart.Utils.scale;
-            var rotate = SF.Chart.Utils.rotate;
-            var skewX = SF.Chart.Utils.skewX;
-            var skewY = SF.Chart.Utils.skewY;
-            var matrix = SF.Chart.Utils.matrix;
-            var scaleFor = SF.Chart.Utils.scaleFor;
-            var rule = SF.Chart.Utils.rule;
+            var getClickKeys = ChartUtils.getClickKeys;
+            var translate = ChartUtils.translate;
+            var scale = ChartUtils.scale;
+            var rotate = ChartUtils.rotate;
+            var skewX = ChartUtils.skewX;
+            var skewY = ChartUtils.skewY;
+            var matrix = ChartUtils.matrix;
+            var scaleFor = ChartUtils.scaleFor;
+            var rule = ChartUtils.rule;
             __baseLineNumber__ = new Error().lineNumber;
             func = eval(code);
         } catch (e) {

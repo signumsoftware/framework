@@ -202,16 +202,6 @@ Write(Html.ScriptCss("~/Profiler/Content/SF_Profiler.css"));
             
             #line default
             #line hidden
-WriteLiteral("\r\n");
-
-            
-            #line 31 "..\..\Profiler\Views\HeavyList.cshtml"
-Write(Html.ScriptsJs("~/scripts/d3.v3.min.js",
-                "~/Profiler/Scripts/SF_Profiler.js"));
-
-            
-            #line default
-            #line hidden
 WriteLiteral("\r\n\r\n<script");
 
 WriteLiteral(" language=\"javascript\"");
@@ -221,7 +211,7 @@ WriteLiteral(">\r\n\r\n    $(function () {\r\n");
 WriteLiteral("         ");
 
             
-            #line 37 "..\..\Profiler\Views\HeavyList.cshtml"
+            #line 35 "..\..\Profiler\Views\HeavyList.cshtml"
      Write(new JsFunction(ProfilerClient.Module, "heavyListChart", Model.HeavyDetailsToJson()));
 
             

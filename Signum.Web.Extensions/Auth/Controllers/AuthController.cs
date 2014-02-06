@@ -74,7 +74,7 @@ namespace Signum.Web.Auth
         [AcceptVerbs(HttpVerbs.Post)]
         public ActionResult SetPasswordOnOk(string prefix, string passPrefix)
         {
-            var context = this.ExtractEntity<SetPasswordModel>(passPrefix).ApplyChanges(this.ControllerContext, prefix, true);
+            var context = this.ExtractEntity<SetPasswordModel>(passPrefix).ApplyChanges(this.ControllerContext, passPrefix, true);
 
             UserDN user = this.ExtractLite<UserDN>(prefix)
                 .ExecuteLite(UserOperation.SetPassword, context.Value.Password);
@@ -365,7 +365,7 @@ namespace Signum.Web.Auth
             TempData["Message"] = AuthLogic.OnLoginMessage();
 
 
-            return new RedirectResult(OnUserLoggedDefaultRedirect(this));
+            return this.RedirectHttpOrAjax(OnUserLoggedDefaultRedirect(this));
 
         }
 
@@ -461,7 +461,7 @@ namespace Signum.Web.Auth
         {
             LogoutDo();
 
-            return new RedirectResult(OnUserLogoutRedirect(this));
+            return this.RedirectHttpOrAjax(OnUserLogoutRedirect(this));
         }
 
         public static void LogoutDo()

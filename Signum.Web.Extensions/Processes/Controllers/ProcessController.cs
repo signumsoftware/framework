@@ -69,9 +69,9 @@ namespace Signum.Web.Processes
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult ProcessFromMany(string operationFullKey, string liteKeys, string newPrefix)
+        public ActionResult ProcessFromMany(string operationFullKey, string newPrefix)
         {
-            var lites = Navigator.ParseLiteKeys<IdentifiableEntity>(liteKeys);
+            var lites = this.ParseLiteKeys<IdentifiableEntity>();
 
             ProcessDN process = PackageLogic.CreatePackageOperation(lites, OperationClient.GetOperationKeyAssert(operationFullKey));
 

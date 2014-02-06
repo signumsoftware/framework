@@ -1021,7 +1021,7 @@
     <Content Include="Chart\Content\SF_Chart.css" />
     <Content Include="Chart\Images\unknown.png" />
     <TypeScriptCompile Include="Chart\Scripts\Chart.ts" />
-    <TypeScriptCompile Include="Chart\Scripts\SF_Chart_Utils.ts" />
+    <TypeScriptCompile Include="Chart\Scripts\ChartUtils.ts" />
     <TypeScriptCompile Include="Chart\Scripts\ChartColors.ts" />
     <Content Include="Chart\Views\ChartRequestView.cshtml">
       <SubType>Code</SubType>
@@ -1062,6 +1062,7 @@
     <Content Include="Mailing\Content\SF_Mailing.css" />
     <TypeScriptCompile Include="Mailing\Scripts\Mailing.ts" />
     <TypeScriptCompile Include="Mailing\Scripts\TabsRepeater.ts" />
+    <TypeScriptCompile Include="Mailing\Scripts\ckeditor.ts" />
     <Content Include="Mailing\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>

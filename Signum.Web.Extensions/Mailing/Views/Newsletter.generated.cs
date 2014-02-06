@@ -80,15 +80,6 @@ WriteLiteral("\r\n");
 
             
             #line 7 "..\..\Mailing\Views\Newsletter.cshtml"
-Write(Html.ScriptsJs("~/Scripts/ckeditor/ckeditor.js"));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n");
-
-            
-            #line 8 "..\..\Mailing\Views\Newsletter.cshtml"
  using (var nc = Html.TypeContext<NewsletterDN>())
 {  
 
@@ -97,14 +88,14 @@ WriteLiteral("\r\n");
             #line hidden
 WriteLiteral("    <div");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 327), Tuple.Create("\"", 369)
+WriteAttribute("class", Tuple.Create(" class=\"", 276), Tuple.Create("\"", 318)
             
-            #line 10 "..\..\Mailing\Views\Newsletter.cshtml"
-, Tuple.Create(Tuple.Create("", 335), Tuple.Create<System.Object, System.Int32>(nc.Value.IsNew ? "" : "sf-tabs"
+            #line 9 "..\..\Mailing\Views\Newsletter.cshtml"
+, Tuple.Create(Tuple.Create("", 284), Tuple.Create<System.Object, System.Int32>(nc.Value.IsNew ? "" : "sf-tabs"
             
             #line default
             #line hidden
-, 335), false)
+, 284), false)
 );
 
 WriteLiteral(">\r\n        <fieldset");
@@ -116,7 +107,7 @@ WriteLiteral(">\r\n            <legend>Newsletter</legend>\r\n");
 WriteLiteral("            ");
 
             
-            #line 13 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 12 "..\..\Mailing\Views\Newsletter.cshtml"
        Write(Html.ValueLine(nc, n => n.Name));
 
             
@@ -127,7 +118,7 @@ WriteLiteral("\r\n");
 WriteLiteral("            ");
 
             
-            #line 14 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 13 "..\..\Mailing\Views\Newsletter.cshtml"
        Write(Html.ValueLine(nc, n => n.State, vl => vl.ReadOnly = true));
 
             
@@ -138,7 +129,7 @@ WriteLiteral("     \r\n            \r\n");
 WriteLiteral("            ");
 
             
-            #line 16 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 15 "..\..\Mailing\Views\Newsletter.cshtml"
        Write(Html.EntityCombo(nc, n => n.SmtpConfig));
 
             
@@ -149,7 +140,7 @@ WriteLiteral("\r\n");
 WriteLiteral("            ");
 
             
-            #line 17 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 16 "..\..\Mailing\Views\Newsletter.cshtml"
        Write(Html.ValueLine(nc, n => n.From));
 
             
@@ -160,7 +151,7 @@ WriteLiteral("\r\n");
 WriteLiteral("            ");
 
             
-            #line 18 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 17 "..\..\Mailing\Views\Newsletter.cshtml"
        Write(Html.ValueLine(nc, n => n.DisplayFrom));
 
             
@@ -171,7 +162,7 @@ WriteLiteral("\r\n\r\n");
 WriteLiteral("            ");
 
             
-            #line 20 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 19 "..\..\Mailing\Views\Newsletter.cshtml"
        Write(Html.EntityLine(nc, e => e.Query));
 
             
@@ -180,13 +171,13 @@ WriteLiteral("            ");
 WriteLiteral("\r\n\r\n");
 
             
-            #line 22 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 21 "..\..\Mailing\Views\Newsletter.cshtml"
             
             
             #line default
             #line hidden
             
-            #line 22 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 21 "..\..\Mailing\Views\Newsletter.cshtml"
              if (nc.Value.State == NewsletterState.Sent)
             {
                 
@@ -194,14 +185,14 @@ WriteLiteral("\r\n\r\n");
             #line default
             #line hidden
             
-            #line 24 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 23 "..\..\Mailing\Views\Newsletter.cshtml"
            Write(Html.ValueLine(nc, n => n.Subject, vl => vl.ReadOnly = true));
 
             
             #line default
             #line hidden
             
-            #line 24 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 23 "..\..\Mailing\Views\Newsletter.cshtml"
                                                                              
 
             
@@ -217,7 +208,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("                        ");
 
             
-            #line 28 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 27 "..\..\Mailing\Views\Newsletter.cshtml"
                    Write(Html.Raw(nc.Value.Text));
 
             
@@ -226,7 +217,7 @@ WriteLiteral("                        ");
 WriteLiteral("\r\n                    </div>\r\n                </fieldset>\r\n");
 
             
-            #line 31 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 30 "..\..\Mailing\Views\Newsletter.cshtml"
             }
             else if (nc.Value.IsNew)
             {
@@ -243,7 +234,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("                    ");
 
             
-            #line 35 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 34 "..\..\Mailing\Views\Newsletter.cshtml"
                Write(Html.ValueLine(nc, e => e.Subject));
 
             
@@ -254,7 +245,7 @@ WriteLiteral("\r\n");
 WriteLiteral("                    ");
 
             
-            #line 36 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 35 "..\..\Mailing\Views\Newsletter.cshtml"
                Write(Html.ValueLine(nc, e => e.Text, vl => vl.ValueLineType = ValueLineType.TextArea));
 
             
@@ -263,7 +254,7 @@ WriteLiteral("                    ");
 WriteLiteral("\r\n                </div>\r\n");
 
             
-            #line 38 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 37 "..\..\Mailing\Views\Newsletter.cshtml"
             }
             else
             {
@@ -291,7 +282,7 @@ WriteLiteral(">\r\n                            <legend>Replacements</legend>\r\n
 WriteLiteral("                            ");
 
             
-            #line 48 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 47 "..\..\Mailing\Views\Newsletter.cshtml"
                        Write(Html.MailingInsertQueryTokenBuilder(null, nc, queryDescription));
 
             
@@ -306,7 +297,7 @@ WriteLiteral(" class=\"sf-button sf-email-inserttoken sf-email-inserttoken-basic
 WriteLiteral(" data-prefix=\"");
 
             
-            #line 49 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 48 "..\..\Mailing\Views\Newsletter.cshtml"
                                                                                                                                        Write(nc.ControlID);
 
             
@@ -314,14 +305,14 @@ WriteLiteral(" data-prefix=\"");
             #line hidden
 WriteLiteral("\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 2275), Tuple.Create("\"", 2332)
+WriteAttribute("value", Tuple.Create(" value=\"", 2224), Tuple.Create("\"", 2281)
             
-            #line 49 "..\..\Mailing\Views\Newsletter.cshtml"
-                                                                                   , Tuple.Create(Tuple.Create("", 2283), Tuple.Create<System.Object, System.Int32>(EmailTemplateViewMessage.Insert.NiceToString()
+            #line 48 "..\..\Mailing\Views\Newsletter.cshtml"
+                                                                                   , Tuple.Create(Tuple.Create("", 2232), Tuple.Create<System.Object, System.Int32>(EmailTemplateViewMessage.Insert.NiceToString()
             
             #line default
             #line hidden
-, 2283), false)
+, 2232), false)
 );
 
 WriteLiteral(" />\r\n                            <input");
@@ -333,7 +324,7 @@ WriteLiteral(" class=\"sf-button sf-email-inserttoken sf-email-inserttoken-if sf
 WriteLiteral(" data-prefix=\"");
 
             
-            #line 50 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 49 "..\..\Mailing\Views\Newsletter.cshtml"
                                                                                                                                     Write(nc.ControlID);
 
             
@@ -354,7 +345,7 @@ WriteLiteral(" class=\"sf-button sf-email-inserttoken sf-email-inserttoken-forea
 WriteLiteral(" data-prefix=\"");
 
             
-            #line 51 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 50 "..\..\Mailing\Views\Newsletter.cshtml"
                                                                                                                                          Write(nc.ControlID);
 
             
@@ -375,7 +366,7 @@ WriteLiteral(" class=\"sf-button sf-email-inserttoken sf-email-inserttoken-any s
 WriteLiteral(" data-prefix=\"");
 
             
-            #line 52 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 51 "..\..\Mailing\Views\Newsletter.cshtml"
                                                                                                                                      Write(nc.ControlID);
 
             
@@ -392,7 +383,7 @@ WriteLiteral(" />\r\n                        </fieldset>\r\n                    
 WriteLiteral("                    ");
 
             
-            #line 55 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 54 "..\..\Mailing\Views\Newsletter.cshtml"
                Write(Html.ValueLine(nc, e => e.Subject, vl => vl.ValueHtmlProps["class"] = "sf-email-inserttoken-target"));
 
             
@@ -403,7 +394,7 @@ WriteLiteral("\r\n");
 WriteLiteral("                    ");
 
             
-            #line 56 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 55 "..\..\Mailing\Views\Newsletter.cshtml"
                Write(Html.ValueLine(nc, e => e.Text, vl =>
                     {
                         vl.ValueLineType = ValueLineType.TextArea;
@@ -419,7 +410,7 @@ WriteLiteral("\r\n                    <script>\r\n                        $(func
 WriteLiteral("                            ");
 
             
-            #line 64 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 63 "..\..\Mailing\Views\Newsletter.cshtml"
                         Write(new JsFunction(MailingClient.Module, "initHtmlEditorWithTokens", nc.SubContext(e => e.Text).ControlID));
 
             
@@ -429,7 +420,7 @@ WriteLiteral(";\r\n                        });\r\n                    </script>\
 "div>\r\n");
 
             
-            #line 68 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 67 "..\..\Mailing\Views\Newsletter.cshtml"
             }
 
             
@@ -438,13 +429,13 @@ WriteLiteral(";\r\n                        });\r\n                    </script>\
 WriteLiteral("        </fieldset>\r\n");
 
             
-            #line 70 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 69 "..\..\Mailing\Views\Newsletter.cshtml"
         
             
             #line default
             #line hidden
             
-            #line 70 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 69 "..\..\Mailing\Views\Newsletter.cshtml"
          if (!nc.Value.IsNew)
         {
 
@@ -461,7 +452,7 @@ WriteLiteral(">\r\n                <legend>Deliveries</legend>\r\n              
 WriteLiteral("                    ");
 
             
-            #line 76 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 75 "..\..\Mailing\Views\Newsletter.cshtml"
                Write(Html.SearchControl(new FindOptions(typeof(NewsletterDeliveryDN))
                {
                    FilterOptions = { new FilterOption("Newsletter", nc.Value) { Frozen = true } },
@@ -474,7 +465,7 @@ WriteLiteral("                    ");
 WriteLiteral("\r\n                </fieldset>\r\n            </fieldset>\r\n");
 
             
-            #line 83 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 82 "..\..\Mailing\Views\Newsletter.cshtml"
         }
 
             
@@ -483,7 +474,7 @@ WriteLiteral("\r\n                </fieldset>\r\n            </fieldset>\r\n");
 WriteLiteral("    </div>    \r\n");
 
             
-            #line 85 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 84 "..\..\Mailing\Views\Newsletter.cshtml"
 }
 
             
@@ -494,7 +485,7 @@ WriteLiteral("<script>\r\n    $(function () {\r\n");
 WriteLiteral("        ");
 
             
-            #line 88 "..\..\Mailing\Views\Newsletter.cshtml"
+            #line 87 "..\..\Mailing\Views\Newsletter.cshtml"
     Write(new JsFunction(MailingClient.Module, "initReplacements"));
 
             

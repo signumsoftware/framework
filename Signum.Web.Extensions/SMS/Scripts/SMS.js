@@ -1,6 +1,6 @@
 ﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
 /// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
-define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Finder", "Framework/Signum.Web/Signum/Scripts/Operations", "Framework/Signum.Web/Signum/Scripts/Navigator"], function(require, exports, Entities, Finder, Operations, Navigator) {
+define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Finder", "Framework/Signum.Web/Signum/Scripts/Operations", "Framework/Signum.Web/Signum/Scripts/Navigator", "Framework/Signum.Web/Signum/Scripts/Validator"], function(require, exports, Entities, Finder, Operations, Navigator, Validator) {
     var SMSMaxTextLength;
     var SMSWarningTextLength;
 
@@ -185,7 +185,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (eHtml == null)
                 return null;
 
-            options.requestExtraJsonData = $.extend({ prefixModel: prefixModel }, eHtml.html.serializeObject());
+            options.requestExtraJsonData = $.extend({ prefixModel: prefixModel }, Validator.getFormValuesHtml(eHtml));
             options.controllerUrl = urlOperation;
 
             Operations.constructFromManyDefault(options);

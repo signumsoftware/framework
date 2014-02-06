@@ -59,7 +59,7 @@ export class FileLine extends Lines.EntityBase {
 
     uploadAsync(f: File, customizeXHR?: (xhr: XMLHttpRequest) => void) {
         $(this.pf('loading')).show();
-        this.runtimeInfo().setValue(new Entities.RuntimeInfoValue(this.staticInfo().singleType(), null));
+        this.runtimeInfo().setValue(new Entities.RuntimeInfoValue(this.staticInfo().singleType(), null, true));
 
         var fileName = f.name;
 
@@ -103,11 +103,11 @@ export class FileLine extends Lines.EntityBase {
         $(this.pf(''))[0].setAttribute('value', (<HTMLInputElement>$(this.pf(''))[0]).value);
         var $mform = $('form');
         $mform.attr('enctype', 'multipart/form-data').attr('encoding', 'multipart/form-data');
-        this.runtimeInfo().setValue(new Entities.RuntimeInfoValue(this.staticInfo().singleType(), null));
+        this.runtimeInfo().setValue(new Entities.RuntimeInfoValue(this.staticInfo().singleType(), null, true));
     }
 
     upload() {
-        this.runtimeInfo().setValue(new Entities.RuntimeInfoValue(this.staticInfo().singleType(), null));
+        this.runtimeInfo().setValue(new Entities.RuntimeInfoValue(this.staticInfo().singleType(), null, true));
 
         var $fileInput = $(this.pf(''));
         $fileInput[0].setAttribute('value', (<HTMLInputElement>$fileInput[0]).value);

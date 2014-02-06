@@ -20,6 +20,7 @@ using Signum.Entities.Reports;
 using Signum.Entities.Basics;
 using Signum.Engine.Reports;
 using Signum.Engine.Basics;
+using Signum.Web.Operations;
 #endregion
 
 namespace Signum.Web.Reports
@@ -52,10 +53,10 @@ namespace Signum.Web.Reports
         }
 
         [HttpPost]
-        public ViewResult Create(Lite<QueryDN> query)
+        public ActionResult Create(Lite<QueryDN> query, string prefix)
         {
             ExcelReportDN report = new ExcelReportDN { Query = query.Retrieve() };
-            return Navigator.NormalPage(this, report);
+            return OperationClient.DefaultConstructResult(this, report, prefix);
         }
     }
 }

@@ -443,9 +443,9 @@ namespace Signum.Web.Selenium
             EntityClick(selenium, lite, prefix, true);
         }
 
-        public static void EntityClick(this ISelenium selenium, Lite<IdentifiableEntity> lite, string prefix, bool allowMultiple)
+        public static void EntityClick(this ISelenium selenium, Lite<IdentifiableEntity> lite, string prefix, bool allowSelection)
         {
-            selenium.Click("{0} > td:nth-child({1}) > a".Formato(EntityRowSelector(lite, prefix), allowMultiple ? 2 : 1));
+            selenium.Click("{0} > td:nth-child({1}) > a".Formato(EntityRowSelector(lite, prefix), allowSelection ? 2 : 1));
         }
 
         public static void EntityClick(this ISelenium selenium, int rowIndexBase1)
@@ -458,9 +458,9 @@ namespace Signum.Web.Selenium
             selenium.EntityClick(rowIndexBase1, prefix, true);
         }
 
-        public static void EntityClick(this ISelenium selenium, int rowIndexBase1, string prefix, bool allowMultiple)
+        public static void EntityClick(this ISelenium selenium, int rowIndexBase1, string prefix, bool allowSelection)
         {
-            if (allowMultiple)
+            if (allowSelection)
                 selenium.Click("{0} > a".Formato(CellSelector(selenium, rowIndexBase1, 2, prefix)));
             else
                 selenium.Click("{0} > a".Formato(CellSelector(selenium, rowIndexBase1, 1, prefix)));

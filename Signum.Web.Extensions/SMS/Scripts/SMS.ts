@@ -6,6 +6,7 @@ import Lines = require("Framework/Signum.Web/Signum/Scripts/Lines")
 import Finder = require("Framework/Signum.Web/Signum/Scripts/Finder")
 import Operations = require("Framework/Signum.Web/Signum/Scripts/Operations")
 import Navigator = require("Framework/Signum.Web/Signum/Scripts/Navigator")
+import Validator = require("Framework/Signum.Web/Signum/Scripts/Validator")
 
 
 var SMSMaxTextLength;
@@ -205,7 +206,7 @@ export function sentMultipleSms(options: Operations.OperationOptions, prefix: st
             if (eHtml == null)
                 return null;
 
-        options.requestExtraJsonData = $.extend({ prefixModel: prefixModel }, eHtml.html.serializeObject());
+        options.requestExtraJsonData = $.extend({ prefixModel: prefixModel }, Validator.getFormValuesHtml(eHtml));
             options.controllerUrl = urlOperation;
 
             Operations.constructFromManyDefault(options);

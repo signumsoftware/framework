@@ -590,26 +590,26 @@ namespace Signum.Web.Selenium
             Selenium.WaitElementDisapear(lastHeaderSelector);
         }
 
-        public string EntityLinkLocator(Lite<IIdentifiable> lite, bool allowMultiple = true)
+        public string EntityLinkLocator(Lite<IIdentifiable> lite, bool allowSelection = true)
         {
-            return RowLocator(lite) + " > td:nth-child({0}) > a".Formato(allowMultiple ? 2 : 1);
+            return RowLocator(lite) + " > td:nth-child({0}) > a".Formato(allowSelection ? 2 : 1);
         }
 
-        public string EntityLinkLocator(int rowIndex, bool allowMultiple = true)
+        public string EntityLinkLocator(int rowIndex, bool allowSelection = true)
         {
-            return RowLocator(rowIndex) + " > td:nth-child({0}) > a".Formato(allowMultiple ? 2 : 1);
+            return RowLocator(rowIndex) + " > td:nth-child({0}) > a".Formato(allowSelection ? 2 : 1);
         }
 
-        public NormalPage<T> EntityClick<T>(Lite<T> lite, bool allowMultiple = true) where T : IdentifiableEntity
+        public NormalPage<T> EntityClick<T>(Lite<T> lite, bool allowSelection = true) where T : IdentifiableEntity
         {
-            Selenium.Click(EntityLinkLocator(lite, allowMultiple));
+            Selenium.Click(EntityLinkLocator(lite, allowSelection));
             Selenium.WaitForPageToLoad();
             return new NormalPage<T>(Selenium);
         }
 
-        public NormalPage<T> EntityClick<T>(int rowIndex, bool allowMultiple = true) where T : IdentifiableEntity
+        public NormalPage<T> EntityClick<T>(int rowIndex, bool allowSelection = true) where T : IdentifiableEntity
         {
-            Selenium.Click(EntityLinkLocator(rowIndex, allowMultiple));
+            Selenium.Click(EntityLinkLocator(rowIndex, allowSelection));
             Selenium.WaitForPageToLoad();
             return new NormalPage<T>(Selenium);
         }

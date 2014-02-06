@@ -89,18 +89,6 @@ namespace Signum.Web.Extensions.ControlPanel.Views
         {
             
             #line 10 "..\..\ControlPanel\Views\UserChartPart.cshtml"
-Write(Html.ScriptsJs("~/Chart/Scripts/SF_Chart.js",
-                "~/Chart/Scripts/SF_Chart_Utils.js",
-                "~/scripts/d3.v3.min.js",
-                "~/scripts/colorbrewer.js"));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n");
-
-            
-            #line 14 "..\..\ControlPanel\Views\UserChartPart.cshtml"
 Write(Html.ScriptCss("~/Chart/Content/SF_Chart.css"));
 
             
@@ -109,16 +97,17 @@ Write(Html.ScriptCss("~/Chart/Content/SF_Chart.css"));
 WriteLiteral("\r\n");
 
             
-            #line 15 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+            #line 11 "..\..\ControlPanel\Views\UserChartPart.cshtml"
    
     var ucPart = (UserChartPartDN)Model.Content;
     UserChartDN uc = ucPart.UserChart;
     ChartRequest request = uc.ToRequest();
-    
-    var containerId = crc.Compose("sfChartBuilderContainer");
+  
 
     using (var crc = new TypeContext<ChartRequest>(request, "r{0}c{1}".Formato(Model.Row, Model.Column)))
     {
+        var containerId = crc.Compose("sfChartBuilderContainer");
+        
         ResultTable resultTable = ChartLogic.ExecuteChart(request);
 
 
@@ -128,14 +117,14 @@ WriteLiteral("\r\n");
             #line hidden
 WriteLiteral("    <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 917), Tuple.Create("\"", 952)
+WriteAttribute("id", Tuple.Create(" id=\"", 739), Tuple.Create("\"", 774)
             
-            #line 27 "..\..\ControlPanel\Views\UserChartPart.cshtml"
-, Tuple.Create(Tuple.Create("", 922), Tuple.Create<System.Object, System.Int32>(crc.Compose("sfChartControl")
+            #line 24 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+, Tuple.Create(Tuple.Create("", 744), Tuple.Create<System.Object, System.Int32>(crc.Compose("sfChartControl")
             
             #line default
             #line hidden
-, 922), false)
+, 744), false)
 );
 
 WriteLiteral(" class=\"sf-search-control sf-chart-control\"");
@@ -143,7 +132,7 @@ WriteLiteral(" class=\"sf-search-control sf-chart-control\"");
 WriteLiteral(" data-prefix=\"");
 
             
-            #line 27 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+            #line 24 "..\..\ControlPanel\Views\UserChartPart.cshtml"
                                                                                                 Write(crc.ControlID);
 
             
@@ -160,7 +149,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("            ");
 
             
-            #line 29 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+            #line 26 "..\..\ControlPanel\Views\UserChartPart.cshtml"
        Write(Html.HiddenRuntimeInfo(crc));
 
             
@@ -171,7 +160,7 @@ WriteLiteral("\r\n");
 WriteLiteral("            ");
 
             
-            #line 30 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+            #line 27 "..\..\ControlPanel\Views\UserChartPart.cshtml"
        Write(Html.Hidden(crc.Compose("sfOrders"), request.Orders.IsNullOrEmpty() ? "" :
                     (request.Orders.ToString(oo => (oo.OrderType == OrderType.Ascending ? "" : "-") + oo.Token.FullKey(), ";") + ";")));
 
@@ -181,13 +170,13 @@ WriteLiteral("            ");
 WriteLiteral("\r\n");
 
             
-            #line 32 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+            #line 29 "..\..\ControlPanel\Views\UserChartPart.cshtml"
             
             
             #line default
             #line hidden
             
-            #line 32 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+            #line 29 "..\..\ControlPanel\Views\UserChartPart.cshtml"
               
         ViewData[ViewDataKeys.QueryDescription] = DynamicQueryManager.Current.QueryDescription(request.QueryName);
         ViewData[ViewDataKeys.FilterOptions] = request.Filters.Select(f => new FilterOption { Token = f.Token, Operation = f.Operation, Value = f.Value }).ToList();
@@ -200,7 +189,7 @@ WriteLiteral("\r\n");
 WriteLiteral("            ");
 
             
-            #line 36 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+            #line 33 "..\..\ControlPanel\Views\UserChartPart.cshtml"
        Write(Html.Partial(Navigator.Manager.FilterBuilderView, crc));
 
             
@@ -208,14 +197,14 @@ WriteLiteral("            ");
             #line hidden
 WriteLiteral("\r\n            <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 1730), Tuple.Create("\"", 1747)
+WriteAttribute("id", Tuple.Create(" id=\"", 1552), Tuple.Create("\"", 1569)
             
-            #line 37 "..\..\ControlPanel\Views\UserChartPart.cshtml"
-, Tuple.Create(Tuple.Create("", 1735), Tuple.Create<System.Object, System.Int32>(containerId
+            #line 34 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+, Tuple.Create(Tuple.Create("", 1557), Tuple.Create<System.Object, System.Int32>(containerId
             
             #line default
             #line hidden
-, 1735), false)
+, 1557), false)
 );
 
 WriteLiteral(">\r\n");
@@ -223,7 +212,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("                ");
 
             
-            #line 38 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+            #line 35 "..\..\ControlPanel\Views\UserChartPart.cshtml"
            Write(Html.Partial(ChartClient.ChartBuilderView, crc));
 
             
@@ -236,7 +225,7 @@ WriteLiteral(" type=\"text/javascript\"");
 WriteLiteral(">\r\n                var findOptions = ");
 
             
-            #line 41 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+            #line 38 "..\..\ControlPanel\Views\UserChartPart.cshtml"
                               Write(MvcHtmlString.Create(uc.ToJS().ToString()));
 
             
@@ -245,17 +234,18 @@ WriteLiteral(">\r\n                var findOptions = ");
 WriteLiteral("\r\n                 require([\"");
 
             
-            #line 42 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+            #line 39 "..\..\ControlPanel\Views\UserChartPart.cshtml"
                       Write(ChartClient.Module);
 
             
             #line default
             #line hidden
-WriteLiteral("\"], function (Chart) { new Chart.ChartBuilder($(\'#");
+WriteLiteral("\"], function (Chart) {\r\n                     var chartBuilder = new Chart.ChartBu" +
+"ilder($(\'#");
 
             
-            #line 42 "..\..\ControlPanel\Views\UserChartPart.cshtml"
-                                                                                           Write(containerId);
+            #line 40 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+                                                              Write(containerId);
 
             
             #line default
@@ -263,43 +253,72 @@ WriteLiteral("\"], function (Chart) { new Chart.ChartBuilder($(\'#");
 WriteLiteral("\'), $.extend({ prefix: \'");
 
             
+            #line 40 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+                                                                                                  Write(crc.ControlID);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\' }, findOptions));\r\n\r\n");
+
+            
             #line 42 "..\..\ControlPanel\Views\UserChartPart.cshtml"
-                                                                                                                               Write(crc.ControlID);
+                     
+            
+            #line default
+            #line hidden
+            
+            #line 42 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+                      if (!ucPart.ShowData)
+                     {
 
             
             #line default
             #line hidden
-WriteLiteral("\' }, findOptions)); }); \r\n            </script>\r\n        </div>\r\n        <div");
+WriteLiteral("                         ");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 2186), Tuple.Create("\"", 2223)
+WriteLiteral("\r\n                     chartBuilder.reDraw();\r\n                        ");
+
+WriteLiteral("\r\n");
+
             
-            #line 45 "..\..\ControlPanel\Views\UserChartPart.cshtml"
-, Tuple.Create(Tuple.Create("", 2191), Tuple.Create<System.Object, System.Int32>(crc.Compose("sfChartContainer")
+            #line 47 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+                     }
+
             
             #line default
             #line hidden
-, 2191), false)
+WriteLiteral("                 }); \r\n            </script>\r\n        </div>\r\n        <div");
+
+WriteAttribute("id", Tuple.Create(" id=\"", 2273), Tuple.Create("\"", 2310)
+            
+            #line 51 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+, Tuple.Create(Tuple.Create("", 2278), Tuple.Create<System.Object, System.Int32>(crc.Compose("sfChartContainer")
+            
+            #line default
+            #line hidden
+, 2278), false)
 );
 
 WriteLiteral(">\r\n            <div");
 
 WriteLiteral(" class=\"sf-chart-container\"");
 
-WriteAttribute("style", Tuple.Create(" style=\"", 2270), Tuple.Create("\"", 2323)
-, Tuple.Create(Tuple.Create("", 2278), Tuple.Create("display:", 2278), true)
+WriteAttribute("style", Tuple.Create(" style=\"", 2357), Tuple.Create("\"", 2410)
+, Tuple.Create(Tuple.Create("", 2365), Tuple.Create("display:", 2365), true)
             
-            #line 46 "..\..\ControlPanel\Views\UserChartPart.cshtml"
-, Tuple.Create(Tuple.Create("", 2286), Tuple.Create<System.Object, System.Int32>(ucPart.ShowData ? "none" : "block"
+            #line 52 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+, Tuple.Create(Tuple.Create("", 2373), Tuple.Create<System.Object, System.Int32>(ucPart.ShowData ? "none" : "block"
             
             #line default
             #line hidden
-, 2286), false)
+, 2373), false)
 );
 
 WriteLiteral(" \r\n                    data-open-url=\"");
 
             
-            #line 47 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+            #line 53 "..\..\ControlPanel\Views\UserChartPart.cshtml"
                                Write(Url.Action<ChartController>(cc => cc.OpenSubgroup(crc.ControlID)));
 
             
@@ -310,7 +329,7 @@ WriteLiteral("\"");
 WriteLiteral(" \r\n                    data-fullscreen-url=\"");
 
             
-            #line 48 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+            #line 54 "..\..\ControlPanel\Views\UserChartPart.cshtml"
                                      Write(Url.Action<ChartController>(cc => cc.FullScreen(crc.ControlID)));
 
             
@@ -321,7 +340,7 @@ WriteLiteral("\"");
 WriteLiteral("\r\n                    data-json=\"");
 
             
-            #line 49 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+            #line 55 "..\..\ControlPanel\Views\UserChartPart.cshtml"
                           Write(Html.Json(ChartUtils.DataJson(crc.Value, resultTable)).ToString());
 
             
@@ -332,7 +351,7 @@ WriteLiteral("\"");
 WriteLiteral(">\r\n            </div>\r\n        </div>\r\n    </div>\r\n");
 
             
-            #line 53 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+            #line 59 "..\..\ControlPanel\Views\UserChartPart.cshtml"
     
         if (ucPart.ShowData)
         {
@@ -347,41 +366,19 @@ WriteLiteral(">\r\n            </div>\r\n        </div>\r\n    </div>\r\n");
             #line default
             #line hidden
             
-            #line 62 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+            #line 68 "..\..\ControlPanel\Views\UserChartPart.cshtml"
        Write(Html.Partial(ChartClient.ChartResultsTableView, new TypeContext<ChartRequest>(request, "r{0}c{1}".Formato(Model.Row, Model.Column))));
 
             
             #line default
             #line hidden
             
-            #line 62 "..\..\ControlPanel\Views\UserChartPart.cshtml"
+            #line 68 "..\..\ControlPanel\Views\UserChartPart.cshtml"
                                                                                                                                                  
         }
         else
         {
             MvcHtmlString divSelector = MvcHtmlString.Create("#" + crc.Compose("sfChartContainer") + " > .sf-chart-container");
-   
-
-            
-            #line default
-            #line hidden
-WriteLiteral("            <script");
-
-WriteLiteral(" type=\"text/javascript\"");
-
-WriteLiteral(">\r\n                (function () {\r\n                    $(\"#");
-
-            
-            #line 70 "..\..\ControlPanel\Views\UserChartPart.cshtml"
-                   Write(containerId);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\").SFControl().reDraw();\r\n                })();\r\n            </script>\r\n");
-
-            
-            #line 73 "..\..\ControlPanel\Views\UserChartPart.cshtml"
         }
 
             

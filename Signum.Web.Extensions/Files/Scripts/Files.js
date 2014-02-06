@@ -48,7 +48,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         FileLine.prototype.uploadAsync = function (f, customizeXHR) {
             $(this.pf('loading')).show();
-            this.runtimeInfo().setValue(new Entities.RuntimeInfoValue(this.staticInfo().singleType(), null));
+            this.runtimeInfo().setValue(new Entities.RuntimeInfoValue(this.staticInfo().singleType(), null, true));
 
             var fileName = f.name;
 
@@ -92,11 +92,11 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             $(this.pf(''))[0].setAttribute('value', $(this.pf(''))[0].value);
             var $mform = $('form');
             $mform.attr('enctype', 'multipart/form-data').attr('encoding', 'multipart/form-data');
-            this.runtimeInfo().setValue(new Entities.RuntimeInfoValue(this.staticInfo().singleType(), null));
+            this.runtimeInfo().setValue(new Entities.RuntimeInfoValue(this.staticInfo().singleType(), null, true));
         };
 
         FileLine.prototype.upload = function () {
-            this.runtimeInfo().setValue(new Entities.RuntimeInfoValue(this.staticInfo().singleType(), null));
+            this.runtimeInfo().setValue(new Entities.RuntimeInfoValue(this.staticInfo().singleType(), null, true));
 
             var $fileInput = $(this.pf(''));
             $fileInput[0].setAttribute('value', $fileInput[0].value);

@@ -1,6 +1,6 @@
 ﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
 define(["require", "exports"], function(require, exports) {
-    once("SF.Calendar", function () {
+    function init() {
         var $selectionOrigin;
         var currShiftSelection = [];
         var inSelectionProcess = false;
@@ -90,6 +90,7 @@ define(["require", "exports"], function(require, exports) {
                 $(".sf-annual-calendar td").width(ui.value + "px").height(ui.value + "px");
             }
         });
-    });
+    }
+    exports.init = init;
 });
 //# sourceMappingURL=calendar.js.map

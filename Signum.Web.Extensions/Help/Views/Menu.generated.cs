@@ -30,7 +30,7 @@ namespace Signum.Web.Extensions.Help.Views
     using Signum.Utilities;
     using Signum.Web;
     
-    #line 2 "..\..\Help\Views\Menu.cshtml"
+    #line 1 "..\..\Help\Views\Menu.cshtml"
     using Signum.Web.Help;
     
     #line default
@@ -45,15 +45,6 @@ namespace Signum.Web.Extensions.Help.Views
         }
         public override void Execute()
         {
-            
-            #line 1 "..\..\Help\Views\Menu.cshtml"
-Write(Html.ScriptsJs("~/help/scripts/help.js"));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n");
-
 WriteLiteral("<div");
 
 WriteLiteral(" id=\"syntax-help\"");
@@ -150,14 +141,14 @@ WriteLiteral(" id=\"saving-error\"");
 
 WriteLiteral("><img");
 
-WriteAttribute("src", Tuple.Create(" src=\"", 2909), Tuple.Create("\"", 2961)
+WriteAttribute("src", Tuple.Create(" src=\"", 2866), Tuple.Create("\"", 2918)
             
-            #line 45 "..\..\Help\Views\Menu.cshtml"
-, Tuple.Create(Tuple.Create("", 2915), Tuple.Create<System.Object, System.Int32>(Url.Content("~/help/Images/icon-warning.png")
+            #line 44 "..\..\Help\Views\Menu.cshtml"
+, Tuple.Create(Tuple.Create("", 2872), Tuple.Create<System.Object, System.Int32>(Url.Content("~/help/Images/icon-warning.png")
             
             #line default
             #line hidden
-, 2915), false)
+, 2872), false)
 );
 
 WriteLiteral(" /><span");
@@ -181,14 +172,14 @@ WriteLiteral(" id=\"edit-action\"");
 
 WriteLiteral(" class=\"action\"");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 3214), Tuple.Create("\"", 3265)
+WriteAttribute("href", Tuple.Create(" href=\"", 3171), Tuple.Create("\"", 3222)
             
-            #line 49 "..\..\Help\Views\Menu.cshtml"
-, Tuple.Create(Tuple.Create("", 3221), Tuple.Create<System.Object, System.Int32>(new JsFunction(HelpClient.Module, "edit")
+            #line 48 "..\..\Help\Views\Menu.cshtml"
+, Tuple.Create(Tuple.Create("", 3178), Tuple.Create<System.Object, System.Int32>(new JsFunction(HelpClient.Module, "edit")
             
             #line default
             #line hidden
-, 3221), false)
+, 3178), false)
 );
 
 WriteLiteral(">Editar</a>\r\n    <a");
@@ -205,14 +196,14 @@ WriteLiteral(" id=\"save-action\"");
 
 WriteLiteral(" class=\"action\"");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 3398), Tuple.Create("\"", 3449)
+WriteAttribute("href", Tuple.Create(" href=\"", 3355), Tuple.Create("\"", 3406)
             
-            #line 51 "..\..\Help\Views\Menu.cshtml"
-, Tuple.Create(Tuple.Create("", 3405), Tuple.Create<System.Object, System.Int32>(new JsFunction(HelpClient.Module, "save")
+            #line 50 "..\..\Help\Views\Menu.cshtml"
+, Tuple.Create(Tuple.Create("", 3362), Tuple.Create<System.Object, System.Int32>(new JsFunction(HelpClient.Module, "save")
             
             #line default
             #line hidden
-, 3405), false)
+, 3362), false)
 );
 
 WriteLiteral(" style=\"display: none\"");

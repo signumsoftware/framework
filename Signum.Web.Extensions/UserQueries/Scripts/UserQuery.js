@@ -16,7 +16,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
 
     function attachShowCurrentEntity(el) {
         var showOnEntity = function () {
-            el.element.next("p").toggle(el.runtimeInfo().value != null);
+            el.element.nextAll("p.messageEntity").toggle(!!el.runtimeInfo().value());
         };
 
         showOnEntity();
@@ -28,7 +28,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
     function deleteUserQuery(os, urlRedirect) {
         os.avoidReturnRedirect = true;
 
-        Operations.deleteAjaxContextual(os).then(function () {
+        Operations.deleteDefault(os).then(function () {
             if (!os.prefix)
                 window.location.href = urlRedirect;
         });

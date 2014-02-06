@@ -61,15 +61,6 @@ WriteLiteral("\r\n");
 
             
             #line 5 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
-Write(Html.ScriptsJs("~/ControlPanel/Scripts/SF_FlowTable.js"));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n");
-
-            
-            #line 6 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
 Write(Html.ScriptCss("~/ControlPanel/Content/SF_FlowTable.css",
                 "~/ControlPanel/Content/SF_ControlPanel.css"));
 
@@ -79,13 +70,13 @@ Write(Html.ScriptCss("~/ControlPanel/Content/SF_FlowTable.css",
 WriteLiteral("\r\n\r\n<div>\r\n");
 
             
-            #line 10 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
+            #line 9 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
     
             
             #line default
             #line hidden
             
-            #line 10 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
+            #line 9 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
      using (var tc = Html.TypeContext<ControlPanelDN>())
     {
         
@@ -93,56 +84,56 @@ WriteLiteral("\r\n\r\n<div>\r\n");
             #line default
             #line hidden
             
-            #line 12 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
+            #line 11 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
    Write(Html.EntityLine(tc, cp => cp.Related, el => el.Create = false));
 
             
             #line default
             #line hidden
             
-            #line 12 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
+            #line 11 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
                                                                        
         
             
             #line default
             #line hidden
             
-            #line 13 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
+            #line 12 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
    Write(Html.ValueLine(tc, cp => cp.DisplayName));
 
             
             #line default
             #line hidden
             
-            #line 13 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
+            #line 12 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
                                                  
         
             
             #line default
             #line hidden
             
-            #line 14 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
+            #line 13 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
    Write(Html.ValueLine(tc, cp => cp.HomePagePriority));
 
             
             #line default
             #line hidden
             
-            #line 14 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
+            #line 13 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
                                                       
         
             
             #line default
             #line hidden
             
-            #line 15 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
+            #line 14 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
    Write(Html.ValueLine(tc, cp => cp.NumberOfColumns));
 
             
             #line default
             #line hidden
             
-            #line 15 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
+            #line 14 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
                                                      
         
         
@@ -150,14 +141,14 @@ WriteLiteral("\r\n\r\n<div>\r\n");
             #line default
             #line hidden
             
-            #line 17 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
+            #line 16 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
    Write(Html.EntityLine(tc, cp => cp.EntityType, el => { el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Signum"); }));
 
             
             #line default
             #line hidden
             
-            #line 17 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
+            #line 16 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
                                                                                                                            
 
         Html.RenderPartial(ControlPanelClient.AdminViewPrefix.Formato("PanelParts"), tc.Value);
@@ -172,7 +163,7 @@ WriteLiteral(" class=\"clearall\"");
 WriteLiteral("></div>   \r\n");
 
             
-            #line 21 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
+            #line 20 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
     }
 
             
@@ -185,7 +176,7 @@ WriteLiteral(" type=\"text/javascript\"");
 WriteLiteral(">\r\n    $(function () {\r\n        require([\"");
 
             
-            #line 26 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
+            #line 25 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
              Write(ControlPanelClient.FlowTableModule);
 
             

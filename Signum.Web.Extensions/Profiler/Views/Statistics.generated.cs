@@ -99,15 +99,6 @@ Write(Html.Partial(ProfilerClient.ViewPrefix.Formato("StatisticsTable")));
             
             #line default
             #line hidden
-WriteLiteral("\r\n");
-
-            
-            #line 14 "..\..\Profiler\Views\Statistics.cshtml"
-Write(Html.ScriptsJs("~/Profiler/Scripts/SF_Profiler.js"));
-
-            
-            #line default
-            #line hidden
 WriteLiteral("\r\n<script");
 
 WriteLiteral(" language=\"javascript\"");
@@ -117,7 +108,7 @@ WriteLiteral(">\r\n    $(function () {\r\n");
 WriteLiteral("        ");
 
             
-            #line 17 "..\..\Profiler\Views\Statistics.cshtml"
+            #line 16 "..\..\Profiler\Views\Statistics.cshtml"
     Write(new JsFunction(ProfilerClient.Module, "initStats"));
 
             

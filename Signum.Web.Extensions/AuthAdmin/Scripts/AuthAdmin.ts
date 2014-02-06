@@ -100,7 +100,7 @@ export function treeView() {
 export function openDialog(e: Event) {
     e.preventDefault();
     var $this = $(this);
-    Navigator.navigatePopup(new Entities.EntityHtml("New", new Entities.RuntimeInfoValue("PropertyRulePack", null)),
+    Navigator.navigatePopup(Entities.EntityHtml.withoutType("New"),
         {
             controllerUrl: $this.attr("href"),
             onPopupLoaded: div => coloredRadios(div)

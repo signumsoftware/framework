@@ -321,16 +321,6 @@ WriteLiteral("\r\n");
 
             
             #line 89 "..\..\Profiler\Views\HeavyDetails.cshtml"
-Write(Html.ScriptsJs("~/scripts/d3.v3.min.js",
-                "~/Profiler/Scripts/SF_Profiler.js"));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n");
-
-            
-            #line 91 "..\..\Profiler\Views\HeavyDetails.cshtml"
    
     var fullTree = Model.FollowC(e => e.Parent).ToList();
     fullTree.AddRange(Model.Descendants()); 
@@ -347,7 +337,7 @@ WriteLiteral(">\r\n    $(function() {\r\n");
 WriteLiteral("       ");
 
             
-            #line 97 "..\..\Profiler\Views\HeavyDetails.cshtml"
+            #line 95 "..\..\Profiler\Views\HeavyDetails.cshtml"
    Write(new JsFunction(ProfilerClient.Module, "heavyDetailsChart", fullTree.HeavyDetailsToJson(), Model.Depth));
 
             

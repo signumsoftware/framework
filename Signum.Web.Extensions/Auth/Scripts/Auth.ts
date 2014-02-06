@@ -4,6 +4,7 @@ import Entities = require("Framework/Signum.Web/Signum/Scripts/Entities")
 import Navigator = require("Framework/Signum.Web/Signum/Scripts/Navigator")
 import Finder = require("Framework/Signum.Web/Signum/Scripts/Finder")
 import Operations = require("Framework/Signum.Web/Signum/Scripts/Operations")
+import Validator = require("Framework/Signum.Web/Signum/Scripts/Validator")
 
 
 export function saveNew(options: Operations.EntityOperationOptions, url: string) {
@@ -19,11 +20,12 @@ export function setPassword(options: Operations.EntityOperationOptions, urlModel
 
     Navigator.viewPopup(Entities.EntityHtml.withoutType(passPrefix), {
         controllerUrl: urlModel,
+        allowErrors : Navigator.AllowErrors.No
     }).then(eHtml => {
             if (eHtml == null)
                 return;
 
-            options.requestExtraJsonData = $.extend({ passPrefix: passPrefix }, eHtml.html.serializeObject());
+        options.requestExtraJsonData = $.extend({ passPrefix: passPrefix }, Validator.getFormValuesHtml(eHtml));
             options.controllerUrl = urlSetPassword;
 
             Operations.executeDefault(options);

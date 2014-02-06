@@ -12,7 +12,7 @@
     FindOptions fo = new FindOptions(queryName)
     {
         FilterMode = FilterMode.OnlyResults,
-        AllowMultiple = false
+        AllowSelection = false
     };
 
     @Html.SearchControl(uq, fo, new Context(null, "r{0}c{1}".Formato(Model.Row, Model.Column)));

@@ -13,5 +13,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             });
         });
     }
+    exports.createNewPart = createNewPart;
 });
 //# sourceMappingURL=ControlPanel.js.map

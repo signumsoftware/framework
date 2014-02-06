@@ -1,13 +1,13 @@
 ﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
 /// <reference path="../../../../Framework/Signum.Web/Signum/Headers/d3/d3.d.ts"/>
-/// <reference path="SF_Chart_Utils.ts"/>
+/// <reference path="ChartUtils.ts"/>
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Framework/Signum.Web/Signum/Scripts/Validator", "Framework/Signum.Web/Signum/Scripts/Operations"], function(require, exports, Finder, Validator, Operations) {
+define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Framework/Signum.Web/Signum/Scripts/Validator", "Framework/Signum.Web/Signum/Scripts/Operations", "ChartUtils", "d3"], function(require, exports, Finder, Validator, Operations, ChartUtils, d3) {
     function openChart(prefix, url) {
         SF.submit(url, Finder.getFor(prefix).requestDataForSearch());
     }
@@ -15,7 +15,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
 
     function attachShowCurrentEntity(el) {
         var showOnEntity = function () {
-            el.element.next("p").toggle(!!el.runtimeInfo().value);
+            el.element.nextAll("p.messageEntity").toggle(!!el.runtimeInfo().value());
         };
 
         showOnEntity();
@@ -236,7 +236,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
             $chartContainer.html("");
 
             var data = $chartContainer.data("json");
-            SF.Chart.Utils.fillAllTokenValueFuntions(data);
+            ChartUtils.fillAllTokenValueFuntions(data);
 
             var self = this;
             $(".sf-chart-redraw-onchange", this.$chartControl).each(function (i, element) {
@@ -277,15 +277,15 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
             var func;
             var __baseLineNumber__;
             try  {
-                var getClickKeys = SF.Chart.Utils.getClickKeys;
-                var translate = SF.Chart.Utils.translate;
-                var scale = SF.Chart.Utils.scale;
-                var rotate = SF.Chart.Utils.rotate;
-                var skewX = SF.Chart.Utils.skewX;
-                var skewY = SF.Chart.Utils.skewY;
-                var matrix = SF.Chart.Utils.matrix;
-                var scaleFor = SF.Chart.Utils.scaleFor;
-                var rule = SF.Chart.Utils.rule;
+                var getClickKeys = ChartUtils.getClickKeys;
+                var translate = ChartUtils.translate;
+                var scale = ChartUtils.scale;
+                var rotate = ChartUtils.rotate;
+                var skewX = ChartUtils.skewX;
+                var skewY = ChartUtils.skewY;
+                var matrix = ChartUtils.matrix;
+                var scaleFor = ChartUtils.scaleFor;
+                var rule = ChartUtils.rule;
                 __baseLineNumber__ = new Error().lineNumber;
                 func = eval(code);
             } catch (e) {

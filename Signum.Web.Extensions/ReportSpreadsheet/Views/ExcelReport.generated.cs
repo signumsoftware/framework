@@ -109,27 +109,13 @@ Write(Html.ValueLine(e, f => f.DisplayName));
             #line hidden
             
             #line 11 "..\..\ReportSpreadsheet\Views\ExcelReport.cshtml"
-Write(Html.FileLine(e, f => f.File, fl => fl.AsyncUpload = false));
-
-            
-            #line default
-            #line hidden
-            
-            #line 11 "..\..\ReportSpreadsheet\Views\ExcelReport.cshtml"
-                                                                
-    
-            
-            #line default
-            #line hidden
-            
-            #line 12 "..\..\ReportSpreadsheet\Views\ExcelReport.cshtml"
 Write(Html.FileLine(e, f => f.File));
 
             
             #line default
             #line hidden
             
-            #line 12 "..\..\ReportSpreadsheet\Views\ExcelReport.cshtml"
+            #line 11 "..\..\ReportSpreadsheet\Views\ExcelReport.cshtml"
                                   
 }
             

@@ -22,16 +22,16 @@ export function administerExcelReports(prefix: string, excelReportQueryName: str
 
     Finder.explore({
         create: false,
-        prefix: prefix,
+        prefix: SF.compose(prefix, "New"),
         webQueryName: excelReportQueryName,
         searchOnLoad: true,
         filters: [{ columnName: "Query", operation: Finder.FilterOperation.EqualTo, value: queryKey }],
     });
 }
 
-export function createExcelReports(prefix: string, url: string) {
-    Navigator.navigatePopup(Entities.EntityHtml.withoutType(prefix), {
+export function createExcelReports(prefix: string, url: string, query: string) {
+    Navigator.navigatePopup(Entities.EntityHtml.withoutType(SF.compose(prefix, "New")), {
         controllerUrl: url,
-        requestExtraJsonData: {}
+        requestExtraJsonData: { query: query }
     });
 }

@@ -982,9 +982,6 @@
     <Resource Include="Images\groupby.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="..\Signum.Web.Extensions\Chart\Scripts\SF_Chart_Utils.js">
-      <Link>Chart\Html\SF_Chart_Utils.js</Link>
-    </EmbeddedResource>
     <EmbeddedResource Include="Chart\Html\ChartContainer.htm" />
     <EmbeddedResource Include="Chart\Html\jquery-1.7.2.min.js" />
   </ItemGroup>
@@ -995,9 +992,6 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Chart\Html\colorbrewer.js" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Chart\Html\d3.v2.min.js" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\execute.png" />
@@ -1028,6 +1022,14 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\chartScript.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\Signum.Web.Extensions\Chart\Scripts\ChartUtils.js">
+      <Link>Chart\Html\ChartUtils.js</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Chart\Html\d3.v3.min.js" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

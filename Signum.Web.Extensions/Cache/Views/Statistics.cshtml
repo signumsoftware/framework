@@ -65,4 +65,8 @@
         }
     </tbody>
 </table>
-@Html.ScriptsJs("~/Cache/Scripts/SF_Cache.js")
+<script>
+    $(function () {
+        @(new JsFunction(CacheClient.Model, "init"));
+    }); 
+</script>

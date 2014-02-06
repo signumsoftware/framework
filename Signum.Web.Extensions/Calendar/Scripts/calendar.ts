@@ -4,7 +4,7 @@ import Entities = require("Framework/Signum.Web/Signum/Scripts/Entities")
 import Lines = require("Framework/Signum.Web/Signum/Scripts/Lines")
 
 
-once("SF.Calendar", () => {
+export function init() {
 
     var $selectionOrigin;
     var currShiftSelection = [];
@@ -95,4 +95,4 @@ once("SF.Calendar", () => {
             $(".sf-annual-calendar td").width(ui.value + "px").height(ui.value + "px");
         }
     });
-});
+}

@@ -1,6 +1,7 @@
-﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
+﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
 /// <reference path="../../../../Framework/Signum.Web/Signum/Headers/d3/d3.d.ts"/>
-/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
+
+import d3 = require("d3")
 
 export interface ProfilerEntry {
     BeforeStart: number;

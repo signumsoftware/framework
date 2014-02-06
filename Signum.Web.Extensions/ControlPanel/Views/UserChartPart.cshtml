@@ -7,20 +7,17 @@
 @using Signum.Engine.Chart
 @using Signum.Engine.DynamicQuery
 @model PanelPartDN
-@Html.ScriptsJs("~/Chart/Scripts/SF_Chart.js",
-                "~/Chart/Scripts/SF_Chart_Utils.js",
-                "~/scripts/d3.v3.min.js",
-                "~/scripts/colorbrewer.js")
 @Html.ScriptCss("~/Chart/Content/SF_Chart.css")
 @{ 
     var ucPart = (UserChartPartDN)Model.Content;
     UserChartDN uc = ucPart.UserChart;
     ChartRequest request = uc.ToRequest();
-    
-    var containerId = crc.Compose("sfChartBuilderContainer");
+  
 
     using (var crc = new TypeContext<ChartRequest>(request, "r{0}c{1}".Formato(Model.Row, Model.Column)))
     {
+        var containerId = crc.Compose("sfChartBuilderContainer");
+        
         ResultTable resultTable = ChartLogic.ExecuteChart(request);
 
 
@@ -39,7 +36,16 @@
             </div>
             <script type="text/javascript">
                 var findOptions = @(MvcHtmlString.Create(uc.ToJS().ToString()))
-                 require(["@ChartClient.Module"], function (Chart) { new Chart.ChartBuilder($('#@containerId'), $.extend({ prefix: '@crc.ControlID' }, findOptions)); }); 
+                 require(["@ChartClient.Module"], function (Chart) {
+                     var chartBuilder = new Chart.ChartBuilder($('#@containerId'), $.extend({ prefix: '@crc.ControlID' }, findOptions));
+
+                     @if (!ucPart.ShowData)
+                     {
+                         <text>
+                     chartBuilder.reDraw();
+                        </text>
+                     }
+                 }); 
             </script>
         </div>
         <div id="@crc.Compose("sfChartContainer")">
@@ -64,12 +70,6 @@
         else
         {
             MvcHtmlString divSelector = MvcHtmlString.Create("#" + crc.Compose("sfChartContainer") + " > .sf-chart-container");
-   
-            <script type="text/javascript">
-                (function () {
-                    $("#@containerId").SFControl().reDraw();
-                })();
-            </script>
         }
         <script type="text/javascript">
             (function () {

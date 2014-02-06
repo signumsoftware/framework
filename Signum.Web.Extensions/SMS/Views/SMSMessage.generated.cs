@@ -291,14 +291,7 @@ Write(Html.ValueLine(e, s => s.From, vl => vl.ReadOnly = (e.Value.State != SMSMe
             
             #line default
             #line hidden
-            
-            #line 54 "..\..\SMS\Views\SMSMessage.cshtml"
-Write(Html.ScriptsJs("~/SMS/Scripts/SF_SMS.js"));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n\r\n");
+WriteLiteral("\r\n");
 
         }
     }

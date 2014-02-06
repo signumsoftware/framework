@@ -24,7 +24,7 @@ once("SF-UserQuery", () => {
 
 export function attachShowCurrentEntity(el: Lines.EntityLine) {
     var showOnEntity = function () {
-        el.element.next("p").toggle(el.runtimeInfo().value != null);
+        el.element.nextAll("p.messageEntity").toggle(!!el.runtimeInfo().value());
     };
 
     showOnEntity();
@@ -36,7 +36,7 @@ export function deleteUserQuery(os: Operations.EntityOperationOptions, urlRedire
 
     os.avoidReturnRedirect = true;
 
-    Operations.deleteAjaxContextual(os).then(() => {
+    Operations.deleteDefault(os).then(() => {
         if (!os.prefix)
             window.location.href = urlRedirect;
     });

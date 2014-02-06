@@ -116,7 +116,9 @@ namespace Signum.Web.Processes
                 }
             }
 
-            List<ContextualItem> operations = contexts.Select(op => OperationClient.Manager.CreateContextual(op)).OrderBy(o => o.Order).ToList();
+            List<ContextualItem> operations = contexts.Select(op => OperationClient.Manager.CreateContextual(op,
+                coc => new JsOperationFunction(ProcessesClient.Module, "processFromMany")
+                )).OrderBy(o => o.Order).ToList();
 
             HtmlStringBuilder content = new HtmlStringBuilder();
             using (content.Surround(new HtmlTag("ul").Class("sf-search-ctxmenu-operations")))
@@ -125,13 +127,13 @@ namespace Signum.Web.Processes
 
                 content.AddLine(new HtmlTag("li")
                     .Class(ctxItemClass + " sf-search-ctxitem-header")
-                    .InnerHtml(new HtmlTag("span").InnerHtml(SearchMessage.Search_CtxMenuItem_Operations.NiceToString().EncodeHtml())));
+                    .InnerHtml(new HtmlTag("span").InnerHtml(SearchMessage.Processes.NiceToString().EncodeHtml())));
 
                 foreach (var operation in operations)
                 {
                     content.AddLine(new HtmlTag("li")
                         .Class(ctxItemClass)
-                        .InnerHtml(OperationClient.Manager.IndividualOperationToString(operation)));
+                        .InnerHtml(OperationClient.Manager.ContextualOperationLink(operation)));
                 }
             }
 
@@ -141,6 +143,8 @@ namespace Signum.Web.Processes
                 Content = content.ToHtml().ToString()
             };
         }
+
+
 
     }
 }

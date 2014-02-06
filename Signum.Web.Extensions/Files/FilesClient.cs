@@ -61,7 +61,7 @@ namespace Signum.Web.Files
                     es.MappingLine = ctx =>
                     {
                         RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
-                        if (runtimeInfo.EntityType == null)
+                        if (runtimeInfo == null)
                             return null;
                         else
                         {
@@ -107,7 +107,7 @@ namespace Signum.Web.Files
                     es.MappingLine = ctx =>
                     {
                         RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
-                        if (runtimeInfo.EntityType == null)
+                        if (runtimeInfo == null)
                             return null;
                         else
                         {
@@ -152,7 +152,7 @@ namespace Signum.Web.Files
                     es.MappingDefault = ctx =>
                     {
                         RuntimeInfo runtimeInfo = ctx.GetRuntimeInfo();
-                        if (runtimeInfo.EntityType == null)
+                        if (runtimeInfo == null)
                             return null;
                         else
                         {
@@ -209,7 +209,7 @@ namespace Signum.Web.Files
             if (file == null)
                 return null;
 
-            return RouteHelper.New().Action((FileController fc) => fc.Download(new RuntimeInfo(file).ToString())); 
+            return RouteHelper.New().Action((FileController fc) => fc.Download( new RuntimeInfo(file).ToString())); 
         }
 
         public static string GetDownloadPath(IFile file)

@@ -1,4 +1,7 @@
 ﻿@using System.Globalization
+@using Signum.Web
+@using Signum.Web.Calendar
+
 
 @Html.ScriptCss("~/calendar/content/calendar.css")
 
@@ -59,5 +62,9 @@
     </tbody>
 </table>
 
-@Html.ScriptsJs("~/calendar/scripts/calendar.js")
+<script>
+    $(function () {
+        @(new JsFunction(CalendarClient.Modules, "init"))
+    })
+</script>
 

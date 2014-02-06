@@ -1,5 +1,4 @@
 /// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
-/// <reference path="SF_Chart_Utils.ts"/>
 define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Validator"], function(require, exports, Validator) {
     function updateColor(input) {
         var $input = $(input);

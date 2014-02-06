@@ -8,7 +8,6 @@
 @using Signum.Web.Chart
 @using Signum.Engine.Basics
 @using Signum.Entities.UserQueries
-@Html.ScriptsJs("~/Chart/Scripts/SF_Chart.js")
 @Html.ScriptCss("~/Chart/Content/SF_Chart.css")
 <style type="text/css">
     .sf-chart-control .sf-repeater-element
@@ -64,7 +63,7 @@
        el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Signum");
        el.AttachFunction = new JsLineFunction(ChartClient.Module, "attachShowCurrentEntity"); 
    })
-        <p>
+        <p class="messageEntity">
             @UserQueryMessage.Use0ToFilterCurrentEntity.NiceToString().Formato(CurrentEntityConverter.CurrentEntityKey)
         </p>
 

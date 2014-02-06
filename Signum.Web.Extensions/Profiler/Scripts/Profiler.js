@@ -1,9 +1,6 @@
-﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
+﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
 /// <reference path="../../../../Framework/Signum.Web/Signum/Headers/d3/d3.d.ts"/>
-/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
-define(["require", "exports"], function(require, exports) {
-    
-
+define(["require", "exports", "d3"], function(require, exports, d3) {
     function initStats() {
         $(document).on("click", "table.sf-stats-table a.sf-stats-show", function (e) {
             e.preventDefault();
