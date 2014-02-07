@@ -928,6 +928,11 @@ namespace Signum.Utilities
                 yield return newList;
         }
 
+        public static IEnumerable<Interval<int>> IntervalsOf(this IEnumerable<int> collection, int groupSize)
+        {
+            return collection.OrderBy().GroupsOf(groupSize).Select(gr => new Interval<int>(gr.Min(), gr.Max() + 1));
+        }
+
         public static IEnumerable<T> Slice<T>(this IEnumerable<T> collection, int firstIncluded, int toNotIncluded)
         {
             return collection.Skip(firstIncluded).Take(toNotIncluded - firstIncluded);
