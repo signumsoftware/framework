@@ -410,6 +410,11 @@ namespace Signum.Utilities
             for (T? i = start; i.HasValue; i = next(i.Value))
                 yield return i.Value;
         }
+
+        public static T Throw<T>(this Exception exception) 
+        {
+            throw exception;
+        }
     }
 
 }
