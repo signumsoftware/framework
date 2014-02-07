@@ -2541,15 +2541,32 @@ namespace Signum.Engine.Linq
             var ifTrue = Visit(c.IfTrue);
             var ifFalse = Visit(c.IfFalse);
 
+            if (colExpression is LiteReferenceExpression)
+            {
+                return Combiner<LiteReferenceExpression>(ifTrue, ifFalse, (col, l, r) =>
+                {
+                    using (this.OverrideColExpression(col.Reference))
+                    {
+                        var entity = CombineConditional(test, l.Reference, r.Reference);
+                        return new LiteReferenceExpression(Lite.Generate(entity.Type), entity, null);
+                    }
+                });
+            }
+
+            return CombineConditional(test, ifTrue, ifFalse) ?? c;
+        }
+
+        private Expression CombineConditional(Expression test, Expression ifTrue, Expression ifFalse)
+        {
             if (colExpression is EntityExpression)
                 return Combiner<EntityExpression>(ifTrue, ifFalse, (col, t, f) =>
                     new EntityExpression(col.Type, Expression.Condition(test, t.ExternalId.Nullify(), f.ExternalId.Nullify()), null, null, null, false));
 
             if (colExpression is ImplementedByExpression)
                 return Combiner<ImplementedByExpression>(ifTrue, ifFalse, (col, t, f) =>
-                    new ImplementedByExpression(col.Type, 
+                    new ImplementedByExpression(col.Type,
                         col.Strategy,
-                        col.Implementations.ToDictionary(a => a.Key, a => new EntityExpression(a.Key, 
+                        col.Implementations.ToDictionary(a => a.Key, a => new EntityExpression(a.Key,
                             Expression.Condition(test,
                             t.Implementations[a.Key].ExternalId.Nullify(),
                             f.Implementations[a.Key].ExternalId.Nullify()), null, null, null, false))));
@@ -2564,10 +2581,10 @@ namespace Signum.Engine.Linq
                 return Combiner<EmbeddedEntityExpression>(ifTrue, ifFalse, (col, t, f) =>
                    new EmbeddedEntityExpression(col.Type,
                        col.HasValue == null ? null : Expression.Condition(test, t.HasValue, f.HasValue),
-                       col.Bindings.Select(bin => GetBinding(bin.FieldInfo, Expression.Condition(test, t.GetBinding(bin.FieldInfo).Nullify(), f.GetBinding(bin.FieldInfo).Nullify()), bin.Binding)), 
+                       col.Bindings.Select(bin => GetBinding(bin.FieldInfo, Expression.Condition(test, t.GetBinding(bin.FieldInfo).Nullify(), f.GetBinding(bin.FieldInfo).Nullify()), bin.Binding)),
                        col.FieldEmbedded));
 
-            return c;
+            return null;
         }
 
         protected override Expression VisitBinary(BinaryExpression b)
@@ -2577,34 +2594,53 @@ namespace Signum.Engine.Linq
                 var left = Visit(b.Left);
                 var right = Visit(b.Right);
 
-                if (colExpression is EntityExpression)
-                    return Combiner<EntityExpression>(left, right, (col, l, r) =>
-                        new EntityExpression(col.Type, Expression.Coalesce(l.ExternalId.Nullify(), r.ExternalId.Nullify()), null, null, null, false));
+                if (colExpression is LiteReferenceExpression)
+                {
+                    return Combiner<LiteReferenceExpression>(left, right, (col, l, r) =>
+                    {
+                        using (this.OverrideColExpression(col.Reference))
+                        {
+                            var entity =  CombineCoalesce(l.Reference, r.Reference);
+                            return new LiteReferenceExpression(Lite.Generate(entity.Type), entity, null);
+                        }
+                    }); 
+                }
 
-                if (colExpression is ImplementedByExpression)
-                    return Combiner<ImplementedByExpression>(left, right, (col, l, r) =>
-                        new ImplementedByExpression(col.Type,
-                            col.Strategy,
-                            col.Implementations.ToDictionary(a => a.Key, a => new EntityExpression(col.Type,
-                                Expression.Coalesce(
-                                l.Implementations[a.Key].ExternalId.Nullify(),
-                                r.Implementations[a.Key].ExternalId.Nullify()), null, null, null, false))));
-
-                if (colExpression is ImplementedByAllExpression)
-                    return Combiner<ImplementedByAllExpression>(left, right, (col, l, r) =>
-                        new ImplementedByAllExpression(col.Type,
-                            Expression.Coalesce(l.Id, r.Id),
-                            new TypeImplementedByAllExpression(Expression.Coalesce(l.TypeId.TypeColumn.Nullify(), r.TypeId.TypeColumn.Nullify()))));
-
-                if (colExpression is EmbeddedEntityExpression)
-                    return Combiner<EmbeddedEntityExpression>(left, right, (col, l, r) =>
-                       new EmbeddedEntityExpression(col.Type,
-                           col.HasValue == null ? null : Expression.Or(l.HasValue, r.HasValue),
-                           col.Bindings.Select(bin => GetBinding(bin.FieldInfo, Expression.Coalesce(l.GetBinding(bin.FieldInfo).Nullify(), r.GetBinding(bin.FieldInfo).Nullify()), bin.Binding)),
-                           col.FieldEmbedded));
+                return CombineCoalesce(left, right) ?? b;
             }
 
             return b;
+        }
+
+        private Expression CombineCoalesce(Expression left, Expression right)
+        {
+            if (colExpression is EntityExpression)
+                return Combiner<EntityExpression>(left, right, (col, l, r) =>
+                    new EntityExpression(col.Type, Expression.Coalesce(l.ExternalId.Nullify(), r.ExternalId.Nullify()), null, null, null, false));
+
+            if (colExpression is ImplementedByExpression)
+                return Combiner<ImplementedByExpression>(left, right, (col, l, r) =>
+                    new ImplementedByExpression(col.Type,
+                        col.Strategy,
+                        col.Implementations.ToDictionary(a => a.Key, a => new EntityExpression(col.Type,
+                            Expression.Coalesce(
+                            l.Implementations[a.Key].ExternalId.Nullify(),
+                            r.Implementations[a.Key].ExternalId.Nullify()), null, null, null, false))));
+
+            if (colExpression is ImplementedByAllExpression)
+                return Combiner<ImplementedByAllExpression>(left, right, (col, l, r) =>
+                    new ImplementedByAllExpression(col.Type,
+                        Expression.Coalesce(l.Id, r.Id),
+                        new TypeImplementedByAllExpression(Expression.Coalesce(l.TypeId.TypeColumn.Nullify(), r.TypeId.TypeColumn.Nullify()))));
+
+            if (colExpression is EmbeddedEntityExpression)
+                return Combiner<EmbeddedEntityExpression>(left, right, (col, l, r) =>
+                   new EmbeddedEntityExpression(col.Type,
+                       col.HasValue == null ? null : Expression.Or(l.HasValue, r.HasValue),
+                       col.Bindings.Select(bin => GetBinding(bin.FieldInfo, Expression.Coalesce(l.GetBinding(bin.FieldInfo).Nullify(), r.GetBinding(bin.FieldInfo).Nullify()), bin.Binding)),
+                       col.FieldEmbedded));
+
+            return null;
         }
 
 
