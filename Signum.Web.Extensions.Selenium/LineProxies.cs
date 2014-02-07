@@ -176,7 +176,7 @@ namespace Signum.Web.Selenium
             {
                 if (Popup.IsChooser(Selenium, Prefix))
                 {
-                    Selenium.Click(TypeLogic.GetCleanName(selectType));
+                    Selenium.Click("jq=[data-value=" + TypeLogic.GetCleanName(selectType) + "]");
 
                     Selenium.Wait(() => !Popup.IsChooser(Selenium, Prefix));
                 }
