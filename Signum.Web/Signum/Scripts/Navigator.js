@@ -221,17 +221,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     }
     exports.closePopup = closePopup;
 
-    function isNavigatePopup(prefix) {
-        var tempDivId = SF.compose(prefix, "Temp");
-
-        var tempDiv = $("#" + tempDivId);
-
-        var popupOptions = tempDiv.popup();
-
-        return popupOptions.onOk == null;
-    }
-    exports.isNavigatePopup = isNavigatePopup;
-
     function reloadPopup(entityHtml) {
         var tempDivId = SF.compose(entityHtml.prefix, "Temp");
 
@@ -257,10 +246,16 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     }
     exports.reload = reload;
 
-    function viewMode(prefix) {
-        return $(".sf-main-control[data-prefix=" + prefix + "]").closest(".sf-popup-control").children(".sf-button-bar").find(".sf-ok-button").length > 0 ? "View" : "Navigate";
+    function isNavigatePopup(prefix) {
+        var tempDivId = SF.compose(prefix, "Temp");
+
+        var tempDiv = $("#" + tempDivId);
+
+        var popupOptions = tempDiv.popup();
+
+        return popupOptions.onOk == null;
     }
-    exports.viewMode = viewMode;
+    exports.isNavigatePopup = isNavigatePopup;
 
     function checkValidation(validatorOptions, allowErrors) {
         return Validator.validate(validatorOptions).then(function (result) {
@@ -379,14 +374,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         if (getValue == null) {
             getValue = function (a) {
-                return a.toStr ? a.type : a.text ? a.value : a.toString();
+                return a.type ? a.type : a.value ? a.value : a.toString();
             };
         }
 
         var div = $('<div id="{0}" class="sf-popup-control" data-prefix="{1}" data-title="{2}"></div>'.format(SF.compose(tempDivId, "panelPopup"), tempDivId, title || lang.signum.chooseAValue));
 
         options.forEach(function (o) {
-            return div.append($('<button type="button" class="sf-chooser-button"/>').data("option", o).text(getStr(o)));
+            return div.append($('<button type="button" class="sf-chooser-button"/>').data("option", o).attr("data-value", getValue(o)).text(getStr(o)));
         });
 
         $("body").append(SF.hiddenDiv(tempDivId, div));

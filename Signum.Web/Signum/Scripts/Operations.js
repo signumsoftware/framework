@@ -19,7 +19,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     function executeAjax(options) {
         options = $.extend({
             controllerUrl: SF.Urls.operationExecute,
-            isLite: false
+            isLite: false,
+            isNavigatePopup: Navigator.isNavigatePopup(options.prefix)
         }, options);
 
         return SF.ajaxPost({ url: options.controllerUrl, data: exports.entityRequestData(options) }).then(function (result) {
@@ -219,6 +220,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         var result = exports.baseRequestData(options, newPrefix);
 
         var formValues = options.isLite ? Validator.getFormValuesLite(options.prefix) : Validator.getFormValues(options.prefix);
+
+        formValues[Entities.Keys.viewMode] = options.isNavigatePopup ? "Navigate" : "View";
 
         return $.extend(result, formValues);
     }

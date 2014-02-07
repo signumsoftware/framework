@@ -226,7 +226,8 @@ define(["require", "exports"], function(require, exports) {
         toStr: "sfToStr",
         link: "sfLink",
         loading: "loading",
-        entityState: "sfEntityState"
+        entityState: "sfEntityState",
+        viewMode: "sfViewMode"
     };
 });
 //# sourceMappingURL=Entities.js.map

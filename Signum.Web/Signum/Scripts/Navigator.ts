@@ -245,16 +245,7 @@ export function closePopup(prefix: string): void {
     tempDiv.remove();
 }
 
-export function isNavigatePopup(prefix: string)
-{
-    var tempDivId = SF.compose(prefix, "Temp");
 
-    var tempDiv = $("#" + tempDivId);
-
-    var popupOptions = tempDiv.popup();
-
-    return popupOptions.onOk == null
-}
 
 export function reloadPopup(entityHtml : Entities.EntityHtml) {
 
@@ -280,9 +271,14 @@ export function reload(entityHtml: Entities.EntityHtml): void {
         reloadPopup(entityHtml);
 }
 
-export function viewMode(prefix: string): string {
-   return $(".sf-main-control[data-prefix=" + prefix + "]")
-        .closest(".sf-popup-control").children(".sf-button-bar").find(".sf-ok-button").length > 0 ? "View" : "Navigate"
+export function isNavigatePopup(prefix: string) {
+    var tempDivId = SF.compose(prefix, "Temp");
+
+    var tempDiv = $("#" + tempDivId);
+
+    var popupOptions = tempDiv.popup();
+
+    return popupOptions.onOk == null
 }
 
 
@@ -403,8 +399,8 @@ export function chooser<T>(parentPrefix: string, title: string, options: T[], ge
 
     if (getValue == null) {
         getValue = (a: any) =>
-            a.toStr ? a.type :
-            a.text ? a.value :
+            a.type ? a.type :
+            a.value ? a.value :
             a.toString();
     }
 
@@ -412,7 +408,7 @@ export function chooser<T>(parentPrefix: string, title: string, options: T[], ge
         .format(SF.compose(tempDivId, "panelPopup"), tempDivId, title || lang.signum.chooseAValue));
 
     options.forEach(o=> div.append($('<button type="button" class="sf-chooser-button"/>')
-        .data("option", o).text(getStr(o))));
+        .data("option", o).attr("data-value", getValue(o)).text(getStr(o))));
 
     $("body").append(SF.hiddenDiv(tempDivId, div));
 

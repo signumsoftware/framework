@@ -19,6 +19,7 @@ export interface OperationOptions {
 export interface EntityOperationOptions extends OperationOptions {
     avoidValidate?: boolean;
     validationOptions?: Validator.ValidationOptions;
+    isNavigatePopup?: boolean
 }
 
 export function executeDefault(options: EntityOperationOptions): Promise<void> {
@@ -39,6 +40,7 @@ export function executeAjax(options: EntityOperationOptions): Promise<Entities.E
     options = $.extend({
         controllerUrl: SF.Urls.operationExecute,
         isLite: false,
+        isNavigatePopup : Navigator.isNavigatePopup(options.prefix)
     }, options);
 
     return SF.ajaxPost({ url: options.controllerUrl, data: entityRequestData(options) })
@@ -138,7 +140,6 @@ export function deleteAjax(options: EntityOperationOptions): Promise<any> {
 
 export function deleteDefaultContextual(options: OperationOptions): Promise<any> {
     options = $.extend({
-        
     }, options);
 
     Finder.removeOverlay();
@@ -148,7 +149,7 @@ export function deleteDefaultContextual(options: OperationOptions): Promise<any>
     });
 }
 
-export function deleteAjaxContextual(options: EntityOperationOptions, runtimeInfo?: Entities.RuntimeInfoValue): Promise<any> {
+export function deleteAjaxContextual(options: OperationOptions, runtimeInfo?: Entities.RuntimeInfoValue): Promise<any> {
     options = $.extend({
         controllerUrl: SF.Urls.operationDelete,
         avoidReturnRedirect: true,
@@ -159,7 +160,6 @@ export function deleteAjaxContextual(options: EntityOperationOptions, runtimeInf
 }
 
 export function constructFromManyDefault(options: OperationOptions, newPrefix?: string): Promise<void> {
-
     options = $.extend({
         controllerUrl: SF.Urls.operationConstructFromMany,
     }, options);
@@ -223,6 +223,8 @@ export function entityRequestData(options: EntityOperationOptions, newPrefix?: s
     var formValues: FormObject = options.isLite ?
         Validator.getFormValuesLite(options.prefix) :
         Validator.getFormValues(options.prefix);
+
+    formValues[Entities.Keys.viewMode] = options.isNavigatePopup ? "Navigate" : "View";
 
     return $.extend(result, formValues);
 }

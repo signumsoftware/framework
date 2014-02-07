@@ -248,6 +248,8 @@ export var Keys = {
     link: "sfLink",
     loading: "loading",
     entityState: "sfEntityState",
+
+    viewMode: "sfViewMode",
 };
 
 
