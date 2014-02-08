@@ -67,9 +67,9 @@ namespace Signum.Web
 
         public string PartialViewName { get; set; }
 
-        public virtual string SFControl()
+        public virtual string SFControlThen(string functionCall)
         {
-            return "$('#{0}').SFControl()".Formato(ControlID);
+            return JsFunction.SFControlThen(ControlID, functionCall);
         }
 
         protected virtual JObject OptionsJSInternal()
@@ -170,15 +170,18 @@ namespace Signum.Web
             var args = (Arguments.IsNullOrEmpty() ? null :
              (", " + Arguments.EmptyIfNull().ToString(a => JsonConvert.SerializeObject(a, JsonSerializerSettings), ", ")));
 
-            return "require(['" + lineInfo.Module + "', '" + Module + "'], function(" + varLines + ", " + varModule + ") { " +
-                varModule + "." + FunctionName + "(" + NewLine(varLines, lineInfo) + args + "); });";
+            return "require(['" + lineInfo.Module + "', '" + Module + "'], function(" + varLines + ", " + varModule + ") {\r\n" +
+                "var " + lineInfo.Type + " = " + NewLine(varLines, lineInfo) + ";\r\n" +
+                varModule + "." + FunctionName + "(" + lineInfo.Type + args + ");\r\n" +
+                lineInfo.Type + ".ready();\r\n" +
+                "});";
         }
 
         public static string BasicConstructor(LineInfo lineInfo)
         {
             var varNameLines = VarName(lineInfo.Module);
 
-            var result = "require(['" + lineInfo.Module + "'], function(" + varNameLines + ") { " + NewLine(varNameLines, lineInfo) + "; });";
+            var result = "require(['" + lineInfo.Module + "'], function(" + varNameLines + ") { " + NewLine(varNameLines, lineInfo) + ".ready(); });";
 
             return result; 
         }

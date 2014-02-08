@@ -1,19 +1,52 @@
 ﻿/// <reference path="SF.ts"/>
 /// <reference path="../Headers/jqueryui/jqueryui.d.ts"/>
 
-once("SF-control", function () {
-    jQuery.fn.SFControl = function () {
-        var result = this.data("SF-control");
-
-        if (result)
-            return result;
-
-        throw Error("this element has not SF-control");
-    };
-});
-
 var SF;
 (function (SF) {
+    once("SF-control", function () {
+        jQuery.fn.SFControl = function () {
+            return getPromise(this);
+        };
+
+        function getPromise(jq) {
+            var result = jq.data("SF-control");
+
+            if (result)
+                return Promise.resolve(result);
+
+            if (!jq.hasClass("SF-control-container"))
+                throw Error("this element has not SF-control");
+
+            var queue = jq.data("SF-queue");
+
+            if (!queue) {
+                queue = [];
+
+                jq.data("SF-queue", queue);
+            }
+
+            return new Promise(function (resolve) {
+                queue.push(resolve);
+            });
+        }
+
+        jQuery.fn.SFControlFullfill = function (val) {
+            fulllFill(this, val);
+        };
+
+        function fulllFill(jq, control) {
+            var queue = jq.data("SF-queue");
+
+            if (queue) {
+                queue.forEach(function (action) {
+                    return action(control);
+                });
+
+                jq.data("SF-queue", null);
+            }
+        }
+    });
+
     once("setupAjaxNotifyPrefilter", function () {
         return setupAjaxNotifyPrefilters();
     });

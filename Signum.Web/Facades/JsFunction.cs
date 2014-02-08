@@ -92,6 +92,11 @@ namespace Signum.Web
                 writer.WriteRaw(((JsLiteral)value).JsText);
             }
         }
+
+        public static string SFControlThen(string controlID, string functionCall)
+        {
+            return "$('#" + controlID + "').SFControl().then(function(c){c." + functionCall + ";})";
+        }
     }
 
     public class ChooserOption

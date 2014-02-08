@@ -30,8 +30,14 @@ export class EntityBase {
         }, _options);
 
         this._create();
+    }
+
+    public ready() {
+        this.element.css("opacity", ".5"); 
 
         this.element.trigger("SF-ready");
+
+        this.element.SFControlFullfill(this); 
     }
 
     static key_entity = "sfEntity";
@@ -766,6 +772,18 @@ export class EntityListDetail extends EntityList {
 
     selection_Changed() {
         this.stageCurrentSelected();
+    }
+
+    remove_click() {
+        return super.remove_click().then(()=>this.stageCurrentSelected())
+    }
+
+    create_click() {
+        return super.create_click().then(() => this.stageCurrentSelected())
+    }
+
+    find_click() {
+        return super.find_click().then(() => this.stageCurrentSelected())
     }
 
     stageCurrentSelected() {

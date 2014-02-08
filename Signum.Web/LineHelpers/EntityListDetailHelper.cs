@@ -28,7 +28,7 @@ namespace Signum.Web
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.Surround(new HtmlTag("div").Id(listDetail.ControlID).Class("sf-field")))
+            using (sb.Surround(new HtmlTag("div").Id(listDetail.ControlID).Class("sf-field SF-control-container")))
             {
                 sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, listDetail));
 
@@ -49,7 +49,7 @@ namespace Signum.Web
                     var sbSelectContainer = new HtmlTag("select").Attr("multiple", "multiple")
                         .IdName(listDetail.Compose(EntityListBaseKeys.List))
                         .Class("sf-entity-list")
-                        .Attr("onchange", "{0}.selection_Changed()".Formato(listDetail.SFControl()));
+                        .Attr("onchange", listDetail.SFControlThen("selection_Changed()"));
 
                     if (listDetail.ListHtmlProps.Any())
                         sbSelectContainer.Attrs(listDetail.ListHtmlProps);

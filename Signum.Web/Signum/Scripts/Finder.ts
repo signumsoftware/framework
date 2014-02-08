@@ -77,7 +77,7 @@ export enum ColumnOptionsMode {
     Replace,
 }
 
-export function getFor(prefix: string): SearchControl {
+export function getFor(prefix: string): Promise<SearchControl> {
     return $("#" + SF.compose(prefix, "sfSearchControl")).SFControl<SearchControl>();
 }
 
@@ -108,21 +108,23 @@ function findInternal(findOptions: FindOptions): Promise<Array<Entities.EntityVa
                 $("#" + divId).popup({
                     onOk: function () {
 
-                        var items = getFor(findOptions.prefix).selectedItems();
+                        getFor(findOptions.prefix).then(sc=>{
 
-                        if (items.length == 0) {
-                            SF.Notify.info(lang.signum.noElementsSelected);
-                            return null;
-                        }
+                            var items = sc.selectedItems();
+                            if (items.length == 0) {
+                                SF.Notify.info(lang.signum.noElementsSelected);
+                                return null;
+                            }
 
-                        if (items.length > 1 && !findOptions.multipleSelection) {
-                            SF.Notify.info(lang.signum.onlyOneElement);
-                            return;
-                        }
+                            if (items.length > 1 && !findOptions.multipleSelection) {
+                                SF.Notify.info(lang.signum.onlyOneElement);
+                                return;
+                            }
 
-                        div.remove();
+                            div.remove();
 
-                        resolve(items);
+                            resolve(items);
+                        });
                     },
                     onCancel: function () { div.remove(); resolve(null); }
                 });
@@ -336,6 +338,10 @@ export class SearchControl {
         }, _options);
 
         this._create();
+    }
+
+    public ready() {
+        this.element.SFControlFullfill(this); 
     }
 
     public pf(s) {
@@ -632,8 +638,8 @@ export class SearchControl {
         });
     }
 
-    requestDataForSearch() {
-        var requestData = new Object();
+    requestDataForSearch() : FormObject {
+        var requestData: FormObject = {};
         requestData["webQueryName"] = this.options.webQueryName;
         requestData["pagination"] = $(this.pf(this.keys.pagination)).val();
         requestData["elems"] = $(this.pf(this.keys.elems)).val();
@@ -727,23 +733,17 @@ export class SearchControl {
         }).join(";");
     }
 
-    selectedItems(): Array<Entities.EntityValue> {
-        var items = [];
-        var selected = $("input:checkbox[name^=" + SF.compose(this.options.prefix, "rowSelection") + "]:checked");
-        if (selected.length == 0)
-            return items;
-
-        var self = this;
-        selected.each(function (i, v) {
+    static getSelectedItems(prefix: string) : Array<Entities.EntityValue> {
+        return $("input:checkbox[name^=" + SF.compose(prefix, "rowSelection") + "]:checked").toArray().map(v=> {
             var parts = (<HTMLInputElement>v).value.split("__");
-            var val = new Entities.EntityValue(new Entities.RuntimeInfoValue(parts[1], parseInt(parts[0]), false),
+            return new Entities.EntityValue(new Entities.RuntimeInfoValue(parts[1], parseInt(parts[0]), false),
                 parts[2],
-                $(this).parent().next().children('a').attr('href'));
+                $(v).parent().next().children('a').attr('href'));
+        }); 
+    }
 
-            items.push(val);
-        });
-
-        return items;
+    selectedItems(): Array<Entities.EntityValue> {
+        return SearchControl.getSelectedItems(this.options.prefix); 
     }
 
     hasSelectedItems(onSuccess: (item: Array<Entities.EntityValue>) => void) {

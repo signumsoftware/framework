@@ -75,21 +75,22 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
                     $("#" + divId).popup({
                         onOk: function () {
-                            var items = exports.getFor(findOptions.prefix).selectedItems();
+                            exports.getFor(findOptions.prefix).then(function (sc) {
+                                var items = sc.selectedItems();
+                                if (items.length == 0) {
+                                    SF.Notify.info(lang.signum.noElementsSelected);
+                                    return null;
+                                }
 
-                            if (items.length == 0) {
-                                SF.Notify.info(lang.signum.noElementsSelected);
-                                return null;
-                            }
+                                if (items.length > 1 && !findOptions.multipleSelection) {
+                                    SF.Notify.info(lang.signum.onlyOneElement);
+                                    return;
+                                }
 
-                            if (items.length > 1 && !findOptions.multipleSelection) {
-                                SF.Notify.info(lang.signum.onlyOneElement);
-                                return;
-                            }
+                                div.remove();
 
-                            div.remove();
-
-                            resolve(items);
+                                resolve(items);
+                            });
                         },
                         onCancel: function () {
                             div.remove();
@@ -309,6 +310,10 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             this._create();
         }
+        SearchControl.prototype.ready = function () {
+            this.element.SFControlFullfill(this);
+        };
+
         SearchControl.prototype.pf = function (s) {
             return "#" + SF.compose(this.options.prefix, s);
         };
@@ -601,7 +606,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         SearchControl.prototype.requestDataForSearch = function () {
-            var requestData = new Object();
+            var requestData = {};
             requestData["webQueryName"] = this.options.webQueryName;
             requestData["pagination"] = $(this.pf(this.keys.pagination)).val();
             requestData["elems"] = $(this.pf(this.keys.elems)).val();
@@ -686,21 +691,15 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             }).join(";");
         };
 
-        SearchControl.prototype.selectedItems = function () {
-            var items = [];
-            var selected = $("input:checkbox[name^=" + SF.compose(this.options.prefix, "rowSelection") + "]:checked");
-            if (selected.length == 0)
-                return items;
-
-            var self = this;
-            selected.each(function (i, v) {
+        SearchControl.getSelectedItems = function (prefix) {
+            return $("input:checkbox[name^=" + SF.compose(prefix, "rowSelection") + "]:checked").toArray().map(function (v) {
                 var parts = v.value.split("__");
-                var val = new Entities.EntityValue(new Entities.RuntimeInfoValue(parts[1], parseInt(parts[0]), false), parts[2], $(this).parent().next().children('a').attr('href'));
-
-                items.push(val);
+                return new Entities.EntityValue(new Entities.RuntimeInfoValue(parts[1], parseInt(parts[0]), false), parts[2], $(v).parent().next().children('a').attr('href'));
             });
+        };
 
-            return items;
+        SearchControl.prototype.selectedItems = function () {
+            return SearchControl.getSelectedItems(this.options.prefix);
         };
 
         SearchControl.prototype.hasSelectedItems = function (onSuccess) {

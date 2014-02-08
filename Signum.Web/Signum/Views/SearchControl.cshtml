@@ -14,10 +14,10 @@
     
     ViewData[ViewDataKeys.FindOptions] = findOptions;
 
-    var searchControl = "$('#" + Model.Compose("sfSearchControl") + "').SFControl()";
+    var controlID = Model.Compose("sfSearchControl");
 }
-<div id="@Model.Compose("sfSearchControl")" 
-     class="sf-search-control" 
+<div id="@controlID" 
+     class="sf-search-control SF-control-container" 
      data-prefix="@Model.ControlID" 
      data-find-url="@Navigator.FindRoute(findOptions.QueryName)" 
      >
@@ -84,7 +84,7 @@
                 "sf-query-button sf-filters-header" + (filtersVisible ? "" : " close"),
                 new Dictionary<string, object> 
                 { 
-                    { "onclick", "{0}.toggleFilters()".Formato(searchControl) },
+                    { "onclick", JsFunction.SFControlThen(controlID,  "toggleFilters()") },
                     { "data-icon", filtersVisible ? "ui-icon-triangle-1-n" : "ui-icon-triangle-1-e" }
                 })
     }
@@ -103,10 +103,10 @@
     }
     
     <div class="sf-query-button-bar" style="display:@((findOptions.FilterMode != FilterMode.OnlyResults) ? "block" : "none")">
-        <button class="sf-query-button sf-search" data-icon="ui-icon-search" id="@Model.Compose("qbSearch")" onclick="event.preventDefault();@(searchControl).search();">@SearchMessage.Search.NiceToString()</button>
+        <button class="sf-query-button sf-search" data-icon="ui-icon-search" id="@Model.Compose("qbSearch")" onclick="event.preventDefault(); @JsFunction.SFControlThen(controlID, "search()")">@SearchMessage.Search.NiceToString()</button>
         @if (findOptions.Create)
         {
-            <a class="sf-query-button" data-icon="ui-icon-plusthick" data-text="false" id="@Model.Compose("qbSearchCreate")" onclick="event.preventDefault();@(searchControl).create_click();">@SearchMessage.Search_Create.NiceToString()</a>
+            <a class="sf-query-button" data-icon="ui-icon-plusthick" data-text="false" id="@Model.Compose("qbSearchCreate")" onclick="event.preventDefault();@JsFunction.SFControlThen(controlID, "create_click()")">@SearchMessage.Create.NiceToString()</a>
         }
         @ButtonBarQueryHelper.GetButtonBarElementsForQuery(new QueryButtonContext
        {
@@ -130,7 +130,7 @@
                     @if (findOptions.AllowSelection)
                     {
                         <th class="ui-state-default sf-th-selection">
-                            @Html.CheckBox(Model.Compose("cbSelectAll"), false, new { onclick = "{0}.toggleSelectAll()".Formato(searchControl) })
+                            @Html.CheckBox(Model.Compose("cbSelectAll"), false, new { onclick = JsFunction.SFControlThen(controlID, "toggleSelectAll()")})
                         </th>
                     }
                     @if (findOptions.Navigate)
@@ -172,5 +172,5 @@
     </div>
 </div>
 <script type="text/javascript">
-    require(["@JsFunction.FinderModule"], function(Finder) { new Finder.SearchControl($("#@Model.Compose("sfSearchControl")"), @(MvcHtmlString.Create(findOptions.ToJS(Model.ControlID).ToString())));});
+    require(["@JsFunction.FinderModule"], function(Finder) { new Finder.SearchControl($("#@Model.Compose("sfSearchControl")"), @(MvcHtmlString.Create(findOptions.ToJS(Model.ControlID).ToString()))).ready();});
 </script>

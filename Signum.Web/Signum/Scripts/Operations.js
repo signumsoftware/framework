@@ -231,7 +231,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         var result = exports.baseRequestData(options, newPrefix);
 
         if (!liteKey) {
-            var items = Finder.getFor(options.prefix).selectedItems();
+            var items = Finder.SearchControl.getSelectedItems(options.prefix);
             liteKey = items.map(function (i) {
                 return i.runtimeInfo.key();
             });
@@ -247,7 +247,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         var result = exports.baseRequestData(options, newPrefix);
 
         if (!runtimeInfo) {
-            var items = Finder.getFor(options.prefix).selectedItems();
+            var items = Finder.SearchControl.getSelectedItems(options.prefix);
 
             if (items.length > 1)
                 throw new Error("just one entity should have been selected");

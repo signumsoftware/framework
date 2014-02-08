@@ -234,7 +234,7 @@ export function constructFromManyRequestData(options: OperationOptions, newPrefi
     var result = baseRequestData(options, newPrefix); 
 
     if (!liteKey) {
-        var items = Finder.getFor(options.prefix).selectedItems();
+        var items = Finder.SearchControl.getSelectedItems(options.prefix);
         liteKey = items.map(i=> i.runtimeInfo.key());
     }
 
@@ -248,7 +248,7 @@ export function contextualRequestData(options: OperationOptions, newPrefix?: str
     var result = baseRequestData(options, newPrefix); 
 
     if (!runtimeInfo) {
-        var items = Finder.getFor(options.prefix).selectedItems();
+        var items = Finder.SearchControl.getSelectedItems(options.prefix);
 
         if (items.length > 1)
             throw new Error("just one entity should have been selected");

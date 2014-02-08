@@ -30,7 +30,7 @@ namespace Signum.Web
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.Surround(new HtmlTag("div").Id(entityCombo.ControlID).Class("sf-field")))
+            using (sb.Surround(new HtmlTag("div").Id(entityCombo.ControlID).Class("sf-field SF-control-container")))
             using (entityCombo.ValueFirst ? sb.Surround(new HtmlTag("div").Class("sf-value-first")) : null)
             {
                 if (!entityCombo.ValueFirst)
@@ -72,7 +72,7 @@ namespace Signum.Web
                         if (entityCombo.ComboHtmlProperties.ContainsKey("onchange"))
                             throw new InvalidOperationException("EntityCombo cannot have onchange html property, use onEntityChanged instead");
 
-                        entityCombo.ComboHtmlProperties.Add("onchange", "{0}.combo_selected();".Formato(entityCombo.SFControl()));
+                        entityCombo.ComboHtmlProperties.Add("onchange", entityCombo.SFControlThen("combo_selected()"));
 
                         if (entityCombo.Size > 0)
                         {

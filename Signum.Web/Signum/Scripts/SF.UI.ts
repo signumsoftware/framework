@@ -2,22 +2,57 @@
 /// <reference path="../Headers/jqueryui/jqueryui.d.ts"/>
 
 interface JQuery {
-    SFControl<T>(): T;
+    SFControl<T>(): Promise<T>;
+    SFControlFullfill<T>(control: T) : void
 }
 
-once("SF-control", () => {
-    jQuery.fn.SFControl = function () {
-        var result = this.data("SF-control");
-
-        if (result)
-            return result;
-
-        throw Error("this element has not SF-control"); 
-    };
-});
-
-
 module SF {
+
+    once("SF-control", () => {
+        jQuery.fn.SFControl = function () {
+            return getPromise(this);
+        };
+
+        function getPromise<T>(jq: JQuery): Promise<T> {
+            var result = <T>jq.data("SF-control");
+
+            if (result)
+                return Promise.resolve(result);
+
+            if (!jq.hasClass("SF-control-container"))
+                throw Error("this element has not SF-control");
+
+            var queue: { (value: T): void }[] = jq.data("SF-queue");
+
+            if (!queue) {
+                queue = [];
+
+                jq.data("SF-queue", queue);
+            }
+
+            return new Promise<T>((resolve) => {
+                queue.push(resolve);
+            });
+        }
+
+        jQuery.fn.SFControlFullfill = function (val : any) {
+            fulllFill<any>(this, val);
+        };
+
+
+        function fulllFill<T>(jq: JQuery, control: T){
+         
+            var queue: { (value: T): void }[] = jq.data("SF-queue");
+
+            if (queue) {
+                queue.forEach(action=> action(control));
+
+                jq.data("SF-queue", null);
+            }
+        }
+    });
+
+
 
     once("setupAjaxNotifyPrefilter", () =>
         setupAjaxNotifyPrefilters());

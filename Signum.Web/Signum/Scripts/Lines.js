@@ -16,9 +16,15 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             }, _options);
 
             this._create();
+        }
+        EntityBase.prototype.ready = function () {
+            this.element.css("opacity", ".5");
 
             this.element.trigger("SF-ready");
-        }
+
+            this.element.SFControlFullfill(this);
+        };
+
         EntityBase.prototype._create = function () {
             var _this = this;
             var $txt = $(this.pf(Entities.Keys.toStr) + ".sf-entity-autocomplete");
@@ -732,6 +738,27 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         }
         EntityListDetail.prototype.selection_Changed = function () {
             this.stageCurrentSelected();
+        };
+
+        EntityListDetail.prototype.remove_click = function () {
+            var _this = this;
+            return _super.prototype.remove_click.call(this).then(function () {
+                return _this.stageCurrentSelected();
+            });
+        };
+
+        EntityListDetail.prototype.create_click = function () {
+            var _this = this;
+            return _super.prototype.create_click.call(this).then(function () {
+                return _this.stageCurrentSelected();
+            });
+        };
+
+        EntityListDetail.prototype.find_click = function () {
+            var _this = this;
+            return _super.prototype.find_click.call(this).then(function () {
+                return _this.stageCurrentSelected();
+            });
         };
 
         EntityListDetail.prototype.stageCurrentSelected = function () {

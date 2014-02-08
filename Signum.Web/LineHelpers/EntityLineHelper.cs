@@ -26,7 +26,7 @@ namespace Signum.Web
                 return MvcHtmlString.Empty;
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(new HtmlTag("div").Id(entityLine.ControlID).Class("sf-field")))
+            using (sb.Surround(new HtmlTag("div").Id(entityLine.ControlID).Class("sf-field SF-control-container")))
             using (entityLine.ValueFirst ? sb.Surround(new HtmlTag("div").Class("sf-value-first")) : null)
             {
                 if (!entityLine.ValueFirst)
