@@ -10,7 +10,7 @@ function attachTabRepeater(repeater: Lines.EntityRepeater) {
     function removeItem(elem: HTMLElement) {
         var $elem = $(elem);
         var itemPrefix = elem.id.before("_btnRemove");
-        $elem.closest('.sf-repeater-field').SFControl<Lines.EntityRepeater>().removeItem_click(itemPrefix);
+        (<any>$elem.closest('.sf-repeater-field').SFControl<Lines.EntityRepeater>()).removeItem_click(itemPrefix);
         var $li = $elem.closest('li');
         if ($li.hasClass("ui-tabs-selected")) {
             $control().tabs("select", 0);
@@ -25,7 +25,7 @@ function attachTabRepeater(repeater: Lines.EntityRepeater) {
     function addItem() {
         var $container = $control();
         var controlId = $container.attr("id");
-        var repeater = $('#' + controlId).SFControl<Lines.EntityRepeater>();
+        var repeater = <any>$('#' + controlId).SFControl<Lines.EntityRepeater>();
 
         var newPrefixIndex = 0;
         var $lastElement = $container.children("ul").find("li:last").find(".sf-remove");

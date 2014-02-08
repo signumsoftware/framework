@@ -2,15 +2,19 @@
 define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Framework/Signum.Web/Signum/Scripts/Operations"], function(require, exports, Finder, Operations) {
     once("SF-UserQuery", function () {
         $(document).on("click", ".sf-userquery", function (e) {
+            var _this = this;
             e.preventDefault();
-            var findOptionsQueryString = Finder.getFor("").requestDataForSearchInUrl();
-            var url = $(this).attr("href") + findOptionsQueryString;
+            Finder.getFor("").then(function (sc) {
+                var findOptionsQueryString = sc.requestDataForSearchInUrl();
 
-            if (e.ctrlKey || e.which == 2) {
-                window.open(url);
-            } else if (e.which == 1) {
-                window.location.href = url;
-            }
+                var url = $(_this).attr("href") + findOptionsQueryString;
+
+                if (e.ctrlKey || e.which == 2) {
+                    window.open(url);
+                } else if (e.which == 1) {
+                    window.location.href = url;
+                }
+            });
         });
     });
 
@@ -43,7 +47,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
     exports.saveUserQuery = saveUserQuery;
 
     function createUserQuery(prefix, url) {
-        return SF.submit(url, Finder.getFor(prefix).requestDataForSearch());
+        return Finder.getFor(prefix).then(function (sc) {
+            return SF.submit(url, sc.requestDataForSearch());
+        });
     }
     exports.createUserQuery = createUserQuery;
 });

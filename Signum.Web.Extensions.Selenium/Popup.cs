@@ -20,6 +20,8 @@ namespace Signum.Web.Selenium
         {
             this.Selenium = selenium;
             this.Prefix = prefix;
+
+            this.WaitVisible();
         }
 
         public string PopupVisibleLocator

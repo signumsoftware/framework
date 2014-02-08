@@ -11,8 +11,9 @@ import Operations = require("Framework/Signum.Web/Signum/Scripts/Operations")
 import ChartUtils = require("ChartUtils")
 import d3 = require("d3")
 
-export function openChart(prefix: string, url : string) {
-    SF.submit(url, Finder.getFor(prefix).requestDataForSearch());
+export function openChart(prefix: string, url: string) {
+    Finder.getFor(prefix).then(sc=>
+        SF.submit(url, sc.requestDataForSearch()));
 }
 
 export function attachShowCurrentEntity(el: Lines.EntityLine) {
@@ -34,16 +35,17 @@ export function deleteUserChart(options: Operations.EntityOperationOptions, url:
 }
 
 export function createUserChart(prefix: string, url: string) {
-    SF.submit(url, getFor(prefix).requestProcessedData());
+    getFor(prefix).then(cb=>
+        SF.submit(url, cb.requestProcessedData()));
 }
 
 export function exportData(prefix: string, validateUrl: string, exportUrl: string) {
-    getFor(prefix).exportData(validateUrl, exportUrl); 
+    getFor(prefix).then(cb=> cb.exportData(validateUrl, exportUrl)); 
 }
 
 
 
-export function getFor(prefix: string): ChartBuilder {
+export function getFor(prefix: string): Promise<ChartBuilder> {
     return $("#" + SF.compose(prefix, "sfChartBuilderContainer")).SFControl<ChartBuilder>();
 };
 
@@ -360,16 +362,15 @@ export class ChartBuilder extends Finder.SearchControl {
             var url = $chartContainer.attr('data-open-url');
 
             var $chartControl = $chartContainer.closest(".sf-chart-control");
-            var findNavigator = getFor($chartControl.attr("data-prefix"));
+            getFor($chartControl.attr("data-prefix")).then(cb=> {
+                var options = $chartControl.find(":input").not($chartControl.find(".sf-filters-list :input")).serialize();
+                options += "&webQueryName=" + cb.options.webQueryName;
+                options += "&orders=" + cb.serializeOrders();
+                options += "&filters=" + cb.serializeFilters();
+                options += $(this).data("click");
 
-
-            var options = $chartControl.find(":input").not($chartControl.find(".sf-filters-list :input")).serialize();
-            options += "&webQueryName=" + findNavigator.options.webQueryName;
-            options += "&orders=" + findNavigator.serializeOrders();
-            options += "&filters=" + findNavigator.serializeFilters();
-            options += $(this).data("click");
-
-            window.open(url + (url.indexOf("?") >= 0 ? "&" : "?") + options);
+                window.open(url + (url.indexOf("?") >= 0 ? "&" : "?") + options);
+            }); 
         });
     }
 }

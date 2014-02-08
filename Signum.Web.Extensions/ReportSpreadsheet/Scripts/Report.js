@@ -1,16 +1,20 @@
 /// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
 define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Navigator", "Framework/Signum.Web/Signum/Scripts/Finder"], function(require, exports, Entities, Navigator, Finder) {
     function toPlainExcel(prefix, url) {
-        var info = Finder.getFor(prefix).requestDataForSearch();
+        Finder.getFor(prefix).then(function (sc) {
+            var info = sc.requestDataForSearch();
 
-        return SF.submitOnly(url, info);
+            return SF.submitOnly(url, info);
+        });
     }
     exports.toPlainExcel = toPlainExcel;
 
     function toExcelReport(prefix, url, excelReportKey) {
-        var info = Finder.getFor(prefix).requestDataForSearch();
+        Finder.getFor(prefix).then(function (sc) {
+            var info = sc.requestDataForSearch();
 
-        return SF.submitOnly(url, $.extend({ excelReport: excelReportKey }, info));
+            return SF.submitOnly(url, $.extend({ excelReport: excelReportKey }, info));
+        });
     }
     exports.toExcelReport = toExcelReport;
 

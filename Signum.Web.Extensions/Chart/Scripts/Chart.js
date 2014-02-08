@@ -9,7 +9,9 @@ var __extends = this.__extends || function (d, b) {
 };
 define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Framework/Signum.Web/Signum/Scripts/Validator", "Framework/Signum.Web/Signum/Scripts/Operations", "ChartUtils", "d3"], function(require, exports, Finder, Validator, Operations, ChartUtils, d3) {
     function openChart(prefix, url) {
-        SF.submit(url, Finder.getFor(prefix).requestDataForSearch());
+        Finder.getFor(prefix).then(function (sc) {
+            return SF.submit(url, sc.requestDataForSearch());
+        });
     }
     exports.openChart = openChart;
 
@@ -34,12 +36,16 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
     exports.deleteUserChart = deleteUserChart;
 
     function createUserChart(prefix, url) {
-        SF.submit(url, exports.getFor(prefix).requestProcessedData());
+        exports.getFor(prefix).then(function (cb) {
+            return SF.submit(url, cb.requestProcessedData());
+        });
     }
     exports.createUserChart = createUserChart;
 
     function exportData(prefix, validateUrl, exportUrl) {
-        exports.getFor(prefix).exportData(validateUrl, exportUrl);
+        exports.getFor(prefix).then(function (cb) {
+            return cb.exportData(validateUrl, exportUrl);
+        });
     }
     exports.exportData = exportData;
 
@@ -354,18 +360,19 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
 
         ChartBuilder.prototype.bindMouseClick = function ($chartContainer) {
             $chartContainer.find('[data-click]').click(function () {
+                var _this = this;
                 var url = $chartContainer.attr('data-open-url');
 
                 var $chartControl = $chartContainer.closest(".sf-chart-control");
-                var findNavigator = exports.getFor($chartControl.attr("data-prefix"));
+                exports.getFor($chartControl.attr("data-prefix")).then(function (cb) {
+                    var options = $chartControl.find(":input").not($chartControl.find(".sf-filters-list :input")).serialize();
+                    options += "&webQueryName=" + cb.options.webQueryName;
+                    options += "&orders=" + cb.serializeOrders();
+                    options += "&filters=" + cb.serializeFilters();
+                    options += $(_this).data("click");
 
-                var options = $chartControl.find(":input").not($chartControl.find(".sf-filters-list :input")).serialize();
-                options += "&webQueryName=" + findNavigator.options.webQueryName;
-                options += "&orders=" + findNavigator.serializeOrders();
-                options += "&filters=" + findNavigator.serializeFilters();
-                options += $(this).data("click");
-
-                window.open(url + (url.indexOf("?") >= 0 ? "&" : "?") + options);
+                    window.open(url + (url.indexOf("?") >= 0 ? "&" : "?") + options);
+                });
             });
         };
         return ChartBuilder;

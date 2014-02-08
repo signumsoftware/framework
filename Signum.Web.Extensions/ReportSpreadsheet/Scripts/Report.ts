@@ -6,15 +6,21 @@ import Finder = require("Framework/Signum.Web/Signum/Scripts/Finder")
 import Operations = require("Framework/Signum.Web/Signum/Scripts/Operations")
 
 export function toPlainExcel(prefix: string, url: string) {
-    var info = Finder.getFor(prefix).requestDataForSearch();
+    Finder.getFor(prefix).then(sc=> {
 
-    return SF.submitOnly(url, info); 
+        var info = sc.requestDataForSearch();
+
+        return SF.submitOnly(url, info);
+    }); 
 }
 
 export function toExcelReport(prefix: string, url: string, excelReportKey : string) {
-    var info = Finder.getFor(prefix).requestDataForSearch();
+    Finder.getFor(prefix).then(sc=>
+    {
+        var info = sc.requestDataForSearch();
 
-    return SF.submitOnly(url, $.extend({excelReport: excelReportKey}, info));
+        return SF.submitOnly(url, $.extend({ excelReport: excelReportKey }, info));
+    });
 }
 
 

@@ -152,20 +152,19 @@ namespace Signum.Web.Selenium
 
         public SearchPopupProxy Find(Type selectType = null)
         {
-            int? index = NewIndex();
-
             Selenium.Click(FindLocator);
 
-            string newPrefix = ChooseType(selectType, index);
+            ChooseType(selectType, null);
 
-            return new SearchPopupProxy(Selenium, newPrefix);
+            return new SearchPopupProxy(Selenium, Prefix);
         }
 
         private string ChooseType(Type selectType, int? index)
         {
             string newPrefix = Prefix + (index == null ? "" : ("_" + index));
 
-            Selenium.Wait(() => Popup.IsPopupVisible(Selenium, newPrefix) || Popup.IsPopupVisible(Selenium, Prefix), () => "Popup {0} or {1} to be visible".Formato(newPrefix, Prefix));
+            Selenium.Wait(() => Popup.IsPopupVisible(Selenium, newPrefix) || Popup.IsPopupVisible(Selenium, Prefix), 
+                () => "Popup {0} or {1} to be visible".Formato(newPrefix, Prefix));
 
             if (selectType == null)
             {
@@ -352,9 +351,9 @@ namespace Signum.Web.Selenium
             bool emptyVisible = Selenium.IsElementPresent(DivSelector + ":empty");
 
             if (parentVisible != !emptyVisible)
-                throw new InvalidOperationException("{0}sfDetail is {1} but has {1}".Formato(Prefix,
-                    parentVisible ? "has parent" : "has no parent",
-                    emptyVisible ? "empty" : "not empty"));
+                throw new InvalidOperationException("{0}sfDetail is {1} but {1}".Formato(Prefix,
+                    emptyVisible ? "empty" : "not empty",
+                    parentVisible ? "has parent" : "has no parent"));
 
 
             return parentVisible;

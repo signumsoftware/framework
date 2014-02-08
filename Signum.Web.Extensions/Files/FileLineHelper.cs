@@ -74,7 +74,7 @@ namespace Signum.Web.Files
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.Surround(new HtmlTag("div").Id(fileLine.ControlID).Class("sf-field")))
+            using (sb.Surround(new HtmlTag("div").Id(fileLine.ControlID).Class("sf-field SF-control-container")))
             using (fileLine.ValueFirst ? sb.Surround(new HtmlTag("div").Class("sf-value-first")) : null)
             {
                 sb.AddLine(new HtmlTag("link").Attrs(new { rel = "stylesheet", type = "text/css", href = RouteHelper.New().Content("~/Files/Content/SF_Files.css") }).ToHtmlSelf());
@@ -156,7 +156,7 @@ namespace Signum.Web.Files
 
                     using (sb.Surround(new HtmlTag("div").Class("sf-value-container")))
                     {
-                        sb.AddLine(MvcHtmlString.Create("<input type='file' onchange=\"{0}.onChanged()\" id='{1}' name='{1}' class='sf-value-line'/>".Formato(fileLine.SFControl(), fileLine.Compose(FileLineKeys.File))));
+                        sb.AddLine(MvcHtmlString.Create("<input type='file' onchange=\"{0}\" id='{1}' name='{1}' class='sf-value-line'/>".Formato(fileLine.SFControlThen("onChanged()"), fileLine.Compose(FileLineKeys.File))));
                         sb.AddLine(MvcHtmlString.Create("<img src='{0}' id='{1}_loading' alt='loading' style='display:none'/>".Formato(RouteHelper.New().Content("~/Files/Images/loading.gif"), fileLine.ControlID)));
                         
                         if (fileLine.ValueFirst)

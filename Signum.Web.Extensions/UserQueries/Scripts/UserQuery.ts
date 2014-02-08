@@ -10,15 +10,18 @@ import Operations = require("Framework/Signum.Web/Signum/Scripts/Operations")
 once("SF-UserQuery", () => {
     $(document).on("click", ".sf-userquery", function (e) {
         e.preventDefault();
-        var findOptionsQueryString = Finder.getFor("").requestDataForSearchInUrl();
-        var url = $(this).attr("href") + findOptionsQueryString;
+        Finder.getFor("").then(sc=> {
+            var findOptionsQueryString = sc.requestDataForSearchInUrl();
 
-        if (e.ctrlKey || e.which == 2) {
-            window.open(url);
-        }
-        else if (e.which == 1) {
-            window.location.href = url;
-        }
+            var url = $(this).attr("href") + findOptionsQueryString;
+
+            if (e.ctrlKey || e.which == 2) {
+                window.open(url);
+            }
+            else if (e.which == 1) {
+                window.location.href = url;
+            }
+        });
     });
 });
 
@@ -50,6 +53,7 @@ export function saveUserQuery(os: Operations.EntityOperationOptions, url: string
 } 
 
 export function createUserQuery(prefix: string, url: string) {
-    return SF.submit(url, Finder.getFor(prefix).requestDataForSearch()); 
+    return Finder.getFor(prefix).then(sc=>
+        SF.submit(url, sc.requestDataForSearch())); 
 }
 
