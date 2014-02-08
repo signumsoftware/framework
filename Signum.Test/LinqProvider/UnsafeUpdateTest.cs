@@ -319,7 +319,20 @@ namespace Signum.Test.LinqProviderUpdateDelete
                     .Execute();
                 //tr.Commit();
             }
+        }
 
+        [TestMethod]
+        public void UpdateIbaLiteFie()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                ArtistDN michael = Database.Query<ArtistDN>().SingleEx(a => a.Dead);
+
+                int count = Database.Query<NoteWithDateDN>().UnsafeUpdate()
+                    .Set(a => a.OtherTarget, a => michael.ToLite())
+                    .Execute();
+                //tr.Commit();
+            }
         }
 
         [TestMethod]
@@ -336,6 +349,19 @@ namespace Signum.Test.LinqProviderUpdateDelete
         }
 
         [TestMethod]
+        public void UpdateIbaLiteNull()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                int count = Database.Query<NoteWithDateDN>().UnsafeUpdate()
+                    .Set(a => a.OtherTarget, a => null)
+                    .Execute();
+                //tr.Commit();
+            }
+
+        }
+
+        [TestMethod]
         public void UpdateIbaConditional()
         {
             using (Transaction tr = new Transaction())
@@ -344,6 +370,50 @@ namespace Signum.Test.LinqProviderUpdateDelete
 
                 int count = Database.Query<NoteWithDateDN>().UnsafeUpdate()
                     .Set(a => a.Target, a => a.Id > 1 ? michael : null)
+                    .Execute();
+                //tr.Commit();
+            }
+        }
+
+
+        [TestMethod]
+        public void UpdateIbaLiteConditional()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                ArtistDN michael = Database.Query<ArtistDN>().SingleEx(a => a.Dead);
+
+                int count = Database.Query<NoteWithDateDN>().UnsafeUpdate()
+                    .Set(a => a.OtherTarget, a => a.Id > 1 ? michael.ToLite() : null)
+                    .Execute();
+                //tr.Commit();
+            }
+        }
+
+        [TestMethod]
+        public void UpdateIbaCoallesce()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                ArtistDN michael = Database.Query<ArtistDN>().SingleEx(a => a.Dead);
+
+                int count = Database.Query<NoteWithDateDN>().UnsafeUpdate()
+                    .Set(a => a.Target, a=>a.Target ??  michael)
+                    .Execute();
+                //tr.Commit();
+            }
+        }
+
+
+        [TestMethod]
+        public void UpdateIbaLiteCoallesce()
+        {
+            using (Transaction tr = new Transaction())
+            {
+                ArtistDN michael = Database.Query<ArtistDN>().SingleEx(a => a.Dead);
+
+                int count = Database.Query<NoteWithDateDN>().UnsafeUpdate()
+                    .Set(a => a.OtherTarget, a => a.OtherTarget ?? michael.ToLite())
                     .Execute();
                 //tr.Commit();
             }

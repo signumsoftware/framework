@@ -32,6 +32,14 @@ namespace Signum.Test.Environment
             set { Set(ref target, value, () => Target); }
         }
 
+        [ImplementedByAll]
+        Lite<IIdentifiable> otherTarget;
+        public Lite<IIdentifiable> OtherTarget
+        {
+            get { return otherTarget; }
+            set { Set(ref otherTarget, value, () => OtherTarget); }
+        }
+
         DateTime creationTime;
         public DateTime CreationTime
         {

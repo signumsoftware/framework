@@ -81,11 +81,20 @@ namespace Signum.Engine.Basics
             ExceptionDN entity = ex.PreviousExceptionDN() ?? new ExceptionDN(ex);
 
             entity.ExceptionType = ex.GetType().Name;
-            string innerMessages = ex.FollowC(e => e.InnerException).ToString(e => e.Message, "\r\n\r\n");
+
+            var exceptions= ex.FollowC(e => e.InnerException);
+            string innerMessages = exceptions.ToString(e => e.Message, "\r\n\r\n");
+            string innerStackTrace = exceptions.ToString(e => e.StackTrace, "\r\n\r\n");
+
             if (innerMessages.HasText())
-                innerMessages = "\r\n\r\n".Formato(innerMessages);
-            entity.ExceptionMessage = ex.Message + innerMessages;
-            entity.StackTrace = ex.StackTrace;
+                innerMessages = "\r\n\r\n {0}".Formato(innerMessages);
+
+
+            if (innerStackTrace.HasText())
+                innerStackTrace = "\r\n\r\n {0}".Formato(innerStackTrace);
+
+            entity.ExceptionMessage = (ex.Message + innerMessages).DefaultText("- No message - ");
+            entity.StackTrace = (ex.StackTrace + innerStackTrace).DefaultText("- No stacktrace -");
             entity.ThreadId = Thread.CurrentThread.ManagedThreadId;
             entity.ApplicationName = Schema.Current.ApplicationName;
 
