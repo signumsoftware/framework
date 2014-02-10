@@ -211,7 +211,7 @@ WriteLiteral("                    ");
 
             
             #line 38 "..\..\Chart\Views\ChartRequestView.cshtml"
-               Write(Html.QueryTokenBuilder(null, Model, queryDescription, canAggregate: Model.Value.GroupResults));
+               Write(Html.QueryTokenBuilder(null, Model, ChartClient.GetQueryTokenBuilderSettings(queryDescription, Model.Value.GroupResults, isKey : false)));
 
             
             #line default
@@ -231,7 +231,7 @@ WriteLiteral("                    ");
                             new Dictionary<string, object> 
                             { 
                                 { "data-icon", "ui-icon-arrowthick-1-s" },
-                                { "data-url", Url.SignumAction("AddFilter") }
+                                { "data-url", Url.Action("AddFilter", "Finder") }
                             }));
 
             
@@ -255,14 +255,14 @@ WriteLiteral("\r\n                </div>\r\n");
             #line hidden
 WriteLiteral("\r\n            </div>\r\n        </div>\r\n    </div>\r\n    <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 2622), Tuple.Create("\"", 2668)
+WriteAttribute("id", Tuple.Create(" id=\"", 2669), Tuple.Create("\"", 2715)
             
             #line 57 "..\..\Chart\Views\ChartRequestView.cshtml"
-, Tuple.Create(Tuple.Create("", 2627), Tuple.Create<System.Object, System.Int32>(Model.Compose("sfChartBuilderContainer")
+, Tuple.Create(Tuple.Create("", 2674), Tuple.Create<System.Object, System.Int32>(Model.Compose("sfChartBuilderContainer")
             
             #line default
             #line hidden
-, 2627), false)
+, 2674), false)
 );
 
 WriteLiteral(">\r\n");
@@ -328,14 +328,14 @@ WriteLiteral(" class=\"sf-query-button sf-chart-draw\"");
 
 WriteLiteral(" data-icon=\"ui-icon-refresh\"");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 3212), Tuple.Create("\"", 3241)
+WriteAttribute("id", Tuple.Create(" id=\"", 3259), Tuple.Create("\"", 3288)
             
             #line 65 "..\..\Chart\Views\ChartRequestView.cshtml"
-                    , Tuple.Create(Tuple.Create("", 3217), Tuple.Create<System.Object, System.Int32>(Model.Compose("qbDraw")
+                    , Tuple.Create(Tuple.Create("", 3264), Tuple.Create<System.Object, System.Int32>(Model.Compose("qbDraw")
             
             #line default
             #line hidden
-, 3217), false)
+, 3264), false)
 );
 
 WriteLiteral(" data-url=\"");
@@ -364,14 +364,14 @@ WriteLiteral(" class=\"sf-query-button sf-chart-script-edit\"");
 
 WriteLiteral(" data-icon=\"ui-icon-script\"");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 3454), Tuple.Create("\"", 3483)
+WriteAttribute("id", Tuple.Create(" id=\"", 3501), Tuple.Create("\"", 3530)
             
             #line 66 "..\..\Chart\Views\ChartRequestView.cshtml"
-            , Tuple.Create(Tuple.Create("", 3459), Tuple.Create<System.Object, System.Int32>(Model.Compose("qbEdit")
+            , Tuple.Create(Tuple.Create("", 3506), Tuple.Create<System.Object, System.Int32>(Model.Compose("qbEdit")
             
             #line default
             #line hidden
-, 3459), false)
+, 3506), false)
 );
 
 WriteLiteral(">");
@@ -420,14 +420,14 @@ WriteLiteral(" class=\"clearall\"");
 
 WriteLiteral(">\r\n    </div>\r\n    <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 4124), Tuple.Create("\"", 4157)
+WriteAttribute("id", Tuple.Create(" id=\"", 4171), Tuple.Create("\"", 4204)
             
             #line 81 "..\..\Chart\Views\ChartRequestView.cshtml"
-, Tuple.Create(Tuple.Create("", 4129), Tuple.Create<System.Object, System.Int32>(Model.Compose("divResults")
+, Tuple.Create(Tuple.Create("", 4176), Tuple.Create<System.Object, System.Int32>(Model.Compose("divResults")
             
             #line default
             #line hidden
-, 4129), false)
+, 4176), false)
 );
 
 WriteLiteral(" class=\"ui-widget ui-corner-all sf-search-results-container\"");

@@ -137,7 +137,7 @@ WriteLiteral("            ");
 
             
             #line 18 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
-       Write(Html.MailingInsertQueryTokenBuilder(null, ec, (QueryDescription)ViewData[ViewDataKeys.QueryDescription]));
+       Write(Html.QueryTokenBuilder(null, ec, MailingClient.GetQueryTokenBuilderSettings((QueryDescription)ViewData[ViewDataKeys.QueryDescription])));
 
             
             #line default
@@ -159,14 +159,14 @@ WriteLiteral(" data-prefix=\"");
             #line hidden
 WriteLiteral("\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 916), Tuple.Create("\"", 973)
+WriteAttribute("value", Tuple.Create(" value=\"", 947), Tuple.Create("\"", 1004)
             
             #line 19 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
-                                                                    , Tuple.Create(Tuple.Create("", 924), Tuple.Create<System.Object, System.Int32>(EmailTemplateViewMessage.Insert.NiceToString()
+                                                                    , Tuple.Create(Tuple.Create("", 955), Tuple.Create<System.Object, System.Int32>(EmailTemplateViewMessage.Insert.NiceToString()
             
             #line default
             #line hidden
-, 924), false)
+, 955), false)
 );
 
 WriteLiteral(" />\r\n            <input");
@@ -238,7 +238,7 @@ WriteLiteral("        ");
 
             
             #line 24 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
-   Write(Html.ValueLine(ec, e => e.Subject, vl => 
+   Write(Html.ValueLine(ec, e => e.Subject, vl =>
         {
             vl.LabelHtmlProps["style"] = "width:100px";
             vl.ValueHtmlProps["class"] = "sf-email-inserttoken-target sf-email-template-message-subject";
@@ -264,13 +264,13 @@ WriteLiteral("        ");
             
             #line default
             #line hidden
-WriteLiteral("\r\n        \r\n        <script>\r\n            $(function () {\r\n");
+WriteLiteral("\r\n\r\n        <script>\r\n            $(function () {\r\n");
 
-WriteLiteral("                 ");
+WriteLiteral("                ");
 
             
             #line 39 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
-             Write(new JsFunction(MailingClient.Module, "initHtmlEditorWithTokens", ec.SubContext(e => e.Text).ControlID));
+            Write(new JsFunction(MailingClient.Module, "initHtmlEditorWithTokens", ec.SubContext(e => e.Text).ControlID));
 
             
             #line default

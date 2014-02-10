@@ -92,7 +92,7 @@ namespace Signum.Web.UserQueries
                 {
                     new EntityOperationSettings(UserQueryOperation.Save)
                     {
-                        OnClick = ctx => new JsOperationFunction(Module, "saveUserQuery", ctx.Url.Action("Save", "UserQueries"))
+                        OnClick = ctx => new JsOperationFunction(Module, "saveUserQuery", ctx.Url.Action((UserQueriesController uq)=>uq.Save()))
                     },
                     new EntityOperationSettings(UserQueryOperation.Delete)
                     {

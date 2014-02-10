@@ -74,7 +74,7 @@ namespace Signum.Web.UserQueries
         }
 
         [HttpPost]
-        public ActionResult Save(string prefix)
+        public ActionResult Save()
         {
             UserQueryDN userQuery = null;
             
@@ -84,7 +84,7 @@ namespace Signum.Web.UserQueries
             }
             catch(Exception){}
 
-            var context = userQuery.ApplyChanges(this.ControllerContext, null, true).ValidateGlobal();
+            var context = userQuery.ApplyChanges(this.ControllerContext, true).ValidateGlobal();
 
             if (context.GlobalErrors.Any())
             {
@@ -93,7 +93,7 @@ namespace Signum.Web.UserQueries
             }
 
             userQuery = context.Value.Execute(UserQueryOperation.Save);
-            return OperationClient.DefaultExecuteResult(this, userQuery, prefix);
+            return OperationClient.DefaultExecuteResult(this, userQuery);
         }
     }
 }

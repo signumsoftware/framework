@@ -44,7 +44,7 @@
                     <div class="sf-template-message-insert-container">
                         <fieldset class="sf-email-replacements-panel">
                             <legend>Replacements</legend>
-                            @Html.MailingInsertQueryTokenBuilder(null, nc, queryDescription)
+                            @Html.QueryTokenBuilder(null, nc, MailingClient.GetQueryTokenBuilderSettings(queryDescription))
                             <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-basic sf-disabled" data-prefix="@nc.ControlID" value="@(EmailTemplateViewMessage.Insert.NiceToString())" />
                             <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-if sf-disabled" data-prefix="@nc.ControlID" data-block="if" value="if" />
                             <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-foreach sf-disabled" data-prefix="@nc.ControlID" data-block="foreach" value="foreach" />

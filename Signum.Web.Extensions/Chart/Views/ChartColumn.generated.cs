@@ -99,62 +99,49 @@ namespace Signum.Web.Extensions.Chart.Views
     public partial class ChartColumn : System.Web.Mvc.WebViewPage<dynamic>
     {
 
+#line 12 "..\..\Chart\Views\ChartColumn.cshtml"
 public System.Web.WebPages.HelperResult ColorLink(Type type)
     {
+#line default
+#line hidden
 return new System.Web.WebPages.HelperResult(__razor_helper_writer => {
-
-
 
 #line 13 "..\..\Chart\Views\ChartColumn.cshtml"
      
         var identType = type.IsEnum ? EnumEntity.Generate(type) : type;
         
     
+
 #line default
 #line hidden
 
-
 #line 16 "..\..\Chart\Views\ChartColumn.cshtml"
-WriteTo(@__razor_helper_writer, Html.Field(ChartMessage.ColorsFor0.NiceToString().Formato(type.NiceName()),
+WriteTo(__razor_helper_writer, Html.Field(ChartMessage.ColorsFor0.NiceToString().Formato(type.NiceName()),
                  Html.ActionLink(Signum.Engine.Chart.ChartColorLogic.Colors.Value.ContainsKey(identType) ? ChartMessage.ViewPalette.NiceToString() : ChartMessage.CreatePalette.NiceToString(),
                           (ColorChartController cc) => cc.Colors(Navigator.ResolveWebTypeName(identType)))));
 
+
 #line default
 #line hidden
-
 
 #line 18 "..\..\Chart\Views\ChartColumn.cshtml"
                                                                                                            ;
 
+
 #line default
 #line hidden
-
 });
 
+#line 19 "..\..\Chart\Views\ChartColumn.cshtml"
 }
-
+#line default
+#line hidden
 
         public ChartColumn()
         {
         }
         public override void Execute()
         {
-
-
-
-
-
-
-
-
-
-
-
-
-
-WriteLiteral("\r\n");
-
-
             
             #line 20 "..\..\Chart\Views\ChartColumn.cshtml"
  using (var tc = Html.TypeContext<ChartColumnDN>())
@@ -168,8 +155,11 @@ WriteLiteral("\r\n");
             
             #line default
             #line hidden
-WriteLiteral("    <tr class=\"sf-chart-token\" data-token=\"");
+WriteLiteral("    <tr");
 
+WriteLiteral(" class=\"sf-chart-token\"");
+
+WriteLiteral(" data-token=\"");
 
             
             #line 27 "..\..\Chart\Views\ChartColumn.cshtml"
@@ -178,8 +168,9 @@ WriteLiteral("    <tr class=\"sf-chart-token\" data-token=\"");
             
             #line default
             #line hidden
-WriteLiteral("\">\r\n        <td>");
+WriteLiteral("\"");
 
+WriteLiteral(">\r\n        <td>");
 
             
             #line 28 "..\..\Chart\Views\ChartColumn.cshtml"
@@ -190,7 +181,12 @@ WriteLiteral("\">\r\n        <td>");
             #line hidden
 WriteLiteral("\r\n        </td>\r\n        <td>\r\n");
 
-
+            
+            #line 31 "..\..\Chart\Views\ChartColumn.cshtml"
+            
+            
+            #line default
+            #line hidden
             
             #line 31 "..\..\Chart\Views\ChartColumn.cshtml"
              if (tc.Value.GroupByVisible)
@@ -244,22 +240,31 @@ WriteLiteral("\r\n        </td>\r\n        <td>\r\n");
             
             #line default
             #line hidden
-WriteLiteral("        </td>\r\n        <td>\r\n            <div class=\"sf-query-token\">\r\n          " +
-"      ");
+WriteLiteral("        </td>\r\n        <td>\r\n            <div");
 
+WriteLiteral(" class=\"sf-query-token\"");
+
+WriteLiteral(">\r\n");
+
+WriteLiteral("                ");
 
             
             #line 55 "..\..\Chart\Views\ChartColumn.cshtml"
-           Write(Html.QueryTokenDNBuilder(tc.SubContext(a=>a.Token), (QueryDescription)ViewData[ViewDataKeys.QueryDescription], canAggregate: tc.Value.ParentChart.GroupResults && tc.Value.IsGroupKey == false));
+           Write(Html.QueryTokenDNBuilder(tc.SubContext(a=>a.Token), ChartClient.GetQueryTokenBuilderSettings(
+                (QueryDescription)ViewData[ViewDataKeys.QueryDescription],  
+                tc.Value.ParentChart.GroupResults, tc.Value.IsGroupKey == true)));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n            </div>\r\n            <a class=\"sf-chart-token-config-trigger\">");
+WriteLiteral("\r\n            </div>\r\n            <a");
 
+WriteLiteral(" class=\"sf-chart-token-config-trigger\"");
+
+WriteLiteral(">");
 
             
-            #line 57 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 59 "..\..\Chart\Views\ChartColumn.cshtml"
                                                 Write(ChartMessage.Chart_ToggleInfo.NiceToString());
 
             
@@ -267,9 +272,8 @@ WriteLiteral("\r\n            </div>\r\n            <a class=\"sf-chart-token-co
             #line hidden
 WriteLiteral("</a>\r\n        </td>\r\n    </tr>\r\n");
 
-
             
-            #line 60 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 62 "..\..\Chart\Views\ChartColumn.cshtml"
     
    
     
@@ -277,12 +281,26 @@ WriteLiteral("</a>\r\n        </td>\r\n    </tr>\r\n");
             
             #line default
             #line hidden
-WriteLiteral("    <tr class=\"sf-chart-token-config\" style=\"display: none\">\r\n        <td>\r\n     " +
-"   </td>\r\n        <td colspan=\"2\">\r\n");
+WriteLiteral("    <tr");
 
+WriteLiteral(" class=\"sf-chart-token-config\"");
+
+WriteLiteral(" style=\"display: none\"");
+
+WriteLiteral(">\r\n        <td>\r\n        </td>\r\n        <td");
+
+WriteLiteral(" colspan=\"2\"");
+
+WriteLiteral(">\r\n");
 
             
-            #line 67 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 69 "..\..\Chart\Views\ChartColumn.cshtml"
+            
+            
+            #line default
+            #line hidden
+            
+            #line 69 "..\..\Chart\Views\ChartColumn.cshtml"
              using (Html.FieldInline())
             { 
                 
@@ -290,56 +308,56 @@ WriteLiteral("    <tr class=\"sf-chart-token-config\" style=\"display: none\">\r
             #line default
             #line hidden
             
-            #line 69 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 71 "..\..\Chart\Views\ChartColumn.cshtml"
            Write(Html.ValueLine(tc, ct => ct.DisplayName, vl => vl.ValueHtmlProps["class"] = "sf-chart-redraw-onchange"));
 
             
             #line default
             #line hidden
             
-            #line 69 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 71 "..\..\Chart\Views\ChartColumn.cshtml"
                                                                                                                         
                 
             
             #line default
             #line hidden
             
-            #line 70 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 72 "..\..\Chart\Views\ChartColumn.cshtml"
            Write(Html.ValueLine(tc, ct => ct.Parameter1, vl => ChartClient.SetupParameter(vl, tc.Value, tc.Value.ScriptColumn.Parameter1)));
 
             
             #line default
             #line hidden
             
-            #line 70 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 72 "..\..\Chart\Views\ChartColumn.cshtml"
                                                                                                                                           
                 
             
             #line default
             #line hidden
             
-            #line 71 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 73 "..\..\Chart\Views\ChartColumn.cshtml"
            Write(Html.ValueLine(tc, ct => ct.Parameter2, vl => ChartClient.SetupParameter(vl, tc.Value, tc.Value.ScriptColumn.Parameter2)));
 
             
             #line default
             #line hidden
             
-            #line 71 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 73 "..\..\Chart\Views\ChartColumn.cshtml"
                                                                                                                                           
                 
             
             #line default
             #line hidden
             
-            #line 72 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 74 "..\..\Chart\Views\ChartColumn.cshtml"
            Write(Html.ValueLine(tc, ct => ct.Parameter3, vl => ChartClient.SetupParameter(vl, tc.Value, tc.Value.ScriptColumn.Parameter3)));
 
             
             #line default
             #line hidden
             
-            #line 72 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 74 "..\..\Chart\Views\ChartColumn.cshtml"
                                                                                                                                           
                 if (tc.Value.Token != null && !Navigator.IsReadOnly(typeof(ChartColorDN)))
                 {
@@ -352,14 +370,14 @@ WriteLiteral("    <tr class=\"sf-chart-token-config\" style=\"display: none\">\r
             #line default
             #line hidden
             
-            #line 79 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 81 "..\..\Chart\Views\ChartColumn.cshtml"
            Write(ColorLink(type.UnNullify()));
 
             
             #line default
             #line hidden
             
-            #line 79 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 81 "..\..\Chart\Views\ChartColumn.cshtml"
                                             ;
                     }
                     else
@@ -382,9 +400,8 @@ WriteLiteral(" | ");
 
 WriteLiteral("\r\n");
 
-
             
-            #line 92 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 94 "..\..\Chart\Views\ChartColumn.cshtml"
                                 }
                                 
                 
@@ -392,14 +409,14 @@ WriteLiteral("\r\n");
             #line default
             #line hidden
             
-            #line 94 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 96 "..\..\Chart\Views\ChartColumn.cshtml"
            Write(ColorLink(item.Value));
 
             
             #line default
             #line hidden
             
-            #line 94 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 96 "..\..\Chart\Views\ChartColumn.cshtml"
                                       ;
                             }
                         }
@@ -412,15 +429,13 @@ WriteLiteral("\r\n");
             #line hidden
 WriteLiteral("        </td>\r\n    </tr>\r\n");
 
-
             
-            #line 102 "..\..\Chart\Views\ChartColumn.cshtml"
+            #line 104 "..\..\Chart\Views\ChartColumn.cshtml"
 }
 
             
             #line default
             #line hidden
-
         }
     }
 }

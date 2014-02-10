@@ -13,7 +13,8 @@
     {
         style.OnlyValue = true;
         <div style="float: left">
-            @Html.QueryTokenDNBuilder(e.SubContext(qf=>qf.Token), (QueryDescription)ViewData[ViewDataKeys.QueryDescription], canAggregate: parent.GroupResults)
+            @Html.QueryTokenDNBuilder(e.SubContext(qf=>qf.Token), ChartClient.GetQueryTokenBuilderSettings(
+            (QueryDescription)ViewData[ViewDataKeys.QueryDescription], parent.GroupResults, isKey : false))
         </div>
         @Html.ValueLine(style, f => f.Operation)
         @Html.ValueLine(style, f => f.ValueString, vl => vl.ValueHtmlProps["size"] = 20)

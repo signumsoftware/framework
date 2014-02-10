@@ -20,42 +20,39 @@ namespace Signum.Web.Mailing
     public class MailingController : Controller
     {
         [HttpPost]
-        public ContentResult NewSubTokensCombo(string webQueryName, string tokenName, string prefix, int index)
+        public ContentResult NewSubTokensCombo(string webQueryName, string tokenName, string prefix)
         {
             object queryName = Navigator.ResolveQueryName(webQueryName);
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
             var token = QueryUtils.Parse(tokenName, qd, canAggregate: false);
 
-            var combo = SignumController.CreateHtmlHelper(this)
-                .MailingInsertQueryTokenCombo(token, null, new Context(null, prefix), index + 1, qd, canAggregate: false);
+            var combo = FinderController.CreateHtmlHelper(this)
+                .QueryTokenBuilderOptions(token, new Context(null, prefix), MailingClient.GetQueryTokenBuilderSettings(qd));
 
-            var content = combo.ToHtmlString();
-            
-            if (content.HasText())
-                return Content(content);
-            else
-                return Content("<span>no-results</span>");
+            return Content(combo.ToHtmlString());
         }
 
         [HttpPost]
-        public ActionResult RemoveRecipientsExecute(Lite<NewsletterDN> newsletter, string prefix)
+        public ActionResult RemoveRecipientsExecute()
         {
             var deliveries = this.ParseLiteKeys<NewsletterDeliveryDN>();
 
+            var newsletter = Lite.Parse<NewsletterDN>(Request["newsletter"]);
+            
             newsletter.ExecuteLite(NewsletterOperation.RemoveRecipients, deliveries);
 
             return this.RedirectHttpOrAjax(Navigator.NavigateRoute(newsletter));
         }
 
         [HttpPost]
-        public ActionResult CreateMailFromTemplateAndEntity(string prefix, string newPrefix)
+        public ActionResult CreateMailFromTemplateAndEntity()
         {
             var entity = Lite.Parse(Request["keys"]).Retrieve();
 
-            var emailMessage = this.ExtractEntity<EmailTemplateDN>(prefix)
+            var emailMessage = this.ExtractEntity<EmailTemplateDN>()
                 .ConstructFrom<EmailMessageDN>(EmailMessageOperation.CreateMailFromTemplate, entity);
 
-            return OperationClient.DefaultConstructResult(this, emailMessage, newPrefix);
+            return OperationClient.DefaultConstructResult(this, emailMessage);
         }
     }
 }

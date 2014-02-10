@@ -39,19 +39,19 @@ namespace Signum.Web.UserQueries
             return helper.CountSearchControl(findOptions, settinsModifier);
         }
 
-        public static MvcHtmlString QueryTokenDNBuilder(this HtmlHelper helper, TypeContext<QueryTokenDN> ctx, QueryDescription qd, bool canAggregate = false)
+        public static MvcHtmlString QueryTokenDNBuilder(this HtmlHelper helper, TypeContext<QueryTokenDN> ctx, QueryTokenBuilderSettings settings)
         {
             if (ctx.Value.TryCC(qt => qt.ParseException) != null)
             {
                 HtmlStringBuilder sb = new HtmlStringBuilder();
                 sb.Add(new HtmlTag("div").Class("ui-state-error").SetInnerText(ctx.Value.ParseException.Message).ToHtml());
                 sb.Add(new HtmlTag("pre").SetInnerText(ctx.Value.TokenString).ToHtml());
-                sb.Add(helper.QueryTokenBuilder(null, ctx, qd, canAggregate));
+                sb.Add(helper.QueryTokenBuilder(null, ctx, settings));
                 return sb.ToHtml();
             }
             else
             {
-                return helper.QueryTokenBuilder(ctx.Value.TryCC(ct => ct.Token), ctx, qd, canAggregate);
+                return helper.QueryTokenBuilder(ctx.Value.TryCC(ct => ct.Token), ctx, settings);
             }
         }
 

@@ -11,7 +11,7 @@
         });
 
         $(".sf-email-replacements-container").on("click", ".sf-email-inserttoken", function () {
-            var tokenName = Finder.constructTokenName($(this).data("prefix"));
+            var tokenName = Finder.QueryTokenBuilder.constructTokenName($(this).data("prefix"));
             if (SF.isEmpty(tokenName)) {
                 return;
             }

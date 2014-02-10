@@ -142,7 +142,7 @@ namespace Signum.Web.Chart
                     Id = TypeContextUtilities.Compose(prefix, "qbUserChartNew"),
                     AltText = uqNewText,
                     Text = uqNewText,
-                    OnClick = new JsFunction(ChartClient.Module, "createUserChart", prefix, url.Action("CreateUserChart", "Chart")),
+                    OnClick = new JsFunction(ChartClient.Module, "createUserChart", prefix, url.Action((ChartController c)=>c.CreateUserChart())),
                     DivCssClass = ToolBarButton.DefaultQueryCssClass
                 });
             }            
@@ -182,8 +182,8 @@ namespace Signum.Web.Chart
                     AltText = ucExportDataText,
                     Text = ucExportDataText,
                     OnClick = new JsFunction(ChartClient.Module, "exportData", prefix, 
-                        url.Action("Validate", "Chart"),
-                        url.Action("ExportData", "Chart")),
+                        url.Action((ChartController c)=>c.Validate()),
+                        url.Action((ChartController c)=>c.ExportData())),
                     DivCssClass = ToolBarButton.DefaultQueryCssClass
                 });
             }

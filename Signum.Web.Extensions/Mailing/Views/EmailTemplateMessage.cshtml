@@ -15,13 +15,13 @@
             vl.LabelText = EmailTemplateViewMessage.Language.NiceToString();
         })
         <div class="sf-template-message-insert-container">
-            @Html.MailingInsertQueryTokenBuilder(null, ec, (QueryDescription)ViewData[ViewDataKeys.QueryDescription])
+            @Html.QueryTokenBuilder(null, ec, MailingClient.GetQueryTokenBuilderSettings((QueryDescription)ViewData[ViewDataKeys.QueryDescription]))
             <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-basic sf-disabled" data-prefix="@ec.ControlID" value="@(EmailTemplateViewMessage.Insert.NiceToString())" />
             <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-if sf-disabled" data-prefix="@ec.ControlID" data-block="if" value="if" />
             <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-foreach sf-disabled" data-prefix="@ec.ControlID" data-block="foreach" value="foreach" />
             <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-any sf-disabled" data-prefix="@ec.ControlID" data-block="any" value="any" />
         </div>
-        @Html.ValueLine(ec, e => e.Subject, vl => 
+        @Html.ValueLine(ec, e => e.Subject, vl =>
         {
             vl.LabelHtmlProps["style"] = "width:100px";
             vl.ValueHtmlProps["class"] = "sf-email-inserttoken-target sf-email-template-message-subject";
@@ -33,10 +33,10 @@
             vl.ValueHtmlProps["style"] = "width:100%; height:180px;";
             vl.ValueHtmlProps["class"] = "sf-rich-text-editor sf-email-template-message-text";
         })
-        
+
         <script>
             $(function () {
-                 @(new JsFunction(MailingClient.Module, "initHtmlEditorWithTokens", ec.SubContext(e => e.Text).ControlID));
+                @(new JsFunction(MailingClient.Module, "initHtmlEditorWithTokens", ec.SubContext(e => e.Text).ControlID));
             });
         </script>
     </div>

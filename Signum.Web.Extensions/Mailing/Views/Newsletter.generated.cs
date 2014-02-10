@@ -283,7 +283,7 @@ WriteLiteral("                            ");
 
             
             #line 47 "..\..\Mailing\Views\Newsletter.cshtml"
-                       Write(Html.MailingInsertQueryTokenBuilder(null, nc, queryDescription));
+                       Write(Html.QueryTokenBuilder(null, nc, MailingClient.GetQueryTokenBuilderSettings(queryDescription)));
 
             
             #line default
@@ -305,14 +305,14 @@ WriteLiteral(" data-prefix=\"");
             #line hidden
 WriteLiteral("\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 2224), Tuple.Create("\"", 2281)
+WriteAttribute("value", Tuple.Create(" value=\"", 2255), Tuple.Create("\"", 2312)
             
             #line 48 "..\..\Mailing\Views\Newsletter.cshtml"
-                                                                                   , Tuple.Create(Tuple.Create("", 2232), Tuple.Create<System.Object, System.Int32>(EmailTemplateViewMessage.Insert.NiceToString()
+                                                                                   , Tuple.Create(Tuple.Create("", 2263), Tuple.Create<System.Object, System.Int32>(EmailTemplateViewMessage.Insert.NiceToString()
             
             #line default
             #line hidden
-, 2232), false)
+, 2263), false)
 );
 
 WriteLiteral(" />\r\n                            <input");

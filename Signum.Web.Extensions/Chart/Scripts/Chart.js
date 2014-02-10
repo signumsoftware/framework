@@ -94,7 +94,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
             $(document).on("change", ".sf-query-token select", function () {
                 var $this = $(this);
                 var id = $this.attr("id");
-                Finder.clearChildSubtokenCombos($this, id.before("_ddlTokens_"), parseInt(id.after("_ddlTokens_")));
+                Finder.QueryTokenBuilder.clearChildSubtokenCombos($this, id.before("_ddlTokens_"), parseInt(id.after("_ddlTokens_")));
                 self.updateChartBuilder($this.closest("tr").attr("data-token"));
             });
 
@@ -164,24 +164,24 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
                 }
                 self.newSubTokensComboAdded($("#" + args[0]));
             });
-
-            var originalNewSubtokensCombo = Finder.newSubTokensCombo;
-
-            Finder.newSubTokensCombo = function (webQueryName, prefix, index, url) {
-                var $selectedCombo = $("#" + SF.compose(prefix, "ddlTokens_" + index));
-                if ($selectedCombo.closest(".sf-chart-builder").length == 0) {
-                    if (self.$chartControl.find(".sf-chart-group-trigger:checked").length > 0) {
-                        url = self.$chartControl.attr("data-subtokens-url");
-                        originalNewSubtokensCombo.call(this, webQueryName, prefix, index, url);
-                    } else {
-                        originalNewSubtokensCombo.call(this, webQueryName, prefix, index, url);
-                    }
-                } else {
-                    Finder.clearChildSubtokenCombos($selectedCombo, prefix, index);
-                    $("#" + SF.compose(self.$chartControl.attr("data-prefix"), "sfOrders")).val('');
-                    self.$chartControl.find('th').removeClass("sf-header-sort-up sf-header-sort-down");
-                }
-            };
+            //var originalNewSubtokensCombo = Finder.newSubTokensCombo;
+            //Finder.newSubTokensCombo = function (webQueryName, prefix, index, url) {
+            //    var $selectedCombo = $("#" + SF.compose(prefix, "ddlTokens_" + index));
+            //    if ($selectedCombo.closest(".sf-chart-builder").length == 0) {
+            //        if (self.$chartControl.find(".sf-chart-group-trigger:checked").length > 0) {
+            //            url = self.$chartControl.attr("data-subtokens-url");
+            //            originalNewSubtokensCombo.call(this, webQueryName, prefix, index, url);
+            //        }
+            //        else {
+            //            originalNewSubtokensCombo.call(this, webQueryName, prefix, index, url);
+            //        }
+            //    }
+            //    else {
+            //        Finder.clearChildSubtokenCombos($selectedCombo, prefix, index);
+            //        $("#" + SF.compose(self.$chartControl.attr("data-prefix"), "sfOrders")).val('');
+            //        self.$chartControl.find('th').removeClass("sf-header-sort-up sf-header-sort-down");
+            //    }
+            //};
         };
 
         ChartBuilder.prototype.requestData = function () {

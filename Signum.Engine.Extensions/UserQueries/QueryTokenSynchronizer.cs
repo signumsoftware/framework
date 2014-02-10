@@ -18,7 +18,7 @@ namespace Signum.Engine.UserQueries
     {
         static void Remember(Replacements replacements, string tokenString, QueryToken token)
         {
-            List<QueryToken> tokenList = token.FollowC(a => a.Subordinated ? null : a.Parent).Reverse().ToList();
+            List<QueryToken> tokenList = token.FollowC(a => a.Parent).Reverse().ToList();
 
             string[] oldParts = tokenString.Split('.');
             string[] newParts = token.FullKey().Split('.');

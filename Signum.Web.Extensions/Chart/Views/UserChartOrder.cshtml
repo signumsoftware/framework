@@ -14,7 +14,8 @@
     {
         style.OnlyValue = true;
     <div style="float: left">
-        @Html.QueryTokenDNBuilder(e.SubContext(a => a.Token), (QueryDescription)ViewData[ViewDataKeys.QueryDescription], userChart.GroupResults)
+        @Html.QueryTokenDNBuilder(e.SubContext(a => a.Token), ChartClient.GetQueryTokenBuilderSettings(
+        (QueryDescription)ViewData[ViewDataKeys.QueryDescription], userChart.GroupResults, isKey: false))
     </div>
     @Html.ValueLine(style, f => f.OrderType)
     }

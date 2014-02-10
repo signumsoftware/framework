@@ -60,7 +60,7 @@
         var entityTypePrefix = uc.SubContext(a => a.EntityType).ControlID;
         
         @Html.EntityLine(uc, f => f.EntityType, el => { 
-       el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Signum");
+       el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Finder");
        el.AttachFunction = new JsLineFunction(ChartClient.Module, "attachShowCurrentEntity"); 
    })
         <p class="messageEntity">

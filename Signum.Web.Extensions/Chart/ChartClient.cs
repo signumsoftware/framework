@@ -179,7 +179,7 @@ namespace Signum.Web.Chart
                 Id = TypeContextUtilities.Compose(ctx.Prefix, "qbChartNew"),
                 AltText = chartNewText,
                 Text = chartNewText,
-                OnClick = new JsFunction(Module, "openChart", ctx.Prefix, ctx.Url.Action("Index", "Chart")),
+                OnClick = new JsFunction(Module, "openChart", ctx.Prefix,  ctx.Url.Action("Index", "Chart")),
                 DivCssClass = ToolBarButton.DefaultQueryCssClass
             };
         }
@@ -255,6 +255,16 @@ namespace Signum.Web.Chart
 
 
             vl.ValueHtmlProps["class"] = "sf-chart-redraw-onchange";
+        }
+
+        public static QueryTokenBuilderSettings GetQueryTokenBuilderSettings(QueryDescription qd, bool groupResults, bool isKey)
+        {
+            return new QueryTokenBuilderSettings
+            {
+                CanAggregate = groupResults && !isKey,
+                QueryDescription = qd,
+                Decorators = new Action<QueryToken, HtmlTag>(SearchControlHelper.CanFilterDecorator),
+            }; 
         }
     }
 }

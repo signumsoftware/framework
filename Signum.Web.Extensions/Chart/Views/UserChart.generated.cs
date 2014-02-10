@@ -300,7 +300,7 @@ WriteLiteral(">\r\n        </div>\r\n");
             
             #line 62 "..\..\Chart\Views\UserChart.cshtml"
    Write(Html.EntityLine(uc, f => f.EntityType, el => { 
-       el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Signum");
+       el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Finder");
        el.AttachFunction = new JsLineFunction(ChartClient.Module, "attachShowCurrentEntity"); 
    }));
 

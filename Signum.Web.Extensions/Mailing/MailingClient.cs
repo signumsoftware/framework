@@ -123,7 +123,7 @@ namespace Signum.Web.Mailing
                         Group = EntityOperationGroup.None,
                         OnClick = ctx => new JsOperationFunction(Module, "createMailFromTemplate",
                             new FindOptions(((EmailTemplateDN)ctx.Entity).Query.ToQueryName()).ToJS(ctx.Prefix, "New"), 
-                            ctx.Url.Action("CreateMailFromTemplateAndEntity", "Mailing"))
+                            ctx.Url.Action((MailingController mc)=>mc.CreateMailFromTemplateAndEntity()))
                     }
                 });
 
@@ -141,7 +141,7 @@ namespace Signum.Web.Mailing
                         {
                             OnClick = ctx =>new JsOperationFunction(Module, "removeRecipients",
                                 new FindOptions(typeof(NewsletterDeliveryDN), "Newsletter", ctx.Entity).ToJS(ctx.Prefix, "New"),
-                                ctx.Url.Action("RemoveRecipientsExecute", "Mailing"))
+                                ctx.Url.Action((MailingController mc)=>mc.RemoveRecipientsExecute()))
                         }
                     });
                 }
@@ -182,79 +182,31 @@ namespace Signum.Web.Mailing
             }
         }
 
-        public static MvcHtmlString MailingInsertQueryTokenBuilder(this HtmlHelper helper, QueryToken queryToken, Context context, QueryDescription qd, bool canAggregate = false)
+        public static QueryTokenBuilderSettings GetQueryTokenBuilderSettings(QueryDescription qd)
         {
-            var tokenPath = queryToken.FollowC(qt => qt.Parent).Reverse().NotNull().ToList();
-
-            HtmlStringBuilder sb = new HtmlStringBuilder();
-
-            for (int i = 0; i < tokenPath.Count; i++)
+            return new QueryTokenBuilderSettings
             {
-                sb.AddLine(helper.MailingInsertQueryTokenCombo(i == 0 ? null : tokenPath[i - 1], tokenPath[i], context, i, qd, canAggregate));
-            }
-
-            sb.AddLine(helper.MailingInsertQueryTokenCombo(queryToken, null, context, tokenPath.Count, qd, canAggregate));
-
-            return sb.ToHtml();
+                CanAggregate = false,
+                ControllerUrl = RouteHelper.New().Action("NewSubTokensCombo", "Mailing"),
+                Decorators = MailingDecorators,
+                QueryDescription = qd,
+                RequestExtraJSonData = null,
+            };
         }
 
-        public static MvcHtmlString MailingInsertQueryTokenCombo(this HtmlHelper helper, QueryToken previous, QueryToken selected, Context context, int index, QueryDescription qd, bool canAggregate)
+        static void MailingDecorators(QueryToken qt, HtmlTag option)
         {
-            if (previous != null && SearchControlHelper.AllowSubTokens != null && !SearchControlHelper.AllowSubTokens(previous))
-                return MvcHtmlString.Create("");
+            string canIf = CanIf(qt);
+            if (canIf.HasText())
+                option.Attr("data-if", canIf);
 
-            var queryTokens = previous.SubTokens(qd, canAggregate);
+            string canForeach = CanForeach(qt);
+            if (canForeach.HasText())
+                option.Attr("data-foreach", canForeach);
 
-            if (queryTokens.IsEmpty())
-                return MvcHtmlString.Create("");
-
-            var options = new HtmlStringBuilder();
-            options.AddLine(new HtmlTag("option").Attr("value", "").SetInnerText("-").ToHtml());
-            foreach (var qt in queryTokens)
-            {
-                var option = new HtmlTag("option")
-                            .Attr("value", qt.Key)
-                            .SetInnerText(qt.SubordinatedToString);
-
-                if (selected != null && qt.Key == selected.Key)
-                    option.Attr("selected", "selected");
-
-                option.Attr("title", qt.NiceTypeName);
-                option.Attr("style", "color:" + qt.TypeColor);
-
-                string canIf = CanIf(qt);
-                if (canIf.HasText())
-                    option.Attr("data-if", canIf);
-
-                string canForeach = CanForeach(qt);
-                if (canForeach.HasText())
-                    option.Attr("data-foreach", canForeach);
-
-                string canAny = CanAny(qt);
-                if (canAny.HasText())
-                    option.Attr("data-any", canAny);
-
-                options.AddLine(option.ToHtml());
-            }
-
-            JsFunction onChange = new JsFunction(JsFunction.FinderModule, "newSubTokensCombo",
-                Navigator.ResolveWebQueryName(qd.QueryName),
-                context.ControlID,
-                index,
-                RouteHelper.New().Action("NewSubTokensCombo", "Mailing"));
-
-            HtmlTag dropdown = new HtmlTag("select")
-                .IdName(context.Compose("ddlTokens_" + index))
-                .InnerHtml(options.ToHtml())
-                .Attr("onchange", onChange.ToString());
-
-            if (selected != null)
-            {
-                dropdown.Attr("title", selected.NiceTypeName);
-                dropdown.Attr("style", "color:" + selected.TypeColor);
-            }
-
-            return dropdown.ToHtml();
+            string canAny = CanAny(qt);
+            if (canAny.HasText())
+                option.Attr("data-any", canAny);
         }
 
         static string CanIf(QueryToken token)

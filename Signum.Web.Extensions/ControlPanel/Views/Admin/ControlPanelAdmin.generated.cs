@@ -142,7 +142,7 @@ WriteLiteral("\r\n\r\n<div>\r\n");
             #line hidden
             
             #line 16 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
-   Write(Html.EntityLine(tc, cp => cp.EntityType, el => { el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Signum"); }));
+   Write(Html.EntityLine(tc, cp => cp.EntityType, el => { el.AutocompleteUrl = Url.Action("TypeAutocomplete", "Finder"); }));
 
             
             #line default

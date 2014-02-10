@@ -428,6 +428,7 @@ namespace Signum.Entities.Omnibox
         public float Distance { get; set; }
         public FilterSyntax Syntax  {get; set;}
 
+        public bool SubordinatedEntity { get; set; }
         public QueryToken QueryToken { get; set; }
         public OmniboxMatch[] QueryTokenMatches { get; set; }
         public FilterOperation? Operation { get; set; }
@@ -438,7 +439,7 @@ namespace Signum.Entities.Omnibox
 
         public override string ToString()
         {
-            string token = QueryToken.FollowC(q => q.Subordinated ? null : q.Parent).Reverse().Select(a => a.ToString().ToOmniboxPascal()).ToString(".");
+            string token = QueryToken.FollowC(q => q.Parent).Reverse().Skip(SubordinatedEntity ? 1 : 0).Select(a => a.ToString().ToOmniboxPascal()).ToString(".");
 
             if (Syntax == null || Syntax.Completion == FilterSyntaxCompletion.Token || CanFilter.HasText())
                 return token;
