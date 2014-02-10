@@ -6,7 +6,7 @@ import Finder = require("Framework/Signum.Web/Signum/Scripts/Finder")
 import Operations = require("Framework/Signum.Web/Signum/Scripts/Operations")
 
 export function exploreAlerts(prefix : string, column : string) {
-    var findOptions: Finder.FindOptions = JSON.parse($("#" + SF.compose(prefix, "alertsWidget") + " ul").data("findOptions"));
+    var findOptions: Finder.FindOptions = JSON.parse(JSON.stringify( $("#" + SF.compose(prefix, "alertsWidget") + " ul").data("findoptions")));
 
     findOptions.filters.push({ columnName: "Entity." + column, operation: Finder.FilterOperation.EqualTo, value: "true" }); 
 
@@ -21,15 +21,14 @@ export function createAlert(prefix: string, operationKey: string) {
 function updateAlerts(prefix: string) {
     var widget = $("#" + SF.compose(prefix, "alertsWidget") + " ul"); 
 
-    $.ajax({
+    SF.ajaxPost({
         url: widget.data("url"),
         data: { sfRuntimeInfo: new Entities.RuntimeInfoElement(prefix).getElem().val() },
-        success: function (jsonNewCount) {
-            updateCountAndHighlight(widget, "warned", jsonNewCount.warned);
-            updateCountAndHighlight(widget, "future", jsonNewCount.future);
-            updateCountAndHighlight(widget, "attended", jsonNewCount.attended);
-        }
-    });
+    }).then(function (jsonNewCount) {
+            updateCountAndHighlight(widget.parent(), "attended", jsonNewCount.Attended);
+            updateCountAndHighlight(widget.parent(), "alerted", jsonNewCount.Alerted);
+            updateCountAndHighlight(widget.parent(), "future", jsonNewCount.Future);
+        });
 }
 
 var highlightClass = "sf-alert-active";

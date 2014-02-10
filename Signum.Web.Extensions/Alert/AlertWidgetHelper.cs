@@ -55,7 +55,7 @@ namespace Signum.Web.Alerts
                 QueryName = typeof(AlertDN),
                 Create = false,
                 SearchOnLoad = true,
-                FilterMode = FilterMode.AlwaysHidden,
+                FilterMode = FilterMode.Hidden,
                 FilterOptions = 
                 { 
                     new FilterOption("Target", identifiable.ToLite()),
@@ -78,7 +78,7 @@ namespace Signum.Web.Alerts
                     {
                         content.AddLine(new HtmlTag("a")
                             .Class("sf-alert-view")
-                            .Attr("onclick", new JsFunction(AlertClient.Module, "explore", prefix, a.Property).ToString())
+                            .Attr("onclick", new JsFunction(AlertClient.Module, "exploreAlerts", prefix, a.Property).ToString())
                             .InnerHtml(
                             new HtmlTag("span").Class("sf-alert-count-label").Class(a.AlertClass).Class(a.Count > 0 ? "sf-alert-active" : null).InnerHtml((a.Title + ": ").EncodeHtml()),
                             new HtmlTag("span").Class(a.AlertClass).Class(a.Count > 0 ? "sf-alert-active" : null).SetInnerText(a.Count.ToString()))

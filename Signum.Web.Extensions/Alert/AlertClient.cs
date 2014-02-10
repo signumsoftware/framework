@@ -15,7 +15,7 @@ namespace Signum.Web.Alerts
     {
         public static string ViewPrefix = "~/Alert/Views/{0}.cshtml";
 
-        public static string Module = "Extensions/Signum.Web.Extensions/Alerts/Scripts/Alerts";
+        public static string Module = "Extensions/Signum.Web.Extensions/Alert/Scripts/Alerts";
 
         public static void Start(params Type[] types)
         {
