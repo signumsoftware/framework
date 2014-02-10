@@ -121,7 +121,7 @@ namespace Signum.Web.Reports
 
                 items.Add(new ToolBarButton
                 {
-                    Id = TypeContextUtilities.Compose(ctx.Prefix, "qbCreateAdminister"),
+                    Id = TypeContextUtilities.Compose(ctx.Prefix, "qbReportCreate"),
                     AltText = ExcelMessage.CreateNew.NiceToString(),
                     Text = ExcelMessage.CreateNew.NiceToString(),
                     OnClick = new JsFunction(Module, "createExcelReports", ctx.Prefix, ctx.Url.Action("Create", "Report"),current),
