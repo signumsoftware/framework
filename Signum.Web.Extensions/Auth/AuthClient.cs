@@ -29,7 +29,7 @@ namespace Signum.Web.Auth
     {
         public static Func<string, string> PublicLoginUrl = (string returnUrl) =>
         {
-            return RouteHelper.New().Action("Login", "Auth", new { referrer = returnUrl });
+            return RouteHelper.New().Action((AuthController c) => c.Login(returnUrl));
         };
 
         public static string CookieName = "sfUser";
@@ -137,14 +137,14 @@ namespace Signum.Web.Auth
                     new EntityOperationSettings(UserOperation.SetPassword) 
                     { 
                         OnClick = ctx => new JsOperationFunction(Module, "setPassword", 
-                            ctx.Url.Action("SetPasswordModel", "Auth"), 
-                            ctx.Url.Action("SetPasswordOnOk", "Auth")), 
+                            ctx.Url.Action((AuthController c)=>c.SetPasswordModel()),
+                            ctx.Url.Action((AuthController c)=>c.SetPasswordOnOk()))
                     },
 
                     new EntityOperationSettings(UserOperation.SaveNew) 
                     { 
                          OnClick = ctx => new JsOperationFunction(Module, "saveNew", 
-                            ctx.Url.Action("SaveNewUser", "Auth"))
+                            ctx.Url.Action((AuthController c)=>c.SaveNewUser()))
                     }
                 });
 

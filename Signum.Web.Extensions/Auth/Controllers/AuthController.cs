@@ -47,9 +47,9 @@ namespace Signum.Web.Auth
         };
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public ActionResult SaveNewUser(string prefix)
+        public ActionResult SaveNewUser()
         {
-            var context = this.ExtractEntity<UserDN>(prefix).ApplyChanges(this.ControllerContext, prefix, UserMapping.NewUser).ValidateGlobal();
+            var context = this.ExtractEntity<UserDN>().ApplyChanges(this.ControllerContext, UserMapping.NewUser).ValidateGlobal();
 
             if (context.GlobalErrors.Any())
             {
@@ -58,28 +58,30 @@ namespace Signum.Web.Auth
             }
 
             context.Value.Execute(UserOperation.SaveNew);
-            return OperationClient.DefaultExecuteResult(this, context.Value, prefix);
+            return OperationClient.DefaultExecuteResult(this, context.Value);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public ActionResult SetPasswordModel(string prefix)
+        public ActionResult SetPasswordModel()
         {
             ViewData[ViewDataKeys.Title] = AuthMessage.EnterTheNewPassword.NiceToString();
 
             var model = new SetPasswordModel { };
-            TypeContext tc = TypeContextUtilities.UntypedNew(model, prefix);
+            TypeContext tc = TypeContextUtilities.UntypedNew(model, this.Prefix());
             return this.PopupOpen(new PopupViewOptions(tc));
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
-        public ActionResult SetPasswordOnOk(string prefix, string passPrefix)
+        public ActionResult SetPasswordOnOk()
         {
-            var context = this.ExtractEntity<SetPasswordModel>(passPrefix).ApplyChanges(this.ControllerContext, passPrefix, true);
+            var passPrefix = Request["passPrefix"];
 
-            UserDN user = this.ExtractLite<UserDN>(prefix)
+            var context = this.ExtractEntity<SetPasswordModel>(passPrefix).ApplyChanges(this.ControllerContext, true, passPrefix);
+
+            UserDN user = this.ExtractLite<UserDN>()
                 .ExecuteLite(UserOperation.SetPassword, context.Value.Password);
 
-            return OperationClient.DefaultExecuteResult(this, user, prefix);
+            return OperationClient.DefaultExecuteResult(this, user);
         }
 
         #region "Change password"
@@ -110,7 +112,7 @@ namespace Signum.Web.Auth
                     using (AuthLogic.Disable())
                         user = AuthLogic.RetrieveUser(username);
 
-                    var context = user.ApplyChanges(this.ControllerContext, "", UserMapping.ChangePasswordOld).ValidateGlobal();
+                    var context = user.ApplyChanges(this.ControllerContext, UserMapping.ChangePasswordOld, "").ValidateGlobal();
 
                     if (context.GlobalErrors.Any())
                     {
@@ -129,7 +131,7 @@ namespace Signum.Web.Auth
                 }
                 else
                 {
-                    var context = UserDN.Current.ApplyChanges(this.ControllerContext, "", UserMapping.ChangePasswordOld).ValidateGlobal();
+                    var context = UserDN.Current.ApplyChanges(this.ControllerContext, UserMapping.ChangePasswordOld, "").ValidateGlobal();
                     if (context.GlobalErrors.Any())
                     {
                         ModelState.FromContext(context);
@@ -247,7 +249,7 @@ namespace Signum.Web.Auth
 
                 var user = request.User;
 
-                var context = user.ApplyChanges(this.ControllerContext, "", UserMapping.ChangePassword).ValidateGlobal();
+                var context = user.ApplyChanges(this.ControllerContext, UserMapping.ChangePassword, "").ValidateGlobal();
 
                 if (!context.Errors.TryGetC(UserMapping.NewPasswordKey).IsNullOrEmpty() ||
                     !context.Errors.TryGetC(UserMapping.NewPasswordBisKey).IsNullOrEmpty())

@@ -34,7 +34,7 @@ namespace Signum.Web.Processes
             {
                 Navigator.RegisterArea(typeof(ProcessesClient));
 
-                UrlsRepository.DefaultSFUrls.Add("processFromMany", url => url.Action("ProcessFromMany", "Process"));
+                UrlsRepository.DefaultSFUrls.Add("processFromMany", url => url.Action((ProcessController pc)=>pc.ProcessFromMany()));
 
                 Navigator.AddSettings(new List<EntitySettings>
                 {

@@ -51,7 +51,7 @@ namespace Signum.Web.SMS
         [HttpPost]
         public JsonResult GetLiteralsForType(string prefix)
         {
-            var type = this.ExtractEntity<TypeDN>(prefix);
+            var type = this.ExtractEntity<TypeDN>();
             return Json(new
             {
                 literals = SMSLogic.GetLiteralsFromDataObjectProvider(type.ToType())
@@ -59,17 +59,17 @@ namespace Signum.Web.SMS
         }
 
         [HttpPost]
-        public ActionResult CreateSMSMessageFromTemplate(string prefix, string newPrefix)
+        public ActionResult CreateSMSMessageFromTemplate()
         {
-            var ie = this.ExtractLite<IdentifiableEntity>(prefix);
+            var ie = this.ExtractLite<IdentifiableEntity>();
             var template = Lite.Parse<SMSTemplateDN>(Request["template"]);
 
             var message = ie.ConstructFromLite<SMSMessageDN>(SMSMessageOperation.CreateSMSWithTemplateFromEntity, template.Retrieve());
-            return OperationClient.DefaultConstructResult(this, message, newPrefix);
+            return OperationClient.DefaultConstructResult(this, message);
         }
 
         [HttpPost]
-        public ActionResult SendMultipleMessagesFromTemplate(string newPrefix)
+        public ActionResult SendMultipleMessagesFromTemplate()
         {
             var template = Lite.Parse<SMSTemplateDN>(Request["template"]);
 
@@ -77,23 +77,25 @@ namespace Signum.Web.SMS
 
             var process = OperationLogic.ServiceConstructFromMany(lites, lites.First().EntityType, SMSProviderOperation.SendSMSMessagesFromTemplate, template.Retrieve());
 
-            return OperationClient.DefaultConstructResult(this, process, newPrefix);
+            return OperationClient.DefaultConstructResult(this, process);
         }
 
         [HttpPost]
-        public PartialViewResult SendMultipleSMSMessagesModel(string newPrefix)
+        public PartialViewResult SendMultipleSMSMessagesModel()
         {
             var model = new MultipleSMSModel
             {
             };
 
-            return this.PopupOpen(new PopupViewOptions(new TypeContext<MultipleSMSModel>(model, newPrefix)));
+            return this.PopupOpen(new PopupViewOptions(new TypeContext<MultipleSMSModel>(model, Request["newPrefix"])));
         }
 
         [HttpPost]
-        public ActionResult SendMultipleMessages(string prefixModel, string newPrefix)
+        public ActionResult SendMultipleMessages()
         {
-            var model = this.ExtractEntity<MultipleSMSModel>(prefixModel).ApplyChanges(this.ControllerContext, null, true).Value;
+            var prefixModel = Request["prefixModel"];
+
+            var model = this.ExtractEntity<MultipleSMSModel>(prefixModel).ApplyChanges(this.ControllerContext, true, prefixModel).Value;
 
             var lites = this.ParseLiteKeys<IdentifiableEntity>();
 
@@ -105,7 +107,7 @@ namespace Signum.Web.SMS
 
             var process = OperationLogic.ServiceConstructFromMany(lites, lites.First().EntityType, SMSProviderOperation.SendSMSMessage, cp);
 
-            return OperationClient.DefaultConstructResult(this, process, newPrefix);
+            return OperationClient.DefaultConstructResult(this, process);
         }
     }
 }

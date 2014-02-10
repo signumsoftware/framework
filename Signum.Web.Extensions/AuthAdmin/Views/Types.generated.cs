@@ -684,10 +684,10 @@ WriteLiteral(">\r\n                                <a");
 
 WriteLiteral(" class=\"sf-submodule-trigger\"");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 6822), Tuple.Create("\"", 6932)
+WriteAttribute("href", Tuple.Create(" href=\"", 6822), Tuple.Create("\"", 6926)
             
             #line 124 "..\..\AuthAdmin\Views\Types.cshtml"
-, Tuple.Create(Tuple.Create("", 6829), Tuple.Create<System.Object, System.Int32>(Url.Action((AuthAdminController a) => a.Properties(tc.Value.Role, item.Value.Resource.ToLite(), null))
+, Tuple.Create(Tuple.Create("", 6829), Tuple.Create<System.Object, System.Int32>(Url.Action((AuthAdminController a) => a.Properties(tc.Value.Role, item.Value.Resource.ToLite()))
             
             #line default
             #line hidden
@@ -696,16 +696,16 @@ WriteAttribute("href", Tuple.Create(" href=\"", 6822), Tuple.Create("\"", 6932)
 
 WriteLiteral(">\r\n                                    <span");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 6977), Tuple.Create("\"", 7050)
-, Tuple.Create(Tuple.Create("", 6985), Tuple.Create("sf-auth-thumb", 6985), true)
-, Tuple.Create(Tuple.Create(" ", 6998), Tuple.Create("sf-auth-", 6999), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 6971), Tuple.Create("\"", 7044)
+, Tuple.Create(Tuple.Create("", 6979), Tuple.Create("sf-auth-thumb", 6979), true)
+, Tuple.Create(Tuple.Create(" ", 6992), Tuple.Create("sf-auth-", 6993), true)
             
             #line 125 "..\..\AuthAdmin\Views\Types.cshtml"
-, Tuple.Create(Tuple.Create("", 7007), Tuple.Create<System.Object, System.Int32>(item.Value.Properties.ToString().ToLower()
+, Tuple.Create(Tuple.Create("", 7001), Tuple.Create<System.Object, System.Int32>(item.Value.Properties.ToString().ToLower()
             
             #line default
             #line hidden
-, 7007), false)
+, 7001), false)
 );
 
 WriteLiteral(">\r\n                                    </span></a>\r\n                            <" +
@@ -765,28 +765,28 @@ WriteLiteral(">\r\n                                <a");
 
 WriteLiteral(" class=\"sf-submodule-trigger\"");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 7534), Tuple.Create("\"", 7644)
+WriteAttribute("href", Tuple.Create(" href=\"", 7528), Tuple.Create("\"", 7632)
             
             #line 137 "..\..\AuthAdmin\Views\Types.cshtml"
-, Tuple.Create(Tuple.Create("", 7541), Tuple.Create<System.Object, System.Int32>(Url.Action((AuthAdminController a) => a.Operations(tc.Value.Role, item.Value.Resource.ToLite(), null))
+, Tuple.Create(Tuple.Create("", 7535), Tuple.Create<System.Object, System.Int32>(Url.Action((AuthAdminController a) => a.Operations(tc.Value.Role, item.Value.Resource.ToLite()))
             
             #line default
             #line hidden
-, 7541), false)
+, 7535), false)
 );
 
 WriteLiteral(">\r\n                                    <span");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 7689), Tuple.Create("\"", 7762)
-, Tuple.Create(Tuple.Create("", 7697), Tuple.Create("sf-auth-thumb", 7697), true)
-, Tuple.Create(Tuple.Create(" ", 7710), Tuple.Create("sf-auth-", 7711), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 7677), Tuple.Create("\"", 7750)
+, Tuple.Create(Tuple.Create("", 7685), Tuple.Create("sf-auth-thumb", 7685), true)
+, Tuple.Create(Tuple.Create(" ", 7698), Tuple.Create("sf-auth-", 7699), true)
             
             #line 138 "..\..\AuthAdmin\Views\Types.cshtml"
-, Tuple.Create(Tuple.Create("", 7719), Tuple.Create<System.Object, System.Int32>(item.Value.Operations.ToString().ToLower()
+, Tuple.Create(Tuple.Create("", 7707), Tuple.Create<System.Object, System.Int32>(item.Value.Operations.ToString().ToLower()
             
             #line default
             #line hidden
-, 7719), false)
+, 7707), false)
 );
 
 WriteLiteral(">\r\n                                    </span></a>\r\n                            <" +
@@ -846,28 +846,28 @@ WriteLiteral(">\r\n                                <a");
 
 WriteLiteral(" class=\"sf-submodule-trigger\"");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 8235), Tuple.Create("\"", 8342)
+WriteAttribute("href", Tuple.Create(" href=\"", 8223), Tuple.Create("\"", 8324)
             
             #line 150 "..\..\AuthAdmin\Views\Types.cshtml"
-, Tuple.Create(Tuple.Create("", 8242), Tuple.Create<System.Object, System.Int32>(Url.Action((AuthAdminController a) => a.Queries(tc.Value.Role, item.Value.Resource.ToLite(), null))
+, Tuple.Create(Tuple.Create("", 8230), Tuple.Create<System.Object, System.Int32>(Url.Action((AuthAdminController a) => a.Queries(tc.Value.Role, item.Value.Resource.ToLite()))
             
             #line default
             #line hidden
-, 8242), false)
+, 8230), false)
 );
 
 WriteLiteral(">\r\n                                    <span");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 8387), Tuple.Create("\"", 8457)
-, Tuple.Create(Tuple.Create("", 8395), Tuple.Create("sf-auth-thumb", 8395), true)
-, Tuple.Create(Tuple.Create(" ", 8408), Tuple.Create("sf-auth-", 8409), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 8369), Tuple.Create("\"", 8439)
+, Tuple.Create(Tuple.Create("", 8377), Tuple.Create("sf-auth-thumb", 8377), true)
+, Tuple.Create(Tuple.Create(" ", 8390), Tuple.Create("sf-auth-", 8391), true)
             
             #line 151 "..\..\AuthAdmin\Views\Types.cshtml"
-, Tuple.Create(Tuple.Create("", 8417), Tuple.Create<System.Object, System.Int32>(item.Value.Queries.ToString().ToLower()
+, Tuple.Create(Tuple.Create("", 8399), Tuple.Create<System.Object, System.Int32>(item.Value.Queries.ToString().ToLower()
             
             #line default
             #line hidden
-, 8417), false)
+, 8399), false)
 );
 
 WriteLiteral("></span>\r\n                                </a>\r\n                            </div" +
@@ -954,41 +954,41 @@ WriteLiteral("\"");
 
 WriteLiteral(">\r\n                <td>\r\n                    <div");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 9406), Tuple.Create("\"", 9476)
-, Tuple.Create(Tuple.Create("", 9414), Tuple.Create("sf-auth-tree", 9414), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 9388), Tuple.Create("\"", 9458)
+, Tuple.Create(Tuple.Create("", 9396), Tuple.Create("sf-auth-tree", 9396), true)
             
             #line 167 "..\..\AuthAdmin\Views\Types.cshtml"
-, Tuple.Create(Tuple.Create(" ", 9426), Tuple.Create<System.Object, System.Int32>(iter.IsLast ? "sf-auth-blank" : "sf-auth-line"
+, Tuple.Create(Tuple.Create(" ", 9408), Tuple.Create<System.Object, System.Int32>(iter.IsLast ? "sf-auth-blank" : "sf-auth-line"
             
             #line default
             #line hidden
-, 9427), false)
+, 9409), false)
 );
 
 WriteLiteral(">\r\n                    </div>\r\n                    <div");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 9532), Tuple.Create("\"", 9603)
-, Tuple.Create(Tuple.Create("", 9540), Tuple.Create("sf-auth-tree", 9540), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 9514), Tuple.Create("\"", 9585)
+, Tuple.Create(Tuple.Create("", 9522), Tuple.Create("sf-auth-tree", 9522), true)
             
             #line 169 "..\..\AuthAdmin\Views\Types.cshtml"
-, Tuple.Create(Tuple.Create(" ", 9552), Tuple.Create<System.Object, System.Int32>(iter2.IsLast ? "sf-auth-blank" : "sf-auth-line"
+, Tuple.Create(Tuple.Create(" ", 9534), Tuple.Create<System.Object, System.Int32>(iter2.IsLast ? "sf-auth-blank" : "sf-auth-line"
             
             #line default
             #line hidden
-, 9553), false)
+, 9535), false)
 );
 
 WriteLiteral(">\r\n                    </div>\r\n                    <div");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 9659), Tuple.Create("\"", 9742)
-, Tuple.Create(Tuple.Create("", 9667), Tuple.Create("sf-auth-tree", 9667), true)
+WriteAttribute("class", Tuple.Create(" class=\"", 9641), Tuple.Create("\"", 9724)
+, Tuple.Create(Tuple.Create("", 9649), Tuple.Create("sf-auth-tree", 9649), true)
             
             #line 171 "..\..\AuthAdmin\Views\Types.cshtml"
-, Tuple.Create(Tuple.Create(" ", 9679), Tuple.Create<System.Object, System.Int32>(conditionIter.IsLast ? "sf-auth-leaf-last" : "sf-auth-leaf"
+, Tuple.Create(Tuple.Create(" ", 9661), Tuple.Create<System.Object, System.Int32>(conditionIter.IsLast ? "sf-auth-leaf-last" : "sf-auth-leaf"
             
             #line default
             #line hidden
-, 9680), false)
+, 9662), false)
 );
 
 WriteLiteral(">\r\n                    </div>\r\n                    <a");
@@ -996,14 +996,14 @@ WriteLiteral(">\r\n                    </div>\r\n                    <a");
 WriteLiteral(" class=\"ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only sf" +
 "-remove sf-auth-condition-button\"");
 
-WriteAttribute("title", Tuple.Create(" title=\"", 9910), Tuple.Create("\"", 9973)
+WriteAttribute("title", Tuple.Create(" title=\"", 9892), Tuple.Create("\"", 9955)
             
             #line 173 "..\..\AuthAdmin\Views\Types.cshtml"
-                                                                 , Tuple.Create(Tuple.Create("", 9918), Tuple.Create<System.Object, System.Int32>(AuthMessage.AuthAdmin_RemoveCondition.NiceToString()
+                                                                 , Tuple.Create(Tuple.Create("", 9900), Tuple.Create<System.Object, System.Int32>(AuthMessage.AuthAdmin_RemoveCondition.NiceToString()
             
             #line default
             #line hidden
-, 9918), false)
+, 9900), false)
 );
 
 WriteLiteral(">\r\n                        <span");
@@ -1114,14 +1114,14 @@ WriteLiteral("                            ");
 WriteLiteral("\r\n                        </a>\r\n                    </td>\r\n                \r\n    " +
 "            <td");
 
-WriteAttribute("colspan", Tuple.Create(" colspan=\"", 11944), Tuple.Create("\"", 12034)
+WriteAttribute("colspan", Tuple.Create(" colspan=\"", 11926), Tuple.Create("\"", 12016)
             
             #line 203 "..\..\AuthAdmin\Views\Types.cshtml"
-, Tuple.Create(Tuple.Create("", 11954), Tuple.Create<System.Object, System.Int32>(1 + (propertyRules ? 1 : 0) + (operationRules ? 1 : 0) + (queryRules ? 1 : 0)
+, Tuple.Create(Tuple.Create("", 11936), Tuple.Create<System.Object, System.Int32>(1 + (propertyRules ? 1 : 0) + (operationRules ? 1 : 0) + (queryRules ? 1 : 0)
             
             #line default
             #line hidden
-, 11954), false)
+, 11936), false)
 );
 
 WriteLiteral(">\r\n                </td>\r\n            </tr>\r\n");

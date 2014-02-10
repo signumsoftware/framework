@@ -121,7 +121,7 @@
                         @if (item.Value.Properties.HasValue)
                         {
                             <div class="sf-auth-property">
-                                <a class="sf-submodule-trigger" href="@Url.Action((AuthAdminController a) => a.Properties(tc.Value.Role, item.Value.Resource.ToLite(), null))">
+                                <a class="sf-submodule-trigger" href="@Url.Action((AuthAdminController a) => a.Properties(tc.Value.Role, item.Value.Resource.ToLite()))">
                                     <span class="sf-auth-thumb sf-auth-@item.Value.Properties.ToString().ToLower()">
                                     </span></a>
                             </div>
@@ -134,7 +134,7 @@
                         @if (item.Value.Operations.HasValue)
                         {
                             <div class="sf-auth-operation">
-                                <a class="sf-submodule-trigger" href="@Url.Action((AuthAdminController a) => a.Operations(tc.Value.Role, item.Value.Resource.ToLite(), null))">
+                                <a class="sf-submodule-trigger" href="@Url.Action((AuthAdminController a) => a.Operations(tc.Value.Role, item.Value.Resource.ToLite()))">
                                     <span class="sf-auth-thumb sf-auth-@item.Value.Operations.ToString().ToLower()">
                                     </span></a>
                             </div>
@@ -147,7 +147,7 @@
                         @if (item.Value.Queries.HasValue)
                         {
                             <div class="sf-auth-query">
-                                <a class="sf-submodule-trigger" href="@Url.Action((AuthAdminController a) => a.Queries(tc.Value.Role, item.Value.Resource.ToLite(), null))">
+                                <a class="sf-submodule-trigger" href="@Url.Action((AuthAdminController a) => a.Queries(tc.Value.Role, item.Value.Resource.ToLite()))">
                                     <span class="sf-auth-thumb sf-auth-@item.Value.Queries.ToString().ToLower()"></span>
                                 </a>
                             </div>
