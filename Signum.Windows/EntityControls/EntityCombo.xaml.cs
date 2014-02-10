@@ -99,7 +99,7 @@ namespace Signum.Windows
             {
                 changing = true;
 
-                var selItem = NullValue && combo.SelectedItem == NullValueString ? null : combo.SelectedItem;
+                var selItem = NullValue && combo.SelectedItem == (object)NullValueString ? null : combo.SelectedItem;
 
                 SetEntityUserInteraction(Server.Convert(selItem, Type));
             }
