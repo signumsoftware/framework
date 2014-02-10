@@ -28,6 +28,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
 
     function deleteUserChart(options, url) {
         options.avoidReturnRedirect = true;
+        if (!Operations.confirmIfNecessary(options))
+            return;
+
         Operations.deleteAjax(options).then(function (a) {
             if (!options.prefix)
                 location.href = url;
@@ -90,6 +93,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
 
             $(document).on("change", ".sf-query-token select", function () {
                 var $this = $(this);
+                var id = $this.attr("id");
+                Finder.clearChildSubtokenCombos($this, id.before("_ddlTokens_"), parseInt(id.after("_ddlTokens_")));
                 self.updateChartBuilder($this.closest("tr").attr("data-token"));
             });
 

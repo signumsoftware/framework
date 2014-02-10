@@ -202,7 +202,7 @@ namespace Signum.Web.Chart
             return new JObject
             {
             { "webQueryName", Navigator.ResolveWebQueryName(request.QueryName) },
-            { "orders", new JArray(request.Orders.Select(o=>new { orderType = o.OrderType, columnName = o.Token.FullKey()}))},
+            { "orders", new JArray(request.Orders.Select(o=>new JObject { {"orderType" ,(int)o.OrderType} , {"columnName" ,o.Token.FullKey()}}))},
             };
         }
 
@@ -211,7 +211,7 @@ namespace Signum.Web.Chart
             return new JObject
             {
             { "webQueryName", Navigator.ResolveWebQueryName(userChart.QueryName) },
-            { "orders", new JArray(userChart.Orders.Select(o=>new { orderType = o.OrderType, columnName = o.Token.Token.FullKey()}))},
+            { "orders", new JArray(userChart.Orders.Select(o=>new JObject { {"orderType" ,(int)o.OrderType} , {"columnName" ,o.Token.Token.FullKey()}}))},
             };
         }
 

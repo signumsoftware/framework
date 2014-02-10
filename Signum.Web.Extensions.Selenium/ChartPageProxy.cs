@@ -26,7 +26,7 @@ namespace Signum.Web.Selenium
         public ChartPageProxy(ISelenium selenium)
         {
             this.Selenium = selenium;
-            this.Results = new ResultTableProxy(selenium, null, () => { }, hasDataEntity: false);
+            this.Results = new ResultTableProxy(selenium, null, a => a(), hasDataEntity: false);
             this.Filters = new FiltersProxy(selenium, null); 
         }
 
@@ -118,11 +118,14 @@ namespace Signum.Web.Selenium
         {
             controlPanel.Selenium.EntityButtonClick("CreatePart");
 
-            SelectorPopup sp = new SelectorPopup(controlPanel.Selenium);
+            ChooserPopup sp = new ChooserPopup(controlPanel.Selenium);
             controlPanel.Selenium.WaitElementPresent(sp.PopupVisibleLocator);
-            sp.Select<T>();
-            controlPanel.Selenium.WaitForPageToLoad();
-            return controlPanel.EntityRepeater(a => a.Parts).Details<PanelPartDN>(index);
+            sp.Choose<T>();
+            var repeater = controlPanel.EntityRepeater(a => a.Parts);
+            var result = repeater.Details<PanelPartDN>(index);
+            controlPanel.Selenium.WaitElementPresent(result.Prefix + "_sfRuntimeInfo");
+
+            return result;
         }
     }
 }

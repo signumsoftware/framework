@@ -28,6 +28,9 @@ export function attachShowCurrentEntity(el: Lines.EntityLine) {
 
 export function deleteUserChart(options: Operations.EntityOperationOptions, url: string) {
     options.avoidReturnRedirect = true;
+    if (!Operations.confirmIfNecessary(options))
+        return;
+
     Operations.deleteAjax(options).then(a=> {
         if (!options.prefix)
             location.href = url; 
@@ -86,6 +89,8 @@ export class ChartBuilder extends Finder.SearchControl {
 
         $(document).on("change", ".sf-query-token select", function () {
             var $this = $(this);
+            var id = $this.attr("id"); 
+            Finder.clearChildSubtokenCombos($this, id.before("_ddlTokens_"), parseInt(id.after("_ddlTokens_")));
             self.updateChartBuilder($this.closest("tr").attr("data-token"));
         });
 
