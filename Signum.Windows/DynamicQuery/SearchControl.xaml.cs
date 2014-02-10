@@ -459,7 +459,7 @@ namespace Signum.Windows
             btCreateFilter.IsEnabled = string.IsNullOrEmpty(canFilter);
             btCreateFilter.ToolTip = canFilter;
 
-            return arg.SubTokens(Description, canAggregate: false);
+            return arg == null ? QueryUtils.MergedTokens(Description, false) : arg.SubTokens(Description, canAggregate: false);
         }
 
         private void btCreateFilter_Click(object sender, RoutedEventArgs e)

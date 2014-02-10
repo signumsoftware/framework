@@ -1029,17 +1029,17 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
     (function (QueryTokenBuilder) {
         function init(containerId, webQueryName, controllerUrl, requestExtraJsonData) {
-            $("#" + containerId).on("changed", "select", function () {
+            $("#" + containerId).on("change", "select", function () {
                 tokenChanged($(this), webQueryName, controllerUrl, requestExtraJsonData);
             });
         }
         QueryTokenBuilder.init = init;
 
         function tokenChanged($selectedCombo, webQueryName, controllerUrl, requestExtraJsonData) {
-            var prefix = $selectedCombo.attr("id").before("_ddlTokens_");
-            var index = parseInt($selectedCombo.attr("id").after("_ddlTokens_"));
+            var prefix = $selectedCombo.attr("id").before("ddlTokens_");
+            var index = parseInt($selectedCombo.attr("id").after("ddlTokens_"));
 
-            this.clearChildSubtokenCombos($selectedCombo, prefix, index);
+            clearChildSubtokenCombos($selectedCombo, prefix, index);
             $selectedCombo.trigger("sf-new-subtokens-combo", $selectedCombo.attr("id"));
 
             var $selectedOption = $selectedCombo.children("option:selected");
@@ -1047,7 +1047,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 return;
             }
 
-            var tokenName = this.constructTokenName(prefix);
+            var tokenName = constructTokenName(prefix);
 
             var data = $.extend({
                 webQueryName: webQueryName,
@@ -1056,13 +1056,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 prefix: prefix
             }, requestExtraJsonData);
 
-            var self = this;
             $.ajax({
                 url: controllerUrl,
                 data: data,
                 dataType: "html",
                 success: function (newHtml) {
-                    $("#" + SF.compose(prefix, "ddlTokens_" + index)).after(newHtml);
+                    $selectedCombo.parent().html(newHtml);
                 }
             });
         }
@@ -1070,16 +1069,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         ;
 
         function clearChildSubtokenCombos($selectedCombo, prefix, index) {
-            $selectedCombo.siblings("select,input[type=hidden]").filter(function () {
-                var elementId = $(this).attr("id");
-                if (typeof elementId == "undefined")
-                    return false;
-
-                if (!elementId.startsWith(SF.compose(prefix, "ddlTokens_")) && !elementId.startsWith(SF.compose(prefix, "ddlTokensEnd")))
-                    return false;
-
-                return parseInt(elementId.afterLast("_")) > index;
-            }).remove();
+            $selectedCombo.next("select,input[type=hidden]").remove();
         }
         QueryTokenBuilder.clearChildSubtokenCombos = clearChildSubtokenCombos;
 

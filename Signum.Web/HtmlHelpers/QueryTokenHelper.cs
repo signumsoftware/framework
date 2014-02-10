@@ -26,12 +26,12 @@ namespace Signum.Web
         {
             HtmlStringBuilder sb = new HtmlStringBuilder();
             var id = context.Compose("ddlTokenContainer");
-            using (sb.Surround(new HtmlTag("div").Id(id)))
+            using (sb.Surround(new HtmlTag("span").Id(id)))
             {
                 sb.Add(QueryTokenBuilderOptions(helper, queryToken, context, settings));
             }
 
-            sb.Add(MvcHtmlString.Create("<script>" + new JsFunction(JsFunction.FinderModule, "init", id,
+            sb.Add(MvcHtmlString.Create("<script>" + new JsFunction(JsFunction.FinderModule, "QueryTokenBuilder.init", id,
                 Navigator.ResolveWebQueryName(settings.QueryDescription.QueryName), settings.ControllerUrl, settings.RequestExtraJSonData).ToString()
                 + "</script>")); 
         
@@ -73,8 +73,8 @@ namespace Signum.Web
             foreach (var qt in queryTokens)
             {
                 var option = new HtmlTag("option")
-                            .Attr("value", qt.Key)
-                            .SetInnerText((previous == null && qt.Parent != null ? " - " : "") + qt.ToString());
+                    .Attr("value", previous == null ? qt.FullKey() : qt.Key)
+                    .SetInnerText((previous == null && qt.Parent != null ? " - " : "") + qt.ToString());
 
                 if (selected != null && qt.Key == selected.Key)
                     option.Attr("selected", "selected");

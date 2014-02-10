@@ -1074,17 +1074,17 @@ export class SearchControl {
 export module QueryTokenBuilder {
 
     export function init(containerId : string, webQueryName: string, controllerUrl: string, requestExtraJsonData: any) {
-        $("#" + containerId).on("changed", "select", function () {
+        $("#" + containerId).on("change", "select", function () {
             tokenChanged($(this), webQueryName, controllerUrl, requestExtraJsonData);
         });
     }
 
     export function tokenChanged($selectedCombo: JQuery, webQueryName : string,  controllerUrl : string, requestExtraJsonData : any) {
 
-        var prefix = $selectedCombo.attr("id").before("_ddlTokens_");
-        var index = parseInt($selectedCombo.attr("id").after("_ddlTokens_"));
+        var prefix = $selectedCombo.attr("id").before("ddlTokens_");
+        var index = parseInt($selectedCombo.attr("id").after("ddlTokens_"));
 
-        this.clearChildSubtokenCombos($selectedCombo, prefix, index);
+        clearChildSubtokenCombos($selectedCombo, prefix, index);
         $selectedCombo.trigger("sf-new-subtokens-combo", $selectedCombo.attr("id"));
         
         var $selectedOption = $selectedCombo.children("option:selected");
@@ -1092,7 +1092,7 @@ export module QueryTokenBuilder {
             return;
         }
 
-        var tokenName = this.constructTokenName(prefix);
+        var tokenName = constructTokenName(prefix);
 
         var data = $.extend({
             webQueryName: webQueryName,
@@ -1101,31 +1101,18 @@ export module QueryTokenBuilder {
             prefix: prefix
         }, requestExtraJsonData);
 
-        var self = this;
         $.ajax({
             url: controllerUrl,
             data: data,
             dataType: "html",
             success: function (newHtml) {
-                $("#" + SF.compose(prefix, "ddlTokens_" + index)).after(newHtml);
+                $selectedCombo.parent().html(newHtml);
             }
         });
     };
 
     export function clearChildSubtokenCombos($selectedCombo: JQuery, prefix: string, index: number) {
-        $selectedCombo.siblings("select,input[type=hidden]")
-            .filter(function () {
-                var elementId = $(this).attr("id");
-                if (typeof elementId == "undefined")
-                    return false;
-
-                if (!elementId.startsWith(SF.compose(prefix, "ddlTokens_"))
-                    && !elementId.startsWith(SF.compose(prefix, "ddlTokensEnd")))
-                    return false;
-
-                return parseInt(elementId.afterLast("_")) > index;
-            })
-            .remove();
+        $selectedCombo.next("select,input[type=hidden]").remove();
     }
 
     export function constructTokenName(prefix) {

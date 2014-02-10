@@ -21,6 +21,8 @@ namespace Signum.Windows
 {
     public partial class QueryTokenBuilder : UserControl
     {
+        public static readonly IValueConverter SurrogatedConverter = ConverterFactory.New((QueryToken token)=> (token.Parent == null ? "" : " - ") + token.ToString());
+
         public static readonly DependencyProperty TokenProperty =
               DependencyProperty.Register("Token", typeof(QueryToken), typeof(QueryTokenBuilder), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
                   (d, e) =>
@@ -38,9 +40,6 @@ namespace Signum.Windows
         List<QueryToken> tokens = new List<QueryToken>(); 
         private void UpdateTokenList(QueryToken queryToken)
         {
-            //if (tokens.LastOrDefault() == queryToken)
-            //    return;
-
             if (queryToken == null)
                 tokens = new List<QueryToken>();
             else
@@ -70,17 +69,6 @@ namespace Signum.Windows
             return SubTokensEvent(token);
         }
 
-        // StaticColumns.Select(c => QueryToken.NewColumn(c)).ToArray()
-
-        //public static readonly DependencyProperty StaticColumnsProperty =
-        //    DependencyProperty.Register("StaticColumns", typeof(IEnumerable<StaticColumn>), typeof(QueryTokenBuilder), new UIPropertyMetadata(null,
-        //        (d, e) => ((QueryTokenBuilder)d).UpdateCombo()));
-        //public IEnumerable<StaticColumn> StaticColumns
-        //{
-        //    get { return (IEnumerable<StaticColumn>)GetValue(StaticColumnsProperty); }
-        //    set { SetValue(StaticColumnsProperty, value); }
-        //}
-
         void UpdateCombo()
         {
             sp.Children.Clear();
@@ -99,6 +87,10 @@ namespace Signum.Windows
                     ItemsSource = subTokens,
                     SelectedIndex = index,
                 };
+
+                if (i == 0)
+                    cb.ItemContainerStyle = (Style)sp.FindResource("SurrogatedToken");
+
                 sp.Children.Add(cb);
             }
         }
