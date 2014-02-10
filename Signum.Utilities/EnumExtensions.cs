@@ -71,7 +71,8 @@ namespace Signum.Utilities
 
         public static bool TryParse(string value, Type enumType, bool ignoreCase, out Enum result)
         {
-            if (!Enum.IsDefined(enumType, value))
+            int rubish;
+            if (!Enum.IsDefined(enumType, value) && !int.TryParse(value, out rubish))
             {
                 result = null;
                 return false;
@@ -83,7 +84,8 @@ namespace Signum.Utilities
         public static bool TryParse<T>(string value, bool ignoreCase, out T result)
             where T:struct
         {
-            if (!Enum.IsDefined(typeof(T), value))
+            int rubish;
+            if (!Enum.IsDefined(typeof(T), value) && !int.TryParse(value, out rubish))
             {
                 result = default(T);
                 return false;
