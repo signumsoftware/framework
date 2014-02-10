@@ -17,8 +17,8 @@ export function createNote(prefix: string, operationKey: string) {
 export function updateNotes(prefix) {
     var widget = $("#" + SF.compose(prefix, "notesWidget") + " ul")
 
-    SF.ajaxGet({
+    SF.ajaxPost({
         url: widget.data("url"),
         data: { sfRuntimeInfo: new Entities.RuntimeInfoElement(prefix).getElem().val() },
-    }).then(html=> widget.find(".sf-widget-count").html(html));
+    }).then(txt=> widget.parent().find(".sf-widget-count").text(txt));
 }

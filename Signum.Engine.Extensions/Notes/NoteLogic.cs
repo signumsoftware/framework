@@ -52,8 +52,6 @@ namespace Signum.Engine.Notes
 
                 new Graph<NoteDN>.ConstructFrom<IdentifiableEntity>(NoteOperation.CreateFromEntity)
                 {
-                    AllowsNew = true,
-                    Lite = false,
                     Construct = (a, _) => new NoteDN{ CreationDate = TimeZoneManager.Now, Target = a.ToLite() }
                 }.Register();
 

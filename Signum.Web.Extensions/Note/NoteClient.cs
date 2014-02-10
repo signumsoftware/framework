@@ -14,7 +14,7 @@ namespace Signum.Web.Notes
     public static class NoteClient
     {
         public static string ViewPrefix = "~/Note/Views/{0}.cshtml";
-        public static string Module = "Extensions/Signum.Web.Extensions/Notes/Scripts/Notes";
+        public static string Module = "Extensions/Signum.Web.Extensions/Note/Scripts/Notes";
 
         public static void Start(params Type[] types)
         {

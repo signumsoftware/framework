@@ -17,11 +17,11 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     function updateNotes(prefix) {
         var widget = $("#" + SF.compose(prefix, "notesWidget") + " ul");
 
-        SF.ajaxGet({
+        SF.ajaxPost({
             url: widget.data("url"),
             data: { sfRuntimeInfo: new Entities.RuntimeInfoElement(prefix).getElem().val() }
-        }).then(function (html) {
-            return widget.find(".sf-widget-count").html(html);
+        }).then(function (txt) {
+            return widget.parent().find(".sf-widget-count").text(txt);
         });
     }
     exports.updateNotes = updateNotes;

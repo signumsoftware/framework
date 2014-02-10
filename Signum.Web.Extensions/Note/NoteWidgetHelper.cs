@@ -39,6 +39,7 @@ namespace Signum.Web.Notes
          
             HtmlStringBuilder content = new HtmlStringBuilder();
             using (content.Surround(new HtmlTag("ul")
+                .Attr("data-url", RouteHelper.New().Action((NoteController ac) => ac.NotesCount()))
                 .Class("sf-menu-button sf-widget-content sf-notes")))
             {
                 using (content.Surround(new HtmlTag("li").Class("sf-note")))
@@ -54,7 +55,7 @@ namespace Signum.Web.Notes
                 {
                     content.AddLine(new HtmlTag("a")
                        .Class("sf-note-create")
-                       .Attr("onclick", new JsFunction(NoteClient.Module, "createAlert", prefix, OperationDN.UniqueKey(NoteOperation.CreateFromEntity)).ToString())
+                       .Attr("onclick", new JsFunction(NoteClient.Module, "createNote", prefix, OperationDN.UniqueKey(NoteOperation.CreateFromEntity)).ToString())
                        .InnerHtml(NoteMessage.CreateNote.NiceToString().EncodeHtml())
                        .ToHtml());
                 }
