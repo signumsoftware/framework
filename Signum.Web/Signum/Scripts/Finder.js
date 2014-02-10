@@ -181,76 +181,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         }).join(";");
     }
 
-    function newSubTokensCombo(webQueryName, prefix, index, controllerUrl, requestExtraJsonData) {
-        var $selectedCombo = $("#" + SF.compose(prefix, "ddlTokens_" + index));
-        if ($selectedCombo.length == 0) {
-            return;
-        }
-
-        this.clearChildSubtokenCombos($selectedCombo, prefix, index);
-
-        var $container = $selectedCombo.closest(".sf-search-control");
-        if ($container.length > 0) {
-            $container.trigger("sf-new-subtokens-combo", $selectedCombo.attr("id"));
-        } else {
-            $selectedCombo.trigger("sf-new-subtokens-combo", $selectedCombo.attr("id"));
-        }
-
-        var $selectedOption = $selectedCombo.children("option:selected");
-        if ($selectedOption.val() == "") {
-            return;
-        }
-
-        var tokenName = this.constructTokenName(prefix);
-
-        var data = $.extend({
-            webQueryName: webQueryName,
-            tokenName: tokenName,
-            index: index,
-            prefix: prefix
-        }, requestExtraJsonData);
-
-        var self = this;
-        $.ajax({
-            url: controllerUrl || SF.Urls.subTokensCombo,
-            data: data,
-            dataType: "html",
-            success: function (newHtml) {
-                $("#" + SF.compose(prefix, "ddlTokens_" + index)).after(newHtml);
-            }
-        });
-    }
-    exports.newSubTokensCombo = newSubTokensCombo;
-    ;
-
-    function clearChildSubtokenCombos($selectedCombo, prefix, index) {
-        $selectedCombo.siblings("select,input[type=hidden]").filter(function () {
-            var elementId = $(this).attr("id");
-            if (typeof elementId == "undefined")
-                return false;
-
-            if (!elementId.startsWith(SF.compose(prefix, "ddlTokens_")) && !elementId.startsWith(SF.compose(prefix, "ddlTokensEnd")))
-                return false;
-
-            return parseInt(elementId.afterLast("_")) > index;
-        }).remove();
-    }
-    exports.clearChildSubtokenCombos = clearChildSubtokenCombos;
-
-    function constructTokenName(prefix) {
-        var tokenName = "";
-        var stop = false;
-        for (var i = 0; !stop; i++) {
-            var currSubtoken = $("#" + SF.compose(prefix, "ddlTokens_" + i));
-            if (currSubtoken.length > 0)
-                tokenName = SF.compose(tokenName, currSubtoken.val(), ".");
-            else
-                stop = true;
-        }
-        return tokenName;
-    }
-    exports.constructTokenName = constructTokenName;
-
     function deleteFilter(trId) {
         var $tr = $("tr#" + trId);
         if ($tr.find("select[disabled]").length > 0) {
@@ -758,7 +688,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 throw "Adding columns is not allowed";
             }
 
-            var tokenName = exports.constructTokenName(this.options.prefix);
+            var tokenName = QueryTokenBuilder.constructTokenName(this.options.prefix);
             if (SF.isEmpty(tokenName)) {
                 return;
             }
@@ -876,7 +806,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 throw "Adding filters is not allowed";
             }
 
-            var tokenName = exports.constructTokenName(this.options.prefix);
+            var tokenName = QueryTokenBuilder.constructTokenName(this.options.prefix);
             if (SF.isEmpty(tokenName)) {
                 return;
             }
@@ -1096,5 +1026,77 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         return SearchControl;
     })();
     exports.SearchControl = SearchControl;
+
+    (function (QueryTokenBuilder) {
+        function init(containerId, webQueryName, controllerUrl, requestExtraJsonData) {
+            $("#" + containerId).on("changed", "select", function () {
+                tokenChanged($(this), webQueryName, controllerUrl, requestExtraJsonData);
+            });
+        }
+        QueryTokenBuilder.init = init;
+
+        function tokenChanged($selectedCombo, webQueryName, controllerUrl, requestExtraJsonData) {
+            var prefix = $selectedCombo.attr("id").before("_ddlTokens_");
+            var index = parseInt($selectedCombo.attr("id").after("_ddlTokens_"));
+
+            this.clearChildSubtokenCombos($selectedCombo, prefix, index);
+            $selectedCombo.trigger("sf-new-subtokens-combo", $selectedCombo.attr("id"));
+
+            var $selectedOption = $selectedCombo.children("option:selected");
+            if ($selectedOption.val() == "") {
+                return;
+            }
+
+            var tokenName = this.constructTokenName(prefix);
+
+            var data = $.extend({
+                webQueryName: webQueryName,
+                tokenName: tokenName,
+                index: index,
+                prefix: prefix
+            }, requestExtraJsonData);
+
+            var self = this;
+            $.ajax({
+                url: controllerUrl,
+                data: data,
+                dataType: "html",
+                success: function (newHtml) {
+                    $("#" + SF.compose(prefix, "ddlTokens_" + index)).after(newHtml);
+                }
+            });
+        }
+        QueryTokenBuilder.tokenChanged = tokenChanged;
+        ;
+
+        function clearChildSubtokenCombos($selectedCombo, prefix, index) {
+            $selectedCombo.siblings("select,input[type=hidden]").filter(function () {
+                var elementId = $(this).attr("id");
+                if (typeof elementId == "undefined")
+                    return false;
+
+                if (!elementId.startsWith(SF.compose(prefix, "ddlTokens_")) && !elementId.startsWith(SF.compose(prefix, "ddlTokensEnd")))
+                    return false;
+
+                return parseInt(elementId.afterLast("_")) > index;
+            }).remove();
+        }
+        QueryTokenBuilder.clearChildSubtokenCombos = clearChildSubtokenCombos;
+
+        function constructTokenName(prefix) {
+            var tokenName = "";
+            var stop = false;
+            for (var i = 0; !stop; i++) {
+                var currSubtoken = $("#" + SF.compose(prefix, "ddlTokens_" + i));
+                if (currSubtoken.length > 0)
+                    tokenName = SF.compose(tokenName, currSubtoken.val(), ".");
+                else
+                    stop = true;
+            }
+            return tokenName;
+        }
+        QueryTokenBuilder.constructTokenName = constructTokenName;
+    })(exports.QueryTokenBuilder || (exports.QueryTokenBuilder = {}));
+    var QueryTokenBuilder = exports.QueryTokenBuilder;
 });
 //# sourceMappingURL=Finder.js.map

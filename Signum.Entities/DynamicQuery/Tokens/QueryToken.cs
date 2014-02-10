@@ -19,24 +19,6 @@ namespace Signum.Entities.DynamicQuery
     {
         public int Priority = 0;
 
-        bool subordianted;
-        public bool Subordinated
-        {
-            get { return subordianted; }
-            set { subordianted = value; }
-        }
-
-        public string SubordinatedToString
-        {
-            get
-            {
-                if (Subordinated)
-                    return "- " + ToString();
-
-                return ToString();
-            }
-        }
-
         public abstract override string ToString();
         public abstract string NiceName();
         public abstract string Format { get; }
@@ -250,7 +232,7 @@ namespace Signum.Entities.DynamicQuery
 
         public string FullKey()
         {
-            if (Parent == null || Subordinated)
+            if (Parent == null)
                 return Key;
 
             return Parent.FullKey() + "." + Key;

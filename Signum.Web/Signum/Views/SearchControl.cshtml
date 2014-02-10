@@ -39,7 +39,7 @@
         <div class="sf-fields-list">
             <div class="ui-widget sf-filters" @(filtersVisible ? "" : "style=display:none")>
                 <div class="ui-widget-header ui-corner-top sf-filters-body">
-                    @Html.QueryTokenBuilder(null, Model, queryDescription)
+                    @Html.QueryTokenBuilder(null, Model, SearchControlHelper.GetQueryTokenBuilderSettings(queryDescription))
                 
                     @Html.Href(
                             Model.Compose("btnAddFilter"), 
@@ -63,7 +63,7 @@
                             new Dictionary<string, object> 
                             { 
                                 { "data-icon", "ui-icon-arrowthick-1-e" },
-                                { "data-url", Url.SignumAction("GetColumnName") }
+                                { "data-url", Url.Action("GetColumnName", "Finder") }
                             })
                     }
                 </div>

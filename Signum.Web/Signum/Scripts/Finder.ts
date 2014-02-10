@@ -201,76 +201,6 @@ function serializeOrders(orders: OrderOption[]) {
     return orders.map(f=> (f.orderType == OrderType.Ascending ? "" : "-") + f.columnName).join(";");//A Json array like ["Id","-Name"] => Id asc, then Name desc
 }
 
-export function newSubTokensCombo(webQueryName, prefix, index, controllerUrl, requestExtraJsonData) {
-    var $selectedCombo = $("#" + SF.compose(prefix, "ddlTokens_" + index));
-    if ($selectedCombo.length == 0) {
-        return;
-    }
-
-    this.clearChildSubtokenCombos($selectedCombo, prefix, index);
-
-    var $container = $selectedCombo.closest(".sf-search-control");
-    if ($container.length > 0) {
-        $container.trigger("sf-new-subtokens-combo", $selectedCombo.attr("id"));
-    }
-    else {
-        $selectedCombo.trigger("sf-new-subtokens-combo", $selectedCombo.attr("id"));
-    }
-
-    var $selectedOption = $selectedCombo.children("option:selected");
-    if ($selectedOption.val() == "") {
-        return;
-    }
-
-    var tokenName = this.constructTokenName(prefix);
-
-     var data = $.extend({
-        webQueryName: webQueryName,
-         tokenName: tokenName,
-        index: index,
-        prefix: prefix
-    }, requestExtraJsonData);
-
-    var self = this;
-    $.ajax({
-        url: controllerUrl || SF.Urls.subTokensCombo,
-        data: data,
-        dataType: "html",
-        success: function (newHtml) {
-            $("#" + SF.compose(prefix, "ddlTokens_" + index)).after(newHtml);
-        }
-    });
-};
-
-export function clearChildSubtokenCombos($selectedCombo : JQuery, prefix : string, index: number) {
-    $selectedCombo.siblings("select,input[type=hidden]")
-        .filter(function () {
-            var elementId = $(this).attr("id");
-            if (typeof elementId == "undefined")
-                return false;
-
-            if (!elementId.startsWith(SF.compose(prefix, "ddlTokens_"))
-                && !elementId.startsWith(SF.compose(prefix, "ddlTokensEnd")))
-                return false;
-
-            return parseInt(elementId.afterLast("_")) > index;
-        })
-        .remove();
-}
-
-export function constructTokenName(prefix) {
-    var tokenName = "";
-    var stop = false;
-    for (var i = 0; !stop; i++) {
-        var currSubtoken = $("#" + SF.compose(prefix, "ddlTokens_" + i));
-        if (currSubtoken.length > 0)
-            tokenName = SF.compose(tokenName, currSubtoken.val(), ".");
-        else
-            stop = true;
-    }
-    return tokenName;
-}
-
 export function deleteFilter(trId) {
     var $tr = $("tr#" + trId);
     if ($tr.find("select[disabled]").length > 0) {
@@ -804,7 +734,7 @@ export class SearchControl {
             throw "Adding columns is not allowed";
         }
 
-        var tokenName = constructTokenName(this.options.prefix);
+        var tokenName = QueryTokenBuilder.constructTokenName(this.options.prefix);
         if (SF.isEmpty(tokenName)) {
             return;
         }
@@ -928,7 +858,7 @@ export class SearchControl {
             throw "Adding filters is not allowed";
         }
 
-        var tokenName = constructTokenName(this.options.prefix);
+        var tokenName = QueryTokenBuilder.constructTokenName(this.options.prefix);
         if (SF.isEmpty(tokenName)) {
             return;
         }
@@ -1138,6 +1068,77 @@ export class SearchControl {
                 }
             });
         }
+    }
+}
+
+export module QueryTokenBuilder {
+
+    export function init(containerId : string, webQueryName: string, controllerUrl: string, requestExtraJsonData: any) {
+        $("#" + containerId).on("changed", "select", function () {
+            tokenChanged($(this), webQueryName, controllerUrl, requestExtraJsonData);
+        });
+    }
+
+    export function tokenChanged($selectedCombo: JQuery, webQueryName : string,  controllerUrl : string, requestExtraJsonData : any) {
+
+        var prefix = $selectedCombo.attr("id").before("_ddlTokens_");
+        var index = parseInt($selectedCombo.attr("id").after("_ddlTokens_"));
+
+        this.clearChildSubtokenCombos($selectedCombo, prefix, index);
+        $selectedCombo.trigger("sf-new-subtokens-combo", $selectedCombo.attr("id"));
+        
+        var $selectedOption = $selectedCombo.children("option:selected");
+        if ($selectedOption.val() == "") {
+            return;
+        }
+
+        var tokenName = this.constructTokenName(prefix);
+
+        var data = $.extend({
+            webQueryName: webQueryName,
+            tokenName: tokenName,
+            index: index,
+            prefix: prefix
+        }, requestExtraJsonData);
+
+        var self = this;
+        $.ajax({
+            url: controllerUrl,
+            data: data,
+            dataType: "html",
+            success: function (newHtml) {
+                $("#" + SF.compose(prefix, "ddlTokens_" + index)).after(newHtml);
+            }
+        });
+    };
+
+    export function clearChildSubtokenCombos($selectedCombo: JQuery, prefix: string, index: number) {
+        $selectedCombo.siblings("select,input[type=hidden]")
+            .filter(function () {
+                var elementId = $(this).attr("id");
+                if (typeof elementId == "undefined")
+                    return false;
+
+                if (!elementId.startsWith(SF.compose(prefix, "ddlTokens_"))
+                    && !elementId.startsWith(SF.compose(prefix, "ddlTokensEnd")))
+                    return false;
+
+                return parseInt(elementId.afterLast("_")) > index;
+            })
+            .remove();
+    }
+
+    export function constructTokenName(prefix) {
+        var tokenName = "";
+        var stop = false;
+        for (var i = 0; !stop; i++) {
+            var currSubtoken = $("#" + SF.compose(prefix, "ddlTokens_" + i));
+            if (currSubtoken.length > 0)
+                tokenName = SF.compose(tokenName, currSubtoken.val(), ".");
+            else
+                stop = true;
+        }
+        return tokenName;
     }
 }
 

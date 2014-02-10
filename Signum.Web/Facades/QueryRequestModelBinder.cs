@@ -78,7 +78,6 @@ namespace Signum.Web
             NameValueCollection parameters = httpContext.Request.Params;
             
             string field = parameters["filters"];
-
             if (!field.HasText())
                 return result;
 

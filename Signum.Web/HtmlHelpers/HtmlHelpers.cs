@@ -15,6 +15,7 @@ using Signum.Entities.Reflection;
 using System.Web.Script.Serialization;
 using System.Web.WebPages;
 using Signum.Engine;
+using Signum.Web.Controllers;
 
 namespace Signum.Web
 {

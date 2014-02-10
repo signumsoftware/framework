@@ -96,7 +96,9 @@
     <Compile Include="HtmlHelpers\CalendarHelper.cs" />
     <Compile Include="Common.cs" />
     <Compile Include="Facades\Constructor.cs" />
+    <Compile Include="HtmlHelpers\FilterBuilderHelper.cs" />
     <Compile Include="HtmlHelpers\PagerExtensions.cs" />
+    <Compile Include="HtmlHelpers\QueryTokenHelper.cs" />
     <Compile Include="HtmlHelpers\ScriptHtmlHelper.cs" />
     <Compile Include="ButtonBar\ContextualItem.cs" />
     <Compile Include="ControllerAttributes\SignumExceptionHandlerAttribute.cs" />
