@@ -95,8 +95,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         Finder.removeOverlay();
 
         return exports.constructFromAjaxContextual(options).then(function (eHtml) {
-            exports.openPopup(eHtml);
             exports.markCells(options.prefix, null);
+            return exports.openPopup(eHtml);
         });
     }
     exports.constructFromDefaultContextual = constructFromDefaultContextual;
@@ -182,8 +182,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         Finder.removeOverlay();
 
         return exports.constructFromManyAjax(options).then(function (eHtml) {
-            exports.openPopup(eHtml);
             exports.markCells(options.prefix, null);
+            return exports.openPopup(eHtml);
         });
     }
     exports.constructFromManyDefault = constructFromManyDefault;
@@ -216,8 +216,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
     function openPopup(entityHtml) {
         exports.disableContextMenu();
-        Navigator.navigatePopup(entityHtml);
         exports.notifyExecuted();
+        return Navigator.navigatePopup(entityHtml);
     }
     exports.openPopup = openPopup;
 

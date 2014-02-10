@@ -110,8 +110,8 @@ export function constructFromDefaultContextual(options: OperationOptions, newPre
     Finder.removeOverlay();
 
     return constructFromAjaxContextual(options).then(eHtml=> {
-        openPopup(eHtml);
         markCells(options.prefix, null);
+        return openPopup(eHtml);
     });
 }
 
@@ -189,8 +189,8 @@ export function constructFromManyDefault(options: OperationOptions, newPrefix?: 
     Finder.removeOverlay();
 
     return constructFromManyAjax(options).then(eHtml=> {
-        openPopup(eHtml);
         markCells(options.prefix, null);
+        return openPopup(eHtml);
     });
 }
 
@@ -217,10 +217,10 @@ export function reload(entityHtml: Entities.EntityHtml) {
     Navigator.reload(entityHtml);
 }
 
-export function openPopup(entityHtml : Entities.EntityHtml) {
+export function openPopup(entityHtml : Entities.EntityHtml) : Promise<void> {
     disableContextMenu();
-    Navigator.navigatePopup(entityHtml);
     notifyExecuted();
+    return Navigator.navigatePopup(entityHtml);
 }
 
 export function disableContextMenu() {
