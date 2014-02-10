@@ -363,15 +363,15 @@ export class EntityCombo extends EntityBase {
     }
 }
 
-export interface EntityDetailOptions extends EntityBaseOptions {
+export interface EntityLineDetailOptions extends EntityBaseOptions {
     detailDiv: string;
 }
 
 export class EntityLineDetail extends EntityBase {
 
-    options: EntityDetailOptions;
+    options: EntityLineDetailOptions;
 
-    constructor(element: JQuery, options: EntityDetailOptions) {
+    constructor(element: JQuery, options: EntityLineDetailOptions) {
         super(element, options);
     }
 
