@@ -531,7 +531,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         SearchControl.prototype.entityContextMenu = function (e) {
             var $td = $(e.target).closest("td");
-            $td.addClass("sf-ctxmenu-active");
 
             var $menu = this.createCtxMenu($td);
             var $itemContainer = $menu.find(".sf-search-ctxmenu");

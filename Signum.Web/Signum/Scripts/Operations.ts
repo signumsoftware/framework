@@ -60,7 +60,7 @@ export function executeDefaultContextual(options: OperationOptions): Promise<voi
     if (!confirmIfNecessary(options))
         return Promise.reject("confirmation");
 
-    return executeAjaxContextual(options).then(result=> markCells(options.prefix, result));
+    return executeAjaxContextual(options).then(result=> { if (result) markCells(options.prefix); });
 }
 
 export function executeAjaxContextual(options: OperationOptions, runtimeInfo?: Entities.RuntimeInfoValue): Promise<boolean> {
@@ -110,7 +110,7 @@ export function constructFromDefaultContextual(options: OperationOptions, newPre
     Finder.removeOverlay();
 
     return constructFromAjaxContextual(options).then(eHtml=> {
-        markCells(options.prefix, null);
+        markCells(options.prefix);
         return openPopup(eHtml);
     });
 }
@@ -164,7 +164,7 @@ export function deleteDefaultContextual(options: OperationOptions): Promise<any>
     Finder.removeOverlay();
 
     return deleteAjaxContextual(options).then(result=> {
-        markCells(options.prefix, result);
+        markCells(options.prefix);
     });
 }
 
@@ -189,7 +189,7 @@ export function constructFromManyDefault(options: OperationOptions, newPrefix?: 
     Finder.removeOverlay();
 
     return constructFromManyAjax(options).then(eHtml=> {
-        markCells(options.prefix, null);
+        markCells(options.prefix);
         return openPopup(eHtml);
     });
 }
@@ -213,24 +213,17 @@ export function confirmIfNecessary(options: OperationOptions): boolean {
 }
 
 export function reload(entityHtml: Entities.EntityHtml) {
-    disableContextMenu();
     Navigator.reload(entityHtml);
 }
 
 export function openPopup(entityHtml : Entities.EntityHtml) : Promise<void> {
-    disableContextMenu();
     notifyExecuted();
     return Navigator.navigatePopup(entityHtml);
 }
 
-export function disableContextMenu() {
-    $(".sf-ctxmenu-active").removeClass("sf-ctxmenu-active");
-}
 
-export function markCells(prefix: string, success: boolean) {
-    $(".sf-ctxmenu-active")
-        .addClass("sf-entity-ctxmenu-" + (success ? "success" : "error"))
-        .removeClass("sf-ctxmenu-active");
+export function markCells(prefix: string) {
+    $("tr.ui-state-active").addClass("sf-entity-ctxmenu-success");
     notifyExecuted();
 }
 

@@ -40,7 +40,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             return Promise.reject("confirmation");
 
         return exports.executeAjaxContextual(options).then(function (result) {
-            return exports.markCells(options.prefix, result);
+            if (result)
+                exports.markCells(options.prefix);
         });
     }
     exports.executeDefaultContextual = executeDefaultContextual;
@@ -95,7 +96,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         Finder.removeOverlay();
 
         return exports.constructFromAjaxContextual(options).then(function (eHtml) {
-            exports.markCells(options.prefix, null);
+            exports.markCells(options.prefix);
             return exports.openPopup(eHtml);
         });
     }
@@ -155,7 +156,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         Finder.removeOverlay();
 
         return exports.deleteAjaxContextual(options).then(function (result) {
-            exports.markCells(options.prefix, result);
+            exports.markCells(options.prefix);
         });
     }
     exports.deleteDefaultContextual = deleteDefaultContextual;
@@ -182,7 +183,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         Finder.removeOverlay();
 
         return exports.constructFromManyAjax(options).then(function (eHtml) {
-            exports.markCells(options.prefix, null);
+            exports.markCells(options.prefix);
             return exports.openPopup(eHtml);
         });
     }
@@ -209,25 +210,18 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.confirmIfNecessary = confirmIfNecessary;
 
     function reload(entityHtml) {
-        exports.disableContextMenu();
         Navigator.reload(entityHtml);
     }
     exports.reload = reload;
 
     function openPopup(entityHtml) {
-        exports.disableContextMenu();
         exports.notifyExecuted();
         return Navigator.navigatePopup(entityHtml);
     }
     exports.openPopup = openPopup;
 
-    function disableContextMenu() {
-        $(".sf-ctxmenu-active").removeClass("sf-ctxmenu-active");
-    }
-    exports.disableContextMenu = disableContextMenu;
-
-    function markCells(prefix, success) {
-        $(".sf-ctxmenu-active").addClass("sf-entity-ctxmenu-" + (success ? "success" : "error")).removeClass("sf-ctxmenu-active");
+    function markCells(prefix) {
+        $("tr.ui-state-active").addClass("sf-entity-ctxmenu-success");
         exports.notifyExecuted();
     }
     exports.markCells = markCells;
