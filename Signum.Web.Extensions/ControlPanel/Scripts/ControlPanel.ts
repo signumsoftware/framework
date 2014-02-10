@@ -6,7 +6,7 @@ import Validator = require("Framework/Signum.Web/Signum/Scripts/Validator")
 
 export function createNewPart(prefix: string, url: string, typesOptions: Navigator.ChooserOption[]) {
 
-    Navigator.chooser(prefix, lang.signum.chooseAType, typesOptions).then(a=> {
+    Navigator.chooser(SF.compose(prefix, "New"), lang.signum.chooseAType, typesOptions).then(a=> {
         if (a == null)
             return;
 
