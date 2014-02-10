@@ -1,8 +1,10 @@
 ﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
 /// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
 define(["require", "exports"], function(require, exports) {
-    function initialize($omnibox, autocompleteOptions) {
+    function initialize(omniboxId, autocompleteOptions) {
         autocompleteOptions = autocompleteOptions || {};
+
+        var $omnibox = $("#" + omniboxId);
 
         var lastXhr;
         $omnibox.autocomplete($.extend({

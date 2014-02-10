@@ -369,7 +369,8 @@ namespace Signum.Windows.Chart
             }
             else
             {
-                var subFilters = lastRequest.KeyColumns.Select(t => new FilterOption(t.Token.FullKey(), FilterValueConverter.Parse(dic["c" + t.Position], t.Token.Type, isList: false)));
+                var subFilters = lastRequest.KeyColumns.Select(t => 
+                    new FilterOption(t.Token.FullKey(), FilterValueConverter.Parse(dic["c" + t.Position], t.Token.Type, isList: false)));
 
                 Navigator.Explore(new ExploreOptions(Request.QueryName)
                 {

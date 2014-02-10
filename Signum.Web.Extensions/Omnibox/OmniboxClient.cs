@@ -17,6 +17,7 @@ namespace Signum.Web.Omnibox
 {
     public static class OmniboxClient
     {
+        public static string Module = "Extensions/Signum.Web.Extensions/Omnibox/Scripts/Omnibox";
         static Dictionary<Type, OmniboxProviderBase> Providers = new Dictionary<Type, OmniboxProviderBase>();
 
         public static void Start()

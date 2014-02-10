@@ -28,7 +28,7 @@
     </script>
     <script src="jquery-1.7.2.min.js" />
     <script src="d3.v3.min.js" />
-    <script src="SF_Chart_Utils.js" />
+    <script src="ChartUtils.js" />
     <script src="colorbrewer.js" />
     <script type="text/javascript">
 
@@ -53,21 +53,21 @@
 
             code = "(" + rawCode + ")";
             data = $.parseJSON(rawData);
-            SF.Chart.Utils.fillAllTokenValueFuntions(data);
+            ChartUtils.fillAllTokenValueFuntions(data);
 
             var func;
             var __baseLineNumber__;
             try {
-                var getColor = SF.Chart.Utils.getColor;
-                var getClickKeys = SF.Chart.Utils.getClickKeys;
-                var translate = SF.Chart.Utils.translate;
-                var scale = SF.Chart.Utils.scale;
-                var rotate = SF.Chart.Utils.rotate;
-                var skewX = SF.Chart.Utils.skewX;
-                var skewY = SF.Chart.Utils.skewY;
-                var matrix = SF.Chart.Utils.matrix;
-                var scaleFor = SF.Chart.Utils.scaleFor;
-                var rule = SF.Chart.Utils.rule; 
+                var getColor = ChartUtils.getColor;
+                var getClickKeys = ChartUtils.getClickKeys;
+                var translate = ChartUtils.translate;
+                var scale = ChartUtils.scale;
+                var rotate = ChartUtils.rotate;
+                var skewX = ChartUtils.skewX;
+                var skewY = ChartUtils.skewY;
+                var matrix = ChartUtils.matrix;
+                var scaleFor = ChartUtils.scaleFor;
+                var rule = ChartUtils.rule; 
                 __baseLineNumber__ = new Error().lineNumber;
                 func = eval(code);
             } catch (e) {

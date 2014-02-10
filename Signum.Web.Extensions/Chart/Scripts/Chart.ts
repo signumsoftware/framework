@@ -366,6 +366,8 @@ export class ChartBuilder extends Finder.SearchControl {
 
             var url = $chartContainer.attr('data-open-url');
 
+            var win = window.open("about:blank");
+
             var $chartControl = $chartContainer.closest(".sf-chart-control");
             getFor($chartControl.attr("data-prefix")).then(cb=> {
                 var options = $chartControl.find(":input").not($chartControl.find(".sf-filters-list :input")).serialize();
@@ -374,7 +376,7 @@ export class ChartBuilder extends Finder.SearchControl {
                 options += "&filters=" + cb.serializeFilters();
                 options += $(this).data("click");
 
-                window.open(url + (url.indexOf("?") >= 0 ? "&" : "?") + options);
+                win.location.href = (url + (url.indexOf("?") >= 0 ? "&" : "?") + options);
             }); 
         });
     }
