@@ -107,11 +107,6 @@ namespace Signum.Web
 
     public static class UrlGenericExtensions
     {
-        public static string SignumAction(this UrlHelper helper, string actionName)
-        {
-            return helper.Action(actionName, "Signum");
-        }
-
         public static string Action<TController>(this UrlHelper helper, Expression<Action<TController>> action)
            where TController : Controller
         {

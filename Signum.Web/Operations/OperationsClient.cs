@@ -16,6 +16,7 @@ using Signum.Engine;
 using Signum.Utilities.ExpressionTrees;
 using System.Collections.Concurrent;
 using Signum.Web.PortableAreas;
+using Signum.Web.Controllers;
 #endregion
 
 namespace Signum.Web.Operations
@@ -30,10 +31,10 @@ namespace Signum.Web.Operations
 
             UrlsRepository.DefaultSFUrls.AddRange(new Dictionary<string, Func<UrlHelper, string>> 
                 { 
-                    { "operationExecute", url =>url.Action("Execute", "Operation") },
-                    { "operationDelete", url =>url.Action("Delete", "Operation") },
-                    { "operationConstructFrom", url =>url.Action("ConstructFrom", "Operation") },
-                    { "operationConstructFromMany", url =>url.Action("ConstructFromMany", "Operation") },
+                    { "operationExecute", url =>url.Action((OperationController c)=>c.Execute()) },
+                    { "operationDelete", url =>url.Action((OperationController c)=>c.Delete()) },
+                    { "operationConstructFrom", url =>url.Action((OperationController c)=>c.ConstructFrom()) },
+                    { "operationConstructFromMany", url =>url.Action((OperationController c)=>c.ConstructFromMany()) },
                 });
 
             ButtonBarEntityHelper.RegisterGlobalButtons(Manager.ButtonBar_GetButtonBarElement);
@@ -59,8 +60,11 @@ namespace Signum.Web.Operations
         }
 
 
-        public static ActionResult DefaultExecuteResult(ControllerBase controller, IdentifiableEntity entity, string prefix)
+        public static ActionResult DefaultExecuteResult(ControllerBase controller, IdentifiableEntity entity, string prefix = null)
         {
+            if (prefix == null)
+                prefix = controller.Prefix(); 
+
             var request = controller.ControllerContext.HttpContext.Request;
 
             if (request[ViewDataKeys.AvoidReturnView].HasText())
@@ -99,12 +103,15 @@ namespace Signum.Web.Operations
             return new ContentResult(); 
         }
 
-        public static ActionResult DefaultConstructResult(ControllerBase controller, IdentifiableEntity entity, string newPrefix)
+        public static ActionResult DefaultConstructResult(ControllerBase controller, IdentifiableEntity entity, string newPrefix = null)
         {
             var request = controller.ControllerContext.HttpContext.Request;
 
             if (request[ViewDataKeys.AvoidReturnView].HasText())
-                return new ContentResult(); 
+                return new ContentResult();
+
+            if (newPrefix == null)
+                newPrefix = request["newPrefix"]; 
 
             if (entity.Modified == ModifiedState.SelfModified)
                 controller.ViewData[ViewDataKeys.WriteEntityState] = true;
@@ -126,13 +133,20 @@ namespace Signum.Web.Operations
             }
         }
 
-        public static Enum GetOperationKeyAssert(string operationFullKey)
+        public static Enum GetOperationKeyAssert(this Controller controller)
         {
+            var operationFullKey = controller.Request.RequestContext.HttpContext.Request["operationFullKey"]; 
+
             var operationKey = MultiEnumLogic<OperationDN>.ToEnum(operationFullKey);
 
             OperationLogic.AssertOperationAllowed(operationKey, inUserInterface: true);
 
             return operationKey;
+        }
+
+        public static bool IsLite(this Controller controller)
+        {
+            return controller.Request.RequestContext.HttpContext.Request["isLite"] == "true";
         }
     }
 

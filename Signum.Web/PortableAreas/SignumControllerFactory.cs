@@ -106,8 +106,8 @@ namespace Signum.Web.PortableAreas
         {
             ValidateInputAttribute doNotValidateInputAttribute = new ValidateInputAttribute(false);
          
-            Controller<SignumController>()
-                .Action(c => c.Validate(null, null, null))
+            Controller<ValidatorController>()
+                .Action(c => c.Validate(null, null))
                 .AddFilters(ctx =>
                 {
                     var form = ctx.ControllerContext.HttpContext.Request.Form;
@@ -129,10 +129,10 @@ namespace Signum.Web.PortableAreas
                 });
 
             Controller<OperationController>()
-                 .Action(c => c.Execute(null, true, null))
+                 .Action(c => c.Execute())
                  .AddFilters(ctx =>
                  {
-                     var form = ctx.ControllerContext.HttpContext.Request.Form;
+                     var form = ctx.ControllerContext.HttpContext.Request;
                      var prefix = form["prefix"];
 
                      RuntimeInfo ri = RuntimeInfo.FromFormValue(form[TypeContextUtilities.Compose(prefix, EntityBaseKeys.RuntimeInfo)]);

@@ -246,22 +246,25 @@ namespace Signum.Web
             return Manager.QuerySettings.GetOrThrow(queryName, "no QuerySettings for queryName {0} found");
         }
 
-        public static MappingContext UntypedApplyChanges(this ModifiableEntity entity, ControllerContext controllerContext, string prefix, bool admin, PropertyRoute route = null, SortedList<string, string> inputs = null)
+        public static MappingContext UntypedApplyChanges(this ModifiableEntity entity, ControllerContext controllerContext, bool admin, string prefix = null, PropertyRoute route = null, SortedList<string, string> inputs = null)
         {
-            return miApplyChanges.GetInvoker(entity.GetType()).Invoke(entity, controllerContext, prefix, admin, route, inputs);
+            return miApplyChanges.GetInvoker(entity.GetType()).Invoke(entity, controllerContext, admin, prefix, route, inputs);
         }
 
-        static GenericInvoker<Func<ModifiableEntity, ControllerContext, string, bool, PropertyRoute, SortedList<string, string>, MappingContext>> miApplyChanges =
-            new GenericInvoker<Func<ModifiableEntity, ControllerContext, string, bool, PropertyRoute, SortedList<string, string>, MappingContext>>((me, cc, prefix, ad, route, dic) => ApplyChanges<TypeDN>((TypeDN)me, cc, prefix, ad, route, dic));
-        public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerContext controllerContext, string prefix, bool admin, PropertyRoute route = null, SortedList<string, string> inputs = null) where T : ModifiableEntity
+        static GenericInvoker<Func<ModifiableEntity, ControllerContext, bool, string, PropertyRoute, SortedList<string, string>, MappingContext>> miApplyChanges =
+            new GenericInvoker<Func<ModifiableEntity, ControllerContext, bool, string, PropertyRoute, SortedList<string, string>, MappingContext>>((me, cc, ad, prefix, route, dic) => ApplyChanges<TypeDN>((TypeDN)me, cc, ad, prefix, route, dic));
+        public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerContext controllerContext, bool admin, string prefix = null, PropertyRoute route = null, SortedList<string, string> inputs = null) where T : ModifiableEntity
         {
             Mapping<T> mapping = (Mapping<T>)Navigator.EntitySettings(typeof(T)).Let(s => admin ? s.UntypedMappingMain : s.UntypedMappingLine);
 
-            return ApplyChanges<T>(entity, controllerContext, prefix, mapping, route, inputs);
+            return ApplyChanges<T>(entity, controllerContext, mapping, prefix, route, inputs);
         }
 
-        public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerContext controllerContext, string prefix, Mapping<T> mapping, PropertyRoute route = null, SortedList<string, string> inputs = null) where T : ModifiableEntity
+        public static MappingContext<T> ApplyChanges<T>(this T entity, ControllerContext controllerContext, Mapping<T> mapping, string prefix = null,  PropertyRoute route = null, SortedList<string, string> inputs = null) where T : ModifiableEntity
         {
+            if (prefix == null)
+                prefix = controllerContext.Controller.Prefix();
+
             if (inputs == null)
                 inputs = controllerContext.HttpContext.Request.Form.ToSortedList(prefix);
 
@@ -276,29 +279,24 @@ namespace Signum.Web
             return Manager.ApplyChanges<T>(controllerContext, entity, prefix, mapping, route, inputs);
         }
 
-        public static ModifiableEntity UntypedExtractEntity(this ControllerBase controller)
+        public static string Prefix(this ControllerBase controller)
         {
-            return Manager.ExtractEntity(controller, null);
+            return controller.ControllerContext.HttpContext.Request["prefix"];
         }
 
-        public static ModifiableEntity UntypedExtractEntity(this ControllerBase controller, string prefix)
+        public static ModifiableEntity UntypedExtractEntity(this ControllerBase controller, string prefix = null)
         {
-            return Manager.ExtractEntity(controller, prefix);
+            return Manager.ExtractEntity(controller, prefix ?? controller.Prefix());
         }
 
-        public static T ExtractEntity<T>(this ControllerBase controller) where T: ModifiableEntity
+        public static T ExtractEntity<T>(this ControllerBase controller, string prefix = null) where T : ModifiableEntity
         {
-            return (T)Manager.ExtractEntity(controller, null);
+            return (T)Manager.ExtractEntity(controller, prefix ?? controller.Prefix());
         }
 
-        public static T ExtractEntity<T>(this ControllerBase controller, string prefix) where T : ModifiableEntity
+        public static Lite<T> ExtractLite<T>(this ControllerBase controller, string prefix = null) where T : class, IIdentifiable
         {
-            return (T) Manager.ExtractEntity(controller, prefix);
-        }
-
-        public static Lite<T> ExtractLite<T>(this ControllerBase controller, string prefix) where T : class, IIdentifiable
-        {
-            return (Lite<T>)Manager.ExtractLite<T>(controller, prefix);
+            return (Lite<T>)Manager.ExtractLite<T>(controller, prefix ?? controller.Prefix());
         }
 
         public static List<Lite<T>> ParseLiteKeys<T>(this ControllerBase controller) where T : class, IIdentifiable

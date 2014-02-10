@@ -124,11 +124,13 @@
     <Compile Include="PortableAreas\Repositories\EmbeddedFilesRespository.cs" />
     <Compile Include="PortableAreas\Repositories\LocalizedJavaScriptRepository.cs" />
     <Compile Include="PreApplicationStartCode.cs" />
+    <Compile Include="Signum\Controllers\FinderController.cs" />
     <Compile Include="Signum\Controllers\JsonConverters.cs" />
+    <Compile Include="Signum\Controllers\ValidatorController.cs" />
     <Compile Include="Signum\Controllers\OperationController.cs" />
     <Compile Include="Signum\Controllers\ResourcesController.cs" />
     <Compile Include="Signum\Controllers\ModelBinders.cs" />
-    <Compile Include="Signum\Controllers\SignumController.cs" />
+    <Compile Include="Signum\Controllers\NavigatorController.cs" />
     <Compile Include="Lines\ValueLine.cs" />
     <Compile Include="Mappings\Mapping.cs">
       <SubType>Code</SubType>

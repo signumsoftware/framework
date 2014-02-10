@@ -23,19 +23,19 @@ namespace Signum.Web.Controllers
     public class OperationController : Controller
     {
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Execute(string operationFullKey, bool isLite, string prefix)
+        public ActionResult Execute()
         {
-            Enum operationKey = OperationClient.GetOperationKeyAssert(operationFullKey);
+            Enum operationKey = this.GetOperationKeyAssert();
 
             IdentifiableEntity entity = null;
-            if (isLite)
+            if (this.IsLite())
             {
-                Lite<IdentifiableEntity> lite = this.ExtractLite<IdentifiableEntity>(prefix);
+                Lite<IdentifiableEntity> lite = this.ExtractLite<IdentifiableEntity>();
                 entity = OperationLogic.ExecuteLite<IdentifiableEntity>(lite, operationKey);
             }
             else
             {
-                MappingContext context = this.UntypedExtractEntity(prefix).UntypedApplyChanges(this.ControllerContext, prefix, true).UntypedValidateGlobal();
+                MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(this.ControllerContext, admin: true).UntypedValidateGlobal();
                 entity = (IdentifiableEntity)context.UntypedValue;
 
                 if (context.GlobalErrors.Any())
@@ -47,17 +47,17 @@ namespace Signum.Web.Controllers
                 entity = OperationLogic.Execute<IdentifiableEntity>(entity, operationKey);
             }
 
-           return OperationClient.DefaultExecuteResult(this, entity, prefix);
+           return OperationClient.DefaultExecuteResult(this, entity);
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult Delete(string operationFullKey, bool isLite, string prefix)
+        public ActionResult Delete()
         {
-            Enum operationKey = OperationClient.GetOperationKeyAssert(operationFullKey);
+            Enum operationKey = this.GetOperationKeyAssert();
 
-            if (isLite)
+            if (this.IsLite())
             {
-                Lite<IdentifiableEntity> lite = this.ExtractLite<IdentifiableEntity>(prefix);
+                Lite<IdentifiableEntity> lite = this.ExtractLite<IdentifiableEntity>();
 
                 OperationLogic.Delete(lite, operationKey, null);
 
@@ -65,7 +65,7 @@ namespace Signum.Web.Controllers
             }
             else
             {
-                MappingContext context = this.UntypedExtractEntity(prefix).UntypedApplyChanges(this.ControllerContext, prefix, true).UntypedValidateGlobal();
+                MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(this.ControllerContext, admin: true).UntypedValidateGlobal();
                 IdentifiableEntity entity = (IdentifiableEntity)context.UntypedValue;
 
                 OperationLogic.Delete(entity, operationKey, null);
@@ -75,19 +75,19 @@ namespace Signum.Web.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult ConstructFrom(string operationFullKey, bool isLite, string prefix, string newPrefix)
+        public ActionResult ConstructFrom()
         {
-            Enum operationKey = OperationClient.GetOperationKeyAssert(operationFullKey);
+            Enum operationKey = this.GetOperationKeyAssert();
 
             IdentifiableEntity entity = null;
-            if (isLite)
+            if (this.IsLite())
             {
-                Lite<IdentifiableEntity> lite = this.ExtractLite<IdentifiableEntity>(prefix);
+                Lite<IdentifiableEntity> lite = this.ExtractLite<IdentifiableEntity>();
                 entity = OperationLogic.ConstructFromLite<IdentifiableEntity>(lite, operationKey);
             }
             else
             {
-                MappingContext context = this.UntypedExtractEntity(prefix).UntypedApplyChanges(this.ControllerContext, prefix, true).UntypedValidateGlobal();
+                MappingContext context = this.UntypedExtractEntity().UntypedApplyChanges(this.ControllerContext, admin: true).UntypedValidateGlobal();
                 entity = (IdentifiableEntity)context.UntypedValue;
 
                 if (context.GlobalErrors.Any())
@@ -99,19 +99,19 @@ namespace Signum.Web.Controllers
                 entity = OperationLogic.ConstructFrom<IdentifiableEntity>(entity, operationKey);
             }
 
-            return OperationClient.DefaultConstructResult(this, entity, newPrefix);
+            return OperationClient.DefaultConstructResult(this, entity);
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public ActionResult ConstructFromMany(string operationFullKey, string newPrefix)
+        public ActionResult ConstructFromMany()
         {
-            Enum operationKey = OperationClient.GetOperationKeyAssert(operationFullKey);
+            Enum operationKey = this.GetOperationKeyAssert();
 
             var lites = this.ParseLiteKeys<IdentifiableEntity>();
 
             IdentifiableEntity entity = OperationLogic.ServiceConstructFromMany(lites, lites.First().EntityType, operationKey);
 
-            return OperationClient.DefaultConstructResult(this, entity, newPrefix);
+            return OperationClient.DefaultConstructResult(this, entity);
         }
     }
 }

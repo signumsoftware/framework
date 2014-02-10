@@ -8,7 +8,7 @@ using Signum.Entities;
 using Signum.Engine;
 using Signum.Utilities;
 
-namespace Signum.Web
+namespace Signum.Web.Controllers
 {
     public class LiteJavaScriptConverter : JavaScriptConverter
     {

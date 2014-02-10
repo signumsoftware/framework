@@ -14,21 +14,24 @@ namespace Signum.Web.PortableAreas
     { 
         public static Dictionary<string, Func<UrlHelper, string>> DefaultSFUrls = new Dictionary<string, Func<UrlHelper, string>>
         {
-                { "popupView", url => url.SignumAction("PopupView") },
-                { "partialView", url => url.SignumAction("PartialView") },
-                { "validate", url => url.SignumAction("Validate") },
-                { "find", url => url.SignumAction("Find") },
-                { "partialFind", url => url.SignumAction("PartialFind") },
-                { "search", url => url.SignumAction("Search") },
-                { "subTokensCombo", url => url.SignumAction("NewSubTokensCombo") },
-                { "addFilter", url => url.Action("AddFilter", "Signum") },
-                { "quickFilter", url => url.SignumAction("QuickFilter") },
-                { "selectedItemsContextMenu", url => url.SignumAction("SelectedItemsContextMenu") },
-                { "create", url => url.SignumAction("Create") },
-                { "view", url => url.SignumAction("View") },
-                { "popupNavigate", url => url.SignumAction("PopupNavigate") },
-                { "normalControl", url => url.SignumAction("NormalControl") },
-                { "autocomplete", url => url.SignumAction("Autocomplete") }
+            { "popupView", url => url.Action("PopupView", "Navigator") },
+            { "partialView", url => url.Action("PartialView", "Navigator") },
+            { "create", url => url.Action("Create", "Navigator") },
+            { "view", url => url.Action("View", "Navigator") },
+            { "popupNavigate", url => url.Action("PopupNavigate", "Navigator") },
+            { "normalControl", url => url.Action("NormalControl", "Navigator") },
+
+            { "validate", url => url.Action("Validate", "Validator") },
+
+            { "find", url => url.Action("Find", "Finder") },
+            { "partialFind", url => url.Action("PartialFind", "Finder") },
+            { "search", url => url.Action("Search", "Finder") },
+            { "subTokensCombo", url => url.Action("NewSubTokensCombo", "Finder") },
+            { "addFilter", url => url.Action("AddFilter", "Finder") },
+            { "quickFilter", url => url.Action("QuickFilter", "Finder") },
+            { "selectedItemsContextMenu", url => url.Action("SelectedItemsContextMenu", "Finder") },
+
+            { "autocomplete", url => url.Action("Autocomplete", "Finder") }
         };
 
         
