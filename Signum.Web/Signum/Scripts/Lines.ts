@@ -33,7 +33,6 @@ export class EntityBase {
     }
 
     public ready() {
-        this.element.css("opacity", ".5"); 
 
         this.element.trigger("SF-ready");
 
