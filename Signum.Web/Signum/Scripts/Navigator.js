@@ -247,6 +247,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.reload = reload;
 
     function isNavigatePopup(prefix) {
+        if (SF.isEmpty(prefix))
+            return false;
+
         var tempDivId = SF.compose(prefix, "Temp");
 
         var tempDiv = $("#" + tempDivId);
@@ -363,8 +366,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     }
     exports.typeChooser = typeChooser;
 
-    function chooser(parentPrefix, title, options, getStr, getValue) {
-        var tempDivId = SF.compose(parentPrefix, "Temp");
+    function chooser(prefix, title, options, getStr, getValue) {
+        var tempDivId = SF.compose(prefix, "Temp");
 
         if (getStr == null) {
             getStr = function (a) {

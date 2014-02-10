@@ -271,7 +271,11 @@ export function reload(entityHtml: Entities.EntityHtml): void {
         reloadPopup(entityHtml);
 }
 
-export function isNavigatePopup(prefix: string) {
+export function isNavigatePopup(prefix: string) : boolean {
+
+    if (SF.isEmpty(prefix))
+        return false;
+
     var tempDivId = SF.compose(prefix, "Temp");
 
     var tempDiv = $("#" + tempDivId);
@@ -312,7 +316,7 @@ function requestHtml(entityHtml: Entities.EntityHtml, viewOptions: ViewOptionsBa
             data: requestData(entityHtml, viewOptions),
             async: false,
             success: resolve,
-            error: reject
+            error: reject,
         });
     }).then(htmlText=> {
             entityHtml.loadHtml(htmlText);
@@ -386,9 +390,9 @@ export function typeChooser(staticInfo: Entities.StaticInfo): Promise<string> {
         .then(t=> t == null ? null : t.type);
 }
 
-export function chooser<T>(parentPrefix: string, title: string, options: T[], getStr?: (data: T) => string, getValue?: (data: T) => string): Promise<T> {
+export function chooser<T>(prefix: string, title: string, options: T[], getStr?: (data: T) => string, getValue?: (data: T) => string): Promise<T> {
 
-    var tempDivId = SF.compose(parentPrefix, "Temp");
+    var tempDivId = SF.compose(prefix, "Temp");
 
     if (getStr == null) {
         getStr = (a: any) =>
