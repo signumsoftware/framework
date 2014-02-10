@@ -7,6 +7,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             isLite: false
         }, options);
 
+        if (!exports.confirmIfNecessary(options))
+            return Promise.reject("confirmation");
+
         return exports.entityIsValidOrLite(options).then(function () {
             return exports.executeAjax(options).then(function (eHtml) {
                 Navigator.reload(eHtml);
@@ -33,6 +36,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     function executeDefaultContextual(options) {
         Finder.removeOverlay();
 
+        if (!exports.confirmIfNecessary(options))
+            return Promise.reject("confirmation");
+
         return exports.executeAjaxContextual(options).then(function (result) {
             return exports.markCells(options.prefix, result);
         });
@@ -57,6 +63,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             isLite: true
         }, options);
 
+        if (!exports.confirmIfNecessary(options))
+            return Promise.reject("confirmation");
+
         return exports.entityIsValidOrLite(options).then(function () {
             return exports.constructFromAjax(options);
         }).then(function (eHtml) {
@@ -80,6 +89,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.constructFromAjax = constructFromAjax;
 
     function constructFromDefaultContextual(options, newPrefix) {
+        if (!exports.confirmIfNecessary(options))
+            return Promise.reject("confirmation");
+
         Finder.removeOverlay();
 
         return exports.constructFromAjaxContextual(options).then(function (eHtml) {
@@ -109,6 +121,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             isLite: true
         }, options);
 
+        if (!exports.confirmIfNecessary(options))
+            return Promise.reject("confirmation");
+
         return exports.entityIsValidOrLite(options).then(function () {
             return exports.deleteAjax(options);
         }).then(function () {
@@ -134,6 +149,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     function deleteDefaultContextual(options) {
         options = $.extend({}, options);
 
+        if (!exports.confirmIfNecessary(options))
+            return Promise.reject("confirmation");
+
         Finder.removeOverlay();
 
         return exports.deleteAjaxContextual(options).then(function (result) {
@@ -158,6 +176,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             controllerUrl: SF.Urls.operationConstructFromMany
         }, options);
 
+        if (!exports.confirmIfNecessary(options))
+            return Promise.reject("confirmation");
+
         Finder.removeOverlay();
 
         return exports.constructFromManyAjax(options).then(function (eHtml) {
@@ -181,6 +202,11 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         });
     }
     exports.constructFromManyAjax = constructFromManyAjax;
+
+    function confirmIfNecessary(options) {
+        return !options.confirmMessage || confirm(options.confirmMessage);
+    }
+    exports.confirmIfNecessary = confirmIfNecessary;
 
     function reload(entityHtml) {
         exports.disableContextMenu();

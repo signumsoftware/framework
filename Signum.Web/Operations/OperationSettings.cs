@@ -120,12 +120,17 @@ namespace Signum.Web.Operations
 
         public JObject Options()
         {
-            return new JObject()
+            var result = new JObject()
             { 
                 { "operationKey", OperationDN.UniqueKey(OperationInfo.Key) },
                 { "isLite", OperationInfo.Lite },
                 { "prefix", this.Prefix },
-            }; 
+            };
+
+            if (OperationInfo.OperationType == OperationType.Delete)
+                result.Add("confirmMessage", OperationMessage.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem.NiceToString());
+
+            return result;
         }
 
         public override string ToString()
@@ -144,12 +149,17 @@ namespace Signum.Web.Operations
 
         public JObject Options()
         {
-            return new JObject()
+            var result = new JObject()
             { 
                 { "operationKey", OperationDN.UniqueKey(OperationInfo.Key) },
                 { "isLite", OperationInfo.Lite },
                 { "prefix", this.Prefix },
-            }; 
+            };
+
+            if (OperationInfo.OperationType == OperationType.Delete)
+                result.Add("confirmMessage", OperationMessage.PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem.NiceToString());
+
+            return result;
         }
     }
 

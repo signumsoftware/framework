@@ -14,6 +14,7 @@ export interface OperationOptions {
     isLite?: boolean;
     avoidReturnRedirect?: boolean;
     avoidReturnView?: boolean;
+    confirmMessage?: string;
 }
 
 export interface EntityOperationOptions extends OperationOptions {
@@ -28,6 +29,9 @@ export function executeDefault(options: EntityOperationOptions): Promise<void> {
         validationOptions: {},
         isLite: false,
     }, options);
+
+    if (!confirmIfNecessary(options))
+        return Promise.reject("confirmation");
 
     return entityIsValidOrLite(options).then(() =>
         executeAjax(options).then(eHtml=> {
@@ -53,6 +57,9 @@ export function executeAjax(options: EntityOperationOptions): Promise<Entities.E
 export function executeDefaultContextual(options: OperationOptions): Promise<void> {
     Finder.removeOverlay();
 
+    if (!confirmIfNecessary(options))
+        return Promise.reject("confirmation");
+
     return executeAjaxContextual(options).then(result=> markCells(options.prefix, result));
 }
 
@@ -75,6 +82,9 @@ export function constructFromDefault(options: EntityOperationOptions): Promise<v
         isLite: true,
     }, options);
 
+    if (!confirmIfNecessary(options))
+        return Promise.reject("confirmation");
+
     return entityIsValidOrLite(options)
         .then(() => constructFromAjax(options))
         .then(eHtml=> openPopup(eHtml));
@@ -94,6 +104,9 @@ export function constructFromAjax(options: EntityOperationOptions, newPrefix?: s
 
 export function constructFromDefaultContextual(options: OperationOptions, newPrefix?: string): Promise<void> {
   
+    if (!confirmIfNecessary(options))
+        return Promise.reject("confirmation");
+
     Finder.removeOverlay();
 
     return constructFromAjaxContextual(options).then(eHtml=> {
@@ -120,6 +133,9 @@ export function deleteDefault(options: EntityOperationOptions) : Promise <void> 
         isLite: true,
     }, options);
 
+    if (!confirmIfNecessary(options))
+        return Promise.reject("confirmation");
+
     return entityIsValidOrLite(options).then(() => deleteAjax(options)).then(() => {
         //ajax prefilter will take redirect
         if (options.prefix) {
@@ -141,6 +157,9 @@ export function deleteAjax(options: EntityOperationOptions): Promise<any> {
 export function deleteDefaultContextual(options: OperationOptions): Promise<any> {
     options = $.extend({
     }, options);
+
+    if (!confirmIfNecessary(options))
+        return Promise.reject("confirmation");
 
     Finder.removeOverlay();
 
@@ -164,6 +183,9 @@ export function constructFromManyDefault(options: OperationOptions, newPrefix?: 
         controllerUrl: SF.Urls.operationConstructFromMany,
     }, options);
 
+    if (!confirmIfNecessary(options))
+        return Promise.reject("confirmation");
+
     Finder.removeOverlay();
 
     return constructFromManyAjax(options).then(eHtml=> {
@@ -178,11 +200,16 @@ export function constructFromManyAjax(options: OperationOptions, newPrefix?: str
         controllerUrl: SF.Urls.operationConstructFromMany,
     }, options);
 
+
     if (!newPrefix)
         newPrefix = getNewPrefix(options);
 
     return SF.ajaxPost({ url: options.controllerUrl, data: constructFromManyRequestData(options, newPrefix) })
         .then(html=> Entities.EntityHtml.fromHtml(newPrefix, html));
+}
+
+export function confirmIfNecessary(options: OperationOptions): boolean {
+    return !options.confirmMessage || confirm(options.confirmMessage);
 }
 
 export function reload(entityHtml: Entities.EntityHtml) {
