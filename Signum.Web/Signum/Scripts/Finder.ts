@@ -105,7 +105,7 @@ function findInternal(findOptions: FindOptions): Promise<Array<Entities.EntityVa
                 var div = $("#" + divId);
                 SF.triggerNewContent(div);
                    
-                $("#" + divId).popup({
+                div.popup({
                     onOk: function () {
 
                         getFor(findOptions.prefix).then(sc=>{
@@ -148,7 +148,7 @@ export function explore(findOptions: FindOptions): Promise<void> {
                 var sc = getFor(findOptions.prefix)
 
                     //$.extend(sc.options, findOptions); //Copy all properties (i.e. onOk was not transmitted)
-                $("#" + divId).popup({
+                div.popup({
                     onCancel: function () { div.remove(); resolve(null); }
                 });
             }
@@ -222,9 +222,11 @@ export function newSubTokensCombo(webQueryName, prefix, index, controllerUrl, re
         return;
     }
 
+    var tokenName = this.constructTokenName(prefix);
+
      var data = $.extend({
         webQueryName: webQueryName,
-        tokenName: this.constructTokenName(prefix),
+         tokenName: tokenName,
         index: index,
         prefix: prefix
     }, requestExtraJsonData);
@@ -234,27 +236,24 @@ export function newSubTokensCombo(webQueryName, prefix, index, controllerUrl, re
         url: controllerUrl || SF.Urls.subTokensCombo,
         data: data,
         dataType: "html",
-        success: function (newCombo) {
-            if (newCombo != "<span>no-results</span>") {
-                $("#" + SF.compose(prefix, "ddlTokens_" + index)).after(newCombo);
-            }
+        success: function (newHtml) {
+            $("#" + SF.compose(prefix, "ddlTokens_" + index)).after(newHtml);
         }
     });
 };
 
-export function clearChildSubtokenCombos($selectedCombo, prefix, index) {
-    $selectedCombo.siblings("select,span")
+export function clearChildSubtokenCombos($selectedCombo : JQuery, prefix : string, index: number) {
+    $selectedCombo.siblings("select,input[type=hidden]")
         .filter(function () {
             var elementId = $(this).attr("id");
-            if (typeof elementId == "undefined") {
+            if (typeof elementId == "undefined")
                 return false;
-            }
-            if ((elementId.indexOf(SF.compose(prefix, "ddlTokens_")) != 0)
-                && (elementId.indexOf(SF.compose(prefix, "lblddlTokens_")) != 0)) {
+
+            if (!elementId.startsWith(SF.compose(prefix, "ddlTokens_"))
+                && !elementId.startsWith(SF.compose(prefix, "ddlTokensEnd")))
                 return false;
-            }
-            var currentIndex = elementId.substring(elementId.lastIndexOf("_") + 1, elementId.length);
-            return parseInt(currentIndex) > index;
+
+            return parseInt(elementId.afterLast("_")) > index;
         })
         .remove();
 }
@@ -328,9 +327,6 @@ export class SearchControl {
             filters: null,
             navigate: true,
             openFinderUrl: null,
-            onCancelled: null,
-            onOk: null,
-            onOkClosed: null,
             orders: [], //A Json array like ["Id","-Name"] => Id asc, then Name desc
             prefix: "",
             searchOnLoad: false,
@@ -620,6 +616,7 @@ export class SearchControl {
     search() {
         var $searchButton = $(this.pf("qbSearch"));
         $searchButton.addClass("sf-searching");
+        var count = parseInt($searchButton.attr("data-searchCount")) || 0;
         var self = this;
         $.ajax({
             url: SF.Urls.search,
@@ -634,6 +631,7 @@ export class SearchControl {
                     $tbody.html("");
                 }
                 $searchButton.removeClass("sf-searching");
+                $searchButton.attr("data-searchCount", count + 1);
             }
         });
     }
@@ -698,7 +696,7 @@ export class SearchControl {
         var info = new Entities.RuntimeInfoElement(SF.compose(SF.compose(this.options.prefix, "value"), index));
         if (info.getElem().length > 0) { //If it's a Lite, the value is the Id
             var val = info.value(); 
-            return SearchControl.encodeCSV(val == null ? null : val.key());
+            return SearchControl.encodeCSV(val == null ? "" : val.key());
         }
 
         return SearchControl.encodeCSV($(SF.compose(this.pf("value"), index), $filter).val());
@@ -836,12 +834,12 @@ export class SearchControl {
         });
     }
 
-    editColumn($th) {
+    editColumn($th : JQuery) {
         var colName = $th.text().trim();
 
         var popupPrefix = SF.compose(this.options.prefix, "newName");
 
-        var divId = "columnNewName";
+        var divId = SF.compose(popupPrefix, "Temp");
         var $div = $("<div id='" + divId + "'></div>");
         $div.html("<p>" + lang.signum.enterTheNewColumnName + "</p>")
             .append("<br />")
@@ -850,14 +848,15 @@ export class SearchControl {
             .append("<input type='button' id='" + SF.compose(popupPrefix, "btnOk") + "' class='sf-button sf-ok-button' value='OK' />");
 
         var $tempContainer = $("<div></div>").append($div);
-
+        SF.triggerNewContent($tempContainer);
         $tempContainer.popup({
-            onOk: function () { $th.find("span").html($("#columnNewName > input:text").val()); },
+            onOk: function () { $th.find("span").text($div.find("input:text").val()); $tempContainer.remove();  },
+            onCancel: function () { $tempContainer.remove(); }
         });
     }
 
 
-    moveColumn($source, $target, before) {
+    moveColumn($source : JQuery, $target : JQuery, before : boolean) {
         if (before) {
             $target.before($source);
         }
@@ -870,7 +869,7 @@ export class SearchControl {
         this.createMoveColumnDragDrop();
     }
 
-    createMoveColumnDragDrop($draggables?, $droppables?) {
+    createMoveColumnDragDrop($draggables? : JQuery, $droppables? : JQuery) {
         $draggables = $draggables || $(this.pf("tblResults") + " th:not(.sf-th-entity):not(.sf-th-selection)");
         $droppables = $droppables || $(this.pf("tblResults") + " .sf-header-droppable");
 

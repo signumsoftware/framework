@@ -225,7 +225,11 @@ namespace Signum.Web
             var queryTokens = previous.SubTokens(qd, canAggregate);
 
             if (queryTokens.IsEmpty())
-                return MvcHtmlString.Create("");
+                return new HtmlTag("input")
+                .Attr("type", "hidden")
+                .IdName(context.Compose("ddlTokensEnd_" + index))
+                .Attr("disabled", "disabled")
+                .Attr("data-parenttoken", previous == null ? "" : previous.FullKey());
 
             var options = new HtmlStringBuilder();
             options.AddLine(new HtmlTag("option").Attr("value", "").SetInnerText("-").ToHtml());
@@ -255,8 +259,8 @@ namespace Signum.Web
             HtmlTag dropdown = new HtmlTag("select")
                 .IdName(context.Compose("ddlTokens_" + index))
                 .InnerHtml(options.ToHtml())
-                .Attr("onchange", new JsFunction(JsFunction.FinderModule, "newSubTokensCombo",
-                    Navigator.ResolveWebQueryName(qd.QueryName), context.ControlID, index).ToString());
+                .Attr("onchange", new JsFunction(JsFunction.FinderModule, "newSubTokensCombo", Navigator.ResolveWebQueryName(qd.QueryName), context.ControlID, index).ToString())
+                .Attr("data-parenttoken", previous == null ? "" : previous.FullKey());
 
             if(selected != null)
             {
