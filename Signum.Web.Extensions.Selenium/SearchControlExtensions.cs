@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Signum.Entities.Reports;
 using Signum.Entities.UserQueries;
 using Signum.Utilities;
 using Signum.Web.Selenium;
@@ -10,11 +11,16 @@ namespace Signum.Web.Selenium
 {
     public static class SearchControlExcelExtensions
     {
-        public static SearchPageProxy AdministerExcelReports(this SearchControlProxy sc)
+        public static SearchPopupProxy AdministerExcelReports(this SearchControlProxy sc)
         {
             sc.Selenium.Click(sc.MenuOptionLocator("tmExcel", "qbReportAdminister"));
-            sc.Selenium.WaitForPageToLoad();
-            return new SearchPageProxy(sc.Selenium);
+            return new SearchPopupProxy(sc.Selenium, sc.PrefixUnderscore + "New");
+        }
+
+        public static PopupControl<ExcelReportDN> CreateExcelReport(this SearchControlProxy sc)
+        {
+            sc.Selenium.Click(sc.MenuOptionLocator("tmExcel", "qbReportCreate"));
+            return new PopupControl<ExcelReportDN>(sc.Selenium, sc.PrefixUnderscore + "New");
         }
 
         public static string ExcelReportLocator(this SearchControlProxy sc, string title)

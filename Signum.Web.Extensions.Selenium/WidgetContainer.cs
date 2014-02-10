@@ -42,7 +42,7 @@ namespace Signum.Web.Selenium
             container.QuickLinkClick(quickLinkIndex);
             var result = new SearchPopupProxy(container.Selenium, "_".Combine(container.Prefix, "New"));
             container.Selenium.WaitElementPresent(result.PopupVisibleLocator);
-            result.SearchControl.WaitSearchCompleted();
+            result.SearchControl.WaitInitialSearchCompleted();
             return result;
         }
 
@@ -69,7 +69,7 @@ namespace Signum.Web.Selenium
 
             SearchPopupProxy result = new SearchPopupProxy(container.Selenium, "New");
             container.Selenium.WaitElementPresent(result.PopupVisibleLocator);
-            result.SearchControl.WaitSearchCompleted();
+            result.SearchControl.WaitInitialSearchCompleted();
             return result;
         }
 
@@ -107,7 +107,7 @@ namespace Signum.Web.Selenium
 
             SearchPopupProxy result = new SearchPopupProxy(container.Selenium, "New");
             container.Selenium.WaitElementPresent(result.PopupVisibleLocator);
-            result.SearchControl.WaitSearchCompleted();
+            result.SearchControl.WaitInitialSearchCompleted();
             return result;
         }
 
@@ -117,7 +117,7 @@ namespace Signum.Web.Selenium
                 return "sf-alert-future";
 
             if (state == AlertCurrentState.Alerted)
-                return "sf-alert-warned";
+                return "sf-alert-alerted";
 
             if(state == AlertCurrentState.Attended)
                 return "sf-alert-attended";

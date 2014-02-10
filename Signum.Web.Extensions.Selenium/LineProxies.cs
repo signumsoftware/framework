@@ -168,16 +168,16 @@ namespace Signum.Web.Selenium
 
             if (selectType == null)
             {
-                if (Popup.IsChooser(Selenium, Prefix))
+                if (ChooserPopup.IsChooser(Selenium, Prefix))
                     throw new InvalidOperationException("TypeChooser found but arugment selectType is not specified");
             }
             else
             {
-                if (Popup.IsChooser(Selenium, Prefix))
+                if (ChooserPopup.IsChooser(Selenium, Prefix))
                 {
-                    Selenium.Click("jq=[data-value=" + TypeLogic.GetCleanName(selectType) + "]");
+                    ChooserPopup.ChooseButton(Selenium, Prefix, TypeLogic.GetCleanName(selectType));
 
-                    Selenium.Wait(() => !Popup.IsChooser(Selenium, Prefix));
+                    Selenium.Wait(() => !ChooserPopup.IsChooser(Selenium, Prefix));
                 }
             }
 
@@ -225,15 +225,7 @@ namespace Signum.Web.Selenium
 
         public bool HasEntity()
         {
-            bool toStrVisible = Selenium.IsElementPresent(ToStrLocator + ":visible");
-            bool linkVisible = Selenium.IsElementPresent(LinkLocator + ":visible");
-
-            if (toStrVisible != !linkVisible)
-                throw new InvalidOperationException("{0}_sfToStr is {1} but {0}_sfLink is {2}".Formato(Prefix,
-                    toStrVisible ? "visible" : "not visible",
-                    linkVisible ? "visible" : "not visible"));
-
-            return linkVisible;
+            return Selenium.IsElementPresent(LinkLocator + ":visible");
         }
 
         public Lite<IIdentifiable> LiteValue
@@ -347,16 +339,7 @@ namespace Signum.Web.Selenium
 
         public bool HasEntity()
         {
-            bool parentVisible = Selenium.IsElementPresent(DivSelector + ":parent");
-            bool emptyVisible = Selenium.IsElementPresent(DivSelector + ":empty");
-
-            if (parentVisible != !emptyVisible)
-                throw new InvalidOperationException("{0}sfDetail is {1} but {1}".Formato(Prefix,
-                    emptyVisible ? "empty" : "not empty",
-                    parentVisible ? "has parent" : "has no parent"));
-
-
-            return parentVisible;
+            return Selenium.IsElementPresent(DivSelector + ":parent");
         }
 
         public Lite<IIdentifiable> Lite
@@ -428,13 +411,7 @@ namespace Signum.Web.Selenium
 
         public bool HasEntity(int index)
         {
-            bool optionVisible = Selenium.IsElementPresent(OptionIdLocator(index));
-            bool runtimeInfoVisible = Selenium.IsElementPresent(RuntimeInfoLocator(index));
-
-            if (optionVisible != runtimeInfoVisible)
-                throw new InvalidOperationException("{0} is {1} but {2} is {3}".Formato(OptionIdLocator(index), ToVisible(optionVisible), RuntimeInfoLocator(index), ToVisible(runtimeInfoVisible)));
-
-            return optionVisible;
+            return Selenium.IsElementPresent(OptionIdLocator(index));
         }
 
 
@@ -539,15 +516,7 @@ namespace Signum.Web.Selenium
 
         public bool HasEntity(int index)
         {
-            bool divPresent = Selenium.IsElementPresent(RepeaterItemSelector(index));
-            bool runtimeInfoPresent = Selenium.IsElementPresent(RuntimeInfoLocator(index));
-
-            if (divPresent != runtimeInfoPresent)
-                throw new InvalidOperationException("{0} is {2} but {1} is {3}".Formato(
-                    RepeaterItemSelector(index), RuntimeInfoLocator(index),
-                    ToVisible(divPresent), ToVisible(runtimeInfoPresent)));
-
-            return divPresent;
+            return Selenium.IsElementPresent(RepeaterItemSelector(index)); ;
         }
 
         public int ItemsCount()
@@ -624,15 +593,7 @@ namespace Signum.Web.Selenium
 
         public bool HasEntity(int index)
         {
-            bool divPresent = Selenium.IsElementPresent(StripItemSelector(index));
-            bool runtimeInfoPresent = Selenium.IsElementPresent(RuntimeInfoLocator(index));
-
-            if (divPresent != runtimeInfoPresent)
-                throw new InvalidOperationException("{0} is {2} but {1} is {3}".Formato(
-                    StripItemSelector(index), RuntimeInfoLocator(index),
-                    ToVisible(divPresent), ToVisible(runtimeInfoPresent)));
-
-            return divPresent;
+            return Selenium.IsElementPresent(StripItemSelector(index));
         }
 
         public int ItemsCount()

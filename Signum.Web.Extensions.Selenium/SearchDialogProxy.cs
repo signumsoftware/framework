@@ -79,10 +79,10 @@ namespace Signum.Web.Selenium
             //implementation popup opens
             Selenium.Wait(() => Popup.IsPopupVisible(Selenium, SearchControl.Prefix));
 
-            if (Popup.IsChooser(Selenium, SearchControl.Prefix))
+            if (!ChooserPopup.IsChooser(Selenium, SearchControl.Prefix))
                 throw new InvalidOperationException("{0} is not a Chooser".Formato(Selenium));
 
-            Selenium.Click(TypeLogic.GetCleanName(typeof(T)));
+            ChooserPopup.ChooseButton(Selenium, SearchControl.Prefix, typeof(T)); 
 
             Selenium.WaitForPageToLoad();
 
@@ -125,10 +125,10 @@ namespace Signum.Web.Selenium
             //implementation popup opens
             Selenium.Wait(() => Popup.IsPopupVisible(Selenium, SearchControl.Prefix));
 
-            if (!Popup.IsChooser(Selenium, SearchControl.Prefix))
+            if (!ChooserPopup.IsChooser(Selenium, SearchControl.Prefix))
                 throw new InvalidOperationException("{0} is not a Chooser".Formato(Selenium));
 
-            Selenium.Click(TypeLogic.GetCleanName(typeof(T)));
+            ChooserPopup.ChooseButton(Selenium, SearchControl.Prefix, typeof(T));
 
             Selenium.WaitForPageToLoad();
 
@@ -177,16 +177,27 @@ namespace Signum.Web.Selenium
 
         public void Search()
         {
-            Selenium.Click(SearchButtonLocator);
-            WaitSearchCompleted();
+            WaitSearchCompleted(() => Selenium.Click(SearchButtonLocator));
         }
 
-        public void WaitSearchCompleted()
+        public void WaitSearchCompleted(Action searchTrigger)
         {
-            var searchButton = SearchButtonLocator;
+            string counter = Selenium.GetEval("window.$('#{0}qbSearch').attr('data-searchcount')".Formato(this.PrefixUnderscore));
+            searchTrigger();
+            WaitSearchCompleted(counter);
+        }
+
+        public void WaitInitialSearchCompleted()
+        {
+            WaitSearchCompleted("null");
+        }
+
+        void WaitSearchCompleted(string counter)
+        {
+            var searchButtonDisctinct = SearchButtonLocator + (counter == "null" ? "[data-searchcount]" : "[data-searchcount!={0}]".Formato(counter));
             Selenium.Wait(() =>
-                Selenium.IsElementPresent(searchButton) &&
-                !Selenium.IsElementPresent("{0}.sf-searching".Formato(searchButton)), () => "button {0} to stop searching".Formato(searchButton));
+                Selenium.IsElementPresent(searchButtonDisctinct)
+                , () => "button {0} to finish searching".Formato(SearchButtonLocator));
         }
 
 
@@ -370,31 +381,47 @@ namespace Signum.Web.Selenium
             this.PrefixUnderscore = prefixUnderscore;
         }
 
-        public string TokenLocator(int tokenIndex)
+        public string TokenLocator(int tokenIndex, string previousToken, bool isEnd)
         {
-            return "{0}ddlTokens_{1}".Formato(PrefixUnderscore, tokenIndex);
+            var result = "jq=#{0}{1}_{2}".Formato(PrefixUnderscore, !isEnd ? "ddlTokens" : "ddlTokensEnd", tokenIndex);
+
+            result += "[data-parenttoken='" + previousToken + "']";
+
+            return result;
         }
 
-        public void WaitTokenCharged(int tokenIndex)
-        {
-            Selenium.WaitElementPresent("{0}ddlTokens_{1}".Formato(PrefixUnderscore, tokenIndex));
-        }
-
-        public void SelectToken(string token, bool waitForLast = false)
+        public void SelectToken(string token)
         {
             string[] parts = token.Split('.');
 
             for (int i = 0; i < parts.Length; i++)
             {
-                Selenium.Select(TokenLocator(i), "value=" + parts[i]);
+                var prev = parts.Take(i).ToString(".");
 
-                if (i < parts.Length - 1 || waitForLast)
-                    WaitTokenCharged(i + 1);
+                var tokenLocator = TokenLocator(i, prev, isEnd : false);
+
+                Selenium.WaitElementPresent(tokenLocator);
+
+                Selenium.Select(tokenLocator, "value=" + parts[i]);
             }
 
-            if (Selenium.IsElementPresent(TokenLocator(parts.Length)))
-                Selenium.Select(TokenLocator(parts.Length), "value=");
+            Selenium.Wait(() =>
+            {
+                var tokenLocator = TokenLocator(parts.Length, token, isEnd: false);
+                if (Selenium.IsElementPresent(tokenLocator))
+                {
+                    Selenium.Select(tokenLocator, "value=");
+                    return true;
+                }
+
+                if (Selenium.IsElementPresent(TokenLocator(parts.Length, token, isEnd: true)))
+                    return true;
+
+                return false;
+            }); 
         }
+
+    
     }
 
     public class ResultTableProxy
@@ -403,11 +430,11 @@ namespace Signum.Web.Selenium
 
         public string PrefixUnderscore;
 
-        public Action WaitSearchCompleted;
+        public Action<Action> WaitSearchCompleted;
 
         public bool HasDataEntity;
 
-        public ResultTableProxy(ISelenium selenium, string prefixUndescore, Action waitSearchCompleted, bool hasDataEntity)
+        public ResultTableProxy(ISelenium selenium, string prefixUndescore, Action<Action> waitSearchCompleted, bool hasDataEntity)
         {
             this.Selenium = selenium;
             this.PrefixUnderscore = prefixUndescore;
@@ -512,17 +539,18 @@ namespace Signum.Web.Selenium
             return this;
         }
 
-        private void OrderBy(int columnIndex, OrderType orderType, bool thenBy = false)
+        void OrderBy(int columnIndex, OrderType orderType, bool thenBy = false)
         {
             do
             {
-                if(thenBy)
-                    Selenium.ShiftKeyDown();
-                Selenium.Click(HeaderCellLocator(columnIndex));
-                if (thenBy)
-                    Selenium.ShiftKeyUp();
-
-                WaitSearchCompleted();
+                WaitSearchCompleted(() =>
+                {
+                    if (thenBy)
+                        Selenium.ShiftKeyDown();
+                    Selenium.Click(HeaderCellLocator(columnIndex));
+                    if (thenBy)
+                        Selenium.ShiftKeyUp();
+                });
             }
             while (!Selenium.IsElementPresent(HeaderCellLocator(columnIndex) + "." + CssClass(orderType)));
         }
@@ -564,13 +592,14 @@ namespace Signum.Web.Selenium
         {
             do
             {
-                if (thenBy)
-                    Selenium.ShiftKeyDown();
-                Selenium.Click(HeaderCellLocator(token));
-                if (thenBy)
-                    Selenium.ShiftKeyUp();
-
-                WaitSearchCompleted();
+                WaitSearchCompleted(() =>
+                {
+                    if (thenBy)
+                        Selenium.ShiftKeyDown();
+                    Selenium.Click(HeaderCellLocator(token));
+                    if (thenBy)
+                        Selenium.ShiftKeyUp();
+                });
             }
             while (!Selenium.IsElementPresent(HeaderCellLocator(token) + "." + CssClass(orderType)));
         }
@@ -833,10 +862,12 @@ namespace Signum.Web.Selenium
 
         public void SetElementsPerPage(int elementPerPage)
         {
-            var combo = ElementsPerPageLocator;
-            SearchControl.Selenium.Select(combo, "value=" + elementPerPage.ToString());
-            SearchControl.Selenium.FireEvent(combo, "change");
-            SearchControl.WaitSearchCompleted();
+            SearchControl.WaitSearchCompleted(() =>
+            {
+                var combo = ElementsPerPageLocator;
+                SearchControl.Selenium.Select(combo, "value=" + elementPerPage.ToString());
+                SearchControl.Selenium.FireEvent(combo, "change");
+            });
         }
 
         public string PaginationModeLocator
