@@ -35,12 +35,15 @@ export function attachShowCurrentEntity(el: Lines.EntityLine) {
     el.entityChanged = showOnEntity;
 }
 
-export function deleteUserQuery(os: Operations.EntityOperationOptions, urlRedirect: string) {
+export function deleteUserQuery(options: Operations.EntityOperationOptions, urlRedirect: string) {
 
-    os.avoidReturnRedirect = true;
+    options.avoidReturnRedirect = true;
 
-    Operations.deleteDefault(os).then(() => {
-        if (!os.prefix)
+    if (!Operations.confirmIfNecessary(options))
+        return;
+
+    Operations.deleteDefault(options).then(() => {
+        if (!options.prefix)
             window.location.href = urlRedirect;
     });
 } 

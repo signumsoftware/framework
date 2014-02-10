@@ -29,11 +29,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
     }
     exports.attachShowCurrentEntity = attachShowCurrentEntity;
 
-    function deleteUserQuery(os, urlRedirect) {
-        os.avoidReturnRedirect = true;
+    function deleteUserQuery(options, urlRedirect) {
+        options.avoidReturnRedirect = true;
 
-        Operations.deleteDefault(os).then(function () {
-            if (!os.prefix)
+        if (!Operations.confirmIfNecessary(options))
+            return;
+
+        Operations.deleteDefault(options).then(function () {
+            if (!options.prefix)
                 window.location.href = urlRedirect;
         });
     }
