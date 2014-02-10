@@ -368,6 +368,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
                 var _this = this;
                 var url = $chartContainer.attr('data-open-url');
 
+                var win = window.open("about:blank");
+
                 var $chartControl = $chartContainer.closest(".sf-chart-control");
                 exports.getFor($chartControl.attr("data-prefix")).then(function (cb) {
                     var options = $chartControl.find(":input").not($chartControl.find(".sf-filters-list :input")).serialize();
@@ -376,7 +378,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
                     options += "&filters=" + cb.serializeFilters();
                     options += $(_this).data("click");
 
-                    window.open(url + (url.indexOf("?") >= 0 ? "&" : "?") + options);
+                    win.location.href = (url + (url.indexOf("?") >= 0 ? "&" : "?") + options);
                 });
             });
         };
