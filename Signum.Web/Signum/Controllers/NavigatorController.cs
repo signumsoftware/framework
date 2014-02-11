@@ -130,5 +130,17 @@ namespace Signum.Web.Controllers
 
             return Navigator.NormalControl(this, new NavigateOptions(entity) { ReadOnly = readOnly, PartialViewName = partialViewName });
         }
+
+        [HttpPost]
+        public PartialViewResult ValueLineBox(string prefix, ValueLineBoxType type, string title, string fieldName, string message, )
+        {
+            ViewData[ViewDataKeys.Title] = title;
+
+            ValueLineBoxModel model = new ValueLineBoxModel(ValueLineBoxType.Integer, 
+                fieldName, message);
+
+            var tc = new TypeContext<ValueLineBoxModel>(model, prefix);
+            return this.PopupOpen(new PopupViewOptions(tc));
+        }
     }
 }

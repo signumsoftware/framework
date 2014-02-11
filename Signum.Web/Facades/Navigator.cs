@@ -289,6 +289,14 @@ namespace Signum.Web
             return Manager.ExtractEntity(controller, prefix ?? controller.Prefix());
         }
 
+
+        public static ValueLineBoxModel ExtractValueLineBox(this ControllerBase controller)
+        {
+            var valueLinePrefix = controller.ControllerContext.HttpContext.Request["valueLinePrefix"];
+            return controller.ExtractEntity<ValueLineBoxModel>(valueLinePrefix)
+             .ApplyChanges(controller.ControllerContext, true, valueLinePrefix).Value;
+        }
+
         public static T ExtractEntity<T>(this ControllerBase controller, string prefix = null) where T : ModifiableEntity
         {
             return (T)Manager.ExtractEntity(controller, prefix ?? controller.Prefix());

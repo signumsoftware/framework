@@ -20,6 +20,7 @@ namespace Signum.Web.PortableAreas
             { "view", url => url.Action("View", "Navigator") },
             { "popupNavigate", url => url.Action("PopupNavigate", "Navigator") },
             { "normalControl", url => url.Action("NormalControl", "Navigator") },
+            { "valueLineBox", url => url.Action("ValueLineBox", "Navigator") },
 
             { "validate", url => url.Action("Validate", "Validator") },
 

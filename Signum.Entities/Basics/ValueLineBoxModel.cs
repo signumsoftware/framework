@@ -90,7 +90,7 @@ namespace Signum.Web
         {
             string error = SelectorMessage.ValueMustBeSpecifiedFor0.NiceToString().Formato(fieldName);
             switch (boxType)
-            { 
+            {
                 case ValueLineBoxType.Boolean:
                     if (boolValue == null)
                         return error;
@@ -119,11 +119,26 @@ namespace Signum.Web
     }
 
     public enum ValueLineBoxType
-    { 
+    {
         String,
         Boolean,
         Integer,
         Decimal,
         DateTime,
+    }
+
+    public class ValueLineOptions
+    {
+        public string prefix;
+        public ValueLineBoxType type;
+        public string title = SelectorMessage.ChooseAValue.NiceToString();
+        public string message = SelectorMessage.PleaseChooseAValueToContinue.NiceToString();
+        public string fieldName = null;
+
+        public ValueLineOptions(ValueLineBoxType type, string parentPrefix, string newPart)
+        {
+            this.type = type;
+            this.prefix = "_".CombineIfNotEmpty(parentPrefix, newPart);
+        }
     }
 }

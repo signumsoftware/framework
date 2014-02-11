@@ -410,6 +410,30 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     }
     exports.chooser = chooser;
 
+    (function (ValueLineBoxType) {
+        ValueLineBoxType[ValueLineBoxType["String"] = 0] = "String";
+        ValueLineBoxType[ValueLineBoxType["Boolean"] = 1] = "Boolean";
+        ValueLineBoxType[ValueLineBoxType["Integer"] = 2] = "Integer";
+        ValueLineBoxType[ValueLineBoxType["Decimal"] = 3] = "Decimal";
+        ValueLineBoxType[ValueLineBoxType["DateTime"] = 4] = "DateTime";
+    })(exports.ValueLineBoxType || (exports.ValueLineBoxType = {}));
+    var ValueLineBoxType = exports.ValueLineBoxType;
+
+    function valueLineBox(options) {
+        return exports.viewPopup(Entities.EntityHtml.withoutType(options.prefix), {
+            controllerUrl: SF.Urls.valueLineBox,
+            requestExtraJsonData: options
+        }).then(function (eHtml) {
+            if (!eHtml)
+                return null;
+
+            var result = Validator.getFormValuesHtml(eHtml);
+            result["valueLinePrefix"] = eHtml.prefix;
+            return result;
+        });
+    }
+    exports.valueLineBox = valueLineBox;
+
     once("widgetToggler", function () {
         return $(document).on("click", ".sf-widget-toggler", function (evt) {
             SF.Dropdowns.toggle(evt, this, 1);

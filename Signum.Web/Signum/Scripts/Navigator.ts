@@ -442,6 +442,37 @@ export interface ChooserOption {
     toStr: string;
 }
 
+export enum ValueLineBoxType {
+    String,
+    Boolean,
+    Integer,
+    Decimal,
+    DateTime,
+}
+
+export interface ValueLineOptions {
+    type: ValueLineBoxType;
+    title: string;
+    fieldName: string;
+    message: string;
+    prefix: string;
+}
+
+export function valueLineBox(options: ValueLineOptions) : Promise<FormObject>
+{
+    return viewPopup(Entities.EntityHtml.withoutType(options.prefix), {
+        controllerUrl: SF.Urls.valueLineBox,
+        requestExtraJsonData: options,
+    }).then(eHtml=> {
+            if (!eHtml)
+                return null;
+
+            var result = Validator.getFormValuesHtml(eHtml);
+            result["valueLinePrefix"] = eHtml.prefix;
+            return result;
+        });
+}
+
 
 once("widgetToggler", () =>
     $(document).on("click", ".sf-widget-toggler", function (evt) {
