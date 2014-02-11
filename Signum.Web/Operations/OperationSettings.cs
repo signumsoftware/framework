@@ -37,7 +37,6 @@ namespace Signum.Web.Operations
 
         public Func<ConstructorOperationContext, ViewResultBase> VisualConstructor { get; set; }
         public Func<ConstructorOperationContext, IdentifiableEntity> Constructor { get; set; }
-        public Func<ConstructorOperationContext, bool> IsVisible { get; set; }
     }
 
     public class EntityOperationGroup
@@ -79,6 +78,7 @@ namespace Signum.Web.Operations
 
         public EntityOperationGroup Group { get; set; }
 
+        public Func<EntityOperationContext, string> ConfirmMessage { get; set; }
         public Func<EntityOperationContext, bool> IsVisible { get; set; }
         public Func<EntityOperationContext, JsOperationFunction> OnClick { get; set; }
     }
@@ -91,6 +91,7 @@ namespace Signum.Web.Operations
         }
 
         public double Order { get; set; }
+        public Func<ContextualOperationContext, string> ConfirmMessage { get; set; }
         public Func<ContextualOperationContext, bool> IsVisible { get; set; }
         public Func<ContextualOperationContext, JsOperationFunction> OnClick { get; set; }
 
@@ -127,8 +128,11 @@ namespace Signum.Web.Operations
                 { "prefix", this.Prefix },
             };
 
-            if (OperationInfo.OperationType == OperationType.Delete)
-                result.Add("confirmMessage", OperationMessage.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem.NiceToString());
+            var confirm = OperationSettings != null && OperationSettings.ConfirmMessage != null ? OperationSettings.ConfirmMessage(this) :
+                OperationInfo.OperationType == OperationType.Delete ? OperationMessage.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem.NiceToString() : null;
+
+            if (confirm != null)
+                result.Add("confirmMessage", confirm);
 
             return result;
         }
@@ -156,8 +160,11 @@ namespace Signum.Web.Operations
                 { "prefix", this.Prefix },
             };
 
-            if (OperationInfo.OperationType == OperationType.Delete)
-                result.Add("confirmMessage", OperationMessage.PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem.NiceToString());
+            var confirm = OperationSettings != null && OperationSettings.ConfirmMessage != null ? OperationSettings.ConfirmMessage(this) :
+                OperationInfo.OperationType == OperationType.Delete ? OperationMessage.PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem.NiceToString() : null;
+            
+            if (confirm != null)
+                result.Add("confirmMessage", confirm);
 
             return result;
         }
