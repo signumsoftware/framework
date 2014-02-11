@@ -60,7 +60,7 @@ namespace Signum.Web.Operations
         }
 
 
-        public static ActionResult DefaultExecuteResult(ControllerBase controller, IdentifiableEntity entity, string prefix = null)
+        public static ActionResult DefaultExecuteResult(this ControllerBase controller, IdentifiableEntity entity, string prefix = null)
         {
             if (prefix == null)
                 prefix = controller.Prefix(); 
@@ -93,7 +93,7 @@ namespace Signum.Web.Operations
             }
         }
 
-        public static ActionResult DefaultDelete(ControllerBase controller, Type type)
+        public static ActionResult DefaultDelete(this ControllerBase controller, Type type)
         {
             var request = controller.ControllerContext.HttpContext.Request;
 
@@ -103,7 +103,7 @@ namespace Signum.Web.Operations
             return new ContentResult(); 
         }
 
-        public static ActionResult DefaultConstructResult(ControllerBase controller, IdentifiableEntity entity, string newPrefix = null)
+        public static ActionResult DefaultConstructResult(this ControllerBase controller, IdentifiableEntity entity, string newPrefix = null)
         {
             var request = controller.ControllerContext.HttpContext.Request;
 
