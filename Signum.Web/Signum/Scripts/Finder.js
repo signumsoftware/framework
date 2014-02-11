@@ -1037,6 +1037,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         function tokenChanged($selectedCombo, webQueryName, controllerUrl, requestExtraJsonData) {
             var prefix = $selectedCombo.attr("id").before("ddlTokens_");
+            if (prefix.endsWith("_"))
+                prefix = prefix.substr(0, prefix.length - 1);
+
             var index = parseInt($selectedCombo.attr("id").after("ddlTokens_"));
 
             clearChildSubtokenCombos($selectedCombo, prefix, index);
