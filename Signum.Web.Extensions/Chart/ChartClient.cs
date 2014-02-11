@@ -264,6 +264,7 @@ namespace Signum.Web.Chart
                 CanAggregate = groupResults && !isKey,
                 QueryDescription = qd,
                 Decorators = new Action<QueryToken, HtmlTag>(SearchControlHelper.CanFilterDecorator),
+                ControllerUrl = RouteHelper.New().Action("NewSubTokensCombo", "Chart")
             }; 
         }
     }

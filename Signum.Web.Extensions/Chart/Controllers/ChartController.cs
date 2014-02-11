@@ -84,14 +84,14 @@ namespace Signum.Web.Chart
         }
 
         [HttpPost]
-        public ContentResult NewSubTokensCombo(string webQueryName, string tokenName, bool isKey)
+        public ContentResult NewSubTokensCombo(string webQueryName, string tokenName)
         {
             ChartRequest request = this.ExtractChartRequestCtx(null).Value;
             QueryDescription qd = DynamicQueryManager.Current.QueryDescription(request.QueryName);
-            QueryToken token = QueryUtils.Parse(tokenName, qd, request.GroupResults && !isKey);
+            QueryToken token = QueryUtils.Parse(tokenName, qd, request.GroupResults);
 
             var combo = FinderController.CreateHtmlHelper(this).QueryTokenBuilderOptions(token, new Context(null, this.Prefix()),
-                ChartClient.GetQueryTokenBuilderSettings(qd, request.GroupResults, isKey));
+                ChartClient.GetQueryTokenBuilderSettings(qd, request.GroupResults, isKey : false));
 
             return Content(combo.ToHtmlString());
         }
