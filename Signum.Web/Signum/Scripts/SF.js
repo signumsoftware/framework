@@ -333,6 +333,10 @@ once("stringExtensions", function () {
         return (this.indexOf(str) === 0);
     };
 
+    String.prototype.endsWith = function (str) {
+        return (this.lastIndexOf(str) === (this.length - str.length));
+    };
+
     String.prototype.format = function () {
         var regex = /\{([\w-]+)(?:\:([\w\.]*)(?:\((.*?)?\))?)?\}/g;
 

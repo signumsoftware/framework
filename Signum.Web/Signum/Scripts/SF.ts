@@ -332,6 +332,7 @@ $.fn.serializeObject = function () {
 interface String {
     hasText(): boolean;
     startsWith(str: string): boolean;
+    endsWith(str: string): boolean;
     format(...parameters: any[]): string;
     replaceAll(from: string, to: string);
     after(separator: string): string;
@@ -351,6 +352,10 @@ once("stringExtensions", () => {
 
     String.prototype.startsWith = function (str) {
         return (this.indexOf(str) === 0);
+    }
+
+    String.prototype.endsWith = function (str) {
+        return (this.lastIndexOf(str) === (this.length - str.length));
     }
 
     String.prototype.format = function () {
