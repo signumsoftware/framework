@@ -336,6 +336,9 @@ namespace Signum.Web
 
         string EncodeCSV(string p)
         {
+            if (p == null)
+                return null;
+
             bool hasQuote = p.Contains("\"");
             if (hasQuote || p.Contains(";") || p.Contains(";"))
             {
