@@ -232,34 +232,6 @@ namespace Signum.Entities.DynamicQuery
             return result;
         }
 
-        public static Func<bool> MergeEntityColumns = null;
-        public static List<QueryToken> MergedTokens(QueryDescription qd, bool canAggregate)
-        {
-            if (MergeEntityColumns != null && !MergeEntityColumns())
-                return qd.Columns.Select(cd => (QueryToken)new ColumnToken(cd, qd.QueryName)).ToList();
-
-            var dictonary = qd.Columns.Where(a => !a.IsEntity).Select(cd => (QueryToken)new ColumnToken(cd, qd.QueryName)).ToDictionary(t => t.Key);
-
-            var entity = new ColumnToken(qd.Columns.SingleEx(a => a.IsEntity), qd.QueryName);
-
-            dictonary.Add(entity.Key, entity);
-
-            foreach (var item in entity.SubTokensInternal().OrderBy(a => a.ToString()))
-            {
-                if (!dictonary.ContainsKey(item.Key))
-                {
-                    dictonary.Add(item.Key, item);
-                }
-            }
-
-            var result = dictonary.Values.ToList();
-
-
-            if (canAggregate)
-                result.AddRange(AggregateTokens(null, qd));
-
-            return result;
-        }
 
         private static IEnumerable<QueryToken> AggregateTokens(QueryToken token, QueryDescription qd)
         {
@@ -304,10 +276,31 @@ namespace Signum.Entities.DynamicQuery
             }
         }
 
+        public static Func<bool> MergeEntityColumns = null;
         static List<QueryToken> SubTokensBasic(QueryToken token, QueryDescription qd)
         {
             if (token == null)
-                return qd.Columns.Select(cd => (QueryToken)new ColumnToken(cd, qd.QueryName)).ToList();
+            {
+                if (MergeEntityColumns != null && !MergeEntityColumns())
+                    return qd.Columns.Select(cd => (QueryToken)new ColumnToken(cd, qd.QueryName)).ToList();
+
+                var dictonary = qd.Columns.Where(a => !a.IsEntity).Select(cd => (QueryToken)new ColumnToken(cd, qd.QueryName)).ToDictionary(t => t.Key);
+
+                var entity = new ColumnToken(qd.Columns.SingleEx(a => a.IsEntity), qd.QueryName);
+
+                dictonary.Add(entity.Key, entity);
+
+                foreach (var item in entity.SubTokensInternal().OrderBy(a => a.ToString()))
+                {
+                    if (!dictonary.ContainsKey(item.Key))
+                    {
+                        dictonary.Add(item.Key, item);
+                    }
+                }
+
+                return dictonary.Values.ToList();
+
+            }
             else
                 return token.SubTokensInternal();
         }

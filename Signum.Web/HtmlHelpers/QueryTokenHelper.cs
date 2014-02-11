@@ -59,7 +59,7 @@ namespace Signum.Web
             if (previous != null && AllowSubTokens != null && !AllowSubTokens(previous))
                 return MvcHtmlString.Create("");
 
-            var queryTokens = previous == null ? QueryUtils.MergedTokens(settings.QueryDescription, settings.CanAggregate) : previous.SubTokens(settings.QueryDescription, settings.CanAggregate);
+            var queryTokens = previous.SubTokens(settings.QueryDescription, settings.CanAggregate);
 
             if (queryTokens.IsEmpty())
                 return new HtmlTag("input")
