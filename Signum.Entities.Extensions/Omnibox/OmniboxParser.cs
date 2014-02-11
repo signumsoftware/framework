@@ -123,7 +123,12 @@ namespace Signum.Entities.Omnibox
         {
             var simple = Regex.Replace(text, OmniboxMessage.ComplementWordsRegex.NiceToString(), m => "", RegexOptions.IgnoreCase);
 
-            return simple.ToPascal();
+            var result = simple.ToPascal();
+
+            if (text.StartsWith("[") && text.EndsWith("]"))
+                return "[" + result + "]";
+
+            return result;
         }
     }
 
