@@ -31,7 +31,7 @@ namespace Signum.Web.Controllers
             Type t = Navigator.ResolveType(webTypeName);
 
             if (id.HasValue)
-                return Navigator.NormalPage(this, Database.Retrieve(t, id.Value)); 
+                return Navigator.NormalPage(this, Database.Retrieve(t, id.Value));
 
             IdentifiableEntity entity = null;
             object result = Constructor.Construct(t);
@@ -39,8 +39,8 @@ namespace Signum.Web.Controllers
                 entity = (IdentifiableEntity)result;
             else
                 throw new InvalidOperationException("Invalid result type for a Constructor");
-             
-            return Navigator.NormalPage(this, entity); 
+
+            return Navigator.NormalPage(this, entity);
         }
 
         public ActionResult Create(string entityType, string prefix)
@@ -79,7 +79,7 @@ namespace Signum.Web.Controllers
         public PartialViewResult PopupView(string entityType, int? id, string prefix, bool? readOnly, string partialViewName)
         {
             Type type = Navigator.ResolveType(entityType);
-            
+
             IdentifiableEntity entity = null;
             if (id.HasValue)
                 entity = Database.Retrieve(type, id.Value);
@@ -91,7 +91,7 @@ namespace Signum.Web.Controllers
                 else
                     throw new InvalidOperationException("Invalid result type for a Constructor");
             }
-            
+
             TypeContext tc = TypeContextUtilities.UntypedNew((IdentifiableEntity)entity, prefix);
             return this.PopupOpen(new PopupViewOptions(tc) { PartialViewName = partialViewName, ReadOnly = readOnly.HasValue });
         }
@@ -100,7 +100,7 @@ namespace Signum.Web.Controllers
         public PartialViewResult PartialView(string entityType, int? id, string prefix, bool? readOnly, string partialViewName)
         {
             Type type = Navigator.ResolveType(entityType);
-            
+
             IdentifiableEntity entity = null;
             if (id.HasValue)
                 entity = Database.Retrieve(type, id.Value);
@@ -112,7 +112,7 @@ namespace Signum.Web.Controllers
                 else
                     throw new InvalidOperationException("Invalid result type for a Constructor");
             }
-            
+
             TypeContext tc = TypeContextUtilities.UntypedNew((IdentifiableEntity)entity, prefix);
 
             if (readOnly == true)
@@ -126,18 +126,17 @@ namespace Signum.Web.Controllers
         {
             Type type = Navigator.ResolveType(entityType);
 
-            IdentifiableEntity entity =  Database.Retrieve(type, id);
+            IdentifiableEntity entity = Database.Retrieve(type, id);
 
             return Navigator.NormalControl(this, new NavigateOptions(entity) { ReadOnly = readOnly, PartialViewName = partialViewName });
         }
 
         [HttpPost]
-        public PartialViewResult ValueLineBox(string prefix, ValueLineBoxType type, string title, string fieldName, string message, )
+        public PartialViewResult ValueLineBox(string prefix, ValueLineBoxType type, string title, string fieldName, string message)
         {
             ViewData[ViewDataKeys.Title] = title;
 
-            ValueLineBoxModel model = new ValueLineBoxModel(ValueLineBoxType.Integer, 
-                fieldName, message);
+            ValueLineBoxModel model = new ValueLineBoxModel(type, fieldName, message);
 
             var tc = new TypeContext<ValueLineBoxModel>(model, prefix);
             return this.PopupOpen(new PopupViewOptions(tc));

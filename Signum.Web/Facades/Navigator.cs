@@ -290,9 +290,9 @@ namespace Signum.Web
         }
 
 
-        public static ValueLineBoxModel ExtractValueLineBox(this ControllerBase controller)
+        public static ValueLineBoxModel ExtractValueLineBox(this ControllerBase controller, string prefix = null)
         {
-            var valueLinePrefix = controller.ControllerContext.HttpContext.Request["valueLinePrefix"];
+            var valueLinePrefix = prefix ?? controller.ControllerContext.HttpContext.Request["valueLinePrefix"];
             return controller.ExtractEntity<ValueLineBoxModel>(valueLinePrefix)
              .ApplyChanges(controller.ControllerContext, true, valueLinePrefix).Value;
         }
