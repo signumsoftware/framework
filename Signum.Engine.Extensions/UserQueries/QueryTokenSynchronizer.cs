@@ -363,7 +363,7 @@ namespace Signum.Engine.UserQueries
                 if (Console.Out == null)
                     throw new InvalidOperationException("Impossible to synchronize without interactive Console");
 
-                var subTokens = token.SubTokens(qd, canAggegate).ToList();
+                var subTokens = token.SubTokens(qd, canAggegate).OrderBy(a => a.Parent != null).ThenBy(a => a.Key).ToList();
 
                 int startingIndex = 0;
 
@@ -375,7 +375,7 @@ namespace Signum.Engine.UserQueries
                 int maxElements = Console.LargestWindowHeight - 11;
 
                 subTokens.Skip(startingIndex).Take(maxElements)
-                    .Select((s, i) => "- {1,2}: {2} ".Formato(i + " ", i + startingIndex, ((isRoot && !(s is ColumnToken)) ? "-" : "") + s.Key)).ToConsole();
+                    .Select((s, i) => "- {1,2}: {2} ".Formato(i + " ", i + startingIndex, ((isRoot && s.Parent != null) ? "-" : "") + s.Key)).ToConsole();
                 Console.WriteLine();
 
                 int remaining = subTokens.Count - startingIndex - maxElements;
