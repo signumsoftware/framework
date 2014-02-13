@@ -367,6 +367,10 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.typeChooser = typeChooser;
 
     function chooser(prefix, title, options, getStr, getValue) {
+        if (options.length == 1) {
+            return Promise.resolve(options[0]);
+        }
+
         var tempDivId = SF.compose(prefix, "Temp");
 
         if (getStr == null) {

@@ -392,7 +392,12 @@ export function typeChooser(staticInfo: Entities.StaticInfo): Promise<string> {
 
 export function chooser<T>(prefix: string, title: string, options: T[], getStr?: (data: T) => string, getValue?: (data: T) => string): Promise<T> {
 
+    if (options.length == 1) {
+        return Promise.resolve(options[0]);
+    }
+
     var tempDivId = SF.compose(prefix, "Temp");
+
 
     if (getStr == null) {
         getStr = (a: any) =>
@@ -450,7 +455,7 @@ export enum ValueLineBoxType {
     DateTime,
 }
 
-export interface ValueLineOptions {
+export interface ValueLineBoxOptions {
     type: ValueLineBoxType;
     title: string;
     fieldName: string;
@@ -458,7 +463,7 @@ export interface ValueLineOptions {
     prefix: string;
 }
 
-export function valueLineBox(options: ValueLineOptions) : Promise<FormObject>
+export function valueLineBox(options: ValueLineBoxOptions) : Promise<FormObject>
 {
     return viewPopup(Entities.EntityHtml.withoutType(options.prefix), {
         controllerUrl: SF.Urls.valueLineBox,
