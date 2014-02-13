@@ -434,6 +434,20 @@ namespace Signum.Utilities
             return -1;
         }
 
+        public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> collection, Random rng)
+        {
+            T[] elements = collection.ToArray();
+           
+            for (int i = elements.Length - 1; i > 0; i--)
+            {
+                int rnd = rng.Next(i + 1);
+                yield return elements[rnd];
+                elements[rnd] = elements[i];
+            }
+
+            yield return elements[0];
+        }
+
         public static string ToString<T>(this IEnumerable<T> source, string separator)
         {
             StringBuilder sb = null;
