@@ -98,7 +98,7 @@ namespace Signum.Web.Extensions.Chart.Views
         {
             
             #line 11 "..\..\Chart\Views\ChartPalette.cshtml"
-Write(Html.ScriptCss("~/Chart/Content/SF_Chart.css"));
+Write(Html.ScriptCss("~/Chart/Content/Chart.css"));
 
             
             #line default

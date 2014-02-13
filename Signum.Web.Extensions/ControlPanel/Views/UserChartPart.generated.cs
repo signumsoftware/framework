@@ -89,7 +89,7 @@ namespace Signum.Web.Extensions.ControlPanel.Views
         {
             
             #line 10 "..\..\ControlPanel\Views\UserChartPart.cshtml"
-Write(Html.ScriptCss("~/Chart/Content/SF_Chart.css"));
+Write(Html.ScriptCss("~/Chart/Content/Chart.css"));
 
             
             #line default
@@ -117,14 +117,14 @@ WriteLiteral("\r\n");
             #line hidden
 WriteLiteral("    <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 739), Tuple.Create("\"", 774)
+WriteAttribute("id", Tuple.Create(" id=\"", 736), Tuple.Create("\"", 771)
             
             #line 24 "..\..\ControlPanel\Views\UserChartPart.cshtml"
-, Tuple.Create(Tuple.Create("", 744), Tuple.Create<System.Object, System.Int32>(crc.Compose("sfChartControl")
+, Tuple.Create(Tuple.Create("", 741), Tuple.Create<System.Object, System.Int32>(crc.Compose("sfChartControl")
             
             #line default
             #line hidden
-, 744), false)
+, 741), false)
 );
 
 WriteLiteral(" class=\"sf-search-control sf-chart-control\"");
@@ -197,14 +197,14 @@ WriteLiteral("            ");
             #line hidden
 WriteLiteral("\r\n            <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 1552), Tuple.Create("\"", 1569)
+WriteAttribute("id", Tuple.Create(" id=\"", 1549), Tuple.Create("\"", 1566)
             
             #line 34 "..\..\ControlPanel\Views\UserChartPart.cshtml"
-, Tuple.Create(Tuple.Create("", 1557), Tuple.Create<System.Object, System.Int32>(containerId
+, Tuple.Create(Tuple.Create("", 1554), Tuple.Create<System.Object, System.Int32>(containerId
             
             #line default
             #line hidden
-, 1557), false)
+, 1554), false)
 );
 
 WriteLiteral(">\r\n");
@@ -290,29 +290,29 @@ WriteLiteral("\r\n");
             #line hidden
 WriteLiteral("                 }); \r\n            </script>\r\n        </div>\r\n        <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 2273), Tuple.Create("\"", 2310)
+WriteAttribute("id", Tuple.Create(" id=\"", 2270), Tuple.Create("\"", 2307)
             
             #line 51 "..\..\ControlPanel\Views\UserChartPart.cshtml"
-, Tuple.Create(Tuple.Create("", 2278), Tuple.Create<System.Object, System.Int32>(crc.Compose("sfChartContainer")
+, Tuple.Create(Tuple.Create("", 2275), Tuple.Create<System.Object, System.Int32>(crc.Compose("sfChartContainer")
             
             #line default
             #line hidden
-, 2278), false)
+, 2275), false)
 );
 
 WriteLiteral(">\r\n            <div");
 
 WriteLiteral(" class=\"sf-chart-container\"");
 
-WriteAttribute("style", Tuple.Create(" style=\"", 2357), Tuple.Create("\"", 2410)
-, Tuple.Create(Tuple.Create("", 2365), Tuple.Create("display:", 2365), true)
+WriteAttribute("style", Tuple.Create(" style=\"", 2354), Tuple.Create("\"", 2407)
+, Tuple.Create(Tuple.Create("", 2362), Tuple.Create("display:", 2362), true)
             
             #line 52 "..\..\ControlPanel\Views\UserChartPart.cshtml"
-, Tuple.Create(Tuple.Create("", 2373), Tuple.Create<System.Object, System.Int32>(ucPart.ShowData ? "none" : "block"
+, Tuple.Create(Tuple.Create("", 2370), Tuple.Create<System.Object, System.Int32>(ucPart.ShowData ? "none" : "block"
             
             #line default
             #line hidden
-, 2373), false)
+, 2370), false)
 );
 
 WriteLiteral(" \r\n                    data-open-url=\"");

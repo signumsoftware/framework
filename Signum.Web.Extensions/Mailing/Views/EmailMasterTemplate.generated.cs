@@ -53,25 +53,7 @@ namespace Signum.Web.Extensions.Mailing.Views
         {
             
             #line 3 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
-Write(Html.ScriptCss("~/Mailing/Content/SF_Mailing.css"));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n");
-
-            
-            #line 4 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
-Write(Html.ScriptsJs("~/Scripts/ckeditor/ckeditor.js"));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n");
-
-            
-            #line 5 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
-Write(Html.ScriptsJs("~/Mailing/Scripts/SF_Mailing.js"));
+Write(Html.ScriptCss("~/Mailing/Content/Mailing.css"));
 
             
             #line default
@@ -79,7 +61,7 @@ Write(Html.ScriptsJs("~/Mailing/Scripts/SF_Mailing.js"));
 WriteLiteral("\r\n\r\n");
 
             
-            #line 7 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
+            #line 5 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
  using (var ec = Html.TypeContext<EmailMasterTemplateDN>())
 {
     
@@ -87,14 +69,14 @@ WriteLiteral("\r\n\r\n");
             #line default
             #line hidden
             
-            #line 9 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
+            #line 7 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
 Write(Html.ValueLine(ec, e => e.Name));
 
             
             #line default
             #line hidden
             
-            #line 9 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
+            #line 7 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
                                     
 
             
@@ -115,7 +97,7 @@ WriteLiteral(">\r\n");
 WriteLiteral("        ");
 
             
-            #line 12 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
+            #line 10 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
    Write(Html.EntityRepeater(ec, e => e.Messages, er =>
         {
             er.AttachFunction = new JsLineFunction(MailingClient.TabsRepeaterModule, "attachTabRepeater");
@@ -128,7 +110,7 @@ WriteLiteral("        ");
 WriteLiteral("\r\n    </div>\r\n");
 
             
-            #line 18 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
+            #line 16 "..\..\Mailing\Views\EmailMasterTemplate.cshtml"
 }
             
             #line default

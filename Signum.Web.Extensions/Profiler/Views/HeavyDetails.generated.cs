@@ -312,7 +312,7 @@ WriteLiteral("<br />\r\n");
 
             
             #line 88 "..\..\Profiler\Views\HeavyDetails.cshtml"
-Write(Html.ScriptCss("~/Profiler/Content/SF_Profiler.css"));
+Write(Html.ScriptCss("~/Profiler/Content/Profiler.css"));
 
             
             #line default

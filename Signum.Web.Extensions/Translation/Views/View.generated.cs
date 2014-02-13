@@ -91,7 +91,7 @@ WriteLiteral("\r\n");
 
             
             #line 21 "..\..\Translation\Views\View.cshtml"
-Write(Html.ScriptCss("~/Translation/Content/SF_Translation.css"));
+Write(Html.ScriptCss("~/Translation/Content/Translation.css"));
 
             
             #line default
@@ -154,14 +154,14 @@ WriteLiteral(" style=\"width: 100%; margin: 0px\"");
 
 WriteLiteral(" class=\"st\"");
 
-WriteAttribute("pluralAndGender", Tuple.Create(" pluralAndGender=\"", 1173), Tuple.Create("\"", 1254)
+WriteAttribute("pluralAndGender", Tuple.Create(" pluralAndGender=\"", 1170), Tuple.Create("\"", 1251)
             
             #line 34 "..\..\Translation\Views\View.cshtml"
-         , Tuple.Create(Tuple.Create("", 1191), Tuple.Create<System.Object, System.Int32>(Url.Action((TranslationController tc) => tc.PluralAndGender())
+         , Tuple.Create(Tuple.Create("", 1188), Tuple.Create<System.Object, System.Int32>(Url.Action((TranslationController tc) => tc.PluralAndGender())
             
             #line default
             #line hidden
-, 1191), false)
+, 1188), false)
 );
 
 WriteLiteral(">\r\n");
@@ -597,14 +597,14 @@ WriteLiteral("    <input");
 
 WriteLiteral(" type=\"submit\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 6952), Tuple.Create("\"", 6999)
+WriteAttribute("value", Tuple.Create(" value=\"", 6949), Tuple.Create("\"", 6996)
             
             #line 148 "..\..\Translation\Views\View.cshtml"
-, Tuple.Create(Tuple.Create("", 6960), Tuple.Create<System.Object, System.Int32>(TranslationMessage.Save.NiceToString()
+, Tuple.Create(Tuple.Create("", 6957), Tuple.Create<System.Object, System.Int32>(TranslationMessage.Save.NiceToString()
             
             #line default
             #line hidden
-, 6960), false)
+, 6957), false)
 );
 
 WriteLiteral(" />\r\n");

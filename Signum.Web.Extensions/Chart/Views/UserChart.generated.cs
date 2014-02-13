@@ -99,7 +99,7 @@ namespace Signum.Web.Extensions.Chart.Views
         {
             
             #line 11 "..\..\Chart\Views\UserChart.cshtml"
-Write(Html.ScriptCss("~/Chart/Content/SF_Chart.css"));
+Write(Html.ScriptCss("~/Chart/Content/Chart.css"));
 
             
             #line default
@@ -370,14 +370,14 @@ WriteLiteral("\r\n        </p>\r\n");
             #line hidden
 WriteLiteral("        <div");
 
-WriteAttribute("id", Tuple.Create(" id=\"", 2913), Tuple.Create("\"", 2956)
+WriteAttribute("id", Tuple.Create(" id=\"", 2910), Tuple.Create("\"", 2953)
             
             #line 74 "..\..\Chart\Views\UserChart.cshtml"
-, Tuple.Create(Tuple.Create("", 2918), Tuple.Create<System.Object, System.Int32>(uc.Compose("sfChartBuilderContainer")
+, Tuple.Create(Tuple.Create("", 2915), Tuple.Create<System.Object, System.Int32>(uc.Compose("sfChartBuilderContainer")
             
             #line default
             #line hidden
-, 2918), false)
+, 2915), false)
 );
 
 WriteLiteral(">\r\n");

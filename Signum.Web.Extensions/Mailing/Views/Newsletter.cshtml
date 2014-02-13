@@ -3,7 +3,7 @@
 @using Signum.Engine.DynamicQuery
 @using Signum.Engine.Basics
 @using Signum.Web.Mailing
-@Html.ScriptCss("~/Mailing/Content/SF_Mailing.css")
+@Html.ScriptCss("~/Mailing/Content/Mailing.css")
 @using (var nc = Html.TypeContext<NewsletterDN>())
 {  
     <div class="@(nc.Value.IsNew ? "" : "sf-tabs")">

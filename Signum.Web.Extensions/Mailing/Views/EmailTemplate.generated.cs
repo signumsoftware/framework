@@ -67,7 +67,7 @@ WriteLiteral("\r\n");
 
             
             #line 6 "..\..\Mailing\Views\EmailTemplate.cshtml"
-Write(Html.ScriptCss("~/Mailing/Content/SF_Mailing.css"));
+Write(Html.ScriptCss("~/Mailing/Content/Mailing.css"));
 
             
             #line default

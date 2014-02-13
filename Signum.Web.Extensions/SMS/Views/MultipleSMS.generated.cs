@@ -76,7 +76,7 @@ WriteLiteral("\r\n\r\n");
 
             
             #line 9 "..\..\SMS\Views\MultipleSMS.cshtml"
-Write(Html.ScriptCss("~/SMS/Content/SF_SMS.css"));
+Write(Html.ScriptCss("~/SMS/Content/SMS.css"));
 
             
             #line default

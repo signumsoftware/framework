@@ -71,7 +71,7 @@ namespace Signum.Web.Extensions.Mailing.Views
         {
             
             #line 6 "..\..\Mailing\Views\Newsletter.cshtml"
-Write(Html.ScriptCss("~/Mailing/Content/SF_Mailing.css"));
+Write(Html.ScriptCss("~/Mailing/Content/Mailing.css"));
 
             
             #line default
@@ -88,14 +88,14 @@ WriteLiteral("\r\n");
             #line hidden
 WriteLiteral("    <div");
 
-WriteAttribute("class", Tuple.Create(" class=\"", 276), Tuple.Create("\"", 318)
+WriteAttribute("class", Tuple.Create(" class=\"", 273), Tuple.Create("\"", 315)
             
             #line 9 "..\..\Mailing\Views\Newsletter.cshtml"
-, Tuple.Create(Tuple.Create("", 284), Tuple.Create<System.Object, System.Int32>(nc.Value.IsNew ? "" : "sf-tabs"
+, Tuple.Create(Tuple.Create("", 281), Tuple.Create<System.Object, System.Int32>(nc.Value.IsNew ? "" : "sf-tabs"
             
             #line default
             #line hidden
-, 284), false)
+, 281), false)
 );
 
 WriteLiteral(">\r\n        <fieldset");
@@ -305,14 +305,14 @@ WriteLiteral(" data-prefix=\"");
             #line hidden
 WriteLiteral("\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 2255), Tuple.Create("\"", 2312)
+WriteAttribute("value", Tuple.Create(" value=\"", 2252), Tuple.Create("\"", 2309)
             
             #line 48 "..\..\Mailing\Views\Newsletter.cshtml"
-                                                                                   , Tuple.Create(Tuple.Create("", 2263), Tuple.Create<System.Object, System.Int32>(EmailTemplateViewMessage.Insert.NiceToString()
+                                                                                   , Tuple.Create(Tuple.Create("", 2260), Tuple.Create<System.Object, System.Int32>(EmailTemplateViewMessage.Insert.NiceToString()
             
             #line default
             #line hidden
-, 2263), false)
+, 2260), false)
 );
 
 WriteLiteral(" />\r\n                            <input");

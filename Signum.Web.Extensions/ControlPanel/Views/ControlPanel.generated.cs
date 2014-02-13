@@ -67,8 +67,8 @@ WriteLiteral("    ");
 
             
             #line 7 "..\..\ControlPanel\Views\ControlPanel.cshtml"
-Write(Html.ScriptCss("~/ControlPanel/Content/SF_FlowTable.css",
-                    "~/ControlPanel/Content/SF_ControlPanel.css"));
+Write(Html.ScriptCss("~/ControlPanel/Content/FlowTable.css",
+                    "~/ControlPanel/Content/ControlPanel.css"));
 
             
             #line default
@@ -120,14 +120,14 @@ WriteLiteral("    <h1>\r\n");
             #line hidden
 WriteLiteral("        <a");
 
-WriteAttribute("href", Tuple.Create(" href=\"", 712), Tuple.Create("\"", 774)
+WriteAttribute("href", Tuple.Create(" href=\"", 706), Tuple.Create("\"", 768)
             
             #line 25 "..\..\ControlPanel\Views\ControlPanel.cshtml"
-, Tuple.Create(Tuple.Create("", 719), Tuple.Create<System.Object, System.Int32>(Navigator.NavigateRoute(typeof(ControlPanelDN), cp.Id)
+, Tuple.Create(Tuple.Create("", 713), Tuple.Create<System.Object, System.Int32>(Navigator.NavigateRoute(typeof(ControlPanelDN), cp.Id)
             
             #line default
             #line hidden
-, 719), false)
+, 713), false)
 );
 
 WriteLiteral(">");

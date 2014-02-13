@@ -50,7 +50,7 @@ namespace Signum.Web.Extensions.AuthAdmin.Views
         {
             
             #line 1 "..\..\AuthAdmin\Views\Permissions.cshtml"
-Write(Html.ScriptCss("~/authAdmin/Content/SF_AuthAdmin.css"));
+Write(Html.ScriptCss("~/authAdmin/Content/AuthAdmin.css"));
 
             
             #line default

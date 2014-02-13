@@ -197,7 +197,7 @@ WriteLiteral("\r\n");
 
             
             #line 30 "..\..\Profiler\Views\HeavyList.cshtml"
-Write(Html.ScriptCss("~/Profiler/Content/SF_Profiler.css"));
+Write(Html.ScriptCss("~/Profiler/Content/Profiler.css"));
 
             
             #line default

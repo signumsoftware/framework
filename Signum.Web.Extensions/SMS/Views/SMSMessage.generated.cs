@@ -70,7 +70,7 @@ WriteLiteral("\r\n");
 
             
             #line 7 "..\..\SMS\Views\SMSMessage.cshtml"
-Write(Html.ScriptCss("~/SMS/Content/SF_SMS.css"));
+Write(Html.ScriptCss("~/SMS/Content/SMS.css"));
 
             
             #line default
@@ -215,14 +215,14 @@ WriteLiteral(" type=\"button\"");
 
 WriteLiteral(" class=\"sf-button sf-sms-remove-chars\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 1552), Tuple.Create("\"", 1611)
+WriteAttribute("value", Tuple.Create(" value=\"", 1549), Tuple.Create("\"", 1608)
             
             #line 41 "..\..\SMS\Views\SMSMessage.cshtml"
-  , Tuple.Create(Tuple.Create("", 1560), Tuple.Create<System.Object, System.Int32>(SmsMessage.RemoveNonValidCharacters.NiceToString()
+  , Tuple.Create(Tuple.Create("", 1557), Tuple.Create<System.Object, System.Int32>(SmsMessage.RemoveNonValidCharacters.NiceToString()
             
             #line default
             #line hidden
-, 1560), false)
+, 1557), false)
 );
 
 WriteLiteral(" />\r\n            </div>\r\n");

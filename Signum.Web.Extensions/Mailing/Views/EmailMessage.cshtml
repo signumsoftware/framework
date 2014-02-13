@@ -16,7 +16,7 @@
         }
 </style>
 
-@Html.ScriptCss("~/Mailing/Content/SF_Mailing.css")
+@Html.ScriptCss("~/Mailing/Content/Mailing.css")
 
 
 @using (var e = Html.TypeContext<EmailMessageDN>())
@@ -59,9 +59,6 @@
             vl.ValueHtmlProps["style"] = "width:100%; height:180px;";
         })
 
-                    @Html.ScriptsJs("~/Scripts/ckeditor/ckeditor.js")
-                    @Html.ScriptsJs("~/Mailing/Scripts/SF_Mailing.js")
-
                     <script>
                         $(function () {
                             @(new JsFunction(MailingClient.Module, "initHtmlEditor", e.Compose("Body")))
@@ -79,9 +76,7 @@
                     <h3>@EmailMessageMessage.Message.NiceToString():</h3>
                     <div>
                         @if (e.Value.IsBodyHtml)
-                        {
-                            @Html.ScriptsJs("~/Mailing/Scripts/SF_Mailing.js")
-            
+                        {            
                             <iframe id="@e.Compose("iframe")" style="width:90%">
                                 @Html.Raw(body)
                             </iframe>

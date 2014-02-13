@@ -88,7 +88,7 @@ WriteLiteral("\r\n\r\n");
 
             
             #line 11 "..\..\SMS\Views\SMSTemplate.cshtml"
-Write(Html.ScriptCss("~/SMS/Content/SF_SMS.css"));
+Write(Html.ScriptCss("~/SMS/Content/SMS.css"));
 
             
             #line default
@@ -297,14 +297,14 @@ WriteLiteral(" class=\"sf-button\"");
 
 WriteLiteral(" id=\"sfInsertLiteral\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 1585), Tuple.Create("\"", 1626)
+WriteAttribute("value", Tuple.Create(" value=\"", 1582), Tuple.Create("\"", 1623)
             
             #line 42 "..\..\SMS\Views\SMSTemplate.cshtml"
-, Tuple.Create(Tuple.Create("", 1593), Tuple.Create<System.Object, System.Int32>(SmsMessage.Insert.NiceToString()
+, Tuple.Create(Tuple.Create("", 1590), Tuple.Create<System.Object, System.Int32>(SmsMessage.Insert.NiceToString()
             
             #line default
             #line hidden
-, 1593), false)
+, 1590), false)
 );
 
 WriteLiteral(" />\r\n    </div>\r\n");

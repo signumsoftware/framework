@@ -61,8 +61,8 @@ WriteLiteral("\r\n");
 
             
             #line 5 "..\..\ControlPanel\Views\Admin\ControlPanelAdmin.cshtml"
-Write(Html.ScriptCss("~/ControlPanel/Content/SF_FlowTable.css",
-                "~/ControlPanel/Content/SF_ControlPanel.css"));
+Write(Html.ScriptCss("~/ControlPanel/Content/FlowTable.css",
+                "~/ControlPanel/Content/ControlPanel.css"));
 
             
             #line default

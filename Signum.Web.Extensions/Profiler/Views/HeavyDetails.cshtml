@@ -85,7 +85,7 @@ else
     </table>
 }
 <br />
-@Html.ScriptCss("~/Profiler/Content/SF_Profiler.css")
+@Html.ScriptCss("~/Profiler/Content/Profiler.css")
 @{ 
     var fullTree = Model.FollowC(e => e.Parent).ToList();
     fullTree.AddRange(Model.Descendants()); 

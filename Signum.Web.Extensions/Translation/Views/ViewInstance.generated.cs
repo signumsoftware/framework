@@ -95,7 +95,7 @@ WriteLiteral("\r\n");
 
             
             #line 20 "..\..\Translation\Views\ViewInstance.cshtml"
-Write(Html.ScriptCss("~/Translation/Content/SF_Translation.css"));
+Write(Html.ScriptCss("~/Translation/Content/Translation.css"));
 
             
             #line default
@@ -372,14 +372,14 @@ WriteLiteral("    <input");
 
 WriteLiteral(" type=\"submit\"");
 
-WriteAttribute("value", Tuple.Create(" value=\"", 3418), Tuple.Create("\"", 3465)
+WriteAttribute("value", Tuple.Create(" value=\"", 3415), Tuple.Create("\"", 3462)
             
             #line 87 "..\..\Translation\Views\ViewInstance.cshtml"
-, Tuple.Create(Tuple.Create("", 3426), Tuple.Create<System.Object, System.Int32>(TranslationMessage.Save.NiceToString()
+, Tuple.Create(Tuple.Create("", 3423), Tuple.Create<System.Object, System.Int32>(TranslationMessage.Save.NiceToString()
             
             #line default
             #line hidden
-, 3426), false)
+, 3423), false)
 );
 
 WriteLiteral(" />\r\n");
