@@ -4,6 +4,10 @@ define(["require", "exports"], function(require, exports) {
     function init($containerTable) {
         createDraggables($containerTable.find(".sf-ftbl-part"));
         createDroppables($containerTable.find(".sf-ftbl-droppable"));
+
+        $(document).on("click", ".sf-ftbl-part-header .sf-remove", function () {
+            $(this).closest(".sf-ftbl-part-container").html("");
+        });
     }
     exports.init = init;
 
@@ -102,11 +106,5 @@ define(["require", "exports"], function(require, exports) {
             }
         });
     }
-
-    once("FlowTable", function () {
-        return $(document).on("click", ".sf-ftbl-part-header .sf-remove", function () {
-            $(this).closest(".sf-ftbl-part-container").html("");
-        });
-    });
 });
 //# sourceMappingURL=FlowTable.js.map

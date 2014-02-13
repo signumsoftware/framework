@@ -5,6 +5,10 @@
 export function init($containerTable: JQuery) {
     createDraggables($containerTable.find(".sf-ftbl-part"));
     createDroppables($containerTable.find(".sf-ftbl-droppable"));
+
+    $(document).on("click", ".sf-ftbl-part-header .sf-remove", function () {
+        $(this).closest(".sf-ftbl-part-container").html("");
+    });
 }
 
 function setDraggingState(active: boolean) {
@@ -99,7 +103,3 @@ function createDroppables($target: JQuery) {
     });
 }
 
-once("FlowTable", () =>
-    $(document).on("click", ".sf-ftbl-part-header .sf-remove", function () {
-        $(this).closest(".sf-ftbl-part-container").html("");
-    }));

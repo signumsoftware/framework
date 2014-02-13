@@ -1,4 +1,5 @@
-﻿define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Framework/Signum.Web/Signum/Scripts/Operations", "ckeditor"], function(require, exports, Finder, Operations, CKEDITOR) {
+﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
+define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Framework/Signum.Web/Signum/Scripts/Operations", "ckeditor"], function(require, exports, Finder, Operations, CKEDITOR) {
     var cssClassActive = "sf-email-inserttoken-targetactive";
     var $lastTokenTarget;
     var onInsertToken;

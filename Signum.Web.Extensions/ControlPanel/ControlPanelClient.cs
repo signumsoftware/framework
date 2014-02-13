@@ -88,7 +88,7 @@ namespace Signum.Web.ControlPanel
                             Text = ControlPanelMessage.ControlPanel_CreateNewPart.NiceToString(),
                             Enabled = !panel.IsNew,
                             AltText = panel.IsNew ? ControlPanelMessage.ControlPanel_YouMustSaveThePanelBeforeAddingParts.NiceToString() : ControlPanelMessage.ControlPanel_CreateNewPart.NiceToString(),
-                            OnClick = new JsFunction(Module, "createNewPart", ctx.Prefix, ctx.Url.Action("AddNewPart", "ControlPanel"), PanelPartViews.Keys.Select(t=>t.ToChooserOption()).ToArray())
+                            OnClick = new JsFunction(Module, "createNewPart", ctx.Prefix, ctx.Url.Action((ControlPanelController a)=>a.AddNewPart()), PanelPartViews.Keys.Select(t=>t.ToChooserOption()).ToArray())
                         }
                     };
                 });

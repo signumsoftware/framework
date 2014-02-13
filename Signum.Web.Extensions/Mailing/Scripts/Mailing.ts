@@ -1,5 +1,5 @@
 ﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
-/// <reference path="../../../../Extensions/Signum.Web.Extensions/Mailing/Scripts/ckeditor.ts"/>
+
 import Entities = require("Framework/Signum.Web/Signum/Scripts/Entities")
 import Lines = require("Framework/Signum.Web/Signum/Scripts/Lines")
 import Finder = require("Framework/Signum.Web/Signum/Scripts/Finder")

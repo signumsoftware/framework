@@ -6,7 +6,6 @@ import Finder = require("Framework/Signum.Web/Signum/Scripts/Finder")
 import Validator = require("Framework/Signum.Web/Signum/Scripts/Validator")
 
 
-
 function updateColor(input: Element) {
     var $input = $(input);
     $input.closest("tr").find("div.sf-chart-color-box").css("background-color", "#" + ($input.val() || "FFFFFF"));
