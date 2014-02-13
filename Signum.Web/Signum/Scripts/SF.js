@@ -329,12 +329,16 @@ once("stringExtensions", function () {
         return (this == null || this == undefined || this == '') ? false : true;
     };
 
+    String.prototype.contains = function (str) {
+        return this.indexOf(str) !== -1;
+    };
+
     String.prototype.startsWith = function (str) {
-        return (this.indexOf(str) === 0);
+        return this.indexOf(str) === 0;
     };
 
     String.prototype.endsWith = function (str) {
-        return (this.lastIndexOf(str) === (this.length - str.length));
+        return this.lastIndexOf(str) === (this.length - str.length);
     };
 
     String.prototype.format = function () {
