@@ -101,6 +101,12 @@ namespace Signum.Web
 
     public class ChooserOption
     {
+        public ChooserOption(string value, string toStr)
+        {
+            this.value = value;
+            this.toStr = toStr;
+        }
+
         public string value;
         public string toStr; 
     }
@@ -109,17 +115,17 @@ namespace Signum.Web
     {
         public static ChooserOption ToChooserOption(this Type type)
         {
-            return new ChooserOption { value = Navigator.ResolveWebTypeName(type), toStr = type.NiceName() }; 
+            return new ChooserOption (Navigator.ResolveWebTypeName(type), type.NiceName() ); 
         }
 
-        public static ChooserOption ToChooserOption(this Enum enumValue)
+        public static ChooserOption ToChooserOptionToSting(this Enum enumValue)
         {
-            return new ChooserOption { value = enumValue.ToString(), toStr = enumValue.NiceToString() };
+            return new ChooserOption(enumValue.ToString(), enumValue.NiceToString());
         }
 
         public static ChooserOption ToChooserOptionMultiEnum(this Enum enumValue)
         {
-            return new ChooserOption { value = MultiEnumDN.UniqueKey(enumValue), toStr = enumValue.NiceToString() };
+            return new ChooserOption(MultiEnumDN.UniqueKey(enumValue), enumValue.NiceToString());
         }
     }
 }
