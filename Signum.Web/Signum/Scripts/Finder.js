@@ -625,6 +625,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             });
         };
 
+        SearchControl.liteKeys = function (values) {
+            return values.map(function (v) {
+                return v.runtimeInfo.key();
+            }).join(",");
+        };
+
         SearchControl.prototype.selectedItems = function () {
             return SearchControl.getSelectedItems(this.options.prefix);
         };

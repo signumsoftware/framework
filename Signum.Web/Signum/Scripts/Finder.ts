@@ -669,6 +669,10 @@ export class SearchControl {
         }); 
     }
 
+    static liteKeys(values: Array<Entities.EntityValue>): string {
+        return values.map(v=> v.runtimeInfo.key()).join(",");
+    }
+
     selectedItems(): Array<Entities.EntityValue> {
         return SearchControl.getSelectedItems(this.options.prefix); 
     }
