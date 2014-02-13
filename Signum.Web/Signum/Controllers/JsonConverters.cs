@@ -30,6 +30,7 @@ namespace Signum.Web.Controllers
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             Lite<IdentifiableEntity> lite = (Lite<IdentifiableEntity>)value;
+            writer.WriteStartObject();
 
             writer.WritePropertyName("Key");
             serializer.Serialize(writer, lite.Key());
@@ -37,6 +38,8 @@ namespace Signum.Web.Controllers
             serializer.Serialize(writer, lite.Id);
             writer.WritePropertyName("ToStr");
             serializer.Serialize(writer, lite.ToString());
+
+            writer.WriteEndObject();
         }
     }
 
