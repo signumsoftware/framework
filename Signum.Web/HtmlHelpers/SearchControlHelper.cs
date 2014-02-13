@@ -21,7 +21,8 @@ namespace Signum.Web
 {
     public class SearchControl
     {
-        public ToolBarButton[] QueryButtons { get; set; }
+        public string ControlID;
+        public ToolBarButton[] ToolBarButton { get; set; }
     }
 
     public class CountSearchControl
@@ -49,7 +50,7 @@ namespace Signum.Web
 
         public static MvcHtmlString SearchControl(this HtmlHelper helper, FindOptions findOptions, Context context, Action<SearchControl> settingsModifier)
         {
-            var options = new SearchControl();
+            var options = new SearchControl { ControlID = context.ControlID }; 
             if (settingsModifier != null)
                 settingsModifier(options);
 
@@ -69,8 +70,8 @@ namespace Signum.Web
                 helper.ViewData[ViewDataKeys.Title] :
                 Navigator.Manager.SearchTitle(findOptions.QueryName);
 
-            if (!options.QueryButtons.IsNullOrEmpty())
-                viewData[ViewDataKeys.ManualToolbarButtons] = options.QueryButtons;
+            if (!options.ToolBarButton.IsNullOrEmpty())
+                viewData[ViewDataKeys.ManualToolbarButtons] = options.ToolBarButton;
 
             return helper.Partial(Navigator.Manager.SearchControlView, viewData);
         }
