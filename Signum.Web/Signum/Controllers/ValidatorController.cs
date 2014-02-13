@@ -12,7 +12,7 @@ namespace Signum.Web.Controllers
     public class ValidatorController : Controller
     {
         [HttpPost]
-        public JsonResult Validate(string rootType = null, string propertyRoute = null)
+        public JsonNetResult Validate(string rootType = null, string propertyRoute = null)
         {
             ModifiableEntity mod = this.UntypedExtractEntity();
             

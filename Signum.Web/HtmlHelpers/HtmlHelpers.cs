@@ -16,6 +16,7 @@ using System.Web.Script.Serialization;
 using System.Web.WebPages;
 using Signum.Engine;
 using Signum.Web.Controllers;
+using Newtonsoft.Json;
 
 namespace Signum.Web
 {
@@ -277,9 +278,9 @@ namespace Signum.Web
 
         public static MvcHtmlString Json(this HtmlHelper html, object value)
         {
-            var serializer = new JavaScriptSerializer();
-            serializer.RegisterConverters(new List<JavaScriptConverter>(new JavaScriptConverter[] { new LiteJavaScriptConverter() }));
-            return new MvcHtmlString(serializer.Serialize(value));
+            var settings = new JsonSerializerSettings();
+            settings.Converters.Add(new LiteJavaScriptConverter());
+            return new MvcHtmlString(JsonConvert.SerializeObject(value, settings));
         }
 
         public static MvcHtmlString JQueryNotification(this HtmlHelper helper, string strongText, string normalText, int? marginTop = 10)

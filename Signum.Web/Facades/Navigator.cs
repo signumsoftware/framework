@@ -83,6 +83,11 @@ namespace Signum.Web
         }
 
         public static ViewResult NormalPage(ControllerBase controller, IRootEntity entity)
+        public static JsonNetResult JsonNet(this ControllerBase controller, object data)
+        {
+            return new JsonNetResult { Data = data }; 
+        }
+
         {
             return Manager.NormalPage(controller, new NavigateOptions(entity));
         }
@@ -1156,9 +1161,9 @@ namespace Signum.Web
                 return new RedirectResult(url);
         }
 
-        public static JsonResult RedirectAjax(string url)
+        public static JsonNetResult RedirectAjax(string url)
         {
-            return new JsonResult
+            return new JsonNetResult
             {
                 Data = new
                 {
@@ -1168,12 +1173,12 @@ namespace Signum.Web
             };
         }
 
-        public static JsonResult ModelState(ModelStateDictionary dictionary)
+        public static JsonNetResult ModelState(ModelStateDictionary dictionary)
         {
             return ModelState(dictionary, null, null); 
         }
 
-        public static JsonResult ModelState(ModelStateDictionary dictionary, string newToString, string newToStringLink)
+        public static JsonNetResult ModelState(ModelStateDictionary dictionary, string newToString, string newToStringLink)
         {
             Dictionary<string, object> result = new Dictionary<string, object>
             {
@@ -1186,7 +1191,47 @@ namespace Signum.Web
             if (newToStringLink != null)
                 result.Add(EntityBaseKeys.Link, newToStringLink);
 
-            return new JsonResult { Data = result };
+            return new JsonNetResult { Data = result };
+        }
+    }
+
+    public class JsonNetResult : ActionResult
+    {
+        public Encoding ContentEncoding { get; set; }
+        public string ContentType { get; set; }
+        public object Data { get; set; }
+
+        public JsonSerializerSettings SerializerSettings { get; set; }
+        public Formatting Formatting { get; set; }
+
+        public JsonNetResult()
+        {
+            SerializerSettings = new JsonSerializerSettings();
+        }
+
+        public override void ExecuteResult(ControllerContext context)
+        {
+            if (context == null)
+                throw new ArgumentNullException("context");
+
+            HttpResponseBase response = context.HttpContext.Response;
+
+            response.ContentType = !string.IsNullOrEmpty(ContentType)
+              ? ContentType
+              : "application/json";
+
+            if (ContentEncoding != null)
+                response.ContentEncoding = ContentEncoding;
+
+            if (Data != null)
+            {
+                JsonTextWriter writer = new JsonTextWriter(response.Output) { Formatting = Formatting };
+
+                JsonSerializer serializer = JsonSerializer.Create(SerializerSettings);
+                serializer.Serialize(writer, Data);
+
+                writer.Flush();
+            }
         }
     }
 }

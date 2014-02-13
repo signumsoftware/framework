@@ -14,7 +14,7 @@ namespace Signum.Web.Controllers
     public class FinderController : Controller
     {
         [HttpPost]
-        public JsonResult Autocomplete(string types, string q, int l)
+        public JsonNetResult Autocomplete(string types, string q, int l)
         {
             Type[] typeArray = StaticInfo.ParseTypes(types);
             if (typeArray == StaticInfo.ImplementedByAll)
@@ -24,11 +24,11 @@ namespace Signum.Web.Controllers
 
             var result = lites.Select(o => new AutoCompleteResult(o)).ToList();
 
-            return Json(result);
+            return this.JsonNet(result);
         }
 
         [HttpPost]
-        public JsonResult TypeAutocomplete(string types, string q, int l)
+        public JsonNetResult TypeAutocomplete(string types, string q, int l)
         {
             var result = TypeClient.ViewableServerTypes()
                 .Where(t => t.CleanName.Contains(q, StringComparison.InvariantCultureIgnoreCase)).
@@ -40,7 +40,7 @@ namespace Signum.Web.Controllers
                     type = Navigator.ResolveWebTypeName(o.GetType())
                 }).ToList();
 
-            return Json(result);
+            return this.JsonNet(result);
         }
 
         public ActionResult Find(FindOptions findOptions)

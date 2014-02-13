@@ -7,71 +7,61 @@ using System.Web.Script.Serialization;
 using Signum.Entities;
 using Signum.Engine;
 using Signum.Utilities;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Signum.Web.Controllers
 {
-    public class LiteJavaScriptConverter : JavaScriptConverter
+    public class LiteJavaScriptConverter : JsonConverter
     {
-        public override IEnumerable<Type> SupportedTypes
+        public override bool CanConvert(Type objectType)
         {
-            get { return new[] { typeof(LiteImp) }; }
+            return typeof(Lite<IdentifiableEntity>).IsAssignableFrom(objectType);
         }
 
-        public override object Deserialize(IDictionary<string, object> dictionary, Type type, JavaScriptSerializer serializer)
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            if (dictionary == null)
-                throw new ArgumentNullException("dictionary");
+            JObject jsonObject = JObject.Load(reader);
 
-            if (type == typeof(Lite<IdentifiableEntity>))
-            {
-                string liteKey = (string)dictionary["Key"];
-                return Lite.Parse(liteKey);
-            }
-
-            return null;
+            string liteKey = (string)jsonObject["Key"];
+            return Lite.Parse(liteKey);
         }
 
-        public override IDictionary<string, object> Serialize(object obj, JavaScriptSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            var result = new Dictionary<string, object>();
+            Lite<IdentifiableEntity> lite = (Lite<IdentifiableEntity>)value;
 
-            Lite<IdentifiableEntity> lite = obj as Lite<IdentifiableEntity>;
-            if (lite != null)
-            {
-                result["Key"] = lite.Key();
-                result["Id"] = lite.Id;
-                result["ToStr"] = lite.ToString();
-            }
-
-            return result;
+            writer.WritePropertyName("Key");
+            serializer.Serialize(writer, lite.Key());
+            writer.WritePropertyName("Id");
+            serializer.Serialize(writer, lite.Id);
+            writer.WritePropertyName("ToStr");
+            serializer.Serialize(writer, lite.ToString());
         }
     }
 
-    public class EnumJavaScriptConverter : JavaScriptConverter
+    public class EnumJavaScriptConverter : JsonConverter
     {
-        public override IEnumerable<Type> SupportedTypes
+        public override bool CanConvert(Type objectType)
         {
-            get { return new[] { typeof(Enum) }; }
+            return objectType == typeof(Enum);
         }
 
-        public override object Deserialize(IDictionary<string, object> dictionary, Type type, JavaScriptSerializer serializer)
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             throw new NotImplementedException();
         }
 
-        public override IDictionary<string, object> Serialize(object obj, JavaScriptSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            var result = new Dictionary<string, object>();
+            Enum myEnum = (Enum)value;
 
-            Enum myEnum = obj as Enum;
-            if (myEnum != null)
-            {
-                result["Id"] = Convert.ToInt32(myEnum);
-                result["Value"] = myEnum.ToString();
-                result["ToStr"] =  myEnum.NiceToString();
-            }
-
-            return result;
+            writer.WritePropertyName("Id");
+            serializer.Serialize(writer, Convert.ToInt32(myEnum));
+            writer.WritePropertyName("Value");
+            serializer.Serialize(writer, myEnum.ToString());
+            writer.WritePropertyName("ToStr");
+            serializer.Serialize(writer, myEnum.NiceToString());
         }
     }
 }
