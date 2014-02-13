@@ -119,20 +119,12 @@ namespace Signum.Web.Operations
         public ViewMode ViewButtons { get; internal set; }
         public bool ShowOperations { get; set; }
 
-        public JObject Options()
+        public JsOperationOptions Options()
         {
-            var result = new JObject()
-            { 
-                { "operationKey", OperationDN.UniqueKey(OperationInfo.Key) },
-                { "isLite", OperationInfo.Lite },
-                { "prefix", this.Prefix },
-            };
+            var result = new JsOperationOptions(OperationInfo.Key, this.Prefix) { isLite = OperationInfo.Lite };
 
-            var confirm = OperationSettings != null && OperationSettings.ConfirmMessage != null ? OperationSettings.ConfirmMessage(this) :
-                OperationInfo.OperationType == OperationType.Delete ? OperationMessage.PleaseConfirmYouDLikeToDeleteTheEntityFromTheSystem.NiceToString() : null;
-
-            if (confirm != null)
-                result.Add("confirmMessage", confirm);
+            result.confirmMessage = OperationSettings != null && OperationSettings.ConfirmMessage != null ? OperationSettings.ConfirmMessage(this) :
+                OperationInfo.OperationType == OperationType.Delete ? OperationMessage.PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem.NiceToString() : null;
 
             return result;
         }
@@ -151,23 +143,30 @@ namespace Signum.Web.Operations
         public ContextualOperationSettings OperationSettings { get; set; }
         public string CanExecute { get; set; }
 
-        public JObject Options()
+        public JsOperationOptions Options()
         {
-            var result = new JObject()
-            { 
-                { "operationKey", OperationDN.UniqueKey(OperationInfo.Key) },
-                { "isLite", OperationInfo.Lite },
-                { "prefix", this.Prefix },
-            };
+            var result = new JsOperationOptions(OperationInfo.Key, this.Prefix){ isLite = OperationInfo.Lite};
 
-            var confirm = OperationSettings != null && OperationSettings.ConfirmMessage != null ? OperationSettings.ConfirmMessage(this) :
+            result.confirmMessage = OperationSettings != null && OperationSettings.ConfirmMessage != null ? OperationSettings.ConfirmMessage(this) :
                 OperationInfo.OperationType == OperationType.Delete ? OperationMessage.PleaseConfirmYouDLikeToDeleteTheSelectedEntitiesFromTheSystem.NiceToString() : null;
-            
-            if (confirm != null)
-                result.Add("confirmMessage", confirm);
 
             return result;
         }
+    }
+
+    public class JsOperationOptions
+    {
+        public JsOperationOptions(Enum operationKey, string prefix)
+        {
+            this.operationKey = OperationDN.UniqueKey(operationKey);
+            this.prefix = prefix;
+        }
+
+        public string operationKey;
+        public string prefix;
+        public bool? isLite;
+        public string confirmMessage;
+        public string controllerUrl; 
     }
 
     public class JsOperationFunction : JsFunction
@@ -180,10 +179,10 @@ namespace Signum.Web.Operations
         {
         }
 
-        JObject OperationObjects;
-        internal JsOperationFunction SetOptions(JObject operationObjects)
+        JsOperationOptions OperationOptions;
+        internal JsOperationFunction SetOptions(JsOperationOptions operationOptions)
         {
-            this.OperationObjects = operationObjects;
+            this.OperationOptions = operationOptions;
             return this;
         }
 
@@ -191,10 +190,9 @@ namespace Signum.Web.Operations
         {
             var varName = VarName(Module);
 
-            var args = (Arguments.IsNullOrEmpty() ? null :
-                (", " + Arguments.EmptyIfNull().ToString(a => JsonConvert.SerializeObject(a, JsonSerializerSettings), ", ")));
+            var args = Arguments.EmptyIfNull().PreAnd(OperationOptions).ToString(a => JsonConvert.SerializeObject(a, JsonSerializerSettings), ", ");
 
-            return "require(['" + Module + "'], function(" + varName + ") { " + varName + "." + FunctionName + "(" + OperationObjects.ToString() + args + "); });";
+            return "require(['" + Module + "'], function(" + varName + ") { " + varName + "." + FunctionName + "("  + args + "); });";
         }
     }
 }
