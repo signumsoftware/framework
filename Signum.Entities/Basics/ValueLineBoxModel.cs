@@ -127,7 +127,7 @@ namespace Signum.Web
         DateTime,
     }
 
-    public class ValueLineOptions
+    public class ValueLineBoxOptions
     {
         public string prefix;
         public ValueLineBoxType type;
@@ -135,7 +135,7 @@ namespace Signum.Web
         public string message = SelectorMessage.PleaseChooseAValueToContinue.NiceToString();
         public string fieldName = null;
 
-        public ValueLineOptions(ValueLineBoxType type, string parentPrefix, string newPart)
+        public ValueLineBoxOptions(ValueLineBoxType type, string parentPrefix, string newPart)
         {
             this.type = type;
             this.prefix = "_".CombineIfNotEmpty(parentPrefix, newPart);
