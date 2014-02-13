@@ -58,7 +58,7 @@ namespace Signum.Web.Auth
             }
 
             context.Value.Execute(UserOperation.SaveNew);
-            return OperationClient.DefaultExecuteResult(this, context.Value);
+            return this.DefaultExecuteResult(context.Value);
         }
 
         [AcceptVerbs(HttpVerbs.Post)]
@@ -81,7 +81,7 @@ namespace Signum.Web.Auth
             UserDN user = this.ExtractLite<UserDN>()
                 .ExecuteLite(UserOperation.SetPassword, context.Value.Password);
 
-            return OperationClient.DefaultExecuteResult(this, user);
+            return this.DefaultExecuteResult(user);
         }
 
         #region "Change password"

@@ -101,7 +101,7 @@ namespace Signum.Web.Files
             return Content(sb.ToString());
         }
 
-        public JsonResult UploadDropped()
+        public JsonNetResult UploadDropped()
         {
             string fileName = Request.Headers["X-FileName"];
 
@@ -133,7 +133,7 @@ namespace Signum.Web.Files
 
             RuntimeInfo ri = file is EmbeddedEntity ? new RuntimeInfo((EmbeddedEntity)file) : new RuntimeInfo((IIdentifiable)file);
             
-            return Json(new
+            return this.JsonNet(new
             {
                 file.FileName,
                 FullWebPath = FilesClient.GetDownloadPath(file),

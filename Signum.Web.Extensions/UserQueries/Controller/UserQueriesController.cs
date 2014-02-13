@@ -93,7 +93,8 @@ namespace Signum.Web.UserQueries
             }
 
             userQuery = context.Value.Execute(UserQueryOperation.Save);
-            return OperationClient.DefaultExecuteResult(this, userQuery);
+
+            return this.DefaultExecuteResult(userQuery);
         }
     }
 }

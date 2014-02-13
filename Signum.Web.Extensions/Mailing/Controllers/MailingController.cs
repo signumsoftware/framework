@@ -52,7 +52,7 @@ namespace Signum.Web.Mailing
             var emailMessage = this.ExtractEntity<EmailTemplateDN>()
                 .ConstructFrom<EmailMessageDN>(EmailMessageOperation.CreateMailFromTemplate, entity);
 
-            return OperationClient.DefaultConstructResult(this, emailMessage);
+            return this.DefaultConstructResult(emailMessage);
         }
     }
 }

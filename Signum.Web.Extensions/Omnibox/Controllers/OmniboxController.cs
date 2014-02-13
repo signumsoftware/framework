@@ -11,7 +11,7 @@ namespace Signum.Web.Omnibox
     public class OmniboxController : Controller
     {
         [HttpPost]
-        public JsonResult Autocomplete(string text)
+        public JsonNetResult Autocomplete(string text)
         {
             var result = OmniboxParser.Results(text, new System.Threading.CancellationToken())
                 .Select(or => new
@@ -20,7 +20,7 @@ namespace Signum.Web.Omnibox
                     cleanText = or.ToString()
                 });
 
-            return Json(result);
+            return this.JsonNet(result);
         }
     }
 }

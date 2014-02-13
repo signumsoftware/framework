@@ -49,7 +49,7 @@ namespace Signum.Web.ControlPanel
 
             cp.Parts.Add(newPart);
 
-            return OperationClient.DefaultExecuteResult(this, cp);
+            return this.DefaultExecuteResult(cp);
         }
     }
 }

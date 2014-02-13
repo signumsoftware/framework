@@ -31,15 +31,15 @@ namespace Signum.Web.SMS
     public class SMSController : Controller
     {
         [HttpPost]
-        public JsonResult GetDictionaries()
+        public JsonNetResult GetDictionaries()
         {
-            return Json(new
-                {
-                    smsLength = SMSCharacters.SMSMaxTextLength,
-                    smsWarningLength = SMSCharacters.SMSMaxTextLength / 4,
-                    normalChar = SMSCharacters.NormalCharacters.Select(li => li.Key).ToList(),
-                    doubleChar = SMSCharacters.DoubleCharacters.Select(li => li.Key).ToList()
-                });
+            return this.JsonNet(new
+            {
+                smsLength = SMSCharacters.SMSMaxTextLength,
+                smsWarningLength = SMSCharacters.SMSMaxTextLength / 4,
+                normalChar = SMSCharacters.NormalCharacters.Select(li => li.Key).ToList(),
+                doubleChar = SMSCharacters.DoubleCharacters.Select(li => li.Key).ToList()
+            });
         }
 
         [HttpPost]
@@ -49,10 +49,10 @@ namespace Signum.Web.SMS
         }
 
         [HttpPost]
-        public JsonResult GetLiteralsForType(string prefix)
+        public JsonNetResult GetLiteralsForType(string prefix)
         {
             var type = this.ExtractEntity<TypeDN>();
-            return Json(new
+            return this.JsonNet(new
             {
                 literals = SMSLogic.GetLiteralsFromDataObjectProvider(type.ToType())
             });
@@ -65,7 +65,7 @@ namespace Signum.Web.SMS
             var template = Lite.Parse<SMSTemplateDN>(Request["template"]);
 
             var message = ie.ConstructFromLite<SMSMessageDN>(SMSMessageOperation.CreateSMSWithTemplateFromEntity, template.Retrieve());
-            return OperationClient.DefaultConstructResult(this, message);
+            return this.DefaultConstructResult(message);
         }
 
         [HttpPost]
@@ -77,17 +77,13 @@ namespace Signum.Web.SMS
 
             var process = OperationLogic.ServiceConstructFromMany(lites, lites.First().EntityType, SMSProviderOperation.SendSMSMessagesFromTemplate, template.Retrieve());
 
-            return OperationClient.DefaultConstructResult(this, process);
+            return this.DefaultConstructResult(process);
         }
 
         [HttpPost]
         public PartialViewResult SendMultipleSMSMessagesModel()
         {
-            var model = new MultipleSMSModel
-            {
-            };
-
-            return this.PopupOpen(new PopupViewOptions(new TypeContext<MultipleSMSModel>(model, Request["newPrefix"])));
+            return this.PopupView(new MultipleSMSModel(), Request["newPrefix"]);
         }
 
         [HttpPost]
@@ -107,7 +103,7 @@ namespace Signum.Web.SMS
 
             var process = OperationLogic.ServiceConstructFromMany(lites, lites.First().EntityType, SMSProviderOperation.SendSMSMessage, cp);
 
-            return OperationClient.DefaultConstructResult(this, process);
+            return this.DefaultConstructResult(process);
         }
     }
 }

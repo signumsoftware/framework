@@ -56,7 +56,8 @@ namespace Signum.Web.Reports
         public ActionResult Create(Lite<QueryDN> query, string prefix)
         {
             ExcelReportDN report = new ExcelReportDN { Query = query.Retrieve() };
-            return OperationClient.DefaultConstructResult(this, report, prefix);
+
+            return this.DefaultConstructResult(report, prefix);
         }
     }
 }

@@ -64,8 +64,7 @@ namespace Signum.Web.AuthAdmin
 
         public ActionResult Properties(Lite<RoleDN> role, Lite<TypeDN> type)
         {
-            TypeContext tc = TypeContextUtilities.UntypedNew(PropertyAuthLogic.GetPropertyRules(role.FillToString(), type.Retrieve()), this.Prefix());
-            return this.PopupOpen(new PopupNavigateOptions(tc));
+            return this.PopupNavigate(PropertyAuthLogic.GetPropertyRules(role.FillToString(), type.Retrieve()));
         }
 
         [HttpPost]
@@ -84,12 +83,11 @@ namespace Signum.Web.AuthAdmin
         [HttpPost]
         public ActionResult Queries(Lite<RoleDN> role, Lite<TypeDN> type)
         {
-            TypeContext tc = TypeContextUtilities.UntypedNew(QueryAuthLogic.GetQueryRules(role.FillToString(), type.Retrieve()), this.Prefix());
-            return this.PopupOpen(new PopupNavigateOptions(tc));
+            return this.PopupNavigate(QueryAuthLogic.GetQueryRules(role.FillToString(), type.Retrieve()));
         }
 
         [HttpPost]
-        public JsonResult SaveQueries(FormCollection form, string prefix)
+        public JsonNetResult SaveQueries(FormCollection form, string prefix)
         {
             Lite<RoleDN> role = this.ExtractLite<RoleDN>(TypeContextUtilities.Compose(prefix, "Role"));
             TypeDN type = this.ExtractEntity<TypeDN>(TypeContextUtilities.Compose(prefix, "Type"));
@@ -105,8 +103,7 @@ namespace Signum.Web.AuthAdmin
         [HttpPost]
         public ActionResult Operations(Lite<RoleDN> role, Lite<TypeDN> type)
         {
-            TypeContext tc = TypeContextUtilities.UntypedNew(OperationAuthLogic.GetOperationRules(role.FillToString(), type.Retrieve()), this.Prefix());
-            return this.PopupOpen(new PopupNavigateOptions(tc));
+            return this.PopupNavigate(OperationAuthLogic.GetOperationRules(role.FillToString(), type.Retrieve()));
         }
 
         [HttpPost]

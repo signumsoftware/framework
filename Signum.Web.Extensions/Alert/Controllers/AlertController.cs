@@ -13,10 +13,10 @@ namespace Signum.Web.Alerts
 {
     public class AlertController : Controller
     {
-        public JsonResult AlertsCount()
+        public JsonNetResult AlertsCount()
         {
             var entity = (IdentifiableEntity)this.UntypedExtractEntity(); //Related entity always sent with no prefix
-            return Json(new
+            return this.JsonNet(new
             {
                 Alerted = AlertWidgetHelper.CountAlerts(entity, "Alerted"),
                 Future = AlertWidgetHelper.CountAlerts(entity, "Future"),

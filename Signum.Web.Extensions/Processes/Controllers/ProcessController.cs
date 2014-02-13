@@ -75,7 +75,7 @@ namespace Signum.Web.Processes
 
             ProcessDN process = PackageLogic.CreatePackageOperation(lites, this.GetOperationKeyAssert());
 
-            return Navigator.PopupOpen(this, new PopupNavigateOptions(new TypeContext<ProcessDN>(process, Request["newPrefix"])));
+            return this.DefaultConstructResult(process);
         }
     }
 }

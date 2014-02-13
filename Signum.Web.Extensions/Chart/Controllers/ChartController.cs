@@ -210,7 +210,7 @@ namespace Signum.Web.Chart
         }
 
         [HttpPost]
-        public JsonResult Validate()
+        public JsonNetResult Validate()
         {
             var requestCtx = this.ExtractChartRequestCtx(null).ValidateGlobal();
 

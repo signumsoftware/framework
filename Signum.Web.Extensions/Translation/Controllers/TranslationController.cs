@@ -119,7 +119,7 @@ namespace Signum.Web.Translation.Controllers
             return list;
         }
 
-        public JsonResult PluralAndGender()
+        public JsonNetResult PluralAndGender()
         {
             string name = Request.Form["name"];
 
@@ -127,7 +127,7 @@ namespace Signum.Web.Translation.Controllers
 
             string text = Request.Form["text"];
 
-            return Json(new
+            return this.JsonNet(new
             {
                 gender = NaturalLanguageTools.GetGender(text, ci),
                 plural = NaturalLanguageTools.Pluralize(text, ci)
