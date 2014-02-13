@@ -297,7 +297,7 @@
       <LastGenOutput>FilterBuilder.generated.cs</LastGenOutput>
       <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
-    <Content Include="Signum\Content\SF_Widgets.css" />
+    <Content Include="Signum\Content\Widgets.css" />
     <None Include="Signum\Views\SearchControl.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>SearchControl.generated.cs</LastGenOutput>
@@ -324,10 +324,10 @@
       <CustomToolNamespace>Signum.Web.Views</CustomToolNamespace>
     </None>
     <Content Include="Signum\Content\reset.css" />
-    <Content Include="Signum\Content\SF_Lines.css" />
-    <Content Include="Signum\Content\SF_NormalPage.css" />
-    <Content Include="Signum\Content\SF_Notify.css" />
-    <Content Include="Signum\Content\SF_Search.css" />
+    <Content Include="Signum\Content\Lines.css" />
+    <Content Include="Signum\Content\NormalPage.css" />
+    <Content Include="Signum\Content\Notify.css" />
+    <Content Include="Signum\Content\Search.css" />
     <None Include="Signum\Views\_ViewStart.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_ViewStart.generated.cs</LastGenOutput>
