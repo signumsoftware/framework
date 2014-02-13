@@ -18,8 +18,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             this._create();
         }
         EntityBase.prototype.ready = function () {
-            this.element.trigger("SF-ready");
-
             this.element.SFControlFullfill(this);
         };
 

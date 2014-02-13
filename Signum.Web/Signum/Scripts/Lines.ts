@@ -34,8 +34,6 @@ export class EntityBase {
 
     public ready() {
 
-        this.element.trigger("SF-ready");
-
         this.element.SFControlFullfill(this); 
     }
 
