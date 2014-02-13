@@ -208,9 +208,9 @@ namespace Signum.Web
             if (!AllowChangeColumns) op.Add("allowChangeColumns", false);
             if (!AllowOrder) op.Add("allowOrder", false);
             if (FilterMode != Web.FilterMode.Visible) op.Add("filterMode", FilterMode.ToString());
-            if (FilterOptions.Any()) op.Add("filters", new JArray(filterOptions.Select(f => new JObject { { "columnName", f.ColumnName }, { "operation", (int)f.Operation }, { "value", f.StringValue() } })));
-            if (OrderOptions.Any()) op.Add("orders", new JArray(OrderOptions.Select(oo => new JObject { { "columnName", oo.ColumnName }, { "orderType", (int)oo.OrderType } })));
-            if (ColumnOptions.Any()) op.Add("columns", new JArray(ColumnOptions.Select(oo => new JObject { { "columnName", oo.ColumnName }, { "displayName", oo.DisplayName } })));
+            if (FilterOptions.Any()) op.Add("filters", new JArray(filterOptions.Select(f => f.ToJS())));
+            if (OrderOptions.Any()) op.Add("orders", new JArray(OrderOptions.Select(oo => oo.ToJS()  )));
+            if (ColumnOptions.Any()) op.Add("columns", new JArray(ColumnOptions.Select(co => co.ToJS() )));
             if (ColumnOptionsMode != Entities.DynamicQuery.ColumnOptionsMode.Add) op.Add("columnMode", ColumnOptionsMode.ToString());
 
             if (Pagination != null)
@@ -348,6 +348,11 @@ namespace Signum.Web
             }
             return p;
         }
+
+        public JObject ToJS()
+        {
+            return new JObject { { "columnName", ColumnName }, { "operation", (int)Operation }, { "value", StringValue() } };
+        }
     }
 
     public class OrderOption
@@ -379,6 +384,11 @@ namespace Signum.Web
         public override string ToString()
         {
             return (OrderType == OrderType.Descending ? "-" : "") + ColumnName;
+        }
+
+        public JObject ToJS()
+        {
+            return new JObject { { "columnName", ColumnName }, { "orderType", (int)OrderType } };
         }
     }
 
@@ -413,6 +423,11 @@ namespace Signum.Web
         public override string ToString()
         {
             return DisplayName.HasText() ? "{0},{1}".Formato(ColumnName, DisplayName) : ColumnName;
+        }
+
+        public JObject ToJS()
+        {
+            return new JObject { { "columnName", ColumnName }, { "displayName", DisplayName } };
         }
     }
 
