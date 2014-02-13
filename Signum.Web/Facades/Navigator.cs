@@ -438,7 +438,7 @@ namespace Signum.Web
         public Dictionary<Type, EntitySettings> EntitySettings {get;set;}
         public Dictionary<object, QuerySettings> QuerySettings {get;set;}
 
-        public static string ViewPrefix = "~/signum/Views/{0}.cshtml";
+        public static string ViewPrefix = "~/Signum/Views/{0}.cshtml";
 
         public string NormalPageView = ViewPrefix.Formato("NormalPage");
         public string NormalControlView = ViewPrefix.Formato("NormalControl");

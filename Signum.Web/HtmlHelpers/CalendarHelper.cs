@@ -124,7 +124,7 @@ namespace Signum.Web
             set { buttonText = value; }
         }
 
-        string buttonImageSrc = VirtualPathUtility.ToAbsolute("~/signum/Images/calendar.png");
+        string buttonImageSrc = VirtualPathUtility.ToAbsolute("~/Signum/Images/calendar.png");
         public string ButtonImageSrc
         {
             get { return buttonImageSrc; }
