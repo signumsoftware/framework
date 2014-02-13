@@ -138,8 +138,7 @@ namespace Signum.Web.Controllers
 
             ValueLineBoxModel model = new ValueLineBoxModel(type, fieldName, message);
 
-            var tc = new TypeContext<ValueLineBoxModel>(model, prefix);
-            return this.PopupOpen(new PopupViewOptions(tc));
+            return this.PopupView(model);
         }
     }
 }
