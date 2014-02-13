@@ -47,7 +47,7 @@ namespace Signum.Web.Controllers
                 entity = OperationLogic.Execute<IdentifiableEntity>(entity, operationKey);
             }
 
-           return OperationClient.DefaultExecuteResult(this, entity);
+           return this.DefaultExecuteResult(entity);
         }
 
         [HttpPost, ValidateAntiForgeryToken]
@@ -61,7 +61,7 @@ namespace Signum.Web.Controllers
 
                 OperationLogic.Delete(lite, operationKey, null);
 
-                return OperationClient.DefaultDelete(this, lite.EntityType);
+                return this.DefaultDelete(lite.EntityType);
             }
             else
             {
@@ -70,7 +70,7 @@ namespace Signum.Web.Controllers
 
                 OperationLogic.Delete(entity, operationKey, null);
 
-                return OperationClient.DefaultDelete(this, entity.GetType());
+                return this.DefaultDelete(entity.GetType());
             }
         }
 
@@ -99,7 +99,7 @@ namespace Signum.Web.Controllers
                 entity = OperationLogic.ConstructFrom<IdentifiableEntity>(entity, operationKey);
             }
 
-            return OperationClient.DefaultConstructResult(this, entity);
+            return this.DefaultConstructResult(entity);
         }
 
         [HttpPost, ValidateAntiForgeryToken]
@@ -111,7 +111,7 @@ namespace Signum.Web.Controllers
 
             IdentifiableEntity entity = OperationLogic.ServiceConstructFromMany(lites, lites.First().EntityType, operationKey);
 
-            return OperationClient.DefaultConstructResult(this, entity);
+            return this.DefaultConstructResult(entity);
         }
     }
 }

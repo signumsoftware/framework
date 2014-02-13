@@ -34,6 +34,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Runtime.Serialization;
 using Microsoft.SqlServer.Types;
+using Newtonsoft.Json;
 #endregion
 
 namespace Signum.Web
@@ -82,27 +83,27 @@ namespace Signum.Web
             });
         }
 
-        public static ViewResult NormalPage(ControllerBase controller, IRootEntity entity)
         public static JsonNetResult JsonNet(this ControllerBase controller, object data)
         {
             return new JsonNetResult { Data = data }; 
         }
 
+        public static ViewResult NormalPage(this ControllerBase controller, IRootEntity entity)
         {
             return Manager.NormalPage(controller, new NavigateOptions(entity));
         }
 
-        public static ViewResult NormalPage(ControllerBase controller, NavigateOptions options)
+        public static ViewResult NormalPage(this ControllerBase controller, NavigateOptions options)
         {
             return Manager.NormalPage(controller, options);
         }
-     
-        public static PartialViewResult NormalControl(ControllerBase controller, IRootEntity entity)
+
+        public static PartialViewResult NormalControl(this ControllerBase controller, IRootEntity entity)
         {
             return Manager.NormalControl(controller, new NavigateOptions(entity));
         }
 
-        public static PartialViewResult NormalControl(ControllerBase controller, NavigateOptions options)
+        public static PartialViewResult NormalControl(this ControllerBase controller, NavigateOptions options)
         {
             return Manager.NormalControl(controller, options);
         }
@@ -123,6 +124,18 @@ namespace Signum.Web
             return tabID;
         }
 
+        public static PartialViewResult PopupView(this ControllerBase controller, IRootEntity entity, string prefix = null)
+        {  
+            TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix ?? controller.Prefix());
+            return controller.PopupOpen(new PopupViewOptions(tc));
+        }
+
+        public static PartialViewResult PopupNavigate(this ControllerBase controller, IRootEntity entity, string prefix = null)
+        {
+            TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix ?? controller.Prefix());
+            return controller.PopupOpen(new PopupNavigateOptions(tc));
+        }
+
         public static PartialViewResult PopupOpen(this ControllerBase controller, PopupOptionsBase viewOptions)
         {
             return Manager.PopupOpen(controller, viewOptions);
@@ -139,22 +152,22 @@ namespace Signum.Web
             return Manager.PartialView(controller, tc, partialViewName);
         }
 
-        public static ViewResult Find(ControllerBase controller, object queryName)
+        public static ViewResult Find(this ControllerBase controller, object queryName)
         {
             return Find(controller, new FindOptions(queryName));
         }
 
-        public static ViewResult Find(ControllerBase controller, FindOptions findOptions)
+        public static ViewResult Find(this ControllerBase controller, FindOptions findOptions)
         {
             return Manager.Find(controller, findOptions);
         }
 
-        public static PartialViewResult PartialFind(ControllerBase controller, FindOptions findOptions, FindMode mode, Context context)
+        public static PartialViewResult PartialFind(this ControllerBase controller, FindOptions findOptions, FindMode mode, Context context)
         {
             return Manager.PartialFind(controller, findOptions, mode, context);
         }
 
-        public static PartialViewResult PartialFind(ControllerBase controller, FindOptions findOptions, FindMode mode, string prefix)
+        public static PartialViewResult PartialFind(this ControllerBase controller, FindOptions findOptions, FindMode mode, string prefix)
         {
             return Manager.PartialFind(controller, findOptions, mode, new Context(null, prefix));
         }
