@@ -11,7 +11,6 @@ namespace Signum.Web
     {
         public const string GlobalErrors = "sfGlobalErrors"; //Key for Global Errors in ModelStateDictionary
         public const string Title = "Title";
-        public const string CustomHtml = "sfCustomHtml";
 
         public const string ViewMode = "sfViewMode";
         public const string FindMode = "sfFindMode";
