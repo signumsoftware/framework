@@ -146,12 +146,6 @@ namespace Signum.Web.Mailing
                     });
                 }
 
-
-                //require("SF_Lines", "MyModule", function(Lines, MyModule) { MyModule.MyMethod(Lines.CreateEntityLine($("#myLine")), args..); });
-                //onClick="require("SF_Operations", function(Operations) { Operations.execute({....}); })"
-                //onClick="require("MyModule", function() { MyModule({....}, args...); })"
-
-
                 if (pop3Config)
                     Navigator.AddSettings(new List<EntitySettings>
                 {
