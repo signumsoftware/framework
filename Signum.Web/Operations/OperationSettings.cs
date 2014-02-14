@@ -162,10 +162,14 @@ namespace Signum.Web.Operations
             this.prefix = prefix;
         }
 
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string operationKey;
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string prefix;
         public bool? isLite;
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string confirmMessage;
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string controllerUrl; 
     }
 
