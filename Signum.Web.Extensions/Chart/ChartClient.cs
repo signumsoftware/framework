@@ -34,6 +34,7 @@ namespace Signum.Web.Chart
         public static string ViewPrefix = "~/Chart/Views/{0}.cshtml";
 
         public static string Module = "Extensions/Signum.Web.Extensions/Chart/Scripts/Chart";
+        public static string ModuleScript = "Extensions/Signum.Web.Extensions/Chart/Scripts/ChartScript";
 
         public static string ChartRequestView = ViewPrefix.Formato("ChartRequestView");
         public static string ChartBuilderView = ViewPrefix.Formato("ChartBuilder");

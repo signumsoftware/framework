@@ -1024,7 +1024,6 @@
     <TypeScriptCompile Include="Chart\Scripts\ChartUtils.ts" />
     <TypeScriptCompile Include="Chart\Scripts\ChartColors.ts" />
     <TypeScriptCompile Include="Chart\Scripts\ChartScript.ts" />
-    <TypeScriptCompile Include="Chart\Scripts\codemirror.d.ts" />
     <Content Include="Chart\Views\ChartRequestView.cshtml">
       <SubType>Code</SubType>
       <Generator>RazorGenerator</Generator>

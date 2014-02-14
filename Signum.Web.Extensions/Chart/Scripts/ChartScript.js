@@ -1,5 +1,7 @@
 /// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
-define(["require", "exports", "codemirror"], function(require, exports, CodeMirror) {
+define(["require", "exports"], function(require, exports) {
+    
+
     function init($textArea) {
         var changedDelay;
 

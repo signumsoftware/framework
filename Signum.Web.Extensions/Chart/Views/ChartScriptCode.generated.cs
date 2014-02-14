@@ -42,6 +42,12 @@ namespace Signum.Web.Extensions.Chart.Views
     using Signum.Utilities;
     using Signum.Web;
     
+    #line 4 "..\..\Chart\Views\ChartScriptCode.cshtml"
+    using Signum.Web.Chart;
+    
+    #line default
+    #line hidden
+    
     #line 2 "..\..\Chart\Views\ChartScriptCode.cshtml"
     using Signum.Web.Files;
     
@@ -58,11 +64,31 @@ namespace Signum.Web.Extensions.Chart.Views
         public override void Execute()
         {
             
-            #line 5 "..\..\Chart\Views\ChartScriptCode.cshtml"
+            #line 6 "..\..\Chart\Views\ChartScriptCode.cshtml"
 Write(Html.ScriptCss(
     "~/Content/CodeMirror/codemirror.css",
     "~/Content/CodeMirror/dialog.css",
     "~/Content/CodeMirror/simple-hint.css"));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n");
+
+            
+            #line 10 "..\..\Chart\Views\ChartScriptCode.cshtml"
+Write(Html.ScriptsJs(
+        "~/Scripts/CodeMirror/codemirror.js",
+        "~/Scripts/CodeMirror/javascript.js",
+        "~/Scripts/CodeMirror/formatting.js",
+        "~/Scripts/CodeMirror/searchcursor.js",
+        "~/Scripts/CodeMirror/show-hint.js",
+        "~/Scripts/CodeMirror/javascript-hint.js",
+        "~/Scripts/CodeMirror/match-highlighter.js",
+        "~/Scripts/CodeMirror/search.js",
+        "~/Scripts/CodeMirror/dialog.js",
+        "~/Scripts/CodeMirror/fullscreen.js"
+        ));
 
             
             #line default
@@ -120,17 +146,25 @@ WriteLiteral(@">
 WriteLiteral("    ");
 
             
-            #line 49 "..\..\Chart\Views\ChartScriptCode.cshtml"
+            #line 62 "..\..\Chart\Views\ChartScriptCode.cshtml"
 Write(Html.ValueLine(Model, c => c.Script, vl => { vl.ValueLineType = ValueLineType.TextArea; vl.LabelVisible = false; }));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n \r\n    <script>\r\n        requre([\"ChartScript\"], function (ChartScript) {\r\n    " +
-"        ChartScript.init($(\"#");
+WriteLiteral("\r\n \r\n    <script>\r\n        require([\"");
 
             
-            #line 53 "..\..\Chart\Views\ChartScriptCode.cshtml"
+            #line 65 "..\..\Chart\Views\ChartScriptCode.cshtml"
+             Write(ChartClient.ModuleScript);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\"], function (ChartScript) {\r\n            ChartScript.init($(\"#");
+
+            
+            #line 66 "..\..\Chart\Views\ChartScriptCode.cshtml"
                              Write(Model.Compose("Script"));
 
             

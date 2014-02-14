@@ -1,6 +1,6 @@
 /// <reference path="../../../../Framework/Signum.Web/Signum/Headers/jquery/jquery.d.ts"/>
 
-import CodeMirror = require("codemirror")
+declare var CodeMirror: any;
 
 export function init($textArea: JQuery) {
 

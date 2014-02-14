@@ -1,11 +1,24 @@
 ﻿@using Signum.Entities.Chart
 @using Signum.Web.Files
 @using Signum.Engine
+@using Signum.Web.Chart
 @model TypeContext<ChartScriptDN>
 @Html.ScriptCss(
     "~/Content/CodeMirror/codemirror.css",
     "~/Content/CodeMirror/dialog.css",
     "~/Content/CodeMirror/simple-hint.css")
+@Html.ScriptsJs(
+        "~/Scripts/CodeMirror/codemirror.js",
+        "~/Scripts/CodeMirror/javascript.js",
+        "~/Scripts/CodeMirror/formatting.js",
+        "~/Scripts/CodeMirror/searchcursor.js",
+        "~/Scripts/CodeMirror/show-hint.js",
+        "~/Scripts/CodeMirror/javascript-hint.js",
+        "~/Scripts/CodeMirror/match-highlighter.js",
+        "~/Scripts/CodeMirror/search.js",
+        "~/Scripts/CodeMirror/dialog.js",
+        "~/Scripts/CodeMirror/fullscreen.js"
+        )
     <style type="text/css">
       .CodeMirror {
         border: 1px solid #eee;
@@ -49,7 +62,7 @@
     @Html.ValueLine(Model, c => c.Script, vl => { vl.ValueLineType = ValueLineType.TextArea; vl.LabelVisible = false; })
  
     <script>
-        requre(["ChartScript"], function (ChartScript) {
+        require(["@ChartClient.ModuleScript"], function (ChartScript) {
             ChartScript.init($("#@(Model.Compose("Script"))"));
         }); 
     </script>
