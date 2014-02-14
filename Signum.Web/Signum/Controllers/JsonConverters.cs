@@ -47,7 +47,7 @@ namespace Signum.Web.Controllers
     {
         public override bool CanConvert(Type objectType)
         {
-            return objectType == typeof(Enum);
+            return objectType.IsEnum;
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
@@ -58,6 +58,7 @@ namespace Signum.Web.Controllers
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             Enum myEnum = (Enum)value;
+            writer.WriteStartObject();
 
             writer.WritePropertyName("Id");
             serializer.Serialize(writer, Convert.ToInt32(myEnum));
@@ -65,6 +66,8 @@ namespace Signum.Web.Controllers
             serializer.Serialize(writer, myEnum.ToString());
             writer.WritePropertyName("ToStr");
             serializer.Serialize(writer, myEnum.NiceToString());
+
+            writer.WriteEndObject();
         }
     }
 }
