@@ -69,7 +69,7 @@ export class FileLine extends Lines.EntityBase {
         xhr.open("POST", this.options.uploadDroppedUrl || SF.Urls.uploadDroppedFile, true);
         xhr.setRequestHeader("X-FileName", fileName);
         xhr.setRequestHeader("X-Prefix", this.options.prefix);
-        xhr.setRequestHeader("X-" + SF.compose(this.options.prefix, Entities.Keys.runtimeInfo), this.runtimeInfo().value.toString());
+        xhr.setRequestHeader("X-" + SF.compose(this.options.prefix, Entities.Keys.runtimeInfo), this.runtimeInfo().value().toString());
         xhr.setRequestHeader("X-sfFileType", $(this.pf("sfFileType")).val());
         xhr.setRequestHeader("X-sfTabId", $("#sfTabId").val());
 
@@ -141,8 +141,13 @@ export class FileLine extends Lines.EntityBase {
 
     setEntitySpecific(entityValue: Entities.EntityValue, itemPrefix?: string) {
         $(this.pf(Entities.Keys.loading)).hide();
-        $(this.pf(Entities.Keys.toStr)).html(entityValue.toStr);
-        $(this.pf(Entities.Keys.link)).html(entityValue.toStr).attr("download", entityValue.toStr).attr("href", entityValue.link);
+        if (entityValue) {
+            $(this.pf(Entities.Keys.toStr)).html(entityValue.toStr);
+            $(this.pf(Entities.Keys.link)).html(entityValue.toStr).attr("download", entityValue.toStr).attr("href", entityValue.link);
+        } else {
+            $(this.pf(Entities.Keys.toStr)).html("")
+            $(this.pf(Entities.Keys.toStr)).html("").attr("download", undefined).attr("href", undefined)
+        }
     }
 
     onUploaded(fileName: string, link: string, runtimeInfo: string, entityState: string) {
@@ -164,7 +169,7 @@ export class FileLine extends Lines.EntityBase {
     }
 
     updateButtonsDisplay() {
-        var hasEntity = !!this.runtimeInfo().value;
+        var hasEntity = !!this.runtimeInfo().value();
 
         $(this.pf('DivOld')).toggle(hasEntity);
         $(this.pf('DivNew')).toggle(!hasEntity);
