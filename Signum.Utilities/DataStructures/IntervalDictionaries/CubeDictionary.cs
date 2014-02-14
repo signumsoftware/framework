@@ -95,5 +95,10 @@ namespace Signum.Utilities.DataStructures
 
             return new IntervalValue<V>(values[ix, iy, iz]);
         }
+
+        public string Counts()
+        {
+            return this.xDimension.Count + " x " + this.yDimension.Count + " x " + this.zDimension.Count;
+        }
     }
 }

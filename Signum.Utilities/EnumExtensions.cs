@@ -101,9 +101,28 @@ namespace Signum.Utilities
 
             return Enum.GetValues(type).Cast<Enum>();
         }
+
+        public static T? GetByCode<T>(string code)
+            where T: struct
+        {
+            return (T?)(object)EnumFieldCache.Get(typeof(T))
+                .Where(kvp => kvp.Value.SingleAttribute<CodeAttribute>().Code == code)
+                .Select(kvp => kvp.Key)
+                .SingleOrDefaultEx();
+        }
     }
 
 
+    [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
+    public class CodeAttribute : Attribute
+    {
+        public readonly string Code;
+
+        public CodeAttribute(string code)
+        {
+            this.Code = code;
+        }
+    }
 
     public static class EnumFieldCache
     {
@@ -127,4 +146,5 @@ namespace Signum.Utilities
             return enumCache.GetOrAdd(type, t => t.GetFields(flags).ToDictionary(fi => (Enum)fi.GetValue(null), fi => fi));
         }
     }
+
 }
