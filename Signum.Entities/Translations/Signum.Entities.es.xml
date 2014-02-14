@@ -220,7 +220,7 @@
   </Type>
   <Type Name="OperationMessage">
     <Member Name="Create" Description="Crear..." />
-    <Member Name="CreateFromRegex" Description="^ Crear (. *) de. *$" />
+    <Member Name="CreateFromRegex" Description="^Crear (.*) desde .*$" />
     <Member Name="Delete" Description="¿Borrar?" />
     <Member Name="InUserInterface" Description="(en interfaz de usuario)" />
     <Member Name="Logs" Description="Registros" />
