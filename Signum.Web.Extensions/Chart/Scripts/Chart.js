@@ -8,6 +8,8 @@ var __extends = this.__extends || function (d, b) {
     d.prototype = new __();
 };
 define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Framework/Signum.Web/Signum/Scripts/Validator", "Framework/Signum.Web/Signum/Scripts/Operations", "ChartUtils", "d3"], function(require, exports, Finder, Validator, Operations, ChartUtils, d3) {
+    ChartUtils;
+
     function openChart(prefix, url) {
         Finder.getFor(prefix).then(function (sc) {
             return SF.submit(url, sc.requestDataForSearch());

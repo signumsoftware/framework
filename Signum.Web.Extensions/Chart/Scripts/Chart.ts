@@ -8,7 +8,7 @@ import Finder = require("Framework/Signum.Web/Signum/Scripts/Finder")
 import Validator = require("Framework/Signum.Web/Signum/Scripts/Validator")
 import Operations = require("Framework/Signum.Web/Signum/Scripts/Operations")
 
-import ChartUtils = require("ChartUtils")
+import ChartUtils = require("ChartUtils"); ChartUtils;
 import d3 = require("d3")
 
 export function openChart(prefix: string, url: string) {
