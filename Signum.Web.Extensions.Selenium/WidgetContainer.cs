@@ -125,6 +125,15 @@ namespace Signum.Web.Selenium
             throw new InvalidOperationException("Unexpected state {0}".Formato(state)); 
         }
 
+        public static bool AlertsAre(this IWidgetContainer container, int attended, int alerted, int future)
+        {
+            return
+                attended == container.AlertCount(AlertCurrentState.Attended) &&
+                alerted == container.AlertCount(AlertCurrentState.Alerted) &&
+                future == container.AlertCount(AlertCurrentState.Future);
+        }
+            
+
         public static int AlertCount(this IWidgetContainer container, AlertCurrentState state)
         {
             var result = container.Selenium.GetEval("window.$('{0} .sf-alerts-toggler .sf-widget-count.{1}').html()".Formato(
