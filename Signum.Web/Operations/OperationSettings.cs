@@ -166,6 +166,7 @@ namespace Signum.Web.Operations
         public string operationKey;
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string prefix;
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public bool? isLite;
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string confirmMessage;
