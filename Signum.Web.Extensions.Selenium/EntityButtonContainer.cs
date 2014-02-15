@@ -33,14 +33,23 @@ namespace Signum.Web.Selenium
             return container.ButtonEnabled(operationKey.GetType().Name + "_" + operationKey.ToString());
         }
 
+        public static bool OperationDisabled(this IEntityButtonContainer container, Enum operationKey)
+        {
+            return container.ButtonEnabled(operationKey.GetType().Name + "_" + operationKey.ToString());
+        }
+
         public static bool ButtonEnabled(this IEntityButtonContainer container, string idButton)
         {
             string locator = container.ButtonLocator(idButton);
 
-            if (!container.Selenium.IsElementPresent(locator))
-                throw new InvalidOperationException("{0} not found".Formato(idButton));
-
             return container.Selenium.IsElementPresent(locator + ":not(.sf-disabled)");
+        }
+
+        public static bool ButtonDisabled(this IEntityButtonContainer container, string idButton)
+        {
+            string locator = container.ButtonLocator(idButton);
+
+            return container.Selenium.IsElementPresent(locator + ".sf-disabled");
         }
 
         public static void OperationClick(this IEntityButtonContainer container, Enum operationKey)
