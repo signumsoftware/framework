@@ -55,7 +55,8 @@ var SF;
                 if (!SF.isEmpty(url))
                     location.href = url;
 
-                originalSuccess(result, text, xhr);
+                if (originalSuccess)
+                    originalSuccess(result, text, xhr);
             };
         });
     }
