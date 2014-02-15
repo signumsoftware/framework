@@ -25,9 +25,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var _this = this;
             var $txt = $(this.pf(Entities.Keys.toStr) + ".sf-entity-autocomplete");
             if ($txt.length > 0) {
-                var data = $txt.data();
+                var url = $txt.attr("data-url");
 
-                this.autoCompleter = new AjaxEntityAutoCompleter(SF.Urls.autocomplete, function (term) {
+                this.autoCompleter = new AjaxEntityAutoCompleter(url || SF.Urls.autocomplete, function (term) {
                     return ({ types: _this.staticInfo().getValue(Entities.StaticInfo._types), l: 5, q: term });
                 });
 
@@ -510,6 +510,20 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         EntityListBase.prototype.getItems = function () {
             throw new Error("getItems is abstract");
+        };
+
+        EntityListBase.prototype.getPrefixes = function () {
+            var _this = this;
+            return this.getItems().toArray().map(function (e) {
+                return e.id.before("_" + _this.itemSuffix());
+            });
+        };
+
+        EntityListBase.prototype.getRuntimeInfos = function () {
+            var _this = this;
+            return this.getPrefixes().map(function (p) {
+                return _this.runtimeInfo(p).value();
+            });
         };
 
         EntityListBase.prototype.getNextPrefix = function () {

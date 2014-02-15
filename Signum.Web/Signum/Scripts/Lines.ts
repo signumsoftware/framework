@@ -42,9 +42,9 @@ export class EntityBase {
     _create() {
         var $txt = $(this.pf(Entities.Keys.toStr) + ".sf-entity-autocomplete");
         if ($txt.length > 0) {
-            var data = $txt.data();
+            var url = $txt.attr("data-url");
 
-            this.autoCompleter = new AjaxEntityAutoCompleter(SF.Urls.autocomplete,
+            this.autoCompleter = new AjaxEntityAutoCompleter(url || SF.Urls.autocomplete,
                 term => ({ types: this.staticInfo().getValue(Entities.StaticInfo._types), l: 5, q: term }));
 
             this.setupAutocomplete($txt);
@@ -451,8 +451,6 @@ export class EntityListBase extends EntityBase {
         return $(containerDivId);
     }
 
-
-
     getEmbeddedTemplate(itemPrefix?: string) {
         var template = super.getEmbeddedTemplate();
         if (SF.isEmpty(template))
@@ -547,6 +545,15 @@ export class EntityListBase extends EntityBase {
 
     getItems(): JQuery {
         throw new Error("getItems is abstract");
+    }
+
+    getPrefixes(): string[] {
+        return this.getItems().toArray()
+            .map((e: HTMLElement) => e.id.before("_" + this.itemSuffix()));
+    }
+
+    getRuntimeInfos(): Entities.RuntimeInfoValue[] {
+        return this.getPrefixes().map(p=> this.runtimeInfo(p).value());
     }
 
     getNextPrefix(): string {
