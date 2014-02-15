@@ -227,7 +227,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 },
                 select: function (event, ui) {
                     _this.onAutocompleteSelected(ui.item.value);
-                    _this.setEntity(ui.item.value);
                     event.preventDefault();
                 }
             });

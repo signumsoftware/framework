@@ -244,7 +244,6 @@ export class EntityBase {
             },
             select: (event, ui) => {
                 this.onAutocompleteSelected(ui.item.value);
-                this.setEntity(ui.item.value);
                 event.preventDefault();
             },
         });
