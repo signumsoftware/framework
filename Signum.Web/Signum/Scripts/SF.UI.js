@@ -9,6 +9,12 @@ var SF;
         };
 
         function getPromise(jq) {
+            if (jq.length == 0)
+                throw new Error("impossible to get SFControl from no elements");
+
+            if (jq.length > 1)
+                throw new Error("impossible to get SFControl from more than one element");
+
             var result = jq.data("SF-control");
 
             if (result)
@@ -35,6 +41,12 @@ var SF;
         };
 
         function fulllFill(jq, control) {
+            if (jq.length == 0)
+                throw new Error("impossible to fulfill SFControl from no elements");
+
+            if (jq.length > 1)
+                throw new Error("impossible to fulfill SFControl from more than one element");
+
             var queue = jq.data("SF-queue");
 
             if (queue) {

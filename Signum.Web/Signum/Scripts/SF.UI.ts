@@ -14,6 +14,13 @@ module SF {
         };
 
         function getPromise<T>(jq: JQuery): Promise<T> {
+
+            if (jq.length == 0)
+                throw new Error("impossible to get SFControl from no elements");
+
+            if (jq.length > 1)
+                throw new Error("impossible to get SFControl from more than one element");
+
             var result = <T>jq.data("SF-control");
 
             if (result)
@@ -42,6 +49,12 @@ module SF {
 
         function fulllFill<T>(jq: JQuery, control: T){
          
+            if (jq.length == 0)
+                throw new Error("impossible to fulfill SFControl from no elements");
+
+            if (jq.length > 1)
+                throw new Error("impossible to fulfill SFControl from more than one element");
+
             var queue: { (value: T): void }[] = jq.data("SF-queue");
 
             if (queue) {
