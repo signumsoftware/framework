@@ -293,7 +293,7 @@ namespace Signum.Web.Selenium
             get { return RuntimeInfo().ToLite(); }
             set
             {
-                Selenium.Select(ComboLocator, "value=" + (value == null ? null : value.Id.ToString()));
+                Selenium.Select(ComboLocator, "value=" + (value == null ? null : value.Key()));
             }
         }
 
