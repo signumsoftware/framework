@@ -490,7 +490,7 @@ namespace Signum.Engine.Maps
             {
                 var atts = ss.FieldAttributes(route);
 
-                return Implementations.TryFromAttributes(route.GetType().CleanType(), atts, route) ?? Implementations.By();
+                return Implementations.TryFromAttributes(route.Type.CleanType(), atts, route) ?? Implementations.By();
             }
 
             throw new InvalidOperationException("Impossible to determine implementations for {0}".Formato(route, typeof(IIdentifiable).Name));
