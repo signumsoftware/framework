@@ -77,7 +77,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
     function constructFromAjax(options, newPrefix) {
         options = $.extend({
-            controllerUrl: SF.Urls.operationConstructFrom
+            controllerUrl: SF.Urls.operationConstructFrom,
+            isLite: true
         }, options);
 
         if (!newPrefix)
@@ -104,7 +105,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
     function constructFromAjaxContextual(options, newPrefix, runtimeInfo) {
         options = $.extend({
-            controllerUrl: SF.Urls.operationConstructFrom
+            controllerUrl: SF.Urls.operationConstructFrom,
+            isLite: true
         }, options);
 
         if (!newPrefix)
@@ -148,7 +150,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.deleteAjax = deleteAjax;
 
     function deleteDefaultContextual(options) {
-        options = $.extend({}, options);
+        options = $.extend({
+            isLite: true
+        }, options);
 
         if (!exports.confirmIfNecessary(options))
             return Promise.reject("confirmation");

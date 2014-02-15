@@ -93,6 +93,7 @@ export function constructFromDefault(options: EntityOperationOptions): Promise<v
 export function constructFromAjax(options: EntityOperationOptions, newPrefix?: string) : Promise<Entities.EntityHtml>  {
     options = $.extend({
         controllerUrl: SF.Urls.operationConstructFrom,
+        isLite: true,
     }, options);
 
     if (!newPrefix)
@@ -118,6 +119,7 @@ export function constructFromDefaultContextual(options: OperationOptions, newPre
 export function constructFromAjaxContextual(options: OperationOptions, newPrefix?: string, runtimeInfo?: Entities.RuntimeInfoValue): Promise<Entities.EntityHtml> {
     options = $.extend({
         controllerUrl: SF.Urls.operationConstructFrom,
+        isLite: true,
     }, options);
 
     if (!newPrefix)
@@ -156,6 +158,7 @@ export function deleteAjax(options: EntityOperationOptions): Promise<any> {
 
 export function deleteDefaultContextual(options: OperationOptions): Promise<any> {
     options = $.extend({
+        isLite: true,
     }, options);
 
     if (!confirmIfNecessary(options))
