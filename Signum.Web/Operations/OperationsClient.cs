@@ -73,7 +73,7 @@ namespace Signum.Web.Operations
             if (prefix.HasText())
             {
                 TypeContext tc = TypeContextUtilities.UntypedNew(entity, prefix);
-                var popupOptions = request[ViewDataKeys.ViewMode].HasText() ?
+                var popupOptions = request[ViewDataKeys.ViewMode] == ViewMode.View.ToString() ?
                     (PopupOptionsBase)new PopupViewOptions(tc) :
                     (PopupOptionsBase)new PopupNavigateOptions(tc);
 
