@@ -105,11 +105,13 @@ namespace Signum.Entities.Mailing
             set { if (Set(ref body, value, () => Subject))CalculateHash(); }
         }
 
+        char[] spaceChars = new[] { '\r', '\r', ' ' };
+
         void CalculateHash()
         {
             var str = subject + body;
 
-            BodyHash = Convert.ToBase64String(SHA1.Create().ComputeHash(Encoding.ASCII.GetBytes(str)));
+            BodyHash = Convert.ToBase64String(SHA1.Create().ComputeHash(Encoding.ASCII.GetBytes(str.Trim(spaceChars))));
         }
 
         [NotNullable, SqlDbType(Size = 150)]
