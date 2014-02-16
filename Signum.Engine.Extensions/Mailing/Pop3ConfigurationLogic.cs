@@ -21,6 +21,7 @@ using Signum.Entities.Mailing;
 using Signum.Utilities;
 using Signum.Utilities.DataStructures;
 using Signum.Entities.Basics;
+using System.Net.Mime;
 
 namespace Signum.Engine.Mailing
 {
@@ -78,7 +79,7 @@ namespace Signum.Engine.Mailing
                        e.Template,
                        e.State,
                        e.Sent,
-                       e.Mixin<EmailReceptionMixin>().ReceptionInfo.SentDate,
+                       SentDate = (DateTime?)e.Mixin<EmailReceptionMixin>().ReceptionInfo.SentDate,
                        e.Package,
                        e.Exception,
                    });
@@ -208,6 +209,15 @@ namespace Signum.Engine.Mailing
 
                                     EmailMessageDN email = ToEmailMessage(mm, rawContent, kvp.Value, reception.ToLite());
 
+                                    if (email.Recipients.IsEmpty())
+                                    {
+                                        email.Recipients.Add(new EmailRecipientDN
+                                        {
+                                            EmailAddress = config.Username,
+                                            Kind = EmailRecipientKind.To,
+                                        }); 
+                                    }
+
                                     Lite<EmailMessageDN> duplicate = Database.Query<EmailMessageDN>()
                                         .Where(a => a.BodyHash == email.BodyHash)
                                         .Select(a => a.ToLite())
@@ -336,7 +346,7 @@ namespace Signum.Engine.Mailing
                     new EmailAttachmentDN
                     {
                         ContentId = a.ContentId,
-                        File = new FilePathDN(EmailFileType.Attachment, a.ContentType.Name, a.ContentStream.ReadAllBytes()).Save(),
+                        File = new FilePathDN(EmailFileType.Attachment, GetName(a.ContentType), a.ContentStream.ReadAllBytes()).Save(),
                         Type = EmailAttachmentType.Attachment
                     }).ToMList()
             };
@@ -372,13 +382,18 @@ namespace Signum.Engine.Mailing
                         new EmailAttachmentDN
                         {
                             ContentId = a.ContentId,
-                            File = new FilePathDN(EmailFileType.Attachment, a.ContentType.Name, a.ContentStream.ReadAllBytes()),
+                            File = new FilePathDN(EmailFileType.Attachment, GetName(a.ContentType), a.ContentStream.ReadAllBytes()),
                             Type = EmailAttachmentType.LinkedResource
                         }));
                 }
             }
 
             return dn;
+        }
+
+        private static string GetName(ContentType ct)
+        {
+            return ct.Name ?? ("unknown" + MimeType.GetDefaultExtension(ct.MediaType));
         }
 
         private static DateTime GetDate(MailMessage mm)
