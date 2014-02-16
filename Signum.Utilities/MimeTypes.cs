@@ -246,5 +246,23 @@ namespace Signum.Utilities
                 return "application/" + extension.Substring(1);
             }); 
         }
+
+        public static ConcurrentDictionary<string, string> CacheExtension = new ConcurrentDictionary<string, string>();
+
+        public static string GetDefaultExtension(string mimeType)
+        {
+            return CacheExtension.GetOrAdd(mimeType, mt =>
+            {
+                RegistryKey key = Registry.ClassesRoot.OpenSubKey(@"MIME\Database\Content Type\" + mt, false);
+                if (key == null)
+                    return "";
+
+                object value = key.GetValue("Extension", null);
+                if (value == null)
+                    return "";
+
+                return value.ToString();
+            }); 
+        }
     }
 }
