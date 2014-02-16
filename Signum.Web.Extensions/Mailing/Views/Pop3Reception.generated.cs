@@ -136,7 +136,7 @@ Write(Html.EntityLine(sc, s => s.Exception));
             #line 12 "..\..\Mailing\Views\Pop3Reception.cshtml"
 Write(Html.CountSearchControl(new FindOptions(typeof(EmailMessageDN))
     {
-        FilterOptions = { new FilterOption("ReceptionInfo.Reception", sc.Value) }
+        FilterOptions = { new FilterOption("Entity.ReceptionInfo.Reception", sc.Value) }
     }, csc => { csc.PopupViewPrefix = sc.Compose("mm"); csc.WriteQueryName = WriteQueryName.Field; }));
 
             
@@ -154,7 +154,7 @@ Write(Html.CountSearchControl(new FindOptions(typeof(EmailMessageDN))
             #line 17 "..\..\Mailing\Views\Pop3Reception.cshtml"
 Write(Html.CountSearchControl(new FindOptions(typeof(ExceptionDN))
     {
-        FilterOptions = { new FilterOption("Pop3Reception", sc.Value) }
+        FilterOptions = { new FilterOption("Entity.Pop3Reception", sc.Value) }
     }, csc => { csc.PopupViewPrefix = sc.Compose("mm"); csc.WriteQueryName = WriteQueryName.Field; }));
 
             
