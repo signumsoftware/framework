@@ -249,7 +249,7 @@ export function activateIFrame($iframe: JQuery) {
 
 
     function fixHeight() {
-        $iframe.height(container.children().height() + 100);
+        $iframe.height(container.children().toArray().map(a=> $(a).height()).reduce((a, b) => a + b, 0) + 100);
     }
     fixHeight();
     setInterval(fixHeight, 500);

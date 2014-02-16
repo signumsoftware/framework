@@ -244,7 +244,11 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
             container = $iframe.contents();
 
         function fixHeight() {
-            $iframe.height(container.children().height() + 100);
+            $iframe.height(container.children().toArray().map(function (a) {
+                return $(a).height();
+            }).reduce(function (a, b) {
+                return a + b;
+            }, 0) + 100);
         }
         fixHeight();
         setInterval(fixHeight, 500);
