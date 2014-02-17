@@ -25,7 +25,7 @@ namespace Signum.Web
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.Surround(new HtmlTag("fieldset").Id(entityRepeater.ControlID).Class("sf-repeater-field SF-control-container")))
+            using (sb.Surround(new HtmlTag("fieldset").Id(entityRepeater.Prefix).Class("sf-repeater-field SF-control-container")))
             {
                 using (sb.Surround(new HtmlTag("legend")))
                 {
@@ -77,7 +77,7 @@ namespace Signum.Web
                                     "sf-line-button sf-remove",
                                     new Dictionary<string, object> 
                                     {
-                                        { "onclick", entityRepeater.SFControlThen("removeItem_click('{0}')".Formato(itemTC.ControlID)) },
+                                        { "onclick", entityRepeater.SFControlThen("removeItem_click('{0}')".Formato(itemTC.Prefix)) },
                                         { "data-icon", "ui-icon-circle-close" }, 
                                         { "data-text", false } 
                                     }));
@@ -90,7 +90,7 @@ namespace Signum.Web
                                 "sf-line-button sf-move-up",
                                 new Dictionary<string, object> 
                                 {  
-                                   { "onclick", entityRepeater.SFControlThen("moveUp('{0}')".Formato(itemTC.ControlID)) },
+                                   { "onclick", entityRepeater.SFControlThen("moveUp('{0}')".Formato(itemTC.Prefix)) },
                                    { "data-icon", "ui-icon-triangle-1-n" },
                                    { "data-text", false },
                                    { "title", JavascriptMessage.moveUp.NiceToString() }
@@ -102,7 +102,7 @@ namespace Signum.Web
                                 "sf-line-button sf-move-down",
                                 new Dictionary<string, object> 
                                 {   
-                                   { "onclick", entityRepeater.SFControlThen("moveDown('{0}')".Formato(itemTC.ControlID)) },
+                                   { "onclick", entityRepeater.SFControlThen("moveDown('{0}')".Formato(itemTC.Prefix)) },
                                    { "data-icon", "ui-icon-triangle-1-s" },
                                    { "data-text", false },
                                    { "title", JavascriptMessage.moveDown.NiceToString() }

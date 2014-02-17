@@ -69,7 +69,7 @@ WriteLiteral(" data-prefix=\"");
 
             
             #line 4 "..\..\Signum\Views\PopupOkControl.cshtml"
-                                                                        Write(Model.ControlID);
+                                                                        Write(Model.Prefix);
 
             
             #line default

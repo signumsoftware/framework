@@ -44,7 +44,7 @@ namespace Signum.Web
             if (tc == null)
                 return null;
             else
-                return tc.ControlID;
+                return tc.Prefix;
         }
     }
 

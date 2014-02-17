@@ -57,7 +57,7 @@ WriteLiteral(" data-prefix=\"");
 
             
             #line 3 "..\..\Signum\Views\PopupCancelControl.cshtml"
-                                                                        Write(Model.ControlID);
+                                                                        Write(Model.Prefix);
 
             
             #line default

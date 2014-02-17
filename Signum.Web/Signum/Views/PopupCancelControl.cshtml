@@ -1,5 +1,5 @@
 ﻿@model Context
 
-<div id="@Model.Compose("panelPopup")" class="sf-popup-control" data-prefix="@Model.ControlID" data-title="@((string)ViewData[ViewDataKeys.Title])">
+<div id="@Model.Compose("panelPopup")" class="sf-popup-control" data-prefix="@Model.Prefix" data-title="@((string)ViewData[ViewDataKeys.Title])">
     @Html.Partial((string)ViewData[ViewDataKeys.PartialViewName], Model)   
 </div>

@@ -49,7 +49,7 @@ namespace Signum.Web
         private static void InternalValueLineLabel(HtmlHelper helper, ValueLine valueLine, HtmlStringBuilder sb)
         {
             if (valueLine.LabelVisible)
-                sb.AddLine(helper.Label(valueLine.Compose("lbl"), valueLine.LabelText, valueLine.ControlID, "sf-label-line", valueLine.LabelHtmlProps));
+                sb.AddLine(helper.Label(valueLine.Compose("lbl"), valueLine.LabelText, valueLine.Prefix, "sf-label-line", valueLine.LabelHtmlProps));
         }
 
         private static void InternalValueLineValue(HtmlHelper helper, ValueLine valueLine, HtmlStringBuilder sb)
@@ -70,7 +70,7 @@ namespace Signum.Web
 
             if (valueLine.ShowValidationMessage)
             {
-                sb.AddLine(helper.ValidationMessage(valueLine.ControlID));
+                sb.AddLine(helper.ValidationMessage(valueLine.Prefix));
             }
         }
 
@@ -83,7 +83,7 @@ namespace Signum.Web
             {
                 MvcHtmlString result = MvcHtmlString.Empty;
                 if (valueLine.WriteHiddenOnReadonly)
-                    result = result.Concat(helper.Hidden(valueLine.ControlID, valueLine.UntypedValue.ToString()));
+                    result = result.Concat(helper.Hidden(valueLine.Prefix, valueLine.UntypedValue.ToString()));
 
                 string str =
                     value == null ? null :
@@ -117,7 +117,7 @@ namespace Signum.Web
                 if (value != null)
                     items.Where(e => e.Value == value.ToString()).SingleEx(()=>"Not value present in ValueLine", ()=> "More than one values present in ValueLine").Selected = true;
 
-            return helper.DropDownList(valueLine.ControlID, items, valueLine.ValueHtmlProps);
+            return helper.DropDownList(valueLine.Prefix, items, valueLine.ValueHtmlProps);
         }
 
         public static MvcHtmlString DateTimePickerTextbox(this HtmlHelper helper, ValueLine valueLine)
@@ -134,7 +134,7 @@ namespace Signum.Web
             {
                 MvcHtmlString result = MvcHtmlString.Empty;
                 if (valueLine.WriteHiddenOnReadonly)
-                    result = result.Concat(helper.Hidden(valueLine.ControlID, value.TryToString(valueLine.Format)));
+                    result = result.Concat(helper.Hidden(valueLine.Prefix, value.TryToString(valueLine.Format)));
                 return result.Concat(helper.Span("", value.TryToString(valueLine.Format), "sf-value-line", valueLine.ValueHtmlProps));
             }
 
@@ -159,10 +159,10 @@ namespace Signum.Web
             if (!valueLine.ValueHtmlProps.ContainsKey("placeholder") && jsDataFormat.HasText())
                 valueLine.ValueHtmlProps["placeholder"] = jsDataFormat.ToLower();
 
-            MvcHtmlString returnString = helper.TextBox(valueLine.ControlID, value.TryToString(valueLine.Format), valueLine.ValueHtmlProps);
+            MvcHtmlString returnString = helper.TextBox(valueLine.Prefix, value.TryToString(valueLine.Format), valueLine.ValueHtmlProps);
             
             if (!isDefaultDatepicker)
-                returnString = returnString.Concat(helper.Calendar(valueLine.ControlID, valueLine.DatePickerOptions));
+                returnString = returnString.Concat(helper.Calendar(valueLine.Prefix, valueLine.DatePickerOptions));
 
             return returnString;
         }
@@ -170,9 +170,9 @@ namespace Signum.Web
         public static MvcHtmlString Hidden(this HtmlHelper helper, ValueLine valueLine)
         {
             if (valueLine.ReadOnly)
-                return helper.Span(valueLine.ControlID, valueLine.UntypedValue.TryToString() ?? "", "sf-value-line");
+                return helper.Span(valueLine.Prefix, valueLine.UntypedValue.TryToString() ?? "", "sf-value-line");
 
-            return HtmlHelperExtenders.InputType("hidden", valueLine.ControlID, valueLine.UntypedValue.TryToString() ?? "", valueLine.ValueHtmlProps);
+            return HtmlHelperExtenders.InputType("hidden", valueLine.Prefix, valueLine.UntypedValue.TryToString() ?? "", valueLine.ValueHtmlProps);
         }
 
         public static MvcHtmlString TextboxInLine(this HtmlHelper helper, ValueLine valueLine)
@@ -184,7 +184,7 @@ namespace Signum.Web
             {
                 MvcHtmlString result = MvcHtmlString.Empty;
                 if (valueLine.WriteHiddenOnReadonly)
-                    result = result.Concat(helper.Hidden(valueLine.ControlID, value));
+                    result = result.Concat(helper.Hidden(valueLine.Prefix, value));
                 return result.Concat(helper.Span("", value, "sf-value-line", valueLine.ValueHtmlProps));
             }
 
@@ -198,7 +198,7 @@ namespace Signum.Web
             if (!valueLine.ValueHtmlProps.ContainsKey("type"))
                 valueLine.ValueHtmlProps["type"] = "text";
 
-            return helper.TextBox(valueLine.ControlID, value, valueLine.ValueHtmlProps);
+            return helper.TextBox(valueLine.Prefix, value, valueLine.ValueHtmlProps);
         }
 
         public static MvcHtmlString NumericTextbox(this HtmlHelper helper, ValueLine valueLine)
@@ -217,14 +217,14 @@ namespace Signum.Web
             {
                 MvcHtmlString result = MvcHtmlString.Empty;
                 if (valueLine.WriteHiddenOnReadonly)
-                    result = result.Concat(helper.Hidden(valueLine.ControlID, (string)valueLine.UntypedValue));
+                    result = result.Concat(helper.Hidden(valueLine.Prefix, (string)valueLine.UntypedValue));
                 return result.Concat(helper.Span("", (string)valueLine.UntypedValue, "sf-value-line", valueLine.ValueHtmlProps));
             }
 
             valueLine.ValueHtmlProps.Add("autocomplete", "off");
             valueLine.ValueHtmlProps["onblur"] = "this.innerHTML = this.value; " + valueLine.ValueHtmlProps.TryGetC("onblur");
 
-            return helper.TextArea(valueLine.ControlID, (string)valueLine.UntypedValue, valueLine.ValueHtmlProps);
+            return helper.TextArea(valueLine.Prefix, (string)valueLine.UntypedValue, valueLine.ValueHtmlProps);
         }
 
         public static MvcHtmlString CheckBox(this HtmlHelper helper, ValueLine valueLine)
@@ -233,7 +233,7 @@ namespace Signum.Web
                 valueLine.ValueHtmlProps.Add("disabled", "disabled");
 
             bool? value = (bool?)valueLine.UntypedValue;
-            return HtmlHelperExtenders.CheckBox(helper, valueLine.ControlID, value.HasValue ? value.Value : false, !valueLine.ReadOnly, valueLine.ValueHtmlProps);
+            return HtmlHelperExtenders.CheckBox(helper, valueLine.Prefix, value.HasValue ? value.Value : false, !valueLine.ReadOnly, valueLine.ValueHtmlProps);
         }
 
         public static MvcHtmlString RadioButtons(this HtmlHelper helper, ValueLine valueLine)
@@ -244,22 +244,22 @@ namespace Signum.Web
             if (valueLine.ReadOnly)
             {
                 if (valueLine.WriteHiddenOnReadonly)
-                    sb.AddLine(helper.Hidden(valueLine.ControlID, value ?? false));
+                    sb.AddLine(helper.Hidden(valueLine.Prefix, value ?? false));
                 
                 valueLine.ValueHtmlProps.Add("disabled", "disabled");
             }
 
-            valueLine.ValueHtmlProps.Add("name", valueLine.ControlID);
+            valueLine.ValueHtmlProps.Add("name", valueLine.Prefix);
 
             valueLine.ValueHtmlProps.AddCssClass("rbValueLine");
 
-            sb.AddLine(MvcHtmlString.Create(helper.RadioButton(valueLine.ControlID, true, value == true, valueLine.ValueHtmlProps).ToHtmlString()
-                .Replace("id=\"" + valueLine.ControlID + "\"", "id=\"" + valueLine.ControlID + "_True\"")));
+            sb.AddLine(MvcHtmlString.Create(helper.RadioButton(valueLine.Prefix, true, value == true, valueLine.ValueHtmlProps).ToHtmlString()
+                .Replace("id=\"" + valueLine.Prefix + "\"", "id=\"" + valueLine.Prefix + "_True\"")));
 
             sb.AddLine(helper.Span(valueLine.Compose("lblRadioTrue"), valueLine.RadioButtonLabelTrue, "sf-value-line-radiolbl"));
 
-            sb.AddLine(MvcHtmlString.Create(helper.RadioButton(valueLine.ControlID, false, value == false, valueLine.ValueHtmlProps).ToHtmlString()
-              .Replace("id=\"" + valueLine.ControlID + "\"", "id=\"" + valueLine.ControlID + "_False\"")));
+            sb.AddLine(MvcHtmlString.Create(helper.RadioButton(valueLine.Prefix, false, value == false, valueLine.ValueHtmlProps).ToHtmlString()
+              .Replace("id=\"" + valueLine.Prefix + "\"", "id=\"" + valueLine.Prefix + "_False\"")));
 
             sb.AddLine(helper.Span(valueLine.Compose("lblRadioFalse"), valueLine.RadioButtonLabelFalse, "sf-value-line-radiolbl"));
 

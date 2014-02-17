@@ -93,9 +93,9 @@ namespace Signum.Web
             }
         }
 
-        public static string SFControlThen(string controlID, string functionCall)
+        public static string SFControlThen(string prefix, string functionCall)
         {
-            return "$('#" + controlID + "').SFControl().then(function(c){c." + functionCall + ";})";
+            return "$('#" + prefix + "').SFControl().then(function(c){c." + functionCall + ";})";
         }
     }
 

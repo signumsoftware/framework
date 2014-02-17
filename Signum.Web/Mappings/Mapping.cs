@@ -320,9 +320,9 @@ namespace Signum.Web
         {
             var csl = sortedList as ContextualSortedList<string>;
 
-            string controlID = csl == null ? nameToAppend : csl.ControlID + nameToAppend;
+            string prefix = csl == null ? nameToAppend : csl.Prefix + nameToAppend;
 
-            return new ContextualSortedList<string>(sortedList, controlID + TypeContext.Separator);
+            return new ContextualSortedList<string>(sortedList, prefix + TypeContext.Separator);
         }
     }
 
@@ -410,7 +410,7 @@ namespace Signum.Web
             }
 
             Mapping<R> mapping =  (Mapping<R>)(AllowedMappings.TryGetC(typeof(R)) ?? Navigator.EntitySettings(typeof(R)).UntypedMappingLine);
-            SubContext<R> sc = new SubContext<R>(ctx.ControlID, null, route, ctx) { Value = ctx.Value as R }; // If the type is different, the AutoEntityMapping has the current value but EntityMapping just null
+            SubContext<R> sc = new SubContext<R>(ctx.Prefix, null, route, ctx) { Value = ctx.Value as R }; // If the type is different, the AutoEntityMapping has the current value but EntityMapping just null
             sc.Value = mapping(sc);
             ctx.SupressChange = sc.SupressChange;
             ctx.AddChild(sc);
@@ -492,10 +492,10 @@ namespace Signum.Web
 
         public SubContext<P> CreateSubContext(MappingContext<T> parent)
         {
-            string newControlId = TypeContextUtilities.Compose(parent.ControlID, PropertyValidator.PropertyInfo.Name);
+            string newPrefix = TypeContextUtilities.Compose(parent.Prefix, PropertyValidator.PropertyInfo.Name);
             PropertyRoute route = parent.PropertyRoute.Add(this.PropertyValidator.PropertyInfo);
 
-            SubContext<P> ctx = new SubContext<P>(newControlId, PropertyValidator, route, parent);
+            SubContext<P> ctx = new SubContext<P>(newPrefix, PropertyValidator, route, parent);
             if (parent.Value != null)
                 ctx.Value = GetValue(parent.Value);
             return ctx;
@@ -900,7 +900,7 @@ namespace Signum.Web
             if (EntityMapping == null)
                 throw new InvalidOperationException("Changes to Entity {0} are not allowed because EntityMapping is null".Formato(lite.TryToString()));
 
-            var sc = new SubContext<S>(ctx.ControlID, null, ctx.PropertyRoute.Add("Entity"), ctx) { Value = lite.Retrieve() };
+            var sc = new SubContext<S>(ctx.Prefix, null, ctx.PropertyRoute.Add("Entity"), ctx) { Value = lite.Retrieve() };
             sc.Value = EntityMapping(sc);
 
             ctx.AddChild(sc);
@@ -945,9 +945,9 @@ namespace Signum.Web
 
             var indexPrefixes = ctx.Inputs.IndexPrefixes();
 
-            foreach (var index in indexPrefixes.OrderBy(ip => (ctx.GlobalInputs.TryGetC(TypeContextUtilities.Compose(ctx.ControlID, ip, EntityListBaseKeys.Indexes)).TryCC(i => i.Split(new[] { ';' })[1]) ?? ip).ToInt()))
+            foreach (var index in indexPrefixes.OrderBy(ip => (ctx.GlobalInputs.TryGetC(TypeContextUtilities.Compose(ctx.Prefix, ip, EntityListBaseKeys.Indexes)).TryCC(i => i.Split(new[] { ';' })[1]) ?? ip).ToInt()))
             {
-                SubContext<S> itemCtx = new SubContext<S>(TypeContextUtilities.Compose(ctx.ControlID, index), null, route, ctx);
+                SubContext<S> itemCtx = new SubContext<S>(TypeContextUtilities.Compose(ctx.Prefix, index), null, route, ctx);
 
                 yield return itemCtx;
             }
@@ -1032,7 +1032,7 @@ namespace Signum.Web
                 MList<S> list = ctx.Value;
                 int i = 0;
 
-                foreach (MappingContext<S> itemCtx in GenerateItemContexts(ctx).OrderBy(mc => mc.ControlID.Substring(mc.ControlID.LastIndexOf("_") + 1).ToInt().Value))
+                foreach (MappingContext<S> itemCtx in GenerateItemContexts(ctx).OrderBy(mc => mc.Prefix.Substring(mc.Prefix.LastIndexOf("_") + 1).ToInt().Value))
                 {
                     Debug.Assert(!itemCtx.Empty());
 
@@ -1098,7 +1098,7 @@ namespace Signum.Web
 
                 foreach (MappingContext<S> itemCtx in GenerateItemContexts(ctx))
                 {
-                    SubContext<K> subContext = new SubContext<K>(TypeContextUtilities.Compose(itemCtx.ControlID, Route), null, route, itemCtx);
+                    SubContext<K> subContext = new SubContext<K>(TypeContextUtilities.Compose(itemCtx.Prefix, Route), null, route, itemCtx);
 
                     subContext.Value = KeyPropertyMapping(subContext);
 

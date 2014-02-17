@@ -23,8 +23,8 @@ namespace Signum.Web
 
         public string AutocompleteUrl { get; set; }
 
-        public EntityLine(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
-            : base(type, untypedValue, parent, controlID, propertyRoute)
+        public EntityLine(Type type, object untypedValue, Context parent, string prefix, PropertyRoute propertyRoute)
+            : base(type, untypedValue, parent, prefix, propertyRoute)
         {
             Autocomplete = true;
             Navigate = true;

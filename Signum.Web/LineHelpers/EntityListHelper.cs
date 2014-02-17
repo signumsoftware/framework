@@ -23,7 +23,7 @@ namespace Signum.Web
                 return MvcHtmlString.Empty;
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(new HtmlTag("div").Id(entityList.ControlID).Class("sf-field SF-control-container")))
+            using (sb.Surround(new HtmlTag("div").Id(entityList.Prefix).Class("sf-field SF-control-container")))
             {
                 sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityList));
 

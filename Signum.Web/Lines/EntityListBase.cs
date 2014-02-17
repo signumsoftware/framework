@@ -28,8 +28,8 @@ namespace Signum.Web
         public int? MaxElements { get; set; }
         
 
-        public EntityListBase(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
-            : base(type, untypedValue, parent, controlID, propertyRoute)
+        public EntityListBase(Type type, object untypedValue, Context parent, string prefix, PropertyRoute propertyRoute)
+            : base(type, untypedValue, parent, prefix, propertyRoute)
         {
         }
 

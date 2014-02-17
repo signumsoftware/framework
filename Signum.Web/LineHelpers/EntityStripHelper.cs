@@ -24,7 +24,7 @@ namespace Signum.Web
                 return MvcHtmlString.Empty;
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
-            using (sb.Surround(new HtmlTag("div").Id(entityStrip.ControlID).Class("sf-field SF-control-container")))
+            using (sb.Surround(new HtmlTag("div").Id(entityStrip.Prefix).Class("sf-field SF-control-container")))
             using (entityStrip.ValueFirst ? sb.Surround(new HtmlTag("div").Class("sf-value-first")) : null)
             {
                 if (!entityStrip.ValueFirst)
@@ -77,7 +77,7 @@ namespace Signum.Web
 
                 if (entityStrip.ShowValidationMessage)
                 {
-                    sb.AddLine(helper.ValidationMessage(entityStrip.ControlID));
+                    sb.AddLine(helper.ValidationMessage(entityStrip.Prefix));
                 }
 
                 if (entityStrip.ValueFirst)
@@ -128,7 +128,7 @@ namespace Signum.Web
                                 "sf-line-button sf-move-up",
                                 new Dictionary<string, object> 
                                 {  
-                                   { "onclick", entityStrip.SFControlThen("moveUp('{0}')".Formato(itemTC.ControlID)) },
+                                   { "onclick", entityStrip.SFControlThen("moveUp('{0}')".Formato(itemTC.Prefix)) },
                                    { "data-icon",  "ui-icon-triangle-1-" + (entityStrip.Vertical ? "n" : "w") },
                                    { "data-text", false },
                                    { "title", JavascriptMessage.moveUp.NiceToString() }
@@ -140,7 +140,7 @@ namespace Signum.Web
                                 "sf-line-button sf-move-down",
                                 new Dictionary<string, object> 
                                 {   
-                                   { "onclick", entityStrip.SFControlThen("moveDown('{0}')".Formato(itemTC.ControlID)) },
+                                   { "onclick", entityStrip.SFControlThen("moveDown('{0}')".Formato(itemTC.Prefix)) },
                                    { "data-icon", "ui-icon-triangle-1-" + (entityStrip.Vertical ? "s" : "e")  },
                                    { "data-text", false },
                                    { "title", JavascriptMessage.moveDown.NiceToString() }
@@ -156,7 +156,7 @@ namespace Signum.Web
                                     "sf-line-button sf-view",
                                     new Dictionary<string, object> 
                                 {
-                                    { "onclick", entityStrip.SFControlThen("viewItem_click('{0}')".Formato(itemTC.ControlID)) },
+                                    { "onclick", entityStrip.SFControlThen("viewItem_click('{0}')".Formato(itemTC.Prefix)) },
                                     { "data-icon",  "ui-icon-circle-arrow-e" },
                                     { "data-text", false } 
                                 }));
@@ -170,7 +170,7 @@ namespace Signum.Web
                                     "sf-line-button sf-remove",
                                     new Dictionary<string, object> 
                                 {
-                                    { "onclick", entityStrip.SFControlThen("removeItem_click('{0}')".Formato(itemTC.ControlID)) },
+                                    { "onclick", entityStrip.SFControlThen("removeItem_click('{0}')".Formato(itemTC.Prefix)) },
                                     { "data-icon", "ui-icon-circle-close" }, 
                                     { "data-text", false } 
                                 }));

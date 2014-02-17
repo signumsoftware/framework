@@ -89,7 +89,7 @@ namespace Signum.Web
                     if (filterOptions.Frozen && !filterOptions.Token.Type.IsLite())
                     {
                         string txtValue = (filterOptions.Value != null) ? filterOptions.Value.ToString() : "";
-                        sb.AddLine(helper.TextBox(valueContext.ControlID, txtValue, new { @readonly = "readonly" }));
+                        sb.AddLine(helper.TextBox(valueContext.Prefix, txtValue, new { @readonly = "readonly" }));
                     }
                     else
                         sb.AddLine(PrintValueField(helper, valueContext, filterOptions));

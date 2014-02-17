@@ -116,7 +116,7 @@ WriteLiteral("        ");
 
             
             #line 15 "..\..\Signum\Views\NormalControl.cshtml"
-   Write(Html.RenderWidgetsForEntity(modifiable, partialViewName, Model.ControlID));
+   Write(Html.RenderWidgetsForEntity(modifiable, partialViewName, Model.Prefix));
 
             
             #line default
@@ -173,7 +173,7 @@ Write(ButtonBarEntityHelper.GetForEntity(new EntityButtonContext
         ShowOperations = (bool)ViewData[ViewDataKeys.ShowOperations],
         ControllerContext = this.ViewContext,
         PartialViewName = ViewData[ViewDataKeys.PartialViewName].ToString(),
-        Prefix =  Model.ControlID
+        Prefix =  Model.Prefix
     },  (ModifiableEntity)Model.UntypedValue).ToString(Html));
 
             
@@ -250,7 +250,7 @@ WriteLiteral(" data-prefix=\"");
 
             
             #line 45 "..\..\Signum\Views\NormalControl.cshtml"
-                                                         Write(Model.ControlID);
+                                                         Write(Model.Prefix);
 
             
             #line default

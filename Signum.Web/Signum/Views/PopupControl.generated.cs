@@ -75,7 +75,7 @@ WriteLiteral(" data-prefix=\"");
 
             
             #line 5 "..\..\Signum\Views\PopupControl.cshtml"
-                                                                        Write(Model.ControlID);
+                                                                        Write(Model.Prefix);
 
             
             #line default
@@ -226,7 +226,7 @@ WriteLiteral("        ");
             ViewMode = (ViewMode)ViewData[ViewDataKeys.ViewMode],
             ControllerContext = this.ViewContext,
             PartialViewName = ViewData[ViewDataKeys.PartialViewName].ToString(),
-            Prefix = Model.ControlID,
+            Prefix = Model.Prefix,
             ShowOperations = (bool?)ViewData[ViewDataKeys.ShowOperations] ?? true,
         }, modifiable).ToString(Html));
 
@@ -271,7 +271,7 @@ WriteLiteral(" \r\n        data-prefix=\"");
 
             
             #line 41 "..\..\Signum\Views\PopupControl.cshtml"
-                Write(Model.ControlID);
+                Write(Model.Prefix);
 
             
             #line default
