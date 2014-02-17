@@ -30,7 +30,7 @@
         
         <script>
             $(function () {
-               @(new JsFunction(MailingClient.Module, "initHtmlEditorMasterTemplate", ec.SubContext(e => e.Text).ControlID))
+               @(new JsFunction(MailingClient.Module, "initHtmlEditorMasterTemplate", ec.SubContext(e => e.Text).Prefix))
             });
         </script>
     </div>

@@ -43,7 +43,7 @@
     
         @Html.ValueLine(e, f => f.DisplayName)
         
-        var entityTypePrefix = e.SubContext(a => a.EntityType).ControlID;
+        var entityTypePrefix = e.SubContext(a => a.EntityType).Prefix;
         
         @Html.EntityLine(e, f => f.EntityType, el => 
         { 

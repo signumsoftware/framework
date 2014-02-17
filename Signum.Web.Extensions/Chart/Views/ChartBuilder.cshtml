@@ -13,7 +13,7 @@
     QueryDescription queryDescription = (QueryDescription)ViewData[ViewDataKeys.QueryDescription];
    
     
-    <table id="@chart.Compose("sfChartBuilder")" class="sf-chart-builder" data-url="@(Url.Action<ChartController>(cc => cc.UpdateChartBuilder(chart.Parent.ControlID)))">
+    <table id="@chart.Compose("sfChartBuilder")" class="sf-chart-builder" data-url="@(Url.Action<ChartController>(cc => cc.UpdateChartBuilder(chart.Parent.Prefix)))">
         <tr>
             <td class="ui-widget ui-widget-content ui-corner-all sf-chart-type">
                 <div class="ui-widget-header">

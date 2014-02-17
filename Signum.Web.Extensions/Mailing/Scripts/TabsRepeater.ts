@@ -18,22 +18,22 @@ function attachTabRepeater(repeater: Lines.EntityRepeater) {
         $li.remove();
     };
 
-    function getItemIndex(controlId, itemPrefix) {
-        return parseInt(itemPrefix.substring(controlId.length + 1, itemPrefix.indexOf("btnRemove") - 1), 10);
+    function getItemIndex(prefix, itemPrefix) {
+        return parseInt(itemPrefix.substring(prefix.length + 1, itemPrefix.indexOf("btnRemove") - 1), 10);
     };
 
     function addItem() {
         var $container = $control();
-        var controlId = $container.attr("id");
-        var repeater = <any>$('#' + controlId).SFControl<Lines.EntityRepeater>();
+        var prefix = $container.attr("id");
+        var repeater = <any>$('#' + prefix).SFControl<Lines.EntityRepeater>();
 
         var newPrefixIndex = 0;
         var $lastElement = $container.children("ul").find("li:last").find(".sf-remove");
         if ($lastElement.length > 0) {
             var lastRemoveId = $lastElement.attr("id");
-            newPrefixIndex = getItemIndex(controlId, lastRemoveId) + 1;
+            newPrefixIndex = getItemIndex(prefix, lastRemoveId) + 1;
         }
-        var itemPrefix = SF.compose(controlId, newPrefixIndex.toString());
+        var itemPrefix = SF.compose(prefix, newPrefixIndex.toString());
 
         var viewOptions = {
             containerDiv: "",
@@ -43,7 +43,7 @@ function attachTabRepeater(repeater: Lines.EntityRepeater) {
 
         var template = repeater.getEmbeddedTemplate();
         if (!SF.isEmpty(template)) {
-            template = template.replace(new RegExp(SF.compose(controlId, "0"), "gi"), viewOptions.prefix);
+            template = template.replace(new RegExp(SF.compose(prefix, "0"), "gi"), viewOptions.prefix);
             // repeater.onItemCreated(template, viewOptions);
         }
 

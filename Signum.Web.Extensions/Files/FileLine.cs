@@ -40,8 +40,8 @@ namespace Signum.Web.Files
         public string UploadUrl { get; set; }
         public string UploadDroppedUrl { get; set; }
 
-        public FileLine(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
-            : base(type, untypedValue, parent, controlID, propertyRoute)
+        public FileLine(Type type, object untypedValue, Context parent, string prefix, PropertyRoute propertyRoute)
+            : base(type, untypedValue, parent, prefix, propertyRoute)
         {
             AsyncUpload = true;
             DragAndDrop = true;

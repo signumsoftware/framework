@@ -208,7 +208,7 @@ WriteLiteral("></div>\r\n");
             #line 44 "..\..\UserQueries\Views\UserQuery.cshtml"
                                               
         
-        var entityTypePrefix = e.SubContext(a => a.EntityType).ControlID;
+        var entityTypePrefix = e.SubContext(a => a.EntityType).Prefix;
         
         
             

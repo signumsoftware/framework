@@ -133,7 +133,7 @@ WriteLiteral(" data-prefix=\"");
 
             
             #line 24 "..\..\ControlPanel\Views\UserChartPart.cshtml"
-                                                                                                Write(crc.ControlID);
+                                                                                                Write(crc.Prefix);
 
             
             #line default
@@ -254,7 +254,7 @@ WriteLiteral("\'), $.extend({ prefix: \'");
 
             
             #line 40 "..\..\ControlPanel\Views\UserChartPart.cshtml"
-                                                                                                  Write(crc.ControlID);
+                                                                                                  Write(crc.Prefix);
 
             
             #line default
@@ -319,7 +319,7 @@ WriteLiteral(" \r\n                    data-open-url=\"");
 
             
             #line 53 "..\..\ControlPanel\Views\UserChartPart.cshtml"
-                               Write(Url.Action<ChartController>(cc => cc.OpenSubgroup(crc.ControlID)));
+                               Write(Url.Action<ChartController>(cc => cc.OpenSubgroup(crc.Prefix)));
 
             
             #line default
@@ -330,7 +330,7 @@ WriteLiteral(" \r\n                    data-fullscreen-url=\"");
 
             
             #line 54 "..\..\ControlPanel\Views\UserChartPart.cshtml"
-                                     Write(Url.Action<ChartController>(cc => cc.FullScreen(crc.ControlID)));
+                                     Write(Url.Action<ChartController>(cc => cc.FullScreen(crc.Prefix)));
 
             
             #line default
@@ -392,7 +392,7 @@ WriteLiteral(">\r\n            (function () {\r\n                $(\"#\" + SF.co
 
             
             #line 76 "..\..\ControlPanel\Views\UserChartPart.cshtml"
-                               Write(crc.ControlID);
+                               Write(crc.Prefix);
 
             
             #line default

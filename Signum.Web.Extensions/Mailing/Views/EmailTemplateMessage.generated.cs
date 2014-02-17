@@ -152,7 +152,7 @@ WriteLiteral(" data-prefix=\"");
 
             
             #line 19 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
-                                                                                                                       Write(ec.ControlID);
+                                                                                                                       Write(ec.Prefix);
 
             
             #line default
@@ -179,7 +179,7 @@ WriteLiteral(" data-prefix=\"");
 
             
             #line 20 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
-                                                                                                                    Write(ec.ControlID);
+                                                                                                                    Write(ec.Prefix);
 
             
             #line default
@@ -200,7 +200,7 @@ WriteLiteral(" data-prefix=\"");
 
             
             #line 21 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
-                                                                                                                         Write(ec.ControlID);
+                                                                                                                         Write(ec.Prefix);
 
             
             #line default
@@ -221,7 +221,7 @@ WriteLiteral(" data-prefix=\"");
 
             
             #line 22 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
-                                                                                                                     Write(ec.ControlID);
+                                                                                                                     Write(ec.Prefix);
 
             
             #line default
@@ -270,7 +270,7 @@ WriteLiteral("                ");
 
             
             #line 39 "..\..\Mailing\Views\EmailTemplateMessage.cshtml"
-            Write(new JsFunction(MailingClient.Module, "initHtmlEditorWithTokens", ec.SubContext(e => e.Text).ControlID));
+            Write(new JsFunction(MailingClient.Module, "initHtmlEditorWithTokens", ec.SubContext(e => e.Text).Prefix));
 
             
             #line default

@@ -147,7 +147,7 @@ WriteLiteral("\">\r\n            <legend>Chart</legend>\r\n            <div clas
 
             
             #line 25 "..\..\Chart\Views\ChartResults.cshtml"
-                           Write(Url.Action<ChartController>(cc => cc.OpenSubgroup(Model.ControlID)));
+                           Write(Url.Action<ChartController>(cc => cc.OpenSubgroup(Model.Prefix)));
 
             
             #line default

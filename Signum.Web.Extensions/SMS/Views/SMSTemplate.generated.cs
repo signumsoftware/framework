@@ -264,8 +264,8 @@ WriteLiteral(">\r\n");
             {
                 ec.Data = SMSLogic.RegisteredDataObjectProviders();
                 ec.ComboHtmlProperties["class"] = "sf-associated-type";
-                ec.ComboHtmlProperties["data-url"] = Url.Action<SMSController>(s => s.GetLiteralsForType(ec.ControlID));
-                ec.ComboHtmlProperties["data-control-id"] = ec.ControlID;
+                ec.ComboHtmlProperties["data-url"] = Url.Action<SMSController>(s => s.GetLiteralsForType(ec.Prefix));
+                ec.ComboHtmlProperties["data-control-id"] = ec.Prefix;
                 ec.AttachFunction = new JsLineFunction(SMSClient.Module, "attachAssociatedType");
             }));
 

@@ -133,7 +133,7 @@ WriteLiteral("\" class=\"sf-chart-builder\" data-url=\"");
 
             
             #line 16 "..\..\Chart\Views\ChartBuilder.cshtml"
-                                                                                Write(Url.Action<ChartController>(cc => cc.UpdateChartBuilder(chart.Parent.ControlID)));
+                                                                                Write(Url.Action<ChartController>(cc => cc.UpdateChartBuilder(chart.Parent.Prefix)));
 
             
             #line default

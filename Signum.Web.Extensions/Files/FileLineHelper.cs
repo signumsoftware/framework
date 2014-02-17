@@ -74,7 +74,7 @@ namespace Signum.Web.Files
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.Surround(new HtmlTag("div").Id(fileLine.ControlID).Class("sf-field SF-control-container")))
+            using (sb.Surround(new HtmlTag("div").Id(fileLine.Prefix).Class("sf-field SF-control-container")))
             using (fileLine.ValueFirst ? sb.Surround(new HtmlTag("div").Class("sf-value-first")) : null)
             {
                 sb.AddLine(new HtmlTag("link").Attrs(new { rel = "stylesheet", type = "text/css", href = RouteHelper.New().Content("~/Files/Content/Files.css") }).ToHtmlSelf());
@@ -128,7 +128,7 @@ namespace Signum.Web.Files
                     .Attr("style", "display:" + (hasEntity ? "none" : "block"));
 
                 using (sb.Surround(divNew))
-                //using (sb.Surround(new HtmlTag("form").Attrs(new { method = "post", enctype = "multipart/form-data", encoding = "multipart/form-data", target = "frame" + fileLine.ControlID })))
+                //using (sb.Surround(new HtmlTag("form").Attrs(new { method = "post", enctype = "multipart/form-data", encoding = "multipart/form-data", target = "frame" + fileLine.Prefix })))
                 {
                     sb.AddLine(helper.HiddenEntityInfo(fileLine));
 
@@ -143,13 +143,13 @@ namespace Signum.Web.Files
                         else
                         {
                             if (fileLine.FileType == null)
-                                throw new ArgumentException("FileType property of FileLine settings must be specified for FileLine {0}".Formato(fileLine.ControlID));
+                                throw new ArgumentException("FileType property of FileLine settings must be specified for FileLine {0}".Formato(fileLine.Prefix));
 
                             sb.AddLine(helper.Hidden(fileLine.Compose(FileLineKeys.FileType), MultiEnumDN.UniqueKey(fileLine.FileType)));
                         }
                     }
 
-                    var label = EntityBaseHelper.BaseLineLabel(helper, fileLine, fileLine.ControlID);
+                    var label = EntityBaseHelper.BaseLineLabel(helper, fileLine, fileLine.Prefix);
 
                     if (!fileLine.ValueFirst)
                         sb.AddLine(label);
@@ -157,7 +157,7 @@ namespace Signum.Web.Files
                     using (sb.Surround(new HtmlTag("div").Class("sf-value-container")))
                     {
                         sb.AddLine(MvcHtmlString.Create("<input type='file' onchange=\"{0}\" id='{1}' name='{1}' class='sf-value-line'/>".Formato(fileLine.SFControlThen("onChanged()"), fileLine.Compose(FileLineKeys.File))));
-                        sb.AddLine(MvcHtmlString.Create("<img src='{0}' id='{1}_loading' alt='loading' style='display:none'/>".Formato(RouteHelper.New().Content("~/Files/Images/loading.gif"), fileLine.ControlID)));
+                        sb.AddLine(MvcHtmlString.Create("<img src='{0}' id='{1}_loading' alt='loading' style='display:none'/>".Formato(RouteHelper.New().Content("~/Files/Images/loading.gif"), fileLine.Prefix)));
                         
                         if (fileLine.ValueFirst)
                             sb.AddLine(label);

@@ -298,7 +298,7 @@ WriteLiteral(" data-prefix=\"");
 
             
             #line 48 "..\..\Mailing\Views\Newsletter.cshtml"
-                                                                                                                                       Write(nc.ControlID);
+                                                                                                                                       Write(nc.Prefix);
 
             
             #line default
@@ -325,7 +325,7 @@ WriteLiteral(" data-prefix=\"");
 
             
             #line 49 "..\..\Mailing\Views\Newsletter.cshtml"
-                                                                                                                                    Write(nc.ControlID);
+                                                                                                                                    Write(nc.Prefix);
 
             
             #line default
@@ -346,7 +346,7 @@ WriteLiteral(" data-prefix=\"");
 
             
             #line 50 "..\..\Mailing\Views\Newsletter.cshtml"
-                                                                                                                                         Write(nc.ControlID);
+                                                                                                                                         Write(nc.Prefix);
 
             
             #line default
@@ -367,7 +367,7 @@ WriteLiteral(" data-prefix=\"");
 
             
             #line 51 "..\..\Mailing\Views\Newsletter.cshtml"
-                                                                                                                                     Write(nc.ControlID);
+                                                                                                                                     Write(nc.Prefix);
 
             
             #line default
@@ -411,7 +411,7 @@ WriteLiteral("                            ");
 
             
             #line 63 "..\..\Mailing\Views\Newsletter.cshtml"
-                        Write(new JsFunction(MailingClient.Module, "initHtmlEditorWithTokens", nc.SubContext(e => e.Text).ControlID));
+                        Write(new JsFunction(MailingClient.Module, "initHtmlEditorWithTokens", nc.SubContext(e => e.Text).Prefix));
 
             
             #line default

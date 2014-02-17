@@ -157,10 +157,10 @@
             </tr>
                     var conditions = item.Compose("Allowed", "Conditions"); 
                 
-                    foreach (var conditionIter in item.Value.Allowed.Conditions.Select((c, i) => new { Condition = c, Index = i, ControlId =  TypeContextUtilities.Compose(conditions, i.ToString())}).Iterate())
+                    foreach (var conditionIter in item.Value.Allowed.Conditions.Select((c, i) => new { Condition = c, Index = i, Prefix =  TypeContextUtilities.Compose(conditions, i.ToString())}).Iterate())
                     {
                         var condition = conditionIter.Value.Condition;
-                        var controlId = conditionIter.Value.ControlId;
+                        var prefix = conditionIter.Value.Prefix;
                         
             <tr class="sf-auth-condition" data-ns="@iter.Value.Key" data-type="@item.Value.Resource.ClassName" data-condition="@TypeConditionNameDN.UniqueKey(condition.ConditionName)" data-index="@conditionIter.Value.Index">
                 <td>
@@ -174,10 +174,10 @@
                         <span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span>
                     </a>
                     <span class="sf-auth-label">@condition.ConditionName.NiceToString()</span>
-                    @Html.Hidden(TypeContextUtilities.Compose(controlId, "ConditionName"), TypeConditionNameDN.UniqueKey(condition.ConditionName))
+                    @Html.Hidden(TypeContextUtilities.Compose(prefix, "ConditionName"), TypeConditionNameDN.UniqueKey(condition.ConditionName))
                 </td>
                 
-                @{var allowed = TypeContextUtilities.Compose(controlId, "Allowed");}
+                @{var allowed = TypeContextUtilities.Compose(prefix, "Allowed");}
                 
                     <td>
                         <a class="sf-auth-chooser sf-auth-create">

@@ -32,7 +32,7 @@
 
     <script type="text/javascript">
         $(function () {
-            @(new JsFunction(ProcessesClient.Module, "refreshUpdate", e.Value.Id, e.ControlID, Url.Action("GetProgressExecution", "Process")))
+            @(new JsFunction(ProcessesClient.Module, "refreshUpdate", e.Value.Id, e.Prefix, Url.Action("GetProgressExecution", "Process")))
         })
     </script>
 

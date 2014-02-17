@@ -79,7 +79,7 @@ namespace Signum.Web.Files
                                 }
                                 else
                                 {
-                                    throw new InvalidOperationException("Impossible to create new FilePath {0}".Formato(ctx.ControlID));
+                                    throw new InvalidOperationException("Impossible to create new FilePath {0}".Formato(ctx.Prefix));
                                 }
                             }
                             else
@@ -125,7 +125,7 @@ namespace Signum.Web.Files
                                 }
                                 else
                                 {
-                                    throw new InvalidOperationException("Impossible to create new FileDN {0}".Formato(ctx.ControlID));
+                                    throw new InvalidOperationException("Impossible to create new FileDN {0}".Formato(ctx.Prefix));
                                 }
                             }
                             else
@@ -198,7 +198,7 @@ namespace Signum.Web.Files
 
         private static HttpPostedFileBase GetHttpRequestFile(MappingContext ctx)
         {
-            string fileKey = TypeContextUtilities.Compose(ctx.ControlID, FileLineKeys.File);
+            string fileKey = TypeContextUtilities.Compose(ctx.Prefix, FileLineKeys.File);
             HttpPostedFileBase hpf = ctx.ControllerContext.HttpContext.Request.Files[fileKey] as HttpPostedFileBase;
             return hpf;
         }

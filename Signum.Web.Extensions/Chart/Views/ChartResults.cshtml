@@ -22,7 +22,7 @@ else
         <fieldset id="@Model.Compose("sfChartContainer")">
             <legend>Chart</legend>
             <div class="sf-chart-container" 
-                data-open-url="@(Url.Action<ChartController>(cc => cc.OpenSubgroup(Model.ControlID)))"
+                data-open-url="@(Url.Action<ChartController>(cc => cc.OpenSubgroup(Model.Prefix)))"
                 data-json="@Html.Json(ChartUtils.DataJson(Model.Value, queryResult)).ToString()">
             </div>
         </fieldset>

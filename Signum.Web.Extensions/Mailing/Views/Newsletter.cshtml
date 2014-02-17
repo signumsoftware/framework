@@ -45,10 +45,10 @@
                         <fieldset class="sf-email-replacements-panel">
                             <legend>Replacements</legend>
                             @Html.QueryTokenBuilder(null, nc, MailingClient.GetQueryTokenBuilderSettings(queryDescription))
-                            <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-basic sf-disabled" data-prefix="@nc.ControlID" value="@(EmailTemplateViewMessage.Insert.NiceToString())" />
-                            <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-if sf-disabled" data-prefix="@nc.ControlID" data-block="if" value="if" />
-                            <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-foreach sf-disabled" data-prefix="@nc.ControlID" data-block="foreach" value="foreach" />
-                            <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-any sf-disabled" data-prefix="@nc.ControlID" data-block="any" value="any" />
+                            <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-basic sf-disabled" data-prefix="@nc.Prefix" value="@(EmailTemplateViewMessage.Insert.NiceToString())" />
+                            <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-if sf-disabled" data-prefix="@nc.Prefix" data-block="if" value="if" />
+                            <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-foreach sf-disabled" data-prefix="@nc.Prefix" data-block="foreach" value="foreach" />
+                            <input type="button" class="sf-button sf-email-inserttoken sf-email-inserttoken-any sf-disabled" data-prefix="@nc.Prefix" data-block="any" value="any" />
                         </fieldset>
                     </div>
                     @Html.ValueLine(nc, e => e.Subject, vl => vl.ValueHtmlProps["class"] = "sf-email-inserttoken-target")
@@ -60,7 +60,7 @@
                     })
                     <script>
                         $(function () {
-                            @(new JsFunction(MailingClient.Module, "initHtmlEditorWithTokens", nc.SubContext(e => e.Text).ControlID));
+                            @(new JsFunction(MailingClient.Module, "initHtmlEditorWithTokens", nc.SubContext(e => e.Text).Prefix));
                         });
                     </script>
                 </div>

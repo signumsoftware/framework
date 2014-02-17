@@ -332,7 +332,7 @@ WriteLiteral("            ");
 
             
             #line 35 "..\..\Processes\Views\Process.cshtml"
-        Write(new JsFunction(ProcessesClient.Module, "refreshUpdate", e.Value.Id, e.ControlID, Url.Action("GetProgressExecution", "Process")));
+        Write(new JsFunction(ProcessesClient.Module, "refreshUpdate", e.Value.Id, e.Prefix, Url.Action("GetProgressExecution", "Process")));
 
             
             #line default

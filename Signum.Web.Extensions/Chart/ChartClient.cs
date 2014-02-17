@@ -121,7 +121,7 @@ namespace Signum.Web.Chart
                 MList<S> list = ctx.Value;
                 int i = 0;
 
-                foreach (MappingContext<S> itemCtx in GenerateItemContexts(ctx).OrderBy(mc => mc.ControlID.Substring(mc.ControlID.LastIndexOf("_") + 1).ToInt().Value))
+                foreach (MappingContext<S> itemCtx in GenerateItemContexts(ctx).OrderBy(mc => mc.Prefix.Substring(mc.Prefix.LastIndexOf("_") + 1).ToInt().Value))
                 {
                     if (i < list.Count)
                     {
