@@ -105,7 +105,7 @@ namespace Signum.Entities.Mailing
             set { if (Set(ref body, value, () => Subject))CalculateHash(); }
         }
 
-        char[] spaceChars = new[] { '\r', '\r', ' ' };
+        static readonly char[] spaceChars = new[] { '\r', '\r', ' ' };
 
         void CalculateHash()
         {
