@@ -56,9 +56,9 @@ namespace Signum.Web
             return Common.UntypedWalkExpression(typeContext, lambda);
         }
 
-        public static TypeContext UntypedNew(IRootEntity entity, string controlID)
+        public static TypeContext UntypedNew(IRootEntity entity, string prefix)
         {
-            return (TypeContext)Activator.CreateInstance(typeof(TypeContext<>).MakeGenericType(entity.GetType()), entity, controlID);
+            return (TypeContext)Activator.CreateInstance(typeof(TypeContext<>).MakeGenericType(entity.GetType()), entity, prefix);
         }
 
         public static string Compose(string prefix, string nameToAppend)

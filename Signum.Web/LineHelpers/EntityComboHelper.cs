@@ -30,11 +30,11 @@ namespace Signum.Web
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.Surround(new HtmlTag("div").Id(entityCombo.ControlID).Class("sf-field SF-control-container")))
+            using (sb.Surround(new HtmlTag("div").Id(entityCombo.Prefix).Class("sf-field SF-control-container")))
             using (entityCombo.ValueFirst ? sb.Surround(new HtmlTag("div").Class("sf-value-first")) : null)
             {
                 if (!entityCombo.ValueFirst)
-                    sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityCombo, entityCombo.ControlID));
+                    sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityCombo, entityCombo.Prefix));
 
                 using (!entityCombo.OnlyValue ? sb.Surround(new HtmlTag("div").Class("sf-value-container")) : null)
                 {
@@ -46,7 +46,7 @@ namespace Signum.Web
                         sb.AddLine(helper.Div(entityCombo.Compose(EntityBaseKeys.Entity), null, "", new Dictionary<string, object> { { "style", "display:none" } }));
 
                     if (entityCombo.ReadOnly)
-                        sb.AddLine(helper.Span(entityCombo.ControlID, entityCombo.UntypedValue.TryToString(), "sf-value-line"));
+                        sb.AddLine(helper.Span(entityCombo.Prefix, entityCombo.UntypedValue.TryToString(), "sf-value-line"));
                     else
                     {
                         List<SelectListItem> items = new List<SelectListItem>();
@@ -91,13 +91,13 @@ namespace Signum.Web
 
                     if (entityCombo.ShowValidationMessage)
                     {
-                        sb.AddLine(helper.ValidationMessage(entityCombo.ControlID));
+                        sb.AddLine(helper.ValidationMessage(entityCombo.Prefix));
                     }
 
                 }
 
                 if (entityCombo.ValueFirst)
-                    sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityCombo, entityCombo.ControlID));
+                    sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityCombo, entityCombo.Prefix));
             }
 
             sb.AddLine(entityCombo.ConstructorScript(JsFunction.LinesModule, "EntityCombo"));

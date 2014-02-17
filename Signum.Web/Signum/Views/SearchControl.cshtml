@@ -14,11 +14,11 @@
     
     ViewData[ViewDataKeys.FindOptions] = findOptions;
 
-    var controlID = Model.Compose("sfSearchControl");
+    var prefix = Model.Compose("sfSearchControl");
 }
-<div id="@controlID" 
+<div id="@prefix" 
      class="sf-search-control SF-control-container" 
-     data-prefix="@Model.ControlID" 
+     data-prefix="@Model.Prefix" 
      data-find-url="@Navigator.FindRoute(findOptions.QueryName)" 
      >
 
@@ -52,7 +52,7 @@
                                 { "data-icon", "ui-icon-arrowthick-1-s" }
                             })
 
-                    @if (string.IsNullOrEmpty(Model.ControlID) && findOptions.AllowChangeColumns)
+                    @if (string.IsNullOrEmpty(Model.Prefix) && findOptions.AllowChangeColumns)
                     {
                         @Html.Href(
                             Model.Compose("btnAddColumn"), 
@@ -84,7 +84,7 @@
                 "sf-query-button sf-filters-header" + (filtersVisible ? "" : " close"),
                 new Dictionary<string, object> 
                 { 
-                    { "onclick", JsFunction.SFControlThen(controlID,  "toggleFilters()") },
+                    { "onclick", JsFunction.SFControlThen(prefix,  "toggleFilters()") },
                     { "data-icon", filtersVisible ? "ui-icon-triangle-1-n" : "ui-icon-triangle-1-e" }
                 })
     }
@@ -103,10 +103,10 @@
     }
     
     <div class="sf-query-button-bar" style="display:@((findOptions.FilterMode != FilterMode.OnlyResults) ? "block" : "none")">
-        <button class="sf-query-button sf-search" data-icon="ui-icon-search" id="@Model.Compose("qbSearch")" onclick="event.preventDefault(); @JsFunction.SFControlThen(controlID, "search()")">@SearchMessage.Search.NiceToString()</button>
+        <button class="sf-query-button sf-search" data-icon="ui-icon-search" id="@Model.Compose("qbSearch")" onclick="event.preventDefault(); @JsFunction.SFControlThen(prefix, "search()")">@SearchMessage.Search.NiceToString()</button>
         @if (findOptions.Create)
         {
-            <a class="sf-query-button" data-icon="ui-icon-plusthick" data-text="false" id="@Model.Compose("qbSearchCreate")" onclick="event.preventDefault();@JsFunction.SFControlThen(controlID, "create_click()")">@SearchMessage.Create.NiceToString()</a>
+            <a class="sf-query-button" data-icon="ui-icon-plusthick" data-text="false" id="@Model.Compose("qbSearchCreate")" onclick="event.preventDefault();@JsFunction.SFControlThen(prefix, "create_click()")">@SearchMessage.Create.NiceToString()</a>
         }
         @ButtonBarQueryHelper.GetButtonBarElementsForQuery(new QueryButtonContext
        {
@@ -115,7 +115,7 @@
            QueryName = findOptions.QueryName,
            ManualQueryButtons = (ToolBarButton[])ViewData[ViewDataKeys.ManualToolbarButtons],
            EntityType = entitiesType,
-           Prefix = Model.ControlID
+           Prefix = Model.Prefix
        }).ToString(Html)
     </div>
     @if (findOptions.FilterMode != FilterMode.OnlyResults)
@@ -130,7 +130,7 @@
                     @if (findOptions.AllowSelection)
                     {
                         <th class="ui-state-default sf-th-selection">
-                            @Html.CheckBox(Model.Compose("cbSelectAll"), false, new { onclick = JsFunction.SFControlThen(controlID, "toggleSelectAll()")})
+                            @Html.CheckBox(Model.Compose("cbSelectAll"), false, new { onclick = JsFunction.SFControlThen(prefix, "toggleSelectAll()")})
                         </th>
                     }
                     @if (findOptions.Navigate)
@@ -172,5 +172,5 @@
     </div>
 </div>
 <script type="text/javascript">
-    require(["@JsFunction.FinderModule"], function(Finder) { new Finder.SearchControl($("#@Model.Compose("sfSearchControl")"), @(MvcHtmlString.Create(findOptions.ToJS(Model.ControlID).ToString()))).ready();});
+    require(["@JsFunction.FinderModule"], function(Finder) { new Finder.SearchControl($("#@Model.Compose("sfSearchControl")"), @(MvcHtmlString.Create(findOptions.ToJS(Model.Prefix).ToString()))).ready();});
 </script>

@@ -20,8 +20,8 @@ namespace Signum.Web
     {
         public readonly RouteValueDictionary ListHtmlProps = new RouteValueDictionary();
         
-        public EntityList(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
-            : base(type, untypedValue, parent, controlID, propertyRoute)
+        public EntityList(Type type, object untypedValue, Context parent, string prefix, PropertyRoute propertyRoute)
+            : base(type, untypedValue, parent, prefix, propertyRoute)
         {
             Reorder = false;
         }

@@ -28,7 +28,7 @@ namespace Signum.Web
 
             HtmlStringBuilder sb = new HtmlStringBuilder();
 
-            using (sb.Surround(new HtmlTag("div").Id(listDetail.ControlID).Class("sf-field SF-control-container")))
+            using (sb.Surround(new HtmlTag("div").Id(listDetail.Prefix).Class("sf-field SF-control-container")))
             {
                 sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, listDetail));
 
@@ -42,7 +42,7 @@ namespace Signum.Web
                     sb.AddLine(EntityBaseHelper.EmbeddedTemplate(listDetail, EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, listDetail)));
                 }
 
-                using (sb.Surround(new HtmlTag("div").Id(listDetail.ControlID).Class("sf-field-list")))
+                using (sb.Surround(new HtmlTag("div").Id(listDetail.Prefix).Class("sf-field-list")))
                 {
                     HtmlStringBuilder sbSelect = new HtmlStringBuilder();
 

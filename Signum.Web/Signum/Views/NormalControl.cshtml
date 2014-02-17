@@ -12,7 +12,7 @@
    
     <div class="ui-widget-header ui-corner-all sf-normal-control-header">
         <span class="sf-type-nice-name">@Navigator.Manager.GetTypeTitle(modifiable)</span>
-        @Html.RenderWidgetsForEntity(modifiable, partialViewName, Model.ControlID)
+        @Html.RenderWidgetsForEntity(modifiable, partialViewName, Model.Prefix)
     </div>
     <div class="clearall"></div>
     @if(string.IsNullOrEmpty(ViewBag.Title))
@@ -29,7 +29,7 @@
         ShowOperations = (bool)ViewData[ViewDataKeys.ShowOperations],
         ControllerContext = this.ViewContext,
         PartialViewName = ViewData[ViewDataKeys.PartialViewName].ToString(),
-        Prefix =  Model.ControlID
+        Prefix =  Model.Prefix
     },  (ModifiableEntity)Model.UntypedValue).ToString(Html)
 </div>
 
@@ -42,6 +42,6 @@
         @Html.Hidden(ViewDataKeys.EntityState, Navigator.Manager.SerializeEntity(modifiable))
     }
 </div>
-<div id="divMainControl" class="sf-main-control" data-prefix="@Model.ControlID">
+<div id="divMainControl" class="sf-main-control" data-prefix="@Model.Prefix">
     @{ Html.RenderPartial(partialViewName, Model);}
 </div>

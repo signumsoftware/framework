@@ -57,19 +57,19 @@ namespace Signum.Web
 
         public abstract MappingContext UntypedValidateGlobal();
 
-        public string ControlID { get; private set; }
+        public string Prefix { get; private set; }
 
         public abstract SortedList<string, string> GlobalInputs { get; }
         public abstract Dictionary<string, List<string>> GlobalErrors { get; }
 
         public bool HasInput
         {
-            get { return Root.GlobalInputs.ContainsKey(ControlID); }
+            get { return Root.GlobalInputs.ContainsKey(Prefix); }
         }
 
         public string Input
         {
-            get { return Root.GlobalInputs.GetOrThrow(ControlID, "'{0}' is not in the form"); }
+            get { return Root.GlobalInputs.GetOrThrow(Prefix, "'{0}' is not in the form"); }
         }
 
         public bool Empty()
@@ -81,21 +81,21 @@ namespace Signum.Web
 
         public List<string> Error
         {
-            get { return Root.GlobalErrors.GetOrCreate(ControlID); }
+            get { return Root.GlobalErrors.GetOrCreate(Prefix); }
             set
             {
                 if (value == null)
-                    Root.GlobalErrors.Remove(ControlID);
+                    Root.GlobalErrors.Remove(Prefix);
                 else
-                    Root.GlobalErrors[ControlID] = value;
+                    Root.GlobalErrors[Prefix] = value;
             }
         }
 
         public abstract IDictionary<string, List<string>> Errors { get; }
 
-        public MappingContext(string controlID, IPropertyValidator propertyValidator, PropertyRoute route)
+        public MappingContext(string prefix, IPropertyValidator propertyValidator, PropertyRoute route)
         {
-            this.ControlID = controlID ?? "";
+            this.Prefix = prefix ?? "";
             this.PropertyValidator = propertyValidator;
             this.PropertyRoute = route; 
         }
@@ -107,7 +107,7 @@ namespace Signum.Web
             if (mapping == null)
                 throw new InvalidOperationException("No mapping for value {0}".Formato(typeof(V).TypeName()));
 
-            var sc = new SubContext<V>(TypeContextUtilities.Compose(this.ControlID, property), null, null, this);
+            var sc = new SubContext<V>(TypeContextUtilities.Compose(this.Prefix, property), null, null, this);
 
             value = mapping(sc);
 
@@ -121,7 +121,7 @@ namespace Signum.Web
             if (mapping == null)
                 throw new InvalidOperationException("No mapping for value {0}".Formato(typeof(V).TypeName()));
 
-            var sc = new SubContext<V>(this.ControlID, null, null, this);
+            var sc = new SubContext<V>(this.Prefix, null, null, this);
 
             value = mapping(sc);
 
@@ -157,8 +157,8 @@ namespace Signum.Web
             get { return Value; }
         }
 
-        public MappingContext(string controlID, IPropertyValidator propertyPack, PropertyRoute route)
-            : base(controlID, propertyPack, route)
+        public MappingContext(string prefix, IPropertyValidator propertyPack, PropertyRoute route)
+            : base(prefix, propertyPack, route)
         {
         }
 
@@ -321,13 +321,13 @@ namespace Signum.Web
         ContextualDictionary<List<string>> errors;
         public override IDictionary<string, List<string>> Errors { get { return errors; } }
 
-        public SubContext(string controlID, IPropertyValidator propertyValidator, PropertyRoute route, MappingContext parent) :
-            base(controlID, propertyValidator, route)
+        public SubContext(string prefix, IPropertyValidator propertyValidator, PropertyRoute route, MappingContext parent) :
+            base(prefix, propertyValidator, route)
         {
             this.parent = parent;
             this.root = parent.Root;
-            this.inputs = new ContextualSortedList<string>(parent.Inputs, controlID + TypeContext.Separator);
-            this.errors = new ContextualDictionary<List<string>>(root.GlobalErrors, controlID);
+            this.inputs = new ContextualSortedList<string>(parent.Inputs, prefix + TypeContext.Separator);
+            this.errors = new ContextualDictionary<List<string>>(root.GlobalErrors, prefix);
         }
     }
 
@@ -353,7 +353,7 @@ namespace Signum.Web
         public override IDictionary<string, List<string>> Errors { get { return parent.Errors; } }
 
         public MixinContext(PropertyRoute route, MappingContext parent) :
-            base(parent.ControlID, null, route)
+            base(parent.Prefix, null, route)
         {
             this.parent = parent;
             this.root = parent.Root;
@@ -363,65 +363,65 @@ namespace Signum.Web
     internal class ContextualDictionary<V> : IDictionary<string, V>, ICollection<KeyValuePair<string, V>>
     {
         Dictionary<string, V> global;
-        string ControlID;
+        string Prefix;
 
-        public ContextualDictionary(Dictionary<string, V> global, string controlID)
+        public ContextualDictionary(Dictionary<string, V> global, string prefix)
         {
             this.global = global;
-            this.ControlID = controlID;
+            this.Prefix = prefix;
         }
 
         public void Add(string key, V value)
         {
-            global.Add(ControlID + key, value);
+            global.Add(Prefix + key, value);
         }
 
         public bool ContainsKey(string key)
         {
-            return global.ContainsKey(ControlID + key);
+            return global.ContainsKey(Prefix + key);
         }
 
         public ICollection<string> Keys
         {
-            get { return global.Keys.Where(s => s.StartsWith(ControlID)).Select(s => s.Substring(ControlID.Length)).ToReadOnly(); }
+            get { return global.Keys.Where(s => s.StartsWith(Prefix)).Select(s => s.Substring(Prefix.Length)).ToReadOnly(); }
         }
 
         public bool Remove(string key)
         {
-            return global.Remove(ControlID + key);
+            return global.Remove(Prefix + key);
         }
 
         public bool TryGetValue(string key, out V value)
         {
-            return global.TryGetValue(ControlID + key, out value);
+            return global.TryGetValue(Prefix + key, out value);
         }
 
         public ICollection<V> Values
         {
-            get { return global.Where(kvp => kvp.Key.StartsWith(ControlID)).Select(kvp => kvp.Value).ToReadOnly(); }
+            get { return global.Where(kvp => kvp.Key.StartsWith(Prefix)).Select(kvp => kvp.Value).ToReadOnly(); }
         }
 
         public V this[string key]
         {
             get
             {
-                return global[ControlID + key];
+                return global[Prefix + key];
             }
             set
             {
-                global[ControlID + key] = value;
+                global[Prefix + key] = value;
             }
         }
 
         public int Count
         {
-            get { return global.Keys.Count(k => k.StartsWith(ControlID)); }
+            get { return global.Keys.Count(k => k.StartsWith(Prefix)); }
         }
 
 
         void ICollection<KeyValuePair<string, V>>.Add(KeyValuePair<string, V> item)
         {
-            global.Add(ControlID + item.Key, item.Value);
+            global.Add(Prefix + item.Key, item.Value);
         }
 
         public void Clear()
@@ -431,7 +431,7 @@ namespace Signum.Web
 
         bool ICollection<KeyValuePair<string, V>>.Contains(KeyValuePair<string, V> item)
         {
-            return ((ICollection<KeyValuePair<string, V>>)global).Contains(new KeyValuePair<string, V>(ControlID + item.Key, item.Value));
+            return ((ICollection<KeyValuePair<string, V>>)global).Contains(new KeyValuePair<string, V>(Prefix + item.Key, item.Value));
         }
 
         void ICollection<KeyValuePair<string, V>>.CopyTo(KeyValuePair<string, V>[] array, int arrayIndex)
@@ -446,12 +446,12 @@ namespace Signum.Web
 
         bool ICollection<KeyValuePair<string, V>>.Remove(KeyValuePair<string, V> item)
         {
-            return ((ICollection<KeyValuePair<string, V>>)global).Remove(new KeyValuePair<string, V>(ControlID + item.Key, item.Value));
+            return ((ICollection<KeyValuePair<string, V>>)global).Remove(new KeyValuePair<string, V>(Prefix + item.Key, item.Value));
         }
 
         public IEnumerator<KeyValuePair<string, V>> GetEnumerator()
         {
-            return global.Where(a => a.Key.StartsWith(ControlID)).Select(a => new KeyValuePair<string, V>(a.Key.Substring(ControlID.Length), a.Value)).GetEnumerator();
+            return global.Where(a => a.Key.StartsWith(Prefix)).Select(a => new KeyValuePair<string, V>(a.Key.Substring(Prefix.Length), a.Value)).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -465,16 +465,16 @@ namespace Signum.Web
         SortedList<string, V> global;
         int startIndex;
         int endIndex;
-        public string ControlID { get; private set; }
+        public string Prefix { get; private set; }
 
-        public ContextualSortedList(IDictionary<string, V> sortedList, string controlID)
+        public ContextualSortedList(IDictionary<string, V> sortedList, string prefix)
         {
             ContextualSortedList<V> csl = sortedList as ContextualSortedList<V>;
             
-            Debug.Assert(controlID.HasText());
-            this.ControlID = controlID ;
+            Debug.Assert(prefix.HasText());
+            this.Prefix = prefix ;
 
-            Debug.Assert(csl == null || ControlID.StartsWith(csl.ControlID));
+            Debug.Assert(csl == null || Prefix.StartsWith(csl.Prefix));
 
             this.global = csl == null ? (SortedList<string, V>)sortedList : csl.global;
 
@@ -492,7 +492,7 @@ namespace Signum.Web
             {
                 int mid = (start + end) / 2;
 
-                var num = global.Keys[mid].CompareTo(ControlID);
+                var num = global.Keys[mid].CompareTo(Prefix);
 
                 if (num > 0)
                     end = mid - 1;
@@ -507,14 +507,14 @@ namespace Signum.Web
 
         int BinarySearchStartsWith(int start, int end)
         {
-            if (!(start < global.Keys.Count && global.Keys[start].StartsWith(ControlID)))
+            if (!(start < global.Keys.Count && global.Keys[start].StartsWith(Prefix)))
                 return start;
 
             while (start < end && start < global.Keys.Count)
             {
                 int mid = (start + end) / 2;
 
-                if (global.Keys[mid].StartsWith(ControlID))
+                if (global.Keys[mid].StartsWith(Prefix))
                     start = mid + 1;
                 else
                     end = mid;
@@ -530,7 +530,7 @@ namespace Signum.Web
 
         public bool ContainsKey(string key)
         {
-            return global.ContainsKey(ControlID + key);
+            return global.ContainsKey(Prefix + key);
         }
 
         public ICollection<string> Keys
@@ -545,7 +545,7 @@ namespace Signum.Web
 
         public bool TryGetValue(string key, out V value)
         {
-            return global.TryGetValue(ControlID + key, out value);
+            return global.TryGetValue(Prefix + key, out value);
         }
 
         public ICollection<V> Values
@@ -557,7 +557,7 @@ namespace Signum.Web
         {
             get
             {
-                return global[ControlID + key];
+                return global[Prefix + key];
             }
             set
             {
@@ -583,7 +583,7 @@ namespace Signum.Web
 
         bool ICollection<KeyValuePair<string, V>>.Contains(KeyValuePair<string, V> item)
         {
-            return ((ICollection<KeyValuePair<string, V>>)global).Contains(new KeyValuePair<string, V>(ControlID + item.Key, item.Value));
+            return ((ICollection<KeyValuePair<string, V>>)global).Contains(new KeyValuePair<string, V>(Prefix + item.Key, item.Value));
         }
 
         void ICollection<KeyValuePair<string, V>>.CopyTo(KeyValuePair<string, V>[] array, int arrayIndex)
@@ -604,7 +604,7 @@ namespace Signum.Web
         public IEnumerator<KeyValuePair<string, V>> GetEnumerator()
         {
             for (int i = startIndex; i < endIndex; i++)
-                yield return new KeyValuePair<string, V>(global.Keys[i].Substring(ControlID.Length), global.Values[i]);
+                yield return new KeyValuePair<string, V>(global.Keys[i].Substring(Prefix.Length), global.Values[i]);
         }
 
         IEnumerator IEnumerable.GetEnumerator()

@@ -13,8 +13,8 @@ namespace Signum.Web.Lines
 
         public bool WriteHiddenOnReadonly { get; set; }
 
-        public HourMinuteLine(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
-            : base(type, untypedValue, parent, controlID, propertyRoute)
+        public HourMinuteLine(Type type, object untypedValue, Context parent, string prefix, PropertyRoute propertyRoute)
+            : base(type, untypedValue, parent, prefix, propertyRoute)
         {
         }
 

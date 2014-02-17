@@ -23,27 +23,27 @@ namespace Signum.Web
     {
         public const string Separator = "_";
 
-        public string ControlID { get; set; }
+        public string Prefix { get; set; }
 
         public Context Parent { get; private set; } 
 
-        public Context(Context parent, string controlID)
+        public Context(Context parent, string prefix)
         {
             if(parent == null)
             {
                 this.Parent = Default;
-                this.ControlID = controlID; 
+                this.Prefix = prefix; 
             }
             else
             {
                 this.Parent = parent;
-                this.ControlID = parent.Compose(controlID); 
+                this.Prefix = parent.Compose(prefix); 
             }
         }
 
         public string Compose(string nameToAppend)
         {
-            return ControlID.Add(Separator, nameToAppend);
+            return Prefix.Add(Separator, nameToAppend);
         }
 
         public string Compose(params string[] namesToAppend)
@@ -145,7 +145,7 @@ namespace Signum.Web
 
         public override string ToString()
         {
-            return ControlID; 
+            return Prefix; 
         }
         #endregion
 
@@ -182,8 +182,8 @@ namespace Signum.Web
 
         public PropertyRoute PropertyRoute { get; private set; }
 
-        protected TypeContext(Context parent, string controlID, PropertyRoute propertyRoute)
-            :base(parent, controlID)
+        protected TypeContext(Context parent, string prefix, PropertyRoute propertyRoute)
+            :base(parent, prefix)
         {
             this.PropertyRoute = propertyRoute;
         }
@@ -220,14 +220,14 @@ namespace Signum.Web
             get { return Value; }
         }
 
-        public TypeContext(T value, string controlID)
-            : base(null, controlID, PropertyRoute.Root(value.GetType()))
+        public TypeContext(T value, string prefix)
+            : base(null, prefix, PropertyRoute.Root(value.GetType()))
         {
             Value = value;
         }
 
-        public TypeContext(T value, TypeContext parent, string controlID, PropertyRoute propertyRoute)
-            : base(parent, controlID, propertyRoute)
+        public TypeContext(T value, TypeContext parent, string prefix, PropertyRoute propertyRoute)
+            : base(parent, prefix, propertyRoute)
         {
             Value = value;
         }
@@ -255,7 +255,7 @@ namespace Signum.Web
 
         internal override TypeContext Clone(object newValue)
         {
-            return new TypeContext<T>((T)newValue, (TypeContext)Parent, ControlID, PropertyRoute);
+            return new TypeContext<T>((T)newValue, (TypeContext)Parent, Prefix, PropertyRoute);
         }
     }
     #endregion

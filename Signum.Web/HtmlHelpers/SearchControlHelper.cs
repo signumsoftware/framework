@@ -21,7 +21,7 @@ namespace Signum.Web
 {
     public class SearchControl
     {
-        public string ControlID;
+        public string Prefix;
         public ToolBarButton[] ToolBarButton { get; set; }
     }
 
@@ -50,7 +50,7 @@ namespace Signum.Web
 
         public static MvcHtmlString SearchControl(this HtmlHelper helper, FindOptions findOptions, Context context, Action<SearchControl> settingsModifier)
         {
-            var options = new SearchControl { ControlID = context.ControlID }; 
+            var options = new SearchControl { Prefix = context.Prefix }; 
             if (settingsModifier != null)
                 settingsModifier(options);
 

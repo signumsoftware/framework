@@ -76,7 +76,7 @@ namespace Signum.Web.Views
     
     ViewData[ViewDataKeys.FindOptions] = findOptions;
 
-    var controlID = Model.Compose("sfSearchControl");
+    var prefix = Model.Compose("sfSearchControl");
 
             
             #line default
@@ -86,7 +86,7 @@ WriteLiteral("\r\n<div");
 WriteAttribute("id", Tuple.Create(" id=\"", 997), Tuple.Create("\"", 1012)
             
             #line 19 "..\..\Signum\Views\SearchControl.cshtml"
-, Tuple.Create(Tuple.Create("", 1002), Tuple.Create<System.Object, System.Int32>(controlID
+, Tuple.Create(Tuple.Create("", 1002), Tuple.Create<System.Object, System.Int32>(prefix
             
             #line default
             #line hidden
@@ -99,7 +99,7 @@ WriteLiteral(" \r\n     data-prefix=\"");
 
             
             #line 21 "..\..\Signum\Views\SearchControl.cshtml"
-             Write(Model.ControlID);
+             Write(Model.Prefix);
 
             
             #line default
@@ -235,7 +235,7 @@ WriteLiteral("\r\n\r\n");
             #line hidden
             
             #line 55 "..\..\Signum\Views\SearchControl.cshtml"
-                     if (string.IsNullOrEmpty(Model.ControlID) && findOptions.AllowChangeColumns)
+                     if (string.IsNullOrEmpty(Model.Prefix) && findOptions.AllowChangeColumns)
                     {
                         
             
@@ -308,7 +308,7 @@ WriteLiteral("\r\n            </div>\r\n        </div>\r\n    </div>\r\n    \r\n
                 "sf-query-button sf-filters-header" + (filtersVisible ? "" : " close"),
                 new Dictionary<string, object> 
                 { 
-                    { "onclick", JsFunction.SFControlThen(controlID,  "toggleFilters()") },
+                    { "onclick", JsFunction.SFControlThen(prefix,  "toggleFilters()") },
                     { "data-icon", filtersVisible ? "ui-icon-triangle-1-n" : "ui-icon-triangle-1-e" }
                 }));
 
@@ -392,7 +392,7 @@ WriteAttribute("onclick", Tuple.Create(" onclick=\"", 5504), Tuple.Create("\"", 
 , Tuple.Create(Tuple.Create("", 5514), Tuple.Create("event.preventDefault();", 5514), true)
             
             #line 106 "..\..\Signum\Views\SearchControl.cshtml"
-                                                             , Tuple.Create(Tuple.Create(" ", 5537), Tuple.Create<System.Object, System.Int32>(JsFunction.SFControlThen(controlID, "search()")
+                                                             , Tuple.Create(Tuple.Create(" ", 5537), Tuple.Create<System.Object, System.Int32>(JsFunction.SFControlThen(prefix, "search()")
             
             #line default
             #line hidden
@@ -446,7 +446,7 @@ WriteAttribute("onclick", Tuple.Create(" onclick=\"", 5804), Tuple.Create("\"", 
 , Tuple.Create(Tuple.Create("", 5814), Tuple.Create("event.preventDefault();", 5814), true)
             
             #line 109 "..\..\Signum\Views\SearchControl.cshtml"
-                                                                             , Tuple.Create(Tuple.Create("", 5837), Tuple.Create<System.Object, System.Int32>(JsFunction.SFControlThen(controlID, "create_click()")
+                                                                             , Tuple.Create(Tuple.Create("", 5837), Tuple.Create<System.Object, System.Int32>(JsFunction.SFControlThen(prefix, "create_click()")
             
             #line default
             #line hidden
@@ -482,7 +482,7 @@ WriteLiteral("        ");
            QueryName = findOptions.QueryName,
            ManualQueryButtons = (ToolBarButton[])ViewData[ViewDataKeys.ManualToolbarButtons],
            EntityType = entitiesType,
-           Prefix = Model.ControlID
+           Prefix = Model.Prefix
        }).ToString(Html));
 
             
@@ -575,7 +575,7 @@ WriteLiteral("                            ");
 
             
             #line 133 "..\..\Signum\Views\SearchControl.cshtml"
-                       Write(Html.CheckBox(Model.Compose("cbSelectAll"), false, new { onclick = JsFunction.SFControlThen(controlID, "toggleSelectAll()")}));
+                       Write(Html.CheckBox(Model.Compose("cbSelectAll"), false, new { onclick = JsFunction.SFControlThen(prefix, "toggleSelectAll()")}));
 
             
             #line default
@@ -789,7 +789,7 @@ WriteLiteral("\"), ");
 
             
             #line 175 "..\..\Signum\Views\SearchControl.cshtml"
-                                                                                                                           Write(MvcHtmlString.Create(findOptions.ToJS(Model.ControlID).ToString()));
+                                                                                                                           Write(MvcHtmlString.Create(findOptions.ToJS(Model.Prefix).ToString()));
 
             
             #line default

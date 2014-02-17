@@ -31,8 +31,8 @@ namespace Signum.Web
 
         public bool Vertical { get; set; }
 
-        public EntityStrip(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
-            : base(type, untypedValue, parent, controlID, propertyRoute)
+        public EntityStrip(Type type, object untypedValue, Context parent, string prefix, PropertyRoute propertyRoute)
+            : base(type, untypedValue, parent, prefix, propertyRoute)
         {
             bool isEmbedded = type.ElementType().IsEmbeddedEntity();
 

@@ -30,8 +30,8 @@ namespace Signum.Web
         public IEnumerable<Lite<IIdentifiable>> Data { get; set; }
         public int Size { get; set; }
 
-        public EntityCombo(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
-            : base(type, untypedValue, parent, controlID, propertyRoute)
+        public EntityCombo(Type type, object untypedValue, Context parent, string prefix, PropertyRoute propertyRoute)
+            : base(type, untypedValue, parent, prefix, propertyRoute)
         {
             Size = 0;
             Preload = true;

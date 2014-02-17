@@ -25,8 +25,8 @@ namespace Signum.Web
 
         public bool WriteHiddenOnReadonly { get; set; }
 
-        public ValueLine(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
-            : base(type, untypedValue, parent, controlID, propertyRoute)
+        public ValueLine(Type type, object untypedValue, Context parent, string prefix, PropertyRoute propertyRoute)
+            : base(type, untypedValue, parent, prefix, propertyRoute)
         {
         }
 

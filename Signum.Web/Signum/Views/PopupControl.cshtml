@@ -2,7 +2,7 @@
 @using Signum.Engine.Operations
 @model TypeContext
 @{ var modifiable = (ModifiableEntity)Model.UntypedValue; }
-<div id="@Model.Compose("panelPopup")" class="sf-popup-control" data-prefix="@Model.ControlID">
+<div id="@Model.Compose("panelPopup")" class="sf-popup-control" data-prefix="@Model.Prefix">
     <span class="sf-popup-title">
     <span style="float:left; display:block">
     @Navigator.Manager.GetTypeTitle(modifiable)
@@ -32,13 +32,13 @@
             ViewMode = (ViewMode)ViewData[ViewDataKeys.ViewMode],
             ControllerContext = this.ViewContext,
             PartialViewName = ViewData[ViewDataKeys.PartialViewName].ToString(),
-            Prefix = Model.ControlID,
+            Prefix = Model.Prefix,
             ShowOperations = (bool?)ViewData[ViewDataKeys.ShowOperations] ?? true,
         }, modifiable).ToString(Html)
     </div>
     @Html.ValidationSummaryAjax(Model)
     <div id="@Model.Compose("divMainControl")" class="sf-main-control@(modifiable.IsGraphModified ? " sf-changed" : "")" 
-        data-prefix="@Model.ControlID" 
+        data-prefix="@Model.Prefix" 
         data-runtimeinfo="@Model.RuntimeInfo().ToString()">
         @if (((bool?)ViewData[ViewDataKeys.WriteEntityState]) == true)
         {

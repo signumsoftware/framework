@@ -115,19 +115,19 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
 
         var allErrors = [];
 
-        var controlID;
-        for (controlID in modelState) {
-            if (modelState.hasOwnProperty(controlID)) {
-                var errorsArray = modelState[controlID];
+        var prefix;
+        for (prefix in modelState) {
+            if (modelState.hasOwnProperty(prefix)) {
+                var errorsArray = modelState[prefix];
                 var partialErrors = errorsArray.map(function (a) {
                     return "<li>" + a + "</li>";
                 });
                 allErrors.push(errorsArray);
 
-                if (controlID != globalErrorsKey && controlID != "") {
-                    var $control = $('#' + controlID);
+                if (prefix != globalErrorsKey && prefix != "") {
+                    var $control = $('#' + prefix);
                     $control.addClass(inputErrorClass);
-                    $('#' + SF.compose(controlID, Entities.Keys.toStr) + ',#' + SF.compose(controlID, Entities.Keys.link)).addClass(inputErrorClass);
+                    $('#' + SF.compose(prefix, Entities.Keys.toStr) + ',#' + SF.compose(prefix, Entities.Keys.link)).addClass(inputErrorClass);
                     if (valOptions.showInlineErrors && $control.hasClass(inlineErrorVal)) {
                         var errorMessage = '<span class="' + fieldErrorClass + '">' + (valOptions.fixedInlineErrorText || errorsArray.join('')) + "</span>";
 
@@ -137,7 +137,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
                             $control.after(errorMessage);
                     }
                 }
-                setPathErrors(valOptions, controlID, partialErrors.join(''), showPathErrors);
+                setPathErrors(valOptions, prefix, partialErrors.join(''), showPathErrors);
             }
         }
 
@@ -150,8 +150,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
     exports.showErrors = showErrors;
 
     //This will mark all the path with the error class, and it will also set summary error entries for the controls more inner than the current one
-    function setPathErrors(valOptions, controlID, partialErrors, showPathErrors) {
-        var pathPrefixes = (controlID != globalErrorsKey) ? SF.getPathPrefixes(controlID) : new Array("");
+    function setPathErrors(valOptions, prefix, partialErrors, showPathErrors) {
+        var pathPrefixes = (prefix != globalErrorsKey) ? SF.getPathPrefixes(prefix) : new Array("");
         for (var i = 0, l = pathPrefixes.length; i < l; i++) {
             var currPrefix = pathPrefixes[i];
             if (currPrefix != undefined) {
@@ -177,9 +177,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
 
     function isValid(modelState) {
         SF.log("Validator isValid");
-        var controlID;
-        for (controlID in modelState) {
-            if (modelState.hasOwnProperty(controlID) && modelState[controlID].length) {
+        for (var prefix in modelState) {
+            if (modelState.hasOwnProperty(prefix) && modelState[prefix].length) {
                 return false;
             }
         }

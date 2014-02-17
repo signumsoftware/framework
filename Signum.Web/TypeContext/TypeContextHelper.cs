@@ -31,7 +31,7 @@ namespace Signum.Web
                 if (!typeof(T).IsAssignableFrom(stc.Type))
                     throw new InvalidOperationException("{0} is not convertible to {1}".Formato(stc.GetType().TypeName(), typeof(TypeContext<T>).TypeName()));
 
-                return new TypeContext<T>((T)stc.UntypedValue, stc.ControlID);
+                return new TypeContext<T>((T)stc.UntypedValue, stc.Prefix);
             }
 
             throw new InvalidCastException("Impossible to convert object {0} of type {1} to {2}".Formato(

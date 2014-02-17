@@ -29,8 +29,8 @@ namespace Signum.Web
 
     public abstract class EntityBase : BaseLine
     {
-        public EntityBase(Type type, object untypedValue, Context parent, string controlID, PropertyRoute propertyRoute)
-            : base(type, untypedValue, parent, controlID, propertyRoute)
+        public EntityBase(Type type, object untypedValue, Context parent, string prefix, PropertyRoute propertyRoute)
+            : base(type, untypedValue, parent, prefix, propertyRoute)
         {
             View = true;
             Create = true;
@@ -69,14 +69,14 @@ namespace Signum.Web
 
         public virtual string SFControlThen(string functionCall)
         {
-            return JsFunction.SFControlThen(ControlID, functionCall);
+            return JsFunction.SFControlThen(Prefix, functionCall);
         }
 
         protected virtual JObject OptionsJSInternal()
         {
             JObject options = new JObject
             {
-                {"prefix", ControlID }
+                {"prefix", Prefix }
             }; 
 
             if (PartialViewName.HasText() && !Type.IsEmbeddedEntity())
@@ -131,7 +131,7 @@ namespace Signum.Web
             {
                 Module = module,
                 Type = type,
-                ControlID = ControlID,
+                Prefix = Prefix,
                 Options = OptionsJSInternal()
             };
 
@@ -188,14 +188,14 @@ namespace Signum.Web
 
         static string NewLine(string varLines, LineInfo lineInfo)
         {
-            return "new {0}.{1}($('#{2}'), {3})".Formato(varLines, lineInfo.Type, lineInfo.ControlID, lineInfo.Options.ToString());
+            return "new {0}.{1}($('#{2}'), {3})".Formato(varLines, lineInfo.Type, lineInfo.Prefix, lineInfo.Options.ToString());
         }
 
         public class LineInfo
         {
             public string Module; 
             public string Type;
-            public string ControlID;
+            public string Prefix;
             public JObject Options;
         }
     }
