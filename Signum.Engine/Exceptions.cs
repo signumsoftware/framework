@@ -87,7 +87,7 @@ namespace Signum.Engine.Exceptions
                 if (Table == null)
                     return InnerException.Message;
 
-                return EngineMessage.TheresAlreadyA0With1EqualsTo2.NiceToString().Formato(
+                return EngineMessage.TheresAlreadyA0With1EqualsTo2.NiceToString().ForGenderAndNumber(Table == null? null: Table.Type.GetGender()).Formato(
                     Table == null ? TableName : Table.Type.NiceName(),
                     Index == null ? IndexName :
                     Properties.IsNullOrEmpty() ? Index.Columns.CommaAnd(c => c.Name) : 

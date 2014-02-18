@@ -66,7 +66,7 @@
     <Member Name="TheEntity0IsNew" Description="La entidad {0} es nueva" />
     <Member Name="ThereAre0ThatReferThisEntity" Description="Hay '{0}' que refieren a esta entidad" />
     <Member Name="ThereAreRecordsIn0PointingToThisTableByColumn1" Description="Hay registros en '{0}' que refieren a esta tabla por la columna '{1}'" />
-    <Member Name="TheresAlreadyA0With12" Description="Ya hay un '{0}' con '{1}' {2}" />
+    <Member Name="TheresAlreadyA0With1EqualsTo2" Description="Ya hay [m:un|f:una] {0} con {1} igual a '{2}'" />
     <Member Name="UnauthorizedAccessTo0Because1" Description="Acceso denegado a {0} porque {1}" />
   </Type>
   <Type Name="Entity" Description="Entidad" />
@@ -140,6 +140,8 @@
   <Type Name="IUserDN" />
   <Type Name="JavascriptMessage">
     <Member Name="addFilter" Description="Añadir filtro" />
+    <Member Name="chooseAType" Description="Elija un tipo" />
+    <Member Name="chooseAValue" Description="Elija un valor" />
     <Member Name="create" Description="Crear" />
     <Member Name="editColumnName" Description="Editar nombre de columna" />
     <Member Name="enterTheNewColumnName" Description="Introduzca el nuevo nombre de la columna" />
@@ -279,6 +281,7 @@
     <Member Name="_01of2Results" Description="{0} - {1} de {2} resultado[s]." />
     <Member Name="_0Results" Description="{0} resultado[s]." />
     <Member Name="ChooseTheDisplayNameOfTheNewColumn" Description="Elige el nombre que se verá en la nueva columna" />
+    <Member Name="Create" Description="Crear" />
     <Member Name="CreateNew" Description="Crear nueva" />
     <Member Name="Field" Description="Campo" />
     <Member Name="FilterBuilder_AddColumn" Description="Añadir columna" />
@@ -298,13 +301,13 @@
     <Member Name="NoResults" Description="No hay resultados" />
     <Member Name="Of" Description="de" />
     <Member Name="Operation" Description="Operación" />
+    <Member Name="Operations" Description="Operaciones" />
+    <Member Name="Processes" Description="Procesos" />
     <Member Name="Query0IsNotAllowed" Description="No se permite la consulta {0}" />
     <Member Name="Query0NotAllowed" Description="La query {0} no está permitida" />
     <Member Name="Query0NotRegistered" Description="La query {0} no está registrada en el DynamicQueryManager" />
     <Member Name="Rename" Description="Renombrar" />
     <Member Name="Search" Description="Buscar" />
-    <Member Name="Search_Create" Description="Crear" />
-    <Member Name="Search_CtxMenuItem_Operations" Description="Operaciones" />
     <Member Name="SearchControl_Pagination_All" Description="Todos" />
     <Member Name="SelectAnElement" Description="Seleccione un elemento" />
     <Member Name="ThereIsNo0" Description="No hay {0}" />
@@ -313,7 +316,6 @@
     <Member Name="ViewSelected" Description="Ver seleccionada" />
   </Type>
   <Type Name="SelectorMessage">
-    <Member Name="ChooseAType" Description="Elija un tipo" />
     <Member Name="ChooseAValue" Description="Elige un valor" />
     <Member Name="ConstructorSelector" Description="Selector de constructor" />
     <Member Name="PleaseChooseAValueToContinue" Description="Por favor, elige un valor para continuar:" />
@@ -384,7 +386,6 @@
     <Member Name="FieldName" Description="Nombre del campo" />
     <Member Name="IntValue" Description="Valor int" />
     <Member Name="IsNullable" Description="Es anulable" />
-    <Member Name="Related" Description="Relacionados" />
     <Member Name="StringValue" Description="Valor de cadena" />
     <Member Name="TopText" Description="Texto superior" />
   </Type>
