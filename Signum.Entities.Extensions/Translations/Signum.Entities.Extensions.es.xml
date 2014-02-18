@@ -25,7 +25,6 @@
   </Type>
   <Type Name="AlertMessage">
     <Member Name="Alert" Description="Alerta" />
-    <Member Name="AlertCreated" Description="Alerta creada" />
     <Member Name="Alerts" Description="Alertas" />
     <Member Name="Alerts_Attended" Description="Atendidas" />
     <Member Name="Alerts_Future" Description="Futuras" />
@@ -38,6 +37,7 @@
   </Type>
   <Type Name="AlertOperation">
     <Member Name="Attend" Description="Atender" />
+    <Member Name="CreateAlertFromEntity" Description="Crear alerta desde entidad" />
     <Member Name="Save" Description="Guardar" />
     <Member Name="SaveNew" Description="Guardar nuevo" />
     <Member Name="Unattend" Description="Desatender" />
@@ -579,10 +579,11 @@
     <Member Name="New" Description="Nueva" />
   </Type>
   <Type Name="ExcelMessage">
+    <Member Name="Administer" Description="Administrar" />
+    <Member Name="CreateNew" Description="Crear nuevo" />
     <Member Name="Data" Description="Datos" />
     <Member Name="Download" Description="Descargar" />
     <Member Name="Excel2007Spreadsheet" Description="Hoja de cálculo de Microsoft Office Excel 2007(*.xlsx)|*.xlsx" />
-    <Member Name="ExcelAdminister" Description="Administrar" />
     <Member Name="ExcelReport" Description="Informe Excel" />
     <Member Name="ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0" Description="El template Excel debe tener extensión .xlsx, pero el actual tiene extensión {0}" />
     <Member Name="FindLocationFoExcelReport" Description="Elija la ubicación del informe Excel" />
@@ -784,6 +785,7 @@
     <Member Name="ViewNotes" Description="Ver notas" />
   </Type>
   <Type Name="NoteOperation">
+    <Member Name="CreateNoteFromEntity" Description="Crear nota desde entidad" />
     <Member Name="Save" Description="Guardar" />
   </Type>
   <Type Name="NoteTypeDN" Description="Tipo de nota" />

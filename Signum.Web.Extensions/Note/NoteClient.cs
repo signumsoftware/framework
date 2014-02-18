@@ -38,7 +38,7 @@ namespace Signum.Web.Notes
 
                 OperationClient.AddSettings(new List<OperationSettings>
                 {
-                    new EntityOperationSettings(NoteOperation.CreateFromEntity) 
+                    new EntityOperationSettings(NoteOperation.CreateNoteFromEntity) 
                     { 
                         IsVisible  = _ => false
                     }

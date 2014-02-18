@@ -147,7 +147,7 @@ namespace Signum.Engine.Alerts
         {
             GetState = a => a.State;
 
-            new ConstructFrom<IdentifiableEntity>(AlertOperation.CreateFromEntity)
+            new ConstructFrom<IdentifiableEntity>(AlertOperation.CreateAlertFromEntity)
             {
                 ToState = AlertState.New,
                 Construct = (a, _) => new AlertDN

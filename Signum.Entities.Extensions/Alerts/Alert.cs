@@ -163,7 +163,7 @@ namespace Signum.Entities.Alerts
 
     public enum AlertOperation
     {
-        CreateFromEntity,
+        CreateAlertFromEntity,
         SaveNew,
         Save,
         Attend,

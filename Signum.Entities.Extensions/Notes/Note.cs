@@ -79,7 +79,7 @@ namespace Signum.Entities.Notes
 
     public enum NoteOperation
     {
-        CreateFromEntity,
+        CreateNoteFromEntity,
         Save,
     }
 

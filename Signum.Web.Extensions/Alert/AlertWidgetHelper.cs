@@ -92,7 +92,7 @@ namespace Signum.Web.Alerts
                 {
                     content.AddLine(new HtmlTag("a")
                        .Class("sf-alert-create")
-                       .Attr("onclick", new JsFunction(AlertClient.Module, "createAlert", prefix, OperationDN.UniqueKey(AlertOperation.CreateFromEntity)).ToString())
+                       .Attr("onclick", new JsFunction(AlertClient.Module, "createAlert", prefix, OperationDN.UniqueKey(AlertOperation.CreateAlertFromEntity)).ToString())
                        .InnerHtml(AlertMessage.CreateAlert.NiceToString().EncodeHtml())
                        .ToHtml());
                 }

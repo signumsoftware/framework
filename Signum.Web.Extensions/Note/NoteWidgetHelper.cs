@@ -55,7 +55,7 @@ namespace Signum.Web.Notes
                 {
                     content.AddLine(new HtmlTag("a")
                        .Class("sf-note-create")
-                       .Attr("onclick", new JsFunction(NoteClient.Module, "createNote", prefix, OperationDN.UniqueKey(NoteOperation.CreateFromEntity)).ToString())
+                       .Attr("onclick", new JsFunction(NoteClient.Module, "createNote", prefix, OperationDN.UniqueKey(NoteOperation.CreateNoteFromEntity)).ToString())
                        .InnerHtml(NoteMessage.CreateNote.NiceToString().EncodeHtml())
                        .ToHtml());
                 }
