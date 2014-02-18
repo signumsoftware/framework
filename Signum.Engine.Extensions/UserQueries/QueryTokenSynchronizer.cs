@@ -79,6 +79,19 @@ namespace Signum.Engine.UserQueries
                 }
                 else
                 {
+                    if (i == 0)
+                    {
+                        var entity = QueryUtils.SubToken(result, qd, canAggregate, "Entity");
+                        QueryToken newSubResult = QueryUtils.SubToken(entity, qd, canAggregate, part);
+
+                        if (newSubResult != null)
+                        {
+                            result = newSubResult;
+                            continue;
+                        }
+                    }
+
+
                     if (Replacements.AutoRepacement != null)
                     {
                         Replacements.Selection? sel = Replacements.AutoRepacement(part, result.SubTokens(qd, canAggregate).Select(a => a.Key).ToList());
