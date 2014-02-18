@@ -213,11 +213,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     }
     exports.confirmIfNecessary = confirmIfNecessary;
 
-    function reload(entityHtml) {
-        Navigator.reload(entityHtml);
-    }
-    exports.reload = reload;
-
     function openPopup(entityHtml) {
         exports.notifyExecuted();
         return Navigator.navigatePopup(entityHtml);

@@ -1,5 +1,22 @@
 /// <reference path="globals.ts"/>
 
+export var Keys = {
+    tabId: "sfTabId",
+    antiForgeryToken: "__RequestVerificationToken",
+
+    entityTypeNames: "sfEntityTypeNames",
+    entityTypeNiceNames: "sfEntityTypeNiceNames",
+
+    runtimeInfo: "sfRuntimeInfo",
+    staticInfo: "sfStaticInfo",
+    toStr: "sfToStr",
+    link: "sfLink",
+    loading: "loading",
+    entityState: "sfEntityState",
+
+    viewMode: "sfViewMode",
+};
+
 export class StaticInfo {
     static _types = 0;
     static _typeNiceNames = 1;
@@ -71,9 +88,9 @@ export class StaticInfo {
         return this.getValue(StaticInfo._propertyRoute);
     }
 
-    public static getFor(prefix: string) : StaticInfo {
+    public static getFor(prefix: string): StaticInfo {
         if (!prefix)
-            throw new Error("prefix not provided"); 
+            throw new Error("prefix not provided");
 
         var staticInfo = new StaticInfo(prefix);
         if (staticInfo.find().length > 0)
@@ -83,78 +100,31 @@ export class StaticInfo {
     }
 }
 
-export class EntityValue {
-    constructor(runtimeInfo: RuntimeInfoValue, toString?: string, link?: string) {
-        if (runtimeInfo == null)
-            throw new Error("runtimeInfo is mandatory for an EntityValue");
 
-        this.runtimeInfo = runtimeInfo;
-        this.toStr = toString;
-        this.link = link;
-    }
+export class RuntimeInfoElement {
 
-    runtimeInfo: RuntimeInfoValue;
-    toStr: string;
-    link: string;
-
-    assertPrefixAndType(prefix: string, staticInfo: StaticInfo) {
-        var types = staticInfo.types();
-
-        if (types.length == 0 && types[0] == "[All]")
-            return;
-
-        if (types.indexOf(this.runtimeInfo.type) == -1)
-            throw new Error("{0} not found in types {1}".format(this.runtimeInfo.type, types.join(", ")));
-    }
-
-    isLoaded() {
-        return false;
-    }
-}
-
-export class EntityHtml extends EntityValue {
     prefix: string;
-    html: JQuery;
+    private $elem: JQuery;
 
-    hasErrors: boolean;
-
-    constructor(prefix: string, runtimeInfo: RuntimeInfoValue, toString?: string, link?: string) {
-        super(runtimeInfo, toString, link);
-
-        if (prefix == null)
-            throw new Error("prefix is mandatory for EntityHtml");
-
-        this.prefix = prefix; 
+    constructor(prefix: string) {
+        this.prefix = prefix;
     }
 
-    assertPrefixAndType(prefix: string, staticInfo: StaticInfo) {
-
-        super.assertPrefixAndType(prefix, staticInfo);
-
-        if (this.prefix != null && this.prefix != prefix)
-            throw Error("EntityHtml prefix should be {0} instead of  {1}".format(prefix, this.prefix));
+    public getElem() {
+        if (!this.$elem) {
+            this.$elem = $('#' + SF.compose(this.prefix, Keys.runtimeInfo));
+        }
+        return this.$elem;
     }
 
-    isLoaded() {
-        return this.html != null && this.html.length != 0;
+    value(): RuntimeInfoValue {
+        return RuntimeInfoValue.parse(this.getElem().val());
     }
 
-    loadHtml(htmlText: string) {
-        this.html = $('<div/>').html(htmlText).contents();
-    }
-
-    static fromHtml(prefix: string, htmlText: string): EntityHtml {
-        var result = new EntityHtml(prefix, new RuntimeInfoValue("?", null, false));
-        result.loadHtml(htmlText);
-        return result;
-    }
-
-    static withoutType(prefix: string): EntityHtml {
-        var result = new EntityHtml(prefix, new RuntimeInfoValue("?", null, false));
-        return result;
+    setValue(runtimeInfo: RuntimeInfoValue) {
+        this.getElem().val(runtimeInfo == null ? null : runtimeInfo.toString());
     }
 }
-
 
 
 export class RuntimeInfoValue {
@@ -210,46 +180,75 @@ export class RuntimeInfoValue {
     }
 }
 
-export class RuntimeInfoElement {
+export class EntityValue {
+    constructor(runtimeInfo: RuntimeInfoValue, toString?: string, link?: string) {
+        if (runtimeInfo == null)
+            throw new Error("runtimeInfo is mandatory for an EntityValue");
 
-    prefix: string;
-    private $elem: JQuery;
-
-    constructor(prefix: string) {
-        this.prefix = prefix;
+        this.runtimeInfo = runtimeInfo;
+        this.toStr = toString;
+        this.link = link;
     }
 
-    public getElem() {
-        if (!this.$elem) {
-            this.$elem = $('#' + SF.compose(this.prefix, Keys.runtimeInfo));
-        }
-        return this.$elem;
+    runtimeInfo: RuntimeInfoValue;
+    toStr: string;
+    link: string;
+
+    assertPrefixAndType(prefix: string, staticInfo: StaticInfo) {
+        var types = staticInfo.types();
+
+        if (types.length == 0 && types[0] == "[All]")
+            return;
+
+        if (types.indexOf(this.runtimeInfo.type) == -1)
+            throw new Error("{0} not found in types {1}".format(this.runtimeInfo.type, types.join(", ")));
     }
 
-    value(): RuntimeInfoValue {
-        return RuntimeInfoValue.parse(this.getElem().val());
-    }
-
-    setValue(runtimeInfo: RuntimeInfoValue) {
-        this.getElem().val(runtimeInfo == null ? null : runtimeInfo.toString());
+    isLoaded() {
+        return false;
     }
 }
 
-export var Keys = {
-    tabId: "sfTabId",
-    antiForgeryToken: "__RequestVerificationToken",
+export class EntityHtml extends EntityValue {
+    prefix: string;
+    html: JQuery;
 
-    entityTypeNames: "sfEntityTypeNames",
-    entityTypeNiceNames: "sfEntityTypeNiceNames",
+    hasErrors: boolean;
 
-    runtimeInfo: "sfRuntimeInfo",
-    staticInfo: "sfStaticInfo",
-    toStr: "sfToStr",
-    link: "sfLink",
-    loading: "loading",
-    entityState: "sfEntityState",
+    constructor(prefix: string, runtimeInfo: RuntimeInfoValue, toString?: string, link?: string) {
+        super(runtimeInfo, toString, link);
 
-    viewMode: "sfViewMode",
-};
+        if (prefix == null)
+            throw new Error("prefix is mandatory for EntityHtml");
 
+        this.prefix = prefix;
+    }
+
+    assertPrefixAndType(prefix: string, staticInfo: StaticInfo) {
+
+        super.assertPrefixAndType(prefix, staticInfo);
+
+        if (this.prefix != null && this.prefix != prefix)
+            throw Error("EntityHtml prefix should be {0} instead of  {1}".format(prefix, this.prefix));
+    }
+
+    isLoaded() {
+        return this.html != null && this.html.length != 0;
+    }
+
+    loadHtml(htmlText: string) {
+        this.html = $('<div/>').html(htmlText).contents();
+    }
+
+    static fromHtml(prefix: string, htmlText: string): EntityHtml {
+        var result = new EntityHtml(prefix, new RuntimeInfoValue("?", null, false));
+        result.loadHtml(htmlText);
+        return result;
+    }
+
+    static withoutType(prefix: string): EntityHtml {
+        var result = new EntityHtml(prefix, new RuntimeInfoValue("?", null, false));
+        return result;
+    }
+}
 

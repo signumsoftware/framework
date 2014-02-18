@@ -143,9 +143,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     });
 
                     continuePromise.then(function (result) {
-                        var newTempDiv = $("#" + tempDivId);
-
                         if (result) {
+                            var newTempDiv = $("#" + tempDivId);
                             var $mainControl = newTempDiv.find(".sf-main-control[data-prefix=" + entityHtml.prefix + "]");
                             if ($mainControl.length > 0) {
                                 entityHtml.runtimeInfo = Entities.RuntimeInfoValue.parse($mainControl.data("runtimeinfo"));
@@ -295,42 +294,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             return entityHtml;
         });
     }
-
-    function serialize(prefix) {
-        var id = SF.compose(prefix, "panelPopup");
-        var $formChildren = $("#" + id + " :input");
-        var data = $formChildren.serialize();
-
-        var myRuntimeInfoKey = SF.compose(prefix, Entities.Keys.runtimeInfo);
-        if ($formChildren.filter("#" + myRuntimeInfoKey).length == 0) {
-            var $mainControl = $(".sf-main-control[data-prefix=" + prefix + "]");
-            data += "&" + myRuntimeInfoKey + "=" + $mainControl.data("runtimeinfo");
-        }
-        return data;
-    }
-    exports.serialize = serialize;
-
-    function serializeJson(prefix) {
-        var id = SF.compose(prefix, "panelPopup");
-        var arr = $("#" + id + " :input").serializeArray();
-        var data = {};
-        for (var index = 0; index < arr.length; index++) {
-            if (data[arr[index].name] != null) {
-                data[arr[index].name] += "," + arr[index].value;
-            } else {
-                data[arr[index].name] = arr[index].value;
-            }
-        }
-
-        var myRuntimeInfoKey = SF.compose(prefix, Entities.Keys.runtimeInfo);
-        if (typeof data[myRuntimeInfoKey] == "undefined") {
-            var $mainControl = $(".sf-main-control[data-prefix=" + prefix + "]");
-            data[myRuntimeInfoKey] = $mainControl.data("runtimeinfo");
-        }
-        return data;
-    }
-    exports.serializeJson = serializeJson;
-    ;
 
     function requestData(entityHtml, options) {
         var obj = {

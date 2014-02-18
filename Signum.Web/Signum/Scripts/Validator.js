@@ -76,6 +76,15 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
     }
     exports.getFormValues = getFormValues;
 
+    function getFormValuesLite(prefix) {
+        var result = exports.getFormBasics();
+
+        result[SF.compose(prefix, Entities.Keys.runtimeInfo)] = prefix ? $("#{0}_divMainControl".format(prefix)).data("runtimeinfo") : $('#' + SF.compose(prefix, Entities.Keys.runtimeInfo)).val();
+
+        return result;
+    }
+    exports.getFormValuesLite = getFormValuesLite;
+
     function getFormValuesHtml(entityHtml) {
         var mainControl = entityHtml.html.find("#{0}_divMainControl".format(entityHtml.prefix));
 
@@ -86,15 +95,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
         return $.extend(result, exports.getFormBasics());
     }
     exports.getFormValuesHtml = getFormValuesHtml;
-
-    function getFormValuesLite(prefix) {
-        var result = exports.getFormBasics();
-
-        result[SF.compose(prefix, Entities.Keys.runtimeInfo)] = prefix ? $("#{0}_divMainControl".format(prefix)).data("runtimeinfo") : $('#' + SF.compose(prefix, Entities.Keys.runtimeInfo)).val();
-
-        return result;
-    }
-    exports.getFormValuesLite = getFormValuesLite;
 
     function getFormBasics() {
         return $('#' + Entities.Keys.tabId + ", input:hidden[name=" + Entities.Keys.antiForgeryToken + "]").serializeObject();

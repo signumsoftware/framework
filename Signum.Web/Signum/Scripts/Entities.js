@@ -6,6 +6,20 @@ var __extends = this.__extends || function (d, b) {
     d.prototype = new __();
 };
 define(["require", "exports"], function(require, exports) {
+    exports.Keys = {
+        tabId: "sfTabId",
+        antiForgeryToken: "__RequestVerificationToken",
+        entityTypeNames: "sfEntityTypeNames",
+        entityTypeNiceNames: "sfEntityTypeNiceNames",
+        runtimeInfo: "sfRuntimeInfo",
+        staticInfo: "sfStaticInfo",
+        toStr: "sfToStr",
+        link: "sfLink",
+        loading: "loading",
+        entityState: "sfEntityState",
+        viewMode: "sfViewMode"
+    };
+
     var StaticInfo = (function () {
         function StaticInfo(prefix) {
             this.prefix = prefix;
@@ -86,6 +100,71 @@ define(["require", "exports"], function(require, exports) {
     })();
     exports.StaticInfo = StaticInfo;
 
+    var RuntimeInfoElement = (function () {
+        function RuntimeInfoElement(prefix) {
+            this.prefix = prefix;
+        }
+        RuntimeInfoElement.prototype.getElem = function () {
+            if (!this.$elem) {
+                this.$elem = $('#' + SF.compose(this.prefix, exports.Keys.runtimeInfo));
+            }
+            return this.$elem;
+        };
+
+        RuntimeInfoElement.prototype.value = function () {
+            return RuntimeInfoValue.parse(this.getElem().val());
+        };
+
+        RuntimeInfoElement.prototype.setValue = function (runtimeInfo) {
+            this.getElem().val(runtimeInfo == null ? null : runtimeInfo.toString());
+        };
+        return RuntimeInfoElement;
+    })();
+    exports.RuntimeInfoElement = RuntimeInfoElement;
+
+    var RuntimeInfoValue = (function () {
+        function RuntimeInfoValue(entityType, id, isNew, ticks) {
+            if (SF.isEmpty(entityType))
+                throw new Error("entityTyp is mandatory for RuntimeInfoValue");
+
+            this.type = entityType;
+            this.id = id;
+            this.isNew = isNew;
+            this.ticks = ticks;
+        }
+        RuntimeInfoValue.parse = function (runtimeInfoString) {
+            if (SF.isEmpty(runtimeInfoString))
+                return null;
+
+            var array = runtimeInfoString.split(';');
+            return new RuntimeInfoValue(array[0], SF.isEmpty(array[1]) ? null : parseInt(array[1]), array[2] == "n", SF.isEmpty(array[3]) ? null : parseInt(array[3]));
+        };
+
+        RuntimeInfoValue.prototype.toString = function () {
+            return [
+                this.type,
+                this.id,
+                this.isNew ? "n" : "o",
+                this.ticks].join(";");
+        };
+
+        RuntimeInfoValue.fromKey = function (key) {
+            if (SF.isEmpty(key))
+                return null;
+
+            return new RuntimeInfoValue(key.before(";"), parseInt(key.after(";")), false);
+        };
+
+        RuntimeInfoValue.prototype.key = function () {
+            if (this.id == null)
+                throw Error("RuntimeInfoValue has no Id");
+
+            return this.type + ";" + this.id;
+        };
+        return RuntimeInfoValue;
+    })();
+    exports.RuntimeInfoValue = RuntimeInfoValue;
+
     var EntityValue = (function () {
         function EntityValue(runtimeInfo, toString, link) {
             if (runtimeInfo == null)
@@ -150,84 +229,5 @@ define(["require", "exports"], function(require, exports) {
         return EntityHtml;
     })(EntityValue);
     exports.EntityHtml = EntityHtml;
-
-    var RuntimeInfoValue = (function () {
-        function RuntimeInfoValue(entityType, id, isNew, ticks) {
-            if (SF.isEmpty(entityType))
-                throw new Error("entityTyp is mandatory for RuntimeInfoValue");
-
-            this.type = entityType;
-            this.id = id;
-            this.isNew = isNew;
-            this.ticks = ticks;
-        }
-        RuntimeInfoValue.parse = function (runtimeInfoString) {
-            if (SF.isEmpty(runtimeInfoString))
-                return null;
-
-            var array = runtimeInfoString.split(';');
-            return new RuntimeInfoValue(array[0], SF.isEmpty(array[1]) ? null : parseInt(array[1]), array[2] == "n", SF.isEmpty(array[3]) ? null : parseInt(array[3]));
-        };
-
-        RuntimeInfoValue.prototype.toString = function () {
-            return [
-                this.type,
-                this.id,
-                this.isNew ? "n" : "o",
-                this.ticks].join(";");
-        };
-
-        RuntimeInfoValue.fromKey = function (key) {
-            if (SF.isEmpty(key))
-                return null;
-
-            return new RuntimeInfoValue(key.before(";"), parseInt(key.after(";")), false);
-        };
-
-        RuntimeInfoValue.prototype.key = function () {
-            if (this.id == null)
-                throw Error("RuntimeInfoValue has no Id");
-
-            return this.type + ";" + this.id;
-        };
-        return RuntimeInfoValue;
-    })();
-    exports.RuntimeInfoValue = RuntimeInfoValue;
-
-    var RuntimeInfoElement = (function () {
-        function RuntimeInfoElement(prefix) {
-            this.prefix = prefix;
-        }
-        RuntimeInfoElement.prototype.getElem = function () {
-            if (!this.$elem) {
-                this.$elem = $('#' + SF.compose(this.prefix, exports.Keys.runtimeInfo));
-            }
-            return this.$elem;
-        };
-
-        RuntimeInfoElement.prototype.value = function () {
-            return RuntimeInfoValue.parse(this.getElem().val());
-        };
-
-        RuntimeInfoElement.prototype.setValue = function (runtimeInfo) {
-            this.getElem().val(runtimeInfo == null ? null : runtimeInfo.toString());
-        };
-        return RuntimeInfoElement;
-    })();
-    exports.RuntimeInfoElement = RuntimeInfoElement;
-
-    exports.Keys = {
-        tabId: "sfTabId",
-        antiForgeryToken: "__RequestVerificationToken",
-        entityTypeNames: "sfEntityTypeNames",
-        entityTypeNiceNames: "sfEntityTypeNiceNames",
-        runtimeInfo: "sfRuntimeInfo",
-        staticInfo: "sfStaticInfo",
-        toStr: "sfToStr",
-        link: "sfLink",
-        loading: "loading",
-        entityState: "sfEntityState",
-        viewMode: "sfViewMode"
-    };
 });
 //# sourceMappingURL=Entities.js.map
