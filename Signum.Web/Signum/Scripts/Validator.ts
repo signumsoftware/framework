@@ -97,6 +97,17 @@ export function getFormValues(prefix: string) : FormObject {
     return $.extend(result, getFormBasics());
 }
 
+export function getFormValuesLite(prefix: string): FormObject {
+
+    var result = getFormBasics();
+
+    result[SF.compose(prefix, Entities.Keys.runtimeInfo)] = prefix ?
+        $("#{0}_divMainControl".format(prefix)).data("runtimeinfo") :
+        $('#' + SF.compose(prefix, Entities.Keys.runtimeInfo)).val();
+
+    return result;
+}
+
 export function getFormValuesHtml(entityHtml: Entities.EntityHtml): FormObject {
 
     var mainControl = entityHtml.html.find("#{0}_divMainControl".format(entityHtml.prefix)); 
@@ -108,16 +119,6 @@ export function getFormValuesHtml(entityHtml: Entities.EntityHtml): FormObject {
     return $.extend(result, getFormBasics());
 }
 
-export function getFormValuesLite(prefix: string): FormObject {
-
-    var result = getFormBasics();
-
-    result[SF.compose(prefix, Entities.Keys.runtimeInfo)] = prefix ?
-    $("#{0}_divMainControl".format(prefix)).data("runtimeinfo") :
-    $('#' + SF.compose(prefix, Entities.Keys.runtimeInfo)).val();
-
-    return result;
-}
 
 export function getFormBasics(): FormObject {
     return $('#' + Entities.Keys.tabId + ", input:hidden[name=" + Entities.Keys.antiForgeryToken + "]").serializeObject();
