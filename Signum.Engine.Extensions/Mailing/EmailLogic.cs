@@ -308,33 +308,25 @@ namespace Signum.Engine.Mailing
             {
                 From = email.From.ToMailAddress(),
                 Subject = email.Subject,
-                Body = email.Body,
                 IsBodyHtml = email.IsBodyHtml,
             };
 
-            if (email.Attachments.Any())
-            {
-                AlternateView view = AlternateView.CreateAlternateViewFromString(email.Body, null, "text/html");
-                view.LinkedResources.AddRange(email.Attachments
-                   .Where(a => a.Type == EmailAttachmentType.LinkedResource)
-                   .Select(a => new LinkedResource(a.File.FullPhysicalPath, MimeType.FromFileName(a.File.FileName))
-                   {
-                       ContentId = a.ContentId
-                   }));
+            AlternateView view = AlternateView.CreateAlternateViewFromString(email.Body, null, email.IsBodyHtml ? "text/html" : "text/plain");
+            view.LinkedResources.AddRange(email.Attachments
+                .Where(a => a.Type == EmailAttachmentType.LinkedResource)
+                .Select(a => new LinkedResource(a.File.FullPhysicalPath, MimeType.FromFileName(a.File.FileName))
+                {
+                    ContentId = a.ContentId
+                }));
 
-                message.Attachments.AddRange(email.Attachments
-                    .Where(a => a.Type == EmailAttachmentType.Attachment)
-                    .Select(a => new Attachment(a.File.FullPhysicalPath, MimeType.FromFileName(a.File.FileName))
-                    {
-                        ContentId = a.ContentId
-                    }));
+            message.Attachments.AddRange(email.Attachments
+                .Where(a => a.Type == EmailAttachmentType.Attachment)
+                .Select(a => new Attachment(a.File.FullPhysicalPath, MimeType.FromFileName(a.File.FileName))
+                {
+                    ContentId = a.ContentId
+                }));
 
-                message.AlternateViews.Add(view);
-            }
-            else
-            {
-                message.Body = email.Body;
-            }
+            message.AlternateViews.Add(view);
 
             message.To.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.To).Select(r => r.ToMailAddress()).ToList());
             message.CC.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.Cc).Select(r => r.ToMailAddress()).ToList());
@@ -449,7 +441,7 @@ namespace Signum.Engine.Mailing
                             {
                                 email.InDB().UnsafeUpdate()
                                    .Set(a => a.Sent, a => TimeZoneManager.Now)
-                                   .Set(a => a.State, a => EmailMessageState.SentException)
+                                   .Set(a => a.State, a => EmailMessageState.Sent)
                                    .Execute();
                             }
                         });

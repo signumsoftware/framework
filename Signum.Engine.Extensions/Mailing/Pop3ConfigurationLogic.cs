@@ -205,7 +205,7 @@ namespace Signum.Engine.Mailing
                                 {
                                     string rawContent = client.GetMessage(kvp.Key);
 
-                                    MailMessage mm = new StringReader(rawContent).Using(MailMimeParser.Parse);
+                                    MailMessage mm = MailMimeParser.Parse(rawContent);
 
                                     EmailMessageDN email = ToEmailMessage(mm, rawContent, kvp.Value, reception.ToLite());
 
@@ -312,7 +312,6 @@ namespace Signum.Engine.Mailing
                 rec.EmailOwner = dup.Recipients.FirstOrDefault(a => a.EmailAddress == rec.EmailAddress).EmailOwner;
         }
 
-        static LambdaComparer<EmailAttachmentDN, string> fileComparer = new LambdaComparer<EmailAttachmentDN, string>(fp => fp.File.FileName);
 
         private static bool AreDuplicates(EmailMessageDN email, EmailMessageDN dup)
         {
@@ -322,7 +321,9 @@ namespace Signum.Engine.Mailing
             if (!dup.From.Equals(email.From))
                 return false;
 
-            if (!dup.Attachments.SequenceEqual(email.Attachments, fileComparer))
+
+
+            if (!dup.Attachments.Select(a=>a.ContentId).OrderBy().SequenceEqual(email.Attachments.Select(a=>a.ContentId).OrderBy()))
                 return false;
 
             return true;

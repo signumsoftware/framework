@@ -14,58 +14,102 @@ namespace Signum.Engine.Mailing.Pop3
 {
     public static class MailMimeParser
     {
-        public static MailMessage Parse(StringReader mimeMail)
+        public static MailMessage Parse(string message)
         {
-            MailMessage returnValue = ParseMessage(mimeMail);
+            MailMessage mail = new MailMessage();
 
-            FixStandardFields(returnValue);
+            var parts = GetParts(message, Request.None, mail.Headers);
 
-            return returnValue;
+            foreach (var p in parts)
+            {
+                if (p is AlternateView)
+                    mail.AlternateViews.Add((AlternateView)p);
+                else if (p is Attachment)
+                    mail.Attachments.Add((Attachment)p);
+                else
+                    throw new InvalidOperationException("{0} not expected at this stage".Formato(p.GetType().Name));
+            }
+
+            FixStandardFields(mail);
+
+            return mail;
         }
 
-        static MailMessage ParseMessage(StringReader mimeMail)
+    
+
+        enum Request
         {
-            MailMessage returnValue = new MailMessage();
-
-            ReadHeaders(mimeMail, returnValue);
-
-            if (returnValue.Headers.Count == 0)
-                return null;
-
-            DecodeHeaders(returnValue.Headers);
-
-            string contentTransferEncoding = returnValue.Headers["content-transfer-encoding"];
-
-            ContentType tmpContentType = FindContentType(returnValue.Headers);
-
-            if (tmpContentType.MediaType != null && tmpContentType.MediaType.StartsWith("multipart/"))
-            {
-                MailMessage tmpMessage = ParseAlternative(tmpContentType.Boundary, mimeMail);
-
-                foreach (AlternateView view in tmpMessage.AlternateViews)
-                    returnValue.AlternateViews.Add(view);
-
-                foreach (Attachment att in tmpMessage.Attachments)
-                    returnValue.Attachments.Add(att);
-            }
-            else if (tmpContentType.MediaType != null && tmpContentType.MediaType.StartsWith("text/"))
-            {
-                returnValue.AlternateViews.Add(ParseTextView(mimeMail, contentTransferEncoding, tmpContentType));
-            }
-            else
-            {
-                returnValue.Attachments.Add(ParseAttachment(mimeMail, contentTransferEncoding, tmpContentType, returnValue.Headers));
-            }
-           
-            return returnValue;
+            None,
+            AlternateView,
+            LinkedResource,
         }
 
-        static void ReadHeaders(StringReader mimeMail, MailMessage returnValue)
+        static List<AttachmentBase> GetParts(string message, Request req, NameValueCollection headers = null)
+        {
+            if (headers == null)
+                headers = new NameValueCollection();
+
+            using (StringReader reader = new StringReader(message))
+            {
+                ReadHeaders(reader, headers);
+
+                string contentTransferEncoding = headers["content-transfer-encoding"];
+
+                ContentType contentType = FindContentType(headers);
+
+                if (contentType.MediaType != null && contentType.MediaType.StartsWith("multipart/"))
+                {
+                    List<string> parts = SplitSubparts(reader, contentType.Boundary);
+
+             
+                    if (contentType.MediaType == "multipart/related")
+                    {
+                        var result = GetParts(parts[0], Request.AlternateView).ToList();
+
+                        var best = result.OfType<AlternateView>().OrderByDescending(a => a.ContentType.MediaType.Contains("html")).ThenByDescending(a => a.ContentStream.Length).FirstOrDefault();
+
+                        foreach (string item in parts.Skip(1))
+                        {
+                            foreach (var part in GetParts(item, best == null ? Request.None: Request.LinkedResource))
+                            {
+                                if (best != null && part is LinkedResource)
+                                    best.LinkedResources.Add((LinkedResource)part);
+                                else
+                                    result.Add(best); 
+                            }
+                        }
+
+                        return result; 
+                    }
+                    else
+                    {
+                        var result = (from p in parts
+                                      from s in GetParts(p, Request.None)
+                                      select s).ToList();
+
+                        return result;
+                    }
+                }
+
+                if (req == Request.AlternateView)
+                    return new List<AttachmentBase> { ParseTextView(reader, contentTransferEncoding, contentType) };
+
+                if (req == Request.LinkedResource)
+                    return new List<AttachmentBase> { ParseAttachment(reader, contentTransferEncoding, contentType, headers, asLinkedResource: true) };
+
+                if (contentType.MediaType != null && contentType.MediaType.StartsWith("text/"))
+                    return new List<AttachmentBase> { ParseTextView(reader, contentTransferEncoding, contentType) };
+
+                return new List<AttachmentBase> { ParseAttachment(reader, contentTransferEncoding, contentType, headers, asLinkedResource: false) };
+            }
+        }
+
+        static NameValueCollection ReadHeaders(StringReader reader, NameValueCollection headers)
         {
             string lastHeader = null;
             while (true)
             {
-                string line = mimeMail.ReadLine();
+                string line = reader.ReadLine();
 
                 if (string.IsNullOrWhiteSpace(line))
                     break;
@@ -73,17 +117,21 @@ namespace Signum.Engine.Mailing.Pop3
                 //If the line starts with a whitespace it is a continuation of the previous line
                 if (Regex.IsMatch(line, @"^\s"))
                 {
-                    returnValue.Headers[lastHeader] = GetHeaderValue(returnValue.Headers, lastHeader) + " " + line.TrimStart('\t', ' ');
+                    headers[lastHeader] = GetHeaderValue(headers, lastHeader) + " " + line.TrimStart('\t', ' ');
                 }
                 else
                 {
                     string headerkey = line.Before(':').ToLower();
                     string value = line.After(':').TrimStart(' ');
                     if (value.HasItems())
-                        returnValue.Headers[headerkey] = value;
+                        headers[headerkey] = value;
                     lastHeader = headerkey;
                 }
             }
+
+            DecodeHeaders(headers);
+
+            return headers;
         }
 
         static void FixStandardFields(MailMessage message)
@@ -109,7 +157,7 @@ namespace Signum.Engine.Mailing.Pop3
                 view.ContentStream.Seek(0, SeekOrigin.Begin);
             }
 
-            if (message.AlternateViews.Count == 1)
+            if (message.AlternateViews.Count == 1 && message.AlternateViews.Single().LinkedResources.IsEmpty())
             {
                 StreamReader re = new StreamReader(message.AlternateViews[0].ContentStream);
                 message.Body = re.ReadToEnd();
@@ -149,28 +197,29 @@ namespace Signum.Engine.Mailing.Pop3
             }
         }
 
-
         static AlternateView ParseTextView(StringReader r, string encoding, System.Net.Mime.ContentType contentType)
         {
             string content = r.ReadToEnd();
 
             string result;
 
+            var enc = GetEncoding(contentType);
+
             switch (encoding)
             {
                 case "quoted-printable":
-                    result = GetEncoding(contentType).GetString(DecodeQuotePrintable(content));
+                    result = enc.GetString(DecodeQuotePrintable(content));
 
                     break;
                 case "base64":
-                    result = Encoding.GetEncoding(contentType.CharSet.ToLower()).GetString(Convert.FromBase64String(content));
+                    result = enc.GetString(Convert.FromBase64String(content));
                     break;
                 default:
                     result = content;
                     break;
             }
 
-            AlternateView returnValue = AlternateView.CreateAlternateViewFromString(result.ToString(), null, contentType.MediaType);
+            AlternateView returnValue = AlternateView.CreateAlternateViewFromString(result.ToString(), GetEncoding(contentType), contentType.MediaType);
             returnValue.TransferEncoding = TransferEncoding.QuotedPrintable;
             return returnValue;
         }
@@ -183,22 +232,24 @@ namespace Signum.Engine.Mailing.Pop3
             return Encoding.GetEncoding(contentType.CharSet.ToLower());
         }
 
-        static Attachment ParseAttachment(StringReader r, string encoding, ContentType contentType, NameValueCollection headers)
+        static AttachmentBase ParseAttachment(StringReader r, string encoding, ContentType contentType, NameValueCollection headers, bool asLinkedResource)
         {
-            string line = r.ReadToEnd();
-            Attachment returnValue = null;
-            switch (encoding)
-            {
-                case "quoted-printable":
-                    returnValue = new Attachment(new MemoryStream(DecodeQuotePrintable(line)), contentType) { TransferEncoding = TransferEncoding.QuotedPrintable };
-                    break;
-                case "base64":
-                    returnValue = new Attachment(new MemoryStream(Convert.FromBase64String(line)), contentType) { TransferEncoding = TransferEncoding.Base64 };
-                    break;
-                default:
-                    returnValue = new Attachment(new MemoryStream(Encoding.ASCII.GetBytes(line)), contentType) { TransferEncoding = TransferEncoding.SevenBit };
-                    break;
-            }
+            TransferEncoding transferEncoding =  
+                encoding == "quoted-printable" ? TransferEncoding.QuotedPrintable: 
+                encoding == "base64" ? TransferEncoding.Base64: 
+                TransferEncoding.SevenBit; 
+          
+            string str = r.ReadToEnd();
+            
+            byte[] data = 
+                transferEncoding == TransferEncoding.QuotedPrintable? DecodeQuotePrintable(str) : 
+                transferEncoding == TransferEncoding.Base64 ? Convert.FromBase64String(str) : 
+                Encoding.ASCII.GetBytes(str); 
+            
+            var returnValue = asLinkedResource?
+                (AttachmentBase)new LinkedResource(new MemoryStream(data), contentType) :
+                (AttachmentBase)new Attachment(new MemoryStream(data), contentType);
+                
             if (headers["content-id"] != null)
                 returnValue.ContentId = headers["content-id"].ToString().Trim('<', '>');
             else if (headers["content-location"] != null)
@@ -209,36 +260,30 @@ namespace Signum.Engine.Mailing.Pop3
             return returnValue;
         }
 
-        static MailMessage ParseAlternative(string multipartBoundary, StringReader message)
+        static List<string> SplitSubparts(StringReader reader, string multipartBoundary)
         {
-            MailMessage returnValue = new MailMessage();
-            string line = string.Empty;
-            List<string> messageParts = new List<string>();
+            List<string> result = new List<string>();
 
+            string line;
             //ffw until first boundary
-            while (!message.ReadLine().TrimEnd().Equals("--" + multipartBoundary)) ;
+            while (!reader.ReadLine().TrimEnd().Equals("--" + multipartBoundary)) ;
             StringBuilder part = new StringBuilder();
-            while ((line = message.ReadLine()) != null)
+            while ((line = reader.ReadLine()) != null)
             {
                 if (line.TrimEnd().Equals("--" + multipartBoundary) || line.TrimEnd().Equals("--" + multipartBoundary + "--"))
                 {
-                    MailMessage tmpMessage = ParseMessage(new StringReader(part.ToString()));
-                    if (tmpMessage != null)
-                    {
-                        foreach (AlternateView view in tmpMessage.AlternateViews)
-                            returnValue.AlternateViews.Add(view);
-                        foreach (Attachment att in tmpMessage.Attachments)
-                            returnValue.Attachments.Add(att);
-                        if (line.Equals("--" + multipartBoundary))
-                            part = new StringBuilder();
-                        else
-                            break;
-                    }
+                    result.Add(part.ToString());
+
+                    if (line.Equals("--" + multipartBoundary))
+                        part = new StringBuilder();
+                    else
+                        break;
                 }
                 else
                     part.AppendLine(line);
             }
-            return returnValue;
+
+            return result;
         }
 
         static string GetHeaderValue(NameValueCollection collection, string key)
@@ -290,12 +335,12 @@ namespace Signum.Engine.Mailing.Pop3
 
                     var result = Encoding.GetEncoding(m.Groups["enc"].Value.ToLower()).GetString(bytes);
 
-                    string result2 = Attachment.CreateAttachmentFromString("", m.Value).Name;
+                    //string result2 = Attachment.CreateAttachmentFromString("", m.Value).Name;
 
-                    if (result != result2)
-                        throw new InvalidOperationException();
+                    //if (result != result2)
+                    //    throw new InvalidOperationException();
 
-                    return result2;
+                    return result;
                 }
                 , options);
             }
