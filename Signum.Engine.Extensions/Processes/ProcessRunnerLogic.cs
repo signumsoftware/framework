@@ -154,8 +154,7 @@ namespace Signum.Engine.Processes
                             using (HeavyProfiler.Log("PWL", ()=> "Process Runner"))
                             {
                                 (from p in Database.Query<ProcessDN>()
-                                 where p.State == ProcessState.Planned && p.PlannedDate <= TimeZoneManager.Now
-                                 orderby p.PlannedDate
+                                 where p.State == ProcessState.Planned && p.PlannedDate <= TimeZoneManager.Now                              
                                  select p).SetAsQueued();
 
                                 var list = Database.Query<ProcessDN>()
@@ -305,13 +304,15 @@ namespace Signum.Engine.Processes
 
         private static void SetNextPannedExecution(DateTime? next)
         {
-            if (nextPlannedExecution == null)
+            nextPlannedExecution = next;
+
+            if (next == null)
             {
                 timer.Change(Timeout.Infinite, Timeout.Infinite);
             }
             else
             {
-                TimeSpan ts = nextPlannedExecution.Value - TimeZoneManager.Now;
+                TimeSpan ts = next.Value - TimeZoneManager.Now;
                 if (ts < TimeSpan.Zero)
                     ts = TimeSpan.Zero;
                 else
