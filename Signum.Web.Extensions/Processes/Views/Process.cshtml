@@ -19,9 +19,15 @@
     @Html.ValueLine(e, f => f.SuspendDate, f => { f.HideIfNull = true; f.ReadOnly = true; })
     @Html.ValueLine(e, f => f.ExceptionDate, f => { f.HideIfNull = true; f.ReadOnly = true; })
     @Html.EntityLine(e, f => f.Exception, f => { f.HideIfNull = true; f.ReadOnly = true; })
-    
-    if (e.Value.State == ProcessState.Executing || e.Value.State == ProcessState.Queued)
-    {
+
+    @Html.CountSearchControl(new FindOptions(typeof(ProcessExceptionLineDN), "Process", e.Value), csc =>
+{
+    csc.PopupViewPrefix = e.Compose("errors");
+    csc.WriteQueryName = WriteQueryName.Field;
+})
+
+      if (e.Value.State == ProcessState.Executing || e.Value.State == ProcessState.Queued)
+      {
     @:Progress:
     <br />
     <br />
@@ -35,6 +41,7 @@
             @(new JsFunction(ProcessesClient.Module, "refreshUpdate", e.Value.Id, e.Prefix, Url.Action("GetProgressExecution", "Process")))
         })
     </script>
+      }
 
-    }
+
 }
