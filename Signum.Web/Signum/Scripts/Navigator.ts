@@ -168,9 +168,8 @@ function openPopupView(entityHtml: Entities.EntityHtml, viewOptions: ViewPopupOp
                     });
 
                 continuePromise.then(result=> {
-                    var newTempDiv = $("#" + tempDivId);
-
                     if (result) {
+                        var newTempDiv = $("#" + tempDivId);
                         var $mainControl = newTempDiv.find(".sf-main-control[data-prefix=" + entityHtml.prefix + "]");
                         if ($mainControl.length > 0) {
                             entityHtml.runtimeInfo = Entities.RuntimeInfoValue.parse($mainControl.data("runtimeinfo"));
@@ -324,40 +323,6 @@ function requestHtml(entityHtml: Entities.EntityHtml, viewOptions: ViewOptionsBa
             });
 }
 
-export function serialize(prefix): string {
-    var id = SF.compose(prefix, "panelPopup");
-    var $formChildren = $("#" + id + " :input");
-    var data = $formChildren.serialize();
-
-    var myRuntimeInfoKey = SF.compose(prefix, Entities.Keys.runtimeInfo);
-    if ($formChildren.filter("#" + myRuntimeInfoKey).length == 0) {
-        var $mainControl = $(".sf-main-control[data-prefix=" + prefix + "]");
-        data += "&" + myRuntimeInfoKey + "=" + $mainControl.data("runtimeinfo");
-    }
-    return data;
-}
-
-export function serializeJson(prefix): any {
-
-    var id = SF.compose(prefix, "panelPopup");
-    var arr = $("#" + id + " :input").serializeArray();
-    var data = {};
-    for (var index = 0; index < arr.length; index++) {
-        if (data[arr[index].name] != null) {
-            data[arr[index].name] += "," + arr[index].value;
-        }
-        else {
-            data[arr[index].name] = arr[index].value;
-        }
-    }
-
-    var myRuntimeInfoKey = SF.compose(prefix, Entities.Keys.runtimeInfo);
-    if (typeof data[myRuntimeInfoKey] == "undefined") {
-        var $mainControl = $(".sf-main-control[data-prefix=" + prefix + "]");
-        data[myRuntimeInfoKey] = $mainControl.data("runtimeinfo");
-    }
-    return data;
-};
 
 function requestData(entityHtml: Entities.EntityHtml, options: ViewOptionsBase): FormObject {
     var obj: FormObject = {
