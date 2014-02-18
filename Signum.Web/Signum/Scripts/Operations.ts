@@ -215,15 +215,10 @@ export function confirmIfNecessary(options: OperationOptions): boolean {
     return !options.confirmMessage || confirm(options.confirmMessage);
 }
 
-export function reload(entityHtml: Entities.EntityHtml) {
-    Navigator.reload(entityHtml);
-}
-
 export function openPopup(entityHtml : Entities.EntityHtml) : Promise<void> {
     notifyExecuted();
     return Navigator.navigatePopup(entityHtml);
 }
-
 
 export function markCells(prefix: string) {
     $("tr.ui-state-active").addClass("sf-entity-ctxmenu-success");
@@ -231,7 +226,6 @@ export function markCells(prefix: string) {
 }
 
 export function notifyExecuted() {
-
     SF.Notify.info(lang.signum.executed, 2000);
 }
 
