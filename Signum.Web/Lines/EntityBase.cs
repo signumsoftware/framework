@@ -167,8 +167,7 @@ namespace Signum.Web
 
             var varLines = VarName(lineInfo.Module);
 
-            var args = (Arguments.IsNullOrEmpty() ? null :
-             (", " + Arguments.EmptyIfNull().ToString(a => JsonConvert.SerializeObject(a, JsonSerializerSettings), ", ")));
+            var args = string.IsNullOrEmpty(Arguments) ? (", " + Arguments) : null;
 
             return "require(['" + lineInfo.Module + "', '" + Module + "'], function(" + varLines + ", " + varModule + ") {\r\n" +
                 "var " + lineInfo.Type + " = " + NewLine(varLines, lineInfo) + ";\r\n" +

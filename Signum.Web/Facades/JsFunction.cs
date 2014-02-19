@@ -19,7 +19,7 @@ namespace Signum.Web
 
         public string Module { get; set; }
         public string FunctionName { get; set; }
-        public object[] Arguments { get; set; }
+        public string Arguments { get; set; }
         public JsonSerializerSettings JsonSerializerSettings { get; set; }
 
         /// <summary>
@@ -35,16 +35,14 @@ namespace Signum.Web
 
             this.Module = module;
             this.FunctionName = functionName;
-            this.Arguments = arguments;
+            this.Arguments = arguments.EmptyIfNull().ToString(a => JsonConvert.SerializeObject(a, JsonSerializerSettings), ", ");
         }
 
         public override string ToString()
         {
             var varName = VarName(Module);
 
-            var args = Arguments.EmptyIfNull().ToString(a => JsonConvert.SerializeObject(a, JsonSerializerSettings), ", ");
-
-            return "require(['" + Module + "'], function(" + varName + ") { " + varName + "." + FunctionName + "(" + args + "); });";
+            return "require(['" + Module + "'], function(" + varName + ") { " + varName + "." + FunctionName + "(" + this.Arguments + "); });";
         }
 
         protected static string VarName(string module)
