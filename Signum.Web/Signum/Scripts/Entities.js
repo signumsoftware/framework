@@ -222,6 +222,12 @@ define(["require", "exports"], function(require, exports) {
             return result;
         };
 
+        EntityHtml.fromDiv = function (prefix, div) {
+            var result = new EntityHtml(prefix, new RuntimeInfoValue("?", null, false));
+            result.html = div.clone();
+            return result;
+        };
+
         EntityHtml.withoutType = function (prefix) {
             var result = new EntityHtml(prefix, new RuntimeInfoValue("?", null, false));
             return result;

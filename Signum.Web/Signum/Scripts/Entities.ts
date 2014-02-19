@@ -246,6 +246,12 @@ export class EntityHtml extends EntityValue {
         return result;
     }
 
+    static fromDiv(prefix: string, div: JQuery): EntityHtml {
+        var result = new EntityHtml(prefix, new RuntimeInfoValue("?", null, false));
+        result.html = div.clone();
+        return result;
+    }
+
     static withoutType(prefix: string): EntityHtml {
         var result = new EntityHtml(prefix, new RuntimeInfoValue("?", null, false));
         return result;
