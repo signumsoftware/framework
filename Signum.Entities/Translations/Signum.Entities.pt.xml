@@ -108,7 +108,7 @@
     <Member Name="removeColumn" Description="Remover a coluna" />
     <Member Name="reorderColumn_MoveLeft" Description="Mover para a esquerda" />
     <Member Name="reorderColumn_MoveRight" Description="Mover para a direita" />
-    <Member Name="saved" Description="Salvo" />
+    <Member Name="saved" Description="Guardado" />
     <Member Name="search" Description="Pesquisa" />
     <Member Name="showFilters" Description="Visualizar filtros" />
   </Type>
