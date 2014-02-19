@@ -114,11 +114,11 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
                         if (typeof result === "object") {
                             if (typeof result.ModelState != "undefined") {
                                 var modelState = result.ModelState;
-                                Validator.showErrors({}, modelState, true);
+                                Validator.showErrors({}, modelState);
                                 SF.Notify.error(lang.signum.error, 2000);
                             }
                         } else {
-                            Validator.showErrors({}, null, true);
+                            Validator.showErrors({}, null);
                             self.$chartControl.find(".sf-search-results-container").html(result);
                             SF.triggerNewContent(self.$chartControl.find(".sf-search-results-container"));
                             self.initOrders();
@@ -166,35 +166,23 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
                 }
                 self.newSubTokensComboAdded($("#" + args[0]));
             });
-            //var originalNewSubtokensCombo = Finder.newSubTokensCombo;
-            //Finder.newSubTokensCombo = function (webQueryName, prefix, index, url) {
-            //    var $selectedCombo = $("#" + SF.compose(prefix, "ddlTokens_" + index));
-            //    if ($selectedCombo.closest(".sf-chart-builder").length == 0) {
-            //        if (self.$chartControl.find(".sf-chart-group-trigger:checked").length > 0) {
-            //            url = self.$chartControl.attr("data-subtokens-url");
-            //            originalNewSubtokensCombo.call(this, webQueryName, prefix, index, url);
-            //        }
-            //        else {
-            //            originalNewSubtokensCombo.call(this, webQueryName, prefix, index, url);
-            //        }
-            //    }
-            //    else {
-            //        Finder.clearChildSubtokenCombos($selectedCombo, prefix, index);
-            //        $("#" + SF.compose(self.$chartControl.attr("data-prefix"), "sfOrders")).val('');
-            //        self.$chartControl.find('th').removeClass("sf-header-sort-up sf-header-sort-down");
-            //    }
-            //};
         };
 
         ChartBuilder.prototype.requestData = function () {
-            return this.$chartControl.find(":input:not(#webQueryName)").serialize() + "&webQueryName=" + this.options.webQueryName + "&filters=" + this.serializeFilters() + "&orders=" + this.serializeOrders();
+            var result = this.$chartControl.find(":input:not(#webQueryName)").serializeObject();
+
+            result["webQueryName"] = this.options.webQueryName;
+            result["filters"] = this.serializeFilters();
+            result["orders"] = this.serializeOrders();
+
+            return result;
         };
 
         ChartBuilder.prototype.updateChartBuilder = function (tokenChanged) {
             var $chartBuilder = this.$chartControl.find(".sf-chart-builder");
             var data = this.requestData();
             if (!SF.isEmpty(tokenChanged)) {
-                data += "&lastTokenChanged=" + tokenChanged;
+                data["lastTokenChanged"] = tokenChanged;
             }
             var self = this;
             $.ajax({
@@ -318,12 +306,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
         };
 
         ChartBuilder.prototype.exportData = function (validateUrl, exportUrl) {
-            var $inputs = this.$chartControl.find(":input").not(":button");
-
-            var data = this.requestProcessedData();
-            $inputs.each(function () {
-                data[this.id] = $(this).val();
-            });
+            var data = this.requestData();
 
             if (Validator.entityIsValid({ prefix: this.options.prefix, controllerUrl: validateUrl, requestExtraJsonData: data }))
                 SF.submitOnly(exportUrl, data);
@@ -342,7 +325,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
 
             var url = this.$chartControl.find(".sf-chart-container").attr("data-fullscreen-url") || this.$chartControl.attr("data-fullscreen-url");
 
-            url += (url.indexOf("?") < 0 ? "?" : "&") + this.requestData();
+            url += (url.indexOf("?") < 0 ? "?" : "&") + $.param(this.requestData());
 
             if (evt.ctrlKey || evt.which == 2) {
                 window.open(url);
