@@ -167,7 +167,7 @@ namespace Signum.Web
 
             var varLines = VarName(lineInfo.Module);
 
-            var args = string.IsNullOrEmpty(Arguments) ? (", " + Arguments) : null;
+            var args = string.IsNullOrEmpty(Arguments) ? null : (", " + Arguments);
 
             return "require(['" + lineInfo.Module + "', '" + Module + "'], function(" + varLines + ", " + varModule + ") {\r\n" +
                 "var " + lineInfo.Type + " = " + NewLine(varLines, lineInfo) + ";\r\n" +

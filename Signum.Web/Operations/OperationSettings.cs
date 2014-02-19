@@ -197,7 +197,7 @@ namespace Signum.Web.Operations
 
             var options = JsonConvert.SerializeObject(this.OperationOptions, JsonSerializerSettings);
 
-            var args = string.IsNullOrEmpty(Arguments) ? (", " + Arguments) : null;
+            var args = string.IsNullOrEmpty(Arguments) ? null : (", " + Arguments);
 
             return "require(['" + Module + "'], function(" + varName + ") { " + varName + "." + FunctionName + "(" + options + args + "); });";
         }
