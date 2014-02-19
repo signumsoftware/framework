@@ -502,7 +502,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         SearchControl.prototype.fullScreen = function (evt) {
-            var url = this.element.attr("data-find-url") + this.requestDataForSearchInUrl();
+            var urlParams = this.requestDataForSearchInUrl();
+
+            var url = this.element.attr("data-find-url") + urlParams;
             if (evt.ctrlKey || evt.which == 2) {
                 window.open(url);
             } else if (evt.which == 1) {
@@ -532,6 +534,13 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             });
         };
 
+        SearchControl.prototype.requestDataForSearchInUrl = function () {
+            var form = this.requestDataForSearch();
+            form["webQueryName"] = undefined;
+
+            return $.param(form);
+        };
+
         SearchControl.prototype.requestDataForSearch = function () {
             var requestData = {};
             requestData["webQueryName"] = this.options.webQueryName;
@@ -548,16 +557,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             requestData["prefix"] = this.options.prefix;
             return requestData;
-        };
-
-        SearchControl.prototype.requestDataForSearchInUrl = function () {
-            var url = "?pagination=" + $(this.pf(this.keys.pagination)).val() + "&elems=" + $(this.pf(this.keys.elems)).val() + "&page=" + $(this.pf(this.keys.page)).val() + "&filters=" + this.serializeFilters() + "&filterMode=Visible" + "&orders=" + this.serializeOrders() + "&columns=" + this.serializeColumns() + "&columnMode=Replace" + "&navigate=" + this.options.navigate;
-
-            if (!this.options.allowSelection) {
-                url += "&allowSelection=" + this.options.allowSelection;
-            }
-
-            return url;
         };
 
         SearchControl.prototype.serializeFilters = function () {

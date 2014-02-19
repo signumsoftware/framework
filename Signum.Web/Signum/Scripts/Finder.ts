@@ -533,7 +533,10 @@ export class SearchControl {
     }
 
     fullScreen(evt) {
-        var url = this.element.attr("data-find-url") + this.requestDataForSearchInUrl();
+
+        var urlParams = this.requestDataForSearchInUrl();
+
+        var url = this.element.attr("data-find-url") + urlParams;
         if (evt.ctrlKey || evt.which == 2) {
             window.open(url);
         }
@@ -565,6 +568,13 @@ export class SearchControl {
         });
     }
 
+    requestDataForSearchInUrl(): string {
+        var form = this.requestDataForSearch();
+        form["webQueryName"] = undefined;
+
+        return $.param(form);
+    }
+
     requestDataForSearch() : FormObject {
         var requestData: FormObject = {};
         requestData["webQueryName"] = this.options.webQueryName;
@@ -583,23 +593,6 @@ export class SearchControl {
         return requestData;
     }
 
-    requestDataForSearchInUrl() {
-        var url = "?pagination=" + $(this.pf(this.keys.pagination)).val() +
-            "&elems=" + $(this.pf(this.keys.elems)).val() +
-            "&page=" + $(this.pf(this.keys.page)).val() +
-            "&filters=" + this.serializeFilters() +
-            "&filterMode=Visible" +
-            "&orders=" + this.serializeOrders() +
-            "&columns=" + this.serializeColumns() +
-            "&columnMode=Replace" +
-            "&navigate=" + this.options.navigate;
-
-        if (!this.options.allowSelection) {
-            url += "&allowSelection=" + this.options.allowSelection;
-        }
-
-        return url;
-    }
 
     serializeFilters() {
 
