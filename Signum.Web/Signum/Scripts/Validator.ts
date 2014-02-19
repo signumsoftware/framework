@@ -5,10 +5,12 @@ import Entities = require("Framework/Signum.Web/Signum/Scripts/Entities");
 export interface ValidationOptions {
     prefix?: string;
     controllerUrl?: string;
+    requestExtraJsonData?: any;
+
     showInlineErrors?: boolean;
     fixedInlineErrorText?: string; //Set to "" for it to be populated from ModelState error messages
-    requestExtraJsonData?: any;
     errorSummaryId?: string;
+    showPathErrors?: boolean;
 }
 
 export function cleanError($element: JQuery) {
@@ -40,9 +42,6 @@ export function validate(valOptions: ValidationOptions): Promise<ValidationResul
     valOptions = $.extend({
         prefix: "",
         controllerUrl: SF.Urls.validate,
-        showInlineErrors: true,
-        fixedInlineErrorText: "*", //Set to "" for it to be populated from ModelState error messages
-        parentDiv: "",
         requestExtraJsonData: null,
         ajaxError: null,
         errorSummaryId: null
@@ -128,7 +127,15 @@ function cleanFormInputs(form: JQuery): JQuery {
     return form.not(".sf-search-control :input");
 }
 
-export function showErrors(valOptions: ValidationOptions, modelState: ModelState , showPathErrors?: boolean): boolean {
+export function showErrors(valOptions: ValidationOptions, modelState: ModelState): boolean {
+    valOptions = $.extend({
+        prefix: "",
+        showInlineErrors: true,
+        fixedInlineErrorText: "*", //Set to "" for it to be populated from ModelState error messages
+        errorSummaryId: null,
+        showPathErrors: false
+    }, valOptions);
+
     SF.log("Validator showErrors");
     //Remove previous errors
     $('.' + fieldErrorClass).remove()
@@ -158,7 +165,7 @@ export function showErrors(valOptions: ValidationOptions, modelState: ModelState
                         $control.after(errorMessage);
                 }
             }
-            setPathErrors(valOptions, prefix, partialErrors.join(''), showPathErrors);
+            setPathErrors(valOptions, prefix, partialErrors.join(''));
         }
     }
 
@@ -171,14 +178,14 @@ export function showErrors(valOptions: ValidationOptions, modelState: ModelState
 
 
 //This will mark all the path with the error class, and it will also set summary error entries for the controls more inner than the current one
-function setPathErrors(valOptions: ValidationOptions, prefix: string, partialErrors: string, showPathErrors: boolean) {
+function setPathErrors(valOptions: ValidationOptions, prefix: string, partialErrors: string) {
     var pathPrefixes = (prefix != globalErrorsKey) ? SF.getPathPrefixes(prefix) : new Array("");
     for (var i = 0, l = pathPrefixes.length; i < l; i++) {
         var currPrefix = pathPrefixes[i];
         if (currPrefix != undefined) {
             var isEqual = (currPrefix === valOptions.prefix);
             var isMoreInner = !isEqual && (currPrefix.indexOf(valOptions.prefix) > -1);
-            if (showPathErrors || isMoreInner) {
+            if (valOptions.showPathErrors || isMoreInner) {
                 $('#' + SF.compose(currPrefix, Entities.Keys.toStr)).addClass(inputErrorClass);
                 $('#' + SF.compose(currPrefix, Entities.Keys.link)).addClass(inputErrorClass);
             }

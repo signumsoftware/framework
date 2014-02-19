@@ -18,9 +18,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
         valOptions = $.extend({
             prefix: "",
             controllerUrl: SF.Urls.validate,
-            showInlineErrors: true,
-            fixedInlineErrorText: "*",
-            parentDiv: "",
             requestExtraJsonData: null,
             ajaxError: null,
             errorSummaryId: null
@@ -105,7 +102,15 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
         return form.not(".sf-search-control :input");
     }
 
-    function showErrors(valOptions, modelState, showPathErrors) {
+    function showErrors(valOptions, modelState) {
+        valOptions = $.extend({
+            prefix: "",
+            showInlineErrors: true,
+            fixedInlineErrorText: "*",
+            errorSummaryId: null,
+            showPathErrors: false
+        }, valOptions);
+
         SF.log("Validator showErrors");
 
         //Remove previous errors
@@ -137,7 +142,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
                             $control.after(errorMessage);
                     }
                 }
-                setPathErrors(valOptions, prefix, partialErrors.join(''), showPathErrors);
+                setPathErrors(valOptions, prefix, partialErrors.join(''));
             }
         }
 
@@ -150,14 +155,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
     exports.showErrors = showErrors;
 
     //This will mark all the path with the error class, and it will also set summary error entries for the controls more inner than the current one
-    function setPathErrors(valOptions, prefix, partialErrors, showPathErrors) {
+    function setPathErrors(valOptions, prefix, partialErrors) {
         var pathPrefixes = (prefix != globalErrorsKey) ? SF.getPathPrefixes(prefix) : new Array("");
         for (var i = 0, l = pathPrefixes.length; i < l; i++) {
             var currPrefix = pathPrefixes[i];
             if (currPrefix != undefined) {
                 var isEqual = (currPrefix === valOptions.prefix);
                 var isMoreInner = !isEqual && (currPrefix.indexOf(valOptions.prefix) > -1);
-                if (showPathErrors || isMoreInner) {
+                if (valOptions.showPathErrors || isMoreInner) {
                     $('#' + SF.compose(currPrefix, Entities.Keys.toStr)).addClass(inputErrorClass);
                     $('#' + SF.compose(currPrefix, Entities.Keys.link)).addClass(inputErrorClass);
                 }
