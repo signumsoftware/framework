@@ -416,11 +416,11 @@
     <Member Name="Subject" Description="Assunto" />
   </Type>
   <Type Name="NewsletterOperations">
-    <Member Name="Save" Description="Salvar" />
+    <Member Name="Save" Description="Guardar" />
     <Member Name="Send" Description="Enviar" />
   </Type>
   <Type Name="NewsletterState">
-    <Member Name="Saved" Description="Salvo" />
+    <Member Name="Saved" Description="Guardado" />
     <Member Name="Sent" Description="Enviado" />
   </Type>
   <Type Name="NoHelpFor0" Description="Nenhuma ajuda para {0}" />
@@ -656,7 +656,7 @@
     <Member Name="Create" Description="Criar" />
     <Member Name="Disable" Description="Desactivar" />
     <Member Name="Enable" Description="Ativar" />
-    <Member Name="Save" Description="Salvar" />
+    <Member Name="Save" Description="Guardar" />
   </Type>
   <Type Name="SMSTemplateState">
     <Member Name="Created" Description="Criado" />
