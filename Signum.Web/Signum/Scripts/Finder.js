@@ -583,13 +583,16 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var info = new Entities.RuntimeInfoElement(SF.compose(SF.compose(this.options.prefix, "value"), index));
             if (info.getElem().length > 0) {
                 var val = info.value();
-                return SearchControl.encodeCSV(val == null ? "" : val.key());
+                return SearchControl.encodeCSV(val == null ? null : val.key());
             }
 
             return SearchControl.encodeCSV($(SF.compose(this.pf("value"), index), $filter).val());
         };
 
         SearchControl.encodeCSV = function (value) {
+            if (!value)
+                return "";
+
             var hasQuote = value.indexOf("\"") != -1;
             if (hasQuote || value.indexOf(",") != -1 || value.indexOf(";") != -1) {
                 if (hasQuote)
@@ -954,11 +957,13 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     if (type == null)
                         return;
 
+                    var requestData = _this.requestDataForSearchPopupCreate();
+
                     var runtimeInfo = new Entities.RuntimeInfoValue(type, null, true);
                     if (SF.isEmpty(_this.options.prefix))
-                        Navigator.navigate(runtimeInfo);
+                        Navigator.navigate(runtimeInfo, { requestExtraJsonData: requestData });
                     else
-                        Navigator.navigatePopup(new Entities.EntityHtml(SF.compose(_this.options.prefix, "Temp"), runtimeInfo));
+                        Navigator.navigatePopup(new Entities.EntityHtml(SF.compose(_this.options.prefix, "Temp"), runtimeInfo), { requestExtraJsonData: requestData });
                 });
         };
 

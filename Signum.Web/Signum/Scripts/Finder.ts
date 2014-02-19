@@ -618,7 +618,7 @@ export class SearchControl {
         var info = new Entities.RuntimeInfoElement(SF.compose(SF.compose(this.options.prefix, "value"), index));
         if (info.getElem().length > 0) { //If it's a Lite, the value is the Id
             var val = info.value(); 
-            return SearchControl.encodeCSV(val == null ? "" : val.key());
+            return SearchControl.encodeCSV(val == null ? null : val.key());
         }
 
         return SearchControl.encodeCSV($(SF.compose(this.pf("value"), index), $filter).val());
@@ -626,6 +626,9 @@ export class SearchControl {
     }
 
     static encodeCSV(value: string) {
+        if (!value)
+            return "";
+
         var hasQuote = value.indexOf("\"") != -1;
         if (hasQuote || value.indexOf(",") != -1 || value.indexOf(";") != -1) {
             if (hasQuote)
@@ -992,11 +995,13 @@ export class SearchControl {
                 if (type == null)
                     return;
 
+                var requestData = this.requestDataForSearchPopupCreate()
+
                 var runtimeInfo = new Entities.RuntimeInfoValue(type, null, true);
                 if (SF.isEmpty(this.options.prefix))
-                    Navigator.navigate(runtimeInfo);
+                    Navigator.navigate(runtimeInfo, { requestExtraJsonData: requestData });
                 else
-                    Navigator.navigatePopup(new Entities.EntityHtml(SF.compose(this.options.prefix, "Temp"), runtimeInfo));
+                    Navigator.navigatePopup(new Entities.EntityHtml(SF.compose(this.options.prefix, "Temp"), runtimeInfo), { requestExtraJsonData: requestData });
             });
     }
 
