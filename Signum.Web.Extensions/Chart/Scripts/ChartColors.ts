@@ -32,7 +32,7 @@ export function savePalette(url: string) {
         data: $("#divMainControl :input").serialize(),
     }).then(result => {
             if (typeof result.ModelState != "undefined") {
-                Validator.showErrors(null, result.ModelState, false);
+                Validator.showErrors(null, result.ModelState);
             }
         }); 
 };

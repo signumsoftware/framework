@@ -26,7 +26,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Validator"], 
             data: $("#divMainControl :input").serialize()
         }).then(function (result) {
             if (typeof result.ModelState != "undefined") {
-                Validator.showErrors(null, result.ModelState, false);
+                Validator.showErrors(null, result.ModelState);
             }
         });
     }
