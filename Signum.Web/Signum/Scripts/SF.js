@@ -322,6 +322,31 @@ $.fn.serializeObject = function () {
     return o;
 };
 
+once("arrayExtensions", function () {
+    Array.prototype.groupByArray = function (keySelector) {
+        var result;
+        var objectGrouped = this.groupByObject(keySelector);
+        for (var prop in objectGrouped) {
+            if (objectGrouped.hasOwnProperty(prop))
+                result.push({ key: prop, elements: objectGrouped[prop] });
+        }
+        return result;
+    };
+
+    Array.prototype.groupByObject = function (keySelector) {
+        var result = {};
+
+        for (var i = 0; i < this.length; i++) {
+            var element = this[i];
+            var key = keySelector(element);
+            if (!result[key])
+                result[key] = [];
+            result[key].push(element);
+        }
+        return result;
+    };
+});
+
 once("stringExtensions", function () {
     String.prototype.hasText = function () {
         return (this == null || this == undefined || this == '') ? false : true;

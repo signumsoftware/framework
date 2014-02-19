@@ -327,6 +327,36 @@ $.fn.serializeObject = function () {
     return o;
 };
 
+interface Array<T> {
+    groupByArray(keySelector: (element: T) => string): { key: string; elements: T[] }[];
+    groupByObject(keySelector: (element: T) => string): { [key: string]: T[] };
+}
+
+once("arrayExtensions", () => {
+    Array.prototype.groupByArray = function (keySelector: (element: any) => string): { key: string; elements: any[] }[]{
+        var result: { key: string; elements: any[] }[];
+        var objectGrouped = this.groupByObject(keySelector);
+        for (var prop in objectGrouped) {
+            if (objectGrouped.hasOwnProperty(prop))
+                result.push({ key: prop, elements: objectGrouped[prop] });
+        }
+        return result;
+    };
+
+    Array.prototype.groupByObject = function (keySelector: (element: any) => string): { [key: string]: any[] } {
+        var result: { [key: string]: any[] } = {};
+
+        for (var i = 0; i < this.length; i++) {
+            var element: any = this[i];
+            var key = keySelector(element);
+            if (!result[key])
+                result[key] = [];
+            result[key].push(element);
+        }
+        return result;
+    };
+});
+
 interface String {
     hasText(): boolean;
     contains(str: string): boolean;

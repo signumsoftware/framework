@@ -126,6 +126,7 @@ export function viewPopup(entityHtml: Entities.EntityHtml, viewOptions?: ViewPop
     if (!viewOptions.avoidValidate)
         viewOptions.validationOptions = $.extend({
             prefix: entityHtml.prefix,
+            showPathErrors: true
         }, viewOptions.validationOptions);
 
 
@@ -194,6 +195,34 @@ function openPopupView(entityHtml: Entities.EntityHtml, viewOptions: ViewPopupOp
             viewOptions.onPopupLoaded(tempDiv);
     });
 }
+
+
+export function basicPopupView(entityHtml: Entities.EntityHtml, onOk: () => Promise<boolean>): Promise<void> {
+
+    var tempDivId = createTempDiv(entityHtml);
+
+    var tempDiv = $("#" + tempDivId);
+
+    return new Promise<void>(function (resolve) {
+        tempDiv.popup({
+            onOk: function () {
+                onOk().then(result => {
+                    if (result) {
+                        var newTempDiv = $("#" + tempDivId);
+                        newTempDiv.popup('destroy');
+                        resolve(null);
+                    }
+                });
+            },
+            onCancel: function () {
+                var newTempDiv = $("#" + tempDivId);
+                newTempDiv.popup('destroy');
+                resolve(null);
+            }
+        });
+    });
+}
+
 
 export function requestAndReload(prefix: string, options?: ViewOptionsBase): Promise<Entities.EntityHtml> {
 
@@ -292,7 +321,7 @@ function checkValidation(validatorOptions: Validator.ValidationOptions, allowErr
         if (result.isValid)
             return result;
 
-        Validator.showErrors(validatorOptions, result.modelState, true);
+        Validator.showErrors(validatorOptions, result.modelState);
 
         if (allowErrors == AllowErrors.Yes)
             return result;

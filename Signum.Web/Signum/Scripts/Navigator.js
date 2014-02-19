@@ -103,7 +103,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         if (!viewOptions.avoidValidate)
             viewOptions.validationOptions = $.extend({
-                prefix: entityHtml.prefix
+                prefix: entityHtml.prefix,
+                showPathErrors: true
             }, viewOptions.validationOptions);
 
         if (entityHtml.isLoaded()) {
@@ -169,6 +170,32 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 viewOptions.onPopupLoaded(tempDiv);
         });
     }
+
+    function basicPopupView(entityHtml, onOk) {
+        var tempDivId = exports.createTempDiv(entityHtml);
+
+        var tempDiv = $("#" + tempDivId);
+
+        return new Promise(function (resolve) {
+            tempDiv.popup({
+                onOk: function () {
+                    onOk().then(function (result) {
+                        if (result) {
+                            var newTempDiv = $("#" + tempDivId);
+                            newTempDiv.popup('destroy');
+                            resolve(null);
+                        }
+                    });
+                },
+                onCancel: function () {
+                    var newTempDiv = $("#" + tempDivId);
+                    newTempDiv.popup('destroy');
+                    resolve(null);
+                }
+            });
+        });
+    }
+    exports.basicPopupView = basicPopupView;
 
     function requestAndReload(prefix, options) {
         options = $.extend({
@@ -264,7 +291,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (result.isValid)
                 return result;
 
-            Validator.showErrors(validatorOptions, result.modelState, true);
+            Validator.showErrors(validatorOptions, result.modelState);
 
             if (allowErrors == 1 /* Yes */)
                 return result;
