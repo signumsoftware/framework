@@ -238,23 +238,6 @@ module SF {
             Promise.resolve<void>(null));
     }
 
-
-    export function redirectUrl(ajaxResult): void {
-        if (SF.isEmpty(ajaxResult))
-            return;
-
-        if (typeof ajaxResult !== "object")
-            return;
-
-        if (ajaxResult.result == null)
-            return;
-
-        if (ajaxResult.result == 'url')
-            location.href = ajaxResult.url;
-
-        return;
-    }
-
     export function submit(urlController: string, requestExtraJsonData?: any, $form?: JQuery) : void {
         $form = $form || $("form");
         if (!SF.isEmpty(requestExtraJsonData)) {
@@ -314,18 +297,20 @@ interface FormObject {
     [formKey: string]: any
 }
 
-$.fn.serializeObject = function () {
-    var o = {};
-    var a = this.serializeArray();
-    $.each(a, function () {
-        if (o[this.name] !== undefined) {
-            o[this.name] += "," + (this.value || '');
-        } else {
-            o[this.name] = this.value || '';
-        }
-    });
-    return o;
-};
+once("serializeObject", () => {
+    $.fn.serializeObject = function () {
+        var o = {};
+        var a = this.serializeArray();
+        $.each(a, function () {
+            if (o[this.name] !== undefined) {
+                o[this.name] += "," + (this.value || '');
+            } else {
+                o[this.name] = this.value || '';
+            }
+        });
+        return o;
+    };
+});
 
 interface Array<T> {
     groupByArray(keySelector: (element: T) => string): { key: string; elements: T[] }[];

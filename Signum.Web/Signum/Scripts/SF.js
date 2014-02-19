@@ -244,23 +244,6 @@ var SF;
     }
     SF.promiseForeach = promiseForeach;
 
-    function redirectUrl(ajaxResult) {
-        if (SF.isEmpty(ajaxResult))
-            return;
-
-        if (typeof ajaxResult !== "object")
-            return;
-
-        if (ajaxResult.result == null)
-            return;
-
-        if (ajaxResult.result == 'url')
-            location.href = ajaxResult.url;
-
-        return;
-    }
-    SF.redirectUrl = redirectUrl;
-
     function submit(urlController, requestExtraJsonData, $form) {
         $form = $form || $("form");
         if (!SF.isEmpty(requestExtraJsonData)) {
@@ -309,18 +292,20 @@ var SF;
     SF.submitOnly = submitOnly;
 })(SF || (SF = {}));
 
-$.fn.serializeObject = function () {
-    var o = {};
-    var a = this.serializeArray();
-    $.each(a, function () {
-        if (o[this.name] !== undefined) {
-            o[this.name] += "," + (this.value || '');
-        } else {
-            o[this.name] = this.value || '';
-        }
-    });
-    return o;
-};
+once("serializeObject", function () {
+    $.fn.serializeObject = function () {
+        var o = {};
+        var a = this.serializeArray();
+        $.each(a, function () {
+            if (o[this.name] !== undefined) {
+                o[this.name] += "," + (this.value || '');
+            } else {
+                o[this.name] = this.value || '';
+            }
+        });
+        return o;
+    };
+});
 
 once("arrayExtensions", function () {
     Array.prototype.groupByArray = function (keySelector) {
