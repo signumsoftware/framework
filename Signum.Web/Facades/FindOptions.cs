@@ -10,6 +10,7 @@ using Signum.Engine;
 using Signum.Utilities.DataStructures;
 using Signum.Engine.DynamicQuery;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace Signum.Web
 {
@@ -31,6 +32,7 @@ namespace Signum.Web
         }
     }
 
+    [JsonConverter(typeof(FindOptions.FindOptionsConverter))]
     public class FindOptions
     {
         public object QueryName { get; set; }
@@ -254,6 +256,24 @@ namespace Signum.Web
             }
         }
 
+
+        class FindOptionsConverter : JsonConverter
+        {
+            public override bool CanConvert(Type objectType)
+            {
+                return typeof(FindOptions).IsAssignableFrom(objectType); 
+            }
+
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+            {
+                throw new NotImplementedException("in order to serialize FindOptions call FindOptions.ToJs()");
+            }
+        }
      
     }
 
