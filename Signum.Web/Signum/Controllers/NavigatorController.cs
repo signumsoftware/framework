@@ -138,6 +138,35 @@ namespace Signum.Web.Controllers
 
             ValueLineBoxModel model = new ValueLineBoxModel(type, fieldName, message);
 
+            switch (model.BoxType)
+            {
+                case ValueLineBoxType.String:
+                    model.StringValue = Request["stringValue"];
+                    break;
+                case ValueLineBoxType.Boolean:
+                    bool bvalue;
+                    if (bool.TryParse(Request["boolValue"], out bvalue))
+                        model.BoolValue = bvalue;
+                    break;
+                case ValueLineBoxType.Integer:
+                    int ivalue;
+                    if (int.TryParse(Request["intValue"], out ivalue))
+                        model.IntValue = ivalue;
+                    break;
+                case ValueLineBoxType.Decimal:
+                    decimal dvalue;
+                    if (decimal.TryParse(Request["decimalValue"], out dvalue))
+                        model.DecimalValue = dvalue;
+                    break;
+                case ValueLineBoxType.DateTime:
+                    DateTime dtvalue;
+                    if (DateTime.TryParse(Request["dateValue"], out dtvalue))
+                        model.DateValue = dtvalue;
+                    break;
+                default:
+                    break;
+            }
+
             return this.PopupView(model);
         }
     }
