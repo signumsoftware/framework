@@ -135,6 +135,12 @@ namespace Signum.Web
         public string message = SelectorMessage.PleaseChooseAValueToContinue.NiceToString();
         public string fieldName = null;
 
+        public int? intValue;
+        public decimal? decimalValue;
+        public bool? boolValue;
+        public string stringValue;
+        public DateTime? dateValue;
+
         public ValueLineBoxOptions(ValueLineBoxType type, string parentPrefix, string newPart)
         {
             this.type = type;

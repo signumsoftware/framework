@@ -455,6 +455,12 @@ export interface ValueLineBoxOptions {
     fieldName: string;
     message: string;
     prefix: string;
+
+    intValue: number;
+    decimalValue: number;
+    boolValue: boolean;
+    stringValue: string;
+    dateValue: string;
 }
 
 export function valueLineBox(options: ValueLineBoxOptions) : Promise<FormObject>
