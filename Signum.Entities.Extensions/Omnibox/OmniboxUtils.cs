@@ -25,7 +25,7 @@ namespace Signum.Entities.Omnibox
 
         public static OmniboxMatch SubsequencePascal(object value, string identifier, string pattern)
         {
-            int[] indices = null;
+            bool[] indices = new bool[identifier.Length];
             int j = 0;
             for (int i = 0; i < pattern.Length; i++)
             {
@@ -38,10 +38,7 @@ namespace Signum.Entities.Omnibox
                     {
                         if (ic == pc)
                         {
-                            if (indices == null)
-                                indices = new int[pattern.Length];
-
-                            indices[i] = j;
+                            indices[j] = true;
 
                             break;
                         }
@@ -65,7 +62,7 @@ namespace Signum.Entities.Omnibox
             T val;
             if (values.TryGetValue(pattern, out val) && filter(val))
             {
-                yield return new OmniboxMatch(val, 0, pattern, 0.To(pattern.Length).ToArray());
+                yield return new OmniboxMatch(val, 0, pattern, Enumerable.Repeat(true, pattern.Length).ToArray());
             }
             else
             {
@@ -95,14 +92,27 @@ namespace Signum.Entities.Omnibox
 
         public static OmniboxMatch Contains(object value, string identifier, string pattern)
         {
-            int index = identifier.IndexOf(pattern, StringComparison.InvariantCultureIgnoreCase);
-            if (index == -1)
-                return null;
+            var parts = pattern.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+            bool[] indices = null;
+
+            foreach (var p in parts)
+	        {
+                int index = identifier.IndexOf(p, StringComparison.InvariantCultureIgnoreCase);
+                if (index == -1)
+                    return null;
+
+                if(indices == null)
+                    indices = new bool[identifier.Length];
+
+                for (int i = 0; i < p.Length; i++)
+                    indices[index + i] = true;
+	        }
 
             return new OmniboxMatch(value,
                 remaining: identifier.Length - pattern.Length,
                 choosenString: identifier,
-                boldIndices: 0.To(pattern.Length).Select(i => index + i).ToArray());
+                boldIndices: indices);
         }
 
         public static string CleanCommas(string str)
@@ -113,7 +123,7 @@ namespace Signum.Entities.Omnibox
 
     public class OmniboxMatch
     {
-        public OmniboxMatch(object value, int remaining, string choosenString, int[] boldIndices)
+        public OmniboxMatch(object value, int remaining, string choosenString, bool[] boldIndices)
         {
             this.Value = value;
 
@@ -122,7 +132,7 @@ namespace Signum.Entities.Omnibox
 
             this.Distance = remaining;
 
-            if (boldIndices.Length > 0 && BoldIndices[0] == 0)
+            if (boldIndices.Length > 0 && boldIndices[0])
                 this.Distance /= 2f;
         }
 
@@ -130,24 +140,19 @@ namespace Signum.Entities.Omnibox
 
         public float Distance;
         public string Text;
-        public int[] BoldIndices;
+        public bool[] BoldIndices;
 
         public IEnumerable<Tuple<string, bool>> BoldSpans()
         {
-            bool[] isBool = new bool[Text.Length];
-
-            for (int i = 0; i < BoldIndices.Length; i++)
-                isBool[BoldIndices[i]] = true;
-
-            bool lastIsBool = isBool[0];
+            bool lastIsBool = BoldIndices[0];
             int lastIndex = 0;
             for (int i = 1; i < Text.Length; i++)
             {
-                if (isBool[i] != lastIsBool)
+                if (BoldIndices[i] != lastIsBool)
                 {
                     yield return Tuple.Create(Text.Substring(lastIndex, i - lastIndex), lastIsBool);
 
-                    lastIsBool = isBool[i];
+                    lastIsBool = BoldIndices[i];
                     lastIndex = i;
                 }
             }
