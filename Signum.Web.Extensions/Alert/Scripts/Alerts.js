@@ -23,7 +23,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         SF.ajaxPost({
             url: widget.data("url"),
-            data: { sfRuntimeInfo: new Entities.RuntimeInfoElement(prefix).getElem().val() }
+            data: { key: Entities.RuntimeInfo.getFromPrefix(prefix).key() }
         }).then(function (jsonNewCount) {
             updateCountAndHighlight(widget.parent(), "attended", jsonNewCount.Attended);
             updateCountAndHighlight(widget.parent(), "alerted", jsonNewCount.Alerted);

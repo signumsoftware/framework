@@ -7,7 +7,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Framework/Signum.Web/Signum/Scripts/Validator", "Framework/Signum.Web/Signum/Scripts/Operations", "ChartUtils", "d3"], function(require, exports, Finder, Validator, Operations, ChartUtils, d3) {
+define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Finder", "Framework/Signum.Web/Signum/Scripts/Validator", "Framework/Signum.Web/Signum/Scripts/Operations", "ChartUtils", "d3"], function(require, exports, Entities, Finder, Validator, Operations, ChartUtils, d3) {
     ChartUtils;
 
     function openChart(prefix, url) {
@@ -19,7 +19,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
 
     function attachShowCurrentEntity(el) {
         var showOnEntity = function () {
-            el.element.nextAll("p.messageEntity").toggle(!!el.runtimeInfo().value());
+            el.element.nextAll("p.messageEntity").toggle(!!Entities.RuntimeInfo.getFromPrefix(el.options.prefix));
         };
 
         showOnEntity();

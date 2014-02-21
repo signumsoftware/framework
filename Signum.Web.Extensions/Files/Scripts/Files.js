@@ -48,7 +48,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         FileLine.prototype.uploadAsync = function (f, customizeXHR) {
             $(this.pf('loading')).show();
-            this.runtimeInfo().setValue(new Entities.RuntimeInfoValue(this.staticInfo().singleType(), null, true));
+            Entities.RuntimeInfo.setFromPrefix(this.options.prefix, new Entities.RuntimeInfo(this.staticInfo().singleType(), null, true));
 
             var fileName = f.name;
 
@@ -58,7 +58,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             xhr.open("POST", this.options.uploadDroppedUrl || SF.Urls.uploadDroppedFile, true);
             xhr.setRequestHeader("X-FileName", fileName);
             xhr.setRequestHeader("X-Prefix", this.options.prefix);
-            xhr.setRequestHeader("X-" + SF.compose(this.options.prefix, Entities.Keys.runtimeInfo), this.runtimeInfo().value().toString());
+            xhr.setRequestHeader("X-" + SF.compose(this.options.prefix, Entities.Keys.runtimeInfo), Entities.RuntimeInfo.getFromPrefix(this.options.prefix).toString());
             xhr.setRequestHeader("X-sfFileType", $(this.pf("sfFileType")).val());
             xhr.setRequestHeader("X-sfTabId", $("#sfTabId").val());
 
@@ -92,11 +92,11 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             $(this.pf(''))[0].setAttribute('value', $(this.pf(''))[0].value);
             var $mform = $('form');
             $mform.attr('enctype', 'multipart/form-data').attr('encoding', 'multipart/form-data');
-            this.runtimeInfo().setValue(new Entities.RuntimeInfoValue(this.staticInfo().singleType(), null, true));
+            Entities.RuntimeInfo.setFromPrefix(this.options.prefix, new Entities.RuntimeInfo(this.staticInfo().singleType(), null, true));
         };
 
         FileLine.prototype.upload = function () {
-            this.runtimeInfo().setValue(new Entities.RuntimeInfoValue(this.staticInfo().singleType(), null, true));
+            Entities.RuntimeInfo.setFromPrefix(this.options.prefix, new Entities.RuntimeInfo(this.staticInfo().singleType(), null, true));
 
             var $fileInput = $(this.pf(''));
             $fileInput[0].setAttribute('value', $fileInput[0].value);
@@ -135,7 +135,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         FileLine.prototype.onUploaded = function (fileName, link, runtimeInfo, entityState) {
-            this.setEntity(new Entities.EntityValue(Entities.RuntimeInfoValue.parse(runtimeInfo), fileName, link));
+            this.setEntity(new Entities.EntityValue(Entities.RuntimeInfo.parse(runtimeInfo), fileName, link));
 
             $(this.pf(Entities.Keys.entityState)).val(entityState);
 
@@ -151,7 +151,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         FileLine.prototype.updateButtonsDisplay = function () {
-            var hasEntity = !!this.runtimeInfo().value();
+            var hasEntity = !!Entities.RuntimeInfo.getFromPrefix(this.options.prefix);
 
             $(this.pf('DivOld')).toggle(hasEntity);
             $(this.pf('DivNew')).toggle(!hasEntity);

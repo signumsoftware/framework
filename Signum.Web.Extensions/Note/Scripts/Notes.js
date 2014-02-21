@@ -19,7 +19,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         SF.ajaxPost({
             url: widget.data("url"),
-            data: { sfRuntimeInfo: new Entities.RuntimeInfoElement(prefix).getElem().val() }
+            data: { key: Entities.RuntimeInfo.getFromPrefix(prefix).key() }
         }).then(function (txt) {
             return widget.parent().find(".sf-widget-count").text(txt);
         });

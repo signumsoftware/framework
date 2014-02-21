@@ -24,7 +24,7 @@ namespace Signum.Web.Alerts
             return new AlertDN { Target = entity.ToLite() };
         }
 
-        public static int CountAlerts(IdentifiableEntity identifiable, string filterField)
+        public static int CountAlerts(Lite<IdentifiableEntity> identifiable, string filterField)
         {
             return Navigator.QueryCount(new CountOptions(typeof(AlertDN))
             {
@@ -39,15 +39,13 @@ namespace Signum.Web.Alerts
         public static WidgetItem CreateWidget(IdentifiableEntity identifiable, string partialViewName, string prefix)
         {
             if (identifiable == null || identifiable.IsNew || identifiable is AlertDN)
-                return null;
-
-         
+                return null;         
 
             var alertList = new[]
             {
-                new { Count = CountAlerts(identifiable, "Attended"), Property = "Attended", AlertClass = "sf-alert-attended", Title = AlertMessage.Alerts_Attended.NiceToString() },
-                new { Count = CountAlerts(identifiable, "Alerted"), Property = "Alerted", AlertClass = "sf-alert-alerted", Title = AlertMessage.Alerts_NotAttended.NiceToString() },
-                new { Count = CountAlerts(identifiable, "Future"), Property = "Future", AlertClass = "sf-alert-future", Title = AlertMessage.Alerts_Future.NiceToString() },
+                new { Count = CountAlerts(identifiable.ToLite(), "Attended"), Property = "Attended", AlertClass = "sf-alert-attended", Title = AlertMessage.Alerts_Attended.NiceToString() },
+                new { Count = CountAlerts(identifiable.ToLite(), "Alerted"), Property = "Alerted", AlertClass = "sf-alert-alerted", Title = AlertMessage.Alerts_NotAttended.NiceToString() },
+                new { Count = CountAlerts(identifiable.ToLite(), "Future"), Property = "Future", AlertClass = "sf-alert-future", Title = AlertMessage.Alerts_Future.NiceToString() },
             };
 
             var options = new FindOptions

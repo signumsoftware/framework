@@ -137,14 +137,14 @@ export function fillLiterals() {
     if ($list.length == 0) {
         return;
     }
-    var runtimeInfo = new Entities.RuntimeInfoElement(prefix);
-    if (SF.isEmpty(runtimeInfo.value)) {
+    var runtimeInfo = Entities.RuntimeInfo.getFromPrefix(prefix);
+    if (!runtimeInfo) {
         $list.html("");
         return;
     }
     $.ajax({
         url: url,
-        data: runtimeInfo.value().toString(),
+        data: runtimeInfo.toString(),
         success: function (data) {
             $list.html("");
             for (var i = 0; i < data.literals.length; i++) {

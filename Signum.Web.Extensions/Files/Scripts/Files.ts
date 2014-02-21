@@ -59,7 +59,7 @@ export class FileLine extends Lines.EntityBase {
 
     uploadAsync(f: File, customizeXHR?: (xhr: XMLHttpRequest) => void) {
         $(this.pf('loading')).show();
-        this.runtimeInfoHiddenElement().setValue(new Entities.RuntimeInfoValue(this.staticInfo().singleType(), null, true));
+        Entities.RuntimeInfo.setFromPrefix(this.options.prefix, new Entities.RuntimeInfo(this.staticInfo().singleType(), null, true));
 
         var fileName = f.name;
 
@@ -103,11 +103,11 @@ export class FileLine extends Lines.EntityBase {
         $(this.pf(''))[0].setAttribute('value', (<HTMLInputElement>$(this.pf(''))[0]).value);
         var $mform = $('form');
         $mform.attr('enctype', 'multipart/form-data').attr('encoding', 'multipart/form-data');
-        this.runtimeInfoHiddenElement().setValue(new Entities.RuntimeInfoValue(this.staticInfo().singleType(), null, true));
+        Entities.RuntimeInfo.setFromPrefix(this.options.prefix, new Entities.RuntimeInfo(this.staticInfo().singleType(), null, true));
     }
 
     upload() {
-        this.runtimeInfoHiddenElement().setValue(new Entities.RuntimeInfoValue(this.staticInfo().singleType(), null, true));
+        Entities.RuntimeInfo.setFromPrefix(this.options.prefix, new Entities.RuntimeInfo(this.staticInfo().singleType(), null, true));
 
         var $fileInput = $(this.pf(''));
         $fileInput[0].setAttribute('value', (<HTMLInputElement>$fileInput[0]).value);
@@ -152,7 +152,7 @@ export class FileLine extends Lines.EntityBase {
 
     onUploaded(fileName: string, link: string, runtimeInfo: string, entityState: string) {
 
-        this.setEntity(new Entities.EntityValue(Entities.RuntimeInfoValue.parse(runtimeInfo), fileName, link));
+        this.setEntity(new Entities.EntityValue(Entities.RuntimeInfo.parse(runtimeInfo), fileName, link));
 
         $(this.pf(Entities.Keys.entityState)).val(entityState);
 
@@ -169,7 +169,7 @@ export class FileLine extends Lines.EntityBase {
     }
 
     updateButtonsDisplay() {
-        var hasEntity = !!this.runtimeInfoHiddenElement().value();
+        var hasEntity = !!Entities.RuntimeInfo.getFromPrefix(this.options.prefix);
 
         $(this.pf('DivOld')).toggle(hasEntity);
         $(this.pf('DivNew')).toggle(!hasEntity);

@@ -19,6 +19,6 @@ export function updateNotes(prefix) {
 
     SF.ajaxPost({
         url: widget.data("url"),
-        data: { sfRuntimeInfo: new Entities.RuntimeInfoElement(prefix).getElem().val() },
+        data: { key: Entities.RuntimeInfo.getFromPrefix(prefix).key() },
     }).then(txt=> widget.parent().find(".sf-widget-count").text(txt));
 }
