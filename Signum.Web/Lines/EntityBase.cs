@@ -94,8 +94,8 @@ namespace Signum.Web
                 if (Implementations != null)
                     throw new ArgumentException("implementations should be null for EmbeddedEntities");
 
-                options.Add("types", Navigator.ResolveWebTypeName(type));
-                options.Add("typeNiceNames", type.NiceName());
+                options.Add("types", new JArray(Navigator.ResolveWebTypeName(type)));
+                options.Add("typeNiceNames", new JArray(type.NiceName()));
 
                 PropertyRoute route = this.GetElementRoute();
                 options.Add("rootType", Navigator.ResolveWebTypeName(route.RootType));
@@ -106,8 +106,13 @@ namespace Signum.Web
                 Type[] types = Implementations.Value.IsByAll ? ImplementedByAll :
                                Implementations.Value.Types.ToArray();
 
-                options.Add("types", types == ImplementedByAll ? ImplementedByAllKey : types.ToString(t => Navigator.ResolveWebTypeName(t), ","));
-                options.Add("typeNiceNames", types == ImplementedByAll ? ImplementedByAllKey : types.ToString(t => t.NiceName(), ","));
+                options.Add("types", new JArray(types == ImplementedByAll ? 
+                    new string[]{ ImplementedByAllKey } :
+                    types.Select(t => Navigator.ResolveWebTypeName(t)).ToArray()));
+
+                options.Add("typeNiceNames", new JArray(types == ImplementedByAll ?
+                    new string[] { ImplementedByAllKey } :
+                    types.Select(t => t.NiceName()).ToArray()));
             }
 
             if (this.ReadOnly)
