@@ -15,7 +15,7 @@ namespace Signum.Web.Alerts
     {
         public JsonNetResult AlertsCount()
         {
-            var entity = (IdentifiableEntity)this.UntypedExtractEntity(); //Related entity always sent with no prefix
+            var entity = Lite.Parse<IdentifiableEntity>(Request["key"]);
             return this.JsonNet(new
             {
                 Alerted = AlertWidgetHelper.CountAlerts(entity, "Alerted"),

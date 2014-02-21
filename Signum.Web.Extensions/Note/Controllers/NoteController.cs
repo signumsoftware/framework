@@ -15,7 +15,7 @@ namespace Signum.Web.Notes
     {
         public ContentResult NotesCount()
         {
-            var entity = (IdentifiableEntity)this.UntypedExtractEntity(); //Related entity always sent with no prefix
+            var entity = Lite.Parse<IdentifiableEntity>(Request["key"]);
             int count = NoteWidgetHelper.CountNotes(entity);
             return Content(count.ToString());
         }

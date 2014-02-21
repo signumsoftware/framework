@@ -1,5 +1,5 @@
 ﻿/// <reference path="../../../../Framework/Signum.Web/Signum/Scripts/globals.ts"/>
-define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Framework/Signum.Web/Signum/Scripts/Operations"], function(require, exports, Finder, Operations) {
+define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Finder", "Framework/Signum.Web/Signum/Scripts/Operations"], function(require, exports, Entities, Finder, Operations) {
     once("SF-UserQuery", function () {
         $(document).on("click", ".sf-userquery", function (e) {
             var _this = this;
@@ -20,7 +20,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Finder", "Fra
 
     function attachShowCurrentEntity(el) {
         var showOnEntity = function () {
-            el.element.nextAll("p.messageEntity").toggle(!!el.runtimeInfo().value());
+            el.element.nextAll("p.messageEntity").toggle(!!Entities.RuntimeInfo.getFromPrefix(el.options.prefix));
         };
 
         showOnEntity();

@@ -27,7 +27,7 @@ once("SF-UserQuery", () => {
 
 export function attachShowCurrentEntity(el: Lines.EntityLine) {
     var showOnEntity = function () {
-        el.element.nextAll("p.messageEntity").toggle(!!el.runtimeInfo().value());
+        el.element.nextAll("p.messageEntity").toggle(!!Entities.RuntimeInfo.getFromPrefix(el.options.prefix));
     };
 
     showOnEntity();

@@ -12,8 +12,7 @@ namespace Signum.Web.Notes
 {
     public static class NoteWidgetHelper
     {
-
-        public static int CountNotes(IdentifiableEntity identifiable)
+        public static int CountNotes(Lite<IdentifiableEntity> identifiable)
         { 
             return Navigator.QueryCount(new CountOptions(typeof(NoteDN))
             {
@@ -61,7 +60,7 @@ namespace Signum.Web.Notes
                 }
             }
 
-            int count = CountNotes(identifiable);
+            int count = CountNotes(identifiable.ToLite());
 
             HtmlStringBuilder label = new HtmlStringBuilder();
             
