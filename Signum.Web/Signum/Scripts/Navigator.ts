@@ -22,19 +22,14 @@ export function requestPartialView(entityHtml: Entities.EntityHtml, viewOptions?
     return requestHtml(entityHtml, viewOptions);
 }
 
-export function navigate(runtimeInfo: Entities.RuntimeInfoValue, viewOptions?: ViewOptionsBase) {
-    viewOptions = $.extend({
-        controllerUrl: runtimeInfo.isNew ? SF.Urls.create : SF.Urls.view,
-        partialViewName: null,
-        requestExtraJsonData: null,
-        readOnly: false,
-    }, viewOptions);
+export function navigate(runtimeInfo: Entities.RuntimeInfo, openNewWindow?: boolean) {
+    var url = runtimeInfo.isNew ? SF.Urls.create : SF.Urls.view;
+    url = "{0}/{1}/{2}".format(url, runtimeInfo.type, !SF.isEmpty(runtimeInfo.id) ? runtimeInfo.id : "");
 
-    $.ajax({
-        url: viewOptions.controllerUrl,
-        data: requestData(new Entities.EntityHtml("", runtimeInfo), viewOptions),
-        async: false,
-    });
+    if (openNewWindow)
+        window.open(url, "_blank");
+    else
+        window.location = url;
 }
 
 export interface NavigatePopupOptions extends ViewOptionsBase {
@@ -173,7 +168,7 @@ function openPopupView(entityHtml: Entities.EntityHtml, viewOptions: ViewPopupOp
                         var newTempDiv = $("#" + tempDivId);
                         var $mainControl = newTempDiv.find(".sf-main-control[data-prefix=" + entityHtml.prefix + "]");
                         if ($mainControl.length > 0) {
-                            entityHtml.runtimeInfo = Entities.RuntimeInfoValue.parse($mainControl.data("runtimeinfo"));
+                            entityHtml.runtimeInfo = Entities.RuntimeInfo.parse($mainControl.data("runtimeinfo"));
                         }
 
                         newTempDiv.popup('restoreTitle');
@@ -241,13 +236,13 @@ export function requestAndReload(prefix: string, options?: ViewOptionsBase): Pro
     });
 }
 
-export function getRuntimeInfoValue(prefix: string) : Entities.RuntimeInfoValue {
+export function getRuntimeInfoValue(prefix: string) : Entities.RuntimeInfo {
     if (!prefix)
-        return new Entities.RuntimeInfoElement(prefix).value();
+        return Entities.RuntimeInfo.getFromPrefix(prefix);
 
     var mainControl = $("#{0}_divMainControl".format(prefix)); 
 
-    return Entities.RuntimeInfoValue.parse(mainControl.data("runtimeinfo"));
+    return Entities.RuntimeInfo.parse(mainControl.data("runtimeinfo"));
 }
 
 export function getEmptyEntityHtml(prefix: string): Entities.EntityHtml {

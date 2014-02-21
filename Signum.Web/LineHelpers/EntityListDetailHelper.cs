@@ -39,7 +39,7 @@ namespace Signum.Web
                 if (listDetail.ElementType.IsEmbeddedEntity())
                 {
                     TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)listDetail.Parent, 0);
-                    sb.AddLine(EntityBaseHelper.EmbeddedTemplate(listDetail, EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, listDetail)));
+                    listDetail.Template = EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, listDetail);
                 }
 
                 using (sb.Surround(new HtmlTag("div").Id(listDetail.Prefix).Class("sf-field-list")))

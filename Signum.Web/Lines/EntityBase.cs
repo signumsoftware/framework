@@ -46,6 +46,8 @@ namespace Signum.Web
             }
         }
 
+        public MvcHtmlString Template { get; set; }
+
         public Implementations? Implementations { get; set; }
 
         public bool View { get; set; }
@@ -81,6 +83,9 @@ namespace Signum.Web
 
             if (PartialViewName.HasText() && !Type.IsEmbeddedEntity())
                 options.Add("partialViewName", PartialViewName);
+
+            if (this.Template != null)
+                options.Add("templae", Template.ToString());
 
             return options;
         }
@@ -132,7 +137,7 @@ namespace Signum.Web
                 Module = module,
                 Type = type,
                 Prefix = Prefix,
-                Options = OptionsJSInternal()
+                Options = OptionsJSInternal(),
             };
 
             var result = AttachFunction != null ? AttachFunction.SetOptions(info).ToString() :

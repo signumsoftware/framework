@@ -100,47 +100,25 @@ define(["require", "exports"], function(require, exports) {
     })();
     exports.StaticInfo = StaticInfo;
 
-    var RuntimeInfoElement = (function () {
-        function RuntimeInfoElement(prefix) {
-            this.prefix = prefix;
-        }
-        RuntimeInfoElement.prototype.getElem = function () {
-            if (!this.$elem) {
-                this.$elem = $('#' + SF.compose(this.prefix, exports.Keys.runtimeInfo));
-            }
-            return this.$elem;
-        };
-
-        RuntimeInfoElement.prototype.value = function () {
-            return RuntimeInfoValue.parse(this.getElem().val());
-        };
-
-        RuntimeInfoElement.prototype.setValue = function (runtimeInfo) {
-            this.getElem().val(runtimeInfo == null ? null : runtimeInfo.toString());
-        };
-        return RuntimeInfoElement;
-    })();
-    exports.RuntimeInfoElement = RuntimeInfoElement;
-
-    var RuntimeInfoValue = (function () {
-        function RuntimeInfoValue(entityType, id, isNew, ticks) {
+    var RuntimeInfo = (function () {
+        function RuntimeInfo(entityType, id, isNew, ticks) {
             if (SF.isEmpty(entityType))
-                throw new Error("entityTyp is mandatory for RuntimeInfoValue");
+                throw new Error("entityTyp is mandatory for RuntimeInfo");
 
             this.type = entityType;
             this.id = id;
             this.isNew = isNew;
             this.ticks = ticks;
         }
-        RuntimeInfoValue.parse = function (runtimeInfoString) {
+        RuntimeInfo.parse = function (runtimeInfoString) {
             if (SF.isEmpty(runtimeInfoString))
                 return null;
 
             var array = runtimeInfoString.split(';');
-            return new RuntimeInfoValue(array[0], SF.isEmpty(array[1]) ? null : parseInt(array[1]), array[2] == "n", SF.isEmpty(array[3]) ? null : parseInt(array[3]));
+            return new RuntimeInfo(array[0], SF.isEmpty(array[1]) ? null : parseInt(array[1]), array[2] == "n", SF.isEmpty(array[3]) ? null : parseInt(array[3]));
         };
 
-        RuntimeInfoValue.prototype.toString = function () {
+        RuntimeInfo.prototype.toString = function () {
             return [
                 this.type,
                 this.id,
@@ -148,22 +126,39 @@ define(["require", "exports"], function(require, exports) {
                 this.ticks].join(";");
         };
 
-        RuntimeInfoValue.fromKey = function (key) {
+        RuntimeInfo.fromKey = function (key) {
             if (SF.isEmpty(key))
                 return null;
 
-            return new RuntimeInfoValue(key.before(";"), parseInt(key.after(";")), false);
+            return new RuntimeInfo(key.before(";"), parseInt(key.after(";")), false);
         };
 
-        RuntimeInfoValue.prototype.key = function () {
+        RuntimeInfo.prototype.key = function () {
             if (this.id == null)
-                throw Error("RuntimeInfoValue has no Id");
+                throw Error("RuntimeInfo has no Id");
 
             return this.type + ";" + this.id;
         };
-        return RuntimeInfoValue;
+
+        RuntimeInfo.getHiddenInput = function (prefix, context) {
+            var result = $('#' + SF.compose(prefix, exports.Keys.runtimeInfo), context);
+
+            if (result.length != 1)
+                throw new Error("{0} elements with id {1} found".format(result.length, SF.compose(prefix, exports.Keys.runtimeInfo)));
+
+            return result;
+        };
+
+        RuntimeInfo.getFromPrefix = function (prefix, context) {
+            return RuntimeInfo.parse(RuntimeInfo.getHiddenInput(prefix, context).val());
+        };
+
+        RuntimeInfo.setFromPrefix = function (prefix, runtimeInfo, context) {
+            RuntimeInfo.getHiddenInput(prefix, context).val(runtimeInfo == null ? "" : runtimeInfo.toString());
+        };
+        return RuntimeInfo;
     })();
-    exports.RuntimeInfoValue = RuntimeInfoValue;
+    exports.RuntimeInfo = RuntimeInfo;
 
     var EntityValue = (function () {
         function EntityValue(runtimeInfo, toString, link) {
@@ -217,19 +212,19 @@ define(["require", "exports"], function(require, exports) {
         };
 
         EntityHtml.fromHtml = function (prefix, htmlText) {
-            var result = new EntityHtml(prefix, new RuntimeInfoValue("?", null, false));
+            var result = new EntityHtml(prefix, new RuntimeInfo("?", null, false));
             result.loadHtml(htmlText);
             return result;
         };
 
         EntityHtml.fromDiv = function (prefix, div) {
-            var result = new EntityHtml(prefix, new RuntimeInfoValue("?", null, false));
+            var result = new EntityHtml(prefix, new RuntimeInfo("?", null, false));
             result.html = div.clone();
             return result;
         };
 
         EntityHtml.withoutType = function (prefix) {
-            var result = new EntityHtml(prefix, new RuntimeInfoValue("?", null, false));
+            var result = new EntityHtml(prefix, new RuntimeInfo("?", null, false));
             return result;
         };
         return EntityHtml;

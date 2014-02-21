@@ -125,11 +125,6 @@ namespace Signum.Web
             return result;
         }
 
-        public static string JsEscape(string input)
-        {
-            return input.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("/", "\\/").Replace("\r\n", "").Replace("\n", "");
-        }
-
         public static MvcHtmlString ViewButton(HtmlHelper helper, EntityBase entityBase, bool hidden)
         {
             if (!entityBase.View)
@@ -245,13 +240,6 @@ namespace Signum.Web
                   EntityControlMessage.Remove.NiceToString(),
                   "sf-line-button sf-remove",
                   htmlAttr);
-        }
-
-        public static MvcHtmlString EmbeddedTemplate(EntityBase entityBase, MvcHtmlString template)
-        {
-            return MvcHtmlString.Create("<script type=\"text/javascript\">var {0} = \"{1}\"</script>".Formato(
-                                entityBase.Compose(EntityBaseKeys.Template),
-                                EntityBaseHelper.JsEscape(template.ToHtmlString())));
         }
 
         public static void ConfigureEntityBase(EntityBase eb, Type cleanType)

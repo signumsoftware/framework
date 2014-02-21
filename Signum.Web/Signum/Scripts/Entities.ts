@@ -100,34 +100,7 @@ export class StaticInfo {
     }
 }
 
-
-export class RuntimeInfoElement {
-
-    prefix: string;
-    private $elem: JQuery;
-
-    constructor(prefix: string) {
-        this.prefix = prefix;
-    }
-
-    public getElem() {
-        if (!this.$elem) {
-            this.$elem = $('#' + SF.compose(this.prefix, Keys.runtimeInfo));
-        }
-        return this.$elem;
-    }
-
-    value(): RuntimeInfoValue {
-        return RuntimeInfoValue.parse(this.getElem().val());
-    }
-
-    setValue(runtimeInfo: RuntimeInfoValue) {
-        this.getElem().val(runtimeInfo == null ? null : runtimeInfo.toString());
-    }
-}
-
-
-export class RuntimeInfoValue {
+export class RuntimeInfo {
     type: string;
     id: number;
     isNew: boolean;
@@ -135,7 +108,7 @@ export class RuntimeInfoValue {
 
     constructor(entityType: string, id: number, isNew: boolean, ticks?: number) {
         if (SF.isEmpty(entityType))
-            throw new Error("entityTyp is mandatory for RuntimeInfoValue");
+            throw new Error("entityTyp is mandatory for RuntimeInfo");
 
         this.type = entityType;
         this.id = id;
@@ -143,12 +116,12 @@ export class RuntimeInfoValue {
         this.ticks = ticks;
     }
 
-    public static parse(runtimeInfoString: string): RuntimeInfoValue {
+    public static parse(runtimeInfoString: string): RuntimeInfo {
         if (SF.isEmpty(runtimeInfoString))
             return null;
 
         var array = runtimeInfoString.split(';');
-        return new RuntimeInfoValue(
+        return new RuntimeInfo(
             array[0],
             SF.isEmpty(array[1]) ? null : parseInt(array[1]),
             array[2] == "n",
@@ -162,11 +135,11 @@ export class RuntimeInfoValue {
             this.ticks].join(";");
     }
 
-    public static fromKey(key: string): RuntimeInfoValue {
+    public static fromKey(key: string): RuntimeInfo {
         if (SF.isEmpty(key))
             return null;
 
-        return new RuntimeInfoValue(
+        return new RuntimeInfo(
             key.before(";"),
             parseInt(key.after(";")),
             false);
@@ -174,14 +147,32 @@ export class RuntimeInfoValue {
 
     key(): string {
         if (this.id == null)
-            throw Error("RuntimeInfoValue has no Id");
+            throw Error("RuntimeInfo has no Id");
 
         return this.type + ";" + this.id;
+    }
+
+
+    private static getHiddenInput(prefix: string, context?: JQuery) {
+        var result = $('#' + SF.compose(prefix, Keys.runtimeInfo), context);
+
+        if (result.length != 1)
+            throw new Error("{0} elements with id {1} found".format(result.length, SF.compose(prefix, Keys.runtimeInfo)));
+
+        return result; 
+    }
+
+    static getFromPrefix(prefix: string, context?: JQuery): RuntimeInfo {
+        return RuntimeInfo.parse(RuntimeInfo.getHiddenInput(prefix, context).val());
+    }
+
+    static setFromPrefix(prefix: string, runtimeInfo: RuntimeInfo, context?: JQuery) {
+        RuntimeInfo.getHiddenInput(prefix, context).val(runtimeInfo == null? "": runtimeInfo.toString());
     }
 }
 
 export class EntityValue {
-    constructor(runtimeInfo: RuntimeInfoValue, toString?: string, link?: string) {
+    constructor(runtimeInfo: RuntimeInfo, toString?: string, link?: string) {
         if (runtimeInfo == null)
             throw new Error("runtimeInfo is mandatory for an EntityValue");
 
@@ -190,7 +181,7 @@ export class EntityValue {
         this.link = link;
     }
 
-    runtimeInfo: RuntimeInfoValue;
+    runtimeInfo: RuntimeInfo;
     toStr: string;
     link: string;
 
@@ -215,7 +206,7 @@ export class EntityHtml extends EntityValue {
 
     hasErrors: boolean;
 
-    constructor(prefix: string, runtimeInfo: RuntimeInfoValue, toString?: string, link?: string) {
+    constructor(prefix: string, runtimeInfo: RuntimeInfo, toString?: string, link?: string) {
         super(runtimeInfo, toString, link);
 
         if (prefix == null)
@@ -241,19 +232,19 @@ export class EntityHtml extends EntityValue {
     }
 
     static fromHtml(prefix: string, htmlText: string): EntityHtml {
-        var result = new EntityHtml(prefix, new RuntimeInfoValue("?", null, false));
+        var result = new EntityHtml(prefix, new RuntimeInfo("?", null, false));
         result.loadHtml(htmlText);
         return result;
     }
 
     static fromDiv(prefix: string, div: JQuery): EntityHtml {
-        var result = new EntityHtml(prefix, new RuntimeInfoValue("?", null, false));
+        var result = new EntityHtml(prefix, new RuntimeInfo("?", null, false));
         result.html = div.clone();
         return result;
     }
 
     static withoutType(prefix: string): EntityHtml {
-        var result = new EntityHtml(prefix, new RuntimeInfoValue("?", null, false));
+        var result = new EntityHtml(prefix, new RuntimeInfo("?", null, false));
         return result;
     }
 }

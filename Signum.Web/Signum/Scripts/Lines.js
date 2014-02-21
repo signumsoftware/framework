@@ -36,7 +36,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         EntityBase.prototype.runtimeInfo = function (itemPrefix) {
-            return new Entities.RuntimeInfoElement(this.options.prefix);
+            return $(this.pf(Entities.Keys.runtimeInfo));
         };
 
         EntityBase.prototype.staticInfo = function () {
@@ -50,13 +50,13 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         EntityBase.prototype.containerDiv = function (itemPrefix) {
             var containerDivId = this.pf(EntityBase.key_entity);
             if ($(containerDivId).length == 0)
-                this.runtimeInfo().getElem().after(SF.hiddenDiv(containerDivId.after('#'), ""));
+                this.runtimeInfo().after(SF.hiddenDiv(containerDivId.after('#'), ""));
 
             return $(containerDivId);
         };
 
         EntityBase.prototype.extractEntityHtml = function (itemPrefix) {
-            var runtimeInfo = this.runtimeInfo().value();
+            var runtimeInfo = Entities.RuntimeInfo.getFromPrefix(this.options.prefix);
 
             if (runtimeInfo == null)
                 return null;
@@ -91,8 +91,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 entityValue.assertPrefixAndType(this.options.prefix, this.staticInfo());
 
             SF.triggerNewContent(this.containerDiv().html(entityValue == null ? null : entityValue.html));
-            this.runtimeInfo().setValue(entityValue == null ? null : entityValue.runtimeInfo);
-
+            Entities.RuntimeInfo.setFromPrefix(this.options.prefix, entityValue == null ? null : entityValue.runtimeInfo);
             if (entityValue == null) {
                 Validator.cleanError($(this.pf(Entities.Keys.toStr)).val(""));
                 Validator.cleanError($(this.pf(Entities.Keys.link)).val("").html(""));
@@ -136,7 +135,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 if (type == null)
                     return null;
 
-                var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfoValue(type, null, true));
+                var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true));
 
                 var template = _this.getEmbeddedTemplate(prefix);
                 if (!SF.isEmpty(template))
@@ -147,7 +146,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         EntityBase.prototype.getEmbeddedTemplate = function (itemPrefix) {
-            return window[SF.compose(this.options.prefix, "sfTemplate")];
+            if (!this.options.template)
+                throw new Error("no template in " + this.options.prefix);
+
+            var result = new Entities.EntityHtml(this.options.prefix, new Entities.RuntimeInfo(this.staticInfo().singleType(), null, true));
+
+            result.loadHtml(this.options.template);
+
+            return result;
         };
 
         EntityBase.prototype.view_click = function () {
@@ -200,7 +206,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         EntityBase.prototype.updateButtonsDisplay = function () {
-            var hasEntity = !!this.runtimeInfo().value();
+            var hasEntity = !!Entities.RuntimeInfo.getFromPrefix(this.options.prefix);
 
             $(this.pf("btnCreate")).toggle(!hasEntity);
             $(this.pf("btnFind")).toggle(!hasEntity);
@@ -263,7 +269,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     success: function (data) {
                         this.lastXhr = null;
                         resolve(data.map(function (item) {
-                            return new Entities.EntityValue(new Entities.RuntimeInfoValue(item.type, parseInt(item.id), false), item.text, item.link);
+                            return new Entities.EntityValue(new Entities.RuntimeInfo(item.type, parseInt(item.id), false), item.text, item.link);
                         }));
                     }
                 });
@@ -333,7 +339,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         EntityCombo.prototype.combo_selected = function () {
             var val = this.combo().val();
 
-            var ri = Entities.RuntimeInfoValue.fromKey(val);
+            var ri = Entities.RuntimeInfo.fromKey(val);
 
             this.setEntity(ri == null ? null : new Entities.EntityValue(ri, this.getToString()));
         };
@@ -364,17 +370,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (this.creating != null)
                 return this.creating(prefix);
 
+            if (this.options.template)
+                return Promise.resolve(this.getEmbeddedTemplate());
+
             return Navigator.typeChooser(this.staticInfo()).then(function (type) {
                 if (type == null)
                     return null;
 
-                var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfoValue(type, null, true));
-
-                var template = _this.getEmbeddedTemplate();
-                if (!SF.isEmpty(template)) {
-                    newEntity.html = $(template);
-                    return Promise.resolve(newEntity);
-                }
+                var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true));
 
                 return Navigator.requestPartialView(newEntity, _this.defaultViewOptions());
             });
@@ -405,28 +408,32 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             _super.call(this, element, options);
         }
         EntityListBase.prototype.runtimeInfo = function (itemPrefix) {
-            return new Entities.RuntimeInfoElement(itemPrefix);
+            return $("#" + SF.compose(itemPrefix, Entities.Keys.runtimeInfo));
         };
 
         EntityListBase.prototype.containerDiv = function (itemPrefix) {
             var containerDivId = "#" + SF.compose(itemPrefix, EntityList.key_entity);
             if ($(containerDivId).length == 0)
-                this.runtimeInfo(itemPrefix).getElem().after(SF.hiddenDiv(containerDivId.after("#"), ""));
+                this.runtimeInfo(itemPrefix).after(SF.hiddenDiv(containerDivId.after("#"), ""));
 
             return $(containerDivId);
         };
 
         EntityListBase.prototype.getEmbeddedTemplate = function (itemPrefix) {
-            var template = _super.prototype.getEmbeddedTemplate.call(this);
-            if (SF.isEmpty(template))
-                return template;
+            if (!this.options.template)
+                throw new Error("no template in " + this.options.prefix);
 
-            template = template.replace(new RegExp(SF.compose(this.options.prefix, "0"), "gi"), itemPrefix);
-            return template;
+            var result = new Entities.EntityHtml(itemPrefix, new Entities.RuntimeInfo(this.staticInfo().singleType(), null, true));
+
+            var replaced = this.options.template.replace(new RegExp(SF.compose(this.options.prefix, "0"), "gi"), itemPrefix);
+
+            result.loadHtml(this.options.template);
+
+            return result;
         };
 
         EntityListBase.prototype.extractEntityHtml = function (itemPrefix) {
-            var runtimeInfo = this.runtimeInfo(itemPrefix).value();
+            var runtimeInfo = Entities.RuntimeInfo.getFromPrefix(itemPrefix);
 
             var div = this.containerDiv(itemPrefix);
 
@@ -450,7 +457,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (entityValue.isLoaded())
                 SF.triggerNewContent(this.containerDiv(itemPrefix).html(entityValue.html));
 
-            this.runtimeInfo(itemPrefix).setValue(entityValue.runtimeInfo);
+            Entities.RuntimeInfo.setFromPrefix(itemPrefix, entityValue.runtimeInfo);
 
             this.updateButtonsDisplay();
             if (!SF.isEmpty(this.entityChanged)) {
@@ -482,7 +489,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             if (entityValue.isLoaded())
                 SF.triggerNewContent(this.containerDiv(itemPrefix).html(entityValue.html));
-            this.runtimeInfo(itemPrefix).setValue(entityValue.runtimeInfo);
+            Entities.RuntimeInfo.setFromPrefix(itemPrefix, entityValue.runtimeInfo);
 
             this.updateButtonsDisplay();
             if (!SF.isEmpty(this.entityChanged)) {
@@ -519,19 +526,19 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         EntityListBase.prototype.getRuntimeInfos = function () {
-            var _this = this;
             return this.getPrefixes().map(function (p) {
-                return _this.runtimeInfo(p).value();
+                return Entities.RuntimeInfo.getFromPrefix(p);
             });
         };
 
-        EntityListBase.prototype.getNextPrefix = function () {
+        EntityListBase.prototype.getNextPrefix = function (inc) {
+            if (typeof inc === "undefined") { inc = 0; }
             var _this = this;
             var indices = this.getItems().toArray().map(function (e) {
                 return parseInt(e.id.after(_this.options.prefix + "_").before("_" + _this.itemSuffix()));
             });
 
-            var next = indices.length == 0 ? 0 : (Math.max.apply(null, indices) + 1);
+            var next = indices.length == 0 ? inc : (Math.max.apply(null, indices) + 1 + inc);
 
             return SF.compose(this.options.prefix, next.toString());
         };
@@ -784,7 +791,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     return;
                 }
                 children.hide();
-                this.runtimeInfo(itemPrefix).getElem().after(children);
+                this.runtimeInfo(itemPrefix).after(children);
             }
 
             var selContainer = this.containerDiv(selPrefix);
@@ -793,7 +800,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 detailDiv.append(selContainer);
                 selContainer.show();
             } else {
-                var entity = new Entities.EntityHtml(selPrefix, this.runtimeInfo(selPrefix).value(), null, null);
+                var entity = new Entities.EntityHtml(selPrefix, Entities.RuntimeInfo.getFromPrefix(selPrefix), null, null);
 
                 Navigator.requestPartialView(entity, this.defaultViewOptions()).then(function (e) {
                     selContainer.html(e.html);
@@ -808,17 +815,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (this.creating != null)
                 return this.creating(prefix);
 
+            if (this.options.template)
+                return Promise.resolve(this.getEmbeddedTemplate(prefix));
+
             return Navigator.typeChooser(this.staticInfo()).then(function (type) {
                 if (type == null)
                     return null;
 
-                var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfoValue(type, null, true));
-
-                var template = _this.getEmbeddedTemplate();
-                if (!SF.isEmpty(template)) {
-                    newEntity.html = $(template);
-                    return Promise.resolve(newEntity);
-                }
+                var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true));
 
                 return Navigator.requestPartialView(newEntity, _this.defaultViewOptions());
             });
@@ -885,17 +889,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (this.creating != null)
                 return this.creating(prefix);
 
+            if (this.options.template)
+                return Promise.resolve(this.getEmbeddedTemplate(prefix));
+
             return Navigator.typeChooser(this.staticInfo()).then(function (type) {
                 if (type == null)
                     return null;
 
-                var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfoValue(type, null, true));
-
-                var template = _this.getEmbeddedTemplate(prefix);
-                if (!SF.isEmpty(template)) {
-                    newEntity.html = $(template);
-                    return Promise.resolve(newEntity);
-                }
+                var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true));
 
                 return Navigator.requestPartialView(newEntity, _this.defaultViewOptions());
             });
@@ -904,18 +905,18 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         EntityRepeater.prototype.find_click = function () {
             var _this = this;
             return this.onFindingMany(this.options.prefix).then(function (result) {
-                if (result == null)
+                if (!result)
                     return;
 
-                SF.promiseForeach(result, function (e) {
-                    var itemPrefix = _this.getNextPrefix();
-
-                    var promise = e.isLoaded() ? Promise.resolve(e) : Navigator.requestPartialView(new Entities.EntityHtml(itemPrefix, e.runtimeInfo), _this.defaultViewOptions());
+                Promise.all(result.map(function (e, i) {
+                    return ({ entity: e, prefix: _this.getNextPrefix(i) });
+                }).map(function (t) {
+                    var promise = t.entity.isLoaded() ? Promise.resolve(t.entity) : Navigator.requestPartialView(new Entities.EntityHtml(t.prefix, t.entity.runtimeInfo), _this.defaultViewOptions());
 
                     return promise.then(function (ev) {
-                        return _this.addEntity(ev, itemPrefix);
+                        return _this.addEntity(ev, t.prefix);
                     });
-                });
+                }));
             });
         };
 
