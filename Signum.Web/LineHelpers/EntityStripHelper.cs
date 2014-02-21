@@ -30,7 +30,6 @@ namespace Signum.Web
                 if (!entityStrip.ValueFirst)
                     sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityStrip));
 
-                sb.AddLine(helper.HiddenStaticInfo(entityStrip));
                 sb.AddLine(helper.Hidden(entityStrip.Compose(EntityListBaseKeys.ListPresent), ""));
 
                 //If it's an embeddedEntity write an empty template with index 0 to be used when creating a new item
@@ -58,7 +57,6 @@ namespace Signum.Web
                             {
                                 { "class", "sf-value-line sf-entity-autocomplete"},
                                 { "autocomplete", "off" }, 
-                                { "data-types", new StaticInfo(entityStrip.Type, entityStrip.Implementations, entityStrip.PropertyRoute, entityStrip.ReadOnly).Types.ToString(Navigator.ResolveWebTypeName, ",") }
                             };
 
                             if (entityStrip.AutocompleteUrl.HasText())

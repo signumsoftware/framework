@@ -333,19 +333,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         return $.extend(obj, options.requestExtraJsonData);
     }
 
-    function typeChooser(staticInfo) {
-        var types = staticInfo.types();
-        if (types.length == 1) {
-            return Promise.resolve(types[0]);
-        }
-
-        var typesNiceNames = staticInfo.typeNiceNames();
-
-        var options = types.map(function (t, i) {
-            return ({ type: t, text: typesNiceNames[i] });
-        });
-
-        return exports.chooser(staticInfo.prefix, lang.signum.chooseAType, options).then(function (t) {
+    function typeChooser(prefix, types) {
+        return exports.chooser(prefix, lang.signum.chooseAType, types).then(function (t) {
             return t == null ? null : t.type;
         });
     }

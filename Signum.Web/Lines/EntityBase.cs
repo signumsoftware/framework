@@ -74,6 +74,9 @@ namespace Signum.Web
             return JsFunction.SFControlThen(Prefix, functionCall);
         }
 
+        public static readonly Type[] ImplementedByAll = new Type[0];
+        public static readonly string ImplementedByAllKey = "[All]";
+
         protected virtual JObject OptionsJSInternal()
         {
             JObject options = new JObject
@@ -84,10 +87,43 @@ namespace Signum.Web
             if (PartialViewName.HasText() && !Type.IsEmbeddedEntity())
                 options.Add("partialViewName", PartialViewName);
 
+            if (this.Type.IsEmbeddedEntity())
+            {
+                if (Implementations != null)
+                    throw new ArgumentException("implementations should be null for EmbeddedEntities");
+
+                options.Add("types", Navigator.ResolveWebTypeName(this.Type));
+                options.Add("typeNiceNames", this.Type.NiceName());
+                options.Add("rootType", Navigator.ResolveWebTypeName(this.PropertyRoute.RootType));
+                options.Add("propertyRoute", this.PropertyRoute.PropertyString());
+            }
+            else
+            {
+                Type[] types = Implementations.Value.IsByAll ? ImplementedByAll :
+                               Implementations.Value.Types.ToArray();
+
+                options.Add("types", types == ImplementedByAll ? ImplementedByAllKey : types.ToString(t => Navigator.ResolveWebTypeName(t), ","));
+                options.Add("typeNiceNames", types == ImplementedByAll ? ImplementedByAllKey : types.ToString(t => t.NiceName(), ","));
+            }
+
+            if (this.ReadOnly)
+                options.Add("isReadOnly", this.ReadOnly);
+
             if (this.Template != null)
                 options.Add("templae", Template.ToString());
 
             return options;
+        }
+
+        public static Type[] ParseTypes(string types)
+        {
+            if (string.IsNullOrEmpty(types))
+                throw new ArgumentNullException("types");
+
+            if (types == ImplementedByAllKey)
+                return ImplementedByAll;
+
+            return types.Split(',').Select(tn => Navigator.ResolveType(tn)).NotNull().ToArray();
         }
 
         internal Type CleanRuntimeType 

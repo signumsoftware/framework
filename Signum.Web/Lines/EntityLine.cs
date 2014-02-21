@@ -13,6 +13,7 @@ using Signum.Entities.Reflection;
 using System.Configuration;
 using Signum.Engine;
 using Signum.Utilities.Reflection;
+using Newtonsoft.Json.Linq;
 #endregion
 
 namespace Signum.Web
@@ -28,6 +29,16 @@ namespace Signum.Web
         {
             Autocomplete = true;
             Navigate = true;
+        }
+
+        protected override JObject OptionsJSInternal()
+        {
+            var result = base.OptionsJSInternal();
+
+            if (AutocompleteUrl.HasText())
+                result.Add("autoCompleteUrl", AutocompleteUrl);
+
+            return result;
         }
 
         protected override void SetReadOnly()

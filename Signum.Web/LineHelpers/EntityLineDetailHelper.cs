@@ -35,7 +35,7 @@ namespace Signum.Web
                     sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityDetail, hidden: entityDetail.UntypedValue == null));
                 }
 
-                sb.AddLine(helper.HiddenEntityInfo(entityDetail));
+                sb.AddLine(helper.HiddenRuntimeInfo(entityDetail));
 
                 if (entityDetail.Type.IsEmbeddedEntity())
                 {

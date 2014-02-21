@@ -365,17 +365,8 @@ function requestData(entityHtml: Entities.EntityHtml, options: ViewOptionsBase):
 }
 
 
-export function typeChooser(staticInfo: Entities.StaticInfo): Promise<string> {
-    var types = staticInfo.types();
-    if (types.length == 1) {
-        return Promise.resolve(types[0]);
-    }
-
-    var typesNiceNames = staticInfo.typeNiceNames();
-
-    var options = types.map((t, i) => ({ type: t, text: typesNiceNames[i] }));
-
-    return chooser(staticInfo.prefix, lang.signum.chooseAType, options)
+export function typeChooser(prefix: string, types: { type: string; toStr: string}[]): Promise<string> {
+    return chooser(prefix, lang.signum.chooseAType, types)
         .then(t=> t == null ? null : t.type);
 }
 
@@ -435,6 +426,12 @@ export interface ChooserOption {
     value: string;
     toStr: string;
 }
+
+export interface TypeChooserOption {
+    type: string;
+    toStr: string;
+}
+
 
 export enum ValueLineBoxType {
     String,

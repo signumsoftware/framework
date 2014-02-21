@@ -23,10 +23,10 @@
      >
 
     @Html.Hidden(Model.Compose("sfEntityTypeNames"), 
-                                implementations.IsByAll ? StaticInfo.ImplementedByAllKey  :
+                                implementations.IsByAll ? EntityBase.ImplementedByAllKey  :
                                 implementations.Types.ToString(t => Navigator.ResolveWebTypeName(t), ","), new { disabled = "disabled" })
      @Html.Hidden(Model.Compose("sfEntityTypeNiceNames"), 
-                                implementations.IsByAll ? StaticInfo.ImplementedByAllKey  :
+                                implementations.IsByAll ? EntityBase.ImplementedByAllKey  :
                                 implementations.Types.ToString(t =>  t.NiceName(), ","), new { disabled = "disabled" })
         
     

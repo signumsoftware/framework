@@ -54,6 +54,10 @@ namespace Signum.Web
         protected override JObject OptionsJSInternal()
         {
             var result = base.OptionsJSInternal();
+
+            if (AutocompleteUrl.HasText())
+                result.Add("autoCompleteUrl", AutocompleteUrl);
+
             return result;
         }
     }

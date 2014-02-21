@@ -47,14 +47,11 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
 
         formValues["prefix"] = valOptions.prefix;
 
-        if (valOptions.prefix) {
-            var staticInfo = Entities.StaticInfo.getFor(valOptions.prefix);
+        if (valOptions.rootType)
+            formValues["rootType"] = valOptions.rootType;
 
-            if (staticInfo.find().length > 0 && staticInfo.isEmbedded()) {
-                formValues["rootType"] = staticInfo.rootType();
-                formValues["propertyRoute"] = staticInfo.propertyRoute();
-            }
-        }
+        if (valOptions.propertyRoute)
+            formValues["propertyRoute"] = valOptions.propertyRoute;
 
         return $.extend(formValues, valOptions.requestExtraJsonData);
     }

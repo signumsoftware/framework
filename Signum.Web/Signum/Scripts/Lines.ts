@@ -9,6 +9,14 @@ export interface EntityBaseOptions {
     prefix: string;
     partialViewName: string;
     template?: string;
+    autoCompleteUrl?: string;
+
+    types: string[];
+    typeNiceNames: string[];
+    isEmbedded: boolean;
+    isReadonly: boolean;
+    rootType?: string;
+    propertyRoute?: string;
 }
 
 export class EntityBase {
@@ -43,21 +51,15 @@ export class EntityBase {
     _create() {
         var $txt = $(this.pf(Entities.Keys.toStr) + ".sf-entity-autocomplete");
         if ($txt.length > 0) {
-            var url = $txt.attr("data-url");
-
-            this.autoCompleter = new AjaxEntityAutoCompleter(url || SF.Urls.autocomplete,
-                term => ({ types: this.staticInfo().getValue(Entities.StaticInfo._types), l: 5, q: term }));
+            this.autoCompleter = new AjaxEntityAutoCompleter(this.options.autoCompleteUrl || SF.Urls.autocomplete,
+                term => ({ types: this.options.types, l: 5, q: term }));
 
             this.setupAutocomplete($txt);
         }
     }
     
-    runtimeInfo(itemPrefix?: string) : JQuery {
+    runtimeInfoHiddenElement(itemPrefix?: string) : JQuery {
         return $(this.pf(Entities.Keys.runtimeInfo));
-    }
-
-    staticInfo() {
-        return new Entities.StaticInfo(this.options.prefix);
     }
 
     pf(s) {
@@ -67,7 +69,7 @@ export class EntityBase {
     containerDiv(itemPrefix?: string) {
         var containerDivId = this.pf(EntityBase.key_entity);
         if ($(containerDivId).length == 0)
-            this.runtimeInfo().after(SF.hiddenDiv(containerDivId.after('#'), ""));
+            this.runtimeInfoHiddenElement().after(SF.hiddenDiv(containerDivId.after('#'), ""));
 
         return $(containerDivId);
     }
@@ -110,7 +112,7 @@ export class EntityBase {
         this.setEntitySpecific(entityValue)
 
         if (entityValue) 
-            entityValue.assertPrefixAndType(this.options.prefix, this.staticInfo());
+            entityValue.assertPrefixAndType(this.options.prefix, this.options.types);
         
 
         SF.triggerNewContent(this.containerDiv().html(entityValue == null ? null : (<Entities.EntityHtml>entityValue).html));
@@ -147,11 +149,23 @@ export class EntityBase {
         });
     }
 
+    typeChooser(): Promise<string> {
+        return Navigator.typeChooser(this.options.prefix,
+            this.options.types.map((t, i) => ({ type: t, toStr: this.options.typeNiceNames[i] })));
+    }
+
+    singleType(): string {
+        if (this.options.types.length != 1)
+            throw new Error("There are {0} types in {1}".format(this.options.types.length, this.options.prefix));
+
+        return this.options.types[0]; 
+    }
+
     onCreating(prefix: string): Promise<Entities.EntityValue> {
         if (this.creating != null)
             return this.creating(prefix);
 
-        return Navigator.typeChooser(this.staticInfo()).then(type=> {
+        return this.typeChooser().then(type=> {
             if (type == null)
                 return null;
 
@@ -170,7 +184,7 @@ export class EntityBase {
             throw new Error("no template in " + this.options.prefix);
 
         var result = new Entities.EntityHtml(this.options.prefix,
-            new Entities.RuntimeInfo(this.staticInfo().singleType(), null, true));
+            new Entities.RuntimeInfo(this.singleType(), null, true));
 
         result.loadHtml(this.options.template);
 
@@ -204,11 +218,13 @@ export class EntityBase {
         });
     }
 
+    
+
     onFinding(prefix: string): Promise<Entities.EntityValue> {
         if (this.finding != null)
             return this.finding(prefix);
 
-        return Navigator.typeChooser(this.staticInfo()).then(type=> {
+        return this.typeChooser().then(type=> {
             if (type == null)
                 return null;
 
@@ -221,8 +237,12 @@ export class EntityBase {
 
     defaultViewOptions(): Navigator.ViewPopupOptions {
         return {
-            readOnly: this.staticInfo().isReadOnly(),
-            partialViewName: this.options.partialViewName
+            readOnly: this.options.isReadonly,
+            partialViewName: this.options.partialViewName,
+            validationOptions: {
+                rootType: this.options.rootType,
+                propertyRoute: this.options.propertyRoute,
+            }
         };
     }
 
@@ -399,7 +419,7 @@ export class EntityLineDetail extends EntityBase {
         if (this.options.template)
             return Promise.resolve(this.getEmbeddedTemplate());
 
-        return Navigator.typeChooser(this.staticInfo()).then(type=> {
+        return this.typeChooser().then(type=> {
             if (type == null)
                 return null;
       
@@ -461,7 +481,7 @@ export class EntityListBase extends EntityBase {
             throw new Error("no template in " + this.options.prefix);
 
         var result = new Entities.EntityHtml(itemPrefix,
-            new Entities.RuntimeInfo(this.staticInfo().singleType(), null, true));
+            new Entities.RuntimeInfo(this.singleType(), null, true));
 
         var replaced = this.options.template.replace(new RegExp(SF.compose(this.options.prefix, "0"), "gi"), itemPrefix)
 
@@ -492,7 +512,7 @@ export class EntityListBase extends EntityBase {
 
         this.setEntitySpecific(entityValue, itemPrefix)
 
-        entityValue.assertPrefixAndType(itemPrefix, this.staticInfo());
+        entityValue.assertPrefixAndType(itemPrefix, this.options.types);
 
         if (entityValue.isLoaded())
             SF.triggerNewContent(this.containerDiv(itemPrefix).html((<Entities.EntityHtml>entityValue).html));
@@ -524,7 +544,7 @@ export class EntityListBase extends EntityBase {
         this.addEntitySpecific(entityValue, itemPrefix);
 
         if (entityValue)
-            entityValue.assertPrefixAndType(itemPrefix, this.staticInfo());
+            entityValue.assertPrefixAndType(itemPrefix, this.options.types);
 
         if (entityValue.isLoaded())
             SF.triggerNewContent(this.containerDiv(itemPrefix).html((<Entities.EntityHtml>entityValue).html));
@@ -612,7 +632,7 @@ export class EntityListBase extends EntityBase {
         if (this.findingMany != null)
             return this.findingMany(prefix);
 
-        return Navigator.typeChooser(this.staticInfo()).then(type=> {
+        return this.typeChooser().then(type=> {
             if (type == null)
                 return null;
 
@@ -840,7 +860,7 @@ export class EntityListDetail extends EntityList {
         if (this.options.template)
             return Promise.resolve(this.getEmbeddedTemplate(prefix));
 
-        return Navigator.typeChooser(this.staticInfo()).then(type=> {
+        return this.typeChooser().then(type=> {
             if (type == null)
                 return null;
 
@@ -920,7 +940,7 @@ export class EntityRepeater extends EntityListBase {
         if (this.options.template)
             return Promise.resolve(this.getEmbeddedTemplate(prefix));
 
-        return Navigator.typeChooser(this.staticInfo()).then(type=> {
+        return this.typeChooser().then(type=> {
             if (type == null)
                 return null;
 
