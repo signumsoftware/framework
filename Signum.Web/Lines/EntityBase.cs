@@ -87,15 +87,19 @@ namespace Signum.Web
             if (PartialViewName.HasText() && !Type.IsEmbeddedEntity())
                 options.Add("partialViewName", PartialViewName);
 
-            if (this.Type.IsEmbeddedEntity())
+            Type type = this.GetElementType();
+
+            if (type.IsEmbeddedEntity())
             {
                 if (Implementations != null)
                     throw new ArgumentException("implementations should be null for EmbeddedEntities");
 
-                options.Add("types", Navigator.ResolveWebTypeName(this.Type));
-                options.Add("typeNiceNames", this.Type.NiceName());
-                options.Add("rootType", Navigator.ResolveWebTypeName(this.PropertyRoute.RootType));
-                options.Add("propertyRoute", this.PropertyRoute.PropertyString());
+                options.Add("types", Navigator.ResolveWebTypeName(type));
+                options.Add("typeNiceNames", type.NiceName());
+
+                PropertyRoute route = this.GetElementRoute();
+                options.Add("rootType", Navigator.ResolveWebTypeName(route.RootType));
+                options.Add("propertyRoute", route.PropertyString());
             }
             else
             {
@@ -113,6 +117,16 @@ namespace Signum.Web
                 options.Add("templae", Template.ToString());
 
             return options;
+        }
+
+        protected virtual PropertyRoute GetElementRoute()
+        {
+            return this.PropertyRoute;
+        }
+
+        protected virtual Type GetElementType()
+        {
+            return this.Type;
         }
 
         public static Type[] ParseTypes(string types)

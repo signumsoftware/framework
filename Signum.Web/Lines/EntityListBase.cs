@@ -52,6 +52,16 @@ namespace Signum.Web
             return result;
         }
 
+        protected override PropertyRoute GetElementRoute()
+        {
+            return this.PropertyRoute.Add("Item");
+        }
+
+        protected override Type GetElementType()
+        {
+            return this.ElementType;
+        }
+
         protected override void SetReadOnly()
         {
             Parent.ReadOnly = true;
