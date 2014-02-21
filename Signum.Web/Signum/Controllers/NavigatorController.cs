@@ -132,42 +132,38 @@ namespace Signum.Web.Controllers
         }
 
         [HttpPost]
-        public PartialViewResult ValueLineBox(string prefix, ValueLineBoxType type, string title, string fieldName, string message)
+        public PartialViewResult ValueLineBox(string prefix, ValueLineType type, string title, string labelText, string message)
         {
-            ViewData[ViewDataKeys.Title] = title;
+            ValueLineBoxOptions options = new ValueLineBoxOptions(type, prefix, null) { labelText = labelText, title = title };
 
-            ValueLineBoxModel model = new ValueLineBoxModel(type, fieldName, message);
-
-            switch (model.BoxType)
+            Type vlType = null;
+            switch (type)
             {
-                case ValueLineBoxType.String:
-                    model.StringValue = Request["stringValue"];
+                case ValueLineType.TextBox:
+                case ValueLineType.TextArea:
+                    vlType = typeof(string);
+                    options.value = this.ParseValue<string>("value");
                     break;
-                case ValueLineBoxType.Boolean:
-                    bool bvalue;
-                    if (bool.TryParse(Request["boolValue"], out bvalue))
-                        model.BoolValue = bvalue;
+                case ValueLineType.Boolean:
+                    vlType = typeof(bool);
+                    options.value = this.ParseValue<bool?>("value");
                     break;
-                case ValueLineBoxType.Integer:
-                    int ivalue;
-                    if (int.TryParse(Request["intValue"], out ivalue))
-                        model.IntValue = ivalue;
+                case ValueLineType.Number:
+                    vlType = typeof(decimal);
+                    options.value = this.ParseValue<decimal?>("value");
                     break;
-                case ValueLineBoxType.Decimal:
-                    decimal dvalue;
-                    if (decimal.TryParse(Request["decimalValue"], out dvalue))
-                        model.DecimalValue = dvalue;
-                    break;
-                case ValueLineBoxType.DateTime:
-                    DateTime dtvalue;
-                    if (DateTime.TryParse(Request["dateValue"], out dtvalue))
-                        model.DateValue = dtvalue;
+                case ValueLineType.DateTime:
+                    vlType = typeof(DateTime);
+                    options.value = this.ParseValue<DateTime?>("value");
                     break;
                 default:
                     break;
             }
 
-            return this.PopupView(model);
+            ViewData["type"] = vlType;
+            ViewData["options"] = options;
+
+            return this.PartialView(Navigator.Manager.ValueLineBoxView, new Context(null, prefix));
         }
     }
 }

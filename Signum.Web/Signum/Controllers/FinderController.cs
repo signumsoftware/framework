@@ -16,8 +16,8 @@ namespace Signum.Web.Controllers
         [HttpPost]
         public JsonNetResult Autocomplete(string types, string q, int l)
         {
-            Type[] typeArray = StaticInfo.ParseTypes(types);
-            if (typeArray == StaticInfo.ImplementedByAll)
+            Type[] typeArray = EntityBase.ParseTypes(types);
+            if (typeArray == EntityBase.ImplementedByAll)
                 throw new ArgumentException("ImplementedBy not allowed in Autocomplete");
 
             List<Lite<IdentifiableEntity>> lites = AutocompleteUtils.FindLiteLike(Implementations.By(typeArray), q, l);

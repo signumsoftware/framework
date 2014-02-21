@@ -35,12 +35,12 @@ namespace Signum.Web
                     sb.AddLine(EntityBaseHelper.RemoveButton(helper, entityDetail, hidden: entityDetail.UntypedValue == null));
                 }
 
-                sb.AddLine(helper.HiddenEntityInfo(entityDetail));
+                sb.AddLine(helper.HiddenRuntimeInfo(entityDetail));
 
                 if (entityDetail.Type.IsEmbeddedEntity())
                 {
                     TypeContext templateTC = ((TypeContext)entityDetail.Parent).Clone((object)Constructor.Construct(entityDetail.Type.CleanType()));
-                    sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityDetail, EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, entityDetail)));
+                    entityDetail.Template = EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, entityDetail);
                 }
 
                 MvcHtmlString controlHtml = null;

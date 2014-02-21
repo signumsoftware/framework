@@ -20,99 +20,15 @@ namespace Signum.Web
             return helper.Hidden(name, lite.Key());
         }
 
-        public static MvcHtmlString HiddenEntityInfo(this HtmlHelper helper, EntityBase tc)
-        {
-            return helper.HiddenRuntimeInfo(tc).Concat(helper.HiddenStaticInfo(tc));
-        }
-
         public static MvcHtmlString HiddenRuntimeInfo(this HtmlHelper helper, TypeContext tc)
         {
             return helper.Hidden(tc.Compose(EntityBaseKeys.RuntimeInfo), tc.RuntimeInfo().TryToString());
-        }
-
-        public static MvcHtmlString HiddenStaticInfo(this HtmlHelper helper, EntityBase tc)
-        {
-            Type type = tc is EntityListBase ? ((EntityListBase)tc).ElementType : tc.Type;
-
-            PropertyRoute pr =
-                !type.IsEmbeddedEntity() ? null :
-                tc is EntityListBase ? tc.PropertyRoute.Add("Item") :
-                tc.PropertyRoute;
-
-            StaticInfo si = new StaticInfo(type, tc.Implementations, pr, tc.ReadOnly);
-            return helper.Hidden(tc.Compose(EntityBaseKeys.StaticInfo), si.ToString(), new { disabled = "disabled" });
         }
 
         public static MvcHtmlString HiddenRuntimeInfo<T, S>(this HtmlHelper helper, TypeContext<T> parent, Expression<Func<T, S>> property)
         {
             TypeContext<S> typeContext = Common.WalkExpression(parent, property);
             return helper.HiddenRuntimeInfo(typeContext);
-        }
-    }
-
-    public class StaticInfo
-    {
-        public static readonly Type[] ImplementedByAll = new Type[0];
-        public static readonly string ImplementedByAllKey = "[All]";
-       
-
-        public StaticInfo(Type staticType, Implementations? implementations , PropertyRoute embeddedRoute, bool readOnly)
-        {
-            if (staticType.IsEmbeddedEntity())
-            {
-                if (implementations != null)
-                    throw new ArgumentException("implementations should be null for EmbeddedEntities");
-
-                Types = new[] { staticType };
-
-                if (embeddedRoute == null)
-                    throw new ArgumentNullException("embeddedRoute"); 
-
-                EmbeddedRoute = embeddedRoute;
-            }
-            else
-            {
-                Types = implementations.Value.IsByAll ? ImplementedByAll :
-                        implementations.Value.Types.ToArray();
-            }
-
-            this.IsReadOnly = readOnly;
-        }
-
-        public Type[] Types { get; private set; }
-        public PropertyRoute EmbeddedRoute { get; private set;}
- 
-        public bool IsEmbedded
-        {
-            get { return Types != null && Types.Length == 1 && typeof(EmbeddedEntity).IsAssignableFrom(Types[0]); }
-        }
-
-        public bool IsReadOnly { get; private set; }
-
-        public override string ToString()
-        {
-            if (Types == null)
-                throw new ArgumentException("StaticInfo.Types must be set");
-
-            return "{0};{1};{2};{3};{4};{5}".Formato(
-                    Types == ImplementedByAll ? ImplementedByAllKey : Types.ToString(t => Navigator.ResolveWebTypeName(t), ","),
-                    Types == ImplementedByAll ? ImplementedByAllKey : Types.ToString(t => t.NiceName(), ","),
-                    IsEmbedded ? "e" : "i",
-                    IsReadOnly ? "r" : "",
-                    EmbeddedRoute != null ? Navigator.ResolveWebTypeName(EmbeddedRoute.RootType) : "",
-                    EmbeddedRoute != null ? EmbeddedRoute.PropertyString() : ""
-                );
-        }
-
-        public static Type[] ParseTypes(string types)
-        {
-            if (string.IsNullOrEmpty(types))
-                throw new ArgumentNullException("types");
-
-            if (types == ImplementedByAllKey)
-                return ImplementedByAll;
-
-            return types.Split(',').Select(tn => Navigator.ResolveType(tn)).NotNull().ToArray();
         }
     }
 

@@ -30,14 +30,13 @@ namespace Signum.Web
                 if (!entityStrip.ValueFirst)
                     sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, entityStrip));
 
-                sb.AddLine(helper.HiddenStaticInfo(entityStrip));
                 sb.AddLine(helper.Hidden(entityStrip.Compose(EntityListBaseKeys.ListPresent), ""));
 
                 //If it's an embeddedEntity write an empty template with index 0 to be used when creating a new item
                 if (entityStrip.ElementType.IsEmbeddedEntity())
                 {
                     TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)entityStrip.Parent, 0);
-                    sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityStrip, EntityBaseHelper.RenderPopup(helper, templateTC, RenderPopupMode.Popup, entityStrip, isTemplate: true)));
+                    entityStrip.Template = EntityBaseHelper.RenderPopup(helper, templateTC, RenderPopupMode.Popup, entityStrip, isTemplate: true);
                 }
 
                 using (sb.Surround(new HtmlTag("ul")
@@ -58,7 +57,6 @@ namespace Signum.Web
                             {
                                 { "class", "sf-value-line sf-entity-autocomplete"},
                                 { "autocomplete", "off" }, 
-                                { "data-types", new StaticInfo(entityStrip.Type, entityStrip.Implementations, entityStrip.PropertyRoute, entityStrip.ReadOnly).Types.ToString(Navigator.ResolveWebTypeName, ",") }
                             };
 
                             if (entityStrip.AutocompleteUrl.HasText())

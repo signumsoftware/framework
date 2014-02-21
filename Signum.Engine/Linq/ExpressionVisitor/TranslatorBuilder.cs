@@ -368,9 +368,6 @@ namespace Signum.Engine.Linq
 
                 var block = Expression.Block(eee.Type, new[] { embeddedParam }, embeddedBindings);
 
-                if (eee.HasValue == null)
-                    return block;
-
                 return Expression.Condition(Expression.Equal(Visit(eee.HasValue.Nullify()), Expression.Constant(true, typeof(bool?))),
                     block, 
                     Expression.Constant(null, block.Type));
@@ -484,10 +481,14 @@ namespace Signum.Engine.Linq
             {
                 Type type = mle.Type;
 
-                return Expression.MemberInit(Expression.New(type),
+                var init = Expression.MemberInit(Expression.New(type),
                     Expression.Bind(type.GetProperty("RowId"), Visit(mle.RowId)),
                     Expression.Bind(type.GetProperty("Parent"), Visit(mle.Parent)),
                     Expression.Bind(type.GetProperty("Element"), Visit(mle.Element)));
+
+                return Expression.Condition(SmartEqualizer.NotEqualNullable(Visit(mle.RowId.Nullify()), NullId),
+                    init,
+                    Expression.Constant(null, init.Type));
             }
 
             private Type ConstantType(Expression typeId)

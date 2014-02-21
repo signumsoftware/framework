@@ -47,14 +47,11 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
 
         formValues["prefix"] = valOptions.prefix;
 
-        if (valOptions.prefix) {
-            var staticInfo = Entities.StaticInfo.getFor(valOptions.prefix);
+        if (valOptions.rootType)
+            formValues["rootType"] = valOptions.rootType;
 
-            if (staticInfo.find().length > 0 && staticInfo.isEmbedded()) {
-                formValues["rootType"] = staticInfo.rootType();
-                formValues["propertyRoute"] = staticInfo.propertyRoute();
-            }
-        }
+        if (valOptions.propertyRoute)
+            formValues["propertyRoute"] = valOptions.propertyRoute;
 
         return $.extend(formValues, valOptions.requestExtraJsonData);
     }
@@ -166,7 +163,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
                     $('#' + SF.compose(currPrefix, Entities.Keys.toStr)).addClass(inputErrorClass);
                     $('#' + SF.compose(currPrefix, Entities.Keys.link)).addClass(inputErrorClass);
                 }
-                if ((isMoreInner || isEqual) && $('#' + SF.compose(currPrefix, globalValidationSummary)).length > 0 && !SF.isEmpty(partialErrors)) {
+                if (valOptions.errorSummaryId || ((isMoreInner || isEqual) && $('#' + SF.compose(currPrefix, globalValidationSummary)).length > 0 && !SF.isEmpty(partialErrors))) {
                     var currentSummary = valOptions.errorSummaryId ? $('#' + valOptions.errorSummaryId) : $('#' + SF.compose(currPrefix, globalValidationSummary));
 
                     var summaryUL = currentSummary.children('.' + summaryErrorClass);

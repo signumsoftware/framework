@@ -35,6 +35,7 @@ using System.Text;
 using System.Runtime.Serialization;
 using Microsoft.SqlServer.Types;
 using Newtonsoft.Json;
+using System.Globalization;
 #endregion
 
 namespace Signum.Web
@@ -307,12 +308,20 @@ namespace Signum.Web
             return Manager.ExtractEntity(controller, prefix ?? controller.Prefix());
         }
 
-
-        public static ValueLineBoxModel ExtractValueLineBox(this ControllerBase controller, string prefix = null)
+        public static Lite<T> ParseLite<T>(this ControllerBase controller, string requestKey)
+            where T : class, IIdentifiable
         {
-            var valueLinePrefix = prefix ?? controller.ControllerContext.HttpContext.Request["valueLinePrefix"];
-            return controller.ExtractEntity<ValueLineBoxModel>(valueLinePrefix)
-             .ApplyChanges(controller.ControllerContext, true, valueLinePrefix).Value;
+            return Lite.Parse<T>(controller.ControllerContext.HttpContext.Request[requestKey]);
+        }
+
+        public static T ParseValue<T>(this ControllerBase controller, string requestKey)
+        {
+            return ReflectionTools.Parse<T>(controller.ControllerContext.HttpContext.Request[requestKey]); 
+        }
+
+        public static T ParseValue<T>(this ControllerBase controller, string requestKey, CultureInfo culture)
+        {
+            return ReflectionTools.Parse<T>(controller.ControllerContext.HttpContext.Request[requestKey], culture);
         }
 
         public static T ExtractEntity<T>(this ControllerBase controller, string prefix = null) where T : ModifiableEntity
@@ -499,8 +508,6 @@ namespace Signum.Web
         {
             if (!Initialized)
             {
-                Navigator.AddSetting(new EmbeddedEntitySettings<ValueLineBoxModel> { PartialViewName = _ => ValueLineBoxView });
-
                 foreach (var es in EntitySettings.Values)
                 {
                     if (string.IsNullOrEmpty(es.WebTypeName) && !es.StaticType.IsEmbeddedEntity())

@@ -32,14 +32,13 @@ namespace Signum.Web
             {
                 sb.AddLine(EntityBaseHelper.BaseLineLabel(helper, listDetail));
 
-                sb.AddLine(helper.HiddenStaticInfo(listDetail));
                 sb.AddLine(helper.Hidden(listDetail.Compose(EntityListBaseKeys.ListPresent), ""));
 
                 //If it's an embeddedEntity write an empty template with index 0 to be used when creating a new item
                 if (listDetail.ElementType.IsEmbeddedEntity())
                 {
                     TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)listDetail.Parent, 0);
-                    sb.AddLine(EntityBaseHelper.EmbeddedTemplate(listDetail, EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, listDetail)));
+                    listDetail.Template = EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, listDetail);
                 }
 
                 using (sb.Surround(new HtmlTag("div").Id(listDetail.Prefix).Class("sf-field-list")))
