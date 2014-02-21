@@ -59,7 +59,7 @@ export class FileLine extends Lines.EntityBase {
 
     uploadAsync(f: File, customizeXHR?: (xhr: XMLHttpRequest) => void) {
         $(this.pf('loading')).show();
-        this.runtimeInfo().setValue(new Entities.RuntimeInfoValue(this.staticInfo().singleType(), null, true));
+        this.runtimeInfoHiddenElement().setValue(new Entities.RuntimeInfoValue(this.staticInfo().singleType(), null, true));
 
         var fileName = f.name;
 
@@ -69,7 +69,7 @@ export class FileLine extends Lines.EntityBase {
         xhr.open("POST", this.options.uploadDroppedUrl || SF.Urls.uploadDroppedFile, true);
         xhr.setRequestHeader("X-FileName", fileName);
         xhr.setRequestHeader("X-Prefix", this.options.prefix);
-        xhr.setRequestHeader("X-" + SF.compose(this.options.prefix, Entities.Keys.runtimeInfo), this.runtimeInfo().value().toString());
+        xhr.setRequestHeader("X-" + SF.compose(this.options.prefix, Entities.Keys.runtimeInfo), this.runtimeInfoHiddenElement().value().toString());
         xhr.setRequestHeader("X-sfFileType", $(this.pf("sfFileType")).val());
         xhr.setRequestHeader("X-sfTabId", $("#sfTabId").val());
 
@@ -103,11 +103,11 @@ export class FileLine extends Lines.EntityBase {
         $(this.pf(''))[0].setAttribute('value', (<HTMLInputElement>$(this.pf(''))[0]).value);
         var $mform = $('form');
         $mform.attr('enctype', 'multipart/form-data').attr('encoding', 'multipart/form-data');
-        this.runtimeInfo().setValue(new Entities.RuntimeInfoValue(this.staticInfo().singleType(), null, true));
+        this.runtimeInfoHiddenElement().setValue(new Entities.RuntimeInfoValue(this.staticInfo().singleType(), null, true));
     }
 
     upload() {
-        this.runtimeInfo().setValue(new Entities.RuntimeInfoValue(this.staticInfo().singleType(), null, true));
+        this.runtimeInfoHiddenElement().setValue(new Entities.RuntimeInfoValue(this.staticInfo().singleType(), null, true));
 
         var $fileInput = $(this.pf(''));
         $fileInput[0].setAttribute('value', (<HTMLInputElement>$fileInput[0]).value);
@@ -169,7 +169,7 @@ export class FileLine extends Lines.EntityBase {
     }
 
     updateButtonsDisplay() {
-        var hasEntity = !!this.runtimeInfo().value();
+        var hasEntity = !!this.runtimeInfoHiddenElement().value();
 
         $(this.pf('DivOld')).toggle(hasEntity);
         $(this.pf('DivNew')).toggle(!hasEntity);
