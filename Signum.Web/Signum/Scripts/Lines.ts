@@ -13,9 +13,9 @@ export interface EntityBaseOptions {
 export class EntityBase {
     options: EntityBaseOptions;
     element: JQuery;
-    autoCompleter: EntityAutoCompleter;
+    autoCompleter: EntityAutocompleter;
 
-    entityChanged: () => any;
+    entityChanged: () => void;
     removing: (prefix: string) => Promise<boolean>;
     creating: (prefix: string) => Promise<Entities.EntityValue>;
     finding: (prefix: string) => Promise<Entities.EntityValue>;
@@ -44,7 +44,7 @@ export class EntityBase {
         if ($txt.length > 0) {
             var url = $txt.attr("data-url");
 
-            this.autoCompleter = new AjaxEntityAutoCompleter(url || SF.Urls.autocomplete,
+            this.autoCompleter = new AjaxEntityAutocompleter(url || SF.Urls.autocomplete,
                 term => ({ types: this.staticInfo().getValue(Entities.StaticInfo._types), l: 5, q: term }));
 
             this.setupAutocomplete($txt);
@@ -264,11 +264,18 @@ export class EntityBase {
     }
 }
 
-export interface EntityAutoCompleter {
+export interface EntityAutocompleter {
     getResults(term: string): Promise<Entities.EntityValue[]>;
 }
 
-export class AjaxEntityAutoCompleter implements EntityAutoCompleter {
+export interface AutocompleteResult {
+    id: number;
+    text: string;
+    type: string;
+    link: string;
+}
+
+export class AjaxEntityAutocompleter implements EntityAutocompleter {
 
     controllerUrl: string;
 
@@ -289,9 +296,11 @@ export class AjaxEntityAutoCompleter implements EntityAutoCompleter {
             this.lastXhr = $.ajax({
                 url: this.controllerUrl,
                 data: this.getData(term),
-                success: function (data: any[]) {
+                success: function (data: AutocompleteResult[]) {
                     this.lastXhr = null;
-                    resolve(data.map(item=> new Entities.EntityValue(new Entities.RuntimeInfoValue(item.type, parseInt(item.id), false), item.text, item.link)));
+                    resolve(data.map(item=> new Entities.EntityValue(
+                        new Entities.RuntimeInfoValue(item.type, item.id, false),
+                        item.text, item.link)));
                 }
             });
         });

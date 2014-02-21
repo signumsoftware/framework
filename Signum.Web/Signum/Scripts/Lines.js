@@ -27,7 +27,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if ($txt.length > 0) {
                 var url = $txt.attr("data-url");
 
-                this.autoCompleter = new AjaxEntityAutoCompleter(url || SF.Urls.autocomplete, function (term) {
+                this.autoCompleter = new AjaxEntityAutocompleter(url || SF.Urls.autocomplete, function (term) {
                     return ({ types: _this.staticInfo().getValue(Entities.StaticInfo._types), l: 5, q: term });
                 });
 
@@ -246,12 +246,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     })();
     exports.EntityBase = EntityBase;
 
-    var AjaxEntityAutoCompleter = (function () {
-        function AjaxEntityAutoCompleter(controllerUrl, getData) {
+    var AjaxEntityAutocompleter = (function () {
+        function AjaxEntityAutocompleter(controllerUrl, getData) {
             this.controllerUrl = controllerUrl;
             this.getData = getData;
         }
-        AjaxEntityAutoCompleter.prototype.getResults = function (term) {
+        AjaxEntityAutocompleter.prototype.getResults = function (term) {
             var _this = this;
             if (this.lastXhr)
                 this.lastXhr.abort();
@@ -263,15 +263,15 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     success: function (data) {
                         this.lastXhr = null;
                         resolve(data.map(function (item) {
-                            return new Entities.EntityValue(new Entities.RuntimeInfoValue(item.type, parseInt(item.id), false), item.text, item.link);
+                            return new Entities.EntityValue(new Entities.RuntimeInfoValue(item.type, item.id, false), item.text, item.link);
                         }));
                     }
                 });
             });
         };
-        return AjaxEntityAutoCompleter;
+        return AjaxEntityAutocompleter;
     })();
-    exports.AjaxEntityAutoCompleter = AjaxEntityAutoCompleter;
+    exports.AjaxEntityAutocompleter = AjaxEntityAutocompleter;
 
     var EntityLine = (function (_super) {
         __extends(EntityLine, _super);
