@@ -13,13 +13,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.requestPartialView = requestPartialView;
 
     function navigate(runtimeInfo, openNewWindow) {
-        var url = runtimeInfo.isNew ? SF.Urls.create : SF.Urls.view;
-        url = "{0}/{1}/{2}".format(url, runtimeInfo.type, !SF.isEmpty(runtimeInfo.id) ? runtimeInfo.id : "");
+        var url = runtimeInfo.isNew ? "{0}/{1}".format(SF.Urls.create, runtimeInfo.type) : "{0}/{1}/{2}".format(SF.Urls.view, runtimeInfo.type, !SF.isEmpty(runtimeInfo.id) ? runtimeInfo.id : "");
 
         if (openNewWindow)
             window.open(url, "_blank");
         else
-            window.location = url;
+            window.location.href = url;
     }
     exports.navigate = navigate;
 

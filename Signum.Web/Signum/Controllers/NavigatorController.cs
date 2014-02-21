@@ -26,21 +26,11 @@ namespace Signum.Web.Controllers
     public class NavigatorController : Controller
     {
         [ValidateInput(false)]  //this is needed since a return content(View...) from an action that doesn't validate will throw here an exception. We suppose that validation has already been performed before getting here
-        public ViewResult View(string webTypeName, int? id)
+        public ViewResult View(string webTypeName, int id)
         {
             Type t = Navigator.ResolveType(webTypeName);
 
-            if (id.HasValue)
-                return Navigator.NormalPage(this, Database.Retrieve(t, id.Value));
-
-            IdentifiableEntity entity = null;
-            object result = Constructor.Construct(t);
-            if (typeof(IdentifiableEntity).IsAssignableFrom(result.GetType()))
-                entity = (IdentifiableEntity)result;
-            else
-                throw new InvalidOperationException("Invalid result type for a Constructor");
-
-            return Navigator.NormalPage(this, entity);
+            return Navigator.NormalPage(this, Database.Retrieve(t, id));
         }
 
         public ActionResult Create(string entityType, string prefix)
