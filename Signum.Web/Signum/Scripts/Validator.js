@@ -163,7 +163,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
                     $('#' + SF.compose(currPrefix, Entities.Keys.toStr)).addClass(inputErrorClass);
                     $('#' + SF.compose(currPrefix, Entities.Keys.link)).addClass(inputErrorClass);
                 }
-                if ((isMoreInner || isEqual) && $('#' + SF.compose(currPrefix, globalValidationSummary)).length > 0 && !SF.isEmpty(partialErrors)) {
+                if (valOptions.errorSummaryId || ((isMoreInner || isEqual) && $('#' + SF.compose(currPrefix, globalValidationSummary)).length > 0 && !SF.isEmpty(partialErrors))) {
                     var currentSummary = valOptions.errorSummaryId ? $('#' + valOptions.errorSummaryId) : $('#' + SF.compose(currPrefix, globalValidationSummary));
 
                     var summaryUL = currentSummary.children('.' + summaryErrorClass);

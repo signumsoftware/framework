@@ -71,7 +71,7 @@ export class RuntimeInfo {
     }
 
 
-    private static getHiddenInput(prefix: string, context?: JQuery) {
+    static getHiddenInput(prefix: string, context?: JQuery) : JQuery {
         var result = $('#' + SF.compose(prefix, Keys.runtimeInfo), context);
 
         if (result.length != 1)
