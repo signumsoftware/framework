@@ -143,11 +143,10 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 if (type == null)
                     return null;
 
-                var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true));
+                if (_this.options.template)
+                    return Promise.resolve(_this.getEmbeddedTemplate());
 
-                var template = _this.getEmbeddedTemplate(prefix);
-                if (!SF.isEmpty(template))
-                    newEntity.html = $(template);
+                var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true));
 
                 return Navigator.viewPopup(newEntity, _this.defaultViewOptions());
             });

@@ -169,11 +169,10 @@ export class EntityBase {
             if (type == null)
                 return null;
 
-            var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true));
+            if (this.options.template)
+                return Promise.resolve(this.getEmbeddedTemplate());
 
-            var template = this.getEmbeddedTemplate(prefix);
-            if (!SF.isEmpty(template))
-                newEntity.html = $(template);
+            var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true));
 
             return Navigator.viewPopup(newEntity, this.defaultViewOptions());
         });
