@@ -26,7 +26,6 @@ namespace Signum.Web
         public bool Reorder { get; set; }
 
         public int? MaxElements { get; set; }
-        
 
         public EntityListBase(Type type, object untypedValue, Context parent, string prefix, PropertyRoute propertyRoute)
             : base(type, untypedValue, parent, prefix, propertyRoute)

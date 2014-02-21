@@ -580,9 +580,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (valBool.length > 0)
                 return valBool[0].checked;
 
-            var info = new Entities.RuntimeInfoElement(SF.compose(SF.compose(this.options.prefix, "value"), index));
-            if (info.getElem().length > 0) {
-                var val = info.value();
+            var infoElem = $("#" + [this.options.prefix, "value", index, Entities.Keys.runtimeInfo].join("_"));
+            if (infoElem.length > 0) {
+                var val = Entities.RuntimeInfo.parse(infoElem.val());
                 return SearchControl.encodeCSV(val == null ? null : val.key());
             }
 
@@ -623,7 +623,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         SearchControl.getSelectedItems = function (prefix) {
             return $("input:checkbox[name^=" + SF.compose(prefix, "rowSelection") + "]:checked").toArray().map(function (v) {
                 var parts = v.value.split("__");
-                return new Entities.EntityValue(new Entities.RuntimeInfoValue(parts[1], parseInt(parts[0]), false), parts[2], $(v).parent().next().children('a').attr('href'));
+                return new Entities.EntityValue(new Entities.RuntimeInfo(parts[1], parseInt(parts[0]), false), parts[2], $(v).parent().next().children('a').attr('href'));
             });
         };
 
@@ -959,9 +959,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
                     var requestData = _this.requestDataForSearchPopupCreate();
 
-                    var runtimeInfo = new Entities.RuntimeInfoValue(type, null, true);
+                    var runtimeInfo = new Entities.RuntimeInfo(type, null, true);
                     if (SF.isEmpty(_this.options.prefix))
-                        Navigator.navigate(runtimeInfo, { requestExtraJsonData: requestData });
+                        Navigator.navigate(runtimeInfo, false);
                     else
                         Navigator.navigatePopup(new Entities.EntityHtml(SF.compose(_this.options.prefix, "Temp"), runtimeInfo), { requestExtraJsonData: requestData });
                 });
