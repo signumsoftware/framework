@@ -50,7 +50,7 @@ namespace Signum.Engine.Files
                 MultiEnumLogic<FileTypeDN>.Start(sb, () => fileTypes.Keys.ToHashSet());
 
                 sb.Schema.EntityEvents<FilePathDN>().PreSaving += FilePath_PreSaving;
-                sb.Schema.EntityEvents<FilePathDN>().PreUnsafeDelete += new QueryHandler<FilePathDN>(FilePathLogic_PreUnsafeDelete);
+                sb.Schema.EntityEvents<FilePathDN>().PreUnsafeDelete += new DeleteHandler<FilePathDN>(FilePathLogic_PreUnsafeDelete);
 
                 dqm.RegisterQuery(typeof(FileRepositoryDN), () =>
                     from r in Database.Query<FileRepositoryDN>()
