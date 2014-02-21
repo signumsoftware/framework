@@ -387,14 +387,16 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     }
     exports.chooser = chooser;
 
-    (function (ValueLineBoxType) {
-        ValueLineBoxType[ValueLineBoxType["String"] = 0] = "String";
-        ValueLineBoxType[ValueLineBoxType["Boolean"] = 1] = "Boolean";
-        ValueLineBoxType[ValueLineBoxType["Integer"] = 2] = "Integer";
-        ValueLineBoxType[ValueLineBoxType["Decimal"] = 3] = "Decimal";
-        ValueLineBoxType[ValueLineBoxType["DateTime"] = 4] = "DateTime";
-    })(exports.ValueLineBoxType || (exports.ValueLineBoxType = {}));
-    var ValueLineBoxType = exports.ValueLineBoxType;
+    (function (ValueLineType) {
+        ValueLineType[ValueLineType["Boolean"] = 0] = "Boolean";
+        ValueLineType[ValueLineType["RadioButtons"] = 1] = "RadioButtons";
+        ValueLineType[ValueLineType["Combo"] = 2] = "Combo";
+        ValueLineType[ValueLineType["DateTime"] = 3] = "DateTime";
+        ValueLineType[ValueLineType["TextBox"] = 4] = "TextBox";
+        ValueLineType[ValueLineType["TextArea"] = 5] = "TextArea";
+        ValueLineType[ValueLineType["Number"] = 6] = "Number";
+    })(exports.ValueLineType || (exports.ValueLineType = {}));
+    var ValueLineType = exports.ValueLineType;
 
     function valueLineBox(options) {
         return new Promise(function (resolve) {

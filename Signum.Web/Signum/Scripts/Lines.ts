@@ -22,9 +22,9 @@ export interface EntityBaseOptions {
 export class EntityBase {
     options: EntityBaseOptions;
     element: JQuery;
-    autoCompleter: EntityAutoCompleter;
+    autoCompleter: EntityAutocompleter;
 
-    entityChanged: () => any;
+    entityChanged: () => void;
     removing: (prefix: string) => Promise<boolean>;
     creating: (prefix: string) => Promise<Entities.EntityValue>;
     finding: (prefix: string) => Promise<Entities.EntityValue>;
@@ -51,7 +51,7 @@ export class EntityBase {
     _create() {
         var $txt = $(this.pf(Entities.Keys.toStr) + ".sf-entity-autocomplete");
         if ($txt.length > 0) {
-            this.autoCompleter = new AjaxEntityAutoCompleter(this.options.autoCompleteUrl || SF.Urls.autocomplete,
+            this.autoCompleter = new AjaxEntityAutocompleter(this.options.autoCompleteUrl || SF.Urls.autocomplete,
                 term => ({ types: this.options.types, l: 5, q: term }));
 
             this.setupAutocomplete($txt);
@@ -191,8 +191,6 @@ export class EntityBase {
         return result;
     }
 
-
-
     view_click(): Promise<void> {
         var entityHtml = this.extractEntityHtml();
 
@@ -293,11 +291,18 @@ export class EntityBase {
     }
 }
 
-export interface EntityAutoCompleter {
+export interface EntityAutocompleter {
     getResults(term: string): Promise<Entities.EntityValue[]>;
 }
 
-export class AjaxEntityAutoCompleter implements EntityAutoCompleter {
+export interface AutocompleteResult {
+    id: number;
+    text: string;
+    type: string;
+    link: string;
+}
+
+export class AjaxEntityAutocompleter implements EntityAutocompleter {
 
     controllerUrl: string;
 
@@ -318,9 +323,9 @@ export class AjaxEntityAutoCompleter implements EntityAutoCompleter {
             this.lastXhr = $.ajax({
                 url: this.controllerUrl,
                 data: this.getData(term),
-                success: function (data: any[]) {
+                success: function (data: AutocompleteResult[]) {
                     this.lastXhr = null;
-                    resolve(data.map(item=> new Entities.EntityValue(new Entities.RuntimeInfo(item.type, parseInt(item.id), false), item.text, item.link)));
+                    resolve(data.map(item=> new Entities.EntityValue(new Entities.RuntimeInfo(item.type, item.id, false), item.text, item.link)));
                 }
             });
         });

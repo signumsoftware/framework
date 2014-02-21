@@ -22,7 +22,7 @@ namespace Signum.Web.Controllers
 
             List<Lite<IdentifiableEntity>> lites = AutocompleteUtils.FindLiteLike(Implementations.By(typeArray), q, l);
 
-            var result = lites.Select(o => new AutoCompleteResult(o)).ToList();
+            var result = lites.Select(o => new AutocompleteResult(o)).ToList();
 
             return this.JsonNet(result);
         }
@@ -33,7 +33,7 @@ namespace Signum.Web.Controllers
             var result = TypeClient.ViewableServerTypes()
                 .Where(t => t.CleanName.Contains(q, StringComparison.InvariantCultureIgnoreCase)).
                 Take(l)
-                .Select(o => new AutoCompleteResult
+                .Select(o => new AutocompleteResult
                 {
                     id = o.Id,
                     text = o.ToString(),
@@ -172,13 +172,13 @@ namespace Signum.Web.Controllers
         }
     }
 
-    public class AutoCompleteResult
+    public class AutocompleteResult
     {
-        public AutoCompleteResult()
+        public AutocompleteResult()
         {
         }
 
-        public AutoCompleteResult(Lite<IdentifiableEntity> lite)
+        public AutocompleteResult(Lite<IdentifiableEntity> lite)
         {
             id = lite.Id;
             text = lite.ToString();
