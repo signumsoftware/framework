@@ -477,9 +477,6 @@ namespace Signum.Engine.Linq
 
         static Expression EmbeddedNullEquals(EmbeddedEntityExpression eee)
         {
-            if (eee.HasValue == null)
-                return False; 
-
             return Expression.Not(eee.HasValue);
         }
 
