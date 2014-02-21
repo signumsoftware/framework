@@ -576,11 +576,11 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         SearchControl.prototype.encodeValue = function ($filter, index) {
-            var valBool = $("input:checkbox[id=" + SF.compose(SF.compose(this.options.prefix, "value"), index) + "]", $filter);
+            var valBool = $("input:checkbox[id=" + SF.compose(this.options.prefix, "value", index) + "]", $filter);
             if (valBool.length > 0)
                 return valBool[0].checked;
 
-            var infoElem = $("#" + [this.options.prefix, "value", index, Entities.Keys.runtimeInfo].join("_"));
+            var infoElem = $("#" + SF.compose(this.options.prefix, "value", index, Entities.Keys.runtimeInfo));
             if (infoElem.length > 0) {
                 var val = Entities.RuntimeInfo.parse(infoElem.val());
                 return SearchControl.encodeCSV(val == null ? null : val.key());
@@ -1089,12 +1089,13 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         function constructTokenName(prefix) {
             var tokenName = "";
             var stop = false;
-            for (var i = 0; !stop; i++) {
+            for (var i = 0; ; i++) {
                 var currSubtoken = $("#" + SF.compose(prefix, "ddlTokens_" + i));
-                if (currSubtoken.length > 0)
-                    tokenName = SF.compose(tokenName, currSubtoken.val(), ".");
-                else
-                    stop = true;
+                if (currSubtoken.length == 0)
+                    break;
+
+                var part = currSubtoken.val();
+                tokenName = !tokenName ? part : !part ? tokenName : (tokenName + "." + part);
             }
             return tokenName;
         }
