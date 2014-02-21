@@ -13,7 +13,6 @@ namespace Signum.Entities.Chart
 {
     public class ChartOmniboxResultGenerator : OmniboxResultGenerator<ChartOmniboxResult>
     {
-        public string Keyword = "Chart";
         public Func<string> NiceName = () => ChartMessage.Chart.NiceToString();
 
         Regex regex = new Regex(@"^II?$", RegexOptions.ExplicitCapture);
@@ -26,7 +25,7 @@ namespace Signum.Entities.Chart
 
             string key = tokens[0].Value;
 
-            var keyMatch = OmniboxUtils.Contains(Keyword, Keyword, key) ?? OmniboxUtils.Contains(Keyword, NiceName(), key);
+            var keyMatch = OmniboxUtils.Contains(NiceName(), NiceName(), key);
 
             if (keyMatch == null)
                 yield break;

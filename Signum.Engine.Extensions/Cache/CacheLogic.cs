@@ -340,14 +340,26 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(database.TryToString() ?? Connector.C
                 ee.Saving += Saving;
                 ee.PreUnsafeDelete += PreUnsafeDelete;
                 ee.PreUnsafeUpdate += UnsafeUpdated;
+                ee.PreUnsafeInsert += UnsafeInsert;
+
             }
+
+         
 
             public void BuildCachedTable()
             {
                 cachedTable = new CachedTable<T>(this, new Linq.AliasGenerator(), null, null);
             }
 
-            void UnsafeUpdated(IUpdateable update)
+            void UnsafeInsert(IQueryable query, LambdaExpression constructor, IQueryable<T> entityQuery)
+            {
+                DisableAllConnectedTypesInTransaction(typeof(T));
+
+                Transaction.PostRealCommit -= Transaction_PostRealCommit;
+                Transaction.PostRealCommit += Transaction_PostRealCommit;
+            }
+
+            void UnsafeUpdated(IUpdateable update, IQueryable<T> entityQuery)
             {
                 DisableAllConnectedTypesInTransaction(typeof(T));
 
