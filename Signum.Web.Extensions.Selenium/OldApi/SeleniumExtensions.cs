@@ -22,6 +22,7 @@ namespace Signum.Web.Selenium
     public static class SeleniumExtensions
     {
         public static WebExplorer Explorer = WebExplorer.Firefox;
+        public static readonly string DefaultTimeout = "180000";
 
         public static Process LaunchSeleniumProcess()
         {
@@ -47,7 +48,7 @@ namespace Signum.Web.Selenium
 
             StartSelenium(selenium);
 
-            selenium.SetTimeout("180000"); //timeout in ms => 3mins
+            selenium.SetTimeout(DefaultTimeout); //timeout in ms => 3mins
             //selenium.SetSpeed("200");
             
             selenium.AddLocationStrategy("jq",
