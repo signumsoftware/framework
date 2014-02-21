@@ -109,11 +109,23 @@ namespace Signum.Web
         public string toStr; 
     }
 
+    public class TypeChooserOption
+    {
+        public TypeChooserOption(string type, string toStr)
+        {
+            this.type = type;
+            this.toStr = toStr;
+        }
+
+        public string type;
+        public string toStr;
+    }
+
     public static class ChooserOptionExtensions
     {
-        public static ChooserOption ToChooserOption(this Type type)
+        public static TypeChooserOption ToChooserOption(this Type type)
         {
-            return new ChooserOption (Navigator.ResolveWebTypeName(type), type.NiceName() ); 
+            return new TypeChooserOption(Navigator.ResolveWebTypeName(type), type.NiceName()); 
         }
 
         public static ChooserOption ToChooserOptionToSting(this Enum enumValue)

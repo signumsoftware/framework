@@ -192,7 +192,7 @@ function openPopupView(entityHtml: Entities.EntityHtml, viewOptions: ViewPopupOp
 }
 
 
-export function basicPopupView(entityHtml: Entities.EntityHtml, onOk: () => Promise<boolean>): Promise<void> {
+export function basicPopupView(entityHtml: Entities.EntityHtml, onOk: (div: JQuery) => Promise<boolean>): Promise<void> {
 
     var tempDivId = createTempDiv(entityHtml);
 
@@ -201,7 +201,7 @@ export function basicPopupView(entityHtml: Entities.EntityHtml, onOk: () => Prom
     return new Promise<void>(function (resolve) {
         tempDiv.popup({
             onOk: function () {
-                onOk().then(result => {
+                onOk($("#" + tempDivId)).then(result => {
                     if (result) {
                         var newTempDiv = $("#" + tempDivId);
                         newTempDiv.popup('destroy');
@@ -432,7 +432,6 @@ export interface TypeChooserOption {
     toStr: string;
 }
 
-
 export enum ValueLineBoxType {
     String,
     Boolean,
@@ -448,26 +447,27 @@ export interface ValueLineBoxOptions {
     message: string;
     prefix: string;
 
-    intValue: number;
-    decimalValue: number;
-    boolValue: boolean;
-    stringValue: string;
-    dateValue: string;
+    value: any;
 }
 
-export function valueLineBox(options: ValueLineBoxOptions) : Promise<FormObject>
+export function valueLineBox(options: ValueLineBoxOptions) : Promise<string>
 {
-    return viewPopup(Entities.EntityHtml.withoutType(options.prefix), {
-        controllerUrl: SF.Urls.valueLineBox,
-        requestExtraJsonData: options,
-    }).then(eHtml=> {
-            if (!eHtml)
-                return null;
+    return new Promise<string>(resolve => {
+        requestHtml(Entities.EntityHtml.withoutType(options.prefix), {
+            controllerUrl: SF.Urls.valueLineBox,
+            requestExtraJsonData: options,
+        }).then(eHtml=> {
+                var result = null;
+                basicPopupView(eHtml, div => {
+                    var input = div.find(":input:not(:button)");
+                    if (input.length != 1)
+                        throw new Error("{0} inputs found in ValueLineBox".format(input.length)); 
 
-            var result = Validator.getFormValuesHtml(eHtml);
-            result["valueLinePrefix"] = eHtml.prefix;
-            return result;
-        });
+                    result = input.val();
+                    return Promise.resolve(true);
+                }).then(() => resolve(result));
+            }); 
+    }); 
 }
 
 

@@ -174,7 +174,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         return new Promise(function (resolve) {
             tempDiv.popup({
                 onOk: function () {
-                    onOk().then(function (result) {
+                    onOk($("#" + tempDivId)).then(function (result) {
                         if (result) {
                             var newTempDiv = $("#" + tempDivId);
                             newTempDiv.popup('destroy');
@@ -398,16 +398,23 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     var ValueLineBoxType = exports.ValueLineBoxType;
 
     function valueLineBox(options) {
-        return exports.viewPopup(Entities.EntityHtml.withoutType(options.prefix), {
-            controllerUrl: SF.Urls.valueLineBox,
-            requestExtraJsonData: options
-        }).then(function (eHtml) {
-            if (!eHtml)
-                return null;
+        return new Promise(function (resolve) {
+            requestHtml(Entities.EntityHtml.withoutType(options.prefix), {
+                controllerUrl: SF.Urls.valueLineBox,
+                requestExtraJsonData: options
+            }).then(function (eHtml) {
+                var result = null;
+                exports.basicPopupView(eHtml, function (div) {
+                    var input = div.find(":input:not(:button)");
+                    if (input.length != 1)
+                        throw new Error("{0} inputs found in ValueLineBox".format(input.length));
 
-            var result = Validator.getFormValuesHtml(eHtml);
-            result["valueLinePrefix"] = eHtml.prefix;
-            return result;
+                    result = input.val();
+                    return Promise.resolve(true);
+                }).then(function () {
+                    return resolve(result);
+                });
+            });
         });
     }
     exports.valueLineBox = valueLineBox;
