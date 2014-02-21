@@ -128,9 +128,8 @@ namespace Signum.Web.Files
                     .Attr("style", "display:" + (hasEntity ? "none" : "block"));
 
                 using (sb.Surround(divNew))
-                //using (sb.Surround(new HtmlTag("form").Attrs(new { method = "post", enctype = "multipart/form-data", encoding = "multipart/form-data", target = "frame" + fileLine.Prefix })))
                 {
-                    sb.AddLine(helper.HiddenEntityInfo(fileLine));
+                    sb.AddLine(helper.HiddenRuntimeInfo(fileLine));
 
                     if (fileLine.PropertyRoute.Type.CleanType() == typeof(FilePathDN))
                     {
