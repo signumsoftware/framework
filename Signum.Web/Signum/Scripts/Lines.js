@@ -281,9 +281,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     success: function (data) {
                         this.lastXhr = null;
                         resolve(data.map(function (item) {
-                            return new Entities.EntityValue(new Entities.RuntimeInfoValue(item.type, parseInt(item.id), false), item.text, item.link);
-                            return new Entities.EntityValue(new Entities.RuntimeInfoValue(item.type, item.id, false), item.text, item.link);
-                            return new Entities.EntityValue(new Entities.RuntimeInfo(item.type, parseInt(item.id), false), item.text, item.link);
+                            return new Entities.EntityValue(new Entities.RuntimeInfo(item.type, item.id, false), item.text, item.link);
                         }));
                     }
                 });

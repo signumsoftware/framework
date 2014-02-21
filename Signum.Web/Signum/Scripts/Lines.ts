@@ -191,8 +191,6 @@ export class EntityBase {
         return result;
     }
 
-
-
     view_click(): Promise<void> {
         var entityHtml = this.extractEntityHtml();
 
@@ -327,7 +325,7 @@ export class AjaxEntityAutocompleter implements EntityAutocompleter {
                 data: this.getData(term),
                 success: function (data: AutocompleteResult[]) {
                     this.lastXhr = null;
-                    resolve(data.map(item=> new Entities.EntityValue(new Entities.RuntimeInfo(item.type, parseInt(item.id), false), item.text, item.link)));
+                    resolve(data.map(item=> new Entities.EntityValue(new Entities.RuntimeInfo(item.type, item.id, false), item.text, item.link)));
                 }
             });
         });

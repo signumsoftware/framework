@@ -432,21 +432,22 @@ export interface TypeChooserOption {
     toStr: string;
 }
 
-export enum ValueLineBoxType {
-    String,
+export enum ValueLineType {
     Boolean,
-    Integer,
-    Decimal,
+    RadioButtons,
+    Combo,
     DateTime,
+    TextBox,
+    TextArea,
+    Number
 }
 
 export interface ValueLineBoxOptions {
-    type: ValueLineBoxType;
+    type: ValueLineType;
     title: string;
-    fieldName: string;
+    labelText: string;
     message: string;
     prefix: string;
-
     value: any;
 }
 
