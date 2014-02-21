@@ -165,14 +165,14 @@ namespace Signum.Engine.Maps
                 ee.OnPreUnsafeUpdate(update);
         }
 
-        internal void OnPreUnsafeInsert(Type type, IQueryable query, LambdaExpression constructor)
+        internal void OnPreUnsafeInsert(Type type, IQueryable query, LambdaExpression constructor, IQueryable entityQuery)
         {
             AssertAllowed(type);
 
             var ee = entityEvents.TryGetC(type);
 
             if (ee != null)
-                ee.OnPreUnsafeInsert(query, constructor);
+                ee.OnPreUnsafeInsert(query, constructor, entityQuery);
         }
 
         public ICacheController CacheController(Type type)
@@ -572,7 +572,7 @@ namespace Signum.Engine.Maps
         void OnRetrieved(IdentifiableEntity entity);
 
         void OnPreUnsafeUpdate(IUpdateable update);
-        void OnPreUnsafeInsert(IQueryable query, LambdaExpression constructor);
+        void OnPreUnsafeInsert(IQueryable query, LambdaExpression constructor, IQueryable entityQuery);
 
         ICacheController CacheController { get; }
 
@@ -624,11 +624,11 @@ namespace Signum.Engine.Maps
 
         public event FilterQueryEventHandler<T> FilterQuery;
 
-        public event QueryHandler<T> PreUnsafeDelete;
+        public event DeleteHandler<T> PreUnsafeDelete;
 
-        public event UpdateHandler PreUnsafeUpdate;
+        public event UpdateHandler<T> PreUnsafeUpdate;
 
-        public event InsertHandler PreUnsafeInsert;
+        public event InsertHandler<T> PreUnsafeInsert;
 
         internal IQueryable<T> OnFilterQuery(IQueryable<T> query)
         {
@@ -647,23 +647,25 @@ namespace Signum.Engine.Maps
         internal void OnPreUnsafeDelete(IQueryable<T> query)
         {
             if (PreUnsafeDelete != null)
-                foreach (QueryHandler<T> action in PreUnsafeDelete.GetInvocationList().Reverse())
+                foreach (DeleteHandler<T> action in PreUnsafeDelete.GetInvocationList().Reverse())
                     action(query);
         }
 
         void IEntityEvents.OnPreUnsafeUpdate(IUpdateable update)
         {
             if (PreUnsafeUpdate != null)
-                foreach (UpdateHandler action in PreUnsafeUpdate.GetInvocationList().Reverse())
-                    action(update);
-
+            {
+                var query = update.EntityQuery<T>();
+                foreach (UpdateHandler<T> action in PreUnsafeUpdate.GetInvocationList().Reverse())
+                    action(update, query);
+            }
         }
 
-        void IEntityEvents.OnPreUnsafeInsert(IQueryable query, LambdaExpression constructor)
+        void IEntityEvents.OnPreUnsafeInsert(IQueryable query, LambdaExpression constructor, IQueryable entityQuery)
         {
             if (PreUnsafeInsert != null)
-                foreach (InsertHandler action in PreUnsafeInsert.GetInvocationList().Reverse())
-                    action(query, constructor);
+                foreach (InsertHandler<T> action in PreUnsafeInsert.GetInvocationList().Reverse())
+                    action(query, constructor, (IQueryable<T>)entityQuery);
 
         }
 
@@ -698,9 +700,9 @@ namespace Signum.Engine.Maps
     public delegate void SavedEventHandler<T>(T ident, SavedEventArgs args) where T : IdentifiableEntity;
     public delegate IQueryable<T> FilterQueryEventHandler<T>(IQueryable<T> query);
 
-    public delegate void QueryHandler<T>(IQueryable<T> query);
-    public delegate void UpdateHandler(IUpdateable update);
-    public delegate void InsertHandler(IQueryable query, LambdaExpression constructor);
+    public delegate void DeleteHandler<T>(IQueryable<T> query);
+    public delegate void UpdateHandler<T>(IUpdateable update, IQueryable<T> entityQuery);
+    public delegate void InsertHandler<T>(IQueryable query, LambdaExpression constructor, IQueryable<T> entityQuery);
 
     public class SavedEventArgs
     {

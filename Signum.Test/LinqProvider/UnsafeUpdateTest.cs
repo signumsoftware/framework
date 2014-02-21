@@ -10,6 +10,7 @@ using System.IO;
 using Signum.Utilities;
 using Signum.Test.Environment;
 using System.Data.SqlClient;
+using Signum.Engine.Maps;
 
 namespace Signum.Test.LinqProviderUpdateDelete
 {
@@ -30,6 +31,10 @@ namespace Signum.Test.LinqProviderUpdateDelete
         public void Initialize()
         {
             Connector.CurrentLogger = new DebugTextWriter();
+            Schema.Current.EntityEvents<LabelDN>().PreUnsafeUpdate += (update, query) => { };
+            Schema.Current.EntityEvents<AlbumDN>().PreUnsafeUpdate += (update, query) => { };
+            Schema.Current.EntityEvents<BandDN>().PreUnsafeUpdate += (update, query) => { };
+            Schema.Current.EntityEvents<ArtistDN>().PreUnsafeUpdate += (update, query) => { };
         }
 
         [TestMethod]

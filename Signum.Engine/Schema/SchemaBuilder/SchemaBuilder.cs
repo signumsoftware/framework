@@ -753,7 +753,7 @@ namespace Signum.Engine.Maps
                 if (!e.IsNew && e.IsGraphModified)
                     action();
             };
-            ee.PreUnsafeUpdate += q => action();
+            ee.PreUnsafeUpdate += (u, q) => action();
         }
 
         static GenericInvoker<Action<Schema, Action>> giAttachInvalidations = new GenericInvoker<Action<Schema, Action>>((s, a) => AttachInvalidations<IdentifiableEntity>(s, a));
@@ -766,7 +766,7 @@ namespace Signum.Engine.Maps
                 if (e.IsGraphModified)
                     action();
             };
-            ee.PreUnsafeUpdate += q => action();
+            ee.PreUnsafeUpdate += (u, q) => action();
             ee.PreUnsafeDelete += q => action();
         }
 

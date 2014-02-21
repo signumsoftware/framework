@@ -83,18 +83,11 @@ namespace Signum.Engine.Basics
             entity.ExceptionType = ex.GetType().Name;
 
             var exceptions= ex.FollowC(e => e.InnerException);
-            string innerMessages = exceptions.ToString(e => e.Message, "\r\n\r\n");
-            string innerStackTrace = exceptions.ToString(e => e.StackTrace, "\r\n\r\n");
-
-            if (innerMessages.HasText())
-                innerMessages = "\r\n\r\n {0}".Formato(innerMessages);
-
-
-            if (innerStackTrace.HasText())
-                innerStackTrace = "\r\n\r\n {0}".Formato(innerStackTrace);
-
-            entity.ExceptionMessage = (ex.Message + innerMessages).DefaultText("- No message - ");
-            entity.StackTrace = (ex.StackTrace + innerStackTrace).DefaultText("- No stacktrace -");
+            string messages = exceptions.ToString(e => e.Message, "\r\n\r\n");
+            string stacktraces = exceptions.ToString(e => e.StackTrace, "\r\n\r\n");
+           
+            entity.ExceptionMessage = messages.DefaultText("- No message - ");
+            entity.StackTrace = stacktraces.DefaultText("- No stacktrace -");
             entity.ThreadId = Thread.CurrentThread.ManagedThreadId;
             entity.ApplicationName = Schema.Current.ApplicationName;
 

@@ -65,17 +65,11 @@ namespace Signum.Engine.DynamicQuery
                 if (subString.Trim('\'', '"').ToInt(numberStyles).HasValue)
                     subString = subString.Trim('\'', '"');
 
-                foreach (var t in types)
-                {
-                    results.AddRange(miLiteStarting.GetInvoker(t)(subString, count - results.Count));
-
-                    if (results.Count >= count)
-                        return results;
-                }
+                var parts = subString.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
                 foreach (var t in types)
                 {
-                    results.AddRange(miLiteContaining.GetInvoker(t)(subString, count - results.Count));
+                    results.AddRange(miLiteContaining.GetInvoker(t)(parts, count - results.Count));
 
                     if (results.Count >= count)
                         return results;
@@ -102,15 +96,15 @@ namespace Signum.Engine.DynamicQuery
                     return results;
             }
 
-            results.AddRange(query.Where(a => a.ToString().StartsWith(subString)).Select(a => a.ToLite()).Take(count - results.Count));
+            if (subString.Trim('\'', '"').ToInt(numberStyles).HasValue)
+                subString = subString.Trim('\'', '"');
 
-            if (results.Count >= count)
-                return results;
+            var parts = subString.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
-            results.AddRange(query.Where(a => !a.ToString().StartsWith(subString) && a.ToString().Contains(subString)).Select(a => a.ToLite()).Take(count - results.Count));
-
-            if (results.Count >= count)
-                return results;
+            results.AddRange(query.Where(a => a.ToString().ContainsAll(parts))
+                .OrderBy(a => a.ToString().Length)
+                .Select(a => a.ToLite())
+                .Take(count - results.Count));
 
             return results;
         }
@@ -123,22 +117,19 @@ namespace Signum.Engine.DynamicQuery
             return Database.Query<T>().Where(a => a.id == id).Select(a => a.ToLite()).SingleOrDefault();
         }
 
-        static GenericInvoker<Func<string, int, List<Lite<IdentifiableEntity>>>> miLiteStarting = 
-            new GenericInvoker<Func<string, int, List<Lite<IdentifiableEntity>>>>((ss, c) => LiteStarting<TypeDN>(ss, c));
-        static List<Lite<IdentifiableEntity>> LiteStarting<T>(string subString, int count)
+        static GenericInvoker<Func<string[], int, List<Lite<IdentifiableEntity>>>> miLiteContaining =
+            new GenericInvoker<Func<string[], int, List<Lite<IdentifiableEntity>>>>((parts, c) => LiteContaining<TypeDN>(parts, c));
+        static List<Lite<IdentifiableEntity>> LiteContaining<T>(string[] parts, int count)
             where T : IdentifiableEntity
         {
-            return Database.Query<T>().Where(a => a.ToString().StartsWith(subString)).Select(a => a.ToLite()).Take(count)
-                .AsEnumerable().OrderBy(l => l.ToString()).Cast<Lite<IdentifiableEntity>>().ToList();
-        }
-
-        static GenericInvoker<Func<string, int, List<Lite<IdentifiableEntity>>>> miLiteContaining = 
-            new GenericInvoker<Func<string, int, List<Lite<IdentifiableEntity>>>>((ss, c) => LiteContaining<TypeDN>(ss, c));
-        static List<Lite<IdentifiableEntity>> LiteContaining<T>(string subString, int count)
-            where T : IdentifiableEntity
-        {
-            return Database.Query<T>().Where(a => a.ToString().Contains(subString) && !a.ToString().StartsWith(subString)).Select(a => a.ToLite()).Take(count)
-                .AsEnumerable().OrderBy(l => l.ToString()).Cast<Lite<IdentifiableEntity>>().ToList();
+            return Database.Query<T>()
+                .Where(a => a.ToString().ContainsAll(parts))
+                .OrderBy(a => a.ToString().Length)
+                .Select(a => a.ToLite())
+                .Take(count)
+                .AsEnumerable()
+                .Cast<Lite<IdentifiableEntity>>()
+                .ToList();
         }
 
         public static List<Lite<IdentifiableEntity>> FindAllLite(Implementations implementations)

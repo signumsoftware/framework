@@ -838,7 +838,7 @@ namespace Signum.Engine
 
                 using (Transaction tr = new Transaction())
                 {
-                    Schema.Current.OnPreUnsafeInsert(typeof(E), query, constructor);
+                    Schema.Current.OnPreUnsafeInsert(typeof(E), query, constructor, query.Select(constructor));
                     var table = Schema.Current.Table(typeof(E));
                     int rows = DbQueryProvider.Single.Insert(query, constructor, table, cr => cr.ExecuteScalar());
 
@@ -861,7 +861,7 @@ namespace Signum.Engine
 
                 using (Transaction tr = new Transaction())
                 {
-                    Schema.Current.OnPreUnsafeInsert(typeof(E), query, constructor);
+                    Schema.Current.OnPreUnsafeInsert(typeof(E), query, constructor, query.Select(constructor).Select(c=>c.Parent));
                     var table = ((FieldMList)Schema.Current.Field(mListProperty)).RelationalTable;
                     int rows = DbQueryProvider.Single.Insert(query, constructor, table, cr => cr.ExecuteScalar());
 
@@ -903,6 +903,8 @@ namespace Signum.Engine
         IEnumerable<SetterExpressions> SetterExpressions{ get; }
 
         Type EntityType { get; }
+
+        IQueryable<E> EntityQuery<E>() where E : IdentifiableEntity;
     }
 
     //E -> E
@@ -941,8 +943,35 @@ namespace Signum.Engine
             return new UpdateablePart<A, T>(this.query, this.partSelector,
                 this.settersExpressions.And(new SetterExpressions(propertyExpression, valueExpression)));
         }
+
+        public IQueryable<E> EntityQuery<E>() where E : IdentifiableEntity
+        {
+            var result = query.Select(partSelector);
+
+            return UpdateableConverter.Convert<T, E>(result);
+        }
     }
 
+    internal class UpdateableConverter
+    {
+        public static IQueryable<E> Convert<T, E>(IQueryable<T> query)
+        {
+            if (typeof(T) == typeof(E))
+                return (IQueryable<E>)query;
+
+            if (typeof(T).IsInstantiationOf(typeof(MListElement<,>)) && typeof(T).GetGenericArguments().First() == typeof(E))
+            {
+                var param = Expression.Parameter(typeof(T));
+
+                var lambda = Expression.Lambda<Func<T, E>>(Expression.Property(param, "Parent"), param);
+
+                return query.Select(lambda);
+            }
+
+            throw new InvalidOperationException("Impossible to convert {0} to {1}".Formato(
+                typeof(IQueryable<T>).TypeName(), typeof(IQueryable<E>).TypeName()));
+        }
+    }
 
     public interface IUpdateable<T> : IUpdateable
     {
@@ -972,6 +1001,11 @@ namespace Signum.Engine
         {
             return new Updateable<T>(this.query,
                 this.settersExpressions.And(new SetterExpressions(propertyExpression, valueExpression)));
+        }
+
+        public IQueryable<E> EntityQuery<E>() where E : IdentifiableEntity
+        {
+            return UpdateableConverter.Convert<T, E>(query);
         }
     }
 
