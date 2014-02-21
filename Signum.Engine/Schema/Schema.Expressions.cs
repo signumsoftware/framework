@@ -22,16 +22,18 @@ namespace Signum.Engine.Maps
     {
         internal Expression GetProjectorExpression(Alias tableAlias, QueryBinder binder)
         {
+            Expression id = GetIdExpression(tableAlias);
+
             if (IsView)
             {
-                var bindings = this.Fields.Values.Select(ef=>new FieldBinding(ef.FieldInfo, ef.Field.GetExpression(tableAlias, binder, null))).ToReadOnly();
+                var bindings = this.Fields.Values.Select(ef=>new FieldBinding(ef.FieldInfo, ef.Field.GetExpression(tableAlias, binder, id))).ToReadOnly();
 
-                return new EmbeddedEntityExpression(this.Type, null, bindings, null);
+                var hasValue = id == null ? Expression.Constant(true): SmartEqualizer.NotEqualNullable(id, QueryBinder.NullId);
+
+                return new EmbeddedEntityExpression(this.Type, hasValue, bindings, null);
             }
             else
             {
-                Expression id = GetIdExpression(tableAlias);
-
                 var bindings = GenerateBindings(tableAlias, binder, id); 
                 var mixins = GenerateMixins(tableAlias, binder, id);
 
@@ -104,7 +106,9 @@ namespace Signum.Engine.Maps
 
         internal Expression FieldExpression(Alias tableAlias, QueryBinder binder)
         {
-            return Field.GetExpression(tableAlias, binder, null);
+            var rowId = RowIdExpression(tableAlias);
+
+            return Field.GetExpression(tableAlias, binder, rowId);
         }
 
         internal Expression GetProjectorExpression(Alias tableAlias, QueryBinder binder)
@@ -113,10 +117,12 @@ namespace Signum.Engine.Maps
 
             Type elementType = typeof(MListElement<,>).MakeGenericType(BackReference.FieldType, Field.FieldType);
 
+            var rowId = RowIdExpression(tableAlias);
+
             return new MListElementExpression(
-                 RowIdExpression(tableAlias) ,
+                rowId,
                 (EntityExpression)this.BackReference.GetExpression(tableAlias, binder, null),
-                this.Field.GetExpression(tableAlias, binder, null), this);
+                this.Field.GetExpression(tableAlias, binder, rowId), this);
         }
 
         ColumnExpression ITablePrivate.GetPrimaryOrder(Alias alias)
@@ -195,7 +201,7 @@ namespace Signum.Engine.Maps
                             let fi = kvp.Value.FieldInfo
                             select new FieldBinding(fi, kvp.Value.Field.GetExpression(tableAlias, binder, id))).ToReadOnly();
 
-            ColumnExpression hasValue = HasValue == null ? null : new ColumnExpression(typeof(bool), tableAlias, HasValue.Name);
+            Expression hasValue = HasValue == null ? SmartEqualizer.NotEqualNullable(id, QueryBinder.NullId) : new ColumnExpression(typeof(bool), tableAlias, HasValue.Name);
             return new EmbeddedEntityExpression(this.FieldType, hasValue, bindings, this); 
         }
     }
