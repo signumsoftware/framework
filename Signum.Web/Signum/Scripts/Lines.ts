@@ -53,7 +53,7 @@ export class EntityBase {
         var $txt = $(this.pf(Entities.Keys.toStr) + ".sf-entity-autocomplete");
         if ($txt.length > 0) {
             this.autoCompleter = new AjaxEntityAutocompleter(this.options.autoCompleteUrl || SF.Urls.autocomplete,
-                term => ({ types: this.options.types, l: 5, q: term }));
+                term => ({ types: this.options.types.join(","), l: 5, q: term }));
 
             this.setupAutocomplete($txt);
         }
@@ -152,7 +152,7 @@ export class EntityBase {
 
     typeChooser(): Promise<string> {
         return Navigator.typeChooser(this.options.prefix,
-            this.options.types.map((t, i) => ({ type: t, toStr: this.options.typeNiceNames[i] })));
+            this.options.types.map((t, i) => ({ value: t, toStr: this.options.typeNiceNames[i] })));
     }
 
     singleType(): string {

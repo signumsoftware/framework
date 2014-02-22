@@ -27,7 +27,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var $txt = $(this.pf(Entities.Keys.toStr) + ".sf-entity-autocomplete");
             if ($txt.length > 0) {
                 this.autoCompleter = new AjaxEntityAutocompleter(this.options.autoCompleteUrl || SF.Urls.autocomplete, function (term) {
-                    return ({ types: _this.options.types, l: 5, q: term });
+                    return ({ types: _this.options.types.join(","), l: 5, q: term });
                 });
 
                 this.setupAutocomplete($txt);
@@ -124,7 +124,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         EntityBase.prototype.typeChooser = function () {
             var _this = this;
             return Navigator.typeChooser(this.options.prefix, this.options.types.map(function (t, i) {
-                return ({ type: t, toStr: _this.options.typeNiceNames[i] });
+                return ({ value: t, toStr: _this.options.typeNiceNames[i] });
             }));
         };
 
