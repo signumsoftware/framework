@@ -98,12 +98,15 @@ namespace Signum.Web.Selenium
 
             return new SearchPageProxy(selenium);
         }
-        
+
         protected virtual string ViewRoute(Type type, int? id)
         {
-            return "View/{0}/{1}".Formato(
-                TypeLogic.TypeToName.TryGetC(type) ?? Reflector.CleanTypeName(type),
-                id.HasValue ? id.ToString() : "");
+            var typeName = TypeLogic.TypeToName.TryGetC(type) ?? Reflector.CleanTypeName(type);
+
+            if (id.HasValue)
+                return "View/{0}/{1}".Formato(typeName, id.HasValue ? id.ToString() : "");
+            else
+                return "Create/{0}".Formato(typeName);
         }
 
         protected virtual string ViewRoute(Lite<IIdentifiable> lite)

@@ -138,9 +138,14 @@ namespace Signum.Web.Selenium
         {
         }
 
-        public ValueLineProxy StringValueLine
+        public ValueLineProxy ValueLine
         {
-            get { return new ValueLineProxy(Selenium, Prefix + "_StringValue", null); }
+            get { return new ValueLineProxy(Selenium, Prefix + "_value", null); }
+        }
+
+        public string StringValue
+        {
+            get { return ValueLine.StringValue; }
         }
     }
 
