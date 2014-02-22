@@ -33,11 +33,11 @@ namespace Signum.Web.Controllers
             return Navigator.NormalPage(this, Database.Retrieve(t, id));
         }
 
-        public ActionResult Create(string entityType, string prefix)
+        public ActionResult Create(string webTypeName)
         {
-            Type type = Navigator.ResolveType(entityType);
+            Type type = Navigator.ResolveType(webTypeName);
 
-            return Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.Navigate, null);
+            return Constructor.VisualConstruct(this, type, "", VisualConstructStyle.View, null);
         }
 
         public PartialViewResult PopupNavigate(string entityType, int? id, string prefix, string partialViewName)
