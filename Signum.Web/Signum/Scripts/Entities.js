@@ -17,6 +17,7 @@ define(["require", "exports"], function(require, exports) {
         link: "sfLink",
         loading: "loading",
         entityState: "sfEntityState",
+        template: "sfTemplate",
         viewMode: "sfViewMode"
     };
 

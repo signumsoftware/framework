@@ -30,13 +30,14 @@ export class EntityBase {
     finding: (prefix: string) => Promise<Entities.EntityValue>;
     viewing: (entityHtml: Entities.EntityHtml) => Promise<Entities.EntityValue>;
 
-    constructor(element: JQuery, _options: EntityBaseOptions) {
+    constructor(element: JQuery, options: EntityBaseOptions) {
         this.element = element;
         this.element.data("SF-control", this);
-        this.options = $.extend({
-            prefix: "",
-            partialViewName: "",
-        }, _options);
+        this.options = options;
+        var temp = $(this.pf(Entities.Keys.template));
+
+        if (temp.length > 0)
+            this.options.template = temp.html().replaceAll("<scriptX", "<script").replaceAll("</scriptX", "</script");
 
         this._create();
     }
@@ -169,10 +170,8 @@ export class EntityBase {
             if (type == null)
                 return null;
 
-            if (this.options.template)
-                return Promise.resolve(this.getEmbeddedTemplate());
-
-            var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true));
+            var newEntity = this.options.template ? this.getEmbeddedTemplate(prefix) :
+                new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true));
 
             return Navigator.viewPopup(newEntity, this.defaultViewOptions());
         });
@@ -421,7 +420,7 @@ export class EntityLineDetail extends EntityBase {
             return this.creating(prefix);
 
         if (this.options.template)
-            return Promise.resolve(this.getEmbeddedTemplate());
+            return Promise.resolve(this.getEmbeddedTemplate(prefix));
 
         return this.typeChooser().then(type=> {
             if (type == null)
@@ -489,7 +488,7 @@ export class EntityListBase extends EntityBase {
 
         var replaced = this.options.template.replace(new RegExp(SF.compose(this.options.prefix, "0"), "gi"), itemPrefix)
 
-        result.loadHtml(this.options.template);
+        result.loadHtml(replaced);
 
         return result;
     }

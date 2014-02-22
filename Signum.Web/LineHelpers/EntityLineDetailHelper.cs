@@ -40,7 +40,7 @@ namespace Signum.Web
                 if (entityDetail.Type.IsEmbeddedEntity())
                 {
                     TypeContext templateTC = ((TypeContext)entityDetail.Parent).Clone((object)Constructor.Construct(entityDetail.Type.CleanType()));
-                    entityDetail.Template = EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, entityDetail);
+                    sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityDetail, EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, entityDetail)));
                 }
 
                 MvcHtmlString controlHtml = null;

@@ -13,6 +13,7 @@ export var Keys = {
     link: "sfLink",
     loading: "loading",
     entityState: "sfEntityState",
+    template: "sfTemplate",
 
     viewMode: "sfViewMode",
 };

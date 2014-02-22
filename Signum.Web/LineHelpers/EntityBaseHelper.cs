@@ -10,6 +10,7 @@ using Signum.Entities;
 using Signum.Web.Controllers;
 using Signum.Entities.Reflection;
 using Signum.Engine.Operations;
+using System.Text.RegularExpressions;
 #endregion
 
 namespace Signum.Web
@@ -240,6 +241,15 @@ namespace Signum.Web
                   EntityControlMessage.Remove.NiceToString(),
                   "sf-line-button sf-remove",
                   htmlAttr);
+        }
+
+        static Regex regex = new Regex("(</?)script", RegexOptions.IgnoreCase);
+
+        public static MvcHtmlString EmbeddedTemplate(EntityBase entityBase, MvcHtmlString template)
+        {
+            return MvcHtmlString.Create("<script type=\"template\" id=\"{0}\">{1}</script>".Formato(
+                                entityBase.Compose(EntityBaseKeys.Template),
+                                regex.Replace(template.ToHtmlString(), m => m.Value + "X")));
         }
 
         public static void ConfigureEntityBase(EntityBase eb, Type cleanType)

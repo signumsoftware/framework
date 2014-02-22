@@ -46,8 +46,6 @@ namespace Signum.Web
             }
         }
 
-        public MvcHtmlString Template { get; set; }
-
         public Implementations? Implementations { get; set; }
 
         public bool View { get; set; }
@@ -117,9 +115,6 @@ namespace Signum.Web
 
             if (this.ReadOnly)
                 options.Add("isReadOnly", this.ReadOnly);
-
-            if (this.Template != null)
-                options.Add("templae", Template.ToString());
 
             return options;
         }

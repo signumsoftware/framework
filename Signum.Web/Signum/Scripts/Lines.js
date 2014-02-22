@@ -7,13 +7,14 @@ var __extends = this.__extends || function (d, b) {
 };
 define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Validator", "Framework/Signum.Web/Signum/Scripts/Navigator", "Framework/Signum.Web/Signum/Scripts/Finder"], function(require, exports, Entities, Validator, Navigator, Finder) {
     var EntityBase = (function () {
-        function EntityBase(element, _options) {
+        function EntityBase(element, options) {
             this.element = element;
             this.element.data("SF-control", this);
-            this.options = $.extend({
-                prefix: "",
-                partialViewName: ""
-            }, _options);
+            this.options = options;
+            var temp = $(this.pf(Entities.Keys.template));
+
+            if (temp.length > 0)
+                this.options.template = temp.html().replaceAll("<scriptX", "<script").replaceAll("</scriptX", "</script");
 
             this._create();
         }
@@ -143,10 +144,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 if (type == null)
                     return null;
 
-                if (_this.options.template)
-                    return Promise.resolve(_this.getEmbeddedTemplate());
-
-                var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true));
+                var newEntity = _this.options.template ? _this.getEmbeddedTemplate(prefix) : new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true));
 
                 return Navigator.viewPopup(newEntity, _this.defaultViewOptions());
             });
@@ -382,7 +380,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 return this.creating(prefix);
 
             if (this.options.template)
-                return Promise.resolve(this.getEmbeddedTemplate());
+                return Promise.resolve(this.getEmbeddedTemplate(prefix));
 
             return this.typeChooser().then(function (type) {
                 if (type == null)
@@ -438,7 +436,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             var replaced = this.options.template.replace(new RegExp(SF.compose(this.options.prefix, "0"), "gi"), itemPrefix);
 
-            result.loadHtml(this.options.template);
+            result.loadHtml(replaced);
 
             return result;
         };
