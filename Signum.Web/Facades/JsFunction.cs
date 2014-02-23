@@ -23,7 +23,7 @@ namespace Signum.Web
         public JsonSerializerSettings JsonSerializerSettings { get; set; }
 
         /// <summary>
-        /// require("module", function(mod) { mod.functionName(arguments...); }
+        /// require(["module"], function(mod) { mod.functionName(arguments...); }
         /// </summary>
         public JsFunction(string module, string functionName, params object[] arguments)
         {
