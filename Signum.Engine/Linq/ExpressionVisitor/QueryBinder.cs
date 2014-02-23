@@ -1387,8 +1387,7 @@ namespace Signum.Engine.Linq
                                 select new FieldBinding(g.Key,  
                                     CombineImplementations(strategy, g.ToDictionary(), g.Key.FieldType))).ToList();
 
-                var hasValue = expressions.All(w => ((EmbeddedEntityExpression)w.Value).HasValue == null) ? null :
-                    CombineImplementations(strategy, expressions.SelectDictionary(w => ((EmbeddedEntityExpression)w).HasValue ?? new SqlConstantExpression(true)), typeof(bool));
+                var hasValue = CombineImplementations(strategy, expressions.SelectDictionary(w => ((EmbeddedEntityExpression)w).HasValue ?? new SqlConstantExpression(true)), typeof(bool));
 
                 return new EmbeddedEntityExpression(returnType, hasValue, bindings, null);
             }
@@ -1894,7 +1893,7 @@ namespace Signum.Engine.Linq
 
                 var bindings = cEmb.Bindings.SelectMany(b => Assign(b.Binding, expEmb.GetBinding(b.FieldInfo)));
 
-                if (cEmb.HasValue != null)
+                if (cEmb.FieldEmbedded.HasValue != null)
                 {
                     var setValue = AssignColumn(cEmb.HasValue, expEmb.HasValue);
                     bindings = bindings.PreAnd(setValue);
@@ -2580,7 +2579,7 @@ namespace Signum.Engine.Linq
             if (colExpression is EmbeddedEntityExpression)
                 return Combiner<EmbeddedEntityExpression>(ifTrue, ifFalse, (col, t, f) =>
                    new EmbeddedEntityExpression(col.Type,
-                       col.HasValue == null ? null : Expression.Condition(test, t.HasValue, f.HasValue),
+                       Expression.Condition(test, t.HasValue, f.HasValue),
                        col.Bindings.Select(bin => GetBinding(bin.FieldInfo, Expression.Condition(test, t.GetBinding(bin.FieldInfo).Nullify(), f.GetBinding(bin.FieldInfo).Nullify()), bin.Binding)),
                        col.FieldEmbedded));
 
@@ -2636,7 +2635,7 @@ namespace Signum.Engine.Linq
             if (colExpression is EmbeddedEntityExpression)
                 return Combiner<EmbeddedEntityExpression>(left, right, (col, l, r) =>
                    new EmbeddedEntityExpression(col.Type,
-                       col.HasValue == null ? null : Expression.Or(l.HasValue, r.HasValue),
+                       Expression.Or(l.HasValue, r.HasValue),
                        col.Bindings.Select(bin => GetBinding(bin.FieldInfo, Expression.Coalesce(l.GetBinding(bin.FieldInfo).Nullify(), r.GetBinding(bin.FieldInfo).Nullify()), bin.Binding)),
                        col.FieldEmbedded));
 

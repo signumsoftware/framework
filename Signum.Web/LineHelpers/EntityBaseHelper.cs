@@ -10,6 +10,7 @@ using Signum.Entities;
 using Signum.Web.Controllers;
 using Signum.Entities.Reflection;
 using Signum.Engine.Operations;
+using System.Text.RegularExpressions;
 #endregion
 
 namespace Signum.Web
@@ -123,11 +124,6 @@ namespace Signum.Web
             var result = es.OnPartialViewName((ModifiableEntity)tc.UntypedValue);
             tc.ViewOverrides = es.ViewOverrides;
             return result;
-        }
-
-        public static string JsEscape(string input)
-        {
-            return input.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("/", "\\/").Replace("\r\n", "").Replace("\n", "");
         }
 
         public static MvcHtmlString ViewButton(HtmlHelper helper, EntityBase entityBase, bool hidden)
@@ -247,11 +243,13 @@ namespace Signum.Web
                   htmlAttr);
         }
 
+        static Regex regex = new Regex("(</?)script", RegexOptions.IgnoreCase);
+
         public static MvcHtmlString EmbeddedTemplate(EntityBase entityBase, MvcHtmlString template)
         {
-            return MvcHtmlString.Create("<script type=\"text/javascript\">var {0} = \"{1}\"</script>".Formato(
+            return MvcHtmlString.Create("<script type=\"template\" id=\"{0}\">{1}</script>".Formato(
                                 entityBase.Compose(EntityBaseKeys.Template),
-                                EntityBaseHelper.JsEscape(template.ToHtmlString())));
+                                regex.Replace(template.ToHtmlString(), m => m.Value + "X")));
         }
 
         public static void ConfigureEntityBase(EntityBase eb, Type cleanType)

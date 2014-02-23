@@ -4,17 +4,17 @@
 @{ var modifiable = (ModifiableEntity)Model.UntypedValue; }
 <div id="@Model.Compose("panelPopup")" class="sf-popup-control" data-prefix="@Model.Prefix">
     <span class="sf-popup-title">
-    <span style="float:left; display:block">
-    @Navigator.Manager.GetTypeTitle(modifiable)
-    </span>
-      @{
+        <span style="float: left; display: block">
+            @Navigator.Manager.GetTypeTitle(modifiable)
+        </span>
+        @{
             var ident = Model.UntypedValue as IdentifiableEntity;
 
             if (ident != null && !ident.IsNew && Navigator.IsNavigable(ident, null))
             {
-                <a href="@Navigator.NavigateRoute(ident)" class="sf-popup-fullscreen">
+            <a href="@Navigator.NavigateRoute(ident)" class="sf-popup-fullscreen">
                 <span class="ui-icon ui-icon-extlink">fullscreen</span>
-                </a>
+            </a>
             }
         }
     </span>
@@ -46,7 +46,7 @@
         }
         @{ 
             ViewData[ViewDataKeys.InPopup] = true;
-             
+
             Html.RenderPartial(ViewData[ViewDataKeys.PartialViewName].ToString(), Model);
         }
     </div>

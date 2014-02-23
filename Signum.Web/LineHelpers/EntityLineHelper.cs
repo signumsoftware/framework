@@ -34,7 +34,7 @@ namespace Signum.Web
 
                 using (sb.Surround(new HtmlTag("div").Class("sf-value-container")))
                 {
-                    sb.AddLine(helper.HiddenEntityInfo(entityLine));
+                    sb.AddLine(helper.HiddenRuntimeInfo(entityLine));
                     
                     if (entityLine.Type.IsIIdentifiable() || entityLine.Type.IsLite())
                     {
@@ -54,11 +54,6 @@ namespace Signum.Web
                                 { "autocomplete", "off" }, 
                                 { "style", "display:" + ((entityLine.UntypedValue==null && !entityLine.ReadOnly) ? "block" : "none")}
                             };
-
-                            htmlAttr.Add("data-types", new StaticInfo(entityLine.Type, entityLine.Implementations, entityLine.PropertyRoute, entityLine.ReadOnly).Types.ToString(Navigator.ResolveWebTypeName, ","));
-
-                            if (entityLine.AutocompleteUrl.HasText())
-                                htmlAttr.Add("data-url", entityLine.AutocompleteUrl);
 
                             sb.AddLine(helper.TextBox(
                                 entityLine.Compose(EntityBaseKeys.ToStr),

@@ -26,7 +26,6 @@ namespace Signum.Web
         public bool Reorder { get; set; }
 
         public int? MaxElements { get; set; }
-        
 
         public EntityListBase(Type type, object untypedValue, Context parent, string prefix, PropertyRoute propertyRoute)
             : base(type, untypedValue, parent, prefix, propertyRoute)
@@ -51,6 +50,16 @@ namespace Signum.Web
             if (MaxElements != null)
                 result.Add("maxElements", MaxElements.Value);
             return result;
+        }
+
+        protected override PropertyRoute GetElementRoute()
+        {
+            return this.PropertyRoute.Add("Item");
+        }
+
+        protected override Type GetElementType()
+        {
+            return this.ElementType;
         }
 
         protected override void SetReadOnly()

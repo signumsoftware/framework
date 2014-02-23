@@ -611,13 +611,13 @@ export class SearchControl {
     }
 
     encodeValue($filter: JQuery, index: string) {
-        var valBool = $("input:checkbox[id=" + SF.compose(SF.compose(this.options.prefix, "value"), index) + "]", $filter); //it's a checkbox
+        var valBool = $("input:checkbox[id=" +  SF.compose(this.options.prefix, "value", index) + "]", $filter); //it's a checkbox
         if (valBool.length > 0)
             return (<HTMLInputElement> valBool[0]).checked;
 
-        var info = new Entities.RuntimeInfoElement(SF.compose(SF.compose(this.options.prefix, "value"), index));
-        if (info.getElem().length > 0) { //If it's a Lite, the value is the Id
-            var val = info.value(); 
+        var infoElem = $("#" + SF.compose(this.options.prefix, "value", index, Entities.Keys.runtimeInfo));
+        if (infoElem.length > 0) { //If it's a Lite, the value is the Id
+            var val = Entities.RuntimeInfo.parse(infoElem.val()); 
             return SearchControl.encodeCSV(val == null ? null : val.key());
         }
 
@@ -659,7 +659,7 @@ export class SearchControl {
     static getSelectedItems(prefix: string) : Array<Entities.EntityValue> {
         return $("input:checkbox[name^=" + SF.compose(prefix, "rowSelection") + "]:checked").toArray().map(v=> {
             var parts = (<HTMLInputElement>v).value.split("__");
-            return new Entities.EntityValue(new Entities.RuntimeInfoValue(parts[1], parseInt(parts[0]), false),
+            return new Entities.EntityValue(new Entities.RuntimeInfo(parts[1], parseInt(parts[0]), false),
                 parts[2],
                 $(v).parent().next().children('a').attr('href'));
         }); 
@@ -986,7 +986,6 @@ export class SearchControl {
         this.onCreate();
     }
 
-
     onCreate() {
         if (this.creating != null)
             this.creating();
@@ -997,9 +996,9 @@ export class SearchControl {
 
                 var requestData = this.requestDataForSearchPopupCreate()
 
-                var runtimeInfo = new Entities.RuntimeInfoValue(type, null, true);
+                var runtimeInfo = new Entities.RuntimeInfo(type, null, true);
                 if (SF.isEmpty(this.options.prefix))
-                    Navigator.navigate(runtimeInfo, { requestExtraJsonData: requestData });
+                    Navigator.navigate(runtimeInfo, false);
                 else
                     Navigator.navigatePopup(new Entities.EntityHtml(SF.compose(this.options.prefix, "Temp"), runtimeInfo), { requestExtraJsonData: requestData });
             });
@@ -1123,12 +1122,15 @@ export module QueryTokenBuilder {
     export function constructTokenName(prefix) {
         var tokenName = "";
         var stop = false;
-        for (var i = 0; !stop; i++) {
+        for (var i = 0; ; i++) {
             var currSubtoken = $("#" + SF.compose(prefix, "ddlTokens_" + i));
-            if (currSubtoken.length > 0)
-                tokenName = SF.compose(tokenName, currSubtoken.val(), ".");
-            else
-                stop = true;
+            if (currSubtoken.length == 0)
+                break;
+
+            var part = currSubtoken.val();
+            tokenName = !tokenName ? part :
+            !part ? tokenName :
+            (tokenName + "." + part);
         }
         return tokenName;
     }

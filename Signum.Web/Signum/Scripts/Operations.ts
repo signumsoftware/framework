@@ -63,7 +63,7 @@ export function executeDefaultContextual(options: OperationOptions): Promise<voi
     return executeAjaxContextual(options).then(result=> { if (result) markCells(options.prefix); });
 }
 
-export function executeAjaxContextual(options: OperationOptions, runtimeInfo?: Entities.RuntimeInfoValue): Promise<boolean> {
+export function executeAjaxContextual(options: OperationOptions, runtimeInfo?: Entities.RuntimeInfo): Promise<boolean> {
     options = $.extend({
         controllerUrl: SF.Urls.operationExecute,
         avoidReturnView: true,
@@ -116,7 +116,7 @@ export function constructFromDefaultContextual(options: OperationOptions, newPre
     });
 }
 
-export function constructFromAjaxContextual(options: OperationOptions, newPrefix?: string, runtimeInfo?: Entities.RuntimeInfoValue): Promise<Entities.EntityHtml> {
+export function constructFromAjaxContextual(options: OperationOptions, newPrefix?: string, runtimeInfo?: Entities.RuntimeInfo): Promise<Entities.EntityHtml> {
     options = $.extend({
         controllerUrl: SF.Urls.operationConstructFrom,
         isLite: true,
@@ -171,7 +171,7 @@ export function deleteDefaultContextual(options: OperationOptions): Promise<any>
     });
 }
 
-export function deleteAjaxContextual(options: OperationOptions, runtimeInfo?: Entities.RuntimeInfoValue): Promise<any> {
+export function deleteAjaxContextual(options: OperationOptions, runtimeInfo?: Entities.RuntimeInfo): Promise<any> {
     options = $.extend({
         controllerUrl: SF.Urls.operationDelete,
         avoidReturnRedirect: true,
@@ -260,7 +260,7 @@ export function constructFromManyRequestData(options: OperationOptions, newPrefi
     return result; 
 }
 
-export function contextualRequestData(options: OperationOptions, newPrefix?: string, runtimeInfo? : Entities.RuntimeInfoValue): FormData {
+export function contextualRequestData(options: OperationOptions, newPrefix?: string, runtimeInfo? : Entities.RuntimeInfo): FormData {
 
     var result = baseRequestData(options, newPrefix); 
 

@@ -6,6 +6,8 @@ export interface ValidationOptions {
     prefix?: string;
     controllerUrl?: string;
     requestExtraJsonData?: any;
+    rootType?: any;
+    propertyRoute?: any;
 
     showInlineErrors?: boolean;
     fixedInlineErrorText?: string; //Set to "" for it to be populated from ModelState error messages
@@ -16,7 +18,6 @@ export interface ValidationOptions {
 export function cleanError($element: JQuery) {
     $element.removeClass(inputErrorClass)
 }
-
 
 export interface ValidationResult {
     modelState: ModelState;
@@ -64,21 +65,18 @@ export function validate(valOptions: ValidationOptions): Promise<ValidationResul
 }
 
 
-function constructRequestData(valOptions: ValidationOptions) : FormObject {
+function constructRequestData(valOptions: ValidationOptions): FormObject {
     SF.log("Validator constructRequestData");
 
     var formValues = getFormValues(valOptions.prefix);
 
     formValues["prefix"] = valOptions.prefix;
 
-    if (valOptions.prefix) {
-        var staticInfo = Entities.StaticInfo.getFor(valOptions.prefix);
+    if (valOptions.rootType)
+        formValues["rootType"] = valOptions.rootType
 
-        if (staticInfo.find().length > 0 && staticInfo.isEmbedded()) {
-            formValues["rootType"] = staticInfo.rootType();
-            formValues["propertyRoute"] = staticInfo.propertyRoute();
-        }
-    }
+    if (valOptions.propertyRoute)
+        formValues["propertyRoute"] = valOptions.propertyRoute;
 
     return $.extend(formValues, valOptions.requestExtraJsonData);
 }
@@ -189,7 +187,7 @@ function setPathErrors(valOptions: ValidationOptions, prefix: string, partialErr
                 $('#' + SF.compose(currPrefix, Entities.Keys.toStr)).addClass(inputErrorClass);
                 $('#' + SF.compose(currPrefix, Entities.Keys.link)).addClass(inputErrorClass);
             }
-            if ((isMoreInner || isEqual) && $('#' + SF.compose(currPrefix, globalValidationSummary)).length > 0 && !SF.isEmpty(partialErrors)) {
+            if (valOptions.errorSummaryId || ((isMoreInner || isEqual) && $('#' + SF.compose(currPrefix, globalValidationSummary)).length > 0 && !SF.isEmpty(partialErrors))) {
                 var currentSummary = valOptions.errorSummaryId ? $('#' + valOptions.errorSummaryId) : $('#' + SF.compose(currPrefix, globalValidationSummary));
 
                 var summaryUL = currentSummary.children('.' + summaryErrorClass);

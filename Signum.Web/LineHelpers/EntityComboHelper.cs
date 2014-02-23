@@ -38,7 +38,7 @@ namespace Signum.Web
 
                 using (!entityCombo.OnlyValue ? sb.Surround(new HtmlTag("div").Class("sf-value-container")) : null)
                 {
-                    sb.AddLine(helper.HiddenEntityInfo(entityCombo));
+                    sb.AddLine(helper.HiddenRuntimeInfo(entityCombo));
 
                     if (EntityBaseHelper.EmbeddedOrNew((Modifiable)entityCombo.UntypedValue))
                         sb.AddLine(EntityBaseHelper.RenderPopup(helper, (TypeContext)entityCombo.Parent, RenderPopupMode.PopupInDiv, entityCombo));

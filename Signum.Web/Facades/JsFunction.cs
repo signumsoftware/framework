@@ -113,7 +113,7 @@ namespace Signum.Web
     {
         public static ChooserOption ToChooserOption(this Type type)
         {
-            return new ChooserOption (Navigator.ResolveWebTypeName(type), type.NiceName() ); 
+            return new ChooserOption(Navigator.ResolveWebTypeName(type), type.NiceName()); 
         }
 
         public static ChooserOption ToChooserOptionToSting(this Enum enumValue)

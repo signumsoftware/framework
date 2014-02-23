@@ -13,121 +13,13 @@ export var Keys = {
     link: "sfLink",
     loading: "loading",
     entityState: "sfEntityState",
+    template: "sfTemplate",
 
     viewMode: "sfViewMode",
 };
 
-export class StaticInfo {
-    static _types = 0;
-    static _typeNiceNames = 1;
-    static _isEmbedded = 2;
-    static _isReadOnly = 3;
-    static _rootType = 4;
-    static _propertyRoute = 5;
 
-    prefix: string;
-    $elem: JQuery;
-
-    constructor(prefix: string) {
-        this.prefix = prefix;
-    }
-
-    public find() {
-        if (!this.$elem) {
-            this.$elem = $('#' + SF.compose(this.prefix, Keys.staticInfo));
-        }
-        return this.$elem;
-    }
-
-    public value(): string {
-        return this.find().val();
-    }
-
-    public toArray() {
-            return this.value().split(";")
-        }
-
-    public toValue(array) {
-        return array.join(";");
-    }
-
-    public getValue(key) {
-        var array = this.toArray();
-        return array[key];
-    }
-
-    public singleType() {
-        var typeArray = this.types();
-        if (typeArray.length !== 1) {
-            throw "types should have only one element for element {0}".format(this.prefix);
-        }
-        return typeArray[0];
-    }
-
-    public types(): string[] {
-        return this.getValue(StaticInfo._types).split(',');
-    }
-
-    public typeNiceNames(): string[] {
-        return this.getValue(StaticInfo._typeNiceNames).split(',');
-    }
-
-    public isEmbedded(): boolean {
-        return this.getValue(StaticInfo._isEmbedded) == "e";
-    }
-
-    public isReadOnly(): boolean {
-        return this.getValue(StaticInfo._isReadOnly) == "r";
-    }
-
-    public rootType(): string {
-        return this.getValue(StaticInfo._rootType);
-    }
-
-    public propertyRoute(): string {
-        return this.getValue(StaticInfo._propertyRoute);
-    }
-
-    public static getFor(prefix: string): StaticInfo {
-        if (!prefix)
-            throw new Error("prefix not provided");
-
-        var staticInfo = new StaticInfo(prefix);
-        if (staticInfo.find().length > 0)
-            return staticInfo;
-
-        return new StaticInfo(prefix.tryBeforeLast("_") || prefix);  //If List => use parent
-    }
-}
-
-
-export class RuntimeInfoElement {
-
-    prefix: string;
-    private $elem: JQuery;
-
-    constructor(prefix: string) {
-        this.prefix = prefix;
-    }
-
-    public getElem() {
-        if (!this.$elem) {
-            this.$elem = $('#' + SF.compose(this.prefix, Keys.runtimeInfo));
-        }
-        return this.$elem;
-    }
-
-    value(): RuntimeInfoValue {
-        return RuntimeInfoValue.parse(this.getElem().val());
-    }
-
-    setValue(runtimeInfo: RuntimeInfoValue) {
-        this.getElem().val(runtimeInfo == null ? null : runtimeInfo.toString());
-    }
-}
-
-
-export class RuntimeInfoValue {
+export class RuntimeInfo {
     type: string;
     id: number;
     isNew: boolean;
@@ -135,7 +27,7 @@ export class RuntimeInfoValue {
 
     constructor(entityType: string, id: number, isNew: boolean, ticks?: number) {
         if (SF.isEmpty(entityType))
-            throw new Error("entityTyp is mandatory for RuntimeInfoValue");
+            throw new Error("entityTyp is mandatory for RuntimeInfo");
 
         this.type = entityType;
         this.id = id;
@@ -143,12 +35,12 @@ export class RuntimeInfoValue {
         this.ticks = ticks;
     }
 
-    public static parse(runtimeInfoString: string): RuntimeInfoValue {
+    public static parse(runtimeInfoString: string): RuntimeInfo {
         if (SF.isEmpty(runtimeInfoString))
             return null;
 
         var array = runtimeInfoString.split(';');
-        return new RuntimeInfoValue(
+        return new RuntimeInfo(
             array[0],
             SF.isEmpty(array[1]) ? null : parseInt(array[1]),
             array[2] == "n",
@@ -162,11 +54,11 @@ export class RuntimeInfoValue {
             this.ticks].join(";");
     }
 
-    public static fromKey(key: string): RuntimeInfoValue {
+    public static fromKey(key: string): RuntimeInfo {
         if (SF.isEmpty(key))
             return null;
 
-        return new RuntimeInfoValue(
+        return new RuntimeInfo(
             key.before(";"),
             parseInt(key.after(";")),
             false);
@@ -174,14 +66,32 @@ export class RuntimeInfoValue {
 
     key(): string {
         if (this.id == null)
-            throw Error("RuntimeInfoValue has no Id");
+            throw Error("RuntimeInfo has no Id");
 
         return this.type + ";" + this.id;
+    }
+
+
+    static getHiddenInput(prefix: string, context?: JQuery) : JQuery {
+        var result = $('#' + SF.compose(prefix, Keys.runtimeInfo), context);
+
+        if (result.length != 1)
+            throw new Error("{0} elements with id {1} found".format(result.length, SF.compose(prefix, Keys.runtimeInfo)));
+
+        return result; 
+    }
+
+    static getFromPrefix(prefix: string, context?: JQuery): RuntimeInfo {
+        return RuntimeInfo.parse(RuntimeInfo.getHiddenInput(prefix, context).val());
+    }
+
+    static setFromPrefix(prefix: string, runtimeInfo: RuntimeInfo, context?: JQuery) {
+        RuntimeInfo.getHiddenInput(prefix, context).val(runtimeInfo == null? "": runtimeInfo.toString());
     }
 }
 
 export class EntityValue {
-    constructor(runtimeInfo: RuntimeInfoValue, toString?: string, link?: string) {
+    constructor(runtimeInfo: RuntimeInfo, toString?: string, link?: string) {
         if (runtimeInfo == null)
             throw new Error("runtimeInfo is mandatory for an EntityValue");
 
@@ -190,13 +100,11 @@ export class EntityValue {
         this.link = link;
     }
 
-    runtimeInfo: RuntimeInfoValue;
+    runtimeInfo: RuntimeInfo;
     toStr: string;
     link: string;
 
-    assertPrefixAndType(prefix: string, staticInfo: StaticInfo) {
-        var types = staticInfo.types();
-
+    assertPrefixAndType(prefix: string, types: string[]) {
         if (types.length == 0 && types[0] == "[All]")
             return;
 
@@ -215,7 +123,7 @@ export class EntityHtml extends EntityValue {
 
     hasErrors: boolean;
 
-    constructor(prefix: string, runtimeInfo: RuntimeInfoValue, toString?: string, link?: string) {
+    constructor(prefix: string, runtimeInfo: RuntimeInfo, toString?: string, link?: string) {
         super(runtimeInfo, toString, link);
 
         if (prefix == null)
@@ -224,9 +132,9 @@ export class EntityHtml extends EntityValue {
         this.prefix = prefix;
     }
 
-    assertPrefixAndType(prefix: string, staticInfo: StaticInfo) {
+    assertPrefixAndType(prefix: string, types: string[]) {
 
-        super.assertPrefixAndType(prefix, staticInfo);
+        super.assertPrefixAndType(prefix, types);
 
         if (this.prefix != null && this.prefix != prefix)
             throw Error("EntityHtml prefix should be {0} instead of  {1}".format(prefix, this.prefix));
@@ -241,19 +149,19 @@ export class EntityHtml extends EntityValue {
     }
 
     static fromHtml(prefix: string, htmlText: string): EntityHtml {
-        var result = new EntityHtml(prefix, new RuntimeInfoValue("?", null, false));
+        var result = new EntityHtml(prefix, new RuntimeInfo("?", null, false));
         result.loadHtml(htmlText);
         return result;
     }
 
     static fromDiv(prefix: string, div: JQuery): EntityHtml {
-        var result = new EntityHtml(prefix, new RuntimeInfoValue("?", null, false));
+        var result = new EntityHtml(prefix, new RuntimeInfo("?", null, false));
         result.html = div.clone();
         return result;
     }
 
     static withoutType(prefix: string): EntityHtml {
-        var result = new EntityHtml(prefix, new RuntimeInfoValue("?", null, false));
+        var result = new EntityHtml(prefix, new RuntimeInfo("?", null, false));
         return result;
     }
 }

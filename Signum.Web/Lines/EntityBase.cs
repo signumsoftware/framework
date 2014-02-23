@@ -72,6 +72,9 @@ namespace Signum.Web
             return JsFunction.SFControlThen(Prefix, functionCall);
         }
 
+        public static readonly Type[] ImplementedByAll = new Type[0];
+        public static readonly string ImplementedByAllKey = "[All]";
+
         protected virtual JObject OptionsJSInternal()
         {
             JObject options = new JObject
@@ -82,7 +85,59 @@ namespace Signum.Web
             if (PartialViewName.HasText() && !Type.IsEmbeddedEntity())
                 options.Add("partialViewName", PartialViewName);
 
+            Type type = this.GetElementType();
+
+            if (type.IsEmbeddedEntity())
+            {
+                if (Implementations != null)
+                    throw new ArgumentException("implementations should be null for EmbeddedEntities");
+
+                options.Add("types", new JArray(Navigator.ResolveWebTypeName(type)));
+                options.Add("typeNiceNames", new JArray(type.NiceName()));
+
+                PropertyRoute route = this.GetElementRoute();
+                options.Add("rootType", Navigator.ResolveWebTypeName(route.RootType));
+                options.Add("propertyRoute", route.PropertyString());
+            }
+            else
+            {
+                Type[] types = Implementations.Value.IsByAll ? ImplementedByAll :
+                               Implementations.Value.Types.ToArray();
+
+                options.Add("types", new JArray(types == ImplementedByAll ? 
+                    new string[]{ ImplementedByAllKey } :
+                    types.Select(t => Navigator.ResolveWebTypeName(t)).ToArray()));
+
+                options.Add("typeNiceNames", new JArray(types == ImplementedByAll ?
+                    new string[] { ImplementedByAllKey } :
+                    types.Select(t => t.NiceName()).ToArray()));
+            }
+
+            if (this.ReadOnly)
+                options.Add("isReadOnly", this.ReadOnly);
+
             return options;
+        }
+
+        protected virtual PropertyRoute GetElementRoute()
+        {
+            return this.PropertyRoute;
+        }
+
+        protected virtual Type GetElementType()
+        {
+            return this.Type;
+        }
+
+        public static Type[] ParseTypes(string types)
+        {
+            if (string.IsNullOrEmpty(types))
+                throw new ArgumentNullException("types");
+
+            if (types == ImplementedByAllKey)
+                return ImplementedByAll;
+
+            return types.Split(',').Select(tn => Navigator.ResolveType(tn)).NotNull().ToArray();
         }
 
         internal Type CleanRuntimeType 
@@ -132,7 +187,7 @@ namespace Signum.Web
                 Module = module,
                 Type = type,
                 Prefix = Prefix,
-                Options = OptionsJSInternal()
+                Options = OptionsJSInternal(),
             };
 
             var result = AttachFunction != null ? AttachFunction.SetOptions(info).ToString() :

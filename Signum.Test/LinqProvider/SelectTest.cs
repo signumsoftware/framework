@@ -522,6 +522,26 @@ namespace Signum.Test.LinqProvider
         {
             var list = Database.Query<ArtistDN>().SelectMany(a => a.FriendsCovariant()).Select(a => a.Id).ToList();
         }
+
+        [TestMethod]
+        public void SelectEmbeddedListNotNullableNull()
+        {
+            var list = (from a in Database.Query<AlbumDN>()
+                        from s in a.Songs.Where(s => s.Seconds < 0).DefaultIfEmpty()
+                        select new { a, s }).ToList();
+
+            Assert.IsTrue(list.All(p => p.s == null));
+        }
+
+        [TestMethod]
+        public void SelectEmbeddedListElementNotNullableNull()
+        {
+            var list = (from a in Database.Query<AlbumDN>()
+                        from s in a.MListElements(_=>_.Songs).Where(s => s.Element.Seconds < 0).DefaultIfEmpty()
+                        select new { a, s }).ToList();
+
+            Assert.IsTrue(list.All(p => p.s == null));
+        }
     }
 
     public static class AuthorExtensions
