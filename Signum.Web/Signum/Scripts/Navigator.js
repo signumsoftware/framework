@@ -176,14 +176,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     onOk($("#" + tempDivId)).then(function (result) {
                         if (result) {
                             var newTempDiv = $("#" + tempDivId);
-                            newTempDiv.popup('destroy');
+                            $("#" + tempDivId).remove();
                             resolve(null);
                         }
                     });
                 },
                 onCancel: function () {
                     var newTempDiv = $("#" + tempDivId);
-                    newTempDiv.popup('destroy');
+                    $("#" + tempDivId).remove();
                     resolve(null);
                 }
             });

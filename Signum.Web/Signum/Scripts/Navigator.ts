@@ -205,14 +205,14 @@ export function basicPopupView(entityHtml: Entities.EntityHtml, onOk: (div: JQue
                 onOk($("#" + tempDivId)).then(result => {
                     if (result) {
                         var newTempDiv = $("#" + tempDivId);
-                        newTempDiv.popup('destroy');
+                          $("#" + tempDivId).remove();
                         resolve(null);
                     }
                 });
             },
             onCancel: function () {
                 var newTempDiv = $("#" + tempDivId);
-                newTempDiv.popup('destroy');
+                $("#" + tempDivId).remove();
                 resolve(null);
             }
         });
