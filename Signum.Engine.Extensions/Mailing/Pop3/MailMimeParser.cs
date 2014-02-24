@@ -157,22 +157,14 @@ namespace Signum.Engine.Mailing.Pop3
                 view.ContentStream.Seek(0, SeekOrigin.Begin);
             }
 
-            if (message.AlternateViews.Count == 1 && message.AlternateViews.Single().LinkedResources.IsEmpty())
+            var onlyView = message.AlternateViews.Only();
+
+            if (onlyView != null && onlyView.LinkedResources.IsEmpty())
             {
-                StreamReader re = new StreamReader(message.AlternateViews[0].ContentStream);
-                message.Body = re.ReadToEnd();
-                message.IsBodyHtml = message.AlternateViews[0].ContentType.MediaType == "text/html";
+                message.Body = new StreamReader(onlyView.ContentStream, GetEncoding(onlyView.ContentType)).Using(r => r.ReadToEnd());
+                message.IsBodyHtml = onlyView.ContentType.MediaType == "text/html";
                 message.AlternateViews.Clear();
             }
-        }
-
-        public static string GetStringFromStream(Stream stream, ContentType contentType)
-        {
-            stream.Seek(0, new SeekOrigin());
-            byte[] buffer = new byte[stream.Length];
-            stream.Read(buffer, 0, (int)stream.Length);
-            string returnValue = Encoding.GetEncoding(contentType.CharSet.ToLower()).GetString(buffer);
-            return returnValue;
         }
 
         static void FillAddressesCollection(ICollection<MailAddress> addresses, string addressHeader)
@@ -224,7 +216,7 @@ namespace Signum.Engine.Mailing.Pop3
             return returnValue;
         }
 
-        private static Encoding GetEncoding(System.Net.Mime.ContentType contentType)
+        public static Encoding GetEncoding(System.Net.Mime.ContentType contentType)
         {
             if (contentType.CharSet == null)
                 return Encoding.UTF8;

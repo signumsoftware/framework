@@ -378,7 +378,7 @@ namespace Signum.Engine.Mailing
                 if (bestView != null)
                 {
                     dn.IsBodyHtml = bestView.ContentType.MediaType.Contains("htm");
-                    dn.Body = MailMimeParser.GetStringFromStream(bestView.ContentStream, bestView.ContentType);
+                    dn.Body = new StreamReader(bestView.ContentStream, MailMimeParser.GetEncoding(bestView.ContentType)).Using(r => r.ReadToEnd()); 
                     dn.Attachments.AddRange(bestView.LinkedResources.Select(a =>
                         new EmailAttachmentDN
                         {
