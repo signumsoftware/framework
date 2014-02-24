@@ -420,7 +420,7 @@ export class SearchControl {
 
 
 
-    changeRowSelection($rowSelectors, select) {
+    changeRowSelection($rowSelectors, select : boolean) {
         $rowSelectors.prop("checked", select);
         $rowSelectors.closest("tr").toggleClass("ui-state-active", select);
 
@@ -1041,7 +1041,7 @@ export class SearchControl {
 
     toggleSelectAll() {
         var select = $(this.pf("cbSelectAll:checked"));
-        $(this.pf("sfSearchControl .sf-td-selection")).prop('checked', (select.length > 0) ? true : false);
+        this.changeRowSelection($(this.pf("sfSearchControl .sf-td-selection")), (select.length > 0) ? true : false);
     }
 
     searchOnLoadFinished = false;

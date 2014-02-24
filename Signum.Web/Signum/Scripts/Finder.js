@@ -1007,7 +1007,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         SearchControl.prototype.toggleSelectAll = function () {
             var select = $(this.pf("cbSelectAll:checked"));
-            $(this.pf("sfSearchControl .sf-td-selection")).prop('checked', (select.length > 0) ? true : false);
+            this.changeRowSelection($(this.pf("sfSearchControl .sf-td-selection")), (select.length > 0) ? true : false);
         };
 
         SearchControl.prototype.searchOnLoad = function () {
