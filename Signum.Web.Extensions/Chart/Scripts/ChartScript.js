@@ -76,5 +76,12 @@ define(["require", "exports"], function(require, exports) {
         };
     }
     exports.init = init;
+
+    function refreshIcon(fileLine, imageId) {
+        fileLine.entityChanged = function () {
+            $('#' + imageId).attr("src", fileLine.getLink());
+        };
+    }
+    exports.refreshIcon = refreshIcon;
 });
 //# sourceMappingURL=ChartScript.js.map

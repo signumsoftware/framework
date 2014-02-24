@@ -158,6 +158,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             $(this.pf("btnRemove")).toggle(hasEntity);
         };
+
+        FileLine.prototype.getLink = function (itemPrefix) {
+            return $(this.pf(Entities.Keys.link)).attr("href");
+        };
+
+        FileLine.prototype.getToString = function (itemPrefix) {
+            return $(this.pf(Entities.Keys.link)).text();
+        };
         return FileLine;
     })(Lines.EntityBase);
     exports.FileLine = FileLine;
