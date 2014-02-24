@@ -930,9 +930,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         SearchControl.prototype.quickFilterCell = function ($elem) {
             var value = $elem.data("value");
-            if (typeof value == "undefined") {
+            if (typeof value == "undefined")
                 value = $elem.html().trim();
-            }
 
             var cellIndex = $elem[0].cellIndex;
             var tokenName = $($($elem.closest(".sf-search-results")).find("th")[cellIndex]).children("input:hidden").val();
