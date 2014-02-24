@@ -227,7 +227,12 @@ namespace Signum.Utilities.ExpressionTrees
                     return exp;
                 }
 
-                return Visit(Expression.Constant(Eval(exp), exp.Type));
+                var constant = Expression.Constant(Eval(exp), exp.Type);
+
+                if (typeof(LambdaExpression).IsAssignableFrom(constant.Type))
+                    return PartialEval((Expression)constant.Value);
+
+                return constant;
             }
             return base.Visit(exp);
         }
