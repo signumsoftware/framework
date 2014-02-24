@@ -9,26 +9,35 @@ export interface EntityBaseOptions {
     prefix: string;
     partialViewName: string;
     template?: string;
+    autoCompleteUrl?: string;
+
+    types: string[];
+    typeNiceNames: string[];
+    isEmbedded: boolean;
+    isReadonly: boolean;
+    rootType?: string;
+    propertyRoute?: string;
 }
 
 export class EntityBase {
     options: EntityBaseOptions;
     element: JQuery;
-    autoCompleter: EntityAutoCompleter;
+    autoCompleter: EntityAutocompleter;
 
-    entityChanged: () => any;
+    entityChanged: () => void;
     removing: (prefix: string) => Promise<boolean>;
     creating: (prefix: string) => Promise<Entities.EntityValue>;
     finding: (prefix: string) => Promise<Entities.EntityValue>;
     viewing: (entityHtml: Entities.EntityHtml) => Promise<Entities.EntityValue>;
 
-    constructor(element: JQuery, _options: EntityBaseOptions) {
+    constructor(element: JQuery, options: EntityBaseOptions) {
         this.element = element;
         this.element.data("SF-control", this);
-        this.options = $.extend({
-            prefix: "",
-            partialViewName: "",
-        }, _options);
+        this.options = options;
+        var temp = $(this.pf(Entities.Keys.template));
+
+        if (temp.length > 0)
+            this.options.template = temp.html().replaceAll("<scriptX", "<script").replaceAll("</scriptX", "</script");
 
         this._create();
     }
@@ -43,21 +52,15 @@ export class EntityBase {
     _create() {
         var $txt = $(this.pf(Entities.Keys.toStr) + ".sf-entity-autocomplete");
         if ($txt.length > 0) {
-            var url = $txt.attr("data-url");
-
-            this.autoCompleter = new AjaxEntityAutoCompleter(url || SF.Urls.autocomplete,
-                term => ({ types: this.staticInfo().getValue(Entities.StaticInfo._types), l: 5, q: term }));
+            this.autoCompleter = new AjaxEntityAutocompleter(this.options.autoCompleteUrl || SF.Urls.autocomplete,
+                term => ({ types: this.options.types.join(","), l: 5, q: term }));
 
             this.setupAutocomplete($txt);
         }
     }
     
-    runtimeInfo(itemPrefix?: string) : JQuery {
+    runtimeInfoHiddenElement(itemPrefix?: string) : JQuery {
         return $(this.pf(Entities.Keys.runtimeInfo));
-    }
-
-    staticInfo() {
-        return new Entities.StaticInfo(this.options.prefix);
     }
 
     pf(s) {
@@ -67,7 +70,7 @@ export class EntityBase {
     containerDiv(itemPrefix?: string) {
         var containerDivId = this.pf(EntityBase.key_entity);
         if ($(containerDivId).length == 0)
-            this.runtimeInfo().after(SF.hiddenDiv(containerDivId.after('#'), ""));
+            this.runtimeInfoHiddenElement().after(SF.hiddenDiv(containerDivId.after('#'), ""));
 
         return $(containerDivId);
     }
@@ -110,7 +113,7 @@ export class EntityBase {
         this.setEntitySpecific(entityValue)
 
         if (entityValue) 
-            entityValue.assertPrefixAndType(this.options.prefix, this.staticInfo());
+            entityValue.assertPrefixAndType(this.options.prefix, this.options.types);
         
 
         SF.triggerNewContent(this.containerDiv().html(entityValue == null ? null : (<Entities.EntityHtml>entityValue).html));
@@ -147,19 +150,28 @@ export class EntityBase {
         });
     }
 
+    typeChooser(): Promise<string> {
+        return Navigator.typeChooser(this.options.prefix,
+            this.options.types.map((t, i) => ({ value: t, toStr: this.options.typeNiceNames[i] })));
+    }
+
+    singleType(): string {
+        if (this.options.types.length != 1)
+            throw new Error("There are {0} types in {1}".format(this.options.types.length, this.options.prefix));
+
+        return this.options.types[0]; 
+    }
+
     onCreating(prefix: string): Promise<Entities.EntityValue> {
         if (this.creating != null)
             return this.creating(prefix);
 
-        return Navigator.typeChooser(this.staticInfo()).then(type=> {
+        return this.typeChooser().then(type=> {
             if (type == null)
                 return null;
 
-            var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true));
-
-            var template = this.getEmbeddedTemplate(prefix);
-            if (!SF.isEmpty(template))
-                newEntity.html = $(template);
+            var newEntity = this.options.template ? this.getEmbeddedTemplate(prefix) :
+                new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true));
 
             return Navigator.viewPopup(newEntity, this.defaultViewOptions());
         });
@@ -170,14 +182,12 @@ export class EntityBase {
             throw new Error("no template in " + this.options.prefix);
 
         var result = new Entities.EntityHtml(this.options.prefix,
-            new Entities.RuntimeInfo(this.staticInfo().singleType(), null, true));
+            new Entities.RuntimeInfo(this.singleType(), null, true));
 
         result.loadHtml(this.options.template);
 
         return result;
     }
-
-
 
     view_click(): Promise<void> {
         var entityHtml = this.extractEntityHtml();
@@ -204,11 +214,13 @@ export class EntityBase {
         });
     }
 
+    
+
     onFinding(prefix: string): Promise<Entities.EntityValue> {
         if (this.finding != null)
             return this.finding(prefix);
 
-        return Navigator.typeChooser(this.staticInfo()).then(type=> {
+        return this.typeChooser().then(type=> {
             if (type == null)
                 return null;
 
@@ -221,8 +233,12 @@ export class EntityBase {
 
     defaultViewOptions(): Navigator.ViewPopupOptions {
         return {
-            readOnly: this.staticInfo().isReadOnly(),
-            partialViewName: this.options.partialViewName
+            readOnly: this.options.isReadonly,
+            partialViewName: this.options.partialViewName,
+            validationOptions: {
+                rootType: this.options.rootType,
+                propertyRoute: this.options.propertyRoute,
+            }
         };
     }
 
@@ -273,11 +289,18 @@ export class EntityBase {
     }
 }
 
-export interface EntityAutoCompleter {
+export interface EntityAutocompleter {
     getResults(term: string): Promise<Entities.EntityValue[]>;
 }
 
-export class AjaxEntityAutoCompleter implements EntityAutoCompleter {
+export interface AutocompleteResult {
+    id: number;
+    text: string;
+    type: string;
+    link: string;
+}
+
+export class AjaxEntityAutocompleter implements EntityAutocompleter {
 
     controllerUrl: string;
 
@@ -298,9 +321,9 @@ export class AjaxEntityAutoCompleter implements EntityAutoCompleter {
             this.lastXhr = $.ajax({
                 url: this.controllerUrl,
                 data: this.getData(term),
-                success: function (data: any[]) {
+                success: function (data: AutocompleteResult[]) {
                     this.lastXhr = null;
-                    resolve(data.map(item=> new Entities.EntityValue(new Entities.RuntimeInfo(item.type, parseInt(item.id), false), item.text, item.link)));
+                    resolve(data.map(item=> new Entities.EntityValue(new Entities.RuntimeInfo(item.type, item.id, false), item.text, item.link)));
                 }
             });
         });
@@ -397,9 +420,9 @@ export class EntityLineDetail extends EntityBase {
             return this.creating(prefix);
 
         if (this.options.template)
-            return Promise.resolve(this.getEmbeddedTemplate());
+            return Promise.resolve(this.getEmbeddedTemplate(prefix));
 
-        return Navigator.typeChooser(this.staticInfo()).then(type=> {
+        return this.typeChooser().then(type=> {
             if (type == null)
                 return null;
       
@@ -461,11 +484,11 @@ export class EntityListBase extends EntityBase {
             throw new Error("no template in " + this.options.prefix);
 
         var result = new Entities.EntityHtml(itemPrefix,
-            new Entities.RuntimeInfo(this.staticInfo().singleType(), null, true));
+            new Entities.RuntimeInfo(this.singleType(), null, true));
 
         var replaced = this.options.template.replace(new RegExp(SF.compose(this.options.prefix, "0"), "gi"), itemPrefix)
 
-        result.loadHtml(this.options.template);
+        result.loadHtml(replaced);
 
         return result;
     }
@@ -492,7 +515,7 @@ export class EntityListBase extends EntityBase {
 
         this.setEntitySpecific(entityValue, itemPrefix)
 
-        entityValue.assertPrefixAndType(itemPrefix, this.staticInfo());
+        entityValue.assertPrefixAndType(itemPrefix, this.options.types);
 
         if (entityValue.isLoaded())
             SF.triggerNewContent(this.containerDiv(itemPrefix).html((<Entities.EntityHtml>entityValue).html));
@@ -524,7 +547,7 @@ export class EntityListBase extends EntityBase {
         this.addEntitySpecific(entityValue, itemPrefix);
 
         if (entityValue)
-            entityValue.assertPrefixAndType(itemPrefix, this.staticInfo());
+            entityValue.assertPrefixAndType(itemPrefix, this.options.types);
 
         if (entityValue.isLoaded())
             SF.triggerNewContent(this.containerDiv(itemPrefix).html((<Entities.EntityHtml>entityValue).html));
@@ -612,7 +635,7 @@ export class EntityListBase extends EntityBase {
         if (this.findingMany != null)
             return this.findingMany(prefix);
 
-        return Navigator.typeChooser(this.staticInfo()).then(type=> {
+        return this.typeChooser().then(type=> {
             if (type == null)
                 return null;
 
@@ -840,7 +863,7 @@ export class EntityListDetail extends EntityList {
         if (this.options.template)
             return Promise.resolve(this.getEmbeddedTemplate(prefix));
 
-        return Navigator.typeChooser(this.staticInfo()).then(type=> {
+        return this.typeChooser().then(type=> {
             if (type == null)
                 return null;
 
@@ -920,7 +943,7 @@ export class EntityRepeater extends EntityListBase {
         if (this.options.template)
             return Promise.resolve(this.getEmbeddedTemplate(prefix));
 
-        return Navigator.typeChooser(this.staticInfo()).then(type=> {
+        return this.typeChooser().then(type=> {
             if (type == null)
                 return null;
 

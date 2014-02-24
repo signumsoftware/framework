@@ -420,7 +420,7 @@ export class SearchControl {
 
 
 
-    changeRowSelection($rowSelectors, select) {
+    changeRowSelection($rowSelectors, select : boolean) {
         $rowSelectors.prop("checked", select);
         $rowSelectors.closest("tr").toggleClass("ui-state-active", select);
 
@@ -611,11 +611,11 @@ export class SearchControl {
     }
 
     encodeValue($filter: JQuery, index: string) {
-        var valBool = $("input:checkbox[id=" + SF.compose(SF.compose(this.options.prefix, "value"), index) + "]", $filter); //it's a checkbox
+        var valBool = $("input:checkbox[id=" +  SF.compose(this.options.prefix, "value", index) + "]", $filter); //it's a checkbox
         if (valBool.length > 0)
             return (<HTMLInputElement> valBool[0]).checked;
 
-        var infoElem = $("#" + [this.options.prefix, "value", index, Entities.Keys.runtimeInfo].join("_"));
+        var infoElem = $("#" + SF.compose(this.options.prefix, "value", index, Entities.Keys.runtimeInfo));
         if (infoElem.length > 0) { //If it's a Lite, the value is the Id
             var val = Entities.RuntimeInfo.parse(infoElem.val()); 
             return SearchControl.encodeCSV(val == null ? null : val.key());
@@ -968,9 +968,9 @@ export class SearchControl {
 
     quickFilterCell($elem) {
         var value = $elem.data("value");
-        if (typeof value == "undefined") {
+        if (typeof value == "undefined")
             value = $elem.html().trim()
-                }
+                
 
         var cellIndex = $elem[0].cellIndex;
         var tokenName = $($($elem.closest(".sf-search-results")).find("th")[cellIndex]).children("input:hidden").val();
@@ -1041,7 +1041,7 @@ export class SearchControl {
 
     toggleSelectAll() {
         var select = $(this.pf("cbSelectAll:checked"));
-        $(this.pf("sfSearchControl .sf-td-selection")).prop('checked', (select.length > 0) ? true : false);
+        this.changeRowSelection($(this.pf("sfSearchControl .sf-td-selection")), (select.length > 0) ? true : false);
     }
 
     searchOnLoadFinished = false;
@@ -1122,12 +1122,15 @@ export module QueryTokenBuilder {
     export function constructTokenName(prefix) {
         var tokenName = "";
         var stop = false;
-        for (var i = 0; !stop; i++) {
+        for (var i = 0; ; i++) {
             var currSubtoken = $("#" + SF.compose(prefix, "ddlTokens_" + i));
-            if (currSubtoken.length > 0)
-                tokenName = SF.compose(tokenName, currSubtoken.val(), ".");
-            else
-                stop = true;
+            if (currSubtoken.length == 0)
+                break;
+
+            var part = currSubtoken.val();
+            tokenName = !tokenName ? part :
+            !part ? tokenName :
+            (tokenName + "." + part);
         }
         return tokenName;
     }

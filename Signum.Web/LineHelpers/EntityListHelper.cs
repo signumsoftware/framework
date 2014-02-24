@@ -29,14 +29,13 @@ namespace Signum.Web
 
                 using (sb.Surround(new HtmlTag("div").Class("sf-field-list")))
                 {
-                    sb.AddLine(helper.HiddenStaticInfo(entityList));
                     sb.AddLine(helper.Hidden(entityList.Compose(EntityListBaseKeys.ListPresent), ""));
 
                     //If it's an embeddedEntity write an empty template with index 0 to be used when creating a new item
                     if (entityList.ElementType.IsEmbeddedEntity())
-                    {   
+                    {
                         TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)entityList.Parent, 0);
-                        entityList.Template = EntityBaseHelper.RenderPopup(helper, templateTC, RenderPopupMode.Popup, entityList, isTemplate: true);
+                        sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityList, EntityBaseHelper.RenderPopup(helper, templateTC, RenderPopupMode.Popup, entityList, isTemplate: true)));
                     }
 
                     HtmlStringBuilder sbSelect = new HtmlStringBuilder();

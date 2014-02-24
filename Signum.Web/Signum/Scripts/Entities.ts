@@ -13,92 +13,11 @@ export var Keys = {
     link: "sfLink",
     loading: "loading",
     entityState: "sfEntityState",
+    template: "sfTemplate",
 
     viewMode: "sfViewMode",
 };
 
-export class StaticInfo {
-    static _types = 0;
-    static _typeNiceNames = 1;
-    static _isEmbedded = 2;
-    static _isReadOnly = 3;
-    static _rootType = 4;
-    static _propertyRoute = 5;
-
-    prefix: string;
-    $elem: JQuery;
-
-    constructor(prefix: string) {
-        this.prefix = prefix;
-    }
-
-    public find() {
-        if (!this.$elem) {
-            this.$elem = $('#' + SF.compose(this.prefix, Keys.staticInfo));
-        }
-        return this.$elem;
-    }
-
-    public value(): string {
-        return this.find().val();
-    }
-
-    public toArray() {
-            return this.value().split(";")
-        }
-
-    public toValue(array) {
-        return array.join(";");
-    }
-
-    public getValue(key) {
-        var array = this.toArray();
-        return array[key];
-    }
-
-    public singleType() {
-        var typeArray = this.types();
-        if (typeArray.length !== 1) {
-            throw "types should have only one element for element {0}".format(this.prefix);
-        }
-        return typeArray[0];
-    }
-
-    public types(): string[] {
-        return this.getValue(StaticInfo._types).split(',');
-    }
-
-    public typeNiceNames(): string[] {
-        return this.getValue(StaticInfo._typeNiceNames).split(',');
-    }
-
-    public isEmbedded(): boolean {
-        return this.getValue(StaticInfo._isEmbedded) == "e";
-    }
-
-    public isReadOnly(): boolean {
-        return this.getValue(StaticInfo._isReadOnly) == "r";
-    }
-
-    public rootType(): string {
-        return this.getValue(StaticInfo._rootType);
-    }
-
-    public propertyRoute(): string {
-        return this.getValue(StaticInfo._propertyRoute);
-    }
-
-    public static getFor(prefix: string): StaticInfo {
-        if (!prefix)
-            throw new Error("prefix not provided");
-
-        var staticInfo = new StaticInfo(prefix);
-        if (staticInfo.find().length > 0)
-            return staticInfo;
-
-        return new StaticInfo(prefix.tryBeforeLast("_") || prefix);  //If List => use parent
-    }
-}
 
 export class RuntimeInfo {
     type: string;
@@ -185,9 +104,7 @@ export class EntityValue {
     toStr: string;
     link: string;
 
-    assertPrefixAndType(prefix: string, staticInfo: StaticInfo) {
-        var types = staticInfo.types();
-
+    assertPrefixAndType(prefix: string, types: string[]) {
         if (types.length == 0 && types[0] == "[All]")
             return;
 
@@ -215,9 +132,9 @@ export class EntityHtml extends EntityValue {
         this.prefix = prefix;
     }
 
-    assertPrefixAndType(prefix: string, staticInfo: StaticInfo) {
+    assertPrefixAndType(prefix: string, types: string[]) {
 
-        super.assertPrefixAndType(prefix, staticInfo);
+        super.assertPrefixAndType(prefix, types);
 
         if (this.prefix != null && this.prefix != prefix)
             throw Error("EntityHtml prefix should be {0} instead of  {1}".format(prefix, this.prefix));

@@ -13,13 +13,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     exports.requestPartialView = requestPartialView;
 
     function navigate(runtimeInfo, openNewWindow) {
-        var url = runtimeInfo.isNew ? SF.Urls.create : SF.Urls.view;
-        url = "{0}/{1}/{2}".format(url, runtimeInfo.type, !SF.isEmpty(runtimeInfo.id) ? runtimeInfo.id : "");
+        var url = runtimeInfo.isNew ? "{0}/{1}".format(SF.Urls.create, runtimeInfo.type) : "{0}/{1}/{2}".format(SF.Urls.view, runtimeInfo.type, !SF.isEmpty(runtimeInfo.id) ? runtimeInfo.id : "");
 
         if (openNewWindow)
             window.open(url, "_blank");
         else
-            window.location = url;
+            window.location.href = url;
     }
     exports.navigate = navigate;
 
@@ -174,17 +173,17 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         return new Promise(function (resolve) {
             tempDiv.popup({
                 onOk: function () {
-                    onOk().then(function (result) {
+                    onOk($("#" + tempDivId)).then(function (result) {
                         if (result) {
                             var newTempDiv = $("#" + tempDivId);
-                            newTempDiv.popup('destroy');
+                            $("#" + tempDivId).remove();
                             resolve(null);
                         }
                     });
                 },
                 onCancel: function () {
                     var newTempDiv = $("#" + tempDivId);
-                    newTempDiv.popup('destroy');
+                    $("#" + tempDivId).remove();
                     resolve(null);
                 }
             });
@@ -333,20 +332,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         return $.extend(obj, options.requestExtraJsonData);
     }
 
-    function typeChooser(staticInfo) {
-        var types = staticInfo.types();
-        if (types.length == 1) {
-            return Promise.resolve(types[0]);
-        }
-
-        var typesNiceNames = staticInfo.typeNiceNames();
-
-        var options = types.map(function (t, i) {
-            return ({ type: t, text: typesNiceNames[i] });
-        });
-
-        return exports.chooser(staticInfo.prefix, lang.signum.chooseAType, options).then(function (t) {
-            return t == null ? null : t.type;
+    function typeChooser(prefix, types) {
+        return exports.chooser(prefix, lang.signum.chooseAType, types).then(function (t) {
+            return t == null ? null : t.value;
         });
     }
     exports.typeChooser = typeChooser;
@@ -399,26 +387,35 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     }
     exports.chooser = chooser;
 
-    (function (ValueLineBoxType) {
-        ValueLineBoxType[ValueLineBoxType["String"] = 0] = "String";
-        ValueLineBoxType[ValueLineBoxType["Boolean"] = 1] = "Boolean";
-        ValueLineBoxType[ValueLineBoxType["Integer"] = 2] = "Integer";
-        ValueLineBoxType[ValueLineBoxType["Decimal"] = 3] = "Decimal";
-        ValueLineBoxType[ValueLineBoxType["DateTime"] = 4] = "DateTime";
-    })(exports.ValueLineBoxType || (exports.ValueLineBoxType = {}));
-    var ValueLineBoxType = exports.ValueLineBoxType;
+    (function (ValueLineType) {
+        ValueLineType[ValueLineType["Boolean"] = 0] = "Boolean";
+        ValueLineType[ValueLineType["RadioButtons"] = 1] = "RadioButtons";
+        ValueLineType[ValueLineType["Combo"] = 2] = "Combo";
+        ValueLineType[ValueLineType["DateTime"] = 3] = "DateTime";
+        ValueLineType[ValueLineType["TextBox"] = 4] = "TextBox";
+        ValueLineType[ValueLineType["TextArea"] = 5] = "TextArea";
+        ValueLineType[ValueLineType["Number"] = 6] = "Number";
+    })(exports.ValueLineType || (exports.ValueLineType = {}));
+    var ValueLineType = exports.ValueLineType;
 
     function valueLineBox(options) {
-        return exports.viewPopup(Entities.EntityHtml.withoutType(options.prefix), {
-            controllerUrl: SF.Urls.valueLineBox,
-            requestExtraJsonData: options
-        }).then(function (eHtml) {
-            if (!eHtml)
-                return null;
+        return new Promise(function (resolve) {
+            requestHtml(Entities.EntityHtml.withoutType(options.prefix), {
+                controllerUrl: SF.Urls.valueLineBox,
+                requestExtraJsonData: options
+            }).then(function (eHtml) {
+                var result = null;
+                exports.basicPopupView(eHtml, function (div) {
+                    var input = div.find(":input:not(:button)");
+                    if (input.length != 1)
+                        throw new Error("{0} inputs found in ValueLineBox".format(input.length));
 
-            var result = Validator.getFormValuesHtml(eHtml);
-            result["valueLinePrefix"] = eHtml.prefix;
-            return result;
+                    result = input.val();
+                    return Promise.resolve(true);
+                }).then(function () {
+                    return resolve(result);
+                });
+            });
         });
     }
     exports.valueLineBox = valueLineBox;

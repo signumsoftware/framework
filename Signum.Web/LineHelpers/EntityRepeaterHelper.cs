@@ -35,14 +35,13 @@ namespace Signum.Web
                     sb.AddLine(EntityBaseHelper.FindButton(helper, entityRepeater, hidden: false));
                 }
 
-                sb.AddLine(helper.HiddenStaticInfo(entityRepeater));
                 sb.AddLine(helper.Hidden(entityRepeater.Compose(EntityListBaseKeys.ListPresent), ""));
 
                 //If it's an embeddedEntity write an empty template with index 0 to be used when creating a new item
                 if (entityRepeater.ElementType.IsEmbeddedEntity())
                 {
                     TypeElementContext<T> templateTC = new TypeElementContext<T>((T)(object)Constructor.Construct(typeof(T)), (TypeContext)entityRepeater.Parent, 0);
-                    entityRepeater.Template = EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, entityRepeater);
+                    sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityRepeater, EntityBaseHelper.RenderContent(helper, templateTC, RenderContentMode.Content, entityRepeater)));
                 }
                 
                 using (sb.Surround(new HtmlTag("div").IdName(entityRepeater.Compose(EntityRepeaterKeys.ItemsContainer))))

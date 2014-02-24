@@ -107,6 +107,7 @@
     <Compile Include="LineHelpers\EntityStripHelper.cs" />
     <Compile Include="Lines\EntityStrip.cs" />
     <Compile Include="Lines\HourMinuteLine.cs" />
+    <Compile Include="ValueLineBoxOptions.cs" />
     <Compile Include="Operations\OperationsClient.cs" />
     <Compile Include="Operations\OperationSettings.cs" />
     <Compile Include="PortableAreas\ActionFilterConfig.cs" />

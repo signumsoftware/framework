@@ -26,28 +26,18 @@ namespace Signum.Web.Controllers
     public class NavigatorController : Controller
     {
         [ValidateInput(false)]  //this is needed since a return content(View...) from an action that doesn't validate will throw here an exception. We suppose that validation has already been performed before getting here
-        public ViewResult View(string webTypeName, int? id)
+        public ViewResult View(string webTypeName, int id)
         {
             Type t = Navigator.ResolveType(webTypeName);
 
-            if (id.HasValue)
-                return Navigator.NormalPage(this, Database.Retrieve(t, id.Value));
-
-            IdentifiableEntity entity = null;
-            object result = Constructor.Construct(t);
-            if (typeof(IdentifiableEntity).IsAssignableFrom(result.GetType()))
-                entity = (IdentifiableEntity)result;
-            else
-                throw new InvalidOperationException("Invalid result type for a Constructor");
-
-            return Navigator.NormalPage(this, entity);
+            return Navigator.NormalPage(this, Database.Retrieve(t, id));
         }
 
-        public ActionResult Create(string entityType, string prefix)
+        public ActionResult Create(string webTypeName)
         {
-            Type type = Navigator.ResolveType(entityType);
+            Type type = Navigator.ResolveType(webTypeName);
 
-            return Constructor.VisualConstruct(this, type, prefix, VisualConstructStyle.Navigate, null);
+            return Constructor.VisualConstruct(this, type, "", VisualConstructStyle.View, null);
         }
 
         public PartialViewResult PopupNavigate(string entityType, int? id, string prefix, string partialViewName)
@@ -132,42 +122,38 @@ namespace Signum.Web.Controllers
         }
 
         [HttpPost]
-        public PartialViewResult ValueLineBox(string prefix, ValueLineBoxType type, string title, string fieldName, string message)
+        public PartialViewResult ValueLineBox(string prefix, ValueLineType type, string title, string labelText, string message)
         {
-            ViewData[ViewDataKeys.Title] = title;
+            ValueLineBoxOptions options = new ValueLineBoxOptions(type, prefix, null) { labelText = labelText, title = title };
 
-            ValueLineBoxModel model = new ValueLineBoxModel(type, fieldName, message);
-
-            switch (model.BoxType)
+            Type vlType = null;
+            switch (type)
             {
-                case ValueLineBoxType.String:
-                    model.StringValue = Request["stringValue"];
+                case ValueLineType.TextBox:
+                case ValueLineType.TextArea:
+                    vlType = typeof(string);
+                    options.value = this.ParseValue<string>("value");
                     break;
-                case ValueLineBoxType.Boolean:
-                    bool bvalue;
-                    if (bool.TryParse(Request["boolValue"], out bvalue))
-                        model.BoolValue = bvalue;
+                case ValueLineType.Boolean:
+                    vlType = typeof(bool);
+                    options.value = this.ParseValue<bool?>("value");
                     break;
-                case ValueLineBoxType.Integer:
-                    int ivalue;
-                    if (int.TryParse(Request["intValue"], out ivalue))
-                        model.IntValue = ivalue;
+                case ValueLineType.Number:
+                    vlType = typeof(decimal);
+                    options.value = this.ParseValue<decimal?>("value");
                     break;
-                case ValueLineBoxType.Decimal:
-                    decimal dvalue;
-                    if (decimal.TryParse(Request["decimalValue"], out dvalue))
-                        model.DecimalValue = dvalue;
-                    break;
-                case ValueLineBoxType.DateTime:
-                    DateTime dtvalue;
-                    if (DateTime.TryParse(Request["dateValue"], out dtvalue))
-                        model.DateValue = dtvalue;
+                case ValueLineType.DateTime:
+                    vlType = typeof(DateTime);
+                    options.value = this.ParseValue<DateTime?>("value");
                     break;
                 default:
                     break;
             }
 
-            return this.PopupView(model);
+            ViewData["type"] = vlType;
+            ViewData["options"] = options;
+
+            return this.PartialView(Navigator.Manager.ValueLineBoxView, new Context(null, prefix));
         }
     }
 }

@@ -1,32 +1,22 @@
-﻿@using (var e = Html.TypeContext<ValueLineBoxModel>())
-{
-    if (e.Value.TopText.HasText())
-    {
-        @e.Value.TopText 
-        <div class='clearall'></div>
-    }
-    <div style="display: none">
-        @Html.ValueLine(e, f => f.BoxType)
-        @Html.Hidden(e.Compose("IsNullable"), e.Value.IsNullable)
+﻿@model Signum.Web.Context
+@{
+    ValueLineBoxOptions options = ViewBag.Options;    
+}
+
+<div id="@Model.Compose("panelPopup")" class="sf-popup-control" data-prefix="@Model.Prefix">
+    <span class="sf-popup-title">
+        @options.title
+    </span>
+
+    <div class="sf-button-bar">
+        <button id="@Model.Compose("btnOk")" class="sf-entity-button sf-ok-button">OK</button>
     </div>
-    switch (e.Value.BoxType)
-    {
-        case ValueLineBoxType.Boolean:
-            @Html.ValueLine(e, f => f.BoolValue, vl => vl.LabelText = e.Value.FieldName)
-            break;
-        case ValueLineBoxType.Integer:
-            @Html.ValueLine(e, f => f.IntValue, vl => vl.LabelText = e.Value.FieldName)
-            break;
-        case ValueLineBoxType.Decimal:
-            @Html.ValueLine(e, f => f.DecimalValue, vl => vl.LabelText = e.Value.FieldName)
-            break;
-        case ValueLineBoxType.DateTime:
-            @Html.ValueLine(e, f => f.DateValue, vl => vl.LabelText = e.Value.FieldName)
-            break;
-        case ValueLineBoxType.String:
-            @Html.ValueLine(e, f => f.StringValue, vl => vl.LabelText = e.Value.FieldName)
-            break;
-        default:
-            throw new InvalidOperationException("ValueLineBoxType {0} does not exist".Formato(e.Value.BoxType));
-    }
-} 
+    <p>
+        @options.message
+    </p>
+    @Html.ValueLine(new ValueLine(@ViewBag.type, options.value, Model, "value", null)
+{
+    LabelText = options.labelText,
+    LabelVisible = options.labelText.HasText()
+})
+</div>

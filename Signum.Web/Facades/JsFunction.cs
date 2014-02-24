@@ -23,7 +23,7 @@ namespace Signum.Web
         public JsonSerializerSettings JsonSerializerSettings { get; set; }
 
         /// <summary>
-        /// require("module", function(mod) { mod.functionName(arguments...); }
+        /// require(["module"], function(mod) { mod.functionName(arguments...); }
         /// </summary>
         public JsFunction(string module, string functionName, params object[] arguments)
         {
@@ -133,7 +133,7 @@ namespace Signum.Web
     {
         public static ChooserOption ToChooserOption(this Type type)
         {
-            return new ChooserOption (Navigator.ResolveWebTypeName(type), type.NiceName() ); 
+            return new ChooserOption(Navigator.ResolveWebTypeName(type), type.NiceName()); 
         }
 
         public static ChooserOption ToChooserOptionToSting(this Enum enumValue)

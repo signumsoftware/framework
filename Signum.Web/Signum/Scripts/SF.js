@@ -162,28 +162,19 @@ var SF;
     }
     SF.hiddenDiv = hiddenDiv;
 
-    function compose(str1, str2, separator) {
-        if (typeof (str1) !== "string" && str1 !== null && str1 != undefined) {
-            throw "str1 " + str1 + " is not a string";
+    function compose(str) {
+        var nextParts = [];
+        for (var _i = 0; _i < (arguments.length - 1); _i++) {
+            nextParts[_i] = arguments[_i + 1];
+        }
+        var result = str;
+        for (var i = 0; i < nextParts.length; i++) {
+            var part = nextParts[i];
+
+            result = !result ? part : !part ? result : result + "_" + part;
         }
 
-        if (typeof (str2) !== "string" && str2 !== null && str2 != undefined) {
-            throw "str2 " + str2 + " is not a string";
-        }
-
-        if (SF.isEmpty(str1)) {
-            return str2;
-        }
-
-        if (SF.isEmpty(str2)) {
-            return str1;
-        }
-
-        if (SF.isEmpty(separator)) {
-            separator = "_";
-        }
-
-        return str1 + separator + str2;
+        return result;
     }
     SF.compose = compose;
 

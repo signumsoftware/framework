@@ -34,7 +34,7 @@ namespace Signum.Web
 
                 using (sb.Surround(new HtmlTag("div").Class("sf-value-container")))
                 {
-                    sb.AddLine(helper.HiddenEntityInfo(entityLine));
+                    sb.AddLine(helper.HiddenRuntimeInfo(entityLine));
                     
                     if (entityLine.Type.IsIIdentifiable() || entityLine.Type.IsLite())
                     {
@@ -54,11 +54,6 @@ namespace Signum.Web
                                 { "autocomplete", "off" }, 
                                 { "style", "display:" + ((entityLine.UntypedValue==null && !entityLine.ReadOnly) ? "block" : "none")}
                             };
-
-                            htmlAttr.Add("data-types", new StaticInfo(entityLine.Type, entityLine.Implementations, entityLine.PropertyRoute, entityLine.ReadOnly).Types.ToString(Navigator.ResolveWebTypeName, ","));
-
-                            if (entityLine.AutocompleteUrl.HasText())
-                                htmlAttr.Add("data-url", entityLine.AutocompleteUrl);
 
                             sb.AddLine(helper.TextBox(
                                 entityLine.Compose(EntityBaseKeys.ToStr),
@@ -89,7 +84,7 @@ namespace Signum.Web
                         if (entityLine.UntypedValue == null && entityLine.Parent is TypeContext) /*Second condition filters embedded entities in filters to be rendered */
                         {
                             TypeContext templateTC = ((TypeContext)entityLine.Parent).Clone((object)Constructor.Construct(entityLine.Type.CleanType()));
-                            entityLine.Template = EntityBaseHelper.RenderPopup(helper, templateTC, RenderPopupMode.Popup, entityLine, isTemplate: true);
+                            sb.AddLine(EntityBaseHelper.EmbeddedTemplate(entityLine, EntityBaseHelper.RenderPopup(helper, templateTC, RenderPopupMode.Popup, entityLine, isTemplate: true)));
                         }
 
                         if (entityLine.UntypedValue != null)

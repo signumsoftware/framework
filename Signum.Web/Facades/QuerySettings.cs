@@ -53,7 +53,7 @@ namespace Signum.Web
                 new FormatterRule(c => c.Type.UnNullify().IsEnum, c => (h,o) => 
                 {
                     return o != null ? ((Enum)o).NiceToString().EncodeHtml() : MvcHtmlString.Empty;
-                }){ WriteData = false },
+                }){ WriteData = true },
                 new FormatterRule(c => c.Type.UnNullify().IsLite(), c => (h,o) => 
                 {
                     return h.LightEntityLine((Lite<IIdentifiable>)o, false);

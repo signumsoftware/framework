@@ -542,6 +542,17 @@ namespace Signum.Test.LinqProvider
 
             Assert.IsTrue(list.All(p => p.s == null));
         }
+
+        [TestMethod]
+        public void SelectWhereExpressionInSelectMany()
+        {
+            var max = 0;
+            Expression<Func<AlbumDN, bool>> blas = a=>a.Id > max;
+
+            var list = (from a in Database.Query<AlbumDN>()
+                        from s in Database.Query<AlbumDN>().Where(blas)
+                        select new { a, s }).ToList();
+        }
     }
 
     public static class AuthorExtensions

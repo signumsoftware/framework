@@ -23,13 +23,14 @@ export function requestPartialView(entityHtml: Entities.EntityHtml, viewOptions?
 }
 
 export function navigate(runtimeInfo: Entities.RuntimeInfo, openNewWindow?: boolean) {
-    var url = runtimeInfo.isNew ? SF.Urls.create : SF.Urls.view;
-    url = "{0}/{1}/{2}".format(url, runtimeInfo.type, !SF.isEmpty(runtimeInfo.id) ? runtimeInfo.id : "");
+    var url = runtimeInfo.isNew ?
+        "{0}/{1}".format(SF.Urls.create, runtimeInfo.type) :
+        "{0}/{1}/{2}".format(SF.Urls.view, runtimeInfo.type, !SF.isEmpty(runtimeInfo.id) ? runtimeInfo.id : "");
 
     if (openNewWindow)
         window.open(url, "_blank");
     else
-        window.location = url;
+        window.location.href = url;
 }
 
 export interface NavigatePopupOptions extends ViewOptionsBase {
@@ -192,7 +193,7 @@ function openPopupView(entityHtml: Entities.EntityHtml, viewOptions: ViewPopupOp
 }
 
 
-export function basicPopupView(entityHtml: Entities.EntityHtml, onOk: () => Promise<boolean>): Promise<void> {
+export function basicPopupView(entityHtml: Entities.EntityHtml, onOk: (div: JQuery) => Promise<boolean>): Promise<void> {
 
     var tempDivId = createTempDiv(entityHtml);
 
@@ -201,17 +202,17 @@ export function basicPopupView(entityHtml: Entities.EntityHtml, onOk: () => Prom
     return new Promise<void>(function (resolve) {
         tempDiv.popup({
             onOk: function () {
-                onOk().then(result => {
+                onOk($("#" + tempDivId)).then(result => {
                     if (result) {
                         var newTempDiv = $("#" + tempDivId);
-                        newTempDiv.popup('destroy');
+                          $("#" + tempDivId).remove();
                         resolve(null);
                     }
                 });
             },
             onCancel: function () {
                 var newTempDiv = $("#" + tempDivId);
-                newTempDiv.popup('destroy');
+                $("#" + tempDivId).remove();
                 resolve(null);
             }
         });
@@ -365,18 +366,9 @@ function requestData(entityHtml: Entities.EntityHtml, options: ViewOptionsBase):
 }
 
 
-export function typeChooser(staticInfo: Entities.StaticInfo): Promise<string> {
-    var types = staticInfo.types();
-    if (types.length == 1) {
-        return Promise.resolve(types[0]);
-    }
-
-    var typesNiceNames = staticInfo.typeNiceNames();
-
-    var options = types.map((t, i) => ({ type: t, text: typesNiceNames[i] }));
-
-    return chooser(staticInfo.prefix, lang.signum.chooseAType, options)
-        .then(t=> t == null ? null : t.type);
+export function typeChooser(prefix: string, types: ChooserOption[]): Promise<string> {
+    return chooser(prefix, lang.signum.chooseAType, types)
+        .then(t=> t == null ? null : t.value);
 }
 
 export function chooser<T>(prefix: string, title: string, options: T[], getStr?: (data: T) => string, getValue?: (data: T) => string): Promise<T> {
@@ -436,41 +428,43 @@ export interface ChooserOption {
     toStr: string;
 }
 
-export enum ValueLineBoxType {
-    String,
+export enum ValueLineType {
     Boolean,
-    Integer,
-    Decimal,
+    RadioButtons,
+    Combo,
     DateTime,
+    TextBox,
+    TextArea,
+    Number
 }
 
 export interface ValueLineBoxOptions {
-    type: ValueLineBoxType;
+    type: ValueLineType;
     title: string;
-    fieldName: string;
+    labelText: string;
     message: string;
     prefix: string;
-
-    intValue: number;
-    decimalValue: number;
-    boolValue: boolean;
-    stringValue: string;
-    dateValue: string;
+    value: any;
 }
 
-export function valueLineBox(options: ValueLineBoxOptions) : Promise<FormObject>
+export function valueLineBox(options: ValueLineBoxOptions) : Promise<string>
 {
-    return viewPopup(Entities.EntityHtml.withoutType(options.prefix), {
-        controllerUrl: SF.Urls.valueLineBox,
-        requestExtraJsonData: options,
-    }).then(eHtml=> {
-            if (!eHtml)
-                return null;
+    return new Promise<string>(resolve => {
+        requestHtml(Entities.EntityHtml.withoutType(options.prefix), {
+            controllerUrl: SF.Urls.valueLineBox,
+            requestExtraJsonData: options,
+        }).then(eHtml=> {
+                var result = null;
+                basicPopupView(eHtml, div => {
+                    var input = div.find(":input:not(:button)");
+                    if (input.length != 1)
+                        throw new Error("{0} inputs found in ValueLineBox".format(input.length)); 
 
-            var result = Validator.getFormValuesHtml(eHtml);
-            result["valueLinePrefix"] = eHtml.prefix;
-            return result;
-        });
+                    result = input.val();
+                    return Promise.resolve(true);
+                }).then(() => resolve(result));
+            }); 
+    }); 
 }
 
 

@@ -7,13 +7,14 @@ var __extends = this.__extends || function (d, b) {
 };
 define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Validator", "Framework/Signum.Web/Signum/Scripts/Navigator", "Framework/Signum.Web/Signum/Scripts/Finder"], function(require, exports, Entities, Validator, Navigator, Finder) {
     var EntityBase = (function () {
-        function EntityBase(element, _options) {
+        function EntityBase(element, options) {
             this.element = element;
             this.element.data("SF-control", this);
-            this.options = $.extend({
-                prefix: "",
-                partialViewName: ""
-            }, _options);
+            this.options = options;
+            var temp = $(this.pf(Entities.Keys.template));
+
+            if (temp.length > 0)
+                this.options.template = temp.html().replaceAll("<scriptX", "<script").replaceAll("</scriptX", "</script");
 
             this._create();
         }
@@ -25,22 +26,16 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var _this = this;
             var $txt = $(this.pf(Entities.Keys.toStr) + ".sf-entity-autocomplete");
             if ($txt.length > 0) {
-                var url = $txt.attr("data-url");
-
-                this.autoCompleter = new AjaxEntityAutoCompleter(url || SF.Urls.autocomplete, function (term) {
-                    return ({ types: _this.staticInfo().getValue(Entities.StaticInfo._types), l: 5, q: term });
+                this.autoCompleter = new AjaxEntityAutocompleter(this.options.autoCompleteUrl || SF.Urls.autocomplete, function (term) {
+                    return ({ types: _this.options.types.join(","), l: 5, q: term });
                 });
 
                 this.setupAutocomplete($txt);
             }
         };
 
-        EntityBase.prototype.runtimeInfo = function (itemPrefix) {
+        EntityBase.prototype.runtimeInfoHiddenElement = function (itemPrefix) {
             return $(this.pf(Entities.Keys.runtimeInfo));
-        };
-
-        EntityBase.prototype.staticInfo = function () {
-            return new Entities.StaticInfo(this.options.prefix);
         };
 
         EntityBase.prototype.pf = function (s) {
@@ -50,7 +45,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         EntityBase.prototype.containerDiv = function (itemPrefix) {
             var containerDivId = this.pf(EntityBase.key_entity);
             if ($(containerDivId).length == 0)
-                this.runtimeInfo().after(SF.hiddenDiv(containerDivId.after('#'), ""));
+                this.runtimeInfoHiddenElement().after(SF.hiddenDiv(containerDivId.after('#'), ""));
 
             return $(containerDivId);
         };
@@ -88,7 +83,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             this.setEntitySpecific(entityValue);
 
             if (entityValue)
-                entityValue.assertPrefixAndType(this.options.prefix, this.staticInfo());
+                entityValue.assertPrefixAndType(this.options.prefix, this.options.types);
 
             SF.triggerNewContent(this.containerDiv().html(entityValue == null ? null : entityValue.html));
             Entities.RuntimeInfo.setFromPrefix(this.options.prefix, entityValue == null ? null : entityValue.runtimeInfo);
@@ -126,20 +121,30 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             });
         };
 
+        EntityBase.prototype.typeChooser = function () {
+            var _this = this;
+            return Navigator.typeChooser(this.options.prefix, this.options.types.map(function (t, i) {
+                return ({ value: t, toStr: _this.options.typeNiceNames[i] });
+            }));
+        };
+
+        EntityBase.prototype.singleType = function () {
+            if (this.options.types.length != 1)
+                throw new Error("There are {0} types in {1}".format(this.options.types.length, this.options.prefix));
+
+            return this.options.types[0];
+        };
+
         EntityBase.prototype.onCreating = function (prefix) {
             var _this = this;
             if (this.creating != null)
                 return this.creating(prefix);
 
-            return Navigator.typeChooser(this.staticInfo()).then(function (type) {
+            return this.typeChooser().then(function (type) {
                 if (type == null)
                     return null;
 
-                var newEntity = new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true));
-
-                var template = _this.getEmbeddedTemplate(prefix);
-                if (!SF.isEmpty(template))
-                    newEntity.html = $(template);
+                var newEntity = _this.options.template ? _this.getEmbeddedTemplate(prefix) : new Entities.EntityHtml(prefix, new Entities.RuntimeInfo(type, null, true));
 
                 return Navigator.viewPopup(newEntity, _this.defaultViewOptions());
             });
@@ -149,7 +154,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (!this.options.template)
                 throw new Error("no template in " + this.options.prefix);
 
-            var result = new Entities.EntityHtml(this.options.prefix, new Entities.RuntimeInfo(this.staticInfo().singleType(), null, true));
+            var result = new Entities.EntityHtml(this.options.prefix, new Entities.RuntimeInfo(this.singleType(), null, true));
 
             result.loadHtml(this.options.template);
 
@@ -187,7 +192,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (this.finding != null)
                 return this.finding(prefix);
 
-            return Navigator.typeChooser(this.staticInfo()).then(function (type) {
+            return this.typeChooser().then(function (type) {
                 if (type == null)
                     return null;
 
@@ -200,8 +205,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         EntityBase.prototype.defaultViewOptions = function () {
             return {
-                readOnly: this.staticInfo().isReadOnly(),
-                partialViewName: this.options.partialViewName
+                readOnly: this.options.isReadonly,
+                partialViewName: this.options.partialViewName,
+                validationOptions: {
+                    rootType: this.options.rootType,
+                    propertyRoute: this.options.propertyRoute
+                }
             };
         };
 
@@ -252,12 +261,12 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     })();
     exports.EntityBase = EntityBase;
 
-    var AjaxEntityAutoCompleter = (function () {
-        function AjaxEntityAutoCompleter(controllerUrl, getData) {
+    var AjaxEntityAutocompleter = (function () {
+        function AjaxEntityAutocompleter(controllerUrl, getData) {
             this.controllerUrl = controllerUrl;
             this.getData = getData;
         }
-        AjaxEntityAutoCompleter.prototype.getResults = function (term) {
+        AjaxEntityAutocompleter.prototype.getResults = function (term) {
             var _this = this;
             if (this.lastXhr)
                 this.lastXhr.abort();
@@ -269,15 +278,15 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     success: function (data) {
                         this.lastXhr = null;
                         resolve(data.map(function (item) {
-                            return new Entities.EntityValue(new Entities.RuntimeInfo(item.type, parseInt(item.id), false), item.text, item.link);
+                            return new Entities.EntityValue(new Entities.RuntimeInfo(item.type, item.id, false), item.text, item.link);
                         }));
                     }
                 });
             });
         };
-        return AjaxEntityAutoCompleter;
+        return AjaxEntityAutocompleter;
     })();
-    exports.AjaxEntityAutoCompleter = AjaxEntityAutoCompleter;
+    exports.AjaxEntityAutocompleter = AjaxEntityAutocompleter;
 
     var EntityLine = (function (_super) {
         __extends(EntityLine, _super);
@@ -371,9 +380,9 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 return this.creating(prefix);
 
             if (this.options.template)
-                return Promise.resolve(this.getEmbeddedTemplate());
+                return Promise.resolve(this.getEmbeddedTemplate(prefix));
 
-            return Navigator.typeChooser(this.staticInfo()).then(function (type) {
+            return this.typeChooser().then(function (type) {
                 if (type == null)
                     return null;
 
@@ -423,11 +432,11 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (!this.options.template)
                 throw new Error("no template in " + this.options.prefix);
 
-            var result = new Entities.EntityHtml(itemPrefix, new Entities.RuntimeInfo(this.staticInfo().singleType(), null, true));
+            var result = new Entities.EntityHtml(itemPrefix, new Entities.RuntimeInfo(this.singleType(), null, true));
 
             var replaced = this.options.template.replace(new RegExp(SF.compose(this.options.prefix, "0"), "gi"), itemPrefix);
 
-            result.loadHtml(this.options.template);
+            result.loadHtml(replaced);
 
             return result;
         };
@@ -452,7 +461,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             this.setEntitySpecific(entityValue, itemPrefix);
 
-            entityValue.assertPrefixAndType(itemPrefix, this.staticInfo());
+            entityValue.assertPrefixAndType(itemPrefix, this.options.types);
 
             if (entityValue.isLoaded())
                 SF.triggerNewContent(this.containerDiv(itemPrefix).html(entityValue.html));
@@ -485,7 +494,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             this.addEntitySpecific(entityValue, itemPrefix);
 
             if (entityValue)
-                entityValue.assertPrefixAndType(itemPrefix, this.staticInfo());
+                entityValue.assertPrefixAndType(itemPrefix, this.options.types);
 
             if (entityValue.isLoaded())
                 SF.triggerNewContent(this.containerDiv(itemPrefix).html(entityValue.html));
@@ -581,7 +590,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (this.findingMany != null)
                 return this.findingMany(prefix);
 
-            return Navigator.typeChooser(this.staticInfo()).then(function (type) {
+            return this.typeChooser().then(function (type) {
                 if (type == null)
                     return null;
 
@@ -818,7 +827,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (this.options.template)
                 return Promise.resolve(this.getEmbeddedTemplate(prefix));
 
-            return Navigator.typeChooser(this.staticInfo()).then(function (type) {
+            return this.typeChooser().then(function (type) {
                 if (type == null)
                     return null;
 
@@ -892,7 +901,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             if (this.options.template)
                 return Promise.resolve(this.getEmbeddedTemplate(prefix));
 
-            return Navigator.typeChooser(this.staticInfo()).then(function (type) {
+            return this.typeChooser().then(function (type) {
                 if (type == null)
                     return null;
 

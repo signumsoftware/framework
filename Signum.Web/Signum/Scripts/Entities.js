@@ -17,88 +17,9 @@ define(["require", "exports"], function(require, exports) {
         link: "sfLink",
         loading: "loading",
         entityState: "sfEntityState",
+        template: "sfTemplate",
         viewMode: "sfViewMode"
     };
-
-    var StaticInfo = (function () {
-        function StaticInfo(prefix) {
-            this.prefix = prefix;
-        }
-        StaticInfo.prototype.find = function () {
-            if (!this.$elem) {
-                this.$elem = $('#' + SF.compose(this.prefix, exports.Keys.staticInfo));
-            }
-            return this.$elem;
-        };
-
-        StaticInfo.prototype.value = function () {
-            return this.find().val();
-        };
-
-        StaticInfo.prototype.toArray = function () {
-            return this.value().split(";");
-        };
-
-        StaticInfo.prototype.toValue = function (array) {
-            return array.join(";");
-        };
-
-        StaticInfo.prototype.getValue = function (key) {
-            var array = this.toArray();
-            return array[key];
-        };
-
-        StaticInfo.prototype.singleType = function () {
-            var typeArray = this.types();
-            if (typeArray.length !== 1) {
-                throw "types should have only one element for element {0}".format(this.prefix);
-            }
-            return typeArray[0];
-        };
-
-        StaticInfo.prototype.types = function () {
-            return this.getValue(StaticInfo._types).split(',');
-        };
-
-        StaticInfo.prototype.typeNiceNames = function () {
-            return this.getValue(StaticInfo._typeNiceNames).split(',');
-        };
-
-        StaticInfo.prototype.isEmbedded = function () {
-            return this.getValue(StaticInfo._isEmbedded) == "e";
-        };
-
-        StaticInfo.prototype.isReadOnly = function () {
-            return this.getValue(StaticInfo._isReadOnly) == "r";
-        };
-
-        StaticInfo.prototype.rootType = function () {
-            return this.getValue(StaticInfo._rootType);
-        };
-
-        StaticInfo.prototype.propertyRoute = function () {
-            return this.getValue(StaticInfo._propertyRoute);
-        };
-
-        StaticInfo.getFor = function (prefix) {
-            if (!prefix)
-                throw new Error("prefix not provided");
-
-            var staticInfo = new StaticInfo(prefix);
-            if (staticInfo.find().length > 0)
-                return staticInfo;
-
-            return new StaticInfo(prefix.tryBeforeLast("_") || prefix);
-        };
-        StaticInfo._types = 0;
-        StaticInfo._typeNiceNames = 1;
-        StaticInfo._isEmbedded = 2;
-        StaticInfo._isReadOnly = 3;
-        StaticInfo._rootType = 4;
-        StaticInfo._propertyRoute = 5;
-        return StaticInfo;
-    })();
-    exports.StaticInfo = StaticInfo;
 
     var RuntimeInfo = (function () {
         function RuntimeInfo(entityType, id, isNew, ticks) {
@@ -169,9 +90,7 @@ define(["require", "exports"], function(require, exports) {
             this.toStr = toString;
             this.link = link;
         }
-        EntityValue.prototype.assertPrefixAndType = function (prefix, staticInfo) {
-            var types = staticInfo.types();
-
+        EntityValue.prototype.assertPrefixAndType = function (prefix, types) {
             if (types.length == 0 && types[0] == "[All]")
                 return;
 
@@ -196,8 +115,8 @@ define(["require", "exports"], function(require, exports) {
 
             this.prefix = prefix;
         }
-        EntityHtml.prototype.assertPrefixAndType = function (prefix, staticInfo) {
-            _super.prototype.assertPrefixAndType.call(this, prefix, staticInfo);
+        EntityHtml.prototype.assertPrefixAndType = function (prefix, types) {
+            _super.prototype.assertPrefixAndType.call(this, prefix, types);
 
             if (this.prefix != null && this.prefix != prefix)
                 throw Error("EntityHtml prefix should be {0} instead of  {1}".format(prefix, this.prefix));
