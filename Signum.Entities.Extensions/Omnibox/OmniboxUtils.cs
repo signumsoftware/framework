@@ -112,7 +112,7 @@ namespace Signum.Entities.Omnibox
             return new OmniboxMatch(value,
                 remaining: identifier.Length - pattern.Length,
                 choosenString: identifier,
-                boldIndices: indices);
+                boldIndices: indices ?? new bool[identifier.Length]);
         }
 
         public static string CleanCommas(string str)

@@ -7,76 +7,79 @@
 <div>
     <h2>@ViewData[ViewDataKeys.Title]</h2>
     <div>
-        <a href="@Url.Action((SchedulerController sc) => sc.Stop())" class="sf-button" style="@(Model.Running ? "" : "display:none");color:red" id="sfProcessDisable">
-            Stop </a>
-        <a href="@Url.Action((SchedulerController sc) => sc.Start())" class="sf-button"  style="@(!Model.Running ? "" : "display:none")" id="sfProcessEnable">
-                Start </a>
+        <a href="@Url.Action((SchedulerController sc) => sc.Stop())" class="sf-button" style="@(Model.Running ? "" : "display:none");color:red" id="sfSchedulerDisable">Stop </a>
+        <a href="@Url.Action((SchedulerController sc) => sc.Start())" class="sf-button"  style="@(!Model.Running ? "" : "display:none")" id="sfSchedulerEnable">Start </a>
     </div>
-    <div id="processMainDiv">
-    <br />
-    <h2>SchedulerLogic state in @Environment.MachineName</h2>
-
-    State: <strong>
-        @if (Model.Running)
-        {
-            <span style="color: Green">RUNNING</span>
-        }
-        else
-        {
-            <span style="color: Red">STOPPED</span>
-        }</strong>
+    <script>
+        $(function () {
+                @(new JsFunction(SchedulerClient.Module, "initControlPanel"))
+            });
+    </script>
+    <div id="schedulerMainDiv">
         <br />
-    SchedulerMargin: @Model.SchedulerMargin
-    <br />
-    NextExecution: @Model.NextExecution  (@(Model.NextExecution == null? "-None-" : Model.NextExecution.Value.ToAgoString()))
+        <h2>SchedulerLogic state in @Environment.MachineName</h2>
+
+        State: <strong>
+            @if (Model.Running)
+            {
+                <span style="color: Green">RUNNING</span>
+            }
+            else
+            {
+                <span style="color: Red">STOPPED</span>
+            }</strong>
+        <br />
+        SchedulerMargin: @Model.SchedulerMargin
+        <br />
+        NextExecution: @Model.NextExecution  (@(Model.NextExecution == null ? "-None-" : Model.NextExecution.Value.ToAgoString()))
     <br />
         <h3>In Memory Queue</h3>
-    <table class="sf-search-results sf-stats-table">
-        <thead>
-            <tr>
-                <th>ScheduledTask
-                </th>
-                <th>Rule
-                </th>
-                <th>NextExecution
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model.Queue)
-            {
+        <table class="sf-search-results sf-stats-table">
+            <thead>
                 <tr>
-                    <td>@Html.LightEntityLine(item.ScheduledTask, true)
-                    </td>
-                    <td>@item.Rule
-                    </td>
-                    <td>@item.NextExecution (@item.NextExecution.ToAgoString())
-                    </td>
+                    <th>ScheduledTask
+                    </th>
+                    <th>Rule
+                    </th>
+                    <th>NextExecution
+                    </th>
                 </tr>
-            }
-        </tbody>
-    </table>
-        
-    <br />
-    <h2>@typeof(ScheduledTaskDN).NicePluralName()</h2>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Queue)
+                {
+                    <tr>
+                        <td>@Html.LightEntityLine(item.ScheduledTask, true)
+                        </td>
+                        <td>@item.Rule
+                        </td>
+                        <td>@item.NextExecution (@item.NextExecution.ToAgoString())
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
 
-    @Html.SearchControl(new FindOptions(typeof(ScheduledTaskDN))
+        <br />
+        <h2>@typeof(ScheduledTaskDN).NicePluralName()</h2>
+
+        @Html.SearchControl(new FindOptions(typeof(ScheduledTaskDN))
 {
     FilterMode = Signum.Web.FilterMode.Hidden,
     SearchOnLoad = true,
     Pagination = new Pagination.Firsts(10),
 }, new Context(null, "st"))
-    <br />
-    <br />
-    <h2>@typeof(ScheduledTaskLogDN).NicePluralName()</h2>
+        <br />
+        <br />
+        <h2>@typeof(ScheduledTaskLogDN).NicePluralName()</h2>
 
-    @Html.SearchControl(new FindOptions(typeof(ScheduledTaskLogDN))
+        @Html.SearchControl(new FindOptions(typeof(ScheduledTaskLogDN))
 {
     OrderOptions = { new OrderOption("StartTime", Signum.Entities.DynamicQuery.OrderType.Descending) },
     FilterMode = Signum.Web.FilterMode.Hidden,
     SearchOnLoad = true,
     Pagination = new Pagination.Firsts(10),
 }, new Context(null, "stl"))
-    <br />
-</div>
+        <br />
+    </div>
 </div>

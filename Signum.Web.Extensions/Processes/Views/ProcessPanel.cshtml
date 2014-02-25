@@ -12,7 +12,7 @@
     </div>
 
     @Html.Partial(ProcessesClient.ViewPrefix.Formato("ProcessPanelTable"))
-    <script language="javascript">
+    <script>
         $(function () {
              @(new JsFunction(ProcessesClient.Module, "initControlPanel", Url.Action((ProcessController p) => p.View())))
         });
