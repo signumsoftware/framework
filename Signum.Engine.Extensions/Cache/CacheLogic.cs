@@ -341,10 +341,8 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(database.TryToString() ?? Connector.C
                 ee.PreUnsafeDelete += PreUnsafeDelete;
                 ee.PreUnsafeUpdate += UnsafeUpdated;
                 ee.PreUnsafeInsert += UnsafeInsert;
-
-            }
-
-         
+                ee.PreUnsafeMListDelete += PreUnsafeMListDelete;
+            }         
 
             public void BuildCachedTable()
             {
@@ -360,6 +358,14 @@ ALTER DATABASE {0} SET NEW_BROKER".Formato(database.TryToString() ?? Connector.C
             }
 
             void UnsafeUpdated(IUpdateable update, IQueryable<T> entityQuery)
+            {
+                DisableAllConnectedTypesInTransaction(typeof(T));
+
+                Transaction.PostRealCommit -= Transaction_PostRealCommit;
+                Transaction.PostRealCommit += Transaction_PostRealCommit;
+            }
+
+            void PreUnsafeMListDelete(IQueryable mlistQuery, IQueryable<T> entityQuery)
             {
                 DisableAllConnectedTypesInTransaction(typeof(T));
 
