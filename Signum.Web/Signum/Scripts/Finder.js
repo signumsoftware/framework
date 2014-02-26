@@ -61,6 +61,13 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
     }
     exports.find = find;
 
+    (function (RequestType) {
+        RequestType[RequestType["QueryRequest"] = 0] = "QueryRequest";
+        RequestType[RequestType["FindOptions"] = 1] = "FindOptions";
+        RequestType[RequestType["FullScreen"] = 2] = "FullScreen";
+    })(exports.RequestType || (exports.RequestType = {}));
+    var RequestType = exports.RequestType;
+
     function findInternal(findOptions) {
         return new Promise(function (resolve) {
             $.ajax({
@@ -504,7 +511,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         SearchControl.prototype.fullScreen = function (evt) {
             var urlParams = this.requestDataForSearchInUrl();
 
-            var url = this.element.attr("data-find-url") + urlParams;
+            var url = this.element.attr("data-find-url") + "?" + urlParams;
             if (evt.ctrlKey || evt.which == 2) {
                 window.open(url);
             } else if (evt.which == 1) {
@@ -519,7 +526,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var self = this;
             $.ajax({
                 url: SF.Urls.search,
-                data: this.requestDataForSearch(),
+                data: this.requestDataForSearch(0 /* QueryRequest */),
                 success: function (r) {
                     var $tbody = self.element.find(".sf-search-results-container tbody");
                     if (!SF.isEmpty(r)) {
@@ -535,22 +542,26 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         SearchControl.prototype.requestDataForSearchInUrl = function () {
-            var form = this.requestDataForSearch();
-            form["webQueryName"] = undefined;
+            var form = this.requestDataForSearch(2 /* FullScreen */);
 
             return $.param(form);
         };
 
-        SearchControl.prototype.requestDataForSearch = function () {
+        SearchControl.prototype.requestDataForSearch = function (type) {
             var requestData = {};
-            requestData["webQueryName"] = this.options.webQueryName;
+            if (type != 2 /* FullScreen */)
+                requestData["webQueryName"] = this.options.webQueryName;
+
             requestData["pagination"] = $(this.pf(this.keys.pagination)).val();
             requestData["elems"] = $(this.pf(this.keys.elems)).val();
             requestData["page"] = ($(this.pf(this.keys.page)).val() || "1");
             requestData["allowSelection"] = this.options.allowSelection;
             requestData["navigate"] = this.options.navigate;
             requestData["filters"] = this.serializeFilters();
-            requestData["filterMode"] = this.options.filterMode;
+
+            if (type != 2 /* FullScreen */)
+                requestData["filterMode"] = this.options.filterMode;
+
             requestData["orders"] = this.serializeOrders();
             requestData["columns"] = this.serializeColumns();
             requestData["columnMode"] = 'Replace';
