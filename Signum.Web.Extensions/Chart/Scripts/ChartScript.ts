@@ -2,6 +2,13 @@
 
 declare var CodeMirror: any;
 
+import Entities = require("Framework/Signum.Web/Signum/Scripts/Entities")
+import Lines = require("Framework/Signum.Web/Signum/Scripts/Lines")
+import Finder = require("Framework/Signum.Web/Signum/Scripts/Finder")
+import Validator = require("Framework/Signum.Web/Signum/Scripts/Validator")
+import Operations = require("Framework/Signum.Web/Signum/Scripts/Operations")
+import Files = require("Extensions/Signum.Web.Extensions/Files/Scripts/Files")
+
 export function init($textArea: JQuery) {
 
     var changedDelay;
@@ -74,5 +81,12 @@ export function init($textArea: JQuery) {
     CodeMirror.commands.autoFormatSelection = function (cm) {
         var range = getSelectedRange();
         editor.autoFormatRange(range.from, range.to);
+    }
+}
+
+export function refreshIcon(fileLine: Files.FileLine,imageId:string)
+{
+    fileLine.entityChanged = () => {
+        $('#' + imageId).attr("src", fileLine.getLink());
     }
 }
