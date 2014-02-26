@@ -12,7 +12,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
     function openChart(prefix, url) {
         Finder.getFor(prefix).then(function (sc) {
-            return SF.submit(url, sc.requestDataForSearch());
+            return SF.submit(url, sc.requestDataForSearch(1 /* FindOptions */));
         });
     }
     exports.openChart = openChart;

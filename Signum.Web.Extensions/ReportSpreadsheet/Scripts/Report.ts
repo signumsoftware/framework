@@ -8,7 +8,7 @@ import Operations = require("Framework/Signum.Web/Signum/Scripts/Operations")
 export function toPlainExcel(prefix: string, url: string) {
     Finder.getFor(prefix).then(sc=> {
 
-        var info = sc.requestDataForSearch();
+        var info = sc.requestDataForSearch(Finder.RequestType.QueryRequest);
 
         return SF.submitOnly(url, info);
     }); 
@@ -17,7 +17,7 @@ export function toPlainExcel(prefix: string, url: string) {
 export function toExcelReport(prefix: string, url: string, excelReportKey : string) {
     Finder.getFor(prefix).then(sc=>
     {
-        var info = sc.requestDataForSearch();
+        var info = sc.requestDataForSearch(Finder.RequestType.QueryRequest);
 
         return SF.submitOnly(url, $.extend({ excelReport: excelReportKey }, info));
     });
