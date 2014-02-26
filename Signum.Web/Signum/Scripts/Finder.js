@@ -648,6 +648,10 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             return SearchControl.getSelectedItems(this.options.prefix);
         };
 
+        SearchControl.prototype.selectedItemsLiteKeys = function () {
+            return SearchControl.liteKeys(this.selectedItems());
+        };
+
         SearchControl.prototype.hasSelectedItems = function (onSuccess) {
             var items = this.selectedItems();
             if (items.length == 0) {

@@ -685,6 +685,10 @@ export class SearchControl {
         return SearchControl.getSelectedItems(this.options.prefix); 
     }
 
+    selectedItemsLiteKeys() : string {
+        return SearchControl.liteKeys(this.selectedItems());
+    }
+
     hasSelectedItems(onSuccess: (item: Array<Entities.EntityValue>) => void) {
         var items = this.selectedItems();
         if (items.length == 0) {

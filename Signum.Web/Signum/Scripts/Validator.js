@@ -43,9 +43,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
     function constructRequestData(valOptions) {
         SF.log("Validator constructRequestData");
 
-        var formValues = exports.getFormValues(valOptions.prefix);
-
-        formValues["prefix"] = valOptions.prefix;
+        var formValues = exports.getFormValues(valOptions.prefix, "prefix");
 
         if (valOptions.rootType)
             formValues["rootType"] = valOptions.rootType;
@@ -56,35 +54,48 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
         return $.extend(formValues, valOptions.requestExtraJsonData);
     }
 
-    function getFormValues(prefix) {
-        if (!prefix)
-            return cleanFormInputs($("form :input")).serializeObject();
+    function getFormValues(prefix, prefixRequestKey) {
+        var result;
+        if (!prefix) {
+            result = cleanFormInputs($("form :input")).serializeObject();
+        } else {
+            var mainControl = $("#{0}_divMainControl".format(prefix));
 
-        var mainControl = $("#{0}_divMainControl".format(prefix));
+            result = cleanFormInputs(mainControl.find(":input")).serializeObject();
 
-        var result = cleanFormInputs(mainControl.find(":input")).serializeObject();
+            result[SF.compose(prefix, Entities.Keys.runtimeInfo)] = mainControl.data("runtimeinfo");
 
-        result[SF.compose(prefix, Entities.Keys.runtimeInfo)] = mainControl.data("runtimeinfo");
+            result = $.extend(result, exports.getFormBasics());
+        }
 
-        return $.extend(result, exports.getFormBasics());
+        if (prefixRequestKey)
+            result[prefixRequestKey] = prefix;
+
+        return result;
     }
     exports.getFormValues = getFormValues;
 
-    function getFormValuesLite(prefix) {
+    function getFormValuesLite(prefix, prefixRequestKey) {
         var result = exports.getFormBasics();
 
         result[SF.compose(prefix, Entities.Keys.runtimeInfo)] = prefix ? $("#{0}_divMainControl".format(prefix)).data("runtimeinfo") : $('#' + SF.compose(prefix, Entities.Keys.runtimeInfo)).val();
+
+        if (prefixRequestKey)
+            result[prefixRequestKey] = prefix;
 
         return result;
     }
     exports.getFormValuesLite = getFormValuesLite;
 
-    function getFormValuesHtml(entityHtml) {
+    function getFormValuesHtml(entityHtml, prefixRequestKey) {
         var mainControl = entityHtml.html.find("#{0}_divMainControl".format(entityHtml.prefix));
 
         var result = cleanFormInputs(mainControl.find(":input")).serializeObject();
 
         result[SF.compose(entityHtml.prefix, Entities.Keys.runtimeInfo)] = mainControl.data("runtimeinfo");
+
+        if (prefixRequestKey)
+            result[prefixRequestKey] = entityHtml.prefix;
 
         return $.extend(result, exports.getFormBasics());
     }
@@ -98,6 +109,11 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities"], f
     function cleanFormInputs(form) {
         return form.not(".sf-search-control :input");
     }
+
+    function isModelState(result) {
+        return typeof result == "Object" && typeof result.ModelState != "undefined";
+    }
+    exports.isModelState = isModelState;
 
     function showErrors(valOptions, modelState) {
         valOptions = $.extend({

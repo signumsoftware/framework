@@ -440,4 +440,8 @@ once("stringExtensions", function () {
         };
     }
 });
+
+function getThis(func) {
+    func(this);
+}
 //# sourceMappingURL=SF.js.map
