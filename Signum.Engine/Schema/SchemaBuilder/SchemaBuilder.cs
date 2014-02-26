@@ -766,8 +766,8 @@ namespace Signum.Engine.Maps
                 if (e.IsGraphModified)
                     action();
             };
-            ee.PreUnsafeUpdate += (u, q) => action();
-            ee.PreUnsafeDelete += q => action();
+            ee.PreUnsafeUpdate += (u, eq) => action();
+            ee.PreUnsafeDelete += (q) => action();
         }
 
         public virtual void OnLoad(SchemaBuilder sb, InvalidateWith invalidateWith)

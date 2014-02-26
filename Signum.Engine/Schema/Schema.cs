@@ -141,15 +141,26 @@ namespace Signum.Engine.Maps
             entityEventsGlobal.OnRetrieved(entity);
         }
 
-        internal void OnPreUnsafeDelete<T>(IQueryable<T> query) where T : IdentifiableEntity
+        internal void OnPreUnsafeDelete<T>(IQueryable<T> entityQuery) where T : IdentifiableEntity
         {
             AssertAllowed(typeof(T));
 
             EntityEvents<T> ee = (EntityEvents<T>)entityEvents.TryGetC(typeof(T));
 
             if (ee != null)
-                ee.OnPreUnsafeDelete(query);
+                ee.OnPreUnsafeDelete(entityQuery);
         }
+
+        internal void OnPreUnsafeMListDelete<T>(IQueryable mlistQuery, IQueryable<T> entityQuery) where T : IdentifiableEntity
+        {
+            AssertAllowed(typeof(T));
+
+            EntityEvents<T> ee = (EntityEvents<T>)entityEvents.TryGetC(typeof(T));
+
+            if (ee != null)
+                ee.OnPreUnsafeMListDelete(mlistQuery, entityQuery);
+        }
+
 
         internal void OnPreUnsafeUpdate(IUpdateable update)
         {
@@ -625,6 +636,7 @@ namespace Signum.Engine.Maps
         public event FilterQueryEventHandler<T> FilterQuery;
 
         public event DeleteHandler<T> PreUnsafeDelete;
+        public event DeleteMlistHandler<T> PreUnsafeMListDelete;
 
         public event UpdateHandler<T> PreUnsafeUpdate;
 
@@ -644,11 +656,18 @@ namespace Signum.Engine.Maps
             get { return FilterQuery != null; }
         }
 
-        internal void OnPreUnsafeDelete(IQueryable<T> query)
+        internal void OnPreUnsafeDelete(IQueryable<T> entityQuery)
         {
             if (PreUnsafeDelete != null)
                 foreach (DeleteHandler<T> action in PreUnsafeDelete.GetInvocationList().Reverse())
-                    action(query);
+                    action(entityQuery);
+        }
+
+        internal void OnPreUnsafeMListDelete(IQueryable mlistQuery, IQueryable<T> entityQuery)
+        {
+            if (PreUnsafeMListDelete != null)
+                foreach (DeleteMlistHandler<T> action in PreUnsafeMListDelete.GetInvocationList().Reverse())
+                    action(mlistQuery, entityQuery);
         }
 
         void IEntityEvents.OnPreUnsafeUpdate(IUpdateable update)
@@ -700,7 +719,8 @@ namespace Signum.Engine.Maps
     public delegate void SavedEventHandler<T>(T ident, SavedEventArgs args) where T : IdentifiableEntity;
     public delegate IQueryable<T> FilterQueryEventHandler<T>(IQueryable<T> query);
 
-    public delegate void DeleteHandler<T>(IQueryable<T> query);
+    public delegate void DeleteHandler<T>(IQueryable<T> entityQuery);
+    public delegate void DeleteMlistHandler<T>(IQueryable mlistQuery, IQueryable<T> entityQuery);
     public delegate void UpdateHandler<T>(IUpdateable update, IQueryable<T> entityQuery);
     public delegate void InsertHandler<T>(IQueryable query, LambdaExpression constructor, IQueryable<T> entityQuery);
 

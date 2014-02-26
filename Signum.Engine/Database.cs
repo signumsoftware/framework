@@ -761,19 +761,19 @@ namespace Signum.Engine
             }
         }
 
-        public static int UnsafeDelete<E, V>(this IQueryable<MListElement<E, V>> query)
+        public static int UnsafeDelete<E, V>(this IQueryable<MListElement<E, V>> mlistQuery)
             where E : IdentifiableEntity
         {
             using (HeavyProfiler.Log("DBUnsafeDelete", () => typeof(MListElement<E, V>).TypeName()))
             {
-                if (query == null)
+                if (mlistQuery == null)
                     throw new ArgumentNullException("query");
 
                 using (Transaction tr = new Transaction())
                 {
-                    Schema.Current.OnPreUnsafeDelete<E>(query.Select(mle => mle.Parent));
+                    Schema.Current.OnPreUnsafeMListDelete<E>(mlistQuery, mlistQuery.Select(mle => mle.Parent));
 
-                    int rows = DbQueryProvider.Single.Delete(query, cm => cm.ExecuteScalar());
+                    int rows = DbQueryProvider.Single.Delete(mlistQuery, cm => cm.ExecuteScalar());
 
                     return tr.Commit(rows);
                 }
