@@ -68,9 +68,9 @@ export function validate(valOptions: ValidationOptions): Promise<ValidationResul
 function constructRequestData(valOptions: ValidationOptions): FormObject {
     SF.log("Validator constructRequestData");
 
-    var formValues = getFormValues(valOptions.prefix);
+    var formValues = getFormValues(valOptions.prefix, "prefix");
 
-    formValues["prefix"] = valOptions.prefix;
+ 
 
     if (valOptions.rootType)
         formValues["rootType"] = valOptions.rootType
@@ -81,20 +81,29 @@ function constructRequestData(valOptions: ValidationOptions): FormObject {
     return $.extend(formValues, valOptions.requestExtraJsonData);
 }
 
-export function getFormValues(prefix: string) : FormObject {
-    if (!prefix)
-        return cleanFormInputs($("form :input")).serializeObject();
+export function getFormValues(prefix: string, prefixRequestKey?: string) : FormObject {
 
-    var mainControl = $("#{0}_divMainControl".format(prefix)); 
+    var result; 
+    if (!prefix) {
+        result = cleanFormInputs($("form :input")).serializeObject();
+    }
+    else {
+        var mainControl = $("#{0}_divMainControl".format(prefix));
 
-    var result = cleanFormInputs(mainControl.find(":input")).serializeObject(); 
+        result = cleanFormInputs(mainControl.find(":input")).serializeObject();
 
-    result[SF.compose(prefix, Entities.Keys.runtimeInfo)] = mainControl.data("runtimeinfo");
+        result[SF.compose(prefix, Entities.Keys.runtimeInfo)] = mainControl.data("runtimeinfo");
 
-    return $.extend(result, getFormBasics());
+        result = $.extend(result, getFormBasics());
+    }
+
+    if (prefixRequestKey)
+        result[prefixRequestKey] = prefix;
+
+    return result;
 }
 
-export function getFormValuesLite(prefix: string): FormObject {
+export function getFormValuesLite(prefix: string, prefixRequestKey? : string): FormObject {
 
     var result = getFormBasics();
 
@@ -102,16 +111,22 @@ export function getFormValuesLite(prefix: string): FormObject {
         $("#{0}_divMainControl".format(prefix)).data("runtimeinfo") :
         $('#' + SF.compose(prefix, Entities.Keys.runtimeInfo)).val();
 
+    if (prefixRequestKey)
+        result[prefixRequestKey] = prefix;
+
     return result;
 }
 
-export function getFormValuesHtml(entityHtml: Entities.EntityHtml): FormObject {
+export function getFormValuesHtml(entityHtml: Entities.EntityHtml, prefixRequestKey?: string): FormObject {
 
     var mainControl = entityHtml.html.find("#{0}_divMainControl".format(entityHtml.prefix)); 
 
     var result = cleanFormInputs(mainControl.find(":input")).serializeObject();
 
     result[SF.compose(entityHtml.prefix, Entities.Keys.runtimeInfo)] = mainControl.data("runtimeinfo");
+
+    if (prefixRequestKey)
+        result[prefixRequestKey] = entityHtml.prefix;
 
     return $.extend(result, getFormBasics());
 }
@@ -123,6 +138,10 @@ export function getFormBasics(): FormObject {
 
 function cleanFormInputs(form: JQuery): JQuery {
     return form.not(".sf-search-control :input");
+}
+
+export function isModelState(result : any) : boolean {
+    return typeof result == "Object" && typeof result.ModelState != "undefined";
 }
 
 export function showErrors(valOptions: ValidationOptions, modelState: ModelState): boolean {

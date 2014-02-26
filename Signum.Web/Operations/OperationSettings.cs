@@ -134,6 +134,11 @@ namespace Signum.Web.Operations
             return OperationInfo.ToString();
         }
 
+
+        public string Compose(string prefixPart)
+        {
+            return TypeContextUtilities.Compose(this.Prefix, prefixPart); 
+        }
     }
 
     public class ContextualOperationContext : OperationContext
@@ -177,7 +182,7 @@ namespace Signum.Web.Operations
     public class JsOperationFunction : JsFunction
     {
         /// <summary>
-        /// require("module", function(mod) { mod.functionName(operationSettings, arguments...); }
+        /// require("module", function(mod) { mod.functionName(operationOptions, arguments...); }
         /// </summary>
         public JsOperationFunction(string module, string functionName, params object[] arguments) :
             base(module, functionName, arguments)
