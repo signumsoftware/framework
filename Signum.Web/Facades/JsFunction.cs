@@ -97,6 +97,26 @@ namespace Signum.Web
         }
     }
 
+    public class JsFunctionSender : JsFunction
+    { 
+        /// <summary>
+        /// SF.getThis(function(that){ require("module", function(mod) { mod.functionName(that, arguments...); })});
+        /// </summary>
+        public JsFunctionSender(string module, string functionName, params object[] arguments) 
+            : base(module, functionName, arguments)
+        {
+        }
+
+        public override string ToString()
+        {
+            var varName = VarName(Module);
+
+            var args = this.Arguments.HasText() ? (", " + this.Arguments) : "";
+
+            return "SF.getThis(function(that) { require(['" + Module + "'], function(" + varName + ") { " + varName + "." + FunctionName + "(that" + args + "); }); });";
+        }
+    }
+
     public class ChooserOption
     {
         public ChooserOption(string value, string toStr)
