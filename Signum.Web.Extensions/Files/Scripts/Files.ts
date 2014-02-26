@@ -176,5 +176,14 @@ export class FileLine extends Lines.EntityBase {
 
         $(this.pf("btnRemove")).toggle(hasEntity);
     }
+
+    getLink(itemPrefix?: string): string {
+        return $(this.pf(Entities.Keys.link)).attr("href");
+    }
+
+    getToString(itemPrefix?: string): string {
+        return $(this.pf(Entities.Keys.link)).text();
+    }
+
 }
 

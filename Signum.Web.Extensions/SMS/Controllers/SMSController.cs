@@ -83,7 +83,7 @@ namespace Signum.Web.SMS
         [HttpPost]
         public PartialViewResult SendMultipleSMSMessagesModel()
         {
-            return this.PopupView(new MultipleSMSModel(), Request["newPrefix"]);
+            return this.PopupView(new MultipleSMSModel());
         }
 
         [HttpPost]
