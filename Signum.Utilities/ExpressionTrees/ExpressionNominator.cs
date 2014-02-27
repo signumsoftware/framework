@@ -29,9 +29,16 @@ namespace Signum.Utilities.ExpressionTrees
 
         private bool ExpressionHasDependencies(Expression expression)
         {
-            return
-                expression.NodeType == ExpressionType.Call && ((MethodCallExpression)expression).Method.DeclaringType == typeof(Queryable) ||
-                expression.NodeType == ExpressionType.Parameter ||
+            if(expression.NodeType == ExpressionType.Call)
+            {
+                var m = ((MethodCallExpression)expression); 
+
+                return m.Method.DeclaringType == typeof(Queryable) ||
+                    m.Method.DeclaringType == typeof(LinqHints) && m.Method.Name == "DisableQueryFilter";
+            }
+
+
+            return expression.NodeType == ExpressionType.Parameter ||
                 expression.NodeType == ExpressionType.Lambda || // why? 
                 !EnumExtensions.IsDefined(expression.NodeType);
         }
@@ -76,9 +83,13 @@ namespace Signum.Utilities.ExpressionTrees
             return value;
         }
 
-        public static T DisableQueryFilter<T>(this T value)
+        public static IQueryable<T> DisableQueryFilter<T>(this IQueryable<T> source)
         {
-            return value;
+            if (source == null)
+                throw new ArgumentNullException("source");
+
+            return source.Provider.CreateQuery<T>(Expression.Call(null, ((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(new Type[] { typeof(T) }),
+                new Expression[] { source.Expression }));
         }
 
         public static IQueryable<T> OrderAlsoByKeys<T>(this IQueryable<T> source)
