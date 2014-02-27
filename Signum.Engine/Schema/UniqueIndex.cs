@@ -111,8 +111,9 @@ namespace Signum.Engine.Maps
                 RootFinder = rootFiender
             };
 
+            var newLambda = (LambdaExpression)ExpressionEvaluator.PartialEval(lambda);
 
-            visitor.Visit(lambda.Body);
+            visitor.Visit(newLambda.Body);
 
             return visitor.sb.ToString();
         }

@@ -494,10 +494,6 @@ interface DataTransfer {
     }[]
 }
 
-function getThis(func: (that: any) => void) {
-    func(this);
-}
-
 
 
 

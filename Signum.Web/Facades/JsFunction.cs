@@ -100,7 +100,7 @@ namespace Signum.Web
     public class JsFunctionSender : JsFunction
     { 
         /// <summary>
-        /// SF.getThis(function(that){ require("module", function(mod) { mod.functionName(that, arguments...); })});
+        /// (function(that){ require("module", function(mod) { mod.functionName(that, arguments...); })})(this);
         /// </summary>
         public JsFunctionSender(string module, string functionName, params object[] arguments) 
             : base(module, functionName, arguments)
@@ -113,7 +113,7 @@ namespace Signum.Web
 
             var args = this.Arguments.HasText() ? (", " + this.Arguments) : "";
 
-            return "SF.getThis(function(that) { require(['" + Module + "'], function(" + varName + ") { " + varName + "." + FunctionName + "(that" + args + "); }); });";
+            return "(function(that) { require(['" + Module + "'], function(" + varName + ") { " + varName + "." + FunctionName + "(that" + args + "); }); })(this);";
         }
     }
 
