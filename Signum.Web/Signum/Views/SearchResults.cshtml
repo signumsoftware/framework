@@ -9,8 +9,6 @@
    Implementations implementations = entityColumn.Implementations.Value;
    bool navigable = (bool)ViewData[ViewDataKeys.Navigate] && (implementations.IsByAll ? true : implementations.Types.Any(t => Navigator.IsNavigable(t, null, isSearchEntity: true)));
    bool allowSelection = (bool)ViewData[ViewDataKeys.AllowSelection];
-
-   FilterMode filterMode = (FilterMode)ViewData[ViewDataKeys.FilterMode];
    
    ResultTable queryResult = (ResultTable)ViewData[ViewDataKeys.Results];
    Dictionary<int, CellFormatter> formatters = (Dictionary<int, CellFormatter>)ViewData[ViewDataKeys.Formatters];

@@ -93,6 +93,12 @@ export function find(findOptions: FindOptions): Promise<Entities.EntityValue> {
     return findInternal(findOptions).then(array=> array == null ? null : array[0]);
 }
 
+export enum RequestType {
+    QueryRequest,
+    FindOptions,
+    FullScreen
+}
+
 function findInternal(findOptions: FindOptions): Promise<Array<Entities.EntityValue>> {
     return new Promise<Array<Entities.EntityValue>>(function (resolve) {
         $.ajax({
@@ -536,7 +542,7 @@ export class SearchControl {
 
         var urlParams = this.requestDataForSearchInUrl();
 
-        var url = this.element.attr("data-find-url") + urlParams;
+        var url = this.element.attr("data-find-url") + "?" + urlParams;
         if (evt.ctrlKey || evt.which == 2) {
             window.open(url);
         }
@@ -552,7 +558,7 @@ export class SearchControl {
         var self = this;
         $.ajax({
             url: SF.Urls.search,
-            data: this.requestDataForSearch(),
+            data: this.requestDataForSearch(RequestType.QueryRequest),
             success: function (r) {
                 var $tbody = self.element.find(".sf-search-results-container tbody");
                 if (!SF.isEmpty(r)) {
@@ -569,22 +575,28 @@ export class SearchControl {
     }
 
     requestDataForSearchInUrl(): string {
-        var form = this.requestDataForSearch();
-        form["webQueryName"] = undefined;
+        var form = this.requestDataForSearch(RequestType.FullScreen);
 
         return $.param(form);
     }
 
-    requestDataForSearch() : FormObject {
+
+
+    requestDataForSearch(type: RequestType) : FormObject {
         var requestData: FormObject = {};
-        requestData["webQueryName"] = this.options.webQueryName;
+        if (type != RequestType.FullScreen)
+            requestData["webQueryName"] = this.options.webQueryName;
+
         requestData["pagination"] = $(this.pf(this.keys.pagination)).val();
         requestData["elems"] = $(this.pf(this.keys.elems)).val();
         requestData["page"] = ($(this.pf(this.keys.page)).val() || "1");
         requestData["allowSelection"] = this.options.allowSelection;
         requestData["navigate"] = this.options.navigate;
         requestData["filters"] = this.serializeFilters();
-        requestData["filterMode"] = this.options.filterMode;
+
+        if (type != RequestType.FullScreen)
+            requestData["filterMode"] = this.options.filterMode;
+
         requestData["orders"] = this.serializeOrders();
         requestData["columns"] = this.serializeColumns();
         requestData["columnMode"] = 'Replace';
