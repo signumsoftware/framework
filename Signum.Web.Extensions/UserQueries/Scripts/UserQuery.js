@@ -51,7 +51,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
     function createUserQuery(prefix, url) {
         return Finder.getFor(prefix).then(function (sc) {
-            return SF.submit(url, sc.requestDataForSearch());
+            return SF.submit(url, sc.requestDataForSearch(0 /* QueryRequest */));
         });
     }
     exports.createUserQuery = createUserQuery;

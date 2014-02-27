@@ -13,7 +13,7 @@ import d3 = require("d3")
 
 export function openChart(prefix: string, url: string) {
     Finder.getFor(prefix).then(sc=>
-        SF.submit(url, sc.requestDataForSearch()));
+        SF.submit(url, sc.requestDataForSearch(Finder.RequestType.FindOptions)));
 }
 
 export function attachShowCurrentEntity(el: Lines.EntityLine) {

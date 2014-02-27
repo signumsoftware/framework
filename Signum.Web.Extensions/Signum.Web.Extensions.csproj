@@ -1334,6 +1334,7 @@
       <LastGenOutput>HolidayCalendar.generated.cs</LastGenOutput>
     </None>
     <TypeScriptCompile Include="ReportSpreadsheet\Scripts\Report.ts" />
+    <TypeScriptCompile Include="Scheduler\Scripts\Scheduler.ts" />
     <Content Include="Scheduler\Views\ScheduleRuleMinutely.cshtml">
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>ScheduleRuleMinutely.generated.cs</LastGenOutput>

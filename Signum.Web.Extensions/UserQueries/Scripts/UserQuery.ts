@@ -57,6 +57,6 @@ export function saveUserQuery(os: Operations.EntityOperationOptions, url: string
 
 export function createUserQuery(prefix: string, url: string) {
     return Finder.getFor(prefix).then(sc=>
-        SF.submit(url, sc.requestDataForSearch())); 
+        SF.submit(url, sc.requestDataForSearch(Finder.RequestType.QueryRequest))); 
 }
 

@@ -2,7 +2,7 @@
 define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "Framework/Signum.Web/Signum/Scripts/Navigator", "Framework/Signum.Web/Signum/Scripts/Finder"], function(require, exports, Entities, Navigator, Finder) {
     function toPlainExcel(prefix, url) {
         Finder.getFor(prefix).then(function (sc) {
-            var info = sc.requestDataForSearch();
+            var info = sc.requestDataForSearch(0 /* QueryRequest */);
 
             return SF.submitOnly(url, info);
         });
@@ -11,7 +11,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
     function toExcelReport(prefix, url, excelReportKey) {
         Finder.getFor(prefix).then(function (sc) {
-            var info = sc.requestDataForSearch();
+            var info = sc.requestDataForSearch(0 /* QueryRequest */);
 
             return SF.submitOnly(url, $.extend({ excelReport: excelReportKey }, info));
         });
