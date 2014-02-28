@@ -38,7 +38,7 @@ namespace Signum.Web
             string error = CanChange(route);
 
             if (error.HasText())
-                throw new UnauthorizedAccessException(error); 
+                throw new UnauthorizedAccessException(error);
         }
 
         static Mapping()
@@ -52,7 +52,7 @@ namespace Signum.Web
             MappingRepository<uint>.Mapping = GetValue(ctx => uint.Parse(ctx.Input));
             MappingRepository<long>.Mapping = GetValue(ctx => long.Parse(ctx.Input));
             MappingRepository<ulong>.Mapping = GetValue(ctx => ulong.Parse(ctx.Input));
-            MappingRepository<float>.Mapping = GetValue(ctx => ctx.PropertyRoute != null && ReflectionTools.IsPercentage(Reflector.FormatString(ctx.PropertyRoute), CultureInfo.CurrentCulture) ? (float)ReflectionTools.ParsePercentage(ctx.Input, typeof(float), CultureInfo.CurrentCulture): float.Parse(ctx.Input));
+            MappingRepository<float>.Mapping = GetValue(ctx => ctx.PropertyRoute != null && ReflectionTools.IsPercentage(Reflector.FormatString(ctx.PropertyRoute), CultureInfo.CurrentCulture) ? (float)ReflectionTools.ParsePercentage(ctx.Input, typeof(float), CultureInfo.CurrentCulture) : float.Parse(ctx.Input));
             MappingRepository<double>.Mapping = GetValue(ctx => ctx.PropertyRoute != null && ReflectionTools.IsPercentage(Reflector.FormatString(ctx.PropertyRoute), CultureInfo.CurrentCulture) ? (double)ReflectionTools.ParsePercentage(ctx.Input, typeof(double), CultureInfo.CurrentCulture) : double.Parse(ctx.Input));
             MappingRepository<decimal>.Mapping = GetValue(ctx => ctx.PropertyRoute != null && ReflectionTools.IsPercentage(Reflector.FormatString(ctx.PropertyRoute), CultureInfo.CurrentCulture) ? (decimal)ReflectionTools.ParsePercentage(ctx.Input, typeof(decimal), CultureInfo.CurrentCulture) : decimal.Parse(ctx.Input));
             MappingRepository<DateTime>.Mapping = GetValue(ctx => DateTime.Parse(ctx.Input).FromUserInterface());
@@ -106,14 +106,14 @@ namespace Signum.Web
                 return ctx.None();
 
             DateTime? dateStart;
-            
+
             if (ctx.Parse(out dateStart))
             {
                 if (dateStart.HasValue)
                 {
                     int hours;
                     int mins;
-                    if(ctx.Parse("Hour", out hours) & ctx.Parse("Minute", out mins))
+                    if (ctx.Parse("Hour", out hours) & ctx.Parse("Minute", out mins))
                         return dateStart.Value.AddHours(hours).AddMinutes(mins);
                 }
                 else
@@ -148,7 +148,7 @@ namespace Signum.Web
             int mins;
             if (ctx.Parse("Hour", out hours) & ctx.Parse("Minute", out mins))
                 return new TimeSpan(hours, mins, 0);
-                
+
             if (ctx.IsEmpty("Hour") && ctx.IsEmpty("Minute"))
                 return null;
 
@@ -234,7 +234,7 @@ namespace Signum.Web
 
         static class MappingRepository<T>
         {
-            public static Mapping<T> Mapping; 
+            public static Mapping<T> Mapping;
         }
 
         public static Mapping<T> New<T>()
@@ -313,7 +313,7 @@ namespace Signum.Web
 
         public static List<IDictionary<string, string>> IndexSubDictionaries(this IDictionary<string, string> inputs)
         {
-            return inputs.IndexPrefixes().Select(pf => inputs.SubDictionary(pf)).ToList(); 
+            return inputs.IndexPrefixes().Select(pf => inputs.SubDictionary(pf)).ToList();
         }
 
         public static IDictionary<string, string> SubDictionary(this IDictionary<string, string> sortedList, string nameToAppend)
@@ -336,13 +336,13 @@ namespace Signum.Web
         }
     }
 
-    public class AutoEntityMapping<T> : BaseMapping<T> where T : class 
+    public class AutoEntityMapping<T> : BaseMapping<T> where T : class
     {
         public Dictionary<Type, Delegate> AllowedMappings;
 
         public AutoEntityMapping<T> RegisterMapping<R>(EntityMapping<R> mapping) where R : ModifiableEntity
         {
-            return RegisterMapping((Mapping<R>) mapping);
+            return RegisterMapping((Mapping<R>)mapping);
         }
 
         public AutoEntityMapping<T> RegisterMapping<R>(Mapping<R> mapping) where R : ModifiableEntity
@@ -364,9 +364,9 @@ namespace Signum.Web
                 if (ctx.Empty())
                     return ctx.None();
 
-                 Type entityType;
-                 entityType = GetRuntimeType(ctx);
-          
+                Type entityType;
+                entityType = GetRuntimeType(ctx);
+
 
                 if (entityType == null)
                     return (T)(object)null;
@@ -399,17 +399,17 @@ namespace Signum.Web
                 return ctx.Value.TryCC(t => t.GetType());
         }
 
-        static GenericInvoker<Func<AutoEntityMapping<T>, MappingContext<T>, PropertyRoute, T>> miGetRuntimeValue = 
-           new GenericInvoker<Func<AutoEntityMapping<T>, MappingContext<T>, PropertyRoute, T>>((aem, mc, pr)=>aem.GetRuntimeValue<T>(mc, pr));
+        static GenericInvoker<Func<AutoEntityMapping<T>, MappingContext<T>, PropertyRoute, T>> miGetRuntimeValue =
+           new GenericInvoker<Func<AutoEntityMapping<T>, MappingContext<T>, PropertyRoute, T>>((aem, mc, pr) => aem.GetRuntimeValue<T>(mc, pr));
         public R GetRuntimeValue<R>(MappingContext<T> ctx, PropertyRoute route)
-            where R : class, T 
+            where R : class, T
         {
             if (AllowedMappings != null && !AllowedMappings.ContainsKey(typeof(R)))
             {
                 return (R)(object)ctx.None(ValidationMessage.Type0NotAllowed.NiceToString().Formato(typeof(R)));
             }
 
-            Mapping<R> mapping =  (Mapping<R>)(AllowedMappings.TryGetC(typeof(R)) ?? Navigator.EntitySettings(typeof(R)).UntypedMappingLine);
+            Mapping<R> mapping = (Mapping<R>)(AllowedMappings.TryGetC(typeof(R)) ?? Navigator.EntitySettings(typeof(R)).UntypedMappingLine);
             SubContext<R> sc = new SubContext<R>(ctx.Prefix, null, route, ctx) { Value = ctx.Value as R }; // If the type is different, the AutoEntityMapping has the current value but EntityMapping just null
             sc.Value = mapping(sc);
             ctx.SupressChange = sc.SupressChange;
@@ -418,49 +418,40 @@ namespace Signum.Web
         }
     }
 
-    abstract class PropertyMapping<T> where T : ModifiableEntity
+    interface IPropertyMapping<T>
     {
-        public readonly IPropertyValidator PropertyValidator;
+        IPropertyValidator PropertyValidator { get; }
 
-        protected PropertyMapping(IPropertyValidator pv)
-        {
-            this.PropertyValidator = pv;
-        }
+        void SetProperty(MappingContext<T> parent);
 
-        public static PropertyMapping<T> Create(IPropertyValidator pv)
-        {
-            return (PropertyMapping<T>)Activator.CreateInstance(typeof(PropertyMapping<,>).MakeGenericType(typeof(T), pv.PropertyInfo.PropertyType), pv);
-        }
-
-        public abstract void SetProperty(MappingContext<T> parent);
-
-        public override string ToString()
-        {
-            return PropertyValidator.PropertyInfo.PropertyName();
-        }
+        Type MixinType { get; }
     }
 
-    class PropertyMapping<T, P> : PropertyMapping<T> where T : ModifiableEntity
+    interface IPropertyMapping<T, P> : IPropertyMapping<T>
     {
-        public readonly Func<T, P> GetValue;
-        public readonly Action<T, P> SetValue;
+        Mapping<P> Mapping { get; set; }
+    }
+
+    class PropertyMapping<T, P> : IPropertyMapping<T, P>
+        where T : ModifiableEntity
+    {
+        public int Order { get; internal set; }
+        public IPropertyValidator PropertyValidator { get; private set; }
+
+        readonly Func<T, P> GetValue;
+        readonly Action<T, P> SetValue;
 
         public Mapping<P> Mapping { get; set; }
 
-        public PropertyMapping(PropertyInfo pi)
-            : this(Validator.TryGetPropertyValidator(typeof(T), pi.Name) ?? new PropertyValidator<T>(pi))
-        {
-        }
-
         public PropertyMapping(IPropertyValidator pv)
-            : base(pv)
         {
+            this.PropertyValidator = pv;
             GetValue = ReflectionTools.CreateGetter<T, P>(pv.PropertyInfo);
             SetValue = ReflectionTools.CreateSetter<T, P>(pv.PropertyInfo);
             Mapping = Signum.Web.Mapping.New<P>();
         }
 
-        public override void SetProperty(MappingContext<T> parent)
+        public void SetProperty(MappingContext<T> parent)
         {
             SubContext<P> ctx = CreateSubContext(parent);
 
@@ -473,7 +464,7 @@ namespace Signum.Web
                 {
                     if (!object.Equals(old, ctx.Value))
                         Signum.Web.Mapping.AssertCanChange(ctx.PropertyRoute);
-                    
+
                     SetValue(parent.Value, ctx.Value);
                 }
             }
@@ -500,107 +491,87 @@ namespace Signum.Web
                 ctx.Value = GetValue(parent.Value);
             return ctx;
         }
-    }
 
-    abstract class MixinMapping<T> : ModifiableEntity
-    {
-        public abstract void SetMixinProperties(MappingContext<T> parent);
 
-        public static MixinMapping<T> Create(Type mt, bool fillProperties)
+        public Type MixinType
         {
-            return (MixinMapping<T>)Activator.CreateInstance(typeof(MixinMapping<,>).MakeGenericType(typeof(T), mt), new object[] { fillProperties });
+            get { return null; }
         }
-
-        public abstract void CreateProperty<P>(PropertyInfo pi);
-        public abstract void ReplaceProperty<P>(PropertyInfo pi, Func<Mapping<P>, Mapping<P>> replacer);
-        public abstract Mapping<P> GetProperty<P>(PropertyInfo pi);
-        public abstract void SetProperty<P>(PropertyInfo pi, Mapping<P> mapping);
-        public abstract void RemoveProperty(PropertyInfo pi);
-        public abstract void ClearProperties();
     }
 
-    class MixinMapping<T, M> : MixinMapping<T>
+    class MixinPropertyMapping<T, M, P> : IPropertyMapping<T, P>
         where T : IdentifiableEntity
         where M : MixinEntity
     {
-        Dictionary<string, PropertyMapping<M>> properties = new Dictionary<string, PropertyMapping<M>>();
+        public PropertyMapping<M, P> PropertyMapping;
 
-        public override void SetMixinProperties(MappingContext<T> parent)
+        public MixinPropertyMapping(IPropertyValidator pv)
+        {
+            PropertyMapping = new PropertyMapping<M, P>(pv);
+        }
+
+        public void SetProperty(MappingContext<T> parent)
         {
             MixinContext<M> ctx = new MixinContext<M>(parent.PropertyRoute.Add(typeof(M)), parent);
             if (parent.Value != null)
                 ctx.Value = parent.Value.Mixin<M>();
 
-            foreach (PropertyMapping<M> item in properties.Values)
-            {
-                item.SetProperty(ctx);
-            }
+            PropertyMapping.SetProperty(ctx);
         }
 
-        public MixinMapping(bool fillProperties)
+        public IPropertyValidator PropertyValidator
         {
-            properties = Validator.GetPropertyValidators(typeof(M))
-                   .Where(kvp => !kvp.Value.PropertyInfo.IsReadOnly())
-                   .ToDictionary(kvp => kvp.Key, kvp => PropertyMapping<M>.Create(kvp.Value));
+            get { return PropertyMapping.PropertyValidator; }
         }
 
-
-        public override void CreateProperty<P>(PropertyInfo pi)
+        public Mapping<P> Mapping
         {
-            PropertyMapping<M, P> propertyMapping = (PropertyMapping<M, P>)properties.GetOrCreate(pi.Name, () => new PropertyMapping<M, P>(pi));
-
-            propertyMapping.Mapping = Mapping.New<P>();
+            get { return PropertyMapping.Mapping; }
+            set { PropertyMapping.Mapping = value; }
         }
 
-        public override void ReplaceProperty<P>(PropertyInfo pi, Func<Mapping<P>, Mapping<P>> replacer)
+        public Type MixinType
         {
-            var pm = (PropertyMapping<M, P>)properties.GetOrThrow(pi.Name);
-
-            pm.Mapping = replacer(pm.Mapping);
-        }
-
-        public override Mapping<P> GetProperty<P>(PropertyInfo pi)
-        {
-            return ((PropertyMapping<M, P>)properties.GetOrThrow(pi.Name)).Mapping;
-        }
-
-        public override void SetProperty<P>(PropertyInfo pi, Mapping<P> mapping)
-        {
-            PropertyMapping<M, P> propertyMapping = (PropertyMapping<M, P>)properties.GetOrCreate(pi.Name, () => new PropertyMapping<M, P>(pi));
-
-            propertyMapping.Mapping = mapping;
-        }
-
-        public override void RemoveProperty(PropertyInfo pi)
-        {
-            properties.Remove(pi.Name);
-        }
-
-        public override void ClearProperties()
-        {
-            properties.Clear();
+            get { return typeof(M); }
         }
     }
 
-    public class EntityMapping<T>: BaseMapping<T> where T : ModifiableEntity
-    { 
-        Dictionary<string, PropertyMapping<T>> properties = new Dictionary<string, PropertyMapping<T>>();
-        Dictionary<Type, MixinMapping<T>> mixinMappings;
+    public class EntityMapping<T> : BaseMapping<T> where T : ModifiableEntity
+    {
+        List<IPropertyMapping<T>> properties = new List<IPropertyMapping<T>>();
 
         public EntityMapping(bool fillProperties)
         {
             if (fillProperties)
             {
-                properties = Validator.GetPropertyValidators(typeof(T))
-                    .Where(kvp => !kvp.Value.PropertyInfo.IsReadOnly())
-                    .ToDictionary(kvp => kvp.Key, kvp => PropertyMapping<T>.Create(kvp.Value));
-            }
+                properties.AddRange(Validator.GetPropertyValidators(typeof(T)).Values
+                    .Where(pv => !pv.PropertyInfo.IsReadOnly())
+                    .Select(pv => NewProperty(pv, null)));
 
-            if (typeof(IdentifiableEntity).IsAssignableFrom(typeof(T)))
-            {
-                mixinMappings = MixinDeclarations.GetMixinDeclarations(typeof(T))
-                    .ToDictionary(t => t, t => MixinMapping<T>.Create(t, fillProperties));
+                if (typeof(IdentifiableEntity).IsAssignableFrom(typeof(T)))
+                {
+                    foreach (var t in MixinDeclarations.GetMixinDeclarations(typeof(T)))
+                    {
+                        properties.AddRange(Validator.GetPropertyValidators(t).Values
+                            .Where(pv => !pv.PropertyInfo.IsReadOnly())
+                            .Select(pv => NewProperty(pv, t)));
+
+                    }
+                }
             }
+        }
+
+        static IPropertyMapping<T> NewProperty(PropertyInfo pi, Type mixinType)
+        {
+            return NewProperty(Validator.TryGetPropertyValidator(mixinType ?? typeof(T), pi.Name) ?? new PropertyValidator<T>(pi), mixinType);
+        }
+
+        static IPropertyMapping<T> NewProperty(IPropertyValidator pv, Type mixinType)
+        {
+            if (mixinType == null)
+                return (IPropertyMapping<T>)Activator.CreateInstance(typeof(PropertyMapping<,>).MakeGenericType(typeof(T), pv.PropertyInfo.PropertyType), pv);
+            else
+                return (IPropertyMapping<T>)Activator.CreateInstance(typeof(MixinPropertyMapping<,,>).MakeGenericType(typeof(T), mixinType, pv.PropertyInfo.PropertyType), pv);
         }
 
         public override T GetValue(MappingContext<T> ctx)
@@ -627,17 +598,9 @@ namespace Signum.Web
 
         public virtual void SetValueProperties(MappingContext<T> ctx)
         {
-            foreach (PropertyMapping<T> item in properties.Values)
+            foreach (IPropertyMapping<T> item in properties)
             {
                 item.SetProperty(ctx);
-            }
-
-            if (mixinMappings != null)
-            {
-                foreach (MixinMapping<T> mt in mixinMappings.Values)
-                {
-                    mt.SetMixinProperties(ctx);
-                }
             }
         }
 
@@ -660,7 +623,7 @@ namespace Signum.Web
             if (!ctx.Inputs.TryGetValue(EntityBaseKeys.RuntimeInfo, out strRuntimeInfo))
                 return ctx.Value; //I only have some ValueLines of an Entity (so no Runtime, Id or anything)
 
-            RuntimeInfo runtimeInfo; 
+            RuntimeInfo runtimeInfo;
             if (!DesambiguateRuntimeInfo)
                 runtimeInfo = RuntimeInfo.FromFormValue(strRuntimeInfo);
             else
@@ -709,75 +672,73 @@ namespace Signum.Web
             else
                 return (T)(ModifiableEntity)Database.Retrieve(runtimeInfo.EntityType, runtimeInfo.IdOrNull.Value);
         }
- 
+
 
         public EntityMapping<T> CreateProperty<P>(Expression<Func<T, P>> property)
         {
-            MixinMapping<T> mixin;
+            Type mixin;
             PropertyInfo pi = GetPropertyInfo(property, out mixin);
-            if (mixin != null)
-                mixin.CreateProperty<P>(pi);
-            else
-            {
-                var pm = (PropertyMapping<T, P>)properties.GetOrCreate(pi.Name, () => new PropertyMapping<T, P>(pi));
-                pm.Mapping = Mapping.New<P>();
-            }
+
+            var prop = (IPropertyMapping<T, P>)properties.SingleOrDefaultEx(p => ReflectionTools.PropertyEquals(p.PropertyValidator.PropertyInfo, pi) && p.MixinType == mixin);
+
+            if (prop != null)
+                throw new InvalidOperationException("{0} already registered".Formato(pi.Name));
+
+            properties.Add(NewProperty(pi, mixin));
 
             return this;
         }
 
-     
-
         public EntityMapping<T> ReplaceProperty<P>(Expression<Func<T, P>> property, Func<Mapping<P>, Mapping<P>> replacer)
         {
-            MixinMapping<T> mixin;
+            Type mixin;
             PropertyInfo pi = GetPropertyInfo(property, out mixin);
-            if (mixin != null)
-                mixin.ReplaceProperty<P>(pi, replacer);
-            else
-            {
-                var pm = (PropertyMapping<T, P>)properties.GetOrThrow(pi.Name);
-                pm.Mapping = replacer(pm.Mapping);
-            }
+
+            var prop = (IPropertyMapping<T, P>)properties.SingleEx(p => ReflectionTools.PropertyEquals(p.PropertyValidator.PropertyInfo, pi) && p.MixinType == mixin);
+
+            prop.Mapping = replacer(prop.Mapping);
 
             return this;
         }
 
         public EntityMapping<T> GetProperty<P>(Expression<Func<T, P>> property, Action<Mapping<P>> continuation)
         {
-            MixinMapping<T> mixin;
+            Type mixin;
             PropertyInfo pi = GetPropertyInfo(property, out mixin);
-            if (mixin != null)
-                continuation(mixin.GetProperty<P>(pi));
-            else
-                continuation(((PropertyMapping<T, P>)properties.GetOrThrow(pi.Name)).Mapping);
+
+            var prop = (IPropertyMapping<T, P>)properties.SingleEx(p => ReflectionTools.PropertyEquals(p.PropertyValidator.PropertyInfo, pi) && p.MixinType == mixin);
+
+            continuation(prop.Mapping);
 
             return this;
         }
 
         public EntityMapping<T> SetProperty<P>(Expression<Func<T, P>> property, Mapping<P> mapping)
         {
-            MixinMapping<T> mixin;
+            Type mixin;
             PropertyInfo pi = GetPropertyInfo(property, out mixin);
-            if (mixin != null)
-                mixin.SetProperty(pi, mapping);
-            else
+
+            var prop = (IPropertyMapping<T, P>)properties.SingleOrDefaultEx(p => ReflectionTools.PropertyEquals(p.PropertyValidator.PropertyInfo, pi) && p.MixinType == mixin);
+
+            if (prop == null)
             {
-                var pm = (PropertyMapping<T, P>)properties.GetOrCreate(pi.Name, () => new PropertyMapping<T, P>(pi));
-                pm.Mapping = mapping;
+                prop = (IPropertyMapping<T, P>)NewProperty(pi, mixin);
+                properties.Add(prop);
             }
-            
+
+            prop.Mapping = mapping;
+
             return this;
         }
 
         public EntityMapping<T> RemoveProperty<P>(Expression<Func<T, P>> property)
         {
-            MixinMapping<T> mixin;
+            Type mixin;
             PropertyInfo pi = GetPropertyInfo(property, out mixin);
-            if (mixin != null)
-                mixin.RemoveProperty(pi);
-            else
-                properties.Remove(pi.Name);
+
+            var prop = properties.SingleEx(p => ReflectionTools.PropertyEquals(p.PropertyValidator.PropertyInfo, pi) && p.MixinType == mixin);
+
+            properties.Remove(prop);
 
             return this;
         }
@@ -786,15 +747,11 @@ namespace Signum.Web
         {
             properties.Clear();
 
-            if (mixinMappings != null)
-                foreach (var mm in mixinMappings.Values)
-                    mm.ClearProperties();
-
             return this;
         }
 
 
-        PropertyInfo GetPropertyInfo(LambdaExpression property, out MixinMapping<T> mixin)
+        PropertyInfo GetPropertyInfo(LambdaExpression property, out Type mixin)
         {
             if (property == null)
                 throw new ArgumentNullException("property");
@@ -820,12 +777,10 @@ namespace Signum.Web
             }
             else if (mce != null && mce.Method.IsInstantiationOf(MixinDeclarations.miMixin))
             {
-                var type = mce.Method.GetGenericArguments()[0];
+                mixin = mce.Method.GetGenericArguments()[0];
 
-                mixin = mixinMappings.TryGetC(type);
-
-                if (mixin == null)
-                    throw new ArgumentException("The mixin {0} used in lambda 'property' is not registered".Formato(type.TypeName()));
+                if (!MixinDeclarations.GetMixinDeclarations(typeof(T)).Contains(mixin))
+                    throw new ArgumentException("The mixin {0} used in lambda 'property' is not registered".Formato(mixin.TypeName()));
 
                 return pi;
             }
@@ -843,7 +798,7 @@ namespace Signum.Web
         {
             EntityMapping = Mapping.New<S>();
 
-            EntityHasChanges = AnyNonSpecialImput; 
+            EntityHasChanges = AnyNonSpecialImput;
         }
 
         public Lite<S> GetValue(MappingContext<Lite<S>> ctx)
@@ -936,7 +891,7 @@ namespace Signum.Web
         public BaseMListMapping<S> SetElementMapping(Mapping<S> elementMapping)
         {
             this.ElementMapping = elementMapping;
-            return this; 
+            return this;
         }
 
         public IEnumerable<MappingContext<S>> GenerateItemContexts(MappingContext<MList<S>> ctx)
@@ -1015,12 +970,12 @@ namespace Signum.Web
 
     public class MListCorrelatedMapping<S> : MListMapping<S>
     {
-         public MListCorrelatedMapping()
+        public MListCorrelatedMapping()
             : base()
         {
         }
 
-         public MListCorrelatedMapping(Mapping<S> elementMapping)
+        public MListCorrelatedMapping(Mapping<S> elementMapping)
             : base(elementMapping)
         {
         }
@@ -1063,8 +1018,8 @@ namespace Signum.Web
 
         public Func<S, bool> FilterElements;
 
-        public Mapping<K> KeyPropertyMapping{get;set;}
-        
+        public Mapping<K> KeyPropertyMapping { get; set; }
+
         public MListDictionaryMapping(Func<S, K> getKey, string route)
         {
             this.GetKey = getKey;
@@ -1074,7 +1029,8 @@ namespace Signum.Web
             this.Route = route;
         }
 
-        public MListDictionaryMapping(Func<S, K> getKey, string route, Mapping<S> elementMapping): base(elementMapping)
+        public MListDictionaryMapping(Func<S, K> getKey, string route, Mapping<S> elementMapping)
+            : base(elementMapping)
         {
             this.GetKey = getKey;
 
