@@ -32,8 +32,7 @@
     @Html.Hidden(Model.Compose("sfOrders"), Model.Value.Orders.IsNullOrEmpty() ? "" :
         (Model.Value.Orders.ToString(oo => (oo.OrderType == OrderType.Ascending ? "" : "-") + oo.Token.FullKey(), ";") + ";"))
     <div>
-        <div class="sf-fields-list">
-            <div class="ui-widget sf-filters">
+            <div id="@Model.Compose("tblFilterBuilder")" class="ui-widget sf-filters">
                 <div class="ui-widget-header ui-corner-top sf-filters-body">
                     @Html.QueryTokenBuilder(null, Model, ChartClient.GetQueryTokenBuilderSettings(queryDescription, Model.Value.GroupResults, isKey : false))
                     @Html.Href(
@@ -52,7 +51,6 @@
                     Html.RenderPartial(Navigator.Manager.FilterBuilderView); 
                 }
             </div>
-        </div>
     </div>
     <div id="@Model.Compose("sfChartBuilderContainer")">
         @Html.Partial(ChartClient.ChartBuilderView, Model.Value)

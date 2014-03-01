@@ -59,7 +59,15 @@ export class ChartBuilder extends Finder.SearchControl {
 
     public _create() {
         var self = this;
+
         this.$chartControl = self.element.closest(".sf-chart-control");
+
+        this.filterBuilder = new Finder.FilterBuilder(
+            $(this.pf("tblFilterBuilder")),
+            this.options.prefix,
+            this.options.webQueryName,
+            this.$chartControl.attr("data-add-filter-url"));
+
         $(document).on("click", ".sf-chart-img", function () {
             var $this = $(this);
             $this.closest(".sf-chart-type").find(".ui-widget-header .sf-chart-type-value").val($this.attr("data-related"));
@@ -154,10 +162,6 @@ export class ChartBuilder extends Finder.SearchControl {
             e.preventDefault();
             self.fullScreen(e);
         });
-
-        this.$chartControl.on("sf-new-subtokens-combo", function (event, ...args) {
-            self.newSubTokensComboAdded($("#" + args[0] /*idSelectedCombo*/));
-        });
     }
 
     requestData(): FormObject {
@@ -165,7 +169,7 @@ export class ChartBuilder extends Finder.SearchControl {
         var result = this.$chartControl.find(":input:not(#webQueryName)").serializeObject();
 
         result["webQueryName"] = this.options.webQueryName;
-        result["filters"] = this.serializeFilters();
+        result["filters"] = this.filterBuilder.serializeFilters();
         result["orders"] = this.serializeOrders();
 
         return result;
@@ -193,19 +197,6 @@ export class ChartBuilder extends Finder.SearchControl {
         });
     }
 
-
-    addFilter() {
-        var $addFilter = $(this.pf("btnAddFilter"));
-        if ($addFilter.closest(".sf-chart-builder").length == 0) {
-            if (this.$chartControl.find(".sf-chart-group-trigger:checked").length > 0) {
-                var url = this.$chartControl.attr("data-add-filter-url");
-                super.addFilter(url);
-            }
-            else {
-                super.addFilter();
-            }
-        }
-    }
 
     showError(e, __baseLineNumber__, chart) {
         var message = e.toString();
@@ -305,7 +296,7 @@ export class ChartBuilder extends Finder.SearchControl {
     requestProcessedData() {
         return {
             webQueryName: this.options.webQueryName,
-            filters: this.serializeFilters(),
+            filters: this.filterBuilder.serializeFilters(),
             orders: this.serializeOrders()
         };
     }
@@ -352,7 +343,7 @@ export class ChartBuilder extends Finder.SearchControl {
                 var options = $chartControl.find(":input").not($chartControl.find(".sf-filters-list :input")).serialize();
                 options += "&webQueryName=" + cb.options.webQueryName;
                 options += "&orders=" + cb.serializeOrders();
-                options += "&filters=" + cb.serializeFilters();
+                options += "&filters=" + cb.filterBuilder.serializeFilters();
                 options += $(this).data("click");
 
                 win.location.href = (url + (url.indexOf("?") >= 0 ? "&" : "?") + options);

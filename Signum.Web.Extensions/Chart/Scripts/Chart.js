@@ -67,7 +67,11 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         }
         ChartBuilder.prototype._create = function () {
             var self = this;
+
             this.$chartControl = self.element.closest(".sf-chart-control");
+
+            this.filterBuilder = new Finder.FilterBuilder($(this.pf("tblFilterBuilder")), this.options.prefix, this.options.webQueryName, this.$chartControl.attr("data-add-filter-url"));
+
             $(document).on("click", ".sf-chart-img", function () {
                 var $this = $(this);
                 $this.closest(".sf-chart-type").find(".ui-widget-header .sf-chart-type-value").val($this.attr("data-related"));
@@ -158,21 +162,13 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 e.preventDefault();
                 self.fullScreen(e);
             });
-
-            this.$chartControl.on("sf-new-subtokens-combo", function (event) {
-                var args = [];
-                for (var _i = 0; _i < (arguments.length - 1); _i++) {
-                    args[_i] = arguments[_i + 1];
-                }
-                self.newSubTokensComboAdded($("#" + args[0]));
-            });
         };
 
         ChartBuilder.prototype.requestData = function () {
             var result = this.$chartControl.find(":input:not(#webQueryName)").serializeObject();
 
             result["webQueryName"] = this.options.webQueryName;
-            result["filters"] = this.serializeFilters();
+            result["filters"] = this.filterBuilder.serializeFilters();
             result["orders"] = this.serializeOrders();
 
             return result;
@@ -197,18 +193,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     }
                 }
             });
-        };
-
-        ChartBuilder.prototype.addFilter = function () {
-            var $addFilter = $(this.pf("btnAddFilter"));
-            if ($addFilter.closest(".sf-chart-builder").length == 0) {
-                if (this.$chartControl.find(".sf-chart-group-trigger:checked").length > 0) {
-                    var url = this.$chartControl.attr("data-add-filter-url");
-                    _super.prototype.addFilter.call(this, url);
-                } else {
-                    _super.prototype.addFilter.call(this);
-                }
-            }
         };
 
         ChartBuilder.prototype.showError = function (e, __baseLineNumber__, chart) {
@@ -315,7 +299,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         ChartBuilder.prototype.requestProcessedData = function () {
             return {
                 webQueryName: this.options.webQueryName,
-                filters: this.serializeFilters(),
+                filters: this.filterBuilder.serializeFilters(),
                 orders: this.serializeOrders()
             };
         };
@@ -360,7 +344,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                     var options = $chartControl.find(":input").not($chartControl.find(".sf-filters-list :input")).serialize();
                     options += "&webQueryName=" + cb.options.webQueryName;
                     options += "&orders=" + cb.serializeOrders();
-                    options += "&filters=" + cb.serializeFilters();
+                    options += "&filters=" + cb.filterBuilder.serializeFilters();
                     options += $(_this).data("click");
 
                     win.location.href = (url + (url.indexOf("?") >= 0 ? "&" : "?") + options);
