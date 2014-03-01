@@ -85,9 +85,14 @@ namespace Signum.Web
             });
         }
 
-        public static JsonNetResult JsonNet(this ControllerBase controller, object data)
+        public static JsonNetResult JsonNet(this ControllerBase controller, object data, JsonSerializerSettings settings = null)
         {
-            return new JsonNetResult { Data = data }; 
+            var result = new JsonNetResult { Data = data };
+
+            if (settings != null)
+                result.SerializerSettings = settings;
+
+            return result;
         }
 
         public static ViewResult NormalPage(this ControllerBase controller, IRootEntity entity)
