@@ -232,6 +232,7 @@ export function removeOverlay() {
 
 export class SearchControl {
 
+    filterBuilder: FilterBuilder;
     element: JQuery;
 
     keys = {
@@ -269,6 +270,8 @@ export class SearchControl {
             webQueryName: null
         }, _options);
 
+      
+
         this._create();
     }
 
@@ -276,7 +279,7 @@ export class SearchControl {
         this.element.SFControlFullfill(this); 
     }
 
-    public pf(s) {
+    public pf(s : string) {
         return "#" + SF.compose(this.options.prefix, s);
     }
 
@@ -291,6 +294,14 @@ export class SearchControl {
 
     _create() {
         var self = this;
+
+        this.filterBuilder = new FilterBuilder(
+            $(this.pf("tblFilterBuilder")),
+            this.options.prefix,
+            this.options.webQueryName,
+            SF.Urls.addFilter);
+
+        this.filterBuilder.addColumnClicked = () => this.addColumn();
 
 
         var $tblResults = self.element.find(".sf-search-results-container");
@@ -400,10 +411,6 @@ export class SearchControl {
             $(this.pf("sfFullScreen")).on("mousedown", function (e) {
                 e.preventDefault();
                 self.fullScreen(e);
-            });
-
-            this.element.on("sf-new-subtokens-combo", function (event, ...args) {
-                self.newSubTokensComboAdded($("#" + args[0]));
             });
 
             this.element.find(".sf-tm-selected").click(function () {
@@ -592,7 +599,7 @@ export class SearchControl {
         requestData["page"] = ($(this.pf(this.keys.page)).val() || "1");
         requestData["allowSelection"] = this.options.allowSelection;
         requestData["navigate"] = this.options.navigate;
-        requestData["filters"] = this.serializeFilters();
+        requestData["filters"] = this.filterBuilder.serializeFilters();
 
         if (type != RequestType.FullScreen)
             requestData["filterMode"] = this.options.filterMode;
@@ -606,36 +613,7 @@ export class SearchControl {
     }
 
 
-    serializeFilters() {
-
-        return $(this.pf("tblFilters > tbody > tr")).toArray().map(f=> {
-            var $filter = $(f);
-
-            var id = $filter[0].id;
-            var index = id.afterLast("_");
-
-            var selector = $(SF.compose(this.pf("ddlSelector"), index) + " option:selected", $filter);
-
-            var value = this.encodeValue($filter, index);
-
-            return $filter.find("td:nth-child(2) > :hidden").val() + "," + selector.val() + "," + value;
-        }).join(";");
-    }
-
-    encodeValue($filter: JQuery, index: string) {
-        var valBool = $("input:checkbox[id=" +  SF.compose(this.options.prefix, "value", index) + "]", $filter); //it's a checkbox
-        if (valBool.length > 0)
-            return (<HTMLInputElement> valBool[0]).checked;
-
-        var infoElem = $("#" + SF.compose(this.options.prefix, "value", index, Entities.Keys.runtimeInfo));
-        if (infoElem.length > 0) { //If it's a Lite, the value is the Id
-            var val = Entities.RuntimeInfo.parse(infoElem.val()); 
-            return SearchControl.encodeCSV(val == null ? null : val.key());
-        }
-
-        return SearchControl.encodeCSV($(SF.compose(this.pf("value"), index), $filter).val());
-
-    }
+  
 
     static encodeCSV(value: string) {
         if (!value)
@@ -868,120 +846,6 @@ export class SearchControl {
         return false;
     }
 
-    addFilter(url?, requestExtraJsonData?) {
-        var tableFilters = $(this.pf("tblFilters tbody"));
-        if (tableFilters.length == 0) {
-            throw "Adding filters is not allowed";
-        }
-
-        var tokenName = QueryTokenBuilder.constructTokenName(this.options.prefix);
-        if (SF.isEmpty(tokenName)) {
-            return;
-        }
-
-        var data = $.extend({
-            webQueryName: this.options.webQueryName,
-            tokenName: tokenName,
-            index: this.newFilterRowIndex(),
-            prefix: this.options.prefix
-        }, requestExtraJsonData);
-
-        var self = this;
-        $.ajax({
-            url: url || SF.Urls.addFilter,
-            data: data,
-            async: false,
-            success: function (filterHtml) {
-                var $filterList = self.element.closest(".sf-search-control").find(".sf-filters-list");
-                $filterList.find(".sf-explanation").hide();
-                $filterList.find("table").show();
-
-                tableFilters.append(filterHtml);
-                SF.triggerNewContent($(self.pf("tblFilters tbody tr:last")));
-            }
-        });
-    }
-
-    newFilterRowIndex(): number {
-        var lastRow = $(this.pf("tblFilters tbody tr:last"));
-        if (lastRow.length == 1) {
-            return parseInt(lastRow[0].id.substr(lastRow[0].id.lastIndexOf("_") + 1, lastRow[0].id.length)) + 1;
-        }
-        return 0;
-    }
-
-    newSubTokensComboAdded($selectedCombo: JQuery) {
-        var $btnAddFilter = $(this.pf("btnAddFilter"));
-        var $btnAddColumn = $(this.pf("btnAddColumn"));
-
-        var self = this;
-        var $selectedOption = $selectedCombo.children("option:selected");
-        $selectedCombo.attr("title", $selectedOption.attr("title"));
-        $selectedCombo.attr("style", $selectedOption.attr("style"));
-        if ($selectedOption.val() == "") {
-            var $prevSelect = $selectedCombo.prev("select");
-            if ($prevSelect.length == 0) {
-                this.changeButtonState($btnAddFilter, lang.signum.selectToken);
-                this.changeButtonState($btnAddColumn, lang.signum.selectToken);
-            }
-            else {
-                var $prevSelectedOption = $prevSelect.find("option:selected");
-                this.changeButtonState($btnAddFilter, $prevSelectedOption.attr("data-filter"), function () { self.addFilter(); });
-                this.changeButtonState($btnAddColumn, $prevSelectedOption.attr("data-column"), function () { self.addColumn(); });
-            }
-            return;
-        }
-
-        this.changeButtonState($btnAddFilter, $selectedOption.attr("data-filter"), function () { self.addFilter(); });
-        this.changeButtonState($btnAddColumn, $selectedOption.attr("data-column"), function () { self.addColumn(); });
-    }
-
-    changeButtonState($button: JQuery, disablingMessage: string, enableCallback?: (eventObject: JQueryEventObject) => any) {
-        var hiddenId = $button.attr("id") + "temp";
-        if (typeof disablingMessage != "undefined") {
-            $button.addClass("ui-button-disabled").addClass("ui-state-disabled").addClass("sf-disabled").attr("disabled", "disabled").attr("title", disablingMessage);
-            $button.unbind('click').bind('click', function (e) { e.preventDefault(); return false; });
-        }
-        else {
-            var self = this;
-            $button.removeClass("ui-button-disabled").removeClass("ui-state-disabled").removeClass("sf-disabled").prop("disabled", null).attr("title", "");
-            $button.unbind('click').bind('click', enableCallback);
-        }
-    }
-
-
-
-
-    quickFilter(value, tokenName) {
-        var tableFilters = $(this.pf("tblFilters tbody"));
-        if (tableFilters.length === 0) {
-            return;
-        }
-
-        var params = {
-            "value": value,
-            "webQueryName": this.options.webQueryName,
-            "tokenName": tokenName,
-            "prefix": this.options.prefix,
-            "index": this.newFilterRowIndex()
-        };
-
-        var self = this;
-        $.ajax({
-            url: SF.Urls.quickFilter,
-            data: params,
-            async: false,
-            success: function (filterHtml) {
-                var $filterList = self.element.find(".sf-filters-list");
-                $filterList.find(".sf-explanation").hide();
-                $filterList.find("table").show();
-
-                tableFilters.append(filterHtml);
-                SF.triggerNewContent($(self.pf("tblFilters tbody tr:last")));
-            }
-        });
-    }
-
     quickFilterCell($elem) {
         var value = $elem.data("value");
         if (typeof value == "undefined")
@@ -991,11 +855,11 @@ export class SearchControl {
         var cellIndex = $elem[0].cellIndex;
         var tokenName = $($($elem.closest(".sf-search-results")).find("th")[cellIndex]).children("input:hidden").val();
 
-        this.quickFilter(value, tokenName);
+        this.filterBuilder.addFilter(tokenName, value);
     }
 
     quickFilterHeader($elem) {
-        this.quickFilter("", $elem.find("input:hidden").val());
+        this.filterBuilder.addFilter($elem.find("input:hidden").val(), "");
     }
 
     create_click() {
@@ -1050,7 +914,7 @@ export class SearchControl {
 
     requestDataForSearchPopupCreate() {
         return {
-            filters: this.serializeFilters(),
+            filters: this.filterBuilder.serializeFilters(),
             webQueryName: this.options.webQueryName
         };
     }
@@ -1086,6 +950,149 @@ export class SearchControl {
             });
         }
     }
+}
+
+export class FilterBuilder {
+
+    addColumnClicked: () => void;
+
+    constructor(
+        public element: JQuery,
+        public prefix: string,
+        public webQueryName: string,
+        public url: string) {
+
+        this.element.on("sf-new-subtokens-combo", (event, ...args) => {
+            this.newSubTokensComboAdded($("#" + args[0]));
+        });
+    }
+
+    public pf(s) {
+        return "#" + SF.compose(this.prefix, s);
+    }
+
+    newSubTokensComboAdded($selectedCombo: JQuery) {
+        var $btnAddFilter = $(this.pf("btnAddFilter"));
+        var $btnAddColumn = $(this.pf("btnAddColumn"));
+
+        var self = this;
+        var $selectedOption = $selectedCombo.children("option:selected");
+        $selectedCombo.attr("title", $selectedOption.attr("title"));
+        $selectedCombo.attr("style", $selectedOption.attr("style"));
+        if ($selectedOption.val() == "") {
+            var $prevSelect = $selectedCombo.prev("select");
+            if ($prevSelect.length == 0) {
+                this.changeButtonState($btnAddFilter, lang.signum.selectToken);
+                this.changeButtonState($btnAddColumn, lang.signum.selectToken);
+            }
+            else {
+                var $prevSelectedOption = $prevSelect.find("option:selected");
+                this.changeButtonState($btnAddFilter, $prevSelectedOption.attr("data-filter"), function () { self.addFilterClicked(); });
+                this.changeButtonState($btnAddColumn, $prevSelectedOption.attr("data-column"), function () { self.addColumnClicked(); });
+            }
+            return;
+        }
+
+        this.changeButtonState($btnAddFilter, $selectedOption.attr("data-filter"), function () { self.addFilterClicked(); });
+        this.changeButtonState($btnAddColumn, $selectedOption.attr("data-column"), function () { self.addColumnClicked(); });
+    }
+
+    changeButtonState($button: JQuery, disablingMessage: string, enableCallback?: (eventObject: JQueryEventObject) => any) {
+
+        if (!$button)
+            return;
+
+        var hiddenId = $button.attr("id") + "temp";
+        if (typeof disablingMessage != "undefined") {
+            $button.addClass("ui-button-disabled").addClass("ui-state-disabled").addClass("sf-disabled").attr("disabled", "disabled").attr("title", disablingMessage);
+            $button.unbind('click').bind('click', function (e) { e.preventDefault(); return false; });
+        }
+        else {
+            var self = this;
+            $button.removeClass("ui-button-disabled").removeClass("ui-state-disabled").removeClass("sf-disabled").prop("disabled", null).attr("title", "");
+            $button.unbind('click').bind('click', enableCallback);
+        }
+    }
+
+
+    addFilterClicked() {
+        var tokenName = QueryTokenBuilder.constructTokenName(this.prefix);
+        if (SF.isEmpty(tokenName)) {
+            return;
+        }
+
+        this.addFilter(tokenName, null);
+    }
+
+    addFilter(tokenName : string, value: string) {
+        var tableFilters = $(this.pf("tblFilters tbody"));
+        if (tableFilters.length == 0) {
+            throw "Adding filters is not allowed";
+        }
+
+        var data = {
+            webQueryName: this.webQueryName,
+            tokenName: tokenName,
+            value: value,
+            index: this.newFilterRowIndex(),
+            prefix: this.prefix
+        };
+
+        var self = this;
+        $.ajax({
+            url: this.url,
+            data: data,
+            async: false,
+            success: function (filterHtml) {
+                var $filterList = self.element.closest(".sf-search-control").find(".sf-filters-list");
+                $filterList.find(".sf-explanation").hide();
+                $filterList.find("table").show();
+
+                tableFilters.append(filterHtml);
+                SF.triggerNewContent($(self.pf("tblFilters tbody tr:last")));
+            }
+        });
+    }
+
+    newFilterRowIndex(): number {
+        var lastRow = $(this.pf("tblFilters tbody tr:last"));
+        if (lastRow.length == 1) {
+            return parseInt(lastRow[0].id.substr(lastRow[0].id.lastIndexOf("_") + 1, lastRow[0].id.length)) + 1;
+        }
+        return 0;
+    }
+
+    serializeFilters() {
+
+        return $(this.pf("tblFilters > tbody > tr")).toArray().map(f=> {
+            var $filter = $(f);
+
+            var id = $filter[0].id;
+            var index = id.afterLast("_");
+
+            var selector = $(SF.compose(this.pf("ddlSelector"), index) + " option:selected", $filter);
+
+            var value = this.encodeValue($filter, index);
+
+            return $filter.find("td:nth-child(2) > :hidden").val() + "," + selector.val() + "," + value;
+        }).join(";");
+    }
+
+    encodeValue($filter: JQuery, index: string) {
+        var valBool = $("input:checkbox[id=" + SF.compose(this.prefix, "value", index) + "]", $filter); //it's a checkbox
+        if (valBool.length > 0)
+            return (<HTMLInputElement> valBool[0]).checked;
+
+        var infoElem = $("#" + SF.compose(this.prefix, "value", index, Entities.Keys.runtimeInfo));
+        if (infoElem.length > 0) { //If it's a Lite, the value is the Id
+            var val = Entities.RuntimeInfo.parse(infoElem.val());
+            return SearchControl.encodeCSV(val == null ? null : val.key());
+        }
+
+        return SearchControl.encodeCSV($(SF.compose(this.pf("value"), index), $filter).val());
+
+    }
+
 }
 
 export module QueryTokenBuilder {

@@ -261,7 +261,14 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         SearchControl.prototype._create = function () {
+            var _this = this;
             var self = this;
+
+            this.filterBuilder = new FilterBuilder($(this.pf("tblFilterBuilder")), this.options.prefix, this.options.webQueryName, SF.Urls.addFilter);
+
+            this.filterBuilder.addColumnClicked = function () {
+                return _this.addColumn();
+            };
 
             var $tblResults = self.element.find(".sf-search-results-container");
 
@@ -368,14 +375,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
                 $(this.pf("sfFullScreen")).on("mousedown", function (e) {
                     e.preventDefault();
                     self.fullScreen(e);
-                });
-
-                this.element.on("sf-new-subtokens-combo", function (event) {
-                    var args = [];
-                    for (var _i = 0; _i < (arguments.length - 1); _i++) {
-                        args[_i] = arguments[_i + 1];
-                    }
-                    self.newSubTokensComboAdded($("#" + args[0]));
                 });
 
                 this.element.find(".sf-tm-selected").click(function () {
@@ -557,7 +556,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             requestData["page"] = ($(this.pf(this.keys.page)).val() || "1");
             requestData["allowSelection"] = this.options.allowSelection;
             requestData["navigate"] = this.options.navigate;
-            requestData["filters"] = this.serializeFilters();
+            requestData["filters"] = this.filterBuilder.serializeFilters();
 
             if (type != 2 /* FullScreen */)
                 requestData["filterMode"] = this.options.filterMode;
@@ -568,36 +567,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
             requestData["prefix"] = this.options.prefix;
             return requestData;
-        };
-
-        SearchControl.prototype.serializeFilters = function () {
-            var _this = this;
-            return $(this.pf("tblFilters > tbody > tr")).toArray().map(function (f) {
-                var $filter = $(f);
-
-                var id = $filter[0].id;
-                var index = id.afterLast("_");
-
-                var selector = $(SF.compose(_this.pf("ddlSelector"), index) + " option:selected", $filter);
-
-                var value = _this.encodeValue($filter, index);
-
-                return $filter.find("td:nth-child(2) > :hidden").val() + "," + selector.val() + "," + value;
-            }).join(";");
-        };
-
-        SearchControl.prototype.encodeValue = function ($filter, index) {
-            var valBool = $("input:checkbox[id=" + SF.compose(this.options.prefix, "value", index) + "]", $filter);
-            if (valBool.length > 0)
-                return valBool[0].checked;
-
-            var infoElem = $("#" + SF.compose(this.options.prefix, "value", index, Entities.Keys.runtimeInfo));
-            if (infoElem.length > 0) {
-                var val = Entities.RuntimeInfo.parse(infoElem.val());
-                return SearchControl.encodeCSV(val == null ? null : val.key());
-            }
-
-            return SearchControl.encodeCSV($(SF.compose(this.pf("value"), index), $filter).val());
         };
 
         SearchControl.encodeCSV = function (value) {
@@ -823,126 +792,6 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             return false;
         };
 
-        SearchControl.prototype.addFilter = function (url, requestExtraJsonData) {
-            var tableFilters = $(this.pf("tblFilters tbody"));
-            if (tableFilters.length == 0) {
-                throw "Adding filters is not allowed";
-            }
-
-            var tokenName = QueryTokenBuilder.constructTokenName(this.options.prefix);
-            if (SF.isEmpty(tokenName)) {
-                return;
-            }
-
-            var data = $.extend({
-                webQueryName: this.options.webQueryName,
-                tokenName: tokenName,
-                index: this.newFilterRowIndex(),
-                prefix: this.options.prefix
-            }, requestExtraJsonData);
-
-            var self = this;
-            $.ajax({
-                url: url || SF.Urls.addFilter,
-                data: data,
-                async: false,
-                success: function (filterHtml) {
-                    var $filterList = self.element.closest(".sf-search-control").find(".sf-filters-list");
-                    $filterList.find(".sf-explanation").hide();
-                    $filterList.find("table").show();
-
-                    tableFilters.append(filterHtml);
-                    SF.triggerNewContent($(self.pf("tblFilters tbody tr:last")));
-                }
-            });
-        };
-
-        SearchControl.prototype.newFilterRowIndex = function () {
-            var lastRow = $(this.pf("tblFilters tbody tr:last"));
-            if (lastRow.length == 1) {
-                return parseInt(lastRow[0].id.substr(lastRow[0].id.lastIndexOf("_") + 1, lastRow[0].id.length)) + 1;
-            }
-            return 0;
-        };
-
-        SearchControl.prototype.newSubTokensComboAdded = function ($selectedCombo) {
-            var $btnAddFilter = $(this.pf("btnAddFilter"));
-            var $btnAddColumn = $(this.pf("btnAddColumn"));
-
-            var self = this;
-            var $selectedOption = $selectedCombo.children("option:selected");
-            $selectedCombo.attr("title", $selectedOption.attr("title"));
-            $selectedCombo.attr("style", $selectedOption.attr("style"));
-            if ($selectedOption.val() == "") {
-                var $prevSelect = $selectedCombo.prev("select");
-                if ($prevSelect.length == 0) {
-                    this.changeButtonState($btnAddFilter, lang.signum.selectToken);
-                    this.changeButtonState($btnAddColumn, lang.signum.selectToken);
-                } else {
-                    var $prevSelectedOption = $prevSelect.find("option:selected");
-                    this.changeButtonState($btnAddFilter, $prevSelectedOption.attr("data-filter"), function () {
-                        self.addFilter();
-                    });
-                    this.changeButtonState($btnAddColumn, $prevSelectedOption.attr("data-column"), function () {
-                        self.addColumn();
-                    });
-                }
-                return;
-            }
-
-            this.changeButtonState($btnAddFilter, $selectedOption.attr("data-filter"), function () {
-                self.addFilter();
-            });
-            this.changeButtonState($btnAddColumn, $selectedOption.attr("data-column"), function () {
-                self.addColumn();
-            });
-        };
-
-        SearchControl.prototype.changeButtonState = function ($button, disablingMessage, enableCallback) {
-            var hiddenId = $button.attr("id") + "temp";
-            if (typeof disablingMessage != "undefined") {
-                $button.addClass("ui-button-disabled").addClass("ui-state-disabled").addClass("sf-disabled").attr("disabled", "disabled").attr("title", disablingMessage);
-                $button.unbind('click').bind('click', function (e) {
-                    e.preventDefault();
-                    return false;
-                });
-            } else {
-                var self = this;
-                $button.removeClass("ui-button-disabled").removeClass("ui-state-disabled").removeClass("sf-disabled").prop("disabled", null).attr("title", "");
-                $button.unbind('click').bind('click', enableCallback);
-            }
-        };
-
-        SearchControl.prototype.quickFilter = function (value, tokenName) {
-            var tableFilters = $(this.pf("tblFilters tbody"));
-            if (tableFilters.length === 0) {
-                return;
-            }
-
-            var params = {
-                "value": value,
-                "webQueryName": this.options.webQueryName,
-                "tokenName": tokenName,
-                "prefix": this.options.prefix,
-                "index": this.newFilterRowIndex()
-            };
-
-            var self = this;
-            $.ajax({
-                url: SF.Urls.quickFilter,
-                data: params,
-                async: false,
-                success: function (filterHtml) {
-                    var $filterList = self.element.find(".sf-filters-list");
-                    $filterList.find(".sf-explanation").hide();
-                    $filterList.find("table").show();
-
-                    tableFilters.append(filterHtml);
-                    SF.triggerNewContent($(self.pf("tblFilters tbody tr:last")));
-                }
-            });
-        };
-
         SearchControl.prototype.quickFilterCell = function ($elem) {
             var value = $elem.data("value");
             if (typeof value == "undefined")
@@ -951,11 +800,11 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
             var cellIndex = $elem[0].cellIndex;
             var tokenName = $($($elem.closest(".sf-search-results")).find("th")[cellIndex]).children("input:hidden").val();
 
-            this.quickFilter(value, tokenName);
+            this.filterBuilder.addFilter(tokenName, value);
         };
 
         SearchControl.prototype.quickFilterHeader = function ($elem) {
-            this.quickFilter("", $elem.find("input:hidden").val());
+            this.filterBuilder.addFilter($elem.find("input:hidden").val(), "");
         };
 
         SearchControl.prototype.create_click = function () {
@@ -1014,7 +863,7 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
 
         SearchControl.prototype.requestDataForSearchPopupCreate = function () {
             return {
-                filters: this.serializeFilters(),
+                filters: this.filterBuilder.serializeFilters(),
                 webQueryName: this.options.webQueryName
             };
         };
@@ -1050,6 +899,156 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         return SearchControl;
     })();
     exports.SearchControl = SearchControl;
+
+    var FilterBuilder = (function () {
+        function FilterBuilder(element, prefix, webQueryName, url) {
+            var _this = this;
+            this.element = element;
+            this.prefix = prefix;
+            this.webQueryName = webQueryName;
+            this.url = url;
+            this.element.on("sf-new-subtokens-combo", function (event) {
+                var args = [];
+                for (var _i = 0; _i < (arguments.length - 1); _i++) {
+                    args[_i] = arguments[_i + 1];
+                }
+                _this.newSubTokensComboAdded($("#" + args[0]));
+            });
+        }
+        FilterBuilder.prototype.pf = function (s) {
+            return "#" + SF.compose(this.prefix, s);
+        };
+
+        FilterBuilder.prototype.newSubTokensComboAdded = function ($selectedCombo) {
+            var $btnAddFilter = $(this.pf("btnAddFilter"));
+            var $btnAddColumn = $(this.pf("btnAddColumn"));
+
+            var self = this;
+            var $selectedOption = $selectedCombo.children("option:selected");
+            $selectedCombo.attr("title", $selectedOption.attr("title"));
+            $selectedCombo.attr("style", $selectedOption.attr("style"));
+            if ($selectedOption.val() == "") {
+                var $prevSelect = $selectedCombo.prev("select");
+                if ($prevSelect.length == 0) {
+                    this.changeButtonState($btnAddFilter, lang.signum.selectToken);
+                    this.changeButtonState($btnAddColumn, lang.signum.selectToken);
+                } else {
+                    var $prevSelectedOption = $prevSelect.find("option:selected");
+                    this.changeButtonState($btnAddFilter, $prevSelectedOption.attr("data-filter"), function () {
+                        self.addFilterClicked();
+                    });
+                    this.changeButtonState($btnAddColumn, $prevSelectedOption.attr("data-column"), function () {
+                        self.addColumnClicked();
+                    });
+                }
+                return;
+            }
+
+            this.changeButtonState($btnAddFilter, $selectedOption.attr("data-filter"), function () {
+                self.addFilterClicked();
+            });
+            this.changeButtonState($btnAddColumn, $selectedOption.attr("data-column"), function () {
+                self.addColumnClicked();
+            });
+        };
+
+        FilterBuilder.prototype.changeButtonState = function ($button, disablingMessage, enableCallback) {
+            if (!$button)
+                return;
+
+            var hiddenId = $button.attr("id") + "temp";
+            if (typeof disablingMessage != "undefined") {
+                $button.addClass("ui-button-disabled").addClass("ui-state-disabled").addClass("sf-disabled").attr("disabled", "disabled").attr("title", disablingMessage);
+                $button.unbind('click').bind('click', function (e) {
+                    e.preventDefault();
+                    return false;
+                });
+            } else {
+                var self = this;
+                $button.removeClass("ui-button-disabled").removeClass("ui-state-disabled").removeClass("sf-disabled").prop("disabled", null).attr("title", "");
+                $button.unbind('click').bind('click', enableCallback);
+            }
+        };
+
+        FilterBuilder.prototype.addFilterClicked = function () {
+            var tokenName = QueryTokenBuilder.constructTokenName(this.prefix);
+            if (SF.isEmpty(tokenName)) {
+                return;
+            }
+
+            this.addFilter(tokenName, null);
+        };
+
+        FilterBuilder.prototype.addFilter = function (tokenName, value) {
+            var tableFilters = $(this.pf("tblFilters tbody"));
+            if (tableFilters.length == 0) {
+                throw "Adding filters is not allowed";
+            }
+
+            var data = {
+                webQueryName: this.webQueryName,
+                tokenName: tokenName,
+                value: value,
+                index: this.newFilterRowIndex(),
+                prefix: this.prefix
+            };
+
+            var self = this;
+            $.ajax({
+                url: this.url,
+                data: data,
+                async: false,
+                success: function (filterHtml) {
+                    var $filterList = self.element.closest(".sf-search-control").find(".sf-filters-list");
+                    $filterList.find(".sf-explanation").hide();
+                    $filterList.find("table").show();
+
+                    tableFilters.append(filterHtml);
+                    SF.triggerNewContent($(self.pf("tblFilters tbody tr:last")));
+                }
+            });
+        };
+
+        FilterBuilder.prototype.newFilterRowIndex = function () {
+            var lastRow = $(this.pf("tblFilters tbody tr:last"));
+            if (lastRow.length == 1) {
+                return parseInt(lastRow[0].id.substr(lastRow[0].id.lastIndexOf("_") + 1, lastRow[0].id.length)) + 1;
+            }
+            return 0;
+        };
+
+        FilterBuilder.prototype.serializeFilters = function () {
+            var _this = this;
+            return $(this.pf("tblFilters > tbody > tr")).toArray().map(function (f) {
+                var $filter = $(f);
+
+                var id = $filter[0].id;
+                var index = id.afterLast("_");
+
+                var selector = $(SF.compose(_this.pf("ddlSelector"), index) + " option:selected", $filter);
+
+                var value = _this.encodeValue($filter, index);
+
+                return $filter.find("td:nth-child(2) > :hidden").val() + "," + selector.val() + "," + value;
+            }).join(";");
+        };
+
+        FilterBuilder.prototype.encodeValue = function ($filter, index) {
+            var valBool = $("input:checkbox[id=" + SF.compose(this.prefix, "value", index) + "]", $filter);
+            if (valBool.length > 0)
+                return valBool[0].checked;
+
+            var infoElem = $("#" + SF.compose(this.prefix, "value", index, Entities.Keys.runtimeInfo));
+            if (infoElem.length > 0) {
+                var val = Entities.RuntimeInfo.parse(infoElem.val());
+                return SearchControl.encodeCSV(val == null ? null : val.key());
+            }
+
+            return SearchControl.encodeCSV($(SF.compose(this.pf("value"), index), $filter).val());
+        };
+        return FilterBuilder;
+    })();
+    exports.FilterBuilder = FilterBuilder;
 
     (function (QueryTokenBuilder) {
         function init(containerId, webQueryName, controllerUrl, requestExtraJsonData) {

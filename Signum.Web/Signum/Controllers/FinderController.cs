@@ -60,21 +60,7 @@ namespace Signum.Web.Controllers
             return Navigator.Search(this, queryRequest, allowSelection, navigate, filterMode, prefix);
         }
 
-        [HttpPost]
-        public ContentResult AddFilter(string webQueryName, string tokenName, int index, string prefix)
-        {
-            object queryName = Navigator.ResolveQueryName(webQueryName);
-
-            FilterOption fo = new FilterOption(tokenName, null);
-            if (fo.Token == null)
-            {
-                QueryDescription qd = DynamicQueryManager.Current.QueryDescription(queryName);
-                fo.Token = QueryUtils.Parse(tokenName, qd, canAggregate: false);
-            }
-            fo.Operation = QueryUtils.GetFilterOperations(QueryUtils.GetFilterType(fo.Token.Type)).FirstEx();
-
-            return Content(FilterBuilderHelper.NewFilter(CreateHtmlHelper(this), queryName, fo, new Context(null, prefix), index).ToHtmlString());
-        }
+       
 
         [HttpPost]
         public ContentResult GetColumnName(string webQueryName, string tokenName)
@@ -121,7 +107,7 @@ namespace Signum.Web.Controllers
         }
 
         [HttpPost]
-        public ContentResult QuickFilter(string webQueryName, string tokenName, int index, string prefix, string value)
+        public ContentResult AddFilter(string webQueryName, string tokenName, int index, string prefix, string value)
         {
             object queryName = Navigator.ResolveQueryName(webQueryName);
 
