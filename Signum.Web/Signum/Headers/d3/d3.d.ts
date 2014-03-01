@@ -42,19 +42,6 @@ declare module D3 {
         };
     }
 
-    export interface Event {
-        dx: number;
-        dy: number;
-        clientX: number;
-        clientY: number;
-        translate: number[];
-        scale: number;
-        sourceEvent: Event;
-        x: number;
-        y: number;
-        keyCode: number;
-        altKey: any;
-    }
 
     export interface Base extends Selectors {
         /**
@@ -756,7 +743,7 @@ declare module D3 {
         each(eachFunction: (data: T, index: number) => any): Selection<T>;
         on: {
             (type: string): (data: T, index: number) => any;
-            (type: string, listener: (data: any, index: number) => any, capture?: boolean): Selection<T>;
+            (type: string, listener: (data: T, index: number) => any, capture?: boolean): Selection<T>;
         };
 
         /**
