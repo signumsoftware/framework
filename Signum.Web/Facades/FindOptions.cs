@@ -65,7 +65,7 @@ namespace Signum.Web
             set { this.columnOptions = value; }
         }
 
-        public static Pagination DefaultPagination = new Pagination.Paginate(50, 1);
+        public static Pagination DefaultPagination = new Pagination.Paginate(20, 1);
 
         Pagination pagination;
         public Pagination Pagination
