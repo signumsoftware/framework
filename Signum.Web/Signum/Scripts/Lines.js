@@ -541,8 +541,8 @@ define(["require", "exports", "Framework/Signum.Web/Signum/Scripts/Entities", "F
         };
 
         EntityListBase.prototype.getNextPrefix = function (inc) {
-            if (typeof inc === "undefined") { inc = 0; }
             var _this = this;
+            if (typeof inc === "undefined") { inc = 0; }
             var indices = this.getItems().toArray().map(function (e) {
                 return parseInt(e.id.after(_this.options.prefix + "_").before("_" + _this.itemSuffix()));
             });
