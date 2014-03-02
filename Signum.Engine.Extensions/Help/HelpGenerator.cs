@@ -195,7 +195,7 @@ namespace Signum.Engine.Help
 
         public static string GetQueryHelp(IDynamicQueryCore dynamicQuery)
         {
-            ColumnDescriptionFactory cdf = dynamicQuery.EntityColumn();
+            ColumnDescriptionFactory cdf = dynamicQuery.EntityColumnFactory();
 
             return HelpMessage.QueryOf0.NiceToString().Formato(cdf.Implementations.Value.TypeLinks(Lite.Extract(cdf.Type)));
         }

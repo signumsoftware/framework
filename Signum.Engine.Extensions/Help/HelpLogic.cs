@@ -178,7 +178,7 @@ namespace Signum.Engine.Help
 
         public static Type GetQueryType(object query)
         {
-            return DynamicQueryManager.Current.GetQuery(query).Core.Value.EntityColumn().Implementations.Value.Types.FirstEx();
+            return DynamicQueryManager.Current.GetQuery(query).Core.Value.EntityColumnFactory().Implementations.Value.Types.FirstEx();
         }
 
         static Lazy<XmlSchemaSet> Schemas = new Lazy<XmlSchemaSet>(() =>
